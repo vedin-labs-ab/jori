@@ -4,9 +4,11 @@ import {
   createLocalPromptTime,
   createPromptTime,
 } from "../../../../prompts/time"
-import { integrationLabels } from "../../../integrations/resolve"
 import { replyAddress } from "../../../messages/surface"
-import { type MessageIntegration } from "../../../shared/integrations"
+import {
+  integrationLabels,
+  type MessageIntegration,
+} from "../../../shared/integrations"
 import { type AgentRuntimeInput } from "../input"
 import { createMessageConversationValues } from "./conversation"
 import { createMessageTargetValues, formatEvent } from "./target"

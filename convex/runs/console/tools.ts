@@ -1,7 +1,7 @@
 import {
   getToolPermission,
   isUserVisibleToolPermission,
-} from "../../permissions/catalog"
+} from "../../../contracts/permissions"
 import {
   consolidateMiloToolGroups,
   type RunToolSnapshot,

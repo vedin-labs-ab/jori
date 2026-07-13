@@ -1,7 +1,7 @@
 import {
   type ToolPermission,
   type ToolSurface,
-} from "../../../permissions/catalog"
+} from "../../../../contracts/permissions"
 
 export type RuntimeToolCapability = {
   surface: ToolSurface

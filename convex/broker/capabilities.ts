@@ -1,4 +1,3 @@
-import { isWebTool } from "../../contracts/permissions/web"
 import {
   getToolPermissionsBySurface,
   type PermissionMode,
@@ -6,7 +5,8 @@ import {
   type ToolAccess,
   type ToolPermission,
   type ToolSurface,
-} from "../permissions/catalog"
+} from "../../contracts/permissions"
+import { isWebTool } from "../../contracts/permissions/web"
 import { type AgentRuntimeInput, inputAccess } from "../runs/agent/input"
 import {
   canUseToolPermission,

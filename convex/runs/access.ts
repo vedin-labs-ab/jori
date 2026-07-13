@@ -1,10 +1,10 @@
-import { isWebTool } from "../../contracts/permissions/web"
-import { type Doc } from "../_generated/dataModel"
-import { listActiveIntegrationsForPrincipal } from "../integrations/data"
 import {
   getToolPermissionsBySurface,
   type ToolSurface,
-} from "../permissions/catalog"
+} from "../../contracts/permissions"
+import { isWebTool } from "../../contracts/permissions/web"
+import { type Doc } from "../_generated/dataModel"
+import { listActiveIntegrationsForPrincipal } from "../integrations/data"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Access } from "../shared/integrations"
 

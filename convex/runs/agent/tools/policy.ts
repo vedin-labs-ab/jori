@@ -4,7 +4,7 @@ import {
   type PermissionMode,
   resolveToolMode,
   type ToolPermission,
-} from "../../../permissions/catalog"
+} from "../../../../contracts/permissions"
 
 export type ToolExecutionType = "automation" | "message"
 export type RuntimeExecutionType = ToolExecutionType | "instruction"

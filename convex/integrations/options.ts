@@ -8,12 +8,12 @@ import { type Doc } from "../_generated/dataModel"
 import { action, internalQuery } from "../_generated/server"
 import { requireTenantAccess } from "../identity/access"
 import { ensureCurrentPersonFromAction } from "../persons/clerk"
-import { integrationValidator } from "../shared/integrations"
+import { integrationLabels, integrationValidator } from "../shared/integrations"
 import {
   type IntegrationOptionSearchResult,
   searchIntegrationOptions,
 } from "./options/load"
-import { integrationLabels, resolveIntegrationForOwner } from "./resolve"
+import { resolveIntegrationForOwner } from "./resolve"
 import { prepareIntegrationForRuntime } from "./runtime"
 
 const matchValidator = v.record(v.string(), v.union(v.string(), v.number()))

@@ -1,21 +1,22 @@
 import { type Infer } from "convex/values"
-import { type Scope } from "../../contracts/permissions/scope"
-import { type Doc, type Id } from "../_generated/dataModel"
-import {
-  integrationLabels,
-  resolveIntegrationForPrincipal,
-} from "../integrations/resolve"
 import {
   getToolPermission,
   isUnattendedToolMode,
   type PermissionMode,
   resolveToolMode,
   resolveToolModes,
-} from "../permissions/catalog"
+} from "../../contracts/permissions"
+import { type Scope } from "../../contracts/permissions/scope"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { resolveIntegrationForPrincipal } from "../integrations/resolve"
 import { listPermissionOverrides } from "../permissions/read"
 import { type ExecutionPrincipal } from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
-import { getIntegrationTools, type Integration } from "../shared/integrations"
+import {
+  getIntegrationTools,
+  type Integration,
+  integrationLabels,
+} from "../shared/integrations"
 import { type access, type accessInput } from "./schema"
 
 export type AutomationAccess = Infer<typeof access>

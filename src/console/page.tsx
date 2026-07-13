@@ -13,6 +13,7 @@ import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackToasts } from "./integrations/callback"
 import { OnboardingGate } from "./onboarding/gate"
 import { FullscreenSkeletonLoader } from "./shared/loading"
+import { localTimezone } from "./shared/time"
 import { ConsoleShell, PublicConsoleFrame } from "./shell"
 
 export function ConsolePage({
@@ -167,7 +168,7 @@ function ClerkIdentitySync({ tenantId }: { tenantId: string }) {
   useEffect(() => {
     void syncCurrentUser({
       tenantId,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezone: localTimezone(),
     }).catch(() => undefined)
   }, [syncCurrentUser, tenantId])
 

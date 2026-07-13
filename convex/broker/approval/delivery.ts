@@ -1,9 +1,9 @@
+import { type ToolSurface } from "../../../contracts/permissions"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { createSlackApprovalRequest } from "../../approvals/slack/blocks"
 import { replyAddress } from "../../messages/surface"
-import { type ToolSurface } from "../../permissions/catalog"
 import {
   postSlackCard,
   slackCardTarget,

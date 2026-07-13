@@ -206,7 +206,6 @@ import type * as organization_profile from "../organization/profile.js";
 import type * as organization_select from "../organization/select.js";
 import type * as organization_sources from "../organization/sources.js";
 import type * as organization_watch from "../organization/watch.js";
-import type * as permissions_catalog from "../permissions/catalog.js";
 import type * as permissions_read from "../permissions/read.js";
 import type * as permissions_tools from "../permissions/tools.js";
 import type * as persons_clerk from "../persons/clerk.js";
@@ -667,7 +666,6 @@ declare const fullApi: ApiFromModules<{
   "organization/select": typeof organization_select;
   "organization/sources": typeof organization_sources;
   "organization/watch": typeof organization_watch;
-  "permissions/catalog": typeof permissions_catalog;
   "permissions/read": typeof permissions_read;
   "permissions/tools": typeof permissions_tools;
   "persons/clerk": typeof persons_clerk;

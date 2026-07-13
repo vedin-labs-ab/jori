@@ -1,11 +1,11 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { internalQuery, type QueryCtx } from "../_generated/server"
 import {
   getToolPermission,
   resolveToolMode,
   resolveToolModes,
-} from "../permissions/catalog"
+} from "../../contracts/permissions"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { internalQuery, type QueryCtx } from "../_generated/server"
 import { listPermissionOverrides } from "../permissions/read"
 import { isUserScopedIntegration } from "../shared/integrations"
 import { getAccessibleArtifact } from "./access"

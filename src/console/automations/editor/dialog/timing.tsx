@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { localTimezone } from "../../../shared/time"
 import { type AutomationFormValues } from "../../types"
 import { RecurringFields } from "../schedule/recurring"
 
@@ -50,7 +51,7 @@ export function AutomationTiming({
           <AutomationDateTimePicker
             id="automation-run-at"
             onValueChange={(runAt) => onValuesChange({ ...values, runAt })}
-            timezone={Intl.DateTimeFormat().resolvedOptions().timeZone}
+            timezone={localTimezone()}
             value={values.runAt}
           />
         </Suspense>

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { getToolPermission } from "../../permissions/catalog"
+import { getToolPermission } from "../../../contracts/permissions"
 import { toolDetails } from "./tools"
 
 test("omits empty access counts from tool labels", () => {

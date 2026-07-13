@@ -2,7 +2,7 @@ import {
   getToolPermissionsBySurface,
   type PermissionMode,
   type ToolSurface,
-} from "../../../permissions/catalog"
+} from "../../../../contracts/permissions"
 import { canUseToolPermission, type ToolExecutionType } from "./policy"
 
 export function getEnabledToolPermissions(

@@ -3,7 +3,7 @@ import {
   resolveToolMode,
   type ToolPermission,
   type ToolSurface,
-} from "../../../permissions/catalog"
+} from "../../../../contracts/permissions"
 import { toolSurfaceLabel } from "../../../shared/integrations"
 import { type RuntimeToolCapability } from "./types"
 

@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import {
   getToolPermission,
   resolveToolModes,
-} from "../../../permissions/catalog"
+} from "../../../../contracts/permissions"
 import { createRuntimeToolCapability } from "./bundles"
 
 test("runtime tool capabilities use user-facing descriptions", () => {

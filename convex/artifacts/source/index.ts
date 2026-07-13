@@ -9,8 +9,6 @@ import {
 import { type Id } from "../../_generated/dataModel"
 import { buildGitTreeSnapshot, gitObjectId } from "./git"
 
-export type { ArtifactSourceFile } from "../../../contracts/artifacts/source"
-
 export type NormalizedArtifactSourceFile = {
   path: string
   content: string
