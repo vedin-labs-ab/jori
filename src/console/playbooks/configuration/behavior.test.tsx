@@ -22,28 +22,42 @@ const behavior = {
       kind: "choice",
       control: "select",
       default: "now",
+      enabledWhen: { key: "delivery", value: true },
       choices: [{ value: "now", label: "Now" }],
+    },
+    {
+      key: "sendAt",
+      label: "Send at",
+      kind: "time",
+      default: "07:30",
+      enabledWhen: { key: "delivery", value: true },
     },
   ],
 } satisfies PlaybookBehavior
 
-test("only option controls intercept the behavior row target", () => {
+test("disabled option controls retain the behavior row boundary", () => {
   render(
     <BehaviorList
       behaviors={[behavior]}
       disabled={false}
       fields={[behavior.enabledBy, ...behavior.fields]}
       onChange={vi.fn()}
-      values={{ delivery: true, send: "now" }}
+      values={{ delivery: false, send: "now", sendAt: "07:30" }}
     />
   )
 
-  const fieldLabel = screen.getByText("Send")
-  const field = fieldLabel.parentElement
+  const select = screen.getByRole("combobox")
+  const time = screen.getByLabelText("Send at")
+  const field = screen.getByText("Send").parentElement
   const fields = field?.parentElement
-  const control = screen.getByRole("combobox")
 
   expect(fields?.getAttribute("class")).toContain("pointer-events-none")
   expect(field?.getAttribute("class")).not.toContain("pointer-events-auto")
-  expect(control.getAttribute("class")).toContain("pointer-events-auto")
+  for (const control of [select, time]) {
+    expect(control).toHaveProperty("disabled", true)
+    expect(control.getAttribute("class")).not.toContain("pointer-events-auto")
+    expect(control.parentElement?.getAttribute("class")).toContain(
+      "pointer-events-auto"
+    )
+  }
 })
