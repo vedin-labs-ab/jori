@@ -151,7 +151,7 @@ export const miloToolPermissionRows = [
     "update_artifact_state",
     "Update artifact state",
     "Write data into an artifact's saved state.",
-    "Replace or merge-patch a contract-bound state document for an artifact. Use from an artifact-owned automation, keyed by contractName; writes must match the contract schema.",
+    "Replace or merge-patch a contract-bound state document, keyed by contractName; writes must match the contract schema. artifactId defaults to the automation run's primary artifact — pass it explicitly for any other artifact.",
     "write",
   ],
   [
@@ -184,7 +184,7 @@ export const miloToolPermissionRows = [
     "add_automation",
     "Add automation",
     "Set up a task that runs on a schedule or event.",
-    "Create a task that runs once at a set time, on a cron schedule, or on an integration event. Write canonical Markdown instructions with @Integration access references, /skill references, #tool references, and txt fences for reference-capable plain text. Keep explicit access aligned with the integration tools the instructions reference. Set artifactId only when the automation should write an artifact's state.",
+    "Create a task that runs once at a set time, on a cron schedule, or on an integration event. Write canonical Markdown instructions with @Integration access references, /skill references, #tool references, and txt fences for reference-capable plain text. Keep explicit access aligned with the integration tools the instructions reference. Set artifactId to the automation's primary artifact when it drives one: state tools default to it, and instructions may still reference other artifacts by ID.",
     "write",
   ],
   [

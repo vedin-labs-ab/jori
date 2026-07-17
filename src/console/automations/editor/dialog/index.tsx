@@ -21,6 +21,7 @@ import {
 import { readAdditionalAutomationSurfaces } from "../instructions/document"
 import { writeAutomationWebSearchPreference } from "../preferences"
 import { AccessFields } from "./access"
+import { AutomationArtifactSection } from "./artifact"
 import { AutomationContextSection } from "./context"
 import { AutomationInstructionsSection } from "./instructions"
 import { AutomationNameField } from "./name"
@@ -162,6 +163,10 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         value={props.values.scope}
       />
       <AutomationContextSection scope={props.values.scope} />
+      <AutomationArtifactSection
+        tenantId={props.tenantId}
+        values={props.values}
+      />
       <AutomationInstructionsSection
         additionalSurfaces={props.additionalSurfaces}
         error={props.instructionsError}

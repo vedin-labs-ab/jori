@@ -111,7 +111,10 @@ describe("attached artifact context", () => {
     const context = assemblePrompt(input).context
 
     expect(context).toContain("## Attached artifact")
-    expect(context).toContain("`Meeting Briefing` is attached to this run")
+    expect(context).toContain(
+      "`Meeting Briefing` is this run's primary artifact"
+    )
+    expect(context).toContain("default to it when `artifactId` is omitted")
     expect(context).toContain(
       "- `briefings` (shared, MeetingBriefings v3): Canonical Meeting Briefing state."
     )
