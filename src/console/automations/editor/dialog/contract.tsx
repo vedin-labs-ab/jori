@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { JsonCode } from "../../../shared/code"
+import { JsonView } from "../../../shared/code"
 import { CopyButton } from "../../../shared/copy"
 import { useRetained } from "../../../shared/retain"
 import { codeTokenClassName } from "../../../shared/tokens"
@@ -177,7 +177,7 @@ function SchemaDialog({
             className={`max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
           >
             <code className="block whitespace-pre-wrap break-words">
-              <JsonCode value={json} />
+              {shown === undefined ? null : <JsonView value={shown.schema} />}
             </code>
           </pre>
         </div>
