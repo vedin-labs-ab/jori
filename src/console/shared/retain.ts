@@ -1,0 +1,16 @@
+import { useRef } from "react"
+
+/**
+ * Keeps the last defined value so dialog content survives the close
+ * animation: deriving both `open` and the content from one piece of
+ * state paints an empty frame while the dialog animates out.
+ */
+export function useRetained<Value>(value: Value | undefined) {
+  const last = useRef(value)
+
+  if (value !== undefined) {
+    last.current = value
+  }
+
+  return value ?? last.current
+}

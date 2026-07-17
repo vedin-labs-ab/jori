@@ -1,4 +1,4 @@
-import { Braces, Link2, Lock, type LucideIcon } from "lucide-react"
+import { Link2, Lock, type LucideIcon } from "lucide-react"
 import { useState } from "react"
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { CopyButton } from "../../../shared/copy"
+import { useRetained } from "../../../shared/retain"
 import { FieldHelp } from "./help"
 
 export type ContractEntrySummary = {
@@ -78,8 +79,7 @@ export function ContractEntries({
   )
 }
 
-/** The entry itself is the schema trigger: hovering underlines the name and
- *  fades in the braces glyph, the row idiom used across artifact lists. */
+/** The entry itself is the schema trigger; hovering underlines the name. */
 function ContractEntryRow({
   entry,
   onReveal,
@@ -99,7 +99,6 @@ function ContractEntryRow({
           {entry.name}
         </span>
         <ScopeMark scope={entry.scope} />
-        <Braces className="size-3 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/schema:opacity-100 group-hover/schema:opacity-100" />
       </button>
       {entry.description === undefined ? null : (
         <ExpandableText className="min-w-0 text-muted-foreground" maxLines={1}>
@@ -115,13 +114,13 @@ const scopeMarks: Record<
   { icon: LucideIcon; label: string; explanation: string }
 > = {
   personal: {
-    explanation: "one document per person, never visible through share links.",
+    explanation: "One document per person. Never visible through share links.",
     icon: Lock,
     label: "Private",
   },
   shared: {
     explanation:
-      "one document for the whole artifact — everyone who can open it sees the same data, and share links can too.",
+      "One document for the whole artifact. Everyone who can open it sees the same data, and share links can too.",
     icon: Link2,
     label: "Shareable",
   },
@@ -142,7 +141,11 @@ function ScopeMark({ scope }: { scope: string }) {
         </span>
       </TooltipTrigger>
       <TooltipContent className="max-w-56">
-        {mark.label} — {mark.explanation}
+        {/* One flex child: the tooltip card lays children out in a row. */}
+        <div className="grid gap-1">
+          <p className="font-medium">{mark.label}</p>
+          <p>{mark.explanation}</p>
+        </div>
       </TooltipContent>
     </Tooltip>
   )
@@ -157,7 +160,8 @@ function SchemaDialog({
   entry: ContractEntrySummary | undefined
   onOpenChange: (open: boolean) => void
 }) {
-  const json = entry === undefined ? "" : JSON.stringify(entry.schema, null, 2)
+  const shown = useRetained(entry)
+  const json = shown === undefined ? "" : JSON.stringify(shown.schema, null, 2)
 
   return (
     <Dialog onOpenChange={onOpenChange} open={entry !== undefined}>
@@ -176,9 +180,9 @@ function SchemaDialog({
         <div className="grid min-w-0 overflow-hidden">
           <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2">
             <DialogTitle className="min-w-0 truncate font-medium font-mono text-foreground text-xs">
-              {entry?.schemaName}{" "}
+              {shown?.schemaName}{" "}
               <span className="font-normal text-[0.625rem] text-muted-foreground">
-                v{entry?.schemaVersion}
+                v{shown?.schemaVersion}
               </span>
             </DialogTitle>
             <CopyButton label="schema" value={json} />
