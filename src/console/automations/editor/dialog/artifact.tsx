@@ -6,7 +6,7 @@ import { playbookTemplateContracts } from "@contracts/playbooks/generated"
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
-import { AppWindow, ArrowUpRight, Info } from "lucide-react"
+import { AppWindow, ArrowUpRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -48,10 +48,10 @@ export function AutomationArtifactSection({
         <Label>Artifact</Label>
         <FieldHelp label="Artifact help">
           <p>
-            The primary artifact this automation drives. Artifact state tools
-            default to it; instructions can still reference other artifacts by
-            ID.
+            The artifact this automation works in — state is read and written
+            here by default.
           </p>
+          <p>Instructions can still reference other artifacts by ID.</p>
         </FieldHelp>
       </div>
       {values.artifactId === undefined ? (
@@ -158,10 +158,9 @@ function LiveArtifact({
   )
 }
 
-/** One quiet filled card telling the artifact's story: identity first,
- *  then its state entries under a State label, with an optional process
- *  hint as a full-bleed footer strip — the Context section's idiom. The
- *  muted fill keeps it distinct from the Instructions editor below. */
+/** One quiet card telling the artifact's story: identity first, then its
+ *  state entries under a State label, with an optional process hint as a
+ *  full-bleed footer strip — the Context card's grammar exactly. */
 function ArtifactCard({
   entries,
   footer,
@@ -174,7 +173,7 @@ function ArtifactCard({
   title: ReactNode
 }) {
   return (
-    <div className="min-w-0 overflow-hidden rounded-md border bg-muted/40 text-xs">
+    <div className="min-w-0 overflow-hidden rounded-md border text-xs">
       <div className="grid min-w-0 gap-3 p-3.5">
         <div className="grid min-w-0 gap-1">
           <div className="flex min-w-0 items-center gap-2">
@@ -186,8 +185,7 @@ function ArtifactCard({
         <ContractEntries entries={entries} />
       </div>
       {footer === undefined ? null : (
-        <p className="flex items-center gap-1.5 border-t bg-muted/30 px-3.5 py-1.5 text-[0.6875rem]/relaxed text-muted-foreground">
-          <Info className="size-3 shrink-0" />
+        <p className="border-t bg-muted/30 px-3.5 py-1.5 text-[0.6875rem]/relaxed text-muted-foreground">
           {footer}
         </p>
       )}

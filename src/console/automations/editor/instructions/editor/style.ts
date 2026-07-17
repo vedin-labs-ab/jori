@@ -1,3 +1,5 @@
+import { codeTokenClassName } from "../../../../shared/tokens"
+
 export const instructionMarkdownClassName = [
   "[&_.tiptap]:min-h-24 [&_.tiptap]:min-w-0 [&_.tiptap]:max-w-full [&_.tiptap]:overflow-x-hidden [&_.tiptap]:px-2 [&_.tiptap]:py-2 [&_.tiptap]:break-words [&_.tiptap]:whitespace-pre-wrap [&_.tiptap]:leading-6 [&_.tiptap]:outline-none [&_.tiptap]:[overflow-wrap:anywhere]",
   "[&_.tiptap>*:first-child]:mt-0 [&_.tiptap>*:last-child]:mb-0",
@@ -15,6 +17,5 @@ export const instructionMarkdownClassName = [
   "[&_.tiptap_pre_code]:bg-transparent [&_.tiptap_pre_code]:p-0 [&_.tiptap_pre_code]:text-xs",
   "[&_.tiptap_pre[data-instruction-text]]:overflow-x-hidden [&_.tiptap_pre[data-instruction-text]]:break-words [&_.tiptap_pre[data-instruction-text]]:whitespace-pre-wrap [&_.tiptap_pre[data-instruction-text]]:[overflow-wrap:anywhere]",
   "[&_.tiptap_[data-markdown-literal]]:font-mono [&_.tiptap_[data-markdown-literal]]:text-muted-foreground",
-  "[&_.hljs-attr]:text-blue-600 dark:[&_.hljs-attr]:text-blue-400 [&_.hljs-string]:text-emerald-700 dark:[&_.hljs-string]:text-emerald-400",
-  "[&_.hljs-literal]:text-violet-600 dark:[&_.hljs-literal]:text-violet-400 [&_.hljs-number]:text-amber-700 dark:[&_.hljs-number]:text-amber-400",
+  codeTokenClassName,
 ].join(" ")

@@ -55,7 +55,7 @@ export function AutomationContextSection({
       <CollapsibleContent className="overflow-hidden rounded-md border">
         <div
           className={cn(
-            "grid gap-3 px-3 py-3",
+            "grid gap-3 p-3.5",
             visibleLayers.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"
           )}
         >
