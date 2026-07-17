@@ -19,6 +19,7 @@ import {
   automationSummary,
   type CapabilityGroup,
   currentVersionMessage,
+  stateScopeLabel,
 } from "../format"
 import { type ArtifactSummary } from "../types"
 
@@ -105,7 +106,8 @@ function ContractRow({ artifact }: { artifact: ArtifactSummary }) {
           <FactLine key={entry.name}>
             <span className="font-medium text-foreground">{entry.name}</span>
             <span>
-              {entry.scope} · {entry.schemaName} v{entry.schemaVersion}
+              {stateScopeLabel(entry.scope)} · {entry.schemaName} v
+              {entry.schemaVersion}
             </span>
             {entry.description === undefined ? null : (
               <>

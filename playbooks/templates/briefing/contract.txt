@@ -130,7 +130,7 @@ export const contract = defineArtifactContract({
       key: "meeting-briefing/briefings",
       scope: "shared",
       description:
-        "Canonical Meeting Briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
+        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
       schema: z.strictObject({
         schemaVersion: z.literal(3),
         timezone: z.string().max(100),
@@ -151,7 +151,7 @@ export const contract = defineArtifactContract({
       key: "meeting-briefing/research",
       scope: "personal",
       description:
-        "Private, temporary Meeting Briefing research. Clear each attempt after synthesis.",
+        "Temporary research working state. Clear each attempt after synthesis.",
       schema: z.strictObject({
         schemaVersion: z.literal(3),
         attempts: z.record(meetingKey, researchAttempt),

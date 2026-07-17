@@ -10,7 +10,7 @@ const scheduleLeadMinutes = 30
  *  meetings into a template-provisioned artifact and protects delivery. */
 export const meetingBriefing: PlaybookDefinition = {
   key: "meeting-briefing",
-  version: 1,
+  version: 2,
   title: "Meeting Briefing",
   description:
     "Walk into important meetings with the context, questions, and decisions that will help you make the most of them.",
