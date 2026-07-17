@@ -4,50 +4,45 @@ import {
   type DeliverySetup,
 } from "@contracts/playbooks/delivery"
 import { useMutation } from "convex/react"
-import { Play, Settings2 } from "lucide-react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Spinner } from "@/components/ui/spinner"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { type PlaybookActions, pendingActionKind } from "../enable"
-import { type PlaybookEnablePlan, type PlaybookListRow } from "../state"
+import {
+  type PlaybookEnabledRow,
+  type PlaybookEnablePlan,
+  type PlaybookListRow,
+} from "../state"
 import { useOptionHints, useOptionsSetup } from "./configuration/state"
+import { EditSetupNotes, SetupFooter, type SetupSubmit } from "./footer"
 import { SetupDialogSections } from "./form"
 
-/** Confirm-and-customize setup for an unenabled playbook. */
+/** Confirm-and-customize setup: enabling a playbook, or — with `enabled`
+ *  present — editing and updating an existing enablement in place. */
 export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
-  const { actions, definition, onOpenChange, open, plan, row, tenantId } = props
-  const [providerIndex, setProviderIndex] = useState(0)
-  const delivery = useDeliverySetup(row.delivery, tenantId)
-  const destination = delivery.value
-  const pendingKind = pendingActionKind(actions, definition)
-  const { options, setupFields } = useOptionsSetup(definition)
-  const { hints, optionsIssue } = useOptionHints(definition, tenantId, options)
-
-  const choices =
-    plan.kind === "choose" ? plan.options[providerIndex].choices : plan.choices
-  // A pending action locks the whole dialog until it settles; an open edit
-  // or an invalid option combination also holds submission.
-  const isBusy = pendingKind !== undefined
-  const blocked = isBusy || delivery.editing || optionsIssue !== undefined
-  const canSubmit = destination !== undefined && !blocked
-  const submit = setupActions({
-    actions,
+  const { actions, definition, enabled, onOpenChange, open, plan, row } = props
+  const {
+    canSubmit,
     choices,
-    definition,
+    delivery,
     destination,
-    onOpenChange,
+    hints,
+    isBusy,
     options,
-  })
+    optionsIssue,
+    pendingKind,
+    providerIndex,
+    setProviderIndex,
+    setupFields,
+  } = useSetupState(props)
+  const submit = setupActions({ ...props, choices, destination, options })
 
   return (
     <Dialog
@@ -59,12 +54,15 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
       open={open}
     >
       <DialogContent className="sm:max-w-xl">
-        <SetupDialogHeader definition={definition} />
-
+        <SetupDialogHeader
+          definition={definition}
+          editing={enabled?.setup != null}
+        />
         <SetupDialogSections
           choices={choices}
           definition={definition}
           delivery={delivery}
+          enabled={enabled}
           hints={hints}
           isBusy={isBusy}
           onProviderIndexChange={setProviderIndex}
@@ -74,19 +72,19 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
           providerIndex={providerIndex}
           row={row}
           setupFields={setupFields}
-          tenantId={tenantId}
+          tenantId={props.tenantId}
         />
-
-        <SetupDialogFooter
+        <EditSetupNotes definition={definition} enabled={enabled} />
+        <SetupFooter
           advancedDisabled={
             destination === undefined || isBusy || optionsIssue !== undefined
           }
           canSubmit={canSubmit}
-          onAdvanced={submit.advanced}
-          onEnable={submit.enable}
+          definition={definition}
+          enabled={enabled}
           onPreloadEdit={actions.preloadEdit}
-          onTrial={submit.trial}
           pendingKind={pendingKind}
+          submit={submit}
         />
       </DialogContent>
     </Dialog>
@@ -96,6 +94,8 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
 type PlaybookSetupDialogProps = {
   actions: PlaybookActions
   definition: PlaybookDefinition
+  /** Present when editing an existing enablement instead of enabling. */
+  enabled?: PlaybookEnabledRow
   onOpenChange: (open: boolean) => void
   open: boolean
   // A resolvable plan (never "connect": the card gates on connection first).
@@ -104,18 +104,64 @@ type PlaybookSetupDialogProps = {
   tenantId: string
 }
 
+/** Dialog state: option picks, delivery, provider choices, and gating. An
+ *  enablement's stored setup seeds every field when editing. */
+function useSetupState({
+  actions,
+  definition,
+  enabled,
+  plan,
+  row,
+  tenantId,
+}: PlaybookSetupDialogProps) {
+  const [providerIndex, setProviderIndex] = useState(0)
+  const setup = enabled?.setup ?? undefined
+  const delivery = useDeliverySetup(row.delivery, tenantId, setup)
+  const pendingKind = pendingActionKind(actions, definition)
+  const { options, setupFields } = useOptionsSetup(definition, setup?.options)
+  const { hints, optionsIssue } = useOptionHints(definition, tenantId, options)
+  const choices =
+    setup?.providers ??
+    (plan.kind === "choose"
+      ? plan.options[providerIndex].choices
+      : plan.choices)
+  // A pending action locks the whole dialog until it settles; an open edit
+  // or an invalid option combination also holds submission.
+  const isBusy = pendingKind !== undefined
+  const blocked = isBusy || delivery.editing || optionsIssue !== undefined
+
+  return {
+    canSubmit: delivery.value !== undefined && !blocked,
+    choices,
+    delivery,
+    destination: delivery.value,
+    hints,
+    isBusy,
+    options,
+    optionsIssue,
+    pendingKind,
+    providerIndex,
+    setProviderIndex,
+    setupFields,
+  }
+}
+
 function setupActions({
   actions,
   choices,
   definition,
   destination,
+  enabled,
   onOpenChange,
   options,
-}: Pick<PlaybookSetupDialogProps, "actions" | "definition" | "onOpenChange"> & {
+}: Pick<
+  PlaybookSetupDialogProps,
+  "actions" | "definition" | "enabled" | "onOpenChange"
+> & {
   choices: Parameters<PlaybookActions["enable"]>[1]
   destination: DeliveryChoice | undefined
   options: Parameters<PlaybookActions["enable"]>[3]
-}) {
+}): SetupSubmit {
   function submit(action: PlaybookActions["enable"], close: boolean) {
     if (destination === undefined) {
       return
@@ -141,73 +187,56 @@ function setupActions({
     },
     enable: () => submit(actions.enable, true),
     trial: () => submit(actions.trial, false),
+    save: () => {
+      if (destination !== undefined && enabled !== undefined) {
+        void actions
+          .reconfigure(
+            definition,
+            enabled.automationId,
+            choices,
+            destination,
+            options
+          )
+          .then(() => onOpenChange(false))
+      }
+    },
   }
 }
 
-function SetupDialogHeader({ definition }: { definition: PlaybookDefinition }) {
-  return (
-    <DialogHeader>
-      <DialogTitle>Set up {definition.title}</DialogTitle>
-      <DialogDescription>{definition.description}</DialogDescription>
-    </DialogHeader>
-  )
-}
-
-function SetupDialogFooter({
-  advancedDisabled,
-  canSubmit,
-  onAdvanced,
-  onEnable,
-  onPreloadEdit,
-  onTrial,
-  pendingKind,
+function SetupDialogHeader({
+  definition,
+  editing,
 }: {
-  advancedDisabled: boolean
-  canSubmit: boolean
-  onAdvanced: () => void
-  onEnable: () => void
-  onPreloadEdit: () => void
-  onTrial: () => void
-  pendingKind: ReturnType<typeof pendingActionKind>
+  definition: PlaybookDefinition
+  editing: boolean
 }) {
   return (
-    <DialogFooter className="sm:justify-between">
-      {/* Utilities on the left; Enable stands alone as the call to action. */}
-      <div className="flex items-center gap-2">
-        <Button
-          disabled={advancedDisabled}
-          onClick={onAdvanced}
-          onPointerEnter={onPreloadEdit}
-          type="button"
-          variant="secondary"
-        >
-          {pendingKind === "advanced" ? <Spinner /> : <Settings2 />} Advanced
-          settings
-        </Button>
-        <Button disabled={!canSubmit} onClick={onTrial} variant="secondary">
-          {pendingKind === "trial" ? <Spinner /> : <Play />} Try once
-        </Button>
-      </div>
-      <Button disabled={!canSubmit} onClick={onEnable}>
-        {pendingKind === "enable" ? <Spinner /> : null} Enable
-      </Button>
-    </DialogFooter>
+    <DialogHeader>
+      <DialogTitle>
+        {editing ? "Edit" : "Set up"} {definition.title}
+      </DialogTitle>
+      <DialogDescription>{definition.description}</DialogDescription>
+    </DialogHeader>
   )
 }
 
 /**
  * Delivery state for the setup dialog: `value` is the committed destination —
  * the field only reports saved, valid choices, so an unsaved edit never leaks
- * into the actions — and `editing` flags an open edit.
+ * into the actions — and `editing` flags an open edit. An enablement's stored
+ * destination wins over the tenant-wide recommendation.
  */
-function useDeliverySetup(setup: DeliverySetup, tenantId: string) {
+function useDeliverySetup(
+  setup: DeliverySetup,
+  tenantId: string,
+  stored?: { destination: DeliveryChoice }
+) {
   const savePreference = useMutation(
     api.playbooks.console.saveDeliveryPreference
   )
-  const [value, setValue] = useState<DeliveryChoice | undefined>(
-    setup.recommended
-  )
-  const [editing, setEditing] = useState(setup.recommended === undefined)
+  const initial = stored?.destination ?? setup.recommended
+  const [value, setValue] = useState<DeliveryChoice | undefined>(initial)
+  const [editing, setEditing] = useState(initial === undefined)
 
   return {
     editing,

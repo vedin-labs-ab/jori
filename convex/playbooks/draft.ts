@@ -7,7 +7,8 @@ import { getTimeTrigger } from "../automations/timing"
 import { requirePersonTimezone } from "../persons/profile/timezone"
 import { executionPrincipalForScope } from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
-import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
+import { playbookBinding } from "./enable"
+import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./plan"
 
 /**
  * Resolve a playbook to the console automation shape without persisting it —
@@ -46,7 +47,7 @@ export async function resolvePlaybookDraft(
     _creationTime: now,
     tenantId: args.tenantId,
     key: `playbook:${plan.definition.key}`,
-    playbook: plan.definition.key,
+    playbook: playbookBinding(plan, args),
     artifactId: args.artifactId,
     name: plan.definition.title,
     instructions: plan.instructions,

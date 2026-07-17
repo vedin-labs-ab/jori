@@ -79,6 +79,11 @@ export type PlaybookDelivery = {
   style?: DeliveryStyle
 }
 
+/** The shared email-or-Slack digest delivery most playbooks use. */
+export const digestDelivery = {
+  allowed: ["email", "slack"],
+} as const satisfies Omit<PlaybookDelivery, "noun">
+
 export function allowsDeliveryChoice(
   delivery: PlaybookDelivery,
   choice: DeliveryChoice

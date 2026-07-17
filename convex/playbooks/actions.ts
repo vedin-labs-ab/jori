@@ -5,25 +5,33 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
 import { requireTenantAccess } from "../access"
+import { provisionTemplateArtifact } from "../artifacts/templates/provision"
+import {
+  accessInput,
+  automationType,
+  triggerInput,
+} from "../automations/schema"
 import { ensureCurrentPersonFromAction } from "../persons/clerk"
-import { provisionPlaybookArtifact } from "./blueprints/provision"
+import { scopeValidator } from "../shared/audience"
 import {
   callerRecipient,
   type PlaybookCallerArgs,
   playbookPlanFields,
 } from "./caller"
 import { type resolvePlaybookDraft } from "./draft"
+import { playbookBindingValidator } from "./schema"
 
 export const enable = action({
   args: playbookPlanFields,
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args): Promise<{ automationId: Id<"automations"> }> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
-    const resolved = await resolveAction(ctx, args, identity, true)
+    const caller = await resolveCaller(ctx, args, identity, true)
 
     return await ctx.runMutation(internal.playbooks.console.enableResolved, {
       ...args,
-      ...resolved,
+      ...caller,
+      artifactId: await provision(ctx, args, caller.createdBy),
     })
   },
 })
@@ -33,14 +41,41 @@ export const trial = action({
   returns: v.object({ runId: v.id("runs") }),
   handler: async (ctx, args): Promise<{ runId: Id<"runs"> }> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
+    const caller = await resolveCaller(ctx, args, identity, false)
 
     return await ctx.runMutation(internal.playbooks.console.trialResolved, {
       ...args,
-      ...(await resolveAction(ctx, args, identity, false)),
+      ...caller,
+      artifactId: await provision(ctx, args, caller.createdBy),
     })
   },
 })
 
+/** Re-render an enabled playbook from new options or a newer catalog
+ *  version, refreshing its artifact alongside the automation. */
+export const reconfigure = action({
+  args: {
+    ...playbookPlanFields,
+    automationId: v.id("automations"),
+  },
+  returns: v.object({ automationId: v.id("automations") }),
+  handler: async (ctx, args): Promise<{ automationId: Id<"automations"> }> => {
+    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const caller = await resolveCaller(ctx, args, identity, false)
+
+    return await ctx.runMutation(
+      internal.playbooks.console.reconfigureResolved,
+      {
+        ...args,
+        ...caller,
+        artifactId: await provision(ctx, args, caller.createdBy),
+      }
+    )
+  },
+})
+
+/** Render the playbook as an automation draft — no artifact is provisioned
+ *  and nothing persists unless the draft is actually created. */
 export const draft = action({
   args: playbookPlanFields,
   handler: async (
@@ -48,15 +83,49 @@ export const draft = action({
     args
   ): Promise<Awaited<ReturnType<typeof resolvePlaybookDraft>>> => {
     const identity = await requireTenantAccess(ctx, args.tenantId)
+    const caller = await resolveCaller(ctx, args, identity, false)
 
     return await ctx.runQuery(internal.playbooks.console.draftResolved, {
       ...args,
-      ...(await resolveAction(ctx, args, identity, false)),
+      ...caller,
     })
   },
 })
 
-async function resolveAction(
+/** Create an automation from an edited playbook draft (the advanced
+ *  builder), provisioning the playbook's artifact at the same edge. */
+export const create = action({
+  args: {
+    tenantId: v.string(),
+    playbook: playbookBindingValidator,
+    key: v.optional(v.string()),
+    name: v.string(),
+    instructions: v.string(),
+    scope: v.optional(scopeValidator),
+    access: accessInput,
+    type: automationType,
+    trigger: triggerInput,
+  },
+  returns: v.object({ automationId: v.id("automations") }),
+  handler: async (ctx, args): Promise<{ automationId: Id<"automations"> }> => {
+    await requireTenantAccess(ctx, args.tenantId)
+
+    const createdBy = await ensureCurrentPersonFromAction(ctx, args.tenantId)
+    const artifactId = await provisionTemplateArtifact(ctx, {
+      key: args.playbook.key,
+      tenantId: args.tenantId,
+      personId: createdBy,
+    })
+
+    return await ctx.runMutation(internal.playbooks.console.createResolved, {
+      ...args,
+      artifactId,
+      createdBy,
+    })
+  },
+})
+
+async function resolveCaller(
   ctx: ActionCtx,
   args: PlaybookCallerArgs,
   identity: Awaited<ReturnType<typeof requireTenantAccess>>,
@@ -70,13 +139,17 @@ async function resolveAction(
 
   await ctx.runQuery(validation, { ...args, createdBy, recipient })
 
-  return {
-    createdBy,
-    recipient,
-    artifactId: await provisionPlaybookArtifact(ctx, {
-      key: args.playbook,
-      tenantId: args.tenantId,
-      personId: createdBy,
-    }),
-  }
+  return { createdBy, recipient }
+}
+
+async function provision(
+  ctx: ActionCtx,
+  args: PlaybookCallerArgs,
+  createdBy: Id<"persons">
+) {
+  return await provisionTemplateArtifact(ctx, {
+    key: args.playbook,
+    tenantId: args.tenantId,
+    personId: createdBy,
+  })
 }

@@ -9,9 +9,13 @@ import { useQuery } from "convex/react"
 import { useMemo, useState } from "react"
 import { api } from "../../../../../convex/_generated/api"
 
-/** Resolve the declarative setup defaults and track the user's changes. */
-export function useOptionsSetup(definition: PlaybookDefinition) {
-  const [picks, setPicks] = useState<PlaybookOptionValues>({})
+/** Resolve the declarative setup defaults and track the user's changes.
+ *  `initial` reopens the dialog on an enablement's stored option values. */
+export function useOptionsSetup(
+  definition: PlaybookDefinition,
+  initial?: PlaybookOptionValues
+) {
+  const [picks, setPicks] = useState<PlaybookOptionValues>(initial ?? {})
   const setup = definition.setup
   const options = useMemo(
     () => resolvePlaybookOptions(setup, picks),

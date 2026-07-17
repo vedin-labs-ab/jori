@@ -1,6 +1,8 @@
 import {
   Activity,
+  Database,
   History,
+  LayoutTemplate,
   Text,
   UserRound,
   Workflow,
@@ -32,6 +34,8 @@ export function ArtifactExpanded({
   return (
     <div>
       <SummaryRow artifact={artifact} />
+      <TemplateRow artifact={artifact} />
+      <ContractRow artifact={artifact} />
       <DetailRow icon={Wrench} label="Tools">
         <ArtifactToolsValue groups={capabilityGroups} />
       </DetailRow>
@@ -56,6 +60,65 @@ export function ArtifactExpanded({
         </FactLine>
       </DetailRow>
     </div>
+  )
+}
+
+/** Template provenance: which template produced this artifact, and whether
+ *  the user has customized it since. */
+function TemplateRow({ artifact }: { artifact: ArtifactSummary }) {
+  const template = artifact.template
+
+  if (template == null) {
+    return null
+  }
+
+  return (
+    <DetailRow icon={LayoutTemplate} label="Template">
+      <FactLine>
+        <span className="font-medium text-foreground">
+          {template.key} · v{template.version}
+        </span>
+        {template.customized ? (
+          <>
+            <SeparatorDot className="text-muted-foreground/60" />
+            <span>Customized — template updates leave it untouched</span>
+          </>
+        ) : null}
+      </FactLine>
+    </DetailRow>
+  )
+}
+
+/** The state contract: named entries the artifact and its automations
+ *  read and write, validated server-side against their schemas. */
+function ContractRow({ artifact }: { artifact: ArtifactSummary }) {
+  const entries = artifact.contract?.state ?? []
+
+  if (entries.length === 0) {
+    return null
+  }
+
+  return (
+    <DetailRow icon={Database} label="State">
+      <div className="grid min-w-0 gap-1 text-muted-foreground text-xs">
+        {entries.map((entry) => (
+          <FactLine key={entry.name}>
+            <span className="font-medium text-foreground">{entry.name}</span>
+            <span>
+              {entry.scope} · {entry.schemaName} v{entry.schemaVersion}
+            </span>
+            {entry.description === undefined ? null : (
+              <>
+                <SeparatorDot className="text-muted-foreground/60" />
+                <span className="min-w-0 truncate" title={entry.description}>
+                  {entry.description}
+                </span>
+              </>
+            )}
+          </FactLine>
+        ))}
+      </div>
+    </DetailRow>
   )
 }
 

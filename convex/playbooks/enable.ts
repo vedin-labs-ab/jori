@@ -1,113 +1,24 @@
 import {
-  type PlaybookCapability,
-  type PlaybookSlot,
-  playbookCapabilityLabels,
-  playbookCapabilityProviders,
-  playbookSlotTools,
-} from "../../contracts/playbooks/capabilities"
-import {
-  getPlaybook,
   type PlaybookDefinition,
   playbookCatalog,
   resolvePlaybookSchedule,
-  resolveValidPlaybookOptions,
 } from "../../contracts/playbooks/catalog"
-import {
-  type DeliveryChoice,
-  destinationIntegration,
-  destinationTools,
-} from "../../contracts/playbooks/delivery"
-import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
 import { playbookCron } from "../../contracts/playbooks/schedule"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { createAutomation } from "../automations/lifecycle"
-import { listActiveIntegrationsForOwner } from "../integrations/data"
+import {
+  createAutomation,
+  getTenantAutomation,
+  updateAutomation,
+} from "../automations/lifecycle"
 import { requirePersonTimezone } from "../persons/profile/timezone"
 import { type QueryLikeCtx } from "../shared/context"
-import { type Integration, integrationLabels } from "../shared/integrations"
 import {
-  emailInputProvider,
-  type PlaybookRecipient,
-  resolveDestination,
-} from "./destination"
-import { renderPlaybookInstructions } from "./instructions"
-
-export type PlaybookSlotState = {
-  capability: PlaybookCapability
-  connected: Integration[]
-}
-
-type ResolvedSlot = {
-  slot: PlaybookSlot
-  integration: Integration
-}
-
-export type PlaybookPlanArgs = {
-  tenantId: string
-  key: string
-  choices: Partial<Record<PlaybookCapability, Integration>>
-  destination: DeliveryChoice
-  options?: PlaybookOptionValues
-  createdBy: Id<"persons">
-  recipient: PlaybookRecipient
-  artifactId?: Id<"artifacts">
-}
-
-/** Resolve a playbook's input slots and delivery destination, and render it. */
-export async function resolvePlaybookPlan(
-  ctx: QueryLikeCtx,
-  args: PlaybookPlanArgs
-) {
-  const definition = getPlaybook(args.key)
-  const connected = await connectedIntegrations(ctx, {
-    ownerId: args.createdBy,
-    tenantId: args.tenantId,
-  })
-  const slots = readPlaybookSlots(definition, connected)
-  const resolved: ResolvedSlot[] = definition.slots.map((slot, index) => ({
-    slot,
-    integration: resolveProvider(slots[index], args.choices[slot.capability]),
-  }))
-  const destination = await resolveDestination(ctx, args.destination, {
-    connected,
-    createdBy: args.createdBy,
-    delivery: definition.delivery,
-    emailProvider: emailInputProvider(resolved),
-    recipient: args.recipient,
-  })
-  const options = resolveValidPlaybookOptions(definition, args.options)
-
-  return {
-    definition,
-    destination,
-    options,
-    instructions: renderPlaybookInstructions({
-      key: definition.key,
-      providers: resolvedProviderLabels(resolved),
-      providerKeys: resolvedProviderKeys(resolved),
-      destination,
-      subject: definition.title,
-      noun: definition.delivery.noun,
-      style: definition.delivery.style,
-      options,
-      agentWait: definition.agentWait,
-    }),
-    access: {
-      integrations: [
-        ...resolved.map(({ slot, integration }) => ({
-          integration,
-          tools: playbookSlotTools(slot, integration),
-        })),
-        {
-          integration: destinationIntegration(destination),
-          tools: destinationTools(destination),
-        },
-      ],
-      web: definition.web,
-    },
-  }
-}
+  type PlaybookPlan,
+  type PlaybookPlanArgs,
+  resolvePlaybookPlan,
+} from "./plan"
+import { type PlaybookBinding } from "./schema"
 
 export async function enablePlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
   const plan = await resolvePlaybookPlan(ctx, args)
@@ -121,24 +32,83 @@ export async function enablePlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
 
   const automation = await createAutomation(ctx, {
     tenantId: args.tenantId,
-    playbook: plan.definition.key,
+    playbook: playbookBinding(plan, args),
     key: `playbook:${plan.definition.key}`,
     name: plan.definition.title,
     instructions: plan.instructions,
     scope: plan.definition.scope,
     access: plan.access,
     type: "cron",
-    trigger: {
-      expression: playbookCron(
-        resolvePlaybookSchedule(plan.definition, plan.options)
-      ),
-      timezone,
-    },
+    trigger: playbookTrigger(plan, timezone),
     createdBy: args.createdBy,
     artifactId: args.artifactId,
   })
 
   return { automationId: automation._id }
+}
+
+/**
+ * Re-render an enabled playbook from new options — or from a newer catalog
+ * version — and apply the result to its automation in place. The same
+ * operation serves "Edit setup" and "Update": both are deterministic
+ * re-renders of the stored recipe input.
+ */
+export async function reconfigurePlaybook(
+  ctx: MutationCtx,
+  args: PlaybookPlanArgs & { automationId: Id<"automations"> }
+) {
+  const plan = await resolvePlaybookPlan(ctx, args)
+  const timezone = await requirePersonTimezone(ctx, args.createdBy)
+  const automation = await getTenantAutomation(
+    ctx,
+    args.tenantId,
+    args.automationId
+  )
+
+  if (
+    automation.playbook?.key !== plan.definition.key ||
+    !matchesPlaybookOwner(automation, args.createdBy)
+  ) {
+    throw new Error("Playbook automation not found.")
+  }
+
+  await updateAutomation(ctx, {
+    tenantId: args.tenantId,
+    automationId: args.automationId,
+    playbook: playbookBinding(plan, args),
+    artifactId: args.artifactId,
+    name: plan.definition.title,
+    instructions: plan.instructions,
+    access: plan.access,
+    type: "cron",
+    trigger: playbookTrigger(plan, timezone),
+    updatedBy: args.createdBy,
+  })
+
+  return { automationId: args.automationId }
+}
+
+/** The stored recipe input: replaying it re-renders the same automation. */
+export function playbookBinding(
+  plan: PlaybookPlan,
+  args: Pick<PlaybookPlanArgs, "destination">
+): PlaybookBinding {
+  return {
+    key: plan.definition.key,
+    version: plan.definition.version,
+    options: plan.options,
+    providers: plan.providers,
+    destination: args.destination,
+  }
+}
+
+function playbookTrigger(plan: PlaybookPlan, timezone: string) {
+  return {
+    expression: playbookCron(
+      resolvePlaybookSchedule(plan.definition, plan.options)
+    ),
+    timezone,
+  }
 }
 
 export async function validatePlaybookEnablement(
@@ -153,28 +123,6 @@ export async function validatePlaybookEnablement(
     ownerId: args.createdBy,
     tenantId: args.tenantId,
   })
-}
-
-/** The caller's connected integrations, honouring user-scope ownership. */
-export async function connectedIntegrations(
-  ctx: QueryLikeCtx,
-  args: { ownerId: Id<"persons"> | undefined; tenantId: string }
-): Promise<Set<Integration>> {
-  const integrations = await listActiveIntegrationsForOwner(ctx, args)
-
-  return new Set(integrations.map((integration) => integration.integration))
-}
-
-export function readPlaybookSlots(
-  definition: PlaybookDefinition,
-  connected: Set<Integration>
-): PlaybookSlotState[] {
-  return definition.slots.map((slot) => ({
-    capability: slot.capability,
-    connected: playbookCapabilityProviders[slot.capability].filter((provider) =>
-      connected.has(provider)
-    ),
-  }))
 }
 
 /**
@@ -195,13 +143,13 @@ export async function readPlaybookAutomations(
   for (const automation of automations) {
     if (
       automation.playbook === undefined ||
-      byKey.has(automation.playbook) ||
+      byKey.has(automation.playbook.key) ||
       !matchesPlaybookOwner(automation, args.ownerId)
     ) {
       continue
     }
 
-    byKey.set(automation.playbook, automation)
+    byKey.set(automation.playbook.key, automation)
   }
 
   return byKey
@@ -212,7 +160,7 @@ function matchesPlaybookOwner(
   ownerId: Id<"persons"> | undefined
 ) {
   const definition = playbookCatalog.find(
-    (candidate) => candidate.key === automation.playbook
+    (candidate) => candidate.key === automation.playbook?.key
   )
 
   if (definition === undefined || definition.scope === "organization") {
@@ -235,57 +183,4 @@ async function requireNotEnabled(
   if (enabled.has(args.definition.key)) {
     throw new Error(`${args.definition.title} is already enabled.`)
   }
-}
-
-function resolveProvider(
-  slot: PlaybookSlotState,
-  choice: Integration | undefined
-): Integration {
-  if (choice !== undefined) {
-    if (!slot.connected.includes(choice)) {
-      throw new Error(`${integrationLabels[choice]} is not connected.`)
-    }
-
-    return choice
-  }
-
-  if (slot.connected.length === 0) {
-    throw new Error(
-      `Connect ${providerChoices(slot.capability)} to enable this playbook.`
-    )
-  }
-
-  if (slot.connected.length > 1) {
-    throw new Error(
-      `Choose between ${providerChoices(slot.capability)} for this playbook.`
-    )
-  }
-
-  return slot.connected[0]
-}
-
-function providerChoices(capability: PlaybookCapability) {
-  return playbookCapabilityProviders[capability]
-    .map((provider) => integrationLabels[provider])
-    .join(" or ")
-}
-
-function resolvedProviderLabels(resolved: ResolvedSlot[]) {
-  const labels = { ...playbookCapabilityLabels }
-
-  for (const { slot, integration } of resolved) {
-    labels[slot.capability] = integrationLabels[integration]
-  }
-
-  return labels
-}
-
-function resolvedProviderKeys(resolved: ResolvedSlot[]) {
-  const providers: Partial<Record<PlaybookCapability, Integration>> = {}
-
-  for (const { slot, integration } of resolved) {
-    providers[slot.capability] = integration
-  }
-
-  return providers
 }

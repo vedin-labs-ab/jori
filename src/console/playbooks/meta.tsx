@@ -5,11 +5,16 @@ import {
   type PlaybookDefinition,
 } from "@contracts/playbooks/catalog"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
-import { CalendarClock, Globe, type LucideIcon } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { AppWindow, CalendarClock, Globe, type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { SurfaceLogo } from "../automations/access/logo"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
-import { type PlaybookListRow, slotDisplayProviders } from "./state"
+import {
+  type PlaybookEnabledRow,
+  type PlaybookListRow,
+  slotDisplayProviders,
+} from "./state"
 
 export function PlaybookIcon({ icon: Icon }: { icon: LucideIcon }) {
   return (
@@ -89,6 +94,57 @@ export function PlaybookAccess({
         </div>
       ) : null}
     </PlaybookSection>
+  )
+}
+
+/**
+ * Discloses the artifact a playbook materializes from its template, so
+ * enabling never creates anything the setup dialog did not name. Links to
+ * the artifact once it exists.
+ */
+export function PlaybookCreates({
+  definition,
+  enabled,
+}: {
+  definition: PlaybookDefinition
+  enabled?: PlaybookEnabledRow
+}) {
+  const artifact = definition.artifact
+
+  if (artifact === undefined) {
+    return null
+  }
+
+  return (
+    <PlaybookSection label="Creates">
+      <div className="flex items-start gap-1.5">
+        <AppWindow className="mt-px size-3.5 shrink-0 text-muted-foreground" />
+        <span>
+          <span className="font-medium">{artifact.title} artifact</span>
+          <span className="text-muted-foreground">
+            {" "}
+            — {artifact.description}
+          </span>{" "}
+          <ArtifactLink enabled={enabled} />
+        </span>
+      </div>
+    </PlaybookSection>
+  )
+}
+
+function ArtifactLink({ enabled }: { enabled?: PlaybookEnabledRow }) {
+  if (enabled?.artifact == null) {
+    return null
+  }
+
+  return (
+    <Link
+      className="whitespace-nowrap underline underline-offset-2 hover:text-foreground"
+      params={{ artifactId: enabled.artifact.artifactId }}
+      to="/artifacts/$artifactId"
+    >
+      View artifact
+    </Link>
   )
 }
 

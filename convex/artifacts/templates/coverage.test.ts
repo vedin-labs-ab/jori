@@ -4,13 +4,13 @@ import {
   normalizeArtifactContract,
   resolveArtifactStateContract,
 } from "../../../contracts/artifacts/contract"
-import { readPlaybookBlueprint } from "./catalog"
+import { readArtifactTemplate } from "./catalog"
 
-const blueprint = readPlaybookBlueprint("meeting-briefing")
+const template = readArtifactTemplate("meeting-briefing")
 
 test("Meeting Briefing keeps sixty compact meetings under the state limit", () => {
-  if (blueprint === undefined) {
-    throw new Error("Meeting Briefing blueprint is missing.")
+  if (template === undefined) {
+    throw new Error("Meeting Briefing template is missing.")
   }
 
   const meetings = Object.fromEntries(
@@ -33,7 +33,7 @@ test("Meeting Briefing keeps sixty compact meetings under the state limit", () =
     dispatches: {},
   }
   const entry = resolveArtifactStateContract(
-    normalizeArtifactContract(blueprint.contract),
+    normalizeArtifactContract(template.contract),
     "briefings"
   )
 

@@ -40,6 +40,14 @@ export const artifactContract = v.object({
   state: v.array(artifactContractStateEntry),
 })
 
+/** Template provenance for a published version: which template, at which
+ *  recipe version, produced its content. Absent on user-authored versions,
+ *  so a template-less head marks the artifact as customized. */
+export const artifactTemplateStamp = v.object({
+  key: v.string(),
+  version: v.number(),
+})
+
 export const artifacts = defineTable({
   tenantId: v.string(),
   ownerId: v.id("persons"),
@@ -50,16 +58,18 @@ export const artifacts = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
   archivedAt: v.optional(v.number()),
-  blueprint: v.optional(v.string()),
-  blueprintPartition: v.optional(v.string()),
+  /** Set only by playbook provisioning: this artifact is the canonical
+   *  instance of the template for its partition (one per person or tenant). */
+  template: v.optional(v.string()),
+  templatePartition: v.optional(v.string()),
 })
   .index("by_tenant", ["tenantId"])
   .index("by_tenant_and_updated_at", ["tenantId", "updatedAt"])
   .index("by_tenant_and_owner", ["tenantId", "ownerId"])
-  .index("by_tenant_and_blueprint", [
+  .index("by_tenant_and_template", [
     "tenantId",
-    "blueprintPartition",
-    "blueprint",
+    "templatePartition",
+    "template",
   ])
 
 export const artifactVersions = defineTable({
@@ -70,6 +80,7 @@ export const artifactVersions = defineTable({
   entrypoint: v.string(),
   sdk: v.string(),
   message: v.optional(v.string()),
+  template: v.optional(artifactTemplateStamp),
   createdBy: v.id("persons"),
   createdAt: v.number(),
 })

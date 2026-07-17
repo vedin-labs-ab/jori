@@ -1,3 +1,4 @@
+import { automationEventMatchKey } from "../../contracts/automations/events"
 import { getNextCronRunAt } from "../../contracts/automations/schedule/cron"
 import { type Doc } from "../_generated/dataModel"
 
@@ -57,4 +58,38 @@ function parseUtcIsoTimestamp(value: string) {
   }
 
   return timestamp
+}
+
+export function isSameEventTrigger(
+  left: Doc<"automations">["trigger"],
+  right: Doc<"automations">["trigger"] | undefined
+) {
+  return (
+    "integrationId" in left &&
+    right !== undefined &&
+    "integrationId" in right &&
+    left.integrationId === right.integrationId &&
+    left.event === right.event &&
+    automationEventMatchKey(left.match) === automationEventMatchKey(right.match)
+  )
+}
+
+export function sameTriggerDefinition(
+  left: Doc<"automations">["trigger"],
+  right: Doc<"automations">["trigger"]
+) {
+  if ("at" in left || "at" in right) {
+    return "at" in left && "at" in right && left.at === right.at
+  }
+
+  if ("expression" in left || "expression" in right) {
+    return (
+      "expression" in left &&
+      "expression" in right &&
+      left.expression === right.expression &&
+      left.timezone === right.timezone
+    )
+  }
+
+  return isSameEventTrigger(left, right)
 }

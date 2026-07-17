@@ -35,6 +35,14 @@ export type SourceReadResult = {
   }>
 } | null
 
+/** Provenance for a version published from a template; `canonical` claims
+ *  the one playbook-provisioned instance per partition (create mode only). */
+export type ArtifactTemplateInput = {
+  key: string
+  version: number
+  canonical?: boolean
+}
+
 export type PublishArtifactArgs =
   | {
       mode: "create"
@@ -47,7 +55,7 @@ export type PublishArtifactArgs =
       personId: Id<"persons">
       message?: string
       capabilities?: ArtifactCapabilityInput[]
-      blueprint?: string
+      template?: ArtifactTemplateInput
     }
   | {
       mode: "update"
@@ -61,6 +69,7 @@ export type PublishArtifactArgs =
       personId: Id<"persons">
       message?: string
       capabilities?: ArtifactCapabilityInput[]
+      template?: Omit<ArtifactTemplateInput, "canonical">
     }
 
 type ArtifactCapabilityInput = {
@@ -104,9 +113,14 @@ export async function publishArtifact(
       sdk: "milo-artifact-sdk@0",
       message: args.message,
       capabilities: args.capabilities ?? [],
-      ...(args.mode === "create" && args.blueprint !== undefined
-        ? { blueprint: args.blueprint }
-        : {}),
+      ...(args.template === undefined
+        ? {}
+        : {
+            template: {
+              key: args.template.key,
+              version: args.template.version,
+            },
+          }),
     }
 
     const published =
@@ -114,6 +128,7 @@ export async function publishArtifact(
         ? await ctx.runMutation(internal.artifacts.records.publishCreated, {
             ...common,
             ownerId: args.personId,
+            canonical: args.template?.canonical,
           })
         : await ctx.runMutation(internal.artifacts.records.publishUpdated, {
             ...common,

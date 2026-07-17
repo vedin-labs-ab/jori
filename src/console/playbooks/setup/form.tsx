@@ -1,8 +1,12 @@
 import { type Integration } from "@contracts/integrations"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
-import { PlaybookAccess, PlaybookSchedule } from "../meta"
-import { type PlaybookEnablePlan, type PlaybookListRow } from "../state"
+import { PlaybookAccess, PlaybookCreates, PlaybookSchedule } from "../meta"
+import {
+  type PlaybookEnabledRow,
+  type PlaybookEnablePlan,
+  type PlaybookListRow,
+} from "../state"
 import { PlaybookConfiguration } from "./configuration"
 import {
   type useOptionHints,
@@ -14,6 +18,7 @@ export function SetupDialogSections({
   choices,
   definition,
   delivery,
+  enabled,
   hints,
   isBusy,
   onProviderIndexChange,
@@ -28,6 +33,7 @@ export function SetupDialogSections({
   choices: Record<string, Integration>
   definition: PlaybookDefinition
   delivery: Omit<Parameters<typeof PlaybookDelivery>[0]["delivery"], "tenantId">
+  enabled?: PlaybookEnabledRow
   hints: ReturnType<typeof useOptionHints>["hints"]
   isBusy: boolean
   onProviderIndexChange: (index: number) => void
@@ -62,6 +68,7 @@ export function SetupDialogSections({
         providerIndex={providerIndex}
       />
       <PlaybookAccess choices={choices} definition={definition} row={row} />
+      <PlaybookCreates definition={definition} enabled={enabled} />
     </div>
   )
 }

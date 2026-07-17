@@ -3,6 +3,7 @@ import { playbookCatalog } from "@contracts/playbooks/catalog"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type PlaybookActions } from "../enable"
+import { stubPlaybookActions } from "../fixtures"
 import { type PlaybookEnablePlan, type PlaybookListRow } from "../state"
 import { PlaybookSetupDialog } from "./dialog"
 
@@ -46,7 +47,10 @@ const singlePlan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
 }
 
 test("a pending Advanced settings locks every control", () => {
-  const actions = stubActions({ key: morningBrief.key, kind: "advanced" })
+  const actions = stubPlaybookActions({
+    key: morningBrief.key,
+    kind: "advanced",
+  })
 
   renderDialog(actions, deliverySetup(), singlePlan)
 
@@ -56,7 +60,7 @@ test("a pending Advanced settings locks every control", () => {
 })
 
 test("advanced settings closes this dialog only after creation", () => {
-  const actions = stubActions()
+  const actions = stubPlaybookActions()
   const onOpenChange = vi.fn()
 
   renderDialog(actions, deliverySetup(), singlePlan, onOpenChange)
@@ -136,7 +140,7 @@ test("setup groups meeting scope and delivery behaviors", () => {
 
 test("behavior choices reach enable as normalized options", async () => {
   shimSelectDom()
-  const actions = stubActions()
+  const actions = stubPlaybookActions()
 
   renderDialog(
     actions,
@@ -217,7 +221,7 @@ function meetingBriefing() {
 
 function renderBriefing(onOpenChange: (open: boolean) => void = () => {}) {
   return renderDialog(
-    stubActions(),
+    stubPlaybookActions(),
     deliverySetup({ kind: "email" }, [
       { mode: "dm", available: true },
       { mode: "email", available: true },
@@ -288,18 +292,5 @@ function deliverySetup(
   return {
     options,
     recommended,
-  }
-}
-
-function stubActions(pending?: PlaybookActions["pending"]): PlaybookActions {
-  return {
-    pending,
-    edit: vi.fn(async () => {}),
-    enable: vi.fn(async () => {}),
-    openAdvanced: vi.fn(async () => {}),
-    preloadEdit: vi.fn(),
-    trial: vi.fn(async () => {}),
-    runNow: vi.fn(async () => {}),
-    setPaused: vi.fn(async () => {}),
   }
 }

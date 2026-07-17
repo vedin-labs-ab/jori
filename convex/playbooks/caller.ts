@@ -3,7 +3,7 @@ import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
 import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
 import { readClerkUserEmail, readClerkUserName } from "../access/users"
 import { type Integration, integrationValidator } from "../shared/integrations"
-import { type PlaybookPlanArgs } from "./enable"
+import { type PlaybookPlanArgs } from "./plan"
 import { deliveryChoiceValidator } from "./schema"
 
 export type PlaybookCallerArgs = {
