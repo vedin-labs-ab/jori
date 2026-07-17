@@ -25,7 +25,7 @@ describe("Meeting Briefing contract", () => {
 
     expect(instructions).toContain("Every eligible meeting is represented")
     expect(instructions).toContain("list up to 250 expanded events")
-    expect(instructions).toContain("This scans all readable calendars")
+    expect(instructions).toContain("this scans all readable calendars")
     expect(instructions).toContain("Keep up to 60 eligible meetings")
     expect(instructions).toContain("state a coverage gap if more qualify")
     expect(instructions).toContain(
@@ -67,19 +67,19 @@ describe("Meeting Briefing state and evidence", () => {
     expect(instructions).toContain(
       "first 32 lowercase hex characters of SHA-256"
     )
-    expect(instructions).toContain("Use literal provider key `googleCalendar`")
+    expect(instructions).toContain("literal provider key `googleCalendar`")
     expect(instructions).toContain("Compute hashes with `bash`")
     expect(instructions).toContain("use that version as `expectedVersion`")
-    expect(instructions).toContain("six relevant non-requester attendees")
+    expect(instructions).toContain("relevant non-requester attendees")
   })
 
   test("requires source integrity and scoped uncertainty", () => {
     const instructions = renderBriefing()
 
     expect(instructions).toContain(
-      "Every final point cites one to three retained source IDs"
+      "Every final point cites retained source IDs"
     )
-    expect(instructions).toContain("Every cited ID resolves")
+    expect(instructions).toContain("every cited ID resolves")
     expect(instructions).toContain(
       "Scope negative claims to the tools and sources actually checked"
     )
@@ -141,11 +141,24 @@ describe("Meeting Briefing delivery", () => {
     )
   })
 
+  test("embeds the fingerprint formula so fenced instructions stand alone", () => {
+    const withReminders = renderBriefing({ beforeMeeting: true })
+
+    expect(
+      renderBriefing().match(/SHA-256 of the UTF-8 JSON array/g)
+    ).toHaveLength(2)
+    expect(
+      withReminders.match(/SHA-256 of the UTF-8 JSON array/g)
+    ).toHaveLength(3)
+  })
+
   test("claims delivery before sending to prevent duplicates", () => {
     const instructions = renderBriefing()
 
     expect(instructions).toContain("Before the provider call, atomically claim")
-    expect(instructions).toContain("payloadHash is SHA-256")
+    expect(instructions).toContain(
+      "payloadHash the SHA-256 of the exact outbound content"
+    )
     expect(instructions).toContain(
       "If the key already exists, never send again"
     )
