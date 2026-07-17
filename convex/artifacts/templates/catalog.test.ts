@@ -5,6 +5,7 @@ import {
   resolveArtifactStateContract,
 } from "../../../contracts/artifacts/contract"
 import { getPlaybook } from "../../../contracts/playbooks/catalog"
+import { playbookTemplateContracts } from "../../../contracts/playbooks/generated"
 import { readArtifactTemplate, templatePartition } from "./catalog"
 
 const template = readArtifactTemplate("meeting-briefing")
@@ -22,6 +23,20 @@ describe("artifact template catalog", () => {
     expect(template?.title).toBe(definition.artifact?.title)
     expect(template?.description).toBe(definition.artifact?.description)
     expect(template?.access).toBe(definition.scope)
+  })
+
+  test("client contract summary mirrors the compiled contract", () => {
+    const compiled = normalizeArtifactContract(template?.contract)
+
+    expect(playbookTemplateContracts["meeting-briefing"]).toEqual(
+      compiled.state.map((entry) => ({
+        name: entry.name,
+        scope: entry.scope,
+        description: entry.description,
+        schemaName: entry.schemaName,
+        schemaVersion: entry.schemaVersion,
+      }))
+    )
   })
 
   test("partitions canonical instances by template access", () => {
