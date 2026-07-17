@@ -49,14 +49,15 @@ export function ContractEntries({
             validated against the entry's schema.
           </p>
           <p>
-            Shareable entries keep one document for the whole artifact and
-            appear through share links. Private entries keep one document per
-            person and never appear through share links.
+            Shareable entries keep one document for the whole artifact —
+            everyone who can open the artifact sees the same data, and share
+            links can too. Private entries keep one document per person and
+            never appear through share links.
           </p>
         </FieldHelp>
       </div>
       {entries.map((entry) => (
-        <div className="grid min-w-0 gap-0.5" key={entry.name}>
+        <div className="grid min-w-0 gap-1" key={entry.name}>
           <div className="flex min-w-0 items-center justify-between gap-2">
             <span className="min-w-0 truncate">
               <span className="font-medium text-foreground">{entry.name}</span>
@@ -72,7 +73,7 @@ export function ContractEntries({
               size="sm"
               title={`${entry.schemaName} v${entry.schemaVersion}`}
               type="button"
-              variant="outline"
+              variant="ghost"
             >
               <Braces /> Schema
             </Button>
@@ -118,14 +119,17 @@ function SchemaDialog({
         className="bg-muted sm:max-w-3xl"
         showCloseButton={false}
       >
-        <DialogTitle className="sr-only">
-          {entry?.name} state schema
-        </DialogTitle>
         <DialogDescription className="sr-only">
           The JSON Schema every write to this state entry is validated against.
         </DialogDescription>
         <div className="grid min-w-0 overflow-hidden">
-          <div className="flex min-w-0 items-center justify-end border-b px-3 py-2">
+          <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2">
+            <DialogTitle className="min-w-0 truncate font-medium font-mono text-foreground text-xs">
+              {entry?.schemaName}{" "}
+              <span className="font-normal text-[0.625rem] text-muted-foreground">
+                v{entry?.schemaVersion}
+              </span>
+            </DialogTitle>
             <CopyButton label="schema" value={json} />
           </div>
           <pre className="max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed">

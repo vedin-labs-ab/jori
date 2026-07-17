@@ -6,7 +6,7 @@ import { playbookTemplateContracts } from "@contracts/playbooks/generated"
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
-import { AppWindow, ArrowUpRight } from "lucide-react"
+import { AppWindow, ArrowUpRight, Info } from "lucide-react"
 import { type ReactNode } from "react"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -85,15 +85,8 @@ function ProspectiveArtifact({
   return (
     <ArtifactCard
       entries={templateContractEntries(binding.key)}
-      lines={
-        <>
-          <p className="text-muted-foreground">{artifact.description}</p>
-          <p className="text-muted-foreground">
-            Will be created from the {artifact.title} template · v
-            {binding.version} when you create this automation.
-          </p>
-        </>
-      }
+      footer="Created from its template when you create this automation."
+      lines={<p className="text-muted-foreground">{artifact.description}</p>}
       title={
         <span className="min-w-0 truncate font-medium text-foreground text-sm">
           {artifact.title}
@@ -166,27 +159,38 @@ function LiveArtifact({
 }
 
 /** One quiet filled card telling the artifact's story: identity first,
- *  then its state entries under a State label. The muted fill keeps it
- *  distinct from the Instructions editor below. */
+ *  then its state entries under a State label, with an optional process
+ *  hint as a full-bleed footer strip — the Context section's idiom. The
+ *  muted fill keeps it distinct from the Instructions editor below. */
 function ArtifactCard({
   entries,
+  footer,
   lines,
   title,
 }: {
   entries: ContractEntrySummary[]
+  footer?: string
   lines: ReactNode
   title: ReactNode
 }) {
   return (
-    <div className="grid min-w-0 gap-3 rounded-md border bg-muted/40 p-3.5 text-xs">
-      <div className="grid min-w-0 gap-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <AppWindow className="size-4 shrink-0 text-muted-foreground" />
-          {title}
+    <div className="min-w-0 overflow-hidden rounded-md border bg-muted/40 text-xs">
+      <div className="grid min-w-0 gap-3 p-3.5">
+        <div className="grid min-w-0 gap-1">
+          <div className="flex min-w-0 items-center gap-2">
+            <AppWindow className="size-4 shrink-0 text-muted-foreground" />
+            {title}
+          </div>
+          {lines}
         </div>
-        {lines}
+        <ContractEntries entries={entries} />
       </div>
-      <ContractEntries entries={entries} />
+      {footer === undefined ? null : (
+        <p className="flex items-center gap-1.5 border-t bg-muted/30 px-3.5 py-1.5 text-[0.6875rem]/relaxed text-muted-foreground">
+          <Info className="size-3 shrink-0" />
+          {footer}
+        </p>
+      )}
     </div>
   )
 }
