@@ -35,6 +35,7 @@ describe("artifact template catalog", () => {
         description: entry.description,
         schemaName: entry.schemaName,
         schemaVersion: entry.schemaVersion,
+        schema: entry.schema,
       }))
     )
   })
