@@ -37,28 +37,34 @@ export function ContractEntries({
   }
 
   return (
-    <div className="grid min-w-0 gap-1.5">
-      <p className="font-medium text-muted-foreground">Contracts</p>
+    <div className="grid min-w-0 gap-2">
+      <p className="font-medium text-muted-foreground">State</p>
       {entries.map((entry) => (
-        <div className="flex min-w-0 items-start gap-2" key={entry.name}>
-          <ExpandableText className="min-w-0 flex-1 pt-1" maxLines={1}>
-            <span className="font-medium text-foreground">{entry.name}</span>
-            <span className="text-muted-foreground">
-              {" "}
-              · {entry.scope}
-              {entry.description === undefined ? "" : ` — ${entry.description}`}
+        <div className="grid min-w-0 gap-0.5" key={entry.name}>
+          <div className="flex min-w-0 items-center justify-between gap-2">
+            <span className="min-w-0 truncate">
+              <span className="font-medium text-foreground">{entry.name}</span>
+              <span className="text-muted-foreground"> · {entry.scope}</span>
             </span>
-          </ExpandableText>
-          <Button
-            aria-label={`View the ${entry.name} schema`}
-            className="shrink-0"
-            onClick={() => setRevealed(entry)}
-            size="sm"
-            type="button"
-            variant="outline"
-          >
-            <Braces /> Schema
-          </Button>
+            <Button
+              aria-label={`View the ${entry.name} schema`}
+              className="shrink-0"
+              onClick={() => setRevealed(entry)}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              <Braces /> Schema
+            </Button>
+          </div>
+          {entry.description === undefined ? null : (
+            <ExpandableText
+              className="min-w-0 text-muted-foreground"
+              maxLines={1}
+            >
+              {entry.description}
+            </ExpandableText>
+          )}
         </div>
       ))}
       <SchemaDialog

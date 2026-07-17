@@ -89,14 +89,14 @@ function ProspectiveArtifact({
         <>
           <p className="text-muted-foreground">{artifact.description}</p>
           <p className="text-muted-foreground">
-            Created from the {binding.key} template (v{binding.version}) when
-            this automation is created.
+            Will be created from the {artifact.title} template · v
+            {binding.version} when you create this automation.
           </p>
         </>
       }
       title={
         <span className="min-w-0 truncate font-medium text-foreground text-sm">
-          {artifact.title} artifact
+          {artifact.title}
         </span>
       }
     />
@@ -137,7 +137,16 @@ function LiveArtifact({
   return (
     <ArtifactCard
       entries={artifactContractEntries(artifact)}
-      lines={provenanceLine(artifact, definition)}
+      lines={
+        <>
+          {definition?.artifact === undefined ? null : (
+            <p className="text-muted-foreground">
+              {definition.artifact.description}
+            </p>
+          )}
+          {provenanceLine(artifact, definition)}
+        </>
+      }
       title={
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
           <span className="truncate font-medium text-foreground text-sm">
@@ -157,8 +166,8 @@ function LiveArtifact({
 }
 
 /** One quiet filled card telling the artifact's story: identity first,
- *  then its state contract under a Contracts label. The muted fill keeps
- *  it distinct from the Instructions editor below. */
+ *  then its state entries under a State label. The muted fill keeps it
+ *  distinct from the Instructions editor below. */
 function ArtifactCard({
   entries,
   lines,
@@ -169,7 +178,7 @@ function ArtifactCard({
   title: ReactNode
 }) {
   return (
-    <div className="grid min-w-0 gap-2 rounded-md border bg-muted/40 px-3 py-2.5 text-xs">
+    <div className="grid min-w-0 gap-3 rounded-md border bg-muted/40 p-3.5 text-xs">
       <div className="grid min-w-0 gap-1">
         <div className="flex min-w-0 items-center gap-2">
           <AppWindow className="size-4 shrink-0 text-muted-foreground" />
@@ -210,7 +219,8 @@ function provenanceLine(
       className="text-muted-foreground"
       title={publishedAt === undefined ? undefined : absoluteTime(publishedAt)}
     >
-      From the {template.key} template · v{template.version}
+      From the {definition?.artifact?.title ?? template.key} template · v
+      {template.version}
       {suffix}
     </p>
   )
