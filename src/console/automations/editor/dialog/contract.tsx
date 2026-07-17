@@ -12,9 +12,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { JsonCode } from "../../../shared/code"
 import { CopyButton } from "../../../shared/copy"
 import { useRetained } from "../../../shared/retain"
-import { FieldHelp } from "./help"
+import { codeTokenClassName } from "../../../shared/tokens"
 
 export type ContractEntrySummary = {
   name: string
@@ -44,22 +45,7 @@ export function ContractEntries({
 
   return (
     <div className="grid min-w-0 gap-2">
-      <div className="flex items-center gap-1.5">
-        <p className="font-medium text-muted-foreground">State</p>
-        <FieldHelp label="State help">
-          <p>
-            State entries are the structured data this artifact stores.
-            Automations read and write them by name, and every write is
-            validated against the entry's schema.
-          </p>
-          <p>
-            Shareable entries keep one document for the whole artifact —
-            everyone who can open the artifact sees the same data, and share
-            links can too. Private entries keep one document per person and
-            never appear through share links.
-          </p>
-        </FieldHelp>
-      </div>
+      <p className="font-medium text-muted-foreground">State</p>
       {entries.map((entry) => (
         <ContractEntryRow
           entry={entry}
@@ -187,9 +173,11 @@ function SchemaDialog({
             </DialogTitle>
             <CopyButton label="schema" value={json} />
           </div>
-          <pre className="max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed">
+          <pre
+            className={`max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
+          >
             <code className="block whitespace-pre-wrap break-words">
-              {json}
+              <JsonCode value={json} />
             </code>
           </pre>
         </div>
