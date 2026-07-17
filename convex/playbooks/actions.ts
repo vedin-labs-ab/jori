@@ -60,15 +60,17 @@ export const reconfigure = action({
   },
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args): Promise<{ automationId: Id<"automations"> }> => {
+    const { automationId, ...plan } = args
     const identity = await requireTenantAccess(ctx, args.tenantId)
-    const caller = await resolveCaller(ctx, args, identity, false)
+    const caller = await resolveCaller(ctx, plan, identity, false)
 
     return await ctx.runMutation(
       internal.playbooks.console.reconfigureResolved,
       {
-        ...args,
+        ...plan,
         ...caller,
-        artifactId: await provision(ctx, args, caller.createdBy),
+        automationId,
+        artifactId: await provision(ctx, plan, caller.createdBy),
       }
     )
   },
