@@ -102,6 +102,13 @@ export const update = internalMutation({
   },
   handler: async (ctx, args) => {
     const artifact = await getAccessibleArtifact(ctx, args)
+
+    // Archiving pauses the automations bound to an artifact; this guard
+    // covers every other writer, so an archived artifact stops changing.
+    if (artifact.archivedAt !== undefined) {
+      throw new Error("Artifact is archived. Restore it to write state.")
+    }
+
     const entry = resolveArtifactStateContract(
       artifact.contract,
       args.contractName

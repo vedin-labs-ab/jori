@@ -35,7 +35,7 @@ const artifactWorkspacePathProperty = stringProperty(
 
 const artifactStateProperties = {
   artifactId: stringProperty(
-    "Milo artifact ID. Artifact-owned automation runs may omit this because Milo can infer it from the run."
+    "Milo artifact ID of any accessible artifact. When omitted in an automation run, defaults to the automation's primary artifact."
   ),
   contractName: stringProperty(
     "State entry name from the artifact contract, not the raw state key."

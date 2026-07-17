@@ -8,7 +8,7 @@ Run ID: {{run.id}}
 
 {% if artifact %}## Attached artifact
 
-`{{artifact.title}}` is attached to this run; #read_artifact_state and #update_artifact_state infer its artifact ID.
+`{{artifact.title}}` is this run's primary artifact; #read_artifact_state and #update_artifact_state default to it when `artifactId` is omitted, and take any other accessible artifact's ID explicitly.
 {% if artifact.contract %}Its state contract defines these entries — address them by `contractName`; the server validates every write against the entry's schema, which #read_artifact shows in full:
 {% for entry in artifact.contract %}
 - `{{entry.name}}` ({{entry.scope}}, {{entry.schema}}){% if entry.description %}: {{entry.description}}{% endif %}{% endfor %}

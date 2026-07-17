@@ -62,7 +62,6 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
           choices={choices}
           definition={definition}
           delivery={delivery}
-          enabled={enabled}
           hints={hints}
           isBusy={isBusy}
           onProviderIndexChange={setProviderIndex}
