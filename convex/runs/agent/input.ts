@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type RunArtifactContext } from "../../artifacts/context"
 import { type WorkstreamContext } from "../../deduction/roster"
 import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
@@ -29,6 +30,7 @@ export type AutomationRuntimeInput = {
   access: Access
   instructions: string
   run: Doc<"runs">
+  artifact: RunArtifactContext | null
   integration: RuntimeIntegration | null
   integrations: RuntimeIntegration[]
   event: Doc<"events"> | null
@@ -41,6 +43,7 @@ export type AutomationRuntimeInput = {
 export type InstructionRuntimeInput = {
   type: "instruction"
   run: Doc<"runs">
+  artifact: RunArtifactContext | null
   integrations: RuntimeIntegration[]
   instructions: string
   access?: Access

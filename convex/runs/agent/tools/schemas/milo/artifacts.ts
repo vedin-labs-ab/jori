@@ -44,11 +44,15 @@ const artifactStateProperties = {
 
 export const artifactToolInputSchemas = {
   create_artifact: objectSchema({
-    required: ["title", "access", "workspacePath"],
     properties: {
-      title: stringProperty("Short artifact title."),
+      title: stringProperty(
+        "Short artifact title. Required unless template is set."
+      ),
       access: artifactAccessProperty,
       workspacePath: artifactWorkspacePathProperty,
+      template: stringProperty(
+        "Playbook template key (for example meeting-briefing) to instantiate instead of building a workspace. Publishes a user-owned copy of that template with its contract; title and access default from the template."
+      ),
       message: stringProperty("Optional version message."),
       capabilities: artifactToolGrantsSchema(),
     },

@@ -1,13 +1,17 @@
-import { automationEventMatchKey } from "../../../contracts/automations/events"
 import { type Scope } from "../../../contracts/permissions/scope"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type PlaybookBinding } from "../../playbooks/schema"
 import { executionPrincipalForScope } from "../../runs/principal"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import { automationKeyPartition, findAutomationByKey } from "../keys"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
-import { normalizeRequiredText } from "../timing"
+import {
+  isSameEventTrigger,
+  normalizeRequiredText,
+  sameTriggerDefinition,
+} from "../timing"
 import { requireAutomationArtifact } from "./artifact"
 import { deleteOwnedAutomations, requireValidOwnershipUpdate } from "./children"
 import { getRequiredAutomation, getTenantAutomation } from "./read"
@@ -17,6 +21,7 @@ type UpdateAutomationArgs = {
   tenantId: string
   automationId: Id<"automations">
   artifactId?: Id<"artifacts">
+  playbook?: PlaybookBinding
   name?: string
   instructions?: string
   scope?: Scope
@@ -104,6 +109,10 @@ async function buildAutomationPatch(
       args.instructions,
       "instructions"
     )
+  }
+
+  if (args.playbook !== undefined) {
+    patch.playbook = args.playbook
   }
 
   await applyPrincipalPatch(ctx, args, existing, principal, patch)
@@ -218,40 +227,6 @@ async function buildTriggerPatch(
   }
 
   return { status, trigger: storedTrigger, type }
-}
-
-function isSameEventTrigger(
-  left: Doc<"automations">["trigger"],
-  right: Doc<"automations">["trigger"] | undefined
-) {
-  return (
-    "integrationId" in left &&
-    right !== undefined &&
-    "integrationId" in right &&
-    left.integrationId === right.integrationId &&
-    left.event === right.event &&
-    automationEventMatchKey(left.match) === automationEventMatchKey(right.match)
-  )
-}
-
-function sameTriggerDefinition(
-  left: Doc<"automations">["trigger"],
-  right: Doc<"automations">["trigger"]
-) {
-  if ("at" in left || "at" in right) {
-    return "at" in left && "at" in right && left.at === right.at
-  }
-
-  if ("expression" in left || "expression" in right) {
-    return (
-      "expression" in left &&
-      "expression" in right &&
-      left.expression === right.expression &&
-      left.timezone === right.timezone
-    )
-  }
-
-  return isSameEventTrigger(left, right)
 }
 
 async function updateKeyPartition(

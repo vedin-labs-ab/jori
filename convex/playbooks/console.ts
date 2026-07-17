@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { playbookCatalog } from "../../contracts/playbooks/catalog"
+import { type Doc } from "../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
@@ -9,8 +10,12 @@ import {
 import { checkTenantAccess, requireTenantAccess } from "../access"
 import { requireClerkUserId } from "../access/users"
 import { listInactiveAccessIntegrations } from "../automations/access"
+import { createAutomation } from "../automations/lifecycle"
+import * as automationSchema from "../automations/schema"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { resolvePersonByIdentity } from "../persons/identity/links"
+import { scopeValidator } from "../shared/audience"
+import { type QueryLikeCtx } from "../shared/context"
 import { callerRecipient, playbookPlanArgs, playbookPlanFields } from "./caller"
 import {
   deliverySetup,
@@ -19,14 +24,17 @@ import {
 } from "./delivery"
 import { resolvePlaybookDraft } from "./draft"
 import {
-  connectedIntegrations,
   enablePlaybook,
   readPlaybookAutomations,
-  readPlaybookSlots,
-  resolvePlaybookPlan,
+  reconfigurePlaybook,
   validatePlaybookEnablement,
 } from "./enable"
-import { deliveryChoiceValidator } from "./schema"
+import {
+  connectedIntegrations,
+  readPlaybookSlots,
+  resolvePlaybookPlan,
+} from "./plan"
+import { deliveryChoiceValidator, playbookBindingValidator } from "./schema"
 import { trialPlaybook } from "./trial"
 
 const recipientValidator = v.object({
@@ -83,34 +91,65 @@ export const list = query({
     return {
       status: "ready" as const,
       playbooks: await Promise.all(
-        playbookCatalog.map(async (definition) => {
-          const automation = enabled.get(definition.key)
-
-          return {
-            key: definition.key,
-            slots: readPlaybookSlots(definition, connected),
-            delivery: deliverySetup(definition, deliveryContext),
-            enabled:
-              automation === undefined
-                ? null
-                : {
-                    automationId: automation._id,
-                    status: automation.status,
-                    nextRunAt:
-                      "nextAt" in automation.trigger
-                        ? automation.trigger.nextAt
-                        : undefined,
-                    missing: await listInactiveAccessIntegrations(
-                      ctx,
-                      automation.access
-                    ),
-                  },
-          }
-        })
+        playbookCatalog.map(async (definition) => ({
+          key: definition.key,
+          slots: readPlaybookSlots(definition, connected),
+          delivery: deliverySetup(definition, deliveryContext),
+          enabled: await enabledProjection(ctx, enabled.get(definition.key)),
+        }))
       ),
     }
   },
 })
+
+/** The enabled card state: run status plus the stored recipe input, so the
+ *  setup dialog can reopen prefilled and detect available updates. */
+async function enabledProjection(
+  ctx: QueryLikeCtx,
+  automation: Doc<"automations"> | undefined
+) {
+  if (automation === undefined) {
+    return null
+  }
+
+  return {
+    automationId: automation._id,
+    status: automation.status,
+    nextRunAt:
+      "nextAt" in automation.trigger ? automation.trigger.nextAt : undefined,
+    missing: await listInactiveAccessIntegrations(ctx, automation.access),
+    setup: automation.playbook ?? null,
+    artifact: await artifactProjection(ctx, automation),
+  }
+}
+
+/** Whether the playbook's artifact head is stock or user-customized — the
+ *  card explains that updates leave a customized artifact untouched. */
+async function artifactProjection(
+  ctx: QueryLikeCtx,
+  automation: Doc<"automations">
+) {
+  if (automation.artifactId === undefined) {
+    return null
+  }
+
+  const artifact = await ctx.db.get(automation.artifactId)
+
+  if (artifact === null) {
+    return null
+  }
+
+  const head =
+    artifact.versionId === undefined
+      ? null
+      : await ctx.db.get(artifact.versionId)
+
+  return {
+    artifactId: artifact._id,
+    archived: artifact.archivedAt !== undefined,
+    customized: head !== null && head.template === undefined,
+  }
+}
 
 export const saveDeliveryPreference = mutation({
   args: {
@@ -139,12 +178,7 @@ export const saveDeliveryPreference = mutation({
 })
 
 export const enableResolved = internalMutation({
-  args: {
-    ...playbookPlanFields,
-    createdBy: v.id("persons"),
-    recipient: recipientValidator,
-    artifactId: v.optional(v.id("artifacts")),
-  },
+  args: resolvedArtifactPlanFields,
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args) =>
     await enablePlaybook(
@@ -153,12 +187,50 @@ export const enableResolved = internalMutation({
     ),
 })
 
-export const validateResolved = internalQuery({
+export const reconfigureResolved = internalMutation({
   args: {
-    ...playbookPlanFields,
-    createdBy: v.id("persons"),
-    recipient: recipientValidator,
+    ...resolvedArtifactPlanFields,
+    automationId: v.id("automations"),
   },
+  returns: v.object({ automationId: v.id("automations") }),
+  handler: async (ctx, args) =>
+    await reconfigurePlaybook(ctx, {
+      ...playbookPlanArgs(
+        args,
+        args.createdBy,
+        args.recipient,
+        args.artifactId
+      ),
+      automationId: args.automationId,
+    }),
+})
+
+/** Create the automation an edited playbook draft describes, bound to the
+ *  artifact the calling action provisioned. */
+export const createResolved = internalMutation({
+  args: {
+    tenantId: v.string(),
+    playbook: playbookBindingValidator,
+    artifactId: v.optional(v.id("artifacts")),
+    key: v.optional(v.string()),
+    name: v.string(),
+    instructions: v.string(),
+    scope: v.optional(scopeValidator),
+    access: automationSchema.accessInput,
+    type: automationSchema.automationType,
+    trigger: automationSchema.triggerInput,
+    createdBy: v.id("persons"),
+  },
+  returns: v.object({ automationId: v.id("automations") }),
+  handler: async (ctx, args) => {
+    const automation = await createAutomation(ctx, args)
+
+    return { automationId: automation._id }
+  },
+})
+
+export const validateResolved = internalQuery({
+  args: resolvedPlanFields,
   returns: v.null(),
   handler: async (ctx, args) => {
     await validatePlaybookEnablement(
@@ -194,10 +266,10 @@ export const trialResolved = internalMutation({
 })
 
 export const draftResolved = internalQuery({
-  args: resolvedArtifactPlanFields,
+  args: resolvedPlanFields,
   handler: async (ctx, args) =>
     await resolvePlaybookDraft(
       ctx,
-      playbookPlanArgs(args, args.createdBy, args.recipient, args.artifactId)
+      playbookPlanArgs(args, args.createdBy, args.recipient)
     ),
 })

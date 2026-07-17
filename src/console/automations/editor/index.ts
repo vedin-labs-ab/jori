@@ -1,4 +1,9 @@
-import { type ReactMutation, useMutation } from "convex/react"
+import {
+  type ReactAction,
+  type ReactMutation,
+  useAction,
+  useMutation,
+} from "convex/react"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
@@ -25,12 +30,20 @@ export function useAutomationEditor(
   }
 }
 
+/** The persistence endpoints a form save can land on. */
+function useAutomationSavers() {
+  return {
+    create: useMutation(api.automations.console.create),
+    createFromPlaybook: useAction(api.playbooks.actions.create),
+    update: useMutation(api.automations.console.update),
+  }
+}
+
 function useAutomationForm(
   tenantId: string,
   permissions?: AutomationPolicyPermissions
 ) {
-  const create = useMutation(api.automations.console.create)
-  const update = useMutation(api.automations.console.update)
+  const savers = useAutomationSavers()
   const [formAutomation, setFormAutomation] = useState<Automation>()
   const [formValues, setFormValues] = useState<AutomationFormValues>(
     automationFormValues(undefined)
@@ -64,12 +77,11 @@ function useAutomationForm(
     setIsSaving(true)
     try {
       await persistAutomation({
-        create,
+        ...savers,
         formAutomation,
         formValues,
         permissions,
         tenantId,
-        update,
       })
       setIsFormOpen(false)
       onSaved.current?.()
@@ -122,6 +134,7 @@ function reportSaveError(
 
 async function persistAutomation({
   create,
+  createFromPlaybook,
   formAutomation,
   formValues,
   permissions,
@@ -129,6 +142,7 @@ async function persistAutomation({
   update,
 }: {
   create: ReactMutation<typeof api.automations.console.create>
+  createFromPlaybook: ReactAction<typeof api.playbooks.actions.create>
   formAutomation: Automation | undefined
   formValues: AutomationFormValues
   permissions?: AutomationPolicyPermissions
@@ -142,7 +156,20 @@ async function persistAutomation({
       throw new Error(result.error)
     }
 
-    await create({ tenantId, ...result.args })
+    // A playbook draft creates through the playbook action, which also
+    // provisions the playbook's artifact; plain drafts stay a mutation.
+    const { artifactId: _artifactId, key, playbook, ...plain } = result.args
+
+    if (playbook !== undefined) {
+      await createFromPlaybook({
+        tenantId,
+        playbook,
+        ...(key === undefined ? {} : { key }),
+        ...plain,
+      })
+    } else {
+      await create({ tenantId, ...plain })
+    }
     return
   }
 

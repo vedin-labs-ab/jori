@@ -30,20 +30,20 @@ export const getExistingBlobIds = internalQuery({
   },
 })
 
-export const findBlueprint = internalQuery({
+export const findTemplate = internalQuery({
   args: {
     tenantId: v.string(),
-    blueprint: v.string(),
+    template: v.string(),
     partition: v.string(),
   },
   handler: async (ctx, args) => {
     const artifact = await ctx.db
       .query("artifacts")
-      .withIndex("by_tenant_and_blueprint", (index) =>
+      .withIndex("by_tenant_and_template", (index) =>
         index
           .eq("tenantId", args.tenantId)
-          .eq("blueprintPartition", args.partition)
-          .eq("blueprint", args.blueprint)
+          .eq("templatePartition", args.partition)
+          .eq("template", args.template)
       )
       .first()
 
@@ -51,12 +51,13 @@ export const findBlueprint = internalQuery({
       return null
     }
 
-    const version =
+    const head =
       artifact.versionId === undefined
         ? null
         : await ctx.db.get(artifact.versionId)
 
-    return { artifact, treeId: version?.treeId }
+    // A head without a template stamp is user-published: customized.
+    return { artifact, headTemplate: head?.template ?? null }
   },
 })
 

@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
+import { readRunArtifactContext } from "../artifacts/context"
 import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForPrincipal } from "../integrations/data"
 import { recentConversation } from "../messages/history"
@@ -126,6 +127,7 @@ async function getAutomationInput(
     access,
     instructions,
     run: args.run,
+    artifact: await readRunArtifactContext(ctx, args.run),
     event:
       event !== null && event.tenantId === args.run.tenantId ? event : null,
     integration:
@@ -171,6 +173,7 @@ async function getInstructionInput(
     type: "instruction" as const,
     run: args.run,
     instructions,
+    artifact: await readRunArtifactContext(ctx, args.run),
     ...(access === undefined ? {} : { access }),
     integrations: grantedIntegrations,
     organization: await readApprovedFacts(ctx, args.run.tenantId),

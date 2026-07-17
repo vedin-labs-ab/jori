@@ -1,33 +1,24 @@
-import { type Integration } from "@contracts/integrations"
-import {
-  describePlaybookCadence,
-  type PlaybookDefinition,
-} from "@contracts/playbooks/catalog"
+import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import { type DeliveryChoice } from "@contracts/playbooks/delivery"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
-import { useNavigate } from "@tanstack/react-router"
-import { useAction, useConvex, useMutation } from "convex/react"
-import { type FunctionArgs } from "convex/server"
-import { useState } from "react"
-import { toast } from "sonner"
+import { useAction, useConvex } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { type AutomationEditorHost } from "../automations/editor/host"
 import { automationFormValues } from "../automations/editor/save"
 import { showErrorToast } from "../shared/error"
+import {
+  type AutomationId,
+  type PlaybookChoices,
+  useAutomationActions,
+  useCatalogActions,
+} from "./catalog"
+import {
+  type PendingAction,
+  type PlaybookActionKind,
+  usePendingAction,
+} from "./pending"
 
-type AutomationId = FunctionArgs<
-  typeof api.automations.console.run
->["automationId"]
-
-type PlaybookChoices = Record<string, Integration>
-
-export type PlaybookActionKind =
-  | "enable"
-  | "trial"
-  | "run"
-  | "pause"
-  | "edit"
-  | "advanced"
+export type { PlaybookActionKind } from "./pending"
 
 export type PlaybookActions = ReturnType<typeof usePlaybookActions>
 
@@ -49,7 +40,7 @@ export function usePlaybookActions(
 /** Opens the shared automation editor from a playbook — existing or draft. */
 function useEditActions(
   tenantId: string,
-  pending: ReturnType<typeof usePendingAction>,
+  pending: PendingAction,
   editorHost: AutomationEditorHost
 ) {
   const convex = useConvex()
@@ -112,146 +103,4 @@ export function pendingActionKind(
   return actions.pending?.key === definition.key
     ? actions.pending.kind
     : undefined
-}
-
-function usePendingAction() {
-  const [current, setCurrent] = useState<{
-    key: string
-    kind: PlaybookActionKind
-  }>()
-
-  async function wrap(
-    key: string,
-    kind: PlaybookActionKind,
-    action: () => Promise<void>
-  ) {
-    setCurrent({ key, kind })
-    try {
-      await action()
-    } finally {
-      setCurrent(undefined)
-    }
-  }
-
-  return { current, wrap }
-}
-
-function useCatalogActions(
-  tenantId: string,
-  pending: ReturnType<typeof usePendingAction>
-) {
-  const enableMutation = useAction(api.playbooks.actions.enable)
-  const trialMutation = useAction(api.playbooks.actions.trial)
-  const viewRuns = useViewRunsAction()
-
-  return {
-    enable: (
-      definition: PlaybookDefinition,
-      choices: PlaybookChoices,
-      destination: DeliveryChoice,
-      options: PlaybookOptionValues
-    ) =>
-      pending.wrap(definition.key, "enable", async () => {
-        try {
-          await enableMutation({
-            tenantId,
-            playbook: definition.key,
-            choices,
-            destination,
-            options,
-          })
-          toast.success(`${definition.title} is on`, {
-            description: `Runs ${lowercaseFirst(
-              describePlaybookCadence(definition, options)
-            )}.`,
-          })
-        } catch (error) {
-          showErrorToast(error, "Couldn't enable the playbook.")
-        }
-      }),
-
-    trial: (
-      definition: PlaybookDefinition,
-      choices: PlaybookChoices,
-      destination: DeliveryChoice,
-      options: PlaybookOptionValues
-    ) =>
-      pending.wrap(definition.key, "trial", async () => {
-        try {
-          await trialMutation({
-            tenantId,
-            playbook: definition.key,
-            choices,
-            destination,
-            options,
-          })
-          toast.success(`${definition.title} is running`, {
-            description: "One-time run — nothing is enabled.",
-            action: viewRuns,
-          })
-        } catch (error) {
-          showErrorToast(error, "Couldn't start the run.")
-        }
-      }),
-  }
-}
-
-function useAutomationActions(
-  tenantId: string,
-  pending: ReturnType<typeof usePendingAction>
-) {
-  const runMutation = useMutation(api.automations.console.run)
-  const pauseMutation = useMutation(api.automations.console.pause)
-  const resumeMutation = useMutation(api.automations.console.resume)
-  const viewRuns = useViewRunsAction()
-
-  return {
-    runNow: (definition: PlaybookDefinition, automationId: AutomationId) =>
-      pending.wrap(definition.key, "run", async () => {
-        try {
-          await runMutation({ tenantId, automationId })
-          toast.success(`${definition.title} is running`, {
-            action: viewRuns,
-          })
-        } catch (error) {
-          showErrorToast(error, "Couldn't start the run.")
-        }
-      }),
-
-    setPaused: (
-      definition: PlaybookDefinition,
-      automationId: AutomationId,
-      paused: boolean
-    ) =>
-      pending.wrap(definition.key, "pause", async () => {
-        try {
-          if (paused) {
-            await pauseMutation({ tenantId, automationId })
-            toast.success(`${definition.title} paused`, {
-              description: "It keeps its setup — switch it back on anytime.",
-            })
-          } else {
-            await resumeMutation({ tenantId, automationId })
-            toast.success(`${definition.title} is back on`)
-          }
-        } catch (error) {
-          showErrorToast(error, "Couldn't update the playbook.")
-        }
-      }),
-  }
-}
-
-function useViewRunsAction() {
-  const navigate = useNavigate()
-
-  return {
-    label: "View run",
-    onClick: () => {
-      void navigate({ to: "/runs" })
-    },
-  }
-}
-
-function lowercaseFirst(text: string) {
-  return text.charAt(0).toLowerCase() + text.slice(1)
 }

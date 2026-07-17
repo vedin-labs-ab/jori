@@ -7,10 +7,10 @@ import {
   RouterContextProvider,
 } from "@tanstack/react-router"
 import { cleanup, render, screen } from "@testing-library/react"
-import { afterEach, expect, test, vi } from "vitest"
+import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { PlaybookCard } from "./card"
-import { type PlaybookActions } from "./enable"
+import { stubPlaybookActions } from "./fixtures"
 import { type PlaybookListRow } from "./state"
 
 afterEach(() => {
@@ -62,7 +62,7 @@ test("disabled card offers a single enable entry without a switch", () => {
   expect(screen.queryByRole("switch")).toBeNull()
 })
 
-function renderCard(row: PlaybookListRow, actions = stubActions()) {
+function renderCard(row: PlaybookListRow, actions = stubPlaybookActions()) {
   const router = createRouter({
     history: createMemoryHistory(),
     routeTree: createRootRoute(),
@@ -80,19 +80,6 @@ function renderCard(row: PlaybookListRow, actions = stubActions()) {
       </TooltipProvider>
     </RouterContextProvider>
   )
-}
-
-function stubActions(): PlaybookActions {
-  return {
-    pending: undefined,
-    edit: vi.fn(async () => {}),
-    enable: vi.fn(async () => {}),
-    openAdvanced: vi.fn(async () => {}),
-    preloadEdit: vi.fn(),
-    trial: vi.fn(async () => {}),
-    runNow: vi.fn(async () => {}),
-    setPaused: vi.fn(async () => {}),
-  }
 }
 
 function disabledRow(): PlaybookListRow {
@@ -125,6 +112,8 @@ function enabledRow(
       status,
       nextRunAt,
       missing,
+      setup: null,
+      artifact: null,
     },
   }
 }

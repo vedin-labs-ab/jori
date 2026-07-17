@@ -8,7 +8,9 @@ export async function prepareMiloToolInput(
   tool: string,
   input: JsonObject
 ) {
-  if (!isArtifactPublishTool(tool)) {
+  // Template instantiation carries no workspace: the backend resolves the
+  // template's source, build, and contract itself.
+  if (!isArtifactPublishTool(tool) || typeof input.template === "string") {
     return input
   }
 

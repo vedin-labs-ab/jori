@@ -4,6 +4,7 @@ import {
 } from "../../../contracts/permissions/scope"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type PlaybookBinding } from "../../playbooks/schema"
 import { executionPrincipalForScope } from "../../runs/principal"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import {
@@ -25,7 +26,7 @@ type CreateAutomationArgs = {
   artifactId?: Id<"artifacts">
   parentId?: Id<"automations">
   expectedParentConfigurationVersion?: number
-  playbook?: string
+  playbook?: PlaybookBinding
   key?: string
   name: string
   instructions: string

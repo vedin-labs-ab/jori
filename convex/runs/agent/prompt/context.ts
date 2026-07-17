@@ -68,6 +68,7 @@ function createRunInstructions(
       id: input.run._id,
       artifactId: input.run.artifactId ?? null,
     },
+    artifact: createArtifactValues(input),
     surface: {
       active: activeSurface !== null,
       label:
@@ -110,6 +111,27 @@ function createTriggerPart(input: AgentRuntimeInput) {
     promptTemplates["agent/context/trigger/message"],
     createMessageValues(input)
   )
+}
+
+/** The attached artifact's state contract, so instructions can reference
+ *  entries by name instead of restating schema details. */
+function createArtifactValues(input: AgentRuntimeInput) {
+  if (input.type === "message" || input.artifact === null) {
+    return null
+  }
+
+  return {
+    title: input.artifact.title,
+    contract:
+      input.artifact.contract.length === 0
+        ? null
+        : input.artifact.contract.map((entry) => ({
+            name: entry.name,
+            scope: entry.scope,
+            schema: `${entry.schemaName} v${entry.schemaVersion}`,
+            description: entry.description,
+          })),
+  }
 }
 
 function createMessageValues(

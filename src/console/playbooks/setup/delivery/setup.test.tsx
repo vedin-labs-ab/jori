@@ -4,6 +4,7 @@ import { playbookCatalog } from "@contracts/playbooks/catalog"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type PlaybookActions } from "../../enable"
+import { stubPlaybookActions } from "../../fixtures"
 import { type PlaybookEnablePlan, type PlaybookListRow } from "../../state"
 import { PlaybookSetupDialog } from "../dialog"
 
@@ -43,7 +44,7 @@ const plan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
 }
 
 test("uses the server-recommended self Slack DM", () => {
-  const actions = stubActions()
+  const actions = stubPlaybookActions()
 
   renderDialog(
     actions,
@@ -61,7 +62,7 @@ test("uses the server-recommended self Slack DM", () => {
 })
 
 test("an open edit blocks enabling until cancelled", () => {
-  renderDialog(stubActions(), deliverySetup())
+  renderDialog(stubPlaybookActions(), deliverySetup())
   fireEvent.click(screen.getByRole("button", { name: /change/i }))
 
   expectButtonDisabled("Enable")
@@ -72,7 +73,7 @@ test("an open edit blocks enabling until cancelled", () => {
 })
 
 test("save stays disabled until the target changes", () => {
-  renderDialog(stubActions(), deliverySetup())
+  renderDialog(stubPlaybookActions(), deliverySetup())
   fireEvent.click(screen.getByRole("button", { name: /change/i }))
 
   expectButtonDisabled("Save")
@@ -83,7 +84,7 @@ test("save stays disabled until the target changes", () => {
 })
 
 test("saves an explicit delivery change as the future preference", () => {
-  renderDialog(stubActions(), deliverySetup())
+  renderDialog(stubPlaybookActions(), deliverySetup())
   fireEvent.click(screen.getByRole("button", { name: /change/i }))
 
   switchMode("Slack DM")
@@ -157,17 +158,4 @@ function expectButtonDisabled(name: string | RegExp, disabled = true) {
     "disabled",
     disabled
   )
-}
-
-function stubActions(): PlaybookActions {
-  return {
-    pending: undefined,
-    edit: vi.fn(async () => {}),
-    enable: vi.fn(async () => {}),
-    openAdvanced: vi.fn(async () => {}),
-    preloadEdit: vi.fn(),
-    trial: vi.fn(async () => {}),
-    runNow: vi.fn(async () => {}),
-    setPaused: vi.fn(async () => {}),
-  }
 }

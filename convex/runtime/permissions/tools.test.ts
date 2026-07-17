@@ -66,6 +66,7 @@ function instructionInput(overrides: Partial<InstructionRuntimeInput>) {
   return {
     type: "instruction" as const,
     run: {} as Doc<"runs">,
+    artifact: null,
     instructions: "Do the thing.",
     integrations: [integration("gmail")],
     organization: null,

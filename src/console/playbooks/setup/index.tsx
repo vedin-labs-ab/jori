@@ -7,6 +7,8 @@ import { type PlaybookActions } from "../enable"
 import { type PlaybookListRow, planPlaybookEnable } from "../state"
 import { PlaybookSetupDialog } from "./dialog"
 
+export { PlaybookSetupDialog } from "./dialog"
+
 /** Link to the integrations page for a playbook that lacks a connection. */
 export function ConnectButton({ label }: { label: string }) {
   return (

@@ -55,10 +55,15 @@ describe("Meeting Briefing contract", () => {
 })
 
 describe("Meeting Briefing state and evidence", () => {
-  test("uses bounded schema-3 state with optimistic concurrency", () => {
+  test("uses contract-bound state with optimistic concurrency", () => {
     const instructions = renderBriefing()
 
-    expect(instructions).toContain("Initialize `briefings` as schema 3")
+    expect(instructions).toContain(
+      "with the contract entries named in the run context"
+    )
+    expect(instructions).toContain(
+      "setting each document's `schemaVersion` to the contract's schema version"
+    )
     expect(instructions).toContain(
       "first 32 lowercase hex characters of SHA-256"
     )

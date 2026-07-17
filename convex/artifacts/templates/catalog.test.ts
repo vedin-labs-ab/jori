@@ -4,47 +4,39 @@ import {
   normalizeArtifactContract,
   resolveArtifactStateContract,
 } from "../../../contracts/artifacts/contract"
-import { type Doc } from "../../_generated/dataModel"
-import { createArtifactSourceSnapshot } from "../../artifacts/source"
-import { isCurrentPlaybookBlueprint, readPlaybookBlueprint } from "./catalog"
+import { getPlaybook } from "../../../contracts/playbooks/catalog"
+import { readArtifactTemplate, templatePartition } from "./catalog"
 
-const blueprint = readPlaybookBlueprint("meeting-briefing")
+const template = readArtifactTemplate("meeting-briefing")
 
-describe("playbook blueprint catalog", () => {
-  test("reads known blueprints only", () => {
-    expect(blueprint).toBeDefined()
-    expect(readPlaybookBlueprint("missing")).toBeUndefined()
+describe("artifact template catalog", () => {
+  test("reads known templates only", () => {
+    expect(template).toBeDefined()
+    expect(readArtifactTemplate("missing")).toBeUndefined()
   })
 
-  test("detects source and presentation drift", () => {
-    if (blueprint === undefined) {
-      throw new Error("Meeting Briefing blueprint is missing.")
-    }
+  test("joins catalog metadata with the compiled template", () => {
+    const definition = getPlaybook("meeting-briefing")
 
-    const treeId = createArtifactSourceSnapshot(
-      blueprint.source.map((file) => ({ ...file }))
-    ).treeId
-    const artifact = {
-      access: blueprint.access,
-      title: blueprint.title,
-    } as Doc<"artifacts">
+    expect(template?.version).toBe(definition.version)
+    expect(template?.title).toBe(definition.artifact?.title)
+    expect(template?.description).toBe(definition.artifact?.description)
+    expect(template?.access).toBe(definition.scope)
+  })
 
-    expect(isCurrentPlaybookBlueprint({ artifact, treeId }, blueprint)).toBe(
-      true
+  test("partitions canonical instances by template access", () => {
+    const personId = "person-1" as Parameters<typeof templatePartition>[1]
+
+    expect(templatePartition({ access: "personal" }, personId)).toBe(
+      "person:person-1"
     )
-    expect(
-      isCurrentPlaybookBlueprint({ artifact, treeId: "stale" }, blueprint)
-    ).toBe(false)
-    expect(
-      isCurrentPlaybookBlueprint(
-        { artifact: { ...artifact, title: "Stale" }, treeId },
-        blueprint
-      )
-    ).toBe(false)
+    expect(templatePartition({ access: "organization" }, personId)).toBe(
+      "organization"
+    )
   })
 
   test("keeps meeting timeline decisions on one live clock", () => {
-    const app = blueprint?.source.find((file) => file.path === "src/App.tsx")
+    const app = template?.source.find((file) => file.path === "src/App.tsx")
 
     expect(app?.content).toContain("const now = useNow();")
     expect(app?.content).toContain(
@@ -101,12 +93,12 @@ function assertMeetingState(meeting: unknown) {
 }
 
 function assertBriefingState(state: unknown) {
-  if (blueprint === undefined) {
-    throw new Error("Meeting Briefing blueprint is missing.")
+  if (template === undefined) {
+    throw new Error("Meeting Briefing template is missing.")
   }
 
   const entry = resolveArtifactStateContract(
-    normalizeArtifactContract(blueprint.contract),
+    normalizeArtifactContract(template.contract),
     "briefings"
   )
   assertContractStateValue({ entry, value: state })

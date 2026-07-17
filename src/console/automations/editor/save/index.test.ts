@@ -69,13 +69,21 @@ describe("automation payload", () => {
   })
 })
 
+const meetingBriefingBinding = {
+  key: "meeting-briefing",
+  version: 1,
+  options: {},
+  providers: {},
+  destination: { kind: "email" as const },
+}
+
 test("creates automation args with access and source bindings", () => {
   expect(
     createAutomationArgs(
       {
         ...emptyAutomationForm,
         key: "playbook:meeting-briefing",
-        playbook: "meeting-briefing",
+        playbook: meetingBriefingBinding,
         artifactId: "artifact" as AutomationFormValues["artifactId"],
         name: "Weekly release summary",
         instructions: "Summarize @GitHub and post to @Slack.",
@@ -90,7 +98,7 @@ test("creates automation args with access and source bindings", () => {
     args: {
       name: "Weekly release summary",
       key: "playbook:meeting-briefing",
-      playbook: "meeting-briefing",
+      playbook: meetingBriefingBinding,
       artifactId: "artifact",
       instructions: "Summarize @GitHub and post to @Slack.",
       scope: "personal",

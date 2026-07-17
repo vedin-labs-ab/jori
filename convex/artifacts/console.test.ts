@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { summarizeCapabilityForConsole } from "./console"
+import { summarizeCapabilityForConsole } from "./summary"
 
 test("summarizes artifact capabilities by canonical tool surface", () => {
   expect(

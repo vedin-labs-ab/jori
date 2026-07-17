@@ -15,7 +15,7 @@ test("milo input passes built artifact publish payloads through unvalidated", ()
   // The worker swaps workspacePath for the built payload before publishing, so
   // the model-facing schema would reject it. The publish path must not run it.
   expect(() => normalizeBrokerToolInput("create_artifact", prepared)).toThrow(
-    "create_artifact.workspacePath is required"
+    "create_artifact.source is not supported"
   )
   expect(normalizeMiloToolInput("create_artifact", prepared)).toBe(prepared)
   expect(

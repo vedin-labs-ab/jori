@@ -64,6 +64,7 @@ describe("raw Markdown trigger instructions", () => {
     const input = {
       type: "instruction" as const,
       run: base.run,
+      artifact: null,
       integrations: base.integrations,
       instructions: markdown,
       organization: null,
@@ -75,6 +76,58 @@ describe("raw Markdown trigger instructions", () => {
     expect(
       assemblePrompt(input).context.endsWith(`## Instructions\n\n${markdown}`)
     ).toBe(true)
+  })
+})
+
+describe("attached artifact context", () => {
+  test("renders the state contract by entry name", () => {
+    const input = automationRuntimeInput()
+
+    if (input.type !== "automation") {
+      throw new Error("Expected automation input.")
+    }
+
+    input.artifact = {
+      artifactId: input.run.artifactId ?? ("artifact" as never),
+      title: "Meeting Briefing",
+      contract: [
+        {
+          name: "briefings",
+          scope: "shared",
+          schemaName: "MeetingBriefings",
+          schemaVersion: 3,
+          description: "Canonical Meeting Briefing state.",
+        },
+        {
+          name: "research",
+          scope: "personal",
+          schemaName: "MeetingBriefingResearch",
+          schemaVersion: 3,
+          description: null,
+        },
+      ],
+    }
+
+    const context = assemblePrompt(input).context
+
+    expect(context).toContain("## Attached artifact")
+    expect(context).toContain("`Meeting Briefing` is attached to this run")
+    expect(context).toContain(
+      "- `briefings` (shared, MeetingBriefings v3): Canonical Meeting Briefing state."
+    )
+    expect(context).toContain(
+      "- `research` (personal, MeetingBriefingResearch v3)"
+    )
+    expect(context).not.toContain(
+      "- `research` (personal, MeetingBriefingResearch v3):"
+    )
+    expectNoSyntheticBlankLines(context)
+  })
+
+  test("stays out without an attached artifact", () => {
+    expect(assemblePrompt(automationRuntimeInput()).context).not.toContain(
+      "## Attached artifact"
+    )
   })
 })
 

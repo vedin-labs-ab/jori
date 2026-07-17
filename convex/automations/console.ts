@@ -78,10 +78,11 @@ export const get = query({
   },
 })
 
+// Playbook-bound creates go through playbooks/actions.create, which also
+// provisions the playbook's artifact; this creates plain automations only.
 export const create = mutation({
   args: {
     tenantId: v.string(),
-    ...automationSchema.automationBinding,
     name: v.string(),
     instructions: v.string(),
     scope: v.optional(scopeValidator),

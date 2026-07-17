@@ -16,6 +16,7 @@ import {
 import { artifactAccess } from "./schema"
 import { artifactSessionDurationMs, createSessionToken } from "./serve/session"
 import { capabilityInputValidator } from "./storage/validators"
+import { instantiateArtifactTemplate } from "./templates/provision"
 
 const artifactSourceFileValidator = v.object({
   path: v.string(),
@@ -90,6 +91,29 @@ export const createFromAgent = internalAction({
       mode: "create",
       personId: args.personId,
     } satisfies PublishArtifactArgs)
+  },
+})
+
+/** Publish a user-owned copy of an artifact template — the public
+ *  counterpart of playbook provisioning, reachable via #create_artifact. */
+export const instantiateFromAgent = internalAction({
+  args: {
+    tenantId: v.string(),
+    personId: v.id("persons"),
+    template: v.string(),
+    title: v.optional(v.string()),
+    access: v.optional(artifactAccess),
+    message: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<PublishResult> => {
+    return await instantiateArtifactTemplate(ctx, {
+      tenantId: args.tenantId,
+      personId: args.personId,
+      key: args.template,
+      title: args.title,
+      access: args.access,
+      message: args.message,
+    })
   },
 })
 

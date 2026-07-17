@@ -2,7 +2,7 @@ import { type MutationCtx } from "../_generated/server"
 import { resolveAccessInput } from "../automations/access"
 import { createInstructionRun } from "../runs/instruction"
 import { executionPrincipalForScope } from "../runs/principal"
-import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./enable"
+import { type PlaybookPlanArgs, resolvePlaybookPlan } from "./plan"
 
 /**
  * A one-time taste of a playbook before enabling it: the rendered

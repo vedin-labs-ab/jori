@@ -76,6 +76,21 @@ async function createArtifact(
   personId: Id<"persons">,
   args: Record<string, unknown>
 ): Promise<unknown> {
+  if (typeof args.template === "string") {
+    return await ctx.runAction(
+      internal.artifacts.actions.instantiateFromAgent,
+      {
+        tenantId,
+        personId,
+        template: args.template,
+        title: optionalString(args.title),
+        access:
+          args.access === undefined ? undefined : normalizeAccess(args.access),
+        message: optionalString(args.message),
+      }
+    )
+  }
+
   return await ctx.runAction(internal.artifacts.actions.createFromAgent, {
     tenantId,
     personId,

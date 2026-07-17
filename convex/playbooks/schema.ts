@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
+import { integrationValidator } from "../shared/integrations"
 
 export const deliveryChoiceValidator = v.union(
   v.object({ kind: v.literal("email") }),
@@ -15,6 +16,22 @@ export const deliveryChoiceValidator = v.union(
     ),
   })
 )
+
+/**
+ * The recipe input an enabled playbook was rendered from. Storing it makes
+ * reconfiguring and upgrading deterministic re-renders: the same key,
+ * version, and configuration always produce the same instructions,
+ * schedule, and access.
+ */
+export const playbookBindingValidator = v.object({
+  key: v.string(),
+  version: v.number(),
+  options: v.record(v.string(), v.union(v.boolean(), v.string(), v.number())),
+  providers: v.record(v.string(), integrationValidator),
+  destination: deliveryChoiceValidator,
+})
+
+export type PlaybookBinding = Infer<typeof playbookBindingValidator>
 
 export const playbookPreferences = defineTable({
   tenantId: v.string(),

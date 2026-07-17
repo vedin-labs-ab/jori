@@ -1,6 +1,5 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { getToolPermission } from "../../contracts/permissions"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
@@ -13,6 +12,12 @@ import {
   getAccessibleArtifact,
   searchArtifacts,
 } from "./access"
+import {
+  summarizeAutomations,
+  summarizeCapabilities,
+  summarizeVersion,
+  templateProvenance,
+} from "./summary"
 
 export const list = query({
   args: {
@@ -192,6 +197,7 @@ async function summarizeForConsole(ctx: QueryCtx, artifact: Doc<"artifacts">) {
     updatedAt: artifact.updatedAt,
     archivedAt: artifact.archivedAt,
     lastOpenedAt: await lastOpenedAt(ctx, artifact._id),
+    template: templateProvenance(versions, artifact.versionId),
     versions: versions.map((version) =>
       summarizeVersion(version, artifact.versionId)
     ),
@@ -210,74 +216,4 @@ async function lastOpenedAt(ctx: QueryCtx, artifactId: Id<"artifacts">) {
     .first()
 
   return latestSession?.seenAt
-}
-
-function summarizeVersion(
-  version: Doc<"artifactVersions">,
-  currentVersionId: Id<"artifactVersions"> | undefined
-) {
-  return {
-    versionId: version._id,
-    parentVersionId: version.parentVersionId,
-    treeId: version.treeId,
-    entrypoint: version.entrypoint,
-    sdk: version.sdk,
-    message: version.message,
-    createdBy: version.createdBy,
-    createdAt: version.createdAt,
-    isCurrent: version._id === currentVersionId,
-  }
-}
-
-function summarizeAutomations(automations: Doc<"automations">[]) {
-  return automations.map((automation) => ({
-    automationId: automation._id,
-    name: automation.name,
-    status: automation.status,
-    firedAt: automation.firedAt,
-    nextAt: automationNextAt(automation),
-    updatedAt: automation.updatedAt,
-  }))
-}
-
-function automationNextAt(automation: Doc<"automations">) {
-  if ("nextAt" in automation.trigger) {
-    return automation.trigger.nextAt
-  }
-
-  return "at" in automation.trigger ? automation.trigger.at : undefined
-}
-
-function summarizeCapabilities(capabilities: Doc<"artifactTools">[]) {
-  const activeCapabilities = capabilities.filter(
-    (capability) => capability.revokedAt === undefined
-  )
-
-  return activeCapabilities
-    .map((capability) => summarizeCapabilityForConsole(capability))
-    .filter((capability) => capability !== null)
-}
-
-export function summarizeCapabilityForConsole(
-  capability: Pick<
-    Doc<"artifactTools">,
-    "approvedAt" | "integrationId" | "tool" | "versionId"
-  >
-) {
-  const permission = getToolPermission(capability.tool)
-
-  if (permission === undefined) {
-    return null
-  }
-
-  return {
-    access: permission.access,
-    approvedAt: capability.approvedAt,
-    description: permission.description,
-    integrationId: capability.integrationId,
-    label: permission.label,
-    surface: permission.surface,
-    tool: permission.tool,
-    versionId: capability.versionId,
-  }
 }

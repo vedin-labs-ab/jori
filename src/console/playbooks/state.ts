@@ -15,7 +15,17 @@ export type PlaybookListRow = FunctionReturnType<
   typeof api.playbooks.console.list
 >["playbooks"][number]
 
+export type PlaybookEnabledRow = NonNullable<PlaybookListRow["enabled"]>
+
 export type PlaybookSlotState = PlaybookListRow["slots"][number]
+
+/** A newer catalog version than the one this enablement was rendered from. */
+export function playbookUpdateAvailable(
+  definition: { version: number },
+  enabled: PlaybookEnabledRow
+) {
+  return enabled.setup !== null && enabled.setup.version < definition.version
+}
 
 type PlaybookEnableOption = {
   label: string

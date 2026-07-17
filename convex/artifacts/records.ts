@@ -1,6 +1,12 @@
 import { v } from "convex/values"
-import { internalMutation } from "../_generated/server"
-import { artifactAccess, artifactContract } from "./schema"
+import { type Doc } from "../_generated/dataModel"
+import { internalMutation, type MutationCtx } from "../_generated/server"
+import { pauseAutomation } from "../automations/lifecycle"
+import {
+  artifactAccess,
+  artifactContract,
+  artifactTemplateStamp,
+} from "./schema"
 import {
   getTenantArtifact,
   insertCapabilities,
@@ -26,10 +32,9 @@ const publishFields = {
   entrypoint: v.string(),
   sdk: v.string(),
   message: v.optional(v.string()),
+  template: v.optional(artifactTemplateStamp),
   capabilities: v.array(capabilityInputValidator),
 }
-
-const blueprintField = { blueprint: v.optional(v.string()) }
 
 export const publishCreated = internalMutation({
   args: {
@@ -37,28 +42,30 @@ export const publishCreated = internalMutation({
     ownerId: v.id("persons"),
     title: v.string(),
     access: artifactAccess,
-    ...blueprintField,
+    /** Claim the canonical playbook-provisioned slot for this template. */
+    canonical: v.optional(v.boolean()),
     ...publishFields,
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    const blueprintPartition =
+    const canonical = args.canonical === true ? args.template : undefined
+    const templatePartition =
       args.access === "personal" ? `person:${args.ownerId}` : "organization"
 
-    if (args.blueprint !== undefined) {
+    if (canonical !== undefined) {
       const existing = await ctx.db
         .query("artifacts")
-        .withIndex("by_tenant_and_blueprint", (index) =>
+        .withIndex("by_tenant_and_template", (index) =>
           index
             .eq("tenantId", args.tenantId)
-            .eq("blueprintPartition", blueprintPartition)
-            .eq("blueprint", args.blueprint)
+            .eq("templatePartition", templatePartition)
+            .eq("template", canonical.key)
         )
         .first()
 
       if (existing !== null) {
         throw new Error(
-          `Artifact blueprint already provisioned: ${args.blueprint}`
+          `Artifact template already provisioned: ${canonical.key}`
         )
       }
     }
@@ -71,9 +78,9 @@ export const publishCreated = internalMutation({
       contract: args.contract,
       createdAt: now,
       updatedAt: now,
-      ...(args.blueprint === undefined
+      ...(canonical === undefined
         ? {}
-        : { blueprint: args.blueprint, blueprintPartition }),
+        : { template: canonical.key, templatePartition }),
     })
     const versionId = await insertVersion(ctx, {
       ...args,
@@ -168,6 +175,7 @@ export const remove = internalMutation({
 
     const now = Date.now()
 
+    await pauseArtifactAutomations(ctx, artifact)
     await ctx.db.patch(artifact._id, {
       archivedAt: now,
       updatedAt: now,
@@ -176,3 +184,29 @@ export const remove = internalMutation({
     return { artifactId: artifact._id, archived: true as const }
   },
 })
+
+/** An archived artifact must not keep collecting writes: recurring
+ *  automations bound to it pause, and their owned one-time children go
+ *  with them. Restoring the artifact leaves resuming to the user. */
+async function pauseArtifactAutomations(
+  ctx: MutationCtx,
+  artifact: Doc<"artifacts">
+) {
+  const automations = await ctx.db
+    .query("automations")
+    .withIndex("by_artifact", (index) => index.eq("artifactId", artifact._id))
+    .take(100)
+
+  for (const automation of automations) {
+    if (
+      automation.tenantId === artifact.tenantId &&
+      automation.type !== "once" &&
+      automation.status === "active"
+    ) {
+      await pauseAutomation(ctx, {
+        tenantId: artifact.tenantId,
+        automationId: automation._id,
+      })
+    }
+  }
+}

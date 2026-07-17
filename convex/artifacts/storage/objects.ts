@@ -33,6 +33,7 @@ export async function insertVersion(
     entrypoint: string
     sdk: string
     message?: string
+    template?: { key: string; version: number }
     createdBy: Id<"persons">
     createdAt: number
   }
@@ -48,6 +49,7 @@ export async function insertVersion(
     entrypoint: args.entrypoint,
     sdk: args.sdk,
     message: args.message,
+    template: args.template,
     createdBy: args.createdBy,
     createdAt: args.createdAt,
   })
