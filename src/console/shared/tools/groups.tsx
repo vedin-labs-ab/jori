@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { ProviderLogo } from "@/shared/logo/provider"
 import { SeparatorDot } from "../dot"
+import { useRetained } from "../retain"
 import { type ToolCapability } from "./model"
 import { ReadonlyToolGroups } from "./readonly"
 
@@ -29,6 +30,7 @@ export function ToolGroupsValue({
   groups: ToolGroup[]
 }) {
   const [activeGroup, setActiveGroup] = useState<ToolGroup>()
+  const shownGroup = useRetained(activeGroup)
 
   return (
     <>
@@ -50,8 +52,8 @@ export function ToolGroupsValue({
         }}
         open={activeGroup !== undefined}
       >
-        {activeGroup === undefined ? null : (
-          <ToolGroupDialog description={description} group={activeGroup} />
+        {shownGroup === undefined ? null : (
+          <ToolGroupDialog description={description} group={shownGroup} />
         )}
       </Dialog>
     </>
