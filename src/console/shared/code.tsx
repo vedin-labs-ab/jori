@@ -1,56 +1,118 @@
-import jsonLanguage from "highlight.js/lib/languages/json"
-import { createLowlight } from "lowlight"
-import { type ReactNode } from "react"
+import { Fragment, useState } from "react"
 
-const lowlight = createLowlight()
-lowlight.register({ json: jsonLanguage })
+type Composite = Record<string, unknown> | readonly unknown[]
 
-type CodeNode = {
-  type: string
-  value?: string
-  properties?: { className?: readonly string[] }
-  children?: CodeNode[]
+const toggleClassName =
+  "-mx-0.5 cursor-pointer rounded-sm px-0.5 outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring/30"
+
+/** JSON rendered as a collapsible structure: every bracket that opens a
+ *  non-empty object or array folds its region, DevTools-style. Emits the
+ *  exact `JSON.stringify(value, null, 2)` layout with `hljs-*` token
+ *  classes — pair with codeTokenClassName (shared/tokens.ts) on a parent. */
+export function JsonView({ value }: { value: unknown }) {
+  return (
+    <>
+      <JsonNode indent={0} value={value} />
+      {"\n"}
+    </>
+  )
 }
 
-/** JSON as `hljs-*` token spans, rendered without innerHTML. Pair with
- *  codeTokenClassName (shared/tokens.ts) on a parent element. */
-export function JsonCode({ value }: { value: string }) {
-  const tree = lowlight.highlight("json", value)
+function JsonNode({ indent, value }: { indent: number; value: unknown }) {
+  const [collapsed, setCollapsed] = useState(false)
 
-  return <>{renderNodes(tree.children as unknown as CodeNode[])}</>
-}
-
-/** Spans keyed by their character offset — the token's stable identity. */
-function renderNodes(nodes: CodeNode[] | undefined, start = 0): ReactNode {
-  let offset = start
-
-  return nodes?.map((node) => {
-    const nodeStart = offset
-    offset += nodeLength(node)
-
-    if (node.type === "text") {
-      return node.value
-    }
-
-    if (node.type === "element") {
-      return (
-        <span className={node.properties?.className?.join(" ")} key={nodeStart}>
-          {renderNodes(node.children, nodeStart)}
-        </span>
-      )
-    }
-
-    return null
-  })
-}
-
-function nodeLength(node: CodeNode): number {
-  if (node.type === "text") {
-    return node.value?.length ?? 0
+  if (!isComposite(value)) {
+    return <JsonLeaf value={value} />
   }
 
-  return (node.children ?? []).reduce(
-    (total, child) => total + nodeLength(child),
-    0
+  const [open, close] = Array.isArray(value) ? ["[", "]"] : ["{", "}"]
+  const size = Array.isArray(value) ? value.length : Object.keys(value).length
+
+  if (size === 0) {
+    return open + close
+  }
+
+  if (collapsed) {
+    return (
+      <button
+        aria-expanded={false}
+        className={toggleClassName}
+        onClick={() => setCollapsed(false)}
+        title={`Expand ${describeSize(size, value)}`}
+        type="button"
+      >
+        {open} <span className="text-muted-foreground">…</span> {close}
+      </button>
+    )
+  }
+
+  return (
+    <>
+      <button
+        aria-expanded={true}
+        className={toggleClassName}
+        onClick={() => setCollapsed(true)}
+        title={`Collapse ${describeSize(size, value)}`}
+        type="button"
+      >
+        {open}
+      </button>
+      {"\n"}
+      <JsonEntries indent={indent + 1} value={value} />
+      {pad(indent) + close}
+    </>
   )
+}
+
+function JsonEntries({ indent, value }: { indent: number; value: Composite }) {
+  const entries = Array.isArray(value)
+    ? value.map((item, index) => ({ item, key: String(index) }))
+    : Object.entries(value).map(([key, item]) => ({ item, key }))
+
+  return entries.map((entry, index) => (
+    <Fragment key={entry.key}>
+      {pad(indent)}
+      {Array.isArray(value) ? null : (
+        <>
+          <span className="hljs-attr">{JSON.stringify(entry.key)}</span>
+          {": "}
+        </>
+      )}
+      <JsonNode indent={indent} value={entry.item} />
+      {index < entries.length - 1 ? "," : ""}
+      {"\n"}
+    </Fragment>
+  ))
+}
+
+function JsonLeaf({ value }: { value: unknown }) {
+  if (typeof value === "string") {
+    return <span className="hljs-string">{JSON.stringify(value)}</span>
+  }
+
+  if (typeof value === "number") {
+    return <span className="hljs-number">{String(value)}</span>
+  }
+
+  if (typeof value === "boolean" || value === null) {
+    return <span className="hljs-literal">{String(value)}</span>
+  }
+
+  return String(value)
+}
+
+function describeSize(size: number, value: Composite) {
+  if (Array.isArray(value)) {
+    return size === 1 ? "1 item" : `${size} items`
+  }
+
+  return size === 1 ? "1 property" : `${size} properties`
+}
+
+function isComposite(value: unknown): value is Composite {
+  return typeof value === "object" && value !== null
+}
+
+function pad(indent: number) {
+  return "  ".repeat(indent)
 }
