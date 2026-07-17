@@ -8,7 +8,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ExpandableText } from "@/components/ui/expandable-text"
+import { stateScopeLabel } from "../../../artifacts/format"
 import { CopyButton } from "../../../shared/copy"
+import { FieldHelp } from "./help"
 
 export type ContractEntrySummary = {
   name: string
@@ -38,19 +40,37 @@ export function ContractEntries({
 
   return (
     <div className="grid min-w-0 gap-2">
-      <p className="font-medium text-muted-foreground">State</p>
+      <div className="flex items-center gap-1.5">
+        <p className="font-medium text-muted-foreground">State</p>
+        <FieldHelp label="State help">
+          <p>
+            State entries are the structured data this artifact stores.
+            Automations read and write them by name, and every write is
+            validated against the entry's schema.
+          </p>
+          <p>
+            Shareable entries keep one document for the whole artifact and
+            appear through share links. Private entries keep one document per
+            person and never appear through share links.
+          </p>
+        </FieldHelp>
+      </div>
       {entries.map((entry) => (
         <div className="grid min-w-0 gap-0.5" key={entry.name}>
           <div className="flex min-w-0 items-center justify-between gap-2">
             <span className="min-w-0 truncate">
               <span className="font-medium text-foreground">{entry.name}</span>
-              <span className="text-muted-foreground"> · {entry.scope}</span>
+              <span className="text-muted-foreground">
+                {" "}
+                · {stateScopeLabel(entry.scope)}
+              </span>
             </span>
             <Button
               aria-label={`View the ${entry.name} schema`}
               className="shrink-0"
               onClick={() => setRevealed(entry)}
               size="sm"
+              title={`${entry.schemaName} v${entry.schemaVersion}`}
               type="button"
               variant="outline"
             >

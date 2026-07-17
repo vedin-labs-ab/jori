@@ -96,3 +96,14 @@ function statusLabel(
 ) {
   return status[0].toUpperCase() + status.slice(1)
 }
+
+/** Human display for a contract entry's scope. The stored enum stays
+ *  shared/personal; these words say what the scope actually governs —
+ *  share-link visibility versus per-person privacy. */
+export function stateScopeLabel(scope: string) {
+  if (scope === "shared") {
+    return "shareable"
+  }
+
+  return scope === "personal" ? "private" : scope
+}

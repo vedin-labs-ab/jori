@@ -6,7 +6,7 @@ export const playbookTemplateContracts = {
       name: "briefings",
       scope: "shared",
       description:
-        "Canonical Meeting Briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
+        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
       schemaName: "MeetingBriefings",
       schemaVersion: 3,
       schema: {
@@ -562,7 +562,7 @@ export const playbookTemplateContracts = {
       name: "research",
       scope: "personal",
       description:
-        "Private, temporary Meeting Briefing research. Clear each attempt after synthesis.",
+        "Temporary research working state. Clear each attempt after synthesis.",
       schemaName: "MeetingBriefingResearch",
       schemaVersion: 3,
       schema: {
