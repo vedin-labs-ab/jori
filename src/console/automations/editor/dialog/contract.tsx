@@ -1,6 +1,5 @@
-import { Braces } from "lucide-react"
+import { Braces, Link2, Lock, type LucideIcon } from "lucide-react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ExpandableText } from "@/components/ui/expandable-text"
-import { stateScopeLabel } from "../../../artifacts/format"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { CopyButton } from "../../../shared/copy"
 import { FieldHelp } from "./help"
 
@@ -57,36 +60,11 @@ export function ContractEntries({
         </FieldHelp>
       </div>
       {entries.map((entry) => (
-        <div className="grid min-w-0 gap-1" key={entry.name}>
-          <div className="flex min-w-0 items-center justify-between gap-2">
-            <span className="min-w-0 truncate">
-              <span className="font-medium text-foreground">{entry.name}</span>
-              <span className="text-muted-foreground">
-                {" "}
-                · {stateScopeLabel(entry.scope)}
-              </span>
-            </span>
-            <Button
-              aria-label={`View the ${entry.name} schema`}
-              className="shrink-0"
-              onClick={() => setRevealed(entry)}
-              size="sm"
-              title={`${entry.schemaName} v${entry.schemaVersion}`}
-              type="button"
-              variant="ghost"
-            >
-              <Braces /> Schema
-            </Button>
-          </div>
-          {entry.description === undefined ? null : (
-            <ExpandableText
-              className="min-w-0 text-muted-foreground"
-              maxLines={1}
-            >
-              {entry.description}
-            </ExpandableText>
-          )}
-        </div>
+        <ContractEntryRow
+          entry={entry}
+          key={entry.name}
+          onReveal={() => setRevealed(entry)}
+        />
       ))}
       <SchemaDialog
         entry={revealed}
@@ -97,6 +75,76 @@ export function ContractEntries({
         }}
       />
     </div>
+  )
+}
+
+/** The entry itself is the schema trigger: hovering underlines the name and
+ *  fades in the braces glyph, the row idiom used across artifact lists. */
+function ContractEntryRow({
+  entry,
+  onReveal,
+}: {
+  entry: ContractEntrySummary
+  onReveal: () => void
+}) {
+  return (
+    <div className="grid min-w-0 gap-1">
+      <button
+        aria-label={`View the ${entry.name} schema`}
+        className="group/schema flex min-w-0 items-center gap-1.5 justify-self-start rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+        onClick={onReveal}
+        type="button"
+      >
+        <span className="min-w-0 truncate font-medium text-foreground underline-offset-2 group-hover/schema:underline">
+          {entry.name}
+        </span>
+        <ScopeMark scope={entry.scope} />
+        <Braces className="size-3 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/schema:opacity-100 group-hover/schema:opacity-100" />
+      </button>
+      {entry.description === undefined ? null : (
+        <ExpandableText className="min-w-0 text-muted-foreground" maxLines={1}>
+          {entry.description}
+        </ExpandableText>
+      )}
+    </div>
+  )
+}
+
+const scopeMarks: Record<
+  string,
+  { icon: LucideIcon; label: string; explanation: string }
+> = {
+  personal: {
+    explanation: "one document per person, never visible through share links.",
+    icon: Lock,
+    label: "Private",
+  },
+  shared: {
+    explanation:
+      "one document for the whole artifact — everyone who can open it sees the same data, and share links can too.",
+    icon: Link2,
+    label: "Shareable",
+  },
+}
+
+function ScopeMark({ scope }: { scope: string }) {
+  const mark = scopeMarks[scope]
+
+  if (mark === undefined) {
+    return null
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="flex shrink-0 items-center text-muted-foreground">
+          <mark.icon aria-label={mark.label} className="size-3" />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-56">
+        {mark.label} — {mark.explanation}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 

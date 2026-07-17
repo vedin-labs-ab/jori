@@ -85,7 +85,7 @@ function ProspectiveArtifact({
   return (
     <ArtifactCard
       entries={templateContractEntries(binding.key)}
-      footer="Created from its template when you create this automation."
+      footer="Set up from its template when you create this automation."
       lines={<p className="text-muted-foreground">{artifact.description}</p>}
       title={
         <span className="min-w-0 truncate font-medium text-foreground text-sm">
