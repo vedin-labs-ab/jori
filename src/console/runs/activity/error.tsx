@@ -51,6 +51,9 @@ function ActivityErrorAction({
         // Full-bleed: the copy-row divider spans the card, the pre scrolls.
         bodyClassName="gap-0 p-0"
         className="bg-muted sm:max-w-3xl"
+        // Autofocusing the copy button pops its tooltip, whose layer then
+        // swallows Escape before the dialog can see it.
+        onOpenAutoFocus={(event) => event.preventDefault()}
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">{title}</DialogTitle>
