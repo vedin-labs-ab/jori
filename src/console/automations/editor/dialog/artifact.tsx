@@ -6,13 +6,14 @@ import { playbookTemplateContracts } from "@contracts/playbooks/generated"
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
-import { ArrowUpRight, Database, LayoutTemplate } from "lucide-react"
+import { ArrowUpRight, LayoutTemplate } from "lucide-react"
 import { type ReactNode } from "react"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../../convex/_generated/api"
 import { absoluteTime, relativeTime } from "../../../shared/time"
 import { type AutomationFormValues } from "../../types"
+import { ContractEntryRows, type ContractEntrySummary } from "./contract"
 import { FieldHelp } from "./help"
 
 type ArtifactResult = FunctionReturnType<typeof api.artifacts.console.get>
@@ -20,14 +21,6 @@ type ArtifactDetail = Extract<
   ArtifactResult,
   { status: "ready" }
 >["artifact"] & {}
-
-type ContractEntrySummary = {
-  name: string
-  scope: string
-  description: string | undefined
-  schemaName: string
-  schemaVersion: number
-}
 
 /**
  * The automation's primary artifact: the default target for artifact state
@@ -50,7 +43,7 @@ export function AutomationArtifactSection({
   }
 
   return (
-    <div className="grid gap-2">
+    <div className="grid min-w-0 gap-2">
       <div className="flex items-center gap-1.5">
         <Label>Artifact</Label>
         <FieldHelp label="Artifact help">
@@ -167,32 +160,15 @@ function ArtifactFacts({
   title: ReactNode
 }) {
   return (
-    <div className="grid gap-1.5 text-xs">
-      <div className="flex items-start gap-1.5">
+    <div className="grid min-w-0 gap-1.5 text-xs">
+      <div className="flex min-w-0 items-start gap-1.5">
         <LayoutTemplate className="mt-px size-3.5 shrink-0 text-muted-foreground" />
         {title}
       </div>
       {detail === null ? null : (
         <p className="pl-5 text-muted-foreground">{detail}</p>
       )}
-      {entries.map((entry) => (
-        <div className="flex items-start gap-1.5" key={entry.name}>
-          <Database className="mt-px size-3.5 shrink-0 text-muted-foreground" />
-          <span className="min-w-0 truncate" title={entry.description}>
-            <span
-              className="font-medium text-foreground"
-              title={`${entry.schemaName} v${entry.schemaVersion}`}
-            >
-              {entry.name}
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              · {entry.scope}
-              {entry.description === undefined ? "" : ` — ${entry.description}`}
-            </span>
-          </span>
-        </div>
-      ))}
+      <ContractEntryRows entries={entries} />
     </div>
   )
 }
@@ -237,7 +213,7 @@ function templateContractEntries(key: string): ContractEntrySummary[] {
 
   return playbookTemplateContracts[
     key as keyof typeof playbookTemplateContracts
-  ].map((entry) => ({ ...entry }))
+  ].map((entry) => ({ ...entry, schema: entry.schema as unknown }))
 }
 
 function artifactContractEntries(
@@ -249,5 +225,6 @@ function artifactContractEntries(
     description: entry.description,
     schemaName: entry.schemaName,
     schemaVersion: entry.schemaVersion,
+    schema: entry.schema as unknown,
   }))
 }
