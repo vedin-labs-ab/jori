@@ -6,14 +6,14 @@ import { playbookTemplateContracts } from "@contracts/playbooks/generated"
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
-import { ArrowUpRight, LayoutTemplate } from "lucide-react"
+import { AppWindow, ArrowUpRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../../convex/_generated/api"
 import { absoluteTime, relativeTime } from "../../../shared/time"
 import { type AutomationFormValues } from "../../types"
-import { ContractEntryRows, type ContractEntrySummary } from "./contract"
+import { ContractEntries, type ContractEntrySummary } from "./contract"
 import { FieldHelp } from "./help"
 
 type ArtifactResult = FunctionReturnType<typeof api.artifacts.console.get>
@@ -83,18 +83,20 @@ function ProspectiveArtifact({
   }
 
   return (
-    <ArtifactFacts
-      detail={`Created from the ${binding.key} template (v${binding.version}) when this automation is created.`}
+    <ArtifactCard
       entries={templateContractEntries(binding.key)}
+      lines={
+        <>
+          <p className="text-muted-foreground">{artifact.description}</p>
+          <p className="text-muted-foreground">
+            Created from the {binding.key} template (v{binding.version}) when
+            this automation is created.
+          </p>
+        </>
+      }
       title={
-        <span className="min-w-0">
-          <span className="font-medium text-foreground">
-            {artifact.title} artifact
-          </span>
-          <span className="text-muted-foreground">
-            {" "}
-            — {artifact.description}
-          </span>
+        <span className="min-w-0 truncate font-medium text-foreground text-sm">
+          {artifact.title} artifact
         </span>
       }
     />
@@ -113,30 +115,36 @@ function LiveArtifact({
   const result = useQuery(api.artifacts.console.get, { tenantId, artifactId })
 
   if (result === undefined) {
-    return <Skeleton className="h-12 w-full" />
+    return <Skeleton className="h-16 w-full" />
   }
 
   if (result.status !== "ready" || result.artifact === null) {
     return (
-      <p className="text-muted-foreground text-xs">
-        Artifact unavailable — it may have been deleted.
-      </p>
+      <ArtifactCard
+        entries={[]}
+        lines={null}
+        title={
+          <span className="min-w-0 truncate text-muted-foreground">
+            Artifact unavailable — it may have been deleted.
+          </span>
+        }
+      />
     )
   }
 
   const artifact = result.artifact
 
   return (
-    <ArtifactFacts
-      detail={provenanceDetail(artifact, definition)}
+    <ArtifactCard
       entries={artifactContractEntries(artifact)}
+      lines={provenanceLine(artifact, definition)}
       title={
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-          <span className="truncate font-medium text-foreground">
+          <span className="truncate font-medium text-foreground text-sm">
             {artifact.title}
           </span>
           <Link
-            className="flex shrink-0 items-center gap-1 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            className="flex shrink-0 items-center gap-1 text-muted-foreground text-xs underline-offset-2 hover:text-foreground hover:underline"
             params={{ artifactId: artifact.artifactId }}
             to="/artifacts/$artifactId"
           >
@@ -148,34 +156,35 @@ function LiveArtifact({
   )
 }
 
-/** Quiet icon rows, matching the playbook dialog's fact sections — the
- *  bordered look is reserved for the Instructions editor below. */
-function ArtifactFacts({
-  detail,
+/** One quiet filled card telling the artifact's story: identity first,
+ *  then its state contract as subordinate rows. No border — that look
+ *  belongs to the Instructions editor below. */
+function ArtifactCard({
   entries,
+  lines,
   title,
 }: {
-  detail: ReactNode
   entries: ContractEntrySummary[]
+  lines: ReactNode
   title: ReactNode
 }) {
   return (
-    <div className="grid min-w-0 gap-1.5 text-xs">
-      <div className="flex min-w-0 items-start gap-1.5">
-        <LayoutTemplate className="mt-px size-3.5 shrink-0 text-muted-foreground" />
-        {title}
+    <div className="grid min-w-0 gap-2 rounded-md bg-muted/40 px-3 py-2.5 text-xs">
+      <div className="grid min-w-0 gap-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <AppWindow className="size-4 shrink-0 text-muted-foreground" />
+          {title}
+        </div>
+        {lines}
       </div>
-      {detail === null ? null : (
-        <p className="pl-5 text-muted-foreground">{detail}</p>
-      )}
-      <ContractEntryRows entries={entries} />
+      <ContractEntries entries={entries} />
     </div>
   )
 }
 
 /** Template provenance with one quiet suffix: customized wins, then an
  *  available update (applied from the playbook card), then recency. */
-function provenanceDetail(
+function provenanceLine(
   artifact: ArtifactDetail,
   definition: PlaybookDefinition | undefined
 ) {
@@ -197,12 +206,13 @@ function provenanceDetail(
         : ` · Published ${relativeTime(publishedAt, Date.now())}`
 
   return (
-    <span
+    <p
+      className="text-muted-foreground"
       title={publishedAt === undefined ? undefined : absoluteTime(publishedAt)}
     >
       From the {template.key} template · v{template.version}
       {suffix}
-    </span>
+    </p>
   )
 }
 
