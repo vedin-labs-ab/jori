@@ -48,6 +48,7 @@ import type * as artifacts_storage_links from "../artifacts/storage/links.js";
 import type * as artifacts_storage_objects from "../artifacts/storage/objects.js";
 import type * as artifacts_storage_purge from "../artifacts/storage/purge.js";
 import type * as artifacts_storage_validators from "../artifacts/storage/validators.js";
+import type * as artifacts_summary from "../artifacts/summary.js";
 import type * as artifacts_templates__generated_templates from "../artifacts/templates/_generated/templates.js";
 import type * as artifacts_templates_catalog from "../artifacts/templates/catalog.js";
 import type * as artifacts_templates_provision from "../artifacts/templates/provision.js";
@@ -535,6 +536,7 @@ declare const fullApi: ApiFromModules<{
   "artifacts/storage/objects": typeof artifacts_storage_objects;
   "artifacts/storage/purge": typeof artifacts_storage_purge;
   "artifacts/storage/validators": typeof artifacts_storage_validators;
+  "artifacts/summary": typeof artifacts_summary;
   "artifacts/templates/_generated/templates": typeof artifacts_templates__generated_templates;
   "artifacts/templates/catalog": typeof artifacts_templates_catalog;
   "artifacts/templates/provision": typeof artifacts_templates_provision;
