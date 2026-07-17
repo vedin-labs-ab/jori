@@ -157,8 +157,8 @@ function LiveArtifact({
 }
 
 /** One quiet filled card telling the artifact's story: identity first,
- *  then its state contract as subordinate rows. No border — that look
- *  belongs to the Instructions editor below. */
+ *  then its state contract under a Contracts label. The muted fill keeps
+ *  it distinct from the Instructions editor below. */
 function ArtifactCard({
   entries,
   lines,
@@ -169,7 +169,7 @@ function ArtifactCard({
   title: ReactNode
 }) {
   return (
-    <div className="grid min-w-0 gap-2 rounded-md bg-muted/40 px-3 py-2.5 text-xs">
+    <div className="grid min-w-0 gap-2 rounded-md border bg-muted/40 px-3 py-2.5 text-xs">
       <div className="grid min-w-0 gap-1">
         <div className="flex min-w-0 items-center gap-2">
           <AppWindow className="size-4 shrink-0 text-muted-foreground" />

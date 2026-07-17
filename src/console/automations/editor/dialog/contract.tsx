@@ -1,5 +1,6 @@
 import { Braces } from "lucide-react"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -36,10 +37,11 @@ export function ContractEntries({
   }
 
   return (
-    <div className="grid min-w-0 gap-1.5 border-border/60 border-t pt-2">
+    <div className="grid min-w-0 gap-1.5">
+      <p className="font-medium text-muted-foreground">Contracts</p>
       {entries.map((entry) => (
         <div className="flex min-w-0 items-start gap-2" key={entry.name}>
-          <ExpandableText className="min-w-0 flex-1" maxLines={1}>
+          <ExpandableText className="min-w-0 flex-1 pt-1" maxLines={1}>
             <span className="font-medium text-foreground">{entry.name}</span>
             <span className="text-muted-foreground">
               {" "}
@@ -47,14 +49,16 @@ export function ContractEntries({
               {entry.description === undefined ? "" : ` — ${entry.description}`}
             </span>
           </ExpandableText>
-          <button
+          <Button
             aria-label={`View the ${entry.name} schema`}
-            className="mt-px shrink-0 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            className="shrink-0"
             onClick={() => setRevealed(entry)}
+            size="sm"
             type="button"
+            variant="outline"
           >
-            <Braces className="size-3.5" />
-          </button>
+            <Braces /> Schema
+          </Button>
         </div>
       ))}
       <SchemaDialog
