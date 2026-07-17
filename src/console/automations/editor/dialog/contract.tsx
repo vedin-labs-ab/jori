@@ -1,12 +1,13 @@
-import { Database } from "lucide-react"
+import { Braces } from "lucide-react"
 import { useState } from "react"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ExpandableText } from "@/components/ui/expandable-text"
+import { CopyButton } from "../../../shared/copy"
 
 export type ContractEntrySummary = {
   name: string
@@ -18,37 +19,42 @@ export type ContractEntrySummary = {
 }
 
 /**
- * Contract entries as quiet rows; each name opens the JSON Schema the
- * server validates every state write against — the same compiled contract
- * the runtime enforces, so there is nothing separate to drift.
+ * The artifact's state contract, subordinate to the artifact card above it:
+ * one expandable line per entry, with the enforced JSON Schema one click
+ * away — the same compiled contract the runtime validates against, so
+ * there is nothing separate to drift.
  */
-export function ContractEntryRows({
+export function ContractEntries({
   entries,
 }: {
   entries: ContractEntrySummary[]
 }) {
   const [revealed, setRevealed] = useState<ContractEntrySummary>()
 
+  if (entries.length === 0) {
+    return null
+  }
+
   return (
-    <>
+    <div className="grid min-w-0 gap-1.5 border-border/60 border-t pt-2">
       {entries.map((entry) => (
-        <div className="flex min-w-0 items-start gap-1.5" key={entry.name}>
-          <Database className="mt-px size-3.5 shrink-0 text-muted-foreground" />
-          <span className="min-w-0 truncate" title={entry.description}>
-            <button
-              aria-label={`View the ${entry.name} schema`}
-              className="font-medium text-foreground underline-offset-2 hover:underline"
-              onClick={() => setRevealed(entry)}
-              type="button"
-            >
-              {entry.name}
-            </button>
+        <div className="flex min-w-0 items-start gap-2" key={entry.name}>
+          <ExpandableText className="min-w-0 flex-1" maxLines={1}>
+            <span className="font-medium text-foreground">{entry.name}</span>
             <span className="text-muted-foreground">
               {" "}
               · {entry.scope}
               {entry.description === undefined ? "" : ` — ${entry.description}`}
             </span>
-          </span>
+          </ExpandableText>
+          <button
+            aria-label={`View the ${entry.name} schema`}
+            className="mt-px shrink-0 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            onClick={() => setRevealed(entry)}
+            type="button"
+          >
+            <Braces className="size-3.5" />
+          </button>
         </div>
       ))}
       <SchemaDialog
@@ -59,10 +65,12 @@ export function ContractEntryRows({
           }
         }}
       />
-    </>
+    </div>
   )
 }
 
+/** Bare JSON viewer, mirroring the runs error dialog: no chrome beyond a
+ *  copy control — the schema is the whole story. */
 function SchemaDialog({
   entry,
   onOpenChange,
@@ -70,20 +78,32 @@ function SchemaDialog({
   entry: ContractEntrySummary | undefined
   onOpenChange: (open: boolean) => void
 }) {
+  const json = entry === undefined ? "" : JSON.stringify(entry.schema, null, 2)
+
   return (
     <Dialog onOpenChange={onOpenChange} open={entry !== undefined}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle className="font-mono text-sm">{entry?.name}</DialogTitle>
-          <DialogDescription>
-            {entry === undefined
-              ? ""
-              : `${entry.scope} · ${entry.schemaName} v${entry.schemaVersion} — every state write is validated against this JSON Schema.`}
-          </DialogDescription>
-        </DialogHeader>
-        <pre className="max-h-[60vh] overflow-auto rounded-md bg-muted/40 p-3 text-xs">
-          {entry === undefined ? "" : JSON.stringify(entry.schema, null, 2)}
-        </pre>
+      <DialogContent
+        // Full-bleed: the copy-row divider spans the card, the pre scrolls.
+        bodyClassName="gap-0 p-0"
+        className="bg-muted sm:max-w-3xl"
+        showCloseButton={false}
+      >
+        <DialogTitle className="sr-only">
+          {entry?.name} state schema
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          The JSON Schema every write to this state entry is validated against.
+        </DialogDescription>
+        <div className="grid min-w-0 overflow-hidden">
+          <div className="flex min-w-0 items-center justify-end border-b px-3 py-2">
+            <CopyButton label="schema" value={json} />
+          </div>
+          <pre className="max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed">
+            <code className="block whitespace-pre-wrap break-words">
+              {json}
+            </code>
+          </pre>
+        </div>
       </DialogContent>
     </Dialog>
   )
