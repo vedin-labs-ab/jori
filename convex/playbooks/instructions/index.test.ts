@@ -47,7 +47,7 @@ describe("playbook instructions", () => {
         kind: "slack",
         target: { kind: "dm", id: "U1", label: "Sam Doe" },
       })
-    ).toContain("to Sam Doe in a Slack DM using user ID U1 via @Slack")
+    ).toContain("to me in a Slack DM using my Slack user ID U1 via @Slack")
   })
 
   test("keeps Slack labels outside the tool namespace", () => {

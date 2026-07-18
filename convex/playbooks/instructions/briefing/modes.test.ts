@@ -22,7 +22,7 @@ describe("Meeting Briefing modes", () => {
       "meeting-briefing:<parent automation ID>:event:<meeting key>:<start UTC>"
     )
     expect(enabled).toContain(
-      "claim the key `reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>` in `dispatches`"
+      "Claim the key `reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>` in `dispatches`"
     )
     expect(enabled).toContain("record the reminder receipt")
   })
@@ -42,9 +42,7 @@ describe("Meeting Briefing modes", () => {
   })
 
   test("meeting scope changes composition", () => {
-    expect(renderBriefing()).toContain(
-      "attendee outside the requester's organization"
-    )
+    expect(renderBriefing()).toContain("attendee outside my organization")
     expect(renderBriefing({ meetings: "internal" })).toContain(
       "Keep internal meetings where preparation could affect a decision"
     )

@@ -154,7 +154,7 @@ export function deliveryInstruction(args: {
       : `Post the ${noun} ${route}.`
   }
 
-  const route = `to ${target.label} in a Slack DM using user ID ${target.id} via @Slack`
+  const route = `to me in a Slack DM using my Slack user ID ${target.id} via @Slack`
 
   return summary
     ? `Send a short summary of the ${noun} ${route}, with the link to the full ${noun}.`
