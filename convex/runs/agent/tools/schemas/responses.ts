@@ -57,17 +57,6 @@ function calendarListingSchema(itemsKey: "items" | "value") {
   }
 }
 
-const toolResponseSchemas: Record<string, object> = {
-  google_calendar_get_event: stampedEventSchema(),
-  google_calendar_list_events: calendarListingSchema("items"),
-  microsoft_calendar_get_event: stampedEventSchema(),
-  microsoft_calendar_list_events: calendarListingSchema("value"),
-}
-
-export function getToolResponseSchema(tool: string) {
-  return toolResponseSchemas[tool]
-}
-
 const agentRunSchema = objectSchema({
   properties: {
     runId: stringProperty("Run ID of the child."),
@@ -89,7 +78,11 @@ const agentRunSchema = objectSchema({
   },
 })
 
-Object.assign(toolResponseSchemas, {
+const toolResponseSchemas: Record<string, object> = {
+  google_calendar_get_event: stampedEventSchema(),
+  google_calendar_list_events: calendarListingSchema("items"),
+  microsoft_calendar_get_event: stampedEventSchema(),
+  microsoft_calendar_list_events: calendarListingSchema("value"),
   start_agent: objectSchema({
     properties: {
       runId: stringProperty("Run ID of the started child."),
@@ -115,4 +108,8 @@ Object.assign(toolResponseSchemas, {
       },
     },
   }),
-})
+}
+
+export function getToolResponseSchema(tool: string) {
+  return toolResponseSchemas[tool]
+}
