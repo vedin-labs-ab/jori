@@ -48,9 +48,7 @@ export function JsonDialog({
             <CopyButton label="schema" value={json} />
           </div>
           <pre
-            // Fixed terminal height: content scrolls inside a stable window,
-            // so late data or tab switches never resize the dialog.
-            className={`h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
+            className={`max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
           >
             {/* Keyed by content so fold state resets when the JSON swaps. */}
             <code className="block whitespace-pre-wrap break-words" key={json}>
