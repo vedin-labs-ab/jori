@@ -9,6 +9,7 @@ import { api, internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action, internalMutation } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
+import { type PromptRecovery } from "../runs/agent/prompt/context"
 import { recordTrace } from "../runs/execution/traces/data"
 import { isTerminalRunStatus, toolSnapshot } from "../runs/schema"
 import { drainSession } from "../sessions/drain"
@@ -74,42 +75,20 @@ export const load = action({
   handler: async (ctx, args): Promise<RuntimeContext> => {
     requireWorkerSecret(args.secret)
 
-    const [session, run] = (await Promise.all([
-      ctx.runQuery(internal.sessions.data.getByRun, { runId: args.runId }),
-      ctx.runQuery(internal.runs.records.get, { runId: args.runId }),
-    ])) as [LoadedSession, LoadedRun | null]
-
-    if (run === null) {
-      throw new Error("Runtime context not found.")
-    }
-
-    // The reaction sync must finish before the input read below so the
-    // prompt renders current reactions; skills don't depend on it.
-    const [skills] = await Promise.all([
-      loadRuntimeSkills(ctx, run.tenantId),
-      session === null
-        ? Promise.resolve()
-        : syncSessionReactions(ctx, session._id),
-    ])
-
-    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
-      runId: args.runId,
-    })) as AgentRuntimeInput | null
-
-    if (input === null) {
-      throw new Error("Runtime context not found.")
-    }
+    const { session, run, skills, input } = await loadRunRecords(ctx, args)
 
     const skillNames = runtimeSkillNames(skills)
-    const [sandbox, permissions, activeSurface, handoffs] = await Promise.all([
-      loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
-      runtimePermissions(ctx, input, skillNames),
-      loadActiveSurface(ctx, input, args.runId),
-      loadWorkerHandoffs(ctx, {
-        runId: args.runId,
-        secret: args.secret,
-      }),
-    ])
+    const [sandbox, permissions, activeSurface, handoffs, recovery] =
+      await Promise.all([
+        loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
+        runtimePermissions(ctx, input, skillNames),
+        loadActiveSurface(ctx, input, args.runId),
+        loadWorkerHandoffs(ctx, {
+          runId: args.runId,
+          secret: args.secret,
+        }),
+        loadRecovery(ctx, args.runId, args.attempt),
+      ])
     const lifecycleTools = runLifecycleTools()
 
     const prepared = await prepareWorkerRun(ctx, {
@@ -133,6 +112,7 @@ export const load = action({
       permissions,
       prompt: buildRuntimePrompt(input, activeSurface, permissions, skills, {
         person: prepared?.person ?? null,
+        recovery,
       }),
       run,
       sandbox,
@@ -140,6 +120,55 @@ export const load = action({
     })
   },
 })
+
+/** The run's stored records, with the reaction sync ordered before the
+ *  input read so the prompt renders current reactions. */
+async function loadRunRecords(ctx: ActionCtx, args: { runId: Id<"runs"> }) {
+  const [session, run] = (await Promise.all([
+    ctx.runQuery(internal.sessions.data.getByRun, { runId: args.runId }),
+    ctx.runQuery(internal.runs.records.get, { runId: args.runId }),
+  ])) as [LoadedSession, LoadedRun | null]
+
+  if (run === null) {
+    throw new Error("Runtime context not found.")
+  }
+
+  const [skills] = await Promise.all([
+    loadRuntimeSkills(ctx, run.tenantId),
+    session === null
+      ? Promise.resolve()
+      : syncSessionReactions(ctx, session._id),
+  ])
+
+  const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
+    runId: args.runId,
+  })) as AgentRuntimeInput | null
+
+  if (input === null) {
+    throw new Error("Runtime context not found.")
+  }
+
+  return { session, run, skills, input }
+}
+
+/** Retries rebuild the model context from scratch; earlier attempts' write
+ *  actions ride along so a retry never repeats a completed side effect. */
+async function loadRecovery(
+  ctx: ActionCtx,
+  runId: Id<"runs">,
+  attempt: number
+): Promise<PromptRecovery | null> {
+  if (attempt <= 1) {
+    return null
+  }
+
+  const actions = (await ctx.runQuery(
+    internal.runs.execution.traces.recovery.listActions,
+    { runId }
+  )) as PromptRecovery["actions"]
+
+  return actions.length === 0 ? null : { attempt, actions }
+}
 
 export const reload = action({
   args: {
