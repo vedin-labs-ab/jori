@@ -1,3 +1,4 @@
+import { isRecord } from "../../contracts/json"
 import { type OpenRouterChatMessage, sendOpenRouterChat } from "./index"
 
 // One structured-output call with a strict JSON schema. Model and reasoning
@@ -61,9 +62,7 @@ function parseJson(text: string): Record<string, unknown> {
   try {
     const value: unknown = JSON.parse(text)
 
-    return typeof value === "object" && value !== null && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {}
+    return isRecord(value) ? value : {}
   } catch {
     throw new Error("The structured model returned invalid JSON.")
   }
