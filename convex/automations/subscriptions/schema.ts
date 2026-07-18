@@ -22,6 +22,4 @@ export const subscriptions = defineTable({
   error: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_integration_event_match", ["integrationId", "event", "matchKey"])
-  .index("by_tenant_and_status", ["tenantId", "status"])
+}).index("by_integration_event_match", ["integrationId", "event", "matchKey"])

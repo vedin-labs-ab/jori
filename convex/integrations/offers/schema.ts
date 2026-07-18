@@ -63,5 +63,4 @@ export const integrationOffers = defineTable({
   consumedAt: v.optional(v.number()),
 })
   .index("by_token_hash", ["tokenHash"])
-  .index("by_tenant_and_status", ["tenantId", "status"])
   .index("by_run_and_status", ["runId", "status"])
