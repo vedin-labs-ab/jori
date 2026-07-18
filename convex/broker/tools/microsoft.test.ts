@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { createAssetContext } from "../../../test/convex/broker"
 import { type Doc, type Id } from "../../_generated/dataModel"
+import { calendarListSchema } from "../../runs/agent/tools/schemas/responses/calendar"
+import { schemaViolations } from "../../runs/agent/tools/schemas/responses/conform"
 import { callMicrosoftTool } from "./microsoft"
 
 const originalFetch = globalThis.fetch
@@ -69,6 +71,50 @@ describe("Microsoft Calendar discovery", () => {
       expect(stamped.entityKey).toMatch(/^[0-9a-f]{32}$/)
       expect(stamped.contentHash).toMatch(/^[0-9a-f]{32}$/)
     }
+  })
+})
+
+describe("Microsoft Calendar listings", () => {
+  test("normalizes Graph calendars and conforms to the schema", async () => {
+    mockMicrosoftFetch({
+      value: [
+        {
+          id: "cal-1",
+          name: "Calendar",
+          isDefaultCalendar: true,
+          canEdit: true,
+          owner: { name: "Albin Vedin", address: "albin@example.com" },
+          allowedOnlineMeetingProviders: ["teamsForBusiness"],
+        },
+        { id: "cal-2", name: "Team", canEdit: false },
+      ],
+    })
+
+    const result = await callMicrosoftTool(
+      microsoftCalendarIntegration(),
+      "microsoft_calendar_list_calendars",
+      {}
+    )
+
+    expect(result).toEqual({
+      calendars: [
+        {
+          provider: "microsoftCalendar",
+          calendarId: "cal-1",
+          name: "Calendar",
+          primary: true,
+          canEdit: true,
+          owner: "albin@example.com",
+        },
+        {
+          provider: "microsoftCalendar",
+          calendarId: "cal-2",
+          name: "Team",
+          canEdit: false,
+        },
+      ],
+    })
+    expect(schemaViolations(result, calendarListSchema(false))).toEqual([])
   })
 })
 

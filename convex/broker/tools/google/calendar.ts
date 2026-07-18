@@ -10,6 +10,7 @@ import {
   setOptionalSearchParam,
 } from "../../../shared/input"
 import { type CalendarEventContent, stampCalendarEvent } from "../events"
+import { listGoogleCalendarSummaries } from "./calendars"
 import { getCalendarId } from "./format"
 
 export async function callGoogleCalendarTool(
@@ -18,7 +19,7 @@ export async function callGoogleCalendarTool(
   args: Record<string, unknown>
 ) {
   if (tool === "google_calendar_list_calendars") {
-    return await listCalendars(token, args)
+    return await listGoogleCalendarSummaries(token, args)
   }
   if (tool === "google_calendar_list_events") {
     return await listCalendarEvents(token, args)
@@ -34,13 +35,6 @@ export async function callGoogleCalendarTool(
   }
 
   throw new Error(`Unknown Google Calendar tool: ${tool}`)
-}
-
-async function listCalendars(token: string, args: Record<string, unknown>) {
-  return await listGoogleCalendars(token, {
-    maxResults: boundedNumber(args.maxResults, 100, 1, 100),
-    pageToken: optionalString(args.pageToken),
-  })
 }
 
 async function listCalendarEvents(
@@ -109,7 +103,9 @@ async function listAllCalendarEvents(
   }
 
   return {
-    items: sortGoogleEvents(items),
+    items: items.sort((left, right) =>
+      googleEventTime(left.start).localeCompare(googleEventTime(right.start))
+    ),
     calendarsScanned,
     gaps: gaps.slice(0, 10),
     status: gaps.length > 0 || truncated ? "partial" : "ready",
@@ -174,12 +170,6 @@ async function listCalendarEventPage(
     url.searchParams.set("singleEvents", String(args.singleEvents))
   }
   return await googleJson(token, url.toString())
-}
-
-function sortGoogleEvents(events: Record<string, unknown>[]) {
-  return events.sort((left, right) =>
-    googleEventTime(left.start).localeCompare(googleEventTime(right.start))
-  )
 }
 
 function googleEventTime(value: unknown) {

@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { googleIntegrationConfigs } from "../../../integrations/google/config"
+import { calendarListSchema } from "../../../runs/agent/tools/schemas/responses/calendar"
+import { schemaViolations } from "../../../runs/agent/tools/schemas/responses/conform"
 import { callGoogleTool } from "."
 
 const originalFetch = globalThis.fetch
@@ -8,6 +10,56 @@ const originalFetch = globalThis.fetch
 afterEach(() => {
   globalThis.fetch = originalFetch
   vi.restoreAllMocks()
+})
+
+describe("Google Calendar listings", () => {
+  test("normalizes calendar entries and conforms to the schema", async () => {
+    mockGoogleFetch(() => ({
+      items: [
+        {
+          id: "primary",
+          summary: "Primary",
+          summaryOverride: "Work",
+          timeZone: "Europe/Stockholm",
+          accessRole: "owner",
+          primary: true,
+          conferenceProperties: {
+            allowedConferenceSolutionTypes: ["hangoutsMeet"],
+          },
+        },
+        { id: "team", summary: "Team", accessRole: "reader", hidden: true },
+      ],
+      nextPageToken: "token",
+    }))
+
+    const result = await callGoogleTool(
+      googleCalendarIntegration(),
+      "google_calendar_list_calendars",
+      {}
+    )
+
+    expect(result).toEqual({
+      calendars: [
+        {
+          provider: "googleCalendar",
+          calendarId: "primary",
+          name: "Work",
+          timeZone: "Europe/Stockholm",
+          primary: true,
+          accessRole: "owner",
+        },
+        {
+          provider: "googleCalendar",
+          calendarId: "team",
+          name: "Team",
+          accessRole: "reader",
+          hidden: true,
+        },
+      ],
+      nextPageToken: "token",
+    })
+    expect(schemaViolations(result, calendarListSchema(true))).toEqual([])
+  })
 })
 
 describe("Google Calendar discovery", () => {
