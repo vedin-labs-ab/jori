@@ -1,3 +1,5 @@
+import { isRecord } from "../../../../../../contracts/json"
+
 // Minimal structural validator for the response-schema subset this folder
 // uses (type, const, enum, required, properties, additionalProperties,
 // items, oneOf). Fixture tests run broker outputs through it so the
@@ -130,8 +132,4 @@ function matchesType(value: unknown, type: unknown) {
 
 function describe(value: unknown) {
   return value === null ? "null" : Array.isArray(value) ? "array" : typeof value
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
