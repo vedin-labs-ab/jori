@@ -15,6 +15,7 @@ import {
   TaskItem,
   TaskTrigger,
 } from "../../../../shared/task"
+import { formatDuration } from "../../../../shared/time"
 import {
   type DiscoveryItemStatus,
   type DiscoveryTask,
@@ -273,16 +274,7 @@ function elapsedLabel(
     return null
   }
 
-  const seconds = Math.max(0, Math.round(elapsedMs / 1000))
-
-  if (seconds < 60) {
-    return `${seconds}s`
-  }
-
-  const minutes = Math.floor(seconds / 60)
-  const remainder = seconds % 60
-
-  return remainder === 0 ? `${minutes}m` : `${minutes}m ${remainder}s`
+  return formatDuration(elapsedMs)
 }
 
 function iconTone(status: DiscoveryItemStatus) {
