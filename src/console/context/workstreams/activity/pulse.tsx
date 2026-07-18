@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../../../convex/_generated/api"
+import { shortDate } from "../../../shared/time"
 import { ContextTitleCount } from "../../section"
 import { type Workstream, type Workstreams } from "../types"
 import { PulseFooter, PulseShell, PulseSkeleton } from "./lane"
@@ -151,10 +152,7 @@ function ReviewedNote({
 
   return (
     <span>
-      Reviewed{" "}
-      <Strong>
-        {date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-      </Strong>
+      Reviewed <Strong>{shortDate(reviewedAt)}</Strong>
     </span>
   )
 }
