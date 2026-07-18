@@ -133,6 +133,8 @@ test("keeps a tool reference visible and unresolved after access is removed", as
     expect(tool?.getAttribute("data-automation-reference-access")).toBe(
       "unresolved"
     )
+    expect(tool?.querySelector(".lucide-ban")).not.toBeNull()
+    expect(tool?.querySelector(".lucide-wrench")).toBeNull()
     expect(field.onValueChange).toHaveBeenLastCalledWith({
       description: "Post with  using #conversations_add_message.",
       surfaces: [],

@@ -82,8 +82,7 @@ function ReferencePill({
   selected: boolean
 }) {
   const tone = automationReferenceToneClassNames[kind]
-  const Icon =
-    kind === "skill" ? BookOpen : scopeIssue === undefined ? Wrench : Ban
+  const Icon = kind === "skill" ? BookOpen : issue === undefined ? Wrench : Ban
   const permission =
     kind === "tool"
       ? referenceOptions(extension)
@@ -115,7 +114,7 @@ function ReferencePill({
             aria-hidden="true"
             className={cn(
               "size-3",
-              scopeIssue === undefined ? tone.icon : "text-destructive"
+              issue === undefined ? tone.icon : "text-destructive"
             )}
           />
         }
