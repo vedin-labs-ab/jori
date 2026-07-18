@@ -1,5 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import { requireProviderEnv } from "../connect/oauth"
+import { requireEnvironmentVariable } from "../../shared/environment"
 import {
   encodeBasicCredentials,
   expectOAuthRevocationResponse,
@@ -63,11 +63,11 @@ export function readNotionSetupIdentity(
 }
 
 export function requireNotionClientId() {
-  return requireProviderEnv("NOTION_CLIENT_ID")
+  return requireEnvironmentVariable("NOTION_CLIENT_ID")
 }
 
 export function requireNotionClientSecret() {
-  return requireProviderEnv("NOTION_CLIENT_SECRET")
+  return requireEnvironmentVariable("NOTION_CLIENT_SECRET")
 }
 
 export async function exchangeNotionAuthorizationCode(args: {

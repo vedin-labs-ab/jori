@@ -1,15 +1,10 @@
 import { type AuthConfig } from "convex/server"
-
-const clerkJwtIssuerDomain = process.env.CLERK_JWT_ISSUER_DOMAIN
-
-if (clerkJwtIssuerDomain === undefined) {
-  throw new Error("Missing CLERK_JWT_ISSUER_DOMAIN")
-}
+import { requireEnvironmentVariable } from "./shared/environment"
 
 export default {
   providers: [
     {
-      domain: clerkJwtIssuerDomain,
+      domain: requireEnvironmentVariable("CLERK_JWT_ISSUER_DOMAIN"),
       applicationID: "convex",
     },
   ],

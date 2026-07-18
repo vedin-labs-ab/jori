@@ -12,6 +12,7 @@ import {
   type OpenRouterChatMessage,
   sendOpenRouterChat,
 } from "../../model"
+import { readEnvironmentVariable } from "../../shared/environment"
 import { optionalString, requiredString } from "../../shared/input"
 import {
   type ArtifactPromptRequestDiagnostics,
@@ -210,11 +211,10 @@ function encodedJsonBytes(value: unknown) {
 }
 
 export function readArtifactModel() {
-  const model = process.env.OPENROUTER_ARTIFACT_MODEL?.trim()
-
-  return model === undefined || model === ""
-    ? defaultArtifactPromptModel
-    : model
+  return (
+    readEnvironmentVariable("OPENROUTER_ARTIFACT_MODEL") ??
+    defaultArtifactPromptModel
+  )
 }
 
 function readAssistantText(

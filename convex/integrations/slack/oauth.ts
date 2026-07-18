@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
-import { fetchFormToken, requireProviderEnv } from "../connect/oauth"
+import { requireEnvironmentVariable } from "../../shared/environment"
+import { fetchFormToken } from "../connect/oauth"
 import { isAlreadyRevoked, postForm } from "../revoke/oauth"
 import {
   slackAppsUninstallUrl,
@@ -44,11 +45,11 @@ export type SlackTokenResponse =
     }
 
 export function requireSlackClientId() {
-  return requireProviderEnv("SLACK_CLIENT_ID")
+  return requireEnvironmentVariable("SLACK_CLIENT_ID")
 }
 
 export function requireSlackClientSecret() {
-  return requireProviderEnv("SLACK_CLIENT_SECRET")
+  return requireEnvironmentVariable("SLACK_CLIENT_SECRET")
 }
 
 export async function exchangeSlackAuthorizationCode(args: {

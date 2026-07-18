@@ -1,5 +1,6 @@
 import { type Id } from "../../_generated/dataModel"
 import { timingSafeEqual } from "../../shared/crypto"
+import { readEnvironmentVariable } from "../../shared/environment"
 import {
   createSignedState,
   hmacSha256Hex,
@@ -48,7 +49,5 @@ export async function verifyNotionWebhookRequest(
 }
 
 function readNotionWebhookVerificationToken() {
-  const token = process.env.NOTION_WEBHOOK_VERIFICATION_TOKEN?.trim()
-
-  return token === "" ? undefined : token
+  return readEnvironmentVariable("NOTION_WEBHOOK_VERIFICATION_TOKEN")
 }

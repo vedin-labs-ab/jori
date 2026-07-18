@@ -1,13 +1,3 @@
-export function requireProviderEnv(name: string) {
-  const value = process.env[name]
-
-  if (value === undefined) {
-    throw new Error(`Missing ${name}`)
-  }
-
-  return value
-}
-
 export async function fetchFormToken<Result>(
   url: string,
   body: Record<string, string>

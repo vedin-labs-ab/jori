@@ -4,6 +4,7 @@ import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { executionPrincipalPersonId } from "../runs/principal"
 import { timingSafeEqual } from "../shared/crypto"
+import { readEnvironmentVariable } from "../shared/environment"
 import { type ApprovalBrokerContext } from "./approval"
 
 type BrokerContext = ApprovalBrokerContext
@@ -76,11 +77,7 @@ export async function loadRunBrokerContext(
 }
 
 function isWorkerSecret(secret: string) {
-  const expected = process.env.MILO_WORKER_SECRET?.trim()
+  const expected = readEnvironmentVariable("MILO_WORKER_SECRET")
 
-  return (
-    expected !== undefined &&
-    expected !== "" &&
-    timingSafeEqual(secret, expected)
-  )
+  return expected !== undefined && timingSafeEqual(secret, expected)
 }

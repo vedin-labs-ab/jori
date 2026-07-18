@@ -3,6 +3,7 @@ import { normalizeWebsiteAddress } from "../../contracts/website"
 import { internal } from "../_generated/api"
 import { type ActionCtx, action } from "../_generated/server"
 import { requireTenantAccess } from "../access"
+import { requireEnvironmentVariable } from "../shared/environment"
 
 // Marks onboarding as seen (so the welcome flow never reopens) and, when a
 // website is provided, kicks off discovery for a proposed organization profile.
@@ -62,11 +63,7 @@ async function patchClerkMetadata(
   tenantId: string,
   metadata: { onboarded?: boolean }
 ) {
-  const clerkSecretKey = process.env.CLERK_SECRET_KEY
-
-  if (clerkSecretKey === undefined) {
-    throw new Error("Missing CLERK_SECRET_KEY")
-  }
+  const clerkSecretKey = requireEnvironmentVariable("CLERK_SECRET_KEY")
 
   const response = await fetch(
     `https://api.clerk.com/v1/organizations/${tenantId}/metadata`,

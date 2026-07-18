@@ -1,5 +1,6 @@
 import { type Id } from "../../_generated/dataModel"
 import { timingSafeEqual } from "../../shared/crypto"
+import { requireEnvironmentVariable } from "../../shared/environment"
 import {
   createSignedState,
   hmacSha256Hex,
@@ -42,11 +43,5 @@ export async function verifyGitHubRequest(_request: Request, body: string) {
 }
 
 function requireGitHubWebhookSecret() {
-  const secret = process.env.GITHUB_WEBHOOK_SECRET
-
-  if (secret === undefined || secret === "") {
-    throw new Error("Missing GITHUB_WEBHOOK_SECRET")
-  }
-
-  return secret
+  return requireEnvironmentVariable("GITHUB_WEBHOOK_SECRET")
 }

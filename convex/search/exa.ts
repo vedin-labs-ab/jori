@@ -1,15 +1,6 @@
 import Exa from "exa-js"
+import { requireEnvironmentVariable } from "../shared/environment"
 
 export function createExaClient() {
-  return new Exa(requireExaApiKey())
-}
-
-function requireExaApiKey() {
-  const apiKey = process.env.EXA_API_KEY?.trim()
-
-  if (apiKey === undefined || apiKey === "") {
-    throw new Error("Missing EXA_API_KEY")
-  }
-
-  return apiKey
+  return new Exa(requireEnvironmentVariable("EXA_API_KEY"))
 }

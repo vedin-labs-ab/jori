@@ -1,6 +1,6 @@
 import { type Id } from "../../_generated/dataModel"
 import { timingSafeEqual } from "../../shared/crypto"
-import { requireProviderEnv } from "../connect/oauth"
+import { requireEnvironmentVariable } from "../../shared/environment"
 import {
   createSignedState,
   hmacSha256Hex,
@@ -44,5 +44,5 @@ export async function verifyLinearRequest(_request: Request, body: string) {
 }
 
 function requireLinearWebhookSecret() {
-  return requireProviderEnv("LINEAR_WEBHOOK_SECRET")
+  return requireEnvironmentVariable("LINEAR_WEBHOOK_SECRET")
 }
