@@ -18,6 +18,9 @@ export type PlaybookDefinition = {
   /** Outcome-first card copy: the value the user gets, never cadence
    *  detail — the rhythm and the setup dialog carry the schedule. */
   description: string
+  /** Prompt template id for the rendered instructions, e.g.
+   *  "playbooks/briefing"; the source file is part of the versioned recipe. */
+  template: string
   /** Personal playbooks enable per member; organization ones per tenant. */
   scope: Scope
   /** The artifact this playbook materializes from its template, when it has
@@ -94,6 +97,7 @@ export function resolvePlaybookSchedule(
 export const playbookCatalog: readonly PlaybookDefinition[] = [
   {
     key: "morning-brief",
+    template: "playbooks/brief",
     version: 1,
     title: "Morning brief",
     description:
@@ -111,6 +115,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
   meetingBriefing,
   {
     key: "follow-up-sweep",
+    template: "playbooks/sweep",
     version: 1,
     title: "Follow-up sweep",
     description:
@@ -124,6 +129,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
   },
   {
     key: "week-in-review",
+    template: "playbooks/review",
     version: 1,
     title: "Week in review",
     description:

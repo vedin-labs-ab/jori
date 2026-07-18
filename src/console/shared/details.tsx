@@ -1,5 +1,11 @@
 import { type Scope, scopeLabels } from "@contracts/permissions/scope"
-import { AlertTriangle, ArrowUpRight, Building2, UserRound } from "lucide-react"
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  Building2,
+  CornerDownLeft,
+  UserRound,
+} from "lucide-react"
 import { type ElementType, type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -27,6 +33,11 @@ export function ErrorDetail({ value }: { value: string }) {
       value={value}
     />
   )
+}
+
+/** The outcome a delegated run returned via finish_run. */
+export function ResultDetail({ value }: { value: string }) {
+  return <CodeBlockDetail icon={CornerDownLeft} label="Result" value={value} />
 }
 
 export function CodeBlockDetail({

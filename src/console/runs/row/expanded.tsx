@@ -1,4 +1,4 @@
-import { ErrorDetail } from "../../shared/details"
+import { ErrorDetail, ResultDetail } from "../../shared/details"
 import { RunActivity } from "../activity"
 import { ApprovalCallout } from "../request/approval"
 import { OfferCallout } from "../request/offer"
@@ -34,6 +34,9 @@ export function ExpandedExecution({
           runId={execution.id}
           tenantId={tenantId}
         />
+      ) : null}
+      {execution.result !== undefined ? (
+        <ResultDetail value={execution.result} />
       ) : null}
       {execution.error !== undefined ? (
         <ErrorDetail value={execution.error} />

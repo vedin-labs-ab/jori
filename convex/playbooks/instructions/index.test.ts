@@ -23,12 +23,9 @@ describe("playbook instructions", () => {
           calendar: integrationLabels[family.calendar],
         }
         const instructions = renderPlaybookInstructions({
-          key: playbook.key,
+          definition: playbook,
           providers,
           destination: emailDestination,
-          subject: playbook.title,
-          noun: playbook.delivery.noun,
-          style: playbook.delivery.style,
           options: resolvePlaybookOptions(playbook.setup),
         })
 
@@ -64,6 +61,26 @@ describe("playbook instructions", () => {
   })
 
   test("rejects unknown playbook keys", () => {
-    expect(() => renderPlaybook("missing")).toThrow("No instruction template")
+    expect(() => renderPlaybook("missing")).toThrow("Unknown playbook.")
+  })
+
+  test("every catalog template id resolves to a compiled template", () => {
+    for (const playbook of playbookCatalog) {
+      expect(() =>
+        renderPlaybookInstructions({
+          definition: { ...playbook, template: "playbooks/missing" },
+          providers: { email: "Gmail", calendar: "Google Calendar" },
+          destination: emailDestination,
+        })
+      ).toThrow("Unknown playbook template")
+      expect(
+        renderPlaybookInstructions({
+          definition: playbook,
+          providers: { email: "Gmail", calendar: "Google Calendar" },
+          destination: emailDestination,
+          options: resolvePlaybookOptions(playbook.setup),
+        })
+      ).not.toBe("")
+    }
   })
 })

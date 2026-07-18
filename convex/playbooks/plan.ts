@@ -81,12 +81,9 @@ export async function resolvePlaybookPlan(
     options,
     providers,
     instructions: renderPlaybookInstructions({
-      key: definition.key,
+      definition,
       providers: resolvedProviderLabels(resolved),
       destination,
-      subject: definition.title,
-      noun: definition.delivery.noun,
-      style: definition.delivery.style,
       options,
     }),
     access: {
