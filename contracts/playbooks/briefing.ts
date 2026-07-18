@@ -2,15 +2,15 @@ import { type PlaybookDefinition } from "./catalog"
 import { digestDelivery } from "./delivery"
 import { shiftClockTime } from "./schedule"
 
-/** The sweep starts early enough to wait for research and still synthesize. */
-const researchMinutes = 15
+/** The planner leads the morning target by the default agent wait
+ *  (15 minutes) plus synthesis and delivery margin. */
 const scheduleLeadMinutes = 30
 
 /** The one artifact-backed playbook: a scheduled planner that researches
  *  meetings into a template-provisioned artifact and protects delivery. */
 export const meetingBriefing: PlaybookDefinition = {
   key: "meeting-briefing",
-  version: 4,
+  version: 5,
   title: "Meeting Briefing",
   description:
     "Walk into important meetings with the context, questions, and decisions that will help you make the most of them.",
@@ -20,7 +20,6 @@ export const meetingBriefing: PlaybookDefinition = {
     description:
       "Stores your prepared briefings and powers the shareable briefing page.",
   },
-  agentWait: { unit: "minutes", value: researchMinutes },
   cadence: "Morning briefing or before each meeting",
   schedule: { repeat: "daily", time: "01:00" },
   setup: [

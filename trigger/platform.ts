@@ -88,6 +88,10 @@ export type RuntimePlatform = {
     parentId: RuntimeId<"runs">
     runIds: RuntimeId<"runs">[]
   }): Promise<AgentRunStatus[]>
+  stopAgentRun(args: {
+    parentId: RuntimeId<"runs">
+    runId: RuntimeId<"runs">
+  }): Promise<unknown>
   recordEvent(args: {
     attempt?: number
     callId?: string

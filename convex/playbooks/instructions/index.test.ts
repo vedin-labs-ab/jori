@@ -25,13 +25,11 @@ describe("playbook instructions", () => {
         const instructions = renderPlaybookInstructions({
           key: playbook.key,
           providers,
-          providerKeys: family,
           destination: emailDestination,
           subject: playbook.title,
           noun: playbook.delivery.noun,
           style: playbook.delivery.style,
           options: resolvePlaybookOptions(playbook.setup),
-          agentWait: playbook.agentWait,
         })
 
         expect(instructions).not.toContain("undefined")

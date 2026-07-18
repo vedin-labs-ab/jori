@@ -24,8 +24,9 @@ export type CalendarEventRef = {
 
 const hashLength = 32
 
-/** Stamp a provider event with `entityKey` (stable across content edits)
- *  and `contentHash` (changes when the event's content changes). */
+/** Stamp a provider event with its integration `provider` key, `entityKey`
+ *  (stable across content edits), and `contentHash` (changes when the
+ *  event's content changes). */
 export async function stampCalendarEvent(
   event: Record<string, unknown>,
   ref: CalendarEventRef,
@@ -33,6 +34,7 @@ export async function stampCalendarEvent(
 ) {
   return {
     ...event,
+    provider: ref.provider,
     entityKey: await calendarEntityKey(ref),
     contentHash: await calendarContentHash(content),
   }

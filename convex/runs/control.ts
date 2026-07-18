@@ -1,5 +1,4 @@
 import { v } from "convex/values"
-import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { mutation } from "../_generated/server"
 import { requireTenantAccess } from "../access"
@@ -10,8 +9,7 @@ import {
 } from "../access/users"
 import { ensureClerkPerson } from "../persons/clerk"
 import { createPersonActor } from "../shared/actor"
-import { recordTrace } from "./execution/traces/data"
-import { wakeParentForTerminalRun, wakeRun } from "./execution/waiters/data"
+import { stopRunTree } from "./tree"
 
 export const stop = mutation({
   args: {
@@ -32,34 +30,7 @@ export const stop = mutation({
       throw new Error("Run not found.")
     }
 
-    if (run.status !== "queued" && run.status !== "running") {
-      return null
-    }
-
-    const now = Date.now()
-    const stoppedBy = stoppedByActor(personId, identity)
-
-    await recordTrace(ctx, {
-      run,
-      key: `run:${run._id}:stopped`,
-      timestamp: now,
-      type: "run.stopped",
-    })
-
-    await ctx.db.patch(run._id, {
-      status: "stopped",
-      stoppedBy,
-      endedAt: now,
-    })
-
-    await wakeRun(ctx, { runId: run._id, reason: "cancelled" })
-    await wakeParentForTerminalRun(ctx, run._id)
-    await ctx.runMutation(
-      internal.runs.execution.outbox.records.enqueueCancellation,
-      {
-        runId: run._id,
-      }
-    )
+    await stopRunTree(ctx, run, stoppedByActor(personId, identity))
 
     return null
   },

@@ -83,13 +83,11 @@ export async function resolvePlaybookPlan(
     instructions: renderPlaybookInstructions({
       key: definition.key,
       providers: resolvedProviderLabels(resolved),
-      providerKeys: providers,
       destination,
       subject: definition.title,
       noun: definition.delivery.noun,
       style: definition.delivery.style,
       options,
-      agentWait: definition.agentWait,
     }),
     access: {
       integrations: [
