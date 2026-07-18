@@ -8,7 +8,7 @@ const morningBrief = getPlaybook("morning-brief")
 test("prefers a linked self Slack DM before email", () => {
   const setup = deliverySetup(
     morningBrief,
-    context(["gmail", "slack"], { hasSlackIdentity: true })
+    context(["gmail", "slack"], { slackDmLabel: "Albin Vedin" })
   )
 
   expect(setup.recommended).toEqual({
@@ -24,7 +24,7 @@ test("a valid manual preference takes priority", () => {
   }
   const setup = deliverySetup(
     morningBrief,
-    context(["gmail", "slack"], { hasSlackIdentity: true, preference })
+    context(["gmail", "slack"], { slackDmLabel: "Albin Vedin", preference })
   )
 
   expect(setup.recommended).toEqual(preference)
@@ -72,7 +72,7 @@ function context(
 ): DeliveryContext {
   return {
     connected: new Set(connected),
-    hasSlackIdentity: false,
+
     recipient: { email: "sam@example.com", name: "Sam" },
     ...overrides,
   }

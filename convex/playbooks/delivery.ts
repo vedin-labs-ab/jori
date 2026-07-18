@@ -22,9 +22,10 @@ import {
 
 export type DeliveryContext = {
   connected: Set<Integration>
-  hasSlackIdentity: boolean
   preference?: DeliveryChoice
   recipient: PlaybookRecipient
+  /** Resolved Slack DM label; absent when no usable Slack identity exists. */
+  slackDmLabel?: string
 }
 
 export async function readDeliveryContext(
@@ -44,9 +45,9 @@ export async function readDeliveryContext(
   ])
   return compactRecord({
     connected: args.connected,
-    hasSlackIdentity: slackTarget !== undefined,
     recipient: args.recipient,
     preference,
+    slackDmLabel: slackTarget?.label,
   })
 }
 
@@ -82,8 +83,8 @@ export async function saveDeliveryPreference(
   )
   const option = deliveryOption(deliveryMode(args.delivery), {
     connected: args.connected,
-    hasSlackIdentity: slackTarget !== undefined,
     recipient: args.recipient,
+    ...(slackTarget === undefined ? {} : { slackDmLabel: slackTarget.label }),
   })
 
   if (!option.available) {
@@ -132,8 +133,10 @@ function deliveryOption(
     return { mode, available: false, reason: "Connect Slack" }
   }
 
-  if (mode === "dm" && !context.hasSlackIdentity) {
-    return { mode, available: false, reason: "No Slack identity linked" }
+  if (mode === "dm") {
+    return context.slackDmLabel === undefined
+      ? { mode, available: false, reason: "No Slack identity linked" }
+      : { mode, available: true, label: context.slackDmLabel }
   }
 
   return { mode, available: true }
