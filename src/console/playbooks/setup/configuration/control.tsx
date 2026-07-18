@@ -177,34 +177,20 @@ function OptionSelect({
   value,
 }: {
   disabled: boolean
-  field: Extract<PlaybookOptionField, { kind: "choice" | "minutes" }>
+  field: Extract<PlaybookOptionField, { kind: "choice" }>
   id: string
-  onChange: (value: number | string) => void
+  onChange: (value: string) => void
   value: boolean | number | string
 }) {
-  const items =
-    field.kind === "choice"
-      ? field.choices
-      : field.presets.map((preset) => ({
-          value: String(preset),
-          label: `${preset} minutes`,
-        }))
-
   return (
-    <Select
-      disabled={disabled}
-      onValueChange={(next) =>
-        onChange(field.kind === "minutes" ? Number(next) : next)
-      }
-      value={String(value)}
-    >
+    <Select disabled={disabled} onValueChange={onChange} value={String(value)}>
       <SelectTrigger className="w-full" id={id}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {items.map((item) => (
-          <SelectItem key={item.value} value={item.value}>
-            {item.label}
+        {field.choices.map((choice) => (
+          <SelectItem key={choice.value} value={choice.value}>
+            {choice.label}
           </SelectItem>
         ))}
       </SelectContent>
@@ -217,10 +203,7 @@ function controlWidth(field: PlaybookOptionField) {
     return "w-36"
   }
 
-  if (
-    field.kind === "minutes" ||
-    (field.kind === "choice" && field.control === "select")
-  ) {
+  if (field.kind === "choice" && field.control === "select") {
     return "w-full sm:w-48"
   }
 

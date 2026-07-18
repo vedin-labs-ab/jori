@@ -28,14 +28,6 @@ export type PlaybookOptionField =
       control?: "toggle" | "select"
     })
   | (PlaybookOptionBase & { kind: "time"; default: string })
-  | (PlaybookOptionBase & {
-      kind: "minutes"
-      default: number
-      min: number
-      max: number
-      /** What the dialog offers; free values within bounds stay valid. */
-      presets: readonly number[]
-    })
 
 export type PlaybookBehavior = {
   key: string
@@ -211,17 +203,6 @@ function validOptionValue(
     if (
       typeof value === "string" &&
       /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
-    ) {
-      return value
-    }
-  }
-
-  if (field.kind === "minutes") {
-    if (
-      typeof value === "number" &&
-      Number.isInteger(value) &&
-      value >= field.min &&
-      value <= field.max
     ) {
       return value
     }
