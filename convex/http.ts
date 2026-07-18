@@ -32,32 +32,8 @@ import {
   handleSlackInteractions,
   handleSlackOAuthCallback,
 } from "./integrations/slack/http"
-import { unauthorizedResponse } from "./shared/http"
 
 const http = httpRouter()
-
-http.route({
-  path: "/ping",
-  method: "GET",
-  handler: httpAction(async (ctx) => {
-    try {
-      const identity = await ctx.auth.getUserIdentity()
-
-      if (identity === null) {
-        return unauthorizedResponse()
-      }
-    } catch {
-      return unauthorizedResponse()
-    }
-
-    return new Response("pong", {
-      status: 200,
-      headers: {
-        "content-type": "text/plain; charset=utf-8",
-      },
-    })
-  }),
-})
 
 http.route({
   path: "/milo/github/clone-credentials",
