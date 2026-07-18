@@ -28,7 +28,7 @@ describe("Slack message tool", () => {
       }
     )
 
-    expect(result).toEqual({ ok: true, ts: "111.222" })
+    expect(result).toEqual({ status: "sent", ts: "111.222" })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe("https://slack.com/api/chat.postMessage")
     expect(calls[0]?.method).toBe("POST")
@@ -83,7 +83,7 @@ describe("Slack reaction tool", () => {
       }
     )
 
-    expect(result).toEqual({ ok: true })
+    expect(result).toEqual({ status: "added" })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe("https://slack.com/api/reactions.add")
     expect(calls[0]?.method).toBe("POST")
@@ -126,10 +126,7 @@ describe("Slack assets", () => {
       createAssetContext()
     )
 
-    expect(result).toEqual({
-      ok: true,
-      files: [{ id: "F123", title: "kitten.png" }],
-    })
+    expect(result).toEqual({ status: "sent" })
     expect(calls).toHaveLength(3)
     expect(calls[0]).toMatchObject({
       body: {
@@ -175,7 +172,7 @@ describe("Slack read tools", () => {
       }
     )
 
-    expect(result).toEqual({ ok: true, messages: [] })
+    expect(result).toEqual({ messages: [], hasMore: false })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe("https://slack.com/api/conversations.replies")
     expect(calls[0]?.method).toBe("GET")

@@ -1,17 +1,24 @@
-import { type Doc } from "../../_generated/dataModel"
-import { type AssetContext, readRunAssets } from "../../assets/read"
-import { slackQueryApi } from "../../integrations/slack/api"
-import { requireSlackCredentials } from "../../integrations/slack/credentials"
+import { type Doc } from "../../../_generated/dataModel"
+import { type AssetContext, readRunAssets } from "../../../assets/read"
+import { slackQueryApi } from "../../../integrations/slack/api"
+import { requireSlackCredentials } from "../../../integrations/slack/credentials"
 import {
   addSlackMessageReaction,
   postSlackMessage,
   type SlackBlock,
-} from "../../integrations/slack/delivery/messages"
+} from "../../../integrations/slack/delivery/messages"
 import {
   boundedNumber,
   optionalString,
   requiredString,
-} from "../../shared/input"
+} from "../../../shared/input"
+import {
+  slackChannelListing,
+  slackMemberListing,
+  slackMessageListing,
+  slackSearchListing,
+  slackSentResult,
+} from "./normalize"
 
 export async function callSlackTool(
   integration: Doc<"integrations">,
@@ -22,39 +29,48 @@ export async function callSlackTool(
   const credentials = requireSlackCredentials(integration)
 
   if (tool === "channels_list") {
-    return await slackQueryApi(credentials.user, "conversations.list", {
-      limit: boundedNumber(args.limit, 100, 1, 1000),
-      cursor: optionalString(args.cursor),
-      types:
-        optionalString(args.types) ?? "public_channel,private_channel,im,mpim",
-    })
+    return slackChannelListing(
+      await slackQueryApi(credentials.user, "conversations.list", {
+        limit: boundedNumber(args.limit, 100, 1, 1000),
+        cursor: optionalString(args.cursor),
+        types:
+          optionalString(args.types) ??
+          "public_channel,private_channel,im,mpim",
+      })
+    )
   }
 
   if (tool === "conversations_history") {
-    return await slackQueryApi(credentials.user, "conversations.history", {
-      channel: requiredString(args.channel, "channel"),
-      limit: boundedNumber(args.limit, 50, 1, 100),
-      latest: optionalString(args.latest),
-      oldest: optionalString(args.oldest),
-      inclusive:
-        typeof args.inclusive === "boolean" ? args.inclusive : undefined,
-    })
+    return slackMessageListing(
+      await slackQueryApi(credentials.user, "conversations.history", {
+        channel: requiredString(args.channel, "channel"),
+        limit: boundedNumber(args.limit, 50, 1, 100),
+        latest: optionalString(args.latest),
+        oldest: optionalString(args.oldest),
+        inclusive:
+          typeof args.inclusive === "boolean" ? args.inclusive : undefined,
+      })
+    )
   }
 
   if (tool === "conversations_replies") {
-    return await slackQueryApi(credentials.user, "conversations.replies", {
-      channel: requiredString(args.channel, "channel"),
-      ts: requiredString(args.ts, "ts"),
-      limit: boundedNumber(args.limit, 50, 1, 100),
-    })
+    return slackMessageListing(
+      await slackQueryApi(credentials.user, "conversations.replies", {
+        channel: requiredString(args.channel, "channel"),
+        ts: requiredString(args.ts, "ts"),
+        limit: boundedNumber(args.limit, 50, 1, 100),
+      })
+    )
   }
 
   if (tool === "conversations_search_messages") {
-    return await slackQueryApi(credentials.user, "search.messages", {
-      query: requiredString(args.query, "query"),
-      count: boundedNumber(args.count, 20, 1, 100),
-      page: boundedNumber(args.page, 1, 1, 100),
-    })
+    return slackSearchListing(
+      await slackQueryApi(credentials.user, "search.messages", {
+        query: requiredString(args.query, "query"),
+        count: boundedNumber(args.count, 20, 1, 100),
+        page: boundedNumber(args.page, 1, 1, 100),
+      })
+    )
   }
 
   if (tool === "users_search") {
@@ -62,15 +78,19 @@ export async function callSlackTool(
   }
 
   if (tool === "conversations_add_message") {
-    return await postSlackMessageTool(integration, args, context)
+    return slackSentResult(
+      await postSlackMessageTool(integration, args, context)
+    )
   }
 
   if (tool === "slack_add_reaction") {
-    return await addSlackMessageReaction(integration, {
+    await addSlackMessageReaction(integration, {
       channel: requiredString(args.channel, "channel"),
       name: requiredString(args.name, "name"),
       timestamp: requiredString(args.timestamp, "timestamp"),
     })
+
+    return { status: "added" as const }
   }
 
   throw new Error(`Unknown Slack tool: ${tool}`)
@@ -88,15 +108,15 @@ async function searchSlackUsers(token: string, args: Record<string, unknown>) {
     query === undefined ||
     !Array.isArray(result.members)
   ) {
-    return result
+    return slackMemberListing(result)
   }
 
-  return {
+  return slackMemberListing({
     ...result,
     members: result.members.filter((member: Record<string, unknown>) =>
       JSON.stringify(member).toLowerCase().includes(query)
     ),
-  }
+  })
 }
 
 async function postSlackMessageTool(
