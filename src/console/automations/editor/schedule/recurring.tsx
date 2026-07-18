@@ -1,4 +1,3 @@
-import { CircleHelp } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -9,12 +8,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { absoluteTime, relativeTime } from "../../../shared/time"
 import {
   composeCron,
@@ -23,6 +16,7 @@ import {
   previewRecurringRun,
   weekdayOptions,
 } from "../../cron"
+import { FieldHelp } from "../../help"
 import {
   type AutomationFormValues,
   type RepeatMode,
@@ -177,38 +171,17 @@ function CustomCronField({
 
 function CronHelp({ cron, timezone }: { cron: string; timezone: string }) {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            aria-label="Expression help"
-            className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-            type="button"
-          >
-            <CircleHelp className="size-3" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent
-          align="center"
-          className="max-w-72 items-start text-left leading-relaxed"
-          side="right"
-        >
-          <div className="grid gap-1">
-            <p>
-              Uses five fields in {timezone}: minute, hour, day, month, weekday.
-            </p>
-            <a
-              className="underline underline-offset-2"
-              href={getCrontabGuruUrl(cron)}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Open Crontab.guru
-            </a>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <FieldHelp label="Expression help">
+      <p>Uses five fields in {timezone}: minute, hour, day, month, weekday.</p>
+      <a
+        className="underline underline-offset-2"
+        href={getCrontabGuruUrl(cron)}
+        rel="noreferrer"
+        target="_blank"
+      >
+        Open Crontab.guru
+      </a>
+    </FieldHelp>
   )
 }
 

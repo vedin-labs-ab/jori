@@ -7,13 +7,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-/** Suffix help icon for a field label; the children fill its tooltip. */
+/** Suffix help icon for a label; the children fill its tooltip. */
 export function FieldHelp({
   children,
   label,
+  side = "right",
 }: {
   children: ReactNode
   label: string
+  side?: "right" | "top"
 }) {
   return (
     <TooltipProvider>
@@ -30,7 +32,7 @@ export function FieldHelp({
         <TooltipContent
           align="center"
           className="max-w-80 items-start text-left leading-relaxed"
-          side="right"
+          side={side}
         >
           <div className="grid gap-1">{children}</div>
         </TooltipContent>

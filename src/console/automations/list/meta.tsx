@@ -1,5 +1,5 @@
 import { getAutomationEventDefinition } from "@contracts/automations/events"
-import { CircleHelp, Clock, Repeat2, Zap } from "lucide-react"
+import { Clock, Repeat2, Zap } from "lucide-react"
 import { type ReactNode } from "react"
 import {
   Tooltip,
@@ -11,6 +11,7 @@ import { absoluteTime, relativeTime } from "../../shared/time"
 import { getAutomationSurfaceLabel } from "../access"
 import { SurfaceLogo } from "../access/logo"
 import { describeCron } from "../cron"
+import { FieldHelp } from "../help"
 import { type Automation } from "../types"
 import { AutomationToolSummary } from "./tools"
 
@@ -182,31 +183,10 @@ function eventTriggerDetail(
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5">
       <span className="truncate">{source}</span>
-      <EventTriggerHelp eventLabel={eventLabel} />
-    </span>
-  )
-}
-
-function EventTriggerHelp({ eventLabel }: { eventLabel: string }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          aria-label={`Event: ${eventLabel}`}
-          className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-          type="button"
-        >
-          <CircleHelp className="size-3" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent
-        align="center"
-        className="max-w-72 items-start text-left leading-relaxed"
-        side="top"
-      >
+      <FieldHelp label={`Event: ${eventLabel}`} side="top">
         {eventLabel}
-      </TooltipContent>
-    </Tooltip>
+      </FieldHelp>
+    </span>
   )
 }
 

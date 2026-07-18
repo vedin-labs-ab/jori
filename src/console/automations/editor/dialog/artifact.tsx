@@ -12,9 +12,9 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../../convex/_generated/api"
 import { absoluteTime, relativeTime } from "../../../shared/time"
+import { FieldHelp } from "../../help"
 import { type AutomationFormValues } from "../../types"
 import { ContractEntries, type ContractEntrySummary } from "./contract"
-import { FieldHelp } from "./help"
 
 type ArtifactResult = FunctionReturnType<typeof api.artifacts.console.get>
 type ArtifactDetail = Extract<
