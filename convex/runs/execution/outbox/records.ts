@@ -2,20 +2,9 @@ import { v } from "convex/values"
 import { internalMutation } from "../../../_generated/server"
 import {
   claimNext as claimNextOperation,
-  enqueueCancellation as enqueueRunCancellation,
   markFailed as markOperationFailed,
   markSent as markOperationSent,
 } from "./data"
-
-export const enqueueCancellation = internalMutation({
-  args: {
-    runId: v.id("runs"),
-  },
-  returns: v.any(),
-  handler: async (ctx, args) => {
-    return await enqueueRunCancellation(ctx, args.runId)
-  },
-})
 
 export const claimNext = internalMutation({
   args: {
