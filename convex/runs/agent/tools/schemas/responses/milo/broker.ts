@@ -1,13 +1,13 @@
 import {
-  constField,
-  enumField,
+  arrayProperty,
+  constProperty,
+  enumProperty,
   type JsonSchema,
-  listField,
-  numberField,
+  numberProperty,
+  objectSchema,
   providerPayload,
-  resultSchema,
   type SchemaMap,
-  stringField,
+  stringProperty,
 } from "../common"
 
 // Broker-scoped tools: capability discovery, integration offers, and the
@@ -16,21 +16,21 @@ import {
 function capabilityGroupSchema(
   extra: Record<string, unknown> = {}
 ): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     required: ["surface", "label", "tools"],
     properties: {
-      surface: stringField("Integration surface key."),
-      label: stringField("Display name of the surface."),
-      tools: listField(
+      surface: stringProperty("Integration surface key."),
+      label: stringProperty("Display name of the surface."),
+      tools: arrayProperty(
         "Tools the surface offers.",
-        resultSchema({
+        objectSchema({
           required: ["tool", "label", "access", "mode"],
           properties: {
-            tool: stringField("Exact tool name."),
-            label: stringField("Display name."),
-            description: stringField("What the tool does."),
-            access: enumField(["read", "write"], "Access level."),
-            mode: stringField("Permission mode for this run."),
+            tool: stringProperty("Exact tool name."),
+            label: stringProperty("Display name."),
+            description: stringProperty("What the tool does."),
+            access: enumProperty(["read", "write"], "Access level."),
+            mode: stringProperty("Permission mode for this run."),
           },
         })
       ),
@@ -40,22 +40,22 @@ function capabilityGroupSchema(
 }
 
 export const brokerMiloToolResponseSchemas = {
-  list_capabilities: resultSchema({
+  list_capabilities: objectSchema({
     required: ["run", "connected", "available"],
     description: "Tool availability grouped by integration surface.",
     properties: {
-      run: listField(
+      run: arrayProperty(
         "Groups already granted to this run.",
         capabilityGroupSchema()
       ),
-      connected: listField(
+      connected: arrayProperty(
         "Groups connected for the tenant.",
         capabilityGroupSchema()
       ),
-      available: listField(
+      available: arrayProperty(
         "Integrations that could be connected.",
         capabilityGroupSchema({
-          status: constField("not_connected", "Not yet connected."),
+          status: constProperty("not_connected", "Not yet connected."),
         })
       ),
     },
@@ -64,16 +64,19 @@ export const brokerMiloToolResponseSchemas = {
     description:
       "Already-connected integrations short-circuit; otherwise the pending offer with its connect link.",
     oneOf: [
-      resultSchema({
+      objectSchema({
         required: ["status", "integration", "integrationId", "message"],
         properties: {
-          status: constField("connected", "Already connected and available."),
-          integration: stringField("Integration key."),
-          integrationId: stringField("Connected integration ID."),
-          message: stringField("Human-readable outcome."),
+          status: constProperty(
+            "connected",
+            "Already connected and available."
+          ),
+          integration: stringProperty("Integration key."),
+          integrationId: stringProperty("Connected integration ID."),
+          message: stringProperty("Human-readable outcome."),
         },
       }),
-      resultSchema({
+      objectSchema({
         required: [
           "status",
           "integration",
@@ -83,29 +86,29 @@ export const brokerMiloToolResponseSchemas = {
           "message",
         ],
         properties: {
-          status: enumField(
+          status: enumProperty(
             ["created", "delivered"],
             "delivered when the offer was posted on the requester surface."
           ),
-          integration: stringField("Integration key."),
-          integrationOfferId: stringField(
+          integration: stringProperty("Integration key."),
+          integrationOfferId: stringProperty(
             "Offer ID for cancel_integration_offer."
           ),
-          url: stringField(
+          url: stringProperty(
             "Absolute connect link, when the host is configured."
           ),
-          urlPath: stringField("Console path for the connect link."),
-          expiresAt: numberField("Offer expiry in epoch milliseconds."),
-          message: stringField("Human-readable outcome."),
+          urlPath: stringProperty("Console path for the connect link."),
+          expiresAt: numberProperty("Offer expiry in epoch milliseconds."),
+          message: stringProperty("Human-readable outcome."),
           delivery: providerPayload("Delivery details for the surface."),
         },
       }),
     ],
   },
-  cancel_approval_request: resultSchema({
+  cancel_approval_request: objectSchema({
     required: ["status", "message"],
     properties: {
-      status: enumField(
+      status: enumProperty(
         [
           "cancelled",
           "invalid_message",
@@ -116,17 +119,17 @@ export const brokerMiloToolResponseSchemas = {
         ],
         "What happened to the pending approval."
       ),
-      message: stringField("Human-readable outcome."),
+      message: stringProperty("Human-readable outcome."),
     },
   }),
-  cancel_integration_offer: resultSchema({
+  cancel_integration_offer: objectSchema({
     required: ["status", "message"],
     properties: {
-      status: enumField(
+      status: enumProperty(
         ["cancelled", "missing", "already_resolved"],
         "What happened to the pending offer."
       ),
-      message: stringField("Human-readable outcome."),
+      message: stringProperty("Human-readable outcome."),
     },
   }),
 } satisfies SchemaMap

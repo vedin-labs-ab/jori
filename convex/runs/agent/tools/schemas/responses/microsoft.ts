@@ -3,14 +3,14 @@ import {
   eventListingSchema,
   stampedEventSchema,
 } from "./calendar"
-import { listField, resultSchema, type SchemaMap } from "./common"
+import { arrayProperty, objectSchema, type SchemaMap } from "./common"
 import { draftedMailSchema, mailMessageSchema, sentMailSchema } from "./mail"
 
 export const microsoftToolResponseSchemas = {
-  microsoft_email_search_messages: resultSchema({
+  microsoft_email_search_messages: objectSchema({
     required: ["messages"],
     properties: {
-      messages: listField(
+      messages: arrayProperty(
         "Matching messages without bodies; read one for its full content.",
         mailMessageSchema()
       ),

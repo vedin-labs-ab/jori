@@ -3,7 +3,12 @@ import {
   eventListingSchema,
   stampedEventSchema,
 } from "./calendar"
-import { listField, resultSchema, type SchemaMap, stringField } from "./common"
+import {
+  arrayProperty,
+  objectSchema,
+  type SchemaMap,
+  stringProperty,
+} from "./common"
 import {
   draftedMailSchema,
   mailMessageSchema,
@@ -12,31 +17,31 @@ import {
 } from "./mail"
 
 export const googleToolResponseSchemas = {
-  google_gmail_search_threads: resultSchema({
+  google_gmail_search_threads: objectSchema({
     required: ["threads"],
     properties: {
-      threads: listField(
+      threads: arrayProperty(
         "Matching threads, newest first. Read one for its messages.",
-        resultSchema({
+        objectSchema({
           required: ["threadId"],
           properties: {
-            threadId: stringField("Gmail thread ID."),
-            snippet: stringField("Preview of the matched content."),
+            threadId: stringProperty("Gmail thread ID."),
+            snippet: stringProperty("Preview of the matched content."),
           },
         })
       ),
-      nextPageToken: stringField(
+      nextPageToken: stringProperty(
         "Pass as pageToken to continue; absent on the last page."
       ),
     },
   }),
   google_gmail_get_thread: mailThreadSchema(),
-  google_gmail_get_threads: listField(
+  google_gmail_get_threads: arrayProperty(
     "One entry per requested thread ID, in request order.",
     mailThreadSchema()
   ),
   google_gmail_get_message: mailMessageSchema(),
-  google_gmail_get_messages: listField(
+  google_gmail_get_messages: arrayProperty(
     "One entry per requested message ID, in request order.",
     mailMessageSchema()
   ),

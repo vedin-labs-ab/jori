@@ -1,11 +1,11 @@
 import {
-  booleanField,
-  constField,
+  arrayProperty,
+  booleanProperty,
+  constProperty,
   type JsonSchema,
-  listField,
-  resultSchema,
+  objectSchema,
   type SchemaMap,
-  stringField,
+  stringProperty,
 } from "./common"
 
 // Notion tools deliberately return Notion API objects unchanged: agents echo
@@ -19,8 +19,8 @@ function notionObject(kind: string, description: string): JsonSchema {
     additionalProperties: true,
     description,
     properties: {
-      object: constField(kind, `Always ${kind}.`),
-      id: stringField(`Notion ${kind} ID.`),
+      object: constProperty(kind, `Always ${kind}.`),
+      id: stringProperty(`Notion ${kind} ID.`),
     },
   }
 }
@@ -32,8 +32,8 @@ function notionPage(description: string): JsonSchema {
     ...page,
     properties: {
       ...(page.properties as Record<string, unknown>),
-      url: stringField("Page URL."),
-      archived: booleanField("True when archived."),
+      url: stringProperty("Page URL."),
+      archived: booleanProperty("True when archived."),
       parent: {
         type: "object",
         additionalProperties: true,
@@ -55,13 +55,13 @@ function notionListing(itemDescription: string, item: JsonSchema): JsonSchema {
     additionalProperties: true,
     description: itemDescription,
     properties: {
-      object: constField("list", "Always list."),
-      results: listField("The page of results.", item),
+      object: constProperty("list", "Always list."),
+      results: arrayProperty("The page of results.", item),
       next_cursor: {
         type: ["string", "null"],
         description: "Pass as start_cursor to continue; null on the last page.",
       },
-      has_more: booleanField("True when more results exist."),
+      has_more: booleanProperty("True when more results exist."),
     },
   }
 }
@@ -73,10 +73,10 @@ function notionBlock(description: string): JsonSchema {
     ...block,
     properties: {
       ...(block.properties as Record<string, unknown>),
-      type: stringField(
+      type: stringProperty(
         "Block type; the same-named key holds the block's content."
       ),
-      has_children: booleanField("True when nested blocks exist."),
+      has_children: booleanProperty("True when nested blocks exist."),
     },
   }
 }
@@ -88,8 +88,8 @@ function notionComment(description: string): JsonSchema {
     ...comment,
     properties: {
       ...(comment.properties as Record<string, unknown>),
-      discussion_id: stringField("Thread the comment belongs to."),
-      rich_text: listField("Comment content as rich text.", {
+      discussion_id: stringProperty("Thread the comment belongs to."),
+      rich_text: arrayProperty("Comment content as rich text.", {
         type: "object",
         additionalProperties: true,
       }),
@@ -122,7 +122,7 @@ export const notionToolResponseSchemas = {
     notionBlock("Created block, unchanged.")
   ),
   notion_create_comment: notionComment("The created comment."),
-  notion_upload_file: resultSchema({
+  notion_upload_file: objectSchema({
     required: ["fileUpload", "file"],
     properties: {
       fileUpload: {
@@ -130,15 +130,15 @@ export const notionToolResponseSchemas = {
         additionalProperties: true,
         description: "Notion's file_upload object with status uploaded.",
       },
-      file: resultSchema({
+      file: objectSchema({
         description: "Ready-to-embed file reference for Notion blocks.",
         required: ["type", "file_upload"],
         properties: {
-          type: constField("file_upload", "Notion file reference type."),
-          file_upload: resultSchema({
+          type: constProperty("file_upload", "Notion file reference type."),
+          file_upload: objectSchema({
             required: ["id"],
             properties: {
-              id: stringField("Notion file upload ID."),
+              id: stringProperty("Notion file upload ID."),
             },
           }),
         },

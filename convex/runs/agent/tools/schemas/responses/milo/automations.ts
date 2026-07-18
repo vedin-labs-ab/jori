@@ -1,23 +1,23 @@
 import {
-  booleanField,
+  arrayProperty,
+  booleanProperty,
   type JsonSchema,
-  listField,
-  numberField,
-  resultSchema,
+  numberProperty,
+  objectSchema,
   type SchemaMap,
-  stringField,
+  stringProperty,
 } from "../common"
 
 function automationRecordProperties() {
   return {
-    _id: stringField("Automation ID."),
-    name: stringField("Automation name."),
-    instructions: stringField("Canonical Markdown instructions."),
-    type: stringField("recurring, once, or mention."),
-    status: stringField("active, paused, or completed."),
-    scope: stringField("personal or organization."),
-    createdAt: numberField("Creation time in epoch milliseconds."),
-    updatedAt: numberField("Last update time in epoch milliseconds."),
+    _id: stringProperty("Automation ID."),
+    name: stringProperty("Automation name."),
+    instructions: stringProperty("Canonical Markdown instructions."),
+    type: stringProperty("recurring, once, or mention."),
+    status: stringProperty("active, paused, or completed."),
+    scope: stringProperty("personal or organization."),
+    createdAt: numberProperty("Creation time in epoch milliseconds."),
+    updatedAt: numberProperty("Last update time in epoch milliseconds."),
   }
 }
 
@@ -37,12 +37,12 @@ export const automationMiloToolResponseSchemas = {
   add_automation: automationRecord(
     "The automation record. An existing automation with the same key and identical configuration is returned instead of a duplicate.",
     {
-      created: booleanField(
+      created: booleanProperty(
         "True when a new automation was created; false when the key already existed."
       ),
     }
   ),
-  search_automations: listField(
+  search_automations: arrayProperty(
     "Visible automations matching the query.",
     automationRecord("Automation record with trigger and access.")
   ),
@@ -55,11 +55,11 @@ export const automationMiloToolResponseSchemas = {
   update_automation: automationRecord(
     "The automation record after the update."
   ),
-  delete_automation: resultSchema({
+  delete_automation: objectSchema({
     required: ["deleted", "automationId"],
     properties: {
       deleted: { type: "boolean", const: true },
-      automationId: stringField("The removed automation's ID."),
+      automationId: stringProperty("The removed automation's ID."),
     },
   }),
 } satisfies SchemaMap

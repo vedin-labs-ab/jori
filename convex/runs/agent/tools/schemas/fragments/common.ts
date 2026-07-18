@@ -50,11 +50,35 @@ export function stringProperty(description: string) {
 }
 
 export function stringArrayProperty(description: string) {
+  return arrayProperty(description, { type: "string" })
+}
+
+export function arrayProperty(description: string, items: unknown) {
   return {
     type: "array",
     description,
-    items: { type: "string" },
+    items,
   }
+}
+
+export function booleanProperty(description: string) {
+  return { type: "boolean", description }
+}
+
+export function enumProperty(values: readonly string[], description: string) {
+  return {
+    type: "string",
+    enum: [...values],
+    description,
+  }
+}
+
+export function constProperty(value: string, description: string) {
+  return { type: "string", const: value, description }
+}
+
+export function nullableStringProperty(description: string) {
+  return { type: ["string", "null"], description }
 }
 
 export function numberProperty(

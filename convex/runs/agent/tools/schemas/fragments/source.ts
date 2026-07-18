@@ -1,4 +1,4 @@
-import { objectSchema, stringProperty } from "./common"
+import { booleanProperty, objectSchema, stringProperty } from "./common"
 
 export function sourceChangesProperty() {
   return {
@@ -43,8 +43,4 @@ export function sourceChangesProperty() {
       headSha: stringProperty("Current local Git HEAD SHA."),
     },
   }
-}
-
-function booleanProperty(description: string) {
-  return { type: "boolean", description }
 }
