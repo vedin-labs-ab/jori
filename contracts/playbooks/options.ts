@@ -61,11 +61,7 @@ export function playbookOptionFields(
   const sectionKeys = new Set<string>()
 
   function add(field: PlaybookOptionField) {
-    if (keys.has(field.key)) {
-      throw new Error(`Duplicate playbook option "${field.key}".`)
-    }
-
-    keys.add(field.key)
+    assertUniqueKey(keys, field.key, "playbook option")
     fields.push(field)
   }
 
