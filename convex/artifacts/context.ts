@@ -38,7 +38,9 @@ export async function readRunArtifactContext(
       scope: entry.scope,
       schemaName: entry.schemaName,
       schemaVersion: entry.schemaVersion,
-      description: entry.description ?? null,
+      // The agent-facing slot: usage carries working guidance, with the
+      // user description as the fallback for single-description contracts.
+      description: entry.usage ?? entry.description ?? null,
     })),
   }
 }

@@ -6,7 +6,7 @@ export const playbookTemplateContracts = {
       name: "briefings",
       scope: "shared",
       description:
-        "Canonical briefing state, keyed by each calendar event's entityKey. Patch one meeting branch at a time and preserve unrelated meetings. revision counts user-visible briefing changes and receipts record the delivered revision; meetings age out seven local days after they end, dispatches after seven days.",
+        "Your prepared briefings, one per meeting: the research behind each one, when it was delivered, and the calendar scan that found it.",
       schemaName: "MeetingBriefings",
       schemaVersion: 5,
       schema: {

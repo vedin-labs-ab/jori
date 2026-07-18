@@ -29,6 +29,7 @@ const artifactContractStateEntry = v.object({
   key: v.string(),
   scope: artifactStateScope,
   description: v.optional(v.string()),
+  usage: v.optional(v.string()),
   schemaName: v.string(),
   schemaVersion: v.number(),
   schemaHash: v.string(),

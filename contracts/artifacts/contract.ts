@@ -14,7 +14,10 @@ export type ArtifactContractStateEntry = {
   name: string
   key: string
   scope: "personal" | "shared"
+  /** Shown to people in the console. */
   description?: string
+  /** Guidance rendered into the agent's run context. */
+  usage?: string
   schemaName: string
   schemaVersion: number
   schemaHash: string
@@ -137,6 +140,7 @@ function normalizeStateEntry(
     key,
     scope,
     description: normalizeOptionalDescription(value.description),
+    usage: normalizeOptionalDescription(value.usage),
     schema,
     schemaHash: stableHash(schema),
     schemaName: normalizeName(value.schemaName ?? name, "schemaName"),

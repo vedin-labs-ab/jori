@@ -118,6 +118,8 @@ export const contract = defineArtifactContract({
       key: "meeting-briefing/briefings",
       scope: "shared",
       description:
+        "Your prepared briefings, one per meeting: the research behind each one, when it was delivered, and the calendar scan that found it.",
+      usage:
         "Canonical briefing state, keyed by each calendar event's entityKey. Patch one meeting branch at a time and preserve unrelated meetings. revision counts user-visible briefing changes and receipts record the delivered revision; meetings age out seven local days after they end, dispatches after seven days.",
       schema: z.strictObject({
         schemaVersion: z.literal(5),
