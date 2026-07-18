@@ -2,6 +2,7 @@ import { isRecord } from "../../contracts/json"
 import { type RuntimeId } from "../../contracts/runtime/worker"
 import { type UploadedAsset } from "../platform"
 import { requireConvexSiteUrl } from "./config"
+import { postWorkerEndpoint } from "./http"
 
 export type UploadAssetArgs = {
   bytes: Uint8Array
@@ -22,28 +23,16 @@ export async function uploadAsset(
     url.searchParams.set("description", args.description)
   }
 
-  const response = await fetch(url, {
-    body: new Uint8Array(args.bytes).buffer,
-    headers: {
-      "content-type": args.mimeType,
-      "x-milo-run-id": args.runId,
-      "x-milo-worker-secret": secret,
-    },
-    method: "POST",
-  })
-  const result = (await response.json().catch(() => null)) as unknown
-
-  if (!response.ok) {
-    throw new Error(assetUploadError(result))
-  }
-
-  return parseUploadedAsset(result)
-}
-
-function assetUploadError(value: unknown) {
-  return isRecord(value) && typeof value.error === "string"
-    ? value.error
-    : "Asset upload failed"
+  return parseUploadedAsset(
+    await postWorkerEndpoint({
+      body: new Uint8Array(args.bytes).buffer,
+      contentType: args.mimeType,
+      failure: "Asset upload failed",
+      runId: args.runId,
+      secret,
+      url,
+    })
+  )
 }
 
 function parseUploadedAsset(value: unknown): UploadedAsset {
