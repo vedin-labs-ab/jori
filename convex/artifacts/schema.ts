@@ -63,7 +63,6 @@ export const artifacts = defineTable({
   template: v.optional(v.string()),
   templatePartition: v.optional(v.string()),
 })
-  .index("by_tenant", ["tenantId"])
   .index("by_tenant_and_updated_at", ["tenantId", "updatedAt"])
   .index("by_tenant_and_owner", ["tenantId", "ownerId"])
   .index("by_tenant_and_template", [

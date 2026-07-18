@@ -46,7 +46,7 @@ export const transitions = defineTable({
   subject: transitionSubject,
   type: transitionType,
   createdAt: v.number(),
-}).index("by_tenant_and_created_at", ["tenantId", "createdAt"])
+})
 
 type TransitionInputBase = {
   tenantId: string

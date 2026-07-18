@@ -36,8 +36,3 @@ export const integrations = defineTable({
     "ownerId",
   ])
   .index("by_integration_and_external", ["integration", "externalId"])
-  .index("by_tenant_and_integration_and_external", [
-    "tenantId",
-    "integration",
-    "externalId",
-  ])

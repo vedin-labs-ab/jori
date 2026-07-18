@@ -52,5 +52,4 @@ export const approvals = defineTable({
   .index("by_tenant_and_code", ["tenantId", "code"])
   .index("by_run_and_status", ["runId", "status"])
   .index("by_run", ["runId"])
-  .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
   .index("by_tenant_and_expires_at", ["tenantId", "expiresAt"])

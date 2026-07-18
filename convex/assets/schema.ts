@@ -17,5 +17,4 @@ export const assets = defineTable({
   createdAt: v.number(),
 })
   .index("by_run", ["runId"])
-  .index("by_tenant", ["tenantId"])
   .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
