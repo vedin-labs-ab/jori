@@ -138,11 +138,24 @@ export async function callLinearTool(
   }
 
   if (tool === "linear_add_comment") {
-    return await postLinearComment(integration, args)
+    const payload = readRecord(
+      readRecord(readRecord(await postLinearComment(integration, args)).data)
+        .commentCreate
+    )
+
+    return { success: payload.success === true, comment: payload.comment ?? null }
   }
 
   if (tool === "linear_add_reaction") {
-    return await addLinearReaction(integration, args)
+    const payload = readRecord(
+      readRecord(readRecord(await addLinearReaction(integration, args)).data)
+        .reactionCreate
+    )
+
+    return {
+      success: payload.success === true,
+      reaction: payload.reaction ?? null,
+    }
   }
 
   throw new Error(`Unknown Linear tool: ${tool}`)
