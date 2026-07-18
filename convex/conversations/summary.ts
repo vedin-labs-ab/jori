@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { collapseWhitespace } from "../../contracts/text"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -65,7 +66,7 @@ export const commit = internalMutation({
     summary: v.string(),
   },
   handler: async (ctx, args) => {
-    const summary = normalizeSummary(args.summary)
+    const summary = collapseWhitespace(args.summary)
 
     await ctx.db.patch(args.conversationId, {
       functionId: undefined,
@@ -199,8 +200,4 @@ function summaryMessage(message: Doc<"messages">): SummaryMessage | null {
     speaker: getActorKind(message.actor),
     text,
   }
-}
-
-function normalizeSummary(value: string) {
-  return value.replace(/\s+/g, " ").trim()
 }

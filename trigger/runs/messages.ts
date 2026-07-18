@@ -4,6 +4,7 @@ import {
   type RuntimeInteraction,
   type RuntimeMessage,
 } from "../../contracts/runtime/worker"
+import { collapseWhitespace } from "../../contracts/text"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { type ModelMessage } from "../model/types"
@@ -200,7 +201,7 @@ function targetText(interaction: RuntimeInteraction) {
 }
 
 function truncatePreview(value: string) {
-  const normalized = value.trim().replace(/\s+/g, " ")
+  const normalized = collapseWhitespace(value)
   const limit = 220
 
   return normalized.length <= limit

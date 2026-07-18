@@ -1,4 +1,5 @@
 import { type ContentsOptions } from "exa-js"
+import { collapseWhitespace } from "../../contracts/text"
 import { createExaClient, withTimeout } from "../search"
 import { sha256Hex } from "../shared/crypto"
 
@@ -95,7 +96,7 @@ export function hostFromUrl(url: string): string | null {
 }
 
 export async function hashText(text: string): Promise<string> {
-  return await sha256Hex(normalizeText(text))
+  return await sha256Hex(collapseWhitespace(text))
 }
 
 async function fetchPage(
@@ -116,11 +117,7 @@ async function fetchPage(
 
   return text === null
     ? null
-    : { text: normalizeText(text), links: readLinks(result) }
-}
-
-function normalizeText(text: string) {
-  return text.replace(/\s+/g, " ").trim()
+    : { text: collapseWhitespace(text), links: readLinks(result) }
 }
 
 function readText(result: unknown) {

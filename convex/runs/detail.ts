@@ -1,3 +1,5 @@
+import { collapseWhitespace } from "../../contracts/text"
+
 export type ExecutionDetailType =
   | "calendar_event"
   | "channel"
@@ -107,9 +109,9 @@ export function uniqueDetails(details: Array<ExecutionDetail | undefined>) {
 }
 
 export function snippet(value: string | undefined) {
-  const normalized = value?.replace(/\s+/g, " ").trim()
+  const normalized = value === undefined ? "" : collapseWhitespace(value)
 
-  if (normalized === undefined || normalized === "") {
+  if (normalized === "") {
     return undefined
   }
 
