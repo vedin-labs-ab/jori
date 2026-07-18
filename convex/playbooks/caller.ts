@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { compactRecord } from "../../contracts/json"
 import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
 import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
 import { readClerkUserEmail, readClerkUserName } from "../access/users"
@@ -46,11 +47,8 @@ export function callerRecipient(identity: {
   email?: string
   name?: string
 }): PlaybookPlanArgs["recipient"] {
-  const email = readClerkUserEmail(identity)
-  const name = readClerkUserName(identity)
-
-  return {
-    ...(email === undefined ? {} : { email }),
-    ...(name === undefined ? {} : { name }),
-  }
+  return compactRecord({
+    email: readClerkUserEmail(identity),
+    name: readClerkUserName(identity),
+  })
 }

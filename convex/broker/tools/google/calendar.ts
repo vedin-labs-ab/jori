@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { googleJson } from "../../../integrations/google/api"
 import { listGoogleCalendars } from "../../../integrations/google/calendars"
 import {
@@ -50,7 +51,7 @@ async function listCalendarEvents(
   const page = readRecord(await listCalendarEventPage(token, args, calendarId))
   const nextPageToken = optionalString(page.nextPageToken)
 
-  return {
+  return compactRecord({
     events: await Promise.all(
       readArray(page.items).map((event) =>
         stampGoogleEvent(readRecord(event), calendarId)
@@ -58,8 +59,8 @@ async function listCalendarEvents(
     ),
     status: nextPageToken === undefined ? "ready" : "partial",
     truncated: nextPageToken !== undefined,
-    ...(nextPageToken === undefined ? {} : { nextPageToken }),
-  }
+    nextPageToken,
+  })
 }
 
 async function listAllCalendarEvents(

@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { summarizePullRequest } from "../../../integrations/github/delivery/format"
 import {
   optionalString,
@@ -183,28 +184,23 @@ function createPullRequestBody(
   args: Record<string, unknown>,
   values: { base: string; head: string; title: string }
 ) {
-  const draft = optionalBoolean(args.draft)
-  const maintainerCanModify = optionalBoolean(args.maintainerCanModify)
-
-  return {
+  return compactRecord({
     base: values.base,
-    ...(draft === undefined ? {} : { draft }),
+    draft: optionalBoolean(args.draft),
     head: values.head,
-    ...(maintainerCanModify === undefined
-      ? {}
-      : { maintainer_can_modify: maintainerCanModify }),
+    maintainer_can_modify: optionalBoolean(args.maintainerCanModify),
     title: values.title,
-    ...(typeof args.body === "string" ? { body: args.body } : {}),
-  }
+    body: typeof args.body === "string" ? args.body : undefined,
+  })
 }
 
 function commitSummary(commit: GitHubSourceCommit) {
-  return {
-    ...(commit.baseSha === undefined ? {} : { baseSha: commit.baseSha }),
+  return compactRecord({
+    baseSha: commit.baseSha,
     files: commit.files,
     sha: commit.sha,
     treeSha: commit.treeSha,
-  }
+  })
 }
 
 function optionalBoolean(value: unknown) {

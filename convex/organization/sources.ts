@@ -1,4 +1,5 @@
 import { type Infer, v } from "convex/values"
+import { compactRecord } from "../../contracts/json"
 import {
   internalMutation,
   internalQuery,
@@ -79,13 +80,16 @@ export async function replaceApprovedSources(
   const checkAt = Date.now() + processedIntervalMs
 
   for (const source of uniqueSnapshots(sources).slice(0, maxSourcesPerTenant)) {
-    await ctx.db.insert("organizationSources", {
-      tenantId,
-      url: source.url,
-      primary: source.primary,
-      checkAt,
-      ...(source.hash === undefined ? {} : { hash: source.hash }),
-    })
+    await ctx.db.insert(
+      "organizationSources",
+      compactRecord({
+        tenantId,
+        url: source.url,
+        primary: source.primary,
+        checkAt,
+        hash: source.hash,
+      })
+    )
   }
 }
 
@@ -155,11 +159,11 @@ function toSnapshot(source: {
   primary: boolean
   url: string
 }): SourceSnapshot {
-  return {
+  return compactRecord({
     url: source.url,
     primary: source.primary,
-    ...(source.hash === undefined ? {} : { hash: source.hash }),
-  }
+    hash: source.hash,
+  })
 }
 
 function uniqueSnapshots(sources: SourceSnapshot[]) {
@@ -170,11 +174,14 @@ function uniqueSnapshots(sources: SourceSnapshot[]) {
     const existing = byUrl.get(key)
     const hash = source.hash ?? existing?.hash
 
-    byUrl.set(key, {
-      url: source.url,
-      primary: source.primary || existing?.primary === true,
-      ...(hash === undefined ? {} : { hash }),
-    })
+    byUrl.set(
+      key,
+      compactRecord({
+        url: source.url,
+        primary: source.primary || existing?.primary === true,
+        hash,
+      })
+    )
   }
 
   return [...byUrl.values()]

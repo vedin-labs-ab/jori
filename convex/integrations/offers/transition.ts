@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../contracts/json"
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { wakeRun } from "../../runs/execution/waiters/data"
@@ -35,10 +36,10 @@ export async function markIntegrationOfferConnected(
     now: number
   }
 ) {
-  const result = {
-    ...(offer.claim?.actor === undefined ? {} : { actor: offer.claim.actor }),
+  const result = compactRecord({
+    actor: offer.claim?.actor,
     integrationId: args.integrationId,
-  }
+  })
 
   await settleIntegrationOffer(ctx, offer, {
     cancelExpiration: true,
@@ -70,10 +71,10 @@ function cancelledResult(args: { actor: Actor | undefined; reason?: string }) {
     return undefined
   }
 
-  return {
-    ...(args.actor === undefined ? {} : { actor: args.actor }),
-    ...(args.reason === undefined ? {} : { reason: args.reason }),
-  }
+  return compactRecord({
+    actor: args.actor,
+    reason: args.reason,
+  })
 }
 
 export async function markIntegrationOfferFailed(
