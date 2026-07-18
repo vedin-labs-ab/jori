@@ -24,6 +24,7 @@ export function useAutomationEditor(
   permissions?: AutomationPolicyPermissions
 ) {
   return {
+    tenantId,
     ...useAutomationForm(tenantId, permissions),
     ...useAutomationControl(tenantId),
     ...useAutomationDeletion(tenantId),

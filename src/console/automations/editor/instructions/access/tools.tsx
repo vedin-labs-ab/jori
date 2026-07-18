@@ -21,6 +21,7 @@ type AutomationSurfaceToolsDialogProps = {
   open: boolean
   permissions: AutomationPolicyPermissions
   integration: AutomationSurfaceFormValue["integration"]
+  tenantId: string
   toolSurfaceLabel: string
   tools: string[]
 }
@@ -31,6 +32,7 @@ export function AutomationSurfaceToolsDialog({
   open,
   permissions,
   integration,
+  tenantId,
   toolSurfaceLabel,
   tools,
 }: AutomationSurfaceToolsDialogProps) {
@@ -50,6 +52,7 @@ export function AutomationSurfaceToolsDialog({
           onToolsChange={onToolsChange}
           permissions={permissions}
           integration={integration}
+          tenantId={tenantId}
           tools={tools}
         />
       </DialogContent>
@@ -61,6 +64,7 @@ type AutomationSurfaceToolsContentProps = {
   onToolsChange: (tools: string[]) => void
   permissions: AutomationPolicyPermissions
   integration: AutomationSurfaceFormValue["integration"]
+  tenantId: string
   tools: string[]
 }
 
@@ -68,6 +72,7 @@ function AutomationSurfaceToolsContent({
   onToolsChange,
   permissions,
   integration,
+  tenantId,
   tools,
 }: AutomationSurfaceToolsContentProps) {
   if (permissions === undefined) {
@@ -103,6 +108,7 @@ function AutomationSurfaceToolsContent({
       <AutomationSurfaceToolGroups
         onToolsChange={onToolsChange}
         permissions={providerPermissions}
+        tenantId={tenantId}
         tools={tools}
       />
       <AutomationSurfaceToolsFooter />

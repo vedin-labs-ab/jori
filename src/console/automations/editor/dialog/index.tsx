@@ -168,6 +168,7 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         values={props.values}
       />
       <AutomationInstructionsSection
+        tenantId={props.tenantId}
         additionalSurfaces={props.additionalSurfaces}
         error={props.instructionsError}
         onBlur={ignoreBlur}
@@ -185,6 +186,7 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         onWebSearchChange={props.actions.updateWebSearch}
         permissions={props.permissions}
         scope={props.values.scope}
+        tenantId={props.tenantId}
         webSearch={props.values.webSearch}
       />
       <AutomationTiming

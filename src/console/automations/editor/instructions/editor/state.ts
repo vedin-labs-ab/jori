@@ -198,6 +198,7 @@ function useInstructionRefs(
     scope: { current: props.scope },
     sources: { current: sources },
     suggestion: { current: null },
+    tenantId: { current: props.tenantId },
   }))
 
   return refs

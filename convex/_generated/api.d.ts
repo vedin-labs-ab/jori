@@ -302,6 +302,7 @@ import type * as organization_select from "../organization/select.js";
 import type * as organization_sources from "../organization/sources.js";
 import type * as organization_watch from "../organization/watch.js";
 import type * as permissions_read from "../permissions/read.js";
+import type * as permissions_reference from "../permissions/reference.js";
 import type * as permissions_tools from "../permissions/tools.js";
 import type * as persons_clerk from "../persons/clerk.js";
 import type * as persons_data from "../persons/data.js";
@@ -387,6 +388,7 @@ import type * as runs_agent_tools_schemas_milo_index from "../runs/agent/tools/s
 import type * as runs_agent_tools_schemas_milo_runs from "../runs/agent/tools/schemas/milo/runs.js";
 import type * as runs_agent_tools_schemas_notion_index from "../runs/agent/tools/schemas/notion/index.js";
 import type * as runs_agent_tools_schemas_notion_media from "../runs/agent/tools/schemas/notion/media.js";
+import type * as runs_agent_tools_schemas_responses from "../runs/agent/tools/schemas/responses.js";
 import type * as runs_agent_tools_schemas_slack from "../runs/agent/tools/schemas/slack.js";
 import type * as runs_agent_tools_snapshot from "../runs/agent/tools/snapshot.js";
 import type * as runs_agent_tools_types from "../runs/agent/tools/types.js";
@@ -793,6 +795,7 @@ declare const fullApi: ApiFromModules<{
   "organization/sources": typeof organization_sources;
   "organization/watch": typeof organization_watch;
   "permissions/read": typeof permissions_read;
+  "permissions/reference": typeof permissions_reference;
   "permissions/tools": typeof permissions_tools;
   "persons/clerk": typeof persons_clerk;
   "persons/data": typeof persons_data;
@@ -878,6 +881,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/milo/runs": typeof runs_agent_tools_schemas_milo_runs;
   "runs/agent/tools/schemas/notion/index": typeof runs_agent_tools_schemas_notion_index;
   "runs/agent/tools/schemas/notion/media": typeof runs_agent_tools_schemas_notion_media;
+  "runs/agent/tools/schemas/responses": typeof runs_agent_tools_schemas_responses;
   "runs/agent/tools/schemas/slack": typeof runs_agent_tools_schemas_slack;
   "runs/agent/tools/snapshot": typeof runs_agent_tools_snapshot;
   "runs/agent/tools/types": typeof runs_agent_tools_types;
