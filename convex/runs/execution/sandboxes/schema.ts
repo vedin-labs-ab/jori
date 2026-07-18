@@ -12,7 +12,6 @@ export const sandboxes = defineTable({
     v.literal("failed")
   ),
   conversationId: v.optional(v.id("conversations")),
-  watchId: v.optional(v.string()),
   expiresAt: v.optional(v.number()),
   error: v.optional(v.string()),
   createdAt: v.number(),
