@@ -25,7 +25,7 @@ describe("Meeting Briefing modes", () => {
     expect(enabled).toContain(
       'dispatches["reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>"]'
     )
-    expect(enabled).toContain("A claimed: false return forbids another send")
+    expect(enabled).toContain("a `sending` dispatch of kind `reminder`")
   })
 
   test("morning-off leaves future work to reminders", () => {
@@ -36,7 +36,7 @@ describe("Meeting Briefing modes", () => {
     })
 
     expect(instructions).toContain(
-      "With morning delivery off, leave other meetings to their reminders"
+      "With morning delivery off, leave future meetings to their reminders"
     )
     expect(instructions).toContain("start minus 60 minutes")
     expect(instructions).not.toContain("morning:<target UTC>")

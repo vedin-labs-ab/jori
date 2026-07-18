@@ -40,6 +40,7 @@ test("start_agent requires an explicit task title", () => {
       },
     },
   })
+  expect(startAgent?.description).toContain("clearly marked data block")
 })
 
 test("wait_for_agents bounds its optional timeout", () => {

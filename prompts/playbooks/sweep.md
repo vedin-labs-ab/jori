@@ -4,6 +4,6 @@ Search my @{{providers.email}} for threads from the past two weeks that are wait
 
 For each thread waiting on me, create a draft reply in my @{{providers.email}} so I only need to review and send. Keep drafts short and specific to the thread. Skip threads that already have a draft from an earlier sweep.
 
-Compose a summary: the new drafts with one line each, then the threads where I am owed a reply. If nothing needs following up, there is nothing to report.
+Compose a summary: the new drafts with one line each, then the threads where I am owed a reply.
 
 {{delivery}}

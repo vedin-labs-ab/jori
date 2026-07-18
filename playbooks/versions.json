@@ -1,18 +1,18 @@
 {
   "follow-up-sweep": {
-    "version": 1,
-    "fingerprint": "cbff9c03165e0968e09e7f0392bef0a7804e673f1f9c295db7f13e851f158857"
+    "version": 2,
+    "fingerprint": "0b54c4c69da8f8dbaafd4cdc2d8fe14ccf57b3faad3b2ce838b96070ec30a562"
   },
   "meeting-briefing": {
-    "version": 5,
-    "fingerprint": "94ef89c580e5f291421415708b2626734a902acb8f6aff4d75d37c7c2f21f72e"
+    "version": 6,
+    "fingerprint": "c875f227c374f5cd4a4f879a1f064edbeb4c0b6ae0f6ff47b16f1b404867fe9d"
   },
   "morning-brief": {
-    "version": 1,
+    "version": 2,
     "fingerprint": "5488a453a15add1e3d32b34106144279cf9508238d00bfcafac96916cb3d8751"
   },
   "week-in-review": {
-    "version": 1,
+    "version": 2,
     "fingerprint": "6ff6fe50df2e6413feab522e88c0624a6289a39c4ea6c5580f5fec1b3d6353c3"
   }
 }

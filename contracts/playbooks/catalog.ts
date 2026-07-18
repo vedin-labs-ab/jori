@@ -98,7 +98,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
   {
     key: "morning-brief",
     template: "playbooks/brief",
-    version: 1,
+    version: 2,
     title: "Morning brief",
     description:
       "Start the day knowing what's ahead: today's meetings and the emails that actually need you, gathered into one brief.",
@@ -116,7 +116,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
   {
     key: "follow-up-sweep",
     template: "playbooks/sweep",
-    version: 1,
+    version: 2,
     title: "Follow-up sweep",
     description:
       "Nothing slips through: threads waiting on you get reply drafts ready to review, and you get a list of who still owes you an answer.",
@@ -130,7 +130,7 @@ export const playbookCatalog: readonly PlaybookDefinition[] = [
   {
     key: "week-in-review",
     template: "playbooks/review",
-    version: 1,
+    version: 2,
     title: "Week in review",
     description:
       "Close the week with a clear head: what happened, what's unresolved, and what next week looks like, in one review.",

@@ -116,7 +116,10 @@ function createTriggerPart(input: AgentRuntimeInput) {
       renderPromptTemplate(
         promptTemplates["agent/context/trigger/instruction"],
         {
-          run: { delegated: input.run.parentId !== undefined },
+          run: {
+            delegated: input.run.parentId !== undefined,
+            trial: input.run.trial === true,
+          },
         }
       ),
       input.instructions

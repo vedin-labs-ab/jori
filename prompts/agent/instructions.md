@@ -10,6 +10,10 @@
 
 {% include "agent/instructions/work" %}
 
+{%- if agent.automation %}
+{{agent.automation}}
+{% endif %}
+
 # Security
 
 {% include "agent/instructions/security" %}
