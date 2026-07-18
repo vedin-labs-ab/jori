@@ -1,7 +1,11 @@
+import { integrationLabel } from "../../../contracts/integrations"
 import { type JsonObject } from "../../../contracts/json"
 import { finalProperty } from "../../../contracts/runtime"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
-import { type MessageIntegration } from "../../shared/integrations"
+import {
+  type MessageIntegration,
+  messageIntegrations,
+} from "../../shared/integrations"
 import { nativeToolUsage } from "../permissions/native"
 
 export type ActiveSurfaceTool = {
@@ -16,6 +20,31 @@ export function activeSurfaceTools(
   surface: MessageIntegration
 ): ActiveSurfaceTool[] {
   return [sendReplyTool(surface), addReactionTool(surface)]
+}
+
+/** Request schemas for the schema viewer, built from the same per-surface
+ *  builders the runtime serves: one labeled variant per message surface. */
+export function activeSurfaceToolReferenceSchemas(): Record<
+  string,
+  JsonObject
+> {
+  return {
+    send_reply: surfaceToolVariants(sendReplySchema),
+    add_reaction: surfaceToolVariants(addReactionSchema),
+  }
+}
+
+function surfaceToolVariants(
+  build: (surface: MessageIntegration) => JsonObject
+): JsonObject {
+  return {
+    description:
+      "The request shape follows the surface the run is replying on.",
+    oneOf: messageIntegrations.map((surface) => ({
+      title: integrationLabel(surface),
+      ...withOptionalFieldGuidance(build(surface)),
+    })),
+  }
 }
 
 function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
