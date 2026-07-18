@@ -24,6 +24,7 @@ export function createInstructionExtensions(refs: InstructionRefs) {
     AutomationReferenceExtension.configure({
       getPermissions: () => refs.permissions.current,
       getScope: () => refs.scope.current,
+      getTenantId: () => refs.tenantId.current,
       getWebSearch: () => refs.sources.current.webSearch ?? false,
     }),
     AutomationSurfaceExtension.configure({

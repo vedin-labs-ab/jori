@@ -31,7 +31,7 @@ export function ToolSchemaButton({
       onClick={onClick}
       size="sm"
       type="button"
-      variant="outline"
+      variant="secondary"
     >
       <Braces aria-hidden="true" />
       Schema
@@ -51,7 +51,8 @@ export function ToolSchemaDialog({
   tenantId: string
 }) {
   const shown = useRetained(permission)
-  // Direction is remembered per tool, so a fresh dialog opens on Request.
+  // Direction is remembered per tool; a fresh dialog opens on Response —
+  // what a tool returns is usually the question being asked.
   const [selected, setSelected] = useState<{
     direction: SchemaDirection
     tool: string
@@ -59,7 +60,7 @@ export function ToolSchemaDialog({
   const direction =
     selected !== undefined && selected.tool === shown?.tool
       ? selected.direction
-      : "request"
+      : "response"
   const reference = useQuery(
     api.permissions.reference.get,
     shown === undefined ? "skip" : { tenantId, tool: shown.tool }

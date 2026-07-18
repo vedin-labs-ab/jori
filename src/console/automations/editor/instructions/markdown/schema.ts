@@ -25,6 +25,7 @@ export type AutomationSurfaceNodeOptions = {
 export type AutomationReferenceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
   getScope: () => Scope
+  getTenantId: () => string
   getWebSearch: () => boolean
 }
 
@@ -119,6 +120,7 @@ export const AutomationReferenceNode =
       return {
         getPermissions: () => undefined,
         getScope: () => "personal",
+        getTenantId: () => "",
         getWebSearch: () => false,
       }
     },
