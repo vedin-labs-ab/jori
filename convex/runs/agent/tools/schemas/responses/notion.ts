@@ -13,7 +13,11 @@ import {
 // fidelity beats reshaping. The schemas document Notion's stable object
 // model without freezing its full surface.
 
-function notionObject(kind: string, description: string): JsonSchema {
+function notionObject(
+  kind: string,
+  description: string,
+  extra: Record<string, unknown> = {}
+): JsonSchema {
   return {
     type: "object",
     additionalProperties: true,
@@ -21,32 +25,27 @@ function notionObject(kind: string, description: string): JsonSchema {
     properties: {
       object: constProperty(kind, `Always ${kind}.`),
       id: stringProperty(`Notion ${kind} ID.`),
+      ...extra,
     },
   }
 }
 
 function notionPage(description: string): JsonSchema {
-  const page = notionObject("page", description)
-
-  return {
-    ...page,
-    properties: {
-      ...(page.properties as Record<string, unknown>),
-      url: stringProperty("Page URL."),
-      archived: booleanProperty("True when archived."),
-      parent: {
-        type: "object",
-        additionalProperties: true,
-        description: "Parent reference: page, data source, or workspace.",
-      },
-      properties: {
-        type: "object",
-        additionalProperties: true,
-        description:
-          "Property values keyed by property name, in Notion's typed value format - reuse these structures when updating.",
-      },
+  return notionObject("page", description, {
+    url: stringProperty("Page URL."),
+    archived: booleanProperty("True when archived."),
+    parent: {
+      type: "object",
+      additionalProperties: true,
+      description: "Parent reference: page, data source, or workspace.",
     },
-  }
+    properties: {
+      type: "object",
+      additionalProperties: true,
+      description:
+        "Property values keyed by property name, in Notion's typed value format - reuse these structures when updating.",
+    },
+  })
 }
 
 function notionListing(itemDescription: string, item: JsonSchema): JsonSchema {
@@ -67,34 +66,22 @@ function notionListing(itemDescription: string, item: JsonSchema): JsonSchema {
 }
 
 function notionBlock(description: string): JsonSchema {
-  const block = notionObject("block", description)
-
-  return {
-    ...block,
-    properties: {
-      ...(block.properties as Record<string, unknown>),
-      type: stringProperty(
-        "Block type; the same-named key holds the block's content."
-      ),
-      has_children: booleanProperty("True when nested blocks exist."),
-    },
-  }
+  return notionObject("block", description, {
+    type: stringProperty(
+      "Block type; the same-named key holds the block's content."
+    ),
+    has_children: booleanProperty("True when nested blocks exist."),
+  })
 }
 
 function notionComment(description: string): JsonSchema {
-  const comment = notionObject("comment", description)
-
-  return {
-    ...comment,
-    properties: {
-      ...(comment.properties as Record<string, unknown>),
-      discussion_id: stringProperty("Thread the comment belongs to."),
-      rich_text: arrayProperty("Comment content as rich text.", {
-        type: "object",
-        additionalProperties: true,
-      }),
-    },
-  }
+  return notionObject("comment", description, {
+    discussion_id: stringProperty("Thread the comment belongs to."),
+    rich_text: arrayProperty("Comment content as rich text.", {
+      type: "object",
+      additionalProperties: true,
+    }),
+  })
 }
 
 export const notionToolResponseSchemas = {
