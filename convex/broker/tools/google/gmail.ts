@@ -16,6 +16,7 @@ import {
   getReplyRecipient,
   parseOptionalEmailAddress,
 } from "./format"
+import { gmailDraftResult, gmailSentResult } from "./mail"
 import {
   getGmailMessage,
   getGmailMessages,
@@ -74,22 +75,24 @@ async function replyToGmailThread(
   const threadId = requiredString(args.threadId, "threadId")
   const reply = await readGmailReplyContext(integration, token, threadId)
 
-  return await googleJson(
-    token,
-    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
-    {
-      method: "POST",
-      body: {
-        raw: createMimeMessage({
-          to: reply.to,
-          subject: reply.subject,
-          body: requiredString(args.body, "body"),
-          inReplyTo: reply.inReplyTo,
-          references: reply.references,
-        }),
-        threadId,
-      },
-    }
+  return gmailSentResult(
+    await googleJson(
+      token,
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+      {
+        method: "POST",
+        body: {
+          raw: createMimeMessage({
+            to: reply.to,
+            subject: reply.subject,
+            body: requiredString(args.body, "body"),
+            inReplyTo: reply.inReplyTo,
+            references: reply.references,
+          }),
+          threadId,
+        },
+      }
+    )
   )
 }
 
@@ -98,18 +101,20 @@ async function sendGmailMessage(
   args: Record<string, unknown>,
   context?: AssetContext
 ) {
-  return await googleJson(
-    token,
-    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
-    {
-      method: "POST",
-      body: {
-        raw: createMimeMessage({
-          ...gmailMessageInput(args),
-          attachments: await readRunAssets(context, args.assets),
-        }),
-      },
-    }
+  return gmailSentResult(
+    await googleJson(
+      token,
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+      {
+        method: "POST",
+        body: {
+          raw: createMimeMessage({
+            ...gmailMessageInput(args),
+            attachments: await readRunAssets(context, args.assets),
+          }),
+        },
+      }
+    )
   )
 }
 
@@ -131,20 +136,22 @@ async function createGmailDraft(
     )
   }
 
-  return await googleJson(
-    token,
-    "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-    {
-      method: "POST",
-      body: {
-        message: {
-          raw: createMimeMessage({
-            ...gmailMessageInput(args),
-            attachments: await readRunAssets(context, args.assets),
-          }),
+  return gmailDraftResult(
+    await googleJson(
+      token,
+      "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+      {
+        method: "POST",
+        body: {
+          message: {
+            raw: createMimeMessage({
+              ...gmailMessageInput(args),
+              attachments: await readRunAssets(context, args.assets),
+            }),
+          },
         },
-      },
-    }
+      }
+    )
   )
 }
 
@@ -157,26 +164,28 @@ async function createGmailThreadDraft(
 ) {
   const reply = await readGmailReplyContext(integration, token, threadId)
 
-  return await googleJson(
-    token,
-    "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-    {
-      method: "POST",
-      body: {
-        message: {
-          raw: createMimeMessage({
-            to: reply.to,
-            subject: reply.subject,
-            body: requiredString(args.body, "body"),
-            bodyType: args.bodyType === "HTML" ? "HTML" : "Text",
-            inReplyTo: reply.inReplyTo,
-            references: reply.references,
-            attachments: await readRunAssets(context, args.assets),
-          }),
-          threadId,
+  return gmailDraftResult(
+    await googleJson(
+      token,
+      "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+      {
+        method: "POST",
+        body: {
+          message: {
+            raw: createMimeMessage({
+              to: reply.to,
+              subject: reply.subject,
+              body: requiredString(args.body, "body"),
+              bodyType: args.bodyType === "HTML" ? "HTML" : "Text",
+              inReplyTo: reply.inReplyTo,
+              references: reply.references,
+              attachments: await readRunAssets(context, args.assets),
+            }),
+            threadId,
+          },
         },
-      },
-    }
+      }
+    )
   )
 }
 

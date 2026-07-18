@@ -88,7 +88,7 @@ describe("Outlook email tools", () => {
       createAssetContext()
     )
 
-    expect(result).toBe("sent")
+    expect(result).toEqual({ status: "sent" })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe("https://graph.microsoft.com/v1.0/me/sendMail")
     expect(calls[0]?.body).toMatchObject({

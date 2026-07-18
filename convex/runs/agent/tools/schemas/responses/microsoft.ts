@@ -3,25 +3,28 @@ import {
   providerEventPayload,
   stampedEventSchema,
 } from "./calendar"
-import { constField, providerPayload, type SchemaMap } from "./common"
+import {
+  listField,
+  providerPayload,
+  resultSchema,
+  type SchemaMap,
+} from "./common"
+import { draftedMailSchema, mailMessageSchema, sentMailSchema } from "./mail"
 
 export const microsoftToolResponseSchemas = {
-  microsoft_email_search_messages: providerPayload(
-    "Microsoft Graph's message listing page: messages in value, plus @odata.nextLink when more exist."
-  ),
-  microsoft_email_get_message: providerPayload(
-    "Microsoft Graph's message object, unchanged."
-  ),
-  microsoft_email_send_message: constField(
-    "sent",
-    "Always the string sent - Microsoft Graph's sendMail returns no message object."
-  ),
-  microsoft_email_create_draft: providerPayload(
-    "Microsoft Graph's created draft message object, including its id."
-  ),
-  microsoft_email_update_message: providerPayload(
-    "Microsoft Graph's message object after the patch, unchanged."
-  ),
+  microsoft_email_search_messages: resultSchema({
+    required: ["messages"],
+    properties: {
+      messages: listField(
+        "Matching messages without bodies; read one for its full content.",
+        mailMessageSchema()
+      ),
+    },
+  }),
+  microsoft_email_get_message: mailMessageSchema(),
+  microsoft_email_send_message: sentMailSchema(),
+  microsoft_email_create_draft: draftedMailSchema(),
+  microsoft_email_update_message: mailMessageSchema(),
   microsoft_calendar_list_calendars: providerPayload(
     "Microsoft Graph's calendar listing page: calendars in value, plus @odata.nextLink when more exist."
   ),

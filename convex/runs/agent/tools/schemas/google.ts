@@ -101,11 +101,6 @@ function gmailReadSchema(idProperty: string) {
     required: [idProperty],
     properties: {
       [idProperty]: stringProperty("Gmail ID."),
-      format: {
-        type: "string",
-        enum: ["full", "metadata", "minimal"],
-        description: "Defaults to full.",
-      },
     },
   })
 }
@@ -115,11 +110,6 @@ function gmailBatchReadSchema(idsProperty: string) {
     required: [idsProperty],
     properties: {
       [idsProperty]: stringArrayProperty("Gmail IDs. Maximum 50."),
-      format: {
-        type: "string",
-        enum: ["full", "metadata", "minimal"],
-        description: "Defaults to full.",
-      },
     },
   })
 }

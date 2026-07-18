@@ -13,6 +13,12 @@ export function base64DecodeBytes(value: string) {
   return bytes
 }
 
+export function base64UrlDecode(value: string) {
+  return new TextDecoder().decode(
+    base64UrlDecodeBytes(value.replace(/\s/g, ""))
+  )
+}
+
 export function base64UrlDecodeBytes(value: string) {
   const base64 = value.replaceAll("-", "+").replaceAll("_", "/")
 

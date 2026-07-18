@@ -7,11 +7,21 @@ import {
   boundedNumber,
   optionalString,
   optionalStringArray,
+  readArray,
+  readRecord,
   requiredObject,
   requiredString,
   requiredStringArray,
 } from "../../../shared/input"
+import { sentMailResult } from "../mail"
 import { callMicrosoftCalendarTool } from "./calendar"
+import {
+  microsoftDraftResult,
+  microsoftMailMessage,
+  microsoftMessageListQuery,
+  microsoftMessageReadQuery,
+  microsoftTextBodyHeaders,
+} from "./mail"
 
 export async function callMicrosoftTool(
   integration: Doc<"integrations">,
@@ -51,9 +61,13 @@ async function callMicrosoftEmailTool(
     return await searchMessages(token, args)
   }
   if (tool === "microsoft_email_get_message") {
-    return await microsoftGraphJson(
-      token,
-      `/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`
+    return microsoftMailMessage(
+      readRecord(
+        await microsoftGraphJson(token, messagePath(args), {
+          query: microsoftMessageReadQuery,
+          headers: microsoftTextBodyHeaders,
+        })
+      )
     )
   }
   if (tool === "microsoft_email_send_message") {
@@ -67,26 +81,40 @@ async function callMicrosoftEmailTool(
         saveToSentItems: args.saveToSentItems !== false,
       },
     })
-    return "sent"
+    // Graph's sendMail returns no message object, so neither can Milo.
+    return sentMailResult({})
   }
   if (tool === "microsoft_email_create_draft") {
     const assets = await readRunAssets(context, args.assets, {
       maxBytes: 3 * 1024 * 1024,
     })
-    return await microsoftGraphJson(token, "/me/messages", {
-      method: "POST",
-      body: buildMicrosoftMessage(args, assets),
-    })
+    return microsoftDraftResult(
+      readRecord(
+        await microsoftGraphJson(token, "/me/messages", {
+          method: "POST",
+          body: buildMicrosoftMessage(args, assets),
+        })
+      )
+    )
   }
   if (tool === "microsoft_email_update_message") {
-    return await microsoftGraphJson(
-      token,
-      `/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`,
-      { method: "PATCH", body: requiredObject(args.message, "message") }
+    return microsoftMailMessage(
+      readRecord(
+        await microsoftGraphJson(token, messagePath(args), {
+          method: "PATCH",
+          query: { $select: microsoftMessageListQuery.$select },
+          headers: microsoftTextBodyHeaders,
+          body: requiredObject(args.message, "message"),
+        })
+      )
     )
   }
 
   throw new Error(`Unknown Microsoft Email tool: ${tool}`)
+}
+
+function messagePath(args: Record<string, unknown>) {
+  return `/me/messages/${encodeURIComponent(requiredString(args.messageId, "messageId"))}`
 }
 
 async function searchMessages(token: string, args: Record<string, unknown>) {
@@ -96,6 +124,7 @@ async function searchMessages(token: string, args: Record<string, unknown>) {
       ? "/me/messages"
       : `/me/mailFolders/${encodeURIComponent(folderId)}/messages`
   const query: Record<string, unknown> = {
+    ...microsoftMessageListQuery,
     $top: boundedNumber(args.top, 10, 1, 25),
   }
   const search = optionalString(args.q)
@@ -106,7 +135,13 @@ async function searchMessages(token: string, args: Record<string, unknown>) {
     query.$search = `"${search.replace(/"/g, '\\"')}"`
   }
 
-  return await microsoftGraphJson(token, path, { query })
+  const page = readRecord(await microsoftGraphJson(token, path, { query }))
+
+  return {
+    messages: readArray(page.value)
+      .map(readRecord)
+      .map((message) => microsoftMailMessage(message)),
+  }
 }
 
 function buildMicrosoftMessage(

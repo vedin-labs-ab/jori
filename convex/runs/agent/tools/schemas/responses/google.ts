@@ -3,35 +3,52 @@ import {
   providerEventPayload,
   stampedEventSchema,
 } from "./calendar"
-import { providerList, providerPayload, type SchemaMap } from "./common"
+import {
+  listField,
+  providerPayload,
+  resultSchema,
+  type SchemaMap,
+  stringField,
+} from "./common"
+import {
+  draftedMailSchema,
+  mailMessageSchema,
+  mailThreadSchema,
+  sentMailSchema,
+} from "./mail"
 
 export const googleToolResponseSchemas = {
-  google_gmail_search_threads: providerPayload(
-    "Gmail's users.threads.list page: thread stubs with id, snippet, and historyId, plus nextPageToken and resultSizeEstimate."
-  ),
-  google_gmail_get_thread: providerPayload(
-    "Gmail's users.threads.get response: the thread with its messages in the requested format, unchanged."
-  ),
-  google_gmail_get_threads: providerList(
+  google_gmail_search_threads: resultSchema({
+    required: ["threads"],
+    properties: {
+      threads: listField(
+        "Matching threads, newest first. Read one for its messages.",
+        resultSchema({
+          required: ["threadId"],
+          properties: {
+            threadId: stringField("Gmail thread ID."),
+            snippet: stringField("Preview of the matched content."),
+          },
+        })
+      ),
+      nextPageToken: stringField(
+        "Pass as pageToken to continue; absent on the last page."
+      ),
+    },
+  }),
+  google_gmail_get_thread: mailThreadSchema(),
+  google_gmail_get_threads: listField(
     "One entry per requested thread ID, in request order.",
-    "Gmail's users.threads.get response for one thread, unchanged."
+    mailThreadSchema()
   ),
-  google_gmail_get_message: providerPayload(
-    "Gmail's users.messages.get response in the requested format, unchanged."
-  ),
-  google_gmail_get_messages: providerList(
+  google_gmail_get_message: mailMessageSchema(),
+  google_gmail_get_messages: listField(
     "One entry per requested message ID, in request order.",
-    "Gmail's users.messages.get response for one message, unchanged."
+    mailMessageSchema()
   ),
-  google_gmail_reply_to_thread: providerPayload(
-    "Gmail's users.messages.send response for the sent reply: id, threadId, and labelIds."
-  ),
-  google_gmail_send_message: providerPayload(
-    "Gmail's users.messages.send response for the sent message: id, threadId, and labelIds."
-  ),
-  google_gmail_create_draft: providerPayload(
-    "Gmail's users.drafts.create response: the draft id and its message stub."
-  ),
+  google_gmail_reply_to_thread: sentMailSchema(),
+  google_gmail_send_message: sentMailSchema(),
+  google_gmail_create_draft: draftedMailSchema(),
   google_calendar_list_calendars: providerPayload(
     "Google Calendar's calendarList.list page: calendar entries in items, plus nextPageToken when more exist."
   ),

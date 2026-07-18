@@ -16,18 +16,6 @@ export function providerPayload(description: string): JsonSchema {
   }
 }
 
-/** An array of provider payloads returned unchanged. */
-export function providerList(
-  description: string,
-  itemDescription: string
-): JsonSchema {
-  return {
-    type: "array",
-    description,
-    items: providerPayload(itemDescription),
-  }
-}
-
 /** A closed object whose fields are all produced by Milo's own code. */
 export function resultSchema(args: {
   description?: string
