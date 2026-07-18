@@ -1,4 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { schemaViolations } from "../../runs/agent/tools/schemas/responses/conform"
+import { linearToolResponseSchemas } from "../../runs/agent/tools/schemas/responses/linear"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { postLinearComment } from "../../integrations/linear/delivery/comments"
 import { callLinearTool } from "./linear"
@@ -142,14 +144,30 @@ test("lists Linear issue comments", async () => {
 })
 
 test("adds a Linear comment with CommentCreateInput", async () => {
+  const comment = {
+    id: "comment-id",
+    body: "Tiny quip.",
+    url: "https://linear.app/c/comment-id",
+    parent: null,
+    issue: { id: "issue-id", identifier: "ENG-1" },
+  }
   const calls = mockLinearFetch({
-    data: { commentCreate: { success: true } },
+    data: { commentCreate: { success: true, comment } },
   })
 
-  await callLinearTool(linearIntegration(), "linear_add_comment", {
-    body: "Tiny quip.",
-    target: { id: "issue-id", type: "issue" },
-  })
+  const result = await callLinearTool(
+    linearIntegration(),
+    "linear_add_comment",
+    {
+      body: "Tiny quip.",
+      target: { id: "issue-id", type: "issue" },
+    }
+  )
+
+  expect(result).toEqual({ success: true, comment })
+  expect(
+    schemaViolations(result, linearToolResponseSchemas.linear_add_comment)
+  ).toEqual([])
   expect(calls[0]?.body.variables).toEqual({
     input: {
       body: "Tiny quip.",
@@ -193,11 +211,19 @@ test.each([
     data: { reactionCreate: { success: true } },
   })
 
-  await callLinearTool(linearIntegration(), "linear_add_reaction", {
-    emoji: "\u{1F44D}",
-    target,
-  })
+  const result = await callLinearTool(
+    linearIntegration(),
+    "linear_add_reaction",
+    {
+      emoji: "\u{1F44D}",
+      target,
+    }
+  )
 
+  expect(result).toEqual({ success: true, reaction: null })
+  expect(
+    schemaViolations(result, linearToolResponseSchemas.linear_add_reaction)
+  ).toEqual([])
   expect(calls[0]?.body.variables).toEqual({
     input: { emoji: "\u{1F44D}", ...expectedTarget },
   })

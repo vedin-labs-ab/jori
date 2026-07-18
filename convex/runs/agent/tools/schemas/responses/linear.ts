@@ -66,10 +66,28 @@ export const linearToolResponseSchemas = {
     "Comments on the issue, as Milo's GraphQL selection returns them.",
     commentNode()
   ),
-  linear_add_comment: providerPayload(
-    "Linear's GraphQL envelope: data.commentCreate with success and the created comment (id, body, url, parent, issue)."
-  ),
-  linear_add_reaction: providerPayload(
-    "Linear's GraphQL envelope: data.reactionCreate with success and the created reaction (id, emoji, user)."
-  ),
+  linear_add_comment: resultSchema({
+    required: ["success", "comment"],
+    properties: {
+      success: { type: "boolean", description: "Whether Linear accepted it." },
+      comment: {
+        ...providerPayload(
+          "The created comment: id, body, url, parent, and issue (id, identifier); null when creation failed."
+        ),
+        type: ["object", "null"],
+      },
+    },
+  }),
+  linear_add_reaction: resultSchema({
+    required: ["success", "reaction"],
+    properties: {
+      success: { type: "boolean", description: "Whether Linear accepted it." },
+      reaction: {
+        ...providerPayload(
+          "The created reaction: id, emoji, and user; null when creation failed."
+        ),
+        type: ["object", "null"],
+      },
+    },
+  }),
 } satisfies SchemaMap
