@@ -4,7 +4,7 @@ import { defineArtifactContract } from "@/milo/contract"
 const timestamp = z.iso.datetime()
 const identifier = z.string().max(512)
 const contentHash = z.string().regex(/^[0-9a-f]{32}$/)
-const meetingKey = z.string().regex(/^mb:[0-9a-f]{32}$/)
+const meetingKey = z.string().regex(/^[0-9a-f]{32}$/)
 const dispatchKey = z.string().min(1).max(120)
 const label = z.string().max(120)
 const note = z.string().max(240)
@@ -112,15 +112,15 @@ export type MeetingBriefing = z.infer<typeof meeting>
 export type BriefingPoint = z.infer<typeof evidencePoint>
 
 export const contract = defineArtifactContract({
-  version: 4,
+  version: 5,
   state: {
     briefings: {
       key: "meeting-briefing/briefings",
       scope: "shared",
       description:
-        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings. Meetings age out seven local days after they end; dispatches after seven days.",
+        "Canonical briefing state, keyed by each calendar event's entityKey. Patch one meeting branch at a time and preserve unrelated meetings. revision counts user-visible briefing changes and receipts record the delivered revision; meetings age out seven local days after they end, dispatches after seven days.",
       schema: z.strictObject({
-        schemaVersion: z.literal(4),
+        schemaVersion: z.literal(5),
         timezone: z.string().max(100),
         scan: z.strictObject({
           scannedAt: timestamp,
@@ -133,7 +133,7 @@ export const contract = defineArtifactContract({
         dispatches: z.record(dispatchKey, dispatch),
       }),
       schemaName: "MeetingBriefings",
-      schemaVersion: 4,
+      schemaVersion: 5,
     },
   },
 })

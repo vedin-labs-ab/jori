@@ -22,10 +22,13 @@ describe("Meeting Briefing contract", () => {
   test("defines complete, actionable coverage", () => {
     const instructions = renderBriefing()
 
-    expect(instructions).toContain("Scan every readable calendar")
-    expect(instructions).toContain("from now through 26 hours ahead")
-    expect(instructions).toContain("Keep up to 60 eligible meetings")
-    expect(instructions).toContain("state a coverage gap if more qualify")
+    expect(instructions).toContain("Scan every calendar the requester can read")
+    expect(instructions).toContain(
+      "including each occurrence of recurring meetings"
+    )
+    expect(instructions).toContain("from now through the next 26 hours")
+    expect(instructions).toContain("Cover up to 60 meetings")
+    expect(instructions).toContain("state the gap if more qualify")
     expect(instructions).toContain(
       "At least one item must change what the requester should decide, ask, say, notice, or do"
     )
@@ -37,29 +40,38 @@ describe("Meeting Briefing contract", () => {
     )
   })
 
-  test("uses a lenient, explicit sensitivity boundary", () => {
+  test("draws the sensitivity boundary at personal, not professional", () => {
     const instructions = renderBriefing()
 
-    expect(instructions).toContain("Be lenient about professional sensitivity")
+    expect(instructions).toContain("Confidential professional meetings")
     expect(instructions).toContain(
-      "Board and investor meetings, commercial negotiations, recruiting interviews, customer escalations"
+      "board and investor meetings, commercial negotiations, recruiting interviews, customer escalations"
     )
     expect(instructions).toContain("medical or therapy appointments")
     expect(instructions).toContain("disciplinary, termination, harassment")
+    expect(instructions).toContain(
+      "Remove a stored meeting that turns out to be one of these"
+    )
   })
+})
 
-  test("keeps platform-owned rules out of the recipe", () => {
-    const instructions = renderBriefing({ beforeMeeting: true })
-
-    expect(instructions).not.toContain("untrusted")
-    expect(instructions).not.toContain("SHA-256")
-    expect(instructions).not.toContain("`bash`")
-    expect(instructions).not.toContain("expectedVersion")
-    expect(instructions).not.toContain("256 KiB")
-    expect(instructions).not.toContain("schemaVersion")
-    expect(instructions).not.toContain("Try once")
-    expect(instructions).not.toContain("failure summary instead of silence")
-    expect(instructions).not.toContain("never send again")
+describe("Meeting Briefing placement", () => {
+  test.each([
+    "untrusted",
+    "SHA-256",
+    "`bash`",
+    "expectedVersion",
+    "256 KiB",
+    "schemaVersion",
+    "Try once",
+    "mb:",
+    "`gaps`",
+    "`truncated`",
+    "`queued`",
+    "researching",
+    "preparedForContentHash",
+  ])("keeps platform-owned %s out of the recipe", (token) => {
+    expect(renderBriefing({ beforeMeeting: true })).not.toContain(token)
   })
 })
 
@@ -67,24 +79,23 @@ describe("Meeting Briefing state and evidence", () => {
   test("builds identity on broker-stamped keys", () => {
     const instructions = renderBriefing({ beforeMeeting: true })
 
-    expect(instructions).toContain("`mb:` plus the event's `entityKey`")
-    expect(instructions).toContain("stamped `provider`")
     expect(instructions).toContain(
-      "never overwrite a newer `contentHash` or revision"
+      "Track each meeting under its event's `entityKey`"
     )
-    expect(instructions).toContain("relevant non-requester attendees")
-    expect(instructions).toContain(
-      "Every stored point cites a retained sanitized source"
-    )
+    expect(instructions).toContain("presentable, source-cited facts")
+    expect(instructions).toContain("preparation for an outdated hash is stale")
+    expect(instructions).toContain("a failed read is a gap, not a cancellation")
   })
 
   test("keeps fenced instructions standalone on contentHash staleness", () => {
     expect(
-      renderBriefing().match(/a changed `contentHash` marks preparation stale/g)
+      renderBriefing().match(
+        /stale when (?:an|the) event's `contentHash` changed/g
+      )
     ).toHaveLength(1)
     expect(
       renderBriefing({ beforeMeeting: true }).match(
-        /a changed `contentHash` marks preparation stale/g
+        /stale when (?:an|the) event's `contentHash` changed/g
       )
     ).toHaveLength(2)
   })
@@ -95,11 +106,11 @@ describe("Meeting Briefing coordination", () => {
     const instructions = renderBriefing()
 
     expect(instructions).toContain("Deep-research up to 20")
-    expect(instructions).toContain("only email read and web tools")
-    expect(instructions).toContain("writes no artifact state")
+    expect(instructions).toContain("granting only email reading and web access")
+    expect(instructions).toContain("Children write no artifact state")
     expect(instructions.match(/#wait_for_agents once/g)).toHaveLength(1)
     expect(instructions).toContain(
-      "accept a result only when its stated `contentHash` still matches"
+      "accept a result only if its meeting is unchanged"
     )
     expect(instructions).toContain(
       "count a failed, timed-out, or mismatched child as an explicit gap"
@@ -120,7 +131,7 @@ describe("Meeting Briefing delivery", () => {
     expect(instructions).toContain("morning-retry:<target UTC>")
     expect(instructions).toContain("no later than 20 minutes after the target")
     expect(instructions).toContain(
-      "continue with available verified work and report the missing coverage once"
+      "continue with what is verified and note the missing coverage once"
     )
   })
 
@@ -128,14 +139,12 @@ describe("Meeting Briefing delivery", () => {
     const instructions = renderBriefing()
 
     expect(instructions).toContain(
-      'claim `dispatches["morning:<parent automation ID>:<target UTC>"]`'
+      "claim the key `morning:<parent automation ID>:<target UTC>` in `dispatches`"
     )
-    expect(instructions).toContain('`dispatches["manual:<run ID>"]`')
+    expect(instructions).toContain("Claim the key `manual:<run ID>`")
+    expect(instructions).toContain("mark an abandoned claim `unknown`")
     expect(instructions).toContain(
-      "change an aged `sending` claim to `unknown`"
-    )
-    expect(instructions).toContain(
-      "Never write a meeting receipt without confirmed success"
+      "never record a receipt without confirmed success"
     )
   })
 })

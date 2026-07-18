@@ -21,11 +21,10 @@ describe("Meeting Briefing modes", () => {
     expect(enabled).toContain(
       "meeting-briefing:<parent automation ID>:event:<meeting key>:<start UTC>"
     )
-    expect(enabled).toContain("delivery.reminder")
     expect(enabled).toContain(
-      'dispatches["reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>"]'
+      "claim the key `reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>` in `dispatches`"
     )
-    expect(enabled).toContain("a `sending` dispatch of kind `reminder`")
+    expect(enabled).toContain("record the reminder receipt")
   })
 
   test("morning-off leaves future work to reminders", () => {

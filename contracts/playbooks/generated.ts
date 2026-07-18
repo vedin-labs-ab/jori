@@ -6,15 +6,15 @@ export const playbookTemplateContracts = {
       name: "briefings",
       scope: "shared",
       description:
-        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings. Meetings age out seven local days after they end; dispatches after seven days.",
+        "Canonical briefing state, keyed by each calendar event's entityKey. Patch one meeting branch at a time and preserve unrelated meetings. revision counts user-visible briefing changes and receipts record the delivered revision; meetings age out seven local days after they end, dispatches after seven days.",
       schemaName: "MeetingBriefings",
-      schemaVersion: 4,
+      schemaVersion: 5,
       schema: {
         type: "object",
         properties: {
           schemaVersion: {
             type: "number",
-            const: 4,
+            const: 5,
           },
           timezone: {
             type: "string",
@@ -67,7 +67,7 @@ export const playbookTemplateContracts = {
             type: "object",
             propertyNames: {
               type: "string",
-              pattern: "^mb:[0-9a-f]{32}$",
+              pattern: "^[0-9a-f]{32}$",
             },
             additionalProperties: {
               type: "object",
