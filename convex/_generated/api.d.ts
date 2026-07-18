@@ -500,6 +500,7 @@ import type * as shared_crypto from "../shared/crypto.js";
 import type * as shared_data from "../shared/data.js";
 import type * as shared_debounce from "../shared/debounce.js";
 import type * as shared_encoding from "../shared/encoding.js";
+import type * as shared_environment from "../shared/environment.js";
 import type * as shared_http_index from "../shared/http/index.js";
 import type * as shared_http_request from "../shared/http/request.js";
 import type * as shared_http_response from "../shared/http/response.js";
@@ -1018,6 +1019,7 @@ declare const fullApi: ApiFromModules<{
   "shared/data": typeof shared_data;
   "shared/debounce": typeof shared_debounce;
   "shared/encoding": typeof shared_encoding;
+  "shared/environment": typeof shared_environment;
   "shared/http/index": typeof shared_http_index;
   "shared/http/request": typeof shared_http_request;
   "shared/http/response": typeof shared_http_response;
