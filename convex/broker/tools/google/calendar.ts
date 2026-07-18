@@ -48,14 +48,17 @@ async function listCalendarEvents(
   }
 
   const page = readRecord(await listCalendarEventPage(token, args, calendarId))
+  const nextPageToken = optionalString(page.nextPageToken)
 
   return {
-    ...page,
-    items: await Promise.all(
+    events: await Promise.all(
       readArray(page.items).map((event) =>
         stampGoogleEvent(readRecord(event), calendarId)
       )
     ),
+    status: nextPageToken === undefined ? "ready" : "partial",
+    truncated: nextPageToken !== undefined,
+    ...(nextPageToken === undefined ? {} : { nextPageToken }),
   }
 }
 
@@ -103,7 +106,7 @@ async function listAllCalendarEvents(
   }
 
   return {
-    items: items.sort((left, right) =>
+    events: items.sort((left, right) =>
       googleEventTime(left.start).localeCompare(googleEventTime(right.start))
     ),
     calendarsScanned,
@@ -228,10 +231,14 @@ async function createCalendarEvent(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(getCalendarId(args))}/events`
   )
   setOptionalSearchParam(url, "sendUpdates", args.sendUpdates)
-  return await googleJson(token, url.toString(), {
-    method: "POST",
-    body: requiredObject(args.event, "event"),
-  })
+  const event = readRecord(
+    await googleJson(token, url.toString(), {
+      method: "POST",
+      body: requiredObject(args.event, "event"),
+    })
+  )
+
+  return await stampGoogleEvent(event, getCalendarId(args))
 }
 
 async function updateCalendarEvent(
@@ -242,8 +249,12 @@ async function updateCalendarEvent(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(getCalendarId(args))}/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`
   )
   setOptionalSearchParam(url, "sendUpdates", args.sendUpdates)
-  return await googleJson(token, url.toString(), {
-    method: "PATCH",
-    body: requiredObject(args.event, "event"),
-  })
+  const event = readRecord(
+    await googleJson(token, url.toString(), {
+      method: "PATCH",
+      body: requiredObject(args.event, "event"),
+    })
+  )
+
+  return await stampGoogleEvent(event, getCalendarId(args))
 }

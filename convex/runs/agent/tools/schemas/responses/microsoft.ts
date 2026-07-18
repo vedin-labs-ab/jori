@@ -1,7 +1,6 @@
 import {
-  calendarListingSchema,
   calendarListSchema,
-  providerEventPayload,
+  eventListingSchema,
   stampedEventSchema,
 } from "./calendar"
 import { listField, resultSchema, type SchemaMap } from "./common"
@@ -22,12 +21,8 @@ export const microsoftToolResponseSchemas = {
   microsoft_email_create_draft: draftedMailSchema(),
   microsoft_email_update_message: mailMessageSchema(),
   microsoft_calendar_list_calendars: calendarListSchema(false),
-  microsoft_calendar_list_events: calendarListingSchema("value"),
+  microsoft_calendar_list_events: eventListingSchema(),
   microsoft_calendar_get_event: stampedEventSchema(),
-  microsoft_calendar_create_event: providerEventPayload(
-    "The created Microsoft Graph"
-  ),
-  microsoft_calendar_update_event: providerEventPayload(
-    "The updated Microsoft Graph"
-  ),
+  microsoft_calendar_create_event: stampedEventSchema(),
+  microsoft_calendar_update_event: stampedEventSchema(),
 } satisfies SchemaMap

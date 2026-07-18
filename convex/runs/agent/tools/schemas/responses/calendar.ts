@@ -32,37 +32,32 @@ export function stampedEventSchema(): JsonSchema {
   }
 }
 
-export function calendarListingSchema(itemsKey: "items" | "value"): JsonSchema {
-  return {
-    type: "object",
-    additionalProperties: true,
+export function eventListingSchema(): JsonSchema {
+  return resultSchema({
     description:
-      "The event listing. The scan fields appear when no calendar ID was given; a single-calendar listing returns the provider's page with stamped events.",
+      "The event listing. Scan fields appear when no calendar ID was given and every readable calendar was covered.",
+    required: ["events", "status", "truncated"],
     properties: {
-      [itemsKey]: listField(
-        "Events across the scanned calendars, by start time.",
+      events: listField(
+        "Stamped events across the listed calendars, by start time.",
         stampedEventSchema()
       ),
       calendarsScanned: numberField("How many calendars the scan covered."),
       gaps: listField("Calendars that could not be read.", {
         type: "string",
       }),
-      status: {
-        type: "string",
-        enum: ["ready", "partial"],
-        description: "partial when gaps exist or the listing was truncated.",
-      },
+      status: enumField(
+        ["ready", "partial"],
+        "partial when gaps exist or the listing was truncated."
+      ),
       truncated: booleanField(
         "True when more events existed than were returned."
       ),
+      nextPageToken: stringField(
+        "Google single-calendar listings: pass as pageToken to continue."
+      ),
     },
-  }
-}
-
-export function providerEventPayload(provider: string): JsonSchema {
-  return providerPayload(
-    `${provider} event object as the provider returns it, unchanged.`
-  )
+  })
 }
 
 export function calendarListSchema(paged: boolean): JsonSchema {

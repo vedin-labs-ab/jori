@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { createAssetContext } from "../../../test/convex/broker"
 import { type Doc, type Id } from "../../_generated/dataModel"
-import { calendarListSchema } from "../../runs/agent/tools/schemas/responses/calendar"
+import {
+  calendarListSchema,
+  eventListingSchema,
+} from "../../runs/agent/tools/schemas/responses/calendar"
 import { schemaViolations } from "../../runs/agent/tools/schemas/responses/conform"
 import { callMicrosoftTool } from "./microsoft"
 
@@ -60,14 +63,15 @@ describe("Microsoft Calendar discovery", () => {
       status: "ready",
       truncated: false,
     })
-    expect(result.value).toEqual([
+    expect(schemaViolations(result, eventListingSchema())).toEqual([])
+    expect(result.events).toEqual([
       expect.objectContaining({ id: "early", calendarId: "primary" }),
       expect.objectContaining({ id: "middle", calendarId: "team" }),
       expect.objectContaining({ id: "late", calendarId: "primary" }),
     ])
     expect(calls.some((call) => call.url.includes("skiptoken=next"))).toBe(true)
 
-    for (const stamped of result.value as Record<string, unknown>[]) {
+    for (const stamped of result.events as Record<string, unknown>[]) {
       expect(stamped.entityKey).toMatch(/^[0-9a-f]{32}$/)
       expect(stamped.contentHash).toMatch(/^[0-9a-f]{32}$/)
     }
