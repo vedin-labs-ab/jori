@@ -32,14 +32,14 @@ test("shaped results carry an authored response schema", () => {
   expect(JSON.stringify(reference.response)).toContain("contentHash")
 })
 
-test("passthrough tools name the provider payload they return", () => {
+test("round-trip payloads stay open and documented", () => {
   const reference = resolveToolReference("notion_get_page")
 
   expect(reference.request).toMatchObject({ type: "object" })
   expect(reference.response).toMatchObject({
     type: "object",
     additionalProperties: true,
-    description: expect.stringContaining("Notion's page object"),
+    properties: { object: { const: "page" } },
   })
 })
 

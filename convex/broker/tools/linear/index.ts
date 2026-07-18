@@ -18,57 +18,7 @@ export async function callLinearTool(
   const credentials = requireLinearCredentials(integration)
 
   if (tool === "linear_search_issues") {
-    const query = normalizeSearchQuery(requiredString(args.query, "query"))
-    const exactIssue = await getLinearIssueSummaryByIdentifier(
-      credentials.tokens.access,
-      query
-    )
-    const result = await linearGraphql(credentials.tokens.access, {
-      query: `
-        query MiloIssueSearch($query: String!, $first: Int!) {
-          issues(
-            first: $first
-            filter: {
-              or: [
-                { title: { containsIgnoreCase: $query } }
-                { description: { containsIgnoreCase: $query } }
-                { comments: { body: { containsIgnoreCase: $query } } }
-              ]
-            }
-          ) {
-            nodes {
-              id
-              identifier
-              title
-              url
-              updatedAt
-              state { name type }
-              assignee { id name }
-              creator { id name }
-            }
-          }
-        }
-      `,
-      variables: {
-        query,
-        first: boundedNumber(args.first, 10, 1, 25),
-      },
-    })
-    const issuesById = new Map<string, unknown>()
-
-    if (exactIssue !== null) {
-      issuesById.set(String(exactIssue.id), exactIssue)
-    }
-
-    for (const issue of readArray(
-      readRecord(readRecord(result.data).issues).nodes
-    )) {
-      const record = readRecord(issue)
-
-      issuesById.set(String(record.id), record)
-    }
-
-    return { query, issues: [...issuesById.values()] }
+    return await searchLinearIssues(credentials.tokens.access, args)
   }
 
   if (tool === "linear_get_issue") {
@@ -138,18 +88,21 @@ export async function callLinearTool(
   }
 
   if (tool === "linear_add_comment") {
-    const payload = readRecord(
-      readRecord(readRecord(await postLinearComment(integration, args)).data)
-        .commentCreate
+    const payload = mutationPayload(
+      await postLinearComment(integration, args),
+      "commentCreate"
     )
 
-    return { success: payload.success === true, comment: payload.comment ?? null }
+    return {
+      success: payload.success === true,
+      comment: payload.comment ?? null,
+    }
   }
 
   if (tool === "linear_add_reaction") {
-    const payload = readRecord(
-      readRecord(readRecord(await addLinearReaction(integration, args)).data)
-        .reactionCreate
+    const payload = mutationPayload(
+      await addLinearReaction(integration, args),
+      "reactionCreate"
     )
 
     return {
@@ -201,4 +154,62 @@ function readOptionalRecord(value: unknown) {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? readRecord(value)
     : null
+}
+
+function mutationPayload(result: unknown, mutation: string) {
+  return readRecord(readRecord(readRecord(result).data)[mutation])
+}
+
+async function searchLinearIssues(
+  token: string,
+  args: Record<string, unknown>
+) {
+  const query = normalizeSearchQuery(requiredString(args.query, "query"))
+  const exactIssue = await getLinearIssueSummaryByIdentifier(token, query)
+  const result = await linearGraphql(token, {
+    query: `
+        query MiloIssueSearch($query: String!, $first: Int!) {
+          issues(
+            first: $first
+            filter: {
+              or: [
+                { title: { containsIgnoreCase: $query } }
+                { description: { containsIgnoreCase: $query } }
+                { comments: { body: { containsIgnoreCase: $query } } }
+              ]
+            }
+          ) {
+            nodes {
+              id
+              identifier
+              title
+              url
+              updatedAt
+              state { name type }
+              assignee { id name }
+              creator { id name }
+            }
+          }
+        }
+      `,
+    variables: {
+      query,
+      first: boundedNumber(args.first, 10, 1, 25),
+    },
+  })
+  const issuesById = new Map<string, unknown>()
+
+  if (exactIssue !== null) {
+    issuesById.set(String(exactIssue.id), exactIssue)
+  }
+
+  for (const issue of readArray(
+    readRecord(readRecord(result.data).issues).nodes
+  )) {
+    const record = readRecord(issue)
+
+    issuesById.set(String(record.id), record)
+  }
+
+  return { query, issues: [...issuesById.values()] }
 }

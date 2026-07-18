@@ -1,48 +1,135 @@
 import {
+  booleanField,
   constField,
-  providerPayload,
+  type JsonSchema,
+  listField,
   resultSchema,
   type SchemaMap,
   stringField,
 } from "./common"
 
-// Notion tools return Notion API objects unchanged; only the file upload is
-// assembled by Milo so the result can be embedded directly in blocks.
+// Notion tools deliberately return Notion API objects unchanged: agents echo
+// the same property and block structures back into the write tools, so
+// fidelity beats reshaping. The schemas document Notion's stable object
+// model without freezing its full surface.
+
+function notionObject(kind: string, description: string): JsonSchema {
+  return {
+    type: "object",
+    additionalProperties: true,
+    description,
+    properties: {
+      object: constField(kind, `Always ${kind}.`),
+      id: stringField(`Notion ${kind} ID.`),
+    },
+  }
+}
+
+function notionPage(description: string): JsonSchema {
+  const page = notionObject("page", description)
+
+  return {
+    ...page,
+    properties: {
+      ...(page.properties as Record<string, unknown>),
+      url: stringField("Page URL."),
+      archived: booleanField("True when archived."),
+      parent: {
+        type: "object",
+        additionalProperties: true,
+        description: "Parent reference: page, data source, or workspace.",
+      },
+      properties: {
+        type: "object",
+        additionalProperties: true,
+        description:
+          "Property values keyed by property name, in Notion's typed value format - reuse these structures when updating.",
+      },
+    },
+  }
+}
+
+function notionListing(itemDescription: string, item: JsonSchema): JsonSchema {
+  return {
+    type: "object",
+    additionalProperties: true,
+    description: itemDescription,
+    properties: {
+      object: constField("list", "Always list."),
+      results: listField("The page of results.", item),
+      next_cursor: {
+        type: ["string", "null"],
+        description: "Pass as start_cursor to continue; null on the last page.",
+      },
+      has_more: booleanField("True when more results exist."),
+    },
+  }
+}
+
+function notionBlock(description: string): JsonSchema {
+  const block = notionObject("block", description)
+
+  return {
+    ...block,
+    properties: {
+      ...(block.properties as Record<string, unknown>),
+      type: stringField(
+        "Block type; the same-named key holds the block's content."
+      ),
+      has_children: booleanField("True when nested blocks exist."),
+    },
+  }
+}
+
+function notionComment(description: string): JsonSchema {
+  const comment = notionObject("comment", description)
+
+  return {
+    ...comment,
+    properties: {
+      ...(comment.properties as Record<string, unknown>),
+      discussion_id: stringField("Thread the comment belongs to."),
+      rich_text: listField("Comment content as rich text.", {
+        type: "object",
+        additionalProperties: true,
+      }),
+    },
+  }
+}
 
 export const notionToolResponseSchemas = {
-  notion_search: providerPayload(
-    "Notion's search response: results of page and data source objects, with next_cursor and has_more."
+  notion_search: notionListing(
+    "Pages and data sources matching the query.",
+    notionObject("page", "Page or data source object, unchanged.")
   ),
-  notion_get_page: providerPayload(
-    "Notion's page object with its property values, unchanged."
+  notion_get_page: notionPage("The page object with its property values."),
+  notion_get_block_children: notionListing(
+    "The block's direct children.",
+    notionBlock("Child block, unchanged.")
   ),
-  notion_get_block_children: providerPayload(
-    "Notion's block children listing: results of block objects, with next_cursor and has_more."
+  notion_query_data_source: notionListing(
+    "Rows matching the query.",
+    notionPage("Row page object with its property values.")
   ),
-  notion_query_data_source: providerPayload(
-    "Notion's query response: results of page objects, with next_cursor and has_more."
+  notion_list_comments: notionListing(
+    "Comments on the block or page.",
+    notionComment("Comment, unchanged.")
   ),
-  notion_list_comments: providerPayload(
-    "Notion's comment listing: results of comment objects, with next_cursor and has_more."
+  notion_create_page: notionPage("The created page object."),
+  notion_update_page: notionPage("The page object after the update."),
+  notion_append_block_children: notionListing(
+    "The created blocks.",
+    notionBlock("Created block, unchanged.")
   ),
-  notion_create_page: providerPayload(
-    "Notion's created page object, unchanged."
-  ),
-  notion_update_page: providerPayload(
-    "Notion's page object after the update, unchanged."
-  ),
-  notion_append_block_children: providerPayload(
-    "Notion's append response: results of the created block objects."
-  ),
-  notion_create_comment: providerPayload(
-    "Notion's created comment object, unchanged."
-  ),
+  notion_create_comment: notionComment("The created comment."),
   notion_upload_file: resultSchema({
     required: ["fileUpload", "file"],
     properties: {
-      fileUpload: providerPayload(
-        "Notion's file_upload object with status uploaded."
-      ),
+      fileUpload: {
+        type: "object",
+        additionalProperties: true,
+        description: "Notion's file_upload object with status uploaded.",
+      },
       file: resultSchema({
         description: "Ready-to-embed file reference for Notion blocks.",
         required: ["type", "file_upload"],
