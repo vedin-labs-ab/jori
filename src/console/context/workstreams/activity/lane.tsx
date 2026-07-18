@@ -14,6 +14,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
 import { type PulseCell, type PulseLane } from "./series"
 
@@ -100,8 +101,8 @@ function UnplacedLabel({ count, name }: { count: number; name: string }) {
         </span>
       </TooltipTrigger>
       <TooltipContent className="max-w-60">
-        {count === 1 ? "1 effort" : `${count} efforts`} not yet in a workstream.
-        The weekly review places them or proposes new workstreams.
+        {countLabel(count, "effort")} not yet in a workstream. The weekly review
+        places them or proposes new workstreams.
       </TooltipContent>
     </Tooltip>
   )
@@ -145,8 +146,7 @@ function CellDetail({ cell }: { cell: PulseCell }) {
   return (
     <div className="flex flex-col gap-0.5">
       <span className="font-medium">
-        {cell.day.title} ·{" "}
-        {cell.count === 1 ? "1 entry" : `${cell.count} entries`}
+        {cell.day.title} · {countLabel(cell.count, "entry")}
       </span>
       {cell.efforts.slice(0, tooltipEffortLimit).map((name) => (
         <span key={name}>{name}</span>
