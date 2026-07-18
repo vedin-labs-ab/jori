@@ -1,10 +1,10 @@
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import {
   type ArtifactContractStateEntry,
   assertContractStateValue,
   resolveArtifactStateContract,
 } from "../../contracts/artifacts/contract"
-import { isRecord } from "../../contracts/json"
+import { mergePatch, pathPatch, readPath } from "../../contracts/json"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -23,8 +23,43 @@ const stateWrite = v.union(
   v.object({
     type: v.literal("merge"),
     patch: v.any(),
+  }),
+  v.object({
+    type: v.literal("claim"),
+    path: v.array(v.string()),
+    value: v.any(),
   })
 )
+
+export type ArtifactStateWrite = Infer<typeof stateWrite>
+
+/** Resolve a write against the current document. A claim is an atomic
+ *  insert-if-absent: it sets its path only when nothing is stored there yet. */
+export function resolveStateWrite(
+  current: unknown,
+  write: ArtifactStateWrite
+): { kind: "write"; value: unknown } | { kind: "held"; existing: unknown } {
+  if (write.type === "replace") {
+    return { kind: "write", value: write.value }
+  }
+
+  if (write.type === "merge") {
+    return { kind: "write", value: mergePatch(current ?? {}, write.patch) }
+  }
+
+  if (write.path.length === 0 || write.value == null) {
+    throw new Error("A claim requires a non-empty path and a non-null value.")
+  }
+
+  const existing = readPath(current, write.path)
+
+  return existing !== undefined
+    ? { kind: "held", existing }
+    : {
+        kind: "write",
+        value: mergePatch(current ?? {}, pathPatch(write.path, write.value)),
+      }
+}
 
 export const read = internalQuery({
   args: {
@@ -123,36 +158,26 @@ export const update = internalMutation({
       throw new Error("Artifact state version conflict.")
     }
 
-    const value =
-      args.write.type === "replace"
-        ? args.write.value
-        : mergePatch(existing?.value ?? {}, args.write.patch)
+    const resolved = resolveStateWrite(existing?.value, args.write)
 
-    assertContractStateValue({ entry, value })
+    if (resolved.kind === "held") {
+      return {
+        claimed: false,
+        existing: resolved.existing,
+        version: currentVersion,
+      }
+    }
 
-    return existing === null
-      ? await insertStateDocument(ctx, args, entry, value)
-      : await updateStateDocument(ctx, existing, entry, value)
+    assertContractStateValue({ entry, value: resolved.value })
+
+    const summary =
+      existing === null
+        ? await insertStateDocument(ctx, args, entry, resolved.value)
+        : await updateStateDocument(ctx, existing, entry, resolved.value)
+
+    return args.write.type === "claim" ? { ...summary, claimed: true } : summary
   },
 })
-
-function mergePatch(target: unknown, patch: unknown): unknown {
-  if (!isRecord(patch)) {
-    return patch
-  }
-
-  const result = isRecord(target) ? { ...target } : {}
-
-  for (const [key, value] of Object.entries(patch)) {
-    if (value === null) {
-      delete result[key]
-    } else {
-      result[key] = mergePatch(result[key], value)
-    }
-  }
-
-  return result
-}
 
 async function insertStateDocument(
   ctx: MutationCtx,

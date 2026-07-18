@@ -101,7 +101,9 @@ function createTriggerPart(input: AgentRuntimeInput) {
     return appendInstructions(
       renderPromptTemplate(
         promptTemplates["agent/context/trigger/instruction"],
-        {}
+        {
+          run: { delegated: input.run.parentId !== undefined },
+        }
       ),
       input.instructions
     )
@@ -163,6 +165,7 @@ function createAutomationValues(
     automation: {
       id: input.run.automationId,
       name: input.run.snapshot.title,
+      cause: input.run.cause.type,
       trigger: formatAutomationTrigger(input),
     },
     event:

@@ -1,6 +1,6 @@
 # Trigger
 
-An automation triggered this run.
+{% if automation.cause == "manual" %}The requester started this automation run manually ("run now").{% elsif automation.cause == "time" %}This automation run fired on its schedule.{% else %}An integration event triggered this automation run.{% endif %}
 
 Automation:
 - ID: {{automation.id}}

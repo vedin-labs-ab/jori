@@ -12,6 +12,8 @@ Run ID: {{run.id}}
 {% if artifact.contract %}Its state contract defines these entries — address them by `contractName`; the server validates every write against the entry's schema, which #read_artifact shows in full:
 {% for entry in artifact.contract %}
 - `{{entry.name}}` ({{entry.scope}}, {{entry.schema}}){% if entry.description %}: {{entry.description}}{% endif %}{% endfor %}
+
+Runs of this artifact may overlap. Before replacing a whole branch, re-read and pass the returned `version` as `expectedVersion`; use `claim` for any effect that must happen at most once. Keep shared-scope entries free of message bodies, private provider URLs, and unnecessary personal data. Report coverage honestly — never let partial work look complete.
 {% endif %}
 {% endif %}
 {% if surface.active %}

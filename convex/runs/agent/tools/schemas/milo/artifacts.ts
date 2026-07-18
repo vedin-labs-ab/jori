@@ -110,11 +110,29 @@ export const artifactToolInputSchemas = {
       ),
       value: {
         description:
-          "JSON value to replace the current state document. Provide either value or patch.",
+          "JSON value to replace the current state document. Provide exactly one of value, patch, or claim.",
       },
       patch: {
         description:
-          "RFC 7396-style state merge patch. Provide either patch or value.",
+          "RFC 7396-style state merge patch. Provide exactly one of value, patch, or claim.",
+      },
+      claim: {
+        ...objectSchema({
+          required: ["path", "value"],
+          properties: {
+            path: {
+              type: "array",
+              items: { type: "string" },
+              description:
+                'Key path from the document root, for example ["dispatches", "morning:2026-07-18"].',
+            },
+            value: {
+              description: "Non-null JSON value to set at the path.",
+            },
+          },
+        }),
+        description:
+          "Atomically set path to value only if nothing is stored there yet. Returns claimed: true when this call won the claim, or claimed: false with the existing value and no write. Claim before any action that must happen at most once (sending, posting, notifying); claimed: false means another run owns it — never repeat the action.",
       },
     },
   }),

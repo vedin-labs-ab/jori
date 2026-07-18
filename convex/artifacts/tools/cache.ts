@@ -2,6 +2,7 @@ import { type ObjectType, v } from "convex/values"
 import { stableJson } from "../../../contracts/artifacts/json"
 import { type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { sha256Hex } from "../../shared/crypto"
 import { artifactCacheKeyFields } from "../schema"
 
 const minCacheTtlMs = 15 * 60 * 1000
@@ -138,14 +139,7 @@ export function normalizeArtifactToolCacheOptions(input: {
 export async function createArtifactToolCacheKey(
   input: ArtifactToolCacheKeyInput
 ) {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(stableJson(input))
-  )
-
-  return Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, "0")
-  ).join("")
+  return await sha256Hex(stableJson(input))
 }
 
 export function canStoreArtifactToolCacheValue(value: unknown) {

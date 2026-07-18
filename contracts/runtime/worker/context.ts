@@ -35,6 +35,8 @@ export type RuntimeContext = {
   drained: DrainedSessionBatch | null
   handoffs: RunHandoffs
   prompt: RuntimePrompt
+  /** Set by finish_run during the loop; recorded with run.completed. */
+  result: string | null
   run: {
     id: RuntimeId<"runs">
     rootId: RuntimeId<"runs"> | null

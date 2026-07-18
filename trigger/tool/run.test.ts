@@ -73,6 +73,43 @@ test("finish_run completes automation runs without a reason", async () => {
   })
 })
 
+test("finish_run stores its result on the context for the parent", async () => {
+  const runtime = createRuntime({ activeSurface: null })
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: { result: "Summary of the delegated work." },
+      id: "call_1",
+      name: "finish_run",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(result.finished).toBe(true)
+  expect(runtime.context.result).toBe("Summary of the delegated work.")
+})
+
+test("finish_run rejects an oversized result", async () => {
+  const runtime = createRuntime({ activeSurface: null })
+
+  const result = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: { result: "x".repeat(8001) },
+      id: "call_1",
+      name: "finish_run",
+    },
+    runtime,
+    sequence: 100,
+  })
+
+  expect(result.finished).toBe(false)
+  expect(runtime.context.result).toBeNull()
+  expect(result.content).toContain("at most 8000 characters")
+})
+
 function createRuntime(
   options: {
     activeSurface?: ToolRuntime["context"]["activeSurface"]
@@ -102,6 +139,7 @@ function createRuntime(
         status: "running",
         tenantId: "tenant",
       },
+      result: null,
       session: null,
       tools: [finishRunTool()],
     },

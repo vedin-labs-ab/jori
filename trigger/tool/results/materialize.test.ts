@@ -67,6 +67,7 @@ function cloneRuntime(): ToolRuntime {
         status: "running",
         tenantId: "tenant",
       },
+      result: null,
       session: null,
       tools: [],
     },

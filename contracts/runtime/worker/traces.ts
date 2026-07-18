@@ -7,6 +7,11 @@ export type RuntimeErrorTraceData = {
   error: string
 }
 
+/** Outcome a run returned via finish_run; recorded with run.completed. */
+export type RuntimeResultTraceData = {
+  result: string
+}
+
 export type RuntimeToolTraceTool = {
   access: ToolAccess
   name: string
@@ -45,6 +50,7 @@ export type RuntimeEventTraceData =
   | RuntimeErrorTraceData
   | RuntimeModelTraceData
   | RuntimeRelationTraceData
+  | RuntimeResultTraceData
   | RuntimeToolTraceData
 
 export type RuntimeEventType =

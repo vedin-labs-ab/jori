@@ -22,6 +22,7 @@ export type {
   RuntimeEventRecord,
   RuntimeEventTraceData,
   RuntimeEventType,
+  RuntimeResultTraceData,
   RuntimeToolProviderTrace,
   RuntimeToolTraceTool,
 } from "./traces"

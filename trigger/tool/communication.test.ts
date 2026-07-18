@@ -182,6 +182,7 @@ function createRuntime(options: {
         status: "running",
         tenantId: "tenant",
       },
+      result: null,
       session: null,
       tools: [options.tool],
     },

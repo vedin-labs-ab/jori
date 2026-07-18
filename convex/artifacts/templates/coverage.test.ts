@@ -20,7 +20,7 @@ test("Meeting Briefing keeps sixty compact meetings under the state limit", () =
     ])
   )
   const state = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     timezone: "UTC",
     scan: {
       scannedAt: "2030-01-01T07:00:00.000Z",
@@ -62,14 +62,14 @@ function compactMeeting(index: number) {
       startsAt: timestamp,
       endsAt: timestamp,
       status: "confirmed",
-      fingerprint: "f".repeat(64),
+      contentHash: "f".repeat(32),
       attendees: [{ name: "Customer", organization: "Example" }],
     },
     whyItMatters: "A customer decision is expected.",
     status: "ready",
     revision: index,
     preparedAt: timestamp,
-    preparedForFingerprint: "f".repeat(64),
+    preparedForContentHash: "f".repeat(32),
     briefing: {
       outcome: "Leave with a decision and named owner.",
       essentials: [point],

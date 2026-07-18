@@ -12,7 +12,7 @@ describe("automation trigger prompts", () => {
     const context = prompt.context
     const instructions = prompt.instructions
 
-    expect(context).toContain("An automation triggered this run.")
+    expect(context).toContain("This automation run fired on its schedule.")
     expect(context).toContain("# Run\n\nRun ID: run\nRun started at:")
     expect(context.match(/Run ID:/g)).toHaveLength(1)
     expect(context).not.toContain("Active surface:")
@@ -30,6 +30,44 @@ describe("automation trigger prompts", () => {
     expect(instructions).not.toContain("send_reply")
     expectNoSyntheticBlankLines(context)
     expectNoSyntheticBlankLines(instructions)
+  })
+})
+
+describe("trigger modes", () => {
+  test("names a manually started automation run", () => {
+    const input = automationRuntimeInput()
+
+    if (input.type !== "automation") {
+      throw new Error("Expected automation input.")
+    }
+
+    input.run.cause = { type: "manual" } as typeof input.run.cause
+
+    expect(assemblePrompt(input).context).toContain(
+      'The requester started this automation run manually ("run now").'
+    )
+  })
+
+  test("tells a delegated run to return its outcome", () => {
+    const base = automationRuntimeInput()
+    const input = {
+      type: "instruction" as const,
+      run: { ...base.run, parentId: "parent" },
+      artifact: null,
+      integrations: base.integrations,
+      instructions: "Research the meeting.",
+      organization: null,
+      requester: null,
+      timezone: null,
+      workstreams: null,
+    }
+    const context = assemblePrompt(
+      input as unknown as Parameters<typeof assemblePrompt>[0]
+    ).context
+
+    expect(context).toContain("A parent run delegated this task to this run.")
+    expect(context).toContain("return your outcome in its `result`")
+    expect(context).not.toContain("Manual instructions triggered this run.")
   })
 })
 
@@ -124,6 +162,11 @@ describe("attached artifact context", () => {
     expect(context).not.toContain(
       "- `research` (personal, MeetingBriefingResearch v3):"
     )
+    expect(context).toContain("as `expectedVersion`")
+    expect(context).toContain(
+      "use `claim` for any effect that must happen at most once"
+    )
+    expect(context).toContain("never let partial work look complete")
     expectNoSyntheticBlankLines(context)
   })
 

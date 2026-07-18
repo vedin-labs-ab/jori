@@ -64,6 +64,11 @@ describe("Microsoft Calendar discovery", () => {
       expect.objectContaining({ id: "late", calendarId: "primary" }),
     ])
     expect(calls.some((call) => call.url.includes("skiptoken=next"))).toBe(true)
+
+    for (const stamped of result.value as Record<string, unknown>[]) {
+      expect(stamped.entityKey).toMatch(/^[0-9a-f]{32}$/)
+      expect(stamped.contentHash).toMatch(/^[0-9a-f]{32}$/)
+    }
   })
 })
 

@@ -2,6 +2,8 @@ import { type JsonObject } from "../../contracts/json"
 import { optionalString } from "../input"
 import { type ToolRuntime } from "./runtime"
 
+const maxResultLength = 8000
+
 export function executeRunTool(
   runtime: ToolRuntime,
   args: {
@@ -18,6 +20,7 @@ export function executeRunTool(
 
 function finishRun(runtime: ToolRuntime, input: JsonObject) {
   const reason = optionalString(input.reason)
+  const result = optionalString(input.result)
   const communicated = runtime.context.activeSurface?.communicated ?? false
 
   if (
@@ -28,6 +31,16 @@ function finishRun(runtime: ToolRuntime, input: JsonObject) {
     throw new Error(
       "finish_run requires reason when no visible communication was sent."
     )
+  }
+
+  if (result !== undefined && result.length > maxResultLength) {
+    throw new Error(
+      `finish_run result must be at most ${maxResultLength} characters; return a concise summary.`
+    )
+  }
+
+  if (result !== undefined) {
+    runtime.context.result = result
   }
 
   return {

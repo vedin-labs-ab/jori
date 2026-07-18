@@ -75,6 +75,7 @@ test("wait_for_agents returns immediately when every child is terminal", async (
       title: "Research attendees",
       status: "completed" as const,
       error: null,
+      result: "Two attendees confirmed; no open commitments.",
     },
   ])
 
@@ -100,6 +101,7 @@ test("wait_for_agents returns immediately when every child is terminal", async (
         title: "Research attendees",
         status: "completed",
         error: null,
+        result: "Two attendees confirmed; no open commitments.",
       },
     ],
   })
@@ -210,6 +212,7 @@ function createRuntime(): ToolRuntime {
         status: "running",
         tenantId: "tenant",
       },
+      result: null,
       session: null,
       tools: [
         {
@@ -244,5 +247,6 @@ function agentRun(status: "completed" | "running") {
     title: "Research attendees",
     status,
     error: null,
+    result: null,
   }
 }

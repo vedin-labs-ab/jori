@@ -1,0 +1,70 @@
+import { sha256Hex } from "../../shared/crypto"
+
+// Calendar events carry a server-computed identity so every reader — planner
+// runs, delivery automations, artifact state — sees the same key and change
+// detector for the same provider data, with no client-side hashing.
+
+/** Content that identifies change. Providers extract these from their native
+ *  payloads; canonicalization and hashing happen here. */
+export type CalendarEventContent = {
+  title: string
+  start: string
+  end: string
+  status: string
+  description: string
+  organizer: string
+  attendees: string[]
+}
+
+export type CalendarEventRef = {
+  provider: "googleCalendar" | "microsoftCalendar"
+  calendarId: string | undefined
+  eventId: string
+}
+
+const hashLength = 32
+
+/** Stamp a provider event with `entityKey` (stable across content edits)
+ *  and `contentHash` (changes when the event's content changes). */
+export async function stampCalendarEvent(
+  event: Record<string, unknown>,
+  ref: CalendarEventRef,
+  content: CalendarEventContent
+) {
+  return {
+    ...event,
+    entityKey: await calendarEntityKey(ref),
+    contentHash: await calendarContentHash(content),
+  }
+}
+
+async function calendarEntityKey(ref: CalendarEventRef) {
+  const hash = await sha256Hex(
+    [ref.provider, ref.calendarId ?? "default", ref.eventId].join("\n")
+  )
+
+  return hash.slice(0, hashLength)
+}
+
+async function calendarContentHash(content: CalendarEventContent) {
+  const attendees = [
+    ...new Set(
+      content.attendees
+        .map((attendee) => attendee.trim().toLowerCase())
+        .filter((attendee) => attendee !== "")
+    ),
+  ].sort()
+  const hash = await sha256Hex(
+    JSON.stringify([
+      content.title.trim(),
+      content.start.trim(),
+      content.end.trim(),
+      content.status.trim().toLowerCase(),
+      content.description.trim(),
+      content.organizer.trim().toLowerCase(),
+      attendees,
+    ])
+  )
+
+  return hash.slice(0, hashLength)
+}

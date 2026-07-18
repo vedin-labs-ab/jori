@@ -68,6 +68,7 @@ const assetData = v.object({ asset: v.id("assets") })
 const agentData = v.object({ child: v.id("runs") })
 const waiterData = v.object({ waiter: v.id("waiters") })
 const errorData = v.object({ error: v.string() })
+const resultData = v.object({ result: v.string() })
 const modelData = v.object({ usage, output: text, reasoning: text })
 const toolStartedData = v.object({ tool, input: v.any() })
 const toolCompletedData = v.object({ tool, result, provider })
@@ -123,7 +124,11 @@ const runResumed = v.object({
 })
 
 const runStarted = v.object({ ...worker, type: v.literal("run.started") })
-const runCompleted = v.object({ ...worker, type: v.literal("run.completed") })
+const runCompleted = v.object({
+  ...worker,
+  type: v.literal("run.completed"),
+  data: v.optional(resultData),
+})
 const runFailed = v.object({
   ...worker,
   type: v.literal("run.failed"),
@@ -194,6 +199,7 @@ export const traceData = v.union(
   agentData,
   waiterData,
   errorData,
+  resultData,
   modelData,
   toolStartedData,
   toolCompletedData,
