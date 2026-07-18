@@ -8,6 +8,7 @@ import {
 import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../../../_generated/server"
+import { sha256Hex } from "../../../shared/crypto"
 import { isTerminalRunStatus } from "../../schema"
 import { formatRuntimeError } from "./error"
 
@@ -230,17 +231,6 @@ async function callTriggerApi(path: string, body?: Record<string, unknown>) {
   }
 
   return (await response.json()) as unknown
-}
-
-async function sha256Hex(value: string) {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(value)
-  )
-
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
 }
 
 function runtimeTags(item: Doc<"outbox">) {

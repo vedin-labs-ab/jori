@@ -1,5 +1,9 @@
 import { timingSafeEqual } from "../../shared/crypto"
-import { base64UrlDecodeBytes, base64UrlEncode } from "../../shared/encoding"
+import {
+  base64UrlDecodeBytes,
+  base64UrlEncode,
+  bytesToHex,
+} from "../../shared/encoding"
 
 export async function createSignedState<State>(secret: string, state: State) {
   const payload = base64UrlEncode(JSON.stringify(state))
@@ -44,7 +48,5 @@ export async function hmacSha256Hex(secret: string, value: string) {
     new TextEncoder().encode(value)
   )
 
-  return Array.from(new Uint8Array(signature))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
+  return bytesToHex(new Uint8Array(signature))
 }
