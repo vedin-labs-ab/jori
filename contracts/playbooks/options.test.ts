@@ -61,11 +61,13 @@ const setup: PlaybookSetupSection[] = [
           {
             key: "remindBefore",
             label: "Send",
-            kind: "minutes",
-            default: 30,
-            min: 5,
-            max: 240,
-            presets: [15, 30, 45, 60],
+            kind: "choice",
+            control: "select",
+            default: "30",
+            choices: [
+              { value: "15", label: "15 minutes" },
+              { value: "30", label: "30 minutes" },
+            ],
             enabledWhen: { key: "reminders", value: true },
           },
         ],
@@ -81,7 +83,7 @@ describe("playbook options", () => {
       morning: true,
       morningTime: "07:30",
       reminders: false,
-      remindBefore: 30,
+      remindBefore: "30",
     })
   })
 
@@ -90,12 +92,12 @@ describe("playbook options", () => {
       resolvePlaybookOptions(setup, {
         morningTime: "08:00",
         reminders: true,
-        remindBefore: 15,
+        remindBefore: "15",
       })
     ).toMatchObject({
       morningTime: "08:00",
       reminders: true,
-      remindBefore: 15,
+      remindBefore: "15",
     })
   })
 
@@ -132,10 +134,7 @@ describe("playbook option validation", () => {
     expect(() =>
       resolvePlaybookOptions(setup, { morningTime: "24:00" })
     ).toThrow('Invalid value for playbook option "morningTime"')
-    expect(() => resolvePlaybookOptions(setup, { remindBefore: 3 })).toThrow(
-      'Invalid value for playbook option "remindBefore"'
-    )
-    expect(() => resolvePlaybookOptions(setup, { remindBefore: 30.5 })).toThrow(
+    expect(() => resolvePlaybookOptions(setup, { remindBefore: 30 })).toThrow(
       'Invalid value for playbook option "remindBefore"'
     )
     expect(() => resolvePlaybookOptions(setup, { bogus: 1 })).toThrow(
