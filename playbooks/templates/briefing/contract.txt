@@ -118,7 +118,7 @@ export const contract = defineArtifactContract({
       key: "meeting-briefing/briefings",
       scope: "shared",
       description:
-        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
+        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings. Meetings age out seven local days after they end; dispatches after seven days.",
       schema: z.strictObject({
         schemaVersion: z.literal(4),
         timezone: z.string().max(100),

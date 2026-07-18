@@ -28,6 +28,7 @@ export async function trialPlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
     }),
     createdBy: args.createdBy,
     principal,
+    trial: true,
   })
 
   return { runId }

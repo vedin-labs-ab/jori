@@ -133,14 +133,13 @@ export function deliveryInstruction(args: {
 }): string {
   const { destination, noun, subject } = args
   const summary = args.style === "summary"
-  const closing = "Unless there is nothing to send."
 
   if (destination.kind === "email") {
     const route = `from my @${integrationLabels[destination.integration]} to ${destination.address}`
 
     return summary
-      ? `Email a short summary of the ${noun} ${route} with the subject "${subject}" plus what it covers, and include the link to the full ${noun}. ${closing}`
-      : `Email the ${noun} ${route} with the subject "${subject}" plus today's date. ${closing}`
+      ? `Email a short summary of the ${noun} ${route} with the subject "${subject}" plus what it covers, and include the link to the full ${noun}.`
+      : `Email the ${noun} ${route} with the subject "${subject}" plus today's date.`
   }
 
   const target = destination.target
@@ -149,13 +148,13 @@ export function deliveryInstruction(args: {
     const route = `to the "${target.label}" Slack channel using channel ID ${target.id} via @Slack`
 
     return summary
-      ? `Post a short summary of the ${noun} ${route}, with the link to the full ${noun}. ${closing}`
-      : `Post the ${noun} ${route}. ${closing}`
+      ? `Post a short summary of the ${noun} ${route}, with the link to the full ${noun}.`
+      : `Post the ${noun} ${route}.`
   }
 
   const route = `to ${target.label} in a Slack DM using user ID ${target.id} via @Slack`
 
   return summary
-    ? `Send a short summary of the ${noun} ${route}, with the link to the full ${noun}. ${closing}`
-    : `Send the ${noun} ${route}. ${closing}`
+    ? `Send a short summary of the ${noun} ${route}, with the link to the full ${noun}.`
+    : `Send the ${noun} ${route}.`
 }

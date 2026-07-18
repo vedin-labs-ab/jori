@@ -6,7 +6,7 @@ export const playbookTemplateContracts = {
       name: "briefings",
       scope: "shared",
       description:
-        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
+        "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings. Meetings age out seven local days after they end; dispatches after seven days.",
       schemaName: "MeetingBriefings",
       schemaVersion: 4,
       schema: {

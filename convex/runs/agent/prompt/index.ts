@@ -47,6 +47,14 @@ export function assemblePrompt(
         approvals: optionalPromptBlock(
           createApprovalInstructions(promptedTools)
         ),
+        automation: optionalPromptBlock(
+          input.type === "automation"
+            ? renderPromptTemplate(
+                promptTemplates["agent/instructions/automation"],
+                {}
+              )
+            : ""
+        ),
         communication: optionalPromptBlock(communication?.communication ?? ""),
         format: optionalPromptBlock(communication?.format ?? ""),
         skills: optionalPromptBlock(skills),
