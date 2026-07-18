@@ -14,10 +14,21 @@ test("passthrough tools fall back to an honest response note", () => {
 
   expect(reference.request).toMatchObject({ type: "object" })
   expect(reference.response).toEqual({
-    description: "The provider's response for this call, returned unchanged.",
+    description: "The raw response for this call, returned unchanged.",
   })
 })
 
 test("unknown tools are rejected", () => {
   expect(() => resolveToolReference("missing_tool")).toThrow("Unknown tool.")
+})
+
+test("native agent tools resolve with authored responses", () => {
+  const reference = resolveToolReference("wait_for_agents")
+
+  expect(reference.request).toMatchObject({ type: "object" })
+  expect(JSON.stringify(reference.response)).toContain("finish_run")
+
+  expect(JSON.stringify(resolveToolReference("bash").response)).toContain(
+    "returned unchanged"
+  )
 })

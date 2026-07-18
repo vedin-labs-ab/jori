@@ -38,15 +38,17 @@ export function getAutomationSurfaceToneClassNames(
 export const automationReferenceToneClassNames = {
   skill: {
     icon: "text-[#B45309]",
+    separator: "bg-[#EDD9B9]",
     surface: "border-[#EDD9B9] bg-[#FDFAF2] text-[#1F2937]",
   },
   tool: {
     icon: "text-[#0F766E]",
+    separator: "bg-[#B9DDD6]",
     surface: "border-[#B9DDD6] bg-[#F4FBF9] text-[#1F2937]",
   },
 } satisfies Record<
   Exclude<AutomationMentionKind, "integration">,
-  { icon: string; surface: string }
+  { icon: string; separator: string; surface: string }
 >
 
 const automationSurfaceToneClassNames = {

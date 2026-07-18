@@ -20,7 +20,10 @@ import {
 } from "../../../access/policy"
 import { parseAutomationSurfaceTools } from "../document"
 import { type AutomationSurfaceExtensionOptions } from "../editor/extension"
-import { AutomationSurfaceRemoveButton } from "./remove"
+import {
+  AutomationMarkerActionButton,
+  AutomationSurfaceRemoveButton,
+} from "./remove"
 import {
   getAutomationSurfaceAccessIcon,
   getAutomationSurfaceToneClassNames,
@@ -210,29 +213,17 @@ function AutomationSurfaceToolsButton({
     : `${toolSurfaceLabel} tools: ${toolCountLabel}. Configure tools.`
 
   return (
-    <button
-      aria-label={label}
-      className={cn(
-        "inline-flex items-center gap-1 self-stretch px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
-        iconClassName
-      )}
-      onClick={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-        onOpen()
-      }}
-      onMouseDown={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-      }}
+    <AutomationMarkerActionButton
+      ariaLabel={label}
+      className={iconClassName}
+      onOpen={onOpen}
       title={
         issue ??
         (count === 0 ? accessLabel : `${accessLabel}: ${count} enabled`)
       }
-      type="button"
     >
       <Icon className="size-3" />
       {count > 0 ? <span className="tabular-nums">{count}</span> : null}
-    </button>
+    </AutomationMarkerActionButton>
   )
 }

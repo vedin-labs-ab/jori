@@ -1,5 +1,6 @@
 import { X } from "lucide-react"
 import { type ReactNode } from "react"
+import { cn } from "@/lib/utils"
 import { type AutomationSurfaceIntegration } from "../../../access"
 import { SurfaceLogo } from "../../../access/logo"
 
@@ -59,5 +60,44 @@ export function AutomationSurfaceRemoveButton({
       label={toolSurfaceLabel}
       onRemove={onRemove}
     />
+  )
+}
+
+/** A marker's action segment: a quiet icon button in the pill's own tone,
+ *  brightening on hover, that must not steal the editor's selection. */
+export function AutomationMarkerActionButton({
+  ariaLabel,
+  children,
+  className,
+  onOpen,
+  title,
+}: {
+  ariaLabel: string
+  children: ReactNode
+  className?: string
+  onOpen: () => void
+  title: string
+}) {
+  return (
+    <button
+      aria-label={ariaLabel}
+      className={cn(
+        "inline-flex items-center gap-1 self-stretch px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        className
+      )}
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onOpen()
+      }}
+      onMouseDown={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      title={title}
+      type="button"
+    >
+      {children}
+    </button>
   )
 }

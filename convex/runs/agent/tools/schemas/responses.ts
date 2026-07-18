@@ -67,3 +67,52 @@ const toolResponseSchemas: Record<string, object> = {
 export function getToolResponseSchema(tool: string) {
   return toolResponseSchemas[tool]
 }
+
+const agentRunSchema = objectSchema({
+  properties: {
+    runId: stringProperty("Run ID of the child."),
+    title: stringProperty("The child's title."),
+    status: {
+      type: "string",
+      enum: ["queued", "running", "completed", "failed", "stopped"],
+      description: "Where the child is in its lifecycle.",
+    },
+    error: {
+      type: ["string", "null"],
+      description: "Why the child failed, when it did.",
+    },
+    result: {
+      type: ["string", "null"],
+      description:
+        "The outcome the child returned via finish_run; null until it completes.",
+    },
+  },
+})
+
+Object.assign(toolResponseSchemas, {
+  start_agent: objectSchema({
+    properties: {
+      runId: stringProperty("Run ID of the started child."),
+    },
+  }),
+  stop_agent: objectSchema({
+    properties: {
+      runId: stringProperty("Run ID of the stopped child."),
+      status: stringProperty("The child's status after the stop."),
+    },
+  }),
+  wait_for_agents: objectSchema({
+    properties: {
+      reason: {
+        type: "string",
+        enum: ["completed", "timeout", "interrupted"],
+        description: "Why the wait ended.",
+      },
+      runs: {
+        type: "array",
+        items: agentRunSchema,
+        description: "Every waited-on child with its result when terminal.",
+      },
+    },
+  }),
+})
