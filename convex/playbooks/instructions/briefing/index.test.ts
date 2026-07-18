@@ -22,28 +22,28 @@ describe("Meeting Briefing contract", () => {
   test("defines complete, actionable coverage", () => {
     const instructions = renderBriefing()
 
-    expect(instructions).toContain("Scan every calendar the requester can read")
+    expect(instructions).toContain("Scan every calendar I can read")
     expect(instructions).toContain(
-      "including each occurrence of recurring meetings"
+      "every occurrence of recurring meetings included"
     )
     expect(instructions).toContain("from now through the next 26 hours")
     expect(instructions).toContain("Cover up to 60 meetings")
     expect(instructions).toContain("state the gap if more qualify")
     expect(instructions).toContain(
-      "At least one item must change what the requester should decide, ask, say, notice, or do"
+      "at least one item that changes what I should decide, ask, say, notice, or do"
     )
     expect(instructions).toContain(
-      "every other eligible meeting still gets a sparse or partial briefing"
+      "Every other eligible meeting gets a sparse or partial briefing"
     )
     expect(instructions).toContain(
-      "Never omit one because research is thin or a child failed"
+      "even when research is thin or a child failed"
     )
   })
 
   test("draws the sensitivity boundary at personal, not professional", () => {
     const instructions = renderBriefing()
 
-    expect(instructions).toContain("Confidential professional meetings")
+    expect(instructions).toContain("confidential professional meetings")
     expect(instructions).toContain(
       "board and investor meetings, commercial negotiations, recruiting interviews, customer escalations"
     )
@@ -107,8 +107,8 @@ describe("Meeting Briefing coordination", () => {
 
     expect(instructions).toContain("Deep-research up to 20")
     expect(instructions).toContain("granting only email reading and web access")
-    expect(instructions).toContain("Children write no artifact state")
-    expect(instructions.match(/#wait_for_agents once/g)).toHaveLength(1)
+    expect(instructions).toContain("Meeting state is written by this run alone")
+    expect(instructions.match(/one #wait_for_agents call/g)).toHaveLength(1)
     expect(instructions).toContain(
       "accept a result only if its meeting is unchanged"
     )
@@ -139,12 +139,12 @@ describe("Meeting Briefing delivery", () => {
     const instructions = renderBriefing()
 
     expect(instructions).toContain(
-      "claim the key `morning:<parent automation ID>:<target UTC>` in `dispatches`"
+      "Claim the key `morning:<parent automation ID>:<target UTC>` in `dispatches`"
     )
-    expect(instructions).toContain("Claim the key `manual:<run ID>`")
-    expect(instructions).toContain("mark an abandoned claim `unknown`")
     expect(instructions).toContain(
-      "never record a receipt without confirmed success"
+      "after claiming the key `manual:<run ID>` in `dispatches`"
     )
+    expect(instructions).toContain("mark an abandoned claim `unknown`")
+    expect(instructions).toContain("a receipt requires confirmed success")
   })
 })
