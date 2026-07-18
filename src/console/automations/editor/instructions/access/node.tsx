@@ -14,12 +14,9 @@ import {
   getAutomationSurfaceScopeIssue,
   isAutomationSurfaceIntegration,
 } from "../../../access"
-import {
-  type AutomationPolicyPermissions,
-  isAutomationSurfacePolicyBlocked,
-} from "../../../access/policy"
+import { isAutomationSurfacePolicyBlocked } from "../../../access/policy"
 import { parseAutomationSurfaceTools } from "../document"
-import { type AutomationSurfaceExtensionOptions } from "../editor/extension"
+import { type AutomationSurfaceNodeOptions } from "../markdown/schema"
 import {
   AutomationMarkerActionButton,
   AutomationSurfaceRemoveButton,
@@ -55,7 +52,7 @@ function AutomationSurfaceNodeContent({
 }: NodeViewProps & { integration: AutomationSurfaceFormValue["integration"] }) {
   const [isToolDialogOpen, setIsToolDialogOpen] = useState(false)
   const tools = parseAutomationSurfaceTools(node.attrs.tools)
-  const permissions = getNodeViewPermissions(extension)
+  const permissions = getNodeViewOptions(extension).getPermissions()
   const surface = { integration, tools }
   const scope = useEditorState({
     editor,
@@ -175,16 +172,8 @@ function AutomationSurfaceMarker({
   )
 }
 
-function getNodeViewPermissions(
-  extension: NodeViewProps["extension"]
-): AutomationPolicyPermissions {
-  return (
-    extension.options as Partial<AutomationSurfaceExtensionOptions>
-  ).getPermissions?.()
-}
-
 function getNodeViewOptions(extension: NodeViewProps["extension"]) {
-  return extension.options as AutomationSurfaceExtensionOptions
+  return extension.options as AutomationSurfaceNodeOptions
 }
 
 function AutomationSurfaceToolsButton({
