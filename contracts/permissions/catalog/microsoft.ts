@@ -54,7 +54,7 @@ export const microsoftToolPermissionRows = [
     "microsoft_calendar_list_events",
     "List calendar events",
     "List events across your Microsoft calendars.",
-    "List Microsoft Calendar events in a time range across every readable calendar, or pass a calendar ID to target one. Use to check availability or find an event before changing it.",
+    "List Microsoft Calendar events in a time range across every readable calendar, or pass a calendar ID to target one. Use to check availability or find an event before changing it. Each event carries entityKey (stable identity) and contentHash (changes when its content changes); use them instead of computing your own keys or fingerprints.",
     "read",
   ],
   [
@@ -62,7 +62,7 @@ export const microsoftToolPermissionRows = [
     "microsoft_calendar_get_event",
     "Read calendar event",
     "Read a Microsoft Calendar event.",
-    "Read one Microsoft Calendar event's details. Use to confirm specifics before updating.",
+    "Read one Microsoft Calendar event's details. Use to confirm specifics before updating. Pass the calendar ID the event was listed under so its entityKey stays stable; the result carries entityKey and contentHash.",
     "read",
   ],
   [

@@ -122,7 +122,7 @@ function assertBriefingState(state: unknown) {
 
 function stateWith(meeting: unknown) {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     timezone: "UTC",
     scan: {
       scannedAt: "2030-01-01T07:00:00.000Z",
@@ -145,7 +145,7 @@ function sampleMeeting() {
       startsAt: "2030-01-01T08:00:00.000Z",
       endsAt: "2030-01-01T09:00:00.000Z",
       status: "confirmed",
-      fingerprint: "f".repeat(64),
+      contentHash: "f".repeat(32),
       attendees: [{}],
     },
     whyItMatters: "External decision meeting",
@@ -166,7 +166,7 @@ function maximalMeeting(index: number) {
     status: "ready",
     revision: index,
     preparedAt: timestamp,
-    preparedForFingerprint: "f".repeat(64),
+    preparedForContentHash: "f".repeat(32),
     briefing: {
       purpose: finding,
       outcome: text,
@@ -220,7 +220,7 @@ function maximalEvent(timestamp: string) {
     startsAt: timestamp,
     endsAt: "2030-01-01T09:00:00.000Z",
     status: "confirmed".padEnd(40, "s"),
-    fingerprint: "f".repeat(64),
+    contentHash: "f".repeat(32),
     organizer: attendee,
     attendees: Array.from({ length: 6 }, () => attendee),
     location: "l".repeat(200),

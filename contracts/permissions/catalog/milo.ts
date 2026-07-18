@@ -151,7 +151,7 @@ export const miloToolPermissionRows = [
     "update_artifact_state",
     "Update artifact state",
     "Write data into an artifact's saved state.",
-    "Replace or merge-patch a contract-bound state document, keyed by contractName; writes must match the contract schema. artifactId defaults to the automation run's primary artifact — pass it explicitly for any other artifact.",
+    "Replace, merge-patch, or claim into a contract-bound state document, keyed by contractName; writes must match the contract schema. A claim atomically sets a path only when it is still unset — claim before at-most-once actions like sending. artifactId defaults to the automation run's primary artifact — pass it explicitly for any other artifact.",
     "write",
   ],
   [

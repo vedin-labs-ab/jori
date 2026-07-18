@@ -99,3 +99,42 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
   return prototype === Object.prototype || prototype === null
 }
+
+/** RFC 7396-style merge patch: objects merge recursively, null deletes. */
+export function mergePatch(target: unknown, patch: unknown): unknown {
+  if (!isRecord(patch)) {
+    return patch
+  }
+
+  const result: Record<string, unknown> = isRecord(target) ? { ...target } : {}
+
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === null) {
+      delete result[key]
+    } else {
+      result[key] = mergePatch(result[key], value)
+    }
+  }
+
+  return result
+}
+
+/** The value at a key path, or undefined when any step is missing. */
+export function readPath(value: unknown, path: readonly string[]): unknown {
+  let current = value
+
+  for (const key of path) {
+    if (!isRecord(current)) {
+      return undefined
+    }
+
+    current = current[key]
+  }
+
+  return current
+}
+
+/** A merge patch that sets exactly one key path to a value. */
+export function pathPatch(path: readonly string[], value: unknown): unknown {
+  return path.reduceRight<unknown>((nested, key) => ({ [key]: nested }), value)
+}

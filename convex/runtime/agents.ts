@@ -82,6 +82,7 @@ export const readChildren = query({
         v.literal("stopped")
       ),
       error: v.union(v.string(), v.null()),
+      result: v.union(v.string(), v.null()),
     })
   ),
   handler: async (ctx, args): Promise<AgentRunStatus[]> => {
@@ -105,6 +106,7 @@ export const readChildren = query({
         title: run.snapshot.title,
         status: run.status,
         error: run.error ?? null,
+        result: run.result ?? null,
       })
     }
 

@@ -9,6 +9,7 @@ import {
   requiredString,
   setOptionalSearchParam,
 } from "../../../shared/input"
+import { type CalendarEventContent, stampCalendarEvent } from "../events"
 import { getCalendarId } from "./format"
 
 export async function callGoogleCalendarTool(
@@ -48,9 +49,20 @@ async function listCalendarEvents(
 ) {
   const calendarId = optionalString(args.calendarId)
 
-  return calendarId === undefined
-    ? await listAllCalendarEvents(token, args)
-    : await listCalendarEventPage(token, args, calendarId)
+  if (calendarId === undefined) {
+    return await listAllCalendarEvents(token, args)
+  }
+
+  const page = readRecord(await listCalendarEventPage(token, args, calendarId))
+
+  return {
+    ...page,
+    items: await Promise.all(
+      readArray(page.items).map((event) =>
+        stampGoogleEvent(readRecord(event), calendarId)
+      )
+    ),
+  }
 }
 
 async function listAllCalendarEvents(
@@ -121,14 +133,21 @@ async function scanGoogleCalendar(
         calendar.calendarId
       )
     )
-    const pageItems = readArray(page.items)
-      .map(readRecord)
-      .slice(0, calendar.limit - items.length)
-      .map((event) => ({
-        ...event,
-        calendarId: calendar.calendarId,
-        calendarName: calendar.calendarName,
-      }))
+    const pageItems = await Promise.all(
+      readArray(page.items)
+        .map(readRecord)
+        .slice(0, calendar.limit - items.length)
+        .map((event) =>
+          stampGoogleEvent(
+            {
+              ...event,
+              calendarId: calendar.calendarId,
+              calendarName: calendar.calendarName,
+            },
+            calendar.calendarId
+          )
+        )
+    )
     items.push(...pageItems)
     pageToken = optionalString(page.nextPageToken)
   } while (pageToken !== undefined && items.length < calendar.limit)
@@ -159,20 +178,56 @@ async function listCalendarEventPage(
 
 function sortGoogleEvents(events: Record<string, unknown>[]) {
   return events.sort((left, right) =>
-    googleEventStart(left).localeCompare(googleEventStart(right))
+    googleEventTime(left.start).localeCompare(googleEventTime(right.start))
   )
 }
 
-function googleEventStart(event: Record<string, unknown>) {
-  const start = readRecord(event.start)
-  return optionalString(start.dateTime) ?? optionalString(start.date) ?? ""
+function googleEventTime(value: unknown) {
+  const time = readRecord(value)
+  return optionalString(time.dateTime) ?? optionalString(time.date) ?? ""
+}
+
+async function stampGoogleEvent(
+  event: Record<string, unknown>,
+  calendarId: string | undefined
+) {
+  return await stampCalendarEvent(
+    event,
+    {
+      provider: "googleCalendar",
+      calendarId,
+      eventId: optionalString(event.id) ?? "",
+    },
+    googleEventContent(event)
+  )
+}
+
+function googleEventContent(
+  event: Record<string, unknown>
+): CalendarEventContent {
+  return {
+    title: optionalString(event.summary) ?? "",
+    start: googleEventTime(event.start),
+    end: googleEventTime(event.end),
+    status: optionalString(event.status) ?? "",
+    description: optionalString(event.description) ?? "",
+    organizer: optionalString(readRecord(event.organizer).email) ?? "",
+    attendees: readArray(event.attendees).map(
+      (attendee) => optionalString(readRecord(attendee).email) ?? ""
+    ),
+  }
 }
 
 async function getCalendarEvent(token: string, args: Record<string, unknown>) {
-  return await googleJson(
-    token,
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(getCalendarId(args))}/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`
+  const calendarId = getCalendarId(args)
+  const event = readRecord(
+    await googleJson(
+      token,
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`
+    )
   )
+
+  return await stampGoogleEvent(event, calendarId)
 }
 
 async function createCalendarEvent(

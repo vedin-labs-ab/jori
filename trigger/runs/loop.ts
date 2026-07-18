@@ -229,10 +229,13 @@ async function completeRun(
   sequence: number,
   attempt: number
 ) {
+  const result = runtime.context.result
+
   await recordRuntimeEvent(runtime.convex, runtime.context, {
     attempt,
     sequence,
     type: "run.completed",
+    ...(result === null ? {} : { data: { result } }),
   })
 }
 

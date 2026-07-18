@@ -1,5 +1,6 @@
 import { type ContentsOptions } from "exa-js"
 import { createExaClient, withTimeout } from "../search"
+import { sha256Hex } from "../shared/crypto"
 
 const fetchMaxCharacters = 12_000
 const fetchTimeoutMs = 15_000
@@ -94,12 +95,7 @@ export function hostFromUrl(url: string): string | null {
 }
 
 export async function hashText(text: string): Promise<string> {
-  const bytes = new TextEncoder().encode(normalizeText(text))
-  const digest = await crypto.subtle.digest("SHA-256", bytes)
-
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
+  return await sha256Hex(normalizeText(text))
 }
 
 async function fetchPage(

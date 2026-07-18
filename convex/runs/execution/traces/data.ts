@@ -138,30 +138,29 @@ async function patchRunStatus(
     return
   }
 
-  if (args.type === "run.completed") {
-    if (run.status !== "queued" && run.status !== "running") {
-      return
-    }
-
-    await ctx.db.patch(args.runId, {
-      status: "completed",
-      error: undefined,
-      endedAt: Date.now(),
-    })
-
+  if (run.status !== "queued" && run.status !== "running") {
     return
   }
 
-  if (args.type === "run.failed") {
-    if (run.status !== "queued" && run.status !== "running") {
-      return
-    }
-
+  if (args.type === "run.completed") {
+    await ctx.db.patch(args.runId, completedRunPatch(args.data))
+  } else if (args.type === "run.failed") {
     await ctx.db.patch(args.runId, {
       status: "failed",
       error: readRunFailedError(args.data),
       endedAt: Date.now(),
     })
+  }
+}
+
+function completedRunPatch(data: TraceData | undefined) {
+  const result = readRunResult(data)
+
+  return {
+    status: "completed" as const,
+    error: undefined,
+    endedAt: Date.now(),
+    ...(result === undefined ? {} : { result }),
   }
 }
 
@@ -171,4 +170,12 @@ function readRunFailedError(data: TraceData | undefined) {
   }
 
   return data.error
+}
+
+function readRunResult(data: TraceData | undefined) {
+  return data !== undefined &&
+    "result" in data &&
+    typeof data.result === "string"
+    ? data.result
+    : undefined
 }

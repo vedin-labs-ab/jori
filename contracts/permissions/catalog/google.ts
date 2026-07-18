@@ -78,7 +78,7 @@ export const googleToolPermissionRows = [
     "google_calendar_list_events",
     "List calendar events",
     "List events across your Google calendars.",
-    "List Google Calendar events in a time range across every readable calendar, or pass a calendar ID to target one. Use to check availability or find an event before reading or changing it.",
+    "List Google Calendar events in a time range across every readable calendar, or pass a calendar ID to target one. Use to check availability or find an event before reading or changing it. Each event carries entityKey (stable identity) and contentHash (changes when its content changes); use them instead of computing your own keys or fingerprints.",
     "read",
   ],
   [
@@ -86,7 +86,7 @@ export const googleToolPermissionRows = [
     "google_calendar_get_event",
     "Read calendar event",
     "Read a Google Calendar event.",
-    "Read one Google Calendar event's details. Use to confirm specifics before updating or referencing it.",
+    "Read one Google Calendar event's details. Use to confirm specifics before updating or referencing it. Pass the calendar ID the event was listed under so its entityKey stays stable; the result carries entityKey and contentHash.",
     "read",
   ],
   [

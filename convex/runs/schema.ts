@@ -125,6 +125,8 @@ export const runs = defineTable({
   status: runStatus,
   workerId: v.optional(v.string()),
   error: v.optional(v.string()),
+  /** Outcome returned via finish_run; parents read it from wait_for_agents. */
+  result: v.optional(v.string()),
   createdBy: v.optional(v.id("persons")),
   createdAt: v.number(),
   endedAt: v.optional(v.number()),

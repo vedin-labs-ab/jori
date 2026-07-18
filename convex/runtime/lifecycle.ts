@@ -33,6 +33,11 @@ function finishRunSchema(): JsonObject {
         description:
           "Internal reason for finishing. Required when this run has an active requester surface and no visible communication was sent.",
       },
+      result: {
+        type: "string",
+        description:
+          "Outcome returned to the run that delegated this one; the parent receives it from wait_for_agents. Keep it a concise, self-contained summary (max 8,000 characters).",
+      },
     },
   }
 }

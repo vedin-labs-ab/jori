@@ -141,6 +141,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
         status: "running",
         tenantId: "tenant",
       },
+      result: null,
       session: null,
       tools: options.tools ?? [sendReplyTool()],
     },

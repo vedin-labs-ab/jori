@@ -1,4 +1,5 @@
-import { boundedNumber } from "../../shared/input"
+import { isRecord } from "../../../contracts/json"
+import { boundedNumber, requiredStringArray } from "../../shared/input"
 
 export function normalizeExpectedVersion(value: unknown) {
   const version = optionalNumber(value)
@@ -7,6 +8,10 @@ export function normalizeExpectedVersion(value: unknown) {
 }
 
 export function normalizeStateWrite(args: Record<string, unknown>) {
+  if ("claim" in args) {
+    return normalizeStateClaim(args.claim)
+  }
+
   if ("patch" in args) {
     return {
       type: "merge" as const,
@@ -21,7 +26,19 @@ export function normalizeStateWrite(args: Record<string, unknown>) {
     }
   }
 
-  throw new Error("State update requires value or patch.")
+  throw new Error("State update requires value, patch, or claim.")
+}
+
+function normalizeStateClaim(claim: unknown) {
+  if (!isRecord(claim)) {
+    throw new Error("claim must be an object with path and value.")
+  }
+
+  return {
+    type: "claim" as const,
+    path: requiredStringArray(claim.path, "claim.path"),
+    value: claim.value,
+  }
 }
 
 export function normalizeListLimit(value: unknown) {

@@ -11,6 +11,7 @@ import {
   requiredObject,
   requiredString,
 } from "../../../shared/input"
+import { type CalendarEventContent, stampCalendarEvent } from "../events"
 
 export async function callMicrosoftCalendarTool(
   token: string,
@@ -27,10 +28,7 @@ export async function callMicrosoftCalendarTool(
     return await listEvents(token, args)
   }
   if (tool === "microsoft_calendar_get_event") {
-    return await microsoftGraphJson(
-      token,
-      calendarEventPath(args, requiredString(args.eventId, "eventId"))
-    )
+    return await getEvent(token, args)
   }
   if (tool === "microsoft_calendar_create_event") {
     return await microsoftGraphJson(token, "/me/events", {
@@ -57,9 +55,31 @@ export async function callMicrosoftCalendarTool(
 async function listEvents(token: string, args: Record<string, unknown>) {
   const calendarId = optionalString(args.calendarId)
 
-  return calendarId === undefined
-    ? await listAllCalendarEvents(token, args)
-    : await listCalendarEventPage(token, args, calendarId)
+  if (calendarId === undefined) {
+    return await listAllCalendarEvents(token, args)
+  }
+
+  const page = readRecord(await listCalendarEventPage(token, args, calendarId))
+
+  return {
+    ...page,
+    value: await Promise.all(
+      readArray(page.value).map((event) =>
+        stampMicrosoftEvent(readRecord(event), calendarId)
+      )
+    ),
+  }
+}
+
+async function getEvent(token: string, args: Record<string, unknown>) {
+  const event = readRecord(
+    await microsoftGraphJson(
+      token,
+      calendarEventPath(args, requiredString(args.eventId, "eventId"))
+    )
+  )
+
+  return await stampMicrosoftEvent(event, optionalString(args.calendarId))
 }
 
 async function listAllCalendarEvents(
@@ -123,14 +143,21 @@ async function scanMicrosoftCalendar(
   )
 
   while (true) {
-    const pageEvents = readArray(page.value)
-      .map(readRecord)
-      .slice(0, calendar.limit - events.length)
-      .map((event) => ({
-        ...event,
-        calendarId: calendar.calendarId,
-        calendarName: calendar.calendarName,
-      }))
+    const pageEvents = await Promise.all(
+      readArray(page.value)
+        .map(readRecord)
+        .slice(0, calendar.limit - events.length)
+        .map((event) =>
+          stampMicrosoftEvent(
+            {
+              ...event,
+              calendarId: calendar.calendarId,
+              calendarName: calendar.calendarName,
+            },
+            calendar.calendarId
+          )
+        )
+    )
     events.push(...pageEvents)
 
     const nextLink = optionalString(page["@odata.nextLink"])
@@ -184,6 +211,53 @@ function sortMicrosoftEvents(events: Record<string, unknown>[]) {
 
 function microsoftEventStart(event: Record<string, unknown>) {
   return optionalString(readRecord(event.start).dateTime) ?? ""
+}
+
+function microsoftEventTime(value: unknown) {
+  const time = readRecord(value)
+
+  return [
+    optionalString(time.dateTime) ?? "",
+    optionalString(time.timeZone) ?? "",
+  ]
+    .join(" ")
+    .trim()
+}
+
+async function stampMicrosoftEvent(
+  event: Record<string, unknown>,
+  calendarId: string | undefined
+) {
+  return await stampCalendarEvent(
+    event,
+    {
+      provider: "microsoftCalendar",
+      calendarId,
+      eventId: optionalString(event.id) ?? "",
+    },
+    microsoftEventContent(event)
+  )
+}
+
+function microsoftEventContent(
+  event: Record<string, unknown>
+): CalendarEventContent {
+  return {
+    title: optionalString(event.subject) ?? "",
+    start: microsoftEventTime(event.start),
+    end: microsoftEventTime(event.end),
+    status: event.isCancelled === true ? "cancelled" : "confirmed",
+    description: optionalString(event.bodyPreview) ?? "",
+    organizer:
+      optionalString(
+        readRecord(readRecord(event.organizer).emailAddress).address
+      ) ?? "",
+    attendees: readArray(event.attendees).map(
+      (attendee) =>
+        optionalString(readRecord(readRecord(attendee).emailAddress).address) ??
+        ""
+    ),
+  }
 }
 
 function calendarEventPath(args: Record<string, unknown>, eventId: string) {

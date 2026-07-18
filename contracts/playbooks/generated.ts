@@ -8,13 +8,13 @@ export const playbookTemplateContracts = {
       description:
         "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
       schemaName: "MeetingBriefings",
-      schemaVersion: 3,
+      schemaVersion: 4,
       schema: {
         type: "object",
         properties: {
           schemaVersion: {
             type: "number",
-            const: 3,
+            const: 4,
           },
           timezone: {
             type: "string",
@@ -111,9 +111,9 @@ export const playbookTemplateContracts = {
                       type: "string",
                       maxLength: 40,
                     },
-                    fingerprint: {
+                    contentHash: {
                       type: "string",
-                      pattern: "^[0-9a-f]{64}$",
+                      pattern: "^[0-9a-f]{32}$",
                     },
                     organizer: {
                       type: "object",
@@ -185,7 +185,7 @@ export const playbookTemplateContracts = {
                     "startsAt",
                     "endsAt",
                     "status",
-                    "fingerprint",
+                    "contentHash",
                     "attendees",
                   ],
                   additionalProperties: false,
@@ -218,9 +218,9 @@ export const playbookTemplateContracts = {
                   pattern:
                     "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
                 },
-                preparedForFingerprint: {
+                preparedForContentHash: {
                   type: "string",
-                  pattern: "^[0-9a-f]{64}$",
+                  pattern: "^[0-9a-f]{32}$",
                 },
                 briefing: {
                   type: "object",
@@ -492,7 +492,8 @@ export const playbookTemplateContracts = {
             type: "object",
             propertyNames: {
               type: "string",
-              pattern: "^md:[0-9a-f]{32}$",
+              minLength: 1,
+              maxLength: 120,
             },
             additionalProperties: {
               type: "object",
@@ -500,10 +501,6 @@ export const playbookTemplateContracts = {
                 kind: {
                   type: "string",
                   enum: ["morning", "reminder", "manual", "failure"],
-                },
-                payloadHash: {
-                  type: "string",
-                  pattern: "^[0-9a-f]{64}$",
                 },
                 status: {
                   type: "string",
@@ -538,7 +535,6 @@ export const playbookTemplateContracts = {
               },
               required: [
                 "kind",
-                "payloadHash",
                 "status",
                 "attemptedAt",
                 "updatedAt",
@@ -555,161 +551,6 @@ export const playbookTemplateContracts = {
           "meetings",
           "dispatches",
         ],
-        additionalProperties: false,
-      },
-    },
-    {
-      name: "research",
-      scope: "personal",
-      description:
-        "Temporary research working state. Clear each attempt after synthesis.",
-      schemaName: "MeetingBriefingResearch",
-      schemaVersion: 3,
-      schema: {
-        type: "object",
-        properties: {
-          schemaVersion: {
-            type: "number",
-            const: 3,
-          },
-          attempts: {
-            type: "object",
-            propertyNames: {
-              type: "string",
-              pattern: "^mb:[0-9a-f]{32}$",
-            },
-            additionalProperties: {
-              type: "object",
-              properties: {
-                attemptId: {
-                  type: "string",
-                  maxLength: 60,
-                },
-                eventFingerprint: {
-                  type: "string",
-                  pattern: "^[0-9a-f]{64}$",
-                },
-                status: {
-                  type: "string",
-                  enum: ["pending", "ready", "partial", "sparse", "failed"],
-                },
-                startedAt: {
-                  type: "string",
-                  format: "date-time",
-                  pattern:
-                    "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
-                },
-                completedAt: {
-                  type: "string",
-                  format: "date-time",
-                  pattern:
-                    "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
-                },
-                findings: {
-                  maxItems: 8,
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      text: {
-                        type: "string",
-                        maxLength: 240,
-                      },
-                      kind: {
-                        type: "string",
-                        enum: ["fact", "inference", "recommendation"],
-                      },
-                      area: {
-                        type: "string",
-                        enum: [
-                          "purpose",
-                          "agenda",
-                          "person",
-                          "history",
-                          "commitment",
-                          "development",
-                          "decision",
-                          "talking-point",
-                          "question",
-                          "risk",
-                        ],
-                      },
-                      sourceIds: {
-                        minItems: 1,
-                        maxItems: 3,
-                        type: "array",
-                        items: {
-                          type: "string",
-                          maxLength: 60,
-                        },
-                      },
-                    },
-                    required: ["text", "kind", "area", "sourceIds"],
-                    additionalProperties: false,
-                  },
-                },
-                sources: {
-                  maxItems: 4,
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      id: {
-                        type: "string",
-                        maxLength: 60,
-                      },
-                      kind: {
-                        type: "string",
-                        maxLength: 40,
-                      },
-                      label: {
-                        type: "string",
-                        maxLength: 120,
-                      },
-                      occurredAt: {
-                        type: "string",
-                        format: "date-time",
-                        pattern:
-                          "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
-                      },
-                      retrievedAt: {
-                        type: "string",
-                        format: "date-time",
-                        pattern:
-                          "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
-                      },
-                      url: {
-                        type: "string",
-                        maxLength: 400,
-                      },
-                    },
-                    required: ["id", "kind", "label", "retrievedAt"],
-                    additionalProperties: false,
-                  },
-                },
-                gaps: {
-                  maxItems: 4,
-                  type: "array",
-                  items: {
-                    type: "string",
-                    maxLength: 160,
-                  },
-                },
-              },
-              required: [
-                "attemptId",
-                "eventFingerprint",
-                "status",
-                "startedAt",
-                "findings",
-                "sources",
-                "gaps",
-              ],
-              additionalProperties: false,
-            },
-          },
-        },
-        required: ["schemaVersion", "attempts"],
         additionalProperties: false,
       },
     },

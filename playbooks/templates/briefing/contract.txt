@@ -3,9 +3,9 @@ import { defineArtifactContract } from "@/milo/contract"
 
 const timestamp = z.iso.datetime()
 const identifier = z.string().max(512)
-const fingerprint = z.string().regex(/^[0-9a-f]{64}$/)
+const contentHash = z.string().regex(/^[0-9a-f]{32}$/)
 const meetingKey = z.string().regex(/^mb:[0-9a-f]{32}$/)
-const dispatchKey = z.string().regex(/^md:[0-9a-f]{32}$/)
+const dispatchKey = z.string().min(1).max(120)
 const label = z.string().max(120)
 const note = z.string().max(240)
 const gap = z.string().max(160)
@@ -45,17 +45,6 @@ const source = z.strictObject({
   url: url.optional(),
 })
 
-const researchAttempt = z.strictObject({
-  attemptId: z.string().max(60),
-  eventFingerprint: fingerprint,
-  status: z.enum(["pending", "ready", "partial", "sparse", "failed"]),
-  startedAt: timestamp,
-  completedAt: timestamp.optional(),
-  findings: z.array(evidencePoint).max(8),
-  sources: z.array(source).max(4),
-  gaps: z.array(gap).max(4),
-})
-
 const briefing = z.strictObject({
   purpose: evidencePoint.optional(),
   outcome: note.optional(),
@@ -73,7 +62,6 @@ const receipt = z.strictObject({
 
 const dispatch = z.strictObject({
   kind: z.enum(["morning", "reminder", "manual", "failure"]),
-  payloadHash: fingerprint,
   status: z.enum(["sending", "delivered", "failed", "unknown"]),
   attemptedAt: timestamp,
   updatedAt: timestamp,
@@ -91,7 +79,7 @@ const event = z.strictObject({
   startsAt: timestamp,
   endsAt: timestamp,
   status: z.string().max(40),
-  fingerprint,
+  contentHash,
   organizer: attendee.optional(),
   attendees: z.array(attendee).max(6),
   location: z.string().max(200).optional(),
@@ -112,7 +100,7 @@ const meeting = z.strictObject({
   ]),
   revision: z.number().int().nonnegative(),
   preparedAt: timestamp.optional(),
-  preparedForFingerprint: fingerprint.optional(),
+  preparedForContentHash: contentHash.optional(),
   briefing: briefing.optional(),
   sources: z.array(source).max(4),
   delivery: z
@@ -124,7 +112,7 @@ export type MeetingBriefing = z.infer<typeof meeting>
 export type BriefingPoint = z.infer<typeof evidencePoint>
 
 export const contract = defineArtifactContract({
-  version: 3,
+  version: 4,
   state: {
     briefings: {
       key: "meeting-briefing/briefings",
@@ -132,7 +120,7 @@ export const contract = defineArtifactContract({
       description:
         "Canonical briefing state. Patch one meeting branch at a time and preserve unrelated meetings.",
       schema: z.strictObject({
-        schemaVersion: z.literal(3),
+        schemaVersion: z.literal(4),
         timezone: z.string().max(100),
         scan: z.strictObject({
           scannedAt: timestamp,
@@ -145,19 +133,7 @@ export const contract = defineArtifactContract({
         dispatches: z.record(dispatchKey, dispatch),
       }),
       schemaName: "MeetingBriefings",
-      schemaVersion: 3,
-    },
-    research: {
-      key: "meeting-briefing/research",
-      scope: "personal",
-      description:
-        "Temporary research working state. Clear each attempt after synthesis.",
-      schema: z.strictObject({
-        schemaVersion: z.literal(3),
-        attempts: z.record(meetingKey, researchAttempt),
-      }),
-      schemaName: "MeetingBriefingResearch",
-      schemaVersion: 3,
+      schemaVersion: 4,
     },
   },
 })

@@ -63,6 +63,62 @@ describe("Google Calendar discovery", () => {
   })
 })
 
+describe("calendar event identity", () => {
+  test("stamps a stable entityKey and a content-sensitive contentHash", async () => {
+    const first = await listedEvent({
+      ...event("evt", "09:00"),
+      summary: "Sync",
+      attendees: [{ email: "A@x.com" }, { email: "a@x.com " }],
+    })
+    const same = await listedEvent({
+      ...event("evt", "09:00"),
+      summary: "Sync",
+      attendees: [{ email: "a@x.com" }],
+    })
+    const renamed = await listedEvent({
+      ...event("evt", "09:00"),
+      summary: "Renamed",
+      attendees: [{ email: "a@x.com" }],
+    })
+
+    expect(first.entityKey).toMatch(/^[0-9a-f]{32}$/)
+    expect(first.contentHash).toMatch(/^[0-9a-f]{32}$/)
+    expect(same.entityKey).toBe(first.entityKey)
+    expect(same.contentHash).toBe(first.contentHash)
+    expect(renamed.entityKey).toBe(first.entityKey)
+    expect(renamed.contentHash).not.toBe(first.contentHash)
+  })
+
+  test("get_event stamps the same identity as the listing", async () => {
+    const listed = await listedEvent({
+      ...event("evt", "09:00"),
+      summary: "Sync",
+    })
+
+    mockGoogleFetch(() => ({ ...event("evt", "09:00"), summary: "Sync" }))
+    const fetched = (await callGoogleTool(
+      googleCalendarIntegration(),
+      "google_calendar_get_event",
+      { calendarId: "team", eventId: "evt" }
+    )) as Record<string, unknown>
+
+    expect(fetched.entityKey).toBe(listed.entityKey)
+    expect(fetched.contentHash).toBe(listed.contentHash)
+  })
+})
+
+async function listedEvent(raw: Record<string, unknown>) {
+  mockGoogleFetch(() => ({ items: [raw] }))
+
+  const result = (await callGoogleTool(
+    googleCalendarIntegration(),
+    "google_calendar_list_events",
+    { calendarId: "team", maxResults: 10 }
+  )) as { items: Record<string, unknown>[] }
+
+  return result.items[0]
+}
+
 function event(id: string, time: string) {
   return { id, start: { dateTime: `2030-01-01T${time}:00Z` } }
 }

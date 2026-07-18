@@ -92,6 +92,7 @@ export function runtimeResponse(args: {
     activeSurface: args.activeSurface.state,
     drained: args.drained ?? null,
     handoffs: args.handoffs,
+    result: null,
     tools: runtimeTools(
       args.lifecycleTools,
       args.activeSurface,

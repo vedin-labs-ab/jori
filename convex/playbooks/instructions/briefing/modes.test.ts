@@ -22,8 +22,10 @@ describe("Meeting Briefing modes", () => {
       "meeting-briefing:<parent automation ID>:event:<meeting key>:<start UTC>"
     )
     expect(enabled).toContain("delivery.reminder")
-    expect(enabled).toContain("reminder\\n<parent automation ID>")
-    expect(enabled).toContain("An existing claim forbids another send")
+    expect(enabled).toContain(
+      'dispatches["reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>"]'
+    )
+    expect(enabled).toContain("A claimed: false return forbids another send")
   })
 
   test("morning-off leaves future work to reminders", () => {
