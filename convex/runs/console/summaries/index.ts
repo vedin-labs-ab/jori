@@ -52,6 +52,7 @@ export async function summarizeRun(
     endedAt: run.endedAt,
     durationMs: getDuration(run),
     error: run.error,
+    result: run.result,
     approval: approvals.at(0) ?? null,
     approvals,
     offer: offers.at(0) ?? null,

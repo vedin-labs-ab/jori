@@ -3,6 +3,7 @@ import { createHash } from "node:crypto"
 import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
+import { playbookCatalog } from "../contracts/playbooks/catalog.ts"
 import { runtimeAssets } from "../runtime/artifacts/_generated/assets.ts"
 import { root } from "./runtime/paths.ts"
 
@@ -11,6 +12,7 @@ const generatedPath = path.join(
   "convex/artifacts/templates/_generated/templates.ts"
 )
 const summaryPath = path.join(root, "contracts/playbooks/generated.ts")
+const versionsPath = path.join(root, "playbooks/versions.json")
 
 export async function compileArtifactTemplates(checkMode: boolean) {
   const runtime = await fs.mkdtemp(path.join(os.tmpdir(), "milo-templates-"))
@@ -51,10 +53,12 @@ export async function compileArtifactTemplates(checkMode: boolean) {
     const templates = { "meeting-briefing": briefing }
     const content = format(generatedPath, renderGenerated(templates))
     const summary = format(summaryPath, renderSummary(templates))
+    const versions = await renderRecipeVersions()
 
     if (checkMode) {
       await requireCurrent(generatedPath, content)
       await requireCurrent(summaryPath, summary)
+      await requireCurrent(versionsPath, versions)
 
       return
     }
@@ -62,6 +66,7 @@ export async function compileArtifactTemplates(checkMode: boolean) {
     await fs.mkdir(path.dirname(generatedPath), { recursive: true })
     await fs.writeFile(generatedPath, content, "utf8")
     await fs.writeFile(summaryPath, summary, "utf8")
+    await fs.writeFile(versionsPath, versions, "utf8")
   } finally {
     await fs.rm(runtime, { force: true, recursive: true })
   }
@@ -75,6 +80,70 @@ async function requireCurrent(filePath: string, content: string) {
       "Artifact templates are stale. Run `pnpm templates:compile` and commit the result."
     )
   }
+}
+
+// Enabled automations pin a playbook version and only see edits through a
+// bump, so recipe content changing under an unchanged version would update
+// invisibly. The committed lock catches exactly that in both modes.
+async function renderRecipeVersions() {
+  const lock = JSON.parse(
+    await fs.readFile(versionsPath, "utf8").catch(() => "{}")
+  ) as Record<string, { version: number; fingerprint: string }>
+  const entries: [string, { version: number; fingerprint: string }][] = []
+
+  for (const definition of playbookCatalog) {
+    const fingerprint = await recipeFingerprint(definition)
+    const locked = lock[definition.key]
+
+    if (
+      locked !== undefined &&
+      locked.version === definition.version &&
+      locked.fingerprint !== fingerprint
+    ) {
+      throw new Error(
+        `The "${definition.key}" recipe changed under version ${definition.version}. ` +
+          "Bump the playbook's version in contracts/playbooks, then run `pnpm templates:compile`."
+      )
+    }
+
+    entries.push([definition.key, { version: definition.version, fingerprint }])
+  }
+
+  entries.sort(([left], [right]) => left.localeCompare(right))
+
+  return `${JSON.stringify(Object.fromEntries(entries), null, 2)}\n`
+}
+
+/** Hash of the recipe's versioned source files: the instruction template
+ *  plus the artifact template directory when the playbook has one. Both
+ *  share the template's short name: playbooks/briefing.md pairs with
+ *  playbooks/templates/briefing/. */
+async function recipeFingerprint(definition: {
+  template: string
+  artifact?: unknown
+}) {
+  const hash = createHash("sha256")
+
+  hash.update(await readRecipeFile(`prompts/${definition.template}.md`))
+
+  if (definition.artifact !== undefined) {
+    const directory = path.join(
+      root,
+      "playbooks/templates",
+      path.basename(definition.template)
+    )
+
+    for (const name of (await fs.readdir(directory)).sort()) {
+      hash.update(`\n${name}\n`)
+      hash.update(await fs.readFile(path.join(directory, name), "utf8"))
+    }
+  }
+
+  return hash.digest("hex")
+}
+
+async function readRecipeFile(relativePath: string) {
+  return await fs.readFile(path.join(root, relativePath), "utf8")
 }
 
 function runtimeRevision() {

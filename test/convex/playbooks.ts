@@ -1,4 +1,4 @@
-import { playbookCatalog } from "../../contracts/playbooks/catalog"
+import { getPlaybook } from "../../contracts/playbooks/catalog"
 import { type DeliveryDestination } from "../../contracts/playbooks/delivery"
 import {
   type PlaybookOptionValues,
@@ -17,15 +17,12 @@ export function renderPlaybook(
   destination: DeliveryDestination = emailDestination,
   options: PlaybookOptionValues = {}
 ) {
-  const definition = playbookCatalog.find((entry) => entry.key === key)
+  const definition = getPlaybook(key)
 
   return renderPlaybookInstructions({
-    key,
+    definition,
     providers: { email: "Gmail", calendar: "Google Calendar" },
     destination,
-    subject: definition?.title ?? key,
-    noun: definition?.delivery.noun ?? "output",
-    style: definition?.delivery.style,
-    options: resolvePlaybookOptions(definition?.setup, options),
+    options: resolvePlaybookOptions(definition.setup, options),
   })
 }
