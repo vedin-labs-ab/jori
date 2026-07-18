@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { listGoogleCalendars } from "../../../integrations/google/calendars"
 import {
   boundedNumber,
@@ -19,32 +20,26 @@ export async function listGoogleCalendarSummaries(
       pageToken: optionalString(args.pageToken),
     })
   )
-  const nextPageToken = optionalString(page.nextPageToken)
-
-  return {
+  return compactRecord({
     calendars: readArray(page.items).map(readRecord).map(googleCalendarSummary),
-    ...(nextPageToken === undefined ? {} : { nextPageToken }),
-  }
+    nextPageToken: optionalString(page.nextPageToken),
+  })
 }
 
 function googleCalendarSummary(
   entry: Record<string, unknown>
 ): CalendarSummary {
-  const description = optionalString(entry.description)
-  const timeZone = optionalString(entry.timeZone)
-  const accessRole = optionalString(entry.accessRole)
-
-  return {
-    provider: "googleCalendar",
+  return compactRecord({
+    provider: "googleCalendar" as const,
     calendarId: optionalString(entry.id) ?? "",
     name:
       optionalString(entry.summaryOverride) ??
       optionalString(entry.summary) ??
       "",
-    ...(description === undefined ? {} : { description }),
-    ...(timeZone === undefined ? {} : { timeZone }),
-    ...(entry.primary === true ? { primary: true } : {}),
-    ...(accessRole === undefined ? {} : { accessRole }),
-    ...(entry.hidden === true ? { hidden: true } : {}),
-  }
+    description: optionalString(entry.description),
+    timeZone: optionalString(entry.timeZone),
+    primary: entry.primary === true ? true : undefined,
+    accessRole: optionalString(entry.accessRole),
+    hidden: entry.hidden === true ? true : undefined,
+  })
 }

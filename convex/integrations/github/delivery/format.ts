@@ -1,7 +1,8 @@
+import { compactRecord } from "../../../../contracts/json"
 import { readArray, readNested, readRecord } from "../../../shared/input"
 
 export function summarizeRepository(repository: Record<string, unknown>) {
-  return compactGitHubSummary({
+  return compactRecord({
     id: repository.id,
     fullName: repository.full_name,
     private: repository.private,
@@ -13,7 +14,7 @@ export function summarizeRepository(repository: Record<string, unknown>) {
 }
 
 export function summarizeIssue(issue: Record<string, unknown>) {
-  return compactGitHubSummary({
+  return compactRecord({
     id: issue.id,
     number: issue.number,
     title: issue.title,
@@ -32,7 +33,7 @@ export function summarizeIssue(issue: Record<string, unknown>) {
 }
 
 export function summarizePullRequest(pullRequest: Record<string, unknown>) {
-  return compactGitHubSummary({
+  return compactRecord({
     id: pullRequest.id,
     number: pullRequest.number,
     title: pullRequest.title,
@@ -54,7 +55,7 @@ export function summarizePullRequest(pullRequest: Record<string, unknown>) {
 }
 
 export function summarizeComment(comment: Record<string, unknown>) {
-  return compactGitHubSummary({
+  return compactRecord({
     id: comment.id,
     body: comment.body,
     htmlUrl: comment.html_url,
@@ -62,10 +63,4 @@ export function summarizeComment(comment: Record<string, unknown>) {
     createdAt: comment.created_at,
     updatedAt: comment.updated_at,
   })
-}
-
-export function compactGitHubSummary(summary: Record<string, unknown>) {
-  return Object.fromEntries(
-    Object.entries(summary).filter(([, value]) => value !== undefined)
-  )
 }

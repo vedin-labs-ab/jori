@@ -138,3 +138,11 @@ export function readPath(value: unknown, path: readonly string[]): unknown {
 export function pathPatch(path: readonly string[], value: unknown): unknown {
   return path.reduceRight<unknown>((nested, key) => ({ [key]: nested }), value)
 }
+
+/** A copy of the record without its undefined entries, so optional fields
+ *  can be written inline and absent ones simply disappear. */
+export function compactRecord<T extends Record<string, unknown>>(record: T): T {
+  return Object.fromEntries(
+    Object.entries(record).filter(([, value]) => value !== undefined)
+  ) as T
+}

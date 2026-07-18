@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { base64UrlDecode } from "../../../shared/encoding"
 import {
   optionalString,
@@ -38,12 +39,9 @@ export function gmailMailMessage(
   message: Record<string, unknown>
 ): MailMessage {
   const payload = readRecord(message.payload)
-  const labels = readArray(message.labelIds).filter(
-    (label): label is string => typeof label === "string"
-  )
   const body = gmailBodyPart(payload)
 
-  return {
+  return compactRecord({
     provider: "gmail",
     messageId: optionalString(message.id) ?? "",
     threadId: optionalString(message.threadId),
@@ -53,12 +51,12 @@ export function gmailMailMessage(
     subject: optionalString(getHeader(message, "subject")) ?? "",
     date: gmailDate(message.internalDate),
     snippet: optionalString(message.snippet),
-    unread: labels.includes("UNREAD"),
+    unread: readArray(message.labelIds).includes("UNREAD"),
     ...(body === undefined
       ? {}
       : boundedMailBody(base64UrlDecode(body.data), body.type)),
     attachments: gmailAttachments(payload),
-  }
+  })
 }
 
 export function gmailMailThread(thread: Record<string, unknown>) {
@@ -71,19 +69,17 @@ export function gmailMailThread(thread: Record<string, unknown>) {
 }
 
 export function gmailThreadSearchPage(page: Record<string, unknown>) {
-  const nextPageToken = optionalString(page.nextPageToken)
-
-  return {
+  return compactRecord({
     threads: readArray(page.threads)
       .map(readRecord)
-      .map((thread) => ({
-        threadId: optionalString(thread.id) ?? "",
-        ...(optionalString(thread.snippet) === undefined
-          ? {}
-          : { snippet: optionalString(thread.snippet) }),
-      })),
-    ...(nextPageToken === undefined ? {} : { nextPageToken }),
-  }
+      .map((thread) =>
+        compactRecord({
+          threadId: optionalString(thread.id) ?? "",
+          snippet: optionalString(thread.snippet),
+        })
+      ),
+    nextPageToken: optionalString(page.nextPageToken),
+  })
 }
 
 function gmailDate(internalDate: unknown) {
@@ -137,17 +133,15 @@ function gmailAttachments(
   const name = optionalString(part.filename)
   const body = readRecord(part.body)
 
-  if (name !== undefined && name !== "") {
-    attachments.push({
-      ...(optionalString(body.attachmentId) === undefined
-        ? {}
-        : { attachmentId: optionalString(body.attachmentId) }),
-      name,
-      ...(optionalString(part.mimeType) === undefined
-        ? {}
-        : { mimeType: optionalString(part.mimeType) }),
-      ...(typeof body.size === "number" ? { size: body.size } : {}),
-    })
+  if (name !== undefined) {
+    attachments.push(
+      compactRecord({
+        attachmentId: optionalString(body.attachmentId),
+        name,
+        mimeType: optionalString(part.mimeType),
+        size: typeof body.size === "number" ? body.size : undefined,
+      })
+    )
   }
 
   for (const child of readArray(part.parts)) {

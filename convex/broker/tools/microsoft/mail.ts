@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { optionalString, readArray, readRecord } from "../../../shared/input"
 import {
   boundedMailBody,
@@ -37,7 +38,7 @@ export function microsoftMailMessage(
           .map(readRecord)
           .map(microsoftMailAttachment)
 
-  return {
+  return compactRecord({
     provider: "microsoftEmail",
     messageId: optionalString(message.id) ?? "",
     threadId: optionalString(message.conversationId),
@@ -47,18 +48,19 @@ export function microsoftMailMessage(
     subject: optionalString(message.subject) ?? "",
     date: optionalString(message.receivedDateTime),
     snippet: optionalString(message.bodyPreview),
-    ...(typeof message.isRead === "boolean" ? { unread: !message.isRead } : {}),
+    unread: typeof message.isRead === "boolean" ? !message.isRead : undefined,
     ...(bodyContent === undefined
       ? {}
       : boundedMailBody(
           bodyContent,
           body.contentType === "html" ? "html" : "text"
         )),
-    ...(attachments === undefined ? {} : { attachments }),
-    ...(typeof message.hasAttachments === "boolean"
-      ? { hasAttachments: message.hasAttachments }
-      : {}),
-  }
+    attachments,
+    hasAttachments:
+      typeof message.hasAttachments === "boolean"
+        ? message.hasAttachments
+        : undefined,
+  })
 }
 
 export function microsoftDraftResult(message: Record<string, unknown>) {
@@ -74,16 +76,12 @@ export function microsoftDraftResult(message: Record<string, unknown>) {
 function microsoftMailAttachment(
   attachment: Record<string, unknown>
 ): MailAttachment {
-  return {
-    ...(optionalString(attachment.id) === undefined
-      ? {}
-      : { attachmentId: optionalString(attachment.id) }),
+  return compactRecord({
+    attachmentId: optionalString(attachment.id),
     name: optionalString(attachment.name) ?? "",
-    ...(optionalString(attachment.contentType) === undefined
-      ? {}
-      : { mimeType: optionalString(attachment.contentType) }),
-    ...(typeof attachment.size === "number" ? { size: attachment.size } : {}),
-  }
+    mimeType: optionalString(attachment.contentType),
+    size: typeof attachment.size === "number" ? attachment.size : undefined,
+  })
 }
 
 function microsoftAddresses(value: unknown) {

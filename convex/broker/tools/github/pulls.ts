@@ -1,5 +1,5 @@
+import { compactRecord } from "../../../../contracts/json"
 import {
-  compactGitHubSummary,
   summarizeComment,
   summarizePullRequest,
 } from "../../../integrations/github/delivery/format"
@@ -93,7 +93,7 @@ function pullRequestUpdateBody(args: Record<string, unknown>) {
 }
 
 function summarizePullRequestFile(file: Record<string, unknown>) {
-  return compactGitHubSummary({
+  return compactRecord({
     additions: file.additions,
     blobUrl: file.blob_url,
     changes: file.changes,
@@ -107,7 +107,7 @@ function summarizePullRequestFile(file: Record<string, unknown>) {
 }
 
 function summarizePullRequestReviewComment(comment: Record<string, unknown>) {
-  return compactGitHubSummary({
+  return compactRecord({
     ...summarizeComment(comment),
     commitId: comment.commit_id,
     diffHunk: comment.diff_hunk,

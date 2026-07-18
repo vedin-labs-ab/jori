@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { listMicrosoftCalendars } from "../../../integrations/microsoft/calendars"
 import {
   boundedNumber,
@@ -27,18 +28,15 @@ export async function listMicrosoftCalendarSummaries(
 function microsoftCalendarSummary(
   calendar: Record<string, unknown>
 ): CalendarSummary {
-  const owner = optionalString(
-    readRecord(calendar.owner).address ?? readRecord(calendar.owner).name
-  )
-
-  return {
-    provider: "microsoftCalendar",
+  return compactRecord({
+    provider: "microsoftCalendar" as const,
     calendarId: optionalString(calendar.id) ?? "",
     name: optionalString(calendar.name) ?? "",
-    ...(calendar.isDefaultCalendar === true ? { primary: true } : {}),
-    ...(typeof calendar.canEdit === "boolean"
-      ? { canEdit: calendar.canEdit }
-      : {}),
-    ...(owner === undefined ? {} : { owner }),
-  }
+    primary: calendar.isDefaultCalendar === true ? true : undefined,
+    canEdit:
+      typeof calendar.canEdit === "boolean" ? calendar.canEdit : undefined,
+    owner: optionalString(
+      readRecord(calendar.owner).address ?? readRecord(calendar.owner).name
+    ),
+  })
 }

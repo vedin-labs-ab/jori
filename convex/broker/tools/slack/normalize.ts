@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { optionalString, readArray, readRecord } from "../../../shared/input"
 
 // Slack Web API envelopes are mapped into compact Milo shapes at this edge:
@@ -25,22 +26,22 @@ export function slackMessage(message: Record<string, unknown>): SlackMessage {
       count: typeof reaction.count === "number" ? reaction.count : 0,
     }))
 
-  return {
+  return compactRecord({
     ts: optionalString(message.ts) ?? "",
-    ...(field("threadTs", message.thread_ts) as object),
-    ...(field("userId", message.user) as object),
-    ...(field("botId", message.bot_id) as object),
-    ...(field("subtype", message.subtype) as object),
+    threadTs: optionalString(message.thread_ts),
+    userId: optionalString(message.user),
+    botId: optionalString(message.bot_id),
+    subtype: optionalString(message.subtype),
     text: optionalString(message.text) ?? "",
-    ...(Array.isArray(message.blocks) && message.blocks.length > 0
-      ? { blocks: message.blocks }
-      : {}),
-    ...(reactions.length > 0 ? { reactions } : {}),
-    ...(typeof message.reply_count === "number"
-      ? { replyCount: message.reply_count }
-      : {}),
-    ...(message.edited === undefined ? {} : { edited: true }),
-  }
+    blocks:
+      Array.isArray(message.blocks) && message.blocks.length > 0
+        ? message.blocks
+        : undefined,
+    reactions: reactions.length > 0 ? reactions : undefined,
+    replyCount:
+      typeof message.reply_count === "number" ? message.reply_count : undefined,
+    edited: message.edited === undefined ? undefined : true,
+  })
 }
 
 export function slackMessageListing(result: unknown) {
@@ -80,43 +81,44 @@ export function slackSearchListing(result: unknown) {
   const messages = readRecord(readRecord(result).messages)
   const paging = readRecord(messages.paging)
 
-  return {
+  return compactRecord({
     matches: readArray(messages.matches)
       .map(readRecord)
-      .map((match) => ({
-        ...slackMessage(match),
-        ...(field("channelId", readRecord(match.channel).id) as object),
-        ...(field("channelName", readRecord(match.channel).name) as object),
-        ...(field("permalink", match.permalink) as object),
-      })),
+      .map((match) =>
+        compactRecord({
+          ...slackMessage(match),
+          channelId: optionalString(readRecord(match.channel).id),
+          channelName: optionalString(readRecord(match.channel).name),
+          permalink: optionalString(match.permalink),
+        })
+      ),
     totalCount: typeof messages.total === "number" ? messages.total : 0,
-    ...(typeof paging.page === "number" ? { page: paging.page } : {}),
-    ...(typeof paging.pages === "number" ? { pageCount: paging.pages } : {}),
-  }
+    page: typeof paging.page === "number" ? paging.page : undefined,
+    pageCount: typeof paging.pages === "number" ? paging.pages : undefined,
+  })
 }
 
 export function slackSentResult(result: unknown) {
   const envelope = readRecord(result)
 
-  return {
+  return compactRecord({
     status: "sent" as const,
-    ...(field("channel", envelope.channel) as object),
-    ...(field("ts", envelope.ts) as object),
-  }
+    channel: optionalString(envelope.channel),
+    ts: optionalString(envelope.ts),
+  })
 }
 
 function slackChannel(channel: Record<string, unknown>) {
-  return {
+  return compactRecord({
     channelId: optionalString(channel.id) ?? "",
-    ...(field("name", channel.name) as object),
+    name: optionalString(channel.name),
     type: slackChannelType(channel),
-    ...(field("topic", readRecord(channel.topic).value) as object),
-    ...(typeof channel.num_members === "number"
-      ? { memberCount: channel.num_members }
-      : {}),
-    ...(channel.is_archived === true ? { archived: true } : {}),
-    ...(field("userId", channel.user) as object),
-  }
+    topic: optionalString(readRecord(channel.topic).value),
+    memberCount:
+      typeof channel.num_members === "number" ? channel.num_members : undefined,
+    archived: channel.is_archived === true ? true : undefined,
+    userId: optionalString(channel.user),
+  })
 }
 
 function slackChannelType(channel: Record<string, unknown>) {
@@ -133,16 +135,16 @@ function slackChannelType(channel: Record<string, unknown>) {
 function slackMember(member: Record<string, unknown>) {
   const profile = readRecord(member.profile)
 
-  return {
+  return compactRecord({
     userId: optionalString(member.id) ?? "",
-    ...(field("name", member.name) as object),
-    ...(field("realName", member.real_name) as object),
-    ...(field("displayName", profile.display_name) as object),
-    ...(field("email", profile.email) as object),
-    ...(member.is_bot === true ? { isBot: true } : {}),
-    ...(member.deleted === true ? { deleted: true } : {}),
-    ...(field("timeZone", member.tz) as object),
-  }
+    name: optionalString(member.name),
+    realName: optionalString(member.real_name),
+    displayName: optionalString(profile.display_name),
+    email: optionalString(profile.email),
+    isBot: member.is_bot === true ? true : undefined,
+    deleted: member.deleted === true ? true : undefined,
+    timeZone: optionalString(member.tz),
+  })
 }
 
 function nextCursor(envelope: Record<string, unknown>) {
@@ -150,11 +152,5 @@ function nextCursor(envelope: Record<string, unknown>) {
     readRecord(envelope.response_metadata).next_cursor
   )
 
-  return cursor === undefined || cursor === "" ? {} : { nextCursor: cursor }
-}
-
-function field(key: string, value: unknown) {
-  const text = optionalString(value)
-
-  return text === undefined || text === "" ? {} : { [key]: text }
+  return cursor === undefined ? {} : { nextCursor: cursor }
 }
