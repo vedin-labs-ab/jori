@@ -8,7 +8,7 @@ import {
   slackSearchListing,
 } from "./normalize"
 
-describe("Slack normalization", () => {
+describe("Slack message normalization", () => {
   test("message listings reduce to normalized messages", () => {
     const result = slackMessageListing({
       ok: true,
@@ -48,7 +48,9 @@ describe("Slack normalization", () => {
       schemaViolations(result, slackToolResponseSchemas.conversations_history)
     ).toEqual([])
   })
+})
 
+describe("Slack channel normalization", () => {
   test("channel listings classify conversation types", () => {
     const result = slackChannelListing({
       ok: true,
@@ -85,7 +87,9 @@ describe("Slack normalization", () => {
       schemaViolations(result, slackToolResponseSchemas.channels_list)
     ).toEqual([])
   })
+})
 
+describe("Slack member and search normalization", () => {
   test("member listings keep profile fields and drop empty cursors", () => {
     const result = slackMemberListing({
       ok: true,
@@ -119,7 +123,9 @@ describe("Slack normalization", () => {
       schemaViolations(result, slackToolResponseSchemas.users_search)
     ).toEqual([])
   })
+})
 
+describe("Slack search normalization", () => {
   test("search results carry their conversation and permalink", () => {
     const result = slackSearchListing({
       ok: true,

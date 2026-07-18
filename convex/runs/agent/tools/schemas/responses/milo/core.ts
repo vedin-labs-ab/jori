@@ -12,6 +12,7 @@ import {
   stringField,
 } from "../common"
 import { automationMiloToolResponseSchemas } from "./automations"
+import { brokerMiloToolResponseSchemas } from "./broker"
 import { runMiloToolResponseSchemas } from "./runs"
 
 function assetSummaryProperties() {
@@ -95,24 +96,7 @@ function webToolResult(): JsonSchema {
 }
 
 export const coreMiloToolResponseSchemas = {
-  list_capabilities: resultSchema({
-    required: ["run", "connected", "available"],
-    description: "Tool availability grouped by integration surface.",
-    properties: {
-      run: listField(
-        "Groups already granted to this run.",
-        providerPayload("Capability group: surface plus its tools and modes.")
-      ),
-      connected: listField(
-        "Groups connected for the tenant.",
-        providerPayload("Capability group: surface plus its tools and modes.")
-      ),
-      available: listField(
-        "Integrations that could be connected.",
-        providerPayload("Capability group with status not_connected.")
-      ),
-    },
-  }),
+  ...brokerMiloToolResponseSchemas,
   load_skill: {
     description: "The skill's instructions, or the catalog when unknown.",
     oneOf: [
@@ -149,36 +133,6 @@ export const coreMiloToolResponseSchemas = {
     ],
   },
   ...runMiloToolResponseSchemas,
-  offer_integration: providerPayload(
-    "Offer outcome: status (connected when already available, otherwise the delivered offer's status) with integration, message, and offer identifiers."
-  ),
-  cancel_approval_request: resultSchema({
-    required: ["status", "message"],
-    properties: {
-      status: enumField(
-        [
-          "cancelled",
-          "invalid_message",
-          "missing",
-          "decided",
-          "expired",
-          "failed",
-        ],
-        "What happened to the pending approval."
-      ),
-      message: stringField("Human-readable outcome."),
-    },
-  }),
-  cancel_integration_offer: resultSchema({
-    required: ["status", "message"],
-    properties: {
-      status: enumField(
-        ["cancelled", "missing", "already_resolved"],
-        "What happened to the pending offer."
-      ),
-      message: stringField("Human-readable outcome."),
-    },
-  }),
   save_asset: resultSchema({
     required: ["assetId", "mimeType", "name", "size", "url"],
     properties: {
