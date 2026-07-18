@@ -132,19 +132,23 @@ function OptionControl({
   )
 }
 
+/** Props shared by the two interchangeable choice renderers; OptionControl
+ *  picks between them via the field's control preference. */
+type ChoiceControlProps = {
+  disabled: boolean
+  field: Extract<PlaybookOptionField, { kind: "choice" }>
+  id: string
+  onChange: (value: string) => void
+  value: boolean | number | string
+}
+
 function ChoiceToggle({
   disabled,
   field,
   id,
   onChange,
   value,
-}: {
-  disabled: boolean
-  field: Extract<PlaybookOptionField, { kind: "choice" }>
-  id: string
-  onChange: (value: string) => void
-  value: boolean | number | string
-}) {
+}: ChoiceControlProps) {
   return (
     <ToggleGroup
       aria-label={field.label}
@@ -175,13 +179,7 @@ function OptionSelect({
   id,
   onChange,
   value,
-}: {
-  disabled: boolean
-  field: Extract<PlaybookOptionField, { kind: "choice" }>
-  id: string
-  onChange: (value: string) => void
-  value: boolean | number | string
-}) {
+}: ChoiceControlProps) {
   return (
     <Select disabled={disabled} onValueChange={onChange} value={String(value)}>
       <SelectTrigger className="w-full" id={id}>
