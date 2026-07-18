@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../contracts/json"
 // One normalized message shape for every mail provider. Provider payloads
 // (Gmail MIME trees, Microsoft Graph messages) are mapped into it at the
 // provider edges, so agents read one compact form regardless of account.
@@ -44,11 +45,7 @@ export function boundedMailBody(content: string, type: "text" | "html") {
 }
 
 export function sentMailResult(ids: { messageId?: string; threadId?: string }) {
-  return {
-    status: "sent" as const,
-    ...(ids.messageId === undefined ? {} : { messageId: ids.messageId }),
-    ...(ids.threadId === undefined ? {} : { threadId: ids.threadId }),
-  }
+  return compactRecord({ status: "sent" as const, ...ids })
 }
 
 export function draftedMailResult(ids: {
@@ -56,12 +53,7 @@ export function draftedMailResult(ids: {
   messageId?: string
   threadId?: string
 }) {
-  return {
-    status: "drafted" as const,
-    draftId: ids.draftId,
-    ...(ids.messageId === undefined ? {} : { messageId: ids.messageId }),
-    ...(ids.threadId === undefined ? {} : { threadId: ids.threadId }),
-  }
+  return compactRecord({ status: "drafted" as const, ...ids })
 }
 
 /** Split an address header on commas, respecting quoted display names. */

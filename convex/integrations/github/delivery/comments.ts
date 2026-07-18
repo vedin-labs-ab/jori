@@ -1,10 +1,11 @@
+import { compactRecord } from "../../../../contracts/json"
 import {
   readNested,
   requiredNumber,
   requiredString,
 } from "../../../shared/input"
 import { githubJsonObject, githubRepositoryPath } from "../api"
-import { compactGitHubSummary, summarizeComment } from "./format"
+import { summarizeComment } from "./format"
 
 export async function addIssueComment(
   token: string,
@@ -76,7 +77,7 @@ export async function addGitHubCommentReaction(
 }
 
 function summarizeReaction(reaction: Record<string, unknown>) {
-  return compactGitHubSummary({
+  return compactRecord({
     content: reaction.content,
     createdAt: reaction.created_at,
     id: reaction.id,
