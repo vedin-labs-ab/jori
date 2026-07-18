@@ -194,7 +194,7 @@ function ArtifactCard({
 }) {
   return (
     <div className="min-w-0 overflow-hidden rounded-md border text-xs">
-      <div className="grid min-w-0 gap-3 p-3.5">
+      <div className="grid min-w-0 gap-2.5 px-2 py-2">
         <div className="grid min-w-0 gap-1">
           <div className="flex min-w-0 items-center gap-2">
             <AppWindow className="size-4 shrink-0 text-muted-foreground" />
@@ -205,7 +205,7 @@ function ArtifactCard({
         <ContractEntries entries={entries} />
       </div>
       {footer === undefined ? null : (
-        <p className="border-t bg-muted/30 px-3.5 py-1.5 text-[0.6875rem]/relaxed text-muted-foreground">
+        <p className="flex min-h-9 items-center border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
           {footer}
         </p>
       )}
