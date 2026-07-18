@@ -1,10 +1,10 @@
 import { Label } from "@/components/ui/label"
 import { type AutomationPolicyPermissions } from "../../access/policy"
+import { FieldHelp } from "../../help"
 import { type AutomationFormValues } from "../../types"
 import { AutomationInstructionsField } from "../instructions/field"
 import { isAutomationToolReferenceError } from "../save/instructions"
 import { automationInstructionMarkerErrors } from "../save/marker"
-import { FieldHelp } from "./help"
 
 export function AutomationInstructionsSection({
   additionalSurfaces,

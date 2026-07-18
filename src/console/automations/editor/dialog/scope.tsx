@@ -1,7 +1,7 @@
 import { type Scope, scopeLabels } from "@contracts/permissions/scope"
 import { Label } from "@/components/ui/label"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { FieldHelp } from "./help"
+import { FieldHelp } from "../../help"
 
 export function ScopeField({
   onValueChange,
