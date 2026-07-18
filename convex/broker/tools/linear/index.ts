@@ -1,3 +1,4 @@
+import { isRecord } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
 import { requireLinearCredentials } from "../../../integrations/linear/credentials"
 import { postLinearComment } from "../../../integrations/linear/delivery/comments"
@@ -151,9 +152,7 @@ async function getLinearIssueSummaryByIdentifier(token: string, query: string) {
 }
 
 function readOptionalRecord(value: unknown) {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? readRecord(value)
-    : null
+  return isRecord(value) ? value : null
 }
 
 function mutationPayload(result: unknown, mutation: string) {

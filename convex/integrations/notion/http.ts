@@ -1,3 +1,4 @@
+import { isRecord } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { normalizeEventData } from "../../events/payload"
@@ -160,9 +161,7 @@ function parseJsonRecord(body: string) {
   try {
     const value: unknown = JSON.parse(body)
 
-    return typeof value === "object" && value !== null && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : null
+    return isRecord(value) ? value : null
   } catch {
     return null
   }

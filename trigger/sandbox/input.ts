@@ -1,7 +1,7 @@
+import { isRecord } from "../../contracts/json"
+
 export function normalizeToolInput(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {}
+  return isRecord(value) ? value : {}
 }
 
 export function optionalTrimmedString(value: unknown) {
