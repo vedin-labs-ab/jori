@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { countLabel } from "@/lib/count"
 import { CopyButton } from "./copy"
 import { codeTokenClassName } from "./tokens"
 
@@ -158,11 +159,7 @@ function JsonLeaf({ value }: { value: unknown }) {
 }
 
 function describeSize(size: number, value: Composite) {
-  if (Array.isArray(value)) {
-    return size === 1 ? "1 item" : `${size} items`
-  }
-
-  return size === 1 ? "1 property" : `${size} properties`
+  return countLabel(size, Array.isArray(value) ? "item" : "property")
 }
 
 function isComposite(value: unknown): value is Composite {
