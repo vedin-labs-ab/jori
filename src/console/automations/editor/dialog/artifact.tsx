@@ -11,10 +11,15 @@ import { type ReactNode } from "react"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../../convex/_generated/api"
+import {
+  ContractEntries,
+  type ContractEntrySummary,
+  TitleVersion,
+} from "../../../artifacts/contract"
+import { stateContractEntries } from "../../../artifacts/format"
 import { absoluteTime, relativeTime } from "../../../shared/time"
 import { FieldHelp } from "../../help"
 import { type AutomationFormValues } from "../../types"
-import { ContractEntries, type ContractEntrySummary } from "./contract"
 
 type ArtifactResult = FunctionReturnType<typeof api.artifacts.console.get>
 type ArtifactDetail = Extract<
@@ -132,7 +137,7 @@ function LiveArtifact({
 
   return (
     <ArtifactCard
-      entries={artifactContractEntries(artifact)}
+      entries={stateContractEntries(artifact.contract?.state)}
       lines={
         <>
           {definition?.artifact === undefined ? null : (
@@ -161,20 +166,6 @@ function LiveArtifact({
         </span>
       }
     />
-  )
-}
-
-/** The template version beside the artifact name, in the state contract's
- *  vN idiom: muted, one size down from the title. */
-function TitleVersion({ version }: { version: number | undefined }) {
-  if (version === undefined) {
-    return null
-  }
-
-  return (
-    <span className="shrink-0 font-normal text-muted-foreground text-xs">
-      v{version}
-    </span>
   )
 }
 
@@ -256,17 +247,4 @@ function templateContractEntries(key: string): ContractEntrySummary[] {
   return playbookTemplateContracts[
     key as keyof typeof playbookTemplateContracts
   ].map((entry) => ({ ...entry, schema: entry.schema as unknown }))
-}
-
-function artifactContractEntries(
-  artifact: ArtifactDetail
-): ContractEntrySummary[] {
-  return (artifact.contract?.state ?? []).map((entry) => ({
-    name: entry.name,
-    scope: entry.scope,
-    description: entry.description,
-    schemaName: entry.schemaName,
-    schemaVersion: entry.schemaVersion,
-    schema: entry.schema as unknown,
-  }))
 }

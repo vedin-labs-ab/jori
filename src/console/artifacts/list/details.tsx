@@ -1,3 +1,4 @@
+import { playbookCatalog } from "@contracts/playbooks/catalog"
 import {
   Activity,
   Database,
@@ -15,11 +16,12 @@ import { DetailRow } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, relativeTime } from "../../shared/time"
 import { ToolGroupsValue } from "../../shared/tools"
+import { ContractEntryList, TitleVersion } from "../contract"
 import {
   automationSummary,
   type CapabilityGroup,
   currentVersionMessage,
-  stateScopeLabel,
+  stateContractEntries,
 } from "../format"
 import { type ArtifactSummary } from "../types"
 
@@ -64,8 +66,9 @@ export function ArtifactExpanded({
   )
 }
 
-/** Template provenance: which template produced this artifact, and whether
- *  the user has customized it since. */
+/** Template provenance in the builder card's grammar: resolved title with
+ *  the vN suffix, then whether the user has customized it since — or that
+ *  the playbook now ships a newer template. */
 function TemplateRow({ artifact }: { artifact: ArtifactSummary }) {
   const template = artifact.template
 
@@ -73,27 +76,40 @@ function TemplateRow({ artifact }: { artifact: ArtifactSummary }) {
     return null
   }
 
+  const definition = playbookCatalog.find(
+    (candidate) => candidate.key === template.key
+  )
+  const note = template.customized
+    ? "Customized — template updates leave it untouched"
+    : definition !== undefined && template.version < definition.version
+      ? `v${definition.version} available — update from the playbook card`
+      : undefined
+
   return (
     <DetailRow icon={LayoutTemplate} label="Template">
       <FactLine>
-        <span className="font-medium text-foreground">
-          {template.key} · v{template.version}
+        <span className="flex min-w-0 items-baseline gap-1.5">
+          <span className="min-w-0 truncate font-medium text-foreground">
+            {definition?.artifact?.title ?? template.key}
+          </span>
+          <TitleVersion version={template.version} />
         </span>
-        {template.customized ? (
+        {note === undefined ? null : (
           <>
             <SeparatorDot className="text-muted-foreground/60" />
-            <span>Customized — template updates leave it untouched</span>
+            <span>{note}</span>
           </>
-        ) : null}
+        )}
       </FactLine>
     </DetailRow>
   )
 }
 
 /** The state contract: named entries the artifact and its automations
- *  read and write, validated server-side against their schemas. */
+ *  read and write, validated server-side against their schemas — each
+ *  entry opens its schema, exactly as in the automation builder. */
 function ContractRow({ artifact }: { artifact: ArtifactSummary }) {
-  const entries = artifact.contract?.state ?? []
+  const entries = stateContractEntries(artifact.contract?.state)
 
   if (entries.length === 0) {
     return null
@@ -101,25 +117,7 @@ function ContractRow({ artifact }: { artifact: ArtifactSummary }) {
 
   return (
     <DetailRow icon={Database} label="State">
-      <div className="grid min-w-0 gap-1 text-muted-foreground text-xs">
-        {entries.map((entry) => (
-          <FactLine key={entry.name}>
-            <span className="font-medium text-foreground">{entry.name}</span>
-            <span>
-              {stateScopeLabel(entry.scope)} · {entry.schemaName} v
-              {entry.schemaVersion}
-            </span>
-            {entry.description === undefined ? null : (
-              <>
-                <SeparatorDot className="text-muted-foreground/60" />
-                <span className="min-w-0 truncate" title={entry.description}>
-                  {entry.description}
-                </span>
-              </>
-            )}
-          </FactLine>
-        ))}
-      </div>
+      <ContractEntryList entries={entries} />
     </DetailRow>
   )
 }

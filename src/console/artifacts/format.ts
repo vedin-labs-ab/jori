@@ -5,6 +5,7 @@ import {
 } from "@contracts/integrations"
 import { relativeTime } from "../shared/time"
 import { type ToolCapability } from "../shared/tools/model"
+import { type ContractEntrySummary } from "./contract"
 import { type ArtifactSummary } from "./types"
 
 export type CapabilityGroup = {
@@ -97,13 +98,25 @@ function statusLabel(
   return status[0].toUpperCase() + status.slice(1)
 }
 
-/** Human display for a contract entry's scope. The stored enum stays
- *  shared/personal; these words say what the scope actually governs —
- *  share-link visibility versus per-person privacy. */
-export function stateScopeLabel(scope: string) {
-  if (scope === "shared") {
-    return "shareable"
-  }
-
-  return scope === "personal" ? "private" : scope
+/** Console rows for a stored artifact contract, as the queries return it. */
+export function stateContractEntries(
+  entries:
+    | readonly {
+        name: string
+        scope: string
+        description?: string
+        schemaName: string
+        schemaVersion: number
+        schema: unknown
+      }[]
+    | undefined
+): ContractEntrySummary[] {
+  return (entries ?? []).map((entry) => ({
+    name: entry.name,
+    scope: entry.scope,
+    description: entry.description,
+    schemaName: entry.schemaName,
+    schemaVersion: entry.schemaVersion,
+    schema: entry.schema,
+  }))
 }
