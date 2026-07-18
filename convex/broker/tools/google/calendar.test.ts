@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { googleIntegrationConfigs } from "../../../integrations/google/config"
-import { calendarListSchema } from "../../../runs/agent/tools/schemas/responses/calendar"
+import {
+  calendarListSchema,
+  eventListingSchema,
+} from "../../../runs/agent/tools/schemas/responses/calendar"
 import { schemaViolations } from "../../../runs/agent/tools/schemas/responses/conform"
 import { callGoogleTool } from "."
 
@@ -98,7 +101,8 @@ describe("Google Calendar discovery", () => {
       status: "ready",
       truncated: false,
     })
-    expect(result.items).toEqual([
+    expect(schemaViolations(result, eventListingSchema())).toEqual([])
+    expect(result.events).toEqual([
       expect.objectContaining({ id: "early", calendarId: "primary" }),
       expect.objectContaining({ id: "middle", calendarId: "team" }),
       expect.objectContaining({ id: "late", calendarId: "primary" }),
@@ -166,9 +170,9 @@ async function listedEvent(raw: Record<string, unknown>) {
     googleCalendarIntegration(),
     "google_calendar_list_events",
     { calendarId: "team", maxResults: 10 }
-  )) as { items: Record<string, unknown>[] }
+  )) as { events: Record<string, unknown>[] }
 
-  return result.items[0]
+  return result.events[0]
 }
 
 function event(id: string, time: string) {

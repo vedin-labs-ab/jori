@@ -29,21 +29,31 @@ export async function callMicrosoftCalendarTool(
     return await getEvent(token, args)
   }
   if (tool === "microsoft_calendar_create_event") {
-    return await microsoftGraphJson(token, "/me/events", {
-      method: "POST",
-      query: microsoftSendUpdatesQuery(args),
-      body: requiredObject(args.event, "event"),
-    })
+    return await stampMicrosoftEvent(
+      readRecord(
+        await microsoftGraphJson(token, "/me/events", {
+          method: "POST",
+          query: microsoftSendUpdatesQuery(args),
+          body: requiredObject(args.event, "event"),
+        })
+      ),
+      undefined
+    )
   }
   if (tool === "microsoft_calendar_update_event") {
-    return await microsoftGraphJson(
-      token,
-      `/me/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`,
-      {
-        method: "PATCH",
-        query: microsoftSendUpdatesQuery(args),
-        body: requiredObject(args.event, "event"),
-      }
+    return await stampMicrosoftEvent(
+      readRecord(
+        await microsoftGraphJson(
+          token,
+          `/me/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`,
+          {
+            method: "PATCH",
+            query: microsoftSendUpdatesQuery(args),
+            body: requiredObject(args.event, "event"),
+          }
+        )
+      ),
+      undefined
     )
   }
 
@@ -58,14 +68,16 @@ async function listEvents(token: string, args: Record<string, unknown>) {
   }
 
   const page = readRecord(await listCalendarEventPage(token, args, calendarId))
+  const truncated = optionalString(page["@odata.nextLink"]) !== undefined
 
   return {
-    ...page,
-    value: await Promise.all(
+    events: await Promise.all(
       readArray(page.value).map((event) =>
         stampMicrosoftEvent(readRecord(event), calendarId)
       )
     ),
+    status: truncated ? "partial" : "ready",
+    truncated,
   }
 }
 
@@ -118,7 +130,7 @@ async function listAllCalendarEvents(
   }
 
   return {
-    value: sortMicrosoftEvents(events),
+    events: sortMicrosoftEvents(events),
     calendarsScanned,
     gaps: gaps.slice(0, 10),
     status: gaps.length > 0 || truncated ? "partial" : "ready",
