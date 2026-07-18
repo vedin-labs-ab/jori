@@ -13,7 +13,6 @@ const reactionSubcursor = v.object({
 
 export const sessions = defineTable({
   conversationId: v.optional(v.id("conversations")),
-  watchId: v.optional(v.string()),
   runId: v.optional(v.id("runs")),
   cursor: v.optional(
     v.object({
