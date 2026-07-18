@@ -218,6 +218,16 @@ export class MiloConvexClient implements RuntimePlatform {
     })) as AgentRunStatus[]
   }
 
+  async stopAgentRun(args: {
+    parentId: RuntimeId<"runs">
+    runId: RuntimeId<"runs">
+  }) {
+    return await this.client.action(api.runtime.agents.stop, {
+      ...args,
+      secret: this.secret,
+    })
+  }
+
   async uploadAsset(args: UploadAssetArgs) {
     return await uploadAsset(this.secret, args)
   }

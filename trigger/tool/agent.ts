@@ -8,12 +8,44 @@ import {
   type AgentRunStatus,
   type RuntimeId,
 } from "../../contracts/runtime/worker"
+import { optionalStringList, requiredString } from "../input"
 import { parkWaitpoint } from "../waiter"
 import { type ToolRuntime } from "./runtime"
 
 const maxAgents = 20
 const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
 const maxTimeoutMs = durationMilliseconds({ unit: "days", value: 30 })
+const defaultTimeoutMs = durationMilliseconds({ unit: "minutes", value: 15 })
+
+/** The agent-route tools: delegate, join, and stop child runs. */
+export async function executeAgentTool(
+  runtime: ToolRuntime,
+  name: string,
+  input: JsonObject,
+  onParked: () => Promise<void>
+) {
+  if (name === "wait_for_agents") {
+    return await waitForAgents(runtime, input, onParked)
+  }
+
+  if (name === "start_agent") {
+    return await runtime.convex.createAgentRun({
+      parentId: runtime.context.run.id,
+      task: requiredString(input.task, "task"),
+      title: requiredString(input.title, "title"),
+      tools: optionalStringList(input.tools),
+    })
+  }
+
+  if (name === "stop_agent") {
+    return await runtime.convex.stopAgentRun({
+      parentId: runtime.context.run.id,
+      runId: requiredString(input.runId, "runId") as RuntimeId<"runs">,
+    })
+  }
+
+  throw new Error(`Unknown agent tool: ${name}`)
+}
 
 export async function waitForAgents(
   runtime: ToolRuntime,
@@ -76,8 +108,12 @@ function readRunIds(value: unknown) {
 }
 
 function readTimeoutMilliseconds(value: unknown) {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error("Missing timeout")
+  if (value === undefined || value === null) {
+    return defaultTimeoutMs
+  }
+
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("timeout must be an object with unit and value.")
   }
 
   const timeout = value as Partial<Duration>

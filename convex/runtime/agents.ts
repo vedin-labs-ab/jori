@@ -5,6 +5,7 @@ import { type Id } from "../_generated/dataModel"
 import { action, internalMutation, query } from "../_generated/server"
 import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
+import { stopRunTree } from "../runs/tree"
 import { requireWorkerSecret } from "./secret"
 
 export const create = action({
@@ -61,6 +62,53 @@ export const insert = internalMutation({
         principal: parent.principal,
       }),
     }
+  },
+})
+
+export const stop = action({
+  args: {
+    parentId: v.id("runs"),
+    runId: v.id("runs"),
+    secret: v.string(),
+  },
+  returns: v.object({
+    runId: v.id("runs"),
+    status: v.string(),
+  }),
+  handler: async (
+    ctx,
+    args
+  ): Promise<{ runId: Id<"runs">; status: string }> => {
+    requireWorkerSecret(args.secret)
+
+    return (await ctx.runMutation(internal.runtime.agents.stopChild, {
+      parentId: args.parentId,
+      runId: args.runId,
+    })) as { runId: Id<"runs">; status: string }
+  },
+})
+
+export const stopChild = internalMutation({
+  args: {
+    parentId: v.id("runs"),
+    runId: v.id("runs"),
+  },
+  returns: v.object({
+    runId: v.id("runs"),
+    status: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const run = await ctx.db.get(args.runId)
+
+    if (run === null || run.parentId !== args.parentId) {
+      throw new Error("Agents may only stop their direct child runs.")
+    }
+
+    await stopRunTree(ctx, run)
+
+    const stopped = await ctx.db.get(args.runId)
+
+    return { runId: args.runId, status: stopped?.status ?? run.status }
   },
 })
 

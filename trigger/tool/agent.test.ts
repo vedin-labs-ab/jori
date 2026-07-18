@@ -2,18 +2,6 @@ import { beforeEach, expect, test, vi } from "vitest"
 import { type RuntimeId } from "../../contracts/runtime/worker"
 import { executeToolCall, type ToolRuntime } from "../tool"
 
-const triggerWait = vi.hoisted(() => ({
-  createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
-  forToken: vi.fn(),
-}))
-
-vi.mock("@trigger.dev/sdk", () => ({
-  wait: {
-    createToken: triggerWait.createToken,
-    forToken: triggerWait.forToken,
-  },
-}))
-
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -67,121 +55,27 @@ test("start_agent rejects a missing title before creating a run", async () => {
   expect(runtime.convex.createAgentRun).not.toHaveBeenCalled()
 })
 
-test("wait_for_agents returns immediately when every child is terminal", async () => {
+test("stop_agent stops a direct child through the platform", async () => {
   const runtime = createRuntime()
-  runtime.convex.readAgentRuns = vi.fn(async () => [
-    {
-      runId: id<"runs">("run_child"),
-      title: "Research attendees",
-      status: "completed" as const,
-      error: null,
-      result: "Two attendees confirmed; no open commitments.",
-    },
-  ])
 
   const result = await executeToolCall({
     attempt: 1,
     call: {
-      args: {
-        runIds: ["run_child"],
-        timeout: { unit: "minutes", value: 15 },
-      },
+      args: { runId: "run_child" },
       id: "call_1",
-      name: "wait_for_agents",
+      name: "stop_agent",
     },
     runtime,
     sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
-    reason: "completed",
-    runs: [
-      {
-        runId: "run_child",
-        title: "Research attendees",
-        status: "completed",
-        error: null,
-        result: "Two attendees confirmed; no open commitments.",
-      },
-    ],
+    runId: "run_child",
+    status: "stopped",
   })
-})
-
-test("wait_for_agents turns a relative timeout into a waitpoint expiry", async () => {
-  const now = Date.parse("2026-07-13T08:00:00.000Z")
-  const runtime = createRuntime()
-  const running = agentRun("running")
-  const completed = agentRun("completed")
-  runtime.convex.readAgentRuns = vi
-    .fn()
-    .mockResolvedValueOnce([running])
-    .mockResolvedValue([completed])
-  runtime.convex.createWaiter = vi.fn(async () => id<"waiters">("waiter_1"))
-  runtime.convex.expireWaiter = vi.fn()
-  const clock = vi.spyOn(Date, "now").mockReturnValue(now)
-
-  const result = await executeToolCall({
-    attempt: 1,
-    call: {
-      args: {
-        runIds: ["run_child"],
-        timeout: { unit: "minutes", value: 15 },
-      },
-      id: "call_1",
-      name: "wait_for_agents",
-    },
-    runtime,
-    sequence: 100,
-  })
-
-  clock.mockRestore()
-  expect(JSON.parse(result.content)).toEqual({
-    reason: "completed",
-    runs: [completed],
-  })
-  expect(runtime.convex.createWaiter).toHaveBeenCalledWith({
-    condition: { kind: "runs", runIds: ["run_child"] },
-    expiresAt: now + 15 * 60 * 1000,
-    runId: "run_1",
-    waitpointId: "waitpoint_1",
-  })
-  expect(runtime.convex.expireWaiter).toHaveBeenCalledWith({
-    waiterId: "waiter_1",
-  })
-  expect(triggerWait.forToken).not.toHaveBeenCalled()
-  expect(
-    vi
-      .mocked(runtime.convex.recordEvent)
-      .mock.calls.map(([event]) => event.type)
-  ).toEqual([
-    "tool.started",
-    "run.waiting",
-    "tool.waiting",
-    "run.resumed",
-    "tool.completed",
-  ])
-})
-
-test("wait_for_agents rejects timeouts outside its bounds", async () => {
-  const runtime = createRuntime()
-
-  const result = await executeToolCall({
-    attempt: 1,
-    call: {
-      args: {
-        runIds: ["run_child"],
-        timeout: { unit: "seconds", value: 4 },
-      },
-      id: "call_1",
-      name: "wait_for_agents",
-    },
-    runtime,
-    sequence: 100,
-  })
-
-  expect(JSON.parse(result.content)).toEqual({
-    error: { message: "timeout must be between 5 seconds and 30 days." },
-    status: "error",
+  expect(runtime.convex.stopAgentRun).toHaveBeenCalledWith({
+    parentId: "run_1",
+    runId: "run_child",
   })
 })
 
@@ -190,6 +84,10 @@ function createRuntime(): ToolRuntime {
     convex: {
       createAgentRun: vi.fn(async () => ({
         runId: id<"runs">("run_child"),
+      })),
+      stopAgentRun: vi.fn(async () => ({
+        runId: id<"runs">("run_child"),
+        status: "stopped",
       })),
       recordEvent: vi.fn(),
     } as unknown as ToolRuntime["convex"],
@@ -224,11 +122,11 @@ function createRuntime(): ToolRuntime {
           route: "agent",
         },
         {
-          access: "read",
-          description: "Wait for agents.",
+          access: "write",
+          description: "Stop an agent.",
           inputSchema: {},
           mode: "required",
-          name: "wait_for_agents",
+          name: "stop_agent",
           route: "agent",
         },
       ],
@@ -239,14 +137,4 @@ function createRuntime(): ToolRuntime {
 
 function id<TableName extends string>(value: string) {
   return value as RuntimeId<TableName>
-}
-
-function agentRun(status: "completed" | "running") {
-  return {
-    runId: id<"runs">("run_child"),
-    title: "Research attendees",
-    status,
-    error: null,
-    result: null,
-  }
 }

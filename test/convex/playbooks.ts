@@ -22,12 +22,10 @@ export function renderPlaybook(
   return renderPlaybookInstructions({
     key,
     providers: { email: "Gmail", calendar: "Google Calendar" },
-    providerKeys: { email: "gmail", calendar: "googleCalendar" },
     destination,
     subject: definition?.title ?? key,
     noun: definition?.delivery.noun ?? "output",
     style: definition?.delivery.style,
     options: resolvePlaybookOptions(definition?.setup, options),
-    agentWait: definition?.agentWait,
   })
 }

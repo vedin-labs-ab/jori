@@ -48,7 +48,7 @@ export const sandboxTools = [
     inputSchema: withOptionalFieldGuidance({
       type: "object",
       additionalProperties: false,
-      required: ["runIds", "timeout"],
+      required: ["runIds"],
       properties: {
         runIds: stringArrayProperty(
           "Run IDs returned by start_agent. Include 1-20 direct child agents."
@@ -57,6 +57,8 @@ export const sandboxTools = [
           type: "object",
           additionalProperties: false,
           required: ["unit", "value"],
+          description:
+            "Maximum wait before resuming with whatever is terminal. Defaults to 15 minutes.",
           properties: {
             unit: {
               type: "string",
@@ -70,6 +72,23 @@ export const sandboxTools = [
                 "Positive whole-number wait. The total timeout must be between 5 seconds and 30 days.",
             },
           },
+        },
+      },
+    }),
+    route: "agent",
+  },
+  {
+    access: "write" as const,
+    name: "stop_agent",
+    description: nativeToolUsage("stop_agent", "agent"),
+    inputSchema: withOptionalFieldGuidance({
+      type: "object",
+      additionalProperties: false,
+      required: ["runId"],
+      properties: {
+        runId: {
+          type: "string",
+          description: "Run ID of a direct child returned by start_agent.",
         },
       },
     }),

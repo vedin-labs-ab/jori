@@ -109,7 +109,6 @@ describe("Meeting Briefing configuration", () => {
       beforeMeeting: false,
       leadMinutes: "45",
     })
-    expect(meetingBriefing.agentWait).toEqual({ unit: "minutes", value: 15 })
     expect(meetingBriefing.slots).toEqual([
       { capability: "email", intents: ["read"] },
       { capability: "calendar", intents: ["read"] },

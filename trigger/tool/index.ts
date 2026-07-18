@@ -4,13 +4,12 @@ import { isVisibleCommunicationTool } from "../../contracts/runtime/surface"
 import { readFinal } from "../../contracts/runtime/tools"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { encodeToolResult } from "../../contracts/transport"
-import { optionalStringList, requiredString } from "../input"
 import { type ModelToolCall } from "../model/types"
 import { executeCodingTool } from "../sandbox/coding"
 import { recordToolResultActivity } from "../trace/activity"
 import { errorDetails } from "../trace/events"
 import { recordToolEvent, toolTraceDetails } from "../trace/tool"
-import { waitForAgents } from "./agent"
+import { executeAgentTool } from "./agent"
 import { prepareMiloToolInput } from "./artifacts"
 import { saveSandboxAsset } from "./assets"
 import { prepareProviderToolInput } from "./github"
@@ -238,28 +237,6 @@ async function callConvexTool(
   })
 
   return await materializeSandboxResult(runtime, result)
-}
-
-async function executeAgentTool(
-  runtime: ToolRuntime,
-  name: string,
-  input: JsonObject,
-  onParked: () => Promise<void>
-) {
-  if (name === "wait_for_agents") {
-    return await waitForAgents(runtime, input, onParked)
-  }
-
-  if (name === "start_agent") {
-    return await runtime.convex.createAgentRun({
-      parentId: runtime.context.run.id,
-      task: requiredString(input.task, "task"),
-      title: requiredString(input.title, "title"),
-      tools: optionalStringList(input.tools),
-    })
-  }
-
-  throw new Error(`Unknown agent tool: ${name}`)
 }
 
 function eventArgs(args: {

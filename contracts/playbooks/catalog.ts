@@ -1,5 +1,4 @@
 import { type Scope } from "../permissions/scope"
-import { type Duration } from "../runtime"
 import { meetingBriefing } from "./briefing"
 import { type PlaybookSlot } from "./capabilities"
 import { digestDelivery, type PlaybookDelivery } from "./delivery"
@@ -45,9 +44,6 @@ export type PlaybookDefinition = {
   /** Where the output goes, and the default the user can override at enable. */
   delivery: PlaybookDelivery
   web: boolean
-  /** Maximum child-agent research wait for instruction templates that
-   *  delegate work. The runtime measures it from the wait tool call. */
-  agentWait?: Duration
 }
 
 export type PlaybookArtifact = {
