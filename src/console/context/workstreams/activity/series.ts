@@ -1,3 +1,5 @@
+import { shortDate } from "../../../shared/time"
+
 type PulseDay = {
   key: string
   label: string
@@ -105,10 +107,7 @@ function axisLabel(date: Date, index: number, isToday: boolean) {
   }
 
   if (index === 0 || date.getDate() === 1) {
-    return date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    })
+    return shortDate(date.getTime())
   }
 
   return String(date.getDate())

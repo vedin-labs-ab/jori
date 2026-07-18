@@ -1,5 +1,6 @@
 import { ShieldCheck } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { absoluteTime } from "../../shared/time"
 import { type ArtifactDetail } from "../types"
 
 export function ArtifactMeta({ artifact }: { artifact: ArtifactDetail }) {
@@ -22,7 +23,7 @@ export function ArtifactMeta({ artifact }: { artifact: ArtifactDetail }) {
       <MetaRow label="Current version" value={artifact.versionId ?? "None"} />
       <MetaRow label="Tree" value={currentVersion?.treeId ?? "None"} />
       <MetaRow label="SDK" value={currentVersion?.sdk ?? "None"} />
-      <MetaRow label="Updated" value={formatDate(artifact.updatedAt)} />
+      <MetaRow label="Updated" value={absoluteTime(artifact.updatedAt)} />
       <MetaRow
         label="Capabilities"
         value={String(artifact.capabilities.length)}
@@ -42,11 +43,4 @@ function MetaRow({ label, value }: { label: string; value: string }) {
       <dd className="break-all font-mono text-xs">{value}</dd>
     </div>
   )
-}
-
-function formatDate(value: number) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(value)
 }
