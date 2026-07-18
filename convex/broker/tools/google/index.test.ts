@@ -20,15 +20,17 @@ describe("Gmail batch read tools", () => {
       gmailIntegration(),
       "google_gmail_get_threads",
       {
-        format: "metadata",
         threadIds: ["thread-a", "thread-b"],
       }
     )
 
-    expect(result).toEqual([{ id: "thread-a" }, { id: "thread-b" }])
+    expect(result).toEqual([
+      { threadId: "thread-a", messages: [] },
+      { threadId: "thread-b", messages: [] },
+    ])
     expect(calls.map((call) => call.url)).toEqual([
-      "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-a?format=metadata",
-      "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-b?format=metadata",
+      "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-a?format=full",
+      "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-b?format=full",
     ])
   })
 
@@ -41,15 +43,17 @@ describe("Gmail batch read tools", () => {
       gmailIntegration(),
       "google_gmail_get_messages",
       {
-        format: "minimal",
         messageIds: ["message-a", "message-b"],
       }
     )
 
-    expect(result).toEqual([{ id: "message-a" }, { id: "message-b" }])
+    expect(result).toMatchObject([
+      { provider: "gmail", messageId: "message-a" },
+      { provider: "gmail", messageId: "message-b" },
+    ])
     expect(calls.map((call) => call.url)).toEqual([
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages/message-a?format=minimal",
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages/message-b?format=minimal",
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/message-a?format=full",
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/message-b?format=full",
     ])
   })
 })
@@ -70,7 +74,7 @@ describe("Gmail write tools", () => {
       }
     )
 
-    expect(result).toEqual({ id: "sent-message" })
+    expect(result).toEqual({ status: "sent", messageId: "sent-message" })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe(
       "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
@@ -99,7 +103,7 @@ describe("Gmail write tools", () => {
       }
     )
 
-    expect(result).toEqual({ id: "draft" })
+    expect(result).toEqual({ status: "drafted", draftId: "draft" })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe(
       "https://gmail.googleapis.com/gmail/v1/users/me/drafts"
@@ -145,7 +149,7 @@ describe("Gmail thread draft tools", () => {
       }
     )
 
-    expect(result).toEqual({ id: "draft" })
+    expect(result).toEqual({ status: "drafted", draftId: "draft" })
     expect(calls.map((call) => call.url)).toEqual([
       "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-1?format=metadata",
       "https://gmail.googleapis.com/gmail/v1/users/me/drafts",

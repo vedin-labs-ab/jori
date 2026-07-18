@@ -151,10 +151,6 @@ function messageAddressHeaders(name: string, addresses: string[] | undefined) {
     : [[name, addresses.join(", ")]]
 }
 
-export function normalizeGmailFormat(value: unknown) {
-  return value === "metadata" || value === "minimal" ? value : "full"
-}
-
 export function getCalendarId(args: Record<string, unknown>) {
   return optionalString(args.calendarId) ?? "primary"
 }

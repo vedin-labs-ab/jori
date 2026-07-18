@@ -8,11 +8,12 @@ export async function microsoftGraphJson(
     method?: string
     query?: Record<string, unknown>
     body?: unknown
+    headers?: Record<string, string>
   } = {}
 ) {
   return await fetchJson(microsoftGraphRequestUrl(path, options.query ?? {}), {
     method: options.method ?? "GET",
-    headers: microsoftGraphHeaders(token),
+    headers: { ...microsoftGraphHeaders(token), ...options.headers },
     body: options.body,
     emptyResponse: null,
   })

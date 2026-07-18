@@ -33,14 +33,22 @@ test("shaped results carry an authored response schema", () => {
 })
 
 test("passthrough tools name the provider payload they return", () => {
-  const reference = resolveToolReference("google_gmail_search_threads")
+  const reference = resolveToolReference("notion_get_page")
 
   expect(reference.request).toMatchObject({ type: "object" })
   expect(reference.response).toMatchObject({
     type: "object",
     additionalProperties: true,
-    description: expect.stringContaining("users.threads.list"),
+    description: expect.stringContaining("Notion's page object"),
   })
+})
+
+test("mail tools share one normalized message schema across providers", () => {
+  const gmail = resolveToolReference("google_gmail_get_message")
+  const outlook = resolveToolReference("microsoft_email_get_message")
+
+  expect(gmail.response).toEqual(outlook.response)
+  expect(JSON.stringify(gmail.response)).toContain("Normalized mail message")
 })
 
 test("unknown tools are rejected", () => {
