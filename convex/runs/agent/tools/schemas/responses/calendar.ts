@@ -1,9 +1,11 @@
 import {
   booleanField,
+  enumField,
   type JsonSchema,
   listField,
   numberField,
   providerPayload,
+  resultSchema,
   stringField,
 } from "./common"
 
@@ -61,4 +63,46 @@ export function providerEventPayload(provider: string): JsonSchema {
   return providerPayload(
     `${provider} event object as the provider returns it, unchanged.`
   )
+}
+
+export function calendarListSchema(paged: boolean): JsonSchema {
+  return resultSchema({
+    required: ["calendars"],
+    properties: {
+      calendars: listField(
+        "The account's calendars in the normalized listing shape.",
+        resultSchema({
+          description:
+            "Normalized calendar; provider-specific fields stay optional.",
+          required: ["provider", "calendarId", "name"],
+          properties: {
+            provider: enumField(
+              ["googleCalendar", "microsoftCalendar"],
+              "Calendar provider."
+            ),
+            calendarId: stringField(
+              "Calendar ID for event listings and writes."
+            ),
+            name: stringField("Calendar display name."),
+            description: stringField("Calendar description."),
+            timeZone: stringField("Calendar time zone."),
+            primary: booleanField("True for the account's primary calendar."),
+            accessRole: stringField(
+              "Google access role: freeBusyReader, reader, writer, or owner."
+            ),
+            canEdit: booleanField("Whether Microsoft allows edits."),
+            owner: stringField("Microsoft calendar owner."),
+            hidden: booleanField("True when hidden from the Google UI."),
+          },
+        })
+      ),
+      ...(paged
+        ? {
+            nextPageToken: stringField(
+              "Pass as pageToken to continue; absent on the last page."
+            ),
+          }
+        : {}),
+    },
+  })
 }

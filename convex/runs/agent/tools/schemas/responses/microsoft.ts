@@ -1,14 +1,10 @@
 import {
   calendarListingSchema,
+  calendarListSchema,
   providerEventPayload,
   stampedEventSchema,
 } from "./calendar"
-import {
-  listField,
-  providerPayload,
-  resultSchema,
-  type SchemaMap,
-} from "./common"
+import { listField, resultSchema, type SchemaMap } from "./common"
 import { draftedMailSchema, mailMessageSchema, sentMailSchema } from "./mail"
 
 export const microsoftToolResponseSchemas = {
@@ -25,9 +21,7 @@ export const microsoftToolResponseSchemas = {
   microsoft_email_send_message: sentMailSchema(),
   microsoft_email_create_draft: draftedMailSchema(),
   microsoft_email_update_message: mailMessageSchema(),
-  microsoft_calendar_list_calendars: providerPayload(
-    "Microsoft Graph's calendar listing page: calendars in value, plus @odata.nextLink when more exist."
-  ),
+  microsoft_calendar_list_calendars: calendarListSchema(false),
   microsoft_calendar_list_events: calendarListingSchema("value"),
   microsoft_calendar_get_event: stampedEventSchema(),
   microsoft_calendar_create_event: providerEventPayload(

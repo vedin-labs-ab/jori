@@ -12,6 +12,7 @@ import {
   requiredString,
 } from "../../../shared/input"
 import { type CalendarEventContent, stampCalendarEvent } from "../events"
+import { listMicrosoftCalendarSummaries } from "./calendars"
 
 export async function callMicrosoftCalendarTool(
   token: string,
@@ -19,10 +20,7 @@ export async function callMicrosoftCalendarTool(
   args: Record<string, unknown>
 ) {
   if (tool === "microsoft_calendar_list_calendars") {
-    return await listMicrosoftCalendars(
-      token,
-      boundedNumber(args.top, 100, 1, 100)
-    )
+    return await listMicrosoftCalendarSummaries(token, args)
   }
   if (tool === "microsoft_calendar_list_events") {
     return await listEvents(token, args)

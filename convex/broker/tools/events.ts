@@ -70,3 +70,18 @@ async function calendarContentHash(content: CalendarEventContent) {
 
   return hash.slice(0, hashLength)
 }
+
+/** One calendar in the normalized listing both providers return from their
+ *  list_calendars tools. Provider-specific fields stay optional and named. */
+export type CalendarSummary = {
+  provider: CalendarEventRef["provider"]
+  calendarId: string
+  name: string
+  description?: string
+  timeZone?: string
+  primary?: boolean
+  accessRole?: string
+  canEdit?: boolean
+  owner?: string
+  hidden?: boolean
+}
