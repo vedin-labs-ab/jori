@@ -37,6 +37,7 @@ export function makeExecution(
     durationMs: 1000,
     endedAt: 1700000001000,
     error: undefined,
+    result: undefined,
     id: "execution" as ExecutionItem["id"],
     offer,
     offers: offer === null ? [] : [offer],
