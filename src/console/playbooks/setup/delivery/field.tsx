@@ -72,7 +72,7 @@ function DeliverySummary({
     <div className="flex min-h-8 items-center justify-between gap-2">
       <span className="flex min-w-0 items-center gap-1.5">
         <DeliveryIcon mode={deliveryMode(value)} />
-        <DeliveryText choice={value} />
+        <DeliveryText choice={value} dmLabel={dmLabel(options)} />
       </span>
       {options.length > 1 ? (
         <Button
@@ -132,7 +132,10 @@ function DeliveryEditor({
             />
           </div>
         ) : (
-          <DeliveryText choice={choiceForMode(draft.mode)} />
+          <DeliveryText
+            choice={choiceForMode(draft.mode)}
+            dmLabel={dmLabel(options)}
+          />
         )}
       </div>
       <ButtonGroup>
@@ -154,7 +157,13 @@ function DeliveryEditor({
   )
 }
 
-function DeliveryText({ choice }: { choice: DeliveryChoice }) {
+function DeliveryText({
+  choice,
+  dmLabel,
+}: {
+  choice: DeliveryChoice
+  dmLabel: string | undefined
+}) {
   const email = useUser().user?.primaryEmailAddress?.emailAddress
   const mode = deliveryMode(choice)
   const target = choice.kind === "slack" ? choice.target : undefined
@@ -172,10 +181,15 @@ function DeliveryText({ choice }: { choice: DeliveryChoice }) {
           ? (email ?? "you")
           : target.kind === "channel"
             ? `#${target.label}`
-            : "You"}
+            : (dmLabel ?? "You")}
       </span>
     </span>
   )
+}
+
+/** The resolved Slack identity name carried on the dm option. */
+function dmLabel(options: DeliveryOption[]) {
+  return options.find((option) => option.mode === "dm")?.label
 }
 
 function committedDraft(

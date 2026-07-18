@@ -52,7 +52,7 @@ test("uses the server-recommended self Slack DM", () => {
   )
   fireEvent.click(screen.getByRole("button", { name: "Enable" }))
 
-  expect(screen.getByText("You")).toBeDefined()
+  expect(screen.getByText("Albin Vedin")).toBeDefined()
   expect(actions.enable).toHaveBeenCalledWith(
     morningBrief,
     { email: "gmail", calendar: "googleCalendar" },
@@ -128,7 +128,7 @@ function deliverySetup(
 ): PlaybookListRow["delivery"] {
   return {
     options: [
-      { mode: "dm", available: true },
+      { mode: "dm", available: true, label: "Albin Vedin" },
       { mode: "email", available: true },
       { mode: "channel", available: true },
     ],

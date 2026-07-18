@@ -85,7 +85,7 @@ function EnableFooter({
           onClick={onAdvanced}
           onPointerEnter={onPreloadEdit}
           type="button"
-          variant="secondary"
+          variant="ghost"
         >
           {pendingKind === "advanced" ? <Spinner /> : <Settings2 />} Advanced
           settings

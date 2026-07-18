@@ -46,6 +46,8 @@ export type DeliveryOption = {
   mode: DeliveryMode
   available: boolean
   reason?: string
+  /** Resolved target shown for the mode — the Slack identity name for dm. */
+  label?: string
 }
 
 export type DeliverySetup = {
