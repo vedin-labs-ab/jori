@@ -8,6 +8,7 @@ import {
   isEmailDeliveryProvider,
   type PlaybookDelivery,
 } from "../../contracts/playbooks/delivery"
+import { collapseWhitespace } from "../../contracts/text"
 import { type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration } from "../shared/integrations"
@@ -92,7 +93,7 @@ export function normalizeSlackChannel(
   }
 ) {
   const id = target.id.trim()
-  const label = target.label.trim().replace(/\s+/g, " ")
+  const label = collapseWhitespace(target.label)
 
   if (id === "" || /\s/.test(id) || label === "") {
     throw new Error("Choose a valid Slack destination.")

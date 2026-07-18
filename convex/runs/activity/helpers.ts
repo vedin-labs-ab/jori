@@ -1,4 +1,5 @@
 import { isRecord } from "../../../contracts/json"
+import { collapseWhitespace } from "../../../contracts/text"
 import { type ActivityMetadataItem } from "./types"
 
 type MetadataKind = ActivityMetadataItem["kind"]
@@ -160,7 +161,7 @@ function cleanText(value: string | undefined) {
     return undefined
   }
 
-  const text = value.replace(/\s+/g, " ").trim()
+  const text = collapseWhitespace(value)
 
   if (text === "") {
     return undefined
