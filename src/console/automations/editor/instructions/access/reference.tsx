@@ -5,6 +5,7 @@ import {
 } from "@tiptap/react"
 import { Ban, BookOpen, Braces, Wrench } from "lucide-react"
 import { useState } from "react"
+import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { type ToolPermission } from "../../../../permissions/types"
 import { useRetained } from "../../../../shared/retain"
@@ -19,9 +20,9 @@ import {
   AutomationMarkerActionButton,
   AutomationMarkerRemoveButton,
 } from "./remove"
-import { ToolSchemaDialog } from "./schema"
+import { ToolReferencesLoader, ToolSchemaDialog } from "./schema"
 import { automationReferenceToneClassNames } from "./tone"
-import { useToolReferences } from "./wire"
+import { type ToolReferences, toolReferenceReady } from "./wire"
 
 export function AutomationReferenceNodeView({
   deleteNode,
@@ -134,7 +135,8 @@ function ReferencePill({
 
 /** The pill's right pane: a schema segment opening the tool's request and
  *  response schemas, mirroring the access pill's tools segment. Hovering
- *  the pill warms the schema subscription so the dialog opens resolved. */
+ *  warms the schema subscription so the dialog usually opens resolved; a
+ *  click that beats the data spins in the braces slot until it lands. */
 function ToolSchemaPane({
   permission,
   separatorClassName,
@@ -146,7 +148,10 @@ function ToolSchemaPane({
 }) {
   const [shown, setShown] = useState<ToolPermission>()
   const [warm, setWarm] = useState(false)
+  const [references, setReferences] = useState<ToolReferences>()
   const engaged = useRetained(shown) !== undefined || warm
+  const pending =
+    shown !== undefined && !toolReferenceReady(references, shown.tool)
 
   return (
     <>
@@ -160,44 +165,29 @@ function ToolSchemaPane({
         onWarm={() => setWarm(true)}
         title="Request and response schema"
       >
-        <Braces className="size-3 opacity-80" />
+        {pending ? (
+          <Spinner className="size-3" />
+        ) : (
+          <Braces className="size-3 opacity-80" />
+        )}
       </AutomationMarkerActionButton>
       {engaged ? (
-        <PillSchemaDialog
-          onClose={() => setShown(undefined)}
-          permission={shown}
+        <ToolReferencesLoader
+          onChange={setReferences}
           tenantId={tenantId}
-          tool={permission.tool}
+          tools={[permission.tool]}
         />
       ) : null}
+      <ToolSchemaDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setShown(undefined)
+          }
+        }}
+        permission={shown}
+        references={references}
+      />
     </>
-  )
-}
-
-/** Mounted on intent: holds the schema subscription for this pill's tool. */
-function PillSchemaDialog({
-  onClose,
-  permission,
-  tenantId,
-  tool,
-}: {
-  onClose: () => void
-  permission: ToolPermission | undefined
-  tenantId: string
-  tool: string
-}) {
-  const references = useToolReferences(tenantId, [tool], true)
-
-  return (
-    <ToolSchemaDialog
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
-      permission={permission}
-      references={references}
-    />
   )
 }
 

@@ -19,3 +19,12 @@ export function useToolReferences(
     enabled ? { tenantId, tools } : "skip"
   )
 }
+
+/** Whether a tool's schemas have arrived, gating dialog opens and driving
+ *  the trigger's pending spinner. */
+export function toolReferenceReady(
+  references: ToolReferences | undefined,
+  tool: string | undefined
+) {
+  return tool !== undefined && references?.[tool] !== undefined
+}

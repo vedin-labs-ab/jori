@@ -17,8 +17,12 @@ import {
   automationToolModeDescription,
   isAutomationToolSelectable,
 } from "../../../access/policy"
-import { ToolSchemaButton, ToolSchemaDialog } from "./schema"
-import { useToolReferences } from "./wire"
+import {
+  ToolReferencesLoader,
+  ToolSchemaButton,
+  ToolSchemaDialog,
+} from "./schema"
+import { type ToolReferences, toolReferenceReady } from "./wire"
 
 type AutomationSurfaceToolGroupsProps = {
   onToolsChange: (tools: string[]) => void
@@ -37,9 +41,10 @@ export function AutomationSurfaceToolGroups({
   const [schemaPermission, setSchemaPermission] = useState<ToolPermission>()
   // Latched on the first sign of intent — pointer or focus reaching a
   // Schema button — so the subscription starts before any click and the
-  // dialog opens with content already resolved. Nothing subscribes for
-  // views the user never engages with.
+  // dialog usually opens with content already resolved. Nothing subscribes
+  // for views the user never engages with.
   const [schemaIntent, setSchemaIntent] = useState(false)
+  const [references, setReferences] = useState<ToolReferences>()
 
   function setTool(tool: string, enabled: boolean) {
     const nextTools = new Set(selectedTools)
@@ -81,51 +86,33 @@ export function AutomationSurfaceToolGroups({
             onToolChange={setTool}
             onViewSchema={setSchemaPermission}
             onWarmSchemas={() => setSchemaIntent(true)}
+            pendingSchemaTool={
+              schemaPermission !== undefined &&
+              !toolReferenceReady(references, schemaPermission.tool)
+                ? schemaPermission.tool
+                : undefined
+            }
             selectedTools={selectedTools}
           />
         ))}
       </ToolGroupsFrame>
       {schemaIntent || schemaPermission !== undefined ? (
-        <SurfaceSchemaDialog
-          onClose={() => setSchemaPermission(undefined)}
-          permission={schemaPermission}
-          permissions={permissions}
+        <ToolReferencesLoader
+          onChange={setReferences}
           tenantId={tenantId}
+          tools={permissions.map((candidate) => candidate.tool)}
         />
       ) : null}
+      <ToolSchemaDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setSchemaPermission(undefined)
+          }
+        }}
+        permission={schemaPermission}
+        references={references}
+      />
     </>
-  )
-}
-
-/** Mounted on intent: subscribes to every listed tool's schemas in one
- *  query, so whichever Schema button gets clicked opens instantly. */
-function SurfaceSchemaDialog({
-  onClose,
-  permission,
-  permissions,
-  tenantId,
-}: {
-  onClose: () => void
-  permission: ToolPermission | undefined
-  permissions: ToolPermission[]
-  tenantId: string
-}) {
-  const references = useToolReferences(
-    tenantId,
-    permissions.map((candidate) => candidate.tool),
-    true
-  )
-
-  return (
-    <ToolSchemaDialog
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
-      permission={permission}
-      references={references}
-    />
   )
 }
 
@@ -135,6 +122,7 @@ function EditableToolGroup({
   onToolChange,
   onViewSchema,
   onWarmSchemas,
+  pendingSchemaTool,
   selectedTools,
 }: {
   group: ToolAccessGroup<ToolPermission>
@@ -142,6 +130,7 @@ function EditableToolGroup({
   onToolChange: (tool: string, enabled: boolean) => void
   onViewSchema: (permission: ToolPermission) => void
   onWarmSchemas: () => void
+  pendingSchemaTool: string | undefined
   selectedTools: Set<string>
 }) {
   const selectableTools = group.tools.filter(isAutomationToolSelectable)
@@ -176,6 +165,7 @@ function EditableToolGroup({
           onCheckedChange={(enabled) => onToolChange(permission.tool, enabled)}
           onViewSchema={() => onViewSchema(permission)}
           onWarmSchemas={onWarmSchemas}
+          pendingSchema={pendingSchemaTool === permission.tool}
           permission={permission}
           selected={selectedTools.has(permission.tool)}
         />
@@ -188,12 +178,14 @@ function EditableToolRow({
   onCheckedChange,
   onViewSchema,
   onWarmSchemas,
+  pendingSchema,
   permission,
   selected,
 }: {
   onCheckedChange: (enabled: boolean) => void
   onViewSchema: () => void
   onWarmSchemas: () => void
+  pendingSchema: boolean
   permission: ToolPermission
   selected: boolean
 }) {
@@ -238,6 +230,7 @@ function EditableToolRow({
         <ToolSchemaButton
           onClick={onViewSchema}
           onWarm={onWarmSchemas}
+          pending={pendingSchema}
           toolLabel={permission.label}
         />
       </div>
