@@ -13,11 +13,10 @@ export const artifactSessionGrant = v.union(
 
 export type ArtifactSessionGrant = Infer<typeof artifactSessionGrant>
 
-const artifactMode = v.union(
+export const artifactMode = v.union(
   v.literal("directory"),
   v.literal("file"),
-  v.literal("executable"),
-  v.literal("symlink")
+  v.literal("executable")
 )
 
 const artifactHashAlgorithm = v.union(v.literal("sha1"), v.literal("sha256"))

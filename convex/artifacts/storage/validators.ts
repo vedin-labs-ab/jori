@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { artifactMode } from "../schema"
 
 export const storedBlobValidator = v.object({
   id: v.string(),
@@ -12,11 +13,7 @@ export const treeValidator = v.object({
   entries: v.array(
     v.object({
       name: v.string(),
-      mode: v.union(
-        v.literal("directory"),
-        v.literal("file"),
-        v.literal("executable")
-      ),
+      mode: artifactMode,
       id: v.string(),
     })
   ),
