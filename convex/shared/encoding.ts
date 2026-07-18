@@ -38,6 +38,12 @@ export function base64UrlEncodeBytes(bytes: Uint8Array) {
     .replaceAll("=", "")
 }
 
+export function bytesToHex(bytes: Uint8Array) {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+    ""
+  )
+}
+
 export function base64EncodeBytes(bytes: Uint8Array) {
   let binary = ""
   const chunkSize = 0x8000

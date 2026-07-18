@@ -9,6 +9,7 @@ import {
   type MutationCtx,
 } from "../../_generated/server"
 import { type RuntimeEnvironment } from "../../shared/app"
+import { bytesToHex } from "../../shared/encoding"
 import { unauthorizedResponse } from "../../shared/http"
 import { canAccessArtifact, getAccessibleArtifact } from "../access"
 import { readArtifactFramePolicy } from "./frame"
@@ -263,9 +264,5 @@ async function requireShareableArtifact(
 }
 
 function randomShareSecret() {
-  const bytes = crypto.getRandomValues(new Uint8Array(32))
-
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
-    ""
-  )
+  return bytesToHex(crypto.getRandomValues(new Uint8Array(32)))
 }
