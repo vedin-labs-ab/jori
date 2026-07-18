@@ -101,6 +101,7 @@ import type * as broker_tools_github_publish from "../broker/tools/github/publis
 import type * as broker_tools_github_pulls from "../broker/tools/github/pulls.js";
 import type * as broker_tools_github_source from "../broker/tools/github/source.js";
 import type * as broker_tools_google_calendar from "../broker/tools/google/calendar.js";
+import type * as broker_tools_google_calendars from "../broker/tools/google/calendars.js";
 import type * as broker_tools_google_format from "../broker/tools/google/format.js";
 import type * as broker_tools_google_gmail from "../broker/tools/google/gmail.js";
 import type * as broker_tools_google_index from "../broker/tools/google/index.js";
@@ -111,11 +112,14 @@ import type * as broker_tools_linear_client from "../broker/tools/linear/client.
 import type * as broker_tools_linear_index from "../broker/tools/linear/index.js";
 import type * as broker_tools_mail from "../broker/tools/mail.js";
 import type * as broker_tools_microsoft_calendar from "../broker/tools/microsoft/calendar.js";
+import type * as broker_tools_microsoft_calendars from "../broker/tools/microsoft/calendars.js";
+import type * as broker_tools_microsoft_events from "../broker/tools/microsoft/events.js";
 import type * as broker_tools_microsoft_index from "../broker/tools/microsoft/index.js";
 import type * as broker_tools_microsoft_mail from "../broker/tools/microsoft/mail.js";
 import type * as broker_tools_notion_index from "../broker/tools/notion/index.js";
 import type * as broker_tools_notion_upload from "../broker/tools/notion/upload.js";
-import type * as broker_tools_slack from "../broker/tools/slack.js";
+import type * as broker_tools_slack_index from "../broker/tools/slack/index.js";
+import type * as broker_tools_slack_normalize from "../broker/tools/slack/normalize.js";
 import type * as broker_tools_web_index from "../broker/tools/web/index.js";
 import type * as broker_tools_web_input from "../broker/tools/web/input.js";
 import type * as broker_tools_web_output from "../broker/tools/web/output.js";
@@ -403,6 +407,7 @@ import type * as runs_agent_tools_schemas_responses_mail from "../runs/agent/too
 import type * as runs_agent_tools_schemas_responses_microsoft from "../runs/agent/tools/schemas/responses/microsoft.js";
 import type * as runs_agent_tools_schemas_responses_milo_artifacts from "../runs/agent/tools/schemas/responses/milo/artifacts.js";
 import type * as runs_agent_tools_schemas_responses_milo_automations from "../runs/agent/tools/schemas/responses/milo/automations.js";
+import type * as runs_agent_tools_schemas_responses_milo_broker from "../runs/agent/tools/schemas/responses/milo/broker.js";
 import type * as runs_agent_tools_schemas_responses_milo_core from "../runs/agent/tools/schemas/responses/milo/core.js";
 import type * as runs_agent_tools_schemas_responses_milo_index from "../runs/agent/tools/schemas/responses/milo/index.js";
 import type * as runs_agent_tools_schemas_responses_milo_runs from "../runs/agent/tools/schemas/responses/milo/runs.js";
@@ -614,6 +619,7 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/github/pulls": typeof broker_tools_github_pulls;
   "broker/tools/github/source": typeof broker_tools_github_source;
   "broker/tools/google/calendar": typeof broker_tools_google_calendar;
+  "broker/tools/google/calendars": typeof broker_tools_google_calendars;
   "broker/tools/google/format": typeof broker_tools_google_format;
   "broker/tools/google/gmail": typeof broker_tools_google_gmail;
   "broker/tools/google/index": typeof broker_tools_google_index;
@@ -624,11 +630,14 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/linear/index": typeof broker_tools_linear_index;
   "broker/tools/mail": typeof broker_tools_mail;
   "broker/tools/microsoft/calendar": typeof broker_tools_microsoft_calendar;
+  "broker/tools/microsoft/calendars": typeof broker_tools_microsoft_calendars;
+  "broker/tools/microsoft/events": typeof broker_tools_microsoft_events;
   "broker/tools/microsoft/index": typeof broker_tools_microsoft_index;
   "broker/tools/microsoft/mail": typeof broker_tools_microsoft_mail;
   "broker/tools/notion/index": typeof broker_tools_notion_index;
   "broker/tools/notion/upload": typeof broker_tools_notion_upload;
-  "broker/tools/slack": typeof broker_tools_slack;
+  "broker/tools/slack/index": typeof broker_tools_slack_index;
+  "broker/tools/slack/normalize": typeof broker_tools_slack_normalize;
   "broker/tools/web/index": typeof broker_tools_web_index;
   "broker/tools/web/input": typeof broker_tools_web_input;
   "broker/tools/web/output": typeof broker_tools_web_output;
@@ -916,6 +925,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/responses/microsoft": typeof runs_agent_tools_schemas_responses_microsoft;
   "runs/agent/tools/schemas/responses/milo/artifacts": typeof runs_agent_tools_schemas_responses_milo_artifacts;
   "runs/agent/tools/schemas/responses/milo/automations": typeof runs_agent_tools_schemas_responses_milo_automations;
+  "runs/agent/tools/schemas/responses/milo/broker": typeof runs_agent_tools_schemas_responses_milo_broker;
   "runs/agent/tools/schemas/responses/milo/core": typeof runs_agent_tools_schemas_responses_milo_core;
   "runs/agent/tools/schemas/responses/milo/index": typeof runs_agent_tools_schemas_responses_milo_index;
   "runs/agent/tools/schemas/responses/milo/runs": typeof runs_agent_tools_schemas_responses_milo_runs;
