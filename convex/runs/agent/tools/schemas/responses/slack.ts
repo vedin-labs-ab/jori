@@ -1,13 +1,13 @@
 import {
-  booleanField,
-  constField,
-  enumField,
+  arrayProperty,
+  booleanProperty,
+  constProperty,
+  enumProperty,
   type JsonSchema,
-  listField,
-  numberField,
-  resultSchema,
+  numberProperty,
+  objectSchema,
   type SchemaMap,
-  stringField,
+  stringProperty,
 } from "./common"
 
 // Slack results are normalized at the broker edge; identifiers keep Slack's
@@ -15,32 +15,32 @@ import {
 
 function slackMessageProperties() {
   return {
-    ts: stringField("Message timestamp; identifies the message."),
-    threadTs: stringField("Parent timestamp for threaded messages."),
-    userId: stringField("Author user ID."),
-    botId: stringField("Author bot ID for bot messages."),
-    subtype: stringField("Slack message subtype, when not a plain message."),
-    text: stringField("Message text in Slack mrkdwn."),
-    blocks: listField("Block Kit content, when the message carries it.", {
+    ts: stringProperty("Message timestamp; identifies the message."),
+    threadTs: stringProperty("Parent timestamp for threaded messages."),
+    userId: stringProperty("Author user ID."),
+    botId: stringProperty("Author bot ID for bot messages."),
+    subtype: stringProperty("Slack message subtype, when not a plain message."),
+    text: stringProperty("Message text in Slack mrkdwn."),
+    blocks: arrayProperty("Block Kit content, when the message carries it.", {
       type: "object",
       additionalProperties: true,
     }),
-    reactions: listField(
+    reactions: arrayProperty(
       "Reactions on the message.",
-      resultSchema({
+      objectSchema({
         properties: {
-          name: stringField("Emoji name."),
-          count: numberField("How many members reacted."),
+          name: stringProperty("Emoji name."),
+          count: numberProperty("How many members reacted."),
         },
       })
     ),
-    replyCount: numberField("Thread reply count, on thread parents."),
-    edited: booleanField("True when the message was edited."),
+    replyCount: numberProperty("Thread reply count, on thread parents."),
+    edited: booleanProperty("True when the message was edited."),
   }
 }
 
 function slackMessageSchema(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description: "Normalized Slack message.",
     required: ["ts", "text"],
     properties: slackMessageProperties(),
@@ -48,102 +48,102 @@ function slackMessageSchema(): JsonSchema {
 }
 
 function messageListing(description: string): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     required: ["messages", "hasMore"],
     properties: {
-      messages: listField(description, slackMessageSchema()),
-      hasMore: booleanField("True when more messages exist in the range."),
+      messages: arrayProperty(description, slackMessageSchema()),
+      hasMore: booleanProperty("True when more messages exist in the range."),
     },
   })
 }
 
 export const slackToolResponseSchemas = {
-  channels_list: resultSchema({
+  channels_list: objectSchema({
     required: ["channels"],
     properties: {
-      channels: listField(
+      channels: arrayProperty(
         "Conversations of the requested types.",
-        resultSchema({
+        objectSchema({
           required: ["channelId", "type"],
           properties: {
-            channelId: stringField("Conversation ID for other Slack calls."),
-            name: stringField("Channel name; absent for direct messages."),
-            type: enumField(
+            channelId: stringProperty("Conversation ID for other Slack calls."),
+            name: stringProperty("Channel name; absent for direct messages."),
+            type: enumProperty(
               ["public_channel", "private_channel", "im", "mpim"],
               "Conversation type."
             ),
-            topic: stringField("Channel topic, when set."),
-            memberCount: numberField("Member count, when Slack reports it."),
-            archived: booleanField("True for archived channels."),
-            userId: stringField("Counterpart user ID for direct messages."),
+            topic: stringProperty("Channel topic, when set."),
+            memberCount: numberProperty("Member count, when Slack reports it."),
+            archived: booleanProperty("True for archived channels."),
+            userId: stringProperty("Counterpart user ID for direct messages."),
           },
         })
       ),
-      nextCursor: stringField(
+      nextCursor: stringProperty(
         "Pass as cursor to continue; absent on the last page."
       ),
     },
   }),
   conversations_history: messageListing("Messages, newest first."),
   conversations_replies: messageListing("The thread, parent message first."),
-  conversations_search_messages: resultSchema({
+  conversations_search_messages: objectSchema({
     required: ["matches", "totalCount"],
     properties: {
-      matches: listField(
+      matches: arrayProperty(
         "Matching messages with their source conversation.",
-        resultSchema({
+        objectSchema({
           required: ["ts", "text"],
           properties: {
             ...slackMessageProperties(),
-            channelId: stringField("Conversation the match is in."),
-            channelName: stringField("Name of that conversation."),
-            permalink: stringField("Link to the message."),
+            channelId: stringProperty("Conversation the match is in."),
+            channelName: stringProperty("Name of that conversation."),
+            permalink: stringProperty("Link to the message."),
           },
         })
       ),
-      totalCount: numberField("Total matches Slack reports."),
-      page: numberField("Current results page."),
-      pageCount: numberField("Total result pages."),
+      totalCount: numberProperty("Total matches Slack reports."),
+      page: numberProperty("Current results page."),
+      pageCount: numberProperty("Total result pages."),
     },
   }),
-  users_search: resultSchema({
+  users_search: objectSchema({
     required: ["members"],
     properties: {
-      members: listField(
+      members: arrayProperty(
         "Workspace members matching the query.",
-        resultSchema({
+        objectSchema({
           required: ["userId"],
           properties: {
-            userId: stringField("User ID for mentions and direct messages."),
-            name: stringField("Slack handle."),
-            realName: stringField("Full name."),
-            displayName: stringField("Display name, when set."),
-            email: stringField("Email, when visible."),
-            isBot: booleanField("True for bot users."),
-            deleted: booleanField("True for deactivated users."),
-            timeZone: stringField("IANA time zone."),
+            userId: stringProperty("User ID for mentions and direct messages."),
+            name: stringProperty("Slack handle."),
+            realName: stringProperty("Full name."),
+            displayName: stringProperty("Display name, when set."),
+            email: stringProperty("Email, when visible."),
+            isBot: booleanProperty("True for bot users."),
+            deleted: booleanProperty("True for deactivated users."),
+            timeZone: stringProperty("IANA time zone."),
           },
         })
       ),
-      nextCursor: stringField(
+      nextCursor: stringProperty(
         "Pass as cursor to continue; absent on the last page."
       ),
     },
   }),
-  conversations_add_message: resultSchema({
+  conversations_add_message: objectSchema({
     description:
       "Delivery confirmation. channel and ts appear for text messages; file uploads omit them.",
     required: ["status"],
     properties: {
-      status: constField("sent", "The message was posted."),
-      channel: stringField("Conversation the message landed in."),
-      ts: stringField("Timestamp of the posted message."),
+      status: constProperty("sent", "The message was posted."),
+      channel: stringProperty("Conversation the message landed in."),
+      ts: stringProperty("Timestamp of the posted message."),
     },
   }),
-  slack_add_reaction: resultSchema({
+  slack_add_reaction: objectSchema({
     required: ["status"],
     properties: {
-      status: constField("added", "The reaction was added."),
+      status: constProperty("added", "The reaction was added."),
     },
   }),
 } satisfies SchemaMap

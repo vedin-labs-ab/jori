@@ -1,10 +1,10 @@
 import {
-  booleanField,
+  arrayProperty,
+  booleanProperty,
   type JsonSchema,
-  listField,
-  numberField,
-  resultSchema,
-  stringField,
+  numberProperty,
+  objectSchema,
+  stringProperty,
 } from "../common"
 
 // GitHub results are shaped by Milo's broker: raw GitHub payloads are
@@ -12,57 +12,57 @@ import {
 // every field here is optional unless the broker itself constructs it.
 
 export function repositorySummary(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description: "Compact repository summary; absent fields are omitted.",
     properties: {
-      id: numberField("GitHub repository ID."),
-      fullName: stringField("owner/name form."),
-      private: booleanField("True for private repositories."),
-      description: stringField("Repository description."),
-      defaultBranch: stringField("Default branch name."),
-      htmlUrl: stringField("Repository page URL."),
-      updatedAt: stringField("Last update timestamp."),
+      id: numberProperty("GitHub repository ID."),
+      fullName: stringProperty("owner/name form."),
+      private: booleanProperty("True for private repositories."),
+      description: stringProperty("Repository description."),
+      defaultBranch: stringProperty("Default branch name."),
+      htmlUrl: stringProperty("Repository page URL."),
+      updatedAt: stringProperty("Last update timestamp."),
     },
   })
 }
 
 export function issueSummary(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description: "Compact issue summary; absent fields are omitted.",
     properties: {
-      id: numberField("GitHub issue ID."),
-      number: numberField("Issue number."),
-      title: stringField("Issue title."),
-      body: stringField("Issue body in GitHub-flavored Markdown."),
-      state: stringField("open or closed."),
-      htmlUrl: stringField("Issue page URL."),
-      pullRequest: booleanField("True when the issue is a pull request."),
-      author: stringField("Author login."),
-      assignees: listField("Assignee logins.", { type: "string" }),
-      labels: listField("Label names.", { type: "string" }),
-      createdAt: stringField("Creation timestamp."),
-      updatedAt: stringField("Last update timestamp."),
+      id: numberProperty("GitHub issue ID."),
+      number: numberProperty("Issue number."),
+      title: stringProperty("Issue title."),
+      body: stringProperty("Issue body in GitHub-flavored Markdown."),
+      state: stringProperty("open or closed."),
+      htmlUrl: stringProperty("Issue page URL."),
+      pullRequest: booleanProperty("True when the issue is a pull request."),
+      author: stringProperty("Author login."),
+      assignees: arrayProperty("Assignee logins.", { type: "string" }),
+      labels: arrayProperty("Label names.", { type: "string" }),
+      createdAt: stringProperty("Creation timestamp."),
+      updatedAt: stringProperty("Last update timestamp."),
     },
   })
 }
 
 export function pullRequestSummary(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description: "Compact pull request summary; absent fields are omitted.",
     properties: {
-      id: numberField("GitHub pull request ID."),
-      number: numberField("Pull request number."),
-      title: stringField("Pull request title."),
-      body: stringField("Pull request body."),
-      state: stringField("open or closed."),
-      draft: booleanField("True for draft pull requests."),
-      merged: booleanField("True once merged."),
+      id: numberProperty("GitHub pull request ID."),
+      number: numberProperty("Pull request number."),
+      title: stringProperty("Pull request title."),
+      body: stringProperty("Pull request body."),
+      state: stringProperty("open or closed."),
+      draft: booleanProperty("True for draft pull requests."),
+      merged: booleanProperty("True once merged."),
       mergeable: {
         type: ["boolean", "null"],
         description: "GitHub's mergeability check.",
       },
-      htmlUrl: stringField("Pull request page URL."),
-      author: stringField("Author login."),
+      htmlUrl: stringProperty("Pull request page URL."),
+      author: stringProperty("Author login."),
       base: {
         type: "object",
         additionalProperties: true,
@@ -73,11 +73,11 @@ export function pullRequestSummary(): JsonSchema {
         additionalProperties: true,
         description: "Head branch ref object with ref and sha.",
       },
-      additions: numberField("Added line count."),
-      deletions: numberField("Deleted line count."),
-      changedFiles: numberField("Changed file count."),
-      createdAt: stringField("Creation timestamp."),
-      updatedAt: stringField("Last update timestamp."),
+      additions: numberProperty("Added line count."),
+      deletions: numberProperty("Deleted line count."),
+      changedFiles: numberProperty("Changed file count."),
+      createdAt: stringProperty("Creation timestamp."),
+      updatedAt: stringProperty("Last update timestamp."),
     },
   })
 }
@@ -85,15 +85,15 @@ export function pullRequestSummary(): JsonSchema {
 export function commentSummary(
   extra: Record<string, unknown> = {}
 ): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description: "Compact comment summary; absent fields are omitted.",
     properties: {
-      id: numberField("GitHub comment ID."),
-      body: stringField("Comment body."),
-      htmlUrl: stringField("Comment page URL."),
-      author: stringField("Author login."),
-      createdAt: stringField("Creation timestamp."),
-      updatedAt: stringField("Last update timestamp."),
+      id: numberProperty("GitHub comment ID."),
+      body: stringProperty("Comment body."),
+      htmlUrl: stringProperty("Comment page URL."),
+      author: stringProperty("Author login."),
+      createdAt: stringProperty("Creation timestamp."),
+      updatedAt: stringProperty("Last update timestamp."),
       ...extra,
     },
   })
@@ -101,27 +101,27 @@ export function commentSummary(
 
 export function reviewCommentSummary(): JsonSchema {
   return commentSummary({
-    commitId: stringField("Commit the comment was left on."),
-    diffHunk: stringField("Diff hunk the comment anchors to."),
-    inReplyToId: numberField("Parent review comment ID for replies."),
-    line: numberField("Current diff line."),
-    originalLine: numberField("Original diff line."),
-    path: stringField("File path the comment is on."),
-    pullRequestReviewId: numberField("Review the comment belongs to."),
-    side: stringField("LEFT or RIGHT diff side."),
+    commitId: stringProperty("Commit the comment was left on."),
+    diffHunk: stringProperty("Diff hunk the comment anchors to."),
+    inReplyToId: numberProperty("Parent review comment ID for replies."),
+    line: numberProperty("Current diff line."),
+    originalLine: numberProperty("Original diff line."),
+    path: stringProperty("File path the comment is on."),
+    pullRequestReviewId: numberProperty("Review the comment belongs to."),
+    side: stringProperty("LEFT or RIGHT diff side."),
   })
 }
 
 export function commitSummary(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description: "The commit Milo created.",
     properties: {
-      baseSha: stringField("Base commit SHA for new branches."),
-      files: listField("Repository-relative committed paths.", {
+      baseSha: stringProperty("Base commit SHA for new branches."),
+      files: arrayProperty("Repository-relative committed paths.", {
         type: "string",
       }),
-      sha: stringField("New commit SHA."),
-      treeSha: stringField("New tree SHA."),
+      sha: stringProperty("New commit SHA."),
+      treeSha: stringProperty("New tree SHA."),
     },
   })
 }

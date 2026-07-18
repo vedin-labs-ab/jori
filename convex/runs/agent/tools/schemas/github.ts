@@ -1,4 +1,5 @@
 import {
+  booleanProperty,
   numberProperty,
   objectSchema,
   type SchemaMap,
@@ -199,8 +200,4 @@ function pullRequestPageSchema(description: string) {
       repo: stringProperty("Repository name."),
     },
   })
-}
-
-function booleanProperty(description: string) {
-  return { type: "boolean", description }
 }

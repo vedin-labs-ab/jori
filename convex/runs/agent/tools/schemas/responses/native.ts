@@ -1,42 +1,42 @@
 import {
-  booleanField,
-  constField,
-  enumField,
+  arrayProperty,
+  booleanProperty,
+  constProperty,
+  enumProperty,
   type JsonSchema,
-  listField,
-  nullableStringField,
-  numberField,
-  resultSchema,
+  nullableStringProperty,
+  numberProperty,
+  objectSchema,
   type SchemaMap,
-  stringField,
+  stringProperty,
 } from "./common"
 
 // Native tools run on Milo's own runtime - sandbox, agent lifecycle, and
 // surface delivery - so every response shape here is exact.
 
 function commandOutput(tool: string): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     required: ["exitCode", "stdout", "stderr"],
     description: `Output of the ${tool} command.`,
     properties: {
-      exitCode: numberField("Process exit code."),
-      stdout: stringField("Captured standard output, bounded."),
-      stderr: stringField("Captured standard error, bounded."),
-      stdoutTruncated: booleanField("True when stdout was cut off."),
-      stderrTruncated: booleanField("True when stderr was cut off."),
+      exitCode: numberProperty("Process exit code."),
+      stdout: stringProperty("Captured standard output, bounded."),
+      stderr: stringProperty("Captured standard error, bounded."),
+      stdoutTruncated: booleanProperty("True when stdout was cut off."),
+      stderrTruncated: booleanProperty("True when stderr was cut off."),
     },
   })
 }
 
-const agentRunSchema = resultSchema({
+const agentRunSchema = objectSchema({
   properties: {
-    runId: stringField("Run ID of the child."),
-    title: stringField("The child's title."),
-    status: enumField(
+    runId: stringProperty("Run ID of the child."),
+    title: stringProperty("The child's title."),
+    status: enumProperty(
       ["queued", "running", "completed", "failed", "stopped"],
       "Where the child is in its lifecycle."
     ),
-    error: nullableStringField("Why the child failed, when it did."),
+    error: nullableStringProperty("Why the child failed, when it did."),
     result: {
       type: ["string", "null"],
       description:
@@ -46,97 +46,99 @@ const agentRunSchema = resultSchema({
 })
 
 export const nativeToolResponseSchemas = {
-  read: resultSchema({
+  read: objectSchema({
     required: ["path", "content"],
     properties: {
-      path: stringField("Workspace-relative file path."),
-      startLine: numberField("First line returned."),
-      endLine: numberField("Last line returned."),
-      content: stringField("File content for the returned range."),
-      truncated: booleanField("True when the range was cut off."),
+      path: stringProperty("Workspace-relative file path."),
+      startLine: numberProperty("First line returned."),
+      endLine: numberProperty("Last line returned."),
+      content: stringProperty("File content for the returned range."),
+      truncated: booleanProperty("True when the range was cut off."),
     },
   }),
-  grep: resultSchema({
+  grep: objectSchema({
     required: ["matches", "truncated"],
     properties: {
-      matches: listField(
+      matches: arrayProperty(
         "Matching lines across the searched files.",
-        resultSchema({
+        objectSchema({
           properties: {
-            path: stringField("Workspace-relative file path."),
-            lineNumber: numberField("1-indexed matching line."),
-            line: stringField("The matching line, bounded to 500 characters."),
+            path: stringProperty("Workspace-relative file path."),
+            lineNumber: numberProperty("1-indexed matching line."),
+            line: stringProperty(
+              "The matching line, bounded to 500 characters."
+            ),
           },
         })
       ),
-      truncated: booleanField("True when more matches existed."),
+      truncated: booleanProperty("True when more matches existed."),
     },
   }),
-  glob: resultSchema({
+  glob: objectSchema({
     required: ["paths", "truncated"],
     properties: {
-      paths: listField("Matching workspace-relative paths.", {
+      paths: arrayProperty("Matching workspace-relative paths.", {
         type: "string",
       }),
-      truncated: booleanField("True when more matches existed."),
+      truncated: booleanProperty("True when more matches existed."),
     },
   }),
   git: commandOutput("git"),
   bash: commandOutput("bash"),
-  apply_patch: resultSchema({
+  apply_patch: objectSchema({
     required: ["applied", "files"],
     properties: {
       applied: { type: "boolean", const: true },
-      files: listField("Workspace-relative patched paths.", {
+      files: arrayProperty("Workspace-relative patched paths.", {
         type: "string",
       }),
     },
   }),
-  start_agent: resultSchema({
+  start_agent: objectSchema({
     properties: {
-      runId: stringField("Run ID of the started child."),
+      runId: stringProperty("Run ID of the started child."),
     },
   }),
-  stop_agent: resultSchema({
+  stop_agent: objectSchema({
     properties: {
-      runId: stringField("Run ID of the stopped child."),
-      status: stringField("The child's status after the stop."),
+      runId: stringProperty("Run ID of the stopped child."),
+      status: stringProperty("The child's status after the stop."),
     },
   }),
-  wait_for_agents: resultSchema({
+  wait_for_agents: objectSchema({
     properties: {
-      reason: enumField(
+      reason: enumProperty(
         ["completed", "timeout", "interrupted"],
         "Why the wait ended."
       ),
-      runs: listField(
+      runs: arrayProperty(
         "Every waited-on child with its result when terminal.",
         agentRunSchema
       ),
     },
   }),
-  finish_run: resultSchema({
+  finish_run: objectSchema({
     required: ["communicated", "reason", "status"],
     properties: {
-      communicated: booleanField(
+      communicated: booleanProperty(
         "Whether a visible communication was sent on the requester surface."
       ),
-      reason: nullableStringField(
+      reason: nullableStringProperty(
         "The internal no-communication reason, when one was given."
       ),
-      status: constField("finished", "The run is finishing."),
+      status: constProperty("finished", "The run is finishing."),
     },
   }),
-  send_reply: resultSchema({
+  send_reply: objectSchema({
     required: ["status"],
     properties: {
-      status: constField("sent", "The reply was delivered to the surface."),
+      status: constProperty("sent", "The reply was delivered to the surface."),
     },
   }),
-  add_reaction: resultSchema({
+  add_reaction: objectSchema({
     required: ["status"],
     properties: {
-      status: constField("added", "The reaction was added on the surface."),
+      status: constProperty("added", "The reaction was added on the surface."),
     },
   }),
 } satisfies SchemaMap

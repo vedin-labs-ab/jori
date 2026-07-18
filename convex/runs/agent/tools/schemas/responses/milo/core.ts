@@ -1,15 +1,15 @@
 import {
-  booleanField,
-  constField,
-  enumField,
+  arrayProperty,
+  booleanProperty,
+  constProperty,
+  enumProperty,
   type JsonSchema,
-  listField,
-  nullableStringField,
-  numberField,
+  nullableStringProperty,
+  numberProperty,
+  objectSchema,
   providerPayload,
-  resultSchema,
   type SchemaMap,
-  stringField,
+  stringProperty,
 } from "../common"
 import { automationMiloToolResponseSchemas } from "./automations"
 import { brokerMiloToolResponseSchemas } from "./broker"
@@ -17,50 +17,56 @@ import { runMiloToolResponseSchemas } from "./runs"
 
 function assetSummaryProperties() {
   return {
-    assetId: stringField("Asset ID."),
-    name: stringField("Asset filename."),
-    mimeType: stringField("Asset content type."),
-    size: numberField("Asset size in bytes."),
-    createdAt: numberField("Creation time in epoch milliseconds."),
-    url: nullableStringField("Temporary download URL, when available."),
-    description: stringField("Asset description, when one was saved."),
+    assetId: stringProperty("Asset ID."),
+    name: stringProperty("Asset filename."),
+    mimeType: stringProperty("Asset content type."),
+    size: numberProperty("Asset size in bytes."),
+    createdAt: numberProperty("Creation time in epoch milliseconds."),
+    url: nullableStringProperty("Temporary download URL, when available."),
+    description: stringProperty("Asset description, when one was saved."),
   }
 }
 
 function skillMetadataSchema(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     properties: {
-      name: stringField("Skill name."),
-      category: stringField("Skill category."),
-      description: stringField("What the skill covers."),
-      associatedIntegrations: listField("Integrations the skill leans on.", {
-        type: "string",
-      }),
+      name: stringProperty("Skill name."),
+      category: stringProperty("Skill category."),
+      description: stringProperty("What the skill covers."),
+      associatedIntegrations: arrayProperty(
+        "Integrations the skill leans on.",
+        {
+          type: "string",
+        }
+      ),
     },
   })
 }
 
 function webToolResult(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     required: ["provider", "results", "truncated"],
     properties: {
-      provider: resultSchema({
+      provider: objectSchema({
         description: "Trace of the provider request.",
         properties: {
-          name: constField("exa", "Search provider."),
-          operation: enumField(["search", "contents"], "Provider operation."),
-          requestId: stringField("Provider request ID."),
-          resolvedSearchType: stringField("Search type the provider chose."),
-          searchTimeMs: numberField("Provider-reported search time."),
-          statuses: listField(
+          name: constProperty("exa", "Search provider."),
+          operation: enumProperty(
+            ["search", "contents"],
+            "Provider operation."
+          ),
+          requestId: stringProperty("Provider request ID."),
+          resolvedSearchType: stringProperty("Search type the provider chose."),
+          searchTimeMs: numberProperty("Provider-reported search time."),
+          statuses: arrayProperty(
             "Per-URL crawl statuses for fetches.",
             providerPayload("id, source, and status.")
           ),
         },
       }),
-      results: listField(
+      results: arrayProperty(
         "Normalized results.",
-        resultSchema({
+        objectSchema({
           required: [
             "url",
             "title",
@@ -70,27 +76,31 @@ function webToolResult(): JsonSchema {
             "content",
           ],
           properties: {
-            url: stringField("Result URL."),
-            title: nullableStringField("Page title."),
+            url: stringProperty("Result URL."),
+            title: nullableStringProperty("Page title."),
             source: providerPayload(
               "Provider metadata: id, and author, faviconUrl, imageUrl, publishedAt, or score when known."
             ),
-            snippet: nullableStringField("Best highlight or leading text."),
-            highlights: listField("Query-relevant excerpts.", {
+            snippet: nullableStringProperty("Best highlight or leading text."),
+            highlights: arrayProperty("Query-relevant excerpts.", {
               type: "string",
             }),
-            content: resultSchema({
+            content: objectSchema({
               required: ["text", "characters", "truncated"],
               properties: {
-                text: nullableStringField("Page text up to the character cap."),
-                characters: numberField("Characters returned."),
-                truncated: booleanField("True when the page had more text."),
+                text: nullableStringProperty(
+                  "Page text up to the character cap."
+                ),
+                characters: numberProperty("Characters returned."),
+                truncated: booleanProperty("True when the page had more text."),
               },
             }),
           },
         })
       ),
-      truncated: booleanField("True when more results existed than returned."),
+      truncated: booleanProperty(
+        "True when more results existed than returned."
+      ),
     },
   })
 }
@@ -100,31 +110,31 @@ export const coreMiloToolResponseSchemas = {
   load_skill: {
     description: "The skill's instructions, or the catalog when unknown.",
     oneOf: [
-      resultSchema({
+      objectSchema({
         required: ["status", "skill"],
         properties: {
-          status: constField("loaded", "The skill was found."),
-          skill: resultSchema({
+          status: constProperty("loaded", "The skill was found."),
+          skill: objectSchema({
             required: ["name", "instructions"],
             properties: {
-              name: stringField("Skill name."),
-              category: stringField("Skill category."),
-              description: stringField("What the skill covers."),
-              associatedIntegrations: listField(
+              name: stringProperty("Skill name."),
+              category: stringProperty("Skill category."),
+              description: stringProperty("What the skill covers."),
+              associatedIntegrations: arrayProperty(
                 "Integrations the skill leans on.",
                 { type: "string" }
               ),
-              instructions: stringField("Full skill instructions."),
+              instructions: stringProperty("Full skill instructions."),
             },
           }),
         },
       }),
-      resultSchema({
+      objectSchema({
         required: ["status", "name", "availableSkills"],
         properties: {
-          status: constField("not_found", "No skill matched the name."),
-          name: nullableStringField("The requested name."),
-          availableSkills: listField(
+          status: constProperty("not_found", "No skill matched the name."),
+          name: nullableStringProperty("The requested name."),
+          availableSkills: arrayProperty(
             "Every available skill.",
             skillMetadataSchema()
           ),
@@ -133,43 +143,45 @@ export const coreMiloToolResponseSchemas = {
     ],
   },
   ...runMiloToolResponseSchemas,
-  save_asset: resultSchema({
+  save_asset: objectSchema({
     required: ["assetId", "mimeType", "name", "size", "url"],
     properties: {
-      assetId: stringField("Asset ID for tools that send assets."),
-      mimeType: stringField("Stored content type."),
-      name: stringField("Stored filename."),
-      size: numberField("Asset size in bytes."),
-      url: nullableStringField("Temporary download URL, when available."),
+      assetId: stringProperty("Asset ID for tools that send assets."),
+      mimeType: stringProperty("Stored content type."),
+      name: stringProperty("Stored filename."),
+      size: numberProperty("Asset size in bytes."),
+      url: nullableStringProperty("Temporary download URL, when available."),
     },
   }),
-  generate_image: resultSchema({
+  generate_image: objectSchema({
     required: ["image", "provider", "status"],
     properties: {
-      image: resultSchema({
+      image: objectSchema({
         description: "The saved image asset.",
         properties: {
-          assetId: stringField("Asset ID for tools that send assets."),
-          mimeType: stringField("Image content type."),
-          name: stringField("Image filename."),
-          size: numberField("Image size in bytes."),
-          url: nullableStringField("Temporary download URL, when available."),
-          model: stringField("Image model that generated it."),
-          path: stringField("Workspace-relative sandbox path."),
+          assetId: stringProperty("Asset ID for tools that send assets."),
+          mimeType: stringProperty("Image content type."),
+          name: stringProperty("Image filename."),
+          size: numberProperty("Image size in bytes."),
+          url: nullableStringProperty(
+            "Temporary download URL, when available."
+          ),
+          model: stringProperty("Image model that generated it."),
+          path: stringProperty("Workspace-relative sandbox path."),
         },
       }),
-      provider: resultSchema({
+      provider: objectSchema({
         properties: {
-          name: constField("openrouter", "Image provider."),
-          requestId: stringField("Provider request ID."),
+          name: constProperty("openrouter", "Image provider."),
+          requestId: stringProperty("Provider request ID."),
         },
       }),
-      status: constField("ok", "Generation succeeded."),
+      status: constProperty("ok", "Generation succeeded."),
     },
   }),
-  search_assets: listField(
+  search_assets: arrayProperty(
     "Matching run assets, newest first.",
-    resultSchema({ properties: assetSummaryProperties() })
+    objectSchema({ properties: assetSummaryProperties() })
   ),
   read_asset: {
     type: ["object", "null"],

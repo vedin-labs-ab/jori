@@ -1,12 +1,12 @@
 import {
-  booleanField,
-  constField,
-  enumField,
+  arrayProperty,
+  booleanProperty,
+  constProperty,
+  enumProperty,
   type JsonSchema,
-  listField,
-  numberField,
-  resultSchema,
-  stringField,
+  numberProperty,
+  objectSchema,
+  stringProperty,
 } from "./common"
 
 // One normalized message shape for every mail provider, mirroring
@@ -14,41 +14,41 @@ import {
 // so Gmail and Outlook results document identically.
 
 export function mailMessageSchema(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description: "Normalized mail message; absent fields were not available.",
     required: ["provider", "messageId", "to", "cc", "subject"],
     properties: {
-      provider: enumField(
+      provider: enumProperty(
         ["gmail", "microsoftEmail"],
         "Mail provider the message came from."
       ),
-      messageId: stringField("Provider message ID."),
-      threadId: stringField("Conversation the message belongs to."),
-      from: stringField("Sender, as a display string."),
-      to: listField("Recipients.", { type: "string" }),
-      cc: listField("CC recipients.", { type: "string" }),
-      subject: stringField("Message subject."),
-      date: stringField("Received time as an ISO timestamp."),
-      snippet: stringField("Short preview of the message content."),
-      unread: booleanField("True when the message is unread."),
-      body: stringField("Decoded message body, when the read included it."),
-      bodyType: enumField(["text", "html"], "Format of body."),
-      bodyTruncated: booleanField(
+      messageId: stringProperty("Provider message ID."),
+      threadId: stringProperty("Conversation the message belongs to."),
+      from: stringProperty("Sender, as a display string."),
+      to: arrayProperty("Recipients.", { type: "string" }),
+      cc: arrayProperty("CC recipients.", { type: "string" }),
+      subject: stringProperty("Message subject."),
+      date: stringProperty("Received time as an ISO timestamp."),
+      snippet: stringProperty("Short preview of the message content."),
+      unread: booleanProperty("True when the message is unread."),
+      body: stringProperty("Decoded message body, when the read included it."),
+      bodyType: enumProperty(["text", "html"], "Format of body."),
+      bodyTruncated: booleanProperty(
         "True when body was cut at 20,000 characters."
       ),
-      attachments: listField(
+      attachments: arrayProperty(
         "Attachments, when the read included them.",
-        resultSchema({
+        objectSchema({
           required: ["name"],
           properties: {
-            attachmentId: stringField("Provider attachment ID."),
-            name: stringField("Attachment filename."),
-            mimeType: stringField("Attachment content type."),
-            size: numberField("Attachment size in bytes."),
+            attachmentId: stringProperty("Provider attachment ID."),
+            name: stringProperty("Attachment filename."),
+            mimeType: stringProperty("Attachment content type."),
+            size: numberProperty("Attachment size in bytes."),
           },
         })
       ),
-      hasAttachments: booleanField(
+      hasAttachments: booleanProperty(
         "True when the message has attachments, on listings that omit them."
       ),
     },
@@ -56,11 +56,11 @@ export function mailMessageSchema(): JsonSchema {
 }
 
 export function mailThreadSchema(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     required: ["threadId", "messages"],
     properties: {
-      threadId: stringField("Gmail thread ID."),
-      messages: listField(
+      threadId: stringProperty("Gmail thread ID."),
+      messages: arrayProperty(
         "The thread's messages, oldest first.",
         mailMessageSchema()
       ),
@@ -69,28 +69,28 @@ export function mailThreadSchema(): JsonSchema {
 }
 
 export function sentMailSchema(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description:
       "Delivery confirmation. IDs appear when the provider returns them.",
     required: ["status"],
     properties: {
-      status: constField("sent", "The message was sent."),
-      messageId: stringField("Provider ID of the sent message."),
-      threadId: stringField("Conversation the message landed in."),
+      status: constProperty("sent", "The message was sent."),
+      messageId: stringProperty("Provider ID of the sent message."),
+      threadId: stringProperty("Conversation the message landed in."),
     },
   })
 }
 
 export function draftedMailSchema(): JsonSchema {
-  return resultSchema({
+  return objectSchema({
     description:
       "The created draft. IDs appear when the provider returns them.",
     required: ["status", "draftId"],
     properties: {
-      status: constField("drafted", "The draft was created."),
-      draftId: stringField("Provider draft ID."),
-      messageId: stringField("Provider ID of the draft message."),
-      threadId: stringField("Conversation the draft belongs to."),
+      status: constProperty("drafted", "The draft was created."),
+      draftId: stringProperty("Provider draft ID."),
+      messageId: stringProperty("Provider ID of the draft message."),
+      threadId: stringProperty("Conversation the draft belongs to."),
     },
   })
 }

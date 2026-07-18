@@ -1,10 +1,10 @@
 import {
+  arrayProperty,
   type JsonSchema,
-  listField,
+  objectSchema,
   providerPayload,
-  resultSchema,
   type SchemaMap,
-  stringField,
+  stringProperty,
 } from "./common"
 
 // Linear results come back from Milo-authored GraphQL selections, so the
@@ -16,11 +16,11 @@ function issueNode(description: string): JsonSchema {
     additionalProperties: true,
     description,
     properties: {
-      id: stringField("Linear issue UUID."),
-      identifier: stringField("Human identifier, for example ENG-42."),
-      title: stringField("Issue title."),
-      url: stringField("Issue page URL."),
-      updatedAt: stringField("Last update timestamp."),
+      id: stringProperty("Linear issue UUID."),
+      identifier: stringProperty("Human identifier, for example ENG-42."),
+      title: stringProperty("Issue title."),
+      url: stringProperty("Issue page URL."),
+      updatedAt: stringProperty("Last update timestamp."),
       state: providerPayload("Workflow state with name and type."),
       assignee: providerPayload("Assignee with id and name, or null."),
       creator: providerPayload("Creator with id and name, or null."),
@@ -34,11 +34,11 @@ function commentNode(): JsonSchema {
     additionalProperties: true,
     description: "Comment node from Milo's GraphQL selection.",
     properties: {
-      id: stringField("Linear comment UUID."),
-      body: stringField("Markdown comment body."),
-      createdAt: stringField("Creation timestamp."),
-      updatedAt: stringField("Last update timestamp."),
-      url: stringField("Comment page URL."),
+      id: stringProperty("Linear comment UUID."),
+      body: stringProperty("Markdown comment body."),
+      createdAt: stringProperty("Creation timestamp."),
+      updatedAt: stringProperty("Last update timestamp."),
+      url: stringProperty("Comment page URL."),
       parent: providerPayload("Parent comment id for replies, or null."),
       user: providerPayload("Comment author with id and name."),
     },
@@ -46,11 +46,11 @@ function commentNode(): JsonSchema {
 }
 
 export const linearToolResponseSchemas = {
-  linear_search_issues: resultSchema({
+  linear_search_issues: objectSchema({
     required: ["query", "issues"],
     properties: {
-      query: stringField("The normalized query that ran."),
-      issues: listField(
+      query: stringProperty("The normalized query that ran."),
+      issues: arrayProperty(
         "Matching issues; an exact identifier match is included first.",
         issueNode("Issue summary node.")
       ),
@@ -62,11 +62,11 @@ export const linearToolResponseSchemas = {
     ),
     type: ["object", "null"],
   },
-  linear_list_comments: listField(
+  linear_list_comments: arrayProperty(
     "Comments on the issue, as Milo's GraphQL selection returns them.",
     commentNode()
   ),
-  linear_add_comment: resultSchema({
+  linear_add_comment: objectSchema({
     required: ["success", "comment"],
     properties: {
       success: { type: "boolean", description: "Whether Linear accepted it." },
@@ -78,7 +78,7 @@ export const linearToolResponseSchemas = {
       },
     },
   }),
-  linear_add_reaction: resultSchema({
+  linear_add_reaction: objectSchema({
     required: ["success", "reaction"],
     properties: {
       success: { type: "boolean", description: "Whether Linear accepted it." },
