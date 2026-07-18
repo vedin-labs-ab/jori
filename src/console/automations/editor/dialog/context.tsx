@@ -55,7 +55,7 @@ export function AutomationContextSection({
       <CollapsibleContent className="overflow-hidden rounded-md border">
         <div
           className={cn(
-            "grid gap-3 p-3.5",
+            "grid gap-3 px-2 py-2",
             visibleLayers.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"
           )}
         >
@@ -63,7 +63,7 @@ export function AutomationContextSection({
             <ContextLayer key={layer.label} {...layer} />
           ))}
         </div>
-        <p className="border-t bg-muted/30 px-3.5 py-1.5 text-muted-foreground text-[0.6875rem]/relaxed">
+        <p className="flex min-h-9 items-center border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
           Context is resolved for each run.
         </p>
       </CollapsibleContent>
