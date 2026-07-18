@@ -1,3 +1,4 @@
+import { isRecord } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
 import { type AssetContext, readRunAssets } from "../../../assets/read"
 import { slackQueryApi } from "../../../integrations/slack/api"
@@ -146,13 +147,7 @@ function optionalBlocks(value: unknown) {
     return undefined
   }
 
-  if (
-    !Array.isArray(value) ||
-    !value.every(
-      (block) =>
-        typeof block === "object" && block !== null && !Array.isArray(block)
-    )
-  ) {
+  if (!Array.isArray(value) || !value.every(isRecord)) {
     throw new Error("blocks must be an array of Block Kit block objects")
   }
 
