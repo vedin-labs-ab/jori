@@ -71,6 +71,33 @@ describe("trigger modes", () => {
   })
 })
 
+describe("recovery context", () => {
+  test("lists prior-attempt write actions on retries only", () => {
+    const input = automationRuntimeInput()
+    const recovered = assemblePrompt(input, {
+      recovery: {
+        attempt: 2,
+        actions: [
+          {
+            name: "google_gmail_send_message",
+            detail: '{"subject":"Morning Briefing"}',
+          },
+          { name: "add_automation", detail: null },
+        ],
+      },
+    }).context
+
+    expect(recovered).toContain("# Recovery")
+    expect(recovered).toContain("This is attempt 2 of this run")
+    expect(recovered).toContain(
+      '- google_gmail_send_message — {"subject":"Morning Briefing"}'
+    )
+    expect(recovered).toContain("- add_automation\n")
+    expect(recovered).toContain("Never repeat one")
+    expect(assemblePrompt(input).context).not.toContain("# Recovery")
+  })
+})
+
 describe("raw Markdown trigger instructions", () => {
   test("appends automation instructions as raw Markdown", () => {
     const input = automationRuntimeInput()

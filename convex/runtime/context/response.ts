@@ -7,6 +7,7 @@ import {
 } from "../../../contracts/runtime/worker"
 import { type AgentRuntimeInput, inputAccess } from "../../runs/agent/input"
 import { assemblePrompt } from "../../runs/agent/prompt"
+import { type PromptRecovery } from "../../runs/agent/prompt/context"
 import {
   getPromptedTools,
   toolExecutionType,
@@ -33,7 +34,7 @@ export function buildRuntimePrompt(
   activeSurface: LoadedActiveSurface,
   permissions: RuntimePermissions,
   skills: RuntimeSkill[],
-  options: { person: string | null }
+  options: { person: string | null; recovery?: PromptRecovery | null }
 ) {
   return assemblePrompt(input, {
     activeSurface: activeSurface.state,
@@ -43,6 +44,7 @@ export function buildRuntimePrompt(
       permissions: permissions.all,
       toolModes: permissions.toolModes,
     }),
+    recovery: options.recovery ?? null,
     skills,
   })
 }

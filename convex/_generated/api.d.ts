@@ -410,6 +410,7 @@ import type * as runs_execution_outbox_records from "../runs/execution/outbox/re
 import type * as runs_execution_sandboxes_data from "../runs/execution/sandboxes/data.js";
 import type * as runs_execution_sandboxes_records from "../runs/execution/sandboxes/records.js";
 import type * as runs_execution_traces_data from "../runs/execution/traces/data.js";
+import type * as runs_execution_traces_recovery from "../runs/execution/traces/recovery.js";
 import type * as runs_execution_waiters_data from "../runs/execution/waiters/data.js";
 import type * as runs_execution_waiters_handoffs from "../runs/execution/waiters/handoffs.js";
 import type * as runs_execution_waiters_records from "../runs/execution/waiters/records.js";
@@ -900,6 +901,7 @@ declare const fullApi: ApiFromModules<{
   "runs/execution/sandboxes/data": typeof runs_execution_sandboxes_data;
   "runs/execution/sandboxes/records": typeof runs_execution_sandboxes_records;
   "runs/execution/traces/data": typeof runs_execution_traces_data;
+  "runs/execution/traces/recovery": typeof runs_execution_traces_recovery;
   "runs/execution/waiters/data": typeof runs_execution_waiters_data;
   "runs/execution/waiters/handoffs": typeof runs_execution_waiters_handoffs;
   "runs/execution/waiters/records": typeof runs_execution_waiters_records;
