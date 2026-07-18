@@ -29,6 +29,7 @@ export function createInstructionExtensions(refs: InstructionRefs) {
     AutomationSurfaceExtension.configure({
       getPermissions: () => refs.permissions.current,
       getScope: () => refs.scope.current,
+      getTenantId: () => refs.tenantId.current,
     }),
     Markdown.configure({
       marked: createInstructionMarked(),

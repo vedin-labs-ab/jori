@@ -19,6 +19,7 @@ type AutomationSurfacePolicyState =
 export type AutomationSurfaceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
   getScope: () => Scope
+  getTenantId: () => string
 }
 
 export type AutomationReferenceNodeOptions = {
@@ -35,7 +36,11 @@ export const AutomationSurfaceNode = Node.create<AutomationSurfaceNodeOptions>({
   selectable: true,
 
   addOptions() {
-    return { getPermissions: () => undefined, getScope: () => "personal" }
+    return {
+      getPermissions: () => undefined,
+      getScope: () => "personal",
+      getTenantId: () => "",
+    }
   },
 
   addAttributes() {

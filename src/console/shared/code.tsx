@@ -1,9 +1,65 @@
-import { Fragment, useState } from "react"
+import { Fragment, type ReactNode, useState } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { CopyButton } from "./copy"
+import { codeTokenClassName } from "./tokens"
 
 type Composite = Record<string, unknown> | readonly unknown[]
 
 const toggleClassName =
   "-mx-0.5 cursor-pointer rounded-sm px-0.5 outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring/30"
+
+/** Terminal-style JSON dialog: a slim header — caller-supplied left side,
+ *  copy control right — over a folding JsonView. No chrome beyond that;
+ *  the JSON is the whole story. */
+export function JsonDialog({
+  description,
+  headerLeft,
+  onOpenChange,
+  open,
+  value,
+}: {
+  description: string
+  headerLeft: ReactNode
+  onOpenChange: (open: boolean) => void
+  open: boolean
+  value: unknown
+}) {
+  const json = value === undefined ? "" : JSON.stringify(value, null, 2)
+
+  return (
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogContent
+        // Full-bleed: the header divider spans the card, the pre scrolls.
+        bodyClassName="gap-0 p-0"
+        className="bg-muted sm:max-w-3xl"
+        // Autofocusing the copy button pops its tooltip, whose layer then
+        // swallows Escape before the dialog can see it.
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        showCloseButton={false}
+      >
+        <DialogDescription className="sr-only">{description}</DialogDescription>
+        <div className="grid min-w-0 overflow-hidden">
+          <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2">
+            {headerLeft}
+            <CopyButton label="schema" value={json} />
+          </div>
+          <pre
+            className={`max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
+          >
+            {/* Keyed by content so fold state resets when the JSON swaps. */}
+            <code className="block whitespace-pre-wrap break-words" key={json}>
+              {value === undefined ? null : <JsonView value={value} />}
+            </code>
+          </pre>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 /** JSON rendered as a collapsible structure: every bracket that opens a
  *  non-empty object or array folds its region, DevTools-style. Emits the

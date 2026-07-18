@@ -1,4 +1,4 @@
-import { useId } from "react"
+import { useId, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,23 +13,31 @@ import {
 } from "@/console/shared/tools"
 import { cn } from "@/lib/utils"
 import { type ToolPermission } from "../../../../permissions/types"
+import { useRetained } from "../../../../shared/retain"
 import {
   automationToolModeDescription,
   isAutomationToolSelectable,
 } from "../../../access/policy"
+import { ToolSchemaButton, ToolSchemaDialog } from "./schema"
 
 type AutomationSurfaceToolGroupsProps = {
   onToolsChange: (tools: string[]) => void
   permissions: ToolPermission[]
+  tenantId: string
   tools: string[]
 }
 
 export function AutomationSurfaceToolGroups({
   onToolsChange,
   permissions,
+  tenantId,
   tools,
 }: AutomationSurfaceToolGroupsProps) {
   const selectedTools = new Set(tools)
+  const [schemaPermission, setSchemaPermission] = useState<ToolPermission>()
+  // Mounted on first use: the dialog subscribes to the schema query, which
+  // nothing should pay for until someone actually asks for a schema.
+  const hasOpenedSchema = useRetained(schemaPermission) !== undefined
 
   function setTool(tool: string, enabled: boolean) {
     const nextTools = new Set(selectedTools)
@@ -61,17 +69,31 @@ export function AutomationSurfaceToolGroups({
   }
 
   return (
-    <ToolGroupsFrame>
-      {groupToolsByAccess(permissions).map((group) => (
-        <EditableToolGroup
-          group={group}
-          key={group.access}
-          onGroupChange={setGroupTools}
-          onToolChange={setTool}
-          selectedTools={selectedTools}
+    <>
+      <ToolGroupsFrame>
+        {groupToolsByAccess(permissions).map((group) => (
+          <EditableToolGroup
+            group={group}
+            key={group.access}
+            onGroupChange={setGroupTools}
+            onToolChange={setTool}
+            onViewSchema={setSchemaPermission}
+            selectedTools={selectedTools}
+          />
+        ))}
+      </ToolGroupsFrame>
+      {hasOpenedSchema ? (
+        <ToolSchemaDialog
+          onOpenChange={(open) => {
+            if (!open) {
+              setSchemaPermission(undefined)
+            }
+          }}
+          permission={schemaPermission}
+          tenantId={tenantId}
         />
-      ))}
-    </ToolGroupsFrame>
+      ) : null}
+    </>
   )
 }
 
@@ -79,11 +101,13 @@ function EditableToolGroup({
   group,
   onGroupChange,
   onToolChange,
+  onViewSchema,
   selectedTools,
 }: {
   group: ToolAccessGroup<ToolPermission>
   onGroupChange: (tools: ToolPermission[], enabled: boolean) => void
   onToolChange: (tool: string, enabled: boolean) => void
+  onViewSchema: (permission: ToolPermission) => void
   selectedTools: Set<string>
 }) {
   const selectableTools = group.tools.filter(isAutomationToolSelectable)
@@ -116,6 +140,7 @@ function EditableToolGroup({
         <EditableToolRow
           key={permission.tool}
           onCheckedChange={(enabled) => onToolChange(permission.tool, enabled)}
+          onViewSchema={() => onViewSchema(permission)}
           permission={permission}
           selected={selectedTools.has(permission.tool)}
         />
@@ -126,10 +151,12 @@ function EditableToolGroup({
 
 function EditableToolRow({
   onCheckedChange,
+  onViewSchema,
   permission,
   selected,
 }: {
   onCheckedChange: (enabled: boolean) => void
+  onViewSchema: () => void
   permission: ToolPermission
   selected: boolean
 }) {
@@ -141,7 +168,7 @@ function EditableToolRow({
   return (
     <div
       className={cn(
-        "grid grid-cols-[auto_1fr] gap-3 border-b p-3 last:border-b-0",
+        "group/tool-row grid grid-cols-[auto_1fr_auto] gap-3 border-b p-3 last:border-b-0",
         disabled && "bg-muted/30"
       )}
     >
@@ -170,6 +197,9 @@ function EditableToolRow({
           </Label>
         }
       />
+      <div className="self-center">
+        <ToolSchemaButton onClick={onViewSchema} toolLabel={permission.label} />
+      </div>
     </div>
   )
 }

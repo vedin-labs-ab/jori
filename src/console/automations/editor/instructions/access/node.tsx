@@ -98,6 +98,7 @@ function AutomationSurfaceNodeContent({
         open={isToolDialogOpen}
         permissions={permissions}
         integration={integration}
+        tenantId={getNodeViewOptions(extension).getTenantId()}
         toolSurfaceLabel={toolSurfaceLabel}
         tools={tools}
       />

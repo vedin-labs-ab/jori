@@ -1,21 +1,14 @@
 import { Link2, Lock, type LucideIcon } from "lucide-react"
 import { useState } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { DialogTitle } from "@/components/ui/dialog"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { JsonView } from "../../../shared/code"
-import { CopyButton } from "../../../shared/copy"
+import { JsonDialog } from "../../../shared/code"
 import { useRetained } from "../../../shared/retain"
-import { codeTokenClassName } from "../../../shared/tokens"
 
 export type ContractEntrySummary = {
   name: string
@@ -137,8 +130,6 @@ function ScopeMark({ scope }: { scope: string }) {
   )
 }
 
-/** Bare JSON viewer, mirroring the runs error dialog: no chrome beyond a
- *  copy control — the schema is the whole story. */
 function SchemaDialog({
   entry,
   onOpenChange,
@@ -147,41 +138,21 @@ function SchemaDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const shown = useRetained(entry)
-  const json = shown === undefined ? "" : JSON.stringify(shown.schema, null, 2)
 
   return (
-    <Dialog onOpenChange={onOpenChange} open={entry !== undefined}>
-      <DialogContent
-        // Full-bleed: the copy-row divider spans the card, the pre scrolls.
-        bodyClassName="gap-0 p-0"
-        className="bg-muted sm:max-w-3xl"
-        // Autofocusing the copy button pops its tooltip, whose layer then
-        // swallows Escape before the dialog can see it.
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        showCloseButton={false}
-      >
-        <DialogDescription className="sr-only">
-          The JSON Schema every write to this state entry is validated against.
-        </DialogDescription>
-        <div className="grid min-w-0 overflow-hidden">
-          <div className="flex min-w-0 items-center justify-between gap-2 border-b px-3 py-2">
-            <DialogTitle className="min-w-0 truncate font-medium font-mono text-foreground text-xs">
-              {shown?.schemaName}{" "}
-              <span className="font-normal text-[0.625rem] text-muted-foreground">
-                v{shown?.schemaVersion}
-              </span>
-            </DialogTitle>
-            <CopyButton label="schema" value={json} />
-          </div>
-          <pre
-            className={`max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
-          >
-            <code className="block whitespace-pre-wrap break-words">
-              {shown === undefined ? null : <JsonView value={shown.schema} />}
-            </code>
-          </pre>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <JsonDialog
+      description="The JSON Schema every write to this state entry is validated against."
+      headerLeft={
+        <DialogTitle className="min-w-0 truncate font-medium font-mono text-foreground text-xs">
+          {shown?.schemaName}{" "}
+          <span className="font-normal text-[0.625rem] text-muted-foreground">
+            v{shown?.schemaVersion}
+          </span>
+        </DialogTitle>
+      }
+      onOpenChange={onOpenChange}
+      open={entry !== undefined}
+      value={shown?.schema}
+    />
   )
 }
