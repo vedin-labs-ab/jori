@@ -88,8 +88,11 @@ function ProspectiveArtifact({
       footer="Set up from its template when you create this automation."
       lines={<p className="text-muted-foreground">{artifact.description}</p>}
       title={
-        <span className="min-w-0 truncate font-medium text-foreground text-sm">
-          {artifact.title}
+        <span className="flex min-w-0 items-baseline gap-1.5">
+          <span className="min-w-0 truncate font-medium text-foreground text-sm">
+            {artifact.title}
+          </span>
+          <TitleVersion version={binding.version} />
         </span>
       }
     />
@@ -142,8 +145,11 @@ function LiveArtifact({
       }
       title={
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-          <span className="truncate font-medium text-foreground text-sm">
-            {artifact.title}
+          <span className="flex min-w-0 items-baseline gap-1.5">
+            <span className="truncate font-medium text-foreground text-sm">
+              {artifact.title}
+            </span>
+            <TitleVersion version={artifact.template?.version} />
           </span>
           <Link
             className="flex shrink-0 items-center gap-1 text-muted-foreground text-xs underline-offset-2 hover:text-foreground hover:underline"
@@ -155,6 +161,20 @@ function LiveArtifact({
         </span>
       }
     />
+  )
+}
+
+/** The template version beside the artifact name, in the state contract's
+ *  vN idiom: muted, one size down from the title. */
+function TitleVersion({ version }: { version: number | undefined }) {
+  if (version === undefined) {
+    return null
+  }
+
+  return (
+    <span className="shrink-0 font-normal text-muted-foreground text-xs">
+      v{version}
+    </span>
   )
 }
 
