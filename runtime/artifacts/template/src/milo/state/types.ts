@@ -44,7 +44,10 @@ export type MiloStateSubscriptionInput = {
 export type ArtifactStateDefinition<TSchema extends z.ZodType = z.ZodType> = {
   key: string
   schema: TSchema
+  /** Shown to people in the console. */
   description?: string
+  /** Guidance rendered into the agent's run context. */
+  usage?: string
   scope?: MiloStateScope
   schemaName?: string
   schemaVersion?: number
@@ -54,6 +57,7 @@ export type ArtifactStateContractJson = {
   key: string
   scope: MiloStateScope
   description?: string
+  usage?: string
   schemaName: string
   schemaVersion: number
   schemaHash: string
@@ -70,6 +74,7 @@ export type ArtifactStateRef<TSchema extends z.ZodType = z.ZodType> = {
   key: string
   scope: MiloStateScope
   description?: string
+  usage?: string
   schema: TSchema
   schemaName: string
   schemaVersion: number
