@@ -39,5 +39,4 @@ export const waiters = defineTable({
   subject: v.optional(waiterSubject),
   createdAt: v.number(),
   updatedAt: v.number(),
-  wokenAt: v.optional(v.number()),
 }).index("by_run_and_status", ["runId", "status"])

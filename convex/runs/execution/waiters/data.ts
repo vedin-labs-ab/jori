@@ -184,14 +184,11 @@ async function wakeWaiter(
   waiter: NonNullable<Awaited<ReturnType<typeof findActiveWaiter>>>,
   args: { reason: WaiterReason; subject?: WaiterSubject }
 ) {
-  const now = Date.now()
-
   await ctx.db.patch(waiter._id, {
     status: "woken",
     reason: args.reason,
     subject: args.subject,
-    wokenAt: now,
-    updatedAt: now,
+    updatedAt: Date.now(),
   })
   await enqueueOperation(ctx, {
     tenantId: waiter.tenantId,
