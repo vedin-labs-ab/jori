@@ -1,4 +1,4 @@
-import { isRecord } from "./json"
+import { compactRecord, isRecord } from "./json"
 export const maxSourceChangeFiles = 100
 export const maxSourceChangeFileBytes = 256 * 1024
 export const maxSourceChangeTreeBytes = 900 * 1024
@@ -30,11 +30,7 @@ export function normalizeSourceChanges(value: unknown): SourceChanges {
   const baseSha = optionalSha(value.baseSha, "changes.baseSha")
   const headSha = optionalSha(value.headSha, "changes.headSha")
 
-  return {
-    ...(baseSha === undefined ? {} : { baseSha }),
-    files,
-    ...(headSha === undefined ? {} : { headSha }),
-  }
+  return compactRecord({ baseSha, files, headSha })
 }
 
 function normalizeSourcePath(value: unknown) {

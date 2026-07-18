@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { compactRecord } from "../../contracts/json"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
 import { requireTenantAccess } from "../access"
@@ -55,14 +56,18 @@ export const startStep = internalMutation({
     const discovery = await requireDiscovery(ctx, args.tenantId)
     const startedAt = Date.now()
 
-    await appendStep(ctx, discovery, {
-      activeAt: startedAt,
-      id: args.id,
-      kind: args.kind,
-      label: args.label,
-      startedAt,
-      ...(args.url === undefined ? {} : { url: args.url }),
-    })
+    await appendStep(
+      ctx,
+      discovery,
+      compactRecord({
+        activeAt: startedAt,
+        id: args.id,
+        kind: args.kind,
+        label: args.label,
+        startedAt,
+        url: args.url,
+      })
+    )
 
     return startedAt
   },
@@ -77,14 +82,18 @@ export const queueStep = internalMutation({
     const discovery = await requireDiscovery(ctx, args.tenantId)
     const queuedAt = Date.now()
 
-    await appendStep(ctx, discovery, {
-      id: args.id,
-      kind: args.kind,
-      label: args.label,
-      queuedAt,
-      startedAt: queuedAt,
-      ...(args.url === undefined ? {} : { url: args.url }),
-    })
+    await appendStep(
+      ctx,
+      discovery,
+      compactRecord({
+        id: args.id,
+        kind: args.kind,
+        label: args.label,
+        queuedAt,
+        startedAt: queuedAt,
+        url: args.url,
+      })
+    )
 
     return queuedAt
   },

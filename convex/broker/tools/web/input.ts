@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import {
   isPublicHostname,
   normalizeHostname,
@@ -47,7 +48,7 @@ export function normalizeWebFetchInput(
 ): WebFetchInput {
   const highlightQuery = optionalQuery(args.highlightQuery)
 
-  return {
+  return compactRecord({
     url: normalizePublicHttpUrl(args.url, "url"),
     maxCharacters: boundedNumber(
       args.maxCharacters,
@@ -55,8 +56,8 @@ export function normalizeWebFetchInput(
       1000,
       maxFetchCharacters
     ),
-    ...(highlightQuery === undefined ? {} : { highlightQuery }),
-  }
+    highlightQuery,
+  })
 }
 
 function normalizeQuery(value: unknown) {

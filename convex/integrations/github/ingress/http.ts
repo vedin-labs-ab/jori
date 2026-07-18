@@ -1,3 +1,4 @@
+import { compactRecord } from "../../../../contracts/json"
 import { internal } from "../../../_generated/api"
 import { type ActionCtx } from "../../../_generated/server"
 import {
@@ -162,18 +163,21 @@ async function recordGitHubMessage(
     mode?: GitHubRecordMode
   }
 ) {
-  await ctx.runMutation(internal.conversations.intake.record, {
-    accountId: message.accountId,
-    integration: "github",
-    ...(options.mode === undefined ? {} : { mode: options.mode }),
-    type: message.type,
-    externalId: message.externalId,
-    actor: options.actor,
-    conversationId: message.conversationId,
-    text: message.text,
-    observedAt: message.observedAt,
-    data: message.data,
-  })
+  await ctx.runMutation(
+    internal.conversations.intake.record,
+    compactRecord({
+      accountId: message.accountId,
+      integration: "github",
+      mode: options.mode,
+      type: message.type,
+      externalId: message.externalId,
+      actor: options.actor,
+      conversationId: message.conversationId,
+      text: message.text,
+      observedAt: message.observedAt,
+      data: message.data,
+    })
+  )
 }
 
 function createGitHubActor(message: GitHubMessage) {

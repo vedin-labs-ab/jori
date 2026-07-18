@@ -1,4 +1,5 @@
 import { linearIssueCommentEvent } from "../../../../contracts/automations/events/names"
+import { compactRecord } from "../../../../contracts/json"
 import { internal } from "../../../_generated/api"
 import { type ActionCtx } from "../../../_generated/server"
 import { createIntegrationActor } from "../../../shared/actor"
@@ -164,23 +165,26 @@ async function recordLinearMessage(
   message: LinearMessage,
   mode?: LinearRecordMode
 ) {
-  await ctx.runMutation(internal.conversations.intake.record, {
-    accountId: message.accountId,
-    integration: "linear",
-    ...(mode === undefined ? {} : { mode }),
-    type: message.type,
-    externalId: message.externalId,
-    actor: createIntegrationActor({
-      externalId: message.actorId,
-      kind: message.actorKind,
-      email: message.actorEmail,
-      name: message.actorName,
-    }),
-    conversationId: message.conversationId,
-    text: message.text,
-    observedAt: message.observedAt,
-    data: message.data,
-  })
+  await ctx.runMutation(
+    internal.conversations.intake.record,
+    compactRecord({
+      accountId: message.accountId,
+      integration: "linear",
+      mode,
+      type: message.type,
+      externalId: message.externalId,
+      actor: createIntegrationActor({
+        externalId: message.actorId,
+        kind: message.actorKind,
+        email: message.actorEmail,
+        name: message.actorName,
+      }),
+      conversationId: message.conversationId,
+      text: message.text,
+      observedAt: message.observedAt,
+      data: message.data,
+    })
+  )
 }
 
 async function recordLinearReaction(ctx: ActionCtx, reaction: LinearReaction) {
@@ -243,10 +247,10 @@ async function hydrateLinearMessage(
 }
 
 function linearIssueMatch(message: LinearMessage) {
-  return {
+  return compactRecord({
     issue: message.data.issueId,
-    ...(message.data.teamId === undefined ? {} : { team: message.data.teamId }),
-  }
+    team: message.data.teamId,
+  })
 }
 
 function withLinearIssueContext(

@@ -2,6 +2,7 @@
 
 import { randomUUID } from "node:crypto"
 import { v } from "convex/values"
+import { compactRecord } from "../../contracts/json"
 import { internal } from "../_generated/api"
 import { type ActionCtx, internalAction } from "../_generated/server"
 import {
@@ -212,13 +213,10 @@ async function startStep(
 ) {
   const stepId = randomUUID()
 
-  await ctx.runMutation(internal.organization.discovery.startStep, {
-    id: stepId,
-    tenantId,
-    kind,
-    label,
-    ...(url === undefined ? {} : { url }),
-  })
+  await ctx.runMutation(
+    internal.organization.discovery.startStep,
+    compactRecord({ id: stepId, tenantId, kind, label, url })
+  )
 
   return stepId
 }
@@ -232,13 +230,10 @@ async function queueStep(
 ) {
   const stepId = randomUUID()
 
-  await ctx.runMutation(internal.organization.discovery.queueStep, {
-    id: stepId,
-    tenantId,
-    kind,
-    label,
-    ...(url === undefined ? {} : { url }),
-  })
+  await ctx.runMutation(
+    internal.organization.discovery.queueStep,
+    compactRecord({ id: stepId, tenantId, kind, label, url })
+  )
 
   return stepId
 }
@@ -256,11 +251,10 @@ async function completeStep(
   stepId: string,
   error?: string
 ) {
-  await ctx.runMutation(internal.organization.discovery.completeStep, {
-    tenantId,
-    id: stepId,
-    ...(error === undefined ? {} : { error }),
-  })
+  await ctx.runMutation(
+    internal.organization.discovery.completeStep,
+    compactRecord({ tenantId, id: stepId, error })
+  )
 }
 
 async function reportFailure(ctx: ActionCtx, tenantId: string, error: unknown) {

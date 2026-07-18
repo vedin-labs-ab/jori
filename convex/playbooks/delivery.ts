@@ -1,3 +1,4 @@
+import { compactRecord } from "../../contracts/json"
 import { type PlaybookDefinition } from "../../contracts/playbooks/catalog"
 import {
   allowsDeliveryMode,
@@ -41,12 +42,12 @@ export async function readDeliveryContext(
       ? undefined
       : readSelfSlackTarget(ctx, args.ownerId, args.recipient.name),
   ])
-  return {
+  return compactRecord({
     connected: args.connected,
     hasSlackIdentity: slackTarget !== undefined,
     recipient: args.recipient,
-    ...(preference === undefined ? {} : { preference }),
-  }
+    preference,
+  })
 }
 
 export function deliverySetup(
@@ -58,10 +59,10 @@ export function deliverySetup(
     .map((mode) => deliveryOption(mode, context))
   const recommended = recommendedDelivery(options, context.preference)
 
-  return {
+  return compactRecord({
     options,
-    ...(recommended === undefined ? {} : { recommended }),
-  }
+    recommended,
+  })
 }
 
 export async function saveDeliveryPreference(
