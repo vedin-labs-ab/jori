@@ -33,15 +33,19 @@ export function resolveToolReference(tool: string) {
   return { request, response }
 }
 
-export const get = query({
+/** One round trip resolves every schema a view can ask about, so opening
+ *  a schema dialog never waits on a second request. */
+export const list = query({
   args: {
     tenantId: v.string(),
-    tool: v.string(),
+    tools: v.array(v.string()),
   },
   handler: async (ctx, args) => {
     await requireTenantAccess(ctx, args.tenantId)
 
-    return resolveToolReference(args.tool)
+    return Object.fromEntries(
+      args.tools.slice(0, 50).map((tool) => [tool, resolveToolReference(tool)])
+    )
   },
 })
 

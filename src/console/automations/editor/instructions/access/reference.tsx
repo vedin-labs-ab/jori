@@ -21,6 +21,7 @@ import {
 } from "./remove"
 import { ToolSchemaDialog } from "./schema"
 import { automationReferenceToneClassNames } from "./tone"
+import { useToolReferences } from "./wire"
 
 export function AutomationReferenceNodeView({
   deleteNode,
@@ -132,7 +133,8 @@ function ReferencePill({
 }
 
 /** The pill's right pane: a schema segment opening the tool's request and
- *  response schemas, mirroring the access pill's tools segment. */
+ *  response schemas, mirroring the access pill's tools segment. Hovering
+ *  the pill warms the schema subscription so the dialog opens resolved. */
 function ToolSchemaPane({
   permission,
   separatorClassName,
@@ -143,8 +145,8 @@ function ToolSchemaPane({
   tenantId: string
 }) {
   const [shown, setShown] = useState<ToolPermission>()
-  // Mounted on first use, so nothing subscribes until someone asks.
-  const hasOpened = useRetained(shown) !== undefined
+  const [warm, setWarm] = useState(false)
+  const engaged = useRetained(shown) !== undefined || warm
 
   return (
     <>
@@ -155,22 +157,47 @@ function ToolSchemaPane({
       <AutomationMarkerActionButton
         ariaLabel={`View the ${permission.label} schema`}
         onOpen={() => setShown(permission)}
+        onWarm={() => setWarm(true)}
         title="Request and response schema"
       >
         <Braces className="size-3 opacity-80" />
       </AutomationMarkerActionButton>
-      {hasOpened ? (
-        <ToolSchemaDialog
-          onOpenChange={(open) => {
-            if (!open) {
-              setShown(undefined)
-            }
-          }}
+      {engaged ? (
+        <PillSchemaDialog
+          onClose={() => setShown(undefined)}
           permission={shown}
           tenantId={tenantId}
+          tool={permission.tool}
         />
       ) : null}
     </>
+  )
+}
+
+/** Mounted on intent: holds the schema subscription for this pill's tool. */
+function PillSchemaDialog({
+  onClose,
+  permission,
+  tenantId,
+  tool,
+}: {
+  onClose: () => void
+  permission: ToolPermission | undefined
+  tenantId: string
+  tool: string
+}) {
+  const references = useToolReferences(tenantId, [tool], true)
+
+  return (
+    <ToolSchemaDialog
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose()
+        }
+      }}
+      permission={permission}
+      references={references}
+    />
   )
 }
 

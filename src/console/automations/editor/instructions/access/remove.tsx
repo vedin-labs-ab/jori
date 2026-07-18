@@ -70,12 +70,15 @@ export function AutomationMarkerActionButton({
   children,
   className,
   onOpen,
+  onWarm,
   title,
 }: {
   ariaLabel: string
   children: ReactNode
   className?: string
   onOpen: () => void
+  /** First sign of pointer or focus intent; lets callers warm data early. */
+  onWarm?: () => void
   title: string
 }) {
   return (
@@ -94,6 +97,8 @@ export function AutomationMarkerActionButton({
         event.preventDefault()
         event.stopPropagation()
       }}
+      onFocus={onWarm}
+      onPointerOver={onWarm}
       title={title}
       type="button"
     >

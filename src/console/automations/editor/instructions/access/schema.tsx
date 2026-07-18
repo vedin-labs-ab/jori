@@ -1,13 +1,12 @@
-import { useQuery } from "convex/react"
 import { Braces } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-import { api } from "../../../../../../convex/_generated/api"
 import { type ToolPermission } from "../../../../permissions/types"
 import { JsonDialog } from "../../../../shared/code"
 import { useRetained } from "../../../../shared/retain"
+import { type ToolReferences } from "./wire"
 
 const directions = [
   { key: "request", label: "Request" },
@@ -19,9 +18,12 @@ type SchemaDirection = (typeof directions)[number]["key"]
 /** Row action revealed on hover: opens the tool's wire schemas. */
 export function ToolSchemaButton({
   onClick,
+  onWarm,
   toolLabel,
 }: {
   onClick: () => void
+  /** First sign of pointer or focus intent; lets callers warm data early. */
+  onWarm: () => void
   toolLabel: string
 }) {
   return (
@@ -29,6 +31,8 @@ export function ToolSchemaButton({
       aria-label={`View the ${toolLabel} schema`}
       className="opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/tool-row:opacity-100"
       onClick={onClick}
+      onFocus={onWarm}
+      onPointerOver={onWarm}
       size="sm"
       type="button"
       variant="secondary"
@@ -40,15 +44,16 @@ export function ToolSchemaButton({
 }
 
 /** The terminal-style schema dialog with a Request/Response switch where
- *  the title normally sits. */
+ *  the title normally sits. It opens only once the schemas are resolved,
+ *  so it never paints empty and never resizes after opening. */
 export function ToolSchemaDialog({
   onOpenChange,
   permission,
-  tenantId,
+  references,
 }: {
   onOpenChange: (open: boolean) => void
   permission: ToolPermission | undefined
-  tenantId: string
+  references: ToolReferences | undefined
 }) {
   const shown = useRetained(permission)
   // Direction is remembered per tool; a fresh dialog opens on Response —
@@ -61,10 +66,7 @@ export function ToolSchemaDialog({
     selected !== undefined && selected.tool === shown?.tool
       ? selected.direction
       : "response"
-  const reference = useQuery(
-    api.permissions.reference.get,
-    shown === undefined ? "skip" : { tenantId, tool: shown.tool }
-  )
+  const reference = shown === undefined ? undefined : references?.[shown.tool]
 
   return (
     <JsonDialog
@@ -100,7 +102,9 @@ export function ToolSchemaDialog({
         </div>
       }
       onOpenChange={onOpenChange}
-      open={permission !== undefined}
+      open={
+        permission !== undefined && references?.[permission.tool] !== undefined
+      }
       value={reference?.[direction]}
     />
   )
