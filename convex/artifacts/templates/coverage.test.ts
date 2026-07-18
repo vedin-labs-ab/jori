@@ -15,12 +15,12 @@ test("Meeting Briefing keeps sixty compact meetings under the state limit", () =
 
   const meetings = Object.fromEntries(
     Array.from({ length: 60 }, (_, index) => [
-      `mb:${index.toString().padStart(32, "0")}`,
+      index.toString().padStart(32, "0"),
       compactMeeting(index),
     ])
   )
   const state = {
-    schemaVersion: 4,
+    schemaVersion: 5,
     timezone: "UTC",
     scan: {
       scannedAt: "2030-01-01T07:00:00.000Z",

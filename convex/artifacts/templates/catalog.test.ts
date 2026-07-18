@@ -122,7 +122,7 @@ function assertBriefingState(state: unknown) {
 
 function stateWith(meeting: unknown) {
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
     timezone: "UTC",
     scan: {
       scannedAt: "2030-01-01T07:00:00.000Z",
@@ -131,7 +131,7 @@ function stateWith(meeting: unknown) {
       status: "ready",
       gaps: [],
     },
-    meetings: { "mb:00000000000000000000000000000000": meeting },
+    meetings: { "00000000000000000000000000000000": meeting },
     dispatches: {},
   }
 }
