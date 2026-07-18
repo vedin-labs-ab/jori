@@ -9,6 +9,10 @@ import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../../../_generated/server"
 import { sha256Hex } from "../../../shared/crypto"
+import {
+  readEnvironmentVariable,
+  requireEnvironmentVariable,
+} from "../../../shared/environment"
 import { isTerminalRunStatus } from "../../schema"
 import { formatRuntimeError } from "./error"
 
@@ -213,11 +217,12 @@ async function triggerTask(
 }
 
 async function callTriggerApi(path: string, body?: Record<string, unknown>) {
-  const baseUrl = process.env.TRIGGER_API_URL ?? "https://api.trigger.dev"
+  const baseUrl =
+    readEnvironmentVariable("TRIGGER_API_URL") ?? "https://api.trigger.dev"
   const response = await fetch(`${baseUrl}${path}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${requireTriggerSecretKey()}`,
+      Authorization: `Bearer ${requireEnvironmentVariable("TRIGGER_DEV_API_KEY")}`,
       "Content-Type": "application/json",
       "x-trigger-api-version": triggerApiVersion,
     },
@@ -239,14 +244,4 @@ function runtimeTags(item: Doc<"outbox">) {
 
 function shortTag(value: string) {
   return value.length <= 56 ? value : value.slice(0, 56)
-}
-
-function requireTriggerSecretKey() {
-  const secretKey = process.env.TRIGGER_DEV_API_KEY?.trim()
-
-  if (secretKey === undefined || secretKey === "") {
-    throw new Error("Missing TRIGGER_DEV_API_KEY")
-  }
-
-  return secretKey
 }

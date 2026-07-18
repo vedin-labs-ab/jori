@@ -1,6 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { base64UrlDecodeBytes } from "../../shared/encoding"
-import { fetchFormToken, requireProviderEnv } from "../connect/oauth"
+import { requireEnvironmentVariable } from "../../shared/environment"
+import { fetchFormToken } from "../connect/oauth"
 import { microsoftGraphUrl, microsoftOAuthTokenUrl } from "./config"
 import { requireMicrosoftCredentials } from "./credentials"
 
@@ -31,11 +32,11 @@ export type MicrosoftInstallationProfile = {
 }
 
 export function requireMicrosoftClientId() {
-  return requireProviderEnv("MICROSOFT_CLIENT_ID")
+  return requireEnvironmentVariable("MICROSOFT_CLIENT_ID")
 }
 
 export function requireMicrosoftClientSecret() {
-  return requireProviderEnv("MICROSOFT_CLIENT_SECRET")
+  return requireEnvironmentVariable("MICROSOFT_CLIENT_SECRET")
 }
 
 export async function exchangeMicrosoftAuthorizationCode(args: {

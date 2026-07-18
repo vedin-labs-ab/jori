@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
-import { fetchFormToken, requireProviderEnv } from "../connect/oauth"
+import { requireEnvironmentVariable } from "../../shared/environment"
+import { fetchFormToken } from "../connect/oauth"
 import {
   encodeBasicCredentials,
   expectOAuthRevocationResponse,
@@ -33,11 +34,11 @@ export type LinearInstallationProfile = {
 }
 
 export function requireLinearClientId() {
-  return requireProviderEnv("LINEAR_CLIENT_ID")
+  return requireEnvironmentVariable("LINEAR_CLIENT_ID")
 }
 
 export function requireLinearClientSecret() {
-  return requireProviderEnv("LINEAR_CLIENT_SECRET")
+  return requireEnvironmentVariable("LINEAR_CLIENT_SECRET")
 }
 
 export async function exchangeLinearAuthorizationCode(args: {

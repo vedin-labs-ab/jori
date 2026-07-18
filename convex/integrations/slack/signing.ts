@@ -1,12 +1,11 @@
 import { type Id } from "../../_generated/dataModel"
 import { timingSafeEqual } from "../../shared/crypto"
+import { requireEnvironmentVariable } from "../../shared/environment"
 import {
   createSignedState,
   hmacSha256Hex,
   parseSignedState,
 } from "../connect/signing"
-
-const slackSigningSecret = process.env.SLACK_SIGNING_SECRET
 
 export type SlackInstallState = {
   tenantId: string
@@ -17,11 +16,7 @@ export type SlackInstallState = {
 }
 
 export function requireSlackSigningSecret() {
-  if (slackSigningSecret === undefined) {
-    throw new Error("Missing SLACK_SIGNING_SECRET")
-  }
-
-  return slackSigningSecret
+  return requireEnvironmentVariable("SLACK_SIGNING_SECRET")
 }
 
 export async function createSignedSlackState(state: SlackInstallState) {

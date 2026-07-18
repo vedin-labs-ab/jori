@@ -6,6 +6,7 @@ import { renderPromptTemplate } from "../../prompts/render"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
 import { type OpenRouterChatMessage, sendOpenRouterChat } from "../model"
+import { readEnvironmentVariable } from "../shared/environment"
 import { summaryOutputTokens } from "./limits"
 import { type PendingSummary, type SummaryMessage } from "./summary"
 
@@ -86,9 +87,9 @@ function formatMessage(message: SummaryMessage) {
 }
 
 function readSummaryModel() {
-  const model = process.env.OPENROUTER_SUMMARY_MODEL?.trim()
-
-  return model === undefined || model === "" ? defaultSummaryModel : model
+  return (
+    readEnvironmentVariable("OPENROUTER_SUMMARY_MODEL") ?? defaultSummaryModel
+  )
 }
 
 function readContent(response: Awaited<ReturnType<typeof sendOpenRouterChat>>) {

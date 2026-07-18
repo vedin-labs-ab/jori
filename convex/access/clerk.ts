@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action } from "../_generated/server"
+import { requireEnvironmentVariable } from "../shared/environment"
 import { requireTenantAccess } from "./index"
 import { readVerifiedClerkEmails } from "./profile"
 import {
@@ -37,11 +38,7 @@ export const syncCurrentUser = action({
 })
 
 async function fetchClerkUser(userId: string) {
-  const clerkSecretKey = process.env.CLERK_SECRET_KEY
-
-  if (clerkSecretKey === undefined) {
-    throw new Error("Missing CLERK_SECRET_KEY")
-  }
+  const clerkSecretKey = requireEnvironmentVariable("CLERK_SECRET_KEY")
 
   const response = await fetch(
     `https://api.clerk.com/v1/users/${encodeURIComponent(userId)}`,

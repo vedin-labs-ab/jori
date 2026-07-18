@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
-import { fetchFormToken, requireProviderEnv } from "../connect/oauth"
+import { requireEnvironmentVariable } from "../../shared/environment"
+import { fetchFormToken } from "../connect/oauth"
 import { expectOAuthRevocationResponse, postForm } from "../revoke/oauth"
 import {
   googleOAuthRevokeUrl,
@@ -30,11 +31,11 @@ export type GoogleInstallationProfile = {
 }
 
 export function requireGoogleClientId() {
-  return requireProviderEnv("GOOGLE_CLIENT_ID")
+  return requireEnvironmentVariable("GOOGLE_CLIENT_ID")
 }
 
 export function requireGoogleClientSecret() {
-  return requireProviderEnv("GOOGLE_CLIENT_SECRET")
+  return requireEnvironmentVariable("GOOGLE_CLIENT_SECRET")
 }
 
 export async function exchangeGoogleAuthorizationCode(args: {

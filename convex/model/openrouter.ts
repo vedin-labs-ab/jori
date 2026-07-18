@@ -4,6 +4,10 @@ import {
   type ChatRequest,
   type ChatResult,
 } from "@openrouter/sdk/models"
+import {
+  readEnvironmentVariable,
+  requireEnvironmentVariable,
+} from "../shared/environment"
 
 const defaultOpenRouterAppTitle = "Milo"
 const defaultOpenRouterAppCategories = "cloud-agent"
@@ -38,14 +42,8 @@ export type OpenRouterChatMessage = ChatMessages
 let cachedClient: OpenRouter | undefined
 
 export function requireOpenRouterConfig(): OpenRouterConfig {
-  const apiKey = readEnvironmentVariable("OPENROUTER_API_KEY")
-
-  if (apiKey === undefined) {
-    throw new Error("Missing OPENROUTER_API_KEY")
-  }
-
   return {
-    apiKey,
+    apiKey: requireEnvironmentVariable("OPENROUTER_API_KEY"),
     appCategories:
       readEnvironmentVariable("OPENROUTER_APP_CATEGORIES") ??
       defaultOpenRouterAppCategories,
@@ -76,9 +74,4 @@ export async function sendOpenRouterChat(
       stream: false,
     },
   })
-}
-
-function readEnvironmentVariable(name: string) {
-  const value = process.env[name]?.trim()
-  return value === "" ? undefined : value
 }
