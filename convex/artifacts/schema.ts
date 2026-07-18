@@ -130,7 +130,6 @@ export const artifactSessions = defineTable({
   personId: v.id("persons"),
   access: artifactAccess,
   grant: artifactSessionGrant,
-  status: v.union(v.literal("active"), v.literal("ended")),
   tokenSecret: v.string(),
   tokenExpiresAt: v.number(),
   createdAt: v.number(),

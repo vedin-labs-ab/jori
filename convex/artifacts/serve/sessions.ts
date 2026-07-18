@@ -56,7 +56,6 @@ export async function createArtifactSession(
     personId: args.personId,
     access: artifact.access,
     grant: args.grant,
-    status: "active",
     tokenSecret: args.secret,
     tokenExpiresAt: args.tokenExpiresAt,
     createdAt: args.now,
@@ -91,7 +90,6 @@ export const authorizeSession = internalMutation({
 
     if (
       session === null ||
-      session.status !== "active" ||
       session.artifactId !== args.artifactId ||
       session.versionId !== args.versionId ||
       session.tenantId !== args.tenantId ||
