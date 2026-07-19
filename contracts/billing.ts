@@ -56,7 +56,8 @@ export const trial = {
 export const interactiveGraceMicros = 2 * microsPerDollar
 
 export const topUp = {
-  presetsUsd: [25, 50, 100],
+  presetsUsd: [25, 50, 100, 200],
+  defaultUsd: 50,
   minimumUsd: 10,
   maximumUsd: 1000,
 }

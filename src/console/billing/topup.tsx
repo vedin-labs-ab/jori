@@ -1,5 +1,5 @@
 import { topUp } from "@contracts/billing"
-import { ArrowRight } from "lucide-react"
+import { ArrowUpRight, Plus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,7 +26,7 @@ import { useBillingCheckout } from "./actions"
  */
 export function TopUpDialog({ tenantId }: { tenantId: string }) {
   const checkout = useBillingCheckout(tenantId)
-  const [amount, setAmount] = useState(String(topUp.presetsUsd[0]))
+  const [amount, setAmount] = useState(String(topUp.defaultUsd))
   const parsed = Number(amount)
   const valid =
     Number.isInteger(parsed) &&
@@ -36,7 +36,10 @@ export function TopUpDialog({ tenantId }: { tenantId: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Top up</Button>
+        <Button variant="outline">
+          <Plus />
+          Top up
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
@@ -83,8 +86,8 @@ export function TopUpDialog({ tenantId }: { tenantId: string }) {
             disabled={!valid || checkout.pending !== null}
             onClick={() => checkout.topUp(parsed)}
           >
-            {checkout.pending === "top-up" ? <Spinner /> : <ArrowRight />}
             Continue to checkout
+            {checkout.pending === "top-up" ? <Spinner /> : <ArrowUpRight />}
           </Button>
         </DialogFooter>
       </DialogContent>
