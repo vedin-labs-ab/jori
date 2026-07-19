@@ -70,9 +70,9 @@ export const topUp = {
 export const autoTopUp = {
   thresholdsUsd: [10, 50, 100],
   defaultThresholdUsd: 10,
-  amountsUsd: [25, 50, 100, 200, 500],
+  amountsUsd: [25, 50, 100, 200],
   defaultAmountUsd: 25,
-  monthlyCapsUsd: [50, 100, 200, 500, 1000],
+  monthlyCapsUsd: [100, 200, 500, 1000],
   defaultCapUsd: 200,
   claimMs: 60 * 60 * 1000,
   cooldownMs: 6 * 60 * 60 * 1000,
