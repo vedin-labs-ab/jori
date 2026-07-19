@@ -1,4 +1,5 @@
 import { formatUsd } from "@contracts/billing"
+import { Link } from "@tanstack/react-router"
 import {
   type Column,
   type ColumnDef,
@@ -10,7 +11,13 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ArrowUpRight,
+  Filter,
+} from "lucide-react"
 import { type ReactNode, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,26 +36,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import { absoluteTime } from "../shared/time"
 import { type BillingOverview } from "./actions"
 
 type BillingEntry = BillingOverview["entries"][number]
 
+type ActivityKind = "run" | "allowance" | "top-up"
+
 type ActivityRow = {
   id: string
   timestamp: number
+  kind: ActivityKind
   label: string
-  source: string
+  runId: string | undefined
+  dot: string | undefined
   signedMicros: number
   balanceMicros: number | undefined
 }
 
-const sources = ["Included", "Wallet", "Included + Wallet"]
+const kindLabels: Record<ActivityKind, string> = {
+  run: "Runs",
+  allowance: "Allowances",
+  "top-up": "Top-ups",
+}
 
 /**
- * The statement, as the stock shadcn data table: sortable time and amount,
- * and a source filter folded into its own column header to keep the surface
- * dense. Rows written before attribution existed simply leave cells blank.
+ * The statement, as the stock shadcn data table. Runs are the only entries
+ * that remove balance, so the single kind filter covers direction too:
+ * sortable time and amount, and the filter folded into the What header.
  */
 export function Activity({ entries }: { entries: BillingEntry[] }) {
   const rows = useMemo(() => entries.map(toRow), [entries])
@@ -89,7 +105,7 @@ type ActivityTableInstance = ReturnType<typeof useReactTable<ActivityRow>>
 function ActivityTable({ table }: { table: ActivityTableInstance }) {
   return (
     <div className="mt-3 overflow-hidden rounded-lg border">
-      <Table>
+      <Table className="[&_td:first-child]:pl-4 [&_td:last-child]:pr-4 [&_th:first-child]:pl-4 [&_th:last-child]:pr-4">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow className="hover:bg-transparent" key={headerGroup.id}>
@@ -133,6 +149,11 @@ function ActivityTable({ table }: { table: ActivityTableInstance }) {
   )
 }
 
+/** Persist the ghost hover treatment while the control is active. */
+function headerButtonClass(active: boolean) {
+  return cn("-ml-2", active && "bg-muted text-foreground dark:bg-muted/50")
+}
+
 function SortHeader({
   column,
   children,
@@ -146,16 +167,19 @@ function SortHeader({
 
   return (
     <Button
-      className={`-ml-3 h-8 ${align === "right" ? "-mr-3 ml-0 float-right" : ""}`}
+      className={cn(
+        headerButtonClass(sorted !== false),
+        align === "right" && "-mr-2 ml-0 float-right"
+      )}
       onClick={() => column.toggleSorting(sorted === "asc")}
       size="sm"
       variant="ghost"
     >
       {children}
       {sorted === "asc" ? (
-        <ArrowUp />
+        <ArrowUp className="text-foreground" />
       ) : sorted === "desc" ? (
-        <ArrowDown />
+        <ArrowDown className="text-foreground" />
       ) : (
         <ArrowUpDown />
       )}
@@ -164,18 +188,22 @@ function SortHeader({
 }
 
 /**
- * The filter lives in the column header itself: a Filter-prefixed label that
- * opens a radio menu. The icon brightens while a filter is active.
+ * The kind filter lives in the What header: a Filter-prefixed label that
+ * opens a radio menu and shows the active choice in place.
  */
-function SourceHeader({ column }: { column: Column<ActivityRow> }) {
-  const value = (column.getFilterValue() as string) ?? ""
+function KindHeader({ column }: { column: Column<ActivityRow> }) {
+  const value = (column.getFilterValue() as ActivityKind | undefined) ?? ""
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="-ml-3 h-8" size="sm" variant="ghost">
+        <Button
+          className={headerButtonClass(value !== "")}
+          size="sm"
+          variant="ghost"
+        >
           <Filter className={value === "" ? "" : "text-foreground"} />
-          {value === "" ? "Source" : value}
+          {value === "" ? "What" : kindLabels[value]}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -185,15 +213,37 @@ function SourceHeader({ column }: { column: Column<ActivityRow> }) {
           }
           value={value}
         >
-          <DropdownMenuRadioItem value="">All sources</DropdownMenuRadioItem>
-          {sources.map((option) => (
-            <DropdownMenuRadioItem key={option} value={option}>
-              {option}
+          <DropdownMenuRadioItem value="">Everything</DropdownMenuRadioItem>
+          {Object.entries(kindLabels).map(([kind, label]) => (
+            <DropdownMenuRadioItem key={kind} value={kind}>
+              {label}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function WhatCell({ row }: { row: ActivityRow }) {
+  if (row.kind === "run" && row.runId !== undefined) {
+    return (
+      <Link
+        className="inline-flex items-center gap-1 underline-offset-4 hover:underline"
+        search={{ run: row.runId }}
+        to="/runs"
+      >
+        {row.label}
+        <ArrowUpRight className="size-3.5 text-muted-foreground" />
+      </Link>
+    )
+  }
+
+  return (
+    <Badge variant="outline">
+      {row.label}
+      <span aria-hidden className={cn("size-1.5 rounded-full", row.dot)} />
+    </Badge>
   )
 }
 
@@ -208,23 +258,10 @@ const columns: ColumnDef<ActivityRow>[] = [
     ),
   },
   {
-    accessorKey: "label",
-    filterFn: "includesString",
-    header: "What",
-    cell: ({ row }) => row.original.label,
-  },
-  {
-    accessorKey: "source",
+    accessorKey: "kind",
     filterFn: "equalsString",
-    header: ({ column }) => <SourceHeader column={column} />,
-    cell: ({ row }) =>
-      row.original.source === "" ? null : (
-        <Badge
-          variant={row.original.source === "Wallet" ? "outline" : "secondary"}
-        >
-          {row.original.source}
-        </Badge>
-      ),
+    header: ({ column }) => <KindHeader column={column} />,
+    cell: ({ row }) => <WhatCell row={row.original} />,
   },
   {
     accessorKey: "signedMicros",
@@ -258,32 +295,22 @@ function toRow(entry: BillingEntry): ActivityRow {
   return {
     id: entry._id,
     timestamp: entry.timestamp,
+    kind: entryKind(entry),
     label: entryLabel(entry),
-    source: entrySource(entry),
+    runId: entry.type === "debit" ? entry.runId : undefined,
+    dot: entryDot(entry),
     signedMicros:
       entry.type === "debit" ? -entry.amountMicros : entry.amountMicros,
     balanceMicros: entry.balanceMicros,
   }
 }
 
-function entrySource(entry: BillingEntry) {
-  if (entry.type === "grant") {
-    return "Included"
+function entryKind(entry: BillingEntry): ActivityKind {
+  if (entry.type === "debit") {
+    return "run"
   }
 
-  if (entry.type === "topup") {
-    return "Wallet"
-  }
-
-  if (entry.includedMicros === undefined) {
-    return ""
-  }
-
-  if (entry.includedMicros >= entry.amountMicros) {
-    return "Included"
-  }
-
-  return entry.includedMicros === 0 ? "Wallet" : "Included + Wallet"
+  return entry.type === "grant" ? "allowance" : "top-up"
 }
 
 function entryLabel(entry: BillingEntry) {
@@ -292,8 +319,20 @@ function entryLabel(entry: BillingEntry) {
   }
 
   if (entry.type === "topup") {
-    return entry.auto ? "Auto top-up" : "Wallet top-up"
+    return entry.auto ? "Auto top-up" : "Top-up"
   }
 
   return entry.source === "trial" ? "Trial allowance" : "Monthly allowance"
+}
+
+function entryDot(entry: BillingEntry) {
+  if (entry.type === "topup") {
+    return "bg-blue-500"
+  }
+
+  if (entry.type === "grant") {
+    return entry.source === "trial" ? "bg-amber-500" : "bg-primary"
+  }
+
+  return undefined
 }

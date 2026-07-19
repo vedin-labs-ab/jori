@@ -1,3 +1,4 @@
+import { useSearch } from "@tanstack/react-router"
 import { memo, useDeferredValue, useEffect, useState } from "react"
 import {
   Select,
@@ -31,6 +32,7 @@ import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 
 export function RunsList({ tenantId }: { tenantId: string }) {
+  const { run: focusRunId } = useSearch({ from: "/runs" })
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
   const [runFilter, setRunFilter] = useState<RunFilter>("all")
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all")
@@ -73,6 +75,7 @@ export function RunsList({ tenantId }: { tenantId: string }) {
         setScopeFilter={setScopeFilterAndReset}
       />
       <ExecutionRows
+        focusRunId={focusRunId}
         pagination={pagination}
         showScope={deferredScopeFilter === "all"}
         tenantId={tenantId}
@@ -154,10 +157,12 @@ const ExecutionFilters = memo(function ExecutionFilters({
 })
 
 function ExecutionRows({
+  focusRunId,
   pagination,
   showScope,
   tenantId,
 }: {
+  focusRunId?: string
   pagination: ExecutionPagination
   showScope: boolean
   tenantId: string
@@ -176,6 +181,7 @@ function ExecutionRows({
       {!pagination.isLoadingFirstPage && pagination.visibleRows.length > 0
         ? pagination.visibleRows.map((execution) => (
             <ExecutionRow
+              defaultOpen={execution.id === focusRunId}
               execution={execution}
               key={execution.id}
               now={displayNowForRun(execution, now)}

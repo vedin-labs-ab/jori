@@ -1,5 +1,5 @@
 import { Timer } from "lucide-react"
-import { lazy, memo, Suspense, useCallback, useState } from "react"
+import { lazy, memo, Suspense, useCallback, useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RelativeTime } from "../../shared/details"
 import { formatDuration, relativeTime } from "../../shared/time"
@@ -29,17 +29,20 @@ const ExpandedExecution = lazy(async () => ({
 }))
 
 export const ExecutionRow = memo(function ExecutionRow({
+  defaultOpen = false,
   execution,
   now,
   showScope,
   tenantId,
 }: {
+  /** Deep links (billing receipts, /runs?run=...) land with the row open. */
+  defaultOpen?: boolean
   execution: ExecutionItem
   now: number
   showScope: boolean
   tenantId: string
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(defaultOpen)
   const preloadExpandedExecution = useCallback(() => {
     void loadExpandedExecution()
   }, [])
@@ -49,8 +52,14 @@ export const ExecutionRow = memo(function ExecutionRow({
   const approvalIndicator = actionApprovalIndicator(execution, now)
   const offerIndicator = actionOfferIndicator(execution, now)
 
+  useEffect(() => {
+    if (defaultOpen) {
+      document.getElementById(execution.id)?.scrollIntoView({ block: "center" })
+    }
+  }, [defaultOpen, execution.id])
+
   return (
-    <RunRowFrame>
+    <RunRowFrame id={execution.id}>
       <RunRowHeader
         action={
           isOngoing ? (
