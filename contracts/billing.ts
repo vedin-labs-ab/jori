@@ -63,14 +63,16 @@ export const topUp = {
 
 /**
  * Auto top-up is the spend control: it fires when the balance drops below the
- * threshold and never adds more than the monthly cap in one billing month.
- * One attempt owns the claim window; a decline cools down before retrying.
+ * chosen threshold and never adds more than the monthly cap in one billing
+ * month. One attempt owns the claim window; a decline cools down before
+ * retrying.
  */
 export const autoTopUp = {
-  thresholdMicros: 10 * microsPerDollar,
-  amountsUsd: [25, 50, 100],
+  thresholdsUsd: [10, 50, 100],
+  defaultThresholdUsd: 10,
+  amountsUsd: [25, 50, 100, 200, 500],
   defaultAmountUsd: 25,
-  monthlyCapsUsd: [50, 100, 200, 500],
+  monthlyCapsUsd: [50, 100, 200, 500, 1000],
   defaultCapUsd: 200,
   claimMs: 60 * 60 * 1000,
   cooldownMs: 6 * 60 * 60 * 1000,

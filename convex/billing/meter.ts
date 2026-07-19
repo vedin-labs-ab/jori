@@ -1,4 +1,9 @@
-import { agentModel, autoTopUp, priceModelUsage } from "../../contracts/billing"
+import {
+  agentModel,
+  autoTopUp,
+  dollarsToMicros,
+  priceModelUsage,
+} from "../../contracts/billing"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
@@ -52,7 +57,10 @@ async function maybeScheduleAutoTopUp(
     return
   }
 
-  if (availableMicros(account) >= autoTopUp.thresholdMicros) {
+  const thresholdMicros =
+    config.thresholdMicros ?? dollarsToMicros(autoTopUp.defaultThresholdUsd)
+
+  if (availableMicros(account) >= thresholdMicros) {
     return
   }
 

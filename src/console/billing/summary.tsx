@@ -23,7 +23,7 @@ export function SummaryBand({
   return (
     <div className="grid md:grid-cols-[5fr_7fr]">
       <PlanCell account={account} tenantId={tenantId} />
-      <div className="border-t p-6 md:border-t-0 md:border-l">
+      <div className="p-6 pt-0 md:pt-6">
         <AvailableCell account={account} tenantId={tenantId} />
       </div>
     </div>
@@ -108,10 +108,14 @@ function AvailableCell({
     0
   )
   const walletMicros = account?.walletMicros ?? 0
-  const grantMicros =
+  // Subscribing mid-trial folds the trial remainder into the first cycle, so
+  // the balance can exceed the plan grant; the denominator follows it.
+  const grantMicros = Math.max(
     account === null || account.plan === undefined
       ? trial.grantMicros
-      : plans[account.plan].includedMonthlyMicros
+      : plans[account.plan].includedMonthlyMicros,
+    includedMicros
+  )
 
   return (
     <>
