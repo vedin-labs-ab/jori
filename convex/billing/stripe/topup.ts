@@ -1,11 +1,10 @@
 import { v } from "convex/values"
-import { microsPerDollar } from "../../../contracts/billing"
+import { autoTopUp, microsPerDollar } from "../../../contracts/billing"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
-import { readObject, readOptionalString, stripeRequest } from "./client"
-
-const failureCooldownMs = 6 * 60 * 60 * 1000
+import { readArray, readString } from "../../shared/input"
+import { stripeRequest } from "./client"
 
 /**
  * Charges the saved card off-session after the meter claimed the top-up hold.
@@ -40,9 +39,9 @@ export const execute = internalAction({
         tenantId: args.tenantId,
       })
     } catch {
-      await ctx.runMutation(internal.billing.stripe.data.holdAutoTopUp, {
+      await ctx.runMutation(internal.billing.stripe.data.cooldown, {
         tenantId: args.tenantId,
-        cooldownMs: failureCooldownMs,
+        cooldownMs: autoTopUp.cooldownMs,
       })
     }
 
@@ -60,8 +59,7 @@ async function chargeSavedCard(args: {
     method: "GET",
     params: { customer: args.customer, type: "card", limit: 1 },
   })
-  const data = Array.isArray(methods.data) ? methods.data : []
-  const paymentMethod = readOptionalString(readObject(data[0])?.id)
+  const paymentMethod = readString(readArray(methods.data)[0], "id")
 
   if (paymentMethod === undefined) {
     throw new Error("No saved card for auto top-up.")

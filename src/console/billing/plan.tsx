@@ -51,7 +51,7 @@ export function PlanCard({
         {planDetail(account)}
       </CardContent>
       <CardFooter className="gap-2">
-        {subscribed ? null : <PlanPicker tenantId={tenantId} />}
+        {subscribed ? null : <PlanPicker onChoose={checkout.choosePlan} />}
         {account?.hasStripeCustomer ? (
           <Button onClick={checkout.managePortal} variant="outline">
             Manage billing
@@ -116,7 +116,9 @@ function planDetail(account: BillingAccount | null) {
     : `${price}. Included usage resets ${shortDate(account.nextGrantAt)}.`
 }
 
-function PlanPicker({ tenantId }: { tenantId: string }) {
+type ChoosePlan = (plan: PlanKey, interval: BillingInterval) => void
+
+function PlanPicker({ onChoose }: { onChoose: ChoosePlan }) {
   const [interval, setInterval] = useState<BillingInterval>("month")
 
   return (
@@ -146,8 +148,8 @@ function PlanPicker({ tenantId }: { tenantId: string }) {
             <PlanOption
               interval={interval}
               key={plan.key}
+              onChoose={onChoose}
               plan={plan.key}
-              tenantId={tenantId}
             />
           ))}
         </div>
@@ -158,14 +160,13 @@ function PlanPicker({ tenantId }: { tenantId: string }) {
 
 function PlanOption({
   interval,
+  onChoose,
   plan,
-  tenantId,
 }: {
   interval: BillingInterval
+  onChoose: ChoosePlan
   plan: PlanKey
-  tenantId: string
 }) {
-  const checkout = useBillingCheckout(tenantId)
   const details = plans[plan]
   const price =
     interval === "year"
@@ -181,9 +182,7 @@ function PlanOption({
           {formatUsd(details.includedMonthlyMicros)} usage included monthly
         </p>
       </div>
-      <Button onClick={() => checkout.choosePlan(plan, interval)}>
-        Choose
-      </Button>
+      <Button onClick={() => onChoose(plan, interval)}>Choose</Button>
     </div>
   )
 }

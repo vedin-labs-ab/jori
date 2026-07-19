@@ -41,6 +41,8 @@ export const plans: Record<PlanKey, Plan> = {
 
 export const planKeys = Object.keys(plans) as PlanKey[]
 
+export const billingIntervals: BillingInterval[] = ["month", "year"]
+
 export const trial = {
   days: 14,
   grantMicros: 25 * microsPerDollar,
@@ -56,16 +58,22 @@ export const interactiveGraceMicros = 2 * microsPerDollar
 export const topUp = {
   presetsUsd: [25, 50, 100],
   minimumUsd: 10,
+  maximumUsd: 1000,
 }
 
 /**
  * Auto top-up is the spend control: it fires when the balance drops below the
  * threshold and never adds more than the monthly cap in one billing month.
+ * One attempt owns the claim window; a decline cools down before retrying.
  */
 export const autoTopUp = {
   thresholdMicros: 10 * microsPerDollar,
   amountsUsd: [25, 50, 100],
+  defaultAmountUsd: 25,
   monthlyCapsUsd: [50, 100, 200, 500],
+  defaultCapUsd: 200,
+  claimMs: 60 * 60 * 1000,
+  cooldownMs: 6 * 60 * 60 * 1000,
 }
 
 /** The model Milo runs on, and therefore the rate usage is billed at. */
@@ -116,6 +124,10 @@ export function priceModelUsage(
 
 export function dollarsToMicros(usd: number) {
   return Math.round(usd * microsPerDollar)
+}
+
+export function microsToDollars(micros: number) {
+  return micros / microsPerDollar
 }
 
 export function formatUsd(micros: number): string {

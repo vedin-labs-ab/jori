@@ -1,4 +1,5 @@
 import { formatUsd, plans, trial } from "@contracts/billing"
+import { Button } from "@/components/ui/button"
 import { GetStarted } from "../cta"
 
 const tiers = [
@@ -94,12 +95,9 @@ function EnterpriseCard() {
         <li>Onboarding and supported self-hosting</li>
       </ul>
       <div className="mt-6">
-        <a
-          className="inline-flex h-9 items-center justify-center rounded-md border bg-background px-4 font-medium text-sm shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground"
-          href="mailto:hello@milo.app"
-        >
-          Talk to us
-        </a>
+        <Button asChild variant="outline">
+          <a href="mailto:hello@milo.app">Talk to us</a>
+        </Button>
       </div>
     </div>
   )

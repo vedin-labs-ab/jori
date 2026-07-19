@@ -56,3 +56,18 @@ export async function ensureAccount(
 export function availableMicros(account: Doc<"billingAccounts">) {
   return account.includedMicros + account.walletMicros
 }
+
+/**
+ * Owns the auto-top-up claim window: set while a charge attempt is in
+ * flight, extended into a cooldown after a decline, cleared on success.
+ */
+export async function holdAutoTopUp(
+  ctx: MutationCtx,
+  account: Doc<"billingAccounts">,
+  untilMs: number | undefined
+) {
+  await ctx.db.patch(account._id, {
+    autoTopUpHoldUntil: untilMs,
+    updatedAt: Date.now(),
+  })
+}
