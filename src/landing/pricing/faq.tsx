@@ -1,3 +1,4 @@
+import { formatUsd, trial } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
 import { Section } from "../section"
 
@@ -9,18 +10,29 @@ export function Faq() {
       title="Questions, answered straight"
     >
       <dl className="grid gap-x-16 gap-y-8 md:grid-cols-2">
-        <Answer question="What's a credit?">
-          A credit covers Milo's model work. A typical run, a brief, a dossier,
-          a mention answered, costs about one. Long research runs can cost a
-          few.
+        <Answer question="How is usage billed?">
+          In dollars, at the model provider's public list rates. A typical
+          morning brief costs cents; a deep research run can cost a few dollars.
+          Every run shows its exact cost in its receipt.
         </Answer>
-        <Answer question="Do credits roll over?">
-          Included credits reset monthly. Credits you add on roll over until
-          they're used.
+        <Answer question="What does the monthly price cover?">
+          Milo being on staff: the always-on background work, plus the included
+          usage. Included usage resets monthly. Wallet top-ups are prepaid and
+          roll over until used.
         </Answer>
         <Answer question="Is there a free trial?">
-          No. Pick a plan and your first brief lands tomorrow at 08:00. Plans
-          are monthly; cancel anytime.
+          Yes. {trial.days} days with {formatUsd(trial.grantMicros)} of usage
+          included, no card required. It ends when the days or the usage run
+          out, whichever comes first.
+        </Answer>
+        <Answer question="Can a bill surprise me?">
+          No. There is no metered invoice at the end of the month. Usage draws
+          from prepaid money, auto top-up is opt-in with a monthly cap, and the
+          console shows a live tally.
+        </Answer>
+        <Answer question="What happens if I cancel?">
+          Automations pause and nothing is deleted. Your data, integrations, and
+          history stay put, and everything resumes when you come back.
         </Answer>
         <Answer question="Who sees what Milo reads?">
           Milo works with the accounts each person connects, as that person.

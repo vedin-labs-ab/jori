@@ -25,3 +25,21 @@ export async function sha256Hex(text: string) {
 
   return bytesToHex(new Uint8Array(digest))
 }
+
+/** Lowercase hex HMAC-SHA-256 of a UTF-8 string with a UTF-8 secret. */
+export async function hmacSha256Hex(secret: string, value: string) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  )
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(value)
+  )
+
+  return bytesToHex(new Uint8Array(signature))
+}

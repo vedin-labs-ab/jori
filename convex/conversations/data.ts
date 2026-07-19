@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { checkRunBudget } from "../billing/guard"
 import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/audience"
 import { queueRun } from "../runs/execution/outbox/data"
@@ -116,6 +117,20 @@ async function startNewMessageRun(
   args: StartMessageRunArgs,
   session: Doc<"sessions"> | null
 ) {
+  // Mentions are interactive work: they get the grace floor. Continuing an
+  // active session never lands here, so in-flight threads are not cut off.
+  const budget = await checkRunBudget(ctx, {
+    tenantId: args.integration.tenantId,
+    interactive: true,
+  })
+
+  if (!budget.ok) {
+    return {
+      status: "blocked" as const,
+      messageId: args.message._id,
+    }
+  }
+
   const kind = session === null ? "mention" : "reply"
   const conversation =
     args.conversation ??

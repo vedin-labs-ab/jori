@@ -13,6 +13,17 @@ crons.interval(
   {}
 )
 
+// Hourly heartbeat for billing cycles: accounts whose anchor is due get their
+// included usage refreshed and their auto-top-up month reset. Grants are
+// cron-driven so annual plans still refresh monthly and a missed Stripe
+// webhook cannot skip a cycle.
+crons.interval(
+  "billing cycle sweep",
+  { hours: 1 },
+  internal.billing.cycle.sweep,
+  {}
+)
+
 // Hourly heartbeat for deduction: each tenant's activity window is clustered
 // into efforts, then each belief kind reviews the changed efforts, with a
 // weekly consolidation pass restructuring the roster. Quiet windows complete

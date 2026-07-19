@@ -1,3 +1,4 @@
+import { agentModel, formatUsd, priceModelUsage } from "@contracts/billing"
 import { Cpu } from "lucide-react"
 import { type TokenUsage, visibleTokenUsageMetrics } from "./metrics"
 
@@ -13,13 +14,22 @@ export function ActivityTokenUsage({ usage }: { usage: TokenUsage }) {
     return null
   }
 
+  // The receipt line: the same list-rate pricing the ledger debits with.
+  const costMicros = priceModelUsage(agentModel, {
+    inputTokens: usage.input,
+    outputTokens: usage.output,
+  })
+
   return (
     <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden whitespace-nowrap text-muted-foreground text-xs">
       <Cpu className="size-3.5 shrink-0" />
       <span className="min-w-0 truncate">
-        {metrics
-          .map((metric) => `${metric.label} ${formatTokens(metric.value)}`)
-          .join(" · ")}
+        {[
+          ...metrics.map(
+            (metric) => `${metric.label} ${formatTokens(metric.value)}`
+          ),
+          ...(costMicros > 0 ? [formatUsd(costMicros)] : []),
+        ].join(" · ")}
       </span>
     </span>
   )

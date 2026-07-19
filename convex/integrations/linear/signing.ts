@@ -1,11 +1,7 @@
 import { type Id } from "../../_generated/dataModel"
-import { timingSafeEqual } from "../../shared/crypto"
+import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { requireEnvironmentVariable } from "../../shared/environment"
-import {
-  createSignedState,
-  hmacSha256Hex,
-  parseSignedState,
-} from "../connect/signing"
+import { createSignedState, parseSignedState } from "../connect/signing"
 import { requireLinearClientSecret } from "./oauth"
 
 export type LinearInstallState = {

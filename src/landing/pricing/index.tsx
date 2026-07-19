@@ -19,11 +19,12 @@ function Intro() {
     <section className="mx-auto w-full max-w-6xl px-6 pt-14 md:pt-24">
       <div className="max-w-2xl">
         <h1 className="font-medium text-4xl text-balance tracking-tight sm:text-5xl">
-          A seat for every teammate. Credits for the work.
+          One price for the whole organization.
         </h1>
         <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-          Every seat includes credits that cover Milo's runs. Add more whenever
-          a busy week needs them.
+          No seats to count. Everyone joins, Milo learns the whole company, and
+          the work it does is billed in dollars at provider list rates. Never
+          marked up.
         </p>
       </div>
     </section>

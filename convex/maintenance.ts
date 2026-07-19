@@ -9,6 +9,8 @@ const tableRegistry: Record<TableName, true> = {
   skills: true,
   persons: true,
   assets: true,
+  billingAccounts: true,
+  billingEntries: true,
   identities: true,
   integrations: true,
   integrationOffers: true,

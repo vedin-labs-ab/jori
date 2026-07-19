@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
 import { registerArtifactRoutes } from "./artifacts/serve/routes"
+import { handleStripeEvents } from "./billing/stripe/http"
 import { handleAssetUploadRequest } from "./broker/assets"
 import { handleGitHubCloneCredentialsRequest } from "./broker/mcp"
 import {
@@ -50,6 +51,12 @@ http.route({
 })
 
 registerArtifactRoutes(http)
+
+http.route({
+  path: "/stripe/events",
+  method: "POST",
+  handler: httpAction((ctx, request) => handleStripeEvents(ctx, request)),
+})
 
 http.route({
   path: "/github/install",

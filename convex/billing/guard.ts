@@ -1,0 +1,61 @@
+import { interactiveGraceMicros } from "../../contracts/billing"
+import { type MutationCtx } from "../_generated/server"
+import { availableMicros, ensureAccount } from "./account"
+
+export type RunBudget =
+  | { ok: true }
+  | { ok: false; reason: "trial-ended" | "paused" | "out-of-usage" }
+
+/**
+ * Decides whether new work may start. Interactive work (console instructions,
+ * mentions) gets a small grace below zero so Milo never goes silent
+ * mid-conversation; scheduled work stops at zero. In-flight runs are never
+ * blocked, only new ones.
+ */
+export async function checkRunBudget(
+  ctx: MutationCtx,
+  args: { tenantId: string; interactive: boolean }
+): Promise<RunBudget> {
+  const account = await ensureAccount(ctx, args.tenantId)
+  const now = Date.now()
+
+  if (account.state === "paused") {
+    return { ok: false, reason: "paused" }
+  }
+
+  if (
+    account.state === "trial" &&
+    account.trialEndsAt !== undefined &&
+    account.trialEndsAt < now
+  ) {
+    return { ok: false, reason: "trial-ended" }
+  }
+
+  const floor = args.interactive ? -interactiveGraceMicros : 0
+
+  if (availableMicros(account) <= floor) {
+    return { ok: false, reason: "out-of-usage" }
+  }
+
+  return { ok: true }
+}
+
+const budgetMessages = {
+  "trial-ended":
+    "The trial has ended. Choose a plan on the Billing page to keep Milo working.",
+  paused:
+    "The subscription is paused. Visit the Billing page to reactivate it.",
+  "out-of-usage":
+    "The organization is out of usage. Add to the wallet on the Billing page, or wait for the monthly reset.",
+} as const
+
+export async function requireRunBudget(
+  ctx: MutationCtx,
+  args: { tenantId: string; interactive: boolean }
+) {
+  const budget = await checkRunBudget(ctx, args)
+
+  if (!budget.ok) {
+    throw new Error(budgetMessages[budget.reason])
+  }
+}

@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { checkRunBudget } from "../../billing/guard"
 import { getTimeTriggerAt } from "../timing"
 import { hasInactiveParent } from "./children"
 import { createAutomationRun } from "./run"
@@ -11,7 +12,7 @@ export async function fireAutomation(
     automationId: Id<"automations">
     expectedAt: number
   }
-) {
+): Promise<{ runId: Id<"runs"> } | null> {
   const automation = await ctx.db.get(args.automationId)
   const now = Date.now()
 
@@ -30,15 +31,24 @@ export async function fireAutomation(
     return null
   }
 
+  // A blocked budget drops this cycle's run but still advances the schedule,
+  // so a paused organization resumes cleanly instead of replaying a backlog.
+  const budget = await checkRunBudget(ctx, {
+    tenantId: automation.tenantId,
+    interactive: false,
+  })
+
   if (automation.type === "once") {
-    const runId = await createAutomationRun(ctx, {
-      automation,
-      cause: {
-        type: "time",
-        scheduledAt: args.expectedAt,
-      },
-      now,
-    })
+    const runId = budget.ok
+      ? await createAutomationRun(ctx, {
+          automation,
+          cause: {
+            type: "time",
+            scheduledAt: args.expectedAt,
+          },
+          now,
+        })
+      : null
 
     if (automation.parentId === undefined) {
       await ctx.db.patch(automation._id, {
@@ -53,25 +63,27 @@ export async function fireAutomation(
       await ctx.db.delete(automation._id)
     }
 
-    return { runId }
+    return runId === null ? null : { runId }
   }
 
   const trigger = await scheduleNextCronAutomation(ctx, automation, now)
-  const runId = await createAutomationRun(ctx, {
-    automation: { ...automation, trigger },
-    cause: {
-      type: "time",
-      scheduledAt: args.expectedAt,
-    },
-    now,
-  })
+  const runId = budget.ok
+    ? await createAutomationRun(ctx, {
+        automation: { ...automation, trigger },
+        cause: {
+          type: "time",
+          scheduledAt: args.expectedAt,
+        },
+        now,
+      })
+    : null
 
   await ctx.db.patch(automation._id, {
     trigger,
     updatedAt: now,
   })
 
-  return { runId }
+  return runId === null ? null : { runId }
 }
 
 export async function startEventAutomations(
@@ -81,6 +93,15 @@ export async function startEventAutomations(
     now: number
   }
 ) {
+  const budget = await checkRunBudget(ctx, {
+    tenantId: args.event.tenantId,
+    interactive: false,
+  })
+
+  if (!budget.ok) {
+    return []
+  }
+
   const integration = await ctx.db.get(args.event.integrationId)
   const automations = await ctx.db
     .query("automations")

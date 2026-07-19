@@ -19,7 +19,7 @@ test("omits zero-value token usage metrics", () => {
     />
   )
 
-  expect(screen.getByText("in 8K · out 37 · total 8K")).toBeDefined()
+  expect(screen.getByText("in 8K · out 37 · total 8K · $0.04")).toBeDefined()
   expect(screen.queryByText(/reasoning 0/)).toBeNull()
 })
 

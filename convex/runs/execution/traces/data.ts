@@ -1,6 +1,7 @@
 import { type Infer } from "convex/values"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
+import { meterModelUsage } from "../../../billing/meter"
 import { continuePendingConversationRun } from "../../../conversations/continuation"
 import { wakeParentForTerminalRun } from "../waiters/data"
 import { type traceData } from "./schema"
@@ -43,6 +44,13 @@ export async function recordWorkerTrace(
     await patchSessionStatus(ctx, args)
     if (args.type === "run.completed" || args.type === "run.failed") {
       await wakeParentForTerminalRun(ctx, args.runId)
+    }
+    if (
+      args.type === "model.completed" &&
+      args.data !== undefined &&
+      "usage" in args.data
+    ) {
+      await meterModelUsage(ctx, { run, usage: args.data.usage })
     }
   }
 

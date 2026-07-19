@@ -9,6 +9,7 @@ import {
   type ToolSet,
   tool,
 } from "ai"
+import { agentModel } from "../../contracts/billing"
 import { toJsonObject } from "../../contracts/json"
 import { requireOpenRouterRuntimeConfig } from "../openrouter"
 import { ingestReasoning, nullableText } from "./reasoning"
@@ -21,7 +22,6 @@ import {
 } from "./types"
 import { readModelUsage } from "./usage"
 
-const agentModel = "openai/gpt-5.6-sol"
 // The first turn produces the start update and is optimized for latency; later
 // turns do the actual work and reason harder. Effort levels are code config.
 const firstTurnReasoningEffort = "low"
