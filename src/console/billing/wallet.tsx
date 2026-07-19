@@ -1,7 +1,7 @@
 import {
   autoTopUp,
   formatUsd,
-  microsPerDollar,
+  microsToDollars,
   plans,
   trial,
 } from "@contracts/billing"
@@ -93,11 +93,11 @@ function AutoTopUpControls({
   const config = account?.autoTopUp
   const enabled = config !== undefined
   const amountUsd = config
-    ? config.amountMicros / microsPerDollar
-    : autoTopUp.amountsUsd[0]
+    ? microsToDollars(config.amountMicros)
+    : autoTopUp.defaultAmountUsd
   const capUsd = config
-    ? config.monthlyCapMicros / microsPerDollar
-    : autoTopUp.monthlyCapsUsd[2]
+    ? microsToDollars(config.monthlyCapMicros)
+    : autoTopUp.defaultCapUsd
 
   const apply = (next: { amountUsd: number; monthlyCapUsd: number } | null) => {
     configure({ tenantId, config: next }).catch((error) =>
@@ -119,11 +119,7 @@ function AutoTopUpControls({
           checked={enabled}
           id="auto-top-up"
           onCheckedChange={(checked) =>
-            apply(
-              checked
-                ? { amountUsd: amountUsd ?? 25, monthlyCapUsd: capUsd ?? 200 }
-                : null
-            )
+            apply(checked ? { amountUsd, monthlyCapUsd: capUsd } : null)
           }
         />
       </div>
@@ -132,18 +128,16 @@ function AutoTopUpControls({
           <AmountSelect
             label="Add"
             onChange={(value) =>
-              apply({ amountUsd: value, monthlyCapUsd: capUsd ?? 200 })
+              apply({ amountUsd: value, monthlyCapUsd: capUsd })
             }
             options={autoTopUp.amountsUsd}
-            value={amountUsd ?? 25}
+            value={amountUsd}
           />
           <AmountSelect
             label="Monthly cap"
-            onChange={(value) =>
-              apply({ amountUsd: amountUsd ?? 25, monthlyCapUsd: value })
-            }
+            onChange={(value) => apply({ amountUsd, monthlyCapUsd: value })}
             options={autoTopUp.monthlyCapsUsd}
-            value={capUsd ?? 200}
+            value={capUsd}
           />
           {account !== null && account.autoTopUpUsedMicros > 0 ? (
             <p className="text-muted-foreground text-sm">

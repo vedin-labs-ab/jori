@@ -5,7 +5,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
 import { requireTenantAccess } from "../../access"
 import { billingInterval, billingPlan } from "../schema"
-import { readString, stripeRequest } from "./client"
+import { requireString, stripeRequest } from "./client"
 import { stripePriceId } from "./config"
 
 /**
@@ -56,7 +56,7 @@ export const startPlanCheckout = action({
       },
     })
 
-    return { url: readString(session, "url") }
+    return { url: requireString(session, "url") }
   },
 })
 
@@ -78,10 +78,10 @@ export const startTopUpCheckout = action({
     if (
       !Number.isInteger(args.amountUsd) ||
       args.amountUsd < topUp.minimumUsd ||
-      args.amountUsd > 1000
+      args.amountUsd > topUp.maximumUsd
     ) {
       throw new Error(
-        `Top up any whole amount from $${topUp.minimumUsd} to $1,000.`
+        `Top up any whole amount from $${topUp.minimumUsd} to $${topUp.maximumUsd.toLocaleString("en-US")}.`
       )
     }
 
@@ -113,7 +113,7 @@ export const startTopUpCheckout = action({
       },
     })
 
-    return { url: readString(session, "url") }
+    return { url: requireString(session, "url") }
   },
 })
 
@@ -135,7 +135,7 @@ export const openPortal = action({
       },
     })
 
-    return { url: readString(session, "url") }
+    return { url: requireString(session, "url") }
   },
 })
 
@@ -164,7 +164,7 @@ async function ensuredCustomer(
       metadata: { tenantId },
     },
   })
-  const customerId = readString(customer, "id")
+  const customerId = requireString(customer, "id")
 
   await ctx.runMutation(internal.billing.stripe.data.attachCustomer, {
     tenantId,

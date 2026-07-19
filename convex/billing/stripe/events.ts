@@ -1,29 +1,29 @@
 import { v } from "convex/values"
-import { plans } from "../../../contracts/billing"
+import {
+  autoTopUp,
+  billingIntervals,
+  planKeys,
+  plans,
+} from "../../../contracts/billing"
+import { type Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
-import { ensureAccount, getAccount } from "../account"
+import { readArray, readRecord, readString } from "../../shared/input"
+import { ensureAccount, getAccount, holdAutoTopUp } from "../account"
 import { addMonths } from "../cycle"
 import { creditTopUp, grantIncluded } from "../ledger"
-import { readObject, readOptionalString } from "./client"
 import { planForPriceId } from "./config"
-
-const autoTopUpFailureCooldownMs = 6 * 60 * 60 * 1000
 
 /**
  * The single place Stripe state enters Milo. Each event is applied in one
  * transaction; money credits are idempotent on the Stripe object id, so
- * webhook retries are harmless.
+ * webhook retries are harmless, and malformed payloads fall through as
+ * no-ops.
  */
 export const apply = internalMutation({
   args: { event: v.any() },
   handler: async (ctx, args) => {
-    const event = readObject(args.event)
-    const type = readOptionalString(event?.type)
-    const object = readObject(readObject(event?.data)?.object)
-
-    if (event === undefined || type === undefined || object === undefined) {
-      return null
-    }
+    const type = readString(args.event, "type")
+    const object = readRecord(readRecord(readRecord(args.event).data).object)
 
     if (type === "checkout.session.completed") {
       await applyCheckoutCompleted(ctx, object)
@@ -51,20 +51,21 @@ async function applyCheckoutCompleted(
   ctx: MutationCtx,
   session: Record<string, unknown>
 ) {
-  const metadata = readObject(session.metadata)
-  const tenantId = readOptionalString(metadata?.tenantId)
-  const kind = readOptionalString(metadata?.kind)
+  const metadata = readRecord(session.metadata)
+  const tenantId = readString(metadata, "tenantId")
 
-  if (metadata === undefined || tenantId === undefined) {
+  if (tenantId === undefined) {
     return
   }
 
   const account = await ensureAccount(ctx, tenantId)
-  const customerId = readOptionalString(session.customer)
+  const customerId = readString(session, "customer")
 
   if (customerId !== undefined && account.stripeCustomerId === undefined) {
     await ctx.db.patch(account._id, { stripeCustomerId: customerId })
   }
+
+  const kind = readString(metadata, "kind")
 
   if (kind === "plan") {
     await applyPlanCheckout(ctx, { account, session, metadata })
@@ -76,14 +77,16 @@ async function applyCheckoutCompleted(
 async function applyPlanCheckout(
   ctx: MutationCtx,
   args: {
-    account: Awaited<ReturnType<typeof ensureAccount>>
+    account: Doc<"billingAccounts">
     session: Record<string, unknown>
     metadata: Record<string, unknown>
   }
 ) {
-  const subscriptionId = readOptionalString(args.session.subscription)
-  const plan = readPlanKey(args.metadata.plan)
-  const interval = readInterval(args.metadata.interval)
+  const subscriptionId = readString(args.session, "subscription")
+  const plan = planKeys.find((key) => key === args.metadata.plan)
+  const interval = billingIntervals.find(
+    (candidate) => candidate === args.metadata.interval
+  )
 
   if (subscriptionId === undefined || plan === undefined) {
     return
@@ -117,12 +120,12 @@ async function applyPlanCheckout(
 async function applyTopUpCheckout(
   ctx: MutationCtx,
   args: {
-    account: Awaited<ReturnType<typeof ensureAccount>>
+    account: Doc<"billingAccounts">
     session: Record<string, unknown>
     metadata: Record<string, unknown>
   }
 ) {
-  const sessionId = readOptionalString(args.session.id)
+  const sessionId = readString(args.session, "id")
   const micros = readMicros(args.metadata.micros)
 
   if (sessionId === undefined || micros === undefined) {
@@ -155,7 +158,7 @@ async function applySubscription(
   }
 
   const now = Date.now()
-  const status = readOptionalString(subscription.status)
+  const status = readString(subscription, "status")
   const ended =
     args.deleted ||
     status === "canceled" ||
@@ -203,13 +206,13 @@ async function applyPaymentIntent(
   intent: Record<string, unknown>,
   args: { succeeded: boolean }
 ) {
-  const metadata = readObject(intent.metadata)
-  const tenantId = readOptionalString(metadata?.tenantId)
+  const metadata = readRecord(intent.metadata)
 
-  if (readOptionalString(metadata?.kind) !== "auto-top-up") {
+  if (readString(metadata, "kind") !== "auto-top-up") {
     return
   }
 
+  const tenantId = readString(metadata, "tenantId")
   const account =
     tenantId === undefined ? null : await getAccount(ctx, tenantId)
 
@@ -220,16 +223,13 @@ async function applyPaymentIntent(
   const now = Date.now()
 
   if (!args.succeeded) {
-    await ctx.db.patch(account._id, {
-      autoTopUpHoldUntil: now + autoTopUpFailureCooldownMs,
-      updatedAt: now,
-    })
+    await holdAutoTopUp(ctx, account, now + autoTopUp.cooldownMs)
 
     return
   }
 
-  const intentId = readOptionalString(intent.id)
-  const micros = readMicros(metadata?.micros)
+  const intentId = readString(intent, "id")
+  const micros = readMicros(metadata.micros)
 
   if (intentId === undefined || micros === undefined) {
     return
@@ -256,15 +256,13 @@ async function findSubscriptionAccount(
   ctx: MutationCtx,
   subscription: Record<string, unknown>
 ) {
-  const tenantId = readOptionalString(
-    readObject(subscription.metadata)?.tenantId
-  )
+  const tenantId = readString(readRecord(subscription.metadata), "tenantId")
 
   if (tenantId !== undefined) {
     return await getAccount(ctx, tenantId)
   }
 
-  const customerId = readOptionalString(subscription.customer)
+  const customerId = readString(subscription, "customer")
 
   if (customerId === undefined) {
     return null
@@ -279,20 +277,10 @@ async function findSubscriptionAccount(
 }
 
 function readSubscriptionPlan(subscription: Record<string, unknown>) {
-  const items = readObject(subscription.items)
-  const data = Array.isArray(items?.data) ? items.data : []
-  const price = readObject(readObject(data[0])?.price)
-  const priceId = readOptionalString(price?.id)
+  const item = readArray(readRecord(subscription.items).data)[0]
+  const priceId = readString(readRecord(item).price, "id")
 
   return priceId === undefined ? undefined : planForPriceId(priceId)
-}
-
-function readPlanKey(value: unknown) {
-  return value === "starter" || value === "team" ? value : undefined
-}
-
-function readInterval(value: unknown) {
-  return value === "month" || value === "year" ? value : undefined
 }
 
 function readMicros(value: unknown) {

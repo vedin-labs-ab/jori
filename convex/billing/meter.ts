@@ -2,10 +2,8 @@ import { agentModel, autoTopUp, priceModelUsage } from "../../contracts/billing"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { availableMicros, ensureAccount } from "./account"
+import { availableMicros, ensureAccount, holdAutoTopUp } from "./account"
 import { debitRun } from "./ledger"
-
-const hourMs = 60 * 60 * 1000
 
 /**
  * Called for every completed model turn: price the tokens at list rates,
@@ -72,7 +70,7 @@ async function maybeScheduleAutoTopUp(
     return
   }
 
-  await ctx.db.patch(account._id, { autoTopUpHoldUntil: now + hourMs })
+  await holdAutoTopUp(ctx, account, now + autoTopUp.claimMs)
   await ctx.scheduler.runAfter(0, internal.billing.stripe.topup.execute, {
     tenantId: account.tenantId,
   })

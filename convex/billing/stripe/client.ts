@@ -82,7 +82,8 @@ export function encodeForm(
   return form
 }
 
-export function readString(payload: Record<string, unknown>, key: string) {
+/** For fields a successful Stripe response must carry, like session URLs. */
+export function requireString(payload: Record<string, unknown>, key: string) {
   const value = payload[key]
 
   if (typeof value !== "string") {
@@ -90,14 +91,4 @@ export function readString(payload: Record<string, unknown>, key: string) {
   }
 
   return value
-}
-
-export function readOptionalString(value: unknown) {
-  return typeof value === "string" ? value : undefined
-}
-
-export function readObject(value: unknown) {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : undefined
 }

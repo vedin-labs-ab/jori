@@ -1,3 +1,4 @@
+import { type BillingInterval, type PlanKey } from "@contracts/billing"
 import { useAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { api } from "../../../convex/_generated/api"
@@ -27,7 +28,7 @@ export function useBillingCheckout(tenantId: string) {
   const openPortal = useAction(api.billing.stripe.checkout.openPortal)
 
   return {
-    choosePlan: (plan: "starter" | "team", interval: "month" | "year") =>
+    choosePlan: (plan: PlanKey, interval: BillingInterval) =>
       redirect(
         () =>
           startPlanCheckout({

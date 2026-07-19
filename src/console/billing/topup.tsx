@@ -22,7 +22,9 @@ export function TopUpDialog({ tenantId }: { tenantId: string }) {
   const [amount, setAmount] = useState(String(topUp.presetsUsd[0]))
   const parsed = Number(amount)
   const valid =
-    Number.isInteger(parsed) && parsed >= topUp.minimumUsd && parsed <= 1000
+    Number.isInteger(parsed) &&
+    parsed >= topUp.minimumUsd &&
+    parsed <= topUp.maximumUsd
 
   return (
     <Dialog>
@@ -59,7 +61,8 @@ export function TopUpDialog({ tenantId }: { tenantId: string }) {
           />
           {valid ? null : (
             <p className="text-muted-foreground text-sm">
-              Any whole amount from ${topUp.minimumUsd} to $1,000.
+              Any whole amount from ${topUp.minimumUsd} to $
+              {topUp.maximumUsd.toLocaleString("en-US")}.
             </p>
           )}
         </div>
