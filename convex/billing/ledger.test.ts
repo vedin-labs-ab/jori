@@ -65,10 +65,12 @@ test("the wallet may go negative for in-flight work", async () => {
   })
 })
 
-test("a run accumulates into a single debit entry", async () => {
+test("a run accumulates into a single debit entry with attribution", async () => {
   const { ctx, insert, patch } = fakeCtx({
     _id: "entry-1",
+    type: "debit",
     amountMicros: 40_000,
+    includedMicros: 40_000,
   })
 
   await debitRun(ctx, {
@@ -81,8 +83,30 @@ test("a run accumulates into a single debit entry", async () => {
   expect(insert).not.toHaveBeenCalled()
   expect(patch).toHaveBeenCalledWith("entry-1", {
     amountMicros: 100_000,
+    includedMicros: 100_000,
+    balanceMicros: 1_440_000,
     timestamp: 42,
   })
+})
+
+test("debit entries record their pot split and the balance left", async () => {
+  const { ctx, insert } = fakeCtx()
+
+  await debitRun(ctx, {
+    account: account({ includedMicros: 50_000, walletMicros: 200_000 }),
+    runId: "run-1" as Id<"runs">,
+    micros: 80_000,
+    now: 42,
+  })
+
+  expect(insert).toHaveBeenCalledWith(
+    "billingEntries",
+    expect.objectContaining({
+      amountMicros: 80_000,
+      includedMicros: 50_000,
+      balanceMicros: 170_000,
+    })
+  )
 })
 
 test("top-ups are idempotent on the Stripe id", async () => {

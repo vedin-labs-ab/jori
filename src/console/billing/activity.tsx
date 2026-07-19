@@ -1,11 +1,5 @@
 import { formatUsd } from "@contracts/billing"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -19,47 +13,92 @@ import { type BillingOverview } from "./actions"
 
 type BillingEntry = BillingOverview["entries"][number]
 
-export function ActivityCard({ entries }: { entries: BillingEntry[] }) {
+/**
+ * The statement: every allowance, top-up, and run, with the pot it touched
+ * and the balance it left behind. Older rows written before attribution
+ * existed simply omit those columns.
+ */
+export function Activity({ entries }: { entries: BillingEntry[] }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Activity</CardTitle>
-        <CardDescription>
-          Every grant, top-up, and run, priced at provider list rates.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {entries.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            Nothing yet. Costs appear here as Milo works.
-          </p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>When</TableHead>
-                <TableHead>What</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+    <section>
+      <h2 className="font-medium">Activity</h2>
+      <p className="mt-0.5 text-muted-foreground text-sm">
+        Every allowance, top-up, and run, priced at provider list rates.
+      </p>
+      {entries.length === 0 ? (
+        <p className="mt-4 text-muted-foreground text-sm">
+          Nothing yet. Costs appear here as Milo works.
+        </p>
+      ) : (
+        <Table className="mt-3">
+          <TableHeader>
+            <TableRow>
+              <TableHead>When</TableHead>
+              <TableHead>What</TableHead>
+              <TableHead>Source</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Available</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {entries.map((entry) => (
+              <TableRow key={entry._id}>
+                <TableCell className="whitespace-nowrap text-muted-foreground">
+                  {absoluteTime(entry.timestamp)}
+                </TableCell>
+                <TableCell>{entryLabel(entry)}</TableCell>
+                <TableCell>
+                  <SourceChip entry={entry} />
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {entryAmount(entry)}
+                </TableCell>
+                <TableCell className="text-right text-muted-foreground tabular-nums">
+                  {entry.balanceMicros === undefined
+                    ? ""
+                    : formatUsd(entry.balanceMicros)}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {entries.map((entry) => (
-                <TableRow key={entry._id}>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">
-                    {absoluteTime(entry.timestamp)}
-                  </TableCell>
-                  <TableCell>{entryLabel(entry)}</TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {entryAmount(entry)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </section>
   )
+}
+
+function SourceChip({ entry }: { entry: BillingEntry }) {
+  const source = entrySource(entry)
+
+  if (source === null) {
+    return null
+  }
+
+  return (
+    <Badge variant={source === "Wallet" ? "outline" : "secondary"}>
+      {source}
+    </Badge>
+  )
+}
+
+function entrySource(entry: BillingEntry) {
+  if (entry.type === "grant") {
+    return "Included"
+  }
+
+  if (entry.type === "topup") {
+    return "Wallet"
+  }
+
+  if (entry.includedMicros === undefined) {
+    return null
+  }
+
+  if (entry.includedMicros >= entry.amountMicros) {
+    return "Included"
+  }
+
+  return entry.includedMicros === 0 ? "Wallet" : "Included + Wallet"
 }
 
 function entryLabel(entry: BillingEntry) {
@@ -71,11 +110,7 @@ function entryLabel(entry: BillingEntry) {
     return entry.auto ? "Auto top-up" : "Wallet top-up"
   }
 
-  if (entry.source === "trial") {
-    return "Trial usage included"
-  }
-
-  return `Included usage${entry.source === "cycle" ? " reset" : ""}`
+  return entry.source === "trial" ? "Trial allowance" : "Monthly allowance"
 }
 
 function entryAmount(entry: BillingEntry) {

@@ -21,6 +21,8 @@ export async function debitRun(
     args.micros
   )
   const fromWallet = args.micros - fromIncluded
+  const balanceMicros =
+    args.account.includedMicros + args.account.walletMicros - args.micros
 
   await ctx.db.patch(args.account._id, {
     includedMicros: args.account.includedMicros - fromIncluded,
@@ -36,6 +38,10 @@ export async function debitRun(
   if (existing !== null) {
     await ctx.db.patch(existing._id, {
       amountMicros: existing.amountMicros + args.micros,
+      includedMicros:
+        (existing.type === "debit" ? (existing.includedMicros ?? 0) : 0) +
+        fromIncluded,
+      balanceMicros,
       timestamp: args.now,
     })
 
@@ -47,6 +53,8 @@ export async function debitRun(
     timestamp: args.now,
     type: "debit",
     amountMicros: args.micros,
+    includedMicros: fromIncluded,
+    balanceMicros,
     runId: args.runId,
   })
 }
@@ -81,6 +89,8 @@ export async function creditTopUp(
     timestamp: args.now,
     type: "topup",
     amountMicros: args.micros,
+    balanceMicros:
+      args.account.includedMicros + args.account.walletMicros + args.micros,
     stripeId: args.stripeId,
     auto: args.auto,
   })
@@ -110,6 +120,7 @@ export async function grantIncluded(
     timestamp: args.now,
     type: "grant",
     amountMicros: args.micros,
+    balanceMicros: args.micros + args.account.walletMicros,
     source: args.source,
   })
 }
