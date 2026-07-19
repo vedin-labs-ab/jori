@@ -11,15 +11,8 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table"
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ArrowUpRight,
-  Filter,
-} from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
 import { type ReactNode, useMemo, useState } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -37,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { RevealArrow } from "../shared/dot"
 import { absoluteTime } from "../shared/time"
 import { type BillingOverview } from "./actions"
 
@@ -225,25 +219,32 @@ function KindHeader({ column }: { column: Column<ActivityRow> }) {
   )
 }
 
+/**
+ * One text treatment for every kind; only the suffix differs. Runs link to
+ * their receipt and reveal an arrow on hover, credits carry their kind dot.
+ */
 function WhatCell({ row }: { row: ActivityRow }) {
   if (row.kind === "run" && row.runId !== undefined) {
     return (
       <Link
-        className="inline-flex items-center gap-1 underline-offset-4 hover:underline"
+        className="group/reveal inline-flex max-w-md items-center gap-0.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         search={{ run: row.runId }}
         to="/runs"
       >
-        {row.label}
-        <ArrowUpRight className="size-3.5 text-muted-foreground" />
+        <span className="truncate">{row.label}</span>
+        <RevealArrow className="shrink-0" />
       </Link>
     )
   }
 
   return (
-    <Badge variant="outline">
-      {row.label}
-      <span aria-hidden className={cn("size-1.5 rounded-full", row.dot)} />
-    </Badge>
+    <span className="inline-flex max-w-md items-center gap-1.5">
+      <span className="truncate">{row.label}</span>
+      <span
+        aria-hidden
+        className={cn("size-1.5 shrink-0 rounded-full", row.dot)}
+      />
+    </span>
   )
 }
 
@@ -271,7 +272,12 @@ const columns: ColumnDef<ActivityRow>[] = [
       </SortHeader>
     ),
     cell: ({ row }) => (
-      <div className="text-right tabular-nums">
+      <div
+        className={cn(
+          "text-right tabular-nums",
+          row.original.signedMicros > 0 && "text-primary"
+        )}
+      >
         {row.original.signedMicros > 0
           ? `+${formatUsd(row.original.signedMicros)}`
           : formatUsd(row.original.signedMicros)}

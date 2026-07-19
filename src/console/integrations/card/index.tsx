@@ -1,10 +1,11 @@
-import { ArrowUpRight, ExternalLink, Loader2 } from "lucide-react"
+import { ExternalLink, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
   type ToolPermissionController,
   type ToolSurface,
 } from "../../permissions/controller"
+import { RevealArrow } from "../../shared/dot"
 import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
 import { type IntegrationCardStatus } from "./headline"
@@ -121,16 +122,13 @@ function IntegrationStatusLine({
         <span>{label}</span>
       ) : (
         <a
-          className="group/status-link inline-flex items-center gap-0.5 rounded-sm underline-offset-4 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="group/reveal inline-flex items-center gap-0.5 rounded-sm transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           href={href}
           rel="noreferrer"
           target="_blank"
         >
           <span>{label}</span>
-          <ArrowUpRight
-            aria-hidden="true"
-            className="size-3 -translate-x-1 opacity-0 transition-all duration-200 ease-out group-hover/status-link:translate-x-0 group-hover/status-link:opacity-100 group-focus-visible/status-link:translate-x-0 group-focus-visible/status-link:opacity-100"
-          />
+          <RevealArrow />
         </a>
       )}
     </div>
