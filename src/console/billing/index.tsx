@@ -28,11 +28,13 @@ function BillingContent({ tenantId }: { tenantId: string }) {
   }
 
   return (
-    <div className="flex max-w-4xl flex-col gap-8">
-      <StateAlert account={overview.account} />
-      <div className="rounded-xl border bg-card">
-        <SummaryBand account={overview.account} tenantId={tenantId} />
-        <AutoTopUpRow account={overview.account} tenantId={tenantId} />
+    <div className="flex flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+        <StateAlert account={overview.account} />
+        <div className="rounded-xl border bg-card">
+          <SummaryBand account={overview.account} tenantId={tenantId} />
+          <AutoTopUpRow account={overview.account} tenantId={tenantId} />
+        </div>
       </div>
       <Activity entries={overview.entries} />
     </div>

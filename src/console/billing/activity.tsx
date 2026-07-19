@@ -10,18 +10,17 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
 import { type ReactNode, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Table,
   TableBody,
@@ -48,8 +47,8 @@ const sources = ["Included", "Wallet", "Included + Wallet"]
 
 /**
  * The statement, as the stock shadcn data table: sortable time and amount,
- * a search over descriptions, and a source filter. Rows written before
- * attribution existed simply leave those cells blank.
+ * and a source filter folded into its own column header to keep the surface
+ * dense. Rows written before attribution existed simply leave cells blank.
  */
 export function Activity({ entries }: { entries: BillingEntry[] }) {
   const rows = useMemo(() => entries.map(toRow), [entries])
@@ -79,10 +78,7 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
           Nothing yet. Costs appear here as Milo works.
         </p>
       ) : (
-        <>
-          <ActivityToolbar table={table} />
-          <ActivityTable table={table} />
-        </>
+        <ActivityTable table={table} />
       )}
     </section>
   )
@@ -90,82 +86,50 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
 
 type ActivityTableInstance = ReturnType<typeof useReactTable<ActivityRow>>
 
-function ActivityToolbar({ table }: { table: ActivityTableInstance }) {
-  const search = table.getColumn("label")
-  const source = table.getColumn("source")
-
-  return (
-    <div className="mt-3 flex flex-wrap items-center gap-2">
-      <Input
-        className="h-8 w-56"
-        onChange={(event) => search?.setFilterValue(event.target.value)}
-        placeholder="Search activity"
-        value={(search?.getFilterValue() as string) ?? ""}
-      />
-      <Select
-        onValueChange={(value) =>
-          source?.setFilterValue(value === "all" ? undefined : value)
-        }
-        value={(source?.getFilterValue() as string) ?? "all"}
-      >
-        <SelectTrigger className="w-36" size="sm">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All sources</SelectItem>
-          {sources.map((option) => (
-            <SelectItem key={option} value={option}>
-              {option}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
-}
-
 function ActivityTable({ table }: { table: ActivityTableInstance }) {
   return (
-    <Table className="mt-2">
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <TableHead key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows.length === 0 ? (
-          <TableRow>
-            <TableCell
-              className="h-16 text-center text-muted-foreground"
-              colSpan={columns.length}
-            >
-              No matching activity.
-            </TableCell>
-          </TableRow>
-        ) : (
-          table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
+    <div className="mt-3 overflow-hidden rounded-lg border">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow className="hover:bg-transparent" key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
               ))}
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.length === 0 ? (
+            <TableRow>
+              <TableCell
+                className="h-16 text-center text-muted-foreground"
+                colSpan={columns.length}
+              >
+                No matching activity.
+              </TableCell>
+            </TableRow>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 
@@ -178,16 +142,58 @@ function SortHeader({
   children: ReactNode
   align?: "left" | "right"
 }) {
+  const sorted = column.getIsSorted()
+
   return (
     <Button
       className={`-ml-3 h-8 ${align === "right" ? "-mr-3 ml-0 float-right" : ""}`}
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      onClick={() => column.toggleSorting(sorted === "asc")}
       size="sm"
       variant="ghost"
     >
       {children}
-      <ArrowUpDown />
+      {sorted === "asc" ? (
+        <ArrowUp />
+      ) : sorted === "desc" ? (
+        <ArrowDown />
+      ) : (
+        <ArrowUpDown />
+      )}
     </Button>
+  )
+}
+
+/**
+ * The filter lives in the column header itself: a Filter-prefixed label that
+ * opens a radio menu. The icon brightens while a filter is active.
+ */
+function SourceHeader({ column }: { column: Column<ActivityRow> }) {
+  const value = (column.getFilterValue() as string) ?? ""
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="-ml-3 h-8" size="sm" variant="ghost">
+          <Filter className={value === "" ? "" : "text-foreground"} />
+          {value === "" ? "Source" : value}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuRadioGroup
+          onValueChange={(next) =>
+            column.setFilterValue(next === "" ? undefined : next)
+          }
+          value={value}
+        >
+          <DropdownMenuRadioItem value="">All sources</DropdownMenuRadioItem>
+          {sources.map((option) => (
+            <DropdownMenuRadioItem key={option} value={option}>
+              {option}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -210,7 +216,7 @@ const columns: ColumnDef<ActivityRow>[] = [
   {
     accessorKey: "source",
     filterFn: "equalsString",
-    header: "Source",
+    header: ({ column }) => <SourceHeader column={column} />,
     cell: ({ row }) =>
       row.original.source === "" ? null : (
         <Badge
