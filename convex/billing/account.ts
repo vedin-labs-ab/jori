@@ -59,6 +59,22 @@ export function availableMicros(account: Doc<"billingAccounts">) {
 }
 
 /**
+ * Subscribing mid-trial keeps the unspent trial usage: it folds into the
+ * first cycle's allotment and expires with it. An already-expired trial
+ * brings nothing along.
+ */
+export function trialRemainderMicros(
+  account: Doc<"billingAccounts">,
+  now: number
+) {
+  const live =
+    account.state === "trial" &&
+    (account.trialEndsAt === undefined || account.trialEndsAt >= now)
+
+  return live ? Math.max(account.includedMicros, 0) : 0
+}
+
+/**
  * Owns the auto-top-up claim window: set while a charge attempt is in
  * flight, extended into a cooldown after a decline, cleared on success.
  */

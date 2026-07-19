@@ -72,7 +72,11 @@ export const configureAutoTopUp = mutation({
     tenantId: v.string(),
     config: v.union(
       v.null(),
-      v.object({ amountUsd: v.number(), monthlyCapUsd: v.number() })
+      v.object({
+        thresholdUsd: v.number(),
+        amountUsd: v.number(),
+        monthlyCapUsd: v.number(),
+      })
     ),
   },
   handler: async (ctx, args) => {
@@ -88,6 +92,10 @@ export const configureAutoTopUp = mutation({
       })
 
       return null
+    }
+
+    if (!autoTopUp.thresholdsUsd.includes(args.config.thresholdUsd)) {
+      throw new Error("Pick one of the offered thresholds.")
     }
 
     if (!autoTopUp.amountsUsd.includes(args.config.amountUsd)) {
@@ -106,6 +114,7 @@ export const configureAutoTopUp = mutation({
 
     await ctx.db.patch(account._id, {
       autoTopUp: {
+        thresholdMicros: dollarsToMicros(args.config.thresholdUsd),
         amountMicros: dollarsToMicros(args.config.amountUsd),
         monthlyCapMicros: dollarsToMicros(args.config.monthlyCapUsd),
       },

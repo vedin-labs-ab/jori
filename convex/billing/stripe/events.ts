@@ -8,7 +8,12 @@ import {
 import { type Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { readArray, readRecord, readString } from "../../shared/input"
-import { ensureAccount, getAccount, holdAutoTopUp } from "../account"
+import {
+  ensureAccount,
+  getAccount,
+  holdAutoTopUp,
+  trialRemainderMicros,
+} from "../account"
 import { addMonths } from "../cycle"
 import { creditTopUp, grantIncluded } from "../ledger"
 import { planForPriceId } from "./config"
@@ -98,6 +103,7 @@ async function applyPlanCheckout(
   }
 
   const now = Date.now()
+  const remainderMicros = trialRemainderMicros(args.account, now)
 
   await ctx.db.patch(args.account._id, {
     state: "active",
@@ -111,7 +117,7 @@ async function applyPlanCheckout(
 
   await grantIncluded(ctx, {
     account: args.account,
-    micros: plans[plan].includedMonthlyMicros,
+    micros: plans[plan].includedMonthlyMicros + remainderMicros,
     source: "plan",
     now,
   })

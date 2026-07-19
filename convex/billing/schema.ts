@@ -21,8 +21,11 @@ export const billingAccounts = defineTable({
   includedMicros: v.number(),
   walletMicros: v.number(),
   nextGrantAt: v.optional(v.number()),
+  // `thresholdMicros` is optional only because rows predating the knob lack
+  // it; readers fall back to the contract default.
   autoTopUp: v.optional(
     v.object({
+      thresholdMicros: v.optional(v.number()),
       amountMicros: v.number(),
       monthlyCapMicros: v.number(),
     })
