@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils"
 export function RunRowFrame({
   children,
   className,
+  id,
 }: {
   children: ReactNode
   className?: string
+  id?: string
 }) {
   return (
     <article
@@ -18,6 +20,7 @@ export function RunRowFrame({
         "overflow-hidden rounded-md bg-background ring-1 ring-foreground/10 ring-inset transition-shadow focus-within:ring-2 focus-within:ring-ring/50",
         className
       )}
+      id={id}
     >
       {children}
     </article>
