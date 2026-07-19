@@ -30,9 +30,11 @@ import {
 } from "../types"
 import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
+import { usePageSearchSync, useSearchTarget } from "./seek"
 
 export function RunsList({ tenantId }: { tenantId: string }) {
   const { run: focusRunId } = useSearch({ from: "/runs" })
+  const target = useSearchTarget()
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
   const [runFilter, setRunFilter] = useState<RunFilter>("all")
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all")
@@ -46,8 +48,11 @@ export function RunsList({ tenantId }: { tenantId: string }) {
     deferredRunFilter,
     deferredApprovalFilter,
     deferredScopeFilter,
-    deferredQuery
+    deferredQuery,
+    target
   )
+
+  usePageSearchSync(pagination.pageIndex)
   const setApprovalFilterAndReset = useResettingSetter(
     setApprovalFilter,
     pagination.reset

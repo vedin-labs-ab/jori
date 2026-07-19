@@ -15,13 +15,15 @@ import {
   pageSize,
   type RunFilter,
 } from "../types"
+import { type PageTarget, useSeekTarget } from "./seek"
 
 export function useExecutionPagination(
   tenantId: string,
   runFilter: RunFilter,
   approvalFilter: ApprovalFilter,
   scopeFilter: ScopeFilter,
-  query: string
+  query: string,
+  target?: PageTarget
 ) {
   const [pageIndex, setPageIndex] = useState(0)
   const advanceAfterLoad = useRef(false)
@@ -43,6 +45,7 @@ export function useExecutionPagination(
     setPageIndex,
   })
 
+  useSeekTarget({ pageLoader: runs, rows, setPageIndex, target })
   usePageBounds(pageIndex, paging.pageCount, setPageIndex)
   useAdvanceAfterLoad({
     advanceAfterLoad,

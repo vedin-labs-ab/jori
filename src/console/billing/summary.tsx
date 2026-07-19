@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Spinner } from "@/components/ui/spinner"
+import { FieldHelp } from "../automations/help"
 import { shortDate } from "../shared/time"
 import { type BillingAccount, useBillingCheckout } from "./actions"
 import { PlanPicker } from "./plan"
@@ -152,9 +153,13 @@ function AvailableCell({
           </span>
         </div>
         <span className="text-muted-foreground">Wallet</span>
-        <span className="tabular-nums">
+        <span className="inline-flex items-center gap-1.5 tabular-nums">
           {formatUsd(walletMicros)}{" "}
-          <span className="text-muted-foreground">rolls over · spent last</span>
+          <span className="text-muted-foreground">· rolls over</span>
+          <FieldHelp label="How the wallet is spent" side="top">
+            Wallet money is prepaid and never expires. Runs spend the monthly
+            allowance first; the wallet covers the rest.
+          </FieldHelp>
         </span>
       </div>
     </>
