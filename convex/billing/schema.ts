@@ -42,6 +42,11 @@ export const billingAccounts = defineTable({
  * progresses, so the feed reads as receipts rather than per-call noise.
  * `stripeId` on top-ups is the Stripe object that paid (checkout session or
  * payment intent) and doubles as the webhook idempotency key.
+ *
+ * `balanceMicros` is the available balance after the entry, so the feed reads
+ * as a statement; `includedMicros` on debits is the portion drained from the
+ * included allotment, attributing each run to its pot. Both are optional only
+ * because rows written before they existed lack them.
  */
 export const billingEntries = defineTable(
   v.union(
@@ -50,6 +55,8 @@ export const billingEntries = defineTable(
       timestamp: v.number(),
       type: v.literal("debit"),
       amountMicros: v.number(),
+      includedMicros: v.optional(v.number()),
+      balanceMicros: v.optional(v.number()),
       runId: v.id("runs"),
     }),
     v.object({
@@ -57,6 +64,7 @@ export const billingEntries = defineTable(
       timestamp: v.number(),
       type: v.literal("grant"),
       amountMicros: v.number(),
+      balanceMicros: v.optional(v.number()),
       source: v.union(
         v.literal("trial"),
         v.literal("cycle"),
@@ -68,6 +76,7 @@ export const billingEntries = defineTable(
       timestamp: v.number(),
       type: v.literal("topup"),
       amountMicros: v.number(),
+      balanceMicros: v.optional(v.number()),
       stripeId: v.string(),
       auto: v.boolean(),
     })

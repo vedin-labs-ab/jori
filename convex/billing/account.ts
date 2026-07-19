@@ -41,6 +41,7 @@ export async function ensureAccount(
     timestamp: now,
     type: "grant",
     amountMicros: trial.grantMicros,
+    balanceMicros: trial.grantMicros,
     source: "trial",
   })
 

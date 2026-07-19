@@ -6,9 +6,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { type BillingAccount } from "./actions"
-import { ActivityCard } from "./activity"
-import { PlanCard } from "./plan"
-import { WalletCard } from "./wallet"
+import { Activity } from "./activity"
+import { AutoTopUpRow } from "./autotopup"
+import { SummaryBand } from "./summary"
 
 export function Billing() {
   return (
@@ -24,22 +24,17 @@ function BillingContent({ tenantId }: { tenantId: string }) {
   const overview = useQuery(api.billing.console.overview, { tenantId })
 
   if (overview === undefined) {
-    return (
-      <div className="grid items-start gap-4 lg:grid-cols-2">
-        <Skeleton className="h-48" />
-        <Skeleton className="h-48" />
-      </div>
-    )
+    return <Skeleton className="h-56" />
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex max-w-4xl flex-col gap-8">
       <StateAlert account={overview.account} />
-      <div className="grid items-start gap-4 lg:grid-cols-2">
-        <PlanCard account={overview.account} tenantId={tenantId} />
-        <WalletCard account={overview.account} tenantId={tenantId} />
+      <div className="rounded-xl border bg-card">
+        <SummaryBand account={overview.account} tenantId={tenantId} />
+        <AutoTopUpRow account={overview.account} tenantId={tenantId} />
       </div>
-      <ActivityCard entries={overview.entries} />
+      <Activity entries={overview.entries} />
     </div>
   )
 }
