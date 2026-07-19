@@ -16,6 +16,7 @@ import {
 import { assets } from "./assets/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
+import { billingAccounts, billingEntries } from "./billing/schema"
 import { conversations } from "./conversations/schema"
 import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
 import { events } from "./events/schema"
@@ -45,6 +46,8 @@ import { transitions } from "./transitions/schema"
 export default defineSchema({
   skills,
   assets,
+  billingAccounts,
+  billingEntries,
   persons,
   identities,
   integrations,

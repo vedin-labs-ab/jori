@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { checkRunBudget } from "../../billing/guard"
 import { fireAutomation } from "./fire"
 import { createAutomationRun } from "./run"
 
+vi.mock("../../billing/guard", () => ({ checkRunBudget: vi.fn() }))
 vi.mock("./run", () => ({ createAutomationRun: vi.fn() }))
 
 beforeEach(() => {
+  vi.mocked(checkRunBudget).mockReset()
+  vi.mocked(checkRunBudget).mockResolvedValue({ ok: true })
   vi.mocked(createAutomationRun).mockReset()
   vi.mocked(createAutomationRun).mockResolvedValue("run" as Id<"runs">)
 })
@@ -128,3 +132,25 @@ function automation(
     updatedAt: 0,
   }
 }
+
+describe("budget-blocked firing", () => {
+  test("completes a once automation without creating its run", async () => {
+    vi.mocked(checkRunBudget).mockResolvedValue({
+      ok: false,
+      reason: "out-of-usage",
+    })
+
+    const child = automation()
+    const { ctx, patch } = context([child])
+
+    await expect(
+      fireAutomation(ctx, { automationId: child._id, expectedAt: 1000 })
+    ).resolves.toBeNull()
+
+    expect(createAutomationRun).not.toHaveBeenCalled()
+    expect(patch).toHaveBeenCalledWith(
+      child._id,
+      expect.objectContaining({ status: "completed" })
+    )
+  })
+})

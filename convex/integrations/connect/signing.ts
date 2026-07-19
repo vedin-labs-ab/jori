@@ -1,9 +1,5 @@
-import { timingSafeEqual } from "../../shared/crypto"
-import {
-  base64UrlDecodeBytes,
-  base64UrlEncode,
-  bytesToHex,
-} from "../../shared/encoding"
+import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
+import { base64UrlDecodeBytes, base64UrlEncode } from "../../shared/encoding"
 
 export async function createSignedState<State>(secret: string, state: State) {
   const payload = base64UrlEncode(JSON.stringify(state))
@@ -32,21 +28,4 @@ export async function parseSignedState<State>(args: {
   return JSON.parse(
     new TextDecoder().decode(base64UrlDecodeBytes(payload))
   ) as State
-}
-
-export async function hmacSha256Hex(secret: string, value: string) {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  )
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(value)
-  )
-
-  return bytesToHex(new Uint8Array(signature))
 }

@@ -1,0 +1,135 @@
+/**
+ * Milo's commercial model in one place: org-wide plans, usage billed in
+ * dollars at the model provider's public list rates, and a prepaid wallet.
+ *
+ * Every amount is an integer count of micro-dollars (1e-6 USD) so per-token
+ * pricing stays exact integer math end to end.
+ */
+
+export const microsPerDollar = 1_000_000
+
+export type PlanKey = "starter" | "team"
+export type BillingInterval = "month" | "year"
+
+export type Plan = {
+  key: PlanKey
+  label: string
+  monthlyPriceUsd: number
+  annualPriceUsd: number
+  includedMonthlyMicros: number
+  memberLimit: number
+}
+
+export const plans: Record<PlanKey, Plan> = {
+  starter: {
+    key: "starter",
+    label: "Starter",
+    monthlyPriceUsd: 34,
+    annualPriceUsd: 324,
+    includedMonthlyMicros: 15 * microsPerDollar,
+    memberLimit: 10,
+  },
+  team: {
+    key: "team",
+    label: "Team",
+    monthlyPriceUsd: 124,
+    annualPriceUsd: 1188,
+    includedMonthlyMicros: 75 * microsPerDollar,
+    memberLimit: 50,
+  },
+}
+
+export const planKeys = Object.keys(plans) as PlanKey[]
+
+export const trial = {
+  days: 14,
+  grantMicros: 25 * microsPerDollar,
+}
+
+/**
+ * Interactive work (console instructions, mentions) may dip slightly below a
+ * zero balance so Milo never goes silent mid-conversation. Scheduled work
+ * stops at zero.
+ */
+export const interactiveGraceMicros = 2 * microsPerDollar
+
+export const topUp = {
+  presetsUsd: [25, 50, 100],
+  minimumUsd: 10,
+}
+
+/**
+ * Auto top-up is the spend control: it fires when the balance drops below the
+ * threshold and never adds more than the monthly cap in one billing month.
+ */
+export const autoTopUp = {
+  thresholdMicros: 10 * microsPerDollar,
+  amountsUsd: [25, 50, 100],
+  monthlyCapsUsd: [50, 100, 200, 500],
+}
+
+/** The model Milo runs on, and therefore the rate usage is billed at. */
+export const agentModel = "openai/gpt-5.6-sol"
+
+export type ModelRate = {
+  inputMicrosPerToken: number
+  outputMicrosPerToken: number
+}
+
+/**
+ * Provider list rates. Input covers every prompt token, cached or not; the
+ * spread against cached actuals is the usage margin. Output covers completion
+ * tokens, reasoning included.
+ */
+export const modelRates: Record<string, ModelRate> = {
+  "openai/gpt-5.6-sol": { inputMicrosPerToken: 5, outputMicrosPerToken: 30 },
+}
+
+/** A model missing from the rate table bills at the highest configured rate
+ *  so a routing change can never silently undercharge. */
+export function resolveModelRate(model: string): ModelRate {
+  const known = modelRates[model]
+
+  if (known !== undefined) {
+    return known
+  }
+
+  return Object.values(modelRates).reduce((left, right) =>
+    left.inputMicrosPerToken + left.outputMicrosPerToken >=
+    right.inputMicrosPerToken + right.outputMicrosPerToken
+      ? left
+      : right
+  )
+}
+
+export function priceModelUsage(
+  model: string,
+  usage: { inputTokens: number; outputTokens: number }
+) {
+  const rate = resolveModelRate(model)
+
+  return (
+    usage.inputTokens * rate.inputMicrosPerToken +
+    usage.outputTokens * rate.outputMicrosPerToken
+  )
+}
+
+export function dollarsToMicros(usd: number) {
+  return Math.round(usd * microsPerDollar)
+}
+
+export function formatUsd(micros: number): string {
+  const sign = micros < 0 ? "-" : ""
+  const magnitude = Math.abs(micros)
+
+  if (magnitude > 0 && magnitude < microsPerDollar / 100) {
+    return `${sign}<$0.01`
+  }
+
+  const cents = Math.round(magnitude / (microsPerDollar / 100))
+
+  return `${sign}$${(cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}

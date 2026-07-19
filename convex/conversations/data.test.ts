@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { startMessageRun } from "./data"
+import { fakeMutationCtx, id, inserted, type Seed } from "./fixtures"
 
 const expectedCursor = {
   message: { createdAt: 0, messageId: "message" },
@@ -30,14 +30,14 @@ test("starts new conversation message runs as mentions", async () => {
     expect.objectContaining({
       conversationId: "conversations-1",
       cursor: expectedCursor,
-      runId: "runs-2",
+      runId: "runs-1",
     }),
   ])
   expect(inserted(ctx, "outbox")).toEqual([
     expect.objectContaining({
-      key: "run:runs-2",
+      key: "run:runs-1",
       operation: expect.objectContaining({
-        runId: "runs-2",
+        runId: "runs-1",
         type: "run.start",
       }),
       status: "pending",
@@ -194,89 +194,4 @@ function activeSessionSeed(
       },
     ],
   ]
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
-}
-
-function inserted(ctx: FakeCtx, table: string) {
-  return ctx.inserts
-    .filter((insert) => insert.table === table)
-    .map((insert) => insert.doc)
-}
-
-type Seed = [string, Record<string, unknown>]
-type FakeCtx = MutationCtx & {
-  inserts: Array<{ table: string; doc: unknown }>
-  patches: Array<{ id: string; patch: unknown }>
-}
-
-function fakeMutationCtx(seed: Seed[] = []): FakeCtx {
-  const inserts: Array<{ table: string; doc: unknown }> = []
-  const patches: Array<{ id: string; patch: unknown }> = []
-  const rows = new Map(seed.map(([, doc]) => [String(doc._id), doc]))
-
-  return {
-    inserts,
-    patches,
-    db: {
-      get: async (rowId: string) => rows.get(rowId) ?? null,
-      insert: async (table: string, doc: Record<string, unknown>) => {
-        const rowId = `${table}-${inserts.length + 1}`
-        const row = { _id: rowId, _creationTime: 0, ...doc }
-
-        inserts.push({ table, doc })
-        rows.set(rowId, row)
-
-        return rowId
-      },
-      patch: async (rowId: string, patch: Record<string, unknown>) => {
-        patches.push({ id: rowId, patch })
-        rows.set(rowId, { ...rows.get(rowId), ...patch })
-      },
-      query: (table: string) => ({
-        withIndex: (_index: string, build: (query: QueryFilter) => unknown) => {
-          const filters: [string, unknown][] = []
-          const query = {
-            eq: (field: string, value: unknown) => {
-              filters.push([field, value])
-              return query
-            },
-          }
-
-          build(query)
-
-          const result = {
-            first: async () =>
-              [...rows.values()].find(
-                (row) => rowTable(row, table) && matches(row, filters)
-              ) ?? null,
-            order: (_direction: "asc" | "desc") => result,
-          }
-
-          return result
-        },
-      }),
-    },
-    scheduler: {
-      runAfter: async () => "scheduled",
-    },
-  } as unknown as FakeCtx
-}
-
-function rowTable(row: Record<string, unknown>, table: string) {
-  return typeof row._id === "string" && row._id.startsWith(tableIdPrefix(table))
-}
-
-function tableIdPrefix(table: string) {
-  return table.endsWith("s") ? table.slice(0, -1) : table
-}
-
-type QueryFilter = {
-  eq: (field: string, value: unknown) => QueryFilter
-}
-
-function matches(row: Record<string, unknown>, filters: [string, unknown][]) {
-  return filters.every(([field, value]) => row[field] === value)
 }

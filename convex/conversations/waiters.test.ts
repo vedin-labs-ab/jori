@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { startMessageRun } from "./data"
+import { fakeMutationCtx, id, inserted, type Seed } from "./fixtures"
 
 test("starts reply runs when a waiter wake never resumed the run", async () => {
   const currentConversation = conversation()
@@ -154,96 +154,4 @@ function trace(runId: string, timestamp: number): Seed {
       type: "run.started",
     },
   ]
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
-}
-
-function inserted(ctx: FakeCtx, table: string) {
-  return ctx.inserts
-    .filter((insert) => insert.table === table)
-    .map((insert) => insert.doc)
-}
-
-type Seed = [string, Record<string, unknown>]
-type FakeCtx = MutationCtx & {
-  inserts: Array<{ table: string; doc: unknown }>
-  patches: Array<{ id: string; patch: unknown }>
-}
-
-function fakeMutationCtx(seed: Seed[]): FakeCtx {
-  const inserts: Array<{ table: string; doc: unknown }> = []
-  const patches: Array<{ id: string; patch: unknown }> = []
-  const rows = new Map(seed.map(([, doc]) => [String(doc._id), doc]))
-
-  return {
-    inserts,
-    patches,
-    db: {
-      get: async (rowId: string) => rows.get(rowId) ?? null,
-      insert: async (table: string, doc: Record<string, unknown>) => {
-        const rowId = `${table}-${inserts.length + 1}`
-        rows.set(rowId, { _creationTime: 0, _id: rowId, ...doc })
-        inserts.push({ table, doc })
-        return rowId
-      },
-      patch: async (rowId: string, patch: Record<string, unknown>) => {
-        rows.set(rowId, { ...rows.get(rowId), ...patch })
-        patches.push({ id: rowId, patch })
-      },
-      query: (table: string) => ({
-        withIndex: (_index: string, build: (query: QueryFilter) => unknown) => {
-          const filters: [string, unknown][] = []
-          const query = queryFilter(filters)
-          build(query)
-          const result = queryResult(rows, table, filters)
-
-          return result
-        },
-      }),
-    },
-    scheduler: { runAfter: async () => "scheduled" },
-  } as unknown as FakeCtx
-}
-
-function queryFilter(filters: [string, unknown][]): QueryFilter {
-  return {
-    eq: (field, value) => {
-      filters.push([field, value])
-      return queryFilter(filters)
-    },
-  }
-}
-
-function queryResult(
-  rows: Map<string, Record<string, unknown>>,
-  table: string,
-  filters: [string, unknown][]
-) {
-  const result = {
-    first: async () =>
-      [...rows.values()].find(
-        (row) => rowTable(row, table) && matches(row, filters)
-      ) ?? null,
-    order: (_direction: "asc" | "desc") => result,
-  }
-
-  return result
-}
-
-function rowTable(row: Record<string, unknown>, table: string) {
-  return typeof row._id === "string" && row._id.startsWith(tableIdPrefix(table))
-}
-
-function tableIdPrefix(table: string) {
-  return table.endsWith("s") ? table.slice(0, -1) : table
-}
-
-type QueryFilter = {
-  eq: (field: string, value: unknown) => QueryFilter
-}
-
-function matches(row: Record<string, unknown>, filters: [string, unknown][]) {
-  return filters.every(([field, value]) => row[field] === value)
 }

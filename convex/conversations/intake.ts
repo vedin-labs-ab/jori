@@ -91,6 +91,11 @@ export const record = internalMutation({
       now,
       conversation,
     })
+
+    if (run.status === "blocked") {
+      return { status: "recorded" as const, messageId: message._id }
+    }
+
     await scheduleConversationSummary(ctx, conversation, now)
 
     return {

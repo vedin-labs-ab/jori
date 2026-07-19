@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { requireRunBudget } from "../billing/guard"
 import { type Access } from "../shared/integrations"
 import { resolveRunAudience } from "./audience"
 import { queueRun } from "./execution/outbox/data"
@@ -30,6 +31,11 @@ export async function createInstructionRun(
   }
 ) {
   const parent = args.parent
+
+  // Child runs ride on their parent's budget; only fresh work is gated.
+  if (parent === undefined) {
+    await requireRunBudget(ctx, { tenantId: args.tenantId, interactive: true })
+  }
 
   const runId = await ctx.db.insert("runs", {
     tenantId: args.tenantId,

@@ -1,11 +1,7 @@
 import { type Id } from "../../_generated/dataModel"
-import { timingSafeEqual } from "../../shared/crypto"
+import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { readEnvironmentVariable } from "../../shared/environment"
-import {
-  createSignedState,
-  hmacSha256Hex,
-  parseSignedState,
-} from "../connect/signing"
+import { createSignedState, parseSignedState } from "../connect/signing"
 import { requireNotionClientSecret } from "./oauth"
 
 export type NotionInstallState = {
