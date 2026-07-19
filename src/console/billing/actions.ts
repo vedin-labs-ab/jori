@@ -1,6 +1,7 @@
 import { type BillingInterval, type PlanKey } from "@contracts/billing"
 import { useAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
+import { useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
 
@@ -10,15 +11,20 @@ export type BillingOverview = FunctionReturnType<
 
 export type BillingAccount = NonNullable<BillingOverview["account"]>
 
+export type CheckoutFlow = "plan" | "top-up" | "portal"
+
 export function billingReturnUrl() {
   return `${window.location.origin}/billing`
 }
 
 /**
  * Every purchase flow ends on a Stripe-hosted page, so these all resolve to a
- * redirect; errors surface as toasts and leave the page in place.
+ * redirect; errors surface as toasts and leave the page in place. `pending`
+ * names the flow currently opening (through to the redirect itself) so its
+ * button can spin and every money button can disable.
  */
 export function useBillingCheckout(tenantId: string) {
+  const [pending, setPending] = useState<CheckoutFlow | null>(null)
   const startPlanCheckout = useAction(
     api.billing.stripe.checkout.startPlanCheckout
   )
@@ -27,9 +33,28 @@ export function useBillingCheckout(tenantId: string) {
   )
   const openPortal = useAction(api.billing.stripe.checkout.openPortal)
 
+  const redirect = async (
+    flow: CheckoutFlow,
+    start: () => Promise<{ url: string }>,
+    fallback: string
+  ) => {
+    setPending(flow)
+
+    try {
+      const { url } = await start()
+
+      window.location.assign(url)
+    } catch (error) {
+      showErrorToast(error, fallback)
+      setPending(null)
+    }
+  }
+
   return {
+    pending,
     choosePlan: (plan: PlanKey, interval: BillingInterval) =>
       redirect(
+        "plan",
         () =>
           startPlanCheckout({
             tenantId,
@@ -41,6 +66,7 @@ export function useBillingCheckout(tenantId: string) {
       ),
     topUp: (amountUsd: number) =>
       redirect(
+        "top-up",
         () =>
           startTopUpCheckout({
             tenantId,
@@ -51,21 +77,9 @@ export function useBillingCheckout(tenantId: string) {
       ),
     managePortal: () =>
       redirect(
+        "portal",
         () => openPortal({ tenantId, returnUrl: billingReturnUrl() }),
         "Could not open the billing portal."
       ),
-  }
-}
-
-async function redirect(
-  start: () => Promise<{ url: string }>,
-  fallback: string
-) {
-  try {
-    const { url } = await start()
-
-    window.location.assign(url)
-  } catch (error) {
-    showErrorToast(error, fallback)
   }
 }

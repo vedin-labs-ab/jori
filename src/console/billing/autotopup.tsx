@@ -51,12 +51,14 @@ export function AutoTopUpRow({
           {enabled ? (
             <>
               <span>Below</span>
-              <InlineAmount
-                onChange={(value) => apply({ thresholdUsd: value })}
-                options={autoTopUp.thresholdsUsd}
-                value={thresholdUsd}
-              />
-              <span>, add</span>
+              <span className="flex items-center">
+                <InlineAmount
+                  onChange={(value) => apply({ thresholdUsd: value })}
+                  options={autoTopUp.thresholdsUsd}
+                  value={thresholdUsd}
+                />
+                <span className="whitespace-pre">, add</span>
+              </span>
               <InlineAmount
                 onChange={(value) => apply({ amountUsd: value })}
                 options={autoTopUp.amountsUsd}

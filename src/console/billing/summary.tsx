@@ -1,7 +1,9 @@
 import { formatUsd, plans, trial } from "@contracts/billing"
+import { CreditCard } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Spinner } from "@/components/ui/spinner"
 import { shortDate } from "../shared/time"
 import { type BillingAccount, useBillingCheckout } from "./actions"
 import { PlanPicker } from "./plan"
@@ -57,7 +59,12 @@ function PlanCell({
       <div className="mt-5 flex gap-2">
         {subscribed ? null : <PlanPicker tenantId={tenantId} />}
         {account?.hasStripeCustomer ? (
-          <Button onClick={checkout.managePortal} variant="outline">
+          <Button
+            disabled={checkout.pending !== null}
+            onClick={checkout.managePortal}
+            variant="outline"
+          >
+            {checkout.pending === "portal" ? <Spinner /> : <CreditCard />}
             Manage billing
           </Button>
         ) : null}

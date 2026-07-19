@@ -4,6 +4,7 @@ import {
   type PlanKey,
   plans,
 } from "@contracts/billing"
+import { ArrowRight } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,12 +15,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Spinner } from "@/components/ui/spinner"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useBillingCheckout } from "./actions"
 
 export function PlanPicker({ tenantId }: { tenantId: string }) {
   const checkout = useBillingCheckout(tenantId)
   const [interval, setInterval] = useState<BillingInterval>("month")
+  const [chosen, setChosen] = useState<PlanKey | null>(null)
+
+  const choose = (plan: PlanKey) => {
+    setChosen(plan)
+    void checkout.choosePlan(plan, interval)
+  }
 
   return (
     <Dialog>
@@ -48,8 +56,10 @@ export function PlanPicker({ tenantId }: { tenantId: string }) {
             <PlanOption
               interval={interval}
               key={plan.key}
-              onChoose={checkout.choosePlan}
+              onChoose={choose}
+              pending={checkout.pending !== null}
               plan={plan.key}
+              spinning={checkout.pending === "plan" && chosen === plan.key}
             />
           ))}
         </div>
@@ -61,11 +71,15 @@ export function PlanPicker({ tenantId }: { tenantId: string }) {
 function PlanOption({
   interval,
   onChoose,
+  pending,
   plan,
+  spinning,
 }: {
   interval: BillingInterval
-  onChoose: (plan: PlanKey, interval: BillingInterval) => void
+  onChoose: (plan: PlanKey) => void
+  pending: boolean
   plan: PlanKey
+  spinning: boolean
 }) {
   const details = plans[plan]
   const price =
@@ -82,7 +96,10 @@ function PlanOption({
           {formatUsd(details.includedMonthlyMicros)} usage included monthly
         </p>
       </div>
-      <Button onClick={() => onChoose(plan, interval)}>Choose</Button>
+      <Button disabled={pending} onClick={() => onChoose(plan)}>
+        {spinning ? <Spinner /> : <ArrowRight />}
+        Choose
+      </Button>
     </div>
   )
 }

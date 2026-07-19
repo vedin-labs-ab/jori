@@ -1,4 +1,5 @@
 import { topUp } from "@contracts/billing"
+import { ArrowRight } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,7 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group"
+import { Spinner } from "@/components/ui/spinner"
 import { useBillingCheckout } from "./actions"
 
 /**
@@ -52,13 +59,18 @@ export function TopUpDialog({ tenantId }: { tenantId: string }) {
               </Button>
             ))}
           </div>
-          <Input
-            inputMode="numeric"
-            min={topUp.minimumUsd}
-            onChange={(event) => setAmount(event.target.value)}
-            type="number"
-            value={amount}
-          />
+          <InputGroup>
+            <InputGroupInput
+              inputMode="numeric"
+              min={topUp.minimumUsd}
+              onChange={(event) => setAmount(event.target.value)}
+              type="number"
+              value={amount}
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupText>$</InputGroupText>
+            </InputGroupAddon>
+          </InputGroup>
           {valid ? null : (
             <p className="text-muted-foreground text-sm">
               Any whole amount from ${topUp.minimumUsd} to $
@@ -67,7 +79,11 @@ export function TopUpDialog({ tenantId }: { tenantId: string }) {
           )}
         </div>
         <DialogFooter>
-          <Button disabled={!valid} onClick={() => checkout.topUp(parsed)}>
+          <Button
+            disabled={!valid || checkout.pending !== null}
+            onClick={() => checkout.topUp(parsed)}
+          >
+            {checkout.pending === "top-up" ? <Spinner /> : <ArrowRight />}
             Continue to checkout
           </Button>
         </DialogFooter>
