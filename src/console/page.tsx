@@ -6,7 +6,11 @@ import { UserInvitations } from "@/components/auth/organization/user-invitations
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { activateOrganization, authClient } from "@/shared/session/auth"
+import {
+  activateOrganization,
+  authClient,
+  isSessionLoading,
+} from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { OnboardingGate } from "./context/organization/onboarding/gate"
 import { IntegrationCallbackToasts } from "./integrations/callback"
@@ -23,11 +27,12 @@ export function ConsolePage({
   chrome?: "shell" | "none"
   loadingFallback?: ReactNode
 }) {
-  const { data: session, isPending: isSessionPending } = authClient.useSession()
+  const sessionQuery = authClient.useSession()
+  const session = sessionQuery.data
   const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
   const loader = loadingFallback ?? <FullscreenSkeletonLoader />
 
-  if (isSessionPending) {
+  if (isSessionLoading(sessionQuery)) {
     return loader
   }
 
@@ -97,12 +102,12 @@ function OrganizationBoundary({
   chrome: "shell" | "none"
   loader: ReactNode
 }) {
-  const { data: active, isPending: isActivePending } =
-    authClient.useActiveOrganization()
-  const { data: organizations, isPending: isListPending } =
-    authClient.useListOrganizations()
+  const activeQuery = authClient.useActiveOrganization()
+  const listQuery = authClient.useListOrganizations()
+  const active = activeQuery.data
+  const organizations = listQuery.data
 
-  if (isActivePending || isListPending) {
+  if (isSessionLoading(activeQuery) || isSessionLoading(listQuery)) {
     return loader
   }
 

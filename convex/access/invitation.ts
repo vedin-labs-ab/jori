@@ -9,7 +9,7 @@ const resend = new Resend(components.resend, { testMode: false })
 
 const defaultSender = "Milo <onboarding@resend.dev>"
 
-type Invitation = {
+export type Invitation = {
   email: string
   organization: { name: string }
   inviter: { user: { name: string; email: string } }
