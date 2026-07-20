@@ -1,4 +1,6 @@
-import { OrganizationSettings } from "@/components/auth/organization/organization-settings"
+import { OrganizationDangerZone } from "@/components/auth/organization/organization-danger-zone"
+import { OrganizationPeople } from "@/components/auth/organization/organization-people"
+import { OrganizationProfile } from "@/components/auth/organization/organization-profile"
 import { AccountSettings } from "@/components/auth/settings/account/account-settings"
 import { SecuritySettings } from "@/components/auth/settings/security/security-settings"
 import {
@@ -63,7 +65,11 @@ export function OrganizationDialog({
             Profile, members, and invitations for your organization.
           </DialogDescription>
         </DialogHeader>
-        <OrganizationSettings />
+        <div className="flex flex-col gap-4 md:gap-6">
+          <OrganizationProfile />
+          <OrganizationPeople />
+          <OrganizationDangerZone />
+        </div>
       </DialogContent>
     </Dialog>
   )
