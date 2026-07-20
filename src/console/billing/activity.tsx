@@ -239,11 +239,11 @@ function WhatCell({ row }: { row: ActivityRow }) {
 
   return (
     <span className="inline-flex max-w-md items-center gap-1.5">
-      <span className="truncate">{row.label}</span>
       <span
         aria-hidden
         className={cn("size-1.5 shrink-0 rounded-full", row.dot)}
       />
+      <span className="truncate">{row.label}</span>
     </span>
   )
 }
