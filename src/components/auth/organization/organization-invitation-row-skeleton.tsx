@@ -25,7 +25,9 @@ export function OrganizationInvitationRowSkeleton() {
         <Skeleton className="h-4 w-14 rounded-full" />
       </TableCell>
 
-      <TableCell />
+      <TableCell>
+        <Skeleton className="ml-auto size-8 rounded-md" />
+      </TableCell>
     </TableRow>
   )
 }

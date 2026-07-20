@@ -2,7 +2,6 @@ import { Building2, CreditCard, Users } from "lucide-react"
 import { type CSSProperties, lazy, Suspense, useState } from "react"
 import { OrganizationPeople } from "@/components/auth/organization/organization-people"
 import { OrganizationSettings } from "@/components/auth/organization/organization-settings"
-import { OrganizationView } from "@/components/auth/organization/organization-view"
 import { AccountSettings } from "@/components/auth/settings/account/account-settings"
 import { SecuritySettings } from "@/components/auth/settings/security/security-settings"
 import {
@@ -17,7 +16,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -41,19 +39,16 @@ export type OrganizationSettingsView = "general" | "people" | "billing"
 
 const organizationViews = [
   {
-    description: "Profile and organization controls.",
     icon: Building2,
     label: "General",
     value: "general",
   },
   {
-    description: "Members, roles, and invitations.",
     icon: Users,
     label: "People",
     value: "people",
   },
   {
-    description: "Plan, usage, and payment settings.",
     icon: CreditCard,
     label: "Billing",
     value: "billing",
@@ -127,7 +122,9 @@ export function OrganizationDialog({
           <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
             <header className="shrink-0 border-b px-4 py-3 pr-12 md:px-6">
               <DialogTitle>{activeView.label}</DialogTitle>
-              <DialogDescription>{activeView.description}</DialogDescription>
+              <DialogDescription className="sr-only">
+                Manage your organization.
+              </DialogDescription>
             </header>
             <OrganizationSettingsMobileNav onViewChange={setView} view={view} />
             <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
@@ -152,12 +149,7 @@ function OrganizationSettingsSidebar({
 }) {
   return (
     <Sidebar className="hidden h-full border-r md:flex" collapsible="none">
-      <SidebarHeader>
-        <div className="flex h-12 items-center gap-2 p-2">
-          <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="pt-2">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
