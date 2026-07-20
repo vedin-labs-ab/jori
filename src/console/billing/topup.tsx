@@ -62,24 +62,26 @@ export function TopUpDialog({ organizationId }: { organizationId: string }) {
             options={presetOptions}
             value={amount}
           />
-          <InputGroup>
-            <InputGroupInput
-              inputMode="numeric"
-              min={topUp.minimumUsd}
-              onChange={(event) => setAmount(event.target.value)}
-              type="number"
-              value={amount}
-            />
-            <InputGroupAddon align="inline-end">
-              <InputGroupText>$</InputGroupText>
-            </InputGroupAddon>
-          </InputGroup>
-          {valid ? null : (
-            <p className="text-muted-foreground text-sm">
-              Any whole amount from ${topUp.minimumUsd} to $
-              {topUp.maximumUsd.toLocaleString("en-US")}.
-            </p>
-          )}
+          <div className="flex flex-col gap-1.5">
+            <InputGroup>
+              <InputGroupInput
+                inputMode="numeric"
+                min={topUp.minimumUsd}
+                onChange={(event) => setAmount(event.target.value)}
+                type="number"
+                value={amount}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupText>$</InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
+            {valid ? null : (
+              <p className="text-destructive text-xs" role="alert">
+                Any whole amount from ${topUp.minimumUsd} to $
+                {topUp.maximumUsd.toLocaleString("en-US")}.
+              </p>
+            )}
+          </div>
         </div>
         <DialogFooter>
           <Button
