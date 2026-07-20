@@ -1,4 +1,4 @@
-import { Building2, ChevronRight, CreditCard, Users } from "lucide-react"
+import { Building2, CreditCard, Users } from "lucide-react"
 import { type CSSProperties, lazy, Suspense, useState } from "react"
 import { OrganizationPeople } from "@/components/auth/organization/organization-people"
 import { OrganizationSettings } from "@/components/auth/organization/organization-settings"
@@ -116,23 +116,17 @@ export function OrganizationDialog({
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent
-        bodyClassName="block overflow-hidden p-0"
+        bodyClassName="flex flex-1 overflow-hidden p-0"
         className="h-[calc(100svh-2rem)] sm:h-[min(44rem,calc(100svh-2rem))] sm:max-w-[calc(100%-2rem)] md:max-w-4xl lg:max-w-5xl"
       >
         <SidebarProvider
-          className="min-h-0 items-stretch"
+          className="h-full min-h-0 items-stretch"
           style={{ "--sidebar-width": "13rem" } as CSSProperties}
         >
           <OrganizationSettingsSidebar onViewChange={setView} view={view} />
           <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
             <header className="shrink-0 border-b px-4 py-3 pr-12 md:px-6">
-              <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground text-sm">
-                  Organization settings
-                </span>
-                <ChevronRight className="size-3.5 text-muted-foreground" />
-                <DialogTitle>{activeView.label}</DialogTitle>
-              </div>
+              <DialogTitle>{activeView.label}</DialogTitle>
               <DialogDescription>{activeView.description}</DialogDescription>
             </header>
             <OrganizationSettingsMobileNav onViewChange={setView} view={view} />
@@ -157,12 +151,14 @@ function OrganizationSettingsSidebar({
   view: OrganizationSettingsView
 }) {
   return (
-    <Sidebar className="hidden border-r md:flex" collapsible="none">
-      <SidebarHeader className="h-16 justify-center border-b px-4">
-        <OrganizationView hideRole hideSlug size="sm" />
+    <Sidebar className="hidden h-full border-r md:flex" collapsible="none">
+      <SidebarHeader>
+        <div className="flex h-12 items-center gap-2 p-2">
+          <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
+        </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup className="p-2">
+        <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {organizationViews.map((item) => (
