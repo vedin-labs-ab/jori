@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action, internalQuery } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { readUserEmail, readUserName } from "../access/users"
+import { readUserProfile } from "../access/users"
 import { ensureCurrentPersonFromAction } from "../persons/account"
 import { createPersonActor } from "../shared/actor"
 import { decideApproval } from "./runtime"
@@ -33,10 +33,7 @@ export const decide = action({
     )
     const result = await decideApproval(ctx, {
       approval: target,
-      decidedBy: createPersonActor(personId, {
-        email: readUserEmail(identity),
-        name: readUserName(identity),
-      }),
+      decidedBy: createPersonActor(personId, readUserProfile(identity)),
       decision: args.decision,
     })
 

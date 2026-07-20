@@ -7,7 +7,7 @@ import {
   mutation,
 } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
-import { readUserEmail, readUserName } from "../../access/users"
+import { readUserProfile } from "../../access/users"
 import { ensureCurrentPerson } from "../../persons/account"
 import { createPersonActor } from "../../shared/actor"
 import { integrationValidator } from "../../shared/integrations"
@@ -192,10 +192,7 @@ async function readClaimActor(
   const personId = await ensureCurrentPerson(ctx, offer.organizationId)
 
   return {
-    actor: createPersonActor(personId, {
-      email: readUserEmail(identity),
-      name: readUserName(identity),
-    }),
+    actor: createPersonActor(personId, readUserProfile(identity)),
     personId,
   }
 }
