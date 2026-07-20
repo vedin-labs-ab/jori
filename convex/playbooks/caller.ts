@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { compactRecord } from "../../contracts/json"
 import { type DeliveryChoice } from "../../contracts/playbooks/delivery"
 import { type PlaybookOptionValues } from "../../contracts/playbooks/options"
-import { readClerkUserEmail, readClerkUserName } from "../access/users"
+import { readUserEmail, readUserName } from "../access/users"
 import { type Integration, integrationValidator } from "../shared/integrations"
 import { type PlaybookPlanArgs } from "./plan"
 import { deliveryChoiceValidator } from "./schema"
@@ -48,7 +48,7 @@ export function callerRecipient(identity: {
   name?: string
 }): PlaybookPlanArgs["recipient"] {
   return compactRecord({
-    email: readClerkUserEmail(identity),
-    name: readClerkUserName(identity),
+    email: readUserEmail(identity),
+    name: readUserName(identity),
   })
 }

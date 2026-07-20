@@ -3,7 +3,7 @@ import { normalizeWebsiteAddress } from "../../contracts/website"
 import { internal } from "../_generated/api"
 import { type ActionCtx, action } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { requireEnvironmentVariable } from "../shared/environment"
+import { authComponent, createAuth } from "../auth"
 
 // Marks onboarding as seen (so the welcome flow never reopens) and, when a
 // website is provided, kicks off discovery for a proposed organization profile.
@@ -12,7 +12,7 @@ export const complete = action({
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
     const website = normalizeWebsite(args.website)
-    await patchClerkMetadata(args.organizationId, { onboarded: true })
+    await markOnboarded(ctx, args.organizationId)
 
     if (website !== undefined) {
       await startDiscovery(ctx, args.organizationId, website)
@@ -61,33 +61,11 @@ function normalizeWebsite(website: string | undefined) {
   return normalizeWebsiteAddress(trimmed, "website")
 }
 
-async function patchClerkMetadata(
-  organizationId: string,
-  metadata: { onboarded?: boolean }
-) {
-  const clerkSecretKey = requireEnvironmentVariable("CLERK_SECRET_KEY")
+async function markOnboarded(ctx: ActionCtx, organizationId: string) {
+  const { auth, headers } = await authComponent.getAuth(createAuth, ctx)
 
-  const response = await fetch(
-    `https://api.clerk.com/v1/organizations/${organizationId}/metadata`,
-    {
-      method: "PATCH",
-      headers: {
-        authorization: `Bearer ${clerkSecretKey}`,
-        "content-type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify({ public_metadata: cleanMetadata(metadata) }),
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error("Could not update the organization.")
-  }
-}
-
-function cleanMetadata(metadata: { onboarded?: boolean }) {
-  return {
-    ...(metadata.onboarded === undefined
-      ? {}
-      : { onboarded: metadata.onboarded }),
-  }
+  await auth.api.updateOrganization({
+    body: { organizationId, data: { metadata: { onboarded: true } } },
+    headers,
+  })
 }

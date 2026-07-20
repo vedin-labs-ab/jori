@@ -8,7 +8,7 @@ import {
   type MutationCtx,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { resolveCurrentPerson } from "../persons/clerk"
+import { resolveCurrentPerson } from "../persons/account"
 import {
   type Integration,
   integrations,

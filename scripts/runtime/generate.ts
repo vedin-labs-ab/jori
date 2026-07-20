@@ -201,9 +201,6 @@ function isExactPackageVersion(version: string) {
 
 function readArtifactThemeCss() {
   return readAppSource("styles.css")
-    .split("\n")
-    .filter((line) => !line.includes("@clerk/ui"))
-    .join("\n")
 }
 
 function readArtifactShellStyle() {

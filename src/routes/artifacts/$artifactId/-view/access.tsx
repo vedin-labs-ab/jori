@@ -1,9 +1,9 @@
-import { useAuth, useOrganization } from "@clerk/tanstack-react-start"
 import { useConvexAuth } from "convex/react"
 import { type GenericId } from "convex/values"
 import { lazy, Suspense } from "react"
 import { ArtifactShareView } from "@/shared/artifacts/share"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
+import { authClient } from "@/shared/session/auth"
 
 /** Lazy so anonymous share-link visitors do not download the member console
  *  graph after the session check establishes that there is no member. */
@@ -20,12 +20,14 @@ export function ArtifactAccess({
   artifactId: string
   secret: string | null
 }) {
-  const { isLoaded: isAuthLoaded, isSignedIn } = useAuth()
+  const { data: session, isPending: isSessionPending } = authClient.useSession()
   const { isAuthenticated, isLoading: isConvexLoading } = useConvexAuth()
-  const { isLoaded: isOrganizationLoaded, organization } = useOrganization()
+  const { data: organization, isPending: isOrganizationPending } =
+    authClient.useActiveOrganization()
+  const isSignedIn = session !== null && session !== undefined
   const loading = <FullscreenSkeletonLoader aria-label="Loading artifact" />
 
-  if (!isAuthLoaded) {
+  if (isSessionPending) {
     return loading
   }
 
@@ -35,7 +37,7 @@ export function ArtifactAccess({
 
   if (
     secret !== null &&
-    (isConvexLoading || (isSignedIn && !isOrganizationLoaded))
+    (isConvexLoading || (isSignedIn && isOrganizationPending))
   ) {
     return loading
   }

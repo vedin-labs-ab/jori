@@ -1,7 +1,7 @@
 import { type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
-import { resolveCurrentPerson } from "../persons/clerk"
+import { resolveCurrentPerson } from "../persons/account"
 import {
   type ExecutionPrincipal,
   executionPrincipalPersonId,

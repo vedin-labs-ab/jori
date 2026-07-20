@@ -8,11 +8,11 @@ import {
   query,
 } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
-import { requireClerkUserId } from "../access/users"
+import { requireUserId } from "../access/users"
 import { listInactiveAccessIntegrations } from "../automations/access"
 import { createAutomation } from "../automations/lifecycle"
 import * as automationSchema from "../automations/schema"
-import { ensureCurrentPerson } from "../persons/clerk"
+import { ensureCurrentPerson } from "../persons/account"
 import { resolvePersonByIdentity } from "../persons/identity/links"
 import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
@@ -70,8 +70,8 @@ export const list = query({
 
     const ownerId = await resolvePersonByIdentity(ctx, {
       organizationId: args.organizationId,
-      provider: "clerk",
-      externalId: requireClerkUserId(access.identity),
+      provider: "auth",
+      externalId: requireUserId(access.identity),
     })
     const connected = await connectedIntegrations(ctx, {
       ownerId,

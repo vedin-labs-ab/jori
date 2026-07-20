@@ -67,9 +67,9 @@ export function DataSection() {
           integration. Revoke a grant and the access is gone.
         </Fact>
         <Fact term="A short list of subprocessors">
-          Convex stores the data. Trigger.dev executes runs. Clerk handles
-          sign-in. Model calls go through OpenRouter to the model provider.
-          That's the list.
+          Convex stores the data, including sign-in sessions. Trigger.dev
+          executes runs. Resend delivers invitation emails. Model calls go
+          through OpenRouter to the model provider. That's the list.
         </Fact>
         <Fact term="Never used for training">
           Your data is never used to train models.

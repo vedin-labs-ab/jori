@@ -3,7 +3,7 @@ import { type Infer, v } from "convex/values"
 import { type Integration } from "../../shared/integrations"
 
 export const identityProvider = v.union(
-  v.literal("clerk"),
+  v.literal("auth"),
   v.literal("email"),
   v.literal("github"),
   v.literal("google"),

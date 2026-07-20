@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RunsRouteImport } from './routes/runs'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -21,15 +22,21 @@ import { Route as ContextRouteImport } from './routes/context'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as BillingRouteImport } from './routes/billing'
 import { Route as AutomationsRouteImport } from './routes/automations'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtifactsRouteImport } from './routes/artifacts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
+import { Route as SettingsViewRouteImport } from './routes/settings/$view'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
+import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
@@ -44,6 +51,11 @@ const TermsRoute = TermsRouteImport.update({
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RunsRoute = RunsRouteImport.update({
@@ -91,6 +103,11 @@ const AutomationsRoute = AutomationsRouteImport.update({
   path: '/automations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArtifactsRoute = ArtifactsRouteImport.update({
   id: '/artifacts',
   path: '/artifacts',
@@ -100,6 +117,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
   id: '/',
@@ -116,6 +138,11 @@ const ArtifactsIndexRoute = ArtifactsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ArtifactsRoute,
 } as any)
+const SettingsViewRoute = SettingsViewRouteImport.update({
+  id: '/$view',
+  path: '/$view',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const ContextWorkstreamsRoute = ContextWorkstreamsRouteImport.update({
   id: '/workstreams',
   path: '/workstreams',
@@ -125,6 +152,16 @@ const ContextPlacesRoute = ContextPlacesRouteImport.update({
   id: '/places',
   path: '/places',
   getParentRoute: () => ContextRoute,
+} as any)
+const AuthSignOutRoute = AuthSignOutRouteImport.update({
+  id: '/sign-out',
+  path: '/sign-out',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AuthRoute,
 } as any)
 const ArtifactsArtifactIdIndexRoute =
   ArtifactsArtifactIdIndexRouteImport.update({
@@ -137,10 +174,16 @@ const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
   path: '/offers/$token',
   getParentRoute: () => IntegrationsRoute,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/artifacts': typeof ArtifactsRouteWithChildren
+  '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/billing': typeof BillingRoute
   '/console': typeof ConsoleRoute
@@ -150,19 +193,26 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/skills': typeof SkillsRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/settings/$view': typeof SettingsViewRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/settings/': typeof SettingsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/billing': typeof BillingRoute
   '/console': typeof ConsoleRoute
@@ -173,11 +223,16 @@ export interface FileRoutesByTo {
   '/skills': typeof SkillsRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/settings/$view': typeof SettingsViewRoute
   '/artifacts': typeof ArtifactsIndexRoute
   '/context': typeof ContextIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
+  '/settings': typeof SettingsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
 }
@@ -185,6 +240,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/artifacts': typeof ArtifactsRouteWithChildren
+  '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/billing': typeof BillingRoute
   '/console': typeof ConsoleRoute
@@ -194,14 +250,20 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/skills': typeof SkillsRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/settings/$view': typeof SettingsViewRoute
   '/artifacts/': typeof ArtifactsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/settings/': typeof SettingsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
 }
@@ -210,6 +272,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/artifacts'
+    | '/auth'
     | '/automations'
     | '/billing'
     | '/console'
@@ -219,19 +282,26 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/runs'
+    | '/settings'
     | '/skills'
     | '/terms'
     | '/trust'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
     | '/context/places'
     | '/context/workstreams'
+    | '/settings/$view'
     | '/artifacts/'
     | '/context/'
     | '/integrations/'
+    | '/settings/'
+    | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/artifacts/$artifactId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/automations'
     | '/billing'
     | '/console'
@@ -242,17 +312,23 @@ export interface FileRouteTypes {
     | '/skills'
     | '/terms'
     | '/trust'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
     | '/context/places'
     | '/context/workstreams'
+    | '/settings/$view'
     | '/artifacts'
     | '/context'
     | '/integrations'
+    | '/settings'
+    | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/artifacts/$artifactId'
   id:
     | '__root__'
     | '/'
     | '/artifacts'
+    | '/auth'
     | '/automations'
     | '/billing'
     | '/console'
@@ -262,14 +338,20 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/runs'
+    | '/settings'
     | '/skills'
     | '/terms'
     | '/trust'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
     | '/context/places'
     | '/context/workstreams'
+    | '/settings/$view'
     | '/artifacts/'
     | '/context/'
     | '/integrations/'
+    | '/settings/'
+    | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/artifacts/$artifactId/'
   fileRoutesById: FileRoutesById
@@ -277,6 +359,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArtifactsRoute: typeof ArtifactsRouteWithChildren
+  AuthRoute: typeof AuthRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
   BillingRoute: typeof BillingRoute
   ConsoleRoute: typeof ConsoleRoute
@@ -286,9 +369,11 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RunsRoute: typeof RunsRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
   SkillsRoute: typeof SkillsRoute
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -312,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/skills'
       fullPath: '/skills'
       preLoaderRoute: typeof SkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/runs': {
@@ -377,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/artifacts': {
       id: '/artifacts'
       path: '/artifacts'
@@ -390,6 +489,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/integrations/': {
       id: '/integrations/'
@@ -412,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtifactsIndexRouteImport
       parentRoute: typeof ArtifactsRoute
     }
+    '/settings/$view': {
+      id: '/settings/$view'
+      path: '/$view'
+      fullPath: '/settings/$view'
+      preLoaderRoute: typeof SettingsViewRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/context/workstreams': {
       id: '/context/workstreams'
       path: '/workstreams'
@@ -426,6 +539,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContextPlacesRouteImport
       parentRoute: typeof ContextRoute
     }
+    '/auth/sign-out': {
+      id: '/auth/sign-out'
+      path: '/sign-out'
+      fullPath: '/auth/sign-out'
+      preLoaderRoute: typeof AuthSignOutRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/artifacts/$artifactId/': {
       id: '/artifacts/$artifactId/'
       path: '/$artifactId'
@@ -439,6 +566,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/integrations/offers/$token'
       preLoaderRoute: typeof IntegrationsOffersTokenRouteImport
       parentRoute: typeof IntegrationsRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -456,6 +590,18 @@ const ArtifactsRouteChildren: ArtifactsRouteChildren = {
 const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
   ArtifactsRouteChildren,
 )
+
+interface AuthRouteChildren {
+  AuthSignInRoute: typeof AuthSignInRoute
+  AuthSignOutRoute: typeof AuthSignOutRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthSignInRoute: AuthSignInRoute,
+  AuthSignOutRoute: AuthSignOutRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface ContextRouteChildren {
   ContextPlacesRoute: typeof ContextPlacesRoute
@@ -486,9 +632,24 @@ const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
   IntegrationsRouteChildren,
 )
 
+interface SettingsRouteChildren {
+  SettingsViewRoute: typeof SettingsViewRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsViewRoute: SettingsViewRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArtifactsRoute: ArtifactsRouteWithChildren,
+  AuthRoute: AuthRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
   BillingRoute: BillingRoute,
   ConsoleRoute: ConsoleRoute,
@@ -498,9 +659,11 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RunsRoute: RunsRoute,
+  SettingsRoute: SettingsRouteWithChildren,
   SkillsRoute: SkillsRoute,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

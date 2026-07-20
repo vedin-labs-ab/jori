@@ -12,7 +12,7 @@ const artifactFrameSandbox =
 type ArtifactSession = { token: string }
 
 /** How the frame gets a session is the caller's edge: members mint through
- *  the Clerk-authed action, share links exchange their secret. */
+ *  the member-authed action, share links exchange their secret. */
 type MintArtifactSession = () => Promise<ArtifactSession>
 
 export function ArtifactFrame({

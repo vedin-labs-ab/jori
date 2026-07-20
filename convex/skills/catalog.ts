@@ -8,7 +8,7 @@ import {
   query,
 } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
-import { ensureCurrentPerson } from "../persons/clerk"
+import { ensureCurrentPerson } from "../persons/account"
 import { integrationValidator } from "../shared/integrations"
 import {
   normalizeSkillInput,

@@ -8,8 +8,8 @@ import {
   query,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { readClerkUserEmail, readClerkUserName } from "../access/users"
-import { ensureCurrentPerson } from "../persons/clerk"
+import { readUserEmail, readUserName } from "../access/users"
+import { ensureCurrentPerson } from "../persons/account"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { factsEqual, type OrganizationFacts, unique } from "./facts"
@@ -49,8 +49,8 @@ export const approve = mutation({
       proposed: undefined,
       approvedAt: now,
       approvedBy: createPersonActor(personId, {
-        email: readClerkUserEmail(identity),
-        name: readClerkUserName(identity),
+        email: readUserEmail(identity),
+        name: readUserName(identity),
       }),
       updatedAt: now,
     })

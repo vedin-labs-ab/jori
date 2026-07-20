@@ -5,7 +5,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { action, internalAction } from "../_generated/server"
-import { ensureCurrentPersonFromAction } from "../persons/clerk"
+import { ensureCurrentPersonFromAction } from "../persons/account"
 import {
   type PublishArtifactArgs,
   type PublishResult,

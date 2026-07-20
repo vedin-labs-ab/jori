@@ -7,8 +7,8 @@ import {
   mutation,
 } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
-import { readClerkUserEmail, readClerkUserName } from "../../access/users"
-import { ensureCurrentPerson } from "../../persons/clerk"
+import { readUserEmail, readUserName } from "../../access/users"
+import { ensureCurrentPerson } from "../../persons/account"
 import { createPersonActor } from "../../shared/actor"
 import { integrationValidator } from "../../shared/integrations"
 import {
@@ -193,8 +193,8 @@ async function readClaimActor(
 
   return {
     actor: createPersonActor(personId, {
-      email: readClerkUserEmail(identity),
-      name: readClerkUserName(identity),
+      email: readUserEmail(identity),
+      name: readUserName(identity),
     }),
     personId,
   }

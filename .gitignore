@@ -17,7 +17,5 @@ todos.json
 # typescript
 *.tsbuildinfo
 
-# clerk configuration (can include secrets)
-.clerk
 .gstack
 .impeccable

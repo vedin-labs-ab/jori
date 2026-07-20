@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 
-const baseRequiredEnv = ["CLERK_JWT_ISSUER_DOMAIN"] as const
+const baseRequiredEnv = [] as const
 const convexDeploymentEnv = "CONVEX_DEPLOYMENT"
 
 const command = process.argv.slice(2)
@@ -53,12 +53,6 @@ function resolveEnv() {
   }
 
   Object.assign(env, process.env)
-
-  if (isEmpty(env.CLERK_JWT_ISSUER_DOMAIN)) {
-    env.CLERK_JWT_ISSUER_DOMAIN = inferClerkIssuerDomain(
-      env.VITE_CLERK_PUBLISHABLE_KEY
-    )
-  }
 
   return { env, sources }
 }
@@ -170,31 +164,6 @@ function parseEnvValue(value: string) {
   }
 
   return value
-}
-
-function inferClerkIssuerDomain(publishableKey: string | undefined) {
-  if (publishableKey === undefined || publishableKey.trim() === "") {
-    return undefined
-  }
-
-  const match = publishableKey.match(/^pk_(?:test|live)_(.+)$/)
-
-  if (match === null) {
-    return undefined
-  }
-
-  const encodedFrontendApi = match[1]
-  const decodedFrontendApi = Buffer.from(encodedFrontendApi, "base64")
-    .toString("utf8")
-    .replace(/\$$/, "")
-
-  if (decodedFrontendApi.trim() === "" || /\s/.test(decodedFrontendApi)) {
-    return undefined
-  }
-
-  return decodedFrontendApi.startsWith("https://")
-    ? decodedFrontendApi
-    : `https://${decodedFrontendApi}`
 }
 
 function unique(values: Array<string | null>) {

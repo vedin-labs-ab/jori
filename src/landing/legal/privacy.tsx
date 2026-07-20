@@ -18,7 +18,7 @@ const sections: readonly LegalSection[] = [
   {
     heading: "Subprocessors",
     paragraphs: [
-      "Convex stores the data. Trigger.dev executes runs. Clerk handles sign-in. Model calls go through OpenRouter to the model provider.",
+      "Convex stores the data, including sign-in sessions. Trigger.dev executes runs. Resend delivers invitation emails. Model calls go through OpenRouter to the model provider.",
     ],
   },
   {

@@ -5,24 +5,26 @@ import { ArtifactAccess } from "./access"
 
 const { session } = vi.hoisted(() => ({
   session: {
-    isAuthLoaded: true,
     isConvexAuthenticated: true,
     isConvexLoading: false,
-    isOrganizationLoaded: true,
+    isOrganizationPending: false,
+    isSessionPending: false,
     isSignedIn: true,
     organization: { id: "organization" } as { id: string } | null,
   },
 }))
 
-vi.mock("@clerk/tanstack-react-start", () => ({
-  useAuth: () => ({
-    isLoaded: session.isAuthLoaded,
-    isSignedIn: session.isSignedIn,
-  }),
-  useOrganization: () => ({
-    isLoaded: session.isOrganizationLoaded,
-    organization: session.organization,
-  }),
+vi.mock("@/shared/session/auth", () => ({
+  authClient: {
+    useSession: () => ({
+      data: session.isSignedIn ? { user: { email: "sam@example.com" } } : null,
+      isPending: session.isSessionPending,
+    }),
+    useActiveOrganization: () => ({
+      data: session.organization,
+      isPending: session.isOrganizationPending,
+    }),
+  },
 }))
 
 vi.mock("convex/react", () => ({
@@ -45,10 +47,10 @@ vi.mock("@/console/artifacts/view", () => ({
 }))
 
 beforeEach(() => {
-  session.isAuthLoaded = true
   session.isConvexAuthenticated = true
   session.isConvexLoading = false
-  session.isOrganizationLoaded = true
+  session.isOrganizationPending = false
+  session.isSessionPending = false
   session.isSignedIn = true
   session.organization = { id: "organization" }
 })

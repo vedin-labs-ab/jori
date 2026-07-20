@@ -1,68 +1,43 @@
-type ClerkIdentity = {
+/** Claim readers for the Convex identity minted by Better Auth. The claim
+ *  set is owned by `definePayload` in convex/auth.ts. */
+type Identity = {
   email?: string
   name?: string
   subject?: string
 }
 
-export function getClerkUserId(identity: ClerkIdentity) {
-  return normalizeClerkUserId(identity.subject)
+export function getUserId(identity: Identity) {
+  return normalizeIdentityString(identity.subject)
 }
 
-export function requireClerkUserId(identity: ClerkIdentity) {
-  const userId = getClerkUserId(identity)
+export function requireUserId(identity: Identity) {
+  const userId = getUserId(identity)
 
   if (userId === undefined) {
-    throw new Error("Authenticated Clerk user is missing a user ID")
+    throw new Error("Authenticated user is missing a user ID")
   }
 
   return userId
 }
 
-export function readClerkUserEmail(identity: ClerkIdentity) {
+export function readUserEmail(identity: Identity) {
   return normalizeIdentityString(identity.email)
 }
 
-export function readClerkUserName(identity: ClerkIdentity) {
+export function readUserName(identity: Identity) {
   return normalizeIdentityString(identity.name)
 }
 
-export function readClerkOrganizationId(identity: Record<string, unknown>) {
-  const candidates = [
-    readNestedIdentityString(identity, "o", "id"),
-    identity["o.id"],
-    identity.org,
-    identity.orgId,
-    identity.org_id,
-    identity.organizationId,
-    identity.organization_id,
-    identity["https://clerk.com/org_id"],
-  ]
+export function readOrganizationClaim(identity: Record<string, unknown>) {
+  const organizationId = identity.org
 
-  return candidates.find((candidate) => typeof candidate === "string")
-}
-
-function normalizeClerkUserId(userId: string | undefined) {
-  return normalizeIdentityString(userId)
+  return typeof organizationId === "string"
+    ? normalizeIdentityString(organizationId)
+    : undefined
 }
 
 function normalizeIdentityString(value: string | undefined) {
   const normalized = value?.trim()
 
   return normalized === "" ? undefined : normalized
-}
-
-function readNestedIdentityString(
-  identity: Record<string, unknown>,
-  key: string,
-  nestedKey: string
-) {
-  const value = identity[key]
-
-  if (typeof value !== "object" || value === null) {
-    return undefined
-  }
-
-  const nestedValue = (value as Record<string, unknown>)[nestedKey]
-
-  return typeof nestedValue === "string" ? nestedValue : undefined
 }

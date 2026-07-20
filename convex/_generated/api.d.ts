@@ -8,9 +8,8 @@
  * @module
  */
 
-import type * as access_clerk from "../access/clerk.js";
 import type * as access_index from "../access/index.js";
-import type * as access_profile from "../access/profile.js";
+import type * as access_invitation from "../access/invitation.js";
 import type * as access_users from "../access/users.js";
 import type * as approvals_actors from "../approvals/actors.js";
 import type * as approvals_approvals from "../approvals/approvals.js";
@@ -62,6 +61,7 @@ import type * as artifacts_tools_prompt from "../artifacts/tools/prompt.js";
 import type * as assets_data from "../assets/data.js";
 import type * as assets_mcp from "../assets/mcp.js";
 import type * as assets_read from "../assets/read.js";
+import type * as auth from "../auth.js";
 import type * as automations_access from "../automations/access.js";
 import type * as automations_connections from "../automations/connections.js";
 import type * as automations_console from "../automations/console.js";
@@ -325,7 +325,7 @@ import type * as organization_watch from "../organization/watch.js";
 import type * as permissions_read from "../permissions/read.js";
 import type * as permissions_reference from "../permissions/reference.js";
 import type * as permissions_tools from "../permissions/tools.js";
-import type * as persons_clerk from "../persons/clerk.js";
+import type * as persons_account from "../persons/account.js";
 import type * as persons_data from "../persons/data.js";
 import type * as persons_email from "../persons/email.js";
 import type * as persons_identity_actors from "../persons/identity/actors.js";
@@ -520,6 +520,7 @@ import type * as shared_http_request from "../shared/http/request.js";
 import type * as shared_http_response from "../shared/http/response.js";
 import type * as shared_input from "../shared/input.js";
 import type * as shared_integrations from "../shared/integrations.js";
+import type * as shared_lazy from "../shared/lazy.js";
 import type * as shared_tools_labels from "../shared/tools/labels.js";
 import type * as shared_tools_names from "../shared/tools/names.js";
 import type * as skills_catalog from "../skills/catalog.js";
@@ -541,9 +542,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "access/clerk": typeof access_clerk;
   "access/index": typeof access_index;
-  "access/profile": typeof access_profile;
+  "access/invitation": typeof access_invitation;
   "access/users": typeof access_users;
   "approvals/actors": typeof approvals_actors;
   "approvals/approvals": typeof approvals_approvals;
@@ -595,6 +595,7 @@ declare const fullApi: ApiFromModules<{
   "assets/data": typeof assets_data;
   "assets/mcp": typeof assets_mcp;
   "assets/read": typeof assets_read;
+  auth: typeof auth;
   "automations/access": typeof automations_access;
   "automations/connections": typeof automations_connections;
   "automations/console": typeof automations_console;
@@ -858,7 +859,7 @@ declare const fullApi: ApiFromModules<{
   "permissions/read": typeof permissions_read;
   "permissions/reference": typeof permissions_reference;
   "permissions/tools": typeof permissions_tools;
-  "persons/clerk": typeof persons_clerk;
+  "persons/account": typeof persons_account;
   "persons/data": typeof persons_data;
   "persons/email": typeof persons_email;
   "persons/identity/actors": typeof persons_identity_actors;
@@ -1053,6 +1054,7 @@ declare const fullApi: ApiFromModules<{
   "shared/http/response": typeof shared_http_response;
   "shared/input": typeof shared_input;
   "shared/integrations": typeof shared_integrations;
+  "shared/lazy": typeof shared_lazy;
   "shared/tools/labels": typeof shared_tools_labels;
   "shared/tools/names": typeof shared_tools_names;
   "skills/catalog": typeof skills_catalog;
@@ -1094,4 +1096,7 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  betterAuth: import("@convex-dev/better-auth/_generated/component.js").ComponentApi<"betterAuth">;
+  resend: import("@convex-dev/resend/_generated/component.js").ComponentApi<"resend">;
+};

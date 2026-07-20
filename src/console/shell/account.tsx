@@ -1,4 +1,4 @@
-import { SignOutButton, useClerk, useUser } from "@clerk/tanstack-react-start"
+import { Link } from "@tanstack/react-router"
 import { ChevronsUpDown, LogOut, ShieldUser } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -17,20 +17,33 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { authClient } from "@/shared/session/auth"
 
 export function SidebarUserButton() {
   const { isMobile } = useSidebar()
-  const { user } = useUser()
-  const { openUserProfile } = useClerk()
+  const { data: session } = authClient.useSession()
+  const user = session?.user
 
-  if (!user) {
+  if (user === undefined) {
     return <Skeleton className="h-12 w-full rounded-md" />
   }
 
-  const initials = `${user.firstName?.at(0) ?? ""}${user.lastName?.at(0) ?? ""}`
-  const name = user.fullName ?? user.username ?? "Account"
-  const email = user.primaryEmailAddress?.emailAddress ?? ""
-  const fallback = initials || name.at(0)?.toUpperCase() || "?"
+  const name = user.name || "Account"
+  const email = user.email
+  const fallback = name.at(0)?.toUpperCase() ?? "?"
+  const identity = (
+    <>
+      <UserAvatar
+        alt={`${name}'s avatar`}
+        fallback={fallback}
+        src={user.image ?? undefined}
+      />
+      <div className="grid flex-1 text-left text-sm leading-tight">
+        <span className="truncate font-medium">{name}</span>
+        {email ? <span className="truncate text-xs">{email}</span> : null}
+      </div>
+    </>
+  )
 
   return (
     <SidebarMenu>
@@ -41,17 +54,7 @@ export function SidebarUserButton() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               size="lg"
             >
-              <UserAvatar
-                alt={`${name}'s avatar`}
-                fallback={fallback}
-                src={user.imageUrl}
-              />
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{name}</span>
-                {email ? (
-                  <span className="truncate text-xs">{email}</span>
-                ) : null}
-              </div>
+              {identity}
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -63,43 +66,25 @@ export function SidebarUserButton() {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <UserAvatar
-                  alt={`${name}'s avatar`}
-                  fallback={fallback}
-                  src={user.imageUrl}
-                />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{name}</span>
-                  {email ? (
-                    <span className="truncate text-xs">{email}</span>
-                  ) : null}
-                </div>
+                {identity}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() =>
-                  openUserProfile({
-                    appearance: {
-                      elements: {
-                        profileSection__connectedAccounts: "!hidden",
-                      },
-                    },
-                  })
-                }
-              >
-                <ShieldUser />
-                Account
+              <DropdownMenuItem asChild>
+                <Link params={{ view: "account" }} to="/settings/$view">
+                  <ShieldUser />
+                  Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <SignOutButton>
-              <DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/auth/sign-out">
                 <LogOut />
                 Sign out
-              </DropdownMenuItem>
-            </SignOutButton>
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
@@ -114,7 +99,7 @@ function UserAvatar({
 }: {
   alt: string
   fallback: string
-  src: string
+  src: string | undefined
 }) {
   return (
     <Avatar className="h-8 w-8 rounded-lg">

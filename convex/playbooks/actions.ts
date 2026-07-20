@@ -11,7 +11,7 @@ import {
   automationType,
   triggerInput,
 } from "../automations/schema"
-import { ensureCurrentPersonFromAction } from "../persons/clerk"
+import { ensureCurrentPersonFromAction } from "../persons/account"
 import { scopeValidator } from "../shared/audience"
 import {
   callerRecipient,

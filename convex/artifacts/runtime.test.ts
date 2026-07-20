@@ -49,7 +49,7 @@ test("generates the artifact UI kit from Milo source", () => {
     '@import "tailwindcss";'
   )
   expect(runtimeAssets.artifact.template["src/milo.css"]).not.toContain(
-    "@clerk/ui"
+    "better-auth"
   )
   expect(artifactBiomeConfig().css?.parser?.tailwindDirectives).toBe(true)
 })

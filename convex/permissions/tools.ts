@@ -18,7 +18,7 @@ import {
   query,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { ensureCurrentPerson } from "../persons/clerk"
+import { ensureCurrentPerson } from "../persons/account"
 import { listPermissionOverrides } from "./read"
 
 const permissionModeValidator = v.union(

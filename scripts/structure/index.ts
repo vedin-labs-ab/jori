@@ -44,6 +44,7 @@ const skippedDirectories = [
   "dist",
   "node_modules",
   "convex/_generated",
+  "src/components/auth",
   "src/components/ui",
   "src/routes",
 ]
