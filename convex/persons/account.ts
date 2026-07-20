@@ -1,18 +1,14 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
-import { type Id } from "../_generated/dataModel"
 import {
   type ActionCtx,
   internalMutation,
   type MutationCtx,
+  mutation,
   type QueryCtx,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import {
-  readClerkUserEmail,
-  readClerkUserName,
-  requireClerkUserId,
-} from "../access/users"
+import { readUserEmail, readUserName, requireUserId } from "../access/users"
 import {
   linkIdentityToPerson,
   resolveIdentity,
@@ -20,12 +16,7 @@ import {
 } from "./identity/links"
 import { updatePersonTimezone } from "./profile/timezone"
 
-const verifiedClerkEmailValidator = v.object({
-  externalId: v.string(),
-  email: v.string(),
-})
-
-type ClerkProfile = {
+type AccountProfile = {
   email?: string
   name?: string
 }
@@ -36,11 +27,11 @@ export async function ensureCurrentPerson(
 ) {
   const identity = await requireOrganizationAccess(ctx, organizationId)
 
-  return await ensureClerkPerson(ctx, {
+  return await ensureAccountPerson(ctx, {
     organizationId,
-    clerkSubject: requireClerkUserId(identity),
-    email: readClerkUserEmail(identity),
-    name: readClerkUserName(identity),
+    userId: requireUserId(identity),
+    email: readUserEmail(identity),
+    name: readUserName(identity),
   })
 }
 
@@ -50,11 +41,11 @@ export async function ensureCurrentPersonFromAction(
 ) {
   const identity = await requireOrganizationAccess(ctx, organizationId)
 
-  return await ctx.runMutation(internal.persons.clerk.ensure, {
+  return await ctx.runMutation(internal.persons.account.ensure, {
     organizationId,
-    clerkSubject: requireClerkUserId(identity),
-    email: readClerkUserEmail(identity),
-    name: readClerkUserName(identity),
+    userId: requireUserId(identity),
+    email: readUserEmail(identity),
+    name: readUserName(identity),
   })
 }
 
@@ -65,8 +56,8 @@ export async function resolveCurrentPerson(
   const identity = await requireOrganizationAccess(ctx, organizationId)
   const personId = await resolvePersonByIdentity(ctx, {
     organizationId,
-    provider: "clerk",
-    externalId: requireClerkUserId(identity),
+    provider: "auth",
+    externalId: requireUserId(identity),
   })
 
   if (personId === undefined) {
@@ -76,17 +67,17 @@ export async function resolveCurrentPerson(
   return personId
 }
 
-export async function ensureClerkPerson(
+export async function ensureAccountPerson(
   ctx: MutationCtx,
   args: {
     organizationId: string
-    clerkSubject: string
-  } & ClerkProfile
+    userId: string
+  } & AccountProfile
 ) {
   return await resolveIdentity(ctx, {
     organizationId: args.organizationId,
-    provider: "clerk",
-    externalId: args.clerkSubject,
+    provider: "auth",
+    externalId: args.userId,
     method: "oauth",
     email: args.email,
     name: args.name,
@@ -96,56 +87,50 @@ export async function ensureClerkPerson(
 export const ensure = internalMutation({
   args: {
     organizationId: v.string(),
-    clerkSubject: v.string(),
+    userId: v.string(),
     email: v.optional(v.string()),
     name: v.optional(v.string()),
   },
   returns: v.id("persons"),
   handler: async (ctx, args) => {
-    return await ensureClerkPerson(ctx, args)
+    return await ensureAccountPerson(ctx, args)
   },
 })
 
-export const sync = internalMutation({
+/** Console session bootstrap: materializes the signed-in member as a person,
+ *  records their timezone, and links their verified sign-in email so observed
+ *  integration identities converge on the same person. */
+export const sync = mutation({
   args: {
     organizationId: v.string(),
-    clerkSubject: v.string(),
-    email: v.optional(v.string()),
-    name: v.optional(v.string()),
-    emails: v.array(verifiedClerkEmailValidator),
     timezone: v.optional(v.string()),
   },
-  returns: v.object({
-    personId: v.id("persons"),
-    synced: v.number(),
-  }),
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const personId = await ensureClerkPerson(ctx, args)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const email = readUserEmail(identity)
+    const personId = await ensureAccountPerson(ctx, {
+      organizationId: args.organizationId,
+      userId: requireUserId(identity),
+      email,
+      name: readUserName(identity),
+    })
 
     if (args.timezone !== undefined) {
       await updatePersonTimezone(ctx, personId, args.timezone)
     }
 
-    for (const email of args.emails) {
-      await linkVerifiedEmail(ctx, args.organizationId, personId, email.email)
+    if (email !== undefined) {
+      await linkIdentityToPerson(ctx, {
+        organizationId: args.organizationId,
+        personId,
+        provider: "email",
+        externalId: email,
+        method: "oauth",
+        email,
+      })
     }
 
-    return { personId, synced: args.emails.length }
+    return null
   },
 })
-
-async function linkVerifiedEmail(
-  ctx: MutationCtx,
-  organizationId: string,
-  personId: Id<"persons">,
-  email: string
-) {
-  await linkIdentityToPerson(ctx, {
-    organizationId,
-    personId,
-    provider: "email",
-    externalId: email,
-    method: "oauth",
-    email,
-  })
-}

@@ -1,8 +1,8 @@
-import { SignUpButton, useAuth } from "@clerk/tanstack-react-start"
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { authClient } from "@/shared/session/auth"
 
 // Every marketing page ends on the same handshake.
 export function Closing({ lede }: { lede: string }) {
@@ -23,13 +23,14 @@ export function Closing({ lede }: { lede: string }) {
   )
 }
 
-// The one call to action, auth-aware: strangers sign up, members go to the
-// console. `prominent` bumps the size for hero and closing placements.
+// The one call to action, auth-aware: strangers sign in with a work account,
+// members go to the console. `prominent` bumps the size for hero and closing
+// placements.
 export function GetStarted({ prominent = false }: { prominent?: boolean }) {
-  const { isLoaded, isSignedIn } = useAuth()
+  const { data: session, isPending } = authClient.useSession()
   const className = cn(prominent && "h-10 px-4 text-sm")
 
-  if (isLoaded && isSignedIn) {
+  if (session !== null && session !== undefined) {
     return (
       <Button asChild className={className} size="lg">
         <Link to="/console">
@@ -41,11 +42,11 @@ export function GetStarted({ prominent = false }: { prominent?: boolean }) {
   }
 
   return (
-    <SignUpButton mode="modal">
-      <Button className={className} disabled={!isLoaded} size="lg">
+    <Button asChild className={className} disabled={isPending} size="lg">
+      <Link to="/auth/sign-in">
         Get started
         <ArrowRight data-icon="inline-end" />
-      </Button>
-    </SignUpButton>
+      </Link>
+    </Button>
   )
 }

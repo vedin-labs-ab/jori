@@ -6,14 +6,14 @@ import {
   type QueryCtx,
 } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
-import { readClerkUserEmail, readClerkUserName } from "../../access/users"
+import { readUserEmail, readUserName } from "../../access/users"
 import { normalizeConsoleIntegrationOfferReturnUrl } from "../../integrations/offers/helpers"
 import {
   claimIntegrationOffer,
   integrationOfferClaimResult,
 } from "../../integrations/offers/records"
 import { markIntegrationOfferCancelled } from "../../integrations/offers/transition"
-import { ensureCurrentPerson } from "../../persons/clerk"
+import { ensureCurrentPerson } from "../../persons/account"
 import { createPersonActor } from "../../shared/actor"
 import { integrationLabel } from "../../shared/integrations"
 
@@ -129,8 +129,8 @@ async function readConsoleActor(ctx: MutationCtx, organizationId: string) {
   const personId = await ensureCurrentPerson(ctx, organizationId)
 
   return createPersonActor(personId, {
-    email: readClerkUserEmail(identity),
-    name: readClerkUserName(identity),
+    email: readUserEmail(identity),
+    name: readUserName(identity),
   })
 }
 

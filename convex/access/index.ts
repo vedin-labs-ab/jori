@@ -3,7 +3,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../_generated/server"
-import { readClerkOrganizationId } from "./users"
+import { readOrganizationClaim } from "./users"
 
 export async function requireOrganizationAccess(
   ctx: QueryCtx | MutationCtx | ActionCtx,
@@ -31,13 +31,13 @@ export async function checkOrganizationAccess(
     }
   }
 
-  const identityOrganizationId = readClerkOrganizationId(identity)
+  const identityOrganizationId = readOrganizationClaim(identity)
 
   if (identityOrganizationId === undefined) {
     return {
       ok: false as const,
       message:
-        'Unauthorized: Convex auth token is missing the active Clerk organization. Add {"org":"{{org.id}}"} to the Clerk JWT template named "convex", then refresh your session.',
+        "Your session has no active organization. Pick an organization and refresh.",
     }
   }
 

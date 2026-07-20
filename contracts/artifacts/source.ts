@@ -188,7 +188,8 @@ function normalizeArtifactSourcePath(path: string) {
 
 const forbiddenSourcePatterns = [
   /\bconvex\/react\b/,
-  /\b@clerk\b/,
+  /\bbetter-auth\b/,
+  /\b@convex-dev\/better-auth\b/,
   /\bprocess\.env\b/,
   /\bfetch\s*\(/,
   /\bXMLHttpRequest\b/,

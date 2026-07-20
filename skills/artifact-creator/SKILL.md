@@ -59,7 +59,7 @@ Do not publish platform-owned files: package and config files, `index.html`,
 `src/lib/utils.ts`, `src/vite-env.d.ts`, `node_modules`, or `dist`.
 
 Do not reach for raw platform or network APIs — `fetch`, `XMLHttpRequest`,
-`WebSocket`, `localStorage`, `sessionStorage`, Clerk, Convex clients, or
+`WebSocket`, `localStorage`, `sessionStorage`, Better Auth, Convex clients, or
 environment variables. Go through the Milo SDK.
 
 Build the UI from the shadcn/ui primitives in `@/components/ui/*` — buttons,

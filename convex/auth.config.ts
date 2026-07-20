@@ -1,11 +1,6 @@
+import { getAuthConfigProvider } from "@convex-dev/better-auth/auth-config"
 import { type AuthConfig } from "convex/server"
-import { requireEnvironmentVariable } from "./shared/environment"
 
 export default {
-  providers: [
-    {
-      domain: requireEnvironmentVariable("CLERK_JWT_ISSUER_DOMAIN"),
-      applicationID: "convex",
-    },
-  ],
+  providers: [getAuthConfigProvider()],
 } satisfies AuthConfig

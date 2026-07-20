@@ -17,6 +17,7 @@
       "!node_modules",
       "!pnpm-lock.yaml",
       "!**/_generated",
+      "!src/components/auth",
       "!src/components/ui",
       "!src/routeTree.gen.ts"
     ]
@@ -139,6 +140,17 @@
   "overrides": [
     {
       "includes": ["convex/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      // TanStack Router owns route file names ($ splat routes).
+      "includes": ["src/routes/**"],
       "linter": {
         "rules": {
           "style": {

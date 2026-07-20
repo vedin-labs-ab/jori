@@ -1,4 +1,3 @@
-import { useUser } from "@clerk/tanstack-react-start"
 import {
   type DeliveryChoice,
   type DeliveryMode,
@@ -10,6 +9,7 @@ import { Pencil } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
+import { authClient } from "@/shared/session/auth"
 import { SlackChannelField } from "../target"
 import { DeliveryIcon, DeliveryModeMenu } from "./menu"
 
@@ -164,7 +164,7 @@ function DeliveryText({
   choice: DeliveryChoice
   dmLabel: string | undefined
 }) {
-  const email = useUser().user?.primaryEmailAddress?.emailAddress
+  const email = authClient.useSession().data?.user.email
   const mode = deliveryMode(choice)
   const target = choice.kind === "slack" ? choice.target : undefined
 

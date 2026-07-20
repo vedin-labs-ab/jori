@@ -2,8 +2,8 @@ import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
-import { requireClerkUserId } from "../access/users"
-import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
+import { requireUserId } from "../access/users"
+import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { resolvePersonByIdentity } from "../persons/identity/links"
 import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
@@ -41,8 +41,8 @@ export const list = query({
 
     const personId = await resolvePersonByIdentity(ctx, {
       organizationId: args.organizationId,
-      provider: "clerk",
-      externalId: requireClerkUserId(access.identity),
+      provider: "auth",
+      externalId: requireUserId(access.identity),
     })
     const automations = await searchAutomations(ctx, {
       organizationId: args.organizationId,

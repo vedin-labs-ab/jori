@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { automationEventCatalog } from "../../contracts/automations/events"
 import { query } from "../_generated/server"
 import { findIntegrationForPrincipal } from "../integrations/resolve"
-import { resolveCurrentPerson } from "../persons/clerk"
+import { resolveCurrentPerson } from "../persons/account"
 import { executionPrincipalForScope } from "../runs/principal"
 import { scopeValidator } from "../shared/audience"
 

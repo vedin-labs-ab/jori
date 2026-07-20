@@ -5,7 +5,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { listArtifactAutomationRoots } from "../automations/lifecycle/read"
-import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
+import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { personDisplayName } from "../persons/names"
 import {
   findAccessibleArtifact,

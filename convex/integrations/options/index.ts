@@ -7,7 +7,7 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { action, internalQuery } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
-import { ensureCurrentPersonFromAction } from "../../persons/clerk"
+import { ensureCurrentPersonFromAction } from "../../persons/account"
 import {
   integrationLabels,
   integrationValidator,

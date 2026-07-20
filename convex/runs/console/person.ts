@@ -1,6 +1,6 @@
 import { type QueryCtx } from "../../_generated/server"
 import { type requireOrganizationAccess } from "../../access"
-import { requireClerkUserId } from "../../access/users"
+import { requireUserId } from "../../access/users"
 import { resolvePersonByIdentity } from "../../persons/identity/links"
 
 /** The caller's person for ownership filtering; authenticate in the handler
@@ -12,7 +12,7 @@ export async function resolveConsolePerson(
 ) {
   return await resolvePersonByIdentity(ctx, {
     organizationId,
-    provider: "clerk",
-    externalId: requireClerkUserId(identity),
+    provider: "auth",
+    externalId: requireUserId(identity),
   })
 }

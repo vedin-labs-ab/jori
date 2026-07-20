@@ -18,6 +18,9 @@ const excludedPaths = [
   "(^|/)dist(/|$)",
   "[.]test[.](?:ts|tsx|js|jsx)$",
   "^runtime/artifacts/template(/|$)",
+  // Vendored better-auth-ui registry code, kept as installed; its internal
+  // wiring (plugin <-> settings views) is upstream's to govern.
+  "^src/components/auth(/|$)",
 ].join("|")
 
 const ruleSet = {

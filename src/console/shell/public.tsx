@@ -1,9 +1,6 @@
-import {
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/tanstack-react-start"
+import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
+import { UserButton } from "@/components/auth/user/user-button"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/shared/brand"
 
@@ -28,18 +25,11 @@ function PublicConsoleHeader({ isSignedIn }: { isSignedIn: boolean }) {
       <BrandMark />
       <div className="ml-auto flex items-center gap-2">
         {!isSignedIn ? (
-          <>
-            <SignInButton mode="modal">
-              <Button size="sm" variant="outline">
-                Sign in
-              </Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button size="sm">Sign up</Button>
-            </SignUpButton>
-          </>
+          <Button asChild size="sm">
+            <Link to="/auth/sign-in">Sign in</Link>
+          </Button>
         ) : null}
-        {isSignedIn ? <UserButton /> : null}
+        {isSignedIn ? <UserButton size="icon" /> : null}
       </div>
     </header>
   )

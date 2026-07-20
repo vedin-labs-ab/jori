@@ -11,10 +11,13 @@ const convexMocks = vi.hoisted(() => ({
   saveDeliveryPreference: vi.fn(async () => null),
 }))
 
-vi.mock("@clerk/tanstack-react-start", () => ({
-  useUser: () => ({
-    user: { primaryEmailAddress: { emailAddress: "sam@example.com" } },
-  }),
+vi.mock("@/shared/session/auth", () => ({
+  authClient: {
+    useSession: () => ({
+      data: { user: { email: "sam@example.com" } },
+      isPending: false,
+    }),
+  },
 }))
 
 let organizationProfile: Record<string, unknown> = {}
