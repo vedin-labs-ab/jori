@@ -149,7 +149,7 @@ async function recordApprovalTransition(
   const subject = { kind: "approval" as const, id: approval._id }
 
   await recordTransition(ctx, {
-    tenantId: approval.tenantId,
+    organizationId: approval.organizationId,
     subject,
     type,
   })

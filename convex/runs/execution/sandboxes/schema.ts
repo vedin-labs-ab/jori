@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 export const sandboxes = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   runId: v.id("runs"),
   externalId: v.string(),
   status: v.union(
@@ -19,8 +19,8 @@ export const sandboxes = defineTable({
 })
   .index("by_run_and_status", ["runId", "status"])
   .index("by_external_id", ["externalId"])
-  .index("by_tenant_and_conversation_and_status_and_expires_at", [
-    "tenantId",
+  .index("by_organization_and_conversation_and_status_and_expires_at", [
+    "organizationId",
     "conversationId",
     "status",
     "expiresAt",

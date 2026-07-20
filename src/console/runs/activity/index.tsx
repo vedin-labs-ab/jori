@@ -14,15 +14,15 @@ type RunId = FunctionArgs<typeof api.runs.activity.index.list>["runId"]
 export function RunActivity({
   now,
   runId,
-  tenantId,
+  organizationId,
 }: {
   now: number
   runId: string
-  tenantId: string
+  organizationId: string
 }) {
   const activity = useQuery(api.runs.activity.index.list, {
     runId: runId as RunId,
-    tenantId,
+    organizationId,
   })
 
   return (

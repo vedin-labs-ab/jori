@@ -24,13 +24,13 @@ import { ProposalReview } from "./proposal"
 import { SourcesSection, WebsitesSection } from "./sources"
 
 export function ContextProfile({
-  tenantId,
+  organizationId,
   website,
   discovery,
   profile,
   sources,
 }: {
-  tenantId: string
+  organizationId: string
   website: string | undefined
   discovery: OrganizationDiscovery | undefined
   profile: OrganizationProfile | undefined
@@ -80,7 +80,7 @@ export function ContextProfile({
               primaryWebsite={website}
               proposed={profile.proposed}
               sources={sources}
-              tenantId={tenantId}
+              organizationId={organizationId}
             />
           )}
           {facts === null ? (
@@ -92,14 +92,14 @@ export function ContextProfile({
             facts={facts}
             profile={profile}
             sources={sources}
-            tenantId={tenantId}
+            organizationId={organizationId}
             website={website}
           />
         </CardContent>
       </Card>
       {editorOpen ? (
         <OrganizationEditDialog
-          tenantId={tenantId}
+          organizationId={organizationId}
           website={website}
           discovery={discovery}
           onOpenChange={setEditorOpen}
@@ -117,13 +117,13 @@ function ProfileSections({
   facts,
   profile,
   sources,
-  tenantId,
+  organizationId,
   website,
 }: {
   facts: NonNullable<OrganizationProfile> | null
   profile: OrganizationProfile
   sources: OrganizationSources | undefined
-  tenantId: string
+  organizationId: string
   website: string | undefined
 }) {
   const hasSources = sources === undefined || sources.length > 0
@@ -134,7 +134,7 @@ function ProfileSections({
         declared={profile?.declared?.domains ?? []}
         domains={facts?.domains ?? []}
         primaryWebsite={website}
-        tenantId={tenantId}
+        organizationId={organizationId}
       />
       {hasSources ? (
         <>

@@ -6,12 +6,12 @@ type SlackChannel = Extract<SlackDeliveryTarget, { kind: "channel" }>
 export function SlackChannelField({
   disabled = false,
   onChange,
-  tenantId,
+  organizationId,
   value,
 }: {
   disabled?: boolean
   onChange: (target: SlackChannel | undefined) => void
-  tenantId: string
+  organizationId: string
   value: SlackChannel | undefined
 }) {
   const selected =
@@ -41,7 +41,7 @@ export function SlackChannelField({
       }
       placeholder="Search channels…"
       source="slack.channels"
-      tenantId={tenantId}
+      organizationId={organizationId}
       value={selected}
     />
   )

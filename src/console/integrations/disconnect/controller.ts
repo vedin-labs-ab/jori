@@ -6,11 +6,11 @@ import { showErrorToast } from "../../shared/error"
 
 export function useIntegrationDisconnect({
   integration,
-  tenantId,
+  organizationId,
   title,
 }: {
   integration: Exclude<ToolSurface, "milo">
-  tenantId: string
+  organizationId: string
   title: string
 }) {
   const disconnectIntegration = useAction(
@@ -22,7 +22,7 @@ export function useIntegrationDisconnect({
     setIsDisconnecting(true)
 
     try {
-      await disconnectIntegration({ integration, tenantId })
+      await disconnectIntegration({ integration, organizationId })
     } catch (disconnectError) {
       showErrorToast(disconnectError, `Couldn't disconnect ${title}.`)
     } finally {

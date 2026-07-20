@@ -3,7 +3,7 @@ import { readCallbackState } from "./http"
 
 describe("readCallbackState", () => {
   test("returns the parsed state while it is fresh", async () => {
-    const state = { createdAt: Date.now(), tenantId: "tenant_1" }
+    const state = { createdAt: Date.now(), organizationId: "organization_1" }
     const result = await readCallbackState({
       value: JSON.stringify(state),
       parse: parseJsonState,

@@ -4,22 +4,24 @@ import { type MutationCtx, type QueryCtx } from "../_generated/server"
 
 const dayMs = 24 * 60 * 60 * 1000
 
-export async function getAccount(ctx: QueryCtx, tenantId: string) {
+export async function getAccount(ctx: QueryCtx, organizationId: string) {
   return await ctx.db
     .query("billingAccounts")
-    .withIndex("by_tenant", (query) => query.eq("tenantId", tenantId))
+    .withIndex("by_organization", (query) =>
+      query.eq("organizationId", organizationId)
+    )
     .unique()
 }
 
 /**
- * Billing accounts are created lazily on first touch: the tenant starts a
+ * Billing accounts are created lazily on first touch: the organization starts a
  * trial with the trial grant as included usage and nothing else configured.
  */
 export async function ensureAccount(
   ctx: MutationCtx,
-  tenantId: string
+  organizationId: string
 ): Promise<Doc<"billingAccounts">> {
-  const existing = await getAccount(ctx, tenantId)
+  const existing = await getAccount(ctx, organizationId)
 
   if (existing !== null) {
     return existing
@@ -27,7 +29,7 @@ export async function ensureAccount(
 
   const now = Date.now()
   const accountId = await ctx.db.insert("billingAccounts", {
-    tenantId,
+    organizationId,
     state: "trial",
     trialEndsAt: now + trial.days * dayMs,
     includedMicros: trial.grantMicros,
@@ -37,7 +39,7 @@ export async function ensureAccount(
   })
 
   await ctx.db.insert("billingEntries", {
-    tenantId,
+    organizationId,
     timestamp: now,
     type: "grant",
     amountMicros: trial.grantMicros,

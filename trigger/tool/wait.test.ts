@@ -186,7 +186,7 @@ function createRuntime(): ToolRuntime {
         rootId: null,
         sandboxId: null,
         status: "running",
-        tenantId: "tenant",
+        organizationId: "organization",
       },
       result: null,
       session: null,

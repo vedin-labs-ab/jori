@@ -113,7 +113,7 @@ test("labels approved approvals as approved actions", () => {
           status: "approved",
           summary: "Create the page.",
           surface: "notion",
-          tenantId: "tenant",
+          organizationId: "organization",
           tool: "notion_create_page",
         } as Doc<"approvals">,
       ],
@@ -140,7 +140,7 @@ test("marks active waiters as live intervals", () => {
           expiresAt: 2000,
           runId: id<"runs">("run"),
           status: "waiting",
-          tenantId: "tenant",
+          organizationId: "organization",
           updatedAt: 1000,
           waitpointId: "waitpoint",
         } as Doc<"waiters">,
@@ -236,7 +236,7 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   } as Doc<"traces">
 }
@@ -249,7 +249,7 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     createdAt: 0,
     snapshot: snapshot("Run"),
     status: "running",
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   } as Doc<"runs">
 }

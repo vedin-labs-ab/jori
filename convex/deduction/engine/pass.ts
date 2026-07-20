@@ -29,7 +29,7 @@ import {
   stageTiming,
 } from "./schedule"
 
-// One review per tenant per beat, stages in order: efforts first, then each
+// One review per organization per beat, stages in order: efforts first, then each
 // belief kind's incremental review, then its consolidation when due. The
 // belief stages always see what this beat's effort stage wrote.
 const stageRuns: { stage: PassStage; scope: PassScope }[] = [
@@ -40,38 +40,38 @@ const stageRuns: { stage: PassStage; scope: PassScope }[] = [
   ]),
 ]
 
-// Hourly heartbeat: hands every tenant with at least one active integration
+// Hourly heartbeat: hands every organization with at least one active integration
 // to the run action. Due checks live in the opener, so this stays cheap.
 export const sweep = internalMutation({
   args: {},
   handler: async (ctx) => {
-    for (const tenantId of await activeTenants(ctx)) {
+    for (const organizationId of await activeOrganizations(ctx)) {
       await ctx.scheduler.runAfter(0, internal.deduction.engine.pass.run, {
-        tenantId,
+        organizationId,
       })
     }
   },
 })
 
-// The tenant registry is "tenants with at least one active integration": a
-// tenant without sources has nothing to review. Full scan is fine at current
+// The organization registry is "organizations with at least one active integration": a
+// organization without sources has nothing to review. Full scan is fine at current
 // integration counts; revisit with a dedicated index if that changes.
-async function activeTenants(ctx: MutationCtx) {
+async function activeOrganizations(ctx: MutationCtx) {
   const integrations = await ctx.db.query("integrations").collect()
-  const tenants = new Set(
+  const organizations = new Set(
     integrations
       .filter((integration) => integration.status === "active")
-      .map((integration) => integration.tenantId)
+      .map((integration) => integration.organizationId)
   )
 
-  return [...tenants].slice(0, sweepBatch)
+  return [...organizations].slice(0, sweepBatch)
 }
 
 export const run = internalAction({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
     for (const { stage, scope } of stageRuns) {
-      await runStage(ctx, args.tenantId, stage, scope)
+      await runStage(ctx, args.organizationId, stage, scope)
     }
   },
 })
@@ -80,14 +80,14 @@ export const run = internalAction({
 // so an effort bootstrap catches up to now within a single sweep.
 async function runStage(
   ctx: ActionCtx,
-  tenantId: string,
+  organizationId: string,
   stage: PassStage,
   scope: PassScope
 ) {
   for (let chunk = 0; chunk < bootstrapMaxChunksPerSweep; chunk += 1) {
     const opened: OpenedPass | null = await ctx.runMutation(
       internal.deduction.engine.pass.open,
-      { tenantId, stage, scope }
+      { organizationId, stage, scope }
     )
 
     if (opened === null) {
@@ -95,7 +95,7 @@ async function runStage(
     }
 
     try {
-      await reviewWindow(ctx, tenantId, opened)
+      await reviewWindow(ctx, organizationId, opened)
     } catch (error) {
       await ctx.runMutation(internal.deduction.engine.pass.fail, {
         passId: opened.passId,
@@ -107,11 +107,11 @@ async function runStage(
   }
 }
 
-// Opens the next window for a tenant, stage, and scope, failing a stale
+// Opens the next window for a organization, stage, and scope, failing a stale
 // running pass on the way. Windows derive from completed passes only, so a
 // failed pass retries the same window.
 export const open = internalMutation({
-  args: { tenantId: v.string(), stage: passStage, scope: passScope },
+  args: { organizationId: v.string(), stage: passStage, scope: passScope },
   handler: async (ctx, args) => {
     const now = Date.now()
     const timing = stageTiming(args.stage, args.scope)
@@ -141,7 +141,7 @@ export const open = internalMutation({
     }
 
     const passId = await ctx.db.insert("passes", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       stage: args.stage,
       scope: args.scope,
       status: "running",
@@ -181,13 +181,13 @@ export const fail = internalMutation({
 
 async function latestPass(
   ctx: MutationCtx,
-  args: { tenantId: string; stage: PassStage; scope: PassScope }
+  args: { organizationId: string; stage: PassStage; scope: PassScope }
 ) {
   return await ctx.db
     .query("passes")
-    .withIndex("by_tenant_and_stage_and_scope_and_started_at", (index) =>
+    .withIndex("by_organization_and_stage_and_scope_and_started_at", (index) =>
       index
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("stage", args.stage)
         .eq("scope", args.scope)
     )
@@ -199,13 +199,13 @@ async function latestPass(
 // one source of "the last reviewed window".
 export async function latestCompletedPass(
   ctx: QueryCtx,
-  args: { tenantId: string; stage: PassStage; scope: PassScope }
+  args: { organizationId: string; stage: PassStage; scope: PassScope }
 ): Promise<Doc<"passes"> | null> {
   return await ctx.db
     .query("passes")
-    .withIndex("by_tenant_and_stage_and_scope_and_started_at", (index) =>
+    .withIndex("by_organization_and_stage_and_scope_and_started_at", (index) =>
       index
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("stage", args.stage)
         .eq("scope", args.scope)
     )

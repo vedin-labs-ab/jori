@@ -50,7 +50,7 @@ export async function resolveAccessInput(
     access: AutomationAccessInput
     artifactId?: Id<"artifacts">
     principal: ExecutionPrincipal
-    tenantId: string
+    organizationId: string
   }
 ): Promise<AutomationAccess> {
   const integrations = normalizeAccessIntegrations(args.access.integrations)
@@ -58,7 +58,7 @@ export async function resolveAccessInput(
   await requireAutomationAccessPolicy(ctx, {
     allowArtifactStateWrite: args.artifactId !== undefined,
     integrations,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 
   return {
@@ -68,7 +68,7 @@ export async function resolveAccessInput(
           await resolveIntegrationForPrincipal(ctx, {
             integration: integration.integration,
             principal: args.principal,
-            tenantId: args.tenantId,
+            organizationId: args.organizationId,
           })
         )._id,
         tools: integration.tools,
@@ -86,7 +86,7 @@ export async function requireAutomationAccessPolicy(
       tools: string[]
     }>
     allowArtifactStateWrite?: boolean
-    tenantId: string
+    organizationId: string
   }
 ) {
   if (args.integrations.length === 0) {
@@ -98,7 +98,7 @@ export async function requireAutomationAccessPolicy(
   }
 
   const toolModes = resolveToolModes(
-    await listPermissionOverrides(ctx, args.tenantId)
+    await listPermissionOverrides(ctx, args.organizationId)
   )
   let hasWriteTool = false
 

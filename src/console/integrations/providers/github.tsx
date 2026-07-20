@@ -23,16 +23,16 @@ const githubConfig = {
 
 export function GitHubIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.github.install.createInstallState
   )
   const status = useQuery(api.integrations.status.getGitHubStatus, {
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -47,7 +47,7 @@ export function GitHubIntegration({
       )}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }

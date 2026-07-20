@@ -105,7 +105,7 @@ function message(overrides: Partial<Doc<"messages">>) {
   return {
     _id: "message",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration",
     integration: "slack",
     type: "message.channels",

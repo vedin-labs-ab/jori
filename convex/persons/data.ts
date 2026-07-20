@@ -6,12 +6,12 @@ const canonicalDepthLimit = 16
 
 export async function createPerson(
   ctx: MutationCtx,
-  args: { tenantId: string; now?: number }
+  args: { organizationId: string; now?: number }
 ) {
   const now = args.now ?? Date.now()
 
   return await ctx.db.insert("persons", {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     createdAt: now,
     updatedAt: now,
   })

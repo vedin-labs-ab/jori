@@ -49,7 +49,7 @@ export async function callIntegrationOfferTool(
   const offer = await ctx.runMutation(
     internal.integrations.offers.records.create,
     {
-      tenantId: context.run.tenantId,
+      organizationId: context.run.organizationId,
       integration,
       summary: offerRequest.summary,
       source: integrationOfferSourceFromInput(context.input),
@@ -85,7 +85,7 @@ export function isCancelIntegrationOfferTool(tool: string) {
 
 export async function cancelIntegrationOffer(
   ctx: ActionCtx,
-  run: { _id: Id<"runs">; tenantId: string },
+  run: { _id: Id<"runs">; organizationId: string },
   args: unknown
 ) {
   const input = parseCancelOffer(args)
@@ -94,7 +94,7 @@ export async function cancelIntegrationOffer(
     {
       integrationOfferId: input.integrationOfferId,
       runId: run._id,
-      tenantId: run.tenantId,
+      organizationId: run.organizationId,
       reason: input.reason,
     }
   )

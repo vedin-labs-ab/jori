@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { integrationValidator } from "../shared/integrations"
 
-const integrationScope = v.union(v.literal("tenant"), v.literal("user"))
+const integrationScope = v.union(v.literal("organization"), v.literal("user"))
 // Rows are never deleted: disconnect and expiry are status transitions, so
 // automations bound to an integration id heal when it is reconnected.
 const integrationStatus = v.union(
@@ -12,7 +12,7 @@ const integrationStatus = v.union(
 )
 
 export const integrations = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integration: integrationValidator,
   scope: integrationScope,
   ownerId: v.optional(v.id("persons")),
@@ -28,10 +28,10 @@ export const integrations = defineTable({
   updatedAt: v.number(),
   data: v.optional(v.any()),
 })
-  .index("by_tenant_and_status", ["tenantId", "status"])
-  .index("by_tenant_and_integration", ["tenantId", "integration"])
-  .index("by_tenant_and_integration_and_owner", [
-    "tenantId",
+  .index("by_organization_and_status", ["organizationId", "status"])
+  .index("by_organization_and_integration", ["organizationId", "integration"])
+  .index("by_organization_and_integration_and_owner", [
+    "organizationId",
     "integration",
     "ownerId",
   ])

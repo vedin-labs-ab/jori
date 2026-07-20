@@ -79,15 +79,15 @@ test("returns available skills when a skill is unknown", () => {
   })
 })
 
-test("tenant skills override global skills with the same name", () => {
+test("organization skills override global skills with the same name", () => {
   expect(
     loadMiloSkillTool(
       runtimeSkills([
         runtimeSkill({
-          tenantId: "tenant",
+          organizationId: "organization",
           name: "image-generation",
-          description: "Tenant image rules.",
-          body: "# Tenant Images\n\nUse the tenant image style.",
+          description: "Organization image rules.",
+          body: "# Organization Images\n\nUse the organization image style.",
         }),
       ]),
       {
@@ -99,8 +99,8 @@ test("tenant skills override global skills with the same name", () => {
     status: "loaded",
     skill: {
       name: "image-generation",
-      description: "Tenant image rules.",
-      instructions: expect.stringContaining("tenant image style"),
+      description: "Organization image rules.",
+      instructions: expect.stringContaining("organization image style"),
     },
   })
 })

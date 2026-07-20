@@ -24,7 +24,7 @@ type DeliveryFieldProps = {
   onChange: (choice: DeliveryChoice) => void
   onEditingChange: (editing: boolean) => void
   options: DeliveryOption[]
-  tenantId: string
+  organizationId: string
   value: DeliveryChoice | undefined
 }
 
@@ -97,7 +97,7 @@ function DeliveryEditor({
   onDraftChange,
   onSave,
   options,
-  tenantId,
+  organizationId,
   value,
 }: DeliveryFieldProps & {
   draft: DeliveryDraft
@@ -127,7 +127,7 @@ function DeliveryEditor({
               onChange={(target) =>
                 onDraftChange({ ...draft, channel: target })
               }
-              tenantId={tenantId}
+              organizationId={organizationId}
               value={draft.channel}
             />
           </div>

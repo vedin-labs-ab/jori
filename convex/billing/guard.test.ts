@@ -18,7 +18,7 @@ beforeEach(() => {
 function accountWith(overrides: Partial<Doc<"billingAccounts">>) {
   vi.mocked(ensureAccount).mockResolvedValue({
     _id: "account-1",
-    tenantId: "tenant-1",
+    organizationId: "organization-1",
     state: "active",
     includedMicros: 0,
     walletMicros: 0,
@@ -32,7 +32,7 @@ test("paused accounts block all new work", async () => {
   accountWith({ state: "paused", includedMicros: 5_000_000 })
 
   const budget = await checkRunBudget(ctx, {
-    tenantId: "tenant-1",
+    organizationId: "organization-1",
     interactive: true,
   })
 
@@ -47,7 +47,7 @@ test("an expired trial blocks even with usage left", async () => {
   })
 
   const budget = await checkRunBudget(ctx, {
-    tenantId: "tenant-1",
+    organizationId: "organization-1",
     interactive: true,
   })
 
@@ -58,10 +58,16 @@ test("scheduled work stops at zero while interactive work has grace", async () =
   accountWith({ includedMicros: 0, walletMicros: -500_000 })
 
   expect(
-    await checkRunBudget(ctx, { tenantId: "tenant-1", interactive: false })
+    await checkRunBudget(ctx, {
+      organizationId: "organization-1",
+      interactive: false,
+    })
   ).toEqual({ ok: false, reason: "out-of-usage" })
   expect(
-    await checkRunBudget(ctx, { tenantId: "tenant-1", interactive: true })
+    await checkRunBudget(ctx, {
+      organizationId: "organization-1",
+      interactive: true,
+    })
   ).toEqual({ ok: true })
 })
 
@@ -69,6 +75,9 @@ test("the grace floor is a floor, not a suggestion", async () => {
   accountWith({ includedMicros: 0, walletMicros: -2_000_000 })
 
   expect(
-    await checkRunBudget(ctx, { tenantId: "tenant-1", interactive: true })
+    await checkRunBudget(ctx, {
+      organizationId: "organization-1",
+      interactive: true,
+    })
   ).toEqual({ ok: false, reason: "out-of-usage" })
 })

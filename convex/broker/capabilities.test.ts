@@ -194,7 +194,7 @@ function run(): Doc<"runs"> {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     status: "running",
     instructions: "Task",
     createdBy: "person" as Id<"persons">,

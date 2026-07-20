@@ -90,7 +90,7 @@ export async function createWaiter(
   const now = Date.now()
 
   return await ctx.db.insert("waiters", {
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
     runId: args.runId,
     ...(args.sessionId === undefined ? {} : { sessionId: args.sessionId }),
     waitpointId: args.waitpointId,
@@ -138,7 +138,7 @@ async function cancelStaleWaiters(ctx: MutationCtx, runId: Id<"runs">) {
 
 async function validateCondition(
   ctx: MutationCtx,
-  run: { _id: Id<"runs">; tenantId: string },
+  run: { _id: Id<"runs">; organizationId: string },
   condition: WaiterCondition | undefined
 ) {
   if (condition === undefined) {
@@ -154,7 +154,7 @@ async function validateCondition(
 
     if (
       child === null ||
-      child.tenantId !== run.tenantId ||
+      child.organizationId !== run.organizationId ||
       child.parentId !== run._id
     ) {
       throw new Error("Agent waits may only target direct child runs.")
@@ -191,7 +191,7 @@ async function wakeWaiter(
     updatedAt: Date.now(),
   })
   await enqueueOperation(ctx, {
-    tenantId: waiter.tenantId,
+    organizationId: waiter.organizationId,
     key: `waiter:${waiter._id}:wake`,
     operation: {
       type: "waiter.wake",

@@ -31,7 +31,7 @@ export const getTarget = internalQuery({
     if (
       integration === null ||
       integration.status !== "active" ||
-      integration.tenantId !== approval.tenantId ||
+      integration.organizationId !== approval.organizationId ||
       integration.integration !== delivery.integration
     ) {
       return null

@@ -42,14 +42,14 @@ const integrationOfferTransitionType = v.union(
 )
 
 export const transitions = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   subject: transitionSubject,
   type: transitionType,
   createdAt: v.number(),
 })
 
 type TransitionInputBase = {
-  tenantId: string
+  organizationId: string
 }
 
 export type ApprovalTransitionType = Infer<typeof approvalTransitionType>

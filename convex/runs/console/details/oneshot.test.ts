@@ -92,7 +92,7 @@ function oneShotRun(scheduledAt: number) {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     automationId: "automation",
     cause: { type: "time", scheduledAt },
     instructions: "Generate a team image.",
@@ -108,7 +108,7 @@ function oneShotAutomation(scheduledAt: number, webSearch = true) {
   return {
     _id: "automation",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     name: "Daily image",
     instructions: "Generate a team image.",
     type: "once",
@@ -134,9 +134,9 @@ function slackIntegration() {
   return {
     _id: "integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "slack",
-    scope: "tenant",
+    scope: "organization",
     externalId: "slack-team",
     credentials: {},
     status: "active",

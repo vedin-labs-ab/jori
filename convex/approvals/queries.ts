@@ -21,8 +21,10 @@ export const getDecisionTarget = internalQuery({
 
     const approval = await ctx.db
       .query("approvals")
-      .withIndex("by_tenant_and_code", (query) =>
-        query.eq("tenantId", integration.tenantId).eq("code", args.code)
+      .withIndex("by_organization_and_code", (query) =>
+        query
+          .eq("organizationId", integration.organizationId)
+          .eq("code", args.code)
       )
       .first()
 

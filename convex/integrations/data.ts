@@ -1,6 +1,6 @@
 import { type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
-import { checkTenantAccess } from "../access"
+import { checkOrganizationAccess } from "../access"
 import { resolveCurrentPerson } from "../persons/clerk"
 import {
   type ExecutionPrincipal,
@@ -40,14 +40,14 @@ export async function findActiveIntegrationByExternalId(
     : integration
 }
 
-export async function getTenantIntegration(
+export async function getOrganizationIntegration(
   ctx: QueryLikeCtx,
   args: {
     integration: Integration
-    tenantId: string
+    organizationId: string
   }
 ) {
-  const access = await checkTenantAccess(ctx, args.tenantId)
+  const access = await checkOrganizationAccess(ctx, args.organizationId)
 
   if (!access.ok) {
     return null
@@ -55,8 +55,10 @@ export async function getTenantIntegration(
 
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_integration", (query) =>
-      query.eq("tenantId", args.tenantId).eq("integration", args.integration)
+    .withIndex("by_organization_and_integration", (query) =>
+      query
+        .eq("organizationId", args.organizationId)
+        .eq("integration", args.integration)
     )
     .order("desc")
     .first()
@@ -66,16 +68,16 @@ export async function getUserIntegration(
   ctx: QueryCtx,
   args: {
     integration: Integration
-    tenantId: string
+    organizationId: string
   }
 ) {
-  const access = await checkTenantAccess(ctx, args.tenantId)
+  const access = await checkOrganizationAccess(ctx, args.organizationId)
 
   if (!access.ok) {
     return null
   }
 
-  const ownerId = await resolveCurrentPerson(ctx, args.tenantId).catch(
+  const ownerId = await resolveCurrentPerson(ctx, args.organizationId).catch(
     () => undefined
   )
 
@@ -86,7 +88,7 @@ export async function getUserIntegration(
   return await getUserIntegrationForOwner(ctx, {
     ownerId,
     integration: args.integration,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 }
 
@@ -95,14 +97,14 @@ export async function getUserIntegrationForOwner(
   args: {
     ownerId: Id<"persons">
     integration: Integration
-    tenantId: string
+    organizationId: string
   }
 ) {
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_integration_and_owner", (query) =>
+    .withIndex("by_organization_and_integration_and_owner", (query) =>
       query
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("integration", args.integration)
         .eq("ownerId", args.ownerId)
     )
@@ -113,14 +115,14 @@ export async function getUserIntegrationForOwner(
 export async function listActiveIntegrationsForOwner(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     ownerId?: Id<"persons"> | undefined
   }
 ) {
   const integrations = await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_status", (query) =>
-      query.eq("tenantId", args.tenantId).eq("status", "active")
+    .withIndex("by_organization_and_status", (query) =>
+      query.eq("organizationId", args.organizationId).eq("status", "active")
     )
     .take(200)
 
@@ -136,12 +138,12 @@ export async function listActiveIntegrationsForOwner(
 export async function listActiveIntegrationsForPrincipal(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     principal: ExecutionPrincipal
   }
 ) {
   return await listActiveIntegrationsForOwner(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     ownerId: executionPrincipalPersonId(args.principal),
   })
 }

@@ -122,7 +122,7 @@ async function callAuthorizedMiloTool(
   return await callMiloTool(
     ctx,
     {
-      tenantId: context.tenantId,
+      organizationId: context.organizationId,
       principal: { kind: "person", personId: context.personId },
     },
     { tool, args }
@@ -163,7 +163,7 @@ async function callAuthorizedExternalTool(
   const result = await callProvider()
 
   await ctx.runMutation(internal.artifacts.tools.cache.invalidate, {
-    tenantId: context.tenantId,
+    organizationId: context.organizationId,
     artifactId: context.artifactId,
     personId: context.personId,
     surface: authorization.permission.surface,
@@ -187,7 +187,7 @@ async function callCachedArtifactTool(
 ) {
   const now = Date.now()
   const cacheKey = await createArtifactToolCacheKey({
-    tenantId: context.tenantId,
+    organizationId: context.organizationId,
     artifactId: context.artifactId,
     versionId: context.versionId,
     personId: context.personId,
@@ -199,7 +199,7 @@ async function callCachedArtifactTool(
 
   if (!input.cache.forceRefresh) {
     const cached = await ctx.runMutation(internal.artifacts.tools.cache.read, {
-      tenantId: context.tenantId,
+      organizationId: context.organizationId,
       artifactId: context.artifactId,
       versionId: context.versionId,
       personId: context.personId,
@@ -219,7 +219,7 @@ async function callCachedArtifactTool(
 
   if (canStoreArtifactToolCacheValue(value)) {
     await ctx.runMutation(internal.artifacts.tools.cache.write, {
-      tenantId: context.tenantId,
+      organizationId: context.organizationId,
       artifactId: context.artifactId,
       versionId: context.versionId,
       personId: context.personId,

@@ -23,15 +23,17 @@ const slackConfig = {
 
 export function SlackIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.slack.install.createInstallState
   )
-  const status = useQuery(api.integrations.status.getSlackStatus, { tenantId })
+  const status = useQuery(api.integrations.status.getSlackStatus, {
+    organizationId,
+  })
 
   return (
     <IntegrationCard
@@ -45,7 +47,7 @@ export function SlackIntegration({
       )}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }

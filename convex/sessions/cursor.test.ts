@@ -116,7 +116,7 @@ function message(
   return {
     _id: id<"messages">(messageId),
     _creationTime: storedAt,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message",

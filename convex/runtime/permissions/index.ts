@@ -13,7 +13,7 @@ export async function runtimePermissions(
   const overrides = await ctx.runQuery(
     internal.permissions.tools.listForRuntime,
     {
-      tenantId: input.run.tenantId,
+      organizationId: input.run.organizationId,
     }
   )
   const toolModes = resolveToolModes(overrides)

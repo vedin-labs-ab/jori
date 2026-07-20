@@ -31,7 +31,7 @@ function githubAutomationRuntimeInput() {
     run: {
       _id: "run",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       automationId: "automation",
       snapshot: {
         title: "GitHub quip",
@@ -46,7 +46,7 @@ function githubAutomationRuntimeInput() {
     event: {
       _id: "event",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       integrationId: github._id,
       key: "github:delivery",
       type: "pull_request.review_comment.edited",
@@ -69,9 +69,9 @@ function githubIntegration(): Doc<"integrations"> {
   return {
     _id: "github-integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "github",
-    scope: "tenant",
+    scope: "organization",
     externalId: "github-account",
     credentials: {},
     status: "active",

@@ -8,14 +8,14 @@ import { WebsiteStep, WelcomeStep, WorkingStep } from "./steps"
 type Step = "welcome" | "website" | "working"
 
 export function OnboardingModal({
-  tenantId,
+  organizationId,
   onClose,
 }: {
-  tenantId: string
+  organizationId: string
   onClose: () => void
 }) {
   const complete = useAction(api.organization.onboarding.complete)
-  const discovery = useQuery(api.organization.discovery.get, { tenantId })
+  const discovery = useQuery(api.organization.discovery.get, { organizationId })
   const [step, setStep] = useState<Step>("welcome")
   const [website, setWebsite] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,7 +23,7 @@ export function OnboardingModal({
 
   const dismiss = () => {
     if (step !== "working") {
-      void complete({ tenantId }).catch(() => undefined)
+      void complete({ organizationId }).catch(() => undefined)
     }
 
     onClose()
@@ -34,7 +34,7 @@ export function OnboardingModal({
     setError(null)
 
     try {
-      await complete({ tenantId, website: website.trim() })
+      await complete({ organizationId, website: website.trim() })
       setStep("working")
     } catch (caught) {
       reportWebsiteStartError(caught, setError)

@@ -52,7 +52,7 @@ function manualRun(personId: string) {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     cause: { type: "manual", personId },
     snapshot: {
       title: "Morning brief",

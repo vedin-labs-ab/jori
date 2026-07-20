@@ -21,7 +21,7 @@ export async function writeEvidence(
     const reference = toReference(sighting)
 
     await ctx.db.insert("evidence", {
-      tenantId: pass.tenantId,
+      organizationId: pass.organizationId,
       subject,
       passId: pass._id,
       reference,
@@ -89,7 +89,7 @@ function toReference(sighting: Sighting) {
 // A move to the current workstream writes nothing. Window passes select
 // efforts by updatedAt, so a review's own writes must never re-qualify an
 // unchanged effort for the next window — bumping updatedAt here is what once
-// kept an idle tenant's judge running every hour.
+// kept an idle organization's judge running every hour.
 export async function moveEffort(
   ctx: MutationCtx,
   effort: Doc<"efforts">,

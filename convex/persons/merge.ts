@@ -14,7 +14,7 @@ export async function mergePersons(
   args: {
     sourcePersonId: Id<"persons">
     targetPersonId: Id<"persons">
-    tenantId: string
+    organizationId: string
   }
 ) {
   const sourcePersonId = await canonicalPersonId(ctx, args.sourcePersonId)
@@ -30,13 +30,18 @@ export async function mergePersons(
   if (
     source === null ||
     target === null ||
-    source.tenantId !== args.tenantId ||
-    target.tenantId !== args.tenantId
+    source.organizationId !== args.organizationId ||
+    target.organizationId !== args.organizationId
   ) {
-    throw new Error("Cannot merge persons across tenants.")
+    throw new Error("Cannot merge persons across organizations.")
   }
 
-  await moveIdentityBatch(ctx, args.tenantId, sourcePersonId, targetPersonId)
+  await moveIdentityBatch(
+    ctx,
+    args.organizationId,
+    sourcePersonId,
+    targetPersonId
+  )
   await ctx.db.patch(sourcePersonId, {
     supersededBy: targetPersonId,
     updatedAt: Date.now(),
@@ -44,12 +49,12 @@ export async function mergePersons(
   await scheduleIdentityRewrite(ctx, {
     sourcePersonId,
     targetPersonId,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
   await scheduleArtifactOwnerRewrite(ctx, {
     sourcePersonId,
     targetPersonId,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 
   return targetPersonId
@@ -60,7 +65,7 @@ export async function mergePersons(
 // supersede a proven identity. Returns the survivor, or undefined when empty.
 export async function mergeWinner(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   candidates: { personId: Id<"persons">; method: LinkMethod }[]
 ): Promise<Id<"persons"> | undefined> {
   const strongest = new Map<Id<"persons">, LinkMethod>()
@@ -89,7 +94,7 @@ export async function mergeWinner(
       await mergePersons(ctx, {
         sourcePersonId: personId,
         targetPersonId: survivor,
-        tenantId,
+        organizationId,
       })
     }
   }
@@ -99,7 +104,7 @@ export async function mergeWinner(
 
 export const rewritePersonIdentities = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     sourcePersonId: v.id("persons"),
     targetPersonId: v.id("persons"),
   },
@@ -107,7 +112,7 @@ export const rewritePersonIdentities = internalMutation({
   handler: async (ctx, args) => {
     const moved = await moveIdentityBatch(
       ctx,
-      args.tenantId,
+      args.organizationId,
       args.sourcePersonId,
       args.targetPersonId
     )
@@ -122,7 +127,7 @@ export const rewritePersonIdentities = internalMutation({
 
 export const rewriteArtifactOwners = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     sourcePersonId: v.id("persons"),
     targetPersonId: v.id("persons"),
   },
@@ -130,8 +135,10 @@ export const rewriteArtifactOwners = internalMutation({
   handler: async (ctx, args) => {
     const artifacts = await ctx.db
       .query("artifacts")
-      .withIndex("by_tenant_and_owner", (index) =>
-        index.eq("tenantId", args.tenantId).eq("ownerId", args.sourcePersonId)
+      .withIndex("by_organization_and_owner", (index) =>
+        index
+          .eq("organizationId", args.organizationId)
+          .eq("ownerId", args.sourcePersonId)
       )
       .take(artifactBatchSize)
 
@@ -152,7 +159,7 @@ export const rewriteArtifactOwners = internalMutation({
 
 async function moveIdentityBatch(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   sourcePersonId: Id<"persons">,
   targetPersonId: Id<"persons">
 ) {
@@ -164,7 +171,7 @@ async function moveIdentityBatch(
   const now = Date.now()
 
   for (const identity of identities) {
-    if (identity.tenantId === tenantId) {
+    if (identity.organizationId === organizationId) {
       await ctx.db.patch(identity._id, {
         personId: targetPersonId,
         updatedAt: now,
@@ -178,7 +185,7 @@ async function moveIdentityBatch(
 async function scheduleIdentityRewrite(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     sourcePersonId: Id<"persons">
     targetPersonId: Id<"persons">
   }
@@ -193,7 +200,7 @@ async function scheduleIdentityRewrite(
 async function scheduleArtifactOwnerRewrite(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     sourcePersonId: Id<"persons">
     targetPersonId: Id<"persons">
   }

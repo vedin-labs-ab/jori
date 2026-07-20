@@ -36,9 +36,9 @@ export async function readRunAssets(
 
   for (const input of inputs) {
     const asset = await context.ctx.runQuery(
-      internal.assets.data.getForTenant,
+      internal.assets.data.getForOrganization,
       {
-        tenantId: context.run.tenantId,
+        organizationId: context.run.organizationId,
         assetId: input.assetId as Id<"assets">,
       }
     )

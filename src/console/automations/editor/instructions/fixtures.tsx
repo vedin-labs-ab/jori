@@ -61,7 +61,7 @@ export function renderInstructionsField({
       scope={nextScope}
       skills={skills}
       surfaces={surfaces}
-      tenantId="tenant"
+      organizationId="organization"
       value={description}
       webSearch={webSearch}
     />

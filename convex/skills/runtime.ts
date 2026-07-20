@@ -11,7 +11,7 @@ export type RuntimeSkill = {
   }
   description: string
   name: string
-  tenantId: string | null
+  organizationId: string | null
 }
 
 export function listRuntimeSkills(skills: readonly RuntimeSkill[]) {
@@ -41,9 +41,9 @@ export function getRuntimeSkillForIntegration(
   )
 
   return (
-    candidates.find(isTenantCommunicationSkill) ??
+    candidates.find(isOrganizationCommunicationSkill) ??
     candidates.find(isCommunicationSkill) ??
-    candidates.find((skill) => skill.tenantId !== null) ??
+    candidates.find((skill) => skill.organizationId !== null) ??
     candidates[0] ??
     null
   )
@@ -71,11 +71,11 @@ function shouldReplaceRuntimeSkill(
   existing: RuntimeSkill,
   candidate: RuntimeSkill
 ) {
-  return existing.tenantId === null && candidate.tenantId !== null
+  return existing.organizationId === null && candidate.organizationId !== null
 }
 
-function isTenantCommunicationSkill(skill: RuntimeSkill) {
-  return skill.tenantId !== null && isCommunicationSkill(skill)
+function isOrganizationCommunicationSkill(skill: RuntimeSkill) {
+  return skill.organizationId !== null && isCommunicationSkill(skill)
 }
 
 function isCommunicationSkill(skill: RuntimeSkill) {

@@ -9,7 +9,7 @@ export async function resolveApprovalActor(
   args: {
     actor: Actor
     surface: ToolSurface
-    tenantId: string
+    organizationId: string
   }
 ) {
   const provider = approvalIdentityProvider(args.surface)
@@ -21,7 +21,7 @@ export async function resolveApprovalActor(
   await resolveActor(ctx, {
     actor: args.actor,
     provider,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 }
 

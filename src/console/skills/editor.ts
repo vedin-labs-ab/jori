@@ -6,18 +6,18 @@ import { emptySkillForm, type Skill, type SkillFormValues } from "./types"
 
 export type SkillEditor = ReturnType<typeof useSkillEditor>
 
-export function useSkillEditor(tenantId: string) {
+export function useSkillEditor(organizationId: string) {
   const [pendingSkillId, setPendingSkillId] = useState<string>()
 
   return {
     pendingSkillId,
-    ...useSkillForm(tenantId, setPendingSkillId),
-    ...useSkillDeletion(tenantId, setPendingSkillId),
+    ...useSkillForm(organizationId, setPendingSkillId),
+    ...useSkillDeletion(organizationId, setPendingSkillId),
   }
 }
 
 function useSkillForm(
-  tenantId: string,
+  organizationId: string,
   setPendingSkillId: (skillId: string | undefined) => void
 ) {
   const createSkill = useMutation(api.skills.catalog.create)
@@ -39,7 +39,7 @@ function useSkillForm(
         createSkill,
         formSkill,
         formValues,
-        tenantId,
+        organizationId,
         updateSkill,
       })
       setIsFormOpen(false)
@@ -66,25 +66,25 @@ async function persistSkill({
   createSkill,
   formSkill,
   formValues,
-  tenantId,
+  organizationId,
   updateSkill,
 }: {
   createSkill: ReactMutation<typeof api.skills.catalog.create>
   formSkill: Skill | undefined
   formValues: SkillFormValues
-  tenantId: string
+  organizationId: string
   updateSkill: ReactMutation<typeof api.skills.catalog.update>
 }) {
   if (formSkill === undefined) {
-    await createSkill({ tenantId, ...formValues })
+    await createSkill({ organizationId, ...formValues })
     return
   }
 
-  await updateSkill({ tenantId, skillId: formSkill._id, ...formValues })
+  await updateSkill({ organizationId, skillId: formSkill._id, ...formValues })
 }
 
 function useSkillDeletion(
-  tenantId: string,
+  organizationId: string,
   setPendingSkillId: (skillId: string | undefined) => void
 ) {
   const removeSkill = useMutation(api.skills.catalog.remove)
@@ -92,7 +92,7 @@ function useSkillDeletion(
   async function deleteSkill(skill: Skill) {
     setPendingSkillId(skill._id)
     try {
-      await removeSkill({ tenantId, skillId: skill._id })
+      await removeSkill({ organizationId, skillId: skill._id })
     } catch (removeError) {
       showErrorToast(removeError, "Couldn't delete the skill.")
     } finally {

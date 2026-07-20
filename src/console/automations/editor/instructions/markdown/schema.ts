@@ -19,13 +19,13 @@ type AutomationSurfacePolicyState =
 export type AutomationSurfaceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
   getScope: () => Scope
-  getTenantId: () => string
+  getOrganizationId: () => string
 }
 
 export type AutomationReferenceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
   getScope: () => Scope
-  getTenantId: () => string
+  getOrganizationId: () => string
   getWebSearch: () => boolean
 }
 
@@ -40,7 +40,7 @@ export const AutomationSurfaceNode = Node.create<AutomationSurfaceNodeOptions>({
     return {
       getPermissions: () => undefined,
       getScope: () => "personal",
-      getTenantId: () => "",
+      getOrganizationId: () => "",
     }
   },
 
@@ -120,7 +120,7 @@ export const AutomationReferenceNode =
       return {
         getPermissions: () => undefined,
         getScope: () => "personal",
-        getTenantId: () => "",
+        getOrganizationId: () => "",
         getWebSearch: () => false,
       }
     },

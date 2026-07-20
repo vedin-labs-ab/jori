@@ -57,29 +57,29 @@ export type EffortEntry = {
 }
 
 export const assemble = internalQuery({
-  args: { tenantId: v.string(), scope: passScope, window: passWindow },
+  args: { organizationId: v.string(), scope: passScope, window: passWindow },
   handler: async (ctx, args): Promise<WorkstreamPassInput> => {
     const efforts = await loadEfforts(ctx, args)
     const changed =
       args.scope === "window"
         ? efforts.length
-        : (await windowEfforts(ctx, args.tenantId, args.window)).length
+        : (await windowEfforts(ctx, args.organizationId, args.window)).length
 
     return {
       window: args.window,
       scope: args.scope,
-      roster: await loadRoster(ctx, args.tenantId),
+      roster: await loadRoster(ctx, args.organizationId),
       efforts,
       changed,
     }
   },
 })
 
-async function loadRoster(ctx: QueryCtx, tenantId: string) {
+async function loadRoster(ctx: QueryCtx, organizationId: string) {
   const rows = await ctx.db
     .query("beliefs")
-    .withIndex("by_tenant_and_kind_and_status", (index) =>
-      index.eq("tenantId", tenantId).eq("kind", "workstream")
+    .withIndex("by_organization_and_kind_and_status", (index) =>
+      index.eq("organizationId", organizationId).eq("kind", "workstream")
     )
     .collect()
   const current = rows.filter((row) => row.supersededBy === undefined)
@@ -121,15 +121,19 @@ async function readRosterEntry(
 async function loadEfforts(
   ctx: QueryCtx,
   args: {
-    tenantId: string
+    organizationId: string
     scope: PassScope
     window: { start: number; end: number }
   }
 ) {
   const rows =
     args.scope === "window"
-      ? await windowEfforts(ctx, args.tenantId, args.window)
-      : await activeEffortRows(ctx, args.tenantId, maxConsolidationEfforts)
+      ? await windowEfforts(ctx, args.organizationId, args.window)
+      : await activeEffortRows(
+          ctx,
+          args.organizationId,
+          maxConsolidationEfforts
+        )
   const tail =
     args.scope === "window" ? effortJournalTail : consolidationJournalTail
   const current = rows.filter((row) => row.supersededBy === undefined)
@@ -144,14 +148,14 @@ async function loadEfforts(
 
 async function windowEfforts(
   ctx: QueryCtx,
-  tenantId: string,
+  organizationId: string,
   window: { start: number; end: number }
 ) {
   return await ctx.db
     .query("efforts")
-    .withIndex("by_tenant_and_updated_at", (index) =>
+    .withIndex("by_organization_and_updated_at", (index) =>
       index
-        .eq("tenantId", tenantId)
+        .eq("organizationId", organizationId)
         .gt("updatedAt", window.start)
         .lte("updatedAt", window.end)
     )

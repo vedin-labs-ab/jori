@@ -18,13 +18,13 @@ export const activeByIntegrationExternal = internalQuery({
 
 export const listActiveForRuntime = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     ownerId: v.optional(v.id("persons")),
   },
   handler: async (ctx, args) => {
     return await listActiveIntegrationsForOwner(ctx, {
       ownerId: args.ownerId as Id<"persons"> | undefined,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
   },
 })

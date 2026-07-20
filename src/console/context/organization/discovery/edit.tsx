@@ -12,7 +12,7 @@ import {
 import { DiscoveryWorkingStep, WebsiteDiscoveryStep } from "./website"
 
 type OrganizationEditDialogProps = {
-  tenantId: string
+  organizationId: string
   website: string | undefined
   discovery: OrganizationDiscovery | undefined
   onOpenChange: (open: boolean) => void
@@ -20,7 +20,7 @@ type OrganizationEditDialogProps = {
 }
 
 export function OrganizationEditDialog({
-  tenantId,
+  organizationId,
   website,
   discovery,
   onOpenChange,
@@ -52,7 +52,7 @@ export function OrganizationEditDialog({
     setPendingStartedAt(discovery?.startedAt ?? null)
 
     try {
-      await discover({ tenantId, website: normalizedWebsite })
+      await discover({ organizationId, website: normalizedWebsite })
       setStep("working")
     } catch (caught) {
       reportWebsiteStartError(caught, setError)

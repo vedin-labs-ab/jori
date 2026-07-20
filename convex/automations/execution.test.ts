@@ -17,7 +17,10 @@ describe("durable automation run tool execution", () => {
     ["paused", automation({ status: "paused" })],
     ["completed", automation({ status: "completed" })],
     ["stale generation", automation({ configurationVersion: 3 })],
-    ["wrong tenant", automation({ tenantId: "another-tenant" })],
+    [
+      "wrong organization",
+      automation({ organizationId: "another-organization" }),
+    ],
     [
       "wrong principal",
       automation({
@@ -131,7 +134,7 @@ function automation(
     parentId?: string
     principal?: Doc<"automations">["principal"]
     status?: Doc<"automations">["status"]
-    tenantId?: string
+    organizationId?: string
     type?: Doc<"automations">["type"]
   } = {}
 ): Doc<"automations"> {
@@ -150,7 +153,7 @@ function automation(
     },
     scope: "personal",
     status: input.status ?? "active",
-    tenantId: input.tenantId ?? "tenant",
+    organizationId: input.organizationId ?? "organization",
     trigger: { expression: "0 8 * * *", nextAt: 1000, timezone: "UTC" },
     type: input.type ?? "cron",
     updatedAt: 0,
@@ -196,6 +199,6 @@ function run(
     scope: "person",
     snapshot: { context: [], source: { type: "manual" }, title: "Run" },
     status: input.status ?? "running",
-    tenantId: "tenant",
+    organizationId: "organization",
   }
 }

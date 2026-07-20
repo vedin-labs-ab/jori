@@ -7,7 +7,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { resolveCurrentPerson } from "../persons/clerk"
 import {
   type Integration,
@@ -16,16 +16,16 @@ import {
   isGoogleIntegration,
   isUserScopedIntegration,
 } from "../shared/integrations"
-import { getTenantIntegration, getUserIntegrationForOwner } from "./data"
+import { getOrganizationIntegration, getUserIntegrationForOwner } from "./data"
 import { revokeIntegrationAccess } from "./revoke"
 
 export const disconnect = action({
   args: {
     integration: integrationValidator,
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args): Promise<Id<"integrations"> | null> => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     const target: DisconnectTarget | null = await ctx.runQuery(
       internal.integrations.disconnect.getDisconnectTarget,
@@ -63,7 +63,7 @@ export const disconnect = action({
       externalId: requireExternalId(target.integration),
       ownerId: target.integration.ownerId,
       integration: target.integration.integration,
-      tenantId: target.integration.tenantId,
+      organizationId: target.integration.organizationId,
     })
 
     return target.integration._id
@@ -73,20 +73,20 @@ export const disconnect = action({
 export const getDisconnectTarget = internalQuery({
   args: {
     integration: integrationValidator,
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args): Promise<DisconnectTarget | null> => {
-    await requireTenantAccess(ctx, args.tenantId)
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const integration = isUserScopedIntegration(args.integration)
       ? await getUserIntegrationForOwner(ctx, {
           ownerId: personId,
           integration: args.integration,
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
         })
-      : await getTenantIntegration(ctx, {
+      : await getOrganizationIntegration(ctx, {
           integration: args.integration,
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
         })
 
     if (integration === null || integration.status !== "active") {
@@ -148,7 +148,7 @@ export const finishDisconnect = internalMutation({
     externalId: v.string(),
     ownerId: v.optional(v.id("persons")),
     integration: integrationValidator,
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
     for (const integration of await listLinkedGoogleIntegrations(ctx, args)) {
@@ -174,7 +174,7 @@ async function listLinkedGoogleIntegrations(
     externalId: string
     ownerId?: Id<"persons"> | undefined
     integration: Integration
-    tenantId: string
+    organizationId: string
   }
 ) {
   if (!isGoogleIntegration(args.integration) || args.ownerId === undefined) {
@@ -187,7 +187,7 @@ async function listLinkedGoogleIntegrations(
     const candidate = await getUserIntegrationForOwner(ctx, {
       ownerId: args.ownerId,
       integration,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
 
     if (

@@ -116,7 +116,7 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
         rootId: null,
         sandboxId: null,
         status: "running",
-        tenantId: "tenant",
+        organizationId: "organization",
       },
       session: null,
       tools: [finishRunTool()],

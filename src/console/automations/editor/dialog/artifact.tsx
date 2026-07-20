@@ -33,10 +33,10 @@ type ArtifactDetail = Extract<
  * automations; prospective for playbook drafts that provision on create.
  */
 export function AutomationArtifactSection({
-  tenantId,
+  organizationId,
   values,
 }: {
-  tenantId: string
+  organizationId: string
   values: AutomationFormValues
 }) {
   const definition = playbookCatalog.find(
@@ -65,7 +65,7 @@ export function AutomationArtifactSection({
         <LiveArtifact
           artifactId={values.artifactId}
           definition={definition}
-          tenantId={tenantId}
+          organizationId={organizationId}
         />
       )}
     </div>
@@ -107,13 +107,16 @@ function ProspectiveArtifact({
 function LiveArtifact({
   artifactId,
   definition,
-  tenantId,
+  organizationId,
 }: {
   artifactId: NonNullable<AutomationFormValues["artifactId"]>
   definition: PlaybookDefinition | undefined
-  tenantId: string
+  organizationId: string
 }) {
-  const result = useQuery(api.artifacts.console.get, { tenantId, artifactId })
+  const result = useQuery(api.artifacts.console.get, {
+    organizationId,
+    artifactId,
+  })
 
   if (result === undefined) {
     return <Skeleton className="h-16 w-full" />

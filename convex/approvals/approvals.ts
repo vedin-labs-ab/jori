@@ -24,7 +24,7 @@ import {
 
 export const create = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     runId: v.id("runs"),
     surface: toolSurfaceValidator,
     tool: v.string(),
@@ -37,7 +37,7 @@ export const create = internalMutation({
     await resolveApprovalActor(ctx, {
       actor: args.requestedBy,
       surface: args.surface,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
     const reusable = await findReusableApproval(ctx, args)
 
@@ -53,7 +53,7 @@ export const create = internalMutation({
     const now = Date.now()
     const expiresAt = now + approvalTtlMs
     const approvalId = await ctx.db.insert("approvals", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       runId: args.runId,
       surface: args.surface,
       tool: args.tool,
@@ -148,7 +148,7 @@ export const decide = internalMutation({
     await resolveApprovalActor(ctx, {
       actor: args.decidedBy,
       surface: approval.surface,
-      tenantId: approval.tenantId,
+      organizationId: approval.organizationId,
     })
     const updated = await markApprovalDecided(ctx, approval, {
       decidedBy: args.decidedBy,
@@ -168,7 +168,7 @@ export const cancel = internalMutation({
     approvalId: v.id("approvals"),
     messageId: v.id("messages"),
     runId: v.id("runs"),
-    tenantId: v.string(),
+    organizationId: v.string(),
     reason: v.string(),
   },
   handler: async (ctx, args) => {
@@ -177,7 +177,7 @@ export const cancel = internalMutation({
     if (
       approval === null ||
       approval.runId !== args.runId ||
-      approval.tenantId !== args.tenantId
+      approval.organizationId !== args.organizationId
     ) {
       return { status: "missing" as const }
     }
@@ -189,7 +189,7 @@ export const cancel = internalMutation({
     const cancelledBy = await resolveCancellationActor(ctx, {
       messageId: args.messageId,
       runId: args.runId,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
 
     if (cancelledBy === null) {
@@ -199,7 +199,7 @@ export const cancel = internalMutation({
     await resolveApprovalActor(ctx, {
       actor: cancelledBy,
       surface: approval.surface,
-      tenantId: approval.tenantId,
+      organizationId: approval.organizationId,
     })
     const updated = await markApprovalCancelled(ctx, approval, {
       cancelledBy,

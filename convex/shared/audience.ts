@@ -1,9 +1,9 @@
 import { v } from "convex/values"
 
-export type AudienceScope = "conversation" | "person" | "tenant"
+export type AudienceScope = "conversation" | "person" | "organization"
 
 export const audienceScopeValidator = v.union(
-  v.literal("tenant"),
+  v.literal("organization"),
   v.literal("conversation"),
   v.literal("person")
 )

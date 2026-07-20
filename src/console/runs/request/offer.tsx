@@ -41,12 +41,12 @@ export function OfferCallout({
   now,
   offers,
   runId,
-  tenantId,
+  organizationId,
 }: {
   now: number
   offers: Offer[]
   runId: string
-  tenantId: string
+  organizationId: string
 }) {
   const carousel = useRunRequestCarousel(offers.length)
   const offer = offers[carousel.index] ?? offers[0]
@@ -63,7 +63,7 @@ export function OfferCallout({
             key={offer.id}
             offer={offer}
             runId={runId}
-            tenantId={tenantId}
+            organizationId={organizationId}
           />
         ) : undefined
       }
@@ -89,11 +89,11 @@ export function OfferCallout({
 function OfferActions({
   offer,
   runId,
-  tenantId,
+  organizationId,
 }: {
   offer: Offer
   runId: string
-  tenantId: string
+  organizationId: string
 }) {
   const claim = useMutation(api.runs.console.offers.claim)
   const cancel = useMutation(api.runs.console.offers.cancel)
@@ -104,13 +104,13 @@ function OfferActions({
 
     try {
       if (action === "cancel") {
-        const result = await cancel(cancelArgs(offer, runId, tenantId))
+        const result = await cancel(cancelArgs(offer, runId, organizationId))
 
         if (result.status !== "cancelled") {
           throw new Error("This integration offer is already resolved.")
         }
       } else {
-        await connectOffer(claim, offer, runId, tenantId)
+        await connectOffer(claim, offer, runId, organizationId)
       }
     } catch (caught) {
       showErrorToast(caught, "Couldn't update the integration offer.")
@@ -156,7 +156,7 @@ async function connectOffer(
   claim: (args: ClaimArgs) => Promise<ClaimResult>,
   offer: Offer,
   runId: string,
-  tenantId: string
+  organizationId: string
 ) {
   if (!convexSiteUrl) {
     throw new Error("Missing VITE_CONVEX_SITE_URL.")
@@ -166,7 +166,7 @@ async function connectOffer(
 
   try {
     const result = await claim({
-      ...offerIds(offer, runId, tenantId),
+      ...offerIds(offer, runId, organizationId),
       returnUrl: runOfferReturnUrl(),
     })
 
@@ -203,15 +203,19 @@ function openConnectTab() {
   return tab
 }
 
-function cancelArgs(offer: Offer, runId: string, tenantId: string): CancelArgs {
-  return offerIds(offer, runId, tenantId)
+function cancelArgs(
+  offer: Offer,
+  runId: string,
+  organizationId: string
+): CancelArgs {
+  return offerIds(offer, runId, organizationId)
 }
 
-function offerIds(offer: Offer, runId: string, tenantId: string) {
+function offerIds(offer: Offer, runId: string, organizationId: string) {
   return {
     integrationOfferId: offer.id as ClaimArgs["integrationOfferId"],
     runId: runId as ClaimArgs["runId"],
-    tenantId,
+    organizationId,
   }
 }
 

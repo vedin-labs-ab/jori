@@ -20,6 +20,11 @@ const maxPages = 7
 
 type StepKind = "page" | "summary"
 
+type Discovery = {
+  ctx: ActionCtx
+  organizationId: string
+}
+
 type DraftResult = {
   facts: OrganizationFacts
   stepId: string
@@ -35,31 +40,33 @@ type QueuedCrawl = {
 // links to read from the homepage. Progress is streamed to the discovery row so
 // the console can show it live.
 export const run = internalAction({
-  args: { tenantId: v.string(), primaryUrl: v.string() },
+  args: { organizationId: v.string(), primaryUrl: v.string() },
   handler: async (ctx, args) => {
+    const discovery = { ctx, organizationId: args.organizationId }
+
     await ctx.runMutation(internal.organization.discovery.start, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
 
     try {
-      await discover(ctx, args.tenantId, args.primaryUrl)
+      await discover(discovery, args.primaryUrl)
       await ctx.runMutation(internal.organization.discovery.finish, {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
       })
     } catch (error) {
-      await reportFailure(ctx, args.tenantId, error)
+      await reportFailure(discovery, error)
     }
   },
 })
 
-async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
+async function discover(discovery: Discovery, primaryUrl: string) {
   const host = hostFromUrl(primaryUrl)
 
   if (host === null) {
     throw new Error("The organization website is not a valid URL.")
   }
 
-  const home = await crawl(ctx, tenantId, `Reading ${host}`, primaryUrl)
+  const home = await crawl(discovery, `Reading ${host}`, primaryUrl)
 
   if (home === null) {
     throw new Error("Could not read any content from the website.")
@@ -71,23 +78,22 @@ async function discover(ctx: ActionCtx, tenantId: string, primaryUrl: string) {
     candidates: candidateLinks(host, pages),
     limit: maxPages,
   })
-  const queued = await queueCrawls(ctx, tenantId, chosen)
+  const queued = await queueCrawls(discovery, chosen)
 
   for (const queuedCrawl of queued) {
-    const page = await crawlQueued(ctx, tenantId, queuedCrawl)
+    const page = await crawlQueued(discovery, queuedCrawl)
 
     if (page !== null) {
       pages.push(page)
     }
   }
 
-  const draft = await extractDraft(ctx, tenantId, primaryUrl, pages)
-  await proposeDraft(ctx, tenantId, primaryUrl, pages, draft)
+  const draft = await extractDraft(discovery, primaryUrl, pages)
+  await proposeDraft(discovery, primaryUrl, pages, draft)
 }
 
 async function proposeDraft(
-  ctx: ActionCtx,
-  tenantId: string,
+  discovery: Discovery,
   primaryUrl: string,
   pages: CrawledPage[],
   draft: DraftResult
@@ -95,43 +101,37 @@ async function proposeDraft(
   const sources = pages.map(toSource)
 
   try {
-    await ctx.runMutation(internal.organization.profile.propose, {
-      tenantId,
+    await discovery.ctx.runMutation(internal.organization.profile.propose, {
+      organizationId: discovery.organizationId,
       facts: draft.facts,
       sources,
       website: primaryUrl,
     })
     // Re-baseline the watcher's fingerprints only after the draft landed; on
     // failure the stale hashes make a later sweep retry the whole draft.
-    await ctx.runMutation(internal.organization.sources.baseline, {
-      tenantId,
+    await discovery.ctx.runMutation(internal.organization.sources.baseline, {
+      organizationId: discovery.organizationId,
       sources,
     })
-    await completeStep(ctx, tenantId, draft.stepId)
+    await completeStep(discovery, draft.stepId)
   } catch (error) {
-    await completeStep(ctx, tenantId, draft.stepId, messageFrom(error))
+    await completeStep(discovery, draft.stepId, messageFrom(error))
     throw error
   }
 }
 
-async function crawl(
-  ctx: ActionCtx,
-  tenantId: string,
-  label: string,
-  url: string
-) {
-  const stepId = await startStep(ctx, tenantId, "page", label, url)
+async function crawl(discovery: Discovery, label: string, url: string) {
+  const stepId = await startStep(discovery, "page", label, url)
 
-  return await crawlStep(ctx, tenantId, stepId, url)
+  return await crawlStep(discovery, stepId, url)
 }
 
-async function queueCrawls(ctx: ActionCtx, tenantId: string, urls: string[]) {
+async function queueCrawls(discovery: Discovery, urls: string[]) {
   const queued: QueuedCrawl[] = []
 
   for (const url of urls) {
     const stepId = await queueStep(
-      ctx,
-      tenantId,
+      discovery,
       "page",
       `Exploring ${shortPath(url)}`,
       url
@@ -143,47 +143,37 @@ async function queueCrawls(ctx: ActionCtx, tenantId: string, urls: string[]) {
   return queued
 }
 
-async function crawlQueued(
-  ctx: ActionCtx,
-  tenantId: string,
-  queued: QueuedCrawl
-) {
-  await activateStep(ctx, tenantId, queued.stepId)
+async function crawlQueued(discovery: Discovery, queued: QueuedCrawl) {
+  await activateStep(discovery, queued.stepId)
 
-  return await crawlStep(ctx, tenantId, queued.stepId, queued.url)
+  return await crawlStep(discovery, queued.stepId, queued.url)
 }
 
 // Fetches one page for an open step and completes the step either way; page
 // failures are recorded on the step, and callers decide whether to keep going.
-async function crawlStep(
-  ctx: ActionCtx,
-  tenantId: string,
-  stepId: string,
-  url: string
-) {
+async function crawlStep(discovery: Discovery, stepId: string, url: string) {
   try {
     const page = await crawlPage(url)
 
     if (page !== null) {
-      await completeStep(ctx, tenantId, stepId)
+      await completeStep(discovery, stepId)
       return page
     }
   } catch {
     // Fall through to record the failure on the step.
   }
 
-  await completeStep(ctx, tenantId, stepId, `Could not read ${shortPath(url)}`)
+  await completeStep(discovery, stepId, `Could not read ${shortPath(url)}`)
 
   return null
 }
 
 async function extractDraft(
-  ctx: ActionCtx,
-  tenantId: string,
+  discovery: Discovery,
   primaryUrl: string,
   pages: CrawledPage[]
 ): Promise<DraftResult> {
-  const stepId = await startStep(ctx, tenantId, "summary", "Drafting profile")
+  const stepId = await startStep(discovery, "summary", "Drafting profile")
 
   try {
     return {
@@ -191,7 +181,7 @@ async function extractDraft(
       stepId,
     }
   } catch (error) {
-    await completeStep(ctx, tenantId, stepId, messageFrom(error))
+    await completeStep(discovery, stepId, messageFrom(error))
     throw error
   }
 }
@@ -205,61 +195,77 @@ function toSource(page: CrawledPage, index: number): SourceSnapshot {
 }
 
 async function startStep(
-  ctx: ActionCtx,
-  tenantId: string,
+  discovery: Discovery,
   kind: StepKind,
   label: string,
   url?: string
 ) {
   const stepId = randomUUID()
 
-  await ctx.runMutation(
+  await discovery.ctx.runMutation(
     internal.organization.discovery.startStep,
-    compactRecord({ id: stepId, tenantId, kind, label, url })
+    compactRecord({
+      id: stepId,
+      organizationId: discovery.organizationId,
+      kind,
+      label,
+      url,
+    })
   )
 
   return stepId
 }
 
 async function queueStep(
-  ctx: ActionCtx,
-  tenantId: string,
+  discovery: Discovery,
   kind: StepKind,
   label: string,
   url?: string
 ) {
   const stepId = randomUUID()
 
-  await ctx.runMutation(
+  await discovery.ctx.runMutation(
     internal.organization.discovery.queueStep,
-    compactRecord({ id: stepId, tenantId, kind, label, url })
+    compactRecord({
+      id: stepId,
+      organizationId: discovery.organizationId,
+      kind,
+      label,
+      url,
+    })
   )
 
   return stepId
 }
 
-async function activateStep(ctx: ActionCtx, tenantId: string, stepId: string) {
-  await ctx.runMutation(internal.organization.discovery.activateStep, {
-    tenantId,
-    id: stepId,
-  })
-}
-
-async function completeStep(
-  ctx: ActionCtx,
-  tenantId: string,
-  stepId: string,
-  error?: string
-) {
-  await ctx.runMutation(
-    internal.organization.discovery.completeStep,
-    compactRecord({ tenantId, id: stepId, error })
+async function activateStep(discovery: Discovery, stepId: string) {
+  await discovery.ctx.runMutation(
+    internal.organization.discovery.activateStep,
+    {
+      organizationId: discovery.organizationId,
+      id: stepId,
+    }
   )
 }
 
-async function reportFailure(ctx: ActionCtx, tenantId: string, error: unknown) {
-  await ctx.runMutation(internal.organization.discovery.finish, {
-    tenantId,
+async function completeStep(
+  discovery: Discovery,
+  stepId: string,
+  error?: string
+) {
+  await discovery.ctx.runMutation(
+    internal.organization.discovery.completeStep,
+    compactRecord({
+      organizationId: discovery.organizationId,
+      id: stepId,
+      error,
+    })
+  )
+}
+
+async function reportFailure(discovery: Discovery, error: unknown) {
+  await discovery.ctx.runMutation(internal.organization.discovery.finish, {
+    organizationId: discovery.organizationId,
     error: messageFrom(error),
   })
 }

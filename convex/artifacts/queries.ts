@@ -6,7 +6,7 @@ import {
   searchArtifacts,
   summarizeArtifact,
 } from "./access"
-import { getTenantArtifact } from "./storage/links"
+import { getOrganizationArtifact } from "./storage/links"
 
 export const getExistingBlobIds = internalQuery({
   args: {
@@ -32,16 +32,16 @@ export const getExistingBlobIds = internalQuery({
 
 export const findTemplate = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     template: v.string(),
     partition: v.string(),
   },
   handler: async (ctx, args) => {
     const artifact = await ctx.db
       .query("artifacts")
-      .withIndex("by_tenant_and_template", (index) =>
+      .withIndex("by_organization_and_template", (index) =>
         index
-          .eq("tenantId", args.tenantId)
+          .eq("organizationId", args.organizationId)
           .eq("templatePartition", args.partition)
           .eq("template", args.template)
       )
@@ -63,7 +63,7 @@ export const findTemplate = internalQuery({
 
 export const searchForAgent = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.id("persons"),
     query: v.optional(v.string()),
     includeArchived: v.optional(v.boolean()),
@@ -78,7 +78,7 @@ export const searchForAgent = internalQuery({
 
 export const readForAgent = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.id("persons"),
     artifactId: v.id("artifacts"),
   },
@@ -115,13 +115,13 @@ export const readForAgent = internalQuery({
 
 export const getArtifactIdForRun = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     runId: v.id("runs"),
   },
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
-    if (run === null || run.tenantId !== args.tenantId) {
+    if (run === null || run.organizationId !== args.organizationId) {
       return null
     }
 
@@ -135,7 +135,7 @@ export const getArtifactIdForRun = internalQuery({
 
     const automation = await ctx.db.get(run.automationId)
 
-    return automation?.tenantId === args.tenantId
+    return automation?.organizationId === args.organizationId
       ? (automation.artifactId ?? null)
       : null
   },
@@ -143,12 +143,12 @@ export const getArtifactIdForRun = internalQuery({
 
 export const listSourceFiles = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     versionId: v.optional(v.id("artifactVersions")),
   },
   handler: async (ctx, args) => {
-    const artifact = await getTenantArtifact(ctx, args)
+    const artifact = await getOrganizationArtifact(ctx, args)
     const versionId = args.versionId ?? artifact.versionId
 
     if (versionId === undefined) {
@@ -160,7 +160,7 @@ export const listSourceFiles = internalQuery({
     if (
       version === null ||
       version.artifactId !== args.artifactId ||
-      version.tenantId !== args.tenantId
+      version.organizationId !== args.organizationId
     ) {
       return null
     }

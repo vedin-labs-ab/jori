@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import { checkTenantAccess } from "../access"
+import { checkOrganizationAccess } from "../access"
 import { type Integration } from "../shared/integrations"
 import { eventKindLabel, statusLabels } from "./labels"
 
@@ -17,9 +17,9 @@ const rollupLimit = 1000
 const timelineLimit = 500
 
 export const list = query({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return { status: "unauthorized" as const, workstreams: [] }
@@ -27,8 +27,8 @@ export const list = query({
 
     const rows = await ctx.db
       .query("beliefs")
-      .withIndex("by_tenant_and_kind_and_status", (index) =>
-        index.eq("tenantId", args.tenantId).eq("kind", "workstream")
+      .withIndex("by_organization_and_kind_and_status", (index) =>
+        index.eq("organizationId", args.organizationId).eq("kind", "workstream")
       )
       .collect()
     const current = rows
@@ -43,9 +43,9 @@ export const list = query({
 })
 
 export const get = query({
-  args: { tenantId: v.string(), workstreamId: v.id("beliefs") },
+  args: { organizationId: v.string(), workstreamId: v.id("beliefs") },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
     const belief = access.ok ? await loadWorkstream(ctx, args) : null
 
     return belief === null
@@ -60,9 +60,9 @@ export const get = query({
 // and rate-limited by the charter, so a year of an active workstream stays
 // in the hundreds; paging in the console is the progressive disclosure.
 export const timeline = query({
-  args: { tenantId: v.string(), workstreamId: v.id("beliefs") },
+  args: { organizationId: v.string(), workstreamId: v.id("beliefs") },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
     const belief = access.ok ? await loadWorkstream(ctx, args) : null
 
     if (belief === null) {
@@ -100,15 +100,15 @@ export const timeline = query({
 // the same effort — the citations behind the claim.
 export const receipts = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     effortId: v.id("efforts"),
     passId: v.id("passes"),
   },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
     const effort = access.ok ? await ctx.db.get(args.effortId) : null
 
-    if (effort === null || effort.tenantId !== args.tenantId) {
+    if (effort === null || effort.organizationId !== args.organizationId) {
       return []
     }
 
@@ -191,12 +191,12 @@ function listRow(row: Doc<"beliefs">) {
 
 async function loadWorkstream(
   ctx: QueryCtx,
-  args: { tenantId: string; workstreamId: Id<"beliefs"> }
+  args: { organizationId: string; workstreamId: Id<"beliefs"> }
 ) {
   const belief = await ctx.db.get(args.workstreamId)
 
   return belief !== null &&
-    belief.tenantId === args.tenantId &&
+    belief.organizationId === args.organizationId &&
     belief.kind === "workstream"
     ? belief
     : null

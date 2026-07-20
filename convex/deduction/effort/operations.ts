@@ -25,7 +25,7 @@ export async function applyCreate(
   sightings: Sighting[]
 ) {
   const effortId = await ctx.db.insert("efforts", {
-    tenantId: pass.tenantId,
+    organizationId: pass.organizationId,
     name: op.name,
     summary: op.summary,
     seenAt: maxObservedAt(sightings),
@@ -39,7 +39,7 @@ export async function applyCreate(
   state.temp.set(op.tempId, effortId)
   state.counts.created += 1
   await ctx.db.insert("journal", {
-    tenantId: pass.tenantId,
+    organizationId: pass.organizationId,
     effortId,
     passId: pass._id,
     entry: op.entry,
@@ -58,7 +58,7 @@ export async function applyUpdate(
 ) {
   const effort = await resolveEffort(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     state.temp,
     op.effortId
   )
@@ -94,7 +94,7 @@ export async function applyJournal(
 ) {
   const effort = await resolveEffort(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     state.temp,
     op.effortId
   )
@@ -106,7 +106,7 @@ export async function applyJournal(
   }
 
   await ctx.db.insert("journal", {
-    tenantId: pass.tenantId,
+    organizationId: pass.organizationId,
     effortId: effort._id,
     passId: pass._id,
     entry: op.entry,
@@ -130,11 +130,16 @@ export async function applyMerge(
 ) {
   const effort = await resolveEffort(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     state.temp,
     op.effortId
   )
-  const into = await resolveEffort(ctx, pass.tenantId, state.temp, op.into)
+  const into = await resolveEffort(
+    ctx,
+    pass.organizationId,
+    state.temp,
+    op.into
+  )
 
   if (effort === null || into === null || effort._id === into._id) {
     discard(state, op.op, "unknown or self merge target")

@@ -57,13 +57,13 @@ async function applyCheckoutCompleted(
   session: Record<string, unknown>
 ) {
   const metadata = readRecord(session.metadata)
-  const tenantId = readString(metadata, "tenantId")
+  const organizationId = readString(metadata, "organizationId")
 
-  if (tenantId === undefined) {
+  if (organizationId === undefined) {
     return
   }
 
-  const account = await ensureAccount(ctx, tenantId)
+  const account = await ensureAccount(ctx, organizationId)
   const customerId = readString(session, "customer")
 
   if (customerId !== undefined && account.stripeCustomerId === undefined) {
@@ -218,9 +218,9 @@ async function applyPaymentIntent(
     return
   }
 
-  const tenantId = readString(metadata, "tenantId")
+  const organizationId = readString(metadata, "organizationId")
   const account =
-    tenantId === undefined ? null : await getAccount(ctx, tenantId)
+    organizationId === undefined ? null : await getAccount(ctx, organizationId)
 
   if (account === null) {
     return
@@ -262,10 +262,13 @@ async function findSubscriptionAccount(
   ctx: MutationCtx,
   subscription: Record<string, unknown>
 ) {
-  const tenantId = readString(readRecord(subscription.metadata), "tenantId")
+  const organizationId = readString(
+    readRecord(subscription.metadata),
+    "organizationId"
+  )
 
-  if (tenantId !== undefined) {
-    return await getAccount(ctx, tenantId)
+  if (organizationId !== undefined) {
+    return await getAccount(ctx, organizationId)
   }
 
   const customerId = readString(subscription, "customer")

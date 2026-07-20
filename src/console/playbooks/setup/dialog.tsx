@@ -71,7 +71,7 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
           providerIndex={providerIndex}
           row={row}
           setupFields={setupFields}
-          tenantId={props.tenantId}
+          organizationId={props.organizationId}
         />
         <EditSetupNotes definition={definition} enabled={enabled} />
         <SetupFooter
@@ -100,7 +100,7 @@ type PlaybookSetupDialogProps = {
   // A resolvable plan (never "connect": the card gates on connection first).
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>
   row: PlaybookListRow
-  tenantId: string
+  organizationId: string
 }
 
 /** Dialog state: option picks, delivery, provider choices, and gating. An
@@ -111,14 +111,18 @@ function useSetupState({
   enabled,
   plan,
   row,
-  tenantId,
+  organizationId,
 }: PlaybookSetupDialogProps) {
   const [providerIndex, setProviderIndex] = useState(0)
   const setup = enabled?.setup ?? undefined
-  const delivery = useDeliverySetup(row.delivery, tenantId, setup)
+  const delivery = useDeliverySetup(row.delivery, organizationId, setup)
   const pendingKind = pendingActionKind(actions, definition)
   const { options, setupFields } = useOptionsSetup(definition, setup?.options)
-  const { hints, optionsIssue } = useOptionHints(definition, tenantId, options)
+  const { hints, optionsIssue } = useOptionHints(
+    definition,
+    organizationId,
+    options
+  )
   const choices =
     setup?.providers ??
     (plan.kind === "choose"
@@ -223,11 +227,11 @@ function SetupDialogHeader({
  * Delivery state for the setup dialog: `value` is the committed destination —
  * the field only reports saved, valid choices, so an unsaved edit never leaks
  * into the actions — and `editing` flags an open edit. An enablement's stored
- * destination wins over the tenant-wide recommendation.
+ * destination wins over the organization-wide recommendation.
  */
 function useDeliverySetup(
   setup: DeliverySetup,
-  tenantId: string,
+  organizationId: string,
   stored?: { destination: DeliveryChoice }
 ) {
   const savePreference = useMutation(
@@ -241,7 +245,7 @@ function useDeliverySetup(
     editing,
     onChange: (delivery: DeliveryChoice) => {
       setValue(delivery)
-      void savePreference({ tenantId, delivery }).catch((error) =>
+      void savePreference({ organizationId, delivery }).catch((error) =>
         showErrorToast(error, "Couldn't save your delivery preference.")
       )
     },

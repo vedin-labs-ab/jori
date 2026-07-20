@@ -167,7 +167,7 @@ function approvalDoc(): Doc<"approvals"> {
     status: "pending",
     summary: "Commit the PRODUCT.md wording fix.",
     surface: "github",
-    tenantId: "tenant",
+    organizationId: "organization",
     tool: "github_commit_to_pull_request",
   }
 }
@@ -181,9 +181,9 @@ function integrationDoc(): Doc<"integrations"> {
     credentials: {},
     externalId: "123",
     integration: "github",
-    scope: "tenant",
+    scope: "organization",
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     updatedAt: 0,
   }
 }

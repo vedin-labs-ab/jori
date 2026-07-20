@@ -203,7 +203,7 @@ function discovery(
     startedAt: 0,
     status,
     steps,
-    tenantId: "tenant",
+    organizationId: "organization",
     ...(status === "completed" ? { endedAt: 25_000 } : {}),
   }
 }

@@ -58,13 +58,13 @@ export async function loadRunBrokerContext(
   const permissions = await ctx.runQuery(
     internal.permissions.tools.listForRuntime,
     {
-      tenantId: run.tenantId,
+      organizationId: run.organizationId,
     }
   )
   const connectedIntegrations = await ctx.runQuery(
     internal.integrations.lookup.listActiveForRuntime,
     {
-      tenantId: run.tenantId,
+      organizationId: run.organizationId,
       ownerId: executionPrincipalPersonId(run.principal),
     }
   )

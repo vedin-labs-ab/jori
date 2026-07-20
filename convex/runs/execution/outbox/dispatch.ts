@@ -239,7 +239,10 @@ async function callTriggerApi(path: string, body?: Record<string, unknown>) {
 }
 
 function runtimeTags(item: Doc<"outbox">) {
-  return [`tenant:${shortTag(item.tenantId)}`, `outbox:${shortTag(item._id)}`]
+  return [
+    `organization:${shortTag(item.organizationId)}`,
+    `outbox:${shortTag(item._id)}`,
+  ]
 }
 
 function shortTag(value: string) {

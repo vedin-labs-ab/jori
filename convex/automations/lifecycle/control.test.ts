@@ -4,14 +4,14 @@ import { type MutationCtx } from "../../_generated/server"
 import { releaseSubscription } from "../subscriptions/data"
 import { deleteOwnedAutomations } from "./children"
 import { pauseAutomation, removeAutomation } from "./control"
-import { getRequiredAutomation, getTenantAutomation } from "./read"
+import { getOrganizationAutomation, getRequiredAutomation } from "./read"
 import { cancelTrigger } from "./trigger"
 
 vi.mock("../subscriptions/data", () => ({ releaseSubscription: vi.fn() }))
 vi.mock("./children", () => ({ deleteOwnedAutomations: vi.fn() }))
 vi.mock("./read", () => ({
   getRequiredAutomation: vi.fn(),
-  getTenantAutomation: vi.fn(),
+  getOrganizationAutomation: vi.fn(),
 }))
 vi.mock("./trigger", () => ({
   cancelTrigger: vi.fn(),
@@ -22,7 +22,7 @@ beforeEach(() => {
   vi.mocked(deleteOwnedAutomations).mockReset()
   vi.mocked(cancelTrigger).mockReset()
   vi.mocked(getRequiredAutomation).mockReset()
-  vi.mocked(getTenantAutomation).mockReset()
+  vi.mocked(getOrganizationAutomation).mockReset()
   vi.mocked(releaseSubscription).mockReset()
 })
 
@@ -30,7 +30,7 @@ test("pausing invalidates runs from the prior configuration", async () => {
   const automation = parentAutomation()
   const patch = vi.fn(async () => undefined)
   const ctx = { db: { patch } } as unknown as MutationCtx
-  vi.mocked(getTenantAutomation).mockResolvedValue(automation)
+  vi.mocked(getOrganizationAutomation).mockResolvedValue(automation)
   vi.mocked(getRequiredAutomation).mockResolvedValue({
     ...automation,
     configurationVersion: 8,
@@ -38,7 +38,7 @@ test("pausing invalidates runs from the prior configuration", async () => {
   })
 
   await pauseAutomation(ctx, {
-    tenantId: automation.tenantId,
+    organizationId: automation.organizationId,
     automationId: automation._id,
   })
 
@@ -53,16 +53,16 @@ test("removing stops the parent before deleting it and its children", async () =
   const automation = eventAutomation()
   const remove = vi.fn(async () => undefined)
   const ctx = { db: { delete: remove } } as unknown as MutationCtx
-  vi.mocked(getTenantAutomation).mockResolvedValue(automation)
+  vi.mocked(getOrganizationAutomation).mockResolvedValue(automation)
 
   await removeAutomation(ctx, {
-    tenantId: automation.tenantId,
+    organizationId: automation.organizationId,
     automationId: automation._id,
   })
 
   expect(cancelTrigger).toHaveBeenCalledWith(ctx, automation.trigger)
   expect(releaseSubscription).toHaveBeenCalledWith(ctx, {
-    tenantId: automation.tenantId,
+    organizationId: automation.organizationId,
     trigger: automation.trigger,
     exceptAutomationId: automation._id,
   })
@@ -74,7 +74,7 @@ function parentAutomation(): Doc<"automations"> {
   return {
     _id: "parent" as Id<"automations">,
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     configurationVersion: 7,
     name: "Meeting Briefing",
     instructions: "Plan briefings.",
@@ -107,7 +107,7 @@ function eventAutomation(): Doc<"automations"> {
     principal: { kind: "organization" },
     scope: "organization",
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     trigger: {
       integrationId: "integration" as Id<"integrations">,
       event: "message.created",

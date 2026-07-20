@@ -20,14 +20,14 @@ import {
 export type AutomationEditor = ReturnType<typeof useAutomationEditor>
 
 export function useAutomationEditor(
-  tenantId: string,
+  organizationId: string,
   permissions?: AutomationPolicyPermissions
 ) {
   return {
-    tenantId,
-    ...useAutomationForm(tenantId, permissions),
-    ...useAutomationControl(tenantId),
-    ...useAutomationDeletion(tenantId),
+    organizationId,
+    ...useAutomationForm(organizationId, permissions),
+    ...useAutomationControl(organizationId),
+    ...useAutomationDeletion(organizationId),
   }
 }
 
@@ -41,7 +41,7 @@ function useAutomationSavers() {
 }
 
 function useAutomationForm(
-  tenantId: string,
+  organizationId: string,
   permissions?: AutomationPolicyPermissions
 ) {
   const savers = useAutomationSavers()
@@ -82,7 +82,7 @@ function useAutomationForm(
         formAutomation,
         formValues,
         permissions,
-        tenantId,
+        organizationId,
       })
       setIsFormOpen(false)
       onSaved.current?.()
@@ -139,7 +139,7 @@ async function persistAutomation({
   formAutomation,
   formValues,
   permissions,
-  tenantId,
+  organizationId,
   update,
 }: {
   create: ReactMutation<typeof api.automations.console.create>
@@ -147,7 +147,7 @@ async function persistAutomation({
   formAutomation: Automation | undefined
   formValues: AutomationFormValues
   permissions?: AutomationPolicyPermissions
-  tenantId: string
+  organizationId: string
   update: ReactMutation<typeof api.automations.console.update>
 }) {
   if (formAutomation === undefined) {
@@ -163,13 +163,13 @@ async function persistAutomation({
 
     if (playbook !== undefined) {
       await createFromPlaybook({
-        tenantId,
+        organizationId,
         playbook,
         ...(key === undefined ? {} : { key }),
         ...plain,
       })
     } else {
-      await create({ tenantId, ...plain })
+      await create({ organizationId, ...plain })
     }
     return
   }
@@ -182,17 +182,21 @@ async function persistAutomation({
     throw new Error(result.error)
   }
 
-  await update({ tenantId, automationId: formAutomation.id, ...result.args })
+  await update({
+    organizationId,
+    automationId: formAutomation.id,
+    ...result.args,
+  })
 }
 
-function useAutomationDeletion(tenantId: string) {
+function useAutomationDeletion(organizationId: string) {
   const remove = useMutation(api.automations.console.remove)
   const [deletingAutomationId, setDeletingAutomationId] = useState<string>()
 
   async function deleteAutomation(automation: Automation) {
     setDeletingAutomationId(automation.id)
     try {
-      await remove({ tenantId, automationId: automation.id })
+      await remove({ organizationId, automationId: automation.id })
     } catch (error) {
       showErrorToast(error, "Couldn't delete the automation.")
     } finally {
@@ -203,7 +207,7 @@ function useAutomationDeletion(tenantId: string) {
   return { deleteAutomation, deletingAutomationId }
 }
 
-function useAutomationControl(tenantId: string) {
+function useAutomationControl(organizationId: string) {
   const pause = useMutation(api.automations.console.pause)
   const resume = useMutation(api.automations.console.resume)
   const [controllingAutomationId, setControllingAutomationId] =
@@ -234,12 +238,12 @@ function useAutomationControl(tenantId: string) {
     fallback: string
     mutation: (args: {
       automationId: Automation["id"]
-      tenantId: string
+      organizationId: string
     }) => Promise<unknown>
   }) {
     setControllingAutomationId(automation.id)
     try {
-      await mutation({ tenantId, automationId: automation.id })
+      await mutation({ organizationId, automationId: automation.id })
     } catch (error) {
       showErrorToast(error, fallback)
     } finally {

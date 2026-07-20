@@ -134,7 +134,7 @@ function renderEventOptionField(
 ) {
   return (
     <EventOptionField
-      tenantId="tenant"
+      organizationId="organization"
       parameter={channelParameter}
       match={{}}
       disabled={false}

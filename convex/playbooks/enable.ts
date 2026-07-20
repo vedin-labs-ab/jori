@@ -8,7 +8,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import {
   createAutomation,
-  getTenantAutomation,
+  getOrganizationAutomation,
   updateAutomation,
 } from "../automations/lifecycle"
 import { requirePersonTimezone } from "../persons/profile/timezone"
@@ -27,11 +27,11 @@ export async function enablePlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
   await requireNotEnabled(ctx, {
     definition: plan.definition,
     ownerId: args.createdBy,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 
   const automation = await createAutomation(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     playbook: playbookBinding(plan, args),
     key: `playbook:${plan.definition.key}`,
     name: plan.definition.title,
@@ -59,9 +59,9 @@ export async function reconfigurePlaybook(
 ) {
   const plan = await resolvePlaybookPlan(ctx, args)
   const timezone = await requirePersonTimezone(ctx, args.createdBy)
-  const automation = await getTenantAutomation(
+  const automation = await getOrganizationAutomation(
     ctx,
-    args.tenantId,
+    args.organizationId,
     args.automationId
   )
 
@@ -73,7 +73,7 @@ export async function reconfigurePlaybook(
   }
 
   await updateAutomation(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     automationId: args.automationId,
     playbook: playbookBinding(plan, args),
     artifactId: args.artifactId,
@@ -121,22 +121,24 @@ export async function validatePlaybookEnablement(
   await requireNotEnabled(ctx, {
     definition: plan.definition,
     ownerId: args.createdBy,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 }
 
 /**
  * Playbook automations relevant to the caller, keyed by playbook key:
  * personal playbooks match only the caller's own enablement, organization
- * playbooks match the tenant-wide one.
+ * playbooks match the organization-wide one.
  */
 export async function readPlaybookAutomations(
   ctx: QueryLikeCtx,
-  args: { ownerId: Id<"persons"> | undefined; tenantId: string }
+  args: { ownerId: Id<"persons"> | undefined; organizationId: string }
 ) {
   const automations = await ctx.db
     .query("automations")
-    .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
+    .withIndex("by_organization", (index) =>
+      index.eq("organizationId", args.organizationId)
+    )
     .collect()
   const byKey = new Map<string, Doc<"automations">>()
 
@@ -175,7 +177,7 @@ async function requireNotEnabled(
   args: {
     definition: PlaybookDefinition
     ownerId: Id<"persons">
-    tenantId: string
+    organizationId: string
   }
 ) {
   const enabled = await readPlaybookAutomations(ctx, args)

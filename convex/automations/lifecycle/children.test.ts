@@ -190,7 +190,7 @@ function automation(
   return {
     _id: (input.id ?? "parent") as Id<"automations">,
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     name: "Automation",
     instructions: "Do the work.",
     scope: "personal",

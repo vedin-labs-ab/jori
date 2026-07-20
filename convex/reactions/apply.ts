@@ -172,7 +172,7 @@ function newReactionRow(state: ReactionTargetState, input: PresenceInput) {
       key: state.enriched.key,
       text: state.enriched.text,
     },
-    tenantId: state.integration.tenantId,
+    organizationId: state.integration.organizationId,
     updatedAt: now,
   }
 }

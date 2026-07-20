@@ -152,7 +152,7 @@ function isCacheInvalidate(call: MutationCall) {
 
 function platformContext(): ArtifactPlatformContext {
   return {
-    tenantId: "tenant",
+    organizationId: "organization",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
     personId: "person" as Id<"persons">,
@@ -169,9 +169,9 @@ function slackIntegration(): Doc<"integrations"> {
     credentials: { tokens: { access: "user-token", bot: "bot-token" } },
     externalId: "T123",
     integration: "slack",
-    scope: "tenant",
+    scope: "organization",
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     updatedAt: 0,
   }
 }

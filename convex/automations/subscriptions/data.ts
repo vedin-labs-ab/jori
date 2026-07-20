@@ -7,7 +7,7 @@ type EventTrigger = Extract<Doc<"automations">["trigger"], { event: string }>
 export async function ensureSubscription(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     trigger: EventTrigger
   }
 ) {
@@ -25,7 +25,7 @@ export async function ensureSubscription(
   }
 
   return await ctx.db.insert("subscriptions", {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     integrationId: args.trigger.integrationId,
     event: args.trigger.event,
     match: args.trigger.match,
@@ -39,7 +39,7 @@ export async function ensureSubscription(
 export async function releaseSubscription(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     trigger: EventTrigger
     exceptAutomationId?: Id<"automations">
   }
@@ -75,15 +75,15 @@ async function findSubscription(ctx: MutationCtx, trigger: EventTrigger) {
 async function hasMatchingAutomation(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     trigger: EventTrigger
     exceptAutomationId?: Id<"automations">
   }
 ) {
   const automations = await ctx.db
     .query("automations")
-    .withIndex("by_tenant_status", (index) =>
-      index.eq("tenantId", args.tenantId).eq("status", "active")
+    .withIndex("by_organization_status", (index) =>
+      index.eq("organizationId", args.organizationId).eq("status", "active")
     )
     .collect()
 

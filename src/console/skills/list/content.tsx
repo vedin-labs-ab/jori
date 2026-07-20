@@ -96,7 +96,7 @@ function emptyDescription(view: SkillFilterView, isFiltering: boolean) {
 }
 
 function viewLabel(view: SkillFilterView) {
-  if (view === "tenant") {
+  if (view === "organization") {
     return "organization"
   }
 

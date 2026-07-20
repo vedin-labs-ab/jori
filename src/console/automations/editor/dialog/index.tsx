@@ -39,7 +39,7 @@ type AutomationDialogProps = {
   permissions?: AutomationPolicyPermissions
   policyKey: string
   automation: Automation | undefined
-  tenantId: string
+  organizationId: string
   values: AutomationFormValues
 }
 
@@ -54,7 +54,7 @@ export function AutomationDialog({
   permissions,
   policyKey,
   automation,
-  tenantId,
+  organizationId,
   values,
 }: AutomationDialogProps) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: fire once on mount
@@ -63,7 +63,7 @@ export function AutomationDialog({
   }, [])
 
   const actions = createDialogActions(values, onValuesChange)
-  const skillList = useQuery(api.skills.catalog.list, { tenantId })
+  const skillList = useQuery(api.skills.catalog.list, { organizationId })
   const skills = useMemo(
     () =>
       skillList !== undefined &&
@@ -121,7 +121,7 @@ export function AutomationDialog({
           permissions={permissions}
           policyKey={policyKey}
           skills={skills}
-          tenantId={tenantId}
+          organizationId={organizationId}
           values={values}
         />
 
@@ -146,7 +146,7 @@ type DialogFieldsProps = {
   permissions: AutomationPolicyPermissions
   policyKey: string
   skills: string[]
-  tenantId: string
+  organizationId: string
   values: AutomationFormValues
 }
 
@@ -164,11 +164,11 @@ function AutomationDialogFields(props: DialogFieldsProps) {
       />
       <AutomationContextSection scope={props.values.scope} />
       <AutomationArtifactSection
-        tenantId={props.tenantId}
+        organizationId={props.organizationId}
         values={props.values}
       />
       <AutomationInstructionsSection
-        tenantId={props.tenantId}
+        organizationId={props.organizationId}
         additionalSurfaces={props.additionalSurfaces}
         error={props.instructionsError}
         onBlur={ignoreBlur}
@@ -186,11 +186,11 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         onWebSearchChange={props.actions.updateWebSearch}
         permissions={props.permissions}
         scope={props.values.scope}
-        tenantId={props.tenantId}
+        organizationId={props.organizationId}
         webSearch={props.values.webSearch}
       />
       <AutomationTiming
-        tenantId={props.tenantId}
+        organizationId={props.organizationId}
         showRunPreview={props.automation !== undefined}
         onValuesChange={props.onValuesChange}
         values={props.values}

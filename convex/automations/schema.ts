@@ -70,7 +70,7 @@ export const automationType = v.union(
 )
 
 export const automations = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   ...automationBinding,
   parentId: v.optional(v.id("automations")),
   configurationVersion: v.optional(v.number()),
@@ -90,18 +90,22 @@ export const automations = defineTable({
   updatedAt: v.number(),
   firedAt: v.optional(v.number()),
 })
-  .index("by_tenant", ["tenantId"])
-  .index("by_tenant_and_key_partition_and_key", [
-    "tenantId",
+  .index("by_organization", ["organizationId"])
+  .index("by_organization_and_key_partition_and_key", [
+    "organizationId",
     "keyPartition",
     "key",
   ])
   .index("by_artifact", ["artifactId"])
   .index("by_artifact_and_parent", ["artifactId", "parentId"])
   .index("by_parent", ["parentId"])
-  .index("by_tenant_status", ["tenantId", "status"])
-  .index("by_tenant_and_parent", ["tenantId", "parentId"])
-  .index("by_tenant_and_status_and_parent", ["tenantId", "status", "parentId"])
+  .index("by_organization_status", ["organizationId", "status"])
+  .index("by_organization_and_parent", ["organizationId", "parentId"])
+  .index("by_organization_and_status_and_parent", [
+    "organizationId",
+    "status",
+    "parentId",
+  ])
 
 export type AutomationTriggerInput = Infer<typeof triggerInput>
 export type AutomationType = Infer<typeof automationType>

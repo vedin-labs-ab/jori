@@ -24,7 +24,7 @@ crons.interval(
   {}
 )
 
-// Hourly heartbeat for deduction: each tenant's activity window is clustered
+// Hourly heartbeat for deduction: each organization's activity window is clustered
 // into efforts, then each belief kind reviews the changed efforts, with a
 // weekly consolidation pass restructuring the roster. Quiet windows complete
 // without a judge call, so frequency only costs when there is activity.

@@ -86,7 +86,7 @@ test.each(settlements)("settles $status offers once", async (settlement) => {
     status: settlement.status,
   })
   expect(recordTransition).toHaveBeenCalledWith(fixture.ctx, {
-    tenantId: fixture.offer.tenantId,
+    organizationId: fixture.offer.organizationId,
     subject: { kind: "integrationOffer", id: fixture.offer._id },
     type: settlement.status,
   })
@@ -167,7 +167,7 @@ function offer(
     runId: "run" as Id<"runs">,
     source: { surface: "slack" },
     status,
-    tenantId: "tenant",
+    organizationId: "organization",
     tokenHash: "token",
     updatedAt: 0,
   }

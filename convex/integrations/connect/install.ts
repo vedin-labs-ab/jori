@@ -16,7 +16,7 @@ import { createSignedSlackState } from "../slack/signing"
 import { redirectWithStatus } from "./http"
 
 export type ProviderInstallState = {
-  tenantId: string
+  organizationId: string
   createdBy: Id<"persons">
   returnUrl: string
   createdAt: number
@@ -26,14 +26,14 @@ export type ProviderInstallState = {
 export async function buildInstallState(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     returnUrl: string
     integrationOfferId?: Id<"integrationOffers">
   }
 ): Promise<ProviderInstallState> {
   return {
-    tenantId: args.tenantId,
-    createdBy: await ensureCurrentPerson(ctx, args.tenantId),
+    organizationId: args.organizationId,
+    createdBy: await ensureCurrentPerson(ctx, args.organizationId),
     returnUrl: requireAppReturnUrl(args.returnUrl),
     createdAt: Date.now(),
     ...(args.integrationOfferId === undefined
@@ -46,7 +46,7 @@ export async function createSignedInstallState(
   ctx: MutationCtx,
   integration: Integration,
   args: {
-    tenantId: string
+    organizationId: string
     returnUrl: string
     integrationOfferId?: Id<"integrationOffers">
   }
@@ -98,16 +98,16 @@ type IntegrationValues = Omit<
 export async function findUserIntegrationForInstall(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     integration: Integration
     createdBy: Id<"persons">
   }
 ) {
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_integration_and_owner", (query) =>
+    .withIndex("by_organization_and_integration_and_owner", (query) =>
       query
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("integration", args.integration)
         .eq("ownerId", args.createdBy)
     )

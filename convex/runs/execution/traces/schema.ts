@@ -3,7 +3,7 @@ import { v } from "convex/values"
 import { toolSnapshot } from "../../schema"
 
 const base = {
-  tenantId: v.string(),
+  organizationId: v.string(),
   runId: v.id("runs"),
   key: v.string(),
   timestamp: v.number(),

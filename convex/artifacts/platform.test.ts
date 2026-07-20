@@ -35,7 +35,7 @@ describe("artifact platform tools", () => {
       {
         kind: "query",
         args: {
-          tenantId: "tenant",
+          organizationId: "organization",
           artifactId: "artifact",
           personId: "person" as Id<"persons">,
           grant: "member",
@@ -45,7 +45,7 @@ describe("artifact platform tools", () => {
       {
         kind: "mutation",
         args: {
-          tenantId: "tenant",
+          organizationId: "organization",
           artifactId: "artifact",
           personId: "person" as Id<"persons">,
           contractName: "emailTriageLatest",
@@ -108,7 +108,7 @@ function createCapturingActionCtx(calls: CapturedCall[]) {
 
 function createPlatformContext(): ArtifactPlatformContext {
   return {
-    tenantId: "tenant",
+    organizationId: "organization",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
     personId: "person" as Id<"persons">,

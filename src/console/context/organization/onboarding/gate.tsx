@@ -22,5 +22,7 @@ export function OnboardingGate() {
     void organization.reload().catch(() => undefined)
   }
 
-  return <OnboardingModal tenantId={organization.id} onClose={handleClose} />
+  return (
+    <OnboardingModal organizationId={organization.id} onClose={handleClose} />
+  )
 }

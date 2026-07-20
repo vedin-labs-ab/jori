@@ -17,7 +17,7 @@ import { createSignedSlackState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -46,7 +46,7 @@ export const getProfileLookupTarget = internalQuery({
   },
   returns: v.union(
     v.object({
-      tenantId: v.string(),
+      organizationId: v.string(),
     }),
     v.null()
   ),
@@ -56,13 +56,15 @@ export const getProfileLookupTarget = internalQuery({
       externalId: args.accountId,
     })
 
-    return integration === null ? null : { tenantId: integration.tenantId }
+    return integration === null
+      ? null
+      : { organizationId: integration.organizationId }
   },
 })
 
 export const recordOAuthInstallation = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     createdBy: v.id("persons"),
     accountId: v.string(),
     botScopes: v.optional(v.string()),
@@ -82,9 +84,9 @@ export const recordOAuthInstallation = internalMutation({
       externalId: args.accountId,
     })
     const integrationId = await upsertIntegration(ctx, existing, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       integration: "slack",
-      scope: "tenant",
+      scope: "organization",
       externalId: args.accountId,
       name: args.team.name,
       credentials: {
@@ -104,7 +106,7 @@ export const recordOAuthInstallation = internalMutation({
     })
 
     await linkSetupIdentity(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId: args.createdBy,
       provider: "slack",
       identity: args.setupIdentity,

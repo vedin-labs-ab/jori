@@ -46,7 +46,7 @@ export async function handleAssetUploadRequest(
     const assetId: Id<"assets"> = await ctx.runMutation(
       internal.assets.data.record,
       {
-        tenantId: context.run.tenantId,
+        organizationId: context.run.organizationId,
         runId: context.run._id,
         storageId,
         name,

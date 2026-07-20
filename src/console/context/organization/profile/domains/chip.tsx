@@ -68,16 +68,16 @@ export function WebsiteChip({
 /** A user-added domain: the same website chip, plus Added badge and remove. */
 export function DeclaredDomainChip({
   domain,
-  tenantId,
+  organizationId,
 }: {
   domain: string
-  tenantId: string
+  organizationId: string
 }) {
   const retractDomain = useMutation(api.organization.profile.retractDomain)
 
   const onRemove = async () => {
     try {
-      await retractDomain({ tenantId, domain })
+      await retractDomain({ organizationId, domain })
     } catch (error) {
       showErrorToast(error, "Could not remove that domain.")
     }

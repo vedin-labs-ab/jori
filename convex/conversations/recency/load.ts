@@ -45,7 +45,7 @@ export async function loadRecentActivity(
     personId: Id<"persons">
     run: RecencyRun
     seen: Id<"conversations">[]
-    tenantId: string
+    organizationId: string
   }
 ): Promise<RecencyEntry[]> {
   const messages = await recentPersonMessages(ctx, args)
@@ -90,12 +90,12 @@ export async function loadRecentActivity(
 
 function isCandidate(
   conversation: Doc<"conversations"> | null,
-  args: { run: RecencyRun; tenantId: string },
+  args: { run: RecencyRun; organizationId: string },
   visited: Set<Id<"conversations">>
 ): conversation is Doc<"conversations"> {
   return (
     conversation !== null &&
-    conversation.tenantId === args.tenantId &&
+    conversation.organizationId === args.organizationId &&
     conversation._id !== args.run.conversationId &&
     !visited.has(conversation._id)
   )
@@ -149,14 +149,14 @@ async function recentPersonMessages(
   args: {
     now: number
     personId: Id<"persons">
-    tenantId: string
+    organizationId: string
   }
 ) {
   return await ctx.db
     .query("messages")
-    .withIndex("by_tenant_and_person_and_created_at", (query) =>
+    .withIndex("by_organization_and_person_and_created_at", (query) =>
       query
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("personId", args.personId)
         .gte("createdAt", args.now - recencyWindowMs)
     )

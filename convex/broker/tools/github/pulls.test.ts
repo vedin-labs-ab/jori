@@ -177,9 +177,9 @@ function githubIntegration(): Doc<"integrations"> {
   return {
     _id: "github-integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "github",
-    scope: "tenant",
+    scope: "organization",
     externalId: "github-account",
     credentials: {
       installationId: "123",

@@ -137,7 +137,7 @@ function approvalDoc(): Doc<"approvals"> {
     status: "pending",
     summary: "Create a page.",
     surface: "notion",
-    tenantId: "tenant",
+    organizationId: "organization",
     tool: "notion_create_page",
   }
 }

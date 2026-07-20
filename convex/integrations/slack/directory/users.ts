@@ -66,7 +66,7 @@ export async function getSlackActorProfile(
   }
 
   return await resolveSlackUserProfile(ctx, {
-    tenantId: target.tenantId,
+    organizationId: target.organizationId,
     token: async () =>
       (await ctx.runQuery(internal.integrations.slack.install.getUserToken, {
         accountId: args.accountId,
@@ -94,7 +94,7 @@ export async function resolveSlackUserNames(
   await Promise.all(
     userIds.map(async (userId) => {
       const profile = await resolveSlackUserProfile(ctx, {
-        tenantId: args.integration.tenantId,
+        organizationId: args.integration.organizationId,
         token: async () => token,
         userId,
       })
@@ -111,7 +111,7 @@ export async function resolveSlackUserNames(
 async function resolveSlackUserProfile(
   ctx: ActionCtx,
   args: {
-    tenantId: string
+    organizationId: string
     token: () => Promise<string | undefined>
     userId: string
   }
@@ -119,7 +119,7 @@ async function resolveSlackUserProfile(
   const cached = await ctx.runQuery(
     internal.persons.identity.actors.resolveProviderActorProfileRecord,
     {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       provider: "slack",
       externalId: args.userId,
     }
@@ -145,7 +145,7 @@ async function resolveSlackUserProfile(
     await cacheSlackActorProfile(ctx, {
       actorId: args.userId,
       profile,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
   } catch {
     // Profile caching must not make the calling interaction fail.
@@ -221,11 +221,11 @@ async function cacheSlackActorProfile(
   args: {
     actorId: string
     profile: SlackActorProfile
-    tenantId: string
+    organizationId: string
   }
 ) {
   await ctx.runMutation(internal.persons.resolve.resolveActorRecord, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     provider: "slack",
     actor: {
       kind: "person",

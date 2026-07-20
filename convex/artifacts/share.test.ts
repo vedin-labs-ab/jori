@@ -226,7 +226,7 @@ describe("share exchange endpoint", () => {
 function artifact(overrides: Partial<Doc<"artifacts">> = {}) {
   return {
     _id: "artifact" as Id<"artifacts">,
-    tenantId: "tenant",
+    organizationId: "organization",
     ownerId: "creator" as Id<"persons">,
     access: "personal",
     versionId: "version" as Id<"artifactVersions">,
@@ -237,7 +237,7 @@ function artifact(overrides: Partial<Doc<"artifacts">> = {}) {
 function share(overrides: Partial<Doc<"artifactShares">> = {}) {
   return {
     _id: "share" as Id<"artifactShares">,
-    tenantId: "tenant",
+    organizationId: "organization",
     artifactId: "artifact" as Id<"artifacts">,
     createdBy: "creator" as Id<"persons">,
     secret: "s3cret",
@@ -253,7 +253,7 @@ function openArgs(overrides: Partial<{ secret: string; now: number }> = {}) {
 
 function shareContext(): ArtifactPlatformContext {
   return {
-    tenantId: "tenant",
+    organizationId: "organization",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
     personId: "creator" as Id<"persons">,

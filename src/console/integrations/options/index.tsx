@@ -26,7 +26,7 @@ type IntegrationOptionPickerProps = {
   onChange: (option: IntegrationOption | null) => void
   placeholder: string
   source: IntegrationOptionSource
-  tenantId: string
+  organizationId: string
   value: IntegrationOption | null
 }
 
@@ -41,7 +41,7 @@ export function IntegrationOptionPicker({
   onChange,
   placeholder,
   source,
-  tenantId,
+  organizationId,
   value,
 }: IntegrationOptionPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -50,7 +50,7 @@ export function IntegrationOptionPicker({
     isOpen,
     match,
     source,
-    tenantId,
+    organizationId,
   })
   const selected =
     options.find((option) => option.value === value?.value) ?? value

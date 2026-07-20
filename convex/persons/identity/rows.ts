@@ -16,16 +16,16 @@ export type IdentityProfile = { email?: string; name?: string }
 export async function findIdentity(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     provider: IdentityProvider
     externalId: string
   }
 ) {
   return await ctx.db
     .query("identities")
-    .withIndex("by_tenant_provider_external_id", (index) =>
+    .withIndex("by_organization_provider_external_id", (index) =>
       index
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("provider", args.provider)
         .eq("externalId", args.externalId)
     )
@@ -35,7 +35,7 @@ export async function findIdentity(
 export async function insertIdentity(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     provider: IdentityProvider
     externalId: string
@@ -47,7 +47,7 @@ export async function insertIdentity(
   const now = Date.now()
 
   await ctx.db.insert("identities", {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     personId: args.personId,
     provider: args.provider,
     externalId: args.externalId,

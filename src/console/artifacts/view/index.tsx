@@ -24,11 +24,11 @@ export function ArtifactView({
 }) {
   return (
     <ConsolePage chrome="none" loadingFallback={<ArtifactViewLoading />}>
-      {(tenantId) => (
+      {(organizationId) => (
         <ArtifactViewContent
           artifactId={artifactId}
           fallback={fallback}
-          tenantId={tenantId}
+          organizationId={organizationId}
         />
       )}
     </ConsolePage>
@@ -38,14 +38,14 @@ export function ArtifactView({
 function ArtifactViewContent({
   artifactId,
   fallback,
-  tenantId,
+  organizationId,
 }: {
   artifactId: ArtifactId
   fallback: ReactNode | undefined
-  tenantId: string
+  organizationId: string
 }) {
   const artifactResult = useQuery(api.artifacts.console.get, {
-    tenantId,
+    organizationId,
     artifactId,
   })
 
@@ -93,7 +93,7 @@ function ArtifactViewContent({
   return (
     <PublishedArtifactView
       artifact={artifactResult.artifact}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }
@@ -104,21 +104,24 @@ function ArtifactViewLoading() {
 
 function PublishedArtifactView({
   artifact,
-  tenantId,
+  organizationId,
 }: {
   artifact: ArtifactDetail
-  tenantId: string
+  organizationId: string
 }) {
   useMemberArtifactUrl()
   const createSession = useAction(api.artifacts.actions.createSession)
   const mintSession = useCallback(
-    () => createSession({ tenantId, artifactId: artifact.artifactId }),
-    [artifact.artifactId, createSession, tenantId]
+    () => createSession({ organizationId, artifactId: artifact.artifactId }),
+    [artifact.artifactId, createSession, organizationId]
   )
 
   return (
     <ArtifactFullscreenShell>
-      <ArtifactLinks artifactId={artifact.artifactId} tenantId={tenantId} />
+      <ArtifactLinks
+        artifactId={artifact.artifactId}
+        organizationId={organizationId}
+      />
       <ArtifactFrame
         artifactId={artifact.artifactId}
         mintSession={mintSession}

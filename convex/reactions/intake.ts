@@ -106,19 +106,19 @@ async function resolveReactionActors(
   await resolveActor(ctx, {
     actor: args.actor,
     provider: args.provider,
-    tenantId: args.integration.tenantId,
+    organizationId: args.integration.organizationId,
   })
   await resolveActor(ctx, {
     actor: args.target.actor,
     provider: args.provider,
-    tenantId: args.integration.tenantId,
+    organizationId: args.integration.organizationId,
   })
 
   for (const reaction of args.reactions ?? []) {
     await resolveActor(ctx, {
       actor: reaction.actor,
       provider: args.provider,
-      tenantId: args.integration.tenantId,
+      organizationId: args.integration.organizationId,
     })
   }
 }

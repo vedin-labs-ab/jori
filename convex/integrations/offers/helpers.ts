@@ -31,7 +31,7 @@ export async function findIntegrationOfferByToken(
 export async function upsertIntegrationOfferSourceIdentity(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     source: IntegrationOfferSource
   }
@@ -44,7 +44,7 @@ export async function upsertIntegrationOfferSourceIdentity(
   }
 
   await linkIdentityToPerson(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     personId: args.personId,
     provider,
     externalId: actor.externalId,

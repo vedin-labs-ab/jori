@@ -105,7 +105,7 @@ function automation(
     name: "Test automation",
     principal: { kind: "person", personId: "person" as Id<"persons"> },
     status: "active",
-    tenantId: "tenant-id",
+    organizationId: "organization-id",
     type: "event",
     scope: "personal",
     trigger: {

@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { moveEffort } from "../deduction/engine/sightings"
 import { type BeliefStatus } from "../deduction/schema"
 
@@ -11,22 +11,22 @@ import { type BeliefStatus } from "../deduction/schema"
 // the structural pen: moving an effort corrects membership without ever
 // editing derived text, and survives re-derivation.
 
-const target = { tenantId: v.string(), workstreamId: v.id("beliefs") }
+const target = { organizationId: v.string(), workstreamId: v.id("beliefs") }
 
 export const assign = mutation({
   args: { ...target, effortId: v.id("efforts") },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     const belief = await requireWorkstream(
       ctx,
-      args.tenantId,
+      args.organizationId,
       args.workstreamId
     )
     const effort = await ctx.db.get(args.effortId)
 
     if (
       effort === null ||
-      effort.tenantId !== args.tenantId ||
+      effort.organizationId !== args.organizationId ||
       effort.supersededBy !== undefined
     ) {
       throw new Error("Effort not found.")
@@ -39,7 +39,7 @@ export const assign = mutation({
 export const confirm = mutation({
   args: target,
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     await transition(ctx, args, ["proposed"], "confirmed")
   },
 })
@@ -47,7 +47,7 @@ export const confirm = mutation({
 export const reject = mutation({
   args: target,
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     await transition(ctx, args, ["proposed"], "rejected")
   },
 })
@@ -55,7 +55,7 @@ export const reject = mutation({
 export const archive = mutation({
   args: target,
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     await transition(ctx, args, ["proposed", "confirmed"], "closed")
   },
 })
@@ -63,7 +63,7 @@ export const archive = mutation({
 export const reopen = mutation({
   args: target,
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     await transition(ctx, args, ["closed"], "confirmed")
   },
 })
@@ -71,18 +71,22 @@ export const reopen = mutation({
 export const restore = mutation({
   args: target,
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     await transition(ctx, args, ["rejected"], "proposed")
   },
 })
 
 async function transition(
   ctx: MutationCtx,
-  args: { tenantId: string; workstreamId: Id<"beliefs"> },
+  args: { organizationId: string; workstreamId: Id<"beliefs"> },
   from: BeliefStatus[],
   to: BeliefStatus
 ) {
-  const belief = await requireWorkstream(ctx, args.tenantId, args.workstreamId)
+  const belief = await requireWorkstream(
+    ctx,
+    args.organizationId,
+    args.workstreamId
+  )
 
   if (!from.includes(belief.status)) {
     throw new Error(`Cannot move a ${belief.status} workstream to ${to}.`)
@@ -91,17 +95,17 @@ async function transition(
   await ctx.db.patch(belief._id, { status: to, updatedAt: Date.now() })
 }
 
-// Callers guard tenant access first; this helper only loads and validates.
+// Callers guard organization access first; this helper only loads and validates.
 async function requireWorkstream(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   workstreamId: Id<"beliefs">
 ) {
   const belief = await ctx.db.get(workstreamId)
 
   if (
     belief === null ||
-    belief.tenantId !== tenantId ||
+    belief.organizationId !== organizationId ||
     belief.kind !== "workstream" ||
     belief.supersededBy !== undefined
   ) {

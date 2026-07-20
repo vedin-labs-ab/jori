@@ -38,7 +38,7 @@ test("hydrates Slack approval actors with profile names", async () => {
         accountLookupCount += 1
 
         return accountLookupCount === 1
-          ? { tenantId: "tenant_1" }
+          ? { organizationId: "organization_1" }
           : "xoxp-user-token"
       }
     ),
@@ -51,7 +51,7 @@ test("hydrates Slack approval actors with profile names", async () => {
 
   expect(getActorDisplayName(actor)).toBe("ÅÄÖ 😊")
   expect(ctx.runMutation).toHaveBeenCalledWith(expect.anything(), {
-    tenantId: "tenant_1",
+    organizationId: "organization_1",
     provider: "slack",
     actor: {
       kind: "person",
@@ -77,7 +77,7 @@ test("hydrates Slack approval actors from cached identities first", async () => 
 
         accountLookupCount += 1
 
-        return { tenantId: "tenant_1" }
+        return { organizationId: "organization_1" }
       }
     ),
   } as unknown as ActionCtx

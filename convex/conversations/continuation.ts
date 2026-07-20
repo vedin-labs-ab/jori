@@ -67,7 +67,7 @@ async function continueSession(
     message: pending.message,
     createdBy: await resolveMessageOwner(ctx, {
       integration: pending.message.integration,
-      tenantId: integration.tenantId,
+      organizationId: integration.organizationId,
       message: pending.message,
     }),
     externalId: conversation.externalId,

@@ -12,7 +12,7 @@ import { debitRun } from "./ledger"
 
 /**
  * Called for every completed model turn: price the tokens at list rates,
- * debit the tenant, and kick off an auto top-up when the balance has sunk
+ * debit the organization, and kick off an auto top-up when the balance has sunk
  * below the threshold. In-flight work is never interrupted here; the run
  * budget guard handles new work.
  */
@@ -30,7 +30,7 @@ export async function meterModelUsage(
   }
 
   const now = Date.now()
-  const account = await ensureAccount(ctx, args.run.tenantId)
+  const account = await ensureAccount(ctx, args.run.organizationId)
 
   await debitRun(ctx, { account, runId: args.run._id, micros, now })
 
@@ -80,6 +80,6 @@ async function maybeScheduleAutoTopUp(
 
   await holdAutoTopUp(ctx, account, now + autoTopUp.claimMs)
   await ctx.scheduler.runAfter(0, internal.billing.stripe.topup.execute, {
-    tenantId: account.tenantId,
+    organizationId: account.organizationId,
   })
 }

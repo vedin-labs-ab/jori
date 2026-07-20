@@ -65,7 +65,7 @@ export const getSurfaceTarget = internalQuery({
     if (
       integration === null ||
       integration.status !== "active" ||
-      integration.tenantId !== offer.tenantId ||
+      integration.organizationId !== offer.organizationId ||
       integration.integration !== delivery.integration
     ) {
       return null

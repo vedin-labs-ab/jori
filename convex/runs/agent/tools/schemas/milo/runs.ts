@@ -7,7 +7,7 @@ import {
 } from "../fragments/common"
 
 const runStatusEnum = ["queued", "running", "completed", "failed", "stopped"]
-const runScopeEnum = ["conversation", "tenant", "all"]
+const runScopeEnum = ["conversation", "organization", "all"]
 const runSourceEnum = ["slack", "github", "linear", "automation"]
 const activityFilterEnum = [
   "tool",
@@ -100,7 +100,7 @@ function scopeProperty() {
     type: "string",
     enum: runScopeEnum,
     description:
-      "Relevance scope within enforced visibility. Defaults to conversation; use tenant or all deliberately.",
+      "Relevance scope within enforced visibility. Defaults to conversation; use organization or all deliberately.",
   }
 }
 

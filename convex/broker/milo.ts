@@ -105,7 +105,7 @@ function requireBrokerContext(
 }
 
 type MiloRunContext = {
-  tenantId: string
+  organizationId: string
   principal: ExecutionPrincipal
   _id?: Id<"runs">
   automationId?: Id<"automations">
@@ -115,7 +115,7 @@ type MiloRunContext = {
 
 function toMiloContext(run: MiloRunContext) {
   return {
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
     createdBy: executionPrincipalPersonId(run.principal),
     runId: run._id,
     automationId: run.automationParentId ?? run.automationId,

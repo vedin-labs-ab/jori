@@ -12,11 +12,11 @@ import { stripeRequest } from "./client"
  * through one path; failures here push the hold into a cooldown.
  */
 export const execute = internalAction({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
     const account: Doc<"billingAccounts"> | null = await ctx.runQuery(
       internal.billing.stripe.data.read,
-      { tenantId: args.tenantId }
+      { organizationId: args.organizationId }
     )
     const config = account?.autoTopUp
     const customer = account?.stripeCustomerId
@@ -36,11 +36,11 @@ export const execute = internalAction({
         amountMicros: config.amountMicros,
         customer,
         holdUntil: account.autoTopUpHoldUntil ?? 0,
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
       })
     } catch {
       await ctx.runMutation(internal.billing.stripe.data.cooldown, {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         cooldownMs: autoTopUp.cooldownMs,
       })
     }
@@ -53,7 +53,7 @@ async function chargeSavedCard(args: {
   amountMicros: number
   customer: string
   holdUntil: number
-  tenantId: string
+  organizationId: string
 }) {
   const methods = await stripeRequest("/v1/payment_methods", {
     method: "GET",
@@ -66,7 +66,7 @@ async function chargeSavedCard(args: {
   }
 
   await stripeRequest("/v1/payment_intents", {
-    idempotencyKey: `auto-top-up-${args.tenantId}-${args.holdUntil}`,
+    idempotencyKey: `auto-top-up-${args.organizationId}-${args.holdUntil}`,
     params: {
       amount: Math.round(args.amountMicros / (microsPerDollar / 100)),
       currency: "usd",
@@ -76,7 +76,7 @@ async function chargeSavedCard(args: {
       confirm: true,
       metadata: {
         kind: "auto-top-up",
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         micros: String(args.amountMicros),
       },
     },

@@ -4,7 +4,7 @@ import { actorValidator } from "../shared/actor"
 import { integrationValidator } from "../shared/integrations"
 
 export const messages = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integrationId: v.id("integrations"),
   integration: integrationValidator,
   type: v.string(),
@@ -26,15 +26,19 @@ export const messages = defineTable({
   createdAt: v.number(),
 })
   .index("by_external_id", ["externalId"])
-  .index("by_conversation", ["tenantId", "integrationId", "conversationId"])
-  .index("by_tenant_and_integration_and_conversation_and_created_at", [
-    "tenantId",
+  .index("by_conversation", [
+    "organizationId",
+    "integrationId",
+    "conversationId",
+  ])
+  .index("by_organization_and_integration_and_conversation_and_created_at", [
+    "organizationId",
     "integrationId",
     "conversationId",
     "createdAt",
   ])
-  .index("by_tenant_and_person_and_created_at", [
-    "tenantId",
+  .index("by_organization_and_person_and_created_at", [
+    "organizationId",
     "personId",
     "createdAt",
   ])

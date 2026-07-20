@@ -40,7 +40,7 @@ export const passWindow = v.object({ start: v.number(), end: v.number() })
 // graph-resolved people are kept — display names live in identities and
 // resolve at read time, so person merges heal on the next refresh.
 export const efforts = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   name: v.string(),
   summary: v.string(),
   workstreamId: v.optional(v.id("beliefs")),
@@ -52,14 +52,14 @@ export const efforts = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 })
-  .index("by_tenant_and_seen_at", ["tenantId", "seenAt"])
-  .index("by_tenant_and_updated_at", ["tenantId", "updatedAt"])
+  .index("by_organization_and_seen_at", ["organizationId", "seenAt"])
+  .index("by_organization_and_updated_at", ["organizationId", "updatedAt"])
   .index("by_workstream", ["workstreamId"])
 
 // Fields every belief kind shares. Kind-specific fields live inline in the
 // union member, so `kind` is stated exactly once per row.
 const beliefFields = {
-  tenantId: v.string(),
+  organizationId: v.string(),
   name: v.string(),
   aliases: v.array(v.string()),
   status: beliefStatus,
@@ -90,7 +90,11 @@ export const beliefs = defineTable(
     })
     // Future kinds ("team", ...) add members here.
   )
-).index("by_tenant_and_kind_and_status", ["tenantId", "kind", "status"])
+).index("by_organization_and_kind_and_status", [
+  "organizationId",
+  "kind",
+  "status",
+])
 
 // Each layer cites only the layer below: effort evidence references events
 // and conversations, belief evidence references efforts. Citations still
@@ -116,7 +120,7 @@ const evidenceReference = v.union(
 // carries the claim as read at citation time; the reference stays a live
 // pointer into the source.
 export const evidence = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   subject: evidenceSubject,
   passId: v.id("passes"),
   reference: evidenceReference,
@@ -141,7 +145,7 @@ export const evidence = defineTable({
 // createdAt is bookkeeping. Bootstrap writes week-old activity in one pass,
 // so the two legitimately diverge.
 export const journal = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   effortId: v.id("efforts"),
   passId: v.id("passes"),
   entry: v.string(),
@@ -165,7 +169,7 @@ const passStatus = v.union(
 // effort stage ranges over event ingestion time and belief stages over
 // effort update time, so late arrivals are never skipped.
 export const passes = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   stage: passStage,
   scope: passScope,
   status: passStatus,
@@ -191,8 +195,8 @@ export const passes = defineTable({
   error: v.optional(v.string()),
   startedAt: v.number(),
   endedAt: v.optional(v.number()),
-}).index("by_tenant_and_stage_and_scope_and_started_at", [
-  "tenantId",
+}).index("by_organization_and_stage_and_scope_and_started_at", [
+  "organizationId",
   "stage",
   "scope",
   "startedAt",

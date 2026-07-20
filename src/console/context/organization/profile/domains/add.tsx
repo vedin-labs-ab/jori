@@ -23,7 +23,11 @@ import {
  * with the same website contract as the Edit flow, on both sides of the
  * mutation.
  */
-export function AddDomainControl({ tenantId }: { tenantId: string }) {
+export function AddDomainControl({
+  organizationId,
+}: {
+  organizationId: string
+}) {
   const declareDomain = useMutation(api.organization.profile.declareDomain)
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState("")
@@ -42,7 +46,7 @@ export function AddDomainControl({ tenantId }: { tenantId: string }) {
     }
 
     try {
-      await declareDomain({ tenantId, domain: value })
+      await declareDomain({ organizationId, domain: value })
       close()
     } catch (caught) {
       const inputError = readWebsiteInputError(caught)

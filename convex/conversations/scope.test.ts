@@ -1,17 +1,17 @@
 import { expect, test } from "vitest"
 import { canIncludeRecentConversation } from "./scope"
 
-test("includes tenant recency everywhere", () => {
+test("includes organization recency everywhere", () => {
   expect(
     canIncludeRecentConversation({
-      candidateScope: "tenant",
+      candidateScope: "organization",
       currentScope: "conversation",
       personal: false,
     })
   ).toBe(true)
   expect(
     canIncludeRecentConversation({
-      candidateScope: "tenant",
+      candidateScope: "organization",
       currentScope: undefined,
       personal: false,
     })
@@ -46,7 +46,7 @@ test("excludes narrower recency for other scopes and other persons", () => {
   expect(
     canIncludeRecentConversation({
       candidateScope: "person",
-      currentScope: "tenant",
+      currentScope: "organization",
       personal: true,
     })
   ).toBe(false)

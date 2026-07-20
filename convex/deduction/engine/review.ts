@@ -29,24 +29,24 @@ export type OpenedPass = {
 // without a judge call, so frequency only costs when there is activity.
 export async function reviewWindow(
   ctx: ActionCtx,
-  tenantId: string,
+  organizationId: string,
   opened: OpenedPass
 ) {
   if (opened.stage === "effort") {
-    return await reviewEffortWindow(ctx, tenantId, opened)
+    return await reviewEffortWindow(ctx, organizationId, opened)
   }
 
-  return await reviewWorkstreamWindow(ctx, tenantId, opened)
+  return await reviewWorkstreamWindow(ctx, organizationId, opened)
 }
 
 async function reviewEffortWindow(
   ctx: ActionCtx,
-  tenantId: string,
+  organizationId: string,
   opened: OpenedPass
 ) {
   const input: EffortPassInput = await ctx.runQuery(
     internal.deduction.effort.input.assemble,
-    { tenantId, window: opened.window }
+    { organizationId, window: opened.window }
   )
   const activity = input.events.length + input.conversations.length
   const { ops, invalid } =
@@ -73,12 +73,12 @@ async function reviewEffortWindow(
 
 async function reviewWorkstreamWindow(
   ctx: ActionCtx,
-  tenantId: string,
+  organizationId: string,
   opened: OpenedPass
 ) {
   const input: WorkstreamPassInput = await ctx.runQuery(
     internal.deduction.workstream.input.assemble,
-    { tenantId, scope: opened.scope, window: opened.window }
+    { organizationId, scope: opened.scope, window: opened.window }
   )
   const { ops, invalid } =
     input.changed === 0

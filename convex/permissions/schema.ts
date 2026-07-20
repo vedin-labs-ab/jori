@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 export const permissions = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   tool: v.string(),
   mode: v.union(
     v.literal("allowed"),
@@ -12,5 +12,5 @@ export const permissions = defineTable({
   updatedBy: v.id("persons"),
   updatedAt: v.number(),
 })
-  .index("by_tenant", ["tenantId"])
-  .index("by_tenant_and_tool", ["tenantId", "tool"])
+  .index("by_organization", ["organizationId"])
+  .index("by_organization_and_tool", ["organizationId", "tool"])

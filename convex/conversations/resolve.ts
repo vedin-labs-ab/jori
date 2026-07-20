@@ -4,12 +4,12 @@ import { type QueryLikeCtx } from "../shared/context"
 type ConversationKey = {
   externalId: string
   integrationId: Id<"integrations">
-  tenantId: string
+  organizationId: string
 }
 
 type ConversationMessage = Pick<
   Doc<"messages">,
-  "conversationId" | "integrationId" | "tenantId"
+  "conversationId" | "integrationId" | "organizationId"
 >
 
 export async function findConversation(
@@ -18,9 +18,9 @@ export async function findConversation(
 ) {
   return await ctx.db
     .query("conversations")
-    .withIndex("by_tenant_and_integration_and_external", (query) =>
+    .withIndex("by_organization_and_integration_and_external", (query) =>
       query
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("integrationId", args.integrationId)
         .eq("externalId", args.externalId)
     )
@@ -32,7 +32,7 @@ export async function findMessageConversation(
   message: ConversationMessage
 ) {
   return await findConversation(ctx, {
-    tenantId: message.tenantId,
+    organizationId: message.organizationId,
     integrationId: message.integrationId,
     externalId: message.conversationId,
   })

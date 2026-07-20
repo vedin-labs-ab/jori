@@ -18,7 +18,7 @@ import {
 import { type PageTarget, useSeekTarget } from "./seek"
 
 export function useExecutionPagination(
-  tenantId: string,
+  organizationId: string,
   runFilter: RunFilter,
   approvalFilter: ApprovalFilter,
   scopeFilter: ScopeFilter,
@@ -32,7 +32,7 @@ export function useExecutionPagination(
     query,
     runFilter,
     scopeFilter,
-    tenantId,
+    organizationId,
   })
   const paging = derivePaging({ pageIndex, rows, stats, status: runs.status })
   const { canLoadMore, canUseNextLoadedPage, isLoadingMore, visibleRows } =
@@ -153,13 +153,13 @@ function useExecutionPageData({
   query,
   runFilter,
   scopeFilter,
-  tenantId,
+  organizationId,
 }: {
   approvalFilter: ApprovalFilter
   query: string
   runFilter: RunFilter
   scopeFilter: ScopeFilter
-  tenantId: string
+  organizationId: string
 }) {
   const normalizedQuery = query.trim().toLowerCase()
   const queryArgs = useMemo(
@@ -168,9 +168,9 @@ function useExecutionPageData({
       query: normalizedQuery,
       runFilter,
       scopeFilter,
-      tenantId,
+      organizationId,
     }),
-    [approvalFilter, normalizedQuery, runFilter, scopeFilter, tenantId]
+    [approvalFilter, normalizedQuery, runFilter, scopeFilter, organizationId]
   )
   const runs = usePaginatedQuery(api.runs.console.page, queryArgs, {
     initialNumItems: pageSize,

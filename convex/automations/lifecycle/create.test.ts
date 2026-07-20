@@ -14,7 +14,7 @@ test.each([
 
   await expect(
     createAutomation(ctx, {
-      tenantId: "tenant",
+      organizationId: "organization",
       parentId: parent._id,
       expectedParentConfigurationVersion,
       name: "Meeting Briefing delivery",
@@ -34,7 +34,7 @@ function automation(input: {
   return {
     _id: "parent" as Id<"automations">,
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     configurationVersion: input.configurationVersion,
     name: "Meeting Briefing",
     instructions: "Plan briefings.",

@@ -154,7 +154,7 @@ function baseParent() {
   return {
     _id: "parent",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     principal: { kind: "person", personId: "person" },
     cause: { type: "manual", personId: "person" },
     createdBy: "person",
@@ -167,9 +167,9 @@ function baseParent() {
 function activeIntegration(id: string, integration: string) {
   return {
     _id: id,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration,
-    scope: "tenant",
+    scope: "organization",
     status: "active",
   }
 }

@@ -130,7 +130,7 @@ function message(number: number): Doc<"messages"> {
   return {
     _id: id<"messages">(`message-${number}`),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message.channels",
@@ -149,10 +149,10 @@ function conversation(
   return {
     _id: id<"conversations">("conversation"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
-    scope: "tenant",
+    scope: "organization",
     ...overrides,
   }
 }

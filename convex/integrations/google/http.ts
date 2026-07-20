@@ -129,7 +129,7 @@ async function recordGoogleInstallation(
     internal.integrations.google.install.recordOAuthInstallation,
     {
       integration: args.integration,
-      tenantId: args.state.tenantId,
+      organizationId: args.state.organizationId,
       createdBy: args.state.createdBy,
       accessToken: args.tokenResult.access_token,
       refreshToken: args.tokenResult.refresh_token,

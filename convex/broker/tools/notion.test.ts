@@ -138,7 +138,7 @@ function assetContext() {
         get: vi.fn(async () => new Blob(["data"], { type: "image/png" })),
       },
     } as unknown as ActionCtx,
-    run: { tenantId: "tenant" } as Doc<"runs">,
+    run: { organizationId: "organization" } as Doc<"runs">,
   }
 }
 
@@ -146,7 +146,7 @@ function asset(): Doc<"assets"> {
   return {
     _id: "asset_1",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     runId: "run_1",
     storageId: "storage_1",
     name: "ÅÄÖ-🚀.png",
@@ -160,9 +160,9 @@ function notionIntegration(): Doc<"integrations"> {
   return {
     _id: "notion_integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "notion",
-    scope: "tenant",
+    scope: "organization",
     externalId: "workspace",
     credentials: { tokens: { access: "notion-token" } },
     status: "active",

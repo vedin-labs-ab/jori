@@ -5,7 +5,7 @@ import { createSignedState, parseSignedState } from "../connect/signing"
 import { requireNotionClientSecret } from "./oauth"
 
 export type NotionInstallState = {
-  tenantId: string
+  organizationId: string
   createdBy: Id<"persons">
   returnUrl: string
   createdAt: number

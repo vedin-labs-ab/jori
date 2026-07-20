@@ -22,7 +22,7 @@ import { getRequiredAutomation } from "./read"
 import { resolveTrigger, scheduleAutomationIfNeeded } from "./trigger"
 
 type CreateAutomationArgs = {
-  tenantId: string
+  organizationId: string
   artifactId?: Id<"artifacts">
   parentId?: Id<"automations">
   expectedParentConfigurationVersion?: number
@@ -81,25 +81,25 @@ async function prepareAutomation(
     ownerId: args.parentId,
     expectedConfigurationVersion: args.expectedParentConfigurationVersion,
     principal,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     type: args.type,
   })
   const trigger = await resolveTrigger(ctx, {
     principal,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     type: args.type,
     trigger: args.trigger,
     now,
   })
 
   await requireAutomationArtifact(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     artifactId: args.artifactId,
     principal,
   })
 
   return {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     artifactId: args.artifactId,
     parentId: ownership?.parentId,
     parentConfigurationVersion: ownership?.configurationVersion,
@@ -118,7 +118,7 @@ async function prepareAutomation(
       access: args.access,
       artifactId: args.artifactId,
       principal,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     }),
     trigger,
     createdBy: args.createdBy,
@@ -131,7 +131,7 @@ async function resolveOwnership(
     ownerId?: Id<"automations">
     expectedConfigurationVersion?: number
     principal: ReturnType<typeof executionPrincipalForScope>
-    tenantId: string
+    organizationId: string
     type: AutomationType
   }
 ) {
@@ -160,7 +160,7 @@ async function resolveOwnership(
   }
 
   if (
-    parent.tenantId !== args.tenantId ||
+    parent.organizationId !== args.organizationId ||
     parent.status !== "active" ||
     parent.type === "once" ||
     !sameAutomationPrincipal(parent.principal, args.principal)
@@ -184,7 +184,7 @@ async function keyedAutomation(
   return prepared.key === undefined || prepared.keyPartition === undefined
     ? null
     : await findAutomationByKey(ctx, {
-        tenantId: prepared.tenantId,
+        organizationId: prepared.organizationId,
         key: prepared.key,
         keyPartition: prepared.keyPartition,
       })
@@ -199,7 +199,7 @@ async function activateAutomation(
 
   if (prepared.type === "event" && "integrationId" in prepared.trigger) {
     await ensureSubscription(ctx, {
-      tenantId: prepared.tenantId,
+      organizationId: prepared.organizationId,
       trigger: prepared.trigger,
     })
   }

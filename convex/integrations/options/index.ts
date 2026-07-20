@@ -6,7 +6,7 @@ import {
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { action, internalQuery } from "../../_generated/server"
-import { requireTenantAccess } from "../../access"
+import { requireOrganizationAccess } from "../../access"
 import { ensureCurrentPersonFromAction } from "../../persons/clerk"
 import {
   integrationLabels,
@@ -23,13 +23,13 @@ const matchValidator = v.record(v.string(), v.union(v.string(), v.number()))
 
 export const search = action({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     source: v.string(),
     query: v.string(),
     match: v.optional(matchValidator),
   },
   handler: async (ctx, args): Promise<IntegrationOptionSearchResult> => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     if (!isIntegrationOptionSource(args.source)) {
       throw new Error("Choose a supported integration option.")
@@ -40,9 +40,12 @@ export const search = action({
     const lookup: IntegrationLookup = await ctx.runQuery(
       internal.integrations.options.index.integration,
       {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         integration: sourceIntegration,
-        createdBy: await ensureCurrentPersonFromAction(ctx, args.tenantId),
+        createdBy: await ensureCurrentPersonFromAction(
+          ctx,
+          args.organizationId
+        ),
       }
     )
 
@@ -75,7 +78,7 @@ type IntegrationLookup =
 
 export const integration = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     integration: integrationValidator,
     createdBy: v.id("persons"),
   },
@@ -84,7 +87,7 @@ export const integration = internalQuery({
       return {
         status: "ready",
         integration: await resolveIntegrationForOwner(ctx, {
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
           integration: args.integration,
           ownerId: args.createdBy,
         }),

@@ -25,13 +25,13 @@ export async function applyCreate(
       ? null
       : await resolveBelief(
           ctx,
-          pass.tenantId,
+          pass.organizationId,
           "workstream",
           state.temp,
           op.parentId
         )
   const beliefId = await ctx.db.insert("beliefs", {
-    tenantId: pass.tenantId,
+    organizationId: pass.organizationId,
     kind: "workstream",
     name: op.name,
     aliases: op.aliases,
@@ -53,7 +53,7 @@ export async function applyCreate(
     sightings,
     op.brief
   )
-  await adoptCitedEfforts(ctx, pass.tenantId, state, beliefId, sightings)
+  await adoptCitedEfforts(ctx, pass.organizationId, state, beliefId, sightings)
 }
 
 export async function applyUpdate(
@@ -65,7 +65,7 @@ export async function applyUpdate(
 ) {
   const belief = await resolveBelief(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     "workstream",
     state.temp,
     op.beliefId
@@ -82,7 +82,7 @@ export async function applyUpdate(
       ? undefined
       : await resolveBelief(
           ctx,
-          pass.tenantId,
+          pass.organizationId,
           "workstream",
           state.temp,
           op.parentId
@@ -114,7 +114,7 @@ export async function applyStatus(
 ) {
   const belief = await resolveBelief(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     "workstream",
     state.temp,
     op.beliefId
@@ -169,14 +169,14 @@ export async function applyMerge(
 ) {
   const belief = await resolveBelief(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     "workstream",
     state.temp,
     op.beliefId
   )
   const into = await resolveBelief(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     "workstream",
     state.temp,
     op.into

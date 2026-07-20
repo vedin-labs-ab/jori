@@ -17,13 +17,13 @@ import { type Place, type Places } from "./types"
 export function ContextPlaces() {
   return (
     <ContextPage tab="places">
-      {(tenantId) => <PlacesView tenantId={tenantId} />}
+      {(organizationId) => <PlacesView organizationId={organizationId} />}
     </ContextPage>
   )
 }
 
-function PlacesView({ tenantId }: { tenantId: string }) {
-  const result = useQuery(api.places.console.list, { tenantId })
+function PlacesView({ organizationId }: { organizationId: string }) {
+  const result = useQuery(api.places.console.list, { organizationId })
   const [openId, setOpenId] = useState<Place["id"] | null>(null)
   const places = result?.places ?? []
   const open = places.find((row) => row.id === openId) ?? null

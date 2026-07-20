@@ -140,7 +140,7 @@ function reaction(
   return {
     _id: id<"reactions">(reactionId),
     _creationTime: storedAt ?? updatedAt,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "linear",
     reaction: "👍",

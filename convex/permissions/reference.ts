@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { getToolPermission } from "../../contracts/permissions"
 import { query } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import {
   getToolInputSchema,
   type JsonSchema,
@@ -37,11 +37,11 @@ export function resolveToolReference(tool: string) {
  *  a schema dialog never waits on a second request. */
 export const list = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     tools: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     return Object.fromEntries(
       args.tools.slice(0, 50).map((tool) => [tool, resolveToolReference(tool)])

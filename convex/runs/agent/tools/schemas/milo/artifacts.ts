@@ -26,7 +26,7 @@ const artifactAccessProperty = {
   type: "string",
   enum: ["personal", "organization"],
   description:
-    "Personal artifacts are owner-only. Organization artifacts are visible to tenant members.",
+    "Personal artifacts are owner-only. Organization artifacts are visible to organization members.",
 }
 
 const artifactWorkspacePathProperty = stringProperty(

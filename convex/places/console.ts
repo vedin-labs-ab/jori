@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { type PlaceIntegration, placeKinds } from "../../contracts/places"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import { checkTenantAccess } from "../access"
+import { checkOrganizationAccess } from "../access"
 import { profileMissLimit } from "./limits"
 
 // One read serves the whole tab: claims already live on the place row, so
@@ -11,9 +11,9 @@ import { profileMissLimit } from "./limits"
 const fadingThreshold = profileMissLimit / 2
 
 export const list = query({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return { status: "unauthorized" as const, places: [] }
@@ -21,8 +21,8 @@ export const list = query({
 
     const rows = await ctx.db
       .query("places")
-      .withIndex("by_tenant_and_integration_and_external", (index) =>
-        index.eq("tenantId", args.tenantId)
+      .withIndex("by_organization_and_integration_and_external", (index) =>
+        index.eq("organizationId", args.organizationId)
       )
       .collect()
     const integrations = await integrationKinds(ctx, rows)

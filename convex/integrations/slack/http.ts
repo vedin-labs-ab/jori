@@ -79,7 +79,7 @@ export async function handleSlackOAuthCallback(
   const integrationId = await ctx.runMutation(
     internal.integrations.slack.install.recordOAuthInstallation,
     {
-      tenantId: state.tenantId,
+      organizationId: state.organizationId,
       createdBy: state.createdBy,
       accountId: tokenResult.team.id,
       botScopes: tokenResult.scope,

@@ -9,7 +9,7 @@ function buildProfile(
   return {
     _id: "profile" as Doc<"organizationProfile">["_id"],
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     name: "Acme",
     aliases: ["Acme Inc"],
     domains: ["acme.com"],

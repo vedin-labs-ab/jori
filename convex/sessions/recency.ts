@@ -77,7 +77,7 @@ async function collectContexts(
         scope: args.run.scope,
       },
       seen,
-      tenantId: args.run.tenantId,
+      organizationId: args.run.organizationId,
     })
 
     done.push(person.personId)

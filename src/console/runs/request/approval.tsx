@@ -16,11 +16,11 @@ type ApprovalDecisionArgs = FunctionArgs<typeof api.approvals.console.decide>
 export function ApprovalCallout({
   approvals,
   now,
-  tenantId,
+  organizationId,
 }: {
   approvals: ExecutionApproval[]
   now: number
-  tenantId: string
+  organizationId: string
 }) {
   const carousel = useRunRequestCarousel(approvals.length)
   const approval = approvals[carousel.index] ?? approvals[0]
@@ -36,7 +36,7 @@ export function ApprovalCallout({
           <ApprovalActions
             key={approval.id}
             approval={approval}
-            tenantId={tenantId}
+            organizationId={organizationId}
           />
         ) : undefined
       }
@@ -59,10 +59,10 @@ export function ApprovalCallout({
 
 function ApprovalActions({
   approval,
-  tenantId,
+  organizationId,
 }: {
   approval: ExecutionApproval
-  tenantId: string
+  organizationId: string
 }) {
   const decide = useAction(api.approvals.console.decide)
   const [pendingDecision, setPendingDecision] =
@@ -75,7 +75,7 @@ function ApprovalActions({
       await decide({
         approvalId: approval.id as ApprovalDecisionArgs["approvalId"],
         decision,
-        tenantId,
+        organizationId,
       })
     } catch (caught) {
       showErrorToast(caught, "Couldn't update the approval.")

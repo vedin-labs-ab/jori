@@ -58,7 +58,7 @@ function testRun(title: string) {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     status: "completed",
     createdAt: 0,
     endedAt: 1000,
@@ -103,7 +103,7 @@ function integrationOffer(overrides: Record<string, unknown>) {
   return {
     _creationTime: 0,
     _id: "offer",
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "notion",
     tokenHash: "hash",
     status: "pending",

@@ -12,15 +12,15 @@ type Violation = Omit<PublicFunction, "block">
 
 // Every public Convex function is an internet-facing endpoint. Its
 // registration block must go through one of these guards, which authenticate
-// the caller and resolve tenant/user scope server-side.
+// the caller and resolve organization/user scope server-side.
 const sanctionedGuards = [
-  "requireTenantAccess",
-  "checkTenantAccess",
+  "requireOrganizationAccess",
+  "checkOrganizationAccess",
   "ensureCurrentPerson",
   "ensureCurrentPersonFromAction",
   "resolveCurrentPerson",
   "requireWorkerSecret",
-  "getTenantIntegration",
+  "getOrganizationIntegration",
   "getUserIntegration",
   "claimIntegrationOffer",
   "buildInstallState",
@@ -130,7 +130,7 @@ function formatViolations(violations: Violation[]) {
       (violation) => `  - ${violation.file}:${violation.line} ${violation.name}`
     ),
     "",
-    "Use requireTenantAccess (console callers) or requireWorkerSecret",
+    "Use requireOrganizationAccess (console callers) or requireWorkerSecret",
     "(worker callers), or register the function as internal instead.",
     "",
   ].join("\n")

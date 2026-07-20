@@ -33,7 +33,7 @@ export const integrationOfferSource = v.object({
 export type IntegrationOfferSource = Infer<typeof integrationOfferSource>
 
 export const integrationOffers = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integration: integrationValidator,
   tokenHash: v.string(),
   status: integrationOfferStatus,

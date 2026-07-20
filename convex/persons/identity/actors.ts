@@ -18,16 +18,16 @@ const providerActorProfile = v.object({
 export async function resolveProviderActorProfile(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     provider: Parameters<typeof linkIdentityToPerson>[1]["provider"]
     externalId: string
   }
 ): Promise<ProviderActorProfile | undefined> {
   const identity = await ctx.db
     .query("identities")
-    .withIndex("by_tenant_provider_external_id", (query) =>
+    .withIndex("by_organization_provider_external_id", (query) =>
       query
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("provider", args.provider)
         .eq("externalId", args.externalId)
     )
@@ -38,7 +38,7 @@ export async function resolveProviderActorProfile(
 
 export const resolveProviderActorProfileRecord = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     provider: identityProvider,
     externalId: v.string(),
   },

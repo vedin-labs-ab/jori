@@ -2,19 +2,19 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
 import { deleteOwnedAutomations } from "./children"
-import { getRequiredAutomation, getTenantAutomation } from "./read"
+import { getOrganizationAutomation, getRequiredAutomation } from "./read"
 import { cancelTrigger, scheduleNextCronAutomation } from "./trigger"
 
 export async function pauseAutomation(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     automationId: Id<"automations">
   }
 ) {
-  const automation = await getTenantAutomation(
+  const automation = await getOrganizationAutomation(
     ctx,
-    args.tenantId,
+    args.organizationId,
     args.automationId
   )
 
@@ -45,13 +45,13 @@ export async function pauseAutomation(
 export async function resumeAutomation(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     automationId: Id<"automations">
   }
 ) {
-  const automation = await getTenantAutomation(
+  const automation = await getOrganizationAutomation(
     ctx,
-    args.tenantId,
+    args.organizationId,
     args.automationId
   )
 
@@ -73,7 +73,7 @@ export async function resumeAutomation(
 
   if (automation.type === "event" && "integrationId" in trigger) {
     await ensureSubscription(ctx, {
-      tenantId: automation.tenantId,
+      organizationId: automation.organizationId,
       trigger,
     })
   }
@@ -90,13 +90,13 @@ export async function resumeAutomation(
 export async function removeAutomation(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     automationId: Id<"automations">
   }
 ) {
-  const automation = await getTenantAutomation(
+  const automation = await getOrganizationAutomation(
     ctx,
-    args.tenantId,
+    args.organizationId,
     args.automationId
   )
 
@@ -115,7 +115,7 @@ async function stopAutomation(
 
   if (automation.type === "event" && "integrationId" in automation.trigger) {
     await releaseSubscription(ctx, {
-      tenantId: automation.tenantId,
+      organizationId: automation.organizationId,
       trigger: automation.trigger,
       exceptAutomationId: automation._id,
     })

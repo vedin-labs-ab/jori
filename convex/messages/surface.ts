@@ -55,7 +55,7 @@ export function conversationScope(
     integration.integration === "github" ||
     integration.integration === "linear"
   ) {
-    return "tenant"
+    return "organization"
   }
 
   return isUserScopedIntegration(integration.integration)
@@ -86,7 +86,7 @@ function slackConversationScope(message: Doc<"messages">): AudienceScope {
   const channelType = getSlackChannelType(message.type)
 
   if (channelType === "channel") {
-    return "tenant"
+    return "organization"
   }
 
   return channelType === "im" ? "person" : "conversation"

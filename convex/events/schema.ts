@@ -128,12 +128,12 @@ export const eventFields = {
 }
 
 export const events = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integrationId: v.id("integrations"),
   ...eventFields,
 })
   .index("by_integration_and_key", ["integrationId", "key"])
-  .index("by_tenant", ["tenantId"])
+  .index("by_organization", ["organizationId"])
 
 export type EventData = Infer<typeof eventData>
 export type EventMatch = Infer<typeof eventMatch>

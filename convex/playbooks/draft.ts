@@ -27,7 +27,7 @@ export async function resolvePlaybookDraft(
   const access = await resolveAccessInput(ctx, {
     access: plan.access,
     principal,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
   const now = Date.now()
   const timezone = await requirePersonTimezone(ctx, args.createdBy)
@@ -45,7 +45,7 @@ export async function resolvePlaybookDraft(
   return await toAutomationDisplay(ctx, {
     _id: "draft" as Id<"automations">,
     _creationTime: now,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     key: `playbook:${plan.definition.key}`,
     playbook: playbookBinding(plan, args),
     artifactId: args.artifactId,

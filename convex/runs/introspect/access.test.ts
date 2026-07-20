@@ -2,14 +2,14 @@ import { expect, test } from "vitest"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { canSee } from "./access"
 
-test("allows tenant runs and only matching private buckets", () => {
+test("allows organization runs and only matching private buckets", () => {
   const current = run({
     scope: "conversation",
     conversationId: id<"conversations">("conversation"),
     createdBy: id<"persons">("person"),
   })
 
-  expect(canSee(current, run({ scope: "tenant" }))).toBe(true)
+  expect(canSee(current, run({ scope: "organization" }))).toBe(true)
   expect(
     canSee(
       current,
@@ -57,7 +57,7 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     createdAt: 0,
     snapshot: { context: [], source: { type: "manual" }, title: "Run" },
     status: "running",
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   }
 }

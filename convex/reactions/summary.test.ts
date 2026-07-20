@@ -89,7 +89,7 @@ function message(): Doc<"messages"> {
   return {
     _id: id<"messages">("message"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message.channels",
@@ -110,7 +110,7 @@ function reaction(
   return {
     _id: id<"reactions">(reactionId),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     target: {

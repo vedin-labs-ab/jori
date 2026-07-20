@@ -19,12 +19,12 @@ export function PlaybookControls({
   actions,
   definition,
   row,
-  tenantId,
+  organizationId,
 }: {
   actions: PlaybookActions
   definition: PlaybookDefinition
   row: PlaybookListRow | undefined
-  tenantId: string
+  organizationId: string
 }) {
   if (row === undefined) {
     return <Skeleton className="h-7 w-full" />
@@ -36,7 +36,7 @@ export function PlaybookControls({
         actions={actions}
         definition={definition}
         row={row}
-        tenantId={tenantId}
+        organizationId={organizationId}
       />
     )
   }
@@ -47,7 +47,7 @@ export function PlaybookControls({
       definition={definition}
       enabled={row.enabled}
       row={row}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }
@@ -87,13 +87,13 @@ function EnabledControls({
   definition,
   enabled,
   row,
-  tenantId,
+  organizationId,
 }: {
   actions: PlaybookActions
   definition: PlaybookDefinition
   enabled: PlaybookEnabledRow
   row: PlaybookListRow
-  tenantId: string
+  organizationId: string
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const pendingKind = pendingActionKind(actions, definition)
@@ -144,7 +144,7 @@ function EnabledControls({
           open={isEditOpen}
           plan={plan}
           row={row}
-          tenantId={tenantId}
+          organizationId={organizationId}
         />
       ) : null}
     </div>

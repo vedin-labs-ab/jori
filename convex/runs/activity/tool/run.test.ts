@@ -42,7 +42,7 @@ test("projects searched runs with compact time and paginated outcome", () => {
     data([
       toolStarted("search_runs", {
         mode: "search",
-        scope: "tenant",
+        scope: "organization",
         since: Date.UTC(2026, 6, 1),
       }),
       toolCompleted("search_runs", result("runs", 10, true)),
@@ -52,7 +52,7 @@ test("projects searched runs with compact time and paginated outcome", () => {
   expect(items).toContainEqual(
     expect.objectContaining({
       metadata: [
-        { kind: "scope", text: "tenant" },
+        { kind: "scope", text: "organization" },
         { kind: "target", text: "since Jul 1" },
         { kind: "outcome", text: "10+ runs" },
       ],
@@ -209,7 +209,7 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   } as Doc<"traces">
 }
@@ -228,7 +228,7 @@ function run(): Doc<"runs"> {
       title: "Run",
     },
     status: "running",
-    tenantId: "tenant",
+    organizationId: "organization",
   } as Doc<"runs">
 }
 

@@ -48,7 +48,7 @@ const identityLink = v.object({
 })
 
 export const identities = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   personId: v.id("persons"),
   provider: identityProvider,
   externalId: v.string(),
@@ -58,9 +58,9 @@ export const identities = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 })
-  .index("by_tenant_email", ["tenantId", "email"])
-  .index("by_tenant_provider_external_id", [
-    "tenantId",
+  .index("by_organization_email", ["organizationId", "email"])
+  .index("by_organization_provider_external_id", [
+    "organizationId",
     "provider",
     "externalId",
   ])

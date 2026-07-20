@@ -20,7 +20,7 @@ test("projects integration offers with integration metadata", () => {
         source: { surface: "milo" },
         status: "expired",
         summary: "Connect GitHub so Milo can inspect repositories.",
-        tenantId: "tenant",
+        organizationId: "organization",
         tokenHash: "token",
         updatedAt: 2000,
       } as Doc<"integrationOffers">,

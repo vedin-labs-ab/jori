@@ -23,16 +23,16 @@ const linearConfig = {
 
 export function LinearIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.linear.install.createInstallState
   )
   const status = useQuery(api.integrations.status.getLinearStatus, {
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -48,7 +48,7 @@ export function LinearIntegration({
       )}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }

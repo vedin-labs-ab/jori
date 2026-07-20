@@ -89,10 +89,10 @@ async function queryByRoot(ctx: QueryCtx, rootId: Id<"runs">) {
 async function queryByScope(
   ctx: QueryCtx,
   current: Doc<"runs">,
-  scope: "conversation" | "tenant" | "all"
+  scope: "conversation" | "organization" | "all"
 ) {
-  if (isTenantScope(current, scope)) {
-    return await queryTenantRuns(ctx, current)
+  if (isOrganizationScope(current, scope)) {
+    return await queryOrganizationRuns(ctx, current)
   }
 
   if (scope === "conversation") {
@@ -100,26 +100,28 @@ async function queryByScope(
   }
 
   return [
-    ...(await queryTenantRuns(ctx, current)),
+    ...(await queryOrganizationRuns(ctx, current)),
     ...(await queryPrivateRuns(ctx, current)),
   ]
 }
 
-function isTenantScope(
+function isOrganizationScope(
   current: Doc<"runs">,
-  scope: "conversation" | "tenant" | "all"
+  scope: "conversation" | "organization" | "all"
 ) {
   return (
-    scope === "tenant" ||
-    (scope === "all" && runAudienceScope(current) === "tenant")
+    scope === "organization" ||
+    (scope === "all" && runAudienceScope(current) === "organization")
   )
 }
 
-async function queryTenantRuns(ctx: QueryCtx, current: Doc<"runs">) {
+async function queryOrganizationRuns(ctx: QueryCtx, current: Doc<"runs">) {
   return await ctx.db
     .query("runs")
-    .withIndex("by_tenant_and_scope_and_created_at", (query) =>
-      query.eq("tenantId", current.tenantId).eq("scope", "tenant")
+    .withIndex("by_organization_and_scope_and_created_at", (query) =>
+      query
+        .eq("organizationId", current.organizationId)
+        .eq("scope", "organization")
     )
     .order("desc")
     .take(runScanLimit)
@@ -136,8 +138,10 @@ async function queryPrivateRuns(ctx: QueryCtx, current: Doc<"runs">) {
 
   return await ctx.db
     .query("runs")
-    .withIndex("by_tenant_and_created_by_and_created_at", (query) =>
-      query.eq("tenantId", current.tenantId).eq("createdBy", current.createdBy)
+    .withIndex("by_organization_and_created_by_and_created_at", (query) =>
+      query
+        .eq("organizationId", current.organizationId)
+        .eq("createdBy", current.createdBy)
     )
     .order("desc")
     .take(runScanLimit)

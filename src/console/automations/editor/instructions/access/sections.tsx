@@ -27,14 +27,14 @@ import { type ToolReferences, toolReferenceReady } from "./wire"
 type AutomationSurfaceToolGroupsProps = {
   onToolsChange: (tools: string[]) => void
   permissions: ToolPermission[]
-  tenantId: string
+  organizationId: string
   tools: string[]
 }
 
 export function AutomationSurfaceToolGroups({
   onToolsChange,
   permissions,
-  tenantId,
+  organizationId,
   tools,
 }: AutomationSurfaceToolGroupsProps) {
   const selectedTools = new Set(tools)
@@ -99,7 +99,7 @@ export function AutomationSurfaceToolGroups({
       {schemaIntent || schemaPermission !== undefined ? (
         <ToolReferencesLoader
           onChange={setReferences}
-          tenantId={tenantId}
+          organizationId={organizationId}
           tools={permissions.map((candidate) => candidate.tool)}
         />
       ) : null}

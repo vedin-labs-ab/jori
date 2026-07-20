@@ -54,11 +54,11 @@ export type WindowConversation = {
 }
 
 export const assemble = internalQuery({
-  args: { tenantId: v.string(), window: passWindow },
+  args: { organizationId: v.string(), window: passWindow },
   handler: async (ctx, args): Promise<EffortPassInput> => {
     return {
       window: args.window,
-      efforts: await loadActiveEfforts(ctx, args.tenantId),
+      efforts: await loadActiveEfforts(ctx, args.organizationId),
       events: await loadEvents(ctx, args),
       conversations: await loadConversations(ctx, args),
     }
@@ -68,8 +68,8 @@ export const assemble = internalQuery({
 // Efforts sighted inside the active window, newest first, capped. Dormant
 // efforts leave the payload, so continuing work spawns a fresh effort
 // instead of reanimating an old one.
-async function loadActiveEfforts(ctx: QueryCtx, tenantId: string) {
-  const rows = await activeEffortRows(ctx, tenantId, maxContextEfforts)
+async function loadActiveEfforts(ctx: QueryCtx, organizationId: string) {
+  const rows = await activeEffortRows(ctx, organizationId, maxContextEfforts)
 
   return Promise.all(rows.map((row) => readEffortContext(ctx, row)))
 }
@@ -79,14 +79,14 @@ async function loadActiveEfforts(ctx: QueryCtx, tenantId: string) {
 // passes its own view range instead.
 export async function activeEffortRows(
   ctx: QueryCtx,
-  tenantId: string,
+  organizationId: string,
   limit: number,
   sightedSince = Date.now() - effortActiveMs
 ) {
   const rows = await ctx.db
     .query("efforts")
-    .withIndex("by_tenant_and_seen_at", (index) =>
-      index.eq("tenantId", tenantId).gt("seenAt", sightedSince)
+    .withIndex("by_organization_and_seen_at", (index) =>
+      index.eq("organizationId", organizationId).gt("seenAt", sightedSince)
     )
     .order("desc")
     .take(limit)
@@ -126,13 +126,13 @@ export async function readEffortContext(
 // are never skipped; observedAt is for narrative.
 async function loadEvents(
   ctx: QueryCtx,
-  args: { tenantId: string; window: { start: number; end: number } }
+  args: { organizationId: string; window: { start: number; end: number } }
 ) {
   const rows = await ctx.db
     .query("events")
-    .withIndex("by_tenant", (index) =>
+    .withIndex("by_organization", (index) =>
       index
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .gt("_creationTime", args.window.start)
         .lte("_creationTime", args.window.end)
     )
@@ -156,13 +156,13 @@ export function readWindowEvent(row: Doc<"events">): WindowEvent {
 
 async function loadConversations(
   ctx: QueryCtx,
-  args: { tenantId: string; window: { start: number; end: number } }
+  args: { organizationId: string; window: { start: number; end: number } }
 ) {
   const rows = await ctx.db
     .query("conversations")
-    .withIndex("by_tenant_and_summarized_at", (index) =>
+    .withIndex("by_organization_and_summarized_at", (index) =>
       index
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .gt("summarizedAt", args.window.start)
         .lte("summarizedAt", args.window.end)
     )
@@ -174,11 +174,11 @@ async function loadConversations(
     .map((row) => readWindowConversation(row))
 }
 
-// The one privacy gate on judge input: only tenant-scoped conversations with
+// The one privacy gate on judge input: only organization-scoped conversations with
 // a non-empty summary are readable.
 export function isReadableConversation(row: Doc<"conversations">) {
   return (
-    row.scope === "tenant" &&
+    row.scope === "organization" &&
     row.summary !== undefined &&
     row.summary !== "" &&
     row.summarizedAt !== undefined

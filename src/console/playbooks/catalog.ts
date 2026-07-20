@@ -27,15 +27,18 @@ type PlanInput = [
 ]
 
 /** Enable, try, and reconfigure — the actions that submit a playbook plan. */
-export function useCatalogActions(tenantId: string, pending: PendingAction) {
+export function useCatalogActions(
+  organizationId: string,
+  pending: PendingAction
+) {
   return {
-    ...useEnableAction(tenantId, pending),
-    ...useTrialAction(tenantId, pending),
-    ...useReconfigureAction(tenantId, pending),
+    ...useEnableAction(organizationId, pending),
+    ...useTrialAction(organizationId, pending),
+    ...useReconfigureAction(organizationId, pending),
   }
 }
 
-function useEnableAction(tenantId: string, pending: PendingAction) {
+function useEnableAction(organizationId: string, pending: PendingAction) {
   const enableMutation = useAction(api.playbooks.actions.enable)
 
   return {
@@ -43,7 +46,7 @@ function useEnableAction(tenantId: string, pending: PendingAction) {
       pending.wrap(definition.key, "enable", async () => {
         try {
           await enableMutation({
-            tenantId,
+            organizationId,
             playbook: definition.key,
             choices,
             destination,
@@ -59,7 +62,7 @@ function useEnableAction(tenantId: string, pending: PendingAction) {
   }
 }
 
-function useTrialAction(tenantId: string, pending: PendingAction) {
+function useTrialAction(organizationId: string, pending: PendingAction) {
   const trialMutation = useAction(api.playbooks.actions.trial)
   const viewRuns = useViewRunsAction()
 
@@ -68,7 +71,7 @@ function useTrialAction(tenantId: string, pending: PendingAction) {
       pending.wrap(definition.key, "trial", async () => {
         try {
           await trialMutation({
-            tenantId,
+            organizationId,
             playbook: definition.key,
             choices,
             destination,
@@ -85,7 +88,7 @@ function useTrialAction(tenantId: string, pending: PendingAction) {
   }
 }
 
-function useReconfigureAction(tenantId: string, pending: PendingAction) {
+function useReconfigureAction(organizationId: string, pending: PendingAction) {
   const reconfigureMutation = useAction(api.playbooks.actions.reconfigure)
 
   return {
@@ -99,7 +102,7 @@ function useReconfigureAction(tenantId: string, pending: PendingAction) {
       pending.wrap(definition.key, "reconfigure", async () => {
         try {
           await reconfigureMutation({
-            tenantId,
+            organizationId,
             playbook: definition.key,
             automationId,
             choices,
@@ -117,7 +120,10 @@ function useReconfigureAction(tenantId: string, pending: PendingAction) {
 }
 
 /** Run-now and pause/resume for an enabled playbook's automation. */
-export function useAutomationActions(tenantId: string, pending: PendingAction) {
+export function useAutomationActions(
+  organizationId: string,
+  pending: PendingAction
+) {
   const runMutation = useMutation(api.automations.console.run)
   const pauseMutation = useMutation(api.automations.console.pause)
   const resumeMutation = useMutation(api.automations.console.resume)
@@ -127,7 +133,7 @@ export function useAutomationActions(tenantId: string, pending: PendingAction) {
     runNow: (definition: PlaybookDefinition, automationId: AutomationId) =>
       pending.wrap(definition.key, "run", async () => {
         try {
-          await runMutation({ tenantId, automationId })
+          await runMutation({ organizationId, automationId })
           toast.success(`${definition.title} is running`, {
             action: viewRuns,
           })
@@ -144,12 +150,12 @@ export function useAutomationActions(tenantId: string, pending: PendingAction) {
       pending.wrap(definition.key, "pause", async () => {
         try {
           if (paused) {
-            await pauseMutation({ tenantId, automationId })
+            await pauseMutation({ organizationId, automationId })
             toast.success(`${definition.title} paused`, {
               description: "It keeps its setup — switch it back on anytime.",
             })
           } else {
-            await resumeMutation({ tenantId, automationId })
+            await resumeMutation({ organizationId, automationId })
             toast.success(`${definition.title} is back on`)
           }
         } catch (error) {

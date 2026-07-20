@@ -10,13 +10,13 @@ export type ToolReferences = Record<
  *  the first sign of intent — hovering a schema affordance — so the data is
  *  already here by the time a schema dialog opens. */
 export function useToolReferences(
-  tenantId: string,
+  organizationId: string,
   tools: string[],
   enabled: boolean
 ): ToolReferences | undefined {
   return useQuery(
     api.permissions.reference.list,
-    enabled ? { tenantId, tools } : "skip"
+    enabled ? { organizationId, tools } : "skip"
   )
 }
 

@@ -6,7 +6,7 @@ export const maxSearchResults = 100
 export async function searchAutomations(
   ctx: QueryCtx,
   args: {
-    tenantId: string
+    organizationId: string
     query?: string
     status?: Doc<"automations">["status"]
     includeCompleted?: boolean
@@ -26,7 +26,7 @@ export async function searchAutomations(
 function queryAutomationRows(
   ctx: QueryCtx,
   args: {
-    tenantId: string
+    organizationId: string
     status?: Doc<"automations">["status"]
     includeCompleted?: boolean
   }
@@ -37,9 +37,9 @@ function queryAutomationRows(
   if (statusFilter !== undefined) {
     return ctx.db
       .query("automations")
-      .withIndex("by_tenant_and_status_and_parent", (index) =>
+      .withIndex("by_organization_and_status_and_parent", (index) =>
         index
-          .eq("tenantId", args.tenantId)
+          .eq("organizationId", args.organizationId)
           .eq("status", statusFilter)
           .eq("parentId", undefined)
       )
@@ -48,8 +48,8 @@ function queryAutomationRows(
 
   return ctx.db
     .query("automations")
-    .withIndex("by_tenant_and_parent", (index) =>
-      index.eq("tenantId", args.tenantId).eq("parentId", undefined)
+    .withIndex("by_organization_and_parent", (index) =>
+      index.eq("organizationId", args.organizationId).eq("parentId", undefined)
     )
     .collect()
 }

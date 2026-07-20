@@ -3,11 +3,11 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { canAccessArtifact } from "../access"
 import { type ArtifactSessionGrant } from "../schema"
-import { getTenantArtifact } from "../storage/links"
+import { getOrganizationArtifact } from "../storage/links"
 
 export const createSessionRecord = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
     secret: v.string(),
@@ -16,7 +16,7 @@ export const createSessionRecord = internalMutation({
     tokenExpiresAt: v.number(),
   },
   handler: async (ctx, args) => {
-    const artifact = await getTenantArtifact(ctx, args)
+    const artifact = await getOrganizationArtifact(ctx, args)
 
     return await createArtifactSession(ctx, {
       ...args,
@@ -50,7 +50,7 @@ export async function createArtifactSession(
   }
 
   const sessionId = await ctx.db.insert("artifactSessions", {
-    tenantId: artifact.tenantId,
+    organizationId: artifact.organizationId,
     artifactId: artifact._id,
     versionId: artifact.versionId,
     personId: args.personId,
@@ -65,7 +65,7 @@ export async function createArtifactSession(
 
   return {
     sessionId,
-    tenantId: artifact.tenantId,
+    organizationId: artifact.organizationId,
     personId: args.personId,
     artifactId: artifact._id,
     versionId: artifact.versionId,
@@ -79,7 +79,7 @@ export const authorizeSession = internalMutation({
     sessionId: v.id("artifactSessions"),
     artifactId: v.id("artifacts"),
     versionId: v.id("artifactVersions"),
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.id("persons"),
     secret: v.string(),
     tokenExpiresAt: v.number(),
@@ -92,7 +92,7 @@ export const authorizeSession = internalMutation({
       session === null ||
       session.artifactId !== args.artifactId ||
       session.versionId !== args.versionId ||
-      session.tenantId !== args.tenantId ||
+      session.organizationId !== args.organizationId ||
       session.personId !== args.personId ||
       session.tokenSecret !== args.secret ||
       session.expiresAt <= args.now ||

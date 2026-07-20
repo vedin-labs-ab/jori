@@ -95,7 +95,7 @@ function traceInsert(args: {
   type: Doc<"traces">["type"]
 }): TraceInsert {
   return {
-    tenantId: args.run.tenantId,
+    organizationId: args.run.organizationId,
     runId: args.run._id,
     key: args.key,
     type: args.type,

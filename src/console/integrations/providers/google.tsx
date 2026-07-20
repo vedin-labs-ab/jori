@@ -40,16 +40,16 @@ const calendarConfig = {
 
 export function GmailIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.google.install.createGmailInstallState
   )
   const status = useQuery(api.integrations.status.getGmailStatus, {
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -59,23 +59,23 @@ export function GmailIntegration({
       headline={getAccountHeadline(status, gmailConfig.label)}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }
 
 export function GoogleCalendarIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.google.install.createGoogleCalendarInstallState
   )
   const status = useQuery(api.integrations.status.getGoogleCalendarStatus, {
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -85,7 +85,7 @@ export function GoogleCalendarIntegration({
       headline={getAccountHeadline(status, calendarConfig.label)}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }

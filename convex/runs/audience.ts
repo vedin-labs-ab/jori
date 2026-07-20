@@ -66,6 +66,6 @@ async function resolveParentAudience(
 
 function automationAudience(automation: Doc<"automations">): RunAudience {
   return automationScope(automation) === "organization"
-    ? { scope: "tenant" }
+    ? { scope: "organization" }
     : { scope: "person" }
 }

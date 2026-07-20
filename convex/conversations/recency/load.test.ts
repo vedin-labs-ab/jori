@@ -5,7 +5,7 @@ import { loadRecentActivity, type RecencyRun } from "./load"
 
 const now = Date.UTC(2026, 6, 2, 8, 57)
 
-test("loads tenant summaries with conversation-level identifiers", async () => {
+test("loads organization summaries with conversation-level identifiers", async () => {
   const ctx = fakeQueryCtx([
     ["messages", personMessage({ id: "m1", thread: "t1" })],
     ["conversations", conversation({ id: "c1", thread: "t1" })],
@@ -41,7 +41,7 @@ test("keeps narrower context inside the person's own person-scoped run", async (
 
   await expect(load(run("person"))).resolves.toHaveLength(1)
   await expect(load(run("conversation"))).resolves.toHaveLength(0)
-  await expect(load(run("tenant"))).resolves.toHaveLength(0)
+  await expect(load(run("organization"))).resolves.toHaveLength(0)
   await expect(
     load({ ...run("person"), personId: id<"persons">("other") })
   ).resolves.toHaveLength(0)
@@ -113,7 +113,7 @@ test("caps summaries, skips the current and summaryless conversations", async ()
 
   const entries = await loadRecentActivity(
     fakeQueryCtx(seed),
-    query(run("tenant"))
+    query(run("organization"))
   )
 
   expect(entries).toHaveLength(5)
@@ -128,7 +128,7 @@ function query(recencyRun: RecencyRun) {
     personId: id<"persons">("person"),
     run: recencyRun,
     seen: [],
-    tenantId: "tenant",
+    organizationId: "organization",
   }
 }
 
@@ -148,7 +148,7 @@ function personMessage(args: {
   return {
     _id: id<"messages">(args.id),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message.channels",
@@ -176,10 +176,10 @@ function conversation(args: {
   return {
     _id: id<"conversations">(args.id),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     externalId: args.thread,
-    scope: args.scope ?? "tenant",
+    scope: args.scope ?? "organization",
     ...(args.summary === null
       ? {}
       : {

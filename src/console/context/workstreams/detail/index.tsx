@@ -25,11 +25,11 @@ import { WorkstreamActions } from "./actions"
 import { WorkstreamTimeline } from "./timeline"
 
 export function WorkstreamDetail({
-  tenantId,
+  organizationId,
   workstream,
   onClose,
 }: {
-  tenantId: string
+  organizationId: string
   workstream: Workstream | null
   onClose: () => void
 }) {
@@ -44,7 +44,7 @@ export function WorkstreamDetail({
     >
       <SheetContent className="flex w-full flex-col gap-0 data-[side=right]:sm:max-w-lg">
         {workstream === null ? null : (
-          <DetailBody tenantId={tenantId} workstream={workstream} />
+          <DetailBody organizationId={organizationId} workstream={workstream} />
         )}
       </SheetContent>
     </Sheet>
@@ -52,13 +52,13 @@ export function WorkstreamDetail({
 }
 
 function DetailBody({
-  tenantId,
+  organizationId,
   workstream,
 }: {
-  tenantId: string
+  organizationId: string
   workstream: Workstream
 }) {
-  const args = { tenantId, workstreamId: workstream.id }
+  const args = { organizationId, workstreamId: workstream.id }
   const detail = useQuery(api.workstreams.queries.get, args)
   const timeline = useQuery(api.workstreams.queries.timeline, args)
   const now = useNow(30_000)
@@ -97,13 +97,16 @@ function DetailBody({
           <DetailSections
             detail={detail}
             now={now}
-            tenantId={tenantId}
+            organizationId={organizationId}
             timeline={timeline}
           />
         )}
       </div>
       <SheetFooter className="border-t">
-        <WorkstreamActions tenantId={tenantId} workstream={workstream} />
+        <WorkstreamActions
+          organizationId={organizationId}
+          workstream={workstream}
+        />
       </SheetFooter>
     </>
   )
@@ -144,12 +147,12 @@ type TimelineItems = NonNullable<
 function DetailSections({
   detail,
   timeline,
-  tenantId,
+  organizationId,
   now,
 }: {
   detail: Detail
   timeline: TimelineItems
-  tenantId: string
+  organizationId: string
   now: number
 }) {
   return (
@@ -159,7 +162,11 @@ function DetailSections({
       </Section>
       {timeline.length === 0 ? null : (
         <Section title="Timeline">
-          <WorkstreamTimeline items={timeline} now={now} tenantId={tenantId} />
+          <WorkstreamTimeline
+            items={timeline}
+            now={now}
+            organizationId={organizationId}
+          />
         </Section>
       )}
     </>

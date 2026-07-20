@@ -4,7 +4,7 @@ import { type GenericId } from "convex/values"
 
 export type Skill = {
   _id: GenericId<"skills">
-  tenantId: string | null
+  organizationId: string | null
   name: string
   category: SkillCategory
   associatedIntegrations: Integration[]
@@ -12,7 +12,7 @@ export type Skill = {
   body: string
   createdAt: number
   updatedAt: number
-  scope: "global" | "tenant"
+  scope: "global" | "organization"
 }
 
 export type SkillFormValues = {
@@ -23,11 +23,11 @@ export type SkillFormValues = {
   body: string
 }
 
-export type SkillFilterView = "all" | "tenant" | "global"
+export type SkillFilterView = "all" | "organization" | "global"
 
 export const skillFilterOptions = [
   { label: "All", value: "all" },
-  { label: "Organization", value: "tenant" },
+  { label: "Organization", value: "organization" },
   { label: "Global", value: "global" },
 ] satisfies Array<{ label: string; value: SkillFilterView }>
 

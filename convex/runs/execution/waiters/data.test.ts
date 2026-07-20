@@ -86,7 +86,7 @@ function waiter(overrides: Record<string, unknown> = {}): Seed {
       expiresAt: 1000,
       runId: id<"runs">("run"),
       status: "waiting",
-      tenantId: "tenant",
+      organizationId: "organization",
       updatedAt: 0,
       waitpointId: "waitpoint",
       ...overrides,
@@ -102,7 +102,7 @@ function run(runId: string, status: "completed" | "failed" | "running"): Seed {
       _id: id<"runs">(runId),
       parentId: id<"runs">("run-parent"),
       status,
-      tenantId: "tenant",
+      organizationId: "organization",
     },
   ]
 }

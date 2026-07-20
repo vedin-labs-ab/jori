@@ -6,7 +6,7 @@ import {
   type MutationCtx,
   mutation,
 } from "../../_generated/server"
-import { requireTenantAccess } from "../../access"
+import { requireOrganizationAccess } from "../../access"
 import { readClerkUserEmail, readClerkUserName } from "../../access/users"
 import { ensureCurrentPerson } from "../../persons/clerk"
 import { createPersonActor } from "../../shared/actor"
@@ -51,7 +51,7 @@ export const integrationOfferClaimResult = v.union(
 
 export const create = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     integration: integrationValidator,
     summary: v.string(),
     source: integrationOfferSource,
@@ -69,7 +69,7 @@ export const create = internalMutation({
     const now = Date.now()
     const expiresAt = now + integrationOfferTtlMs
     const integrationOfferId = await ctx.db.insert("integrationOffers", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       integration: args.integration,
       tokenHash: await hashIntegrationOfferToken(token),
       status: "pending",
@@ -167,7 +167,7 @@ export async function claimIntegrationOffer(
 
   await requireClaimableOffer(ctx, args.offer, { now, personId })
   await upsertIntegrationOfferSourceIdentity(ctx, {
-    tenantId: args.offer.tenantId,
+    organizationId: args.offer.organizationId,
     personId,
     source: args.offer.source,
   })
@@ -188,8 +188,8 @@ async function readClaimActor(
   ctx: MutationCtx,
   offer: Doc<"integrationOffers">
 ) {
-  const identity = await requireTenantAccess(ctx, offer.tenantId)
-  const personId = await ensureCurrentPerson(ctx, offer.tenantId)
+  const identity = await requireOrganizationAccess(ctx, offer.organizationId)
+  const personId = await ensureCurrentPerson(ctx, offer.organizationId)
 
   return {
     actor: createPersonActor(personId, {
@@ -256,7 +256,7 @@ async function readyOfferResult(
   args: { offer: Doc<"integrationOffers">; returnUrl: string }
 ) {
   const state = await createSignedInstallState(ctx, args.offer.integration, {
-    tenantId: args.offer.tenantId,
+    organizationId: args.offer.organizationId,
     returnUrl: args.returnUrl,
     integrationOfferId: args.offer._id,
   })

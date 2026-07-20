@@ -17,7 +17,7 @@ beforeEach(() => {
 
 test("links setup identities as OAuth provider identities", async () => {
   const result = await linkSetupIdentity(ctx, {
-    tenantId: "tenant_1",
+    organizationId: "organization_1",
     personId,
     provider: "slack",
     identity: {
@@ -29,7 +29,7 @@ test("links setup identities as OAuth provider identities", async () => {
 
   expect(result).toBe("linked_person")
   expect(linkIdentityToPerson).toHaveBeenCalledWith(ctx, {
-    tenantId: "tenant_1",
+    organizationId: "organization_1",
     personId,
     provider: "slack",
     externalId: "U123",
@@ -41,7 +41,7 @@ test("links setup identities as OAuth provider identities", async () => {
 
 test("skips setup identity linking when providers lack a human handle", async () => {
   const result = await linkSetupIdentity(ctx, {
-    tenantId: "tenant_1",
+    organizationId: "organization_1",
     personId,
     provider: "linear",
     identity: undefined,

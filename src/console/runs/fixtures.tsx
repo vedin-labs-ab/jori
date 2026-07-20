@@ -17,7 +17,7 @@ export function renderExecutionRow(item: ExecutionItem) {
         execution={item}
         now={1700000001000}
         showScope={true}
-        tenantId="tenant"
+        organizationId="organization"
       />
     </TooltipProvider>
   )

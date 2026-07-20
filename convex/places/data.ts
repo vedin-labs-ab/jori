@@ -27,7 +27,7 @@ export async function ensurePlace(
   }
 ): Promise<Doc<"places">> {
   const existing = await findPlace(ctx, {
-    tenantId: input.integration.tenantId,
+    organizationId: input.integration.organizationId,
     integrationId: input.integration._id,
     externalId: input.place.externalId,
   })
@@ -37,7 +37,7 @@ export async function ensurePlace(
   }
 
   const placeId = await ctx.db.insert("places", {
-    tenantId: input.integration.tenantId,
+    organizationId: input.integration.organizationId,
     integrationId: input.integration._id,
     externalId: input.place.externalId,
     name: input.place.name,
@@ -56,16 +56,16 @@ export async function ensurePlace(
 export async function findPlace(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     integrationId: Doc<"integrations">["_id"]
     externalId: string
   }
 ) {
   return await ctx.db
     .query("places")
-    .withIndex("by_tenant_and_integration_and_external", (query) =>
+    .withIndex("by_organization_and_integration_and_external", (query) =>
       query
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("integrationId", args.integrationId)
         .eq("externalId", args.externalId)
     )

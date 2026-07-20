@@ -164,7 +164,7 @@ function run(idValue: string, status: "completed" | "running") {
   return {
     _id: id<"runs">(idValue),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     status,
   }
 }
@@ -183,7 +183,7 @@ function sandbox(overrides: Record<string, unknown>) {
   return {
     _id: id<"sandboxes">("sandbox-1"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     externalId: "sandbox-external",
     createdAt: 0,
     updatedAt: 0,

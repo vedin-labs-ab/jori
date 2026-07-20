@@ -63,7 +63,7 @@ describe("artifact tool cache", () => {
 
 function cacheKeyInput() {
   return {
-    tenantId: "tenant",
+    organizationId: "organization",
     artifactId: "artifact" as Id<"artifacts">,
     versionId: "version" as Id<"artifactVersions">,
     personId: "person" as Id<"persons">,

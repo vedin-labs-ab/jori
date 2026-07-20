@@ -73,7 +73,7 @@ export async function createPromptedToolApproval(
   }
 
   const approval = await ctx.runMutation(internal.approvals.approvals.create, {
-    tenantId: context.run.tenantId,
+    organizationId: context.run.organizationId,
     runId: context.run._id,
     surface: request.surface,
     tool: request.tool,

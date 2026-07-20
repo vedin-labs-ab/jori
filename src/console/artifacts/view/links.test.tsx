@@ -48,7 +48,12 @@ afterEach(() => {
 })
 
 test("opens a compact active and expired link list", () => {
-  render(<ArtifactLinks artifactId={"artifact" as never} tenantId="tenant" />)
+  render(
+    <ArtifactLinks
+      artifactId={"artifact" as never}
+      organizationId="organization"
+    />
+  )
 
   fireEvent.click(screen.getByRole("button", { name: "Manage share links" }))
 
@@ -59,7 +64,12 @@ test("opens a compact active and expired link list", () => {
 })
 
 test("revokes only the selected active link", () => {
-  render(<ArtifactLinks artifactId={"artifact" as never} tenantId="tenant" />)
+  render(
+    <ArtifactLinks
+      artifactId={"artifact" as never}
+      organizationId="organization"
+    />
+  )
 
   fireEvent.click(screen.getByRole("button", { name: "Manage share links" }))
   fireEvent.click(screen.getByRole("button", { name: "Revoke" }))
@@ -67,13 +77,18 @@ test("revokes only the selected active link", () => {
   expect(revokeShare).toHaveBeenCalledWith({
     artifactId: "artifact",
     shareId: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
   })
 })
 
 test("uses the shared empty-state primitive", () => {
   query.results = []
-  render(<ArtifactLinks artifactId={"artifact" as never} tenantId="tenant" />)
+  render(
+    <ArtifactLinks
+      artifactId={"artifact" as never}
+      organizationId="organization"
+    />
+  )
 
   fireEvent.click(screen.getByRole("button", { name: "Manage share links" }))
 

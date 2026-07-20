@@ -75,7 +75,7 @@ function renderCard(row: PlaybookListRow, actions = stubPlaybookActions()) {
           actions={actions}
           definition={morningBrief}
           row={row}
-          tenantId="tenant"
+          organizationId="organization"
         />
       </TooltipProvider>
     </RouterContextProvider>

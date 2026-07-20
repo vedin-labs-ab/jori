@@ -55,7 +55,7 @@ export function runtimeSkill(
     Pick<RuntimeSkill, "body" | "description" | "name">
 ): RuntimeSkill {
   return {
-    tenantId: null,
+    organizationId: null,
     category: "creation",
     associatedIntegrations: [],
     ...skill,

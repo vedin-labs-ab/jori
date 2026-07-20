@@ -28,7 +28,7 @@ const waiterStatus = v.union(
 )
 
 export const waiters = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   runId: v.id("runs"),
   sessionId: v.optional(v.id("sessions")),
   waitpointId: v.string(),

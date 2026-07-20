@@ -114,7 +114,7 @@ describe("artifact access", () => {
     )
   })
 
-  test("allows tenant members to open organization artifacts", () => {
+  test("allows organization members to open organization artifacts", () => {
     const ownerId = id<"persons">("person_1")
     const otherId = id<"persons">("person_2")
 
@@ -154,7 +154,7 @@ describe("artifact session tokens", () => {
   test("round-trips token payloads", () => {
     const payload = {
       sessionId: "session" as Id<"artifactSessions">,
-      tenantId: "tenant",
+      organizationId: "organization",
       personId: "person" as Id<"persons">,
       artifactId: "artifact" as Id<"artifacts">,
       versionId: "version" as Id<"artifactVersions">,

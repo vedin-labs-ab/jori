@@ -9,7 +9,7 @@ import { type IdentityProvider, identityProvider } from "./identity/schema"
 export async function resolveActor(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     provider: IdentityProvider
     actor: Actor | undefined
   }
@@ -24,7 +24,7 @@ export async function resolveActor(
 
   if ("externalId" in args.actor) {
     return await resolveIdentity(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       provider: args.provider,
       externalId: args.actor.externalId,
       method: "observed",
@@ -34,7 +34,7 @@ export async function resolveActor(
   }
 
   return await resolveIdentity(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     provider: "email",
     externalId: args.actor.email,
     method: "email",
@@ -44,7 +44,7 @@ export async function resolveActor(
 
 export const resolveActorRecord = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     provider: identityProvider,
     actor: v.optional(actorValidator),
   },
@@ -54,7 +54,7 @@ export const resolveActorRecord = internalMutation({
       (await resolveActor(ctx, {
         actor: args.actor,
         provider: args.provider,
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
       })) ?? null
     )
   },

@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import { checkTenantAccess } from "../access"
+import { checkOrganizationAccess } from "../access"
 import { activeEffortRows } from "../deduction/effort/input"
 import { latestCompletedPass } from "../deduction/engine/pass"
 import {
@@ -21,11 +21,11 @@ const dayMs = 24 * 60 * 60 * 1000
 
 export const read = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     days: v.optional(v.union(v.literal(14), v.literal(30), v.literal(60))),
   },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return null
@@ -38,7 +38,7 @@ export const read = query({
     // to the active layer, matching what the judges still see.
     const efforts = await activeEffortRows(
       ctx,
-      args.tenantId,
+      args.organizationId,
       maxConsolidationEfforts,
       now - days * dayMs
     )
@@ -51,8 +51,8 @@ export const read = query({
       unplaced: efforts.filter(
         (row) => row.workstreamId === undefined && row.seenAt > activeCutoff
       ).length,
-      reviewedAt: await lastReviewedAt(ctx, args.tenantId),
-      consolidationAt: await nextConsolidationAt(ctx, args.tenantId),
+      reviewedAt: await lastReviewedAt(ctx, args.organizationId),
+      consolidationAt: await nextConsolidationAt(ctx, args.organizationId),
     }
   },
 })
@@ -88,9 +88,9 @@ async function windowEntries(
   return perEffort.flat()
 }
 
-async function lastReviewedAt(ctx: QueryCtx, tenantId: string) {
+async function lastReviewedAt(ctx: QueryCtx, organizationId: string) {
   const pass = await latestCompletedPass(ctx, {
-    tenantId,
+    organizationId,
     stage: "effort",
     scope: "window",
   })
@@ -100,11 +100,11 @@ async function lastReviewedAt(ctx: QueryCtx, tenantId: string) {
 
 // The soonest due consolidation across belief kinds; cadence measures from
 // the last reviewed window's end, mirroring the scheduler.
-async function nextConsolidationAt(ctx: QueryCtx, tenantId: string) {
+async function nextConsolidationAt(ctx: QueryCtx, organizationId: string) {
   const dueTimes = await Promise.all(
     beliefKinds.map(async (kind) => {
       const pass = await latestCompletedPass(ctx, {
-        tenantId,
+        organizationId,
         stage: kind,
         scope: "full",
       })

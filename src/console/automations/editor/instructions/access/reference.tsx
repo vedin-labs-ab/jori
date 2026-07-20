@@ -125,7 +125,7 @@ function ReferencePill({
         <ToolSchemaPane
           permission={permission}
           separatorClassName={tone.separator}
-          tenantId={referenceOptions(extension).getTenantId()}
+          organizationId={referenceOptions(extension).getOrganizationId()}
         />
       )}
     </span>
@@ -139,11 +139,11 @@ function ReferencePill({
 function ToolSchemaPane({
   permission,
   separatorClassName,
-  tenantId,
+  organizationId,
 }: {
   permission: ToolPermission
   separatorClassName: string
-  tenantId: string
+  organizationId: string
 }) {
   const [shown, setShown] = useState<ToolPermission>()
   const [warm, setWarm] = useState(false)
@@ -173,7 +173,7 @@ function ToolSchemaPane({
       {engaged ? (
         <ToolReferencesLoader
           onChange={setReferences}
-          tenantId={tenantId}
+          organizationId={organizationId}
           tools={[permission.tool]}
         />
       ) : null}

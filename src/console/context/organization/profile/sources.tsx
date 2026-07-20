@@ -19,12 +19,12 @@ export function WebsitesSection({
   declared,
   domains,
   primaryWebsite,
-  tenantId,
+  organizationId,
 }: {
   declared: string[]
   domains: ContextFacts["domains"]
   primaryWebsite: string | undefined
-  tenantId: string
+  organizationId: string
 }) {
   const websites = websiteItems(domains, primaryWebsite)
   const count = websites.length + declared.length
@@ -32,7 +32,7 @@ export function WebsitesSection({
   return (
     <section className="grid gap-2.5">
       <ContextSectionTitle
-        action={<AddDomainControl tenantId={tenantId} />}
+        action={<AddDomainControl organizationId={organizationId} />}
         count={count === 0 ? undefined : count}
       >
         Websites
@@ -50,7 +50,7 @@ export function WebsitesSection({
             <DeclaredDomainChip
               domain={domain}
               key={domain}
-              tenantId={tenantId}
+              organizationId={organizationId}
             />
           ))}
         </div>

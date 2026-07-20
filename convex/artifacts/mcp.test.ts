@@ -40,7 +40,7 @@ describe("artifact MCP publishing", () => {
     await callMiloArtifactTool(
       ctx as never,
       {
-        tenantId: "tenant",
+        organizationId: "organization",
         createdBy: "person" as Id<"persons">,
       },
       {

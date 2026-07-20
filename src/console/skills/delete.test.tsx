@@ -62,8 +62,8 @@ function skill(): Skill {
     createdAt: 1,
     description: "Writes concise launch notes.",
     name: "Launch notes",
-    scope: "tenant",
-    tenantId: "tenant_1",
+    scope: "organization",
+    organizationId: "organization_1",
     updatedAt: 1,
   } as unknown as Skill
 }

@@ -75,10 +75,10 @@ async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {
   return await ctx.db
     .query("messages")
     .withIndex(
-      "by_tenant_and_integration_and_conversation_and_created_at",
+      "by_organization_and_integration_and_conversation_and_created_at",
       (query) =>
         query
-          .eq("tenantId", message.tenantId)
+          .eq("organizationId", message.organizationId)
           .eq("integrationId", message.integrationId)
           .eq("conversationId", message.conversationId)
     )

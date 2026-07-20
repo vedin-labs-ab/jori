@@ -12,7 +12,7 @@ import {
 
 type ProvisionArgs = {
   key: string
-  tenantId: string
+  organizationId: string
   personId: Id<"persons">
 }
 
@@ -66,7 +66,7 @@ export async function provisionTemplateArtifact(
 export async function instantiateArtifactTemplate(
   ctx: ActionCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     key: string
     title?: string
@@ -82,7 +82,7 @@ export async function instantiateArtifactTemplate(
 
   return await publishArtifact(ctx, {
     mode: "create",
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     personId: args.personId,
     title: args.title ?? template.title,
     access: args.access ?? template.access,
@@ -104,7 +104,7 @@ async function refreshProvisioned(
   if (existing.artifact.archivedAt !== undefined) {
     await ctx.runMutation(internal.artifacts.records.restore, {
       artifactId: existing.artifact._id,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
   }
 
@@ -127,7 +127,7 @@ async function publishTemplate(
   artifactId?: Id<"artifacts">
 ) {
   const common = {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     personId: args.personId,
     capabilities: [],
     title: template.title,
@@ -162,7 +162,7 @@ async function findProvisioned(
   partition: string
 ): Promise<FoundTemplate | null> {
   return await ctx.runQuery(internal.artifacts.queries.findTemplate, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     template: args.key,
     partition,
   })

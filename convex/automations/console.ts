@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
-import { checkTenantAccess } from "../access"
+import { checkOrganizationAccess } from "../access"
 import { requireClerkUserId } from "../access/users"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { resolvePersonByIdentity } from "../persons/identity/links"
@@ -12,7 +12,7 @@ import { toAutomationDisplay } from "./display"
 import {
   createAutomation,
   createAutomationRun,
-  getTenantAutomation,
+  getOrganizationAutomation,
   maxSearchResults,
   pauseAutomation,
   removeAutomation,
@@ -24,12 +24,12 @@ import * as automationSchema from "./schema"
 
 export const list = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     query: v.string(),
     statusFilter: v.union(v.literal("all"), automationSchema.status),
   },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return {
@@ -40,12 +40,12 @@ export const list = query({
     }
 
     const personId = await resolvePersonByIdentity(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       provider: "clerk",
       externalId: requireClerkUserId(access.identity),
     })
     const automations = await searchAutomations(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       query: args.query,
       status: args.statusFilter === "all" ? undefined : args.statusFilter,
       includeCompleted: args.statusFilter === "all",
@@ -65,11 +65,11 @@ export const list = query({
 
 export const get = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
 
     return await toAutomationDisplay(
       ctx,
@@ -82,7 +82,7 @@ export const get = query({
 // provisions the playbook's artifact; this creates plain automations only.
 export const create = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     name: v.string(),
     instructions: v.string(),
     scope: v.optional(scopeValidator),
@@ -91,7 +91,7 @@ export const create = mutation({
     trigger: automationSchema.triggerInput,
   },
   handler: async (ctx, args) => {
-    const createdBy = await ensureCurrentPerson(ctx, args.tenantId)
+    const createdBy = await ensureCurrentPerson(ctx, args.organizationId)
     const automation = await createAutomation(ctx, {
       ...args,
       createdBy,
@@ -103,7 +103,7 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     automationId: v.id("automations"),
     name: v.string(),
     instructions: v.string(),
@@ -113,7 +113,7 @@ export const update = mutation({
     trigger: v.optional(automationSchema.triggerInput),
   },
   handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     await requireAccessibleAutomation(ctx, args, personId)
 
     return await toAutomationDisplay(
@@ -125,11 +125,11 @@ export const update = mutation({
 
 export const pause = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     await requireAccessibleAutomation(ctx, args, personId)
 
     return await toAutomationDisplay(ctx, await pauseAutomation(ctx, args))
@@ -138,11 +138,11 @@ export const pause = mutation({
 
 export const resume = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     await requireAccessibleAutomation(ctx, args, personId)
 
     return await toAutomationDisplay(ctx, await resumeAutomation(ctx, args))
@@ -151,11 +151,11 @@ export const resume = mutation({
 
 export const remove = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     await requireAccessibleAutomation(ctx, args, personId)
     await removeAutomation(ctx, args)
 
@@ -165,14 +165,14 @@ export const remove = mutation({
 
 export const run = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     automationId: v.id("automations"),
   },
   handler: async (ctx, args) => {
-    const personId = await ensureCurrentPerson(ctx, args.tenantId)
-    const automation = await getTenantAutomation(
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+    const automation = await getOrganizationAutomation(
       ctx,
-      args.tenantId,
+      args.organizationId,
       args.automationId
     )
 
@@ -194,15 +194,15 @@ export const run = mutation({
   },
 })
 
-/** Ownership rule on top of tenant access: personal automations are owner-only. */
+/** Ownership rule on top of organization access: personal automations are owner-only. */
 async function requireAccessibleAutomation(
   ctx: QueryLikeCtx,
-  args: { tenantId: string; automationId: Doc<"automations">["_id"] },
+  args: { organizationId: string; automationId: Doc<"automations">["_id"] },
   personId: Doc<"persons">["_id"]
 ) {
-  const automation = await getTenantAutomation(
+  const automation = await getOrganizationAutomation(
     ctx,
-    args.tenantId,
+    args.organizationId,
     args.automationId
   )
 

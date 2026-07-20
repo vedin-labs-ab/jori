@@ -19,8 +19,8 @@ import { Spinner } from "@/components/ui/spinner"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useBillingCheckout } from "./actions"
 
-export function PlanPicker({ tenantId }: { tenantId: string }) {
-  const checkout = useBillingCheckout(tenantId)
+export function PlanPicker({ organizationId }: { organizationId: string }) {
+  const checkout = useBillingCheckout(organizationId)
   const [interval, setInterval] = useState<BillingInterval>("month")
   const [chosen, setChosen] = useState<PlanKey | null>(null)
 

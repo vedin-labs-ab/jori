@@ -3,7 +3,7 @@ import { v } from "convex/values"
 import { audienceScopeValidator } from "../shared/audience"
 
 export const conversations = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integrationId: v.id("integrations"),
   externalId: v.string(),
   scope: audienceScopeValidator,
@@ -12,9 +12,12 @@ export const conversations = defineTable({
   functionId: v.optional(v.id("_scheduled_functions")),
   summarizeAt: v.optional(v.number()),
 })
-  .index("by_tenant_and_integration_and_external", [
-    "tenantId",
+  .index("by_organization_and_integration_and_external", [
+    "organizationId",
     "integrationId",
     "externalId",
   ])
-  .index("by_tenant_and_summarized_at", ["tenantId", "summarizedAt"])
+  .index("by_organization_and_summarized_at", [
+    "organizationId",
+    "summarizedAt",
+  ])

@@ -15,15 +15,15 @@ export async function findIntegrationForOwner(
   args: {
     integration: Integration
     ownerId: Id<"persons"> | undefined
-    tenantId: string
+    organizationId: string
   }
 ) {
   if (isUserScopedIntegration(args.integration) && args.ownerId !== undefined) {
     return await ctx.db
       .query("integrations")
-      .withIndex("by_tenant_and_integration_and_owner", (query) =>
+      .withIndex("by_organization_and_integration_and_owner", (query) =>
         query
-          .eq("tenantId", args.tenantId)
+          .eq("organizationId", args.organizationId)
           .eq("integration", args.integration)
           .eq("ownerId", args.ownerId)
       )
@@ -32,8 +32,10 @@ export async function findIntegrationForOwner(
 
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_integration", (query) =>
-      query.eq("tenantId", args.tenantId).eq("integration", args.integration)
+    .withIndex("by_organization_and_integration", (query) =>
+      query
+        .eq("organizationId", args.organizationId)
+        .eq("integration", args.integration)
     )
     .first()
 }
@@ -43,13 +45,13 @@ export async function resolveIntegrationForOwner(
   args: {
     integration: Integration
     ownerId: Id<"persons"> | undefined
-    tenantId: string
+    organizationId: string
   }
 ): Promise<Doc<"integrations">> {
   const integration = await findIntegrationForOwner(ctx, {
     integration: args.integration,
     ownerId: args.ownerId,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 
   if (integration === null || integration.status !== "active") {
@@ -64,7 +66,7 @@ export async function findIntegrationForPrincipal(
   args: {
     integration: Integration
     principal: ExecutionPrincipal
-    tenantId: string
+    organizationId: string
   }
 ) {
   if (!canPrincipalUseIntegration(args.principal, args.integration)) {
@@ -80,9 +82,9 @@ export async function findIntegrationForPrincipal(
 
     return await ctx.db
       .query("integrations")
-      .withIndex("by_tenant_and_integration_and_owner", (query) =>
+      .withIndex("by_organization_and_integration_and_owner", (query) =>
         query
-          .eq("tenantId", args.tenantId)
+          .eq("organizationId", args.organizationId)
           .eq("integration", args.integration)
           .eq("ownerId", ownerId)
       )
@@ -92,10 +94,12 @@ export async function findIntegrationForPrincipal(
 
   return await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_integration", (query) =>
-      query.eq("tenantId", args.tenantId).eq("integration", args.integration)
+    .withIndex("by_organization_and_integration", (query) =>
+      query
+        .eq("organizationId", args.organizationId)
+        .eq("integration", args.integration)
     )
-    .filter((query) => query.eq(query.field("scope"), "tenant"))
+    .filter((query) => query.eq(query.field("scope"), "organization"))
     .order("desc")
     .first()
 }
@@ -112,7 +116,7 @@ export async function resolveIntegrationForPrincipal(
   args: {
     integration: Integration
     principal: ExecutionPrincipal
-    tenantId: string
+    organizationId: string
   }
 ): Promise<Doc<"integrations">> {
   const integration = await findIntegrationForPrincipal(ctx, args)

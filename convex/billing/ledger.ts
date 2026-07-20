@@ -49,7 +49,7 @@ export async function debitRun(
   }
 
   await ctx.db.insert("billingEntries", {
-    tenantId: args.account.tenantId,
+    organizationId: args.account.organizationId,
     timestamp: args.now,
     type: "debit",
     amountMicros: args.micros,
@@ -85,7 +85,7 @@ export async function creditTopUp(
   })
 
   await ctx.db.insert("billingEntries", {
-    tenantId: args.account.tenantId,
+    organizationId: args.account.organizationId,
     timestamp: args.now,
     type: "topup",
     amountMicros: args.micros,
@@ -116,7 +116,7 @@ export async function grantIncluded(
   })
 
   await ctx.db.insert("billingEntries", {
-    tenantId: args.account.tenantId,
+    organizationId: args.account.organizationId,
     timestamp: args.now,
     type: "grant",
     amountMicros: args.micros,

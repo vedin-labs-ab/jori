@@ -42,7 +42,7 @@ export type RuntimeContext = {
     rootId: RuntimeId<"runs"> | null
     sandboxId: string | null
     status: "completed" | "failed" | "queued" | "running" | "stopped"
-    tenantId: string
+    organizationId: string
   }
   session: {
     id: RuntimeId<"sessions">

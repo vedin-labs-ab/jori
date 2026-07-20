@@ -34,7 +34,7 @@ export async function readDeliveryContext(
     connected: Set<Integration>
     ownerId: Id<"persons"> | undefined
     recipient: PlaybookRecipient
-    tenantId: string
+    organizationId: string
   }
 ): Promise<DeliveryContext> {
   const [preference, slackTarget] = await Promise.all([
@@ -73,7 +73,7 @@ export async function saveDeliveryPreference(
     delivery: DeliveryChoice
     personId: Id<"persons">
     recipient: PlaybookRecipient
-    tenantId: string
+    organizationId: string
   }
 ) {
   const slackTarget = await readSelfSlackTarget(
@@ -94,15 +94,17 @@ export async function saveDeliveryPreference(
   const delivery = normalizeDeliveryChoice(args.delivery)
   const existing = await ctx.db
     .query("playbookPreferences")
-    .withIndex("by_tenant_and_person", (query) =>
-      query.eq("tenantId", args.tenantId).eq("personId", args.personId)
+    .withIndex("by_organization_and_person", (query) =>
+      query
+        .eq("organizationId", args.organizationId)
+        .eq("personId", args.personId)
     )
     .unique()
   const values = { delivery, updatedAt: Date.now() }
 
   if (existing === null) {
     await ctx.db.insert("playbookPreferences", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId: args.personId,
       ...values,
     })
@@ -169,7 +171,7 @@ function modeAvailable(options: DeliveryOption[], mode: DeliveryMode) {
 
 async function readDeliveryPreference(
   ctx: QueryLikeCtx,
-  args: { ownerId: Id<"persons"> | undefined; tenantId: string }
+  args: { ownerId: Id<"persons"> | undefined; organizationId: string }
 ) {
   if (args.ownerId === undefined) {
     return undefined
@@ -178,8 +180,8 @@ async function readDeliveryPreference(
   const ownerId = args.ownerId
   const preference = await ctx.db
     .query("playbookPreferences")
-    .withIndex("by_tenant_and_person", (query) =>
-      query.eq("tenantId", args.tenantId).eq("personId", ownerId)
+    .withIndex("by_organization_and_person", (query) =>
+      query.eq("organizationId", args.organizationId).eq("personId", ownerId)
     )
     .unique()
 

@@ -3,7 +3,7 @@ import { dollarsToMicros, topUp } from "../../../contracts/billing"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
-import { requireTenantAccess } from "../../access"
+import { requireOrganizationAccess } from "../../access"
 import { billingInterval, billingPlan } from "../schema"
 import { requireString, stripeRequest } from "./client"
 import { stripePriceId } from "./config"
@@ -16,15 +16,15 @@ import { stripePriceId } from "./config"
  */
 export const startPlanCheckout = action({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     plan: billingPlan,
     interval: billingInterval,
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    const account = await ensuredAccount(ctx, args.tenantId)
+    const account = await ensuredAccount(ctx, args.organizationId)
 
     if (account.stripeSubscriptionId !== undefined) {
       throw new Error(
@@ -32,7 +32,7 @@ export const startPlanCheckout = action({
       )
     }
 
-    const customer = await ensuredCustomer(ctx, args.tenantId, account)
+    const customer = await ensuredCustomer(ctx, args.organizationId, account)
     const session = await stripeRequest("/v1/checkout/sessions", {
       params: {
         mode: "subscription",
@@ -43,12 +43,14 @@ export const startPlanCheckout = action({
           "0": { price: stripePriceId(args.plan, args.interval), quantity: 1 },
         },
         metadata: {
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
           kind: "plan",
           plan: args.plan,
           interval: args.interval,
         },
-        subscription_data: { metadata: { tenantId: args.tenantId } },
+        subscription_data: {
+          metadata: { organizationId: args.organizationId },
+        },
         automatic_tax: { enabled: true },
         tax_id_collection: { enabled: true },
         billing_address_collection: "required",
@@ -68,12 +70,12 @@ export const startPlanCheckout = action({
  */
 export const startTopUpCheckout = action({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     amountUsd: v.number(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     if (
       !Number.isInteger(args.amountUsd) ||
@@ -85,8 +87,8 @@ export const startTopUpCheckout = action({
       )
     }
 
-    const account = await ensuredAccount(ctx, args.tenantId)
-    const customer = await ensuredCustomer(ctx, args.tenantId, account)
+    const account = await ensuredAccount(ctx, args.organizationId)
+    const customer = await ensuredCustomer(ctx, args.organizationId, account)
     const micros = dollarsToMicros(args.amountUsd)
     const session = await stripeRequest("/v1/checkout/sessions", {
       params: {
@@ -106,7 +108,7 @@ export const startTopUpCheckout = action({
         },
         payment_intent_data: { setup_future_usage: "off_session" },
         metadata: {
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
           kind: "top-up",
           micros: String(micros),
         },
@@ -118,11 +120,11 @@ export const startTopUpCheckout = action({
 })
 
 export const openPortal = action({
-  args: { tenantId: v.string(), returnUrl: v.string() },
+  args: { organizationId: v.string(), returnUrl: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    const account = await ensuredAccount(ctx, args.tenantId)
+    const account = await ensuredAccount(ctx, args.organizationId)
 
     if (account.stripeCustomerId === undefined) {
       throw new Error("Nothing to manage yet. Subscribe or top up first.")
@@ -139,10 +141,10 @@ export const openPortal = action({
   },
 })
 
-async function ensuredAccount(ctx: ActionCtx, tenantId: string) {
+async function ensuredAccount(ctx: ActionCtx, organizationId: string) {
   const account: Doc<"billingAccounts"> = await ctx.runMutation(
     internal.billing.stripe.data.ensure,
-    { tenantId }
+    { organizationId }
   )
 
   return account
@@ -150,7 +152,7 @@ async function ensuredAccount(ctx: ActionCtx, tenantId: string) {
 
 async function ensuredCustomer(
   ctx: ActionCtx,
-  tenantId: string,
+  organizationId: string,
   account: Doc<"billingAccounts">
 ) {
   if (account.stripeCustomerId !== undefined) {
@@ -161,13 +163,13 @@ async function ensuredCustomer(
   const customer = await stripeRequest("/v1/customers", {
     params: {
       ...(identity?.email === undefined ? {} : { email: identity.email }),
-      metadata: { tenantId },
+      metadata: { organizationId },
     },
   })
   const customerId = requireString(customer, "id")
 
   await ctx.runMutation(internal.billing.stripe.data.attachCustomer, {
-    tenantId,
+    organizationId,
     stripeCustomerId: customerId,
   })
 

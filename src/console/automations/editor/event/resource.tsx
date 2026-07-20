@@ -3,7 +3,7 @@ import { IntegrationOptionPicker } from "@/console/integrations/options"
 import { cn } from "@/lib/utils"
 
 type EventOptionFieldProps = {
-  tenantId: string
+  organizationId: string
   parameter: Extract<AutomationEventParameter, { type: "option" }>
   match: Record<string, string>
   disabled: boolean
@@ -15,7 +15,7 @@ type EventOptionFieldProps = {
 }
 
 export function EventOptionField({
-  tenantId,
+  organizationId,
   parameter,
   match,
   disabled,
@@ -43,7 +43,7 @@ export function EventOptionField({
           : parameter.placeholder
       }
       source={parameter.source}
-      tenantId={tenantId}
+      organizationId={organizationId}
       value={selected}
     />
   )

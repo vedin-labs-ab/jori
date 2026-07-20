@@ -38,13 +38,13 @@ export function automationKeyPartition(principal: ExecutionPrincipal) {
 
 export async function findAutomationByKey(
   ctx: QueryLikeCtx,
-  args: { tenantId: string; keyPartition: string; key: string }
+  args: { organizationId: string; keyPartition: string; key: string }
 ) {
   return await ctx.db
     .query("automations")
-    .withIndex("by_tenant_and_key_partition_and_key", (query) =>
+    .withIndex("by_organization_and_key_partition_and_key", (query) =>
       query
-        .eq("tenantId", args.tenantId)
+        .eq("organizationId", args.organizationId)
         .eq("keyPartition", args.keyPartition)
         .eq("key", args.key)
     )

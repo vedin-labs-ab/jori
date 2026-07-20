@@ -34,7 +34,7 @@ function discovery(steps: DiscoveryStep[]): Discovery {
     startedAt: 0,
     status: "running",
     steps,
-    tenantId: "tenant",
+    organizationId: "organization",
   }
 }
 

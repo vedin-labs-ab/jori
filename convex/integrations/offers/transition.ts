@@ -186,7 +186,7 @@ async function recordIntegrationOfferTransition(
   }
 
   await recordTransition(ctx, {
-    tenantId: offer.tenantId,
+    organizationId: offer.organizationId,
     subject,
     type,
   })

@@ -14,11 +14,11 @@ import {
 } from "../timing"
 import { requireAutomationArtifact } from "./artifact"
 import { deleteOwnedAutomations, requireValidOwnershipUpdate } from "./children"
-import { getRequiredAutomation, getTenantAutomation } from "./read"
+import { getOrganizationAutomation, getRequiredAutomation } from "./read"
 import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
 
 type UpdateAutomationArgs = {
-  tenantId: string
+  organizationId: string
   automationId: Id<"automations">
   artifactId?: Id<"artifacts">
   playbook?: PlaybookBinding
@@ -35,9 +35,9 @@ export async function updateAutomation(
   ctx: MutationCtx,
   args: UpdateAutomationArgs
 ) {
-  const existing = await getTenantAutomation(
+  const existing = await getOrganizationAutomation(
     ctx,
-    args.tenantId,
+    args.organizationId,
     args.automationId
   )
   await requireValidOwnershipUpdate(ctx, args, existing)
@@ -58,7 +58,7 @@ export async function updateAutomation(
     !isSameEventTrigger(existing.trigger, patch.trigger)
   ) {
     await releaseSubscription(ctx, {
-      tenantId: existing.tenantId,
+      organizationId: existing.organizationId,
       trigger: existing.trigger,
       exceptAutomationId: args.automationId,
     })
@@ -123,7 +123,7 @@ async function buildAutomationPatch(
 
   if (args.artifactId !== undefined || args.scope !== undefined) {
     await requireAutomationArtifact(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       artifactId: args.artifactId ?? existing.artifactId,
       principal,
     })
@@ -134,7 +134,7 @@ async function buildAutomationPatch(
       access: args.access,
       artifactId: args.artifactId ?? existing.artifactId,
       principal,
-      tenantId: existing.tenantId,
+      organizationId: existing.organizationId,
     })
   }
 
@@ -204,7 +204,7 @@ async function buildTriggerPatch(
   await cancelTrigger(ctx, existing.trigger)
   const trigger = await resolveTrigger(ctx, {
     principal,
-    tenantId: existing.tenantId,
+    organizationId: existing.organizationId,
     type,
     trigger: input,
     now,
@@ -221,7 +221,7 @@ async function buildTriggerPatch(
     "integrationId" in storedTrigger
   ) {
     await ensureSubscription(ctx, {
-      tenantId: existing.tenantId,
+      organizationId: existing.organizationId,
       trigger: storedTrigger,
     })
   }
@@ -241,7 +241,7 @@ async function updateKeyPartition(
 
   const keyPartition = automationKeyPartition(principal)
   const conflict = await findAutomationByKey(ctx, {
-    tenantId: existing.tenantId,
+    organizationId: existing.organizationId,
     key: existing.key,
     keyPartition,
   })

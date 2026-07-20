@@ -3,7 +3,7 @@ import { runStatus } from "../schema"
 
 const runScope = v.union(
   v.literal("conversation"),
-  v.literal("tenant"),
+  v.literal("organization"),
   v.literal("all")
 )
 

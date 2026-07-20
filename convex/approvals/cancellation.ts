@@ -7,14 +7,14 @@ export async function resolveCancellationActor(
   args: {
     messageId: Id<"messages">
     runId: Id<"runs">
-    tenantId: string
+    organizationId: string
   }
 ): Promise<Actor | null> {
   const message = await ctx.db.get(args.messageId)
 
   if (
     message === null ||
-    message.tenantId !== args.tenantId ||
+    message.organizationId !== args.organizationId ||
     message.actor?.kind !== "person"
   ) {
     return null
@@ -50,7 +50,7 @@ function isMessageInConversation(
   conversation: Doc<"conversations">
 ) {
   return (
-    message.tenantId === conversation.tenantId &&
+    message.organizationId === conversation.organizationId &&
     message.integrationId === conversation.integrationId &&
     message.conversationId === conversation.externalId
   )

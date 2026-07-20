@@ -104,7 +104,7 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   } as Doc<"traces">
 }

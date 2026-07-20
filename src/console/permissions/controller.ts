@@ -17,11 +17,12 @@ export type ToolPermissionController = {
   updatePermission: (tool: string, mode: ConfigurablePermissionMode) => void
 }
 
-export function useToolPermissions(tenantId: string): ToolPermissionController {
-  const permissions = useQuery(api.permissions.tools.list, { tenantId }) as
-    | ToolPermission[]
-    | null
-    | undefined
+export function useToolPermissions(
+  organizationId: string
+): ToolPermissionController {
+  const permissions = useQuery(api.permissions.tools.list, {
+    organizationId,
+  }) as ToolPermission[] | null | undefined
   const setPermission = useMutation(api.permissions.tools.set)
   const [pendingTool, setPendingTool] = useState<string>()
 
@@ -32,7 +33,7 @@ export function useToolPermissions(tenantId: string): ToolPermissionController {
     setPendingTool(tool)
 
     try {
-      await setPermission({ tenantId, tool, mode })
+      await setPermission({ organizationId, tool, mode })
     } catch (updateError) {
       showErrorToast(updateError, "Couldn't update the permission.")
     } finally {

@@ -11,5 +11,5 @@ export function runAudienceScope(
 
 /** Project the internal audience scope onto the shared personal/organization vocabulary. */
 export function runScope(run: Pick<Doc<"runs">, "scope">): Scope {
-  return runAudienceScope(run) === "tenant" ? "organization" : "personal"
+  return runAudienceScope(run) === "organization" ? "organization" : "personal"
 }
