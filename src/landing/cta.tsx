@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
+import { type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { authClient } from "@/shared/session/auth"
+import { useSession } from "@/shared/session/auth"
 
 // Every marketing page ends on the same handshake.
 export function Closing({ lede }: { lede: string }) {
@@ -27,26 +28,45 @@ export function Closing({ lede }: { lede: string }) {
 // members go to the console. `prominent` bumps the size for hero and closing
 // placements.
 export function GetStarted({ prominent = false }: { prominent?: boolean }) {
-  const sessionQuery = authClient.useSession()
-  const className = cn(prominent && "h-10 px-4 text-sm")
+  const session = useSession()
+  const isSignedIn = session.data !== null && session.data !== undefined
 
-  if (sessionQuery.data !== null && sessionQuery.data !== undefined) {
+  return (
+    <SessionButton
+      className={cn(prominent && "h-10 px-4 text-sm")}
+      pending={session.isPending}
+      to={isSignedIn ? "/console" : "/auth/sign-in"}
+    >
+      {isSignedIn ? "Open console" : "Get started"}
+      <ArrowRight data-icon="inline-end" />
+    </SessionButton>
+  )
+}
+
+/** A session-aware link button for marketing surfaces: disabled while the
+ *  session state resolves, a plain link afterwards. The pending markup
+ *  matches what the server renders, so hydration stays clean. */
+export function SessionButton({
+  children,
+  pending,
+  to,
+  ...buttonProps
+}: {
+  children: ReactNode
+  pending: boolean
+  to: string
+} & Pick<ComponentProps<typeof Button>, "className" | "size" | "variant">) {
+  if (pending) {
     return (
-      <Button asChild className={className} size="lg">
-        <Link to="/console">
-          Open console
-          <ArrowRight data-icon="inline-end" />
-        </Link>
+      <Button disabled size="lg" {...buttonProps}>
+        {children}
       </Button>
     )
   }
 
   return (
-    <Button asChild className={className} size="lg">
-      <Link to="/auth/sign-in">
-        Get started
-        <ArrowRight data-icon="inline-end" />
-      </Link>
+    <Button asChild size="lg" {...buttonProps}>
+      <Link to={to}>{children}</Link>
     </Button>
   )
 }

@@ -1,22 +1,53 @@
+import {
+  type OrganizationAuthClient,
+  useActiveOrganization as useActiveOrganizationQuery,
+  useListOrganizations as useListOrganizationsQuery,
+  useSession as useSessionQuery,
+} from "@better-auth-ui/react"
 import { convexClient } from "@convex-dev/better-auth/client/plugins"
 import { organizationClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
+import { useConvexAuth } from "convex/react"
 
 /** The single Better Auth client. Milo components read session and
- *  organization state from here so tests can mock one seam. */
+ *  organization state through the hooks below so tests can mock one seam. */
 export const authClient = createAuthClient({
   plugins: [organizationClient(), convexClient()],
 })
 
-/** True only while an auth query hook is on its first load. Refetches (for
- *  example on window focus) re-enter isPending whenever data is null — a
- *  signed-out session, no active organization — and must not tear down UI
- *  that is already showing. */
-export function isSessionLoading(query: {
-  isPending: boolean
-  isRefetching: boolean
-}) {
-  return query.isPending && !query.isRefetching
+const organizationAuthClient = authClient as OrganizationAuthClient
+
+/** Session and organization state served from the same react-query cache the
+ *  vendored auth components use: one fetch per query, data retained across
+ *  refetches and errors, and isPending true only until the first resolution —
+ *  so gates can hold a stable loader exactly until the state is known. */
+export function useSession() {
+  return useSessionQuery(authClient)
+}
+
+export function useActiveOrganization() {
+  return useActiveOrganizationQuery(organizationAuthClient)
+}
+
+export function useListOrganizations() {
+  return useListOrganizationsQuery(organizationAuthClient)
+}
+
+/** One-way latch: once this page load has authenticated with Convex, token
+ *  re-mints must read as still-authenticated instead of tearing down UI. */
+let convexAuthenticatedOnce = false
+
+export function useConvexSession() {
+  const { isAuthenticated, isLoading } = useConvexAuth()
+
+  if (isAuthenticated) {
+    convexAuthenticatedOnce = true
+  }
+
+  return {
+    isAuthenticated: isAuthenticated || convexAuthenticatedOnce,
+    isLoading: isLoading && !convexAuthenticatedOnce,
+  }
 }
 
 /** Activates an organization and reloads into the console. The Convex JWT

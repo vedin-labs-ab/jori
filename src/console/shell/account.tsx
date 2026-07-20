@@ -17,11 +17,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { authClient } from "@/shared/session/auth"
+import { useSession } from "@/shared/session/auth"
 
 export function SidebarUserButton() {
   const { isMobile } = useSidebar()
-  const { data: session } = authClient.useSession()
+  const { data: session } = useSession()
   const user = session?.user
 
   if (user === undefined) {

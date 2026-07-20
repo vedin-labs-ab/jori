@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { authClient } from "@/shared/session/auth"
+import { useActiveOrganization } from "@/shared/session/auth"
 import { OnboardingModal } from "./modal"
 
 // Shows the one-time welcome flow on console load when the active organization
 // has not been onboarded yet. Completing or dismissing it persists a flag in
 // the organization's metadata so it never reopens.
 export function OnboardingGate() {
-  const { data: organization } = authClient.useActiveOrganization()
+  const { data: organization, refetch } = useActiveOrganization()
   const [dismissed, setDismissed] = useState(false)
 
   if (organization === null || organization === undefined) {
@@ -19,11 +19,9 @@ export function OnboardingGate() {
 
   const handleClose = () => {
     setDismissed(true)
-    // Re-activating the same organization refreshes the cached organization,
-    // so the persisted onboarded flag survives route remounts.
-    void authClient.organization
-      .setActive({ organizationId: organization.id })
-      .catch(() => undefined)
+    // Refresh the cached organization so the persisted onboarded flag
+    // survives route remounts.
+    void refetch()
   }
 
   return (

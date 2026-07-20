@@ -12,12 +12,10 @@ const convexMocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/shared/session/auth", () => ({
-  authClient: {
-    useSession: () => ({
-      data: { user: { email: "sam@example.com" } },
-      isPending: false,
-    }),
-  },
+  useSession: () => ({
+    data: { user: { email: "sam@example.com" } },
+    isPending: false,
+  }),
 }))
 
 let organizationProfile: Record<string, unknown> = {}

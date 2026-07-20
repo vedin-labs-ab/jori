@@ -1,9 +1,12 @@
-import { useConvexAuth } from "convex/react"
 import { type GenericId } from "convex/values"
 import { lazy, Suspense } from "react"
 import { ArtifactShareView } from "@/shared/artifacts/share"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { authClient, isSessionLoading } from "@/shared/session/auth"
+import {
+  useActiveOrganization,
+  useConvexSession,
+  useSession,
+} from "@/shared/session/auth"
 
 /** Lazy so anonymous share-link visitors do not download the member console
  *  graph after the session check establishes that there is no member. */
@@ -20,15 +23,13 @@ export function ArtifactAccess({
   artifactId: string
   secret: string | null
 }) {
-  const sessionQuery = authClient.useSession()
-  const { isAuthenticated, isLoading: isConvexLoading } = useConvexAuth()
-  const organizationQuery = authClient.useActiveOrganization()
-  const organization = organizationQuery.data
-  const isSignedIn =
-    sessionQuery.data !== null && sessionQuery.data !== undefined
+  const session = useSession()
+  const convex = useConvexSession()
+  const organization = useActiveOrganization()
+  const isSignedIn = session.data !== null && session.data !== undefined
   const loading = <FullscreenSkeletonLoader aria-label="Loading artifact" />
 
-  if (isSessionLoading(sessionQuery)) {
+  if (session.isPending) {
     return loading
   }
 
@@ -38,7 +39,7 @@ export function ArtifactAccess({
 
   if (
     secret !== null &&
-    (isConvexLoading || (isSignedIn && isSessionLoading(organizationQuery)))
+    (convex.isLoading || (isSignedIn && organization.isPending))
   ) {
     return loading
   }
@@ -50,7 +51,9 @@ export function ArtifactAccess({
 
   if (
     shareFallback !== undefined &&
-    (!isAuthenticated || organization === null || organization === undefined)
+    (!convex.isAuthenticated ||
+      organization.data === null ||
+      organization.data === undefined)
   ) {
     return shareFallback
   }
