@@ -7,16 +7,10 @@ import {
   useListOrganizationMembers,
   useSession
 } from "@better-auth-ui/react"
-import type { Member } from "better-auth/client"
-import { Search, Users } from "lucide-react"
+import { Users } from "lucide-react"
 import { type ComponentProps, useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput
-} from "@/components/ui/input-group"
 import {
   Table,
   TableBody,
@@ -31,15 +25,9 @@ import { OrganizationMemberRow } from "./organization-member-row"
 import { OrganizationMemberRowSkeleton } from "./organization-member-row-skeleton"
 import {
   OrganizationFilterTableHead,
-  OrganizationSortableTableHead,
-  OrganizationTableEmpty,
-  type OrganizationTableSortDirection
+  OrganizationSearchableTableHead,
+  OrganizationTableEmpty
 } from "./table"
-
-type SortDescriptor = {
-  column: string
-  direction: OrganizationTableSortDirection
-}
 
 /** Props for the `OrganizationMembers` component. */
 export type OrganizationMembersProps = {
@@ -82,7 +70,6 @@ export function OrganizationMembers({
     updatePermissionPending ||
     deletePermissionPending
 
-  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>()
   const [roleFilter, setRoleFilter] = useState("all")
   const [search, setSearch] = useState("")
 
@@ -97,29 +84,6 @@ export function OrganizationMembers({
     )
   }, [search, membersData?.members, roleFilter])
 
-  const sortedMembers = useMemo(() => {
-    if (!sortDescriptor || !filteredMembers) return filteredMembers
-
-    return [...filteredMembers].sort((a, b) => {
-      const column = sortDescriptor.column as keyof Member | "user"
-      const first =
-        column === "user"
-          ? a.user.name || a.user.email
-          : String(a[column])
-      const second =
-        column === "user"
-          ? b.user.name || b.user.email
-          : String(b[column])
-
-      let comparison = first.localeCompare(second)
-      if (sortDescriptor.direction === "descending") {
-        comparison *= -1
-      }
-
-      return comparison
-    })
-  }, [sortDescriptor, filteredMembers])
-
   const [inviteOpen, setInviteOpen] = useState(false)
 
   const isOwner = membersData?.members.some(
@@ -130,18 +94,6 @@ export function OrganizationMembers({
     label,
     value
   }))
-
-  function toggleSort(column: string) {
-    setSortDescriptor((current) => {
-      if (current?.column !== column) {
-        return { column, direction: "ascending" }
-      }
-      if (current.direction === "ascending") {
-        return { column, direction: "descending" }
-      }
-      return undefined
-    })
-  }
 
   return (
     <div className={cn("flex flex-col gap-3", className)} {...props}>
@@ -160,21 +112,6 @@ export function OrganizationMembers({
         </Button>
       </div>
 
-      <InputGroup className="min-w-0 sm:w-[220px]">
-        <InputGroupInput
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          aria-label={organizationLocalization.search}
-          placeholder={organizationLocalization.search}
-          disabled={isPending}
-        />
-
-        <InputGroupAddon>
-          <Search className="text-muted-foreground" />
-        </InputGroupAddon>
-      </InputGroup>
-
       <div className="overflow-x-auto rounded-lg border">
         <Table
           aria-label={organizationLocalization.members}
@@ -182,16 +119,13 @@ export function OrganizationMembers({
         >
           <TableHeader>
             <TableRow className="hover:bg-transparent has-aria-expanded:bg-transparent">
-              <OrganizationSortableTableHead
-                sortDirection={
-                  sortDescriptor?.column === "user"
-                    ? sortDescriptor.direction
-                    : undefined
-                }
-                onClick={() => toggleSort("user")}
-              >
-                {organizationLocalization.member}
-              </OrganizationSortableTableHead>
+              <OrganizationSearchableTableHead
+                disabled={isPending}
+                label={organizationLocalization.member}
+                onValueChange={setSearch}
+                placeholder="Search members"
+                value={search}
+              />
 
               <OrganizationFilterTableHead
                 allLabel={organizationLocalization.all}
@@ -211,7 +145,7 @@ export function OrganizationMembers({
           <TableBody>
             {isPending ? (
               <OrganizationMemberRowSkeleton />
-            ) : !activeOrganization || !sortedMembers?.length ? (
+            ) : !activeOrganization || !filteredMembers?.length ? (
               <OrganizationTableEmpty
                 colSpan={3}
                 description={
@@ -223,7 +157,7 @@ export function OrganizationMembers({
                 title={hasFilters ? "No matching members" : "No members yet"}
               />
             ) : (
-              sortedMembers.map((member) => (
+              filteredMembers.map((member) => (
                 <OrganizationMemberRow
                   key={member.id}
                   member={member}

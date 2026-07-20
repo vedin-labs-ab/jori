@@ -8,14 +8,9 @@ import {
   useHasPermission,
   useListOrganizationInvitations
 } from "@better-auth-ui/react"
-import { Search, Send } from "lucide-react"
+import { Send } from "lucide-react"
 import { type ComponentProps, useMemo, useState } from "react"
 
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput
-} from "@/components/ui/input-group"
 import {
   Table,
   TableBody,
@@ -29,15 +24,11 @@ import { OrganizationInvitationRow } from "./organization-invitation-row"
 import { OrganizationInvitationRowSkeleton } from "./organization-invitation-row-skeleton"
 import {
   OrganizationFilterTableHead,
+  OrganizationSearchableTableHead,
   OrganizationSortableTableHead,
   OrganizationTableEmpty,
   type OrganizationTableSortDirection
 } from "./table"
-
-type SortDescriptor = {
-  column: string
-  direction: OrganizationTableSortDirection
-}
 
 const invitationStatuses = [
   "pending",
@@ -72,7 +63,8 @@ export function OrganizationInvitations({
 
   const isPending = invitationsPending || invitationPermissionPending
 
-  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>()
+  const [sortDirection, setSortDirection] =
+    useState<OrganizationTableSortDirection>()
   const [roleFilter, setRoleFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [search, setSearch] = useState("")
@@ -89,27 +81,20 @@ export function OrganizationInvitations({
   }, [search, invitations, roleFilter, statusFilter])
 
   const sortedInvitations = useMemo(() => {
-    if (!sortDescriptor || !filteredInvitations) return filteredInvitations
+    if (!sortDirection || !filteredInvitations) return filteredInvitations
 
     return [...filteredInvitations].sort((first, second) => {
-      const column = sortDescriptor.column as keyof typeof first
-      let comparison = 0
+      let comparison =
+        new Date(first.createdAt).getTime() -
+        new Date(second.createdAt).getTime()
 
-      if (column === "createdAt") {
-        comparison =
-          new Date(first.createdAt).getTime() -
-          new Date(second.createdAt).getTime()
-      } else {
-        comparison = String(first[column]).localeCompare(String(second[column]))
-      }
-
-      if (sortDescriptor.direction === "descending") {
+      if (sortDirection === "descending") {
         comparison *= -1
       }
 
       return comparison
     })
-  }, [sortDescriptor, filteredInvitations])
+  }, [sortDirection, filteredInvitations])
 
   const hasFilters =
     search.trim() !== "" || roleFilter !== "all" || statusFilter !== "all"
@@ -124,16 +109,14 @@ export function OrganizationInvitations({
     value
   }))
 
-  function toggleSort(column: string) {
-    setSortDescriptor((current) => {
-      if (current?.column !== column) {
-        return { column, direction: "ascending" }
-      }
-      if (current.direction === "ascending") {
-        return { column, direction: "descending" }
-      }
-      return undefined
-    })
+  function toggleSort() {
+    setSortDirection((current) =>
+      current === undefined
+        ? "ascending"
+        : current === "ascending"
+          ? "descending"
+          : undefined
+    )
   }
 
   return (
@@ -142,21 +125,6 @@ export function OrganizationInvitations({
         {organizationLocalization.invitations}
       </h3>
 
-      <InputGroup className="min-w-0 sm:w-[220px]">
-        <InputGroupInput
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          aria-label={organizationLocalization.search}
-          placeholder={organizationLocalization.search}
-          disabled={isPending}
-        />
-
-        <InputGroupAddon>
-          <Search className="text-muted-foreground" />
-        </InputGroupAddon>
-      </InputGroup>
-
       <div className="overflow-x-auto rounded-lg border">
         <Table
           aria-label={organizationLocalization.invitations}
@@ -164,24 +132,17 @@ export function OrganizationInvitations({
         >
           <TableHeader>
             <TableRow className="hover:bg-transparent has-aria-expanded:bg-transparent">
-              <OrganizationSortableTableHead
-                sortDirection={
-                  sortDescriptor?.column === "email"
-                    ? sortDescriptor.direction
-                    : undefined
-                }
-                onClick={() => toggleSort("email")}
-              >
-                {localization.auth.email}
-              </OrganizationSortableTableHead>
+              <OrganizationSearchableTableHead
+                disabled={isPending}
+                label={localization.auth.email}
+                onValueChange={setSearch}
+                placeholder="Search emails"
+                value={search}
+              />
 
               <OrganizationSortableTableHead
-                sortDirection={
-                  sortDescriptor?.column === "createdAt"
-                    ? sortDescriptor.direction
-                    : undefined
-                }
-                onClick={() => toggleSort("createdAt")}
+                sortDirection={sortDirection}
+                onClick={toggleSort}
               >
                 {organizationLocalization.invitedAt}
               </OrganizationSortableTableHead>
