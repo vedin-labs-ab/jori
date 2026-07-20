@@ -19,10 +19,15 @@ import {
 } from "@/shared/session/auth"
 import { OrganizationDialog } from "./settings"
 
+function billingSettingsRequested() {
+  return new URL(window.location.href).searchParams.has("billing")
+}
+
 export function SidebarOrganizationSwitcher() {
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
-  const [managing, setManaging] = useState(false)
+  const [billingRequested] = useState(billingSettingsRequested)
+  const [managing, setManaging] = useState(billingRequested)
   const [creating, setCreating] = useState(false)
   const others =
     organizations.data?.filter(
@@ -77,7 +82,14 @@ export function SidebarOrganizationSwitcher() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <OrganizationDialog onOpenChange={setManaging} open={managing} />
+      {active.data ? (
+        <OrganizationDialog
+          initialView={billingRequested ? "billing" : "general"}
+          onOpenChange={setManaging}
+          open={managing}
+          organizationId={active.data.id}
+        />
+      ) : null}
       <CreateOrganizationDialog onOpenChange={setCreating} open={creating} />
     </>
   )

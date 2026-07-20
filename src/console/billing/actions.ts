@@ -13,8 +13,14 @@ export type BillingAccount = NonNullable<BillingOverview["account"]>
 
 export type CheckoutFlow = "plan" | "top-up" | "portal"
 
-export function billingReturnUrl() {
-  return `${window.location.origin}/billing`
+export function billingReturnUrl(reopenSettings = false) {
+  const url = new URL("/console", window.location.origin)
+
+  if (reopenSettings) {
+    url.searchParams.set("billing", "portal")
+  }
+
+  return url.toString()
 }
 
 /**
@@ -32,6 +38,7 @@ export function useBillingCheckout(organizationId: string) {
     api.billing.stripe.checkout.startTopUpCheckout
   )
   const openPortal = useAction(api.billing.stripe.checkout.openPortal)
+  const portalReturnUrl = billingReturnUrl(true)
 
   const redirect = async (
     flow: CheckoutFlow,
@@ -78,7 +85,7 @@ export function useBillingCheckout(organizationId: string) {
     managePortal: () =>
       redirect(
         "portal",
-        () => openPortal({ organizationId, returnUrl: billingReturnUrl() }),
+        () => openPortal({ organizationId, returnUrl: portalReturnUrl }),
         "Could not open the billing portal."
       ),
   }

@@ -24,9 +24,9 @@ export function SummaryBand({
   organizationId: string
 }) {
   return (
-    <div className="grid md:grid-cols-[5fr_7fr]">
+    <div className="grid lg:grid-cols-[5fr_7fr]">
       <PlanCell account={account} organizationId={organizationId} />
-      <div className="p-6 pt-0 md:pt-6">
+      <div className="p-6 pt-0 lg:pt-6">
         <AvailableCell account={account} organizationId={organizationId} />
       </div>
     </div>

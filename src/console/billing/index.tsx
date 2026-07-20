@@ -4,21 +4,16 @@ import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
-import { ConsolePage } from "../page"
 import { type BillingAccount } from "./actions"
 import { Activity } from "./activity"
 import { AutoTopUpRow } from "./autotopup"
 import { SummaryBand } from "./summary"
 
-export function Billing() {
-  return (
-    <ConsolePage>
-      {(organizationId) => <BillingContent organizationId={organizationId} />}
-    </ConsolePage>
-  )
-}
-
-function BillingContent({ organizationId }: { organizationId: string }) {
+export function BillingSettings({
+  organizationId,
+}: {
+  organizationId: string
+}) {
   useBillingReturnToasts()
 
   const overview = useQuery(api.billing.console.overview, { organizationId })
@@ -28,19 +23,17 @@ function BillingContent({ organizationId }: { organizationId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
-        <StateAlert account={overview.account} />
-        <div className="rounded-xl border bg-card">
-          <SummaryBand
-            account={overview.account}
-            organizationId={organizationId}
-          />
-          <AutoTopUpRow
-            account={overview.account}
-            organizationId={organizationId}
-          />
-        </div>
+    <div className="flex flex-col gap-6">
+      <StateAlert account={overview.account} />
+      <div className="rounded-xl border bg-card">
+        <SummaryBand
+          account={overview.account}
+          organizationId={organizationId}
+        />
+        <AutoTopUpRow
+          account={overview.account}
+          organizationId={organizationId}
+        />
       </div>
       <Activity entries={overview.entries} />
     </div>

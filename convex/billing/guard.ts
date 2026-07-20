@@ -42,11 +42,11 @@ export async function checkRunBudget(
 
 const budgetMessages = {
   "trial-ended":
-    "The trial has ended. Choose a plan on the Billing page to keep Milo working.",
+    "The trial has ended. Choose a plan in Billing settings to keep Milo working.",
   paused:
-    "The subscription is paused. Visit the Billing page to reactivate it.",
+    "The subscription is paused. Visit Billing settings to reactivate it.",
   "out-of-usage":
-    "The organization is out of usage. Add to the wallet on the Billing page, or wait for the monthly reset.",
+    "The organization is out of usage. Add to the wallet in Billing settings, or wait for the monthly reset.",
 } as const
 
 export async function requireRunBudget(

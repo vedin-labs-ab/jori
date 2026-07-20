@@ -7,7 +7,6 @@ import {
   Library,
   ListChecks,
   NotebookTabs,
-  Wallet,
 } from "lucide-react"
 
 export const consoleNavigation = [
@@ -19,7 +18,6 @@ export const consoleNavigation = [
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Layers, label: "Context", to: "/context" },
-  { icon: Wallet, label: "Billing", to: "/billing" },
 ] as const
 
 export function getPageTitle(pathname: string) {
