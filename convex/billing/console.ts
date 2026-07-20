@@ -8,9 +8,9 @@ import { ensureAccount, getAccount } from "./account"
 const entryPageSize = 30
 
 /**
- * Everything the Billing page renders. `account` is null until the organization's
- * first metered run or checkout creates one; the page shows the trial as not
- * yet started in that case.
+ * Everything Billing settings renders. `account` is null until the
+ * organization's first metered run or checkout creates one; the view shows the
+ * trial as not yet started in that case.
  */
 export const overview = query({
   args: { organizationId: v.string() },

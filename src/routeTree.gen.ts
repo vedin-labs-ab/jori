@@ -19,7 +19,6 @@ import { Route as PlaybooksRouteImport } from './routes/playbooks'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ContextRouteImport } from './routes/context'
 import { Route as ConsoleRouteImport } from './routes/console'
-import { Route as BillingRouteImport } from './routes/billing'
 import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtifactsRouteImport } from './routes/artifacts'
@@ -83,11 +82,6 @@ const ContextRoute = ContextRouteImport.update({
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/console',
   path: '/console',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BillingRoute = BillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutomationsRoute = AutomationsRouteImport.update({
@@ -167,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/artifacts': typeof ArtifactsRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
-  '/billing': typeof BillingRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
@@ -193,7 +186,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
-  '/billing': typeof BillingRoute
   '/console': typeof ConsoleRoute
   '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
@@ -219,7 +211,6 @@ export interface FileRoutesById {
   '/artifacts': typeof ArtifactsRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
-  '/billing': typeof BillingRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
@@ -248,7 +239,6 @@ export interface FileRouteTypes {
     | '/artifacts'
     | '/auth'
     | '/automations'
-    | '/billing'
     | '/console'
     | '/context'
     | '/integrations'
@@ -274,7 +264,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/automations'
-    | '/billing'
     | '/console'
     | '/playbooks'
     | '/pricing'
@@ -299,7 +288,6 @@ export interface FileRouteTypes {
     | '/artifacts'
     | '/auth'
     | '/automations'
-    | '/billing'
     | '/console'
     | '/context'
     | '/integrations'
@@ -327,7 +315,6 @@ export interface RootRouteChildren {
   ArtifactsRoute: typeof ArtifactsRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
-  BillingRoute: typeof BillingRoute
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRouteWithChildren
@@ -411,13 +398,6 @@ declare module '@tanstack/react-router' {
       path: '/console'
       fullPath: '/console'
       preLoaderRoute: typeof ConsoleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/billing': {
-      id: '/billing'
-      path: '/billing'
-      fullPath: '/billing'
-      preLoaderRoute: typeof BillingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/automations': {
@@ -581,7 +561,6 @@ const rootRouteChildren: RootRouteChildren = {
   ArtifactsRoute: ArtifactsRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
-  BillingRoute: BillingRoute,
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,
   IntegrationsRoute: IntegrationsRouteWithChildren,
