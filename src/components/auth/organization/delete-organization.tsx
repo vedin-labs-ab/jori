@@ -60,7 +60,6 @@ export function DeleteOrganization() {
         disabled={!activeOrganization}
         size="sm"
         variant="outline"
-        className="text-destructive"
         onClick={() => setConfirmOpen(true)}
       >
         {organizationLocalization.deleteOrganization}

@@ -13,18 +13,10 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { cn } from "@/lib/utils"
 import { OrganizationInvitationRowSkeleton } from "./organization-invitation-row-skeleton"
 
 export type OrganizationInvitationRowProps = {
   invitation: Invitation
-}
-
-const statusBadgeClasses: Record<string, string> = {
-  pending: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  accepted: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  rejected: "bg-destructive/10 text-destructive",
-  canceled: "bg-muted text-muted-foreground"
 }
 
 export function OrganizationInvitationRow({
@@ -57,7 +49,7 @@ export function OrganizationInvitationRow({
 
   return (
     <TableRow>
-      <TableCell className="font-medium text-sm">{invitation.email}</TableCell>
+      <TableCell className="font-medium">{invitation.email}</TableCell>
 
       <TableCell className="text-muted-foreground text-xs tabular-nums whitespace-nowrap">
         {new Date(invitation.createdAt).toLocaleString(undefined, {
@@ -66,15 +58,10 @@ export function OrganizationInvitationRow({
         })}
       </TableCell>
 
-      <TableCell className="text-sm">{roleLabel}</TableCell>
+      <TableCell>{roleLabel}</TableCell>
 
-      <TableCell className="text-sm">
-        <Badge
-          variant="secondary"
-          className={cn(statusBadgeClasses[invitation.status])}
-        >
-          {String(statusLabel)}
-        </Badge>
+      <TableCell>
+        <Badge variant="secondary">{String(statusLabel)}</Badge>
       </TableCell>
 
       <TableCell className="text-end">
@@ -83,7 +70,7 @@ export function OrganizationInvitationRow({
             <Button
               size="icon"
               variant="outline"
-              className="size-8 text-destructive"
+              className="size-8"
               disabled={cancelPending}
               onClick={() => cancelInvitation({ invitationId: invitation.id })}
               aria-label={organizationLocalization.cancelInvitation}

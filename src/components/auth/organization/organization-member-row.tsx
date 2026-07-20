@@ -121,7 +121,7 @@ export function OrganizationMemberRow({
             <Button
               size="icon"
               variant="outline"
-              className="size-8 text-destructive"
+              className="size-8"
               aria-label={organizationLocalization.leaveOrganization}
               onClick={() => setLeaveOpen(true)}
             >
@@ -132,7 +132,7 @@ export function OrganizationMemberRow({
               <Button
                 size="icon"
                 variant="outline"
-                className="size-8 text-destructive"
+                className="size-8"
                 aria-label={organizationLocalization.removeMember}
                 onClick={() => setRemoveOpen(true)}
               >
