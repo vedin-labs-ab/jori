@@ -2,7 +2,6 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 
-const baseRequiredEnv = [] as const
 const convexDeploymentEnv = "CONVEX_DEPLOYMENT"
 
 const command = process.argv.slice(2)
@@ -58,9 +57,7 @@ function resolveEnv() {
 }
 
 function requiredEnvironmentVariables(command: readonly string[]) {
-  return isConvexConfigureCommand(command)
-    ? [...baseRequiredEnv]
-    : [convexDeploymentEnv, ...baseRequiredEnv]
+  return isConvexConfigureCommand(command) ? [] : [convexDeploymentEnv]
 }
 
 function isConvexConfigureCommand(command: readonly string[]) {
