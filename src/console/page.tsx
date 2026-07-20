@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { useConvexAuth, useMutation } from "convex/react"
+import { useMutation } from "convex/react"
 import { type ReactNode, useEffect, useState } from "react"
 import { CreateOrganizationDialog } from "@/components/auth/organization/create-organization-dialog"
 import { UserInvitations } from "@/components/auth/organization/user-invitations"
@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
   activateOrganization,
-  authClient,
-  isSessionLoading,
+  useActiveOrganization,
+  useConvexSession,
+  useListOrganizations,
+  useSession,
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { OnboardingGate } from "./context/organization/onboarding/gate"
@@ -18,6 +20,8 @@ import { localTimezone } from "./shared/time"
 import { ConsoleShell } from "./shell"
 import { PublicConsoleFrame } from "./shell/public"
 
+/** Gates a console surface: a stable loader until the session, Convex auth,
+ *  and active organization are each known, then exactly one target view. */
 export function ConsolePage({
   children,
   chrome = "shell",
@@ -27,16 +31,15 @@ export function ConsolePage({
   chrome?: "shell" | "none"
   loadingFallback?: ReactNode
 }) {
-  const sessionQuery = authClient.useSession()
-  const session = sessionQuery.data
-  const { isAuthenticated, isLoading: isConvexAuthLoading } = useConvexAuth()
+  const session = useSession()
+  const convex = useConvexSession()
   const loader = loadingFallback ?? <FullscreenSkeletonLoader />
 
-  if (isSessionLoading(sessionQuery)) {
+  if (session.isPending) {
     return loader
   }
 
-  if (session === null) {
+  if (session.data === null || session.data === undefined) {
     return (
       <PublicConsoleFrame isSignedIn={false}>
         <SignedOutView />
@@ -44,11 +47,11 @@ export function ConsolePage({
     )
   }
 
-  if (isConvexAuthLoading) {
+  if (convex.isLoading) {
     return loader
   }
 
-  if (!isAuthenticated) {
+  if (!convex.isAuthenticated) {
     return (
       <PublicConsoleFrame isSignedIn>
         <Alert variant="destructive">
@@ -102,28 +105,26 @@ function OrganizationBoundary({
   chrome: "shell" | "none"
   loader: ReactNode
 }) {
-  const activeQuery = authClient.useActiveOrganization()
-  const listQuery = authClient.useListOrganizations()
-  const active = activeQuery.data
-  const organizations = listQuery.data
+  const active = useActiveOrganization()
+  const organizations = useListOrganizations()
 
-  if (isSessionLoading(activeQuery) || isSessionLoading(listQuery)) {
+  if (active.isPending || organizations.isPending) {
     return loader
   }
 
-  if (active !== null && active !== undefined) {
+  if (active.data !== null && active.data !== undefined) {
     const content = (
       <>
-        <SessionSync organizationId={active.id} />
+        <SessionSync organizationId={active.data.id} />
         <OnboardingGate />
-        {children(active.id)}
+        {children(active.data.id)}
       </>
     )
 
     return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
   }
 
-  const firstOrganizationId = organizations?.at(0)?.id
+  const firstOrganizationId = organizations.data?.at(0)?.id
 
   if (firstOrganizationId !== undefined) {
     return <ActivateOrganization organizationId={firstOrganizationId} />

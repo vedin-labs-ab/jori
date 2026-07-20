@@ -1,9 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { UserButton } from "@/components/auth/user/user-button"
-import { Button } from "@/components/ui/button"
 import { BrandLink } from "@/shared/brand/link"
-import { authClient } from "@/shared/session/auth"
-import { GetStarted } from "./cta"
+import { useSession } from "@/shared/session/auth"
+import { GetStarted, SessionButton } from "./cta"
 
 export function LandingHeader() {
   return (
@@ -31,16 +30,19 @@ export function LandingHeader() {
 }
 
 function HeaderActions() {
-  const sessionQuery = authClient.useSession()
-  const isSignedIn =
-    sessionQuery.data !== null && sessionQuery.data !== undefined
+  const session = useSession()
+  const isSignedIn = session.data !== null && session.data !== undefined
 
   return (
     <div className="flex items-center gap-2">
       {!isSignedIn ? (
-        <Button asChild size="lg" variant="ghost">
-          <Link to="/auth/sign-in">Sign in</Link>
-        </Button>
+        <SessionButton
+          pending={session.isPending}
+          to="/auth/sign-in"
+          variant="ghost"
+        >
+          Sign in
+        </SessionButton>
       ) : null}
       <GetStarted />
       {isSignedIn ? <UserButton size="icon" /> : null}

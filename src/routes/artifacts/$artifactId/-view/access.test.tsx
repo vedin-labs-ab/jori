@@ -14,24 +14,16 @@ const { session } = vi.hoisted(() => ({
   },
 }))
 
-vi.mock("@/shared/session/auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/shared/session/auth")>()),
-  authClient: {
-    useSession: () => ({
-      data: session.isSignedIn ? { user: { email: "sam@example.com" } } : null,
-      isPending: session.isSessionPending,
-      isRefetching: false,
-    }),
-    useActiveOrganization: () => ({
-      data: session.organization,
-      isPending: session.isOrganizationPending,
-      isRefetching: false,
-    }),
-  },
-}))
-
-vi.mock("convex/react", () => ({
-  useConvexAuth: () => ({
+vi.mock("@/shared/session/auth", () => ({
+  useSession: () => ({
+    data: session.isSignedIn ? { user: { email: "sam@example.com" } } : null,
+    isPending: session.isSessionPending,
+  }),
+  useActiveOrganization: () => ({
+    data: session.organization,
+    isPending: session.isOrganizationPending,
+  }),
+  useConvexSession: () => ({
     isAuthenticated: session.isConvexAuthenticated,
     isLoading: session.isConvexLoading,
   }),
