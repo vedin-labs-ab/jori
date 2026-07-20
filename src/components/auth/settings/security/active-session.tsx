@@ -11,7 +11,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 
 function timeAgo(date: Date) {
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
+  // Local patch: list-sessions delivers ISO strings at runtime despite the
+  // Session type; coerce like organization-invitations.tsx does.
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
   const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })
 
   const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
