@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { authClient, isSessionLoading } from "@/shared/session/auth"
+import { authClient } from "@/shared/session/auth"
 
 // Every marketing page ends on the same handshake.
 export function Closing({ lede }: { lede: string }) {
@@ -42,12 +42,7 @@ export function GetStarted({ prominent = false }: { prominent?: boolean }) {
   }
 
   return (
-    <Button
-      asChild
-      className={className}
-      disabled={isSessionLoading(sessionQuery)}
-      size="lg"
-    >
+    <Button asChild className={className} size="lg">
       <Link to="/auth/sign-in">
         Get started
         <ArrowRight data-icon="inline-end" />
