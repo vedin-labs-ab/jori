@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
 import { registerArtifactRoutes } from "./artifacts/serve/routes"
+import { requireEnvironmentVariable } from "./shared/environment"
 import { lazyHttpAction } from "./shared/lazy"
 
 // Every handler module loads on first request through lazyHttpAction: the
@@ -19,7 +20,6 @@ http.route({
   path: "/.well-known/openid-configuration",
   method: "GET",
   handler: httpAction(async () => {
-    const { requireEnvironmentVariable } = await import("./shared/environment")
     const siteUrl = requireEnvironmentVariable("CONVEX_SITE_URL")
 
     return await Promise.resolve(
