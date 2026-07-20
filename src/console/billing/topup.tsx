@@ -18,7 +18,13 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
+import { ConsoleFilterToggle } from "../shared/layout"
 import { useBillingCheckout } from "./actions"
+
+const presetOptions = topUp.presetsUsd.map((preset) => ({
+  label: `$${preset}`,
+  value: String(preset),
+}))
 
 /**
  * Presets cover the common case; the input takes any whole amount from the
@@ -50,18 +56,12 @@ export function TopUpDialog({ organizationId }: { organizationId: string }) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
-            {topUp.presetsUsd.map((preset) => (
-              <Button
-                key={preset}
-                onClick={() => setAmount(String(preset))}
-                size="sm"
-                variant={amount === String(preset) ? "default" : "outline"}
-              >
-                ${preset}
-              </Button>
-            ))}
-          </div>
+          <ConsoleFilterToggle
+            label="Amount"
+            onValueChange={setAmount}
+            options={presetOptions}
+            value={amount}
+          />
           <InputGroup>
             <InputGroupInput
               inputMode="numeric"
