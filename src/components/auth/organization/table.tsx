@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react"
-import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
-import type { ReactNode } from "react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Filter, Search, X } from "lucide-react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +17,12 @@ import {
   EmptyMedia,
   EmptyTitle
 } from "@/components/ui/empty"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput
+} from "@/components/ui/input-group"
 import { TableCell, TableHead, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
@@ -25,6 +31,85 @@ export type OrganizationTableSortDirection = "ascending" | "descending"
 export type OrganizationTableFilterOption = {
   label: string
   value: string
+}
+
+export function OrganizationSearchableTableHead({
+  label,
+  placeholder,
+  value,
+  disabled,
+  onValueChange
+}: {
+  label: string
+  placeholder: string
+  value: string
+  disabled?: boolean
+  onValueChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const restoreFocusRef = useRef(false)
+
+  useEffect(() => {
+    if (!open && restoreFocusRef.current) {
+      restoreFocusRef.current = false
+      triggerRef.current?.focus()
+    }
+  }, [open])
+
+  function close() {
+    restoreFocusRef.current = true
+    onValueChange("")
+    setOpen(false)
+  }
+
+  return (
+    <TableHead className="min-w-48">
+      {open ? (
+        <InputGroup className="-ml-2 w-48">
+          <InputGroupInput
+            aria-label={placeholder}
+            autoFocus
+            className="[&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+            disabled={disabled}
+            onChange={(event) => onValueChange(event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault()
+                event.stopPropagation()
+                close()
+              }
+            }}
+            placeholder={placeholder}
+            type="search"
+            value={value}
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              aria-label={`Clear ${label.toLowerCase()} search`}
+              onClick={close}
+              size="icon-xs"
+            >
+              <X />
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+      ) : (
+        <Button
+          aria-label={`Search ${label.toLowerCase()}`}
+          className="-ml-2"
+          disabled={disabled}
+          onClick={() => setOpen(true)}
+          ref={triggerRef}
+          size="sm"
+          variant="ghost"
+        >
+          {label}
+          <Search />
+        </Button>
+      )}
+    </TableHead>
+  )
 }
 
 export function OrganizationSortableTableHead({
