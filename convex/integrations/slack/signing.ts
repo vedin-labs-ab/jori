@@ -4,7 +4,7 @@ import { requireEnvironmentVariable } from "../../shared/environment"
 import { createSignedState, parseSignedState } from "../connect/signing"
 
 export type SlackInstallState = {
-  tenantId: string
+  organizationId: string
   createdBy: Id<"persons">
   returnUrl: string
   createdAt: number

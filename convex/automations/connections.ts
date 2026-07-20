@@ -8,11 +8,11 @@ import { scopeValidator } from "../shared/audience"
 
 export const list = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     scope: scopeValidator,
   },
   handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const principal = executionPrincipalForScope(args.scope, personId)
 
     return {
@@ -24,7 +24,7 @@ export const list = query({
               await findIntegrationForPrincipal(ctx, {
                 integration: definition.integration,
                 principal,
-                tenantId: args.tenantId,
+                organizationId: args.organizationId,
               })
             )?.status === "active",
         }))

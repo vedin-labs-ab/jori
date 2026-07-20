@@ -267,7 +267,7 @@ function gmailIntegration(): Doc<"integrations"> {
   return {
     _id: "gmail-integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "gmail",
     scope: "user",
     ownerId: "person" as Id<"persons">,

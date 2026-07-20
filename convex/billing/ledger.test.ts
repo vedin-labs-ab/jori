@@ -6,7 +6,7 @@ import { creditTopUp, debitRun } from "./ledger"
 const account = (overrides: Partial<Doc<"billingAccounts">> = {}) =>
   ({
     _id: "account-1",
-    tenantId: "tenant-1",
+    organizationId: "organization-1",
     state: "active",
     includedMicros: 1_000_000,
     walletMicros: 500_000,

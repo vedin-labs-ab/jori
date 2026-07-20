@@ -34,20 +34,23 @@ import {
 export function Automations() {
   return (
     <ConsolePage>
-      {(tenantId) => <AutomationListView tenantId={tenantId} />}
+      {(organizationId) => (
+        <AutomationListView organizationId={organizationId} />
+      )}
     </ConsolePage>
   )
 }
 
-function AutomationListView({ tenantId }: { tenantId: string }) {
+function AutomationListView({ organizationId }: { organizationId: string }) {
   const filters = useAutomationFilters()
   const deferredQuery = useDeferredValue(filters.query)
   const automationList = useQuery(api.automations.console.list, {
-    tenantId,
+    organizationId,
     query: deferredQuery,
     statusFilter: filters.filter,
   })
-  const { dialog, editor, preloadDialog } = useAutomationEditorHost(tenantId)
+  const { dialog, editor, preloadDialog } =
+    useAutomationEditorHost(organizationId)
   const now = useNow(30_000)
   const { hasFilters, pagination } = useAutomationPagination({
     automationList,

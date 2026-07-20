@@ -27,13 +27,13 @@ import { type Workstream, type Workstreams } from "./types"
 export function ContextWorkstreams() {
   return (
     <ContextPage tab="workstreams">
-      {(tenantId) => <WorkstreamsView tenantId={tenantId} />}
+      {(organizationId) => <WorkstreamsView organizationId={organizationId} />}
     </ContextPage>
   )
 }
 
-function WorkstreamsView({ tenantId }: { tenantId: string }) {
-  const result = useQuery(api.workstreams.queries.list, { tenantId })
+function WorkstreamsView({ organizationId }: { organizationId: string }) {
+  const result = useQuery(api.workstreams.queries.list, { organizationId })
   const [openId, setOpenId] = useState<Workstream["id"] | null>(null)
   const workstreams = result?.workstreams ?? []
   const list = useWorkstreamPagination(workstreams, result !== undefined)
@@ -49,7 +49,7 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
         <PulseSkeleton />
       ) : (
         <WorkstreamsPulse
-          tenantId={tenantId}
+          organizationId={organizationId}
           workstreams={roster}
           onOpen={openWorkstream}
         />
@@ -68,7 +68,7 @@ function WorkstreamsView({ tenantId }: { tenantId: string }) {
         <ConsoleListPager pagination={list.pagination} />
       ) : null}
       <WorkstreamDetail
-        tenantId={tenantId}
+        organizationId={organizationId}
         workstream={open}
         onClose={() => setOpenId(null)}
       />

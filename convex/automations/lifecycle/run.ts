@@ -15,7 +15,7 @@ export async function createAutomationRun(
   }
 ) {
   const runId = await ctx.db.insert("runs", {
-    tenantId: args.automation.tenantId,
+    organizationId: args.automation.organizationId,
     automationId: args.automation._id,
     automationParentId: args.automation.parentId,
     automationConfigurationVersion:

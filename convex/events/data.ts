@@ -39,14 +39,14 @@ export async function recordEvent(
 
   if (provider !== undefined) {
     await resolveActor(ctx, {
-      tenantId: args.integration.tenantId,
+      organizationId: args.integration.organizationId,
       provider,
       actor: args.actor,
     })
   }
 
   const eventId = await ctx.db.insert("events", {
-    tenantId: args.integration.tenantId,
+    organizationId: args.integration.organizationId,
     integrationId: args.integration._id,
     key: args.key,
     type: args.type,

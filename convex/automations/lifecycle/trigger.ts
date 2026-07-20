@@ -15,7 +15,7 @@ export async function resolveTrigger(
   ctx: MutationCtx,
   args: {
     principal: ExecutionPrincipal
-    tenantId: string
+    organizationId: string
     type: AutomationType
     trigger: AutomationTriggerInput
     now: number
@@ -44,7 +44,7 @@ export async function resolveTrigger(
         await resolveIntegrationForPrincipal(ctx, {
           integration: args.trigger.integration,
           principal: args.principal,
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
         })
       )._id,
       event: definition.value,

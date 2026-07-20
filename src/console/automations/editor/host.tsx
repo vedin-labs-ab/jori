@@ -22,9 +22,9 @@ export type AutomationEditorHost = ReturnType<typeof useAutomationEditorHost>
  * Automation editor state plus its lazily mounted dialog, shared by every
  * page that opens the create/edit flow. Render `dialog` once per page.
  */
-export function useAutomationEditorHost(tenantId: string) {
-  const permissions = useToolPermissions(tenantId)
-  const editor = useAutomationEditor(tenantId, permissions.permissions)
+export function useAutomationEditorHost(organizationId: string) {
+  const permissions = useToolPermissions(organizationId)
+  const editor = useAutomationEditor(organizationId, permissions.permissions)
   const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
   const mount = useRef<{ isReady: boolean; waiters: (() => void)[] }>({
     isReady: false,
@@ -60,7 +60,7 @@ export function useAutomationEditorHost(tenantId: string) {
           permissions={permissions.permissions}
           policyKey={automationPolicyKey(permissions.permissions)}
           automation={editor.formAutomation}
-          tenantId={tenantId}
+          organizationId={organizationId}
           values={editor.formValues}
         />
       </Suspense>

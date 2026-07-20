@@ -9,7 +9,7 @@ const subscriptionStatus = v.union(
 )
 
 export const subscriptions = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integrationId: v.id("integrations"),
   event: v.string(),
   match: v.optional(eventMatch),

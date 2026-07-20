@@ -106,7 +106,7 @@ async function collectFacets(ctx: MutationCtx, rows: Doc<"evidence">[]) {
 
     const anchor = eventAnchor(event)
     const personId = await resolvePersonId(ctx, {
-      tenantId: event.tenantId,
+      organizationId: event.organizationId,
       provider:
         row.integration === undefined
           ? undefined

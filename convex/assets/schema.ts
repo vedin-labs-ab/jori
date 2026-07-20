@@ -3,7 +3,7 @@ import { v } from "convex/values"
 
 // One recorded sandbox output file; shared by the record mutation args.
 export const assetFields = {
-  tenantId: v.string(),
+  organizationId: v.string(),
   runId: v.id("runs"),
   storageId: v.id("_storage"),
   name: v.string(),
@@ -17,4 +17,4 @@ export const assets = defineTable({
   createdAt: v.number(),
 })
   .index("by_run", ["runId"])
-  .index("by_tenant_and_created_at", ["tenantId", "createdAt"])
+  .index("by_organization_and_created_at", ["organizationId", "createdAt"])

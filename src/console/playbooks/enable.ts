@@ -23,7 +23,7 @@ export type { PlaybookActionKind } from "./pending"
 export type PlaybookActions = ReturnType<typeof usePlaybookActions>
 
 export function usePlaybookActions(
-  tenantId: string,
+  organizationId: string,
   editorHost: AutomationEditorHost
 ) {
   const pending = usePendingAction()
@@ -31,15 +31,15 @@ export function usePlaybookActions(
   return {
     pending: pending.current,
     preloadEdit: editorHost.preloadDialog,
-    ...useCatalogActions(tenantId, pending),
-    ...useAutomationActions(tenantId, pending),
-    ...useEditActions(tenantId, pending, editorHost),
+    ...useCatalogActions(organizationId, pending),
+    ...useAutomationActions(organizationId, pending),
+    ...useEditActions(organizationId, pending, editorHost),
   }
 }
 
 /** Opens the shared automation editor from a playbook — existing or draft. */
 function useEditActions(
-  tenantId: string,
+  organizationId: string,
   pending: PendingAction,
   editorHost: AutomationEditorHost
 ) {
@@ -52,7 +52,7 @@ function useEditActions(
         editorHost.preloadDialog()
         try {
           const automation = await convex.query(api.automations.console.get, {
-            tenantId,
+            organizationId,
             automationId,
           })
           editorHost.editor.openEditForm(automation)
@@ -75,7 +75,7 @@ function useEditActions(
           const [, draft] = await Promise.all([
             editorHost.preloadDialog(),
             draftAction({
-              tenantId,
+              organizationId,
               playbook: definition.key,
               choices,
               destination,

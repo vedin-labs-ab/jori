@@ -11,7 +11,7 @@ export function isCancelApprovalTool(tool: string) {
 
 export async function cancelApprovalRequest(
   ctx: ActionCtx,
-  run: { _id: Id<"runs">; tenantId: string },
+  run: { _id: Id<"runs">; organizationId: string },
   args: unknown
 ) {
   const input = parseCancelInput(args)
@@ -19,7 +19,7 @@ export async function cancelApprovalRequest(
     approvalId: input.approvalId,
     messageId: input.messageId,
     runId: run._id,
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
     reason: input.reason,
   })
 

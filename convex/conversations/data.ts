@@ -31,7 +31,7 @@ export async function ensureConversation(
   }
 ) {
   const conversation = await findConversation(ctx, {
-    tenantId: args.integration.tenantId,
+    organizationId: args.integration.organizationId,
     integrationId: args.integration._id,
     externalId: args.externalId,
   })
@@ -56,7 +56,7 @@ async function insertConversation(
   }
 ) {
   const conversationId = await ctx.db.insert("conversations", {
-    tenantId: args.integration.tenantId,
+    organizationId: args.integration.organizationId,
     integrationId: args.integration._id,
     externalId: args.externalId,
     scope: conversationScope(args.message, args.integration),
@@ -120,7 +120,7 @@ async function startNewMessageRun(
   // Mentions are interactive work: they get the grace floor. Continuing an
   // active session never lands here, so in-flight threads are not cut off.
   const budget = await checkRunBudget(ctx, {
-    tenantId: args.integration.tenantId,
+    organizationId: args.integration.organizationId,
     interactive: true,
   })
 
@@ -171,7 +171,7 @@ async function insertRun(
   }
 ) {
   return await ctx.db.insert("runs", {
-    tenantId: args.integration.tenantId,
+    organizationId: args.integration.organizationId,
     cause: {
       type: "message",
       messageId: args.message._id,

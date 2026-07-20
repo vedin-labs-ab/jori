@@ -5,7 +5,7 @@ export function createAssetContext() {
     run: {
       _id: "run-id",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       promptId: "prompt-id",
       status: "running",
       createdAt: 0,
@@ -20,7 +20,7 @@ export function createAssetContext() {
       runQuery: vi.fn(async () => ({
         _id: "asset-id",
         _creationTime: 0,
-        tenantId: "tenant",
+        organizationId: "organization",
         runId: "run-id",
         storageId: "storage-id",
         name: "kitten.png",

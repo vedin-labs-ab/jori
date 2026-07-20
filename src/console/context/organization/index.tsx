@@ -7,15 +7,15 @@ import { type OrganizationSources } from "./types"
 export function ContextOrganization() {
   return (
     <ContextPage tab="organization">
-      {(tenantId) => <OrganizationView tenantId={tenantId} />}
+      {(organizationId) => <OrganizationView organizationId={organizationId} />}
     </ContextPage>
   )
 }
 
-function OrganizationView({ tenantId }: { tenantId: string }) {
-  const profile = useQuery(api.organization.profile.get, { tenantId })
-  const discovery = useQuery(api.organization.discovery.get, { tenantId })
-  const sources = useQuery(api.organization.sources.list, { tenantId })
+function OrganizationView({ organizationId }: { organizationId: string }) {
+  const profile = useQuery(api.organization.profile.get, { organizationId })
+  const discovery = useQuery(api.organization.discovery.get, { organizationId })
+  const sources = useQuery(api.organization.sources.list, { organizationId })
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -23,7 +23,7 @@ function OrganizationView({ tenantId }: { tenantId: string }) {
         discovery={discovery}
         profile={profile}
         sources={sources}
-        tenantId={tenantId}
+        organizationId={organizationId}
         website={readPrimaryWebsite(sources)}
       />
     </div>

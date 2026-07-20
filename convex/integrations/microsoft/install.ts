@@ -20,7 +20,7 @@ const microsoftIntegration = v.union(
 
 export const createMicrosoftEmailInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -30,7 +30,7 @@ export const createMicrosoftEmailInstallState = mutation({
 
 export const createMicrosoftCalendarInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -41,7 +41,7 @@ export const createMicrosoftCalendarInstallState = mutation({
 export const recordOAuthInstallation = internalMutation({
   args: {
     integration: microsoftIntegration,
-    tenantId: v.string(),
+    organizationId: v.string(),
     createdBy: v.id("persons"),
     microsoftTenantId: v.string(),
     accessToken: v.string(),
@@ -82,7 +82,7 @@ export const recordOAuthInstallation = internalMutation({
     }
     const email = getMicrosoftIdentityEmail(args.profile)
     const integrationId = await upsertIntegration(ctx, existing, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       integration: args.integration,
       scope: "user",
       ownerId: args.createdBy,
@@ -99,7 +99,7 @@ export const recordOAuthInstallation = internalMutation({
     })
 
     await linkSetupIdentity(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId: args.createdBy,
       provider: "microsoft",
       identity: {

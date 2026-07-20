@@ -19,7 +19,7 @@ export function automationRuntimeInput(webSearch = true) {
     run: {
       _id: "run",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       automationId: "automation",
       snapshot: {
         title: "Daily digest",
@@ -52,7 +52,7 @@ export function linearAutomationRuntimeInput() {
     run: {
       _id: "run",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       automationId: "automation",
       snapshot: {
         title: "Linear quip",
@@ -68,7 +68,7 @@ export function linearAutomationRuntimeInput() {
     event: {
       _id: "event",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       integrationId: linear._id,
       key: "linear:delivery",
       type: "issue.comment.edited",
@@ -106,7 +106,7 @@ export function notionAutomationRuntimeInput() {
     run: {
       _id: "run",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       automationId: "automation",
       snapshot: {
         title: "Notion follow-up",
@@ -130,7 +130,7 @@ function notionCommentEvent(integrationId: string) {
   return {
     _id: "event",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId,
     key: "notion:workspace:event",
     type: "comment.created",
@@ -157,7 +157,7 @@ export function runtimeInput(
     run: {
       _id: "run",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       cause: {
         type: "message",
         messageId: "message",
@@ -172,7 +172,7 @@ export function runtimeInput(
     message: {
       _id: "message",
       _creationTime: 0,
-      tenantId: "tenant",
+      organizationId: "organization",
       integrationId: `${integration}-integration`,
       integration,
       externalId: "external-message",
@@ -210,9 +210,9 @@ function promptIntegration(integration: string): RuntimeIntegration {
   return {
     _id: `${integration}-integration`,
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration,
-    scope: "tenant",
+    scope: "organization",
     externalId: `${integration}-account`,
     credentials: {},
     data: integration === "slack" ? { botUserId: "UBOT" } : {},

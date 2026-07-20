@@ -27,15 +27,15 @@ type RunId = FunctionArgs<typeof api.runs.control.stop>["runId"]
 export function StopExecution({
   className,
   runId,
-  tenantId,
+  organizationId,
 }: {
   className?: string
   runId: string
-  tenantId: string
+  organizationId: string
 }) {
   const { isOpen, isStopping, setOpen, stopExecution } = useStopExecution({
     runId,
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -97,10 +97,10 @@ export function StopExecution({
 
 function useStopExecution({
   runId,
-  tenantId,
+  organizationId,
 }: {
   runId: string
-  tenantId: string
+  organizationId: string
 }) {
   const stop = useMutation(api.runs.control.stop)
   const [isOpen, setIsOpen] = useState(false)
@@ -118,7 +118,7 @@ function useStopExecution({
     try {
       await stop({
         runId: runId as RunId,
-        tenantId,
+        organizationId,
       })
     } catch (caught) {
       showErrorToast(caught, "Couldn't stop the run.")

@@ -49,7 +49,7 @@ export const artifactTemplateStamp = v.object({
 })
 
 export const artifacts = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   ownerId: v.id("persons"),
   title: v.string(),
   access: artifactAccess,
@@ -59,20 +59,20 @@ export const artifacts = defineTable({
   updatedAt: v.number(),
   archivedAt: v.optional(v.number()),
   /** Set only by playbook provisioning: this artifact is the canonical
-   *  instance of the template for its partition (one per person or tenant). */
+   *  instance of the template for its partition (one per person or organization). */
   template: v.optional(v.string()),
   templatePartition: v.optional(v.string()),
 })
-  .index("by_tenant_and_updated_at", ["tenantId", "updatedAt"])
-  .index("by_tenant_and_owner", ["tenantId", "ownerId"])
-  .index("by_tenant_and_template", [
-    "tenantId",
+  .index("by_organization_and_updated_at", ["organizationId", "updatedAt"])
+  .index("by_organization_and_owner", ["organizationId", "ownerId"])
+  .index("by_organization_and_template", [
+    "organizationId",
     "templatePartition",
     "template",
   ])
 
 export const artifactVersions = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   artifactId: v.id("artifacts"),
   parentVersionId: v.optional(v.id("artifactVersions")),
   treeId: v.string(),
@@ -111,7 +111,7 @@ export const artifactBlobs = defineTable({
 }).index("by_object_id", ["id"])
 
 export const artifactTools = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   artifactId: v.id("artifacts"),
   versionId: v.optional(v.id("artifactVersions")),
   tool: v.string(),
@@ -124,7 +124,7 @@ export const artifactTools = defineTable({
   .index("by_artifact_and_tool", ["artifactId", "tool"])
 
 export const artifactSessions = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   artifactId: v.id("artifacts"),
   versionId: v.id("artifactVersions"),
   personId: v.id("persons"),
@@ -142,7 +142,7 @@ export const artifactSessions = defineTable({
 /** Each share is an independent grant with its own secret and expiry; an
  *  artifact can have several live at once. */
 export const artifactShares = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   artifactId: v.id("artifacts"),
   createdBy: v.id("persons"),
   secret: v.string(),
@@ -154,7 +154,7 @@ export const artifactShares = defineTable({
   .index("by_artifact_and_secret", ["artifactId", "secret"])
 
 export const artifactAssets = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   artifactId: v.id("artifacts"),
   versionId: v.id("artifactVersions"),
   path: v.string(),
@@ -167,7 +167,7 @@ export const artifactAssets = defineTable({
   .index("by_version_and_path", ["versionId", "path"])
 
 export const artifactState = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   artifactId: v.id("artifacts"),
   personId: v.optional(v.id("persons")),
   scope: artifactStateScope,
@@ -189,7 +189,7 @@ export const artifactState = defineTable({
 
 // Identifies one cache entry; shared by the cache read/write args and lookup.
 export const artifactCacheKeyFields = {
-  tenantId: v.string(),
+  organizationId: v.string(),
   artifactId: v.id("artifacts"),
   versionId: v.id("artifactVersions"),
   personId: v.id("persons"),

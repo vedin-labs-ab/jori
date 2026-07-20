@@ -7,7 +7,7 @@ const artifactSummaryLimit = 100
 export async function searchArtifacts(
   ctx: QueryCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     query?: string
     includeArchived?: boolean
@@ -18,8 +18,8 @@ export async function searchArtifacts(
   const limit = normalizeLimit(args.limit)
   const artifacts = await ctx.db
     .query("artifacts")
-    .withIndex("by_tenant_and_updated_at", (index) =>
-      index.eq("tenantId", args.tenantId)
+    .withIndex("by_organization_and_updated_at", (index) =>
+      index.eq("organizationId", args.organizationId)
     )
     .order("desc")
     .take(artifactSummaryLimit)
@@ -41,12 +41,12 @@ export function canAccessArtifact(
   return artifact.access === "organization" || artifact.ownerId === personId
 }
 
-/** Load an artifact only if it is in the tenant and visible to the person;
+/** Load an artifact only if it is in the organization and visible to the person;
  *  null otherwise, so callers cannot tell missing from inaccessible. */
 export async function findAccessibleArtifact(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
     personId: Id<"persons">
   }
@@ -55,7 +55,7 @@ export async function findAccessibleArtifact(
 
   if (
     artifact === null ||
-    artifact.tenantId !== args.tenantId ||
+    artifact.organizationId !== args.organizationId ||
     !canAccessArtifact(artifact, args.personId)
   ) {
     return null
@@ -67,7 +67,7 @@ export async function findAccessibleArtifact(
 export async function getAccessibleArtifact(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
     personId: Id<"persons">
   }

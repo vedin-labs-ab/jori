@@ -5,7 +5,7 @@ import { createSignedState, parseSignedState } from "../connect/signing"
 import { requireLinearClientSecret } from "./oauth"
 
 export type LinearInstallState = {
-  tenantId: string
+  organizationId: string
   createdBy: Id<"persons">
   returnUrl: string
   createdAt: number

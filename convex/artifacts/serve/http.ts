@@ -69,7 +69,7 @@ export async function handleArtifactToolRequest(
       await callArtifactTool(
         ctx,
         {
-          tenantId: session.tenantId,
+          organizationId: session.organizationId,
           artifactId: session.artifactId,
           versionId: session.versionId,
           personId: session.personId,

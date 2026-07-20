@@ -59,7 +59,7 @@ export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
     expiresAt: undefined,
     runId: args.runId,
     status: "active" as const,
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
     updatedAt: now,
     conversationId,
   }
@@ -165,7 +165,7 @@ export async function claimReusableSandbox(
 
   const reusable = await findReusableSandbox(ctx, {
     now: Date.now(),
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
     conversationId: session.conversationId,
   })
 
@@ -195,17 +195,17 @@ async function findReusableSandbox(
   ctx: MutationCtx,
   args: {
     now: number
-    tenantId: string
+    organizationId: string
     conversationId: Id<"conversations">
   }
 ) {
   return await ctx.db
     .query("sandboxes")
     .withIndex(
-      "by_tenant_and_conversation_and_status_and_expires_at",
+      "by_organization_and_conversation_and_status_and_expires_at",
       (query) =>
         query
-          .eq("tenantId", args.tenantId)
+          .eq("organizationId", args.organizationId)
           .eq("conversationId", args.conversationId)
           .eq("status", "idle")
           .gt("expiresAt", args.now)

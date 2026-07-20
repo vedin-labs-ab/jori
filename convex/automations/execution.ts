@@ -28,7 +28,7 @@ export async function canExecuteAutomationRunTools(
   if (
     automation === null ||
     automation.parentId !== undefined ||
-    automation.tenantId !== run.tenantId ||
+    automation.organizationId !== run.organizationId ||
     !sameAutomationPrincipal(automation.principal, run.principal) ||
     snapshot.automationConfigurationVersion === undefined ||
     (automation.configurationVersion ?? 1) !==

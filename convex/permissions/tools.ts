@@ -17,7 +17,7 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { listPermissionOverrides } from "./read"
 
@@ -29,12 +29,12 @@ const permissionModeValidator = v.union(
 
 export const list = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    const overrides = await listPermissionOverrides(ctx, args.tenantId)
+    const overrides = await listPermissionOverrides(ctx, args.organizationId)
     const modes = resolveToolModes(overrides)
     const overridesByTool = new Map(
       overrides.map((override) => [override.tool, override.mode])
@@ -54,12 +54,12 @@ export const list = query({
 
 export const set = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     tool: v.string(),
     mode: permissionModeValidator,
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     const permission = getToolPermission(args.tool)
 
@@ -71,8 +71,8 @@ export const set = mutation({
       throw new Error("This tool permission cannot be changed to that mode")
     }
 
-    const existing = await getOverride(ctx, args.tenantId, args.tool)
-    const personId = await ensureCurrentPerson(ctx, args.tenantId)
+    const existing = await getOverride(ctx, args.organizationId, args.tool)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     if (args.mode === permission.defaultMode) {
       if (existing !== null) {
@@ -84,7 +84,7 @@ export const set = mutation({
 
     if (existing === null) {
       await ctx.db.insert("permissions", {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         tool: args.tool,
         mode: args.mode,
         updatedBy: personId,
@@ -104,18 +104,22 @@ export const set = mutation({
 
 export const listForRuntime = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    return await listPermissionOverrides(ctx, args.tenantId)
+    return await listPermissionOverrides(ctx, args.organizationId)
   },
 })
 
-async function getOverride(ctx: MutationCtx, tenantId: string, tool: string) {
+async function getOverride(
+  ctx: MutationCtx,
+  organizationId: string,
+  tool: string
+) {
   return await ctx.db
     .query("permissions")
-    .withIndex("by_tenant_and_tool", (query) =>
-      query.eq("tenantId", tenantId).eq("tool", tool)
+    .withIndex("by_organization_and_tool", (query) =>
+      query.eq("organizationId", organizationId).eq("tool", tool)
     )
     .unique()
 }

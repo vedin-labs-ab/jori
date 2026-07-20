@@ -10,11 +10,11 @@ import { TaskDetail } from "./task"
 export function ExpandedExecution({
   execution,
   now,
-  tenantId,
+  organizationId,
 }: {
   execution: ExecutionItem
   now: number
-  tenantId: string
+  organizationId: string
 }) {
   return (
     <RunRowBody>
@@ -24,7 +24,7 @@ export function ExpandedExecution({
         <ApprovalCallout
           approvals={execution.approvals}
           now={now}
-          tenantId={tenantId}
+          organizationId={organizationId}
         />
       ) : null}
       {execution.offers.length > 0 ? (
@@ -32,7 +32,7 @@ export function ExpandedExecution({
           now={now}
           offers={execution.offers}
           runId={execution.id}
-          tenantId={tenantId}
+          organizationId={organizationId}
         />
       ) : null}
       {execution.result !== undefined ? (
@@ -41,7 +41,11 @@ export function ExpandedExecution({
       {execution.error !== undefined ? (
         <ErrorDetail value={execution.error} />
       ) : null}
-      <RunActivity now={now} runId={execution.id} tenantId={tenantId} />
+      <RunActivity
+        now={now}
+        runId={execution.id}
+        organizationId={organizationId}
+      />
     </RunRowBody>
   )
 }

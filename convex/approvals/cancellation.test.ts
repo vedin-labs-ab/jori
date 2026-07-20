@@ -16,7 +16,7 @@ test("resolves the cancellation actor from a user message in the run conversatio
     resolveCancellationActor(ctx, {
       messageId: id<"messages">("message"),
       runId: id<"runs">("run"),
-      tenantId: "tenant",
+      organizationId: "organization",
     })
   ).resolves.toEqual(actor)
 })
@@ -32,7 +32,7 @@ test("rejects cancellation messages outside the run conversation", async () => {
     resolveCancellationActor(ctx, {
       messageId: id<"messages">("message"),
       runId: id<"runs">("run"),
-      tenantId: "tenant",
+      organizationId: "organization",
     })
   ).resolves.toBeNull()
 })
@@ -48,7 +48,7 @@ test("rejects non-user cancellation messages", async () => {
     resolveCancellationActor(ctx, {
       messageId: id<"messages">("message"),
       runId: id<"runs">("run"),
-      tenantId: "tenant",
+      organizationId: "organization",
     })
   ).resolves.toBeNull()
 })
@@ -84,7 +84,7 @@ function message(overrides: Partial<Doc<"messages">> = {}): Doc<"messages"> {
   return {
     _id: id<"messages">("message"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message",
@@ -112,10 +112,10 @@ function conversation(): Doc<"conversations"> {
   return {
     _id: id<"conversations">("conversation"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
-    scope: "tenant",
+    scope: "organization",
   }
 }
 

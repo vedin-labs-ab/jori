@@ -30,7 +30,7 @@ function automation(
   return {
     _id: "automation",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     name: "Automation",
     instructions: "Do work.",
     access: { integrations: [], web: true },
@@ -50,7 +50,7 @@ function event(match: NonNullable<Doc<"events">["match"]>): Doc<"events"> {
   return {
     _id: "event",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration",
     key: "event-key",
     type: "issue.comment.created",

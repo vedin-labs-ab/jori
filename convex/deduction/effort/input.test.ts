@@ -86,7 +86,7 @@ function eventDoc(overrides: Partial<Doc<"events">>): Doc<"events"> {
   return {
     _id: "event-1",
     _creationTime: 1_000,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration-1",
     key: "key-1",
     type: "pull_request.closed",
@@ -100,10 +100,10 @@ function conversationDoc(
   return {
     _id: "conversation-1",
     _creationTime: 1_000,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration-1",
     externalId: "C123",
-    scope: "tenant",
+    scope: "organization",
     summary: "#payments: cutover slipping to Jul 20",
     summarizedAt: 5_000,
     ...overrides,

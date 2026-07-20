@@ -12,15 +12,15 @@ describe("buildInstallState", () => {
     vi.unstubAllEnvs()
   })
 
-  test("returns the signed state fields for a tenant member", async () => {
-    const ctx = createCtx({ subject: "user_1", org: "tenant_1" })
+  test("returns the signed state fields for a organization member", async () => {
+    const ctx = createCtx({ subject: "user_1", org: "organization_1" })
     const state = await buildInstallState(ctx, {
-      tenantId: "tenant_1",
+      organizationId: "organization_1",
       returnUrl: "https://app.example/integrations",
     })
 
     expect(state).toMatchObject({
-      tenantId: "tenant_1",
+      organizationId: "organization_1",
       createdBy: "person_1" as Id<"persons">,
       returnUrl: "https://app.example/integrations",
     })
@@ -32,40 +32,40 @@ describe("buildInstallState", () => {
 
     await expect(
       buildInstallState(ctx, {
-        tenantId: "tenant_1",
+        organizationId: "organization_1",
         returnUrl: "https://app.example/integrations",
       })
     ).rejects.toThrow("Sign in")
   })
 
   test("rejects a caller from another organization", async () => {
-    const ctx = createCtx({ subject: "user_1", org: "tenant_2" })
+    const ctx = createCtx({ subject: "user_1", org: "organization_2" })
 
     await expect(
       buildInstallState(ctx, {
-        tenantId: "tenant_1",
+        organizationId: "organization_1",
         returnUrl: "https://app.example/integrations",
       })
     ).rejects.toThrow("another organization")
   })
 
   test("rejects a return URL outside the Milo app origin", async () => {
-    const ctx = createCtx({ subject: "user_1", org: "tenant_1" })
+    const ctx = createCtx({ subject: "user_1", org: "organization_1" })
 
     await expect(
       buildInstallState(ctx, {
-        tenantId: "tenant_1",
+        organizationId: "organization_1",
         returnUrl: "https://evil.example/integrations",
       })
     ).rejects.toThrow("Return URL must point to the Milo app.")
   })
 
   test("rejects a relative return URL", async () => {
-    const ctx = createCtx({ subject: "user_1", org: "tenant_1" })
+    const ctx = createCtx({ subject: "user_1", org: "organization_1" })
 
     await expect(
       buildInstallState(ctx, {
-        tenantId: "tenant_1",
+        organizationId: "organization_1",
         returnUrl: "/integrations",
       })
     ).rejects.toThrow("Return URL must be absolute.")

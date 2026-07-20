@@ -7,7 +7,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import {
   readClerkUserEmail,
   readClerkUserName,
@@ -30,11 +30,14 @@ type ClerkProfile = {
   name?: string
 }
 
-export async function ensureCurrentPerson(ctx: MutationCtx, tenantId: string) {
-  const identity = await requireTenantAccess(ctx, tenantId)
+export async function ensureCurrentPerson(
+  ctx: MutationCtx,
+  organizationId: string
+) {
+  const identity = await requireOrganizationAccess(ctx, organizationId)
 
   return await ensureClerkPerson(ctx, {
-    tenantId,
+    organizationId,
     clerkSubject: requireClerkUserId(identity),
     email: readClerkUserEmail(identity),
     name: readClerkUserName(identity),
@@ -43,22 +46,25 @@ export async function ensureCurrentPerson(ctx: MutationCtx, tenantId: string) {
 
 export async function ensureCurrentPersonFromAction(
   ctx: ActionCtx,
-  tenantId: string
+  organizationId: string
 ) {
-  const identity = await requireTenantAccess(ctx, tenantId)
+  const identity = await requireOrganizationAccess(ctx, organizationId)
 
   return await ctx.runMutation(internal.persons.clerk.ensure, {
-    tenantId,
+    organizationId,
     clerkSubject: requireClerkUserId(identity),
     email: readClerkUserEmail(identity),
     name: readClerkUserName(identity),
   })
 }
 
-export async function resolveCurrentPerson(ctx: QueryCtx, tenantId: string) {
-  const identity = await requireTenantAccess(ctx, tenantId)
+export async function resolveCurrentPerson(
+  ctx: QueryCtx,
+  organizationId: string
+) {
+  const identity = await requireOrganizationAccess(ctx, organizationId)
   const personId = await resolvePersonByIdentity(ctx, {
-    tenantId,
+    organizationId,
     provider: "clerk",
     externalId: requireClerkUserId(identity),
   })
@@ -73,12 +79,12 @@ export async function resolveCurrentPerson(ctx: QueryCtx, tenantId: string) {
 export async function ensureClerkPerson(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     clerkSubject: string
   } & ClerkProfile
 ) {
   return await resolveIdentity(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     provider: "clerk",
     externalId: args.clerkSubject,
     method: "oauth",
@@ -89,7 +95,7 @@ export async function ensureClerkPerson(
 
 export const ensure = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     clerkSubject: v.string(),
     email: v.optional(v.string()),
     name: v.optional(v.string()),
@@ -102,7 +108,7 @@ export const ensure = internalMutation({
 
 export const sync = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     clerkSubject: v.string(),
     email: v.optional(v.string()),
     name: v.optional(v.string()),
@@ -121,7 +127,7 @@ export const sync = internalMutation({
     }
 
     for (const email of args.emails) {
-      await linkVerifiedEmail(ctx, args.tenantId, personId, email.email)
+      await linkVerifiedEmail(ctx, args.organizationId, personId, email.email)
     }
 
     return { personId, synced: args.emails.length }
@@ -130,12 +136,12 @@ export const sync = internalMutation({
 
 async function linkVerifiedEmail(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   personId: Id<"persons">,
   email: string
 ) {
   await linkIdentityToPerson(ctx, {
-    tenantId,
+    organizationId,
     personId,
     provider: "email",
     externalId: email,

@@ -56,7 +56,7 @@ export function readArtifactTemplate(
 }
 
 /** One canonical provisioned artifact per person for personal templates,
- *  per tenant for organization ones. */
+ *  per organization for organization ones. */
 export function templatePartition(
   template: Pick<ArtifactTemplate, "access">,
   personId: Id<"persons">

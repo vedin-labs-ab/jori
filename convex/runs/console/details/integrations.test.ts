@@ -73,7 +73,7 @@ function eventRun(input: {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     cause: { type: "event", eventId: "event" },
     instructions: input.task,
     snapshot: {
@@ -128,7 +128,7 @@ function githubPullRequestCommentEvent() {
   return {
     _id: "event",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration",
     key: "github:event",
     type: "pull_request.review_comment.created",
@@ -157,7 +157,7 @@ function linearIssueCommentEvent() {
   return {
     _id: "event",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration",
     key: "linear:event",
     type: "issue.comment.created",
@@ -178,9 +178,9 @@ function githubIntegration() {
   return {
     _id: "integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "github",
-    scope: "tenant",
+    scope: "organization",
     externalId: "github-installation",
     credentials: {},
     status: "active",

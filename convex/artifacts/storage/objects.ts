@@ -13,7 +13,7 @@ export type TreeInput = {
 export async function insertVersion(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
     parentVersionId?: Id<"artifactVersions">
     treeId: string
@@ -42,7 +42,7 @@ export async function insertVersion(
   await insertTrees(ctx, args.trees, args.createdAt)
 
   const versionId = await ctx.db.insert("artifactVersions", {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     artifactId: args.artifactId,
     parentVersionId: args.parentVersionId,
     treeId: args.treeId,
@@ -56,7 +56,7 @@ export async function insertVersion(
 
   for (const asset of args.assets) {
     await ctx.db.insert("artifactAssets", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       artifactId: args.artifactId,
       versionId,
       path: asset.path,

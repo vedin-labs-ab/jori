@@ -37,6 +37,6 @@ function automationRun(): Doc<"runs"> {
       title: "Automation",
     },
     status: "running",
-    tenantId: "tenant",
+    organizationId: "organization",
   }
 }

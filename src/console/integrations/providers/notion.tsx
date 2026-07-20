@@ -23,16 +23,16 @@ const notionConfig = {
 
 export function NotionIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.notion.install.createInstallState
   )
   const status = useQuery(api.integrations.status.getNotionStatus, {
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -47,7 +47,7 @@ export function NotionIntegration({
       )}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }

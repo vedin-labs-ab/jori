@@ -149,7 +149,7 @@ export async function findVisibleMessage(
     .query("messages")
     .withIndex("by_conversation", (query) =>
       query
-        .eq("tenantId", message.tenantId)
+        .eq("organizationId", message.organizationId)
         .eq("integrationId", message.integrationId)
         .eq("conversationId", message.conversationId)
     )

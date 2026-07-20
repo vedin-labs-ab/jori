@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action, internalQuery } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { readClerkUserEmail, readClerkUserName } from "../access/users"
 import { ensureCurrentPersonFromAction } from "../persons/clerk"
 import { createPersonActor } from "../shared/actor"
@@ -11,15 +11,15 @@ export const decide = action({
   args: {
     approvalId: v.id("approvals"),
     decision: v.union(v.literal("approved"), v.literal("denied")),
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const target = await ctx.runQuery(
       internal.approvals.console.getDecisionTarget,
       {
         approvalId: args.approvalId,
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
       }
     )
 
@@ -27,7 +27,10 @@ export const decide = action({
       throw new Error("Approval not found.")
     }
 
-    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
+    const personId = await ensureCurrentPersonFromAction(
+      ctx,
+      args.organizationId
+    )
     const result = await decideApproval(ctx, {
       approval: target,
       decidedBy: createPersonActor(personId, {
@@ -47,12 +50,12 @@ export const decide = action({
 export const getDecisionTarget = internalQuery({
   args: {
     approvalId: v.id("approvals"),
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
 
-    if (approval === null || approval.tenantId !== args.tenantId) {
+    if (approval === null || approval.organizationId !== args.organizationId) {
       return null
     }
 

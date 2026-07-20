@@ -21,7 +21,7 @@ const googleIntegration = v.union(
 
 export const createGmailInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -31,7 +31,7 @@ export const createGmailInstallState = mutation({
 
 export const createGoogleCalendarInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -42,7 +42,7 @@ export const createGoogleCalendarInstallState = mutation({
 export const recordOAuthInstallation = internalMutation({
   args: {
     integration: googleIntegration,
-    tenantId: v.string(),
+    organizationId: v.string(),
     createdBy: v.id("persons"),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
@@ -80,7 +80,7 @@ export const recordOAuthInstallation = internalMutation({
     )
 
     await linkSetupIdentity(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId: args.createdBy,
       provider: "google",
       identity: {
@@ -97,7 +97,7 @@ export const recordOAuthInstallation = internalMutation({
 function createGoogleIntegrationValues(
   args: {
     integration: GoogleIntegration
-    tenantId: string
+    organizationId: string
     createdBy: Id<"persons">
     profile: {
       id: string
@@ -117,7 +117,7 @@ function createGoogleIntegrationValues(
   now: number
 ) {
   return {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     integration: args.integration,
     scope: "user" as const,
     ownerId: args.createdBy,

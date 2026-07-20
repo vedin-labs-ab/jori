@@ -5,7 +5,7 @@ import {
   mutation,
   type QueryCtx,
 } from "../../_generated/server"
-import { requireTenantAccess } from "../../access"
+import { requireOrganizationAccess } from "../../access"
 import { readClerkUserEmail, readClerkUserName } from "../../access/users"
 import { normalizeConsoleIntegrationOfferReturnUrl } from "../../integrations/offers/helpers"
 import {
@@ -20,7 +20,7 @@ import { integrationLabel } from "../../shared/integrations"
 const consoleOfferArgs = {
   integrationOfferId: v.id("integrationOffers"),
   runId: v.id("runs"),
-  tenantId: v.string(),
+  organizationId: v.string(),
 }
 
 const cancelResult = v.object({
@@ -38,7 +38,7 @@ export const claim = mutation({
   },
   returns: integrationOfferClaimResult,
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     const offer = await requireConsoleOffer(ctx, args)
 
@@ -53,7 +53,7 @@ export const cancel = mutation({
   args: consoleOfferArgs,
   returns: cancelResult,
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     const offer = await findConsoleOffer(ctx, args)
 
@@ -66,7 +66,7 @@ export const cancel = mutation({
     }
 
     await markIntegrationOfferCancelled(ctx, offer, {
-      actor: await readConsoleActor(ctx, args.tenantId),
+      actor: await readConsoleActor(ctx, args.organizationId),
       reason: "Cancelled from the run page.",
       now: Date.now(),
     })
@@ -114,18 +114,19 @@ async function requireConsoleOffer(ctx: MutationCtx, args: ConsoleOfferArgs) {
   return offer
 }
 
-// Callers must authorize tenant access before looking up the offer.
+// Callers must authorize organization access before looking up the offer.
 async function findConsoleOffer(ctx: MutationCtx, args: ConsoleOfferArgs) {
   const offer = await ctx.db.get(args.integrationOfferId)
 
-  return offer?.tenantId === args.tenantId && offer.runId === args.runId
+  return offer?.organizationId === args.organizationId &&
+    offer.runId === args.runId
     ? offer
     : null
 }
 
-async function readConsoleActor(ctx: MutationCtx, tenantId: string) {
-  const identity = await requireTenantAccess(ctx, tenantId)
-  const personId = await ensureCurrentPerson(ctx, tenantId)
+async function readConsoleActor(ctx: MutationCtx, organizationId: string) {
+  const identity = await requireOrganizationAccess(ctx, organizationId)
+  const personId = await ensureCurrentPerson(ctx, organizationId)
 
   return createPersonActor(personId, {
     email: readClerkUserEmail(identity),
@@ -168,5 +169,5 @@ function offerResult(offer: Doc<"integrationOffers">) {
 type ConsoleOfferArgs = {
   integrationOfferId: Doc<"integrationOffers">["_id"]
   runId: Doc<"runs">["_id"]
-  tenantId: string
+  organizationId: string
 }

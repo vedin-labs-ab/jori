@@ -11,15 +11,15 @@ import { usePlaybookActions } from "./enable"
 export function Playbooks() {
   return (
     <ConsolePage>
-      {(tenantId) => <PlaybookCatalog tenantId={tenantId} />}
+      {(organizationId) => <PlaybookCatalog organizationId={organizationId} />}
     </ConsolePage>
   )
 }
 
-function PlaybookCatalog({ tenantId }: { tenantId: string }) {
-  const list = useQuery(api.playbooks.console.list, { tenantId })
-  const editorHost = useAutomationEditorHost(tenantId)
-  const actions = usePlaybookActions(tenantId, editorHost)
+function PlaybookCatalog({ organizationId }: { organizationId: string }) {
+  const list = useQuery(api.playbooks.console.list, { organizationId })
+  const editorHost = useAutomationEditorHost(organizationId)
+  const actions = usePlaybookActions(organizationId, editorHost)
 
   if (list?.status === "unauthorized") {
     return (
@@ -39,7 +39,7 @@ function PlaybookCatalog({ tenantId }: { tenantId: string }) {
             actions={actions}
             definition={definition}
             row={list?.playbooks.find((row) => row.key === definition.key)}
-            tenantId={tenantId}
+            organizationId={organizationId}
           />
         ))}
       </ConsoleContentGrid>

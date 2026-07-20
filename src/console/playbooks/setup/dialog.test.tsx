@@ -262,7 +262,7 @@ function renderDialog(
       open
       plan={plan}
       row={row(delivery)}
-      tenantId="tenant"
+      organizationId="organization"
     />
   )
 }

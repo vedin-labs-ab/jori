@@ -47,7 +47,7 @@ test("counts active workstream lanes without including unplaced", async () => {
   render(
     <TooltipProvider>
       <WorkstreamsPulse
-        tenantId="tenant"
+        organizationId="organization"
         workstreams={workstreams}
         onOpen={() => undefined}
       />

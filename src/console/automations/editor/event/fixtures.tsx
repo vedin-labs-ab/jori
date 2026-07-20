@@ -43,7 +43,7 @@ export function renderEventFields(
 ) {
   render(
     <EventFields
-      tenantId="tenant"
+      organizationId="organization"
       onValuesChange={onValuesChange}
       values={{
         ...emptyAutomationForm,

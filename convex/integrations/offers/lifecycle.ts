@@ -43,7 +43,7 @@ export const cancelForRun = internalMutation({
   args: {
     integrationOfferId: v.id("integrationOffers"),
     runId: v.id("runs"),
-    tenantId: v.string(),
+    organizationId: v.string(),
     reason: v.string(),
   },
   returns: v.object({
@@ -59,7 +59,7 @@ export const cancelForRun = internalMutation({
     if (
       offer === null ||
       offer.runId !== args.runId ||
-      offer.tenantId !== args.tenantId
+      offer.organizationId !== args.organizationId
     ) {
       return { status: "missing" as const }
     }

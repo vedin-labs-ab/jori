@@ -6,7 +6,7 @@ export async function recordTransition(
   args: TransitionInput
 ) {
   await ctx.db.insert("transitions", {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     subject: args.subject,
     type: args.type,
     createdAt: Date.now(),

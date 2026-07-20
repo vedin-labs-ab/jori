@@ -93,7 +93,7 @@ function automation(
   return {
     _id: id<"automations">("automation"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     access: { integrations: [], web: false },
     status: "active",
     principal: { kind: "person", personId: "person" as Id<"persons"> },
@@ -111,9 +111,9 @@ function integration(): Parameters<
   return {
     _id: id<"integrations">("integration"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "slack",
-    scope: "tenant",
+    scope: "organization",
     externalId: "team",
     credentials: {},
     status: "active",
@@ -130,7 +130,7 @@ function message(
   return {
     _id: id<"messages">("message"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message.channels",

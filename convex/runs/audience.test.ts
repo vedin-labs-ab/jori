@@ -8,11 +8,11 @@ test("resolves conversation and automation audiences", async () => {
 
   await expect(
     resolveRunAudience(ctx, {
-      origin: { conversation: conversation("tenant") },
+      origin: { conversation: conversation("organization") },
       run: {},
     })
   ).resolves.toEqual({
-    scope: "tenant",
+    scope: "organization",
     conversationId: id<"conversations">("conversation"),
   })
   await expect(
@@ -35,7 +35,7 @@ test("resolves conversation and automation audiences", async () => {
       origin: { automation: automation("organization") },
       run: {},
     })
-  ).resolves.toEqual({ scope: "tenant" })
+  ).resolves.toEqual({ scope: "organization" })
 })
 
 function conversation(
@@ -47,7 +47,7 @@ function conversation(
     externalId: "external",
     integrationId: id<"integrations">("integration"),
     scope,
-    tenantId: "tenant",
+    organizationId: "organization",
   }
 }
 
@@ -66,7 +66,7 @@ function automation(
         ? { kind: "organization" }
         : { kind: "person", personId: "person" as Id<"persons"> },
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     trigger: { at: 1 },
     type: "once",
     updatedAt: 0,

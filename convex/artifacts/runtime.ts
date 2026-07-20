@@ -12,7 +12,7 @@ import { getAccessibleArtifact } from "./access"
 
 export const authorizeTool = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     versionId: v.id("artifactVersions"),
     personId: v.id("persons"),
@@ -44,7 +44,7 @@ export const authorizeTool = internalQuery({
     }
 
     const mode = resolveToolMode(
-      resolveToolModes(await listPermissionOverrides(ctx, args.tenantId)),
+      resolveToolModes(await listPermissionOverrides(ctx, args.organizationId)),
       args.tool
     )
 
@@ -60,7 +60,7 @@ export const authorizeTool = internalQuery({
       permission.surface === "milo"
         ? null
         : await findRuntimeIntegration(ctx, {
-            tenantId: args.tenantId,
+            organizationId: args.organizationId,
             personId: args.personId,
             surface: permission.surface,
             integrationId: capability.integrationId ?? args.integrationId,
@@ -109,7 +109,7 @@ async function findActiveCapability(
 async function findRuntimeIntegration(
   ctx: QueryCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     surface: Exclude<Doc<"integrations">["integration"], "milo">
     integrationId?: Id<"integrations">
@@ -124,9 +124,9 @@ async function findRuntimeIntegration(
   if (isUserScopedIntegration(args.surface)) {
     const integration = await ctx.db
       .query("integrations")
-      .withIndex("by_tenant_and_integration_and_owner", (index) =>
+      .withIndex("by_organization_and_integration_and_owner", (index) =>
         index
-          .eq("tenantId", args.tenantId)
+          .eq("organizationId", args.organizationId)
           .eq("integration", args.surface)
           .eq("ownerId", args.personId)
       )
@@ -137,8 +137,10 @@ async function findRuntimeIntegration(
 
   const integration = await ctx.db
     .query("integrations")
-    .withIndex("by_tenant_and_integration", (index) =>
-      index.eq("tenantId", args.tenantId).eq("integration", args.surface)
+    .withIndex("by_organization_and_integration", (index) =>
+      index
+        .eq("organizationId", args.organizationId)
+        .eq("integration", args.surface)
     )
     .first()
 
@@ -159,14 +161,14 @@ function matchesIntegration(
 function isUsableIntegration(
   integration: Doc<"integrations"> | null,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     surface: Doc<"integrations">["integration"]
   }
 ) {
   if (
     integration === null ||
-    integration.tenantId !== args.tenantId ||
+    integration.organizationId !== args.organizationId ||
     integration.status !== "active" ||
     integration.integration !== args.surface
   ) {

@@ -3,13 +3,13 @@ import { type MutationCtx, type QueryCtx } from "../../_generated/server"
 import { type BeliefKind } from "../schema"
 import { type SupportRecord } from "./rules"
 
-// Resolve a wire id to a live row of the pass's tenant: temp ids minted by
+// Resolve a wire id to a live row of the pass's organization: temp ids minted by
 // this pass first, then real document ids. Superseded rows are out of the
 // roster and never valid targets.
 
 export async function resolveEffort(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   temp: Map<string, Id<"efforts">>,
   raw: string
 ): Promise<Doc<"efforts"> | null> {
@@ -22,7 +22,7 @@ export async function resolveEffort(
   const doc = await ctx.db.get(id)
 
   return doc !== null &&
-    doc.tenantId === tenantId &&
+    doc.organizationId === organizationId &&
     doc.supersededBy === undefined
     ? doc
     : null
@@ -30,7 +30,7 @@ export async function resolveEffort(
 
 export async function resolveBelief(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   kind: BeliefKind,
   temp: Map<string, Id<"beliefs">>,
   raw: string
@@ -44,7 +44,7 @@ export async function resolveBelief(
   const doc = await ctx.db.get(id)
 
   return doc !== null &&
-    doc.tenantId === tenantId &&
+    doc.organizationId === organizationId &&
     doc.kind === kind &&
     doc.supersededBy === undefined
     ? doc

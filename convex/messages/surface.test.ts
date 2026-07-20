@@ -125,7 +125,7 @@ describe("conversation scope", () => {
         message({ type: "message.channels" }),
         integration({ integration: "slack" })
       )
-    ).toBe("tenant")
+    ).toBe("organization")
     expect(
       conversationScope(
         message({ type: "message.groups" }),
@@ -149,7 +149,7 @@ describe("conversation scope", () => {
         message({ integration: "github" }),
         integration({ integration: "github" })
       )
-    ).toBe("tenant")
+    ).toBe("organization")
     expect(
       conversationScope(
         message({ integration: "gmail" }),
@@ -210,7 +210,7 @@ function message(overrides: Partial<Doc<"messages">>) {
   return {
     _id: "message",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration",
     integration: "slack",
     externalId: "external",

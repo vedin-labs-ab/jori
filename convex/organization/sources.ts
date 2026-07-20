@@ -6,7 +6,7 @@ import {
   type MutationCtx,
   query,
 } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { type QueryLikeCtx } from "../shared/context"
 import { organizationSourceSnapshot } from "./schema"
 
@@ -14,23 +14,23 @@ export type SourceSnapshot = Infer<typeof organizationSourceSnapshot>
 
 const dayMs = 24 * 60 * 60 * 1000
 const processedIntervalMs = 14 * dayMs
-const maxSourcesPerTenant = 50
+const maxSourcesPerOrganization = 50
 
 // Records the fingerprints of the pages a draft just processed, so the watcher
 // only re-triggers on content the pipeline has not seen yet. Patches known
-// pages, registers newly crawled ones up to the tenant cap, moves the primary
+// pages, registers newly crawled ones up to the organization cap, moves the primary
 // flag to the draft's entrypoint, and relaxes each next check by two weeks.
 export const baseline = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     sources: v.array(organizationSourceSnapshot),
   },
   handler: async (ctx, args) => {
-    const existing = await readByTenant(ctx, args.tenantId)
+    const existing = await readByOrganization(ctx, args.organizationId)
     const pages = uniqueSnapshots(args.sources).filter(hasHash)
     const primaryUrl = pages.find((page) => page.primary)?.url
     const checkAt = Date.now() + processedIntervalMs
-    let capacity = maxSourcesPerTenant - existing.length
+    let capacity = maxSourcesPerOrganization - existing.length
 
     for (const row of existing) {
       if (primaryUrl !== undefined && row.primary && row.url !== primaryUrl) {
@@ -55,7 +55,7 @@ export const baseline = internalMutation({
       if (capacity > 0) {
         capacity -= 1
         await ctx.db.insert("organizationSources", {
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
           url: page.url,
           primary: page.primary,
           hash: page.hash,
@@ -68,10 +68,10 @@ export const baseline = internalMutation({
 
 export async function replaceApprovedSources(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   sources: SourceSnapshot[]
 ) {
-  const existing = await readByTenant(ctx, tenantId)
+  const existing = await readByOrganization(ctx, organizationId)
 
   for (const source of existing) {
     await ctx.db.delete(source._id)
@@ -79,11 +79,14 @@ export async function replaceApprovedSources(
 
   const checkAt = Date.now() + processedIntervalMs
 
-  for (const source of uniqueSnapshots(sources).slice(0, maxSourcesPerTenant)) {
+  for (const source of uniqueSnapshots(sources).slice(
+    0,
+    maxSourcesPerOrganization
+  )) {
     await ctx.db.insert(
       "organizationSources",
       compactRecord({
-        tenantId,
+        organizationId,
         url: source.url,
         primary: source.primary,
         checkAt,
@@ -95,9 +98,9 @@ export async function replaceApprovedSources(
 
 export async function readApprovedSources(
   ctx: QueryLikeCtx,
-  tenantId: string
+  organizationId: string
 ): Promise<SourceSnapshot[]> {
-  return (await readByTenant(ctx, tenantId)).map(toSnapshot)
+  return (await readByOrganization(ctx, organizationId)).map(toSnapshot)
 }
 
 // Equality covers the reviewable identity of the source set — urls and the
@@ -109,20 +112,20 @@ export function sourcesEqual(left: SourceSnapshot[], right: SourceSnapshot[]) {
 }
 
 export const primaryUrl = internalQuery({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    const sources = await readByTenant(ctx, args.tenantId)
+    const sources = await readByOrganization(ctx, args.organizationId)
 
     return sources.find((source) => source.primary)?.url ?? null
   },
 })
 
 export const list = query({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    const sources = await readByTenant(ctx, args.tenantId)
+    const sources = await readByOrganization(ctx, args.organizationId)
 
     return sources
       .map((source) => ({ primary: source.primary, url: source.url }))
@@ -141,11 +144,13 @@ function compareSources(
   return left.url.localeCompare(right.url)
 }
 
-async function readByTenant(ctx: QueryLikeCtx, tenantId: string) {
+async function readByOrganization(ctx: QueryLikeCtx, organizationId: string) {
   return await ctx.db
     .query("organizationSources")
-    .withIndex("by_tenant_and_url", (q) => q.eq("tenantId", tenantId))
-    .take(maxSourcesPerTenant)
+    .withIndex("by_organization_and_url", (q) =>
+      q.eq("organizationId", organizationId)
+    )
+    .take(maxSourcesPerOrganization)
 }
 
 function hasHash(

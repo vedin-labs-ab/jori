@@ -13,15 +13,15 @@ import { SummaryBand } from "./summary"
 export function Billing() {
   return (
     <ConsolePage>
-      {(tenantId) => <BillingContent tenantId={tenantId} />}
+      {(organizationId) => <BillingContent organizationId={organizationId} />}
     </ConsolePage>
   )
 }
 
-function BillingContent({ tenantId }: { tenantId: string }) {
+function BillingContent({ organizationId }: { organizationId: string }) {
   useBillingReturnToasts()
 
-  const overview = useQuery(api.billing.console.overview, { tenantId })
+  const overview = useQuery(api.billing.console.overview, { organizationId })
 
   if (overview === undefined) {
     return <Skeleton className="h-56" />
@@ -32,8 +32,14 @@ function BillingContent({ tenantId }: { tenantId: string }) {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
         <StateAlert account={overview.account} />
         <div className="rounded-xl border bg-card">
-          <SummaryBand account={overview.account} tenantId={tenantId} />
-          <AutoTopUpRow account={overview.account} tenantId={tenantId} />
+          <SummaryBand
+            account={overview.account}
+            organizationId={organizationId}
+          />
+          <AutoTopUpRow
+            account={overview.account}
+            organizationId={organizationId}
+          />
         </div>
       </div>
       <Activity entries={overview.entries} />

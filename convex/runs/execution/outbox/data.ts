@@ -24,7 +24,7 @@ export async function enqueueCancellation(ctx: MutationCtx, runId: Id<"runs">) {
   }
 
   return await enqueueOperation(ctx, {
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
     key: `cancel:${run._id}`,
     operation: {
       type: "run.cancel",
@@ -117,7 +117,7 @@ export async function markFailed(
 
 async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
   return await enqueueOperation(ctx, {
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
     key: `run:${run._id}`,
     operation: {
       type: "run.start",
@@ -128,7 +128,7 @@ async function enqueueRun(ctx: MutationCtx, run: Doc<"runs">) {
 
 export async function enqueueOperation(
   ctx: MutationCtx,
-  args: Pick<Doc<"outbox">, "key" | "operation" | "tenantId">
+  args: Pick<Doc<"outbox">, "key" | "operation" | "organizationId">
 ) {
   const existing = await ctx.db
     .query("outbox")

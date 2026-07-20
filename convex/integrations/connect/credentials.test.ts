@@ -53,7 +53,7 @@ function integration(credentials: unknown): Doc<"integrations"> {
   return {
     _id: "integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "gmail",
     scope: "user",
     ownerId: "person" as Id<"persons">,

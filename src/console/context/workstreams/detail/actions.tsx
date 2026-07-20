@@ -34,10 +34,10 @@ const labels: Record<WorkstreamAction, string> = {
 }
 
 export function WorkstreamActions({
-  tenantId,
+  organizationId,
   workstream,
 }: {
-  tenantId: string
+  organizationId: string
   workstream: Workstream
 }) {
   const confirm = useMutation(api.workstreams.corrections.confirm)
@@ -45,7 +45,7 @@ export function WorkstreamActions({
   const archive = useMutation(api.workstreams.corrections.archive)
   const reopen = useMutation(api.workstreams.corrections.reopen)
   const restore = useMutation(api.workstreams.corrections.restore)
-  const target = { tenantId, workstreamId: workstream.id }
+  const target = { organizationId, workstreamId: workstream.id }
   const runAction = (mutation: (args: typeof target) => Promise<unknown>) => {
     void mutation(target).catch((error: unknown) => {
       showErrorToast(error, "Couldn't update the workstream.")

@@ -51,7 +51,7 @@ export function runVisibleToPerson(
   personId: Id<"persons"> | undefined
 ) {
   return (
-    runAudienceScope(run) === "tenant" ||
+    runAudienceScope(run) === "organization" ||
     run.createdBy === undefined ||
     run.createdBy === personId
   )

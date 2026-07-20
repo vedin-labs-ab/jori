@@ -16,10 +16,10 @@ import { type BillingAccount } from "./actions"
 /** One sentence with the three knobs inline: trigger, amount, monthly cap. */
 export function AutoTopUpRow({
   account,
-  tenantId,
+  organizationId,
 }: {
   account: BillingAccount | null
-  tenantId: string
+  organizationId: string
 }) {
   const configure = useMutation(api.billing.console.configureAutoTopUp)
   const config = account?.autoTopUp
@@ -38,7 +38,7 @@ export function AutoTopUpRow({
 
   const apply = (next: Partial<typeof current> | null) => {
     configure({
-      tenantId,
+      organizationId,
       config: next === null ? null : { ...current, ...next },
     }).catch((error) => showErrorToast(error, "Could not update auto top-up."))
   }

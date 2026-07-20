@@ -2,26 +2,27 @@ import { v } from "convex/values"
 import { autoTopUp, dollarsToMicros } from "../../contracts/billing"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { ensureAccount, getAccount } from "./account"
 
 const entryPageSize = 30
 
 /**
- * Everything the Billing page renders. `account` is null until the tenant's
+ * Everything the Billing page renders. `account` is null until the organization's
  * first metered run or checkout creates one; the page shows the trial as not
  * yet started in that case.
  */
 export const overview = query({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    const account = await getAccount(ctx, args.tenantId)
+    const account = await getAccount(ctx, args.organizationId)
 
     return {
       account: account === null ? null : publicAccount(account),
-      entries: account === null ? [] : await readEntries(ctx, args.tenantId),
+      entries:
+        account === null ? [] : await readEntries(ctx, args.organizationId),
     }
   },
 })
@@ -41,11 +42,11 @@ function publicAccount(account: Doc<"billingAccounts">) {
   }
 }
 
-async function readEntries(ctx: QueryCtx, tenantId: string) {
+async function readEntries(ctx: QueryCtx, organizationId: string) {
   const entries = await ctx.db
     .query("billingEntries")
-    .withIndex("by_tenant_and_timestamp", (query) =>
-      query.eq("tenantId", tenantId)
+    .withIndex("by_organization_and_timestamp", (query) =>
+      query.eq("organizationId", organizationId)
     )
     .order("desc")
     .take(entryPageSize)
@@ -69,7 +70,7 @@ async function readEntries(ctx: QueryCtx, tenantId: string) {
  */
 export const configureAutoTopUp = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     config: v.union(
       v.null(),
       v.object({
@@ -80,9 +81,9 @@ export const configureAutoTopUp = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    const account = await ensureAccount(ctx, args.tenantId)
+    const account = await ensureAccount(ctx, args.organizationId)
 
     if (args.config === null) {
       await ctx.db.patch(account._id, {

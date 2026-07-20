@@ -7,7 +7,7 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { checkTenantAccess, requireTenantAccess } from "../access"
+import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { requireClerkUserId } from "../access/users"
 import { listInactiveAccessIntegrations } from "../automations/access"
 import { createAutomation } from "../automations/lifecycle"
@@ -55,10 +55,10 @@ const resolvedArtifactPlanFields = {
 
 export const list = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return {
@@ -69,23 +69,23 @@ export const list = query({
     }
 
     const ownerId = await resolvePersonByIdentity(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       provider: "clerk",
       externalId: requireClerkUserId(access.identity),
     })
     const connected = await connectedIntegrations(ctx, {
       ownerId,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
     const enabled = await readPlaybookAutomations(ctx, {
       ownerId,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
     const deliveryContext = await readDeliveryContext(ctx, {
       connected,
       ownerId,
       recipient: callerRecipient(access.identity),
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
 
     return {
@@ -153,16 +153,16 @@ async function artifactProjection(
 
 export const saveDeliveryPreference = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     delivery: deliveryChoiceValidator,
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const personId = await ensureCurrentPerson(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
     const connected = await connectedIntegrations(ctx, {
       ownerId: personId,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
 
     await persistDeliveryPreference(ctx, {
@@ -170,7 +170,7 @@ export const saveDeliveryPreference = mutation({
       delivery: args.delivery,
       personId,
       recipient: callerRecipient(identity),
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     })
 
     return null
@@ -209,7 +209,7 @@ export const reconfigureResolved = internalMutation({
  *  artifact the calling action provisioned. */
 export const createResolved = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     playbook: playbookBindingValidator,
     artifactId: v.optional(v.id("artifacts")),
     key: v.optional(v.string()),

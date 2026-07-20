@@ -2,14 +2,14 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { type QueryLikeCtx } from "../../shared/context"
 
-export async function getTenantAutomation(
+export async function getOrganizationAutomation(
   ctx: QueryLikeCtx,
-  tenantId: string,
+  organizationId: string,
   automationId: Id<"automations">
 ) {
   const automation = await ctx.db.get(automationId)
 
-  if (automation === null || automation.tenantId !== tenantId) {
+  if (automation === null || automation.organizationId !== organizationId) {
     throw new Error("Automation not found.")
   }
 

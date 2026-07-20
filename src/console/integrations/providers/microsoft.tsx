@@ -40,16 +40,16 @@ const calendarConfig = {
 
 export function MicrosoftEmailIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.microsoft.install.createMicrosoftEmailInstallState
   )
   const status = useQuery(api.integrations.status.getMicrosoftEmailStatus, {
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -59,23 +59,23 @@ export function MicrosoftEmailIntegration({
       headline={getAccountHeadline(status, emailConfig.label)}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }
 
 export function MicrosoftCalendarIntegration({
   permissions,
-  tenantId,
+  organizationId,
 }: {
   permissions: ToolPermissionController
-  tenantId: string
+  organizationId: string
 }) {
   const createInstallState = useMutation(
     api.integrations.microsoft.install.createMicrosoftCalendarInstallState
   )
   const status = useQuery(api.integrations.status.getMicrosoftCalendarStatus, {
-    tenantId,
+    organizationId,
   })
 
   return (
@@ -85,7 +85,7 @@ export function MicrosoftCalendarIntegration({
       headline={getAccountHeadline(status, calendarConfig.label)}
       permissions={permissions}
       status={status}
-      tenantId={tenantId}
+      organizationId={organizationId}
     />
   )
 }

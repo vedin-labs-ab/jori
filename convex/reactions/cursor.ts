@@ -139,10 +139,10 @@ async function queryConversationReactions(
   return await ctx.db
     .query("reactions")
     .withIndex(
-      "by_tenant_and_integration_and_target_conversation_and_updated",
+      "by_organization_integration_target_conversation_updated",
       (query) => {
         const scoped = query
-          .eq("tenantId", args.conversation.tenantId)
+          .eq("organizationId", args.conversation.organizationId)
           .eq("integrationId", args.conversation.integrationId)
           .eq("target.conversationId", args.conversation.externalId)
 

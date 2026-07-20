@@ -36,24 +36,24 @@ export function IntegrationCard({
   headline,
   permissions,
   status,
-  tenantId,
+  organizationId,
 }: {
   config: IntegrationCardConfig
   createInstallState: CreateInstallState
   headline: string
   permissions: ToolPermissionController
   status: IntegrationStatus | undefined
-  tenantId: string
+  organizationId: string
 }) {
   const install = useIntegrationInstall({
     connectError: config.connectError,
     createInstallState,
     installPath: config.installPath,
-    tenantId,
+    organizationId,
   })
   const disconnect = useIntegrationDisconnect({
     integration: config.integration,
-    tenantId,
+    organizationId,
     title: config.label,
   })
   const isConnected = status?.status === "active"

@@ -56,7 +56,7 @@ export function SkillCard({
           size="md"
         />
         <div className="ml-auto flex items-center gap-3">
-          {skill.scope === "tenant" ? (
+          {skill.scope === "organization" ? (
             <span className="whitespace-nowrap text-muted-foreground text-xs">
               Updated {relativeTime(skill.updatedAt, now)}
             </span>

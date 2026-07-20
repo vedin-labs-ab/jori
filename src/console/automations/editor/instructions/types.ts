@@ -22,10 +22,10 @@ export type AutomationInstructionsFieldProps = {
   policyKey: string
   showAccessError?: boolean
   scope: Scope
-  /** Tenant skill names, for `/` mentions; empty while loading. */
+  /** Organization skill names, for `/` mentions; empty while loading. */
   skills: readonly string[]
   surfaces: AutomationSurfaceFormValue[]
-  tenantId: string
+  organizationId: string
   value: string
   webSearch: boolean
 }
@@ -46,5 +46,5 @@ export type InstructionRefs = {
   scope: MutableRefObject<AutomationInstructionsFieldProps["scope"]>
   sources: MutableRefObject<AutomationMentionSources>
   suggestion: MutableRefObject<InstructionSuggestionState | null>
-  tenantId: MutableRefObject<string>
+  organizationId: MutableRefObject<string>
 }

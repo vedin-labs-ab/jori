@@ -11,15 +11,17 @@ test("default search returns active top-level automations only", async () => {
   ]
   const { ctx, equals, withIndex } = searchContext(rows)
 
-  const result = await searchAutomations(ctx, { tenantId: "tenant" })
+  const result = await searchAutomations(ctx, {
+    organizationId: "organization",
+  })
 
   expect(result.map((item) => item._id)).toEqual(["parent"])
   expect(withIndex).toHaveBeenCalledWith(
-    "by_tenant_and_status_and_parent",
+    "by_organization_and_status_and_parent",
     expect.any(Function)
   )
   expect(equals.mock.calls).toEqual([
-    ["tenantId", "tenant"],
+    ["organizationId", "organization"],
     ["status", "active"],
     ["parentId", undefined],
   ])
@@ -39,28 +41,28 @@ test("completed search still omits owned automations", async () => {
   const { ctx, equals, withIndex } = searchContext(rows)
 
   const result = await searchAutomations(ctx, {
-    tenantId: "tenant",
+    organizationId: "organization",
     includeCompleted: true,
   })
 
   expect(result.map((item) => item._id)).toEqual(["active", "completed"])
   expect(withIndex).toHaveBeenCalledWith(
-    "by_tenant_and_parent",
+    "by_organization_and_parent",
     expect.any(Function)
   )
   expect(equals.mock.calls).toEqual([
-    ["tenantId", "tenant"],
+    ["organizationId", "organization"],
     ["parentId", undefined],
   ])
 })
 
 function searchContext(rows: Doc<"automations">[]) {
-  let tenantId: unknown
+  let organizationId: unknown
   let status: unknown
   let filtersByParent = false
   const equals = vi.fn((field: string, value: unknown) => {
-    if (field === "tenantId") {
-      tenantId = value
+    if (field === "organizationId") {
+      organizationId = value
     } else if (field === "status") {
       status = value
     } else if (field === "parentId") {
@@ -76,7 +78,7 @@ function searchContext(rows: Doc<"automations">[]) {
   const collect = vi.fn(async () =>
     rows.filter(
       (row) =>
-        row.tenantId === tenantId &&
+        row.organizationId === organizationId &&
         (status === undefined || row.status === status) &&
         (!filtersByParent || row.parentId === undefined)
     )
@@ -111,7 +113,7 @@ function automation(input: {
     principal: { kind: "organization" },
     scope: "organization",
     status: input.status,
-    tenantId: "tenant",
+    organizationId: "organization",
     trigger: { at: input.at },
     type: "once",
     updatedAt: 0,

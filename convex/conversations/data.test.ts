@@ -15,7 +15,7 @@ test("starts new conversation message runs as mentions", async () => {
   expect(result.status).toBe("started")
   expect(inserted(ctx, "runs")).toEqual([
     expect.objectContaining({
-      scope: "tenant",
+      scope: "organization",
       cause: { type: "message", messageId: "message", kind: "mention" },
       conversationId: "conversations-1",
     }),
@@ -23,7 +23,7 @@ test("starts new conversation message runs as mentions", async () => {
   expect(inserted(ctx, "conversations")).toEqual([
     expect.objectContaining({
       externalId: "conversation",
-      scope: "tenant",
+      scope: "organization",
     }),
   ])
   expect(inserted(ctx, "sessions")).toEqual([
@@ -113,10 +113,10 @@ function conversationDoc(): Doc<"conversations"> {
   return {
     _id: id<"conversations">("conversation-doc"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
-    scope: "tenant",
+    scope: "organization",
   }
 }
 
@@ -138,9 +138,9 @@ function integration() {
   return {
     _id: id<"integrations">("integration"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "slack",
-    scope: "tenant",
+    scope: "organization",
     externalId: "team",
     credentials: {},
     status: "active",
@@ -154,7 +154,7 @@ function message(text: string, data?: unknown) {
   return {
     _id: id<"messages">("message"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message.channels",
@@ -188,7 +188,7 @@ function activeSessionSeed(
       {
         _id: id<"runs">(runId),
         _creationTime: 0,
-        tenantId: "tenant",
+        organizationId: "organization",
         status,
         createdAt: 0,
       },

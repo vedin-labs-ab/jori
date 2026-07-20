@@ -81,7 +81,7 @@ function approvalDoc(): Doc<"approvals"> {
     status: "pending",
     summary: "Create a page.",
     surface: "notion",
-    tenantId: "tenant",
+    organizationId: "organization",
     tool: "notion_create_page",
   }
 }
@@ -95,9 +95,9 @@ function integrationDoc(): Doc<"integrations"> {
     credentials: {},
     externalId: "linear-org",
     integration: "linear",
-    scope: "tenant",
+    scope: "organization",
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     updatedAt: 0,
   }
 }

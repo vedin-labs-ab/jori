@@ -8,7 +8,7 @@ import {
   artifactTemplateStamp,
 } from "./schema"
 import {
-  getTenantArtifact,
+  getOrganizationArtifact,
   insertCapabilities,
   normalizeTitle,
   revokeCapabilities,
@@ -38,7 +38,7 @@ const publishFields = {
 
 export const publishCreated = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     ownerId: v.id("persons"),
     title: v.string(),
     access: artifactAccess,
@@ -55,9 +55,9 @@ export const publishCreated = internalMutation({
     if (canonical !== undefined) {
       const existing = await ctx.db
         .query("artifacts")
-        .withIndex("by_tenant_and_template", (index) =>
+        .withIndex("by_organization_and_template", (index) =>
           index
-            .eq("tenantId", args.tenantId)
+            .eq("organizationId", args.organizationId)
             .eq("templatePartition", templatePartition)
             .eq("template", canonical.key)
         )
@@ -71,7 +71,7 @@ export const publishCreated = internalMutation({
     }
 
     const artifactId = await ctx.db.insert("artifacts", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       ownerId: args.ownerId,
       title: normalizeTitle(args.title),
       access: args.access,
@@ -94,7 +94,7 @@ export const publishCreated = internalMutation({
       approvedBy: args.ownerId,
       artifactId,
       capabilities: args.capabilities,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       versionId,
     })
 
@@ -104,7 +104,7 @@ export const publishCreated = internalMutation({
 
 export const publishUpdated = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     updatedBy: v.id("persons"),
     title: v.optional(v.string()),
@@ -112,7 +112,7 @@ export const publishUpdated = internalMutation({
     ...publishFields,
   },
   handler: async (ctx, args) => {
-    const artifact = await getTenantArtifact(ctx, args)
+    const artifact = await getOrganizationArtifact(ctx, args)
     const now = Date.now()
     const versionId = await insertVersion(ctx, {
       ...args,
@@ -136,7 +136,7 @@ export const publishUpdated = internalMutation({
       approvedBy: args.updatedBy,
       artifactId: args.artifactId,
       capabilities: args.capabilities,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       versionId,
     })
 
@@ -146,11 +146,11 @@ export const publishUpdated = internalMutation({
 
 export const restore = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args) => {
-    const artifact = await getTenantArtifact(ctx, args)
+    const artifact = await getOrganizationArtifact(ctx, args)
 
     await ctx.db.patch(artifact._id, {
       archivedAt: undefined,
@@ -163,11 +163,11 @@ export const restore = internalMutation({
 
 export const remove = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args) => {
-    const artifact = await getTenantArtifact(ctx, args)
+    const artifact = await getOrganizationArtifact(ctx, args)
 
     if (artifact.archivedAt !== undefined) {
       return await purgeArchivedArtifact(ctx, args)
@@ -199,12 +199,12 @@ async function pauseArtifactAutomations(
 
   for (const automation of automations) {
     if (
-      automation.tenantId === artifact.tenantId &&
+      automation.organizationId === artifact.organizationId &&
       automation.type !== "once" &&
       automation.status === "active"
     ) {
       await pauseAutomation(ctx, {
-        tenantId: artifact.tenantId,
+        organizationId: artifact.organizationId,
         automationId: automation._id,
       })
     }

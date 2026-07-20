@@ -123,7 +123,7 @@ function automation(
     },
     scope: "personal",
     status: input.status ?? "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     trigger:
       input.type === "cron"
         ? { expression: "0 8 * * *", nextAt: 1000, timezone: "UTC" }

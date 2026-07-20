@@ -8,7 +8,7 @@ import { type QueryLikeCtx } from "../../shared/context"
 export async function requireAutomationArtifact(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts"> | undefined
     principal: ExecutionPrincipal
   }
@@ -21,7 +21,7 @@ export async function requireAutomationArtifact(
 
   if (
     artifact === null ||
-    artifact.tenantId !== args.tenantId ||
+    artifact.organizationId !== args.organizationId ||
     (artifact.access === "personal" &&
       artifact.ownerId !== executionPrincipalPersonId(args.principal)) ||
     (args.principal.kind === "organization" &&

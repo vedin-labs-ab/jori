@@ -32,16 +32,16 @@ const rangeOptions: { value: PulseDays; label: string }[] = [
 // rhythm and the weekly restructure visible instead of leaving quiet periods
 // looking broken.
 export function WorkstreamsPulse({
-  tenantId,
+  organizationId,
   workstreams,
   onOpen,
 }: {
-  tenantId: string
+  organizationId: string
   workstreams: Workstreams
   onOpen: (workstream: Workstream) => void
 }) {
   const [days, setDays] = useState<PulseDays>(14)
-  const result = useQuery(api.workstreams.pulse.read, { tenantId, days })
+  const result = useQuery(api.workstreams.pulse.read, { organizationId, days })
   const [pulse, setPulse] = useState<PulseData | null>(null)
 
   // Hold the last loaded window while a new range streams in, so switching

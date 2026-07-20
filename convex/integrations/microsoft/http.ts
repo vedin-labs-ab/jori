@@ -126,7 +126,7 @@ async function recordMicrosoftInstallation(
     internal.integrations.microsoft.install.recordOAuthInstallation,
     {
       integration: args.integration,
-      tenantId: args.state.tenantId,
+      organizationId: args.state.organizationId,
       createdBy: args.state.createdBy,
       microsoftTenantId: args.profile.tenant.id,
       accessToken: args.tokenResult.access_token,

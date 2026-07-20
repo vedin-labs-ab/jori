@@ -143,7 +143,7 @@ async function queryConversationMessages(
     .withIndex("by_conversation", (query) => {
       const cursor = args.session.cursor?.message
       const scoped = query
-        .eq("tenantId", args.conversation.tenantId)
+        .eq("organizationId", args.conversation.organizationId)
         .eq("integrationId", args.conversation.integrationId)
         .eq("conversationId", args.conversation.externalId)
 

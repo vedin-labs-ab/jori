@@ -20,14 +20,14 @@ import { SkillViewDialog } from "./view"
 export function Skills() {
   return (
     <ConsolePage>
-      {(tenantId) => <SkillsCard tenantId={tenantId} />}
+      {(organizationId) => <SkillsCard organizationId={organizationId} />}
     </ConsolePage>
   )
 }
 
-function SkillsCard({ tenantId }: { tenantId: string }) {
-  const skillList = useQuery(api.skills.catalog.list, { tenantId })
-  const editor = useSkillEditor(tenantId)
+function SkillsCard({ organizationId }: { organizationId: string }) {
+  const skillList = useQuery(api.skills.catalog.list, { organizationId })
+  const editor = useSkillEditor(organizationId)
   const filters = useSkillFilters()
   const [viewSkill, setViewSkill] = useState<Skill>()
   const skills = skillList?.status === "ready" ? skillList.skills : undefined
@@ -85,7 +85,7 @@ function SkillsCard({ tenantId }: { tenantId: string }) {
 }
 
 function useSkillFilters() {
-  const [view, setView] = useState<SkillFilterView>("tenant")
+  const [view, setView] = useState<SkillFilterView>("organization")
   const [searchTerm, setSearchTerm] = useState("")
 
   return { searchTerm, setSearchTerm, setView, view }

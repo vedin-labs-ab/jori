@@ -23,7 +23,7 @@ export function billingReturnUrl() {
  * names the flow currently opening (through to the redirect itself) so its
  * button can spin and every money button can disable.
  */
-export function useBillingCheckout(tenantId: string) {
+export function useBillingCheckout(organizationId: string) {
   const [pending, setPending] = useState<CheckoutFlow | null>(null)
   const startPlanCheckout = useAction(
     api.billing.stripe.checkout.startPlanCheckout
@@ -57,7 +57,7 @@ export function useBillingCheckout(tenantId: string) {
         "plan",
         () =>
           startPlanCheckout({
-            tenantId,
+            organizationId,
             plan,
             interval,
             returnUrl: billingReturnUrl(),
@@ -69,7 +69,7 @@ export function useBillingCheckout(tenantId: string) {
         "top-up",
         () =>
           startTopUpCheckout({
-            tenantId,
+            organizationId,
             amountUsd,
             returnUrl: billingReturnUrl(),
           }),
@@ -78,7 +78,7 @@ export function useBillingCheckout(tenantId: string) {
     managePortal: () =>
       redirect(
         "portal",
-        () => openPortal({ tenantId, returnUrl: billingReturnUrl() }),
+        () => openPortal({ organizationId, returnUrl: billingReturnUrl() }),
         "Could not open the billing portal."
       ),
   }

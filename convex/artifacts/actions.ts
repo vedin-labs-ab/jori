@@ -33,7 +33,7 @@ const artifactBuildValidator = v.object({
   assets: v.array(artifactBuildAssetValidator),
 })
 const publishArgs = {
-  tenantId: v.string(),
+  organizationId: v.string(),
   title: v.string(),
   access: artifactAccess,
   contract: v.optional(v.any()),
@@ -45,7 +45,7 @@ const publishArgs = {
 
 type SessionResult = {
   sessionId: Id<"artifactSessions">
-  tenantId: string
+  organizationId: string
   personId: Id<"persons">
   artifactId: Id<"artifacts">
   versionId: Id<"artifactVersions">
@@ -56,17 +56,20 @@ type SessionResult = {
 
 export const createSession = action({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args): Promise<SessionResult> => {
-    const personId = await ensureCurrentPersonFromAction(ctx, args.tenantId)
+    const personId = await ensureCurrentPersonFromAction(
+      ctx,
+      args.organizationId
+    )
     const now = Date.now()
     const expiresAt = now + artifactSessionDurationMs
     const record: Omit<SessionResult, "token"> = await ctx.runMutation(
       internal.artifacts.serve.sessions.createSessionRecord,
       {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         artifactId: args.artifactId,
         personId,
         secret: randomTokenSecret(),
@@ -98,7 +101,7 @@ export const createFromAgent = internalAction({
  *  counterpart of playbook provisioning, reachable via #create_artifact. */
 export const instantiateFromAgent = internalAction({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.id("persons"),
     template: v.string(),
     title: v.optional(v.string()),
@@ -107,7 +110,7 @@ export const instantiateFromAgent = internalAction({
   },
   handler: async (ctx, args): Promise<PublishResult> => {
     return await instantiateArtifactTemplate(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId: args.personId,
       key: args.template,
       title: args.title,
@@ -134,7 +137,7 @@ export const updateFromAgent = internalAction({
 
 export const readForAgent = internalAction({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     versionId: v.optional(v.id("artifactVersions")),
   },

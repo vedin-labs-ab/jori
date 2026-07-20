@@ -76,7 +76,7 @@ export async function hasInactiveParent(
     parent === null ||
     parent.status !== "active" ||
     parent.type === "once" ||
-    parent.tenantId !== automation.tenantId ||
+    parent.organizationId !== automation.organizationId ||
     (automation.parentConfigurationVersion ?? 0) !==
       (parent.configurationVersion ?? 1) ||
     !sameAutomationPrincipal(parent.principal, automation.principal)

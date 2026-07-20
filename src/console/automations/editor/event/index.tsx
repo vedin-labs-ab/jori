@@ -20,11 +20,11 @@ import { EventIntegrationField } from "./options/field"
 import { EventScopeFields } from "./scope"
 
 export function EventFields({
-  tenantId,
+  organizationId,
   onValuesChange,
   values,
 }: {
-  tenantId: string
+  organizationId: string
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
@@ -38,7 +38,7 @@ export function EventFields({
         <div className="grid gap-2">
           <Label htmlFor="automation-event-integration">Integration</Label>
           <EventIntegrationField
-            tenantId={tenantId}
+            organizationId={organizationId}
             scope={values.scope}
             value={values.eventIntegration}
             onValueChange={(integration) =>
@@ -77,7 +77,7 @@ export function EventFields({
         </div>
       </div>
       <EventParameterFields
-        tenantId={tenantId}
+        organizationId={organizationId}
         integration={values.eventIntegration}
         event={selectedEvent}
         onValuesChange={(eventMatch) =>
@@ -90,13 +90,13 @@ export function EventFields({
 }
 
 function EventParameterFields({
-  tenantId,
+  organizationId,
   integration,
   event,
   onValuesChange,
   values,
 }: {
-  tenantId: string
+  organizationId: string
   integration: AutomationEventIntegration
   event: AutomationEventDefinition
   onValuesChange: (values: Record<string, string>) => void
@@ -114,7 +114,7 @@ function EventParameterFields({
       ) : null}
       <EventScopeFields
         key={`${integration}:${event.value}`}
-        tenantId={tenantId}
+        organizationId={organizationId}
         event={event}
         onValuesChange={onValuesChange}
         values={values}

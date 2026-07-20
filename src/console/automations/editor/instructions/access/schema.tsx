@@ -25,14 +25,14 @@ type SchemaDirection = (typeof directions)[number]["key"]
  *  through onChange. */
 export function ToolReferencesLoader({
   onChange,
-  tenantId,
+  organizationId,
   tools,
 }: {
   onChange: (references: ToolReferences) => void
-  tenantId: string
+  organizationId: string
   tools: string[]
 }) {
-  const references = useToolReferences(tenantId, tools, true)
+  const references = useToolReferences(organizationId, tools, true)
 
   useEffect(() => {
     if (references !== undefined) {

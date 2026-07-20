@@ -56,7 +56,7 @@ function subtaskRun(overrides: Record<string, unknown> = {}) {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     parentId: "parent",
     rootId: "parent",
     cause: { type: "manual", personId: "person" },
@@ -76,7 +76,7 @@ function parentRun() {
   return {
     _id: "parent",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     cause: { type: "time", scheduledAt: 0 },
     snapshot: {
       title: "Meeting Briefing",

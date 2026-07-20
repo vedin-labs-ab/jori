@@ -118,7 +118,7 @@ async function insertObservedMessage(
 ) {
   const observed = observedMessage(args, integration)
   const createdBy = await resolveActor(ctx, {
-    tenantId: integration.tenantId,
+    organizationId: integration.organizationId,
     provider: args.integration,
     actor: observed.actor,
   })
@@ -195,7 +195,7 @@ async function messageRunConversation(
         message: args.message,
       })
     : await findConversation(ctx, {
-        tenantId: args.integration.tenantId,
+        organizationId: args.integration.organizationId,
         integrationId: args.integration._id,
         externalId: args.message.conversationId,
       })

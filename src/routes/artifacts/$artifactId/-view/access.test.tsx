@@ -10,7 +10,7 @@ const { session } = vi.hoisted(() => ({
     isConvexLoading: false,
     isOrganizationLoaded: true,
     isSignedIn: true,
-    organization: { id: "tenant" } as { id: string } | null,
+    organization: { id: "organization" } as { id: string } | null,
   },
 }))
 
@@ -50,7 +50,7 @@ beforeEach(() => {
   session.isConvexLoading = false
   session.isOrganizationLoaded = true
   session.isSignedIn = true
-  session.organization = { id: "tenant" }
+  session.organization = { id: "organization" }
 })
 
 afterEach(() => cleanup())
@@ -72,7 +72,7 @@ test("uses the share grant for an anonymous visitor", () => {
   expect(screen.getByText("Shared artifact")).toBeDefined()
 })
 
-test("uses the share grant when the signed-in session has no tenant", () => {
+test("uses the share grant when the signed-in session has no organization", () => {
   session.organization = null
 
   render(<ArtifactAccess artifactId="artifact" secret="secret" />)

@@ -72,7 +72,7 @@ export async function handleNotionOAuthCallback(
   const integrationId = await ctx.runMutation(
     internal.integrations.notion.install.recordOAuthInstallation,
     {
-      tenantId: state.tenantId,
+      organizationId: state.organizationId,
       createdBy: state.createdBy,
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token ?? undefined,

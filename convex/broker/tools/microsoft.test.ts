@@ -192,7 +192,7 @@ function microsoftEmailIntegration(): Doc<"integrations"> {
   return {
     _id: "microsoft-email-integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "microsoftEmail",
     scope: "user",
     ownerId: "person" as Id<"persons">,

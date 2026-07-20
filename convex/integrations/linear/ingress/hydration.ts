@@ -41,8 +41,10 @@ export const issueProject = internalQuery({
 
     const automations = await ctx.db
       .query("automations")
-      .withIndex("by_tenant_status", (query) =>
-        query.eq("tenantId", integration.tenantId).eq("status", "active")
+      .withIndex("by_organization_status", (query) =>
+        query
+          .eq("organizationId", integration.organizationId)
+          .eq("status", "active")
       )
       .collect()
 

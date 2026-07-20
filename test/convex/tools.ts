@@ -6,9 +6,9 @@ export function integration(integration: string): IntegrationDoc {
   return {
     _id: `${integration}-integration`,
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration,
-    scope: isUserScopedIntegration(integration) ? "user" : "tenant",
+    scope: isUserScopedIntegration(integration) ? "user" : "organization",
     ownerId: isUserScopedIntegration(integration)
       ? ("person" as PersonId)
       : undefined,

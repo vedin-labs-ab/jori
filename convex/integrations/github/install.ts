@@ -8,7 +8,7 @@ import { createSignedGitHubState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -18,7 +18,7 @@ export const createInstallState = mutation({
 
 export const recordInstallation = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     createdBy: v.id("persons"),
     installationId: v.string(),
     profile: v.object({
@@ -41,9 +41,9 @@ export const recordInstallation = internalMutation({
     })
 
     return await upsertIntegration(ctx, existing, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       integration: "github",
-      scope: "tenant",
+      scope: "organization",
       externalId: args.installationId,
       name: args.profile.account?.login,
       url: args.profile.account?.html_url ?? args.profile.html_url,

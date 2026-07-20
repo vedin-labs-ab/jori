@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { compactRecord } from "../../contracts/json"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { type QueryLikeCtx } from "../shared/context"
 import { discoveryStepKind } from "./schema"
 
@@ -17,20 +17,20 @@ const stepArgs = {
 type DiscoveryStep = Doc<"organizationDiscovery">["steps"][number]
 
 export const get = query({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    return await readDiscovery(ctx, args.tenantId)
+    return await readDiscovery(ctx, args.organizationId)
   },
 })
 
 export const start = internalMutation({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    const existing = await readDiscovery(ctx, args.tenantId)
+    const existing = await readDiscovery(ctx, args.organizationId)
     const value = {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       status: "running" as const,
       steps: [],
       startedAt: Date.now(),
@@ -49,11 +49,11 @@ export const start = internalMutation({
 
 export const startStep = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     ...stepArgs,
   },
   handler: async (ctx, args) => {
-    const discovery = await requireDiscovery(ctx, args.tenantId)
+    const discovery = await requireDiscovery(ctx, args.organizationId)
     const startedAt = Date.now()
 
     await appendStep(
@@ -75,11 +75,11 @@ export const startStep = internalMutation({
 
 export const queueStep = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     ...stepArgs,
   },
   handler: async (ctx, args) => {
-    const discovery = await requireDiscovery(ctx, args.tenantId)
+    const discovery = await requireDiscovery(ctx, args.organizationId)
     const queuedAt = Date.now()
 
     await appendStep(
@@ -101,11 +101,11 @@ export const queueStep = internalMutation({
 
 export const activateStep = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     id: v.string(),
   },
   handler: async (ctx, args) => {
-    const discovery = await readDiscovery(ctx, args.tenantId)
+    const discovery = await readDiscovery(ctx, args.organizationId)
 
     const activeAt = Date.now()
 
@@ -127,12 +127,12 @@ export const activateStep = internalMutation({
 
 export const completeStep = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     id: v.string(),
     error: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const discovery = await readDiscovery(ctx, args.tenantId)
+    const discovery = await readDiscovery(ctx, args.organizationId)
 
     if (discovery === null) {
       return
@@ -156,9 +156,9 @@ export const completeStep = internalMutation({
 })
 
 export const finish = internalMutation({
-  args: { tenantId: v.string(), error: v.optional(v.string()) },
+  args: { organizationId: v.string(), error: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const discovery = await readDiscovery(ctx, args.tenantId)
+    const discovery = await readDiscovery(ctx, args.organizationId)
 
     if (discovery === null) {
       return
@@ -175,8 +175,8 @@ export const finish = internalMutation({
   },
 })
 
-async function requireDiscovery(ctx: MutationCtx, tenantId: string) {
-  const discovery = await readDiscovery(ctx, tenantId)
+async function requireDiscovery(ctx: MutationCtx, organizationId: string) {
+  const discovery = await readDiscovery(ctx, organizationId)
 
   if (discovery === null) {
     throw new Error("Discovery run has not started.")
@@ -219,9 +219,9 @@ function appendError(errors: string[], error: string | undefined) {
   return [...errors, error]
 }
 
-async function readDiscovery(ctx: QueryLikeCtx, tenantId: string) {
+async function readDiscovery(ctx: QueryLikeCtx, organizationId: string) {
   return await ctx.db
     .query("organizationDiscovery")
-    .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+    .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
     .unique()
 }

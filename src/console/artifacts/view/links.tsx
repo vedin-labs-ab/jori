@@ -36,10 +36,10 @@ type ShareLink = NonNullable<
 
 export function ArtifactLinks({
   artifactId,
-  tenantId,
+  organizationId,
 }: {
   artifactId: ArtifactId
-  tenantId: string
+  organizationId: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -62,7 +62,7 @@ export function ArtifactLinks({
       <ArtifactLinksDialog
         artifactId={artifactId}
         open={open}
-        tenantId={tenantId}
+        organizationId={organizationId}
       />
     </Dialog>
   )
@@ -71,15 +71,15 @@ export function ArtifactLinks({
 function ArtifactLinksDialog({
   artifactId,
   open,
-  tenantId,
+  organizationId,
 }: {
   artifactId: ArtifactId
   open: boolean
-  tenantId: string
+  organizationId: string
 }) {
   const shares = usePaginatedQuery(
     api.artifacts.console.pageShares,
-    open ? { artifactId, tenantId } : "skip",
+    open ? { artifactId, organizationId } : "skip",
     { initialNumItems: sharePageSize }
   )
 
@@ -96,7 +96,7 @@ function ArtifactLinksDialog({
         loadMore={shares.loadMore}
         results={shares.results}
         status={shares.status}
-        tenantId={tenantId}
+        organizationId={organizationId}
       />
     </DialogContent>
   )
@@ -107,13 +107,13 @@ function ShareLinksContent({
   loadMore,
   results,
   status,
-  tenantId,
+  organizationId,
 }: {
   artifactId: ArtifactId
   loadMore: (count: number) => void
   results: ShareLink[]
   status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted"
-  tenantId: string
+  organizationId: string
 }) {
   const now = useNow(30_000)
   const revokeShare = useMutation(api.artifacts.console.revokeShare)
@@ -122,7 +122,7 @@ function ShareLinksContent({
   >(null)
   const revoke = (shareId: ShareLink["shareId"]) => {
     setRevokingShareId(shareId)
-    void revokeShare({ tenantId, artifactId, shareId })
+    void revokeShare({ organizationId, artifactId, shareId })
       .then(() => toast.success("Share link revoked."))
       .catch((error: unknown) =>
         showErrorToast(error, "Could not revoke the share link.")

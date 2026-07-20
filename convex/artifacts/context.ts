@@ -18,7 +18,7 @@ export type RunArtifactContext = {
 
 export async function readRunArtifactContext(
   ctx: QueryLikeCtx,
-  run: Pick<Doc<"runs">, "artifactId" | "tenantId">
+  run: Pick<Doc<"runs">, "artifactId" | "organizationId">
 ): Promise<RunArtifactContext | null> {
   if (run.artifactId === undefined) {
     return null
@@ -26,7 +26,7 @@ export async function readRunArtifactContext(
 
   const artifact = await ctx.db.get(run.artifactId)
 
-  if (artifact === null || artifact.tenantId !== run.tenantId) {
+  if (artifact === null || artifact.organizationId !== run.organizationId) {
     return null
   }
 

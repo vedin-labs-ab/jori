@@ -2,16 +2,16 @@ import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { type QueryLikeCtx } from "../../shared/context"
 
-export async function getTenantArtifact(
+export async function getOrganizationArtifact(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
   }
 ) {
   const artifact = await ctx.db.get(args.artifactId)
 
-  if (artifact === null || artifact.tenantId !== args.tenantId) {
+  if (artifact === null || artifact.organizationId !== args.organizationId) {
     throw new Error("Artifact not found.")
   }
 
@@ -21,7 +21,7 @@ export async function getTenantArtifact(
 export async function insertCapabilities(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
     versionId: Id<"artifactVersions">
     approvedBy: Id<"persons">
@@ -36,7 +36,7 @@ export async function insertCapabilities(
 
   for (const capability of args.capabilities) {
     await ctx.db.insert("artifactTools", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       artifactId: args.artifactId,
       versionId: capability.versionPinned === true ? args.versionId : undefined,
       tool: capability.tool,

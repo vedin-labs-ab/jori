@@ -149,9 +149,9 @@ function linearIntegration(): Doc<"integrations"> {
   return {
     _id: "linear-integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "linear",
-    scope: "tenant",
+    scope: "organization",
     externalId: "linear-account",
     credentials: {
       tokens: { access: "access-token", refresh: "refresh-token" },

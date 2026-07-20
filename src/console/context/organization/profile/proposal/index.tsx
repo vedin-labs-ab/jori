@@ -33,7 +33,7 @@ type ProposalReviewProps = {
   primaryWebsite: string | undefined
   proposed: ContextProposal
   sources: OrganizationSources | undefined
-  tenantId: string
+  organizationId: string
 }
 
 export function ProposalReview({
@@ -43,7 +43,7 @@ export function ProposalReview({
   primaryWebsite,
   proposed,
   sources,
-  tenantId,
+  organizationId,
 }: ProposalReviewProps) {
   const [localOpen, setLocalOpen] = useState(false)
   const dialogOpen = open ?? localOpen
@@ -58,7 +58,7 @@ export function ProposalReview({
         primaryWebsite={primaryWebsite}
         proposed={proposed}
         sources={sources}
-        tenantId={tenantId}
+        organizationId={organizationId}
       />
     </Dialog>
   )
@@ -89,14 +89,14 @@ function ProposalDialog({
   primaryWebsite,
   proposed,
   sources,
-  tenantId,
+  organizationId,
 }: {
   current: ContextFacts | null
   onClose: () => void
   primaryWebsite: string | undefined
   proposed: ContextProposal
   sources: OrganizationSources | undefined
-  tenantId: string
+  organizationId: string
 }) {
   const approve = useMutation(api.organization.profile.approve)
   const dismiss = useMutation(api.organization.profile.dismiss)
@@ -108,7 +108,7 @@ function ProposalDialog({
     setPendingAction("approve")
 
     try {
-      await approve({ tenantId })
+      await approve({ organizationId })
       onClose()
     } catch (approveError) {
       showErrorToast(approveError, "Couldn't approve the update.")
@@ -121,7 +121,7 @@ function ProposalDialog({
     setPendingAction("dismiss")
 
     try {
-      await dismiss({ tenantId })
+      await dismiss({ organizationId })
       onClose()
     } catch (dismissError) {
       showErrorToast(dismissError, "Couldn't discard the proposal.")

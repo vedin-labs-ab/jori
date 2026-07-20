@@ -215,7 +215,7 @@ function trace(
     key: `trace:${overrides.timestamp}`,
     runId: id<"runs">("run"),
     sequence: undefined,
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   } as Doc<"traces">
 }
@@ -234,7 +234,7 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
       title: "Run",
     },
     status: "running",
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   } as Doc<"runs">
 }
@@ -246,7 +246,7 @@ function artifact(overrides: Partial<Doc<"artifacts">>): Doc<"artifacts"> {
     access: "organization",
     createdAt: 0,
     ownerId: id<"persons">("person"),
-    tenantId: "tenant",
+    organizationId: "organization",
     title: "Artifact",
     updatedAt: 0,
     ...overrides,

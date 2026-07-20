@@ -24,8 +24,8 @@ import { useBillingCheckout } from "./actions"
  * Presets cover the common case; the input takes any whole amount from the
  * minimum up. Checkout also saves the card, which unlocks auto top-up.
  */
-export function TopUpDialog({ tenantId }: { tenantId: string }) {
-  const checkout = useBillingCheckout(tenantId)
+export function TopUpDialog({ organizationId }: { organizationId: string }) {
+  const checkout = useBillingCheckout(organizationId)
   const [amount, setAmount] = useState(String(topUp.defaultUsd))
   const parsed = Number(amount)
   const valid =

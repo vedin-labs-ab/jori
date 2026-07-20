@@ -20,14 +20,14 @@ export const organizationSourceSnapshot = v.object({
   hash: v.optional(v.string()),
 })
 
-// One row per tenant, three provenance spaces: top-level fields are
+// One row per organization, three provenance spaces: top-level fields are
 // live/approved and read on the hot path; `proposed` holds a draft awaiting
 // human approval (absent when none); `declared` holds facts the user states
 // directly — user-owned, effective immediately, and never touched by
 // discovery, drafts, or approval. Deliberately narrower than factsFields:
 // each declared field must earn its place with its own merge semantics.
 export const organizationProfile = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   ...factsFields,
   proposed: v.optional(
     v.object({
@@ -41,19 +41,19 @@ export const organizationProfile = defineTable({
   approvedAt: v.optional(v.number()),
   approvedBy: v.optional(actorValidator),
   updatedAt: v.number(),
-}).index("by_tenant", ["tenantId"])
+}).index("by_organization", ["organizationId"])
 
 // First-party pages we crawl for an organization. `hash` is the normalized-text
 // fingerprint that gates re-drafting; `checkAt` is the watcher's due time.
 export const organizationSources = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   url: v.string(),
   primary: v.boolean(),
   hash: v.optional(v.string()),
   changedAt: v.optional(v.number()),
   checkAt: v.number(),
 })
-  .index("by_tenant_and_url", ["tenantId", "url"])
+  .index("by_organization_and_url", ["organizationId", "url"])
   .index("by_check_at", ["checkAt"])
 
 export const discoveryStepKind = v.union(
@@ -77,12 +77,12 @@ const discoveryStatus = v.union(v.literal("running"), v.literal("completed"))
 
 // High-churn progress for the latest discovery run, kept separate from the
 // stable profile so live updates never contend with the hot read path. One row
-// per tenant; each run resets it.
+// per organization; each run resets it.
 export const organizationDiscovery = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   status: discoveryStatus,
   steps: v.array(discoveryStep),
   startedAt: v.number(),
   endedAt: v.optional(v.number()),
   errors: v.array(v.string()),
-}).index("by_tenant", ["tenantId"])
+}).index("by_organization", ["organizationId"])

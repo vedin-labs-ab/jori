@@ -32,7 +32,7 @@ export type ArtifactShareSession = {
 /** Create an independent share link; existing links keep their own expiry. */
 export const mint = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
     expiresInHours: v.optional(v.number()),
@@ -55,7 +55,7 @@ export const mint = internalMutation({
     }
 
     await ctx.db.insert("artifactShares", {
-      tenantId: artifact.tenantId,
+      organizationId: artifact.organizationId,
       artifactId: artifact._id,
       createdBy: args.personId,
       secret,
@@ -124,7 +124,7 @@ export const open = internalMutation({
 
 export const revoke = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     shareId: v.id("artifactShares"),
     personId: v.id("persons"),
@@ -136,7 +136,7 @@ export const revoke = internalMutation({
     if (
       share === null ||
       share.artifactId !== artifact._id ||
-      share.tenantId !== artifact.tenantId
+      share.organizationId !== artifact.organizationId
     ) {
       throw new Error("Share link not found.")
     }
@@ -153,7 +153,7 @@ export function canOpenShare(
   return (
     share.secret === args.secret &&
     share.expiresAt > args.now &&
-    share.tenantId === artifact.tenantId &&
+    share.organizationId === artifact.organizationId &&
     artifact.archivedAt === undefined &&
     artifact.versionId !== undefined &&
     canAccessArtifact(artifact, share.createdBy)
@@ -245,7 +245,7 @@ function isShareRequest(
 async function requireShareableArtifact(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
     personId: Id<"persons">
   }

@@ -15,7 +15,7 @@ export function AutomationInstructionsSection({
   permissions,
   policyKey,
   skills,
-  tenantId,
+  organizationId,
   values,
 }: {
   additionalSurfaces: AutomationFormValues["surfaces"]
@@ -29,7 +29,7 @@ export function AutomationInstructionsSection({
   permissions?: AutomationPolicyPermissions
   policyKey: string
   skills: readonly string[]
-  tenantId: string
+  organizationId: string
   values: AutomationFormValues
 }) {
   return (
@@ -53,7 +53,7 @@ export function AutomationInstructionsSection({
         scope={values.scope}
         skills={skills}
         surfaces={values.surfaces}
-        tenantId={tenantId}
+        organizationId={organizationId}
         webSearch={values.webSearch}
       />
     </div>

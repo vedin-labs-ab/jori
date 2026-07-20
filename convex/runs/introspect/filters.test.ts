@@ -107,12 +107,12 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     _creationTime: 0,
     _id: id<"runs">("run"),
     principal: { kind: "organization" },
-    scope: "tenant",
+    scope: "organization",
     cause: { type: "manual" },
     createdAt: 0,
     snapshot: { context: [], source: { type: "manual" }, title: "Run" },
     status: "running",
-    tenantId: "tenant",
+    organizationId: "organization",
     ...overrides,
   }
 }
@@ -127,7 +127,7 @@ function message(messageId: Id<"messages">, text: string): Doc<"messages"> {
     integrationId: id<"integrations">("integration"),
     mentioned: true,
     conversationId: "conversation",
-    tenantId: "tenant",
+    organizationId: "organization",
     text,
     type: "message",
   }

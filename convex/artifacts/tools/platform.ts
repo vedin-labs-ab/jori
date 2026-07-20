@@ -13,7 +13,7 @@ import {
 import { promptModel, readArtifactModel } from "./prompt"
 
 export type ArtifactPlatformContext = {
-  tenantId: string
+  organizationId: string
   artifactId: Id<"artifacts">
   versionId: Id<"artifactVersions">
   personId: Id<"persons">
@@ -26,7 +26,7 @@ type ArtifactPlatformRequest = {
 }
 
 type ArtifactDataContext = {
-  tenantId: string
+  organizationId: string
   artifactId: Id<"artifacts">
   personId: Id<"persons">
 }
@@ -125,7 +125,7 @@ function artifactDataContext(
   context: ArtifactPlatformContext
 ): ArtifactDataContext {
   return {
-    tenantId: context.tenantId,
+    organizationId: context.organizationId,
     artifactId: context.artifactId,
     personId: context.personId,
   }

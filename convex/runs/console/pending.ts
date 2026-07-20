@@ -22,7 +22,7 @@ export async function pagePendingApprovals(
     runFilter: RunFilter
     scopeFilter: RunScopeFilter
     query: string
-    tenantId: string
+    organizationId: string
     paginationOpts: {
       cursor: string | null
       numItems: number
@@ -41,7 +41,7 @@ export async function pagePendingApprovals(
     personId: args.personId,
     runFilter: args.runFilter,
     scopeFilter: args.scopeFilter,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })) {
     const summary = await summarizeRun(ctx, run, args.personId, approval)
 
@@ -77,7 +77,7 @@ export async function countPendingApprovals(
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
     scopeFilter: RunScopeFilter
-    tenantId: string
+    organizationId: string
   }
 ) {
   const now = Date.now()
@@ -88,7 +88,7 @@ export async function countPendingApprovals(
     personId: args.personId,
     runFilter: args.runFilter,
     scopeFilter: args.scopeFilter,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })) {
     if (args.normalizedQuery === "") {
       count += 1
@@ -112,11 +112,11 @@ async function* pendingApprovalRuns(
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
     scopeFilter: RunScopeFilter
-    tenantId: string
+    organizationId: string
   }
 ) {
   const seenRunIds = new Set<string>()
-  const approvals = pendingApprovalQuery(ctx, args.tenantId, args.now)
+  const approvals = pendingApprovalQuery(ctx, args.organizationId, args.now)
 
   for await (const approval of approvals) {
     if (
@@ -130,7 +130,7 @@ async function* pendingApprovalRuns(
 
     if (
       run === null ||
-      run.tenantId !== args.tenantId ||
+      run.organizationId !== args.organizationId ||
       isTerminalRunStatus(run.status)
     ) {
       continue
@@ -148,11 +148,15 @@ async function* pendingApprovalRuns(
   }
 }
 
-function pendingApprovalQuery(ctx: QueryCtx, tenantId: string, now: number) {
+function pendingApprovalQuery(
+  ctx: QueryCtx,
+  organizationId: string,
+  now: number
+) {
   return ctx.db
     .query("approvals")
-    .withIndex("by_tenant_and_expires_at", (index) =>
-      index.eq("tenantId", tenantId).gt("expiresAt", now)
+    .withIndex("by_organization_and_expires_at", (index) =>
+      index.eq("organizationId", organizationId).gt("expiresAt", now)
     )
     .order("asc")
 }

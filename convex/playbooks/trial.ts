@@ -17,14 +17,14 @@ export async function trialPlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
   )
 
   const runId = await createInstructionRun(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     instructions: plan.instructions,
     title: plan.definition.title,
     artifactId: args.artifactId,
     access: await resolveAccessInput(ctx, {
       access: plan.access,
       principal,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
     }),
     createdBy: args.createdBy,
     principal,

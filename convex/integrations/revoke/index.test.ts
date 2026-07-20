@@ -144,9 +144,9 @@ function integration(
       integration === "microsoftEmail" ||
       integration === "microsoftCalendar"
         ? "user"
-        : "tenant",
+        : "organization",
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     updatedAt: Date.now(),
   } as Doc<"integrations">
 }

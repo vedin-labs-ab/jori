@@ -46,7 +46,7 @@ export type ArtifactTemplateInput = {
 export type PublishArtifactArgs =
   | {
       mode: "create"
-      tenantId: string
+      organizationId: string
       title: string
       access: "personal" | "organization"
       contract?: unknown
@@ -59,7 +59,7 @@ export type PublishArtifactArgs =
     }
   | {
       mode: "update"
-      tenantId: string
+      organizationId: string
       artifactId: Id<"artifacts">
       title: string
       access: "personal" | "organization"
@@ -101,7 +101,7 @@ export async function publishArtifact(
     const assets = await storeBuildAssets(ctx, buildAssets, storedStorageIds)
     const contract = normalizeArtifactContract(args.contract)
     const common = {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       title: args.title,
       access: args.access,
       contract,
@@ -151,7 +151,7 @@ export async function publishArtifact(
 export async function readArtifactSource(
   ctx: ActionCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
     versionId?: Id<"artifactVersions">
   }

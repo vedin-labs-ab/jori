@@ -56,7 +56,7 @@ export function isPassDue(
   return now - latest.window.end >= cadenceMs
 }
 
-// A running pass whose action died would block its tenant and stage forever;
+// A running pass whose action died would block its organization and stage forever;
 // after two hourly cadences it is presumed dead and failed by the next
 // opener. Judge calls finish in minutes, so the bound holds for every scope.
 export function isStaleRunning(now: number, pass: { startedAt: number }) {

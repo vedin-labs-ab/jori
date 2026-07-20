@@ -13,7 +13,7 @@ test("summarizes active waiters for parked running runs", async () => {
       activeWaiter: {
         _id: "waiter",
         _creationTime: 1000,
-        tenantId: "tenant",
+        organizationId: "organization",
         runId: "run",
         waitpointId: "waitpoint",
         status: "waiting",
@@ -36,7 +36,7 @@ function testRun(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     status: "completed",
     cause: { type: "manual" },
     createdAt: 0,

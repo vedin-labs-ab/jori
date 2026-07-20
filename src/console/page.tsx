@@ -22,7 +22,7 @@ export function ConsolePage({
   chrome = "shell",
   loadingFallback,
 }: {
-  children: (tenantId: string) => ReactNode
+  children: (organizationId: string) => ReactNode
   chrome?: "shell" | "none"
   loadingFallback?: ReactNode
 }) {
@@ -57,7 +57,7 @@ function ConsoleContent({
   isSignedIn,
   loadingFallback,
 }: {
-  children: (tenantId: string) => ReactNode
+  children: (organizationId: string) => ReactNode
   chrome: "shell" | "none"
   isConvexAuthenticated: boolean
   isConvexAuthLoading: boolean
@@ -123,7 +123,7 @@ function SignedInView({
   chrome,
   loadingFallback,
 }: {
-  children: (tenantId: string) => ReactNode
+  children: (organizationId: string) => ReactNode
   chrome: "shell" | "none"
   loadingFallback: ReactNode | undefined
 }) {
@@ -154,7 +154,7 @@ function SignedInView({
 
   const content = (
     <>
-      <ClerkIdentitySync tenantId={organization.id} />
+      <ClerkIdentitySync organizationId={organization.id} />
       <OnboardingGate />
       {children(organization.id)}
     </>
@@ -163,15 +163,15 @@ function SignedInView({
   return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
 }
 
-function ClerkIdentitySync({ tenantId }: { tenantId: string }) {
+function ClerkIdentitySync({ organizationId }: { organizationId: string }) {
   const syncCurrentUser = useAction(api.access.clerk.syncCurrentUser)
 
   useEffect(() => {
     void syncCurrentUser({
-      tenantId,
+      organizationId,
       timezone: localTimezone(),
     }).catch(() => undefined)
-  }, [syncCurrentUser, tenantId])
+  }, [syncCurrentUser, organizationId])
 
   return null
 }

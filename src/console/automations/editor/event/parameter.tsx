@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input"
 import { EventOptionField } from "./resource"
 
 export function EventParameterControl({
-  tenantId,
+  organizationId,
   parameter,
   parameters,
   values,
@@ -11,7 +11,7 @@ export function EventParameterControl({
   className,
   onValueChange,
 }: {
-  tenantId: string
+  organizationId: string
   parameter: AutomationEventParameter
   parameters: readonly AutomationEventParameter[]
   values: Record<string, string>
@@ -24,7 +24,7 @@ export function EventParameterControl({
   if (parameter.type === "option") {
     return (
       <EventOptionField
-        tenantId={tenantId}
+        organizationId={organizationId}
         parameter={parameter}
         match={values}
         disabled={dependencyLabel !== undefined}

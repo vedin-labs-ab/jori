@@ -7,7 +7,7 @@ import {
   getDeletedTreeIds,
   getTreeEntries,
 } from "./gc"
-import { getTenantArtifact } from "./links"
+import { getOrganizationArtifact } from "./links"
 
 const purgeLimit = 500
 
@@ -23,11 +23,11 @@ export type ArtifactPurgeResult = {
 export async function purgeArchivedArtifact(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Id<"artifacts">
   }
 ): Promise<ArtifactPurgeResult> {
-  const artifact = await getTenantArtifact(ctx, args)
+  const artifact = await getOrganizationArtifact(ctx, args)
 
   if (artifact.archivedAt === undefined) {
     throw new Error("Archive artifact before deleting it.")
@@ -131,7 +131,7 @@ async function deleteArtifactAutomations(
   for (const automation of automations) {
     if ((await ctx.db.get(automation._id)) !== null) {
       await removeAutomation(ctx, {
-        tenantId: artifact.tenantId,
+        organizationId: artifact.organizationId,
         automationId: automation._id,
       })
     }

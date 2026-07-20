@@ -56,7 +56,7 @@ export async function insertMessage(
 ): Promise<Doc<"messages">> {
   const now = Date.now()
   const messageId = await ctx.db.insert("messages", {
-    tenantId: input.integration.tenantId,
+    organizationId: input.integration.organizationId,
     integrationId: input.integration._id,
     integration: input.integration.integration,
     type: input.message.type,
@@ -89,7 +89,7 @@ export async function resolveMessageOwner(
   input: {
     integration: MessageIntegration
     message: ObservedMessage | Doc<"messages">
-    tenantId: string
+    organizationId: string
   }
 ) {
   if ("personId" in input.message && input.message.personId !== undefined) {
@@ -97,7 +97,7 @@ export async function resolveMessageOwner(
   }
 
   return await resolveActor(ctx, {
-    tenantId: input.tenantId,
+    organizationId: input.organizationId,
     provider: input.integration,
     actor: input.message.actor,
   })

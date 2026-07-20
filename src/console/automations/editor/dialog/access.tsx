@@ -21,7 +21,7 @@ export function AccessFields({
   onWebSearchChange,
   permissions,
   scope,
-  tenantId,
+  organizationId,
   webSearch,
 }: {
   additionalSurfaces: AutomationSurfaceFormValue[]
@@ -32,7 +32,7 @@ export function AccessFields({
   onWebSearchChange: (webSearch: boolean) => void
   permissions: AutomationPolicyPermissions
   scope: Scope
-  tenantId: string
+  organizationId: string
   webSearch: boolean
 }) {
   return (
@@ -61,7 +61,7 @@ export function AccessFields({
                 permissions={permissions}
                 scope={scope}
                 surface={surface}
-                tenantId={tenantId}
+                organizationId={organizationId}
               />
             ))}
           </div>
@@ -77,14 +77,14 @@ function AdditionalSurface({
   permissions,
   scope,
   surface,
-  tenantId,
+  organizationId,
 }: {
   onChange: (surface: AutomationSurfaceFormValue) => void
   onRemove: (integration: AutomationSurfaceFormValue["integration"]) => void
   permissions: AutomationPolicyPermissions
   scope: Scope
   surface: AutomationSurfaceFormValue
-  tenantId: string
+  organizationId: string
 }) {
   const [open, setOpen] = useState(false)
   const label = getAutomationSurfaceLabel(surface.integration)
@@ -141,7 +141,7 @@ function AdditionalSurface({
         onToolsChange={(tools) => onChange({ ...surface, tools })}
         open={open}
         permissions={permissions}
-        tenantId={tenantId}
+        organizationId={organizationId}
         tools={surface.tools}
         toolSurfaceLabel={label}
       />

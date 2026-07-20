@@ -8,7 +8,7 @@ import { canExecuteAutomationRunTools } from "./execution"
 import {
   createAutomation,
   fireAutomation,
-  getTenantAutomation,
+  getOrganizationAutomation,
   removeAutomation,
   searchAutomations,
   updateAutomation,
@@ -23,7 +23,7 @@ import {
 
 export const create = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     ...automationBinding,
     parentId: v.optional(v.id("automations")),
     expectedParentConfigurationVersion: v.optional(v.number()),
@@ -40,7 +40,7 @@ export const create = internalMutation({
 
 export const search = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.optional(v.id("persons")),
     query: v.optional(v.string()),
     includeCompleted: v.optional(v.boolean()),
@@ -57,7 +57,7 @@ export const search = internalQuery({
 
 export const read = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.optional(v.id("persons")),
     automationId: v.id("automations"),
   },
@@ -66,7 +66,7 @@ export const read = internalQuery({
 
     if (
       automation === null ||
-      automation.tenantId !== args.tenantId ||
+      automation.organizationId !== args.organizationId ||
       !canAccessAutomation(automation, args.personId)
     ) {
       return null
@@ -87,7 +87,7 @@ export const canExecuteRunTools = internalQuery({
 
 export const update = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.optional(v.id("persons")),
     automationId: v.id("automations"),
     artifactId: v.optional(v.id("artifacts")),
@@ -107,7 +107,7 @@ export const update = internalMutation({
 
 export const remove = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     personId: v.optional(v.id("persons")),
     automationId: v.id("automations"),
   },
@@ -135,14 +135,14 @@ export const cleanupOwned = internalMutation({
 async function requireRecordAccess(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId?: Id<"persons">
     automationId: Doc<"automations">["_id"]
   }
 ) {
-  const automation = await getTenantAutomation(
+  const automation = await getOrganizationAutomation(
     ctx,
-    args.tenantId,
+    args.organizationId,
     args.automationId
   )
 

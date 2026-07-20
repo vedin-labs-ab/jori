@@ -13,12 +13,12 @@ const EventFields = lazy(async () => ({
 }))
 
 export function AutomationTiming({
-  tenantId,
+  organizationId,
   showRunPreview,
   onValuesChange,
   values,
 }: {
-  tenantId: string
+  organizationId: string
   showRunPreview: boolean
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
@@ -59,7 +59,7 @@ export function AutomationTiming({
       <TabsContent value="event">
         <Suspense fallback={<TimingFallback />}>
           <EventFields
-            tenantId={tenantId}
+            organizationId={organizationId}
             onValuesChange={onValuesChange}
             values={values}
           />

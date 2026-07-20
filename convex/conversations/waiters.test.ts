@@ -50,8 +50,8 @@ function conversation(): Doc<"conversations"> {
     _id: id<"conversations">("conversation"),
     externalId: "conversation",
     integrationId: id<"integrations">("integration"),
-    tenantId: "tenant",
-    scope: "tenant",
+    organizationId: "organization",
+    scope: "organization",
   }
 }
 
@@ -64,9 +64,9 @@ function integration(): StartArgs["integration"] {
     credentials: {},
     externalId: "team",
     integration: "slack",
-    scope: "tenant",
+    scope: "organization",
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     updatedAt: 0,
   }
 }
@@ -81,7 +81,7 @@ function message(): StartArgs["message"] {
     integrationId: id<"integrations">("integration"),
     mentioned: false,
     conversationId: "conversation",
-    tenantId: "tenant",
+    organizationId: "organization",
     text: "Still there?",
     type: "message.channels",
   }
@@ -115,7 +115,7 @@ function run(
       _id: id<"runs">(runId),
       createdAt,
       status,
-      tenantId: "tenant",
+      organizationId: "organization",
     },
   ]
 }
@@ -134,7 +134,7 @@ function waiter(
       expiresAt: updatedAt + 1000,
       runId: id<"runs">(runId),
       status,
-      tenantId: "tenant",
+      organizationId: "organization",
       updatedAt,
       waitpointId: "waitpoint",
     },
@@ -149,7 +149,7 @@ function trace(runId: string, timestamp: number): Seed {
       _id: id<"traces">("trace"),
       key: `trace:${runId}:${timestamp}`,
       runId: id<"runs">(runId),
-      tenantId: "tenant",
+      organizationId: "organization",
       timestamp,
       type: "run.started",
     },

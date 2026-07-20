@@ -3,7 +3,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
-import { checkTenantAccess } from "../access"
+import { checkOrganizationAccess } from "../access"
 import { listArtifactAutomationRoots } from "../automations/lifecycle/read"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/clerk"
 import { personDisplayName } from "../persons/names"
@@ -21,12 +21,12 @@ import {
 
 export const list = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     query: v.string(),
     includeArchived: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return {
@@ -36,9 +36,9 @@ export const list = query({
       }
     }
 
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const artifacts = await searchArtifacts(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId,
       query: args.query,
       includeArchived: args.includeArchived,
@@ -58,11 +58,11 @@ export const list = query({
 
 export const get = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
   },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return {
@@ -72,7 +72,7 @@ export const get = query({
       }
     }
 
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const artifact = await findAccessibleArtifact(ctx, { ...args, personId })
 
     if (artifact === null) {
@@ -93,12 +93,12 @@ export const get = query({
  *  of every past expiry, so one indexed cursor yields active links first. */
 export const pageShares = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.tenantId)
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
 
     await getAccessibleArtifact(ctx, { ...args, personId })
 
@@ -123,7 +123,7 @@ export const pageShares = query({
 
 export const remove = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
   },
   handler: async (
@@ -134,7 +134,7 @@ export const remove = mutation({
     archived?: true
     deleted?: true
   }> => {
-    await ensureCurrentPerson(ctx, args.tenantId)
+    await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.artifacts.records.remove, args)
   },
@@ -142,14 +142,14 @@ export const remove = mutation({
 
 export const restore = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
   },
   handler: async (
     ctx,
     args
   ): Promise<{ artifactId: Id<"artifacts">; restored: true }> => {
-    await ensureCurrentPerson(ctx, args.tenantId)
+    await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.artifacts.records.restore, args)
   },
@@ -157,12 +157,12 @@ export const restore = mutation({
 
 export const revokeShare = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     shareId: v.id("artifactShares"),
   },
   handler: async (ctx, args): Promise<null> => {
-    const personId = await ensureCurrentPerson(ctx, args.tenantId)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     await ctx.runMutation(internal.artifacts.serve.share.revoke, {
       ...args,

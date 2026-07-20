@@ -10,7 +10,7 @@ import { createSignedNotionState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -20,7 +20,7 @@ export const createInstallState = mutation({
 
 export const recordOAuthInstallation = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     createdBy: v.id("persons"),
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
@@ -39,9 +39,9 @@ export const recordOAuthInstallation = internalMutation({
       externalId: args.profile.workspaceId,
     })
     const integrationId = await upsertIntegration(ctx, existing, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       integration: "notion",
-      scope: "tenant",
+      scope: "organization",
       externalId: args.profile.workspaceId,
       name: args.profile.workspaceName,
       avatar: args.profile.workspaceIcon,
@@ -61,7 +61,7 @@ export const recordOAuthInstallation = internalMutation({
     })
 
     await linkSetupIdentity(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId: args.createdBy,
       provider: "notion",
       identity: args.setupIdentity,

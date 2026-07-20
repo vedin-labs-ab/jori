@@ -4,11 +4,11 @@ import { runAudienceScope } from "../scope"
 export function canSee(current: Doc<"runs">, candidate: Doc<"runs">) {
   const scope = runAudienceScope(candidate)
 
-  if (candidate.tenantId !== current.tenantId) {
+  if (candidate.organizationId !== current.organizationId) {
     return false
   }
 
-  if (scope === "tenant") {
+  if (scope === "organization") {
     return true
   }
 

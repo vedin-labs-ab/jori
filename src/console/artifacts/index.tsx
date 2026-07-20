@@ -20,7 +20,7 @@ import { ArtifactLoadingView, ArtifactReadyView } from "./list"
 export function Artifacts() {
   return (
     <ConsolePage>
-      {(tenantId) => <ArtifactListView tenantId={tenantId} />}
+      {(organizationId) => <ArtifactListView organizationId={organizationId} />}
     </ConsolePage>
   )
 }
@@ -29,15 +29,15 @@ function useArtifactRows({
   filter,
   query,
   scope,
-  tenantId,
+  organizationId,
 }: {
   filter: ArtifactFilter
   query: string
   scope: ScopeFilter
-  tenantId: string
+  organizationId: string
 }) {
   const artifactList = useQuery(api.artifacts.console.list, {
-    tenantId,
+    organizationId,
     query,
     includeArchived: shouldIncludeArchivedArtifacts(filter),
   })
@@ -60,17 +60,17 @@ function useArtifactFilters() {
   return { filter, query, scope, setFilter, setQuery, setScope }
 }
 
-function ArtifactListView({ tenantId }: { tenantId: string }) {
+function ArtifactListView({ organizationId }: { organizationId: string }) {
   const { filter, query, scope, setFilter, setQuery, setScope } =
     useArtifactFilters()
-  const deletion = useArtifactDeletion(tenantId)
+  const deletion = useArtifactDeletion(organizationId)
   const now = useNow(60_000)
   const deferredQuery = useDeferredValue(query)
   const { artifactList, artifacts, hasFilters } = useArtifactRows({
     filter,
     query: deferredQuery,
     scope,
-    tenantId,
+    organizationId,
   })
   const pagination = useClientPagination({
     hasFilters,

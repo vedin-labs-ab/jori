@@ -134,7 +134,7 @@ async function loadRunRecords(ctx: ActionCtx, args: { runId: Id<"runs"> }) {
   }
 
   const [skills] = await Promise.all([
-    loadRuntimeSkills(ctx, run.tenantId),
+    loadRuntimeSkills(ctx, run.organizationId),
     session === null
       ? Promise.resolve()
       : syncSessionReactions(ctx, session._id),
@@ -189,7 +189,7 @@ export const reload = action({
       throw new Error("Runtime context not found.")
     }
 
-    const skills = await loadRuntimeSkills(ctx, input.run.tenantId)
+    const skills = await loadRuntimeSkills(ctx, input.run.organizationId)
     const permissions = await runtimePermissions(
       ctx,
       input,

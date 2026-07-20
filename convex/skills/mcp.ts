@@ -9,7 +9,7 @@ import {
 } from "./runtime"
 
 type MiloSkillRun = {
-  tenantId: string
+  organizationId: string
 }
 
 export function isMiloSkillTool(tool: string) {
@@ -22,7 +22,7 @@ export async function callMiloSkillTool(
   request: MiloToolRequest
 ) {
   const skills = (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
   })) as RuntimeSkill[]
 
   return loadMiloSkillTool(skills, request)

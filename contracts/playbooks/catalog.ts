@@ -21,7 +21,7 @@ export type PlaybookDefinition = {
   /** Prompt template id for the rendered instructions, e.g.
    *  "playbooks/briefing"; the source file is part of the versioned recipe. */
   template: string
-  /** Personal playbooks enable per member; organization ones per tenant. */
+  /** Personal playbooks enable per member; organization ones per organization. */
   scope: Scope
   /** The artifact this playbook materializes from its template, when it has
    *  one — setup discloses it and the artifact records the provenance. */

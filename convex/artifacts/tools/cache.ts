@@ -16,7 +16,7 @@ export type ArtifactToolCacheOptions = {
 }
 
 export type ArtifactToolCacheKeyInput = {
-  tenantId: string
+  organizationId: string
   artifactId: Id<"artifacts">
   versionId: Id<"artifactVersions">
   personId: Id<"persons">
@@ -66,7 +66,7 @@ export const write = internalMutation({
 
     if (document === null) {
       await ctx.db.insert("artifactCaches", {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         artifactId: args.artifactId,
         versionId: args.versionId,
         personId: args.personId,
@@ -95,7 +95,7 @@ export const write = internalMutation({
 
 export const invalidate = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
     surface: v.string(),
@@ -114,7 +114,7 @@ export const invalidate = internalMutation({
 
     for (const document of documents) {
       if (
-        document.tenantId === args.tenantId &&
+        document.organizationId === args.organizationId &&
         (args.integrationId === undefined ||
           document.integrationId === args.integrationId)
       ) {
@@ -166,7 +166,7 @@ async function findCacheDocument(
     return null
   }
 
-  return document.tenantId === args.tenantId &&
+  return document.organizationId === args.organizationId &&
     document.versionId === args.versionId &&
     document.personId === args.personId &&
     document.surface === args.surface &&

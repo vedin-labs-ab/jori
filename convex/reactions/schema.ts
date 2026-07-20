@@ -14,7 +14,7 @@ export const reactionTarget = v.object({
 })
 
 export const reactions = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integrationId: v.id("integrations"),
   integration: integrationValidator,
   target: reactionTarget,
@@ -26,8 +26,8 @@ export const reactions = defineTable({
   createdAt: v.number(),
 })
   .index("by_integration_and_target_key", ["integrationId", "target.key"])
-  .index("by_tenant_and_integration_and_target_conversation_and_updated", [
-    "tenantId",
+  .index("by_organization_integration_target_conversation_updated", [
+    "organizationId",
     "integrationId",
     "target.conversationId",
     "updatedAt",

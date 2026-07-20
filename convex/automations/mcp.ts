@@ -41,7 +41,7 @@ type UpdateAutomationArgs = {
 export async function callMiloAutomationTool(
   ctx: ActionCtx,
   execution: {
-    tenantId: string
+    organizationId: string
     createdBy?: Id<"persons">
     automationId?: Id<"automations">
     automationConfigurationVersion?: number
@@ -54,7 +54,7 @@ export async function callMiloAutomationTool(
     const input = args as AddAutomationArgs
     return await ctx.runMutation(internal.automations.records.create, {
       ...input,
-      tenantId: execution.tenantId,
+      organizationId: execution.organizationId,
       createdBy: execution.createdBy,
       parentId: input.type === "once" ? execution.automationId : undefined,
       expectedParentConfigurationVersion:
@@ -67,7 +67,7 @@ export async function callMiloAutomationTool(
   if (request.tool === "search_automations") {
     return await ctx.runQuery(internal.automations.records.search, {
       ...(args as SearchAutomationsArgs),
-      tenantId: execution.tenantId,
+      organizationId: execution.organizationId,
       personId: execution.createdBy,
     })
   }
@@ -75,7 +75,7 @@ export async function callMiloAutomationTool(
   if (request.tool === "read_automation") {
     return await ctx.runQuery(internal.automations.records.read, {
       ...(args as ReadAutomationArgs),
-      tenantId: execution.tenantId,
+      organizationId: execution.organizationId,
       personId: execution.createdBy,
     })
   }
@@ -83,7 +83,7 @@ export async function callMiloAutomationTool(
   if (request.tool === "update_automation") {
     return await ctx.runMutation(internal.automations.records.update, {
       ...(args as UpdateAutomationArgs),
-      tenantId: execution.tenantId,
+      organizationId: execution.organizationId,
       personId: execution.createdBy,
     })
   }
@@ -91,7 +91,7 @@ export async function callMiloAutomationTool(
   if (request.tool === "delete_automation") {
     return await ctx.runMutation(internal.automations.records.remove, {
       ...(args as ReadAutomationArgs),
-      tenantId: execution.tenantId,
+      organizationId: execution.organizationId,
       personId: execution.createdBy,
     })
   }

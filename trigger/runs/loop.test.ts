@@ -191,7 +191,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
         rootId: null,
         sandboxId: null,
         status: "running",
-        tenantId: "tenant",
+        organizationId: "organization",
       },
       session: null,
       tools: options.tools ?? [finishRunTool()],

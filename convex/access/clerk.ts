@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { action } from "../_generated/server"
 import { requireEnvironmentVariable } from "../shared/environment"
-import { requireTenantAccess } from "./index"
+import { requireOrganizationAccess } from "./index"
 import { readVerifiedClerkEmails } from "./profile"
 import {
   readClerkUserEmail,
@@ -12,11 +12,11 @@ import {
 
 export const syncCurrentUser = action({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     timezone: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<{ synced: number }> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const userId = requireClerkUserId(identity)
     const profile = await fetchClerkUser(userId)
     const emails = readVerifiedClerkEmails(profile)
@@ -24,7 +24,7 @@ export const syncCurrentUser = action({
     const result: { synced: number } = await ctx.runMutation(
       internal.persons.clerk.sync,
       {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         clerkSubject: userId,
         email: readClerkUserEmail(identity),
         name: readClerkUserName(identity),

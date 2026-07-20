@@ -15,7 +15,7 @@ export function conversationAudience(
   }
 }
 
-// The one inclusion gate for recent-activity context: tenant-wide
+// The one inclusion gate for recent-activity context: organization-wide
 // conversations are always shareable; anything narrower may only surface in a
 // run that is scoped to the very person being contextualized.
 export function canIncludeRecentConversation(args: {
@@ -24,7 +24,7 @@ export function canIncludeRecentConversation(args: {
   personal: boolean
 }) {
   return (
-    args.candidateScope === "tenant" ||
+    args.candidateScope === "organization" ||
     (args.currentScope === "person" && args.personal)
   )
 }

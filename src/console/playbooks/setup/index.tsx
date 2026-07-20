@@ -25,12 +25,12 @@ export function SetupControls({
   actions,
   definition,
   row,
-  tenantId,
+  organizationId,
 }: {
   actions: PlaybookActions
   definition: PlaybookDefinition
   row: PlaybookListRow
-  tenantId: string
+  organizationId: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const plan = planPlaybookEnable(row.slots)
@@ -52,7 +52,7 @@ export function SetupControls({
           open={isOpen}
           plan={plan}
           row={row}
-          tenantId={tenantId}
+          organizationId={organizationId}
         />
       ) : null}
     </>

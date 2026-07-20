@@ -8,7 +8,7 @@ import { syncSessionReactions } from "../sessions"
 export type LoadedRun = {
   _id: Id<"runs">
   status: "completed" | "failed" | "queued" | "running" | "stopped"
-  tenantId: string
+  organizationId: string
 }
 export type LoadedSandbox = { externalId: string } | null
 export type LoadedSession = {
@@ -28,9 +28,12 @@ export async function loadRunSession(ctx: ActionCtx, runId: Id<"runs">) {
   return session
 }
 
-export async function loadRuntimeSkills(ctx: ActionCtx, tenantId: string) {
+export async function loadRuntimeSkills(
+  ctx: ActionCtx,
+  organizationId: string
+) {
   return (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
-    tenantId,
+    organizationId,
   })) as RuntimeSkill[]
 }
 

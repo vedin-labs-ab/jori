@@ -50,7 +50,7 @@ export const insert = internalMutation({
 
     return {
       runId: await createInstructionRun(ctx, {
-        tenantId: parent.tenantId,
+        organizationId: parent.organizationId,
         instructions: args.task,
         title: args.title,
         access: await resolveSubtaskAccess(ctx, {

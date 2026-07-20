@@ -48,7 +48,7 @@ async function loadArtifacts(
   return artifacts.filter(
     (artifact): artifact is Doc<"artifacts"> =>
       artifact !== null &&
-      artifact.tenantId === run.tenantId &&
+      artifact.organizationId === run.organizationId &&
       (artifact.access === "organization" ||
         (personId !== undefined && canAccessArtifact(artifact, personId)))
   )

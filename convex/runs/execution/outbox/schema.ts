@@ -20,7 +20,7 @@ const runtimeOperation = v.union(
 )
 
 export const outbox = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   operation: runtimeOperation,
   key: v.string(),
   status: v.union(

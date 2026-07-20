@@ -7,7 +7,7 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { readClerkUserEmail, readClerkUserName } from "../access/users"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { createPersonActor } from "../shared/actor"
@@ -24,20 +24,20 @@ import {
 } from "./sources"
 
 export const get = query({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    return await readProfile(ctx, args.tenantId)
+    return await readProfile(ctx, args.organizationId)
   },
 })
 
 export const approve = mutation({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const personId = await ensureCurrentPerson(ctx, args.tenantId)
-    const profile = await readProfile(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+    const profile = await readProfile(ctx, args.organizationId)
 
     if (profile === null || profile.proposed === undefined) {
       throw new Error("There is no proposed update to approve.")
@@ -56,16 +56,20 @@ export const approve = mutation({
     })
 
     if (profile.proposed.sources !== undefined) {
-      await replaceApprovedSources(ctx, args.tenantId, profile.proposed.sources)
+      await replaceApprovedSources(
+        ctx,
+        args.organizationId,
+        profile.proposed.sources
+      )
     }
   },
 })
 
 export const dismiss = mutation({
-  args: { tenantId: v.string() },
+  args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
-    const profile = await readProfile(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
+    const profile = await readProfile(ctx, args.organizationId)
 
     if (profile === null || profile.proposed === undefined) {
       throw new Error("There is no proposed update to discard.")
@@ -79,9 +83,9 @@ export const dismiss = mutation({
 })
 
 export const declareDomain = mutation({
-  args: { tenantId: v.string(), domain: v.string() },
+  args: { organizationId: v.string(), domain: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     const address = parseWebsiteAddress(args.domain)
 
     if (address === null) {
@@ -90,12 +94,12 @@ export const declareDomain = mutation({
 
     const domain = address.key
 
-    const profile = await readProfile(ctx, args.tenantId)
+    const profile = await readProfile(ctx, args.organizationId)
     const domains = unique([...(profile?.declared?.domains ?? []), domain])
 
     if (profile === null) {
       await ctx.db.insert("organizationProfile", {
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
         aliases: [],
         domains: [],
         declared: { domains },
@@ -113,10 +117,10 @@ export const declareDomain = mutation({
 })
 
 export const retractDomain = mutation({
-  args: { tenantId: v.string(), domain: v.string() },
+  args: { organizationId: v.string(), domain: v.string() },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
-    const profile = await readProfile(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
+    const profile = await readProfile(ctx, args.organizationId)
     const declared = profile?.declared?.domains ?? []
     const domains = declared.filter((entry) => entry !== args.domain)
 
@@ -133,14 +137,14 @@ export const retractDomain = mutation({
 
 export const propose = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     facts: organizationFacts,
     sources: v.array(organizationSourceSnapshot),
     website: v.string(),
   },
   handler: async (ctx, args) => {
-    const profile = await readProfile(ctx, args.tenantId)
-    const approvedSources = await readApprovedSources(ctx, args.tenantId)
+    const profile = await readProfile(ctx, args.organizationId)
+    const approvedSources = await readApprovedSources(ctx, args.organizationId)
 
     if (
       profile !== null &&
@@ -158,7 +162,7 @@ export const propose = internalMutation({
     await writeProposed(ctx, profile, {
       facts: args.facts,
       sources: args.sources,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       website: args.website,
     })
   },
@@ -170,7 +174,7 @@ async function writeProposed(
   input: {
     facts: OrganizationFacts
     sources: SourceSnapshot[]
-    tenantId: string
+    organizationId: string
     website: string
   }
 ) {
@@ -183,7 +187,7 @@ async function writeProposed(
 
   if (profile === null) {
     await ctx.db.insert("organizationProfile", {
-      tenantId: input.tenantId,
+      organizationId: input.organizationId,
       aliases: [],
       domains: [],
       proposed,
@@ -224,16 +228,16 @@ export function approvedFacts(
 
 export async function readApprovedFacts(
   ctx: QueryLikeCtx,
-  tenantId: string
+  organizationId: string
 ): Promise<OrganizationFacts | null> {
-  const profile = await readProfile(ctx, tenantId)
+  const profile = await readProfile(ctx, organizationId)
 
   return profile === null ? null : approvedFacts(profile)
 }
 
-async function readProfile(ctx: QueryLikeCtx, tenantId: string) {
+async function readProfile(ctx: QueryLikeCtx, organizationId: string) {
   return await ctx.db
     .query("organizationProfile")
-    .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+    .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
     .unique()
 }

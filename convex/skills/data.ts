@@ -61,15 +61,15 @@ export function normalizeSkillInput(input: {
   }
 }
 
-export async function requireUniqueTenantSkillName(
+export async function requireUniqueOrganizationSkillName(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   name: string
 ) {
   const existingSkill = await ctx.db
     .query("skills")
-    .withIndex("by_tenant_name", (index) =>
-      index.eq("tenantId", tenantId).eq("name", name)
+    .withIndex("by_organization_name", (index) =>
+      index.eq("organizationId", organizationId).eq("name", name)
     )
     .first()
 
@@ -78,15 +78,15 @@ export async function requireUniqueTenantSkillName(
   }
 }
 
-export function sortSkills<T extends { tenantId: string | null; name: string }>(
-  skills: T[]
-) {
+export function sortSkills<
+  T extends { organizationId: string | null; name: string },
+>(skills: T[]) {
   return [...skills].sort((left, right) => {
-    if (left.tenantId === null && right.tenantId !== null) {
+    if (left.organizationId === null && right.organizationId !== null) {
       return -1
     }
 
-    if (left.tenantId !== null && right.tenantId === null) {
+    if (left.organizationId !== null && right.organizationId === null) {
       return 1
     }
 

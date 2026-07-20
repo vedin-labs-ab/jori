@@ -17,12 +17,12 @@ import { applyEventMatchChange, removeEventMatch } from "./match"
 import { EventParameterControl } from "./parameter"
 
 export function EventScopeFields({
-  tenantId,
+  organizationId,
   event,
   onValuesChange,
   values,
 }: {
-  tenantId: string
+  organizationId: string
   event: AutomationEventDefinition
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
@@ -62,7 +62,7 @@ export function EventScopeFields({
       {visibleParameters.map((parameter) => (
         <ScopeField
           key={parameter.key}
-          tenantId={tenantId}
+          organizationId={organizationId}
           parameter={parameter}
           parameters={parameters}
           removable={addedKeys.includes(parameter.key)}
@@ -136,7 +136,7 @@ function AddConditionMenu({
 }
 
 function ScopeField({
-  tenantId,
+  organizationId,
   parameter,
   parameters,
   removable,
@@ -144,7 +144,7 @@ function ScopeField({
   onValueChange,
   onRemove,
 }: {
-  tenantId: string
+  organizationId: string
   parameter: AutomationEventParameter
   parameters: readonly AutomationEventParameter[]
   removable: boolean
@@ -158,7 +158,7 @@ function ScopeField({
     : undefined
   const control = (
     <EventParameterControl
-      tenantId={tenantId}
+      organizationId={organizationId}
       parameter={parameter}
       parameters={parameters}
       values={values}

@@ -15,14 +15,14 @@ export type WorkstreamContext = {
 
 export async function readWorkstreamRoster(
   ctx: QueryCtx,
-  tenantId: string
+  organizationId: string
 ): Promise<WorkstreamContext[]> {
   const now = Date.now()
   const rows = await ctx.db
     .query("beliefs")
-    .withIndex("by_tenant_and_kind_and_status", (index) =>
+    .withIndex("by_organization_and_kind_and_status", (index) =>
       index
-        .eq("tenantId", tenantId)
+        .eq("organizationId", organizationId)
         .eq("kind", "workstream")
         .eq("status", "confirmed")
     )

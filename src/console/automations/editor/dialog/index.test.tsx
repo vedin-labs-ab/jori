@@ -200,7 +200,7 @@ function renderAutomationDialog({
       onSave={() => undefined}
       onValuesChange={() => undefined}
       policyKey="test"
-      tenantId="tenant"
+      organizationId="organization"
       values={values}
     />
   )

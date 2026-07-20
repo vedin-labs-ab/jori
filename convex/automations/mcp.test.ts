@@ -11,7 +11,7 @@ test("automation runs own the one-time automations they create", async () => {
   await callMiloAutomationTool(
     { runMutation } as unknown as ActionCtx,
     {
-      tenantId: "tenant",
+      organizationId: "organization",
       createdBy: "person" as Id<"persons">,
       automationId,
       automationConfigurationVersion: 3,
@@ -35,13 +35,13 @@ test("manual and durable creations stay unowned", async () => {
 
   await callMiloAutomationTool(
     ctx,
-    { tenantId: "tenant", createdBy: "person" as Id<"persons"> },
+    { organizationId: "organization", createdBy: "person" as Id<"persons"> },
     { tool: "add_automation", args: automationArgs("once") }
   )
   await callMiloAutomationTool(
     ctx,
     {
-      tenantId: "tenant",
+      organizationId: "organization",
       createdBy: "person" as Id<"persons">,
       automationId: "parent" as Id<"automations">,
     },
@@ -66,7 +66,7 @@ test("an owned run keeps its durable parent after the child fires", async () => 
   await callMiloTool(
     { runMutation } as unknown as ActionCtx,
     {
-      tenantId: "tenant",
+      organizationId: "organization",
       principal: {
         kind: "person",
         personId: "person" as Id<"persons">,
@@ -94,13 +94,13 @@ test("known automation IDs remain directly readable", async () => {
 
   await callMiloAutomationTool(
     { runQuery } as unknown as ActionCtx,
-    { tenantId: "tenant", createdBy: "person" as Id<"persons"> },
+    { organizationId: "organization", createdBy: "person" as Id<"persons"> },
     { tool: "read_automation", args: { automationId } }
   )
 
   expect(runQuery).toHaveBeenCalledWith(
     expect.anything(),
-    expect.objectContaining({ automationId, tenantId: "tenant" })
+    expect.objectContaining({ automationId, organizationId: "organization" })
   )
 })
 

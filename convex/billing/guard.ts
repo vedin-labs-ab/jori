@@ -14,9 +14,9 @@ export type RunBudget =
  */
 export async function checkRunBudget(
   ctx: MutationCtx,
-  args: { tenantId: string; interactive: boolean }
+  args: { organizationId: string; interactive: boolean }
 ): Promise<RunBudget> {
-  const account = await ensureAccount(ctx, args.tenantId)
+  const account = await ensureAccount(ctx, args.organizationId)
   const now = Date.now()
 
   if (account.state === "paused") {
@@ -51,7 +51,7 @@ const budgetMessages = {
 
 export async function requireRunBudget(
   ctx: MutationCtx,
-  args: { tenantId: string; interactive: boolean }
+  args: { organizationId: string; interactive: boolean }
 ) {
   const budget = await checkRunBudget(ctx, args)
 

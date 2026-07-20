@@ -7,12 +7,12 @@ import {
   type QueryCtx,
   query,
 } from "../_generated/server"
-import { checkTenantAccess, requireTenantAccess } from "../access"
+import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { ensureCurrentPerson } from "../persons/clerk"
 import { integrationValidator } from "../shared/integrations"
 import {
   normalizeSkillInput,
-  requireUniqueTenantSkillName,
+  requireUniqueOrganizationSkillName,
   sortSkills,
 } from "./data"
 import { skillCategoryValidator } from "./schema"
@@ -30,10 +30,10 @@ type SeedSkill = {
 
 export const list = query({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    const access = await checkTenantAccess(ctx, args.tenantId)
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
 
     if (!access.ok) {
       return {
@@ -43,13 +43,13 @@ export const list = query({
       }
     }
 
-    const skills = await loadSortedSkills(ctx, args.tenantId)
+    const skills = await loadSortedSkills(ctx, args.organizationId)
 
     return {
       status: "ready" as const,
       skills: skills.map((skill) => ({
         _id: skill._id,
-        tenantId: skill.tenantId,
+        organizationId: skill.organizationId,
         name: skill.name,
         description: skill.description,
         category: skill.category,
@@ -58,7 +58,9 @@ export const list = query({
         createdAt: skill.createdAt,
         updatedAt: skill.updatedAt,
         scope:
-          skill.tenantId === null ? ("global" as const) : ("tenant" as const),
+          skill.organizationId === null
+            ? ("global" as const)
+            : ("organization" as const),
       })),
     }
   },
@@ -66,7 +68,7 @@ export const list = query({
 
 export const create = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     name: v.string(),
     category: skillCategoryValidator,
     associatedIntegrations: v.array(integrationValidator),
@@ -74,16 +76,20 @@ export const create = mutation({
     body: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     const input = normalizeSkillInput(args)
 
-    await requireUniqueTenantSkillName(ctx, args.tenantId, input.name)
+    await requireUniqueOrganizationSkillName(
+      ctx,
+      args.organizationId,
+      input.name
+    )
 
     const now = Date.now()
-    const personId = await ensureCurrentPerson(ctx, args.tenantId)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.db.insert("skills", {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       name: input.name,
       category: input.category,
       associatedIntegrations: input.associatedIntegrations,
@@ -98,7 +104,7 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     skillId: v.id("skills"),
     name: v.string(),
     category: skillCategoryValidator,
@@ -107,18 +113,22 @@ export const update = mutation({
     body: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     const skill = await ctx.db.get(args.skillId)
 
-    if (skill === null || skill.tenantId !== args.tenantId) {
+    if (skill === null || skill.organizationId !== args.organizationId) {
       throw new Error("Skill not found.")
     }
 
     const input = normalizeSkillInput(args)
 
     if (input.name !== skill.name) {
-      await requireUniqueTenantSkillName(ctx, args.tenantId, input.name)
+      await requireUniqueOrganizationSkillName(
+        ctx,
+        args.organizationId,
+        input.name
+      )
     }
 
     await ctx.db.patch(args.skillId, {
@@ -134,15 +144,15 @@ export const update = mutation({
 
 export const remove = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     skillId: v.id("skills"),
   },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
     const skill = await ctx.db.get(args.skillId)
 
-    if (skill === null || skill.tenantId !== args.tenantId) {
+    if (skill === null || skill.organizationId !== args.organizationId) {
       throw new Error("Skill not found.")
     }
 
@@ -152,14 +162,14 @@ export const remove = mutation({
 
 export const listForRuntime = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    const skills = await loadSortedSkills(ctx, args.tenantId)
+    const skills = await loadSortedSkills(ctx, args.organizationId)
 
     return skills.map((skill) => ({
       id: skill._id,
-      tenantId: skill.tenantId,
+      organizationId: skill.organizationId,
       name: skill.name,
       category: skill.category,
       associatedIntegrations: skill.associatedIntegrations ?? [],
@@ -172,19 +182,21 @@ export const listForRuntime = internalQuery({
   },
 })
 
-async function loadSortedSkills(ctx: QueryCtx, tenantId: string) {
-  const [globalSkills, tenantSkills] = await Promise.all([
+async function loadSortedSkills(ctx: QueryCtx, organizationId: string) {
+  const [globalSkills, organizationSkills] = await Promise.all([
     ctx.db
       .query("skills")
-      .withIndex("by_tenant", (index) => index.eq("tenantId", null))
+      .withIndex("by_organization", (index) => index.eq("organizationId", null))
       .collect(),
     ctx.db
       .query("skills")
-      .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
+      .withIndex("by_organization", (index) =>
+        index.eq("organizationId", organizationId)
+      )
       .collect(),
   ])
 
-  return sortSkills([...globalSkills, ...tenantSkills])
+  return sortSkills([...globalSkills, ...organizationSkills])
 }
 
 export const syncGlobalSkills = internalMutation({
@@ -195,7 +207,7 @@ export const syncGlobalSkills = internalMutation({
     const seedNames = new Set<string>(seedSkills.map((skill) => skill.name))
     const existingGlobalSkills = await ctx.db
       .query("skills")
-      .withIndex("by_tenant", (index) => index.eq("tenantId", null))
+      .withIndex("by_organization", (index) => index.eq("organizationId", null))
       .collect()
 
     for (const seedSkill of seedSkills) {
@@ -206,7 +218,7 @@ export const syncGlobalSkills = internalMutation({
 
       if (existingSkill === undefined) {
         await ctx.db.insert("skills", {
-          tenantId: null,
+          organizationId: null,
           name: input.name,
           category: input.category,
           associatedIntegrations: input.associatedIntegrations,

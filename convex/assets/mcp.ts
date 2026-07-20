@@ -22,7 +22,7 @@ export function isMiloAssetTool(tool: string) {
 export async function callMiloAssetTool(
   ctx: ActionCtx,
   run: {
-    tenantId: string
+    organizationId: string
   },
   request: MiloToolRequest
 ): Promise<unknown> {
@@ -31,14 +31,14 @@ export async function callMiloAssetTool(
   if (request.tool === "search_assets") {
     return await ctx.runQuery(internal.assets.data.search, {
       ...(args as SearchAssetsArgs),
-      tenantId: run.tenantId,
+      organizationId: run.organizationId,
     })
   }
 
   if (request.tool === "read_asset") {
     return await ctx.runQuery(internal.assets.data.read, {
       ...(args as ReadAssetArgs),
-      tenantId: run.tenantId,
+      organizationId: run.organizationId,
     })
   }
 

@@ -1,5 +1,5 @@
 import { type QueryCtx } from "../../_generated/server"
-import { type requireTenantAccess } from "../../access"
+import { type requireOrganizationAccess } from "../../access"
 import { requireClerkUserId } from "../../access/users"
 import { resolvePersonByIdentity } from "../../persons/identity/links"
 
@@ -7,11 +7,11 @@ import { resolvePersonByIdentity } from "../../persons/identity/links"
  * before resolving it here. */
 export async function resolveConsolePerson(
   ctx: QueryCtx,
-  tenantId: string,
-  identity: Awaited<ReturnType<typeof requireTenantAccess>>
+  organizationId: string,
+  identity: Awaited<ReturnType<typeof requireOrganizationAccess>>
 ) {
   return await resolvePersonByIdentity(ctx, {
-    tenantId,
+    organizationId,
     provider: "clerk",
     externalId: requireClerkUserId(identity),
   })

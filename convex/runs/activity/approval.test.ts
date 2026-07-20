@@ -19,7 +19,7 @@ test("projects approvals with surface action metadata", () => {
         status: "expired",
         summary: "Create a Notion page with the requested content.",
         surface: "notion",
-        tenantId: "tenant",
+        organizationId: "organization",
         tool: "notion_create_page",
       } as Doc<"approvals">,
     ],

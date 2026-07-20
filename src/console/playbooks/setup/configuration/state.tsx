@@ -39,10 +39,10 @@ export function useOptionsSetup(
 /** Add context that is specific to a setup field, plus form validation. */
 export function useOptionHints(
   definition: PlaybookDefinition,
-  tenantId: string,
+  organizationId: string,
   options: PlaybookOptionValues
 ) {
-  const meetings = useMeetingsHint(definition, tenantId, options)
+  const meetings = useMeetingsHint(definition, organizationId, options)
 
   return {
     optionsIssue: definition.validateOptions?.(options),
@@ -53,7 +53,7 @@ export function useOptionHints(
 /** Ground the Meetings scope in the organization's configured domains. */
 function useMeetingsHint(
   definition: PlaybookDefinition,
-  tenantId: string,
+  organizationId: string,
   options: PlaybookOptionValues
 ) {
   const hasMeetings = playbookOptionFields(definition.setup).some(
@@ -61,7 +61,7 @@ function useMeetingsHint(
   )
   const profile = useQuery(
     api.organization.profile.get,
-    hasMeetings ? { tenantId } : "skip"
+    hasMeetings ? { organizationId } : "skip"
   )
 
   if (!hasMeetings || options.meetings === "external") {

@@ -117,8 +117,8 @@ function run(): Doc<"runs"> {
   return {
     _id: id<"runs">("run"),
     _creationTime: 0,
-    tenantId: "tenant",
-    scope: "tenant",
+    organizationId: "organization",
+    scope: "organization",
     principal: { kind: "person", personId: id<"persons">("person") },
     conversationId: id<"conversations">("current-conversation"),
     cause: {
@@ -141,7 +141,7 @@ function person(args: { id: string; supersededBy?: string }): Doc<"persons"> {
   return {
     _id: id<"persons">(args.id),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     ...(args.supersededBy === undefined
       ? {}
       : { supersededBy: id<"persons">(args.supersededBy) }),
@@ -159,7 +159,7 @@ function message(args: {
   return {
     _id: id<"messages">(args.id),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "slack",
     type: "message.channels",
@@ -185,10 +185,10 @@ function conversation(args: {
   return {
     _id: id<"conversations">(args.id),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     externalId: args.thread,
-    scope: "tenant",
+    scope: "organization",
     summarizedAt: Date.now() - 19 * 60_000,
     summary: "Albin wants a cartoon avatar.",
   }

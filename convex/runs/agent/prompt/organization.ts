@@ -5,9 +5,9 @@ import { rosterActiveMs } from "../../../deduction/limits"
 import { type WorkstreamContext } from "../../../deduction/roster"
 import { type AgentRuntimeInput } from "../input"
 
-// The organization message: tenant-scoped context (approved facts and the
+// The organization message: organization-scoped context (approved facts and the
 // deduced workstream roster) delivered as data alongside the run prompt,
-// never as instructions. Renders when anything is known, so a tenant that
+// never as instructions. Renders when anything is known, so a organization that
 // skipped onboarding still gets its roster.
 export function createOrganizationMessage(input: AgentRuntimeInput) {
   const facts = input.organization

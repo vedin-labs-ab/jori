@@ -77,7 +77,7 @@ test("marks approval-required access counts in mention and reply runs", async ()
 function slackIntegration() {
   return {
     _id: "integration",
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "slack",
   }
 }
@@ -86,7 +86,7 @@ function event() {
   return {
     _id: "event",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration",
     key: "slack:event",
     type: "message.created",
@@ -98,7 +98,7 @@ function message(kind: "mention" | "reply") {
   return {
     _id: "message",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: "integration",
     integration: "slack",
     type: "message.channels",
@@ -145,7 +145,7 @@ function testRun(
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     status: "completed",
     createdAt: 0,
     endedAt: 1000,

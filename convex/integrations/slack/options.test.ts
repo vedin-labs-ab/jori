@@ -83,9 +83,9 @@ function slackIntegration(): Doc<"integrations"> {
   return {
     _id: "slack" as Id<"integrations">,
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "slack",
-    scope: "tenant",
+    scope: "organization",
     externalId: "team",
     credentials: { bot: "bot-token", user: "user-token" },
     status: "active",

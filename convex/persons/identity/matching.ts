@@ -12,7 +12,7 @@ const emailIdentityLimit = 5
 // non-identifying or spans too many identities to be trusted.
 export async function convergeEmail(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   email: string | undefined
 ): Promise<Id<"persons"> | undefined> {
   const normalized = identifyingEmail(email)
@@ -23,8 +23,8 @@ export async function convergeEmail(
 
   const identities = await ctx.db
     .query("identities")
-    .withIndex("by_tenant_email", (index) =>
-      index.eq("tenantId", tenantId).eq("email", normalized)
+    .withIndex("by_organization_email", (index) =>
+      index.eq("organizationId", organizationId).eq("email", normalized)
     )
     .take(emailIdentityLimit + 1)
 
@@ -34,7 +34,7 @@ export async function convergeEmail(
 
   return await mergeWinner(
     ctx,
-    tenantId,
+    organizationId,
     identities.map((identity) => ({
       personId: identity.personId,
       method: identity.link.method,

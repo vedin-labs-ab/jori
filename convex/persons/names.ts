@@ -21,7 +21,7 @@ const namePreference: IdentityProvider[] = [
 export async function resolvePersonId(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     provider: IdentityProvider | undefined
     actor: Actor | undefined
   }
@@ -38,7 +38,7 @@ export async function resolvePersonId(
   }
 
   const identity = await findIdentity(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     provider: args.provider,
     externalId: actor.externalId,
   })

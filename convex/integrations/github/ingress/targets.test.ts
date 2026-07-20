@@ -60,7 +60,7 @@ function message(data: Record<string, unknown>): Doc<"messages"> {
   return {
     _id: id<"messages">("message"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "github",
     type: "comment.pull_request.created",

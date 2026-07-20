@@ -38,7 +38,7 @@ type ResolvedSlot = {
 }
 
 export type PlaybookPlanArgs = {
-  tenantId: string
+  organizationId: string
   key: string
   choices: Partial<Record<PlaybookCapability, Integration>>
   destination: DeliveryChoice
@@ -58,7 +58,7 @@ export async function resolvePlaybookPlan(
   const definition = getPlaybook(args.key)
   const connected = await connectedIntegrations(ctx, {
     ownerId: args.createdBy,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
   const slots = readPlaybookSlots(definition, connected)
   const resolved: ResolvedSlot[] = definition.slots.map((slot, index) => ({
@@ -105,7 +105,7 @@ export async function resolvePlaybookPlan(
 /** The caller's connected integrations, honouring user-scope ownership. */
 export async function connectedIntegrations(
   ctx: QueryLikeCtx,
-  args: { ownerId: Id<"persons"> | undefined; tenantId: string }
+  args: { ownerId: Id<"persons"> | undefined; organizationId: string }
 ): Promise<Set<Integration>> {
   const integrations = await listActiveIntegrationsForOwner(ctx, args)
 

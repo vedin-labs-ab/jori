@@ -6,7 +6,7 @@ const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 const integrationReturnPath = "/integrations"
 
 export type CreateInstallState = (args: {
-  tenantId: string
+  organizationId: string
   returnUrl: string
 }) => Promise<string>
 
@@ -14,12 +14,12 @@ export function useIntegrationInstall({
   connectError,
   createInstallState,
   installPath,
-  tenantId,
+  organizationId,
 }: {
   connectError: string
   createInstallState: CreateInstallState
   installPath: string
-  tenantId: string
+  organizationId: string
 }) {
   const [isConnecting, setIsConnecting] = useState(false)
 
@@ -33,7 +33,7 @@ export function useIntegrationInstall({
 
     try {
       const state = await createInstallState({
-        tenantId,
+        organizationId,
         returnUrl: `${window.location.origin}${integrationReturnPath}`,
       })
       const installUrl = new URL(installPath, convexSiteUrl)

@@ -36,7 +36,7 @@ export type PlaceVisibility = Infer<typeof placeVisibility>
 // distilled. A run reads exactly one place, the one its message landed in,
 // so private-place claims never travel.
 export const places = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   integrationId: v.id("integrations"),
   externalId: v.string(),
   name: v.string(),
@@ -47,8 +47,8 @@ export const places = defineTable({
   // Debounce state, mirroring conversation summaries.
   profileAt: v.optional(v.number()),
   functionId: v.optional(v.id("_scheduled_functions")),
-}).index("by_tenant_and_integration_and_external", [
-  "tenantId",
+}).index("by_organization_and_integration_and_external", [
+  "organizationId",
   "integrationId",
   "externalId",
 ])

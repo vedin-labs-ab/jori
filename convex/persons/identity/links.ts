@@ -18,7 +18,7 @@ import { type IdentityProvider, type LinkMethod } from "./schema"
 export async function resolveIdentity(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     provider: IdentityProvider
     externalId: string
     method: LinkMethod
@@ -31,18 +31,20 @@ export async function resolveIdentity(
   const existing = await findIdentity(ctx, {
     externalId,
     provider: args.provider,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
 
   if (existing !== null) {
     const personId = await canonicalPersonId(ctx, existing.personId)
     await patchIdentity(ctx, existing, { ...args, externalId, personId })
-    return (await convergeEmail(ctx, args.tenantId, profile.email)) ?? personId
+    return (
+      (await convergeEmail(ctx, args.organizationId, profile.email)) ?? personId
+    )
   }
 
   const target =
-    (await convergeEmail(ctx, args.tenantId, profile.email)) ??
-    (await createPerson(ctx, { tenantId: args.tenantId }))
+    (await convergeEmail(ctx, args.organizationId, profile.email)) ??
+    (await createPerson(ctx, { organizationId: args.organizationId }))
 
   return await linkIdentityToPerson(ctx, {
     ...args,
@@ -54,7 +56,7 @@ export async function resolveIdentity(
 export async function linkIdentityToPerson(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     provider: IdentityProvider
     externalId: string
@@ -70,7 +72,7 @@ export async function linkIdentityToPerson(
   const existing = await findIdentity(ctx, {
     externalId,
     provider: args.provider,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
   })
   const personId =
     existing === null
@@ -88,19 +90,21 @@ export async function linkIdentityToPerson(
 
   await ensureEmailIdentity(ctx, { ...args, personId, profile })
 
-  return (await convergeEmail(ctx, args.tenantId, profile.email)) ?? personId
+  return (
+    (await convergeEmail(ctx, args.organizationId, profile.email)) ?? personId
+  )
 }
 
 export async function resolvePersonByIdentity(
   ctx: QueryLikeCtx,
   args: {
-    tenantId: string
+    organizationId: string
     provider: IdentityProvider
     externalId: string
   }
 ) {
   const identity = await findIdentity(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     provider: args.provider,
     externalId: normalizeExternalId(args.provider, args.externalId),
   })
@@ -114,7 +118,7 @@ async function resolveLinkConflict(
   ctx: MutationCtx,
   existing: Doc<"identities">,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     method: LinkMethod
   }
@@ -126,7 +130,7 @@ async function resolveLinkConflict(
   }
 
   return (
-    (await mergeWinner(ctx, args.tenantId, [
+    (await mergeWinner(ctx, args.organizationId, [
       { personId: existingPersonId, method: existing.link.method },
       { personId: args.personId, method: args.method },
     ])) ?? args.personId
@@ -136,7 +140,7 @@ async function resolveLinkConflict(
 async function ensureEmailIdentity(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     provider: IdentityProvider
     method: LinkMethod
@@ -150,7 +154,7 @@ async function ensureEmailIdentity(
   }
 
   await linkIdentityToPerson(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     personId: args.personId,
     provider: "email",
     externalId: email,

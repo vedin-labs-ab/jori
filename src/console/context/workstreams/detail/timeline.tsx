@@ -26,11 +26,11 @@ type TimelineItem = NonNullable<
 // entry text and the receipts behind it. Day labels sit left of a shared
 // rail; older updates page in below.
 export function WorkstreamTimeline({
-  tenantId,
+  organizationId,
   items,
   now,
 }: {
-  tenantId: string
+  organizationId: string
   items: TimelineItem[]
   now: number
 }) {
@@ -45,7 +45,7 @@ export function WorkstreamTimeline({
               first={index === 0}
               key={day.key}
               now={now}
-              tenantId={tenantId}
+              organizationId={organizationId}
             />
           ))}
         </div>
@@ -56,13 +56,13 @@ export function WorkstreamTimeline({
 
 function DaySection({
   day,
-  tenantId,
+  organizationId,
   now,
   first,
   continues,
 }: {
   day: TimelineDay<TimelineItem>
-  tenantId: string
+  organizationId: string
   now: number
   first: boolean
   continues: boolean
@@ -88,7 +88,7 @@ function DaySection({
                   item={item}
                   key={item.id}
                   now={now}
-                  tenantId={tenantId}
+                  organizationId={organizationId}
                 />
               ))}
             </ol>
@@ -117,11 +117,11 @@ function TimelineDot({ live }: { live: boolean }) {
 
 function EntryRow({
   item,
-  tenantId,
+  organizationId,
   now,
 }: {
   item: TimelineItem
-  tenantId: string
+  organizationId: string
   now: number
 }) {
   return (
@@ -141,7 +141,7 @@ function EntryRow({
         <CollapsibleContent className="flex flex-col gap-2.5 border-t bg-muted/30 p-2.5">
           <p className="text-sm">{item.entry}</p>
           {item.receipts === 0 ? null : (
-            <EntryReceipts item={item} tenantId={tenantId} />
+            <EntryReceipts item={item} organizationId={organizationId} />
           )}
         </CollapsibleContent>
       </Collapsible>
@@ -188,13 +188,13 @@ function EntryMeta({ item, now }: { item: TimelineItem; now: number }) {
 // intent and stays one click behind the claim.
 function EntryReceipts({
   item,
-  tenantId,
+  organizationId,
 }: {
   item: TimelineItem
-  tenantId: string
+  organizationId: string
 }) {
   const receipts = useQuery(api.workstreams.queries.receipts, {
-    tenantId,
+    organizationId,
     effortId: item.effortId,
     passId: item.passId,
   })

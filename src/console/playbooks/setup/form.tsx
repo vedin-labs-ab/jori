@@ -23,11 +23,14 @@ export function SetupDialogSections({
   providerIndex,
   row,
   setupFields,
-  tenantId,
+  organizationId,
 }: {
   choices: Record<string, Integration>
   definition: PlaybookDefinition
-  delivery: Omit<Parameters<typeof PlaybookDelivery>[0]["delivery"], "tenantId">
+  delivery: Omit<
+    Parameters<typeof PlaybookDelivery>[0]["delivery"],
+    "organizationId"
+  >
   hints: ReturnType<typeof useOptionHints>["hints"]
   isBusy: boolean
   onProviderIndexChange: (index: number) => void
@@ -37,7 +40,7 @@ export function SetupDialogSections({
   providerIndex: number
   row: PlaybookListRow
   setupFields: ReturnType<typeof useOptionsSetup>["setupFields"]
-  tenantId: string
+  organizationId: string
 }) {
   return (
     <div className="grid gap-4">
@@ -52,7 +55,7 @@ export function SetupDialogSections({
         />
       )}
       <PlaybookDelivery
-        delivery={{ ...delivery, tenantId }}
+        delivery={{ ...delivery, organizationId }}
         disabled={isBusy}
       />
       <PlaybookAccounts

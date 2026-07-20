@@ -10,7 +10,7 @@ import { createSignedLinearState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -20,7 +20,7 @@ export const createInstallState = mutation({
 
 export const recordOAuthInstallation = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     createdBy: v.id("persons"),
     accessToken: v.string(),
     refreshToken: v.string(),
@@ -43,9 +43,9 @@ export const recordOAuthInstallation = internalMutation({
     })
 
     return await upsertIntegration(ctx, existing, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       integration: "linear",
-      scope: "tenant",
+      scope: "organization",
       externalId: args.profile.organization.id,
       name: args.profile.organization.name,
       url: getLinearUrl(args.profile.organization.urlKey),

@@ -169,7 +169,7 @@ function googleIntegration(): Doc<"integrations"> {
   return {
     _id: "integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "gmail",
     scope: "user",
     externalId: "google-user",
@@ -188,9 +188,9 @@ function githubIntegration(credentials: unknown): Doc<"integrations"> {
   return {
     _id: "integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "github",
-    scope: "tenant",
+    scope: "organization",
     externalId: "98765",
     credentials,
     status: "active",

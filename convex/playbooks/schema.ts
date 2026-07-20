@@ -34,8 +34,8 @@ export const playbookBindingValidator = v.object({
 export type PlaybookBinding = Infer<typeof playbookBindingValidator>
 
 export const playbookPreferences = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   personId: v.id("persons"),
   delivery: deliveryChoiceValidator,
   updatedAt: v.number(),
-}).index("by_tenant_and_person", ["tenantId", "personId"])
+}).index("by_organization_and_person", ["organizationId", "personId"])

@@ -164,10 +164,10 @@ async function conversationMessages(
   return await ctx.db
     .query("messages")
     .withIndex(
-      "by_tenant_and_integration_and_conversation_and_created_at",
+      "by_organization_and_integration_and_conversation_and_created_at",
       (q) => {
         const scoped = q
-          .eq("tenantId", conversation.tenantId)
+          .eq("organizationId", conversation.organizationId)
           .eq("integrationId", conversation.integrationId)
           .eq("conversationId", conversation.externalId)
 

@@ -65,7 +65,7 @@ async function grantableIntegrations(
 
   const integrations = await listActiveIntegrationsForPrincipal(ctx, {
     principal: parent.principal,
-    tenantId: parent.tenantId,
+    organizationId: parent.organizationId,
   })
 
   return integrations.map((integration) => ({

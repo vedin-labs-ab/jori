@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import {
   type ApprovalFilter,
   approvalFilterValidator,
@@ -28,12 +28,16 @@ export const page = query({
     runFilter: runFilterValidator,
     scopeFilter: scopeFilterValidator,
     query: v.string(),
-    tenantId: v.string(),
+    organizationId: v.string(),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const personId = await resolveConsolePerson(ctx, args.tenantId, identity)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const personId = await resolveConsolePerson(
+      ctx,
+      args.organizationId,
+      identity
+    )
 
     if (args.approvalFilter === "pending") {
       return await pagePendingApprovals(ctx, { ...args, personId })
@@ -46,7 +50,9 @@ export const page = query({
     let hasMore = false
     const runs = ctx.db
       .query("runs")
-      .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
+      .withIndex("by_organization", (index) =>
+        index.eq("organizationId", args.organizationId)
+      )
       .order("desc")
 
     const shouldMatchSummary = needsSummary(
@@ -102,11 +108,15 @@ export const stats = query({
     runFilter: runFilterValidator,
     scopeFilter: scopeFilterValidator,
     query: v.string(),
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
-    const personId = await resolveConsolePerson(ctx, args.tenantId, identity)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const personId = await resolveConsolePerson(
+      ctx,
+      args.organizationId,
+      identity
+    )
 
     const normalizedQuery = normalizeQuery(args.query)
 
@@ -117,9 +127,9 @@ export const stats = query({
           scopeFilter: args.scopeFilter,
           normalizedQuery,
           personId,
-          tenantId: args.tenantId,
+          organizationId: args.organizationId,
         }),
-        totalCount: await countRuns(ctx, args.tenantId, personId),
+        totalCount: await countRuns(ctx, args.organizationId, personId),
       }
     }
 
@@ -127,7 +137,9 @@ export const stats = query({
     let totalCount = 0
     const runs = ctx.db
       .query("runs")
-      .withIndex("by_tenant", (index) => index.eq("tenantId", args.tenantId))
+      .withIndex("by_organization", (index) =>
+        index.eq("organizationId", args.organizationId)
+      )
       .order("desc")
 
     for await (const run of runs) {
@@ -162,13 +174,15 @@ export const stats = query({
 
 async function countRuns(
   ctx: QueryCtx,
-  tenantId: string,
+  organizationId: string,
   personId: Id<"persons"> | undefined
 ) {
   let count = 0
   const runs = ctx.db
     .query("runs")
-    .withIndex("by_tenant", (index) => index.eq("tenantId", tenantId))
+    .withIndex("by_organization", (index) =>
+      index.eq("organizationId", organizationId)
+    )
 
   for await (const run of runs) {
     if (runVisibleToPerson(run, personId)) {

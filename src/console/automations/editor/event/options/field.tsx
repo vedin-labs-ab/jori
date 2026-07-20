@@ -15,17 +15,17 @@ import { type EventIntegrationOption, getIntegrationOptions } from "."
 
 export function EventIntegrationField({
   onValueChange,
-  tenantId,
+  organizationId,
   scope,
   value,
 }: {
   onValueChange: (integration: AutomationEventIntegration) => void
-  tenantId: string
+  organizationId: string
   scope: Scope
   value: AutomationEventIntegration
 }) {
   const connections = useQuery(api.automations.connections.list, {
-    tenantId,
+    organizationId,
     scope,
   })
   const options = getIntegrationOptions(connections)

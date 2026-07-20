@@ -32,7 +32,7 @@ import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { usePageSearchSync, useSearchTarget } from "./seek"
 
-export function RunsList({ tenantId }: { tenantId: string }) {
+export function RunsList({ organizationId }: { organizationId: string }) {
   const { run: focusRunId } = useSearch({ from: "/runs" })
   const target = useSearchTarget()
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
@@ -44,7 +44,7 @@ export function RunsList({ tenantId }: { tenantId: string }) {
   const deferredScopeFilter = useDeferredValue(scopeFilter)
   const deferredQuery = useDeferredValue(query)
   const pagination = useExecutionPagination(
-    tenantId,
+    organizationId,
     deferredRunFilter,
     deferredApprovalFilter,
     deferredScopeFilter,
@@ -83,7 +83,7 @@ export function RunsList({ tenantId }: { tenantId: string }) {
         focusRunId={focusRunId}
         pagination={pagination}
         showScope={deferredScopeFilter === "all"}
-        tenantId={tenantId}
+        organizationId={organizationId}
       />
       <ConsoleListPager pagination={pagination} />
     </ConsolePageLayout>
@@ -165,12 +165,12 @@ function ExecutionRows({
   focusRunId,
   pagination,
   showScope,
-  tenantId,
+  organizationId,
 }: {
   focusRunId?: string
   pagination: ExecutionPagination
   showScope: boolean
-  tenantId: string
+  organizationId: string
 }) {
   const now = useExecutionClock(pagination.visibleRows)
 
@@ -191,7 +191,7 @@ function ExecutionRows({
               key={execution.id}
               now={displayNowForRun(execution, now)}
               showScope={showScope}
-              tenantId={tenantId}
+              organizationId={organizationId}
             />
           ))
         : null}

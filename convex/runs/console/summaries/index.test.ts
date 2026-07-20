@@ -75,7 +75,7 @@ test("summarizes event source labels from already-loaded event context", async (
       event: {
         _id: "event",
         _creationTime: 0,
-        tenantId: "tenant",
+        organizationId: "organization",
         integrationId: "integration",
         key: "github:event",
         type: "pull_request.review_comment.created",
@@ -113,7 +113,7 @@ test("uses source message text for message tasks", async () => {
       message: {
         _id: "message",
         _creationTime: 0,
-        tenantId: "tenant",
+        organizationId: "organization",
         integrationId: "integration",
         integration: "slack",
         type: "message.channels",
@@ -191,7 +191,7 @@ test("keeps stored automation snapshots when the automation changes", async () =
       automation: {
         _id: "automation",
         _creationTime: 0,
-        tenantId: "tenant",
+        organizationId: "organization",
         name: "Updated automation name",
         instructions: "Updated automation instructions.",
         trigger: { type: "time" },
@@ -216,9 +216,9 @@ function slackIntegration() {
   return {
     _id: "integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "slack",
-    scope: "tenant",
+    scope: "organization",
     externalId: "slack-team",
     credentials: {},
     status: "active",
@@ -239,7 +239,7 @@ function testRun(overrides: Record<string, unknown>) {
   return {
     _id: "run",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     status: "completed",
     createdAt: 0,
     endedAt: 1000,

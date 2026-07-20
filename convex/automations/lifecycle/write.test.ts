@@ -51,7 +51,7 @@ function automation(): Doc<"automations"> {
     },
     scope: "personal",
     status: "active",
-    tenantId: "tenant",
+    organizationId: "organization",
     trigger: {
       expression: "0 8 * * *",
       nextAt: 1,

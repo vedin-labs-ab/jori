@@ -16,13 +16,13 @@ export function createInstructionExtensions(refs: InstructionRefs) {
     AutomationReferenceExtension.configure({
       getPermissions: () => refs.permissions.current,
       getScope: () => refs.scope.current,
-      getTenantId: () => refs.tenantId.current,
+      getOrganizationId: () => refs.organizationId.current,
       getWebSearch: () => refs.sources.current.webSearch ?? false,
     }),
     AutomationSurfaceExtension.configure({
       getPermissions: () => refs.permissions.current,
       getScope: () => refs.scope.current,
-      getTenantId: () => refs.tenantId.current,
+      getOrganizationId: () => refs.organizationId.current,
     }),
     Markdown.configure({
       marked: createInstructionMarked(),

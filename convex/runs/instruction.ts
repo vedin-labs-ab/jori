@@ -18,7 +18,7 @@ import { createInstructionRunSnapshot } from "./snapshot"
 export async function createInstructionRun(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     instructions: string
     title?: string
     access?: Access
@@ -34,11 +34,14 @@ export async function createInstructionRun(
 
   // Child runs ride on their parent's budget; only fresh work is gated.
   if (parent === undefined) {
-    await requireRunBudget(ctx, { tenantId: args.tenantId, interactive: true })
+    await requireRunBudget(ctx, {
+      organizationId: args.organizationId,
+      interactive: true,
+    })
   }
 
   const runId = await ctx.db.insert("runs", {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     artifactId: args.artifactId ?? parent?.artifactId,
     ...(parent === undefined
       ? {}

@@ -32,12 +32,12 @@ export function PlaybookCard({
   actions,
   definition,
   row,
-  tenantId,
+  organizationId,
 }: {
   actions: PlaybookActions
   definition: PlaybookDefinition
   row: PlaybookListRow | undefined
-  tenantId: string
+  organizationId: string
 }) {
   const Icon = playbookIcons[definition.key] ?? NotebookTabs
 
@@ -68,7 +68,7 @@ export function PlaybookCard({
           actions={actions}
           definition={definition}
           row={row}
-          tenantId={tenantId}
+          organizationId={organizationId}
         />
       </CardFooter>
     </Card>

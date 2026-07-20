@@ -18,7 +18,7 @@ export type WorkstreamApplyState = ApplyTracking & {
 // moveEffort primitive, shared with console corrections.
 export async function adoptCitedEfforts(
   ctx: MutationCtx,
-  tenantId: string,
+  organizationId: string,
   state: WorkstreamApplyState,
   beliefId: Id<"beliefs">,
   sightings: Sighting[]
@@ -30,7 +30,7 @@ export async function adoptCitedEfforts(
 
     const effort = await resolveEffort(
       ctx,
-      tenantId,
+      organizationId,
       new Map(),
       sighting.citation.effort
     )
@@ -52,10 +52,10 @@ export async function applyAssign(
   const effort =
     state.allowed.efforts.has(op.effortId) === false
       ? null
-      : await resolveEffort(ctx, pass.tenantId, new Map(), op.effortId)
+      : await resolveEffort(ctx, pass.organizationId, new Map(), op.effortId)
   const belief = await resolveBelief(
     ctx,
-    pass.tenantId,
+    pass.organizationId,
     "workstream",
     state.temp,
     op.beliefId

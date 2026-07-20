@@ -63,7 +63,7 @@ export function resolveStateWrite(
 
 export const read = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
     grant: v.optional(artifactSessionGrant),
@@ -88,7 +88,7 @@ export const read = internalQuery({
 
 export const list = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
     grant: v.optional(artifactSessionGrant),
@@ -128,7 +128,7 @@ export function isStateEntryVisible(
 
 export const update = internalMutation({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     artifactId: v.id("artifacts"),
     personId: v.id("persons"),
     contractName: v.string(),
@@ -182,7 +182,7 @@ export const update = internalMutation({
 async function insertStateDocument(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     artifactId: Doc<"artifacts">["_id"]
     personId: Id<"persons">
   },
@@ -191,7 +191,7 @@ async function insertStateDocument(
 ) {
   const now = Date.now()
   const documentId = await ctx.db.insert("artifactState", {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     artifactId: args.artifactId,
     personId: statePersonId(entry.scope, args.personId),
     scope: entry.scope,

@@ -103,7 +103,7 @@ export const toolSnapshot = v.object({
 })
 
 export const runs = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   automationId: v.optional(v.id("automations")),
   automationParentId: v.optional(v.id("automations")),
   automationConfigurationVersion: v.optional(v.number()),
@@ -134,17 +134,17 @@ export const runs = defineTable({
   endedAt: v.optional(v.number()),
   stoppedBy: v.optional(actorValidator),
 })
-  .index("by_tenant", ["tenantId"])
+  .index("by_organization", ["organizationId"])
   .index("by_parent", ["parentId"])
   .index("by_root", ["rootId"])
   .index("by_conversation_and_created_at", ["conversationId", "createdAt"])
-  .index("by_tenant_and_scope_and_created_at", [
-    "tenantId",
+  .index("by_organization_and_scope_and_created_at", [
+    "organizationId",
     "scope",
     "createdAt",
   ])
-  .index("by_tenant_and_created_by_and_created_at", [
-    "tenantId",
+  .index("by_organization_and_created_by_and_created_at", [
+    "organizationId",
     "createdBy",
     "createdAt",
   ])

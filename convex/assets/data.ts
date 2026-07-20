@@ -22,7 +22,7 @@ export const record = internalMutation({
 
 export const search = internalQuery({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     query: v.optional(v.string()),
     mimeType: v.optional(v.string()),
     limit: v.optional(v.number()),
@@ -33,8 +33,8 @@ export const search = internalQuery({
     const mimeType = normalizeSearchText(args.mimeType)
     const assets = await ctx.db
       .query("assets")
-      .withIndex("by_tenant_and_created_at", (index) =>
-        index.eq("tenantId", args.tenantId)
+      .withIndex("by_organization_and_created_at", (index) =>
+        index.eq("organizationId", args.organizationId)
       )
       .order("desc")
       .take(maxAssetsScanned)
@@ -51,32 +51,34 @@ export const search = internalQuery({
   },
 })
 
-const tenantAssetArgs = {
-  tenantId: v.string(),
+const organizationAssetArgs = {
+  organizationId: v.string(),
   assetId: v.id("assets"),
 }
 
 export const read = internalQuery({
-  args: tenantAssetArgs,
+  args: organizationAssetArgs,
   handler: async (ctx, args) => {
-    const asset = await getTenantAsset(ctx, args)
+    const asset = await getOrganizationAsset(ctx, args)
 
     return asset === null ? null : await summarizeAsset(ctx, asset)
   },
 })
 
-export const getForTenant = internalQuery({
-  args: tenantAssetArgs,
-  handler: async (ctx, args) => await getTenantAsset(ctx, args),
+export const getForOrganization = internalQuery({
+  args: organizationAssetArgs,
+  handler: async (ctx, args) => await getOrganizationAsset(ctx, args),
 })
 
-async function getTenantAsset(
+async function getOrganizationAsset(
   ctx: QueryCtx,
-  args: { tenantId: string; assetId: Id<"assets"> }
+  args: { organizationId: string; assetId: Id<"assets"> }
 ) {
   const asset = await ctx.db.get(args.assetId)
 
-  return asset !== null && asset.tenantId === args.tenantId ? asset : null
+  return asset !== null && asset.organizationId === args.organizationId
+    ? asset
+    : null
 }
 
 function normalizeLimit(value: number | undefined) {

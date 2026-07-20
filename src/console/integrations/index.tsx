@@ -23,43 +23,58 @@ const integrationGrid =
 export function Integrations() {
   return (
     <ConsolePage>
-      {(tenantId) => <IntegrationTabs tenantId={tenantId} />}
+      {(organizationId) => <IntegrationTabs organizationId={organizationId} />}
     </ConsolePage>
   )
 }
 
-function IntegrationTabs({ tenantId }: { tenantId: string }) {
-  const permissions = useToolPermissions(tenantId)
+function IntegrationTabs({ organizationId }: { organizationId: string }) {
+  const permissions = useToolPermissions(organizationId)
 
   return (
-    <Tabs defaultValue="tenant" className="gap-4">
+    <Tabs defaultValue="organization" className="gap-4">
       <TabsList className="w-fit !h-7">
-        <TabsTrigger value="tenant">Organization</TabsTrigger>
+        <TabsTrigger value="organization">Organization</TabsTrigger>
         <TabsTrigger value="user">Personal</TabsTrigger>
       </TabsList>
-      <TabsContent value="tenant" asChild>
+      <TabsContent value="organization" asChild>
         <ConsoleContentGrid className={integrationGrid}>
-          <SlackIntegration permissions={permissions} tenantId={tenantId} />
-          <LinearIntegration permissions={permissions} tenantId={tenantId} />
-          <GitHubIntegration permissions={permissions} tenantId={tenantId} />
-          <NotionIntegration permissions={permissions} tenantId={tenantId} />
+          <SlackIntegration
+            permissions={permissions}
+            organizationId={organizationId}
+          />
+          <LinearIntegration
+            permissions={permissions}
+            organizationId={organizationId}
+          />
+          <GitHubIntegration
+            permissions={permissions}
+            organizationId={organizationId}
+          />
+          <NotionIntegration
+            permissions={permissions}
+            organizationId={organizationId}
+          />
           <NativePermissionsCard controller={permissions} />
         </ConsoleContentGrid>
       </TabsContent>
       <TabsContent value="user" asChild>
         <ConsoleContentGrid className={integrationGrid}>
-          <GmailIntegration permissions={permissions} tenantId={tenantId} />
+          <GmailIntegration
+            permissions={permissions}
+            organizationId={organizationId}
+          />
           <GoogleCalendarIntegration
             permissions={permissions}
-            tenantId={tenantId}
+            organizationId={organizationId}
           />
           <MicrosoftEmailIntegration
             permissions={permissions}
-            tenantId={tenantId}
+            organizationId={organizationId}
           />
           <MicrosoftCalendarIntegration
             permissions={permissions}
-            tenantId={tenantId}
+            organizationId={organizationId}
           />
         </ConsoleContentGrid>
       </TabsContent>

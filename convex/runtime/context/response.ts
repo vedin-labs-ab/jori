@@ -83,7 +83,7 @@ export function runtimeResponse(args: {
       rootId: args.input.run.rootId ?? null,
       sandboxId: args.sandbox?.externalId ?? null,
       status: args.run.status,
-      tenantId: args.input.run.tenantId,
+      organizationId: args.input.run.organizationId,
     },
     session:
       args.session === null

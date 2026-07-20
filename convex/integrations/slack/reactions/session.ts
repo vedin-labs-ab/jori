@@ -120,7 +120,7 @@ async function conversationChannelId(
     .query("messages")
     .withIndex("by_conversation", (query) =>
       query
-        .eq("tenantId", args.conversation.tenantId)
+        .eq("organizationId", args.conversation.organizationId)
         .eq("integrationId", args.integration._id)
         .eq("conversationId", args.conversation.externalId)
     )

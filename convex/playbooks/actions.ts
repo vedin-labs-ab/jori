@@ -4,7 +4,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { provisionTemplateArtifact } from "../artifacts/templates/provision"
 import {
   accessInput,
@@ -25,7 +25,7 @@ export const enable = action({
   args: playbookPlanFields,
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args): Promise<{ automationId: Id<"automations"> }> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const caller = await resolveCaller(ctx, args, identity, true)
 
     return await ctx.runMutation(internal.playbooks.console.enableResolved, {
@@ -40,7 +40,7 @@ export const trial = action({
   args: playbookPlanFields,
   returns: v.object({ runId: v.id("runs") }),
   handler: async (ctx, args): Promise<{ runId: Id<"runs"> }> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const caller = await resolveCaller(ctx, args, identity, false)
 
     return await ctx.runMutation(internal.playbooks.console.trialResolved, {
@@ -61,7 +61,7 @@ export const reconfigure = action({
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args): Promise<{ automationId: Id<"automations"> }> => {
     const { automationId, ...plan } = args
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const caller = await resolveCaller(ctx, plan, identity, false)
 
     return await ctx.runMutation(
@@ -84,7 +84,7 @@ export const draft = action({
     ctx,
     args
   ): Promise<Awaited<ReturnType<typeof resolvePlaybookDraft>>> => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const caller = await resolveCaller(ctx, args, identity, false)
 
     return await ctx.runQuery(internal.playbooks.console.draftResolved, {
@@ -98,7 +98,7 @@ export const draft = action({
  *  builder), provisioning the playbook's artifact at the same edge. */
 export const create = action({
   args: {
-    tenantId: v.string(),
+    organizationId: v.string(),
     playbook: playbookBindingValidator,
     key: v.optional(v.string()),
     name: v.string(),
@@ -110,12 +110,15 @@ export const create = action({
   },
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args): Promise<{ automationId: Id<"automations"> }> => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
 
-    const createdBy = await ensureCurrentPersonFromAction(ctx, args.tenantId)
+    const createdBy = await ensureCurrentPersonFromAction(
+      ctx,
+      args.organizationId
+    )
     const artifactId = await provisionTemplateArtifact(ctx, {
       key: args.playbook.key,
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       personId: createdBy,
     })
 
@@ -130,10 +133,13 @@ export const create = action({
 async function resolveCaller(
   ctx: ActionCtx,
   args: PlaybookCallerArgs,
-  identity: Awaited<ReturnType<typeof requireTenantAccess>>,
+  identity: Awaited<ReturnType<typeof requireOrganizationAccess>>,
   enablement: boolean
 ) {
-  const createdBy = await ensureCurrentPersonFromAction(ctx, args.tenantId)
+  const createdBy = await ensureCurrentPersonFromAction(
+    ctx,
+    args.organizationId
+  )
   const recipient = callerRecipient(identity)
   const validation = enablement
     ? internal.playbooks.console.validateResolved
@@ -151,7 +157,7 @@ async function provision(
 ) {
   return await provisionTemplateArtifact(ctx, {
     key: args.playbook,
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     personId: createdBy,
   })
 }

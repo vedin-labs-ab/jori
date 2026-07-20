@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { mutation } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import {
   readClerkUserEmail,
   readClerkUserName,
@@ -14,19 +14,19 @@ import { stopRunTree } from "./tree"
 export const stop = mutation({
   args: {
     runId: v.id("runs"),
-    tenantId: v.string(),
+    organizationId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireTenantAccess(ctx, args.tenantId)
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const personId = await ensureClerkPerson(ctx, {
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       clerkSubject: requireClerkUserId(identity),
       email: readClerkUserEmail(identity),
       name: readClerkUserName(identity),
     })
     const run = await ctx.db.get(args.runId)
 
-    if (run === null || run.tenantId !== args.tenantId) {
+    if (run === null || run.organizationId !== args.organizationId) {
       throw new Error("Run not found.")
     }
 

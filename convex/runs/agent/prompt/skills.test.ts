@@ -61,21 +61,21 @@ describe("runtime skill prompts", () => {
   })
 })
 
-describe("tenant runtime skill prompts", () => {
-  test("uses tenant skills from the runtime list", () => {
+describe("organization runtime skill prompts", () => {
+  test("uses organization skills from the runtime list", () => {
     const prompt = assemblePrompt(githubInput(), {
       skills: runtimeSkills([
         runtimeSkill({
-          tenantId: "tenant",
-          name: "tenant-playbook",
-          description: "Follow the tenant operating playbook.",
-          body: "# Tenant Playbook\n\nPrefer tenant-specific guidance.",
+          organizationId: "organization",
+          name: "organization-playbook",
+          description: "Follow the organization operating playbook.",
+          body: "# Organization Playbook\n\nPrefer organization-specific guidance.",
         }),
       ]),
     }).instructions
 
     expect(prompt).toContain(
-      "`tenant-playbook`: Follow the tenant operating playbook."
+      "`organization-playbook`: Follow the organization operating playbook."
     )
   })
 })

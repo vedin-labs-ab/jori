@@ -19,7 +19,7 @@ export type SetupIdentity = {
 export async function linkSetupIdentity(
   ctx: MutationCtx,
   args: {
-    tenantId: string
+    organizationId: string
     personId: Id<"persons">
     provider: IdentityProvider
     identity: SetupIdentity | undefined
@@ -30,7 +30,7 @@ export async function linkSetupIdentity(
   }
 
   return await linkIdentityToPerson(ctx, {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     personId: args.personId,
     provider: args.provider,
     externalId: args.identity.externalId,

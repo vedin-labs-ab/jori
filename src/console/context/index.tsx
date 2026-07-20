@@ -19,11 +19,11 @@ export function ContextPage({
   children,
 }: {
   tab: ContextTab
-  children: (tenantId: string) => ReactNode
+  children: (organizationId: string) => ReactNode
 }) {
   return (
     <ConsolePage>
-      {(tenantId) => (
+      {(organizationId) => (
         <ConsolePageLayout>
           <Tabs value={tab}>
             <TabsList className="w-fit !h-7">
@@ -34,7 +34,7 @@ export function ContextPage({
               ))}
             </TabsList>
           </Tabs>
-          {children(tenantId)}
+          {children(organizationId)}
         </ConsolePageLayout>
       )}
     </ConsolePage>

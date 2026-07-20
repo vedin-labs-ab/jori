@@ -22,7 +22,7 @@ describe("instruction child runs", () => {
     const ctx = { db: { insert } } as unknown as MutationCtx
 
     await createInstructionRun(ctx, {
-      tenantId: parent.tenantId,
+      organizationId: parent.organizationId,
       instructions: "Research the attendees.",
       parent,
       principal: parent.principal,
@@ -62,6 +62,6 @@ function automationRun(): Doc<"runs"> {
       title: "Meeting Briefing",
     },
     status: "running",
-    tenantId: "tenant",
+    organizationId: "organization",
   }
 }

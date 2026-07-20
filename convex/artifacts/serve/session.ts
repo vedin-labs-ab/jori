@@ -7,7 +7,7 @@ export type ArtifactSessionTokenPayload = {
   expiresAt: number
   secret: string
   sessionId: Id<"artifactSessions">
-  tenantId: string
+  organizationId: string
   personId: Id<"persons">
   versionId: Id<"artifactVersions">
 }
@@ -27,7 +27,7 @@ export function createSessionToken(record: ArtifactSessionTokenPayload) {
     expiresAt: record.expiresAt,
     secret: record.secret,
     sessionId: record.sessionId,
-    tenantId: record.tenantId,
+    organizationId: record.organizationId,
     personId: record.personId,
     versionId: record.versionId,
   })
@@ -44,7 +44,7 @@ export function readSessionTokenPayload(token: string) {
       typeof parsed.expiresAt !== "number" ||
       typeof parsed.secret !== "string" ||
       typeof parsed.sessionId !== "string" ||
-      typeof parsed.tenantId !== "string" ||
+      typeof parsed.organizationId !== "string" ||
       typeof parsed.personId !== "string" ||
       typeof parsed.versionId !== "string"
     ) {
@@ -65,7 +65,7 @@ export function createSessionAuthorizationArgs(
     sessionId: payload.sessionId,
     artifactId: payload.artifactId,
     versionId: payload.versionId,
-    tenantId: payload.tenantId,
+    organizationId: payload.organizationId,
     personId: payload.personId,
     secret: payload.secret,
     tokenExpiresAt: payload.expiresAt,

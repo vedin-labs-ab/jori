@@ -2,49 +2,51 @@ import { v } from "convex/values"
 import { normalizeWebsiteAddress } from "../../contracts/website"
 import { internal } from "../_generated/api"
 import { type ActionCtx, action } from "../_generated/server"
-import { requireTenantAccess } from "../access"
+import { requireOrganizationAccess } from "../access"
 import { requireEnvironmentVariable } from "../shared/environment"
 
 // Marks onboarding as seen (so the welcome flow never reopens) and, when a
 // website is provided, kicks off discovery for a proposed organization profile.
 export const complete = action({
-  args: { tenantId: v.string(), website: v.optional(v.string()) },
+  args: { organizationId: v.string(), website: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     const website = normalizeWebsite(args.website)
-    await patchClerkMetadata(args.tenantId, { onboarded: true })
+    await patchClerkMetadata(args.organizationId, { onboarded: true })
 
     if (website !== undefined) {
-      await startDiscovery(ctx, args.tenantId, website)
+      await startDiscovery(ctx, args.organizationId, website)
     }
   },
 })
 
 // Re-runs discovery from the context page, optionally updating the website.
 export const discover = action({
-  args: { tenantId: v.string(), website: v.optional(v.string()) },
+  args: { organizationId: v.string(), website: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    await requireTenantAccess(ctx, args.tenantId)
+    await requireOrganizationAccess(ctx, args.organizationId)
     const website = normalizeWebsite(args.website)
-    await startDiscovery(ctx, args.tenantId, website)
+    await startDiscovery(ctx, args.organizationId, website)
   },
 })
 
 async function startDiscovery(
   ctx: ActionCtx,
-  tenantId: string,
+  organizationId: string,
   website: string | undefined
 ) {
   const primaryUrl =
     website ??
-    (await ctx.runQuery(internal.organization.sources.primaryUrl, { tenantId }))
+    (await ctx.runQuery(internal.organization.sources.primaryUrl, {
+      organizationId,
+    }))
 
   if (primaryUrl === null || primaryUrl === undefined) {
     throw new Error("Add a website before running discovery.")
   }
 
   await ctx.scheduler.runAfter(0, internal.organization.draft.run, {
-    tenantId,
+    organizationId,
     primaryUrl,
   })
 }
@@ -60,13 +62,13 @@ function normalizeWebsite(website: string | undefined) {
 }
 
 async function patchClerkMetadata(
-  tenantId: string,
+  organizationId: string,
   metadata: { onboarded?: boolean }
 ) {
   const clerkSecretKey = requireEnvironmentVariable("CLERK_SECRET_KEY")
 
   const response = await fetch(
-    `https://api.clerk.com/v1/organizations/${tenantId}/metadata`,
+    `https://api.clerk.com/v1/organizations/${organizationId}/metadata`,
     {
       method: "PATCH",
       headers: {

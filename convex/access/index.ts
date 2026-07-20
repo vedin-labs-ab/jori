@@ -5,11 +5,11 @@ import {
 } from "../_generated/server"
 import { readClerkOrganizationId } from "./users"
 
-export async function requireTenantAccess(
+export async function requireOrganizationAccess(
   ctx: QueryCtx | MutationCtx | ActionCtx,
-  tenantId: string
+  organizationId: string
 ) {
-  const access = await checkTenantAccess(ctx, tenantId)
+  const access = await checkOrganizationAccess(ctx, organizationId)
 
   if (!access.ok) {
     throw new Error(access.message)
@@ -18,9 +18,9 @@ export async function requireTenantAccess(
   return access.identity
 }
 
-export async function checkTenantAccess(
+export async function checkOrganizationAccess(
   ctx: QueryCtx | MutationCtx | ActionCtx,
-  tenantId: string
+  organizationId: string
 ) {
   const identity = await ctx.auth.getUserIdentity()
 
@@ -31,9 +31,9 @@ export async function checkTenantAccess(
     }
   }
 
-  const identityTenantId = readClerkOrganizationId(identity)
+  const identityOrganizationId = readClerkOrganizationId(identity)
 
-  if (identityTenantId === undefined) {
+  if (identityOrganizationId === undefined) {
     return {
       ok: false as const,
       message:
@@ -41,7 +41,7 @@ export async function checkTenantAccess(
     }
   }
 
-  if (identityTenantId !== tenantId) {
+  if (identityOrganizationId !== organizationId) {
     return {
       ok: false as const,
       message:

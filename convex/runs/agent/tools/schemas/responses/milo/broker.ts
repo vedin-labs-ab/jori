@@ -49,7 +49,7 @@ export const brokerMiloToolResponseSchemas = {
         capabilityGroupSchema()
       ),
       connected: arrayProperty(
-        "Groups connected for the tenant.",
+        "Groups connected for the organization.",
         capabilityGroupSchema()
       ),
       available: arrayProperty(

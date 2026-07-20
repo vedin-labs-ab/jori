@@ -195,7 +195,7 @@ function googleCalendarIntegration(): Doc<"integrations"> {
   return {
     _id: "google-calendar-integration",
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "googleCalendar",
     scope: "user",
     ownerId: "person" as Id<"persons">,

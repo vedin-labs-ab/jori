@@ -31,7 +31,7 @@ describe("organization edit website validation", () => {
         discovery={undefined}
         onOpenChange={() => undefined}
         onReviewProfile={() => undefined}
-        tenantId="tenant"
+        organizationId="organization"
         website="https://digiproc.com"
       />
     )
@@ -71,7 +71,7 @@ describe("organization edit website validation", () => {
 
     await waitFor(() => {
       expect(discoverMock).toHaveBeenCalledWith({
-        tenantId: "tenant",
+        organizationId: "organization",
         website: "https://example.com",
       })
     })

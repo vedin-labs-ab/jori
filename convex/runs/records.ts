@@ -50,7 +50,7 @@ async function getMessageInput(
 
   const message = await ctx.db.get(args.run.cause.messageId)
 
-  if (message === null || message.tenantId !== args.run.tenantId) {
+  if (message === null || message.organizationId !== args.run.organizationId) {
     return null
   }
 
@@ -58,7 +58,7 @@ async function getMessageInput(
 
   if (
     integration === null ||
-    integration.tenantId !== args.run.tenantId ||
+    integration.organizationId !== args.run.organizationId ||
     !isMessageIntegration(integration.integration)
   ) {
     return null
@@ -75,11 +75,11 @@ async function getMessageInput(
     integration,
     integrations,
     conversation: await recentConversation(ctx, message),
-    organization: await readApprovedFacts(ctx, args.run.tenantId),
+    organization: await readApprovedFacts(ctx, args.run.organizationId),
     requester: personContext.requester,
     place: await readPlaceContext(ctx, message),
     timezone: personContext.timezone,
-    workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
+    workstreams: await readWorkstreamRoster(ctx, args.run.organizationId),
   }
 }
 
@@ -98,7 +98,7 @@ async function getAutomationInput(
       ? await ctx.db.get(args.run.cause.eventId)
       : null
   const integration =
-    event === null || event.tenantId !== args.run.tenantId
+    event === null || event.organizationId !== args.run.organizationId
       ? null
       : await ctx.db.get(event.integrationId)
   const integrations = await listActiveIntegrations(ctx, args.run)
@@ -129,16 +129,19 @@ async function getAutomationInput(
     run: args.run,
     artifact: await readRunArtifactContext(ctx, args.run),
     event:
-      event !== null && event.tenantId === args.run.tenantId ? event : null,
+      event !== null && event.organizationId === args.run.organizationId
+        ? event
+        : null,
     integration:
-      integration !== null && integration.tenantId === args.run.tenantId
+      integration !== null &&
+      integration.organizationId === args.run.organizationId
         ? integration
         : null,
     integrations: grantedIntegrations,
-    organization: await readApprovedFacts(ctx, args.run.tenantId),
+    organization: await readApprovedFacts(ctx, args.run.organizationId),
     requester: personContext.requester,
     timezone: personContext.timezone,
-    workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
+    workstreams: await readWorkstreamRoster(ctx, args.run.organizationId),
   }
 }
 
@@ -176,10 +179,10 @@ async function getInstructionInput(
     artifact: await readRunArtifactContext(ctx, args.run),
     ...(access === undefined ? {} : { access }),
     integrations: grantedIntegrations,
-    organization: await readApprovedFacts(ctx, args.run.tenantId),
+    organization: await readApprovedFacts(ctx, args.run.organizationId),
     requester: personContext.requester,
     timezone: personContext.timezone,
-    workstreams: await readWorkstreamRoster(ctx, args.run.tenantId),
+    workstreams: await readWorkstreamRoster(ctx, args.run.organizationId),
   }
 }
 
@@ -195,7 +198,7 @@ export const get = internalQuery({
 async function listActiveIntegrations(ctx: QueryCtx, run: Doc<"runs">) {
   return await listActiveIntegrationsForPrincipal(ctx, {
     principal: run.principal,
-    tenantId: run.tenantId,
+    organizationId: run.organizationId,
   })
 }
 

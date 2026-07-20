@@ -18,7 +18,7 @@ type OptionsArgs = {
   isOpen: boolean
   match?: IntegrationOptionMatch
   source: IntegrationOptionSource
-  tenantId: string
+  organizationId: string
 }
 
 type OptionsState = {
@@ -49,13 +49,13 @@ export function useIntegrationOptions(args: OptionsArgs) {
         search,
         setState,
         source: args.source,
-        tenantId: args.tenantId,
+        organizationId: args.organizationId,
       }),
     [
       args.disabled,
       args.isOpen,
       args.source,
-      args.tenantId,
+      args.organizationId,
       matchKey,
       query,
       search,
@@ -73,7 +73,7 @@ function startOptionsSearch(args: {
   search: SearchAction
   setState: Dispatch<SetStateAction<OptionsState>>
   source: IntegrationOptionSource
-  tenantId: string
+  organizationId: string
 }) {
   if (!args.active) {
     return
@@ -106,7 +106,7 @@ async function loadOptions(
 ) {
   try {
     const result = await args.search({
-      tenantId: args.tenantId,
+      organizationId: args.organizationId,
       source: args.source,
       query: args.query,
       match: JSON.parse(args.matchKey) as IntegrationOptionMatch,

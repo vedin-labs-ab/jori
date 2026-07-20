@@ -33,14 +33,14 @@ export const ExecutionRow = memo(function ExecutionRow({
   execution,
   now,
   showScope,
-  tenantId,
+  organizationId,
 }: {
   /** Deep links (billing receipts, /runs?run=...) land with the row open. */
   defaultOpen?: boolean
   execution: ExecutionItem
   now: number
   showScope: boolean
-  tenantId: string
+  organizationId: string
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const preloadExpandedExecution = useCallback(() => {
@@ -66,7 +66,7 @@ export const ExecutionRow = memo(function ExecutionRow({
             <StopExecution
               className="mr-3 shrink-0"
               runId={execution.id}
-              tenantId={tenantId}
+              organizationId={organizationId}
             />
           ) : undefined
         }
@@ -100,7 +100,7 @@ export const ExecutionRow = memo(function ExecutionRow({
           <ExpandedExecution
             execution={execution}
             now={now}
-            tenantId={tenantId}
+            organizationId={organizationId}
           />
         </Suspense>
       ) : null}

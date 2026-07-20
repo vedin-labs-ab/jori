@@ -8,7 +8,7 @@ import { type PlaybookPlanArgs } from "./plan"
 import { deliveryChoiceValidator } from "./schema"
 
 export type PlaybookCallerArgs = {
-  tenantId: string
+  organizationId: string
   playbook: string
   choices?: Record<string, Integration>
   destination: DeliveryChoice
@@ -16,7 +16,7 @@ export type PlaybookCallerArgs = {
 }
 
 export const playbookPlanFields = {
-  tenantId: v.string(),
+  organizationId: v.string(),
   playbook: v.string(),
   choices: v.optional(v.record(v.string(), integrationValidator)),
   destination: deliveryChoiceValidator,
@@ -32,7 +32,7 @@ export function playbookPlanArgs(
   artifactId?: PlaybookPlanArgs["artifactId"]
 ): PlaybookPlanArgs {
   return {
-    tenantId: args.tenantId,
+    organizationId: args.organizationId,
     key: args.playbook,
     choices: args.choices ?? {},
     destination: args.destination,

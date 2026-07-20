@@ -18,16 +18,16 @@ import { TopUpDialog } from "./topup"
  */
 export function SummaryBand({
   account,
-  tenantId,
+  organizationId,
 }: {
   account: BillingAccount | null
-  tenantId: string
+  organizationId: string
 }) {
   return (
     <div className="grid md:grid-cols-[5fr_7fr]">
-      <PlanCell account={account} tenantId={tenantId} />
+      <PlanCell account={account} organizationId={organizationId} />
       <div className="p-6 pt-0 md:pt-6">
-        <AvailableCell account={account} tenantId={tenantId} />
+        <AvailableCell account={account} organizationId={organizationId} />
       </div>
     </div>
   )
@@ -35,12 +35,12 @@ export function SummaryBand({
 
 function PlanCell({
   account,
-  tenantId,
+  organizationId,
 }: {
   account: BillingAccount | null
-  tenantId: string
+  organizationId: string
 }) {
-  const checkout = useBillingCheckout(tenantId)
+  const checkout = useBillingCheckout(organizationId)
   const subscribed = account !== null && account.plan !== undefined
 
   return (
@@ -58,7 +58,7 @@ function PlanCell({
         {planDetail(account)}
       </p>
       <div className="mt-5 flex gap-2">
-        {subscribed ? null : <PlanPicker tenantId={tenantId} />}
+        {subscribed ? null : <PlanPicker organizationId={organizationId} />}
         {account?.hasStripeCustomer ? (
           <Button
             disabled={checkout.pending !== null}
@@ -106,10 +106,10 @@ function planDetail(account: BillingAccount | null) {
 
 function AvailableCell({
   account,
-  tenantId,
+  organizationId,
 }: {
   account: BillingAccount | null
-  tenantId: string
+  organizationId: string
 }) {
   const includedMicros = Math.max(
     account?.includedMicros ?? trial.grantMicros,
@@ -134,7 +134,7 @@ function AvailableCell({
             {formatUsd(includedMicros + walletMicros)}
           </p>
         </div>
-        <TopUpDialog tenantId={tenantId} />
+        <TopUpDialog organizationId={organizationId} />
       </div>
       <div className="mt-5 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2.5 text-sm">
         <span className="text-muted-foreground">

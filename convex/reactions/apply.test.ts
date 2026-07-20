@@ -106,9 +106,9 @@ function githubIntegration(): Doc<"integrations"> {
   return {
     _id: id<"integrations">("integration"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integration: "github",
-    scope: "tenant",
+    scope: "organization",
     externalId: "installation",
     credentials: {},
     status: "active",
@@ -123,7 +123,7 @@ function targetMessage(): Doc<"messages"> {
   return {
     _id: id<"messages">("message"),
     _creationTime: 0,
-    tenantId: "tenant",
+    organizationId: "organization",
     integrationId: id<"integrations">("integration"),
     integration: "github",
     type: "comment.issue.created",

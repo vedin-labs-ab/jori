@@ -5,7 +5,7 @@ export const billingPlan = v.union(v.literal("starter"), v.literal("team"))
 export const billingInterval = v.union(v.literal("month"), v.literal("year"))
 
 /**
- * One row per tenant: plan state plus the two spendable balances, in integer
+ * One row per organization: plan state plus the two spendable balances, in integer
  * micro-dollars. `includedMicros` is the plan's monthly allotment and resets
  * each cycle; `walletMicros` is prepaid, rolls over, and may dip slightly
  * negative while in-flight runs finish. `autoTopUpHoldUntil` is the in-flight
@@ -13,7 +13,7 @@ export const billingInterval = v.union(v.literal("month"), v.literal("year"))
  * down after a decline, so concurrent debits cannot double-charge.
  */
 export const billingAccounts = defineTable({
-  tenantId: v.string(),
+  organizationId: v.string(),
   state: v.union(v.literal("trial"), v.literal("active"), v.literal("paused")),
   plan: v.optional(billingPlan),
   interval: v.optional(billingInterval),
@@ -36,7 +36,7 @@ export const billingAccounts = defineTable({
   stripeSubscriptionId: v.optional(v.string()),
   updatedAt: v.number(),
 })
-  .index("by_tenant", ["tenantId"])
+  .index("by_organization", ["organizationId"])
   .index("by_next_grant", ["nextGrantAt"])
   .index("by_stripe_customer", ["stripeCustomerId"])
 
@@ -54,7 +54,7 @@ export const billingAccounts = defineTable({
 export const billingEntries = defineTable(
   v.union(
     v.object({
-      tenantId: v.string(),
+      organizationId: v.string(),
       timestamp: v.number(),
       type: v.literal("debit"),
       amountMicros: v.number(),
@@ -63,7 +63,7 @@ export const billingEntries = defineTable(
       runId: v.id("runs"),
     }),
     v.object({
-      tenantId: v.string(),
+      organizationId: v.string(),
       timestamp: v.number(),
       type: v.literal("grant"),
       amountMicros: v.number(),
@@ -75,7 +75,7 @@ export const billingEntries = defineTable(
       ),
     }),
     v.object({
-      tenantId: v.string(),
+      organizationId: v.string(),
       timestamp: v.number(),
       type: v.literal("topup"),
       amountMicros: v.number(),
@@ -85,6 +85,6 @@ export const billingEntries = defineTable(
     })
   )
 )
-  .index("by_tenant_and_timestamp", ["tenantId", "timestamp"])
+  .index("by_organization_and_timestamp", ["organizationId", "timestamp"])
   .index("by_run", ["runId"])
   .index("by_stripe", ["stripeId"])

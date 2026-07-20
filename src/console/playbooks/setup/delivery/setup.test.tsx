@@ -91,7 +91,7 @@ test("saves an explicit delivery change as the future preference", () => {
   fireEvent.click(screen.getByRole("button", { name: "Save" }))
 
   expect(convexMocks.saveDeliveryPreference).toHaveBeenCalledWith({
-    tenantId: "tenant",
+    organizationId: "organization",
     delivery: { kind: "slack", target: { kind: "dm" } },
   })
 })
@@ -116,7 +116,7 @@ function renderDialog(
         delivery,
         enabled: null,
       }}
-      tenantId="tenant"
+      organizationId="organization"
     />
   )
 }

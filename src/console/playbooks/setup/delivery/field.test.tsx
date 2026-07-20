@@ -61,7 +61,7 @@ test("selects self Slack DM without choosing another person", async () => {
       onChange={onChange}
       onEditingChange={vi.fn()}
       options={[...options]}
-      tenantId="tenant"
+      organizationId="organization"
       value={{ kind: "email" }}
     />
   )
@@ -85,7 +85,7 @@ test("selects a Slack channel and commits its stable channel ID", async () => {
       onChange={onChange}
       onEditingChange={vi.fn()}
       options={[...options]}
-      tenantId="tenant"
+      organizationId="organization"
       value={{ kind: "email" }}
     />
   )

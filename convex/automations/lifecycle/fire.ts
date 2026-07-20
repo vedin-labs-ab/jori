@@ -34,7 +34,7 @@ export async function fireAutomation(
   // A blocked budget drops this cycle's run but still advances the schedule,
   // so a paused organization resumes cleanly instead of replaying a backlog.
   const budget = await checkRunBudget(ctx, {
-    tenantId: automation.tenantId,
+    organizationId: automation.organizationId,
     interactive: false,
   })
 
@@ -94,7 +94,7 @@ export async function startEventAutomations(
   }
 ) {
   const budget = await checkRunBudget(ctx, {
-    tenantId: args.event.tenantId,
+    organizationId: args.event.organizationId,
     interactive: false,
   })
 
@@ -105,8 +105,10 @@ export async function startEventAutomations(
   const integration = await ctx.db.get(args.event.integrationId)
   const automations = await ctx.db
     .query("automations")
-    .withIndex("by_tenant_status", (index) =>
-      index.eq("tenantId", args.event.tenantId).eq("status", "active")
+    .withIndex("by_organization_status", (index) =>
+      index
+        .eq("organizationId", args.event.organizationId)
+        .eq("status", "active")
     )
     .collect()
   const runIds: Id<"runs">[] = []
