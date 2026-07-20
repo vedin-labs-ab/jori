@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils"
 import { RevealArrow } from "../shared/dot"
 import { absoluteTime } from "../shared/time"
 import { type BillingOverview } from "./actions"
+import { BillingActivityEmpty } from "./empty"
 
 type BillingEntry = BillingOverview["entries"][number]
 
@@ -84,9 +85,7 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
         Every allowance, top-up, and run, priced at provider list rates.
       </p>
       {rows.length === 0 ? (
-        <p className="mt-4 text-muted-foreground text-sm">
-          Nothing yet. Costs appear here as Milo works.
-        </p>
+        <BillingActivityEmpty />
       ) : (
         <ActivityTable table={table} />
       )}
