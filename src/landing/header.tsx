@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { UserButton } from "@/components/auth/user/user-button"
 import { Button } from "@/components/ui/button"
 import { BrandLink } from "@/shared/brand/link"
-import { authClient } from "@/shared/session/auth"
+import { authClient, isSessionLoading } from "@/shared/session/auth"
 import { GetStarted } from "./cta"
 
 export function LandingHeader() {
@@ -31,13 +31,19 @@ export function LandingHeader() {
 }
 
 function HeaderActions() {
-  const { data: session, isPending } = authClient.useSession()
-  const isSignedIn = session !== null && session !== undefined
+  const sessionQuery = authClient.useSession()
+  const isSignedIn =
+    sessionQuery.data !== null && sessionQuery.data !== undefined
 
   return (
     <div className="flex items-center gap-2">
       {!isSignedIn ? (
-        <Button asChild disabled={isPending} size="lg" variant="ghost">
+        <Button
+          asChild
+          disabled={isSessionLoading(sessionQuery)}
+          size="lg"
+          variant="ghost"
+        >
           <Link to="/auth/sign-in">Sign in</Link>
         </Button>
       ) : null}

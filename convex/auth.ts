@@ -4,8 +4,9 @@ import { betterAuth } from "better-auth/minimal"
 import { organization } from "better-auth/plugins/organization"
 import { components } from "./_generated/api"
 import { type DataModel } from "./_generated/dataModel"
-import { sendInvitation } from "./access/invitation"
+import { type Invitation } from "./access/invitation"
 import authConfig from "./auth.config"
+import authSchema from "./betterauth/schema"
 import { requireAppOrigin } from "./shared/app"
 import { requireEnvironmentVariable } from "./shared/environment"
 
@@ -13,26 +14,50 @@ import { requireEnvironmentVariable } from "./shared/environment"
  *  trusted linking folds the two into one user per address. */
 const trustedProviders = ["google", "microsoft"]
 
-export const authComponent = createClient<DataModel>(components.betterAuth)
+export const authComponent = createClient<DataModel, typeof authSchema>(
+  components.betterAuth,
+  { local: { schema: authSchema } }
+)
 
-export const createAuth = (ctx: GenericCtx<DataModel>) =>
-  betterAuth({
-    baseURL: requireAppOrigin(),
-    secret: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
-    database: authComponent.adapter(ctx),
+/** The schema-shaping options. The component adapter derives its table
+ *  model from exactly this plugin set, so it is shared: runtime adds the
+ *  delivery callback, which does not affect schema. */
+function createOptions(delivery?: {
+  sendInvitationEmail: (invitation: Invitation) => Promise<void>
+}) {
+  return {
     account: {
       accountLinking: { enabled: true, trustedProviders },
     },
+    plugins: [
+      organization({ sendInvitationEmail: delivery?.sendInvitationEmail }),
+      convex({ authConfig, jwt: { definePayload } }),
+    ],
+  }
+}
+
+/** Env-free options for the component adapter in convex/betterauth, which
+ *  evaluates at module scope where deployment env is unavailable. */
+export const createAdapterOptions = () => createOptions()
+
+export const createAuth = (ctx: GenericCtx<DataModel>) =>
+  betterAuth({
+    ...createOptions({
+      // Dynamic import: the delivery edge references app components
+      // (Resend), which must stay out of the component adapter's bundle.
+      sendInvitationEmail: async (invitation) => {
+        const { sendInvitation } = await import("./access/invitation")
+
+        await sendInvitation(ctx, invitation)
+      },
+    }),
+    baseURL: requireAppOrigin(),
+    secret: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
+    database: authComponent.adapter(ctx),
     socialProviders: {
       google: socialCredentials("GOOGLE"),
       microsoft: socialCredentials("MICROSOFT"),
     },
-    plugins: [
-      organization({
-        sendInvitationEmail: (invitation) => sendInvitation(ctx, invitation),
-      }),
-      convex({ authConfig, jwt: { definePayload } }),
-    ],
   })
 
 /** Serves a Better Auth request. Reached through a dynamic import so the

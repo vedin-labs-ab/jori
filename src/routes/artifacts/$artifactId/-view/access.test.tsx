@@ -14,15 +14,18 @@ const { session } = vi.hoisted(() => ({
   },
 }))
 
-vi.mock("@/shared/session/auth", () => ({
+vi.mock("@/shared/session/auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/session/auth")>()),
   authClient: {
     useSession: () => ({
       data: session.isSignedIn ? { user: { email: "sam@example.com" } } : null,
       isPending: session.isSessionPending,
+      isRefetching: false,
     }),
     useActiveOrganization: () => ({
       data: session.organization,
       isPending: session.isOrganizationPending,
+      isRefetching: false,
     }),
   },
 }))
