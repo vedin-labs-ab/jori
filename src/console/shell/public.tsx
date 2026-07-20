@@ -29,7 +29,7 @@ function PublicConsoleHeader({ isSignedIn }: { isSignedIn: boolean }) {
             <Link to="/auth/sign-in">Sign in</Link>
           </Button>
         ) : null}
-        {isSignedIn ? <UserButton size="icon" /> : null}
+        {isSignedIn ? <UserButton hideSettings size="icon" /> : null}
       </div>
     </header>
   )

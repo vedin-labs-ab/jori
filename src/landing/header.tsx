@@ -45,7 +45,7 @@ function HeaderActions() {
         </SessionButton>
       ) : null}
       <GetStarted />
-      {isSignedIn ? <UserButton size="icon" /> : null}
+      {isSignedIn ? <UserButton hideSettings size="icon" /> : null}
     </div>
   )
 }
