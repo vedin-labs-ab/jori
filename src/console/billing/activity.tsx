@@ -101,8 +101,13 @@ function ActivityTable({ table }: { table: ActivityTableInstance }) {
     <div className="mt-3 overflow-hidden rounded-lg border">
       <Table className="[&_td:first-child]:pl-4 [&_td:last-child]:pr-4 [&_th:first-child]:pl-4 [&_th:last-child]:pr-4">
         <TableHeader>
+          {/* The header keeps a constant background: no hover wash, and no
+              aria-expanded tint while the filter menu is open. */}
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow className="hover:bg-transparent" key={headerGroup.id}>
+            <TableRow
+              className="hover:bg-transparent has-aria-expanded:bg-transparent"
+              key={headerGroup.id}
+            >
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}>
                   {header.isPlaceholder
