@@ -6,12 +6,8 @@ type Identity = {
   subject?: string
 }
 
-export function getUserId(identity: Identity) {
-  return normalizeIdentityString(identity.subject)
-}
-
 export function requireUserId(identity: Identity) {
-  const userId = getUserId(identity)
+  const userId = normalizeIdentityString(identity.subject)
 
   if (userId === undefined) {
     throw new Error("Authenticated user is missing a user ID")
@@ -20,12 +16,12 @@ export function requireUserId(identity: Identity) {
   return userId
 }
 
-export function readUserEmail(identity: Identity) {
-  return normalizeIdentityString(identity.email)
-}
-
-export function readUserName(identity: Identity) {
-  return normalizeIdentityString(identity.name)
+/** The caller's display profile, as carried on the identity claims. */
+export function readUserProfile(identity: Identity) {
+  return {
+    email: normalizeIdentityString(identity.email),
+    name: normalizeIdentityString(identity.name),
+  }
 }
 
 export function readOrganizationClaim(identity: Record<string, unknown>) {

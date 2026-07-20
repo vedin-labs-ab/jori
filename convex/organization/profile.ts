@@ -8,7 +8,7 @@ import {
   query,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { readUserEmail, readUserName } from "../access/users"
+import { readUserProfile } from "../access/users"
 import { ensureCurrentPerson } from "../persons/account"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
@@ -48,10 +48,7 @@ export const approve = mutation({
       ...derivedFacts(profile.proposed),
       proposed: undefined,
       approvedAt: now,
-      approvedBy: createPersonActor(personId, {
-        email: readUserEmail(identity),
-        name: readUserName(identity),
-      }),
+      approvedBy: createPersonActor(personId, readUserProfile(identity)),
       updatedAt: now,
     })
 

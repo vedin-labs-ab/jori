@@ -6,7 +6,7 @@ import {
   type QueryCtx,
 } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
-import { readUserEmail, readUserName } from "../../access/users"
+import { readUserProfile } from "../../access/users"
 import { normalizeConsoleIntegrationOfferReturnUrl } from "../../integrations/offers/helpers"
 import {
   claimIntegrationOffer,
@@ -128,10 +128,7 @@ async function readConsoleActor(ctx: MutationCtx, organizationId: string) {
   const identity = await requireOrganizationAccess(ctx, organizationId)
   const personId = await ensureCurrentPerson(ctx, organizationId)
 
-  return createPersonActor(personId, {
-    email: readUserEmail(identity),
-    name: readUserName(identity),
-  })
+  return createPersonActor(personId, readUserProfile(identity))
 }
 
 function offerState(offer: Doc<"integrationOffers">) {

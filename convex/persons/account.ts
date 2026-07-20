@@ -8,7 +8,7 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { readUserEmail, readUserName, requireUserId } from "../access/users"
+import { readUserProfile, requireUserId } from "../access/users"
 import {
   linkIdentityToPerson,
   resolveIdentity,
@@ -21,18 +21,26 @@ type AccountProfile = {
   name?: string
 }
 
+/** The account-person shape of an identity: how a signed-in caller maps to
+ *  a person row. Every materialization site must build it the same way. */
+export function accountArgs(
+  identity: Parameters<typeof readUserProfile>[0],
+  organizationId: string
+) {
+  return {
+    organizationId,
+    userId: requireUserId(identity),
+    ...readUserProfile(identity),
+  }
+}
+
 export async function ensureCurrentPerson(
   ctx: MutationCtx,
   organizationId: string
 ) {
   const identity = await requireOrganizationAccess(ctx, organizationId)
 
-  return await ensureAccountPerson(ctx, {
-    organizationId,
-    userId: requireUserId(identity),
-    email: readUserEmail(identity),
-    name: readUserName(identity),
-  })
+  return await ensureAccountPerson(ctx, accountArgs(identity, organizationId))
 }
 
 export async function ensureCurrentPersonFromAction(
@@ -41,12 +49,10 @@ export async function ensureCurrentPersonFromAction(
 ) {
   const identity = await requireOrganizationAccess(ctx, organizationId)
 
-  return await ctx.runMutation(internal.persons.account.ensure, {
-    organizationId,
-    userId: requireUserId(identity),
-    email: readUserEmail(identity),
-    name: readUserName(identity),
-  })
+  return await ctx.runMutation(
+    internal.persons.account.ensure,
+    accountArgs(identity, organizationId)
+  )
 }
 
 export async function resolveCurrentPerson(
@@ -108,26 +114,21 @@ export const sync = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
-    const email = readUserEmail(identity)
-    const personId = await ensureAccountPerson(ctx, {
-      organizationId: args.organizationId,
-      userId: requireUserId(identity),
-      email,
-      name: readUserName(identity),
-    })
+    const account = accountArgs(identity, args.organizationId)
+    const personId = await ensureAccountPerson(ctx, account)
 
     if (args.timezone !== undefined) {
       await updatePersonTimezone(ctx, personId, args.timezone)
     }
 
-    if (email !== undefined) {
+    if (account.email !== undefined) {
       await linkIdentityToPerson(ctx, {
         organizationId: args.organizationId,
         personId,
         provider: "email",
-        externalId: email,
+        externalId: account.email,
         method: "oauth",
-        email,
+        email: account.email,
       })
     }
 
