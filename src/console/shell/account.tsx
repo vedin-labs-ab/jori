@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronsUpDown, LogOut, ShieldUser } from "lucide-react"
+import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -18,10 +19,12 @@ import {
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/shared/session/auth"
+import { AccountDialog } from "./settings"
 
 export function SidebarUserButton() {
   const { isMobile } = useSidebar()
   const { data: session } = useSession()
+  const [managing, setManaging] = useState(false)
   const user = session?.user
 
   if (user === undefined) {
@@ -71,11 +74,9 @@ export function SidebarUserButton() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link params={{ view: "account" }} to="/settings/$view">
-                  <ShieldUser />
-                  Account
-                </Link>
+              <DropdownMenuItem onSelect={() => setManaging(true)}>
+                <ShieldUser />
+                Account
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -87,6 +88,7 @@ export function SidebarUserButton() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <AccountDialog onOpenChange={setManaging} open={managing} />
       </SidebarMenuItem>
     </SidebarMenu>
   )

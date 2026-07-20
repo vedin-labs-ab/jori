@@ -1,20 +1,37 @@
-import { ChevronsUpDown } from "lucide-react"
-import { OrganizationSwitcher } from "@/components/auth/organization/organization-switcher"
+import { ChevronsUpDown, Plus, Settings } from "lucide-react"
+import { useState } from "react"
+import { CreateOrganizationDialog } from "@/components/auth/organization/create-organization-dialog"
 import { OrganizationView } from "@/components/auth/organization/organization-view"
-import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
-import { activateOrganization } from "@/shared/session/auth"
+import {
+  activateOrganization,
+  useActiveOrganization,
+  useListOrganizations,
+} from "@/shared/session/auth"
+import { OrganizationDialog } from "./settings"
 
 export function SidebarOrganizationSwitcher() {
+  const active = useActiveOrganization()
+  const organizations = useListOrganizations()
+  const [managing, setManaging] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const others =
+    organizations.data?.filter(
+      (organization) => organization.id !== active.data?.id
+    ) ?? []
+
   return (
-    <OrganizationSwitcher
-      hidePersonal
-      setActive={(organization) => {
-        if (organization !== null) {
-          void activateOrganization(organization.id)
-        }
-      }}
-      trigger={
+    <>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -24,7 +41,44 @@ export function SidebarOrganizationSwitcher() {
             <ChevronsUpDown className="ml-auto size-4" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-      }
-    />
+        <DropdownMenuContent align="start" className="w-72 rounded-lg">
+          <DropdownMenuLabel className="p-0 font-normal">
+            <div className="flex items-center justify-between gap-4 px-2 py-2">
+              <OrganizationView className="min-w-0" hideRole hideSlug />
+              <Button
+                onClick={() => setManaging(true)}
+                size="sm"
+                variant="outline"
+              >
+                <Settings className="text-muted-foreground" />
+                Manage
+              </Button>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {others.map((organization) => (
+            <DropdownMenuItem
+              key={organization.id}
+              onSelect={() => void activateOrganization(organization.id)}
+            >
+              <OrganizationView
+                className="min-w-0"
+                hideRole
+                hideSlug
+                organization={organization}
+                size="sm"
+              />
+            </DropdownMenuItem>
+          ))}
+          {others.length > 0 ? <DropdownMenuSeparator /> : null}
+          <DropdownMenuItem onSelect={() => setCreating(true)}>
+            <Plus />
+            Create organization
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <OrganizationDialog onOpenChange={setManaging} open={managing} />
+      <CreateOrganizationDialog onOpenChange={setCreating} open={creating} />
+    </>
   )
 }
