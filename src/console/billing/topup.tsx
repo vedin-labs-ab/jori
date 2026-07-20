@@ -65,6 +65,8 @@ export function TopUpDialog({ organizationId }: { organizationId: string }) {
           <div className="flex flex-col gap-1.5">
             <InputGroup>
               <InputGroupInput
+                aria-describedby={valid ? undefined : "top-up-amount-issue"}
+                aria-invalid={valid ? undefined : true}
                 inputMode="numeric"
                 min={topUp.minimumUsd}
                 onChange={(event) => setAmount(event.target.value)}
@@ -76,7 +78,11 @@ export function TopUpDialog({ organizationId }: { organizationId: string }) {
               </InputGroupAddon>
             </InputGroup>
             {valid ? null : (
-              <p className="text-destructive text-xs" role="alert">
+              <p
+                className="text-destructive text-xs"
+                id="top-up-amount-issue"
+                role="alert"
+              >
                 Any whole amount from ${topUp.minimumUsd} to $
                 {topUp.maximumUsd.toLocaleString("en-US")}.
               </p>
