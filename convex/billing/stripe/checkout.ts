@@ -4,6 +4,7 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
+import { requireActivePlan } from "../account"
 import { billingInterval, billingPlan } from "../schema"
 import { requireString, stripeRequest } from "./client"
 import { stripePriceId } from "./config"
@@ -88,6 +89,7 @@ export const startTopUpCheckout = action({
     }
 
     const account = await ensuredAccount(ctx, args.organizationId)
+    requireActivePlan(account)
     const customer = await ensuredCustomer(ctx, args.organizationId, account)
     const micros = dollarsToMicros(args.amountUsd)
     const session = await stripeRequest("/v1/checkout/sessions", {
