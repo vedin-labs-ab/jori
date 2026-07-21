@@ -29,12 +29,17 @@ export function OrganizationViewSkeleton({
     >
       <OrganizationLogo
         isPending
-        className={size === "sm" ? "size-5" : undefined}
+        className={size === "sm" ? "size-6" : undefined}
         size={size === "lg" ? "md" : "sm"}
       />
 
       <div className="flex flex-col min-w-0 gap-1">
-        <Skeleton className="h-3.5 w-20 rounded-md" />
+        <Skeleton
+          className={cn(
+            "w-20 rounded-md",
+            size === "sm" ? "h-3" : "h-3.5"
+          )}
+        />
 
         {!hideSlug && <Skeleton className="h-3 w-28 rounded-md" />}
       </div>
