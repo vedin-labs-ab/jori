@@ -1,6 +1,7 @@
-import { FileText } from "lucide-react"
+import { FileText, Globe2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ConsoleEmptyState } from "../../../shared/list/empty"
 import { Paged } from "../../../shared/paging"
 import { ContextSectionTitle } from "../../section"
 import { sourceLabel, type WebsiteItem, websiteItems } from "../discovery/url"
@@ -37,7 +38,14 @@ export function WebsitesSection({
       >
         Websites
       </ContextSectionTitle>
-      {count === 0 ? null : (
+      {count === 0 ? (
+        <ConsoleEmptyState
+          className="min-h-32"
+          description="Add one to give Milo clearer organization context."
+          icon={Globe2}
+          title="No websites yet"
+        />
+      ) : (
         <div className="flex flex-wrap gap-1.5">
           {websites.map((website) => (
             <WebsiteChip
