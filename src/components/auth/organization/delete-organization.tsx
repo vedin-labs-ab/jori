@@ -59,7 +59,7 @@ export function DeleteOrganization() {
       <Button
         disabled={!activeOrganization}
         size="sm"
-        variant="outline"
+        variant="destructive"
         onClick={() => setConfirmOpen(true)}
       >
         {organizationLocalization.deleteOrganization}

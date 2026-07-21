@@ -20,17 +20,20 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
-const triggerVariants = cva("max-w-full justify-start", {
-  variants: {
-    size: {
-      sm: "h-6 px-2 text-xs/relaxed [&_svg]:size-3",
-      md: "h-7 px-2 text-sm [&_svg]:size-3.5",
-      lg: "h-8 px-2.5 text-base font-semibold [&_svg]:size-3.5",
-      xl: "h-9 px-3 text-xl font-semibold tracking-tight [&_svg]:size-4",
+const triggerVariants = cva(
+  "group/editable max-w-full justify-start px-0 hover:bg-transparent dark:hover:bg-transparent",
+  {
+    variants: {
+      size: {
+        sm: "h-6 text-xs/relaxed [&_svg]:size-3",
+        md: "h-7 text-sm [&_svg]:size-3.5",
+        lg: "h-8 text-base font-semibold [&_svg]:size-3.5",
+        xl: "h-9 text-xl font-semibold tracking-tight [&_svg]:size-4",
+      },
     },
-  },
-  defaultVariants: { size: "md" },
-})
+    defaultVariants: { size: "md" },
+  }
+)
 
 const editorVariants = cva("max-w-full", {
   variants: {
@@ -239,8 +242,10 @@ export function EditableText({
           type="button"
           variant="ghost"
         >
-          <span className="truncate">{displayValue ?? value}</span>
-          <Pencil />
+          <span className="truncate transition-opacity group-hover/editable:opacity-70 group-focus-visible/editable:opacity-70">
+            {displayValue ?? value}
+          </span>
+          <Pencil className="text-muted-foreground transition-colors group-hover/editable:text-foreground group-focus-visible/editable:text-foreground" />
         </Button>
       )}
     </div>
