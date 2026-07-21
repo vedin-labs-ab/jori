@@ -1,14 +1,10 @@
 "use client"
 
 import {
-  type OrganizationAuthClient,
   useAuth,
-  useAuthPlugin,
-  useCheckSlug
+  useAuthPlugin
 } from "@better-auth-ui/react"
-import { useDebouncer } from "@tanstack/react-pacer"
-import { Check, X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { Field, FieldError } from "@/components/ui/field"
 import {
@@ -17,8 +13,12 @@ import {
   InputGroupInput
 } from "@/components/ui/input-group"
 import { Label } from "@/components/ui/label"
-import { Spinner } from "@/components/ui/spinner"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
+import {
+  sanitizeSlug,
+  SlugAvailabilityIndicator,
+  useSlugAvailability
+} from "./slug"
 
 /** Props for the `SlugField` component. */
 export type SlugFieldProps = {
@@ -34,9 +34,7 @@ export type SlugFieldProps = {
  * and dashes. Runs of disallowed characters are collapsed to a single dash, but
  * leading/trailing dashes are preserved while the user is still typing.
  */
-export function sanitizeSlug(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-}
+export { sanitizeSlug } from "./slug"
 
 /**
  * Organization slug field with debounced availability checking.
@@ -48,7 +46,7 @@ export function SlugField({
   disabled,
   id = "slug"
 }: SlugFieldProps) {
-  const { authClient, localization: authLocalization } = useAuth()
+  const { localization: authLocalization } = useAuth()
   const {
     localization,
     checkSlug: checkSlugEnabled,
@@ -57,37 +55,17 @@ export function SlugField({
 
   const [slugError, setSlugError] = useState<string>()
 
-  const {
-    mutate: checkSlug,
-    data: checkSlugData,
-    error: checkSlugError,
-    reset: resetCheckSlug
-  } = useCheckSlug(authClient as OrganizationAuthClient)
-
-  const debouncer = useDebouncer(
-    (next: string) => {
-      if (!checkSlugEnabled || !next.trim() || next.trim() === currentSlug)
-        return
-
-      checkSlug({ slug: next.trim() })
-    },
-    { wait: 500 }
+  const availability = useSlugAvailability(
+    value,
+    currentSlug,
+    checkSlugEnabled
   )
-
-  useEffect(() => {
-    // Clear stale validation errors when the controlled value changes
-    // externally (e.g. the parent resets the form), not just via this
-    // input's onChange.
-    setSlugError(undefined)
-
-    if (!checkSlugEnabled) return
-
-    resetCheckSlug()
-    debouncer.maybeExecute(value)
-  }, [checkSlugEnabled, value, debouncer.maybeExecute, resetCheckSlug])
+  const unavailable = availability === "unavailable"
+  const error =
+    slugError ?? (unavailable ? "This slug is unavailable." : undefined)
 
   return (
-    <Field data-invalid={!!slugError}>
+    <Field data-invalid={!!error}>
       <Label htmlFor={id}>{localization.slug}</Label>
 
       <InputGroup>
@@ -107,26 +85,20 @@ export function SlugField({
             e.preventDefault()
             setSlugError(authLocalization.auth.fieldRequired)
           }}
-          aria-invalid={!!slugError}
+          aria-invalid={!!error}
           placeholder={localization.slugPlaceholder}
           required
           disabled={disabled}
         />
 
-        {checkSlugEnabled && !!value.trim() && value.trim() !== currentSlug && (
+        {availability !== "idle" && (
           <InputGroupAddon align="inline-end">
-            {checkSlugData?.status ? (
-              <Check className="size-4 text-foreground" />
-            ) : checkSlugError ? (
-              <X className="size-4 text-destructive" />
-            ) : (
-              <Spinner />
-            )}
+            <SlugAvailabilityIndicator status={availability} />
           </InputGroupAddon>
         )}
       </InputGroup>
 
-      <FieldError>{slugError}</FieldError>
+      <FieldError>{error}</FieldError>
     </Field>
   )
 }
