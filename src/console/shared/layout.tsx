@@ -6,7 +6,13 @@ import {
   useContext,
 } from "react"
 import { createPortal } from "react-dom"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
@@ -49,6 +55,27 @@ export function ConsoleHeaderActions({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-2">{children}</div>,
         slot
       )
+}
+
+export function ConsoleHeaderButton({
+  className,
+  icon,
+  label,
+  ...props
+}: Omit<ComponentProps<typeof Button>, "children"> & {
+  icon: ReactNode
+  label: string
+}) {
+  return (
+    <Button
+      aria-label={label}
+      className={cn("max-sm:size-7 max-sm:px-0", className)}
+      {...props}
+    >
+      {icon}
+      <span className="max-sm:hidden">{label}</span>
+    </Button>
+  )
 }
 
 /** Pairs a filter control with a muted inline label, shared across facets. */
@@ -133,7 +160,59 @@ export function ConsoleSearch({
   value: string
 }) {
   return (
-    <div className="relative w-56 lg:w-72">
+    <>
+      <ConsoleSearchField
+        className="hidden w-56 sm:block lg:w-72"
+        label={label}
+        onValueChange={onValueChange}
+        placeholder={placeholder}
+        value={value}
+      />
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            aria-label={value === "" ? label : `${label}: ${value}`}
+            className="sm:hidden"
+            size="icon"
+            type="button"
+            variant={value === "" ? "outline" : "secondary"}
+          >
+            <Search />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="end"
+          className="w-[min(20rem,calc(100vw-2rem))] p-2 sm:hidden"
+        >
+          <ConsoleSearchField
+            autoFocus
+            label={label}
+            onValueChange={onValueChange}
+            placeholder={placeholder}
+            value={value}
+          />
+        </PopoverContent>
+      </Popover>
+    </>
+  )
+}
+
+function ConsoleSearchField({
+  className,
+  label,
+  onValueChange,
+  placeholder,
+  value,
+  ...props
+}: {
+  className?: string
+  label: string
+  onValueChange: (value: string) => void
+  placeholder?: string
+  value: string
+} & Omit<ComponentProps<typeof Input>, "onChange" | "value">) {
+  return (
+    <div className={cn("relative w-full", className)}>
       <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2 size-3.5 text-muted-foreground" />
       <Input
         aria-label={label}
@@ -141,6 +220,7 @@ export function ConsoleSearch({
         onChange={(event) => onValueChange(event.target.value)}
         placeholder={placeholder ?? label}
         value={value}
+        {...props}
       />
     </div>
   )

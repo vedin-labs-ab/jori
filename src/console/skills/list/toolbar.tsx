@@ -1,9 +1,9 @@
 import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
   ConsoleFilterGroup,
   ConsoleFilterToggle,
   ConsoleHeaderActions,
+  ConsoleHeaderButton,
   ConsoleSearch,
 } from "../../shared/layout"
 import { type SkillFilterView, skillFilterOptions } from "../types"
@@ -31,15 +31,14 @@ export function SkillsToolbar({
           onValueChange={onSearchChange}
           value={searchTerm}
         />
-        <Button
-          type="button"
-          onClick={onCreate}
-          disabled={isCreateDisabled}
+        <ConsoleHeaderButton
           className="w-fit"
-        >
-          <Plus />
-          New skill
-        </Button>
+          disabled={isCreateDisabled}
+          icon={<Plus />}
+          label="New skill"
+          onClick={onCreate}
+          type="button"
+        />
       </ConsoleHeaderActions>
       <ConsoleFilterGroup>
         <ConsoleFilterToggle

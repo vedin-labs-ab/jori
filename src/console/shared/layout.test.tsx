@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { ConsoleFilterToggle, ConsoleSearch } from "./layout"
+import {
+  ConsoleFilterToggle,
+  ConsoleHeaderButton,
+  ConsoleSearch,
+} from "./layout"
 
 afterEach(() => {
   cleanup()
@@ -76,4 +80,62 @@ test("toolbar search can use a placeholder different from its label", () => {
   const input = screen.getByRole("textbox", { name: "Search runs" })
 
   expect(input.getAttribute("placeholder")).toBe("Search runs...")
+})
+
+test("toolbar search exposes a compact mobile trigger", () => {
+  render(
+    <ConsoleSearch
+      label="Search artifacts"
+      onValueChange={() => {}}
+      value="report"
+    />
+  )
+
+  const trigger = screen.getByRole("button", {
+    name: "Search artifacts: report",
+  })
+
+  expect(trigger.className).toContain("sm:hidden")
+  expect(trigger.dataset.variant).toBe("secondary")
+})
+
+test("compact search opens an auto-focused search field", async () => {
+  const onValueChange = vi.fn()
+
+  render(
+    <ConsoleSearch
+      label="Search artifacts"
+      onValueChange={onValueChange}
+      value=""
+    />
+  )
+
+  fireEvent.click(screen.getByRole("button", { name: "Search artifacts" }))
+
+  const inputs = await screen.findAllByRole("textbox", {
+    name: "Search artifacts",
+  })
+  const compactInput = inputs.at(-1)
+
+  expect(compactInput).toBe(document.activeElement)
+  fireEvent.change(compactInput as HTMLInputElement, {
+    target: { value: "report" },
+  })
+  expect(onValueChange).toHaveBeenCalledWith("report")
+})
+
+test("header buttons keep their accessible label when compact", () => {
+  render(
+    <ConsoleHeaderButton
+      icon={<svg aria-hidden />}
+      label="New automation"
+      type="button"
+    />
+  )
+
+  const button = screen.getByRole("button", { name: "New automation" })
+  const label = screen.getByText("New automation")
+
+  expect(button.className).toContain("max-sm:size-7")
+  expect(label.className).toContain("max-sm:hidden")
 })
