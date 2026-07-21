@@ -5,6 +5,7 @@ import {
   useAuth,
   useHasPermission
 } from "@better-auth-ui/react"
+import { TriangleAlert } from "lucide-react"
 import type { ComponentProps } from "react"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -42,7 +43,14 @@ export function OrganizationDangerZone({
 
   return (
     <div className={cn("flex w-full flex-col gap-3", className)} {...props}>
-      <SectionHeader title={localization.settings.dangerZone} />
+      <SectionHeader
+        title={
+          <span className="inline-flex items-center gap-2">
+            <TriangleAlert className="size-4 text-destructive" />
+            {localization.settings.dangerZone}
+          </span>
+        }
+      />
 
       <Card className="gap-0">
         <CardContent>

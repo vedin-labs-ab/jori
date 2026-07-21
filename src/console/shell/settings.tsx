@@ -1,5 +1,6 @@
 import { Building2, CreditCard, Users } from "lucide-react"
 import { type CSSProperties, lazy, Suspense, useState } from "react"
+import { InviteMemberButton } from "@/components/auth/organization/invite-member-dialog"
 import { OrganizationPeople } from "@/components/auth/organization/organization-people"
 import { OrganizationSettings } from "@/components/auth/organization/organization-settings"
 import { AccountSettings } from "@/components/auth/settings/account/account-settings"
@@ -113,6 +114,7 @@ export function OrganizationDialog({
       <DialogContent
         bodyClassName="flex flex-1 overflow-hidden p-0"
         className="h-[calc(100svh-2rem)] sm:h-[min(44rem,calc(100svh-2rem))] sm:max-w-[calc(100%-2rem)] md:max-w-4xl lg:max-w-5xl"
+        showCloseButton={false}
       >
         <SidebarProvider
           className="h-full min-h-0 items-stretch"
@@ -120,10 +122,13 @@ export function OrganizationDialog({
         >
           <OrganizationSettingsSidebar onViewChange={setView} view={view} />
           <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-            <header className="shrink-0 border-b px-4 py-3 pr-12 md:px-6">
-              <DialogTitle className="text-base font-semibold">
-                {activeView.label}
-              </DialogTitle>
+            <header className="shrink-0 border-b px-4 py-3 md:px-6">
+              <div className="flex min-h-8 items-center justify-between gap-3">
+                <DialogTitle className="text-base font-semibold">
+                  {activeView.label}
+                </DialogTitle>
+                {view === "people" ? <InviteMemberButton /> : null}
+              </div>
               <DialogDescription className="sr-only">
                 Manage your organization.
               </DialogDescription>

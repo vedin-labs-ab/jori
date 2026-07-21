@@ -9,25 +9,27 @@ import {
   useUpdateMemberRole
 } from "@better-auth-ui/react"
 import type { Member, Organization, User } from "better-auth/client"
-import { LogOut, Pencil, Trash2 } from "lucide-react"
+import { ChevronDown, LogOut, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { cn } from "@/lib/utils"
 import { UserView } from "../user/user-view"
 import { LeaveOrganizationDialog } from "./leave-organization-dialog"
 import { OrganizationMemberRowSkeleton } from "./organization-member-row-skeleton"
 import { RemoveMemberDialog } from "./remove-member-dialog"
+import { OrganizationTableActionMenu } from "./table"
 
 export type OrganizationMemberRowProps = {
   member: Member & { user: Partial<User> }
@@ -70,6 +72,7 @@ export function OrganizationMemberRow({
   )
 
   const isCurrentUser = session?.user.id === member.userId
+  const memberLabel = member.user.name ?? member.user.email ?? roleLabel
 
   const [removeOpen, setRemoveOpen] = useState(false)
   const [leaveOpen, setLeaveOpen] = useState(false)
@@ -84,80 +87,115 @@ export function OrganizationMemberRow({
         <UserView user={member.user} />
       </TableCell>
 
-      <TableCell>{roleLabel}</TableCell>
-
       <TableCell>
-        <div className="flex items-center justify-end gap-1">
-          {hasUpdatePermission?.success && (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={cn(
-                  buttonVariants({ size: "icon", variant: "ghost" }),
-                  "size-8"
-                )}
-                disabled={isUpdatingRole}
-                aria-label={organizationLocalization.changeMemberRole}
+        <MemberRoleMenu
+          disabled={!hasUpdatePermission?.success}
+          label={`${organizationLocalization.changeMemberRole}: ${memberLabel}`}
+          onValueChange={(role) =>
+            updateMemberRole({ memberId: member.id, role })
+          }
+          options={assignableRoles}
+          pending={isUpdatingRole}
+          role={member.role}
+          roleLabel={roleLabel}
+        />
+      </TableCell>
+
+      <TableCell className="text-end">
+        {isCurrentUser || hasDeletePermission?.success ? (
+          <OrganizationTableActionMenu
+            label={`${organizationLocalization.actions}: ${memberLabel}`}
+          >
+            {isCurrentUser ? (
+              <DropdownMenuItem
+                onSelect={() => setLeaveOpen(true)}
+                variant="destructive"
               >
-                {isUpdatingRole ? <Spinner /> : <Pencil />}
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end">
-                {assignableRoles.map(([role, label]) => (
-                  <DropdownMenuItem
-                    key={role}
-                    disabled={member.role === role}
-                    onClick={() =>
-                      updateMemberRole({ memberId: member.id, role })
-                    }
-                  >
-                    {label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
-          {isCurrentUser ? (
-            <Button
-              size="icon"
-              variant="destructive"
-              className="size-8"
-              aria-label={organizationLocalization.leaveOrganization}
-              onClick={() => setLeaveOpen(true)}
-            >
-              <LogOut />
-            </Button>
-          ) : (
-            hasDeletePermission?.success && (
-              <Button
-                size="icon"
-                variant="outline"
-                className="size-8"
-                aria-label={organizationLocalization.removeMember}
-                onClick={() => setRemoveOpen(true)}
+                <LogOut />
+                {organizationLocalization.leaveOrganization}
+              </DropdownMenuItem>
+            ) : hasDeletePermission?.success ? (
+              <DropdownMenuItem
+                onSelect={() => setRemoveOpen(true)}
+                variant="destructive"
               >
                 <Trash2 />
-              </Button>
-            )
-          )}
-        </div>
+                {organizationLocalization.removeMember}
+              </DropdownMenuItem>
+            ) : null}
+          </OrganizationTableActionMenu>
+        ) : null}
 
-        {isCurrentUser && organization ? (
+        {isCurrentUser ? (
           <LeaveOrganizationDialog
             open={leaveOpen}
             onOpenChange={setLeaveOpen}
             organization={organization}
           />
-        ) : (
-          hasDeletePermission?.success && (
-            <RemoveMemberDialog
-              open={removeOpen}
-              onOpenChange={setRemoveOpen}
-              member={member}
-            />
-          )
-        )}
+        ) : hasDeletePermission?.success ? (
+          <RemoveMemberDialog
+            open={removeOpen}
+            onOpenChange={setRemoveOpen}
+            member={member}
+          />
+        ) : null}
       </TableCell>
     </TableRow>
+  )
+}
+
+function MemberRoleMenu({
+  disabled,
+  label,
+  onValueChange,
+  options,
+  pending,
+  role,
+  roleLabel
+}: {
+  disabled: boolean
+  label: string
+  onValueChange: (role: string) => void
+  options: [string, string][]
+  pending: boolean
+  role: string
+  roleLabel: string
+}) {
+  if (disabled) {
+    return <span>{roleLabel}</span>
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={label}
+          className="-ml-2"
+          disabled={pending}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
+          {roleLabel}
+          {pending ? <Spinner /> : <ChevronDown />}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuRadioGroup
+          onValueChange={(value) => {
+            if (value !== role) {
+              onValueChange(value)
+            }
+          }}
+          value={role}
+        >
+          {options.map(([value, optionLabel]) => (
+            <DropdownMenuRadioItem key={value} value={value}>
+              {optionLabel}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

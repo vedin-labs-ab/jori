@@ -3,7 +3,12 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { useState } from "react"
 import { afterEach, expect, test, vi } from "vitest"
-import { OrganizationSearchableTableHead } from "./table"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import {
+  OrganizationActionsTableHead,
+  OrganizationSearchableTableHead,
+  OrganizationTableActionMenu
+} from "./table"
 
 afterEach(cleanup)
 
@@ -52,6 +57,32 @@ test("Escape clears and closes a searchable table header", () => {
   expect(document.activeElement).toBe(
     screen.getByRole("button", { name: "Search member" })
   )
+})
+
+test("keeps row actions compact and accessible", () => {
+  render(
+    <table>
+      <thead>
+        <tr>
+          <OrganizationActionsTableHead label="Actions" />
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <OrganizationTableActionMenu label="Actions: Ada Lovelace">
+              <DropdownMenuItem>Remove member</DropdownMenuItem>
+            </OrganizationTableActionMenu>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  )
+
+  expect(screen.getByRole("columnheader", { name: "Actions" })).toBeDefined()
+  expect(
+    screen.getByRole("button", { name: "Actions: Ada Lovelace" })
+  ).toBeDefined()
 })
 
 function SearchableHeader() {

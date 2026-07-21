@@ -14,7 +14,6 @@ import { type ComponentProps, useMemo, useState } from "react"
 import {
   Table,
   TableBody,
-  TableHead,
   TableHeader,
   TableRow
 } from "@/components/ui/table"
@@ -24,6 +23,7 @@ import { cn } from "@/lib/utils"
 import { OrganizationInvitationRow } from "./organization-invitation-row"
 import { OrganizationInvitationRowSkeleton } from "./organization-invitation-row-skeleton"
 import {
+  OrganizationActionsTableHead,
   OrganizationFilterTableHead,
   OrganizationSearchableTableHead,
   OrganizationSortableTableHead,
@@ -164,9 +164,9 @@ export function OrganizationInvitations({
                 value={statusFilter}
               />
 
-              <TableHead className="text-end">
-                {organizationLocalization.actions}
-              </TableHead>
+              <OrganizationActionsTableHead
+                label={organizationLocalization.actions}
+              />
             </TableRow>
           </TableHeader>
 
