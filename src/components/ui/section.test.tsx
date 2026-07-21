@@ -34,3 +34,18 @@ test("composes the shared view and section spacing primitives", () => {
   expect(screen.getByTestId("group").className).toContain("md:gap-6")
   expect(screen.getByTestId("section").className).toContain("gap-3")
 })
+
+test("aligns an optional title icon within the heading line box", () => {
+  render(
+    <SectionHeader
+      icon={<svg aria-hidden data-testid="warning-icon" />}
+      title="Danger zone"
+    />
+  )
+
+  const heading = screen.getByRole("heading", { name: "Danger zone" })
+  expect(heading.className).toContain("leading-5")
+  expect(screen.getByTestId("warning-icon").parentElement?.dataset.slot).toBe(
+    "section-icon"
+  )
+})

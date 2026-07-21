@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 type SectionHeaderProps = Omit<ComponentProps<"div">, "title"> & {
   action?: ReactNode
   description?: ReactNode
+  icon?: ReactNode
   title: ReactNode
 }
 
@@ -35,6 +36,7 @@ function SectionHeader({
   action,
   className,
   description,
+  icon,
   title,
   ...props
 }: SectionHeaderProps) {
@@ -49,10 +51,18 @@ function SectionHeader({
     >
       <div className="min-w-0">
         <h3
-          className="truncate font-heading text-sm font-medium tracking-tight"
+          className="flex min-w-0 items-center gap-2 font-heading text-sm font-medium leading-5 tracking-tight"
           data-slot="section-title"
         >
-          {title}
+          {icon ? (
+            <span
+              className="inline-flex size-4 shrink-0 items-center justify-center text-muted-foreground [&>svg]:size-4"
+              data-slot="section-icon"
+            >
+              {icon}
+            </span>
+          ) : null}
+          <span className="truncate">{title}</span>
         </h3>
         {description ? (
           <p
