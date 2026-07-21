@@ -55,7 +55,6 @@ function Workstreams() {
         />
         <WorkstreamRow
           integrations={["linear"]}
-          muted
           name="Onboarding revamp"
           note="Still open, no recent activity."
           timeline="Quiet since Jun 20"
@@ -90,19 +89,17 @@ const sourceIntegrations: readonly Integration[] = [
 
 function WorkstreamRow({
   integrations,
-  muted = false,
   name,
   note,
   timeline,
 }: {
   integrations: readonly Integration[]
-  muted?: boolean
   name: string
   note: string
   timeline: string
 }) {
   return (
-    <div className={`px-5 py-3.5 ${muted ? "opacity-60" : ""}`}>
+    <div className="px-5 py-3.5">
       <p className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
         <span className="flex items-center gap-2 font-medium text-sm">
           {name}

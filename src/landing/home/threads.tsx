@@ -110,7 +110,7 @@ function ThreadMessage({
         <p className="flex items-baseline gap-2 text-xs">
           <span className="font-semibold text-sm">{author}</span>
           {isMilo ? (
-            <span className="rounded-sm bg-muted px-1 py-px font-medium text-[10px] text-muted-foreground">
+            <span className="rounded-sm bg-muted px-1 py-px font-medium text-[10px] text-foreground/70">
               APP
             </span>
           ) : null}

@@ -6,6 +6,7 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { type ComponentProps, type ReactNode } from "react"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
+import { Toaster } from "@/components/ui/sonner"
 import { authClient } from "./auth"
 import { convex } from "./client"
 
@@ -16,25 +17,30 @@ export function SessionProviders({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
 
   return (
-    <AuthProvider
-      Link={SessionLink}
-      authClient={authClient}
-      emailAndPassword={{ enabled: false }}
-      navigate={({ to, replace }) => void navigate({ to, replace })}
-      plugins={[organizationPlugin()]}
-      redirectTo="/console"
-      socialProviders={["google", "microsoft"]}
-    >
-      {/* The provider's AuthClient type only models its own convex plugin;
-          the organization plugin widens useSession, so structurally ours is
-          a superset. */}
-      <ConvexBetterAuthProvider
-        authClient={authClient as unknown as ConvexAuthClient}
-        client={convex}
+    <>
+      {/* Pinned because the app is light-only. Keep this beside the provider
+          so public pages do not load the notification runtime. */}
+      <Toaster theme="light" />
+      <AuthProvider
+        Link={SessionLink}
+        authClient={authClient}
+        emailAndPassword={{ enabled: false }}
+        navigate={({ to, replace }) => void navigate({ to, replace })}
+        plugins={[organizationPlugin()]}
+        redirectTo="/console"
+        socialProviders={["google", "microsoft"]}
       >
-        {children}
-      </ConvexBetterAuthProvider>
-    </AuthProvider>
+        {/* The provider's AuthClient type only models its own convex plugin;
+            the organization plugin widens useSession, so structurally ours is
+            a superset. */}
+        <ConvexBetterAuthProvider
+          authClient={authClient as unknown as ConvexAuthClient}
+          client={convex}
+        >
+          {children}
+        </ConvexBetterAuthProvider>
+      </AuthProvider>
+    </>
   )
 }
 
