@@ -41,7 +41,7 @@ export function LeaveOrganization() {
       <Button
         disabled={!activeOrganization}
         size="sm"
-        variant="outline"
+        variant="destructive"
         onClick={() => setConfirmOpen(true)}
       >
         {organizationLocalization.leaveOrganization}

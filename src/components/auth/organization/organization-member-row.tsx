@@ -120,7 +120,7 @@ export function OrganizationMemberRow({
           {isCurrentUser ? (
             <Button
               size="icon"
-              variant="outline"
+              variant="destructive"
               className="size-8"
               aria-label={organizationLocalization.leaveOrganization}
               onClick={() => setLeaveOpen(true)}

@@ -77,3 +77,22 @@ test("supports transform and size presets", () => {
   fireEvent.change(input, { target: { value: "Milo Labs" } })
   expect((input as HTMLInputElement).value).toBe("milo-labs")
 })
+
+test("uses flush, quiet interaction styling for the idle trigger", () => {
+  render(
+    <EditableText label="Organization name" onSave={vi.fn()} value="Milo" />
+  )
+
+  const trigger = screen.getByRole("button", {
+    name: "Edit organization name: Milo",
+  })
+  const label = trigger.querySelector("span")
+  const icon = trigger.querySelector("svg")
+
+  expect(trigger.className).toContain("px-0")
+  expect(trigger.className).toContain("hover:bg-transparent")
+  expect(label?.className).toContain("group-hover/editable:opacity-70")
+  expect(icon?.getAttribute("class")).toContain(
+    "group-hover/editable:text-foreground"
+  )
+})
