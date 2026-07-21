@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
+import { OAuthFeedback } from "./oauth-feedback"
 import { ProviderButtons, type SocialLayout } from "./provider-buttons"
 
 export type SignInProps = {
@@ -111,6 +112,7 @@ export function SignIn({
 
   return (
     <Card className={cn("w-full max-w-sm", className)}>
+      <OAuthFeedback />
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
           {localization.auth.signIn}

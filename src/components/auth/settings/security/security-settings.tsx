@@ -4,28 +4,25 @@ import { useAuth } from "@better-auth-ui/react"
 import { SectionGroup } from "@/components/ui/section"
 import { ActiveSessions } from "./active-sessions"
 import { ChangePassword } from "./change-password"
-import { LinkedAccounts } from "./linked-accounts"
 
 export type SecuritySettingsProps = {
   className?: string
 }
 
 /**
- * Renders the security settings layout including password management, linked accounts, and active sessions.
+ * Renders password management, active sessions, and plugin security cards.
  *
- * ChangePassword is rendered when password authentication is enabled; LinkedAccounts is rendered when social providers are present.
  * Each registered auth plugin may contribute `securityCards` (for example passkeys, delete-user).
  *
  * @param className - Optional additional CSS class names for the outer container.
  * @returns The security settings container as a JSX element.
  */
 export function SecuritySettings({ className }: SecuritySettingsProps) {
-  const { emailAndPassword, plugins, socialProviders } = useAuth()
+  const { emailAndPassword, plugins } = useAuth()
 
   return (
     <SectionGroup className={className}>
       {emailAndPassword?.enabled && <ChangePassword />}
-      {!!socialProviders?.length && <LinkedAccounts />}
       <ActiveSessions />
       {plugins.flatMap(
         (plugin) =>

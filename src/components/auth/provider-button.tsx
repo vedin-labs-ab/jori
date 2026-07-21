@@ -8,6 +8,7 @@ import type { ComponentProps } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { signInErrorCallbackURL } from "./oauth"
 
 export type ProviderButtonProps = {
   provider: SocialProvider
@@ -48,7 +49,13 @@ export function ProviderButton({
       type="button"
       variant={variant}
       disabled={isPending}
-      onClick={() => signInSocial({ provider, callbackURL })}
+      onClick={() =>
+        signInSocial({
+          provider,
+          callbackURL,
+          errorCallbackURL: signInErrorCallbackURL(provider)
+        })
+      }
       {...props}
       aria-label={getProviderName(provider)}
     >
