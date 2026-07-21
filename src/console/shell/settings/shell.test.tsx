@@ -36,6 +36,12 @@ test("settings views share one sidebar and content header", () => {
   expect(screen.getByRole("heading", { name: "Account" })).toBeDefined()
   expect(screen.getByText("Profile fields")).toBeDefined()
 
+  const mobileTabs = screen
+    .getByRole("tablist", { name: "Account settings" })
+    .closest('[data-slot="tabs"]')
+
+  expect(mobileTabs?.className.split(" ")).not.toContain("border-b")
+
   const sidebar = screen.getByRole("list", { name: "Account settings" })
   fireEvent.click(within(sidebar).getByRole("button", { name: "Security" }))
 
