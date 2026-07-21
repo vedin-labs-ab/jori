@@ -8,11 +8,11 @@ import {
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { Card, CardContent } from "@/components/ui/card"
 import { EditableText } from "@/components/ui/editable"
 import { Field, FieldError, FieldTitle } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
+import { cn } from "@/lib/utils"
 import { ChangeOrganizationLogo } from "./change-organization-logo"
 import {
   sanitizeSlug,
@@ -55,69 +55,61 @@ export function OrganizationProfile({ className }: OrganizationProfileProps) {
   )
 
   return (
-    <div>
-      <h2 className="mb-3 text-sm font-semibold">
-        {organizationLocalization.organizationProfile}
-      </h2>
+    <div className={cn("flex flex-col gap-6", className)}>
+      <ChangeOrganizationLogo />
 
-      <Card className={className}>
-        <CardContent className="flex flex-col gap-6">
-          <ChangeOrganizationLogo />
-
-          {activeOrganization ? (
-            <>
-              <Field>
-                <FieldTitle>{organizationLocalization.name}</FieldTitle>
-                <EditableText
-                  autoComplete="organization"
-                  disabled={isPending}
-                  label={organizationLocalization.name}
-                  onSave={async (name) => {
-                    await updateOrganization({ data: { name } })
-                  }}
-                  placeholder={organizationLocalization.namePlaceholder}
-                  size="lg"
-                  value={activeOrganization.name}
-                />
-              </Field>
-
-              <Field data-invalid={slugAvailability === "unavailable"}>
-                <FieldTitle>{organizationLocalization.slug}</FieldTitle>
-                <EditableText
-                  disabled={isPending}
-                  displayValue={`${slugPrefix}${activeOrganization.slug}`}
-                  endContent={
-                    <SlugAvailabilityIndicator status={slugAvailability} />
-                  }
-                  inputStart={slugPrefix || undefined}
-                  label={organizationLocalization.slug}
-                  onDraftChange={setSlugDraft}
-                  onSave={async (slug) => {
-                    await updateOrganization({ data: { slug } })
-                  }}
-                  placeholder={organizationLocalization.slugPlaceholder}
-                  saveDisabled={
-                    slugAvailability === "checking" ||
-                    slugAvailability === "unavailable"
-                  }
-                  transform={sanitizeSlug}
-                  value={activeOrganization.slug}
-                />
-                <FieldError>
-                  {slugAvailability === "unavailable"
-                    ? "This slug is unavailable."
-                    : undefined}
-                </FieldError>
-              </Field>
-            </>
-          ) : (
-            <OrganizationProfileSkeleton
-              name={organizationLocalization.name}
-              slug={organizationLocalization.slug}
+      {activeOrganization ? (
+        <>
+          <Field>
+            <FieldTitle>{organizationLocalization.name}</FieldTitle>
+            <EditableText
+              autoComplete="organization"
+              disabled={isPending}
+              label={organizationLocalization.name}
+              onSave={async (name) => {
+                await updateOrganization({ data: { name } })
+              }}
+              placeholder={organizationLocalization.namePlaceholder}
+              size="lg"
+              value={activeOrganization.name}
             />
-          )}
-        </CardContent>
-      </Card>
+          </Field>
+
+          <Field data-invalid={slugAvailability === "unavailable"}>
+            <FieldTitle>{organizationLocalization.slug}</FieldTitle>
+            <EditableText
+              disabled={isPending}
+              displayValue={`${slugPrefix}${activeOrganization.slug}`}
+              endContent={
+                <SlugAvailabilityIndicator status={slugAvailability} />
+              }
+              inputStart={slugPrefix || undefined}
+              label={organizationLocalization.slug}
+              onDraftChange={setSlugDraft}
+              onSave={async (slug) => {
+                await updateOrganization({ data: { slug } })
+              }}
+              placeholder={organizationLocalization.slugPlaceholder}
+              saveDisabled={
+                slugAvailability === "checking" ||
+                slugAvailability === "unavailable"
+              }
+              transform={sanitizeSlug}
+              value={activeOrganization.slug}
+            />
+            <FieldError>
+              {slugAvailability === "unavailable"
+                ? "This slug is unavailable."
+                : undefined}
+            </FieldError>
+          </Field>
+        </>
+      ) : (
+        <OrganizationProfileSkeleton
+          name={organizationLocalization.name}
+          slug={organizationLocalization.slug}
+        />
+      )}
     </div>
   )
 }
