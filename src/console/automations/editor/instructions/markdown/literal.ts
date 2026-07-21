@@ -1,11 +1,13 @@
 import { Extension, Mark, mergeAttributes } from "@tiptap/core"
-import { Lexer, Marked, type marked } from "marked"
+import { type MarkdownExtensionOptions } from "@tiptap/markdown"
+import { Lexer, Marked } from "marked"
 
 export const literalMarkdownMarkName = "literalMarkdown"
 const literalMark = [{ type: literalMarkdownMarkName }]
+type TiptapMarked = NonNullable<MarkdownExtensionOptions["marked"]>
 
-export function createInstructionMarked() {
-  return new Marked() as unknown as typeof marked
+export function createInstructionMarked(): TiptapMarked {
+  return new Marked() as unknown as TiptapMarked
 }
 
 export const LiteralMarkdown = Mark.create({

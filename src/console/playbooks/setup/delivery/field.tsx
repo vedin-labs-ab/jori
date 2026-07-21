@@ -140,14 +140,14 @@ function DeliveryEditor({
       </div>
       <ButtonGroup>
         <Button
-          disabled={disabled || onCancel === undefined}
+          disabled={disabled ? true : onCancel === undefined}
           onClick={onCancel}
           variant="outline"
         >
           Cancel
         </Button>
         <Button
-          disabled={disabled || !changed}
+          disabled={disabled ? true : !changed}
           onClick={() => next !== undefined && onSave(next)}
         >
           Save

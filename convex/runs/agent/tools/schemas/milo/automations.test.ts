@@ -1,24 +1,24 @@
 import { expect, test } from "vitest"
 import { automationMiloToolInputSchemas } from "./automations"
 
-test.each([
-  "add_automation",
-  "update_automation",
-] as const)("%s explains canonical instruction syntax", (tool) => {
-  const instructions = readProperties(
-    automationMiloToolInputSchemas[tool]
-  ).instructions
+test.each(["add_automation", "update_automation"] as const)(
+  "%s explains canonical instruction syntax",
+  (tool) => {
+    const instructions = readProperties(
+      automationMiloToolInputSchemas[tool]
+    ).instructions
 
-  expect(instructions).toMatchObject({
-    description: expect.stringContaining("Canonical Markdown"),
-    type: "string",
-  })
-  expect(readDescription(instructions)).toContain("@Integration")
-  expect(readDescription(instructions)).toContain("/skill")
-  expect(readDescription(instructions)).toContain("#tool")
-  expect(readDescription(instructions)).toContain("txt fences")
-  expect(readDescription(instructions)).toContain("explicit access")
-})
+    expect(instructions).toMatchObject({
+      description: expect.stringContaining("Canonical Markdown"),
+      type: "string",
+    })
+    expect(readDescription(instructions)).toContain("@Integration")
+    expect(readDescription(instructions)).toContain("/skill")
+    expect(readDescription(instructions)).toContain("#tool")
+    expect(readDescription(instructions)).toContain("txt fences")
+    expect(readDescription(instructions)).toContain("explicit access")
+  }
+)
 
 function readProperties(schema: Record<string, unknown>) {
   const properties = schema.properties

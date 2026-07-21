@@ -61,7 +61,7 @@ async function applyOp(
   pass: Doc<"passes">,
   state: EffortApplyState,
   op: EffortOp
-) {
+): Promise<void> {
   const sightings = resolveCitations(op.citations, state.allowed)
 
   if (sightings === null) {
@@ -78,12 +78,15 @@ async function applyOp(
 
   switch (op.op) {
     case "create":
-      return applyCreate(ctx, pass, state, op, sightings)
+      await applyCreate(ctx, pass, state, op, sightings)
+      return
     case "update":
-      return applyUpdate(ctx, pass, state, op, sightings)
+      await applyUpdate(ctx, pass, state, op, sightings)
+      return
     case "journal":
-      return applyJournal(ctx, pass, state, op, sightings)
+      await applyJournal(ctx, pass, state, op, sightings)
+      return
     case "merge":
-      return applyMerge(ctx, pass, state, op, sightings)
+      await applyMerge(ctx, pass, state, op, sightings)
   }
 }

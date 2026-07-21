@@ -1,7 +1,27 @@
 packages: []
 
+minimumReleaseAge: 0
+
+overrides:
+  '@opentelemetry/core': 2.9.0
+  '@trigger.dev/core>socket.io': 4.8.3
+  '@trigger.dev/core>socket.io-client': 4.8.3
+  'giget>tar': 7.5.20
+  'trigger.dev>esbuild': 0.28.1
+  'trigger.dev>socket.io-client': 4.8.3
+  tsconfck: 3.1.6
+  ws: 8.21.1
+
+peerDependencyRules:
+  allowedVersions:
+    'tsconfck>typescript': ^6.0.0
+
 allowBuilds:
   esbuild: true
   lightningcss: true
   unrs-resolver: true
   msw: false
+  '@depot/cli': false
+  '@openrouter/sdk': false
+  bufferutil: false
+  utf-8-validate: false

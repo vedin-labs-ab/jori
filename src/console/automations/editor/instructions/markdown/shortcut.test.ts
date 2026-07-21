@@ -36,19 +36,19 @@ test("accepts Enter after a plain tilde fence opener", () => {
   expect(editor.getJSON().content?.[0]?.type).toBe("fencedText")
 })
 
-test.each([
-  "````json ",
-  "   ```json ",
-])("turns the typed %j opener into a programming block", (opener) => {
-  const editor = createEditor()
+test.each(["````json ", "   ```json "])(
+  "turns the typed %j opener into a programming block",
+  (opener) => {
+    const editor = createEditor()
 
-  typeText(editor, opener)
+    typeText(editor, opener)
 
-  expect(editor.getJSON().content?.[0]).toMatchObject({
-    attrs: { language: "json" },
-    type: "codeBlock",
-  })
-})
+    expect(editor.getJSON().content?.[0]).toMatchObject({
+      attrs: { language: "json" },
+      type: "codeBlock",
+    })
+  }
+)
 
 test("does not treat four-space indentation as a fenced block", () => {
   const editor = createEditor()
@@ -94,16 +94,16 @@ test("keeps prose before a soft-break fence", () => {
   expect(documentNodeTypes(editor)).toEqual(["paragraph", "fencedText"])
 })
 
-test.each([
-  "```txt ",
-  "```json ",
-])("does not append a cursor paragraph after the final %j block", (opener) => {
-  const editor = createEditor()
+test.each(["```txt ", "```json "])(
+  "does not append a cursor paragraph after the final %j block",
+  (opener) => {
+    const editor = createEditor()
 
-  typeText(editor, opener)
+    typeText(editor, opener)
 
-  expect(editor.getJSON().content).toHaveLength(1)
-})
+    expect(editor.getJSON().content).toHaveLength(1)
+  }
+)
 
 test("creates a following paragraph only when leaving the fenced block", () => {
   const editor = createEditor()

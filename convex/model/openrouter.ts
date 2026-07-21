@@ -68,10 +68,16 @@ export function getOpenRouterClient() {
 export async function sendOpenRouterChat(
   input: OpenRouterChatInput
 ): Promise<ChatResult> {
-  return await getOpenRouterClient().chat.send({
+  const result = await getOpenRouterClient().chat.send({
     chatRequest: {
       ...input,
       stream: false,
     },
   })
+
+  if ("choices" in result) {
+    return result
+  }
+
+  throw new Error("OpenRouter returned a stream for a non-streaming request")
 }

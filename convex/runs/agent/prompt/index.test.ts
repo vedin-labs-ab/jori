@@ -50,32 +50,33 @@ const messageTriggerCases = [
 ] as const
 
 describe("runtime prompts", () => {
-  test.each(
-    messageTriggerCases
-  )("renders %s message trigger target", (provider, data, toolSurfaceLabel, targetLines) => {
-    const prompt = assemblePrompt(runtimeInput(provider, data)).context
+  test.each(messageTriggerCases)(
+    "renders %s message trigger target",
+    (provider, data, toolSurfaceLabel, targetLines) => {
+      const prompt = assemblePrompt(runtimeInput(provider, data)).context
 
-    expect(prompt).toContain(
-      `A ${toolSurfaceLabel} message triggered this run.`
-    )
-    expect(prompt).toContain(`Active surface: \`${toolSurfaceLabel}\``)
-    expectRunBefore(prompt, "# Trigger")
+      expect(prompt).toContain(
+        `A ${toolSurfaceLabel} message triggered this run.`
+      )
+      expect(prompt).toContain(`Active surface: \`${toolSurfaceLabel}\``)
+      expectRunBefore(prompt, "# Trigger")
 
-    if (targetLines.length === 0) {
-      expect(prompt).not.toContain("Target:")
-    } else {
-      expect(prompt).toContain("Target:")
-      expect(prompt).toContain(targetLines.join("\n"))
+      if (targetLines.length === 0) {
+        expect(prompt).not.toContain("Target:")
+      } else {
+        expect(prompt).toContain("Target:")
+        expect(prompt).toContain(targetLines.join("\n"))
+      }
+
+      expect(prompt).not.toContain("Recent messages")
+      expect(prompt).toContain("Current message:")
+      expect(prompt).not.toContain("\nHistory:\n")
+      expect(prompt).not.toContain("{{message.target}}")
+      expect(prompt).toContain(
+        "- 1970-01-01T00:00:01.000Z | person | Albin Vedin"
+      )
     }
-
-    expect(prompt).not.toContain("Recent messages")
-    expect(prompt).toContain("Current message:")
-    expect(prompt).not.toContain("\nHistory:\n")
-    expect(prompt).not.toContain("{{message.target}}")
-    expect(prompt).toContain(
-      "- 1970-01-01T00:00:01.000Z | person | Albin Vedin"
-    )
-  })
+  )
 
   test("renders Slack trigger text with actor metadata", () => {
     const input = runtimeInput("slack", {
@@ -168,17 +169,18 @@ describe("runtime delivery prompts", () => {
     expectNoSyntheticBlankLines(instructions)
   })
 
-  test.each(
-    messageTriggerCases
-  )("renders generic communication guidance for %s message runs", (provider, data) => {
-    const prompt = assemblePrompt(runtimeInput(provider, data)).instructions
+  test.each(messageTriggerCases)(
+    "renders generic communication guidance for %s message runs",
+    (provider, data) => {
+      const prompt = assemblePrompt(runtimeInput(provider, data)).instructions
 
-    expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("use the lightest action that delivers it")
-    expect(prompt).toContain("Use `send_reply`")
-    expect(prompt).toContain("# Finish")
-    expect(prompt).toContain("prefer setting `final: true`")
-  })
+      expect(prompt).toContain("# Communication")
+      expect(prompt).toContain("use the lightest action that delivers it")
+      expect(prompt).toContain("Use `send_reply`")
+      expect(prompt).toContain("# Finish")
+      expect(prompt).toContain("prefer setting `final: true`")
+    }
+  )
 
   test("omits automatic final delivery instructions", () => {
     const prompt = assemblePrompt(githubMessageInput()).instructions

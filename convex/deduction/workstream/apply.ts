@@ -57,9 +57,10 @@ async function applyOp(
   pass: Doc<"passes">,
   state: WorkstreamApplyState,
   op: WorkstreamOp
-) {
+): Promise<void> {
   if (op.op === "assign") {
-    return applyAssign(ctx, pass, state, op)
+    await applyAssign(ctx, pass, state, op)
+    return
   }
 
   const sightings = resolveCitations(op.citations, state.allowed)
@@ -79,12 +80,15 @@ async function applyOp(
 
   switch (op.op) {
     case "create":
-      return applyCreate(ctx, pass, state, op, sightings)
+      await applyCreate(ctx, pass, state, op, sightings)
+      return
     case "update":
-      return applyUpdate(ctx, pass, state, op, sightings)
+      await applyUpdate(ctx, pass, state, op, sightings)
+      return
     case "status":
-      return applyStatus(ctx, pass, state, op, sightings)
+      await applyStatus(ctx, pass, state, op, sightings)
+      return
     case "merge":
-      return applyMerge(ctx, pass, state, op, sightings)
+      await applyMerge(ctx, pass, state, op, sightings)
   }
 }
