@@ -45,24 +45,23 @@ export function OrganizationDangerZone({
         {localization.settings.dangerZone}
       </h2>
 
-      <Card>
+      <Card className="gap-0">
         <CardContent>
           {deletePermissionPending ? (
             <DeleteOrganizationSkeleton />
           ) : (
-            <>
-              <LeaveOrganization />
-
-              {canDelete && (
-                <>
-                  <Separator className="my-4" />
-
-                  <DeleteOrganization />
-                </>
-              )}
-            </>
+            <LeaveOrganization />
           )}
         </CardContent>
+
+        {!deletePermissionPending && canDelete ? (
+          <>
+            <Separator className="my-4" />
+            <CardContent>
+              <DeleteOrganization />
+            </CardContent>
+          </>
+        ) : null}
       </Card>
     </div>
   )

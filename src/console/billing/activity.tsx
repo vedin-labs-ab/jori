@@ -84,11 +84,7 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
       <p className="mt-0.5 text-muted-foreground text-sm">
         Every allowance, top-up, and run, priced at provider list rates.
       </p>
-      {rows.length === 0 ? (
-        <BillingActivityEmpty />
-      ) : (
-        <ActivityTable table={table} />
-      )}
+      <ActivityTable table={table} />
     </section>
   )
 }
@@ -121,7 +117,13 @@ function ActivityTable({ table }: { table: ActivityTableInstance }) {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length === 0 ? (
+          {table.getCoreRowModel().rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length}>
+                <BillingActivityEmpty />
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length === 0 ? (
             <TableRow>
               <TableCell
                 className="h-16 text-center text-muted-foreground"

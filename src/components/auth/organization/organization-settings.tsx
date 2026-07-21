@@ -10,7 +10,7 @@ export type OrganizationSettingsProps = {
 }
 
 /**
- * Organization settings UI: profile card, plugin-contributed cards
+ * Organization settings UI: profile details, plugin-contributed cards
  * (`organizationCards`), then danger zone.
  */
 export function OrganizationSettings({

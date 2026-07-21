@@ -9,7 +9,7 @@ import {
 
 export function BillingActivityEmpty() {
   return (
-    <Empty className="mt-3 h-48">
+    <Empty className="min-h-40 rounded-none p-4">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <ReceiptText />
