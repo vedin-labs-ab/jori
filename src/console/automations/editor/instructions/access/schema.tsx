@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DialogTitle } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { type ToolPermission } from "../../../../permissions/types"
 import { JsonDialog } from "../../../../shared/code"
 import { useRetained } from "../../../../shared/retain"
@@ -61,7 +61,7 @@ export function ToolSchemaButton({
   return (
     <Button
       aria-label={`View the ${toolLabel} schema`}
-      className="opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/tool-row:opacity-100"
+      className="opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/tool-row:opacity-100 [@media(pointer:coarse)]:opacity-100"
       disabled={pending}
       onClick={onClick}
       onFocus={onWarm}
@@ -105,34 +105,31 @@ export function ToolSchemaDialog({
     <JsonDialog
       description="The request schema this tool accepts and the response it returns."
       headerLeft={
-        <div
+        <ToggleGroup
           aria-label="Schema direction"
           className="flex min-w-0 items-center gap-0.5"
-          role="tablist"
+          onValueChange={(nextDirection) => {
+            if (shown !== undefined && nextDirection !== "") {
+              setSelected({
+                direction: nextDirection as SchemaDirection,
+                tool: shown.tool,
+              })
+            }
+          }}
+          type="single"
+          value={direction}
         >
           <DialogTitle className="sr-only">{shown?.label} schema</DialogTitle>
           {directions.map((option) => (
-            <button
-              aria-selected={direction === option.key}
-              className={cn(
-                "rounded-sm px-2 py-0.5 font-medium font-mono text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/30",
-                direction === option.key
-                  ? "bg-foreground/10 text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
+            <ToggleGroupItem
+              className="h-auto min-w-0 rounded-sm px-2 py-0.5 font-mono text-xs shadow-none active:translate-y-0 data-[state=on]:bg-foreground/10 data-[state=on]:text-foreground"
               key={option.key}
-              onClick={() =>
-                shown === undefined
-                  ? undefined
-                  : setSelected({ direction: option.key, tool: shown.tool })
-              }
-              role="tab"
-              type="button"
+              value={option.key}
             >
               {option.label}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
       }
       onOpenChange={onOpenChange}
       open={toolReferenceReady(references, permission?.tool)}

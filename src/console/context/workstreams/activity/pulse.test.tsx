@@ -57,6 +57,7 @@ test("counts active workstream lanes without including unplaced", async () => {
   const count = await screen.findByText("(2)")
 
   expect(screen.getByText("Activity")).toBeDefined()
+  expect(screen.getByRole("combobox", { name: "Activity range" })).toBeDefined()
   expect(count.className).toContain("font-normal")
   expect(count.className).toContain("text-muted-foreground/70")
 })

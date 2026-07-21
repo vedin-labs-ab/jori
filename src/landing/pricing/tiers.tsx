@@ -47,7 +47,7 @@ function TierCard({ tier }: { tier: (typeof tiers)[number] }) {
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="font-medium text-lg">{tier.plan.label}</h2>
         {tier.featured ? (
-          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary text-xs">
+          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-foreground text-xs">
             Most teams start here
           </span>
         ) : null}

@@ -22,7 +22,7 @@ export function AutomationMarkerRemoveButton({
     >
       <button
         aria-label={`Remove ${label}`}
-        className="group/x grid w-4 place-items-center self-stretch outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30"
+        className="group/x grid w-6 place-items-center self-stretch outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30 lg:w-4"
         onClick={(event) => {
           event.preventDefault()
           event.stopPropagation()
@@ -35,10 +35,10 @@ export function AutomationMarkerRemoveButton({
         title={`Remove ${label}`}
         type="button"
       >
-        <span className="grid place-items-center group-focus-within/remove:hidden group-hover/remove:hidden">
+        <span className="hidden place-items-center lg:grid lg:group-focus-within/remove:hidden lg:group-hover/remove:hidden">
           {icon}
         </span>
-        <X className="hidden size-3 opacity-55 transition-opacity duration-150 ease-out group-focus-within/remove:block group-hover/remove:block group-focus-visible/x:opacity-100 group-hover/x:opacity-100" />
+        <X className="block size-3 opacity-100 transition-opacity duration-150 ease-out lg:hidden lg:opacity-55 lg:group-focus-within/remove:block lg:group-hover/remove:block lg:group-focus-visible/x:opacity-100 lg:group-hover/x:opacity-100" />
       </button>
       <span className="whitespace-nowrap">{label}</span>
     </span>

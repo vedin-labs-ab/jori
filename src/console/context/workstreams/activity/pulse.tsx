@@ -82,7 +82,11 @@ export function WorkstreamsPulse({
           value={String(days)}
           onValueChange={(value) => setDays(Number(value) as PulseDays)}
         >
-          <SelectTrigger size="sm" className="w-fit">
+          <SelectTrigger
+            aria-label="Activity range"
+            className="w-fit"
+            size="sm"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

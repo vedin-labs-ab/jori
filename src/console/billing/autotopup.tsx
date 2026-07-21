@@ -53,6 +53,7 @@ export function AutoTopUpRow({
               <span>Below</span>
               <span className="flex items-center">
                 <InlineAmount
+                  label="Auto top-up balance threshold"
                   onChange={(value) => apply({ thresholdUsd: value })}
                   options={autoTopUp.thresholdsUsd}
                   value={thresholdUsd}
@@ -60,12 +61,14 @@ export function AutoTopUpRow({
                 <span className="whitespace-pre">, add</span>
               </span>
               <InlineAmount
+                label="Auto top-up amount"
                 onChange={(value) => apply({ amountUsd: value })}
                 options={autoTopUp.amountsUsd}
                 value={amountUsd}
               />
               <span>· at most</span>
               <InlineAmount
+                label="Monthly auto top-up limit"
                 onChange={(value) => apply({ monthlyCapUsd: value })}
                 options={autoTopUp.monthlyCapsUsd}
                 value={capUsd}
@@ -92,10 +95,12 @@ export function AutoTopUpRow({
 }
 
 function InlineAmount({
+  label,
   onChange,
   options,
   value,
 }: {
+  label: string
   onChange: (value: number) => void
   options: number[]
   value: number
@@ -105,7 +110,7 @@ function InlineAmount({
       onValueChange={(next) => onChange(Number(next))}
       value={String(value)}
     >
-      <SelectTrigger className="h-7 w-20" size="sm">
+      <SelectTrigger aria-label={label} className="h-7 w-20" size="sm">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
