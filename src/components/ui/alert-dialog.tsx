@@ -3,16 +3,48 @@ import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+import { useIsMobile } from "@/hooks/use-mobile"
+
+const AlertDialogContext = React.createContext({ mobile: false })
 
 function AlertDialog({
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+  const mobile = useIsMobile()
+
+  return (
+    <AlertDialogContext.Provider value={{ mobile }}>
+      {mobile ? (
+        <Drawer {...props}>{children}</Drawer>
+      ) : (
+        <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props}>
+          {children}
+        </AlertDialogPrimitive.Root>
+      )}
+    </AlertDialogContext.Provider>
+  )
 }
 
 function AlertDialogTrigger({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return <DrawerTrigger {...props} />
+  }
+
   return (
     <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
   )
@@ -21,6 +53,12 @@ function AlertDialogTrigger({
 function AlertDialogPortal({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return <DrawerPortal {...props} />
+  }
+
   return (
     <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
   )
@@ -30,6 +68,12 @@ function AlertDialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Overlay>) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return <DrawerOverlay className={className} {...props} />
+  }
+
   return (
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
@@ -44,12 +88,35 @@ function AlertDialogOverlay({
 
 function AlertDialogContent({
   className,
+  desktopClassName,
+  drawerClassName,
   size = "default",
   children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
+  desktopClassName?: string
+  drawerClassName?: string
   size?: "default" | "sm"
 }) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return (
+      <DrawerContent
+        className={cn(
+          "group/alert-dialog-content",
+          className,
+          drawerClassName,
+          "sm:max-w-none!"
+        )}
+        data-size={size}
+        {...props}
+      >
+        <AlertDialogBody>{children}</AlertDialogBody>
+      </DrawerContent>
+    )
+  }
+
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
@@ -58,21 +125,27 @@ function AlertDialogContent({
         data-size={size}
         className={cn(
           "group/alert-dialog-content fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100%-2rem)] w-full -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none data-[size=default]:max-w-xs data-[size=sm]:max-w-64 data-[size=default]:sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className
+          className,
+          desktopClassName
         )}
         {...props}
       >
         {/* The card itself must not scroll: browsers paint an opaque
             background into the scrolling contents layer, so overscroll
             bounce would drag it away from the ring. The body scrolls. */}
-        <div
-          data-slot="alert-dialog-body"
-          className="grid min-h-0 gap-3 overflow-y-auto p-4"
-        >
-          {children}
-        </div>
+        <AlertDialogBody>{children}</AlertDialogBody>
       </AlertDialogPrimitive.Content>
     </AlertDialogPortal>
+  )
+}
+
+function AlertDialogBody(props: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-dialog-body"
+      className="grid min-h-0 gap-3 overflow-y-auto p-4"
+      {...props}
+    />
   )
 }
 
@@ -128,6 +201,12 @@ function AlertDialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return <DrawerTitle className={className} {...props} />
+  }
+
   return (
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
@@ -144,6 +223,12 @@ function AlertDialogDescription({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return <DrawerDescription className={className} {...props} />
+  }
+
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
@@ -163,6 +248,20 @@ function AlertDialogAction({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action> &
   Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return (
+      <Button variant={variant} size={size} asChild>
+        <DrawerClose
+          data-slot="alert-dialog-action"
+          className={cn(className)}
+          {...props}
+        />
+      </Button>
+    )
+  }
+
   return (
     <Button variant={variant} size={size} asChild>
       <AlertDialogPrimitive.Action
@@ -181,6 +280,20 @@ function AlertDialogCancel({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel> &
   Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
+  const { mobile } = React.useContext(AlertDialogContext)
+
+  if (mobile) {
+    return (
+      <Button variant={variant} size={size} asChild>
+        <DrawerClose
+          data-slot="alert-dialog-cancel"
+          className={cn(className)}
+          {...props}
+        />
+      </Button>
+    )
+  }
+
   return (
     <Button variant={variant} size={size} asChild>
       <AlertDialogPrimitive.Cancel
