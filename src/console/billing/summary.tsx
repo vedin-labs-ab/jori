@@ -3,6 +3,7 @@ import { CreditCard } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Spinner } from "@/components/ui/spinner"
 import { FieldHelp } from "../automations/help"
@@ -27,9 +28,9 @@ export function SummaryBand({
   return (
     <div className="grid lg:grid-cols-[5fr_7fr]">
       <PlanCell account={account} organizationId={organizationId} />
-      <div className="p-6 pt-0 lg:pt-6">
+      <CardContent className="pt-0 pb-4 lg:py-4">
         <AvailableCell account={account} organizationId={organizationId} />
-      </div>
+      </CardContent>
     </div>
   )
 }
@@ -45,7 +46,7 @@ function PlanCell({
   const subscribed = account !== null && account.plan !== undefined
 
   return (
-    <div className="p-6">
+    <CardContent className="py-4">
       <MetricLabel>Plan</MetricLabel>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className="font-medium text-2xl tracking-tight">
@@ -71,7 +72,7 @@ function PlanCell({
           </Button>
         ) : null}
       </div>
-    </div>
+    </CardContent>
   )
 }
 

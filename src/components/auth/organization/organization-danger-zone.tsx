@@ -9,9 +9,8 @@ import { TriangleAlert } from "lucide-react"
 import type { ComponentProps } from "react"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { SectionHeader } from "@/components/ui/section"
+import { Section, SectionHeader } from "@/components/ui/section"
 import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
 import { DeleteOrganization } from "./delete-organization"
 import { DeleteOrganizationSkeleton } from "./delete-organization-skeleton"
 import { LeaveOrganization } from "./leave-organization"
@@ -31,7 +30,7 @@ export type OrganizationDangerZoneProps = {
 export function OrganizationDangerZone({
   className,
   ...props
-}: OrganizationDangerZoneProps & ComponentProps<"div">) {
+}: OrganizationDangerZoneProps & ComponentProps<"section">) {
   const { authClient, localization } = useAuth()
 
   const { data: deletePermission, isPending: deletePermissionPending } =
@@ -42,7 +41,7 @@ export function OrganizationDangerZone({
   const canDelete = !!deletePermission?.success
 
   return (
-    <div className={cn("flex w-full flex-col gap-3", className)} {...props}>
+    <Section className={className} {...props}>
       <SectionHeader
         title={
           <span className="inline-flex items-center gap-2">
@@ -52,8 +51,8 @@ export function OrganizationDangerZone({
         }
       />
 
-      <Card className="gap-0">
-        <CardContent>
+      <Card className="gap-0 py-0">
+        <CardContent className="py-4">
           {deletePermissionPending ? (
             <DeleteOrganizationSkeleton />
           ) : (
@@ -63,13 +62,13 @@ export function OrganizationDangerZone({
 
         {!deletePermissionPending && canDelete ? (
           <>
-            <Separator className="my-4" />
-            <CardContent>
+            <Separator />
+            <CardContent className="py-4">
               <DeleteOrganization />
             </CardContent>
           </>
         ) : null}
       </Card>
-    </div>
+    </Section>
   )
 }

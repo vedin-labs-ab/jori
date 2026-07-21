@@ -10,15 +10,15 @@ import {
 import { Users } from "lucide-react"
 import { type ComponentProps, useMemo, useState } from "react"
 
-import { SectionHeader } from "@/components/ui/section"
+import { Section, SectionHeader } from "@/components/ui/section"
 import {
   Table,
   TableBody,
+  TableFrame,
   TableHeader,
   TableRow
 } from "@/components/ui/table"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { cn } from "@/lib/utils"
 import { OrganizationMemberRow } from "./organization-member-row"
 import { OrganizationMemberRowSkeleton } from "./organization-member-row-skeleton"
 import {
@@ -39,7 +39,7 @@ export type OrganizationMembersProps = {
 export function OrganizationMembers({
   className,
   ...props
-}: OrganizationMembersProps & ComponentProps<"div">) {
+}: OrganizationMembersProps & ComponentProps<"section">) {
   const { authClient } = useAuth()
   const { localization: organizationLocalization, roles } =
     useAuthPlugin(organizationPlugin)
@@ -93,13 +93,13 @@ export function OrganizationMembers({
   }))
 
   return (
-    <div className={cn("flex flex-col gap-3", className)} {...props}>
+    <Section className={className} {...props}>
       <SectionHeader title={organizationLocalization.members} />
 
-      <div className="overflow-x-auto rounded-lg border">
+      <TableFrame>
         <Table
           aria-label={organizationLocalization.members}
-          className="min-w-lg [&_td:first-child]:pl-4 [&_td:last-child]:pr-4 [&_th:first-child]:pl-4 [&_th:last-child]:pr-4"
+          className="min-w-lg"
         >
           <TableHeader>
             <TableRow className="hover:bg-transparent has-aria-expanded:bg-transparent">
@@ -152,7 +152,7 @@ export function OrganizationMembers({
             )}
           </TableBody>
         </Table>
-      </div>
-    </div>
+      </TableFrame>
+    </Section>
   )
 }

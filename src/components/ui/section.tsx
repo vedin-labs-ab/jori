@@ -8,6 +8,28 @@ type SectionHeaderProps = Omit<ComponentProps<"div">, "title"> & {
   title: ReactNode
 }
 
+/** A responsive stack of peer product sections. */
+function SectionGroup({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("flex w-full flex-col gap-4 md:gap-6", className)}
+      data-slot="section-group"
+      {...props}
+    />
+  )
+}
+
+/** A section whose header and content share the platform's compact rhythm. */
+function Section({ className, ...props }: ComponentProps<"section">) {
+  return (
+    <section
+      className={cn("flex w-full flex-col gap-3", className)}
+      data-slot="section"
+      {...props}
+    />
+  )
+}
+
 /** A compact product-section heading with optional supporting copy and action. */
 function SectionHeader({
   action,
@@ -50,5 +72,5 @@ function SectionHeader({
   )
 }
 
-export { SectionHeader }
+export { Section, SectionGroup, SectionHeader }
 export type { SectionHeaderProps }

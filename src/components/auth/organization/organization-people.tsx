@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 
-import { cn } from "@/lib/utils"
+import { SectionGroup } from "@/components/ui/section"
 import { OrganizationInvitations } from "./organization-invitations"
 import { OrganizationMembers } from "./organization-members"
 
@@ -20,9 +20,9 @@ export function OrganizationPeople({
   ...props
 }: OrganizationPeopleProps & ComponentProps<"div">) {
   return (
-    <div className={cn("flex flex-col gap-4 md:gap-6", className)} {...props}>
+    <SectionGroup className={className} {...props}>
       <OrganizationMembers />
       <OrganizationInvitations />
-    </div>
+    </SectionGroup>
   )
 }

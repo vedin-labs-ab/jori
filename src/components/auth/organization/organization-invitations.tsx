@@ -14,12 +14,12 @@ import { type ComponentProps, useMemo, useState } from "react"
 import {
   Table,
   TableBody,
+  TableFrame,
   TableHeader,
   TableRow
 } from "@/components/ui/table"
-import { SectionHeader } from "@/components/ui/section"
+import { Section, SectionHeader } from "@/components/ui/section"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { cn } from "@/lib/utils"
 import { OrganizationInvitationRow } from "./organization-invitation-row"
 import { OrganizationInvitationRowSkeleton } from "./organization-invitation-row-skeleton"
 import {
@@ -47,7 +47,7 @@ export type OrganizationInvitationsProps = {
 export function OrganizationInvitations({
   className,
   ...props
-}: OrganizationInvitationsProps & ComponentProps<"div">) {
+}: OrganizationInvitationsProps & ComponentProps<"section">) {
   const { authClient, localization } = useAuth()
   const { localization: organizationLocalization, roles } =
     useAuthPlugin(organizationPlugin)
@@ -121,13 +121,13 @@ export function OrganizationInvitations({
   }
 
   return (
-    <div className={cn("flex flex-col gap-3", className)} {...props}>
+    <Section className={className} {...props}>
       <SectionHeader title={organizationLocalization.invitations} />
 
-      <div className="overflow-x-auto rounded-lg border">
+      <TableFrame>
         <Table
           aria-label={organizationLocalization.invitations}
-          className="min-w-2xl [&_td:first-child]:pl-4 [&_td:last-child]:pr-4 [&_th:first-child]:pl-4 [&_th:last-child]:pr-4"
+          className="min-w-2xl"
         >
           <TableHeader>
             <TableRow className="hover:bg-transparent has-aria-expanded:bg-transparent">
@@ -198,7 +198,7 @@ export function OrganizationInvitations({
             )}
           </TableBody>
         </Table>
-      </div>
-    </div>
+      </TableFrame>
+    </Section>
   )
 }
