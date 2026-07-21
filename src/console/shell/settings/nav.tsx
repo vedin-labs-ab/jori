@@ -57,7 +57,7 @@ function SettingsMobileNav<Value extends string>({
 }: SettingsNavigationProps<Value>) {
   return (
     <Tabs
-      className="shrink-0 border-b p-2 md:hidden"
+      className="shrink-0 p-2 md:hidden"
       onValueChange={(value) => onViewChange(value as Value)}
       value={view}
     >

@@ -26,9 +26,9 @@ export function SummaryBand({
   organizationId: string
 }) {
   return (
-    <div className="grid lg:grid-cols-[5fr_7fr]">
+    <div className="grid min-w-0 lg:grid-cols-[5fr_7fr]">
       <PlanCell account={account} organizationId={organizationId} />
-      <CardContent className="pt-0 pb-4 lg:py-4">
+      <CardContent className="min-w-0 pt-0 pb-4 lg:py-4">
         <AvailableCell account={account} organizationId={organizationId} />
       </CardContent>
     </div>
@@ -46,7 +46,7 @@ function PlanCell({
   const subscribed = account !== null && account.plan !== undefined
 
   return (
-    <CardContent className="py-4">
+    <CardContent className="min-w-0 py-4">
       <MetricLabel>Plan</MetricLabel>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className="font-medium text-2xl tracking-tight">
@@ -129,25 +129,27 @@ function AvailableCell({
 
   return (
     <>
-      <div className="flex items-start justify-between gap-3">
-        <div>
+      <div className="flex min-w-0 flex-wrap items-start gap-3">
+        <div className="min-w-32 flex-1">
           <MetricLabel>Available usage</MetricLabel>
           <p className="mt-1.5 font-medium text-2xl tabular-nums tracking-tight">
             {formatUsd(includedMicros + walletMicros)}
           </p>
         </div>
-        <TopUpDialog organizationId={organizationId} />
+        <div className="ml-auto shrink-0">
+          <TopUpDialog organizationId={organizationId} />
+        </div>
       </div>
-      <div className="mt-1.5 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2.5 text-sm">
+      <div className="mt-1.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2.5 text-sm sm:items-center">
         <span className="text-muted-foreground">
           {account === null || account.state === "trial" ? "Trial" : "Monthly"}
         </span>
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <Progress
-            className="h-1.5 flex-1"
+            className="order-2 h-1.5 w-full sm:order-none sm:flex-1"
             value={Math.min(100, (includedMicros / grantMicros) * 100)}
           />
-          <span className="whitespace-nowrap tabular-nums">
+          <span className="tabular-nums sm:whitespace-nowrap">
             {formatUsd(includedMicros)}{" "}
             <span className="text-muted-foreground">
               of {formatUsd(grantMicros)} · {resetLabel(account)}
@@ -155,7 +157,7 @@ function AvailableCell({
           </span>
         </div>
         <span className="text-muted-foreground">Wallet</span>
-        <span className="inline-flex items-center gap-1.5 tabular-nums">
+        <span className="flex min-w-0 flex-wrap items-center gap-1.5 tabular-nums">
           {formatUsd(walletMicros)}{" "}
           <span className="text-muted-foreground">· rolls over</span>
           <FieldHelp label="How the wallet is spent" side="top">

@@ -27,7 +27,7 @@ export function BillingSettings({
   return (
     <SectionGroup>
       <StateAlert account={overview.account} />
-      <Card className="gap-0 py-0">
+      <Card className="min-w-0 gap-0 py-0">
         <SummaryBand
           account={overview.account}
           organizationId={organizationId}
