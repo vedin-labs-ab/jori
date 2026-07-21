@@ -2,6 +2,8 @@ import { useQuery } from "convex/react"
 import { useEffect } from "react"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Card } from "@/components/ui/card"
+import { SectionGroup } from "@/components/ui/section"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
 import { type BillingAccount } from "./actions"
@@ -23,9 +25,9 @@ export function BillingSettings({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <SectionGroup>
       <StateAlert account={overview.account} />
-      <div className="rounded-xl border bg-card">
+      <Card className="gap-0 py-0">
         <SummaryBand
           account={overview.account}
           organizationId={organizationId}
@@ -34,9 +36,9 @@ export function BillingSettings({
           account={overview.account}
           organizationId={organizationId}
         />
-      </div>
+      </Card>
       <Activity entries={overview.entries} />
-    </div>
+    </SectionGroup>
   )
 }
 

@@ -1,7 +1,7 @@
 import { useAuth } from "@better-auth-ui/react"
 import type { ComponentProps } from "react"
 
-import { cn } from "@/lib/utils"
+import { SectionGroup } from "@/components/ui/section"
 import { OrganizationDangerZone } from "./organization-danger-zone"
 import { OrganizationProfile } from "./organization-profile"
 
@@ -20,7 +20,7 @@ export function OrganizationSettings({
   const { plugins } = useAuth()
 
   return (
-    <div className={cn("flex flex-col gap-4 md:gap-6", className)} {...props}>
+    <SectionGroup className={className} {...props}>
       <OrganizationProfile />
 
       {plugins.flatMap((plugin) =>
@@ -30,6 +30,6 @@ export function OrganizationSettings({
       )}
 
       <OrganizationDangerZone />
-    </div>
+    </SectionGroup>
   )
 }

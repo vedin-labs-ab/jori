@@ -17,6 +17,19 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   )
 }
 
+function TableFrame({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="table-frame"
+      className={cn(
+        "overflow-hidden rounded-lg border [&_td:first-child]:pl-4 [&_td:last-child]:pr-4 [&_th:first-child]:pl-4 [&_th:last-child]:pr-4",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
@@ -104,6 +117,7 @@ function TableCaption({
 
 export {
   Table,
+  TableFrame,
   TableHeader,
   TableBody,
   TableFooter,

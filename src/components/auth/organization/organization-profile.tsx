@@ -9,10 +9,14 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { EditableText } from "@/components/ui/editable"
-import { Field, FieldError, FieldTitle } from "@/components/ui/field"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldTitle
+} from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { cn } from "@/lib/utils"
 import { ChangeOrganizationLogo } from "./change-organization-logo"
 import {
   sanitizeSlug,
@@ -55,7 +59,7 @@ export function OrganizationProfile({ className }: OrganizationProfileProps) {
   )
 
   return (
-    <div className={cn("flex flex-col gap-6", className)}>
+    <FieldGroup className={className}>
       {activeOrganization ? (
         <Field>
           <FieldTitle>{organizationLocalization.name}</FieldTitle>
@@ -113,7 +117,7 @@ export function OrganizationProfile({ className }: OrganizationProfileProps) {
           label={organizationLocalization.slug}
         />
       )}
-    </div>
+    </FieldGroup>
   )
 }
 

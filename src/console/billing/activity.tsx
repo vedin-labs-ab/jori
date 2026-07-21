@@ -21,11 +21,12 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SectionHeader } from "@/components/ui/section"
+import { Section, SectionHeader } from "@/components/ui/section"
 import {
   Table,
   TableBody,
   TableCell,
+  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
@@ -57,11 +58,7 @@ const kindLabels: Record<ActivityKind, string> = {
   "top-up": "Top-ups",
 }
 
-/**
- * The statement, as the stock shadcn data table. Runs are the only entries
- * that remove balance, so the single kind filter covers direction too:
- * sortable time and amount, and the filter folded into the What header.
- */
+/** Billing statement with sortable time and amount, plus an inline kind filter. */
 export function Activity({ entries }: { entries: BillingEntry[] }) {
   const rows = useMemo(() => entries.map(toRow), [entries])
   const [sorting, setSorting] = useState<SortingState>([
@@ -80,13 +77,13 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
   })
 
   return (
-    <section className="flex flex-col gap-3">
+    <Section>
       <SectionHeader
         description="Every allowance, top-up, and run, priced at provider list rates."
         title="Activity"
       />
       <ActivityTable table={table} />
-    </section>
+    </Section>
   )
 }
 
@@ -94,11 +91,10 @@ type ActivityTableInstance = ReturnType<typeof useReactTable<ActivityRow>>
 
 function ActivityTable({ table }: { table: ActivityTableInstance }) {
   return (
-    <div className="overflow-x-auto rounded-lg border">
-      <Table className="min-w-xl [&_td:first-child]:pl-4 [&_td:last-child]:pr-4 [&_th:first-child]:pl-4 [&_th:last-child]:pr-4">
+    <TableFrame>
+      <Table className="min-w-xl">
         <TableHeader>
-          {/* The header keeps a constant background: no hover wash, and no
-              aria-expanded tint while the filter menu is open. */}
+          {/* The header stays neutral while its controls are active. */}
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               className="hover:bg-transparent has-aria-expanded:bg-transparent"
@@ -146,7 +142,7 @@ function ActivityTable({ table }: { table: ActivityTableInstance }) {
           )}
         </TableBody>
       </Table>
-    </div>
+    </TableFrame>
   )
 }
 
@@ -339,13 +335,9 @@ function entryLabel(entry: BillingEntry) {
 }
 
 function entryDot(entry: BillingEntry) {
-  if (entry.type === "topup") {
-    return "bg-blue-500"
-  }
-
   if (entry.type === "grant") {
     return entry.source === "trial" ? "bg-amber-500" : "bg-primary"
   }
 
-  return undefined
+  return entry.type === "topup" ? "bg-blue-500" : undefined
 }
