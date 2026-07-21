@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuth } from "@better-auth-ui/react"
-import { cn } from "@/lib/utils"
+import { SectionGroup } from "@/components/ui/section"
 import { ActiveSessions } from "./active-sessions"
 import { ChangePassword } from "./change-password"
 import { LinkedAccounts } from "./linked-accounts"
@@ -23,7 +23,7 @@ export function SecuritySettings({ className }: SecuritySettingsProps) {
   const { emailAndPassword, plugins, socialProviders } = useAuth()
 
   return (
-    <div className={cn("flex w-full flex-col gap-4 md:gap-6", className)}>
+    <SectionGroup className={className}>
       {emailAndPassword?.enabled && <ChangePassword />}
       {!!socialProviders?.length && <LinkedAccounts />}
       <ActiveSessions />
@@ -33,6 +33,6 @@ export function SecuritySettings({ className }: SecuritySettingsProps) {
             <Card key={`${plugin.id}-${index.toString()}`} />
           )) ?? []
       )}
-    </div>
+    </SectionGroup>
   )
 }

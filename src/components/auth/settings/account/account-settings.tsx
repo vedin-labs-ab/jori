@@ -1,7 +1,7 @@
 import { useAuth } from "@better-auth-ui/react"
 import type { ComponentProps } from "react"
 
-import { cn } from "@/lib/utils"
+import { SectionGroup } from "@/components/ui/section"
 import { ChangeEmail } from "./change-email"
 import { UserProfile } from "./user-profile"
 
@@ -29,10 +29,7 @@ export function AccountSettings({
   const hasMagicLink = plugins.some((plugin) => plugin.id === "magicLink")
 
   return (
-    <div
-      className={cn("flex w-full flex-col gap-4 md:gap-6", className)}
-      {...props}
-    >
+    <SectionGroup className={className} {...props}>
       <UserProfile />
       {(emailAndPassword?.enabled || hasMagicLink) && <ChangeEmail />}
       {plugins.flatMap(
@@ -41,6 +38,6 @@ export function AccountSettings({
             <Card key={`${plugin.id}-${index.toString()}`} />
           )) ?? []
       )}
-    </div>
+    </SectionGroup>
   )
 }
