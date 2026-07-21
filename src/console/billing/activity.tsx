@@ -21,6 +21,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SectionHeader } from "@/components/ui/section"
 import {
   Table,
   TableBody,
@@ -79,11 +80,11 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
   })
 
   return (
-    <section>
-      <h2 className="font-medium">Activity</h2>
-      <p className="mt-0.5 text-muted-foreground text-sm">
-        Every allowance, top-up, and run, priced at provider list rates.
-      </p>
+    <section className="flex flex-col gap-3">
+      <SectionHeader
+        description="Every allowance, top-up, and run, priced at provider list rates."
+        title="Activity"
+      />
       <ActivityTable table={table} />
     </section>
   )
@@ -93,7 +94,7 @@ type ActivityTableInstance = ReturnType<typeof useReactTable<ActivityRow>>
 
 function ActivityTable({ table }: { table: ActivityTableInstance }) {
   return (
-    <div className="mt-3 overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-lg border">
       <Table className="min-w-xl [&_td:first-child]:pl-4 [&_td:last-child]:pr-4 [&_th:first-child]:pl-4 [&_th:last-child]:pr-4">
         <TableHeader>
           {/* The header keeps a constant background: no hover wash, and no

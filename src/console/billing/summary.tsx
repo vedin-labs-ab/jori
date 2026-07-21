@@ -1,5 +1,6 @@
 import { formatUsd, plans, trial } from "@contracts/billing"
 import { CreditCard } from "lucide-react"
+import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -45,7 +46,7 @@ function PlanCell({
 
   return (
     <div className="p-6">
-      <p className="text-muted-foreground text-sm">Plan</p>
+      <MetricLabel>Plan</MetricLabel>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className="font-medium text-2xl tracking-tight">
           {planName(account)}
@@ -54,7 +55,7 @@ function PlanCell({
           <Badge variant="destructive">Paused</Badge>
         ) : null}
       </div>
-      <p className="mt-1.5 text-muted-foreground text-sm">
+      <p className="mt-1.5 text-xs/relaxed text-muted-foreground">
         {planDetail(account)}
       </p>
       <div className="mt-5 flex gap-2">
@@ -129,7 +130,7 @@ function AvailableCell({
     <>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-muted-foreground text-sm">Available usage</p>
+          <MetricLabel>Available usage</MetricLabel>
           <p className="mt-1.5 font-medium text-2xl tabular-nums tracking-tight">
             {formatUsd(includedMicros + walletMicros)}
           </p>
@@ -163,6 +164,14 @@ function AvailableCell({
         </span>
       </div>
     </>
+  )
+}
+
+function MetricLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="text-xs/relaxed font-medium text-muted-foreground">
+      {children}
+    </p>
   )
 }
 

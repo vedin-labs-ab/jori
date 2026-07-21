@@ -47,7 +47,7 @@ export function AutoTopUpRow({
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-b-xl border-t bg-muted/30 px-6 py-4">
       <div className="min-w-48 flex-1">
         <Label htmlFor="auto-top-up">Auto top-up</Label>
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-2 text-muted-foreground text-sm">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-2 text-xs/relaxed text-muted-foreground">
           {enabled ? (
             <>
               <span>Below</span>

@@ -121,7 +121,9 @@ export function OrganizationDialog({
           <OrganizationSettingsSidebar onViewChange={setView} view={view} />
           <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
             <header className="shrink-0 border-b px-4 py-3 pr-12 md:px-6">
-              <DialogTitle>{activeView.label}</DialogTitle>
+              <DialogTitle className="text-base font-semibold">
+                {activeView.label}
+              </DialogTitle>
               <DialogDescription className="sr-only">
                 Manage your organization.
               </DialogDescription>

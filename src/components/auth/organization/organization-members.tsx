@@ -11,6 +11,7 @@ import { Users } from "lucide-react"
 import { type ComponentProps, useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { SectionHeader } from "@/components/ui/section"
 import {
   Table,
   TableBody,
@@ -97,20 +98,18 @@ export function OrganizationMembers({
 
   return (
     <div className={cn("flex flex-col gap-3", className)} {...props}>
-      <div className="flex items-end justify-between gap-3">
-        <h3 className="truncate text-sm font-semibold">
-          {organizationLocalization.members}
-        </h3>
-
-        <Button
-          className="shrink-0"
-          size="sm"
-          disabled={isPending}
-          onClick={() => setInviteOpen(true)}
-        >
-          {organizationLocalization.inviteMember}
-        </Button>
-      </div>
+      <SectionHeader
+        action={
+          <Button
+            size="sm"
+            disabled={isPending}
+            onClick={() => setInviteOpen(true)}
+          >
+            {organizationLocalization.inviteMember}
+          </Button>
+        }
+        title={organizationLocalization.members}
+      />
 
       <div className="overflow-x-auto rounded-lg border">
         <Table
