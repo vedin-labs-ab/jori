@@ -5,44 +5,48 @@ import {
   useAuthPlugin,
   useUpdateOrganization
 } from "@better-auth-ui/react"
-import { type SyntheticEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Field, FieldError } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { EditableText } from "@/components/ui/editable"
+import { Field, FieldError, FieldTitle } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { cn } from "@/lib/utils"
 import { ChangeOrganizationLogo } from "./change-organization-logo"
-import { SlugField } from "./slug-field"
+import {
+  sanitizeSlug,
+  SlugAvailabilityIndicator,
+  useSlugAvailability
+} from "./slug"
 
 export type OrganizationProfileProps = {
   className?: string
 }
 
-/**
- * Profile card for the active organization: logo (when enabled), display name, and slug.
- */
+/** Active organization logo, name, and slug with independent editors. */
 export function OrganizationProfile({ className }: OrganizationProfileProps) {
-  const { authClient, localization } = useAuth()
-  const { localization: organizationLocalization } =
-    useAuthPlugin(organizationPlugin)
-
+  const { authClient } = useAuth()
+  const {
+    checkSlug,
+    localization: organizationLocalization,
+    slugPrefix
+  } = useAuthPlugin(organizationPlugin)
   const { data: activeOrganization } = useActiveOrganization(
     authClient as OrganizationAuthClient
   )
-
-  const [slug, setSlug] = useState(activeOrganization?.slug ?? "")
+  const [slugDraft, setSlugDraft] = useState(activeOrganization?.slug ?? "")
 
   useEffect(() => {
-    setSlug(activeOrganization?.slug ?? "")
+    setSlugDraft(activeOrganization?.slug ?? "")
   }, [activeOrganization?.slug])
 
-  const { mutate: commitOrganizationUpdate, isPending } = useUpdateOrganization(
+  const slugAvailability = useSlugAvailability(
+    slugDraft,
+    activeOrganization?.slug,
+    checkSlug
+  )
+  const { mutateAsync: updateOrganization, isPending } = useUpdateOrganization(
     authClient as OrganizationAuthClient,
     {
       onSuccess: () =>
@@ -50,82 +54,89 @@ export function OrganizationProfile({ className }: OrganizationProfileProps) {
     }
   )
 
-  function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!activeOrganization) return
-
-    const formData = new FormData(e.currentTarget)
-    const name = formData.get("name") as string
-
-    commitOrganizationUpdate({
-      data: { name, slug }
-    })
-  }
-
-  const nameInputId = `${activeOrganization?.id ?? "org"}-name`
-  const slugInputId = `${activeOrganization?.id ?? "org"}-slug`
-
   return (
     <div>
-      <h2 className={cn("mb-3 text-sm font-semibold")}>
+      <h2 className="mb-3 text-sm font-semibold">
         {organizationLocalization.organizationProfile}
       </h2>
 
       <Card className={className}>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <ChangeOrganizationLogo />
+        <CardContent className="flex flex-col gap-6">
+          <ChangeOrganizationLogo />
 
-            <Field>
-              <Label htmlFor={nameInputId}>
-                {organizationLocalization.name}
-              </Label>
-
-              {activeOrganization ? (
-                <Input
-                  key={activeOrganization.id}
-                  id={nameInputId}
-                  name="name"
-                  defaultValue={activeOrganization.name}
-                  autoComplete="organization"
-                  placeholder={organizationLocalization.namePlaceholder}
-                  disabled={isPending}
-                />
-              ) : (
-                <Skeleton className="h-8 w-full rounded-md" />
-              )}
-
-              <FieldError />
-            </Field>
-
-            {activeOrganization ? (
-              <SlugField
-                id={slugInputId}
-                value={slug}
-                onChange={setSlug}
-                currentSlug={activeOrganization.slug}
-                disabled={isPending}
-              />
-            ) : (
+          {activeOrganization ? (
+            <>
               <Field>
-                <Label>{organizationLocalization.slug}</Label>
-                <Skeleton className="h-8 w-full rounded-md" />
+                <FieldTitle>{organizationLocalization.name}</FieldTitle>
+                <EditableText
+                  autoComplete="organization"
+                  disabled={isPending}
+                  label={organizationLocalization.name}
+                  onSave={async (name) => {
+                    await updateOrganization({ data: { name } })
+                  }}
+                  placeholder={organizationLocalization.namePlaceholder}
+                  size="lg"
+                  value={activeOrganization.name}
+                />
               </Field>
-            )}
 
-            <Button
-              type="submit"
-              disabled={isPending || !activeOrganization}
-              size="sm"
-              className="mt-1 w-fit"
-            >
-              {isPending && <Spinner />}
-
-              {localization.settings.saveChanges}
-            </Button>
-          </form>
+              <Field data-invalid={slugAvailability === "unavailable"}>
+                <FieldTitle>{organizationLocalization.slug}</FieldTitle>
+                <EditableText
+                  disabled={isPending}
+                  displayValue={`${slugPrefix}${activeOrganization.slug}`}
+                  endContent={
+                    <SlugAvailabilityIndicator status={slugAvailability} />
+                  }
+                  inputStart={slugPrefix || undefined}
+                  label={organizationLocalization.slug}
+                  onDraftChange={setSlugDraft}
+                  onSave={async (slug) => {
+                    await updateOrganization({ data: { slug } })
+                  }}
+                  placeholder={organizationLocalization.slugPlaceholder}
+                  saveDisabled={
+                    slugAvailability === "checking" ||
+                    slugAvailability === "unavailable"
+                  }
+                  transform={sanitizeSlug}
+                  value={activeOrganization.slug}
+                />
+                <FieldError>
+                  {slugAvailability === "unavailable"
+                    ? "This slug is unavailable."
+                    : undefined}
+                </FieldError>
+              </Field>
+            </>
+          ) : (
+            <OrganizationProfileSkeleton
+              name={organizationLocalization.name}
+              slug={organizationLocalization.slug}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function OrganizationProfileSkeleton({
+  name,
+  slug
+}: {
+  name: string
+  slug: string
+}) {
+  return (
+    <>
+      {[name, slug].map((label) => (
+        <Field key={label}>
+          <FieldTitle>{label}</FieldTitle>
+          <Skeleton className="h-8 w-56 rounded-md" />
+        </Field>
+      ))}
+    </>
   )
 }
