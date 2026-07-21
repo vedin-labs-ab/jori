@@ -63,6 +63,7 @@ export function AccountDialog({ open, onOpenChange }: SettingsDialogProps) {
       <DialogContent
         bodyClassName="overflow-y-auto"
         className="max-h-[85svh] sm:max-w-2xl"
+        drawerClassName="max-h-[calc(100svh-0.5rem)]!"
       >
         <DialogHeader>
           <DialogTitle>Account</DialogTitle>
@@ -114,6 +115,7 @@ export function OrganizationDialog({
       <DialogContent
         bodyClassName="flex flex-1 overflow-hidden p-0"
         className="h-[calc(100svh-2rem)] sm:h-[min(44rem,calc(100svh-2rem))] sm:max-w-[calc(100%-2rem)] md:max-w-4xl lg:max-w-5xl"
+        drawerClassName="max-h-[calc(100svh-0.5rem)]!"
         showCloseButton={false}
       >
         <SidebarProvider
