@@ -17,7 +17,7 @@ export const playbookTemplates = {
       },
       {
         "path": "src/revision.ts",
-        "content": "export const artifactRuntimeRevision =\n  \"23ef8d748fc25fb76a29ff40715eea37148525cb477831331c5258737165ea63\";\n"
+        "content": "export const artifactRuntimeRevision =\n  \"68237df319880f5b1ce78742386ee066a86cbfd1252a1b643e6985883190a25c\";\n"
       }
     ],
     "contract": {
@@ -624,7 +624,7 @@ export const playbookTemplates = {
       ]
     },
     "build": {
-      "sourceHash": "182ef508c012a14b311977af118e3ca5aaf4d3a9c2fe0310ddc8967c713eeb54",
+      "sourceHash": "3b0ee0e5e129ff24028a0a24e35e20bafaec74cb9e42911a90215964cd0d9590",
       "assets": [
         {
           "path": "assets/geist-latin-wght-normal-BgDaEnEv.woff2",

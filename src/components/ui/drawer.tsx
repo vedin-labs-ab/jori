@@ -4,19 +4,36 @@ import { Drawer as DrawerPrimitive } from "vaul"
 import { cn } from "@/lib/utils"
 
 const DrawerNestingContext = React.createContext(false)
+const DrawerFocusContext = React.createContext<
+  React.RefObject<HTMLElement | null> | undefined
+>(undefined)
+const popupContentSelector = [
+  '[data-slot="dropdown-menu-content"]',
+  '[data-slot="popover-content"]',
+  '[data-slot="select-content"]',
+].join(",")
+const openPopupTriggerSelector = [
+  '[data-slot="dropdown-menu-trigger"][data-state="open"]',
+  '[data-slot="popover-trigger"][data-state="open"]',
+  '[data-slot="select-trigger"][data-state="open"]',
+].join(",")
 
 function Drawer({
   children,
+  autoFocus = true,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   const nested = React.useContext(DrawerNestingContext)
+  const restoreFocusRef = React.useRef<HTMLElement | null>(null)
   const Root = nested ? DrawerPrimitive.NestedRoot : DrawerPrimitive.Root
 
   return (
-    <Root data-slot="drawer" {...props}>
-      <DrawerNestingContext.Provider value>
-        {children}
-      </DrawerNestingContext.Provider>
+    <Root autoFocus={autoFocus} data-slot="drawer" {...props}>
+      <DrawerFocusContext.Provider value={restoreFocusRef}>
+        <DrawerNestingContext.Provider value>
+          {children}
+        </DrawerNestingContext.Provider>
+      </DrawerFocusContext.Provider>
     </Root>
   )
 }
@@ -58,8 +75,12 @@ function DrawerOverlay({
 function DrawerContent({
   className,
   children,
+  onCloseAutoFocus,
+  onOpenAutoFocus,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+  const restoreFocusRef = React.useContext(DrawerFocusContext)
+
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
@@ -69,6 +90,31 @@ function DrawerContent({
           "group/drawer-content fixed z-50 flex h-auto flex-col bg-transparent p-2 text-xs/relaxed text-popover-foreground before:absolute before:inset-2 before:-z-10 before:rounded-xl before:border before:border-border before:bg-popover data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:max-h-[calc(100dvh-0.5rem)] data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:max-h-[calc(100dvh-0.5rem)] data-[vaul-drawer-direction=left]:sm:max-w-sm data-[vaul-drawer-direction=right]:sm:max-w-sm",
           className
         )}
+        onCloseAutoFocus={(event) => {
+          onCloseAutoFocus?.(event)
+          const target = restoreFocusRef?.current
+
+          if (!event.defaultPrevented && target?.isConnected) {
+            target.focus({ preventScroll: true })
+          }
+
+          if (restoreFocusRef) {
+            restoreFocusRef.current = null
+          }
+        }}
+        onOpenAutoFocus={(event) => {
+          const activeElement = focusReturnTarget()
+
+          if (
+            restoreFocusRef &&
+            activeElement !== null &&
+            activeElement !== document.body
+          ) {
+            restoreFocusRef.current = activeElement
+          }
+
+          onOpenAutoFocus?.(event)
+        }}
         {...props}
       >
         <DrawerHandle />
@@ -76,6 +122,24 @@ function DrawerContent({
       </DrawerPrimitive.Content>
     </DrawerPortal>
   )
+}
+
+function focusReturnTarget() {
+  const activeElement = document.activeElement
+
+  if (!(activeElement instanceof HTMLElement)) {
+    return null
+  }
+
+  if (activeElement.closest(popupContentSelector)) {
+    const openTriggers = document.querySelectorAll<HTMLElement>(
+      openPopupTriggerSelector
+    )
+
+    return openTriggers.item(openTriggers.length - 1) ?? activeElement
+  }
+
+  return activeElement
 }
 
 function DrawerHandle({

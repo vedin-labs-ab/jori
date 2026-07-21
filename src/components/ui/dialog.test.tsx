@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { useState } from "react"
 import { afterEach, expect, test, vi } from "vitest"
 import {
   AlertDialog,
@@ -15,6 +16,12 @@ import {
   DialogDescription,
   DialogTitle,
 } from "./dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./dropdown-menu"
 
 let mobile = false
 
@@ -82,6 +89,101 @@ test("mobile dialogs automatically stack nested drawers", () => {
   expect(document.querySelectorAll('[data-slot="drawer-handle"]')).toHaveLength(
     2
   )
+})
+
+test("mobile nested drawers move focus into the active surface and restore it", async () => {
+  mobile = true
+
+  function Fixture() {
+    const [nestedOpen, setNestedOpen] = useState(false)
+
+    return (
+      <Dialog open>
+        <DialogContent>
+          <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>Organization settings.</DialogDescription>
+          <button type="button" onClick={() => setNestedOpen(true)}>
+            Invite member
+          </button>
+          <Dialog open={nestedOpen} onOpenChange={setNestedOpen}>
+            <DialogContent>
+              <DialogTitle>Invite member</DialogTitle>
+              <DialogDescription>Send an invitation.</DialogDescription>
+              <input aria-label="Email" />
+              <button type="button" onClick={() => setNestedOpen(false)}>
+                Cancel
+              </button>
+            </DialogContent>
+          </Dialog>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  render(<Fixture />)
+
+  const trigger = screen.getByRole("button", { name: "Invite member" })
+  fireEvent.click(trigger)
+
+  await waitFor(() =>
+    expect(document.activeElement).toBe(screen.getByLabelText("Email"))
+  )
+  expect(document.activeElement?.closest('[aria-hidden="true"]')).toBeNull()
+
+  fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+
+  await waitFor(() => expect(document.activeElement).toBe(trigger))
+  expect(document.activeElement?.closest('[aria-hidden="true"]')).toBeNull()
+})
+
+test("mobile drawers restore focus to a popup trigger after its action opens a drawer", async () => {
+  mobile = true
+
+  function Fixture() {
+    const [nestedOpen, setNestedOpen] = useState(false)
+
+    return (
+      <Dialog open>
+        <DialogContent>
+          <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>Organization settings.</DialogDescription>
+          <DropdownMenu>
+            <DropdownMenuTrigger>Member actions</DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => setNestedOpen(true)}>
+                Remove member
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Dialog open={nestedOpen} onOpenChange={setNestedOpen}>
+            <DialogContent>
+              <DialogTitle>Remove member</DialogTitle>
+              <DialogDescription>This cannot be undone.</DialogDescription>
+              <button type="button" onClick={() => setNestedOpen(false)}>
+                Cancel
+              </button>
+            </DialogContent>
+          </Dialog>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  render(<Fixture />)
+
+  const trigger = screen.getByRole("button", { name: "Member actions" })
+  trigger.focus()
+  fireEvent.keyDown(trigger, { key: "ArrowDown" })
+  fireEvent.click(screen.getByRole("menuitem", { name: "Remove member" }))
+
+  const cancel = screen.getByRole("button", { name: "Cancel" })
+  await waitFor(() => expect(document.activeElement).toBe(cancel))
+  expect(document.activeElement?.closest('[aria-hidden="true"]')).toBeNull()
+
+  fireEvent.click(cancel)
+
+  await waitFor(() => expect(document.activeElement).toBe(trigger))
+  expect(document.activeElement?.closest('[aria-hidden="true"]')).toBeNull()
 })
 
 test("alert dialogs retain explicit actions in mobile drawers", async () => {
