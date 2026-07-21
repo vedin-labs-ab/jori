@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronsUpDown, LogOut, ShieldUser } from "lucide-react"
 import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { UserView } from "@/components/auth/user/user-view"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,23 +31,6 @@ export function SidebarUserButton() {
     return <Skeleton className="h-12 w-full rounded-md" />
   }
 
-  const name = user.name || "Account"
-  const email = user.email
-  const fallback = name.at(0)?.toUpperCase() ?? "?"
-  const identity = (
-    <>
-      <UserAvatar
-        alt={`${name}'s avatar`}
-        fallback={fallback}
-        src={user.image ?? undefined}
-      />
-      <div className="grid flex-1 text-left text-sm leading-tight">
-        <span className="truncate font-medium">{name}</span>
-        {email ? <span className="truncate text-xs">{email}</span> : null}
-      </div>
-    </>
-  )
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -57,7 +40,7 @@ export function SidebarUserButton() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               size="lg"
             >
-              {identity}
+              <UserView className="flex-1" user={user} />
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -68,9 +51,7 @@ export function SidebarUserButton() {
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                {identity}
-              </div>
+              <UserView className="px-1 py-1.5" user={user} />
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -91,22 +72,5 @@ export function SidebarUserButton() {
         <AccountDialog onOpenChange={setManaging} open={managing} />
       </SidebarMenuItem>
     </SidebarMenu>
-  )
-}
-
-function UserAvatar({
-  alt,
-  fallback,
-  src,
-}: {
-  alt: string
-  fallback: string
-  src: string | undefined
-}) {
-  return (
-    <Avatar className="h-8 w-8 rounded-lg">
-      <AvatarImage alt={alt} src={src} />
-      <AvatarFallback className="rounded-lg">{fallback}</AvatarFallback>
-    </Avatar>
   )
 }
