@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react"
 import { type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useSession } from "@/shared/session/auth"
+import { usePublicSession } from "@/shared/session/public"
 
 // Every marketing page ends on the same handshake.
 export function Closing({ lede }: { lede: string }) {
@@ -28,7 +28,7 @@ export function Closing({ lede }: { lede: string }) {
 // members go to the console. `prominent` bumps the size for hero and closing
 // placements.
 export function GetStarted({ prominent = false }: { prominent?: boolean }) {
-  const session = useSession()
+  const session = usePublicSession()
   const isSignedIn = session.data !== null && session.data !== undefined
 
   return (

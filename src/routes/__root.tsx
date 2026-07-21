@@ -8,17 +8,32 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { AlertTriangle, SearchX } from "lucide-react"
+import { lazy, Suspense } from "react"
 import { Button } from "@/components/ui/button"
-import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { FullscreenLoadingProvider } from "@/shared/loading"
-import { SessionProviders } from "@/shared/session"
+import {
+  FullscreenLoadingProvider,
+  FullscreenSkeletonLoader,
+} from "@/shared/loading"
 import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
 const appTitle = "Milo"
 const appDescription =
   "An AI teammate inside Slack, your email, and your calendar. Milo preps your day, drafts the follow-ups, works by your rules, and keeps receipts."
+const providerlessRouteIds = new Set([
+  "/",
+  "/artifacts/$artifactId/",
+  "/pricing",
+  "/privacy",
+  "/terms",
+  "/trust",
+])
+const SessionProviders = lazy(() =>
+  import("@/shared/session").then((module) => ({
+    default: module.SessionProviders,
+  }))
+)
 
 export const Route = createRootRoute({
   errorComponent: RootError,
@@ -152,11 +167,12 @@ function readErrorMessage(error: unknown) {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const isArtifactViewer = useRouterState({
-    select: (state) =>
-      state.matches.some(
-        (match) => match.routeId === "/artifacts/$artifactId/"
-      ),
+  const usesSessionProvider = useRouterState({
+    select: (state) => {
+      const routeId = state.matches.at(-1)?.routeId
+
+      return routeId === undefined || !providerlessRouteIds.has(routeId)
+    },
   })
   const content = (
     <FullscreenLoadingProvider>
@@ -170,18 +186,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {/*
-          Mounted before the app so it subscribes before mount effects toast.
-          The theme is pinned because the app renders light-only: without a
-          next-themes provider the component falls back to the OS scheme,
-          which paints dark-theme text on our light toasts. Remove the pin
-          when a ThemeProvider owns the html.dark class.
-        */}
-        <Toaster theme="light" />
-        {isArtifactViewer ? (
-          content
+        {usesSessionProvider ? (
+          <Suspense fallback={<FullscreenSkeletonLoader />}>
+            <SessionProviders>{content}</SessionProviders>
+          </Suspense>
         ) : (
-          <SessionProviders>{content}</SessionProviders>
+          content
         )}
         <TanStackDevtools
           config={{

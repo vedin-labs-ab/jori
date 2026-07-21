@@ -59,7 +59,7 @@ export function Prop({
 
 export function Mention() {
   return (
-    <span className="rounded-sm bg-primary/10 px-1 py-px font-medium text-primary">
+    <span className="rounded-sm bg-primary/10 px-1 py-px font-medium text-foreground">
       @milo
     </span>
   )
@@ -70,36 +70,5 @@ export function Chip({ children }: { children: ReactNode }) {
     <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-muted-foreground text-xs">
       {children}
     </span>
-  )
-}
-
-// Entrance reveal for the hero only: one orchestrated moment, gated behind
-// motion-safe so the page is complete without it.
-const revealDelays = [
-  "",
-  "[animation-delay:100ms]",
-  "[animation-delay:200ms]",
-  "[animation-delay:320ms]",
-] as const
-
-export function Reveal({
-  children,
-  className,
-  delay = 0,
-}: {
-  children: ReactNode
-  className?: string
-  delay?: 0 | 1 | 2 | 3
-}) {
-  return (
-    <div
-      className={cn(
-        "[animation-fill-mode:backwards] motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:animate-in motion-safe:duration-700",
-        revealDelays[delay],
-        className
-      )}
-    >
-      {children}
-    </div>
   )
 }

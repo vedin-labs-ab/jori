@@ -15,7 +15,7 @@ const modeLabels = {
 const modeStyles = {
   allowed: "border text-muted-foreground",
   blocked: "border border-dashed text-muted-foreground",
-  prompted: "bg-primary/10 font-medium text-primary",
+  prompted: "bg-primary/10 font-medium text-foreground",
 } as const
 
 export type ModeRow = {

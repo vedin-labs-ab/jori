@@ -1,8 +1,12 @@
 import { Link } from "@tanstack/react-router"
-import { UserButton } from "@/components/auth/user/user-button"
+import { lazy, Suspense } from "react"
 import { BrandLink } from "@/shared/brand/link"
-import { useSession } from "@/shared/session/auth"
+import { usePublicSession } from "@/shared/session/public"
 import { GetStarted, SessionButton } from "./cta"
+
+const LandingAccount = lazy(() =>
+  import("./account").then((module) => ({ default: module.LandingAccount }))
+)
 
 export function LandingHeader() {
   return (
@@ -30,7 +34,7 @@ export function LandingHeader() {
 }
 
 function HeaderActions() {
-  const session = useSession()
+  const session = usePublicSession()
   const isSignedIn = session.data !== null && session.data !== undefined
 
   return (
@@ -45,7 +49,11 @@ function HeaderActions() {
         </SessionButton>
       ) : null}
       <GetStarted />
-      {isSignedIn ? <UserButton hideSettings size="icon" /> : null}
+      {isSignedIn ? (
+        <Suspense fallback={<div aria-hidden="true" className="size-8" />}>
+          <LandingAccount />
+        </Suspense>
+      ) : null}
     </div>
   )
 }
