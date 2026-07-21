@@ -43,7 +43,7 @@ const allowedParentOrigins = new Set([
   miloWindow.location.origin,
   ...config.parentOrigins,
 ])
-const loadedAssets = new Map<string, Promise<unknown>>()
+const loadedAssets = new Map<string, Promise<void>>()
 
 miloWindow.addEventListener("message", async (event) => {
   if (!isArtifactTokenMessage(event)) {
@@ -74,9 +74,12 @@ miloWindow.addEventListener("message", async (event) => {
   }
 })
 
-async function loadArtifact(versionId: string, token: string) {
-  if (loadedAssets.has(versionId)) {
-    return loadedAssets.get(versionId)
+async function loadArtifact(versionId: string, token: string): Promise<void> {
+  const loadedAsset = loadedAssets.get(versionId)
+
+  if (loadedAsset !== undefined) {
+    await loadedAsset
+    return
   }
 
   const manifest = await fetchJson<ArtifactManifest>(
@@ -95,9 +98,9 @@ async function loadArtifact(versionId: string, token: string) {
   const moduleUrl = URL.createObjectURL(
     new Blob([js], { type: "text/javascript" })
   )
-  const promise = import(moduleUrl)
+  const promise = import(moduleUrl).then(() => undefined)
   loadedAssets.set(versionId, promise)
-  return promise
+  await promise
 }
 
 function createMiloSdk(input: {

@@ -142,10 +142,16 @@ describe("Slack assets", () => {
       method: "POST",
       url: "https://files.slack.com/upload/v1/TICKET",
     })
-    expect(calls[1]?.body).toBeInstanceOf(Blob)
-    expect(
-      new Uint8Array(await (calls[1]?.body as Blob).arrayBuffer())
-    ).toEqual(new Uint8Array([104, 101, 108, 108, 111]))
+    const uploadBody = calls[1]?.body
+    expect(uploadBody).toBeInstanceOf(Blob)
+
+    if (!(uploadBody instanceof Blob)) {
+      throw new Error("Expected the upload body to be a Blob")
+    }
+
+    expect(new Uint8Array(await uploadBody.arrayBuffer())).toEqual(
+      new Uint8Array([104, 101, 108, 108, 111])
+    )
     expect(calls[2]).toMatchObject({
       body: {
         channel_id: "C123",

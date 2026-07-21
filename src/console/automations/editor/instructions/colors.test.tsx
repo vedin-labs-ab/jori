@@ -45,34 +45,30 @@ const markerToneCases = [
 ] as const
 
 describe("automation instructions marker colors", () => {
-  test.each(markerToneCases)("uses the $accessLabel palette", async ({
-    ariaLabel,
-    scopeIcon,
-    separator,
-    surface,
-    title,
-    tools,
-  }) => {
-    const field = renderInstructionsField({
-      description: "Post to @GitHub.",
-      surfaces: [{ integration: "github", tools: [...tools] }],
-    })
+  test.each(markerToneCases)(
+    "uses the $accessLabel palette",
+    async ({ ariaLabel, scopeIcon, separator, surface, title, tools }) => {
+      const field = renderInstructionsField({
+        description: "Post to @GitHub.",
+        surfaces: [{ integration: "github", tools: [...tools] }],
+      })
 
-    const accessButton = await screen.findByRole("button", {
-      name: ariaLabel,
-    })
-    const buttonGroup = field.container.querySelector(
-      '[data-slot="button-group"]'
-    )
-    const markerSeparator = buttonGroup?.querySelector(
-      "[data-automation-surface-separator]"
-    )
+      const accessButton = await screen.findByRole("button", {
+        name: ariaLabel,
+      })
+      const buttonGroup = field.container.querySelector(
+        '[data-slot="button-group"]'
+      )
+      const markerSeparator = buttonGroup?.querySelector(
+        "[data-automation-surface-separator]"
+      )
 
-    expectClasses(buttonGroup, surface)
-    expect(accessButton.className).toContain(scopeIcon)
-    expect(accessButton.getAttribute("title")).toBe(title)
-    expect(markerSeparator?.className).toContain(separator)
-  })
+      expectClasses(buttonGroup, surface)
+      expect(accessButton.className).toContain(scopeIcon)
+      expect(accessButton.getAttribute("title")).toBe(title)
+      expect(markerSeparator?.className).toContain(separator)
+    }
+  )
 })
 
 describe("automation instructions blocked marker colors", () => {

@@ -96,9 +96,7 @@ test("mints and persists a stale GitHub installation token", async () => {
     accept: "application/vnd.github+json",
     "x-github-api-version": "2022-11-28",
   })
-  expect((init?.headers as Record<string, string>).authorization).toMatch(
-    /^Bearer /
-  )
+  expect(new Headers(init?.headers).get("authorization")).toMatch(/^Bearer /)
 })
 
 test("marks a Google integration expired when the refresh grant is dead", async () => {
