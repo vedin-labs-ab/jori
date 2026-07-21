@@ -2,21 +2,10 @@
 
 import { fileToBase64 } from "@better-auth-ui/core"
 import { useAuth, useSession, useUpdateUser } from "@better-auth-ui/react"
-import { Trash2, Upload } from "lucide-react"
-import { type ChangeEvent, useRef, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
+import { AvatarField } from "@/components/auth/avatar"
 import { UserAvatar } from "@/components/auth/user/user-avatar"
-import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import { Field } from "@/components/ui/field"
-import { Label } from "@/components/ui/label"
-import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
 
 export type ChangeAvatarProps = {
   className?: string
@@ -24,23 +13,17 @@ export type ChangeAvatarProps = {
 
 export function ChangeAvatar({ className }: ChangeAvatarProps) {
   const { authClient, localization, avatar } = useAuth()
-  const { data: session } = useSession(authClient)
+  const { data: session, isPending: sessionPending } = useSession(authClient)
 
   const { mutate: updateUser, isPending: updatePending } =
     useUpdateUser(authClient)
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const isPending = updatePending || isUploading || isDeleting
 
-  async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    e.target.value = ""
-
+  async function handleFileChange(file: File) {
     setIsUploading(true)
 
     try {
@@ -89,57 +72,18 @@ export function ChangeAvatar({ className }: ChangeAvatarProps) {
   }
 
   return (
-    <Field className={className}>
-      <Label>{localization.settings.avatar}</Label>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
-      <div className="flex items-center gap-4">
-        <Button
-          type="button"
-          variant="ghost"
-          className="p-0 h-auto w-auto rounded-full"
-          disabled={isPending}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <UserAvatar className="size-12" isPending={isPending} />
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}
-            disabled={!session || isPending}
-          >
-            {isPending && <Spinner />}
-
-            {localization.settings.changeAvatar}
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent className="min-w-fit">
-            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-              <Upload className="text-muted-foreground" />
-
-              {localization.settings.uploadAvatar}
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              variant="destructive"
-              disabled={!session?.user.image}
-              onClick={handleDelete}
-            >
-              <Trash2 />
-
-              {localization.settings.deleteAvatar}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </Field>
+    <AvatarField
+      avatar={<UserAvatar className="size-12" isPending={sessionPending} />}
+      changeLabel={localization.settings.changeAvatar}
+      className={className}
+      deleteDisabled={!session?.user.image}
+      deleteLabel={localization.settings.deleteAvatar}
+      disabled={!session}
+      isPending={isPending}
+      label={localization.settings.avatar}
+      onDelete={handleDelete}
+      onFileChange={handleFileChange}
+      uploadLabel={localization.settings.uploadAvatar}
+    />
   )
 }

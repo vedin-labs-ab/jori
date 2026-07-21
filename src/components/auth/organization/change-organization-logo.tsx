@@ -8,21 +8,11 @@ import {
   useAuthPlugin,
   useUpdateOrganization
 } from "@better-auth-ui/react"
-import { Trash2, Upload } from "lucide-react"
-import { type ChangeEvent, useRef, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
-import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import { Spinner } from "@/components/ui/spinner"
+import { AvatarField } from "@/components/auth/avatar"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { cn } from "@/lib/utils"
 import { OrganizationLogo } from "./organization-logo"
 
 export type ChangeOrganizationLogoProps = {
@@ -42,17 +32,13 @@ export function ChangeOrganizationLogo({
   const { mutate: updateOrganization, isPending: updatePending } =
     useUpdateOrganization(authClient as OrganizationAuthClient)
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const isPending = updatePending || isUploading || isDeleting
 
-  async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !activeOrganization) return
-
-    e.target.value = ""
+  async function handleFileChange(file: File) {
+    if (!activeOrganization) return
 
     setIsUploading(true)
 
@@ -112,64 +98,24 @@ export function ChangeOrganizationLogo({
   }
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <Label aria-disabled={!activeOrganization}>
-        {organizationLocalization.logo}
-      </Label>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
-      <div className="flex items-center gap-4">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-auto w-auto rounded-full p-0"
-          disabled={!activeOrganization || isPending}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <OrganizationLogo
-            size="lg"
-            isPending={activeOrganizationPending}
-            organization={activeOrganization}
-          />
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(buttonVariants({ size: "sm", variant: "secondary" }))}
-            disabled={!activeOrganization || isPending}
-          >
-            {isPending && <Spinner />}
-
-            {organizationLocalization.changeLogo}
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="start" className="min-w-fit">
-            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-              <Upload className="text-muted-foreground" />
-
-              {organizationLocalization.uploadLogo}
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              disabled={!activeOrganization?.logo}
-              onClick={handleDelete}
-              variant="destructive"
-            >
-              <Trash2 />
-
-              {organizationLocalization.deleteLogo}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
+    <AvatarField
+      avatar={
+        <OrganizationLogo
+          isPending={activeOrganizationPending}
+          organization={activeOrganization}
+          size="lg"
+        />
+      }
+      changeLabel={organizationLocalization.changeLogo}
+      className={className}
+      deleteDisabled={!activeOrganization?.logo}
+      deleteLabel={organizationLocalization.deleteLogo}
+      disabled={!activeOrganization}
+      isPending={isPending}
+      label={organizationLocalization.logo}
+      onDelete={handleDelete}
+      onFileChange={handleFileChange}
+      uploadLabel={organizationLocalization.uploadLogo}
+    />
   )
 }

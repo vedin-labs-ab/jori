@@ -80,7 +80,7 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
         </span>
 
         {isCurrentSession ? (
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary w-fit">
+          <span className="text-xs text-primary capitalize">
             {localization.settings.currentSession}
           </span>
         ) : (
