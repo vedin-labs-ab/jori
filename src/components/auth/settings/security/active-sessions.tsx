@@ -1,22 +1,15 @@
 import { useAuth, useListSessions, useSession } from "@better-auth-ui/react"
 import { Card, CardContent } from "@/components/ui/card"
+import { Section, SectionHeader } from "@/components/ui/section"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 import { ActiveSession } from "./active-session"
 
 export type ActiveSessionsProps = {
   className?: string
 }
 
-/**
- * Render a card listing all active sessions for the current user with revoke controls.
- *
- * Shows each session's browser, OS, IP address, and creation time. The current session is marked
- * and navigates to sign-out on click, while other sessions can be revoked individually.
- *
- * @returns A JSX element containing the sessions card
- */
+/** Active session list with current-session and revoke actions. */
 export function ActiveSessions({ className }: ActiveSessionsProps) {
   const { authClient, localization } = useAuth()
   const { data: session } = useSession(authClient)
@@ -28,12 +21,10 @@ export function ActiveSessions({ className }: ActiveSessionsProps) {
   )
 
   return (
-    <div>
-      <h2 className="text-sm font-semibold mb-3">
-        {localization.settings.activeSessions}
-      </h2>
+    <Section className={className}>
+      <SectionHeader title={localization.settings.activeSessions} />
 
-      <Card className={cn("p-0", className)}>
+      <Card className="p-0">
         <CardContent className="p-0">
           {isPending ? (
             <SessionRowSkeleton />
@@ -48,21 +39,19 @@ export function ActiveSessions({ className }: ActiveSessionsProps) {
           )}
         </CardContent>
       </Card>
-    </div>
+    </Section>
   )
 }
 
 function SessionRowSkeleton() {
   return (
-    <Card className="bg-transparent border-0 ring-0 shadow-none">
-      <CardContent className="flex items-center gap-3">
-        <Skeleton className="size-10 rounded-md" />
+    <div className="flex items-center gap-3 p-4">
+      <Skeleton className="size-10 rounded-md" />
 
-        <div className="flex flex-col gap-1">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-3 w-32" />
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-3 w-32" />
+      </div>
+    </div>
   )
 }
