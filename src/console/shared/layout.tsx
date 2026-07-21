@@ -182,7 +182,7 @@ export function ConsoleSearch({
         </PopoverTrigger>
         <PopoverContent
           align="end"
-          className="w-[min(20rem,calc(100vw-2rem))] p-2 sm:hidden"
+          className="w-[min(20rem,calc(100vw-2rem))] gap-0 rounded-md bg-transparent p-0 shadow-none ring-0 sm:hidden"
         >
           <ConsoleSearchField
             autoFocus
