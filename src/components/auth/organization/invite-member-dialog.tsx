@@ -4,7 +4,7 @@ import {
   useAuthPlugin,
   useInviteMember
 } from "@better-auth-ui/react"
-import { UserPlus } from "lucide-react"
+import { Plus, UserPlus } from "lucide-react"
 import { type SyntheticEvent, useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -36,6 +36,23 @@ import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 export type InviteMemberDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+}
+
+/** Header action that owns the invite dialog's open state. */
+export function InviteMemberButton() {
+  const { localization: organizationLocalization } =
+    useAuthPlugin(organizationPlugin)
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)} size="sm" type="button">
+        <Plus />
+        {organizationLocalization.inviteMember}
+      </Button>
+      <InviteMemberDialog onOpenChange={setOpen} open={open} />
+    </>
+  )
 }
 
 const pickDefaultRole = (keys: string[]) =>

@@ -9,11 +9,11 @@ import type { Invitation } from "better-auth/client"
 import { X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Spinner } from "@/components/ui/spinner"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 import { OrganizationInvitationRowSkeleton } from "./organization-invitation-row-skeleton"
+import { OrganizationTableActionMenu } from "./table"
 
 export type OrganizationInvitationRowProps = {
   invitation: Invitation
@@ -67,16 +67,20 @@ export function OrganizationInvitationRow({
       <TableCell className="text-end">
         {cancelInvitationPermission?.success &&
           invitation.status === "pending" && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="size-8"
-              disabled={cancelPending}
-              onClick={() => cancelInvitation({ invitationId: invitation.id })}
-              aria-label={organizationLocalization.cancelInvitation}
+            <OrganizationTableActionMenu
+              label={`${organizationLocalization.actions}: ${invitation.email}`}
+              pending={cancelPending}
             >
-              {cancelPending ? <Spinner /> : <X />}
-            </Button>
+              <DropdownMenuItem
+                onSelect={() =>
+                  cancelInvitation({ invitationId: invitation.id })
+                }
+                variant="destructive"
+              >
+                <X />
+                {organizationLocalization.cancelInvitation}
+              </DropdownMenuItem>
+            </OrganizationTableActionMenu>
           )}
       </TableCell>
     </TableRow>

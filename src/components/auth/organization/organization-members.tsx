@@ -10,21 +10,19 @@ import {
 import { Users } from "lucide-react"
 import { type ComponentProps, useMemo, useState } from "react"
 
-import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/ui/section"
 import {
   Table,
   TableBody,
-  TableHead,
   TableHeader,
   TableRow
 } from "@/components/ui/table"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 import { cn } from "@/lib/utils"
-import { InviteMemberDialog } from "./invite-member-dialog"
 import { OrganizationMemberRow } from "./organization-member-row"
 import { OrganizationMemberRowSkeleton } from "./organization-member-row-skeleton"
 import {
+  OrganizationActionsTableHead,
   OrganizationFilterTableHead,
   OrganizationSearchableTableHead,
   OrganizationTableEmpty
@@ -85,8 +83,6 @@ export function OrganizationMembers({
     )
   }, [search, membersData?.members, roleFilter])
 
-  const [inviteOpen, setInviteOpen] = useState(false)
-
   const isOwner = membersData?.members.some(
     (member) => member.role === "owner" && member.userId === session?.user.id
   )
@@ -98,18 +94,7 @@ export function OrganizationMembers({
 
   return (
     <div className={cn("flex flex-col gap-3", className)} {...props}>
-      <SectionHeader
-        action={
-          <Button
-            size="sm"
-            disabled={isPending}
-            onClick={() => setInviteOpen(true)}
-          >
-            {organizationLocalization.inviteMember}
-          </Button>
-        }
-        title={organizationLocalization.members}
-      />
+      <SectionHeader title={organizationLocalization.members} />
 
       <div className="overflow-x-auto rounded-lg border">
         <Table
@@ -135,9 +120,9 @@ export function OrganizationMembers({
                 value={roleFilter}
               />
 
-              <TableHead className="text-end">
-                {organizationLocalization.actions}
-              </TableHead>
+              <OrganizationActionsTableHead
+                label={organizationLocalization.actions}
+              />
             </TableRow>
           </TableHeader>
 
@@ -168,8 +153,6 @@ export function OrganizationMembers({
           </TableBody>
         </Table>
       </div>
-
-      <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </div>
   )
 }

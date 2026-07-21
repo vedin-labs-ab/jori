@@ -56,79 +56,72 @@ export function OrganizationProfile({ className }: OrganizationProfileProps) {
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
+      {activeOrganization ? (
+        <Field>
+          <FieldTitle>{organizationLocalization.name}</FieldTitle>
+          <EditableText
+            autoComplete="organization"
+            disabled={isPending}
+            label={organizationLocalization.name}
+            onSave={async (name) => {
+              await updateOrganization({ data: { name } })
+            }}
+            placeholder={organizationLocalization.namePlaceholder}
+            size="lg"
+            value={activeOrganization.name}
+          />
+        </Field>
+      ) : (
+        <OrganizationProfileFieldSkeleton
+          label={organizationLocalization.name}
+        />
+      )}
+
       <ChangeOrganizationLogo />
 
       {activeOrganization ? (
-        <>
-          <Field>
-            <FieldTitle>{organizationLocalization.name}</FieldTitle>
-            <EditableText
-              autoComplete="organization"
-              disabled={isPending}
-              label={organizationLocalization.name}
-              onSave={async (name) => {
-                await updateOrganization({ data: { name } })
-              }}
-              placeholder={organizationLocalization.namePlaceholder}
-              size="lg"
-              value={activeOrganization.name}
-            />
-          </Field>
-
-          <Field data-invalid={slugAvailability === "unavailable"}>
-            <FieldTitle>{organizationLocalization.slug}</FieldTitle>
-            <EditableText
-              disabled={isPending}
-              displayValue={`${slugPrefix}${activeOrganization.slug}`}
-              endContent={
-                <SlugAvailabilityIndicator status={slugAvailability} />
-              }
-              inputStart={slugPrefix || undefined}
-              label={organizationLocalization.slug}
-              onDraftChange={setSlugDraft}
-              onSave={async (slug) => {
-                await updateOrganization({ data: { slug } })
-              }}
-              placeholder={organizationLocalization.slugPlaceholder}
-              saveDisabled={
-                slugAvailability === "checking" ||
-                slugAvailability === "unavailable"
-              }
-              transform={sanitizeSlug}
-              value={activeOrganization.slug}
-            />
-            <FieldError>
-              {slugAvailability === "unavailable"
-                ? "This slug is unavailable."
-                : undefined}
-            </FieldError>
-          </Field>
-        </>
+        <Field data-invalid={slugAvailability === "unavailable"}>
+          <FieldTitle>{organizationLocalization.slug}</FieldTitle>
+          <EditableText
+            disabled={isPending}
+            displayValue={`${slugPrefix}${activeOrganization.slug}`}
+            endContent={
+              <SlugAvailabilityIndicator status={slugAvailability} />
+            }
+            inputStart={slugPrefix || undefined}
+            label={organizationLocalization.slug}
+            onDraftChange={setSlugDraft}
+            onSave={async (slug) => {
+              await updateOrganization({ data: { slug } })
+            }}
+            placeholder={organizationLocalization.slugPlaceholder}
+            saveDisabled={
+              slugAvailability === "checking" ||
+              slugAvailability === "unavailable"
+            }
+            transform={sanitizeSlug}
+            value={activeOrganization.slug}
+          />
+          <FieldError>
+            {slugAvailability === "unavailable"
+              ? "This slug is unavailable."
+              : undefined}
+          </FieldError>
+        </Field>
       ) : (
-        <OrganizationProfileSkeleton
-          name={organizationLocalization.name}
-          slug={organizationLocalization.slug}
+        <OrganizationProfileFieldSkeleton
+          label={organizationLocalization.slug}
         />
       )}
     </div>
   )
 }
 
-function OrganizationProfileSkeleton({
-  name,
-  slug
-}: {
-  name: string
-  slug: string
-}) {
+function OrganizationProfileFieldSkeleton({ label }: { label: string }) {
   return (
-    <>
-      {[name, slug].map((label) => (
-        <Field key={label}>
-          <FieldTitle>{label}</FieldTitle>
-          <Skeleton className="h-8 w-56 rounded-md" />
-        </Field>
-      ))}
-    </>
+    <Field>
+      <FieldTitle>{label}</FieldTitle>
+      <Skeleton className="h-8 w-56 rounded-md" />
+    </Field>
   )
 }

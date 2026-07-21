@@ -1,5 +1,13 @@
 import type { LucideIcon } from "lucide-react"
-import { ArrowDown, ArrowUp, ArrowUpDown, Filter, Search, X } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Filter,
+  MoreHorizontal,
+  Search,
+  X
+} from "lucide-react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -23,6 +31,7 @@ import {
   InputGroupButton,
   InputGroupInput
 } from "@/components/ui/input-group"
+import { Spinner } from "@/components/ui/spinner"
 import { TableCell, TableHead, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
@@ -195,6 +204,45 @@ export function OrganizationFilterTableHead({
         </DropdownMenuContent>
       </DropdownMenu>
     </TableHead>
+  )
+}
+
+export function OrganizationActionsTableHead({ label }: { label: string }) {
+  return (
+    <TableHead className="w-12 text-end">
+      <span className="sr-only">{label}</span>
+    </TableHead>
+  )
+}
+
+export function OrganizationTableActionMenu({
+  children,
+  disabled,
+  label,
+  pending
+}: {
+  children: ReactNode
+  disabled?: boolean
+  label: string
+  pending?: boolean
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={label}
+          disabled={disabled || pending}
+          size="icon-sm"
+          type="button"
+          variant="ghost"
+        >
+          {pending ? <Spinner /> : <MoreHorizontal />}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        {children}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

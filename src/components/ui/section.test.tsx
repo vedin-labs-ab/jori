@@ -11,7 +11,7 @@ test("renders the shared section hierarchy with optional supporting content", ()
     <SectionHeader
       action={<button type="button">Invite</button>}
       description="People with access to this organization."
-      title="Members"
+      title={<span>Members</span>}
     />
   )
 
