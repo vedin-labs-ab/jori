@@ -15,6 +15,10 @@ const ignoredWorkspacePaths = [
 ]
 
 const config = defineConfig({
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
   resolve: {
     tsconfigPaths: true,
     // These packages coordinate through module-level state (React context,
@@ -30,7 +34,12 @@ const config = defineConfig({
       "@base-ui/react",
     ],
   },
-  plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [
+    devtools({ consolePiping: { enabled: false } }),
+    tailwindcss(),
+    tanstackStart(),
+    viteReact(),
+  ],
   ssr: {
     // Ships files with directives that need bundling to resolve during SSR.
     noExternal: ["@convex-dev/better-auth"],
