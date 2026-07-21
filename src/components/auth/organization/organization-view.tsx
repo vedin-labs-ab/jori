@@ -87,13 +87,22 @@ export function OrganizationView({
     >
       <OrganizationLogo
         organization={resolvedOrganization}
-        className={size === "sm" ? "size-5" : undefined}
+        className={
+          size === "sm"
+            ? "size-6 [&_[data-slot=avatar-fallback]]:text-xs"
+            : undefined
+        }
         size={size === "lg" ? "md" : "sm"}
       />
 
       <div className="flex min-w-0 flex-col">
         <div className="flex min-w-0 items-center gap-2">
-          <p className="truncate text-sm font-medium leading-tight text-foreground">
+          <p
+            className={cn(
+              "truncate font-medium text-foreground",
+              size === "sm" ? "text-xs/relaxed" : "text-sm leading-tight"
+            )}
+          >
             {resolvedOrganization?.name}
           </p>
 

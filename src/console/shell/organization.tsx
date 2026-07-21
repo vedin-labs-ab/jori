@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SidebarMenuButton } from "@/components/ui/sidebar"
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 import {
   activateOrganization,
   useActiveOrganization,
@@ -24,6 +24,7 @@ function billingSettingsRequested() {
 }
 
 export function SidebarOrganizationSwitcher() {
+  const { isMobile } = useSidebar()
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
   const [billingRequested] = useState(billingSettingsRequested)
@@ -46,10 +47,15 @@ export function SidebarOrganizationSwitcher() {
             <ChevronsUpDown className="ml-auto size-4" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-72 rounded-lg">
+        <DropdownMenuContent
+          align="start"
+          className="w-(--radix-dropdown-menu-trigger-width) min-w-64 rounded-lg"
+          side={isMobile ? "bottom" : "right"}
+          sideOffset={4}
+        >
           <DropdownMenuLabel className="p-0 font-normal">
-            <div className="flex items-center justify-between gap-4 px-2 py-2">
-              <OrganizationView className="min-w-0" hideRole hideSlug />
+            <div className="flex items-center justify-between gap-3 px-1 py-1.5">
+              <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
               <Button
                 onClick={() => setManaging(true)}
                 size="sm"
