@@ -25,10 +25,25 @@ const triggerVariants = cva(
   {
     variants: {
       size: {
-        sm: "h-6 text-xs/relaxed [&_svg]:size-3",
-        md: "h-7 text-sm [&_svg]:size-3.5",
-        lg: "h-8 text-base font-semibold [&_svg]:size-3.5",
-        xl: "h-9 text-xl font-semibold tracking-tight [&_svg]:size-4",
+        sm: "h-6 text-xs/relaxed",
+        md: "h-7 text-sm",
+        lg: "h-8 text-base font-semibold",
+        xl: "h-9 text-xl font-semibold tracking-tight",
+      },
+    },
+    defaultVariants: { size: "md" },
+  }
+)
+
+const iconVariants = cva(
+  "text-muted-foreground transition-colors group-hover/editable:text-foreground group-focus-visible/editable:text-foreground",
+  {
+    variants: {
+      size: {
+        sm: "size-3",
+        md: "size-3.5",
+        lg: "size-4",
+        xl: "size-4.5",
       },
     },
     defaultVariants: { size: "md" },
@@ -242,10 +257,10 @@ export function EditableText({
           type="button"
           variant="ghost"
         >
-          <span className="truncate transition-opacity group-hover/editable:opacity-70 group-focus-visible/editable:opacity-70">
+          <span className="truncate underline-offset-4 group-hover/editable:underline group-focus-visible/editable:underline">
             {displayValue ?? value}
           </span>
-          <Pencil className="text-muted-foreground transition-colors group-hover/editable:text-foreground group-focus-visible/editable:text-foreground" />
+          <Pencil className={iconVariants({ size })} />
         </Button>
       )}
     </div>

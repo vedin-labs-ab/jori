@@ -91,8 +91,31 @@ test("uses flush, quiet interaction styling for the idle trigger", () => {
 
   expect(trigger.className).toContain("px-0")
   expect(trigger.className).toContain("hover:bg-transparent")
-  expect(label?.className).toContain("group-hover/editable:opacity-70")
+  expect(label?.className).toContain("group-hover/editable:underline")
+  expect(label?.className).not.toContain("opacity")
   expect(icon?.getAttribute("class")).toContain(
     "group-hover/editable:text-foreground"
   )
+})
+
+test("scales the edit icon with each text size", () => {
+  const { rerender } = render(
+    <EditableText label="Name" onSave={vi.fn()} size="sm" value="Milo" />
+  )
+
+  for (const [size, expectedClass] of [
+    ["sm", "size-3"],
+    ["md", "size-3.5"],
+    ["lg", "size-4"],
+    ["xl", "size-4.5"],
+  ] as const) {
+    rerender(
+      <EditableText label="Name" onSave={vi.fn()} size={size} value="Milo" />
+    )
+
+    const icon = screen
+      .getByRole("button", { name: "Edit name: Milo" })
+      .querySelector("svg")
+    expect(icon?.classList.contains(expectedClass)).toBe(true)
+  }
 })
