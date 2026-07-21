@@ -41,15 +41,17 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             className="mr-2 data-vertical:h-4 data-vertical:self-auto"
             orientation="vertical"
           />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
+          <Breadcrumb className="min-w-0">
+            <BreadcrumbList className="flex-nowrap">
+              <BreadcrumbItem className="min-w-0">
+                <BreadcrumbPage className="truncate">
+                  {pageTitle}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div
-            className="ml-auto flex items-center gap-2"
+            className="ml-auto flex shrink-0 items-center gap-2"
             ref={setHeaderSlot}
           />
         </header>

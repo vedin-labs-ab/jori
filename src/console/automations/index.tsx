@@ -1,13 +1,13 @@
 import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useDeferredValue, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import {
   ConsoleFilterGroup,
   ConsoleFilterToggle,
   ConsoleHeaderActions,
+  ConsoleHeaderButton,
   ConsolePageLayout,
   ConsoleSearch,
 } from "../shared/layout"
@@ -165,7 +165,9 @@ function AutomationFilters({
           onValueChange={setQuery}
           value={query}
         />
-        <Button
+        <ConsoleHeaderButton
+          icon={<Plus />}
+          label="New automation"
           onClick={() => {
             preloadDialog()
             onCreate()
@@ -173,10 +175,7 @@ function AutomationFilters({
           onFocus={preloadDialog}
           onPointerEnter={preloadDialog}
           type="button"
-        >
-          <Plus />
-          New automation
-        </Button>
+        />
       </ConsoleHeaderActions>
       <ConsoleFilterGroup>
         <ConsoleFilterToggle
