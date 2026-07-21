@@ -10,10 +10,6 @@ import authSchema from "./betterauth/schema"
 import { requireAppOrigin } from "./shared/app"
 import { requireEnvironmentVariable } from "./shared/environment"
 
-/** Sign-in is social-only: both providers report verified work emails, and
- *  trusted linking folds the two into one user per address. */
-const trustedProviders = ["google", "microsoft"]
-
 export const authComponent = createClient<DataModel, typeof authSchema>(
   components.betterAuth,
   { local: { schema: authSchema } }
@@ -27,7 +23,9 @@ function createOptions(delivery?: {
 }) {
   return {
     account: {
-      accountLinking: { enabled: true, trustedProviders },
+      accountLinking: {
+        enabled: false,
+      },
     },
     plugins: [
       organization({ sendInvitationEmail: delivery?.sendInvitationEmail }),
