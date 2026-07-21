@@ -138,7 +138,7 @@ function AvailableCell({
         </div>
         <TopUpDialog organizationId={organizationId} />
       </div>
-      <div className="mt-5 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2.5 text-sm">
+      <div className="mt-1.5 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2.5 text-sm">
         <span className="text-muted-foreground">
           {account === null || account.state === "trial" ? "Trial" : "Monthly"}
         </span>
