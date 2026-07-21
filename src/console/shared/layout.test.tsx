@@ -119,7 +119,8 @@ test("compact search opens an auto-focused search field", async () => {
   const popover = compactInput?.closest('[data-slot="popover-content"]')
 
   expect(compactInput).toBe(document.activeElement)
-  expect(popover?.className).toContain("bg-transparent")
+  expect(popover?.className).toContain("bg-popover")
+  expect(popover?.className).not.toContain("bg-transparent")
   expect(popover?.className).toContain("p-0")
   expect(popover?.className).toContain("shadow-none")
   expect(popover?.className).toContain("ring-0")
