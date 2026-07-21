@@ -1,5 +1,6 @@
 import { autoTopUp, formatUsd, microsToDollars } from "@contracts/billing"
 import { useMutation } from "convex/react"
+import { toast } from "sonner"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -22,7 +23,8 @@ export function AutoTopUpRow({
   organizationId: string
 }) {
   const configure = useMutation(api.billing.console.configureAutoTopUp)
-  const config = account?.autoTopUp
+  const available = account?.canFundWallet ?? false
+  const config = available ? account?.autoTopUp : undefined
   const enabled = config !== undefined
   const thresholdUsd =
     config?.thresholdMicros !== undefined
@@ -35,6 +37,9 @@ export function AutoTopUpRow({
     ? microsToDollars(config.monthlyCapMicros)
     : autoTopUp.defaultCapUsd
   const current = { thresholdUsd, amountUsd, monthlyCapUsd: capUsd }
+  const description = available
+    ? "When the balance runs low, add money automatically."
+    : "Available once the organization is on an active plan."
 
   const apply = (next: Partial<typeof current> | null) => {
     configure({
@@ -81,16 +86,44 @@ export function AutoTopUpRow({
               ) : null}
             </>
           ) : (
-            <span>When the balance runs low, add money automatically.</span>
+            <span>{description}</span>
           )}
         </div>
       </div>
-      <Switch
+      <AutoTopUpSwitch
+        available={available}
         checked={enabled}
-        id="auto-top-up"
         onCheckedChange={(checked) => apply(checked ? {} : null)}
       />
     </div>
+  )
+}
+
+function AutoTopUpSwitch({
+  available,
+  checked,
+  onCheckedChange,
+}: {
+  available: boolean
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+}) {
+  return (
+    <Switch
+      aria-disabled={!available}
+      checked={checked}
+      className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+      id="auto-top-up"
+      onCheckedChange={(nextChecked) => {
+        if (available) {
+          onCheckedChange(nextChecked)
+        } else {
+          toast.info("Choose or reactivate a plan to use auto top-up.", {
+            id: "billing-plan-required-auto-top-up",
+          })
+        }
+      }}
+    />
   )
 }
 

@@ -1,6 +1,10 @@
 import { expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { trialRemainderMicros } from "./account"
+import {
+  hasActivePlan,
+  requireActivePlan,
+  trialRemainderMicros,
+} from "./account"
 
 function account(overrides: Partial<Doc<"billingAccounts">>) {
   return {
@@ -45,4 +49,18 @@ test("active accounts have no trial remainder", () => {
   )
 
   expect(remainder).toBe(0)
+})
+
+test("wallet funding requires an active plan", () => {
+  const active = account({ state: "active", plan: "starter" })
+
+  expect(hasActivePlan(active)).toBe(true)
+  expect(() => requireActivePlan(active)).not.toThrow()
+  expect(hasActivePlan(account({ state: "trial" }))).toBe(false)
+  expect(() => requireActivePlan(account({ state: "trial" }))).toThrow(
+    "An active plan is required to fund the wallet."
+  )
+  expect(hasActivePlan(account({ state: "paused", plan: "starter" }))).toBe(
+    false
+  )
 })

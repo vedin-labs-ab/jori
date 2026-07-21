@@ -1,6 +1,7 @@
 import { topUp } from "@contracts/billing"
 import { ArrowUpRight, Plus } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -30,8 +31,15 @@ const presetOptions = topUp.presetsUsd.map((preset) => ({
  * Presets cover the common case; the input takes any whole amount from the
  * minimum up. Checkout also saves the card, which unlocks auto top-up.
  */
-export function TopUpDialog({ organizationId }: { organizationId: string }) {
+export function TopUpDialog({
+  available,
+  organizationId,
+}: {
+  available: boolean
+  organizationId: string
+}) {
   const checkout = useBillingCheckout(organizationId)
+  const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState(String(topUp.defaultUsd))
   const parsed = Number(amount)
   const valid =
@@ -40,9 +48,21 @@ export function TopUpDialog({ organizationId }: { organizationId: string }) {
     parsed <= topUp.maximumUsd
 
   return (
-    <Dialog>
+    <Dialog
+      onOpenChange={(nextOpen) => {
+        if (nextOpen && !available) {
+          toast.info("Choose or reactivate a plan before topping up.", {
+            id: "billing-plan-required-top-up",
+          })
+          return
+        }
+
+        setOpen(nextOpen)
+      }}
+      open={open}
+    >
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button aria-disabled={!available} variant="outline">
           <Plus />
           Top up
         </Button>

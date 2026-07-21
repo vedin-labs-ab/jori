@@ -137,7 +137,10 @@ function AvailableCell({
           </p>
         </div>
         <div className="ml-auto shrink-0">
-          <TopUpDialog organizationId={organizationId} />
+          <TopUpDialog
+            available={account?.canFundWallet ?? false}
+            organizationId={organizationId}
+          />
         </div>
       </div>
       <div className="mt-1.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2.5 text-sm sm:items-center">

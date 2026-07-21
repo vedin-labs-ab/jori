@@ -1,13 +1,19 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { toast } from "sonner"
 import { afterEach, expect, test, vi } from "vitest"
 import { type BillingAccount } from "./actions"
 import { AutoTopUpRow } from "./autotopup"
 
-vi.mock("convex/react", () => ({ useMutation: () => vi.fn() }))
+const configure = vi.fn()
+
+vi.mock("convex/react", () => ({ useMutation: () => configure }))
+vi.mock("sonner", () => ({ toast: { info: vi.fn() } }))
 
 afterEach(() => {
   cleanup()
+  configure.mockReset()
+  vi.mocked(toast.info).mockReset()
 })
 
 test("names each inline auto top-up control", () => {
@@ -21,6 +27,9 @@ test("names each inline auto top-up control", () => {
             thresholdMicros: 5_000_000,
           },
           autoTopUpUsedMicros: 0,
+          canFundWallet: true,
+          plan: "starter",
+          state: "active",
         } as BillingAccount
       }
       organizationId="organization"
@@ -37,5 +46,31 @@ test("names each inline auto top-up control", () => {
   ).toBeDefined()
   expect(
     screen.getByRole("combobox", { name: "Monthly auto top-up limit" })
+  ).toBeDefined()
+})
+
+test("explains why trial organizations cannot enable auto top-up", () => {
+  render(
+    <AutoTopUpRow
+      account={
+        {
+          autoTopUpUsedMicros: 0,
+          canFundWallet: false,
+          state: "trial",
+        } as BillingAccount
+      }
+      organizationId="organization"
+    />
+  )
+
+  fireEvent.click(screen.getByRole("switch", { name: "Auto top-up" }))
+
+  expect(configure).not.toHaveBeenCalled()
+  expect(toast.info).toHaveBeenCalledWith(
+    "Choose or reactivate a plan to use auto top-up.",
+    { id: "billing-plan-required-auto-top-up" }
+  )
+  expect(
+    screen.getByText("Available once the organization is on an active plan.")
   ).toBeDefined()
 })

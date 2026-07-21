@@ -7,7 +7,12 @@ import {
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { availableMicros, ensureAccount, holdAutoTopUp } from "./account"
+import {
+  availableMicros,
+  ensureAccount,
+  hasActivePlan,
+  holdAutoTopUp,
+} from "./account"
 import { debitRun } from "./ledger"
 
 /**
@@ -53,7 +58,11 @@ async function maybeScheduleAutoTopUp(
   const { account, now } = args
   const config = account.autoTopUp
 
-  if (config === undefined || account.stripeCustomerId === undefined) {
+  if (
+    !hasActivePlan(account) ||
+    config === undefined ||
+    account.stripeCustomerId === undefined
+  ) {
     return
   }
 

@@ -60,6 +60,16 @@ export function availableMicros(account: Doc<"billingAccounts">) {
   return account.includedMicros + account.walletMicros
 }
 
+export function hasActivePlan(account: Doc<"billingAccounts">) {
+  return account.state === "active" && account.plan !== undefined
+}
+
+export function requireActivePlan(account: Doc<"billingAccounts">) {
+  if (!hasActivePlan(account)) {
+    throw new Error("An active plan is required to fund the wallet.")
+  }
+}
+
 /**
  * Subscribing mid-trial keeps the unspent trial usage: it folds into the
  * first cycle's allotment and expires with it. An already-expired trial

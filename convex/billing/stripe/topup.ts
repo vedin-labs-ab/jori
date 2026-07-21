@@ -4,6 +4,7 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
 import { readArray, readString } from "../../shared/input"
+import { hasActivePlan } from "../account"
 import { stripeRequest } from "./client"
 
 /**
@@ -23,6 +24,7 @@ export const execute = internalAction({
 
     if (
       account === null ||
+      !hasActivePlan(account) ||
       config === undefined ||
       customer === undefined ||
       account.autoTopUpUsedMicros + config.amountMicros >

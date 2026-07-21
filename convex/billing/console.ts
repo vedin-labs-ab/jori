@@ -3,7 +3,12 @@ import { autoTopUp, dollarsToMicros } from "../../contracts/billing"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { ensureAccount, getAccount } from "./account"
+import {
+  ensureAccount,
+  getAccount,
+  hasActivePlan,
+  requireActivePlan,
+} from "./account"
 
 const entryPageSize = 30
 
@@ -39,6 +44,7 @@ function publicAccount(account: Doc<"billingAccounts">) {
     autoTopUp: account.autoTopUp,
     autoTopUpUsedMicros: account.autoTopUpUsedMicros,
     hasStripeCustomer: account.stripeCustomerId !== undefined,
+    canFundWallet: hasActivePlan(account),
   }
 }
 
@@ -65,8 +71,8 @@ async function readEntries(ctx: QueryCtx, organizationId: string) {
 }
 
 /**
- * Auto top-up needs a saved card, which arrives with any completed checkout,
- * so enabling it is gated on the Stripe customer existing.
+ * Auto top-up requires an active plan and a saved card. Disabling remains
+ * available without a plan so legacy configurations can always be removed.
  */
 export const configureAutoTopUp = mutation({
   args: {
@@ -95,6 +101,8 @@ export const configureAutoTopUp = mutation({
       return null
     }
 
+    requireActivePlan(account)
+
     if (!autoTopUp.thresholdsUsd.includes(args.config.thresholdUsd)) {
       throw new Error("Pick one of the offered thresholds.")
     }
@@ -109,7 +117,7 @@ export const configureAutoTopUp = mutation({
 
     if (account.stripeCustomerId === undefined) {
       throw new Error(
-        "Add a payment method first: subscribe or make a top-up, and the card is saved for auto top-ups."
+        "Add a payment method to the active plan before enabling auto top-up."
       )
     }
 

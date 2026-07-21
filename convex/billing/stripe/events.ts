@@ -110,6 +110,8 @@ async function applyPlanCheckout(
     plan,
     interval,
     trialEndsAt: undefined,
+    autoTopUp: undefined,
+    autoTopUpHoldUntil: undefined,
     stripeSubscriptionId: subscriptionId,
     nextGrantAt: addMonths(now, 1),
     updatedAt: now,
