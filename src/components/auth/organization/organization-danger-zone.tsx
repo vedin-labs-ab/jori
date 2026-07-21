@@ -43,12 +43,8 @@ export function OrganizationDangerZone({
   return (
     <Section className={className} {...props}>
       <SectionHeader
-        title={
-          <span className="inline-flex items-center gap-2">
-            <TriangleAlert className="size-4 text-destructive" />
-            {localization.settings.dangerZone}
-          </span>
-        }
+        icon={<TriangleAlert className="text-destructive" />}
+        title={localization.settings.dangerZone}
       />
 
       <Card className="gap-0 py-0">
