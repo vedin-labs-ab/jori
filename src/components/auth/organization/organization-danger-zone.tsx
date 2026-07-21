@@ -8,6 +8,7 @@ import {
 import type { ComponentProps } from "react"
 
 import { Card, CardContent } from "@/components/ui/card"
+import { SectionHeader } from "@/components/ui/section"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { DeleteOrganization } from "./delete-organization"
@@ -40,10 +41,8 @@ export function OrganizationDangerZone({
   const canDelete = !!deletePermission?.success
 
   return (
-    <div className={cn("flex w-full flex-col", className)} {...props}>
-      <h2 className="mb-3 text-sm font-semibold">
-        {localization.settings.dangerZone}
-      </h2>
+    <div className={cn("flex w-full flex-col gap-3", className)} {...props}>
+      <SectionHeader title={localization.settings.dangerZone} />
 
       <Card className="gap-0">
         <CardContent>

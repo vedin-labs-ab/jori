@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table"
+import { SectionHeader } from "@/components/ui/section"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 import { cn } from "@/lib/utils"
 import { OrganizationInvitationRow } from "./organization-invitation-row"
@@ -121,9 +122,7 @@ export function OrganizationInvitations({
 
   return (
     <div className={cn("flex flex-col gap-3", className)} {...props}>
-      <h3 className="truncate text-sm font-semibold">
-        {organizationLocalization.invitations}
-      </h3>
+      <SectionHeader title={organizationLocalization.invitations} />
 
       <div className="overflow-x-auto rounded-lg border">
         <Table

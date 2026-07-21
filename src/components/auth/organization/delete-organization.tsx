@@ -10,6 +10,7 @@ import {
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { CardDescription, CardTitle } from "@/components/ui/card"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 import { DeleteOrganizationDialog } from "./delete-organization-dialog"
 import { DeleteOrganizationSkeleton } from "./delete-organization-skeleton"
@@ -47,13 +48,13 @@ export function DeleteOrganization() {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="text-sm font-medium leading-tight">
+        <CardTitle>
           {organizationLocalization.deleteOrganization}
-        </p>
+        </CardTitle>
 
-        <p className="text-muted-foreground mt-0.5 text-xs">
+        <CardDescription className="mt-0.5">
           {organizationLocalization.deleteOrganizationDescription}
-        </p>
+        </CardDescription>
       </div>
 
       <Button
