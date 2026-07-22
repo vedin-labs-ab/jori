@@ -7,7 +7,7 @@ import { type DataModel } from "./_generated/dataModel"
 import { type Invitation } from "./access/invitation"
 import authConfig from "./auth.config"
 import authSchema from "./betterauth/schema"
-import { requireAppOrigin } from "./shared/app"
+import { requireAppOrigin, requireAppRegion } from "./shared/app"
 import { requireEnvironmentVariable } from "./shared/environment"
 
 export const authComponent = createClient<DataModel, typeof authSchema>(
@@ -112,6 +112,7 @@ function definePayload({
   return {
     email: user.email,
     name: user.name,
+    region: requireAppRegion(),
     ...(typeof organizationId === "string" ? { org: organizationId } : {}),
   }
 }

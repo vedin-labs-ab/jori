@@ -1,6 +1,33 @@
+import { isRegion } from "../../contracts/region"
+
+const appRegionEnv = "MILO_REGION"
 const appUrlEnv = "MILO_APP_URL"
 
 export type RuntimeEnvironment = Record<string, string | undefined>
+
+export function readAppRegion(environment: RuntimeEnvironment = process.env) {
+  const value = environment[appRegionEnv]?.trim()
+
+  if (value === undefined || value === "") {
+    return undefined
+  }
+
+  if (!isRegion(value)) {
+    throw new Error(`${appRegionEnv} must be "us" or "eu".`)
+  }
+
+  return value
+}
+
+export function requireAppRegion() {
+  const region = readAppRegion()
+
+  if (region === undefined) {
+    throw new Error(`${appRegionEnv} must be configured.`)
+  }
+
+  return region
+}
 
 export function readAppOrigin(environment: RuntimeEnvironment = process.env) {
   const value = environment[appUrlEnv]?.trim()
