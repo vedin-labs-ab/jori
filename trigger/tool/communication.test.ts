@@ -30,29 +30,26 @@ test.each([
     { channel: "C123", name: "thumbsup", timestamp: "123.456" },
     "slack_add_reaction",
   ],
-] as const)(
-  "%s reaction tools do not mark the active surface communicated",
-  async (surface, tool, args, name) => {
-    const runtime = createRuntime({
-      result: { ok: true },
-      surface,
-      tool,
-    })
+] as const)("%s reaction tools do not mark the active surface communicated", async (surface, tool, args, name) => {
+  const runtime = createRuntime({
+    result: { ok: true },
+    surface,
+    tool,
+  })
 
-    await executeToolCall({
-      attempt: 1,
-      call: {
-        args,
-        id: "call_1",
-        name,
-      },
-      runtime,
-      sequence: 100,
-    })
+  await executeToolCall({
+    attempt: 1,
+    call: {
+      args,
+      id: "call_1",
+      name,
+    },
+    runtime,
+    sequence: 100,
+  })
 
-    expect(runtime.context.activeSurface?.communicated).toBe(false)
-  }
-)
+  expect(runtime.context.activeSurface?.communicated).toBe(false)
+})
 
 test("delivered integration offers mark the active surface communicated", async () => {
   const runtime = createRuntime({
@@ -107,32 +104,29 @@ test.each([
   ["delivered", { delivery: { status: "delivered" } }],
   ["not delivered", { delivery: { status: "created" } }],
   ["already connected", { status: "connected" }],
-] as const)(
-  "integration offers do not finish without final when %s",
-  async (_label, result) => {
-    const runtime = createRuntime({
-      result,
-      surface: "slack",
-      tool: integrationOfferTool(),
-    })
+] as const)("integration offers do not finish without final when %s", async (_label, result) => {
+  const runtime = createRuntime({
+    result,
+    surface: "slack",
+    tool: integrationOfferTool(),
+  })
 
-    const output = await executeToolCall({
-      attempt: 1,
-      call: {
-        args: {
-          integration: "gmail",
-          summary: "Gmail is needed here.",
-        },
-        id: "call_1",
-        name: "offer_integration",
+  const output = await executeToolCall({
+    attempt: 1,
+    call: {
+      args: {
+        integration: "gmail",
+        summary: "Gmail is needed here.",
       },
-      runtime,
-      sequence: 100,
-    })
+      id: "call_1",
+      name: "offer_integration",
+    },
+    runtime,
+    sequence: 100,
+  })
 
-    expect(output.finished).toBe(false)
-  }
-)
+  expect(output.finished).toBe(false)
+})
 
 test("undelivered integration offers do not mark visible communication", async () => {
   const runtime = createRuntime({
