@@ -1,6 +1,7 @@
 import { compactRecord } from "../../../../contracts/json"
 import { summarizePullRequest } from "../../../integrations/github/delivery/format"
 import {
+  optionalBoolean,
   optionalString,
   readRecord,
   requiredNumber,
@@ -201,8 +202,4 @@ function commitSummary(commit: GitHubSourceCommit) {
     sha: commit.sha,
     treeSha: commit.treeSha,
   })
-}
-
-function optionalBoolean(value: unknown) {
-  return typeof value === "boolean" ? value : undefined
 }

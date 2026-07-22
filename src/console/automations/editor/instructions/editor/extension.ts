@@ -1,14 +1,17 @@
 import { Markdown } from "@tiptap/markdown"
 import { ReactNodeViewRenderer } from "@tiptap/react"
 import { AutomationSurfaceNodeView } from "../access/node"
+import { AutomationReferenceNodeView } from "../access/reference"
 import {
   createInstructionMarkdownExtensions,
   instructionMarkdownOptions,
 } from "../markdown/extensions"
 import { createInstructionMarked } from "../markdown/literal"
-import { AutomationSurfaceNode } from "../markdown/schema"
+import {
+  AutomationReferenceNode,
+  AutomationSurfaceNode,
+} from "../markdown/schema"
 import { type InstructionRefs } from "../types"
-import { AutomationReferenceExtension } from "./reference"
 
 export function createInstructionExtensions(refs: InstructionRefs) {
   return [
@@ -30,6 +33,12 @@ export function createInstructionExtensions(refs: InstructionRefs) {
     }),
   ]
 }
+
+const AutomationReferenceExtension = AutomationReferenceNode.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(AutomationReferenceNodeView)
+  },
+})
 
 const AutomationSurfaceExtension = AutomationSurfaceNode.extend({
   addNodeView() {

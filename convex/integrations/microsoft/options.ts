@@ -1,10 +1,9 @@
+import { optionalNumber, readArray } from "../../shared/input"
 import {
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
-  optionalOptionNumber,
   optionMatches,
-  readArray,
   readNestedString,
   readRecord,
   requiredOptionString,
@@ -58,8 +57,8 @@ async function microsoftGraph(
 }
 
 function microsoftFolderDescription(folder: Record<string, unknown>) {
-  const total = optionalOptionNumber(folder.totalItemCount)
-  const unread = optionalOptionNumber(folder.unreadItemCount)
+  const total = optionalNumber(folder.totalItemCount)
+  const unread = optionalNumber(folder.unreadItemCount)
 
   if (total === undefined && unread === undefined) {
     return undefined

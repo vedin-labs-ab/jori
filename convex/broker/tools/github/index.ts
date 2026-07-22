@@ -22,6 +22,7 @@ import {
   requiredString,
 } from "../../../shared/input"
 import {
+  encodeGitHubPath,
   githubJson,
   githubJsonObject,
   repositoryPath,
@@ -187,7 +188,7 @@ async function getFile(token: string, args: Record<string, unknown>) {
   const ref = optionalString(args.ref)
   const result = await githubJson(
     token,
-    `${repositoryPath(args.owner, args.repo)}/contents/${encodeRepositoryPath(path)}`,
+    `${repositoryPath(args.owner, args.repo)}/contents/${encodeGitHubPath(path)}`,
     ref === undefined ? {} : { ref }
   )
 
@@ -228,8 +229,4 @@ async function getFile(token: string, args: Record<string, unknown>) {
     truncated: content.length > 100_000,
     content: content.slice(0, 100_000),
   }
-}
-
-function encodeRepositoryPath(value: string) {
-  return value.split("/").map(encodeURIComponent).join("/")
 }

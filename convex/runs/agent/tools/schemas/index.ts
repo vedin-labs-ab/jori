@@ -13,7 +13,6 @@ export {
   emptyObjectSchema,
   isJsonSchema,
   optionalFieldGuidance,
-  readNumber,
   readSchemaMap,
   readString,
   readStringArray,

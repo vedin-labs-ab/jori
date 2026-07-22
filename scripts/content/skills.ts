@@ -1,8 +1,8 @@
-import { readdir, readFile } from "node:fs/promises"
+import { readdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { isSkillCategory, type SkillCategory } from "../../contracts/skills.ts"
 
-export type Skill = {
+type Skill = {
   associatedIntegrations?: string[]
   body: string
   category: SkillCategory
@@ -30,9 +30,20 @@ type Frontmatter = Partial<
 const communicationDirectoryName = "communication"
 const communicationPartOrder = ["text", "rich", "interactive", "files"]
 
-export async function readSkills(
-  directory: string
-): Promise<Record<string, Skill>> {
+export async function writeSkills(root: string) {
+  const skills = await readSkills(path.join(root, "skills"))
+
+  await writeFile(
+    path.join(root, "skills", "generated.ts"),
+    [
+      "export const skills = ",
+      JSON.stringify(skills, null, 2),
+      " as const\n",
+    ].join("")
+  )
+}
+
+async function readSkills(directory: string): Promise<Record<string, Skill>> {
   const entries = await readdir(directory, { withFileTypes: true })
   const result: Record<string, Skill> = {}
 

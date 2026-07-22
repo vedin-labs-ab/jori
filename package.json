@@ -23,9 +23,9 @@
     "convex:truncate": "node --experimental-strip-types scripts/truncate.ts",
     "preview": "vite preview",
     "skills:sync": "node --experimental-strip-types scripts/env.ts npx convex run skills/catalog:syncGlobalSkills",
-    "content:compile": "node --experimental-strip-types scripts/content.ts",
-    "runtime:check": "node --experimental-strip-types scripts/runtime/index.ts --check",
-    "runtime:generate": "node --experimental-strip-types scripts/runtime/index.ts",
+    "content:compile": "node --experimental-strip-types scripts/content/index.ts",
+    "runtime:check": "node --experimental-strip-types scripts/runtime/generate.ts --check",
+    "runtime:generate": "node --experimental-strip-types scripts/runtime/generate.ts",
     "trigger:dev": "node --experimental-strip-types scripts/env.ts trigger dev --env-file .env.local",
     "test": "vitest run",
     "check:versions": "node --experimental-strip-types scripts/versions.ts"

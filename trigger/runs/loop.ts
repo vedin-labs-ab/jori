@@ -36,7 +36,7 @@ export async function runAgentLoop(args: {
   attempt: number
   model: ModelRuntime
   runtime: ToolRuntime
-}) {
+}): Promise<AgentLoopOutput> {
   const messages: ModelMessage[] = promptMessages(args.runtime.context.prompt)
 
   // The context load already fetched the handoffs and drained the first
@@ -69,11 +69,11 @@ export async function runAgentLoop(args: {
         : await runModelToolStep(args, messages, response, step)
 
     if (result.outcome === "finished") {
-      return completedOutput()
+      return { message: "", status: "completed" }
     }
 
     if (result.outcome === "aborted") {
-      return stoppedOutput()
+      return { message: "", status: "stopped" }
     }
 
     drainPending = result.drainPending
@@ -246,18 +246,4 @@ async function failRun(runtime: ToolRuntime, attempt: number) {
     sequence: maxModelSteps * toolSequenceOffset + toolSequenceOffset,
     type: "run.failed",
   })
-}
-
-function completedOutput(): AgentLoopOutput {
-  return {
-    message: "",
-    status: "completed",
-  }
-}
-
-function stoppedOutput(): AgentLoopOutput {
-  return {
-    message: "",
-    status: "stopped",
-  }
 }

@@ -1,6 +1,7 @@
 import { isRecord } from "../../../../contracts/json"
 import { reactionDisplayLabel } from "../../../../contracts/reactions"
 import { type Doc } from "../../../_generated/dataModel"
+import { optionalString } from "../../../shared/input"
 import {
   arrayLength,
   channelLabel,
@@ -12,7 +13,6 @@ import {
   issueOrPullTarget,
   item,
   noun,
-  readString,
   readStringArray,
   repositoryLabel,
   targetObjectLabel,
@@ -79,7 +79,7 @@ function inputMetadata(
 function webInputMetadata(tool: string, input: Record<string, unknown>) {
   if (tool === "web_search") {
     return [
-      item("target", readString(input.query)),
+      item("target", optionalString(input.query)),
       domainScope(input.includeDomains, "in") ??
         domainScope(input.excludeDomains, "excluding"),
     ]
@@ -87,8 +87,8 @@ function webInputMetadata(tool: string, input: Record<string, unknown>) {
 
   return tool === "web_fetch"
     ? [
-        item("target", displayUrl(readString(input.url))),
-        item("scope", readString(input.highlightQuery)),
+        item("target", displayUrl(optionalString(input.url))),
+        item("scope", optionalString(input.highlightQuery)),
       ]
     : []
 }
@@ -96,22 +96,28 @@ function webInputMetadata(tool: string, input: Record<string, unknown>) {
 function codeInputMetadata(tool: string, input: Record<string, unknown>) {
   switch (tool) {
     case "bash":
-      return [item("target", readString(input.command))]
+      return [item("target", optionalString(input.command))]
     case "git":
       return [item("target", readStringArray(input.args)?.join(" "))]
     case "glob":
     case "grep":
       return [
-        item("target", readString(input.pattern)),
-        item("scope", readString(input.path) ?? readString(input.include)),
+        item("target", optionalString(input.pattern)),
+        item(
+          "scope",
+          optionalString(input.path) ?? optionalString(input.include)
+        ),
       ]
     case "github_clone_repository":
       return [
         item("target", repositoryLabel(input)),
-        item("scope", readString(input.ref) ?? readString(input.directory)),
+        item(
+          "scope",
+          optionalString(input.ref) ?? optionalString(input.directory)
+        ),
       ]
     case "read":
-      return [item("target", readString(input.path))]
+      return [item("target", optionalString(input.path))]
     default:
       return []
   }
@@ -128,26 +134,28 @@ function githubInputMetadata(tool: string, input: Record<string, unknown>) {
       issueOrPullTarget(input) ??
         fileTarget(input) ??
         repositoryLabel(input) ??
-        readString(input.query)
+        optionalString(input.query)
     ),
-    item("scope", readString(input.state)),
+    item("scope", optionalString(input.state)),
   ]
 }
 
 function messageInputMetadata(tool: string, input: Record<string, unknown>) {
   if (tool.includes("search")) {
-    return [item("target", readString(input.query) ?? readString(input.q))]
+    return [
+      item("target", optionalString(input.query) ?? optionalString(input.q)),
+    ]
   }
 
   if (tool.includes("send") || tool.includes("draft")) {
     return [
-      item("target", readString(input.subject)),
+      item("target", optionalString(input.subject)),
       item("scope", countText(arrayLength(input.to), "recipient")),
     ]
   }
 
   if (tool.includes("reply")) {
-    return [item("target", readString(input.threadId))]
+    return [item("target", optionalString(input.threadId))]
   }
 
   return tool.includes("add_message")
@@ -160,7 +168,8 @@ function resourceInputMetadata(tool: string, input: Record<string, unknown>) {
     return [
       item(
         "target",
-        readString(input.event.summary) ?? readString(input.event.subject)
+        optionalString(input.event.summary) ??
+          optionalString(input.event.subject)
       ),
       item("scope", countText(arrayLength(input.event.attendees), "attendee")),
     ]
@@ -170,12 +179,12 @@ function resourceInputMetadata(tool: string, input: Record<string, unknown>) {
     item(
       "target",
       targetObjectLabel(input.target) ??
-        readString(input.title) ??
-        readString(input.name) ??
-        readString(input.pageId) ??
-        readString(input.fileId) ??
-        readString(input.issueId) ??
-        readString(input.eventId)
+        optionalString(input.title) ??
+        optionalString(input.name) ??
+        optionalString(input.pageId) ??
+        optionalString(input.fileId) ??
+        optionalString(input.issueId) ??
+        optionalString(input.eventId)
     ),
   ]
 }
@@ -184,10 +193,10 @@ function genericInputMetadata(input: Record<string, unknown>) {
   return [
     item(
       "target",
-      readString(input.query) ??
-        readString(input.q) ??
-        displayUrl(readString(input.url)) ??
-        readString(input.path)
+      optionalString(input.query) ??
+        optionalString(input.q) ??
+        displayUrl(optionalString(input.url)) ??
+        optionalString(input.path)
     ),
   ]
 }
@@ -216,10 +225,10 @@ function reactionMetadata(
     item(
       "target",
       reactionDisplayLabel(
-        readString(input.reaction) ??
-          readString(input.name) ??
-          readString(input.content) ??
-          readString(input.emoji)
+        optionalString(input.reaction) ??
+          optionalString(input.name) ??
+          optionalString(input.content) ??
+          optionalString(input.emoji)
       )
     ),
   ]

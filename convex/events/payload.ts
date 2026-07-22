@@ -1,4 +1,5 @@
 import { type Integration } from "../../contracts/integrations"
+import { compactRecord } from "../../contracts/json"
 import { readNumber, readString, readValue } from "../shared/input"
 import {
   type EventData,
@@ -34,8 +35,8 @@ function slackData(data: unknown): SlackEventData | undefined {
     return undefined
   }
 
-  return compact({
-    channel: compact({
+  return compactRecord({
+    channel: compactRecord({
       id: channelId,
       name: readString(channel, "name"),
     }),
@@ -56,9 +57,9 @@ function githubData(data: unknown): GitHubEventData | undefined {
     return undefined
   }
 
-  return compact({
+  return compactRecord({
     action: readString(data, "action"),
-    repository: compact({
+    repository: compactRecord({
       id: readNumber(repository, "id"),
       owner: readString(repository, "owner"),
       name: readString(repository, "name"),
@@ -109,7 +110,7 @@ function linearData(data: unknown): LinearEventData | undefined {
     return undefined
   }
 
-  return compact({
+  return compactRecord({
     action: readString(data, "action"),
     issueId,
     issueIdentifier: readString(data, "issueIdentifier"),
@@ -146,7 +147,7 @@ function notionData(data: unknown): NotionEventData | undefined {
     return undefined
   }
 
-  return compact({
+  return compactRecord({
     notionEventId,
     notionEventType,
     workspaceId,
@@ -170,7 +171,7 @@ function pageData(data: unknown) {
     return undefined
   }
 
-  return compact({
+  return compactRecord({
     id,
     title: readString(data, "title"),
     url: readString(data, "url"),
@@ -185,15 +186,9 @@ function entityData(data: unknown) {
 }
 
 function optionalObject<T extends Record<string, unknown>>(value: T) {
-  const result = compact(value)
+  const result = compactRecord(value)
 
   return Object.keys(result).length === 0 ? undefined : result
-}
-
-function compact<T extends Record<string, unknown>>(value: T) {
-  return Object.fromEntries(
-    Object.entries(value).filter(([, entry]) => entry !== undefined)
-  ) as T
 }
 
 function readObject(data: unknown, key: string) {

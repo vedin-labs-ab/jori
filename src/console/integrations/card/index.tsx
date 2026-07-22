@@ -5,12 +5,12 @@ import {
   type ToolPermissionController,
   type ToolSurface,
 } from "../../permissions/controller"
+import { PermissionSection } from "../../permissions/section"
 import { RevealArrow } from "../../shared/dot"
 import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
 import { type IntegrationCardStatus } from "./headline"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
-import { IntegrationPermissions } from "./permissions"
 import { IntegrationCardSurface, type SurfaceLogo } from "./surface"
 
 export type IntegrationCardConfig = {
@@ -93,9 +93,11 @@ export function IntegrationCard({
       title={config.label}
     >
       {isConnected ? (
-        <IntegrationPermissions
+        <PermissionSection
           controller={permissions}
+          emptyLabel="No permissions to configure yet."
           surface={config.integration}
+          title="Permissions"
         />
       ) : undefined}
     </IntegrationCardSurface>
@@ -110,13 +112,16 @@ function IntegrationStatusLine({
   status: IntegrationStatus | undefined
 }) {
   const label = getStatusLabel(status, headline)
-  const href = getStatusHref(status)
+  const href = status?.url
 
   return (
     <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
       <span
         aria-hidden="true"
-        className={cn("size-1.5 rounded-full", getStatusDotClassName(status))}
+        className={cn(
+          "size-1.5 rounded-full",
+          status?.status === "active" ? "bg-primary" : "bg-muted-foreground/40"
+        )}
       />
       {href === undefined ? (
         <span>{label}</span>
@@ -152,20 +157,4 @@ function getStatusLabel(
   }
 
   return headline
-}
-
-function getStatusHref(status: IntegrationStatus | undefined) {
-  if (status === undefined || status === null) {
-    return undefined
-  }
-
-  return status.url
-}
-
-function getStatusDotClassName(status: IntegrationStatus | undefined) {
-  if (status?.status === "active") {
-    return "bg-primary"
-  }
-
-  return "bg-muted-foreground/40"
 }

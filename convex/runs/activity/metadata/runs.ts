@@ -1,4 +1,5 @@
-import { item, readString } from "../helpers"
+import { optionalString } from "../../../shared/input"
+import { item } from "../helpers"
 import { type ToolResult } from "../read"
 import {
   activityFilterLabel,
@@ -40,10 +41,10 @@ function searchRunsMetadata(
   }
 
   return [
-    item("scope", readString(input.scope) ?? "conversation"),
+    item("scope", optionalString(input.scope) ?? "conversation"),
     item("target", searchRunsTarget(input)),
-    item("filter", readString(input.status)),
-    item("filter", sourceLabel(readString(input.source))),
+    item("filter", optionalString(input.status)),
+    item("filter", sourceLabel(optionalString(input.source))),
     item("outcome", outcome),
   ]
 }
@@ -59,7 +60,7 @@ function searchRunActivityMetadata(
 }
 
 function searchRunsTarget(input: Record<string, unknown>) {
-  const query = readString(input.query)
+  const query = optionalString(input.query)
 
   return query === undefined
     ? (timeWindow(input) ?? "recent runs")
@@ -67,7 +68,7 @@ function searchRunsTarget(input: Record<string, unknown>) {
 }
 
 function searchRunsMode(input: Record<string, unknown>) {
-  const mode = readString(input.mode)
+  const mode = optionalString(input.mode)
 
   if (mode !== undefined) {
     return mode
@@ -78,10 +79,10 @@ function searchRunsMode(input: Record<string, unknown>) {
 
 function hasSearchCriteria(input: Record<string, unknown>) {
   return (
-    readString(input.query) !== undefined ||
-    readString(input.scope) !== undefined ||
-    readString(input.status) !== undefined ||
-    readString(input.source) !== undefined ||
+    optionalString(input.query) !== undefined ||
+    optionalString(input.scope) !== undefined ||
+    optionalString(input.status) !== undefined ||
+    optionalString(input.source) !== undefined ||
     timeWindow(input) !== undefined
   )
 }

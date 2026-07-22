@@ -1,9 +1,8 @@
 import { fetchJsonObject } from "../../shared/http"
-import { optionalString } from "../../shared/input"
+import { optionalString, readArray } from "../../shared/input"
 import {
   maxOptions,
   type OptionLoaderArgs,
-  readArray,
   readRecord,
   requiredOptionString,
 } from "../options/common"

@@ -4,7 +4,7 @@ import {
   type SourceFileChange,
 } from "../../../../contracts/source"
 import { readRecord } from "../../../shared/input"
-import { githubJsonObject, repositoryPath } from "./client"
+import { encodeGitHubPath, githubJsonObject, repositoryPath } from "./client"
 
 export type GitHubSourceCommit = {
   baseSha?: string
@@ -47,7 +47,7 @@ export async function commitSourceChangesToBranch(
 
   await githubJsonObject(
     token,
-    `${repositoryPath(args.owner, args.repo)}/git/refs/heads/${encodeGitRef(branch)}`,
+    `${repositoryPath(args.owner, args.repo)}/git/refs/heads/${encodeGitHubPath(branch)}`,
     {},
     {
       method: "PATCH",
@@ -197,7 +197,7 @@ async function readBranchRef(
 ) {
   const ref = await githubJsonObject(
     token,
-    `${repositoryPath(owner, repo)}/git/ref/heads/${encodeGitRef(branch)}`
+    `${repositoryPath(owner, repo)}/git/ref/heads/${encodeGitHubPath(branch)}`
   )
 
   return {
@@ -219,10 +219,6 @@ async function readCommit(
   return {
     treeSha: readSha(readRecord(commit.tree).sha, "commit tree SHA"),
   }
-}
-
-function encodeGitRef(value: string) {
-  return value.split("/").map(encodeURIComponent).join("/")
 }
 
 function readSha(value: unknown, name: string) {

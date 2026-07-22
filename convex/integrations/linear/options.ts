@@ -1,5 +1,5 @@
 import { fetchJsonObject } from "../../shared/http"
-import { optionalString } from "../../shared/input"
+import { optionalString, readArray } from "../../shared/input"
 import {
   compactDescription,
   maxOptions,
@@ -7,7 +7,6 @@ import {
   type OptionLoaderArgs,
   optionalMatch,
   optionMatches,
-  readArray,
   readNestedString,
   readRecord,
   requiredOptionString,
