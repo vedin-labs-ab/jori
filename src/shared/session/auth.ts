@@ -50,10 +50,13 @@ export function useConvexSession() {
   }
 }
 
-/** Activates an organization and reloads into the console. The Convex JWT
- *  carries the active organization claim and is cached per session, so a
- *  full navigation is the reliable way to re-mint it everywhere. */
+/** Activates an organization and reloads the current console route. The
+ *  Convex JWT carries the active organization claim and is cached per
+ *  session, so a full navigation is the reliable way to re-mint it. */
 export async function activateOrganization(organizationId: string | null) {
-  await authClient.organization.setActive({ organizationId })
-  window.location.assign("/console")
+  await authClient.organization.setActive({
+    organizationId,
+    fetchOptions: { throw: true },
+  })
+  window.location.reload()
 }
