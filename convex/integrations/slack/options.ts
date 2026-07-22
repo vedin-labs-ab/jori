@@ -1,10 +1,10 @@
 import { type IntegrationOption } from "../../../contracts/integrations/options"
+import { optionalString } from "../../shared/input"
 import {
   compactDescription,
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
-  optionalOptionString,
   readRecord,
 } from "../options/common"
 import { slackQueryApi } from "./api"
@@ -61,9 +61,7 @@ export async function searchSlackChannels(args: OptionLoaderArgs) {
 export async function searchSlackUsers(args: OptionLoaderArgs) {
   const credentials = requireSlackCredentials(args.integration)
   const normalizedQuery = normalizeQuery(args.query)
-  const botUserId = optionalOptionString(
-    readRecord(args.integration.data).botUserId
-  )
+  const botUserId = optionalString(readRecord(args.integration.data).botUserId)
   const options: IntegrationOption[] = []
   let cursor: string | undefined
 
@@ -159,7 +157,7 @@ function slackUserOption(
     return undefined
   }
 
-  const handle = optionalOptionString(user.name)
+  const handle = optionalString(user.name)
   const profile = slackDirectoryUserProfile(user)
   const label = profile.name
 

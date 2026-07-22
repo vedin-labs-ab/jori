@@ -9,7 +9,7 @@ import { type AutomationFormValues, emptyAutomationForm } from "./types"
 
 export { describeCron } from "@contracts/automations/schedule/labels"
 
-export type CronParts = Pick<
+type CronParts = Pick<
   AutomationFormValues,
   "cron" | "monthDay" | "repeat" | "time" | "timezone" | "weekday"
 >

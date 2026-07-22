@@ -15,7 +15,7 @@ import { countLabel } from "@/lib/count"
 import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
 import { ToolCountSummary } from "../../shared/tools/summary"
-import { capabilityGroupsFor, toolSurfaceList } from "../format"
+import { capabilityGroupsFor } from "../format"
 import { type ArtifactSummary } from "../types"
 import { ArtifactActions } from "./actions"
 import { ArtifactExpanded } from "./details"
@@ -39,7 +39,7 @@ export function ArtifactRow({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const capabilityGroups = useCapabilityGroups(artifact)
-  const surfaces = toolSurfaceList(capabilityGroups)
+  const surfaces = capabilityGroups.map((group) => group.type)
 
   return (
     <li>

@@ -42,14 +42,6 @@ export function capabilityGroupsFor(artifact: ArtifactSummary) {
   return [...groups.values()].sort(compareCapabilityGroups)
 }
 
-export function toolSurfaceList(groups: CapabilityGroup[]) {
-  return groups.map((group) => group.type)
-}
-
-export function currentVersionMessage(artifact: ArtifactSummary) {
-  return artifact.versions.find((version) => version.isCurrent)?.message
-}
-
 export function automationSummary(
   automation: ArtifactSummary["automations"][number],
   now: number

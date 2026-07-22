@@ -7,7 +7,7 @@
  */
 const artifactPublishTools = ["create_artifact", "update_artifact"] as const
 
-export type ArtifactPublishTool = (typeof artifactPublishTools)[number]
+type ArtifactPublishTool = (typeof artifactPublishTools)[number]
 
 export function isArtifactPublishTool(
   tool: string

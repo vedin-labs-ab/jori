@@ -6,7 +6,7 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination"
 
-export type ConsolePagerState = {
+type ConsolePagerState = {
   canGoNext: boolean
   footerLabel: string | undefined
   isLoadingMore?: boolean

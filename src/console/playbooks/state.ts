@@ -17,7 +17,7 @@ export type PlaybookListRow = FunctionReturnType<
 
 export type PlaybookEnabledRow = NonNullable<PlaybookListRow["enabled"]>
 
-export type PlaybookSlotState = PlaybookListRow["slots"][number]
+type PlaybookSlotState = PlaybookListRow["slots"][number]
 
 /** A newer catalog version than the one this enablement was rendered from. */
 export function playbookUpdateAvailable(

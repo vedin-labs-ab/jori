@@ -5,7 +5,7 @@ import { SeparatorDot } from "../../../shared/dot"
 import { flushRowClassName } from "../../../shared/flush"
 import { relativeTime } from "../../../shared/time"
 
-export type ReceiptRow = {
+type ReceiptRow = {
   id: string
   integration: Integration | null
   kind: string

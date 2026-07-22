@@ -5,12 +5,7 @@ import { showErrorToast } from "../../../shared/error"
 import { type Workstream } from "../types"
 
 // One action vocabulary for the detail dialog. Adoption decisions come first.
-export type WorkstreamAction =
-  | "confirm"
-  | "reject"
-  | "archive"
-  | "reopen"
-  | "restore"
+type WorkstreamAction = "confirm" | "reject" | "archive" | "reopen" | "restore"
 
 function actionsFor(status: Workstream["status"]): WorkstreamAction[] {
   switch (status) {

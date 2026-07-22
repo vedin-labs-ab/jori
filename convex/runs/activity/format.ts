@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { readString } from "./helpers"
 import { type ActivityDetail } from "./types"
 
 const visibleInputKeys = [
@@ -44,7 +45,7 @@ export function approvalTitle(status: Doc<"approvals">["status"]) {
   return status === "approved" ? "Action approved" : `Approval ${status}`
 }
 
-export function fieldLabel(value: string) {
+function fieldLabel(value: string) {
   return value
     .replace(/[A-Z]/g, (letter) => ` ${letter}`)
     .replace(/^./, (letter) => letter.toUpperCase())
@@ -64,16 +65,16 @@ export function inputDescription(input: Record<string, unknown> | undefined) {
   }
 
   return (
-    stringField(input.command) ??
+    readString(input.command) ??
     stringArrayField(input.args) ??
-    stringField(input.pattern) ??
-    stringField(input.path) ??
-    stringField(input.directory) ??
-    stringField(input.repo) ??
-    stringField(input.query) ??
-    stringField(input.q) ??
-    stringField(input.url) ??
-    stringField(input.subject)
+    readString(input.pattern) ??
+    readString(input.path) ??
+    readString(input.directory) ??
+    readString(input.repo) ??
+    readString(input.query) ??
+    readString(input.q) ??
+    readString(input.url) ??
+    readString(input.subject)
   )
 }
 
@@ -126,12 +127,6 @@ function detailValue(value: unknown) {
   }
 
   return Array.isArray(value) ? stringArrayField(value) : undefined
-}
-
-function stringField(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }
 
 function stringArrayField(value: unknown) {

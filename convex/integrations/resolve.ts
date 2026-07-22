@@ -10,7 +10,7 @@ import {
   isUserScopedIntegration,
 } from "../shared/integrations"
 
-export async function findIntegrationForOwner(
+async function findIntegrationForOwner(
   ctx: QueryLikeCtx,
   args: {
     integration: Integration

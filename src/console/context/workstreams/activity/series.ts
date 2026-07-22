@@ -26,7 +26,7 @@ export type Pulse = {
   lanes: PulseLane[]
 }
 
-export type PulseEntry = {
+type PulseEntry = {
   observedAt: number
   effort: string
   workstreamId: string | null

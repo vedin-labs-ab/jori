@@ -1,9 +1,9 @@
+import { optionalString } from "../../shared/input"
 import {
   compactDescription,
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
-  optionalOptionString,
   optionMatches,
   readArray,
   readNestedString,
@@ -72,6 +72,6 @@ async function searchGitHubIssueLike(
 function githubRepositoryDescription(repository: Record<string, unknown>) {
   return compactDescription([
     repository.private === true ? "Private" : "Public",
-    optionalOptionString(repository.description),
+    optionalString(repository.description),
   ])
 }

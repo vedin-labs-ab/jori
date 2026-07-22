@@ -22,6 +22,13 @@ type GenerateOptions = {
 }
 
 const require = createRequire(import.meta.url)
+const builderContractSourcePaths = [
+  "contract.ts",
+  "json.ts",
+  "schema.ts",
+  "source.ts",
+  "validation.ts",
+] as const
 
 export function generateRuntimeAssets({ checkMode }: GenerateOptions) {
   const assets = readRuntimeAssets()
@@ -128,15 +135,8 @@ function readBuilderFiles() {
 function addBuilderContractFiles(files: Record<string, string>) {
   const artifactContractsRoot = path.join(contractsRoot, "artifacts")
 
-  for (const filePath of listFiles(artifactContractsRoot)) {
-    const sourcePath = normalizePath(
-      path.relative(artifactContractsRoot, filePath)
-    )
-
-    if (sourcePath.endsWith(".test.ts")) {
-      continue
-    }
-
+  for (const sourcePath of builderContractSourcePaths) {
+    const filePath = path.join(artifactContractsRoot, sourcePath)
     const content = fs.readFileSync(filePath, "utf8")
     files[`.milo/builder/contracts/artifacts/${sourcePath}`] =
       rewriteGeneratedContractImports(

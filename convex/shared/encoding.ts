@@ -19,7 +19,7 @@ export function base64UrlDecode(value: string) {
   )
 }
 
-export function base64UrlDecodeBytes(value: string) {
+function base64UrlDecodeBytes(value: string) {
   const base64 = value.replaceAll("-", "+").replaceAll("_", "/")
 
   return base64DecodeBytes(

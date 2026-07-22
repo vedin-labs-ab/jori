@@ -1,10 +1,5 @@
 import { expect, test } from "vitest"
-import {
-  automationSummary,
-  capabilityGroupsFor,
-  currentVersionMessage,
-  toolSurfaceList,
-} from "./format"
+import { automationSummary, capabilityGroupsFor } from "./format"
 import { type ArtifactSummary } from "./types"
 
 test("groups artifact tools by canonical surface", () => {
@@ -45,7 +40,7 @@ test("groups artifact tools by canonical surface", () => {
     })
   )
 
-  expect(toolSurfaceList(groups)).toEqual(["milo", "gmail"])
+  expect(groups.map((group) => group.type)).toEqual(["milo", "gmail"])
   expect(groups).toMatchObject([
     {
       label: "Milo",
@@ -93,21 +88,6 @@ test("labels paused automations over run history", () => {
 
 test("labels active automations without runs as monitoring", () => {
   expect(automationSummary(automation({}), 1)).toBe("Monitoring")
-})
-
-test("reads the current version message", () => {
-  const artifact = {
-    ...artifactSummary({ capabilities: [] }),
-    versions: [
-      { isCurrent: false, message: "Newer draft" },
-      { isCurrent: true, message: "Inbox triage workspace" },
-    ],
-  } as unknown as ArtifactSummary
-
-  expect(currentVersionMessage(artifact)).toBe("Inbox triage workspace")
-  expect(
-    currentVersionMessage(artifactSummary({ capabilities: [] }))
-  ).toBeUndefined()
 })
 
 function automation(

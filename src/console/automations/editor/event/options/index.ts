@@ -3,7 +3,7 @@ import {
   automationEventCatalog,
 } from "@contracts/automations/events"
 
-export type EventIntegrationConnectionState = {
+type EventIntegrationConnectionState = {
   integrations: Array<{
     connected: boolean
     integration: AutomationEventIntegration

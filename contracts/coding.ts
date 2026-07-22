@@ -9,7 +9,7 @@ export const codingToolNames = [
 
 export type CodingToolName = (typeof codingToolNames)[number]
 
-export type CodingToolDefinition = {
+type CodingToolDefinition = {
   description: string
   inputSchema: Record<string, unknown>
   name: CodingToolName

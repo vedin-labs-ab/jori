@@ -1,11 +1,11 @@
 import { fetchJsonObject } from "../../shared/http"
+import { optionalString } from "../../shared/input"
 import {
   compactDescription,
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
   optionalMatch,
-  optionalOptionString,
   optionMatches,
   readArray,
   readNestedString,
@@ -57,7 +57,7 @@ export async function searchLinearProjects(args: OptionLoaderArgs) {
       value: requiredOptionString(project.id),
       label: requiredOptionString(project.name),
       description: compactDescription([
-        optionalOptionString(project.state),
+        optionalString(project.state),
         projectTeamSummary(project),
       ]),
     }))
@@ -149,7 +149,7 @@ function projectMatchesTeam(
 
 function projectTeamSummary(project: Record<string, unknown>) {
   const teams = readArray(readRecord(project.teams).nodes)
-    .map((team) => optionalOptionString(readRecord(team).key))
+    .map((team) => optionalString(readRecord(team).key))
     .filter((team): team is string => team !== undefined)
 
   return teams.length === 0 ? undefined : teams.join(", ")

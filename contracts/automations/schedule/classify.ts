@@ -1,4 +1,4 @@
-export type ClassifiedCron = {
+type ClassifiedCron = {
   dayOfMonth?: string
   dayOfWeek?: string
   repeat: "daily" | "monthly" | "weekdays" | "weekly"

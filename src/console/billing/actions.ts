@@ -11,7 +11,7 @@ export type BillingOverview = FunctionReturnType<
 
 export type BillingAccount = NonNullable<BillingOverview["account"]>
 
-export type CheckoutFlow = "plan" | "top-up" | "portal"
+type CheckoutFlow = "plan" | "top-up" | "portal"
 
 export function billingReturnUrl(reopenSettings = false) {
   const url = new URL("/console", window.location.origin)
