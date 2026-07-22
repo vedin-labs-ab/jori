@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react"
+import { type FunctionReturnType } from "convex/server"
 import { Lock } from "lucide-react"
 import { type ReactNode } from "react"
 import {
@@ -138,10 +139,10 @@ function WorkstreamTitle({
 }
 
 type Detail = NonNullable<
-  ReturnType<typeof useQuery<typeof api.workstreams.queries.get>>
+  FunctionReturnType<typeof api.workstreams.queries.get>
 >
 type TimelineItems = NonNullable<
-  ReturnType<typeof useQuery<typeof api.workstreams.queries.timeline>>
+  FunctionReturnType<typeof api.workstreams.queries.timeline>
 >
 
 function DetailSections({

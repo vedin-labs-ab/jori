@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react"
+import { type FunctionReturnType } from "convex/server"
 import { CalendarDays, Clock } from "lucide-react"
 import { type ReactNode, useEffect, useState } from "react"
 import {
@@ -18,7 +19,7 @@ import { PulseViewport } from "./viewport"
 
 type PulseDays = 14 | 30 | 60
 type PulseData = NonNullable<
-  ReturnType<typeof useQuery<typeof api.workstreams.pulse.read>>
+  FunctionReturnType<typeof api.workstreams.pulse.read>
 >
 
 const rangeOptions: { value: PulseDays; label: string }[] = [

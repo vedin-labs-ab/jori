@@ -1,33 +1,13 @@
-import { afterEach, describe, expect, test } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
 import { requireOpenRouterRuntimeConfig } from "./openrouter"
-
-const environmentNames = [
-  "OPENROUTER_API_KEY",
-  "OPENROUTER_APP_TITLE",
-  "OPENROUTER_HTTP_REFERER",
-  "CONVEX_SITE_URL",
-  "VITE_CONVEX_SITE_URL",
-] as const
-
-const originalEnvironment = new Map(
-  environmentNames.map((name) => [name, process.env[name]])
-)
 
 describe("agent model runtime config", () => {
   afterEach(() => {
-    for (const name of environmentNames) {
-      const value = originalEnvironment.get(name)
-
-      if (value === undefined) {
-        delete process.env[name]
-      } else {
-        process.env[name] = value
-      }
-    }
+    vi.unstubAllEnvs()
   })
 
   test("requires an OpenRouter API key", () => {
-    delete process.env.OPENROUTER_API_KEY
+    vi.stubEnv("OPENROUTER_API_KEY", undefined)
 
     expect(() => requireOpenRouterRuntimeConfig()).toThrow(
       "Missing OPENROUTER_API_KEY"
@@ -35,11 +15,11 @@ describe("agent model runtime config", () => {
   })
 
   test("reads OpenRouter runtime settings with defaults", () => {
-    process.env.OPENROUTER_API_KEY = " key "
-    delete process.env.OPENROUTER_APP_TITLE
-    delete process.env.OPENROUTER_HTTP_REFERER
-    delete process.env.CONVEX_SITE_URL
-    delete process.env.VITE_CONVEX_SITE_URL
+    vi.stubEnv("OPENROUTER_API_KEY", " key ")
+    vi.stubEnv("OPENROUTER_APP_TITLE", undefined)
+    vi.stubEnv("OPENROUTER_HTTP_REFERER", undefined)
+    vi.stubEnv("CONVEX_SITE_URL", undefined)
+    vi.stubEnv("VITE_CONVEX_SITE_URL", undefined)
 
     expect(requireOpenRouterRuntimeConfig()).toEqual({
       apiKey: "key",

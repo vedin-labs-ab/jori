@@ -60,8 +60,7 @@ export function AutomationContent({
           now={now}
           onDelete={editor.deleteAutomation}
           onEdit={editor.openEditForm}
-          onPause={editor.pauseAutomation}
-          onResume={editor.resumeAutomation}
+          onPausedChange={editor.setAutomationPaused}
           automation={automation}
         />
       ))}

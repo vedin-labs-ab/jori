@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
+import { parseEnv } from "node:util"
 
 const convexDeploymentEnv = "CONVEX_DEPLOYMENT"
 
@@ -47,7 +48,7 @@ function resolveEnv() {
       continue
     }
 
-    Object.assign(env, readEnvFile(source))
+    Object.assign(env, parseEnv(readFileSync(source, "utf8")))
     sources.push(source)
   }
 
@@ -91,76 +92,6 @@ function getPrimaryWorktreeEnvPath() {
     path.dirname(path.resolve(process.cwd(), result.stdout.trim())),
     ".env.local"
   )
-}
-
-function readEnvFile(filePath: string) {
-  const env: Record<string, string> = {}
-
-  for (const line of readFileSync(filePath, "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim()
-
-    if (trimmed === "" || trimmed.startsWith("#")) {
-      continue
-    }
-
-    const withoutExport = trimmed.startsWith("export ")
-      ? trimmed.slice("export ".length).trim()
-      : trimmed
-    const separator = withoutExport.indexOf("=")
-
-    if (separator === -1) {
-      continue
-    }
-
-    const name = withoutExport.slice(0, separator).trim()
-    const rawValue = stripInlineComment(
-      withoutExport.slice(separator + 1)
-    ).trim()
-
-    if (/^[A-Z_][A-Z0-9_]*$/.test(name)) {
-      env[name] = parseEnvValue(rawValue)
-    }
-  }
-
-  return env
-}
-
-function stripInlineComment(value: string) {
-  let quote: string | null = null
-
-  for (let index = 0; index < value.length; index += 1) {
-    const char = value[index]
-
-    if ((char === '"' || char === "'") && value[index - 1] !== "\\") {
-      quote = quote === char ? null : char
-      continue
-    }
-
-    if (
-      char === "#" &&
-      quote === null &&
-      (index === 0 || /\s/.test(value[index - 1]))
-    ) {
-      return value.slice(0, index)
-    }
-  }
-
-  return value
-}
-
-function parseEnvValue(value: string) {
-  if (value.length < 2) {
-    return value
-  }
-
-  const quote = value[0]
-  const last = value[value.length - 1]
-
-  if ((quote === '"' || quote === "'") && last === quote) {
-    return value.slice(1, -1)
-  }
-
-  return value
 }
 
 function unique(values: Array<string | null>) {

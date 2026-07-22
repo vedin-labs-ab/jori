@@ -11,7 +11,7 @@ import {
   findUserIntegrationForInstall,
   upsertIntegration,
 } from "../connect/install"
-import { getMicrosoftIdentityEmail } from "./identity"
+import { getMicrosoftIdentityEmail } from "./data"
 
 const microsoftIntegration = v.union(
   v.literal("microsoftCalendar"),

@@ -13,26 +13,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { type Automation } from "../types"
+import { type Automation, automationControlAction } from "../types"
 
 export function AutomationActions({
   isControlling,
   isDeleting,
   onDeleteRequest,
   onEdit,
-  onPause,
-  onResume,
+  onPausedChange,
   automation,
 }: {
   isControlling: boolean
   isDeleting: boolean
   onDeleteRequest: () => void
   onEdit: (automation: Automation) => void
-  onPause: (automation: Automation) => void
-  onResume: (automation: Automation) => void
+  onPausedChange: (automation: Automation, paused: boolean) => void
   automation: Automation
 }) {
   const controlAction = automationControlAction(automation)
+  const shouldPause = controlAction === "pause"
+  const controlLabel = shouldPause
+    ? isControlling
+      ? "Pausing"
+      : "Pause"
+    : isControlling
+      ? "Resuming"
+      : "Resume"
 
   return (
     <DropdownMenu>
@@ -51,24 +57,21 @@ export function AutomationActions({
           <Pencil />
           Edit
         </DropdownMenuItem>
-        {controlAction === "pause" ? (
+        {controlAction === undefined ? null : (
           <DropdownMenuItem
             disabled={isControlling}
-            onSelect={() => onPause(automation)}
+            onSelect={() => onPausedChange(automation, shouldPause)}
           >
-            {isControlling ? <Loader2 className="animate-spin" /> : <Pause />}
-            {isControlling ? "Pausing" : "Pause"}
+            {isControlling ? (
+              <Loader2 className="animate-spin" />
+            ) : shouldPause ? (
+              <Pause />
+            ) : (
+              <Play />
+            )}
+            {controlLabel}
           </DropdownMenuItem>
-        ) : null}
-        {controlAction === "resume" ? (
-          <DropdownMenuItem
-            disabled={isControlling}
-            onSelect={() => onResume(automation)}
-          >
-            {isControlling ? <Loader2 className="animate-spin" /> : <Play />}
-            {isControlling ? "Resuming" : "Resume"}
-          </DropdownMenuItem>
-        ) : null}
+        )}
         <DropdownMenuItem
           disabled={isDeleting}
           onSelect={onDeleteRequest}
@@ -80,12 +83,4 @@ export function AutomationActions({
       </DropdownMenuContent>
     </DropdownMenu>
   )
-}
-
-function automationControlAction(automation: Automation) {
-  if (automation.type === "once" || automation.status === "completed") {
-    return undefined
-  }
-
-  return automation.status === "paused" ? "resume" : "pause"
 }

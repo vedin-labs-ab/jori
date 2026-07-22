@@ -9,6 +9,7 @@ import {
   integrationLabels,
   isUserScopedIntegration,
 } from "../shared/integrations"
+import { getUserIntegrationForOwner } from "./data"
 
 async function findIntegrationForOwner(
   ctx: QueryLikeCtx,
@@ -80,16 +81,11 @@ export async function findIntegrationForPrincipal(
       return null
     }
 
-    return await ctx.db
-      .query("integrations")
-      .withIndex("by_organization_and_integration_and_owner", (query) =>
-        query
-          .eq("organizationId", args.organizationId)
-          .eq("integration", args.integration)
-          .eq("ownerId", ownerId)
-      )
-      .order("desc")
-      .first()
+    return await getUserIntegrationForOwner(ctx, {
+      integration: args.integration,
+      organizationId: args.organizationId,
+      ownerId,
+    })
   }
 
   return await ctx.db

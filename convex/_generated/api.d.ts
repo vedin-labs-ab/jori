@@ -232,7 +232,6 @@ import type * as integrations_microsoft_credentials from "../integrations/micros
 import type * as integrations_microsoft_data from "../integrations/microsoft/data.js";
 import type * as integrations_microsoft_graph from "../integrations/microsoft/graph.js";
 import type * as integrations_microsoft_http from "../integrations/microsoft/http.js";
-import type * as integrations_microsoft_identity from "../integrations/microsoft/identity.js";
 import type * as integrations_microsoft_install from "../integrations/microsoft/install.js";
 import type * as integrations_microsoft_oauth from "../integrations/microsoft/oauth.js";
 import type * as integrations_microsoft_options from "../integrations/microsoft/options.js";
@@ -763,7 +762,6 @@ declare const fullApi: ApiFromModules<{
   "integrations/microsoft/data": typeof integrations_microsoft_data;
   "integrations/microsoft/graph": typeof integrations_microsoft_graph;
   "integrations/microsoft/http": typeof integrations_microsoft_http;
-  "integrations/microsoft/identity": typeof integrations_microsoft_identity;
   "integrations/microsoft/install": typeof integrations_microsoft_install;
   "integrations/microsoft/oauth": typeof integrations_microsoft_oauth;
   "integrations/microsoft/options": typeof integrations_microsoft_options;

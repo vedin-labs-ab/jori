@@ -12,7 +12,7 @@ type MutationCtx = import("../../convex/_generated/server").MutationCtx
 
 export type Seed = [string, Record<string, unknown>]
 
-export type FakeCtx = MutationCtx & {
+type FakeCtx = MutationCtx & {
   inserts: Array<{ table: string; doc: unknown }>
   patches: Array<{ id: string; patch: unknown }>
 }

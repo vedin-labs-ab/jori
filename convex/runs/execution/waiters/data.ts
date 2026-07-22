@@ -1,7 +1,6 @@
 import { type Infer } from "convex/values"
 import { type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
-import { type QueryLikeCtx } from "../../../shared/context"
 import { enqueueOperation } from "../outbox/data"
 import {
   type waiterCondition,
@@ -114,10 +113,6 @@ export async function expireWaiter(ctx: MutationCtx, waiterId: Id<"waiters">) {
   }
 
   return null
-}
-
-export async function getWaiter(ctx: QueryLikeCtx, waiterId: Id<"waiters">) {
-  return await ctx.db.get(waiterId)
 }
 
 async function cancelStaleWaiters(ctx: MutationCtx, runId: Id<"runs">) {

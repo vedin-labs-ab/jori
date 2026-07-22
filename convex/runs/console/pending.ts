@@ -1,4 +1,4 @@
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { isTerminalRunStatus } from "../schema"
 import {
@@ -117,10 +117,7 @@ async function* pendingApprovalRuns(
   const approvals = pendingApprovalQuery(ctx, args.organizationId, args.now)
 
   for await (const approval of approvals) {
-    if (
-      !isPendingApproval(approval, args.now) ||
-      seenRunIds.has(approval.runId)
-    ) {
+    if (approval.status !== "pending" || seenRunIds.has(approval.runId)) {
       continue
     }
 
@@ -157,8 +154,4 @@ function pendingApprovalQuery(
       index.eq("organizationId", organizationId).gt("expiresAt", now)
     )
     .order("asc")
-}
-
-function isPendingApproval(approval: Doc<"approvals">, now: number) {
-  return approval.status === "pending" && approval.expiresAt > now
 }

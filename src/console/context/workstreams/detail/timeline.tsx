@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react"
+import { type FunctionReturnType } from "convex/server"
 import { ChevronDown } from "lucide-react"
 import {
   Collapsible,
@@ -18,7 +19,7 @@ import { groupByDay, type TimelineDay } from "./grouping"
 import { Receipt } from "./receipt"
 
 type TimelineItem = NonNullable<
-  ReturnType<typeof useQuery<typeof api.workstreams.queries.timeline>>
+  FunctionReturnType<typeof api.workstreams.queries.timeline>
 >[number]
 
 // The workstream narrative as an index, not prose: one row per effort
