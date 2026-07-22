@@ -6,12 +6,11 @@ import {
 } from "../../shared/actor"
 import { readDataString } from "../../shared/data"
 
-export function getGitHubAppSlug(data: unknown) {
-  return readDataString(data, "appSlug")
-}
-
-export function getGitHubBotLogin(data: unknown) {
-  return readDataString(data, "botLogin") ?? botLogin(getGitHubAppSlug(data))
+function getGitHubBotLogin(data: unknown) {
+  return (
+    readDataString(data, "botLogin") ??
+    botLogin(readDataString(data, "appSlug"))
+  )
 }
 
 export function isGitHubSelfActor(

@@ -213,39 +213,18 @@ function useAutomationControl(organizationId: string) {
   const [controllingAutomationId, setControllingAutomationId] =
     useState<string>()
 
-  async function pauseAutomation(automation: Automation) {
-    await controlAutomation({
-      automation,
-      fallback: "Couldn't pause the automation.",
-      mutation: pause,
-    })
-  }
-
-  async function resumeAutomation(automation: Automation) {
-    await controlAutomation({
-      automation,
-      fallback: "Couldn't resume the automation.",
-      mutation: resume,
-    })
-  }
-
-  async function controlAutomation({
-    automation,
-    fallback,
-    mutation,
-  }: {
-    automation: Automation
-    fallback: string
-    mutation: (args: {
-      automationId: Automation["id"]
-      organizationId: string
-    }) => Promise<unknown>
-  }) {
+  async function setAutomationPaused(automation: Automation, paused: boolean) {
     setControllingAutomationId(automation.id)
     try {
+      const mutation = paused ? pause : resume
       await mutation({ organizationId, automationId: automation.id })
     } catch (error) {
-      showErrorToast(error, fallback)
+      showErrorToast(
+        error,
+        paused
+          ? "Couldn't pause the automation."
+          : "Couldn't resume the automation."
+      )
     } finally {
       setControllingAutomationId(undefined)
     }
@@ -253,7 +232,6 @@ function useAutomationControl(organizationId: string) {
 
   return {
     controllingAutomationId,
-    pauseAutomation,
-    resumeAutomation,
+    setAutomationPaused,
   }
 }

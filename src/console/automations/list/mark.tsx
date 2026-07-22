@@ -14,21 +14,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { type Automation } from "../types"
+import { type Automation, automationControlAction } from "../types"
 
 export function AutomationStatusMark({
   isControlling,
   isDeleting,
   onDeleteRequest,
-  onPause,
-  onResume,
+  onPausedChange,
   automation,
 }: {
   isControlling: boolean
   isDeleting: boolean
   onDeleteRequest: () => void
-  onPause: (automation: Automation) => void
-  onResume: (automation: Automation) => void
+  onPausedChange: (automation: Automation, paused: boolean) => void
   automation: Automation
 }) {
   const [isActionVisible, setIsActionVisible] = useState(false)
@@ -52,8 +50,7 @@ export function AutomationStatusMark({
     action,
     automation,
     onDeleteRequest,
-    onPause,
-    onResume,
+    onPausedChange,
   })
 
   return (
@@ -110,11 +107,7 @@ function automationStatusAction(
     return "delete"
   }
 
-  if (automation.status === "completed") {
-    return undefined
-  }
-
-  return automation.status === "paused" ? "resume" : "pause"
+  return automationControlAction(automation)
 }
 
 function StaticStatusIcon({ automation }: { automation: Automation }) {
@@ -199,24 +192,16 @@ function statusActionClick({
   action,
   automation,
   onDeleteRequest,
-  onPause,
-  onResume,
+  onPausedChange,
 }: {
   action: StatusAction
   automation: Automation
   onDeleteRequest: () => void
-  onPause: (automation: Automation) => void
-  onResume: (automation: Automation) => void
+  onPausedChange: (automation: Automation, paused: boolean) => void
 }) {
   if (action === "delete") {
     return onDeleteRequest
   }
 
-  return () => {
-    if (action === "pause") {
-      onPause(automation)
-    } else {
-      onResume(automation)
-    }
-  }
+  return () => onPausedChange(automation, action === "pause")
 }

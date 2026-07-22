@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react"
+import { type FunctionReturnType } from "convex/server"
 import { useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
@@ -104,7 +105,7 @@ function SkillListBody({
   onViewSkillChange: (skill: Skill) => void
   pagination: ReturnType<typeof useSkillPagination>["pagination"]
   searchTerm: string
-  skillList: ReturnType<typeof useQuery<typeof api.skills.catalog.list>>
+  skillList: FunctionReturnType<typeof api.skills.catalog.list> | undefined
   visibleCount: number
   view: SkillFilterView
 }) {

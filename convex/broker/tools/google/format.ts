@@ -1,13 +1,15 @@
 import { base64EncodeBytes, base64UrlEncode } from "../../../shared/encoding"
-import { optionalString } from "../../../shared/input"
+import { optionalString, readArray, readRecord } from "../../../shared/input"
 
 export function getHeader(message: Record<string, unknown>, name: string) {
   const payload = readObject(message.payload)
+  const value = readArray(payload.headers)
+    .map(readRecord)
+    .find(
+      (header) => String(header.name).toLowerCase() === name.toLowerCase()
+    )?.value
 
-  return readArray(payload.headers).find(
-    (header: Record<string, unknown>) =>
-      String(header.name).toLowerCase() === name.toLowerCase()
-  )?.value
+  return typeof value === "string" ? value : undefined
 }
 
 export function getReplyRecipient(
@@ -159,8 +161,4 @@ function readObject(value: unknown) {
   return typeof value === "object" && value !== null
     ? (value as Record<string, unknown>)
     : {}
-}
-
-function readArray(value: unknown) {
-  return Array.isArray(value) ? value : []
 }

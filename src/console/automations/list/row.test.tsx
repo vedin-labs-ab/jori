@@ -60,10 +60,10 @@ test("uses the main icon instead of a badge for completed one-time automation", 
 })
 
 test("pauses active recurring automation from status icon", () => {
-  const onPause = vi.fn()
+  const onPausedChange = vi.fn()
 
   renderRow({
-    onPause,
+    onPausedChange,
     automation: automation({
       type: "cron",
       trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: now + day },
@@ -72,7 +72,10 @@ test("pauses active recurring automation from status icon", () => {
 
   fireEvent.click(screen.getByRole("button", { name: "Pause Automation" }))
 
-  expect(onPause).toHaveBeenCalledTimes(1)
+  expect(onPausedChange).toHaveBeenCalledWith(
+    expect.objectContaining({ id: "automation-id" }),
+    true
+  )
 })
 
 test("shows pause action while active cron icon is hovered", () => {
@@ -98,10 +101,10 @@ test("shows pause action while active cron icon is hovered", () => {
 })
 
 test("resumes paused event automation from status icon", () => {
-  const onResume = vi.fn()
+  const onPausedChange = vi.fn()
 
   renderRow({
-    onResume,
+    onPausedChange,
     automation: automation({
       status: "paused",
       type: "event",
@@ -115,7 +118,10 @@ test("resumes paused event automation from status icon", () => {
 
   fireEvent.click(screen.getByRole("button", { name: "Resume Automation" }))
 
-  expect(onResume).toHaveBeenCalledTimes(1)
+  expect(onPausedChange).toHaveBeenCalledWith(
+    expect.objectContaining({ id: "automation-id" }),
+    false
+  )
 })
 
 test("opens the shared delete dialog from the action menu", () => {
@@ -166,15 +172,13 @@ function renderRow({
   isControlling = false,
   onDelete = vi.fn(),
   onEdit = vi.fn(),
-  onPause = vi.fn(),
-  onResume = vi.fn(),
+  onPausedChange = vi.fn(),
   automation,
 }: {
   isControlling?: boolean
   onDelete?: (automation: Automation) => void
   onEdit?: (automation: Automation) => void
-  onPause?: (automation: Automation) => void
-  onResume?: (automation: Automation) => void
+  onPausedChange?: (automation: Automation, paused: boolean) => void
   automation: Automation
 }) {
   return render(
@@ -185,8 +189,7 @@ function renderRow({
         now={now}
         onDelete={onDelete}
         onEdit={onEdit}
-        onPause={onPause}
-        onResume={onResume}
+        onPausedChange={onPausedChange}
         automation={automation}
       />
     </TooltipProvider>

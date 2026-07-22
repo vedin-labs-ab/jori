@@ -1,10 +1,14 @@
 import { isRecord } from "../../../contracts/json"
-import { boundedNumber, requiredStringArray } from "../../shared/input"
+import {
+  boundedNumber,
+  optionalNumber,
+  requiredStringArray,
+} from "../../shared/input"
 
 export function normalizeExpectedVersion(value: unknown) {
   const version = optionalNumber(value)
 
-  return version === undefined ? undefined : Math.max(0, version)
+  return version === undefined ? undefined : Math.max(0, Math.trunc(version))
 }
 
 export function normalizeStateWrite(args: Record<string, unknown>) {
@@ -43,10 +47,4 @@ function normalizeStateClaim(claim: unknown) {
 
 export function normalizeListLimit(value: unknown) {
   return boundedNumber(value, 50, 1, 100)
-}
-
-export function optionalNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value)
-    ? Math.trunc(value)
-    : undefined
 }

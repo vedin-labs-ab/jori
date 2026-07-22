@@ -12,6 +12,14 @@ export type AutomationList = FunctionReturnType<
 >
 export type Automation = AutomationList["automations"][number]
 
+export function automationControlAction(automation: Automation) {
+  if (automation.type === "once" || automation.status === "completed") {
+    return undefined
+  }
+
+  return automation.status === "paused" ? "resume" : "pause"
+}
+
 export const automationFilterOptions = [
   { label: "All", value: "all" },
   { label: "Active", value: "active" },

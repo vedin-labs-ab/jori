@@ -1,4 +1,8 @@
-import { type JsonObject, toJsonObject } from "../../contracts/json"
+import {
+  type JsonObject,
+  readStringArray,
+  toJsonObject,
+} from "../../contracts/json"
 import {
   maxSourceChangeFileBytes,
   maxSourceChangeFiles,
@@ -49,7 +53,7 @@ export async function prepareProviderToolInput(
 
 async function collectSourceChanges(runtime: ToolRuntime, input: JsonObject) {
   const result = await runtime.sandbox.runCommand({
-    command: sourceChangeScript(readPathFilters(input.paths)),
+    command: sourceChangeScript(readStringArray(input.paths)),
     cwd: sourceDirectory(input),
     timeoutMs: 30_000,
   })
@@ -76,12 +80,6 @@ function sourceDirectory(input: JsonObject) {
     repository: `${requiredString(input.owner, "owner")}/${requiredString(input.repo, "repo")}`,
     value: optionalString(input.directory),
   })
-}
-
-function readPathFilters(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : []
 }
 
 function defaultBranchName(runId: string) {

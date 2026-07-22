@@ -1,8 +1,8 @@
-import { type useQuery } from "convex/react"
+import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
 
 export type ArtifactListResult = NonNullable<
-  ReturnType<typeof useQuery<typeof api.artifacts.console.list>>
+  FunctionReturnType<typeof api.artifacts.console.list>
 >
 
 export type ArtifactSummary = Extract<
@@ -11,7 +11,7 @@ export type ArtifactSummary = Extract<
 >["artifacts"][number]
 
 type ArtifactDetailResult = NonNullable<
-  ReturnType<typeof useQuery<typeof api.artifacts.console.get>>
+  FunctionReturnType<typeof api.artifacts.console.get>
 >
 
 export type ArtifactDetail = NonNullable<

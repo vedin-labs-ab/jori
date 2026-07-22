@@ -4,14 +4,12 @@ import { type RuntimeId } from "../../../contracts/runtime/worker"
 import { type ToolRuntime } from "../runtime"
 import { generateImageAsset } from "./index"
 
-const originalOpenRouterApiKey = process.env.OPENROUTER_API_KEY
-
 beforeEach(() => {
-  process.env.OPENROUTER_API_KEY = "openrouter_key"
+  vi.stubEnv("OPENROUTER_API_KEY", "openrouter_key")
 })
 
 afterEach(() => {
-  restoreEnvironmentVariable("OPENROUTER_API_KEY", originalOpenRouterApiKey)
+  vi.unstubAllEnvs()
   vi.unstubAllGlobals()
 })
 
@@ -165,13 +163,4 @@ function openRouterRequestBody(fetchMock: ReturnType<typeof mockFetch>) {
   }
 
   return JSON.parse(init.body) as Record<string, unknown>
-}
-
-function restoreEnvironmentVariable(name: string, value: string | undefined) {
-  if (value === undefined) {
-    delete process.env[name]
-    return
-  }
-
-  process.env[name] = value
 }

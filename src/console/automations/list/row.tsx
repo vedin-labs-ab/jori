@@ -14,8 +14,7 @@ export function AutomationRow({
   now,
   onDelete,
   onEdit,
-  onPause,
-  onResume,
+  onPausedChange,
   automation,
 }: {
   isControlling: boolean
@@ -23,8 +22,7 @@ export function AutomationRow({
   now: number
   onDelete: (automation: Automation) => void
   onEdit: (automation: Automation) => void
-  onPause: (automation: Automation) => void
-  onResume: (automation: Automation) => void
+  onPausedChange: (automation: Automation, paused: boolean) => void
   automation: Automation
 }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -38,8 +36,7 @@ export function AutomationRow({
             isControlling={isControlling}
             isDeleting={isDeleting}
             onDeleteRequest={requestDelete}
-            onPause={onPause}
-            onResume={onResume}
+            onPausedChange={onPausedChange}
             automation={automation}
           />
           <div className="grid min-w-0 content-start gap-1.5">
@@ -69,8 +66,7 @@ export function AutomationRow({
                 isDeleting={isDeleting}
                 onDeleteRequest={requestDelete}
                 onEdit={onEdit}
-                onPause={onPause}
-                onResume={onResume}
+                onPausedChange={onPausedChange}
                 automation={automation}
               />
             </div>

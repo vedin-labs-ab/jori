@@ -8,6 +8,7 @@ import {
   createTracking,
   discard,
   requireRunningPass,
+  toAllowedMaps,
 } from "../engine/wire"
 import { applyAssign, type WorkstreamApplyState } from "./members"
 import { applyCreate, applyMerge, applyStatus, applyUpdate } from "./operations"
@@ -34,11 +35,7 @@ export const apply = internalMutation({
     }
 
     const state: WorkstreamApplyState = {
-      allowed: {
-        events: new Map(),
-        conversations: new Map(),
-        efforts: new Map(args.allowed.efforts.map((row) => [row.id, row])),
-      },
+      allowed: toAllowedMaps(args.allowed),
       temp: new Map(),
       now: Date.now(),
       ...createTracking(args),
