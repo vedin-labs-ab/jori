@@ -30,59 +30,67 @@ export type ActionStatus = {
   label: string
 }
 
-const approvalLabels = {
-  approved: "Approved",
-  denied: "Denied",
-  cancelled: "Cancelled",
-  expired: "Approval expired",
-  failed: "Approval failed",
-  pending: "Needs approval",
-} satisfies Record<ApprovalState, string>
+const approvalStatuses = {
+  approved: {
+    Icon: UserCheck,
+    className: "text-emerald-800",
+    label: "Approved",
+  },
+  denied: { Icon: UserX, className: "text-destructive", label: "Denied" },
+  cancelled: {
+    Icon: UserX,
+    className: "text-muted-foreground",
+    label: "Cancelled",
+  },
+  expired: {
+    Icon: ClockAlert,
+    className: "text-warning",
+    label: "Approval expired",
+  },
+  failed: {
+    Icon: AlertCircle,
+    className: "text-destructive",
+    label: "Approval failed",
+  },
+  pending: {
+    Icon: UserPen,
+    className: "text-muted-foreground",
+    label: "Needs approval",
+  },
+} satisfies Record<ApprovalState, ActionStatus>
 
-const offerLabels = {
-  cancelled: "Offer cancelled",
-  claimed: "Needs action",
-  connected: "Connected",
-  expired: "Offer expired",
-  failed: "Offer failed",
-  pending: "Needs action",
-} satisfies Record<OfferState, string>
-
-const approvalIcons = {
-  approved: UserCheck,
-  denied: UserX,
-  cancelled: UserX,
-  expired: ClockAlert,
-  failed: AlertCircle,
-  pending: UserPen,
-} satisfies Record<ApprovalState, LucideIcon>
-
-const offerIcons = {
-  cancelled: UserX,
-  claimed: Hourglass,
-  connected: CheckCircle2,
-  expired: ClockAlert,
-  failed: AlertCircle,
-  pending: Hourglass,
-} satisfies Record<OfferState, LucideIcon>
-
-const approvalClasses = {
-  approved: "text-emerald-800",
-  denied: "text-destructive",
-  cancelled: "text-muted-foreground",
-  expired: "text-warning",
-  failed: "text-destructive",
-  pending: "text-muted-foreground",
-} satisfies Record<ApprovalState, string>
-
-const offerClasses = {
-  cancelled: "text-muted-foreground",
-  claimed: "text-muted-foreground",
-  connected: "text-emerald-800",
-  expired: "text-warning",
-  failed: "text-destructive",
-  pending: "text-muted-foreground",
-} satisfies Record<OfferState, string>
+const offerStatuses = {
+  cancelled: {
+    Icon: UserX,
+    className: "text-muted-foreground",
+    label: "Offer cancelled",
+  },
+  claimed: {
+    Icon: Hourglass,
+    className: "text-muted-foreground",
+    label: "Needs action",
+  },
+  connected: {
+    Icon: CheckCircle2,
+    className: "text-emerald-800",
+    label: "Connected",
+  },
+  expired: {
+    Icon: ClockAlert,
+    className: "text-warning",
+    label: "Offer expired",
+  },
+  failed: {
+    Icon: AlertCircle,
+    className: "text-destructive",
+    label: "Offer failed",
+  },
+  pending: {
+    Icon: Hourglass,
+    className: "text-muted-foreground",
+    label: "Needs action",
+  },
+} satisfies Record<OfferState, ActionStatus>
 
 export function getActionStatus({
   approval,
@@ -96,32 +104,12 @@ export function getActionStatus({
   const approvalState = effectiveApprovalState(approval, now)
 
   if (approvalState !== null) {
-    return actionStatus(
-      approvalState,
-      approvalIcons,
-      approvalClasses,
-      approvalLabels
-    )
+    return approvalStatuses[approvalState]
   }
 
   const offerState = effectiveOfferState(offer, now)
 
-  return offerState === null
-    ? null
-    : actionStatus(offerState, offerIcons, offerClasses, offerLabels)
-}
-
-function actionStatus<State extends string>(
-  state: State,
-  icons: Record<State, LucideIcon>,
-  classes: Record<State, string>,
-  labels: Record<State, string>
-) {
-  return {
-    Icon: icons[state],
-    className: classes[state],
-    label: labels[state],
-  }
+  return offerState === null ? null : offerStatuses[offerState]
 }
 
 function effectiveApprovalState(

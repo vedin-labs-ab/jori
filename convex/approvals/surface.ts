@@ -32,7 +32,7 @@ export const getTarget = internalQuery({
       integration === null ||
       integration.status !== "active" ||
       integration.organizationId !== approval.organizationId ||
-      integration.integration !== delivery.integration
+      integration.integration !== "slack"
     ) {
       return null
     }

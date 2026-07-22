@@ -1,15 +1,13 @@
 import { useQuery } from "convex/react"
-import { type FunctionArgs } from "convex/server"
 import { Logs } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { countLabel } from "@/lib/count"
 import { api } from "../../../../convex/_generated/api"
 import { DetailRow } from "../../shared/details"
+import { type ExecutionItem } from "../types"
 import { ActivityEmpty, ActivitySkeleton } from "./empty"
 import { ActivityTimeline } from "./item"
 import { type ActivityResult } from "./types"
-
-type RunId = FunctionArgs<typeof api.runs.activity.index.list>["runId"]
 
 export function RunActivity({
   now,
@@ -17,11 +15,11 @@ export function RunActivity({
   organizationId,
 }: {
   now: number
-  runId: string
+  runId: ExecutionItem["id"]
   organizationId: string
 }) {
   const activity = useQuery(api.runs.activity.index.list, {
-    runId: runId as RunId,
+    runId,
     organizationId,
   })
 

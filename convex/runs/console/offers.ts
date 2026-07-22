@@ -143,11 +143,7 @@ function offerState(offer: Doc<"integrationOffers">) {
 }
 
 function deliveryLabel(delivery: Doc<"integrationOffers">["delivery"]) {
-  if (delivery?.integration === "slack") {
-    return "Delivered to Slack"
-  }
-
-  return undefined
+  return delivery === undefined ? undefined : "Delivered to Slack"
 }
 
 function offerResult(offer: Doc<"integrationOffers">) {

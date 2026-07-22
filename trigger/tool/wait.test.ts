@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { type RuntimeId } from "../../contracts/runtime/worker"
+import { runtimeId } from "../../test/trigger"
 import { executeToolCall, type ToolRuntime } from "../tool"
 
 const triggerWait = vi.hoisted(() => ({
@@ -22,7 +22,7 @@ test("wait_for_agents returns immediately when every child is terminal", async (
   const runtime = createRuntime()
   runtime.convex.readAgentRuns = vi.fn(async () => [
     {
-      runId: id<"runs">("run_child"),
+      runId: runtimeId<"runs">("run_child"),
       title: "Research attendees",
       status: "completed" as const,
       error: null,
@@ -65,7 +65,9 @@ test("wait_for_agents defaults a missing timeout to 15 minutes", async () => {
     .fn()
     .mockResolvedValueOnce([agentRun("running")])
     .mockResolvedValue([agentRun("completed")])
-  runtime.convex.createWaiter = vi.fn(async () => id<"waiters">("waiter_1"))
+  runtime.convex.createWaiter = vi.fn(async () =>
+    runtimeId<"waiters">("waiter_1")
+  )
   runtime.convex.expireWaiter = vi.fn()
   const clock = vi.spyOn(Date, "now").mockReturnValue(now)
 
@@ -95,7 +97,9 @@ test("wait_for_agents turns a relative timeout into a waitpoint expiry", async (
     .fn()
     .mockResolvedValueOnce([running])
     .mockResolvedValue([completed])
-  runtime.convex.createWaiter = vi.fn(async () => id<"waiters">("waiter_1"))
+  runtime.convex.createWaiter = vi.fn(async () =>
+    runtimeId<"waiters">("waiter_1")
+  )
   runtime.convex.expireWaiter = vi.fn()
   const clock = vi.spyOn(Date, "now").mockReturnValue(now)
 
@@ -182,7 +186,7 @@ function createRuntime(): ToolRuntime {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -205,13 +209,9 @@ function createRuntime(): ToolRuntime {
   }
 }
 
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
-}
-
 function agentRun(status: "completed" | "running") {
   return {
-    runId: id<"runs">("run_child"),
+    runId: runtimeId<"runs">("run_child"),
     title: "Research attendees",
     status,
     error: null,

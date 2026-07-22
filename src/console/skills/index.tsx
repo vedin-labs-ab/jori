@@ -18,6 +18,8 @@ import { SkillsToolbar } from "./list/toolbar"
 import { type Skill, type SkillFilterView } from "./types"
 import { SkillViewDialog } from "./view"
 
+type SkillPagination = ReturnType<typeof useClientPagination<Skill>>
+
 export function Skills() {
   return (
     <ConsolePage>
@@ -43,11 +45,12 @@ function SkillsCard({ organizationId }: { organizationId: string }) {
     [skills, filters.searchTerm, filters.view]
   )
   const isAccessReady = skillList?.status === "ready"
-  const { pagination } = useSkillPagination({
-    skills,
-    visibleSkills,
-    view: filters.view,
-    searchTerm: filters.searchTerm,
+  const pagination = useClientPagination({
+    hasFilters: filters.searchTerm.trim() !== "" || filters.view !== "all",
+    isReady: skills !== undefined,
+    itemLabel: { singular: "skill", plural: "skills" },
+    items: visibleSkills ?? [],
+    totalCount: skills?.length ?? 0,
   })
   const setSearchTermAndReset = useResettingSetter(
     filters.setSearchTerm,
@@ -103,7 +106,7 @@ function SkillListBody({
 }: {
   editor: SkillEditor
   onViewSkillChange: (skill: Skill) => void
-  pagination: ReturnType<typeof useSkillPagination>["pagination"]
+  pagination: SkillPagination
   searchTerm: string
   skillList: FunctionReturnType<typeof api.skills.catalog.list> | undefined
   visibleCount: number
@@ -134,29 +137,6 @@ function SkillListBody({
       <ConsoleListPager pagination={pagination} />
     </>
   )
-}
-
-function useSkillPagination({
-  skills,
-  visibleSkills,
-  view,
-  searchTerm,
-}: {
-  skills: Skill[] | undefined
-  visibleSkills: Skill[] | undefined
-  view: SkillFilterView
-  searchTerm: string
-}) {
-  const hasFilters = searchTerm.trim() !== "" || view !== "all"
-  const pagination = useClientPagination({
-    hasFilters,
-    isReady: skills !== undefined,
-    itemLabel: { singular: "skill", plural: "skills" },
-    items: visibleSkills ?? [],
-    totalCount: skills?.length ?? 0,
-  })
-
-  return { pagination }
 }
 
 function SkillDialogs({

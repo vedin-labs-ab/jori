@@ -1,5 +1,4 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
-import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -66,33 +65,23 @@ export function IntegrationLogo({
 }
 
 export function IntegrationLogoStack({
-  className,
-  emptyFallback = null,
   integrations,
-  maxVisible = 3,
   size = "sm",
 }: {
-  className?: string
-  emptyFallback?: ReactNode
   integrations: readonly Integration[]
-  maxVisible?: number
   size?: IntegrationLogoSize
 }) {
   const uniqueIntegrations = [...new Set(integrations)]
-  const visibleLimit = Math.max(1, maxVisible)
-  const hasOverflow = uniqueIntegrations.length > visibleLimit
-  const visibleCount = hasOverflow
-    ? Math.max(1, visibleLimit - 1)
-    : visibleLimit
+  const visibleCount = uniqueIntegrations.length > 3 ? 2 : 3
   const visibleIntegrations = uniqueIntegrations.slice(0, visibleCount)
   const hiddenIntegrations = uniqueIntegrations.slice(visibleCount)
 
   if (visibleIntegrations.length === 0) {
-    return emptyFallback
+    return null
   }
 
   return (
-    <span className={cn("inline-flex shrink-0 items-center", className)}>
+    <span className="inline-flex shrink-0 items-center">
       <span className="-space-x-1 inline-flex">
         {visibleIntegrations.map((integration) => (
           <IntegrationLogo

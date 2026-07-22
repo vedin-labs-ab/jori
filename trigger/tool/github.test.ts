@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
-import { type RuntimeId } from "../../contracts/runtime/worker"
+import { runtimeId } from "../../test/trigger"
 import { executeToolCall, type ToolRuntime } from "../tool"
 
 test("prompted GitHub commit tools include collected workspace changes", async () => {
@@ -59,7 +59,7 @@ function createRuntime(): ToolRuntime {
       callTool: vi.fn(),
       recordEvent: vi.fn(),
       requestApproval: vi.fn(async () => ({
-        approvalId: id<"approvals">("approval_1"),
+        approvalId: runtimeId<"approvals">("approval_1"),
         code: "ABC123",
         instruction: "Approval requested.",
         status: "approval_requested",
@@ -78,7 +78,7 @@ function createRuntime(): ToolRuntime {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -115,8 +115,4 @@ function createRuntime(): ToolRuntime {
       })),
     } as unknown as ToolRuntime["sandbox"],
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

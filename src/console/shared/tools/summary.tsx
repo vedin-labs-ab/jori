@@ -1,6 +1,5 @@
 import { type ToolSurface, toolSurfaceLabel } from "@contracts/integrations"
 import { Globe, GlobeOff } from "lucide-react"
-import { type ReactNode } from "react"
 import {
   Tooltip,
   TooltipContent,
@@ -13,23 +12,17 @@ import { ProviderLogo } from "@/shared/logo/provider"
 type ToolSurfaceLogoSize = "sm" | "md"
 
 export function ToolAccessSummary({
-  logoSize,
   surfaces,
   toolCount,
   webSearch,
 }: {
-  logoSize?: ToolSurfaceLogoSize
   surfaces: ToolSurface[]
   toolCount: number
   webSearch: boolean
 }) {
   return (
     <span className="grid min-w-0 gap-1.5">
-      <ToolCountSummary
-        logoSize={logoSize}
-        surfaces={surfaces}
-        toolCount={toolCount}
-      />
+      <ToolCountSummary surfaces={surfaces} toolCount={toolCount} />
       <WebSearchStatus allowed={webSearch} />
     </span>
   )
@@ -53,25 +46,19 @@ export function ToolCountSummary({
 }
 
 function ToolSurfaceLogoStack({
-  emptyFallback = null,
   logoSize,
-  maxVisible = 3,
   surfaces,
 }: {
-  emptyFallback?: ReactNode
   logoSize: ToolSurfaceLogoSize
-  maxVisible?: number
   surfaces: readonly ToolSurface[]
 }) {
   const uniqueSurfaces = [...new Set(surfaces)]
-  const visibleLimit = Math.max(1, maxVisible)
-  const visibleCount =
-    uniqueSurfaces.length > visibleLimit ? visibleLimit - 1 : visibleLimit
-  const visibleSurfaces = uniqueSurfaces.slice(0, Math.max(1, visibleCount))
+  const visibleCount = uniqueSurfaces.length > 3 ? 2 : 3
+  const visibleSurfaces = uniqueSurfaces.slice(0, visibleCount)
   const hiddenSurfaces = uniqueSurfaces.slice(visibleSurfaces.length)
 
   if (visibleSurfaces.length === 0) {
-    return emptyFallback
+    return null
   }
 
   return (

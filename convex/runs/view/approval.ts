@@ -4,7 +4,6 @@ import {
   getSlackMessageTs,
 } from "../../integrations/slack/data"
 import { slackMessageUrl } from "../../integrations/slack/links"
-import { toolSurfaceLabel } from "../../shared/integrations"
 import { getToolLabel } from "../../shared/tools/labels"
 
 export function summarizeApproval(args: {
@@ -66,13 +65,13 @@ function approvalSource({
   }
 
   const deliveryUrl =
-    approval.delivery?.integration === "slack"
-      ? slackMessageUrl({
+    approval.delivery === undefined
+      ? undefined
+      : slackMessageUrl({
           channelId: approval.delivery.data.channelId,
           messageTs: approval.delivery.data.messageTs,
           teamId: approvalDeliveryIntegration?.externalId ?? null,
         })
-      : undefined
 
   if (deliveryUrl !== undefined) {
     return {
@@ -97,9 +96,5 @@ function deliveryLabel(delivery: Doc<"approvals">["delivery"]) {
     return undefined
   }
 
-  if (delivery.integration === "slack") {
-    return "Delivered to Slack"
-  }
-
-  return `Delivered to ${toolSurfaceLabel(delivery.integration)}`
+  return "Delivered to Slack"
 }

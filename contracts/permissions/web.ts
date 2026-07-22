@@ -1,7 +1,3 @@
-const webToolNames = ["web_search", "web_fetch"] as const
-
-type WebToolName = (typeof webToolNames)[number]
-
 export const webToolPermissionRows = [
   [
     "milo",
@@ -21,7 +17,9 @@ export const webToolPermissionRows = [
   ],
 ] as const
 
-const webTools = new Set<string>(webToolNames)
+type WebToolName = (typeof webToolPermissionRows)[number][1]
+
+const webTools = new Set<string>(webToolPermissionRows.map(([, tool]) => tool))
 
 export function isWebTool(tool: string): tool is WebToolName {
   return webTools.has(tool)

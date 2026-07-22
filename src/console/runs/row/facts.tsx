@@ -82,8 +82,6 @@ const compactFieldTypes = new Set<ExecutionDetailType>([
   "web_search",
 ])
 
-const timeOnlyFieldTypes = new Set<ExecutionDetailType>(["next"])
-
 export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {
   if (details.length === 0) {
     return null
@@ -99,7 +97,7 @@ function ExecutionFact({ detail }: { detail: ExecutionDetail }) {
   const time =
     detail.timestamp === undefined
       ? undefined
-      : usesUtcTime(detail.type)
+      : detail.type === "next"
         ? absoluteUtcTime(detail.timestamp)
         : absoluteTime(detail.timestamp)
 
@@ -128,7 +126,7 @@ function InlineFact({
   label: ReactNode
   time: string | undefined
 }) {
-  const hasValue = !timeOnlyFieldTypes.has(detail.type)
+  const hasValue = detail.type !== "next"
 
   return (
     <DetailRow icon={icon} label={label}>
@@ -254,10 +252,6 @@ function detailLabel(detail: ExecutionDetail, label: string) {
 
 function isPayloadDetail(detail: ExecutionDetail) {
   return detail.type === "comment" || detail.type === "message"
-}
-
-function usesUtcTime(type: ExecutionDetailType) {
-  return type === "next"
 }
 
 function detailKey(detail: ExecutionDetail) {

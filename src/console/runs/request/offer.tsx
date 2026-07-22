@@ -15,14 +15,13 @@ import { IntegrationLogo } from "@/shared/logo/integration"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { absoluteTime, expirationLabel } from "../../shared/time"
-import { type ExecutionOffer } from "../types"
+import { type ExecutionItem, type ExecutionOffer } from "../types"
 import { useRunRequestCarousel } from "./carousel"
 import { type RunRequestMeta, RunRequestSection } from "./section"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
 type ClaimArgs = FunctionArgs<typeof api.runs.console.offers.claim>
-type CancelArgs = FunctionArgs<typeof api.runs.console.offers.cancel>
 type OfferAction = "cancel" | "connect"
 type ClaimResult =
   | {
@@ -44,7 +43,7 @@ export function OfferCallout({
 }: {
   now: number
   offers: ExecutionOffer[]
-  runId: string
+  runId: ExecutionItem["id"]
   organizationId: string
 }) {
   const carousel = useRunRequestCarousel(offers.length)
@@ -91,7 +90,7 @@ function OfferActions({
   organizationId,
 }: {
   offer: ExecutionOffer
-  runId: string
+  runId: ExecutionItem["id"]
   organizationId: string
 }) {
   const claim = useMutation(api.runs.console.offers.claim)
@@ -103,7 +102,7 @@ function OfferActions({
 
     try {
       if (action === "cancel") {
-        const result = await cancel(cancelArgs(offer, runId, organizationId))
+        const result = await cancel(offerIds(offer, runId, organizationId))
 
         if (result.status !== "cancelled") {
           throw new Error("This integration offer is already resolved.")
@@ -154,7 +153,7 @@ function OfferActions({
 async function connectOffer(
   claim: (args: ClaimArgs) => Promise<ClaimResult>,
   offer: ExecutionOffer,
-  runId: string,
+  runId: ExecutionItem["id"],
   organizationId: string
 ) {
   if (!convexSiteUrl) {
@@ -166,7 +165,7 @@ async function connectOffer(
   try {
     const result = await claim({
       ...offerIds(offer, runId, organizationId),
-      returnUrl: runOfferReturnUrl(),
+      returnUrl: `${window.location.origin}/runs`,
     })
 
     if (result.status === "connected") {
@@ -202,28 +201,16 @@ function openConnectTab() {
   return tab
 }
 
-function cancelArgs(
-  offer: ExecutionOffer,
-  runId: string,
-  organizationId: string
-): CancelArgs {
-  return offerIds(offer, runId, organizationId)
-}
-
 function offerIds(
   offer: ExecutionOffer,
-  runId: string,
+  runId: ExecutionItem["id"],
   organizationId: string
 ) {
   return {
-    integrationOfferId: offer.id as ClaimArgs["integrationOfferId"],
-    runId: runId as ClaimArgs["runId"],
+    integrationOfferId: offer.id,
+    runId,
     organizationId,
   }
-}
-
-function runOfferReturnUrl() {
-  return `${window.location.origin}/runs`
 }
 
 function offerMeta(offer: ExecutionOffer, now: number): RunRequestMeta | null {

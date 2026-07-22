@@ -1,5 +1,4 @@
 import { useMutation } from "convex/react"
-import { type FunctionArgs } from "convex/server"
 import { Loader2, Square } from "lucide-react"
 import { useRef, useState } from "react"
 import {
@@ -21,8 +20,7 @@ import {
 } from "@/components/ui/tooltip"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
-
-type RunId = FunctionArgs<typeof api.runs.control.stop>["runId"]
+import { type ExecutionItem } from "../types"
 
 export function StopExecution({
   className,
@@ -30,7 +28,7 @@ export function StopExecution({
   organizationId,
 }: {
   className?: string
-  runId: string
+  runId: ExecutionItem["id"]
   organizationId: string
 }) {
   const { isOpen, isStopping, setOpen, stopExecution } = useStopExecution({
@@ -99,7 +97,7 @@ function useStopExecution({
   runId,
   organizationId,
 }: {
-  runId: string
+  runId: ExecutionItem["id"]
   organizationId: string
 }) {
   const stop = useMutation(api.runs.control.stop)
@@ -117,7 +115,7 @@ function useStopExecution({
 
     try {
       await stop({
-        runId: runId as RunId,
+        runId,
         organizationId,
       })
     } catch (caught) {

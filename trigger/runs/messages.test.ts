@@ -1,9 +1,9 @@
 import { expect, test, vi } from "vitest"
 import {
-  type RuntimeId,
   type RuntimeInteraction,
   type RuntimeMessage,
 } from "../../contracts/runtime/worker"
+import { runtimeId } from "../../test/trigger"
 import { type ToolRuntime } from "../tool"
 import {
   appendSessionMessages,
@@ -58,7 +58,7 @@ test("updates the active surface target from drained messages", async () => {
         surface: "linear",
         target: "linear:issue:issue-id",
       },
-      session: { id: id<"sessions">("session") },
+      session: { id: runtimeId<"sessions">("session") },
     },
   } as unknown as ToolRuntime
   const messages: Array<{ content: string; role: "user" }> = []
@@ -78,7 +78,7 @@ test("appends person context before drained batch items", async () => {
     },
     context: {
       activeSurface: null,
-      session: { id: id<"sessions">("session") },
+      session: { id: runtimeId<"sessions">("session") },
     },
   } as unknown as ToolRuntime
   const messages: Array<{ content: string; role: "user" }> = []
@@ -91,10 +91,6 @@ test("appends person context before drained batch items", async () => {
   expect(messages).toHaveLength(2)
 })
 
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
-}
-
 function runtimeMessage(
   overrides: Partial<RuntimeMessage> = {}
 ): RuntimeMessage {
@@ -103,7 +99,7 @@ function runtimeMessage(
     actorIds: ["slack:user:U0B96KZ7WJG"],
     authority: "soft",
     createdAt: Date.parse("2026-06-22T09:34:35.000Z"),
-    id: id<"messages">("message"),
+    id: runtimeId<"messages">("message"),
     identifiers: [
       "internal:message:message",
       "slack:message:1782231485.491049",
@@ -127,7 +123,7 @@ function runtimeInteraction(
     actor: "Albin",
     actorIds: ["linear:user:user"],
     createdAt: Date.parse("2026-06-22T09:35:00.000Z"),
-    id: id<"reactions">("reaction"),
+    id: runtimeId<"reactions">("reaction"),
     identifiers: ["linear:issue:ISS-1", "linear:comment:comment"],
     observedAt: Date.parse("2026-06-22T09:35:00.000Z"),
     preview: "I can proceed with option B.",

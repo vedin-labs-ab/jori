@@ -10,10 +10,7 @@ import { updateSlackMessage } from "../delivery/messages"
 import { createSlackIntegrationOfferMessage } from "./card"
 
 type SurfaceTarget = {
-  delivery: Extract<
-    Doc<"integrationOffers">["delivery"],
-    { integration: "slack" }
-  >
+  delivery: NonNullable<Doc<"integrationOffers">["delivery"]>
   integration: Doc<"integrations">
   offer: Doc<"integrationOffers"> & { status: TerminalIntegrationOfferStatus }
 }
@@ -52,11 +49,7 @@ export const getSurfaceTarget = internalQuery({
     const status = terminalIntegrationOfferStatus(offer.status)
     const delivery = offer.delivery
 
-    if (
-      status === null ||
-      delivery === undefined ||
-      delivery.integration !== "slack"
-    ) {
+    if (status === null || delivery === undefined) {
       return null
     }
 
@@ -66,7 +59,7 @@ export const getSurfaceTarget = internalQuery({
       integration === null ||
       integration.status !== "active" ||
       integration.organizationId !== offer.organizationId ||
-      integration.integration !== delivery.integration
+      integration.integration !== "slack"
     ) {
       return null
     }
