@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
 import { Prop } from "../section"
 
-export type Receipt = {
+type Receipt = {
   at: string
   step: string
   done?: boolean

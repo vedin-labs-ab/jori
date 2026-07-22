@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { schemaViolations } from "../../../../test/convex/schema"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { postLinearComment } from "../../../integrations/linear/delivery/comments"
-import { schemaViolations } from "../../../runs/agent/tools/schemas/responses/conform"
 import { linearToolResponseSchemas } from "../../../runs/agent/tools/schemas/responses/linear"
 import { callLinearTool } from "."
 

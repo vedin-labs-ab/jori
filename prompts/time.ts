@@ -1,33 +1,17 @@
-const utcWeekdays = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-] as const
-
-const utcMonths = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-] as const
+const utcWeekdayFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: "UTC",
+  weekday: "long",
+})
+const utcMonthFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  timeZone: "UTC",
+  year: "numeric",
+})
 
 export function createPromptTime(now = new Date()) {
-  const weekday = utcWeekdays[now.getUTCDay()]
   const timestamp = now.toISOString().replace(/\.\d{3}Z$/, "Z")
 
-  return `${weekday}, ${timestamp}`
+  return `${utcWeekdayFormatter.format(now)}, ${timestamp}`
 }
 
 /** The same instant in an IANA zone, with the zone and offset spelled out —
@@ -93,9 +77,7 @@ export function formatAge(ageMs: number) {
 }
 
 export function formatMonth(timestamp: number) {
-  const date = new Date(timestamp)
-
-  return `${utcMonths[date.getUTCMonth()]} ${date.getUTCFullYear()}`
+  return utcMonthFormatter.format(timestamp)
 }
 
 function unit(value: number, label: string) {

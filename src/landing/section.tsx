@@ -31,6 +31,38 @@ export function Section({
   )
 }
 
+export function PageIntro({ lede, title }: { lede: string; title: string }) {
+  return (
+    <section className="mx-auto w-full max-w-6xl px-6 pt-14 md:pt-24">
+      <div className="max-w-2xl">
+        <h1 className="font-medium text-4xl text-balance tracking-tight sm:text-5xl">
+          {title}
+        </h1>
+        <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
+          {lede}
+        </p>
+      </div>
+    </section>
+  )
+}
+
+export function Definition({
+  children,
+  term,
+}: {
+  children: ReactNode
+  term: string
+}) {
+  return (
+    <div>
+      <dt className="font-medium">{term}</dt>
+      <dd className="mt-1.5 max-w-md text-muted-foreground text-sm leading-relaxed">
+        {children}
+      </dd>
+    </div>
+  )
+}
+
 // Props are illustrations of Milo's work rendered as documents: an email, a
 // thread, a run. They share one quiet frame so the page reads as one system.
 export function Prop({

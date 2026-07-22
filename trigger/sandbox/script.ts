@@ -104,13 +104,10 @@ function gitCheckoutRefLines() {
   ]
 }
 
-export function readOnlyGitCommand(cwd: string, args: string[]) {
+export function readOnlyGitCommand(args: string[]) {
   validateReadOnlyGitArgs(args)
 
-  return [
-    `cd ${shellQuote(cwd)} || exit 2`,
-    `GIT_OPTIONAL_LOCKS=0 git ${args.map(shellQuote).join(" ")}`,
-  ].join("\n")
+  return `GIT_OPTIONAL_LOCKS=0 git ${args.map(shellQuote).join(" ")}`
 }
 
 export function gitBashGuard() {

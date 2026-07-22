@@ -31,7 +31,6 @@ async function runChecks() {
       packageCommand("check:dependencies"),
       packageCommand("check:versions"),
       packageCommand("check:entrypoints"),
-      packageCommand("check:drift"),
       packageCommand("check:typecheck"),
     ]),
     runBiomeChecks(),

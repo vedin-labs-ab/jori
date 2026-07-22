@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { schemaViolations } from "../../../runs/agent/tools/schemas/responses/conform"
+import { schemaViolations } from "../../../../test/convex/schema"
 import { slackToolResponseSchemas } from "../../../runs/agent/tools/schemas/responses/slack"
 import {
   slackChannelListing,

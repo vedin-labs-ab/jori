@@ -1,3 +1,5 @@
+import { readStringArray } from "../../../../../../contracts/json"
+
 export type JsonSchema = Record<string, unknown>
 export type SchemaMap = Record<string, JsonSchema>
 
@@ -166,12 +168,6 @@ export function readSchemaMap(value: unknown) {
       isJsonSchema(entry[1])
     )
   )
-}
-
-export function readStringArray(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : []
 }
 
 export function readString(value: unknown) {

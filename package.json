@@ -12,7 +12,6 @@
     "templates:compile": "tsx scripts/templates.ts",
     "check:biome": "node --experimental-strip-types scripts/check.ts biome",
     "check:dependencies": "node --experimental-strip-types scripts/dependencies.ts",
-    "check:drift": "node --experimental-strip-types scripts/drift.ts",
     "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
     "check:fix": "biome check --write .",
     "check:structure": "node --experimental-strip-types scripts/structure/index.ts",

@@ -52,6 +52,19 @@ export function copyBytesToArrayBuffer(bytes: Uint8Array) {
   return buffer
 }
 
+export function concatenateBytes(...chunks: Uint8Array[]) {
+  const length = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0)
+  const result = new Uint8Array(length)
+  let offset = 0
+
+  for (const chunk of chunks) {
+    result.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+
+  return result
+}
+
 export function base64EncodeBytes(bytes: Uint8Array) {
   let binary = ""
   const chunkSize = 0x8000

@@ -28,15 +28,15 @@ export async function handleMicrosoftInstall(
   request: Request,
   integration: MicrosoftIntegration
 ) {
-  const surface = microsoftIntegrationConfigs[integration]
+  const config = microsoftIntegrationConfigs[integration]
 
   return oauthAuthorizeRedirect(request, {
     authorizeUrl: microsoftOAuthAuthorizeUrl("organizations"),
-    callbackPath: surface.callbackPath,
+    callbackPath: config.callbackPath,
     clientId: requireMicrosoftClientId(),
     params: {
       response_type: "code",
-      scope: surface.scopes.join(" "),
+      scope: config.scopes.join(" "),
       prompt: "consent",
     },
   })
@@ -47,7 +47,7 @@ export async function handleMicrosoftOAuthCallback(
   request: Request,
   integration: MicrosoftIntegration
 ) {
-  const surface = microsoftIntegrationConfigs[integration]
+  const config = microsoftIntegrationConfigs[integration]
   const callback = await readOAuthCallback(request, {
     parse: parseSignedMicrosoftState,
     label: "Microsoft OAuth",
@@ -65,14 +65,14 @@ export async function handleMicrosoftOAuthCallback(
 
   const tokenResult = await exchangeMicrosoftAuthorizationCode({
     code,
-    redirectUri: `${requestUrl.origin}${surface.callbackPath}`,
+    redirectUri: `${requestUrl.origin}${config.callbackPath}`,
   })
 
   if ("error" in tokenResult) {
     return await redirectWithMicrosoftInstallError(ctx, {
       state,
       integration,
-      error: `${surface.integration} OAuth token exchange failed.`,
+      error: `${integration} OAuth token exchange failed.`,
     })
   }
 
@@ -86,7 +86,7 @@ export async function handleMicrosoftOAuthCallback(
     return await redirectWithMicrosoftInstallError(ctx, {
       state,
       integration,
-      error: `${surface.integration} installation profile could not be loaded.`,
+      error: `${integration} installation profile could not be loaded.`,
     })
   }
 
@@ -101,11 +101,11 @@ export async function handleMicrosoftOAuthCallback(
     return await redirectWithMicrosoftInstallError(ctx, {
       state,
       integration,
-      error: `${surface.integration} installation could not be recorded.`,
+      error: `${integration} installation could not be recorded.`,
     })
   }
 
-  return redirectWithStatus(state.returnUrl, surface.callbackParam, "connected")
+  return redirectWithStatus(state.returnUrl, integration, "connected")
 }
 
 async function recordMicrosoftInstallation(
@@ -152,7 +152,7 @@ function redirectWithMicrosoftInstallError(
   }
 ) {
   return failOfferAndRedirect(ctx, {
-    callbackParam: microsoftIntegrationConfigs[args.integration].callbackParam,
+    callbackParam: args.integration,
     error: args.error,
     integrationOfferId: args.state.integrationOfferId,
     returnUrl: args.state.returnUrl,
