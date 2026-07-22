@@ -18,7 +18,7 @@ const modeStyles = {
   prompted: "bg-primary/10 font-medium text-foreground",
 } as const
 
-export type ModeRow = {
+type ModeRow = {
   tool: string
   mode: keyof typeof modeLabels
 }

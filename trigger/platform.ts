@@ -1,18 +1,16 @@
 import { type ToolSurface } from "../contracts/integrations"
 import { type JsonObject, type JsonValue } from "../contracts/json"
-import { type RuntimePrompt } from "../contracts/runtime/prompt"
 import { type SurfaceReactionTarget } from "../contracts/runtime/surface"
 import {
-  type ActiveSurface,
   type AgentRunPayload,
   type AgentRunStatus,
   type DrainedSessionBatch,
   type HandoffSubject,
   type RunHandoffs,
   type RuntimeContext,
+  type RuntimeContextReload,
   type RuntimeEventInput,
   type RuntimeId,
-  type RuntimeTool,
   type WaiterCondition,
 } from "../contracts/runtime/worker"
 
@@ -105,11 +103,9 @@ export type RuntimePlatform = {
     externalId: string
     runId: RuntimeId<"runs">
   }): Promise<{ expiresAt: number } | null>
-  reloadContext(args: { runId: RuntimeId<"runs"> }): Promise<{
-    prompt: RuntimePrompt
-    tools: RuntimeTool[]
-    activeSurface: ActiveSurface | null
-  }>
+  reloadContext(args: {
+    runId: RuntimeId<"runs">
+  }): Promise<RuntimeContextReload>
   requestApproval(args: {
     input: JsonObject
     replyTarget?: string

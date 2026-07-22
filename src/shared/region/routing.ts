@@ -57,7 +57,7 @@ export function regionSelectionUrl(
   return url.toString()
 }
 
-export function regionalUrl(config: RegionConfig, region: Region, path = "/") {
+function regionalUrl(config: RegionConfig, region: Region, path = "/") {
   return new URL(
     normalizeReturnPath(path),
     requireRegionOrigin(config, region)

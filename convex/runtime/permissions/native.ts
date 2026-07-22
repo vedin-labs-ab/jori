@@ -12,7 +12,7 @@ export function nativeToolUsage(tool: string, route: NativeToolRoute) {
   return nativeToolPermission(tool, route).usage
 }
 
-export function nativeToolSnapshot(args: {
+function nativeToolSnapshot(args: {
   access: ToolAccess
   route: NativeToolRoute
   tool: string
@@ -27,7 +27,7 @@ export function nativeToolSnapshot(args: {
   }
 }
 
-export function visibleNativeToolSnapshot(args: {
+function visibleNativeToolSnapshot(args: {
   access: ToolAccess
   route: NativeToolRoute
   tool: string

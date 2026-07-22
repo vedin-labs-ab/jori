@@ -50,7 +50,7 @@ function ActivityContent({
   return (
     <div className="grid min-w-0 gap-2">
       <div className="text-muted-foreground text-xs">
-        {activityCaption(activity.items.length)}
+        {countLabel(activity.items.length, "event")}
       </div>
       <ScrollArea className="max-h-[28rem]">
         <div className="pr-2">
@@ -59,12 +59,4 @@ function ActivityContent({
       </ScrollArea>
     </div>
   )
-}
-
-function activityCaption(count: number | undefined) {
-  if (count === undefined) {
-    return "Loading"
-  }
-
-  return countLabel(count, "event")
 }

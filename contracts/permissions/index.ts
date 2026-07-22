@@ -52,7 +52,7 @@ export const internalRequiredToolNames = [
   "add_reaction",
 ] as const
 /** Tools that need a person in the conversation, so automations never get them. */
-export const interactiveToolNames = [
+const interactiveToolNames = [
   "offer_integration",
   "cancel_integration_offer",
 ] as const
@@ -80,7 +80,7 @@ export function getToolPermission(tool: string) {
   return toolPermissionsByName.get(tool)
 }
 
-export function isInteractiveTool(tool: string) {
+function isInteractiveTool(tool: string) {
   return interactiveTools.has(tool)
 }
 

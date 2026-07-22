@@ -3,6 +3,7 @@ import {
   type IntegrationOptionMatch,
 } from "../../../contracts/integrations/options"
 import { type Doc } from "../../_generated/dataModel"
+import { optionalString } from "../../shared/input"
 
 export const maxOptions = 50
 
@@ -24,11 +25,7 @@ export function optionalMatch(
   match: IntegrationOptionMatch | undefined,
   key: string
 ) {
-  const value = match?.[key]
-
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
+  return optionalString(match?.[key])
 }
 
 export function optionMatches(
@@ -64,7 +61,7 @@ export function readNestedString(
   key: string,
   nestedKey: string
 ) {
-  return optionalOptionString(readRecord(value[key])[nestedKey])
+  return optionalString(readRecord(value[key])[nestedKey])
 }
 
 export function requiredOptionString(value: unknown) {
@@ -73,12 +70,6 @@ export function requiredOptionString(value: unknown) {
   }
 
   return value.trim()
-}
-
-export function optionalOptionString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }
 
 export function requiredOptionNumber(value: unknown) {

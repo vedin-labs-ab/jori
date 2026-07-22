@@ -1,6 +1,7 @@
 import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
+import { optionalString } from "../../../shared/input"
 import { type SlackApiResult } from "../api"
 import { requireSlackCredentials } from "../credentials"
 
@@ -199,21 +200,15 @@ function readSlackProfile(
   user: SlackDirectoryUser | undefined
 ): SlackActorProfile {
   return {
-    email: normalizeSlackProfileString(user?.profile?.email),
+    email: optionalString(user?.profile?.email),
     name:
-      normalizeSlackProfileString(user?.profile?.display_name_normalized) ??
-      normalizeSlackProfileString(user?.profile?.display_name) ??
-      normalizeSlackProfileString(user?.profile?.real_name_normalized) ??
-      normalizeSlackProfileString(user?.profile?.real_name) ??
-      normalizeSlackProfileString(user?.real_name) ??
-      normalizeSlackProfileString(user?.name),
+      optionalString(user?.profile?.display_name_normalized) ??
+      optionalString(user?.profile?.display_name) ??
+      optionalString(user?.profile?.real_name_normalized) ??
+      optionalString(user?.profile?.real_name) ??
+      optionalString(user?.real_name) ??
+      optionalString(user?.name),
   }
-}
-
-function normalizeSlackProfileString(value: string | undefined) {
-  const trimmed = value?.trim()
-
-  return trimmed === undefined || trimmed === "" ? undefined : trimmed
 }
 
 async function cacheSlackActorProfile(

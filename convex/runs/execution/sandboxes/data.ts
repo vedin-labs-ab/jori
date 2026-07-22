@@ -8,7 +8,7 @@ const idleSandboxLeaseMs = 5 * 60 * 1000
 type SandboxRun = { externalId: string; runId: Id<"runs"> }
 type ExpiredSandboxCleanup = SandboxRun & { expiresAt: number }
 
-export async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
+async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
   return await ctx.db
     .query("sandboxes")
     .withIndex("by_run_and_status", (query) =>
@@ -18,10 +18,7 @@ export async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
     .first()
 }
 
-export async function findSandboxByExternalId(
-  ctx: QueryLikeCtx,
-  externalId: string
-) {
+async function findSandboxByExternalId(ctx: QueryLikeCtx, externalId: string) {
   return await ctx.db
     .query("sandboxes")
     .withIndex("by_external_id", (query) => query.eq("externalId", externalId))

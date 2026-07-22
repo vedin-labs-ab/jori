@@ -5,10 +5,7 @@ type ProposalSectionKey = "aliases" | "sources" | "summary" | "websites"
 
 export type ProposalSectionStatus = "changed" | "unchanged"
 
-export type ProposalSectionStatuses = Record<
-  ProposalSectionKey,
-  ProposalSectionStatus
->
+type ProposalSectionStatuses = Record<ProposalSectionKey, ProposalSectionStatus>
 
 const emptyFacts: ContextFacts = {
   aliases: [],

@@ -23,23 +23,36 @@ function validateArtifactBuilder(builder: Record<string, string>) {
   }
 
   const paths = new Set(Object.keys(builder))
-  const missing = collectImportSpecifiers(entry).filter((specifier) => {
-    if (!specifier.startsWith(".")) {
-      return false
-    }
+  const missing = Object.entries(builder).flatMap(([sourcePath, source]) =>
+    collectStaticImportSpecifiers(source).flatMap((specifier) => {
+      if (!specifier.startsWith(".")) {
+        return []
+      }
 
-    const target = path.posix.normalize(
-      path.posix.join(path.posix.dirname(entryPath), specifier)
-    )
+      const target = path.posix.normalize(
+        path.posix.join(path.posix.dirname(sourcePath), specifier)
+      )
 
-    return !paths.has(target)
-  })
+      return paths.has(target) ? [] : [`${sourcePath} -> ${target}`]
+    })
+  )
 
   if (missing.length > 0) {
     throw new Error(
-      `Artifact builder entrypoint imports missing files: ${missing.join(", ")}`
+      `Artifact builder imports missing files: ${missing.join(", ")}`
     )
   }
+}
+
+function collectStaticImportSpecifiers(content: string) {
+  return [
+    ...content.matchAll(
+      /^\s*import(?:\s+type)?(?:\s+[\s\S]*?\s+from)?\s*["']([^"']+)["']/gm
+    ),
+    ...content.matchAll(
+      /^\s*export(?:\s+type)?\s+(?:\*|\{[\s\S]*?\})\s+from\s+["']([^"']+)["']/gm
+    ),
+  ].map((match) => match[1])
 }
 
 function validateJsonSources() {

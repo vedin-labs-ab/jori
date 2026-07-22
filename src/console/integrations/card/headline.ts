@@ -4,14 +4,14 @@ export type IntegrationCardStatus =
   | "expired"
   | undefined
 
-export type AccountStatus = {
+type AccountStatus = {
   externalId: string
   email?: string
   name?: string
   status: Exclude<IntegrationCardStatus, undefined>
 } | null
 
-export type WorkspaceStatus = {
+type WorkspaceStatus = {
   externalId: string
   status: Exclude<IntegrationCardStatus, undefined>
 } | null

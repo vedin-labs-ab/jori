@@ -9,7 +9,7 @@ import { type LinkMethod } from "./identity/schema"
 const identityBatchSize = 100
 const artifactBatchSize = 50
 
-export async function mergePersons(
+async function mergePersons(
   ctx: MutationCtx,
   args: {
     sourcePersonId: Id<"persons">

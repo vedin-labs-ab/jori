@@ -1,5 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import { base64UrlDecodeBytes } from "../../shared/encoding"
+import { base64UrlDecode } from "../../shared/encoding"
 import { requireEnvironmentVariable } from "../../shared/environment"
 import { fetchFormToken } from "../connect/oauth"
 import { microsoftGraphUrl, microsoftOAuthTokenUrl } from "./config"
@@ -136,9 +136,10 @@ function readJwtStringClaim(token: string, claim: string) {
   }
 
   try {
-    const decoded = JSON.parse(
-      new TextDecoder().decode(base64UrlDecodeBytes(payload))
-    ) as Record<string, unknown>
+    const decoded = JSON.parse(base64UrlDecode(payload)) as Record<
+      string,
+      unknown
+    >
     const value = decoded[claim]
 
     return typeof value === "string" ? value : undefined

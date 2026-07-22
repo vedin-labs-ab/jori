@@ -12,7 +12,7 @@ export const emailDeliveryProviders = ["gmail", "microsoftEmail"] as const
 export type EmailDeliveryProvider = (typeof emailDeliveryProviders)[number]
 
 /** Integrations backing a delivery — the subset that can emit output. */
-export type DeliveryIntegration = EmailDeliveryProvider | "slack"
+type DeliveryIntegration = EmailDeliveryProvider | "slack"
 
 export function isEmailDeliveryProvider(
   integration: Integration
@@ -107,7 +107,7 @@ export function allowsDeliveryMode(
   )
 }
 
-export type DeliveryStyle = "content" | "summary"
+type DeliveryStyle = "content" | "summary"
 
 // The only per-provider send-tool code; everything else is generic.
 const deliverySendTools = {

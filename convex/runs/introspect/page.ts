@@ -3,14 +3,11 @@ import { boundedNumber } from "../../shared/input"
 const defaultLimit = 15
 const maxLimit = 50
 
-export function normalizeLimit(
-  value: number | undefined,
-  fallback = defaultLimit
-) {
+function normalizeLimit(value: number | undefined, fallback = defaultLimit) {
   return boundedNumber(value, fallback, 1, maxLimit)
 }
 
-export function readCursor(cursor: string | undefined) {
+function readCursor(cursor: string | undefined) {
   if (cursor === undefined || cursor.trim() === "") {
     return 0
   }

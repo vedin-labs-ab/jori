@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { requireEnvironmentVariable } from "../../shared/environment"
+import { optionalString } from "../../shared/input"
 import {
   encodeBasicCredentials,
   expectOAuthRevocationResponse,
@@ -57,8 +58,8 @@ export function readNotionSetupIdentity(
 
   return {
     externalId: user.id,
-    email: normalizeNullableText(user.person?.email),
-    name: normalizeNullableText(user.name),
+    email: optionalString(user.person?.email),
+    name: optionalString(user.name),
   }
 }
 
@@ -109,8 +110,9 @@ async function notionOAuthToken(body: Record<string, string>) {
     method: "POST",
     headers: {
       accept: "application/json",
-      authorization: `Basic ${btoa(
-        `${requireNotionClientId()}:${requireNotionClientSecret()}`
+      authorization: `Basic ${encodeBasicCredentials(
+        requireNotionClientId(),
+        requireNotionClientSecret()
       )}`,
       "content-type": "application/json",
       "notion-version": notionApiVersion,
@@ -119,10 +121,4 @@ async function notionOAuthToken(body: Record<string, string>) {
   })
 
   return (await response.json()) as NotionTokenResponse
-}
-
-function normalizeNullableText(value: string | null | undefined) {
-  const trimmed = value?.trim()
-
-  return trimmed === undefined || trimmed === "" ? undefined : trimmed
 }

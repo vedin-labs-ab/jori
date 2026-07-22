@@ -1,11 +1,12 @@
 import { v } from "convex/values"
 import { internalQuery } from "../../_generated/server"
 import { type QueryLikeCtx } from "../../shared/context"
+import { optionalString } from "../../shared/input"
 import { normalizeEmail } from "../email"
 import { type linkIdentityToPerson } from "./links"
 import { identityProvider } from "./schema"
 
-export type ProviderActorProfile = {
+type ProviderActorProfile = {
   email?: string
   name?: string
 }
@@ -15,7 +16,7 @@ const providerActorProfile = v.object({
   name: v.optional(v.string()),
 })
 
-export async function resolveProviderActorProfile(
+async function resolveProviderActorProfile(
   ctx: QueryLikeCtx,
   args: {
     organizationId: string
@@ -53,7 +54,7 @@ function normalizeProviderActorProfile(args: {
   name?: string
 }): ProviderActorProfile | undefined {
   const email = normalizeEmail(args.email)
-  const name = normalizeProfileText(args.name)
+  const name = optionalString(args.name)
 
   if (email === undefined && name === undefined) {
     return undefined
@@ -63,10 +64,4 @@ function normalizeProviderActorProfile(args: {
     ...(email === undefined ? {} : { email }),
     ...(name === undefined ? {} : { name }),
   }
-}
-
-function normalizeProfileText(value: string | undefined) {
-  const trimmed = value?.trim()
-
-  return trimmed === undefined || trimmed === "" ? undefined : trimmed
 }

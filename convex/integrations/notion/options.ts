@@ -1,8 +1,8 @@
 import { fetchJsonObject } from "../../shared/http"
+import { optionalString } from "../../shared/input"
 import {
   maxOptions,
   type OptionLoaderArgs,
-  optionalOptionString,
   readArray,
   readRecord,
   requiredOptionString,
@@ -24,7 +24,7 @@ export async function searchNotionObjects(args: OptionLoaderArgs) {
     return {
       value: requiredOptionString(object.id),
       label: notionPageTitle(object) ?? requiredOptionString(object.id),
-      description: optionalOptionString(object.url),
+      description: optionalString(object.url),
     }
   })
 }

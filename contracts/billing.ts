@@ -82,7 +82,7 @@ export const autoTopUp = {
 /** The model Milo runs on, and therefore the rate usage is billed at. */
 export const agentModel = "openai/gpt-5.6-sol"
 
-export type ModelRate = {
+type ModelRate = {
   inputMicrosPerToken: number
   outputMicrosPerToken: number
 }

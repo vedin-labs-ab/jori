@@ -53,7 +53,7 @@ export async function ensurePlace(
   return place
 }
 
-export async function findPlace(
+async function findPlace(
   ctx: QueryLikeCtx,
   args: {
     organizationId: string

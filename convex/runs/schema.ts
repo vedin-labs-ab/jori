@@ -32,7 +32,7 @@ const runSnapshotContext = v.object({
   timestamp: v.optional(v.number()),
 })
 
-export const runSnapshot = v.object({
+const runSnapshot = v.object({
   title: v.string(),
   source: v.object({
     type: v.union(

@@ -2,7 +2,7 @@
 // describe the setup flow, fields hold typed values, and behaviors group the
 // values that together express one user-visible outcome.
 
-export type PlaybookOptionValue = boolean | number | string
+type PlaybookOptionValue = boolean | number | string
 export type PlaybookOptionValues = Record<string, PlaybookOptionValue>
 
 type PlaybookOptionBase = {
@@ -13,7 +13,7 @@ type PlaybookOptionBase = {
   enabledWhen?: { key: string; value: PlaybookOptionValue }
 }
 
-export type PlaybookBooleanOptionField = PlaybookOptionBase & {
+type PlaybookBooleanOptionField = PlaybookOptionBase & {
   kind: "boolean"
   default: boolean
 }

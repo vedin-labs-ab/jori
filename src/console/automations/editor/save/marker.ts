@@ -6,7 +6,7 @@ export const automationInstructionMarkerErrors = {
     "Some selected integration tools are not available for automations.",
 } as const
 
-export type AutomationInstructionMarkerError =
+type AutomationInstructionMarkerError =
   (typeof automationInstructionMarkerErrors)[keyof typeof automationInstructionMarkerErrors]
 
 export function readAutomationInstructionMarkerError(

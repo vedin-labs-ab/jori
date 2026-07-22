@@ -9,10 +9,7 @@ const integrationOfferSubject = v.object({
   kind: v.literal("integrationOffer"),
   id: v.id("integrationOffers"),
 })
-export const transitionSubject = v.union(
-  approvalSubject,
-  integrationOfferSubject
-)
+const transitionSubject = v.union(approvalSubject, integrationOfferSubject)
 const transitionType = v.union(
   v.literal("created"),
   v.literal("delivered"),

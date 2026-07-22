@@ -20,7 +20,6 @@ import { ContractEntryList, TitleVersion } from "../contract"
 import {
   automationSummary,
   type CapabilityGroup,
-  currentVersionMessage,
   stateContractEntries,
 } from "../format"
 import { type ArtifactSummary } from "../types"
@@ -123,7 +122,9 @@ function ContractRow({ artifact }: { artifact: ArtifactSummary }) {
 }
 
 function SummaryRow({ artifact }: { artifact: ArtifactSummary }) {
-  const message = currentVersionMessage(artifact)
+  const message = artifact.versions.find(
+    (version) => version.isCurrent
+  )?.message
 
   if (message === undefined) {
     return null

@@ -9,64 +9,38 @@ import {
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 
-export type TaskItemFileProps = ComponentProps<"div">
-
-export const TaskItemFile = ({
+export const TaskItem = ({
   children,
   className,
   ...props
-}: TaskItemFileProps) => (
-  <div
-    className={cn(
-      "inline-flex items-center gap-1 rounded-md border bg-secondary px-1.5 py-0.5 text-foreground text-xs",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-)
-
-export type TaskItemProps = ComponentProps<"div">
-
-export const TaskItem = ({ children, className, ...props }: TaskItemProps) => (
+}: ComponentProps<"div">) => (
   <div className={cn("text-muted-foreground text-sm", className)} {...props}>
     {children}
   </div>
 )
 
-export type TaskLabelProps = ComponentProps<"span"> & {
-  shimmer?: boolean
-}
-
 export const TaskLabel = ({
   className,
   shimmer = false,
   ...props
-}: TaskLabelProps) => (
+}: ComponentProps<"span"> & { shimmer?: boolean }) => (
   <span className={cn(shimmer ? "shimmer" : null, className)} {...props} />
 )
-
-export type TaskProps = ComponentProps<typeof Collapsible>
 
 export const Task = ({
   defaultOpen = true,
   className,
   ...props
-}: TaskProps) => (
-  <Collapsible className={cn(className)} defaultOpen={defaultOpen} {...props} />
+}: ComponentProps<typeof Collapsible>) => (
+  <Collapsible className={className} defaultOpen={defaultOpen} {...props} />
 )
-
-export type TaskTriggerProps = ComponentProps<typeof CollapsibleTrigger> & {
-  title: string
-}
 
 export const TaskTrigger = ({
   children,
   className,
   title,
   ...props
-}: TaskTriggerProps) => (
+}: ComponentProps<typeof CollapsibleTrigger> & { title: string }) => (
   <CollapsibleTrigger asChild className={cn("group", className)} {...props}>
     {children ?? (
       <div className="flex w-full cursor-pointer items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground">
@@ -78,13 +52,11 @@ export const TaskTrigger = ({
   </CollapsibleTrigger>
 )
 
-export type TaskContentProps = ComponentProps<typeof CollapsibleContent>
-
 export const TaskContent = ({
   children,
   className,
   ...props
-}: TaskContentProps) => (
+}: ComponentProps<typeof CollapsibleContent>) => (
   <CollapsibleContent
     className={cn(
       "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",

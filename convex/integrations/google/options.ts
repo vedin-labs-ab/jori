@@ -1,9 +1,9 @@
+import { optionalString } from "../../shared/input"
 import {
   compactDescription,
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
-  optionalOptionString,
   optionMatches,
   readArray,
   readRecord,
@@ -25,7 +25,7 @@ export async function searchGmailLabels(args: OptionLoaderArgs) {
     .map((label) => ({
       value: requiredOptionString(label.id),
       label: requiredOptionString(label.name),
-      description: optionalOptionString(label.type),
+      description: optionalString(label.type),
     }))
     .filter((option) => optionMatches(option, normalizedQuery))
     .slice(0, maxOptions)
@@ -54,6 +54,6 @@ function googleAccessToken(args: OptionLoaderArgs) {
 function googleCalendarDescription(calendar: Record<string, unknown>) {
   return compactDescription([
     calendar.primary === true ? "Primary" : undefined,
-    optionalOptionString(calendar.accessRole),
+    optionalString(calendar.accessRole),
   ])
 }

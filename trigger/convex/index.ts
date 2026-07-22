@@ -1,19 +1,17 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../../contracts/integrations"
 import { type JsonObject } from "../../contracts/json"
-import { type RuntimePrompt } from "../../contracts/runtime/prompt"
 import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
 import {
-  type ActiveSurface,
   type AgentRunPayload,
   type AgentRunStatus,
   type DrainedSessionBatch,
   type HandoffSubject,
   type RunHandoffs,
   type RuntimeContext,
+  type RuntimeContextReload,
   type RuntimeEventInput,
   type RuntimeId,
-  type RuntimeTool,
   type WaiterCondition,
 } from "../../contracts/runtime/worker"
 import { decodeToolResult, encodeToolInput } from "../../contracts/transport"
@@ -136,11 +134,7 @@ export class MiloConvexClient implements RuntimePlatform {
     return (await this.client.action(api.runtime.context.reload, {
       runId: args.runId,
       secret: this.secret,
-    })) as {
-      prompt: RuntimePrompt
-      tools: RuntimeTool[]
-      activeSurface: ActiveSurface | null
-    }
+    })) as RuntimeContextReload
   }
 
   async sendReply(args: {

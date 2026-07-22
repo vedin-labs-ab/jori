@@ -1,4 +1,4 @@
-export type AutomationCommentEventAction = "created" | "edited"
+type AutomationCommentEventAction = "created" | "edited"
 
 export const issueCommentEvent = {
   created: "issue.comment.created",

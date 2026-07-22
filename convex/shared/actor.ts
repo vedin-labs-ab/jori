@@ -15,7 +15,7 @@ export type Actor =
       email?: string
     }
 
-export const actorKindValidator = v.union(
+const actorKindValidator = v.union(
   v.literal("bot"),
   v.literal("person"),
   v.literal("self")

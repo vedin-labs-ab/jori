@@ -22,7 +22,7 @@ type SettingsDialogProps = {
 }
 
 type AccountSettingsView = "account" | "security"
-export type OrganizationSettingsView = "general" | "people" | "billing"
+type OrganizationSettingsView = "general" | "people" | "billing"
 
 const accountViews = [
   { icon: UserRound, label: "Account", value: "account" },

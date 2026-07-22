@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { type QueryLikeCtx } from "../../shared/context"
+import { optionalString } from "../../shared/input"
 import { normalizeEmail } from "../email"
 import { type IdentityProvider, type LinkMethod } from "./schema"
 
@@ -121,7 +122,7 @@ export function normalizeExternalId(
 
 export function normalizeProfile(profile: IdentityProfile): IdentityProfile {
   const email = normalizeEmail(profile.email)
-  const name = normalizeText(profile.name)
+  const name = optionalString(profile.name)
 
   return {
     ...(email === undefined ? {} : { email }),
@@ -131,12 +132,6 @@ export function normalizeProfile(profile: IdentityProfile): IdentityProfile {
 
 function outranksOrEquals(left: LinkMethod, right: LinkMethod) {
   return methodRank[left] >= methodRank[right]
-}
-
-function normalizeText(value: string | undefined) {
-  const trimmed = value?.trim()
-
-  return trimmed === undefined || trimmed === "" ? undefined : trimmed
 }
 
 function linkValue(method: LinkMethod, linkedAt: number, evidence?: string) {

@@ -1,6 +1,6 @@
 import { type Id } from "../../_generated/dataModel"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
-import { base64UrlDecodeBytes, base64UrlEncode } from "../../shared/encoding"
+import { base64UrlDecode, base64UrlEncode } from "../../shared/encoding"
 
 export type ProviderInstallState = {
   organizationId: string
@@ -34,7 +34,5 @@ export async function parseSignedState<State>(args: {
     throw new Error(`Invalid ${args.errorLabel} state signature`)
   }
 
-  return JSON.parse(
-    new TextDecoder().decode(base64UrlDecodeBytes(payload))
-  ) as State
+  return JSON.parse(base64UrlDecode(payload)) as State
 }

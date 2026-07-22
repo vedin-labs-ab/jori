@@ -10,7 +10,7 @@ import {
 } from "./catalog"
 import { getAutomationSurfaceScopeIssue } from "./scope"
 
-export type AutomationToolPermissions = ToolPermission[] | null | undefined
+type AutomationToolPermissions = ToolPermission[] | null | undefined
 export type AutomationToolAccess =
   | { kind: "ready" | "builtIn" | "web" }
   | { integration: AutomationSurfaceIntegration; kind: "integration" }
