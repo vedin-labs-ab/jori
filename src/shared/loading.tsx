@@ -14,7 +14,6 @@ import {
 import { cn } from "@/lib/utils"
 
 /** Loading primitives shared by public, console, and artifact routes. */
-let hasShownFullscreenLoaderFade = false
 const fullscreenLoaderHideDelayMs = 150
 
 type FullscreenLoadingContextValue = {
@@ -38,11 +37,13 @@ export function LoadingMessage({ label }: { label: string }) {
 
 export function FullscreenLoadingProvider({
   children,
+  initiallyVisible = false,
 }: {
   children: ReactNode
+  initiallyVisible?: boolean
 }) {
   const [activeCount, setActiveCount] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(initiallyVisible)
   const hideTimeoutRef = useRef<number | undefined>(undefined)
   const register = useCallback(() => {
     window.clearTimeout(hideTimeoutRef.current)
@@ -78,12 +79,10 @@ export function FullscreenLoadingProvider({
 
 export function FullscreenSkeletonLoader({
   className,
-  fadeOnInitialMount = true,
   mode = "viewport",
   style,
   ...props
 }: ComponentProps<"div"> & {
-  fadeOnInitialMount?: boolean
   mode?: "fill" | "viewport"
 }) {
   const loadingContext = useContext(FullscreenLoadingContext)
@@ -95,7 +94,6 @@ export function FullscreenSkeletonLoader({
   return (
     <FullscreenLoadingOverlay
       className={className}
-      fadeOnInitialMount={fadeOnInitialMount}
       isVisible
       mode={mode}
       style={style}
@@ -116,26 +114,23 @@ function FullscreenLoadingSignal() {
 
 function FullscreenLoadingOverlay({
   className,
-  fadeOnInitialMount = true,
   isVisible,
   mode = "viewport",
   style,
   ...props
 }: ComponentProps<"div"> & {
-  fadeOnInitialMount?: boolean
   isVisible: boolean
   mode?: "fill" | "viewport"
 }) {
-  const shouldFade = useInitialFullscreenLoaderFade(fadeOnInitialMount)
-
   return (
     <div
       aria-hidden={isVisible ? undefined : true}
       aria-label="Loading"
       className={cn(
-        "grid w-full place-items-center bg-muted transition-opacity duration-150",
-        shouldFade && "duration-200 animate-in fade-in-0",
-        isVisible ? "opacity-100" : "pointer-events-none opacity-0",
+        "grid w-full place-items-center bg-muted",
+        isVisible
+          ? "opacity-100"
+          : "pointer-events-none opacity-0 transition-opacity duration-150 motion-reduce:transition-none",
         mode === "viewport"
           ? "fixed inset-0 z-50 min-h-svh"
           : "h-full min-h-0 flex-1",
@@ -151,16 +146,4 @@ function FullscreenLoadingOverlay({
       />
     </div>
   )
-}
-
-function useInitialFullscreenLoaderFade(enabled: boolean) {
-  const [shouldFade] = useState(() => enabled && !hasShownFullscreenLoaderFade)
-
-  useEffect(() => {
-    if (shouldFade) {
-      hasShownFullscreenLoaderFade = true
-    }
-  }, [shouldFade])
-
-  return shouldFade
 }

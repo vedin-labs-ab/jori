@@ -32,7 +32,6 @@ export function ConsolePage({
   loadingFallback?: ReactNode
 }) {
   const session = useSession()
-  const convex = useConvexSession()
   const loader = loadingFallback ?? <FullscreenSkeletonLoader />
 
   if (session.isPending) {
@@ -47,30 +46,10 @@ export function ConsolePage({
     )
   }
 
-  if (convex.isLoading) {
-    return loader
-  }
-
-  if (!convex.isAuthenticated) {
-    return (
-      <PublicConsoleFrame isSignedIn>
-        <Alert variant="destructive">
-          <AlertTitle>Couldn't verify your session</AlertTitle>
-          <AlertDescription>
-            Sign out and back in, then try again.
-          </AlertDescription>
-        </Alert>
-      </PublicConsoleFrame>
-    )
-  }
-
   return (
-    <>
-      {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
-      <OrganizationBoundary chrome={chrome} loader={loader}>
-        {children}
-      </OrganizationBoundary>
-    </>
+    <SignedInConsole chrome={chrome} loader={loader}>
+      {children}
+    </SignedInConsole>
   )
 }
 
@@ -96,7 +75,7 @@ function SignedOutView() {
 /** Resolves the active organization: renders the console once one is active,
  *  activates the first membership when none is, and otherwise offers
  *  creation alongside any pending invitations. */
-function OrganizationBoundary({
+function SignedInConsole({
   children,
   chrome,
   loader,
@@ -105,16 +84,22 @@ function OrganizationBoundary({
   chrome: "shell" | "none"
   loader: ReactNode
 }) {
+  const convex = useConvexSession()
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
 
-  if (active.isPending || organizations.isPending) {
+  if (convex.isLoading || active.isPending || organizations.isPending) {
     return loader
+  }
+
+  if (!convex.isAuthenticated) {
+    return <ConvexSessionError />
   }
 
   if (active.data !== null && active.data !== undefined) {
     const content = (
       <>
+        {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
         <SessionSync organizationId={active.data.id} />
         <OnboardingGate />
         {children(active.data.id)}
@@ -133,6 +118,19 @@ function OrganizationBoundary({
   return (
     <PublicConsoleFrame isSignedIn>
       <CreateOrganizationView />
+    </PublicConsoleFrame>
+  )
+}
+
+function ConvexSessionError() {
+  return (
+    <PublicConsoleFrame isSignedIn>
+      <Alert variant="destructive">
+        <AlertTitle>Couldn't verify your session</AlertTitle>
+        <AlertDescription>
+          Sign out and back in, then try again.
+        </AlertDescription>
+      </Alert>
     </PublicConsoleFrame>
   )
 }
