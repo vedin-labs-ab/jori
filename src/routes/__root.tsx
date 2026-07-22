@@ -167,15 +167,17 @@ function readErrorMessage(error: unknown) {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const usesSessionProvider = useRouterState({
-    select: (state) => {
-      const routeId = state.matches.at(-1)?.routeId
-
-      return routeId === undefined || !providerlessRouteIds.has(routeId)
-    },
+  const routeId = useRouterState({
+    select: (state) => state.matches.at(-1)?.routeId,
   })
+  const usesSessionProvider =
+    routeId === undefined || !providerlessRouteIds.has(routeId)
+  // Console routes need client session state before they can render. Auth
+  // routes and public pages already send their complete first view from SSR.
+  const waitsForClientSession =
+    usesSessionProvider && !routeId?.startsWith("/auth/")
   const content = (
-    <FullscreenLoadingProvider>
+    <FullscreenLoadingProvider initiallyVisible={waitsForClientSession}>
       <TooltipProvider>{children}</TooltipProvider>
     </FullscreenLoadingProvider>
   )
