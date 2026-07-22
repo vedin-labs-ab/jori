@@ -9,7 +9,7 @@ import {
   useSession
 } from "@better-auth-ui/react"
 import type { Organization } from "better-auth/client"
-import type { ComponentProps } from "react"
+import type { ComponentProps, ReactNode } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
@@ -26,6 +26,7 @@ export type OrganizationViewProps = {
   size?: OrganizationLogoSize
   hideRole?: boolean
   hideSlug?: boolean
+  logo?: ReactNode
   organization?: Partial<Organization>
 }
 
@@ -38,6 +39,7 @@ export function OrganizationView({
   size = "md",
   hideSlug,
   hideRole,
+  logo,
   organization,
   ...props
 }: OrganizationViewProps & ComponentProps<"div">) {
@@ -85,15 +87,17 @@ export function OrganizationView({
       className={cn("flex min-w-0 items-center gap-2", className)}
       {...props}
     >
-      <OrganizationLogo
-        organization={resolvedOrganization}
-        className={
-          size === "sm"
-            ? "size-6 [&_[data-slot=avatar-fallback]]:text-xs"
-            : undefined
-        }
-        size={size === "lg" ? "md" : "sm"}
-      />
+      {logo ?? (
+        <OrganizationLogo
+          organization={resolvedOrganization}
+          className={
+            size === "sm"
+              ? "size-6 [&_[data-slot=avatar-fallback]]:text-xs"
+              : undefined
+          }
+          size={size === "lg" ? "md" : "sm"}
+        />
+      )}
 
       <div className="flex min-w-0 flex-col">
         <div className="flex min-w-0 items-center gap-2">
