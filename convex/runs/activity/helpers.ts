@@ -1,5 +1,6 @@
 import { isRecord } from "../../../contracts/json"
 import { collapseWhitespace } from "../../../contracts/text"
+import { optionalNumber, optionalString } from "../../shared/input"
 import { type ActivityMetadataItem } from "./types"
 
 type MetadataKind = ActivityMetadataItem["kind"]
@@ -8,8 +9,8 @@ const maxTextLength = 80
 const maxItems = 5
 
 export function repositoryLabel(input: Record<string, unknown>) {
-  const owner = readString(input.owner)
-  const repo = readString(input.repo)
+  const owner = optionalString(input.owner)
+  const repo = optionalString(input.repo)
 
   return owner === undefined || repo === undefined
     ? undefined
@@ -18,7 +19,8 @@ export function repositoryLabel(input: Record<string, unknown>) {
 
 export function issueOrPullTarget(input: Record<string, unknown>) {
   const repo = repositoryLabel(input)
-  const number = readNumber(input.issueNumber) ?? readNumber(input.pullNumber)
+  const number =
+    optionalNumber(input.issueNumber) ?? optionalNumber(input.pullNumber)
 
   return repo === undefined || number === undefined
     ? undefined
@@ -27,7 +29,7 @@ export function issueOrPullTarget(input: Record<string, unknown>) {
 
 export function fileTarget(input: Record<string, unknown>) {
   const repo = repositoryLabel(input)
-  const path = readString(input.path)
+  const path = optionalString(input.path)
 
   if (path === undefined) {
     return repo
@@ -45,7 +47,7 @@ export function domainScope(value: unknown, prefix: string) {
 }
 
 export function channelLabel(value: unknown) {
-  const channel = readString(value)
+  const channel = optionalString(value)
 
   return channel === undefined
     ? undefined
@@ -59,8 +61,8 @@ export function targetObjectLabel(value: unknown) {
     return undefined
   }
 
-  const id = readString(value.id)
-  const type = readString(value.type)
+  const id = optionalString(value.id)
+  const type = optionalString(value.type)
 
   if (id === undefined) {
     return undefined
@@ -109,12 +111,6 @@ export function item(kind: MetadataKind, value: string | undefined) {
   return text === undefined ? undefined : { kind, text }
 }
 
-export function readString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
-}
-
 export function readStringArray(value: unknown) {
   if (!Array.isArray(value)) {
     return undefined
@@ -123,10 +119,6 @@ export function readStringArray(value: unknown) {
   const items = value.filter((item): item is string => typeof item === "string")
 
   return items.length === 0 ? undefined : items
-}
-
-export function readNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }
 
 export function arrayLength(value: unknown) {

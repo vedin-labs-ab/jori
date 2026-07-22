@@ -47,7 +47,7 @@ export async function executeAgentTool(
   throw new Error(`Unknown agent tool: ${name}`)
 }
 
-export async function waitForAgents(
+async function waitForAgents(
   runtime: ToolRuntime,
   input: JsonObject,
   onParked?: () => Promise<void>

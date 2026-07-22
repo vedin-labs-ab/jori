@@ -1,5 +1,6 @@
 import { clampShareExpiryHours } from "../../../../contracts/artifacts/share"
-import { item, readNumber, readString } from "../helpers"
+import { optionalNumber, optionalString } from "../../../shared/input"
+import { item } from "../helpers"
 
 type ArtifactMetadataArgs = {
   artifactTitles: ReadonlyMap<string, string>
@@ -24,7 +25,7 @@ export function artifactMetadata(args: ArtifactMetadataArgs) {
   if (isArtifactStateTool(args.tool)) {
     return [
       item("target", artifactTitle),
-      item("scope", readString(args.input?.contractName)),
+      item("scope", optionalString(args.input?.contractName)),
     ]
   }
 
@@ -44,7 +45,7 @@ export function activityArtifactId(
   }
 
   return (
-    readString(input?.artifactId) ??
+    optionalString(input?.artifactId) ??
     (isArtifactStateTool(tool) ? runArtifactId : undefined)
   )
 }
@@ -54,7 +55,7 @@ function isArtifactStateTool(tool: string | undefined) {
 }
 
 function shareDurationLabel(value: unknown) {
-  const hours = clampShareExpiryHours(readNumber(value))
+  const hours = clampShareExpiryHours(optionalNumber(value))
 
   return `${hours}h link`
 }

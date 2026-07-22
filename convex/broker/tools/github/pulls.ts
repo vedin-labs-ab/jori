@@ -5,6 +5,7 @@ import {
 } from "../../../integrations/github/delivery/format"
 import {
   boundedNumber,
+  optionalBoolean,
   optionalString,
   readArray,
   readRecord,
@@ -126,8 +127,4 @@ function readPullRequestState(value: unknown) {
   }
 
   return undefined
-}
-
-function optionalBoolean(value: unknown) {
-  return typeof value === "boolean" ? value : undefined
 }

@@ -1,5 +1,18 @@
-import { isRecord } from "../../../contracts/json"
-import { type ToolRuntime } from "../runtime"
+import { isRecord, type JsonObject } from "../../contracts/json"
+import { type ToolRuntime } from "./runtime"
+
+export function toolResult(value: unknown, finished = false) {
+  return { finished, value }
+}
+
+export function toolErrorResult(message: string): JsonObject {
+  return {
+    error: {
+      message,
+    },
+    status: "error",
+  }
+}
 
 export async function materializeSandboxResult(
   runtime: ToolRuntime,

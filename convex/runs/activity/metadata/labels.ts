@@ -1,4 +1,5 @@
-import { readNumber, readStringArray } from "../helpers"
+import { optionalNumber } from "../../../shared/input"
+import { readStringArray } from "../helpers"
 import { type ToolResult } from "../read"
 
 export function activityFilterLabel(value: unknown) {
@@ -87,7 +88,7 @@ function dateLabel(value: number) {
 }
 
 function readTimestamp(value: unknown) {
-  const timestamp = readNumber(value)
+  const timestamp = optionalNumber(value)
 
   return timestamp === undefined || timestamp <= 0 ? undefined : timestamp
 }

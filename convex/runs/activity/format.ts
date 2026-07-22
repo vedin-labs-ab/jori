@@ -1,5 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
-import { readString } from "./helpers"
+import { optionalString } from "../../shared/input"
 import { type ActivityDetail } from "./types"
 
 const visibleInputKeys = [
@@ -65,16 +65,16 @@ export function inputDescription(input: Record<string, unknown> | undefined) {
   }
 
   return (
-    readString(input.command) ??
+    optionalString(input.command) ??
     stringArrayField(input.args) ??
-    readString(input.pattern) ??
-    readString(input.path) ??
-    readString(input.directory) ??
-    readString(input.repo) ??
-    readString(input.query) ??
-    readString(input.q) ??
-    readString(input.url) ??
-    readString(input.subject)
+    optionalString(input.pattern) ??
+    optionalString(input.path) ??
+    optionalString(input.directory) ??
+    optionalString(input.repo) ??
+    optionalString(input.query) ??
+    optionalString(input.q) ??
+    optionalString(input.url) ??
+    optionalString(input.subject)
   )
 }
 

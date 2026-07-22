@@ -52,10 +52,6 @@ export function readRecord(value: unknown) {
     : {}
 }
 
-export function readArray(value: unknown): unknown[] {
-  return Array.isArray(value) ? value : []
-}
-
 export function readNestedString(
   value: Record<string, unknown>,
   key: string,
@@ -78,10 +74,6 @@ export function requiredOptionNumber(value: unknown) {
   }
 
   return value
-}
-
-export function optionalOptionNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }
 
 export function normalizeQuery(value: string) {

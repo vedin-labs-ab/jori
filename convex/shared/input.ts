@@ -26,6 +26,14 @@ export function optionalString(value: unknown) {
     : undefined
 }
 
+export function optionalNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined
+}
+
+export function optionalBoolean(value: unknown) {
+  return typeof value === "boolean" ? value : undefined
+}
+
 export function requiredNumber(value: unknown, name: string) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     throw new Error(`${name} is required`)
@@ -119,7 +127,5 @@ export function readString(data: unknown, key: string) {
 }
 
 export function readNumber(data: unknown, key: string) {
-  const value = readValue(data, key)
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
+  return optionalNumber(readValue(data, key))
 }

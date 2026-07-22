@@ -1,11 +1,10 @@
-import { optionalString } from "../../shared/input"
+import { optionalString, readArray } from "../../shared/input"
 import {
   compactDescription,
   maxOptions,
   normalizeQuery,
   type OptionLoaderArgs,
   optionMatches,
-  readArray,
   readRecord,
   requiredOptionString,
 } from "../options/common"

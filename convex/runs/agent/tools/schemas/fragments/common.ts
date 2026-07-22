@@ -178,10 +178,6 @@ export function readString(value: unknown) {
   return typeof value === "string" ? value : undefined
 }
 
-export function readNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
 export function isJsonSchema(value: unknown): value is JsonSchema {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }

@@ -118,7 +118,7 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
       </TaskTrigger>
       <TaskContent className="mt-2 data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none">
         {task.items.map((item) => (
-          <ExplorationItem item={item} key={item.key} now={now} showStatus />
+          <ExplorationItem item={item} key={item.key} now={now} />
         ))}
       </TaskContent>
     </Task>
@@ -134,15 +134,13 @@ type OpenPreference = {
 function ExplorationItem({
   item,
   now,
-  showStatus,
 }: {
   item: DiscoveryTaskItem
   now: number
-  showStatus: boolean
 }) {
   return (
     <TaskItem className="flex h-6 min-w-0 items-center gap-2 text-xs">
-      {showStatus ? <ItemStatusIcon status={item.status} /> : null}
+      <ItemStatusIcon status={item.status} />
       <span
         className={cn(
           "min-w-0 flex-1 truncate text-foreground",
@@ -169,20 +167,11 @@ function ElapsedTime({ children }: { children: string | null }) {
   )
 }
 
-function IconSlot({
-  children,
-  size = "md",
-}: {
-  children: ReactNode
-  size?: "md" | "sm"
-}) {
+function IconSlot({ children }: { children: ReactNode }) {
   return (
     <span
       aria-hidden={children === null ? "true" : undefined}
-      className={cn(
-        "flex shrink-0 items-center justify-center",
-        size === "md" ? "size-4" : "size-3.5"
-      )}
+      className="flex size-4 shrink-0 items-center justify-center"
     >
       {children}
     </span>

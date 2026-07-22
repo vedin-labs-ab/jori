@@ -4,7 +4,7 @@ import {
   type RuntimeValueSummary,
 } from "../../../contracts/runtime"
 import { type Doc } from "../../_generated/dataModel"
-import { readNumber, readString } from "./helpers"
+import { optionalNumber, optionalString } from "../../shared/input"
 import { type ToolLabel } from "./types"
 
 export type ToolResult = RuntimeValueSummary
@@ -30,7 +30,7 @@ export function readPreparedTools(data: unknown) {
 }
 
 export function readTraceError(data: unknown) {
-  return readString(asRecord(data)?.error)
+  return optionalString(asRecord(data)?.error)
 }
 
 export function readTraceData(trace: Doc<"traces">) {
@@ -53,20 +53,20 @@ export function readModelUsage(data: unknown): ModelUsage | undefined {
   }
 
   return {
-    durationMs: readNumber(usage.durationMs) ?? 0,
-    inputTokens: readNumber(usage.inputTokens) ?? 0,
-    inputCacheReadTokens: readNumber(usage.inputCacheReadTokens) ?? 0,
-    inputCacheWriteTokens: readNumber(usage.inputCacheWriteTokens) ?? 0,
-    inputUncachedTokens: readNumber(usage.inputUncachedTokens) ?? 0,
-    outputTokens: readNumber(usage.outputTokens) ?? 0,
-    reasoningTokens: readNumber(usage.reasoningTokens) ?? 0,
-    totalTokens: readNumber(usage.totalTokens) ?? 0,
-    toolCalls: readNumber(usage.toolCalls) ?? 0,
+    durationMs: optionalNumber(usage.durationMs) ?? 0,
+    inputTokens: optionalNumber(usage.inputTokens) ?? 0,
+    inputCacheReadTokens: optionalNumber(usage.inputCacheReadTokens) ?? 0,
+    inputCacheWriteTokens: optionalNumber(usage.inputCacheWriteTokens) ?? 0,
+    inputUncachedTokens: optionalNumber(usage.inputUncachedTokens) ?? 0,
+    outputTokens: optionalNumber(usage.outputTokens) ?? 0,
+    reasoningTokens: optionalNumber(usage.reasoningTokens) ?? 0,
+    totalTokens: optionalNumber(usage.totalTokens) ?? 0,
+    toolCalls: optionalNumber(usage.toolCalls) ?? 0,
   }
 }
 
 export function readModelReasoning(data: unknown) {
-  const reasoning = readString(asRecord(data)?.reasoning)
+  const reasoning = optionalString(asRecord(data)?.reasoning)
 
   return reasoning === undefined
     ? undefined
@@ -91,7 +91,7 @@ export function readToolName(data: unknown) {
 
 export function readToolResult(data: unknown): ToolResult | undefined {
   const result = asRecord(asRecord(data)?.result)
-  const kind = readString(result?.kind)
+  const kind = optionalString(result?.kind)
 
   if (kind === undefined) {
     return undefined
@@ -106,8 +106,8 @@ function readTool(
   | { access: NonNullable<ToolLabel["access"]>; name: string; route: string }
   | undefined {
   const tool = asRecord(asRecord(data)?.tool)
-  const name = readString(tool?.name)
-  const route = readString(tool?.route)
+  const name = optionalString(tool?.name)
+  const route = optionalString(tool?.route)
   const access =
     tool?.access === "read" || tool?.access === "write"
       ? tool.access
@@ -145,13 +145,13 @@ function resultSize(
   kind: "array",
   result: Record<string, unknown> | undefined
 ) {
-  const size = readNumber(result?.size)
+  const size = optionalNumber(result?.size)
 
   return size === undefined ? undefined : { kind, size }
 }
 
 function objectResult(result: Record<string, unknown> | undefined) {
-  const size = readNumber(result?.size)
+  const size = optionalNumber(result?.size)
 
   if (size === undefined) {
     return undefined
@@ -160,8 +160,8 @@ function objectResult(result: Record<string, unknown> | undefined) {
   return {
     kind: "object" as const,
     size,
-    ...optionalNumber("itemCount", result?.itemCount),
-    ...optionalString("itemKey", result?.itemKey),
+    ...optionalNumberField("itemCount", result?.itemCount),
+    ...optionalStringField("itemKey", result?.itemKey),
     ...optionalBoolean("hasMore", result?.hasMore),
   }
 }
@@ -170,14 +170,14 @@ function resultPreview(
   kind: "number",
   result: Record<string, unknown> | undefined
 ) {
-  const preview = readString(result?.preview)
+  const preview = optionalString(result?.preview)
 
   return preview === undefined ? undefined : { kind, preview }
 }
 
 function resultString(result: Record<string, unknown> | undefined) {
-  const preview = readString(result?.preview)
-  const length = readNumber(result?.length)
+  const preview = optionalString(result?.preview)
+  const length = optionalNumber(result?.length)
 
   return preview === undefined || length === undefined
     ? undefined
@@ -189,8 +189,8 @@ function readPreparedTool(value: unknown): ToolLabel[] {
     return []
   }
 
-  const tool = readString(value.tool)
-  const label = readString(value.label)
+  const tool = optionalString(value.tool)
+  const label = optionalString(value.label)
   const access =
     value.access === "read" || value.access === "write"
       ? value.access
@@ -203,7 +203,7 @@ function readPreparedTool(value: unknown): ToolLabel[] {
   return [
     {
       access,
-      description: readString(value.description),
+      description: optionalString(value.description),
       label,
       tool,
     },
@@ -214,14 +214,14 @@ function optionalBoolean(key: "hasMore", value: unknown) {
   return typeof value === "boolean" ? { [key]: value } : {}
 }
 
-function optionalNumber(key: "itemCount", value: unknown) {
-  const number = readNumber(value)
+function optionalNumberField(key: "itemCount", value: unknown) {
+  const number = optionalNumber(value)
 
   return number === undefined ? {} : { [key]: number }
 }
 
-function optionalString(key: "itemKey", value: unknown) {
-  const string = readString(value)
+function optionalStringField(key: "itemKey", value: unknown) {
+  const string = optionalString(value)
 
   return string === undefined ? {} : { [key]: string }
 }

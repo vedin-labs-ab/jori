@@ -2,11 +2,11 @@ import { type JsonObject } from "../../../contracts/json"
 import {
   isJsonSchema,
   type JsonSchema,
-  readNumber,
   readSchemaMap,
   readString,
   readStringArray,
 } from "../../runs/agent/tools/schemas"
+import { optionalNumber } from "../../shared/input"
 
 export function validateSchemaValue(
   value: unknown,
@@ -185,8 +185,8 @@ function validateArrayLength(
   schema: JsonSchema,
   path: string
 ) {
-  const minItems = readNumber(schema.minItems)
-  const maxItems = readNumber(schema.maxItems)
+  const minItems = optionalNumber(schema.minItems)
+  const maxItems = optionalNumber(schema.maxItems)
 
   if (minItems !== undefined && value.length < minItems) {
     throw new Error(`${path} must contain at least ${minItems} item`)
@@ -202,8 +202,8 @@ function validateNumber(value: unknown, schema: JsonSchema, path: string) {
     throw new Error(`${path} must be a number`)
   }
 
-  const minimum = readNumber(schema.minimum)
-  const maximum = readNumber(schema.maximum)
+  const minimum = optionalNumber(schema.minimum)
+  const maximum = optionalNumber(schema.maximum)
 
   if (minimum !== undefined && value < minimum) {
     throw new Error(`${path} must be at least ${minimum}`)
@@ -219,8 +219,8 @@ function validateString(value: unknown, schema: JsonSchema, path: string) {
     throw new Error(`${path} must be a string`)
   }
 
-  const minLength = readNumber(schema.minLength)
-  const maxLength = readNumber(schema.maxLength)
+  const minLength = optionalNumber(schema.minLength)
+  const maxLength = optionalNumber(schema.maxLength)
   const pattern = readString(schema.pattern)
 
   if (minLength !== undefined && value.length < minLength) {

@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
-import { type RuntimeId } from "../../../contracts/runtime/worker"
-import { type ToolRuntime } from "../runtime"
-import { materializeSandboxResult } from "./materialize"
+import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
+import { type RuntimeId } from "../../contracts/runtime/worker"
+import { materializeSandboxResult } from "./results"
+import { type ToolRuntime } from "./runtime"
 
 test("materializes GitHub clone descriptors as Git working copies", async () => {
   const runtime = cloneRuntime()

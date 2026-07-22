@@ -3,6 +3,7 @@ import { stableJson } from "../../../contracts/artifacts/json"
 import { type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { sha256Hex } from "../../shared/crypto"
+import { optionalNumber } from "../../shared/input"
 import { artifactCacheKeyFields } from "../schema"
 
 const minCacheTtlMs = 15 * 60 * 1000
@@ -131,7 +132,7 @@ export function normalizeArtifactToolCacheOptions(input: {
   forceRefresh?: unknown
 }): ArtifactToolCacheOptions {
   return {
-    ttlMs: clampCacheTtlMs(readOptionalNumber(input.ttlMs)),
+    ttlMs: clampCacheTtlMs(optionalNumber(input.ttlMs)),
     forceRefresh: input.forceRefresh === true,
   }
 }
@@ -193,8 +194,4 @@ function clampCacheTtlMs(value: number | undefined) {
   }
 
   return Math.max(minCacheTtlMs, Math.min(maxCacheTtlMs, Math.trunc(value)))
-}
-
-function readOptionalNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }

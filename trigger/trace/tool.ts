@@ -8,7 +8,7 @@ import {
 } from "../../contracts/runtime/worker"
 import { type ModelToolCall } from "../model/types"
 import { type RuntimePlatform } from "../platform"
-import { runtimeEvent } from "./events"
+import { recordRuntimeEvent } from "./runtime"
 
 const maxToolInputBytes = 32 * 1024
 const textEncoder = new TextEncoder()
@@ -82,16 +82,13 @@ export async function recordToolEvent(
   type: ToolEventType,
   details?: RuntimeToolCompletedDetails | RuntimeToolFailedDetails
 ) {
-  await args.convex.recordEvent(
-    runtimeEvent({
-      attempt: args.attempt,
-      callId: args.call.id,
-      data: toolTraceData(tool, type, args.call.args, details),
-      runId: args.context.run.id,
-      sequence: args.sequence,
-      type,
-    })
-  )
+  await recordRuntimeEvent(args.convex, args.context, {
+    attempt: args.attempt,
+    callId: args.call.id,
+    data: toolTraceData(tool, type, args.call.args, details),
+    sequence: args.sequence,
+    type,
+  })
 }
 
 export function traceToolInput(input: JsonValue): JsonValue | null {
