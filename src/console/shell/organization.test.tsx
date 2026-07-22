@@ -15,6 +15,7 @@ const { auth, toast } = vi.hoisted(() => ({
     organizations: [
       { id: "vedin", name: "Vedin Labs", slug: "vedin-labs" },
       { id: "test", name: "test", slug: "test" },
+      { id: "other", name: "Other organization", slug: "other" },
     ],
   },
   toast: { error: vi.fn() },
@@ -28,14 +29,12 @@ vi.mock("@/shared/session/auth", () => ({
 
 vi.mock("@/components/auth/organization/organization-view", () => ({
   OrganizationView: ({
-    logo,
     organization = auth.organizations[0],
   }: {
-    logo?: React.ReactNode
     organization?: { name: string }
   }) => (
     <div>
-      {logo ?? <span aria-hidden="true">Avatar</span>}
+      <span>Avatar</span>
       <span>{organization.name}</span>
     </div>
   ),
@@ -84,9 +83,19 @@ test("keeps the switcher open with a stable pending organization row", async () 
     expect(auth.activateOrganization).toHaveBeenCalledWith("test")
   )
   const spinner = screen.getByRole("status", { name: "Switching to test" })
-  expect(spinner.getAttribute("class")).toContain("size-6")
+  expect(spinner.getAttribute("class")).toContain("size-3.5")
   expect(screen.getByRole("menu").getAttribute("aria-busy")).toBe("true")
-  expect(screen.getByRole("menuitem", { name: /test/ })).toBeDefined()
+  const pendingItem = screen.getByRole("menuitem", { name: /test/ })
+  expect(pendingItem.textContent).toContain("Avatar")
+  expect(pendingItem.getAttribute("aria-disabled")).toBe("true")
+  expect(pendingItem.getAttribute("class")).toContain(
+    "data-disabled:opacity-50"
+  )
+  expect(
+    screen
+      .getByRole("menuitem", { name: /Other organization/ })
+      .getAttribute("aria-disabled")
+  ).toBe("true")
   expect(
     screen
       .getByRole("menuitem", { name: /Create organization/ })
@@ -96,6 +105,10 @@ test("keeps the switcher open with a stable pending organization row", async () 
     (screen.getByRole("button", { name: /Manage/ }) as HTMLButtonElement)
       .disabled
   ).toBe(true)
+  const trigger = document.querySelector<HTMLButtonElement>(
+    "[data-slot=dropdown-menu-trigger]"
+  )
+  expect(trigger?.disabled).toBe(true)
 })
 
 test("restores the switcher after a failed organization change", async () => {
