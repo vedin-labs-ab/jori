@@ -1,6 +1,6 @@
 const defaultOutputLimit = 20_000
 
-export type BoundedText = {
+type BoundedText = {
   text: string
   truncated: boolean
 }

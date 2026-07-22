@@ -5,6 +5,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { boundedNumber } from "../shared/input"
 import { assetFields } from "./schema"
 
 const maxAssetSearchResults = 100
@@ -28,7 +29,7 @@ export const search = internalQuery({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const limit = normalizeLimit(args.limit)
+    const limit = boundedNumber(args.limit, 25, 1, maxAssetSearchResults)
     const query = normalizeSearchText(args.query)
     const mimeType = normalizeSearchText(args.mimeType)
     const assets = await ctx.db
@@ -79,14 +80,6 @@ async function getOrganizationAsset(
   return asset !== null && asset.organizationId === args.organizationId
     ? asset
     : null
-}
-
-function normalizeLimit(value: number | undefined) {
-  if (value === undefined || !Number.isFinite(value)) {
-    return 25
-  }
-
-  return Math.max(1, Math.min(maxAssetSearchResults, Math.trunc(value)))
 }
 
 function normalizeSearchText(value: string | undefined) {

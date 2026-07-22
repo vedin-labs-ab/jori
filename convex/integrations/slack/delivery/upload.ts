@@ -1,4 +1,5 @@
 import { type RunAsset } from "../../../assets/read"
+import { copyBytesToArrayBuffer } from "../../../shared/encoding"
 import { requiredSlackResultString, slackFormApi, slackJsonApi } from "../api"
 
 export async function postSlackFiles(
@@ -56,12 +57,4 @@ async function uploadSlackFile(token: string, asset: RunAsset) {
     id: fileId,
     title: asset.name,
   }
-}
-
-function copyBytesToArrayBuffer(bytes: Uint8Array) {
-  const buffer = new ArrayBuffer(bytes.byteLength)
-
-  new Uint8Array(buffer).set(bytes)
-
-  return buffer
 }

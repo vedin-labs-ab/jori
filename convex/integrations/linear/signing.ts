@@ -1,23 +1,18 @@
-import { type Id } from "../../_generated/dataModel"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { requireEnvironmentVariable } from "../../shared/environment"
-import { createSignedState, parseSignedState } from "../connect/signing"
+import {
+  createSignedState,
+  type ProviderInstallState,
+  parseSignedState,
+} from "../connect/signing"
 import { requireLinearClientSecret } from "./oauth"
 
-export type LinearInstallState = {
-  organizationId: string
-  createdBy: Id<"persons">
-  returnUrl: string
-  createdAt: number
-  integrationOfferId?: Id<"integrationOffers">
-}
-
-export async function createSignedLinearState(state: LinearInstallState) {
+export async function createSignedLinearState(state: ProviderInstallState) {
   return await createSignedState(requireLinearClientSecret(), state)
 }
 
 export async function parseSignedLinearState(value: string) {
-  return await parseSignedState<LinearInstallState>({
+  return await parseSignedState<ProviderInstallState>({
     secret: requireLinearClientSecret(),
     value,
     errorLabel: "Linear",

@@ -85,14 +85,6 @@ export function formatRuntimeMessage(
   }
 }
 
-export function normalizeLimit(limit: number | undefined) {
-  if (limit === undefined || !Number.isFinite(limit)) {
-    return defaultDrainLimit
-  }
-
-  return Math.min(Math.max(1, Math.trunc(limit)), maxDrainLimit)
-}
-
 function isAfterSessionCursor(
   message: Doc<"messages">,
   cursor: MessageCursor | undefined,

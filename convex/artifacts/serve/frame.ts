@@ -1,9 +1,8 @@
 import { runtimeAssets } from "../../../runtime/artifacts/_generated/assets"
 import { type Id } from "../../_generated/dataModel"
+import { type RuntimeEnvironment } from "../../shared/app"
 
 const frameAncestorsEnv = "MILO_ARTIFACT_FRAME_ANCESTORS"
-
-type RuntimeEnvironment = Record<string, string | undefined>
 
 export type ArtifactFramePolicy = {
   frameAncestors: string[]

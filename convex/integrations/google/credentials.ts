@@ -1,18 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { requireTokenCredentials } from "../connect/credentials"
 
-export type GoogleCredentials = {
-  tokens: {
-    access: string
-    refresh: string
-  }
-  expiresAt: number
-  scope?: string
-}
-
-export function requireGoogleCredentials(
-  integration: Doc<"integrations">
-): GoogleCredentials {
+export function requireGoogleCredentials(integration: Doc<"integrations">) {
   return requireTokenCredentials(
     integration,
     {

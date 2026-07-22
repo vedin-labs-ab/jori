@@ -19,11 +19,6 @@ type CredentialResult<
   [Key in keyof Optional]?: CredentialValue<Optional[Key]>
 }
 
-type TokenShape = {
-  access?: "string"
-  refresh?: "string"
-}
-
 export function requireCredentials<
   Required extends CredentialShape,
   Optional extends CredentialShape = Record<never, never>,
@@ -50,22 +45,26 @@ export function requireCredentials<
 }
 
 export function requireTokenCredentials<
-  Required extends CredentialShape,
+  Required extends CredentialShape = Record<never, never>,
   Optional extends CredentialShape = Record<never, never>,
-  Tokens extends TokenShape = { access: "string"; refresh: "string" },
+  RequiredTokens extends CredentialShape = {
+    access: "string"
+    refresh: "string"
+  },
+  OptionalTokens extends CredentialShape = Record<never, never>,
 >(
   integration: Doc<"integrations">,
   shape: {
     required?: Required
     optional?: Optional
     tokens?: {
-      required?: Tokens
-      optional?: TokenShape
+      required?: RequiredTokens
+      optional?: OptionalTokens
     }
   },
   errorMessage: string
 ): CredentialResult<Required, Optional> & {
-  tokens: TokenResult<Tokens> & Partial<TokenResult<TokenShape>>
+  tokens: CredentialResult<RequiredTokens, OptionalTokens>
 } {
   const credentials = integration.credentials
 
@@ -88,15 +87,11 @@ export function requireTokenCredentials<
       (shape.tokens?.required ?? {
         access: "string",
         refresh: "string",
-      }) as Tokens,
-      shape.tokens?.optional ?? {},
+      }) as RequiredTokens,
+      shape.tokens?.optional ?? ({} as OptionalTokens),
       errorMessage
-    ) as TokenResult<Tokens> & Partial<TokenResult<TokenShape>>,
+    ),
   }
-}
-
-type TokenResult<Tokens extends TokenShape> = {
-  [Key in keyof Tokens]: Tokens[Key] extends "string" ? string : never
 }
 
 function readCredentialFields<

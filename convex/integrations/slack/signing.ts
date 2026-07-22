@@ -1,26 +1,21 @@
-import { type Id } from "../../_generated/dataModel"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { requireEnvironmentVariable } from "../../shared/environment"
-import { createSignedState, parseSignedState } from "../connect/signing"
-
-export type SlackInstallState = {
-  organizationId: string
-  createdBy: Id<"persons">
-  returnUrl: string
-  createdAt: number
-  integrationOfferId?: Id<"integrationOffers">
-}
+import {
+  createSignedState,
+  type ProviderInstallState,
+  parseSignedState,
+} from "../connect/signing"
 
 export function requireSlackSigningSecret() {
   return requireEnvironmentVariable("SLACK_SIGNING_SECRET")
 }
 
-export async function createSignedSlackState(state: SlackInstallState) {
+export async function createSignedSlackState(state: ProviderInstallState) {
   return await createSignedState(requireSlackSigningSecret(), state)
 }
 
 export async function parseSignedSlackState(value: string) {
-  return await parseSignedState<SlackInstallState>({
+  return await parseSignedState<ProviderInstallState>({
     secret: requireSlackSigningSecret(),
     value,
     errorLabel: "Slack",

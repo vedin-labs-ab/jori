@@ -1,12 +1,6 @@
-export type ToolAccess = "read" | "write"
+import { type ToolAccess, type ToolCapability } from "@contracts/permissions"
 
-export type ToolCapability = {
-  access: ToolAccess
-  description: string
-  label: string
-  requiresApproval?: boolean
-  tool: string
-}
+export type { ToolAccess, ToolCapability } from "@contracts/permissions"
 
 export type ToolAccessGroup<T extends ToolCapability> = {
   access: ToolAccess

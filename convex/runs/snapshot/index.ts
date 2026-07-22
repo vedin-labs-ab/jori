@@ -1,10 +1,7 @@
-import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import { type Access } from "../../shared/integrations"
-import { type MessageCauseKind, type runSnapshot } from "../schema"
+import { type MessageCauseKind, type RunSnapshot } from "../schema"
 import { automationSnapshotBody, messageSnapshotBody } from "./source"
-
-type RunSnapshot = Infer<typeof runSnapshot>
 
 type RunSnapshotInput = {
   access?: Access

@@ -11,9 +11,7 @@ import {
   runVisibleToPerson,
   summaryMatchesSearch,
 } from "./filters"
-import { summarizeRun } from "./summaries"
-
-type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
+import { type RunSummary, summarizeRun } from "./summaries"
 
 export async function pagePendingApprovals(
   ctx: QueryCtx,

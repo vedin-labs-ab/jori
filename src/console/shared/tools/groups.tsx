@@ -1,3 +1,4 @@
+import { summarizeToolCapabilities } from "@contracts/permissions"
 import { ChevronRight } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -67,7 +68,7 @@ function ToolGroupButton({
   group: ToolGroup
   onClick: () => void
 }) {
-  const counts = countTools(group.tools)
+  const counts = summarizeToolCapabilities(group.tools)
   const hasToolCounts = counts.read > 0 || counts.write > 0
 
   return (
@@ -184,26 +185,4 @@ function ToolGroupDialog({
       </DialogFooter>
     </DialogContent>
   )
-}
-
-function countTools(tools: ToolGroup["tools"]) {
-  const counts = {
-    read: 0,
-    readRequiresApproval: false,
-    write: 0,
-    writeRequiresApproval: false,
-  }
-
-  for (const tool of tools) {
-    counts[tool.access] += 1
-    if (tool.requiresApproval === true) {
-      if (tool.access === "read") {
-        counts.readRequiresApproval = true
-      } else {
-        counts.writeRequiresApproval = true
-      }
-    }
-  }
-
-  return counts
 }

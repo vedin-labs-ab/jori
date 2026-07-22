@@ -3,6 +3,7 @@ import { toolPermissionRows } from "./catalog"
 import {
   type PermissionMode,
   type PermissionOverride,
+  type ToolCapability,
   type ToolPermission,
   type ToolPermissionRoute,
 } from "./types"
@@ -13,11 +14,37 @@ export type {
   PermissionMode,
   PermissionOverride,
   ToolAccess,
+  ToolCapability,
   ToolPermission,
   ToolPermissionRoute,
   ToolPermissionRow,
   UserVisibleToolPermission,
 } from "./types"
+
+export function summarizeToolCapabilities(
+  tools: readonly Pick<ToolCapability, "access" | "requiresApproval">[]
+) {
+  const summary = {
+    read: 0,
+    readRequiresApproval: false,
+    write: 0,
+    writeRequiresApproval: false,
+  }
+
+  for (const tool of tools) {
+    summary[tool.access] += 1
+
+    if (tool.requiresApproval === true) {
+      if (tool.access === "read") {
+        summary.readRequiresApproval = true
+      } else {
+        summary.writeRequiresApproval = true
+      }
+    }
+  }
+
+  return summary
+}
 
 export const internalRequiredToolNames = [
   "finish_run",

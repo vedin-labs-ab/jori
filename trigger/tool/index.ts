@@ -26,7 +26,7 @@ import { executeActiveSurfaceTool } from "./surface"
 
 export type { ToolRuntime } from "./runtime"
 
-export type ToolCallResult = {
+type ToolCallResult = {
   content: string
   finished: boolean
 }

@@ -14,7 +14,7 @@ const generatedPath = path.join(
 const summaryPath = path.join(root, "contracts/playbooks/generated.ts")
 const versionsPath = path.join(root, "playbooks/versions.json")
 
-export async function compileArtifactTemplates(checkMode: boolean) {
+async function compileArtifactTemplates(checkMode: boolean) {
   const runtime = await fs.mkdtemp(path.join(os.tmpdir(), "milo-templates-"))
 
   try {

@@ -1,18 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { requireTokenCredentials } from "../connect/credentials"
 
-export type LinearCredentials = {
-  tokens: {
-    access: string
-    refresh: string
-  }
-  expiresAt: number
-  scope?: string
-}
-
-export function requireLinearCredentials(
-  integration: Doc<"integrations">
-): LinearCredentials {
+export function requireLinearCredentials(integration: Doc<"integrations">) {
   return requireTokenCredentials(
     integration,
     {

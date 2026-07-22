@@ -7,6 +7,7 @@ import {
   notionJson,
   notionMultipartJson,
 } from "../../../integrations/notion/api"
+import { copyBytesToArrayBuffer } from "../../../shared/encoding"
 import { optionalString, requiredString } from "../../../shared/input"
 
 const maxSinglePartUploadBytes = 20 * 1024 * 1024
@@ -98,12 +99,4 @@ function validateFilename(filename: string) {
   if (new TextEncoder().encode(filename).byteLength > maxFilenameBytes) {
     throw new Error("Notion upload filename exceeds 900 bytes")
   }
-}
-
-function copyBytesToArrayBuffer(bytes: Uint8Array) {
-  const buffer = new ArrayBuffer(bytes.byteLength)
-
-  new Uint8Array(buffer).set(bytes)
-
-  return buffer
 }

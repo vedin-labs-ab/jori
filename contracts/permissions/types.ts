@@ -22,6 +22,13 @@ export type ToolPermission = {
   defaultMode: PermissionMode
 }
 
+export type ToolCapability = Pick<
+  ToolPermission,
+  "access" | "description" | "label" | "tool"
+> & {
+  requiresApproval?: boolean
+}
+
 export type UserVisibleToolPermission = Omit<
   ToolPermission,
   "defaultMode" | "usage"

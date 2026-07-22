@@ -8,12 +8,11 @@ import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
-import { buildInstallState, upsertIntegration } from "../connect/install"
+import { createSignedInstallState, upsertIntegration } from "../connect/install"
 import {
   findActiveIntegrationByExternalId,
   findIntegrationByExternalId,
 } from "../data"
-import { createSignedSlackState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
@@ -21,7 +20,7 @@ export const createInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createSignedSlackState(await buildInstallState(ctx, args))
+    return await createSignedInstallState(ctx, "slack", args)
   },
 })
 

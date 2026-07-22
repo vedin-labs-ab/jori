@@ -1,17 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { requireCredentials } from "../connect/credentials"
 
-export type GitHubCredentials = {
-  installationId: string
-  tokens?: {
-    access?: string
-  }
-  expiresAt?: number
-}
-
-export function requireGitHubCredentials(
-  integration: Doc<"integrations">
-): GitHubCredentials {
+export function requireGitHubCredentials(integration: Doc<"integrations">) {
   const credentials = requireCredentials(
     integration,
     {

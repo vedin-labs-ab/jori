@@ -1,10 +1,9 @@
 import { v } from "convex/values"
 import { internalMutation, mutation } from "../../_generated/server"
-import { buildInstallState, upsertIntegration } from "../connect/install"
+import { createSignedInstallState, upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
 import { requireGitHubCredentials } from "./credentials"
 import { githubIntegrationData } from "./data"
-import { createSignedGitHubState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
@@ -12,7 +11,7 @@ export const createInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createSignedGitHubState(await buildInstallState(ctx, args))
+    return await createSignedInstallState(ctx, "github", args)
   },
 })
 

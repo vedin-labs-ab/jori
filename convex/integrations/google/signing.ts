@@ -1,15 +1,13 @@
-import { type Id } from "../../_generated/dataModel"
-import { createSignedState, parseSignedState } from "../connect/signing"
+import {
+  createSignedState,
+  type ProviderInstallState,
+  parseSignedState,
+} from "../connect/signing"
 import { type GoogleIntegration } from "./config"
 import { requireGoogleClientSecret } from "./oauth"
 
-export type GoogleInstallState = {
+export type GoogleInstallState = ProviderInstallState & {
   integration: GoogleIntegration
-  organizationId: string
-  createdBy: Id<"persons">
-  returnUrl: string
-  createdAt: number
-  integrationOfferId?: Id<"integrationOffers">
 }
 
 export async function createSignedGoogleState(state: GoogleInstallState) {

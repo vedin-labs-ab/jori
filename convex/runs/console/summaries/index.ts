@@ -10,6 +10,8 @@ import { runDetailSummary } from "../details"
 import { summarizeRunOffer } from "../offers"
 import { isManualTrigger, runSource, sourceSearchText } from "../source"
 
+export type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
+
 export async function summarizeRun(
   ctx: QueryCtx,
   run: Doc<"runs">,
