@@ -14,14 +14,7 @@ import { createSignedMicrosoftState } from "../microsoft/signing"
 import { createSignedNotionState } from "../notion/signing"
 import { createSignedSlackState } from "../slack/signing"
 import { redirectWithStatus } from "./http"
-
-export type ProviderInstallState = {
-  organizationId: string
-  createdBy: Id<"persons">
-  returnUrl: string
-  createdAt: number
-  integrationOfferId?: Id<"integrationOffers">
-}
+import { type ProviderInstallState } from "./signing"
 
 export async function buildInstallState(
   ctx: MutationCtx,

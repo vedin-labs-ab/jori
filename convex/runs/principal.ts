@@ -42,9 +42,3 @@ export function executionPrincipalForPerson(
     ? { kind: "organization" }
     : { kind: "person", personId }
 }
-
-export function scopeForExecutionPrincipal(
-  principal: ExecutionPrincipal
-): Scope {
-  return principal.kind === "person" ? "personal" : "organization"
-}

@@ -1,19 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { requireTokenCredentials } from "../connect/credentials"
 
-export type MicrosoftCredentials = {
-  tokens: {
-    access: string
-    refresh: string
-  }
-  expiresAt: number
-  scope?: string
-  tenantId: string
-}
-
-export function requireMicrosoftCredentials(
-  integration: Doc<"integrations">
-): MicrosoftCredentials {
+export function requireMicrosoftCredentials(integration: Doc<"integrations">) {
   return requireTokenCredentials(
     integration,
     {

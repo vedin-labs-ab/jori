@@ -5,7 +5,7 @@ import {
   requireOpenRouterRuntimeConfig,
 } from "../../openrouter"
 
-export type GeneratedImage = {
+type GeneratedImage = {
   bytes: Uint8Array
   mimeType: string
   model: string

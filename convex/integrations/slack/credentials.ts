@@ -1,14 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { requireCredentials } from "../connect/credentials"
 
-export type SlackCredentials = {
-  bot: string
-  user: string
-}
-
-export function requireSlackCredentials(
-  integration: Doc<"integrations">
-): SlackCredentials {
+export function requireSlackCredentials(integration: Doc<"integrations">) {
   return requireCredentials(
     integration,
     { required: { bot: "string", user: "string" } },

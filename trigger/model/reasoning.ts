@@ -1,14 +1,8 @@
-export type ReasoningDisclosure = "summary" | "raw"
-
-export function reasoningDisclosure(model: string): ReasoningDisclosure {
-  return model.startsWith("openai/") ? "summary" : "raw"
-}
-
 export function ingestReasoning(
   model: string,
   reasoningText: unknown
 ): string | null {
-  if (reasoningDisclosure(model) === "summary") {
+  if (model.startsWith("openai/")) {
     return nullableText(reasoningText)
   }
 

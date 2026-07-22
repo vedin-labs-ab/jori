@@ -1,17 +1,14 @@
 import {
   getToolPermission,
   isUserVisibleToolPermission,
+  summarizeToolCapabilities,
+  type ToolCapability,
 } from "../../../contracts/permissions"
 import {
   consolidateMiloToolGroups,
   type RunToolSnapshot,
 } from "../agent/tools/snapshot"
-import {
-  compactDetails,
-  detail,
-  type ExecutionDetailGroup,
-  type ExecutionDetailTool,
-} from "../detail"
+import { compactDetails, detail, type ExecutionDetailGroup } from "../detail"
 
 export function toolDetails(snapshot: RunToolSnapshot | undefined) {
   if (snapshot === undefined) {
@@ -57,9 +54,7 @@ function displayGroup(
       }
 }
 
-function displayTool(
-  tool: ExecutionDetailTool
-): ExecutionDetailTool | undefined {
+function displayTool(tool: ToolCapability): ToolCapability | undefined {
   if (!isUserVisibleToolPermission(tool.tool)) {
     return undefined
   }
@@ -91,7 +86,7 @@ function leaksInternalGuidance(description: string) {
 }
 
 function toolGroupLabel(group: ExecutionDetailGroup) {
-  const counts = countTools(group.tools)
+  const counts = summarizeToolCapabilities(group.tools)
   const countLabels = [
     toolCountLabel("Read", counts.read, counts.readRequiresApproval),
     toolCountLabel("Write", counts.write, counts.writeRequiresApproval),
@@ -108,28 +103,6 @@ function toolCountLabel(
   return value > 0
     ? `${label} ${value}${requiresApproval ? "*" : ""}`
     : undefined
-}
-
-function countTools(tools: ExecutionDetailGroup["tools"]) {
-  const counts = {
-    read: 0,
-    readRequiresApproval: false,
-    write: 0,
-    writeRequiresApproval: false,
-  }
-
-  for (const tool of tools) {
-    counts[tool.access] += 1
-    if (tool.requiresApproval === true) {
-      if (tool.access === "read") {
-        counts.readRequiresApproval = true
-      } else {
-        counts.writeRequiresApproval = true
-      }
-    }
-  }
-
-  return counts
 }
 
 function isPresent<T>(value: T | undefined): value is T {

@@ -44,6 +44,14 @@ export function bytesToHex(bytes: Uint8Array) {
   )
 }
 
+export function copyBytesToArrayBuffer(bytes: Uint8Array) {
+  const buffer = new ArrayBuffer(bytes.byteLength)
+
+  new Uint8Array(buffer).set(bytes)
+
+  return buffer
+}
+
 export function base64EncodeBytes(bytes: Uint8Array) {
   let binary = ""
   const chunkSize = 0x8000

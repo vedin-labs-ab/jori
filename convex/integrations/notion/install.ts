@@ -4,9 +4,8 @@ import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
-import { buildInstallState, upsertIntegration } from "../connect/install"
+import { createSignedInstallState, upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
-import { createSignedNotionState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
@@ -14,7 +13,7 @@ export const createInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createSignedNotionState(await buildInstallState(ctx, args))
+    return await createSignedInstallState(ctx, "notion", args)
   },
 })
 

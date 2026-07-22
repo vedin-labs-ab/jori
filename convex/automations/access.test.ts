@@ -5,7 +5,7 @@ import {
   type AutomationAccess,
   canAccessAutomation,
   canUseAutomationTool,
-  getIntegrationAccess,
+  resolveToolAccessLevel,
 } from "./access"
 
 describe("automation tool access", () => {
@@ -16,7 +16,9 @@ describe("automation tool access", () => {
       "github_add_issue_comment",
     ])
 
-    expect(getIntegrationAccess(access, githubId)).toBe("both")
+    expect(resolveToolAccessLevel(access.integrations[0]?.tools ?? [])).toBe(
+      "both"
+    )
     expect(canUseAutomationTool(access, githubId, "github_get_issue")).toBe(
       true
     )
@@ -26,12 +28,7 @@ describe("automation tool access", () => {
   })
 
   test("returns no access without selected tools for the integration", () => {
-    const githubId = "github-integration" as Id<"integrations">
-    const slackId = "slack-integration" as Id<"integrations">
-
-    expect(getIntegrationAccess(automationAccess(githubId, []), slackId)).toBe(
-      "none"
-    )
+    expect(resolveToolAccessLevel([])).toBe("none")
   })
 })
 

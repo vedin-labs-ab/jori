@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
+import { boundedNumber } from "../shared/input"
 
 const artifactSummaryLimit = 100
 
@@ -15,7 +16,7 @@ export async function searchArtifacts(
   }
 ) {
   const query = normalizeSearch(args.query)
-  const limit = normalizeLimit(args.limit)
+  const limit = boundedNumber(args.limit, 25, 1, artifactSummaryLimit)
   const artifacts = await ctx.db
     .query("artifacts")
     .withIndex("by_organization_and_updated_at", (index) =>
@@ -99,14 +100,6 @@ function normalizeSearch(query: string | undefined) {
   const normalized = query?.trim().toLowerCase()
 
   return normalized === "" ? undefined : normalized
-}
-
-function normalizeLimit(limit: number | undefined) {
-  if (limit === undefined || !Number.isFinite(limit)) {
-    return 25
-  }
-
-  return Math.max(1, Math.min(artifactSummaryLimit, Math.trunc(limit)))
 }
 
 function matchesArtifactQuery(

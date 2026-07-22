@@ -13,7 +13,7 @@ import {
 } from "../../../reactions/data"
 import { activeSessionIntegration } from "../../../sessions/integration"
 import { createIntegrationActor } from "../../../shared/actor"
-import { readRecord, readString } from "../../../shared/input"
+import { boundedNumber, readRecord, readString } from "../../../shared/input"
 import { githubJsonArray } from "../api"
 import { createGitHubInstallationToken } from "../app"
 import { requireGitHubCredentials } from "../credentials"
@@ -65,7 +65,7 @@ export const sessionTargets = internalQuery({
 
     const messages = await recentConversationMessages(ctx, {
       integration,
-      limit: normalizeLimit(args.limit),
+      limit: boundedNumber(args.limit, defaultTargetLimit, 1, maxTargetLimit),
       conversation,
     })
 
@@ -206,14 +206,6 @@ function githubReactionSnapshotItem(
     }),
     observedAt: parseTimestamp(readString(reaction, "created_at")),
   }
-}
-
-function normalizeLimit(limit: number | undefined) {
-  if (limit === undefined || !Number.isFinite(limit)) {
-    return defaultTargetLimit
-  }
-
-  return Math.min(Math.max(1, Math.trunc(limit)), maxTargetLimit)
 }
 
 // Truncates because GitHub numeric ids must be whole numbers.

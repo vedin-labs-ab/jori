@@ -3,7 +3,6 @@ import { type Id } from "../_generated/dataModel"
 import {
   executionPrincipalForScope,
   executionPrincipalPersonId,
-  scopeForExecutionPrincipal,
 } from "./principal"
 
 test("maps audience scope to a matching execution principal", () => {
@@ -28,6 +27,4 @@ test("only person principals resolve a person identity", () => {
 
   expect(executionPrincipalPersonId(person)).toBe(personId)
   expect(executionPrincipalPersonId(organization)).toBeUndefined()
-  expect(scopeForExecutionPrincipal(person)).toBe("personal")
-  expect(scopeForExecutionPrincipal(organization)).toBe("organization")
 })

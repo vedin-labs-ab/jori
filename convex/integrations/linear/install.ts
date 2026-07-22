@@ -4,9 +4,8 @@ import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../connect/credentials"
-import { buildInstallState, upsertIntegration } from "../connect/install"
+import { createSignedInstallState, upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
-import { createSignedLinearState } from "./signing"
 
 export const createInstallState = mutation({
   args: {
@@ -14,7 +13,7 @@ export const createInstallState = mutation({
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    return await createSignedLinearState(await buildInstallState(ctx, args))
+    return await createSignedInstallState(ctx, "linear", args)
   },
 })
 

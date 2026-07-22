@@ -33,8 +33,6 @@ const template = Template()
       "hash -r",
       [
         `npm install --prefix ${shellQuote(sandboxArtifactRuntime)}`,
-        "@microsoft/microsoft-graph-client@3.0.7",
-        "@octokit/rest@22.0.1",
         ...runtimeAssets.artifact.dependencies,
       ].join(" "),
       `chown -R user:user ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxInternalRoot)}`,

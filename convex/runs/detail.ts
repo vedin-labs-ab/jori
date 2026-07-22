@@ -1,3 +1,4 @@
+import { type ToolCapability } from "../../contracts/permissions"
 import { collapseWhitespace } from "../../contracts/text"
 
 export type ExecutionDetailType =
@@ -26,15 +27,7 @@ export type ExecutionDetailType =
 export type ExecutionDetailGroup = {
   type: string
   label: string
-  tools: ExecutionDetailTool[]
-}
-
-export type ExecutionDetailTool = {
-  access: "read" | "write"
-  description: string
-  label: string
-  requiresApproval?: boolean
-  tool: string
+  tools: ToolCapability[]
 }
 
 export type ExecutionDetail = {

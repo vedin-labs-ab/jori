@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
+import { type ToolCapability } from "../../../../contracts/permissions"
 import { createRunToolSnapshot } from "./snapshot"
-import { type RuntimeToolCapabilityTool } from "./types"
 
 test("stores all surface tool capabilities for run details", () => {
   const miloTools = [
@@ -150,7 +150,7 @@ test("stores workspace tools after provider capabilities", () => {
   })
 })
 
-function slackTools(): RuntimeToolCapabilityTool[] {
+function slackTools(): ToolCapability[] {
   return [
     {
       access: "write",

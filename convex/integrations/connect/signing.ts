@@ -1,5 +1,14 @@
+import { type Id } from "../../_generated/dataModel"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { base64UrlDecodeBytes, base64UrlEncode } from "../../shared/encoding"
+
+export type ProviderInstallState = {
+  organizationId: string
+  createdBy: Id<"persons">
+  returnUrl: string
+  createdAt: number
+  integrationOfferId?: Id<"integrationOffers">
+}
 
 export async function createSignedState<State>(secret: string, state: State) {
   const payload = base64UrlEncode(JSON.stringify(state))

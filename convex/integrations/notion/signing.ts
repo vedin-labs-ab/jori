@@ -1,23 +1,18 @@
-import { type Id } from "../../_generated/dataModel"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { readEnvironmentVariable } from "../../shared/environment"
-import { createSignedState, parseSignedState } from "../connect/signing"
+import {
+  createSignedState,
+  type ProviderInstallState,
+  parseSignedState,
+} from "../connect/signing"
 import { requireNotionClientSecret } from "./oauth"
 
-export type NotionInstallState = {
-  organizationId: string
-  createdBy: Id<"persons">
-  returnUrl: string
-  createdAt: number
-  integrationOfferId?: Id<"integrationOffers">
-}
-
-export async function createSignedNotionState(state: NotionInstallState) {
+export async function createSignedNotionState(state: ProviderInstallState) {
   return await createSignedState(requireNotionClientSecret(), state)
 }
 
 export async function parseSignedNotionState(value: string) {
-  return await parseSignedState<NotionInstallState>({
+  return await parseSignedState<ProviderInstallState>({
     secret: requireNotionClientSecret(),
     value,
     errorLabel: "Notion",

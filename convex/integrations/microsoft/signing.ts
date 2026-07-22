@@ -1,15 +1,13 @@
-import { type Id } from "../../_generated/dataModel"
-import { createSignedState, parseSignedState } from "../connect/signing"
+import {
+  createSignedState,
+  type ProviderInstallState,
+  parseSignedState,
+} from "../connect/signing"
 import { type MicrosoftIntegration } from "./config"
 import { requireMicrosoftClientSecret } from "./oauth"
 
-export type MicrosoftInstallState = {
+export type MicrosoftInstallState = ProviderInstallState & {
   integration: MicrosoftIntegration
-  organizationId: string
-  createdBy: Id<"persons">
-  returnUrl: string
-  createdAt: number
-  integrationOfferId?: Id<"integrationOffers">
 }
 
 export async function createSignedMicrosoftState(state: MicrosoftInstallState) {

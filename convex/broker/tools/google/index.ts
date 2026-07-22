@@ -1,6 +1,6 @@
 import { type Doc } from "../../../_generated/dataModel"
+import { type AssetContext } from "../../../assets/read"
 import { requireGoogleCredentials } from "../../../integrations/google/credentials"
-import { type ProviderToolContext } from "../context"
 import { callGoogleCalendarTool } from "./calendar"
 import { callGmailTool } from "./gmail"
 
@@ -8,7 +8,7 @@ export async function callGoogleTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: ProviderToolContext
+  context?: AssetContext
 ) {
   const credentials = requireGoogleCredentials(integration)
 

@@ -145,13 +145,6 @@ function requireAutomationTool(
   return permission.access === "write"
 }
 
-export function getIntegrationAccess(
-  access: AutomationAccess,
-  integrationId: Id<"integrations">
-): AccessLevel {
-  return resolveToolAccessLevel(getIntegrationTools(access, integrationId))
-}
-
 export function canUseAutomationTool(
   access: AutomationAccess,
   integrationId: Id<"integrations">,

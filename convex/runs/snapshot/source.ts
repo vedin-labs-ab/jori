@@ -1,4 +1,3 @@
-import { type Infer } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import {
   compactDetails,
@@ -7,12 +6,11 @@ import {
   type ExecutionDetailType,
   uniqueDetails,
 } from "../detail"
-import { type MessageCauseKind, type runSnapshot } from "../schema"
+import { type MessageCauseKind, type RunSnapshot } from "../schema"
 import { createSourceMetadata, type SourceMetadataItem } from "./metadata"
 import { originDetails } from "./origin"
 import { cronScheduleLabel } from "./schedule"
 
-type RunSnapshot = Infer<typeof runSnapshot>
 type RunSnapshotBody = Omit<RunSnapshot, "title">
 type SnapshotContext = RunSnapshot["context"][number]
 type SnapshotContextType = SnapshotContext["type"]

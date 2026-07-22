@@ -1,22 +1,17 @@
-import { type Id } from "../../_generated/dataModel"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { requireEnvironmentVariable } from "../../shared/environment"
-import { createSignedState, parseSignedState } from "../connect/signing"
+import {
+  createSignedState,
+  type ProviderInstallState,
+  parseSignedState,
+} from "../connect/signing"
 
-export type GitHubInstallState = {
-  organizationId: string
-  createdBy: Id<"persons">
-  returnUrl: string
-  createdAt: number
-  integrationOfferId?: Id<"integrationOffers">
-}
-
-export async function createSignedGitHubState(state: GitHubInstallState) {
+export async function createSignedGitHubState(state: ProviderInstallState) {
   return await createSignedState(requireGitHubWebhookSecret(), state)
 }
 
 export async function parseSignedGitHubState(value: string) {
-  return await parseSignedState<GitHubInstallState>({
+  return await parseSignedState<ProviderInstallState>({
     secret: requireGitHubWebhookSecret(),
     value,
     errorLabel: "GitHub",

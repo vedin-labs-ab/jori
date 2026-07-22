@@ -1,5 +1,7 @@
-import { type DataModel, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+type DataModel = import("../../convex/_generated/dataModel").DataModel
+type Id<TableName extends keyof DataModel> =
+  import("../../convex/_generated/dataModel").Id<TableName>
+type MutationCtx = import("../../convex/_generated/server").MutationCtx
 
 /**
  * Shared hand-rolled Convex fakes for conversation tests: seeded rows, an

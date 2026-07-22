@@ -1,7 +1,12 @@
 import { expect, test } from "vitest"
+import {
+  fakeMutationCtx,
+  id,
+  inserted,
+  type Seed,
+} from "../../test/convex/conversations"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { startMessageRun } from "./data"
-import { fakeMutationCtx, id, inserted, type Seed } from "./fixtures"
 
 test("starts reply runs when a waiter wake never resumed the run", async () => {
   const currentConversation = conversation()

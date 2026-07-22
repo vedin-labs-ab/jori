@@ -2,10 +2,10 @@
 // tool named apply_patch: whole-file adds and deletes, plus context-anchored
 // update hunks without line numbers.
 
-export type HunkLine = { kind: "add" | "context" | "remove"; text: string }
+type HunkLine = { kind: "add" | "context" | "remove"; text: string }
 export type Hunk = { anchor: string | null; lines: HunkLine[] }
 
-export type EnvelopeOp =
+type EnvelopeOp =
   | { kind: "add"; path: string; content: string }
   | { kind: "delete"; path: string }
   | { kind: "update"; path: string; moveTo?: string; hunks: Hunk[] }

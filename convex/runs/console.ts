@@ -18,9 +18,7 @@ import {
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
 import { resolveConsolePerson } from "./console/person"
-import { summarizeRun } from "./console/summaries"
-
-type RunSummary = Awaited<ReturnType<typeof summarizeRun>>
+import { type RunSummary, summarizeRun } from "./console/summaries"
 
 export const page = query({
   args: {
