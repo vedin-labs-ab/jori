@@ -21,21 +21,29 @@ import {
 } from "../request/action"
 import { type ExecutionItem, type ExecutionStatus } from "../types"
 
-const statusIconClasses = {
-  completed: "text-emerald-800",
-  failed: "text-red-800",
-  queued: "text-muted-foreground",
-  running: "text-muted-foreground",
-  stopped: "text-muted-foreground",
-} satisfies Record<ExecutionStatus, string>
-
-const statusIcons = {
-  completed: CheckCircle2,
-  failed: AlertCircle,
-  queued: Loader2,
-  running: Loader2,
-  stopped: Circle,
-} satisfies Record<ExecutionStatus, LucideIcon>
+const executionStatuses = {
+  completed: {
+    Icon: CheckCircle2,
+    className: "text-emerald-800",
+    label: "Completed",
+  },
+  failed: { Icon: AlertCircle, className: "text-red-800", label: "Failed" },
+  queued: {
+    Icon: Loader2,
+    className: "text-muted-foreground",
+    label: "Queued",
+  },
+  running: {
+    Icon: Loader2,
+    className: "text-muted-foreground",
+    label: "Running",
+  },
+  stopped: {
+    Icon: Circle,
+    className: "text-muted-foreground",
+    label: "Stopped",
+  },
+} satisfies Record<ExecutionStatus, ActionStatus>
 
 type WaiterIndicator = Pick<
   NonNullable<ExecutionItem["waiter"]>,
@@ -59,10 +67,10 @@ export function StatusIcon({
   const isWaitingForInput = actionStatus === null && waiter?.state === "waiting"
   const label =
     actionStatus !== null
-      ? `${executionStatusLabels[status]}, ${actionStatus.label}`
+      ? `${executionStatuses[status].label}, ${actionStatus.label}`
       : isWaitingForInput
         ? waitingStatusLabel
-        : executionStatusLabels[status]
+        : executionStatuses[status].label
 
   return (
     <Tooltip>
@@ -96,12 +104,13 @@ function StatusGlyph({
   isWaitingForInput: boolean
   status: ExecutionStatus
 }) {
+  const statusMetadata = executionStatuses[status]
   const Icon =
     actionStatus !== null
       ? actionStatus.Icon
       : isWaitingForInput
         ? Hourglass
-        : statusIcons[status]
+        : statusMetadata.Icon
 
   return (
     <Icon
@@ -109,7 +118,7 @@ function StatusGlyph({
         "size-4",
         actionStatus !== null
           ? actionStatus.className
-          : statusIconClasses[status],
+          : statusMetadata.className,
         actionStatus === null &&
           !isWaitingForInput &&
           (status === "queued" || status === "running") &&
@@ -118,14 +127,6 @@ function StatusGlyph({
     />
   )
 }
-
-const executionStatusLabels = {
-  completed: "Completed",
-  failed: "Failed",
-  queued: "Queued",
-  running: "Running",
-  stopped: "Stopped",
-} satisfies Record<ExecutionStatus, string>
 
 const waitingStatusLabel = "Waiting for input"
 

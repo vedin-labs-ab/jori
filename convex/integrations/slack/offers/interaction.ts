@@ -63,7 +63,7 @@ export const cancel = internalMutation({
     const delivery = offer.delivery
 
     if (
-      delivery?.integration !== "slack" ||
+      delivery === undefined ||
       delivery.data.channelId !== args.channelId ||
       delivery.data.messageTs !== args.messageTs
     ) {
@@ -74,7 +74,7 @@ export const cancel = internalMutation({
 
     if (
       integration === null ||
-      integration.integration !== delivery.integration ||
+      integration.integration !== "slack" ||
       integration.externalId !== args.accountId
     ) {
       return null

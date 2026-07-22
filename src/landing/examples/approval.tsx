@@ -6,7 +6,30 @@ import { Prop } from "../section"
 
 /** An ask-first request as the requester sees it: what would run, on whose
  *  behalf, with the decision still theirs. */
-export function ApprovalCard({
+export function PayrollApprovalCard() {
+  return (
+    <ApprovalCard
+      attachment="Payroll run 214: what happened"
+      label={
+        <>
+          <span className="font-medium text-foreground">
+            Approval requested
+          </span>
+          <span>#support · Slack</span>
+        </>
+      }
+      lines={[
+        "To: Dan Okafor · Harbor House Group",
+        "Re: Tuesday's payroll run",
+        "Sent from your Gmail",
+      ]}
+      surface="gmail"
+      title="Email Dan Okafor the payroll fix summary"
+    />
+  )
+}
+
+function ApprovalCard({
   attachment,
   label,
   lines,

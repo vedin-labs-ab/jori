@@ -1,6 +1,7 @@
 import { type JsonValue } from "../../json"
 import { type ToolAccess } from "../../permissions"
 import { type RuntimeModelUsage, type RuntimeValueSummary } from "../trace"
+import { type RuntimeTool } from "./context"
 import { type RuntimeId } from "./ids"
 
 export type RuntimeErrorTraceData = {
@@ -15,7 +16,7 @@ export type RuntimeResultTraceData = {
 export type RuntimeToolTraceTool = {
   access: ToolAccess
   name: string
-  route: "agent" | "surface" | "convex" | "run" | "sandbox"
+  route: RuntimeTool["route"]
 }
 
 export type RuntimeToolProviderTrace = {

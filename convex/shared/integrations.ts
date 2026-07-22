@@ -35,19 +35,17 @@ export const messageIntegrationValidator = v.union(
   ...messageIntegrations.map((integration) => v.literal(integration))
 )
 
-// Where a surface message (approval prompt, integration offer) was delivered,
+// Where a Slack surface message (approval prompt, integration offer) was delivered,
 // so later status changes can update that message in place.
-export const messageDeliveryValidator = v.union(
-  v.object({
-    integration: v.literal("slack"),
-    integrationId: v.id("integrations"),
-    data: v.object({
-      channelId: v.string(),
-      messageTs: v.string(),
-      threadTs: v.optional(v.string()),
-    }),
-  })
-)
+export const slackMessageDeliveryValidator = v.object({
+  integration: v.literal("slack"),
+  integrationId: v.id("integrations"),
+  data: v.object({
+    channelId: v.string(),
+    messageTs: v.string(),
+    threadTs: v.optional(v.string()),
+  }),
+})
 
 /**
  * A resolved tool contract: which tools a run may use per integration, and

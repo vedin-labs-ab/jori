@@ -1,13 +1,14 @@
-import { type ToolSurface } from "../../integrations"
+import { type MessageIntegration, type ToolSurface } from "../../integrations"
 import { type JsonObject } from "../../json"
 import { type ToolAccess } from "../../permissions"
 import { type RuntimePrompt } from "../prompt"
+import { type AgentRunStatus } from "./agents"
 import { type RunHandoffs } from "./handoffs"
 import { type RuntimeId } from "./ids"
 
 export type ActiveSurface = {
   communicated: boolean
-  surface: "github" | "linear" | "slack"
+  surface: MessageIntegration
   target: string | null
 }
 
@@ -41,7 +42,7 @@ export type RuntimeContext = {
     id: RuntimeId<"runs">
     rootId: RuntimeId<"runs"> | null
     sandboxId: string | null
-    status: "completed" | "failed" | "queued" | "running" | "stopped"
+    status: AgentRunStatus["status"]
     organizationId: string
   }
   session: {
@@ -88,7 +89,7 @@ export type RuntimeInteraction = {
   observedAt: number | null
   preview: string | null
   reaction: string
-  source: "bot" | "person" | "self" | "unknown"
+  source: RuntimeMessage["source"]
   target: string
   type: "reaction.added" | "reaction.removed"
 }

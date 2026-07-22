@@ -1,18 +1,7 @@
-export const codingToolNames = [
-  "read",
-  "grep",
-  "glob",
-  "git",
-  "apply_patch",
-  "bash",
-] as const
-
-export type CodingToolName = (typeof codingToolNames)[number]
-
 type CodingToolDefinition = {
   description: string
   inputSchema: Record<string, unknown>
-  name: CodingToolName
+  name: string
 }
 
 export const codingToolDefinitions = [
@@ -88,8 +77,12 @@ export const codingToolDefinitions = [
   },
 ] as const satisfies readonly CodingToolDefinition[]
 
+export const codingToolNames = codingToolDefinitions.map(({ name }) => name)
+
+export type CodingToolName = (typeof codingToolDefinitions)[number]["name"]
+
 export function isCodingToolName(name: string): name is CodingToolName {
-  return (codingToolNames as readonly string[]).includes(name)
+  return codingToolNames.some((candidate) => candidate === name)
 }
 
 function objectSchema(

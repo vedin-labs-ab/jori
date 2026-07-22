@@ -1,4 +1,4 @@
-import { ApprovalCard } from "../examples/approval"
+import { PayrollApprovalCard } from "../examples/approval"
 import { ReceiptsTimeline } from "../examples/receipts"
 import { Section } from "../section"
 
@@ -22,24 +22,7 @@ export function ApprovalsSection() {
             waits for a run with you in it.
           </p>
         </div>
-        <ApprovalCard
-          attachment="Payroll run 214: what happened"
-          label={
-            <>
-              <span className="font-medium text-foreground">
-                Approval requested
-              </span>
-              <span>#support · Slack</span>
-            </>
-          }
-          lines={[
-            "To: Dan Okafor · Harbor House Group",
-            "Re: Tuesday's payroll run",
-            "Sent from your Gmail",
-          ]}
-          surface="gmail"
-          title="Email Dan Okafor the payroll fix summary"
-        />
+        <PayrollApprovalCard />
       </div>
     </Section>
   )

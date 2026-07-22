@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { actorValidator } from "../shared/actor"
 import {
-  messageDeliveryValidator,
+  slackMessageDeliveryValidator,
   toolSurfaceValidator,
 } from "../shared/integrations"
 
@@ -41,7 +41,7 @@ export const approvals = defineTable({
   createdAt: v.number(),
   expiresAt: v.number(),
   functionId: v.optional(v.id("_scheduled_functions")),
-  delivery: v.optional(messageDeliveryValidator),
+  delivery: v.optional(slackMessageDeliveryValidator),
   deliveryFailure: v.optional(approvalDeliveryFailure),
   cancelledAt: v.optional(v.number()),
   decidedAt: v.optional(v.number()),

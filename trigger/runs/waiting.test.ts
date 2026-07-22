@@ -1,10 +1,9 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import {
   type RunHandoffs,
-  type RuntimeId,
   type RuntimeTool,
 } from "../../contracts/runtime/worker"
-import { createQueuedModel } from "../../test/trigger"
+import { createQueuedModel, runtimeId } from "../../test/trigger"
 import { type ToolRuntime } from "../tool"
 import { runAgentLoop } from "./loop"
 
@@ -91,7 +90,7 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
   return {
     convex: {
       callTool: vi.fn(async () => ({ status: "sent" })),
-      createWaiter: vi.fn(async () => id<"waiters">("waiter_1")),
+      createWaiter: vi.fn(async () => runtimeId<"waiters">("waiter_1")),
       expireWaiter: vi.fn(),
       loadRunHandoffs,
       markApprovalConsumed: vi.fn(),
@@ -112,7 +111,7 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -131,7 +130,7 @@ function emptyHandoffs(): RunHandoffs {
 
 function approvalHandoff(status: "denied") {
   return {
-    id: id<"approvals">("approval_1"),
+    id: runtimeId<"approvals">("approval_1"),
     status,
     surface: "notion" as const,
     tool: "notion_create_page",
@@ -143,7 +142,7 @@ function approvalHandoff(status: "denied") {
 
 function offerHandoff(status: "pending") {
   return {
-    id: id<"integrationOffers">("offer_1"),
+    id: runtimeId<"integrationOffers">("offer_1"),
     integration: "notion",
     status,
     summary: null,
@@ -159,8 +158,4 @@ function finishRunTool(): RuntimeTool {
     name: "finish_run",
     route: "run",
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

@@ -1,8 +1,6 @@
 import { expect, test, vi } from "vitest"
-import {
-  type RuntimeId,
-  type RuntimeTool,
-} from "../../contracts/runtime/worker"
+import { type RuntimeTool } from "../../contracts/runtime/worker"
+import { runtimeId } from "../../test/trigger"
 import { executeToolCall, type ToolRuntime } from "."
 
 test("finish_run requires a reason when an active surface has no communication", async () => {
@@ -133,7 +131,7 @@ function createRuntime(
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -168,8 +166,4 @@ function finishRunTool(): RuntimeTool {
     name: "finish_run",
     route: "run",
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

@@ -1,22 +1,6 @@
-import {
-  type Command,
-  packageCommand,
-  runCommand,
-  runCommands,
-  runTasks,
-} from "./process.ts"
+import { packageCommand, runCommand, runCommands, runTasks } from "./process.ts"
 
-const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm"
-
-const mode = process.argv[2]
-
-if (mode === undefined) {
-  await runChecks()
-} else if (mode === "biome") {
-  await runBiomeChecks()
-} else {
-  throw new Error(`Unknown check mode: ${mode}`)
-}
+await runChecks()
 
 async function runChecks() {
   await runCommands([
@@ -33,18 +17,6 @@ async function runChecks() {
       packageCommand("check:entrypoints"),
       packageCommand("check:typecheck"),
     ]),
-    runBiomeChecks(),
+    runCommand(packageCommand("check:biome")),
   ])
-}
-
-async function runBiomeChecks() {
-  await runCommand(biomeCommand("biome", ["ci", "--error-on-warnings", "."]))
-}
-
-function biomeCommand(label: string, args: string[]): Command {
-  return {
-    args: ["exec", "biome", ...args],
-    command: pnpm,
-    label,
-  }
 }

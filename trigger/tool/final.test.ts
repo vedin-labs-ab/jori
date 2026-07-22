@@ -1,8 +1,6 @@
 import { expect, test, vi } from "vitest"
-import {
-  type RuntimeId,
-  type RuntimeTool,
-} from "../../contracts/runtime/worker"
+import { type RuntimeTool } from "../../contracts/runtime/worker"
+import { runtimeId } from "../../test/trigger"
 import { executeToolCall, type ToolRuntime } from "."
 
 test("send_reply can finish the run after a successful final reply", async () => {
@@ -135,7 +133,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -167,8 +165,4 @@ function addReactionTool(): RuntimeTool {
     name: "add_reaction",
     route: "surface",
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

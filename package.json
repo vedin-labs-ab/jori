@@ -10,7 +10,7 @@
     "check": "node --experimental-strip-types scripts/check.ts",
     "templates:check": "tsx scripts/templates.ts --check",
     "templates:compile": "tsx scripts/templates.ts",
-    "check:biome": "node --experimental-strip-types scripts/check.ts biome",
+    "check:biome": "biome ci --error-on-warnings .",
     "check:dependencies": "node --experimental-strip-types scripts/dependencies.ts",
     "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
     "check:fix": "biome check --write .",

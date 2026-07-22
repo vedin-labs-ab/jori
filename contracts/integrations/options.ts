@@ -1,23 +1,5 @@
 import { type Integration } from "."
 
-const integrationOptionSources = [
-  "slack.channels",
-  "slack.users",
-  "github.repositories",
-  "github.issues",
-  "github.pullRequests",
-  "linear.teams",
-  "linear.projects",
-  "linear.issues",
-  "gmail.labels",
-  "microsoftEmail.folders",
-  "googleCalendar.calendars",
-  "microsoftCalendar.calendars",
-  "notion.pages",
-] as const
-
-export type IntegrationOptionSource = (typeof integrationOptionSources)[number]
-
 export type IntegrationOption = {
   value: string
   label: string
@@ -40,15 +22,14 @@ const sourceIntegrations = {
   "googleCalendar.calendars": "googleCalendar",
   "microsoftCalendar.calendars": "microsoftCalendar",
   "notion.pages": "notion",
-} as const satisfies Record<IntegrationOptionSource, Integration>
+} as const satisfies Record<string, Integration>
+
+export type IntegrationOptionSource = keyof typeof sourceIntegrations
 
 export function isIntegrationOptionSource(
   source: unknown
 ): source is IntegrationOptionSource {
-  return (
-    typeof source === "string" &&
-    integrationOptionSources.some((candidate) => candidate === source)
-  )
+  return typeof source === "string" && Object.hasOwn(sourceIntegrations, source)
 }
 
 export function integrationForOptionSource(source: IntegrationOptionSource) {

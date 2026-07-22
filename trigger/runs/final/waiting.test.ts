@@ -1,12 +1,12 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import {
   type RunHandoffs,
-  type RuntimeId,
   type RuntimeTool,
 } from "../../../contracts/runtime/worker"
 import {
   createQueuedModel,
   type QueuedModelResponse,
+  runtimeId,
 } from "../../../test/trigger"
 import { type ToolRuntime } from "../../tool"
 import { runAgentLoop } from "../loop"
@@ -34,7 +34,10 @@ test("final visible actions think after one of several offers resolves", async (
       ok: true,
       output: {
         reason: "resolved",
-        subject: { id: id<"integrationOffers">("offer_github"), kind: "offer" },
+        subject: {
+          id: runtimeId<"integrationOffers">("offer_github"),
+          kind: "offer",
+        },
       },
     })
     .mockResolvedValueOnce({
@@ -126,7 +129,7 @@ function createRuntime(options: {
   return {
     convex: {
       addReaction: vi.fn(async () => ({ status: "added" })),
-      createWaiter: vi.fn(async () => id<"waiters">("waiter_1")),
+      createWaiter: vi.fn(async () => runtimeId<"waiters">("waiter_1")),
       expireWaiter: vi.fn(),
       loadRunHandoffSubjects: vi.fn(async () => options.subjects),
       loadRunHandoffs,
@@ -150,7 +153,7 @@ function createRuntime(options: {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -182,7 +185,7 @@ function offerHandoff(
   expiresAt: number
 ) {
   return {
-    id: id<"integrationOffers">(offerId),
+    id: runtimeId<"integrationOffers">(offerId),
     integration,
     status,
     summary: null,
@@ -198,8 +201,4 @@ function addReactionTool(): RuntimeTool {
     name: "add_reaction",
     route: "surface",
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

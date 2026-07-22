@@ -1,4 +1,5 @@
 import { vi } from "vitest"
+import { type RuntimeId } from "../contracts/runtime/worker"
 import {
   type ModelResponse,
   type ModelRuntime,
@@ -22,6 +23,10 @@ export type QueuedModelResponse =
       type: "tool_calls"
       usage?: ModelUsage
     }
+
+export function runtimeId<TableName extends string>(value: string) {
+  return value as RuntimeId<TableName>
+}
 
 export function createQueuedModel(responses: QueuedModelResponse[]) {
   const queue = queuedModelResponses(responses)

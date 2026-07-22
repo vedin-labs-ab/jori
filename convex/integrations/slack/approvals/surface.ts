@@ -15,10 +15,7 @@ import {
 
 const cardBodyLimit = 200
 
-type SlackApprovalDelivery = Extract<
-  NonNullable<Doc<"approvals">["delivery"]>,
-  { integration: "slack" }
->
+type SlackApprovalDelivery = NonNullable<Doc<"approvals">["delivery"]>
 
 export const sync = internalAction({
   args: {
@@ -30,7 +27,7 @@ export const sync = internalAction({
       approvalId: args.approvalId,
     })) as ApprovalSurfaceTarget | null
 
-    if (target?.delivery.integration !== "slack") {
+    if (target === null) {
       return null
     }
 

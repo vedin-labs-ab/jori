@@ -32,27 +32,31 @@ import {
   type ActivityStatus,
 } from "./types"
 
-const kindIcons = {
-  agent: GitBranch,
-  approval: ShieldCheck,
-  asset: Package,
-  model: Brain,
-  offer: Plug,
-  run: Play,
-  tool: Wrench,
-  wait: Hourglass,
-} satisfies Record<ActivityKind, LucideIcon>
+const kindMetadata = {
+  agent: { Icon: GitBranch, label: "Agent" },
+  approval: { Icon: ShieldCheck, label: "Approval" },
+  asset: { Icon: Package, label: "Asset" },
+  model: { Icon: Brain, label: "Model" },
+  offer: { Icon: Plug, label: "Connection" },
+  run: { Icon: Play, label: "Run" },
+  tool: { Icon: Wrench, label: "Tool" },
+  wait: { Icon: Hourglass, label: "Wait" },
+} satisfies Record<ActivityKind, { Icon: LucideIcon; label: string }>
 
-const kindLabels = {
-  agent: "Agent",
-  approval: "Approval",
-  asset: "Asset",
-  model: "Model",
-  offer: "Connection",
-  run: "Run",
-  tool: "Tool",
-  wait: "Wait",
-} satisfies Record<ActivityKind, string>
+const statusLabels = {
+  approved: "approved",
+  cancelled: "cancelled",
+  completed: "done",
+  connected: "connected",
+  denied: "denied",
+  expired: "expired",
+  failed: "failed",
+  pending: "pending",
+  requested: "requested",
+  running: "running",
+  stopped: "stopped",
+  waiting: "waiting",
+} satisfies Record<ActivityStatus, string>
 
 const toolIcons: Record<string, LucideIcon> = {
   bash: Terminal,
@@ -81,8 +85,9 @@ export function ActivityTimelineIcon({
   kind: ActivityKind
   status: ActivityStatus
 }) {
-  const Icon = icon ?? kindIcons[kind]
-  const label = `${kindLabels[kind]} ${statusLabel(status)}`
+  const metadata = kindMetadata[kind]
+  const Icon = icon ?? metadata.Icon
+  const label = `${metadata.label} ${statusLabels[status]}`
 
   return (
     <span
@@ -108,7 +113,7 @@ function itemIcon(item: ActivityItem) {
   }
 
   if (item.kind !== "tool") {
-    return kindIcons[item.kind]
+    return kindMetadata[item.kind].Icon
   }
 
   if (item.tool === "wait_for_agents") {
@@ -219,33 +224,4 @@ export function ActivityEntryMeta({
   return visibleDurationMs === undefined ? null : (
     <MetaPill icon={Timer} label={formatDuration(visibleDurationMs)} />
   )
-}
-
-function statusLabel(status: ActivityStatus) {
-  switch (status) {
-    case "approved":
-      return "approved"
-    case "cancelled":
-      return "cancelled"
-    case "completed":
-      return "done"
-    case "connected":
-      return "connected"
-    case "denied":
-      return "denied"
-    case "expired":
-      return "expired"
-    case "failed":
-      return "failed"
-    case "pending":
-      return "pending"
-    case "requested":
-      return "requested"
-    case "running":
-      return "running"
-    case "stopped":
-      return "stopped"
-    case "waiting":
-      return "waiting"
-  }
 }

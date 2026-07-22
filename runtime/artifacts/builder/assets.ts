@@ -19,13 +19,9 @@ export async function readBuildAssets(
   project: string
 ): Promise<ArtifactBuildAsset[]> {
   const dist = path.join(project, "dist")
-  const paths = (await listFiles(dist)).filter(
-    (assetPath) =>
-      normalizeAssetPath(path.relative(dist, assetPath)) !== manifestAssetPath
-  )
-  const assetPaths = paths.map((assetPath) =>
-    normalizeAssetPath(path.relative(dist, assetPath))
-  )
+  const assetPaths = (await listFiles(dist))
+    .map((assetPath) => normalizeAssetPath(path.relative(dist, assetPath)))
+    .filter((assetPath) => assetPath !== manifestAssetPath)
   const manifest = createRuntimeManifest(assetPaths)
   const assets: ArtifactBuildAsset[] = [
     {
@@ -35,13 +31,12 @@ export async function readBuildAssets(
     },
   ]
 
-  for (const assetPath of paths) {
-    const relativePath = normalizeAssetPath(path.relative(dist, assetPath))
-    const bytes = await fs.readFile(assetPath)
+  for (const assetPath of assetPaths) {
+    const bytes = await fs.readFile(path.join(dist, assetPath))
 
     assets.push({
-      path: relativePath,
-      mimeType: inferAssetMimeType(relativePath),
+      path: assetPath,
+      mimeType: inferAssetMimeType(assetPath),
       contentBase64: bytes.toString("base64"),
     })
   }
@@ -50,8 +45,7 @@ export async function readBuildAssets(
 }
 
 function createRuntimeManifest(assetPaths: string[]): ArtifactManifest {
-  const normalized = assetPaths.map(normalizeAssetPath)
-  const entry = normalized.find(
+  const entry = assetPaths.find(
     (assetPath) => assetPath.startsWith("assets/") && assetPath.endsWith(".js")
   )
 
@@ -61,7 +55,7 @@ function createRuntimeManifest(assetPaths: string[]): ArtifactManifest {
 
   return {
     entry,
-    styles: normalized.filter(
+    styles: assetPaths.filter(
       (assetPath) =>
         assetPath.startsWith("assets/") && assetPath.endsWith(".css")
     ),

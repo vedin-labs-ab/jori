@@ -6,7 +6,7 @@ import { internalMutation, type MutationCtx } from "../_generated/server"
 import { isTerminalRunStatus } from "../runs/schema"
 import { actorValidator } from "../shared/actor"
 import {
-  messageDeliveryValidator,
+  slackMessageDeliveryValidator,
   toolSurfaceValidator,
 } from "../shared/integrations"
 import { resolveApprovalActor } from "./actors"
@@ -83,7 +83,7 @@ export const create = internalMutation({
 export const recordDelivery = internalMutation({
   args: {
     approvalId: v.id("approvals"),
-    delivery: messageDeliveryValidator,
+    delivery: slackMessageDeliveryValidator,
   },
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)

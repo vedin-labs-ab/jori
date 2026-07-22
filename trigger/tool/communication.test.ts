@@ -1,8 +1,6 @@
 import { expect, test, vi } from "vitest"
-import {
-  type RuntimeId,
-  type RuntimeTool,
-} from "../../contracts/runtime/worker"
+import { type RuntimeTool } from "../../contracts/runtime/worker"
+import { runtimeId } from "../../test/trigger"
 import { executeToolCall, type ToolRuntime } from "../tool"
 
 test.each([
@@ -176,7 +174,7 @@ function createRuntime(options: {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -215,8 +213,4 @@ function integrationOfferTool(): RuntimeTool {
     route: "convex",
     surface: "milo",
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

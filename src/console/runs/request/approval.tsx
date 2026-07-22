@@ -73,7 +73,7 @@ function ApprovalActions({
 
     try {
       await decide({
-        approvalId: approval.id as ApprovalDecisionArgs["approvalId"],
+        approvalId: approval.id,
         decision,
         organizationId,
       })

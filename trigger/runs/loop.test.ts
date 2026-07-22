@@ -1,9 +1,6 @@
 import { expect, test, vi } from "vitest"
-import {
-  type RuntimeId,
-  type RuntimeTool,
-} from "../../contracts/runtime/worker"
-import { createQueuedModel } from "../../test/trigger"
+import { type RuntimeTool } from "../../contracts/runtime/worker"
+import { createQueuedModel, runtimeId } from "../../test/trigger"
 import { type ToolRuntime } from "../tool"
 import { runAgentLoop } from "./loop"
 
@@ -187,7 +184,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -220,8 +217,4 @@ function slackMessageTool(): RuntimeTool {
     route: "convex",
     surface: "slack",
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

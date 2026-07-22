@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { type RuntimeId } from "../../contracts/runtime/worker"
+import { runtimeId } from "../../test/trigger"
 import { executeToolCall, type ToolRuntime } from "../tool"
 
 beforeEach(() => {
@@ -83,10 +83,10 @@ function createRuntime(): ToolRuntime {
   return {
     convex: {
       createAgentRun: vi.fn(async () => ({
-        runId: id<"runs">("run_child"),
+        runId: runtimeId<"runs">("run_child"),
       })),
       stopAgentRun: vi.fn(async () => ({
-        runId: id<"runs">("run_child"),
+        runId: runtimeId<"runs">("run_child"),
         status: "stopped",
       })),
       recordEvent: vi.fn(),
@@ -104,7 +104,7 @@ function createRuntime(): ToolRuntime {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -133,8 +133,4 @@ function createRuntime(): ToolRuntime {
     },
     sandbox: {} as ToolRuntime["sandbox"],
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }

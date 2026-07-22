@@ -1,9 +1,7 @@
 import { expect, test, vi } from "vitest"
-import {
-  type RuntimeId,
-  type RuntimeTool,
-} from "../../../contracts/runtime/worker"
+import { type RuntimeTool } from "../../../contracts/runtime/worker"
 import { encodeToolResult } from "../../../contracts/transport"
+import { runtimeId } from "../../../test/trigger"
 import { type ModelMessage } from "../../model/types"
 import { type ToolRuntime } from "../../tool"
 import { reconcileHandoffs } from "./reconcile"
@@ -171,7 +169,7 @@ function createRuntime(options: {
         requester: null,
       },
       run: {
-        id: id<"runs">("run_1"),
+        id: runtimeId<"runs">("run_1"),
         rootId: null,
         sandboxId: null,
         status: "running",
@@ -187,7 +185,7 @@ function createRuntime(options: {
 
 function approvalHandoff(status: "approved" | "denied" | "failed" | "pending") {
   return {
-    id: id<"approvals">("approval_1"),
+    id: runtimeId<"approvals">("approval_1"),
     status,
     surface: "notion" as const,
     tool: "notion_create_page",
@@ -199,7 +197,7 @@ function approvalHandoff(status: "approved" | "denied" | "failed" | "pending") {
 
 function offerHandoff(status: "connected" | "pending") {
   return {
-    id: id<"integrationOffers">("offer_1"),
+    id: runtimeId<"integrationOffers">("offer_1"),
     integration: "notion",
     status,
     summary: null,
@@ -216,8 +214,4 @@ function refreshedTool(): RuntimeTool {
     route: "convex",
     surface: "notion",
   }
-}
-
-function id<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
 }
