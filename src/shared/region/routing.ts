@@ -1,42 +1,7 @@
 import { isRegion, type Region } from "@contracts/region"
 import { type RegionConfig, requireRegionOrigin } from "./config"
-
-const preferenceCookie = "milo_region"
-const preferenceMaxAgeSeconds = 60 * 60 * 24 * 365
-const euCountryCodes = new Set([
-  "AT",
-  "BE",
-  "BG",
-  "CH",
-  "CY",
-  "CZ",
-  "DE",
-  "DK",
-  "EE",
-  "ES",
-  "FI",
-  "FR",
-  "GB",
-  "GR",
-  "HR",
-  "HU",
-  "IE",
-  "IS",
-  "IT",
-  "LI",
-  "LT",
-  "LU",
-  "LV",
-  "MT",
-  "NL",
-  "NO",
-  "PL",
-  "PT",
-  "RO",
-  "SE",
-  "SI",
-  "SK",
-])
+import { estimateRegion } from "./geography"
+import { readRegionPreference, regionPreferenceHeader } from "./preference"
 
 export function handleRegionRequest(
   request: Request,
@@ -69,7 +34,7 @@ export function handleRegionRequest(
     return textResponse("Misdirected request.", 421)
   }
 
-  const preferred = readPreference(request, config)
+  const preferred = readRegionPreference(request, config)
   const region = preferred ?? estimateRegion(request, config)
   const target = regionalUrl(config, region, requestPath(requestUrl))
 
@@ -137,42 +102,6 @@ function handleRegionSelection(
   )
 }
 
-function readPreference(request: Request, config: RegionConfig) {
-  const header = request.headers.get("cookie")
-
-  if (header === null) {
-    return undefined
-  }
-
-  for (const part of header.split(";")) {
-    const [name, ...valueParts] = part.trim().split("=")
-
-    if (name !== preferenceCookie) {
-      continue
-    }
-
-    const value = valueParts.join("=")
-
-    return isRegion(value) && config.enabled.has(value) ? value : undefined
-  }
-
-  return undefined
-}
-
-function estimateRegion(request: Request, config: RegionConfig): Region {
-  const country =
-    request.headers.get("x-vercel-ip-country") ??
-    request.headers.get("cf-ipcountry")
-  const estimate =
-    country !== null && euCountryCodes.has(country.toUpperCase()) ? "eu" : "us"
-
-  if (config.enabled.has(estimate)) {
-    return estimate
-  }
-
-  return config.current
-}
-
 function resolveRequestOrigin(request: Request, config: RegionConfig) {
   const directOrigin = new URL(request.url).origin
   const allowedOrigins = new Set([
@@ -214,16 +143,10 @@ function redirectResponse(
   })
 
   if (preference !== undefined) {
-    headers.set("Set-Cookie", preferenceHeader(preference, publicOrigin))
+    headers.set("Set-Cookie", regionPreferenceHeader(preference, publicOrigin))
   }
 
   return new Response(null, { headers, status: 307 })
-}
-
-function preferenceHeader(region: Region, publicOrigin: string) {
-  const secure = new URL(publicOrigin).protocol === "https:" ? "; Secure" : ""
-
-  return `${preferenceCookie}=${region}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${preferenceMaxAgeSeconds}${secure}`
 }
 
 function requireEnabledRegion(config: RegionConfig, region: Region) {
