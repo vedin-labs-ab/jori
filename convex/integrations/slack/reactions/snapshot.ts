@@ -1,3 +1,4 @@
+import { readStringArray } from "../../../../contracts/json"
 import {
   type ReactionSnapshotItem,
   type ReactionSnapshotTarget,
@@ -77,10 +78,4 @@ function slackReactionItems(value: unknown) {
   }
 
   return items
-}
-
-function readStringArray(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : []
 }

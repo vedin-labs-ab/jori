@@ -3,6 +3,7 @@ import {
   base64DecodeBytes,
   base64UrlEncode,
   base64UrlEncodeBytes,
+  concatenateBytes,
 } from "../../shared/encoding"
 import {
   githubApiUrl,
@@ -188,12 +189,12 @@ function wrapPkcs1PrivateKey(pkcs1: Uint8Array) {
 
   return derSequence(
     0x30,
-    concatBytes(version, rsaAlgorithmIdentifier, privateKey)
+    concatenateBytes(version, rsaAlgorithmIdentifier, privateKey)
   )
 }
 
 function derSequence(tag: number, body: Uint8Array) {
-  return concatBytes(new Uint8Array([tag]), derLength(body.length), body)
+  return concatenateBytes(new Uint8Array([tag]), derLength(body.length), body)
 }
 
 function derLength(length: number) {
@@ -210,17 +211,4 @@ function derLength(length: number) {
   }
 
   return new Uint8Array([0x80 | bytes.length, ...bytes])
-}
-
-function concatBytes(...parts: Uint8Array[]) {
-  const totalLength = parts.reduce((sum, part) => sum + part.length, 0)
-  const result = new Uint8Array(totalLength)
-  let offset = 0
-
-  for (const part of parts) {
-    result.set(part, offset)
-    offset += part.length
-  }
-
-  return result
 }

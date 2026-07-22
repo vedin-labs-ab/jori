@@ -4,27 +4,21 @@ const microsoftIdentityScopes = ["offline_access", "User.Read"]
 
 export type MicrosoftIntegration = "microsoftCalendar" | "microsoftEmail"
 
-export type MicrosoftIntegrationConfig = {
-  callbackParam: MicrosoftIntegration
+type MicrosoftIntegrationConfig = {
   callbackPath: string
   installPath: string
-  integration: MicrosoftIntegration
   scopes: string[]
 }
 
 export const microsoftIntegrationConfigs = {
   microsoftEmail: {
-    callbackParam: "microsoftEmail",
     callbackPath: "/microsoft-email/oauth/callback",
     installPath: "/microsoft-email/install",
-    integration: "microsoftEmail",
     scopes: [...microsoftIdentityScopes, "Mail.ReadWrite", "Mail.Send"],
   },
   microsoftCalendar: {
-    callbackParam: "microsoftCalendar",
     callbackPath: "/microsoft-calendar/oauth/callback",
     installPath: "/microsoft-calendar/install",
-    integration: "microsoftCalendar",
     scopes: [...microsoftIdentityScopes, "Calendars.ReadWrite"],
   },
 } satisfies Record<MicrosoftIntegration, MicrosoftIntegrationConfig>

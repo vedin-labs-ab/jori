@@ -1,4 +1,4 @@
-import { isRecord, type JsonObject } from "./json"
+import { isRecord, type JsonObject, readStringArray } from "./json"
 import { finalProperty } from "./runtime"
 
 const approvalTtlSeconds = 30 * 60
@@ -70,10 +70,4 @@ function approvalMetadataSchema() {
 
 function readObject(value: unknown) {
   return isRecord(value) ? value : {}
-}
-
-function readStringArray(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : []
 }

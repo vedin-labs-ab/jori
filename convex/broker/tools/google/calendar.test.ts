@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { schemaViolations } from "../../../../test/convex/schema"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { googleIntegrationConfigs } from "../../../integrations/google/config"
 import {
   calendarListSchema,
   eventListingSchema,
 } from "../../../runs/agent/tools/schemas/responses/calendar"
-import { schemaViolations } from "../../../runs/agent/tools/schemas/responses/conform"
 import { callGoogleTool } from "."
 
 const originalFetch = globalThis.fetch

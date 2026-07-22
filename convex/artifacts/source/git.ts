@@ -1,6 +1,7 @@
 "use node"
 
 import { createHash } from "node:crypto"
+import { concatenateBytes } from "../../shared/encoding"
 import { type ArtifactTreeRecord, type NormalizedArtifactSourceFile } from "."
 
 export function buildGitTreeSnapshot(files: NormalizedArtifactSourceFile[]) {
@@ -109,7 +110,7 @@ function encodeTreeObject(
     chunks.push(hexToBytes(entry.id))
   }
 
-  return concatenateBytes(chunks)
+  return concatenateBytes(...chunks)
 }
 
 function hexToBytes(hex: string) {
@@ -120,19 +121,6 @@ function hexToBytes(hex: string) {
   }
 
   return bytes
-}
-
-function concatenateBytes(chunks: Uint8Array[]) {
-  const length = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0)
-  const result = new Uint8Array(length)
-  let offset = 0
-
-  for (const chunk of chunks) {
-    result.set(chunk, offset)
-    offset += chunk.byteLength
-  }
-
-  return result
 }
 
 type MutableTreeNode = {

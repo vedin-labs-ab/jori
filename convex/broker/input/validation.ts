@@ -1,10 +1,9 @@
-import { type JsonObject } from "../../../contracts/json"
+import { type JsonObject, readStringArray } from "../../../contracts/json"
 import {
   isJsonSchema,
   type JsonSchema,
   readSchemaMap,
   readString,
-  readStringArray,
 } from "../../runs/agent/tools/schemas"
 import { optionalNumber } from "../../shared/input"
 

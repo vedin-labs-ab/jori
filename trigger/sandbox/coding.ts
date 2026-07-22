@@ -96,7 +96,7 @@ function commandOutput(result: {
 }
 
 function gitCommand(cwd: string, args: string[]) {
-  return [...workspaceGuard(cwd), readOnlyGitCommand(cwd, args)].join("\n")
+  return [...workspaceGuard(cwd), readOnlyGitCommand(args)].join("\n")
 }
 
 function bashCommand(cwd: string, command: string) {

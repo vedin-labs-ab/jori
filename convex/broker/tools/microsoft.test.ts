@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { createAssetContext } from "../../../test/convex/broker"
+import { schemaViolations } from "../../../test/convex/schema"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import {
   calendarListSchema,
   eventListingSchema,
 } from "../../runs/agent/tools/schemas/responses/calendar"
-import { schemaViolations } from "../../runs/agent/tools/schemas/responses/conform"
 import { callMicrosoftTool } from "./microsoft"
 
 const originalFetch = globalThis.fetch

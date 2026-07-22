@@ -10,20 +10,16 @@ const googleIdentityScopes = ["openid", "email", "profile"]
 
 export type GoogleIntegration = "gmail" | "googleCalendar"
 
-export type GoogleIntegrationConfig = {
-  callbackParam: GoogleIntegration
+type GoogleIntegrationConfig = {
   callbackPath: string
   installPath: string
-  integration: GoogleIntegration
   scopes: string[]
 }
 
 export const googleIntegrationConfigs = {
   gmail: {
-    callbackParam: "gmail",
     callbackPath: googleOAuthCallbackPath,
     installPath: "/gmail/install",
-    integration: "gmail",
     scopes: [
       ...googleIdentityScopes,
       "https://www.googleapis.com/auth/gmail.readonly",
@@ -32,10 +28,8 @@ export const googleIntegrationConfigs = {
     ],
   },
   googleCalendar: {
-    callbackParam: "googleCalendar",
     callbackPath: googleOAuthCallbackPath,
     installPath: "/google-calendar/install",
-    integration: "googleCalendar",
     scopes: [
       ...googleIdentityScopes,
       "https://www.googleapis.com/auth/calendar.events",

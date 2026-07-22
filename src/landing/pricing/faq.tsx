@@ -1,6 +1,6 @@
 import { formatUsd, trial } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
-import { Section } from "../section"
+import { Definition, Section } from "../section"
 
 export function Faq() {
   return (
@@ -10,31 +10,31 @@ export function Faq() {
       title="Questions, answered straight"
     >
       <dl className="grid gap-x-16 gap-y-8 md:grid-cols-2">
-        <Answer question="How is usage billed?">
+        <Definition term="How is usage billed?">
           In dollars, at the model provider's public list rates. A typical
           morning brief costs cents; a deep research run can cost a few dollars.
           Every run shows its exact cost in its receipt.
-        </Answer>
-        <Answer question="What does the monthly price cover?">
+        </Definition>
+        <Definition term="What does the monthly price cover?">
           Milo being on staff: the always-on background work, plus the included
           usage. Included usage resets monthly. Wallet top-ups are prepaid and
           roll over until used.
-        </Answer>
-        <Answer question="Is there a free trial?">
+        </Definition>
+        <Definition term="Is there a free trial?">
           Yes. {trial.days} days with {formatUsd(trial.grantMicros)} of usage
           included, no card required. It ends when the days or the usage run
           out, whichever comes first.
-        </Answer>
-        <Answer question="Can a bill surprise me?">
+        </Definition>
+        <Definition term="Can a bill surprise me?">
           No. There is no metered invoice at the end of the month. Usage draws
           from prepaid money, auto top-up is opt-in with a monthly cap, and the
           console shows a live tally.
-        </Answer>
-        <Answer question="What happens if I cancel?">
+        </Definition>
+        <Definition term="What happens if I cancel?">
           Automations pause and nothing is deleted. Your data, integrations, and
           history stay put, and everything resumes when you come back.
-        </Answer>
-        <Answer question="Who sees what Milo reads?">
+        </Definition>
+        <Definition term="Who sees what Milo reads?">
           Milo works with the accounts each person connects, as that person.
           Personal work stays personal; organization work is visible to the
           team.{" "}
@@ -44,29 +44,12 @@ export function Faq() {
           >
             More on the trust page.
           </Link>
-        </Answer>
-        <Answer question="GDPR and DPAs?">
+        </Definition>
+        <Definition term="GDPR and DPAs?">
           Milo is built to operate in line with GDPR. For a data processing
           agreement, write to security@milo.app.
-        </Answer>
+        </Definition>
       </dl>
     </Section>
-  )
-}
-
-function Answer({
-  children,
-  question,
-}: {
-  children: React.ReactNode
-  question: string
-}) {
-  return (
-    <div>
-      <dt className="font-medium">{question}</dt>
-      <dd className="mt-1.5 max-w-md text-muted-foreground text-sm leading-relaxed">
-        {children}
-      </dd>
-    </div>
   )
 }

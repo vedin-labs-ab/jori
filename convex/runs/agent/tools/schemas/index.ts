@@ -15,7 +15,6 @@ export {
   optionalFieldGuidance,
   readSchemaMap,
   readString,
-  readStringArray,
   schemaHasOptionalFields,
   stringArrayProperty,
   withOptionalFieldGuidance,

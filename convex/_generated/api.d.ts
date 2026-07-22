@@ -409,7 +409,6 @@ import type * as runs_agent_tools_schemas_notion_index from "../runs/agent/tools
 import type * as runs_agent_tools_schemas_notion_media from "../runs/agent/tools/schemas/notion/media.js";
 import type * as runs_agent_tools_schemas_responses_calendar from "../runs/agent/tools/schemas/responses/calendar.js";
 import type * as runs_agent_tools_schemas_responses_common from "../runs/agent/tools/schemas/responses/common.js";
-import type * as runs_agent_tools_schemas_responses_conform from "../runs/agent/tools/schemas/responses/conform.js";
 import type * as runs_agent_tools_schemas_responses_github_index from "../runs/agent/tools/schemas/responses/github/index.js";
 import type * as runs_agent_tools_schemas_responses_github_summaries from "../runs/agent/tools/schemas/responses/github/summaries.js";
 import type * as runs_agent_tools_schemas_responses_google from "../runs/agent/tools/schemas/responses/google.js";
@@ -941,7 +940,6 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/notion/media": typeof runs_agent_tools_schemas_notion_media;
   "runs/agent/tools/schemas/responses/calendar": typeof runs_agent_tools_schemas_responses_calendar;
   "runs/agent/tools/schemas/responses/common": typeof runs_agent_tools_schemas_responses_common;
-  "runs/agent/tools/schemas/responses/conform": typeof runs_agent_tools_schemas_responses_conform;
   "runs/agent/tools/schemas/responses/github/index": typeof runs_agent_tools_schemas_responses_github_index;
   "runs/agent/tools/schemas/responses/github/summaries": typeof runs_agent_tools_schemas_responses_github_summaries;
   "runs/agent/tools/schemas/responses/google": typeof runs_agent_tools_schemas_responses_google;

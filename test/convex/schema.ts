@@ -1,4 +1,4 @@
-import { isRecord } from "../../../../../../contracts/json"
+import { isRecord } from "../../contracts/json"
 
 // Minimal structural validator for the response-schema subset this folder
 // uses (type, const, enum, required, properties, additionalProperties,

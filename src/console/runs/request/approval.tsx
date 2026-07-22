@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ProviderLogo } from "@/shared/logo/provider"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
-import { absoluteTime, formatDuration } from "../../shared/time"
+import { absoluteTime, expirationLabel } from "../../shared/time"
 import { type ExecutionApproval } from "../types"
 import { useRunRequestCarousel } from "./carousel"
 import { type RunRequestMeta, RunRequestSection } from "./section"
@@ -118,14 +118,6 @@ function ApprovalActions({
   )
 }
 
-function expirationLabel(approval: ExecutionApproval, now: number) {
-  if (now >= approval.expiresAt) {
-    return `Expired at ${absoluteTime(approval.expiresAt)}`
-  }
-
-  return `Expires in ${formatDuration(Math.max(0, approval.expiresAt - now))}`
-}
-
 function approvalMeta(
   approval: ExecutionApproval,
   now: number
@@ -136,7 +128,7 @@ function approvalMeta(
     return {
       Icon: Clock3,
       iconClassName: hasExpired ? "text-warning" : undefined,
-      label: expirationLabel(approval, now),
+      label: expirationLabel(approval.expiresAt, now),
     }
   }
 

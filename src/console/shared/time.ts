@@ -96,6 +96,14 @@ export function absoluteTime(timestamp: number) {
   }).format(timestamp)
 }
 
+export function expirationLabel(expiresAt: number, now: number) {
+  if (now >= expiresAt) {
+    return `Expired at ${absoluteTime(expiresAt)}`
+  }
+
+  return `Expires in ${formatDuration(Math.max(0, expiresAt - now))}`
+}
+
 export function absoluteUtcTime(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, {
     day: "numeric",

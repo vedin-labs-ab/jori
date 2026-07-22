@@ -8,19 +8,7 @@
 
 export const microsPerDollar = 1_000_000
 
-export type PlanKey = "starter" | "team"
-export type BillingInterval = "month" | "year"
-
-export type Plan = {
-  key: PlanKey
-  label: string
-  monthlyPriceUsd: number
-  annualPriceUsd: number
-  includedMonthlyMicros: number
-  memberLimit: number
-}
-
-export const plans: Record<PlanKey, Plan> = {
+export const plans = {
   starter: {
     key: "starter",
     label: "Starter",
@@ -37,11 +25,15 @@ export const plans: Record<PlanKey, Plan> = {
     includedMonthlyMicros: 75 * microsPerDollar,
     memberLimit: 50,
   },
-}
+} as const
+
+export type PlanKey = keyof typeof plans
 
 export const planKeys = Object.keys(plans) as PlanKey[]
 
-export const billingIntervals: BillingInterval[] = ["month", "year"]
+export const billingIntervals = ["month", "year"] as const
+
+export type BillingInterval = (typeof billingIntervals)[number]
 
 export const trial = {
   days: 14,

@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react"
 import { ApprovalCard } from "../examples/approval"
 import { ModeMatrix } from "../examples/modes"
 import { ReceiptsTimeline } from "../examples/receipts"
-import { Section } from "../section"
+import { Definition, Section } from "../section"
 
 // The approval story is staged on a mention run: scheduled runs never use
 // ask-first tools, so this is the flow where approvals actually happen.
@@ -17,20 +17,20 @@ export function Control() {
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div>
           <dl className="space-y-8">
-            <ControlPoint term="Permission modes">
+            <Definition term="Permission modes">
               Every action Milo can take has a mode: allowed, ask first, or
               blocked. Sending, posting, changing: you decide which need your
               sign-off.
-            </ControlPoint>
-            <ControlPoint term="Ask-first approvals">
+            </Definition>
+            <Definition term="Ask-first approvals">
               Set a tool to ask first and Milo requests before acting, with a
               code you can approve right from the thread. Denied requests never
               run.
-            </ControlPoint>
-            <ControlPoint term="Receipts for every run">
+            </Definition>
+            <Definition term="Receipts for every run">
               Every run records what Milo read, what it did, and what it asked.
               Open any run in the console and check.
-            </ControlPoint>
+            </Definition>
           </dl>
           <Link
             className="mt-8 inline-flex items-center gap-1.5 font-medium text-primary text-sm hover:underline"
@@ -94,22 +94,5 @@ export function Control() {
         </div>
       </div>
     </Section>
-  )
-}
-
-function ControlPoint({
-  children,
-  term,
-}: {
-  children: React.ReactNode
-  term: string
-}) {
-  return (
-    <div>
-      <dt className="font-medium">{term}</dt>
-      <dd className="mt-1.5 max-w-md text-muted-foreground text-sm leading-relaxed">
-        {children}
-      </dd>
-    </div>
   )
 }

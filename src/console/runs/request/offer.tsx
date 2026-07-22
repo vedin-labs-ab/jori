@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
-import { absoluteTime, formatDuration } from "../../shared/time"
+import { absoluteTime, expirationLabel } from "../../shared/time"
 import { type ExecutionOffer } from "../types"
 import { useRunRequestCarousel } from "./carousel"
 import { type RunRequestMeta, RunRequestSection } from "./section"
@@ -23,7 +23,6 @@ const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
 type ClaimArgs = FunctionArgs<typeof api.runs.console.offers.claim>
 type CancelArgs = FunctionArgs<typeof api.runs.console.offers.cancel>
-type Offer = ExecutionOffer
 type OfferAction = "cancel" | "connect"
 type ClaimResult =
   | {
@@ -44,7 +43,7 @@ export function OfferCallout({
   organizationId,
 }: {
   now: number
-  offers: Offer[]
+  offers: ExecutionOffer[]
   runId: string
   organizationId: string
 }) {
@@ -91,7 +90,7 @@ function OfferActions({
   runId,
   organizationId,
 }: {
-  offer: Offer
+  offer: ExecutionOffer
   runId: string
   organizationId: string
 }) {
@@ -154,7 +153,7 @@ function OfferActions({
 
 async function connectOffer(
   claim: (args: ClaimArgs) => Promise<ClaimResult>,
-  offer: Offer,
+  offer: ExecutionOffer,
   runId: string,
   organizationId: string
 ) {
@@ -204,14 +203,18 @@ function openConnectTab() {
 }
 
 function cancelArgs(
-  offer: Offer,
+  offer: ExecutionOffer,
   runId: string,
   organizationId: string
 ): CancelArgs {
   return offerIds(offer, runId, organizationId)
 }
 
-function offerIds(offer: Offer, runId: string, organizationId: string) {
+function offerIds(
+  offer: ExecutionOffer,
+  runId: string,
+  organizationId: string
+) {
   return {
     integrationOfferId: offer.id as ClaimArgs["integrationOfferId"],
     runId: runId as ClaimArgs["runId"],
@@ -223,22 +226,14 @@ function runOfferReturnUrl() {
   return `${window.location.origin}/runs`
 }
 
-function expirationLabel(offer: Offer, now: number) {
-  if (now >= offer.expiresAt) {
-    return `Expired at ${absoluteTime(offer.expiresAt)}`
-  }
-
-  return `Expires in ${formatDuration(Math.max(0, offer.expiresAt - now))}`
-}
-
-function offerMeta(offer: Offer, now: number): RunRequestMeta | null {
+function offerMeta(offer: ExecutionOffer, now: number): RunRequestMeta | null {
   if (offer.state === "pending" || offer.state === "claimed") {
     const hasExpired = now >= offer.expiresAt
 
     return {
       Icon: Clock3,
       iconClassName: hasExpired ? "text-warning" : undefined,
-      label: expirationLabel(offer, now),
+      label: expirationLabel(offer.expiresAt, now),
     }
   }
 
@@ -277,7 +272,7 @@ function offerMeta(offer: Offer, now: number): RunRequestMeta | null {
   return null
 }
 
-function isLiveOffer(offer: Offer, now: number) {
+function isLiveOffer(offer: ExecutionOffer, now: number) {
   return (
     (offer.state === "pending" || offer.state === "claimed") &&
     offer.expiresAt > now
