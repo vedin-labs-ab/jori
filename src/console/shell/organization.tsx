@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
 import {
   activateOrganization,
   useActiveOrganization,
@@ -199,7 +198,6 @@ function OrganizationOption({
 }) {
   return (
     <DropdownMenuItem
-      className={cn(switching && "data-disabled:opacity-100")}
       disabled={switchingDisabled}
       onSelect={(event) => {
         event.preventDefault()
@@ -207,20 +205,18 @@ function OrganizationOption({
       }}
     >
       <OrganizationView
-        className="min-w-0"
+        className="min-w-0 flex-1"
         hideRole
         hideSlug
-        logo={
-          switching ? (
-            <Spinner
-              aria-label={`Switching to ${organization.name}`}
-              className="size-6 text-muted-foreground"
-            />
-          ) : undefined
-        }
         organization={organization}
         size="sm"
       />
+      {switching ? (
+        <Spinner
+          aria-label={`Switching to ${organization.name}`}
+          className="ml-auto size-3.5"
+        />
+      ) : null}
     </DropdownMenuItem>
   )
 }
