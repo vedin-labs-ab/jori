@@ -175,7 +175,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   // Console routes need client session state before they can render. Auth
   // routes and public pages already send their complete first view from SSR.
   const waitsForClientSession =
-    usesSessionProvider && !routeId?.startsWith("/auth/")
+    usesSessionProvider &&
+    (!routeId?.startsWith("/auth/") || routeId === "/auth/sign-out")
   const content = (
     <FullscreenLoadingProvider initiallyVisible={waitsForClientSession}>
       <TooltipProvider>{children}</TooltipProvider>

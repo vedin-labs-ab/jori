@@ -1,45 +1,44 @@
 "use client"
 
 import { useAuth, useSignOut } from "@better-auth-ui/react"
-import { useEffect, useRef } from "react"
-import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
 
-export type SignOutProps = {
-  className?: string
-}
-
-/**
- * Signs the current user out on mount and renders a centered spinner while the operation completes.
- *
- * @param className - Optional additional class names appended to the root element
- * @returns The spinner shown during sign-out
- */
-export function SignOut({ className }: SignOutProps) {
+/** Starts sign-out once and keeps the loading state latched through redirect. */
+export function useSignOutFlow() {
   const { authClient, basePaths, navigate, viewPaths } = useAuth()
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const startedRef = useRef(false)
+  const navigateToSignIn = useCallback(() => {
+    navigate({
+      to: `${basePaths.auth}/${viewPaths.auth.signIn}`,
+      replace: true
+    })
+  }, [basePaths.auth, navigate, viewPaths.auth.signIn])
 
-  const { mutate: signOut } = useSignOut(authClient, {
-    onError: () => {
-      navigate({
-        to: `${basePaths.auth}/${viewPaths.auth.signIn}`,
-        replace: true
-      })
-    },
-    onSuccess: () =>
-      navigate({
-        to: `${basePaths.auth}/${viewPaths.auth.signIn}`,
-        replace: true
-      })
+  const { mutate } = useSignOut(authClient, {
+    onError: navigateToSignIn,
+    onSuccess: navigateToSignIn
   })
 
-  const hasSignedOut = useRef(false)
+  const signOut = useCallback(() => {
+    if (startedRef.current) return
+
+    startedRef.current = true
+    setIsSigningOut(true)
+    mutate()
+  }, [mutate])
+
+  return { isSigningOut, signOut }
+}
+
+/** Direct-entry fallback that signs out on mount behind the shared loader. */
+export function SignOut() {
+  const { signOut } = useSignOutFlow()
 
   useEffect(() => {
-    if (hasSignedOut.current) return
-    hasSignedOut.current = true
-
     signOut()
   }, [signOut])
 
-  return <Spinner className={cn("mx-auto my-auto", className)} />
+  return <FullscreenSkeletonLoader />
 }
