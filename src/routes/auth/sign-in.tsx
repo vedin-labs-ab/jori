@@ -25,6 +25,7 @@ function SignInPage() {
           <div className="w-full max-w-xs">
             <SignIn
               className="max-w-none gap-0 py-0 ring-0 [--card-spacing:--spacing(0)] [&>[data-slot=card-header]]:mb-6"
+              description="Good to see you. Let’s get to work."
               headerContent={
                 <div className="mt-7">
                   <RegionPicker
@@ -33,6 +34,7 @@ function SignInPage() {
                   />
                 </div>
               }
+              title="Sign in to Milo"
             />
             <div className="mt-7 flex justify-center">
               <InvitationInfo />
