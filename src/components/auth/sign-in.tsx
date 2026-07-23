@@ -114,7 +114,11 @@ export function SignIn({
     <Card className={cn("w-full max-w-sm", className)}>
       <OAuthFeedback />
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">
+        <CardTitle
+          aria-level={1}
+          className="text-xl font-semibold"
+          role="heading"
+        >
           {localization.auth.signIn}
         </CardTitle>
       </CardHeader>

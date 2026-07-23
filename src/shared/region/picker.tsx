@@ -32,6 +32,7 @@ export function RegionPicker() {
       >
         {regionOptions.map((option) => {
           const enabled = regionConfig.enabled.has(option.id)
+          const label = `${option.flag} ${option.label}`
 
           return (
             <NativeSelectOption
@@ -39,7 +40,7 @@ export function RegionPicker() {
               key={option.id}
               value={option.id}
             >
-              {enabled ? option.label : `${option.label} (Coming soon)`}
+              {enabled ? label : `${label} (Coming soon)`}
             </NativeSelectOption>
           )
         })}
