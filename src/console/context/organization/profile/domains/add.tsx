@@ -61,13 +61,7 @@ export function AddDomainControl({
 
   if (!open) {
     return (
-      <Button
-        className="h-7 px-2.5 text-xs"
-        onClick={() => setOpen(true)}
-        size="sm"
-        type="button"
-        variant="outline"
-      >
+      <Button onClick={() => setOpen(true)} type="button" variant="outline">
         <Plus className="size-3.5" /> Add
       </Button>
     )
@@ -134,13 +128,7 @@ function AddDomainForm({
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>
-        <Button
-          className="h-7 px-2.5 text-xs"
-          disabled={value.trim() === ""}
-          size="sm"
-          type="submit"
-          variant="outline"
-        >
+        <Button disabled={value.trim() === ""} type="submit" variant="outline">
           <Plus className="size-3.5" /> Add
         </Button>
       </ButtonGroup>

@@ -38,7 +38,7 @@ function ActivityErrorAction({
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className="h-5 shrink-0 px-1.5 text-destructive hover:text-destructive"
+          className="shrink-0 text-destructive hover:text-destructive"
           size="xs"
           type="button"
           variant="ghost"

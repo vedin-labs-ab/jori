@@ -23,7 +23,7 @@ export function RunRequestPager({
       >
         <Button
           aria-label={`Previous ${navigation.itemLabel}`}
-          className="size-5 p-0 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
           onClick={navigation.onPrevious}
           size="icon-xs"
           type="button"
@@ -33,7 +33,7 @@ export function RunRequestPager({
         </Button>
         <Button
           aria-label={`Next ${navigation.itemLabel}`}
-          className="size-5 p-0 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
           onClick={navigation.onNext}
           size="icon-xs"
           type="button"

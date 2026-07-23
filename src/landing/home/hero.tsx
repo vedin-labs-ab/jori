@@ -21,12 +21,7 @@ export function Hero() {
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <GetStarted prominent />
-          <Button
-            asChild
-            className="h-10 px-4 text-sm"
-            size="lg"
-            variant="outline"
-          >
+          <Button asChild size="xl" variant="outline">
             <a href="#day">
               See a day with Milo
               <ArrowDown data-icon="inline-end" />

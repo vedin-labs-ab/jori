@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
 import { type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 import { usePublicSession } from "@/shared/session/public"
 
 // Every marketing page ends on the same handshake.
@@ -33,8 +32,8 @@ export function GetStarted({ prominent = false }: { prominent?: boolean }) {
 
   return (
     <SessionButton
-      className={cn(prominent && "h-10 px-4 text-sm")}
       pending={session.isPending}
+      size={prominent ? "xl" : "lg"}
       to={isSignedIn ? "/console" : "/auth/sign-in"}
     >
       {isSignedIn ? "Open console" : "Get started"}
