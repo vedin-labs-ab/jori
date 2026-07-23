@@ -26,6 +26,8 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
+import { useSignOutFlow } from "../sign-out"
 import { UserAvatar } from "./user-avatar"
 import { UserView } from "./user-view"
 
@@ -116,6 +118,7 @@ export function UserButton({
 }: UserButtonProps) {
   const { authClient, basePaths, viewPaths, localization, plugins, navigate } =
     useAuth()
+  const signOut = useSignOutFlow()
 
   const { isPending: settingActiveSession } = useSetActiveSession(
     authClient as MultiSessionAuthClient
@@ -132,6 +135,10 @@ export function UserButton({
       renderUserLink(link, navigate, `user-button-link-${index.toString()}`)
     ]
   })
+
+  if (signOut.isSigningOut) {
+    return <FullscreenSkeletonLoader />
+  }
 
   return (
     <DropdownMenu>
@@ -211,13 +218,7 @@ export function UserButton({
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem
-              onClick={() =>
-                navigate({
-                  to: `${basePaths.auth}/${viewPaths.auth.signOut}`
-                })
-              }
-            >
+            <DropdownMenuItem onClick={signOut.signOut}>
               <LogOut className="text-muted-foreground" />
 
               {localization.auth.signOut}

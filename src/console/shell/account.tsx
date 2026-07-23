@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router"
 import { ChevronsUpDown, LogOut, ShieldUser } from "lucide-react"
 import { useState } from "react"
+import { useSignOutFlow } from "@/components/auth/sign-out"
 import { UserView } from "@/components/auth/user/user-view"
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { useSession } from "@/shared/session/auth"
 import { AccountDialog } from "./settings"
 
@@ -25,7 +26,12 @@ export function SidebarUserButton() {
   const { isMobile } = useSidebar()
   const { data: session } = useSession()
   const [managing, setManaging] = useState(false)
+  const signOut = useSignOutFlow()
   const user = session?.user
+
+  if (signOut.isSigningOut) {
+    return <FullscreenSkeletonLoader />
+  }
 
   if (user === undefined) {
     return <Skeleton className="h-12 w-full rounded-md" />
@@ -61,11 +67,9 @@ export function SidebarUserButton() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/auth/sign-out">
-                <LogOut />
-                Sign out
-              </Link>
+            <DropdownMenuItem onSelect={signOut.signOut}>
+              <LogOut />
+              Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

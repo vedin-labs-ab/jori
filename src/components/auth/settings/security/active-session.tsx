@@ -8,6 +8,8 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { FullscreenSkeletonLoader } from "@/shared/loading"
+import { useSignOutFlow } from "../../sign-out"
 
 function timeAgo(date: Date) {
   // Local patch: list-sessions delivers ISO strings at runtime despite the
@@ -48,8 +50,9 @@ export type ActiveSessionProps = {
  * @returns A JSX element containing the active session row
  */
 export function ActiveSession({ activeSession }: ActiveSessionProps) {
-  const { authClient, basePaths, localization, viewPaths, navigate } = useAuth()
+  const { authClient, localization } = useAuth()
   const { data: session } = useSession(authClient, { refetchOnMount: false })
+  const signOut = useSignOutFlow()
 
   const { mutate: revokeSession, isPending: isRevoking } = useRevokeSession(
     authClient,
@@ -62,6 +65,10 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
   const ua = Bowser.parse(activeSession.userAgent || "")
   const isMobile =
     ua.platform.type === "mobile" || ua.platform.type === "tablet"
+
+  if (signOut.isSigningOut) {
+    return <FullscreenSkeletonLoader />
+  }
 
   return (
     <div className="flex items-center gap-3 p-4">
@@ -98,9 +105,7 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
         size="sm"
         onClick={() =>
           isCurrentSession
-            ? navigate({
-                to: `${basePaths.auth}/${viewPaths.auth.signOut}`
-              })
+            ? signOut.signOut()
             : revokeSession(activeSession)
         }
         disabled={isRevoking}
