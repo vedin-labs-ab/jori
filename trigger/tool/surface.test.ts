@@ -1,7 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "."
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "."
 
 test("send_reply routes through Convex and marks the active surface communicated", async () => {
   const runtime = createRuntime()
@@ -23,7 +24,7 @@ test("send_reply routes through Convex and marks the active surface communicated
   expect(result.finished).toBe(false)
   expect(JSON.parse(result.content)).toEqual({ status: "sent" })
   expect(runtime.context.activeSurface?.communicated).toBe(true)
-  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+  expect(runtime.platform.sendReply).toHaveBeenCalledWith({
     blocks: [{ text: { text: "Done", type: "mrkdwn" }, type: "section" }],
     runId: "run_1",
     text: "Done",
@@ -50,7 +51,7 @@ test("send_reply forwards the active Linear target by default", async () => {
     sequence: 100,
   })
 
-  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+  expect(runtime.platform.sendReply).toHaveBeenCalledWith({
     blocks: undefined,
     runId: "run_1",
     target: "linear:thread:comment-id",
@@ -78,7 +79,7 @@ test("send_reply can target a specific Linear comment", async () => {
     sequence: 100,
   })
 
-  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+  expect(runtime.platform.sendReply).toHaveBeenCalledWith({
     blocks: undefined,
     runId: "run_1",
     target: "linear:thread:new-comment-id",
@@ -109,7 +110,7 @@ test("add_reaction routes through Convex and marks the active surface communicat
   expect(result.finished).toBe(false)
   expect(JSON.parse(result.content)).toEqual({ status: "added" })
   expect(runtime.context.activeSurface?.communicated).toBe(true)
-  expect(runtime.convex.addReaction).toHaveBeenCalledWith({
+  expect(runtime.platform.addReaction).toHaveBeenCalledWith({
     reaction: "white_check_mark",
     runId: "run_1",
     target: { messageTs: "123.456" },
@@ -146,7 +147,7 @@ test("add_reaction validates GitHub reaction targets before calling Convex", asy
     },
     status: "error",
   })
-  expect(runtime.convex.addReaction).not.toHaveBeenCalled()
+  expect(runtime.platform.addReaction).not.toHaveBeenCalled()
 })
 
 test("add_reaction validates GitHub reaction values before calling Convex", async () => {
@@ -180,22 +181,22 @@ test("add_reaction validates GitHub reaction values before calling Convex", asyn
     },
     status: "error",
   })
-  expect(runtime.convex.addReaction).not.toHaveBeenCalled()
+  expect(runtime.platform.addReaction).not.toHaveBeenCalled()
 })
 
 function createRuntime(
   options: {
-    activeSurface?: ToolRuntime["context"]["activeSurface"]
+    activeSurface?: AgentRuntime["context"]["activeSurface"]
     communicated?: boolean
     tools?: RuntimeTool[]
   } = {}
-): ToolRuntime {
+): AgentRuntime {
   return {
-    convex: {
+    platform: {
       addReaction: vi.fn(async () => ({ status: "added" })),
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: options.activeSurface ?? {
         communicated: options.communicated ?? false,
@@ -223,7 +224,7 @@ function createRuntime(
       session: null,
       tools: options.tools ?? [sendReplyTool()],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }
 

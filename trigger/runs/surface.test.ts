@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { createQueuedModel, runtimeId } from "../../test/trigger"
-import { type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
 import { runAgentLoop } from "./loop"
 
 test("active surface stops are repaired back to finish_run", async () => {
@@ -53,7 +53,7 @@ test("active surface stops are repaired back to finish_run", async () => {
       ],
     })
   )
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({ type: "run.completed" })
   )
 })
@@ -141,12 +141,12 @@ test("active surface replies complete only after finish_run", async () => {
 
   await runAgentLoop({ attempt: 1, model, runtime })
 
-  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+  expect(runtime.platform.sendReply).toHaveBeenCalledWith({
     blocks: undefined,
     runId: "run_1",
     text: "Here is the answer.",
   })
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({ type: "run.completed" })
   )
 })
@@ -178,12 +178,12 @@ test("active surface final replies complete without finish_run", async () => {
   await runAgentLoop({ attempt: 1, model, runtime })
 
   expect(model.complete).toHaveBeenCalledTimes(1)
-  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+  expect(runtime.platform.sendReply).toHaveBeenCalledWith({
     blocks: undefined,
     runId: "run_1",
     text: "Here is the answer.",
   })
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({ type: "run.completed" })
   )
 })
@@ -191,9 +191,9 @@ test("active surface final replies complete without finish_run", async () => {
 function createRuntime(options: {
   surface?: "github" | "linear" | "slack"
   tools: RuntimeTool[]
-}): ToolRuntime {
+}): AgentRuntime {
   return {
-    convex: {
+    platform: {
       addReaction: vi.fn(async () => ({ status: "added" })),
       callTool: vi.fn(),
       loadRunHandoffs: vi.fn(async () => ({ approvals: [], offers: [] })),
@@ -227,7 +227,7 @@ function createRuntime(options: {
       tools: options.tools,
     },
     sandbox: {},
-  } as unknown as ToolRuntime
+  } as unknown as AgentRuntime
 }
 
 function runtimeTool(

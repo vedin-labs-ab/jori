@@ -9,23 +9,28 @@ import {
   encodeToolResult,
 } from "../../../contracts/transport"
 import { type ModelMessage } from "../../model/types"
-import { markVisibleCommunication, type ToolRuntime } from "../../tool"
+import { type AgentRuntime } from "../../runtime"
+import { markVisibleCommunication } from "../../tool"
 import { materializeSandboxResult } from "../../tool/results"
 import {
   recordApprovalResolved,
   recordOfferResolved,
 } from "../../trace/activity"
 import { appendSessionMessages, replacePromptMessages } from "../messages"
-import { type PendingHandoff } from "./pending"
+import {
+  isPendingApproval,
+  isPendingOffer,
+  type PendingHandoff,
+} from "./pending"
 
 export async function reconcileHandoffs(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   subjects: HandoffSubject[] = []
 ) {
   const [subjectHandoffs, runHandoffs] = await Promise.all([
     loadSubjectHandoffs(runtime, subjects),
-    runtime.convex.loadRunHandoffs({ runId: runtime.context.run.id }),
+    runtime.platform.loadRunHandoffs({ runId: runtime.context.run.id }),
   ])
   const applied = await applyHandoffs(
     runtime,
@@ -43,7 +48,7 @@ export async function reconcileHandoffs(
 // Applies already-loaded handoffs without fetching or draining; run entry
 // uses this with the handoffs bundled into the runtime context load.
 export async function applyHandoffs(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   handoffs: RunHandoffs
 ) {
@@ -68,7 +73,7 @@ export async function applyHandoffs(
 }
 
 async function reconcileApproval(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   approval: ApprovalHandoff
 ) {
@@ -83,18 +88,18 @@ async function reconcileApproval(
     return true
   }
 
-  await runtime.convex.markApprovalConsumed({ approvalId: approval.id })
+  await runtime.platform.markApprovalConsumed({ approvalId: approval.id })
   messages.push(userNote(approvalOutcomeNote(approval)))
 
   return true
 }
 
 async function executeApprovedAction(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   approval: ApprovalHandoff
 ) {
-  const encoded = await runtime.convex.executeApproval({
+  const encoded = await runtime.platform.executeApproval({
     approvalId: approval.id,
     runId: runtime.context.run.id,
   })
@@ -112,7 +117,7 @@ async function executeApprovedAction(
 }
 
 async function reconcileOffer(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   offer: OfferHandoff
 ) {
@@ -121,7 +126,7 @@ async function reconcileOffer(
   }
 
   await recordOfferResolved(runtime, offer)
-  await runtime.convex.markOfferConsumed({ integrationOfferId: offer.id })
+  await runtime.platform.markOfferConsumed({ integrationOfferId: offer.id })
 
   if (offer.status === "connected") {
     await refreshRuntimeContext(runtime, messages)
@@ -139,10 +144,10 @@ async function reconcileOffer(
 }
 
 async function refreshRuntimeContext(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[]
 ) {
-  const reloaded = await runtime.convex.reloadContext({
+  const reloaded = await runtime.platform.reloadContext({
     runId: runtime.context.run.id,
   })
 
@@ -177,21 +182,13 @@ function pendingHandoff(
   return { expiresAt, subject }
 }
 
-function isPendingApproval(approval: ApprovalHandoff) {
-  return approval.status === "pending"
-}
-
-function isPendingOffer(offer: OfferHandoff) {
-  return offer.status === "pending" || offer.status === "claimed"
-}
-
 async function loadSubjectHandoffs(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   subjects: HandoffSubject[]
 ) {
   return subjects.length === 0
     ? emptyHandoffs()
-    : await runtime.convex.loadRunHandoffSubjects({ subjects })
+    : await runtime.platform.loadRunHandoffSubjects({ subjects })
 }
 
 function mergeHandoffs(primary: RunHandoffs, secondary: RunHandoffs) {

@@ -17,7 +17,6 @@ export type {
   ToolCapability,
   ToolPermission,
   ToolPermissionRoute,
-  ToolPermissionRow,
   UserVisibleToolPermission,
 } from "./types"
 

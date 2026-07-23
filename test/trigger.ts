@@ -10,14 +10,12 @@ import {
 export type QueuedModelResponse =
   | {
       content: string
-      output?: string | null
       reasoning?: string | null
       type: "stop"
       usage?: ModelUsage
     }
   | {
       content: string | null
-      output?: string | null
       reasoning?: string | null
       toolCalls: ModelToolCall[]
       type: "tool_calls"
@@ -51,9 +49,7 @@ function queuedModelResponses(
 }
 
 function queuedModelResponse(response: QueuedModelResponse): ModelResponse {
-  const output = response.output ?? response.content
   const base = {
-    output,
     reasoning: response.reasoning ?? null,
     usage: response.usage ?? emptyUsage(),
   }

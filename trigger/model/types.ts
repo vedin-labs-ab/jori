@@ -42,14 +42,12 @@ export type ModelUsage = {
 export type ModelResponse =
   | {
       content: string
-      output: string | null
       reasoning: string | null
       usage: ModelUsage
       type: "stop"
     }
   | {
       content: string | null
-      output: string | null
       reasoning: string | null
       toolCalls: ModelToolCall[]
       usage: ModelUsage

@@ -1,11 +1,11 @@
 import { type JsonObject } from "../../contracts/json"
 import { optionalString } from "../input"
-import { type ToolRuntime } from "./runtime"
+import { type AgentRuntime } from "../runtime"
 
 const maxResultLength = 8000
 
 export function executeRunTool(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   args: {
     input: JsonObject
     name: string
@@ -18,7 +18,7 @@ export function executeRunTool(
   throw new Error(`Unknown run tool: ${args.name}`)
 }
 
-function finishRun(runtime: ToolRuntime, input: JsonObject) {
+function finishRun(runtime: AgentRuntime, input: JsonObject) {
   const reason = optionalString(input.reason)
   const result = optionalString(input.result)
   const communicated = runtime.context.activeSurface?.communicated ?? false

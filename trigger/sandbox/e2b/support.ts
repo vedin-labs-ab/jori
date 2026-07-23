@@ -9,13 +9,13 @@ const defaultCommandTimeoutMs = 20 * 60 * 1000
 const defaultSandboxTimeoutMs = 60 * 60 * 1000
 
 export async function killE2BSandbox(args: {
-  convex: RuntimePlatform
+  platform: RuntimePlatform
   sandboxId: string
 }) {
   await Sandbox.kill(args.sandboxId, { apiKey: requireE2BApiKey() }).catch(
     () => false
   )
-  await args.convex.markSandboxCleaned({
+  await args.platform.markSandboxCleaned({
     externalId: args.sandboxId,
   })
 }

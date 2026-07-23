@@ -1,10 +1,10 @@
 import { type WaiterWake } from "../../contracts/runtime/worker"
-import { type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
 import { parkWaitpoint } from "../waiter"
 import { hasResolvedHandoffs, type PendingHandoff } from "./handoffs/pending"
 
 export async function parkRun(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   pending: PendingHandoff[]
 ): Promise<WaiterWake> {
   return await parkWaitpoint(runtime, {
@@ -13,8 +13,8 @@ export async function parkRun(
   })
 }
 
-async function handoffsResolved(runtime: ToolRuntime) {
-  const handoffs = await runtime.convex.loadRunHandoffs({
+async function handoffsResolved(runtime: AgentRuntime) {
+  const handoffs = await runtime.platform.loadRunHandoffs({
     runId: runtime.context.run.id,
   })
 

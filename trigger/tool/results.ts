@@ -1,5 +1,5 @@
 import { isRecord, type JsonObject } from "../../contracts/json"
-import { type ToolRuntime } from "./runtime"
+import { type AgentRuntime } from "../runtime"
 
 export function toolResult(value: unknown, finished = false) {
   return { finished, value }
@@ -15,7 +15,7 @@ export function toolErrorResult(message: string): JsonObject {
 }
 
 export async function materializeSandboxResult(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   result: unknown
 ) {
   const clone = githubRepositoryClone(result)
@@ -24,7 +24,7 @@ export async function materializeSandboxResult(
     return result
   }
 
-  const credentials = await runtime.convex.fetchGitHubCloneCredentials({
+  const credentials = await runtime.platform.fetchGitHubCloneCredentials({
     owner: clone.owner,
     repo: clone.repo,
     runId: runtime.context.run.id,

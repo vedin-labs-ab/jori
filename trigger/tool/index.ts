@@ -5,6 +5,7 @@ import { readFinal } from "../../contracts/runtime/tools"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { encodeToolResult } from "../../contracts/transport"
 import { type ModelToolCall } from "../model/types"
+import { type AgentRuntime } from "../runtime"
 import { executeCodingTool } from "../sandbox/coding"
 import { recordToolResultActivity } from "../trace/activity"
 import { errorDetails } from "../trace/events"
@@ -20,11 +21,8 @@ import {
   toolResult,
 } from "./results"
 import { executeRunTool } from "./run"
-import { type ToolRuntime } from "./runtime"
 import { findTool, requireSurface, shouldFinishConvexTool } from "./select"
 import { executeActiveSurfaceTool } from "./surface"
-
-export type { ToolRuntime } from "./runtime"
 
 type ToolCallResult = {
   content: string
@@ -61,7 +59,7 @@ export async function executeToolCall(
 type ToolCallArgs = {
   attempt: number
   call: ModelToolCall
-  runtime: ToolRuntime
+  runtime: AgentRuntime
   sequence: number
 }
 
@@ -72,7 +70,7 @@ async function recordToolSuccess(
 ): Promise<ToolCallResult> {
   try {
     await recordToolResultActivity({
-      convex: args.runtime.convex,
+      platform: args.runtime.platform,
       context: args.runtime.context,
       result: result.value,
       sequence: args.sequence,
@@ -118,7 +116,7 @@ export function modelTools(tools: RuntimeTool[]) {
 }
 
 async function executeTool(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   tool: RuntimeTool,
   call: ModelToolCall,
   onParked: () => Promise<void>
@@ -152,7 +150,7 @@ async function executeTool(
 }
 
 async function executeConvexTool(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   tool: RuntimeTool,
   call: ModelToolCall
 ) {
@@ -175,7 +173,7 @@ async function executeConvexTool(
 }
 
 async function requestPromptedApproval(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   surface: ToolSurface,
   tool: string,
   args: JsonObject
@@ -186,7 +184,7 @@ async function requestPromptedApproval(
       : await prepareProviderToolInput(runtime, surface, tool, args)
   const replyTarget = runtime.context.activeSurface?.target
 
-  return await runtime.convex.requestApproval({
+  return await runtime.platform.requestApproval({
     input,
     ...(replyTarget === undefined || replyTarget === null
       ? {}
@@ -198,7 +196,7 @@ async function requestPromptedApproval(
 }
 
 export function markVisibleCommunication(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   toolName: string,
   result: unknown
 ) {
@@ -213,7 +211,7 @@ export function markVisibleCommunication(
 }
 
 async function callConvexTool(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   surface: ToolSurface,
   tool: string,
   input: JsonObject
@@ -226,7 +224,7 @@ async function callConvexTool(
     return await generateImageAsset(runtime, input)
   }
 
-  const result = await runtime.convex.callTool({
+  const result = await runtime.platform.callTool({
     input:
       surface === "milo"
         ? await prepareMiloToolInput(runtime, tool, input)
@@ -242,13 +240,13 @@ async function callConvexTool(
 function eventArgs(args: {
   attempt: number
   call: ModelToolCall
-  runtime: ToolRuntime
+  runtime: AgentRuntime
   sequence: number
 }) {
   return {
     attempt: args.attempt,
     call: args.call,
-    convex: args.runtime.convex,
+    platform: args.runtime.platform,
     context: args.runtime.context,
     sequence: args.sequence,
   }

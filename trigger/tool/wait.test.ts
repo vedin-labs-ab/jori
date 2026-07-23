@@ -1,6 +1,7 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "../tool"
 
 const triggerWait = vi.hoisted(() => ({
   createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
@@ -20,7 +21,7 @@ beforeEach(() => {
 
 test("wait_for_agents returns immediately when every child is terminal", async () => {
   const runtime = createRuntime()
-  runtime.convex.readAgentRuns = vi.fn(async () => [
+  runtime.platform.readAgentRuns = vi.fn(async () => [
     {
       runId: runtimeId<"runs">("run_child"),
       title: "Research attendees",
@@ -61,14 +62,14 @@ test("wait_for_agents returns immediately when every child is terminal", async (
 test("wait_for_agents defaults a missing timeout to 15 minutes", async () => {
   const now = Date.parse("2026-07-13T08:00:00.000Z")
   const runtime = createRuntime()
-  runtime.convex.readAgentRuns = vi
+  runtime.platform.readAgentRuns = vi
     .fn()
     .mockResolvedValueOnce([agentRun("running")])
     .mockResolvedValue([agentRun("completed")])
-  runtime.convex.createWaiter = vi.fn(async () =>
+  runtime.platform.createWaiter = vi.fn(async () =>
     runtimeId<"waiters">("waiter_1")
   )
-  runtime.convex.expireWaiter = vi.fn()
+  runtime.platform.expireWaiter = vi.fn()
   const clock = vi.spyOn(Date, "now").mockReturnValue(now)
 
   await executeToolCall({
@@ -83,7 +84,7 @@ test("wait_for_agents defaults a missing timeout to 15 minutes", async () => {
   })
 
   clock.mockRestore()
-  expect(runtime.convex.createWaiter).toHaveBeenCalledWith(
+  expect(runtime.platform.createWaiter).toHaveBeenCalledWith(
     expect.objectContaining({ expiresAt: now + 15 * 60 * 1000 })
   )
 })
@@ -93,14 +94,14 @@ test("wait_for_agents turns a relative timeout into a waitpoint expiry", async (
   const runtime = createRuntime()
   const running = agentRun("running")
   const completed = agentRun("completed")
-  runtime.convex.readAgentRuns = vi
+  runtime.platform.readAgentRuns = vi
     .fn()
     .mockResolvedValueOnce([running])
     .mockResolvedValue([completed])
-  runtime.convex.createWaiter = vi.fn(async () =>
+  runtime.platform.createWaiter = vi.fn(async () =>
     runtimeId<"waiters">("waiter_1")
   )
-  runtime.convex.expireWaiter = vi.fn()
+  runtime.platform.expireWaiter = vi.fn()
   const clock = vi.spyOn(Date, "now").mockReturnValue(now)
 
   const result = await executeToolCall({
@@ -122,19 +123,19 @@ test("wait_for_agents turns a relative timeout into a waitpoint expiry", async (
     reason: "completed",
     runs: [completed],
   })
-  expect(runtime.convex.createWaiter).toHaveBeenCalledWith({
+  expect(runtime.platform.createWaiter).toHaveBeenCalledWith({
     condition: { kind: "runs", runIds: ["run_child"] },
     expiresAt: now + 15 * 60 * 1000,
     runId: "run_1",
     waitpointId: "waitpoint_1",
   })
-  expect(runtime.convex.expireWaiter).toHaveBeenCalledWith({
+  expect(runtime.platform.expireWaiter).toHaveBeenCalledWith({
     waiterId: "waiter_1",
   })
   expect(triggerWait.forToken).not.toHaveBeenCalled()
   expect(
     vi
-      .mocked(runtime.convex.recordEvent)
+      .mocked(runtime.platform.recordEvent)
       .mock.calls.map(([event]) => event.type)
   ).toEqual([
     "tool.started",
@@ -168,11 +169,11 @@ test("wait_for_agents rejects timeouts outside its bounds", async () => {
   })
 })
 
-function createRuntime(): ToolRuntime {
+function createRuntime(): AgentRuntime {
   return {
-    convex: {
+    platform: {
       recordEvent: vi.fn(),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: null,
       drained: null,
@@ -205,7 +206,7 @@ function createRuntime(): ToolRuntime {
         },
       ],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }
 

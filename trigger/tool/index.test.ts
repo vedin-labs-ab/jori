@@ -1,6 +1,7 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "./index"
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "./index"
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -22,13 +23,13 @@ test("prompted tools request approval without executing", async () => {
     instruction: "Approval requested.",
     status: "approval_requested",
   })
-  expect(runtime.convex.requestApproval).toHaveBeenCalledWith({
+  expect(runtime.platform.requestApproval).toHaveBeenCalledWith({
     input: promptedToolCall().args,
     runId: "run_1",
     surface: "notion",
     tool: "notion_create_page",
   })
-  expect(runtime.convex.callTool).not.toHaveBeenCalled()
+  expect(runtime.platform.callTool).not.toHaveBeenCalled()
 })
 
 test("prompted tools carry the active reply target into approval delivery", async () => {
@@ -47,7 +48,7 @@ test("prompted tools carry the active reply target into approval delivery", asyn
     sequence: 100,
   })
 
-  expect(runtime.convex.requestApproval).toHaveBeenCalledWith(
+  expect(runtime.platform.requestApproval).toHaveBeenCalledWith(
     expect.objectContaining({
       replyTarget: "linear:thread:comment-id",
     })
@@ -71,7 +72,7 @@ test("prompted tools can finish the tool step with final", async () => {
   })
 
   expect(result.finished).toBe(true)
-  expect(runtime.convex.requestApproval).toHaveBeenCalledWith({
+  expect(runtime.platform.requestApproval).toHaveBeenCalledWith({
     input: {
       ...promptedToolCall().args,
       final: true,
@@ -102,14 +103,14 @@ test("prompted tools reject invalid final before requesting approval", async () 
     error: { message: "final must be a boolean" },
     status: "error",
   })
-  expect(runtime.convex.requestApproval).not.toHaveBeenCalled()
+  expect(runtime.platform.requestApproval).not.toHaveBeenCalled()
 })
 
 test("tool failures are returned to the agent instead of thrown", async () => {
   const runtime = createRuntime({
     mode: "allowed",
   })
-  runtime.convex.callTool = vi.fn(async () => {
+  runtime.platform.callTool = vi.fn(async () => {
     throw new Error("Provider rejected the request")
   })
 
@@ -126,7 +127,7 @@ test("tool failures are returned to the agent instead of thrown", async () => {
     },
     status: "error",
   })
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({
       data: {
         error: "Provider rejected the request",
@@ -144,12 +145,12 @@ test("tool failures are returned to the agent instead of thrown", async () => {
 
 function createRuntime(
   options: {
-    activeSurface?: ToolRuntime["context"]["activeSurface"]
+    activeSurface?: AgentRuntime["context"]["activeSurface"]
     mode?: "allowed" | "prompted"
   } = {}
-): ToolRuntime {
+): AgentRuntime {
   return {
-    convex: {
+    platform: {
       callTool: vi.fn(),
       recordEvent: vi.fn(),
       requestApproval: vi.fn(async () => ({
@@ -158,7 +159,7 @@ function createRuntime(
         instruction: "Approval requested.",
         status: "approval_requested",
       })),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: options.activeSurface ?? null,
       drained: null,
@@ -192,7 +193,7 @@ function createRuntime(
         },
       ],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }
 

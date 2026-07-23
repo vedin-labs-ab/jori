@@ -8,10 +8,10 @@ import { collapseWhitespace } from "../../contracts/text"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { type ModelMessage } from "../model/types"
-import { type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
 
 // The prompt prefix every run starts with: instructions as the system
-// message, then the organization, place, and requester person contexts
+// message, then the organization, requester, place, and person contexts
 // (when present) and the run context as user messages, broad to narrow.
 // Everything after the prefix is history.
 export function promptMessages(prompt: RuntimePrompt): ModelMessage[] {
@@ -80,7 +80,7 @@ export function formatSessionInteraction(interaction: RuntimeInteraction) {
 }
 
 export async function appendSessionMessages(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[]
 ) {
   const session = runtime.context.session
@@ -93,7 +93,7 @@ export async function appendSessionMessages(
   let hasMore = true
 
   while (hasMore) {
-    const drained = await runtime.convex.drainSessionMessages({
+    const drained = await runtime.platform.drainSessionMessages({
       sessionId: session.id,
     })
 
@@ -110,7 +110,7 @@ export async function appendSessionMessages(
 // Appends the batch the runtime context load already drained, then keeps
 // draining only when that batch was cut short.
 export async function seedSessionMessages(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[]
 ) {
   const drained = runtime.context.drained
@@ -131,7 +131,7 @@ export async function seedSessionMessages(
 }
 
 function appendDrainedBatch(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   drained: DrainedSessionBatch
 ) {
@@ -210,7 +210,7 @@ function truncatePreview(value: string) {
 }
 
 function updateActiveSurfaceTarget(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   message: RuntimeMessage
 ) {
   const activeSurface = runtime.context.activeSurface

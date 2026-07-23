@@ -13,7 +13,6 @@ type FolderCount = {
 
 type FolderScan = FolderCount & {
   hasChildSource: boolean
-  hasSource: boolean
   hasSupportingSource: boolean
 }
 
@@ -49,12 +48,7 @@ const skippedDirectories = [
   "src/routes",
 ]
 
-const allowedSingleFileFolders = [
-  ".",
-  "runtime/artifacts/shell",
-  "src/hooks",
-  "src/lib",
-]
+const allowedSingleFileFolders = ["runtime/artifacts/shell", "src/hooks"]
 
 const counts = await countFolders(root)
 const namingViolations = await findNamingViolations({
@@ -96,16 +90,13 @@ async function countFolders(directory: string): Promise<FolderScan[]> {
   const hasSupportingSource =
     entries.filter((entry) => entry.isFile() && isSourceFile(entry.name))
       .length > directSourceFileCount
-  const hasChildSource = childScanGroups.some((folders) =>
-    folders.some((folder) => folder.hasSource)
-  )
+  const hasChildSource = childScanGroups.some((folders) => folders.length > 0)
   const result = childScanGroups.flat()
 
   if (directSourceFileCount > 0 && !isSkipped(relativePath)) {
     result.push({
       count: directSourceFileCount,
       hasChildSource,
-      hasSource: true,
       hasSupportingSource,
       relativePath,
     })

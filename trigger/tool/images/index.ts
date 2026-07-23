@@ -2,7 +2,7 @@ import path from "node:path"
 import { isRecord, type JsonObject } from "../../../contracts/json"
 import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "../../input"
-import { type ToolRuntime } from "../runtime"
+import { type AgentRuntime } from "../../runtime"
 import { generateOpenRouterImage } from "./openrouter"
 
 type GenerateImageInput = {
@@ -16,7 +16,7 @@ type GenerateImageInput = {
 const generatedImageDirectory = "generated-images"
 
 export async function generateImageAsset(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   input: JsonObject
 ) {
   const request = normalizeGenerateImageInput(input)
@@ -31,7 +31,7 @@ export async function generateImageAsset(
     },
   ])
 
-  const asset = await runtime.convex.uploadAsset({
+  const asset = await runtime.platform.uploadAsset({
     bytes: generated.bytes,
     description: request.save.description,
     mimeType: generated.mimeType,

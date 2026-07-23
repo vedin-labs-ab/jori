@@ -5,6 +5,7 @@ import {
   getActorEmail,
   getActorExternalId,
 } from "../../shared/actor"
+import { optionalString } from "../../shared/input"
 import { type ToolSurface } from "../../shared/integrations"
 import { type IntegrationOfferSource } from "./schema"
 
@@ -60,7 +61,7 @@ function isSurfaceIdentityProvider(
 }
 
 function optionalText<Key extends string>(key: Key, value: string | undefined) {
-  const trimmed = value?.trim()
+  const normalized = optionalString(value)
 
-  return trimmed === undefined || trimmed === "" ? {} : { [key]: trimmed }
+  return normalized === undefined ? {} : { [key]: normalized }
 }

@@ -12,7 +12,7 @@ const parkGraceMs = 5000
 const minTimeoutSeconds = 5
 
 type WaitRuntime = {
-  convex: RuntimePlatform
+  platform: RuntimePlatform
   context: RuntimeContext
 }
 
@@ -29,7 +29,7 @@ export async function parkWaitpoint(
     timeout: `${timeoutSeconds(args.deadline)}s`,
     tags: [runtime.context.run.id],
   })
-  const waiterId = await runtime.convex.createWaiter({
+  const waiterId = await runtime.platform.createWaiter({
     runId: runtime.context.run.id,
     ...(runtime.context.session === null
       ? {}
@@ -43,7 +43,7 @@ export async function parkWaitpoint(
   await args.onParked?.()
 
   if (await args.resolved()) {
-    await runtime.convex.expireWaiter({ waiterId })
+    await runtime.platform.expireWaiter({ waiterId })
     await recordResumed(runtime, waiterId, { reason: "resolved" })
     return { reason: "resolved" }
   }
@@ -51,7 +51,7 @@ export async function parkWaitpoint(
   const result = await wait.forToken<WaiterWake>(token)
 
   if (!result.ok) {
-    await runtime.convex.expireWaiter({ waiterId })
+    await runtime.platform.expireWaiter({ waiterId })
     await recordResumed(runtime, waiterId, { reason: "expired" })
     return { reason: "expired" }
   }
@@ -71,7 +71,7 @@ async function recordWaiting(
   runtime: WaitRuntime,
   waiterId: RuntimeId<"waiters">
 ) {
-  await recordRuntimeEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.platform, runtime.context, {
     data: { waiter: waiterId },
     keyId: waiterId,
     sequence: 700_000,
@@ -84,7 +84,7 @@ async function recordResumed(
   waiterId: RuntimeId<"waiters">,
   wake: WaiterWake
 ) {
-  await recordRuntimeEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.platform, runtime.context, {
     data: { waiter: waiterId },
     keyId: `${waiterId}:${wake.reason}`,
     sequence: 700_001,

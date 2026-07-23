@@ -25,11 +25,11 @@ type RuntimeEventArgs =
     })
 
 export async function recordRuntimeEvent(
-  convex: RuntimePlatform,
+  platform: RuntimePlatform,
   context: RuntimeContext,
   input: RuntimeEventArgs
 ) {
-  await convex.recordEvent(
+  await platform.recordEvent(
     runtimeEvent({
       ...input,
       runId: context.run.id,

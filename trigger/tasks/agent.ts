@@ -2,6 +2,7 @@ import { task } from "@trigger.dev/sdk"
 import { agentTaskId } from "../../contracts/runtime/tasks"
 import {
   type AgentRunPayload,
+  isTerminalAgentRunStatus,
   type RuntimeContext,
 } from "../../contracts/runtime/worker"
 import { MiloConvexClient } from "../convex"
@@ -24,19 +25,19 @@ export const miloAgentRun = task({
     randomize: true,
   },
   run: async (payload: AgentRunPayload, { ctx }) => {
-    const convex = new MiloConvexClient()
+    const platform = new MiloConvexClient()
     const attempt = ctx.attempt.number
     // Loading the run also records the started trace, flips the run to
     // running, and drains the first session batch, so the loop starts with
     // no further round trips.
-    const context = await convex.loadRun(payload, attempt)
+    const context = await platform.loadRun(payload, attempt)
     const sandbox = new E2BSandboxRuntime(
-      convex,
+      platform,
       context.run.id,
       context.run.sandboxId
     )
 
-    if (isTerminalStatus(context.run.status)) {
+    if (isTerminalAgentRunStatus(context.run.status)) {
       await sandbox.cleanup()
 
       return {
@@ -48,26 +49,22 @@ export const miloAgentRun = task({
       const output = await runAgentLoop({
         attempt,
         model: new OpenRouterModelRuntime(),
-        runtime: { convex, context, sandbox },
+        runtime: { context, platform, sandbox },
       })
       await releaseSandbox({ context, sandbox })
 
       return output
     } catch (error) {
-      await handleFailure({ attempt, context, convex, error, sandbox })
+      await handleFailure({ attempt, context, error, platform, sandbox })
       throw error
     }
   },
 })
 
-function isTerminalStatus(status: RuntimeContext["run"]["status"]) {
-  return status === "completed" || status === "failed" || status === "stopped"
-}
-
 async function handleFailure(args: {
   attempt: number
   context: RuntimeContext
-  convex: MiloConvexClient
+  platform: MiloConvexClient
   error: unknown
   sandbox: E2BSandboxRuntime
 }) {
@@ -75,7 +72,7 @@ async function handleFailure(args: {
     return
   }
 
-  await recordRuntimeEvent(args.convex, args.context, {
+  await recordRuntimeEvent(args.platform, args.context, {
     attempt: args.attempt,
     data: errorDetails(args.error),
     sequence: 999_999,

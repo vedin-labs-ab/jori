@@ -10,8 +10,8 @@ import {
   normalizeSourceChanges,
 } from "../../contracts/source"
 import { optionalString, requiredString } from "../input"
+import { type AgentRuntime } from "../runtime"
 import { sandboxClonePath } from "../sandbox/path"
-import { type ToolRuntime } from "./runtime"
 
 const sourceChangeTools = new Set([
   "github_commit_to_pull_request",
@@ -19,7 +19,7 @@ const sourceChangeTools = new Set([
 ])
 
 export async function prepareProviderToolInput(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   surface: string,
   tool: string,
   input: JsonObject
@@ -51,7 +51,7 @@ export async function prepareProviderToolInput(
   return output
 }
 
-async function collectSourceChanges(runtime: ToolRuntime, input: JsonObject) {
+async function collectSourceChanges(runtime: AgentRuntime, input: JsonObject) {
   const result = await runtime.sandbox.runCommand({
     command: sourceChangeScript(readStringArray(input.paths)),
     cwd: sourceDirectory(input),

@@ -12,7 +12,7 @@ import {
 import { agentModel } from "../../contracts/billing"
 import { toJsonObject } from "../../contracts/json"
 import { requireOpenRouterRuntimeConfig } from "../openrouter"
-import { ingestReasoning, nullableText } from "./reasoning"
+import { ingestReasoning } from "./reasoning"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -57,14 +57,12 @@ export class OpenRouterModelRuntime implements ModelRuntime {
       tools: toAiTools(args.tools),
     })
     const toolCalls = response.toolCalls.flatMap(readToolCall)
-    const output = nullableText(response.text)
     const reasoning = ingestReasoning(this.config.model, response.reasoningText)
     const usage = readModelUsage(response)
 
     if (toolCalls.length === 0) {
       return {
         content: response.text,
-        output,
         reasoning,
         usage,
         type: "stop",
@@ -73,7 +71,6 @@ export class OpenRouterModelRuntime implements ModelRuntime {
 
     return {
       content: response.text === "" ? null : response.text,
-      output,
       reasoning,
       toolCalls,
       usage,

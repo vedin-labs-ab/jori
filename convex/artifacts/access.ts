@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
-import { boundedNumber } from "../shared/input"
+import { boundedNumber, optionalString } from "../shared/input"
 
 const artifactSummaryLimit = 100
 
@@ -97,9 +97,7 @@ export function summarizeArtifact(artifact: Doc<"artifacts">) {
 }
 
 function normalizeSearch(query: string | undefined) {
-  const normalized = query?.trim().toLowerCase()
-
-  return normalized === "" ? undefined : normalized
+  return optionalString(query)?.toLowerCase()
 }
 
 function matchesArtifactQuery(
