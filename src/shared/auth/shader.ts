@@ -12,68 +12,57 @@ const fragmentSource = `
   uniform vec2 resolution;
   uniform float time;
 
-  float random(vec2 point) {
-    return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
+  float grain(vec2 point) {
+    return fract(sin(dot(point, vec2(12.9898, 78.233))) * 43758.5453);
   }
 
-  float noise(vec2 point) {
-    vec2 cell = floor(point);
-    vec2 local = fract(point);
-    local = local * local * (3.0 - 2.0 * local);
-
-    float bottom = mix(
-      random(cell),
-      random(cell + vec2(1.0, 0.0)),
-      local.x
-    );
-    float top = mix(
-      random(cell + vec2(0.0, 1.0)),
-      random(cell + vec2(1.0, 1.0)),
-      local.x
-    );
-
-    return mix(bottom, top, local.y);
-  }
-
-  float fieldNoise(vec2 point) {
-    float value = 0.0;
-    float amplitude = 0.5;
-
-    for (int octave = 0; octave < 4; octave++) {
-      value += amplitude * noise(point);
-      point = point * 2.03 + vec2(7.4, 3.8);
-      amplitude *= 0.5;
-    }
-
-    return value;
-  }
-
-  float contour(float value, float count, float width) {
-    float distanceToLine = abs(fract(value * count) - 0.5);
-    return 1.0 - smoothstep(width, width + 0.012, distanceToLine);
+  float fold(float distance, float center, float width) {
+    float normalized = (distance - center) / width;
+    return exp(-normalized * normalized);
   }
 
   void main() {
     vec2 uv = gl_FragCoord.xy / resolution;
-    vec2 point = uv - 0.5;
-    point.x *= resolution.x / resolution.y;
+    float slowTime = time * 0.075;
+    float vertical = 1.0 - uv.y;
+    float curve = 0.40 + 0.25 * pow(vertical, 1.45);
+    curve += sin(uv.y * 3.2 + slowTime) * 0.012;
+    curve += sin(uv.y * 7.0 - slowTime * 0.65) * 0.004;
 
-    float drift = time * 0.018;
-    float broad = fieldNoise(
-      point * 1.7 + vec2(drift, -drift * 0.7)
+    float distanceToCurve = uv.x - curve;
+    float diagonal = clamp(uv.x * 0.72 + uv.y * 0.54, 0.0, 1.0);
+    float lowerLeftLight = 1.0 - smoothstep(
+      0.12,
+      1.05,
+      distance(uv, vec2(0.08, 0.10))
     );
-    float detail = fieldNoise(
-      point * 3.2 + vec2(broad * 0.45, drift * 0.55)
-    );
-    float surface = broad * 0.72 + detail * 0.28 + point.y * 0.12;
-    float primaryLine = contour(surface, 8.0, 0.025);
-    float fineLine = contour(surface + detail * 0.08, 15.0, 0.012);
 
-    vec3 canvas = vec3(0.929, 0.945, 0.918);
-    vec3 sage = vec3(0.318, 0.421, 0.345);
-    float ink = clamp(primaryLine * 0.20 + fineLine * 0.055, 0.0, 0.24);
+    vec3 lightSage = vec3(0.925, 0.945, 0.895);
+    vec3 middleSage = vec3(0.655, 0.728, 0.630);
+    vec3 deepSage = vec3(0.280, 0.390, 0.315);
+    vec3 color = mix(lightSage, middleSage, diagonal * 0.72);
+    color = mix(color, lightSage, lowerLeftLight * 0.36);
 
-    gl_FragColor = vec4(mix(canvas, sage, ink), 1.0);
+    float ribbon = smoothstep(-0.025, 0.14, distanceToCurve);
+    vec3 ribbonColor = mix(middleSage, deepSage, 0.40 + diagonal * 0.42);
+    color = mix(color, ribbonColor, ribbon * 0.43);
+
+    float edgeShadow = fold(distanceToCurve, 0.010, 0.030);
+    float firstShadow = fold(distanceToCurve, 0.062, 0.023);
+    float secondShadow = fold(distanceToCurve, 0.112, 0.029);
+    float thirdShadow = fold(distanceToCurve, 0.175, 0.043);
+    float innerLight = fold(distanceToCurve, 0.037, 0.017);
+    float secondLight = fold(distanceToCurve, 0.087, 0.018);
+
+    color = mix(color, deepSage, edgeShadow * 0.20);
+    color = mix(color, deepSage, firstShadow * 0.15);
+    color = mix(color, deepSage, secondShadow * 0.11);
+    color = mix(color, deepSage, thirdShadow * 0.065);
+    color = mix(color, lightSage, innerLight * 0.10);
+    color = mix(color, lightSage, secondLight * 0.065);
+
+    float texture = (grain(gl_FragCoord.xy) - 0.5) * 0.018;
+    gl_FragColor = vec4(color + texture, 1.0);
   }
 `
 
