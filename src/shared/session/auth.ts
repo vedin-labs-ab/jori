@@ -1,6 +1,7 @@
 import {
   type OrganizationAuthClient,
   useActiveOrganization as useActiveOrganizationQuery,
+  useAuthenticate,
   useListOrganizations as useListOrganizationsQuery,
   useSession as useSessionQuery,
 } from "@better-auth-ui/react"
@@ -23,6 +24,12 @@ const organizationAuthClient = authClient as OrganizationAuthClient
  *  so gates can hold a stable loader exactly until the state is known. */
 export function useSession() {
   return useSessionQuery(authClient)
+}
+
+/** Session gate for protected surfaces. Signed-out visitors are sent to
+ *  sign-in with the current path preserved as their post-auth destination. */
+export function useAuthenticatedSession() {
+  return useAuthenticate(authClient)
 }
 
 export function useActiveOrganization() {

@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import { useMutation } from "convex/react"
 import { type ReactNode, useEffect, useState } from "react"
 import { CreateOrganizationDialog } from "@/components/auth/organization/create-organization-dialog"
@@ -9,9 +8,9 @@ import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
   activateOrganization,
   useActiveOrganization,
+  useAuthenticatedSession,
   useConvexSession,
   useListOrganizations,
-  useSession,
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { OnboardingGate } from "./context/organization/onboarding/gate"
@@ -31,7 +30,7 @@ export function ConsolePage({
   chrome?: "shell" | "none"
   loadingFallback?: ReactNode
 }) {
-  const session = useSession()
+  const session = useAuthenticatedSession()
   const loader = loadingFallback ?? <FullscreenSkeletonLoader />
 
   if (session.isPending) {
@@ -39,36 +38,13 @@ export function ConsolePage({
   }
 
   if (session.data === null || session.data === undefined) {
-    return (
-      <PublicConsoleFrame isSignedIn={false}>
-        <SignedOutView />
-      </PublicConsoleFrame>
-    )
+    return loader
   }
 
   return (
     <SignedInConsole chrome={chrome} loader={loader}>
       {children}
     </SignedInConsole>
-  )
-}
-
-function SignedOutView() {
-  return (
-    <section className="grid max-w-xl gap-3">
-      <h1 className="text-2xl font-medium tracking-normal">
-        Bring Milo into your work.
-      </h1>
-      <p className="text-sm text-muted-foreground">
-        Create an organization, connect your tools, and Milo starts helping
-        where your team already works.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Button asChild>
-          <Link to="/sign-in">Get started</Link>
-        </Button>
-      </div>
-    </section>
   )
 }
 
