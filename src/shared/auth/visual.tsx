@@ -11,13 +11,26 @@ export function SignInVisual() {
       return
     }
 
-    return mountShader(canvas)
+    const desktop = window.matchMedia("(min-width: 64rem)")
+    let destroy: (() => void) | undefined
+    const update = () => {
+      destroy?.()
+      destroy = desktop.matches ? mountShader(canvas) : undefined
+    }
+
+    update()
+    desktop.addEventListener("change", update)
+
+    return () => {
+      desktop.removeEventListener("change", update)
+      destroy?.()
+    }
   }, [])
 
   return (
     <aside
       aria-label="About Milo"
-      className="relative hidden min-h-svh overflow-hidden border-l bg-[#edf1eb] lg:block"
+      className="relative hidden min-h-svh overflow-hidden border-l bg-[#eaf0e4] lg:block"
     >
       <div aria-hidden="true" className="absolute inset-0">
         <canvas className="size-full" ref={canvasRef} />
