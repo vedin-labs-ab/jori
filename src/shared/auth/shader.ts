@@ -10,6 +10,7 @@ const fragmentSource = `
   precision highp float;
 
   uniform vec2 resolution;
+  uniform vec2 pointer;
   uniform float time;
 
   float grain(vec2 point) {
@@ -23,18 +24,25 @@ const fragmentSource = `
 
   void main() {
     vec2 uv = gl_FragCoord.xy / resolution;
-    float slowTime = time * 0.075;
+    vec2 waveDirection = vec2(-0.242, 0.970);
+    vec2 waveOrigin = vec2(0.717, 0.810);
+    float wavePhase = dot(uv - waveOrigin, waveDirection) * 4.398;
+    float primaryWave = sin(wavePhase - time * 0.8);
+    float secondaryWave = sin(wavePhase * 1.85 + time * 0.52);
     float vertical = 1.0 - uv.y;
+    vec2 pointerOffset = (pointer - 0.5) * 0.20;
     float curve = 0.40 + 0.25 * pow(vertical, 1.45);
-    curve += sin(uv.y * 3.2 + slowTime) * 0.012;
-    curve += sin(uv.y * 7.0 - slowTime * 0.65) * 0.004;
+    curve += primaryWave * 0.075 + secondaryWave * 0.018;
+    curve += pointerOffset.x * 0.55;
+    curve += pointerOffset.y * (vertical - 0.5) * 0.30;
 
     float distanceToCurve = uv.x - curve;
     float diagonal = clamp(uv.x * 0.72 + uv.y * 0.54, 0.0, 1.0);
+    vec2 focalPoint = vec2(0.097, 0.10) + pointerOffset;
     float lowerLeftLight = 1.0 - smoothstep(
       0.12,
       1.05,
-      distance(uv, vec2(0.08, 0.10))
+      distance(uv, focalPoint)
     );
 
     vec3 lightSage = vec3(0.925, 0.945, 0.895);
@@ -68,8 +76,19 @@ const fragmentSource = `
 
 type ShaderRenderer = {
   destroy(): void
-  draw(time: number): void
+  draw(pointer: ShaderPointer, time: number): void
   resize(): void
+}
+
+type ShaderPointer = {
+  x: number
+  y: number
+}
+
+type PointerTracker = {
+  current: ShaderPointer
+  destroy(): void
+  update(): void
 }
 
 export function mountShader(canvas: HTMLCanvasElement) {
@@ -122,6 +141,7 @@ function buildRenderer(
   activateProgram(program)
 
   const position = context.getAttribLocation(program, "position")
+  const pointer = context.getUniformLocation(program, "pointer")
   const resolution = context.getUniformLocation(program, "resolution")
   const time = context.getUniformLocation(program, "time")
 
@@ -133,8 +153,9 @@ function buildRenderer(
       context.deleteBuffer(buffer)
       context.deleteProgram(program)
     },
-    draw(elapsedTime) {
+    draw(currentPointer, elapsedTime) {
       context.uniform2f(resolution, canvas.width, canvas.height)
+      context.uniform2f(pointer, currentPointer.x, currentPointer.y)
       context.uniform1f(time, elapsedTime)
       context.drawArrays(context.TRIANGLES, 0, 6)
     },
@@ -150,6 +171,7 @@ function runRenderer(
 ): () => void {
   const frameDuration = 1000 / 30
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
+  const pointerTracker = createPointerTracker(canvas, reducedMotion)
   let animationFrame = 0
   let isVisible = true
   let lastRenderedAt = 0
@@ -157,7 +179,11 @@ function runRenderer(
 
   const draw = (now: number) => {
     if (lastRenderedAt === 0 || now - lastRenderedAt >= frameDuration) {
-      renderer.draw(reducedMotion.matches ? 0 : (now - startedAt) / 1000)
+      pointerTracker.update()
+      renderer.draw(
+        pointerTracker.current,
+        reducedMotion.matches ? 0 : (now - startedAt) / 1000
+      )
       lastRenderedAt = now
     }
 
@@ -190,7 +216,44 @@ function runRenderer(
     observer.disconnect()
     resizeObserver.disconnect()
     reducedMotion.removeEventListener("change", restart)
+    pointerTracker.destroy()
     renderer.destroy()
+  }
+}
+
+function createPointerTracker(
+  canvas: HTMLCanvasElement,
+  reducedMotion: MediaQueryList
+): PointerTracker {
+  const current = { x: 0.5, y: 0.5 }
+  const target = { x: 0.5, y: 0.5 }
+  const handlePointerMove = (event: PointerEvent) => {
+    if (reducedMotion.matches) {
+      return
+    }
+
+    const bounds = canvas.getBoundingClientRect()
+    target.x = (event.clientX - bounds.left) / bounds.width
+    target.y = 1 - (event.clientY - bounds.top) / bounds.height
+  }
+  const handlePointerLeave = () => {
+    target.x = 0.5
+    target.y = 0.5
+  }
+
+  canvas.addEventListener("pointermove", handlePointerMove, { passive: true })
+  canvas.addEventListener("pointerleave", handlePointerLeave)
+
+  return {
+    current,
+    destroy() {
+      canvas.removeEventListener("pointermove", handlePointerMove)
+      canvas.removeEventListener("pointerleave", handlePointerLeave)
+    },
+    update() {
+      current.x += (target.x - current.x) * 0.065
+      current.y += (target.y - current.y) * 0.065
+    },
   }
 }
 
