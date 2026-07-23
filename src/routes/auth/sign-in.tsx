@@ -24,7 +24,7 @@ function SignInPage() {
         <div className="flex flex-1 items-center justify-center py-16">
           <div className="w-full max-w-xs">
             <SignIn
-              className="max-w-none gap-0 py-0 ring-0 [--card-spacing:--spacing(0)] [&>[data-slot=card-header]]:mb-6"
+              className="max-w-none gap-0 overflow-visible py-0 ring-0 [--card-spacing:--spacing(0)] [&>[data-slot=card-header]]:mb-6"
               description="Good to see you. Let’s get to work."
               headerContent={
                 <div className="mt-7">
