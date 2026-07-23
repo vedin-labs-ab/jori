@@ -36,10 +36,10 @@ function SignInPage() {
               }
               title="Sign in to Milo"
             />
-            <div className="mt-7 flex justify-center">
-              <InvitationInfo />
-            </div>
-            <div className="mt-5">
+            <div className="mt-8 space-y-4">
+              <div className="flex justify-center">
+                <InvitationInfo />
+              </div>
               <SignInLegalNotice />
             </div>
           </div>
