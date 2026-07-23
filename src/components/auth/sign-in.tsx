@@ -1,7 +1,7 @@
 import { authMutationKeys } from "@better-auth-ui/core"
 import { useAuth, useFetchOptions, useSignInEmail } from "@better-auth-ui/react"
 import { useIsMutating } from "@tanstack/react-query"
-import { type SyntheticEvent, useState } from "react"
+import { type ReactNode, type SyntheticEvent, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +22,7 @@ import { ProviderButtons, type SocialLayout } from "./provider-buttons"
 
 export type SignInProps = {
   className?: string
+  headerContent?: ReactNode
   socialLayout?: SocialLayout
   socialPosition?: "top" | "bottom"
 }
@@ -30,12 +31,14 @@ export type SignInProps = {
  * Render the sign-in form UI with email/password, magic link, and social provider options.
  *
  * @param className - Optional additional container class names
+ * @param headerContent - Optional content rendered between the title and form
  * @param socialLayout - Layout style for social provider buttons
  * @param socialPosition - Position of social provider buttons; `"top"` or `"bottom"`. Defaults to `"bottom"`.
  * @returns The rendered sign-in UI as a JSX element
  */
 export function SignIn({
   className,
+  headerContent,
   socialLayout,
   socialPosition = "bottom"
 }: SignInProps) {
@@ -116,11 +119,12 @@ export function SignIn({
       <CardHeader>
         <CardTitle
           aria-level={1}
-          className="text-xl font-semibold"
+          className="text-center text-xl font-semibold"
           role="heading"
         >
           {localization.auth.signIn}
         </CardTitle>
+        {headerContent}
       </CardHeader>
 
       <CardContent>

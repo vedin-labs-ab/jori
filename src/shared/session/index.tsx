@@ -25,6 +25,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
         Link={SessionLink}
         authClient={authClient}
         emailAndPassword={{ enabled: false }}
+        localization={{ auth: { signIn: "Sign in" } }}
         navigate={({ to, replace }) => void navigate({ to, replace })}
         plugins={[organizationPlugin()]}
         redirectTo="/console"

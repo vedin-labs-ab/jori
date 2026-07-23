@@ -28,7 +28,7 @@ export function SignInVisual() {
           Start the day already caught up.
         </p>
         <p className="mt-3 max-w-sm text-pretty text-foreground/65 text-sm/relaxed">
-          Milo keeps work moving across your tools, and asks before it acts.
+          Milo keeps work moving across your tools and asks before it acts.
         </p>
       </div>
     </aside>

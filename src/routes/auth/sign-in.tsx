@@ -12,19 +12,22 @@ function SignInPage() {
   return (
     <main className="grid min-h-svh bg-background lg:grid-cols-2">
       <section className="flex min-h-svh flex-col px-6 py-7 sm:px-10 sm:py-9 lg:px-12 xl:px-16">
-        <header className="flex items-center justify-between gap-6">
+        <header className="flex items-center">
           <BrandLink />
-          <RegionPicker />
         </header>
 
         <div className="flex flex-1 items-center justify-center py-16">
-          <div className="w-full max-w-sm">
-            <SignIn className="max-w-none gap-0 py-0 ring-0 [--card-spacing:--spacing(0)] [&>[data-slot=card-header]]:mb-6" />
-
-            <p className="mt-7 text-pretty text-center text-muted-foreground text-xs/relaxed">
-              Your account and organization stay in the selected data region.
-            </p>
-          </div>
+          <SignIn
+            className="max-w-xs gap-0 py-0 ring-0 [--card-spacing:--spacing(0)] [&>[data-slot=card-header]]:mb-6"
+            headerContent={
+              <div className="mt-7">
+                <RegionPicker layout="field" />
+                <p className="mt-2 text-pretty text-center text-muted-foreground text-xs/relaxed">
+                  Your account and organization stay in this region.
+                </p>
+              </div>
+            }
+          />
         </div>
       </section>
 
