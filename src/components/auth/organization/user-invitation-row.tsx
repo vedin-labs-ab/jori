@@ -69,11 +69,11 @@ export function UserInvitationRow({ invitation }: UserInvitationRowProps) {
         </Button>
 
         <Button
-          variant="outline"
-          size="icon"
-          className="size-8 text-destructive"
+          className="text-destructive"
           disabled={isAccepting || isRejecting}
           onClick={() => rejectInvitation({ invitationId: invitation.id })}
+          size="icon-lg"
+          variant="outline"
           aria-label={organizationLocalization.rejectInvitation}
         >
           {isRejecting ? <Spinner /> : <X />}

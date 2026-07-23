@@ -36,7 +36,6 @@ export function DeliveryModeMenu({
       <DropdownMenuTrigger asChild>
         <Button
           aria-label="Delivery method"
-          className="px-2"
           disabled={disabled}
           variant="outline"
         >

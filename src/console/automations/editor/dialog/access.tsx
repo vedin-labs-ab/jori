@@ -105,12 +105,11 @@ function AdditionalSurface({
         aria-invalid={issue === undefined ? undefined : true}
         aria-label={`${label} additional access: ${toolCount} enabled. Configure tools.`}
         className={cn(
-          "h-7 gap-1.5 rounded-r-none px-2 text-xs",
+          "gap-1.5 rounded-r-none",
           issue !== undefined &&
             "border-destructive/60 bg-destructive/5 text-destructive"
         )}
         onClick={() => setOpen(true)}
-        size="sm"
         type="button"
         variant="outline"
       >
@@ -124,7 +123,7 @@ function AdditionalSurface({
         aria-invalid={issue === undefined ? undefined : true}
         aria-label={`Remove additional ${label} access`}
         className={cn(
-          "h-7 w-7 rounded-l-none border-l-0",
+          "rounded-l-none border-l-0",
           issue !== undefined &&
             "border-destructive/60 bg-destructive/5 text-destructive"
         )}

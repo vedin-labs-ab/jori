@@ -24,8 +24,8 @@ export function WebsiteChip({
   const chip = (
     <Button
       asChild
-      className="h-8 justify-start gap-2 px-2.5 text-xs"
-      size="sm"
+      className="justify-start gap-2"
+      size="lg"
       variant="secondary"
     >
       <a href={website.href} rel="noreferrer" target="_blank">
@@ -53,9 +53,8 @@ export function WebsiteChip({
       <ButtonGroupSeparator />
       <Button
         aria-label={`Remove ${website.label}`}
-        className="h-8 px-2"
         onClick={onRemove}
-        size="sm"
+        size="icon-lg"
         type="button"
         variant="secondary"
       >
