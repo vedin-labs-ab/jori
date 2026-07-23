@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { SignIn } from "@/components/auth/sign-in"
+import {
+  DataRegionInfo,
+  InvitationInfo,
+  SignInLegalNotice,
+} from "@/shared/auth/guidance"
 import { SignInVisual } from "@/shared/auth/visual"
 import { BrandLink } from "@/shared/brand/link"
 import { RegionPicker } from "@/shared/region/picker"
@@ -17,17 +22,25 @@ function SignInPage() {
         </header>
 
         <div className="flex flex-1 items-center justify-center py-16">
-          <SignIn
-            className="max-w-xs gap-0 py-0 ring-0 [--card-spacing:--spacing(0)] [&>[data-slot=card-header]]:mb-6"
-            headerContent={
-              <div className="mt-7">
-                <RegionPicker layout="field" />
-                <p className="mt-2 text-pretty text-center text-muted-foreground text-xs/relaxed">
-                  Your account and organization stay in this region.
-                </p>
-              </div>
-            }
-          />
+          <div className="w-full max-w-xs">
+            <SignIn
+              className="max-w-none gap-0 py-0 ring-0 [--card-spacing:--spacing(0)] [&>[data-slot=card-header]]:mb-6"
+              headerContent={
+                <div className="mt-7">
+                  <RegionPicker
+                    labelAction={<DataRegionInfo />}
+                    layout="field"
+                  />
+                </div>
+              }
+            />
+            <div className="mt-7 flex justify-center">
+              <InvitationInfo />
+            </div>
+            <div className="mt-5">
+              <SignInLegalNotice />
+            </div>
+          </div>
         </div>
       </section>
 
