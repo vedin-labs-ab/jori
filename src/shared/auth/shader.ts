@@ -13,64 +13,60 @@ const fragmentSource = `
   uniform vec2 pointer;
   uniform float time;
 
-  float grain(vec2 point) {
-    return fract(sin(dot(point, vec2(12.9898, 78.233))) * 43758.5453);
+  float hash(vec2 point) {
+    return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
   }
 
-  float fold(float distance, float center, float width) {
-    float normalized = (distance - center) / width;
-    return exp(-normalized * normalized);
+  mat2 rotate(float angle) {
+    float sine = sin(angle);
+    float cosine = cos(angle);
+    return mat2(cosine, -sine, sine, cosine);
+  }
+
+  float streamline(vec2 point, float lane, float phase) {
+    float focus = exp(-pow((point.x - 0.06) * 4.8, 2.0));
+    float wave = sin(point.x * 2.4 + phase + lane * 4.8) * 0.042;
+    wave += sin(point.x * 5.2 - phase * 0.56 - lane * 3.1) * 0.012;
+    float center = lane + wave;
+    center *= mix(1.0, 0.52, focus);
+    center += sin(phase * 0.72 + lane * 5.0) * focus * 0.026;
+
+    float distanceToLine = abs(point.y - center);
+    float antialias = 0.95 / min(resolution.x, resolution.y);
+    return 1.0 - smoothstep(0.00035, 0.00035 + antialias, distanceToLine);
   }
 
   void main() {
     vec2 uv = gl_FragCoord.xy / resolution;
-    vec2 waveDirection = vec2(-0.242, 0.970);
-    vec2 waveOrigin = vec2(0.717, 0.810);
-    float wavePhase = dot(uv - waveOrigin, waveDirection) * 4.398;
-    float primaryWave = sin(wavePhase - time * 0.8);
-    float secondaryWave = sin(wavePhase * 1.85 + time * 0.52);
-    float vertical = 1.0 - uv.y;
-    vec2 pointerOffset = (pointer - 0.5) * 0.20;
-    float curve = 0.40 + 0.25 * pow(vertical, 1.45);
-    curve += primaryWave * 0.075 + secondaryWave * 0.018;
-    curve += pointerOffset.x * 0.55;
-    curve += pointerOffset.y * (vertical - 0.5) * 0.30;
+    float aspect = resolution.x / resolution.y;
+    vec2 point = vec2((uv.x - 0.5) * aspect, uv.y - 0.5);
+    vec2 pointerOffset = (pointer - 0.5) * vec2(0.040, 0.024);
+    float phase = time * 0.20;
+    float lines = 0.0;
+    float anchorLines = 0.0;
 
-    float distanceToCurve = uv.x - curve;
-    float diagonal = clamp(uv.x * 0.72 + uv.y * 0.54, 0.0, 1.0);
-    vec2 focalPoint = vec2(0.097, 0.10) + pointerOffset;
-    float lowerLeftLight = 1.0 - smoothstep(
-      0.12,
-      1.05,
-      distance(uv, focalPoint)
-    );
+    point = rotate(-0.12) * (point - pointerOffset);
+    point.y -= 0.17;
 
-    vec3 lightSage = vec3(0.925, 0.945, 0.895);
-    vec3 middleSage = vec3(0.655, 0.728, 0.630);
-    vec3 deepSage = vec3(0.280, 0.390, 0.315);
-    vec3 color = mix(lightSage, middleSage, diagonal * 0.72);
-    color = mix(color, lightSage, lowerLeftLight * 0.36);
+    for (int index = 0; index < 16; index++) {
+      float lane = (float(index) - 5.5) * 0.056;
+      float line = streamline(point, lane, phase);
+      lines = max(lines, line);
 
-    float ribbon = smoothstep(-0.025, 0.14, distanceToCurve);
-    vec3 ribbonColor = mix(middleSage, deepSage, 0.40 + diagonal * 0.42);
-    color = mix(color, ribbonColor, ribbon * 0.43);
+      if (index == 2 || index == 7 || index == 12) {
+        anchorLines = max(anchorLines, line);
+      }
+    }
 
-    float edgeShadow = fold(distanceToCurve, 0.010, 0.030);
-    float firstShadow = fold(distanceToCurve, 0.062, 0.023);
-    float secondShadow = fold(distanceToCurve, 0.112, 0.029);
-    float thirdShadow = fold(distanceToCurve, 0.175, 0.043);
-    float innerLight = fold(distanceToCurve, 0.037, 0.017);
-    float secondLight = fold(distanceToCurve, 0.087, 0.018);
+    vec3 paper = vec3(0.918, 0.936, 0.895);
+    vec3 sage = vec3(0.395, 0.490, 0.401);
+    vec3 deepSage = vec3(0.255, 0.340, 0.280);
+    vec3 color = paper;
+    color = mix(color, sage, lines * 0.32);
+    color = mix(color, deepSage, anchorLines * 0.16);
 
-    color = mix(color, deepSage, edgeShadow * 0.20);
-    color = mix(color, deepSage, firstShadow * 0.15);
-    color = mix(color, deepSage, secondShadow * 0.11);
-    color = mix(color, deepSage, thirdShadow * 0.065);
-    color = mix(color, lightSage, innerLight * 0.10);
-    color = mix(color, lightSage, secondLight * 0.065);
-
-    float texture = (grain(gl_FragCoord.xy) - 0.5) * 0.018;
-    gl_FragColor = vec4(color + texture, 1.0);
+    float grain = (hash(gl_FragCoord.xy) - 0.5) * 0.007;
+    gl_FragColor = vec4(color + grain, 1.0);
   }
 `
 
