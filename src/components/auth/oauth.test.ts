@@ -20,7 +20,7 @@ test("keeps social sign-in failures inside Milo", () => {
 test("explains that provider identities are distinct", () => {
   const feedback = readOAuthFeedback({
     url: new URL(
-      "https://milo.test/auth/sign-in?authProvider=microsoft&error=account_not_linked"
+      "https://milo.test/sign-in?authProvider=microsoft&error=account_not_linked"
     ),
   })
 

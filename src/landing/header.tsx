@@ -42,7 +42,7 @@ function HeaderActions() {
       {!isSignedIn ? (
         <SessionButton
           pending={session.isPending}
-          to="/auth/sign-in"
+          to="/sign-in"
           variant="ghost"
         >
           Sign in

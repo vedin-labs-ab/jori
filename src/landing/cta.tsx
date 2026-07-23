@@ -34,7 +34,7 @@ export function GetStarted({ prominent = false }: { prominent?: boolean }) {
     <SessionButton
       pending={session.isPending}
       size={prominent ? "xl" : "lg"}
-      to={isSignedIn ? "/console" : "/auth/sign-in"}
+      to={isSignedIn ? "/console" : "/sign-in"}
     >
       {isSignedIn ? "Open console" : "Get started"}
       <ArrowRight data-icon="inline-end" />

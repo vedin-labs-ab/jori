@@ -65,7 +65,7 @@ function SignedOutView() {
       </p>
       <div className="flex flex-wrap gap-2">
         <Button asChild>
-          <Link to="/auth/sign-in">Get started</Link>
+          <Link to="/sign-in">Get started</Link>
         </Button>
       </div>
     </section>
