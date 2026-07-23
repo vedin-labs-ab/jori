@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { createQueuedModel, runtimeId } from "../../test/trigger"
-import { type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
 import { runAgentLoop } from "./loop"
 
 test.each([
@@ -41,7 +41,7 @@ test.each([
       tools: [expect.objectContaining({ name: "finish_run" })],
     })
   )
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({ type: "run.completed" })
   )
 })
@@ -114,7 +114,7 @@ test("allows tool calls after stop repair", async () => {
 
   await runAgentLoop({ attempt: 1, model, runtime })
 
-  expect(runtime.convex.callTool).toHaveBeenCalledWith(
+  expect(runtime.platform.callTool).toHaveBeenCalledWith(
     expect.objectContaining({
       input: {
         channel: "C123",
@@ -123,7 +123,7 @@ test("allows tool calls after stop repair", async () => {
       tool: "conversations_add_message",
     })
   )
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({ type: "run.completed" })
   )
 })
@@ -155,7 +155,7 @@ test("marks the run failed when model steps are exhausted", async () => {
   })
 
   expect(model.complete).toHaveBeenCalledTimes(30)
-  expect(runtime.convex.recordEvent).toHaveBeenCalledWith(
+  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
     expect.objectContaining({
       data: { error: "Model loop exceeded the maximum step count." },
       type: "run.failed",
@@ -163,9 +163,9 @@ test("marks the run failed when model steps are exhausted", async () => {
   )
 })
 
-function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
+function createRuntime(options: { tools?: RuntimeTool[] } = {}): AgentRuntime {
   return {
-    convex: {
+    platform: {
       callTool: vi.fn(async () => ({ status: "sent" })),
       loadRunHandoffs: vi.fn(async () => ({ approvals: [], offers: [] })),
       recordEvent: vi.fn(),
@@ -194,7 +194,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
       tools: options.tools ?? [finishRunTool()],
     },
     sandbox: {},
-  } as unknown as ToolRuntime
+  } as unknown as AgentRuntime
 }
 
 function finishRunTool(): RuntimeTool {

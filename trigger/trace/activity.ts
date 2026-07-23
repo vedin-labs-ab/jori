@@ -10,7 +10,7 @@ import { type RuntimePlatform } from "../platform"
 import { recordRuntimeEvent } from "./runtime"
 
 export async function recordToolResultActivity(args: {
-  convex: RuntimePlatform
+  platform: RuntimePlatform
   context: RuntimeContext
   result: unknown
   sequence: number
@@ -22,7 +22,7 @@ export async function recordToolResultActivity(args: {
     return
   }
 
-  await recordRuntimeEvent(args.convex, args.context, {
+  await recordRuntimeEvent(args.platform, args.context, {
     data: event.data,
     keyId: event.keyId,
     sequence: args.sequence,
@@ -34,7 +34,7 @@ export async function recordApprovalResolved(
   runtime: ActivityRuntime,
   approval: ApprovalHandoff
 ) {
-  await recordRuntimeEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.platform, runtime.context, {
     data: { approval: approval.id },
     keyId: approval.id,
     sequence: 800_000,
@@ -46,7 +46,7 @@ export async function recordOfferResolved(
   runtime: ActivityRuntime,
   offer: OfferHandoff
 ) {
-  await recordRuntimeEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.platform, runtime.context, {
     data: { offer: offer.id },
     keyId: offer.id,
     sequence: 810_000,
@@ -65,7 +65,7 @@ type ToolResultEvent = {
 }
 
 type ActivityRuntime = {
-  convex: RuntimePlatform
+  platform: RuntimePlatform
   context: RuntimeContext
 }
 

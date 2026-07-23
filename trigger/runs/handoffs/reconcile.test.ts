@@ -3,7 +3,7 @@ import { type RuntimeTool } from "../../../contracts/runtime/worker"
 import { encodeToolResult } from "../../../contracts/transport"
 import { runtimeId } from "../../../test/trigger"
 import { type ModelMessage } from "../../model/types"
-import { type ToolRuntime } from "../../tool"
+import { type AgentRuntime } from "../../runtime"
 import { reconcileHandoffs } from "./reconcile"
 
 test("executes an approved handoff once and injects the result", async () => {
@@ -14,8 +14,8 @@ test("executes an approved handoff once and injects the result", async () => {
 
   const result = await reconcileHandoffs(runtime, messages)
 
-  expect(runtime.convex.executeApproval).toHaveBeenCalledTimes(1)
-  expect(runtime.convex.executeApproval).toHaveBeenCalledWith({
+  expect(runtime.platform.executeApproval).toHaveBeenCalledTimes(1)
+  expect(runtime.platform.executeApproval).toHaveBeenCalledWith({
     approvalId: "approval_1",
     runId: "run_1",
   })
@@ -35,8 +35,8 @@ test("surfaces a denied handoff and consumes it without executing", async () => 
 
   const result = await reconcileHandoffs(runtime, messages)
 
-  expect(runtime.convex.executeApproval).not.toHaveBeenCalled()
-  expect(runtime.convex.markApprovalConsumed).toHaveBeenCalledWith({
+  expect(runtime.platform.executeApproval).not.toHaveBeenCalled()
+  expect(runtime.platform.markApprovalConsumed).toHaveBeenCalledWith({
     approvalId: "approval_1",
   })
   expect(result.progressed).toBe(true)
@@ -51,8 +51,8 @@ test("surfaces a failed approval delivery without executing", async () => {
 
   const result = await reconcileHandoffs(runtime, messages)
 
-  expect(runtime.convex.executeApproval).not.toHaveBeenCalled()
-  expect(runtime.convex.markApprovalConsumed).toHaveBeenCalledWith({
+  expect(runtime.platform.executeApproval).not.toHaveBeenCalled()
+  expect(runtime.platform.markApprovalConsumed).toHaveBeenCalledWith({
     approvalId: "approval_1",
   })
   expect(result.progressed).toBe(true)
@@ -69,7 +69,7 @@ test("keeps a pending handoff as a wait without progress", async () => {
 
   const result = await reconcileHandoffs(runtime, messages)
 
-  expect(runtime.convex.executeApproval).not.toHaveBeenCalled()
+  expect(runtime.platform.executeApproval).not.toHaveBeenCalled()
   expect(result.progressed).toBe(false)
   expect(result.pending).toEqual([
     {
@@ -107,8 +107,10 @@ test("refreshes runtime tools when an integration offer connects", async () => {
 
   const result = await reconcileHandoffs(runtime, messages)
 
-  expect(runtime.convex.reloadContext).toHaveBeenCalledWith({ runId: "run_1" })
-  expect(runtime.convex.markOfferConsumed).toHaveBeenCalledWith({
+  expect(runtime.platform.reloadContext).toHaveBeenCalledWith({
+    runId: "run_1",
+  })
+  expect(runtime.platform.markOfferConsumed).toHaveBeenCalledWith({
     integrationOfferId: "offer_1",
   })
   expect(runtime.context.tools).toEqual([refreshedTool()])
@@ -126,9 +128,9 @@ test("refreshes runtime tools when an integration offer connects", async () => {
 function createRuntime(options: {
   approvals?: ReturnType<typeof approvalHandoff>[]
   offers?: ReturnType<typeof offerHandoff>[]
-}): ToolRuntime {
+}): AgentRuntime {
   return {
-    convex: {
+    platform: {
       executeApproval: vi.fn(async () =>
         encodeToolResult({ status: "posted" })
       ),
@@ -155,7 +157,7 @@ function createRuntime(options: {
         tools: [refreshedTool()],
         activeSurface: null,
       })),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: null,
       drained: null,
@@ -179,7 +181,7 @@ function createRuntime(options: {
       session: null,
       tools: [],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }
 

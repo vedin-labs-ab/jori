@@ -1,6 +1,5 @@
-export type { AgentRunStatus } from "./agents"
+export { type AgentRunStatus, isTerminalAgentRunStatus } from "./agents"
 export type {
-  ActiveSurface,
   DrainedSessionBatch,
   RuntimeContext,
   RuntimeContextReload,
@@ -28,7 +27,5 @@ export type {
 } from "./traces"
 export type {
   WaiterCondition,
-  WaiterSubject,
   WaiterWake,
-  WaiterWakeReason,
 } from "./waiters"

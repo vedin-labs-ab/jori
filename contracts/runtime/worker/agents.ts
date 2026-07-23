@@ -8,3 +8,7 @@ export type AgentRunStatus = {
   /** Outcome the child returned via finish_run; null until it completes. */
   result: string | null
 }
+
+export function isTerminalAgentRunStatus(status: AgentRunStatus["status"]) {
+  return status === "completed" || status === "failed" || status === "stopped"
+}

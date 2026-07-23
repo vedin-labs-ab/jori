@@ -4,7 +4,7 @@ import {
   type RuntimeTool,
 } from "../../contracts/runtime/worker"
 import { createQueuedModel, runtimeId } from "../../test/trigger"
-import { type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
 import { runAgentLoop } from "./loop"
 
 const triggerWait = vi.hoisted(() => ({
@@ -65,10 +65,10 @@ test("thinks after one handoff resolves before parking on another", async () => 
       role: "user",
     })
   )
-  expect(runtime.convex.markApprovalConsumed).toHaveBeenCalledWith({
+  expect(runtime.platform.markApprovalConsumed).toHaveBeenCalledWith({
     approvalId: "approval_1",
   })
-  expect(runtime.convex.createWaiter).toHaveBeenCalledWith({
+  expect(runtime.platform.createWaiter).toHaveBeenCalledWith({
     expiresAt: 2000,
     runId: "run_1",
     waitpointId: "waitpoint_1",
@@ -79,7 +79,7 @@ test("thinks after one handoff resolves before parking on another", async () => 
   expect(triggerWait.forToken).toHaveBeenCalledWith({ id: "waitpoint_1" })
 })
 
-function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
+function createRuntime(handoffs: RunHandoffs[]): AgentRuntime {
   // The context load bundles the first handoff snapshot; later reconciles
   // fetch the rest.
   const bundled = handoffs.shift() ?? emptyHandoffs()
@@ -88,7 +88,7 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
   })
 
   return {
-    convex: {
+    platform: {
       callTool: vi.fn(async () => ({ status: "sent" })),
       createWaiter: vi.fn(async () => runtimeId<"waiters">("waiter_1")),
       expireWaiter: vi.fn(),
@@ -121,7 +121,7 @@ function createRuntime(handoffs: RunHandoffs[]): ToolRuntime {
       tools: [finishRunTool()],
     },
     sandbox: {},
-  } as unknown as ToolRuntime
+  } as unknown as AgentRuntime
 }
 
 function emptyHandoffs(): RunHandoffs {

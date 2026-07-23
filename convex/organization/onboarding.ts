@@ -4,6 +4,7 @@ import { internal } from "../_generated/api"
 import { type ActionCtx, action } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { authComponent, createAuth } from "../auth"
+import { optionalString } from "../shared/input"
 
 // Marks onboarding as seen (so the welcome flow never reopens) and, when a
 // website is provided, kicks off discovery for a proposed organization profile.
@@ -52,13 +53,13 @@ async function startDiscovery(
 }
 
 function normalizeWebsite(website: string | undefined) {
-  const trimmed = website?.trim()
+  const normalized = optionalString(website)
 
-  if (trimmed === undefined || trimmed === "") {
+  if (normalized === undefined) {
     return undefined
   }
 
-  return normalizeWebsiteAddress(trimmed, "website")
+  return normalizeWebsiteAddress(normalized, "website")
 }
 
 async function markOnboarded(ctx: ActionCtx, organizationId: string) {

@@ -1,10 +1,11 @@
 import { type RuntimeModelUsage } from "../../contracts/runtime/trace"
+import { nullableText } from "../model/reasoning"
 import {
   type ModelMessage,
   type ModelRuntime,
   type ModelTool,
 } from "../model/types"
-import { type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
 import { formatError } from "../trace/events"
 import { recordRuntimeEvent } from "../trace/runtime"
 
@@ -13,7 +14,7 @@ export async function completeModelStep(args: {
   firstTurn: boolean
   messages: ModelMessage[]
   model: ModelRuntime
-  runtime: ToolRuntime
+  runtime: AgentRuntime
   step: number
   tools: ModelTool[]
 }) {
@@ -23,7 +24,7 @@ export async function completeModelStep(args: {
   // trace, so the started trace always lands first and a failed trace write
   // still aborts the attempt.
   const startedPending = recordRuntimeEvent(
-    args.runtime.convex,
+    args.runtime.platform,
     args.runtime.context,
     {
       attempt: args.attempt,
@@ -42,7 +43,7 @@ export async function completeModelStep(args: {
     })
   } catch (error) {
     await startedPending.catch(() => undefined)
-    await recordRuntimeEvent(args.runtime.convex, args.runtime.context, {
+    await recordRuntimeEvent(args.runtime.platform, args.runtime.context, {
       attempt: args.attempt,
       data: { error: formatError(error) },
       sequence,
@@ -63,7 +64,7 @@ export async function completeModelStep(args: {
 }
 
 function recordModelCompleted(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   args: {
     attempt: number
     durationMs: number
@@ -71,11 +72,11 @@ function recordModelCompleted(
     sequence: number
   }
 ) {
-  return recordRuntimeEvent(runtime.convex, runtime.context, {
+  return recordRuntimeEvent(runtime.platform, runtime.context, {
     attempt: args.attempt,
     data: {
       usage: modelUsage(args.response, args.durationMs),
-      output: args.response.output,
+      output: nullableText(args.response.content),
       reasoning: args.response.reasoning,
     },
     sequence: args.sequence,

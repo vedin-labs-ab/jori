@@ -1,7 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "."
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "."
 
 test("finish_run requires a reason when an active surface has no communication", async () => {
   const runtime = createRuntime()
@@ -110,14 +111,14 @@ test("finish_run rejects an oversized result", async () => {
 
 function createRuntime(
   options: {
-    activeSurface?: ToolRuntime["context"]["activeSurface"]
+    activeSurface?: AgentRuntime["context"]["activeSurface"]
     communicated?: boolean
   } = {}
-): ToolRuntime {
+): AgentRuntime {
   return {
-    convex: {
+    platform: {
       recordEvent: vi.fn(),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: activeSurfaceState(options),
       drained: null,
@@ -141,14 +142,14 @@ function createRuntime(
       session: null,
       tools: [finishRunTool()],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }
 
 function activeSurfaceState(options: {
-  activeSurface?: ToolRuntime["context"]["activeSurface"]
+  activeSurface?: AgentRuntime["context"]["activeSurface"]
   communicated?: boolean
-}): ToolRuntime["context"]["activeSurface"] {
+}): AgentRuntime["context"]["activeSurface"] {
   return "activeSurface" in options
     ? (options.activeSurface ?? null)
     : {

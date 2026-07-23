@@ -103,20 +103,15 @@ async function resolveReactionActors(
     target: ReactionTarget
   }
 ) {
-  await resolveActor(ctx, {
-    actor: args.actor,
-    provider: args.provider,
-    organizationId: args.integration.organizationId,
-  })
-  await resolveActor(ctx, {
-    actor: args.target.actor,
-    provider: args.provider,
-    organizationId: args.integration.organizationId,
-  })
+  const actors = [
+    args.actor,
+    args.target.actor,
+    ...(args.reactions ?? []).map((reaction) => reaction.actor),
+  ]
 
-  for (const reaction of args.reactions ?? []) {
+  for (const actor of actors) {
     await resolveActor(ctx, {
-      actor: reaction.actor,
+      actor,
       provider: args.provider,
       organizationId: args.integration.organizationId,
     })

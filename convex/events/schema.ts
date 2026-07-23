@@ -15,6 +15,13 @@ const slackData = v.object({
   ts: v.optional(v.string()),
 })
 
+const githubItem = v.object({
+  id: v.optional(v.number()),
+  number: v.optional(v.number()),
+  title: v.optional(v.string()),
+  url: v.optional(v.string()),
+})
+
 const githubData = v.object({
   action: v.optional(v.string()),
   repository: v.object({
@@ -29,22 +36,8 @@ const githubData = v.object({
   issueNumber: v.optional(v.number()),
   pullNumber: v.optional(v.number()),
   isPullRequest: v.optional(v.boolean()),
-  issue: v.optional(
-    v.object({
-      id: v.optional(v.number()),
-      number: v.optional(v.number()),
-      title: v.optional(v.string()),
-      url: v.optional(v.string()),
-    })
-  ),
-  pullRequest: v.optional(
-    v.object({
-      id: v.optional(v.number()),
-      number: v.optional(v.number()),
-      title: v.optional(v.string()),
-      url: v.optional(v.string()),
-    })
-  ),
+  issue: v.optional(githubItem),
+  pullRequest: v.optional(githubItem),
   comment: v.optional(
     v.object({
       id: v.optional(v.string()),

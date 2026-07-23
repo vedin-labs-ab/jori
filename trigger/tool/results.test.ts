@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { type RuntimeId } from "../../contracts/runtime/worker"
+import { type AgentRuntime } from "../runtime"
 import { materializeSandboxResult } from "./results"
-import { type ToolRuntime } from "./runtime"
 
 test("materializes GitHub clone descriptors as Git working copies", async () => {
   const runtime = cloneRuntime()
@@ -24,7 +24,7 @@ test("materializes GitHub clone descriptors as Git working copies", async () => 
     repository: "acme/app",
   })
 
-  expect(runtime.convex.fetchGitHubCloneCredentials).toHaveBeenCalledWith({
+  expect(runtime.platform.fetchGitHubCloneCredentials).toHaveBeenCalledWith({
     owner: "acme",
     repo: "app",
     runId: "run_1",
@@ -39,15 +39,15 @@ test("materializes GitHub clone descriptors as Git working copies", async () => 
   })
 })
 
-function cloneRuntime(): ToolRuntime {
+function cloneRuntime(): AgentRuntime {
   return {
-    convex: {
+    platform: {
       fetchGitHubCloneCredentials: vi.fn(async () => ({
         remoteUrl: "https://github.com/acme/app.git",
         token: "secret-token",
         username: "x-access-token",
       })),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: null,
       drained: null,
@@ -79,6 +79,6 @@ function cloneRuntime(): ToolRuntime {
         remoteUrl: input.remoteUrl,
         repository: input.repository,
       })),
-    } as unknown as ToolRuntime["sandbox"],
+    } as unknown as AgentRuntime["sandbox"],
   }
 }

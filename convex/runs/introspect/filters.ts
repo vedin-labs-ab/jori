@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { optionalString } from "../../shared/input"
 import { type ActivityItem } from "../activity/types"
 import {
   matchesSummaryQuery,
@@ -97,9 +98,7 @@ export function matchesActivityFilter(
 }
 
 export function normalizeQuery(query: string | undefined) {
-  const value = query?.trim().toLowerCase()
-
-  return value === "" ? undefined : value
+  return optionalString(query)?.toLowerCase()
 }
 
 export function normalizeTimestamp(value: number | undefined) {

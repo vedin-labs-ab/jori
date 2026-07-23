@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type RuntimeId } from "../../../contracts/runtime/worker"
-import { type ToolRuntime } from "../runtime"
+import { type AgentRuntime } from "../../runtime"
 import { generateImageAsset } from "./index"
 
 beforeEach(() => {
@@ -108,8 +108,8 @@ test("returns a repairable error when OpenRouter produces no image", async () =>
   ).rejects.toThrow("OpenRouter did not return a generated image.")
 })
 
-type UploadAssetInput = Parameters<ToolRuntime["convex"]["uploadAsset"]>[0]
-type WriteFilesInput = Parameters<ToolRuntime["sandbox"]["writeFiles"]>[0]
+type UploadAssetInput = Parameters<AgentRuntime["platform"]["uploadAsset"]>[0]
+type WriteFilesInput = Parameters<AgentRuntime["sandbox"]["writeFiles"]>[0]
 
 function createRuntime() {
   const uploadAsset = vi.fn(async (args: UploadAssetInput) => ({
@@ -126,13 +126,13 @@ function createRuntime() {
         id: "run_1" as RuntimeId<"runs">,
       },
     },
-    convex: {
+    platform: {
       uploadAsset,
     },
     sandbox: {
       writeFiles,
     },
-  } as unknown as ToolRuntime
+  } as unknown as AgentRuntime
 
   return {
     runtime,

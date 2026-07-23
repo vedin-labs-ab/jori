@@ -8,7 +8,7 @@ import {
   type QueuedModelResponse,
   runtimeId,
 } from "../../../test/trigger"
-import { type ToolRuntime } from "../../tool"
+import { type AgentRuntime } from "../../runtime"
 import { runAgentLoop } from "../loop"
 
 const triggerWait = vi.hoisted(() => ({
@@ -66,10 +66,10 @@ test("final visible actions think after one of several offers resolves", async (
       role: "user",
     })
   )
-  expect(runtime.convex.markOfferConsumed).toHaveBeenCalledWith({
+  expect(runtime.platform.markOfferConsumed).toHaveBeenCalledWith({
     integrationOfferId: "offer_github",
   })
-  expect(runtime.convex.createWaiter).toHaveBeenLastCalledWith({
+  expect(runtime.platform.createWaiter).toHaveBeenLastCalledWith({
     expiresAt: 2000,
     runId: "run_1",
     waitpointId: "waitpoint_1",
@@ -118,7 +118,7 @@ function reactionResponse(
 function createRuntime(options: {
   handoffs: RunHandoffs[]
   subjects: RunHandoffs
-}): ToolRuntime {
+}): AgentRuntime {
   // The context load bundles the first handoff snapshot; later reconciles
   // fetch the rest.
   const bundled = options.handoffs.shift() ?? emptyHandoffs()
@@ -127,7 +127,7 @@ function createRuntime(options: {
   })
 
   return {
-    convex: {
+    platform: {
       addReaction: vi.fn(async () => ({ status: "added" })),
       createWaiter: vi.fn(async () => runtimeId<"waiters">("waiter_1")),
       expireWaiter: vi.fn(),
@@ -163,7 +163,7 @@ function createRuntime(options: {
       tools: [addReactionTool()],
     },
     sandbox: {},
-  } as unknown as ToolRuntime
+  } as unknown as AgentRuntime
 }
 
 function emptyHandoffs(): RunHandoffs {

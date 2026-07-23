@@ -15,10 +15,10 @@ export const miloSandboxCleanup = task({
     randomize: true,
   },
   run: async (payload: SandboxCleanupPayload) => {
-    const convex = new MiloConvexClient()
+    const platform = new MiloConvexClient()
 
     if (payload.expiresAt !== undefined) {
-      const reserved = await convex.reserveExpiredSandboxCleanup({
+      const reserved = await platform.reserveExpiredSandboxCleanup({
         expiresAt: payload.expiresAt,
         externalId: payload.sandboxId,
         runId: payload.runId,
@@ -33,7 +33,7 @@ export const miloSandboxCleanup = task({
     }
 
     await killE2BSandbox({
-      convex,
+      platform,
       sandboxId: payload.sandboxId,
     })
 

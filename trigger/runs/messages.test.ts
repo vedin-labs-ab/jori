@@ -4,7 +4,7 @@ import {
   type RuntimeMessage,
 } from "../../contracts/runtime/worker"
 import { runtimeId } from "../../test/trigger"
-import { type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
 import {
   appendSessionMessages,
   formatSessionInteraction,
@@ -41,7 +41,7 @@ Reacted ✅ to Milo's message: "I can proceed with option B."
 
 test("updates the active surface target from drained messages", async () => {
   const runtime = {
-    convex: {
+    platform: {
       drainSessionMessages: vi.fn(async () => ({
         hasMore: false,
         messages: [
@@ -60,7 +60,7 @@ test("updates the active surface target from drained messages", async () => {
       },
       session: { id: runtimeId<"sessions">("session") },
     },
-  } as unknown as ToolRuntime
+  } as unknown as AgentRuntime
   const messages: Array<{ content: string; role: "user" }> = []
 
   await expect(appendSessionMessages(runtime, messages)).resolves.toBe(true)
@@ -69,7 +69,7 @@ test("updates the active surface target from drained messages", async () => {
 
 test("appends person context before drained batch items", async () => {
   const runtime = {
-    convex: {
+    platform: {
       drainSessionMessages: vi.fn(async () => ({
         contexts: ["# Recent activity — Albin"],
         hasMore: false,
@@ -80,7 +80,7 @@ test("appends person context before drained batch items", async () => {
       activeSurface: null,
       session: { id: runtimeId<"sessions">("session") },
     },
-  } as unknown as ToolRuntime
+  } as unknown as AgentRuntime
   const messages: Array<{ content: string; role: "user" }> = []
 
   await expect(appendSessionMessages(runtime, messages)).resolves.toBe(true)

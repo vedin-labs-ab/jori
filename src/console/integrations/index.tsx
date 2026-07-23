@@ -3,15 +3,8 @@ import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
 import { ConsoleContentGrid } from "../shared/layout"
 import { NativePermissionsCard } from "./card/native"
-import { GitHubIntegration } from "./providers/github"
-import { GmailIntegration, GoogleCalendarIntegration } from "./providers/google"
-import { LinearIntegration } from "./providers/linear"
-import {
-  MicrosoftCalendarIntegration,
-  MicrosoftEmailIntegration,
-} from "./providers/microsoft"
-import { NotionIntegration } from "./providers/notion"
-import { SlackIntegration } from "./providers/slack"
+import { organizationProviders, personalProviders } from "./catalog"
+import { IntegrationProvider } from "./providers"
 
 // Integration cards hold permission rows, so the track floor is wider than
 // the playbook grid's: one column on small screens, two on laptops, three or
@@ -39,43 +32,27 @@ function IntegrationTabs({ organizationId }: { organizationId: string }) {
       </TabsList>
       <TabsContent value="organization" asChild>
         <ConsoleContentGrid className={integrationGrid}>
-          <SlackIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
-          <LinearIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
-          <GitHubIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
-          <NotionIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
+          {organizationProviders.map((provider) => (
+            <IntegrationProvider
+              key={provider.config.integration}
+              organizationId={organizationId}
+              permissions={permissions}
+              provider={provider}
+            />
+          ))}
           <NativePermissionsCard controller={permissions} />
         </ConsoleContentGrid>
       </TabsContent>
       <TabsContent value="user" asChild>
         <ConsoleContentGrid className={integrationGrid}>
-          <GmailIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
-          <GoogleCalendarIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
-          <MicrosoftEmailIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
-          <MicrosoftCalendarIntegration
-            permissions={permissions}
-            organizationId={organizationId}
-          />
+          {personalProviders.map((provider) => (
+            <IntegrationProvider
+              key={provider.config.integration}
+              organizationId={organizationId}
+              permissions={permissions}
+              provider={provider}
+            />
+          ))}
         </ConsoleContentGrid>
       </TabsContent>
     </Tabs>

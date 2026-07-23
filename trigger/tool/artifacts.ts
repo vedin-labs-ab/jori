@@ -1,10 +1,10 @@
 import { isArtifactPublishTool } from "../../contracts/artifacts/publish"
 import { type JsonObject } from "../../contracts/json"
 import { requiredString } from "../input"
-import { type ToolRuntime } from "./runtime"
+import { type AgentRuntime } from "../runtime"
 
 export async function prepareMiloToolInput(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   tool: string,
   input: JsonObject
 ) {

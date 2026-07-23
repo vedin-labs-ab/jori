@@ -1,6 +1,7 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "../tool"
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -26,7 +27,7 @@ test("start_agent forwards its explicit title", async () => {
   })
 
   expect(JSON.parse(result.content)).toEqual({ runId: "run_child" })
-  expect(runtime.convex.createAgentRun).toHaveBeenCalledWith({
+  expect(runtime.platform.createAgentRun).toHaveBeenCalledWith({
     parentId: "run_1",
     task: "Research the attendees.",
     title: "Research attendees",
@@ -52,7 +53,7 @@ test("start_agent rejects a missing title before creating a run", async () => {
     error: { message: "Missing title" },
     status: "error",
   })
-  expect(runtime.convex.createAgentRun).not.toHaveBeenCalled()
+  expect(runtime.platform.createAgentRun).not.toHaveBeenCalled()
 })
 
 test("stop_agent stops a direct child through the platform", async () => {
@@ -73,15 +74,15 @@ test("stop_agent stops a direct child through the platform", async () => {
     runId: "run_child",
     status: "stopped",
   })
-  expect(runtime.convex.stopAgentRun).toHaveBeenCalledWith({
+  expect(runtime.platform.stopAgentRun).toHaveBeenCalledWith({
     parentId: "run_1",
     runId: "run_child",
   })
 })
 
-function createRuntime(): ToolRuntime {
+function createRuntime(): AgentRuntime {
   return {
-    convex: {
+    platform: {
       createAgentRun: vi.fn(async () => ({
         runId: runtimeId<"runs">("run_child"),
       })),
@@ -90,7 +91,7 @@ function createRuntime(): ToolRuntime {
         status: "stopped",
       })),
       recordEvent: vi.fn(),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: null,
       drained: null,
@@ -131,6 +132,6 @@ function createRuntime(): ToolRuntime {
         },
       ],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }

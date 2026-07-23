@@ -8,7 +8,8 @@ import {
   type ModelRuntime,
   type ModelToolCall,
 } from "../model/types"
-import { executeToolCall, modelTools, type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall, modelTools } from "../tool"
 import { recordRuntimeEvent } from "../trace/runtime"
 import { pendingHandoffSubjects } from "./handoffs/pending"
 import { applyHandoffs, reconcileHandoffs } from "./handoffs/reconcile"
@@ -35,7 +36,7 @@ const toolSequenceOffset = 100
 export async function runAgentLoop(args: {
   attempt: number
   model: ModelRuntime
-  runtime: ToolRuntime
+  runtime: AgentRuntime
 }): Promise<AgentLoopOutput> {
   const messages: ModelMessage[] = promptMessages(args.runtime.context.prompt)
 
@@ -95,7 +96,7 @@ function settled(outcome: YieldOutcome): StepResult {
 }
 
 async function runModelToolStep(
-  args: { attempt: number; runtime: ToolRuntime },
+  args: { attempt: number; runtime: AgentRuntime },
   messages: ModelMessage[],
   response: Extract<ModelResponse, { type: "tool_calls" }>,
   step: number
@@ -125,7 +126,7 @@ async function runModelToolStep(
 }
 
 function reportUndeliveredText(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   response: Extract<ModelResponse, { type: "tool_calls" }>,
   step: number
 ) {
@@ -142,7 +143,7 @@ function reportUndeliveredText(
 }
 
 async function settleYield(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   kind: YieldKind,
   content?: string
@@ -191,7 +192,7 @@ function finalizeYield(
 }
 
 async function runToolCalls(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   messages: ModelMessage[],
   calls: ModelToolCall[],
   meta: { attempt: number; step: number }
@@ -225,13 +226,13 @@ async function runToolCalls(
 }
 
 async function completeRun(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   sequence: number,
   attempt: number
 ) {
   const result = runtime.context.result
 
-  await recordRuntimeEvent(runtime.convex, runtime.context, {
+  await recordRuntimeEvent(runtime.platform, runtime.context, {
     attempt,
     sequence,
     type: "run.completed",
@@ -239,8 +240,8 @@ async function completeRun(
   })
 }
 
-async function failRun(runtime: ToolRuntime, attempt: number) {
-  await recordRuntimeEvent(runtime.convex, runtime.context, {
+async function failRun(runtime: AgentRuntime, attempt: number) {
+  await recordRuntimeEvent(runtime.platform, runtime.context, {
     attempt,
     data: { error: maxModelStepsError },
     sequence: maxModelSteps * toolSequenceOffset + toolSequenceOffset,

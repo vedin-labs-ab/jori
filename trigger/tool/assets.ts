@@ -6,7 +6,7 @@ import {
 } from "../../contracts/runtime/assets"
 import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "../input"
-import { type ToolRuntime } from "./runtime"
+import { type AgentRuntime } from "../runtime"
 
 const mimeTypesByExtension: Record<string, string> = {
   ".csv": "text/csv",
@@ -24,7 +24,7 @@ const mimeTypesByExtension: Record<string, string> = {
 }
 
 export async function saveSandboxAsset(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   input: JsonObject
 ) {
   const filePath = sandboxFilePath(requiredString(input.path, "path"))
@@ -38,7 +38,7 @@ export async function saveSandboxAsset(
     throw new Error(assetTooLargeError)
   }
 
-  return await runtime.convex.uploadAsset({
+  return await runtime.platform.uploadAsset({
     bytes,
     description: optionalString(input.description),
     mimeType: optionalString(input.mimeType) ?? inferMimeType(filePath),

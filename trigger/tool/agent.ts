@@ -6,11 +6,12 @@ import {
 } from "../../contracts/runtime/duration"
 import {
   type AgentRunStatus,
+  isTerminalAgentRunStatus,
   type RuntimeId,
 } from "../../contracts/runtime/worker"
 import { optionalStringList, requiredString } from "../input"
+import { type AgentRuntime } from "../runtime"
 import { parkWaitpoint } from "../waiter"
-import { type ToolRuntime } from "./runtime"
 
 const maxAgents = 20
 const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
@@ -19,7 +20,7 @@ const defaultTimeoutMs = durationMilliseconds({ unit: "minutes", value: 15 })
 
 /** The agent-route tools: delegate, join, and stop child runs. */
 export async function executeAgentTool(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   name: string,
   input: JsonObject,
   onParked: () => Promise<void>
@@ -29,7 +30,7 @@ export async function executeAgentTool(
   }
 
   if (name === "start_agent") {
-    return await runtime.convex.createAgentRun({
+    return await runtime.platform.createAgentRun({
       parentId: runtime.context.run.id,
       task: requiredString(input.task, "task"),
       title: requiredString(input.title, "title"),
@@ -38,7 +39,7 @@ export async function executeAgentTool(
   }
 
   if (name === "stop_agent") {
-    return await runtime.convex.stopAgentRun({
+    return await runtime.platform.stopAgentRun({
       parentId: runtime.context.run.id,
       runId: requiredString(input.runId, "runId") as RuntimeId<"runs">,
     })
@@ -48,14 +49,14 @@ export async function executeAgentTool(
 }
 
 async function waitForAgents(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   input: JsonObject,
   onParked?: () => Promise<void>
 ) {
   const runIds = readRunIds(input.runIds)
   const timeoutMs = readTimeoutMilliseconds(input.timeout)
   const readRuns = async () =>
-    await runtime.convex.readAgentRuns({
+    await runtime.platform.readAgentRuns({
       parentId: runtime.context.run.id,
       runIds,
     })
@@ -143,10 +144,5 @@ function readTimeoutMilliseconds(value: unknown) {
 }
 
 function allTerminal(runs: AgentRunStatus[]) {
-  return runs.every(
-    (run) =>
-      run.status === "completed" ||
-      run.status === "failed" ||
-      run.status === "stopped"
-  )
+  return runs.every((run) => isTerminalAgentRunStatus(run.status))
 }

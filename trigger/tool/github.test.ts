@@ -1,7 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "../tool"
 
 test("prompted GitHub commit tools include collected workspace changes", async () => {
   const runtime = createRuntime()
@@ -29,7 +30,7 @@ test("prompted GitHub commit tools include collected workspace changes", async (
     cwd: `${sandboxWorkspace}/app`,
     timeoutMs: 30_000,
   })
-  expect(runtime.convex.requestApproval).toHaveBeenCalledWith({
+  expect(runtime.platform.requestApproval).toHaveBeenCalledWith({
     input: {
       changes: {
         files: [
@@ -53,9 +54,9 @@ test("prompted GitHub commit tools include collected workspace changes", async (
   })
 })
 
-function createRuntime(): ToolRuntime {
+function createRuntime(): AgentRuntime {
   return {
-    convex: {
+    platform: {
       callTool: vi.fn(),
       recordEvent: vi.fn(),
       requestApproval: vi.fn(async () => ({
@@ -64,7 +65,7 @@ function createRuntime(): ToolRuntime {
         instruction: "Approval requested.",
         status: "approval_requested",
       })),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: null,
       drained: null,
@@ -113,6 +114,6 @@ function createRuntime(): ToolRuntime {
           headSha: "a".repeat(40),
         }),
       })),
-    } as unknown as ToolRuntime["sandbox"],
+    } as unknown as AgentRuntime["sandbox"],
   }
 }

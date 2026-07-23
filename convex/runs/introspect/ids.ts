@@ -1,16 +1,17 @@
 import { type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { optionalString } from "../../shared/input"
 
 type RunIdContext = Pick<QueryCtx, "db">
 
 export function normalizeRunId(ctx: RunIdContext, value: string | undefined) {
-  const trimmed = value?.trim()
+  const normalized = optionalString(value)
 
-  if (trimmed === undefined || trimmed === "") {
+  if (normalized === undefined) {
     return undefined
   }
 
-  return ctx.db.normalizeId("runs", trimmed)
+  return ctx.db.normalizeId("runs", normalized)
 }
 
 export function normalizeRunIds(

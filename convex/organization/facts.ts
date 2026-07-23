@@ -1,4 +1,5 @@
 import { type Infer } from "convex/values"
+import { optionalString } from "../shared/input"
 import { type organizationFacts } from "./schema"
 
 export type OrganizationFacts = Infer<typeof organizationFacts>
@@ -31,7 +32,5 @@ export function unique(values: string[]) {
 }
 
 function clean(value: string | undefined) {
-  const trimmed = value?.trim()
-
-  return trimmed === undefined || trimmed === "" ? null : trimmed
+  return optionalString(value) ?? null
 }

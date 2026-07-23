@@ -2,10 +2,10 @@ import { type JsonObject } from "../../contracts/json"
 import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
 import { readFinal } from "../../contracts/runtime/tools"
 import { optionalString, requiredString } from "../input"
-import { type ToolRuntime } from "./runtime"
+import { type AgentRuntime } from "../runtime"
 
 export async function executeActiveSurfaceTool(
-  runtime: ToolRuntime,
+  runtime: AgentRuntime,
   args: {
     input: JsonObject
     name: string
@@ -22,13 +22,13 @@ export async function executeActiveSurfaceTool(
   throw new Error(`Unknown active surface tool: ${args.name}`)
 }
 
-async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
+async function sendActiveReply(runtime: AgentRuntime, input: JsonObject) {
   const finished = readFinal(input)
   const activeSurface = requireActiveSurface(runtime)
   const explicitTarget = optionalReplyTarget(input, activeSurface.surface)
   const target = explicitTarget ?? activeSurface.target
 
-  const result = await runtime.convex.sendReply({
+  const result = await runtime.platform.sendReply({
     blocks: optionalBlocks(input.blocks),
     runId: runtime.context.run.id,
     text: requiredString(input.text, "text"),
@@ -44,10 +44,10 @@ async function sendActiveReply(runtime: ToolRuntime, input: JsonObject) {
   }
 }
 
-async function addActiveReaction(runtime: ToolRuntime, input: JsonObject) {
+async function addActiveReaction(runtime: AgentRuntime, input: JsonObject) {
   const finished = readFinal(input)
   const activeSurface = requireActiveSurface(runtime)
-  const result = await runtime.convex.addReaction({
+  const result = await runtime.platform.addReaction({
     reaction: requiredReaction(input.reaction, activeSurface.surface),
     runId: runtime.context.run.id,
     target: requiredReactionTarget(input.target, activeSurface.surface),
@@ -93,7 +93,7 @@ function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
-function requireActiveSurface(runtime: ToolRuntime) {
+function requireActiveSurface(runtime: AgentRuntime) {
   const activeSurface = runtime.context.activeSurface
 
   if (activeSurface === null) {

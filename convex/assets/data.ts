@@ -5,7 +5,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { boundedNumber } from "../shared/input"
+import { boundedNumber, optionalString } from "../shared/input"
 import { assetFields } from "./schema"
 
 const maxAssetSearchResults = 100
@@ -83,9 +83,7 @@ async function getOrganizationAsset(
 }
 
 function normalizeSearchText(value: string | undefined) {
-  const normalized = value?.trim().toLowerCase()
-
-  return normalized === "" ? undefined : normalized
+  return optionalString(value)?.toLowerCase()
 }
 
 function matchesQuery(asset: Doc<"assets">, query: string | undefined) {

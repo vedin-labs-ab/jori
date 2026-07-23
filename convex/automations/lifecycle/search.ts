@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { optionalString } from "../../shared/input"
 
 export const maxSearchResults = 100
 
@@ -14,7 +15,7 @@ export async function searchAutomations(
   }
 ) {
   const limit = Math.min(args.limit ?? 25, maxSearchResults)
-  const query = args.query?.trim().toLowerCase()
+  const query = optionalString(args.query)?.toLowerCase()
   const automations = await queryAutomationRows(ctx, args)
 
   return automations
@@ -58,7 +59,7 @@ function matchesQuery(
   automation: Doc<"automations">,
   query: string | undefined
 ) {
-  if (query === undefined || query === "") {
+  if (query === undefined) {
     return true
   }
 

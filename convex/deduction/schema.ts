@@ -9,9 +9,7 @@ export const beliefKinds = ["workstream"] as const
 const beliefKind = v.union(v.literal("workstream"))
 export type BeliefKind = Infer<typeof beliefKind>
 
-// Review stages: the kind-neutral effort review, then one review per belief
-// kind. Each stage cites only the layer below it.
-export const passStages = ["effort", ...beliefKinds] as const
+// Review stages cite only the layer below them.
 export const passStage = v.union(v.literal("effort"), v.literal("workstream"))
 export type PassStage = Infer<typeof passStage>
 

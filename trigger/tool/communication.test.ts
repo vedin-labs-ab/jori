@@ -1,7 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "../tool"
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "../tool"
 
 test.each([
   [
@@ -151,12 +152,12 @@ function createRuntime(options: {
   result: unknown
   surface?: "github" | "linear" | "slack"
   tool: RuntimeTool
-}): ToolRuntime {
+}): AgentRuntime {
   return {
-    convex: {
+    platform: {
       callTool: vi.fn(async () => options.result),
       recordEvent: vi.fn(),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: {
         communicated: false,
@@ -184,7 +185,7 @@ function createRuntime(options: {
       session: null,
       tools: [options.tool],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }
 

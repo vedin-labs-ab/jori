@@ -1,3 +1,5 @@
+import { optionalString } from "../shared/input"
+
 const sharedLocalParts = new Set([
   "abuse",
   "admin",
@@ -18,9 +20,7 @@ const sharedLocalParts = new Set([
 ])
 
 export function normalizeEmail(email: string | undefined) {
-  const normalized = email?.trim().toLowerCase()
-
-  return normalized === "" ? undefined : normalized
+  return optionalString(email)?.toLowerCase()
 }
 
 export function identifyingEmail(email: string | undefined) {

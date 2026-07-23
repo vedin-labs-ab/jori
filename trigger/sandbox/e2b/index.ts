@@ -35,7 +35,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
   private workspaceReady = false
 
   constructor(
-    private readonly convex: RuntimePlatform,
+    private readonly platform: RuntimePlatform,
     private readonly runId: RuntimeId<"runs">,
     sandboxId: string | null
   ) {
@@ -118,7 +118,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     }
 
     await killE2BSandbox({
-      convex: this.convex,
+      platform: this.platform,
       sandboxId: this.sandboxId,
     })
     this.sandbox = undefined
@@ -131,7 +131,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
       return null
     }
 
-    const lease = await this.convex.releaseSandbox({
+    const lease = await this.platform.releaseSandbox({
       externalId: this.sandboxId,
       runId: this.runId,
     })
@@ -148,7 +148,7 @@ export class E2BSandboxRuntime implements SandboxRuntime {
           ? await createSandbox(this.runId)
           : await connectSandbox(this.sandboxId)
       this.sandboxId = this.sandbox.sandboxId
-      await this.convex.upsertSandbox({
+      await this.platform.upsertSandbox({
         externalId: this.sandbox.sandboxId,
         runId: this.runId,
       })

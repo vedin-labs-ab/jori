@@ -1,7 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
 import { runtimeId } from "../../test/trigger"
-import { executeToolCall, type ToolRuntime } from "."
+import { type AgentRuntime } from "../runtime"
+import { executeToolCall } from "."
 
 test("send_reply can finish the run after a successful final reply", async () => {
   const runtime = createRuntime()
@@ -22,7 +23,7 @@ test("send_reply can finish the run after a successful final reply", async () =>
 
   expect(result.finished).toBe(true)
   expect(runtime.context.activeSurface?.communicated).toBe(true)
-  expect(runtime.convex.sendReply).toHaveBeenCalledWith({
+  expect(runtime.platform.sendReply).toHaveBeenCalledWith({
     blocks: undefined,
     runId: "run_1",
     text: "Done",
@@ -31,7 +32,7 @@ test("send_reply can finish the run after a successful final reply", async () =>
 
 test("send_reply final does not finish when delivery fails", async () => {
   const runtime = createRuntime()
-  vi.mocked(runtime.convex.sendReply).mockRejectedValueOnce(
+  vi.mocked(runtime.platform.sendReply).mockRejectedValueOnce(
     new Error("Reply failed")
   )
 
@@ -78,7 +79,7 @@ test("send_reply rejects invalid final before sending", async () => {
     error: { message: "final must be a boolean" },
     status: "error",
   })
-  expect(runtime.convex.sendReply).not.toHaveBeenCalled()
+  expect(runtime.platform.sendReply).not.toHaveBeenCalled()
   expect(runtime.context.activeSurface?.communicated).toBe(false)
 })
 
@@ -102,20 +103,20 @@ test("add_reaction can finish the run after a successful final reaction", async 
 
   expect(result.finished).toBe(true)
   expect(runtime.context.activeSurface?.communicated).toBe(true)
-  expect(runtime.convex.addReaction).toHaveBeenCalledWith({
+  expect(runtime.platform.addReaction).toHaveBeenCalledWith({
     reaction: "white_check_mark",
     runId: "run_1",
     target: { messageTs: "123.456" },
   })
 })
 
-function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
+function createRuntime(options: { tools?: RuntimeTool[] } = {}): AgentRuntime {
   return {
-    convex: {
+    platform: {
       addReaction: vi.fn(async () => ({ status: "added" })),
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
-    } as unknown as ToolRuntime["convex"],
+    } as unknown as AgentRuntime["platform"],
     context: {
       activeSurface: {
         communicated: false,
@@ -143,7 +144,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): ToolRuntime {
       session: null,
       tools: options.tools ?? [sendReplyTool()],
     },
-    sandbox: {} as ToolRuntime["sandbox"],
+    sandbox: {} as AgentRuntime["sandbox"],
   }
 }
 

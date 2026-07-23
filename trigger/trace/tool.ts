@@ -82,7 +82,7 @@ export async function recordToolEvent(
   type: ToolEventType,
   details?: RuntimeToolCompletedDetails | RuntimeToolFailedDetails
 ) {
-  await recordRuntimeEvent(args.convex, args.context, {
+  await recordRuntimeEvent(args.platform, args.context, {
     attempt: args.attempt,
     callId: args.call.id,
     data: toolTraceData(tool, type, args.call.args, details),
@@ -232,7 +232,7 @@ function hasMoreItems(record: Record<string, unknown>) {
 type ToolEventArgs = {
   attempt: number
   call: ModelToolCall
-  convex: RuntimePlatform
+  platform: RuntimePlatform
   context: RuntimeContext
   sequence: number
 }
