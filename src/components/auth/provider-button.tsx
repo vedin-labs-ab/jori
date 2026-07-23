@@ -57,7 +57,7 @@ export function ProviderButton({
         })
       }
       {...props}
-      aria-label={getProviderName(provider)}
+      aria-label={display === "icon" ? getProviderName(provider) : undefined}
     >
       {signInSocialPending ? (
         <Spinner />
