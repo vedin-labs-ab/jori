@@ -3,10 +3,14 @@ import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { ConsolePage } from "./page"
 
-const { loading } = vi.hoisted(() => ({
+const { loading, session } = vi.hoisted(() => ({
   loading: {
     activeOrganizationQueries: 0,
     organizationListQueries: 0,
+  },
+  session: {
+    isPending: false,
+    isSignedIn: true,
   },
 }))
 
@@ -21,9 +25,9 @@ vi.mock("@/shared/session/auth", () => ({
     loading.organizationListQueries += 1
     return { data: undefined, isPending: true }
   },
-  useSession: () => ({
-    data: { user: { id: "user" } },
-    isPending: false,
+  useAuthenticatedSession: () => ({
+    data: session.isSignedIn ? { user: { id: "user" } } : null,
+    isPending: session.isPending,
   }),
 }))
 
@@ -48,6 +52,8 @@ vi.mock("./shell/public", () => ({
 beforeEach(() => {
   loading.activeOrganizationQueries = 0
   loading.organizationListQueries = 0
+  session.isPending = false
+  session.isSignedIn = true
 })
 
 afterEach(cleanup)
@@ -58,4 +64,14 @@ test("starts organization loading while Convex authentication resolves", () => {
   expect(screen.getByText("Loading console")).toBeDefined()
   expect(loading.activeOrganizationQueries).toBe(1)
   expect(loading.organizationListQueries).toBe(1)
+})
+
+test("keeps signed-out users behind the loader during redirect", () => {
+  session.isSignedIn = false
+
+  render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+
+  expect(screen.getByText("Loading console")).toBeDefined()
+  expect(loading.activeOrganizationQueries).toBe(0)
+  expect(loading.organizationListQueries).toBe(0)
 })
