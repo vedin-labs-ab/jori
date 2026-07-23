@@ -1,8 +1,8 @@
 import { type Region } from "@contracts/region"
 
 export const regionOptions = [
-  { flag: "🇺🇸", id: "us", label: "US" },
-  { flag: "🇪🇺", id: "eu", label: "EU" },
+  { flag: "🇺🇸", id: "us", label: "United States" },
+  { flag: "🇪🇺", id: "eu", label: "European Union" },
 ] as const satisfies readonly {
   flag: string
   id: Region
