@@ -4,7 +4,13 @@ import { useIsMutating } from "@tanstack/react-query"
 import { type ReactNode, type SyntheticEvent, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Field,
@@ -22,25 +28,31 @@ import { ProviderButtons, type SocialLayout } from "./provider-buttons"
 
 export type SignInProps = {
   className?: string
+  description?: ReactNode
   headerContent?: ReactNode
   socialLayout?: SocialLayout
   socialPosition?: "top" | "bottom"
+  title?: ReactNode
 }
 
 /**
  * Render the sign-in form UI with email/password, magic link, and social provider options.
  *
  * @param className - Optional additional container class names
+ * @param description - Optional supporting copy rendered below the title
  * @param headerContent - Optional content rendered between the title and form
  * @param socialLayout - Layout style for social provider buttons
  * @param socialPosition - Position of social provider buttons; `"top"` or `"bottom"`. Defaults to `"bottom"`.
+ * @param title - Optional title override
  * @returns The rendered sign-in UI as a JSX element
  */
 export function SignIn({
   className,
+  description,
   headerContent,
   socialLayout,
-  socialPosition = "bottom"
+  socialPosition = "bottom",
+  title
 }: SignInProps) {
   const {
     authClient,
@@ -119,11 +131,16 @@ export function SignIn({
       <CardHeader>
         <CardTitle
           aria-level={1}
-          className="text-center text-xl font-semibold"
+          className="text-center text-2xl font-semibold tracking-tight"
           role="heading"
         >
-          {localization.auth.signIn}
+          {title ?? localization.auth.signIn}
         </CardTitle>
+        {description && (
+          <CardDescription className="mt-1 text-center text-sm/relaxed">
+            {description}
+          </CardDescription>
+        )}
         {headerContent}
       </CardHeader>
 
