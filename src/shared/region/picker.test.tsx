@@ -13,8 +13,8 @@ test("shows the current region and keeps EU unavailable", () => {
 
   expect(picker.value).toBe("us")
   expect(options.map((option) => option.text)).toEqual([
-    "🇺🇸 US",
-    "🇪🇺 EU (Coming soon)",
+    "🇺🇸 United States",
+    "🇪🇺 European Union (Coming soon)",
   ])
   expect(screen.getByText("Data region").getAttribute("for")).toBe(picker.id)
   expect(options[1]?.disabled).toBe(true)
