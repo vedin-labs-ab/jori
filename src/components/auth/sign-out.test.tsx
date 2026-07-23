@@ -25,7 +25,7 @@ const auth = vi.hoisted(() => ({
 vi.mock("@better-auth-ui/react", () => ({
   useAuth: () => ({
     authClient: {},
-    basePaths: { auth: "/auth" },
+    basePaths: { auth: "" },
     navigate: auth.navigate,
     viewPaths: { auth: { signIn: "sign-in" } },
   }),
@@ -72,7 +72,7 @@ test.each(["onSuccess", "onError"] as const)(
 
     expect(auth.navigate).toHaveBeenCalledWith({
       replace: true,
-      to: "/auth/sign-in",
+      to: "/sign-in",
     })
   }
 )

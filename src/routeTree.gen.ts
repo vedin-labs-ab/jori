@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArtifactsRouteImport } from './routes/artifacts'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as ContextRouteImport } from './routes/context'
@@ -20,12 +19,12 @@ import { Route as PlaybooksRouteImport } from './routes/playbooks'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RunsRouteImport } from './routes/runs'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as SignOutRouteImport } from './routes/sign-out'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
-import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
 import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
@@ -42,11 +41,6 @@ const IndexRoute = IndexRouteImport.update({
 const ArtifactsRoute = ArtifactsRouteImport.update({
   id: '/artifacts',
   path: '/artifacts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutomationsRoute = AutomationsRouteImport.update({
@@ -89,6 +83,16 @@ const RunsRoute = RunsRouteImport.update({
   path: '/runs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignOutRoute = SignOutRouteImport.update({
+  id: '/sign-out',
+  path: '/sign-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
@@ -108,16 +112,6 @@ const ArtifactsIndexRoute = ArtifactsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ArtifactsRoute,
-} as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthSignOutRoute = AuthSignOutRouteImport.update({
-  id: '/sign-out',
-  path: '/sign-out',
-  getParentRoute: () => AuthRoute,
 } as any)
 const ContextIndexRoute = ContextIndexRouteImport.update({
   id: '/',
@@ -159,7 +153,6 @@ const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/artifacts': typeof ArtifactsRouteWithChildren
-  '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
@@ -168,11 +161,11 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-out': typeof SignOutRoute
   '/skills': typeof SkillsRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
@@ -184,18 +177,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-out': typeof SignOutRoute
   '/skills': typeof SkillsRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts': typeof ArtifactsIndexRoute
@@ -209,7 +201,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/artifacts': typeof ArtifactsRouteWithChildren
-  '/auth': typeof AuthRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
@@ -218,11 +209,11 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-out': typeof SignOutRoute
   '/skills': typeof SkillsRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/artifacts/': typeof ArtifactsIndexRoute
@@ -237,7 +228,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/artifacts'
-    | '/auth'
     | '/automations'
     | '/console'
     | '/context'
@@ -246,11 +236,11 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/runs'
+    | '/sign-in'
+    | '/sign-out'
     | '/skills'
     | '/terms'
     | '/trust'
-    | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/context/places'
     | '/context/workstreams'
     | '/artifacts/'
@@ -262,18 +252,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
     | '/automations'
     | '/console'
     | '/playbooks'
     | '/pricing'
     | '/privacy'
     | '/runs'
+    | '/sign-in'
+    | '/sign-out'
     | '/skills'
     | '/terms'
     | '/trust'
-    | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/context/places'
     | '/context/workstreams'
     | '/artifacts'
@@ -286,7 +275,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/artifacts'
-    | '/auth'
     | '/automations'
     | '/console'
     | '/context'
@@ -295,11 +283,11 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/runs'
+    | '/sign-in'
+    | '/sign-out'
     | '/skills'
     | '/terms'
     | '/trust'
-    | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/context/places'
     | '/context/workstreams'
     | '/artifacts/'
@@ -313,7 +301,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArtifactsRoute: typeof ArtifactsRouteWithChildren
-  AuthRoute: typeof AuthRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
@@ -322,6 +309,8 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RunsRoute: typeof RunsRoute
+  SignInRoute: typeof SignInRoute
+  SignOutRoute: typeof SignOutRoute
   SkillsRoute: typeof SkillsRoute
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
@@ -342,13 +331,6 @@ declare module '@tanstack/react-router' {
       path: '/artifacts'
       fullPath: '/artifacts'
       preLoaderRoute: typeof ArtifactsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/automations': {
@@ -407,6 +389,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RunsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-out': {
+      id: '/sign-out'
+      path: '/sign-out'
+      fullPath: '/sign-out'
+      preLoaderRoute: typeof SignOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/skills': {
       id: '/skills'
       path: '/skills'
@@ -434,20 +430,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/artifacts/'
       preLoaderRoute: typeof ArtifactsIndexRouteImport
       parentRoute: typeof ArtifactsRoute
-    }
-    '/auth/sign-in': {
-      id: '/auth/sign-in'
-      path: '/sign-in'
-      fullPath: '/auth/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/sign-out': {
-      id: '/auth/sign-out'
-      path: '/sign-out'
-      fullPath: '/auth/sign-out'
-      preLoaderRoute: typeof AuthSignOutRouteImport
-      parentRoute: typeof AuthRoute
     }
     '/context/': {
       id: '/context/'
@@ -515,18 +497,6 @@ const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
   ArtifactsRouteChildren,
 )
 
-interface AuthRouteChildren {
-  AuthSignInRoute: typeof AuthSignInRoute
-  AuthSignOutRoute: typeof AuthSignOutRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthSignInRoute: AuthSignInRoute,
-  AuthSignOutRoute: AuthSignOutRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 interface ContextRouteChildren {
   ContextPlacesRoute: typeof ContextPlacesRoute
   ContextWorkstreamsRoute: typeof ContextWorkstreamsRoute
@@ -559,7 +529,6 @@ const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArtifactsRoute: ArtifactsRouteWithChildren,
-  AuthRoute: AuthRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,
@@ -568,6 +537,8 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RunsRoute: RunsRoute,
+  SignInRoute: SignInRoute,
+  SignOutRoute: SignOutRoute,
   SkillsRoute: SkillsRoute,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,

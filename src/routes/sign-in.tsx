@@ -9,8 +9,9 @@ import { SignInVisual } from "@/shared/auth/visual"
 import { BrandLink } from "@/shared/brand/link"
 import { RegionPicker } from "@/shared/region/picker"
 
-export const Route = createFileRoute("/auth/sign-in")({
+export const Route = createFileRoute("/sign-in")({
   component: SignInPage,
+  head: () => ({ meta: [{ title: "Milo · Sign in" }] }),
 })
 
 function SignInPage() {

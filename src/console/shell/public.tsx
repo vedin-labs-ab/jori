@@ -26,7 +26,7 @@ function PublicConsoleHeader({ isSignedIn }: { isSignedIn: boolean }) {
       <div className="ml-auto flex items-center gap-2">
         {!isSignedIn ? (
           <Button asChild size="sm">
-            <Link to="/auth/sign-in">Sign in</Link>
+            <Link to="/sign-in">Sign in</Link>
           </Button>
         ) : null}
         {isSignedIn ? <UserButton hideSettings size="icon" /> : null}

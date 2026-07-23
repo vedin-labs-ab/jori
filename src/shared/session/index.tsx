@@ -24,6 +24,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
       <AuthProvider
         Link={SessionLink}
         authClient={authClient}
+        basePaths={{ auth: "" }}
         emailAndPassword={{ enabled: false }}
         localization={{ auth: { signIn: "Sign in" } }}
         navigate={({ to, replace }) => void navigate({ to, replace })}
