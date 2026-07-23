@@ -1,10 +1,19 @@
 import { isRegion, type Region } from "@contracts/region"
+import { useId } from "react"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { cn } from "@/lib/utils"
 import { regionOptions } from "./catalog"
 import { regionConfig } from "./config"
 import { regionSelectionUrl } from "./routing"
 
-export function RegionPicker() {
+type RegionPickerProps = {
+  layout?: "compact" | "field"
+}
+
+export function RegionPicker({ layout = "compact" }: RegionPickerProps) {
+  const pickerId = useId()
+  const isField = layout === "field"
+
   function selectRegion(region: Region) {
     if (region === regionConfig.current || !regionConfig.enabled.has(region)) {
       return
@@ -16,10 +25,23 @@ export function RegionPicker() {
   }
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <span className="text-muted-foreground">Data region</span>
+    <div
+      className={cn(
+        "flex text-sm",
+        isField ? "flex-col gap-2" : "items-center gap-2"
+      )}
+    >
+      <label
+        className={cn(
+          isField ? "font-medium text-xs" : "text-muted-foreground"
+        )}
+        htmlFor={pickerId}
+      >
+        Data region
+      </label>
       <NativeSelect
-        aria-label="Data region"
+        className={cn(isField && "w-full")}
+        id={pickerId}
         onChange={(event) => {
           const region = event.currentTarget.value
 
@@ -27,7 +49,7 @@ export function RegionPicker() {
             selectRegion(region)
           }
         }}
-        size="sm"
+        size={isField ? "default" : "sm"}
         value={regionConfig.current}
       >
         {regionOptions.map((option) => {

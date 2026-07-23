@@ -16,5 +16,6 @@ test("shows the current region and keeps EU unavailable", () => {
     "🇺🇸 US",
     "🇪🇺 EU (Coming soon)",
   ])
+  expect(screen.getByText("Data region").getAttribute("for")).toBe(picker.id)
   expect(options[1]?.disabled).toBe(true)
 })
