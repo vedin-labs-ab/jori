@@ -1,4 +1,4 @@
-import { CircleDot, GitPullRequest } from "lucide-react"
+import { CircleDot, GitPullRequest, MessageSquare } from "lucide-react"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { Mention, Prop } from "../section"
 
@@ -99,7 +99,8 @@ export function ReviewMention() {
 }
 
 /** Slack has no issue title to anchor on, so the message being answered
- *  stands in for one, with the sender where the identifier would be. */
+ *  stands in for one and the sender takes the identifier's place, which keeps
+ *  the card the same two lines as the other three. */
 export function SlackMention() {
   return (
     <Prop
@@ -112,14 +113,12 @@ export function SlackMention() {
       }
     >
       <div className="px-5 py-4">
-        <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-          <span className="font-medium">Priya Nair</span>
-          <span className="text-muted-foreground text-xs tabular-nums">
-            14:03
+        <p className="flex flex-wrap items-center gap-x-1.5 text-sm">
+          <MessageSquare className="size-3.5 shrink-0 text-muted-foreground" />
+          <span className="text-muted-foreground">Priya Nair</span>
+          <span className="font-medium">
+            Tips double-counted at Harbor House
           </span>
-        </p>
-        <p className="mt-1 text-muted-foreground text-sm">
-          Harbor House says tips double-counted again on Tuesday.
         </p>
         <p className="mt-2.5 flex flex-wrap items-center gap-x-1.5 text-sm">
           <Mention /> have we seen this before?
