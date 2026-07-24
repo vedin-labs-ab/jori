@@ -1,5 +1,4 @@
 import { automationScopeConflictMessage } from "../access"
-import { isAutomationToolReferenceError } from "./save/instructions"
 import { readAutomationInstructionMarkerError } from "./save/marker"
 
 const automationNameErrors = {
@@ -61,4 +60,14 @@ function isAutomationInstructionsError(error: string | undefined) {
 
 export function isAutomationFieldError(error: string | undefined) {
   return isAutomationNameError(error) || isAutomationInstructionsError(error)
+}
+
+export function isAutomationToolReferenceError(error: string | undefined) {
+  return (
+    error?.startsWith("Give @") === true ||
+    error?.startsWith("Enable web access to use #") === true ||
+    error?.endsWith("requires Personal sharing.") === true ||
+    (error?.startsWith("#") === true &&
+      error.endsWith("is not available in automations."))
+  )
 }

@@ -2,8 +2,8 @@ import { Label } from "@/components/ui/label"
 import { FieldHelp } from "@/shared/field"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type AutomationFormValues } from "../../types"
+import { isAutomationToolReferenceError } from "../errors"
 import { AutomationInstructionsField } from "../instructions/field"
-import { isAutomationToolReferenceError } from "../save/instructions"
 import { automationInstructionMarkerErrors } from "../save/marker"
 
 export function AutomationInstructionsSection({

@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 /**
  * Keeps the last defined value so dialog content survives the close
@@ -13,4 +13,20 @@ export function useRetained<Value>(value: Value | undefined) {
   }
 
   return value ?? last.current
+}
+
+/**
+ * Keeps a dialog mounted from its first open onwards, so a lazily loaded
+ * dialog stays out of the page's chunk without losing its close animation.
+ */
+export function useRetainedMount(isOpen: boolean) {
+  const [hasOpened, setHasOpened] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setHasOpened(true)
+    }
+  }, [isOpen])
+
+  return isOpen || hasOpened
 }

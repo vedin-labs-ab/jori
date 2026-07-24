@@ -2,7 +2,8 @@
 import { afterEach, describe, expect, test } from "vitest"
 import { type AutomationFormValues, emptyAutomationForm } from "../../types"
 import { writeAutomationWebSearchPreference } from "../preferences"
-import { automationFormValues, createAutomationArgs } from "."
+import { automationFormValues } from "."
+import { createAutomationArgs } from "./args"
 import { automationInstructionMarkerErrors } from "./marker"
 
 afterEach(() => {

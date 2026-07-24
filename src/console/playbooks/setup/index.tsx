@@ -1,13 +1,26 @@
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import { Link } from "@tanstack/react-router"
 import { Cable } from "lucide-react"
-import { useState } from "react"
+import { lazy, Suspense, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { type PlaybookActions } from "../enable"
 import { type PlaybookListRow, planPlaybookEnable } from "../state"
-import { PlaybookSetupDialog } from "./dialog"
+import { type PlaybookSetupDialogProps } from "./dialog"
 
-export { PlaybookSetupDialog } from "./dialog"
+// The setup form reaches the integration combobox and every customization
+// control, so it loads with the first open rather than with the page.
+const SetupDialog = lazy(() =>
+  import("./dialog").then((module) => ({ default: module.PlaybookSetupDialog }))
+)
+
+/** The setup dialog, loaded on demand. Callers already gate on open state. */
+export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
+  return (
+    <Suspense fallback={null}>
+      <SetupDialog {...props} />
+    </Suspense>
+  )
+}
 
 /** Link to the integrations page for a playbook that lacks a connection. */
 export function ConnectButton({ label }: { label: string }) {

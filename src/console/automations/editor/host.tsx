@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react"
+import { lazy, Suspense, useRef } from "react"
 import { useToolPermissions } from "../../permissions/controller"
+import { useRetainedMount } from "../../shared/retain"
 import { automationPolicyKey } from "../access/policy"
 import { useAutomationEditor } from "."
 
@@ -25,7 +26,7 @@ export type AutomationEditorHost = ReturnType<typeof useAutomationEditorHost>
 export function useAutomationEditorHost(organizationId: string) {
   const permissions = useToolPermissions(organizationId)
   const editor = useAutomationEditor(organizationId, permissions.permissions)
-  const isDialogMounted = useAutomationDialogMount(editor.isFormOpen)
+  const isDialogMounted = useRetainedMount(editor.isFormOpen)
   const mount = useRef<{ isReady: boolean; waiters: (() => void)[] }>({
     isReady: false,
     waiters: [],
@@ -66,16 +67,4 @@ export function useAutomationEditorHost(organizationId: string) {
       </Suspense>
     ) : null,
   }
-}
-
-function useAutomationDialogMount(isFormOpen: boolean) {
-  const [hasOpened, setHasOpened] = useState(false)
-
-  useEffect(() => {
-    if (isFormOpen) {
-      setHasOpened(true)
-    }
-  }, [isFormOpen])
-
-  return isFormOpen || hasOpened
 }
