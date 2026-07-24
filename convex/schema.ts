@@ -1,4 +1,5 @@
 import { defineSchema } from "convex/server"
+import { allowlist } from "./access/schema"
 import { approvals } from "./approvals/schema"
 import {
   appAssets,
@@ -46,6 +47,7 @@ import { waitlist } from "./waitlist/schema"
 
 export default defineSchema({
   skills,
+  allowlist,
   waitlist,
   assets,
   billingAccounts,

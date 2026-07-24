@@ -1,4 +1,4 @@
-import { useMutation } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import { type ReactNode, useEffect, useState } from "react"
 import { CreateOrganizationDialog } from "@/components/auth/organization/create-organization-dialog"
 import { UserInvitations } from "@/components/auth/organization/user-invitations"
@@ -17,6 +17,7 @@ import { OnboardingGate } from "./context/organization/onboarding/gate"
 import { IntegrationCallbackToasts } from "./integrations/callback"
 import { localTimezone } from "./shared/time"
 import { ConsoleShell } from "./shell"
+import { LaunchGate } from "./shell/gate"
 import { PublicConsoleFrame } from "./shell/public"
 
 /** Gates a console surface: a stable loader until the session, Convex auth,
@@ -89,6 +90,22 @@ function SignedInConsole({
 
   if (firstOrganizationId !== undefined) {
     return <ActivateOrganization organizationId={firstOrganizationId} />
+  }
+
+  return <NoOrganization />
+}
+
+/** No organization yet: either this address may open one, or Milo is not open
+ *  to it and the useful thing left is the list. */
+function NoOrganization() {
+  const gate = useQuery(api.access.gate.status)
+
+  if (gate === undefined) {
+    return <FullscreenSkeletonLoader />
+  }
+
+  if (!gate.allowed) {
+    return <LaunchGate email={gate.email} />
   }
 
   return (
