@@ -136,6 +136,11 @@ export function UserButton({
     ]
   })
 
+  const hasMenuSection =
+    (userLinks?.length ?? 0) > 0 ||
+    !hideSettings ||
+    plugins.some((plugin) => (plugin.userMenuItems?.length ?? 0) > 0)
+
   if (signOut.isSigningOut) {
     return <FullscreenSkeletonLoader />
   }
@@ -216,7 +221,7 @@ export function UserButton({
               ))
             )}
 
-            <DropdownMenuSeparator />
+            {hasMenuSection && <DropdownMenuSeparator />}
 
             <DropdownMenuItem onClick={signOut.signOut}>
               <LogOut className="text-muted-foreground" />
