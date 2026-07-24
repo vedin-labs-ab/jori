@@ -1,5 +1,10 @@
 import { Section } from "../section"
-import { GitHubMention, LinearMention } from "./mentions"
+import {
+  GitHubMention,
+  LinearMention,
+  ReviewMention,
+  SlackMention,
+} from "./mentions"
 
 export function Threads() {
   return (
@@ -9,8 +14,10 @@ export function Threads() {
       title="The rest, you just ask for"
     >
       <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
+        <SlackMention />
         <GitHubMention />
         <LinearMention />
+        <ReviewMention />
       </div>
     </Section>
   )

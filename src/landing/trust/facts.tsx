@@ -29,7 +29,7 @@ export function ScopeSection() {
 export function BoundariesSection() {
   return (
     <Section
-      className="bg-muted/50"
+      className="border-y bg-muted/50"
       lede="Not settings, and not promises. The way it's built."
       support
       title="Some things are structural"

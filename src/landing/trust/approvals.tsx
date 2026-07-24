@@ -6,7 +6,7 @@ import { Section } from "../section"
 export function ApprovalsSection() {
   return (
     <Section
-      className="bg-muted/50"
+      className="border-y bg-muted/50"
       lede="Set a tool to ask first and Milo requests before acting. Nothing runs until you approve it."
       title="Ask first means ask you"
     >

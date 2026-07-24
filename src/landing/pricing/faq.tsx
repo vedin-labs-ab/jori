@@ -5,7 +5,7 @@ import { Definition, Section } from "../section"
 export function Faq() {
   return (
     <Section
-      className="bg-muted/50"
+      className="border-y bg-muted/50"
       lede="The short version. For access and data, the trust page goes deeper."
       title="Questions, answered straight"
     >
