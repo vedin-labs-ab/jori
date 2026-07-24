@@ -36,8 +36,8 @@ export function Apps() {
               outside it a link that expires when you say so.
             </Definition>
             <Definition term="Grounded in your tools">
-              <span className="flex flex-wrap items-center gap-1.5">
-                It reads from
+              It reads from{" "}
+              <span className="inline-flex items-center gap-1 align-middle">
                 {sourceIntegrations.map((integration) => (
                   <IntegrationLogo
                     className="size-3.5"
@@ -45,8 +45,8 @@ export function Apps() {
                     key={integration}
                   />
                 ))}
-                and works from what is really there, not a wiki nobody updates.
-              </span>
+              </span>{" "}
+              and works from what is really there, not a wiki nobody updates.
             </Definition>
           </dl>
         </div>

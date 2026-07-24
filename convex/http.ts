@@ -54,6 +54,24 @@ http.route({
 registerAppRoutes(http)
 
 http.route({
+  path: "/waitlist",
+  method: "POST",
+  handler: lazyHttpAction(
+    () => import("./waitlist/http"),
+    (module) => module.handleWaitlistRequest
+  ),
+})
+
+http.route({
+  path: "/waitlist",
+  method: "OPTIONS",
+  handler: lazyHttpAction(
+    () => import("./waitlist/http"),
+    (module) => (_ctx, request) => module.handleWaitlistPreflight(request)
+  ),
+})
+
+http.route({
   path: "/stripe/events",
   method: "POST",
   handler: lazyHttpAction(

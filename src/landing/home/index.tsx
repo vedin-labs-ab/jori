@@ -7,7 +7,7 @@ import { Threads } from "./threads"
 
 export function Landing() {
   return (
-    <MarketingShell>
+    <MarketingShell closing="Tell us what your team keeps doing by hand. We're setting up the first teams ourselves, so the fit matters more than the queue.">
       <Hero />
       <Apps />
       <Threads />

@@ -1,12 +1,26 @@
 import { type ReactNode } from "react"
+import { Closing } from "./cta"
 import { LandingFooter } from "./footer"
 import { LandingHeader } from "./header"
 
-export function MarketingShell({ children }: { children: ReactNode }) {
+/** Marketing pages end on the waitlist handshake. Declaring its lede here is
+ *  what puts the anchor on the page, so the header's call to action can never
+ *  point at a section that is not there. Legal documents pass none and send
+ *  their readers to the home page's instead. */
+export function MarketingShell({
+  children,
+  closing,
+}: {
+  children: ReactNode
+  closing?: string
+}) {
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <LandingHeader />
-      <main>{children}</main>
+      <LandingHeader onWaitlistPage={closing !== undefined} />
+      <main>
+        {children}
+        {closing === undefined ? null : <Closing lede={closing} />}
+      </main>
       <LandingFooter />
     </div>
   )

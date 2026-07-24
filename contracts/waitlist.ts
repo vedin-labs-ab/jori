@@ -14,15 +14,21 @@ export const teamSizeLabels = {
   "100+": "100 or more people",
 } satisfies Record<TeamSize, string>
 
-/** Field caps, shared by the form's maxLength and the mutation's validation
- *  so the browser and the server agree on what is too long. */
+/** Field caps, shared by the form's maxLength and the server's validation so
+ *  the browser and the server agree on what is too long. */
 export const waitlistLimits = { email: 254, work: 600 } as const
+
+export type WaitlistField = "email" | "size" | "work"
 
 export type WaitlistEntry = {
   email: string
   size: TeamSize
   work: string
 }
+
+/** A rejection names the field it belongs to, so the form can mark that one
+ *  input invalid rather than printing a notice under the whole form. */
+export type WaitlistRejection = { field: WaitlistField; message: string }
 
 export function isTeamSize(value: string): value is TeamSize {
   return teamSizes.some((size) => size === value)
@@ -45,27 +51,34 @@ export function normalizeWork(value: string) {
   return collapseWhitespace(value).slice(0, waitlistLimits.work)
 }
 
-/** The single validation path. Returns the row to store, or the reason it
- *  cannot be stored, so the form and the mutation never disagree. */
+/** The single validation path. Returns the row to store, or the field that
+ *  stopped it, so the form and the server never disagree. */
 export function readWaitlistEntry(input: {
   email: string
   size: string
   work: string
-}): { entry: WaitlistEntry } | { error: string } {
+}): { entry: WaitlistEntry } | { rejection: WaitlistRejection } {
   const email = normalizeEmail(input.email)
 
   if (email === undefined) {
-    return { error: "Enter a valid email address." }
+    return {
+      rejection: { field: "email", message: "Enter a valid email address." },
+    }
   }
 
   if (!isTeamSize(input.size)) {
-    return { error: "Choose a team size." }
+    return { rejection: { field: "size", message: "Choose a team size." } }
   }
 
   const work = normalizeWork(input.work)
 
   if (work === "") {
-    return { error: "Tell us one thing your team does by hand." }
+    return {
+      rejection: {
+        field: "work",
+        message: "Tell us one thing your team does by hand.",
+      },
+    }
   }
 
   return { entry: { email, size: input.size, work } }
