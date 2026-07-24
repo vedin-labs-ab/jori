@@ -1,6 +1,10 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../../contracts/integrations"
 import { type JsonObject } from "../../contracts/json"
+import {
+  decodeToolResult,
+  encodeToolInput,
+} from "../../contracts/json/transport"
 import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
 import {
   type AgentRunPayload,
@@ -14,7 +18,6 @@ import {
   type RuntimeId,
   type WaiterCondition,
 } from "../../contracts/runtime/worker"
-import { decodeToolResult, encodeToolInput } from "../../contracts/transport"
 import { api } from "../../convex/_generated/api"
 import { type RuntimePlatform } from "../platform"
 import { type UploadAssetArgs, uploadAsset } from "./assets"

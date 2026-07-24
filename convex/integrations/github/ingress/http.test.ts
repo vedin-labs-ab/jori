@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest"
-import { encodeToolInput } from "../../../../contracts/transport"
+import { encodeToolInput } from "../../../../contracts/json/transport"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
 import { getGitHubMessage } from "./events"

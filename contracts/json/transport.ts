@@ -6,7 +6,7 @@ import {
   encodeUnknownJson,
   type JsonObject,
   type JsonValue,
-} from "./json"
+} from "."
 
 type ToolInputTransport = {
   inputJson: EncodedJson

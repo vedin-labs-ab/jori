@@ -1,13 +1,8 @@
 import { type GenericCtx } from "@convex-dev/better-auth"
-import { Resend } from "@convex-dev/resend"
-import { components } from "../_generated/api"
+import { escapeHtml } from "../../contracts/text"
 import { type DataModel } from "../_generated/dataModel"
-import { readEnvironmentVariable } from "../shared/environment"
+import { sendEmail } from "../email"
 import { requireOrigin } from "../shared/origin"
-
-const resend = new Resend(components.resend, { testMode: false })
-
-const defaultSender = "Milo <onboarding@resend.dev>"
 
 export type Invitation = {
   email: string
@@ -28,8 +23,7 @@ export async function sendInvitation(
   const organization = invitation.organization.name
   const consoleUrl = `${requireOrigin()}/console`
 
-  await resend.sendEmail(ctx, {
-    from: readEnvironmentVariable("MILO_EMAIL_FROM") ?? defaultSender,
+  await sendEmail(ctx, {
     to: invitation.email,
     subject: `${invitation.inviter.user.name} invited you to ${organization} on Milo`,
     html: invitationHtml(invitation, consoleUrl),
@@ -57,12 +51,4 @@ function invitationText(invitation: Invitation, consoleUrl: string) {
     "Sign in with this email address and the invitation will be waiting for you.",
     consoleUrl,
   ].join("\n\n")
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
 }

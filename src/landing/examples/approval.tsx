@@ -5,26 +5,26 @@ import { ProviderLogo } from "@/shared/logo/provider"
 import { Prop } from "../section"
 
 /** An ask-first request as the requester sees it: what would run, on whose
- *  behalf, with the decision still theirs. */
-export function PayrollApprovalCard() {
+ *  behalf, with the decision still theirs. One composed instance, shared by
+ *  the home and trust pages, so the story stays identical in both places. */
+export function ReleaseApprovalCard() {
   return (
     <ApprovalCard
-      attachment="Payroll run 214: what happened"
       label={
         <>
           <span className="font-medium text-foreground">
             Approval requested
           </span>
-          <span>#support · Slack</span>
+          <span>#eng · Slack</span>
         </>
       }
       lines={[
-        "To: Dan Okafor · Harbor House Group",
-        "Re: Tuesday's payroll run",
-        "Sent from your Gmail",
+        "On: COP-73 · Tip-pooling certification",
+        "Asking Jonas which two signatures are missing",
+        "Posted as you",
       ]}
-      surface="gmail"
-      title="Email Dan Okafor the payroll fix summary"
+      surface="linear"
+      title="Comment on the certification issue"
     />
   )
 }

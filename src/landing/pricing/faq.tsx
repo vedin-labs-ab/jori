@@ -11,14 +11,14 @@ export function Faq() {
     >
       <dl className="grid gap-x-16 gap-y-8 md:grid-cols-2">
         <Definition term="How is usage billed?">
-          In dollars, at the model provider's public list rates. A typical
-          morning brief costs cents; a deep research run can cost a few dollars.
-          Every run shows its exact cost in its receipt.
+          In dollars, at the model provider's public list rates. Keeping an app
+          current costs cents a day; building one, or a deep research run, can
+          cost a few dollars. Every run shows its exact cost in its receipt.
         </Definition>
         <Definition term="What does the monthly price cover?">
-          Milo being on staff: the always-on background work, plus the included
-          usage. Included usage resets monthly. Wallet top-ups are prepaid and
-          roll over until used.
+          Milo being on staff: the always-on background work that keeps your
+          apps current, plus the included usage. Included usage resets monthly.
+          Wallet top-ups are prepaid and roll over until used.
         </Definition>
         <Definition term="Is there a free trial?">
           Yes. {trial.days} days with {formatUsd(trial.grantMicros)} of usage

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
-import { PayrollApprovalCard } from "../examples/approval"
+import { ReleaseApprovalCard } from "../examples/approval"
 import { ModeMatrix } from "../examples/modes"
 import { ReceiptsTimeline } from "../examples/receipts"
 import { Definition, Section } from "../section"
@@ -11,7 +11,7 @@ export function Control() {
   return (
     <Section
       className="border-y bg-muted/50"
-      lede="Reading your email is a big ask. Milo is built so you never have to take its word for anything."
+      lede="Handing over real work means handing over real access. Milo is built so you never have to take its word for anything."
       title="It works on your terms"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
@@ -19,7 +19,7 @@ export function Control() {
           <dl className="space-y-8">
             <Definition term="Permission modes">
               Every action Milo can take has a mode: allowed, ask first, or
-              blocked. Sending, posting, changing: you decide which need your
+              blocked. Posting, commenting, changing: you decide which need your
               sign-off.
             </Definition>
             <Definition term="Ask-first approvals">
@@ -45,33 +45,33 @@ export function Control() {
             label={
               <>
                 <span className="font-medium text-foreground">Permissions</span>
-                <span>Gmail, GitHub, and web</span>
+                <span>GitHub, Linear, and web</span>
               </>
             }
             rows={[
-              { mode: "allowed", tool: "google_gmail_search_threads" },
-              { mode: "prompted", tool: "google_gmail_send_message" },
+              { mode: "allowed", tool: "github_search_issues" },
+              { mode: "prompted", tool: "linear_add_comment" },
               { mode: "prompted", tool: "github_create_pull_request" },
               { mode: "blocked", tool: "web_search" },
             ]}
           />
-          <PayrollApprovalCard />
+          <ReleaseApprovalCard />
           <ReceiptsTimeline
             label={
               <>
                 <span className="font-medium text-foreground">
                   Run receipts
                 </span>
-                <span>#support mention · today</span>
+                <span>#eng mention · today</span>
               </>
             }
             receipts={[
-              { at: "14:03", step: "Mentioned by Priya in #support" },
-              { at: "14:04", step: "Read payroll run logs and tickets" },
-              { at: "14:09", step: "Posted the write-up in the thread" },
-              { at: "14:10", step: "Requested approval to email Harbor House" },
-              { at: "14:26", step: "Approved by Priya" },
-              { at: "14:27", step: "Sent. Run complete.", done: true },
+              { at: "09:12", step: "Mentioned by Maya in #eng" },
+              { at: "09:13", step: "Read open pull requests and issues" },
+              { at: "09:18", step: "Built Release readiness and shared it" },
+              { at: "09:19", step: "Requested approval to comment on COP-73" },
+              { at: "09:31", step: "Approved by Maya" },
+              { at: "09:31", step: "Commented. Run complete.", done: true },
             ]}
           />
         </div>

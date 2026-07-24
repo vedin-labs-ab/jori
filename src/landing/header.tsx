@@ -10,7 +10,7 @@ const LandingAccount = lazy(() =>
 
 export function LandingHeader() {
   return (
-    <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-5">
+    <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-6 py-5">
       <div className="flex items-center gap-7">
         <BrandLink />
         <nav

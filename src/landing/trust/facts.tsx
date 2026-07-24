@@ -46,8 +46,8 @@ export function BoundariesSection() {
           permission, or change the task. Only you can.
         </Definition>
         <Definition term="Share links are view-only and mortal">
-          Artifact links carry their secret in the URL fragment, so it stays out
-          of server logs. They expire on a clock you choose, and you can revoke
+          App links carry their secret in the URL fragment, so it stays out of
+          server logs. They expire on a clock you choose, and you can revoke
           them anytime.
         </Definition>
       </FactList>
@@ -68,8 +68,9 @@ export function DataSection() {
         </Definition>
         <Definition term="A short list of subprocessors">
           Convex stores the data, including sign-in sessions. Trigger.dev
-          executes runs. Resend delivers invitation emails. Model calls go
-          through OpenRouter to the model provider. That's the list.
+          executes runs. E2B runs sandboxed work. Resend delivers Milo's email.
+          Model calls go through OpenRouter to the model provider. That's the
+          list.
         </Definition>
         <Definition term="Never used for training">
           Your data is never used to train models.

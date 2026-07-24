@@ -9,7 +9,7 @@ export function TrustPage() {
   return (
     <MarketingShell>
       <PageIntro
-        lede="Milo reads your email, your calendar, and your team's threads. That access comes with controls you can see and receipts you can audit. This page explains exactly who can do what."
+        lede="Handing work to Milo means handing it your repositories, your issues, your threads, and your inbox. That access comes with controls you can see and receipts you can audit. This page explains exactly who can do what."
         title="Built to be checked."
       />
       <ModesSection />
@@ -18,7 +18,7 @@ export function TrustPage() {
       <ScopeSection />
       <BoundariesSection />
       <DataSection />
-      <Closing lede="Set the modes, watch the receipts, expand from there." />
+      <Closing lede="Set the modes, watch the receipts, expand from there. Tell us what you'd hand over first." />
     </MarketingShell>
   )
 }

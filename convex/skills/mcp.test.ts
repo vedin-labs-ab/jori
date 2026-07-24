@@ -1,5 +1,8 @@
 import { expect, test } from "vitest"
-import { decodeToolResult, encodeToolResult } from "../../contracts/transport"
+import {
+  decodeToolResult,
+  encodeToolResult,
+} from "../../contracts/json/transport"
 import { runtimeSkill, runtimeSkills } from "../../test/convex/skills"
 import { loadMiloSkillTool } from "./mcp"
 

@@ -3,42 +3,58 @@ import { ArrowRight } from "lucide-react"
 import { type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { usePublicSession } from "@/shared/session/public"
+import { WaitlistForm } from "./waitlist/form"
+
+/** The anchor every call to action points at. Each marketing page ends on the
+ *  same waitlist section, so the target exists wherever the button appears. */
+export const waitlistAnchor = "waitlist"
 
 // Every marketing page ends on the same handshake.
 export function Closing({ lede }: { lede: string }) {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 pb-24 md:pb-32">
+    <section
+      className="mx-auto w-full max-w-6xl scroll-mt-10 px-6 pb-24 md:pb-32"
+      id={waitlistAnchor}
+    >
       <div className="border-t pt-14 md:pt-18">
         <h2 className="font-medium text-4xl tracking-tight sm:text-5xl">
-          Meet Milo.
+          Opening to a few teams at a time.
         </h2>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground leading-relaxed">
           {lede}
         </p>
-        <div className="mt-8">
-          <GetStarted prominent />
+        <div className="mt-10">
+          <WaitlistForm />
         </div>
       </div>
     </section>
   )
 }
 
-// The one call to action, auth-aware: strangers sign in with a work account,
-// members go to the console. `prominent` bumps the size for hero and closing
-// placements.
+/** The one call to action, auth-aware: members go to the console, everyone
+ *  else drops to the waitlist that closes every page. `prominent` bumps the
+ *  size for hero placements. */
 export function GetStarted({ prominent = false }: { prominent?: boolean }) {
   const session = usePublicSession()
   const isSignedIn = session.data !== null && session.data !== undefined
+  const size = prominent ? "xl" : "lg"
+
+  if (isSignedIn) {
+    return (
+      <SessionButton pending={session.isPending} size={size} to="/console">
+        Open console
+        <ArrowRight data-icon="inline-end" />
+      </SessionButton>
+    )
+  }
 
   return (
-    <SessionButton
-      pending={session.isPending}
-      size={prominent ? "xl" : "lg"}
-      to={isSignedIn ? "/console" : "/sign-in"}
-    >
-      {isSignedIn ? "Open console" : "Get started"}
-      <ArrowRight data-icon="inline-end" />
-    </SessionButton>
+    <Button asChild size={size}>
+      <a href={`#${waitlistAnchor}`}>
+        Join the waitlist
+        <ArrowRight data-icon="inline-end" />
+      </a>
+    </Button>
   )
 }
 

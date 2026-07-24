@@ -20,7 +20,7 @@ import appCss from "../styles.css?url"
 
 const appTitle = "Milo"
 const appDescription =
-  "An AI teammate inside Slack, your email, and your calendar. Milo preps your day, drafts the follow-ups, works by your rules, and keeps receipts."
+  "An AI teammate for the work your team repeats. Milo runs it across Slack, GitHub, and Linear, leaves behind a live app anyone can open, and asks before it acts."
 const providerlessRouteIds = new Set([
   "/",
   "/apps/$appId/",

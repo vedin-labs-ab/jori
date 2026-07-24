@@ -76,7 +76,7 @@ metadata, not only compute location.
 
 | System | Current state | EU launch requirement |
 | --- | --- | --- |
-| Frontend hosting | Host not selected | Pin EU execution and verify logs, analytics, previews, and support access |
+| Frontend hosting | Railway selected, unverified | Deploy the EU frontend in EU West and verify logs, metrics, build data, and support access |
 | Convex and Better Auth | Regional code plumbing implemented; production targets not provisioned | Provision named US and EU deployments, secrets, backups, and recovery procedures |
 | Trigger.dev | US-centric, blocking | Replace with a verified EU-resident setup or self-host without losing required wait/checkpoint behavior |
 | Stripe | US-centric aspects expected | Define an acceptable billing boundary or replace it for a strict 100% EU promise |
@@ -98,7 +98,7 @@ complete Milo workflow satisfies the final residency promise.
 ## Enablement checklist
 
 - [ ] Approve a precise, customer-facing definition of EU data residency.
-- [ ] Select and review the production frontend host.
+- [ ] Review Railway against that definition before the first EU deployment.
 - [ ] Verify the host's trusted country header or add an equivalent geographic
       adapter. Missing geographic evidence deliberately falls back to US.
 - [ ] Provision the EU frontend and EU Convex deployment.
@@ -110,7 +110,7 @@ complete Milo workflow satisfies the final residency promise.
 - [ ] Register EU-specific OAuth callbacks and webhook endpoints where needed.
 - [ ] Resolve every `Unverified` or `blocking` provider row above.
 - [ ] Verify backup, restore, deletion, incident response, and support access.
-- [ ] Confirm invitation, artifact, integration, checkout, and email links use
+- [ ] Confirm invitation, app, integration, checkout, and email links use
       the EU hostname.
 - [ ] Confirm each `MILO_REGION` value matches the physical Convex region. See
       [Convex regions](https://docs.convex.dev/production/regions).
@@ -137,3 +137,24 @@ unless the final residency promise includes anonymous public-site processing.
 
 Milo keeps the current managed Trigger.dev workflow while EU is disabled. EU
 support cannot launch until Trigger's data boundary is resolved.
+
+### 2026-07-24: Railway hosts the frontend
+
+Railway is the frontend host, chosen over Vercel for the residency story rather
+than for developer experience.
+
+Railway offers an EU West region in Amsterdam, and a service deployed there
+keeps its data on European infrastructure. Vercel can pin function execution to
+Frankfurt, but its edge network terminates every request, including session
+cookies and form submissions, in US-owned infrastructure before any regional
+function runs, and its caching, logging, and analytics are not region-selected.
+Vercel is also not listed under the EU-US Data Privacy Framework as of early
+2026. That combination caps how strong an EU claim Milo could make, and the
+frontend is the application host, not a disposable marketing site.
+
+Neither provider delivers sovereignty. Both are US-incorporated and therefore
+in scope for the CLOUD Act, which the EU Cloud Sovereignty Framework names
+explicitly as a limiting factor. Railway improves residency, not sovereignty.
+If the final promise is written at the sovereignty level rather than the
+residency level, the frontend host must be revisited alongside every other
+US-owned provider in the table above.

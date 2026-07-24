@@ -1,5 +1,8 @@
 import { v } from "convex/values"
-import { decodeToolInput, encodeToolResult } from "../../contracts/transport"
+import {
+  decodeToolInput,
+  encodeToolResult,
+} from "../../contracts/json/transport"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
