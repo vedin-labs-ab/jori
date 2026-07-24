@@ -1,4 +1,5 @@
 import { Definition, Section } from "../section"
+import { Subprocessors } from "./subprocessors"
 
 export function ScopeSection() {
   return (
@@ -70,10 +71,7 @@ export function DataSection() {
           integration. Revoke a grant and the access is gone.
         </Definition>
         <Definition term="A short list of subprocessors">
-          Convex stores the data, including sign-in sessions. Trigger.dev
-          executes runs. E2B runs sandboxed work. Resend delivers Milo's email.
-          Model calls go through OpenRouter to the model provider. That's the
-          list.
+          <Subprocessors />
         </Definition>
         <Definition term="Never used for training">
           Your data is never used to train models.
