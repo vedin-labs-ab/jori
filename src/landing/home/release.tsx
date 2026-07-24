@@ -11,6 +11,14 @@ const stateStyles = {
   ready: "bg-primary",
 } satisfies Record<RowState, string>
 
+/** The dot is the only place a row wears its state, and colour is the whole
+ *  of it. Screen readers get the word instead. */
+const stateLabels = {
+  blocked: "Blocked",
+  waiting: "Waiting",
+  ready: "Ready",
+} satisfies Record<RowState, string>
+
 /** The hero app: what Milo leaves behind after it takes over a team's release
  *  checklist. Live state, one shared surface, kept current by a run. All prop
  *  content lives in the Copperline fiction. */
@@ -107,13 +115,16 @@ function ReleaseRow({
 
 function StateDot({ state }: { state: RowState }) {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "mt-1.5 size-1.5 shrink-0 rounded-full",
-        stateStyles[state]
-      )}
-    />
+    <>
+      <span className="sr-only">{stateLabels[state]}</span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "mt-1.5 size-1.5 shrink-0 rounded-full",
+          stateStyles[state]
+        )}
+      />
+    </>
   )
 }
 
