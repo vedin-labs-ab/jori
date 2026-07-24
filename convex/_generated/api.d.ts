@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as access_allowlist from "../access/allowlist.js";
+import type * as access_gate from "../access/gate.js";
 import type * as access_index from "../access/index.js";
 import type * as access_invitation from "../access/invitation.js";
 import type * as access_users from "../access/users.js";
@@ -543,6 +545,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "access/allowlist": typeof access_allowlist;
+  "access/gate": typeof access_gate;
   "access/index": typeof access_index;
   "access/invitation": typeof access_invitation;
   "access/users": typeof access_users;

@@ -18,6 +18,7 @@ type Violation = Omit<PublicFunction, "block">
 // belong on an HTTP route, where the caller's address is readable and can be
 // rate limited per caller; see convex/waitlist/http.ts.
 const sanctionedGuards = [
+  "requireIdentity",
   "requireOrganizationAccess",
   "checkOrganizationAccess",
   "ensureCurrentPerson",

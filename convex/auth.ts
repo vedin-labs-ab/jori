@@ -2,7 +2,7 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth"
 import { convex } from "@convex-dev/better-auth/plugins"
 import { betterAuth } from "better-auth/minimal"
 import { organization } from "better-auth/plugins/organization"
-import { components } from "./_generated/api"
+import { components, internal } from "./_generated/api"
 import { type DataModel } from "./_generated/dataModel"
 import { type Invitation } from "./access/invitation"
 import authConfig from "./auth.config"
@@ -17,9 +17,10 @@ export const authComponent = createClient<DataModel, typeof authSchema>(
 
 /** The schema-shaping options. The component adapter derives its table
  *  model from exactly this plugin set, so it is shared: runtime adds the
- *  delivery callback, which does not affect schema. */
-function createOptions(delivery?: {
+ *  callbacks, which do not affect schema. */
+function createOptions(runtime?: {
   sendInvitationEmail: (invitation: Invitation) => Promise<void>
+  allowUserToCreateOrganization: (user: { email: string }) => Promise<boolean>
 }) {
   return {
     account: {
@@ -28,7 +29,10 @@ function createOptions(delivery?: {
       },
     },
     plugins: [
-      organization({ sendInvitationEmail: delivery?.sendInvitationEmail }),
+      organization({
+        allowUserToCreateOrganization: runtime?.allowUserToCreateOrganization,
+        sendInvitationEmail: runtime?.sendInvitationEmail,
+      }),
       convex({ authConfig, jwt: { definePayload } }),
     ],
   }
@@ -41,6 +45,13 @@ export const createAdapterOptions = () => createOptions()
 export const createAuth = (ctx: GenericCtx<DataModel>) =>
   betterAuth({
     ...createOptions({
+      // Milo is closed, and this is where that is true rather than merely
+      // displayed: Better Auth refuses the creation, so a signed-in stranger
+      // never gets the organization claim every other surface demands.
+      allowUserToCreateOrganization: async (user) =>
+        await ctx.runQuery(internal.access.allowlist.check, {
+          email: user.email,
+        }),
       // Dynamic import: the delivery edge references app components
       // (Resend), which must stay out of the component adapter's bundle.
       sendInvitationEmail: async (invitation) => {

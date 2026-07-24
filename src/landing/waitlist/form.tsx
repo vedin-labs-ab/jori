@@ -26,7 +26,7 @@ const throttledMessage =
   "That's a lot of signups from here. Try again in a few minutes."
 const failedMessage = "Something went wrong. Try again in a moment."
 
-export function WaitlistForm() {
+export function WaitlistForm({ defaultEmail }: { defaultEmail?: string }) {
   const fieldId = useId()
   const [status, setStatus] = useState<Status>("idle")
   const [rejection, setRejection] = useState<Rejection>()
@@ -51,7 +51,12 @@ export function WaitlistForm() {
   return (
     <form className="grid max-w-xl gap-5" noValidate onSubmit={submit}>
       <div className="grid gap-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <EmailField fieldId={fieldId} invalid={invalid} rejection={rejection} />
+        <EmailField
+          defaultEmail={defaultEmail}
+          fieldId={fieldId}
+          invalid={invalid}
+          rejection={rejection}
+        />
         <SizeField fieldId={fieldId} invalid={invalid} rejection={rejection} />
       </div>
       <WorkField fieldId={fieldId} invalid={invalid} rejection={rejection} />
@@ -80,7 +85,12 @@ type FieldProps = {
   rejection: Rejection | undefined
 }
 
-function EmailField({ fieldId, invalid, rejection }: FieldProps) {
+function EmailField({
+  defaultEmail,
+  fieldId,
+  invalid,
+  rejection,
+}: FieldProps & { defaultEmail?: string }) {
   return (
     <Field data-invalid={invalid === "email"}>
       <FieldLabel htmlFor={`${fieldId}-email`}>Work email</FieldLabel>
@@ -88,6 +98,7 @@ function EmailField({ fieldId, invalid, rejection }: FieldProps) {
         aria-describedby={describedBy(fieldId, invalid, "email")}
         aria-invalid={invalid === "email"}
         autoComplete="email"
+        defaultValue={defaultEmail}
         id={`${fieldId}-email`}
         maxLength={waitlistLimits.email}
         name="email"
