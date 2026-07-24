@@ -1,3 +1,4 @@
+import { CalendarClock } from "lucide-react"
 import { ReleaseApprovalCard } from "../examples/approval"
 import { ReceiptsTimeline } from "../examples/receipts"
 import { Section } from "../section"
@@ -51,18 +52,39 @@ export function ReceiptsSection() {
           label={
             <>
               <span className="font-medium text-foreground">Run receipts</span>
-              <span>Release readiness · weekday mornings</span>
+              <span>Release readiness · today</span>
             </>
           }
           receipts={[
-            { at: "07:58", step: "Started on schedule" },
-            { at: "07:58", step: "Read 9 open pull requests" },
-            { at: "07:59", step: "Read 14 issues across two Linear teams" },
-            { at: "07:59", step: "Updated the app: 2 blocking, 11 ready" },
+            {
+              at: "07:58",
+              icon: CalendarClock,
+              step: "Started on schedule",
+            },
+            {
+              at: "07:58",
+              detail: "copperline/payroll, 9 open",
+              step: "Read pull requests",
+              surface: "github",
+            },
+            {
+              at: "07:59",
+              detail: "Copperline and Platform, 14 issues",
+              step: "Read issues",
+              surface: "linear",
+            },
+            {
+              at: "07:59",
+              detail: "2 blocking, 11 ready, 1 waiting on review",
+              step: "Updated Release readiness",
+              surface: "milo",
+            },
             {
               at: "08:00",
-              step: "Posted the change in #eng. Run complete.",
+              detail: "#eng, what changed since yesterday",
               done: true,
+              step: "Posted the change",
+              surface: "slack",
             },
           ]}
         />
