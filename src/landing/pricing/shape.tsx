@@ -29,18 +29,23 @@ export function Shape() {
           </Definition>
         ))}
       </dl>
-      <div className="mt-10 border-t pt-10">
-        <h2 className="font-medium text-2xl tracking-tight">
+      <div className="mt-20">
+        <h2 className="max-w-xl font-medium text-2xl text-balance tracking-tight">
           Final numbers land when Milo opens.
         </h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground leading-relaxed">
-          We're opening to a few teams at a time and setting each one up
-          ourselves, so we would rather price it once we know what the work
-          costs to run. Everyone on the waitlist sees the numbers first. Every
-          plan includes every integration, mentions, ask-first approvals, and
-          receipts, and the {trial.days}-day trial starts with{" "}
-          {formatUsd(trial.grantMicros)} of usage and no card.
+        <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
+          We would rather price it once we know what the work costs to run.
+          Everyone on the waitlist sees the numbers first.
         </p>
+        <dl className="mt-8 grid max-w-xl gap-x-10 gap-y-6 sm:grid-cols-2">
+          <Definition term="In every plan">
+            Every integration, mentions, ask-first approvals, receipts.
+          </Definition>
+          <Definition term="To start">
+            {trial.days} days and {formatUsd(trial.grantMicros)} of usage, no
+            card.
+          </Definition>
+        </dl>
       </div>
     </section>
   )

@@ -7,7 +7,7 @@ export function PricingPage() {
   return (
     <MarketingShell closing="Join the waitlist and you'll see the numbers before they're public.">
       <PageIntro
-        lede="No seats to count. Everyone joins, Milo learns the whole company, and the work it does is billed in dollars at provider list rates. Never marked up."
+        lede="Not per seat, and not marked up. The shape is settled. The numbers are not, and we would rather say so."
         title="One price for the whole organization."
       />
       <Shape />

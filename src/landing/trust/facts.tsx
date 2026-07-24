@@ -4,6 +4,7 @@ export function ScopeSection() {
   return (
     <Section
       lede="Milo works with the accounts you connect, with the access you grant. Nothing else."
+      support
       title="It acts as you, never past you"
     >
       <FactList>
@@ -28,8 +29,9 @@ export function ScopeSection() {
 export function BoundariesSection() {
   return (
     <Section
-      className="border-y bg-muted/50"
+      className="bg-muted/50"
       lede="Not settings, and not promises. The way it's built."
+      support
       title="Some things are structural"
     >
       <FactList>
@@ -59,6 +61,7 @@ export function DataSection() {
   return (
     <Section
       lede="Short list, plain words."
+      support
       title="Where your data goes, and doesn't"
     >
       <FactList>

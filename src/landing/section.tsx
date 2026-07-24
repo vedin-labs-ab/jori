@@ -1,31 +1,58 @@
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
+/**
+ * Two rhythms, and only two. A lead section carries an argument the page is
+ * making; a supporting one qualifies the argument beside it. Giving them the
+ * same height and the same heading size is what makes a long page read as one
+ * undifferentiated stack, so the choice is deliberate at every call site.
+ */
 export function Section({
   children,
   className,
   id,
   lede,
+  support = false,
   title,
 }: {
   children: ReactNode
   className?: string
   id?: string
-  lede: string
+  lede?: string
+  support?: boolean
   title: string
 }) {
   return (
-    <section className={cn("scroll-mt-10 py-20 md:py-28", className)} id={id}>
+    <section
+      className={cn(
+        "scroll-mt-10",
+        support ? "py-14 md:py-18" : "py-20 md:py-28",
+        className
+      )}
+      id={id}
+    >
       <div className="mx-auto w-full max-w-6xl px-6">
         <div className="max-w-2xl">
-          <h2 className="font-medium text-3xl text-balance tracking-tight sm:text-4xl">
+          <h2
+            className={cn(
+              "font-medium text-balance tracking-tight",
+              support ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"
+            )}
+          >
             {title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-            {lede}
-          </p>
+          {lede === undefined ? null : (
+            <p
+              className={cn(
+                "text-muted-foreground leading-relaxed",
+                support ? "mt-3" : "mt-4 text-lg"
+              )}
+            >
+              {lede}
+            </p>
+          )}
         </div>
-        <div className="mt-12">{children}</div>
+        <div className={support ? "mt-8" : "mt-12"}>{children}</div>
       </div>
     </section>
   )

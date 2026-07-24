@@ -16,8 +16,7 @@ export function ModesSection() {
           </p>
           <p className="max-w-xl">
             Answering where it's asked stays on, so Milo can always report back
-            in the thread that called it. Everything else is yours to set, and
-            the names below come straight from the product.
+            in the thread that called it. Everything else is yours to set.
           </p>
         </div>
         <ModeMatrix

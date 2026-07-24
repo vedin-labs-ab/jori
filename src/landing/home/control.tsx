@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
 import { ReleaseApprovalCard } from "../examples/approval"
 import { ModeMatrix } from "../examples/modes"
-import { ReceiptsTimeline } from "../examples/receipts"
 import { Definition, Section } from "../section"
 
 // The approval story is staged on a mention run: scheduled runs never use
@@ -10,7 +9,7 @@ import { Definition, Section } from "../section"
 export function Control() {
   return (
     <Section
-      className="border-y bg-muted/50"
+      className="bg-muted/50"
       lede="Handing over real work means handing over real access. Milo is built so you never have to take its word for anything."
       title="It works on your terms"
     >
@@ -56,24 +55,6 @@ export function Control() {
             ]}
           />
           <ReleaseApprovalCard />
-          <ReceiptsTimeline
-            label={
-              <>
-                <span className="font-medium text-foreground">
-                  Run receipts
-                </span>
-                <span>#eng mention · today</span>
-              </>
-            }
-            receipts={[
-              { at: "09:12", step: "Mentioned by Maya in #eng" },
-              { at: "09:13", step: "Read open pull requests and issues" },
-              { at: "09:18", step: "Built Release readiness and shared it" },
-              { at: "09:19", step: "Requested approval to comment on COP-73" },
-              { at: "09:31", step: "Approved by Maya" },
-              { at: "09:31", step: "Commented. Run complete.", done: true },
-            ]}
-          />
         </div>
       </div>
     </Section>
