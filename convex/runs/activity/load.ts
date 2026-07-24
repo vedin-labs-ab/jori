@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { canAccessArtifact } from "../../artifacts/access"
-import { activityArtifactId } from "./metadata/artifacts"
+import { canAccessApp } from "../../apps/access"
+import { activityAppId } from "./metadata/apps"
 import { readToolInput, readToolName, readTraceData } from "./read"
 import { type ActivityData } from "./types"
 
@@ -22,12 +22,12 @@ export async function loadActivityData(
       loadAgents(ctx, run._id),
       loadAssets(ctx, run._id),
     ])
-  const artifacts = await loadArtifacts(ctx, run, traces, personId)
+  const apps = await loadApps(ctx, run, traces, personId)
 
   return {
     agents,
     approvals,
-    artifacts,
+    apps,
     assets,
     offers,
     run,
@@ -36,40 +36,39 @@ export async function loadActivityData(
   }
 }
 
-async function loadArtifacts(
+async function loadApps(
   ctx: QueryCtx,
   run: Doc<"runs">,
   traces: Doc<"traces">[],
   personId: Id<"persons"> | undefined
 ) {
-  const ids = referencedArtifactIds(ctx, run, traces)
-  const artifacts = await Promise.all(ids.map((id) => ctx.db.get(id)))
+  const ids = referencedAppIds(ctx, run, traces)
+  const apps = await Promise.all(ids.map((id) => ctx.db.get(id)))
 
-  return artifacts.filter(
-    (artifact): artifact is Doc<"artifacts"> =>
-      artifact !== null &&
-      artifact.organizationId === run.organizationId &&
-      (artifact.access === "organization" ||
-        (personId !== undefined && canAccessArtifact(artifact, personId)))
+  return apps.filter(
+    (app): app is Doc<"apps"> =>
+      app !== null &&
+      app.organizationId === run.organizationId &&
+      (app.access === "organization" ||
+        (personId !== undefined && canAccessApp(app, personId)))
   )
 }
 
-function referencedArtifactIds(
+function referencedAppIds(
   ctx: QueryCtx,
   run: Doc<"runs">,
   traces: Doc<"traces">[]
 ) {
-  const ids = new Set<Id<"artifacts">>()
+  const ids = new Set<Id<"apps">>()
 
   for (let index = traces.length - 1; index >= 0; index -= 1) {
     const trace = readTraceData(traces[index])
-    const value = activityArtifactId(
+    const value = activityAppId(
       readToolName(trace),
       readToolInput(trace),
-      run.artifactId
+      run.appId
     )
-    const id =
-      value === undefined ? null : ctx.db.normalizeId("artifacts", value)
+    const id = value === undefined ? null : ctx.db.normalizeId("apps", value)
 
     if (id !== null) {
       ids.add(id)

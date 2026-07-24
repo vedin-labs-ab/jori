@@ -6,7 +6,7 @@ describe("owned automation invalidation", () => {
   const existing = automation()
 
   test.each([
-    ["artifact", { artifactId: "next-artifact" as Id<"artifacts"> }],
+    ["app", { appId: "next-app" as Id<"apps"> }],
     ["instructions", { instructions: "New destination." }],
     ["scope", { scope: "organization" as const }],
     ["access", { access: { integrations: [], web: true } }],
@@ -41,7 +41,7 @@ function automation(): Doc<"automations"> {
     _id: "parent" as Id<"automations">,
     _creationTime: 0,
     access: { integrations: [], web: false },
-    artifactId: "artifact" as Id<"artifacts">,
+    appId: "app" as Id<"apps">,
     createdAt: 0,
     instructions: "Deliver to Sam.",
     name: "Meeting Briefing",

@@ -136,10 +136,10 @@ test("uses a terminal icon for bash", () => {
   )
 })
 
-test("uses the shared link icon for share_artifact", () => {
+test("uses the shared link icon for share_app", () => {
   renderActivity({
-    title: "Share artifact",
-    tool: "share_artifact",
+    title: "Share app",
+    tool: "share_app",
   })
 
   const icon = screen.getByRole("img", { name: "Tool done" })

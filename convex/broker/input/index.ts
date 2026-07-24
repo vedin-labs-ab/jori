@@ -1,4 +1,4 @@
-import { isArtifactPublishTool } from "../../../contracts/artifacts/publish"
+import { isAppPublishTool } from "../../../contracts/apps/publish"
 import { type JsonObject } from "../../../contracts/json"
 import {
   getToolInputSchema,
@@ -10,7 +10,7 @@ export function normalizeMiloToolInput(
   tool: string,
   input: unknown
 ): JsonObject {
-  if (isArtifactPublishTool(tool)) {
+  if (isAppPublishTool(tool)) {
     if (!isJsonObject(input)) {
       throw new Error(`${tool} must be an object`)
     }

@@ -87,19 +87,19 @@ test("does not synthesize descriptions from result shape", () => {
   )
 })
 
-test("labels artifact shares with the title and link lifetime", () => {
-  const artifactId = id<"artifacts">("artifact")
+test("labels app shares with the title and link lifetime", () => {
+  const appId = id<"apps">("app")
   const items = projectActivity(
     data({
-      artifacts: [artifact({ _id: artifactId, title: "Meeting Briefing" })],
+      apps: [app({ _id: appId, title: "Meeting Briefing" })],
       traces: [
         trace({
           callId: "call-1",
           data: {
-            input: { artifactId, expiresInHours: 24 },
+            input: { appId, expiresInHours: 24 },
             tool: {
               access: "write",
-              name: "share_artifact",
+              name: "share_app",
               route: "convex",
             },
           },
@@ -116,17 +116,17 @@ test("labels artifact shares with the title and link lifetime", () => {
         { kind: "target", text: "Meeting Briefing" },
         { kind: "scope", text: "24h link" },
       ],
-      tool: "share_artifact",
+      tool: "share_app",
     })
   )
 })
 
-test("labels inferred artifact state reads with the title and state entry", () => {
-  const artifactId = id<"artifacts">("artifact")
+test("labels inferred app state reads with the title and state entry", () => {
+  const appId = id<"apps">("app")
   const items = projectActivity(
     data({
-      artifacts: [artifact({ _id: artifactId, title: "Meeting Briefing" })],
-      run: run({ artifactId }),
+      apps: [app({ _id: appId, title: "Meeting Briefing" })],
+      run: run({ appId }),
       traces: [
         trace({
           callId: "call-1",
@@ -134,7 +134,7 @@ test("labels inferred artifact state reads with the title and state entry", () =
             input: { contractName: "meetings" },
             tool: {
               access: "read",
-              name: "read_artifact_state",
+              name: "read_app_state",
               route: "convex",
             },
           },
@@ -151,17 +151,17 @@ test("labels inferred artifact state reads with the title and state entry", () =
         { kind: "target", text: "Meeting Briefing" },
         { kind: "scope", text: "meetings" },
       ],
-      tool: "read_artifact_state",
+      tool: "read_app_state",
     })
   )
 })
 
-test("labels inferred artifact state updates with the title and state entry", () => {
-  const artifactId = id<"artifacts">("artifact")
+test("labels inferred app state updates with the title and state entry", () => {
+  const appId = id<"apps">("app")
   const items = projectActivity(
     data({
-      artifacts: [artifact({ _id: artifactId, title: "Meeting Briefing" })],
-      run: run({ artifactId }),
+      apps: [app({ _id: appId, title: "Meeting Briefing" })],
+      run: run({ appId }),
       traces: [
         trace({
           callId: "call-1",
@@ -169,7 +169,7 @@ test("labels inferred artifact state updates with the title and state entry", ()
             input: { contractName: "dossiers", patch: { status: "ready" } },
             tool: {
               access: "write",
-              name: "update_artifact_state",
+              name: "update_app_state",
               route: "convex",
             },
           },
@@ -186,7 +186,7 @@ test("labels inferred artifact state updates with the title and state entry", ()
         { kind: "target", text: "Meeting Briefing" },
         { kind: "scope", text: "dossiers" },
       ],
-      tool: "update_artifact_state",
+      tool: "update_app_state",
     })
   )
 })
@@ -195,7 +195,7 @@ function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],
     approvals: [],
-    artifacts: [],
+    apps: [],
     assets: [],
     offers: [],
     run: run({}),
@@ -239,15 +239,15 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
   } as Doc<"runs">
 }
 
-function artifact(overrides: Partial<Doc<"artifacts">>): Doc<"artifacts"> {
+function app(overrides: Partial<Doc<"apps">>): Doc<"apps"> {
   return {
     _creationTime: 0,
-    _id: id<"artifacts">("artifact"),
+    _id: id<"apps">("app"),
     access: "organization",
     createdAt: 0,
     ownerId: id<"persons">("person"),
     organizationId: "organization",
-    title: "Artifact",
+    title: "App",
     updatedAt: 0,
     ...overrides,
   }

@@ -11,9 +11,7 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Load full instructions with `load_skill`")
-    expect(prompt).toContain(
-      "`artifact-creator`: Create or update Milo artifacts"
-    )
+    expect(prompt).toContain("`app-creator`: Create or update Milo apps")
     expect(prompt).toContain("`frontend-design`: Design Milo-native")
     expect(prompt).toContain("`image-generation`: Generate Milo image assets")
     expect(prompt).toContain("`slack`: Format Slack replies")

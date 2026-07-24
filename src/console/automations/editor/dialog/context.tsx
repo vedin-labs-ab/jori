@@ -24,7 +24,7 @@ const contextLayers = [
       "Current time",
       "Trigger details",
       "Event details",
-      "Associated artifact",
+      "Associated app",
     ],
   },
 ] as const

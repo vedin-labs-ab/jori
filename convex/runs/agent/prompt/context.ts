@@ -80,9 +80,9 @@ function createRunInstructions(
   return renderPromptTemplate(promptTemplates["agent/context/run"], {
     run: {
       id: input.run._id,
-      artifactId: input.run.artifactId ?? null,
+      appId: input.run.appId ?? null,
     },
-    artifact: createArtifactValues(input),
+    app: createAppValues(input),
     surface: {
       active: activeSurface !== null,
       label:
@@ -132,19 +132,19 @@ function createTriggerPart(input: AgentRuntimeInput) {
   )
 }
 
-/** The attached artifact's state contract, so instructions can reference
+/** The attached app's state contract, so instructions can reference
  *  entries by name instead of restating schema details. */
-function createArtifactValues(input: AgentRuntimeInput) {
-  if (input.type === "message" || input.artifact === null) {
+function createAppValues(input: AgentRuntimeInput) {
+  if (input.type === "message" || input.app === null) {
     return null
   }
 
   return {
-    title: input.artifact.title,
+    title: input.app.title,
     contract:
-      input.artifact.contract.length === 0
+      input.app.contract.length === 0
         ? null
-        : input.artifact.contract.map((entry) => ({
+        : input.app.contract.map((entry) => ({
             name: entry.name,
             scope: entry.scope,
             schema: `${entry.schemaName} v${entry.schemaVersion}`,

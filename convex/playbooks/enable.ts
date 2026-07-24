@@ -41,7 +41,7 @@ export async function enablePlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
     type: "cron",
     trigger: playbookTrigger(plan, timezone),
     createdBy: args.createdBy,
-    artifactId: args.artifactId,
+    appId: args.appId,
   })
 
   return { automationId: automation._id }
@@ -76,7 +76,7 @@ export async function reconfigurePlaybook(
     organizationId: args.organizationId,
     automationId: args.automationId,
     playbook: playbookBinding(plan, args),
-    artifactId: args.artifactId,
+    appId: args.appId,
     name: plan.definition.title,
     instructions: plan.instructions,
     access: plan.access,

@@ -13,7 +13,7 @@ import {
 import { transpileTypeScript } from "./transpile.ts"
 import { type RuntimeAssets } from "./types.ts"
 import {
-  readArtifactPackageDependencies,
+  readAppPackageDependencies,
   validateRuntimeSources,
 } from "./validate.ts"
 
@@ -42,9 +42,9 @@ function readRuntimeAssets(): RuntimeAssets {
   const template = readTemplateFiles()
 
   return {
-    artifact: {
+    app: {
       builder: readBuilderFiles(),
-      dependencies: readArtifactDependencies(template),
+      dependencies: readAppDependencies(template),
       fonts: {
         geistLatinWoff2: readDependencyBase64(
           "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2"
@@ -53,7 +53,7 @@ function readRuntimeAssets(): RuntimeAssets {
       shell: {
         html: readSource("shell/index.html"),
         loader: readExecutableSource("shell/loader.ts"),
-        style: readArtifactShellStyle(),
+        style: readAppShellStyle(),
       },
       template,
     },
@@ -82,16 +82,16 @@ function readTemplateFiles() {
 
   for (const filePath of listFiles(templateRoot)) {
     const sourcePath = normalizePath(path.relative(templateRoot, filePath))
-    const relativePath = artifactTemplateOutputPath(sourcePath)
+    const relativePath = appTemplateOutputPath(sourcePath)
     files[relativePath] = fs.readFileSync(filePath, "utf8")
   }
 
-  addArtifactPlatformFiles(files)
+  addAppPlatformFiles(files)
 
   return sortRecord(files)
 }
 
-function addArtifactPlatformFiles(files: Record<string, string>) {
+function addAppPlatformFiles(files: Record<string, string>) {
   for (const filePath of listFiles(path.join(appSourceRoot, "components/ui"))) {
     if (filePath.endsWith(".test.ts") || filePath.endsWith(".test.tsx")) {
       continue
@@ -105,7 +105,7 @@ function addArtifactPlatformFiles(files: Record<string, string>) {
     files[`src/${relativePath}`] = readAppSource(relativePath)
   }
 
-  files["src/milo.css"] = readArtifactThemeCss()
+  files["src/milo.css"] = readAppThemeCss()
 }
 
 function readBuilderFiles() {
@@ -116,7 +116,7 @@ function readBuilderFiles() {
     const sourcePath = normalizePath(path.relative(builderRoot, filePath))
     const outputPath =
       sourcePath === "index.ts"
-        ? "milo-artifact-builder.ts"
+        ? "milo-app-builder.ts"
         : `.milo/builder/${sourcePath}`
     const content = fs.readFileSync(filePath, "utf8")
     files[outputPath] =
@@ -135,14 +135,14 @@ function readBuilderFiles() {
 }
 
 function addBuilderContractFiles(files: Record<string, string>) {
-  const artifactContractsRoot = path.join(contractsRoot, "artifacts")
+  const appContractsRoot = path.join(contractsRoot, "apps")
 
   for (const sourcePath of builderContractSourcePaths) {
-    const filePath = path.join(artifactContractsRoot, sourcePath)
+    const filePath = path.join(appContractsRoot, sourcePath)
     const content = fs.readFileSync(filePath, "utf8")
-    files[`.milo/builder/contracts/artifacts/${sourcePath}`] =
+    files[`.milo/builder/contracts/apps/${sourcePath}`] =
       rewriteGeneratedContractImports(
-        transpileTypeScript(content, `contracts/artifacts/${sourcePath}`)
+        transpileTypeScript(content, `contracts/apps/${sourcePath}`)
       )
   }
 }
@@ -177,18 +177,18 @@ function renderGeneratedModule(runtimeAssets: RuntimeAssets) {
   ].join("")
 }
 
-function artifactTemplateOutputPath(sourcePath: string) {
+function appTemplateOutputPath(sourcePath: string) {
   return sourcePath === "biome.config.json" ? "biome.json" : sourcePath
 }
 
-function readArtifactDependencies(template: Record<string, string>) {
-  const dependencies = readArtifactPackageDependencies(template)
+function readAppDependencies(template: Record<string, string>) {
+  const dependencies = readAppPackageDependencies(template)
 
   return Object.entries(dependencies)
     .map(([name, version]) => {
       if (!isExactPackageVersion(version)) {
         throw new Error(
-          `Artifact template dependency ${name} must use an exact version.`
+          `App template dependency ${name} must use an exact version.`
         )
       }
 
@@ -201,11 +201,11 @@ function isExactPackageVersion(version: string) {
   return /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)
 }
 
-function readArtifactThemeCss() {
+function readAppThemeCss() {
   return readAppSource("styles.css")
 }
 
-function readArtifactShellStyle() {
+function readAppShellStyle() {
   return [
     extractDesignTokenCss(readAppSource("styles.css")),
     readSource("shell/style.css"),
@@ -226,15 +226,15 @@ function rewriteBuilderEntrypointImports(source: string) {
   return source
     .replaceAll(/from "\.\/([a-z-]+)\.ts"/g, 'from "./.milo/builder/$1.ts"')
     .replaceAll(
-      'from "../../../contracts/artifacts/',
-      'from "./.milo/builder/contracts/artifacts/'
+      'from "../../../contracts/apps/',
+      'from "./.milo/builder/contracts/apps/'
     )
 }
 
 function rewriteBuilderSharedImports(source: string) {
   return source.replaceAll(
-    'from "../../../contracts/artifacts/',
-    'from "./contracts/artifacts/'
+    'from "../../../contracts/apps/',
+    'from "./contracts/apps/'
   )
 }
 

@@ -118,7 +118,7 @@ function data(overrides: Partial<ActivityData>): ActivityData {
   return {
     agents: [],
     approvals: [],
-    artifacts: [],
+    apps: [],
     assets: [],
     offers: [],
     run: run({}),

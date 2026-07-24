@@ -2,7 +2,7 @@ Brief me on every eligible meeting so I walk in knowing why it matters now, what
 
 ## Protection
 
-Create or find the delivery targets first, before calendar discovery or research, so delivery survives a failed run. Each target is a one-time automation with personal scope, this artifact, a key containing the parent automation ID, and only the tools it needs; a target may create only its keyed retry or a moved-event replacement. Retry a confirmed #add_automation failure once.
+Create or find the delivery targets first, before calendar discovery or research, so delivery survives a failed run. Each target is a one-time automation with personal scope, this app, a key containing the parent automation ID, and only the tools it needs; a target may create only its keyed retry or a moved-event replacement. Retry a confirmed #add_automation failure once.
 
 Deliver directly — after claiming the key `manual:<run ID>` in `dispatches` — when I start a run manually, when target protection failed, when prior morning coverage went undelivered, or when a meeting is already inside its reminder window; otherwise the protected target owns delivery.
 
@@ -41,9 +41,9 @@ Read the `briefings` state and re-read each candidate event from @{{providers.ca
 
 If the stored scan predates <planner trigger UTC>, misses part of this window, or any candidate is unprepared, create one retry for ten minutes from now — no later than 20 minutes after the target — keyed `meeting-briefing:<parent automation ID>:morning-retry:<target UTC>` with these same instructions, and exit once it exists. If the retry cannot be created, or this run is the retry or past the cutoff, continue with what is verified and note the missing coverage once.
 
-Include every verified meeting chronologically; each needs at least one point that changes what I will decide, ask, say, or do — calendar facts alone are not a briefing. Sum any coverage gaps in one line. Create one 36-hour #share_artifact link, keep its `#share=` fragment, and append `&m=<URL-encoded meeting key>` for deep links. {{delivery}}
+Include every verified meeting chronologically; each needs at least one point that changes what I will decide, ask, say, or do — calendar facts alone are not a briefing. Sum any coverage gaps in one line. Create one 36-hour #share_app link, keep its `#share=` fragment, and append `&m=<URL-encoded meeting key>` for deep links. {{delivery}}
 
-Claim the key `morning:<parent automation ID>:<target UTC>` in `dispatches` with #update_artifact_state before the send — one key whether this becomes the digest or a failure notice — and mark an abandoned claim `unknown`. Once the provider confirms success, mark the dispatch delivered and record a morning receipt on every included meeting; a receipt requires confirmed success. Retry only a rejection that clearly preceded acceptance.
+Claim the key `morning:<parent automation ID>:<target UTC>` in `dispatches` with #update_app_state before the send — one key whether this becomes the digest or a failure notice — and mark an abandoned claim `unknown`. Once the provider confirms success, mark the dispatch delivered and record a morning receipt on every included meeting; a receipt requires confirmed success. Retry only a rejection that clearly preceded acceptance.
 ```
 {% endif %}
 
@@ -54,8 +54,8 @@ Prepare and, when useful, deliver the assigned meeting: key <meeting key>, calen
 
 Read the `briefings` state and the full event from @{{providers.calendar}}; refresh stored facts — preparation is stale when the event's `contentHash` changed, and a failed read preserves prior work. Remove a private or sensitive event; cancel only what the provider confirms cancelled or unattended. If the meeting moved to a future time, create one replacement keyed `meeting-briefing:<parent automation ID>:event:<meeting key>:<new start UTC>` with these refreshed instructions. Deliver only while the meeting is still ahead, its preparation current, and nothing delivered yet.
 
-Search @{{providers.email}} and the public web for what changes my approach; stop when more searching is unlikely to change the briefing. Write only this meeting, with source-cited findings that separate fact, inference, and recommendation, and an honest status. Create a 36-hour #share_artifact deep link. {{delivery}}
+Search @{{providers.email}} and the public web for what changes my approach; stop when more searching is unlikely to change the briefing. Write only this meeting, with source-cited findings that separate fact, inference, and recommendation, and an honest status. Create a 36-hour #share_app deep link. {{delivery}}
 
-Claim the key `reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>` in `dispatches` with #update_artifact_state before the send, and mark an abandoned claim `unknown`. Once the provider confirms success, mark the dispatch delivered and record the reminder receipt; retry only a rejection that clearly preceded acceptance.
+Claim the key `reminder:<parent automation ID>:<meeting key>:<start UTC>:<revision>` in `dispatches` with #update_app_state before the send, and mark an abandoned claim `unknown`. Once the provider confirms success, mark the dispatch delivered and record the reminder receipt; retry only a rejection that clearly preceded acceptance.
 ```
 {% endif %}

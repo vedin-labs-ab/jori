@@ -5,7 +5,7 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { provisionTemplateArtifact } from "../artifacts/templates/provision"
+import { provisionTemplateApp } from "../apps/templates/provision"
 import {
   accessInput,
   automationType,
@@ -31,7 +31,7 @@ export const enable = action({
     return await ctx.runMutation(internal.playbooks.console.enableResolved, {
       ...args,
       ...caller,
-      artifactId: await provision(ctx, args, caller.createdBy),
+      appId: await provision(ctx, args, caller.createdBy),
     })
   },
 })
@@ -46,13 +46,13 @@ export const trial = action({
     return await ctx.runMutation(internal.playbooks.console.trialResolved, {
       ...args,
       ...caller,
-      artifactId: await provision(ctx, args, caller.createdBy),
+      appId: await provision(ctx, args, caller.createdBy),
     })
   },
 })
 
 /** Re-render an enabled playbook from new options or a newer catalog
- *  version, refreshing its artifact alongside the automation. */
+ *  version, refreshing its app alongside the automation. */
 export const reconfigure = action({
   args: {
     ...playbookPlanFields,
@@ -70,13 +70,13 @@ export const reconfigure = action({
         ...plan,
         ...caller,
         automationId,
-        artifactId: await provision(ctx, plan, caller.createdBy),
+        appId: await provision(ctx, plan, caller.createdBy),
       }
     )
   },
 })
 
-/** Render the playbook as an automation draft — no artifact is provisioned
+/** Render the playbook as an automation draft — no app is provisioned
  *  and nothing persists unless the draft is actually created. */
 export const draft = action({
   args: playbookPlanFields,
@@ -95,7 +95,7 @@ export const draft = action({
 })
 
 /** Create an automation from an edited playbook draft (the advanced
- *  builder), provisioning the playbook's artifact at the same edge. */
+ *  builder), provisioning the playbook's app at the same edge. */
 export const create = action({
   args: {
     organizationId: v.string(),
@@ -116,7 +116,7 @@ export const create = action({
       ctx,
       args.organizationId
     )
-    const artifactId = await provisionTemplateArtifact(ctx, {
+    const appId = await provisionTemplateApp(ctx, {
       key: args.playbook.key,
       organizationId: args.organizationId,
       personId: createdBy,
@@ -124,7 +124,7 @@ export const create = action({
 
     return await ctx.runMutation(internal.playbooks.console.createResolved, {
       ...args,
-      artifactId,
+      appId,
       createdBy,
     })
   },
@@ -155,7 +155,7 @@ async function provision(
   args: PlaybookCallerArgs,
   createdBy: Id<"persons">
 ) {
-  return await provisionTemplateArtifact(ctx, {
+  return await provisionTemplateApp(ctx, {
     key: args.playbook,
     organizationId: args.organizationId,
     personId: createdBy,

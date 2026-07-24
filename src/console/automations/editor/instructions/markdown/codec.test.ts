@@ -8,7 +8,7 @@ import { readInstructionReferences } from "./references"
 
 const catalog = createAutomationMentionCatalog({
   skills: ["meeting-prep"],
-  tools: ["share_artifact"],
+  tools: ["share_app"],
 })
 
 test("round-trips the supported Markdown profile", () => {
@@ -39,15 +39,15 @@ test.each([
   "PLAINTEXT",
 ])("treats the %s fence as canonical plain text", (language) => {
   const document = parse(
-    [`\`\`\`${language}`, "Use #share_artifact.", "```"].join("\n")
+    [`\`\`\`${language}`, "Use #share_app.", "```"].join("\n")
   )
 
   expect(document.content?.[0]?.type).toBe("fencedText")
   expect(readInstructionReferences(document)).toEqual([
-    { id: "share_artifact", kind: "tool" },
+    { id: "share_app", kind: "tool" },
   ])
   expect(serialize(document).description).toBe(
-    ["```txt", "Use #share_artifact.", "```"].join("\n")
+    ["```txt", "Use #share_app.", "```"].join("\n")
   )
 })
 
@@ -56,9 +56,7 @@ test.each([
   "instructions",
   "javascript",
 ])("keeps the %s fence literal and inert", (language) => {
-  const source = [`\`\`\`${language}`, 'Use "#share_artifact".', "```"].join(
-    "\n"
-  )
+  const source = [`\`\`\`${language}`, 'Use "#share_app".', "```"].join("\n")
   const document = parse(source)
 
   expect(document.content?.[0]?.type).toBe("codeBlock")
@@ -67,43 +65,39 @@ test.each([
 })
 
 test("distinguishes headings from tool references", () => {
-  const document = parse("# Heading\n\n#share_artifact")
+  const document = parse("# Heading\n\n#share_app")
 
   expect(document.content?.map((node) => node.type)).toEqual([
     "heading",
     "paragraph",
   ])
   expect(readInstructionReferences(document)).toEqual([
-    { id: "share_artifact", kind: "tool" },
+    { id: "share_app", kind: "tool" },
   ])
 })
 
 test("only hydrates inline-code references after whitespace", () => {
-  const document = parse(
-    "`#share_artifact` and `Use #share_artifact for the result`."
-  )
+  const document = parse("`#share_app` and `Use #share_app for the result`.")
 
   expect(readInstructionReferences(document)).toEqual([
-    { id: "share_artifact", kind: "tool" },
+    { id: "share_app", kind: "tool" },
   ])
   expect(serialize(document).description).toBe(
-    "`#share_artifact` and `Use #share_artifact for the result`."
+    "`#share_app` and `Use #share_app for the result`."
   )
 })
 
 test("round-trips code spans containing pills, backticks, and spaces", () => {
-  const source = ["``Use `literal` #share_artifact``", "", "`  padded  `"].join(
-    "\n"
-  )
+  const source = ["``Use `literal` #share_app``", "", "`  padded  `"].join("\n")
 
   expect(readInstructionReferences(parse(source))).toEqual([
-    { id: "share_artifact", kind: "tool" },
+    { id: "share_app", kind: "tool" },
   ])
   expect(roundTrip(roundTrip(source))).toBe(roundTrip(source))
 })
 
 test("preserves user text that resembles an internal placeholder", () => {
-  const source = "Keep \uE0000:0\uE001 and use #share_artifact."
+  const source = "Keep \uE0000:0\uE001 and use #share_app."
 
   expect(roundTrip(source)).toBe(source)
 })
@@ -130,9 +124,9 @@ test.each([
 
 test("keeps raw HTML and images literal without hydrating references", () => {
   const source = [
-    '<span data-automation-reference="#share_artifact">#share_artifact</span>',
+    '<span data-automation-reference="#share_app">#share_app</span>',
     "",
-    "![#share_artifact](https://example.com/image.png)",
+    "![#share_app](https://example.com/image.png)",
   ].join("\n")
   const document = parse(source)
 

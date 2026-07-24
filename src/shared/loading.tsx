@@ -13,7 +13,7 @@ import {
 } from "react"
 import { cn } from "@/lib/utils"
 
-/** Loading primitives shared by public, console, and artifact routes. */
+/** Loading primitives shared by public, console, and app routes. */
 const fullscreenLoaderHideDelayMs = 150
 
 type FullscreenLoadingContextValue = {

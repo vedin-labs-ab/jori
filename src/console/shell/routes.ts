@@ -14,7 +14,7 @@ export const consoleNavigation = [
   { icon: ListChecks, label: "Runs", to: "/runs" },
   { icon: NotebookTabs, label: "Playbooks", to: "/playbooks" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },
-  { icon: Component, label: "Artifacts", to: "/artifacts" },
+  { icon: Component, label: "Apps", to: "/apps" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Layers, label: "Context", to: "/context" },

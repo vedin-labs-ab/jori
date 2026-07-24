@@ -1,18 +1,18 @@
 import { defineSchema } from "convex/server"
 import { approvals } from "./approvals/schema"
 import {
-  artifactAssets,
-  artifactBlobs,
-  artifactCaches,
-  artifactEntries,
-  artifactSessions,
-  artifactShares,
-  artifactState,
-  artifacts,
-  artifactTools,
-  artifactTrees,
-  artifactVersions,
-} from "./artifacts/schema"
+  appAssets,
+  appBlobs,
+  appCaches,
+  appEntries,
+  appSessions,
+  appShares,
+  appState,
+  apps,
+  appTools,
+  appTrees,
+  appVersions,
+} from "./apps/schema"
 import { assets } from "./assets/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
@@ -77,15 +77,15 @@ export default defineSchema({
   sandboxes,
   permissions,
   reactions,
-  artifacts,
-  artifactVersions,
-  artifactTrees,
-  artifactEntries,
-  artifactBlobs,
-  artifactTools,
-  artifactSessions,
-  artifactShares,
-  artifactAssets,
-  artifactState,
-  artifactCaches,
+  apps,
+  appVersions,
+  appTrees,
+  appEntries,
+  appBlobs,
+  appTools,
+  appSessions,
+  appShares,
+  appAssets,
+  appState,
+  appCaches,
 })

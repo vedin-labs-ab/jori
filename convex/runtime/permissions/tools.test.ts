@@ -18,13 +18,13 @@ test("uses runtime skill names in the load_skill schema", () => {
 
   expect(
     toolDescriptor("milo", permission, resolveToolModes([]), [
-      "artifact-creator",
+      "app-creator",
       "frontend-design",
     ]).inputSchema
   ).toMatchObject({
     properties: {
       name: {
-        enum: ["artifact-creator", "frontend-design"],
+        enum: ["app-creator", "frontend-design"],
       },
     },
   })
@@ -66,7 +66,7 @@ function instructionInput(overrides: Partial<InstructionRuntimeInput>) {
   return {
     type: "instruction" as const,
     run: {} as Doc<"runs">,
-    artifact: null,
+    app: null,
     instructions: "Do the thing.",
     integrations: [integration("gmail")],
     organization: null,

@@ -3,8 +3,8 @@ import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx, type MutationCtx } from "../../_generated/server"
 import { ensureCurrentPerson } from "../../persons/account"
-import { requireAppReturnUrl } from "../../shared/app"
 import { type Integration } from "../../shared/integrations"
+import { requireReturnUrl } from "../../shared/origin"
 import { createSignedGitHubState } from "../github/signing"
 import { googleIntegrationConfigs } from "../google/config"
 import { createSignedGoogleState } from "../google/signing"
@@ -27,7 +27,7 @@ export async function buildInstallState(
   return {
     organizationId: args.organizationId,
     createdBy: await ensureCurrentPerson(ctx, args.organizationId),
-    returnUrl: requireAppReturnUrl(args.returnUrl),
+    returnUrl: requireReturnUrl(args.returnUrl),
     createdAt: Date.now(),
     ...(args.integrationOfferId === undefined
       ? {}

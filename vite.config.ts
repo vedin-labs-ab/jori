@@ -11,7 +11,7 @@ const ignoredWorkspacePaths = [
   "**/.tanstack/**",
   "**/dist/**",
   "**/node_modules/**",
-  "**/runtime/artifacts/template/**",
+  "**/runtime/apps/template/**",
 ]
 
 const reactOrAccessibilityWarning =

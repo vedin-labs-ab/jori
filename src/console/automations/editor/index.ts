@@ -158,8 +158,8 @@ async function persistAutomation({
     }
 
     // A playbook draft creates through the playbook action, which also
-    // provisions the playbook's artifact; plain drafts stay a mutation.
-    const { artifactId: _artifactId, key, playbook, ...plain } = result.args
+    // provisions the playbook's app; plain drafts stay a mutation.
+    const { appId: _appId, key, playbook, ...plain } = result.args
 
     if (playbook !== undefined) {
       await createFromPlaybook({

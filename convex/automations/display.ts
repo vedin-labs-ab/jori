@@ -15,7 +15,7 @@ export async function toAutomationDisplay(
     id: automation._id,
     key: automation.key,
     playbook: automation.playbook,
-    artifactId: automation.artifactId,
+    appId: automation.appId,
     name: automation.name,
     instructions: automation.instructions,
     scope: automationScope(automation),

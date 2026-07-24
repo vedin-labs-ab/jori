@@ -6,17 +6,17 @@ import { shiftClockTime } from "./schedule"
  *  (15 minutes) plus synthesis and delivery margin. */
 const scheduleLeadMinutes = 30
 
-/** The one artifact-backed playbook: a scheduled planner that researches
- *  meetings into a template-provisioned artifact and protects delivery. */
+/** The one app-backed playbook: a scheduled planner that researches
+ *  meetings into a template-provisioned app and protects delivery. */
 export const meetingBriefing: PlaybookDefinition = {
   key: "meeting-briefing",
   template: "playbooks/briefing",
-  version: 10,
+  version: 11,
   title: "Meeting Briefing",
   description:
     "Walk into important meetings with the context, questions, and decisions that will help you make the most of them.",
   scope: "personal",
-  artifact: {
+  app: {
     title: "Meeting Briefing",
     description:
       "Stores your prepared briefings and powers the shareable briefing page.",

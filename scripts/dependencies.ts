@@ -4,7 +4,7 @@ const roots = [
   "src",
   "convex",
   "contracts",
-  "runtime/artifacts",
+  "runtime/apps",
   "trigger",
   "prompts",
   "scripts",
@@ -17,7 +17,7 @@ const excludedPaths = [
   "(^|/)node_modules(/|$)",
   "(^|/)dist(/|$)",
   "[.]test[.](?:ts|tsx|js|jsx)$",
-  "^runtime/artifacts/template(/|$)",
+  "^runtime/apps/template(/|$)",
   // Vendored better-auth-ui registry code, kept as installed; its internal
   // wiring (plugin <-> settings views) is upstream's to govern.
   "^src/components/auth(/|$)",
@@ -71,7 +71,7 @@ const ruleSet = {
       },
       to: {
         path: "^(?:src|runtime|trigger|scripts)(?:/|$)",
-        pathNot: "^runtime/artifacts/_generated/",
+        pathNot: "^runtime/apps/_generated/",
       },
     },
     {
@@ -80,7 +80,7 @@ const ruleSet = {
       comment:
         "Runtime source may depend on contracts, not app, Convex, or script code.",
       from: {
-        path: "^runtime/artifacts/",
+        path: "^runtime/apps/",
       },
       to: {
         path: "^(?:src|convex|trigger|prompts|scripts)(?:/|$)",
@@ -96,7 +96,7 @@ const ruleSet = {
       },
       to: {
         path: "^(?:src|convex|runtime|scripts)(?:/|$)",
-        pathNot: "^(?:convex/_generated/|runtime/artifacts/_generated/)",
+        pathNot: "^(?:convex/_generated/|runtime/apps/_generated/)",
       },
     },
     {

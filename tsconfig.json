@@ -7,7 +7,7 @@
     ".tanstack",
     "dist",
     "node_modules",
-    "runtime/artifacts/template"
+    "runtime/apps/template"
   ],
   "compilerOptions": {
     "target": "ES2022",

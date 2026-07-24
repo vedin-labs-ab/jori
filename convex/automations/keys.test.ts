@@ -64,7 +64,7 @@ function automation() {
       ],
       web: true,
     },
-    artifactId: "artifact" as Id<"artifacts">,
+    appId: "app" as Id<"apps">,
     instructions: "Prepare the meeting.",
     name: "Prep",
     principal: { kind: "person", personId: "person" as Id<"persons"> },

@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ArtifactsRouteImport } from './routes/artifacts'
+import { Route as AppsRouteImport } from './routes/apps'
 import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as ContextRouteImport } from './routes/context'
@@ -24,13 +24,13 @@ import { Route as SignOutRouteImport } from './routes/sign-out'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
-import { Route as ArtifactsIndexRouteImport } from './routes/artifacts/index'
+import { Route as AppsIndexRouteImport } from './routes/apps/index'
 import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ArtifactsArtifactIdIndexRouteImport } from './routes/artifacts/$artifactId/index'
+import { Route as AppsAppIdIndexRouteImport } from './routes/apps/$appId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -38,9 +38,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArtifactsRoute = ArtifactsRouteImport.update({
-  id: '/artifacts',
-  path: '/artifacts',
+const AppsRoute = AppsRouteImport.update({
+  id: '/apps',
+  path: '/apps',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutomationsRoute = AutomationsRouteImport.update({
@@ -108,10 +108,10 @@ const TrustRoute = TrustRouteImport.update({
   path: '/trust',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArtifactsIndexRoute = ArtifactsIndexRouteImport.update({
+const AppsIndexRoute = AppsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ArtifactsRoute,
+  getParentRoute: () => AppsRoute,
 } as any)
 const ContextIndexRoute = ContextIndexRouteImport.update({
   id: '/',
@@ -138,12 +138,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArtifactsArtifactIdIndexRoute =
-  ArtifactsArtifactIdIndexRouteImport.update({
-    id: '/$artifactId/',
-    path: '/$artifactId/',
-    getParentRoute: () => ArtifactsRoute,
-  } as any)
+const AppsAppIdIndexRoute = AppsAppIdIndexRouteImport.update({
+  id: '/$appId/',
+  path: '/$appId/',
+  getParentRoute: () => AppsRoute,
+} as any)
 const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
   id: '/offers/$token',
   path: '/offers/$token',
@@ -152,7 +151,7 @@ const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/artifacts': typeof ArtifactsRouteWithChildren
+  '/apps': typeof AppsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
@@ -168,12 +167,12 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/artifacts/': typeof ArtifactsIndexRoute
+  '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
+  '/apps/$appId/': typeof AppsAppIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -190,17 +189,17 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/artifacts': typeof ArtifactsIndexRoute
+  '/apps': typeof AppsIndexRoute
   '/context': typeof ContextIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/artifacts/$artifactId': typeof ArtifactsArtifactIdIndexRoute
+  '/apps/$appId': typeof AppsAppIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/artifacts': typeof ArtifactsRouteWithChildren
+  '/apps': typeof AppsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
@@ -216,18 +215,18 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/artifacts/': typeof ArtifactsIndexRoute
+  '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/artifacts/$artifactId/': typeof ArtifactsArtifactIdIndexRoute
+  '/apps/$appId/': typeof AppsAppIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/artifacts'
+    | '/apps'
     | '/automations'
     | '/console'
     | '/context'
@@ -243,12 +242,12 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
-    | '/artifacts/'
+    | '/apps/'
     | '/context/'
     | '/integrations/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
-    | '/artifacts/$artifactId/'
+    | '/apps/$appId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -265,16 +264,16 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
-    | '/artifacts'
+    | '/apps'
     | '/context'
     | '/integrations'
     | '/api/auth/$'
     | '/integrations/offers/$token'
-    | '/artifacts/$artifactId'
+    | '/apps/$appId'
   id:
     | '__root__'
     | '/'
-    | '/artifacts'
+    | '/apps'
     | '/automations'
     | '/console'
     | '/context'
@@ -290,17 +289,17 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
-    | '/artifacts/'
+    | '/apps/'
     | '/context/'
     | '/integrations/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
-    | '/artifacts/$artifactId/'
+    | '/apps/$appId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ArtifactsRoute: typeof ArtifactsRouteWithChildren
+  AppsRoute: typeof AppsRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
@@ -326,11 +325,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/artifacts': {
-      id: '/artifacts'
-      path: '/artifacts'
-      fullPath: '/artifacts'
-      preLoaderRoute: typeof ArtifactsRouteImport
+    '/apps': {
+      id: '/apps'
+      path: '/apps'
+      fullPath: '/apps'
+      preLoaderRoute: typeof AppsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/automations': {
@@ -424,12 +423,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrustRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/artifacts/': {
-      id: '/artifacts/'
+    '/apps/': {
+      id: '/apps/'
       path: '/'
-      fullPath: '/artifacts/'
-      preLoaderRoute: typeof ArtifactsIndexRouteImport
-      parentRoute: typeof ArtifactsRoute
+      fullPath: '/apps/'
+      preLoaderRoute: typeof AppsIndexRouteImport
+      parentRoute: typeof AppsRoute
     }
     '/context/': {
       id: '/context/'
@@ -466,12 +465,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/artifacts/$artifactId/': {
-      id: '/artifacts/$artifactId/'
-      path: '/$artifactId'
-      fullPath: '/artifacts/$artifactId/'
-      preLoaderRoute: typeof ArtifactsArtifactIdIndexRouteImport
-      parentRoute: typeof ArtifactsRoute
+    '/apps/$appId/': {
+      id: '/apps/$appId/'
+      path: '/$appId'
+      fullPath: '/apps/$appId/'
+      preLoaderRoute: typeof AppsAppIdIndexRouteImport
+      parentRoute: typeof AppsRoute
     }
     '/integrations/offers/$token': {
       id: '/integrations/offers/$token'
@@ -483,19 +482,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface ArtifactsRouteChildren {
-  ArtifactsIndexRoute: typeof ArtifactsIndexRoute
-  ArtifactsArtifactIdIndexRoute: typeof ArtifactsArtifactIdIndexRoute
+interface AppsRouteChildren {
+  AppsIndexRoute: typeof AppsIndexRoute
+  AppsAppIdIndexRoute: typeof AppsAppIdIndexRoute
 }
 
-const ArtifactsRouteChildren: ArtifactsRouteChildren = {
-  ArtifactsIndexRoute: ArtifactsIndexRoute,
-  ArtifactsArtifactIdIndexRoute: ArtifactsArtifactIdIndexRoute,
+const AppsRouteChildren: AppsRouteChildren = {
+  AppsIndexRoute: AppsIndexRoute,
+  AppsAppIdIndexRoute: AppsAppIdIndexRoute,
 }
 
-const ArtifactsRouteWithChildren = ArtifactsRoute._addFileChildren(
-  ArtifactsRouteChildren,
-)
+const AppsRouteWithChildren = AppsRoute._addFileChildren(AppsRouteChildren)
 
 interface ContextRouteChildren {
   ContextPlacesRoute: typeof ContextPlacesRoute
@@ -528,7 +525,7 @@ const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ArtifactsRoute: ArtifactsRouteWithChildren,
+  AppsRoute: AppsRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,

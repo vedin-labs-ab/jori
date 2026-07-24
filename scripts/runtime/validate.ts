@@ -9,17 +9,17 @@ import { type RuntimeAssets } from "./types.ts"
 
 export function validateRuntimeSources(runtimeAssets: RuntimeAssets) {
   validateJsonSources()
-  validateArtifactShell(runtimeAssets.artifact.shell.html)
-  validateArtifactBuilder(runtimeAssets.artifact.builder)
-  validateArtifactTemplate(runtimeAssets.artifact.template)
+  validateAppShell(runtimeAssets.app.shell.html)
+  validateAppBuilder(runtimeAssets.app.builder)
+  validateAppTemplate(runtimeAssets.app.template)
 }
 
-function validateArtifactBuilder(builder: Record<string, string>) {
-  const entryPath = "milo-artifact-builder.ts"
+function validateAppBuilder(builder: Record<string, string>) {
+  const entryPath = "milo-app-builder.ts"
   const entry = builder[entryPath]
 
   if (entry === undefined) {
-    throw new Error(`Artifact builder is missing ${entryPath}.`)
+    throw new Error(`App builder is missing ${entryPath}.`)
   }
 
   const paths = new Set(Object.keys(builder))
@@ -38,9 +38,7 @@ function validateArtifactBuilder(builder: Record<string, string>) {
   )
 
   if (missing.length > 0) {
-    throw new Error(
-      `Artifact builder imports missing files: ${missing.join(", ")}`
-    )
+    throw new Error(`App builder imports missing files: ${missing.join(", ")}`)
   }
 }
 
@@ -63,24 +61,24 @@ function validateJsonSources() {
   }
 }
 
-function validateArtifactShell(html: string) {
+function validateAppShell(html: string) {
   for (const placeholder of [
-    "__MILO_ARTIFACT_TITLE__",
-    "__MILO_ARTIFACT_STYLE__",
-    "__MILO_ARTIFACT_CONFIG__",
-    "__MILO_ARTIFACT_LOADER__",
+    "__MILO_APP_TITLE__",
+    "__MILO_APP_STYLE__",
+    "__MILO_APP_CONFIG__",
+    "__MILO_APP_LOADER__",
   ]) {
     if (!html.includes(placeholder)) {
-      throw new Error(`Artifact shell is missing ${placeholder}.`)
+      throw new Error(`App shell is missing ${placeholder}.`)
     }
   }
 
   if (!html.trimStart().startsWith("<!doctype html>")) {
-    throw new Error("Artifact shell must be a complete HTML document.")
+    throw new Error("App shell must be a complete HTML document.")
   }
 }
 
-function validateArtifactTemplate(template: Record<string, string>) {
+function validateAppTemplate(template: Record<string, string>) {
   for (const requiredPath of [
     "package.json",
     "index.html",
@@ -94,19 +92,17 @@ function validateArtifactTemplate(template: Record<string, string>) {
     "src/lib/utils.ts",
   ]) {
     if (template[requiredPath] === undefined) {
-      throw new Error(`Artifact template is missing ${requiredPath}.`)
+      throw new Error(`App template is missing ${requiredPath}.`)
     }
   }
 
-  validateArtifactTemplateDependencies(template)
-  validateArtifactTemplateBuild(template)
+  validateAppTemplateDependencies(template)
+  validateAppTemplateBuild(template)
 }
 
-function validateArtifactTemplateDependencies(
-  template: Record<string, string>
-) {
+function validateAppTemplateDependencies(template: Record<string, string>) {
   const packageNames = new Set(
-    Object.keys(readArtifactPackageDependencies(template))
+    Object.keys(readAppPackageDependencies(template))
   )
   const imports = collectExternalImports(template)
   const missing = [...imports].filter(
@@ -115,18 +111,16 @@ function validateArtifactTemplateDependencies(
 
   if (missing.length > 0) {
     throw new Error(
-      `Artifact template package.json is missing dependencies: ${missing.join(", ")}`
+      `App template package.json is missing dependencies: ${missing.join(", ")}`
     )
   }
 }
 
-export function readArtifactPackageDependencies(
-  template: Record<string, string>
-) {
+export function readAppPackageDependencies(template: Record<string, string>) {
   const content = template["package.json"]
 
   if (content === undefined) {
-    throw new Error("Artifact template is missing package.json.")
+    throw new Error("App template is missing package.json.")
   }
 
   const packageJson = JSON.parse(content) as {
@@ -184,7 +178,7 @@ function externalPackageName(specifier: string) {
   return builtinModules.includes(packageName) ? null : packageName
 }
 
-function validateArtifactTemplateBuild(template: Record<string, string>) {
+function validateAppTemplateBuild(template: Record<string, string>) {
   const project = fs.mkdtempSync(path.join(os.tmpdir(), "milo-template-"))
   const fixtureSourcePaths = ["src/App.tsx", "src/styles.css"]
 
@@ -194,14 +188,10 @@ function validateArtifactTemplateBuild(template: Record<string, string>) {
       path.join(root, "node_modules"),
       path.join(project, "node_modules")
     )
-    runArtifactTemplateCommand(project, "biome", ["format", "--write", "src"])
-    runArtifactTemplateCommand(project, "tsc", [
-      "-p",
-      "tsconfig.json",
-      "--noEmit",
-    ])
-    runArtifactTemplateCommand(project, "biome", ["ci", ...fixtureSourcePaths])
-    runArtifactTemplateCommand(project, "vite", [
+    runAppTemplateCommand(project, "biome", ["format", "--write", "src"])
+    runAppTemplateCommand(project, "tsc", ["-p", "tsconfig.json", "--noEmit"])
+    runAppTemplateCommand(project, "biome", ["ci", ...fixtureSourcePaths])
+    runAppTemplateCommand(project, "vite", [
       "build",
       "--config",
       "vite.config.ts",
@@ -211,7 +201,7 @@ function validateArtifactTemplateBuild(template: Record<string, string>) {
   }
 }
 
-function runArtifactTemplateCommand(
+function runAppTemplateCommand(
   project: string,
   command: string,
   args: string[]

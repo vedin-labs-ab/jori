@@ -16,14 +16,14 @@ import {
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription } from "../subscriptions/data"
 import { normalizeRequiredText } from "../timing"
-import { requireAutomationArtifact } from "./artifact"
+import { requireAutomationApp } from "./app"
 import { sameAutomationPrincipal } from "./children"
 import { getRequiredAutomation } from "./read"
 import { resolveTrigger, scheduleAutomationIfNeeded } from "./trigger"
 
 type CreateAutomationArgs = {
   organizationId: string
-  artifactId?: Id<"artifacts">
+  appId?: Id<"apps">
   parentId?: Id<"automations">
   expectedParentConfigurationVersion?: number
   playbook?: PlaybookBinding
@@ -92,15 +92,15 @@ async function prepareAutomation(
     now,
   })
 
-  await requireAutomationArtifact(ctx, {
+  await requireAutomationApp(ctx, {
     organizationId: args.organizationId,
-    artifactId: args.artifactId,
+    appId: args.appId,
     principal,
   })
 
   return {
     organizationId: args.organizationId,
-    artifactId: args.artifactId,
+    appId: args.appId,
     parentId: ownership?.parentId,
     parentConfigurationVersion: ownership?.configurationVersion,
     configurationVersion: 1,
@@ -116,7 +116,7 @@ async function prepareAutomation(
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,
-      artifactId: args.artifactId,
+      appId: args.appId,
       principal,
       organizationId: args.organizationId,
     }),

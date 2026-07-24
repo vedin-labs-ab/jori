@@ -2,8 +2,8 @@ import { type GenericCtx } from "@convex-dev/better-auth"
 import { Resend } from "@convex-dev/resend"
 import { components } from "../_generated/api"
 import { type DataModel } from "../_generated/dataModel"
-import { requireAppOrigin } from "../shared/app"
 import { readEnvironmentVariable } from "../shared/environment"
+import { requireOrigin } from "../shared/origin"
 
 const resend = new Resend(components.resend, { testMode: false })
 
@@ -26,7 +26,7 @@ export async function sendInvitation(
   }
 
   const organization = invitation.organization.name
-  const consoleUrl = `${requireAppOrigin()}/console`
+  const consoleUrl = `${requireOrigin()}/console`
 
   await resend.sendEmail(ctx, {
     from: readEnvironmentVariable("MILO_EMAIL_FROM") ?? defaultSender,
