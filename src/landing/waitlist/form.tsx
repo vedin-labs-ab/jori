@@ -1,6 +1,11 @@
-import { teamSizeLabels, teamSizes, waitlistLimits } from "@contracts/waitlist"
+import {
+  teamSizeLabels,
+  teamSizes,
+  type WaitlistField,
+  waitlistLimits,
+} from "@contracts/waitlist"
 import { Check } from "lucide-react"
-import { useId, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -11,10 +16,28 @@ import { joinWaitlist } from "./client"
 
 type Status = "idle" | "submitting" | "joined"
 
+/** Field rejections mark their own input; anything that is not about one
+ *  field lands under the submit button, where a form-level notice belongs. */
+type Rejection =
+  | { kind: "field"; field: WaitlistField; message: string }
+  | { kind: "form"; message: string }
+
+const throttledMessage =
+  "That's a lot of signups from here. Try again in a few minutes."
+const failedMessage = "Something went wrong. Try again in a moment."
+
+/** Marketing scale for the controls. The console runs dense, but this is the
+ *  only form on the public site, and anything under 16px makes iOS Safari zoom
+ *  the page the moment a control takes focus. */
+const inputClassName = "h-10 px-3 text-base md:text-base"
+const textareaClassName = "px-3 py-2.5 text-base md:text-base"
+const selectClassName =
+  "[&_select]:h-10 [&_select]:pr-8 [&_select]:pl-3 [&_select]:text-base"
+
 export function WaitlistForm() {
   const fieldId = useId()
   const [status, setStatus] = useState<Status>("idle")
-  const [error, setError] = useState<string>()
+  const [rejection, setRejection] = useState<Rejection>()
 
   if (status === "joined") {
     return <Joined />
@@ -22,90 +45,212 @@ export function WaitlistForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const data = new FormData(event.currentTarget)
-
     setStatus("submitting")
-    setError(undefined)
+    setRejection(undefined)
 
-    try {
-      const result = await joinWaitlist({
-        email: String(data.get("email") ?? ""),
-        size: String(data.get("size") ?? ""),
-        work: String(data.get("work") ?? ""),
-      })
+    const outcome = await requestSpot(event.currentTarget)
 
-      if (result.status === "rejected") {
-        setError(result.message)
-        setStatus("idle")
-
-        return
-      }
-
-      setStatus("joined")
-    } catch {
-      setError("Something went wrong. Try again in a moment.")
-      setStatus("idle")
-    }
+    setRejection(outcome)
+    setStatus(outcome === undefined ? "joined" : "idle")
   }
 
-  const isSubmitting = status === "submitting"
+  const invalid = rejection?.kind === "field" ? rejection.field : undefined
 
   return (
     <form className="grid max-w-xl gap-5" noValidate onSubmit={submit}>
       <div className="grid gap-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Field>
-          <FieldLabel htmlFor={`${fieldId}-email`}>Work email</FieldLabel>
-          <Input
-            autoComplete="email"
-            id={`${fieldId}-email`}
-            maxLength={waitlistLimits.email}
-            name="email"
-            placeholder="you@company.com"
-            type="email"
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor={`${fieldId}-size`}>Team size</FieldLabel>
-          <NativeSelect defaultValue="10-24" id={`${fieldId}-size`} name="size">
-            {teamSizes.map((size) => (
-              <NativeSelectOption key={size} value={size}>
-                {teamSizeLabels[size]}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </Field>
+        <EmailField fieldId={fieldId} invalid={invalid} rejection={rejection} />
+        <SizeField fieldId={fieldId} invalid={invalid} rejection={rejection} />
       </div>
-      <Field>
-        <FieldLabel htmlFor={`${fieldId}-work`}>
-          What does your team do by hand every week?
-        </FieldLabel>
-        <Textarea
-          id={`${fieldId}-work`}
-          maxLength={waitlistLimits.work}
-          name="work"
-          placeholder="The release checklist. Someone reads every PR and Linear issue on Thursday and writes up what is ready."
-          rows={3}
-        />
-      </Field>
-      {error === undefined ? null : (
-        <FieldError className="-mt-1">{error}</FieldError>
-      )}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <Button disabled={isSubmitting} size="lg" type="submit">
-          {isSubmitting ? <Spinner /> : null}
-          Join the waitlist
-        </Button>
-        <p className="text-muted-foreground text-xs">
-          One email when there's a spot. Nothing else.
-        </p>
+      <WorkField fieldId={fieldId} invalid={invalid} rejection={rejection} />
+      <Honeypot />
+      <div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Button disabled={status === "submitting"} size="xl" type="submit">
+            {status === "submitting" ? <Spinner /> : null}
+            Join the waitlist
+          </Button>
+          <p className="text-muted-foreground text-sm">
+            One email when there's a spot. Nothing else.
+          </p>
+        </div>
+        {rejection?.kind === "form" ? (
+          <FieldError className="mt-2 text-sm">{rejection.message}</FieldError>
+        ) : null}
       </div>
     </form>
   )
 }
 
-function Joined() {
+type FieldProps = {
+  fieldId: string
+  invalid: WaitlistField | undefined
+  rejection: Rejection | undefined
+}
+
+function EmailField({ fieldId, invalid, rejection }: FieldProps) {
   return (
-    <div className="flex max-w-xl items-start gap-3 rounded-xl border bg-card p-5">
+    <Field data-invalid={invalid === "email"}>
+      <FieldLabel className="text-sm" htmlFor={`${fieldId}-email`}>
+        Work email
+      </FieldLabel>
+      <Input
+        aria-describedby={describedBy(fieldId, invalid, "email")}
+        aria-invalid={invalid === "email"}
+        autoComplete="email"
+        className={inputClassName}
+        id={`${fieldId}-email`}
+        maxLength={waitlistLimits.email}
+        name="email"
+        placeholder="you@company.com"
+        required
+        type="email"
+      />
+      <FieldError id={errorId(fieldId, "email")}>
+        {fieldMessage(rejection, "email")}
+      </FieldError>
+    </Field>
+  )
+}
+
+function SizeField({ fieldId, invalid, rejection }: FieldProps) {
+  return (
+    <Field data-invalid={invalid === "size"}>
+      <FieldLabel className="text-sm" htmlFor={`${fieldId}-size`}>
+        Team size
+      </FieldLabel>
+      <NativeSelect
+        aria-describedby={describedBy(fieldId, invalid, "size")}
+        aria-invalid={invalid === "size"}
+        className={selectClassName}
+        defaultValue="10-24"
+        id={`${fieldId}-size`}
+        name="size"
+      >
+        {teamSizes.map((size) => (
+          <NativeSelectOption key={size} value={size}>
+            {teamSizeLabels[size]}
+          </NativeSelectOption>
+        ))}
+      </NativeSelect>
+      <FieldError id={errorId(fieldId, "size")}>
+        {fieldMessage(rejection, "size")}
+      </FieldError>
+    </Field>
+  )
+}
+
+function WorkField({ fieldId, invalid, rejection }: FieldProps) {
+  return (
+    <Field data-invalid={invalid === "work"}>
+      <FieldLabel className="text-sm" htmlFor={`${fieldId}-work`}>
+        What does your team do by hand every week?
+      </FieldLabel>
+      <Textarea
+        aria-describedby={describedBy(fieldId, invalid, "work")}
+        aria-invalid={invalid === "work"}
+        className={textareaClassName}
+        id={`${fieldId}-work`}
+        maxLength={waitlistLimits.work}
+        name="work"
+        placeholder="The release checklist. Someone reads every PR and Linear issue on Thursday and writes up what is ready."
+        required
+        rows={3}
+      />
+      <FieldError id={errorId(fieldId, "work")}>
+        {fieldMessage(rejection, "work")}
+      </FieldError>
+    </Field>
+  )
+}
+
+/** One round trip, reduced to what the form does next: a rejection to show,
+ *  or nothing left to say. */
+async function requestSpot(form: HTMLFormElement) {
+  const data = new FormData(form)
+  const result = await joinWaitlist({
+    company: String(data.get("company") ?? ""),
+    email: String(data.get("email") ?? ""),
+    size: String(data.get("size") ?? ""),
+    work: String(data.get("work") ?? ""),
+  }).catch(() => ({ status: "failed" }) as const)
+
+  return result.status === "joined" ? undefined : readRejection(result)
+}
+
+/** A field no person can see, reach by tab, or have filled for them. Only an
+ *  automated submission puts anything in it. */
+function Honeypot() {
+  return (
+    <div aria-hidden="true" className="hidden">
+      <label htmlFor="company-role">Company role</label>
+      <input
+        autoComplete="off"
+        defaultValue=""
+        id="company-role"
+        name="company"
+        tabIndex={-1}
+        type="text"
+      />
+    </div>
+  )
+}
+
+function readRejection(result: {
+  status: "rejected" | "throttled" | "failed"
+  field?: WaitlistField
+  message?: string
+}): Rejection {
+  if (result.status === "rejected" && result.field !== undefined) {
+    return {
+      kind: "field",
+      field: result.field,
+      message: result.message ?? failedMessage,
+    }
+  }
+
+  return {
+    kind: "form",
+    message: result.status === "throttled" ? throttledMessage : failedMessage,
+  }
+}
+
+function fieldMessage(rejection: Rejection | undefined, field: WaitlistField) {
+  return rejection?.kind === "field" && rejection.field === field
+    ? rejection.message
+    : null
+}
+
+function errorId(fieldId: string, field: WaitlistField) {
+  return `${fieldId}-${field}-error`
+}
+
+/** Only point at the message when there is one: FieldError renders nothing
+ *  until it has content, and a dangling reference reads as an empty hint. */
+function describedBy(
+  fieldId: string,
+  invalid: WaitlistField | undefined,
+  field: WaitlistField
+) {
+  return invalid === field ? errorId(fieldId, field) : undefined
+}
+
+/** Submitting swaps the form out, so the confirmation takes focus: without it
+ *  focus falls back to the document and a screen reader says nothing. */
+function Joined() {
+  const confirmation = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    confirmation.current?.focus()
+  }, [])
+
+  return (
+    <div
+      className="flex max-w-xl items-start gap-3 rounded-xl border bg-card p-5 outline-none"
+      ref={confirmation}
+      role="status"
+      tabIndex={-1}
+    >
       <Check className="mt-0.5 size-4 shrink-0 text-primary" />
       <div>
         <p className="font-medium text-sm">You're on the list.</p>

@@ -14,12 +14,10 @@ type Violation = Omit<PublicFunction, "block">
 // registration block must go through one of these guards, which authenticate
 // the caller and resolve organization/user scope server-side.
 //
-// requireAnonymousSignup is the one guard that does not authenticate, because
-// its endpoint is one a stranger is meant to reach. It is still a guard, not
-// an exemption: it bounds abuse in place of identity. A second anonymous
-// entrypoint means writing that ceiling too, not widening this list.
+// There is no exemption for endpoints strangers are meant to reach. Those
+// belong on an HTTP route, where the caller's address is readable and can be
+// rate limited per caller; see convex/waitlist/http.ts.
 const sanctionedGuards = [
-  "requireAnonymousSignup",
   "requireOrganizationAccess",
   "checkOrganizationAccess",
   "ensureCurrentPerson",

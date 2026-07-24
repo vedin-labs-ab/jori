@@ -33,7 +33,7 @@ export function Control() {
             </Definition>
           </dl>
           <Link
-            className="mt-8 inline-flex items-center gap-1.5 font-medium text-primary text-sm hover:underline"
+            className="mt-7 inline-flex items-center gap-1.5 py-1 font-medium text-primary text-sm hover:underline"
             to="/trust"
           >
             How Milo handles access and data

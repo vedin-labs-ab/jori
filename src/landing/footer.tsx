@@ -9,6 +9,11 @@ const footerLinks = [
   { label: "Terms", to: "/terms" },
 ] as const
 
+/** Padded to a 24px target box, then pulled back by the same amount so the
+ *  row still starts on the container edge. */
+const footerLinkClassName =
+  "inline-flex items-center px-2.5 py-1 transition-colors hover:text-foreground"
+
 export function LandingFooter() {
   return (
     <footer className="border-t">
@@ -22,21 +27,14 @@ export function LandingFooter() {
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
           <nav
             aria-label="Footer"
-            className="flex flex-wrap items-center gap-x-5 gap-y-2 text-muted-foreground text-sm"
+            className="-mx-2.5 flex flex-wrap items-center gap-y-1 text-muted-foreground text-sm"
           >
             {footerLinks.map((link) => (
-              <Link
-                className="transition-colors hover:text-foreground"
-                key={link.to}
-                to={link.to}
-              >
+              <Link className={footerLinkClassName} key={link.to} to={link.to}>
                 {link.label}
               </Link>
             ))}
-            <a
-              className="transition-colors hover:text-foreground"
-              href="mailto:hello@milo.app"
-            >
+            <a className={footerLinkClassName} href="mailto:hello@milo.app">
               hello@milo.app
             </a>
           </nav>

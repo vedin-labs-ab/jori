@@ -43,12 +43,14 @@ companies of roughly 10–80 people running Slack, GitHub, and Linear.
       runtime
 - [x] Confirmation email through a shared `convex/email` edge, reused by
       organization invitations
+- [x] Field-level validation: rejections name their field, so the form marks
+      that input invalid instead of printing one notice under the whole thing
 - [ ] Verified sending domain. Both senders currently fall back to
       `onboarding@resend.dev`, which is Resend's test domain and only delivers
       to the account owner. Set `MILO_EMAIL_FROM` once a domain is verified
-- [ ] Rate limiting on the public mutation. Repeat submissions from one address
-      update in place rather than duplicating, and field lengths are capped, but
-      there is no per-IP throttle
+- [x] Abuse controls: per-caller and global token buckets via
+      `@convex-dev/rate-limiter`, a honeypot field, and identical responses for
+      new and existing addresses so the list cannot be enumerated
 - [ ] Console read surface for signups, or an export
 
 ## Phase 4 · Production deployment

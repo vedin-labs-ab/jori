@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as access_anonymous from "../access/anonymous.js";
 import type * as access_index from "../access/index.js";
 import type * as access_invitation from "../access/invitation.js";
 import type * as access_users from "../access/users.js";
@@ -529,6 +528,8 @@ import type * as skills_runtime from "../skills/runtime.js";
 import type * as transitions_data from "../transitions/data.js";
 import type * as transitions_index from "../transitions/index.js";
 import type * as waitlist_email from "../waitlist/email.js";
+import type * as waitlist_http from "../waitlist/http.js";
+import type * as waitlist_limits from "../waitlist/limits.js";
 import type * as waitlist_signup from "../waitlist/signup.js";
 import type * as workstreams_corrections from "../workstreams/corrections.js";
 import type * as workstreams_labels from "../workstreams/labels.js";
@@ -542,7 +543,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "access/anonymous": typeof access_anonymous;
   "access/index": typeof access_index;
   "access/invitation": typeof access_invitation;
   "access/users": typeof access_users;
@@ -1063,6 +1063,8 @@ declare const fullApi: ApiFromModules<{
   "transitions/data": typeof transitions_data;
   "transitions/index": typeof transitions_index;
   "waitlist/email": typeof waitlist_email;
+  "waitlist/http": typeof waitlist_http;
+  "waitlist/limits": typeof waitlist_limits;
   "waitlist/signup": typeof waitlist_signup;
   "workstreams/corrections": typeof workstreams_corrections;
   "workstreams/labels": typeof workstreams_labels;
@@ -1099,4 +1101,5 @@ export declare const internal: FilterApi<
 export declare const components: {
   betterAuth: import("../betterauth/_generated/component.js").ComponentApi<"betterAuth">;
   resend: import("@convex-dev/resend/_generated/component.js").ComponentApi<"resend">;
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
 };

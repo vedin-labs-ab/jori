@@ -1,5 +1,6 @@
 import { formatUsd, trial } from "@contracts/billing"
 import { Button } from "@/components/ui/button"
+import { Definition } from "../section"
 
 /** What is settled about pricing is its shape, not its numbers. Publishing the
  *  shape is honest and still says the useful thing: Milo is not sold by the
@@ -22,15 +23,13 @@ const principles = [
 export function Shape() {
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
-      <div className="grid gap-4 md:grid-cols-3">
+      <dl className="grid gap-x-16 gap-y-8 md:grid-cols-3">
         {principles.map((principle) => (
-          <Principle
-            body={principle.body}
-            key={principle.title}
-            title={principle.title}
-          />
+          <Definition key={principle.title} term={principle.title}>
+            {principle.body}
+          </Definition>
         ))}
-      </div>
+      </dl>
       <div className="mt-10 border-t pt-10">
         <h2 className="font-medium text-2xl tracking-tight">
           Final numbers land when Milo opens.
@@ -50,16 +49,5 @@ export function Shape() {
         </div>
       </div>
     </section>
-  )
-}
-
-function Principle({ body, title }: { body: string; title: string }) {
-  return (
-    <div className="rounded-xl border bg-card p-6">
-      <h2 className="font-medium">{title}</h2>
-      <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-        {body}
-      </p>
-    </div>
   )
 }

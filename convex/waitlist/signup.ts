@@ -1,30 +1,55 @@
 import { v } from "convex/values"
 import { readWaitlistEntry } from "../../contracts/waitlist"
-import { mutation } from "../_generated/server"
-import { requireAnonymousSignup } from "../access/anonymous"
+import { internalMutation } from "../_generated/server"
 import { sendWaitlistConfirmation } from "./email"
+import { rateLimiter } from "./limits"
 
-/** Public and unauthenticated: this is the only write a stranger can make, so
- *  a rate ceiling stands in for caller identity. Validation is the contract's,
- *  so the form and the server agree, and the outcome comes back as a value the
- *  form can render rather than an error. */
-export const join = mutation({
+/** Requests that arrive without a usable address share one bucket, so a
+ *  missing header cannot be used to skip the per-address limit. */
+const unknownAddress = "unknown"
+
+/**
+ * Internal on purpose. The public surface is the HTTP route in ./http, which
+ * is the only place the caller's address can be read; this holds the logic so
+ * the transport layer stays thin.
+ *
+ * The result is identical whether an address is new or already on the list,
+ * so nothing here reveals who has signed up.
+ */
+export const join = internalMutation({
   args: {
+    address: v.optional(v.string()),
     email: v.string(),
     size: v.string(),
     work: v.string(),
   },
   returns: v.union(
     v.object({ status: v.literal("joined") }),
-    v.object({ status: v.literal("rejected"), message: v.string() })
+    v.object({ status: v.literal("throttled") }),
+    v.object({
+      status: v.literal("rejected"),
+      field: v.string(),
+      message: v.string(),
+    })
   ),
   handler: async (ctx, args) => {
-    await requireAnonymousSignup(ctx)
+    const perAddress = await rateLimiter.limit(
+      ctx,
+      "waitlistSignupPerAddress",
+      {
+        key: args.address ?? unknownAddress,
+      }
+    )
+    const total = await rateLimiter.limit(ctx, "waitlistSignupTotal")
+
+    if (!perAddress.ok || !total.ok) {
+      return { status: "throttled" as const }
+    }
 
     const result = readWaitlistEntry(args)
 
-    if ("error" in result) {
-      return { status: "rejected" as const, message: result.error }
+    if ("rejection" in result) {
+      return { status: "rejected" as const, ...result.rejection }
     }
 
     const { entry } = result

@@ -14,6 +14,4 @@ export const waitlist = defineTable({
   work: v.string(),
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_email", ["email"])
-  .index("by_created_at", ["createdAt"])
+}).index("by_email", ["email"])

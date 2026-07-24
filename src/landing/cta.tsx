@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 import { usePublicSession } from "@/shared/session/public"
 import { WaitlistForm } from "./waitlist/form"
 
-/** The anchor every call to action points at. Each marketing page ends on the
- *  same waitlist section, so the target exists wherever the button appears. */
+/** The anchor every call to action points at. `MarketingShell` is what puts it
+ *  on a page, so whether it exists is a fact the shell already knows. */
 export const waitlistAnchor = "waitlist"
 
 // Every marketing page ends on the same handshake.
@@ -32,9 +32,16 @@ export function Closing({ lede }: { lede: string }) {
 }
 
 /** The one call to action, auth-aware: members go to the console, everyone
- *  else drops to the waitlist that closes every page. `prominent` bumps the
+ *  else drops to the waitlist. Pages that close on it scroll down; the rest
+ *  (legal documents) send the reader to the home page's. `prominent` bumps the
  *  size for hero placements. */
-export function GetStarted({ prominent = false }: { prominent?: boolean }) {
+export function GetStarted({
+  onWaitlistPage = true,
+  prominent = false,
+}: {
+  onWaitlistPage?: boolean
+  prominent?: boolean
+}) {
   const session = usePublicSession()
   const isSignedIn = session.data !== null && session.data !== undefined
   const size = prominent ? "xl" : "lg"
@@ -48,12 +55,22 @@ export function GetStarted({ prominent = false }: { prominent?: boolean }) {
     )
   }
 
+  const label = (
+    <>
+      Join the waitlist
+      <ArrowRight data-icon="inline-end" />
+    </>
+  )
+
   return (
     <Button asChild size={size}>
-      <a href={`#${waitlistAnchor}`}>
-        Join the waitlist
-        <ArrowRight data-icon="inline-end" />
-      </a>
+      {onWaitlistPage ? (
+        <a href={`#${waitlistAnchor}`}>{label}</a>
+      ) : (
+        <Link hash={waitlistAnchor} to="/">
+          {label}
+        </Link>
+      )}
     </Button>
   )
 }
