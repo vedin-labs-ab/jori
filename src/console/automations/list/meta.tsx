@@ -7,11 +7,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { FieldHelp } from "@/shared/field"
 import { absoluteTime, relativeTime } from "../../shared/time"
 import { getAutomationSurfaceLabel } from "../access"
 import { SurfaceLogo } from "../access/logo"
 import { describeCron } from "../cron"
-import { FieldHelp } from "../help"
 import { type Automation } from "../types"
 import { AutomationToolSummary } from "./tools"
 

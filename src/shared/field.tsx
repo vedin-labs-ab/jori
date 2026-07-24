@@ -1,4 +1,4 @@
-import { CircleHelp } from "lucide-react"
+import { CircleHelp, type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import {
   Tooltip,
@@ -7,13 +7,17 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-/** Suffix help icon for a label; the children fill its tooltip. */
+/** Suffix hint icon for a label; the children fill its tooltip. The icon is
+ *  swappable so a field can say which kind of hint it is: a question mark
+ *  explains, a lock states a constraint. */
 export function FieldHelp({
   children,
+  icon: Icon = CircleHelp,
   label,
   side = "right",
 }: {
   children: ReactNode
+  icon?: LucideIcon
   label: string
   side?: "right" | "top"
 }) {
@@ -26,7 +30,7 @@ export function FieldHelp({
             className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             type="button"
           >
-            <CircleHelp className="size-3" />
+            <Icon className="size-3" />
           </button>
         </TooltipTrigger>
         <TooltipContent

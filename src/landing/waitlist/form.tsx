@@ -1,10 +1,11 @@
 import {
+  readWaitlistEntry,
   teamSizeLabels,
   teamSizes,
   type WaitlistField,
   waitlistLimits,
 } from "@contracts/waitlist"
-import { Check } from "lucide-react"
+import { Check, Lock } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
+import { FieldHelp } from "@/shared/field"
 import { joinWaitlist } from "./client"
 
 type Status = "idle" | "submitting" | "joined"
@@ -43,10 +45,24 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    const fields = readFields(event.currentTarget, lockedEmail)
+    const checked = readWaitlistEntry(fields)
+
+    // The server validates too, and is the authority. Running the same
+    // contract here first means a typo answers in the same frame instead of
+    // after a round trip, and never spends a slice of the caller's rate
+    // limit on something both sides already know is wrong.
+    if ("rejection" in checked) {
+      setRejection({ kind: "field", ...checked.rejection })
+
+      return
+    }
+
     setStatus("submitting")
     setRejection(undefined)
 
-    const outcome = await requestSpot(event.currentTarget, lockedEmail)
+    const outcome = await requestSpot(fields)
 
     setRejection(outcome)
     setStatus(outcome === undefined ? "joined" : "idle")
@@ -55,7 +71,12 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
   const invalid = rejection?.kind === "field" ? rejection.field : undefined
 
   return (
-    <form className="grid max-w-xl gap-5" noValidate onSubmit={submit}>
+    <form
+      className="grid max-w-xl gap-5"
+      noValidate
+      onInput={() => setRejection(undefined)}
+      onSubmit={submit}
+    >
       <div className="grid gap-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <EmailField
           fieldId={fieldId}
@@ -68,18 +89,16 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
       <WorkField fieldId={fieldId} invalid={invalid} rejection={rejection} />
       <Honeypot />
       <div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Button disabled={status === "submitting"} type="submit">
-            {status === "submitting" ? <Spinner /> : null}
-            Join the waitlist
-          </Button>
-          <p className="text-muted-foreground text-xs">
-            One email when there's a spot. Nothing else.
-          </p>
-        </div>
+        <Button disabled={status === "submitting"} type="submit">
+          {status === "submitting" ? <Spinner /> : null}
+          Join the waitlist
+        </Button>
         {rejection?.kind === "form" ? (
-          <FieldError className="mt-2">{rejection.message}</FieldError>
+          <FieldError className="mt-3">{rejection.message}</FieldError>
         ) : null}
+        <p className="mt-3 text-muted-foreground text-xs">
+          We email you once, when there's room for your team. No newsletter.
+        </p>
       </div>
     </form>
   )
@@ -100,21 +119,20 @@ function EmailField({
   if (lockedEmail !== undefined) {
     return (
       <Field>
-        <FieldLabel htmlFor={`${fieldId}-email`}>Work email</FieldLabel>
+        <FieldLabel className="gap-1.5" htmlFor={`${fieldId}-email`}>
+          Work email
+          <FieldHelp icon={Lock} label="Why this address is fixed">
+            We open Milo for the account you sign in with, so this is the
+            address that gets in. Sign out to use another.
+          </FieldHelp>
+        </FieldLabel>
         <Input
-          aria-describedby={`${fieldId}-email-locked`}
           defaultValue={lockedEmail}
           id={`${fieldId}-email`}
           name="email"
           readOnly
           type="email"
         />
-        <p
-          className="text-muted-foreground text-xs"
-          id={`${fieldId}-email-locked`}
-        >
-          The account you signed in with. Sign out to use another.
-        </p>
       </Field>
     )
   }
@@ -187,16 +205,32 @@ function WorkField({ fieldId, invalid, rejection }: FieldProps) {
   )
 }
 
-/** One round trip, reduced to what the form does next: a rejection to show,
- *  or nothing left to say. */
-async function requestSpot(form: HTMLFormElement, lockedEmail?: string) {
+type Fields = {
+  company: string
+  email: string
+  size: string
+  work: string
+}
+
+/** A locked address comes from the session, not the field, so a readonly
+ *  input cannot be edited around. */
+function readFields(form: HTMLFormElement, lockedEmail?: string): Fields {
   const data = new FormData(form)
-  const result = await joinWaitlist({
+
+  return {
     company: String(data.get("company") ?? ""),
     email: lockedEmail ?? String(data.get("email") ?? ""),
     size: String(data.get("size") ?? ""),
     work: String(data.get("work") ?? ""),
-  }).catch(() => ({ status: "failed" }) as const)
+  }
+}
+
+/** One round trip, reduced to what the form does next: a rejection to show,
+ *  or nothing left to say. */
+async function requestSpot(fields: Fields) {
+  const result = await joinWaitlist(fields).catch(
+    () => ({ status: "failed" }) as const
+  )
 
   return result.status === "joined" ? undefined : readRejection(result)
 }
