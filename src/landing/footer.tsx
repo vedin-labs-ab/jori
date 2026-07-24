@@ -16,7 +16,7 @@ const footerLinkClassName =
 
 export function LandingFooter() {
   return (
-    <footer className="border-t">
+    <footer>
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-6 py-8">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <BrandLink />
