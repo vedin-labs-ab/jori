@@ -6,6 +6,7 @@ import {
   callAppPlatformTool,
   createAppPlatformToolCacheArgs,
 } from "./tools/platform"
+import { appPromptModel } from "./tools/prompt"
 
 type CapturedCall = {
   kind: "query" | "mutation"
@@ -58,38 +59,21 @@ describe("app platform tools", () => {
 })
 
 test("includes app prompt model in prompt cache identity", () => {
-  const originalModel = process.env.OPENROUTER_APP_MODEL
-
-  try {
-    process.env.OPENROUTER_APP_MODEL = "z-ai/glm-5.2"
-
-    expect(
-      createAppPlatformToolCacheArgs("promptModel", {
-        input: { message: "hello" },
-      })
-    ).toEqual({
-      _miloCache: { model: "z-ai/glm-5.2" },
+  expect(
+    createAppPlatformToolCacheArgs("promptModel", {
       input: { message: "hello" },
     })
+  ).toEqual({
+    _miloCache: { model: appPromptModel },
+    input: { message: "hello" },
+  })
 
-    expect(
-      createAppPlatformToolCacheArgs("readState", {
-        contractName: "state",
-      })
-    ).toEqual({ contractName: "state" })
-  } finally {
-    restoreAppModel(originalModel)
-  }
+  expect(
+    createAppPlatformToolCacheArgs("readState", {
+      contractName: "state",
+    })
+  ).toEqual({ contractName: "state" })
 })
-
-function restoreAppModel(value: string | undefined) {
-  if (value === undefined) {
-    delete process.env.OPENROUTER_APP_MODEL
-    return
-  }
-
-  process.env.OPENROUTER_APP_MODEL = value
-}
 
 function createCapturingActionCtx(calls: CapturedCall[]) {
   return {

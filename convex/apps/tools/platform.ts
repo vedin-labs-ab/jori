@@ -10,7 +10,7 @@ import {
   normalizeListLimit,
   normalizeStateWrite,
 } from "./input"
-import { promptModel, readAppModel } from "./prompt"
+import { appPromptModel, promptModel } from "./prompt"
 
 export type AppPlatformContext = {
   organizationId: string
@@ -60,7 +60,7 @@ export function createAppPlatformToolCacheArgs(
   return {
     ...args,
     _miloCache: {
-      model: readAppModel(),
+      model: appPromptModel,
     },
   }
 }

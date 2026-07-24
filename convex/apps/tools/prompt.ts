@@ -12,7 +12,6 @@ import {
   type OpenRouterChatMessage,
   sendOpenRouterChat,
 } from "../../model"
-import { readEnvironmentVariable } from "../../shared/environment"
 import { optionalString, requiredString } from "../../shared/input"
 import {
   type AppPromptRequestDiagnostics,
@@ -34,8 +33,12 @@ const maxSchemaBytes = 64 * 1024
 const defaultPromptOutputTokens = 1000
 const minPromptOutputTokens = 64
 const maxPromptOutputTokens = 16_000
-const defaultAppPromptModel = "openai/gpt-5.6-sol"
 const appReasoningEffort = "medium"
+
+/** The model behind milo.model.prompt inside an app. Fixed in code, not
+ *  configuration: an app's output shape and cost are part of the platform
+ *  contract, so a deployment cannot quietly swap the model underneath it. */
+export const appPromptModel = "openai/gpt-5.6-sol"
 
 export async function promptModel(
   context: AppPlatformContext,
@@ -66,7 +69,7 @@ export function createAppPromptRequest(
   input: AppPromptInput
 ): OpenRouterChatInput {
   return {
-    model: readAppModel(),
+    model: appPromptModel,
     messages: promptMessages(context, input),
     maxTokens: input.maxOutputTokens,
     provider: { requireParameters: true, sort: "latency" },
@@ -208,12 +211,6 @@ function encodedJsonBytes(value: unknown) {
   return encoded === undefined
     ? 0
     : new TextEncoder().encode(encoded).byteLength
-}
-
-export function readAppModel() {
-  return (
-    readEnvironmentVariable("OPENROUTER_APP_MODEL") ?? defaultAppPromptModel
-  )
 }
 
 function readAssistantText(

@@ -2,21 +2,12 @@ import { describe, expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { type AppPlatformContext } from "./tools/platform"
 import {
+  appPromptModel,
   createAppPromptRequest,
   createAppPromptRequestDiagnostics,
   normalizeAppPromptInput,
   parsePromptOutput,
-  readAppModel,
 } from "./tools/prompt"
-
-function restoreAppModel(value: string | undefined) {
-  if (value === undefined) {
-    delete process.env.OPENROUTER_APP_MODEL
-    return
-  }
-
-  process.env.OPENROUTER_APP_MODEL = value
-}
 
 function promptArgs(overrides: Record<string, unknown> = {}) {
   return {
@@ -45,18 +36,14 @@ function platformContext(): AppPlatformContext {
 }
 
 describe("app prompt model contract", () => {
-  test("uses GPT-5.6 Sol by default while allowing env overrides", () => {
-    const originalModel = process.env.OPENROUTER_APP_MODEL
-
-    try {
-      process.env.OPENROUTER_APP_MODEL = ""
-      expect(readAppModel()).toBe("openai/gpt-5.6-sol")
-
-      process.env.OPENROUTER_APP_MODEL = "z-ai/glm-5.2"
-      expect(readAppModel()).toBe("z-ai/glm-5.2")
-    } finally {
-      restoreAppModel(originalModel)
-    }
+  test("pins the model in code, with no deployment override", () => {
+    expect(appPromptModel).toBe("openai/gpt-5.6-sol")
+    expect(
+      createAppPromptRequest(
+        platformContext(),
+        normalizeAppPromptInput(promptArgs())
+      ).model
+    ).toBe(appPromptModel)
   })
 
   test("requires a named object output schema", () => {

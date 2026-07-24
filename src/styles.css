@@ -82,7 +82,9 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.575 0.121 33.2);
   --destructive-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.713 0.122 81.8);
+  /* Darkened from 0.713 to clear 3:1 against the background (2.58 before,
+     3.02 now). Chroma and hue are untouched, so it is the same yellow. */
+  --warning: oklch(0.672 0.122 81.8);
   --warning-foreground: oklch(0.145 0 0);
   --informational: oklch(0.61 0.036 236);
   --informational-foreground: oklch(0.145 0 0);
