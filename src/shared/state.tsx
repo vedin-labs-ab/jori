@@ -35,7 +35,12 @@ export function RootStateFrame({
     // is the same in every full-page view Milo serves.
     <main className="flex min-h-svh flex-col px-6 py-7 sm:px-10 sm:py-9">
       <header className="flex items-center">
-        <BrandMark />
+        {/* A plain anchor, not a router link: this frame renders the root
+            error boundary, so the way home must not depend on the router
+            being in a state that can navigate. */}
+        <a aria-label="Milo home" className="rounded-md" href="/">
+          <BrandMark />
+        </a>
       </header>
       {/* Optically centred: the bottom padding lifts the block off the true
           middle, which is what reads as centred to the eye. */}

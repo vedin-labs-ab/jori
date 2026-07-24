@@ -12,20 +12,19 @@ import { PublicConsoleFrame } from "./public"
 export function LaunchGate({ email }: { email: string | null }) {
   return (
     <PublicConsoleFrame isSignedIn>
-      <section className="grid max-w-xl gap-4">
-        <div className="grid gap-1.5">
+      <section className="grid gap-6">
+        <div className="grid gap-2">
           <h1 className="font-medium text-2xl tracking-tight">
             Milo isn't open yet.
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            You're signed in{email === null ? "" : ` as ${email}`}, and we're
-            letting teams in a few at a time so we can set each one up
+            We're letting teams in a few at a time so we can set each one up
             ourselves. Tell us what your team does by hand and we'll come find
             you.
           </p>
         </div>
-        <div className="mt-2">
-          <WaitlistForm defaultEmail={email ?? undefined} />
+        <div>
+          <WaitlistForm lockedEmail={email ?? undefined} />
         </div>
       </section>
     </PublicConsoleFrame>

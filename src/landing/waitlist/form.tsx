@@ -26,7 +26,13 @@ const throttledMessage =
   "That's a lot of signups from here. Try again in a few minutes."
 const failedMessage = "Something went wrong. Try again in a moment."
 
-export function WaitlistForm({ defaultEmail }: { defaultEmail?: string }) {
+/**
+ * `lockedEmail` binds the form to a signed-in account. The address submitted
+ * here is the one that gets admitted, and admission is matched against the
+ * account someone signs in with, so letting them type a different address
+ * would quietly guarantee that admitting them does not work.
+ */
+export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
   const fieldId = useId()
   const [status, setStatus] = useState<Status>("idle")
   const [rejection, setRejection] = useState<Rejection>()
@@ -40,7 +46,7 @@ export function WaitlistForm({ defaultEmail }: { defaultEmail?: string }) {
     setStatus("submitting")
     setRejection(undefined)
 
-    const outcome = await requestSpot(event.currentTarget)
+    const outcome = await requestSpot(event.currentTarget, lockedEmail)
 
     setRejection(outcome)
     setStatus(outcome === undefined ? "joined" : "idle")
@@ -52,9 +58,9 @@ export function WaitlistForm({ defaultEmail }: { defaultEmail?: string }) {
     <form className="grid max-w-xl gap-5" noValidate onSubmit={submit}>
       <div className="grid gap-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <EmailField
-          defaultEmail={defaultEmail}
           fieldId={fieldId}
           invalid={invalid}
+          lockedEmail={lockedEmail}
           rejection={rejection}
         />
         <SizeField fieldId={fieldId} invalid={invalid} rejection={rejection} />
@@ -86,11 +92,33 @@ type FieldProps = {
 }
 
 function EmailField({
-  defaultEmail,
   fieldId,
   invalid,
+  lockedEmail,
   rejection,
-}: FieldProps & { defaultEmail?: string }) {
+}: FieldProps & { lockedEmail?: string }) {
+  if (lockedEmail !== undefined) {
+    return (
+      <Field>
+        <FieldLabel htmlFor={`${fieldId}-email`}>Work email</FieldLabel>
+        <Input
+          aria-describedby={`${fieldId}-email-locked`}
+          defaultValue={lockedEmail}
+          id={`${fieldId}-email`}
+          name="email"
+          readOnly
+          type="email"
+        />
+        <p
+          className="text-muted-foreground text-xs"
+          id={`${fieldId}-email-locked`}
+        >
+          The account you signed in with. Sign out to use another.
+        </p>
+      </Field>
+    )
+  }
+
   return (
     <Field data-invalid={invalid === "email"}>
       <FieldLabel htmlFor={`${fieldId}-email`}>Work email</FieldLabel>
@@ -98,7 +126,6 @@ function EmailField({
         aria-describedby={describedBy(fieldId, invalid, "email")}
         aria-invalid={invalid === "email"}
         autoComplete="email"
-        defaultValue={defaultEmail}
         id={`${fieldId}-email`}
         maxLength={waitlistLimits.email}
         name="email"
@@ -162,11 +189,11 @@ function WorkField({ fieldId, invalid, rejection }: FieldProps) {
 
 /** One round trip, reduced to what the form does next: a rejection to show,
  *  or nothing left to say. */
-async function requestSpot(form: HTMLFormElement) {
+async function requestSpot(form: HTMLFormElement, lockedEmail?: string) {
   const data = new FormData(form)
   const result = await joinWaitlist({
     company: String(data.get("company") ?? ""),
-    email: String(data.get("email") ?? ""),
+    email: lockedEmail ?? String(data.get("email") ?? ""),
     size: String(data.get("size") ?? ""),
     work: String(data.get("work") ?? ""),
   }).catch(() => ({ status: "failed" }) as const)
