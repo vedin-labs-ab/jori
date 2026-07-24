@@ -25,14 +25,12 @@ const toolTerminalTypes = new Set(["tool.completed", "tool.failed"])
 export function projectToolTraces(
   traces: Doc<"traces">[],
   agents: Doc<"runs">[],
-  artifacts: Doc<"artifacts">[],
-  runArtifactId: Id<"artifacts"> | undefined,
+  apps: Doc<"apps">[],
+  runAppId: Id<"apps"> | undefined,
   isRunLive: boolean
 ): ActivityItem[] {
   const labels = toolLabels(traces)
-  const artifactTitles = new Map(
-    artifacts.map((artifact) => [artifact._id, artifact.title])
-  )
+  const appTitles = new Map(apps.map((app) => [app._id, app.title]))
   const groups = new Map<string, Doc<"traces">[]>()
 
   for (const trace of traces) {
@@ -47,14 +45,7 @@ export function projectToolTraces(
   }
 
   return [...groups.values()].map((group) =>
-    projectToolGroup(
-      group,
-      labels,
-      agents,
-      artifactTitles,
-      runArtifactId,
-      isRunLive
-    )
+    projectToolGroup(group, labels, agents, appTitles, runAppId, isRunLive)
   )
 }
 
@@ -62,8 +53,8 @@ function projectToolGroup(
   group: Doc<"traces">[],
   labels: Map<string, ToolLabel>,
   agents: Doc<"runs">[],
-  artifactTitles: ReadonlyMap<string, string>,
-  runArtifactId: Id<"artifacts"> | undefined,
+  appTitles: ReadonlyMap<string, string>,
+  runAppId: Id<"apps"> | undefined,
   isRunLive: boolean
 ): ActivityItem {
   const started = group.find((trace) => trace.type === "tool.started")
@@ -81,10 +72,10 @@ function projectToolGroup(
   const endedAt = (waiting ?? terminal)?.timestamp
   const metadata = toolMetadata({
     agents,
-    artifactTitles,
+    appTitles,
     input: readToolInput(startedData),
     result: readToolResult(terminalData),
-    runArtifactId,
+    runAppId,
     tool: name,
   })
 

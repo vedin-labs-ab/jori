@@ -48,9 +48,9 @@ const resolvedPlanFields = {
   recipient: recipientValidator,
 }
 
-const resolvedArtifactPlanFields = {
+const resolvedAppPlanFields = {
   ...resolvedPlanFields,
-  artifactId: v.optional(v.id("artifacts")),
+  appId: v.optional(v.id("apps")),
 }
 
 export const list = query({
@@ -119,34 +119,32 @@ async function enabledProjection(
       "nextAt" in automation.trigger ? automation.trigger.nextAt : undefined,
     missing: await listInactiveAccessIntegrations(ctx, automation.access),
     setup: automation.playbook ?? null,
-    artifact: await artifactProjection(ctx, automation),
+    app: await appProjection(ctx, automation),
   }
 }
 
-/** Whether the playbook's artifact head is stock or user-customized — the
- *  card explains that updates leave a customized artifact untouched. */
-async function artifactProjection(
+/** Whether the playbook's app head is stock or user-customized — the
+ *  card explains that updates leave a customized app untouched. */
+async function appProjection(
   ctx: QueryLikeCtx,
   automation: Doc<"automations">
 ) {
-  if (automation.artifactId === undefined) {
+  if (automation.appId === undefined) {
     return null
   }
 
-  const artifact = await ctx.db.get(automation.artifactId)
+  const app = await ctx.db.get(automation.appId)
 
-  if (artifact === null) {
+  if (app === null) {
     return null
   }
 
   const head =
-    artifact.versionId === undefined
-      ? null
-      : await ctx.db.get(artifact.versionId)
+    app.versionId === undefined ? null : await ctx.db.get(app.versionId)
 
   return {
-    artifactId: artifact._id,
-    archived: artifact.archivedAt !== undefined,
+    appId: app._id,
+    archived: app.archivedAt !== undefined,
     customized: head !== null && head.template === undefined,
   }
 }
@@ -178,40 +176,35 @@ export const saveDeliveryPreference = mutation({
 })
 
 export const enableResolved = internalMutation({
-  args: resolvedArtifactPlanFields,
+  args: resolvedAppPlanFields,
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args) =>
     await enablePlaybook(
       ctx,
-      playbookPlanArgs(args, args.createdBy, args.recipient, args.artifactId)
+      playbookPlanArgs(args, args.createdBy, args.recipient, args.appId)
     ),
 })
 
 export const reconfigureResolved = internalMutation({
   args: {
-    ...resolvedArtifactPlanFields,
+    ...resolvedAppPlanFields,
     automationId: v.id("automations"),
   },
   returns: v.object({ automationId: v.id("automations") }),
   handler: async (ctx, args) =>
     await reconfigurePlaybook(ctx, {
-      ...playbookPlanArgs(
-        args,
-        args.createdBy,
-        args.recipient,
-        args.artifactId
-      ),
+      ...playbookPlanArgs(args, args.createdBy, args.recipient, args.appId),
       automationId: args.automationId,
     }),
 })
 
 /** Create the automation an edited playbook draft describes, bound to the
- *  artifact the calling action provisioned. */
+ *  app the calling action provisioned. */
 export const createResolved = internalMutation({
   args: {
     organizationId: v.string(),
     playbook: playbookBindingValidator,
-    artifactId: v.optional(v.id("artifacts")),
+    appId: v.optional(v.id("apps")),
     key: v.optional(v.string()),
     name: v.string(),
     instructions: v.string(),
@@ -256,12 +249,12 @@ export const validatePlanResolved = internalQuery({
 })
 
 export const trialResolved = internalMutation({
-  args: resolvedArtifactPlanFields,
+  args: resolvedAppPlanFields,
   returns: v.object({ runId: v.id("runs") }),
   handler: async (ctx, args) =>
     await trialPlaybook(
       ctx,
-      playbookPlanArgs(args, args.createdBy, args.recipient, args.artifactId)
+      playbookPlanArgs(args, args.createdBy, args.recipient, args.appId)
     ),
 })
 

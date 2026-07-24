@@ -11,7 +11,7 @@ import { describePlaybookSchedule, type PlaybookSchedule } from "./schedule"
 
 export type PlaybookDefinition = {
   key: string
-  /** Recipe version: bump when the instruction template, options, or artifact
+  /** Recipe version: bump when the instruction template, options, or app
    *  template change. Enablements pin it and surface newer as an update. */
   version: number
   title: string
@@ -23,9 +23,9 @@ export type PlaybookDefinition = {
   template: string
   /** Personal playbooks enable per member; organization ones per organization. */
   scope: Scope
-  /** The artifact this playbook materializes from its template, when it has
-   *  one — setup discloses it and the artifact records the provenance. */
-  artifact?: PlaybookArtifact
+  /** The app this playbook materializes from its template, when it has
+   *  one — setup discloses it and the app records the provenance. */
+  app?: PlaybookApp
   /** Card-level rhythm on browse surfaces: what to expect and, when the
    *  playbook offers modes, that there is a choice ("Morning briefing or
    *  before each meeting"). No clock times — setup shows the precise cadence. */
@@ -49,9 +49,9 @@ export type PlaybookDefinition = {
   web: boolean
 }
 
-export type PlaybookArtifact = {
+export type PlaybookApp = {
   title: string
-  /** What the artifact holds, in the user's terms, for setup disclosure. */
+  /** What the app holds, in the user's terms, for setup disclosure. */
   description: string
 }
 

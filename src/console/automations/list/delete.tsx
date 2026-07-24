@@ -33,7 +33,7 @@ export function DeleteAutomationDialog({
             runs. Past runs are kept.
             {automation.playbook === undefined
               ? ""
-              : " It also switches the playbook off; the playbook's artifact and its data are kept."}
+              : " It also switches the playbook off; the playbook's app and its data are kept."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

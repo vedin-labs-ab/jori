@@ -21,7 +21,7 @@ export const access = accessValidator
 export const automationBinding = {
   key: v.optional(v.string()),
   playbook: v.optional(playbookBindingValidator),
-  artifactId: v.optional(v.id("artifacts")),
+  appId: v.optional(v.id("apps")),
 }
 
 export const triggerInput = v.union(
@@ -96,8 +96,8 @@ export const automations = defineTable({
     "keyPartition",
     "key",
   ])
-  .index("by_artifact", ["artifactId"])
-  .index("by_artifact_and_parent", ["artifactId", "parentId"])
+  .index("by_app", ["appId"])
+  .index("by_app_and_parent", ["appId", "parentId"])
   .index("by_parent", ["parentId"])
   .index("by_organization_status", ["organizationId", "status"])
   .index("by_organization_and_parent", ["organizationId", "parentId"])

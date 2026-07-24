@@ -60,11 +60,11 @@ describe("raw Markdown trigger instructions", () => {
 
   test("appends manual instructions as raw Markdown", () => {
     const base = automationRuntimeInput()
-    const markdown = "## Delegate\n\n```txt\nUse #share_artifact.\n```"
+    const markdown = "## Delegate\n\n```txt\nUse #share_app.\n```"
     const input = {
       type: "instruction" as const,
       run: base.run,
-      artifact: null,
+      app: null,
       integrations: base.integrations,
       instructions: markdown,
       organization: null,
@@ -79,7 +79,7 @@ describe("raw Markdown trigger instructions", () => {
   })
 })
 
-describe("attached artifact context", () => {
+describe("attached app context", () => {
   test("renders the state contract by entry name", () => {
     const input = automationRuntimeInput()
 
@@ -87,8 +87,8 @@ describe("attached artifact context", () => {
       throw new Error("Expected automation input.")
     }
 
-    input.artifact = {
-      artifactId: input.run.artifactId ?? ("artifact" as never),
+    input.app = {
+      appId: input.run.appId ?? ("app" as never),
       title: "Meeting Briefing",
       contract: [
         {
@@ -110,11 +110,9 @@ describe("attached artifact context", () => {
 
     const context = assemblePrompt(input).context
 
-    expect(context).toContain("## Attached artifact")
-    expect(context).toContain(
-      "`Meeting Briefing` is this run's primary artifact"
-    )
-    expect(context).toContain("default to it when `artifactId` is omitted")
+    expect(context).toContain("## Attached app")
+    expect(context).toContain("`Meeting Briefing` is this run's primary app")
+    expect(context).toContain("default to it when `appId` is omitted")
     expect(context).toContain(
       "- `briefings` (shared, MeetingBriefings v3): Canonical Meeting Briefing state."
     )
@@ -132,9 +130,9 @@ describe("attached artifact context", () => {
     expectNoSyntheticBlankLines(context)
   })
 
-  test("stays out without an attached artifact", () => {
+  test("stays out without an attached app", () => {
     expect(assemblePrompt(automationRuntimeInput()).context).not.toContain(
-      "## Attached artifact"
+      "## Attached app"
     )
   })
 })

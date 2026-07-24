@@ -13,8 +13,8 @@ describe("Meeting Briefing contract", () => {
     "#start_agent",
     "#wait_for_agents",
     "#add_automation",
-    "#update_artifact_state",
-    "#share_artifact",
+    "#update_app_state",
+    "#share_app",
   ])("uses the %s reference", (reference) => {
     expect(renderBriefing()).toContain(reference)
   })

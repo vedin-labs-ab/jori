@@ -1,0 +1,184 @@
+import { Link2, Lock, type LucideIcon } from "lucide-react"
+import { useState } from "react"
+import { DialogTitle } from "@/components/ui/dialog"
+import { ExpandableText } from "@/components/ui/expandable-text"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { JsonDialog } from "../shared/code"
+import { useRetained } from "../shared/retain"
+
+export type ContractEntrySummary = {
+  name: string
+  scope: string
+  description: string | undefined
+  schemaName: string
+  schemaVersion: number
+  schema: unknown
+}
+
+/** A version suffix beside a name: muted, one size down from its title. */
+export function TitleVersion({ version }: { version: number | undefined }) {
+  if (version === undefined) {
+    return null
+  }
+
+  return (
+    <span className="shrink-0 font-normal text-muted-foreground text-xs">
+      v{version}
+    </span>
+  )
+}
+
+/**
+ * The app's state contract under its State heading: one expandable
+ * line per entry, with the enforced JSON Schema one click away — the same
+ * compiled contract the runtime validates against, so there is nothing
+ * separate to drift.
+ */
+export function ContractEntries({
+  entries,
+}: {
+  entries: ContractEntrySummary[]
+}) {
+  if (entries.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="grid min-w-0 gap-2">
+      <p className="font-medium text-muted-foreground">State</p>
+      <ContractEntryList entries={entries} />
+    </div>
+  )
+}
+
+/** The heading-free entry rows, for surfaces that already label them. */
+export function ContractEntryList({
+  entries,
+}: {
+  entries: ContractEntrySummary[]
+}) {
+  const [revealed, setRevealed] = useState<ContractEntrySummary>()
+
+  return (
+    <div className="grid min-w-0 gap-2">
+      {entries.map((entry) => (
+        <ContractEntryRow
+          entry={entry}
+          key={entry.name}
+          onReveal={() => setRevealed(entry)}
+        />
+      ))}
+      <SchemaDialog
+        entry={revealed}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRevealed(undefined)
+          }
+        }}
+      />
+    </div>
+  )
+}
+
+/** The entry itself is the schema trigger; hovering underlines the name. */
+function ContractEntryRow({
+  entry,
+  onReveal,
+}: {
+  entry: ContractEntrySummary
+  onReveal: () => void
+}) {
+  return (
+    <div className="grid min-w-0 gap-1">
+      <button
+        aria-label={`View the ${entry.name} schema`}
+        className="group/schema flex min-w-0 items-center gap-1.5 justify-self-start rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+        onClick={onReveal}
+        type="button"
+      >
+        <span className="min-w-0 truncate font-medium text-foreground underline-offset-2 group-hover/schema:underline">
+          {entry.name}
+        </span>
+        <ScopeMark scope={entry.scope} />
+      </button>
+      {entry.description === undefined ? null : (
+        <ExpandableText className="min-w-0 text-muted-foreground" maxLines={1}>
+          {entry.description}
+        </ExpandableText>
+      )}
+    </div>
+  )
+}
+
+const scopeMarks: Record<
+  string,
+  { icon: LucideIcon; label: string; explanation: string }
+> = {
+  personal: {
+    explanation: "One document per person. Never visible through share links.",
+    icon: Lock,
+    label: "Private",
+  },
+  shared: {
+    explanation:
+      "One document for the whole app. Everyone who can open it sees the same data, and share links can too.",
+    icon: Link2,
+    label: "Shareable",
+  },
+}
+
+function ScopeMark({ scope }: { scope: string }) {
+  const mark = scopeMarks[scope]
+
+  if (mark === undefined) {
+    return null
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="flex shrink-0 items-center text-muted-foreground">
+          <mark.icon aria-label={mark.label} className="size-3" />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-56">
+        {/* One flex child: the tooltip card lays children out in a row. */}
+        <div className="grid gap-1">
+          <p className="font-medium">{mark.label}</p>
+          <p>{mark.explanation}</p>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+function SchemaDialog({
+  entry,
+  onOpenChange,
+}: {
+  entry: ContractEntrySummary | undefined
+  onOpenChange: (open: boolean) => void
+}) {
+  const shown = useRetained(entry)
+
+  return (
+    <JsonDialog
+      description="The JSON Schema every write to this state entry is validated against."
+      headerLeft={
+        <DialogTitle className="min-w-0 truncate font-medium font-mono text-foreground text-xs">
+          {shown?.schemaName}{" "}
+          <span className="font-normal text-[0.625rem] text-muted-foreground">
+            v{shown?.schemaVersion}
+          </span>
+        </DialogTitle>
+      }
+      onOpenChange={onOpenChange}
+      open={entry !== undefined}
+      value={shown?.schema}
+    />
+  )
+}

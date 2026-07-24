@@ -1,11 +1,11 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
-import { registerArtifactRoutes } from "./artifacts/serve/routes"
+import { registerAppRoutes } from "./apps/serve/routes"
 import { requireEnvironmentVariable } from "./shared/environment"
 import { lazyHttpAction } from "./shared/lazy"
 
 // Every handler module loads on first request through lazyHttpAction: the
-// combined static graph (Better Auth, integrations, artifact serving) does
+// combined static graph (Better Auth, integrations, app serving) does
 // not fit the module evaluation memory ceiling, and each route group only
 // pays for itself this way.
 const http = httpRouter()
@@ -51,7 +51,7 @@ http.route({
   ),
 })
 
-registerArtifactRoutes(http)
+registerAppRoutes(http)
 
 http.route({
   path: "/stripe/events",

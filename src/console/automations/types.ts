@@ -42,7 +42,7 @@ type AutomationTriggerType = "cron" | "once" | "event"
 export type AutomationFormValues = {
   key?: Automation["key"]
   playbook?: Automation["playbook"]
-  artifactId?: Automation["artifactId"]
+  appId?: Automation["appId"]
   name: string
   instructions: string
   type: AutomationTriggerType

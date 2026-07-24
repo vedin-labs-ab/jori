@@ -29,15 +29,15 @@ export async function getRequiredAutomation(
   return automation
 }
 
-export async function listArtifactAutomationRoots(
+export async function listAppAutomationRoots(
   ctx: QueryLikeCtx,
-  artifactId: Id<"artifacts">,
+  appId: Id<"apps">,
   limit: number
 ): Promise<Doc<"automations">[]> {
   return await ctx.db
     .query("automations")
-    .withIndex("by_artifact_and_parent", (index) =>
-      index.eq("artifactId", artifactId).eq("parentId", undefined)
+    .withIndex("by_app_and_parent", (index) =>
+      index.eq("appId", appId).eq("parentId", undefined)
     )
     .take(limit)
 }

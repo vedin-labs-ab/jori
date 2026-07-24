@@ -1,11 +1,11 @@
 import { type JsonObject, toJsonObject } from "../../../contracts/json"
 import {
-  sandboxArtifactRuntime,
+  sandboxAppRuntime,
   sandboxWorkspace,
 } from "../../../contracts/runtime/sandbox"
 import { type RuntimeId } from "../../../contracts/runtime/worker"
 import { type RuntimePlatform } from "../../platform"
-import { artifactBuildCommand, artifactRuntimeFiles } from "../artifacts"
+import { appBuildCommand, appRuntimeFiles } from "../apps"
 import { compactFailure } from "../output"
 import { sandboxClonePath, shellQuote } from "../path"
 import {
@@ -100,16 +100,16 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     }
   }
 
-  async buildArtifact(workspacePath: string): Promise<JsonObject> {
+  async buildApp(workspacePath: string): Promise<JsonObject> {
     const result = await this.runCommand({
-      command: artifactBuildCommand(workspacePath),
+      command: appBuildCommand(workspacePath),
     })
 
     if (result.exitCode !== 0) {
       throw new Error(compactFailure(result))
     }
 
-    return parseArtifactBuild(result.stdout)
+    return parseAppBuild(result.stdout)
   }
 
   async cleanup() {
@@ -164,9 +164,9 @@ export class E2BSandboxRuntime implements SandboxRuntime {
       return
     }
 
-    // Provision the artifact builder and template up front so the agent can copy
+    // Provision the app builder and template up front so the agent can copy
     // the template and run local checks before publishing, not only at build time.
-    await writeSandboxFiles(this.sandbox, artifactRuntimeFiles())
+    await writeSandboxFiles(this.sandbox, appRuntimeFiles())
 
     const result = await runSandboxCommand(this.sandbox, {
       command: workspaceBootstrapCommand(),
@@ -198,17 +198,17 @@ async function writeSandboxFiles(
 export function workspaceBootstrapCommand() {
   return [
     "set -eu",
-    `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxArtifactRuntime)}`,
+    `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxAppRuntime)}`,
     `chmod 755 ${shellQuote(sandboxWorkspace)}`,
   ].join("\n")
 }
 
-function parseArtifactBuild(stdout: string) {
+function parseAppBuild(stdout: string) {
   const parsed = JSON.parse(stdout) as unknown
 
   try {
     return toJsonObject(parsed)
   } catch {
-    throw new Error("Artifact builder returned an invalid payload.")
+    throw new Error("App builder returned an invalid payload.")
   }
 }

@@ -12,7 +12,7 @@ import {
   normalizeRequiredText,
   sameTriggerDefinition,
 } from "../timing"
-import { requireAutomationArtifact } from "./artifact"
+import { requireAutomationApp } from "./app"
 import { deleteOwnedAutomations, requireValidOwnershipUpdate } from "./children"
 import { getOrganizationAutomation, getRequiredAutomation } from "./read"
 import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
@@ -20,7 +20,7 @@ import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
 type UpdateAutomationArgs = {
   organizationId: string
   automationId: Id<"automations">
-  artifactId?: Id<"artifacts">
+  appId?: Id<"apps">
   playbook?: PlaybookBinding
   name?: string
   instructions?: string
@@ -75,8 +75,7 @@ export function ownedAutomationsAreStale(
   patch: Partial<Doc<"automations">>
 ) {
   return (
-    (patch.artifactId !== undefined &&
-      patch.artifactId !== existing.artifactId) ||
+    (patch.appId !== undefined && patch.appId !== existing.appId) ||
     (patch.instructions !== undefined &&
       patch.instructions !== existing.instructions) ||
     (patch.scope !== undefined && patch.scope !== existing.scope) ||
@@ -117,14 +116,14 @@ async function buildAutomationPatch(
 
   await applyPrincipalPatch(ctx, args, existing, principal, patch)
 
-  if (args.artifactId !== undefined) {
-    patch.artifactId = args.artifactId
+  if (args.appId !== undefined) {
+    patch.appId = args.appId
   }
 
-  if (args.artifactId !== undefined || args.scope !== undefined) {
-    await requireAutomationArtifact(ctx, {
+  if (args.appId !== undefined || args.scope !== undefined) {
+    await requireAutomationApp(ctx, {
       organizationId: args.organizationId,
-      artifactId: args.artifactId ?? existing.artifactId,
+      appId: args.appId ?? existing.appId,
       principal,
     })
   }
@@ -132,7 +131,7 @@ async function buildAutomationPatch(
   if (args.access !== undefined) {
     patch.access = await resolveAccessInput(ctx, {
       access: args.access,
-      artifactId: args.artifactId ?? existing.artifactId,
+      appId: args.appId ?? existing.appId,
       principal,
       organizationId: existing.organizationId,
     })

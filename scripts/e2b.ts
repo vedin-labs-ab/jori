@@ -3,11 +3,11 @@ import { homedir } from "node:os"
 import { join } from "node:path"
 import { defaultBuildLogger, Template } from "e2b"
 import {
-  sandboxArtifactRuntime,
+  sandboxAppRuntime,
   sandboxInternalRoot,
   sandboxWorkspace,
 } from "../contracts/runtime/sandbox.ts"
-import { runtimeAssets } from "../runtime/artifacts/_generated/assets.ts"
+import { runtimeAssets } from "../runtime/apps/_generated/assets.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
 const e2bSandboxTemplate = process.env.MILO_E2B_TEMPLATE?.trim() || "milo-codex"
@@ -27,13 +27,13 @@ const template = Template()
   })
   .runCmd(
     [
-      `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxArtifactRuntime)}`,
+      `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxAppRuntime)}`,
       "npm install -g n@10.2.0",
       `n ${sandboxNodeVersion}`,
       "hash -r",
       [
-        `npm install --prefix ${shellQuote(sandboxArtifactRuntime)}`,
-        ...runtimeAssets.artifact.dependencies,
+        `npm install --prefix ${shellQuote(sandboxAppRuntime)}`,
+        ...runtimeAssets.app.dependencies,
       ].join(" "),
       `chown -R user:user ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxInternalRoot)}`,
       `chmod 755 ${shellQuote(sandboxWorkspace)}`,
@@ -68,11 +68,11 @@ function createImageCheckCommand() {
     "command -v npm >/dev/null",
     "command -v git >/dev/null",
     `mkdir -p ${shellQuote(sandboxWorkspace)}`,
-    `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/tsc`)}`,
-    `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/biome`)}`,
-    `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/vite`)}`,
-    `test -x ${shellQuote(`${sandboxArtifactRuntime}/node_modules/.bin/shadcn`)}`,
-    `cd ${shellQuote(sandboxArtifactRuntime)}`,
+    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/tsc`)}`,
+    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/biome`)}`,
+    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/vite`)}`,
+    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/shadcn`)}`,
+    `cd ${shellQuote(sandboxAppRuntime)}`,
     `node -e ${JSON.stringify(imageCheckScript())}`,
   ].join("\n")
 }

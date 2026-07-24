@@ -7,8 +7,8 @@ import { type DataModel } from "./_generated/dataModel"
 import { type Invitation } from "./access/invitation"
 import authConfig from "./auth.config"
 import authSchema from "./betterauth/schema"
-import { requireAppOrigin, requireAppRegion } from "./shared/app"
 import { requireEnvironmentVariable } from "./shared/environment"
+import { requireOrigin, requireRegion } from "./shared/origin"
 
 export const authComponent = createClient<DataModel, typeof authSchema>(
   components.betterAuth,
@@ -49,7 +49,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
         await sendInvitation(ctx, invitation)
       },
     }),
-    baseURL: requireAppOrigin(),
+    baseURL: requireOrigin(),
     secret: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
     database: authComponent.adapter(ctx),
     socialProviders: {
@@ -112,7 +112,7 @@ function definePayload({
   return {
     email: user.email,
     name: user.name,
-    region: requireAppRegion(),
+    region: requireRegion(),
     ...(typeof organizationId === "string" ? { org: organizationId } : {}),
   }
 }

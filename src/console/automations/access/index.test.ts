@@ -11,7 +11,7 @@ import {
 
 const catalog = createAutomationMentionCatalog({
   skills: ["meeting-prep", "release-notes"],
-  tools: ["share_artifact", "github_get_issue"],
+  tools: ["share_app", "github_get_issue"],
 })
 const expectedToolAccessSuggestions = [
   {
@@ -19,7 +19,7 @@ const expectedToolAccessSuggestions = [
     id: "github_get_issue",
     surface: "github",
   },
-  { access: { kind: "builtIn" }, id: "share_artifact", surface: "milo" },
+  { access: { kind: "builtIn" }, id: "share_app", surface: "milo" },
   { access: { kind: "builtIn" }, id: "start_agent", surface: "milo" },
   { access: { kind: "web" }, id: "web_search", surface: "milo" },
 ]
@@ -28,13 +28,13 @@ describe("explicit mention scanning", () => {
   test("recognizes sigil tokens for all three kinds", () => {
     expect(
       readAutomationMentions(
-        "Review @github, run /meeting-prep, then #share_artifact.",
+        "Review @github, run /meeting-prep, then #share_app.",
         catalog
       )
     ).toEqual([
       { end: 14, id: "github", kind: "integration", start: 7 },
       { end: 33, id: "meeting-prep", kind: "skill", start: 20 },
-      { end: 55, id: "share_artifact", kind: "tool", start: 40 },
+      { end: 50, id: "share_app", kind: "tool", start: 40 },
     ])
   })
 
@@ -56,11 +56,11 @@ describe("explicit mention scanning", () => {
 
   test("sigils fire only at whitespace boundaries", () => {
     expect(
-      readAutomationMentions("Run /meeting-prep and #share_artifact", catalog)
+      readAutomationMentions("Run /meeting-prep and #share_app", catalog)
     ).toHaveLength(2)
     expect(
       readAutomationMentions(
-        'Run x/meeting-prep, x#share_artifact, and "@GitHub"',
+        'Run x/meeting-prep, x#share_app, and "@GitHub"',
         catalog
       )
     ).toEqual([])
@@ -188,7 +188,7 @@ describe("mention suggestions", () => {
     const permissions = [
       toolPermission("github", "github_get_issue", "read", "allowed"),
       toolPermission("milo", "web_search", "read", "allowed"),
-      toolPermission("milo", "share_artifact", "write", "allowed"),
+      toolPermission("milo", "share_app", "write", "allowed"),
       {
         ...toolPermission("milo", "start_agent", "write", "required"),
         route: "agent" as const,

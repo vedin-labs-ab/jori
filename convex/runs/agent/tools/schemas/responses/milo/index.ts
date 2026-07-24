@@ -1,4 +1,4 @@
-import { artifactToolResponseSchemas } from "./artifacts"
+import { appToolResponseSchemas } from "./apps"
 import {
   automationMiloToolResponseSchemas,
   coreMiloToolResponseSchemas,
@@ -6,6 +6,6 @@ import {
 
 export const miloToolResponseSchemas = {
   ...coreMiloToolResponseSchemas,
-  ...artifactToolResponseSchemas,
+  ...appToolResponseSchemas,
   ...automationMiloToolResponseSchemas,
 }

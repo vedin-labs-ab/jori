@@ -29,7 +29,7 @@ export function playbookPlanArgs(
   args: PlaybookCallerArgs,
   createdBy: PlaybookPlanArgs["createdBy"],
   recipient: PlaybookPlanArgs["recipient"],
-  artifactId?: PlaybookPlanArgs["artifactId"]
+  appId?: PlaybookPlanArgs["appId"]
 ): PlaybookPlanArgs {
   return {
     organizationId: args.organizationId,
@@ -39,7 +39,7 @@ export function playbookPlanArgs(
     options: args.options,
     createdBy,
     recipient,
-    artifactId,
+    appId,
   }
 }
 

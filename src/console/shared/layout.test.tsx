@@ -52,16 +52,12 @@ test("toolbar search labels the input and reports typed values", () => {
   const onValueChange = vi.fn()
 
   render(
-    <ConsoleSearch
-      label="Search artifacts"
-      onValueChange={onValueChange}
-      value=""
-    />
+    <ConsoleSearch label="Search apps" onValueChange={onValueChange} value="" />
   )
 
-  const input = screen.getByRole("textbox", { name: "Search artifacts" })
+  const input = screen.getByRole("textbox", { name: "Search apps" })
 
-  expect(input.getAttribute("placeholder")).toBe("Search artifacts")
+  expect(input.getAttribute("placeholder")).toBe("Search apps")
   fireEvent.change(input, { target: { value: "report" } })
 
   expect(onValueChange).toHaveBeenCalledWith("report")
@@ -85,14 +81,14 @@ test("toolbar search can use a placeholder different from its label", () => {
 test("toolbar search exposes a compact mobile trigger", () => {
   render(
     <ConsoleSearch
-      label="Search artifacts"
+      label="Search apps"
       onValueChange={() => {}}
       value="report"
     />
   )
 
   const trigger = screen.getByRole("button", {
-    name: "Search artifacts: report",
+    name: "Search apps: report",
   })
 
   expect(trigger.className).toContain("sm:hidden")
@@ -103,17 +99,13 @@ test("compact search opens an auto-focused search field", async () => {
   const onValueChange = vi.fn()
 
   render(
-    <ConsoleSearch
-      label="Search artifacts"
-      onValueChange={onValueChange}
-      value=""
-    />
+    <ConsoleSearch label="Search apps" onValueChange={onValueChange} value="" />
   )
 
-  fireEvent.click(screen.getByRole("button", { name: "Search artifacts" }))
+  fireEvent.click(screen.getByRole("button", { name: "Search apps" }))
 
   const inputs = await screen.findAllByRole("textbox", {
-    name: "Search artifacts",
+    name: "Search apps",
   })
   const compactInput = inputs.at(-1)
   const popover = compactInput?.closest('[data-slot="popover-content"]')

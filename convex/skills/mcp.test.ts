@@ -64,7 +64,7 @@ test("returns available skills when a skill is unknown", () => {
     name: "github",
     availableSkills: expect.arrayContaining([
       expect.objectContaining({
-        name: "artifact-creator",
+        name: "app-creator",
       }),
       expect.objectContaining({
         name: "frontend-design",

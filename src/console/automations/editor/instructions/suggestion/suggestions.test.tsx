@@ -21,9 +21,9 @@ test("uses provider logos and a full-width muted footer", () => {
           {
             access: { kind: "builtIn" },
             disabled: false,
-            id: "share_artifact",
+            id: "share_app",
             kind: "tool",
-            label: "share_artifact",
+            label: "share_app",
             surface: "milo",
           },
           {
@@ -44,7 +44,7 @@ test("uses provider logos and a full-width muted footer", () => {
   const footer = screen.getByText(
     "Selecting a tool can add the access it needs."
   )
-  const builtIn = screen.getByRole("option", { name: "share_artifact" })
+  const builtIn = screen.getByRole("option", { name: "share_app" })
   const needsAccess = screen.getByRole("option", {
     name: "conversations_add_message",
   })

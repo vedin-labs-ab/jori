@@ -9,7 +9,7 @@ export function projectTraceActivity(
   traces: Doc<"traces">[],
   run: Doc<"runs">,
   agents: Doc<"runs">[],
-  artifacts: Doc<"artifacts">[]
+  apps: Doc<"apps">[]
 ) {
   const isRunLive =
     isLiveRunStatus(run.status) &&
@@ -18,7 +18,7 @@ export function projectTraceActivity(
   return [
     ...projectRunTraces(traces, run),
     ...projectModelTraces(traces, isRunLive),
-    ...projectToolTraces(traces, agents, artifacts, run.artifactId, isRunLive),
+    ...projectToolTraces(traces, agents, apps, run.appId, isRunLive),
   ]
 }
 

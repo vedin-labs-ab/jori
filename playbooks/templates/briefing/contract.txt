@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { defineArtifactContract } from "@/milo/contract"
+import { defineAppContract } from "@/milo/contract"
 
 const timestamp = z.iso.datetime()
 const identifier = z.string().max(512)
@@ -111,7 +111,7 @@ const meeting = z.strictObject({
 export type MeetingBriefing = z.infer<typeof meeting>
 export type BriefingPoint = z.infer<typeof evidencePoint>
 
-export const contract = defineArtifactContract({
+export const contract = defineAppContract({
   version: 5,
   state: {
     briefings: {

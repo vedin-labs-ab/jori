@@ -45,7 +45,7 @@ export type PlaybookPlanArgs = {
   options?: PlaybookOptionValues
   createdBy: Id<"persons">
   recipient: PlaybookRecipient
-  artifactId?: Id<"artifacts">
+  appId?: Id<"apps">
 }
 
 export type PlaybookPlan = Awaited<ReturnType<typeof resolvePlaybookPlan>>

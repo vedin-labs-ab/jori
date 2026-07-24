@@ -7,7 +7,7 @@ import { outranks, selectSurvivor } from "./identity/rows"
 import { type LinkMethod } from "./identity/schema"
 
 const identityBatchSize = 100
-const artifactBatchSize = 50
+const appBatchSize = 50
 
 async function mergePersons(
   ctx: MutationCtx,
@@ -51,7 +51,7 @@ async function mergePersons(
     targetPersonId,
     organizationId: args.organizationId,
   })
-  await scheduleArtifactOwnerRewrite(ctx, {
+  await scheduleAppOwnerRewrite(ctx, {
     sourcePersonId,
     targetPersonId,
     organizationId: args.organizationId,
@@ -125,7 +125,7 @@ export const rewritePersonIdentities = internalMutation({
   },
 })
 
-export const rewriteArtifactOwners = internalMutation({
+export const rewriteAppOwners = internalMutation({
   args: {
     organizationId: v.string(),
     sourcePersonId: v.id("persons"),
@@ -133,24 +133,24 @@ export const rewriteArtifactOwners = internalMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const artifacts = await ctx.db
-      .query("artifacts")
+    const apps = await ctx.db
+      .query("apps")
       .withIndex("by_organization_and_owner", (index) =>
         index
           .eq("organizationId", args.organizationId)
           .eq("ownerId", args.sourcePersonId)
       )
-      .take(artifactBatchSize)
+      .take(appBatchSize)
 
-    for (const artifact of artifacts) {
-      await ctx.db.patch(artifact._id, {
+    for (const app of apps) {
+      await ctx.db.patch(app._id, {
         ownerId: args.targetPersonId,
         updatedAt: Date.now(),
       })
     }
 
-    if (artifacts.length === artifactBatchSize) {
-      await scheduleArtifactOwnerRewrite(ctx, args)
+    if (apps.length === appBatchSize) {
+      await scheduleAppOwnerRewrite(ctx, args)
     }
 
     return null
@@ -197,7 +197,7 @@ async function scheduleIdentityRewrite(
   )
 }
 
-async function scheduleArtifactOwnerRewrite(
+async function scheduleAppOwnerRewrite(
   ctx: MutationCtx,
   args: {
     organizationId: string
@@ -205,9 +205,5 @@ async function scheduleArtifactOwnerRewrite(
     targetPersonId: Id<"persons">
   }
 ) {
-  await ctx.scheduler.runAfter(
-    0,
-    internal.persons.merge.rewriteArtifactOwners,
-    args
-  )
+  await ctx.scheduler.runAfter(0, internal.persons.merge.rewriteAppOwners, args)
 }

@@ -1,13 +1,13 @@
 ---
 name: frontend-design
-description: Design good UI for any surface Milo renders — artifacts, served HTML assets, dashboards, tools, forms, empty states. Use when creating, revising, simplifying, or evaluating layout, visual hierarchy, required states, copy, and interaction. Outcome-first product design, not platform mechanics.
+description: Design good UI for any surface Milo renders — apps, served HTML assets, dashboards, tools, forms, empty states. Use when creating, revising, simplifying, or evaluating layout, visual hierarchy, required states, copy, and interaction. Outcome-first product design, not platform mechanics.
 category: creation
 ---
 
 # Frontend Design
 
 Design Milo-native UI that helps users get value quickly. This applies to any
-surface Milo renders — an artifact, served HTML, or any other view. The result
+surface Milo renders — an app, served HTML, or any other view. The result
 should feel like part of Milo, not a standalone mini-site, demo, or decorative
 page.
 

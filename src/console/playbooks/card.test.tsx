@@ -113,7 +113,7 @@ function enabledRow(
       nextRunAt,
       missing,
       setup: null,
-      artifact: null,
+      app: null,
     },
   }
 }

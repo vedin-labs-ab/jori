@@ -22,7 +22,7 @@ function githubAutomationRuntimeInput() {
 
   return {
     type: "automation",
-    artifact: null,
+    app: null,
     instructions: "Reply with a short quip.",
     access: {
       integrations: [{ id: github._id, tools: ["github_add_issue_comment"] }],

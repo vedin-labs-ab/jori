@@ -14,13 +14,13 @@ export function runtimeSkills(
 ): RuntimeSkill[] {
   return [
     runtimeSkill({
-      name: "artifact-creator",
-      description: "Create or update Milo artifacts.",
-      body: "# Artifact Creator\n\nUse this skill for artifact work.",
+      name: "app-creator",
+      description: "Create or update Milo apps.",
+      body: "# App Creator\n\nUse this skill for app work.",
     }),
     runtimeSkill({
       name: "frontend-design",
-      description: "Design Milo-native artifact and frontend UI.",
+      description: "Design Milo-native app and frontend UI.",
       body: "# Frontend Design\n\nDesign the useful surface first.",
     }),
     runtimeSkill({

@@ -1,14 +1,14 @@
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { linkIdentityToPerson } from "../../persons/identity/links"
-import { requireAppOrigin } from "../../shared/app"
+import { requireOrigin } from "../../shared/origin"
 import { type IntegrationOfferSource } from "./schema"
 import { surfaceIdentityProvider } from "./source"
 import { hashIntegrationOfferToken } from "./tokens"
 
 export function integrationOfferLocation(token: string) {
   const urlPath = `/integrations/offers/${encodeURIComponent(token)}`
-  const origin = requireAppOrigin()
+  const origin = requireOrigin()
 
   return {
     url: new URL(urlPath, origin).toString(),
@@ -76,7 +76,7 @@ function normalizeOfferReturnUrl(
     throw new Error("Integration offer return URL must be absolute.")
   }
 
-  if (url.origin !== requireAppOrigin() || !isAllowedPath(url)) {
+  if (url.origin !== requireOrigin() || !isAllowedPath(url)) {
     throw new Error(
       "Integration offer return URL must point to a Milo integration offer."
     )

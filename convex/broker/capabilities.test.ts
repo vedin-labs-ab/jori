@@ -171,7 +171,7 @@ function automationInput(
     },
     instructions: "Test",
     run: run(),
-    artifact: null,
+    app: null,
     event: null,
     integration: null,
     integrations: [integration],

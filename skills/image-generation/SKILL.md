@@ -35,5 +35,5 @@ tool separately for each. Set `save.name` when the image has an obvious durable
 name, and `save.description` when it helps the user tell assets apart later.
 
 After the tool succeeds, reference the returned asset and workspace path. If the
-image feeds another tool or an artifact, pass the returned `path` or `assetId`
+image feeds another tool or an app, pass the returned `path` or `assetId`
 instead of regenerating it.

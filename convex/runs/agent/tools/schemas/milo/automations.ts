@@ -106,8 +106,8 @@ export const automationMiloToolInputSchemas = {
   add_automation: objectSchema({
     required: ["name", "instructions", "type", "trigger", "access"],
     properties: {
-      artifactId: stringProperty(
-        "Optional artifact ID. Use this for artifact-owned automations that write artifact state."
+      appId: stringProperty(
+        "Optional app ID. Use this for app-owned automations that write app state."
       ),
       key: stringProperty(
         "Optional stable idempotency key. Reusing it in the same scope returns the existing equivalent automation and rejects conflicting configuration."
@@ -146,8 +146,8 @@ export const automationMiloToolInputSchemas = {
     required: ["automationId"],
     properties: {
       automationId: stringProperty("Milo automation ID."),
-      artifactId: stringProperty(
-        "Optional artifact ID. Set this when binding the automation to an artifact."
+      appId: stringProperty(
+        "Optional app ID. Set this when binding the automation to an app."
       ),
       name: stringProperty("Updated automation name."),
       instructions: stringProperty(automationInstructionsDescription),

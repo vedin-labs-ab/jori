@@ -22,7 +22,7 @@ describe("trigger modes", () => {
     const input = {
       type: "instruction" as const,
       run: { ...base.run, parentId: "parent" },
-      artifact: null,
+      app: null,
       integrations: base.integrations,
       instructions: "Research the meeting.",
       organization: null,
@@ -44,7 +44,7 @@ describe("trigger modes", () => {
     const input = {
       type: "instruction" as const,
       run: { ...base.run, trial: true },
-      artifact: null,
+      app: null,
       integrations: base.integrations,
       instructions: "Prepare my meetings.",
       organization: null,
@@ -79,7 +79,7 @@ describe("automation operating contract", () => {
     const instruction = assemblePrompt({
       type: "instruction",
       run: base.run,
-      artifact: null,
+      app: null,
       integrations: base.integrations,
       instructions: "Do the thing.",
       organization: null,

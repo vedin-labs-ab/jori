@@ -7,7 +7,7 @@ test("projects integration offers with integration metadata", () => {
   const items = projectRelationActivity({
     agents: [],
     approvals: [],
-    artifacts: [],
+    apps: [],
     assets: [],
     offers: [
       {

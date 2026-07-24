@@ -133,8 +133,8 @@ test("renders bash commands as inline code", () => {
 })
 
 test.each([
-  ["read_artifact_state", "Read artifact state"],
-  ["update_artifact_state", "Update artifact state"],
+  ["read_app_state", "Read app state"],
+  ["update_app_state", "Update app state"],
 ])("renders %s state keys as inline code", (tool, title) => {
   render(
     <TooltipProvider>
@@ -152,10 +152,10 @@ test.each([
     </TooltipProvider>
   )
 
-  const artifactTitle = screen.getByText("Meeting Briefing")
+  const appTitle = screen.getByText("Meeting Briefing")
   const key = screen.getByText("dossiers")
 
-  expect(artifactTitle.parentElement?.className).not.toContain("basis-0")
+  expect(appTitle.parentElement?.className).not.toContain("basis-0")
   expect(key.tagName).toBe("CODE")
   expect(key.className).toContain("font-mono")
   expect(key.className).toContain("bg-muted")

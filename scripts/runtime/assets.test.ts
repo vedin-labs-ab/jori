@@ -2,10 +2,10 @@ import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, expect, test, vi } from "vitest"
-import { readBuildAssets } from "../../runtime/artifacts/builder/assets.ts"
+import { readBuildAssets } from "../../runtime/apps/builder/assets.ts"
 
-vi.mock("../../runtime/artifacts/builder/config.ts", () => ({
-  config: { artifactTemplatePath: "" },
+vi.mock("../../runtime/apps/builder/config.ts", () => ({
+  config: { appTemplatePath: "" },
 }))
 
 const projects: string[] = []

@@ -256,7 +256,7 @@ class LocalSandbox implements SandboxRuntime {
 
   async cleanup() {}
 
-  async buildArtifact() {
+  async buildApp() {
     return {}
   }
 

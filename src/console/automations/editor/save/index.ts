@@ -65,7 +65,7 @@ export function automationFormValues(
   return {
     key: automation.key,
     playbook: automation.playbook,
-    artifactId: automation.artifactId,
+    appId: automation.appId,
     name: automation.name,
     instructions: automation.instructions,
     ...triggerFormValues(automation),
@@ -82,7 +82,7 @@ export function createAutomationArgs(
   AutomationArgs & {
     key?: AutomationFormValues["key"]
     playbook?: AutomationFormValues["playbook"]
-    artifactId?: AutomationFormValues["artifactId"]
+    appId?: AutomationFormValues["appId"]
     type: AutomationFormValues["type"]
     trigger: TriggerSpec
   }
@@ -105,9 +105,7 @@ export function createAutomationArgs(
       ...trigger,
       ...(values.key === undefined ? {} : { key: values.key }),
       ...(values.playbook === undefined ? {} : { playbook: values.playbook }),
-      ...(values.artifactId === undefined
-        ? {}
-        : { artifactId: values.artifactId }),
+      ...(values.appId === undefined ? {} : { appId: values.appId }),
     },
   }
 }

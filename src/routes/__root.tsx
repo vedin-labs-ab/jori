@@ -23,7 +23,7 @@ const appDescription =
   "An AI teammate inside Slack, your email, and your calendar. Milo preps your day, drafts the follow-ups, works by your rules, and keeps receipts."
 const providerlessRouteIds = new Set([
   "/",
-  "/artifacts/$artifactId/",
+  "/apps/$appId/",
   "/pricing",
   "/privacy",
   "/terms",

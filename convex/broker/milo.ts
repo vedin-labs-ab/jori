@@ -4,7 +4,7 @@ import {
   cancelApprovalRequest,
   isCancelApprovalTool,
 } from "../approvals/cancel"
-import { callMiloArtifactTool, isMiloArtifactTool } from "../artifacts/mcp"
+import { callMiloAppTool, isMiloAppTool } from "../apps/mcp"
 import { callMiloAssetTool, isMiloAssetTool } from "../assets/mcp"
 import { callMiloAutomationTool } from "../automations/mcp"
 import {
@@ -46,8 +46,8 @@ export async function callMiloTool(
     return await callMiloAssetTool(ctx, run, request)
   }
 
-  if (isMiloArtifactTool(request.tool)) {
-    return await callMiloArtifactTool(ctx, toMiloContext(run), request)
+  if (isMiloAppTool(request.tool)) {
+    return await callMiloAppTool(ctx, toMiloContext(run), request)
   }
 
   if (request.tool === "web_search" || request.tool === "web_fetch") {

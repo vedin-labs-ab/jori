@@ -22,7 +22,7 @@ export async function createAutomationRun(
       args.automation.parentId === undefined
         ? (args.automation.configurationVersion ?? 1)
         : (args.automation.parentConfigurationVersion ?? 0),
-    artifactId: args.automation.artifactId,
+    appId: args.automation.appId,
     cause: args.cause,
     principal: args.automation.principal,
     ...createAutomationRunSnapshot(args),

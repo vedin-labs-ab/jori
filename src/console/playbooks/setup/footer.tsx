@@ -102,7 +102,7 @@ function EnableFooter({
 }
 
 /** What saving means for an existing enablement: version updates refresh
- *  the rendered instructions, and a customized artifact is never touched. */
+ *  the rendered instructions, and a customized app is never touched. */
 export function EditSetupNotes({
   definition,
   enabled,
@@ -115,7 +115,7 @@ export function EditSetupNotes({
   }
 
   const updateAvailable = playbookUpdateAvailable(definition, enabled)
-  const customized = enabled.artifact?.customized === true
+  const customized = enabled.app?.customized === true
 
   if (!updateAvailable && !customized) {
     return null
@@ -126,14 +126,14 @@ export function EditSetupNotes({
       {updateAvailable ? (
         <p>
           A newer version of this playbook is available. Saving re-renders its
-          instructions{definition.artifact === undefined ? "" : " and artifact"}{" "}
-          from your settings.
+          instructions{definition.app === undefined ? "" : " and app"} from your
+          settings.
         </p>
       ) : null}
       {customized ? (
         <p>
-          Your {definition.artifact?.title ?? "playbook"} artifact has custom
-          changes — Milo keeps them and never overwrites a customized artifact.
+          Your {definition.app?.title ?? "playbook"} app has custom changes —
+          Milo keeps them and never overwrites a customized app.
         </p>
       ) : null}
     </div>

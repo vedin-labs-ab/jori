@@ -14,7 +14,7 @@ type ReceiptRow = {
   url?: string
 }
 
-// One cited source record: the header row links out to the artifact when the
+// One cited source record: the header row links out to the app when the
 // receipt has one; the description stays outside the link so it can expand
 // in place. On narrow screens the event kind wraps to its own line under the
 // provider and timestamp instead of truncating away.

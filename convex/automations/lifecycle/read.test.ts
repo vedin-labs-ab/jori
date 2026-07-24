@@ -1,10 +1,10 @@
 import { expect, test, vi } from "vitest"
 import { type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { listArtifactAutomationRoots } from "./read"
+import { listAppAutomationRoots } from "./read"
 
-test("loads only top-level automations for artifact summaries", async () => {
-  const artifactId = "artifact" as Id<"artifacts">
+test("loads only top-level automations for app summaries", async () => {
+  const appId = "app" as Id<"apps">
   const equals = vi.fn()
   const take = vi.fn(async () => [])
   const index = {
@@ -23,14 +23,14 @@ test("loads only top-level automations for artifact summaries", async () => {
     db: { query: vi.fn(() => ({ withIndex })) },
   } as unknown as QueryCtx
 
-  await listArtifactAutomationRoots(ctx, artifactId, 20)
+  await listAppAutomationRoots(ctx, appId, 20)
 
   expect(withIndex).toHaveBeenCalledWith(
-    "by_artifact_and_parent",
+    "by_app_and_parent",
     expect.any(Function)
   )
   expect(equals.mock.calls).toEqual([
-    ["artifactId", artifactId],
+    ["appId", appId],
     ["parentId", undefined],
   ])
   expect(take).toHaveBeenCalledWith(20)

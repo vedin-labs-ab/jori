@@ -84,7 +84,7 @@ test("creates automation args with access and source bindings", () => {
         ...emptyAutomationForm,
         key: "playbook:meeting-briefing",
         playbook: meetingBriefingBinding,
-        artifactId: "artifact" as AutomationFormValues["artifactId"],
+        appId: "app" as AutomationFormValues["appId"],
         name: "Weekly release summary",
         instructions: "Summarize @GitHub and post to @Slack.",
         surfaces: [
@@ -99,7 +99,7 @@ test("creates automation args with access and source bindings", () => {
       name: "Weekly release summary",
       key: "playbook:meeting-briefing",
       playbook: meetingBriefingBinding,
-      artifactId: "artifact",
+      appId: "app",
       instructions: "Summarize @GitHub and post to @Slack.",
       scope: "personal",
       access: {

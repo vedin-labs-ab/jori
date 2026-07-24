@@ -53,11 +53,11 @@ describe("playbook instructions", () => {
   test("keeps Slack labels outside the tool namespace", () => {
     const instructions = renderPlaybook("morning-brief", {
       kind: "slack",
-      target: { kind: "channel", id: "C1", label: "share_artifact" },
+      target: { kind: "channel", id: "C1", label: "share_app" },
     })
 
-    expect(instructions).toContain('the "share_artifact" Slack channel')
-    expect(instructions).not.toContain("#share_artifact")
+    expect(instructions).toContain('the "share_app" Slack channel')
+    expect(instructions).not.toContain("#share_app")
   })
 
   test("rejects unknown playbook keys", () => {

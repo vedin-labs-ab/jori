@@ -1,5 +1,5 @@
 export type RuntimeAssets = {
-  artifact: {
+  app: {
     builder: Record<string, string>
     dependencies: string[]
     fonts: {

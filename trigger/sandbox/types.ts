@@ -27,7 +27,7 @@ export type SandboxWriteFile = {
 }
 
 export type SandboxRuntime = {
-  buildArtifact(workspacePath: string): Promise<JsonObject>
+  buildApp(workspacePath: string): Promise<JsonObject>
   cleanup(): Promise<void>
   cloneRepository(input: SandboxCloneRepositoryInput): Promise<{
     directory: string
