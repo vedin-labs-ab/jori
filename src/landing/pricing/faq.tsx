@@ -46,8 +46,8 @@ export function Faq() {
           </Link>
         </Definition>
         <Definition term="GDPR and DPAs?">
-          Milo is built to operate in line with GDPR. For a data processing
-          agreement, write to security@milo.app.
+          Milo is built to operate in line with GDPR. Data processing agreements
+          are available from launch.
         </Definition>
       </dl>
     </Section>

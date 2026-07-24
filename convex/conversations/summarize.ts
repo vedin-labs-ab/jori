@@ -1,12 +1,12 @@
 "use node"
 
 import { v } from "convex/values"
+import { miloModel } from "../../contracts/billing"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
 import { type OpenRouterChatMessage, sendOpenRouterChat } from "../model"
-import { readEnvironmentVariable } from "../shared/environment"
 import { summaryOutputTokens } from "./limits"
 import { type PendingSummary, type SummaryMessage } from "./summary"
 
@@ -18,7 +18,6 @@ const summarySchema = {
     summary: { type: "string" },
   },
 }
-const defaultSummaryModel = "openai/gpt-5.6-sol"
 
 export const run = internalAction({
   args: { conversationId: v.id("conversations") },
@@ -45,7 +44,7 @@ export const run = internalAction({
 
 async function summarizeConversation(input: PendingSummary) {
   const response = await sendOpenRouterChat({
-    model: readSummaryModel(),
+    model: miloModel,
     maxTokens: summaryOutputTokens,
     provider: { requireParameters: true, sort: "latency" },
     reasoning: { effort: "low" },
@@ -84,12 +83,6 @@ function formatMessage(message: SummaryMessage) {
     `${new Date(observedAt).toISOString()} | ${message.speaker} | ${message.actor}`,
     message.text,
   ].join("\n")
-}
-
-function readSummaryModel() {
-  return (
-    readEnvironmentVariable("OPENROUTER_SUMMARY_MODEL") ?? defaultSummaryModel
-  )
 }
 
 function readContent(response: Awaited<ReturnType<typeof sendOpenRouterChat>>) {

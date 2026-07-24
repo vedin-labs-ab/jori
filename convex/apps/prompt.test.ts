@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest"
+import { miloModel } from "../../contracts/billing"
 import { type Id } from "../_generated/dataModel"
 import { type AppPlatformContext } from "./tools/platform"
 import {
-  appPromptModel,
   createAppPromptRequest,
   createAppPromptRequestDiagnostics,
   normalizeAppPromptInput,
@@ -36,14 +36,13 @@ function platformContext(): AppPlatformContext {
 }
 
 describe("app prompt model contract", () => {
-  test("pins the model in code, with no deployment override", () => {
-    expect(appPromptModel).toBe("openai/gpt-5.6-sol")
+  test("uses Milo's one model, with no deployment override", () => {
     expect(
       createAppPromptRequest(
         platformContext(),
         normalizeAppPromptInput(promptArgs())
       ).model
-    ).toBe(appPromptModel)
+    ).toBe(miloModel)
   })
 
   test("requires a named object output schema", () => {

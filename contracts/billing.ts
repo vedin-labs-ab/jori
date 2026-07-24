@@ -71,8 +71,17 @@ export const autoTopUp = {
   cooldownMs: 6 * 60 * 60 * 1000,
 }
 
-/** The model Milo runs on, and therefore the rate usage is billed at. */
-export const agentModel = "openai/gpt-5.6-sol"
+/**
+ * The model Milo runs on. One choice, stated once, for every call Milo makes:
+ * the agent, the deduction judge, conversation summaries, place profiles,
+ * organization discovery, and the prompt tool inside an app.
+ *
+ * Model selection is deliberately not deployment configuration. It decides
+ * what Milo costs and how its output behaves, so it belongs in code and in
+ * review, and it lives here because the rate table below has to be keyed by
+ * it: a model Milo can call but cannot price is not a thing that should exist.
+ */
+export const miloModel = "openai/gpt-5.6-sol"
 
 type ModelRate = {
   inputMicrosPerToken: number
@@ -85,7 +94,7 @@ type ModelRate = {
  * tokens, reasoning included.
  */
 export const modelRates: Record<string, ModelRate> = {
-  "openai/gpt-5.6-sol": { inputMicrosPerToken: 5, outputMicrosPerToken: 30 },
+  [miloModel]: { inputMicrosPerToken: 5, outputMicrosPerToken: 30 },
 }
 
 /** A model missing from the rate table bills at the highest configured rate

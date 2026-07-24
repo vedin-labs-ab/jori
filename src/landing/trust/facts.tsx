@@ -76,8 +76,8 @@ export function DataSection() {
           Your data is never used to train models.
         </Definition>
         <Definition term="GDPR">
-          Milo is built to operate in line with GDPR. For a data processing
-          agreement, write to security@milo.app.
+          Milo is built to operate in line with GDPR. Data processing agreements
+          are available from launch.
         </Definition>
         {/* TODO: add the retention commitment here once decided. */}
         <Definition term="Audits">

@@ -1,3 +1,4 @@
+import { miloModel } from "../../contracts/billing"
 import { parseWebsiteAddress } from "../../contracts/website"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
@@ -28,7 +29,7 @@ export async function extractFacts(
   input: ExtractionInput
 ): Promise<OrganizationFacts> {
   const value = await requestStructured({
-    model: "openai/gpt-5.6-sol",
+    model: miloModel,
     schemaName: "organization_facts",
     schema: factsSchema,
     system: renderPromptTemplate(promptTemplates["organization/discovery"], {}),

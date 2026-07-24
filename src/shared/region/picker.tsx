@@ -41,10 +41,10 @@ export function RegionPicker({
           isField ? "justify-between gap-3" : "shrink-0 gap-2"
         )}
       >
+        {/* Inline, the region reads from the option itself, so the label is
+            for screen readers only. As a field it needs the visible name. */}
         <label
-          className={cn(
-            isField ? "font-medium text-xs" : "text-muted-foreground"
-          )}
+          className={cn(isField ? "font-medium text-xs" : "sr-only")}
           htmlFor={pickerId}
         >
           Data region

@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { miloModel } from "../../../contracts/billing"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import {
@@ -10,7 +11,6 @@ import {
 } from "../../_generated/server"
 import {
   bootstrapMaxChunksPerSweep,
-  judgeModel,
   promptVersions,
   sweepBatch,
 } from "../limits"
@@ -146,7 +146,7 @@ export const open = internalMutation({
       scope: args.scope,
       status: "running",
       window,
-      prompt: { version: promptVersion(args), model: judgeModel },
+      prompt: { version: promptVersion(args), model: miloModel },
       startedAt: now,
     })
 

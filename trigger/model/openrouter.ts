@@ -9,7 +9,7 @@ import {
   type ToolSet,
   tool,
 } from "ai"
-import { agentModel } from "../../contracts/billing"
+import { miloModel } from "../../contracts/billing"
 import { toJsonObject } from "../../contracts/json"
 import { requireOpenRouterRuntimeConfig } from "../openrouter"
 import { ingestReasoning } from "./reasoning"
@@ -33,7 +33,7 @@ const agentProviderRouting = {
 export class OpenRouterModelRuntime implements ModelRuntime {
   private readonly config = {
     ...requireOpenRouterRuntimeConfig(),
-    model: agentModel,
+    model: miloModel,
   }
   private readonly provider = createOpenRouter({
     apiKey: this.config.apiKey,
