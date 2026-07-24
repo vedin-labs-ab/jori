@@ -9,7 +9,7 @@ import { Definition, Section } from "../section"
 export function Control() {
   return (
     <Section
-      className="bg-muted/50"
+      className="border-y bg-muted/50"
       lede="Handing over real work means handing over real access. Milo is built so you never have to take its word for anything."
       title="It works on your terms"
     >

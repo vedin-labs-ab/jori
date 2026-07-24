@@ -1,23 +1,12 @@
-import { LegalDocument, type LegalSection } from "./document"
-
-const placeholder =
-  "Draft. Replaced by the counsel-reviewed terms before launch."
-
-const sections: readonly LegalSection[] = [
-  { heading: "The service", paragraphs: [placeholder] },
-  { heading: "Accounts and organizations", paragraphs: [placeholder] },
-  { heading: "Billing", paragraphs: [placeholder] },
-  { heading: "Acceptable use", paragraphs: [placeholder] },
-  { heading: "Liability", paragraphs: [placeholder] },
-  { heading: "Termination", paragraphs: [placeholder] },
-]
+import { Scale } from "lucide-react"
+import { LegalPlaceholder } from "./document"
 
 export function TermsPage() {
   return (
-    <LegalDocument
-      sections={sections}
+    <LegalPlaceholder
+      description="We're writing these with counsel, and they'll be published before Milo opens. What Milo can access, and when it acts, is already written down."
+      icon={<Scale />}
       title="Terms of service"
-      updated="July 2026"
     />
   )
 }

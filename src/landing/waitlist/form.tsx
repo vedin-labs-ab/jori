@@ -97,7 +97,7 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
           <FieldError className="mt-3">{rejection.message}</FieldError>
         ) : null}
         <p className="mt-3 text-muted-foreground text-xs">
-          We email you once, when there's room for your team. No newsletter.
+          We'll only email you when there's room for your team.
         </p>
       </div>
     </form>

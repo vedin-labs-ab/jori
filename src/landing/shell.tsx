@@ -15,9 +15,9 @@ export function MarketingShell({
   closing?: string
 }) {
   return (
-    <div className="min-h-svh bg-background text-foreground">
+    <div className="flex min-h-svh flex-col bg-background text-foreground">
       <LandingHeader onWaitlistPage={closing !== undefined} />
-      <main>
+      <main className="flex-1">
         {children}
         {closing === undefined ? null : <Closing lede={closing} />}
       </main>
