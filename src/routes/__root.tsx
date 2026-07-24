@@ -130,12 +130,12 @@ function RootError({ error, reset }: { error: unknown; reset?: () => void }) {
           Reload
         </Button>
       }
-      description="The app hit an unexpected state. Reload to reconnect your session and try again."
+      description="Something went wrong loading this page. A reload usually clears it."
       icon={<AlertTriangle />}
       title="Milo couldn't load this page"
     >
       {import.meta.env.DEV ? (
-        <code className="block max-w-full overflow-x-auto rounded-md bg-muted px-2.5 py-2 text-left font-mono text-muted-foreground text-xs">
+        <code className="block w-full overflow-x-auto rounded-md border bg-muted/50 px-3 py-2 text-left font-mono text-muted-foreground text-xs">
           {message}
         </code>
       ) : null}
@@ -147,11 +147,13 @@ function NotFound() {
   return (
     <RootStateFrame
       action={
+        // A plain anchor, not a router link: the console and the marketing
+        // site share this boundary, and home resolves correctly for both.
         <Button asChild variant="outline">
-          <a href="/console">Go to console</a>
+          <a href="/">Back to Milo</a>
         </Button>
       }
-      description="The link may be outdated, or the page may have moved."
+      description="The link may be out of date, or the page may have moved."
       icon={<SearchX />}
       title="Page not found"
     />
