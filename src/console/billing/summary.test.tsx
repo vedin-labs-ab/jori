@@ -18,7 +18,7 @@ vi.mock("./topup", () => ({
   TopUpDialog: () => <button type="button">Top up</button>,
 }))
 
-vi.mock("../automations/help", () => ({
+vi.mock("@/shared/field", () => ({
   FieldHelp: () => null,
 }))
 

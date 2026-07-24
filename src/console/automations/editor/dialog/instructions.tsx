@@ -1,6 +1,6 @@
 import { Label } from "@/components/ui/label"
+import { FieldHelp } from "@/shared/field"
 import { type AutomationPolicyPermissions } from "../../access/policy"
-import { FieldHelp } from "../../help"
 import { type AutomationFormValues } from "../../types"
 import { AutomationInstructionsField } from "../instructions/field"
 import { isAutomationToolReferenceError } from "../save/instructions"

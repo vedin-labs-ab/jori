@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { FieldHelp } from "@/shared/field"
 import { absoluteTime, relativeTime } from "../../../shared/time"
 import {
   composeCron,
@@ -16,7 +17,6 @@ import {
   previewRecurringRun,
   weekdayOptions,
 } from "../../cron"
-import { FieldHelp } from "../../help"
 import {
   type AutomationFormValues,
   type RepeatMode,

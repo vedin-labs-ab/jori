@@ -10,6 +10,7 @@ import { AppWindow, ArrowUpRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
+import { FieldHelp } from "@/shared/field"
 import { api } from "../../../../../convex/_generated/api"
 import {
   ContractEntries,
@@ -18,7 +19,6 @@ import {
 } from "../../../apps/contract"
 import { stateContractEntries } from "../../../apps/format"
 import { absoluteTime, relativeTime } from "../../../shared/time"
-import { FieldHelp } from "../../help"
 import { type AutomationFormValues } from "../../types"
 
 type AppResult = FunctionReturnType<typeof api.apps.console.get>
