@@ -1,4 +1,4 @@
-import { PayrollApprovalCard } from "../examples/approval"
+import { ReleaseApprovalCard } from "../examples/approval"
 import { ReceiptsTimeline } from "../examples/receipts"
 import { Section } from "../section"
 
@@ -22,7 +22,7 @@ export function ApprovalsSection() {
             waits for a run with you in it.
           </p>
         </div>
-        <PayrollApprovalCard />
+        <ReleaseApprovalCard />
       </div>
     </Section>
   )
@@ -51,17 +51,17 @@ export function ReceiptsSection() {
           label={
             <>
               <span className="font-medium text-foreground">Run receipts</span>
-              <span>Morning brief · weekdays</span>
+              <span>Release readiness · weekday mornings</span>
             </>
           }
           receipts={[
             { at: "07:58", step: "Started on schedule" },
-            { at: "07:58", step: "Read calendar: 3 meetings today" },
-            { at: "07:59", step: "Searched Gmail: 14 open threads" },
-            { at: "07:59", step: "Wrote the brief" },
+            { at: "07:58", step: "Read 9 open pull requests" },
+            { at: "07:59", step: "Read 14 issues across two Linear teams" },
+            { at: "07:59", step: "Updated the app: 2 blocking, 11 ready" },
             {
               at: "08:00",
-              step: "Emailed it to you. Run complete.",
+              step: "Posted the change in #eng. Run complete.",
               done: true,
             },
           ]}

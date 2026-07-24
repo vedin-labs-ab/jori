@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { decodeJson, decodeJsonObject, encodeJson, toJsonValue } from "./json"
+import { decodeJson, decodeJsonObject, encodeJson, toJsonValue } from "."
 
 describe("JSON transport codec", () => {
   test("preserves arbitrary unicode object keys", () => {

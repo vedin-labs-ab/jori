@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as access_anonymous from "../access/anonymous.js";
 import type * as access_index from "../access/index.js";
 import type * as access_invitation from "../access/invitation.js";
 import type * as access_users from "../access/users.js";
@@ -171,6 +172,7 @@ import type * as deduction_workstream_members from "../deduction/workstream/memb
 import type * as deduction_workstream_operations from "../deduction/workstream/operations.js";
 import type * as deduction_workstream_ops from "../deduction/workstream/ops.js";
 import type * as deduction_workstream_parse from "../deduction/workstream/parse.js";
+import type * as email from "../email.js";
 import type * as events_data from "../events/data.js";
 import type * as events_ingest from "../events/ingest.js";
 import type * as events_payload from "../events/payload.js";
@@ -526,6 +528,8 @@ import type * as skills_mcp from "../skills/mcp.js";
 import type * as skills_runtime from "../skills/runtime.js";
 import type * as transitions_data from "../transitions/data.js";
 import type * as transitions_index from "../transitions/index.js";
+import type * as waitlist_email from "../waitlist/email.js";
+import type * as waitlist_signup from "../waitlist/signup.js";
 import type * as workstreams_corrections from "../workstreams/corrections.js";
 import type * as workstreams_labels from "../workstreams/labels.js";
 import type * as workstreams_pulse from "../workstreams/pulse.js";
@@ -538,6 +542,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "access/anonymous": typeof access_anonymous;
   "access/index": typeof access_index;
   "access/invitation": typeof access_invitation;
   "access/users": typeof access_users;
@@ -701,6 +706,7 @@ declare const fullApi: ApiFromModules<{
   "deduction/workstream/operations": typeof deduction_workstream_operations;
   "deduction/workstream/ops": typeof deduction_workstream_ops;
   "deduction/workstream/parse": typeof deduction_workstream_parse;
+  email: typeof email;
   "events/data": typeof events_data;
   "events/ingest": typeof events_ingest;
   "events/payload": typeof events_payload;
@@ -1056,6 +1062,8 @@ declare const fullApi: ApiFromModules<{
   "skills/runtime": typeof skills_runtime;
   "transitions/data": typeof transitions_data;
   "transitions/index": typeof transitions_index;
+  "waitlist/email": typeof waitlist_email;
+  "waitlist/signup": typeof waitlist_signup;
   "workstreams/corrections": typeof workstreams_corrections;
   "workstreams/labels": typeof workstreams_labels;
   "workstreams/pulse": typeof workstreams_pulse;

@@ -1,13 +1,13 @@
 import {
+  decodeToolResult,
+  encodeToolResult,
+} from "../../../contracts/json/transport"
+import {
   type ApprovalHandoff,
   type HandoffSubject,
   type OfferHandoff,
   type RunHandoffs,
 } from "../../../contracts/runtime/worker"
-import {
-  decodeToolResult,
-  encodeToolResult,
-} from "../../../contracts/transport"
 import { type ModelMessage } from "../../model/types"
 import { type AgentRuntime } from "../../runtime"
 import { markVisibleCommunication } from "../../tool"

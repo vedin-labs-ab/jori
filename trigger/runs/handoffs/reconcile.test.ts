@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
+import { encodeToolResult } from "../../../contracts/json/transport"
 import { type RuntimeTool } from "../../../contracts/runtime/worker"
-import { encodeToolResult } from "../../../contracts/transport"
 import { runtimeId } from "../../../test/trigger"
 import { type ModelMessage } from "../../model/types"
 import { type AgentRuntime } from "../../runtime"

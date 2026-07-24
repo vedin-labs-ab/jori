@@ -1,7 +1,6 @@
 import { MarketingShell } from "../shell"
-import { ContextSection } from "./context"
+import { Apps } from "./apps"
 import { Control } from "./control"
-import { Day } from "./day"
 import { Hero } from "./hero"
 import { Start } from "./start"
 import { Threads } from "./threads"
@@ -10,9 +9,8 @@ export function Landing() {
   return (
     <MarketingShell>
       <Hero />
-      <Day />
+      <Apps />
       <Threads />
-      <ContextSection />
       <Control />
       <Start />
     </MarketingShell>

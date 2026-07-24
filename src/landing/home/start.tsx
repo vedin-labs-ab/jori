@@ -8,8 +8,8 @@ export function Start() {
   return (
     <>
       <Section
-        lede="Setup takes a few minutes in the console."
-        title="Running before your next meeting"
+        lede="Setup takes a few minutes in the console. The first app takes one conversation."
+        title="Running the same day"
       >
         <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
           <Step index="01" title="Point Milo at your website">
@@ -32,15 +32,15 @@ export function Start() {
               ))}
             </div>
           </Step>
-          <Step index="03" title="Enable a playbook">
+          <Step index="03" title="Hand over the first job">
             <p>
-              Pick one, choose where it delivers, done. Tomorrow starts with a
-              brief.
+              Describe something your team does by hand every week. Milo builds
+              the app and starts keeping it current.
             </p>
           </Step>
         </ol>
       </Section>
-      <Closing lede="Your first brief can land tomorrow at 08:00." />
+      <Closing lede="Tell us what your team keeps doing by hand. We're setting up the first teams ourselves, so the fit matters more than the queue." />
     </>
   )
 }
