@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { miloModel } from "../../contracts/billing"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
@@ -6,7 +7,6 @@ import {
   callAppPlatformTool,
   createAppPlatformToolCacheArgs,
 } from "./tools/platform"
-import { appPromptModel } from "./tools/prompt"
 
 type CapturedCall = {
   kind: "query" | "mutation"
@@ -64,7 +64,7 @@ test("includes app prompt model in prompt cache identity", () => {
       input: { message: "hello" },
     })
   ).toEqual({
-    _miloCache: { model: appPromptModel },
+    _miloCache: { model: miloModel },
     input: { message: "hello" },
   })
 

@@ -26,14 +26,6 @@ const throttledMessage =
   "That's a lot of signups from here. Try again in a few minutes."
 const failedMessage = "Something went wrong. Try again in a moment."
 
-/** Marketing scale for the controls. The console runs dense, but this is the
- *  only form on the public site, and anything under 16px makes iOS Safari zoom
- *  the page the moment a control takes focus. */
-const inputClassName = "h-10 px-3 text-base md:text-base"
-const textareaClassName = "px-3 py-2.5 text-base md:text-base"
-const selectClassName =
-  "[&_select]:h-10 [&_select]:pr-8 [&_select]:pl-3 [&_select]:text-base"
-
 export function WaitlistForm() {
   const fieldId = useId()
   const [status, setStatus] = useState<Status>("idle")
@@ -66,16 +58,16 @@ export function WaitlistForm() {
       <Honeypot />
       <div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Button disabled={status === "submitting"} size="xl" type="submit">
+          <Button disabled={status === "submitting"} type="submit">
             {status === "submitting" ? <Spinner /> : null}
             Join the waitlist
           </Button>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-xs">
             One email when there's a spot. Nothing else.
           </p>
         </div>
         {rejection?.kind === "form" ? (
-          <FieldError className="mt-2 text-sm">{rejection.message}</FieldError>
+          <FieldError className="mt-2">{rejection.message}</FieldError>
         ) : null}
       </div>
     </form>
@@ -91,14 +83,11 @@ type FieldProps = {
 function EmailField({ fieldId, invalid, rejection }: FieldProps) {
   return (
     <Field data-invalid={invalid === "email"}>
-      <FieldLabel className="text-sm" htmlFor={`${fieldId}-email`}>
-        Work email
-      </FieldLabel>
+      <FieldLabel htmlFor={`${fieldId}-email`}>Work email</FieldLabel>
       <Input
         aria-describedby={describedBy(fieldId, invalid, "email")}
         aria-invalid={invalid === "email"}
         autoComplete="email"
-        className={inputClassName}
         id={`${fieldId}-email`}
         maxLength={waitlistLimits.email}
         name="email"
@@ -116,13 +105,10 @@ function EmailField({ fieldId, invalid, rejection }: FieldProps) {
 function SizeField({ fieldId, invalid, rejection }: FieldProps) {
   return (
     <Field data-invalid={invalid === "size"}>
-      <FieldLabel className="text-sm" htmlFor={`${fieldId}-size`}>
-        Team size
-      </FieldLabel>
+      <FieldLabel htmlFor={`${fieldId}-size`}>Team size</FieldLabel>
       <NativeSelect
         aria-describedby={describedBy(fieldId, invalid, "size")}
         aria-invalid={invalid === "size"}
-        className={selectClassName}
         defaultValue="10-24"
         id={`${fieldId}-size`}
         name="size"
@@ -143,13 +129,12 @@ function SizeField({ fieldId, invalid, rejection }: FieldProps) {
 function WorkField({ fieldId, invalid, rejection }: FieldProps) {
   return (
     <Field data-invalid={invalid === "work"}>
-      <FieldLabel className="text-sm" htmlFor={`${fieldId}-work`}>
+      <FieldLabel htmlFor={`${fieldId}-work`}>
         What does your team do by hand every week?
       </FieldLabel>
       <Textarea
         aria-describedby={describedBy(fieldId, invalid, "work")}
         aria-invalid={invalid === "work"}
-        className={textareaClassName}
         id={`${fieldId}-work`}
         maxLength={waitlistLimits.work}
         name="work"

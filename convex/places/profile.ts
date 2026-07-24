@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { miloModel } from "../../contracts/billing"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { internal } from "../_generated/api"
@@ -7,8 +8,6 @@ import { requestStructured } from "../model/structured"
 import { profileOutputTokens } from "./limits"
 import { parseProfileReview, profileReviewSchema } from "./parse"
 import { type PendingProfile } from "./window"
-
-const profileModel = "openai/gpt-5.6-sol"
 
 export const run = internalAction({
   args: { placeId: v.id("places") },
@@ -42,7 +41,7 @@ export const run = internalAction({
 
 async function requestReview(pending: PendingProfile) {
   return await requestStructured({
-    model: profileModel,
+    model: miloModel,
     // Calibrated judgment against explicit bars, closer to the deduction
     // judge (high) than to the conversation summarizer (low).
     reasoning: "medium",

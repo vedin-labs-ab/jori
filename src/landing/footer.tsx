@@ -34,9 +34,6 @@ export function LandingFooter() {
                 {link.label}
               </Link>
             ))}
-            <a className={footerLinkClassName} href="mailto:hello@milo.app">
-              hello@milo.app
-            </a>
           </nav>
           <RegionPicker />
         </div>

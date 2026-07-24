@@ -38,10 +38,11 @@ export function SignInVisual() {
 
       <div className="absolute right-12 bottom-11 left-12 max-w-md xl:right-16 xl:bottom-14 xl:left-16">
         <p className="max-w-sm text-balance font-medium text-2xl tracking-tight">
-          Start the day already caught up.
+          Hand over the work you repeat.
         </p>
         <p className="mt-3 max-w-sm text-pretty text-foreground/65 text-sm/relaxed">
-          Milo keeps work moving across your tools and asks before it acts.
+          Milo runs it across Slack, GitHub, and Linear, leaves behind a live
+          app your team can open, and asks before it acts.
         </p>
       </div>
     </aside>

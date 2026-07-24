@@ -1,5 +1,6 @@
 "use node"
 
+import { miloModel } from "../../../contracts/billing"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
@@ -10,7 +11,7 @@ import {
   normalizeListLimit,
   normalizeStateWrite,
 } from "./input"
-import { appPromptModel, promptModel } from "./prompt"
+import { promptModel } from "./prompt"
 
 export type AppPlatformContext = {
   organizationId: string
@@ -60,7 +61,7 @@ export function createAppPlatformToolCacheArgs(
   return {
     ...args,
     _miloCache: {
-      model: appPromptModel,
+      model: miloModel,
     },
   }
 }

@@ -1,5 +1,4 @@
 import { formatUsd, trial } from "@contracts/billing"
-import { Button } from "@/components/ui/button"
 import { Definition } from "../section"
 
 /** What is settled about pricing is its shape, not its numbers. Publishing the
@@ -42,11 +41,6 @@ export function Shape() {
           receipts, and the {trial.days}-day trial starts with{" "}
           {formatUsd(trial.grantMicros)} of usage and no card.
         </p>
-        <div className="mt-7">
-          <Button asChild variant="outline">
-            <a href="mailto:hello@milo.app">Ask about pricing</a>
-          </Button>
-        </div>
       </div>
     </section>
   )

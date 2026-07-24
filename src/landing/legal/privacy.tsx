@@ -40,10 +40,6 @@ const sections: readonly LegalSection[] = [
     heading: "Your rights under GDPR",
     paragraphs: [placeholder],
   },
-  {
-    heading: "Contact",
-    paragraphs: ["Questions about this policy: security@milo.app."],
-  },
 ]
 
 export function PrivacyPage() {

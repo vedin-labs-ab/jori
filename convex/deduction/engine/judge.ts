@@ -1,3 +1,4 @@
+import { miloModel } from "../../../contracts/billing"
 import { isRecord } from "../../../contracts/json"
 import {
   type PromptTemplateId,
@@ -6,7 +7,7 @@ import {
 import { renderPromptTemplate } from "../../../prompts/render"
 import { type Doc } from "../../_generated/dataModel"
 import { requestStructured } from "../../model/structured"
-import { judgeMaxTokens, judgeModel, judgeReasoning } from "../limits"
+import { judgeMaxTokens, judgeReasoning } from "../limits"
 import { type Citation } from "./rules"
 
 // One structured judge call: a charter template as the system prompt, one
@@ -18,7 +19,7 @@ export async function requestJudge(options: {
   payload: unknown
 }): Promise<Record<string, unknown>> {
   return await requestStructured({
-    model: judgeModel,
+    model: miloModel,
     reasoning: judgeReasoning,
     schemaName: options.schemaName,
     schema: options.schema,

@@ -5,6 +5,7 @@ import {
   assertSupportedJsonSchema,
   normalizeJsonSchema,
 } from "../../../contracts/apps/schema"
+import { miloModel } from "../../../contracts/billing"
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import {
@@ -35,11 +36,6 @@ const minPromptOutputTokens = 64
 const maxPromptOutputTokens = 16_000
 const appReasoningEffort = "medium"
 
-/** The model behind milo.model.prompt inside an app. Fixed in code, not
- *  configuration: an app's output shape and cost are part of the platform
- *  contract, so a deployment cannot quietly swap the model underneath it. */
-export const appPromptModel = "openai/gpt-5.6-sol"
-
 export async function promptModel(
   context: AppPlatformContext,
   args: Record<string, unknown>
@@ -69,7 +65,7 @@ export function createAppPromptRequest(
   input: AppPromptInput
 ): OpenRouterChatInput {
   return {
-    model: appPromptModel,
+    model: miloModel,
     messages: promptMessages(context, input),
     maxTokens: input.maxOutputTokens,
     provider: { requireParameters: true, sort: "latency" },

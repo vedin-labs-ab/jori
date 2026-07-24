@@ -45,7 +45,6 @@ export const maxRosterEntries = 40
 export const maxWindowEvents = 500
 export const maxWindowConversations = 200
 
-export const judgeModel = "openai/gpt-5.6-sol"
 export const judgeReasoning = "high" as const
 // Sized for a busy bootstrap chunk: many creates with entries and citations,
 // plus reasoning tokens, in one structured response.

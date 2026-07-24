@@ -1,4 +1,4 @@
-import { agentModel, formatUsd, priceModelUsage } from "@contracts/billing"
+import { formatUsd, miloModel, priceModelUsage } from "@contracts/billing"
 import { Cpu } from "lucide-react"
 import { type TokenUsage, visibleTokenUsageMetrics } from "./metrics"
 
@@ -15,7 +15,7 @@ export function ActivityTokenUsage({ usage }: { usage: TokenUsage }) {
   }
 
   // The receipt line: the same list-rate pricing the ledger debits with.
-  const costMicros = priceModelUsage(agentModel, {
+  const costMicros = priceModelUsage(miloModel, {
     inputTokens: usage.input,
     outputTokens: usage.output,
   })

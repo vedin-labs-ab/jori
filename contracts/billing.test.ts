@@ -1,17 +1,22 @@
 import { expect, test } from "vitest"
 import {
-  agentModel,
   dollarsToMicros,
   formatUsd,
+  miloModel,
   modelRates,
   priceModelUsage,
   resolveModelRate,
 } from "./billing"
 
+test("pins one model, priced by the rate table", () => {
+  expect(miloModel).toBe("openai/gpt-5.6-sol")
+  expect(modelRates[miloModel]).toBeDefined()
+})
+
 test("prices usage at exact integer list rates", () => {
   // 1M input at $5/M plus 100k output at $30/M.
   expect(
-    priceModelUsage(agentModel, {
+    priceModelUsage(miloModel, {
       inputTokens: 1_000_000,
       outputTokens: 100_000,
     })
@@ -19,8 +24,8 @@ test("prices usage at exact integer list rates", () => {
 })
 
 test("a single token stays exact", () => {
-  expect(priceModelUsage(agentModel, { inputTokens: 1, outputTokens: 0 })).toBe(
-    modelRates[agentModel]?.inputMicrosPerToken
+  expect(priceModelUsage(miloModel, { inputTokens: 1, outputTokens: 0 })).toBe(
+    modelRates[miloModel]?.inputMicrosPerToken
   )
 })
 

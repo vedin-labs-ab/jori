@@ -1,3 +1,4 @@
+import { miloModel } from "../../contracts/billing"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { requestStructured } from "../model/structured"
@@ -28,7 +29,7 @@ export async function selectLinks(options: {
 
   const considered = options.candidates.slice(0, maxCandidatesConsidered)
   const value = await requestStructured({
-    model: "openai/gpt-5.6-sol",
+    model: miloModel,
     reasoning: "low",
     schemaName: "selected_links",
     schema: selectionSchema,

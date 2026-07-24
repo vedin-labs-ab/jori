@@ -10,10 +10,6 @@ const sections: readonly LegalSection[] = [
   { heading: "Acceptable use", paragraphs: [placeholder] },
   { heading: "Liability", paragraphs: [placeholder] },
   { heading: "Termination", paragraphs: [placeholder] },
-  {
-    heading: "Contact",
-    paragraphs: ["Questions about these terms: hello@milo.app."],
-  },
 ]
 
 export function TermsPage() {
