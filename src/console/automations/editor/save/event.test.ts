@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
 import { type AutomationFormValues, emptyAutomationForm } from "../../types"
-import { createAutomationArgs } from "."
+import { createAutomationArgs } from "./args"
 
 describe("automation event payload match", () => {
   test("creates event automation args with required option match", () => {

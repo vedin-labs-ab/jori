@@ -90,7 +90,7 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
   )
 }
 
-type PlaybookSetupDialogProps = {
+export type PlaybookSetupDialogProps = {
   actions: PlaybookActions
   definition: PlaybookDefinition
   /** Present when editing an existing enablement instead of enabling. */

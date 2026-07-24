@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
-import { useMemo, useState } from "react"
+import { lazy, Suspense, useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
@@ -10,13 +10,19 @@ import {
   useClientPagination,
   useResettingSetter,
 } from "../shared/list/pagination"
-import { SkillDialog } from "./dialog"
+import { useRetainedMount } from "../shared/retain"
 import { type SkillEditor, useSkillEditor } from "./editor"
 import { filterSkills, filterSkillsByView } from "./filter"
 import { SkillContent } from "./list/content"
 import { SkillsToolbar } from "./list/toolbar"
 import { type Skill, type SkillFilterView } from "./types"
 import { SkillViewDialog } from "./view"
+
+// The editor form carries the integration combobox, so it loads with the
+// first open rather than with the page.
+const SkillDialog = lazy(() =>
+  import("./dialog").then((module) => ({ default: module.SkillDialog }))
+)
 
 type SkillPagination = ReturnType<typeof useClientPagination<Skill>>
 
@@ -148,17 +154,25 @@ function SkillDialogs({
   onViewSkillChange: (skill: Skill | undefined) => void
   viewSkill: Skill | undefined
 }) {
+  const isFormMounted = useRetainedMount(editor.isFormOpen)
+
   return (
     <>
-      <SkillDialog
-        isOpen={editor.isFormOpen}
-        isSaving={editor.pendingSkillId === (editor.formSkill?._id ?? "new")}
-        onOpenChange={editor.setIsFormOpen}
-        onSave={editor.saveSkill}
-        onValuesChange={editor.setFormValues}
-        skill={editor.formSkill}
-        values={editor.formValues}
-      />
+      {isFormMounted ? (
+        <Suspense fallback={null}>
+          <SkillDialog
+            isOpen={editor.isFormOpen}
+            isSaving={
+              editor.pendingSkillId === (editor.formSkill?._id ?? "new")
+            }
+            onOpenChange={editor.setIsFormOpen}
+            onSave={editor.saveSkill}
+            onValuesChange={editor.setFormValues}
+            skill={editor.formSkill}
+            values={editor.formValues}
+          />
+        </Suspense>
+      ) : null}
       <SkillViewDialog
         skill={viewSkill}
         onOpenChange={(open) => {

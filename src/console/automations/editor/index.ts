@@ -11,13 +11,24 @@ import { readErrorMessage, showErrorToast } from "../../shared/error"
 import { type AutomationPolicyPermissions } from "../access/policy"
 import { type Automation, type AutomationFormValues } from "../types"
 import { isAutomationFieldError } from "./errors"
-import {
-  automationFormValues,
-  createAutomationArgs,
-  updateAutomationArgs,
-} from "./save"
+import { automationFormValues } from "./save"
 
 export type AutomationEditor = ReturnType<typeof useAutomationEditor>
+
+/** The mutation-args builders reach the markdown codec, which ships with the
+ *  editor dialog. Loading them at save time keeps that weight off the pages
+ *  that only mount the host. */
+const loadAutomationArgs = () => import("./save/args")
+
+type AutomationPersistence = {
+  create: ReactMutation<typeof api.automations.console.create>
+  createFromPlaybook: ReactAction<typeof api.playbooks.actions.create>
+  formAutomation: Automation | undefined
+  formValues: AutomationFormValues
+  permissions?: AutomationPolicyPermissions
+  organizationId: string
+  update: ReactMutation<typeof api.automations.console.update>
+}
 
 export function useAutomationEditor(
   organizationId: string,
@@ -141,15 +152,10 @@ async function persistAutomation({
   permissions,
   organizationId,
   update,
-}: {
-  create: ReactMutation<typeof api.automations.console.create>
-  createFromPlaybook: ReactAction<typeof api.playbooks.actions.create>
-  formAutomation: Automation | undefined
-  formValues: AutomationFormValues
-  permissions?: AutomationPolicyPermissions
-  organizationId: string
-  update: ReactMutation<typeof api.automations.console.update>
-}) {
+}: AutomationPersistence) {
+  const { createAutomationArgs, updateAutomationArgs } =
+    await loadAutomationArgs()
+
   if (formAutomation === undefined) {
     const result = createAutomationArgs(formValues, { permissions })
 
