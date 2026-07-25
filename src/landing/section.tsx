@@ -124,9 +124,20 @@ export function Mention() {
   )
 }
 
-export function Chip({ children }: { children: ReactNode }) {
+export function Chip({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-muted-foreground text-xs">
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-muted-foreground text-xs",
+        className
+      )}
+    >
       {children}
     </span>
   )
