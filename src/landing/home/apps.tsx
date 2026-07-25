@@ -7,8 +7,8 @@ export function Apps() {
   return (
     <Section
       id="apps"
-      lede="Describe what you keep doing by hand. Milo works out what it needs, builds the app, and puts it in front of the team."
-      title="Every job ends in an app, not a message"
+      lede="Describe what your team keeps doing by hand. Milo works out what it needs, builds the app, and puts it in front of everyone."
+      title="When the work repeats, it gets an app"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
         <div>
@@ -32,7 +32,7 @@ export function Apps() {
             <p className="text-muted-foreground text-sm">
               Built from what is really there, not a wiki nobody updates.
             </p>
-            <div className="mt-3.5 flex flex-wrap gap-1.5">
+            <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
               {integrations.map((integration) => (
                 <Chip key={integration}>
                   <IntegrationLogo
@@ -43,6 +43,10 @@ export function Apps() {
                   {integrationLabels[integration]}
                 </Chip>
               ))}
+              {/* Dashed, the way this system already marks something that
+                  is not there yet, so the row reads as unfinished by design
+                  rather than as a connector called "more". */}
+              <Chip className="border-dashed">+ more</Chip>
             </div>
           </div>
         </div>
