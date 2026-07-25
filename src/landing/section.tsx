@@ -1,3 +1,4 @@
+import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
@@ -75,14 +76,23 @@ export function PageIntro({ lede, title }: { lede: string; title: string }) {
 
 export function Definition({
   children,
+  icon: Icon,
   term,
 }: {
   children: ReactNode
+  icon?: LucideIcon
   term: string
 }) {
   return (
     <div>
-      <dt className="font-medium">{term}</dt>
+      {/* Aligned to the first line, not to the block: a term that wraps
+          would otherwise float its glyph between the two lines. */}
+      <dt className="flex items-start gap-2 font-medium">
+        {Icon === undefined ? null : (
+          <Icon className="mt-1 size-4 shrink-0 text-muted-foreground" />
+        )}
+        {term}
+      </dt>
       <dd className="mt-1.5 max-w-md text-muted-foreground text-sm leading-relaxed">
         {children}
       </dd>
