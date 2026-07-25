@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { ArrowUpRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -40,7 +41,10 @@ export function LegalPlaceholder({
           </EmptyHeader>
           <EmptyContent>
             <Button asChild variant="outline">
-              <Link to="/trust">Read the trust page</Link>
+              <Link to="/trust">
+                Read the trust page
+                <ArrowUpRight data-icon="inline-end" />
+              </Link>
             </Button>
           </EmptyContent>
         </Empty>

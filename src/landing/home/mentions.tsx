@@ -120,7 +120,10 @@ export function SlackMention() {
             Tips double-counted at Harbor House
           </span>
         </p>
-        <p className="mt-2.5 flex flex-wrap items-center gap-x-1.5 text-sm">
+        {/* Indented under the sender, the way Slack stacks a second line from
+            the same person, so the ask reads as Priya's rather than as an
+            unnamed someone answering her. */}
+        <p className="mt-2.5 ml-5 flex flex-wrap items-center gap-x-1.5 text-sm">
           <Mention /> have we seen this before?
         </p>
       </div>
