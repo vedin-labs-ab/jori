@@ -1,6 +1,6 @@
 export const webToolPermissionRows = [
   [
-    "milo",
+    "jori",
     "web_search",
     "Search web",
     "Search the public web.",
@@ -8,7 +8,7 @@ export const webToolPermissionRows = [
     "read",
   ],
   [
-    "milo",
+    "jori",
     "web_fetch",
     "Fetch web page",
     "Open a public web page by its address.",

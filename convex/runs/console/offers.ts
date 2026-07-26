@@ -96,7 +96,7 @@ export function summarizeRunOffer(offer: Doc<"integrationOffers">) {
     state: offerState(offer),
     integration: offer.integration,
     integrationLabel: label,
-    summary: offer.summary ?? `Milo requested access to ${label}.`,
+    summary: offer.summary ?? `Jori requested access to ${label}.`,
     expiresAt: offer.expiresAt,
     updatedAt: offer.updatedAt,
     delivery: deliveryLabel(offer.delivery),

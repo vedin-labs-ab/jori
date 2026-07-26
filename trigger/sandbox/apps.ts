@@ -7,9 +7,9 @@ import { runtimeAssets } from "../../runtime/apps/_generated/assets"
 import { shellQuote } from "./path"
 import { type SandboxWriteFile } from "./types"
 
-const appBuilderConfigPath = `${sandboxAppRuntime}/.milo/app-builder.json`
+const appBuilderConfigPath = `${sandboxAppRuntime}/.jori/app-builder.json`
 export const appTemplatePath = `${sandboxInternalRoot}/apps/template`
-const appRunnerPath = `${sandboxAppRuntime}/.milo/build-app.mjs`
+const appRunnerPath = `${sandboxAppRuntime}/.jori/build-app.mjs`
 
 export function appRuntimeFiles(): SandboxWriteFile[] {
   return [
@@ -36,8 +36,8 @@ export function appRuntimeFiles(): SandboxWriteFile[] {
 
 export function appBuildCommand(workspacePath: string) {
   return [
-    `MILO_WORKSPACE=${shellQuote(sandboxAppRuntime)}`,
-    `MILO_APP_BUILDER_CONFIG=${shellQuote(appBuilderConfigPath)}`,
+    `JORI_WORKSPACE=${shellQuote(sandboxAppRuntime)}`,
+    `JORI_APP_BUILDER_CONFIG=${shellQuote(appBuilderConfigPath)}`,
     "node",
     "--experimental-strip-types",
     shellQuote(appRunnerPath),
@@ -53,7 +53,7 @@ function createAppRunnerScript() {
   return `
 import fs from "node:fs/promises"
 import path from "node:path"
-import { checkAppWorkspace } from "../milo-app-builder.ts"
+import { checkAppWorkspace } from "../jori-app-builder.ts"
 
 const workspace = ${JSON.stringify(sandboxWorkspace)}
 const inputPath = process.argv[2]
@@ -77,7 +77,7 @@ async function resolveWorkspacePath(value) {
   const relative = path.relative(workspaceRoot, resolved)
 
   if (relative === "" || relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error("workspacePath must be inside the Milo workspace")
+    throw new Error("workspacePath must be inside the Jori workspace")
   }
 
   return resolved

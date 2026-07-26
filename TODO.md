@@ -1,10 +1,10 @@
 # TODO
 
-High-level work to get Milo from "built, unpositioned" to "positioned, deployed,
+High-level work to get Jori from "built, unpositioned" to "positioned, deployed,
 collecting qualified waitlist signups". Product completeness is not a launch
 gate; a truthful public promise is.
 
-Position: **Milo runs the recurring work your team does by hand, and leaves
+Position: **Jori runs the recurring work your team does by hand, and leaves
 behind a live app the team can open instead of a message.**
 
 ICP: founders, engineering leads, and operations-minded people at software
@@ -47,7 +47,7 @@ companies of roughly 10–80 people running Slack, GitHub, and Linear.
       that input invalid instead of printing one notice under the whole thing
 - [ ] Verified sending domain. Both senders currently fall back to
       `onboarding@resend.dev`, which is Resend's test domain and only delivers
-      to the account owner. Set `MILO_EMAIL_FROM` once a domain is verified
+      to the account owner. Set `JORI_EMAIL_FROM` once a domain is verified
 - [x] Abuse controls: per-caller and global token buckets via
       `@convex-dev/rate-limiter`, a honeypot field, and identical responses for
       new and existing addresses so the list cannot be enumerated
@@ -62,11 +62,11 @@ Convex deployment, and no hosting provider is configured.
 - [ ] Provision a production Convex deployment, separate from the existing
       personal development deployment
 - [ ] Create the Railway project (see the 2026-07-24 decision in `EU.md`) and
-      wire `VITE_MILO_REGION`, `VITE_MILO_ENABLED_REGIONS`,
-      `VITE_MILO_PUBLIC_ORIGIN`, `VITE_MILO_US_ORIGIN`, `VITE_MILO_EU_ORIGIN`,
+      wire `VITE_JORI_REGION`, `VITE_JORI_ENABLED_REGIONS`,
+      `VITE_JORI_PUBLIC_ORIGIN`, `VITE_JORI_US_ORIGIN`, `VITE_JORI_EU_ORIGIN`,
       `VITE_CONVEX_URL`, `VITE_CONVEX_SITE_URL`
-- [ ] Set deployment-local `MILO_APP_URL`, `MILO_REGION`, `BETTER_AUTH_SECRET`,
-      `MILO_EMAIL_FROM`, and the Resend credentials
+- [ ] Set deployment-local `JORI_APP_URL`, `JORI_REGION`, `BETTER_AUTH_SECRET`,
+      `JORI_EMAIL_FROM`, and the Resend credentials
 - [ ] Add a `deploy:production` script alongside `deploy:development`
 - [ ] Smoke test: marketing routes, waitlist submission, confirmation email
 

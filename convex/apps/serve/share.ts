@@ -216,7 +216,7 @@ export function handleAppSharePreflight(
   })
 }
 
-/** The exchange is called from the Milo app origin, unlike the same-origin
+/** The exchange is called from the Jori app origin, unlike the same-origin
  *  loader fetches, so it is the one app endpoint that needs CORS. */
 function shareCorsHeaders(
   request: Request,

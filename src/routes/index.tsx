@@ -4,6 +4,6 @@ import { Landing } from "@/landing/home"
 export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
-    meta: [{ title: "Milo · Hand over the work you repeat" }],
+    meta: [{ title: "Jori · Hand over the work you repeat" }],
   }),
 })

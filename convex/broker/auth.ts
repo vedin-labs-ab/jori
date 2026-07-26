@@ -13,8 +13,8 @@ export async function authenticateBrokerRequest(
   ctx: ActionCtx,
   request: Request
 ): Promise<BrokerContext | null> {
-  const runId = request.headers.get("x-milo-run-id")
-  const secret = request.headers.get("x-milo-worker-secret")?.trim()
+  const runId = request.headers.get("x-jori-run-id")
+  const secret = request.headers.get("x-jori-worker-secret")?.trim()
 
   if (
     runId === null ||
@@ -77,7 +77,7 @@ export async function loadRunBrokerContext(
 }
 
 function isWorkerSecret(secret: string) {
-  const expected = readEnvironmentVariable("MILO_WORKER_SECRET")
+  const expected = readEnvironmentVariable("JORI_WORKER_SECRET")
 
   return expected !== undefined && timingSafeEqual(secret, expected)
 }

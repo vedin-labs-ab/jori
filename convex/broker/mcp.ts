@@ -26,8 +26,8 @@ import {
 } from "./approval"
 import { authenticateBrokerRequest } from "./auth"
 import { listCapabilities } from "./capabilities"
-import { normalizeBrokerToolInput, normalizeMiloToolInput } from "./input"
-import { callMiloTool } from "./milo"
+import { normalizeBrokerToolInput, normalizeJoriToolInput } from "./input"
+import { callJoriTool } from "./jori"
 import { callProviderTool, createGitHubCloneCredentials } from "./tools"
 
 type BrokerContext = ApprovalBrokerContext
@@ -93,7 +93,7 @@ export async function callBrokerTool(
   context: BrokerContext,
   request: BrokerToolRequest
 ): Promise<unknown> {
-  if (request.surface === "milo") {
+  if (request.surface === "jori") {
     const { mode } = authorizeTool(context, request)
 
     if (request.tool === "list_capabilities") {
@@ -104,7 +104,7 @@ export async function callBrokerTool(
       return await createPromptedToolApproval(ctx, context, request)
     }
 
-    return await runMiloTool(ctx, context, request)
+    return await runJoriTool(ctx, context, request)
   }
 
   const { mode, permission } = authorizeTool(context, request)
@@ -126,10 +126,10 @@ export async function executeApprovedTool(
   context: BrokerContext,
   request: BrokerToolRequest
 ): Promise<unknown> {
-  if (request.surface === "milo") {
+  if (request.surface === "jori") {
     authorizeTool(context, request)
 
-    return await runMiloTool(ctx, context, request)
+    return await runJoriTool(ctx, context, request)
   }
 
   const { permission } = authorizeTool(context, request)
@@ -142,14 +142,14 @@ export async function executeApprovedTool(
   return await runProviderTool(ctx, context, integration, request)
 }
 
-async function runMiloTool(
+async function runJoriTool(
   ctx: ActionCtx,
   context: BrokerContext,
   request: BrokerToolRequest
 ) {
-  return await callMiloTool(ctx, context, {
+  return await callJoriTool(ctx, context, {
     tool: request.tool,
-    args: normalizeMiloToolInput(request.tool, request.args),
+    args: normalizeJoriToolInput(request.tool, request.args),
   })
 }
 
@@ -172,7 +172,7 @@ async function requireSurfaceIntegration(
   context: BrokerContext,
   request: {
     permission: ToolPermission
-    surface: Exclude<ToolSurface, "milo">
+    surface: Exclude<ToolSurface, "jori">
     tool: string
   }
 ) {
@@ -232,7 +232,7 @@ async function authorizeSurfaceTool(
   context: BrokerContext,
   request: {
     permission: ToolPermission
-    surface: Exclude<ToolSurface, "milo">
+    surface: Exclude<ToolSurface, "jori">
     tool: string
   }
 ) {

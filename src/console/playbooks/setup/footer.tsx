@@ -133,7 +133,7 @@ export function EditSetupNotes({
       {customized ? (
         <p>
           Your {definition.app?.title ?? "playbook"} app has custom changes —
-          Milo keeps them and never overwrites a customized app.
+          Jori keeps them and never overwrites a customized app.
         </p>
       ) : null}
     </div>

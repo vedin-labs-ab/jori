@@ -107,7 +107,7 @@ export async function publishApp(
       blobs,
       assets,
       entrypoint: appEntrypoint,
-      sdk: "milo-app-sdk@0",
+      sdk: "jori-app-sdk@0",
       message: args.message,
       capabilities: args.capabilities ?? [],
       ...(args.template === undefined

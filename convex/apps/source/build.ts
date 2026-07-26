@@ -21,7 +21,7 @@ export type BuildAsset = {
   bytes: Buffer
 }
 
-const manifestPath = "milo-manifest.json"
+const manifestPath = "jori-manifest.json"
 const maxBuildAssets = 120
 const maxBuildAssetBytes = 2 * 1024 * 1024
 const maxBuildBytes = 8 * 1024 * 1024
@@ -89,7 +89,7 @@ function validateManifest(assets: BuildAsset[]) {
   const manifest = assets.find((asset) => asset.path === manifestPath)
 
   if (manifest === undefined) {
-    throw new Error("App build is missing milo-manifest.json.")
+    throw new Error("App build is missing jori-manifest.json.")
   }
 
   const parsed = JSON.parse(manifest.bytes.toString("utf8")) as {

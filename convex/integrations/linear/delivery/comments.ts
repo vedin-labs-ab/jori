@@ -22,7 +22,7 @@ export async function postLinearComment(
 
   return await linearGraphql(credentials.tokens.access, {
     query: `
-      mutation MiloAddComment($input: CommentCreateInput!) {
+      mutation JoriAddComment($input: CommentCreateInput!) {
         commentCreate(input: $input) {
           success
           comment {

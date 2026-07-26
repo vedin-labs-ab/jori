@@ -57,7 +57,7 @@ export const authorizeTool = internalQuery({
     }
 
     const integration =
-      permission.surface === "milo"
+      permission.surface === "jori"
         ? null
         : await findRuntimeIntegration(ctx, {
             organizationId: args.organizationId,
@@ -66,7 +66,7 @@ export const authorizeTool = internalQuery({
             integrationId: capability.integrationId ?? args.integrationId,
           })
 
-    if (permission.surface !== "milo" && integration === null) {
+    if (permission.surface !== "jori" && integration === null) {
       throw new Error(
         `No active ${permission.surface} integration is available`
       )
@@ -111,7 +111,7 @@ async function findRuntimeIntegration(
   args: {
     organizationId: string
     personId: Id<"persons">
-    surface: Exclude<Doc<"integrations">["integration"], "milo">
+    surface: Exclude<Doc<"integrations">["integration"], "jori">
     integrationId?: Id<"integrations">
   }
 ) {

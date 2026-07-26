@@ -1,4 +1,4 @@
-import { miloModel } from "../../../contracts/billing"
+import { joriModel } from "../../../contracts/billing"
 import { isRecord } from "../../../contracts/json"
 import {
   type PromptTemplateId,
@@ -19,7 +19,7 @@ export async function requestJudge(options: {
   payload: unknown
 }): Promise<Record<string, unknown>> {
   return await requestStructured({
-    model: miloModel,
+    model: joriModel,
     reasoning: judgeReasoning,
     schemaName: options.schemaName,
     schema: options.schema,

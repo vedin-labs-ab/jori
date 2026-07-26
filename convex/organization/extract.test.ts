@@ -16,9 +16,9 @@ describe("extractFacts", () => {
     sendOpenRouterChatMock.mockResolvedValue(
       openRouterResult({
         aliases: [],
-        domains: ["https://milo.example"],
-        name: "Milo",
-        summary: "Milo helps teams move work forward inside their tools.",
+        domains: ["https://jori.example"],
+        name: "Jori",
+        summary: "Jori helps teams move work forward inside their tools.",
       })
     )
   })
@@ -27,16 +27,16 @@ describe("extractFacts", () => {
     const input = {
       pages: [
         {
-          text: "Milo helps teams move work forward inside their tools.",
-          url: "https://milo.example",
+          text: "Jori helps teams move work forward inside their tools.",
+          url: "https://jori.example",
         },
       ],
-      primaryUrl: "https://milo.example",
+      primaryUrl: "https://jori.example",
     }
 
     await expect(extractFacts(input)).resolves.toMatchObject({
-      domains: ["milo.example"],
-      name: "Milo",
+      domains: ["jori.example"],
+      name: "Jori",
     })
 
     expect(sendOpenRouterChatMock).toHaveBeenCalledTimes(1)

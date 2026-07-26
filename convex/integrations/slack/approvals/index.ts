@@ -169,11 +169,11 @@ export function parseSlackApprovalInteraction(payload: unknown) {
 }
 
 function readActionDecision(actionId: unknown) {
-  if (actionId === "milo_approval_approve") {
+  if (actionId === "jori_approval_approve") {
     return "approved" as const
   }
 
-  if (actionId === "milo_approval_deny") {
+  if (actionId === "jori_approval_deny") {
     return "denied" as const
   }
 

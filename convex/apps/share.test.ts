@@ -145,19 +145,19 @@ describe("share grant enforcement", () => {
 })
 
 const exchangeEnvironment = {
-  MILO_APP_FRAME_ANCESTORS: "https://app.milo.example",
+  JORI_APP_FRAME_ANCESTORS: "https://app.jori.example",
 }
 
 describe("share exchange preflight", () => {
   test("allows configured app origins only", () => {
     const allowed = handleAppSharePreflight(
-      exchangeRequest({}, "https://app.milo.example"),
+      exchangeRequest({}, "https://app.jori.example"),
       exchangeEnvironment
     )
 
     expect(allowed.status).toBe(204)
     expect(allowed.headers.get("access-control-allow-origin")).toBe(
-      "https://app.milo.example"
+      "https://app.jori.example"
     )
     expect(allowed.headers.get("access-control-allow-methods")).toBe("POST")
 
@@ -204,14 +204,14 @@ describe("share exchange endpoint", () => {
       ctx,
       exchangeRequest(
         { appId: "app_1", secret: "s3cret" },
-        "https://app.milo.example"
+        "https://app.jori.example"
       ),
       exchangeEnvironment
     )
 
     expect(response.status).toBe(200)
     expect(response.headers.get("access-control-allow-origin")).toBe(
-      "https://app.milo.example"
+      "https://app.jori.example"
     )
     expect(await response.json()).toEqual(session)
     expect(vi.mocked(ctx.runMutation)).toHaveBeenCalledWith(

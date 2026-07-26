@@ -1,7 +1,7 @@
 import { type ComponentType, StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import * as AppModule from "./App"
-import "./milo.css"
+import "./jori.css"
 import "./styles.css"
 
 type AppExports = {

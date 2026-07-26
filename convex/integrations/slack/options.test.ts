@@ -15,7 +15,7 @@ test("returns active human Slack users with compact identity details", async () 
     { ...slackUser("U2", "old", "Old User"), deleted: true },
     { ...slackUser("U3", "helper", "Helper"), is_bot: true },
     { ...slackUser("U4", "app", "App"), is_app_user: true },
-    slackUser("UBOT", "milo", "Milo"),
+    slackUser("UBOT", "jori", "Jori"),
   ])
 
   const options = await searchSlackUsers({

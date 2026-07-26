@@ -131,7 +131,7 @@ function useAppFrameSession({
     }
 
     contentWindow.postMessage(
-      { type: "milo:app-token", token: session.token },
+      { type: "jori:app-token", token: session.token },
       convexSiteUrl
     )
   }, [iframeRef, session])
@@ -211,11 +211,11 @@ function useAppFrameMessages({
         return
       }
 
-      if (event.data?.type === "milo:app-ready" && event.data.appId === appId) {
+      if (event.data?.type === "jori:app-ready" && event.data.appId === appId) {
         setIsReady(true)
       }
 
-      if (event.data?.type === "milo:app-error" && event.data.appId === appId) {
+      if (event.data?.type === "jori:app-error" && event.data.appId === appId) {
         setError("The app frame failed to load.")
       }
     }

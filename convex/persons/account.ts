@@ -67,7 +67,7 @@ export async function resolveCurrentPerson(
   })
 
   if (personId === undefined) {
-    throw new Error("Your Milo identity is still syncing. Refresh shortly.")
+    throw new Error("Your Jori identity is still syncing. Refresh shortly.")
   }
 
   return personId

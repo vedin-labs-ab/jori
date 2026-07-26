@@ -11,9 +11,9 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Load full instructions with `load_skill`")
-    expect(prompt).toContain("`app-creator`: Create or update Milo apps")
-    expect(prompt).toContain("`frontend-design`: Design Milo-native")
-    expect(prompt).toContain("`image-generation`: Generate Milo image assets")
+    expect(prompt).toContain("`app-creator`: Create or update Jori apps")
+    expect(prompt).toContain("`frontend-design`: Design Jori-native")
+    expect(prompt).toContain("`image-generation`: Generate Jori image assets")
     expect(prompt).toContain("`slack`: Format Slack replies")
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("Use `send_reply`")
@@ -37,7 +37,7 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain("# Format")
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Load full instructions with `load_skill`")
-    expect(prompt).toContain("`image-generation`: Generate Milo image assets")
+    expect(prompt).toContain("`image-generation`: Generate Jori image assets")
     expect(prompt).not.toContain("`slack`: Format Slack replies")
     expect(prompt.indexOf("# Communication")).toBeLessThan(
       prompt.indexOf("# Format")

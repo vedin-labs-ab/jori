@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { callMiloTool } from "../../broker/milo"
+import { callJoriTool } from "../../broker/jori"
 import { callProviderTool } from "../../broker/tools"
 import { prepareIntegrationForRuntime } from "../../integrations/runtime"
 import { readRecord } from "../../shared/input"
@@ -56,8 +56,8 @@ export async function callAppTool(
 
   const authorization = await authorizeAppTool(ctx, context, request)
 
-  if (authorization.permission.surface === "milo") {
-    return await callAuthorizedMiloTool(ctx, context, request.tool, args)
+  if (authorization.permission.surface === "jori") {
+    return await callAuthorizedJoriTool(ctx, context, request.tool, args)
   }
 
   if (authorization.integration === null) {
@@ -113,13 +113,13 @@ async function authorizeAppTool(
   })
 }
 
-async function callAuthorizedMiloTool(
+async function callAuthorizedJoriTool(
   ctx: ActionCtx,
   context: AppPlatformContext,
   tool: string,
   args: Record<string, unknown>
 ) {
-  return await callMiloTool(
+  return await callJoriTool(
     ctx,
     {
       organizationId: context.organizationId,

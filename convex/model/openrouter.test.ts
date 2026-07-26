@@ -36,7 +36,7 @@ describe("openrouter client", () => {
 
   test("reads API key and default attribution", () => {
     process.env.OPENROUTER_API_KEY = " key "
-    process.env.CONVEX_SITE_URL = " https://milo.example "
+    process.env.CONVEX_SITE_URL = " https://jori.example "
     delete process.env.OPENROUTER_APP_CATEGORIES
     delete process.env.OPENROUTER_APP_TITLE
     delete process.env.OPENROUTER_HTTP_REFERER
@@ -44,8 +44,8 @@ describe("openrouter client", () => {
     expect(requireOpenRouterConfig()).toEqual({
       apiKey: "key",
       appCategories: "cloud-agent",
-      appTitle: "Milo",
-      httpReferer: "https://milo.example",
+      appTitle: "Jori",
+      httpReferer: "https://jori.example",
     })
   })
 
@@ -53,13 +53,13 @@ describe("openrouter client", () => {
     process.env.OPENROUTER_API_KEY = "key"
     process.env.CONVEX_SITE_URL = "https://convex.example"
     process.env.OPENROUTER_APP_CATEGORIES = "automation"
-    process.env.OPENROUTER_APP_TITLE = "Custom Milo"
+    process.env.OPENROUTER_APP_TITLE = "Custom Jori"
     process.env.OPENROUTER_HTTP_REFERER = "https://app.example"
 
     expect(requireOpenRouterConfig()).toEqual({
       apiKey: "key",
       appCategories: "automation",
-      appTitle: "Custom Milo",
+      appTitle: "Custom Jori",
       httpReferer: "https://app.example",
     })
   })

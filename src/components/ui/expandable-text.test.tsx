@@ -17,7 +17,7 @@ afterEach(() => {
 })
 
 const longText =
-  "Milo watches the conversations that matter, gathers the right context, and helps teams move work forward."
+  "Jori watches the conversations that matter, gathers the right context, and helps teams move work forward."
 
 function mockOverflowingContent() {
   vi.spyOn(Element.prototype, "scrollHeight", "get").mockReturnValue(96)

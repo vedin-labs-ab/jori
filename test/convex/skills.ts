@@ -15,17 +15,17 @@ export function runtimeSkills(
   return [
     runtimeSkill({
       name: "app-creator",
-      description: "Create or update Milo apps.",
+      description: "Create or update Jori apps.",
       body: "# App Creator\n\nUse this skill for app work.",
     }),
     runtimeSkill({
       name: "frontend-design",
-      description: "Design Milo-native app and frontend UI.",
+      description: "Design Jori-native app and frontend UI.",
       body: "# Frontend Design\n\nDesign the useful surface first.",
     }),
     runtimeSkill({
       name: "image-generation",
-      description: "Generate Milo image assets.",
+      description: "Generate Jori image assets.",
       body: "# Image Generation\n\nCall `generate_image` for images.",
     }),
     runtimeSkill({

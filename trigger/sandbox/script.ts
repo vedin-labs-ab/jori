@@ -24,7 +24,7 @@ export async function runJsonScript(args: {
 }
 
 export function temporaryGitCredentialPath(label: string) {
-  return `/tmp/milo-github-${label}-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  return `/tmp/jori-github-${label}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
 export function gitCredentialHelperScript(tokenPath: string, username: string) {
@@ -114,11 +114,11 @@ export function gitBashGuard() {
   const subcommand = shellParameter(1)
 
   return [
-    'milo_real_git="$(command -v git)" || exit 2',
-    'milo_git_guard="$(mktemp -d)" || exit 2',
-    'cleanup_git_guard() { rm -rf "$milo_git_guard"; }',
+    'jori_real_git="$(command -v git)" || exit 2',
+    'jori_git_guard="$(mktemp -d)" || exit 2',
+    'cleanup_git_guard() { rm -rf "$jori_git_guard"; }',
     "trap cleanup_git_guard EXIT",
-    "cat > \"$milo_git_guard/git\" <<'MILO_READ_ONLY_GIT'",
+    "cat > \"$jori_git_guard/git\" <<'JORI_READ_ONLY_GIT'",
     "#!/bin/sh",
     `case "${subcommand}" in`,
     ...readOnlyGitShellCases("    "),
@@ -133,11 +133,11 @@ export function gitBashGuard() {
     "    exit 2",
     "    ;;",
     "esac",
-    'GIT_OPTIONAL_LOCKS=0 exec "$MILO_REAL_GIT" "$@"',
-    "MILO_READ_ONLY_GIT",
-    'chmod 700 "$milo_git_guard/git"',
-    'export MILO_REAL_GIT="$milo_real_git"',
-    'PATH="$milo_git_guard:$PATH"',
+    'GIT_OPTIONAL_LOCKS=0 exec "$JORI_REAL_GIT" "$@"',
+    "JORI_READ_ONLY_GIT",
+    'chmod 700 "$jori_git_guard/git"',
+    'export JORI_REAL_GIT="$jori_real_git"',
+    'PATH="$jori_git_guard:$PATH"',
     "export PATH",
   ].join("\n")
 }
@@ -177,10 +177,10 @@ function shellParameter(index: number, fallback = "") {
 
 function scriptCommand(script: string, input: Record<string, unknown>) {
   return [
-    `export MILO_TOOL_INPUT=${shellQuote(JSON.stringify(input))}`,
-    "node --input-type=module <<'MILO_TOOL_SCRIPT'",
+    `export JORI_TOOL_INPUT=${shellQuote(JSON.stringify(input))}`,
+    "node --input-type=module <<'JORI_TOOL_SCRIPT'",
     script,
-    "MILO_TOOL_SCRIPT",
+    "JORI_TOOL_SCRIPT",
   ].join("\n")
 }
 

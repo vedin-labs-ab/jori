@@ -15,7 +15,7 @@ export function BillingActivityEmpty() {
           <ReceiptText />
         </EmptyMedia>
         <EmptyTitle>No billing activity yet</EmptyTitle>
-        <EmptyDescription>Costs appear here as Milo works.</EmptyDescription>
+        <EmptyDescription>Costs appear here as Jori works.</EmptyDescription>
       </EmptyHeader>
     </Empty>
   )

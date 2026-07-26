@@ -36,7 +36,7 @@ describe("execution row one-shot details", () => {
 
     await screen.findByText("Tools")
 
-    expect(screen.getByText("Milo")).toBeDefined()
+    expect(screen.getByText("Jori")).toBeDefined()
     expect(screen.queryByText("Scheduled")).toBeNull()
     expect(screen.queryByText("One-shot")).toBeNull()
     expect(screen.getByText("Tools")).toBeDefined()
@@ -76,7 +76,7 @@ describe("execution row one-shot details", () => {
 function oneShotExecution({ details }: Pick<ExecutionItem, "details">) {
   return makeExecution({
     details,
-    source: { type: "automation", surface: "milo" },
+    source: { type: "automation", surface: "jori" },
     task: "Generate a team image.",
     title: "Daily image",
     trigger: "Time automation",

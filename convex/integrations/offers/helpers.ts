@@ -78,7 +78,7 @@ function normalizeOfferReturnUrl(
 
   if (url.origin !== requireOrigin() || !isAllowedPath(url)) {
     throw new Error(
-      "Integration offer return URL must point to a Milo integration offer."
+      "Integration offer return URL must point to a Jori integration offer."
     )
   }
 

@@ -74,7 +74,7 @@ export async function fetchLinearInstallationProfile(accessToken: string) {
     }
   }>(accessToken, {
     query: `
-      query MiloLinearInstallation {
+      query JoriLinearInstallation {
         viewer {
           id
           name

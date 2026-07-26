@@ -22,18 +22,18 @@ afterEach(async () => {
 })
 
 test("replaces a source manifest with one generated build asset", async () => {
-  const project = await fs.mkdtemp(path.join(os.tmpdir(), "milo-assets-"))
+  const project = await fs.mkdtemp(path.join(os.tmpdir(), "jori-assets-"))
   const assetsDirectory = path.join(project, "dist/assets")
   projects.push(project)
   await fs.mkdir(assetsDirectory, { recursive: true })
   await Promise.all([
     fs.writeFile(path.join(assetsDirectory, "app.js"), "export {}"),
-    fs.writeFile(path.join(project, "dist/milo-manifest.json"), "stale"),
+    fs.writeFile(path.join(project, "dist/jori-manifest.json"), "stale"),
   ])
 
   const assets = await readBuildAssets(project)
   const manifests = assets.filter(
-    (asset) => asset.path === "milo-manifest.json"
+    (asset) => asset.path === "jori-manifest.json"
   )
 
   expect(manifests).toHaveLength(1)

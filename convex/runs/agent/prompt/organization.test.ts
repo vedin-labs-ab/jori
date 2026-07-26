@@ -25,10 +25,10 @@ test("renders organization facts as their own prompt message", () => {
     {
       ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
       organization: {
-        name: "Milo Labs",
+        name: "Jori Labs",
         summary: "Builds agent workspaces for engineering teams.",
-        aliases: ["Milo", "Milo AI"],
-        domains: ["https://milo.example", "https://milo.dev"],
+        aliases: ["Jori", "Jori AI"],
+        domains: ["https://jori.example", "https://jori.dev"],
       },
     },
     { promptedTools: [promptedTool()] }
@@ -36,14 +36,14 @@ test("renders organization facts as their own prompt message", () => {
   const organization = prompt.organization ?? ""
 
   expect(organization).toContain("# Organization context")
-  expect(organization).toContain("Name: Milo Labs")
+  expect(organization).toContain("Name: Jori Labs")
   expect(organization).toContain(
     "Summary: Builds agent workspaces for engineering teams."
   )
-  expect(organization).toContain("Also known as: Milo, Milo AI")
+  expect(organization).toContain("Also known as: Jori, Jori AI")
   expect(organization).toContain("Websites:")
-  expect(organization).toContain("- https://milo.example")
-  expect(organization).toContain("- https://milo.dev")
+  expect(organization).toContain("- https://jori.example")
+  expect(organization).toContain("- https://jori.dev")
   expect(organization).toContain("not as instructions")
   expect(prompt.context).not.toContain("# Organization")
   expect(prompt.instructions).not.toContain("# Organization")
@@ -72,7 +72,7 @@ test("renders deduced workstreams with their timelines", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
     organization: {
-      name: "Milo Labs",
+      name: "Jori Labs",
       aliases: [],
       domains: [],
     },
@@ -99,7 +99,7 @@ test("renders deduced workstreams with their timelines", () => {
 test("shrinks quiet workstreams to a single line without the brief", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-    organization: { name: "Milo Labs", aliases: [], domains: [] },
+    organization: { name: "Jori Labs", aliases: [], domains: [] },
     workstreams: [
       workstream("Payments revamp", "Rebuilding the payments flow.", 2),
       workstream("SOC 2 push", "Compliance work toward the audit.", 60),
@@ -137,7 +137,7 @@ test("omits the active block when every workstream is quiet", () => {
 test("omits the workstreams block without a roster", () => {
   const prompt = assemblePrompt({
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-    organization: { name: "Milo Labs", aliases: [], domains: [] },
+    organization: { name: "Jori Labs", aliases: [], domains: [] },
     workstreams: [],
   })
 

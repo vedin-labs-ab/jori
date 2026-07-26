@@ -28,7 +28,7 @@ test("renders recurring automation details", async () => {
       source: {
         kind: { label: "recurring", type: "recurring" },
         type: "automation",
-        surface: "milo",
+        surface: "jori",
       },
       details: [
         { type: "schedule", label: "Daily at 09:00 UTC" },
@@ -56,7 +56,7 @@ test("renders recurring automation details", async () => {
 
   await screen.findByText("Tools")
 
-  expect(screen.getByText("Milo")).toBeDefined()
+  expect(screen.getByText("Jori")).toBeDefined()
   expect(screen.getAllByText("Daily at 09:00 UTC").length).toBeGreaterThan(1)
   expect(screen.getByText("Schedule")).toBeDefined()
   expect(screen.queryByText("Occurrence")).toBeNull()

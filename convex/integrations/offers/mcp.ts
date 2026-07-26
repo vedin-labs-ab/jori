@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { type MiloToolRequest, requiredString } from "../../shared/input"
+import { type JoriToolRequest, requiredString } from "../../shared/input"
 import {
   type Integration,
   integrationLabel,
@@ -21,7 +21,7 @@ export function isIntegrationOfferTool(tool: string) {
 export async function callIntegrationOfferTool(
   ctx: ActionCtx,
   context: OfferContext,
-  request: MiloToolRequest,
+  request: JoriToolRequest,
   deliver: IntegrationOfferDeliverer
 ) {
   if (!isIntegrationOfferTool(request.tool)) {
@@ -42,7 +42,7 @@ export async function callIntegrationOfferTool(
       status: "connected",
       integration,
       integrationId: existing._id,
-      message: `${label} is already connected and available to Milo.`,
+      message: `${label} is already connected and available to Jori.`,
     }
   }
 

@@ -18,13 +18,13 @@ import { Subprocessors } from "./subprocessors"
 export function ScopeSection() {
   return (
     <Section
-      lede="Milo works with the accounts you connect, with the access you grant. Nothing else."
+      lede="Jori works with the accounts you connect, with the access you grant. Nothing else."
       support
       title="It acts as you, never past you"
     >
       <FactList>
         <Definition icon={Fingerprint} term="Your accounts, your identity">
-          Milo acts through the accounts you connect, as you. Disconnect an
+          Jori acts through the accounts you connect, as you. Disconnect an
           integration and its access ends with it.
         </Definition>
         <Definition icon={Users} term="Personal and organization">
@@ -33,7 +33,7 @@ export function ScopeSection() {
           sight.
         </Definition>
         <Definition icon={GitBranch} term="Subtasks inherit less, never more">
-          Milo can split a job into subtasks. A subtask can never hold access
+          Jori can split a job into subtasks. A subtask can never hold access
           its parent lacks.
         </Definition>
       </FactList>
@@ -63,9 +63,9 @@ export function BoundariesSection() {
         </Definition>
         <Definition
           icon={FileSearch}
-          term="What Milo reads is evidence, not instructions"
+          term="What Jori reads is evidence, not instructions"
         >
-          Text inside emails, pages, and tickets can't redirect Milo, grant
+          Text inside emails, pages, and tickets can't redirect Jori, grant
           permission, or change the task. Only you can.
         </Definition>
         <Definition icon={Link2} term="Share links are view-only and mortal">
@@ -87,7 +87,7 @@ export function DataSection() {
     >
       <FactList>
         <Definition icon={KeyRound} term="Access you grant">
-          Milo reads through the OAuth grants you approve, integration by
+          Jori reads through the OAuth grants you approve, integration by
           integration. Revoke a grant and the access is gone.
         </Definition>
         <Definition icon={Share2} term="A short list of subprocessors">
@@ -97,7 +97,7 @@ export function DataSection() {
           Your data is never used to train models.
         </Definition>
         <Definition icon={BadgeCheck} term="GDPR">
-          Milo is built to operate in line with GDPR. Data processing agreements
+          Jori is built to operate in line with GDPR. Data processing agreements
           are available from launch.
         </Definition>
         {/* TODO: add the retention commitment here once decided. */}

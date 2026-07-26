@@ -7,7 +7,7 @@ export type StripeParams = {
 }
 
 /**
- * The whole Stripe surface Milo uses is a handful of REST calls, so the edge
+ * The whole Stripe surface Jori uses is a handful of REST calls, so the edge
  * is a plain fetch client with Stripe's form encoding rather than an SDK.
  * Responses come back as loosely typed objects; call sites read the few
  * fields they need with the readers below.

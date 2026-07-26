@@ -10,14 +10,14 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useMiloState } from "@/milo"
+import { useJoriState } from "@/jori"
 import { BriefingView } from "./Briefing"
 import { contract, type MeetingBriefing } from "./contract"
 
 type MeetingEntry = [string, MeetingBriefing]
 
 export default function App() {
-  const state = useMiloState(contract.state.briefings)
+  const state = useJoriState(contract.state.briefings)
   const [chosenId, setChosenId] = useState(readMeetingId)
   const now = useNow()
   const meetings = useMemo(() => orderedMeetings(state.value?.meetings, now), [state.value, now])
@@ -48,7 +48,7 @@ export default function App() {
       />
       {deliveryIssue === undefined ? null : (
         <p className="mt-5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
-          {deliveryIssue.error ?? "The latest briefing delivery could not be confirmed. Milo will not resend it automatically, to avoid a duplicate."}
+          {deliveryIssue.error ?? "The latest briefing delivery could not be confirmed. Jori will not resend it automatically, to avoid a duplicate."}
         </p>
       )}
       {state.error === null || meetings.length === 0 ? null : (
@@ -162,7 +162,7 @@ function EmptyState() {
       <EmptyHeader>
         <EmptyMedia variant="icon"><CalendarDays /></EmptyMedia>
         <EmptyTitle>No meeting needs a briefing yet</EmptyTitle>
-        <EmptyDescription>Milo will add one here when an upcoming meeting has useful context to prepare.</EmptyDescription>
+        <EmptyDescription>Jori will add one here when an upcoming meeting has useful context to prepare.</EmptyDescription>
       </EmptyHeader>
     </Empty>
   )
@@ -174,7 +174,7 @@ function IncompleteState({ failed, gap }: { failed: boolean; gap?: string }) {
       <EmptyHeader>
         <EmptyMedia variant="icon"><CalendarDays /></EmptyMedia>
         <EmptyTitle>{failed ? "Meeting check did not finish" : "Meeting check incomplete"}</EmptyTitle>
-        <EmptyDescription>{gap ?? "Milo could not verify the upcoming calendar, so no new briefings were created."}</EmptyDescription>
+        <EmptyDescription>{gap ?? "Jori could not verify the upcoming calendar, so no new briefings were created."}</EmptyDescription>
       </EmptyHeader>
     </Empty>
   )

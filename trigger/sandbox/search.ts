@@ -47,7 +47,7 @@ import fs from "node:fs";
 import path from "node:path";
 import readline from "node:readline";
 
-const input = JSON.parse(process.env.MILO_TOOL_INPUT ?? "{}");
+const input = JSON.parse(process.env.JORI_TOOL_INPUT ?? "{}");
 const workspace = ${JSON.stringify(sandboxWorkspace)};
 const skipped = new Set([".git", "node_modules", "dist"]);
 
@@ -154,7 +154,7 @@ async function resolveBase(value) {
   const relative = path.relative(root, real);
 
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error("Path must be inside the Milo workspace.");
+    throw new Error("Path must be inside the Jori workspace.");
   }
 
   return { real, baseReal: real };

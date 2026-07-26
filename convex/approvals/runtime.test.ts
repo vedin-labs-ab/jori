@@ -15,7 +15,7 @@ describe("approval command parsing", () => {
       code: "ABC12345",
       decision: "denied",
     })
-    expect(parseApprovalDecisionText("@milo approve ABC12345")).toBeNull()
+    expect(parseApprovalDecisionText("@jori approve ABC12345")).toBeNull()
     expect(parseApprovalDecisionText("approve abc")).toBeNull()
   })
 

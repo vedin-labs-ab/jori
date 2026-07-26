@@ -33,7 +33,7 @@ function automationRecord(
   }
 }
 
-export const automationMiloToolResponseSchemas = {
+export const automationJoriToolResponseSchemas = {
   add_automation: automationRecord(
     "The automation record. An existing automation with the same key and identical configuration is returned instead of a duplicate.",
     {

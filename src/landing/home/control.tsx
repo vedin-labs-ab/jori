@@ -10,24 +10,24 @@ export function Control() {
   return (
     <Section
       className="border-y bg-muted/50"
-      lede="Handing over real work means handing over real access. Milo is built so you never have to take its word for anything."
+      lede="Handing over real work means handing over real access. Jori is built so you never have to take its word for anything."
       title="It works on your terms"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div>
           <dl className="space-y-8">
             <Definition term="Permission modes">
-              Every action Milo can take has a mode: allowed, ask first, or
+              Every action Jori can take has a mode: allowed, ask first, or
               blocked. Posting, commenting, changing: you decide which need your
               sign-off.
             </Definition>
             <Definition term="Ask-first approvals">
-              Set a tool to ask first and Milo requests before acting, with a
+              Set a tool to ask first and Jori requests before acting, with a
               code you can approve right from the thread. Denied requests never
               run.
             </Definition>
             <Definition term="Receipts for every run">
-              Every run records what Milo read, what it did, and what it asked.
+              Every run records what Jori read, what it did, and what it asked.
               Open any run in the console and check.
             </Definition>
           </dl>
@@ -35,7 +35,7 @@ export function Control() {
             className="mt-7 inline-flex items-center gap-1.5 py-1 font-medium text-primary text-sm hover:underline"
             to="/trust"
           >
-            How Milo handles access and data
+            How Jori handles access and data
             <ArrowRight className="size-3.5" />
           </Link>
         </div>

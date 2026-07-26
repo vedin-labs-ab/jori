@@ -5,7 +5,7 @@ import { buildInstallState } from "./install"
 
 describe("buildInstallState", () => {
   beforeEach(() => {
-    vi.stubEnv("MILO_APP_URL", "https://app.example")
+    vi.stubEnv("JORI_APP_URL", "https://app.example")
   })
 
   afterEach(() => {
@@ -49,7 +49,7 @@ describe("buildInstallState", () => {
     ).rejects.toThrow("another organization")
   })
 
-  test("rejects a return URL outside the Milo app origin", async () => {
+  test("rejects a return URL outside the Jori app origin", async () => {
     const ctx = createCtx({ subject: "user_1", org: "organization_1" })
 
     await expect(
@@ -57,7 +57,7 @@ describe("buildInstallState", () => {
         organizationId: "organization_1",
         returnUrl: "https://evil.example/integrations",
       })
-    ).rejects.toThrow("Return URL must point to the Milo app.")
+    ).rejects.toThrow("Return URL must point to the Jori app.")
   })
 
   test("rejects a relative return URL", async () => {

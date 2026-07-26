@@ -40,7 +40,7 @@ export function isManualTrigger(run: Doc<"runs">) {
   return run.cause.type === "manual" && run.parentId === undefined
 }
 
-/** A run Milo spawned from another run to work a delegated subtask. */
+/** A run Jori spawned from another run to work a delegated subtask. */
 export function isSubtaskRun(run: Doc<"runs">) {
   return run.parentId !== undefined
 }
@@ -56,7 +56,7 @@ export function runSource(
   }
 
   if (isManualTrigger(context.run)) {
-    source.surface = "milo"
+    source.surface = "jori"
     source.trigger =
       triggeredBy === undefined
         ? {}
@@ -64,7 +64,7 @@ export function runSource(
   }
 
   if (isSubtaskRun(context.run)) {
-    source.surface = "milo"
+    source.surface = "jori"
     source.parent =
       context.parent === null ? {} : { title: context.parent.snapshot.title }
   }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { callMiloAppTool } from "./mcp"
+import { callJoriAppTool } from "./mcp"
 import { createAppSourceSnapshot, hashAppSource } from "./source"
 import { validateAppBuild } from "./source/build"
 
@@ -14,7 +14,7 @@ describe("app MCP publishing", () => {
       {
         path: "src/contract.ts",
         content:
-          'import { defineAppContract } from "@/milo/contract"\nexport const contract = defineAppContract({ version: 1, state: {} })\n',
+          'import { defineAppContract } from "@/jori/contract"\nexport const contract = defineAppContract({ version: 1, state: {} })\n',
       },
       {
         path: "src/styles.css",
@@ -37,7 +37,7 @@ describe("app MCP publishing", () => {
       },
     }
 
-    await callMiloAppTool(
+    await callJoriAppTool(
       ctx as never,
       {
         organizationId: "organization",
@@ -68,7 +68,7 @@ function minimalBuildAssets() {
       contentBase64: Buffer.from("export {}\n").toString("base64"),
     },
     {
-      path: "milo-manifest.json",
+      path: "jori-manifest.json",
       mimeType: "application/json; charset=utf-8",
       contentBase64: Buffer.from(
         JSON.stringify({ entry: "assets/app.js", styles: [] })

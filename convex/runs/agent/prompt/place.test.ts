@@ -38,7 +38,7 @@ test("renders place claims as their own prompt message", () => {
 test("orders sections canonically regardless of claim order", () => {
   const prompt = assemblePrompt(
     inputWithPlace([
-      { section: "milo", text: "Milo drafts replies for review." },
+      { section: "jori", text: "Jori drafts replies for review." },
       { section: "purpose", text: "Customer bug intake." },
     ]),
     { promptedTools: [promptedTool()] }
@@ -46,7 +46,7 @@ test("orders sections canonically regardless of claim order", () => {
   const block = prompt.place ?? ""
 
   expect(block.indexOf("Purpose:")).toBeLessThan(
-    block.indexOf("Milo's role here:")
+    block.indexOf("Jori's role here:")
   )
 })
 

@@ -11,9 +11,9 @@ import {
   type SchemaMap,
   stringProperty,
 } from "../common"
-import { automationMiloToolResponseSchemas } from "./automations"
-import { brokerMiloToolResponseSchemas } from "./broker"
-import { runMiloToolResponseSchemas } from "./runs"
+import { automationJoriToolResponseSchemas } from "./automations"
+import { brokerJoriToolResponseSchemas } from "./broker"
+import { runJoriToolResponseSchemas } from "./runs"
 
 function assetSummaryProperties() {
   return {
@@ -105,8 +105,8 @@ function webToolResult(): JsonSchema {
   })
 }
 
-export const coreMiloToolResponseSchemas = {
-  ...brokerMiloToolResponseSchemas,
+export const coreJoriToolResponseSchemas = {
+  ...brokerJoriToolResponseSchemas,
   load_skill: {
     description: "The skill's instructions, or the catalog when unknown.",
     oneOf: [
@@ -142,7 +142,7 @@ export const coreMiloToolResponseSchemas = {
       }),
     ],
   },
-  ...runMiloToolResponseSchemas,
+  ...runJoriToolResponseSchemas,
   save_asset: objectSchema({
     required: ["assetId", "mimeType", "name", "size", "url"],
     properties: {
@@ -193,4 +193,4 @@ export const coreMiloToolResponseSchemas = {
   web_fetch: webToolResult(),
 } satisfies SchemaMap
 
-export { automationMiloToolResponseSchemas }
+export { automationJoriToolResponseSchemas }

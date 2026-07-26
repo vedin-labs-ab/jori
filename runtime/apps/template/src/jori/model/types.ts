@@ -1,7 +1,7 @@
 import { type z } from "zod"
 import { type JsonObject } from "../json"
 
-export type MiloPromptInput<TSchema extends z.ZodType = z.ZodType> = {
+export type JoriPromptInput<TSchema extends z.ZodType = z.ZodType> = {
   instruction: string
   input?: unknown
   schema: TSchema
@@ -14,15 +14,15 @@ export type MiloPromptInput<TSchema extends z.ZodType = z.ZodType> = {
   maxOutputTokens?: number
 }
 
-export type MiloPromptResult<T> = {
+export type JoriPromptResult<T> = {
   output: T
   text: string
-  diagnostics: MiloPromptDiagnostics
+  diagnostics: JoriPromptDiagnostics
   model: string
   usage?: unknown
 }
 
-export type MiloPromptDiagnostics = {
+export type JoriPromptDiagnostics = {
   durationMs: number
   generationId: string
   model: string
@@ -67,7 +67,7 @@ export type RawPromptInput = {
 export type RawPromptResult = {
   output: unknown
   text: string
-  diagnostics: MiloPromptDiagnostics
+  diagnostics: JoriPromptDiagnostics
   model: string
   usage?: unknown
 }

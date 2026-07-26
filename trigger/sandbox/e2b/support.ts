@@ -36,7 +36,7 @@ export async function createSandbox(runId: RuntimeId<"runs">) {
       onTimeout: "pause",
     },
     metadata: {
-      app: "milo",
+      app: "jori",
       runId,
       runtime: "trigger",
     },
@@ -78,7 +78,7 @@ export async function runSandboxCommand(
 }
 
 function requireSandboxTemplate() {
-  return process.env.MILO_E2B_TEMPLATE?.trim() || "milo-codex"
+  return process.env.JORI_E2B_TEMPLATE?.trim() || "jori-codex"
 }
 
 function requireE2BApiKey() {

@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "check": "node --experimental-strip-types /home/user/.milo/apps/runtime/milo-app-builder.ts check ."
+    "check": "node --experimental-strip-types /home/user/.jori/apps/runtime/jori-app-builder.ts check ."
   },
   "dependencies": {
     "@base-ui/react": "1.5.0",

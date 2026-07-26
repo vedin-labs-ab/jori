@@ -1,6 +1,6 @@
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
-import { type MiloToolRequest } from "../shared/input"
+import { type JoriToolRequest } from "../shared/input"
 import {
   getRuntimeSkill,
   listRuntimeSkills,
@@ -8,32 +8,32 @@ import {
   runtimeSkillAssociatedIntegrations,
 } from "./runtime"
 
-type MiloSkillRun = {
+type JoriSkillRun = {
   organizationId: string
 }
 
-export function isMiloSkillTool(tool: string) {
+export function isJoriSkillTool(tool: string) {
   return tool === "load_skill"
 }
 
-export async function callMiloSkillTool(
+export async function callJoriSkillTool(
   ctx: ActionCtx,
-  run: MiloSkillRun,
-  request: MiloToolRequest
+  run: JoriSkillRun,
+  request: JoriToolRequest
 ) {
   const skills = (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
     organizationId: run.organizationId,
   })) as RuntimeSkill[]
 
-  return loadMiloSkillTool(skills, request)
+  return loadJoriSkillTool(skills, request)
 }
 
-export function loadMiloSkillTool(
+export function loadJoriSkillTool(
   skills: readonly RuntimeSkill[],
-  request: MiloToolRequest
+  request: JoriToolRequest
 ) {
-  if (!isMiloSkillTool(request.tool)) {
-    throw new Error(`Unknown Milo skill tool: ${request.tool}`)
+  if (!isJoriSkillTool(request.tool)) {
+    throw new Error(`Unknown Jori skill tool: ${request.tool}`)
   }
 
   const name = readSkillName(request.args)

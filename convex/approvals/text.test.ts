@@ -25,7 +25,7 @@ test("detects exact user approval commands", () => {
   expect(
     isPersonApprovalDecisionText({
       actorKind: "person",
-      text: "@milo approve yd4uefnv",
+      text: "@jori approve yd4uefnv",
     })
   ).toBe(false)
 })
@@ -103,7 +103,7 @@ test("ignores bot-authored provider text commands", async () => {
     actor: {
       externalId: "292075993",
       kind: "bot",
-      name: "meet-milo[bot]",
+      name: "meet-jori[bot]",
     },
     actorKind: "bot",
     integration: "github",

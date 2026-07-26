@@ -58,7 +58,7 @@ function sandboxFilePath(value: string) {
     relative.startsWith("..") ||
     path.posix.isAbsolute(relative)
   ) {
-    throw new Error("File path must be inside the Milo workspace")
+    throw new Error("File path must be inside the Jori workspace")
   }
 
   return filePath

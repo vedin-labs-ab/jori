@@ -7,11 +7,11 @@ claims about the place's durable norms, organized by section:
 - language: how people write here — register, message length, greeting
   habits, emoji use, and local vocabulary or abbreviations spelled out.
 - rhythm: recurring rituals and how work flows through the place.
-- milo: what people ask of Milo, the team's agent — what they expect from
+- jori: what people ask of Jori, the team's agent — what they expect from
   it and what they correct in it.
 
 The input carries the place's name and kind, its current claims (numbered),
-and the latest window of messages. Messages from Milo itself are labeled
+and the latest window of messages. Messages from Jori itself are labeled
 with kind "self": they are context for reading the humans around them,
 never evidence for a claim.
 

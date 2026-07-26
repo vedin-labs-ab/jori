@@ -44,7 +44,7 @@ export function PlaceCard({
   )
 }
 
-// Places Milo is present in but has no norms for yet: quiet, not clickable,
+// Places Jori is present in but has no norms for yet: quiet, not clickable,
 // there to show coverage. The section header explains warming once; each
 // card carries only its own facts. The Card primitive draws its edge with a
 // ring, which can't dash, so this swaps it for a dashed border.

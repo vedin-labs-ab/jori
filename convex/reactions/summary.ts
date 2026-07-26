@@ -172,7 +172,7 @@ function reactionActorName(actor: Actor | undefined) {
   }
 
   if ("externalId" in actor) {
-    return actor.kind === "self" ? "Milo" : actor.name
+    return actor.kind === "self" ? "Jori" : actor.name
   }
 
   return "personId" in actor ? actor.name : undefined

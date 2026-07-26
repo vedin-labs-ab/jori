@@ -39,7 +39,7 @@ function capabilityGroupSchema(
   })
 }
 
-export const brokerMiloToolResponseSchemas = {
+export const brokerJoriToolResponseSchemas = {
   list_capabilities: objectSchema({
     required: ["run", "connected", "available"],
     description: "Tool availability grouped by integration surface.",

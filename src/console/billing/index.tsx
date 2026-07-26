@@ -53,7 +53,7 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
         <AlertTitle>Subscription paused</AlertTitle>
         <AlertDescription>
           Scheduled work is on hold and mentions go unanswered. Choose a plan or
-          fix the payment method to get Milo working again.
+          fix the payment method to get Jori working again.
         </AlertDescription>
       </Alert>
     )
@@ -69,7 +69,7 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
       <Alert>
         <AlertTitle>Trial ended</AlertTitle>
         <AlertDescription>
-          Milo is paused until the organization is on a plan. Everything is
+          Jori is paused until the organization is on a plan. Everything is
           saved and resumes the moment you subscribe.
         </AlertDescription>
       </Alert>
@@ -92,7 +92,7 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
 }
 
 const billingReturnToasts: Record<string, string> = {
-  subscribed: "Plan activated. Milo is on the clock.",
+  subscribed: "Plan activated. Jori is on the clock.",
   "topped-up": "Wallet topped up.",
 }
 

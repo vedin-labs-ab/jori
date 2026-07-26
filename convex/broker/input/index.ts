@@ -6,7 +6,7 @@ import {
 } from "../../runs/agent/tools/schemas"
 import { validateSchemaValue } from "./validation"
 
-export function normalizeMiloToolInput(
+export function normalizeJoriToolInput(
   tool: string,
   input: unknown
 ): JsonObject {

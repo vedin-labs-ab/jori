@@ -45,7 +45,7 @@ export const createAdapterOptions = () => createOptions()
 export const createAuth = (ctx: GenericCtx<DataModel>) =>
   betterAuth({
     ...createOptions({
-      // Milo is closed, and this is where that is true rather than merely
+      // Jori is closed, and this is where that is true rather than merely
       // displayed: Better Auth refuses the creation, so a signed-in stranger
       // never gets the organization claim every other surface demands.
       allowUserToCreateOrganization: async (user) =>

@@ -78,7 +78,7 @@ export function getActorDisplayName(actor: Actor | undefined) {
 
   if ("externalId" in actor) {
     if (actor.kind === "self") {
-      return "Milo"
+      return "Jori"
     }
 
     return actor.name ?? actor.email ?? actor.externalId

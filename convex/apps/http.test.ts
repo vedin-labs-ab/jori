@@ -5,7 +5,7 @@ import { handleAppStaticAssetRequest } from "./serve/http"
 import { createSessionAuthorizationArgs } from "./serve/session"
 
 describe("app render CSP", () => {
-  test("allows only self when no Milo app origins are configured", () => {
+  test("allows only self when no Jori app origins are configured", () => {
     const policy = readAppFramePolicy({})
 
     expect(policy).toEqual({
@@ -21,37 +21,37 @@ describe("app render CSP", () => {
     expect(csp).toContain("style-src 'self' 'unsafe-inline' blob:")
   })
 
-  test("adds configured Milo app origins to frame ancestors", () => {
+  test("adds configured Jori app origins to frame ancestors", () => {
     const policy = readAppFramePolicy({
-      MILO_APP_FRAME_ANCESTORS:
-        "http://localhost:5173, https://app.milo.example/",
+      JORI_APP_FRAME_ANCESTORS:
+        "http://localhost:5173, https://app.jori.example/",
     })
 
     expect(policy).toEqual({
       frameAncestors: [
         "'self'",
         "http://localhost:5173",
-        "https://app.milo.example",
+        "https://app.jori.example",
       ],
-      parentOrigins: ["http://localhost:5173", "https://app.milo.example"],
+      parentOrigins: ["http://localhost:5173", "https://app.jori.example"],
     })
     expect(createAppRenderCsp(policy)).toContain(
-      "frame-ancestors 'self' http://localhost:5173 https://app.milo.example"
+      "frame-ancestors 'self' http://localhost:5173 https://app.jori.example"
     )
   })
 
   test("rejects non-origin frame ancestor values", () => {
     expect(() =>
       readAppFramePolicy({
-        MILO_APP_FRAME_ANCESTORS: "https://app.milo.example/apps",
+        JORI_APP_FRAME_ANCESTORS: "https://app.jori.example/apps",
       })
-    ).toThrow("MILO_APP_FRAME_ANCESTORS must contain origins only")
+    ).toThrow("JORI_APP_FRAME_ANCESTORS must contain origins only")
 
     expect(() =>
       readAppFramePolicy({
-        MILO_APP_FRAME_ANCESTORS: "*",
+        JORI_APP_FRAME_ANCESTORS: "*",
       })
-    ).toThrow("MILO_APP_FRAME_ANCESTORS must contain origins only")
+    ).toThrow("JORI_APP_FRAME_ANCESTORS must contain origins only")
   })
 })
 
@@ -59,7 +59,7 @@ describe("app static assets", () => {
   test("serves the Vite-emitted Geist font path", async () => {
     const response = await handleAppStaticAssetRequest(
       new Request(
-        "https://milo.example/assets/geist-latin-wght-normal-BgDaEnEv.woff2"
+        "https://jori.example/assets/geist-latin-wght-normal-BgDaEnEv.woff2"
       )
     )
 
@@ -71,7 +71,7 @@ describe("app static assets", () => {
 
   test("rejects unknown static asset paths", async () => {
     const response = await handleAppStaticAssetRequest(
-      new Request("https://milo.example/assets/app.js")
+      new Request("https://jori.example/assets/app.js")
     )
 
     expect(response.status).toBe(404)

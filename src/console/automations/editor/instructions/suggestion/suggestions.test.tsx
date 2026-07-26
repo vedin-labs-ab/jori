@@ -24,7 +24,7 @@ test("uses provider logos and a full-width muted footer", () => {
             id: "share_app",
             kind: "tool",
             label: "share_app",
-            surface: "milo",
+            surface: "jori",
           },
           {
             access: { integration: "slack", kind: "integration" },

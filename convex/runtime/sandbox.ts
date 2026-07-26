@@ -35,7 +35,7 @@ export const sandboxTools = [
           description: "Concise title that identifies the delegated work.",
         },
         tools: stringArrayProperty(
-          "Integration and web tool names the agent may use, exact names from your own tools. Omit to pass on your full access. Grant the smallest set that covers the task; names outside your own access are dropped. Core Milo tools are always included."
+          "Integration and web tool names the agent may use, exact names from your own tools. Omit to pass on your full access. Grant the smallest set that covers the task; names outside your own access are dropped. Core Jori tools are always included."
         ),
       },
     }),

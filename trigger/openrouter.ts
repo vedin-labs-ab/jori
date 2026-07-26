@@ -13,7 +13,7 @@ export function requireOpenRouterRuntimeConfig(): OpenRouterRuntimeConfig {
 
   return {
     apiKey,
-    appName: readEnvironmentVariable("OPENROUTER_APP_TITLE") ?? "Milo",
+    appName: readEnvironmentVariable("OPENROUTER_APP_TITLE") ?? "Jori",
     appUrl:
       readEnvironmentVariable("OPENROUTER_HTTP_REFERER") ??
       readEnvironmentVariable("CONVEX_SITE_URL") ??

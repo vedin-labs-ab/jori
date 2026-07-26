@@ -93,7 +93,7 @@ test("applies patches inside the workspace and rejects escaping paths", async ()
       sandbox,
       tool: "apply_patch",
     })
-  ).rejects.toThrow("escapes the Milo workspace")
+  ).rejects.toThrow("escapes the Jori workspace")
 })
 
 test("applies patches from an explicit workspace cwd", async () => {
@@ -139,7 +139,7 @@ test("runs bash from a workspace cwd and rejects outside cwd values", async () =
       sandbox,
       tool: "bash",
     })
-  ).rejects.toThrow("Sandbox path must be inside the Milo workspace")
+  ).rejects.toThrow("Sandbox path must be inside the Jori workspace")
 })
 
 test("runs read-only git commands against a real repository", async () => {
@@ -191,7 +191,7 @@ test("guards git writes inside bash commands", async () => {
 })
 
 function createLocalSandbox(files: Record<string, string>) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "milo-tools-"))
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "jori-tools-"))
   roots.push(root)
 
   for (const [file, content] of Object.entries(files)) {
@@ -206,8 +206,8 @@ function createLocalSandbox(files: Record<string, string>) {
 function createGitSandbox() {
   const sandbox = createLocalSandbox({ "file.txt": "hello\n" })
   runGit(sandbox.root, "init")
-  runGit(sandbox.root, "config", "user.email", "milo@example.com")
-  runGit(sandbox.root, "config", "user.name", "Milo")
+  runGit(sandbox.root, "config", "user.email", "jori@example.com")
+  runGit(sandbox.root, "config", "user.name", "Jori")
   runGit(sandbox.root, "add", "file.txt")
   runGit(sandbox.root, "commit", "-m", "initial")
 

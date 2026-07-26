@@ -101,7 +101,7 @@ describe("Slack member and search normalization", () => {
           profile: { display_name: "albin", email: "albin@example.com" },
           tz: "Europe/Stockholm",
         },
-        { id: "B1", name: "milo", is_bot: true, deleted: true },
+        { id: "B1", name: "jori", is_bot: true, deleted: true },
       ],
       response_metadata: { next_cursor: "" },
     })
@@ -116,7 +116,7 @@ describe("Slack member and search normalization", () => {
           email: "albin@example.com",
           timeZone: "Europe/Stockholm",
         },
-        { userId: "B1", name: "milo", isBot: true, deleted: true },
+        { userId: "B1", name: "jori", isBot: true, deleted: true },
       ],
     })
     expect(

@@ -108,7 +108,7 @@ test("labels approved approvals as approved actions", () => {
           createdAt: 1000,
           decidedAt: 1400,
           expiresAt: 2000,
-          requestedBy: { kind: "self", externalId: "milo" },
+          requestedBy: { kind: "self", externalId: "jori" },
           runId: id<"runs">("run"),
           status: "approved",
           summary: "Create the page.",
@@ -183,7 +183,7 @@ function toolTraces() {
           groups: [
             {
               label: "Workspace",
-              surface: "milo",
+              surface: "jori",
               tools: [
                 {
                   access: "read",

@@ -7,7 +7,7 @@ import {
   stringProperty,
 } from "./common"
 
-// Linear results come back from Milo-authored GraphQL selections, so the
+// Linear results come back from Jori-authored GraphQL selections, so the
 // node shapes are known; mutations return the raw GraphQL envelope.
 
 function issueNode(description: string): JsonSchema {
@@ -32,7 +32,7 @@ function commentNode(): JsonSchema {
   return {
     type: "object",
     additionalProperties: true,
-    description: "Comment node from Milo's GraphQL selection.",
+    description: "Comment node from Jori's GraphQL selection.",
     properties: {
       id: stringProperty("Linear comment UUID."),
       body: stringProperty("Markdown comment body."),
@@ -63,7 +63,7 @@ export const linearToolResponseSchemas = {
     type: ["object", "null"],
   },
   linear_list_comments: arrayProperty(
-    "Comments on the issue, as Milo's GraphQL selection returns them.",
+    "Comments on the issue, as Jori's GraphQL selection returns them.",
     commentNode()
   ),
   linear_add_comment: objectSchema({

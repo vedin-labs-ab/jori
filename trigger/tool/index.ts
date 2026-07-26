@@ -11,7 +11,7 @@ import { recordToolResultActivity } from "../trace/activity"
 import { errorDetails } from "../trace/events"
 import { recordToolEvent, toolTraceDetails } from "../trace/tool"
 import { executeAgentTool } from "./agent"
-import { prepareMiloToolInput } from "./apps"
+import { prepareJoriToolInput } from "./apps"
 import { saveSandboxAsset } from "./assets"
 import { prepareProviderToolInput } from "./github"
 import { generateImageAsset } from "./images"
@@ -179,8 +179,8 @@ async function requestPromptedApproval(
   args: JsonObject
 ) {
   const input =
-    surface === "milo"
-      ? await prepareMiloToolInput(runtime, tool, args)
+    surface === "jori"
+      ? await prepareJoriToolInput(runtime, tool, args)
       : await prepareProviderToolInput(runtime, surface, tool, args)
   const replyTarget = runtime.context.activeSurface?.target
 
@@ -216,18 +216,18 @@ async function callConvexTool(
   tool: string,
   input: JsonObject
 ) {
-  if (surface === "milo" && tool === "save_asset") {
+  if (surface === "jori" && tool === "save_asset") {
     return await saveSandboxAsset(runtime, input)
   }
 
-  if (surface === "milo" && tool === "generate_image") {
+  if (surface === "jori" && tool === "generate_image") {
     return await generateImageAsset(runtime, input)
   }
 
   const result = await runtime.platform.callTool({
     input:
-      surface === "milo"
-        ? await prepareMiloToolInput(runtime, tool, input)
+      surface === "jori"
+        ? await prepareJoriToolInput(runtime, tool, input)
         : await prepareProviderToolInput(runtime, surface, tool, input),
     runId: runtime.context.run.id,
     surface,

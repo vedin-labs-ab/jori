@@ -12,7 +12,7 @@ import { components } from "../_generated/api"
  *
  * Total is a backstop, deliberately far above any real launch day. It exists
  * because a distributed flood defeats a per-address limit, and the cost of
- * that is Milo's outbound mail reputation, not just a full table.
+ * that is Jori's outbound mail reputation, not just a full table.
  */
 export const rateLimiter = new RateLimiter(components.rateLimiter, {
   waitlistSignupPerAddress: {

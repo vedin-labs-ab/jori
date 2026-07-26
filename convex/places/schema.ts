@@ -3,7 +3,7 @@ import { type Infer, v } from "convex/values"
 import { type PlaceSection, placeSections } from "../../contracts/places"
 
 // Sections a place profile is organized by: what the place is for, who is
-// active there, how people write, how work recurs, and what Milo is asked to
+// active there, how people write, how work recurs, and what Jori is asked to
 // do. The canonical order lives in contracts so the prompt renderer and the
 // console share it; the validator is derived, never restated.
 export { type PlaceSection, placeSections }

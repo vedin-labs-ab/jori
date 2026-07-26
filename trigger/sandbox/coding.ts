@@ -115,7 +115,7 @@ function workspaceGuard(cwd: string) {
     'root="$(realpath "$workspace")" || exit 2',
     'current="$(realpath "$target")" || exit 2',
     'case "$current" in "$root"|"$root"/*) ;; *)',
-    '  echo "cwd must be inside the Milo workspace." >&2',
+    '  echo "cwd must be inside the Jori workspace." >&2',
     "  exit 2",
     "esac",
     'cd "$current" || exit 2',

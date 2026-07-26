@@ -11,7 +11,7 @@ test("a manual run drops the schedule and reads 'you' for the viewer", async () 
 
   expect(summary.source).toEqual({
     type: "automation",
-    surface: "milo",
+    surface: "jori",
     trigger: { actor: { type: "user", label: "you" } },
   })
   expect(
@@ -56,7 +56,7 @@ function manualRun(personId: string) {
     cause: { type: "manual", personId },
     snapshot: {
       title: "Morning brief",
-      source: { type: "automation", surface: "milo" },
+      source: { type: "automation", surface: "jori" },
       context: [
         { type: "schedule", label: "Weekdays at 06:00 UTC" },
         { type: "status", label: "Paused" },

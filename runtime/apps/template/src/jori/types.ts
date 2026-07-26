@@ -1,59 +1,59 @@
 import { type z } from "zod"
 import {
-  type MiloPromptInput,
-  type MiloPromptResult,
+  type JoriPromptInput,
+  type JoriPromptResult,
   type RawPromptInput,
 } from "./model/types"
 import {
-  type MiloStateClient,
-  type MiloStateDocument,
-  type RawMiloStateListInput,
-  type RawMiloStateReadInput,
-  type RawMiloStateUpdateInput,
+  type JoriStateClient,
+  type JoriStateDocument,
+  type RawJoriStateListInput,
+  type RawJoriStateReadInput,
+  type RawJoriStateUpdateInput,
 } from "./state/types"
-import { type MiloToolCaller, type ToolMethod } from "./tools"
+import { type JoriToolCaller, type ToolMethod } from "./tools"
 
-export type MiloToolOptions = {
+export type JoriToolOptions = {
   cacheTtlMs?: number
   forceRefresh?: boolean
   integrationId?: string
 }
 
-export type RawMiloClient = Readonly<{
+export type RawJoriClient = Readonly<{
   appId: string
   versionId: string
   getToken: () => string
-  callTool: MiloToolCaller
+  callTool: JoriToolCaller
   state: Readonly<{
     read: <T = unknown>(
-      input: RawMiloStateReadInput
-    ) => Promise<MiloStateDocument<T> | null>
+      input: RawJoriStateReadInput
+    ) => Promise<JoriStateDocument<T> | null>
     list: <T = unknown>(
-      input?: RawMiloStateListInput
-    ) => Promise<MiloStateDocument<T>[]>
+      input?: RawJoriStateListInput
+    ) => Promise<JoriStateDocument<T>[]>
     update: <T = unknown>(
-      input: RawMiloStateUpdateInput
-    ) => Promise<MiloStateDocument<T>>
+      input: RawJoriStateUpdateInput
+    ) => Promise<JoriStateDocument<T>>
   }>
   model: Readonly<{
     prompt: <T = unknown>(
       input: RawPromptInput,
-      options?: MiloToolOptions
+      options?: JoriToolOptions
     ) => Promise<T>
   }>
 }>
 
-export type MiloClient = Readonly<{
+export type JoriClient = Readonly<{
   appId: string
   versionId: string
   getToken: () => string
-  callTool: MiloToolCaller
-  state: MiloStateClient
+  callTool: JoriToolCaller
+  state: JoriStateClient
   model: Readonly<{
     prompt: <TSchema extends z.ZodType>(
-      input: MiloPromptInput<TSchema>,
-      options?: MiloToolOptions
-    ) => Promise<MiloPromptResult<z.output<TSchema>>>
+      input: JoriPromptInput<TSchema>,
+      options?: JoriToolOptions
+    ) => Promise<JoriPromptResult<z.output<TSchema>>>
   }>
   web: Readonly<{
     search: ToolMethod<"web_search">
@@ -73,9 +73,9 @@ export type MiloClient = Readonly<{
 
 export type { JsonObject } from "./json"
 export type {
-  MiloPromptDiagnostics,
-  MiloPromptInput,
-  MiloPromptResult,
+  JoriPromptDiagnostics,
+  JoriPromptInput,
+  JoriPromptResult,
   RawPromptInput,
   RawPromptResult,
 } from "./model/types"
@@ -85,18 +85,18 @@ export type {
   AppStateContractJson,
   AppStateDefinition,
   AppStateRef,
-  MiloStateClient,
-  MiloStateDocument,
-  MiloStateHookInput,
-  MiloStateHookResult,
-  MiloStatePatch,
-  MiloStatePatchInput,
-  MiloStateReplaceInput,
-  MiloStateScope,
-  MiloStateStatus,
-  MiloStateSubscriptionInput,
-  MiloStateWriteOptions,
-  RawMiloStateListInput,
-  RawMiloStateReadInput,
-  RawMiloStateUpdateInput,
+  JoriStateClient,
+  JoriStateDocument,
+  JoriStateHookInput,
+  JoriStateHookResult,
+  JoriStatePatch,
+  JoriStatePatchInput,
+  JoriStateReplaceInput,
+  JoriStateScope,
+  JoriStateStatus,
+  JoriStateSubscriptionInput,
+  JoriStateWriteOptions,
+  RawJoriStateListInput,
+  RawJoriStateReadInput,
+  RawJoriStateUpdateInput,
 } from "./state/types"

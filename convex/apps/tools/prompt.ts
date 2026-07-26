@@ -5,7 +5,7 @@ import {
   assertSupportedJsonSchema,
   normalizeJsonSchema,
 } from "../../../contracts/apps/schema"
-import { miloModel } from "../../../contracts/billing"
+import { joriModel } from "../../../contracts/billing"
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import {
@@ -65,7 +65,7 @@ export function createAppPromptRequest(
   input: AppPromptInput
 ): OpenRouterChatInput {
   return {
-    model: miloModel,
+    model: joriModel,
     messages: promptMessages(context, input),
     maxTokens: input.maxOutputTokens,
     provider: { requireParameters: true, sort: "latency" },

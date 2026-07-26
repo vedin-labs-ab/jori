@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { miloModel } from "../../contracts/billing"
+import { joriModel } from "../../contracts/billing"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
@@ -64,7 +64,7 @@ test("includes app prompt model in prompt cache identity", () => {
       input: { message: "hello" },
     })
   ).toEqual({
-    _miloCache: { model: miloModel },
+    _joriCache: { model: joriModel },
     input: { message: "hello" },
   })
 

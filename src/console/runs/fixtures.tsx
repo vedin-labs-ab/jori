@@ -82,7 +82,7 @@ export function makeOffer(
     integrationLabel: "Notion",
     result: undefined,
     state: "pending",
-    summary: "Connect Notion so Milo can create the requested page.",
+    summary: "Connect Notion so Jori can create the requested page.",
     updatedAt: 1700000001000,
     ...overrides,
   }

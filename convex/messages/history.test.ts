@@ -6,12 +6,12 @@ describe("message conversation history", () => {
     expect(
       mergeRecentConversation([
         entry("message-2", "User", "thanks", 3000, "message.channels"),
-        entry("milo-1", "Milo", "On it.", 2000, "message.channels"),
+        entry("jori-1", "Jori", "On it.", 2000, "message.channels"),
         entry("message-1", "User", "hello", 1000, "message.channels"),
       ])
     ).toEqual([
       entry("message-1", "User", "hello", 1000, "message.channels"),
-      entry("milo-1", "Milo", "On it.", 2000, "message.channels"),
+      entry("jori-1", "Jori", "On it.", 2000, "message.channels"),
       entry("message-2", "User", "thanks", 3000, "message.channels"),
     ])
   })
@@ -32,7 +32,7 @@ function entry(
     identifiers: [],
     observedAt: null,
     reactions: null,
-    source: actor === "Milo" ? "self" : "person",
+    source: actor === "Jori" ? "self" : "person",
     text,
     type,
   }

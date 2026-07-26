@@ -9,39 +9,39 @@ afterEach(cleanup)
 test("edits the current value and only saves a changed non-empty draft", () => {
   const onSave = vi.fn()
   render(
-    <EditableText label="Organization name" onSave={onSave} value="Milo" />
+    <EditableText label="Organization name" onSave={onSave} value="Jori" />
   )
 
   fireEvent.click(
-    screen.getByRole("button", { name: "Edit organization name: Milo" })
+    screen.getByRole("button", { name: "Edit organization name: Jori" })
   )
 
   const input = screen.getByRole("textbox", { name: "Organization name" })
   const save = screen.getByRole("button", { name: "Save" })
   expect(document.activeElement).toBe(input)
-  expect((input as HTMLInputElement).value).toBe("Milo")
+  expect((input as HTMLInputElement).value).toBe("Jori")
   expect((save as HTMLButtonElement).disabled).toBe(true)
 
   fireEvent.change(input, { target: { value: "  " } })
   expect((save as HTMLButtonElement).disabled).toBe(true)
 
-  fireEvent.change(input, { target: { value: "Milo Labs" } })
+  fireEvent.change(input, { target: { value: "Jori Labs" } })
   expect((save as HTMLButtonElement).disabled).toBe(false)
   fireEvent.click(save)
 
-  expect(onSave).toHaveBeenCalledWith("Milo Labs")
+  expect(onSave).toHaveBeenCalledWith("Jori Labs")
 })
 
 test("cancel restores the value and focus without bubbling Escape", () => {
   const onKeyDown = vi.fn()
   render(
     <div onKeyDown={onKeyDown}>
-      <EditableText label="Organization name" onSave={vi.fn()} value="Milo" />
+      <EditableText label="Organization name" onSave={vi.fn()} value="Jori" />
     </div>
   )
 
   fireEvent.click(
-    screen.getByRole("button", { name: "Edit organization name: Milo" })
+    screen.getByRole("button", { name: "Edit organization name: Jori" })
   )
   const input = screen.getByRole("textbox", { name: "Organization name" })
   fireEvent.change(input, { target: { value: "Changed" } })
@@ -49,9 +49,9 @@ test("cancel restores the value and focus without bubbling Escape", () => {
 
   expect(onKeyDown).not.toHaveBeenCalled()
   const trigger = screen.getByRole("button", {
-    name: "Edit organization name: Milo",
+    name: "Edit organization name: Jori",
   })
-  expect(trigger.textContent).toContain("Milo")
+  expect(trigger.textContent).toContain("Jori")
   expect(document.activeElement).toBe(trigger)
 })
 
@@ -63,7 +63,7 @@ test("supports transform and size presets", () => {
       onSave={onSave}
       size="xl"
       transform={(value) => value.toLowerCase().replaceAll(" ", "-")}
-      value="milo"
+      value="jori"
     />
   )
 
@@ -72,19 +72,19 @@ test("supports transform and size presets", () => {
       "data-size"
     )
   ).toBe("xl")
-  fireEvent.click(screen.getByRole("button", { name: "Edit slug: milo" }))
+  fireEvent.click(screen.getByRole("button", { name: "Edit slug: jori" }))
   const input = screen.getByRole("textbox", { name: "Slug" })
-  fireEvent.change(input, { target: { value: "Milo Labs" } })
-  expect((input as HTMLInputElement).value).toBe("milo-labs")
+  fireEvent.change(input, { target: { value: "Jori Labs" } })
+  expect((input as HTMLInputElement).value).toBe("jori-labs")
 })
 
 test("uses flush, quiet interaction styling for the idle trigger", () => {
   render(
-    <EditableText label="Organization name" onSave={vi.fn()} value="Milo" />
+    <EditableText label="Organization name" onSave={vi.fn()} value="Jori" />
   )
 
   const trigger = screen.getByRole("button", {
-    name: "Edit organization name: Milo",
+    name: "Edit organization name: Jori",
   })
   const label = trigger.querySelector("span")
   const icon = trigger.querySelector("svg")
@@ -100,7 +100,7 @@ test("uses flush, quiet interaction styling for the idle trigger", () => {
 
 test("scales the edit icon with each text size", () => {
   const { rerender } = render(
-    <EditableText label="Name" onSave={vi.fn()} size="sm" value="Milo" />
+    <EditableText label="Name" onSave={vi.fn()} size="sm" value="Jori" />
   )
 
   for (const [size, expectedClass] of [
@@ -110,11 +110,11 @@ test("scales the edit icon with each text size", () => {
     ["xl", "size-4.5"],
   ] as const) {
     rerender(
-      <EditableText label="Name" onSave={vi.fn()} size={size} value="Milo" />
+      <EditableText label="Name" onSave={vi.fn()} size={size} value="Jori" />
     )
 
     const icon = screen
-      .getByRole("button", { name: "Edit name: Milo" })
+      .getByRole("button", { name: "Edit name: Jori" })
       .querySelector("svg")
     expect(icon?.classList.contains(expectedClass)).toBe(true)
   }

@@ -29,10 +29,10 @@ test("groups app tools by canonical surface", () => {
         {
           access: "write",
           approvedAt: 1,
-          description: "Validate, store, and publish a new Milo app.",
+          description: "Validate, store, and publish a new Jori app.",
           integrationId: undefined,
           label: "Create app",
-          surface: "milo",
+          surface: "jori",
           tool: "create_app",
           versionId: undefined,
         },
@@ -40,11 +40,11 @@ test("groups app tools by canonical surface", () => {
     })
   )
 
-  expect(groups.map((group) => group.type)).toEqual(["milo", "gmail"])
+  expect(groups.map((group) => group.type)).toEqual(["jori", "gmail"])
   expect(groups).toMatchObject([
     {
-      label: "Milo",
-      type: "milo",
+      label: "Jori",
+      type: "jori",
       tools: [{ label: "Create app", tool: "create_app" }],
     },
     {

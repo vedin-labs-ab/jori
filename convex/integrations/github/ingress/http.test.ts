@@ -63,13 +63,13 @@ test("ignores approval commands from commenters outside the repository audience"
 test("records ordinary GitHub comments with normal run intake", async () => {
   const ctx = actionCtx()
 
-  await handleGitHubMessageEvent(ctx, githubMessage({ body: "hello milo" }))
+  await handleGitHubMessageEvent(ctx, githubMessage({ body: "hello jori" }))
 
   expect(ctx.runMutation).toHaveBeenCalledTimes(1)
   expect(ctx.runMutation.mock.calls[0]?.[1]).toMatchObject({
     accountId: "123",
     integration: "github",
-    text: "hello milo",
+    text: "hello jori",
   })
   expect(ctx.runMutation.mock.calls[0]?.[1]).not.toHaveProperty("mode")
   expect(ctx.runQuery).not.toHaveBeenCalled()
@@ -105,22 +105,22 @@ function githubPayload(
       body,
       created_at: "2026-06-26T11:07:51Z",
       html_url:
-        "https://github.com/vedin-labs-ab/milo/pull/3#issuecomment-4808980612",
+        "https://github.com/vedin-labs-ab/jori/pull/3#issuecomment-4808980612",
       id: 4808980612,
-      url: "https://api.github.com/repos/vedin-labs-ab/milo/issues/comments/4808980612",
+      url: "https://api.github.com/repos/vedin-labs-ab/jori/issues/comments/4808980612",
     },
     installation: { id: 123 },
     issue: {
-      html_url: "https://github.com/vedin-labs-ab/milo/pull/3",
+      html_url: "https://github.com/vedin-labs-ab/jori/pull/3",
       id: 4750750824,
       number: 3,
       pull_request: {},
       title: "Update console to website in PRODUCT.md",
     },
     repository: {
-      full_name: "vedin-labs-ab/milo",
+      full_name: "vedin-labs-ab/jori",
       id: 1,
-      name: "milo",
+      name: "jori",
       owner: { login: "vedin-labs-ab" },
     },
     sender: {

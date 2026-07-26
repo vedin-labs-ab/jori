@@ -17,7 +17,7 @@ import { requireLinearCredentials } from "./credentials"
 export async function searchLinearTeams(args: OptionLoaderArgs) {
   const result = await linearGraphql(args, {
     query: `
-      query MiloAutomationTeams($first: Int!) {
+      query JoriAutomationTeams($first: Int!) {
         teams(first: $first) { nodes { id key name } }
       }
     `,
@@ -38,7 +38,7 @@ export async function searchLinearTeams(args: OptionLoaderArgs) {
 export async function searchLinearProjects(args: OptionLoaderArgs) {
   const result = await linearGraphql(args, {
     query: `
-      query MiloAutomationProjects($first: Int!) {
+      query JoriAutomationProjects($first: Int!) {
         projects(first: $first) {
           nodes { id name state teams { nodes { id key name } } }
         }
@@ -118,13 +118,13 @@ function issueSearchBody(query: string) {
 
   return query === ""
     ? {
-        query: `query MiloAutomationIssues($first: Int!) {
+        query: `query JoriAutomationIssues($first: Int!) {
           issues(first: $first) { ${fields} }
         }`,
         variables: { first: maxOptions },
       }
     : {
-        query: `query MiloAutomationIssues($first: Int!, $query: String!) {
+        query: `query JoriAutomationIssues($first: Int!, $query: String!) {
           issues(first: $first, filter: { title: { containsIgnoreCase: $query } }) {
             ${fields}
           }

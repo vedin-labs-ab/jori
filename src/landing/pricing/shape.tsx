@@ -4,7 +4,7 @@ import { Definition } from "../section"
 import { UsageMeter } from "./usage"
 
 /** What is settled about pricing is its shape, not its numbers. Publishing the
- *  shape is honest and still says the useful thing: Milo is not sold by the
+ *  shape is honest and still says the useful thing: Jori is not sold by the
  *  seat, and usage is not a margin line. */
 const principles = [
   {
@@ -15,7 +15,7 @@ const principles = [
   {
     icon: Receipt,
     title: "Usage at cost",
-    body: "The model work Milo does is billed in dollars at the provider's public list rates, never marked up. Every run shows what it cost.",
+    body: "The model work Jori does is billed in dollars at the provider's public list rates, never marked up. Every run shows what it cost.",
   },
   {
     icon: Wallet,
@@ -43,7 +43,7 @@ export function Shape() {
       <div className="mt-20 grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
         <div>
           <h2 className="max-w-xl font-medium text-2xl text-balance tracking-tight">
-            Final numbers land when Milo opens.
+            Final numbers land when Jori opens.
           </h2>
           <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
             We would rather price it once we know what the work costs to run.

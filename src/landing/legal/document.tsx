@@ -19,7 +19,7 @@ import { MarketingShell } from "../shell"
  * nothing, which is worse than an empty page: a reader has to work to find
  * that out. This is the empty state exactly as the design system ships it, so
  * a page with nothing on it says so the same way every other empty surface in
- * Milo does, and offers the page that does have answers today.
+ * Jori does, and offers the page that does have answers today.
  */
 export function LegalPlaceholder({
   description,

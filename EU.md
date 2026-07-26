@@ -1,12 +1,12 @@
 # EU data residency
 
-This document is the launch gate for Milo's EU data region. EU must remain
+This document is the launch gate for Jori's EU data region. EU must remain
 disabled until every blocking item is resolved and the enablement checklist is
 complete.
 
 ## Product contract
 
-- A Milo account, session, organization, invitation, and all core product data
+- A Jori account, session, organization, invitation, and all core product data
   belong to one regional deployment.
 - US and EU deployments do not share authentication or application databases.
 - An email address may independently create an account in each region. Those
@@ -35,7 +35,7 @@ same-origin session.
 
 The apex currently shares the US frontend deployment. Anonymous request data
 and hosting logs for the public website may therefore be processed in the US.
-If Milo's final residency promise covers anonymous marketing traffic, the apex
+If Jori's final residency promise covers anonymous marketing traffic, the apex
 must move to a suitable independent deployment before EU launch.
 
 ## Configuration
@@ -44,17 +44,17 @@ Each frontend build receives:
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_MILO_REGION` | Current deployment identity: `us` or `eu` |
-| `VITE_MILO_ENABLED_REGIONS` | Comma-separated regions exposed to users |
-| `VITE_MILO_PUBLIC_ORIGIN` | Neutral public origin |
-| `VITE_MILO_US_ORIGIN` | US application origin |
-| `VITE_MILO_EU_ORIGIN` | EU application origin |
+| `VITE_JORI_REGION` | Current deployment identity: `us` or `eu` |
+| `VITE_JORI_ENABLED_REGIONS` | Comma-separated regions exposed to users |
+| `VITE_JORI_PUBLIC_ORIGIN` | Neutral public origin |
+| `VITE_JORI_US_ORIGIN` | US application origin |
+| `VITE_JORI_EU_ORIGIN` | EU application origin |
 | `VITE_CONVEX_URL` | Convex client URL for the current region |
 | `VITE_CONVEX_SITE_URL` | Convex HTTP URL for the current region |
 
-Each Convex deployment receives its exact regional `MILO_APP_URL`, plus
-`MILO_REGION=us` or `MILO_REGION=eu`. Secrets and provider credentials are
-deployment-local. In production, `MILO_REGION` must match the physical region
+Each Convex deployment receives its exact regional `JORI_APP_URL`, plus
+`JORI_REGION=us` or `JORI_REGION=eu`. Secrets and provider credentials are
+deployment-local. In production, `JORI_REGION` must match the physical region
 shown in the Convex deployment settings.
 
 The existing personal development deployment is hosted in Convex EU West even
@@ -65,7 +65,7 @@ residency readiness from the development environment.
 EU is currently held off with:
 
 ```text
-VITE_MILO_ENABLED_REGIONS=us
+VITE_JORI_ENABLED_REGIONS=us
 ```
 
 ## Provider readiness
@@ -93,7 +93,7 @@ region does not by itself relocate all payloads, outputs, tags, logs, or
 control-plane data. Treat Trigger as US-only until a fresh review of the
 [run region documentation](https://trigger.dev/docs/triggering)
 and [data processing addendum](https://trigger.dev/legal/dpa) proves that the
-complete Milo workflow satisfies the final residency promise.
+complete Jori workflow satisfies the final residency promise.
 
 ## Enablement checklist
 
@@ -112,19 +112,19 @@ complete Milo workflow satisfies the final residency promise.
 - [ ] Verify backup, restore, deletion, incident response, and support access.
 - [ ] Confirm invitation, app, integration, checkout, and email links use
       the EU hostname.
-- [ ] Confirm each `MILO_REGION` value matches the physical Convex region. See
+- [ ] Confirm each `JORI_REGION` value matches the physical Convex region. See
       [Convex regions](https://docs.convex.dev/production/regions).
 - [ ] Confirm the apex cannot serve `/api/auth` or authenticated product data.
 - [ ] Run host-routing, sign-in, organization, invitation, and integration
       smoke tests against both production deployments.
 - [ ] Review privacy, trust, subprocessors, and customer-facing copy.
-- [ ] Set `VITE_MILO_ENABLED_REGIONS=us,eu` only after the preceding checks pass.
+- [ ] Set `VITE_JORI_ENABLED_REGIONS=us,eu` only after the preceding checks pass.
 
 ## Decisions
 
 ### 2026-07-22: Region-local identities
 
-Milo uses independent accounts in each region. A person may intentionally have
+Jori uses independent accounts in each region. A person may intentionally have
 both a US account and an EU account. No global identity directory is introduced.
 
 ### 2026-07-22: Two frontend deployments
@@ -135,7 +135,7 @@ unless the final residency promise includes anonymous public-site processing.
 
 ### 2026-07-22: Trigger remains US-only
 
-Milo keeps the current managed Trigger.dev workflow while EU is disabled. EU
+Jori keeps the current managed Trigger.dev workflow while EU is disabled. EU
 support cannot launch until Trigger's data boundary is resolved.
 
 ### 2026-07-24: Railway hosts the frontend
@@ -149,7 +149,7 @@ Frankfurt, but its edge network terminates every request, including session
 cookies and form submissions, in US-owned infrastructure before any regional
 function runs, and its caching, logging, and analytics are not region-selected.
 Vercel is also not listed under the EU-US Data Privacy Framework as of early
-2026. That combination caps how strong an EU claim Milo could make, and the
+2026. That combination caps how strong an EU claim Jori could make, and the
 frontend is the application host, not a disposable marketing site.
 
 Neither provider delivers sovereignty. Both are US-incorporated and therefore

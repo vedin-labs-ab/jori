@@ -124,7 +124,7 @@ export const githubToolInputSchemas = {
       ),
       body: stringProperty("GitHub-flavored Markdown pull request body."),
       branch: stringProperty(
-        "New branch name when creating a PR from local source changes. Omit to use a Milo-generated branch."
+        "New branch name when creating a PR from local source changes. Omit to use a Jori-generated branch."
       ),
       changes: sourceChangesProperty(),
       commitMessage: stringProperty(

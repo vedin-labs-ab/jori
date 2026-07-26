@@ -3,7 +3,7 @@ import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
   boundedNumber,
-  type MiloToolRequest,
+  type JoriToolRequest,
   optionalString,
   requiredString,
 } from "../shared/input"
@@ -28,18 +28,18 @@ const appTools = new Set([
   "delete_app",
 ])
 
-export function isMiloAppTool(tool: string) {
+export function isJoriAppTool(tool: string) {
   return appTools.has(tool)
 }
 
-export async function callMiloAppTool(
+export async function callJoriAppTool(
   ctx: ActionCtx,
   execution: {
     organizationId: string
     createdBy?: Id<"persons">
     runId?: Id<"runs">
   },
-  request: MiloToolRequest
+  request: JoriToolRequest
 ): Promise<unknown> {
   const args = normalizeToolArgs(request.args)
   const personId = execution.createdBy
@@ -66,7 +66,7 @@ export async function callMiloAppTool(
     case "delete_app":
       return await deleteApp(ctx, execution.organizationId, args)
     default:
-      throw new Error(`Unknown Milo app tool: ${request.tool}`)
+      throw new Error(`Unknown Jori app tool: ${request.tool}`)
   }
 }
 

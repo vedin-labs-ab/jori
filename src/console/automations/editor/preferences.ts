@@ -1,6 +1,6 @@
 import { type AutomationFormValues, emptyAutomationForm } from "../types"
 
-const webSearchKey = "milo.automation.webSearch"
+const webSearchKey = "jori.automation.webSearch"
 
 export function readAutomationPreferences(): Pick<
   AutomationFormValues,

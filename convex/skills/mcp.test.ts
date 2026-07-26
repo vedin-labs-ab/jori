@@ -4,11 +4,11 @@ import {
   encodeToolResult,
 } from "../../contracts/json/transport"
 import { runtimeSkill, runtimeSkills } from "../../test/convex/skills"
-import { loadMiloSkillTool } from "./mcp"
+import { loadJoriSkillTool } from "./mcp"
 
 test("loads an available runtime skill", () => {
   expect(
-    loadMiloSkillTool(runtimeSkills(), {
+    loadJoriSkillTool(runtimeSkills(), {
       tool: "load_skill",
       args: { name: "slack" },
     })
@@ -26,7 +26,7 @@ test("loads an available runtime skill", () => {
 
 test("loads complete instructions with all communication parts", () => {
   expect(
-    loadMiloSkillTool(runtimeSkills(), {
+    loadJoriSkillTool(runtimeSkills(), {
       tool: "load_skill",
       args: { name: "slack" },
     })
@@ -41,7 +41,7 @@ test("loads complete instructions with all communication parts", () => {
 })
 
 test("loads non-integration skills with JSON-safe metadata", () => {
-  const result = loadMiloSkillTool(runtimeSkills(), {
+  const result = loadJoriSkillTool(runtimeSkills(), {
     tool: "load_skill",
     args: { name: "image-generation" },
   })
@@ -58,7 +58,7 @@ test("loads non-integration skills with JSON-safe metadata", () => {
 
 test("returns available skills when a skill is unknown", () => {
   expect(
-    loadMiloSkillTool(runtimeSkills(), {
+    loadJoriSkillTool(runtimeSkills(), {
       tool: "load_skill",
       args: { name: "github" },
     })
@@ -84,7 +84,7 @@ test("returns available skills when a skill is unknown", () => {
 
 test("organization skills override global skills with the same name", () => {
   expect(
-    loadMiloSkillTool(
+    loadJoriSkillTool(
       runtimeSkills([
         runtimeSkill({
           organizationId: "organization",

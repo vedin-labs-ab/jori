@@ -1,12 +1,12 @@
 import { expect, test } from "vitest"
-import { automationMiloToolInputSchemas } from "./automations"
+import { automationJoriToolInputSchemas } from "./automations"
 
 test.each([
   "add_automation",
   "update_automation",
 ] as const)("%s explains canonical instruction syntax", (tool) => {
   const instructions = readProperties(
-    automationMiloToolInputSchemas[tool]
+    automationJoriToolInputSchemas[tool]
   ).instructions
 
   expect(instructions).toMatchObject({

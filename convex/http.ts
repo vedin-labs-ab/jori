@@ -34,7 +34,7 @@ http.route({ pathPrefix: "/api/auth/", method: "GET", handler: handleAuth })
 http.route({ pathPrefix: "/api/auth/", method: "POST", handler: handleAuth })
 
 http.route({
-  path: "/milo/github/clone-credentials",
+  path: "/jori/github/clone-credentials",
   method: "POST",
   handler: lazyHttpAction(
     () => import("./broker/mcp"),
@@ -43,7 +43,7 @@ http.route({
 })
 
 http.route({
-  path: "/milo/assets",
+  path: "/jori/assets",
   method: "POST",
   handler: lazyHttpAction(
     () => import("./broker/assets"),

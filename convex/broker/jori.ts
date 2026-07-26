@@ -4,9 +4,9 @@ import {
   cancelApprovalRequest,
   isCancelApprovalTool,
 } from "../approvals/cancel"
-import { callMiloAppTool, isMiloAppTool } from "../apps/mcp"
-import { callMiloAssetTool, isMiloAssetTool } from "../assets/mcp"
-import { callMiloAutomationTool } from "../automations/mcp"
+import { callJoriAppTool, isJoriAppTool } from "../apps/mcp"
+import { callJoriAssetTool, isJoriAssetTool } from "../assets/mcp"
+import { callJoriAutomationTool } from "../automations/mcp"
 import {
   callIntegrationOfferTool,
   cancelIntegrationOffer,
@@ -22,18 +22,18 @@ import {
   type ExecutionPrincipal,
   executionPrincipalPersonId,
 } from "../runs/principal"
-import { type MiloToolRequest, readRecord } from "../shared/input"
-import { callMiloSkillTool, isMiloSkillTool } from "../skills/mcp"
+import { type JoriToolRequest, readRecord } from "../shared/input"
+import { callJoriSkillTool, isJoriSkillTool } from "../skills/mcp"
 import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
 
-export async function callMiloTool(
+export async function callJoriTool(
   ctx: ActionCtx,
-  context: ApprovalBrokerContext | MiloRunContext,
-  request: MiloToolRequest
+  context: ApprovalBrokerContext | JoriRunContext,
+  request: JoriToolRequest
 ): Promise<unknown> {
-  if (isBrokerScopedMiloTool(request.tool)) {
-    return await callBrokerScopedMiloTool(
+  if (isBrokerScopedJoriTool(request.tool)) {
+    return await callBrokerScopedJoriTool(
       ctx,
       requireBrokerContext(context),
       request
@@ -42,30 +42,30 @@ export async function callMiloTool(
 
   const run = isBrokerContext(context) ? context.run : context
 
-  if (isMiloAssetTool(request.tool)) {
-    return await callMiloAssetTool(ctx, run, request)
+  if (isJoriAssetTool(request.tool)) {
+    return await callJoriAssetTool(ctx, run, request)
   }
 
-  if (isMiloAppTool(request.tool)) {
-    return await callMiloAppTool(ctx, toMiloContext(run), request)
+  if (isJoriAppTool(request.tool)) {
+    return await callJoriAppTool(ctx, toJoriContext(run), request)
   }
 
   if (request.tool === "web_search" || request.tool === "web_fetch") {
     return await callWebTool(request.tool, readRecord(request.args))
   }
 
-  if (isMiloSkillTool(request.tool)) {
-    return await callMiloSkillTool(ctx, run, request)
+  if (isJoriSkillTool(request.tool)) {
+    return await callJoriSkillTool(ctx, run, request)
   }
 
   if (isRunIntrospectionTool(request.tool)) {
     return await callRunIntrospectionTool(ctx, run, request)
   }
 
-  return await callMiloAutomationTool(ctx, toMiloContext(run), request)
+  return await callJoriAutomationTool(ctx, toJoriContext(run), request)
 }
 
-function isBrokerScopedMiloTool(tool: string) {
+function isBrokerScopedJoriTool(tool: string) {
   return (
     isIntegrationOfferTool(tool) ||
     isCancelApprovalTool(tool) ||
@@ -73,10 +73,10 @@ function isBrokerScopedMiloTool(tool: string) {
   )
 }
 
-async function callBrokerScopedMiloTool(
+async function callBrokerScopedJoriTool(
   ctx: ActionCtx,
   context: ApprovalBrokerContext,
-  request: MiloToolRequest
+  request: JoriToolRequest
 ) {
   if (isIntegrationOfferTool(request.tool)) {
     return await callIntegrationOfferTool(
@@ -95,7 +95,7 @@ async function callBrokerScopedMiloTool(
 }
 
 function requireBrokerContext(
-  context: ApprovalBrokerContext | MiloRunContext
+  context: ApprovalBrokerContext | JoriRunContext
 ): ApprovalBrokerContext {
   if (!isBrokerContext(context)) {
     throw new Error("This tool requires an interactive run.")
@@ -104,7 +104,7 @@ function requireBrokerContext(
   return context
 }
 
-type MiloRunContext = {
+type JoriRunContext = {
   organizationId: string
   principal: ExecutionPrincipal
   _id?: Id<"runs">
@@ -113,7 +113,7 @@ type MiloRunContext = {
   automationConfigurationVersion?: number
 }
 
-function toMiloContext(run: MiloRunContext) {
+function toJoriContext(run: JoriRunContext) {
   return {
     organizationId: run.organizationId,
     createdBy: executionPrincipalPersonId(run.principal),
@@ -124,7 +124,7 @@ function toMiloContext(run: MiloRunContext) {
 }
 
 function isBrokerContext(
-  context: ApprovalBrokerContext | MiloRunContext
+  context: ApprovalBrokerContext | JoriRunContext
 ): context is ApprovalBrokerContext {
   return "input" in context
 }

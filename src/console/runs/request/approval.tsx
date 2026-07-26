@@ -152,7 +152,7 @@ function approvalMeta(
     return {
       Icon: X,
       iconClassName: "text-muted-foreground",
-      label: "Cancelled by Milo",
+      label: "Cancelled by Jori",
     }
   }
 

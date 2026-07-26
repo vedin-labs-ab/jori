@@ -1,14 +1,14 @@
 ---
 name: frontend-design
-description: Design good UI for any surface Milo renders — apps, served HTML assets, dashboards, tools, forms, empty states. Use when creating, revising, simplifying, or evaluating layout, visual hierarchy, required states, copy, and interaction. Outcome-first product design, not platform mechanics.
+description: Design good UI for any surface Jori renders — apps, served HTML assets, dashboards, tools, forms, empty states. Use when creating, revising, simplifying, or evaluating layout, visual hierarchy, required states, copy, and interaction. Outcome-first product design, not platform mechanics.
 category: creation
 ---
 
 # Frontend Design
 
-Design Milo-native UI that helps users get value quickly. This applies to any
-surface Milo renders — an app, served HTML, or any other view. The result
-should feel like part of Milo, not a standalone mini-site, demo, or decorative
+Design Jori-native UI that helps users get value quickly. This applies to any
+surface Jori renders — an app, served HTML, or any other view. The result
+should feel like part of Jori, not a standalone mini-site, demo, or decorative
 page.
 
 ## Design Goal
@@ -24,9 +24,9 @@ Before designing, identify:
 Good UI makes the useful thing obvious. The user should not have to inspect a
 decorative interface to find the value.
 
-## Milo Design Language
+## Jori Design Language
 
-Milo UI is calm, capable, operational, and direct.
+Jori UI is calm, capable, operational, and direct.
 
 Prefer:
 
@@ -162,4 +162,4 @@ Before handing off a design or implementation, verify:
 - The layout contains only sections that support the outcome.
 - Copy is short, concrete, and non-redundant.
 - Empty, loading, error, and success states are accounted for.
-- The UI feels like Milo, not a separate app.
+- The UI feels like Jori, not a separate app.

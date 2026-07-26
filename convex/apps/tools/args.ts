@@ -59,7 +59,7 @@ export function normalizeCapabilities(value: unknown) {
 export function normalizeBuild(value: unknown) {
   if (!isRecord(value)) {
     throw new Error(
-      "App source must be validated by the Milo app builder before publishing."
+      "App source must be validated by the Jori app builder before publishing."
     )
   }
 

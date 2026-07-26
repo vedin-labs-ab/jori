@@ -21,7 +21,7 @@ describe("WebsitesSection", () => {
 
     expect(screen.getByText("No websites yet")).toBeDefined()
     expect(
-      screen.getByText("Add one to give Milo clearer organization context.")
+      screen.getByText("Add one to give Jori clearer organization context.")
     ).toBeDefined()
     expect(screen.getByRole("button", { name: "Add" })).toBeDefined()
   })

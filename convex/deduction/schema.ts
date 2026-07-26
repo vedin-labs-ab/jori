@@ -74,7 +74,7 @@ const beliefFields = {
   updatedAt: v.number(),
 }
 
-// What Milo currently thinks exists. Beliefs and efforts are the only mutable
+// What Jori currently thinks exists. Beliefs and efforts are the only mutable
 // tables in the module: written by pass application and console corrections,
 // nothing else. A row with supersededBy set is out of the roster whatever its
 // status.

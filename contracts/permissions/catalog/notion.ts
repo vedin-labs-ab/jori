@@ -5,7 +5,7 @@ export const notionToolPermissionRows = [
     "notion",
     "notion_search",
     "Search Notion",
-    "Search the Notion pages and databases shared with Milo.",
+    "Search the Notion pages and databases shared with Jori.",
     "Search shared Notion pages and databases by query. Use to locate a page or database before reading it.",
     "read",
   ],

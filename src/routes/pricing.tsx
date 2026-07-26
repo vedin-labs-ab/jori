@@ -4,6 +4,6 @@ import { PricingPage } from "@/landing/pricing"
 export const Route = createFileRoute("/pricing")({
   component: PricingPage,
   head: () => ({
-    meta: [{ title: "Pricing · Milo" }],
+    meta: [{ title: "Pricing · Jori" }],
   }),
 })

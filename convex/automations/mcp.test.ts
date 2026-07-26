@@ -1,14 +1,14 @@
 import { expect, test, vi } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { callMiloTool } from "../broker/milo"
-import { callMiloAutomationTool } from "./mcp"
+import { callJoriTool } from "../broker/jori"
+import { callJoriAutomationTool } from "./mcp"
 
 test("automation runs own the one-time automations they create", async () => {
   const runMutation = vi.fn(async () => ({ created: true }))
   const automationId = "parent" as Id<"automations">
 
-  await callMiloAutomationTool(
+  await callJoriAutomationTool(
     { runMutation } as unknown as ActionCtx,
     {
       organizationId: "organization",
@@ -33,12 +33,12 @@ test("manual and durable creations stay unowned", async () => {
   const runMutation = vi.fn(async () => ({ created: true }))
   const ctx = { runMutation } as unknown as ActionCtx
 
-  await callMiloAutomationTool(
+  await callJoriAutomationTool(
     ctx,
     { organizationId: "organization", createdBy: "person" as Id<"persons"> },
     { tool: "add_automation", args: automationArgs("once") }
   )
-  await callMiloAutomationTool(
+  await callJoriAutomationTool(
     ctx,
     {
       organizationId: "organization",
@@ -63,7 +63,7 @@ test("manual and durable creations stay unowned", async () => {
 test("an owned run keeps its durable parent after the child fires", async () => {
   const runMutation = vi.fn(async () => ({ created: true }))
 
-  await callMiloTool(
+  await callJoriTool(
     { runMutation } as unknown as ActionCtx,
     {
       organizationId: "organization",
@@ -92,7 +92,7 @@ test("known automation IDs remain directly readable", async () => {
   const runQuery = vi.fn(async () => ({ id: "child" }))
   const automationId = "child" as Id<"automations">
 
-  await callMiloAutomationTool(
+  await callJoriAutomationTool(
     { runQuery } as unknown as ActionCtx,
     { organizationId: "organization", createdBy: "person" as Id<"persons"> },
     { tool: "read_automation", args: { automationId } }

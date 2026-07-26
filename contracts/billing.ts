@@ -1,5 +1,5 @@
 /**
- * Milo's commercial model in one place: org-wide plans, usage billed in
+ * Jori's commercial model in one place: org-wide plans, usage billed in
  * dollars at the model provider's public list rates, and a prepaid wallet.
  *
  * Every amount is an integer count of micro-dollars (1e-6 USD) so per-token
@@ -42,7 +42,7 @@ export const trial = {
 
 /**
  * Interactive work (console instructions, mentions) may dip slightly below a
- * zero balance so Milo never goes silent mid-conversation. Scheduled work
+ * zero balance so Jori never goes silent mid-conversation. Scheduled work
  * stops at zero.
  */
 export const interactiveGraceMicros = 2 * microsPerDollar
@@ -72,16 +72,16 @@ export const autoTopUp = {
 }
 
 /**
- * The model Milo runs on. One choice, stated once, for every call Milo makes:
+ * The model Jori runs on. One choice, stated once, for every call Jori makes:
  * the agent, the deduction judge, conversation summaries, place profiles,
  * organization discovery, and the prompt tool inside an app.
  *
  * Model selection is deliberately not deployment configuration. It decides
- * what Milo costs and how its output behaves, so it belongs in code and in
+ * what Jori costs and how its output behaves, so it belongs in code and in
  * review, and it lives here because the rate table below has to be keyed by
- * it: a model Milo can call but cannot price is not a thing that should exist.
+ * it: a model Jori can call but cannot price is not a thing that should exist.
  */
-export const miloModel = "openai/gpt-5.6-sol"
+export const joriModel = "openai/gpt-5.6-sol"
 
 type ModelRate = {
   inputMicrosPerToken: number
@@ -94,7 +94,7 @@ type ModelRate = {
  * tokens, reasoning included.
  */
 export const modelRates: Record<string, ModelRate> = {
-  [miloModel]: { inputMicrosPerToken: 5, outputMicrosPerToken: 30 },
+  [joriModel]: { inputMicrosPerToken: 5, outputMicrosPerToken: 30 },
 }
 
 /** A model missing from the rate table bills at the highest configured rate

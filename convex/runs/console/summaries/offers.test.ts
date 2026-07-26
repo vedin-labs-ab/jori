@@ -12,7 +12,7 @@ test("includes the latest integration offer for the run", async () => {
     fakeQueryCtx({
       integrationOffer: integrationOffer({
         _id: "offer",
-        summary: "Connect Notion so Milo can create the requested page.",
+        summary: "Connect Notion so Jori can create the requested page.",
       }),
       run,
     }),
@@ -27,7 +27,7 @@ test("includes the latest integration offer for the run", async () => {
     integrationLabel: "Notion",
     result: undefined,
     state: "pending",
-    summary: "Connect Notion so Milo can create the requested page.",
+    summary: "Connect Notion so Jori can create the requested page.",
     updatedAt: 10,
   })
   expect(summary.offers).toHaveLength(1)

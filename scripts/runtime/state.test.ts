@@ -2,12 +2,12 @@
 
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { z } from "zod"
-import { defineAppContract } from "../../runtime/apps/template/src/milo/contract"
-import { createStateClient } from "../../runtime/apps/template/src/milo/state"
+import { defineAppContract } from "../../runtime/apps/template/src/jori/contract"
+import { createStateClient } from "../../runtime/apps/template/src/jori/state"
 import {
-  type MiloStateDocument,
-  type RawMiloClient,
-} from "../../runtime/apps/template/src/milo/types"
+  type JoriStateDocument,
+  type RawJoriClient,
+} from "../../runtime/apps/template/src/jori/types"
 
 const ref = defineAppContract({
   state: {
@@ -36,7 +36,7 @@ test("state subscriptions emit an initially absent document", async () => {
 test("poll errors surface and an unchanged document re-emits on recovery", async () => {
   const document = stateDocument()
   const read = vi
-    .fn<() => Promise<MiloStateDocument | null>>()
+    .fn<() => Promise<JoriStateDocument | null>>()
     .mockResolvedValueOnce(document)
     .mockRejectedValueOnce(new Error("offline"))
     .mockResolvedValue(document)
@@ -60,10 +60,10 @@ test("poll errors surface and an unchanged document re-emits on recovery", async
 })
 
 test("state subscriptions do not overlap polls", async () => {
-  const first = deferred<MiloStateDocument | null>()
+  const first = deferred<JoriStateDocument | null>()
   const second = { ...stateDocument(), version: 2 }
   const read = vi
-    .fn<() => Promise<MiloStateDocument | null>>()
+    .fn<() => Promise<JoriStateDocument | null>>()
     .mockReturnValueOnce(first.promise)
     .mockResolvedValue(second)
   const handler = vi.fn()
@@ -85,7 +85,7 @@ test("state subscriptions do not overlap polls", async () => {
 })
 
 function rawClient(
-  read: (input: { contractName: string }) => Promise<MiloStateDocument | null>
+  read: (input: { contractName: string }) => Promise<JoriStateDocument | null>
 ) {
   return {
     state: {
@@ -93,10 +93,10 @@ function rawClient(
       list: async () => [],
       update: async () => stateDocument(),
     },
-  } as unknown as RawMiloClient
+  } as unknown as RawJoriClient
 }
 
-function stateDocument(): MiloStateDocument {
+function stateDocument(): JoriStateDocument {
   return {
     contractName: "sample",
     key: "sample",

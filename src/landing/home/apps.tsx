@@ -7,7 +7,7 @@ export function Apps() {
   return (
     <Section
       id="apps"
-      lede="Describe what your team keeps doing by hand. Milo works out what it needs, builds the app, and puts it in front of everyone."
+      lede="Describe what your team keeps doing by hand. Jori works out what it needs, builds the app, and puts it in front of everyone."
       title="When the work repeats, it gets an app"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
@@ -18,7 +18,7 @@ export function Apps() {
               changed since yesterday.
             </Definition>
             <Definition term="A run keeps it current">
-              Milo rechecks on a schedule, or when something moves in a
+              Jori rechecks on a schedule, or when something moves in a
               connected tool. Open it tomorrow and it already knows.
             </Definition>
             <Definition term="One page for the whole team">

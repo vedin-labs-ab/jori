@@ -193,8 +193,8 @@ function interactionPreview(interaction: RuntimeInteraction) {
 function targetText(interaction: RuntimeInteraction) {
   const preposition = interaction.type === "reaction.added" ? "to" : "from"
   const target =
-    interaction.target === "Milo"
-      ? "Milo's message"
+    interaction.target === "Jori"
+      ? "Jori's message"
       : `${interaction.target}'s message`
 
   return `${preposition} ${target}`

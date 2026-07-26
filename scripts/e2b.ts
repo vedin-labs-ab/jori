@@ -10,7 +10,7 @@ import {
 import { runtimeAssets } from "../runtime/apps/_generated/assets.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
-const e2bSandboxTemplate = process.env.MILO_E2B_TEMPLATE?.trim() || "milo-codex"
+const e2bSandboxTemplate = process.env.JORI_E2B_TEMPLATE?.trim() || "jori-codex"
 const sandboxNodeVersion = "26.3.0"
 
 const apiKey = process.env.E2B_API_KEY ?? readCliApiKey()

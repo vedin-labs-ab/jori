@@ -19,7 +19,7 @@ import { creditTopUp, grantIncluded } from "../ledger"
 import { planForPriceId } from "./config"
 
 /**
- * The single place Stripe state enters Milo. Each event is applied in one
+ * The single place Stripe state enters Jori. Each event is applied in one
  * transaction; money credits are idempotent on the Stripe object id, so
  * webhook retries are harmless, and malformed payloads fall through as
  * no-ops.

@@ -87,7 +87,7 @@ function gmailDraftSchema() {
         "Message subject. Required unless threadId is provided."
       ),
       threadId: stringProperty(
-        "Optional Gmail thread ID. When provided, Milo creates a reply draft and infers recipient and subject."
+        "Optional Gmail thread ID. When provided, Jori creates a reply draft and infers recipient and subject."
       ),
       to: stringArrayProperty(
         "Recipient email addresses. Required unless threadId is provided."

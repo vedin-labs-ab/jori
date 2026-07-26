@@ -3,7 +3,7 @@ import { type JsonObject } from "../../contracts/json"
 import { requiredString } from "../input"
 import { type AgentRuntime } from "../runtime"
 
-export async function prepareMiloToolInput(
+export async function prepareJoriToolInput(
   runtime: AgentRuntime,
   tool: string,
   input: JsonObject

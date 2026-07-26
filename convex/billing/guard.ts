@@ -8,7 +8,7 @@ export type RunBudget =
 
 /**
  * Decides whether new work may start. Interactive work (console instructions,
- * mentions) gets a small grace below zero so Milo never goes silent
+ * mentions) gets a small grace below zero so Jori never goes silent
  * mid-conversation; scheduled work stops at zero. In-flight runs are never
  * blocked, only new ones.
  */
@@ -42,7 +42,7 @@ export async function checkRunBudget(
 
 const budgetMessages = {
   "trial-ended":
-    "The trial has ended. Choose a plan in Billing settings to keep Milo working.",
+    "The trial has ended. Choose a plan in Billing settings to keep Jori working.",
   paused:
     "The subscription is paused. Visit Billing settings to reactivate it.",
   "out-of-usage":

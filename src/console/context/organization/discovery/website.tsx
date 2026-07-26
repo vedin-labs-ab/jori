@@ -162,7 +162,7 @@ function workingTitle({ failed, ready }: { failed: boolean; ready: boolean }) {
 
 function workingDescription(discovery: OrganizationDiscovery | undefined) {
   if (discoveryReadyForReview(discovery)) {
-    return "Review and approve what Milo drafted from your site."
+    return "Review and approve what Jori drafted from your site."
   }
 
   if (discoveryFailed(discovery)) {

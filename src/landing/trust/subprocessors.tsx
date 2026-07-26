@@ -28,7 +28,7 @@ const subprocessors = [
     logo: "/logos/subprocessors/resend.svg",
     name: "Resend",
     url: "https://resend.com",
-    purpose: "Delivers Milo's email.",
+    purpose: "Delivers Jori's email.",
   },
   {
     logo: "/logos/subprocessors/openrouter.svg",

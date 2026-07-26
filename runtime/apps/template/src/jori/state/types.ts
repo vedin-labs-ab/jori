@@ -1,12 +1,12 @@
 import { type z } from "zod"
 import { type JsonObject } from "../json"
 
-export type MiloStateScope = "personal" | "shared"
+export type JoriStateScope = "personal" | "shared"
 
-export type MiloStateDocument<T = unknown> = {
+export type JoriStateDocument<T = unknown> = {
   contractName: string
   key: string
-  scope: MiloStateScope
+  scope: JoriStateScope
   schemaHash: string
   schemaName: string
   schemaVersion: number
@@ -14,15 +14,15 @@ export type MiloStateDocument<T = unknown> = {
   version: number
   updatedAt: number
 }
-export type RawMiloStateReadInput = {
+export type RawJoriStateReadInput = {
   contractName: string
 }
 
-export type RawMiloStateListInput = {
+export type RawJoriStateListInput = {
   limit?: number
 }
 
-export type RawMiloStateUpdateInput = {
+export type RawJoriStateUpdateInput = {
   contractName: string
   expectedVersion?: number
 } & (
@@ -36,7 +36,7 @@ export type RawMiloStateUpdateInput = {
     }
 )
 
-export type MiloStateSubscriptionInput = {
+export type JoriStateSubscriptionInput = {
   intervalMs?: number
   onError?: (error: unknown) => void
 }
@@ -48,14 +48,14 @@ export type AppStateDefinition<TSchema extends z.ZodType = z.ZodType> = {
   description?: string
   /** Guidance rendered into the agent's run context. */
   usage?: string
-  scope?: MiloStateScope
+  scope?: JoriStateScope
   schemaName?: string
   schemaVersion?: number
 }
 export type AppStateContractJson = {
   name: string
   key: string
-  scope: MiloStateScope
+  scope: JoriStateScope
   description?: string
   usage?: string
   schemaName: string
@@ -72,7 +72,7 @@ export type AppContractJson = {
 export type AppStateRef<TSchema extends z.ZodType = z.ZodType> = {
   name: string
   key: string
-  scope: MiloStateScope
+  scope: JoriStateScope
   description?: string
   usage?: string
   schema: TSchema
@@ -90,73 +90,73 @@ export type AppContract<
   toJSON: () => AppContractJson
 }
 
-export type MiloStatePatch<T> = T extends unknown[]
+export type JoriStatePatch<T> = T extends unknown[]
   ? T | null
   : T extends object
-    ? { [Key in keyof T]?: MiloStatePatch<T[Key]> | null }
+    ? { [Key in keyof T]?: JoriStatePatch<T[Key]> | null }
     : T | null
 
-export type MiloStateWriteOptions = {
+export type JoriStateWriteOptions = {
   expectedVersion?: number
 }
 
-export type MiloStateReplaceInput<TSchema extends z.ZodType> = {
+export type JoriStateReplaceInput<TSchema extends z.ZodType> = {
   expectedVersion?: number
   value: z.input<TSchema>
   patch?: never
 }
 
-export type MiloStatePatchInput<TSchema extends z.ZodType = z.ZodType> = {
+export type JoriStatePatchInput<TSchema extends z.ZodType = z.ZodType> = {
   expectedVersion?: number
-  patch: MiloStatePatch<z.input<TSchema>>
+  patch: JoriStatePatch<z.input<TSchema>>
   value?: never
 }
 
-export type MiloStateClient = Readonly<{
+export type JoriStateClient = Readonly<{
   read: <TSchema extends z.ZodType>(
     ref: AppStateRef<TSchema>
-  ) => Promise<MiloStateDocument<z.output<TSchema>> | null>
-  list: () => Promise<MiloStateDocument[]>
+  ) => Promise<JoriStateDocument<z.output<TSchema>> | null>
+  list: () => Promise<JoriStateDocument[]>
   replace: <TSchema extends z.ZodType>(
     ref: AppStateRef<TSchema>,
     value: z.input<TSchema>,
-    options?: MiloStateWriteOptions
-  ) => Promise<MiloStateDocument<z.output<TSchema>>>
+    options?: JoriStateWriteOptions
+  ) => Promise<JoriStateDocument<z.output<TSchema>>>
   patch: <TSchema extends z.ZodType>(
     ref: AppStateRef<TSchema>,
-    patch: MiloStatePatch<z.input<TSchema>>,
-    options?: MiloStateWriteOptions
-  ) => Promise<MiloStateDocument<z.output<TSchema>>>
+    patch: JoriStatePatch<z.input<TSchema>>,
+    options?: JoriStateWriteOptions
+  ) => Promise<JoriStateDocument<z.output<TSchema>>>
   update: <TSchema extends z.ZodType>(
     ref: AppStateRef<TSchema>,
-    input: MiloStateReplaceInput<TSchema> | MiloStatePatchInput<TSchema>
-  ) => Promise<MiloStateDocument<z.output<TSchema>>>
+    input: JoriStateReplaceInput<TSchema> | JoriStatePatchInput<TSchema>
+  ) => Promise<JoriStateDocument<z.output<TSchema>>>
   subscribe: <TSchema extends z.ZodType>(
     ref: AppStateRef<TSchema>,
-    handler: (document: MiloStateDocument<z.output<TSchema>> | null) => void,
-    input?: MiloStateSubscriptionInput
+    handler: (document: JoriStateDocument<z.output<TSchema>> | null) => void,
+    input?: JoriStateSubscriptionInput
   ) => () => void
 }>
 
-export type MiloStateStatus = "loading" | "ready" | "saving" | "error"
+export type JoriStateStatus = "loading" | "ready" | "saving" | "error"
 
-export type MiloStateHookInput<T> = {
+export type JoriStateHookInput<T> = {
   defaultValue?: T
   intervalMs?: number
 }
 
-export type MiloStateHookResult<TSchema extends z.ZodType> = {
-  document: MiloStateDocument<z.output<TSchema>> | null
+export type JoriStateHookResult<TSchema extends z.ZodType> = {
+  document: JoriStateDocument<z.output<TSchema>> | null
   error: Error | null
-  status: MiloStateStatus
+  status: JoriStateStatus
   value: z.output<TSchema> | null
   patch: (
-    patch: MiloStatePatch<z.input<TSchema>>,
-    options?: MiloStateWriteOptions
-  ) => Promise<MiloStateDocument<z.output<TSchema>>>
-  refresh: () => Promise<MiloStateDocument<z.output<TSchema>> | null>
+    patch: JoriStatePatch<z.input<TSchema>>,
+    options?: JoriStateWriteOptions
+  ) => Promise<JoriStateDocument<z.output<TSchema>>>
+  refresh: () => Promise<JoriStateDocument<z.output<TSchema>> | null>
   replace: (
     value: z.input<TSchema>,
-    options?: MiloStateWriteOptions
-  ) => Promise<MiloStateDocument<z.output<TSchema>>>
+    options?: JoriStateWriteOptions
+  ) => Promise<JoriStateDocument<z.output<TSchema>>>
 }

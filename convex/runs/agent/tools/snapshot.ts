@@ -15,7 +15,7 @@ export function createRunToolSnapshot(input: {
   webSearch: boolean
 }): RunToolSnapshot {
   return {
-    groups: consolidateMiloToolGroups([
+    groups: consolidateJoriToolGroups([
       ...lifecycleGroups(input.lifecycleTools),
       ...activeSurfaceGroups(input.activeSurfaceTools),
       ...input.capabilities.map((capability) => ({
@@ -29,39 +29,39 @@ export function createRunToolSnapshot(input: {
   }
 }
 
-export function consolidateMiloToolGroups(
+export function consolidateJoriToolGroups(
   groups: RunToolSnapshot["groups"]
 ): RunToolSnapshot["groups"] {
-  const tools = miloTools(groups)
+  const tools = joriTools(groups)
 
   if (tools.length === 0) {
     return groups
   }
 
   const result: RunToolSnapshot["groups"] = []
-  let hasAddedMilo = false
+  let hasAddedJori = false
 
   for (const group of groups) {
-    if (group.surface !== "milo") {
+    if (group.surface !== "jori") {
       result.push(group)
       continue
     }
 
-    if (!hasAddedMilo) {
-      result.push({ surface: "milo", label: "Milo", tools })
-      hasAddedMilo = true
+    if (!hasAddedJori) {
+      result.push({ surface: "jori", label: "Jori", tools })
+      hasAddedJori = true
     }
   }
 
   return result
 }
 
-function miloTools(groups: RunToolSnapshot["groups"]) {
-  return groups.flatMap((group) => (isMiloGroup(group) ? group.tools : []))
+function joriTools(groups: RunToolSnapshot["groups"]) {
+  return groups.flatMap((group) => (isJoriGroup(group) ? group.tools : []))
 }
 
-function isMiloGroup(group: RunToolSnapshotGroup) {
-  return group.surface === "milo"
+function isJoriGroup(group: RunToolSnapshotGroup) {
+  return group.surface === "jori"
 }
 
 function lifecycleGroups(tools: RunToolSnapshotTool[] | undefined) {
@@ -69,7 +69,7 @@ function lifecycleGroups(tools: RunToolSnapshotTool[] | undefined) {
     ? []
     : [
         {
-          surface: "milo" as const,
+          surface: "jori" as const,
           label: "Run",
           tools,
         },
@@ -81,7 +81,7 @@ function activeSurfaceGroups(tools: RunToolSnapshotTool[] | undefined) {
     ? []
     : [
         {
-          surface: "milo" as const,
+          surface: "jori" as const,
           label: "Active surface",
           tools,
         },
@@ -93,7 +93,7 @@ function workspaceGroups(tools: RunToolSnapshotTool[] | undefined) {
     ? []
     : [
         {
-          surface: "milo" as const,
+          surface: "jori" as const,
           label: "Workspace",
           tools,
         },

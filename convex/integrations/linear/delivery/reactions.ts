@@ -22,7 +22,7 @@ export async function addLinearReaction(
 
   return await linearGraphql(credentials.tokens.access, {
     query: `
-      mutation MiloAddReaction($input: ReactionCreateInput!) {
+      mutation JoriAddReaction($input: ReactionCreateInput!) {
         reactionCreate(input: $input) {
           success
           reaction {

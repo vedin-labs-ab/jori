@@ -9,7 +9,7 @@ export const integrations = [
   "microsoftCalendar",
 ] as const
 
-export const toolSurfaces = ["milo", ...integrations] as const
+export const toolSurfaces = ["jori", ...integrations] as const
 
 // Integrations that carry conversations: they record messages and reactions
 // and can host an active run surface.
@@ -50,7 +50,7 @@ export const integrationLabels = {
 } satisfies Record<Integration, string>
 
 const toolSurfaceLabels = {
-  milo: "Milo",
+  jori: "Jori",
   ...integrationLabels,
 } satisfies Record<ToolSurface, string>
 
@@ -64,7 +64,7 @@ export function integrationLabel(integration: string | undefined) {
 
 export function toolSurfaceLabel(surface: string | undefined) {
   if (surface === undefined) {
-    return "Milo"
+    return "Jori"
   }
 
   return toolSurfaceLabels[surface as ToolSurface] ?? surface

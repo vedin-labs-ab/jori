@@ -76,7 +76,7 @@ describe("GitHub comment tool", () => {
             id: 789,
             body: "Nice.",
             html_url: "https://github.com/acme/app/pull/12#discussion_r789",
-            user: { login: "milo" },
+            user: { login: "jori" },
             created_at: "2026-06-12T15:28:00Z",
             updated_at: "2026-06-12T15:28:00Z",
           },
@@ -115,7 +115,7 @@ describe("GitHub comment tool", () => {
       id: 789,
       body: "Nice.",
       htmlUrl: "https://github.com/acme/app/pull/12#discussion_r789",
-      author: "milo",
+      author: "jori",
       createdAt: "2026-06-12T15:28:00Z",
       updatedAt: "2026-06-12T15:28:00Z",
     })

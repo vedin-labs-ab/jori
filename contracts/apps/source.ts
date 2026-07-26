@@ -34,13 +34,13 @@ const platformAppSourcePaths = [
   "src/vite-env.d.ts",
   "src/hooks/use-mobile.ts",
   "src/lib/utils.ts",
-  "src/milo.ts",
-  "src/milo.css",
+  "src/jori.ts",
+  "src/jori.css",
 ] as const
 
 const platformAppSourcePathPrefixes = [
   "src/components/ui/",
-  "src/milo/",
+  "src/jori/",
 ] as const
 
 export function isPlatformAppSourcePath(path: string) {
@@ -206,7 +206,7 @@ export function rejectForbiddenSourceAccess(
 
     if (match !== undefined) {
       throw new Error(
-        `App source file ${file.path} uses a forbidden platform API. Use the Milo SDK instead.`
+        `App source file ${file.path} uses a forbidden platform API. Use the Jori SDK instead.`
       )
     }
   }

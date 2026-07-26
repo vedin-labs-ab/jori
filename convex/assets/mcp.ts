@@ -1,7 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { type MiloToolRequest, readRecord } from "../shared/input"
+import { type JoriToolRequest, readRecord } from "../shared/input"
 
 type SearchAssetsArgs = {
   query?: string
@@ -15,16 +15,16 @@ type ReadAssetArgs = {
 
 const assetTools = new Set(["search_assets", "read_asset"])
 
-export function isMiloAssetTool(tool: string) {
+export function isJoriAssetTool(tool: string) {
   return assetTools.has(tool)
 }
 
-export async function callMiloAssetTool(
+export async function callJoriAssetTool(
   ctx: ActionCtx,
   run: {
     organizationId: string
   },
-  request: MiloToolRequest
+  request: JoriToolRequest
 ): Promise<unknown> {
   const args = readRecord(request.args)
 
@@ -42,5 +42,5 @@ export async function callMiloAssetTool(
     })
   }
 
-  throw new Error(`Unknown Milo asset tool: ${request.tool}`)
+  throw new Error(`Unknown Jori asset tool: ${request.tool}`)
 }

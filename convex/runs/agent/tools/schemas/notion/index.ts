@@ -96,7 +96,7 @@ function notionChildrenProperty() {
   return {
     type: "array",
     description:
-      "Notion block children. Milo supports paragraph, headings, list items, quote, to_do, and divider blocks.",
+      "Notion block children. Jori supports paragraph, headings, list items, quote, to_do, and divider blocks.",
     items: {
       oneOf: [
         richTextBlock("paragraph"),

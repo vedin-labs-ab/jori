@@ -15,7 +15,7 @@ export async function readAppContract(project: string): Promise<AppContract> {
   }
 
   const entryPath = await writeContractEntry(project)
-  const outputDirectory = path.join(project, ".milo", "contract-dist")
+  const outputDirectory = path.join(project, ".jori", "contract-dist")
 
   await build({
     build: {
@@ -45,7 +45,7 @@ async function hasContractSource(project: string) {
 }
 
 async function writeContractEntry(project: string) {
-  const entryPath = path.join(project, ".milo", "contract-entry.ts")
+  const entryPath = path.join(project, ".jori", "contract-entry.ts")
 
   await fs.mkdir(path.dirname(entryPath), { recursive: true })
   await fs.writeFile(

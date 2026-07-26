@@ -86,17 +86,17 @@ function planName(account: BillingAccount | null) {
 
 function planDetail(account: BillingAccount | null) {
   if (account === null) {
-    return "14 days of everything Milo does. Starts with the first run."
+    return "14 days of everything Jori does. Starts with the first run."
   }
 
   if (account.state === "trial") {
     return account.trialEndsAt === undefined
-      ? "Everything Milo does, on the house."
-      : `Everything Milo does, until ${shortDate(account.trialEndsAt)}.`
+      ? "Everything Jori does, on the house."
+      : `Everything Jori does, until ${shortDate(account.trialEndsAt)}.`
   }
 
   if (account.plan === undefined) {
-    return "Pick a plan to keep Milo working."
+    return "Pick a plan to keep Jori working."
   }
 
   const plan = plans[account.plan]

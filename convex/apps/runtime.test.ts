@@ -8,10 +8,10 @@ const sourceRoot = path.join(root, "runtime/apps")
 const appSourceRoot = path.join(root, "src")
 
 test("derives executable payloads from checked TypeScript source files", () => {
-  expect(runtimeAssets.app.builder["milo-app-builder.ts"]).toContain(
-    "./.milo/builder/config.ts"
+  expect(runtimeAssets.app.builder["jori-app-builder.ts"]).toContain(
+    "./.jori/builder/config.ts"
   )
-  expect(runtimeAssets.app.builder[".milo/builder/config.ts"]).toContain(
+  expect(runtimeAssets.app.builder[".jori/builder/config.ts"]).toContain(
     "app-builder.json"
   )
   expect(runtimeAssets.app.fonts.geistLatinWoff2).not.toBe("")
@@ -28,11 +28,11 @@ test("keeps app shell code and markup in native source assets", () => {
   expect(runtimeAssets.app.shell.loader).toContain(
     "App shell config is missing"
   )
-  expect(runtimeAssets.app.shell.loader).toContain("milo-runtime=1")
+  expect(runtimeAssets.app.shell.loader).toContain("jori-runtime=1")
   expect(runtimeAssets.app.shell.loader).not.toContain("type AppShellConfig")
 })
 
-test("generates the app UI kit from Milo source", () => {
+test("generates the app UI kit from Jori source", () => {
   expect(runtimeAssets.app.template["src/components/ui/button.tsx"]).toBe(
     readAppSource("components/ui/button.tsx")
   )
@@ -42,11 +42,11 @@ test("generates the app UI kit from Milo source", () => {
   expect(runtimeAssets.app.template["src/lib/utils.ts"]).toBe(
     readAppSource("lib/utils.ts")
   )
-  expect(runtimeAssets.app.template["src/milo.ts"]).toContain("MiloClient")
-  expect(runtimeAssets.app.template["src/milo.css"]).toContain(
+  expect(runtimeAssets.app.template["src/jori.ts"]).toContain("JoriClient")
+  expect(runtimeAssets.app.template["src/jori.css"]).toContain(
     '@import "tailwindcss";'
   )
-  expect(runtimeAssets.app.template["src/milo.css"]).not.toContain(
+  expect(runtimeAssets.app.template["src/jori.css"]).not.toContain(
     "better-auth"
   )
   expect(appBiomeConfig().css?.parser?.tailwindDirectives).toBe(true)
@@ -54,7 +54,7 @@ test("generates the app UI kit from Milo source", () => {
 
 test("keeps the app SDK barrel safe for contract extraction", async () => {
   await expect(
-    import("../../runtime/apps/template/src/milo")
+    import("../../runtime/apps/template/src/jori")
   ).resolves.toHaveProperty("defineAppContract")
 })
 
@@ -64,7 +64,7 @@ test("generates app sandbox dependencies from template package manifest", () => 
   )
   expect(runtimeAssets.app.dependencies).toContain("@biomejs/biome@2.4.12")
   expect(appPackageScripts().check).toBe(
-    "node --experimental-strip-types /home/user/.milo/apps/runtime/milo-app-builder.ts check ."
+    "node --experimental-strip-types /home/user/.jori/apps/runtime/jori-app-builder.ts check ."
   )
 })
 

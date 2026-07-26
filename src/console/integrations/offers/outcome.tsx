@@ -13,13 +13,13 @@ const offerOutcomeContent: Record<
   }
 > = {
   connected: {
-    description: "This integration is connected and available to Milo.",
+    description: "This integration is connected and available to Jori.",
     icon: <CheckCircle2 />,
     title: "Integration connected",
   },
   expired: {
     description:
-      "Ask Milo for a new integration offer, or open integrations to connect manually.",
+      "Ask Jori for a new integration offer, or open integrations to connect manually.",
     icon: <AlertTriangle />,
     title: "Integration offer expired",
   },
@@ -30,7 +30,7 @@ const offerOutcomeContent: Record<
   },
   terminal: {
     description:
-      "Milo couldn't open this integration offer. Open integrations to connect manually.",
+      "Jori couldn't open this integration offer. Open integrations to connect manually.",
     icon: <AlertTriangle />,
     title: "Integration offer unavailable",
   },

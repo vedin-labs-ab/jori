@@ -25,7 +25,7 @@ export async function sendInvitation(
 
   await sendEmail(ctx, {
     to: invitation.email,
-    subject: `${invitation.inviter.user.name} invited you to ${organization} on Milo`,
+    subject: `${invitation.inviter.user.name} invited you to ${organization} on Jori`,
     html: invitationHtml(invitation, consoleUrl),
     text: invitationText(invitation, consoleUrl),
   })
@@ -37,9 +37,9 @@ function invitationHtml(invitation: Invitation, consoleUrl: string) {
   const organization = escapeHtml(invitation.organization.name)
 
   return [
-    `<p>${inviter} (${email}) invited you to join <strong>${organization}</strong> on Milo.</p>`,
+    `<p>${inviter} (${email}) invited you to join <strong>${organization}</strong> on Jori.</p>`,
     `<p>Sign in with this email address and the invitation will be waiting for you.</p>`,
-    `<p><a href="${consoleUrl}">Open Milo</a></p>`,
+    `<p><a href="${consoleUrl}">Open Jori</a></p>`,
   ].join("\n")
 }
 
@@ -47,7 +47,7 @@ function invitationText(invitation: Invitation, consoleUrl: string) {
   const { name, email } = invitation.inviter.user
 
   return [
-    `${name} (${email}) invited you to join ${invitation.organization.name} on Milo.`,
+    `${name} (${email}) invited you to join ${invitation.organization.name} on Jori.`,
     "Sign in with this email address and the invitation will be waiting for you.",
     consoleUrl,
   ].join("\n\n")

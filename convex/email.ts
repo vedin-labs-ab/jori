@@ -10,7 +10,7 @@ type DeliveryCtx = Parameters<Resend["sendEmail"]>[0]
 
 /** Resend's shared test domain. It only delivers to the account owner, so it
  *  is a development fallback, never the production sender. */
-const fallbackSender = "Milo <onboarding@resend.dev>"
+const fallbackSender = "Jori <onboarding@resend.dev>"
 
 export type Message = {
   to: string
@@ -19,11 +19,11 @@ export type Message = {
   text: string
 }
 
-/** Every email Milo sends goes through here, so the sender address is
+/** Every email Jori sends goes through here, so the sender address is
  *  resolved in exactly one place. */
 export async function sendEmail(ctx: DeliveryCtx, message: Message) {
   await resend.sendEmail(ctx, {
-    from: readEnvironmentVariable("MILO_EMAIL_FROM") ?? fallbackSender,
+    from: readEnvironmentVariable("JORI_EMAIL_FROM") ?? fallbackSender,
     ...message,
   })
 }

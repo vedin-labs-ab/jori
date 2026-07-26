@@ -69,9 +69,9 @@ describe("app source validation", () => {
     for (const path of [
       "src/components/ui/button.tsx",
       "src/lib/utils.ts",
-      "src/milo/client.ts",
-      "src/milo.ts",
-      "src/milo.css",
+      "src/jori/client.ts",
+      "src/jori.ts",
+      "src/jori.css",
     ]) {
       expect(() =>
         createAppSourceSnapshot([
@@ -128,7 +128,7 @@ describe("app build payloads", () => {
 
     expect(assets.map((asset) => asset.path)).toEqual([
       "assets/app.js",
-      "milo-manifest.json",
+      "jori-manifest.json",
     ])
   })
 
@@ -168,7 +168,7 @@ describe("app session tokens", () => {
 
 const appSource = "export function App() { return <main>Hello</main> }\n"
 const contractSource =
-  'import { defineAppContract } from "@/milo/contract"\nexport const contract = defineAppContract({ version: 1, state: {} })\n'
+  'import { defineAppContract } from "@/jori/contract"\nexport const contract = defineAppContract({ version: 1, state: {} })\n'
 
 function minimalSource(overrides: { app?: string } = {}) {
   return [
@@ -186,7 +186,7 @@ function minimalBuildAssets() {
       contentBase64: Buffer.from("export {}\n").toString("base64"),
     },
     {
-      path: "milo-manifest.json",
+      path: "jori-manifest.json",
       mimeType: "application/json; charset=utf-8",
       contentBase64: Buffer.from(
         JSON.stringify({ entry: "assets/app.js", styles: [] })

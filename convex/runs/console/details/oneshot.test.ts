@@ -27,7 +27,7 @@ test("includes one-shot automation access details", async () => {
   expect(summary.source).toEqual({
     kind: { label: "one-shot", type: "one-shot" },
     type: "automation",
-    surface: "milo",
+    surface: "jori",
   })
   expect(summary.details).toEqual([
     {
@@ -84,7 +84,7 @@ test("keeps the one-shot label after an owned automation is cleaned up", async (
   expect(summary.source).toEqual({
     kind: { label: "one-shot", type: "one-shot" },
     type: "automation",
-    surface: "milo",
+    surface: "jori",
   })
 })
 

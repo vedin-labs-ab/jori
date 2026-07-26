@@ -45,7 +45,7 @@ export const codingToolDefinitions = [
         'Git arguments without the leading git executable, for example ["log", "--oneline", "-5"].'
       ),
       cwd: stringSchema(
-        'Optional workspace directory to run from, for example "milo". Defaults to /home/user/workspace.'
+        'Optional workspace directory to run from, for example "jori". Defaults to /home/user/workspace.'
       ),
       timeoutMs: numberSchema("Optional command timeout in milliseconds."),
     }),
@@ -59,7 +59,7 @@ export const codingToolDefinitions = [
         "The patch: a unified diff, or a *** Begin Patch / *** End Patch envelope with Add File, Update File, and Delete File sections."
       ),
       cwd: stringSchema(
-        'Optional workspace directory to apply from, for example "milo". Defaults to /home/user/workspace.'
+        'Optional workspace directory to apply from, for example "jori". Defaults to /home/user/workspace.'
       ),
     }),
   },
@@ -70,7 +70,7 @@ export const codingToolDefinitions = [
     inputSchema: objectSchema(["command"], {
       command: stringSchema("Shell command to execute."),
       cwd: stringSchema(
-        'Optional workspace directory to run from, for example "milo". Defaults to /home/user/workspace.'
+        'Optional workspace directory to run from, for example "jori". Defaults to /home/user/workspace.'
       ),
       timeoutMs: numberSchema("Optional command timeout in milliseconds."),
     }),

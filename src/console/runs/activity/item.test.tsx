@@ -41,7 +41,7 @@ test("renders a compact non-collapsible activity item", () => {
 })
 
 test("renders integration offer descriptions as provider identity", () => {
-  const summary = "Connect GitHub so Milo can inspect repositories."
+  const summary = "Connect GitHub so Jori can inspect repositories."
 
   render(
     <TooltipProvider>

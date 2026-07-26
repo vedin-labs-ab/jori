@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { miloModel } from "../../contracts/billing"
+import { joriModel } from "../../contracts/billing"
 import { type Id } from "../_generated/dataModel"
 import { type AppPlatformContext } from "./tools/platform"
 import {
@@ -36,13 +36,13 @@ function platformContext(): AppPlatformContext {
 }
 
 describe("app prompt model contract", () => {
-  test("uses Milo's one model, with no deployment override", () => {
+  test("uses Jori's one model, with no deployment override", () => {
     expect(
       createAppPromptRequest(
         platformContext(),
         normalizeAppPromptInput(promptArgs())
       ).model
-    ).toBe(miloModel)
+    ).toBe(joriModel)
   })
 
   test("requires a named object output schema", () => {

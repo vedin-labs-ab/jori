@@ -22,7 +22,7 @@ export type IntegrationCardConfig = {
   label: string
   loading: string
   logo: SurfaceLogo
-  integration: Exclude<ToolSurface, "milo">
+  integration: Exclude<ToolSurface, "jori">
 }
 
 type IntegrationStatus = {

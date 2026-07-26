@@ -21,7 +21,7 @@ export async function fetchGitHubCloneCredentials(
       failure: "GitHub clone credentials request failed",
       runId: args.runId,
       secret,
-      url: new URL("/milo/github/clone-credentials", requireConvexSiteUrl()),
+      url: new URL("/jori/github/clone-credentials", requireConvexSiteUrl()),
     })
   )
 }

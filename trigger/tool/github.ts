@@ -88,7 +88,7 @@ function defaultBranchName(runId: string) {
     .replaceAll(/^-+|-+$/g, "")
     .slice(0, 96)
 
-  return `milo/${suffix === "" ? "change" : suffix}`
+  return `jori/${suffix === "" ? "change" : suffix}`
 }
 
 function compactError(stderr: string, stdout: string) {
@@ -101,7 +101,7 @@ function compactError(stderr: string, stdout: string) {
 }
 
 function sourceChangeScript(paths: string[]) {
-  return `node --input-type=module <<'MILO_SOURCE_CHANGES'
+  return `node --input-type=module <<'JORI_SOURCE_CHANGES'
 import { spawnSync } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
@@ -272,5 +272,5 @@ function isUnmerged(code) {
     code === "DD"
   )
 }
-MILO_SOURCE_CHANGES`
+JORI_SOURCE_CHANGES`
 }

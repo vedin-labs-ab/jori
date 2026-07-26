@@ -170,7 +170,7 @@ function useScopeMentionSources(props: AutomationInstructionsFieldProps) {
         ? props.permissions
         : props.permissions.filter(
             (permission) =>
-              permission.surface === "milo" ||
+              permission.surface === "jori" ||
               isAutomationSurfaceAllowedForScope(
                 props.scope,
                 permission.surface

@@ -9,18 +9,18 @@ describe("billingReturnUrl", () => {
   it("returns checkout flows to the console", () => {
     stubWindowOrigin()
 
-    expect(billingReturnUrl()).toBe("https://milo.test/console")
+    expect(billingReturnUrl()).toBe("https://jori.test/console")
   })
 
   it("marks portal returns so billing settings reopen", () => {
     stubWindowOrigin()
 
     expect(billingReturnUrl(true)).toBe(
-      "https://milo.test/console?billing=portal"
+      "https://jori.test/console?billing=portal"
     )
   })
 })
 
 function stubWindowOrigin() {
-  vi.stubGlobal("window", { location: { origin: "https://milo.test" } })
+  vi.stubGlobal("window", { location: { origin: "https://jori.test" } })
 }

@@ -30,7 +30,7 @@ test("aligns plan detail and usage breakdown on the same rhythm", () => {
   render(<SummaryBand account={null} organizationId="organization" />)
 
   const planDetail = screen.getByText(
-    "14 days of everything Milo does. Starts with the first run."
+    "14 days of everything Jori does. Starts with the first run."
   )
   const usageBreakdown = screen.getByText("Wallet").parentElement
 

@@ -38,10 +38,10 @@ export const organizationProviders = [
     config: {
       action: "Connect Slack",
       connectedDetail:
-        "Milo responds to mentions, searches conversation context, and replies in threads.",
+        "Jori responds to mentions, searches conversation context, and replies in threads.",
       connectError: "Couldn't start the Slack integration.",
       emptyDetail:
-        "Install the Slack app so Milo can respond to mentions where your team talks.",
+        "Install the Slack app so Jori can respond to mentions where your team talks.",
       installPath: "/slack/install",
       integration: "slack",
       label: "Slack",
@@ -60,10 +60,10 @@ export const organizationProviders = [
     config: {
       action: "Connect Linear",
       connectedDetail:
-        "Milo responds to mentions, reads issue context, and comments on issues.",
+        "Jori responds to mentions, reads issue context, and comments on issues.",
       connectError: "Couldn't start the Linear integration.",
       emptyDetail:
-        "Connect Linear so Milo can respond to mentions and comment on issues.",
+        "Connect Linear so Jori can respond to mentions and comment on issues.",
       installPath: "/linear/install",
       integration: "linear",
       label: "Linear",
@@ -83,10 +83,10 @@ export const organizationProviders = [
     config: {
       action: "Connect GitHub",
       connectedDetail:
-        "Milo responds to mentions, reads the connected repositories, and replies in issue and pull request threads.",
+        "Jori responds to mentions, reads the connected repositories, and replies in issue and pull request threads.",
       connectError: "Couldn't start the GitHub integration.",
       emptyDetail:
-        "Install the GitHub App so Milo can respond to mentions in issues and pull requests.",
+        "Install the GitHub App so Jori can respond to mentions in issues and pull requests.",
       installPath: "/github/install",
       integration: "github",
       label: "GitHub",
@@ -105,10 +105,10 @@ export const organizationProviders = [
     config: {
       action: "Connect Notion",
       connectedDetail:
-        "Milo can search shared content, read and update pages, and add comments.",
+        "Jori can search shared content, read and update pages, and add comments.",
       connectError: "Couldn't start the Notion integration.",
       emptyDetail:
-        "Connect Notion so Milo can work with the pages and databases you share.",
+        "Connect Notion so Jori can work with the pages and databases you share.",
       installPath: "/notion/install",
       integration: "notion",
       label: "Notion",
@@ -130,7 +130,7 @@ export const personalProviders = [
     config: {
       action: "Connect Gmail",
       connectedDetail:
-        "Connected for you only. Milo can read and reply to your email when you ask.",
+        "Connected for you only. Jori can read and reply to your email when you ask.",
       connectError: "Couldn't start the Gmail integration.",
       emptyDetail:
         "Connect your Gmail account. This connects only you, not the whole organization.",
@@ -151,7 +151,7 @@ export const personalProviders = [
     config: {
       action: "Connect Calendar",
       connectedDetail:
-        "Connected for you only. Milo can read, create, and update your events when you ask.",
+        "Connected for you only. Jori can read, create, and update your events when you ask.",
       connectError: "Couldn't start the Google Calendar integration.",
       emptyDetail:
         "Connect your Google Calendar. This connects only you, not the whole organization.",
@@ -172,7 +172,7 @@ export const personalProviders = [
     config: {
       action: "Connect Outlook",
       connectedDetail:
-        "Connected for you only. Milo can read, draft, and send your mail when you ask.",
+        "Connected for you only. Jori can read, draft, and send your mail when you ask.",
       connectError: "Couldn't start the Outlook integration.",
       emptyDetail:
         "Connect your Outlook account. This connects only you, not the whole organization.",
@@ -194,7 +194,7 @@ export const personalProviders = [
     config: {
       action: "Connect Calendar",
       connectedDetail:
-        "Connected for you only. Milo can read, create, and update your events when you ask.",
+        "Connected for you only. Jori can read, create, and update your events when you ask.",
       connectError: "Couldn't start the Microsoft Calendar integration.",
       emptyDetail:
         "Connect your Microsoft Calendar. This connects only you, not the whole organization.",

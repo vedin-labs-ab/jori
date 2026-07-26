@@ -115,7 +115,7 @@ function githubIntegration(): Doc<"integrations"> {
     createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
-    data: { appSlug: "milo", botLogin: "milo[bot]" },
+    data: { appSlug: "jori", botLogin: "jori[bot]" },
   }
 }
 
@@ -129,10 +129,10 @@ function targetMessage(): Doc<"messages"> {
     type: "comment.issue.created",
     externalId: "message",
     mentioned: false,
-    actor: { externalId: "999", kind: "bot", name: "milo[bot]" },
+    actor: { externalId: "999", kind: "bot", name: "jori[bot]" },
     conversationId: "acme/app#12",
     targetKey: target.key,
-    text: "Milo reply.",
+    text: "Jori reply.",
     createdAt: 0,
   }
 }

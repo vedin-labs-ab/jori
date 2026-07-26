@@ -1,7 +1,7 @@
 "use node"
 
 import { v } from "convex/values"
-import { miloModel } from "../../contracts/billing"
+import { joriModel } from "../../contracts/billing"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { internal } from "../_generated/api"
@@ -44,7 +44,7 @@ export const run = internalAction({
 
 async function summarizeConversation(input: PendingSummary) {
   const response = await sendOpenRouterChat({
-    model: miloModel,
+    model: joriModel,
     maxTokens: summaryOutputTokens,
     provider: { requireParameters: true, sort: "latency" },
     reasoning: { effort: "low" },

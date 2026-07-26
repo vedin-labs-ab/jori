@@ -31,7 +31,7 @@ export async function fetchLinearIssueContext(
     credentials.tokens.access,
     {
       query: `
-        query MiloAutomationIssueContext($id: String!) {
+        query JoriAutomationIssueContext($id: String!) {
           issue(id: $id) {
             id
             team { id }

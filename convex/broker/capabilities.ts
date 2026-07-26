@@ -149,7 +149,7 @@ function isSelectedForRun(
     return true
   }
 
-  if (permission.surface === "milo") {
+  if (permission.surface === "jori") {
     return !isWebTool(permission.tool) || access.web
   }
 
@@ -164,7 +164,7 @@ function isSelectedForRun(
 }
 
 function runSurfaces(input: AgentRuntimeInput) {
-  const surfaces: ToolSurface[] = ["milo"]
+  const surfaces: ToolSurface[] = ["jori"]
   const seen = new Set<ToolSurface>(surfaces)
 
   for (const integration of input.integrations) {

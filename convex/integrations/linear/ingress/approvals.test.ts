@@ -45,7 +45,7 @@ test("lets ordinary Linear messages fall through to intake", async () => {
   const handled = await handleLinearApprovalDecision(ctx, {
     accountId: "linear-org",
     actorKind: "person",
-    text: "hello milo",
+    text: "hello jori",
   })
 
   expect(handled).toBe(false)

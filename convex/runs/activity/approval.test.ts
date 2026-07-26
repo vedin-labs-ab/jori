@@ -14,7 +14,7 @@ test("projects approvals with surface action metadata", () => {
         code: "ABC123",
         createdAt: 1000,
         expiresAt: 2000,
-        requestedBy: { kind: "self", externalId: "milo" },
+        requestedBy: { kind: "self", externalId: "jori" },
         runId: "run" as Id<"runs">,
         status: "expired",
         summary: "Create a Notion page with the requested content.",

@@ -66,7 +66,7 @@ function oauthErrorMessage({
   }
 
   if (error === "account_not_linked") {
-    return `This Milo account does not use ${providerName} sign-in. Use the provider you originally chose.`
+    return `This Jori account does not use ${providerName} sign-in. Use the provider you originally chose.`
   }
 
   if (error === "state_not_found" || error === "state_mismatch") {

@@ -11,7 +11,7 @@ import { RegionPicker } from "@/shared/region/picker"
 
 export const Route = createFileRoute("/sign-in")({
   component: SignInPage,
-  head: () => ({ meta: [{ title: "Milo · Sign in" }] }),
+  head: () => ({ meta: [{ title: "Jori · Sign in" }] }),
 })
 
 function SignInPage() {
@@ -35,7 +35,7 @@ function SignInPage() {
                   />
                 </div>
               }
-              title="Sign in to Milo"
+              title="Sign in to Jori"
             />
             <div className="mt-8 space-y-4">
               <div className="flex justify-center">

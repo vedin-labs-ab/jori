@@ -105,7 +105,7 @@ function addAppPlatformFiles(files: Record<string, string>) {
     files[`src/${relativePath}`] = readAppSource(relativePath)
   }
 
-  files["src/milo.css"] = readAppThemeCss()
+  files["src/jori.css"] = readAppThemeCss()
 }
 
 function readBuilderFiles() {
@@ -116,8 +116,8 @@ function readBuilderFiles() {
     const sourcePath = normalizePath(path.relative(builderRoot, filePath))
     const outputPath =
       sourcePath === "index.ts"
-        ? "milo-app-builder.ts"
-        : `.milo/builder/${sourcePath}`
+        ? "jori-app-builder.ts"
+        : `.jori/builder/${sourcePath}`
     const content = fs.readFileSync(filePath, "utf8")
     files[outputPath] =
       sourcePath === "index.ts"
@@ -140,7 +140,7 @@ function addBuilderContractFiles(files: Record<string, string>) {
   for (const sourcePath of builderContractSourcePaths) {
     const filePath = path.join(appContractsRoot, sourcePath)
     const content = fs.readFileSync(filePath, "utf8")
-    files[`.milo/builder/contracts/apps/${sourcePath}`] =
+    files[`.jori/builder/contracts/apps/${sourcePath}`] =
       rewriteGeneratedContractImports(
         transpileTypeScript(content, `contracts/apps/${sourcePath}`)
       )
@@ -216,7 +216,7 @@ function extractDesignTokenCss(source: string) {
   const blocks = source.match(/(?:^|\n)(?::root|\.dark)\s\{[\s\S]*?\n\}/g)
 
   if (blocks === null || blocks.length !== 2) {
-    throw new Error("Milo style source must define :root and .dark tokens.")
+    throw new Error("Jori style source must define :root and .dark tokens.")
   }
 
   return blocks.map((block) => block.trim()).join("\n\n")
@@ -224,10 +224,10 @@ function extractDesignTokenCss(source: string) {
 
 function rewriteBuilderEntrypointImports(source: string) {
   return source
-    .replaceAll(/from "\.\/([a-z-]+)\.ts"/g, 'from "./.milo/builder/$1.ts"')
+    .replaceAll(/from "\.\/([a-z-]+)\.ts"/g, 'from "./.jori/builder/$1.ts"')
     .replaceAll(
       'from "../../../contracts/apps/',
-      'from "./.milo/builder/contracts/apps/'
+      'from "./.jori/builder/contracts/apps/'
     )
 }
 

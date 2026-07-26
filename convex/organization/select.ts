@@ -1,4 +1,4 @@
-import { miloModel } from "../../contracts/billing"
+import { joriModel } from "../../contracts/billing"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { requestStructured } from "../model/structured"
@@ -29,7 +29,7 @@ export async function selectLinks(options: {
 
   const considered = options.candidates.slice(0, maxCandidatesConsidered)
   const value = await requestStructured({
-    model: miloModel,
+    model: joriModel,
     reasoning: "low",
     schemaName: "selected_links",
     schema: selectionSchema,

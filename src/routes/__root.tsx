@@ -18,9 +18,9 @@ import {
 import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
-const appTitle = "Milo"
+const appTitle = "Jori"
 const appDescription =
-  "An AI teammate for the work your team repeats. Milo runs it across Slack, GitHub, and Linear, leaves behind a live app anyone can open, and asks before it acts."
+  "An AI teammate for the work your team repeats. Jori runs it across Slack, GitHub, and Linear, leaves behind a live app anyone can open, and asks before it acts."
 const providerlessRouteIds = new Set([
   "/",
   "/apps/$appId/",
@@ -132,7 +132,7 @@ function RootError({ error, reset }: { error: unknown; reset?: () => void }) {
       }
       description="Something went wrong loading this page. A reload usually clears it."
       icon={<AlertTriangle />}
-      title="Milo couldn't load this page"
+      title="Jori couldn't load this page"
     >
       {import.meta.env.DEV ? (
         <code className="block w-full overflow-x-auto rounded-md border bg-muted/50 px-3 py-2 text-left font-mono text-muted-foreground text-xs">
@@ -150,7 +150,7 @@ function NotFound() {
         // A plain anchor, not a router link: the console and the marketing
         // site share this boundary, and home resolves correctly for both.
         <Button asChild variant="outline">
-          <a href="/">Back to Milo</a>
+          <a href="/">Back to Jori</a>
         </Button>
       }
       description="The link may be out of date, or the page may have moved."
