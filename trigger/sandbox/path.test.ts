@@ -20,13 +20,13 @@ test("keeps explicit clone destinations inside the workspace", () => {
   )
   expect(() =>
     sandboxClonePath({ repository: "acme/app", value: "/tmp/repository" })
-  ).toThrow("Sandbox path must be inside the Milo workspace")
+  ).toThrow("Sandbox path must be inside the Jori workspace")
 })
 
 test("allows the workspace root as a command cwd", () => {
   expect(sandboxWorkspacePath(undefined)).toBe(sandboxWorkspace)
   expect(sandboxWorkspacePath(sandboxWorkspace)).toBe(sandboxWorkspace)
   expect(() => sandboxWorkspacePath("/tmp")).toThrow(
-    "Sandbox path must be inside the Milo workspace"
+    "Sandbox path must be inside the Jori workspace"
   )
 })

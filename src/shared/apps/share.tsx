@@ -57,7 +57,7 @@ function ShareFrame({
       <header className="flex items-center justify-between gap-3 border-b px-4 py-2.5">
         <h1 className="truncate font-medium text-sm">{session.title}</h1>
         <Button asChild size="sm" variant="outline">
-          <a href={`/apps/${encodeURIComponent(appId)}`}>Open in Milo</a>
+          <a href={`/apps/${encodeURIComponent(appId)}`}>Open in Jori</a>
         </Button>
       </header>
       <AppFrame
@@ -83,7 +83,7 @@ function ShareUnavailable({ appId }: { appId: string }) {
         </p>
       </div>
       <Button asChild variant="outline">
-        <a href={`/apps/${encodeURIComponent(appId)}`}>Open in Milo</a>
+        <a href={`/apps/${encodeURIComponent(appId)}`}>Open in Jori</a>
       </Button>
     </main>
   )

@@ -9,14 +9,14 @@ import {
 const entities = {
   channels: new Map([["C042ABC", "social"]]),
   users: new Map([
-    ["U0B96KZ7WJG", "Milo"],
+    ["U0B96KZ7WJG", "Jori"],
     ["U777", "Albin Vedin"],
   ]),
 }
 
 test.each([
-  ["<@U0B96KZ7WJG> :man-raising-hand:", "@Milo 🙋‍♂️"],
-  ["<@U0B96KZ7WJG|milo> hello", "@Milo hello"],
+  ["<@U0B96KZ7WJG> :man-raising-hand:", "@Jori 🙋‍♂️"],
+  ["<@U0B96KZ7WJG|jori> hello", "@Jori hello"],
   ["ask <@U777> about it", "ask @Albin Vedin about it"],
   ["ping <@U999>", "ping @U999"],
   ["ping <@U999|dave>", "ping @dave"],
@@ -58,7 +58,7 @@ test("collects unlabeled channel ids", () => {
 
 test.each([
   ["<@U0B96KZ7WJG> hi", true],
-  ["<@U0B96KZ7WJG|milo> hi", true],
+  ["<@U0B96KZ7WJG|jori> hi", true],
   ["<@U777> hi", false],
   ["plain", false],
 ])("detects self mention in %j", (text, expected) => {

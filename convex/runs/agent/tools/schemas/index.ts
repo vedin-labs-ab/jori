@@ -1,10 +1,10 @@
 import { withOptionalFieldGuidance } from "./fragments/common"
 import { githubToolInputSchemas } from "./github"
 import { googleToolInputSchemas } from "./google"
+import { loadSkillInputSchema } from "./jori/core"
+import { joriToolInputSchemas } from "./jori/index"
 import { linearToolInputSchemas } from "./linear"
 import { microsoftToolInputSchemas } from "./microsoft"
-import { loadSkillInputSchema } from "./milo/core"
-import { miloToolInputSchemas } from "./milo/index"
 import { notionToolInputSchemas } from "./notion"
 import { slackToolInputSchemas } from "./slack"
 
@@ -25,7 +25,7 @@ const toolInputSchemas = {
   ...googleToolInputSchemas,
   ...linearToolInputSchemas,
   ...microsoftToolInputSchemas,
-  ...miloToolInputSchemas,
+  ...joriToolInputSchemas,
   ...notionToolInputSchemas,
   ...slackToolInputSchemas,
 }

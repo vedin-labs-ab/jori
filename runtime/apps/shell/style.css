@@ -24,10 +24,10 @@ body {
   border: 2px solid currentColor;
   border-top-color: transparent;
   border-radius: 9999px;
-  animation: milo-app-spin 1s linear infinite;
+  animation: jori-app-spin 1s linear infinite;
 }
 
-@keyframes milo-app-spin {
+@keyframes jori-app-spin {
   to {
     transform: rotate(360deg);
   }

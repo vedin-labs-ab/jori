@@ -11,7 +11,7 @@ import {
 
 function appSummaryProperties() {
   return {
-    appId: stringProperty("Milo app ID."),
+    appId: stringProperty("Jori app ID."),
     title: stringProperty("App title."),
     access: stringProperty("personal or organization."),
     contract: providerPayload("The app's contract document."),
@@ -35,7 +35,7 @@ function publishResult(description: string): JsonSchema {
     description,
     required: ["appId", "versionId", "urlPath"],
     properties: {
-      appId: stringProperty("Milo app ID."),
+      appId: stringProperty("Jori app ID."),
       versionId: stringProperty("Published version ID."),
       url: stringProperty("Absolute console URL when the host is configured."),
       urlPath: stringProperty("Console path for the app."),
@@ -130,14 +130,14 @@ export const appToolResponseSchemas = {
       objectSchema({
         required: ["appId", "archived"],
         properties: {
-          appId: stringProperty("Milo app ID."),
+          appId: stringProperty("Jori app ID."),
           archived: { type: "boolean", const: true },
         },
       }),
       objectSchema({
         required: ["appId", "deleted"],
         properties: {
-          appId: stringProperty("Milo app ID."),
+          appId: stringProperty("Jori app ID."),
           deleted: { type: "boolean", const: true },
           deletedAssets: numberProperty("Assets removed."),
           deletedBlobs: numberProperty("Content blobs removed."),

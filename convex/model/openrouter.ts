@@ -9,7 +9,7 @@ import {
   requireEnvironmentVariable,
 } from "../shared/environment"
 
-const defaultOpenRouterAppTitle = "Milo"
+const defaultOpenRouterAppTitle = "Jori"
 const defaultOpenRouterAppCategories = "cloud-agent"
 
 type OpenRouterModelSelection =

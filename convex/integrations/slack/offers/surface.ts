@@ -74,7 +74,7 @@ async function syncSlackSurface(target: SurfaceTarget) {
     integration: target.offer.integration,
     actor: target.offer.result?.actor,
     status: target.offer.status,
-    summary: target.offer.summary ?? "Milo requested this integration.",
+    summary: target.offer.summary ?? "Jori requested this integration.",
     updatedAt: target.offer.updatedAt,
   })
 

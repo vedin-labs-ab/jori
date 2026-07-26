@@ -146,7 +146,7 @@ test("enables web access with a selected web tool", () => {
       id: "web_search",
       kind: "tool",
       label: "web_search",
-      surface: "milo",
+      surface: "jori",
     },
     setSuggestion: vi.fn(),
     state: suggestionState(),

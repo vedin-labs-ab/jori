@@ -8,7 +8,7 @@ import {
   stringProperty,
 } from "./common"
 
-// Both calendar providers return provider event objects that Milo stamps
+// Both calendar providers return provider event objects that Jori stamps
 // with a stable identity; the multi-calendar scan wraps them in one shared
 // envelope. One schema each, reused by the Google and Microsoft maps.
 
@@ -26,7 +26,7 @@ export function stampedEventSchema(): JsonSchema {
   return {
     type: "object",
     additionalProperties: true,
-    description: "The provider's event object plus Milo's identity stamp.",
+    description: "The provider's event object plus Jori's identity stamp.",
     properties: stampProperties,
   }
 }

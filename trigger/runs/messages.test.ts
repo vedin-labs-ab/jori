@@ -18,13 +18,13 @@ test("formats drained messages like conversation messages", () => {
 
   expect(
     formatted
-  ).toBe(`- 2026-06-22T09:34:35.618Z | self | Milo | identifiers=[internal:message:message, slack:message:1782231485.491049] | actor_ids=[slack:user:U0B96KZ7WJG]
+  ).toBe(`- 2026-06-22T09:34:35.618Z | self | Jori | identifiers=[internal:message:message, slack:message:1782231485.491049] | actor_ids=[slack:user:U0B96KZ7WJG]
 \`\`\`text
 Here's what I've got.
 \`\`\``)
   expect(formatted).not.toContain("New slack message")
   expect(formatted).not.toContain("Authority:")
-  expect(formatted).not.toContain("Mentioned Milo:")
+  expect(formatted).not.toContain("Mentioned Jori:")
   expect(formatted).not.toContain("Message:")
 })
 
@@ -35,7 +35,7 @@ test("formats drained reaction interactions compactly", () => {
     formatted
   ).toBe(`- 2026-06-22T09:35:00.000Z | reaction.added | person | Albin | reaction=✅ | identifiers=[linear:issue:ISS-1, linear:comment:comment] | actor_ids=[linear:user:user]
 \`\`\`text
-Reacted ✅ to Milo's message: "I can proceed with option B."
+Reacted ✅ to Jori's message: "I can proceed with option B."
 \`\`\``)
 })
 
@@ -95,7 +95,7 @@ function runtimeMessage(
   overrides: Partial<RuntimeMessage> = {}
 ): RuntimeMessage {
   return {
-    actor: "Milo",
+    actor: "Jori",
     actorIds: ["slack:user:U0B96KZ7WJG"],
     authority: "soft",
     createdAt: Date.parse("2026-06-22T09:34:35.000Z"),
@@ -129,7 +129,7 @@ function runtimeInteraction(
     preview: "I can proceed with option B.",
     reaction: "✅",
     source: "person",
-    target: "Milo",
+    target: "Jori",
     type: "reaction.added",
     ...overrides,
   }

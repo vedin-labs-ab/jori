@@ -36,7 +36,7 @@ describe("automation event payload match", () => {
           integration: "github",
           event: "pull_request.review_comment.edited",
           match: {
-            repo: "milo/app",
+            repo: "jori/app",
             pr: "42",
             path: "src/app.ts",
           },
@@ -108,7 +108,7 @@ function githubReviewForm() {
     eventIntegration: "github",
     event: "pull_request.review_comment.edited",
     eventMatch: {
-      repo: "milo/app",
+      repo: "jori/app",
       pr: "42",
       path: "src/app.ts",
     },

@@ -7,7 +7,7 @@ export function requireConvexSiteUrl() {
 }
 
 export function requireWorkerSecret() {
-  return requireEnv("MILO_WORKER_SECRET")
+  return requireEnv("JORI_WORKER_SECRET")
 }
 
 function requireEnv(name: string, fallback?: string) {

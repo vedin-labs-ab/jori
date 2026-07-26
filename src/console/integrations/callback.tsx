@@ -6,49 +6,49 @@ const integrationCallbackToasts = [
     "slack",
     "connected",
     "Slack connected",
-    "Milo can now respond to mentions and search context in your Slack workspace."
+    "Jori can now respond to mentions and search context in your Slack workspace."
   ),
   callbackToast(
     "linear",
     "connected",
     "Linear connected",
-    "Milo can now respond to mentions and comment on Linear issues."
+    "Jori can now respond to mentions and comment on Linear issues."
   ),
   callbackToast(
     "microsoftEmail",
     "connected",
     "Outlook Mail connected",
-    "Milo can now work with your Outlook mail when you ask."
+    "Jori can now work with your Outlook mail when you ask."
   ),
   callbackToast(
     "microsoftCalendar",
     "connected",
     "Microsoft Calendar connected",
-    "Milo can now work with your Microsoft calendar when you ask."
+    "Jori can now work with your Microsoft calendar when you ask."
   ),
   callbackToast(
     "github",
     "connected",
     "GitHub connected",
-    "Milo can now respond to mentions in GitHub issues and pull requests."
+    "Jori can now respond to mentions in GitHub issues and pull requests."
   ),
   callbackToast(
     "gmail",
     "connected",
     "Gmail connected",
-    "Milo can now work with your Gmail when you ask."
+    "Jori can now work with your Gmail when you ask."
   ),
   callbackToast(
     "googleCalendar",
     "connected",
     "Google Calendar connected",
-    "Milo can now work with your Google Calendar when you ask."
+    "Jori can now work with your Google Calendar when you ask."
   ),
   callbackToast(
     "notion",
     "connected",
     "Notion connected",
-    "Milo can now work with the Notion pages and databases you share."
+    "Jori can now work with the Notion pages and databases you share."
   ),
   callbackToast(
     "slack",

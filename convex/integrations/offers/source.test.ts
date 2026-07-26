@@ -36,14 +36,14 @@ describe("integration offer source", () => {
     })
   })
 
-  test("uses Milo as the source for non-message runs", () => {
+  test("uses Jori as the source for non-message runs", () => {
     const input = {
       type: "instruction",
       run: { _id: "run_1" },
     } as unknown as AgentRuntimeInput
 
     expect(integrationOfferSourceFromInput(input)).toEqual({
-      surface: "milo",
+      surface: "jori",
       runId: "run_1",
     })
   })
@@ -52,6 +52,6 @@ describe("integration offer source", () => {
     expect(surfaceIdentityProvider("slack")).toBe("slack")
     expect(surfaceIdentityProvider("github")).toBe("github")
     expect(surfaceIdentityProvider("linear")).toBe("linear")
-    expect(surfaceIdentityProvider("milo")).toBeUndefined()
+    expect(surfaceIdentityProvider("jori")).toBeUndefined()
   })
 })

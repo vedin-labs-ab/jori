@@ -2,7 +2,7 @@ import { runtimeAssets } from "../../../runtime/apps/_generated/assets"
 import { type Id } from "../../_generated/dataModel"
 import { type RuntimeEnvironment } from "../../shared/origin"
 
-const frameAncestorsEnv = "MILO_APP_FRAME_ANCESTORS"
+const frameAncestorsEnv = "JORI_APP_FRAME_ANCESTORS"
 
 export type AppFramePolicy = {
   frameAncestors: string[]
@@ -40,16 +40,16 @@ export function readAppFramePolicy(
 // session-token-authorized tool and asset endpoints.
 export function renderAppShell(appId: Id<"apps">, policy: AppFramePolicy) {
   return runtimeAssets.app.shell.html
-    .replace("__MILO_APP_TITLE__", "App")
-    .replace("/* __MILO_APP_STYLE__ */", runtimeAssets.app.shell.style)
+    .replace("__JORI_APP_TITLE__", "App")
+    .replace("/* __JORI_APP_STYLE__ */", runtimeAssets.app.shell.style)
     .replace(
-      "__MILO_APP_CONFIG__",
+      "__JORI_APP_CONFIG__",
       escapeScriptJson({
         appId,
         parentOrigins: policy.parentOrigins,
       })
     )
-    .replace("/* __MILO_APP_LOADER__ */", runtimeAssets.app.shell.loader)
+    .replace("/* __JORI_APP_LOADER__ */", runtimeAssets.app.shell.loader)
 }
 
 function readConfiguredOrigins(value: string | undefined) {

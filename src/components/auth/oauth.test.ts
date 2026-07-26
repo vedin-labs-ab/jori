@@ -10,7 +10,7 @@ beforeEach(() => {
   window.history.replaceState({}, "", "/automations?page=2")
 })
 
-test("keeps social sign-in failures inside Milo", () => {
+test("keeps social sign-in failures inside Jori", () => {
   const errorURL = new URL(signInErrorCallbackURL("google"))
 
   expect(errorURL.pathname).toBe("/automations")
@@ -20,13 +20,13 @@ test("keeps social sign-in failures inside Milo", () => {
 test("explains that provider identities are distinct", () => {
   const feedback = readOAuthFeedback({
     url: new URL(
-      "https://milo.test/sign-in?authProvider=microsoft&error=account_not_linked"
+      "https://jori.test/sign-in?authProvider=microsoft&error=account_not_linked"
     ),
   })
 
   expect(feedback).toEqual({
     message:
-      "This Milo account does not use Microsoft sign-in. Use the provider you originally chose.",
+      "This Jori account does not use Microsoft sign-in. Use the provider you originally chose.",
   })
 })
 

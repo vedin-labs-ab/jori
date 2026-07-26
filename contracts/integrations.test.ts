@@ -23,10 +23,10 @@ describe("integration catalog", () => {
     expect(isMicrosoftIntegration("notion")).toBe(false)
   })
 
-  test("models Milo as a native tool surface, not an integration", () => {
-    expect(toolSurfaces).toContain("milo")
-    expect(integrations).not.toContain("milo")
-    expect(toolSurfaceLabel("milo")).toBe("Milo")
+  test("models Jori as a native tool surface, not an integration", () => {
+    expect(toolSurfaces).toContain("jori")
+    expect(integrations).not.toContain("jori")
+    expect(toolSurfaceLabel("jori")).toBe("Jori")
     expect(integrationLabel("gmail")).toBe("Gmail")
   })
 

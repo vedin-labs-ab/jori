@@ -1,14 +1,14 @@
 import {
-  type MiloStateDocument,
-  type RawMiloStateListInput,
-  type RawMiloStateReadInput,
-  type RawMiloStateUpdateInput,
-} from "../template/src/milo/state/types"
+  type JoriStateDocument,
+  type RawJoriStateListInput,
+  type RawJoriStateReadInput,
+  type RawJoriStateUpdateInput,
+} from "../template/src/jori/state/types"
 import {
-  type MiloToolOptions,
-  type RawMiloClient,
+  type JoriToolOptions,
+  type RawJoriClient,
   type RawPromptInput,
-} from "../template/src/milo/types"
+} from "../template/src/jori/types"
 
 type AppShellConfig = {
   appId: string
@@ -25,14 +25,14 @@ type AppManifest = {
   styles?: string[]
 }
 
-type MiloWindow = Window &
+type JoriWindow = Window &
   typeof globalThis & {
-    __MILO_APP_SHELL__?: AppShellConfig
-    Milo?: RawMiloClient
+    __JORI_APP_SHELL__?: AppShellConfig
+    Jori?: RawJoriClient
   }
 
-const miloWindow = window as MiloWindow
-const config = miloWindow.__MILO_APP_SHELL__
+const joriWindow = window as JoriWindow
+const config = joriWindow.__JORI_APP_SHELL__
 
 if (config === undefined) {
   throw new Error("App shell config is missing")
@@ -40,12 +40,12 @@ if (config === undefined) {
 
 const { appId } = config
 const allowedParentOrigins = new Set([
-  miloWindow.location.origin,
+  joriWindow.location.origin,
   ...config.parentOrigins,
 ])
 const loadedAssets = new Map<string, Promise<void>>()
 
-miloWindow.addEventListener("message", async (event) => {
+joriWindow.addEventListener("message", async (event) => {
   if (!isAppTokenMessage(event)) {
     return
   }
@@ -58,15 +58,15 @@ miloWindow.addEventListener("message", async (event) => {
       throw new Error("Token app mismatch")
     }
 
-    miloWindow.Milo = createMiloSdk({
+    joriWindow.Jori = createJoriSdk({
       appId,
       token,
       versionId: payload.versionId,
     })
 
     await loadApp(payload.versionId, token)
-    miloWindow.parent.postMessage(
-      { type: "milo:app-ready", appId },
+    joriWindow.parent.postMessage(
+      { type: "jori:app-ready", appId },
       event.origin
     )
   } catch (error) {
@@ -83,7 +83,7 @@ async function loadApp(versionId: string, token: string): Promise<void> {
   }
 
   const manifest = await fetchJson<AppManifest>(
-    assetUrl(versionId, "milo-manifest.json"),
+    assetUrl(versionId, "jori-manifest.json"),
     token
   )
 
@@ -103,15 +103,15 @@ async function loadApp(versionId: string, token: string): Promise<void> {
   await promise
 }
 
-function createMiloSdk(input: {
+function createJoriSdk(input: {
   appId: string
   versionId: string
   token: string
-}): RawMiloClient {
+}): RawJoriClient {
   async function callTool<T = unknown>(
     tool: string,
     args?: unknown,
-    options: MiloToolOptions = {}
+    options: JoriToolOptions = {}
   ): Promise<T> {
     const response = await fetch("/apps/tools", {
       method: "POST",
@@ -142,15 +142,15 @@ function createMiloSdk(input: {
     getToken: () => input.token,
     callTool,
     state: Object.freeze({
-      read: <T = unknown>(args: RawMiloStateReadInput) =>
-        callTool<MiloStateDocument<T> | null>("readState", args),
-      list: <T = unknown>(args: RawMiloStateListInput = {}) =>
-        callTool<MiloStateDocument<T>[]>("listState", args),
-      update: <T = unknown>(args: RawMiloStateUpdateInput) =>
-        callTool<MiloStateDocument<T>>("updateState", args),
+      read: <T = unknown>(args: RawJoriStateReadInput) =>
+        callTool<JoriStateDocument<T> | null>("readState", args),
+      list: <T = unknown>(args: RawJoriStateListInput = {}) =>
+        callTool<JoriStateDocument<T>[]>("listState", args),
+      update: <T = unknown>(args: RawJoriStateUpdateInput) =>
+        callTool<JoriStateDocument<T>>("updateState", args),
     }),
     model: Object.freeze({
-      prompt: <T = unknown>(args: RawPromptInput, options?: MiloToolOptions) =>
+      prompt: <T = unknown>(args: RawPromptInput, options?: JoriToolOptions) =>
         callTool<T>("promptModel", args, options),
     }),
   })
@@ -164,7 +164,7 @@ function rewriteCssAssetUrls(css: string) {
   return css.replace(
     /url\((["']?)(\/?assets\/geist-latin-wght-normal-[\w-]+\.woff2)\1\)/g,
     (_source, quote: string, assetPath: string) =>
-      `url(${quote}/${assetPath.replace(/^\/+/, "")}?milo-runtime=1${quote})`
+      `url(${quote}/${assetPath.replace(/^\/+/, "")}?jori-runtime=1${quote})`
   )
 }
 
@@ -207,7 +207,7 @@ function isAppTokenMessage(
   return (
     event.source === window.parent &&
     isRecord(event.data) &&
-    event.data.type === "milo:app-token" &&
+    event.data.type === "jori:app-token" &&
     allowedParentOrigins.has(event.origin)
   )
 }
@@ -220,7 +220,7 @@ function reportLoadError(error: unknown, origin: string) {
       error instanceof Error ? error.message : "App failed to load"
   }
 
-  miloWindow.parent.postMessage({ type: "milo:app-error", appId }, origin)
+  joriWindow.parent.postMessage({ type: "jori:app-error", appId }, origin)
 }
 
 function requiredString(value: unknown) {

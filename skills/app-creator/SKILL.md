@@ -1,6 +1,6 @@
 ---
 name: app-creator
-description: Create or update Milo apps from the platform template. Use for building persistent React app UIs that run in Milo's iframe sandbox, use the Milo SDK, request narrow tool capabilities, validate locally, and publish through create_app or update_app.
+description: Create or update Jori apps from the platform template. Use for building persistent React app UIs that run in Jori's iframe sandbox, use the Jori SDK, request narrow tool capabilities, validate locally, and publish through create_app or update_app.
 category: creation
 ---
 
@@ -13,8 +13,8 @@ capabilities, components, and the validate-then-publish flow.
 
 ## Mental Model
 
-A Milo app is a versioned React + TypeScript mini-app served inside a
-sandboxed iframe. Milo owns the shell, SDK, theme, shadcn/ui primitives, build
+A Jori app is a versioned React + TypeScript mini-app served inside a
+sandboxed iframe. Jori owns the shell, SDK, theme, shadcn/ui primitives, build
 pipeline, and serving path. The app owns only task-specific files under
 `src/**`.
 
@@ -43,11 +43,11 @@ before writing code:
 
 Treat the template as immutable infrastructure. It provides:
 
-- `@/milo` for the app SDK.
-- `@/milo/contract` for contract-only helpers that load during Node-side
+- `@/jori` for the app SDK.
+- `@/jori/contract` for contract-only helpers that load during Node-side
   validation.
-- `@/components/ui/*` for Milo-owned shadcn/ui primitives.
-- `@/milo.css`, `src/main.tsx`, config, theme, and the build pipeline.
+- `@/components/ui/*` for Jori-owned shadcn/ui primitives.
+- `@/jori.css`, `src/main.tsx`, config, theme, and the build pipeline.
 
 You create `src/App.tsx` and `src/contract.ts`, plus optional `src/styles.css`
 and relative imports under `src/**`. `src/App.tsx` exports a default or named
@@ -55,12 +55,12 @@ and relative imports under `src/**`. `src/App.tsx` exports a default or named
 `defineAppContract`.
 
 Do not publish platform-owned files: package and config files, `index.html`,
-`src/main.tsx`, `src/milo.ts`, `src/milo.css`, `src/components/ui/**`,
+`src/main.tsx`, `src/jori.ts`, `src/jori.css`, `src/components/ui/**`,
 `src/lib/utils.ts`, `src/vite-env.d.ts`, `node_modules`, or `dist`.
 
 Do not reach for raw platform or network APIs — `fetch`, `XMLHttpRequest`,
 `WebSocket`, `localStorage`, `sessionStorage`, Better Auth, Convex clients, or
-environment variables. Go through the Milo SDK.
+environment variables. Go through the Jori SDK.
 
 Build the UI from the shadcn/ui primitives in `@/components/ui/*` — buttons,
 inputs, selects, dialogs, tabs, tables, badges, cards, separators, skeletons,
@@ -73,18 +73,18 @@ workflow.
 
 The contract is the app's durable-state API. Any domain state that must
 survive reloads, be shared, or be written by an automation belongs in
-contract-backed Milo state. Keep `useState` for ephemeral UI only — selected
+contract-backed Jori state. Keep `useState` for ephemeral UI only — selected
 row, open dialog, pending form text, loading flags — never for important domain
 state.
 
-Runtime code reads through `@/milo`; `src/contract.ts` imports from
-`@/milo/contract` so validation can load the contract without browser-only APIs.
+Runtime code reads through `@/jori`; `src/contract.ts` imports from
+`@/jori/contract` so validation can load the contract without browser-only APIs.
 
 Define state once in `src/contract.ts` with strict Zod object schemas:
 
 ```ts
 import { z } from "zod"
-import { defineAppContract } from "@/milo/contract"
+import { defineAppContract } from "@/jori/contract"
 
 const triageResultSchema = z.strictObject({
   schemaVersion: z.literal(1),
@@ -113,21 +113,21 @@ export const contract = defineAppContract({
 })
 ```
 
-Read and write through contract refs, never raw keys. `useMiloState` mirrors one
+Read and write through contract refs, never raw keys. `useJoriState` mirrors one
 contract entry into React and re-renders when it changes:
 
 ```ts
-import { milo, useMiloState } from "@/milo"
+import { jori, useJoriState } from "@/jori"
 import { contract } from "./contract"
 
-const latest = await milo.state.read(contract.state.reviewQueueLatest)
+const latest = await jori.state.read(contract.state.reviewQueueLatest)
 
-const unsubscribe = milo.state.subscribe(
+const unsubscribe = jori.state.subscribe(
   contract.state.reviewQueueLatest,
   (document) => setLatest(document?.value ?? null)
 )
 
-const { value, patch, status, error } = useMiloState(
+const { value, patch, status, error } = useJoriState(
   contract.state.reviewQueueLatest
 )
 ```
@@ -140,7 +140,7 @@ a complete document. Set `scope: "personal"` for user-local state and
 Every app needs a contract, even with no durable state:
 
 ```ts
-import { defineAppContract } from "@/milo/contract"
+import { defineAppContract } from "@/jori/contract"
 
 export const contract = defineAppContract({ version: 1, state: {} })
 ```
@@ -154,16 +154,16 @@ user-requested freshness.
 ## Models and Data
 
 Use deterministic sources first. Pull facts, counts, IDs, dates, participants,
-links, and statuses from structured tool outputs and existing Milo state. Reach
-for `milo.model.prompt` only for semantic work: judgment, classification,
+links, and statuses from structured tool outputs and existing Jori state. Reach
+for `jori.model.prompt` only for semantic work: judgment, classification,
 summarization, ranking, extraction from unstructured text, and drafting.
 
-`milo.model.prompt` takes a strict Zod object schema and returns parsed
+`jori.model.prompt` takes a strict Zod object schema and returns parsed
 `output`, not best-effort JSON. Define the schema beside the call:
 
 ```ts
 import { z } from "zod"
-import { milo } from "@/milo"
+import { jori } from "@/jori"
 
 const triageSchema = z.object({
   priority: z.enum(["low", "normal", "high"]),
@@ -171,7 +171,7 @@ const triageSchema = z.object({
   suggestedReply: z.string().nullable(),
 })
 
-const { output } = await milo.model.prompt({
+const { output } = await jori.model.prompt({
   instruction: "Classify the email for a support operator.",
   input: { subject, body },
   schema: triageSchema,
@@ -191,14 +191,14 @@ only when deterministic filters cannot decide relevance; hydrate full records
 only for candidates that need high-trust output or write actions; and ground
 consequential output in those full records, not snippets alone.
 
-The SDK and broker cache external reads and `milo.model.prompt` for at least 15
+The SDK and broker cache external reads and `jori.model.prompt` for at least 15
 minutes. Pass `{ cacheTtlMs }` for up to 60 minutes on stable reads or expensive
 prompts, and `{ forceRefresh: true }` when you need fresh data for the same
-arguments. Do not cache `milo.state` yourself; it is Milo-owned and read live.
+arguments. Do not cache `jori.state` yourself; it is Jori-owned and read live.
 
 ## Capabilities
 
-Capabilities grant the tools the UI may call at runtime, through `milo.callTool`
+Capabilities grant the tools the UI may call at runtime, through `jori.callTool`
 or typed integration wrappers. Keep them narrow:
 
 - Grant only tools the UI actually calls, and prefer read tools.
@@ -215,7 +215,7 @@ of the platform, not capabilities.
 
 1. Apply `frontend-design`.
 2. When updating, read the current source with `read_app`.
-3. Copy the template from `/home/user/.milo/apps/template` into a working
+3. Copy the template from `/home/user/.jori/apps/template` into a working
    folder under `/home/user/workspace/apps/`.
 4. Edit only app-owned `src/**` files.
 5. Run `npm run check` in the app folder; fix failures and rerun until
@@ -224,7 +224,7 @@ of the platform, not capabilities.
 
 The workspace layout is known — inspect only the app folder and its
 `src/**` files, never broad directories like `/home/user/workspace`,
-`/home/user/.milo`, or `node_modules`.
+`/home/user/.jori`, or `node_modules`.
 
 `npm run check` is the local mirror of publish validation: it formats,
 typechecks, validates the contract, runs Biome, and builds. Use it as the single

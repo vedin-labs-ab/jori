@@ -33,7 +33,7 @@ test("includes recurring automation details", async () => {
   expect(summary.source).toEqual({
     kind: { label: "recurring", type: "recurring" },
     type: "automation",
-    surface: "milo",
+    surface: "jori",
   })
   expect(summary.details).toEqual([
     { type: "schedule", label: "Daily at 09:00 UTC" },

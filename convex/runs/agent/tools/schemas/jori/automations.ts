@@ -8,7 +8,7 @@ import {
 } from "../fragments/common"
 
 const automationInstructionsDescription =
-  "Canonical Markdown instructions for each run. Use @Integration for every integration whose access is granted, /skill for skills, and #tool for tools. Use txt fences for plain-text examples that should keep Milo references active; language-tagged code fences are literal. Keep the explicit access payload aligned with every referenced integration tool."
+  "Canonical Markdown instructions for each run. Use @Integration for every integration whose access is granted, /skill for skills, and #tool for tools. Use txt fences for plain-text examples that should keep Jori references active; language-tagged code fences are literal. Keep the explicit access payload aligned with every referenced integration tool."
 
 const eventIntegrationEnum = automationEventCatalog.map(
   (definition) => definition.integration
@@ -102,7 +102,7 @@ const triggerSchema = () => ({
   ],
 })
 
-export const automationMiloToolInputSchemas = {
+export const automationJoriToolInputSchemas = {
   add_automation: objectSchema({
     required: ["name", "instructions", "type", "trigger", "access"],
     properties: {
@@ -139,13 +139,13 @@ export const automationMiloToolInputSchemas = {
   read_automation: objectSchema({
     required: ["automationId"],
     properties: {
-      automationId: stringProperty("Milo automation ID."),
+      automationId: stringProperty("Jori automation ID."),
     },
   }),
   update_automation: objectSchema({
     required: ["automationId"],
     properties: {
-      automationId: stringProperty("Milo automation ID."),
+      automationId: stringProperty("Jori automation ID."),
       appId: stringProperty(
         "Optional app ID. Set this when binding the automation to an app."
       ),
@@ -165,7 +165,7 @@ export const automationMiloToolInputSchemas = {
   delete_automation: objectSchema({
     required: ["automationId"],
     properties: {
-      automationId: stringProperty("Milo automation ID."),
+      automationId: stringProperty("Jori automation ID."),
     },
   }),
 }

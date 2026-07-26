@@ -23,7 +23,7 @@ describe("agent model runtime config", () => {
 
     expect(requireOpenRouterRuntimeConfig()).toEqual({
       apiKey: "key",
-      appName: "Milo",
+      appName: "Jori",
       appUrl: undefined,
     })
   })

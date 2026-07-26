@@ -22,7 +22,7 @@ export function DataRegionInfo() {
   return (
     <InfoDialog title="About data regions" trigger="What's this?">
       <span className="block">
-        Your data region determines where Milo stores your account,
+        Your data region determines where Jori stores your account,
         organization, and authentication data.
       </span>
       <span className="mt-3 block">
@@ -42,7 +42,7 @@ export function InvitationInfo() {
     >
       <span className="block">
         Sign in with the same Google or Microsoft address that received the
-        invitation. Milo will show it after you sign in.
+        invitation. Jori will show it after you sign in.
       </span>
       <span className="mt-3 block">
         Can&apos;t find the email? Check spam, then ask the person who invited
@@ -55,7 +55,7 @@ export function InvitationInfo() {
 export function SignInLegalNotice() {
   return (
     <p className="text-pretty text-center text-[0.625rem]/relaxed text-muted-foreground">
-      By continuing, you agree to Milo&apos;s{" "}
+      By continuing, you agree to Jori&apos;s{" "}
       <LegalLink to="/terms">Terms</LegalLink> and acknowledge the{" "}
       <LegalLink to="/privacy">Privacy Policy</LegalLink>.
     </p>

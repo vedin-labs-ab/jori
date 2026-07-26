@@ -16,7 +16,7 @@ test("separates run tools from connected and available capabilities", () => {
   )
 
   expect(capabilities.run.map((group) => group.surface)).toEqual([
-    "milo",
+    "jori",
     "slack",
   ])
   expect(capabilities.connected.map((group) => group.surface)).toContain(
@@ -27,7 +27,7 @@ test("separates run tools from connected and available capabilities", () => {
   )
   expect(
     capabilities.run
-      .find((group) => group.surface === "milo")
+      .find((group) => group.surface === "jori")
       ?.tools.some((tool) => tool.tool === "list_capabilities")
   ).toBe(true)
   expect(
@@ -65,7 +65,7 @@ test("limits automation run tools to selected unattended access", () => {
   )
 
   expect(capabilities.run.map((group) => group.surface)).toEqual([
-    "milo",
+    "jori",
     "github",
   ])
   expect(
@@ -98,8 +98,8 @@ test("hides interactive tools from automation runs", () => {
     })
   )
 
-  expect(miloTools(automation)).not.toContain("offer_integration")
-  expect(miloTools(message)).toContain("offer_integration")
+  expect(joriTools(automation)).not.toContain("offer_integration")
+  expect(joriTools(message)).toContain("offer_integration")
 })
 
 test("hides web tools from automation runs without web access", () => {
@@ -119,9 +119,9 @@ test("hides web tools from automation runs without web access", () => {
     })
   )
 
-  expect(miloTools(blocked)).not.toContain("web_search")
-  expect(miloTools(blocked)).not.toContain("web_fetch")
-  expect(miloTools(allowed)).toEqual(
+  expect(joriTools(blocked)).not.toContain("web_search")
+  expect(joriTools(blocked)).not.toContain("web_fetch")
+  expect(joriTools(allowed)).toEqual(
     expect.arrayContaining(["web_search", "web_fetch"])
   )
 })
@@ -182,10 +182,10 @@ function automationInput(
   }
 }
 
-function miloTools(capabilities: ReturnType<typeof listCapabilities>) {
+function joriTools(capabilities: ReturnType<typeof listCapabilities>) {
   return (
     capabilities.run
-      .find((group) => group.surface === "milo")
+      .find((group) => group.surface === "jori")
       ?.tools.map((tool) => tool.tool) ?? []
   )
 }

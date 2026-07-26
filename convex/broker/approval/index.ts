@@ -24,7 +24,7 @@ export type ApprovalBrokerContext = {
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
-const workerOnlyMiloTools = ["save_asset", "generate_image"]
+const workerOnlyJoriTools = ["save_asset", "generate_image"]
 
 export async function createPromptedToolApproval(
   ctx: ActionCtx,
@@ -59,14 +59,14 @@ export async function createPromptedToolApproval(
   }
 
   if (
-    request.surface === "milo" &&
-    workerOnlyMiloTools.includes(request.tool)
+    request.surface === "jori" &&
+    workerOnlyJoriTools.includes(request.tool)
   ) {
     throw new Error(`Tool cannot be approval-gated: ${request.tool}`)
   }
 
   if (
-    request.surface !== "milo" &&
+    request.surface !== "jori" &&
     findRunIntegration(context.input, request.surface) === null
   ) {
     throw new Error(`No active ${request.surface} integration is available`)

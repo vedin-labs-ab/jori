@@ -70,15 +70,15 @@ test("creates a pull request branch from local source changes", async () => {
     { tree: { sha: treeSha } },
     { sha: newTreeSha },
     { sha: commitSha },
-    { ref: "refs/heads/milo/fix" },
-    pullRequestPayload({ headRef: "milo/fix", headSha: commitSha }),
+    { ref: "refs/heads/jori/fix" },
+    pullRequestPayload({ headRef: "jori/fix", headSha: commitSha }),
   ])
 
   const result = await callGitHubTool(
     githubIntegration(),
     "github_create_pull_request",
     {
-      branch: "milo/fix",
+      branch: "jori/fix",
       changes: sourceChanges(),
       owner: "acme",
       repo: "app",
@@ -96,12 +96,12 @@ test("creates a pull request branch from local source changes", async () => {
     "https://api.github.com/repos/acme/app/pulls",
   ])
   expect(jsonBody(fetchMock, 5)).toEqual({
-    ref: "refs/heads/milo/fix",
+    ref: "refs/heads/jori/fix",
     sha: commitSha,
   })
   expect(jsonBody(fetchMock, 6)).toEqual({
     base: "main",
-    head: "milo/fix",
+    head: "jori/fix",
     title: "Replace console references",
   })
   expect(result).toMatchObject({

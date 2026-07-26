@@ -22,11 +22,11 @@ export function approvalDecisionMessage(
   approval?: Doc<"approvals">
 ) {
   if (status === "approved") {
-    return "Approved. Milo is continuing the run."
+    return "Approved. Jori is continuing the run."
   }
 
   if (status === "denied") {
-    return "Denied. Milo is continuing without this action."
+    return "Denied. Jori is continuing without this action."
   }
 
   if (status === "closed") {

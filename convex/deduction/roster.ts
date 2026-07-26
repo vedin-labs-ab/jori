@@ -4,7 +4,7 @@ import { maxRosterEntries, rosterRecencyMs } from "./limits"
 // The slice of the roster that grounds runs: confirmed workstreams with a
 // sighting inside the rolling window, newest sighting first, capped. Proposed
 // beliefs never reach runs; that is the point of the status. Timestamps ride
-// along so the prompt can render ages: createdAt is when Milo started
+// along so the prompt can render ages: createdAt is when Jori started
 // tracking the workstream, not when the work began.
 export type WorkstreamContext = {
   name: string

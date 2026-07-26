@@ -13,19 +13,19 @@ describe("automation event match hard dependencies", () => {
       applyEventMatchChange({
         key: "repo",
         parameters: event.parameters ?? [],
-        value: "milo/api",
+        value: "jori/api",
         values: {
-          repo: "milo/app",
+          repo: "jori/app",
           issue: "42",
         },
       })
-    ).toEqual({ repo: "milo/api" })
+    ).toEqual({ repo: "jori/api" })
   })
 
   test("preserves dependent match when a parent value is unchanged", () => {
     const event = requireEvent("github", "issue.comment.created")
     const values = {
-      repo: "milo/app",
+      repo: "jori/app",
       issue: "42",
     }
 
@@ -33,7 +33,7 @@ describe("automation event match hard dependencies", () => {
       applyEventMatchChange({
         key: "repo",
         parameters: event.parameters ?? [],
-        value: "milo/app",
+        value: "jori/app",
         values,
       })
     ).toBe(values)
@@ -107,12 +107,12 @@ describe("automation event match text dependencies", () => {
         parameters: event.parameters ?? [],
         value: "43",
         values: {
-          repo: "milo/app",
+          repo: "jori/app",
           pr: "42",
           path: "src/app.ts",
         },
       })
-    ).toEqual({ repo: "milo/app", pr: "43" })
+    ).toEqual({ repo: "jori/app", pr: "43" })
   })
 })
 
@@ -141,7 +141,7 @@ describe("automation event match removal", () => {
         key: "repo",
         parameters: event.parameters ?? [],
         values: {
-          repo: "milo/app",
+          repo: "jori/app",
           issue: "42",
         },
       })

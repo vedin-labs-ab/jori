@@ -10,7 +10,7 @@ import { organizationClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
 import { useConvexAuth } from "convex/react"
 
-/** The single Better Auth client. Milo components read session and
+/** The single Better Auth client. Jori components read session and
  *  organization state through the hooks below so tests can mock one seam. */
 export const authClient = createAuthClient({
   plugins: [organizationClient(), convexClient()],

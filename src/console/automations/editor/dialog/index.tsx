@@ -107,7 +107,7 @@ export function AutomationDialog({
             {automation === undefined ? "New automation" : "Edit automation"}
           </DialogTitle>
           <DialogDescription>
-            Tell Milo what to do, what it can access, and when to run.
+            Tell Jori what to do, what it can access, and when to run.
           </DialogDescription>
         </DialogHeader>
 

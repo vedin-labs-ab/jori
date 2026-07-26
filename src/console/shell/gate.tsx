@@ -2,7 +2,7 @@ import { WaitlistForm } from "@/landing/waitlist/form"
 import { PublicConsoleFrame } from "./public"
 
 /**
- * Signed in, but Milo is not open to this address yet.
+ * Signed in, but Jori is not open to this address yet.
  *
  * Getting this far means the account is real and the email is known, so the
  * page skips the sales pitch and does the one useful thing left: puts them on
@@ -15,7 +15,7 @@ export function LaunchGate({ email }: { email: string | null }) {
       <section className="grid gap-6">
         <div className="grid gap-2">
           <h1 className="font-medium text-2xl tracking-tight">
-            Milo isn't open yet.
+            Jori isn't open yet.
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
             We're letting teams in a few at a time so we can set each one up

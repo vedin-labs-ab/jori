@@ -54,7 +54,7 @@ export function oneShotDisplay(): RunSnapshotInput {
   return automationDisplay({
     source: {
       type: "automation",
-      surface: "milo",
+      surface: "jori",
     },
   })
 }
@@ -66,7 +66,7 @@ export function recurringDisplay(input: {
   return automationDisplay({
     source: {
       type: "automation",
-      surface: "milo",
+      surface: "jori",
     },
     context: [
       { type: "schedule", label: input.schedule ?? "Daily at 09:00 UTC" },

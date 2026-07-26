@@ -122,7 +122,7 @@ function EmailField({
         <FieldLabel className="gap-1.5" htmlFor={`${fieldId}-email`}>
           Work email
           <FieldHelp icon={Lock} label="Why this address is fixed">
-            We open Milo for the account you sign in with, so this is the
+            We open Jori for the account you sign in with, so this is the
             address that gets in. Sign out to use another.
           </FieldHelp>
         </FieldLabel>

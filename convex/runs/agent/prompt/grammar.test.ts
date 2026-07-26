@@ -14,7 +14,7 @@ test("organization and person context share one message grammar", () => {
   const organization =
     assemblePrompt({
       ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-      organization: { name: "Milo Labs", aliases: [], domains: [] },
+      organization: { name: "Jori Labs", aliases: [], domains: [] },
       workstreams: [
         {
           name: "Payments revamp",

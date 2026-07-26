@@ -11,7 +11,7 @@ const scheduleLeadMinutes = 30
 export const meetingBriefing: PlaybookDefinition = {
   key: "meeting-briefing",
   template: "playbooks/briefing",
-  version: 11,
+  version: 12,
   title: "Meeting Briefing",
   description:
     "Walk into important meetings with the context, questions, and decisions that will help you make the most of them.",

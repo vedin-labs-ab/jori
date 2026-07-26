@@ -14,7 +14,7 @@ test("parses Slack approval button payloads", () => {
       message: { ts: "1710000000.000100" },
       actions: [
         {
-          action_id: "milo_approval_approve",
+          action_id: "jori_approval_approve",
           value: JSON.stringify({ code: "abc12345" }),
         },
       ],
@@ -65,8 +65,8 @@ test("renders Slack approval requests as compact cards", () => {
   )
   expect(JSON.stringify(card.body)).not.toContain("Expires at")
   expect(actions.map((action) => action.action_id)).toEqual([
-    "milo_approval_deny",
-    "milo_approval_approve",
+    "jori_approval_deny",
+    "jori_approval_approve",
   ])
   expect(actions[0]).not.toHaveProperty("style")
   expect(actions[1]).toMatchObject({ style: "primary" })
@@ -87,7 +87,7 @@ test("keeps Slack approval card bodies within card limits", () => {
   expect(body.text.endsWith("...")).toBe(true)
 })
 
-test("renders approved delivered approvals with the Milo approver", () => {
+test("renders approved delivered approvals with the Jori approver", () => {
   const response = createSlackApprovalSurfaceMessage({
     surface: "notion",
     tool: "notion_create_page",
@@ -104,14 +104,14 @@ test("renders approved delivered approvals with the Milo approver", () => {
   const rendered = JSON.stringify(response)
   const card = response.blocks[0] as Record<string, unknown>
 
-  expect(response.text).toBe("Approved. Milo is continuing the run.")
+  expect(response.text).toBe("Approved. Jori is continuing the run.")
   expect(card.slack_icon).toEqual({ type: "icon", name: "check" })
   expect(card.title).toMatchObject({
     type: "mrkdwn",
-    text: "Approved by Albin Vedin in Milo",
+    text: "Approved by Albin Vedin in Jori",
   })
   expect(rendered).toContain("Approved at <!date^1710000000^{time}|")
-  expect(rendered).not.toContain("Approved by Albin Vedin in Milo at <!date^")
+  expect(rendered).not.toContain("Approved by Albin Vedin in Jori at <!date^")
   expect(rendered).toContain("Create a new Notion page.")
   expect(rendered).not.toContain('"actions"')
 })
@@ -131,7 +131,7 @@ test("renders denied delivered approvals with the Slack approver", () => {
   const rendered = JSON.stringify(response)
   const card = response.blocks[0] as Record<string, unknown>
 
-  expect(response.text).toBe("Denied. Milo is continuing without this action.")
+  expect(response.text).toBe("Denied. Jori is continuing without this action.")
   expect(card.slack_icon).toEqual({ type: "icon", name: "thumbs-down" })
   expect(card.title).toMatchObject({
     type: "mrkdwn",
@@ -155,7 +155,7 @@ test("renders expired delivered approvals without actions", () => {
   const rendered = JSON.stringify(response)
   const card = response.blocks[0] as Record<string, unknown>
 
-  expect(response.text).toBe("Request expired. Milo skipped this action.")
+  expect(response.text).toBe("Request expired. Jori skipped this action.")
   expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
   expect(card.title).toMatchObject({
     type: "mrkdwn",
@@ -185,7 +185,7 @@ test("renders cancelled delivered approvals without actions", () => {
   const rendered = JSON.stringify(response)
   const card = response.blocks[0] as Record<string, unknown>
 
-  expect(response.text).toBe("Request cancelled. Milo skipped this action.")
+  expect(response.text).toBe("Request cancelled. Jori skipped this action.")
   expect(card.slack_icon).toEqual({ type: "icon", name: "archive" })
   expect(card.title).toMatchObject({ text: "Request cancelled" })
   expect(rendered).toContain("Create a new Notion page.")

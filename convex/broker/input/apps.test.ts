@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
-import { normalizeBrokerToolInput, normalizeMiloToolInput } from "."
+import { normalizeBrokerToolInput, normalizeJoriToolInput } from "."
 
-test("milo input passes built app publish payloads through unvalidated", () => {
+test("jori input passes built app publish payloads through unvalidated", () => {
   const prepared = {
     title: "Inbox Triage",
     access: "personal",
@@ -17,17 +17,17 @@ test("milo input passes built app publish payloads through unvalidated", () => {
   expect(() => normalizeBrokerToolInput("create_app", prepared)).toThrow(
     "create_app.source is not supported"
   )
-  expect(normalizeMiloToolInput("create_app", prepared)).toBe(prepared)
+  expect(normalizeJoriToolInput("create_app", prepared)).toBe(prepared)
   expect(
-    normalizeMiloToolInput("update_app", { ...prepared, appId: "a1" })
+    normalizeJoriToolInput("update_app", { ...prepared, appId: "a1" })
   ).toMatchObject({ appId: "a1" })
 })
 
-test("milo input still validates non-publish tools against their schema", () => {
-  expect(normalizeMiloToolInput("search_apps", { limit: 5 })).toMatchObject({
+test("jori input still validates non-publish tools against their schema", () => {
+  expect(normalizeJoriToolInput("search_apps", { limit: 5 })).toMatchObject({
     limit: 5,
   })
   expect(() =>
-    normalizeMiloToolInput("search_apps", { limit: "lots" })
+    normalizeJoriToolInput("search_apps", { limit: "lots" })
   ).toThrow("search_apps.limit must be a number")
 })

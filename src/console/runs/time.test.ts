@@ -79,7 +79,7 @@ describe("run clock timing", () => {
 test("uses a second interval while a pending offer is live", () => {
   const offer = makeOffer({
     expiresAt: 1700000066000,
-    summary: "Connect Notion so Milo can continue.",
+    summary: "Connect Notion so Jori can continue.",
     updatedAt: 1700000000000,
   })
 

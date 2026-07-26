@@ -95,7 +95,7 @@ function SignedInConsole({
   return <NoOrganization />
 }
 
-/** No organization yet: either this address may open one, or Milo is not open
+/** No organization yet: either this address may open one, or Jori is not open
  *  to it and the useful thing left is the list. */
 function NoOrganization() {
   const gate = useQuery(api.access.gate.status)

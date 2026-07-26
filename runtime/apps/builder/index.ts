@@ -24,7 +24,7 @@ import {
 export async function buildApp(source: unknown) {
   const files = normalizeAppSourceFiles(source)
   const sourcePaths = files.map((file) => file.path)
-  const project = await fs.mkdtemp(path.join(os.tmpdir(), "milo-app-"))
+  const project = await fs.mkdtemp(path.join(os.tmpdir(), "jori-app-"))
 
   try {
     await copyPlatformTemplate(project)
@@ -70,8 +70,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.stdout.write(`${config.appTemplatePath}\n`)
   } else {
     process.stderr.write(
-      "Usage: node --experimental-strip-types milo-app-builder.ts check <app-workspace>\n" +
-        "       node --experimental-strip-types milo-app-builder.ts template\n"
+      "Usage: node --experimental-strip-types jori-app-builder.ts check <app-workspace>\n" +
+        "       node --experimental-strip-types jori-app-builder.ts template\n"
     )
     process.exitCode = 1
   }

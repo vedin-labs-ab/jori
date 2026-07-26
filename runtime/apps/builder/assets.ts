@@ -13,7 +13,7 @@ type AppManifest = {
   styles: string[]
 }
 
-const manifestAssetPath = "milo-manifest.json"
+const manifestAssetPath = "jori-manifest.json"
 
 export async function readBuildAssets(
   project: string

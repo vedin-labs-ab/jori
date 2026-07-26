@@ -1,9 +1,9 @@
 import { assertDisjointResponseKeys } from "./common"
 import { githubToolResponseSchemas } from "./github"
 import { googleToolResponseSchemas } from "./google"
+import { joriToolResponseSchemas } from "./jori/index"
 import { linearToolResponseSchemas } from "./linear"
 import { microsoftToolResponseSchemas } from "./microsoft"
-import { miloToolResponseSchemas } from "./milo/index"
 import { nativeToolResponseSchemas } from "./native"
 import { notionToolResponseSchemas } from "./notion"
 import { slackToolResponseSchemas } from "./slack"
@@ -13,7 +13,7 @@ const responseSchemaMaps = [
   googleToolResponseSchemas,
   linearToolResponseSchemas,
   microsoftToolResponseSchemas,
-  miloToolResponseSchemas,
+  joriToolResponseSchemas,
   nativeToolResponseSchemas,
   notionToolResponseSchemas,
   slackToolResponseSchemas,

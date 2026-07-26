@@ -16,7 +16,7 @@ export async function uploadAsset(
   secret: string,
   args: UploadAssetArgs
 ): Promise<UploadedAsset> {
-  const url = new URL("/milo/assets", requireConvexSiteUrl())
+  const url = new URL("/jori/assets", requireConvexSiteUrl())
   url.searchParams.set("name", args.name)
 
   if (args.description !== undefined) {

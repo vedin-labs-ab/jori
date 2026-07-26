@@ -6,7 +6,7 @@ export const placeSections = [
   "people",
   "language",
   "rhythm",
-  "milo",
+  "jori",
 ] as const
 
 export type PlaceSection = (typeof placeSections)[number]
@@ -16,7 +16,7 @@ export const placeSectionLabels: Record<PlaceSection, string> = {
   people: "People",
   language: "Language and tone",
   rhythm: "Operating rhythm",
-  milo: "Milo's role here",
+  jori: "Jori's role here",
 }
 
 export const placeKinds = {

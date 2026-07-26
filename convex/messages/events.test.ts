@@ -29,7 +29,7 @@ describe("Slack and GitHub message automation event projection", () => {
           data: {
             action: "created",
             eventType: "issue_comment",
-            repository: { fullName: "milo/app" },
+            repository: { fullName: "jori/app" },
             issueNumber: 42,
             isPullRequest: false,
           },
@@ -38,7 +38,7 @@ describe("Slack and GitHub message automation event projection", () => {
     ).toMatchObject([
       {
         type: "issue.comment.created",
-        match: { repo: "milo/app", issue: "42" },
+        match: { repo: "jori/app", issue: "42" },
       },
     ])
   })
@@ -52,7 +52,7 @@ describe("Slack and GitHub message automation event projection", () => {
           data: {
             action: "edited",
             eventType: "issue_comment",
-            repository: { fullName: "milo/app" },
+            repository: { fullName: "jori/app" },
             issueNumber: 42,
             isPullRequest: true,
           },
@@ -61,7 +61,7 @@ describe("Slack and GitHub message automation event projection", () => {
     ).toMatchObject([
       {
         type: "pull_request.comment.edited",
-        match: { repo: "milo/app", pr: "42" },
+        match: { repo: "jori/app", pr: "42" },
       },
     ])
   })
@@ -77,7 +77,7 @@ describe("review and Linear message automation event projection", () => {
           data: {
             action: "edited",
             eventType: "pull_request_review_comment",
-            repository: { fullName: "milo/app" },
+            repository: { fullName: "jori/app" },
             pullNumber: 12,
             comment: { path: "src/app.ts" },
           },
@@ -86,7 +86,7 @@ describe("review and Linear message automation event projection", () => {
     ).toMatchObject([
       {
         type: "pull_request.review_comment.edited",
-        match: { repo: "milo/app", pr: "12", path: "src/app.ts" },
+        match: { repo: "jori/app", pr: "12", path: "src/app.ts" },
       },
     ])
   })

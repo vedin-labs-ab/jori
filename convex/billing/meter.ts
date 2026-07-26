@@ -1,7 +1,7 @@
 import {
   autoTopUp,
   dollarsToMicros,
-  miloModel,
+  joriModel,
   priceModelUsage,
 } from "../../contracts/billing"
 import { internal } from "../_generated/api"
@@ -28,7 +28,7 @@ export async function meterModelUsage(
     usage: { inputTokens: number; outputTokens: number }
   }
 ) {
-  const micros = priceModelUsage(miloModel, args.usage)
+  const micros = priceModelUsage(joriModel, args.usage)
 
   if (micros <= 0) {
     return

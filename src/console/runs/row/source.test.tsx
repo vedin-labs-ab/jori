@@ -86,18 +86,18 @@ test("renders source kind and event labels", () => {
   )
 })
 
-test("renders Milo source labels", () => {
+test("renders Jori source labels", () => {
   const { container } = render(
     <SourceLine
       scope="personal"
       source={{
         type: "automation",
-        surface: "milo",
+        surface: "jori",
       }}
     />
   )
 
-  expect(screen.getByText("Milo").className).toContain("font-medium")
+  expect(screen.getByText("Jori").className).toContain("font-medium")
   expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
 })
 
@@ -108,7 +108,7 @@ test("renders recurring automation source details", () => {
       details={[{ type: "schedule", label: "Daily at 09:00 UTC" }]}
       source={{
         kind: { label: "recurring", type: "recurring" },
-        surface: "milo",
+        surface: "jori",
         type: "automation",
       }}
     />
@@ -194,13 +194,13 @@ test("renders the subtask relation with an emphasized parent title", () => {
       scope="personal"
       source={{
         type: "manual",
-        surface: "milo",
+        surface: "jori",
         parent: { title: "Meeting Briefing" },
       }}
     />
   )
 
-  expect(container.textContent).toBe("MiloSubtask of Meeting BriefingPersonal")
+  expect(container.textContent).toBe("JoriSubtask of Meeting BriefingPersonal")
   expect(screen.getByText("Meeting Briefing").className).toContain(
     "font-medium"
   )
@@ -217,7 +217,7 @@ test("renders a bare subtask when the parent title is unknown", () => {
       scope="personal"
       source={{
         type: "manual",
-        surface: "milo",
+        surface: "jori",
         parent: {},
       }}
     />

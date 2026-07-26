@@ -15,12 +15,12 @@ describe("automation event catalog match", () => {
 
     expect(
       normalizeAutomationEventMatch(definition, {
-        repo: " milo/app ",
+        repo: " jori/app ",
         pr: "42",
         path: " src/app.ts ",
       })
     ).toEqual({
-      repo: "milo/app",
+      repo: "jori/app",
       pr: "42",
       path: "src/app.ts",
     })

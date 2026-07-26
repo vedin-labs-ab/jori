@@ -1,6 +1,6 @@
-# Milo
+# Jori
 
-Milo is an AI teammate for company work. The application uses TanStack Start,
+Jori is an AI teammate for company work. The application uses TanStack Start,
 Convex with Better Auth, and Trigger.dev.
 
 ## Development
@@ -34,7 +34,7 @@ pnpm deploy
 
 ## Data regions
 
-Milo is designed as two isolated regional applications built from the same
+Jori is designed as two isolated regional applications built from the same
 codebase. Region is deployment configuration, not a property repeated across
 product records.
 

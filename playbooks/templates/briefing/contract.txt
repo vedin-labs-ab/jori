@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { defineAppContract } from "@/milo/contract"
+import { defineAppContract } from "@/jori/contract"
 
 const timestamp = z.iso.datetime()
 const identifier = z.string().max(512)

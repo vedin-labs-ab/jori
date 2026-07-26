@@ -29,7 +29,7 @@ export function createSlackApprovalRequest(args: {
 }) {
   return {
     text: [
-      "Milo needs approval before continuing.",
+      "Jori needs approval before continuing.",
       `Action: ${getToolLabel(args.tool)}`,
       args.summary,
     ].join("\n"),
@@ -67,7 +67,7 @@ function createApprovalActions(code: string) {
         text: "Deny",
         emoji: false,
       },
-      action_id: "milo_approval_deny",
+      action_id: "jori_approval_deny",
       value: JSON.stringify({ code }),
     },
     {
@@ -78,7 +78,7 @@ function createApprovalActions(code: string) {
         text: "Approve",
         emoji: false,
       },
-      action_id: "milo_approval_approve",
+      action_id: "jori_approval_approve",
       value: JSON.stringify({ code }),
     },
   ]

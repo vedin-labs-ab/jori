@@ -2,7 +2,7 @@ import { type Scope } from "../../contracts/permissions/scope"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { type MiloToolRequest, readRecord } from "../shared/input"
+import { type JoriToolRequest, readRecord } from "../shared/input"
 import { type AutomationAccessInput } from "./access"
 import { type AutomationTriggerInput, type AutomationType } from "./schema"
 
@@ -38,7 +38,7 @@ type UpdateAutomationArgs = {
   trigger?: AutomationTriggerInput
 }
 
-export async function callMiloAutomationTool(
+export async function callJoriAutomationTool(
   ctx: ActionCtx,
   execution: {
     organizationId: string
@@ -46,7 +46,7 @@ export async function callMiloAutomationTool(
     automationId?: Id<"automations">
     automationConfigurationVersion?: number
   },
-  request: MiloToolRequest
+  request: JoriToolRequest
 ) {
   const args = readRecord(request.args)
 
@@ -96,5 +96,5 @@ export async function callMiloAutomationTool(
     })
   }
 
-  throw new Error(`Unknown Milo tool: ${request.tool}`)
+  throw new Error(`Unknown Jori tool: ${request.tool}`)
 }

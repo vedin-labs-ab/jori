@@ -75,7 +75,7 @@ export function ReleaseApp() {
         ))}
       </div>
       <p className="border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
-        Milo rechecks every morning and before the cut. Everyone opens the same
+        Jori rechecks every morning and before the cut. Everyone opens the same
         page.
       </p>
     </Prop>

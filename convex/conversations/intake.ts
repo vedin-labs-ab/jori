@@ -161,14 +161,14 @@ function normalizeMentioned(
     integration.integration === "github" ||
     integration.integration === "linear"
   ) {
-    return mentionsMilo(message.text)
+    return mentionsJori(message.text)
   }
 
   return false
 }
 
-function mentionsMilo(text: string | undefined) {
-  return text !== undefined && /(?:^|\W)@milo(?:$|\W)/i.test(text)
+function mentionsJori(text: string | undefined) {
+  return text !== undefined && /(?:^|\W)@jori(?:$|\W)/i.test(text)
 }
 
 async function messageRunConversation(

@@ -35,7 +35,7 @@ const appWorkspacePathProperty = stringProperty(
 
 const appStateProperties = {
   appId: stringProperty(
-    "Milo app ID of any accessible app. When omitted in an automation run, defaults to the automation's primary app."
+    "Jori app ID of any accessible app. When omitted in an automation run, defaults to the automation's primary app."
   ),
   contractName: stringProperty(
     "State entry name from the app contract, not the raw state key."
@@ -70,7 +70,7 @@ export const appToolInputSchemas = {
   read_app: objectSchema({
     required: ["appId"],
     properties: {
-      appId: stringProperty("Milo app ID."),
+      appId: stringProperty("Jori app ID."),
       versionId: stringProperty("Optional app version ID."),
     },
   }),
@@ -81,7 +81,7 @@ export const appToolInputSchemas = {
   share_app: objectSchema({
     required: ["appId"],
     properties: {
-      appId: stringProperty("Milo app ID."),
+      appId: stringProperty("Jori app ID."),
       expiresInHours: numberProperty(
         "How long the link stays valid, in hours. Defaults to 72. Match the content's shelf life: a meeting briefing might use 24, a weekly review 168.",
         shareExpiry.minHours,
@@ -92,7 +92,7 @@ export const appToolInputSchemas = {
   update_app: objectSchema({
     required: ["appId", "title", "access", "workspacePath"],
     properties: {
-      appId: stringProperty("Milo app ID."),
+      appId: stringProperty("Jori app ID."),
       title: stringProperty("Short app title."),
       access: appAccessProperty,
       workspacePath: appWorkspacePathProperty,
@@ -139,7 +139,7 @@ export const appToolInputSchemas = {
   delete_app: objectSchema({
     required: ["appId"],
     properties: {
-      appId: stringProperty("Milo app ID."),
+      appId: stringProperty("Jori app ID."),
     },
   }),
 }

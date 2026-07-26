@@ -70,7 +70,7 @@ function readAddress(request: Request) {
   return address?.trim() || undefined
 }
 
-/** Posted from the Milo app origin, which is a different host from the
+/** Posted from the Jori app origin, which is a different host from the
  *  deployment's own, so this route needs CORS. */
 function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("origin")

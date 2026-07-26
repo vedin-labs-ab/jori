@@ -63,7 +63,7 @@ export function AutomationInstructionsSection({
 function InstructionsHelp() {
   return (
     <FieldHelp label="Instructions help">
-      <p>Write the work Milo should do.</p>
+      <p>Write the work Jori should do.</p>
       <p>Mention integrations with @, skills with /, and tools with #.</p>
       <p>Choose tools from each integration badge.</p>
     </FieldHelp>

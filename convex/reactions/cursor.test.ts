@@ -5,7 +5,7 @@ import { collectPendingReactionBatch, formatRuntimeReaction } from "./cursor"
 const self = { externalId: "UBOT", kind: "self" as const }
 const user = { externalId: "U123", kind: "person" as const }
 
-test("drains only reactions to Milo-authored targets", () => {
+test("drains only reactions to Jori-authored targets", () => {
   const batch = collectPendingReactionBatch(
     [
       reaction("a", 1, { target: reactionTarget({ actor: self }) }),
@@ -103,7 +103,7 @@ test("formats added and removed runtime reactions", () => {
     identifiers: ["linear:issue:ISS-1", "linear:comment:comment"],
     preview: "I can proceed with option B.",
     reaction: "✅",
-    target: "Milo",
+    target: "Jori",
     type: "reaction.added",
   })
 

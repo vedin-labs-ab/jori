@@ -73,7 +73,7 @@ export function normalizeReturnPath(value: string | null | undefined) {
     return "/"
   }
 
-  const url = new URL(value, "https://milo.invalid")
+  const url = new URL(value, "https://jori.invalid")
 
   return `${url.pathname}${url.search}${url.hash}`
 }

@@ -122,7 +122,7 @@ function reactionActorIds(reaction: Doc<"reactions">) {
 
 function reactionTargetLabel(reaction: Doc<"reactions">) {
   if (reaction.target.actor?.kind === "self") {
-    return "Milo"
+    return "Jori"
   }
 
   return getActorDisplayName(reaction.target.actor) ?? "message"

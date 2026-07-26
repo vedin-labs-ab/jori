@@ -11,7 +11,7 @@ test("renders summary and reference entries in the person context grammar", () =
         identifiers: ["internal:conversation:recent", "slack:channel:C1"],
         integration: "slack",
         kind: "summary",
-        summary: "Albin wants Milo to generate a cartoon avatar of him.",
+        summary: "Albin wants Jori to generate a cartoon avatar of him.",
       },
       {
         conversationId: "other" as Id<"conversations">,
@@ -36,7 +36,7 @@ test("renders summary and reference entries in the person context grammar", () =
     "- Slack | identifiers=[internal:conversation:recent, slack:channel:C1] | summary updated 19 minutes ago"
   )
   expect(rendered).toContain(
-    "```text\nAlbin wants Milo to generate a cartoon avatar of him.\n```"
+    "```text\nAlbin wants Jori to generate a cartoon avatar of him.\n```"
   )
   expect(rendered).toContain(
     "- GitHub | identifiers=[internal:conversation:other] | summarized above"

@@ -111,7 +111,7 @@ function createRenderer(canvas: HTMLCanvasElement): ShaderRenderer | undefined {
   try {
     return buildRenderer(canvas, context)
   } catch (error) {
-    console.warn("Milo sign-in shader could not start.", error)
+    console.warn("Jori sign-in shader could not start.", error)
     return
   }
 }

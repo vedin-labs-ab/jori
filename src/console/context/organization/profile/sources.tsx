@@ -41,7 +41,7 @@ export function WebsitesSection({
       {count === 0 ? (
         <ConsoleEmptyState
           className="min-h-32"
-          description="Add one to give Milo clearer organization context."
+          description="Add one to give Jori clearer organization context."
           icon={Globe2}
           title="No websites yet"
         />

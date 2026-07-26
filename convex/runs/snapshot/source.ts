@@ -117,7 +117,7 @@ function timeAutomationDisplay(
     return {
       source: {
         type: "automation",
-        surface: "milo",
+        surface: "jori",
       },
       context: [],
     }
@@ -126,7 +126,7 @@ function timeAutomationDisplay(
   return {
     source: {
       type: "automation",
-      surface: "milo",
+      surface: "jori",
     },
     context: timeAutomationContext({
       status: automation.status,

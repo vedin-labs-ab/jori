@@ -154,7 +154,7 @@ function StatusNotice({ meeting }: { meeting: MeetingBriefing }) {
 
 function notice(status: MeetingBriefing["status"]) {
   if (status === "partial") return "Useful context is ready, with some sources or questions still unresolved."
-  if (status === "sparse") return "Only limited reliable context was available. Milo left the gaps visible."
+  if (status === "sparse") return "Only limited reliable context was available. Jori left the gaps visible."
   if (status === "stale") return "The meeting changed or a refresh failed. Review the preparation time before relying on this briefing."
   if (status === "failed") return "Research could not produce a reliable briefing."
   if (status === "cancelled") return "This meeting was cancelled or removed from the requester's calendar."
@@ -163,7 +163,7 @@ function notice(status: MeetingBriefing["status"]) {
 
 function emptyMessage(status: MeetingBriefing["status"]) {
   if (status === "queued") return "Research is queued for the appropriate preparation window."
-  if (status === "researching") return "Milo is gathering and checking the relevant context."
+  if (status === "researching") return "Jori is gathering and checking the relevant context."
   return notice(status) ?? "No reliable preparation is available yet."
 }
 

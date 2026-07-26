@@ -36,7 +36,7 @@ test("advances across self messages without returning them as user input", () =>
   const batch = collectPendingBatch(
     [
       message("last", 1, "Already consumed."),
-      message("approval", 2, "Milo needs approval.", {
+      message("approval", 2, "Jori needs approval.", {
         actor: { externalId: "UBOT", kind: "self" },
       }),
       message("next", 3, "Follow up.", {
@@ -57,7 +57,7 @@ test("advances the cursor when only self messages are pending", () => {
   const batch = collectPendingBatch(
     [
       message("last", 1, "Already consumed."),
-      message("approval", 2, "Milo needs approval.", {
+      message("approval", 2, "Jori needs approval.", {
         actor: { externalId: "UBOT", kind: "self" },
       }),
     ],
@@ -73,7 +73,7 @@ test("advances the cursor when only self messages are pending", () => {
 test("formats runtime messages with stored text and Slack identifiers", () => {
   expect(
     formatRuntimeMessage(
-      message("next", 3, "@Milo follow-up", {
+      message("next", 3, "@Jori follow-up", {
         actor: { externalId: "U123", kind: "person", name: "Albin" },
         data: { ts: "123.456" },
         mentioned: true,
@@ -88,7 +88,7 @@ test("formats runtime messages with stored text and Slack identifiers", () => {
       "slack:thread:123.456",
     ],
     replyTarget: null,
-    text: "@Milo follow-up",
+    text: "@Jori follow-up",
   })
 })
 

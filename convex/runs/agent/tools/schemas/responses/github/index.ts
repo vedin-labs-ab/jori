@@ -105,7 +105,7 @@ export const githubToolResponseSchemas = {
   },
   github_clone_repository: objectSchema({
     required: ["directory", "git", "remoteUrl", "repository"],
-    description: "The clone Milo materialized into the sandbox workspace.",
+    description: "The clone Jori materialized into the sandbox workspace.",
     properties: {
       directory: stringProperty("Workspace path of the Git working copy."),
       git: { type: "boolean", const: true },

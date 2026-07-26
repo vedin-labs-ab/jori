@@ -188,7 +188,7 @@ test("rejects a web tool reference while web access is off", () => {
           toolPermission({
             access: "read",
             mode: "allowed",
-            surface: "milo",
+            surface: "jori",
             tool: "web_search",
           }),
         ],
@@ -246,7 +246,7 @@ function toolPermission(
   overrides: Partial<{
     access: "read" | "write"
     mode: "required" | "allowed" | "prompted" | "blocked"
-    surface: "github" | "milo" | "slack"
+    surface: "github" | "jori" | "slack"
     tool: string
   }>
 ) {

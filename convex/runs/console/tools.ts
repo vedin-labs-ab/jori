@@ -5,7 +5,7 @@ import {
   type ToolCapability,
 } from "../../../contracts/permissions"
 import {
-  consolidateMiloToolGroups,
+  consolidateJoriToolGroups,
   type RunToolSnapshot,
 } from "../agent/tools/snapshot"
 import { compactDetails, detail, type ExecutionDetailGroup } from "../detail"
@@ -26,7 +26,7 @@ export function toolDetails(snapshot: RunToolSnapshot | undefined) {
 }
 
 function toolsDetail(groups: RunToolSnapshot["groups"]) {
-  const detailGroups = consolidateMiloToolGroups(groups)
+  const detailGroups = consolidateJoriToolGroups(groups)
     .map(displayGroup)
     .filter(isPresent)
 

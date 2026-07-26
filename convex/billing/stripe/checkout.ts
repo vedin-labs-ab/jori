@@ -102,7 +102,7 @@ export const startTopUpCheckout = action({
           "0": {
             price_data: {
               currency: "usd",
-              product_data: { name: "Milo usage top-up" },
+              product_data: { name: "Jori usage top-up" },
               unit_amount: args.amountUsd * 100,
             },
             quantity: 1,

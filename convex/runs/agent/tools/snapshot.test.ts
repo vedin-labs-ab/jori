@@ -3,7 +3,7 @@ import { type ToolCapability } from "../../../../contracts/permissions"
 import { createRunToolSnapshot } from "./snapshot"
 
 test("stores all surface tool capabilities for run details", () => {
-  const miloTools = [
+  const joriTools = [
     {
       access: "write" as const,
       description: "Persist a generated asset.",
@@ -17,9 +17,9 @@ test("stores all surface tool capabilities for run details", () => {
       webSearch: true,
       capabilities: [
         {
-          surface: "milo",
-          label: "Milo",
-          tools: miloTools,
+          surface: "jori",
+          label: "Jori",
+          tools: joriTools,
         },
         {
           surface: "slack",
@@ -31,9 +31,9 @@ test("stores all surface tool capabilities for run details", () => {
   ).toEqual({
     groups: [
       {
-        surface: "milo",
-        label: "Milo",
-        tools: miloTools,
+        surface: "jori",
+        label: "Jori",
+        tools: joriTools,
       },
       {
         surface: "slack",
@@ -45,7 +45,7 @@ test("stores all surface tool capabilities for run details", () => {
   })
 })
 
-test("stores all native Milo tools in one group", () => {
+test("stores all native Jori tools in one group", () => {
   const finishRunTool = {
     access: "write" as const,
     description: "Finish this run.",
@@ -76,8 +76,8 @@ test("stores all native Milo tools in one group", () => {
       activeSurfaceTools: [sendReplyTool],
       capabilities: [
         {
-          surface: "milo",
-          label: "Milo",
+          surface: "jori",
+          label: "Jori",
           tools: [saveAssetTool],
         },
         {
@@ -93,8 +93,8 @@ test("stores all native Milo tools in one group", () => {
   ).toEqual({
     groups: [
       {
-        surface: "milo",
-        label: "Milo",
+        surface: "jori",
+        label: "Jori",
         tools: [finishRunTool, sendReplyTool, saveAssetTool, gitTool],
       },
       {
@@ -141,8 +141,8 @@ test("stores workspace tools after provider capabilities", () => {
         tools: [cloneTool],
       },
       {
-        surface: "milo",
-        label: "Milo",
+        surface: "jori",
+        label: "Jori",
         tools: [gitTool],
       },
     ],

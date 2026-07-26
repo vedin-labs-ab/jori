@@ -17,9 +17,9 @@ test("projects integration offers with integration metadata", () => {
         expiresAt: 2000,
         integration: "github",
         runId: "run" as Id<"runs">,
-        source: { surface: "milo" },
+        source: { surface: "jori" },
         status: "expired",
-        summary: "Connect GitHub so Milo can inspect repositories.",
+        summary: "Connect GitHub so Jori can inspect repositories.",
         organizationId: "organization",
         tokenHash: "token",
         updatedAt: 2000,
@@ -32,7 +32,7 @@ test("projects integration offers with integration metadata", () => {
 
   expect(items).toContainEqual(
     expect.objectContaining({
-      description: "Connect GitHub so Milo can inspect repositories.",
+      description: "Connect GitHub so Jori can inspect repositories.",
       integration: "github",
       kind: "offer",
       status: "expired",

@@ -10,15 +10,15 @@ const config: RegionConfig = {
   current: "us",
   enabled: new Set(["us", "eu"]),
   origins: {
-    eu: "https://eu.milo.example",
-    us: "https://us.milo.example",
+    eu: "https://eu.jori.example",
+    us: "https://us.jori.example",
   },
-  publicOrigin: "https://milo.example",
+  publicOrigin: "https://jori.example",
 }
 
 test("leaves the current regional host alone", () => {
   const response = handleRegionRequest(
-    new Request("https://us.milo.example/pricing"),
+    new Request("https://us.jori.example/pricing"),
     config
   )
 
@@ -27,41 +27,41 @@ test("leaves the current regional host alone", () => {
 
 test("routes apex requests to a remembered region", () => {
   const response = handleRegionRequest(
-    new Request("https://milo.example/pricing?plan=team", {
-      headers: { cookie: "milo_region=eu" },
+    new Request("https://jori.example/pricing?plan=team", {
+      headers: { cookie: "jori_region=eu" },
     }),
     config
   )
 
   expect(response?.status).toBe(307)
   expect(response?.headers.get("location")).toBe(
-    "https://eu.milo.example/pricing?plan=team"
+    "https://eu.jori.example/pricing?plan=team"
   )
   expect(response?.headers.get("set-cookie")).toBeNull()
 })
 
 test("estimates Europe and persists the routing preference", () => {
   const response = handleRegionRequest(
-    new Request("https://milo.example/", {
+    new Request("https://jori.example/", {
       headers: { "x-vercel-ip-country": "SE" },
     }),
     config
   )
 
-  expect(response?.headers.get("location")).toBe("https://eu.milo.example/")
-  expect(response?.headers.get("set-cookie")).toContain("milo_region=eu")
+  expect(response?.headers.get("location")).toBe("https://eu.jori.example/")
+  expect(response?.headers.get("set-cookie")).toContain("jori_region=eu")
   expect(response?.headers.get("cache-control")).toBe("private, no-store")
 })
 
 test("falls back to the deployment region when EU is disabled", () => {
   const response = handleRegionRequest(
-    new Request("https://milo.example/", {
+    new Request("https://jori.example/", {
       headers: { "cf-ipcountry": "DE" },
     }),
     { ...config, enabled: new Set(["us"]) }
   )
 
-  expect(response?.headers.get("location")).toBe("https://us.milo.example/")
+  expect(response?.headers.get("location")).toBe("https://us.jori.example/")
 })
 
 test("changes regions through the apex and preserves a safe path", () => {
@@ -69,9 +69,9 @@ test("changes regions through the apex and preserves a safe path", () => {
   const response = handleRegionRequest(new Request(selection), config)
 
   expect(response?.headers.get("location")).toBe(
-    "https://eu.milo.example/pricing?plan=team"
+    "https://eu.jori.example/pricing?plan=team"
   )
-  expect(response?.headers.get("set-cookie")).toContain("milo_region=eu")
+  expect(response?.headers.get("set-cookie")).toContain("jori_region=eu")
 })
 
 test("does not create links to disabled regions", () => {
@@ -86,7 +86,7 @@ test("does not create links to disabled regions", () => {
 
 test("does not expose authentication on the apex", () => {
   const response = handleRegionRequest(
-    new Request("https://milo.example/api/auth/get-session"),
+    new Request("https://jori.example/api/auth/get-session"),
     config
   )
 
@@ -95,7 +95,7 @@ test("does not expose authentication on the apex", () => {
 
 test("rejects requests delivered to the wrong deployment", () => {
   const response = handleRegionRequest(
-    new Request("https://eu.milo.example/console"),
+    new Request("https://eu.jori.example/console"),
     config
   )
 
@@ -105,19 +105,19 @@ test("rejects requests delivered to the wrong deployment", () => {
 test("uses a validated forwarded host behind a deployment proxy", () => {
   const response = handleRegionRequest(
     new Request("http://internal.service/pricing", {
-      headers: { "x-forwarded-host": "milo.example" },
+      headers: { "x-forwarded-host": "jori.example" },
     }),
     config
   )
 
   expect(response?.headers.get("location")).toBe(
-    "https://us.milo.example/pricing"
+    "https://us.jori.example/pricing"
   )
 })
 
 test("does not forward writes from the public host", () => {
   const response = handleRegionRequest(
-    new Request("https://milo.example/console", { method: "POST" }),
+    new Request("https://jori.example/console", { method: "POST" }),
     config
   )
 

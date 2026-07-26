@@ -14,7 +14,7 @@ afterEach(() => {
 })
 
 test("generates an image through OpenRouter and saves it as an asset", async () => {
-  const imageBytes = new Uint8Array(Buffer.from("milo-image"))
+  const imageBytes = new Uint8Array(Buffer.from("jori-image"))
   const fetchMock = mockFetch(
     Response.json(
       {
@@ -44,7 +44,7 @@ test("generates an image through OpenRouter and saves it as an asset", async () 
   const runtime = createRuntime()
 
   const result = await generateImageAsset(runtime.runtime, {
-    prompt: "A clean product hero image for Milo.",
+    prompt: "A clean product hero image for Jori.",
     save: {
       description: "Product hero",
       name: "hero",
@@ -52,7 +52,7 @@ test("generates an image through OpenRouter and saves it as an asset", async () 
   })
 
   expect(openRouterRequestBody(fetchMock)).toMatchObject({
-    messages: [{ content: "A clean product hero image for Milo." }],
+    messages: [{ content: "A clean product hero image for Jori." }],
     modalities: ["image", "text"],
     model: "google/gemini-3.1-flash-image",
   })

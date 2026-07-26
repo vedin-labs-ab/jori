@@ -6,8 +6,8 @@ import {
 } from "../../../../test/convex/console"
 import { summarizeRun } from "../summaries"
 
-// A subtask runs under Milo on behalf of its parent, so its row leads with
-// Milo and names the parent instead of claiming the parent's origin.
+// A subtask runs under Jori on behalf of its parent, so its row leads with
+// Jori and names the parent instead of claiming the parent's origin.
 test("a subtask names its parent run", async () => {
   const run = subtaskRun()
   const summary = await summarizeRun(
@@ -17,7 +17,7 @@ test("a subtask names its parent run", async () => {
 
   expect(summary.source).toEqual({
     type: "manual",
-    surface: "milo",
+    surface: "jori",
     parent: { title: "Meeting Briefing" },
   })
   expect(summary.searchableText).toContain("subtask")
@@ -38,7 +38,7 @@ test("a subtask drops origin context copied from its parent", async () => {
     run
   )
 
-  expect(summary.source.surface).toBe("milo")
+  expect(summary.source.surface).toBe("jori")
   expect(summary.source.parent).toEqual({ title: "Meeting Briefing" })
   expect(summary.details.some((detail) => detail.type === "schedule")).toBe(
     false

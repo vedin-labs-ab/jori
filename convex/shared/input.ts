@@ -1,5 +1,5 @@
-/** A Milo platform tool call as the broker and every domain dispatcher receive it. */
-export type MiloToolRequest = {
+/** A Jori platform tool call as the broker and every domain dispatcher receive it. */
+export type JoriToolRequest = {
   tool: string
   args?: unknown
 }

@@ -7,7 +7,7 @@ import {
   stringProperty,
 } from "../common"
 
-// GitHub results are shaped by Milo's broker: raw GitHub payloads are
+// GitHub results are shaped by Jori's broker: raw GitHub payloads are
 // summarized into compact objects whose undefined fields are dropped, so
 // every field here is optional unless the broker itself constructs it.
 
@@ -114,7 +114,7 @@ export function reviewCommentSummary(): JsonSchema {
 
 export function commitSummary(): JsonSchema {
   return objectSchema({
-    description: "The commit Milo created.",
+    description: "The commit Jori created.",
     properties: {
       baseSha: stringProperty("Base commit SHA for new branches."),
       files: arrayProperty("Repository-relative committed paths.", {

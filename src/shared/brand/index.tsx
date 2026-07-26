@@ -1,7 +1,7 @@
 import { type SVGProps } from "react"
 import { cn } from "@/lib/utils"
 
-type MiloLogoProps = SVGProps<SVGSVGElement> & {
+type JoriLogoProps = SVGProps<SVGSVGElement> & {
   title?: string
 }
 
@@ -9,20 +9,20 @@ export function BrandMark() {
   return (
     <div className="flex items-center gap-2">
       <BrandIcon className="size-8" />
-      <span className="text-base font-medium">Milo</span>
+      <span className="text-base font-medium">Jori</span>
     </div>
   )
 }
 
 export function BrandIcon({ className }: { className: string }) {
-  return <MiloLogo aria-hidden="true" className={className} />
+  return <JoriLogo aria-hidden="true" className={className} />
 }
 
-export function MiloLogo({
+export function JoriLogo({
   className,
-  title = "Milo logo",
+  title = "Jori logo",
   ...props
-}: MiloLogoProps) {
+}: JoriLogoProps) {
   return (
     <svg
       viewBox="6 6 52 52"

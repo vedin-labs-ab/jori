@@ -3,12 +3,12 @@ import { isRegion, type Region, regions } from "@contracts/region"
 const localOrigin = "http://localhost:5173"
 
 const environmentNames = {
-  current: "VITE_MILO_REGION",
-  enabled: "VITE_MILO_ENABLED_REGIONS",
-  publicOrigin: "VITE_MILO_PUBLIC_ORIGIN",
+  current: "VITE_JORI_REGION",
+  enabled: "VITE_JORI_ENABLED_REGIONS",
+  publicOrigin: "VITE_JORI_PUBLIC_ORIGIN",
   origins: {
-    eu: "VITE_MILO_EU_ORIGIN",
-    us: "VITE_MILO_US_ORIGIN",
+    eu: "VITE_JORI_EU_ORIGIN",
+    us: "VITE_JORI_US_ORIGIN",
   },
 } as const
 

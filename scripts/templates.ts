@@ -15,7 +15,7 @@ const summaryPath = path.join(root, "contracts/playbooks/generated.ts")
 const versionsPath = path.join(root, "playbooks/versions.json")
 
 async function compileAppTemplates(checkMode: boolean) {
-  const runtime = await fs.mkdtemp(path.join(os.tmpdir(), "milo-templates-"))
+  const runtime = await fs.mkdtemp(path.join(os.tmpdir(), "jori-templates-"))
 
   try {
     const template = path.join(runtime, "template")
@@ -26,8 +26,8 @@ async function compileAppTemplates(checkMode: boolean) {
       JSON.stringify({ appTemplatePath: template }),
       "utf8"
     )
-    process.env.MILO_WORKSPACE = root
-    process.env.MILO_APP_BUILDER_CONFIG = configPath
+    process.env.JORI_WORKSPACE = root
+    process.env.JORI_APP_BUILDER_CONFIG = configPath
 
     const { buildApp } = await import("../runtime/apps/builder/index.ts")
     const briefing = await buildApp([

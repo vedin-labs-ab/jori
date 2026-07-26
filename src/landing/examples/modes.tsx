@@ -53,9 +53,9 @@ function ModeMatrixRow({ row }: { row: ModeRow }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-3">
       <div className="flex min-w-0 items-start gap-2.5">
-        {/* Web tools live on the milo surface; a globe reads truer than the
+        {/* Web tools live on the jori surface; a globe reads truer than the
             brand mark next to "Search web". */}
-        {permission.surface === "milo" ? (
+        {permission.surface === "jori" ? (
           <Globe className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         ) : (
           <ProviderLogo

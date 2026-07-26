@@ -15,7 +15,7 @@ export function validateRuntimeSources(runtimeAssets: RuntimeAssets) {
 }
 
 function validateAppBuilder(builder: Record<string, string>) {
-  const entryPath = "milo-app-builder.ts"
+  const entryPath = "jori-app-builder.ts"
   const entry = builder[entryPath]
 
   if (entry === undefined) {
@@ -63,10 +63,10 @@ function validateJsonSources() {
 
 function validateAppShell(html: string) {
   for (const placeholder of [
-    "__MILO_APP_TITLE__",
-    "__MILO_APP_STYLE__",
-    "__MILO_APP_CONFIG__",
-    "__MILO_APP_LOADER__",
+    "__JORI_APP_TITLE__",
+    "__JORI_APP_STYLE__",
+    "__JORI_APP_CONFIG__",
+    "__JORI_APP_LOADER__",
   ]) {
     if (!html.includes(placeholder)) {
       throw new Error(`App shell is missing ${placeholder}.`)
@@ -86,7 +86,7 @@ function validateAppTemplate(template: Record<string, string>) {
     "biome.json",
     "vite.config.ts",
     "src/main.tsx",
-    "src/milo.css",
+    "src/jori.css",
     "src/vite-env.d.ts",
     "src/components/ui/button.tsx",
     "src/lib/utils.ts",
@@ -179,7 +179,7 @@ function externalPackageName(specifier: string) {
 }
 
 function validateAppTemplateBuild(template: Record<string, string>) {
-  const project = fs.mkdtempSync(path.join(os.tmpdir(), "milo-template-"))
+  const project = fs.mkdtempSync(path.join(os.tmpdir(), "jori-template-"))
   const fixtureSourcePaths = ["src/App.tsx", "src/styles.css"]
 
   try {

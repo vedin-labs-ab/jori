@@ -63,7 +63,7 @@ function activityItemSchema(): JsonSchema {
   }
 }
 
-export const runMiloToolResponseSchemas = {
+export const runJoriToolResponseSchemas = {
   search_runs: objectSchema({
     required: ["cursor", "runs"],
     properties: {

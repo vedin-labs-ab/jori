@@ -96,7 +96,7 @@ test("adds reactions to pull request review comments", async () => {
     {
       id: 123,
       content: "rocket",
-      user: { login: "milo" },
+      user: { login: "jori" },
       created_at: "2026-06-12T15:28:00Z",
     },
   ])
@@ -124,7 +124,7 @@ test("adds reactions to pull request review comments", async () => {
     content: "rocket",
     createdAt: "2026-06-12T15:28:00Z",
     id: 123,
-    user: "milo",
+    user: "jori",
   })
 })
 

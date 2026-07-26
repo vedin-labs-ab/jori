@@ -88,14 +88,14 @@ describe("runtime prompts", () => {
     }
 
     // Message text is humanized at the provider edge before it is stored.
-    input.message.text = "@Milo what tools do u have?"
+    input.message.text = "@Jori what tools do u have?"
 
     const prompt = assemblePrompt(input).context
 
     expect(prompt).toContain(
       "- 1970-01-01T00:00:01.000Z | person | Albin Vedin | identifiers=[internal:message:message, slack:channel:C123, slack:message:123.456, slack:thread:123.456] | actor_ids=[slack:user:UACTOR]"
     )
-    expect(prompt).toContain("@Milo what tools do u have?")
+    expect(prompt).toContain("@Jori what tools do u have?")
   })
 
   test("keeps Slack thread routing in message identifiers, not a target block", () => {
@@ -183,7 +183,7 @@ describe("runtime delivery prompts", () => {
   test("omits automatic final delivery instructions", () => {
     const prompt = assemblePrompt(githubMessageInput()).instructions
 
-    expect(prompt).not.toMatch(/Milo will .*post it/)
+    expect(prompt).not.toMatch(/Jori will .*post it/)
     expect(prompt).not.toContain("Use GitHub write tools only")
     expect(prompt).not.toContain("not for routine replies")
     expect(prompt).not.toContain("The requester cannot see you working")

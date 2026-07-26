@@ -68,7 +68,7 @@ export function StopExecution({
         <AlertDialogHeader>
           <AlertDialogTitle>Stop this run?</AlertDialogTitle>
           <AlertDialogDescription>
-            Milo stops working immediately and the run can't resume. The trace
+            Jori stops working immediately and the run can't resume. The trace
             so far is kept.
           </AlertDialogDescription>
         </AlertDialogHeader>

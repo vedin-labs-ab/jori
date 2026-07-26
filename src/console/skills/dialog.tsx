@@ -88,7 +88,7 @@ export function SkillDialog({
             {skill === undefined ? "Add skill" : "Edit skill"}
           </DialogTitle>
           <DialogDescription>
-            Name the skill, choose a category, describe when Milo should use it,
+            Name the skill, choose a category, describe when Jori should use it,
             and write the instructions in Markdown.
           </DialogDescription>
         </DialogHeader>
@@ -295,7 +295,7 @@ function SkillDescriptionField({
         id="skill-description"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Use when Milo is handling customer support requests."
+        placeholder="Use when Jori is handling customer support requests."
         rows={3}
       />
     </div>

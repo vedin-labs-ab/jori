@@ -100,7 +100,7 @@ export function Definition({
   )
 }
 
-// Props are illustrations of Milo's work rendered as documents: an email, a
+// Props are illustrations of Jori's work rendered as documents: an email, a
 // thread, a run. They share one quiet frame so the page reads as one system.
 export function Prop({
   children,
@@ -129,7 +129,7 @@ export function Prop({
 export function Mention() {
   return (
     <span className="rounded-sm bg-primary/10 px-1 py-px font-medium text-foreground">
-      @milo
+      @jori
     </span>
   )
 }

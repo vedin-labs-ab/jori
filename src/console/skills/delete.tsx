@@ -23,7 +23,7 @@ export function DeleteSkillDialog({
       <AlertDialogHeader>
         <AlertDialogTitle>Delete "{skill.name}"?</AlertDialogTitle>
         <AlertDialogDescription>
-          This permanently deletes the skill. Milo stops applying it to new
+          This permanently deletes the skill. Jori stops applying it to new
           runs.
         </AlertDialogDescription>
       </AlertDialogHeader>

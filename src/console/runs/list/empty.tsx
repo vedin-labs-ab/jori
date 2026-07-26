@@ -6,7 +6,7 @@ const skeletonRows = ["first", "second", "third", "fourth"]
 export function EmptyExecutions({ hasFilters }: { hasFilters: boolean }) {
   return (
     <FilterableEmptyState
-      description="Runs appear here when Milo picks up work from messages or automations."
+      description="Runs appear here when Jori picks up work from messages or automations."
       hasFilters={hasFilters}
       icon={FileText}
       noun="runs"

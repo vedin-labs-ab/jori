@@ -1,7 +1,7 @@
 import { compactRecord } from "../../../../contracts/json"
 import { optionalString, readArray, readRecord } from "../../../shared/input"
 
-// Slack Web API envelopes are mapped into compact Milo shapes at this edge:
+// Slack Web API envelopes are mapped into compact Jori shapes at this edge:
 // identifiers keep Slack's values (ts, channel and user IDs) so they thread
 // straight back into follow-up calls, and the ok/noise fields drop away.
 

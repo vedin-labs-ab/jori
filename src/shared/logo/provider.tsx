@@ -1,4 +1,4 @@
-import { MiloLogo } from "@/shared/brand"
+import { JoriLogo } from "@/shared/brand"
 import { providerLogoPath } from "./path"
 
 export function ProviderLogo({
@@ -8,9 +8,9 @@ export function ProviderLogo({
   className?: string
   surface: string | undefined
 }) {
-  if (surface === "milo") {
+  if (surface === "jori") {
     return (
-      <MiloLogo
+      <JoriLogo
         aria-hidden="true"
         className={className}
         focusable="false"

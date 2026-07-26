@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { miloModel } from "../../contracts/billing"
+import { joriModel } from "../../contracts/billing"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { internal } from "../_generated/api"
@@ -41,7 +41,7 @@ export const run = internalAction({
 
 async function requestReview(pending: PendingProfile) {
   return await requestStructured({
-    model: miloModel,
+    model: joriModel,
     // Calibrated judgment against explicit bars, closer to the deduction
     // judge (high) than to the conversation summarizer (low).
     reasoning: "medium",

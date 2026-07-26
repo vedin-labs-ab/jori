@@ -23,7 +23,7 @@ test("stores automation display data directly", () => {
       title: "Daily digest",
       source: {
         type: "automation",
-        surface: "milo",
+        surface: "jori",
       },
       context: [],
     },

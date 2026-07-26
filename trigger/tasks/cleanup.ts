@@ -1,10 +1,10 @@
 import { task } from "@trigger.dev/sdk"
 import { cleanupTaskId } from "../../contracts/runtime/tasks"
 import { type SandboxCleanupPayload } from "../../contracts/runtime/worker"
-import { MiloConvexClient } from "../convex"
+import { JoriConvexClient } from "../convex"
 import { killE2BSandbox } from "../sandbox/e2b/support"
 
-export const miloSandboxCleanup = task({
+export const joriSandboxCleanup = task({
   id: cleanupTaskId,
   maxDuration: 600,
   retry: {
@@ -15,7 +15,7 @@ export const miloSandboxCleanup = task({
     randomize: true,
   },
   run: async (payload: SandboxCleanupPayload) => {
-    const platform = new MiloConvexClient()
+    const platform = new JoriConvexClient()
 
     if (payload.expiresAt !== undefined) {
       const reserved = await platform.reserveExpiredSandboxCleanup({

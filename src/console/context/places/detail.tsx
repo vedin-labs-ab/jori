@@ -18,7 +18,7 @@ import { ContextSectionTitle } from "../section"
 import { PlaceMeta, PlaceName } from "./card"
 import { type Place } from "./types"
 
-// A faithful render of the context block Milo reads in this place: the same
+// A faithful render of the context block Jori reads in this place: the same
 // sections, in the same order, with the same words. Lifecycle surfaces only
 // as a quiet fading cue.
 export function PlaceDetail({

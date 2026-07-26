@@ -80,7 +80,7 @@ describe("permission catalog shape", () => {
       expect(permissionsByTool.get(tool)).toEqual(
         expect.objectContaining({
           defaultMode: "required",
-          surface: "milo",
+          surface: "jori",
         })
       )
     }

@@ -1,6 +1,6 @@
 ---
 name: image-generation
-description: Generate a bitmap image asset with the `generate_image` tool and save it as a run asset. Use when the user asks Milo to produce an illustration, mockup, icon, texture, background, social image, or other generated picture.
+description: Generate a bitmap image asset with the `generate_image` tool and save it as a run asset. Use when the user asks Jori to produce an illustration, mockup, icon, texture, background, social image, or other generated picture.
 category: creation
 ---
 

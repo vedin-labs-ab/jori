@@ -84,7 +84,7 @@ describe("Linear message identifiers", () => {
 })
 
 describe("message surface audience", () => {
-  test("detects GitHub and Linear Milo mentions", () => {
+  test("detects GitHub and Linear Jori mentions", () => {
     expect(
       messageAudience(
         message({ integration: "github", mentioned: true }),
@@ -99,7 +99,7 @@ describe("message surface audience", () => {
     ).toMatchObject({ isAddressed: true, isDirect: false })
     expect(
       messageAudience(
-        message({ integration: "github", text: "Follow-up for Milo" }),
+        message({ integration: "github", text: "Follow-up for Jori" }),
         integration({})
       )
     ).toMatchObject({ isAddressed: false, isDirect: false })

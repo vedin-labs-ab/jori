@@ -2,9 +2,9 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
 /**
- * Who may open an organization while Milo is closed.
+ * Who may open an organization while Jori is closed.
  *
- * This is Milo's table, not Better Auth's. Better Auth owns who someone is;
+ * This is Jori's table, not Better Auth's. Better Auth owns who someone is;
  * which of those people may start using the product is a product decision,
  * and putting it in a generated auth table would mean editing a file that
  * says not to and re-deciding it on every regeneration.

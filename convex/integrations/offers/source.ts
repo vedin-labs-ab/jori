@@ -18,7 +18,7 @@ export function integrationOfferSourceFromInput(
 ): IntegrationOfferSource {
   if (input.type !== "message") {
     return {
-      surface: "milo",
+      surface: "jori",
       runId: input.run._id,
     }
   }

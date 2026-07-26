@@ -6,8 +6,8 @@ describe("automation event matching", () => {
   test("matches when trigger match are a subset of event match", () => {
     expect(
       matchesEvent(
-        automation({ repo: "milo/app" }),
-        event({ repo: "milo/app", issue: "42" })
+        automation({ repo: "jori/app" }),
+        event({ repo: "jori/app", issue: "42" })
       )
     ).toBe(true)
   })
@@ -15,8 +15,8 @@ describe("automation event matching", () => {
   test("rejects mismatched match", () => {
     expect(
       matchesEvent(
-        automation({ repo: "milo/app", issue: "41" }),
-        event({ repo: "milo/app", issue: "42" })
+        automation({ repo: "jori/app", issue: "41" }),
+        event({ repo: "jori/app", issue: "42" })
       )
     ).toBe(false)
   })

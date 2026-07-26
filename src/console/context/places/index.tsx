@@ -11,7 +11,7 @@ import { PlaceCard, WarmingPlaceCard } from "./card"
 import { PlaceDetail } from "./detail"
 import { type Place, type Places } from "./types"
 
-// Milo's per-place working memory: the places it works in and what it
+// Jori's per-place working memory: the places it works in and what it
 // believes about how each one operates. Read-only — profiles are distilled
 // from each place's own traffic and correct themselves as it changes.
 export function ContextPlaces() {
@@ -70,7 +70,7 @@ function PlaceGroups({
         <div className="flex flex-col gap-2">
           <ContextSectionTitle
             count={warming.length}
-            hint="Milo is in these places but hasn't learned their norms yet. Profiles build as conversation happens."
+            hint="Jori is in these places but hasn't learned their norms yet. Profiles build as conversation happens."
           >
             Warming up
           </ContextSectionTitle>
@@ -90,7 +90,7 @@ function PlaceGroups({
 function PlacesEmpty() {
   return (
     <ConsoleEmptyState
-      description="Milo learns each place it works in. They appear here once it sees activity."
+      description="Jori learns each place it works in. They appear here once it sees activity."
       icon={Signpost}
       title="No places yet"
     />

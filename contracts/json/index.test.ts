@@ -6,7 +6,7 @@ describe("JSON transport codec", () => {
     const value = {
       properties: {
         "Company 😀": {
-          title: [{ plain_text: "Milo" }],
+          title: [{ plain_text: "Jori" }],
         },
         ÅÄÖ: {
           rich_text: [{ plain_text: "Swedish letters" }],

@@ -38,7 +38,7 @@ test("rejects envelope paths that escape the workspace", async () => {
     applyWorkspacePatch(sandbox, {
       patch: "*** Begin Patch\n*** Add File: ../escape.txt\n+x\n*** End Patch",
     })
-  ).rejects.toThrow("escapes the Milo workspace")
+  ).rejects.toThrow("escapes the Jori workspace")
 })
 
 test("updating a missing file fails with the original path", async () => {

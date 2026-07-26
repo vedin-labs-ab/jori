@@ -41,7 +41,7 @@ export function AccessFields({
         checked={webSearch}
         description="For current public information."
         id="automation-web-search"
-        label="Let Milo search the web"
+        label="Let Jori search the web"
         onCheckedChange={onWebSearchChange}
       />
       {additionalSurfaces.length === 0 ? null : (

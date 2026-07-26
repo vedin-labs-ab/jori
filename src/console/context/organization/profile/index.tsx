@@ -186,7 +186,7 @@ function EmptyProfile() {
         </EmptyMedia>
         <EmptyTitle>No organization context</EmptyTitle>
         <EmptyDescription>
-          Add your website to discover and approve facts Milo can use in every
+          Add your website to discover and approve facts Jori can use in every
           run.
         </EmptyDescription>
       </EmptyHeader>
@@ -223,7 +223,7 @@ function approvalActorName(actor: ApprovalActor | undefined) {
   }
 
   if ("externalId" in actor) {
-    return actor.kind === "self" ? "Milo" : (actor.name ?? actor.email)
+    return actor.kind === "self" ? "Jori" : (actor.name ?? actor.email)
   }
 
   return "personId" in actor ? (actor.name ?? actor.email) : actor.email

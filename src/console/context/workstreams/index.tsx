@@ -23,7 +23,7 @@ import {
 } from "./filter"
 import { type Workstream, type Workstreams } from "./types"
 
-// Milo's deduced picture of the org's work. Corrections teach the judge.
+// Jori's deduced picture of the org's work. Corrections teach the judge.
 export function ContextWorkstreams() {
   return (
     <ContextPage tab="workstreams">
@@ -131,7 +131,7 @@ function WorkstreamList({
   if (workstreams.length === 0) {
     return (
       <FilterableEmptyState
-        description="Milo reviews activity across your connected tools every hour; suggested workstreams appear here."
+        description="Jori reviews activity across your connected tools every hour; suggested workstreams appear here."
         hasFilters={hasFilters}
         icon={Layers}
         noun="workstreams"

@@ -1,8 +1,8 @@
 import { isRecord } from "../../contracts/json"
 import { type RuntimeId } from "../../contracts/runtime/worker"
 
-/** POST to a Milo worker HTTP endpoint: the run id and worker secret ride
- *  the x-milo-* headers, the response is JSON, and failures surface the
+/** POST to a Jori worker HTTP endpoint: the run id and worker secret ride
+ *  the x-jori-* headers, the response is JSON, and failures surface the
  *  server's { error } envelope when present. */
 export async function postWorkerEndpoint(args: {
   body: BodyInit
@@ -16,8 +16,8 @@ export async function postWorkerEndpoint(args: {
     body: args.body,
     headers: {
       "content-type": args.contentType,
-      "x-milo-run-id": args.runId,
-      "x-milo-worker-secret": args.secret,
+      "x-jori-run-id": args.runId,
+      "x-jori-worker-secret": args.secret,
     },
     method: "POST",
   })

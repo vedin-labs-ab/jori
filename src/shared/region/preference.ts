@@ -1,7 +1,7 @@
 import { isRegion, type Region } from "@contracts/region"
 import { type RegionConfig } from "./config"
 
-const preferenceCookie = "milo_region"
+const preferenceCookie = "jori_region"
 const preferenceMaxAgeSeconds = 60 * 60 * 24 * 365
 
 export function readRegionPreference(request: Request, config: RegionConfig) {

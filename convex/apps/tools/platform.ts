@@ -1,6 +1,6 @@
 "use node"
 
-import { miloModel } from "../../../contracts/billing"
+import { joriModel } from "../../../contracts/billing"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
@@ -60,8 +60,8 @@ export function createAppPlatformToolCacheArgs(
 
   return {
     ...args,
-    _miloCache: {
-      model: miloModel,
+    _joriCache: {
+      model: joriModel,
     },
   }
 }

@@ -13,13 +13,13 @@ test("renders a URL button for the requested integration", () => {
     integration: "github",
     integrationOfferId,
     summary: "GitHub is needed before I can inspect the repository.",
-    url: "https://app.milo.example/integrations/offers/token",
+    url: "https://app.jori.example/integrations/offers/token",
   })
   const card = message.blocks[0] as Record<string, unknown>
   const subtext = card.subtext as { text: string }
   const actions = card.actions as Record<string, unknown>[]
 
-  expect(message.text).toContain("Connect GitHub to Milo")
+  expect(message.text).toContain("Connect GitHub to Jori")
   expect(message.blocks).toHaveLength(1)
   expect(message.blocks).toMatchObject([
     {
@@ -46,13 +46,13 @@ test("renders a URL button for the requested integration", () => {
       actions: [
         {
           type: "button",
-          action_id: "milo_integration_offer_cancel",
+          action_id: "jori_integration_offer_cancel",
           value: JSON.stringify({ integrationOfferId }),
         },
         {
           type: "button",
-          action_id: "milo_integration_offer_open",
-          url: "https://app.milo.example/integrations/offers/token",
+          action_id: "jori_integration_offer_open",
+          url: "https://app.jori.example/integrations/offers/token",
         },
       ],
     },
@@ -122,7 +122,7 @@ test("renders cancelled updates without offer actions", () => {
     text: "Connect Notion",
   })
   expect(subtext.text).toContain("Cancelled at <!date^1699999000^{time}|")
-  expect(subtext.text).not.toContain("Ask Milo")
+  expect(subtext.text).not.toContain("Ask Jori")
   expect(subtext.text.endsWith(".")).toBe(false)
 })
 
@@ -147,8 +147,8 @@ test("renders terminal integration offer timestamps as footnotes", () => {
   expect(JSON.stringify(expired.subtext)).toContain(
     "Expired at <!date^1700000000^{time}|"
   )
-  expect(JSON.stringify(failed.subtext)).not.toContain("Ask Milo")
-  expect(JSON.stringify(expired.subtext)).not.toContain("Ask Milo")
+  expect(JSON.stringify(failed.subtext)).not.toContain("Ask Jori")
+  expect(JSON.stringify(expired.subtext)).not.toContain("Ask Jori")
 })
 
 test("keeps integration offer card bodies within card limits", () => {
@@ -156,7 +156,7 @@ test("keeps integration offer card bodies within card limits", () => {
     expiresAt: 1_700_000_000_000,
     integration: "googleCalendar",
     summary: "A".repeat(240),
-    url: "https://app.milo.example/integrations/offers/token",
+    url: "https://app.jori.example/integrations/offers/token",
   })
   const card = message.blocks[0] as Record<string, unknown>
   const body = card.body as { text: string }
@@ -177,7 +177,7 @@ test("parses integration offer cancellation interactions", () => {
       message: { ts: "1710000000.000100" },
       actions: [
         {
-          action_id: "milo_integration_offer_cancel",
+          action_id: "jori_integration_offer_cancel",
           value: JSON.stringify({ integrationOfferId }),
         },
       ],
@@ -194,7 +194,7 @@ test("parses integration offer cancellation interactions", () => {
 test("recognizes integration offer URL button interactions", () => {
   expect(
     isSlackIntegrationOfferInteraction({
-      actions: [{ action_id: "milo_integration_offer_open" }],
+      actions: [{ action_id: "jori_integration_offer_open" }],
     })
   ).toBe(true)
   expect(

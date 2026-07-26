@@ -13,7 +13,7 @@ import { BrandMark } from "@/shared/brand"
  * A whole-page state: not found, or an error the app could not recover from.
  *
  * It is the console's own empty state one size up. Same icon chip, same
- * centred rhythm, so a dead end reads as part of Milo rather than as a
+ * centred rhythm, so a dead end reads as part of Jori rather than as a
  * different application's error screen. The mark stays top-left to say which
  * app you are still in.
  */
@@ -32,13 +32,13 @@ export function RootStateFrame({
 }) {
   return (
     // The mark sits at the page margin, as it does on sign-in, so the corner
-    // is the same in every full-page view Milo serves.
+    // is the same in every full-page view Jori serves.
     <main className="flex min-h-svh flex-col px-6 py-7 sm:px-10 sm:py-9">
       <header className="flex items-center">
         {/* A plain anchor, not a router link: this frame renders the root
             error boundary, so the way home must not depend on the router
             being in a state that can navigate. */}
-        <a aria-label="Milo home" className="rounded-md" href="/">
+        <a aria-label="Jori home" className="rounded-md" href="/">
           <BrandMark />
         </a>
       </header>

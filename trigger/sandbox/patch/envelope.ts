@@ -115,7 +115,7 @@ function resolveTarget(cwd: string, filePath: string) {
     normalized.startsWith("../") ||
     path.posix.isAbsolute(normalized)
   ) {
-    throw new Error(`Patch path escapes the Milo workspace: ${filePath}`)
+    throw new Error(`Patch path escapes the Jori workspace: ${filePath}`)
   }
 
   return path.posix.join(cwd, normalized)

@@ -3,26 +3,26 @@ import { type z } from "zod"
 import { createStateClient } from "./state"
 import {
   type AppStateRef,
-  type MiloStateClient,
-  type MiloStateDocument,
-  type MiloStateHookInput,
-  type MiloStateHookResult,
-  type MiloStatePatch,
-  type MiloStateStatus,
-  type MiloStateWriteOptions,
-  type RawMiloClient,
+  type JoriStateClient,
+  type JoriStateDocument,
+  type JoriStateHookInput,
+  type JoriStateHookResult,
+  type JoriStatePatch,
+  type JoriStateStatus,
+  type JoriStateWriteOptions,
+  type RawJoriClient,
 } from "./types"
 
-export function useMiloState<TSchema extends z.ZodType>(
+export function useJoriState<TSchema extends z.ZodType>(
   ref: AppStateRef<TSchema>,
-  input: MiloStateHookInput<z.output<TSchema>> = {}
-): MiloStateHookResult<TSchema> {
-  const client = useMemo(() => createStateClient(readRawMiloClient()), [])
-  const [document, setDocument] = useState<MiloStateDocument<
+  input: JoriStateHookInput<z.output<TSchema>> = {}
+): JoriStateHookResult<TSchema> {
+  const client = useMemo(() => createStateClient(readRawJoriClient()), [])
+  const [document, setDocument] = useState<JoriStateDocument<
     z.output<TSchema>
   > | null>(null)
   const [error, setError] = useState<Error | null>(null)
-  const [status, setStatus] = useState<MiloStateStatus>("loading")
+  const [status, setStatus] = useState<JoriStateStatus>("loading")
   const refresh = useRefreshState(client, ref, setDocument, setError, setStatus)
   const replace = useReplaceState(client, ref, setDocument, setError, setStatus)
   const patch = usePatchState(client, ref, setDocument, setError, setStatus)
@@ -48,11 +48,11 @@ export function useMiloState<TSchema extends z.ZodType>(
 }
 
 function useRefreshState<TSchema extends z.ZodType>(
-  client: MiloStateClient,
+  client: JoriStateClient,
   ref: AppStateRef<TSchema>,
-  setDocument: (document: MiloStateDocument<z.output<TSchema>> | null) => void,
+  setDocument: (document: JoriStateDocument<z.output<TSchema>> | null) => void,
   setError: (error: Error | null) => void,
-  setStatus: (status: MiloStateStatus) => void
+  setStatus: (status: JoriStateStatus) => void
 ) {
   return useCallback(async () => {
     return await runStateOperation("loading", setError, setStatus, async () => {
@@ -64,14 +64,14 @@ function useRefreshState<TSchema extends z.ZodType>(
 }
 
 function useReplaceState<TSchema extends z.ZodType>(
-  client: MiloStateClient,
+  client: JoriStateClient,
   ref: AppStateRef<TSchema>,
-  setDocument: (document: MiloStateDocument<z.output<TSchema>>) => void,
+  setDocument: (document: JoriStateDocument<z.output<TSchema>>) => void,
   setError: (error: Error | null) => void,
-  setStatus: (status: MiloStateStatus) => void
+  setStatus: (status: JoriStateStatus) => void
 ) {
   return useCallback(
-    async (value: z.input<TSchema>, options?: MiloStateWriteOptions) =>
+    async (value: z.input<TSchema>, options?: JoriStateWriteOptions) =>
       await runStateOperation("saving", setError, setStatus, async () => {
         const document = await client.replace(ref, value, options)
         setDocument(document)
@@ -82,16 +82,16 @@ function useReplaceState<TSchema extends z.ZodType>(
 }
 
 function usePatchState<TSchema extends z.ZodType>(
-  client: MiloStateClient,
+  client: JoriStateClient,
   ref: AppStateRef<TSchema>,
-  setDocument: (document: MiloStateDocument<z.output<TSchema>>) => void,
+  setDocument: (document: JoriStateDocument<z.output<TSchema>>) => void,
   setError: (error: Error | null) => void,
-  setStatus: (status: MiloStateStatus) => void
+  setStatus: (status: JoriStateStatus) => void
 ) {
   return useCallback(
     async (
-      patch: MiloStatePatch<z.input<TSchema>>,
-      options?: MiloStateWriteOptions
+      patch: JoriStatePatch<z.input<TSchema>>,
+      options?: JoriStateWriteOptions
     ) =>
       await runStateOperation("saving", setError, setStatus, async () => {
         const document = await client.patch(ref, patch, options)
@@ -103,12 +103,12 @@ function usePatchState<TSchema extends z.ZodType>(
 }
 
 function useSubscribedState<TSchema extends z.ZodType>(
-  client: MiloStateClient,
+  client: JoriStateClient,
   ref: AppStateRef<TSchema>,
   intervalMs: number | undefined,
-  setDocument: (document: MiloStateDocument<z.output<TSchema>> | null) => void,
+  setDocument: (document: JoriStateDocument<z.output<TSchema>> | null) => void,
   setError: (error: Error | null) => void,
-  setStatus: (status: MiloStateStatus) => void
+  setStatus: (status: JoriStateStatus) => void
 ) {
   useEffect(() => {
     setStatus("loading")
@@ -132,9 +132,9 @@ function useSubscribedState<TSchema extends z.ZodType>(
 }
 
 async function runStateOperation<T>(
-  loadingStatus: MiloStateStatus,
+  loadingStatus: JoriStateStatus,
   setError: (error: Error | null) => void,
-  setStatus: (status: MiloStateStatus) => void,
+  setStatus: (status: JoriStateStatus) => void,
   run: () => Promise<T>
 ) {
   setStatus(loadingStatus)
@@ -151,11 +151,11 @@ async function runStateOperation<T>(
   }
 }
 
-function readRawMiloClient() {
-  const raw = (window as Window & { Milo?: RawMiloClient }).Milo
+function readRawJoriClient() {
+  const raw = (window as Window & { Jori?: RawJoriClient }).Jori
 
   if (raw === undefined) {
-    throw new Error("Milo app SDK is not ready.")
+    throw new Error("Jori app SDK is not ready.")
   }
 
   return raw

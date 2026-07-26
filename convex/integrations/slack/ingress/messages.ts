@@ -147,7 +147,7 @@ async function humanizeSlackMessage(
   ])
 
   if (botUserId !== undefined) {
-    users.set(botUserId, "Milo")
+    users.set(botUserId, "Jori")
   }
 
   return {

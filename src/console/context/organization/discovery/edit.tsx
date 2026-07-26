@@ -112,7 +112,7 @@ function WebsiteEditStep({
   return (
     <WebsiteDiscoveryStep
       continueLabel="Run extraction"
-      description="Change the main website Milo uses, then rerun extraction to draft updated organization facts."
+      description="Change the main website Jori uses, then rerun extraction to draft updated organization facts."
       error={error}
       inputId="context-website"
       isSubmitting={submitting}

@@ -112,7 +112,7 @@ function createMultipartMimeMessage(args: {
     bytes: Uint8Array
   }>
 }) {
-  const boundary = `milo-${crypto.randomUUID()}`
+  const boundary = `jori-${crypto.randomUUID()}`
   const bodyContentType = args.bodyType === "HTML" ? "text/html" : "text/plain"
   const parts = [
     ...args.headers,

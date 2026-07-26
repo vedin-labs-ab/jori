@@ -6,7 +6,7 @@ import { createAuth } from "../convex/auth"
  *  Regenerate convex/betterauth/schema.ts after changing auth plugins; the
  *  options read deployment env, so prime placeholders:
  *
- *    BETTER_AUTH_SECRET=generate MILO_APP_URL=http://localhost:5173 \
+ *    BETTER_AUTH_SECRET=generate JORI_APP_URL=http://localhost:5173 \
  *    GOOGLE_CLIENT_ID=generate GOOGLE_CLIENT_SECRET=generate \
  *    MICROSOFT_CLIENT_ID=generate MICROSOFT_CLIENT_SECRET=generate \
  *    npx auth generate --config scripts/betterauth.ts \

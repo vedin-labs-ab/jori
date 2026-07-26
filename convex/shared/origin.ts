@@ -1,7 +1,7 @@
 import { isRegion } from "../../contracts/region"
 
-const regionEnv = "MILO_REGION"
-const originEnv = "MILO_APP_URL"
+const regionEnv = "JORI_REGION"
+const originEnv = "JORI_APP_URL"
 
 export type RuntimeEnvironment = Record<string, string | undefined>
 
@@ -75,7 +75,7 @@ export function requireReturnUrl(returnUrl: string) {
   }
 
   if (url.origin !== requireOrigin()) {
-    throw new Error("Return URL must point to the Milo app.")
+    throw new Error("Return URL must point to the Jori app.")
   }
 
   return url.toString()

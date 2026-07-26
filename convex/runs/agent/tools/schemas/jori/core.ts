@@ -6,14 +6,14 @@ import {
   stringArrayProperty,
   stringProperty,
 } from "../fragments/common"
-import { runMiloToolInputSchemas } from "./runs"
+import { runJoriToolInputSchemas } from "./runs"
 
-export const coreMiloToolInputSchemas = {
+export const coreJoriToolInputSchemas = {
   list_capabilities: objectSchema({
     properties: {},
   }),
   load_skill: loadSkillInputSchema(),
-  ...runMiloToolInputSchemas,
+  ...runJoriToolInputSchemas,
   offer_integration: objectSchema({
     required: ["integration", "summary"],
     properties: {
@@ -35,7 +35,7 @@ export const coreMiloToolInputSchemas = {
         "ID of the pending approval request to withdraw, returned when you requested it."
       ),
       messageId: stringProperty(
-        "Milo internal message id for the user message that requested this cancellation. Use the value after internal:message: from that message's identifiers list. Do not pass Slack, GitHub, or Linear message ids."
+        "Jori internal message id for the user message that requested this cancellation. Use the value after internal:message: from that message's identifiers list. Do not pass Slack, GitHub, or Linear message ids."
       ),
       reason: stringProperty(
         "Short explanation of why the request is no longer needed."
@@ -135,7 +135,7 @@ export function loadSkillInputSchema(skillNames: readonly string[] = []) {
     properties: {
       name: {
         type: "string",
-        description: "Available Milo skill name.",
+        description: "Available Jori skill name.",
         ...(skillNames.length === 0 ? {} : { enum: skillNames }),
       },
     },

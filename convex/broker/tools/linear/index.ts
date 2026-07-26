@@ -25,7 +25,7 @@ export async function callLinearTool(
   if (tool === "linear_get_issue") {
     const result = await linearGraphql(credentials.tokens.access, {
       query: `
-        query MiloIssue($id: String!) {
+        query JoriIssue($id: String!) {
           issue(id: $id) {
             id
             identifier
@@ -60,7 +60,7 @@ export async function callLinearTool(
   if (tool === "linear_list_comments") {
     const result = await linearGraphql(credentials.tokens.access, {
       query: `
-        query MiloIssueComments($id: String!, $first: Int!) {
+        query JoriIssueComments($id: String!, $first: Int!) {
           issue(id: $id) {
             id
             comments(first: $first) {
@@ -132,7 +132,7 @@ async function getLinearIssueSummaryByIdentifier(token: string, query: string) {
 
   const result = await linearGraphql(token, {
     query: `
-      query MiloIssueSummary($id: String!) {
+      query JoriIssueSummary($id: String!) {
         issue(id: $id) {
           id
           identifier
@@ -167,7 +167,7 @@ async function searchLinearIssues(
   const exactIssue = await getLinearIssueSummaryByIdentifier(token, query)
   const result = await linearGraphql(token, {
     query: `
-        query MiloIssueSearch($query: String!, $first: Int!) {
+        query JoriIssueSearch($query: String!, $first: Int!) {
           issues(
             first: $first
             filter: {

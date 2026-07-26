@@ -212,6 +212,6 @@ function integrationOfferTool(): RuntimeTool {
     mode: "required",
     name: "offer_integration",
     route: "convex",
-    surface: "milo",
+    surface: "jori",
   }
 }

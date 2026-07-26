@@ -67,7 +67,7 @@ describe("Gmail write tools", () => {
       "google_gmail_send_message",
       {
         bcc: ["audit@example.com"],
-        body: "Hello from Milo",
+        body: "Hello from Jori",
         cc: ["team@example.com"],
         subject: "Hello",
         to: ["recipient@example.com"],
@@ -86,7 +86,7 @@ describe("Gmail write tools", () => {
     expect(raw).toContain("Bcc: audit@example.com")
     expect(raw).toContain("Subject: Hello")
     expect(raw).toContain("Content-Type: text/plain; charset=UTF-8")
-    expect(raw).toContain("\r\n\r\nHello from Milo")
+    expect(raw).toContain("\r\n\r\nHello from Jori")
   })
 
   test("creates a Gmail draft", async () => {
@@ -96,7 +96,7 @@ describe("Gmail write tools", () => {
       gmailIntegration(),
       "google_gmail_create_draft",
       {
-        body: "<p>Hello from Milo</p>",
+        body: "<p>Hello from Jori</p>",
         bodyType: "HTML",
         subject: "Draft",
         to: ["recipient@example.com"],
@@ -113,7 +113,7 @@ describe("Gmail write tools", () => {
     expect(raw).toContain("To: recipient@example.com")
     expect(raw).toContain("Subject: Draft")
     expect(raw).toContain("Content-Type: text/html; charset=UTF-8")
-    expect(raw).toContain("\r\n\r\n<p>Hello from Milo</p>")
+    expect(raw).toContain("\r\n\r\n<p>Hello from Jori</p>")
   })
 })
 

@@ -9,7 +9,7 @@ import {
 export function Threads() {
   return (
     <Section
-      lede="Mention Milo in Slack, GitHub, or Linear and it does the one-off job right there in the thread."
+      lede="Mention Jori in Slack, GitHub, or Linear and it does the one-off job right there in the thread."
       support
       title="The rest, you just ask for"
     >

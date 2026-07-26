@@ -31,7 +31,7 @@ function sandboxPath(value: string, options: { allowRoot?: boolean } = {}) {
   }
 
   if (isEscapingSandbox(relative)) {
-    throw new Error("Sandbox path must be inside the Milo workspace.")
+    throw new Error("Sandbox path must be inside the Jori workspace.")
   }
 
   return filePath

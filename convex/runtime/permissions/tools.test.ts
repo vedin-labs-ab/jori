@@ -17,7 +17,7 @@ test("uses runtime skill names in the load_skill schema", () => {
   }
 
   expect(
-    toolDescriptor("milo", permission, resolveToolModes([]), [
+    toolDescriptor("jori", permission, resolveToolModes([]), [
       "app-creator",
       "frontend-design",
     ]).inputSchema
@@ -39,7 +39,7 @@ test("instruction runs without access get the full tool surface", () => {
       "google_gmail_send_message",
     ])
   )
-  expect(surfaceTools(groups, "milo")).toContain("web_search")
+  expect(surfaceTools(groups, "jori")).toContain("web_search")
 })
 
 test("instruction runs with access are narrowed to their tool contract", () => {
@@ -58,8 +58,8 @@ test("instruction runs with access are narrowed to their tool contract", () => {
   )
 
   expect(surfaceTools(groups, "gmail")).toEqual(["google_gmail_search_threads"])
-  expect(surfaceTools(groups, "milo")).not.toContain("web_search")
-  expect(surfaceTools(groups, "milo")).not.toContain("web_fetch")
+  expect(surfaceTools(groups, "jori")).not.toContain("web_search")
+  expect(surfaceTools(groups, "jori")).not.toContain("web_fetch")
 })
 
 function instructionInput(overrides: Partial<InstructionRuntimeInput>) {
@@ -96,7 +96,7 @@ test("approval-wrapped runtime tool schemas preserve optional field guidance", (
   }
 
   const descriptor = toolDescriptor(
-    "milo",
+    "jori",
     permission,
     resolveToolModes([{ mode: "prompted", tool: "read_asset" }])
   )

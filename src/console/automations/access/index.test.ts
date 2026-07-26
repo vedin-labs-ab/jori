@@ -19,9 +19,9 @@ const expectedToolAccessSuggestions = [
     id: "github_get_issue",
     surface: "github",
   },
-  { access: { kind: "builtIn" }, id: "share_app", surface: "milo" },
-  { access: { kind: "builtIn" }, id: "start_agent", surface: "milo" },
-  { access: { kind: "web" }, id: "web_search", surface: "milo" },
+  { access: { kind: "builtIn" }, id: "share_app", surface: "jori" },
+  { access: { kind: "builtIn" }, id: "start_agent", surface: "jori" },
+  { access: { kind: "web" }, id: "web_search", surface: "jori" },
 ]
 
 describe("explicit mention scanning", () => {
@@ -187,10 +187,10 @@ describe("mention suggestions", () => {
   test("classifies the access a tool selection will add", () => {
     const permissions = [
       toolPermission("github", "github_get_issue", "read", "allowed"),
-      toolPermission("milo", "web_search", "read", "allowed"),
-      toolPermission("milo", "share_app", "write", "allowed"),
+      toolPermission("jori", "web_search", "read", "allowed"),
+      toolPermission("jori", "share_app", "write", "allowed"),
       {
-        ...toolPermission("milo", "start_agent", "write", "required"),
+        ...toolPermission("jori", "start_agent", "write", "required"),
         route: "agent" as const,
       },
     ]

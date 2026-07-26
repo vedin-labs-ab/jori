@@ -9,7 +9,7 @@ export function useIntegrationDisconnect({
   organizationId,
   title,
 }: {
-  integration: Exclude<ToolSurface, "milo">
+  integration: Exclude<ToolSurface, "jori">
   organizationId: string
   title: string
 }) {

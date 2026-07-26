@@ -83,7 +83,7 @@ function DetailBody({
         {workstream.locked ? (
           <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
             <Lock className="size-3 shrink-0" />
-            Protected: Milo won't rewrite this workstream.
+            Protected: Jori won't rewrite this workstream.
           </p>
         ) : null}
       </SheetHeader>

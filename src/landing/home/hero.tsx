@@ -15,7 +15,7 @@ export function Hero() {
           Hand over the work you repeat.
         </h1>
         <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-          The release checklist. The dependency sweep. The Thursday triage. Milo
+          The release checklist. The dependency sweep. The Thursday triage. Jori
           runs them where the work already lives, and leaves behind a live app
           your team opens instead of a message that scrolls away.
         </p>

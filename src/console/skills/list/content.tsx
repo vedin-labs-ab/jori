@@ -92,7 +92,7 @@ function emptyDescription(view: SkillFilterView, isFiltering: boolean) {
     return "Global skills will appear here when they are available."
   }
 
-  return "Add one to teach Milo how your team works."
+  return "Add one to teach Jori how your team works."
 }
 
 function viewLabel(view: SkillFilterView) {

@@ -11,7 +11,7 @@ import {
   stringProperty,
 } from "./common"
 
-// Native tools run on Milo's own runtime - sandbox, agent lifecycle, and
+// Native tools run on Jori's own runtime - sandbox, agent lifecycle, and
 // surface delivery - so every response shape here is exact.
 
 function commandOutput(tool: string): JsonSchema {

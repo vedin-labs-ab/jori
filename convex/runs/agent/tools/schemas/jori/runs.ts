@@ -18,7 +18,7 @@ const activityFilterEnum = [
   "error",
 ]
 
-export const runMiloToolInputSchemas = {
+export const runJoriToolInputSchemas = {
   search_runs: searchRunsInputSchema(),
   search_run_activity: searchRunActivityInputSchema(),
 }

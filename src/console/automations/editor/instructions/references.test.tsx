@@ -151,7 +151,7 @@ test("resolves web tool references through the web access control", async () => 
       mode: "allowed" as const,
       overrideMode: null,
       route: "broker" as const,
-      surface: "milo" as const,
+      surface: "jori" as const,
       tool: "web_search",
     },
   ]

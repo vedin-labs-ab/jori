@@ -1,23 +1,23 @@
 import { type z } from "zod"
 import { toJsonObjectSchema } from "../contract"
-import { type MiloToolOptions } from "../types"
+import { type JoriToolOptions } from "../types"
 import {
-  type MiloPromptInput,
-  type MiloPromptResult,
+  type JoriPromptInput,
+  type JoriPromptResult,
   type RawPromptInput,
   type RawPromptResult,
 } from "./types"
 
 type RawPromptCaller = <T = unknown>(
   input: RawPromptInput,
-  options?: MiloToolOptions
+  options?: JoriToolOptions
 ) => Promise<T>
 
 export async function promptModel<TSchema extends z.ZodType>(
   prompt: RawPromptCaller,
-  input: MiloPromptInput<TSchema>,
-  options?: MiloToolOptions
-): Promise<MiloPromptResult<z.output<TSchema>>> {
+  input: JoriPromptInput<TSchema>,
+  options?: JoriToolOptions
+): Promise<JoriPromptResult<z.output<TSchema>>> {
   const result = await prompt<RawPromptResult>(
     {
       instruction: input.instruction,
@@ -33,7 +33,7 @@ export async function promptModel<TSchema extends z.ZodType>(
 
   if (!parsed.success) {
     throw new Error(
-      `Milo prompt output failed schema validation: ${formatZodError(parsed.error)}`
+      `Jori prompt output failed schema validation: ${formatZodError(parsed.error)}`
     )
   }
 

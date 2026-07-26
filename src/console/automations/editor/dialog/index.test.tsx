@@ -152,7 +152,7 @@ describe("automation dialog access controls", () => {
     const instructionsFrame = document.body.querySelector(
       "[data-automation-instructions-frame]"
     )
-    const webSearchLabel = screen.getByText("Let Milo search the web")
+    const webSearchLabel = screen.getByText("Let Jori search the web")
 
     expect(screen.queryByText("Access")).toBeNull()
     expect(instructionsFrame).not.toBeNull()

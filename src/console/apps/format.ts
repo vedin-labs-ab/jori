@@ -66,18 +66,18 @@ export function automationSummary(
 }
 
 function normalizeSurface(value: string | undefined) {
-  return toolSurfaceSet.has(value ?? "") ? (value as ToolSurface) : "milo"
+  return toolSurfaceSet.has(value ?? "") ? (value as ToolSurface) : "jori"
 }
 
 function compareCapabilityGroups(
   left: CapabilityGroup,
   right: CapabilityGroup
 ) {
-  if (left.type === "milo") {
+  if (left.type === "jori") {
     return -1
   }
 
-  if (right.type === "milo") {
+  if (right.type === "jori") {
     return 1
   }
 

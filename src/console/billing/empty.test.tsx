@@ -12,7 +12,7 @@ describe("BillingActivityEmpty", () => {
     render(<BillingActivityEmpty />)
 
     expect(screen.getByText("No billing activity yet")).toBeDefined()
-    expect(screen.getByText("Costs appear here as Milo works.")).toBeDefined()
+    expect(screen.getByText("Costs appear here as Jori works.")).toBeDefined()
   })
 
   it("renders the empty state inside the activity table", () => {

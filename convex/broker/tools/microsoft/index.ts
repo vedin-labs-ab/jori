@@ -81,7 +81,7 @@ async function callMicrosoftEmailTool(
         saveToSentItems: args.saveToSentItems !== false,
       },
     })
-    // Graph's sendMail returns no message object, so neither can Milo.
+    // Graph's sendMail returns no message object, so neither can Jori.
     return sentMailResult({})
   }
   if (tool === "microsoft_email_create_draft") {

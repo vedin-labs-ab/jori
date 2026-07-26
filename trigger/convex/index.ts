@@ -24,7 +24,7 @@ import { type UploadAssetArgs, uploadAsset } from "./assets"
 import { requireConvexUrl, requireWorkerSecret } from "./config"
 import { fetchGitHubCloneCredentials, type GitHubCloneArgs } from "./github"
 
-export class MiloConvexClient implements RuntimePlatform {
+export class JoriConvexClient implements RuntimePlatform {
   private readonly client = new ConvexHttpClient(requireConvexUrl())
   private readonly secret = requireWorkerSecret()
 

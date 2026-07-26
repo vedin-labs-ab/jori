@@ -81,7 +81,7 @@ function offerTitle(args: {
     const actor = getActorDisplayName(args.actor)
 
     return actor === undefined
-      ? `${args.label} connected to Milo`
+      ? `${args.label} connected to Jori`
       : `${args.label} connected by ${actor}`
   }
 
@@ -93,7 +93,7 @@ function offerTitle(args: {
     return `${args.label} integration offer expired`
   }
 
-  return `Connect ${args.label} to Milo`
+  return `Connect ${args.label} to Jori`
 }
 
 function offerCardTitle(args: {

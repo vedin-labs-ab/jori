@@ -27,7 +27,7 @@ test("builds GitHub review comment reaction targets", () => {
         "github:comment:987",
       ],
       key: "github:comment:acme/app:987",
-      text: "Milo reply.",
+      text: "Jori reply.",
     },
   })
 })
@@ -66,9 +66,9 @@ function message(data: Record<string, unknown>): Doc<"messages"> {
     type: "comment.pull_request.created",
     externalId: "github:message",
     mentioned: false,
-    actor: { externalId: "1", kind: "self", name: "milo[bot]" },
+    actor: { externalId: "1", kind: "self", name: "jori[bot]" },
     conversationId: "acme/app#42",
-    text: "Milo reply.",
+    text: "Jori reply.",
     data: {
       repository: {
         fullName: "acme/app",

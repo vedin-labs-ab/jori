@@ -5,7 +5,7 @@ import {
   isTerminalAgentRunStatus,
   type RuntimeContext,
 } from "../../contracts/runtime/worker"
-import { MiloConvexClient } from "../convex"
+import { JoriConvexClient } from "../convex"
 import { OpenRouterModelRuntime } from "../model/openrouter"
 import { runAgentLoop } from "../runs/loop"
 import { E2BSandboxRuntime } from "../sandbox/e2b"
@@ -15,7 +15,7 @@ import { recordRuntimeEvent } from "../trace/runtime"
 
 const maxAttempts = 3
 
-export const miloAgentRun = task({
+export const joriAgentRun = task({
   id: agentTaskId,
   retry: {
     factor: 2,
@@ -25,7 +25,7 @@ export const miloAgentRun = task({
     randomize: true,
   },
   run: async (payload: AgentRunPayload, { ctx }) => {
-    const platform = new MiloConvexClient()
+    const platform = new JoriConvexClient()
     const attempt = ctx.attempt.number
     // Loading the run also records the started trace, flips the run to
     // running, and drains the first session batch, so the loop starts with
@@ -64,7 +64,7 @@ export const miloAgentRun = task({
 async function handleFailure(args: {
   attempt: number
   context: RuntimeContext
-  platform: MiloConvexClient
+  platform: JoriConvexClient
   error: unknown
   sandbox: E2BSandboxRuntime
 }) {

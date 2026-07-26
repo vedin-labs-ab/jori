@@ -1,18 +1,18 @@
 import { type z } from "zod"
 import { parseStateValue } from "../contract"
-import { type RawMiloClient } from "../types"
+import { type RawJoriClient } from "../types"
 import {
   type AppStateRef,
-  type MiloStateClient,
-  type MiloStateDocument,
-  type MiloStatePatch,
-  type MiloStatePatchInput,
-  type MiloStateReplaceInput,
-  type MiloStateSubscriptionInput,
-  type MiloStateWriteOptions,
+  type JoriStateClient,
+  type JoriStateDocument,
+  type JoriStatePatch,
+  type JoriStatePatchInput,
+  type JoriStateReplaceInput,
+  type JoriStateSubscriptionInput,
+  type JoriStateWriteOptions,
 } from "./types"
 
-export function createStateClient(raw: RawMiloClient): MiloStateClient {
+export function createStateClient(raw: RawJoriClient): JoriStateClient {
   return Object.freeze({
     read: (ref) => readState(raw, ref),
     list: async () => await raw.state.list(),
@@ -25,7 +25,7 @@ export function createStateClient(raw: RawMiloClient): MiloStateClient {
 }
 
 async function readState<TSchema extends z.ZodType>(
-  raw: RawMiloClient,
+  raw: RawJoriClient,
   ref: AppStateRef<TSchema>
 ) {
   const document = await raw.state.read({ contractName: ref.name })
@@ -34,10 +34,10 @@ async function readState<TSchema extends z.ZodType>(
 }
 
 async function replaceState<TSchema extends z.ZodType>(
-  raw: RawMiloClient,
+  raw: RawJoriClient,
   ref: AppStateRef<TSchema>,
   value: z.input<TSchema>,
-  options: MiloStateWriteOptions = {}
+  options: JoriStateWriteOptions = {}
 ) {
   const document = await raw.state.update({
     contractName: ref.name,
@@ -49,10 +49,10 @@ async function replaceState<TSchema extends z.ZodType>(
 }
 
 async function patchState<TSchema extends z.ZodType>(
-  raw: RawMiloClient,
+  raw: RawJoriClient,
   ref: AppStateRef<TSchema>,
-  patch: MiloStatePatch<z.input<TSchema>>,
-  options: MiloStateWriteOptions = {}
+  patch: JoriStatePatch<z.input<TSchema>>,
+  options: JoriStateWriteOptions = {}
 ) {
   const current = await raw.state.read({ contractName: ref.name })
   const value = parseStateValue(ref, mergePatch(current?.value ?? {}, patch))
@@ -66,9 +66,9 @@ async function patchState<TSchema extends z.ZodType>(
 }
 
 async function updateState<TSchema extends z.ZodType>(
-  raw: RawMiloClient,
+  raw: RawJoriClient,
   ref: AppStateRef<TSchema>,
-  input: MiloStateReplaceInput<TSchema> | MiloStatePatchInput<TSchema>
+  input: JoriStateReplaceInput<TSchema> | JoriStatePatchInput<TSchema>
 ) {
   if (isReplaceInput(input)) {
     return await replaceState(raw, ref, input.value, {
@@ -82,15 +82,15 @@ async function updateState<TSchema extends z.ZodType>(
 }
 
 function isReplaceInput<TSchema extends z.ZodType>(
-  input: MiloStateReplaceInput<TSchema> | MiloStatePatchInput<TSchema>
-): input is MiloStateReplaceInput<TSchema> {
+  input: JoriStateReplaceInput<TSchema> | JoriStatePatchInput<TSchema>
+): input is JoriStateReplaceInput<TSchema> {
   return "value" in input
 }
 
 function parseStateDocument<TSchema extends z.ZodType>(
   ref: AppStateRef<TSchema>,
-  document: MiloStateDocument
-): MiloStateDocument<z.output<TSchema>> {
+  document: JoriStateDocument
+): JoriStateDocument<z.output<TSchema>> {
   if (document.schemaHash !== ref.schemaHash) {
     throw new Error(
       `App state ${ref.name} schema hash mismatch. Refresh the app contract.`
@@ -104,10 +104,10 @@ function parseStateDocument<TSchema extends z.ZodType>(
 }
 
 function subscribeToState<TSchema extends z.ZodType>(
-  raw: RawMiloClient,
+  raw: RawJoriClient,
   ref: AppStateRef<TSchema>,
-  handler: (document: MiloStateDocument<z.output<TSchema>> | null) => void,
-  input: MiloStateSubscriptionInput
+  handler: (document: JoriStateDocument<z.output<TSchema>> | null) => void,
+  input: JoriStateSubscriptionInput
 ) {
   let active = true
   let failed = false

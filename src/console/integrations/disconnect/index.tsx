@@ -42,7 +42,7 @@ export function DisconnectDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Disconnect {title}?</AlertDialogTitle>
           <AlertDialogDescription>
-            Milo will stop using this integration for new runs. You can connect
+            Jori will stop using this integration for new runs. You can connect
             it again later.
           </AlertDialogDescription>
         </AlertDialogHeader>

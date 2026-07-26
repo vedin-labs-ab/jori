@@ -27,14 +27,14 @@ export function permissionGroups(
     surface: ToolSurface
   }> = [
     {
-      surface: "milo" as const,
+      surface: "jori" as const,
       permissions: filterWebPermissions(
         input,
-        getEnabledToolPermissions("milo", toolModes, executionType)
+        getEnabledToolPermissions("jori", toolModes, executionType)
       ),
     },
   ]
-  const seen = new Set<ToolSurface>(["milo"])
+  const seen = new Set<ToolSurface>(["jori"])
 
   for (const integration of input.integrations) {
     const surface = integration.integration as ToolSurface

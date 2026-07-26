@@ -29,7 +29,7 @@ export function SignInVisual() {
 
   return (
     <aside
-      aria-label="About Milo"
+      aria-label="About Jori"
       className="relative hidden min-h-svh overflow-hidden border-l bg-[#eaf0e4] lg:block"
     >
       <div aria-hidden="true" className="absolute inset-0">
@@ -41,7 +41,7 @@ export function SignInVisual() {
           Hand over the work you repeat.
         </p>
         <p className="mt-3 max-w-sm text-pretty text-foreground/65 text-sm/relaxed">
-          Milo runs it across Slack, GitHub, and Linear, leaves behind a live
+          Jori runs it across Slack, GitHub, and Linear, leaves behind a live
           app your team can open, and asks before it acts.
         </p>
       </div>

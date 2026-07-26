@@ -1,4 +1,4 @@
-import { type JsonObject, type MiloToolOptions } from "./types"
+import { type JoriToolOptions, type JsonObject } from "./types"
 
 export type WebSearchInput = {
   query: string
@@ -110,7 +110,7 @@ export type GmailDraftInput = {
   cc?: string[]
 }
 
-export type MiloToolInputs = {
+export type JoriToolInputs = {
   web_search: WebSearchInput
   web_fetch: WebFetchInput
   google_gmail_search_threads: { q?: string; maxResults?: number }
@@ -123,7 +123,7 @@ export type MiloToolInputs = {
   google_gmail_create_draft: GmailDraftInput
 }
 
-export type MiloToolResults = {
+export type JoriToolResults = {
   web_search: WebToolResult
   web_fetch: WebToolResult
   google_gmail_search_threads: GmailThreadSearchResult
@@ -136,22 +136,22 @@ export type MiloToolResults = {
   google_gmail_create_draft: GmailDraftResult
 }
 
-export type MiloToolName = keyof MiloToolInputs
+export type JoriToolName = keyof JoriToolInputs
 
-export type MiloToolCaller = {
-  <TTool extends MiloToolName>(
+export type JoriToolCaller = {
+  <TTool extends JoriToolName>(
     tool: TTool,
-    args: MiloToolInputs[TTool],
-    options?: MiloToolOptions
-  ): Promise<MiloToolResults[TTool]>
+    args: JoriToolInputs[TTool],
+    options?: JoriToolOptions
+  ): Promise<JoriToolResults[TTool]>
   <T = unknown>(
     tool: string,
     args?: unknown,
-    options?: MiloToolOptions
+    options?: JoriToolOptions
   ): Promise<T>
 }
 
-export type ToolMethod<TTool extends MiloToolName> = (
-  input: MiloToolInputs[TTool],
-  options?: MiloToolOptions
-) => Promise<MiloToolResults[TTool]>
+export type ToolMethod<TTool extends JoriToolName> = (
+  input: JoriToolInputs[TTool],
+  options?: JoriToolOptions
+) => Promise<JoriToolResults[TTool]>

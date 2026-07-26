@@ -73,23 +73,23 @@ export function createSlackApprovalSurfaceMessage(approval: Doc<"approvals">) {
 
 function fallbackText(approval: Doc<"approvals">) {
   if (approval.status === "approved") {
-    return "Approved. Milo is continuing the run."
+    return "Approved. Jori is continuing the run."
   }
 
   if (approval.status === "denied") {
-    return "Denied. Milo is continuing without this action."
+    return "Denied. Jori is continuing without this action."
   }
 
   if (approval.status === "cancelled") {
-    return "Request cancelled. Milo skipped this action."
+    return "Request cancelled. Jori skipped this action."
   }
 
   if (approval.status === "expired") {
-    return "Request expired. Milo skipped this action."
+    return "Request expired. Jori skipped this action."
   }
 
   if (approval.status === "failed") {
-    return "Request failed. Milo skipped this action."
+    return "Request failed. Jori skipped this action."
   }
 
   return "Approval request updated."
@@ -138,7 +138,7 @@ function actorTitle(label: string, actor: Doc<"approvals">["decidedBy"]) {
     return label
   }
 
-  const surface = actor !== undefined && "personId" in actor ? " in Milo" : ""
+  const surface = actor !== undefined && "personId" in actor ? " in Jori" : ""
 
   return `${label} by ${name}${surface}`
 }
