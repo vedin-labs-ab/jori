@@ -78,7 +78,7 @@ export async function runSandboxCommand(
 }
 
 function requireSandboxTemplate() {
-  return process.env.JORI_E2B_TEMPLATE?.trim() || "jori-codex"
+  return process.env.JORI_E2B_TEMPLATE?.trim() || "jori-sandbox"
 }
 
 function requireE2BApiKey() {
