@@ -1,7 +1,7 @@
 import { v } from "convex/values"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type MutationCtx } from "../_generated/server"
-import { isTerminalRunStatus } from "../runs/schema"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   collectPendingBatch,

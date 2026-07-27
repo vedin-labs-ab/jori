@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
+import { runStatuses } from "../../contracts/runtime/runs"
 import { actorValidator } from "../shared/actor"
 import { audienceScopeValidator } from "../shared/audience"
 import { accessValidator, toolSurfaceValidator } from "../shared/integrations"
@@ -74,16 +75,8 @@ const runCause = v.union(
 )
 
 export const runStatus = v.union(
-  v.literal("queued"),
-  v.literal("running"),
-  v.literal("completed"),
-  v.literal("failed"),
-  v.literal("stopped")
+  ...runStatuses.map((status) => v.literal(status))
 )
-
-export function isTerminalRunStatus(status: Infer<typeof runStatus>) {
-  return status === "completed" || status === "failed" || status === "stopped"
-}
 
 export const toolSnapshot = v.object({
   groups: v.array(

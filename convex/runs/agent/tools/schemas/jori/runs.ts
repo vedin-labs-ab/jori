@@ -1,3 +1,4 @@
+import { runStatuses } from "../../../../../../contracts/runtime/runs"
 import {
   type JsonSchema,
   numberProperty,
@@ -6,7 +7,6 @@ import {
   stringProperty,
 } from "../fragments/common"
 
-const runStatusEnum = ["queued", "running", "completed", "failed", "stopped"]
 const runScopeEnum = ["conversation", "organization", "all"]
 const runSourceEnum = ["slack", "github", "linear", "automation"]
 const activityFilterEnum = [
@@ -111,7 +111,7 @@ function filterProperties() {
     ),
     status: {
       type: "string",
-      enum: runStatusEnum,
+      enum: runStatuses,
       description: "Run status filter.",
     },
     source: {

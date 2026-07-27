@@ -1,10 +1,10 @@
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import { enqueueCancellation } from "./execution/outbox/data"
 import { recordTrace } from "./execution/traces/data"
 import { wakeParentForTerminalRun, wakeRun } from "./execution/waiters/data"
-import { isTerminalRunStatus } from "./schema"
 
 // Delegation implies lifetime containment: a child run never outlives its
 // parent. One stop implementation serves the console stop, the terminal

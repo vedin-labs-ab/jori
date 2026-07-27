@@ -1,6 +1,6 @@
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { isTerminalRunStatus } from "../runs/schema"
 
 const waiterWakeGraceMs = 5 * 60 * 1000
 const runActivityGraceMs = 2 * 60 * 60 * 1000

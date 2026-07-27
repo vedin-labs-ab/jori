@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import {
   type DrainedSessionBatch,
   type RunHandoffs,
@@ -11,7 +12,7 @@ import { type ActionCtx, action, internalMutation } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { type PromptRecovery } from "../runs/agent/prompt/context"
 import { recordTrace } from "../runs/execution/traces/data"
-import { isTerminalRunStatus, toolSnapshot } from "../runs/schema"
+import { toolSnapshot } from "../runs/schema"
 import { drainSession } from "../sessions/drain"
 import { runtimeSkillNames } from "../skills/runtime"
 import {
