@@ -11,6 +11,7 @@ import { AlertTriangle, SearchX } from "lucide-react"
 import { lazy, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Analytics } from "@/shared/analytics"
 import {
   FullscreenLoadingProvider,
   FullscreenSkeletonLoader,
@@ -166,13 +167,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {usesSessionProvider ? (
-          <Suspense fallback={<FullscreenSkeletonLoader />}>
-            <SessionProviders>{content}</SessionProviders>
-          </Suspense>
-        ) : (
-          content
-        )}
+        <Analytics>
+          {usesSessionProvider ? (
+            <Suspense fallback={<FullscreenSkeletonLoader />}>
+              <SessionProviders>{content}</SessionProviders>
+            </Suspense>
+          ) : (
+            content
+          )}
+        </Analytics>
         <TanStackDevtools
           config={{
             position: "bottom-right",
