@@ -23,8 +23,12 @@ import appCss from "../styles.css?url"
 const appTitle = "Jori"
 /** Link previews fetch this from outside the app, so it cannot be a path. */
 const appImage = new URL("/brand/og.jpg", regionConfig.publicOrigin).toString()
+/** Opens on the transformation rather than the category, because "an AI
+ *  teammate" is the half of the sentence every other result already claims.
+ *  The share image carries the same line, so a preview reads as one thought
+ *  rather than as a picture with an unrelated caption. */
 const appDescription =
-  "An AI teammate for the work your team repeats. Jori runs it across Slack, GitHub, and Linear, leaves behind a live app anyone can open, and asks before it acts."
+  "Work that lives in one head becomes a team app. Jori runs what your team repeats across Slack, GitHub, and Linear, and asks before it acts."
 const providerlessRouteIds = new Set([
   "/",
   "/apps/$appId/",
