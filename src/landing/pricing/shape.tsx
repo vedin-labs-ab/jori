@@ -5,7 +5,11 @@ import { UsageMeter } from "./usage"
 
 /** What is settled about pricing is its shape, not its numbers. Publishing the
  *  shape is honest and still says the useful thing: Jori is not sold by the
- *  seat, and usage is not a margin line. */
+ *  seat, and the bill is the provider's own rate rather than a multiplier on
+ *  it. Where Jori does earn on usage is named rather than implied, because
+ *  `contracts/billing.ts` bills every prompt token at list whether it was
+ *  cached or not, and a reader who works that out for themselves is owed the
+ *  sentence up front. */
 const principles = [
   {
     icon: Users,
@@ -14,8 +18,8 @@ const principles = [
   },
   {
     icon: Receipt,
-    title: "Usage at cost",
-    body: "The model work Jori does is billed in dollars at the provider's public list rates, never marked up. Every run shows what it cost.",
+    title: "No markup on usage",
+    body: "Model work is billed in dollars at the provider's public list rates. What we make on it is the difference good caching buys, never a multiplier on your bill. Every run shows what it was billed.",
   },
   {
     icon: Wallet,
@@ -46,10 +50,10 @@ export function Shape() {
             Usage is settled. The plan price isn't.
           </h2>
           <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
-            A run costs what its model work costs at the provider's rates, with
-            nothing added on top. We would rather set the organization's flat
-            fee once we have watched real teams run, and everyone on the
-            waitlist sees it first.
+            A run is billed at the provider's list rates, and what we keep is
+            what efficient context management saves rather than a multiplier on
+            top. We would rather set the organization's flat fee once we have
+            watched real teams run, and everyone on the waitlist sees it first.
           </p>
           <dl className="mt-8 grid max-w-xl gap-x-10 gap-y-6 sm:grid-cols-2">
             <Definition term="In every plan">

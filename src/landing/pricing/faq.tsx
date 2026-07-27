@@ -1,4 +1,4 @@
-import { formatUsd, trial } from "@contracts/billing"
+import { formatUsd, interactiveGraceMicros, trial } from "@contracts/billing"
 import { Definition, Section } from "../section"
 
 /**
@@ -18,10 +18,10 @@ export function Faq() {
       title="Questions, answered straight"
     >
       <dl className="grid gap-x-16 gap-y-8 md:grid-cols-2">
-        <Definition term="Can a bill surprise me?">
-          No. There is no metered invoice at the end of the month. Usage draws
-          from prepaid money, auto top-up is opt-in with a monthly cap, and the
-          console shows a live tally.
+        <Definition term="What happens when usage runs out?">
+          Scheduled runs stop at zero. Interactive work carries{" "}
+          {formatUsd(interactiveGraceMicros)} of grace below it, so Jori never
+          goes silent halfway through answering you.
         </Definition>
         <Definition term="How is usage billed?">
           In dollars, at the model provider's public list rates. Keeping an app
