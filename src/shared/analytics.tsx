@@ -1,10 +1,24 @@
+import { isEnvironment } from "@contracts/environment"
 import { PostHogProvider } from "@posthog/react"
 import { type PostHogConfig } from "posthog-js"
 import { type ReactNode } from "react"
 
-const environment: Record<string, string | undefined> = import.meta.env
-const projectKey = readSetting("VITE_POSTHOG_KEY")
-const apiHost = readSetting("VITE_POSTHOG_HOST")
+const settings: Record<string, string | undefined> = import.meta.env
+const deployment = readSetting("VITE_JORI_ENVIRONMENT")
+
+if (deployment !== undefined && !isEnvironment(deployment)) {
+  throw new Error(
+    `VITE_JORI_ENVIRONMENT must name an environment, received ${JSON.stringify(deployment)}.`
+  )
+}
+
+/** Only production reports. Development and staging run the same build from
+ *  the same code, so the environment has to say which one is live — an unset
+ *  key would only mean "nobody configured this yet", which is exactly the
+ *  mistake that puts a laptop's traffic in the numbers. */
+const reports = deployment === "prod"
+const projectKey = reports ? readSetting("VITE_POSTHOG_KEY") : undefined
+const apiHost = reports ? readSetting("VITE_POSTHOG_HOST") : undefined
 
 if (projectKey !== undefined && apiHost === undefined) {
   throw new Error("VITE_POSTHOG_HOST must be set alongside VITE_POSTHOG_KEY.")
@@ -22,8 +36,7 @@ const options: Partial<PostHogConfig> = {
 }
 
 /**
- * Web analytics for every page, reported to the deployment's own PostHog
- * project.
+ * Web analytics for every page of the production site, and only that one.
  *
  * The project token is public by design — it only permits writes — so it ships
  * in the bundle like any other client setting. Its host ships with it rather
@@ -31,9 +44,9 @@ const options: Partial<PostHogConfig> = {
  * to the PostHog cloud in its own region and a default would quietly carry
  * visitor data out of it.
  *
- * A deployment with no token, which is every local checkout, renders no
- * provider at all. Development traffic is not usage, and counting it costs
- * more than it tells anyone.
+ * Everywhere else renders no provider at all, so the SDK is never initialised
+ * and nothing is sent. Development and staging traffic is not usage, and
+ * counting it costs more than it tells anyone.
  */
 export function Analytics({ children }: { children: ReactNode }) {
   if (projectKey === undefined) {
@@ -48,7 +61,7 @@ export function Analytics({ children }: { children: ReactNode }) {
 }
 
 function readSetting(name: string) {
-  const value = environment[name]?.trim()
+  const value = settings[name]?.trim()
 
   return value === undefined || value === "" ? undefined : value
 }
