@@ -33,7 +33,7 @@ type PlaybookEnableOption = {
 }
 
 export type PlaybookEnablePlan =
-  | { kind: "connect"; label: string }
+  | { kind: "connect"; integrations: Integration[]; label: string }
   | { kind: "enable"; choices: Record<string, Integration> }
   | { kind: "choose"; options: PlaybookEnableOption[] }
 
@@ -45,10 +45,21 @@ const familyLabels: Record<string, string> = {
 export function planPlaybookEnable(
   slots: PlaybookSlotState[]
 ): PlaybookEnablePlan {
-  const missing = slots.find((slot) => slot.connected.length === 0)
+  const [firstMissing, ...restMissing] = slots.filter(
+    (slot) => slot.connected.length === 0
+  )
 
-  if (missing !== undefined) {
-    return { kind: "connect", label: connectLabel(missing.capability) }
+  if (firstMissing !== undefined) {
+    // The label names the first gap so it stays short, but the link carries
+    // every unconnected candidate: a playbook can span scopes, and the tab
+    // worth landing on is wherever most of the remaining work sits.
+    return {
+      kind: "connect",
+      integrations: [firstMissing, ...restMissing].flatMap((slot) => [
+        ...playbookCapabilityProviders[slot.capability],
+      ]),
+      label: connectLabel(firstMissing.capability),
+    }
   }
 
   const options = enableOptions(slots)

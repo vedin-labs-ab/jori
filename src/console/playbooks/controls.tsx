@@ -106,7 +106,10 @@ function EnabledControls({
   return (
     <div className="flex w-full items-center justify-between gap-2">
       {enabled.missing.length > 0 ? (
-        <ConnectButton label={connectMissingLabel(enabled.missing)} />
+        <ConnectButton
+          integrations={enabled.missing}
+          label={connectMissingLabel(enabled.missing)}
+        />
       ) : (
         <Button
           disabled={pendingKind !== undefined}

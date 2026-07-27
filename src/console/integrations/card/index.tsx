@@ -9,6 +9,7 @@ import { PermissionSection } from "../../permissions/section"
 import { RevealArrow } from "../../shared/dot"
 import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
+import { integrationsRouteFor } from "../routes"
 import { type IntegrationCardStatus } from "./headline"
 import { type CreateInstallState, useIntegrationInstall } from "./install"
 import { IntegrationCardSurface, type SurfaceLogo } from "./surface"
@@ -50,6 +51,8 @@ export function IntegrationCard({
     createInstallState,
     installPath: config.installPath,
     organizationId,
+    // Come back to the tab the card lives on, not whichever one is default.
+    returnPath: integrationsRouteFor([config.integration]),
   })
   const disconnect = useIntegrationDisconnect({
     integration: config.integration,
