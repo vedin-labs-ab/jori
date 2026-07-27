@@ -39,7 +39,7 @@ const inFlight: readonly BodyOfWork[] = [
 export function Context() {
   return (
     <Section
-      lede="Jori reads what is already happening across your tools and works out the bodies of work your team would name out loud. That is what the apps are built on, and it sharpens the longer Jori runs."
+      lede="Jori reads what's already happening across your tools and works out the bodies of work your team would name out loud. That's what the apps are built on, and it sharpens the longer Jori runs."
       title="It learns how your company works"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
@@ -54,7 +54,7 @@ export function Context() {
           </Definition>
           <Definition term="Sharper the longer it runs">
             Every run adds to what Jori knows about your company. This is the
-            part a new tool cannot copy on the day you switch.
+            part a new tool can't copy on the day you switch.
           </Definition>
         </dl>
         <InFlight />
@@ -87,8 +87,12 @@ function InFlight() {
           <BodyRow body={body} key={body.name} />
         ))}
       </div>
+      {/* The definition beside this one is already called "Assembled from
+          activity", so saying it again here spends the footer on a word the
+          reader met a moment ago. The second sentence always carried the
+          point on its own. */}
       <p className="border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
-        Assembled from activity. Nothing here was typed in.
+        Nothing here was typed in.
       </p>
     </Prop>
   )
