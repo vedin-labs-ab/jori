@@ -63,7 +63,10 @@ function SettingsDialog<Value extends string>({
             view={view}
             views={views}
           />
-          <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* Not a main landmark: this opens over the console, which already
+              has one, and a document with two is a document with none. The
+              dialog role is what scopes it. */}
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
             <header className="shrink-0 border-b px-4 py-3 md:px-6">
               <div className="flex min-h-8 items-center justify-between gap-3">
                 <DialogTitle className="text-base font-semibold">
@@ -84,7 +87,7 @@ function SettingsDialog<Value extends string>({
             <div className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-6">
               {children(view)}
             </div>
-          </main>
+          </div>
         </SidebarProvider>
       </DialogContent>
     </Dialog>
