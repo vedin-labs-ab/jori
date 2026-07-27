@@ -1,9 +1,11 @@
 /**
  * Who else touches the data, and for what.
  *
- * Real marks, from each vendor's own assets: Convex, Resend, and OpenRouter
- * publish an SVG; Trigger.dev and E2B publish only raster, so those are their
- * official PNGs. Square marks throughout, so the column reads as one list.
+ * Real marks, from each vendor's own assets: Convex, Resend, OpenRouter, and
+ * PostHog publish an SVG; Trigger.dev and E2B publish only raster, so those
+ * are their official PNGs. Each one is fitted into the same square box rather
+ * than cropped or stretched to fill it — PostHog's hedgehog is wider than it
+ * is tall, and a mark redrawn to match its neighbours is no longer the mark.
  */
 const subprocessors = [
   {
@@ -36,6 +38,12 @@ const subprocessors = [
     url: "https://openrouter.ai",
     purpose: "Routes model calls to the provider.",
   },
+  {
+    logo: "/logos/subprocessors/posthog.svg",
+    name: "PostHog",
+    url: "https://posthog.com",
+    purpose: "Counts how the website is used.",
+  },
 ] as const
 
 export function Subprocessors() {
@@ -45,7 +53,7 @@ export function Subprocessors() {
         // Each row is one line, so the mark centres against it rather than
         // hanging from a hand-tuned offset that only holds at one text size.
         <li className="flex items-center gap-2.5" key={name}>
-          <img alt="" className="size-4 shrink-0" src={logo} />
+          <img alt="" className="size-4 shrink-0 object-contain" src={logo} />
           <p>
             <a
               className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"

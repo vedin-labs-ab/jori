@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
+import { environments, isEnvironment } from "../../contracts/environment.ts"
 import { loadEnvironment } from "./load.ts"
-import { environments, isEnvironment } from "./names.ts"
 
 const usage = `Usage: scripts/env/index.ts --env <${environments.join("|")}> -- <command>`
 
