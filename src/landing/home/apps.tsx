@@ -30,12 +30,12 @@ export function Apps() {
             </Definition>
           </dl>
           {/* Where the sources come from is the Context section's argument, so
-              this row carries the other half: these are modelled, not merely
+              this row carries the other half: these are modeled, not merely
               reachable. Naming that is what stops a short list reading as a
               short list. */}
           <div className="mt-12">
             <p className="text-muted-foreground text-sm">
-              Modelled in depth, not just connected.
+              Modeled in depth, not just connected.
             </p>
             <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
               {integrations.map((integration) => (
