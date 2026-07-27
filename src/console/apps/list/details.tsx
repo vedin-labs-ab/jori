@@ -79,9 +79,9 @@ function TemplateRow({ app }: { app: AppSummary }) {
     (candidate) => candidate.key === template.key
   )
   const note = template.customized
-    ? "Customized — template updates leave it untouched"
+    ? "Customized: template updates leave it untouched"
     : definition !== undefined && template.version < definition.version
-      ? `v${definition.version} available — update from the playbook card`
+      ? `v${definition.version} available: update from the playbook card`
       : undefined
 
   return (

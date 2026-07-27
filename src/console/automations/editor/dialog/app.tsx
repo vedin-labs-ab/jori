@@ -50,7 +50,7 @@ export function AutomationAppSection({
         <Label>App</Label>
         <FieldHelp label="App help">
           <p>
-            The app this automation works in — state is read and written here by
+            The app this automation works in. State is read and written here by
             default.
           </p>
           <p>Instructions can still reference other apps by ID.</p>
@@ -126,7 +126,7 @@ function LiveApp({
         lines={null}
         title={
           <span className="min-w-0 truncate text-muted-foreground">
-            App unavailable — it may have been deleted.
+            App unavailable. It may have been deleted.
           </span>
         }
       />
@@ -220,9 +220,9 @@ function provenanceLine(
     (version) => version.isCurrent
   )?.createdAt
   const suffix = template.customized
-    ? " · Customized — template updates leave it untouched"
+    ? " · Customized: template updates leave it untouched"
     : definition !== undefined && template.version < definition.version
-      ? ` · v${definition.version} available — update from the playbook card`
+      ? ` · v${definition.version} available: update from the playbook card`
       : publishedAt === undefined
         ? ""
         : ` · Published ${relativeTime(publishedAt, Date.now())}`

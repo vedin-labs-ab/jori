@@ -65,7 +65,7 @@ describe("automation payload", () => {
       })
     ).toEqual({
       error:
-        "Organization automations can’t use personal access. Remove the highlighted items or switch to Personal.",
+        "Organization automations can't use personal access. Remove the highlighted items or switch to Personal.",
     })
   })
 })

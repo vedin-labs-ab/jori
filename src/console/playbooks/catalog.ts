@@ -78,7 +78,7 @@ function useTrialAction(organizationId: string, pending: PendingAction) {
             options,
           })
           toast.success(`${definition.title} is running`, {
-            description: "One-time run — nothing is enabled.",
+            description: "One-time run. Nothing is enabled.",
             action: viewRuns,
           })
         } catch (error) {
@@ -152,7 +152,7 @@ export function useAutomationActions(
           if (paused) {
             await pauseMutation({ organizationId, automationId })
             toast.success(`${definition.title} paused`, {
-              description: "It keeps its setup — switch it back on anytime.",
+              description: "It keeps its setup. Switch it back on anytime.",
             })
           } else {
             await resumeMutation({ organizationId, automationId })
