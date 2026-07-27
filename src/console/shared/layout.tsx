@@ -233,32 +233,20 @@ export function ConsoleContentGrid({
   return <div className={cn("grid gap-4", className)} {...props} />
 }
 
+/** Scroll-in-place stack: the div and ul forms differ only in semantics. */
+const scrollableStack =
+  "grid min-h-0 flex-1 auto-rows-max content-start gap-3 overflow-y-auto"
+
 export function ConsoleScrollableGrid({
   className,
   ...props
 }: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn(
-        "grid min-h-0 flex-1 auto-rows-max content-start gap-3 overflow-y-auto",
-        className
-      )}
-      {...props}
-    />
-  )
+  return <div className={cn(scrollableStack, className)} {...props} />
 }
 
 export function ConsoleScrollableList({
   className,
   ...props
 }: ComponentProps<"ul">) {
-  return (
-    <ul
-      className={cn(
-        "grid min-h-0 flex-1 auto-rows-max content-start gap-3 overflow-y-auto",
-        className
-      )}
-      {...props}
-    />
-  )
+  return <ul className={cn(scrollableStack, className)} {...props} />
 }
