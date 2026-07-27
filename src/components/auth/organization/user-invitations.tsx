@@ -19,8 +19,11 @@ export type UserInvitationsProps = {
 }
 
 /**
- * Organization invitations for the signed-in user. Always renders the section
- * card; uses `UserInvitationsEmpty` when there are no pending invitations.
+ * Organization invitations for the signed-in user.
+ *
+ * The card is what separates stacked rows from one another, so it only appears
+ * when there are rows. Drawing it around an empty state makes the quietest
+ * section on the page the most heavily framed one.
  */
 export function UserInvitations({ className }: UserInvitationsProps) {
   const { authClient } = useAuth()
@@ -30,6 +33,7 @@ export function UserInvitations({ className }: UserInvitationsProps) {
   const { data: invitations, isPending } = useListUserInvitations(
     authClient as OrganizationAuthClient
   )
+  const hasInvitations = Boolean(invitations?.length)
 
   return (
     <div className={className}>
@@ -38,27 +42,29 @@ export function UserInvitations({ className }: UserInvitationsProps) {
           {organizationLocalization.invitations}
         </h2>
 
-        <Card className="p-0">
-          <CardContent className="p-0">
-            {isPending ? (
-              <div className="p-4">
-                <UserInvitationRowSkeleton />
-              </div>
-            ) : !invitations?.length ? (
-              <UserInvitationsEmpty />
-            ) : (
-              invitations.map((invitation, index) => (
-                <div key={invitation.id}>
-                  {index > 0 && <Separator />}
-
-                  <div className="p-4">
-                    <UserInvitationRow invitation={invitation} />
-                  </div>
+        {isPending || hasInvitations ? (
+          <Card className="p-0">
+            <CardContent className="p-0">
+              {isPending ? (
+                <div className="p-4">
+                  <UserInvitationRowSkeleton />
                 </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                invitations?.map((invitation, index) => (
+                  <div key={invitation.id}>
+                    {index > 0 && <Separator />}
+
+                    <div className="p-4">
+                      <UserInvitationRow invitation={invitation} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <UserInvitationsEmpty />
+        )}
       </div>
     </div>
   )
