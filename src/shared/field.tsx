@@ -9,7 +9,11 @@ import {
 
 /** Suffix hint icon for a label; the children fill its tooltip. The icon is
  *  swappable so a field can say which kind of hint it is: a question mark
- *  explains, a lock states a constraint. */
+ *  explains, a lock states a constraint.
+ *
+ *  The glyph stays 12px and the pointer target grows to 24px through a
+ *  pseudo-element, which is the only way to get there without spending
+ *  layout: margins would eat the label's gap and move the icon. */
 export function FieldHelp({
   children,
   icon: Icon = CircleHelp,
@@ -27,7 +31,7 @@ export function FieldHelp({
         <TooltipTrigger asChild>
           <button
             aria-label={label}
-            className="inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            className='relative inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors after:absolute after:-inset-1.5 after:content-[""] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30'
             type="button"
           >
             <Icon className="size-3" />
