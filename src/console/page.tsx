@@ -142,21 +142,25 @@ function CreateOrganizationView() {
   const [creating, setCreating] = useState(false)
 
   return (
-    <section className="grid max-w-xl gap-4">
-      <div className="grid gap-1">
-        <h1 className="text-2xl font-medium tracking-normal">
-          Create your organization.
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Integrations, automations, and permissions are shared with your team
-          through an organization.
-        </p>
+    // The frame already bounds the column, and the two paths in and out of
+    // this screen — make one, or wait for one — read as separate blocks.
+    <section className="grid gap-6">
+      <div className="grid gap-4">
+        <div className="grid gap-2">
+          <h1 className="font-medium text-2xl tracking-tight">
+            Create your organization.
+          </h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Integrations, automations, and permissions are shared with your team
+            through an organization.
+          </p>
+        </div>
+        <div>
+          <Button onClick={() => setCreating(true)}>Create organization</Button>
+        </div>
       </div>
-      <div>
-        <Button onClick={() => setCreating(true)}>Create organization</Button>
-      </div>
-      <CreateOrganizationDialog onOpenChange={setCreating} open={creating} />
       <UserInvitations />
+      <CreateOrganizationDialog onOpenChange={setCreating} open={creating} />
     </section>
   )
 }

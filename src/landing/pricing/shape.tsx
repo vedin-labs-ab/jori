@@ -43,11 +43,13 @@ export function Shape() {
       <div className="mt-20 grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
         <div>
           <h2 className="max-w-xl font-medium text-2xl text-balance tracking-tight">
-            Final numbers land when Jori opens.
+            Usage is settled. The plan price isn't.
           </h2>
           <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
-            We would rather price it once we know what the work costs to run.
-            Everyone on the waitlist sees the numbers first.
+            A run costs what its model work costs at the provider's rates, with
+            nothing added on top. We would rather set the organization's flat
+            fee once we have watched real teams run, and everyone on the
+            waitlist sees it first.
           </p>
           <dl className="mt-8 grid max-w-xl gap-x-10 gap-y-6 sm:grid-cols-2">
             <Definition term="In every plan">
