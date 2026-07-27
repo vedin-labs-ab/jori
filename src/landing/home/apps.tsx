@@ -17,20 +17,25 @@ export function Apps() {
               Not a saved summary. What is blocking, who owns it, and what
               changed since yesterday.
             </Definition>
+            {/* Second, not third. One shared page is the line between this and
+                every agent that answers one person at a time, so it does not
+                sit last behind two facts about the page itself. */}
+            <Definition term="One page, not one per person">
+              Everyone opens the same one, holding the same state. Send it
+              outside the company with a link that expires when you say so.
+            </Definition>
             <Definition term="A run keeps it current">
               Jori rechecks on a schedule, or when something moves in a
               connected tool. Open it tomorrow and it already knows.
             </Definition>
-            <Definition term="One page for the whole team">
-              Not a copy per person. Send it outside the company with a link
-              that expires when you say so.
-            </Definition>
           </dl>
-          {/* An app is only as good as what grounds it, so the sources are
-              named rather than implied by a row of logos. */}
+          {/* Where the sources come from is the Context section's argument, so
+              this row carries the other half: these are modelled, not merely
+              reachable. Naming that is what stops a short list reading as a
+              short list. */}
           <div className="mt-12">
             <p className="text-muted-foreground text-sm">
-              Built from what is really there, not a wiki nobody updates.
+              Modelled in depth, not just connected.
             </p>
             <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
               {integrations.map((integration) => (
@@ -43,10 +48,6 @@ export function Apps() {
                   {integrationLabels[integration]}
                 </Chip>
               ))}
-              {/* Dashed, the way this system already marks something that
-                  is not there yet, so the row reads as unfinished by design
-                  rather than as a connector called "more". */}
-              <Chip className="border-dashed">+ more</Chip>
             </div>
           </div>
         </div>
