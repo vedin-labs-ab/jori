@@ -158,3 +158,36 @@
     @apply font-sans;
   }
 }
+
+/**
+ * Every page works without motion.
+ *
+ * Gating each animation at its call site means the guarantee holds only where
+ * someone remembered, and there are roughly eighty animated or transitioned
+ * elements across the console and the marketing site. One rule holds for all
+ * of them: entrance and exit choreography, attention loops, and transitions
+ * arrive at their end state immediately.
+ *
+ * A spinner is the exception, because it is not decoration. It is the only
+ * signal that something is still running, and a frozen one reads as hung. It
+ * keeps turning, slower, which is the part that was carrying meaning.
+ *
+ * Unlayered on purpose, and that is what makes it hold without `!important`:
+ * Tailwind and tw-animate-css declare every animation and transition utility
+ * inside the `utilities` cascade layer, and an unlayered rule outranks any
+ * layered one whatever its selector.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+    transition-duration: 1ms;
+  }
+
+  .animate-spin {
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+  }
+}
