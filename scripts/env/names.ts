@@ -1,4 +1,15 @@
-import { type Environment } from "../../contracts/environment.ts"
+/** The environments Jori deploys to.
+ *
+ *  Staging slots in here without touching anything else: add the name, add
+ *  its env file, and provision resources under the matching `jori-staging`
+ *  names. Nothing below is dev-or-prod specific by construction. */
+export const environments = ["dev", "prod"] as const
+
+export type Environment = (typeof environments)[number]
+
+export function isEnvironment(value: string): value is Environment {
+  return environments.includes(value as Environment)
+}
 
 /** The env file an environment reads.
  *

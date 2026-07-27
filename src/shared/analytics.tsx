@@ -1,27 +1,16 @@
-import { isEnvironment } from "@contracts/environment"
 import { PostHogProvider } from "@posthog/react"
 import { type PostHogConfig } from "posthog-js"
 import { type ReactNode } from "react"
 
 const settings: Record<string, string | undefined> = import.meta.env
-const deployment = readSetting("VITE_JORI_ENVIRONMENT")
+const enabled = readFlag("VITE_POSTHOG_ENABLED")
+const projectKey = enabled ? readSetting("VITE_POSTHOG_KEY") : undefined
+const apiHost = enabled ? readSetting("VITE_POSTHOG_HOST") : undefined
 
-if (deployment !== undefined && !isEnvironment(deployment)) {
+if (enabled && (projectKey === undefined || apiHost === undefined)) {
   throw new Error(
-    `VITE_JORI_ENVIRONMENT must name an environment, received ${JSON.stringify(deployment)}.`
+    "VITE_POSTHOG_KEY and VITE_POSTHOG_HOST must be set when VITE_POSTHOG_ENABLED is true."
   )
-}
-
-/** Only production reports. Development and staging run the same build from
- *  the same code, so the environment has to say which one is live — an unset
- *  key would only mean "nobody configured this yet", which is exactly the
- *  mistake that puts a laptop's traffic in the numbers. */
-const reports = deployment === "prod"
-const projectKey = reports ? readSetting("VITE_POSTHOG_KEY") : undefined
-const apiHost = reports ? readSetting("VITE_POSTHOG_HOST") : undefined
-
-if (projectKey !== undefined && apiHost === undefined) {
-  throw new Error("VITE_POSTHOG_HOST must be set alongside VITE_POSTHOG_KEY.")
 }
 
 /** One object for the lifetime of the page, so the provider configures the
@@ -36,17 +25,19 @@ const options: Partial<PostHogConfig> = {
 }
 
 /**
- * Web analytics for every page of the production site, and only that one.
+ * Web analytics for every page, on the one deployment that asks for it.
  *
- * The project token is public by design — it only permits writes — so it ships
- * in the bundle like any other client setting. Its host ships with it rather
- * than falling back to the SDK's US default, because each deployment reports
- * to the PostHog cloud in its own region and a default would quietly carry
- * visitor data out of it.
+ * Reporting is its own decision rather than a side effect of holding a token:
+ * every environment builds the same code, so each one says whether it counts,
+ * and only production does. Anywhere else renders no provider at all, so the
+ * SDK is never initialised and nothing is sent. Development and staging
+ * traffic is not usage, and counting it costs more than it tells anyone.
  *
- * Everywhere else renders no provider at all, so the SDK is never initialised
- * and nothing is sent. Development and staging traffic is not usage, and
- * counting it costs more than it tells anyone.
+ * The token is public by design. It only permits writes, and it ships in the
+ * bundle where anyone can read it, so it names the project rather than
+ * guarding it. Its host ships with it rather than falling back to the SDK's US
+ * default, because each deployment reports to the PostHog cloud in its own
+ * region and a default would quietly carry visitor data out of it.
  */
 export function Analytics({ children }: { children: ReactNode }) {
   if (projectKey === undefined) {
@@ -58,6 +49,21 @@ export function Analytics({ children }: { children: ReactNode }) {
       {children}
     </PostHogProvider>
   )
+}
+
+/** Off unless a deployment says otherwise, and loud about anything that is
+ *  neither, so a value like `1` cannot read as enabled to a person while the
+ *  site treats it as disabled. */
+function readFlag(name: string) {
+  const value = readSetting(name)
+
+  if (value !== undefined && value !== "true" && value !== "false") {
+    throw new Error(
+      `${name} must be true or false, received ${JSON.stringify(value)}.`
+    )
+  }
+
+  return value === "true"
 }
 
 function readSetting(name: string) {
