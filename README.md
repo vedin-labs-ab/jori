@@ -72,6 +72,12 @@ they are the handoff gate, and they do not touch any deployment:
 pnpm check && pnpm test
 ```
 
+`pnpm check` is also where every generated file is regenerated and verified, so
+`pnpm build` only builds. That split is not cosmetic: the generators format
+their output with Biome, which is configured to read the repository's git
+ignore file, and the build host has no git checkout to read it from. Adding a
+check back into `build` breaks the deploy rather than the check.
+
 The `pnpm dev` watcher keeps the development deployment in step with the
 working tree. `pnpm deploy:dev` pushes it once without that watcher running.
 
