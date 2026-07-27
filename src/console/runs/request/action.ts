@@ -33,7 +33,7 @@ export type ActionStatus = {
 const approvalStatuses = {
   approved: {
     Icon: UserCheck,
-    className: "text-emerald-800",
+    className: "text-success",
     label: "Approved",
   },
   denied: { Icon: UserX, className: "text-destructive", label: "Denied" },
@@ -72,7 +72,7 @@ const offerStatuses = {
   },
   connected: {
     Icon: CheckCircle2,
-    className: "text-emerald-800",
+    className: "text-success",
     label: "Connected",
   },
   expired: {

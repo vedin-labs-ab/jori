@@ -38,6 +38,8 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-informational: var(--informational);
@@ -82,10 +84,17 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.575 0.121 33.2);
   --destructive-foreground: oklch(0.985 0 0);
-  /* Darkened from 0.713 to clear 3:1 against the background (2.58 before,
-     3.02 now). Chroma and hue are untouched, so it is the same yellow. */
-  --warning: oklch(0.672 0.122 81.8);
-  --warning-foreground: oklch(0.145 0 0);
+  --success: oklch(0.43 0.086 167);
+  --success-foreground: oklch(0.985 0 0);
+  /* Darkened again, from 0.672 to 0.565, so it clears 4.5:1 against the
+     background (3.02 before, 4.62 now). Every other semantic colour is legible
+     as text on white, and this one is used as text too: "Requires approval",
+     "Approval expired", an expiry countdown. Chroma and hue are untouched, so
+     it is the same yellow. */
+  --warning: oklch(0.565 0.122 81.8);
+  --warning-foreground: oklch(0.985 0 0);
+  /* Graphic only: the workstream activity ramp. Nothing sets it as text, so
+     it answers to 3:1 rather than 4.5:1. */
   --informational: oklch(0.61 0.036 236);
   --informational-foreground: oklch(0.145 0 0);
   --border: oklch(0.922 0 0);
@@ -125,6 +134,8 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.575 0.121 33.2);
   --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.43 0.086 167);
+  --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.713 0.122 81.8);
   --warning-foreground: oklch(0.145 0 0);
   --informational: oklch(0.61 0.036 236);

@@ -81,8 +81,10 @@ export function LaneRow({
 }
 
 // The count lives on the lane label itself: the number of efforts waiting
-// for a workstream sits exactly where their activity renders. The dot and
-// count carry the lane's color key; the name reads like every other label.
+// for a workstream sits exactly where their activity renders. The dot and the
+// count's tint carry the lane's color key; the name reads like every other
+// label. The digits themselves stay ink: the blue is light enough to be a
+// surface and too light to be legible type on one.
 function UnplacedLabel({ count, name }: { count: number; name: string }) {
   return (
     <Tooltip>
@@ -94,7 +96,7 @@ function UnplacedLabel({ count, name }: { count: number; name: string }) {
           />
           <span className="truncate text-muted-foreground">{name}</span>
           {count > 0 ? (
-            <span className="rounded-sm bg-informational/15 px-1 font-medium text-[11px] text-informational tabular-nums">
+            <span className="rounded-sm bg-informational/15 px-1 font-medium text-[11px] text-foreground tabular-nums">
               {count}
             </span>
           ) : null}

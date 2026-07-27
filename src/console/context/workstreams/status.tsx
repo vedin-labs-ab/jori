@@ -20,7 +20,7 @@ export function WorkstreamStatusCue({
       <TooltipTrigger asChild>
         <span
           aria-label={workstream.statusLabel}
-          className="inline-flex size-4 shrink-0 items-center justify-center text-warning/75"
+          className="inline-flex size-4 shrink-0 items-center justify-center text-warning"
           role="img"
         >
           <CircleAlert className="size-3.5" />

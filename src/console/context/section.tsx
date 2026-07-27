@@ -1,10 +1,6 @@
 import { Info } from "lucide-react"
 import { type ReactNode } from "react"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { FieldHelp } from "@/shared/field"
 
 export function ContextSectionTitle({
   action,
@@ -22,16 +18,14 @@ export function ContextSectionTitle({
       <h3 className="flex items-baseline gap-1.5 font-medium text-muted-foreground text-xs">
         <span>{children}</span>
         {count === undefined ? null : <ContextTitleCount count={count} />}
+        {/* The same hint affordance the forms use: a button, so the tooltip
+            is reachable by keyboard rather than by pointer alone. */}
         {hint === undefined ? null : (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info
-                aria-label={`About ${children.toLowerCase()}`}
-                className="size-3 self-center text-muted-foreground/70"
-              />
-            </TooltipTrigger>
-            <TooltipContent className="max-w-64">{hint}</TooltipContent>
-          </Tooltip>
+          <span className="self-center">
+            <FieldHelp icon={Info} label={`About ${children.toLowerCase()}`}>
+              {hint}
+            </FieldHelp>
+          </span>
         )}
       </h3>
       {action}
@@ -41,7 +35,7 @@ export function ContextSectionTitle({
 
 export function ContextTitleCount({ count }: { count: number }) {
   return (
-    <span className="font-normal text-muted-foreground/70 tabular-nums">
+    <span className="font-normal text-muted-foreground tabular-nums">
       ({count})
     </span>
   )
