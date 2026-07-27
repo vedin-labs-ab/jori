@@ -1,8 +1,10 @@
+import { type Integration } from "@contracts/integrations"
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import { Link } from "@tanstack/react-router"
 import { Cable } from "lucide-react"
 import { lazy, Suspense, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { integrationsRouteFor } from "../../integrations/routes"
 import { type PlaybookActions } from "../enable"
 import { type PlaybookListRow, planPlaybookEnable } from "../state"
 import { type PlaybookSetupDialogProps } from "./dialog"
@@ -22,11 +24,23 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
   )
 }
 
-/** Link to the integrations page for a playbook that lacks a connection. */
-export function ConnectButton({ label }: { label: string }) {
+/**
+ * Link to the integrations page for a playbook that lacks a connection.
+ *
+ * Aimed at the tab that actually holds the missing connections, so a playbook
+ * wanting mail and calendar does not land on the organization list that has
+ * neither.
+ */
+export function ConnectButton({
+  integrations,
+  label,
+}: {
+  integrations: Integration[]
+  label: string
+}) {
   return (
     <Button asChild className="w-full" variant="outline">
-      <Link to="/integrations">
+      <Link to={integrationsRouteFor(integrations)}>
         <Cable /> {label}
       </Link>
     </Button>
@@ -49,7 +63,7 @@ export function SetupControls({
   const plan = planPlaybookEnable(row.slots)
 
   if (plan.kind === "connect") {
-    return <ConnectButton label={plan.label} />
+    return <ConnectButton integrations={plan.integrations} label={plan.label} />
   }
 
   return (

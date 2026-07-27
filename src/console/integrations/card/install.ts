@@ -3,7 +3,6 @@ import { toast } from "sonner"
 import { showErrorToast } from "../../shared/error"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
-const integrationReturnPath = "/integrations"
 
 export type CreateInstallState = (args: {
   organizationId: string
@@ -15,11 +14,13 @@ export function useIntegrationInstall({
   createInstallState,
   installPath,
   organizationId,
+  returnPath,
 }: {
   connectError: string
   createInstallState: CreateInstallState
   installPath: string
   organizationId: string
+  returnPath: string
 }) {
   const [isConnecting, setIsConnecting] = useState(false)
 
@@ -34,7 +35,7 @@ export function useIntegrationInstall({
     try {
       const state = await createInstallState({
         organizationId,
-        returnUrl: `${window.location.origin}${integrationReturnPath}`,
+        returnUrl: `${window.location.origin}${returnPath}`,
       })
       const installUrl = new URL(installPath, convexSiteUrl)
       installUrl.searchParams.set("state", state)

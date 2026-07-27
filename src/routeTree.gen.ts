@@ -29,6 +29,7 @@ import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
+import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppsAppIdIndexRouteImport } from './routes/apps/$appId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
@@ -133,6 +134,11 @@ const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => IntegrationsRoute,
 } as any)
+const IntegrationsPersonalRoute = IntegrationsPersonalRouteImport.update({
+  id: '/personal',
+  path: '/personal',
+  getParentRoute: () => IntegrationsRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/integrations/personal': typeof IntegrationsPersonalRoute
   '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/integrations/personal': typeof IntegrationsPersonalRoute
   '/apps': typeof AppsIndexRoute
   '/context': typeof ContextIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/integrations/personal': typeof IntegrationsPersonalRoute
   '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
+    | '/integrations/personal'
     | '/apps/'
     | '/context/'
     | '/integrations/'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
+    | '/integrations/personal'
     | '/apps'
     | '/context'
     | '/integrations'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
+    | '/integrations/personal'
     | '/apps/'
     | '/context/'
     | '/integrations/'
@@ -458,6 +470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntegrationsIndexRouteImport
       parentRoute: typeof IntegrationsRoute
     }
+    '/integrations/personal': {
+      id: '/integrations/personal'
+      path: '/personal'
+      fullPath: '/integrations/personal'
+      preLoaderRoute: typeof IntegrationsPersonalRouteImport
+      parentRoute: typeof IntegrationsRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -510,11 +529,13 @@ const ContextRouteWithChildren =
   ContextRoute._addFileChildren(ContextRouteChildren)
 
 interface IntegrationsRouteChildren {
+  IntegrationsPersonalRoute: typeof IntegrationsPersonalRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   IntegrationsOffersTokenRoute: typeof IntegrationsOffersTokenRoute
 }
 
 const IntegrationsRouteChildren: IntegrationsRouteChildren = {
+  IntegrationsPersonalRoute: IntegrationsPersonalRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   IntegrationsOffersTokenRoute: IntegrationsOffersTokenRoute,
 }
