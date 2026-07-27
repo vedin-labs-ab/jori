@@ -55,25 +55,31 @@ companies of roughly 10–80 people running Slack, GitHub, and Linear.
 
 ## Phase 4 · Production deployment
 
-The commands exist and `pnpm deploy:prod` is wired end to end. What is left is
-provisioning: no production target has been created yet.
+The commands exist and the targets are provisioned. What is left needs
+accounts this repository cannot reach.
 
 - [x] Split every command and resource name by environment, and add
       `pnpm deploy:prod` with its guards and preflight
-- [ ] Point `usejori.com` at the Vercel project, with `www` redirecting
-- [ ] Provision the `jori-prod-us` Convex project in US East, separate from the
-      existing personal development deployment
+- [x] Provision the production Convex deployment `insightful-goat-7` in US East,
+      inside the existing `jori` project, and deploy the backend to it
+- [x] Create the `jori` Vercel project, set its Production build variables, and
+      attach `usejori.com` and `www.usejori.com`
+- [ ] Point the Porkbun DNS at Vercel: `A usejori.com 76.76.21.21`
+- [ ] Set `www.usejori.com` to redirect to the apex in the Vercel project's
+      domain settings
+- [ ] Delete the empty `jori-prod-us` Convex project, created by mistake and
+      unused. Convex has no CLI for it
+- [ ] Verify a Resend sending domain and set `RESEND_API_KEY` and
+      `JORI_EMAIL_FROM` on the production deployment. Until then the waitlist
+      confirmation falls back to Resend's shared test domain
+- [ ] Register the production Google and Microsoft OAuth clients against
+      `https://usejori.com/api/auth/callback/{google,microsoft}` and set all
+      four credentials. Sign-in resolves both providers on every auth request,
+      so it stays broken until all four exist
 - [ ] Recreate the development deployment in US East so it mirrors production.
       A Convex deployment's region cannot be changed after creation, and the
-      current one sits in EU West
-- [ ] Set the Vercel Production build variables: `VITE_JORI_REGION`,
-      `VITE_JORI_ENABLED_REGIONS`, `VITE_JORI_PUBLIC_ORIGIN`,
-      `VITE_JORI_US_ORIGIN`, `VITE_CONVEX_URL`, `VITE_CONVEX_SITE_URL`. The
-      build reads them at build time and fails without them
-- [ ] Set the deployment variables listed in `scripts/env/names.ts`, and verify
-      the Resend sending domain before relying on any email
-- [ ] Register the production Google and Microsoft OAuth clients against
-      `https://usejori.com/api/auth/callback/{google,microsoft}`
+      current one sits in EU West. This discards development data and needs the
+      development deployment variables set again
 - [ ] Smoke test: marketing routes, waitlist submission, confirmation email,
       sign-in, the waitlist gate, and one allowlisted address reaching the
       console

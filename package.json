@@ -8,7 +8,7 @@
     "dev": "node --experimental-strip-types scripts/dev.ts",
     "dev:web": "vite",
     "dev:convex": "node --experimental-strip-types scripts/env/index.ts --env dev -- npx convex dev",
-    "dev:trigger": "node --experimental-strip-types scripts/env/index.ts --env dev -- npx trigger dev --env-file .env.dev.local",
+    "dev:trigger": "node --experimental-strip-types scripts/env/index.ts --env dev -- npx trigger dev --env-file .env.local",
     "build": "pnpm runtime:check && pnpm templates:check && pnpm content:compile && pnpm check:typecheck && vite build",
     "check": "node --experimental-strip-types scripts/check.ts",
     "templates:check": "tsx scripts/templates.ts --check",
