@@ -2,7 +2,6 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
-  integrationLabel,
   isGoogleIntegration,
   isMicrosoftIntegration,
 } from "../shared/integrations"
@@ -14,10 +13,20 @@ import { requireLinearCredentials } from "./linear/credentials"
 import { getLinearTokenScope, refreshLinearAccessToken } from "./linear/oauth"
 import { requireMicrosoftCredentials } from "./microsoft/credentials"
 import { refreshMicrosoftAccessToken } from "./microsoft/oauth"
+import {
+  failOAuthRefresh,
+  hasFreshOAuthToken,
+  hasFreshTokenExpiration,
+  withCredentials,
+} from "./refresh"
+import {
+  requireSlackCredentials,
+  type SlackTokenPair,
+  slackTokenKinds,
+} from "./slack/credentials"
+import { refreshSlackAccessToken, slackGrantIsDead } from "./slack/oauth"
 
 type RuntimeIntegration = Doc<"integrations">
-
-const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000
 
 export async function prepareIntegrationForRuntime(
   ctx: ActionCtx,
@@ -33,6 +42,10 @@ export async function prepareIntegrationForRuntime(
 
   if (integration.integration === "linear") {
     return await prepareLinearIntegrationForRuntime(ctx, integration)
+  }
+
+  if (integration.integration === "slack") {
+    return await prepareSlackIntegrationForRuntime(ctx, integration)
   }
 
   if (isGoogleIntegration(integration.integration)) {
@@ -195,50 +208,45 @@ function hasFreshGitHubToken(credentials: {
   )
 }
 
-function hasFreshOAuthToken(credentials: { expiresAt: number }) {
-  return hasFreshTokenExpiration(credentials.expiresAt)
-}
-
-function hasFreshTokenExpiration(expiresAt: number) {
-  return expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS
-}
-
-// OAuth providers signal a permanently dead grant (revoked consent, expired
-// refresh token) with "invalid_grant"; only a full reconnect recovers from it.
-async function failOAuthRefresh(
+/** Slack rotates the bot and user tokens on independent clocks, and each
+ *  refresh token is single-use, so only the stale side is exchanged and the
+ *  result is written back before the next one is attempted. */
+async function prepareSlackIntegrationForRuntime(
   ctx: ActionCtx,
-  integration: RuntimeIntegration,
-  platform: string,
-  result: { error: string; error_description?: string }
-): Promise<never> {
-  if (result.error !== "invalid_grant") {
-    throw tokenRefreshError(platform, result)
-  }
-
-  await ctx.runMutation(internal.integrations.expire.markExpired, {
-    integrationId: integration._id,
-  })
-
-  throw new Error(
-    `${integrationLabel(integration.integration)} access has expired and needs to be reconnected.`
-  )
-}
-
-function tokenRefreshError(
-  platform: string,
-  result: { error: string; error_description?: string }
+  integration: RuntimeIntegration
 ) {
-  return new Error(
-    `${platform} token refresh failed: ${result.error_description ?? result.error}`
+  const credentials = requireSlackCredentials(integration)
+  const stale = slackTokenKinds.filter(
+    (kind) => !hasFreshOAuthToken(credentials[kind])
   )
-}
 
-function withCredentials(
-  integration: RuntimeIntegration,
-  credentials: RuntimeIntegration["credentials"]
-): RuntimeIntegration {
-  return {
-    ...integration,
-    credentials,
+  if (stale.length === 0) {
+    return integration
   }
+
+  const refreshed: { bot?: SlackTokenPair; user?: SlackTokenPair } = {}
+
+  for (const kind of stale) {
+    const result = await refreshSlackAccessToken(credentials[kind].refresh)
+
+    if (!result.ok) {
+      return await failOAuthRefresh(ctx, integration, "Slack", {
+        error: slackGrantIsDead(result.error) ? "invalid_grant" : "slack_error",
+        error_description: result.error,
+      })
+    }
+
+    refreshed[kind] = {
+      access: result.access_token,
+      refresh: result.refresh_token,
+      expiresAt: Date.now() + result.expires_in * 1000,
+    }
+  }
+
+  const updatedCredentials = await ctx.runMutation(
+    internal.integrations.slack.install.updateOAuthCredentials,
+    { integrationId: integration._id, ...refreshed }
+  )
+
+  return withCredentials(integration, updatedCredentials)
 }

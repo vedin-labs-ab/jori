@@ -25,12 +25,16 @@ export async function searchSlackChannels(args: OptionLoaderArgs) {
   let cursor: string | undefined
 
   for (let page = 0; page < maxSlackPages; page += 1) {
-    const result = await slackQueryApi(credentials.user, "conversations.list", {
-      cursor,
-      exclude_archived: true,
-      limit: 200,
-      types: slackChannelTypes,
-    })
+    const result = await slackQueryApi(
+      credentials.user.access,
+      "conversations.list",
+      {
+        cursor,
+        exclude_archived: true,
+        limit: 200,
+        types: slackChannelTypes,
+      }
+    )
 
     for (const channel of readSlackChannels(result)) {
       if (options.length >= maxOptions) {
@@ -66,7 +70,7 @@ export async function searchSlackUsers(args: OptionLoaderArgs) {
   let cursor: string | undefined
 
   for (let page = 0; page < maxSlackPages; page += 1) {
-    const result = await slackQueryApi(credentials.user, "users.list", {
+    const result = await slackQueryApi(credentials.user.access, "users.list", {
       cursor,
       limit: 200,
     })

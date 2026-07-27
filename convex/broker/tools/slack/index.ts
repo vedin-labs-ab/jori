@@ -31,7 +31,7 @@ export async function callSlackTool(
 
   if (tool === "channels_list") {
     return slackChannelListing(
-      await slackQueryApi(credentials.user, "conversations.list", {
+      await slackQueryApi(credentials.user.access, "conversations.list", {
         limit: boundedNumber(args.limit, 100, 1, 1000),
         cursor: optionalString(args.cursor),
         types:
@@ -43,7 +43,7 @@ export async function callSlackTool(
 
   if (tool === "conversations_history") {
     return slackMessageListing(
-      await slackQueryApi(credentials.user, "conversations.history", {
+      await slackQueryApi(credentials.user.access, "conversations.history", {
         channel: requiredString(args.channel, "channel"),
         limit: boundedNumber(args.limit, 50, 1, 100),
         latest: optionalString(args.latest),
@@ -56,7 +56,7 @@ export async function callSlackTool(
 
   if (tool === "conversations_replies") {
     return slackMessageListing(
-      await slackQueryApi(credentials.user, "conversations.replies", {
+      await slackQueryApi(credentials.user.access, "conversations.replies", {
         channel: requiredString(args.channel, "channel"),
         ts: requiredString(args.ts, "ts"),
         limit: boundedNumber(args.limit, 50, 1, 100),
@@ -66,7 +66,7 @@ export async function callSlackTool(
 
   if (tool === "conversations_search_messages") {
     return slackSearchListing(
-      await slackQueryApi(credentials.user, "search.messages", {
+      await slackQueryApi(credentials.user.access, "search.messages", {
         query: requiredString(args.query, "query"),
         count: boundedNumber(args.count, 20, 1, 100),
         page: boundedNumber(args.page, 1, 1, 100),
@@ -75,7 +75,7 @@ export async function callSlackTool(
   }
 
   if (tool === "users_search") {
-    return await searchSlackUsers(credentials.user, args)
+    return await searchSlackUsers(credentials.user.access, args)
   }
 
   if (tool === "conversations_add_message") {

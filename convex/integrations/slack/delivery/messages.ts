@@ -21,7 +21,7 @@ export async function postSlackMessage(
   const assets = args.assets ?? []
 
   if (assets.length > 0) {
-    return await postSlackFiles(credentials.bot, {
+    return await postSlackFiles(credentials.bot.access, {
       assets,
       channel: args.channel,
       text: args.text,
@@ -29,7 +29,7 @@ export async function postSlackMessage(
     })
   }
 
-  return await slackJsonApi(credentials.bot, "chat.postMessage", {
+  return await slackJsonApi(credentials.bot.access, "chat.postMessage", {
     channel: args.channel,
     text: args.text,
     thread_ts: args.thread_ts,
@@ -48,7 +48,7 @@ export async function updateSlackMessage(
 ) {
   const credentials = requireSlackCredentials(integration)
 
-  return await slackJsonApi(credentials.bot, "chat.update", {
+  return await slackJsonApi(credentials.bot.access, "chat.update", {
     channel: args.channel,
     ts: args.ts,
     text: args.text,
@@ -66,7 +66,7 @@ export async function addSlackMessageReaction(
 ) {
   const credentials = requireSlackCredentials(integration)
 
-  return await addSlackReaction(credentials.bot, args)
+  return await addSlackReaction(credentials.bot.access, args)
 }
 
 async function addSlackReaction(token: string, args: Record<string, unknown>) {

@@ -47,7 +47,7 @@ export async function slackReactionSnapshots(
   }
 
   const targets = await fetchSlackReactionSnapshots(
-    requireSlackCredentials(plan.integration).user,
+    requireSlackCredentials(plan.integration).user.access,
     plan
   )
 

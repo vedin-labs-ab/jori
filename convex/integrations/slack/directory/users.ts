@@ -157,7 +157,7 @@ async function resolveSlackUserProfile(
 
 function slackUserToken(integration: Doc<"integrations">) {
   try {
-    return requireSlackCredentials(integration).user
+    return requireSlackCredentials(integration).user.access
   } catch {
     return undefined
   }

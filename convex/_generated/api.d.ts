@@ -263,6 +263,7 @@ import type * as integrations_offers_updates from "../integrations/offers/update
 import type * as integrations_options_common from "../integrations/options/common.js";
 import type * as integrations_options_index from "../integrations/options/index.js";
 import type * as integrations_options_load from "../integrations/options/load.js";
+import type * as integrations_refresh from "../integrations/refresh.js";
 import type * as integrations_resolve from "../integrations/resolve.js";
 import type * as integrations_revoke_index from "../integrations/revoke/index.js";
 import type * as integrations_revoke_oauth from "../integrations/revoke/oauth.js";
@@ -800,6 +801,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/options/common": typeof integrations_options_common;
   "integrations/options/index": typeof integrations_options_index;
   "integrations/options/load": typeof integrations_options_load;
+  "integrations/refresh": typeof integrations_refresh;
   "integrations/resolve": typeof integrations_resolve;
   "integrations/revoke/index": typeof integrations_revoke_index;
   "integrations/revoke/oauth": typeof integrations_revoke_oauth;
