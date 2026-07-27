@@ -38,93 +38,55 @@ const SessionProviders = lazy(() =>
   }))
 )
 
+/** Nothing here reads from the request, so the head is one value rather than
+ *  a table rebuilt on every match. Routes that need their own title override
+ *  it from their own `head`. */
+const rootMeta: React.ComponentProps<"meta">[] = [
+  { charSet: "utf-8" },
+  { name: "viewport", content: "width=device-width, initial-scale=1" },
+  // The surface is white and light-only, so the browser chrome matches it
+  // rather than falling back to the browser's own grey.
+  { name: "theme-color", content: "#ffffff" },
+  { title: appTitle },
+  { name: "description", content: appDescription },
+  { property: "og:title", content: appTitle },
+  { property: "og:description", content: appDescription },
+  { property: "og:type", content: "website" },
+  { property: "og:site_name", content: appTitle },
+  { property: "og:image", content: appImage },
+  // Declared so a preview reserves the right box before it has the file, and
+  // so the card still says something when images are off.
+  { property: "og:image:width", content: "1200" },
+  { property: "og:image:height", content: "630" },
+  { property: "og:image:alt", content: appTitle },
+  { name: "twitter:card", content: "summary_large_image" },
+  { name: "twitter:image", content: appImage },
+  { name: "twitter:title", content: appTitle },
+  { name: "twitter:description", content: appDescription },
+]
+const rootLinks: React.ComponentProps<"link">[] = [
+  {
+    rel: "preload",
+    href: geistLatinWoff2,
+    as: "font",
+    type: "font/woff2",
+    crossOrigin: "anonymous",
+  },
+  { rel: "stylesheet", href: appCss },
+  { rel: "icon", href: "/brand/favicon/favicon.ico" },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "32x32",
+    href: "/brand/favicon/favicon-32.png",
+  },
+  { rel: "apple-touch-icon", href: "/brand/favicon/apple-touch-icon.png" },
+  { rel: "manifest", href: "/manifest.json" },
+]
+
 export const Route = createRootRoute({
   errorComponent: RootError,
-  head: () => ({
-    meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      {
-        title: appTitle,
-      },
-      {
-        name: "description",
-        content: appDescription,
-      },
-      {
-        property: "og:title",
-        content: appTitle,
-      },
-      {
-        property: "og:description",
-        content: appDescription,
-      },
-      {
-        property: "og:type",
-        content: "website",
-      },
-      {
-        property: "og:site_name",
-        content: appTitle,
-      },
-      {
-        property: "og:image",
-        content: appImage,
-      },
-      {
-        name: "twitter:card",
-        content: "summary_large_image",
-      },
-      {
-        name: "twitter:image",
-        content: appImage,
-      },
-      {
-        name: "twitter:title",
-        content: appTitle,
-      },
-      {
-        name: "twitter:description",
-        content: appDescription,
-      },
-    ],
-    links: [
-      {
-        rel: "preload",
-        href: geistLatinWoff2,
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      {
-        rel: "icon",
-        href: "/brand/favicon/favicon.ico",
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "32x32",
-        href: "/brand/favicon/favicon-32.png",
-      },
-      {
-        rel: "apple-touch-icon",
-        href: "/brand/favicon/apple-touch-icon.png",
-      },
-      {
-        rel: "manifest",
-        href: "/manifest.json",
-      },
-    ],
-  }),
+  head: () => ({ meta: rootMeta, links: rootLinks }),
   notFoundComponent: NotFound,
   shellComponent: RootDocument,
 })
