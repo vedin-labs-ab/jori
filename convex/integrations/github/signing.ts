@@ -18,8 +18,8 @@ export async function parseSignedGitHubState(value: string) {
   })
 }
 
-export async function verifyGitHubRequest(_request: Request, body: string) {
-  const signature = _request.headers.get("x-hub-signature-256")
+export async function verifyGitHubRequest(request: Request, body: string) {
+  const signature = request.headers.get("x-hub-signature-256")
 
   if (signature === null || !signature.startsWith("sha256=")) {
     return false

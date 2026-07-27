@@ -1,4 +1,4 @@
-import { fetchJsonObject } from "../../shared/http"
+import { type JsonObject } from "../../../contracts/json"
 import { optionalString, readArray } from "../../shared/input"
 import {
   compactDescription,
@@ -11,11 +11,11 @@ import {
   readRecord,
   requiredOptionString,
 } from "../options/common"
-import { linearGraphqlUrl } from "./config"
 import { requireLinearCredentials } from "./credentials"
+import { type LinearGraphqlBody, linearGraphql } from "./graphql"
 
 export async function searchLinearTeams(args: OptionLoaderArgs) {
-  const result = await linearGraphql(args, {
+  const result = await linearOptionsGraphql(args, {
     query: `
       query JoriAutomationTeams($first: Int!) {
         teams(first: $first) { nodes { id key name } }
@@ -36,7 +36,7 @@ export async function searchLinearTeams(args: OptionLoaderArgs) {
 }
 
 export async function searchLinearProjects(args: OptionLoaderArgs) {
-  const result = await linearGraphql(args, {
+  const result = await linearOptionsGraphql(args, {
     query: `
       query JoriAutomationProjects($first: Int!) {
         projects(first: $first) {
@@ -65,7 +65,10 @@ export async function searchLinearProjects(args: OptionLoaderArgs) {
 
 export async function searchLinearIssues(args: OptionLoaderArgs) {
   const normalizedQuery = normalizeQuery(args.query)
-  const result = await linearGraphql(args, issueSearchBody(normalizedQuery))
+  const result = await linearOptionsGraphql(
+    args,
+    issueSearchBody(normalizedQuery)
+  )
   const teamId = optionalMatch(args.match, "team")
   const projectId = optionalMatch(args.match, "project")
 
@@ -83,25 +86,13 @@ export async function searchLinearIssues(args: OptionLoaderArgs) {
     }))
 }
 
-async function linearGraphql(
+async function linearOptionsGraphql(
   args: OptionLoaderArgs,
-  body: Record<string, unknown>
+  body: LinearGraphqlBody
 ) {
   const credentials = requireLinearCredentials(args.integration)
-  const result = await fetchJsonObject(linearGraphqlUrl, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${credentials.tokens.access}`,
-      "content-type": "application/json",
-    },
-    body,
-  })
 
-  if (result?.errors !== undefined) {
-    throw new Error("Linear option request failed")
-  }
-
-  return result
+  return await linearGraphql<JsonObject>(credentials.tokens.access, body)
 }
 
 function issueSearchBody(query: string) {
