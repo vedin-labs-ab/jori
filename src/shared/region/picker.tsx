@@ -28,6 +28,23 @@ export function RegionPicker({
     window.location.assign(regionSelectionUrl(regionConfig, region, returnTo))
   }
 
+  // Inline, the region reads from the option itself, so the label is for
+  // screen readers only. As a field it needs the visible name.
+  const label = (
+    <label
+      className={cn(isField ? "font-medium text-xs" : "sr-only")}
+      htmlFor={pickerId}
+    >
+      Data region
+    </label>
+  )
+  // A screen-reader-only label is absolutely positioned, so it takes no part
+  // in flex layout. A wrapper around it does. Wrapping unconditionally put an
+  // empty box before the select and the row's gap after it, which is why the
+  // compact picker sat indented from the edge the rest of the footer aligns
+  // to. The row exists only when it holds something visible.
+  const hasVisibleLabelRow = isField || labelAction !== undefined
+
   return (
     <div
       className={cn(
@@ -35,22 +52,19 @@ export function RegionPicker({
         isField ? "flex-col gap-2" : "items-center gap-2"
       )}
     >
-      <div
-        className={cn(
-          "flex items-center",
-          isField ? "justify-between gap-3" : "shrink-0 gap-2"
-        )}
-      >
-        {/* Inline, the region reads from the option itself, so the label is
-            for screen readers only. As a field it needs the visible name. */}
-        <label
-          className={cn(isField ? "font-medium text-xs" : "sr-only")}
-          htmlFor={pickerId}
+      {hasVisibleLabelRow ? (
+        <div
+          className={cn(
+            "flex items-center",
+            isField ? "justify-between gap-3" : "shrink-0 gap-2"
+          )}
         >
-          Data region
-        </label>
-        {labelAction}
-      </div>
+          {label}
+          {labelAction}
+        </div>
+      ) : (
+        label
+      )}
       <NativeSelect
         className={cn(isField && "w-full")}
         id={pickerId}

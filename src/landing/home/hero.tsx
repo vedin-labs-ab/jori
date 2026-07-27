@@ -8,7 +8,11 @@ export function Hero() {
   return (
     <section className="mx-auto grid w-full max-w-6xl items-center gap-14 px-6 pt-14 pb-24 md:grid-cols-[minmax(0,1fr)_minmax(0,24.5rem)] md:pt-24 md:pb-32 lg:gap-20">
       <div>
-        <p className="flex flex-wrap items-center gap-x-1.5 text-muted-foreground text-sm">
+        {/* Plain text flow rather than a flex row. As flex items, the chip and
+            the sentence were separated by the row's gap on top of the space
+            already inside the text and the chip's own padding, which read as
+            a wider space than the ones between the words after it. */}
+        <p className="text-muted-foreground text-sm">
           <Mention /> works in Slack, GitHub, and Linear
         </p>
         <h1 className="mt-5 font-medium text-5xl text-balance tracking-tight sm:text-6xl lg:text-7xl">
