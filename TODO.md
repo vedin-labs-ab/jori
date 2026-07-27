@@ -55,23 +55,31 @@ companies of roughly 10–80 people running Slack, GitHub, and Linear.
 
 ## Phase 4 · Production deployment
 
-No production target exists today. `pnpm deploy` only targets the development
-Convex deployment, and no hosting provider is configured.
+The commands exist and `pnpm deploy:prod` is wired end to end. What is left is
+provisioning: no production target has been created yet.
 
-- [ ] Register the domain
-- [ ] Provision a production Convex deployment, separate from the existing
-      personal development deployment
-- [ ] Create the Railway project (see the 2026-07-24 decision in `EU.md`) and
-      wire `VITE_JORI_REGION`, `VITE_JORI_ENABLED_REGIONS`,
-      `VITE_JORI_PUBLIC_ORIGIN`, `VITE_JORI_US_ORIGIN`, `VITE_JORI_EU_ORIGIN`,
-      `VITE_CONVEX_URL`, `VITE_CONVEX_SITE_URL`
-- [ ] Set deployment-local `JORI_APP_URL`, `JORI_REGION`, `BETTER_AUTH_SECRET`,
-      `JORI_EMAIL_FROM`, and the Resend credentials
-- [ ] Add a `deploy:production` script alongside `deploy:development`
-- [ ] Smoke test: marketing routes, waitlist submission, confirmation email
+- [x] Split every command and resource name by environment, and add
+      `pnpm deploy:prod` with its guards and preflight
+- [ ] Point `usejori.com` at the Vercel project, with `www` redirecting
+- [ ] Provision the `jori-prod-us` Convex project in US East, separate from the
+      existing personal development deployment
+- [ ] Recreate the development deployment in US East so it mirrors production.
+      A Convex deployment's region cannot be changed after creation, and the
+      current one sits in EU West
+- [ ] Set the Vercel Production build variables: `VITE_JORI_REGION`,
+      `VITE_JORI_ENABLED_REGIONS`, `VITE_JORI_PUBLIC_ORIGIN`,
+      `VITE_JORI_US_ORIGIN`, `VITE_CONVEX_URL`, `VITE_CONVEX_SITE_URL`. The
+      build reads them at build time and fails without them
+- [ ] Set the deployment variables listed in `scripts/env/names.ts`, and verify
+      the Resend sending domain before relying on any email
+- [ ] Register the production Google and Microsoft OAuth clients against
+      `https://usejori.com/api/auth/callback/{google,microsoft}`
+- [ ] Smoke test: marketing routes, waitlist submission, confirmation email,
+      sign-in, the waitlist gate, and one allowlisted address reaching the
+      console
 
-Sign-in, integrations, Trigger.dev, E2B, and Stripe are deliberately **not**
-part of this phase. The waitlist launch needs none of them in production.
+Integrations, Trigger.dev, E2B, and Stripe are deliberately **not** part of
+this phase. Sign-in is, because the waitlist gate is only visible behind it.
 
 ## Phase 5 · Product gaps for the new positioning
 
@@ -107,8 +115,9 @@ Ordered by how much each one blocks the promise.
   stage. Easier to do later than to undo
 - **EU residency claims.** `EU.md` is the gate. EU is disabled, Trigger.dev is
   blocking, and roughly ten provider rows are unverified. Region-isolated
-  architecture may be described as built; residency may not be promised. Railway
-  improves residency but not sovereignty, and no marketing copy claims either
+  architecture may be described as built; residency may not be promised. The US
+  frontend host cannot serve the EU region, so the EU host is an open selection
+  and no marketing copy claims either residency or sovereignty
 - **The active-workstream / commitment / verification data model.**
   Contract-backed app state already serves as a typed, validated, shared work
   object. Promote fields into a native model only after the same ones recur

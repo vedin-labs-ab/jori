@@ -4,11 +4,12 @@ dist
 dist-ssr
 *.local
 .env*
-!.env.local.example
+!.env.*.example
 .tanstack
 .trigger/
 .wrangler
 .output
+.vercel
 .vinxi
 __unconfig*
 todos.json

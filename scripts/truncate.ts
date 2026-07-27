@@ -19,6 +19,7 @@ async function main() {
     return
   }
 
+  requireDevelopmentDeployment()
   writeStdout("Starting Convex table truncation.")
 
   let batchNumber = 0
@@ -27,10 +28,7 @@ async function main() {
   while (true) {
     batchNumber += 1
 
-    const result = runTruncateBatch({
-      deployment: options.deployment,
-      limit: batchLimit,
-    })
+    const result = runTruncateBatch({ limit: batchLimit })
 
     if (result.deletedCount === 0 && result.hasMore) {
       throw new Error(
@@ -49,21 +47,24 @@ async function main() {
   writeStdout(`Finished truncation. Deleted ${totalDeleted} documents.`)
 }
 
-function parseArguments(arguments_: string[]) {
-  let deployment: string | null = null
+/** Truncation is irreversible, so the target is never an argument: it is
+ *  whichever deployment the development environment names, and a deployment
+ *  that is not a development one stops the command. */
+function requireDevelopmentDeployment() {
+  const deployment = process.env.CONVEX_DEPLOYMENT?.trim() ?? ""
+
+  if (!deployment.startsWith("dev:")) {
+    throw new Error(
+      `Truncation only runs against a development deployment, not ${deployment === "" ? "an unset CONVEX_DEPLOYMENT" : deployment}.`
+    )
+  }
+}
+
+function parseArguments(arguments_: readonly string[]) {
   let help = false
 
-  for (let index = 0; index < arguments_.length; index += 1) {
-    const argument = arguments_[index]
-    const value = arguments_[index + 1]
-
+  for (const argument of arguments_) {
     if (argument === "--") {
-      continue
-    }
-
-    if (argument === "--deployment") {
-      deployment = requireValue(argument, value)
-      index += 1
       continue
     }
 
@@ -75,16 +76,11 @@ function parseArguments(arguments_: string[]) {
     throw new Error(`Unknown argument: ${argument}`)
   }
 
-  return {
-    deployment,
-    help,
-  }
+  return { help }
 }
 
-function runTruncateBatch(args: { deployment: string | null; limit: number }) {
+function runTruncateBatch(args: { limit: number }) {
   const command = process.platform === "win32" ? "npx.cmd" : "npx"
-  const deploymentArgs =
-    args.deployment === null ? [] : ["--deployment", args.deployment]
   const result = spawnSync(
     command,
     [
@@ -92,7 +88,6 @@ function runTruncateBatch(args: { deployment: string | null; limit: number }) {
       "run",
       "--typecheck=disable",
       "--codegen=disable",
-      ...deploymentArgs,
       "maintenance:databaseBatch",
       JSON.stringify({ limit: args.limit }),
     ],
@@ -128,14 +123,6 @@ function parseBatchResult(output: string): TruncateBatchResult {
   return JSON.parse(normalized) as TruncateBatchResult
 }
 
-function requireValue(flag: string, value: string | undefined) {
-  if (value === undefined || value.startsWith("--")) {
-    throw new Error(`${flag} requires a value`)
-  }
-
-  return value
-}
-
 function printBatchResult(batchNumber: number, result: TruncateBatchResult) {
   if (result.deletedCount === 0) {
     writeStdout(`Batch ${batchNumber}: nothing to delete.`)
@@ -152,10 +139,10 @@ function printBatchResult(batchNumber: number, result: TruncateBatchResult) {
 }
 
 function printUsage() {
-  writeStdout("Usage: pnpm convex:truncate [-- --deployment <name>]")
+  writeStdout("Usage: pnpm db:truncate:dev")
   writeStdout("")
   writeStdout(
-    "Truncates all application tables from the current Convex deployment."
+    "Truncates all application tables from the development Convex deployment."
   )
 }
 

@@ -2,10 +2,9 @@
 
 ## Development Guidelines
 
-- Ensure `pnpm run check` passes before handoff.
+- Ensure `pnpm run check` and `pnpm run test` pass before handoff. Together they are the handoff gate.
 - Use Biome only for linting and formatting.
 - Before making code changes, read `biome.jsonc`, `scripts/dependencies.ts`, and `scripts/structure/index.ts`; shape the implementation to satisfy formatting, dependency boundary, and folder structure constraints from the start.
-- If you've changed Convex code, run `pnpm run deploy` before handoff.
 - Do not weaken or bypass checks to make them pass unless explicitly instructed.
 
 ### Change Workflow
@@ -17,6 +16,25 @@
 - Update `main` atomically with a serialized fast-forward merge from the checked task branch.
 - If no git remote is configured, updating local `main` is sufficient.
 - If `main` moves before the update lands, repeat the rebase/check/fast-forward sequence.
+
+### Environments
+
+Jori runs in two environments, `dev` and `prod`. Every resource is named for
+the environment that owns it, and every environment-targeting command is
+suffixed with it. See [README.md](README.md) for the command surface.
+
+- Worktrees never deploy. Concurrent tasks share one development deployment,
+  so a push from a worktree silently replaces whatever another task just
+  verified. `pnpm check` and `pnpm test` are the gate instead.
+- A change that genuinely needs a live backend — a schema migration, an HTTP
+  action, webhook ingress — verifies against a Convex preview deployment and a
+  Trigger.dev preview branch named after the task branch. Both expire on their
+  own; neither touches a shared environment.
+- After a task branch lands on `main`, the development deployment picks the
+  change up from the `pnpm dev` watcher. `pnpm deploy:dev` is only needed to
+  push without that watcher running.
+- Production is deployed by a person, never by an agent. Do not run
+  `pnpm deploy:prod`, and do not read or write production credentials.
 
 ### Code Quality & Architecture
 
