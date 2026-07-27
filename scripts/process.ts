@@ -3,12 +3,13 @@ import { spawn } from "node:child_process"
 export type Command = {
   args: string[]
   command: string
+  env?: NodeJS.ProcessEnv
   label: string
 }
 
-export async function runCommand({ args, command, label }: Command) {
+export async function runCommand({ args, command, env, label }: Command) {
   const exitCode = await new Promise<number>((resolve, reject) => {
-    const child = spawn(command, args, { stdio: "inherit" })
+    const child = spawn(command, args, { env, stdio: "inherit" })
 
     child.once("error", reject)
     child.once("exit", (code, signal) => {
@@ -46,5 +47,13 @@ export function packageCommand(script: string): Command {
     args: [script],
     command: process.platform === "win32" ? "pnpm.cmd" : "pnpm",
     label: script,
+  }
+}
+
+export function toolCommand(args: string[]): Command {
+  return {
+    args,
+    command: process.platform === "win32" ? "npx.cmd" : "npx",
+    label: args.join(" "),
   }
 }

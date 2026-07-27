@@ -2,6 +2,7 @@ import tailwindcss from "@tailwindcss/vite"
 import { devtools } from "@tanstack/devtools-vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
+import { nitro } from "nitro/vite"
 import { configDefaults, defineConfig } from "vitest/config"
 
 const ignoredWorkspacePaths = [
@@ -13,6 +14,14 @@ const ignoredWorkspacePaths = [
   "**/node_modules/**",
   "**/runtime/apps/template/**",
 ]
+
+// TanStack Start emits a request handler, not a server. Nitro wraps it into
+// something a host can run, and picks its Vercel preset up from the build
+// environment, so no target is configured here.
+//
+// Tests never serve requests, and leaving the server runtime installed holds
+// the Vitest worker open past the last assertion, so it is left out there.
+const serverPlugins = process.env.VITEST === undefined ? [nitro()] : []
 
 const reactOrAccessibilityWarning =
   /Blocked aria-hidden|Each child in a list should have a unique|validateDOMNesting|A component is changing an? (?:un)?controlled|Cannot update a component while rendering|does not recognize the .* prop on a DOM element|Received `(?:true|false)` for a non-boolean attribute/
@@ -41,6 +50,7 @@ const config = defineConfig({
     devtools({ consolePiping: { enabled: false } }),
     tailwindcss(),
     tanstackStart(),
+    ...serverPlugins,
     viteReact(),
   ],
   ssr: {

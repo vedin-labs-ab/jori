@@ -76,7 +76,7 @@ metadata, not only compute location.
 
 | System | Current state | EU launch requirement |
 | --- | --- | --- |
-| Frontend hosting | Railway selected, unverified | Deploy the EU frontend in EU West and verify logs, metrics, build data, and support access |
+| Frontend hosting | Vercel hosts US, blocking for EU | Select an EU-resident host and deploy the EU frontend there. Vercel cannot carry the promise; see the 2026-07-27 decision |
 | Convex and Better Auth | Regional code plumbing implemented; production targets not provisioned | Provision named US and EU deployments, secrets, backups, and recovery procedures |
 | Trigger.dev | US-centric, blocking | Replace with a verified EU-resident setup or self-host without losing required wait/checkpoint behavior |
 | Stripe | US-centric aspects expected | Define an acceptable billing boundary or replace it for a strict 100% EU promise |
@@ -98,14 +98,14 @@ complete Jori workflow satisfies the final residency promise.
 ## Enablement checklist
 
 - [ ] Approve a precise, customer-facing definition of EU data residency.
-- [ ] Review Railway against that definition before the first EU deployment.
+- [ ] Select an EU frontend host that satisfies that definition, and verify it
+      against the definition before the first EU deployment. The US frontend
+      host does not carry over.
 - [ ] Verify the host's trusted country header or add an equivalent geographic
       adapter. Missing geographic evidence deliberately falls back to US.
 - [ ] Provision the EU frontend and EU Convex deployment.
-- [ ] Provision and verify the US production deployment independently of the
-      existing personal development deployment.
-- [ ] Add `deploy:us` and `deploy:eu` targets plus one serialized production
-      parent command after both named deployment targets exist.
+- [ ] Split `deploy:prod` into `deploy:prod:us` and `deploy:prod:eu` with the
+      existing command as the serialized parent, once the EU target exists.
 - [ ] Configure deployment-local auth, integration, billing, and email secrets.
 - [ ] Register EU-specific OAuth callbacks and webhook endpoints where needed.
 - [ ] Resolve every `Unverified` or `blocking` provider row above.
@@ -158,3 +158,30 @@ explicitly as a limiting factor. Railway improves residency, not sovereignty.
 If the final promise is written at the sovereignty level rather than the
 residency level, the frontend host must be revisited alongside every other
 US-owned provider in the table above.
+
+Reversed on 2026-07-27.
+
+### 2026-07-27: Vercel hosts the US frontend
+
+Vercel replaces Railway as the frontend host, chosen for developer experience.
+
+This reverses the 2026-07-24 decision on its own terms. That decision picked
+Railway for the residency story, and the residency story does not survive
+either choice: Railway improves residency without delivering sovereignty, and
+the EU promise Jori intends to make is not one a US-incorporated host can
+carry. Paying a developer experience cost for a partial improvement that still
+needs replacing is the wrong trade, so the US frontend optimises for the thing
+it can actually have.
+
+The objections to Vercel recorded on 2026-07-24 stand and are not answered
+here. Its edge terminates every request, including session cookies and form
+submissions, in US-owned infrastructure before any regional function runs; its
+caching, logging, and analytics are not region-selected; and it is not listed
+under the EU-US Data Privacy Framework. None of that constrains the US
+deployment, which makes no residency promise. All of it disqualifies Vercel
+from serving the EU region.
+
+The EU frontend is therefore an open provider selection rather than a
+configuration of the existing one. Scaleway is the current candidate, chosen
+against a residency definition that does not yet exist; the enablement
+checklist keeps that ordering. Nothing about the EU host is decided here.

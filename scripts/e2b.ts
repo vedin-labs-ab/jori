@@ -10,8 +10,7 @@ import {
 import { runtimeAssets } from "../runtime/apps/_generated/assets.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
-const e2bSandboxTemplate =
-  process.env.JORI_E2B_TEMPLATE?.trim() || "jori-sandbox"
+const e2bSandboxTemplate = requireTemplateName()
 const sandboxNodeVersion = "26.3.0"
 
 const apiKey = process.env.E2B_API_KEY ?? readCliApiKey()
@@ -49,6 +48,19 @@ await Template.build(template, e2bSandboxTemplate, {
   apiKey,
   onBuildLogs: defaultBuildLogger(),
 })
+
+/** Template names are global to the E2B team, so each environment must name
+ *  its own. There is no default: one would let a development build overwrite
+ *  the template production sandboxes start from. */
+function requireTemplateName() {
+  const template = process.env.JORI_E2B_TEMPLATE?.trim()
+
+  if (template === undefined || template === "") {
+    throw new Error("Missing JORI_E2B_TEMPLATE")
+  }
+
+  return template
+}
 
 function readCliApiKey() {
   if (!existsSync(cliConfigPath)) {
