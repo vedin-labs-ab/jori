@@ -1,6 +1,6 @@
+import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { isTerminalRunStatus } from "../schema"
 import {
   normalizeQuery,
   parseCursor,

@@ -1,9 +1,9 @@
 import { v } from "convex/values"
 import { approvalTtlMs } from "../../contracts/approvals"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { isTerminalRunStatus } from "../runs/schema"
 import { actorValidator } from "../shared/actor"
 import {
   slackMessageDeliveryValidator,

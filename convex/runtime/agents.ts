@@ -5,6 +5,7 @@ import { type Id } from "../_generated/dataModel"
 import { action, internalMutation, query } from "../_generated/server"
 import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
+import { runStatus } from "../runs/schema"
 import { stopRunTree } from "../runs/tree"
 import { requireWorkerSecret } from "./secret"
 
@@ -122,13 +123,7 @@ export const readChildren = query({
     v.object({
       runId: v.id("runs"),
       title: v.string(),
-      status: v.union(
-        v.literal("queued"),
-        v.literal("running"),
-        v.literal("completed"),
-        v.literal("failed"),
-        v.literal("stopped")
-      ),
+      status: runStatus,
       error: v.union(v.string(), v.null()),
       result: v.union(v.string(), v.null()),
     })

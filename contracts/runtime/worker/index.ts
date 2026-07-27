@@ -1,4 +1,4 @@
-export { type AgentRunStatus, isTerminalAgentRunStatus } from "./agents"
+export type { AgentRunStatus } from "./agents"
 export type {
   DrainedSessionBatch,
   RuntimeContext,

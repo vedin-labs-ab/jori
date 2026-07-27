@@ -1,3 +1,4 @@
+import { runStatuses } from "../../../../../../contracts/runtime/runs"
 import {
   arrayProperty,
   booleanProperty,
@@ -32,10 +33,7 @@ const agentRunSchema = objectSchema({
   properties: {
     runId: stringProperty("Run ID of the child."),
     title: stringProperty("The child's title."),
-    status: enumProperty(
-      ["queued", "running", "completed", "failed", "stopped"],
-      "Where the child is in its lifecycle."
-    ),
+    status: enumProperty(runStatuses, "Where the child is in its lifecycle."),
     error: nullableStringProperty("Why the child failed, when it did."),
     result: {
       type: ["string", "null"],

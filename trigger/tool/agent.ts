@@ -4,9 +4,9 @@ import {
   durationMilliseconds,
   isDurationUnit,
 } from "../../contracts/runtime/duration"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import {
   type AgentRunStatus,
-  isTerminalAgentRunStatus,
   type RuntimeId,
 } from "../../contracts/runtime/worker"
 import { optionalStringList, requiredString } from "../input"
@@ -144,5 +144,5 @@ function readTimeoutMilliseconds(value: unknown) {
 }
 
 function allTerminal(runs: AgentRunStatus[]) {
-  return runs.every((run) => isTerminalAgentRunStatus(run.status))
+  return runs.every((run) => isTerminalRunStatus(run.status))
 }

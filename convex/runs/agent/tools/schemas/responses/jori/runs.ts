@@ -1,3 +1,4 @@
+import { runStatuses } from "../../../../../../../contracts/runtime/runs"
 import {
   arrayProperty,
   enumProperty,
@@ -19,10 +20,7 @@ function runSummarySchema(): JsonSchema {
       task: stringProperty("The task the run was started with."),
       trigger: stringProperty("What triggered the run."),
       scope: stringProperty("Audience scope of the run."),
-      status: enumProperty(
-        ["queued", "running", "completed", "failed", "stopped"],
-        "Where the run is in its lifecycle."
-      ),
+      status: enumProperty(runStatuses, "Where the run is in its lifecycle."),
       source: stringProperty("Surface or automation the run came from."),
       context: arrayProperty("Context labels for the run.", {
         type: "object",

@@ -1,7 +1,7 @@
+import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
 import { type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { type QueryLikeCtx } from "../../../shared/context"
-import { isTerminalRunStatus } from "../../schema"
 
 const idleSandboxLeaseMs = 5 * 60 * 1000
 

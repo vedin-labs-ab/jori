@@ -1,8 +1,8 @@
 import { task } from "@trigger.dev/sdk"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { agentTaskId } from "../../contracts/runtime/tasks"
 import {
   type AgentRunPayload,
-  isTerminalAgentRunStatus,
   type RuntimeContext,
 } from "../../contracts/runtime/worker"
 import { JoriConvexClient } from "../convex"
@@ -37,7 +37,7 @@ export const joriAgentRun = task({
       context.run.sandboxId
     )
 
-    if (isTerminalAgentRunStatus(context.run.status)) {
+    if (isTerminalRunStatus(context.run.status)) {
       await sandbox.cleanup()
 
       return {

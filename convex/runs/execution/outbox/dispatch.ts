@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { agentTaskId, cleanupTaskId } from "../../../../contracts/runtime"
+import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
 import {
   type AgentRunPayload,
   type SandboxCleanupPayload,
@@ -13,7 +14,6 @@ import {
   readEnvironmentVariable,
   requireEnvironmentVariable,
 } from "../../../shared/environment"
-import { isTerminalRunStatus } from "../../schema"
 import { formatRuntimeError } from "./error"
 
 const batchSize = 5

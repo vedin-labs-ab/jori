@@ -1,13 +1,16 @@
+import {
+  isTerminalRunStatus,
+  type RunStatus,
+} from "../../../contracts/runtime/runs"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { isTerminalRunStatus } from "../../runs/schema"
 import { type RuntimeSkill } from "../../skills/runtime"
 import { syncSessionReactions } from "../sessions"
 
 export type LoadedRun = {
   _id: Id<"runs">
-  status: "completed" | "failed" | "queued" | "running" | "stopped"
+  status: RunStatus
   organizationId: string
 }
 export type LoadedSandbox = { externalId: string } | null
