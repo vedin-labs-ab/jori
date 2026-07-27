@@ -132,7 +132,7 @@ export function EditSetupNotes({
       ) : null}
       {customized ? (
         <p>
-          Your {definition.app?.title ?? "playbook"} app has custom changes —
+          Your {definition.app?.title ?? "playbook"} app has custom changes.
           Jori keeps them and never overwrites a customized app.
         </p>
       ) : null}
