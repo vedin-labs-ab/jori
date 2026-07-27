@@ -45,9 +45,8 @@ companies of roughly 10–80 people running Slack, GitHub, and Linear.
       organization invitations
 - [x] Field-level validation: rejections name their field, so the form marks
       that input invalid instead of printing one notice under the whole thing
-- [ ] Verified sending domain. Both senders currently fall back to
-      `onboarding@resend.dev`, which is Resend's test domain and only delivers
-      to the account owner. Set `JORI_EMAIL_FROM` once a domain is verified
+- [x] Verified sending domain. `mail.usejori.com` is verified in Resend, and
+      every sender is the one address in `convex/email.ts`
 - [x] Abuse controls: per-caller and global token buckets via
       `@convex-dev/rate-limiter`, a honeypot field, and identical responses for
       new and existing addresses so the list cannot be enumerated
@@ -64,14 +63,16 @@ accounts this repository cannot reach.
       inside the existing `jori` project, and deploy the backend to it
 - [x] Create the `jori` Vercel project, set its Production build variables, and
       attach `usejori.com` and `www.usejori.com`
-- [ ] Point the Porkbun DNS at Vercel: `A usejori.com 76.76.21.21`
+- [x] Point the Porkbun DNS at Vercel and deploy the frontend. `usejori.com`
+      serves the marketing routes; every other host is refused
+- [x] Verify `mail.usejori.com` in Resend and set `RESEND_API_KEY` on the
+      production deployment
 - [ ] Set `www.usejori.com` to redirect to the apex in the Vercel project's
-      domain settings
+      domain settings. It currently refuses the request as a wrong host
 - [ ] Delete the empty `jori-prod-us` Convex project, created by mistake and
       unused. Convex has no CLI for it
-- [ ] Verify a Resend sending domain and set `RESEND_API_KEY` and
-      `JORI_EMAIL_FROM` on the production deployment. Until then the waitlist
-      confirmation falls back to Resend's shared test domain
+- [ ] Give the development deployment's Resend key sending access to
+      `mail.usejori.com`, now that the sender is one hardcoded address
 - [ ] Register the production Google and Microsoft OAuth clients against
       `https://usejori.com/api/auth/callback/{google,microsoft}` and set all
       four credentials. Sign-in resolves both providers on every auth request,
