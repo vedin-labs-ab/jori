@@ -11,23 +11,30 @@ export function isEnvironment(value: string): value is Environment {
   return environments.includes(value as Environment)
 }
 
-/** The env file an environment reads. Dev holds working credentials. Prod
- *  holds credentials that *target* production, never the secrets production
- *  *runs on* — those live in the Convex and Vercel dashboards so a developer
- *  machine never has to. */
-export function environmentFile(environment: Environment) {
-  return `.env.${environment}.local`
+/** The env file an environment reads.
+ *
+ *  Development keeps the conventional name. The Convex CLI writes the selected
+ *  deployment into `.env.local` and Vite loads it without being asked, so
+ *  renaming it would mean fighting two tools for a filename that already means
+ *  "this machine". Everything else is named for its environment, because
+ *  nothing but development should ever be picked up by accident. */
+const files: Record<Environment, string> = {
+  dev: ".env.local",
+  prod: ".env.prod.local",
 }
 
-/** Local variables the wrapper refuses to run without. */
+export function environmentFile(environment: Environment) {
+  return files[environment]
+}
+
+/** Local variables the wrapper refuses to run without.
+ *
+ *  Production is one deploy key. The Vercel CLI carries its own credentials
+ *  and reads the linked project from `.vercel/`, so nothing about production
+ *  hosting has to be restated here. */
 export const localNames: Record<Environment, readonly string[]> = {
   dev: ["CONVEX_DEPLOYMENT"],
-  prod: [
-    "CONVEX_DEPLOY_KEY",
-    "VERCEL_ORG_ID",
-    "VERCEL_PROJECT_ID",
-    "VERCEL_TOKEN",
-  ],
+  prod: ["CONVEX_DEPLOY_KEY"],
 }
 
 /** Variables the Convex deployment itself must hold before it can serve a

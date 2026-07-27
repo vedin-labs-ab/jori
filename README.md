@@ -11,19 +11,27 @@ that owns it, so a name always says which environment it belongs to.
 | | `dev` | `prod` |
 | --- | --- | --- |
 | Frontend | `localhost:5173` | Vercel, `usejori.com` |
-| Convex project | `jori-dev` | `jori-prod-us` |
+| Convex deployment | personal dev deployment | `insightful-goat-7`, US East |
 | Trigger.dev environment | `dev` | `prod` |
 | E2B template | `jori-sandbox-dev` | `jori-sandbox-prod` |
-| Local env file | `.env.dev.local` | `.env.prod.local` |
+| Local env file | `.env.local` | `.env.prod.local` |
+
+Both Convex deployments live in the one `jori` project, which is how Convex
+models a project: one production deployment, plus a development deployment per
+person. A second project is only needed for a deployment that project cannot
+hold — a permanent staging environment, or the EU production deployment, since
+a project has exactly one production slot.
 
 A staging environment slots in without renaming anything: add `staging` to
-`scripts/env/names.ts`, add `.env.staging.local`, and provision resources
-under the matching `jori-staging` names.
+`scripts/env/names.ts`, add `.env.staging.local`, and provision a
+`jori-staging` project.
 
-`.env.dev.local` holds working development credentials. `.env.prod.local`
-holds credentials that *target* production — deploy keys — never the secrets
-production *runs on*. Those live in the Convex and Vercel dashboards, and
-`pnpm deploy:prod` verifies the deployment holds them before it deploys.
+`.env.local` holds working development credentials, and keeps its conventional
+name because the Convex CLI writes the selected deployment there and Vite loads
+it automatically. `.env.prod.local` holds one deploy key — a credential that
+*targets* production, never a secret production *runs on*. Those live in the
+Convex and Vercel dashboards, and `pnpm deploy:prod` verifies the deployment
+holds them before it deploys.
 
 ## Development
 
@@ -34,7 +42,7 @@ pnpm install
 ```
 
 ```sh
-cp .env.dev.local.example .env.dev.local
+cp .env.local.example .env.local
 ```
 
 The Convex CLI creates the deployment and writes `CONVEX_DEPLOYMENT` into that
@@ -69,7 +77,20 @@ working tree. `pnpm deploy:dev` pushes it once without that watcher running.
 
 ## Deploying to production
 
-Production is deployed by a person, explicitly, from `main`:
+Production needs two credentials on the machine that deploys, written once.
+The Convex deploy key:
+
+```sh
+npx convex deployment token create local-deploy --prod --save-env .env.prod.local
+```
+
+And the Vercel link, which writes `.vercel/` from your `vercel login` session:
+
+```sh
+npx vercel link --yes --project jori
+```
+
+Production is then deployed by a person, explicitly, from `main`:
 
 ```sh
 pnpm deploy:prod
