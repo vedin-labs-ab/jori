@@ -8,6 +8,7 @@ import {
   validateAutomationPolicy,
 } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
+import { automationInstructionsErrors, automationNameErrors } from "../errors"
 import { automationFormValues } from "."
 import { prepareAutomationInstructions } from "./instructions"
 import { automationInstructionMarkerErrors } from "./marker"
@@ -116,11 +117,11 @@ function buildBaseArgs(
   const surfaces = values.surfaces
 
   if (name === "") {
-    return { error: "Name is required." }
+    return { error: automationNameErrors.required }
   }
 
   if (instructions === "") {
-    return { error: "Instructions are required." }
+    return { error: automationInstructionsErrors.required }
   }
 
   if (surfaces.length === 0) {

@@ -170,15 +170,7 @@ export const run = mutation({
   },
   handler: async (ctx, args) => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
-    const automation = await getOrganizationAutomation(
-      ctx,
-      args.organizationId,
-      args.automationId
-    )
-
-    if (!canAccessAutomation(automation, personId)) {
-      throw new Error("Automation not found.")
-    }
+    const automation = await requireAccessibleAutomation(ctx, args, personId)
 
     if (automation.type === "event") {
       throw new Error("Event automations run when their event arrives.")

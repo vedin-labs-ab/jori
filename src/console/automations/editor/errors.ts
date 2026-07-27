@@ -1,11 +1,11 @@
 import { automationScopeConflictMessage } from "../access"
 import { readAutomationInstructionMarkerError } from "./save/marker"
 
-const automationNameErrors = {
+export const automationNameErrors = {
   required: "Name is required.",
 } as const
 
-const automationInstructionsErrors = {
+export const automationInstructionsErrors = {
   required: "Instructions are required.",
 } as const
 
