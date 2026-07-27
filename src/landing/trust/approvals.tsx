@@ -11,16 +11,16 @@ export function ApprovalsSection() {
       title="Ask first means ask you"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
-        <div className="space-y-5 text-muted-foreground text-sm leading-relaxed">
+        {/* What happens to a gated tool on an unattended run belongs with the
+            other structural guarantees, in `BoundariesSection`. Stating it
+            here as well made the same promise twice on one page, which reads
+            as padding on the one page that cannot afford it. */}
+        <div className="text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
             Every request carries a code. Approve it from the console, or reply
             where the work is: type approve YD4UEFNV in the thread and the
             action runs. Deny it, or let it expire, and it never does. Jori
             doesn't retry on its own.
-          </p>
-          <p className="max-w-xl">
-            Unattended runs can never use ask-first tools. Anything you gate
-            waits for a run with you in it.
           </p>
         </div>
         <ReleaseApprovalCard />
