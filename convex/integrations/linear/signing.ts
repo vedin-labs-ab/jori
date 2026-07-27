@@ -19,8 +19,8 @@ export async function parseSignedLinearState(value: string) {
   })
 }
 
-export async function verifyLinearRequest(_request: Request, body: string) {
-  const signature = _request.headers.get("linear-signature")
+export async function verifyLinearRequest(request: Request, body: string) {
+  const signature = request.headers.get("linear-signature")
 
   if (signature === null) {
     return false
