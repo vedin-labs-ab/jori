@@ -36,8 +36,11 @@ const failedMessage = "Something went wrong. Try again in a moment."
  */
 export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
   const fieldId = useId()
+  const form = useRef<HTMLFormElement>(null)
   const [status, setStatus] = useState<Status>("idle")
   const [rejection, setRejection] = useState<Rejection>()
+
+  useRejectionFocus(form, fieldId, rejection)
 
   if (status === "joined") {
     return <Joined />
@@ -76,6 +79,7 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
       noValidate
       onInput={() => setRejection(undefined)}
       onSubmit={submit}
+      ref={form}
     >
       <div className="grid gap-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <EmailField
@@ -282,6 +286,38 @@ function errorId(fieldId: string, field: WaitlistField) {
   return `${fieldId}-${field}-error`
 }
 
+/**
+ * Submitting disables the button focus was sitting on, so a rejection that
+ * left focus where it found it would drop it to the document and start the
+ * keyboard over at the top of the page.
+ *
+ * A named field takes focus, because that is where the fix is, and arriving
+ * there reads the label and the reason together. Anything else goes back to
+ * the button that will be pressed again. It waits for the commit rather than
+ * moving focus from the submit handler, because until the button is enabled
+ * again nothing can focus it.
+ */
+function useRejectionFocus(
+  form: React.RefObject<HTMLFormElement | null>,
+  fieldId: string,
+  rejection: Rejection | undefined
+) {
+  useEffect(() => {
+    if (form.current === null || rejection === undefined) {
+      return
+    }
+
+    const target =
+      rejection.kind === "field"
+        ? document.getElementById(`${fieldId}-${rejection.field}`)
+        : form.current.querySelector("button[type=submit]")
+
+    if (target instanceof HTMLElement) {
+      target.focus()
+    }
+  }, [fieldId, form, rejection])
+}
+
 /** Only point at the message when there is one: FieldError renders nothing
  *  until it has content, and a dangling reference reads as an empty hint. */
 function describedBy(
@@ -311,9 +347,13 @@ function Joined() {
       <Check className="mt-0.5 size-4 shrink-0 text-primary" />
       <div>
         <p className="font-medium text-sm">You're on the list.</p>
+        {/* The confirmation email invites no reply, because Jori sends from a
+            subdomain with no mailbox behind it. Offering one here would be the
+            same dead end one screen earlier. */}
         <p className="mt-1 text-muted-foreground text-sm leading-relaxed">
-          Check your inbox for a confirmation. We're opening to a few teams at a
-          time, and you can reply to that email if you want to jump the queue.
+          Check your inbox for a confirmation. We open to a few teams at a time
+          and set each one up ourselves, so you'll hear from us directly when
+          yours is next.
         </p>
       </div>
     </div>

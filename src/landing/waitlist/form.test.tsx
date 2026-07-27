@@ -73,3 +73,45 @@ test("leaves the inputs undescribed while nothing is wrong", () => {
     screen.getByLabelText("Work email").getAttribute("aria-describedby")
   ).toBeNull()
 })
+
+// Submitting disables the button focus was on, so a rejection that left focus
+// where it found it would drop it to the document and start the keyboard over
+// at the top of the page.
+test("moves focus to the field a rejection names", async () => {
+  joinWaitlist.mockResolvedValue({
+    status: "rejected",
+    field: "work",
+    message: "Tell us a little more.",
+  })
+  render(<WaitlistForm />)
+  fill()
+
+  await waitFor(() => {
+    expect(document.activeElement).toBe(
+      screen.getByLabelText(/by hand every week/)
+    )
+  })
+})
+
+test("hands focus back to the button when nothing names a field", async () => {
+  joinWaitlist.mockResolvedValue({ status: "throttled" })
+  render(<WaitlistForm />)
+  fill()
+
+  await waitFor(() => {
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Join the waitlist" })
+    )
+  })
+})
+
+test("marks the field a local rejection names, before any round trip", () => {
+  render(<WaitlistForm />)
+  fireEvent.submit(screen.getByRole("button", { name: "Join the waitlist" }))
+
+  const email = screen.getByLabelText("Work email")
+
+  expect(email.getAttribute("aria-invalid")).toBe("true")
+  expect(document.activeElement).toBe(email)
+  expect(joinWaitlist).not.toHaveBeenCalled()
+})
