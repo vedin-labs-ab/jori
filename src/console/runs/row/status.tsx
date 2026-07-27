@@ -24,10 +24,14 @@ import { type ExecutionItem, type ExecutionStatus } from "../types"
 const executionStatuses = {
   completed: {
     Icon: CheckCircle2,
-    className: "text-emerald-800",
+    className: "text-success",
     label: "Completed",
   },
-  failed: { Icon: AlertCircle, className: "text-red-800", label: "Failed" },
+  failed: {
+    Icon: AlertCircle,
+    className: "text-destructive",
+    label: "Failed",
+  },
   queued: {
     Icon: Loader2,
     className: "text-muted-foreground",

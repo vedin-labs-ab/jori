@@ -12,7 +12,8 @@ Pure-neutral shadcn ramp plus one committed accent:
 - `--muted` oklch(0.97 0 0), `--muted-foreground` oklch(0.556 0 0)
 - `--border` / `--input` oklch(0.922 0 0)
 - `--primary` muted sage green oklch(0.535 0.051 153.5): primary buttons, links, small highlights. Keep it scarce; it reads as the brand color because it is rare.
-- Semantic: `--destructive` oklch(0.575 0.121 33.2), `--warning`, `--informational`.
+- Semantic, and each one is set dark enough to be read as text on the background, not just seen as a shape: `--destructive` oklch(0.575 0.121 33.2), `--success` oklch(0.43 0.086 167), `--warning` oklch(0.565 0.122 81.8). `--informational` oklch(0.61 0.036 236) is the exception: it only ever fills the workstream activity ramp, so it answers to 3:1 rather than 4.5:1, and nothing should set it as text.
+- Never reach into Tailwind's own palette (`text-emerald-800`, `text-red-800`) for a state a token already names.
 
 ## Typography
 
