@@ -54,7 +54,9 @@ export function InvitationInfo() {
 
 export function SignInLegalNotice() {
   return (
-    <p className="text-pretty text-center text-[0.625rem]/relaxed text-muted-foreground">
+    // Consent copy, so it is set at the smallest size the system actually
+    // uses for reading rather than a step below it.
+    <p className="text-pretty text-center text-muted-foreground text-xs/relaxed">
       By continuing, you agree to Jori&apos;s{" "}
       <LegalLink to="/terms">Terms</LegalLink> and acknowledge the{" "}
       <LegalLink to="/privacy">Privacy Policy</LegalLink>.
@@ -72,7 +74,13 @@ function InfoDialog({
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className={cn("h-auto px-0 py-0", triggerClassName)}
+          // Its own target, not a word inside a sentence, so the hit area is
+          // grown to the 24px WCAG 2.5.8 asks for. A pseudo-element does it,
+          // so the line it sits on keeps its height.
+          className={cn(
+            'relative h-auto px-0 py-0 after:absolute after:-inset-y-1 after:inset-x-0 after:content-[""]',
+            triggerClassName
+          )}
           size="sm"
           variant="link"
         >
