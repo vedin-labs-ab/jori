@@ -48,6 +48,10 @@ export function Apps() {
                   {integrationLabels[integration]}
                 </Chip>
               ))}
+              {/* Dashed, the way this system already marks something that is
+                  not there yet. Depth first is the bet, but the list does
+                  grow, and a row that reads as closed says otherwise. */}
+              <Chip className="border-dashed">+ more</Chip>
             </div>
           </div>
         </div>
