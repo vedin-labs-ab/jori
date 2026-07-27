@@ -93,6 +93,39 @@ test("does not expose authentication on the apex", () => {
   expect(response?.status).toBe(404)
 })
 
+test("sends the www spelling to the public origin", () => {
+  const response = handleRegionRequest(
+    new Request("https://www.jori.example/pricing?plan=team"),
+    config
+  )
+
+  expect(response?.status).toBe(308)
+  expect(response?.headers.get("location")).toBe(
+    "https://jori.example/pricing?plan=team"
+  )
+})
+
+test("sends the www spelling on behind a deployment proxy", () => {
+  const response = handleRegionRequest(
+    new Request("http://internal.service/pricing", {
+      headers: { "x-forwarded-host": "www.jori.example" },
+    }),
+    config
+  )
+
+  expect(response?.status).toBe(308)
+  expect(response?.headers.get("location")).toBe("https://jori.example/pricing")
+})
+
+test("does not treat a www regional host as the public origin", () => {
+  const response = handleRegionRequest(
+    new Request("https://www.eu.jori.example/console"),
+    config
+  )
+
+  expect(response?.status).toBe(421)
+})
+
 test("rejects requests delivered to the wrong deployment", () => {
   const response = handleRegionRequest(
     new Request("https://eu.jori.example/console"),

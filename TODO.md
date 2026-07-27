@@ -17,8 +17,8 @@ companies of roughly 10–80 people running Slack, GitHub, and Linear.
 - [x] Settle the public vocabulary: "app" replaces "artifact" everywhere,
       internals included, so the concept reads the same in the UI, the schema,
       the tool names, and the SDK
-- [ ] Decide whether the `workstreams` console page survives the repositioning
-      or becomes internal-only context grounding
+- [x] Decide whether the `workstreams` console page survives the repositioning.
+      It stays as a console page for now
 
 ## Phase 2 · Marketing site
 
@@ -31,7 +31,9 @@ companies of roughly 10–80 people running Slack, GitHub, and Linear.
       nothing claimed that does not ship
 - [x] Pricing page: tiers replaced with the pricing *shape* plus an honest
       "numbers at launch" note. `contracts/billing.ts` is untouched
-- [ ] OG image against the new promise (currently text-only metadata)
+- [ ] OG image against the new promise. `public/brand/og.jpg` is the mark on a
+      1200x630 canvas, which makes link previews render but says nothing about
+      the promise. It wants a designed asset carrying the headline
 - [ ] Legal and privacy review for waitlist data collection
 
 ## Phase 3 · Waitlist
@@ -67,20 +69,14 @@ accounts this repository cannot reach.
       serves the marketing routes; every other host is refused
 - [x] Verify `mail.usejori.com` in Resend and set `RESEND_API_KEY` on the
       production deployment
-- [ ] Set `www.usejori.com` to redirect to the apex in the Vercel project's
-      domain settings. It currently refuses the request as a wrong host
-- [ ] Delete the empty `jori-prod-us` Convex project, created by mistake and
-      unused. Convex has no CLI for it
-- [ ] Give the development deployment's Resend key sending access to
+- [x] Send the `www` spelling to the public origin. Host routing answers it,
+      so it needs no per-deployment dashboard setting
+- [x] Delete the empty `jori-prod-us` Convex project
+- [x] Give the development deployment's Resend key sending access to
       `mail.usejori.com`, now that the sender is one hardcoded address
-- [ ] Register the production Google and Microsoft OAuth clients against
+- [x] Register the production Google and Microsoft OAuth clients against
       `https://usejori.com/api/auth/callback/{google,microsoft}` and set all
-      four credentials. Sign-in resolves both providers on every auth request,
-      so it stays broken until all four exist
-- [ ] Recreate the development deployment in US East so it mirrors production.
-      A Convex deployment's region cannot be changed after creation, and the
-      current one sits in EU West. This discards development data and needs the
-      development deployment variables set again
+      four credentials
 - [ ] Smoke test: marketing routes, waitlist submission, confirmation email,
       sign-in, the waitlist gate, and one allowlisted address reaching the
       console

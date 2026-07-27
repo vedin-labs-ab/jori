@@ -15,6 +15,12 @@ export function handleRegionRequest(
     return null
   }
 
+  const canonical = canonicalHostRedirect(request, requestUrl, config)
+
+  if (canonical !== null) {
+    return canonical
+  }
+
   if (requestOrigin !== config.publicOrigin) {
     return textResponse("Misdirected request.", 421)
   }
@@ -99,6 +105,46 @@ function handleRegionSelection(
     regionalUrl(config, candidate, returnTo),
     config.publicOrigin,
     candidate
+  )
+}
+
+/**
+ * `www` is not a region. It is how people type the public origin, so it is
+ * answered here rather than left to the host: a request that reaches the
+ * application at all has already been routed correctly, and refusing it as a
+ * wrong host would be a broken link for a spelling everyone uses.
+ *
+ * The redirect is permanent because the public origin is the canonical one and
+ * that is not a preference the visitor can change.
+ */
+function canonicalHostRedirect(
+  request: Request,
+  requestUrl: URL,
+  config: RegionConfig
+) {
+  const publicHost = new URL(config.publicOrigin).host
+
+  if (resolveRequestHost(request, requestUrl) !== `www.${publicHost}`) {
+    return null
+  }
+
+  return new Response(null, {
+    headers: {
+      "Cache-Control": "public, max-age=3600",
+      Location: new URL(
+        normalizeReturnPath(requestPath(requestUrl)),
+        config.publicOrigin
+      ).toString(),
+    },
+    status: 308,
+  })
+}
+
+/** What the visitor typed, as the deployment's proxy reports it. */
+function resolveRequestHost(request: Request, requestUrl: URL) {
+  return (
+    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ??
+    requestUrl.host
   )
 }
 
