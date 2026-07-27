@@ -27,6 +27,18 @@ export function getPageTitle(pathname: string) {
   )
 }
 
+/**
+ * What the browser tab says. Console routes declare it from their own path so
+ * the name comes from the same table the sidebar and the header read, and a
+ * page can never be called one thing in the app and another in history.
+ *
+ * The page comes first: a tab strip with eight consoles open truncates from
+ * the right, and "Runs" is the half worth keeping.
+ */
+export function consoleDocumentTitle(pathname: string) {
+  return `${getPageTitle(pathname)} · Jori`
+}
+
 export function isNavigationActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(`${to}/`)
 }

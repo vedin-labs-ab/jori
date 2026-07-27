@@ -1,11 +1,5 @@
 import { useRouterState } from "@tanstack/react-router"
 import { type ReactNode, useState } from "react"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
@@ -13,6 +7,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { mainContentId, SkipToContent } from "@/shared/skip"
 import { ConsoleHeaderActionsProvider } from "../shared/layout"
 import { ConsoleSidebar } from "./navigation"
 import { getPageTitle } from "./routes"
@@ -28,8 +23,9 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider className="h-svh overflow-hidden">
+      <SkipToContent />
       <ConsoleSidebar pathname={pathname} />
-      <SidebarInset className="min-h-0">
+      <SidebarInset className="min-h-0" id={mainContentId} tabIndex={-1}>
         <header
           className={cn(
             consoleFrame,
@@ -41,15 +37,10 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             className="mr-2 data-vertical:h-4 data-vertical:self-auto"
             orientation="vertical"
           />
-          <Breadcrumb className="min-w-0">
-            <BreadcrumbList className="flex-nowrap">
-              <BreadcrumbItem className="min-w-0">
-                <BreadcrumbPage className="truncate">
-                  {pageTitle}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+          {/* A one-item breadcrumb is not a trail, it is the page's name, so
+              it is marked up as one. Every console page gets its heading from
+              here rather than repeating it in the content below. */}
+          <h1 className="min-w-0 truncate text-xs/relaxed">{pageTitle}</h1>
           <div
             className="ml-auto flex shrink-0 items-center gap-2"
             ref={setHeaderSlot}

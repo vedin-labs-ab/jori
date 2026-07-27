@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Runs } from "@/console/runs"
+import { consoleDocumentTitle } from "@/console/shell/routes"
 
 // `run` deep-links to a single run: the list opens and scrolls to that row.
 // `page` survives refreshes; it is absent on the first page.
@@ -15,4 +16,5 @@ export const Route = createFileRoute("/runs")({
       : {}),
   }),
   component: Runs,
+  head: () => ({ meta: [{ title: consoleDocumentTitle("/runs") }] }),
 })

@@ -11,7 +11,7 @@ import { RegionPicker } from "@/shared/region/picker"
 
 export const Route = createFileRoute("/sign-in")({
   component: SignInPage,
-  head: () => ({ meta: [{ title: "Jori · Sign in" }] }),
+  head: () => ({ meta: [{ title: "Sign in · Jori" }] }),
 })
 
 function SignInPage() {
@@ -35,7 +35,9 @@ function SignInPage() {
                   />
                 </div>
               }
-              title="Sign in to Jori"
+              // The card's title slot is a div. This is the page's only
+              // heading, so it says so.
+              title={<h1>Sign in to Jori</h1>}
             />
             <div className="mt-8 space-y-4">
               <div className="flex justify-center">

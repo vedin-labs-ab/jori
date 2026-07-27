@@ -36,7 +36,12 @@ export function LegalPlaceholder({
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">{icon}</EmptyMedia>
-            <EmptyTitle>{title}</EmptyTitle>
+            {/* The empty state's title slot is a div, and on a page whose
+                whole content is the empty state that leaves nothing for a
+                reader jumping by heading to land on. */}
+            <EmptyTitle>
+              <h1>{title}</h1>
+            </EmptyTitle>
             <EmptyDescription>{description}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>

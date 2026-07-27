@@ -47,7 +47,10 @@ export function RootStateFrame({
       <Empty className="flex-1 pb-20">
         <EmptyHeader className="max-w-md gap-2">
           <EmptyMedia variant="icon">{icon}</EmptyMedia>
-          <EmptyTitle className="text-xl">{title}</EmptyTitle>
+          {/* The title slot is a div, and this frame is the whole page. */}
+          <EmptyTitle className="text-xl">
+            <h1>{title}</h1>
+          </EmptyTitle>
           <EmptyDescription className="text-sm/relaxed">
             {description}
           </EmptyDescription>

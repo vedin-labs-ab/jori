@@ -3,5 +3,5 @@ import { SignOut } from "@/components/auth/sign-out"
 
 export const Route = createFileRoute("/sign-out")({
   component: SignOut,
-  head: () => ({ meta: [{ title: "Jori · Signing out" }] }),
+  head: () => ({ meta: [{ title: "Signing out · Jori" }] }),
 })

@@ -1,4 +1,5 @@
 import { type ReactNode } from "react"
+import { mainContentId, SkipToContent } from "@/shared/skip"
 import { Closing } from "./cta"
 import { LandingFooter } from "./footer"
 import { LandingHeader } from "./header"
@@ -16,8 +17,9 @@ export function MarketingShell({
 }) {
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
+      <SkipToContent />
       <LandingHeader onWaitlistPage={closing !== undefined} />
-      <main className="flex-1">
+      <main className="flex-1" id={mainContentId} tabIndex={-1}>
         {children}
         {closing === undefined ? null : <Closing lede={closing} />}
       </main>
