@@ -8,11 +8,22 @@ import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
+import {
+  requireProviderIntegration,
+  saveOAuthCredentials,
+} from "../connect/credentials"
 import { createSignedInstallState, upsertIntegration } from "../connect/install"
 import {
   findActiveIntegrationByExternalId,
   findIntegrationByExternalId,
 } from "../data"
+import { readSlackTokenPair, requireSlackCredentials } from "./credentials"
+
+const tokenPairValidator = v.object({
+  access: v.string(),
+  refresh: v.string(),
+  expiresAt: v.number(),
+})
 
 export const createInstallState = mutation({
   args: {
@@ -67,14 +78,14 @@ export const recordOAuthInstallation = internalMutation({
     createdBy: v.id("persons"),
     accountId: v.string(),
     botScopes: v.optional(v.string()),
-    botToken: v.string(),
+    bot: tokenPairValidator,
     team: v.object({
       id: v.string(),
       name: v.optional(v.string()),
     }),
     botUserId: v.optional(v.string()),
     userScopes: v.optional(v.string()),
-    userToken: v.string(),
+    user: tokenPairValidator,
     setupIdentity: v.optional(setupIdentityValidator),
   },
   handler: async (ctx, args) => {
@@ -89,8 +100,8 @@ export const recordOAuthInstallation = internalMutation({
       externalId: args.accountId,
       name: args.team.name,
       credentials: {
-        bot: args.botToken,
-        user: args.userToken,
+        bot: args.bot,
+        user: args.user,
       },
       status: "active",
       createdBy: args.createdBy,
@@ -115,14 +126,41 @@ export const recordOAuthInstallation = internalMutation({
   },
 })
 
+/**
+ * Writes back a rotated pair.
+ *
+ * Each side is optional and merged over what is stored, because the bot and
+ * user tokens expire on separate clocks: refreshing one must not stamp a
+ * stale copy over the other, whose refresh token may already have been spent.
+ */
+export const updateOAuthCredentials = internalMutation({
+  args: {
+    integrationId: v.id("integrations"),
+    bot: v.optional(tokenPairValidator),
+    user: v.optional(tokenPairValidator),
+  },
+  handler: async (ctx, args) => {
+    const integration = await requireProviderIntegration(ctx, {
+      integrationId: args.integrationId,
+      provider: "slack",
+      label: "Slack",
+    })
+    const current = requireSlackCredentials(integration)
+
+    return await saveOAuthCredentials(ctx, args.integrationId, {
+      bot: args.bot ?? current.bot,
+      user: args.user ?? current.user,
+    })
+  },
+})
+
 function readSlackUserToken(credentials: unknown) {
   if (
     typeof credentials === "object" &&
     credentials !== null &&
-    "user" in credentials &&
-    typeof credentials.user === "string"
+    "user" in credentials
   ) {
-    return credentials.user
+    return readSlackTokenPair(credentials.user)?.access
   }
 
   return undefined

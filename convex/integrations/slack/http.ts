@@ -54,23 +54,21 @@ export async function handleSlackOAuthCallback(
     redirectUri: `${requestUrl.origin}${slackOAuthCallbackPath}`,
   })
 
-  const botToken =
-    tokenResult.ok === true && tokenResult.access_token !== ""
-      ? tokenResult.access_token
-      : undefined
-  const userToken =
-    tokenResult.ok === true && tokenResult.authed_user?.access_token !== ""
-      ? tokenResult.authed_user?.access_token
+  // Rotation is a per-app setting, so a missing refresh token means the app
+  // is still issuing non-expiring tokens. Refusing the install here beats
+  // storing a credential the runtime can never renew.
+  const bot =
+    tokenResult.ok === true ? readSlackInstallPair(tokenResult) : undefined
+  const user =
+    tokenResult.ok === true
+      ? readSlackInstallPair(tokenResult.authed_user)
       : undefined
 
-  if (
-    tokenResult.ok !== true ||
-    botToken === undefined ||
-    userToken === undefined
-  ) {
+  if (tokenResult.ok !== true || bot === undefined || user === undefined) {
     return await failOfferAndRedirect(ctx, {
       callbackParam: "slack",
-      error: "Slack OAuth did not return required bot and user tokens.",
+      error:
+        "Slack OAuth did not return rotating bot and user tokens. Check that token rotation is enabled for the app.",
       integrationOfferId: state.integrationOfferId,
       returnUrl: state.returnUrl,
     })
@@ -83,11 +81,11 @@ export async function handleSlackOAuthCallback(
       createdBy: state.createdBy,
       accountId: tokenResult.team.id,
       botScopes: tokenResult.scope,
-      botToken,
+      bot,
       team: tokenResult.team,
       botUserId: tokenResult.bot_user_id,
       userScopes: tokenResult.authed_user?.scope,
-      userToken,
+      user,
       setupIdentity: slackSetupIdentity(tokenResult.authed_user?.id),
     }
   )
@@ -98,6 +96,27 @@ export async function handleSlackOAuthCallback(
   })
 
   return redirectWithStatus(state.returnUrl, "slack", "connected")
+}
+
+function readSlackInstallPair(
+  source:
+    | { access_token?: string; refresh_token?: string; expires_in?: number }
+    | undefined
+) {
+  if (
+    source?.access_token === undefined ||
+    source.access_token === "" ||
+    source.refresh_token === undefined ||
+    source.expires_in === undefined
+  ) {
+    return undefined
+  }
+
+  return {
+    access: source.access_token,
+    refresh: source.refresh_token,
+    expiresAt: Date.now() + source.expires_in * 1000,
+  }
 }
 
 function slackSetupIdentity(externalId: string | undefined) {

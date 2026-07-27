@@ -98,8 +98,16 @@ test("falls back to Slack token revocation when app uninstall is unavailable", a
 
   await revokeIntegrationAccess(
     integration("slack", {
-      bot: "xoxb-bot",
-      user: "xoxp-user",
+      bot: {
+        access: "xoxb-bot",
+        refresh: "xoxe-bot-refresh",
+        expiresAt: Date.now() + 3_600_000,
+      },
+      user: {
+        access: "xoxp-user",
+        refresh: "xoxe-user-refresh",
+        expiresAt: Date.now() + 3_600_000,
+      },
     })
   )
 

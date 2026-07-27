@@ -62,7 +62,7 @@ export async function fetchSlackChannelContext(
 ): Promise<SlackChannelContext | undefined> {
   try {
     const result = await slackQueryApi(
-      requireSlackCredentials(integration).user,
+      requireSlackCredentials(integration).user.access,
       "conversations.info",
       { channel: channelId }
     )

@@ -262,8 +262,16 @@ function slackIntegration(): Doc<"integrations"> {
     scope: "organization",
     externalId: "slack-account",
     credentials: {
-      bot: "bot-token",
-      user: "user-token",
+      bot: {
+        access: "bot-token",
+        refresh: "bot-refresh",
+        expiresAt: Date.now() + 3_600_000,
+      },
+      user: {
+        access: "user-token",
+        refresh: "user-refresh",
+        expiresAt: Date.now() + 3_600_000,
+      },
     },
     status: "active",
     createdBy: "person" as Id<"persons">,
