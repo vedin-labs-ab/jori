@@ -15,10 +15,13 @@ import {
   FullscreenLoadingProvider,
   FullscreenSkeletonLoader,
 } from "@/shared/loading"
+import { regionConfig } from "@/shared/region/config"
 import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
 const appTitle = "Jori"
+/** Link previews fetch this from outside the app, so it cannot be a path. */
+const appImage = new URL("/brand/og.jpg", regionConfig.publicOrigin).toString()
 const appDescription =
   "An AI teammate for the work your team repeats. Jori runs it across Slack, GitHub, and Linear, leaves behind a live app anyone can open, and asks before it acts."
 const providerlessRouteIds = new Set([
@@ -66,8 +69,20 @@ export const Route = createRootRoute({
         content: "website",
       },
       {
+        property: "og:site_name",
+        content: appTitle,
+      },
+      {
+        property: "og:image",
+        content: appImage,
+      },
+      {
         name: "twitter:card",
-        content: "summary",
+        content: "summary_large_image",
+      },
+      {
+        name: "twitter:image",
+        content: appImage,
       },
       {
         name: "twitter:title",

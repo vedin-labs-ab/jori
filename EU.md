@@ -57,10 +57,10 @@ Each Convex deployment receives its exact regional `JORI_APP_URL`, plus
 deployment-local. In production, `JORI_REGION` must match the physical region
 shown in the Convex deployment settings.
 
-The existing personal development deployment is hosted in Convex EU West even
-though normal frontend development simulates the US product region. It is test
-infrastructure, not either production target. Do not derive production
-residency readiness from the development environment.
+The personal development deployment is hosted in Convex US East, alongside
+production, so development exercises the same region the US product runs in. It
+is still test infrastructure and not either production target. Do not derive
+production residency readiness from the development environment.
 
 EU is currently held off with:
 
