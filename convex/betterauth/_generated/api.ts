@@ -9,6 +9,7 @@
  */
 
 import type * as adapter from "../adapter.js";
+import type * as generated from "../generated.js";
 
 import type {
   ApiFromModules,
@@ -19,6 +20,7 @@ import { anyApi, componentsGeneric } from "convex/server";
 
 const fullApi: ApiFromModules<{
   adapter: typeof adapter;
+  generated: typeof generated;
 }> = anyApi as any;
 
 /**
