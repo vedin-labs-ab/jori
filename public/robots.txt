@@ -1,3 +1,18 @@
 # https://www.robotstxt.org/robotstxt.html
+#
+# The marketing pages are the public surface, so they are the only thing left
+# open. Everything else is either behind sign-in, where a crawler reaches a
+# redirect and nothing else, or a share link, whose whole point is that it
+# travels by hand rather than by search.
 User-agent: *
-Disallow:
+Disallow: /api/
+Disallow: /apps
+Disallow: /automations
+Disallow: /console
+Disallow: /context
+Disallow: /integrations
+Disallow: /playbooks
+Disallow: /runs
+Disallow: /sign-in
+Disallow: /sign-out
+Disallow: /skills
