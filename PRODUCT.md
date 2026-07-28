@@ -32,6 +32,7 @@ Sharp, easygoing, trustworthy. Jori's own voice prompt is the brand voice: direc
 - Claim only what ships: no capability, region, or guarantee reaches copy before it is real and verifiable.
 - Personality through copy and micro-physics, not decoration: quiet canvas, a few deliberate moments.
 - Marketing and product share one language (organization, runs, apps, playbooks, ask-first) and one design system.
+- Name the surfaces, not the connectors: copy may name the tools you can mention Jori in, because that set is bounded and specific. The tools Jori reaches are named by the mechanism you connect them through, never enumerated; a prose list goes stale the week a connector ships. Where the full set matters, show it from the integration data itself.
 
 ## Accessibility & Inclusion
 
