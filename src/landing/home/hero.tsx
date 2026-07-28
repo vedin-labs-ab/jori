@@ -12,8 +12,14 @@ export function Hero() {
             the sentence were separated by the row's gap on top of the space
             already inside the text and the chip's own padding, which read as
             a wider space than the ones between the words after it. */}
+        {/* Two claims, not one list. The named three are the surfaces you can
+            mention Jori in, which is a bounded set and the specific thing a
+            reader can check. Everything else Jori reaches is named by the
+            mechanism instead, so the line stays this length as the connector
+            list grows. */}
         <p className="text-muted-foreground text-sm">
-          <Mention /> works in Slack, GitHub, and Linear
+          <Mention /> answers in Slack, GitHub, and Linear, and works across
+          everything you connect
         </p>
         <h1 className="mt-5 font-medium text-5xl text-balance tracking-tight sm:text-6xl lg:text-7xl">
           Hand over the work you repeat.
