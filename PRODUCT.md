@@ -4,13 +4,23 @@
 
 product
 
+## Status
+
+Positioning is mid-validation. Users and Product Purpose below describe the
+wedge hypothesis being tested through paid pilots, not settled truth.
+[VALIDATION.md](VALIDATION.md) holds the hypotheses, personas, evidence log,
+and kill criteria; [TODO.md](TODO.md) holds the sprint. Until pilots convert,
+changes to these two sections follow evidence, not taste.
+
 ## Users
 
-Founders, engineering leads, and whoever ended up running operations at software companies of roughly 10–80 people. They live in Slack, GitHub, and Linear, and they carry a list of recurring work that only happens because somebody remembers it: the release checklist, the dependency sweep, the on-call handover, the weekly triage, the customer bug that has to reach an issue. The landing page reader is that person recognizing their own list; the console user is the same person supervising Jori's runs and opening the apps Jori built for the team. Technical evaluators read closely for what Jori can access and when it acts.
+The buyer is whoever assembles the company picture by hand: founders, COOs, and operations-minded leads at software companies of roughly 10–80 people running Slack, GitHub, and Linear. Every week someone at these companies stitches the Monday sync together out of tool tabs, channel scrolls, and memory, and still finds out about stalled work late. The landing page reader is that person recognizing the assembly job; the console user is the same person opening the pre-read before the sync, then the rest of the team opening the apps Jori keeps current. Technical evaluators read closely for what Jori can access and when it acts.
+
+Later personas are expansion inside a live organization, not entry: engineering leads (the customer-bug pipeline) and product marketing (the publishable what-shipped edition).
 
 ## Product Purpose
 
-Jori runs the recurring work a team does by hand, inside the tools that work already lives in: Slack, GitHub, and Linear for conversation and activity; Gmail/Outlook, Google/Microsoft Calendar, and Notion for reading and writing. When work repeats, Jori builds the team a real app for it: a live shared surface with typed durable state, kept current by a scheduled or event-driven run, that anyone on the team can open. Consequential actions go through ask-first approvals, and every run leaves receipts. Success: a team stops running a process out of one person's head, and starts opening the app Jori keeps current.
+Jori's first job is the leadership pre-read: a live page assembled from what already happened across Slack, GitHub, Linear, and Notion, opened before the weekly sync. What moved, what stalled, what shipped, every line citing its evidence, nothing typed in. When more of a team's work repeats, Jori runs it the same way: playbooks deliver into real apps with typed durable state, kept current by scheduled or event-driven runs, that anyone on the team can open. Consequential actions go through ask-first approvals, and every run leaves receipts. Success: the Monday sync runs off the page Jori assembled, and nobody assembled it.
 
 ## Brand Personality
 

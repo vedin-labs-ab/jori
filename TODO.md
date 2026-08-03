@@ -1,130 +1,110 @@
 # TODO
 
-High-level work to get Jori from "built, unpositioned" to "positioned, deployed,
-collecting qualified waitlist signups". Product completeness is not a launch
-gate; a truthful public promise is.
+High-level work to get Jori from "positioned, unsold" to "three paying pilot
+organizations or a documented kill". A truthful public promise remains the
+gate for marketing copy; a paying organization is the gate for everything
+else, including new product surface.
 
-Position: **Jori runs the recurring work your team does by hand, and leaves
-behind a live app the team can open instead of a message.**
+Position: **Jori writes the Monday pre-read: a live page assembled from the
+week's activity across the team's tools, opened before the leadership sync,
+every line cited.**
 
-ICP: founders, engineering leads, and operations-minded people at software
-companies of roughly 10–80 people running Slack, GitHub, and Linear.
+Wedge ICP: founders, COOs, and operations-minded leads at software companies
+of roughly 10–80 people running Slack, GitHub, and Linear, reached warm
+through the Stockholm network first.
 
-## Phase 1 · Positioning source of truth
+[VALIDATION.md](VALIDATION.md) holds the hypotheses, personas, interview
+script, outreach playbook, pilot offer, competition notes, and the evidence
+log. This file holds the work. The positioning, marketing-site, waitlist, and
+deployment phases that preceded this file's current shape are done and their
+history lives in git.
 
-- [x] Rewrite `PRODUCT.md` around the new job (team ops, app-first)
-- [x] Create this file
-- [x] Settle the public vocabulary: "app" replaces "artifact" everywhere,
-      internals included, so the concept reads the same in the UI, the schema,
-      the tool names, and the SDK
-- [x] Decide whether the `workstreams` console page survives the repositioning.
-      It stays as a console page for now
+## Phase 0 · Validation sprint
 
-## Phase 2 · Marketing site
+Build gates, smallest honest versions, in order:
 
-- [x] **Hero prop**: a live Release readiness app replaces the morning brief
-- [x] Home sections: `Day` and `Context` retired, `Apps` added as the substance
-      section, `Threads` reframed to one-off mentions, `Control` restaged on the
-      new fiction
-- [x] Home copy against the new promise, meta description and page titles
-- [x] Trust page: receipts and approvals restaged, subprocessor list corrected,
-      nothing claimed that does not ship
-- [x] Pricing page: tiers replaced with the pricing *shape* plus an honest
-      "numbers at launch" note. `contracts/billing.ts` is untouched
-- [ ] OG image against the new promise. `public/brand/og.jpg` is the mark on a
-      1200x630 canvas, which makes link previews render but says nothing about
-      the promise. It wants a designed asset carrying the headline
-- [ ] Legal and privacy review for waitlist data collection
+- [ ] **History backfill.** The deduction engine feeds on webhook events only,
+      so day one of any pilot shows an empty roster. Add a backfill pass that
+      runs effort/workstream deduction over historical GitHub, Linear, Slack,
+      and Notion activity, so "connect, then see your company mapped" is true
+      within the first hour. This is the demo, so it goes first
+- [ ] **The pre-read app.** A first-party app authored by us, running on the
+      apps platform: week header, moved/stalled/shipped, attention rows with
+      citations, refreshed by a weekly automation, delivered through the
+      existing playbook preference channels. No conversation-to-app
+      generation on this path
+- [ ] **Dogfood accuracy check.** Run backfill against one friendly
+      organization's real workspace before any sales conversation, and review
+      the inferred roster together. The engine has never digested a real
+      organization; that first contact happens in private, not in a pilot
+- [ ] **Pilot legal.** A real privacy policy and a lightweight DPA template.
+      Placeholder legal pages block connecting anyone's workspace
 
-## Phase 3 · Waitlist
+Sales work, which is the actual sprint:
 
-- [x] `waitlist` table, public `join` mutation, one shared validation path in
-      `contracts/waitlist.ts` so the form and the server agree
-- [x] Form on every marketing page: email, team size, and the qualifying
-      question. Provider-free, so public pages stay outside the Convex and auth
-      runtime
-- [x] Confirmation email through a shared `convex/email` edge, reused by
-      organization invitations
-- [x] Field-level validation: rejections name their field, so the form marks
-      that input invalid instead of printing one notice under the whole thing
-- [x] Verified sending domain. `mail.usejori.com` is verified in Resend, and
-      every sender is the one address in `convex/email.ts`
-- [x] Abuse controls: per-caller and global token buckets via
-      `@convex-dev/rate-limiter`, a honeypot field, and identical responses for
-      new and existing addresses so the list cannot be enumerated
-- [ ] Console read surface for signups, or an export
+- [ ] **Network audit.** The 40 warmest reachable people, with company, size,
+      and persona fit, logged in VALIDATION.md. Decides outreach order, and
+      tests whether the ICP matches the network or needs revisiting
+- [ ] **Outreach.** 25 conversations against the interview script. Every one
+      logged in the evidence log, verbatim where it stings
+- [ ] **Pilot offers.** Paid from day one, terms per VALIDATION.md, success
+      metric written down with the pilot organization before it starts
+- [ ] **Kill or commit.** Three paid pilots by the decision date in
+      VALIDATION.md, or the wedge is dead and the cross-boundary variant gets
+      its two weeks of conversations before anything new is built
 
-## Phase 4 · Production deployment
+## Parked · Marketing polish
 
-The commands exist and the targets are provisioned. What is left needs
-accounts this repository cannot reach.
+Deliberately parked until pilots convert: the OG image, and a console read
+surface or export for waitlist signups. During the sprint the site's only job
+is to not embarrass warm outreach.
 
-- [x] Split every command and resource name by environment, and add
-      `pnpm deploy:prod` with its guards and preflight
-- [x] Provision the production Convex deployment `insightful-goat-7` in US East,
-      inside the existing `jori` project, and deploy the backend to it
-- [x] Create the `jori` Vercel project, set its Production build variables, and
-      attach `usejori.com` and `www.usejori.com`
-- [x] Point the Porkbun DNS at Vercel and deploy the frontend. `usejori.com`
-      serves the marketing routes; every other host is refused
-- [x] Verify `mail.usejori.com` in Resend and set `RESEND_API_KEY` on the
-      production deployment
-- [x] Send the `www` spelling to the public origin. Host routing answers it,
-      so it needs no per-deployment dashboard setting
-- [x] Delete the empty `jori-prod-us` Convex project
-- [x] Give the development deployment's Resend key sending access to
-      `mail.usejori.com`, now that the sender is one hardcoded address
-- [x] Register the production Google and Microsoft OAuth clients against
-      `https://usejori.com/api/auth/callback/{google,microsoft}` and set all
-      four credentials
+## Parked · Production smoke test
+
 - [ ] Smoke test: marketing routes, waitlist submission, confirmation email,
       sign-in, the waitlist gate, and one allowlisted address reaching the
       console
 
-Integrations, Trigger.dev, E2B, and Stripe are deliberately **not** part of
-this phase. Sign-in is, because the waitlist gate is only visible behind it.
+The rest of the deployment phase is done. Integrations, Trigger.dev, E2B, and
+Stripe stay out of it.
 
-## Phase 5 · Product gaps for the new positioning
+## Phase 5 · Product gaps, reordered for the wedge
 
-Ordered by how much each one blocks the promise.
+Ordered by how much each blocks the pre-read promise. Nothing below the first
+item gets built without a pilot organization asking.
 
-- [ ] **Linear write depth.** `contracts/permissions/catalog/linear.ts` has
-      search, read, comment, and react. There is no create or update issue. For
-      a product about moving work, this is the sharpest gap. GitHub is already
-      far deeper
-- [ ] **Apps as a first-class object.** Today an app is mostly a byproduct of a
-      playbook. It needs to be something a user asks for, browses, shares with
-      the team, and returns to
-- [ ] **App creation from a conversation.** The home page stakes the pitch on
-      one thread turning into a published, automation-backed app. The
-      primitives exist; the path has never been proven end to end. Prove it,
-      then make it reliable
-- [ ] **Multi-user presence.** Shared state exists; "who else is looking at
-      this, who changed what, what did the last run do" does not. This is where
-      the multiplayer claim becomes visible instead of asserted
-- [ ] **The playbook catalog is the old positioning.** Morning brief, meeting
-      briefing, follow-up sweep, and week in review are personal-assistant
-      playbooks. They still work and are deliberately not marketed. Decide
-      whether they become team-shaped app templates or retire
-- [ ] **Email and calendar as observed events.** `convex/events/schema.ts`
-      models Slack, GitHub, Linear, and Notion only. Fine for engineering-shaped
-      processes; a hard limit the moment a process is email-driven. Do not build
-      this until a real user's process demands it
+- [ ] **History backfill** is the sharpest gap now (Phase 0)
+- [ ] **PostHog read connector.** The numbers half of the pre-read. Built for
+      the first pilot that wants metrics in the picture, not before
+- [ ] **Stripe read connector.** Same rule, for revenue in the picture
+- [ ] **Linear write depth.** Create and update issue. Gated behind the
+      customer-bug pipeline playbook, which is gated behind a paying
+      organization showing the pain in its own support channels
+- [ ] **Apps as a first-class object** and **app creation from a
+      conversation.** Explicitly deferred: the pre-read ships as a
+      first-party app, so the generative path is a later chapter rather than
+      a launch gate
+- [ ] **Multi-user presence.** Deferred until pilot teams ask who changed what
+- [ ] **The playbook catalog.** Morning brief, meeting briefing, follow-up
+      sweep, and week in review are retired: nothing lists or markets them.
+      Their code leaves when removal is free. The forward catalog is the
+      pre-read, the publishable what-shipped edition, and the gated
+      customer-bug pipeline
+- [ ] **Email and calendar as observed events.** Unchanged: built when a real
+      user's process demands it
 
 ## Explicitly not now
 
 - **Open source.** Real commitment (license, open-core boundary, contribution
-  surface, support load, security disclosure) that buys nothing at waitlist
+  surface, support load, security disclosure) that buys nothing at pilot
   stage. Easier to do later than to undo
 - **EU residency claims.** `EU.md` is the gate. EU is disabled, Trigger.dev is
   blocking, and roughly ten provider rows are unverified. Region-isolated
-  architecture may be described as built; residency may not be promised. The US
-  frontend host cannot serve the EU region, so the EU host is an open selection
-  and no marketing copy claims either residency or sovereignty
+  architecture may be described as built; residency may not be promised
 - **The active-workstream / commitment / verification data model.**
   Contract-backed app state already serves as a typed, validated, shared work
   object. Promote fields into a native model only after the same ones recur
-  across several real users
-- **CRM, ticketing, and customer/account identity.** No account entity exists in
-  the schema, and adding one is a semantic layer, not a connector. Out of scope
-  until a paying user's process requires it
+  across several real pilots
+- **CRM, ticketing, and customer/account identity.** No account entity exists
+  in the schema, and adding one is a semantic layer, not a connector. Out of
+  scope until a paying organization's process requires it
