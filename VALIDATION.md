@@ -114,7 +114,37 @@ A calendar invite or money scores.
 
 Scanned 2026-08-03. What matters for the sprint:
 
-**Closest three.**
+**The platform collision: Stilla (stilla.ai, Stockholm).** Out of stealth
+January 2026 with a $5M General Catalyst pre-seed; founders ex-Shopify
+(built Shop and Shop Pay). "One teammate for the whole company. Knows your
+context. Follows your permissions. Does the work." Mentions in Slack and
+Teams threads, GitHub PRs, meeting notes, automations, sandboxed coding,
+cross-tool search; press frames it as a shared brain aggregating Slack,
+GitHub, Linear, and Notion signals. Cited customers include Spotify, Ramp,
+Lovable, and Legora. Pricing is org-flat plus credit tiers: $50 per
+organization per month base ($40 billed yearly) at 40k credits, scaling at
+roughly $1.25 per 1,000 credits, Team plan capped at 29 members.
+
+Consequence: the horizontal "AI teammate for your company" lane in
+Stockholm is funded, live, and already selling into the same network this
+sprint will call. Jori does not pitch that lane, ever, in any call. The
+wedge is the answer to the inevitable question, kept in every call's back
+pocket: "Stilla is a teammate you mention when you think of it; the
+pre-read is the page your leadership opens Monday morning, every line
+cited, nobody had to remember to ask."
+
+**Platform pricing mechanics** (for launch shape, not the pilot): every
+surviving platform meters usage in credits. Dust dropped flat fair-use for
+$30/seat plus 8k credits in June 2026; Town sells personal tiers $15–199
+and team seats from $59; Relay.app shut down this quarter. Stilla is
+org-flat plus marked-up credits. Jori's existing shape, one organization
+price with usage at provider list rates and no markup, matches Stilla's
+structure and undercuts its credit margin, and the in-code Starter number
+already sits under Stilla's base. Nothing about the pilot price changes
+because of this; the pilot sells the artifact and the setup, and converts
+to the standard shape afterwards.
+
+**Closest three on the wedge itself.**
 
 - **Bond (YC X25).** "AI chief of staff for CEOs": connects Slack, Gmail,
   Calendar, Linear, Notion, CRM; daily prioritized brief; pitched as killing
@@ -150,7 +180,10 @@ says the pre-read, the sync, the citations, and what stalled. Objection
 prep: "Linear Pulse does this" gets "Pulse reads Linear; your week happens
 in five tools, and the sync needs one picture, not a feed." "We could build
 this with Notion agents" gets "you can, and someone babysits it; the pilot
-costs less than the babysitter."
+costs less than the babysitter." "How is this not Stilla?" gets "Stilla is
+a teammate you ask; the pre-read arrives without being asked, holds the
+whole week in one page, and cites every line. If you already run Stilla,
+the pre-read still lands Monday."
 
 ## Kill / commit
 
