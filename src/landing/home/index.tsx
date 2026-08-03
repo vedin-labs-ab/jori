@@ -12,7 +12,7 @@ import { Threads } from "./threads"
  *  different claim from an app someone described. */
 export function Landing() {
   return (
-    <MarketingShell closing="Tell us what your team keeps doing by hand. We're setting up the first teams ourselves, so the fit matters more than the queue.">
+    <MarketingShell closing="We're running paid pilots with a few teams at a time, set up by us. Tell us what your team assembles by hand, and we'll be in touch if it's a fit.">
       <Hero />
       <Context />
       <Apps />
