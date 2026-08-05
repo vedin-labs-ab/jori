@@ -6,35 +6,75 @@ import { resolveActor } from "../persons/resolve"
 import { normalizeEventData } from "./payload"
 import { type EventMatch } from "./schema"
 
+type EventInput = {
+  integration: Doc<"integrations">
+  key: string
+  type: string
+  match?: EventMatch
+  actor?: Doc<"events">["actor"]
+  text?: string
+  data?: unknown
+  observedAt?: number
+}
+
 export async function recordEvent(
   ctx: MutationCtx,
-  args: {
-    integration: Doc<"integrations">
-    key: string
-    type: string
-    match?: EventMatch
-    actor?: Doc<"events">["actor"]
-    text?: string
-    data?: unknown
-    observedAt?: number
-    now?: number
-  }
+  args: EventInput & { now?: number }
 ): Promise<
   | { status: "duplicate"; eventId: Id<"events"> }
   | { status: "recorded"; eventId: Id<"events">; runIds: Id<"runs">[] }
 > {
-  const existing = await ctx.db
-    .query("events")
-    .withIndex("by_integration_and_key", (index) =>
-      index.eq("integrationId", args.integration._id).eq("key", args.key)
-    )
-    .first()
+  const existing = await findEventByKey(ctx, args)
 
   if (existing !== null) {
     return { status: "duplicate", eventId: existing._id }
   }
 
   const now = args.now ?? Date.now()
+  const event = await insertEvent(ctx, args)
+
+  return {
+    status: "recorded",
+    eventId: event._id,
+    runIds: await startEventAutomations(ctx, { event, now }),
+  }
+}
+
+// Historical imports feed deduction, never automations: replaying a month of
+// activity through event triggers would fire every automation retroactively.
+// observedAt is required because backfilled rows are the one case where the
+// ingestion-time fallback would date all of history as today.
+export async function recordBackfillEvent(
+  ctx: MutationCtx,
+  args: EventInput & { observedAt: number }
+): Promise<
+  | { status: "duplicate"; eventId: Id<"events"> }
+  | { status: "recorded"; eventId: Id<"events"> }
+> {
+  const existing = await findEventByKey(ctx, args)
+
+  if (existing !== null) {
+    return { status: "duplicate", eventId: existing._id }
+  }
+
+  const event = await insertEvent(ctx, args)
+
+  return { status: "recorded", eventId: event._id }
+}
+
+async function findEventByKey(
+  ctx: MutationCtx,
+  args: { integration: Doc<"integrations">; key: string }
+) {
+  return await ctx.db
+    .query("events")
+    .withIndex("by_integration_and_key", (index) =>
+      index.eq("integrationId", args.integration._id).eq("key", args.key)
+    )
+    .first()
+}
+
+async function insertEvent(ctx: MutationCtx, args: EventInput) {
   const provider = actorIdentityProvider(args.integration.integration)
 
   if (provider !== undefined) {
@@ -62,9 +102,5 @@ export async function recordEvent(
     throw new Error("Event insert failed.")
   }
 
-  return {
-    status: "recorded",
-    eventId,
-    runIds: await startEventAutomations(ctx, { event, now }),
-  }
+  return event
 }

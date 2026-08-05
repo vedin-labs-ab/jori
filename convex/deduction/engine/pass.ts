@@ -67,11 +67,20 @@ async function activeOrganizations(ctx: MutationCtx) {
   return [...organizations].slice(0, sweepBatch)
 }
 
+// Backfill forces catch-up passes between ingest batches. Force skips the
+// cadence rest only, never the running-pass guard or window derivation, and
+// stays off the full-scope consolidations so a paced import cannot trigger
+// week-scale restructuring every few minutes.
 export const run = internalAction({
-  args: { organizationId: v.string() },
+  args: { organizationId: v.string(), force: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
-    for (const { stage, scope } of stageRuns) {
-      await runStage(ctx, args.organizationId, stage, scope)
+    const force = args.force === true
+    const stages = force
+      ? stageRuns.filter((stageRun) => stageRun.scope === "window")
+      : stageRuns
+
+    for (const { stage, scope } of stages) {
+      await runStage(ctx, args.organizationId, stage, scope, force)
     }
   },
 })
@@ -82,12 +91,13 @@ async function runStage(
   ctx: ActionCtx,
   organizationId: string,
   stage: PassStage,
-  scope: PassScope
+  scope: PassScope,
+  force = false
 ) {
   for (let chunk = 0; chunk < bootstrapMaxChunksPerSweep; chunk += 1) {
     const opened: OpenedPass | null = await ctx.runMutation(
       internal.deduction.engine.pass.open,
-      { organizationId, stage, scope }
+      { organizationId, stage, scope, force }
     )
 
     if (opened === null) {
@@ -111,15 +121,16 @@ async function runStage(
 // running pass on the way. Windows derive from completed passes only, so a
 // failed pass retries the same window.
 export const open = internalMutation({
-  args: { organizationId: v.string(), stage: passStage, scope: passScope },
+  args: {
+    organizationId: v.string(),
+    stage: passStage,
+    scope: passScope,
+    force: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
     const now = Date.now()
     const timing = stageTiming(args.stage, args.scope)
     const latest = await latestPass(ctx, args)
-
-    if (!isPassDue(now, latest ?? undefined, timing.cadenceMs)) {
-      return null
-    }
 
     if (latest?.status === "running") {
       if (!isStaleRunning(now, latest)) {
@@ -131,6 +142,11 @@ export const open = internalMutation({
         endedAt: now,
         error: "Stale running pass failed by the next opener.",
       })
+    } else if (
+      args.force !== true &&
+      !isPassDue(now, latest ?? undefined, timing.cadenceMs)
+    ) {
+      return null
     }
 
     const completed = await latestCompletedPass(ctx, args)
