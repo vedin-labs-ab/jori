@@ -43,6 +43,20 @@ its standalone form is the first expansion inside a live account. The
 customer-bug pipeline is deliberately not a hypothesis: it is an expansion
 playbook, gated in TODO.md behind a paying organization showing the pain.
 
+If C activates (fewer than three pilots on the decision date), its target
+is accounting and CFO-services firms serving 10–80-person startups, not
+audit upmarket: Fieldguide ($75M Series C, half the US top-100 firms),
+Circit (all top-20 global networks), and DataSnipper ($1B) already hold
+that field. Qualification test for any C workflow, from the 2026-08-04
+multiplayer-AI analysis: asymmetric authority, a trust boundary inside the
+loop, a governed artifact as output, and the approval log as evidence,
+plus one correction to that thread's litmus: the blocker that keeps the
+work out of a free group chat may be structural (privilege, attestation)
+or economic (someone still has to do the assembling every week); both
+count. Client-side scouting data comes from script probe 7. Shared live
+sessions are not part of C in any form; the commoditized surface stays
+dead.
+
 ## Interview script
 
 Thirty minutes. The first twenty belong to them; the demo is not shown before
@@ -58,9 +72,13 @@ the walk-through under any circumstance.
    stopped updating. Log the graveyard; it prices the problem.)
 5. H2 probe: "Walk me through your last launch. What nearly slipped?"
 6. H3 probe: "How do customers find out what you shipped?"
-7. Only if a wince appeared: five-minute demo of the pre-read on our own
+7. C probe, when time allows: "Who does your accounting and audit prep,
+   and what does that back-and-forth look like?" Every founder is some
+   accounting firm's client, so the 25 calls scout the contingency from
+   the client side for free.
+8. Only if a wince appeared: five-minute demo of the pre-read on our own
    workspace, then the offer, verbatim from the section below.
-8. Always, regardless of fit: "Who do you know who runs a heavier Monday
+9. Always, regardless of fit: "Who do you know who runs a heavier Monday
    than you?" Two names or a pilot step; no call ends with neither.
 
 Scoring per call, logged the same hour: wince 0–2, hours number if given,
