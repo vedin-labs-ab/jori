@@ -85,9 +85,10 @@ item gets built without a pilot organization asking.
       first-party app, so the generative path is a later chapter rather than
       a launch gate
 - [ ] **Multi-user presence.** Deferred until pilot teams ask who changed what
-- [ ] **The playbook catalog.** Morning brief, meeting briefing, follow-up
-      sweep, and week in review are retired: nothing lists or markets them.
-      Their code leaves when removal is free. The forward catalog is the
+- [ ] **The playbook catalog.** Morning brief, follow-up sweep, and week in
+      review are retired: nothing lists or markets them, and their code
+      leaves when removal is free. Meeting briefing stays in the product by
+      decision (2026-08-05), unmarketed. The forward catalog is the
       pre-read, the publishable what-shipped edition, and the gated
       customer-bug pipeline
 - [ ] **Email and calendar as observed events.** Unchanged: built when a real
