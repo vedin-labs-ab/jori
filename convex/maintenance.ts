@@ -26,6 +26,7 @@ const tableRegistry: Record<TableName, true> = {
   playbookPreferences: true,
   subscriptions: true,
   events: true,
+  backfills: true,
   runs: true,
   conversations: true,
   beliefs: true,

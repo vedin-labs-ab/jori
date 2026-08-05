@@ -23,11 +23,15 @@ history lives in git.
 
 Build gates, smallest honest versions, in order:
 
-- [ ] **History backfill.** The deduction engine feeds on webhook events only,
-      so day one of any pilot shows an empty roster. Add a backfill pass that
-      runs effort/workstream deduction over historical GitHub, Linear, Slack,
-      and Notion activity, so "connect, then see your company mapped" is true
-      within the first hour. This is the demo, so it goes first
+- [x] **History backfill (GitHub and Linear).** `backfill/control:start`
+      imports the deduction bootstrap horizon per active integration: paced
+      steps ingest snapshot events with re-run-safe keys and no automation
+      fire, forcing a catch-up pass between batches so the judge's window
+      cap never drops history. Start it during pilot setup with
+      `npx convex run backfill/control:start '{"organizationId": "..."}'`.
+      Slack and Notion history wait until the conversation-summary hop earns
+      its cost. Regenerate `convex/_generated` on the next `pnpm dev`; the
+      checked-in copy was extended by hand
 - [ ] **The pre-read app.** A first-party app authored by us, running on the
       apps platform: week header, moved/stalled/shipped, attention rows with
       citations, refreshed by a weekly automation, delivered through the
