@@ -7,7 +7,7 @@ export function Apps() {
   return (
     <Section
       id="apps"
-      lede="Describe what your team keeps doing by hand. Jori works out what it needs, builds the app, and puts it in front of everyone."
+      lede="Jori's playbooks run the work a team repeats, and each one lands as an app: a live page holding real state, not a message. Enable one from the catalog, or hand the job over in a thread."
       title="When the work repeats, it gets an app"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">

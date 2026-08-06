@@ -12,6 +12,14 @@ wedge hypothesis being tested through paid pilots, not settled truth.
 and kill criteria; [TODO.md](TODO.md) holds the sprint. Until pilots convert,
 changes to these two sections follow evidence, not taste.
 
+Internal product truth, settled across the wedge analysis, the competitive
+scan, and product instinct alike: Jori's durable value is its company
+memory, the maintained, evidence-cited model of the organization built by
+the deduction engine. It answers two questions, what is true now (beliefs,
+the roster) and what is happening now (efforts, the journal). Everything
+else is a view over that memory or a consumer of it. Views are how it gets
+sold; the memory is why it gets kept.
+
 ## Users
 
 The buyer is whoever assembles the company picture by hand: founders, COOs, and operations-minded leads at software companies of roughly 10–80 people running Slack, GitHub, and Linear. Every week someone at these companies stitches the Monday sync together out of tool tabs, channel scrolls, and memory, and still finds out about stalled work late. The landing page reader is that person recognizing the assembly job; the console user is the same person opening the pre-read before the sync, then the rest of the team opening the apps Jori keeps current. Technical evaluators read closely for what Jori can access and when it acts.

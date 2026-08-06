@@ -76,10 +76,15 @@ the walk-through under any circumstance.
    and what does that back-and-forth look like?" Every founder is some
    accounting firm's client, so the 25 calls scout the contingency from
    the client side for free.
-8. Only if a wince appeared: five-minute demo of the pre-read on our own
+8. Memory probe, when time allows: "Do the agents and automations your
+   team runs know what's going on in the company? Has that ever
+   mattered?" Tests pull for the context layer (MCP/API exposure of the
+   company memory) across every call for free; three or more winces here
+   un-gates that build.
+9. Only if a wince appeared: five-minute demo of the pre-read on our own
    workspace, then the offer, verbatim from the section below.
-9. Always, regardless of fit: "Who do you know who runs a heavier Monday
-   than you?" Two names or a pilot step; no call ends with neither.
+10. Always, regardless of fit: "Who do you know who runs a heavier Monday
+    than you?" Two names or a pilot step; no call ends with neither.
 
 Scoring per call, logged the same hour: wince 0–2, hours number if given,
 graveyard entries, objections verbatim, next step. "Interesting" scores 0.
