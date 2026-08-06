@@ -1,11 +1,9 @@
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
 import {
-  CalendarRange,
   CalendarSearch,
   type LucideIcon,
-  MailCheck,
+  Newspaper,
   NotebookTabs,
-  Sunrise,
 } from "lucide-react"
 import {
   Card,
@@ -22,10 +20,8 @@ import { PlaybookIcon, PlaybookMeta } from "./meta"
 import { type PlaybookListRow } from "./state"
 
 const playbookIcons: Record<string, LucideIcon> = {
-  "morning-brief": Sunrise,
+  preread: Newspaper,
   "meeting-briefing": CalendarSearch,
-  "follow-up-sweep": MailCheck,
-  "week-in-review": CalendarRange,
 }
 
 export function PlaybookCard({

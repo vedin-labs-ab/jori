@@ -413,6 +413,7 @@ import type * as runs_agent_tools_schemas_jori_automations from "../runs/agent/t
 import type * as runs_agent_tools_schemas_jori_core from "../runs/agent/tools/schemas/jori/core.js";
 import type * as runs_agent_tools_schemas_jori_index from "../runs/agent/tools/schemas/jori/index.js";
 import type * as runs_agent_tools_schemas_jori_runs from "../runs/agent/tools/schemas/jori/runs.js";
+import type * as runs_agent_tools_schemas_jori_workstreams from "../runs/agent/tools/schemas/jori/workstreams.js";
 import type * as runs_agent_tools_schemas_linear from "../runs/agent/tools/schemas/linear.js";
 import type * as runs_agent_tools_schemas_microsoft from "../runs/agent/tools/schemas/microsoft.js";
 import type * as runs_agent_tools_schemas_notion_index from "../runs/agent/tools/schemas/notion/index.js";
@@ -429,6 +430,7 @@ import type * as runs_agent_tools_schemas_responses_jori_broker from "../runs/ag
 import type * as runs_agent_tools_schemas_responses_jori_core from "../runs/agent/tools/schemas/responses/jori/core.js";
 import type * as runs_agent_tools_schemas_responses_jori_index from "../runs/agent/tools/schemas/responses/jori/index.js";
 import type * as runs_agent_tools_schemas_responses_jori_runs from "../runs/agent/tools/schemas/responses/jori/runs.js";
+import type * as runs_agent_tools_schemas_responses_jori_workstreams from "../runs/agent/tools/schemas/responses/jori/workstreams.js";
 import type * as runs_agent_tools_schemas_responses_linear from "../runs/agent/tools/schemas/responses/linear.js";
 import type * as runs_agent_tools_schemas_responses_mail from "../runs/agent/tools/schemas/responses/mail.js";
 import type * as runs_agent_tools_schemas_responses_microsoft from "../runs/agent/tools/schemas/responses/microsoft.js";
@@ -541,10 +543,13 @@ import type * as waitlist_email from "../waitlist/email.js";
 import type * as waitlist_http from "../waitlist/http.js";
 import type * as waitlist_limits from "../waitlist/limits.js";
 import type * as waitlist_signup from "../waitlist/signup.js";
+import type * as workstreams_agent from "../workstreams/agent.js";
 import type * as workstreams_corrections from "../workstreams/corrections.js";
 import type * as workstreams_labels from "../workstreams/labels.js";
+import type * as workstreams_mcp from "../workstreams/mcp.js";
 import type * as workstreams_pulse from "../workstreams/pulse.js";
 import type * as workstreams_queries from "../workstreams/queries.js";
+import type * as workstreams_read from "../workstreams/read.js";
 
 import type {
   ApiFromModules,
@@ -958,6 +963,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/jori/core": typeof runs_agent_tools_schemas_jori_core;
   "runs/agent/tools/schemas/jori/index": typeof runs_agent_tools_schemas_jori_index;
   "runs/agent/tools/schemas/jori/runs": typeof runs_agent_tools_schemas_jori_runs;
+  "runs/agent/tools/schemas/jori/workstreams": typeof runs_agent_tools_schemas_jori_workstreams;
   "runs/agent/tools/schemas/linear": typeof runs_agent_tools_schemas_linear;
   "runs/agent/tools/schemas/microsoft": typeof runs_agent_tools_schemas_microsoft;
   "runs/agent/tools/schemas/notion/index": typeof runs_agent_tools_schemas_notion_index;
@@ -974,6 +980,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/responses/jori/core": typeof runs_agent_tools_schemas_responses_jori_core;
   "runs/agent/tools/schemas/responses/jori/index": typeof runs_agent_tools_schemas_responses_jori_index;
   "runs/agent/tools/schemas/responses/jori/runs": typeof runs_agent_tools_schemas_responses_jori_runs;
+  "runs/agent/tools/schemas/responses/jori/workstreams": typeof runs_agent_tools_schemas_responses_jori_workstreams;
   "runs/agent/tools/schemas/responses/linear": typeof runs_agent_tools_schemas_responses_linear;
   "runs/agent/tools/schemas/responses/mail": typeof runs_agent_tools_schemas_responses_mail;
   "runs/agent/tools/schemas/responses/microsoft": typeof runs_agent_tools_schemas_responses_microsoft;
@@ -1086,10 +1093,13 @@ declare const fullApi: ApiFromModules<{
   "waitlist/http": typeof waitlist_http;
   "waitlist/limits": typeof waitlist_limits;
   "waitlist/signup": typeof waitlist_signup;
+  "workstreams/agent": typeof workstreams_agent;
   "workstreams/corrections": typeof workstreams_corrections;
   "workstreams/labels": typeof workstreams_labels;
+  "workstreams/mcp": typeof workstreams_mcp;
   "workstreams/pulse": typeof workstreams_pulse;
   "workstreams/queries": typeof workstreams_queries;
+  "workstreams/read": typeof workstreams_read;
 }>;
 
 /**

@@ -1,12 +1,13 @@
 import { type Scope } from "../permissions/scope"
 import { meetingBriefing } from "./briefing"
 import { type PlaybookSlot } from "./capabilities"
-import { digestDelivery, type PlaybookDelivery } from "./delivery"
+import { type PlaybookDelivery } from "./delivery"
 import {
   type PlaybookOptionValues,
   type PlaybookSetupSection,
   resolvePlaybookOptions,
 } from "./options"
+import { preread } from "./preread"
 import { describePlaybookSchedule, type PlaybookSchedule } from "./schedule"
 
 export type PlaybookDefinition = {
@@ -95,55 +96,8 @@ export function resolvePlaybookSchedule(
 }
 
 export const playbookCatalog: readonly PlaybookDefinition[] = [
-  {
-    key: "morning-brief",
-    template: "playbooks/brief",
-    version: 2,
-    title: "Morning brief",
-    description:
-      "Start the day knowing what's ahead: today's meetings and the emails that actually need you, gathered into one brief.",
-    scope: "personal",
-    cadence: "Every weekday morning",
-    schedule: { repeat: "weekdays", time: "08:00" },
-    slots: [
-      { capability: "email", intents: ["read"] },
-      { capability: "calendar", intents: ["read"] },
-    ],
-    delivery: { ...digestDelivery, noun: "brief" },
-    web: false,
-  },
+  preread,
   meetingBriefing,
-  {
-    key: "follow-up-sweep",
-    template: "playbooks/sweep",
-    version: 2,
-    title: "Follow-up sweep",
-    description:
-      "Nothing slips through: threads waiting on you get reply drafts ready to review, and you get a list of who still owes you an answer.",
-    scope: "personal",
-    cadence: "Weekday afternoons",
-    schedule: { repeat: "weekdays", time: "15:30" },
-    slots: [{ capability: "email", intents: ["read", "draft"] }],
-    delivery: { ...digestDelivery, noun: "summary" },
-    web: false,
-  },
-  {
-    key: "week-in-review",
-    template: "playbooks/review",
-    version: 2,
-    title: "Week in review",
-    description:
-      "Close the week with a clear head: what happened, what's unresolved, and what next week looks like, in one review.",
-    scope: "personal",
-    cadence: "Friday afternoons",
-    schedule: { repeat: "weekly", weekday: 5, time: "16:00" },
-    slots: [
-      { capability: "email", intents: ["read"] },
-      { capability: "calendar", intents: ["read"] },
-    ],
-    delivery: { ...digestDelivery, noun: "review" },
-    web: false,
-  },
 ]
 
 export function getPlaybook(key: string) {

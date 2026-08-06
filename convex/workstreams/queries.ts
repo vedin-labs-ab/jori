@@ -4,6 +4,7 @@ import { type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { type Integration } from "../shared/integrations"
 import { eventKindLabel, statusLabels } from "./labels"
+import { effortNames, eventUrl } from "./read"
 
 // Console reads follow the write-time read model: source chips come from the
 // belief's `sources` rollup, per-entry providers from the evidence rows'
@@ -165,17 +166,6 @@ async function receiptRollups(ctx: QueryCtx, beliefId: Id<"beliefs">) {
   return rollups
 }
 
-// Journal rows keep citing superseded efforts, so name resolution reads the
-// whole membership, replaced rows included.
-async function effortNames(ctx: QueryCtx, beliefId: Id<"beliefs">) {
-  const rows = await ctx.db
-    .query("efforts")
-    .withIndex("by_workstream", (index) => index.eq("workstreamId", beliefId))
-    .collect()
-
-  return new Map(rows.map((row) => [row._id, row.name]))
-}
-
 function listRow(row: Doc<"beliefs">) {
   return {
     id: row._id,
@@ -225,29 +215,4 @@ async function receiptRow(ctx: QueryCtx, row: Doc<"evidence">) {
     kind: eventKindLabel(event?.type ?? ""),
     url: event === null ? undefined : eventUrl(event.data),
   }
-}
-
-function eventUrl(data: Doc<"events">["data"]): string | undefined {
-  if (data === undefined) {
-    return undefined
-  }
-
-  if ("repository" in data) {
-    return (
-      data.pullRequest?.url ??
-      data.issue?.url ??
-      data.comment?.url ??
-      data.repository.url
-    )
-  }
-
-  if ("notionEventId" in data) {
-    return data.page?.url
-  }
-
-  if ("channel" in data) {
-    return undefined
-  }
-
-  return data.url ?? data.issue?.url ?? data.project?.url
 }

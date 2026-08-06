@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { playbookCatalog } from "@contracts/playbooks/catalog"
+import { getPlaybook } from "@contracts/playbooks/catalog"
 import {
   createMemoryHistory,
   createRootRoute,
@@ -17,13 +17,13 @@ afterEach(() => {
   cleanup()
 })
 
-const morningBrief = playbookCatalog[0]
+const briefing = getPlaybook("meeting-briefing")
 
 test("active card puts the switch in the header and run-now in the footer", () => {
   renderCard(enabledRow("active", Date.now() + 2 * 60 * 60 * 1000))
 
   expect(
-    screen.getByRole("switch", { name: "Morning brief enabled" })
+    screen.getByRole("switch", { name: "Meeting Briefing enabled" })
   ).toBeDefined()
   expect(screen.getByText("On")).toBeDefined()
   expect(screen.getByRole("button", { name: /run now/i })).toBeDefined()
@@ -37,7 +37,7 @@ test("paused card shows paused state and no next run", () => {
   renderCard(enabledRow("paused"))
 
   expect(
-    screen.getByRole("switch", { name: "Morning brief enabled" })
+    screen.getByRole("switch", { name: "Meeting Briefing enabled" })
   ).toBeDefined()
   expect(screen.getByText("Paused")).toBeDefined()
   expect(screen.queryByText(/Next in/)).toBeNull()
@@ -50,7 +50,7 @@ test("enabled card with a lost connection offers reconnect over run-now", () => 
   expect(screen.queryByRole("button", { name: /run now/i })).toBeNull()
   expect(screen.getByRole("button", { name: "View" })).toBeDefined()
   expect(
-    screen.getByRole("switch", { name: "Morning brief enabled" })
+    screen.getByRole("switch", { name: "Meeting Briefing enabled" })
   ).toBeDefined()
 })
 
@@ -73,7 +73,7 @@ function renderCard(row: PlaybookListRow, actions = stubPlaybookActions()) {
       <TooltipProvider>
         <PlaybookCard
           actions={actions}
-          definition={morningBrief}
+          definition={briefing}
           row={row}
           organizationId="organization"
         />
@@ -92,7 +92,7 @@ function enabledRow(
   missing: NonNullable<PlaybookListRow["enabled"]>["missing"] = []
 ): PlaybookListRow {
   return {
-    key: morningBrief.key,
+    key: briefing.key,
     slots: [
       { capability: "email", connected: ["gmail"] },
       { capability: "calendar", connected: ["googleCalendar"] },

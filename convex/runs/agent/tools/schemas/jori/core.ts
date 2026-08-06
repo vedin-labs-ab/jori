@@ -7,6 +7,7 @@ import {
   stringProperty,
 } from "../fragments/common"
 import { runJoriToolInputSchemas } from "./runs"
+import { workstreamJoriToolInputSchemas } from "./workstreams"
 
 export const coreJoriToolInputSchemas = {
   list_capabilities: objectSchema({
@@ -14,6 +15,7 @@ export const coreJoriToolInputSchemas = {
   }),
   load_skill: loadSkillInputSchema(),
   ...runJoriToolInputSchemas,
+  ...workstreamJoriToolInputSchemas,
   offer_integration: objectSchema({
     required: ["integration", "summary"],
     properties: {

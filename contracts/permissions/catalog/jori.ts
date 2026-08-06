@@ -38,6 +38,14 @@ export const joriToolPermissionRows = [
   ],
   [
     "jori",
+    "read_workstreams",
+    "Read workstreams",
+    "Read the organization's workstream roster and its recent activity.",
+    "Read the deduced workstream roster with each workstream's recent journal entries and their citation links inside a day window; defaults to the last week. Workstreams with no entries in the window went quiet, which is signal, not absence. Use before summarizing what moved, stalled, or shipped, and cite the returned links.",
+    "read",
+  ],
+  [
+    "jori",
     "offer_integration",
     "Offer integration",
     "Offer to connect an integration so Jori can use it.",

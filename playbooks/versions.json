@@ -1,18 +1,10 @@
 {
-  "follow-up-sweep": {
-    "version": 2,
-    "fingerprint": "0b54c4c69da8f8dbaafd4cdc2d8fe14ccf57b3faad3b2ce838b96070ec30a562"
-  },
   "meeting-briefing": {
     "version": 12,
     "fingerprint": "9f9a69261eb58635b37665b624777a03d22e0cca7e8653f35de37b8337cc71e7"
   },
-  "morning-brief": {
-    "version": 2,
-    "fingerprint": "5488a453a15add1e3d32b34106144279cf9508238d00bfcafac96916cb3d8751"
-  },
-  "week-in-review": {
-    "version": 2,
-    "fingerprint": "6ff6fe50df2e6413feab522e88c0624a6289a39c4ea6c5580f5fec1b3d6353c3"
+  "preread": {
+    "version": 1,
+    "fingerprint": "9e7877f4bdc5d9b8cd96a157bd2b854d04b2751759836de094fa1fca9be0fa8b"
   }
 }
