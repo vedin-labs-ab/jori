@@ -5,8 +5,8 @@ import { BrandIcon } from "@/shared/brand"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { Mention, Prop } from "../section"
 
-/** Where an app comes from: someone describes the thing they keep doing, and
- *  Jori sets it up in the same thread. */
+/** Where an app comes from: someone hands over the job they keep doing, and
+ *  Jori sets up the playbook in the same thread. */
 export function Handover() {
   return (
     <Prop
@@ -20,19 +20,21 @@ export function Handover() {
     >
       <div className="space-y-4 px-5 py-4">
         <ThreadMessage author="Maya Lund" initials="ML" time="09:12">
-          <Mention /> every Thursday one of us reads through the open PRs and
-          Linear issues to work out what's actually ready to ship. Can you take
-          it over?
+          <Mention /> every Monday I piece together where everything stands from
+          GitHub, Linear, and this channel before our sync. Can you take that
+          over?
         </ThreadMessage>
         <ThreadMessage author="Jori" isJori time="09:12">
-          Sure. I'll check GitHub and Linear every morning and again before the
-          Thursday cut, and keep the state on one page for the team.
+          Sure. I'll read the week across your tools and keep the pre-read on
+          one page, ready before the sync. Every line will link to where it came
+          from.
         </ThreadMessage>
         <ThreadMessage author="Jori" isJori time="09:18">
-          Set up and running. Two things are blocking 2.14 right now.
+          Set up and running. First one's ready, and two things stalled this
+          week that nobody has flagged.
           <span className="mt-2 flex w-fit items-center gap-1.5 rounded-md border bg-background px-2 py-1 font-medium text-xs">
             <LayoutGrid className="size-3.5 text-muted-foreground" />
-            Release readiness
+            Monday pre-read
             <span className="font-normal text-muted-foreground">
               shared with Copperline
             </span>
