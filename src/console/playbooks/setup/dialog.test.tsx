@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { playbookCatalog } from "@contracts/playbooks/catalog"
+import { getPlaybook, playbookCatalog } from "@contracts/playbooks/catalog"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type PlaybookActions } from "../enable"
@@ -40,7 +40,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-const morningBrief = playbookCatalog[0]
+const briefing = getPlaybook("meeting-briefing")
 
 const singlePlan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
   kind: "enable",
@@ -49,7 +49,7 @@ const singlePlan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
 
 test("a pending Advanced settings locks every control", () => {
   const actions = stubPlaybookActions({
-    key: morningBrief.key,
+    key: briefing.key,
     kind: "advanced",
   })
 
@@ -253,7 +253,7 @@ function renderDialog(
   delivery: PlaybookListRow["delivery"],
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>,
   onOpenChange: (open: boolean) => void = () => {},
-  definition = morningBrief
+  definition = briefing
 ) {
   return render(
     <PlaybookSetupDialog
@@ -270,7 +270,7 @@ function renderDialog(
 
 function row(delivery: PlaybookListRow["delivery"]): PlaybookListRow {
   return {
-    key: morningBrief.key,
+    key: briefing.key,
     slots: [
       { capability: "email", connected: ["gmail"] },
       { capability: "calendar", connected: ["googleCalendar"] },

@@ -7,6 +7,7 @@ import { ConsolePage } from "../page"
 import { ConsoleContentGrid, ConsolePageLayout } from "../shared/layout"
 import { PlaybookCard } from "./card"
 import { usePlaybookActions } from "./enable"
+import { MorePlaybooks } from "./more"
 
 export function Playbooks() {
   return (
@@ -42,6 +43,7 @@ function PlaybookCatalog({ organizationId }: { organizationId: string }) {
             organizationId={organizationId}
           />
         ))}
+        <MorePlaybooks />
       </ConsoleContentGrid>
       {editorHost.dialog}
     </ConsolePageLayout>

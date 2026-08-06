@@ -1,13 +1,20 @@
 import { expect, test } from "vitest"
 import { getPlaybook } from "../../contracts/playbooks/catalog"
+import { digestDelivery } from "../../contracts/playbooks/delivery"
 import { type Integration } from "../shared/integrations"
 import { type DeliveryContext, deliverySetup } from "./delivery"
 
-const morningBrief = getPlaybook("morning-brief")
+// These tests pin resolution for the digest contract, email or Slack with
+// both targets open, so the fixture owns its delivery shape instead of
+// borrowing whichever catalog playbook happens to ship it.
+const digestPlaybook = {
+  ...getPlaybook("meeting-briefing"),
+  delivery: { ...digestDelivery, noun: "brief" },
+}
 
 test("prefers a linked self Slack DM before email", () => {
   const setup = deliverySetup(
-    morningBrief,
+    digestPlaybook,
     context(["gmail", "slack"], { slackDmLabel: "Albin Vedin" })
   )
 
@@ -23,7 +30,7 @@ test("a valid manual preference takes priority", () => {
     target: { kind: "channel" as const, id: "C1", label: "leadership" },
   }
   const setup = deliverySetup(
-    morningBrief,
+    digestPlaybook,
     context(["gmail", "slack"], { slackDmLabel: "Albin Vedin", preference })
   )
 
@@ -32,7 +39,7 @@ test("a valid manual preference takes priority", () => {
 
 test("an unavailable preference falls back without choosing a channel", () => {
   const setup = deliverySetup(
-    morningBrief,
+    digestPlaybook,
     context(["gmail"], {
       preference: {
         kind: "slack",
@@ -46,7 +53,7 @@ test("an unavailable preference falls back without choosing a channel", () => {
 
 test("Slack channel stays available but is never inferred", () => {
   const setup = deliverySetup(
-    morningBrief,
+    digestPlaybook,
     context(["slack"], { recipient: {} })
   )
 

@@ -32,11 +32,15 @@ Build gates, smallest honest versions, in order:
       Slack and Notion history wait until the conversation-summary hop earns
       its cost. Regenerate `convex/_generated` on the next `pnpm dev`; the
       checked-in copy was extended by hand
-- [ ] **The pre-read app.** A first-party app authored by us, running on the
-      apps platform: week header, moved/stalled/shipped, attention rows with
-      citations, refreshed by a weekly automation, delivered through the
-      existing playbook preference channels. No conversation-to-app
-      generation on this path
+- [x] **The pre-read playbook.** Organization-scoped, the first of its kind:
+      no capability slots (organization principals hold no personal
+      integrations), Slack-channel delivery (the one destination that
+      belongs to the organization), weekly schedule with day and time setup.
+      Its instructions read the memory through the new `read_workstreams`
+      agent tool: the confirmed roster with each workstream's journal window
+      and citation links, quiet workstreams included as the stall signal.
+      The app-page surface is a Phase 5 item; the channel post is the
+      artifact until then
 - [ ] **Dogfood accuracy check.** Run backfill against one friendly
       organization's real workspace before any sales conversation, and review
       the inferred roster together. The engine has never digested a real
@@ -89,12 +93,18 @@ item gets built without a pilot organization asking.
       first-party app, so the generative path is a later chapter rather than
       a launch gate
 - [ ] **Multi-user presence.** Deferred until pilot teams ask who changed what
-- [ ] **The playbook catalog.** Morning brief, follow-up sweep, and week in
-      review are retired: nothing lists or markets them, and their code
-      leaves when removal is free. Meeting briefing stays in the product by
-      decision (2026-08-05), unmarketed. The forward catalog is the
-      pre-read, the publishable what-shipped edition, and the gated
-      customer-bug pipeline
+- [x] **The playbook catalog.** Morning brief, follow-up sweep, and week in
+      review are removed outright, definitions and prompts both. Meeting
+      briefing stays by decision (2026-08-05), unmarketed. The catalog now
+      lists the pre-read and the meeting briefing, closed by a request card
+      that mails hello@usejori.com; the what-shipped edition and the gated
+      customer-bug pipeline remain the forward additions
+- [ ] **The pre-read app surface.** The playbook delivers to a channel; the
+      live page needs organization-principal runs to hold app-state write
+      access, which app tools currently refuse for lack of an authenticated
+      execution user. Resolve that, then materialize the pre-read app.
+      Build it for the first pilot that asks to open a page instead of
+      reading the post
 - [ ] **Email and calendar as observed events.** Unchanged: built when a real
       user's process demands it
 

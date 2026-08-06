@@ -14,6 +14,7 @@ import {
 import { automationJoriToolResponseSchemas } from "./automations"
 import { brokerJoriToolResponseSchemas } from "./broker"
 import { runJoriToolResponseSchemas } from "./runs"
+import { workstreamJoriToolResponseSchemas } from "./workstreams"
 
 function assetSummaryProperties() {
   return {
@@ -143,6 +144,7 @@ export const coreJoriToolResponseSchemas = {
     ],
   },
   ...runJoriToolResponseSchemas,
+  ...workstreamJoriToolResponseSchemas,
   save_asset: objectSchema({
     required: ["assetId", "mimeType", "name", "size", "url"],
     properties: {
