@@ -29,9 +29,14 @@ export function PlaybookConfiguration({
   return setup.map((section, index) => {
     const invalid = issue !== undefined && index === setup.length - 1
     const issueId = `playbook-setup-${section.key}-issue`
+    const heading =
+      section.kind === "fields" &&
+      planSectionFields(section, fields, values).labeled
+        ? undefined
+        : section.label
 
     return (
-      <PlaybookSection key={section.key} label={section.label}>
+      <PlaybookSection key={section.key} label={heading}>
         {section.kind === "behaviors" ? (
           <fieldset
             aria-describedby={invalid ? issueId : undefined}
@@ -68,6 +73,26 @@ export function PlaybookConfiguration({
   })
 }
 
+/** A fields section labels either the section or every field, never both:
+ *  a lone field named like its section leans on the heading, while fields
+ *  with names of their own make the heading redundant. */
+function planSectionFields(
+  section: Extract<PlaybookSetupSection, { kind: "fields" }>,
+  fields: ReturnType<typeof playbookOptionFields>,
+  values: PlaybookOptionValues
+) {
+  const visible = section.fields.filter((field) =>
+    isPlaybookOptionEnabled(field, fields, values)
+  )
+
+  return {
+    visible,
+    labeled:
+      visible.length > 1 ||
+      visible.some((field) => field.label !== section.label),
+  }
+}
+
 function SectionFields({
   disabled,
   fields,
@@ -83,9 +108,7 @@ function SectionFields({
   section: Extract<PlaybookSetupSection, { kind: "fields" }>
   values: PlaybookOptionValues
 }) {
-  const visible = section.fields.filter((field) =>
-    isPlaybookOptionEnabled(field, fields, values)
-  )
+  const { labeled, visible } = planSectionFields(section, fields, values)
 
   return (
     // The same field grid the behavior rows use, so labeled fields keep
@@ -97,7 +120,7 @@ function SectionFields({
           field={field}
           hint={hints?.[field.key]}
           key={field.key}
-          label={visible.length > 1 || field.label !== section.label}
+          label={labeled}
           onChange={(value) => onChange(field.key, value)}
           value={values[field.key]}
         />

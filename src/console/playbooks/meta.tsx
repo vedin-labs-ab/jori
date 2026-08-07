@@ -166,16 +166,19 @@ function providerAlt(provider: {
   return provider.connected ? label : `${label} (not connected)`
 }
 
+/** A section without a label leans on its fields to label themselves. */
 export function PlaybookSection({
   children,
   label,
 }: {
   children: ReactNode
-  label: string
+  label?: string
 }) {
   return (
     <div className="grid gap-1.5 text-xs">
-      <p className="font-medium text-muted-foreground">{label}</p>
+      {label === undefined ? null : (
+        <p className="font-medium text-muted-foreground">{label}</p>
+      )}
       {children}
     </div>
   )
