@@ -62,7 +62,22 @@ test("disabled card offers a single enable entry without a switch", () => {
   expect(screen.queryByRole("switch")).toBeNull()
 })
 
-function renderCard(row: PlaybookListRow, actions = stubPlaybookActions()) {
+const preread = getPlaybook("preread")
+
+test("access lists Jori-level tools alongside integrations", () => {
+  renderCard(prereadRow(), preread)
+
+  expect(screen.getByText("Access")).toBeDefined()
+  expect(screen.getByText("Workstream memory")).toBeDefined()
+})
+
+test("access section disappears entirely when the playbook needs nothing", () => {
+  renderCard(prereadRow(), { ...preread, jori: [] })
+
+  expect(screen.queryByText("Access")).toBeNull()
+})
+
+function renderCard(row: PlaybookListRow, definition = briefing) {
   const router = createRouter({
     history: createMemoryHistory(),
     routeTree: createRootRoute(),
@@ -72,8 +87,8 @@ function renderCard(row: PlaybookListRow, actions = stubPlaybookActions()) {
     <RouterContextProvider router={router}>
       <TooltipProvider>
         <PlaybookCard
-          actions={actions}
-          definition={briefing}
+          actions={stubPlaybookActions()}
+          definition={definition}
           row={row}
           organizationId="organization"
         />
@@ -84,6 +99,21 @@ function renderCard(row: PlaybookListRow, actions = stubPlaybookActions()) {
 
 function disabledRow(): PlaybookListRow {
   return { ...enabledRow("active"), enabled: null }
+}
+
+function prereadRow(): PlaybookListRow {
+  return {
+    key: preread.key,
+    slots: [],
+    delivery: {
+      options: [{ mode: "channel", available: true }],
+      recommended: {
+        kind: "slack",
+        target: { kind: "channel", id: "channel-1", label: "#general" },
+      },
+    },
+    enabled: null,
+  }
 }
 
 function enabledRow(

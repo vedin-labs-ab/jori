@@ -132,6 +132,7 @@ export const meetingBriefing: PlaybookDefinition = {
     { capability: "email", intents: ["read"] },
     { capability: "calendar", intents: ["read"] },
   ],
+  jori: [],
   delivery: {
     ...digestDelivery,
     slackTargets: ["dm"],

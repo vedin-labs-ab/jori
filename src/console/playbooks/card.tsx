@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { ScopeBadge } from "../shared/details"
 import { PlaybookControls, PlaybookSwitch } from "./controls"
 import { type PlaybookActions } from "./enable"
 import { PlaybookIcon, PlaybookMeta } from "./meta"
@@ -43,7 +42,6 @@ export function PlaybookCard({
         <div className="flex items-center gap-2.5">
           <PlaybookIcon icon={Icon} />
           <CardTitle>{definition.title}</CardTitle>
-          <ScopeBadge scope={definition.scope} />
           {row?.enabled ? (
             <span className="ml-auto flex shrink-0 items-center gap-2">
               <PlaybookSwitch

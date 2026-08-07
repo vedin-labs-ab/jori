@@ -210,6 +210,19 @@ export function ScopeBadge({ scope }: { scope: Scope }) {
   )
 }
 
+/** Who an entity belongs to, as an icon: the organization or one member. */
+export function ScopeIcon({
+  className,
+  scope,
+}: {
+  className?: string
+  scope: Scope
+}) {
+  const Icon = scope === "organization" ? Building2 : UserRound
+
+  return <Icon className={className} />
+}
+
 /** Quiet inline scope marker for list metadata rows; shown for both scopes. */
 export function ScopeDatum({
   iconClassName = "size-3.5",
@@ -218,11 +231,9 @@ export function ScopeDatum({
   iconClassName?: string
   scope: Scope
 }) {
-  const Icon = scope === "organization" ? Building2 : UserRound
-
   return (
     <span className="inline-flex shrink-0 items-center gap-1">
-      <Icon className={cn("shrink-0", iconClassName)} />
+      <ScopeIcon className={cn("shrink-0", iconClassName)} scope={scope} />
       <span className="text-foreground">{scopeLabels[scope]}</span>
     </span>
   )
