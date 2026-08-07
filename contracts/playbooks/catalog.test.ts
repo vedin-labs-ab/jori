@@ -213,7 +213,7 @@ describe("Meeting Briefing cadence", () => {
 
   test("browse surfaces get the rhythm, not resolved defaults", () => {
     expect(describePlaybookCadence(meetingBriefing)).toBe(
-      "Morning briefing or before each meeting"
+      "Daily or before each meeting"
     )
   })
 })

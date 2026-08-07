@@ -21,7 +21,7 @@ export const meetingBriefing: PlaybookDefinition = {
     description:
       "Stores your prepared briefings and powers the shareable briefing page.",
   },
-  cadence: "Morning briefing or before each meeting",
+  cadence: "Daily or before each meeting",
   schedule: { repeat: "daily", time: "01:00" },
   setup: [
     {
