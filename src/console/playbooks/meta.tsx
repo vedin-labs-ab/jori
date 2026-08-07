@@ -6,8 +6,9 @@ import {
   type PlaybookJoriTool,
 } from "@contracts/playbooks/catalog"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
-import { CalendarClock, Globe, Layers, type LucideIcon } from "lucide-react"
+import { CalendarClock, Globe, type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
+import { ProviderLogo } from "@/shared/logo/provider"
 import { SurfaceLogo } from "../automations/access/logo"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { type PlaybookListRow, slotDisplayProviders } from "./state"
@@ -55,11 +56,8 @@ export function PlaybookSchedule({
   )
 }
 
-const joriToolAccess: Record<
-  PlaybookJoriTool,
-  { icon: LucideIcon; label: string }
-> = {
-  memory: { icon: Layers, label: "Workstream memory" },
+const joriToolLabels: Record<PlaybookJoriTool, string> = {
+  memory: "Workstream memory",
 }
 
 export function PlaybookAccess({
@@ -99,24 +97,27 @@ export function PlaybookAccess({
         </div>
       ))}
       {definition.jori.map((tool) => (
-        <ToolAccess key={tool} {...joriToolAccess[tool]} />
+        <ToolAccess
+          key={tool}
+          icon={<ProviderLogo className="size-3.5" surface="jori" />}
+          label={joriToolLabels[tool]}
+        />
       ))}
-      {definition.web ? <ToolAccess icon={Globe} label="Web research" /> : null}
+      {definition.web ? (
+        <ToolAccess
+          icon={<Globe className="size-3.5 shrink-0 text-muted-foreground" />}
+          label="Web research"
+        />
+      ) : null}
     </PlaybookSection>
   )
 }
 
 /** A non-integration access line: a Jori-level system or web research. */
-function ToolAccess({
-  icon: Icon,
-  label,
-}: {
-  icon: LucideIcon
-  label: string
-}) {
+function ToolAccess({ icon, label }: { icon: ReactNode; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <Icon className="size-3.5 shrink-0 text-muted-foreground" />
+      {icon}
       <span>{label}</span>
     </div>
   )
