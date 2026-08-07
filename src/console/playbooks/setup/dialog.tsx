@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../convex/_generated/api"
+import { ScopeIcon } from "../../shared/details"
 import { showErrorToast } from "../../shared/error"
 import { type PlaybookActions, pendingActionKind } from "../enable"
 import {
@@ -215,8 +216,14 @@ function SetupDialogHeader({
 }) {
   return (
     <DialogHeader>
-      <DialogTitle>
-        {editing ? "Edit" : "Set up"} {definition.title}
+      <DialogTitle className="flex items-center gap-2">
+        <ScopeIcon
+          className="size-4 shrink-0 text-muted-foreground"
+          scope={definition.scope}
+        />
+        <span>
+          {editing ? "Edit" : "Set up"} {definition.title}
+        </span>
       </DialogTitle>
       <DialogDescription>{definition.description}</DialogDescription>
     </DialogHeader>
