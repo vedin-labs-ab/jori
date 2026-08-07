@@ -100,9 +100,6 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
         {rejection?.kind === "form" ? (
           <FieldError className="mt-3">{rejection.message}</FieldError>
         ) : null}
-        <p className="mt-3 text-muted-foreground text-xs">
-          We'll only email you when there's room for your team.
-        </p>
       </div>
     </form>
   )

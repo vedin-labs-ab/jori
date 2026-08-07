@@ -18,8 +18,7 @@ export function Hero() {
             mechanism instead, so the line stays this length as the connector
             list grows. */}
         <p className="text-muted-foreground text-sm">
-          <Mention /> answers in Slack, GitHub, and Linear, and works across
-          everything you connect
+          <Mention /> answers in Slack, GitHub, Linear, and more
         </p>
         <h1 className="mt-5 font-medium text-5xl text-balance tracking-tight sm:text-6xl lg:text-7xl">
           Jori writes the Monday pre-read.
