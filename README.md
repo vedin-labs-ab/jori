@@ -83,17 +83,35 @@ working tree. `pnpm deploy:dev` pushes it once without that watcher running.
 
 ## Deploying to production
 
-Production needs two credentials on the machine that deploys, written once.
+Production needs three credentials on the machine that deploys, written once.
 The Convex deploy key:
 
 ```sh
 npx convex deployment token create local-deploy --prod --save-env .env.prod.local
 ```
 
-And the Vercel link, which writes `.vercel/` from your `vercel login` session:
+The Vercel link, which writes `.vercel/` from your `vercel login` session:
 
 ```sh
 npx vercel link --yes --project jori
+```
+
+And the Trigger.dev CLI session, plus the project ref in `.env.prod.local`
+(an environment without a login session sets `TRIGGER_ACCESS_TOKEN` instead):
+
+```sh
+npx trigger login
+```
+
+```sh
+echo "TRIGGER_PROJECT_REF=proj_ewxxlowxmqxozoefzode" >> .env.prod.local
+```
+
+The production sandbox template is built once, and rebuilt when the sandbox
+image changes:
+
+```sh
+pnpm sandbox:build:prod
 ```
 
 Production is then deployed by a person, explicitly, from `main`:
@@ -103,9 +121,11 @@ pnpm deploy:prod
 ```
 
 The command refuses to start unless the checkout is clean, `main` is checked
-out, `main` matches `origin/main`, the checks and tests pass, and the
-production Convex deployment already holds every variable it needs. It then
-deploys Convex, deploys the frontend to Vercel, and syncs the skill catalog.
+out, `main` matches `origin/main`, the checks and tests pass, the production
+Convex deployment already holds every variable it needs, and the production
+Trigger.dev environment holds every variable its workers need. It then deploys
+the Trigger.dev tasks, deploys Convex, deploys the frontend to Vercel, and
+syncs the skill catalog.
 
 Nothing else deploys to production. Pushing `main` deploys nothing: Vercel's
 git integration is turned off for `main` in `vercel.json`, so the only route to

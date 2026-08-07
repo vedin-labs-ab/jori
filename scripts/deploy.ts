@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process"
 import { createInterface } from "node:readline/promises"
 import { loadEnvironment } from "./env/load.ts"
-import { deploymentNames } from "./env/names.ts"
+import { deploymentNames, workerNames } from "./env/names.ts"
 import { packageCommand, runCommand, toolCommand } from "./process.ts"
 
 const environment = "prod"
@@ -26,9 +26,19 @@ async function deployProduction() {
   await runCommand(packageCommand("test"))
 
   requireDeploymentVariables(env)
+  requireWorkerVariables(env)
 
-  // Convex first: the frontend is served against these functions, so the
-  // backend leads and the frontend follows.
+  // Each layer deploys before the one that calls it: Convex dispatches runs
+  // that expect the task code to exist, so the workers lead, and the frontend
+  // is served against the Convex functions, so the backend leads it in turn.
+  // In-flight runs are safe either way: Trigger.dev pins every run to the
+  // deployment version it started on.
+  await step(env, "Deploying Trigger.dev", [
+    "trigger",
+    "deploy",
+    "--env",
+    environment,
+  ])
   await step(env, "Deploying Convex", ["convex", "deploy", "--yes"])
   await step(env, "Deploying frontend", ["vercel", "deploy", "--prod", "--yes"])
   await step(env, "Syncing skills", [
@@ -91,7 +101,48 @@ async function requireConfirmation() {
  * whole answer, and the command that reports it must not leak the rest.
  */
 function requireDeploymentVariables(env: NodeJS.ProcessEnv) {
-  const command = toolCommand(["convex", "env", "list"])
+  const output = commandOutput(
+    env,
+    ["convex", "env", "list"],
+    "Reading the production Convex environment failed."
+  )
+  const present = new Set(
+    output.split("\n").map((line) => line.split("=")[0].trim())
+  )
+
+  reportMissing(
+    deploymentNames.filter((name) => !present.has(name)),
+    "The production Convex deployment",
+    "Set each one with: npx convex env set <NAME> <value>"
+  )
+}
+
+/**
+ * Every variable the deployed workers need at run time, checked against the
+ * Trigger.dev environment. The CLI prints names with values hidden, so only
+ * names ever reach this process; each is matched as a whole word to keep a
+ * similarly named variable from standing in for it.
+ */
+function requireWorkerVariables(env: NodeJS.ProcessEnv) {
+  const output = commandOutput(
+    env,
+    ["trigger", "env", "list", "--env", environment],
+    "Reading the production Trigger.dev environment failed."
+  )
+
+  reportMissing(
+    workerNames.filter((name) => !new RegExp(`\\b${name}\\b`).test(output)),
+    "The production Trigger.dev environment",
+    "Set each one in the Trigger.dev dashboard for the prod environment."
+  )
+}
+
+function commandOutput(
+  env: NodeJS.ProcessEnv,
+  args: string[],
+  failure: string
+) {
+  const command = toolCommand(args)
   const result = spawnSync(command.command, command.args, {
     encoding: "utf8",
     env,
@@ -99,22 +150,20 @@ function requireDeploymentVariables(env: NodeJS.ProcessEnv) {
   })
 
   if (result.status !== 0) {
-    throw new Error(
-      `Reading the production Convex environment failed.\n${result.stderr.trim()}`
-    )
+    throw new Error(`${failure}\n${result.stderr.trim()}`)
   }
 
-  const present = new Set(
-    result.stdout.split("\n").map((line) => line.split("=")[0].trim())
-  )
-  const missing = deploymentNames.filter((name) => !present.has(name))
+  return result.stdout
+}
 
+function reportMissing(
+  missing: readonly string[],
+  where: string,
+  remedy: string
+) {
   if (missing.length > 0) {
     throw new Error(
-      [
-        `The production Convex deployment is missing: ${missing.join(", ")}`,
-        "Set each one with: npx convex env set <NAME> <value>",
-      ].join("\n")
+      [`${where} is missing: ${missing.join(", ")}`, remedy].join("\n")
     )
   }
 }
