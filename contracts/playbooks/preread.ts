@@ -55,6 +55,7 @@ export const preread: PlaybookDefinition = {
     return `${weekdayLabel(options)}s at ${schedule.time}`
   },
   slots: [],
+  jori: ["memory"],
   delivery: {
     allowed: ["slack"],
     slackTargets: ["channel"],

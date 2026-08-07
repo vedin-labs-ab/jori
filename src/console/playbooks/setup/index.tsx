@@ -5,6 +5,7 @@ import { Cable } from "lucide-react"
 import { lazy, Suspense, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { integrationsRouteFor } from "../../integrations/routes"
+import { ScopeIcon } from "../../shared/details"
 import { type PlaybookActions } from "../enable"
 import { type PlaybookListRow, planPlaybookEnable } from "../state"
 import { type PlaybookSetupDialogProps } from "./dialog"
@@ -69,7 +70,9 @@ export function SetupControls({
   return (
     <>
       <Button className="w-full" onClick={() => setIsOpen(true)} type="button">
-        Enable
+        {/* Enabling acts for the whole organization or just this member;
+            the icon discloses which before the dialog opens. */}
+        <ScopeIcon scope={definition.scope} /> Enable
       </Button>
       {isOpen ? (
         <PlaybookSetupDialog

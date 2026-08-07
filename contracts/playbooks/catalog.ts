@@ -45,10 +45,15 @@ export type PlaybookDefinition = {
   validateOptions?: (options: PlaybookOptionValues) => string | undefined
   /** Input capabilities the playbook reads; delivery is separate. */
   slots: readonly PlaybookSlot[]
+  /** Jori-level systems the playbook reads — always available, never a
+   *  connection to make; surfaced under Access alongside integrations. */
+  jori: readonly PlaybookJoriTool[]
   /** Where the output goes, and the default the user can override at enable. */
   delivery: PlaybookDelivery
   web: boolean
 }
+
+export type PlaybookJoriTool = "memory"
 
 export type PlaybookApp = {
   title: string

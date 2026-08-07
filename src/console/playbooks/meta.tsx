@@ -3,9 +3,10 @@ import { playbookSlotIntentLabels } from "@contracts/playbooks/capabilities"
 import {
   describePlaybookCadence,
   type PlaybookDefinition,
+  type PlaybookJoriTool,
 } from "@contracts/playbooks/catalog"
 import { type PlaybookOptionValues } from "@contracts/playbooks/options"
-import { CalendarClock, Globe, type LucideIcon } from "lucide-react"
+import { CalendarClock, Globe, Layers, type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { SurfaceLogo } from "../automations/access/logo"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
@@ -54,6 +55,13 @@ export function PlaybookSchedule({
   )
 }
 
+const joriToolAccess: Record<
+  PlaybookJoriTool,
+  { icon: LucideIcon; label: string }
+> = {
+  memory: { icon: Layers, label: "Workstream memory" },
+}
+
 export function PlaybookAccess({
   choices,
   definition,
@@ -63,6 +71,14 @@ export function PlaybookAccess({
   definition: PlaybookDefinition
   row: PlaybookListRow | undefined
 }) {
+  if (
+    definition.slots.length === 0 &&
+    definition.jori.length === 0 &&
+    !definition.web
+  ) {
+    return null
+  }
+
   return (
     <PlaybookSection label="Access">
       {definition.slots.map((slot) => (
@@ -82,13 +98,27 @@ export function PlaybookAccess({
           </span>
         </div>
       ))}
-      {definition.web ? (
-        <div className="flex items-center gap-1.5">
-          <Globe className="size-3.5 shrink-0 text-muted-foreground" />
-          <span>Web research</span>
-        </div>
-      ) : null}
+      {definition.jori.map((tool) => (
+        <ToolAccess key={tool} {...joriToolAccess[tool]} />
+      ))}
+      {definition.web ? <ToolAccess icon={Globe} label="Web research" /> : null}
     </PlaybookSection>
+  )
+}
+
+/** A non-integration access line: a Jori-level system or web research. */
+function ToolAccess({
+  icon: Icon,
+  label,
+}: {
+  icon: LucideIcon
+  label: string
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Icon className="size-3.5 shrink-0 text-muted-foreground" />
+      <span>{label}</span>
+    </div>
   )
 }
 
