@@ -87,15 +87,21 @@ function SectionFields({
     isPlaybookOptionEnabled(field, fields, values)
   )
 
-  return visible.map((field) => (
-    <OptionField
-      disabled={disabled}
-      field={field}
-      hint={hints?.[field.key]}
-      key={field.key}
-      label={visible.length > 1 || field.label !== section.label}
-      onChange={(value) => onChange(field.key, value)}
-      value={values[field.key]}
-    />
-  ))
+  return (
+    // The same field grid the behavior rows use, so labeled fields keep
+    // one rhythm everywhere in the dialog.
+    <div className="grid gap-3 sm:grid-cols-2">
+      {visible.map((field) => (
+        <OptionField
+          disabled={disabled}
+          field={field}
+          hint={hints?.[field.key]}
+          key={field.key}
+          label={visible.length > 1 || field.label !== section.label}
+          onChange={(value) => onChange(field.key, value)}
+          value={values[field.key]}
+        />
+      ))}
+    </div>
+  )
 }

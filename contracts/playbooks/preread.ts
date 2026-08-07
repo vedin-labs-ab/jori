@@ -18,12 +18,12 @@ const weekdays = [
 export const preread: PlaybookDefinition = {
   key: "preread",
   template: "playbooks/preread",
-  version: 1,
+  version: 2,
   title: "Pre-read",
   description:
     "Walk into the sync already briefed: what moved, what stalled, and what shipped across your tools, with every line linked to where it came from.",
   scope: "organization",
-  cadence: "Weekly, before the sync",
+  cadence: "Weekly",
   schedule: { repeat: "weekly", weekday: 1, time: "06:30" },
   setup: [
     {
