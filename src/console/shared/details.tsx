@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { FieldHelp } from "@/shared/field"
 import { CopyableCodeBlock, CopyButton } from "./copy"
 import { absoluteTime } from "./time"
 
@@ -34,15 +35,29 @@ export function ErrorDetail({ value }: { value: string }) {
   )
 }
 
-/** The outcome a delegated run returned via finish_run. */
+/** The outcome a run returned via finish_run. */
 export function ResultDetail({ value }: { value: string }) {
-  return <CodeBlockDetail icon={CornerDownLeft} label="Result" value={value} />
+  return (
+    <CodeBlockDetail
+      help={
+        <FieldHelp label="About the outcome">
+          The run's return value, written by the agent as it finished. A parent
+          run waiting on this one receives exactly this text; the steps behind
+          it are in the run's activity.
+        </FieldHelp>
+      }
+      icon={CornerDownLeft}
+      label="Outcome"
+      value={value}
+    />
+  )
 }
 
 export function CodeBlockDetail({
   contentClassName,
   framed = false,
   header,
+  help,
   icon: Icon,
   iconClassName,
   label,
@@ -51,14 +66,26 @@ export function CodeBlockDetail({
   contentClassName?: string
   framed?: boolean
   header?: ReactNode
+  /** Suffix hint after the label, a FieldHelp explaining the row. */
+  help?: ReactNode
   icon: DetailIcon
   iconClassName?: string
   label: string
   value: string
 }) {
+  const rowLabel =
+    help === undefined ? (
+      label
+    ) : (
+      <span className="inline-flex items-center gap-1.5">
+        {label}
+        {help}
+      </span>
+    )
+
   if (framed || header !== undefined) {
     return (
-      <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
+      <DetailRow icon={Icon} iconClassName={iconClassName} label={rowLabel}>
         <DetailFrame
           action={<CopyButton label={label} value={value} />}
           header={header}
@@ -70,7 +97,7 @@ export function CodeBlockDetail({
   }
 
   return (
-    <DetailRow icon={Icon} iconClassName={iconClassName} label={label}>
+    <DetailRow icon={Icon} iconClassName={iconClassName} label={rowLabel}>
       <CopyableCodeBlock
         contentClassName={contentClassName}
         label={label}
