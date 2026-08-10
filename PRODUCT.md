@@ -20,6 +20,35 @@ the roster) and what is happening now (efforts, the journal). Everything
 else is a view over that memory or a consumer of it. Views are how it gets
 sold; the memory is why it gets kept.
 
+## Vision
+
+Every company is filling with agents: its own, its vendors', its people's.
+All of them share two problems. They do not know what is going on, and
+nobody can account for what they do. Context and accountability are the
+scarce layers; models, chat surfaces, and automation are already
+commodities.
+
+Jori is both layers. The memory is the evidence-cited, continuously
+maintained model of what exists and what is happening, built from the work
+itself, where a claim without a receipt does not exist. The permission
+system is the gate through which anything automated reads the
+organization, acts on its behalf, and answers for it. The mission in one
+sentence: every organization knows itself, and everything acting on its
+behalf answers to it.
+
+The arc has three acts. Act one proves the memory: the pre-read is the
+door, the first view compelling enough that a leadership team lets Jori
+read everything and opens what it writes every week. Act two grows
+consumers: more views, then other agents, with the memory exposed over MCP
+and API so the company's own tooling stops being context-starved. Act
+three is governance: when every agent wants to act on the memory, the
+permission modes, ask-first approvals, and receipts built today become the
+product. Read first, act second, govern third; each act is sold only after
+the one before it is trusted.
+
+One buyer through all three acts: whoever answers for the organization
+knowing itself.
+
 ## Users
 
 The buyer is whoever assembles the company picture by hand: founders, COOs, and operations-minded leads at software companies of roughly 10–80 people running Slack, GitHub, and Linear. Every week someone at these companies stitches the Monday sync together out of tool tabs, channel scrolls, and memory, and still finds out about stalled work late. The landing page reader is that person recognizing the assembly job; the console user is the same person opening the pre-read before the sync, then the rest of the team opening the apps Jori keeps current. Technical evaluators read closely for what Jori can access and when it acts.
