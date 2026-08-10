@@ -39,8 +39,8 @@ const inFlight: readonly BodyOfWork[] = [
 export function Context() {
   return (
     <Section
-      lede="Jori reads what's already happening across your tools and works out the bodies of work your team would name out loud. That's what the apps are built on, and it sharpens the longer Jori runs."
-      title="It learns how your company works"
+      lede="What's happening lives scattered across threads, issues, and pull requests, and in people's heads. Jori reads what already exists and keeps one picture of the work in flight, grouped the way your team would name it out loud."
+      title="Stop rebuilding the picture by hand"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
         <dl className="space-y-8">
