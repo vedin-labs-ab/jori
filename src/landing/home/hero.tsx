@@ -24,10 +24,9 @@ export function Hero() {
           Jori writes the Monday pre-read.
         </h1>
         <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-          What moved, what stalled, what shipped. Jori reads the week across
-          your tools and keeps one live page your leadership team opens before
-          the sync, with every line linked to where it came from. Nothing was
-          typed in.
+          Walk into Monday with one shared picture: what moved, what stalled,
+          what shipped, every line linked to where it came from. Nobody chased
+          status, and nothing was typed in.
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <GetStarted prominent />

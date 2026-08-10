@@ -51,6 +51,7 @@ Sharp, easygoing, trustworthy. Jori's own voice prompt is the brand voice: direc
 - Personality through copy and micro-physics, not decoration: quiet canvas, a few deliberate moments.
 - Marketing and product share one language (organization, runs, apps, playbooks, ask-first) and one design system.
 - Name the surfaces, not the connectors: copy may name the tools you can mention Jori in, because that set is bounded and specific. The tools Jori reaches are named by the mechanism you connect them through, never enumerated; a prose list goes stale the week a connector ships. Where the full set matters, show it from the integration data itself.
+- Sell the organization that no longer spends energy understanding its own state, never the AI that understands it. Outcomes lead; the mechanism is the proof, not the promise.
 
 ## Accessibility & Inclusion
 
