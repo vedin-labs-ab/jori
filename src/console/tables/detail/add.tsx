@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { type TableColumn } from "../types"
 import { buildRowValues, type RowDraft } from "./cells"
 
@@ -124,21 +123,11 @@ function RowField({
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{label}</Label>
-      {column.type === "json" ? (
-        <Textarea
-          className="min-h-24 font-mono text-xs"
-          id={id}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="{ }"
-          value={text}
-        />
-      ) : (
-        <Input
-          id={id}
-          onChange={(event) => onChange(event.target.value)}
-          value={text}
-        />
-      )}
+      <Input
+        id={id}
+        onChange={(event) => onChange(event.target.value)}
+        value={text}
+      />
     </div>
   )
 }

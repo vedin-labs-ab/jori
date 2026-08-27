@@ -1,15 +1,21 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { act, cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { MaterialBreadcrumbContext } from "../shared/materials/breadcrumb"
 import { ConsoleShell } from "./index"
 import { consoleDocumentTitle } from "./routes"
+
+let pathname = "/runs"
 
 vi.mock("@tanstack/react-router", () => ({
   useRouterState: ({
     select,
   }: {
     select: (state: { location: { pathname: string } }) => unknown
-  }) => select({ location: { pathname: "/runs" } }),
+  }) => select({ location: { pathname } }),
+  Link: ({ to, ...props }: { to: string } & React.ComponentProps<"a">) => (
+    <a href={to} {...props} />
+  ),
 }))
 
 vi.mock("@/components/ui/sidebar", () => ({
@@ -35,6 +41,7 @@ vi.mock("./navigation", () => ({
 
 afterEach(() => {
   cleanup()
+  pathname = "/runs"
 })
 
 test("names the page with a heading rather than a one-item breadcrumb", () => {
@@ -42,6 +49,41 @@ test("names the page with a heading rather than a one-item breadcrumb", () => {
 
   expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Runs")
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
+})
+
+test("heads a material detail page with the linked parent surface", () => {
+  pathname = "/tables/abc123"
+  render(<ConsoleShell>Content</ConsoleShell>)
+
+  const trail = screen.getByRole("navigation", { name: "breadcrumb" })
+  const parent = screen.getByRole("link", { name: "Tables" })
+
+  expect(trail.contains(parent)).toBe(true)
+  expect(parent.getAttribute("href")).toBe("/tables")
+  expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
+})
+
+test("appends the material's name once its view publishes it", () => {
+  pathname = "/tables/abc123"
+
+  let publish: ((name: string | undefined) => void) | undefined
+
+  render(
+    <ConsoleShell>
+      <MaterialBreadcrumbContext.Consumer>
+        {(value) => {
+          publish = value
+
+          return null
+        }}
+      </MaterialBreadcrumbContext.Consumer>
+    </ConsoleShell>
+  )
+  act(() => publish?.("Launch checklist"))
+
+  const current = screen.getByText("Launch checklist")
+
+  expect(current.getAttribute("aria-current")).toBe("page")
 })
 
 test("opens on a skip link pointing at the main element", () => {

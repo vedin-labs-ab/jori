@@ -9,13 +9,11 @@ export const tableColumn = v.object({
   name: v.string(),
   type: v.union(
     v.literal("boolean"),
+    v.literal("float"),
     v.literal("integer"),
-    v.literal("json"),
-    v.literal("number"),
     v.literal("string")
   ),
   required: v.optional(v.boolean()),
-  schema: v.optional(v.any()),
 })
 
 /** A table: rows typed by a column schema fixed at creation and evolved

@@ -1,12 +1,25 @@
-import { CalendarClock } from "lucide-react"
+import { CalendarClock, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { FilterableEmptyState } from "../../shared/list/empty"
 
 const skeletonRows = ["first", "second", "third"]
 
-export function EmptyAutomations({ hasFilters }: { hasFilters: boolean }) {
+export function EmptyAutomations({
+  hasFilters,
+  onCreate,
+}: {
+  hasFilters: boolean
+  onCreate: () => void
+}) {
   return (
     <FilterableEmptyState
+      action={
+        <Button onClick={onCreate} type="button">
+          <Plus />
+          New automation
+        </Button>
+      }
       description="Create an automation for recurring, one-time, or event-triggered work."
       hasFilters={hasFilters}
       icon={CalendarClock}

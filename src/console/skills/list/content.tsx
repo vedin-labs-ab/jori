@@ -1,4 +1,5 @@
-import { BookOpenText } from "lucide-react"
+import { BookOpenText, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ConsoleScrollableGrid } from "../../shared/layout"
 import { ConsoleEmptyState } from "../../shared/list/empty"
@@ -14,6 +15,7 @@ const skillGrid = "grid-cols-[repeat(auto-fill,minmax(min(20rem,100%),1fr))]"
 export function SkillContent({
   filteredCount,
   isLoading,
+  onCreate,
   onDelete,
   onEdit,
   onView,
@@ -24,6 +26,7 @@ export function SkillContent({
 }: {
   filteredCount: number
   isLoading: boolean
+  onCreate: () => void
   onDelete: (skill: Skill) => void
   onEdit: (skill: Skill) => void
   onView: (skill: Skill) => void
@@ -47,6 +50,16 @@ export function SkillContent({
     <ConsoleScrollableGrid className="md:grid-cols-2 xl:grid-cols-3">
       {filteredCount === 0 ? (
         <SkillEmptyState
+          // Global skills are curated, not created, so only views that can
+          // hold an organization skill offer the create action.
+          action={
+            isFiltering || view === "global" ? undefined : (
+              <Button onClick={onCreate} type="button">
+                <Plus />
+                New skill
+              </Button>
+            )
+          }
           description={emptyDescription(view, isFiltering)}
           title={emptyTitle(view, isFiltering)}
         />
@@ -108,14 +121,17 @@ function viewLabel(view: SkillFilterView) {
 }
 
 function SkillEmptyState({
+  action,
   description,
   title,
 }: {
+  action: React.ReactNode
   description: string
   title: string
 }) {
   return (
     <ConsoleEmptyState
+      action={action}
       className="col-span-full"
       description={description}
       icon={BookOpenText}

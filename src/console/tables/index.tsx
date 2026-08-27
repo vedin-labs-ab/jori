@@ -93,6 +93,7 @@ function TablesView({ organizationId }: { organizationId: string }) {
       />
       <TablesBody
         hasFilters={hasFilters}
+        onCreate={() => setIsCreateOpen(true)}
         pagination={pagination}
         removal={removal}
         tableList={tableList}
@@ -108,11 +109,13 @@ function TablesView({ organizationId }: { organizationId: string }) {
 
 function TablesBody({
   hasFilters,
+  onCreate,
   pagination,
   removal,
   tableList,
 }: {
   hasFilters: boolean
+  onCreate: () => void
   pagination: ReturnType<typeof useClientPagination<TableSummary>>
   removal: ReturnType<typeof useTableRemoval>
   tableList: TableListResult | undefined
@@ -132,6 +135,7 @@ function TablesBody({
       <ConsoleScrollableGrid>
         <TableList
           hasFilters={hasFilters}
+          onCreate={onCreate}
           removal={removal}
           tables={pagination.visibleRows}
           unauthorizedMessage={

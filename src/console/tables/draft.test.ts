@@ -4,6 +4,7 @@ import {
   draftsFromColumns,
   draftsToColumns,
   newColumnDraft,
+  validateTableForm,
 } from "./draft"
 import { type TableColumn } from "./types"
 
@@ -44,9 +45,8 @@ test("locked drafts keep everything but the display name", () => {
     {
       key: "amount",
       name: "Amount",
-      type: "number",
+      type: "float",
       required: true,
-      schema: undefined,
     },
   ]
   const drafts = draftsFromColumns(existing)
@@ -56,6 +56,17 @@ test("locked drafts keep everything but the display name", () => {
   expect(draftsToColumns(renamed, existing)).toEqual([
     { ...existing[0], name: "Total" },
   ])
+})
+
+test("form validation flags a missing name and column problems together", () => {
+  expect(validateTableForm("  ", [draft({ key: "" })])).toEqual({
+    name: "Give the table a name.",
+    columns: "Every column needs a key.",
+  })
+  expect(validateTableForm("Launches", [draft({ key: "title" })])).toEqual({
+    name: undefined,
+    columns: undefined,
+  })
 })
 
 function draft(overrides: Partial<ReturnType<typeof newColumnDraft>>) {

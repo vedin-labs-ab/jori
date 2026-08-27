@@ -1,30 +1,18 @@
 import { isRecord } from "../json"
-import { assertJsonSerializable, stableJson } from "../json/stable"
-import {
-  assertSupportedJsonSchema,
-  normalizeJsonValueSchema,
-} from "../schema/normalize"
-import { type JsonSchemaObject } from "../schema/validate"
+import { assertJsonSerializable } from "../json/stable"
 
 // A table is typed by its column schema: an ordered list of columns, each
 // with a stable key, a display name, and a value type. Rows are documents
 // holding values keyed by column key, validated against these columns on
 // every write.
 
-export type TableColumnType =
-  | "boolean"
-  | "integer"
-  | "json"
-  | "number"
-  | "string"
+export type TableColumnType = "boolean" | "float" | "integer" | "string"
 
 export type TableColumn = {
   key: string
   name: string
   type: TableColumnType
   required?: boolean
-  /** Optional JSON Schema for the values of a json column. */
-  schema?: JsonSchemaObject
 }
 
 export const tableLimits = {
@@ -35,9 +23,8 @@ export const tableLimits = {
 
 const columnTypes = new Set<TableColumnType>([
   "boolean",
+  "float",
   "integer",
-  "json",
-  "number",
   "string",
 ])
 const columnKeyPattern = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
@@ -66,8 +53,8 @@ export function normalizeTableColumns(value: unknown): TableColumn[] {
 }
 
 /** Column evolution is additive only: existing columns keep their key,
- *  type, required flag, and schema (display names may change), and new
- *  columns must be optional so existing rows stay valid. */
+ *  type, and required flag (display names may change), and new columns
+ *  must be optional so existing rows stay valid. */
 export function assertColumnEvolution(
   current: TableColumn[],
   next: TableColumn[]
@@ -83,8 +70,7 @@ export function assertColumnEvolution(
 
     if (
       candidate.type !== column.type ||
-      (candidate.required === true) !== (column.required === true) ||
-      stableJson(candidate.schema) !== stableJson(column.schema)
+      (candidate.required === true) !== (column.required === true)
     ) {
       throw new Error(`Column ${column.key} can only change its display name.`)
     }
@@ -107,7 +93,6 @@ function normalizeColumn(value: unknown, keys: Set<string>): TableColumn {
   }
 
   const key = normalizeColumnKey(value.key)
-  const type = normalizeColumnType(value.type, key)
 
   if (keys.has(key)) {
     throw new Error(`Duplicate table column key: ${key}`)
@@ -118,9 +103,8 @@ function normalizeColumn(value: unknown, keys: Set<string>): TableColumn {
   return {
     key,
     name: normalizeColumnName(value.name, key),
-    type,
+    type: normalizeColumnType(value.type, key),
     ...(value.required === true ? { required: true } : {}),
-    ...normalizeColumnSchema(value.schema, type, key),
   }
 }
 
@@ -152,24 +136,4 @@ function normalizeColumnType(value: unknown, key: string): TableColumnType {
   }
 
   return value as TableColumnType
-}
-
-function normalizeColumnSchema(
-  value: unknown,
-  type: TableColumnType,
-  key: string
-) {
-  if (value === undefined || value === null) {
-    return {}
-  }
-
-  if (type !== "json") {
-    throw new Error(`Column ${key} carries a schema but is not a json column.`)
-  }
-
-  const schema = normalizeJsonValueSchema(value, `Column ${key} schema`)
-
-  assertSupportedJsonSchema(schema, `Column ${key} schema`)
-
-  return { schema }
 }

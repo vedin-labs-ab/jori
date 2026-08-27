@@ -27,6 +27,20 @@ export function getPageTitle(pathname: string) {
   )
 }
 
+// The material surfaces whose member detail pages live one level below the
+// list, so the header names them with a trail instead of a single heading.
+const materialSurfacePaths = ["/tables", "/stores", "/files"] as const
+
+/** The surface a material detail page belongs to, when the path is one;
+ *  list pages and non-material surfaces stay a single heading. */
+export function getMaterialSurface(pathname: string) {
+  return consoleNavigation.find(
+    (item) =>
+      materialSurfacePaths.some((path) => path === item.to) &&
+      pathname.startsWith(`${item.to}/`)
+  )
+}
+
 /**
  * What the browser tab says. Console routes declare it from their own path so
  * the name comes from the same table the sidebar and the header read, and a

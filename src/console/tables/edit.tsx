@@ -13,13 +13,17 @@ import {
 } from "@/components/ui/dialog"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
-import { MaterialDetailFields } from "../shared/materials/fields"
+import {
+  MaterialDescriptionField,
+  MaterialNameField,
+} from "../shared/materials/fields"
 import { ColumnEditor } from "./columns"
 import {
   type ColumnDraft,
-  columnDraftsIssue,
   draftsFromColumns,
   draftsToColumns,
+  type TableFormErrors,
+  validateTableForm,
 } from "./draft"
 import { type TableDetail } from "./types"
 
@@ -35,7 +39,6 @@ export function EditTableDialog({
   table: TableDetail | undefined
 }) {
   const form = useEditTable(organizationId, table, () => onOpenChange(false))
-  const issue = columnDraftsIssue(form.drafts)
 
   return (
     <Dialog
@@ -55,27 +58,31 @@ export function EditTableDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
-          <MaterialDetailFields
-            description={form.description}
+          <MaterialNameField
+            error={form.errors.name}
             idPrefix="table-edit"
             name={form.name}
-            onDescriptionChange={form.setDescription}
             onNameChange={form.setName}
+          />
+          <MaterialDescriptionField
+            description={form.description}
+            idPrefix="table-edit"
+            onDescriptionChange={form.setDescription}
           />
           <ColumnEditor
             allowRequired={false}
             drafts={form.drafts}
             onChange={form.setDrafts}
           />
-          {issue === undefined ? null : (
-            <p className="text-destructive text-xs">{issue}</p>
+          {form.errors.columns === undefined ? null : (
+            <p className="text-destructive text-xs" role="alert">
+              {form.errors.columns}
+            </p>
           )}
         </div>
         <DialogFooter>
           <Button
-            disabled={
-              form.name.trim() === "" || issue !== undefined || form.isSaving
-            }
+            disabled={form.isSaving}
             onClick={() => void form.submit()}
             type="button"
           >
@@ -97,16 +104,26 @@ function useEditTable(
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [drafts, setDrafts] = useState<ColumnDraft[]>([])
+  const [errors, setErrors] = useState<TableFormErrors>({})
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     setName(table?.name ?? "")
     setDescription(table?.description ?? "")
     setDrafts(table === undefined ? [] : draftsFromColumns(table.columns))
+    setErrors({})
   }, [table])
 
   async function submit() {
     if (table === undefined) {
+      return
+    }
+
+    const found = validateTableForm(name, drafts)
+
+    setErrors(found)
+
+    if (found.name !== undefined || found.columns !== undefined) {
       return
     }
 
@@ -132,11 +149,20 @@ function useEditTable(
   return {
     description,
     drafts,
+    errors,
     isSaving,
     name,
     setDescription,
-    setDrafts,
-    setName,
+    // Validation shows only after a submit attempt; new input in a field
+    // clears that field's error right away.
+    setDrafts: (next: ColumnDraft[]) => {
+      setErrors((current) => ({ ...current, columns: undefined }))
+      setDrafts(next)
+    },
+    setName: (next: string) => {
+      setErrors((current) => ({ ...current, name: undefined }))
+      setName(next)
+    },
     submit,
   }
 }

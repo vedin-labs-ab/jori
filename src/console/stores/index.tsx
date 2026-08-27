@@ -93,6 +93,7 @@ function StoresView({ organizationId }: { organizationId: string }) {
       />
       <StoresBody
         hasFilters={hasFilters}
+        onCreate={() => setIsCreateOpen(true)}
         pagination={pagination}
         removal={removal}
         storeList={storeList}
@@ -108,11 +109,13 @@ function StoresView({ organizationId }: { organizationId: string }) {
 
 function StoresBody({
   hasFilters,
+  onCreate,
   pagination,
   removal,
   storeList,
 }: {
   hasFilters: boolean
+  onCreate: () => void
   pagination: ReturnType<typeof useClientPagination<StoreSummary>>
   removal: ReturnType<typeof useStoreRemoval>
   storeList: StoreListResult | undefined
@@ -132,6 +135,7 @@ function StoresBody({
       <ConsoleScrollableGrid>
         <StoreList
           hasFilters={hasFilters}
+          onCreate={onCreate}
           removal={removal}
           stores={pagination.visibleRows}
           unauthorizedMessage={

@@ -52,6 +52,7 @@ function FilesCard({ organizationId }: { organizationId: string }) {
           isLoading={pagination.isLoading}
           onDelete={actions.deleteFile}
           onEdit={setEditFile}
+          onUpload={() => setIsUploadOpen(true)}
           pendingFileId={actions.pendingFileId}
         />
       </ConsoleScrollableGrid>

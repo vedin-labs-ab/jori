@@ -1,6 +1,8 @@
+import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
-import { Signpost } from "lucide-react"
+import { Cable, Signpost } from "lucide-react"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleEmptyState } from "../../shared/list/empty"
@@ -90,6 +92,16 @@ function PlaceGroups({
 function PlacesEmpty() {
   return (
     <ConsoleEmptyState
+      // Places are learned from activity, not created by hand, so the
+      // closest primary action is connecting the tools they live in.
+      action={
+        <Button asChild variant="outline">
+          <Link to="/integrations">
+            <Cable />
+            Connect integrations
+          </Link>
+        </Button>
+      }
       description="Jori learns each place it works in. They appear here once it sees activity."
       icon={Signpost}
       title="No places yet"

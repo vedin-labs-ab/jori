@@ -21,13 +21,8 @@ function tableSummaryProperties() {
         properties: {
           key: stringProperty("Stable column key."),
           name: stringProperty("Display name."),
-          type: stringProperty("string, number, integer, boolean, or json."),
+          type: stringProperty("string, float, integer, or boolean."),
           required: booleanProperty("Whether every row needs a value."),
-          schema: {
-            type: "object",
-            additionalProperties: true,
-            description: "JSON Schema for a json column's values.",
-          },
         },
       })
     ),

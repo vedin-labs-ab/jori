@@ -28,18 +28,12 @@ const tableColumnInput = objectSchema({
     name: stringProperty("Display name; defaults to the key."),
     type: {
       type: "string",
-      enum: ["string", "number", "integer", "boolean", "json"],
+      enum: ["string", "float", "integer", "boolean"],
       description: "Value type enforced on every row write.",
     },
     required: {
       type: "boolean",
       description: "Require a value in every row.",
-    },
-    schema: {
-      type: "object",
-      additionalProperties: true,
-      description:
-        "Optional JSON Schema for a json column's values. Fully inlined, no $ref.",
     },
   },
 })

@@ -1,6 +1,8 @@
+import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
-import { Layers } from "lucide-react"
+import { Cable, Layers } from "lucide-react"
 import { useMemo, useState } from "react"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleFilterGroup, ConsoleFilterToggle } from "../../shared/layout"
@@ -131,6 +133,16 @@ function WorkstreamList({
   if (workstreams.length === 0) {
     return (
       <FilterableEmptyState
+        // Workstreams are deduced from activity, not created by hand, so
+        // the closest primary action is connecting the tools they come from.
+        action={
+          <Button asChild variant="outline">
+            <Link to="/integrations">
+              <Cable />
+              Connect integrations
+            </Link>
+          </Button>
+        }
         description="Jori reviews activity across your connected tools every hour; suggested workstreams appear here."
         hasFilters={hasFilters}
         icon={Layers}

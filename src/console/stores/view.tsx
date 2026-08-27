@@ -24,6 +24,7 @@ import {
 } from "../shared/layout"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { MaterialActions } from "../shared/materials/actions"
+import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { MaterialScopeBadge } from "../shared/materials/scope"
 import { EditStoreDialog } from "./edit"
@@ -114,6 +115,7 @@ function StoreReadyView({
   store: StoreDetail
 }) {
   useMemberUrl()
+  useMaterialBreadcrumb(store.name)
 
   const navigate = useNavigate()
   const removal = useStoreRemoval(organizationId)

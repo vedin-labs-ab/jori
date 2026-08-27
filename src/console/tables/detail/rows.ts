@@ -75,32 +75,24 @@ export function useRowWrites(
   tableId: GenericId<"tables">
 ) {
   const insert = useMutation(api.tables.console.insertRow)
+  const insertBatch = useMutation(api.tables.console.insertRows)
   const update = useMutation(api.tables.console.updateRow)
   const remove = useMutation(api.tables.console.removeRow)
   const [pendingRowId, setPendingRowId] = useState<TableRow["rowId"]>()
 
-  async function run(action: () => Promise<unknown>, fallback: string) {
-    try {
-      await action()
-
-      return true
-    } catch (error) {
-      if (isVersionConflict(error)) {
-        toast.error(conflictMessage("row"))
-      } else {
-        showErrorToast(error, fallback)
-      }
-
-      return false
-    }
-  }
-
-  async function insertRow(values: Record<string, unknown>) {
-    return await run(
+  const insertRow = (values: Record<string, unknown>) =>
+    run(
       () => insert({ organizationId, tableId, values }),
       "Could not add the row."
     )
-  }
+
+  // Imports send validated rows in batches, one call at a time, so each
+  // mutation stays inside transaction limits.
+  const importRows = (rows: Record<string, unknown>[]) =>
+    run(
+      () => insertInBatches(insertBatch, { organizationId, tableId, rows }),
+      "Could not import the rows."
+    )
 
   async function updateCell(row: TableRow, key: string, value: unknown) {
     setPendingRowId(row.rowId)
@@ -141,5 +133,42 @@ export function useRowWrites(
     return ok
   }
 
-  return { deleteRow, insertRow, pendingRowId, updateCell }
+  return { deleteRow, importRows, insertRow, pendingRowId, updateCell }
+}
+
+async function run(action: () => Promise<unknown>, fallback: string) {
+  try {
+    await action()
+
+    return true
+  } catch (error) {
+    if (isVersionConflict(error)) {
+      toast.error(conflictMessage("row"))
+    } else {
+      showErrorToast(error, fallback)
+    }
+
+    return false
+  }
+}
+
+const importBatchSize = 100
+
+type InsertBatchArgs = {
+  organizationId: string
+  tableId: GenericId<"tables">
+  rows: Record<string, unknown>[]
+}
+
+async function insertInBatches(
+  insertBatch: (args: InsertBatchArgs) => Promise<unknown>,
+  args: InsertBatchArgs
+) {
+  for (let start = 0; start < args.rows.length; start += importBatchSize) {
+    await insertBatch({
+      organizationId: args.organizationId,
+      tableId: args.tableId,
+      rows: args.rows.slice(start, start + importBatchSize),
+    })
+  }
 }

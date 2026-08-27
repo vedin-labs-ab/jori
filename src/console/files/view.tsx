@@ -14,6 +14,7 @@ import {
   ConsolePageLayout,
 } from "../shared/layout"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
+import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { FileLinksDialog } from "./share"
 import { formatFileSize } from "./types"
@@ -91,6 +92,7 @@ function FileReadyView({
   organizationId: string
 }) {
   useMemberUrl()
+  useMaterialBreadcrumb(file.name)
 
   const [isShareOpen, setIsShareOpen] = useState(false)
 

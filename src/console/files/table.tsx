@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
-import { Files } from "lucide-react"
+import { Files, Upload } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -21,12 +22,14 @@ export function FileTable({
   isLoading,
   onDelete,
   onEdit,
+  onUpload,
   pendingFileId,
 }: {
   files: FileRow[]
   isLoading: boolean
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
+  onUpload: () => void
   pendingFileId: FileRow["fileId"] | undefined
 }) {
   if (isLoading) {
@@ -36,6 +39,12 @@ export function FileTable({
   if (files.length === 0) {
     return (
       <ConsoleEmptyState
+        action={
+          <Button onClick={onUpload} type="button">
+            <Upload />
+            Upload file
+          </Button>
+        }
         description="Files Jori saves during runs and uploads from your team appear here."
         icon={Files}
         title="No files yet"
