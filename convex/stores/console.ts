@@ -36,7 +36,12 @@ export const list = query({
 
     return {
       status: "ready" as const,
-      stores: stores.map((store) => summarizeStore(store)),
+      stores: await Promise.all(
+        stores.map(async (store) => ({
+          ...summarizeStore(store),
+          version: (await findValueDocument(ctx, store._id))?.version ?? 0,
+        }))
+      ),
     }
   },
 })
@@ -108,6 +113,26 @@ export const update = mutation({
     return await ctx.runMutation(internal.stores.records.update, {
       ...args,
       personId,
+    })
+  },
+})
+
+export const writeValue = mutation({
+  args: {
+    organizationId: v.string(),
+    storeId: v.id("stores"),
+    value: v.any(),
+    expectedVersion: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<unknown> => {
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.stores.values.write, {
+      organizationId: args.organizationId,
+      storeId: args.storeId,
+      personId,
+      expectedVersion: args.expectedVersion,
+      write: { type: "replace", value: args.value },
     })
   },
 })

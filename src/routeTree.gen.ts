@@ -23,6 +23,8 @@ import { Route as RunsRouteImport } from './routes/runs'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignOutRouteImport } from './routes/sign-out'
 import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as StoresRouteImport } from './routes/stores'
+import { Route as TablesRouteImport } from './routes/tables'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as AppsIndexRouteImport } from './routes/apps/index'
@@ -31,6 +33,10 @@ import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
+import { Route as StoresIndexRouteImport } from './routes/stores/index'
+import { Route as StoresStoreIdRouteImport } from './routes/stores/$storeId'
+import { Route as TablesIndexRouteImport } from './routes/tables/index'
+import { Route as TablesTableIdRouteImport } from './routes/tables/$tableId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppsAppIdIndexRouteImport } from './routes/apps/$appId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
@@ -105,6 +111,16 @@ const SkillsRoute = SkillsRouteImport.update({
   path: '/skills',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoresRoute = StoresRouteImport.update({
+  id: '/stores',
+  path: '/stores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TablesRoute = TablesRouteImport.update({
+  id: '/tables',
+  path: '/tables',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -145,6 +161,26 @@ const IntegrationsPersonalRoute = IntegrationsPersonalRouteImport.update({
   path: '/personal',
   getParentRoute: () => IntegrationsRoute,
 } as any)
+const StoresIndexRoute = StoresIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StoresRoute,
+} as any)
+const StoresStoreIdRoute = StoresStoreIdRouteImport.update({
+  id: '/$storeId',
+  path: '/$storeId',
+  getParentRoute: () => StoresRoute,
+} as any)
+const TablesIndexRoute = TablesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TablesRoute,
+} as any)
+const TablesTableIdRoute = TablesTableIdRouteImport.update({
+  id: '/$tableId',
+  path: '/$tableId',
+  getParentRoute: () => TablesRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -176,14 +212,20 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-out': typeof SignOutRoute
   '/skills': typeof SkillsRoute
+  '/stores': typeof StoresRouteWithChildren
+  '/tables': typeof TablesRouteWithChildren
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
+  '/stores/$storeId': typeof StoresStoreIdRoute
+  '/tables/$tableId': typeof TablesTableIdRoute
   '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/stores/': typeof StoresIndexRoute
+  '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/apps/$appId/': typeof AppsAppIdIndexRoute
@@ -205,9 +247,13 @@ export interface FileRoutesByTo {
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
+  '/stores/$storeId': typeof StoresStoreIdRoute
+  '/tables/$tableId': typeof TablesTableIdRoute
   '/apps': typeof AppsIndexRoute
   '/context': typeof ContextIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
+  '/stores': typeof StoresIndexRoute
+  '/tables': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/apps/$appId': typeof AppsAppIdIndexRoute
@@ -228,14 +274,20 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-out': typeof SignOutRoute
   '/skills': typeof SkillsRoute
+  '/stores': typeof StoresRouteWithChildren
+  '/tables': typeof TablesRouteWithChildren
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
+  '/stores/$storeId': typeof StoresStoreIdRoute
+  '/tables/$tableId': typeof TablesTableIdRoute
   '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/stores/': typeof StoresIndexRoute
+  '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/apps/$appId/': typeof AppsAppIdIndexRoute
@@ -257,14 +309,20 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-out'
     | '/skills'
+    | '/stores'
+    | '/tables'
     | '/terms'
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
+    | '/stores/$storeId'
+    | '/tables/$tableId'
     | '/apps/'
     | '/context/'
     | '/integrations/'
+    | '/stores/'
+    | '/tables/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/apps/$appId/'
@@ -286,9 +344,13 @@ export interface FileRouteTypes {
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
+    | '/stores/$storeId'
+    | '/tables/$tableId'
     | '/apps'
     | '/context'
     | '/integrations'
+    | '/stores'
+    | '/tables'
     | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/apps/$appId'
@@ -308,14 +370,20 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-out'
     | '/skills'
+    | '/stores'
+    | '/tables'
     | '/terms'
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
+    | '/stores/$storeId'
+    | '/tables/$tableId'
     | '/apps/'
     | '/context/'
     | '/integrations/'
+    | '/stores/'
+    | '/tables/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/apps/$appId/'
@@ -336,6 +404,8 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignOutRoute: typeof SignOutRoute
   SkillsRoute: typeof SkillsRoute
+  StoresRoute: typeof StoresRouteWithChildren
+  TablesRoute: typeof TablesRouteWithChildren
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -441,6 +511,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkillsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stores': {
+      id: '/stores'
+      path: '/stores'
+      fullPath: '/stores'
+      preLoaderRoute: typeof StoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tables': {
+      id: '/tables'
+      path: '/tables'
+      fullPath: '/tables'
+      preLoaderRoute: typeof TablesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -496,6 +580,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/integrations/personal'
       preLoaderRoute: typeof IntegrationsPersonalRouteImport
       parentRoute: typeof IntegrationsRoute
+    }
+    '/stores/': {
+      id: '/stores/'
+      path: '/'
+      fullPath: '/stores/'
+      preLoaderRoute: typeof StoresIndexRouteImport
+      parentRoute: typeof StoresRoute
+    }
+    '/stores/$storeId': {
+      id: '/stores/$storeId'
+      path: '/$storeId'
+      fullPath: '/stores/$storeId'
+      preLoaderRoute: typeof StoresStoreIdRouteImport
+      parentRoute: typeof StoresRoute
+    }
+    '/tables/': {
+      id: '/tables/'
+      path: '/'
+      fullPath: '/tables/'
+      preLoaderRoute: typeof TablesIndexRouteImport
+      parentRoute: typeof TablesRoute
+    }
+    '/tables/$tableId': {
+      id: '/tables/$tableId'
+      path: '/$tableId'
+      fullPath: '/tables/$tableId'
+      preLoaderRoute: typeof TablesTableIdRouteImport
+      parentRoute: typeof TablesRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -564,6 +676,32 @@ const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
   IntegrationsRouteChildren,
 )
 
+interface StoresRouteChildren {
+  StoresStoreIdRoute: typeof StoresStoreIdRoute
+  StoresIndexRoute: typeof StoresIndexRoute
+}
+
+const StoresRouteChildren: StoresRouteChildren = {
+  StoresStoreIdRoute: StoresStoreIdRoute,
+  StoresIndexRoute: StoresIndexRoute,
+}
+
+const StoresRouteWithChildren =
+  StoresRoute._addFileChildren(StoresRouteChildren)
+
+interface TablesRouteChildren {
+  TablesTableIdRoute: typeof TablesTableIdRoute
+  TablesIndexRoute: typeof TablesIndexRoute
+}
+
+const TablesRouteChildren: TablesRouteChildren = {
+  TablesTableIdRoute: TablesTableIdRoute,
+  TablesIndexRoute: TablesIndexRoute,
+}
+
+const TablesRouteWithChildren =
+  TablesRoute._addFileChildren(TablesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppsRoute: AppsRouteWithChildren,
@@ -579,6 +717,8 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignOutRoute: SignOutRoute,
   SkillsRoute: SkillsRoute,
+  StoresRoute: StoresRouteWithChildren,
+  TablesRoute: TablesRouteWithChildren,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
