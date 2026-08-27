@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { emptyActivityData } from "../../../../test/convex/console"
 import {
   type Doc,
   type Id,
@@ -154,16 +155,7 @@ test("projects search run activity metadata without run ids", () => {
 })
 
 function data(traces: Doc<"traces">[]): ActivityData {
-  return {
-    agents: [],
-    approvals: [],
-    apps: [],
-    assets: [],
-    offers: [],
-    run: run(),
-    traces,
-    waiters: [],
-  }
+  return { ...emptyActivityData(), run: run(), traces }
 }
 
 function result(

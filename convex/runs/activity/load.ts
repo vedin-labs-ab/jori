@@ -1,7 +1,9 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { canAccessApp } from "../../apps/access"
+import { canAccessMaterial, type MaterialDoc } from "../../materials/access"
 import { activityAppId } from "./metadata/apps"
+import { activityMaterialId } from "./metadata/materials"
 import { readToolInput, readToolName, readTraceData } from "./read"
 import { type ActivityData } from "./types"
 
@@ -23,6 +25,8 @@ export async function loadActivityData(
       loadAssets(ctx, run._id),
     ])
   const apps = await loadApps(ctx, run, traces, personId)
+  const stores = await loadMaterials(ctx, run, traces, personId, "stores")
+  const tables = await loadMaterials(ctx, run, traces, personId, "tables")
 
   return {
     agents,
@@ -31,9 +35,64 @@ export async function loadActivityData(
     assets,
     offers,
     run,
+    stores,
+    tables,
     traces,
     waiters,
   }
+}
+
+/** Loads the tables or stores the run's tool calls referenced, keeping only
+ *  those the viewer may see. */
+async function loadMaterials<Table extends "stores" | "tables">(
+  ctx: QueryCtx,
+  run: Doc<"runs">,
+  traces: Doc<"traces">[],
+  personId: Id<"persons"> | undefined,
+  table: Table
+) {
+  const ids = new Set<Id<Table>>()
+
+  for (const trace of traces) {
+    const data = readTraceData(trace)
+    const reference = activityMaterialId(
+      readToolName(data),
+      readToolInput(data)
+    )
+
+    if (reference?.table !== table) {
+      continue
+    }
+
+    const id = ctx.db.normalizeId(table, reference.id)
+
+    if (id !== null) {
+      ids.add(id)
+    }
+
+    if (ids.size >= relationLimit) {
+      break
+    }
+  }
+
+  const materials = await Promise.all([...ids].map((id) => ctx.db.get(id)))
+
+  const visible = materials.filter((material) => {
+    if (material === null) {
+      return false
+    }
+
+    const doc = material as MaterialDoc
+
+    return (
+      doc.organizationId === run.organizationId &&
+      (personId === undefined
+        ? doc.scope === "organization"
+        : canAccessMaterial(doc, personId))
+    )
+  })
+
+  return visible as Doc<Table>[]
 }
 
 async function loadApps(

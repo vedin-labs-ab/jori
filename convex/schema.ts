@@ -43,6 +43,8 @@ import { waiters } from "./runs/execution/waiters/schema"
 import { runs } from "./runs/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
+import { stores, storeValues } from "./stores/schema"
+import { tableRows, tables } from "./tables/schema"
 import { transitions } from "./transitions/schema"
 import { waitlist } from "./waitlist/schema"
 
@@ -94,4 +96,8 @@ export default defineSchema({
   appAssets,
   appState,
   appCaches,
+  tables,
+  tableRows,
+  stores,
+  storeValues,
 })

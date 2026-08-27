@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { emptyActivityData } from "../../../../test/convex/console"
 import {
   type Doc,
   type Id,
@@ -192,17 +193,7 @@ test("labels inferred app state updates with the title and state entry", () => {
 })
 
 function data(overrides: Partial<ActivityData>): ActivityData {
-  return {
-    agents: [],
-    approvals: [],
-    apps: [],
-    assets: [],
-    offers: [],
-    run: run({}),
-    traces: [],
-    waiters: [],
-    ...overrides,
-  }
+  return { ...emptyActivityData(), run: run({}), ...overrides }
 }
 
 function trace(
