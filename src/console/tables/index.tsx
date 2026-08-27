@@ -2,7 +2,7 @@ import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { ConsolePageLayout } from "../shared/layout"
+import { ConsolePageLayout, ConsoleScrollableGrid } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
 import {
   useClientPagination,
@@ -118,19 +118,27 @@ function TablesBody({
   tableList: TableListResult | undefined
 }) {
   if (tableList === undefined) {
-    return <TableListSkeleton />
+    return (
+      <ConsoleScrollableGrid>
+        <TableListSkeleton />
+      </ConsoleScrollableGrid>
+    )
   }
 
   return (
     <>
-      <TableList
-        hasFilters={hasFilters}
-        removal={removal}
-        tables={pagination.visibleRows}
-        unauthorizedMessage={
-          tableList.status === "unauthorized" ? tableList.message : undefined
-        }
-      />
+      {/* The list scrolls in place so the pager stays pinned below it,
+          matching the other paginated console pages. */}
+      <ConsoleScrollableGrid>
+        <TableList
+          hasFilters={hasFilters}
+          removal={removal}
+          tables={pagination.visibleRows}
+          unauthorizedMessage={
+            tableList.status === "unauthorized" ? tableList.message : undefined
+          }
+        />
+      </ConsoleScrollableGrid>
       {tableList.status === "ready" ? (
         <ConsoleListPager pagination={pagination} />
       ) : null}

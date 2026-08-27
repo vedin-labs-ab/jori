@@ -1,13 +1,6 @@
 import { type Scope } from "@contracts/permissions/scope"
 import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { ScopeField } from "../scope/field"
 
 export function MaterialScopeBadge({ scope }: { scope: Scope }) {
   return (
@@ -17,33 +10,29 @@ export function MaterialScopeBadge({ scope }: { scope: Scope }) {
   )
 }
 
-/** Visibility picker for material create dialogs; organization by default. */
+/** Sharing picker for material create dialogs; organization by default.
+ *  The same field the automation editor uses, with its help copy phrased
+ *  for the material noun at hand. */
 export function MaterialScopeField({
   id,
+  noun,
   onScopeChange,
   scope,
 }: {
   id: string
+  noun: string
   onScopeChange: (scope: Scope) => void
   scope: Scope
 }) {
   return (
-    <div className="grid gap-2">
-      <Label htmlFor={id}>Visibility</Label>
-      <Select
-        onValueChange={(value) => onScopeChange(value as Scope)}
-        value={scope}
-      >
-        <SelectTrigger className="w-full" id={id}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="organization">
-            Everyone in the organization
-          </SelectItem>
-          <SelectItem value="personal">Only me</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+    <ScopeField
+      help={{
+        organization: `everyone in the organization can see and use this ${noun}.`,
+        personal: `only you can see and use this ${noun}.`,
+      }}
+      id={id}
+      onValueChange={onScopeChange}
+      value={scope}
+    />
   )
 }

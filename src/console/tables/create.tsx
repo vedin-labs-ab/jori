@@ -62,6 +62,7 @@ export function CreateTableDialog({
           />
           <MaterialScopeField
             id="table-create-scope"
+            noun="table"
             onScopeChange={form.setScope}
             scope={form.scope}
           />

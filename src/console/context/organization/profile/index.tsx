@@ -125,6 +125,7 @@ function ProfileSections({
   website: string | undefined
 }) {
   const hasSources = sources === undefined || sources.length > 0
+  const hasWebsites = website !== undefined
 
   return (
     <>
@@ -136,7 +137,7 @@ function ProfileSections({
       />
       {hasSources ? (
         <>
-          <Separator />
+          {hasWebsites ? <Separator /> : null}
           <SourcesSection sources={sources} />
         </>
       ) : null}
