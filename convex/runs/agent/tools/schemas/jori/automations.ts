@@ -106,9 +106,6 @@ export const automationJoriToolInputSchemas = {
   add_automation: objectSchema({
     required: ["name", "instructions", "type", "trigger", "access"],
     properties: {
-      appId: stringProperty(
-        "Optional app ID. Use this for app-owned automations that write app state."
-      ),
       key: stringProperty(
         "Optional stable idempotency key. Reusing it in the same scope returns the existing equivalent automation and rejects conflicting configuration."
       ),
@@ -146,9 +143,6 @@ export const automationJoriToolInputSchemas = {
     required: ["automationId"],
     properties: {
       automationId: stringProperty("Jori automation ID."),
-      appId: stringProperty(
-        "Optional app ID. Set this when binding the automation to an app."
-      ),
       name: stringProperty("Updated automation name."),
       instructions: stringProperty(automationInstructionsDescription),
       scope: scopeProperty,

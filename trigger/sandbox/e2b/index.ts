@@ -1,11 +1,6 @@
-import { type JsonObject, toJsonObject } from "../../../contracts/json"
-import {
-  sandboxAppRuntime,
-  sandboxWorkspace,
-} from "../../../contracts/runtime/sandbox"
+import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
 import { type RuntimeId } from "../../../contracts/runtime/worker"
 import { type RuntimePlatform } from "../../platform"
-import { appBuildCommand, appRuntimeFiles } from "../apps"
 import { compactFailure } from "../output"
 import { sandboxClonePath, shellQuote } from "../path"
 import {
@@ -100,18 +95,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
     }
   }
 
-  async buildApp(workspacePath: string): Promise<JsonObject> {
-    const result = await this.runCommand({
-      command: appBuildCommand(workspacePath),
-    })
-
-    if (result.exitCode !== 0) {
-      throw new Error(compactFailure(result))
-    }
-
-    return parseAppBuild(result.stdout)
-  }
-
   async cleanup() {
     if (this.sandboxId === null) {
       return
@@ -164,10 +147,6 @@ export class E2BSandboxRuntime implements SandboxRuntime {
       return
     }
 
-    // Provision the app builder and template up front so the agent can copy
-    // the template and run local checks before publishing, not only at build time.
-    await writeSandboxFiles(this.sandbox, appRuntimeFiles())
-
     const result = await runSandboxCommand(this.sandbox, {
       command: workspaceBootstrapCommand(),
     })
@@ -198,17 +177,7 @@ async function writeSandboxFiles(
 export function workspaceBootstrapCommand() {
   return [
     "set -eu",
-    `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxAppRuntime)}`,
+    `mkdir -p ${shellQuote(sandboxWorkspace)}`,
     `chmod 755 ${shellQuote(sandboxWorkspace)}`,
   ].join("\n")
-}
-
-function parseAppBuild(stdout: string) {
-  const parsed = JSON.parse(stdout) as unknown
-
-  try {
-    return toJsonObject(parsed)
-  } catch {
-    throw new Error("App builder returned an invalid payload.")
-  }
 }

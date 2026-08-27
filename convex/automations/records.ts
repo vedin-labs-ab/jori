@@ -90,7 +90,6 @@ export const update = internalMutation({
     organizationId: v.string(),
     personId: v.optional(v.id("persons")),
     automationId: v.id("automations"),
-    appId: v.optional(v.id("apps")),
     name: v.optional(v.string()),
     instructions: v.optional(v.string()),
     scope: v.optional(scopeValidator),

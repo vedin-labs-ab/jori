@@ -6,6 +6,7 @@ import {
 import { resolvePlaybookOptions } from "@contracts/playbooks/options"
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
+import { digestPlaybook } from "../../../../../test/playbooks"
 import { PlaybookConfiguration } from "./index"
 
 afterEach(() => {
@@ -21,9 +22,9 @@ test("fields with names of their own replace the section heading", () => {
 })
 
 test("a lone field named like its section leans on the heading", () => {
-  renderConfiguration(getPlaybook("meeting-briefing"))
+  renderConfiguration(digestPlaybook)
 
-  expect(screen.getAllByText("Meetings")).toHaveLength(1)
+  expect(screen.getAllByText("Audience")).toHaveLength(1)
 })
 
 function renderConfiguration(definition: PlaybookDefinition) {

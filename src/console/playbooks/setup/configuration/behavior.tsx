@@ -6,31 +6,23 @@ import {
   type PlaybookOptionField,
   type PlaybookOptionValues,
 } from "@contracts/playbooks/options"
-import { CalendarClock, Clock3, type LucideIcon, Sunrise } from "lucide-react"
-import { type ReactNode } from "react"
+import { Clock3 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { PlaybookIcon } from "../../meta"
 import { OptionField } from "./control"
 
-const behaviorIcons: Record<string, LucideIcon> = {
-  "before-meeting": CalendarClock,
-  "morning-briefing": Sunrise,
-}
-
 export function BehaviorList({
   behaviors,
   disabled,
   fields,
-  hints,
   onChange,
   values,
 }: {
   behaviors: readonly PlaybookBehavior[]
   disabled: boolean
   fields: readonly PlaybookOptionField[]
-  hints?: Partial<Record<string, ReactNode>>
   onChange: (key: string, value: boolean | number | string) => void
   values: PlaybookOptionValues
 }) {
@@ -39,7 +31,6 @@ export function BehaviorList({
       behavior={behavior}
       disabled={disabled}
       fields={fields}
-      hints={hints}
       key={behavior.key}
       onChange={onChange}
       values={values}
@@ -51,18 +42,16 @@ function BehaviorRow({
   behavior,
   disabled,
   fields,
-  hints,
   onChange,
   values,
 }: {
   behavior: PlaybookBehavior
   disabled: boolean
   fields: readonly PlaybookOptionField[]
-  hints?: Partial<Record<string, ReactNode>>
   onChange: (key: string, value: boolean | number | string) => void
   values: PlaybookOptionValues
 }) {
-  const Icon = behaviorIcons[behavior.key] ?? Clock3
+  const Icon = Clock3
   const enabled = isPlaybookBehaviorEnabled(behavior, values)
   const enabledBy = behavior.enabledBy
   const checkboxId = `playbook-behavior-${behavior.key}`
@@ -114,7 +103,6 @@ function BehaviorRow({
                 controlClassName="pointer-events-auto"
                 disabled={disabled || !fieldEnabled}
                 field={field}
-                hint={hints?.[field.key]}
                 key={field.key}
                 muted={!fieldEnabled}
                 onChange={(value) => onChange(field.key, value)}

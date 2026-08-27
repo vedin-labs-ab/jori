@@ -74,7 +74,7 @@ export const autoTopUp = {
 /**
  * The model Jori runs on. One choice, stated once, for every call Jori makes:
  * the agent, the deduction judge, conversation summaries, place profiles,
- * organization discovery, and the prompt tool inside an app.
+ * and organization discovery.
  *
  * Model selection is deliberately not deployment configuration. It decides
  * what Jori costs and how its output behaves, so it belongs in code and in

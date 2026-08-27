@@ -26,7 +26,7 @@ import {
 } from "./approval"
 import { authenticateBrokerRequest } from "./auth"
 import { listCapabilities } from "./capabilities"
-import { normalizeBrokerToolInput, normalizeJoriToolInput } from "./input"
+import { normalizeBrokerToolInput } from "./input"
 import { callJoriTool } from "./jori"
 import { callProviderTool, createGitHubCloneCredentials } from "./tools"
 
@@ -149,7 +149,7 @@ async function runJoriTool(
 ) {
   return await callJoriTool(ctx, context, {
     tool: request.tool,
-    args: normalizeJoriToolInput(request.tool, request.args),
+    args: normalizeBrokerToolInput(request.tool, request.args),
   })
 }
 

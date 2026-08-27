@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppsRouteImport } from './routes/apps'
 import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as ContextRouteImport } from './routes/context'
@@ -27,7 +26,6 @@ import { Route as StoresRouteImport } from './routes/stores'
 import { Route as TablesRouteImport } from './routes/tables'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
-import { Route as AppsIndexRouteImport } from './routes/apps/index'
 import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
@@ -37,7 +35,6 @@ import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/
 import { Route as StoresIndexRouteImport } from './routes/stores/index'
 import { Route as TablesIndexRouteImport } from './routes/tables/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AppsAppIdIndexRouteImport } from './routes/apps/$appId/index'
 import { Route as FilesFileIdIndexRouteImport } from './routes/files/$fileId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
 import { Route as StoresStoreIdIndexRouteImport } from './routes/stores/$storeId/index'
@@ -46,11 +43,6 @@ import { Route as TablesTableIdIndexRouteImport } from './routes/tables/$tableId
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppsRoute = AppsRouteImport.update({
-  id: '/apps',
-  path: '/apps',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutomationsRoute = AutomationsRouteImport.update({
@@ -133,11 +125,6 @@ const TrustRoute = TrustRouteImport.update({
   path: '/trust',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppsIndexRoute = AppsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppsRoute,
-} as any)
 const ContextIndexRoute = ContextIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -183,11 +170,6 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppsAppIdIndexRoute = AppsAppIdIndexRouteImport.update({
-  id: '/$appId/',
-  path: '/$appId/',
-  getParentRoute: () => AppsRoute,
-} as any)
 const FilesFileIdIndexRoute = FilesFileIdIndexRouteImport.update({
   id: '/$fileId/',
   path: '/$fileId/',
@@ -211,7 +193,6 @@ const TablesTableIdIndexRoute = TablesTableIdIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/apps': typeof AppsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
@@ -231,7 +212,6 @@ export interface FileRoutesByFullPath {
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
@@ -239,7 +219,6 @@ export interface FileRoutesByFullPath {
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/apps/$appId/': typeof AppsAppIdIndexRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/stores/$storeId/': typeof StoresStoreIdIndexRoute
   '/tables/$tableId/': typeof TablesTableIdIndexRoute
@@ -260,7 +239,6 @@ export interface FileRoutesByTo {
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/apps': typeof AppsIndexRoute
   '/context': typeof ContextIndexRoute
   '/files': typeof FilesIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
@@ -268,7 +246,6 @@ export interface FileRoutesByTo {
   '/tables': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/apps/$appId': typeof AppsAppIdIndexRoute
   '/files/$fileId': typeof FilesFileIdIndexRoute
   '/stores/$storeId': typeof StoresStoreIdIndexRoute
   '/tables/$tableId': typeof TablesTableIdIndexRoute
@@ -276,7 +253,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/apps': typeof AppsRouteWithChildren
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
@@ -296,7 +272,6 @@ export interface FileRoutesById {
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
@@ -304,7 +279,6 @@ export interface FileRoutesById {
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/apps/$appId/': typeof AppsAppIdIndexRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/stores/$storeId/': typeof StoresStoreIdIndexRoute
   '/tables/$tableId/': typeof TablesTableIdIndexRoute
@@ -313,7 +287,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/apps'
     | '/automations'
     | '/console'
     | '/context'
@@ -333,7 +306,6 @@ export interface FileRouteTypes {
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
-    | '/apps/'
     | '/context/'
     | '/files/'
     | '/integrations/'
@@ -341,7 +313,6 @@ export interface FileRouteTypes {
     | '/tables/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
-    | '/apps/$appId/'
     | '/files/$fileId/'
     | '/stores/$storeId/'
     | '/tables/$tableId/'
@@ -362,7 +333,6 @@ export interface FileRouteTypes {
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
-    | '/apps'
     | '/context'
     | '/files'
     | '/integrations'
@@ -370,14 +340,12 @@ export interface FileRouteTypes {
     | '/tables'
     | '/api/auth/$'
     | '/integrations/offers/$token'
-    | '/apps/$appId'
     | '/files/$fileId'
     | '/stores/$storeId'
     | '/tables/$tableId'
   id:
     | '__root__'
     | '/'
-    | '/apps'
     | '/automations'
     | '/console'
     | '/context'
@@ -397,7 +365,6 @@ export interface FileRouteTypes {
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
-    | '/apps/'
     | '/context/'
     | '/files/'
     | '/integrations/'
@@ -405,7 +372,6 @@ export interface FileRouteTypes {
     | '/tables/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
-    | '/apps/$appId/'
     | '/files/$fileId/'
     | '/stores/$storeId/'
     | '/tables/$tableId/'
@@ -413,7 +379,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppsRoute: typeof AppsRouteWithChildren
   AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
@@ -440,13 +405,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/apps': {
-      id: '/apps'
-      path: '/apps'
-      fullPath: '/apps'
-      preLoaderRoute: typeof AppsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/automations': {
@@ -561,13 +519,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrustRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/apps/': {
-      id: '/apps/'
-      path: '/'
-      fullPath: '/apps/'
-      preLoaderRoute: typeof AppsIndexRouteImport
-      parentRoute: typeof AppsRoute
-    }
     '/context/': {
       id: '/context/'
       path: '/'
@@ -631,13 +582,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/apps/$appId/': {
-      id: '/apps/$appId/'
-      path: '/$appId'
-      fullPath: '/apps/$appId/'
-      preLoaderRoute: typeof AppsAppIdIndexRouteImport
-      parentRoute: typeof AppsRoute
-    }
     '/files/$fileId/': {
       id: '/files/$fileId/'
       path: '/$fileId'
@@ -668,18 +612,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface AppsRouteChildren {
-  AppsIndexRoute: typeof AppsIndexRoute
-  AppsAppIdIndexRoute: typeof AppsAppIdIndexRoute
-}
-
-const AppsRouteChildren: AppsRouteChildren = {
-  AppsIndexRoute: AppsIndexRoute,
-  AppsAppIdIndexRoute: AppsAppIdIndexRoute,
-}
-
-const AppsRouteWithChildren = AppsRoute._addFileChildren(AppsRouteChildren)
 
 interface ContextRouteChildren {
   ContextPlacesRoute: typeof ContextPlacesRoute
@@ -752,7 +684,6 @@ const TablesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppsRoute: AppsRouteWithChildren,
   AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,

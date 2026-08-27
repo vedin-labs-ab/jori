@@ -4,21 +4,18 @@ import {
   type PlaybookSetupSection,
   playbookOptionFields,
 } from "@contracts/playbooks/options"
-import { type ReactNode } from "react"
 import { PlaybookSection } from "../../meta"
 import { BehaviorList } from "./behavior"
 import { OptionField } from "./control"
 
 export function PlaybookConfiguration({
   disabled,
-  hints,
   issue,
   onChange,
   setup,
   values,
 }: {
   disabled: boolean
-  hints?: Partial<Record<string, ReactNode>>
   issue?: string
   onChange: (key: string, value: boolean | number | string) => void
   setup: readonly PlaybookSetupSection[]
@@ -48,7 +45,6 @@ export function PlaybookConfiguration({
               behaviors={section.behaviors}
               disabled={disabled}
               fields={fields}
-              hints={hints}
               onChange={onChange}
               values={values}
             />
@@ -57,7 +53,6 @@ export function PlaybookConfiguration({
           <SectionFields
             disabled={disabled}
             fields={fields}
-            hints={hints}
             onChange={onChange}
             section={section}
             values={values}
@@ -96,14 +91,12 @@ function planSectionFields(
 function SectionFields({
   disabled,
   fields,
-  hints,
   onChange,
   section,
   values,
 }: {
   disabled: boolean
   fields: ReturnType<typeof playbookOptionFields>
-  hints?: Partial<Record<string, ReactNode>>
   onChange: (key: string, value: boolean | number | string) => void
   section: Extract<PlaybookSetupSection, { kind: "fields" }>
   values: PlaybookOptionValues
@@ -118,7 +111,6 @@ function SectionFields({
         <OptionField
           disabled={disabled}
           field={field}
-          hint={hints?.[field.key]}
           key={field.key}
           label={labeled}
           onChange={(value) => onChange(field.key, value)}

@@ -1,5 +1,4 @@
 import { type Scope } from "../permissions/scope"
-import { meetingBriefing } from "./briefing"
 import { type PlaybookSlot } from "./capabilities"
 import { type PlaybookDelivery } from "./delivery"
 import {
@@ -12,24 +11,21 @@ import { describePlaybookSchedule, type PlaybookSchedule } from "./schedule"
 
 export type PlaybookDefinition = {
   key: string
-  /** Recipe version: bump when the instruction template, options, or app
-   *  template change. Enablements pin it and surface newer as an update. */
+  /** Recipe version: bump when the instruction template or options change.
+   *  Enablements pin it and surface newer as an update. */
   version: number
   title: string
   /** Outcome-first card copy: the value the user gets, never cadence
    *  detail — the rhythm and the setup dialog carry the schedule. */
   description: string
   /** Prompt template id for the rendered instructions, e.g.
-   *  "playbooks/briefing"; the source file is part of the versioned recipe. */
+   *  "playbooks/preread"; the source file is part of the versioned recipe. */
   template: string
   /** Personal playbooks enable per member; organization ones per organization. */
   scope: Scope
-  /** The app this playbook materializes from its template, when it has
-   *  one — setup discloses it and the app records the provenance. */
-  app?: PlaybookApp
   /** Card-level rhythm on browse surfaces: what to expect and, when the
-   *  playbook offers modes, that there is a choice ("Morning briefing or
-   *  before each meeting"). No clock times — setup shows the precise cadence. */
+   *  playbook offers modes, that there is a choice ("Weekly or on demand").
+   *  No clock times — setup shows the precise cadence. */
   cadence: string
   schedule: PlaybookSchedule
   /** High-level setup that compiles into the automation. */
@@ -54,12 +50,6 @@ export type PlaybookDefinition = {
 }
 
 export type PlaybookJoriTool = "memory"
-
-export type PlaybookApp = {
-  title: string
-  /** What the app holds, in the user's terms, for setup disclosure. */
-  description: string
-}
 
 /** What the user is promised: the card rhythm on browse surfaces, or the
  *  precise cadence once options are in hand at the point of decision. */
@@ -100,10 +90,7 @@ export function resolvePlaybookSchedule(
   return definition.resolveSchedule?.(options) ?? definition.schedule
 }
 
-export const playbookCatalog: readonly PlaybookDefinition[] = [
-  preread,
-  meetingBriefing,
-]
+export const playbookCatalog: readonly PlaybookDefinition[] = [preread]
 
 export function getPlaybook(key: string) {
   const playbook = playbookCatalog.find((definition) => definition.key === key)

@@ -12,7 +12,6 @@ import {
   normalizeRequiredText,
   sameTriggerDefinition,
 } from "../timing"
-import { requireAutomationApp } from "./app"
 import { deleteOwnedAutomations, requireValidOwnershipUpdate } from "./children"
 import { getOrganizationAutomation, getRequiredAutomation } from "./read"
 import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
@@ -20,7 +19,6 @@ import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
 type UpdateAutomationArgs = {
   organizationId: string
   automationId: Id<"automations">
-  appId?: Id<"apps">
   playbook?: PlaybookBinding
   name?: string
   instructions?: string
@@ -75,7 +73,6 @@ export function ownedAutomationsAreStale(
   patch: Partial<Doc<"automations">>
 ) {
   return (
-    (patch.appId !== undefined && patch.appId !== existing.appId) ||
     (patch.instructions !== undefined &&
       patch.instructions !== existing.instructions) ||
     (patch.scope !== undefined && patch.scope !== existing.scope) ||
@@ -116,22 +113,9 @@ async function buildAutomationPatch(
 
   await applyPrincipalPatch(ctx, args, existing, principal, patch)
 
-  if (args.appId !== undefined) {
-    patch.appId = args.appId
-  }
-
-  if (args.appId !== undefined || args.scope !== undefined) {
-    await requireAutomationApp(ctx, {
-      organizationId: args.organizationId,
-      appId: args.appId ?? existing.appId,
-      principal,
-    })
-  }
-
   if (args.access !== undefined) {
     patch.access = await resolveAccessInput(ctx, {
       access: args.access,
-      appId: args.appId ?? existing.appId,
       principal,
       organizationId: existing.organizationId,
     })

@@ -11,8 +11,8 @@
     "dev:trigger": "node --experimental-strip-types scripts/env/index.ts --env dev -- npx trigger dev --env-file .env.local",
     "build": "vite build",
     "check": "node --experimental-strip-types scripts/check.ts",
-    "templates:check": "tsx scripts/templates.ts --check",
-    "templates:compile": "tsx scripts/templates.ts",
+    "playbooks:check": "tsx scripts/playbooks.ts --check",
+    "playbooks:lock": "tsx scripts/playbooks.ts",
     "check:biome": "biome ci --error-on-warnings .",
     "check:dependencies": "node --experimental-strip-types scripts/dependencies.ts",
     "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
@@ -29,8 +29,6 @@
     "db:truncate:dev": "node --experimental-strip-types scripts/env/index.ts --env dev -- node --experimental-strip-types scripts/truncate.ts",
     "preview": "vite preview",
     "content:compile": "node --experimental-strip-types scripts/content/index.ts",
-    "runtime:check": "node --experimental-strip-types scripts/runtime/generate.ts --check",
-    "runtime:generate": "node --experimental-strip-types scripts/runtime/generate.ts",
     "test": "vitest run"
   },
   "dependencies": {

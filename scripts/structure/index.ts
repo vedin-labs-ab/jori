@@ -48,7 +48,7 @@ const skippedDirectories = [
   "src/routes",
 ]
 
-const allowedSingleFileFolders = ["runtime/apps/shell", "src/hooks"]
+const allowedSingleFileFolders = ["src/hooks"]
 
 const counts = await countFolders(root)
 const namingViolations = await findNamingViolations({

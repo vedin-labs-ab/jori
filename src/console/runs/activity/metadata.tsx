@@ -61,7 +61,6 @@ const statusLabels = {
 const toolIcons: Record<string, LucideIcon> = {
   bash: Terminal,
   load_skill: BookOpen,
-  share_app: Link2,
   share_file: Link2,
   share_store: Link2,
   share_table: Link2,

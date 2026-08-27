@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { getPlaybook } from "@contracts/playbooks/catalog"
 import { resolvePlaybookOptions } from "@contracts/playbooks/options"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { digestPlaybook } from "../../../../../test/playbooks"
 import { type PlaybookActions } from "../../enable"
 import { stubPlaybookActions } from "../../fixtures"
 import { type PlaybookEnablePlan, type PlaybookListRow } from "../../state"
@@ -39,7 +39,6 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-const briefing = getPlaybook("meeting-briefing")
 const plan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
   kind: "enable",
   choices: { email: "gmail", calendar: "googleCalendar" },
@@ -56,10 +55,10 @@ test("uses the server-recommended self Slack DM", () => {
 
   expect(screen.getByText("Albin Vedin")).toBeDefined()
   expect(actions.enable).toHaveBeenCalledWith(
-    briefing,
+    digestPlaybook,
     { email: "gmail", calendar: "googleCalendar" },
     { kind: "slack", target: { kind: "dm" } },
-    resolvePlaybookOptions(briefing.setup)
+    resolvePlaybookOptions(digestPlaybook.setup)
   )
 })
 
@@ -105,12 +104,12 @@ function renderDialog(
   return render(
     <PlaybookSetupDialog
       actions={actions}
-      definition={briefing}
+      definition={digestPlaybook}
       onOpenChange={() => {}}
       open
       plan={plan}
       row={{
-        key: briefing.key,
+        key: digestPlaybook.key,
         slots: [
           { capability: "email", connected: ["gmail"] },
           { capability: "calendar", connected: ["googleCalendar"] },

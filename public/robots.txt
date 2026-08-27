@@ -6,7 +6,6 @@
 # travels by hand rather than by search.
 User-agent: *
 Disallow: /api/
-Disallow: /apps
 Disallow: /automations
 Disallow: /console
 Disallow: /context

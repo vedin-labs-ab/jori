@@ -2,12 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 import { defaultBuildLogger, Template } from "e2b"
-import {
-  sandboxAppRuntime,
-  sandboxInternalRoot,
-  sandboxWorkspace,
-} from "../contracts/runtime/sandbox.ts"
-import { runtimeAssets } from "../runtime/apps/_generated/assets.ts"
+import { sandboxWorkspace } from "../contracts/runtime/sandbox.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
 const e2bSandboxTemplate = requireTemplateName()
@@ -27,15 +22,11 @@ const template = Template()
   })
   .runCmd(
     [
-      `mkdir -p ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxAppRuntime)}`,
+      `mkdir -p ${shellQuote(sandboxWorkspace)}`,
       "npm install -g n@10.2.0",
       `n ${sandboxNodeVersion}`,
       "hash -r",
-      [
-        `npm install --prefix ${shellQuote(sandboxAppRuntime)}`,
-        ...runtimeAssets.app.dependencies,
-      ].join(" "),
-      `chown -R user:user ${shellQuote(sandboxWorkspace)} ${shellQuote(sandboxInternalRoot)}`,
+      `chown -R user:user ${shellQuote(sandboxWorkspace)}`,
       `chmod 755 ${shellQuote(sandboxWorkspace)}`,
       "npm cache clean --force",
       "rm -rf /var/lib/apt/lists/*",
@@ -81,24 +72,7 @@ function createImageCheckCommand() {
     "command -v npm >/dev/null",
     "command -v git >/dev/null",
     `mkdir -p ${shellQuote(sandboxWorkspace)}`,
-    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/tsc`)}`,
-    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/biome`)}`,
-    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/vite`)}`,
-    `test -x ${shellQuote(`${sandboxAppRuntime}/node_modules/.bin/shadcn`)}`,
-    `cd ${shellQuote(sandboxAppRuntime)}`,
-    `node -e ${JSON.stringify(imageCheckScript())}`,
   ].join("\n")
-}
-
-function imageCheckScript() {
-  return [
-    "await import('react')",
-    "await import('vite')",
-    "await import('zod')",
-    "await import('lucide-react')",
-    "await import('@tailwindcss/vite')",
-    "await import('tailwindcss')",
-  ].join(";")
 }
 
 function shellQuote(value: string) {

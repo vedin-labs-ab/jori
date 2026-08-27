@@ -1,7 +1,7 @@
 import { type Integration, isUserScopedIntegration } from "../integrations"
 
 /**
- * Audience of a long-lived entity (automation, playbook, app, run):
+ * Audience of a long-lived entity (automation, playbook, material, run):
  * personal entities are visible to and managed by their owner only;
  * organization entities are visible to and managed by every member.
  * Execution identity is orthogonal and represented by an execution principal.

@@ -11,7 +11,7 @@ import {
 
 const catalog = createAutomationMentionCatalog({
   skills: ["meeting-prep", "release-notes"],
-  tools: ["share_app", "github_get_issue"],
+  tools: ["save_file", "github_get_issue"],
 })
 const expectedToolAccessSuggestions = [
   {
@@ -19,7 +19,7 @@ const expectedToolAccessSuggestions = [
     id: "github_get_issue",
     surface: "github",
   },
-  { access: { kind: "builtIn" }, id: "share_app", surface: "jori" },
+  { access: { kind: "builtIn" }, id: "save_file", surface: "jori" },
   { access: { kind: "builtIn" }, id: "start_agent", surface: "jori" },
   { access: { kind: "web" }, id: "web_search", surface: "jori" },
 ]
@@ -28,13 +28,13 @@ describe("explicit mention scanning", () => {
   test("recognizes sigil tokens for all three kinds", () => {
     expect(
       readAutomationMentions(
-        "Review @github, run /meeting-prep, then #share_app.",
+        "Review @github, run /meeting-prep, then #save_file.",
         catalog
       )
     ).toEqual([
       { end: 14, id: "github", kind: "integration", start: 7 },
       { end: 33, id: "meeting-prep", kind: "skill", start: 20 },
-      { end: 50, id: "share_app", kind: "tool", start: 40 },
+      { end: 50, id: "save_file", kind: "tool", start: 40 },
     ])
   })
 
@@ -56,11 +56,11 @@ describe("explicit mention scanning", () => {
 
   test("sigils fire only at whitespace boundaries", () => {
     expect(
-      readAutomationMentions("Run /meeting-prep and #share_app", catalog)
+      readAutomationMentions("Run /meeting-prep and #save_file", catalog)
     ).toHaveLength(2)
     expect(
       readAutomationMentions(
-        'Run x/meeting-prep, x#share_app, and "@GitHub"',
+        'Run x/meeting-prep, x#save_file, and "@GitHub"',
         catalog
       )
     ).toEqual([])
@@ -188,7 +188,7 @@ describe("mention suggestions", () => {
     const permissions = [
       toolPermission("github", "github_get_issue", "read", "allowed"),
       toolPermission("jori", "web_search", "read", "allowed"),
-      toolPermission("jori", "share_app", "write", "allowed"),
+      toolPermission("jori", "save_file", "write", "allowed"),
       {
         ...toolPermission("jori", "start_agent", "write", "required"),
         route: "agent" as const,

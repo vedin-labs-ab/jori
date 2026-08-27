@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from "vitest"
-import { type AutomationFormValues, emptyAutomationForm } from "../../types"
+import { emptyAutomationForm } from "../../types"
 import { writeAutomationWebSearchPreference } from "../preferences"
 import { automationFormValues } from "."
 import { createAutomationArgs } from "./args"
@@ -70,8 +70,8 @@ describe("automation payload", () => {
   })
 })
 
-const meetingBriefingBinding = {
-  key: "meeting-briefing",
+const prereadBinding = {
+  key: "preread",
   version: 1,
   options: {},
   providers: {},
@@ -83,9 +83,8 @@ test("creates automation args with access and source bindings", () => {
     createAutomationArgs(
       {
         ...emptyAutomationForm,
-        key: "playbook:meeting-briefing",
-        playbook: meetingBriefingBinding,
-        appId: "app" as AutomationFormValues["appId"],
+        key: "playbook:preread",
+        playbook: prereadBinding,
         name: "Weekly release summary",
         instructions: "Summarize @GitHub and post to @Slack.",
         surfaces: [
@@ -98,9 +97,8 @@ test("creates automation args with access and source bindings", () => {
   ).toEqual({
     args: {
       name: "Weekly release summary",
-      key: "playbook:meeting-briefing",
-      playbook: meetingBriefingBinding,
-      appId: "app",
+      key: "playbook:preread",
+      playbook: prereadBinding,
       instructions: "Summarize @GitHub and post to @Slack.",
       scope: "personal",
       access: {

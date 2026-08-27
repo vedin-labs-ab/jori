@@ -39,11 +39,9 @@ describe("playbook instructions", () => {
   })
 
   test("renders email and Slack routes with stable identifiers", () => {
-    expect(renderPlaybook("meeting-briefing")).toContain(
-      'to Sam Doe <sam@example.com> with the subject "Meeting Briefing"'
-    )
+    expect(renderPlaybook("preread")).toContain("to Sam Doe <sam@example.com>")
     expect(
-      renderPlaybook("meeting-briefing", {
+      renderPlaybook("preread", {
         kind: "slack",
         target: { kind: "dm", id: "U1", label: "Sam Doe" },
       })
@@ -53,11 +51,11 @@ describe("playbook instructions", () => {
   test("keeps Slack labels outside the tool namespace", () => {
     const instructions = renderPlaybook("preread", {
       kind: "slack",
-      target: { kind: "channel", id: "C1", label: "share_app" },
+      target: { kind: "channel", id: "C1", label: "save_file" },
     })
 
-    expect(instructions).toContain('the "share_app" Slack channel')
-    expect(instructions).not.toContain("#share_app")
+    expect(instructions).toContain('the "save_file" Slack channel')
+    expect(instructions).not.toContain("#save_file")
   })
 
   test("rejects unknown playbook keys", () => {

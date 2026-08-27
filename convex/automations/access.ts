@@ -48,7 +48,6 @@ export async function resolveAccessInput(
   ctx: QueryLikeCtx,
   args: {
     access: AutomationAccessInput
-    appId?: Id<"apps">
     principal: ExecutionPrincipal
     organizationId: string
   }
@@ -56,7 +55,6 @@ export async function resolveAccessInput(
   const integrations = normalizeAccessIntegrations(args.access.integrations)
 
   await requireAutomationAccessPolicy(ctx, {
-    allowAppStateWrite: args.appId !== undefined,
     integrations,
     organizationId: args.organizationId,
   })
@@ -85,15 +83,10 @@ export async function requireAutomationAccessPolicy(
       integration: Integration
       tools: string[]
     }>
-    allowAppStateWrite?: boolean
     organizationId: string
   }
 ) {
   if (args.integrations.length === 0) {
-    if (args.allowAppStateWrite === true) {
-      return
-    }
-
     throw new Error("Select at least one integration tool.")
   }
 
@@ -110,7 +103,7 @@ export async function requireAutomationAccessPolicy(
     }
   }
 
-  if (!hasWriteTool && args.allowAppStateWrite !== true) {
+  if (!hasWriteTool) {
     throw new Error("Give at least one integration write tool.")
   }
 }

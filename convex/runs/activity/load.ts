@@ -1,8 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { canAccessApp } from "../../apps/access"
 import { canAccessMaterial, type MaterialDoc } from "../../materials/access"
-import { activityAppId } from "./metadata/apps"
 import { activityMaterialId } from "./metadata/materials"
 import { readToolInput, readToolName, readTraceData } from "./read"
 import { type ActivityData } from "./types"
@@ -25,14 +23,12 @@ export async function loadActivityData(
       loadFiles(ctx, run._id),
     ]
   )
-  const apps = await loadApps(ctx, run, traces, personId)
   const stores = await loadMaterials(ctx, run, traces, personId, "stores")
   const tables = await loadMaterials(ctx, run, traces, personId, "tables")
 
   return {
     agents,
     approvals,
-    apps,
     files,
     offers,
     run,
@@ -94,52 +90,6 @@ async function loadMaterials<Table extends "stores" | "tables">(
   })
 
   return visible as Doc<Table>[]
-}
-
-async function loadApps(
-  ctx: QueryCtx,
-  run: Doc<"runs">,
-  traces: Doc<"traces">[],
-  personId: Id<"persons"> | undefined
-) {
-  const ids = referencedAppIds(ctx, run, traces)
-  const apps = await Promise.all(ids.map((id) => ctx.db.get(id)))
-
-  return apps.filter(
-    (app): app is Doc<"apps"> =>
-      app !== null &&
-      app.organizationId === run.organizationId &&
-      (app.access === "organization" ||
-        (personId !== undefined && canAccessApp(app, personId)))
-  )
-}
-
-function referencedAppIds(
-  ctx: QueryCtx,
-  run: Doc<"runs">,
-  traces: Doc<"traces">[]
-) {
-  const ids = new Set<Id<"apps">>()
-
-  for (let index = traces.length - 1; index >= 0; index -= 1) {
-    const trace = readTraceData(traces[index])
-    const value = activityAppId(
-      readToolName(trace),
-      readToolInput(trace),
-      run.appId
-    )
-    const id = value === undefined ? null : ctx.db.normalizeId("apps", value)
-
-    if (id !== null) {
-      ids.add(id)
-    }
-
-    if (ids.size >= relationLimit) {
-      break
-    }
-  }
-
-  return [...ids]
 }
 
 async function loadTraces(ctx: QueryCtx, runId: Id<"runs">) {

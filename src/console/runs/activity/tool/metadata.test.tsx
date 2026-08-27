@@ -132,36 +132,6 @@ test("renders bash commands as inline code", () => {
   expect(code.className).toContain("bg-muted")
 })
 
-test.each([
-  ["read_app_state", "Read app state"],
-  ["update_app_state", "Update app state"],
-])("renders %s state keys as inline code", (tool, title) => {
-  render(
-    <TooltipProvider>
-      <ActivityItem
-        item={activityItem({
-          metadata: [
-            { kind: "target", text: "Meeting Briefing" },
-            { kind: "scope", text: "dossiers" },
-          ],
-          title,
-          tool,
-        })}
-        now={1700000002000}
-      />
-    </TooltipProvider>
-  )
-
-  const appTitle = screen.getByText("Meeting Briefing")
-  const key = screen.getByText("dossiers")
-
-  expect(appTitle.parentElement?.className).not.toContain("basis-0")
-  expect(key.tagName).toBe("CODE")
-  expect(key.className).toContain("font-mono")
-  expect(key.className).toContain("bg-muted")
-  expect(key.parentElement?.className).toContain("shrink-0")
-})
-
 function activityItem(
   overrides: Partial<ActivityItemType> = {}
 ): ActivityItemType {

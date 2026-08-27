@@ -1,14 +1,21 @@
 import { describe, expect, test, vi } from "vitest"
-import { getPlaybook } from "../../contracts/playbooks/catalog"
+import { digestDelivery } from "../../contracts/playbooks/delivery"
 import { type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration } from "../shared/integrations"
 import { resolveDestination } from "./destination"
 
 const personId = "person" as Id<"persons">
-const delivery = getPlaybook("meeting-briefing").delivery
+// A DM-only digest contract: the fixture owns its delivery shape instead
+// of borrowing a catalog playbook.
+const delivery = {
+  ...digestDelivery,
+  slackTargets: ["dm"],
+  noun: "briefing",
+  style: "summary",
+} as const
 
-describe("Meeting Briefing destination", () => {
+describe("digest destination", () => {
   test("rejects Slack channels", async () => {
     await expect(
       resolveDestination(

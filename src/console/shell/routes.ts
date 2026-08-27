@@ -1,7 +1,6 @@
 import {
   Cable,
   CalendarClock,
-  Component,
   Database,
   Files,
   Layers,
@@ -20,7 +19,6 @@ export const consoleNavigation = [
   { icon: Table2, label: "Tables", to: "/tables" },
   { icon: Database, label: "Stores", to: "/stores" },
   { icon: Files, label: "Files", to: "/files" },
-  { icon: Component, label: "Apps", to: "/apps" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Layers, label: "Context", to: "/context" },

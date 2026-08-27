@@ -16,9 +16,9 @@ test("normalizes keys and scopes their uniqueness", () => {
   expect(automationKeyPartition({ kind: "organization" })).toBe("organization")
 })
 
-test("bounded Meeting Briefing keys fit with long provider identifiers", () => {
-  const meetingKey = `mb:${"a".repeat(32)}`
-  const key = `meeting-briefing:${"p".repeat(64)}:event:${meetingKey}:2030-01-01T08:00:00.000Z`
+test("bounded playbook keys fit with long provider identifiers", () => {
+  const entityKey = `dg:${"a".repeat(32)}`
+  const key = `digest:${"p".repeat(64)}:event:${entityKey}:2030-01-01T08:00:00.000Z`
 
   expect(normalizeAutomationKey(key)).toBe(key)
   expect(key.length).toBeLessThan(240)
@@ -64,7 +64,6 @@ function automation() {
       ],
       web: true,
     },
-    appId: "app" as Id<"apps">,
     instructions: "Prepare the meeting.",
     name: "Prep",
     principal: { kind: "person", personId: "person" as Id<"persons"> },

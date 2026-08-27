@@ -1,10 +1,5 @@
 import { type PlaybookDefinition } from "@contracts/playbooks/catalog"
-import {
-  CalendarSearch,
-  type LucideIcon,
-  Newspaper,
-  NotebookTabs,
-} from "lucide-react"
+import { type LucideIcon, Newspaper, NotebookTabs } from "lucide-react"
 import {
   Card,
   CardContent,
@@ -20,7 +15,6 @@ import { type PlaybookListRow } from "./state"
 
 const playbookIcons: Record<string, LucideIcon> = {
   preread: Newspaper,
-  "meeting-briefing": CalendarSearch,
 }
 
 export function PlaybookCard({

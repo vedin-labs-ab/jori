@@ -1,5 +1,3 @@
-import { type JsonObject } from "../../contracts/json"
-
 export type SandboxCommandInput = {
   command: string
   cwd?: string
@@ -27,7 +25,6 @@ export type SandboxWriteFile = {
 }
 
 export type SandboxRuntime = {
-  buildApp(workspacePath: string): Promise<JsonObject>
   cleanup(): Promise<void>
   cloneRepository(input: SandboxCloneRepositoryInput): Promise<{
     directory: string

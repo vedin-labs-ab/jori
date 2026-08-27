@@ -61,7 +61,6 @@ export function sameAutomationDefinition(
 type AutomationDefinition = Pick<
   Doc<"automations">,
   | "access"
-  | "appId"
   | "instructions"
   | "name"
   | "parentId"
@@ -84,7 +83,6 @@ function definitionKey(definition: AutomationDefinition) {
         .sort((left, right) => String(left.id).localeCompare(String(right.id))),
       web: definition.access.web,
     },
-    appId: definition.appId ?? null,
     instructions: definition.instructions,
     name: definition.name,
     parentId: definition.parentId ?? null,

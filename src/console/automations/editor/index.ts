@@ -163,9 +163,9 @@ async function persistAutomation({
       throw new Error(result.error)
     }
 
-    // A playbook draft creates through the playbook action, which also
-    // provisions the playbook's app; plain drafts stay a mutation.
-    const { appId: _appId, key, playbook, ...plain } = result.args
+    // A playbook draft creates through the playbook action; plain drafts
+    // stay a mutation.
+    const { key, playbook, ...plain } = result.args
 
     if (playbook !== undefined) {
       await createFromPlaybook({

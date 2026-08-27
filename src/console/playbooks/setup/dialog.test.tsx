@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-import { getPlaybook, playbookCatalog } from "@contracts/playbooks/catalog"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { digestPlaybook } from "../../../../test/playbooks"
 import { type PlaybookActions } from "../enable"
 import { stubPlaybookActions } from "../fixtures"
 import { type PlaybookEnablePlan, type PlaybookListRow } from "../state"
@@ -18,13 +18,11 @@ vi.mock("@/shared/session/auth", () => ({
   }),
 }))
 
-let organizationProfile: Record<string, unknown> = {}
-
 vi.mock("convex/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("convex/react")>()),
   useAction: () => vi.fn(async () => ({ status: "ready", options: [] })),
   useMutation: () => convexMocks.saveDeliveryPreference,
-  useQuery: () => organizationProfile,
+  useQuery: () => ({}),
 }))
 
 vi.mock("@tanstack/react-router", async (importOriginal) => ({
@@ -36,11 +34,8 @@ vi.mock("@tanstack/react-router", async (importOriginal) => ({
 
 afterEach(() => {
   cleanup()
-  organizationProfile = {}
   vi.clearAllMocks()
 })
-
-const briefing = getPlaybook("meeting-briefing")
 
 const singlePlan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
   kind: "enable",
@@ -49,7 +44,7 @@ const singlePlan: Exclude<PlaybookEnablePlan, { kind: "connect" }> = {
 
 test("a pending Advanced settings locks every control", () => {
   const actions = stubPlaybookActions({
-    key: briefing.key,
+    key: digestPlaybook.key,
     kind: "advanced",
   })
 
@@ -79,9 +74,9 @@ test("closing an option dropdown never closes the dialog", async () => {
   shimSelectDom()
   const onOpenChange = vi.fn()
 
-  renderBriefing(onOpenChange)
+  renderDigest(onOpenChange)
 
-  fireEvent.click(screen.getByText("Toggle before meetings"))
+  fireEvent.click(screen.getByText("Toggle reminders"))
   fireEvent.click(screen.getByRole("combobox"))
   expect(screen.getByRole("listbox")).toBeDefined()
   await new Promise((resolve) => setTimeout(resolve, 0))
@@ -92,14 +87,14 @@ test("closing an option dropdown never closes the dialog", async () => {
   await new Promise((resolve) => setTimeout(resolve, 0))
 
   expect(onOpenChange).not.toHaveBeenCalledWith(false)
-  expect(screen.getByText(/set up meeting briefing/i)).toBeDefined()
+  expect(screen.getByText(/set up daily digest/i)).toBeDefined()
 })
 
 test("turning off both deliveries blocks enabling", async () => {
-  renderBriefing()
+  renderDigest()
 
   fireEvent.click(
-    screen.getByRole("checkbox", { name: "Include morning briefing" })
+    screen.getByRole("checkbox", { name: "Include morning digest" })
   )
 
   expect(screen.getByText("Choose at least one delivery time.")).toBeDefined()
@@ -112,27 +107,27 @@ test("turning off both deliveries blocks enabling", async () => {
     expectButtonDisabled(name)
   }
 
-  fireEvent.click(screen.getByText("Toggle before meetings"))
+  fireEvent.click(screen.getByText("Toggle reminders"))
 
   expect(screen.queryByText("Choose at least one delivery time.")).toBeNull()
   expectButtonDisabled("Enable", false)
 })
 
-test("setup groups meeting scope and delivery behaviors", () => {
-  renderBriefing()
+test("setup groups audience and delivery behaviors", () => {
+  renderDigest()
 
-  expect(screen.getByText("Meetings")).toBeDefined()
+  expect(screen.getByText("Audience")).toBeDefined()
   expect(screen.getByRole("group", { name: "Delivery timing" })).toBeDefined()
   expect(screen.queryByText("Schedule")).toBeNull()
   expect(document.body.textContent).toMatch(/timing.*Deliver to.*Access/i)
   expect(
     screen
-      .getByRole("checkbox", { name: "Include morning briefing" })
+      .getByRole("checkbox", { name: "Include morning digest" })
       .getAttribute("aria-checked")
   ).toBe("true")
   expect(
     screen
-      .getByRole("checkbox", { name: "Include before meetings" })
+      .getByRole("checkbox", { name: "Include reminders" })
       .getAttribute("aria-checked")
   ).toBe("false")
   expect(screen.getByLabelText("Send at")).toBeDefined()
@@ -143,84 +138,23 @@ test("behavior choices reach enable as normalized options", async () => {
   shimSelectDom()
   const actions = stubPlaybookActions()
 
-  renderDialog(
-    actions,
-    deliverySetup(),
-    singlePlan,
-    () => {},
-    meetingBriefing()
-  )
-  fireEvent.click(
-    screen.getByRole("checkbox", { name: "Include before meetings" })
-  )
+  renderDialog(actions, deliverySetup(), singlePlan)
+  fireEvent.click(screen.getByRole("checkbox", { name: "Include reminders" }))
   fireEvent.click(screen.getByRole("combobox"))
   await new Promise((resolve) => setTimeout(resolve, 0))
   fireEvent.click(screen.getByRole("option", { name: "60 minutes before" }))
   fireEvent.click(screen.getByRole("button", { name: "Enable" }))
 
   expect(vi.mocked(actions.enable).mock.calls[0][3]).toEqual({
-    meetings: "external",
+    audience: "external",
     morning: true,
     morningTime: "07:30",
-    beforeMeeting: true,
+    reminders: true,
     leadMinutes: "60",
   })
 })
 
-test("a single organization domain is named in the meetings hint", () => {
-  organizationProfile = { domains: ["acme.com"] }
-
-  renderBriefing()
-  fireEvent.click(screen.getByRole("radio", { name: "Internal" }))
-
-  expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
-  expect(
-    screen.getByRole("link", { name: "Manage" }).getAttribute("href")
-  ).toBe("/context")
-})
-
-test("multiple organization domains collapse to a count", () => {
-  organizationProfile = {
-    domains: ["acme.com"],
-    declared: { domains: ["acme.io"] },
-  }
-
-  renderBriefing()
-  fireEvent.click(screen.getByRole("radio", { name: "Both" }))
-
-  expect(screen.getByText(/Internal: 2 domains/)).toBeDefined()
-  expect(screen.getByRole("link", { name: "Manage" })).toBeDefined()
-})
-
-test("the hint is hidden for the default External scope", () => {
-  organizationProfile = { domains: ["acme.com"] }
-
-  renderBriefing()
-
-  expect(screen.queryByText(/Internal:/)).toBeNull()
-
-  fireEvent.click(screen.getByRole("radio", { name: "Internal" }))
-
-  expect(screen.getByText(/Internal: anyone at acme\.com/)).toBeDefined()
-
-  fireEvent.click(screen.getByRole("radio", { name: "External" }))
-
-  expect(screen.queryByText(/Internal:/)).toBeNull()
-})
-
-function meetingBriefing() {
-  const definition = playbookCatalog.find(
-    (entry) => entry.key === "meeting-briefing"
-  )
-
-  if (definition === undefined) {
-    throw new Error("Meeting Briefing definition is missing.")
-  }
-
-  return definition
-}
-
-function renderBriefing(onOpenChange: (open: boolean) => void = () => {}) {
+function renderDigest(onOpenChange: (open: boolean) => void = () => {}) {
   return renderDialog(
     stubPlaybookActions(),
     deliverySetup({ kind: "email" }, [
@@ -228,8 +162,7 @@ function renderBriefing(onOpenChange: (open: boolean) => void = () => {}) {
       { mode: "email", available: true },
     ]),
     singlePlan,
-    onOpenChange,
-    meetingBriefing()
+    onOpenChange
   )
 }
 
@@ -252,13 +185,12 @@ function renderDialog(
   actions: PlaybookActions,
   delivery: PlaybookListRow["delivery"],
   plan: Exclude<PlaybookEnablePlan, { kind: "connect" }>,
-  onOpenChange: (open: boolean) => void = () => {},
-  definition = briefing
+  onOpenChange: (open: boolean) => void = () => {}
 ) {
   return render(
     <PlaybookSetupDialog
       actions={actions}
-      definition={definition}
+      definition={digestPlaybook}
       onOpenChange={onOpenChange}
       open
       plan={plan}
@@ -270,7 +202,7 @@ function renderDialog(
 
 function row(delivery: PlaybookListRow["delivery"]): PlaybookListRow {
   return {
-    key: briefing.key,
+    key: digestPlaybook.key,
     slots: [
       { capability: "email", connected: ["gmail"] },
       { capability: "calendar", connected: ["googleCalendar"] },

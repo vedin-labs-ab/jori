@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest"
+import { digestPlaybook } from "../../test/playbooks"
 import { getToolPermission } from "../permissions"
 import { playbookCapabilityProviders, playbookSlotTools } from "./capabilities"
 import {
   describePlaybookCadence,
-  getPlaybook,
   playbookCatalog,
   resolvePlaybookSchedule,
 } from "./catalog"
@@ -77,10 +77,8 @@ describe("playbook catalog", () => {
   })
 })
 
-const meetingBriefing = getPlaybook("meeting-briefing")
-
-function meetingBehavior(key: string): PlaybookBehavior {
-  for (const section of meetingBriefing.setup ?? []) {
+const digestBehavior = (key: string): PlaybookBehavior => {
+  for (const section of digestPlaybook.setup ?? []) {
     if (section.kind === "behaviors") {
       const behavior = section.behaviors.find((entry) => entry.key === key)
 
@@ -90,150 +88,110 @@ function meetingBehavior(key: string): PlaybookBehavior {
     }
   }
 
-  throw new Error(`Meeting Briefing behavior "${key}" is missing.`)
+  throw new Error(`Digest behavior "${key}" is missing.`)
 }
 
-function meetingOptions(
-  values: Record<string, boolean | number | string> = {}
-) {
-  return resolvePlaybookOptions(meetingBriefing.setup, values)
+function digestOptions(values: Record<string, boolean | number | string> = {}) {
+  return resolvePlaybookOptions(digestPlaybook.setup, values)
 }
 
-describe("Meeting Briefing configuration", () => {
-  test("has focused defaults and the capabilities research can use", () => {
-    expect(meetingBriefing.title).toBe("Meeting Briefing")
-    expect(meetingOptions()).toMatchObject({
-      meetings: "external",
+describe("behavior configuration", () => {
+  test("resolves focused defaults from the setup sections", () => {
+    expect(digestOptions()).toMatchObject({
+      audience: "external",
       morning: true,
       morningTime: "07:30",
-      beforeMeeting: false,
+      reminders: false,
       leadMinutes: "45",
     })
-    expect(meetingBriefing.slots).toEqual([
-      { capability: "email", intents: ["read"] },
-      { capability: "calendar", intents: ["read"] },
-    ])
-    expect(meetingBriefing.web).toBe(true)
-
-    const calendarSlot = meetingBriefing.slots.find(
-      (slot) => slot.capability === "calendar"
-    )
-    if (calendarSlot === undefined) {
-      throw new Error("Meeting Briefing calendar slot is missing.")
-    }
-    expect(playbookSlotTools(calendarSlot, "googleCalendar")).toContain(
-      "google_calendar_list_calendars"
-    )
-    expect(playbookSlotTools(calendarSlot, "microsoftCalendar")).toContain(
-      "microsoft_calendar_list_calendars"
-    )
   })
 
-  test("delivery copy distinguishes preparation from reminders", () => {
-    const morning = meetingBehavior("morning-briefing")
-    const before = meetingBehavior("before-meeting")
+  test("behavior copy follows the chosen options", () => {
+    const morning = digestBehavior("morning")
+    const reminders = digestBehavior("reminders")
 
-    expect(describePlaybookBehavior(morning, meetingOptions())).toBe(
-      "Relevant meetings in one daily digest"
+    expect(describePlaybookBehavior(morning, digestOptions())).toBe(
+      "Everything relevant in one daily digest"
     )
-    expect(before.label).toBe("Before meetings")
-    expect(describePlaybookBehavior(before, meetingOptions())).toBe(
-      "Resend the prepared dossier as a reminder"
+    expect(describePlaybookBehavior(reminders, digestOptions())).toBe(
+      "Resend before each deadline"
     )
     expect(
-      describePlaybookBehavior(before, meetingOptions({ morning: false }))
-    ).toBe("Prepare and send each dossier just in time")
+      describePlaybookBehavior(reminders, digestOptions({ morning: false }))
+    ).toBe("Send each item just in time")
   })
+})
 
-  test("starts research with margin before the chosen delivery time", () => {
-    expect(resolvePlaybookSchedule(meetingBriefing, meetingOptions())).toEqual({
+describe("option-driven scheduling", () => {
+  test("derives the schedule from the chosen options", () => {
+    expect(resolvePlaybookSchedule(digestPlaybook, digestOptions())).toEqual({
       repeat: "daily",
       time: "07:00",
     })
     expect(
       resolvePlaybookSchedule(
-        meetingBriefing,
-        meetingOptions({ morningTime: "00:05" })
+        digestPlaybook,
+        digestOptions({ morningTime: "00:05" })
       )
     ).toEqual({ repeat: "daily", time: "23:35" })
-  })
-})
-
-describe("Meeting Briefing cadence", () => {
-  test("without a digest the planning sweep stays early", () => {
     expect(
       resolvePlaybookSchedule(
-        meetingBriefing,
-        meetingOptions({
-          morning: false,
-          beforeMeeting: true,
-        })
+        digestPlaybook,
+        digestOptions({ morning: false, reminders: true })
       )
     ).toEqual({ repeat: "daily", time: "01:00" })
   })
 
   test("cadence copy follows the chosen options", () => {
-    expect(describePlaybookCadence(meetingBriefing, meetingOptions())).toBe(
-      "Morning briefing at 07:30"
+    expect(describePlaybookCadence(digestPlaybook, digestOptions())).toBe(
+      "Morning digest at 07:30"
     )
     expect(
       describePlaybookCadence(
-        meetingBriefing,
-        meetingOptions({ beforeMeeting: true })
+        digestPlaybook,
+        digestOptions({ reminders: true })
       )
-    ).toBe("Morning briefing at 07:30, briefing 45 minutes before each meeting")
+    ).toBe("Morning digest at 07:30, digest 45 minutes before each deadline")
     expect(
       describePlaybookCadence(
-        meetingBriefing,
-        meetingOptions({
-          morning: false,
-          beforeMeeting: true,
-        })
+        digestPlaybook,
+        digestOptions({ morning: false, reminders: true })
       )
-    ).toBe("Briefing 45 minutes before each meeting")
+    ).toBe("Digest 45 minutes before each deadline")
   })
 
-  test("at least one delivery must stay on", () => {
+  test("cross-field validation blocks impossible combinations", () => {
     expect(
-      meetingBriefing.validateOptions?.(
-        meetingOptions({ morning: false, beforeMeeting: false })
+      digestPlaybook.validateOptions?.(
+        digestOptions({ morning: false, reminders: false })
       )
     ).toBe("Choose at least one delivery time.")
     expect(
-      meetingBriefing.validateOptions?.(
-        meetingOptions({ morning: false, beforeMeeting: true })
-      )
-    ).toBe(undefined)
-    expect(
-      meetingBriefing.validateOptions?.(
-        meetingOptions({ beforeMeeting: false })
+      digestPlaybook.validateOptions?.(
+        digestOptions({ morning: false, reminders: true })
       )
     ).toBe(undefined)
   })
 
   test("browse surfaces get the rhythm, not resolved defaults", () => {
-    expect(describePlaybookCadence(meetingBriefing)).toBe(
-      "Daily or before each meeting"
-    )
+    expect(describePlaybookCadence(digestPlaybook)).toBe("Daily or on demand")
   })
 })
 
-describe("Meeting Briefing delivery", () => {
-  test("offers private destinations but rejects Slack channels", () => {
-    expect(meetingBriefing.delivery).toMatchObject({
+describe("delivery target restrictions", () => {
+  test("a DM-only Slack contract rejects channels", () => {
+    expect(digestPlaybook.delivery).toMatchObject({
       allowed: ["email", "slack"],
       slackTargets: ["dm"],
-      noun: "briefing",
-      style: "summary",
     })
     expect(
-      allowsDeliveryChoice(meetingBriefing.delivery, {
+      allowsDeliveryChoice(digestPlaybook.delivery, {
         kind: "slack",
         target: { kind: "dm" },
       })
     ).toBe(true)
     expect(
-      allowsDeliveryChoice(meetingBriefing.delivery, {
+      allowsDeliveryChoice(digestPlaybook.delivery, {
         kind: "slack",
         target: { kind: "channel", id: "C1", label: "team" },
       })

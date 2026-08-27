@@ -22,7 +22,6 @@ describe("trigger modes", () => {
     const input = {
       type: "instruction" as const,
       run: { ...base.run, parentId: "parent" },
-      app: null,
       integrations: base.integrations,
       instructions: "Research the meeting.",
       organization: null,

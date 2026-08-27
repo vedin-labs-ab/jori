@@ -1,13 +1,12 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
-import { registerAppRoutes } from "./apps/serve/routes"
 import { requireEnvironmentVariable } from "./shared/environment"
 import { lazyHttpAction } from "./shared/lazy"
 
 // Every handler module loads on first request through lazyHttpAction: the
-// combined static graph (Better Auth, integrations, app serving) does
-// not fit the module evaluation memory ceiling, and each route group only
-// pays for itself this way.
+// combined static graph (Better Auth plus every integration) does not fit
+// the module evaluation memory ceiling, and each route group only pays for
+// itself this way.
 const http = httpRouter()
 
 // The route surface mirrors the Better Auth component's registerRoutesLazy.
@@ -50,8 +49,6 @@ http.route({
     (module) => module.handleFileUploadRequest
   ),
 })
-
-registerAppRoutes(http)
 
 http.route({
   path: "/waitlist",
