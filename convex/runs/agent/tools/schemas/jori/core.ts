@@ -55,17 +55,17 @@ export const coreJoriToolInputSchemas = {
       ),
     },
   }),
-  save_asset: objectSchema({
+  save_file: objectSchema({
     required: ["path"],
     properties: {
       path: stringProperty(
-        "Local sandbox file path to persist as a run asset for tools that send assets."
+        "Local sandbox file path to persist as a saved file for tools that send files."
       ),
       name: stringProperty("Optional filename to show to recipients."),
       mimeType: stringProperty(
         "Optional content type, for example image/png or application/pdf."
       ),
-      description: stringProperty("Optional short description of the asset."),
+      description: stringProperty("Optional short description of the file."),
     },
   }),
   generate_image: objectSchema({
@@ -75,26 +75,26 @@ export const coreJoriToolInputSchemas = {
       save: objectSchema({
         properties: {
           name: stringProperty("Optional generated image filename."),
-          description: stringProperty("Optional asset description."),
+          description: stringProperty("Optional file description."),
         },
       }),
     },
   }),
-  search_assets: objectSchema({
+  search_files: objectSchema({
     properties: {
       query: stringProperty(
-        "Substring matched against asset names, descriptions, and content types."
+        "Substring matched against file names, descriptions, and content types."
       ),
       mimeType: stringProperty(
         "Optional content type filter, for example image/png or image/."
       ),
-      limit: numberProperty("Maximum assets to return.", 1, 100),
+      limit: numberProperty("Maximum files to return.", 1, 100),
     },
   }),
-  read_asset: objectSchema({
-    required: ["assetId"],
+  read_file: objectSchema({
+    required: ["fileId"],
     properties: {
-      assetId: stringProperty("Asset ID."),
+      fileId: stringProperty("File ID."),
     },
   }),
   web_search: objectSchema({

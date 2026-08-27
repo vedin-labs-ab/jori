@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type RuntimeId } from "../../../contracts/runtime/worker"
 import { type AgentRuntime } from "../../runtime"
-import { generateImageAsset } from "./index"
+import { generateImageFile } from "./index"
 
 beforeEach(() => {
   vi.stubEnv("OPENROUTER_API_KEY", "openrouter_key")
@@ -13,7 +13,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test("generates an image through OpenRouter and saves it as an asset", async () => {
+test("generates an image through OpenRouter and saves it as a file", async () => {
   const imageBytes = new Uint8Array(Buffer.from("jori-image"))
   const fetchMock = mockFetch(
     Response.json(
@@ -43,7 +43,7 @@ test("generates an image through OpenRouter and saves it as an asset", async () 
   )
   const runtime = createRuntime()
 
-  const result = await generateImageAsset(runtime.runtime, {
+  const result = await generateImageFile(runtime.runtime, {
     prompt: "A clean product hero image for Jori.",
     save: {
       description: "Product hero",
@@ -62,7 +62,7 @@ test("generates an image through OpenRouter and saves it as an asset", async () 
       path: "/home/user/workspace/generated-images/hero.png",
     },
   ])
-  expect(runtime.uploadAsset).toHaveBeenCalledWith({
+  expect(runtime.uploadFile).toHaveBeenCalledWith({
     bytes: imageBytes,
     description: "Product hero",
     mimeType: "image/png",
@@ -71,7 +71,7 @@ test("generates an image through OpenRouter and saves it as an asset", async () 
   })
   expect(result).toEqual({
     image: {
-      assetId: "asset_1",
+      fileId: "file_1",
       mimeType: "image/png",
       model: "google/gemini-3.1-flash-image",
       name: "hero.png",
@@ -102,18 +102,18 @@ test("returns a repairable error when OpenRouter produces no image", async () =>
   )
 
   await expect(
-    generateImageAsset(createRuntime().runtime, {
+    generateImageFile(createRuntime().runtime, {
       prompt: "Create a launch image.",
     })
   ).rejects.toThrow("OpenRouter did not return a generated image.")
 })
 
-type UploadAssetInput = Parameters<AgentRuntime["platform"]["uploadAsset"]>[0]
+type UploadFileInput = Parameters<AgentRuntime["platform"]["uploadFile"]>[0]
 type WriteFilesInput = Parameters<AgentRuntime["sandbox"]["writeFiles"]>[0]
 
 function createRuntime() {
-  const uploadAsset = vi.fn(async (args: UploadAssetInput) => ({
-    assetId: "asset_1" as RuntimeId<"assets">,
+  const uploadFile = vi.fn(async (args: UploadFileInput) => ({
+    fileId: "file_1" as RuntimeId<"files">,
     mimeType: args.mimeType,
     name: args.name,
     size: args.bytes.byteLength,
@@ -127,7 +127,7 @@ function createRuntime() {
       },
     },
     platform: {
-      uploadAsset,
+      uploadFile,
     },
     sandbox: {
       writeFiles,
@@ -136,7 +136,7 @@ function createRuntime() {
 
   return {
     runtime,
-    uploadAsset,
+    uploadFile,
     writeFiles,
   }
 }

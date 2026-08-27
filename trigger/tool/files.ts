@@ -1,9 +1,6 @@
 import path from "node:path"
 import { type JsonObject } from "../../contracts/json"
-import {
-  assetTooLargeError,
-  maxAssetBytes,
-} from "../../contracts/runtime/assets"
+import { fileTooLargeError, maxFileBytes } from "../../contracts/runtime/files"
 import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "../input"
 import { type AgentRuntime } from "../runtime"
@@ -23,7 +20,7 @@ const mimeTypesByExtension: Record<string, string> = {
   ".webp": "image/webp",
 }
 
-export async function saveSandboxAsset(
+export async function saveSandboxFile(
   runtime: AgentRuntime,
   input: JsonObject
 ) {
@@ -31,14 +28,14 @@ export async function saveSandboxAsset(
   const bytes = await runtime.sandbox.readFile(filePath)
 
   if (bytes.byteLength === 0) {
-    throw new Error("Asset is empty")
+    throw new Error("File is empty")
   }
 
-  if (bytes.byteLength > maxAssetBytes) {
-    throw new Error(assetTooLargeError)
+  if (bytes.byteLength > maxFileBytes) {
+    throw new Error(fileTooLargeError)
   }
 
-  return await runtime.platform.uploadAsset({
+  return await runtime.platform.uploadFile({
     bytes,
     description: optionalString(input.description),
     mimeType: optionalString(input.mimeType) ?? inferMimeType(filePath),

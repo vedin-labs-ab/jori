@@ -20,8 +20,8 @@ import {
 } from "../../contracts/runtime/worker"
 import { api } from "../../convex/_generated/api"
 import { type RuntimePlatform } from "../platform"
-import { type UploadAssetArgs, uploadAsset } from "./assets"
 import { requireConvexUrl, requireWorkerSecret } from "./config"
+import { type UploadFileArgs, uploadFile } from "./files"
 import { fetchGitHubCloneCredentials, type GitHubCloneArgs } from "./github"
 
 export class JoriConvexClient implements RuntimePlatform {
@@ -225,8 +225,8 @@ export class JoriConvexClient implements RuntimePlatform {
     })
   }
 
-  async uploadAsset(args: UploadAssetArgs) {
-    return await uploadAsset(this.secret, args)
+  async uploadFile(args: UploadFileArgs) {
+    return await uploadFile(this.secret, args)
   }
 
   async fetchGitHubCloneCredentials(args: GitHubCloneArgs) {

@@ -158,7 +158,7 @@ function data(traces: Doc<"traces">[]): ActivityData {
     agents: [],
     approvals: [],
     apps: [],
-    assets: [],
+    files: [],
     offers: [],
     run: run(),
     traces,

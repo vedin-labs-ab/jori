@@ -43,7 +43,7 @@ type RuntimeModelTraceData = {
 type RuntimeRelationTraceData =
   | { approval: RuntimeId<"approvals"> }
   | { offer: RuntimeId<"integrationOffers"> }
-  | { asset: RuntimeId<"assets"> }
+  | { file: RuntimeId<"files"> }
   | { child: RuntimeId<"runs"> }
   | { waiter: RuntimeId<"waiters"> }
 
@@ -58,7 +58,7 @@ export type RuntimeEventType =
   | "agent.started"
   | "approval.requested"
   | "approval.resolved"
-  | "asset.saved"
+  | "file.saved"
   | "model.completed"
   | "model.failed"
   | "model.started"

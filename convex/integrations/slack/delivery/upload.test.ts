@@ -29,9 +29,9 @@ test("shares uploaded files to a DM selected by user ID", async () => {
   })
 
   await postSlackFiles("bot-token", {
-    assets: [
+    files: [
       {
-        assetId: "asset" as Id<"assets">,
+        fileId: "file" as Id<"files">,
         bytes: new Uint8Array([1]),
         mimeType: "text/plain",
         name: "note.txt",

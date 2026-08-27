@@ -41,7 +41,7 @@ test("creates Notion pages with icon and cover payloads", async () => {
   })
 })
 
-test("uploads run assets to Notion file uploads", async () => {
+test("uploads saved files to Notion file uploads", async () => {
   const calls = mockNotionFetch((url: Parameters<typeof fetch>[0]) => {
     const pathname = new URL(String(url)).pathname
 
@@ -54,8 +54,8 @@ test("uploads run assets to Notion file uploads", async () => {
   const result = await callNotionTool(
     notionIntegration(),
     "notion_upload_file",
-    { assetId: "asset_1" },
-    assetContext()
+    { fileId: "file_1" },
+    fileContext()
   )
 
   expect(result).toMatchObject({
@@ -130,30 +130,35 @@ function isResponder(
   return typeof value === "function"
 }
 
-function assetContext() {
+function fileContext() {
   return {
     ctx: {
-      runQuery: vi.fn(async () => asset()),
+      runQuery: vi.fn(async () => file()),
       storage: {
         get: vi.fn(async () => new Blob(["data"], { type: "image/png" })),
       },
     } as unknown as ActionCtx,
-    run: { organizationId: "organization" } as Doc<"runs">,
+    run: {
+      organizationId: "organization",
+      principal: { kind: "organization" },
+    } as Doc<"runs">,
   }
 }
 
-function asset(): Doc<"assets"> {
+function file(): Doc<"files"> {
   return {
-    _id: "asset_1",
+    _id: "file_1",
     _creationTime: 0,
     organizationId: "organization",
+    scope: "organization",
     runId: "run_1",
     storageId: "storage_1",
     name: "ÅÄÖ-🚀.png",
     mimeType: "image/png",
     size: 4,
     createdAt: 0,
-  } as Doc<"assets">
+    updatedAt: 0,
+  } as Doc<"files">
 }
 
 function notionIntegration(): Doc<"integrations"> {

@@ -85,7 +85,7 @@ async function projectRunSummaries(ctx: QueryCtx, runs: Doc<"runs">[]) {
 export function matchesActivityFilter(
   item: ActivityItem,
   filter:
-    | ("agent" | "approval" | "asset" | "error" | "model" | "tool")[]
+    | ("agent" | "approval" | "error" | "file" | "model" | "tool")[]
     | undefined
 ) {
   if (filter === undefined || filter.length === 0) {

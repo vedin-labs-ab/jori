@@ -45,7 +45,7 @@ function activityItemSchema(): JsonSchema {
     properties: {
       id: stringProperty("Activity entry ID."),
       kind: enumProperty(
-        ["tool", "model", "approval", "asset", "agent"],
+        ["tool", "model", "approval", "file", "agent"],
         "What kind of step this was."
       ),
       status: stringProperty(

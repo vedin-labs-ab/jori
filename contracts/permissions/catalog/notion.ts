@@ -62,7 +62,7 @@ export const notionToolPermissionRows = [
     "notion_upload_file",
     "Upload file",
     "Upload a saved file to Notion.",
-    "Upload a saved run asset to Notion for a page icon, cover, or file property. Save the asset first, then reference it here.",
+    "Upload a saved file to Notion for a page icon, cover, or file property. Save the file first, then reference it here.",
     "write",
   ],
   [

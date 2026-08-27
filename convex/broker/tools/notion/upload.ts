@@ -1,8 +1,8 @@
 import {
-  type AssetContext,
-  type RunAsset,
-  readRunAssets,
-} from "../../../assets/read"
+  type AttachmentContext,
+  type FileAttachment,
+  readAttachments,
+} from "../../../files/attachments"
 import {
   notionJson,
   notionMultipartJson,
@@ -16,12 +16,12 @@ const maxFilenameBytes = 900
 export async function uploadNotionFile(
   token: string,
   args: Record<string, unknown>,
-  context?: AssetContext
+  context?: AttachmentContext
 ) {
-  const asset = await readUploadAsset(context, args)
-  const upload = await createFileUpload(token, asset)
+  const attachment = await readUploadAttachment(context, args)
+  const upload = await createFileUpload(token, attachment)
   const uploadId = requiredString(upload.id, "Notion file upload id")
-  const sent = await sendFileUpload(token, uploadId, asset)
+  const sent = await sendFileUpload(token, uploadId, attachment)
 
   if (sent.status !== "uploaded") {
     throw new Error(`Notion file upload did not finish: ${sent.status}`)
@@ -36,15 +36,15 @@ export async function uploadNotionFile(
   }
 }
 
-async function readUploadAsset(
-  context: AssetContext | undefined,
+async function readUploadAttachment(
+  context: AttachmentContext | undefined,
   args: Record<string, unknown>
 ) {
-  const [asset] = await readRunAssets(
+  const [attachment] = await readAttachments(
     context,
     [
       {
-        assetId: requiredString(args.assetId, "assetId"),
+        fileId: requiredString(args.fileId, "fileId"),
         name: optionalString(args.filename),
         mimeType: optionalString(args.contentType),
       },
@@ -52,36 +52,36 @@ async function readUploadAsset(
     { maxBytes: maxSinglePartUploadBytes }
   )
 
-  if (asset === undefined) {
-    throw new Error("assetId is required")
+  if (attachment === undefined) {
+    throw new Error("fileId is required")
   }
 
-  validateFilename(asset.name)
+  validateFilename(attachment.name)
 
-  return asset
+  return attachment
 }
 
-async function createFileUpload(token: string, asset: RunAsset) {
+async function createFileUpload(token: string, attachment: FileAttachment) {
   return await notionJson(token, "POST", "/file_uploads", {
     mode: "single_part",
-    filename: asset.name,
-    content_type: asset.mimeType,
+    filename: attachment.name,
+    content_type: attachment.mimeType,
   })
 }
 
 async function sendFileUpload(
   token: string,
   uploadId: string,
-  asset: RunAsset
+  attachment: FileAttachment
 ) {
   const form = new FormData()
 
   form.set(
     "file",
-    new Blob([copyBytesToArrayBuffer(asset.bytes)], {
-      type: asset.mimeType,
+    new Blob([copyBytesToArrayBuffer(attachment.bytes)], {
+      type: attachment.mimeType,
     }),
-    asset.name
+    attachment.name
   )
 
   return await notionMultipartJson(

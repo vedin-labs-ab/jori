@@ -22,7 +22,7 @@ export const microsoftToolPermissionRows = [
     "microsoft_email_send_message",
     "Send email",
     "Send a new email from your Outlook account.",
-    "Send a new Outlook email, optionally attaching saved run assets. Use for a fresh message; create a draft instead when the requester should review it first.",
+    "Send a new Outlook email, optionally attaching saved files. Use for a fresh message; create a draft instead when the requester should review it first.",
     "write",
   ],
   [

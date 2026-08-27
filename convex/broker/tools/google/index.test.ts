@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { createAssetContext } from "../../../../test/convex/broker"
+import { createFileContext } from "../../../../test/convex/broker"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { callGoogleTool } from "."
 
@@ -165,20 +165,20 @@ describe("Gmail thread draft tools", () => {
   })
 })
 
-describe("Gmail assets", () => {
-  test("sends run assets", async () => {
+describe("Gmail files", () => {
+  test("sends saved files", async () => {
     const calls = mockGoogleFetch({ id: "sent-message" })
 
     await callGoogleTool(
       gmailIntegration(),
       "google_gmail_send_message",
       {
-        assets: [{ assetId: "asset-id" }],
+        files: [{ fileId: "file-id" }],
         body: "See attached.",
         subject: "File",
         to: ["recipient@example.com"],
       },
-      createAssetContext()
+      createFileContext()
     )
 
     const raw = readRawMessage(calls[0]?.body)

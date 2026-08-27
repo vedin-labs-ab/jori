@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { createAssetContext } from "../../../test/convex/broker"
+import { createFileContext } from "../../../test/convex/broker"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { callSlackTool } from "./slack"
 
@@ -99,8 +99,8 @@ describe("Slack reaction tool", () => {
   })
 })
 
-describe("Slack assets", () => {
-  test("uploads run assets as Slack files", async () => {
+describe("Slack files", () => {
+  test("uploads saved files to Slack", async () => {
     const calls = mockSlackFetch([
       {
         ok: true,
@@ -118,12 +118,12 @@ describe("Slack assets", () => {
       slackIntegration(),
       "conversations_add_message",
       {
-        assets: [{ assetId: "asset-id" }],
+        files: [{ fileId: "file-id" }],
         channel: "C123",
         text: "Here is the image.",
         thread_ts: "123.456",
       },
-      createAssetContext()
+      createFileContext()
     )
 
     expect(result).toEqual({ status: "sent" })

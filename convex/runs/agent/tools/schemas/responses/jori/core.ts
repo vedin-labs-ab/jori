@@ -16,15 +16,15 @@ import { brokerJoriToolResponseSchemas } from "./broker"
 import { runJoriToolResponseSchemas } from "./runs"
 import { workstreamJoriToolResponseSchemas } from "./workstreams"
 
-function assetSummaryProperties() {
+function fileSummaryProperties() {
   return {
-    assetId: stringProperty("Asset ID."),
-    name: stringProperty("Asset filename."),
-    mimeType: stringProperty("Asset content type."),
-    size: numberProperty("Asset size in bytes."),
+    fileId: stringProperty("File ID."),
+    name: stringProperty("Filename."),
+    mimeType: stringProperty("File content type."),
+    size: numberProperty("File size in bytes."),
     createdAt: numberProperty("Creation time in epoch milliseconds."),
     url: nullableStringProperty("Temporary download URL, when available."),
-    description: stringProperty("Asset description, when one was saved."),
+    description: stringProperty("File description, when one was saved."),
   }
 }
 
@@ -145,13 +145,13 @@ export const coreJoriToolResponseSchemas = {
   },
   ...runJoriToolResponseSchemas,
   ...workstreamJoriToolResponseSchemas,
-  save_asset: objectSchema({
-    required: ["assetId", "mimeType", "name", "size", "url"],
+  save_file: objectSchema({
+    required: ["fileId", "mimeType", "name", "size", "url"],
     properties: {
-      assetId: stringProperty("Asset ID for tools that send assets."),
+      fileId: stringProperty("File ID for tools that send files."),
       mimeType: stringProperty("Stored content type."),
       name: stringProperty("Stored filename."),
-      size: numberProperty("Asset size in bytes."),
+      size: numberProperty("File size in bytes."),
       url: nullableStringProperty("Temporary download URL, when available."),
     },
   }),
@@ -159,9 +159,9 @@ export const coreJoriToolResponseSchemas = {
     required: ["image", "provider", "status"],
     properties: {
       image: objectSchema({
-        description: "The saved image asset.",
+        description: "The saved image file.",
         properties: {
-          assetId: stringProperty("Asset ID for tools that send assets."),
+          fileId: stringProperty("File ID for tools that send files."),
           mimeType: stringProperty("Image content type."),
           name: stringProperty("Image filename."),
           size: numberProperty("Image size in bytes."),
@@ -181,15 +181,15 @@ export const coreJoriToolResponseSchemas = {
       status: constProperty("ok", "Generation succeeded."),
     },
   }),
-  search_assets: arrayProperty(
-    "Matching run assets, newest first.",
-    objectSchema({ properties: assetSummaryProperties() })
+  search_files: arrayProperty(
+    "Matching saved files, newest first.",
+    objectSchema({ properties: fileSummaryProperties() })
   ),
-  read_asset: {
+  read_file: {
     type: ["object", "null"],
     additionalProperties: false,
-    description: "The asset summary; null when not found.",
-    properties: assetSummaryProperties(),
+    description: "The file summary; null when not found.",
+    properties: fileSummaryProperties(),
   },
   web_search: webToolResult(),
   web_fetch: webToolResult(),

@@ -35,7 +35,7 @@ import {
 const kindMetadata = {
   agent: { Icon: GitBranch, label: "Agent" },
   approval: { Icon: ShieldCheck, label: "Approval" },
-  asset: { Icon: Package, label: "Asset" },
+  file: { Icon: Package, label: "File" },
   model: { Icon: Brain, label: "Model" },
   offer: { Icon: Plug, label: "Connection" },
   run: { Icon: Play, label: "Run" },

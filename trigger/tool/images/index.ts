@@ -15,7 +15,7 @@ type GenerateImageInput = {
 
 const generatedImageDirectory = "generated-images"
 
-export async function generateImageAsset(
+export async function generateImageFile(
   runtime: AgentRuntime,
   input: JsonObject
 ) {
@@ -31,7 +31,7 @@ export async function generateImageAsset(
     },
   ])
 
-  const asset = await runtime.platform.uploadAsset({
+  const file = await runtime.platform.uploadFile({
     bytes: generated.bytes,
     description: request.save.description,
     mimeType: generated.mimeType,
@@ -41,7 +41,7 @@ export async function generateImageAsset(
 
   return {
     image: {
-      ...asset,
+      ...file,
       model: generated.model,
       path: workspacePath,
     },

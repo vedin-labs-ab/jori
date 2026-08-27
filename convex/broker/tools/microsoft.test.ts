@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { createAssetContext } from "../../../test/convex/broker"
+import { createFileContext } from "../../../test/convex/broker"
 import { schemaViolations } from "../../../test/convex/schema"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import {
@@ -123,19 +123,19 @@ describe("Microsoft Calendar listings", () => {
 })
 
 describe("Outlook email tools", () => {
-  test("sends run assets as Graph file attachments", async () => {
+  test("sends saved files as Graph file attachments", async () => {
     const calls = mockMicrosoftFetch(null)
 
     const result = await callMicrosoftTool(
       microsoftEmailIntegration(),
       "microsoft_email_send_message",
       {
-        assets: [{ assetId: "asset-id" }],
+        files: [{ fileId: "file-id" }],
         body: "See attached.",
         subject: "File",
         to: ["recipient@example.com"],
       },
-      createAssetContext()
+      createFileContext()
     )
 
     expect(result).toEqual({ status: "sent" })

@@ -25,7 +25,7 @@ const activityFilter = v.union(
   v.literal("tool"),
   v.literal("model"),
   v.literal("approval"),
-  v.literal("asset"),
+  v.literal("file"),
   v.literal("agent"),
   v.literal("error")
 )

@@ -24,7 +24,7 @@ test("projects approvals with surface action metadata", () => {
       } as Doc<"approvals">,
     ],
     apps: [],
-    assets: [],
+    files: [],
     offers: [],
     run: {} as Doc<"runs">,
     traces: [],

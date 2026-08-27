@@ -24,7 +24,7 @@ export type ApprovalBrokerContext = {
   toolModes: ReadonlyMap<string, PermissionMode>
 }
 
-const workerOnlyJoriTools = ["save_asset", "generate_image"]
+const workerOnlyJoriTools = ["save_file", "generate_image"]
 
 export async function createPromptedToolApproval(
   ctx: ActionCtx,

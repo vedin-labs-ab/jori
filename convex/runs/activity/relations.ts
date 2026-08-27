@@ -11,7 +11,7 @@ export function projectRelationActivity(data: ActivityData): ActivityItem[] {
   return [
     ...data.approvals.map(projectApproval),
     ...data.offers.map(projectOffer),
-    ...data.assets.map(projectAsset),
+    ...data.files.map(projectFile),
     ...data.waiters.map(projectWaiter),
     ...data.agents.map(projectAgent),
   ]
@@ -50,18 +50,18 @@ function projectOffer(offer: Doc<"integrationOffers">): ActivityItem {
   }
 }
 
-function projectAsset(asset: Doc<"assets">): ActivityItem {
+function projectFile(file: Doc<"files">): ActivityItem {
   return {
-    id: asset._id,
-    kind: "asset",
+    id: file._id,
+    kind: "file",
     status: "completed",
-    title: "Asset saved",
-    description: asset.name,
+    title: "File saved",
+    description: file.name,
     details: [
-      { label: "Type", value: asset.mimeType },
-      { label: "Size", value: formatBytes(asset.size) },
+      { label: "Type", value: file.mimeType },
+      { label: "Size", value: formatBytes(file.size) },
     ],
-    startedAt: asset.createdAt,
+    startedAt: file.createdAt,
   }
 }
 

@@ -1,5 +1,5 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { type RunAsset } from "../../../assets/read"
+import { type FileAttachment } from "../../../files/attachments"
 import { requiredString } from "../../../shared/input"
 import { slackJsonApi } from "../api"
 import { requireSlackCredentials } from "../credentials"
@@ -14,15 +14,15 @@ export async function postSlackMessage(
     text: string
     thread_ts?: string
     blocks?: SlackBlock[]
-    assets?: RunAsset[]
+    files?: FileAttachment[]
   }
 ) {
   const credentials = requireSlackCredentials(integration)
-  const assets = args.assets ?? []
+  const files = args.files ?? []
 
-  if (assets.length > 0) {
+  if (files.length > 0) {
     return await postSlackFiles(credentials.bot.access, {
-      assets,
+      files,
       channel: args.channel,
       text: args.text,
       thread_ts: args.thread_ts,

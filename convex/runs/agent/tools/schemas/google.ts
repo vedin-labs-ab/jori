@@ -1,9 +1,9 @@
 import { calendarEventProperty } from "./calendar"
 import { emailMessageSchema } from "./email"
 import {
+  filesProperty,
   numberProperty,
   objectSchema,
-  runAssetsProperty,
   type SchemaMap,
   stringArrayProperty,
   stringProperty,
@@ -70,7 +70,7 @@ function gmailDraftSchema() {
   return objectSchema({
     required: ["body"],
     properties: {
-      assets: runAssetsProperty(),
+      files: filesProperty(),
       bcc: stringArrayProperty(
         "BCC recipient email addresses. Standalone drafts only."
       ),
