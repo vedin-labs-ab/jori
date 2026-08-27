@@ -14,10 +14,9 @@ export type ColumnDraft = {
 
 export const columnTypeOptions = [
   { label: "Text", value: "string" },
-  { label: "Number", value: "number" },
+  { label: "Float", value: "float" },
   { label: "Integer", value: "integer" },
   { label: "Boolean", value: "boolean" },
-  { label: "JSON", value: "json" },
 ] as const satisfies readonly { label: string; value: TableColumnType }[]
 
 const columnKeyPattern = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
@@ -44,8 +43,8 @@ export function draftsFromColumns(columns: TableColumn[]): ColumnDraft[] {
   }))
 }
 
-/** The payload `create`/`update` expect. Existing columns keep their type,
- *  required flag, and schema; only the display name follows the draft. */
+/** The payload `create`/`update` expect. Existing columns keep their type
+ *  and required flag; only the display name follows the draft. */
 export function draftsToColumns(
   drafts: ColumnDraft[],
   existing: TableColumn[]
@@ -69,6 +68,20 @@ export function draftsToColumns(
       ...(draft.required ? { required: true } : {}),
     }
   })
+}
+
+export type TableFormErrors = { name?: string; columns?: string }
+
+/** Errors for a table dialog submit attempt. Dialogs show these only after
+ *  a submit and clear a field's error as soon as it gets new input. */
+export function validateTableForm(
+  name: string,
+  drafts: ColumnDraft[]
+): TableFormErrors {
+  return {
+    name: name.trim() === "" ? "Give the table a name." : undefined,
+    columns: columnDraftsIssue(drafts),
+  }
 }
 
 /** First problem that blocks submitting the drafts, if any. */

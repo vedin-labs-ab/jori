@@ -7,12 +7,12 @@ describe("normalizeTableColumns", () => {
       normalizeTableColumns([
         { key: "title", name: " Title ", type: "string", required: true },
         { key: "count", type: "integer" },
-        { key: "meta", type: "json", schema: { type: "array" } },
+        { key: "score", type: "float" },
       ])
     ).toEqual([
       { key: "title", name: "Title", type: "string", required: true },
       { key: "count", name: "count", type: "integer" },
-      { key: "meta", name: "meta", type: "json", schema: { type: "array" } },
+      { key: "score", name: "score", type: "float" },
     ])
   })
 
@@ -24,20 +24,18 @@ describe("normalizeTableColumns", () => {
     expect(() =>
       normalizeTableColumns([
         { key: "title", type: "string" },
-        { key: "title", type: "number" },
+        { key: "title", type: "float" },
       ])
     ).toThrow("Duplicate table column key")
   })
 
-  test("rejects unknown types and schemas on non-json columns", () => {
+  test("rejects unknown types", () => {
     expect(() =>
       normalizeTableColumns([{ key: "when", type: "date" }])
     ).toThrow("must use one of")
     expect(() =>
-      normalizeTableColumns([
-        { key: "title", type: "string", schema: { type: "string" } },
-      ])
-    ).toThrow("not a json column")
+      normalizeTableColumns([{ key: "meta", type: "json" }])
+    ).toThrow("must use one of")
   })
 })
 
@@ -69,7 +67,7 @@ describe("assertColumnEvolution", () => {
       assertColumnEvolution(
         current,
         normalizeTableColumns([
-          { key: "title", name: "Title", type: "number", required: true },
+          { key: "title", name: "Title", type: "float", required: true },
         ])
       )
     ).toThrow("only change its display name")

@@ -133,6 +133,7 @@ function SkillListBody({
         filteredCount={visibleCount}
         skills={pagination.visibleRows}
         isLoading={skillList === undefined}
+        onCreate={editor.openCreateForm}
         onDelete={editor.deleteSkill}
         onEdit={editor.openEditForm}
         onView={onViewSkillChange}

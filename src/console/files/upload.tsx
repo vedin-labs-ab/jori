@@ -75,6 +75,12 @@ function UploadFields({ upload }: { upload: FileUpload }) {
           type="file"
         />
       </div>
+      <MaterialScopeField
+        id="file-upload-scope"
+        noun="file"
+        onScopeChange={upload.setScope}
+        scope={upload.scope}
+      />
       <div className="grid gap-2">
         <Label htmlFor="file-upload-description">Description</Label>
         <Input
@@ -84,12 +90,6 @@ function UploadFields({ upload }: { upload: FileUpload }) {
           value={upload.description}
         />
       </div>
-      <MaterialScopeField
-        id="file-upload-scope"
-        noun="file"
-        onScopeChange={upload.setScope}
-        scope={upload.scope}
-      />
     </div>
   )
 }

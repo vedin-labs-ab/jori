@@ -1,28 +1,23 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { Link2, Pencil, Plus } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
-import {
-  ConsoleHeaderActions,
-  ConsoleHeaderButton,
-  ConsolePageLayout,
-  ConsoleScrollableGrid,
-} from "../../shared/layout"
+import { ConsolePageLayout, ConsoleScrollableGrid } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { ConsoleListSkeleton } from "../../shared/list/skeleton"
-import { MaterialActions } from "../../shared/materials/actions"
+import { useMaterialBreadcrumb } from "../../shared/materials/breadcrumb"
 import { useMemberUrl } from "../../shared/materials/fragment"
-import { MaterialScopeBadge } from "../../shared/materials/scope"
 import { EditTableDialog } from "../edit"
-import { tableDeleteDescription, useTableRemoval } from "../manage"
+import { useTableRemoval } from "../manage"
 import { type TableDetail } from "../types"
 import { AddRowDialog } from "./add"
+import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
+import { TableHeaderActions, TableHeading } from "./header"
+import { ImportRowsDialog } from "./import"
 import { useRowPages, useRowWrites } from "./rows"
 import { TableLinksDialog } from "./share"
 
@@ -100,6 +95,8 @@ function TableViewContent({
   return <TableReadyView organizationId={organizationId} table={result.table} />
 }
 
+type TableDialog = "add" | "edit" | "import" | "share"
+
 function TableReadyView({
   organizationId,
   table,
@@ -108,14 +105,14 @@ function TableReadyView({
   table: TableDetail
 }) {
   useMemberUrl()
+  useMaterialBreadcrumb(table.name)
 
   const navigate = useNavigate()
   const pages = useRowPages(organizationId, table.tableId)
   const writes = useRowWrites(organizationId, table.tableId)
+  const exporter = useCsvExport(organizationId, table)
   const removal = useTableRemoval(organizationId)
-  const [isAddOpen, setIsAddOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [isShareOpen, setIsShareOpen] = useState(false)
+  const [dialog, setDialog] = useState<TableDialog>()
   const isArchived = table.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
@@ -130,10 +127,13 @@ function TableReadyView({
     <ConsolePageLayout>
       <TableHeaderActions
         isArchived={isArchived}
+        isExporting={exporter.isExporting}
+        onAdd={() => setDialog("add")}
         onDelete={removeAndLeaveWhenDeleted}
-        onEdit={() => setIsEditOpen(true)}
-        onAdd={() => setIsAddOpen(true)}
-        onShare={() => setIsShareOpen(true)}
+        onEdit={() => setDialog("edit")}
+        onExport={() => void exporter.exportCsv()}
+        onImport={() => setDialog("import")}
+        onShare={() => setDialog("share")}
         removal={removal}
         table={table}
       />
@@ -152,102 +152,61 @@ function TableReadyView({
         />
       </ConsoleScrollableGrid>
       <ConsoleListPager pagination={pages} />
-      <AddRowDialog
-        columns={table.columns}
-        isOpen={isAddOpen}
-        onOpenChange={setIsAddOpen}
-        onSubmit={writes.insertRow}
-      />
-      <EditTableDialog
-        onOpenChange={setIsEditOpen}
+      <TableDialogs
+        dialog={dialog}
+        onClose={() => setDialog(undefined)}
         organizationId={organizationId}
-        table={isEditOpen ? table : undefined}
-      />
-      <TableLinksDialog
-        onOpenChange={setIsShareOpen}
-        open={isShareOpen}
-        organizationId={organizationId}
-        tableId={table.tableId}
+        table={table}
+        writes={writes}
       />
     </ConsolePageLayout>
   )
 }
 
-function TableHeaderActions({
-  isArchived,
-  onAdd,
-  onDelete,
-  onEdit,
-  onShare,
-  removal,
+function TableDialogs({
+  dialog,
+  onClose,
+  organizationId,
   table,
+  writes,
 }: {
-  isArchived: boolean
-  onAdd: () => void
-  onDelete: () => void
-  onEdit: () => void
-  onShare: () => void
-  removal: ReturnType<typeof useTableRemoval>
+  dialog: TableDialog | undefined
+  onClose: () => void
+  organizationId: string
   table: TableDetail
+  writes: ReturnType<typeof useRowWrites>
 }) {
-  return (
-    <ConsoleHeaderActions>
-      <ConsoleHeaderButton
-        icon={<Link2 />}
-        label="Share"
-        onClick={onShare}
-        type="button"
-        variant="outline"
-      />
-      <ConsoleHeaderButton
-        icon={<Pencil />}
-        label="Edit table"
-        onClick={onEdit}
-        type="button"
-        variant="outline"
-      />
-      <ConsoleHeaderButton
-        disabled={isArchived}
-        icon={<Plus />}
-        label="Add row"
-        onClick={onAdd}
-        type="button"
-      />
-      <MaterialActions
-        deleteDescription={tableDeleteDescription}
-        isDeleting={removal.removingTableId === table.tableId}
-        isRestoring={removal.restoringTableId === table.tableId}
-        material={{ name: table.name, archivedAt: table.archivedAt }}
-        noun="table"
-        onDelete={onDelete}
-        onRestore={() => void removal.restoreTable(table)}
-      />
-    </ConsoleHeaderActions>
-  )
-}
+  function closeWhenDismissed(open: boolean) {
+    if (!open) {
+      onClose()
+    }
+  }
 
-function TableHeading({
-  isArchived,
-  table,
-}: {
-  isArchived: boolean
-  table: TableDetail
-}) {
   return (
-    <div className="grid gap-1">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-medium text-lg tracking-tight">{table.name}</h2>
-        <MaterialScopeBadge scope={table.scope} />
-        {isArchived ? <Badge variant="secondary">Archived</Badge> : null}
-      </div>
-      {table.description === undefined ? null : (
-        <p className="text-muted-foreground text-sm">{table.description}</p>
-      )}
-      {isArchived ? (
-        <p className="text-muted-foreground text-xs">
-          Archived tables are read-only. Restore the table to change rows.
-        </p>
-      ) : null}
-    </div>
+    <>
+      <AddRowDialog
+        columns={table.columns}
+        isOpen={dialog === "add"}
+        onOpenChange={closeWhenDismissed}
+        onSubmit={writes.insertRow}
+      />
+      <ImportRowsDialog
+        columns={table.columns}
+        isOpen={dialog === "import"}
+        onImport={writes.importRows}
+        onOpenChange={closeWhenDismissed}
+      />
+      <EditTableDialog
+        onOpenChange={closeWhenDismissed}
+        organizationId={organizationId}
+        table={dialog === "edit" ? table : undefined}
+      />
+      <TableLinksDialog
+        onOpenChange={closeWhenDismissed}
+        open={dialog === "share"}
+        organizationId={organizationId}
+        tableId={table.tableId}
+      />
+    </>
   )
 }

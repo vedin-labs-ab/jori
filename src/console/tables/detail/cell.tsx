@@ -1,17 +1,7 @@
 import { useState } from "react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { displayCellText } from "@/shared/materials/cells"
 import { type TableColumn, type TableRow } from "../types"
 import { formatCellText, parseCellText } from "./cells"
@@ -22,8 +12,8 @@ export type CommitCell = (
   value: unknown
 ) => Promise<boolean>
 
-/** One grid cell: booleans toggle in place, JSON edits in a dialog, and
- *  text-like types edit inline. Every commit carries the row version. */
+/** One grid cell: booleans toggle in place and text-like types edit
+ *  inline. Every commit carries the row version. */
 export function RowCell({
   column,
   disabled,
@@ -46,17 +36,6 @@ export function RowCell({
         onCheckedChange={(checked) =>
           void onCommit(row, column.key, checked === true)
         }
-      />
-    )
-  }
-
-  if (column.type === "json") {
-    return (
-      <JsonCell
-        column={column}
-        disabled={disabled}
-        onCommit={onCommit}
-        row={row}
       />
     )
   }
@@ -111,7 +90,7 @@ function TextCell({
         disabled={disabled}
         label={`Edit ${column.name}`}
         onClick={() => setDraft(formatCellText(column, value))}
-        text={displayCellText(column, value)}
+        text={displayCellText(value)}
       />
     )
   }
@@ -134,96 +113,6 @@ function TextCell({
       }}
       value={draft}
     />
-  )
-}
-
-function JsonCell({
-  column,
-  disabled,
-  onCommit,
-  row,
-}: {
-  column: TableColumn
-  disabled: boolean
-  onCommit: CommitCell
-  row: TableRow
-}) {
-  const [isOpen, setIsOpen] = useState(false)
-  const value = row.values[column.key]
-
-  return (
-    <>
-      <CellButton
-        disabled={disabled}
-        label={`Edit ${column.name}`}
-        onClick={() => setIsOpen(true)}
-        text={displayCellText(column, value)}
-      />
-      {isOpen ? (
-        <JsonCellDialog
-          column={column}
-          onClose={() => setIsOpen(false)}
-          onCommit={onCommit}
-          row={row}
-        />
-      ) : null}
-    </>
-  )
-}
-
-function JsonCellDialog({
-  column,
-  onClose,
-  onCommit,
-  row,
-}: {
-  column: TableColumn
-  onClose: () => void
-  onCommit: CommitCell
-  row: TableRow
-}) {
-  const [text, setText] = useState(() =>
-    formatCellText(column, row.values[column.key])
-  )
-  const parsed = parseCellText(column, text)
-
-  return (
-    <Dialog onOpenChange={(open) => (open ? undefined : onClose())} open>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Edit {column.name}</DialogTitle>
-          <DialogDescription>
-            JSON for this cell; leave empty to clear it.
-          </DialogDescription>
-        </DialogHeader>
-        <Textarea
-          aria-label={`${column.name} JSON`}
-          className="min-h-40 font-mono text-xs"
-          onChange={(event) => setText(event.target.value)}
-          value={text}
-        />
-        {parsed.ok ? null : (
-          <p className="text-destructive text-xs">{parsed.error}</p>
-        )}
-        <DialogFooter>
-          <Button
-            disabled={!parsed.ok}
-            onClick={() => {
-              if (parsed.ok) {
-                void onCommit(row, column.key, parsed.value).then((saved) => {
-                  if (saved) {
-                    onClose()
-                  }
-                })
-              }
-            }}
-            type="button"
-          >
-            Save cell
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   )
 }
 

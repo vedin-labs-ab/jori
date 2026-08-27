@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { Database, Plus } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -83,11 +84,13 @@ export function StoresToolbar({
 
 export function StoreList({
   hasFilters,
+  onCreate,
   removal,
   stores,
   unauthorizedMessage,
 }: {
   hasFilters: boolean
+  onCreate: () => void
   removal: ReturnType<typeof useStoreRemoval>
   stores: StoreSummary[]
   unauthorizedMessage: string | undefined
@@ -104,6 +107,12 @@ export function StoreList({
   if (stores.length === 0) {
     return (
       <FilterableEmptyState
+        action={
+          <Button onClick={onCreate} type="button">
+            <Plus />
+            New store
+          </Button>
+        }
         description="Schema-backed JSON documents Jori and your team keep state in appear here."
         hasFilters={hasFilters}
         icon={Database}

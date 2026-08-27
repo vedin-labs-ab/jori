@@ -88,6 +88,10 @@ function AutomationListView({ organizationId }: { organizationId: string }) {
         hasFilters={hasFilters}
         now={now}
         automationList={automationList}
+        onCreate={() => {
+          void preloadDialog()
+          editor.openCreateForm()
+        }}
         visibleAutomations={pagination.visibleRows}
       />
       {automationList?.status !== "unauthorized" ? (

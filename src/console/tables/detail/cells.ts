@@ -1,4 +1,3 @@
-import { parseJsonText } from "../../shared/json/parse"
 import { type TableColumn } from "../types"
 
 // Cell edits travel as text; these helpers translate between the text a
@@ -19,25 +18,15 @@ export function parseCellText(column: TableColumn, text: string): CellParse {
       : { ok: true, value: undefined }
   }
 
-  return parseFilledCellText(column, text, trimmed)
-}
-
-function parseFilledCellText(
-  column: TableColumn,
-  text: string,
-  trimmed: string
-): CellParse {
   switch (column.type) {
     case "string":
       return { ok: true, value: text }
-    case "number":
+    case "float":
       return parseNumberText(trimmed, false)
     case "integer":
       return parseNumberText(trimmed, true)
     case "boolean":
       return parseBooleanText(trimmed)
-    case "json":
-      return parseJsonCellText(trimmed)
   }
 }
 
@@ -49,10 +38,6 @@ export function formatCellText(column: TableColumn, value: unknown) {
 
   if (column.type === "string" && typeof value === "string") {
     return value
-  }
-
-  if (column.type === "json") {
-    return JSON.stringify(value, null, 2) ?? ""
   }
 
   return String(value)
@@ -114,21 +99,4 @@ function parseBooleanText(trimmed: string): CellParse {
   }
 
   return { ok: false, error: "Enter true or false." }
-}
-
-function parseJsonCellText(trimmed: string): CellParse {
-  const parsed = parseJsonText(trimmed)
-
-  if (!parsed.ok) {
-    return parsed
-  }
-
-  if (parsed.value === null) {
-    return {
-      ok: false,
-      error: "Cells never store null; clear the cell instead.",
-    }
-  }
-
-  return parsed
 }

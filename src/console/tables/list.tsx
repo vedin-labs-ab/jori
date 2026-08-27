@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { Plus, Table2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -84,11 +85,13 @@ export function TablesToolbar({
 
 export function TableList({
   hasFilters,
+  onCreate,
   removal,
   tables,
   unauthorizedMessage,
 }: {
   hasFilters: boolean
+  onCreate: () => void
   removal: ReturnType<typeof useTableRemoval>
   tables: TableSummary[]
   unauthorizedMessage: string | undefined
@@ -105,6 +108,12 @@ export function TableList({
   if (tables.length === 0) {
     return (
       <FilterableEmptyState
+        action={
+          <Button onClick={onCreate} type="button">
+            <Plus />
+            New table
+          </Button>
+        }
         description="Typed tables Jori and your team keep structured records in appear here."
         hasFilters={hasFilters}
         icon={Table2}

@@ -14,14 +14,18 @@ import {
 } from "@/components/ui/dialog"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
-import { MaterialDetailFields } from "../shared/materials/fields"
+import {
+  MaterialDescriptionField,
+  MaterialNameField,
+} from "../shared/materials/fields"
 import { MaterialScopeField } from "../shared/materials/scope"
 import { ColumnEditor } from "./columns"
 import {
   type ColumnDraft,
-  columnDraftsIssue,
   draftsToColumns,
   newColumnDraft,
+  type TableFormErrors,
+  validateTableForm,
 } from "./draft"
 
 export function CreateTableDialog({
@@ -34,7 +38,6 @@ export function CreateTableDialog({
   organizationId: string
 }) {
   const form = useCreateTable(organizationId, () => onOpenChange(false))
-  const issue = columnDraftsIssue(form.drafts)
 
   return (
     <Dialog
@@ -53,11 +56,10 @@ export function CreateTableDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
-          <MaterialDetailFields
-            description={form.description}
+          <MaterialNameField
+            error={form.errors.name}
             idPrefix="table-create"
             name={form.name}
-            onDescriptionChange={form.setDescription}
             onNameChange={form.setName}
           />
           <MaterialScopeField
@@ -66,20 +68,25 @@ export function CreateTableDialog({
             onScopeChange={form.setScope}
             scope={form.scope}
           />
+          <MaterialDescriptionField
+            description={form.description}
+            idPrefix="table-create"
+            onDescriptionChange={form.setDescription}
+          />
           <ColumnEditor
             allowRequired
             drafts={form.drafts}
             onChange={form.setDrafts}
           />
-          {issue === undefined ? null : (
-            <p className="text-destructive text-xs">{issue}</p>
+          {form.errors.columns === undefined ? null : (
+            <p className="text-destructive text-xs" role="alert">
+              {form.errors.columns}
+            </p>
           )}
         </div>
         <DialogFooter>
           <Button
-            disabled={
-              form.name.trim() === "" || issue !== undefined || form.isCreating
-            }
+            disabled={form.isCreating}
             onClick={() => void form.submit()}
             type="button"
           >
@@ -98,9 +105,18 @@ function useCreateTable(organizationId: string, onCreated: () => void) {
   const [description, setDescription] = useState("")
   const [scope, setScope] = useState<Scope>("organization")
   const [drafts, setDrafts] = useState<ColumnDraft[]>(() => [newColumnDraft()])
+  const [errors, setErrors] = useState<TableFormErrors>({})
   const [isCreating, setIsCreating] = useState(false)
 
   async function submit() {
+    const found = validateTableForm(name, drafts)
+
+    setErrors(found)
+
+    if (found.name !== undefined || found.columns !== undefined) {
+      return
+    }
+
     setIsCreating(true)
 
     try {
@@ -127,12 +143,21 @@ function useCreateTable(organizationId: string, onCreated: () => void) {
   return {
     description,
     drafts,
+    errors,
     isCreating,
     name,
     scope,
     setDescription,
-    setDrafts,
-    setName,
+    // Validation shows only after a submit attempt; new input in a field
+    // clears that field's error right away.
+    setDrafts: (next: ColumnDraft[]) => {
+      setErrors((current) => ({ ...current, columns: undefined }))
+      setDrafts(next)
+    },
+    setName: (next: string) => {
+      setErrors((current) => ({ ...current, name: undefined }))
+      setName(next)
+    },
     setScope,
     submit,
   }

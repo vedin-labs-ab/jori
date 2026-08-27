@@ -95,7 +95,7 @@ function SharedRows({
               <TableRow key={row.rowId}>
                 {table.columns.map((column) => (
                   <TableCell key={column.key}>
-                    {displayCellText(column, row.values[column.key])}
+                    {displayCellText(row.values[column.key])}
                   </TableCell>
                 ))}
               </TableRow>

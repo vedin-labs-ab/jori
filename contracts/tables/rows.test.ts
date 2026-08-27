@@ -5,13 +5,8 @@ import { applyRowPatch, assertRowValues } from "./rows"
 const columns = normalizeTableColumns([
   { key: "title", type: "string", required: true },
   { key: "count", type: "integer" },
-  { key: "score", type: "number" },
+  { key: "score", type: "float" },
   { key: "done", type: "boolean" },
-  {
-    key: "meta",
-    type: "json",
-    schema: { type: "object", required: ["source"], properties: {} },
-  },
 ])
 
 describe("assertRowValues", () => {
@@ -24,7 +19,6 @@ describe("assertRowValues", () => {
           count: 3,
           score: 0.5,
           done: false,
-          meta: { source: "slack" },
         },
         label: "Row",
       })
@@ -58,7 +52,7 @@ describe("assertRowValues", () => {
         values: { title: "x", score: "high" },
         label: "Row",
       })
-    ).toThrow("score must be a number")
+    ).toThrow("score must be a float")
     expect(() =>
       assertRowValues({
         columns,
@@ -69,18 +63,6 @@ describe("assertRowValues", () => {
     expect(() =>
       assertRowValues({ columns, values: { title: 4 }, label: "Row" })
     ).toThrow("title must be a string")
-  })
-})
-
-describe("assertRowValues json and null handling", () => {
-  test("validates json columns against their schema", () => {
-    expect(() =>
-      assertRowValues({
-        columns,
-        values: { title: "x", meta: {} },
-        label: "Row",
-      })
-    ).toThrow("meta.source is required")
   })
 
   test("rejects stored nulls", () => {

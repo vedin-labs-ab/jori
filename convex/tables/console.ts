@@ -149,6 +149,22 @@ export const insertRow = mutation({
   },
 })
 
+export const insertRows = mutation({
+  args: {
+    organizationId: v.string(),
+    tableId: v.id("tables"),
+    rows: v.array(v.any()),
+  },
+  handler: async (ctx, args): Promise<{ inserted: number }> => {
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.tables.rows.insertMany, {
+      ...args,
+      personId,
+    })
+  },
+})
+
 export const updateRow = mutation({
   args: {
     organizationId: v.string(),

@@ -15,12 +15,14 @@ export function AutomationContent({
   hasFilters,
   now,
   automationList,
+  onCreate,
   visibleAutomations,
 }: {
   editor: AutomationEditor
   hasFilters: boolean
   now: number
   automationList: AutomationList | undefined
+  onCreate: () => void
   visibleAutomations: AutomationList["automations"]
 }) {
   if (automationList === undefined) {
@@ -44,7 +46,7 @@ export function AutomationContent({
     return (
       <ConsoleScrollableList className={automationGrid}>
         <li className="col-span-full">
-          <EmptyAutomations hasFilters={hasFilters} />
+          <EmptyAutomations hasFilters={hasFilters} onCreate={onCreate} />
         </li>
       </ConsoleScrollableList>
     )

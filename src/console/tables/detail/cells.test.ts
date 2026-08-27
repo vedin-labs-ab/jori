@@ -23,12 +23,12 @@ test("rejects clearing a required cell", () => {
   expect(parsed.ok).toBe(false)
 })
 
-test("parses numbers and rejects non-numeric text", () => {
-  expect(parseCellText(column("number"), "1.5")).toEqual({
+test("parses floats and rejects non-numeric text", () => {
+  expect(parseCellText(column("float"), "1.5")).toEqual({
     ok: true,
     value: 1.5,
   })
-  expect(parseCellText(column("number"), "abc").ok).toBe(false)
+  expect(parseCellText(column("float"), "abc").ok).toBe(false)
 })
 
 test("integers reject fractions", () => {
@@ -44,30 +44,14 @@ test("booleans accept only true and false", () => {
   expect(parseCellText(column("boolean"), "yes").ok).toBe(false)
 })
 
-test("json cells parse structures and reject null and invalid text", () => {
-  expect(parseCellText(column("json"), '{"a":1}')).toEqual({
-    ok: true,
-    value: { a: 1 },
-  })
-  expect(parseCellText(column("json"), "null").ok).toBe(false)
-  expect(parseCellText(column("json"), "{oops").ok).toBe(false)
-})
-
 test("formats cell text so an edit round-trips", () => {
-  const jsonColumn = column("json")
-  const parsed = parseCellText(
-    jsonColumn,
-    formatCellText(jsonColumn, { a: [1, 2] })
-  )
-
-  expect(parsed).toEqual({ ok: true, value: { a: [1, 2] } })
-  expect(formatCellText(column("number"), 3)).toBe("3")
+  expect(formatCellText(column("float"), 3)).toBe("3")
   expect(formatCellText(column("string"), undefined)).toBe("")
 })
 
-test("displays compact json and an empty marker for cleared cells", () => {
-  expect(displayCellText(column("json"), { a: 1 })).toBe('{"a":1}')
-  expect(displayCellText(column("string"), undefined)).toBe("")
+test("displays an empty marker for cleared cells", () => {
+  expect(displayCellText(false)).toBe("false")
+  expect(displayCellText(undefined)).toBe("")
 })
 
 test("builds insert values, skipping empty optional columns", () => {

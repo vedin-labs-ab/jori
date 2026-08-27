@@ -65,6 +65,47 @@ export const insert = internalMutation({
   },
 })
 
+/** Batched insert for imports: every row is validated before the first
+ *  write, so a batch either lands whole or not at all. */
+export const insertMany = internalMutation({
+  args: {
+    organizationId: v.string(),
+    tableId: v.id("tables"),
+    personId: v.id("persons"),
+    rows: v.array(v.any()),
+  },
+  handler: async (ctx, args) => {
+    if (args.rows.length === 0 || args.rows.length > importBatchSize) {
+      throw new Error(
+        `Row batches must hold 1 to ${importBatchSize} rows per call.`
+      )
+    }
+
+    const table = await getWritableTable(ctx, args)
+
+    for (const values of args.rows) {
+      assertValues(table, values)
+    }
+
+    const now = Date.now()
+
+    for (const values of args.rows) {
+      await ctx.db.insert("tableRows", {
+        organizationId: args.organizationId,
+        tableId: args.tableId,
+        values,
+        version: 1,
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+
+    return { inserted: args.rows.length }
+  },
+})
+
+const importBatchSize = 100
+
 export const update = internalMutation({
   args: {
     organizationId: v.string(),
