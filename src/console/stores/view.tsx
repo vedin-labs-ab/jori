@@ -31,7 +31,7 @@ import { EditStoreDialog } from "./edit"
 import { storeDeleteDescription, useStoreRemoval } from "./manage"
 import { StoreLinksDialog } from "./share"
 import { type StoreDetail } from "./types"
-import { StoreValue } from "./value"
+import { StoreValue } from "./value/section"
 
 /** Member view of one store. The share fork wraps exactly this component,
  *  so it owns everything inside the console chrome. A visitor holding a
