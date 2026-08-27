@@ -13,6 +13,7 @@ import {
   traceSequence,
 } from "../read"
 import {
+  type ActivityData,
   type ActivityDetail,
   type ActivityItem,
   type ActivityStatus,
@@ -22,15 +23,33 @@ import {
 const hiddenToolNames = new Set(["finish_run", "start_agent"])
 const toolTerminalTypes = new Set(["tool.completed", "tool.failed"])
 
+type ToolProjectionContext = {
+  agents: Doc<"runs">[]
+  appTitles: ReadonlyMap<string, string>
+  isRunLive: boolean
+  labels: Map<string, ToolLabel>
+  materialNames: ReadonlyMap<string, string>
+  runAppId: Id<"apps"> | undefined
+}
+
 export function projectToolTraces(
-  traces: Doc<"traces">[],
-  agents: Doc<"runs">[],
-  apps: Doc<"apps">[],
-  runAppId: Id<"apps"> | undefined,
+  data: ActivityData,
   isRunLive: boolean
 ): ActivityItem[] {
-  const labels = toolLabels(traces)
-  const appTitles = new Map(apps.map((app) => [app._id, app.title]))
+  const { agents, apps, run, stores, tables, traces } = data
+  const context: ToolProjectionContext = {
+    agents,
+    appTitles: new Map(apps.map((app) => [app._id, app.title])),
+    isRunLive,
+    labels: toolLabels(traces),
+    materialNames: new Map(
+      [...stores, ...tables].map((material) => [
+        material._id as string,
+        material.name,
+      ])
+    ),
+    runAppId: run.appId,
+  }
   const groups = new Map<string, Doc<"traces">[]>()
 
   for (const trace of traces) {
@@ -44,19 +63,15 @@ export function projectToolTraces(
     groups.set(key, [...(groups.get(key) ?? []), trace])
   }
 
-  return [...groups.values()].map((group) =>
-    projectToolGroup(group, labels, agents, appTitles, runAppId, isRunLive)
-  )
+  return [...groups.values()].map((group) => projectToolGroup(group, context))
 }
 
 function projectToolGroup(
   group: Doc<"traces">[],
-  labels: Map<string, ToolLabel>,
-  agents: Doc<"runs">[],
-  appTitles: ReadonlyMap<string, string>,
-  runAppId: Id<"apps"> | undefined,
-  isRunLive: boolean
+  context: ToolProjectionContext
 ): ActivityItem {
+  const { agents, appTitles, isRunLive, labels, materialNames, runAppId } =
+    context
   const started = group.find((trace) => trace.type === "tool.started")
   const waiting = group.find((trace) => trace.type === "tool.waiting")
   const terminal = group.find((trace) => toolTerminalTypes.has(trace.type))
@@ -74,6 +89,7 @@ function projectToolGroup(
     agents,
     appTitles,
     input: readToolInput(startedData),
+    materialNames,
     result: readToolResult(terminalData),
     runAppId,
     tool: name,

@@ -3,14 +3,14 @@ import { getActorDisplayName } from "../../shared/actor"
 import { projectModelTraces } from "./model"
 import { readTraceError } from "./read"
 import { projectToolTraces } from "./tool"
-import { type ActivityItem, type ActivityStatus } from "./types"
+import {
+  type ActivityData,
+  type ActivityItem,
+  type ActivityStatus,
+} from "./types"
 
-export function projectTraceActivity(
-  traces: Doc<"traces">[],
-  run: Doc<"runs">,
-  agents: Doc<"runs">[],
-  apps: Doc<"apps">[]
-) {
+export function projectTraceActivity(data: ActivityData) {
+  const { run, traces } = data
   const isRunLive =
     isLiveRunStatus(run.status) &&
     !traces.some((trace) => isTerminalRunTrace(trace))
@@ -18,7 +18,7 @@ export function projectTraceActivity(
   return [
     ...projectRunTraces(traces, run),
     ...projectModelTraces(traces, isRunLive),
-    ...projectToolTraces(traces, agents, apps, run.appId, isRunLive),
+    ...projectToolTraces(data, isRunLive),
   ]
 }
 

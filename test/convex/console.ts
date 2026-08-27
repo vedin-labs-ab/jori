@@ -1,9 +1,26 @@
 import { type MessageCauseKind } from "../../convex/runs/schema"
 
+type ActivityData = import("../../convex/runs/activity/types").ActivityData
 type QueryCtx = import("../../convex/_generated/server").QueryCtx
 type RunSnapshot =
   import("../../convex/_generated/dataModel").Doc<"runs">["snapshot"]
 type RunSnapshotInput = Omit<RunSnapshot, "title">
+
+/** Activity projection input with every relation empty; callers add the
+ *  run and whatever the test exercises. */
+export function emptyActivityData(): Omit<ActivityData, "run"> {
+  return {
+    agents: [],
+    approvals: [],
+    apps: [],
+    files: [],
+    offers: [],
+    stores: [],
+    tables: [],
+    traces: [],
+    waiters: [],
+  }
+}
 
 export function automationDisplay(
   overrides: Partial<RunSnapshotInput> = {}
