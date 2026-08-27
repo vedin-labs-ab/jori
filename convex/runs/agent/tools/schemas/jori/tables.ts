@@ -1,3 +1,4 @@
+import { shareExpiry } from "../../../../../../contracts/shares/expiry"
 import {
   numberProperty,
   objectSchema,
@@ -116,6 +117,17 @@ export const tableToolInputSchemas = {
       tableId: tableIdProperty,
       rowId: rowIdProperty,
       expectedVersion: rowVersionProperty,
+    },
+  }),
+  share_table: objectSchema({
+    required: ["tableId"],
+    properties: {
+      tableId: tableIdProperty,
+      expiresInHours: numberProperty(
+        "How long the link stays valid, in hours. Defaults to 72. Match the content's shelf life.",
+        shareExpiry.minHours,
+        shareExpiry.maxHours
+      ),
     },
   }),
 }

@@ -5,7 +5,12 @@ import {
   type ExecutionPrincipal,
   executionPrincipalPersonId,
 } from "../runs/principal"
-import { type JoriToolRequest, readRecord } from "../shared/input"
+import {
+  type JoriToolRequest,
+  optionalNumber,
+  readRecord,
+  requiredString,
+} from "../shared/input"
 
 type SearchFilesArgs = {
   query?: string
@@ -17,7 +22,7 @@ type ReadFileArgs = {
   fileId: Id<"files">
 }
 
-const fileTools = new Set(["search_files", "read_file"])
+const fileTools = new Set(["search_files", "read_file", "share_file"])
 
 export function isJoriFileTool(tool: string) {
   return fileTools.has(tool)
@@ -48,6 +53,19 @@ export async function callJoriFileTool(
     return await ctx.runQuery(internal.files.data.read, {
       ...(args as ReadFileArgs),
       ...viewer,
+    })
+  }
+
+  if (request.tool === "share_file") {
+    if (viewer.personId === undefined) {
+      throw new Error("Sharing files requires an authenticated execution user.")
+    }
+
+    return await ctx.runMutation(internal.files.share.mint, {
+      organizationId: viewer.organizationId,
+      personId: viewer.personId,
+      fileId: requiredString(args.fileId, "fileId") as Id<"files">,
+      expiresInHours: optionalNumber(args.expiresInHours),
     })
   }
 

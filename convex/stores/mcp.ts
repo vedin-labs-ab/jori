@@ -9,6 +9,7 @@ import {
 import {
   boundedNumber,
   type JoriToolRequest,
+  optionalNumber,
   optionalString,
   readRecord,
   requiredString,
@@ -20,6 +21,7 @@ const storeTools = new Set([
   "create_store",
   "read_store",
   "write_store",
+  "share_store",
 ])
 
 export function isJoriStoreTool(tool: string) {
@@ -71,6 +73,13 @@ export async function callJoriStoreTool(
         storeId: requiredStoreId(args.storeId),
         expectedVersion: normalizeExpectedVersion(args.expectedVersion),
         write: normalizeStoreWriteInput(args),
+      })
+    case "share_store":
+      return await ctx.runMutation(internal.stores.share.mint, {
+        organizationId,
+        personId,
+        storeId: requiredStoreId(args.storeId),
+        expiresInHours: optionalNumber(args.expiresInHours),
       })
     default:
       throw new Error(`Unknown Jori store tool: ${request.tool}`)

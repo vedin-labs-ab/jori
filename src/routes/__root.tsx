@@ -32,8 +32,11 @@ const appDescription =
 const providerlessRouteIds = new Set([
   "/",
   "/apps/$appId/",
+  "/files/$fileId/",
   "/pricing",
   "/privacy",
+  "/stores/$storeId/",
+  "/tables/$tableId/",
   "/terms",
   "/trust",
 ])

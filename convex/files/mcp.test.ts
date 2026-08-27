@@ -9,6 +9,7 @@ const personId = "person-id" as Id<"persons">
 test("recognizes exactly the renamed file tools", () => {
   expect(isJoriFileTool("search_files")).toBe(true)
   expect(isJoriFileTool("read_file")).toBe(true)
+  expect(isJoriFileTool("share_file")).toBe(true)
   expect(isJoriFileTool("save_file")).toBe(false)
   expect(isJoriFileTool("search_assets")).toBe(false)
   expect(isJoriFileTool("read_asset")).toBe(false)
@@ -50,6 +51,36 @@ test("dispatches read_file without a person for organization runs", async () => 
     personId: undefined,
     fileId: "file-id",
   })
+})
+
+test("dispatches share_file to the share mint with the person", async () => {
+  const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))
+  const ctx = { runMutation } as unknown as ActionCtx
+
+  await callJoriFileTool(
+    ctx,
+    { organizationId: "organization", principal: { kind: "person", personId } },
+    { tool: "share_file", args: { fileId: "file-id", expiresInHours: 24 } }
+  )
+
+  expect(runMutation).toHaveBeenCalledWith(internal.files.share.mint, {
+    organizationId: "organization",
+    personId,
+    fileId: "file-id",
+    expiresInHours: 24,
+  })
+})
+
+test("refuses share_file without an execution person", async () => {
+  const ctx = { runMutation: vi.fn() } as unknown as ActionCtx
+
+  await expect(
+    callJoriFileTool(
+      ctx,
+      { organizationId: "organization", principal: { kind: "organization" } },
+      { tool: "share_file", args: { fileId: "file-id" } }
+    )
+  ).rejects.toThrow("authenticated execution user")
 })
 
 test("rejects unknown file tools", async () => {

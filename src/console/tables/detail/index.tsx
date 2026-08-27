@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
-import { Pencil, Plus } from "lucide-react"
-import { useState } from "react"
+import { Link2, Pencil, Plus } from "lucide-react"
+import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { api } from "../../../../convex/_generated/api"
@@ -15,6 +15,7 @@ import {
 import { ConsoleListPager } from "../../shared/list/pager"
 import { ConsoleListSkeleton } from "../../shared/list/skeleton"
 import { MaterialActions } from "../../shared/materials/actions"
+import { useMemberUrl } from "../../shared/materials/fragment"
 import { MaterialScopeBadge } from "../../shared/materials/scope"
 import { EditTableDialog } from "../edit"
 import { tableDeleteDescription, useTableRemoval } from "../manage"
@@ -22,23 +23,37 @@ import { type TableDetail } from "../types"
 import { AddRowDialog } from "./add"
 import { RowGrid } from "./grid"
 import { useRowPages, useRowWrites } from "./rows"
+import { TableLinksDialog } from "./share"
 
-/** Member view of one table. The later share fork wraps exactly this
- *  component, so it owns everything inside the console chrome. */
-export function TableView({ tableId }: { tableId: Id<"tables"> }) {
+/** Member view of one table. The share fork wraps exactly this component,
+ *  so it owns everything inside the console chrome. A visitor holding a
+ *  share secret who cannot see the table falls back to the share view. */
+export function TableView({
+  fallback,
+  tableId,
+}: {
+  fallback?: ReactNode
+  tableId: Id<"tables">
+}) {
   return (
     <ConsolePage>
       {(organizationId) => (
-        <TableViewContent organizationId={organizationId} tableId={tableId} />
+        <TableViewContent
+          fallback={fallback}
+          organizationId={organizationId}
+          tableId={tableId}
+        />
       )}
     </ConsolePage>
   )
 }
 
 function TableViewContent({
+  fallback,
   organizationId,
   tableId,
 }: {
+  fallback: ReactNode | undefined
   organizationId: string
   tableId: Id<"tables">
 }) {
@@ -54,25 +69,30 @@ function TableViewContent({
 
   if (result.status === "unauthorized") {
     return (
-      <ConsolePageLayout>
-        <Alert variant="destructive">
-          <AlertTitle>Could not load table</AlertTitle>
-          <AlertDescription>{result.message}</AlertDescription>
-        </Alert>
-      </ConsolePageLayout>
+      fallback ?? (
+        <ConsolePageLayout>
+          <Alert variant="destructive">
+            <AlertTitle>Could not load table</AlertTitle>
+            <AlertDescription>{result.message}</AlertDescription>
+          </Alert>
+        </ConsolePageLayout>
+      )
     )
   }
 
   if (result.status === "not_found" || result.table === null) {
     return (
-      <ConsolePageLayout>
-        <Alert>
-          <AlertTitle>Table not found</AlertTitle>
-          <AlertDescription>
-            The table may have been deleted or belongs to another organization.
-          </AlertDescription>
-        </Alert>
-      </ConsolePageLayout>
+      fallback ?? (
+        <ConsolePageLayout>
+          <Alert>
+            <AlertTitle>Table not found</AlertTitle>
+            <AlertDescription>
+              The table may have been deleted or belongs to another
+              organization.
+            </AlertDescription>
+          </Alert>
+        </ConsolePageLayout>
+      )
     )
   }
 
@@ -86,12 +106,15 @@ function TableReadyView({
   organizationId: string
   table: TableDetail
 }) {
+  useMemberUrl()
+
   const navigate = useNavigate()
   const pages = useRowPages(organizationId, table.tableId)
   const writes = useRowWrites(organizationId, table.tableId)
   const removal = useTableRemoval(organizationId)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isShareOpen, setIsShareOpen] = useState(false)
   const isArchived = table.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
@@ -109,6 +132,7 @@ function TableReadyView({
         onDelete={removeAndLeaveWhenDeleted}
         onEdit={() => setIsEditOpen(true)}
         onAdd={() => setIsAddOpen(true)}
+        onShare={() => setIsShareOpen(true)}
         removal={removal}
         table={table}
       />
@@ -134,6 +158,12 @@ function TableReadyView({
         organizationId={organizationId}
         table={isEditOpen ? table : undefined}
       />
+      <TableLinksDialog
+        onOpenChange={setIsShareOpen}
+        open={isShareOpen}
+        organizationId={organizationId}
+        tableId={table.tableId}
+      />
     </ConsolePageLayout>
   )
 }
@@ -143,6 +173,7 @@ function TableHeaderActions({
   onAdd,
   onDelete,
   onEdit,
+  onShare,
   removal,
   table,
 }: {
@@ -150,11 +181,19 @@ function TableHeaderActions({
   onAdd: () => void
   onDelete: () => void
   onEdit: () => void
+  onShare: () => void
   removal: ReturnType<typeof useTableRemoval>
   table: TableDetail
 }) {
   return (
     <ConsoleHeaderActions>
+      <ConsoleHeaderButton
+        icon={<Link2 />}
+        label="Share"
+        onClick={onShare}
+        type="button"
+        variant="outline"
+      />
       <ConsoleHeaderButton
         icon={<Pencil />}
         label="Edit table"

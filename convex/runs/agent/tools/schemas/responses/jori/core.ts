@@ -191,6 +191,13 @@ export const coreJoriToolResponseSchemas = {
     description: "The file summary; null when not found.",
     properties: fileSummaryProperties(),
   },
+  share_file: objectSchema({
+    required: ["url", "expiresAt"],
+    properties: {
+      url: stringProperty("View-only share link."),
+      expiresAt: numberProperty("Expiry time in epoch milliseconds."),
+    },
+  }),
   web_search: webToolResult(),
   web_fetch: webToolResult(),
 } satisfies SchemaMap

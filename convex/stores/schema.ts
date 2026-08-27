@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { shareFields } from "../materials/shares"
 import { scopeValidator } from "../shared/audience"
 
 /** A store: one named JSON document with a schema fixed at creation. The
@@ -26,6 +27,15 @@ export const storeValues = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 }).index("by_store", ["storeId"])
+
+/** Each share is an independent read-only grant with its own secret and
+ *  expiry; a store can have several live at once. */
+export const storeShares = defineTable({
+  ...shareFields,
+  storeId: v.id("stores"),
+})
+  .index("by_store_and_expires_at", ["storeId", "expiresAt"])
+  .index("by_store_and_secret", ["storeId", "secret"])
 
 /** How a store value changes; mirrors contracts/stores/write.ts StoreWrite. */
 export const storeWrite = v.union(

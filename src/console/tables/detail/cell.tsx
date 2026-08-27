@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { displayCellText } from "@/shared/materials/cells"
 import { type TableColumn, type TableRow } from "../types"
-import { displayCellText, formatCellText, parseCellText } from "./cells"
+import { formatCellText, parseCellText } from "./cells"
 
 export type CommitCell = (
   row: TableRow,
