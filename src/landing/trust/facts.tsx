@@ -69,7 +69,7 @@ export function BoundariesSection() {
           permission, or change the task. Only you can.
         </Definition>
         <Definition icon={Link2} term="Share links are view-only and mortal">
-          App links carry their secret in the URL fragment, so it stays out of
+          Page links carry their secret in the URL fragment, so it stays out of
           server logs. They expire on a clock you choose, and you can revoke
           them anytime.
         </Definition>

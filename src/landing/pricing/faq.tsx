@@ -24,9 +24,9 @@ export function Faq() {
           goes silent halfway through answering you.
         </Definition>
         <Definition term="How is usage billed?">
-          In dollars, at the model provider's public list rates. Keeping an app
-          current costs cents a day; building one, or a deep research run, can
-          cost a few dollars. Every run shows its exact cost in its receipt.
+          In dollars, at the model provider's public list rates. Keeping a page
+          current costs cents a day; a deep research run can cost a few dollars.
+          Every run shows its exact cost in its receipt.
         </Definition>
         <Definition term="Is there a free trial?">
           Yes. {trial.days} days with {formatUsd(trial.grantMicros)} of usage

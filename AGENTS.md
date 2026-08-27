@@ -21,7 +21,7 @@
 
 Jori runs in two environments, `dev` and `prod`. Every resource is named for
 the environment that owns it, and every environment-targeting command is
-suffixed with it. See [README.md](README.md) for the command surface.
+suffixed with it.
 
 - Worktrees never deploy. Concurrent tasks share one development deployment,
   so a push from a worktree silently replaces whatever another task just

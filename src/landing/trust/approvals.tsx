@@ -89,7 +89,7 @@ export function ReceiptsSection() {
               duration: "2s",
               icon: LayoutGrid,
               source: "Release readiness",
-              step: "Updated the app",
+              step: "Updated the page",
               surface: "jori",
             },
             {

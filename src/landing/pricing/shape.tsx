@@ -14,7 +14,7 @@ const principles = [
   {
     icon: Users,
     title: "No seats to count",
-    body: "One price for the organization. Everyone joins, including the people who only ever open an app someone else handed over.",
+    body: "One price for the organization. Everyone joins, including the people who only ever open a page someone else handed over.",
   },
   {
     icon: Receipt,

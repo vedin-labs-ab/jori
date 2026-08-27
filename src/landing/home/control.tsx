@@ -15,22 +15,7 @@ export function Control() {
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div>
-          <dl className="space-y-8">
-            <Definition term="Permission modes">
-              Every action Jori can take has a mode: allowed, ask first, or
-              blocked. Posting, commenting, changing: you decide which need your
-              sign-off.
-            </Definition>
-            <Definition term="Ask-first approvals">
-              Set a tool to ask first and Jori requests before acting, with a
-              code you can approve right from the thread. Denied requests never
-              run.
-            </Definition>
-            <Definition term="Receipts for every run">
-              Every run records what Jori read, what it did, and what it asked.
-              Open any run in the console and check.
-            </Definition>
-          </dl>
+          <ControlTerms />
           <Link
             className="mt-7 inline-flex items-center gap-1.5 py-1 font-medium text-primary text-sm hover:underline"
             to="/trust"
@@ -58,5 +43,30 @@ export function Control() {
         </div>
       </div>
     </Section>
+  )
+}
+
+/** Four terms, not three: the stop button and the per-run bill are what close
+ *  the owner accountable for letting AI touch company systems. */
+function ControlTerms() {
+  return (
+    <dl className="space-y-8">
+      <Definition term="Permission modes">
+        Every action Jori can take has a mode: allowed, ask first, or blocked.
+        Scoped per team, per person, and per job.
+      </Definition>
+      <Definition term="Ask-first approvals">
+        Set a tool to ask first and Jori requests before acting, with a code you
+        can approve right from the thread. Denied requests never run.
+      </Definition>
+      <Definition term="Receipts, with the bill">
+        Every run records what Jori read, what it did, and what it cost. Open
+        any run in the console and check.
+      </Definition>
+      <Definition term="Stop means stop">
+        Any run can be stopped at any moment, from anywhere you can see it
+        running.
+      </Definition>
+    </dl>
   )
 }
