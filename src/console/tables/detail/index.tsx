@@ -1,11 +1,11 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
+import { type GenericId } from "convex/values"
 import { Link2, Pencil, Plus } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { api } from "../../../../convex/_generated/api"
-import { type Id } from "../../../../convex/_generated/dataModel"
 import { ConsolePage } from "../../page"
 import {
   ConsoleHeaderActions,
@@ -33,7 +33,7 @@ export function TableView({
   tableId,
 }: {
   fallback?: ReactNode
-  tableId: Id<"tables">
+  tableId: GenericId<"tables">
 }) {
   return (
     <ConsolePage>
@@ -55,7 +55,7 @@ function TableViewContent({
 }: {
   fallback: ReactNode | undefined
   organizationId: string
-  tableId: Id<"tables">
+  tableId: GenericId<"tables">
 }) {
   const result = useQuery(api.tables.console.get, { organizationId, tableId })
 

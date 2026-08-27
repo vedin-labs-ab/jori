@@ -1,4 +1,5 @@
 import { useMutation } from "convex/react"
+import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -21,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../convex/_generated/api"
-import { type Id } from "../../../convex/_generated/dataModel"
 import { showErrorToast } from "../shared/error"
 
 type FileScope = "organization" | "personal"
@@ -178,7 +178,7 @@ async function uploadToStorage(uploadUrl: string, file: File) {
   }
 
   const { storageId } = (await response.json()) as {
-    storageId: Id<"_storage">
+    storageId: GenericId<"_storage">
   }
 
   return storageId

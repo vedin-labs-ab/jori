@@ -38,6 +38,7 @@ const skippedDirectories = [
   ".agents",
   ".claude",
   ".git",
+  ".output",
   ".trigger",
   ".tanstack",
   "dist",

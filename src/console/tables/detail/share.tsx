@@ -1,6 +1,6 @@
 import { useMutation, usePaginatedQuery } from "convex/react"
+import { type GenericId } from "convex/values"
 import { api } from "../../../../convex/_generated/api"
-import { type Id } from "../../../../convex/_generated/dataModel"
 import { sharePageSize } from "../../shared/materials/history"
 import { MaterialLinksDialog } from "../../shared/materials/links"
 
@@ -13,7 +13,7 @@ export function TableLinksDialog({
   onOpenChange: (open: boolean) => void
   open: boolean
   organizationId: string
-  tableId: Id<"tables">
+  tableId: GenericId<"tables">
 }) {
   const shares = usePaginatedQuery(
     api.tables.share.page,

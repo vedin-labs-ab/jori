@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react"
+import { type GenericId } from "convex/values"
 import { Download, Link2 } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -6,7 +7,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { FilePreview } from "@/shared/materials/file"
 import { api } from "../../../convex/_generated/api"
-import { type Id } from "../../../convex/_generated/dataModel"
 import { ConsolePage } from "../page"
 import {
   ConsoleHeaderActions,
@@ -31,7 +31,7 @@ export function FileView({
   fileId,
 }: {
   fallback?: ReactNode
-  fileId: Id<"files">
+  fileId: GenericId<"files">
 }) {
   return (
     <ConsolePage>
@@ -52,7 +52,7 @@ function FileViewContent({
   organizationId,
 }: {
   fallback: ReactNode | undefined
-  fileId: Id<"files">
+  fileId: GenericId<"files">
   organizationId: string
 }) {
   const result = useQuery(api.files.console.get, { organizationId, fileId })
