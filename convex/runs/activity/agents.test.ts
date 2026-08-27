@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { emptyActivityData } from "../../../test/convex/console"
 import { type Doc, type Id, type TableNames } from "../../_generated/dataModel"
 import { projectActivity } from "./project"
 import { type ActivityData } from "./types"
@@ -93,17 +94,7 @@ function waitTool() {
 }
 
 function data(overrides: Partial<ActivityData>): ActivityData {
-  return {
-    agents: [],
-    approvals: [],
-    apps: [],
-    files: [],
-    offers: [],
-    run: run({}),
-    traces: [],
-    waiters: [],
-    ...overrides,
-  }
+  return { ...emptyActivityData(), run: run({}), ...overrides }
 }
 
 function trace(

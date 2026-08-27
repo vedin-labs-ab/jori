@@ -68,6 +68,8 @@ export type ActivityData = {
   agents: Doc<"runs">[]
   offers: Doc<"integrationOffers">[]
   run: Doc<"runs">
+  stores: Doc<"stores">[]
+  tables: Doc<"tables">[]
   traces: Doc<"traces">[]
   waiters: Doc<"waiters">[]
 }

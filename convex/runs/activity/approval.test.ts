@@ -1,11 +1,12 @@
 import { expect, test } from "vitest"
+import { emptyActivityData } from "../../../test/convex/console"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { projectRelationActivity } from "./relations"
 import { type ActivityData } from "./types"
 
 test("projects approvals with surface action metadata", () => {
   const items = projectRelationActivity({
-    agents: [],
+    ...emptyActivityData(),
     approvals: [
       {
         _creationTime: 1000,
@@ -23,12 +24,7 @@ test("projects approvals with surface action metadata", () => {
         tool: "notion_create_page",
       } as Doc<"approvals">,
     ],
-    apps: [],
-    files: [],
-    offers: [],
     run: {} as Doc<"runs">,
-    traces: [],
-    waiters: [],
   } satisfies ActivityData)
 
   expect(items).toContainEqual(

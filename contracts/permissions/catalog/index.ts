@@ -4,6 +4,7 @@ import { githubToolPermissionRows } from "./github"
 import { googleToolPermissionRows } from "./google"
 import { joriToolPermissionRows } from "./jori"
 import { linearToolPermissionRows } from "./linear"
+import { materialToolPermissionRows } from "./materials"
 import { microsoftToolPermissionRows } from "./microsoft"
 import { nativeToolPermissionRows } from "./native"
 import { notionToolPermissionRows } from "./notion"
@@ -12,6 +13,7 @@ import { slackToolPermissionRows } from "./slack"
 export const toolPermissionRows = [
   ...nativeToolPermissionRows,
   ...joriToolPermissionRows,
+  ...materialToolPermissionRows,
   ...webToolPermissionRows,
   ...slackToolPermissionRows,
   ...linearToolPermissionRows,
