@@ -11,6 +11,7 @@ import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsolePageLayout,
+  ConsoleScrollableGrid,
 } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { ConsoleListSkeleton } from "../../shared/list/skeleton"
@@ -137,15 +138,19 @@ function TableReadyView({
         table={table}
       />
       <TableHeading isArchived={isArchived} table={table} />
-      <RowGrid
-        columns={table.columns}
-        disabled={isArchived}
-        isLoading={pages.isLoading}
-        onCommit={writes.updateCell}
-        onDeleteRow={(row) => void writes.deleteRow(row)}
-        pendingRowId={writes.pendingRowId}
-        rows={pages.rows}
-      />
+      {/* The rows scroll in place so the pager stays pinned below them,
+          matching the paginated console list pages. */}
+      <ConsoleScrollableGrid>
+        <RowGrid
+          columns={table.columns}
+          disabled={isArchived}
+          isLoading={pages.isLoading}
+          onCommit={writes.updateCell}
+          onDeleteRow={(row) => void writes.deleteRow(row)}
+          pendingRowId={writes.pendingRowId}
+          rows={pages.rows}
+        />
+      </ConsoleScrollableGrid>
       <ConsoleListPager pagination={pages} />
       <AddRowDialog
         columns={table.columns}

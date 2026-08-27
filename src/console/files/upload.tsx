@@ -1,3 +1,4 @@
+import { type Scope } from "@contracts/permissions/scope"
 import { useMutation } from "convex/react"
 import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
@@ -14,17 +15,9 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
-
-type FileScope = "organization" | "personal"
+import { MaterialScopeField } from "../shared/materials/scope"
 
 export function UploadFileDialog({
   isOpen,
@@ -91,23 +84,12 @@ function UploadFields({ upload }: { upload: FileUpload }) {
           value={upload.description}
         />
       </div>
-      <div className="grid gap-2">
-        <Label htmlFor="file-upload-scope">Visibility</Label>
-        <Select
-          onValueChange={(scope) => upload.setScope(scope as FileScope)}
-          value={upload.scope}
-        >
-          <SelectTrigger className="w-full" id="file-upload-scope">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="organization">
-              Everyone in the organization
-            </SelectItem>
-            <SelectItem value="personal">Only me</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <MaterialScopeField
+        id="file-upload-scope"
+        noun="file"
+        onScopeChange={upload.setScope}
+        scope={upload.scope}
+      />
     </div>
   )
 }
@@ -119,7 +101,7 @@ function useFileUpload(organizationId: string, onUploaded: () => void) {
   const createFile = useMutation(api.files.console.create)
   const [file, setFile] = useState<File | null>(null)
   const [description, setDescription] = useState("")
-  const [scope, setScope] = useState<FileScope>("organization")
+  const [scope, setScope] = useState<Scope>("organization")
   const [isUploading, setIsUploading] = useState(false)
 
   async function submit() {

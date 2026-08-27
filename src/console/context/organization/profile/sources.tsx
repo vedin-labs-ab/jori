@@ -1,7 +1,6 @@
-import { FileText, Globe2 } from "lucide-react"
+import { FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ConsoleEmptyState } from "../../../shared/list/empty"
 import { Paged } from "../../../shared/paging"
 import { ContextSectionTitle } from "../../section"
 import { sourceLabel, type WebsiteItem, websiteItems } from "../discovery/url"
@@ -14,7 +13,9 @@ const visibleSourceCount = 3
 /**
  * One row for every domain that defines the organization: discovered website
  * domains as links, user-added ones as removable "Added" chips, and an
- * inline add control in the header.
+ * inline add control in the header. Secondary domains only qualify a main
+ * website, so before one exists — it is added through the profile card's
+ * Add flow — the section renders nothing at all.
  */
 export function WebsitesSection({
   declared,
@@ -27,6 +28,10 @@ export function WebsitesSection({
   primaryWebsite: string | undefined
   organizationId: string
 }) {
+  if (primaryWebsite === undefined) {
+    return null
+  }
+
   const websites = websiteItems(domains, primaryWebsite)
   const count = websites.length + declared.length
 
@@ -34,35 +39,26 @@ export function WebsitesSection({
     <section className="grid gap-2.5">
       <ContextSectionTitle
         action={<AddDomainControl organizationId={organizationId} />}
-        count={count === 0 ? undefined : count}
+        count={count}
       >
         Websites
       </ContextSectionTitle>
-      {count === 0 ? (
-        <ConsoleEmptyState
-          className="min-h-32"
-          description="Add one to give Jori clearer organization context."
-          icon={Globe2}
-          title="No websites yet"
-        />
-      ) : (
-        <div className="flex flex-wrap gap-1.5">
-          {websites.map((website) => (
-            <WebsiteChip
-              badge={website.main ? "Main" : undefined}
-              key={website.key}
-              website={website}
-            />
-          ))}
-          {declared.map((domain) => (
-            <DeclaredDomainChip
-              domain={domain}
-              key={domain}
-              organizationId={organizationId}
-            />
-          ))}
-        </div>
-      )}
+      <div className="flex flex-wrap gap-1.5">
+        {websites.map((website) => (
+          <WebsiteChip
+            badge={website.main ? "Main" : undefined}
+            key={website.key}
+            website={website}
+          />
+        ))}
+        {declared.map((domain) => (
+          <DeclaredDomainChip
+            domain={domain}
+            key={domain}
+            organizationId={organizationId}
+          />
+        ))}
+      </div>
     </section>
   )
 }
