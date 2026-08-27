@@ -13,8 +13,8 @@ import {
 import { IntegrationProvider } from "./providers"
 import { type IntegrationTab, integrationTabs } from "./routes"
 
-// Integration cards hold permission rows, so the track floor is wider than
-// the playbook grid's: one column on small screens, two on laptops, three or
+// Integration cards hold permission rows, so the track floor is wide: one
+// column on small screens, two on laptops, three or
 // more only on wide monitors. Cards top-align at their natural height so an
 // expanded permissions list doesn't stretch its row neighbors.
 const integrationGrid =

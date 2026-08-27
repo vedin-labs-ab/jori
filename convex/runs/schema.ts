@@ -121,8 +121,6 @@ export const runs = defineTable({
   error: v.optional(v.string()),
   /** Outcome returned via finish_run; parents read it from wait_for_agents. */
   result: v.optional(v.string()),
-  /** One-time playbook trial: the run does a representative slice only. */
-  trial: v.optional(v.literal(true)),
   createdBy: v.optional(v.id("persons")),
   createdAt: v.number(),
   endedAt: v.optional(v.number()),

@@ -1,7 +1,6 @@
 import { type Scope } from "../../../contracts/permissions/scope"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { type PlaybookBinding } from "../../playbooks/schema"
 import { executionPrincipalForScope } from "../../runs/principal"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import { automationKeyPartition, findAutomationByKey } from "../keys"
@@ -19,7 +18,6 @@ import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
 type UpdateAutomationArgs = {
   organizationId: string
   automationId: Id<"automations">
-  playbook?: PlaybookBinding
   name?: string
   instructions?: string
   scope?: Scope
@@ -105,10 +103,6 @@ async function buildAutomationPatch(
       args.instructions,
       "instructions"
     )
-  }
-
-  if (args.playbook !== undefined) {
-    patch.playbook = args.playbook
   }
 
   await applyPrincipalPatch(ctx, args, existing, principal, patch)

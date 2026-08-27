@@ -65,7 +65,6 @@ type AutomationDefinition = Pick<
   | "name"
   | "parentId"
   | "parentConfigurationVersion"
-  | "playbook"
   | "principal"
   | "scope"
   | "trigger"
@@ -87,7 +86,6 @@ function definitionKey(definition: AutomationDefinition) {
     name: definition.name,
     parentId: definition.parentId ?? null,
     parentConfigurationVersion: definition.parentConfigurationVersion ?? null,
-    playbook: definition.playbook ?? null,
     principal: definition.principal,
     scope: definition.scope,
     trigger: triggerKey(definition.trigger),

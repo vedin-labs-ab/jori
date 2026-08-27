@@ -1,7 +1,6 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { eventMatch } from "../events/schema"
-import { playbookBindingValidator } from "../playbooks/schema"
 import { executionPrincipalValidator } from "../runs/principal"
 import { scopeValidator } from "../shared/audience"
 import { accessValidator, integrationValidator } from "../shared/integrations"
@@ -20,7 +19,6 @@ export const access = accessValidator
 
 export const automationBinding = {
   key: v.optional(v.string()),
-  playbook: v.optional(playbookBindingValidator),
 }
 
 export const triggerInput = v.union(

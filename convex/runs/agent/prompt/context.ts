@@ -116,7 +116,6 @@ function createTriggerPart(input: AgentRuntimeInput) {
         {
           run: {
             delegated: input.run.parentId !== undefined,
-            trial: input.run.trial === true,
           },
         }
       ),

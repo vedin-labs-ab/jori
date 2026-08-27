@@ -41,8 +41,6 @@ export function createAutomationArgs(
   options: AutomationArgsOptions = {}
 ): ArgsResult<
   AutomationArgs & {
-    key?: AutomationFormValues["key"]
-    playbook?: AutomationFormValues["playbook"]
     type: AutomationFormValues["type"]
     trigger: TriggerSpec
   }
@@ -63,8 +61,6 @@ export function createAutomationArgs(
     args: {
       ...base.args,
       ...trigger,
-      ...(values.key === undefined ? {} : { key: values.key }),
-      ...(values.playbook === undefined ? {} : { playbook: values.playbook }),
     },
   }
 }

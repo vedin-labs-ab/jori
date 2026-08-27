@@ -37,29 +37,6 @@ describe("trigger modes", () => {
     expect(context).toContain("return your outcome in its `result`")
     expect(context).not.toContain("Manual instructions triggered this run.")
   })
-
-  test("tells a trial run to do one representative slice", () => {
-    const base = automationRuntimeInput()
-    const input = {
-      type: "instruction" as const,
-      run: { ...base.run, trial: true },
-      app: null,
-      integrations: base.integrations,
-      instructions: "Prepare my meetings.",
-      organization: null,
-      requester: null,
-      timezone: null,
-      workstreams: null,
-    }
-    const context = assemblePrompt(
-      input as unknown as Parameters<typeof assemblePrompt>[0]
-    ).context
-
-    expect(context).toContain("one-time trial of the instructions below")
-    expect(context).toContain("one representative slice")
-    expect(context).toContain("create no automations and no child agents")
-    expect(context).not.toContain("Manual instructions triggered this run.")
-  })
 })
 
 describe("automation operating contract", () => {

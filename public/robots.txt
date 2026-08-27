@@ -11,7 +11,6 @@ Disallow: /console
 Disallow: /context
 Disallow: /files
 Disallow: /integrations
-Disallow: /playbooks
 Disallow: /runs
 Disallow: /sign-in
 Disallow: /sign-out

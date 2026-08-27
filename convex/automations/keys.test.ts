@@ -16,7 +16,7 @@ test("normalizes keys and scopes their uniqueness", () => {
   expect(automationKeyPartition({ kind: "organization" })).toBe("organization")
 })
 
-test("bounded playbook keys fit with long provider identifiers", () => {
+test("bounded keys fit with long provider identifiers", () => {
   const entityKey = `dg:${"a".repeat(32)}`
   const key = `digest:${"p".repeat(64)}:event:${entityKey}:2030-01-01T08:00:00.000Z`
 

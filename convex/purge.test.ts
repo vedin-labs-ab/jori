@@ -55,10 +55,11 @@ test("stays on a legacy table while a full batch remains", async () => {
   expect((await database.query("apps").collect()).length).toBe(1)
 })
 
-test("strips stray appId fields and leaves other documents alone", async () => {
+test("strips stray legacy fields and leaves other documents alone", async () => {
   const { ctx, database } = databaseContext()
   const strayId = await database.insert("automations", {
     appId: "apps:legacy",
+    playbook: { key: "preread", version: 1 },
     name: "Stray",
   })
   const cleanId = await database.insert("automations", { name: "Clean" })
@@ -68,6 +69,19 @@ test("strips stray appId fields and leaves other documents alone", async () => {
   expect(await database.get(strayId)).toEqual({ _id: strayId, name: "Stray" })
   expect(await database.get(cleanId)).toEqual({ _id: cleanId, name: "Clean" })
   expect(next).toEqual({ phase: legacyTables.length + 1, cursor: null })
+})
+
+test("strips stray trial flags from runs", async () => {
+  const { ctx, database } = databaseContext()
+  const strayId = await database.insert("runs", { trial: true, status: "done" })
+
+  const next = await stripBatch(ctx, legacyTables.length + 1, null)
+
+  expect(await database.get(strayId)).toEqual({
+    _id: strayId,
+    status: "done",
+  })
+  expect(next).toEqual({ phase: legacyTables.length + 2, cursor: null })
 })
 
 test("finishes after the last strip phase", async () => {

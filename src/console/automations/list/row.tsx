@@ -46,11 +46,6 @@ export function AutomationRow({
                   {automation.name}
                 </h3>
                 <ScopeBadge scope={automation.scope} />
-                {automation.playbook === undefined ? null : (
-                  <Badge className="shrink-0" variant="outline">
-                    Playbook
-                  </Badge>
-                )}
                 {shouldShowCompletedBadge(automation) ? (
                   <Badge className="shrink-0" variant="outline">
                     Completed

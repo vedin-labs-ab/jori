@@ -40,8 +40,6 @@ export type RepeatMode = (typeof repeatOptions)[number]["value"]
 type AutomationTriggerType = "cron" | "once" | "event"
 
 export type AutomationFormValues = {
-  key?: Automation["key"]
-  playbook?: Automation["playbook"]
   name: string
   instructions: string
   type: AutomationTriggerType

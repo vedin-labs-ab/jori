@@ -14,7 +14,6 @@ export async function toAutomationDisplay(
   return {
     id: automation._id,
     key: automation.key,
-    playbook: automation.playbook,
     name: automation.name,
     instructions: automation.instructions,
     scope: automationScope(automation),

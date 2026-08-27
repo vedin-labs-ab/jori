@@ -78,8 +78,6 @@ export const get = query({
   },
 })
 
-// Playbook-bound creates go through playbooks/actions.create, which also
-// provisions the playbook's app; this creates plain automations only.
 export const create = mutation({
   args: {
     organizationId: v.string(),
