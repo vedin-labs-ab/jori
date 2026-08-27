@@ -24,6 +24,8 @@ import {
 } from "../runs/principal"
 import { type JoriToolRequest, readRecord } from "../shared/input"
 import { callJoriSkillTool, isJoriSkillTool } from "../skills/mcp"
+import { callJoriStoreTool, isJoriStoreTool } from "../stores/mcp"
+import { callJoriTableTool, isJoriTableTool } from "../tables/mcp"
 import { callWorkstreamTool, isWorkstreamTool } from "../workstreams/mcp"
 import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
@@ -49,6 +51,14 @@ export async function callJoriTool(
 
   if (isJoriAppTool(request.tool)) {
     return await callJoriAppTool(ctx, toJoriContext(run), request)
+  }
+
+  if (isJoriTableTool(request.tool)) {
+    return await callJoriTableTool(ctx, toJoriContext(run), request)
+  }
+
+  if (isJoriStoreTool(request.tool)) {
+    return await callJoriStoreTool(ctx, toJoriContext(run), request)
   }
 
   if (request.tool === "web_search" || request.tool === "web_fetch") {
