@@ -70,21 +70,11 @@ describe("automation payload", () => {
   })
 })
 
-const prereadBinding = {
-  key: "preread",
-  version: 1,
-  options: {},
-  providers: {},
-  destination: { kind: "email" as const },
-}
-
 test("creates automation args with access and source bindings", () => {
   expect(
     createAutomationArgs(
       {
         ...emptyAutomationForm,
-        key: "playbook:preread",
-        playbook: prereadBinding,
         name: "Weekly release summary",
         instructions: "Summarize @GitHub and post to @Slack.",
         surfaces: [
@@ -97,8 +87,6 @@ test("creates automation args with access and source bindings", () => {
   ).toEqual({
     args: {
       name: "Weekly release summary",
-      key: "playbook:preread",
-      playbook: prereadBinding,
       instructions: "Summarize @GitHub and post to @Slack.",
       scope: "personal",
       access: {

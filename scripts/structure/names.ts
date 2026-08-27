@@ -16,7 +16,6 @@ type NamingOptions = {
 const namingRoots = new Set([
   "contracts",
   "convex",
-  "playbooks",
   "prompts",
   "scripts",
   "src",

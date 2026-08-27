@@ -4,9 +4,10 @@ import { type Id } from "./_generated/dataModel"
 import { internalMutation, type MutationCtx } from "./_generated/server"
 
 /**
- * One-shot purge of legacy generated-apps data.
+ * One-shot purge of legacy data: the generated-apps concept and the
+ * playbooks concept, both removed from the product.
  *
- * Run once per environment after deploying the apps removal, then delete
+ * Run once per environment after deploying both removals, then delete
  * this module in a follow-up commit once both environments are purged:
  *
  *   node --experimental-strip-types scripts/env/index.ts --env dev \
@@ -15,13 +16,14 @@ import { internalMutation, type MutationCtx } from "./_generated/server"
  *     -- npx convex run purge:start
  *
  * Deploy ordering: Convex validates declared-table documents against the
- * schema at push time, so an automations or runs document still carrying an
- * `appId` field would reject the very deploy that ships this code. The
- * remediation for that is pre-deploy: clear the offending fields or
- * documents from the dashboard, deploy, then run this purge. The
- * appId-stripping pass below cannot help there — it only runs after a
- * successful deploy — so it is belt-and-braces for documents the old code
- * wrote between schema validation and deploy activation.
+ * schema at push time, so an automations document still carrying an `appId`
+ * or `playbook` field, or a runs document carrying `appId` or `trial`,
+ * would reject the very deploy that ships this code. The remediation for
+ * that is pre-deploy: clear the offending fields or documents from the
+ * dashboard, deploy, then run this purge. The field-stripping pass below
+ * cannot help there — it only runs after a successful deploy — so it is
+ * belt-and-braces for documents the old code wrote between schema
+ * validation and deploy activation.
  *
  * The legacy tables are no longer declared in the schema, so this module
  * reaches them through untyped db access; the casts stay contained here.
@@ -41,13 +43,17 @@ export const legacyTables = [
   "appState",
   "appCaches",
   "assets",
+  "playbookPreferences",
 ] as const
 
 /** Rows in these tables own a `_storage` blob that must die with them. */
 const storageTables = new Set<string>(["appBlobs", "appAssets", "assets"])
 
-/** Declared tables whose documents may still carry a stray appId field. */
-const stripTables = ["automations", "runs"] as const
+/** Declared tables whose documents may still carry stray legacy fields. */
+const stripTables = [
+  { table: "automations", fields: ["appId", "playbook"] },
+  { table: "runs", fields: ["appId", "trial"] },
+] as const
 
 const batchLimit = 100
 
@@ -95,25 +101,30 @@ export async function purgeLegacyBatch(
     : { phase: phase + 1, cursor: null }
 }
 
-/** Strips stray appId fields from one page of a declared table. */
+/** Strips stray legacy fields from one page of a declared table. */
 export async function stripBatch(
   ctx: MutationCtx,
   phase: number,
   cursor: string | null
 ): Promise<NextStep> {
-  const table = stripTables[phase - legacyTables.length]
+  const pass = stripTables[phase - legacyTables.length]
 
-  if (table === undefined) {
+  if (pass === undefined) {
     return null
   }
 
   const page = await ctx.db
-    .query(table)
+    .query(pass.table)
     .paginate({ numItems: batchLimit, cursor })
 
   for (const doc of page.page) {
-    if ("appId" in doc) {
-      await looseDb(ctx).patch(doc._id, { appId: undefined })
+    const stray = pass.fields.filter((field) => field in doc)
+
+    if (stray.length > 0) {
+      await looseDb(ctx).patch(
+        doc._id,
+        Object.fromEntries(stray.map((field) => [field, undefined]))
+      )
     }
   }
 

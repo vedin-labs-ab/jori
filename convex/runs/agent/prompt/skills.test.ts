@@ -62,15 +62,15 @@ describe("organization runtime skill prompts", () => {
       skills: runtimeSkills([
         runtimeSkill({
           organizationId: "organization",
-          name: "organization-playbook",
-          description: "Follow the organization operating playbook.",
-          body: "# Organization Playbook\n\nPrefer organization-specific guidance.",
+          name: "organization-handbook",
+          description: "Follow the organization operating handbook.",
+          body: "# Organization Handbook\n\nPrefer organization-specific guidance.",
         }),
       ]),
     }).instructions
 
     expect(prompt).toContain(
-      "`organization-playbook`: Follow the organization operating playbook."
+      "`organization-handbook`: Follow the organization operating handbook."
     )
   })
 })

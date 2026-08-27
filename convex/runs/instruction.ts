@@ -25,8 +25,6 @@ export async function createInstructionRun(
     parent?: Doc<"runs">
     createdBy?: Id<"persons">
     principal?: ExecutionPrincipal
-    /** One-time playbook trial: the run does a representative slice only. */
-    trial?: true
   }
 ) {
   const parent = args.parent
@@ -48,7 +46,6 @@ export async function createInstructionRun(
           rootId: parent.rootId ?? parent._id,
           ...inheritedAutomationExecution(parent),
         }),
-    ...(args.trial === true ? { trial: true } : {}),
     cause: { type: "manual", personId: args.createdBy },
     principal:
       args.principal ??

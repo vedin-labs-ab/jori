@@ -39,7 +39,7 @@ export function PlanPicker({ organizationId }: { organizationId: string }) {
           <DialogTitle>Choose a plan</DialogTitle>
           <DialogDescription>
             One price for the whole organization. Every plan includes every
-            integration and playbook; usage is billed at provider list rates.
+            integration; usage is billed at provider list rates.
           </DialogDescription>
         </DialogHeader>
         <Tabs

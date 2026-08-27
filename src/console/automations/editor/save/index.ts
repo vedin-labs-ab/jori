@@ -29,8 +29,6 @@ export function automationFormValues(
   }
 
   return {
-    key: automation.key,
-    playbook: automation.playbook,
     name: automation.name,
     instructions: automation.instructions,
     ...triggerFormValues(automation),

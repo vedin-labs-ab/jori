@@ -1,9 +1,4 @@
-import {
-  type ReactAction,
-  type ReactMutation,
-  useAction,
-  useMutation,
-} from "convex/react"
+import { type ReactMutation, useMutation } from "convex/react"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
@@ -22,7 +17,6 @@ const loadAutomationArgs = () => import("./save/args")
 
 type AutomationPersistence = {
   create: ReactMutation<typeof api.automations.console.create>
-  createFromPlaybook: ReactAction<typeof api.playbooks.actions.create>
   formAutomation: Automation | undefined
   formValues: AutomationFormValues
   permissions?: AutomationPolicyPermissions
@@ -46,7 +40,6 @@ export function useAutomationEditor(
 function useAutomationSavers() {
   return {
     create: useMutation(api.automations.console.create),
-    createFromPlaybook: useAction(api.playbooks.actions.create),
     update: useMutation(api.automations.console.update),
   }
 }
@@ -69,17 +62,6 @@ function useAutomationForm(
     onSaved.current = undefined
     setFormAutomation(automation)
     setFormValues(automationFormValues(automation))
-    setFormError(undefined)
-    setIsFormOpen(true)
-  }
-
-  // Prefilled create form (e.g. a playbook opened in the raw builder): no
-  // backing automation, so saving creates a fresh one. `onCreated` fires
-  // after that save, letting the opener close its own surface too.
-  function openDraftForm(values: AutomationFormValues, onCreated?: () => void) {
-    onSaved.current = onCreated
-    setFormAutomation(undefined)
-    setFormValues(values)
     setFormError(undefined)
     setIsFormOpen(true)
   }
@@ -112,7 +94,6 @@ function useAutomationForm(
     isFormOpen,
     isSaving,
     openCreateForm: () => openForm(undefined),
-    openDraftForm,
     openEditForm: openForm,
     saveAutomation,
     setFormValues: createFormUpdater(setFormValues, setFormError),
@@ -146,7 +127,6 @@ function reportSaveError(
 
 async function persistAutomation({
   create,
-  createFromPlaybook,
   formAutomation,
   formValues,
   permissions,
@@ -163,20 +143,7 @@ async function persistAutomation({
       throw new Error(result.error)
     }
 
-    // A playbook draft creates through the playbook action; plain drafts
-    // stay a mutation.
-    const { key, playbook, ...plain } = result.args
-
-    if (playbook !== undefined) {
-      await createFromPlaybook({
-        organizationId,
-        playbook,
-        ...(key === undefined ? {} : { key }),
-        ...plain,
-      })
-    } else {
-      await create({ organizationId, ...plain })
-    }
+    await create({ organizationId, ...result.args })
     return
   }
 

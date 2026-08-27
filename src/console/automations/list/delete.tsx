@@ -31,9 +31,6 @@ export function DeleteAutomationDialog({
           <AlertDialogDescription>
             This permanently deletes the automation and cancels its upcoming
             runs. Past runs are kept.
-            {automation.playbook === undefined
-              ? ""
-              : " It also switches the playbook off."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

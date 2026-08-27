@@ -15,7 +15,6 @@ import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as ContextRouteImport } from './routes/context'
 import { Route as FilesRouteImport } from './routes/files'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as PlaybooksRouteImport } from './routes/playbooks'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RunsRouteImport } from './routes/runs'
@@ -68,11 +67,6 @@ const FilesRoute = FilesRouteImport.update({
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlaybooksRoute = PlaybooksRouteImport.update({
-  id: '/playbooks',
-  path: '/playbooks',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -198,7 +192,6 @@ export interface FileRoutesByFullPath {
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
-  '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -227,7 +220,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -258,7 +250,6 @@ export interface FileRoutesById {
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
-  '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -292,7 +283,6 @@ export interface FileRouteTypes {
     | '/context'
     | '/files'
     | '/integrations'
-    | '/playbooks'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -321,7 +311,6 @@ export interface FileRouteTypes {
     | '/'
     | '/automations'
     | '/console'
-    | '/playbooks'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -351,7 +340,6 @@ export interface FileRouteTypes {
     | '/context'
     | '/files'
     | '/integrations'
-    | '/playbooks'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -384,7 +372,6 @@ export interface RootRouteChildren {
   ContextRoute: typeof ContextRouteWithChildren
   FilesRoute: typeof FilesRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRouteWithChildren
-  PlaybooksRoute: typeof PlaybooksRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RunsRoute: typeof RunsRoute
@@ -440,13 +427,6 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/playbooks': {
-      id: '/playbooks'
-      path: '/playbooks'
-      fullPath: '/playbooks'
-      preLoaderRoute: typeof PlaybooksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -689,7 +669,6 @@ const rootRouteChildren: RootRouteChildren = {
   ContextRoute: ContextRouteWithChildren,
   FilesRoute: FilesRouteWithChildren,
   IntegrationsRoute: IntegrationsRouteWithChildren,
-  PlaybooksRoute: PlaybooksRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RunsRoute: RunsRoute,

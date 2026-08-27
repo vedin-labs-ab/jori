@@ -66,7 +66,7 @@ test("buckets entries into lanes by current membership", () => {
     { observedAt: daysAgo(0), effort: "Cards", workstreamId: "ws1" },
     { observedAt: daysAgo(0, 23), effort: "Drive", workstreamId: "ws1" },
     { observedAt: daysAgo(4), effort: "Places", workstreamId: "ws2" },
-    { observedAt: daysAgo(0), effort: "Playbooks", workstreamId: null },
+    { observedAt: daysAgo(0), effort: "Roadmap", workstreamId: null },
   ]
   const pulse = buildPulse(entries, workstreams, now)
 
@@ -78,7 +78,7 @@ test("buckets entries into lanes by current membership", () => {
   expect(pulse.lanes[0]?.cells.at(-1)?.count).toBe(2)
   expect(pulse.lanes[0]?.cells.at(-1)?.efforts).toEqual(["Cards", "Drive"])
   expect(pulse.lanes[1]?.cells.at(-5)?.count).toBe(1)
-  expect(pulse.lanes[2]?.cells.at(-1)?.efforts).toEqual(["Playbooks"])
+  expect(pulse.lanes[2]?.cells.at(-1)?.efforts).toEqual(["Roadmap"])
 })
 
 test("drops quiet lanes and out-of-window entries", () => {

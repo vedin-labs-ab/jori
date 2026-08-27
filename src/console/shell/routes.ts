@@ -7,14 +7,12 @@ import {
   LayoutDashboard,
   Library,
   ListChecks,
-  NotebookTabs,
   Table2,
 } from "lucide-react"
 
 export const consoleNavigation = [
   { icon: LayoutDashboard, label: "Overview", to: "/console" },
   { icon: ListChecks, label: "Runs", to: "/runs" },
-  { icon: NotebookTabs, label: "Playbooks", to: "/playbooks" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },
   { icon: Table2, label: "Tables", to: "/tables" },
   { icon: Database, label: "Stores", to: "/stores" },

@@ -4,7 +4,6 @@ import {
 } from "../../../contracts/permissions/scope"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { type PlaybookBinding } from "../../playbooks/schema"
 import { executionPrincipalForScope } from "../../runs/principal"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import {
@@ -24,7 +23,6 @@ type CreateAutomationArgs = {
   organizationId: string
   parentId?: Id<"automations">
   expectedParentConfigurationVersion?: number
-  playbook?: PlaybookBinding
   key?: string
   name: string
   instructions: string
@@ -95,7 +93,6 @@ async function prepareAutomation(
     parentId: ownership?.parentId,
     parentConfigurationVersion: ownership?.configurationVersion,
     configurationVersion: 1,
-    playbook: args.playbook,
     key,
     ...(key === undefined
       ? {}
