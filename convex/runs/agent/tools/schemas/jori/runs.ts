@@ -13,7 +13,7 @@ const activityFilterEnum = [
   "tool",
   "model",
   "approval",
-  "asset",
+  "file",
   "agent",
   "error",
 ]

@@ -1,5 +1,8 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { type AssetContext, readRunAssets } from "../../../assets/read"
+import {
+  type AttachmentContext,
+  readAttachments,
+} from "../../../files/attachments"
 import { googleJson } from "../../../integrations/google/api"
 import {
   optionalString,
@@ -30,7 +33,7 @@ export async function callGmailTool(
   token: string,
   tool: string,
   args: Record<string, unknown>,
-  context?: AssetContext
+  context?: AttachmentContext
 ) {
   if (tool === "google_gmail_search_threads") {
     return await searchGmailThreads(token, args)
@@ -99,7 +102,7 @@ async function replyToGmailThread(
 async function sendGmailMessage(
   token: string,
   args: Record<string, unknown>,
-  context?: AssetContext
+  context?: AttachmentContext
 ) {
   return gmailSentResult(
     await googleJson(
@@ -110,7 +113,7 @@ async function sendGmailMessage(
         body: {
           raw: createMimeMessage({
             ...gmailMessageInput(args),
-            attachments: await readRunAssets(context, args.assets),
+            attachments: await readAttachments(context, args.files),
           }),
         },
       }
@@ -122,7 +125,7 @@ async function createGmailDraft(
   integration: Doc<"integrations">,
   token: string,
   args: Record<string, unknown>,
-  context?: AssetContext
+  context?: AttachmentContext
 ) {
   const threadId = optionalString(args.threadId)
 
@@ -146,7 +149,7 @@ async function createGmailDraft(
           message: {
             raw: createMimeMessage({
               ...gmailMessageInput(args),
-              attachments: await readRunAssets(context, args.assets),
+              attachments: await readAttachments(context, args.files),
             }),
           },
         },
@@ -160,7 +163,7 @@ async function createGmailThreadDraft(
   token: string,
   threadId: string,
   args: Record<string, unknown>,
-  context?: AssetContext
+  context?: AttachmentContext
 ) {
   const reply = await readGmailReplyContext(integration, token, threadId)
 
@@ -179,7 +182,7 @@ async function createGmailThreadDraft(
               bodyType: args.bodyType === "HTML" ? "HTML" : "Text",
               inReplyTo: reply.inReplyTo,
               references: reply.references,
-              attachments: await readRunAssets(context, args.assets),
+              attachments: await readAttachments(context, args.files),
             }),
             threadId,
           },

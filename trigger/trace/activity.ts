@@ -60,7 +60,7 @@ type ToolResultEvent = {
   type:
     | "agent.started"
     | "approval.requested"
-    | "asset.saved"
+    | "file.saved"
     | "offer.requested"
 }
 
@@ -81,7 +81,7 @@ function toolResultEvent(
     approvalEvent(result) ??
     offerEvent(result) ??
     agentEvent(toolName, result) ??
-    assetEvent(result)
+    fileEvent(result)
   )
 }
 
@@ -134,19 +134,19 @@ function agentEvent(
   }
 }
 
-function assetEvent(
+function fileEvent(
   result: Record<string, unknown>
 ): ToolResultEvent | undefined {
-  const assetId = readString(result.assetId)
+  const fileId = readString(result.fileId)
 
-  if (assetId === undefined) {
+  if (fileId === undefined) {
     return undefined
   }
 
   return {
-    data: { asset: assetId as RuntimeId<"assets"> },
-    keyId: assetId,
-    type: "asset.saved",
+    data: { file: fileId as RuntimeId<"files"> },
+    keyId: fileId,
+    type: "file.saved",
   }
 }
 

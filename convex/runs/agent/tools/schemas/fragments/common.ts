@@ -104,17 +104,17 @@ export function objectProperty(description: string) {
   }
 }
 
-export function runAssetsProperty() {
+export function filesProperty() {
   return {
     type: "array",
     description:
-      "Run assets to send. Create them with save_asset or find existing assets with search_assets, then pass asset IDs here.",
+      "Saved files to send. Create them with save_file or find existing files with search_files, then pass file IDs here.",
     items: objectSchema({
-      required: ["assetId"],
+      required: ["fileId"],
       properties: {
-        assetId: stringProperty("Asset ID returned by save_asset."),
-        name: stringProperty("Optional asset filename override."),
-        mimeType: stringProperty("Optional asset content type override."),
+        fileId: stringProperty("File ID returned by save_file."),
+        name: stringProperty("Optional filename override."),
+        mimeType: stringProperty("Optional content type override."),
       },
     }),
   }

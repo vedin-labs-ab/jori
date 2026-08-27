@@ -89,20 +89,20 @@ function surfaceTools(
 }
 
 test("approval-wrapped runtime tool schemas preserve optional field guidance", () => {
-  const permission = getToolPermission("read_asset")
+  const permission = getToolPermission("read_file")
 
   if (permission === undefined) {
-    throw new Error("Missing read_asset permission.")
+    throw new Error("Missing read_file permission.")
   }
 
   const descriptor = toolDescriptor(
     "jori",
     permission,
-    resolveToolModes([{ mode: "prompted", tool: "read_asset" }])
+    resolveToolModes([{ mode: "prompted", tool: "read_file" }])
   )
 
   expect(descriptor.inputSchema).toMatchObject({
     description: expect.stringContaining(optionalFieldGuidance),
-    required: ["assetId", "approval"],
+    required: ["fileId", "approval"],
   })
 })

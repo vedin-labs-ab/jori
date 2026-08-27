@@ -6,9 +6,9 @@ test("stores all surface tool capabilities for run details", () => {
   const joriTools = [
     {
       access: "write" as const,
-      description: "Persist a generated asset.",
-      label: "Save asset",
-      tool: "save_asset",
+      description: "Persist a generated file.",
+      label: "Save file",
+      tool: "save_file",
     },
   ]
 
@@ -58,11 +58,11 @@ test("stores all native Jori tools in one group", () => {
     label: "Send reply",
     tool: "send_reply",
   }
-  const saveAssetTool = {
+  const saveFileTool = {
     access: "write" as const,
-    description: "Persist a generated asset.",
-    label: "Save asset",
-    tool: "save_asset",
+    description: "Persist a generated file.",
+    label: "Save file",
+    tool: "save_file",
   }
   const gitTool = {
     access: "read" as const,
@@ -78,7 +78,7 @@ test("stores all native Jori tools in one group", () => {
         {
           surface: "jori",
           label: "Jori",
-          tools: [saveAssetTool],
+          tools: [saveFileTool],
         },
         {
           surface: "slack",
@@ -95,7 +95,7 @@ test("stores all native Jori tools in one group", () => {
       {
         surface: "jori",
         label: "Jori",
-        tools: [finishRunTool, sendReplyTool, saveAssetTool, gitTool],
+        tools: [finishRunTool, sendReplyTool, saveFileTool, gitTool],
       },
       {
         surface: "slack",

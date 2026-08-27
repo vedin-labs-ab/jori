@@ -12,9 +12,9 @@ import { errorDetails } from "../trace/events"
 import { recordToolEvent, toolTraceDetails } from "../trace/tool"
 import { executeAgentTool } from "./agent"
 import { prepareJoriToolInput } from "./apps"
-import { saveSandboxAsset } from "./assets"
+import { saveSandboxFile } from "./files"
 import { prepareProviderToolInput } from "./github"
-import { generateImageAsset } from "./images"
+import { generateImageFile } from "./images"
 import {
   materializeSandboxResult,
   toolErrorResult,
@@ -216,12 +216,12 @@ async function callConvexTool(
   tool: string,
   input: JsonObject
 ) {
-  if (surface === "jori" && tool === "save_asset") {
-    return await saveSandboxAsset(runtime, input)
+  if (surface === "jori" && tool === "save_file") {
+    return await saveSandboxFile(runtime, input)
   }
 
   if (surface === "jori" && tool === "generate_image") {
-    return await generateImageAsset(runtime, input)
+    return await generateImageFile(runtime, input)
   }
 
   const result = await runtime.platform.callTool({

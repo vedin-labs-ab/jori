@@ -1,6 +1,9 @@
 import { isRecord } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
-import { type AssetContext, readRunAssets } from "../../../assets/read"
+import {
+  type AttachmentContext,
+  readAttachments,
+} from "../../../files/attachments"
 import { slackQueryApi } from "../../../integrations/slack/api"
 import { requireSlackCredentials } from "../../../integrations/slack/credentials"
 import {
@@ -25,7 +28,7 @@ export async function callSlackTool(
   integration: Doc<"integrations">,
   tool: string,
   args: Record<string, unknown>,
-  context?: AssetContext
+  context?: AttachmentContext
 ) {
   const credentials = requireSlackCredentials(integration)
 
@@ -123,9 +126,9 @@ async function searchSlackUsers(token: string, args: Record<string, unknown>) {
 async function postSlackMessageTool(
   integration: Doc<"integrations">,
   args: Record<string, unknown>,
-  context?: AssetContext
+  context?: AttachmentContext
 ) {
-  const assets = await readRunAssets(context, args.assets, {
+  const files = await readAttachments(context, args.files, {
     maxBytes: 25 * 1024 * 1024,
   })
   const channel = requiredString(args.channel, "channel")
@@ -134,7 +137,7 @@ async function postSlackMessageTool(
   const blocks = optionalBlocks(args.blocks)
 
   return await postSlackMessage(integration, {
-    assets,
+    files,
     blocks,
     channel,
     text,

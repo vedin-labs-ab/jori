@@ -46,7 +46,7 @@ export const slackToolPermissionRows = [
     "conversations_add_message",
     "Send message",
     "Post a message to Slack.",
-    "Post a message to a Slack channel, DM, or thread, optionally attaching saved run assets. Reply in-thread via thread_ts when continuing a conversation; confirm the destination before sending.",
+    "Post a message to a Slack channel, DM, or thread, optionally attaching saved files. Reply in-thread via thread_ts when continuing a conversation; confirm the destination before sending.",
     "write",
     "required",
   ],

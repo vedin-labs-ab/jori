@@ -64,7 +64,7 @@ const text = v.union(v.string(), v.null())
 const preparedData = v.object({ tools: toolSnapshot })
 const offerData = v.object({ offer: v.id("integrationOffers") })
 const approvalData = v.object({ approval: v.id("approvals") })
-const assetData = v.object({ asset: v.id("assets") })
+const fileData = v.object({ file: v.id("files") })
 const agentData = v.object({ child: v.id("runs") })
 const waiterData = v.object({ waiter: v.id("waiters") })
 const errorData = v.object({ error: v.string() })
@@ -102,10 +102,10 @@ const approvalResolved = v.object({
   type: v.literal("approval.resolved"),
   data: approvalData,
 })
-const assetSaved = v.object({
+const fileSaved = v.object({
   ...timeline,
-  type: v.literal("asset.saved"),
-  data: assetData,
+  type: v.literal("file.saved"),
+  data: fileData,
 })
 const agentStarted = v.object({
   ...timeline,
@@ -187,7 +187,7 @@ export const traceType = v.union(
   v.literal("offer.resolved"),
   v.literal("approval.requested"),
   v.literal("approval.resolved"),
-  v.literal("asset.saved"),
+  v.literal("file.saved"),
   v.literal("agent.started")
 )
 
@@ -195,7 +195,7 @@ export const traceData = v.union(
   preparedData,
   offerData,
   approvalData,
-  assetData,
+  fileData,
   agentData,
   waiterData,
   errorData,
@@ -227,7 +227,7 @@ export const traces = defineTable(
     offerResolved,
     approvalRequested,
     approvalResolved,
-    assetSaved,
+    fileSaved,
     agentStarted
   )
 )

@@ -43,11 +43,11 @@ http.route({
 })
 
 http.route({
-  path: "/jori/assets",
+  path: "/jori/files",
   method: "POST",
   handler: lazyHttpAction(
-    () => import("./broker/assets"),
-    (module) => module.handleAssetUploadRequest
+    () => import("./broker/files"),
+    (module) => module.handleFileUploadRequest
   ),
 })
 

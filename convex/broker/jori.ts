@@ -5,8 +5,8 @@ import {
   isCancelApprovalTool,
 } from "../approvals/cancel"
 import { callJoriAppTool, isJoriAppTool } from "../apps/mcp"
-import { callJoriAssetTool, isJoriAssetTool } from "../assets/mcp"
 import { callJoriAutomationTool } from "../automations/mcp"
+import { callJoriFileTool, isJoriFileTool } from "../files/mcp"
 import {
   callIntegrationOfferTool,
   cancelIntegrationOffer,
@@ -43,8 +43,8 @@ export async function callJoriTool(
 
   const run = isBrokerContext(context) ? context.run : context
 
-  if (isJoriAssetTool(request.tool)) {
-    return await callJoriAssetTool(ctx, run, request)
+  if (isJoriFileTool(request.tool)) {
+    return await callJoriFileTool(ctx, run, request)
   }
 
   if (isJoriAppTool(request.tool)) {

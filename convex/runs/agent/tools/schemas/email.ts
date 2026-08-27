@@ -1,6 +1,6 @@
 import {
+  filesProperty,
   objectSchema,
-  runAssetsProperty,
   stringArrayProperty,
   stringProperty,
 } from "./fragments/common"
@@ -11,7 +11,7 @@ export function emailMessageSchema(properties: Record<string, unknown> = {}) {
   return objectSchema({
     required: ["to", "subject", "body"],
     properties: {
-      assets: runAssetsProperty(),
+      files: filesProperty(),
       bcc: stringArrayProperty("BCC recipient email addresses."),
       body: stringProperty("Message body."),
       bodyType: {

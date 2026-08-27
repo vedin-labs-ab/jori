@@ -19,7 +19,7 @@ export type ActivityStatus =
 export type ActivityKind =
   | "agent"
   | "approval"
-  | "asset"
+  | "file"
   | "model"
   | "offer"
   | "run"
@@ -64,7 +64,7 @@ export type ActivityItem = {
 export type ActivityData = {
   approvals: Doc<"approvals">[]
   apps: Doc<"apps">[]
-  assets: Doc<"assets">[]
+  files: Doc<"files">[]
   agents: Doc<"runs">[]
   offers: Doc<"integrationOffers">[]
   run: Doc<"runs">

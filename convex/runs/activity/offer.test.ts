@@ -8,7 +8,7 @@ test("projects integration offers with integration metadata", () => {
     agents: [],
     approvals: [],
     apps: [],
-    assets: [],
+    files: [],
     offers: [
       {
         _creationTime: 1000,

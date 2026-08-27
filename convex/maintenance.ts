@@ -10,7 +10,7 @@ const tableRegistry: Record<TableName, true> = {
   allowlist: true,
   waitlist: true,
   persons: true,
-  assets: true,
+  files: true,
   billingAccounts: true,
   billingEntries: true,
   identities: true,

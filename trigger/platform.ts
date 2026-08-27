@@ -14,8 +14,8 @@ import {
   type WaiterCondition,
 } from "../contracts/runtime/worker"
 
-export type UploadedAsset = {
-  assetId: RuntimeId<"assets">
+export type UploadedFile = {
+  fileId: RuntimeId<"files">
   mimeType: string
   name: string
   size: number
@@ -124,13 +124,13 @@ export type RuntimePlatform = {
     target?: string
     text: string
   }): Promise<unknown>
-  uploadAsset(args: {
+  uploadFile(args: {
     bytes: Uint8Array
     description?: string
     mimeType: string
     name: string
     runId: RuntimeId<"runs">
-  }): Promise<UploadedAsset>
+  }): Promise<UploadedFile>
   upsertSandbox(args: {
     externalId: string
     runId: RuntimeId<"runs">

@@ -54,7 +54,7 @@ export const googleToolPermissionRows = [
     "google_gmail_send_message",
     "Send email",
     "Send a new email from your Gmail account.",
-    "Send a new Gmail email, optionally attaching saved run assets. Use for a fresh message; reply to the thread when continuing a conversation, or create a draft when the requester should review it first.",
+    "Send a new Gmail email, optionally attaching saved files. Use for a fresh message; reply to the thread when continuing a conversation, or create a draft when the requester should review it first.",
     "write",
   ],
   [

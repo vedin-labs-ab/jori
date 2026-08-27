@@ -166,7 +166,7 @@ function data(overrides: Partial<ActivityData>): ActivityData {
     agents: [],
     approvals: [],
     apps: [],
-    assets: [],
+    files: [],
     offers: [],
     run: run({}),
     traces: [],

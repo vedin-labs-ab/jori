@@ -1,11 +1,12 @@
 import { vi } from "vitest"
 
-export function createAssetContext() {
+export function createFileContext() {
   return {
     run: {
       _id: "run-id",
       _creationTime: 0,
       organizationId: "organization",
+      principal: { kind: "organization" },
       promptId: "prompt-id",
       status: "running",
       createdAt: 0,
@@ -18,9 +19,10 @@ export function createAssetContext() {
         threadTs: "123.456",
       })),
       runQuery: vi.fn(async () => ({
-        _id: "asset-id",
+        _id: "file-id",
         _creationTime: 0,
         organizationId: "organization",
+        scope: "organization",
         runId: "run-id",
         storageId: "storage-id",
         name: "kitten.png",
@@ -28,6 +30,7 @@ export function createAssetContext() {
         size: 5,
         description: "A small generated image.",
         createdAt: 0,
+        updatedAt: 0,
       })),
       storage: {
         get: vi.fn(

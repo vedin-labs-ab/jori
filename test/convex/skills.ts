@@ -25,7 +25,7 @@ export function runtimeSkills(
     }),
     runtimeSkill({
       name: "image-generation",
-      description: "Generate Jori image assets.",
+      description: "Generate Jori image files.",
       body: "# Image Generation\n\nCall `generate_image` for images.",
     }),
     runtimeSkill({
