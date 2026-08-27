@@ -1,6 +1,5 @@
 import { Files } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -11,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ConsoleEmptyState } from "../shared/list/empty"
+import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { FileMenu } from "./menu"
 import { type FileRow, formatFileSize } from "./types"
@@ -29,7 +29,7 @@ export function FileTable({
   pendingFileId: FileRow["fileId"] | undefined
 }) {
   if (isLoading) {
-    return <FileTableSkeleton />
+    return <ConsoleListSkeleton />
   }
 
   if (files.length === 0) {
@@ -133,17 +133,5 @@ function FileTableRow({
         />
       </TableCell>
     </TableRow>
-  )
-}
-
-const skeletonRows = ["one", "two", "three", "four", "five", "six"]
-
-function FileTableSkeleton() {
-  return (
-    <div className="grid gap-2">
-      {skeletonRows.map((row) => (
-        <Skeleton className="h-10 w-full" key={row} />
-      ))}
-    </div>
   )
 }

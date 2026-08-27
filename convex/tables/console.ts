@@ -133,6 +133,60 @@ export const update = mutation({
   },
 })
 
+export const insertRow = mutation({
+  args: {
+    organizationId: v.string(),
+    tableId: v.id("tables"),
+    values: v.any(),
+  },
+  handler: async (ctx, args): Promise<unknown> => {
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.tables.rows.insert, {
+      ...args,
+      personId,
+    })
+  },
+})
+
+export const updateRow = mutation({
+  args: {
+    organizationId: v.string(),
+    tableId: v.id("tables"),
+    rowId: v.id("tableRows"),
+    values: v.any(),
+    expectedVersion: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<unknown> => {
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.tables.rows.update, {
+      ...args,
+      personId,
+    })
+  },
+})
+
+export const removeRow = mutation({
+  args: {
+    organizationId: v.string(),
+    tableId: v.id("tables"),
+    rowId: v.id("tableRows"),
+    expectedVersion: v.optional(v.number()),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Promise<{ rowId: Id<"tableRows">; deleted: true }> => {
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.tables.rows.remove, {
+      ...args,
+      personId,
+    })
+  },
+})
+
 export const remove = mutation({
   args: {
     organizationId: v.string(),

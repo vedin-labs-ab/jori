@@ -62,6 +62,19 @@ export function JsonDialog({
   )
 }
 
+/** Scrollable folding-JSON pane for detail frames and document views. */
+export function JsonBlock({ value }: { value: unknown }) {
+  return (
+    <pre
+      className={`max-h-96 min-w-0 overflow-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
+    >
+      <code className="block whitespace-pre-wrap break-words">
+        <JsonView value={value} />
+      </code>
+    </pre>
+  )
+}
+
 /** JSON rendered as a collapsible structure: every bracket that opens a
  *  non-empty object or array folds its region, DevTools-style. Emits the
  *  exact `JSON.stringify(value, null, 2)` layout with `hljs-*` token

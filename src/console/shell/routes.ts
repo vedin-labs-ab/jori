@@ -2,12 +2,14 @@ import {
   Cable,
   CalendarClock,
   Component,
+  Database,
   Files,
   Layers,
   LayoutDashboard,
   Library,
   ListChecks,
   NotebookTabs,
+  Table2,
 } from "lucide-react"
 
 export const consoleNavigation = [
@@ -15,6 +17,8 @@ export const consoleNavigation = [
   { icon: ListChecks, label: "Runs", to: "/runs" },
   { icon: NotebookTabs, label: "Playbooks", to: "/playbooks" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },
+  { icon: Table2, label: "Tables", to: "/tables" },
+  { icon: Database, label: "Stores", to: "/stores" },
   { icon: Files, label: "Files", to: "/files" },
   { icon: Component, label: "Apps", to: "/apps" },
   { icon: Cable, label: "Integrations", to: "/integrations" },
