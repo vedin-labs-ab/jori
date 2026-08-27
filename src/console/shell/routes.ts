@@ -4,14 +4,12 @@ import {
   Database,
   Files,
   Layers,
-  LayoutDashboard,
   Library,
   ListChecks,
   Table2,
 } from "lucide-react"
 
 export const consoleNavigation = [
-  { icon: LayoutDashboard, label: "Overview", to: "/console" },
   { icon: ListChecks, label: "Runs", to: "/runs" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },
   { icon: Table2, label: "Tables", to: "/tables" },

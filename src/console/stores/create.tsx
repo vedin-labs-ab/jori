@@ -62,6 +62,7 @@ export function CreateStoreDialog({
           />
           <MaterialScopeField
             id="store-create-scope"
+            noun="store"
             onScopeChange={form.setScope}
             scope={form.scope}
           />
