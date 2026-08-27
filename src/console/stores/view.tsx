@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
+import { type GenericId } from "convex/values"
 import { ChevronsUpDown, Link2, Pencil } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -11,7 +12,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { api } from "../../../convex/_generated/api"
-import { type Id } from "../../../convex/_generated/dataModel"
 import { ConsolePage } from "../page"
 import { JsonBlock } from "../shared/code"
 import { CopyButton } from "../shared/copy"
@@ -40,7 +40,7 @@ export function StoreView({
   storeId,
 }: {
   fallback?: ReactNode
-  storeId: Id<"stores">
+  storeId: GenericId<"stores">
 }) {
   return (
     <ConsolePage>
@@ -62,7 +62,7 @@ function StoreViewContent({
 }: {
   fallback: ReactNode | undefined
   organizationId: string
-  storeId: Id<"stores">
+  storeId: GenericId<"stores">
 }) {
   const result = useQuery(api.stores.console.get, { organizationId, storeId })
 

@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "convex/react"
+import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
-import { type Id } from "../../../../convex/_generated/dataModel"
 import { showErrorToast } from "../../shared/error"
 import {
   conflictMessage,
@@ -13,7 +13,10 @@ import { rowPageSize, type TableRow } from "../types"
 /** Cursor-stack pagination over pageRows: each visited page keeps its
  *  cursor so Previous re-reads the same window, and the reactive query
  *  keeps the visible page fresh. */
-export function useRowPages(organizationId: string, tableId: Id<"tables">) {
+export function useRowPages(
+  organizationId: string,
+  tableId: GenericId<"tables">
+) {
   const [cursors, setCursors] = useState<(string | null)[]>([null])
   const [pageIndex, setPageIndex] = useState(0)
   const page = useQuery(api.tables.console.pageRows, {
@@ -67,7 +70,10 @@ export function rowFooterLabel(
 
 /** Row writes with the optimistic-version handshake: a stale write toasts
  *  and the already-refreshed grid shows what won. */
-export function useRowWrites(organizationId: string, tableId: Id<"tables">) {
+export function useRowWrites(
+  organizationId: string,
+  tableId: GenericId<"tables">
+) {
   const insert = useMutation(api.tables.console.insertRow)
   const update = useMutation(api.tables.console.updateRow)
   const remove = useMutation(api.tables.console.removeRow)
