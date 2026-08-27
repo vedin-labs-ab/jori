@@ -92,6 +92,28 @@ describe("store tool dispatch", () => {
   })
 })
 
+describe("store share dispatch", () => {
+  test("share_store routes through the broker to the share mint", async () => {
+    const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))
+
+    await callJoriTool(
+      { runMutation } as unknown as ActionCtx,
+      {
+        organizationId: "organization",
+        principal: { kind: "person", personId: "person" as Id<"persons"> },
+      },
+      { tool: "share_store", args: { storeId: "store", expiresInHours: 24 } }
+    )
+
+    expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+      organizationId: "organization",
+      personId: "person",
+      storeId: "store",
+      expiresInHours: 24,
+    })
+  })
+})
+
 describe("normalizeStoreWriteInput", () => {
   test("maps value, patch, and claim to their write types", () => {
     expect(normalizeStoreWriteInput({ value: { a: 1 } })).toEqual({

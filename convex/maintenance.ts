@@ -55,8 +55,11 @@ const tableRegistry: Record<TableName, true> = {
   appCaches: true,
   tables: true,
   tableRows: true,
+  tableShares: true,
   stores: true,
   storeValues: true,
+  storeShares: true,
+  fileShares: true,
 }
 
 const tables = Object.keys(tableRegistry) as TableName[]

@@ -31,15 +31,17 @@ import { Route as AppsIndexRouteImport } from './routes/apps/index'
 import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
+import { Route as FilesIndexRouteImport } from './routes/files/index'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
 import { Route as StoresIndexRouteImport } from './routes/stores/index'
-import { Route as StoresStoreIdRouteImport } from './routes/stores/$storeId'
 import { Route as TablesIndexRouteImport } from './routes/tables/index'
-import { Route as TablesTableIdRouteImport } from './routes/tables/$tableId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppsAppIdIndexRouteImport } from './routes/apps/$appId/index'
+import { Route as FilesFileIdIndexRouteImport } from './routes/files/$fileId/index'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
+import { Route as StoresStoreIdIndexRouteImport } from './routes/stores/$storeId/index'
+import { Route as TablesTableIdIndexRouteImport } from './routes/tables/$tableId/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -151,6 +153,11 @@ const ContextWorkstreamsRoute = ContextWorkstreamsRouteImport.update({
   path: '/workstreams',
   getParentRoute: () => ContextRoute,
 } as any)
+const FilesIndexRoute = FilesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FilesRoute,
+} as any)
 const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -166,19 +173,9 @@ const StoresIndexRoute = StoresIndexRouteImport.update({
   path: '/',
   getParentRoute: () => StoresRoute,
 } as any)
-const StoresStoreIdRoute = StoresStoreIdRouteImport.update({
-  id: '/$storeId',
-  path: '/$storeId',
-  getParentRoute: () => StoresRoute,
-} as any)
 const TablesIndexRoute = TablesIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => TablesRoute,
-} as any)
-const TablesTableIdRoute = TablesTableIdRouteImport.update({
-  id: '/$tableId',
-  path: '/$tableId',
   getParentRoute: () => TablesRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -191,10 +188,25 @@ const AppsAppIdIndexRoute = AppsAppIdIndexRouteImport.update({
   path: '/$appId/',
   getParentRoute: () => AppsRoute,
 } as any)
+const FilesFileIdIndexRoute = FilesFileIdIndexRouteImport.update({
+  id: '/$fileId/',
+  path: '/$fileId/',
+  getParentRoute: () => FilesRoute,
+} as any)
 const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
   id: '/offers/$token',
   path: '/offers/$token',
   getParentRoute: () => IntegrationsRoute,
+} as any)
+const StoresStoreIdIndexRoute = StoresStoreIdIndexRouteImport.update({
+  id: '/$storeId/',
+  path: '/$storeId/',
+  getParentRoute: () => StoresRoute,
+} as any)
+const TablesTableIdIndexRoute = TablesTableIdIndexRouteImport.update({
+  id: '/$tableId/',
+  path: '/$tableId/',
+  getParentRoute: () => TablesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -203,7 +215,7 @@ export interface FileRoutesByFullPath {
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
-  '/files': typeof FilesRoute
+  '/files': typeof FilesRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
@@ -219,22 +231,23 @@ export interface FileRoutesByFullPath {
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/stores/$storeId': typeof StoresStoreIdRoute
-  '/tables/$tableId': typeof TablesTableIdRoute
   '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
+  '/files/': typeof FilesIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/apps/$appId/': typeof AppsAppIdIndexRoute
+  '/files/$fileId/': typeof FilesFileIdIndexRoute
+  '/stores/$storeId/': typeof StoresStoreIdIndexRoute
+  '/tables/$tableId/': typeof TablesTableIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/files': typeof FilesRoute
   '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -247,16 +260,18 @@ export interface FileRoutesByTo {
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/stores/$storeId': typeof StoresStoreIdRoute
-  '/tables/$tableId': typeof TablesTableIdRoute
   '/apps': typeof AppsIndexRoute
   '/context': typeof ContextIndexRoute
+  '/files': typeof FilesIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/stores': typeof StoresIndexRoute
   '/tables': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/apps/$appId': typeof AppsAppIdIndexRoute
+  '/files/$fileId': typeof FilesFileIdIndexRoute
+  '/stores/$storeId': typeof StoresStoreIdIndexRoute
+  '/tables/$tableId': typeof TablesTableIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -265,7 +280,7 @@ export interface FileRoutesById {
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
-  '/files': typeof FilesRoute
+  '/files': typeof FilesRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
   '/playbooks': typeof PlaybooksRoute
   '/pricing': typeof PricingRoute
@@ -281,16 +296,18 @@ export interface FileRoutesById {
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/stores/$storeId': typeof StoresStoreIdRoute
-  '/tables/$tableId': typeof TablesTableIdRoute
   '/apps/': typeof AppsIndexRoute
   '/context/': typeof ContextIndexRoute
+  '/files/': typeof FilesIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/apps/$appId/': typeof AppsAppIdIndexRoute
+  '/files/$fileId/': typeof FilesFileIdIndexRoute
+  '/stores/$storeId/': typeof StoresStoreIdIndexRoute
+  '/tables/$tableId/': typeof TablesTableIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -316,22 +333,23 @@ export interface FileRouteTypes {
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
-    | '/stores/$storeId'
-    | '/tables/$tableId'
     | '/apps/'
     | '/context/'
+    | '/files/'
     | '/integrations/'
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/apps/$appId/'
+    | '/files/$fileId/'
+    | '/stores/$storeId/'
+    | '/tables/$tableId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/automations'
     | '/console'
-    | '/files'
     | '/playbooks'
     | '/pricing'
     | '/privacy'
@@ -344,16 +362,18 @@ export interface FileRouteTypes {
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
-    | '/stores/$storeId'
-    | '/tables/$tableId'
     | '/apps'
     | '/context'
+    | '/files'
     | '/integrations'
     | '/stores'
     | '/tables'
     | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/apps/$appId'
+    | '/files/$fileId'
+    | '/stores/$storeId'
+    | '/tables/$tableId'
   id:
     | '__root__'
     | '/'
@@ -377,16 +397,18 @@ export interface FileRouteTypes {
     | '/context/places'
     | '/context/workstreams'
     | '/integrations/personal'
-    | '/stores/$storeId'
-    | '/tables/$tableId'
     | '/apps/'
     | '/context/'
+    | '/files/'
     | '/integrations/'
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
     | '/integrations/offers/$token'
     | '/apps/$appId/'
+    | '/files/$fileId/'
+    | '/stores/$storeId/'
+    | '/tables/$tableId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -395,7 +417,7 @@ export interface RootRouteChildren {
   AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
-  FilesRoute: typeof FilesRoute
+  FilesRoute: typeof FilesRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRouteWithChildren
   PlaybooksRoute: typeof PlaybooksRoute
   PricingRoute: typeof PricingRoute
@@ -567,6 +589,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContextWorkstreamsRouteImport
       parentRoute: typeof ContextRoute
     }
+    '/files/': {
+      id: '/files/'
+      path: '/'
+      fullPath: '/files/'
+      preLoaderRoute: typeof FilesIndexRouteImport
+      parentRoute: typeof FilesRoute
+    }
     '/integrations/': {
       id: '/integrations/'
       path: '/'
@@ -588,25 +617,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoresIndexRouteImport
       parentRoute: typeof StoresRoute
     }
-    '/stores/$storeId': {
-      id: '/stores/$storeId'
-      path: '/$storeId'
-      fullPath: '/stores/$storeId'
-      preLoaderRoute: typeof StoresStoreIdRouteImport
-      parentRoute: typeof StoresRoute
-    }
     '/tables/': {
       id: '/tables/'
       path: '/'
       fullPath: '/tables/'
       preLoaderRoute: typeof TablesIndexRouteImport
-      parentRoute: typeof TablesRoute
-    }
-    '/tables/$tableId': {
-      id: '/tables/$tableId'
-      path: '/$tableId'
-      fullPath: '/tables/$tableId'
-      preLoaderRoute: typeof TablesTableIdRouteImport
       parentRoute: typeof TablesRoute
     }
     '/api/auth/$': {
@@ -623,12 +638,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppsAppIdIndexRouteImport
       parentRoute: typeof AppsRoute
     }
+    '/files/$fileId/': {
+      id: '/files/$fileId/'
+      path: '/$fileId'
+      fullPath: '/files/$fileId/'
+      preLoaderRoute: typeof FilesFileIdIndexRouteImport
+      parentRoute: typeof FilesRoute
+    }
     '/integrations/offers/$token': {
       id: '/integrations/offers/$token'
       path: '/offers/$token'
       fullPath: '/integrations/offers/$token'
       preLoaderRoute: typeof IntegrationsOffersTokenRouteImport
       parentRoute: typeof IntegrationsRoute
+    }
+    '/stores/$storeId/': {
+      id: '/stores/$storeId/'
+      path: '/$storeId'
+      fullPath: '/stores/$storeId/'
+      preLoaderRoute: typeof StoresStoreIdIndexRouteImport
+      parentRoute: typeof StoresRoute
+    }
+    '/tables/$tableId/': {
+      id: '/tables/$tableId/'
+      path: '/$tableId'
+      fullPath: '/tables/$tableId/'
+      preLoaderRoute: typeof TablesTableIdIndexRouteImport
+      parentRoute: typeof TablesRoute
     }
   }
 }
@@ -660,6 +696,18 @@ const ContextRouteChildren: ContextRouteChildren = {
 const ContextRouteWithChildren =
   ContextRoute._addFileChildren(ContextRouteChildren)
 
+interface FilesRouteChildren {
+  FilesIndexRoute: typeof FilesIndexRoute
+  FilesFileIdIndexRoute: typeof FilesFileIdIndexRoute
+}
+
+const FilesRouteChildren: FilesRouteChildren = {
+  FilesIndexRoute: FilesIndexRoute,
+  FilesFileIdIndexRoute: FilesFileIdIndexRoute,
+}
+
+const FilesRouteWithChildren = FilesRoute._addFileChildren(FilesRouteChildren)
+
 interface IntegrationsRouteChildren {
   IntegrationsPersonalRoute: typeof IntegrationsPersonalRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
@@ -677,26 +725,26 @@ const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
 )
 
 interface StoresRouteChildren {
-  StoresStoreIdRoute: typeof StoresStoreIdRoute
   StoresIndexRoute: typeof StoresIndexRoute
+  StoresStoreIdIndexRoute: typeof StoresStoreIdIndexRoute
 }
 
 const StoresRouteChildren: StoresRouteChildren = {
-  StoresStoreIdRoute: StoresStoreIdRoute,
   StoresIndexRoute: StoresIndexRoute,
+  StoresStoreIdIndexRoute: StoresStoreIdIndexRoute,
 }
 
 const StoresRouteWithChildren =
   StoresRoute._addFileChildren(StoresRouteChildren)
 
 interface TablesRouteChildren {
-  TablesTableIdRoute: typeof TablesTableIdRoute
   TablesIndexRoute: typeof TablesIndexRoute
+  TablesTableIdIndexRoute: typeof TablesTableIdIndexRoute
 }
 
 const TablesRouteChildren: TablesRouteChildren = {
-  TablesTableIdRoute: TablesTableIdRoute,
   TablesIndexRoute: TablesIndexRoute,
+  TablesTableIdIndexRoute: TablesTableIdIndexRoute,
 }
 
 const TablesRouteWithChildren =
@@ -708,7 +756,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,
-  FilesRoute: FilesRoute,
+  FilesRoute: FilesRouteWithChildren,
   IntegrationsRoute: IntegrationsRouteWithChildren,
   PlaybooksRoute: PlaybooksRoute,
   PricingRoute: PricingRoute,

@@ -78,4 +78,11 @@ export const storeToolResponseSchemas = {
       }),
     ],
   },
+  share_store: objectSchema({
+    required: ["url", "expiresAt"],
+    properties: {
+      url: stringProperty("View-only share link."),
+      expiresAt: numberProperty("Expiry time in epoch milliseconds."),
+    },
+  }),
 } satisfies SchemaMap

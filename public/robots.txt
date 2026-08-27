@@ -10,9 +10,12 @@ Disallow: /apps
 Disallow: /automations
 Disallow: /console
 Disallow: /context
+Disallow: /files
 Disallow: /integrations
 Disallow: /playbooks
 Disallow: /runs
 Disallow: /sign-in
 Disallow: /sign-out
 Disallow: /skills
+Disallow: /stores
+Disallow: /tables

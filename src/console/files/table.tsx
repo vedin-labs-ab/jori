@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { Files } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -94,9 +95,14 @@ function FileTableRow({
   return (
     <TableRow>
       <TableCell className="max-w-64">
-        <p className="truncate font-medium" title={file.name}>
+        <Link
+          className="block truncate font-medium hover:underline"
+          params={{ fileId: file.fileId }}
+          title={file.name}
+          to="/files/$fileId"
+        >
           {file.name}
-        </p>
+        </Link>
         {file.description === undefined ? null : (
           <p
             className="truncate text-muted-foreground"

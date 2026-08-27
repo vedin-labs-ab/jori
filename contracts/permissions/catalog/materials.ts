@@ -2,7 +2,8 @@ import { type ToolPermissionRow } from "../types"
 
 // Workspace materials: data both Jori and people read and edit under the
 // same permissions. Tables hold typed rows; stores hold one schema-backed
-// JSON document each.
+// JSON document each; files hold uploaded and generated blobs. Sharing a
+// material mints a read-only link that works without signing in.
 
 export const materialToolPermissionRows = [
   // Tables
@@ -62,6 +63,14 @@ export const materialToolPermissionRows = [
     "Delete one row by ID. Confirm intent when the requester did not name the row.",
     "write",
   ],
+  [
+    "jori",
+    "share_table",
+    "Share table",
+    "Create a time-limited link that lets anyone view a table.",
+    "Mint a read-only link for a table that works without signing in to Jori. Use when delivering table contents to people who may lack Jori access, and include the returned url in your message. Each call creates an independent link with its own expiry; earlier links keep working until they expire.",
+    "write",
+  ],
   // Stores
   [
     "jori",
@@ -93,6 +102,23 @@ export const materialToolPermissionRows = [
     "Write store",
     "Write data into a store's document.",
     "Replace, merge-patch, or claim into a store's document; writes must match the store schema and stay within the 256 KiB value cap. A claim atomically sets a path only when it is still unset — claim before at-most-once actions like sending. Pass expectedVersion from a previous read to fail cleanly on concurrent writes.",
+    "write",
+  ],
+  [
+    "jori",
+    "share_store",
+    "Share store",
+    "Create a time-limited link that lets anyone view a store.",
+    "Mint a read-only link for a store that works without signing in to Jori. Use when delivering a store's document to people who may lack Jori access, and include the returned url in your message. Each call creates an independent link with its own expiry; earlier links keep working until they expire.",
+    "write",
+  ],
+  // Files
+  [
+    "jori",
+    "share_file",
+    "Share file",
+    "Create a time-limited link that lets anyone view a file.",
+    "Mint a read-only link for a saved file that works without signing in to Jori. Use when delivering a file to people who may lack Jori access, and include the returned url in your message. Each call creates an independent link with its own expiry; earlier links keep working until they expire.",
     "write",
   ],
 ] satisfies ToolPermissionRow[]

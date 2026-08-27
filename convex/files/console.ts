@@ -40,6 +40,24 @@ export const page = query({
   },
 })
 
+export const get = query({
+  args: {
+    organizationId: v.string(),
+    fileId: v.id("files"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const viewer = await resolveViewer(ctx, args.organizationId, identity)
+    const file = await ctx.db.get(args.fileId)
+
+    if (file === null || !canViewFile(file, viewer)) {
+      return { status: "not_found" as const, file: null }
+    }
+
+    return { status: "ready" as const, file: await toConsoleRow(ctx, file) }
+  },
+})
+
 export const uploadUrl = mutation({
   args: {
     organizationId: v.string(),

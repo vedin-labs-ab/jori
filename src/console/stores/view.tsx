@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
-import { ChevronsUpDown, Pencil } from "lucide-react"
-import { useState } from "react"
+import { ChevronsUpDown, Link2, Pencil } from "lucide-react"
+import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,28 +24,43 @@ import {
 } from "../shared/layout"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { MaterialActions } from "../shared/materials/actions"
+import { useMemberUrl } from "../shared/materials/fragment"
 import { MaterialScopeBadge } from "../shared/materials/scope"
 import { EditStoreDialog } from "./edit"
 import { storeDeleteDescription, useStoreRemoval } from "./manage"
+import { StoreLinksDialog } from "./share"
 import { type StoreDetail } from "./types"
 import { StoreValue } from "./value"
 
-/** Member view of one store. The later share fork wraps exactly this
- *  component, so it owns everything inside the console chrome. */
-export function StoreView({ storeId }: { storeId: Id<"stores"> }) {
+/** Member view of one store. The share fork wraps exactly this component,
+ *  so it owns everything inside the console chrome. A visitor holding a
+ *  share secret who cannot see the store falls back to the share view. */
+export function StoreView({
+  fallback,
+  storeId,
+}: {
+  fallback?: ReactNode
+  storeId: Id<"stores">
+}) {
   return (
     <ConsolePage>
       {(organizationId) => (
-        <StoreViewContent organizationId={organizationId} storeId={storeId} />
+        <StoreViewContent
+          fallback={fallback}
+          organizationId={organizationId}
+          storeId={storeId}
+        />
       )}
     </ConsolePage>
   )
 }
 
 function StoreViewContent({
+  fallback,
   organizationId,
   storeId,
 }: {
+  fallback: ReactNode | undefined
   organizationId: string
   storeId: Id<"stores">
 }) {
@@ -61,25 +76,30 @@ function StoreViewContent({
 
   if (result.status === "unauthorized") {
     return (
-      <ConsolePageLayout>
-        <Alert variant="destructive">
-          <AlertTitle>Could not load store</AlertTitle>
-          <AlertDescription>{result.message}</AlertDescription>
-        </Alert>
-      </ConsolePageLayout>
+      fallback ?? (
+        <ConsolePageLayout>
+          <Alert variant="destructive">
+            <AlertTitle>Could not load store</AlertTitle>
+            <AlertDescription>{result.message}</AlertDescription>
+          </Alert>
+        </ConsolePageLayout>
+      )
     )
   }
 
   if (result.status === "not_found" || result.store === null) {
     return (
-      <ConsolePageLayout>
-        <Alert>
-          <AlertTitle>Store not found</AlertTitle>
-          <AlertDescription>
-            The store may have been deleted or belongs to another organization.
-          </AlertDescription>
-        </Alert>
-      </ConsolePageLayout>
+      fallback ?? (
+        <ConsolePageLayout>
+          <Alert>
+            <AlertTitle>Store not found</AlertTitle>
+            <AlertDescription>
+              The store may have been deleted or belongs to another
+              organization.
+            </AlertDescription>
+          </Alert>
+        </ConsolePageLayout>
+      )
     )
   }
 
@@ -93,9 +113,12 @@ function StoreReadyView({
   organizationId: string
   store: StoreDetail
 }) {
+  useMemberUrl()
+
   const navigate = useNavigate()
   const removal = useStoreRemoval(organizationId)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isShareOpen, setIsShareOpen] = useState(false)
   const isArchived = store.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
@@ -108,24 +131,13 @@ function StoreReadyView({
 
   return (
     <ConsolePageLayout>
-      <ConsoleHeaderActions>
-        <ConsoleHeaderButton
-          icon={<Pencil />}
-          label="Edit store"
-          onClick={() => setIsEditOpen(true)}
-          type="button"
-          variant="outline"
-        />
-        <MaterialActions
-          deleteDescription={storeDeleteDescription}
-          isDeleting={removal.removingStoreId === store.storeId}
-          isRestoring={removal.restoringStoreId === store.storeId}
-          material={{ name: store.name, archivedAt: store.archivedAt }}
-          noun="store"
-          onDelete={removeAndLeaveWhenDeleted}
-          onRestore={() => void removal.restoreStore(store)}
-        />
-      </ConsoleHeaderActions>
+      <StoreHeaderActions
+        onDelete={removeAndLeaveWhenDeleted}
+        onEdit={() => setIsEditOpen(true)}
+        onShare={() => setIsShareOpen(true)}
+        removal={removal}
+        store={store}
+      />
       <StoreHeading isArchived={isArchived} store={store} />
       <SchemaSection store={store} />
       <StoreValue organizationId={organizationId} store={store} />
@@ -134,7 +146,55 @@ function StoreReadyView({
         organizationId={organizationId}
         store={isEditOpen ? store : undefined}
       />
+      <StoreLinksDialog
+        onOpenChange={setIsShareOpen}
+        open={isShareOpen}
+        organizationId={organizationId}
+        storeId={store.storeId}
+      />
     </ConsolePageLayout>
+  )
+}
+
+function StoreHeaderActions({
+  onDelete,
+  onEdit,
+  onShare,
+  removal,
+  store,
+}: {
+  onDelete: () => void
+  onEdit: () => void
+  onShare: () => void
+  removal: ReturnType<typeof useStoreRemoval>
+  store: StoreDetail
+}) {
+  return (
+    <ConsoleHeaderActions>
+      <ConsoleHeaderButton
+        icon={<Link2 />}
+        label="Share"
+        onClick={onShare}
+        type="button"
+        variant="outline"
+      />
+      <ConsoleHeaderButton
+        icon={<Pencil />}
+        label="Edit store"
+        onClick={onEdit}
+        type="button"
+        variant="outline"
+      />
+      <MaterialActions
+        deleteDescription={storeDeleteDescription}
+        isDeleting={removal.removingStoreId === store.storeId}
+        isRestoring={removal.restoringStoreId === store.storeId}
+        material={{ name: store.name, archivedAt: store.archivedAt }}
+        noun="store"
+        onDelete={onDelete}
+        onRestore={() => void removal.restoreStore(store)}
+      />
+    </ConsoleHeaderActions>
   )
 }
 

@@ -1,3 +1,4 @@
+import { shareExpiry } from "../../../../../../contracts/shares/expiry"
 import {
   numberProperty,
   objectSchema,
@@ -78,6 +79,17 @@ export const storeToolInputSchemas = {
         description:
           "Atomically set path to value only if nothing is stored there yet. Returns claimed: true when this call won the claim, or claimed: false with the existing value and no write. Claim before any action that must happen at most once (sending, posting, notifying); claimed: false means another run owns it — never repeat the action.",
       },
+    },
+  }),
+  share_store: objectSchema({
+    required: ["storeId"],
+    properties: {
+      storeId: storeIdProperty,
+      expiresInHours: numberProperty(
+        "How long the link stays valid, in hours. Defaults to 72. Match the content's shelf life.",
+        shareExpiry.minHours,
+        shareExpiry.maxHours
+      ),
     },
   }),
 }

@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { shareFields } from "../materials/shares"
 import { scopeValidator } from "../shared/audience"
 
 /** One typed column; mirrors contracts/tables/columns.ts TableColumn. */
@@ -40,3 +41,12 @@ export const tableRows = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 }).index("by_table", ["tableId"])
+
+/** Each share is an independent read-only grant with its own secret and
+ *  expiry; a table can have several live at once. */
+export const tableShares = defineTable({
+  ...shareFields,
+  tableId: v.id("tables"),
+})
+  .index("by_table_and_expires_at", ["tableId", "expiresAt"])
+  .index("by_table_and_secret", ["tableId", "secret"])

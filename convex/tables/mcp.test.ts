@@ -102,4 +102,21 @@ describe("table row dispatch", () => {
       )
     ).rejects.toThrow("authenticated execution user")
   })
+
+  test("share_table mints a link with the requested expiry", async () => {
+    const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))
+
+    await callJoriTableTool(
+      { runMutation } as unknown as ActionCtx,
+      execution,
+      { tool: "share_table", args: { tableId: "table", expiresInHours: 24 } }
+    )
+
+    expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+      organizationId: "organization",
+      personId: "person",
+      tableId: "table",
+      expiresInHours: 24,
+    })
+  })
 })

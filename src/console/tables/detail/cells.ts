@@ -58,19 +58,6 @@ export function formatCellText(column: TableColumn, value: unknown) {
   return String(value)
 }
 
-/** Compact text a grid cell displays. */
-export function displayCellText(column: TableColumn, value: unknown) {
-  if (value === undefined) {
-    return ""
-  }
-
-  if (column.type === "json") {
-    return JSON.stringify(value) ?? ""
-  }
-
-  return String(value)
-}
-
 /** Text (and checkbox) drafts for a new row, keyed by column key. */
 export type RowDraft = Record<string, string | boolean>
 

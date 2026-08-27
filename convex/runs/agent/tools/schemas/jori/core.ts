@@ -1,4 +1,5 @@
 import { finalProperty } from "../../../../../../contracts/runtime"
+import { shareExpiry } from "../../../../../../contracts/shares/expiry"
 import { integrations as integrationEnum } from "../../../../../shared/integrations"
 import {
   numberProperty,
@@ -95,6 +96,17 @@ export const coreJoriToolInputSchemas = {
     required: ["fileId"],
     properties: {
       fileId: stringProperty("File ID."),
+    },
+  }),
+  share_file: objectSchema({
+    required: ["fileId"],
+    properties: {
+      fileId: stringProperty("File ID."),
+      expiresInHours: numberProperty(
+        "How long the link stays valid, in hours. Defaults to 72. Match the content's shelf life.",
+        shareExpiry.minHours,
+        shareExpiry.maxHours
+      ),
     },
   }),
   web_search: objectSchema({

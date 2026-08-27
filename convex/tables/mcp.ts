@@ -8,6 +8,7 @@ import {
 import {
   boundedNumber,
   type JoriToolRequest,
+  optionalNumber,
   optionalString,
   readRecord,
   requiredObject,
@@ -22,11 +23,14 @@ const tableTools = new Set([
   "insert_table_row",
   "update_table_row",
   "delete_table_row",
+  "share_table",
 ])
 
 export function isJoriTableTool(tool: string) {
   return tableTools.has(tool)
 }
+
+type TablePrincipal = { organizationId: string; personId: Id<"persons"> }
 
 export async function callJoriTableTool(
   ctx: ActionCtx,
@@ -72,6 +76,24 @@ export async function callJoriTableTool(
           cursor: optionalString(args.cursor) ?? null,
         },
       })
+    case "share_table":
+      return await ctx.runMutation(internal.tables.share.mint, {
+        ...principal,
+        tableId: requiredTableId(args.tableId),
+        expiresInHours: optionalNumber(args.expiresInHours),
+      })
+    default:
+      return await callJoriTableRowTool(ctx, principal, request.tool, args)
+  }
+}
+
+async function callJoriTableRowTool(
+  ctx: ActionCtx,
+  principal: TablePrincipal,
+  tool: string,
+  args: Record<string, unknown>
+): Promise<unknown> {
+  switch (tool) {
     case "insert_table_row":
       return await ctx.runMutation(internal.tables.rows.insert, {
         ...principal,
@@ -94,7 +116,7 @@ export async function callJoriTableTool(
         expectedVersion: normalizeExpectedVersion(args.expectedVersion),
       })
     default:
-      throw new Error(`Unknown Jori table tool: ${request.tool}`)
+      throw new Error(`Unknown Jori table tool: ${tool}`)
   }
 }
 

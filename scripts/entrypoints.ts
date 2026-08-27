@@ -14,9 +14,12 @@ type Violation = Omit<PublicFunction, "block">
 // registration block must go through one of these guards, which authenticate
 // the caller and resolve organization/user scope server-side.
 //
-// There is no exemption for endpoints strangers are meant to reach. Those
-// belong on an HTTP route, where the caller's address is readable and can be
-// rate limited per caller; see convex/waitlist/http.ts.
+// Endpoints strangers are meant to reach carry their own credential:
+// material share reads authenticate with a per-link secret through an
+// open*Share guard that checks secret, expiry, and access on every read and
+// fails closed with null (see convex/materials/shares.ts). Anything else
+// strangers reach belongs on an HTTP route, where the caller's address is
+// readable and can be rate limited per caller; see convex/waitlist/http.ts.
 const sanctionedGuards = [
   "requireIdentity",
   "requireOrganizationAccess",
@@ -30,6 +33,9 @@ const sanctionedGuards = [
   "claimIntegrationOffer",
   "buildInstallState",
   "createSignedInstallState",
+  "openTableShare",
+  "openStoreShare",
+  "openFileShare",
 ]
 
 const root = process.cwd()
