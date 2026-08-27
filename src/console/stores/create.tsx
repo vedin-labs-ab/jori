@@ -12,17 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { api } from "../../../convex/_generated/api"
-import { showErrorToast } from "../shared/error"
-import { parseJsonText } from "../shared/json/parse"
-import { MaterialDetailFields } from "../shared/materials/fields"
+import { readErrorMessage } from "../shared/error"
 import { MaterialScopeField } from "../shared/materials/scope"
-
-const defaultSchemaText = `{
-  "type": "object"
-}`
+import { SchemaEditorSection } from "./schema/editor"
+import { useSchemaEditor } from "./schema/state"
 
 export function CreateStoreDialog({
   isOpen,
@@ -34,7 +30,6 @@ export function CreateStoreDialog({
   organizationId: string
 }) {
   const form = useCreateStore(organizationId, () => onOpenChange(false))
-  const parsedSchema = parseJsonText(form.schemaText)
 
   return (
     <Dialog
@@ -53,42 +48,20 @@ export function CreateStoreDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
-          <MaterialDetailFields
-            description={form.description}
-            idPrefix="store-create"
-            name={form.name}
-            onDescriptionChange={form.setDescription}
-            onNameChange={form.setName}
-          />
+          <StoreNameField form={form} />
           <MaterialScopeField
             id="store-create-scope"
             noun="store"
             onScopeChange={form.setScope}
             scope={form.scope}
           />
-          <div className="grid gap-2">
-            <Label htmlFor="store-create-schema">JSON Schema</Label>
-            <Textarea
-              className="min-h-40 font-mono text-xs"
-              id="store-create-schema"
-              onChange={(event) => form.setSchemaText(event.target.value)}
-              value={form.schemaText}
-            />
-            {parsedSchema.ok ? null : (
-              <p className="text-destructive text-xs">{parsedSchema.error}</p>
-            )}
-          </div>
+          <StoreDescriptionField form={form} />
+          <SchemaEditorSection editor={form.schema} idPrefix="store-create" />
         </div>
         <DialogFooter>
           <Button
-            disabled={
-              form.name.trim() === "" || !parsedSchema.ok || form.isCreating
-            }
-            onClick={() => {
-              if (parsedSchema.ok) {
-                void form.submit(parsedSchema.value)
-              }
-            }}
+            disabled={form.isCreating}
+            onClick={() => void form.submit()}
             type="button"
           >
             {form.isCreating ? <Loader2 className="animate-spin" /> : null}
@@ -100,15 +73,69 @@ export function CreateStoreDialog({
   )
 }
 
+function StoreNameField({ form }: { form: CreateStoreForm }) {
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor="store-create-name">Name</Label>
+      <div className="grid gap-1">
+        <Input
+          aria-invalid={form.nameError === undefined ? undefined : true}
+          id="store-create-name"
+          onChange={(event) => form.setName(event.target.value)}
+          value={form.name}
+        />
+        {form.nameError === undefined ? null : (
+          <p className="text-destructive text-xs" role="alert">
+            {form.nameError}
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function StoreDescriptionField({ form }: { form: CreateStoreForm }) {
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor="store-create-description">Description</Label>
+      <Input
+        id="store-create-description"
+        onChange={(event) => form.setDescription(event.target.value)}
+        placeholder="Optional note that helps others find it"
+        value={form.description}
+      />
+    </div>
+  )
+}
+
+type CreateStoreForm = ReturnType<typeof useCreateStore>
+
 function useCreateStore(organizationId: string, onCreated: () => void) {
   const create = useMutation(api.stores.console.create)
-  const [name, setName] = useState("")
+  const schema = useSchemaEditor()
+  const [name, setNameState] = useState("")
+  const [nameError, setNameError] = useState<string>()
   const [description, setDescription] = useState("")
   const [scope, setScope] = useState<Scope>("organization")
-  const [schemaText, setSchemaText] = useState(defaultSchemaText)
   const [isCreating, setIsCreating] = useState(false)
 
-  async function submit(schema: unknown) {
+  function setName(next: string) {
+    setNameState(next)
+    setNameError(undefined)
+  }
+
+  async function submit() {
+    const schemaResult = schema.submit()
+    const isNameMissing = name.trim() === ""
+
+    if (isNameMissing) {
+      setNameError("Name is required.")
+    }
+
+    if (isNameMissing || !schemaResult.ok) {
+      return
+    }
+
     setIsCreating(true)
 
     try {
@@ -117,16 +144,16 @@ function useCreateStore(organizationId: string, onCreated: () => void) {
         name,
         description: description.trim() === "" ? undefined : description,
         scope,
-        schema,
+        schema: schemaResult.schema,
       })
       toast.success(`Created ${name.trim()}.`)
-      setName("")
+      setNameState("")
       setDescription("")
       setScope("organization")
-      setSchemaText(defaultSchemaText)
+      schema.reset()
       onCreated()
     } catch (error) {
-      showErrorToast(error, "Could not create the store.")
+      reportCreateError(error, schema.setSubmitError)
     } finally {
       setIsCreating(false)
     }
@@ -136,12 +163,26 @@ function useCreateStore(organizationId: string, onCreated: () => void) {
     description,
     isCreating,
     name,
-    schemaText,
+    nameError,
+    schema,
     scope,
     setDescription,
     setName,
-    setSchemaText,
     setScope,
     submit,
+  }
+}
+
+/** Schema errors attach under the schema editor; anything else toasts. */
+function reportCreateError(
+  error: unknown,
+  setSubmitError: (message: string) => void
+) {
+  const message = readErrorMessage(error, "Could not create the store.")
+
+  if (/schema/i.test(message)) {
+    setSubmitError(message)
+  } else {
+    toast.error(message)
   }
 }
