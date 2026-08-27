@@ -45,9 +45,6 @@ importers:
       '@openrouter/sdk':
         specifier: ^1.0.0
         version: 1.0.0
-      '@posthog/react':
-        specifier: ^1.10.3
-        version: 1.10.3(@types/react@19.2.17)(posthog-js@1.407.3)(react@19.2.7)
       '@radix-ui/react-dismissable-layer':
         specifier: ^1.1.16
         version: 1.1.16(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1615,16 +1612,6 @@ packages:
 
   '@posthog/core@1.45.1':
     resolution: {integrity: sha512-tLtvzomavb2PPWdGYKsusyIzIeL2Px47v348Smibkay7sMy/83TyPk+Ptsp2NdeOgJsbuwSxWkR2+XA0aSCAaA==}
-
-  '@posthog/react@1.10.3':
-    resolution: {integrity: sha512-Qu//fGQmVlX0B9kTA3LLg67e7AYLEmeuA0Bf1qSyUM0uUILcRQGjQezhNQPLYSTakOqvXEnl6fM2iQBF6Toxrw==}
-    peerDependencies:
-      '@types/react': '>=16.8.0'
-      posthog-js: '>=1.257.2'
-      react: '>=16.8.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
 
   '@posthog/types@1.398.0':
     resolution: {integrity: sha512-sJMkl4k+u8yS/0fjHsKqE9xTdsAh30a2WvgChiptellnVoE0e8QJKFgqOMD2sk8FaEArPdeFklAhXvmENAt3Sg==}
@@ -8068,13 +8055,6 @@ snapshots:
   '@posthog/core@1.45.1':
     dependencies:
       '@posthog/types': 1.398.0
-
-  '@posthog/react@1.10.3(@types/react@19.2.17)(posthog-js@1.407.3)(react@19.2.7)':
-    dependencies:
-      posthog-js: 1.407.3
-      react: 19.2.7
-    optionalDependencies:
-      '@types/react': 19.2.17
 
   '@posthog/types@1.398.0': {}
 

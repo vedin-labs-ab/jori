@@ -1,6 +1,4 @@
-import { PostHogProvider } from "@posthog/react"
-import { type PostHogConfig } from "posthog-js"
-import { type ReactNode } from "react"
+import { type ReactNode, useEffect } from "react"
 
 const settings: Record<string, string | undefined> = import.meta.env
 const enabled = readFlag("VITE_POSTHOG_ENABLED")
@@ -13,9 +11,12 @@ if (enabled && (projectKey === undefined || apiHost === undefined)) {
   )
 }
 
-/** One object for the lifetime of the page, so the provider configures the
- *  SDK once instead of on every render. */
-const options: Partial<PostHogConfig> = {
+/** One object for the lifetime of the page, so the SDK configures once
+ *  instead of on every render. The type arrives through `import()` rather
+ *  than an import statement, because `verbatimModuleSyntax` keeps even a
+ *  type-only statement as a runtime import of the module, and pulling the
+ *  SDK into the entry chunk is exactly what this file avoids. */
+const options: Partial<import("posthog-js").PostHogConfig> = {
   api_host: apiHost,
   // PostHog's own defaults, taken at the newest snapshot it publishes. It is
   // what makes a pageview follow a History API navigation rather than a page
@@ -24,14 +25,25 @@ const options: Partial<PostHogConfig> = {
   defaults: "2026-06-25",
 }
 
+/** The effect below runs once per mount of the root, and React mounts twice
+ *  in development strict mode, so the guard lives at module scope where a
+ *  remount cannot reset it. */
+let initialized = false
+
 /**
  * Web analytics for every page, on the one deployment that asks for it.
  *
  * Reporting is its own decision rather than a side effect of holding a token:
  * every environment builds the same code, so each one says whether it counts,
- * and only production does. Anywhere else renders no provider at all, so the
- * SDK is never initialised and nothing is sent. Development and staging
- * traffic is not usage, and counting it costs more than it tells anyone.
+ * and only production does. Anywhere else the SDK is never loaded and nothing
+ * is sent. Development and staging traffic is not usage, and counting it
+ * costs more than it tells anyone.
+ *
+ * The SDK arrives through a dynamic import after hydration rather than a
+ * static one, because a static import makes it the heaviest module in the
+ * entry chunk, paid on every page before the app is interactive. Nothing
+ * renders analytics state, so nothing needs it before this effect runs, and
+ * a pageview captured moments after load is the same pageview.
  *
  * The token is public by design. It only permits writes, and it ships in the
  * bundle where anyone can read it, so it names the project rather than
@@ -40,15 +52,18 @@ const options: Partial<PostHogConfig> = {
  * region and a default would quietly carry visitor data out of it.
  */
 export function Analytics({ children }: { children: ReactNode }) {
-  if (projectKey === undefined) {
-    return children
-  }
+  useEffect(() => {
+    if (projectKey === undefined || initialized) {
+      return
+    }
 
-  return (
-    <PostHogProvider apiKey={projectKey} options={options}>
-      {children}
-    </PostHogProvider>
-  )
+    initialized = true
+    void import("posthog-js").then(({ default: posthog }) => {
+      posthog.init(projectKey, options)
+    })
+  }, [])
+
+  return children
 }
 
 /** Off unless a deployment says otherwise, and loud about anything that is
