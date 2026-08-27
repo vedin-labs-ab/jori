@@ -1,23 +1,29 @@
 import { MarketingShell } from "../shell"
-import { Apps } from "./apps"
-import { Context } from "./context"
+import { Automations } from "./automations"
+import { Catalog } from "./catalog"
+import { Contrast } from "./contrast"
 import { Control } from "./control"
 import { Hero } from "./hero"
-import { Threads } from "./threads"
+import { Infrastructure } from "./infrastructure"
+import { Materials } from "./materials"
+import { Surfaces } from "./surfaces"
 
-/** The argument in order: here is the app a team opens, here is how Jori
- *  works out what goes in it, here is how one lands, here is the rest you can
- *  just ask for, here is what it takes to hand any of it over. Context sits
- *  ahead of Apps because an app assembled from a model of the company is a
- *  different claim from an app someone described. */
+/** The argument in order: one teammate the whole company shares, why shared
+ *  beats private, the surfaces that reach it, the work you hand it, the
+ *  materials it works on, the jobs it already does, and then the control and
+ *  residency story that makes handing any of it over safe. The pillars hook
+ *  the team; the last two sections close the owner. */
 export function Landing() {
   return (
     <MarketingShell closing="We're running paid pilots with a few teams at a time, set up by us. Tell us what your team assembles by hand, and we'll be in touch if it's a fit.">
       <Hero />
-      <Context />
-      <Apps />
-      <Threads />
+      <Contrast />
+      <Surfaces />
+      <Automations />
+      <Materials />
+      <Catalog />
       <Control />
+      <Infrastructure />
     </MarketingShell>
   )
 }

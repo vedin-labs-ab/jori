@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Landing } from "@/landing/home"
 
-const title = "Jori · The Monday pre-read, written for you"
+const title = "Jori · The AI teammate your whole company shares"
 const description =
-  "Jori reads the week across your tools and keeps one live page your leadership team opens before the sync: what moved, what stalled, what shipped. Every line cited. Nothing typed in."
+  "Hand Jori the work your team repeats, in Slack, GitHub, Linear, or email. It runs in the cloud, remembers as one teammate, and shows you everything it read, did, and cost."
 
 export const Route = createFileRoute("/")({
   component: Landing,

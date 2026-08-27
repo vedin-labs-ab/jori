@@ -16,7 +16,7 @@ export function Section({
   support = false,
   title,
 }: {
-  children: ReactNode
+  children?: ReactNode
   className?: string
   id?: string
   lede?: string
@@ -53,7 +53,11 @@ export function Section({
             </p>
           )}
         </div>
-        <div className={support ? "mt-8" : "mt-12"}>{children}</div>
+        {/* A section with no children is a statement band: the heading and
+            lede are the whole content, so no empty block reserves space. */}
+        {children === undefined ? null : (
+          <div className={support ? "mt-8" : "mt-12"}>{children}</div>
+        )}
       </div>
     </section>
   )

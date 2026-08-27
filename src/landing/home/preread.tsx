@@ -28,7 +28,7 @@ const attention: readonly Attention[] = [
 ]
 
 /**
- * The hero app.
+ * The hero page.
  *
  * It has one job: show that this is a page a leadership team opens, not a
  * message. So it answers the three questions a pre-read exists to answer, in
@@ -40,7 +40,7 @@ const attention: readonly Attention[] = [
  * that somebody does. The source logos carry the rest of the argument: this is
  * assembled across tools, which is the part no single one of them gives you.
  */
-export function PrereadApp() {
+export function PrereadPage() {
   return (
     <Prop
       label={
