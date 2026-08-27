@@ -12,7 +12,6 @@ const ignoredWorkspacePaths = [
   "**/.tanstack/**",
   "**/dist/**",
   "**/node_modules/**",
-  "**/runtime/apps/template/**",
 ]
 
 // TanStack Start emits a request handler, not a server. Nitro wraps it into

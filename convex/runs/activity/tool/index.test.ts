@@ -88,110 +88,6 @@ test("does not synthesize descriptions from result shape", () => {
   )
 })
 
-test("labels app shares with the title and link lifetime", () => {
-  const appId = id<"apps">("app")
-  const items = projectActivity(
-    data({
-      apps: [app({ _id: appId, title: "Meeting Briefing" })],
-      traces: [
-        trace({
-          callId: "call-1",
-          data: {
-            input: { appId, expiresInHours: 24 },
-            tool: {
-              access: "write",
-              name: "share_app",
-              route: "convex",
-            },
-          },
-          timestamp: 10,
-          type: "tool.started",
-        }),
-      ],
-    })
-  )
-
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      metadata: [
-        { kind: "target", text: "Meeting Briefing" },
-        { kind: "scope", text: "24h link" },
-      ],
-      tool: "share_app",
-    })
-  )
-})
-
-test("labels inferred app state reads with the title and state entry", () => {
-  const appId = id<"apps">("app")
-  const items = projectActivity(
-    data({
-      apps: [app({ _id: appId, title: "Meeting Briefing" })],
-      run: run({ appId }),
-      traces: [
-        trace({
-          callId: "call-1",
-          data: {
-            input: { contractName: "meetings" },
-            tool: {
-              access: "read",
-              name: "read_app_state",
-              route: "convex",
-            },
-          },
-          timestamp: 10,
-          type: "tool.started",
-        }),
-      ],
-    })
-  )
-
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      metadata: [
-        { kind: "target", text: "Meeting Briefing" },
-        { kind: "scope", text: "meetings" },
-      ],
-      tool: "read_app_state",
-    })
-  )
-})
-
-test("labels inferred app state updates with the title and state entry", () => {
-  const appId = id<"apps">("app")
-  const items = projectActivity(
-    data({
-      apps: [app({ _id: appId, title: "Meeting Briefing" })],
-      run: run({ appId }),
-      traces: [
-        trace({
-          callId: "call-1",
-          data: {
-            input: { contractName: "dossiers", patch: { status: "ready" } },
-            tool: {
-              access: "write",
-              name: "update_app_state",
-              route: "convex",
-            },
-          },
-          timestamp: 10,
-          type: "tool.started",
-        }),
-      ],
-    })
-  )
-
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      metadata: [
-        { kind: "target", text: "Meeting Briefing" },
-        { kind: "scope", text: "dossiers" },
-      ],
-      tool: "update_app_state",
-    })
-  )
-})
-
 function data(overrides: Partial<ActivityData>): ActivityData {
   return { ...emptyActivityData(), run: run({}), ...overrides }
 }
@@ -228,20 +124,6 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     organizationId: "organization",
     ...overrides,
   } as Doc<"runs">
-}
-
-function app(overrides: Partial<Doc<"apps">>): Doc<"apps"> {
-  return {
-    _creationTime: 0,
-    _id: id<"apps">("app"),
-    access: "organization",
-    createdAt: 0,
-    ownerId: id<"persons">("person"),
-    organizationId: "organization",
-    title: "App",
-    updatedAt: 0,
-    ...overrides,
-  }
 }
 
 function id<TableName extends TableNames>(value: string) {

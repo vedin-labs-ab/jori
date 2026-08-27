@@ -11,14 +11,11 @@ describe("runtime skill prompts", () => {
 
     expect(prompt).toContain("# Skills")
     expect(prompt).toContain("Load full instructions with `load_skill`")
-    expect(prompt).toContain("`app-creator`: Create or update Jori apps")
-    expect(prompt).toContain("`frontend-design`: Design Jori-native")
     expect(prompt).toContain("`image-generation`: Generate Jori image files")
     expect(prompt).toContain("`slack`: Format Slack replies")
     expect(prompt).toContain("# Communication")
     expect(prompt).toContain("Use `send_reply`")
     expect(prompt).not.toContain("# Format")
-    expect(prompt).not.toContain("Do not use app-callback controls")
   })
 
   test("eagerly loads Slack guidance for Slack final replies", () => {

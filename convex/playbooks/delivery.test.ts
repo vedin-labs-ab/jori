@@ -8,7 +8,7 @@ import { type DeliveryContext, deliverySetup } from "./delivery"
 // both targets open, so the fixture owns its delivery shape instead of
 // borrowing whichever catalog playbook happens to ship it.
 const digestPlaybook = {
-  ...getPlaybook("meeting-briefing"),
+  ...getPlaybook("preread"),
   delivery: { ...digestDelivery, noun: "brief" },
 }
 

@@ -20,7 +20,6 @@ export async function trialPlaybook(ctx: MutationCtx, args: PlaybookPlanArgs) {
     organizationId: args.organizationId,
     instructions: plan.instructions,
     title: plan.definition.title,
-    appId: args.appId,
     access: await resolveAccessInput(ctx, {
       access: plan.access,
       principal,

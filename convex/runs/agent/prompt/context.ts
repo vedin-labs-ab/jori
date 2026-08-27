@@ -80,9 +80,7 @@ function createRunInstructions(
   return renderPromptTemplate(promptTemplates["agent/context/run"], {
     run: {
       id: input.run._id,
-      appId: input.run.appId ?? null,
     },
-    app: createAppValues(input),
     surface: {
       active: activeSurface !== null,
       label:
@@ -130,27 +128,6 @@ function createTriggerPart(input: AgentRuntimeInput) {
     promptTemplates["agent/context/trigger/message"],
     createMessageValues(input)
   )
-}
-
-/** The attached app's state contract, so instructions can reference
- *  entries by name instead of restating schema details. */
-function createAppValues(input: AgentRuntimeInput) {
-  if (input.type === "message" || input.app === null) {
-    return null
-  }
-
-  return {
-    title: input.app.title,
-    contract:
-      input.app.contract.length === 0
-        ? null
-        : input.app.contract.map((entry) => ({
-            name: entry.name,
-            scope: entry.scope,
-            schema: `${entry.schemaName} v${entry.schemaVersion}`,
-            description: entry.description,
-          })),
-  }
 }
 
 function createMessageValues(

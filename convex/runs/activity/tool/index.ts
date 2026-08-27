@@ -1,4 +1,4 @@
-import { type Doc, type Id } from "../../../_generated/dataModel"
+import { type Doc } from "../../../_generated/dataModel"
 import { formatToolName, inputDescription, inputDetails } from "../format"
 import { toolMetadata } from "../metadata"
 import {
@@ -25,21 +25,18 @@ const toolTerminalTypes = new Set(["tool.completed", "tool.failed"])
 
 type ToolProjectionContext = {
   agents: Doc<"runs">[]
-  appTitles: ReadonlyMap<string, string>
   isRunLive: boolean
   labels: Map<string, ToolLabel>
   materialNames: ReadonlyMap<string, string>
-  runAppId: Id<"apps"> | undefined
 }
 
 export function projectToolTraces(
   data: ActivityData,
   isRunLive: boolean
 ): ActivityItem[] {
-  const { agents, apps, run, stores, tables, traces } = data
+  const { agents, stores, tables, traces } = data
   const context: ToolProjectionContext = {
     agents,
-    appTitles: new Map(apps.map((app) => [app._id, app.title])),
     isRunLive,
     labels: toolLabels(traces),
     materialNames: new Map(
@@ -48,7 +45,6 @@ export function projectToolTraces(
         material.name,
       ])
     ),
-    runAppId: run.appId,
   }
   const groups = new Map<string, Doc<"traces">[]>()
 
@@ -70,8 +66,7 @@ function projectToolGroup(
   group: Doc<"traces">[],
   context: ToolProjectionContext
 ): ActivityItem {
-  const { agents, appTitles, isRunLive, labels, materialNames, runAppId } =
-    context
+  const { agents, isRunLive, labels, materialNames } = context
   const started = group.find((trace) => trace.type === "tool.started")
   const waiting = group.find((trace) => trace.type === "tool.waiting")
   const terminal = group.find((trace) => toolTerminalTypes.has(trace.type))
@@ -87,11 +82,9 @@ function projectToolGroup(
   const endedAt = (waiting ?? terminal)?.timestamp
   const metadata = toolMetadata({
     agents,
-    appTitles,
     input: readToolInput(startedData),
     materialNames,
     result: readToolResult(terminalData),
-    runAppId,
     tool: name,
   })
 

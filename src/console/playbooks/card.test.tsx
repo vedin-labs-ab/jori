@@ -9,6 +9,7 @@ import {
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { digestPlaybook } from "../../../test/playbooks"
 import { PlaybookCard } from "./card"
 import { stubPlaybookActions } from "./fixtures"
 import { type PlaybookListRow } from "./state"
@@ -17,13 +18,11 @@ afterEach(() => {
   cleanup()
 })
 
-const briefing = getPlaybook("meeting-briefing")
-
 test("active card puts the switch in the header and run-now in the footer", () => {
   renderCard(enabledRow("active", Date.now() + 2 * 60 * 60 * 1000))
 
   expect(
-    screen.getByRole("switch", { name: "Meeting Briefing enabled" })
+    screen.getByRole("switch", { name: "Daily Digest enabled" })
   ).toBeDefined()
   expect(screen.getByText("On")).toBeDefined()
   expect(screen.getByRole("button", { name: /run now/i })).toBeDefined()
@@ -37,7 +36,7 @@ test("paused card shows paused state and no next run", () => {
   renderCard(enabledRow("paused"))
 
   expect(
-    screen.getByRole("switch", { name: "Meeting Briefing enabled" })
+    screen.getByRole("switch", { name: "Daily Digest enabled" })
   ).toBeDefined()
   expect(screen.getByText("Paused")).toBeDefined()
   expect(screen.queryByText(/Next in/)).toBeNull()
@@ -50,7 +49,7 @@ test("enabled card with a lost connection offers reconnect over run-now", () => 
   expect(screen.queryByRole("button", { name: /run now/i })).toBeNull()
   expect(screen.getByRole("button", { name: "View" })).toBeDefined()
   expect(
-    screen.getByRole("switch", { name: "Meeting Briefing enabled" })
+    screen.getByRole("switch", { name: "Daily Digest enabled" })
   ).toBeDefined()
 })
 
@@ -77,7 +76,7 @@ test("access section disappears entirely when the playbook needs nothing", () =>
   expect(screen.queryByText("Access")).toBeNull()
 })
 
-function renderCard(row: PlaybookListRow, definition = briefing) {
+function renderCard(row: PlaybookListRow, definition = digestPlaybook) {
   const router = createRouter({
     history: createMemoryHistory(),
     routeTree: createRootRoute(),
@@ -122,7 +121,7 @@ function enabledRow(
   missing: NonNullable<PlaybookListRow["enabled"]>["missing"] = []
 ): PlaybookListRow {
   return {
-    key: briefing.key,
+    key: digestPlaybook.key,
     slots: [
       { capability: "email", connected: ["gmail"] },
       { capability: "calendar", connected: ["googleCalendar"] },
@@ -143,7 +142,6 @@ function enabledRow(
       nextRunAt,
       missing,
       setup: null,
-      app: null,
     },
   }
 }

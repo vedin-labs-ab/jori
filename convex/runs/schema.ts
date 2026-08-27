@@ -102,7 +102,6 @@ export const runs = defineTable({
   automationId: v.optional(v.id("automations")),
   automationParentId: v.optional(v.id("automations")),
   automationConfigurationVersion: v.optional(v.number()),
-  appId: v.optional(v.id("apps")),
   parentId: v.optional(v.id("runs")),
   rootId: v.optional(v.id("runs")),
   scope: v.optional(audienceScopeValidator),

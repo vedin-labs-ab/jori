@@ -21,7 +21,7 @@ import {
   type PlaybookEnablePlan,
   type PlaybookListRow,
 } from "../state"
-import { useOptionHints, useOptionsSetup } from "./configuration/state"
+import { useOptionsSetup } from "./configuration/state"
 import { EditSetupNotes, SetupFooter, type SetupSubmit } from "./footer"
 import { SetupDialogSections } from "./form"
 
@@ -34,7 +34,6 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
     choices,
     delivery,
     destination,
-    hints,
     isBusy,
     options,
     optionsIssue,
@@ -63,7 +62,6 @@ export function PlaybookSetupDialog(props: PlaybookSetupDialogProps) {
           choices={choices}
           definition={definition}
           delivery={delivery}
-          hints={hints}
           isBusy={isBusy}
           onProviderIndexChange={setProviderIndex}
           options={options}
@@ -119,11 +117,7 @@ function useSetupState({
   const delivery = useDeliverySetup(row.delivery, organizationId, setup)
   const pendingKind = pendingActionKind(actions, definition)
   const { options, setupFields } = useOptionsSetup(definition, setup?.options)
-  const { hints, optionsIssue } = useOptionHints(
-    definition,
-    organizationId,
-    options
-  )
+  const optionsIssue = definition.validateOptions?.(options)
   const choices =
     setup?.providers ??
     (plan.kind === "choose"
@@ -139,7 +133,6 @@ function useSetupState({
     choices,
     delivery,
     destination: delivery.value,
-    hints,
     isBusy,
     options,
     optionsIssue,

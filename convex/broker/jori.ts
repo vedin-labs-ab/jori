@@ -4,7 +4,6 @@ import {
   cancelApprovalRequest,
   isCancelApprovalTool,
 } from "../approvals/cancel"
-import { callJoriAppTool, isJoriAppTool } from "../apps/mcp"
 import { callJoriAutomationTool } from "../automations/mcp"
 import { callJoriFileTool, isJoriFileTool } from "../files/mcp"
 import {
@@ -47,10 +46,6 @@ export async function callJoriTool(
 
   if (isJoriFileTool(request.tool)) {
     return await callJoriFileTool(ctx, run, request)
-  }
-
-  if (isJoriAppTool(request.tool)) {
-    return await callJoriAppTool(ctx, toJoriContext(run), request)
   }
 
   if (isJoriTableTool(request.tool)) {

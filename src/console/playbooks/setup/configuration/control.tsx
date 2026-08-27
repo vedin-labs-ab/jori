@@ -1,5 +1,4 @@
 import { type PlaybookOptionField } from "@contracts/playbooks/options"
-import { type ReactNode } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,7 +16,6 @@ export function OptionField({
   controlClassName,
   disabled,
   field,
-  hint,
   label = true,
   muted = false,
   onChange,
@@ -26,7 +24,6 @@ export function OptionField({
   controlClassName?: string
   disabled: boolean
   field: PlaybookOptionField
-  hint?: ReactNode
   label?: boolean
   muted?: boolean
   onChange: (value: boolean | number | string) => void
@@ -62,7 +59,6 @@ export function OptionField({
           value={value}
         />
       </div>
-      {hint}
     </div>
   )
 }

@@ -5,7 +5,6 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { provisionTemplateApp } from "../apps/templates/provision"
 import {
   accessInput,
   automationType,
@@ -31,7 +30,6 @@ export const enable = action({
     return await ctx.runMutation(internal.playbooks.console.enableResolved, {
       ...args,
       ...caller,
-      appId: await provision(ctx, args, caller.createdBy),
     })
   },
 })
@@ -46,13 +44,12 @@ export const trial = action({
     return await ctx.runMutation(internal.playbooks.console.trialResolved, {
       ...args,
       ...caller,
-      appId: await provision(ctx, args, caller.createdBy),
     })
   },
 })
 
 /** Re-render an enabled playbook from new options or a newer catalog
- *  version, refreshing its app alongside the automation. */
+ *  version, applying the result to its automation in place. */
 export const reconfigure = action({
   args: {
     ...playbookPlanFields,
@@ -70,14 +67,13 @@ export const reconfigure = action({
         ...plan,
         ...caller,
         automationId,
-        appId: await provision(ctx, plan, caller.createdBy),
       }
     )
   },
 })
 
-/** Render the playbook as an automation draft — no app is provisioned
- *  and nothing persists unless the draft is actually created. */
+/** Render the playbook as an automation draft — nothing persists unless
+ *  the draft is actually created. */
 export const draft = action({
   args: playbookPlanFields,
   handler: async (
@@ -95,7 +91,7 @@ export const draft = action({
 })
 
 /** Create an automation from an edited playbook draft (the advanced
- *  builder), provisioning the playbook's app at the same edge. */
+ *  builder). */
 export const create = action({
   args: {
     organizationId: v.string(),
@@ -116,15 +112,9 @@ export const create = action({
       ctx,
       args.organizationId
     )
-    const appId = await provisionTemplateApp(ctx, {
-      key: args.playbook.key,
-      organizationId: args.organizationId,
-      personId: createdBy,
-    })
 
     return await ctx.runMutation(internal.playbooks.console.createResolved, {
       ...args,
-      appId,
       createdBy,
     })
   },
@@ -148,16 +138,4 @@ async function resolveCaller(
   await ctx.runQuery(validation, { ...args, createdBy, recipient })
 
   return { createdBy, recipient }
-}
-
-async function provision(
-  ctx: ActionCtx,
-  args: PlaybookCallerArgs,
-  createdBy: Id<"persons">
-) {
-  return await provisionTemplateApp(ctx, {
-    key: args.playbook,
-    organizationId: args.organizationId,
-    personId: createdBy,
-  })
 }

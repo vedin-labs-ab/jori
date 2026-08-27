@@ -1,37 +1,31 @@
-import { type PlaybookDefinition } from "./catalog"
-import { digestDelivery } from "./delivery"
-import { shiftClockTime } from "./schedule"
+import { type PlaybookDefinition } from "../contracts/playbooks/catalog"
+import { digestDelivery } from "../contracts/playbooks/delivery"
+import { shiftClockTime } from "../contracts/playbooks/schedule"
 
-/** The planner leads the morning target by the default agent wait
- *  (15 minutes) plus synthesis and delivery margin. */
 const scheduleLeadMinutes = 30
 
-/** The one app-backed playbook: a scheduled planner that researches
- *  meetings into a template-provisioned app and protects delivery. */
-export const meetingBriefing: PlaybookDefinition = {
-  key: "meeting-briefing",
-  template: "playbooks/briefing",
-  version: 12,
-  title: "Meeting Briefing",
-  description:
-    "Walk into important meetings with the context, questions, and decisions that will help you make the most of them.",
+/** A test-only playbook exercising the full setup surface — a lone choice
+ *  field, behavior toggles with dependent fields, cross-field validation,
+ *  and option-driven scheduling — so the generic machinery stays covered
+ *  without borrowing a catalog playbook. */
+export const digestPlaybook: PlaybookDefinition = {
+  key: "digest",
+  template: "playbooks/digest",
+  version: 1,
+  title: "Daily Digest",
+  description: "A focused digest of what changed, delivered on your terms.",
   scope: "personal",
-  app: {
-    title: "Meeting Briefing",
-    description:
-      "Stores your prepared briefings and powers the shareable briefing page.",
-  },
-  cadence: "Daily or before each meeting",
+  cadence: "Daily or on demand",
   schedule: { repeat: "daily", time: "01:00" },
   setup: [
     {
-      key: "meetings",
+      key: "audience",
       kind: "fields",
-      label: "Meetings",
+      label: "Audience",
       fields: [
         {
-          key: "meetings",
-          label: "Meetings",
+          key: "audience",
+          label: "Audience",
           kind: "choice",
           default: "external",
           choices: [
@@ -48,12 +42,12 @@ export const meetingBriefing: PlaybookDefinition = {
       label: "Delivery timing",
       behaviors: [
         {
-          key: "morning-briefing",
-          label: "Morning briefing",
-          description: "Relevant meetings in one daily digest",
+          key: "morning",
+          label: "Morning digest",
+          description: "Everything relevant in one daily digest",
           enabledBy: {
             key: "morning",
-            label: "Morning briefing",
+            label: "Morning digest",
             kind: "boolean",
             default: true,
           },
@@ -68,15 +62,15 @@ export const meetingBriefing: PlaybookDefinition = {
           ],
         },
         {
-          key: "before-meeting",
-          label: "Before meetings",
+          key: "reminders",
+          label: "Reminders",
           description: (options) =>
             options.morning === true
-              ? "Resend the prepared dossier as a reminder"
-              : "Prepare and send each dossier just in time",
+              ? "Resend before each deadline"
+              : "Send each item just in time",
           enabledBy: {
-            key: "beforeMeeting",
-            label: "Before meetings",
+            key: "reminders",
+            label: "Reminders",
             kind: "boolean",
             default: false,
           },
@@ -87,7 +81,7 @@ export const meetingBriefing: PlaybookDefinition = {
               kind: "choice",
               control: "select",
               default: "45",
-              enabledWhen: { key: "beforeMeeting", value: true },
+              enabledWhen: { key: "reminders", value: true },
               choices: [
                 { value: "15", label: "15 minutes before" },
                 { value: "30", label: "30 minutes before" },
@@ -100,8 +94,6 @@ export const meetingBriefing: PlaybookDefinition = {
       ],
     },
   ],
-  // The planning sweep starts early enough for per-meeting researchers to
-  // finish before the morning briefing. Without it, the sweep plans early.
   resolveSchedule: (options) =>
     options.morning === true
       ? {
@@ -114,18 +106,16 @@ export const meetingBriefing: PlaybookDefinition = {
       : { repeat: "daily", time: "01:00" },
   describeCadence: (options) => {
     const morning =
-      options.morning === true
-        ? `Morning briefing at ${options.morningTime}`
+      options.morning === true ? `Morning digest at ${options.morningTime}` : ""
+    const reminders =
+      options.reminders === true
+        ? `${options.morning === true ? "digest" : "Digest"} ${options.leadMinutes} minutes before each deadline`
         : ""
-    const before =
-      options.beforeMeeting === false
-        ? ""
-        : `${options.morning === true ? "briefing" : "Briefing"} ${options.leadMinutes} minutes before each meeting`
 
-    return [morning, before].filter((part) => part !== "").join(", ")
+    return [morning, reminders].filter((part) => part !== "").join(", ")
   },
   validateOptions: (options) =>
-    options.morning === false && options.beforeMeeting === false
+    options.morning === false && options.reminders === false
       ? "Choose at least one delivery time."
       : undefined,
   slots: [
@@ -136,7 +126,7 @@ export const meetingBriefing: PlaybookDefinition = {
   delivery: {
     ...digestDelivery,
     slackTargets: ["dm"],
-    noun: "briefing",
+    noun: "digest",
     style: "summary",
   },
   web: true,

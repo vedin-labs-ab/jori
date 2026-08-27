@@ -1,4 +1,4 @@
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { type QueryLikeCtx } from "../../shared/context"
 
@@ -27,17 +27,4 @@ export async function getRequiredAutomation(
   }
 
   return automation
-}
-
-export async function listAppAutomationRoots(
-  ctx: QueryLikeCtx,
-  appId: Id<"apps">,
-  limit: number
-): Promise<Doc<"automations">[]> {
-  return await ctx.db
-    .query("automations")
-    .withIndex("by_app_and_parent", (index) =>
-      index.eq("appId", appId).eq("parentId", undefined)
-    )
-    .take(limit)
 }

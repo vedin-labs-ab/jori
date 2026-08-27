@@ -1,14 +1,6 @@
 import { cruise, type IFlattenedRuleSet } from "dependency-cruiser"
 
-const roots = [
-  "src",
-  "convex",
-  "contracts",
-  "runtime/apps",
-  "trigger",
-  "prompts",
-  "scripts",
-]
+const roots = ["src", "convex", "contracts", "trigger", "prompts", "scripts"]
 const excludedPaths = [
   "(^|/)[.]agents(/|$)",
   "(^|/)[.]claude(/|$)",
@@ -17,7 +9,6 @@ const excludedPaths = [
   "(^|/)node_modules(/|$)",
   "(^|/)dist(/|$)",
   "[.]test[.](?:ts|tsx|js|jsx)$",
-  "^runtime/apps/template(/|$)",
   // Vendored better-auth-ui registry code, kept as installed; its internal
   // wiring (plugin <-> settings views) is upstream's to govern.
   "^src/components/auth(/|$)",
@@ -45,58 +36,44 @@ const ruleSet = {
         path: "^contracts/",
       },
       to: {
-        path: "^(?:src|convex|runtime|trigger|prompts|scripts)(?:/|$)",
-      },
-    },
-    {
-      name: "src-does-not-import-backend-runtime-or-scripts",
-      severity: "error",
-      comment:
-        "App code may use generated Convex API refs, not backend, runtime, or script internals.",
-      from: {
-        path: "^src/",
-      },
-      to: {
-        path: "^(?:convex|runtime|trigger|prompts|scripts)(?:/|$)",
-        pathNot: "^convex/_generated/",
-      },
-    },
-    {
-      name: "convex-does-not-import-app-runtime-or-scripts",
-      severity: "error",
-      comment:
-        "Convex code may consume generated runtime assets, not app, runtime source, Trigger, or tooling code.",
-      from: {
-        path: "^convex/",
-      },
-      to: {
-        path: "^(?:src|runtime|trigger|scripts)(?:/|$)",
-        pathNot: "^runtime/apps/_generated/",
-      },
-    },
-    {
-      name: "runtime-does-not-import-app-backend-or-scripts",
-      severity: "error",
-      comment:
-        "Runtime source may depend on contracts, not app, Convex, or script code.",
-      from: {
-        path: "^runtime/apps/",
-      },
-      to: {
         path: "^(?:src|convex|trigger|prompts|scripts)(?:/|$)",
       },
     },
     {
-      name: "trigger-does-not-import-app-backend-runtime-or-scripts",
+      name: "src-does-not-import-backend-or-scripts",
       severity: "error",
       comment:
-        "Trigger worker code may use contracts, prompts, generated Convex API refs, and generated runtime assets, not app, backend, runtime source, or script internals.",
+        "App code may use generated Convex API refs, not backend or script internals.",
+      from: {
+        path: "^src/",
+      },
+      to: {
+        path: "^(?:convex|trigger|prompts|scripts)(?:/|$)",
+        pathNot: "^convex/_generated/",
+      },
+    },
+    {
+      name: "convex-does-not-import-app-or-scripts",
+      severity: "error",
+      comment: "Convex code must not depend on app, Trigger, or tooling code.",
+      from: {
+        path: "^convex/",
+      },
+      to: {
+        path: "^(?:src|trigger|scripts)(?:/|$)",
+      },
+    },
+    {
+      name: "trigger-does-not-import-app-backend-or-scripts",
+      severity: "error",
+      comment:
+        "Trigger worker code may use contracts, prompts, and generated Convex API refs, not app, backend, or script internals.",
       from: {
         path: "^trigger/",
       },
       to: {
-        path: "^(?:src|convex|runtime|scripts)(?:/|$)",
-        pathNot: "^(?:convex/_generated/|runtime/apps/_generated/)",
+        path: "^(?:src|convex|scripts)(?:/|$)",
+        pathNot: "^convex/_generated/",
       },
     },
     {

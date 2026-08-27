@@ -60,11 +60,10 @@ describe("raw Markdown trigger instructions", () => {
 
   test("appends manual instructions as raw Markdown", () => {
     const base = automationRuntimeInput()
-    const markdown = "## Delegate\n\n```txt\nUse #share_app.\n```"
+    const markdown = "## Delegate\n\n```txt\nUse #search_runs.\n```"
     const input = {
       type: "instruction" as const,
       run: base.run,
-      app: null,
       integrations: base.integrations,
       instructions: markdown,
       organization: null,
@@ -76,64 +75,6 @@ describe("raw Markdown trigger instructions", () => {
     expect(
       assemblePrompt(input).context.endsWith(`## Instructions\n\n${markdown}`)
     ).toBe(true)
-  })
-})
-
-describe("attached app context", () => {
-  test("renders the state contract by entry name", () => {
-    const input = automationRuntimeInput()
-
-    if (input.type !== "automation") {
-      throw new Error("Expected automation input.")
-    }
-
-    input.app = {
-      appId: input.run.appId ?? ("app" as never),
-      title: "Meeting Briefing",
-      contract: [
-        {
-          name: "briefings",
-          scope: "shared",
-          schemaName: "MeetingBriefings",
-          schemaVersion: 3,
-          description: "Canonical Meeting Briefing state.",
-        },
-        {
-          name: "research",
-          scope: "personal",
-          schemaName: "MeetingBriefingResearch",
-          schemaVersion: 3,
-          description: null,
-        },
-      ],
-    }
-
-    const context = assemblePrompt(input).context
-
-    expect(context).toContain("## Attached app")
-    expect(context).toContain("`Meeting Briefing` is this run's primary app")
-    expect(context).toContain("default to it when `appId` is omitted")
-    expect(context).toContain(
-      "- `briefings` (shared, MeetingBriefings v3): Canonical Meeting Briefing state."
-    )
-    expect(context).toContain(
-      "- `research` (personal, MeetingBriefingResearch v3)"
-    )
-    expect(context).not.toContain(
-      "- `research` (personal, MeetingBriefingResearch v3):"
-    )
-    expect(context).toContain("as `expectedVersion`")
-    expect(context).toContain(
-      "use `claim` for any effect that must happen at most once"
-    )
-    expect(context).toContain("never let partial work look complete")
-    expectNoSyntheticBlankLines(context)
-  })
-
-  test("stays out without an attached app", () => {
-    expect(assemblePrompt(automationRuntimeInput()).context).not.toContain(
-      "## Attached app"
-    )
   })
 })
 

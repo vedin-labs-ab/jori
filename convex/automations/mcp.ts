@@ -7,7 +7,6 @@ import { type AutomationAccessInput } from "./access"
 import { type AutomationTriggerInput, type AutomationType } from "./schema"
 
 type AddAutomationArgs = {
-  appId?: Id<"apps">
   key?: string
   name: string
   instructions: string
@@ -29,7 +28,6 @@ type ReadAutomationArgs = {
 
 type UpdateAutomationArgs = {
   automationId: Id<"automations">
-  appId?: Id<"apps">
   name?: string
   instructions?: string
   scope?: Scope

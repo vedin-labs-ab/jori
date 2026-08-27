@@ -22,7 +22,6 @@ export async function createInstructionRun(
     instructions: string
     title?: string
     access?: Access
-    appId?: Id<"apps">
     parent?: Doc<"runs">
     createdBy?: Id<"persons">
     principal?: ExecutionPrincipal
@@ -42,7 +41,6 @@ export async function createInstructionRun(
 
   const runId = await ctx.db.insert("runs", {
     organizationId: args.organizationId,
-    appId: args.appId ?? parent?.appId,
     ...(parent === undefined
       ? {}
       : {

@@ -18,7 +18,6 @@ const namingRoots = new Set([
   "convex",
   "playbooks",
   "prompts",
-  "runtime",
   "scripts",
   "src",
   "test",
@@ -26,7 +25,6 @@ const namingRoots = new Set([
 ])
 const conventionalSourcePaths = new Set([
   "convex/auth.config.ts",
-  "runtime/apps/template/src/vite-env.d.ts",
   "src/hooks/use-mobile.ts",
   "src/routeTree.gen.ts",
 ])

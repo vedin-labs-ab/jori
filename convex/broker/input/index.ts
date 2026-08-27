@@ -1,25 +1,9 @@
-import { isAppPublishTool } from "../../../contracts/apps/publish"
 import { type JsonObject } from "../../../contracts/json"
 import {
   getToolInputSchema,
   isJsonSchema,
 } from "../../runs/agent/tools/schemas"
 import { validateSchemaValue } from "./validation"
-
-export function normalizeJoriToolInput(
-  tool: string,
-  input: unknown
-): JsonObject {
-  if (isAppPublishTool(tool)) {
-    if (!isJsonObject(input)) {
-      throw new Error(`${tool} must be an object`)
-    }
-
-    return input
-  }
-
-  return normalizeBrokerToolInput(tool, input)
-}
 
 export function normalizeBrokerToolInput(
   tool: string,

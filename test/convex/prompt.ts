@@ -32,7 +32,6 @@ export function automationRuntimeInput(webSearch = true) {
       },
       createdAt: 0,
     },
-    app: null,
     integration: null,
     integrations: [github, slack],
     event: null,
@@ -62,7 +61,6 @@ export function linearAutomationRuntimeInput() {
       cause: { type: "event", eventId: "event" },
       createdAt: 0,
     },
-    app: null,
     integration: linear,
     integrations: [linear],
     event: {
@@ -119,7 +117,6 @@ export function notionAutomationRuntimeInput() {
       },
       createdAt: 0,
     },
-    app: null,
     integration: notion,
     integrations: [notion],
     event: notionCommentEvent(notion._id),

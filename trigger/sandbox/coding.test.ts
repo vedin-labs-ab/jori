@@ -256,10 +256,6 @@ class LocalSandbox implements SandboxRuntime {
 
   async cleanup() {}
 
-  async buildApp() {
-    return {}
-  }
-
   async cloneRepository(input: SandboxCloneRepositoryInput) {
     return {
       directory: sandboxClonePath({

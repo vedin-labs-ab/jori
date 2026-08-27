@@ -1,4 +1,3 @@
-import { appToolResponseSchemas } from "./apps"
 import {
   automationJoriToolResponseSchemas,
   coreJoriToolResponseSchemas,
@@ -8,7 +7,6 @@ import { tableToolResponseSchemas } from "./tables"
 
 export const joriToolResponseSchemas = {
   ...coreJoriToolResponseSchemas,
-  ...appToolResponseSchemas,
   ...tableToolResponseSchemas,
   ...storeToolResponseSchemas,
   ...automationJoriToolResponseSchemas,

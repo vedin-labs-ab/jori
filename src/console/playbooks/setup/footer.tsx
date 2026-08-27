@@ -102,7 +102,7 @@ function EnableFooter({
 }
 
 /** What saving means for an existing enablement: version updates refresh
- *  the rendered instructions, and a customized app is never touched. */
+ *  the rendered instructions. */
 export function EditSetupNotes({
   definition,
   enabled,
@@ -114,28 +114,16 @@ export function EditSetupNotes({
     return null
   }
 
-  const updateAvailable = playbookUpdateAvailable(definition, enabled)
-  const customized = enabled.app?.customized === true
-
-  if (!updateAvailable && !customized) {
+  if (!playbookUpdateAvailable(definition, enabled)) {
     return null
   }
 
   return (
     <div className="grid gap-1 text-muted-foreground text-xs">
-      {updateAvailable ? (
-        <p>
-          A newer version of this playbook is available. Saving re-renders its
-          instructions{definition.app === undefined ? "" : " and app"} from your
-          settings.
-        </p>
-      ) : null}
-      {customized ? (
-        <p>
-          Your {definition.app?.title ?? "playbook"} app has custom changes.
-          Jori keeps them and never overwrites a customized app.
-        </p>
-      ) : null}
+      <p>
+        A newer version of this playbook is available. Saving re-renders its
+        instructions from your settings.
+      </p>
     </div>
   )
 }

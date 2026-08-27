@@ -48,7 +48,6 @@ export async function resolvePlaybookDraft(
     organizationId: args.organizationId,
     key: `playbook:${plan.definition.key}`,
     playbook: playbookBinding(plan, args),
-    appId: args.appId,
     name: plan.definition.title,
     instructions: plan.instructions,
     scope: plan.definition.scope,

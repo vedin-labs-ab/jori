@@ -1,19 +1,6 @@
 import { defineSchema } from "convex/server"
 import { allowlist } from "./access/schema"
 import { approvals } from "./approvals/schema"
-import {
-  appAssets,
-  appBlobs,
-  appCaches,
-  appEntries,
-  appSessions,
-  appShares,
-  appState,
-  apps,
-  appTools,
-  appTrees,
-  appVersions,
-} from "./apps/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
 import { backfills } from "./backfill/schema"
@@ -86,17 +73,6 @@ export default defineSchema({
   sandboxes,
   permissions,
   reactions,
-  apps,
-  appVersions,
-  appTrees,
-  appEntries,
-  appBlobs,
-  appTools,
-  appSessions,
-  appShares,
-  appAssets,
-  appState,
-  appCaches,
   tables,
   tableRows,
   tableShares,

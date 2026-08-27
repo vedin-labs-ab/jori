@@ -28,8 +28,7 @@ export const playbookPlanFields = {
 export function playbookPlanArgs(
   args: PlaybookCallerArgs,
   createdBy: PlaybookPlanArgs["createdBy"],
-  recipient: PlaybookPlanArgs["recipient"],
-  appId?: PlaybookPlanArgs["appId"]
+  recipient: PlaybookPlanArgs["recipient"]
 ): PlaybookPlanArgs {
   return {
     organizationId: args.organizationId,
@@ -39,7 +38,6 @@ export function playbookPlanArgs(
     options: args.options,
     createdBy,
     recipient,
-    appId,
   }
 }
 

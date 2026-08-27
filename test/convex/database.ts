@@ -50,6 +50,22 @@ export function createDatabase() {
         }
       }
     },
+    // Convex patch semantics: undefined values remove the field.
+    patch: async (id: string, value: Record<string, unknown>) => {
+      const stored = docs.get(id)
+
+      if (stored === undefined) {
+        throw new Error(`Missing document: ${id}`)
+      }
+
+      for (const [field, fieldValue] of Object.entries(value)) {
+        if (fieldValue === undefined) {
+          delete stored[field]
+        } else {
+          stored[field] = fieldValue
+        }
+      }
+    },
     query: (table: string) => queryBuilder(rowsOf(table)),
   }
 }
@@ -100,6 +116,7 @@ function queryBuilder(rows: StoredDoc[]) {
       return result[0] ?? null
     },
     collect: async () => filtered(),
+    take: async (count: number) => filtered().slice(0, count),
     paginate: async (_opts: unknown) => ({
       page: filtered(),
       isDone: true,

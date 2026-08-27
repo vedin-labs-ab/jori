@@ -11,7 +11,6 @@ import { recordToolResultActivity } from "../trace/activity"
 import { errorDetails } from "../trace/events"
 import { recordToolEvent, toolTraceDetails } from "../trace/tool"
 import { executeAgentTool } from "./agent"
-import { prepareJoriToolInput } from "./apps"
 import { saveSandboxFile } from "./files"
 import { prepareProviderToolInput } from "./github"
 import { generateImageFile } from "./images"
@@ -180,7 +179,7 @@ async function requestPromptedApproval(
 ) {
   const input =
     surface === "jori"
-      ? await prepareJoriToolInput(runtime, tool, args)
+      ? args
       : await prepareProviderToolInput(runtime, surface, tool, args)
   const replyTarget = runtime.context.activeSurface?.target
 
@@ -227,7 +226,7 @@ async function callConvexTool(
   const result = await runtime.platform.callTool({
     input:
       surface === "jori"
-        ? await prepareJoriToolInput(runtime, tool, input)
+        ? input
         : await prepareProviderToolInput(runtime, surface, tool, input),
     runId: runtime.context.run.id,
     surface,

@@ -4,8 +4,7 @@ await runChecks()
 
 async function runChecks() {
   await runCommands([
-    packageCommand("runtime:check"),
-    packageCommand("templates:check"),
+    packageCommand("playbooks:check"),
     packageCommand("content:compile"),
   ])
 

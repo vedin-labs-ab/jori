@@ -18,13 +18,13 @@ test("uses runtime skill names in the load_skill schema", () => {
 
   expect(
     toolDescriptor("jori", permission, resolveToolModes([]), [
-      "app-creator",
-      "frontend-design",
+      "image-generation",
+      "slack",
     ]).inputSchema
   ).toMatchObject({
     properties: {
       name: {
-        enum: ["app-creator", "frontend-design"],
+        enum: ["image-generation", "slack"],
       },
     },
   })

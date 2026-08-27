@@ -14,16 +14,6 @@ export function runtimeSkills(
 ): RuntimeSkill[] {
   return [
     runtimeSkill({
-      name: "app-creator",
-      description: "Create or update Jori apps.",
-      body: "# App Creator\n\nUse this skill for app work.",
-    }),
-    runtimeSkill({
-      name: "frontend-design",
-      description: "Design Jori-native app and frontend UI.",
-      body: "# Frontend Design\n\nDesign the useful surface first.",
-    }),
-    runtimeSkill({
       name: "image-generation",
       description: "Generate Jori image files.",
       body: "# Image Generation\n\nCall `generate_image` for images.",

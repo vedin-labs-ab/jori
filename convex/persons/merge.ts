@@ -7,7 +7,6 @@ import { outranks, selectSurvivor } from "./identity/rows"
 import { type LinkMethod } from "./identity/schema"
 
 const identityBatchSize = 100
-const appBatchSize = 50
 
 async function mergePersons(
   ctx: MutationCtx,
@@ -47,11 +46,6 @@ async function mergePersons(
     updatedAt: Date.now(),
   })
   await scheduleIdentityRewrite(ctx, {
-    sourcePersonId,
-    targetPersonId,
-    organizationId: args.organizationId,
-  })
-  await scheduleAppOwnerRewrite(ctx, {
     sourcePersonId,
     targetPersonId,
     organizationId: args.organizationId,
@@ -125,38 +119,6 @@ export const rewritePersonIdentities = internalMutation({
   },
 })
 
-export const rewriteAppOwners = internalMutation({
-  args: {
-    organizationId: v.string(),
-    sourcePersonId: v.id("persons"),
-    targetPersonId: v.id("persons"),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const apps = await ctx.db
-      .query("apps")
-      .withIndex("by_organization_and_owner", (index) =>
-        index
-          .eq("organizationId", args.organizationId)
-          .eq("ownerId", args.sourcePersonId)
-      )
-      .take(appBatchSize)
-
-    for (const app of apps) {
-      await ctx.db.patch(app._id, {
-        ownerId: args.targetPersonId,
-        updatedAt: Date.now(),
-      })
-    }
-
-    if (apps.length === appBatchSize) {
-      await scheduleAppOwnerRewrite(ctx, args)
-    }
-
-    return null
-  },
-})
-
 async function moveIdentityBatch(
   ctx: MutationCtx,
   organizationId: string,
@@ -195,15 +157,4 @@ async function scheduleIdentityRewrite(
     internal.persons.merge.rewritePersonIdentities,
     args
   )
-}
-
-async function scheduleAppOwnerRewrite(
-  ctx: MutationCtx,
-  args: {
-    organizationId: string
-    sourcePersonId: Id<"persons">
-    targetPersonId: Id<"persons">
-  }
-) {
-  await ctx.scheduler.runAfter(0, internal.persons.merge.rewriteAppOwners, args)
 }

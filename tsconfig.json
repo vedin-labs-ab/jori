@@ -6,8 +6,7 @@
     ".trigger",
     ".tanstack",
     "dist",
-    "node_modules",
-    "runtime/apps/template"
+    "node_modules"
   ],
   "compilerOptions": {
     "target": "ES2022",

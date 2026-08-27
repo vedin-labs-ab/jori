@@ -12,7 +12,6 @@ export function emptyActivityData(): Omit<ActivityData, "run"> {
   return {
     agents: [],
     approvals: [],
-    apps: [],
     files: [],
     offers: [],
     stores: [],
