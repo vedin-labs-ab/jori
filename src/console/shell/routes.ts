@@ -4,7 +4,6 @@ import {
   Database,
   Files,
   Layers,
-  LayoutDashboard,
   Library,
   ListChecks,
   NotebookTabs,
@@ -12,7 +11,6 @@ import {
 } from "lucide-react"
 
 export const consoleNavigation = [
-  { icon: LayoutDashboard, label: "Overview", to: "/console" },
   { icon: ListChecks, label: "Runs", to: "/runs" },
   { icon: NotebookTabs, label: "Playbooks", to: "/playbooks" },
   { icon: CalendarClock, label: "Automations", to: "/automations" },

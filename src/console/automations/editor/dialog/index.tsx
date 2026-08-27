@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
+import { ScopeField } from "../../../shared/scope/field"
 import { getAutomationScopeConflict } from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
@@ -24,7 +25,6 @@ import { AccessFields } from "./access"
 import { AutomationContextSection } from "./context"
 import { AutomationInstructionsSection } from "./instructions"
 import { AutomationNameField } from "./name"
-import { ScopeField } from "./scope"
 import { AutomationTiming } from "./timing"
 
 type AutomationDialogProps = {
@@ -158,6 +158,13 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         value={props.values.name}
       />
       <ScopeField
+        help={{
+          organization:
+            "everyone can manage it. Runs use organization context and shared integrations only.",
+          personal:
+            "only you can manage it. Runs use your context and connected accounts.",
+        }}
+        id="automation-scope"
         onValueChange={props.actions.updateScope}
         value={props.values.scope}
       />

@@ -9,6 +9,7 @@ import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsolePageLayout,
+  ConsoleScrollableGrid,
 } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
 import { EditFileDialog } from "./edit"
@@ -43,13 +44,17 @@ function FilesCard({ organizationId }: { organizationId: string }) {
         />
       </ConsoleHeaderActions>
 
-      <FileTable
-        files={pagination.visibleRows}
-        isLoading={pagination.isLoading}
-        onDelete={actions.deleteFile}
-        onEdit={setEditFile}
-        pendingFileId={actions.pendingFileId}
-      />
+      {/* The list scrolls in place so the pager stays pinned below it,
+          matching the other paginated console pages. */}
+      <ConsoleScrollableGrid>
+        <FileTable
+          files={pagination.visibleRows}
+          isLoading={pagination.isLoading}
+          onDelete={actions.deleteFile}
+          onEdit={setEditFile}
+          pendingFileId={actions.pendingFileId}
+        />
+      </ConsoleScrollableGrid>
       <ConsoleListPager pagination={pagination} />
 
       <UploadFileDialog
