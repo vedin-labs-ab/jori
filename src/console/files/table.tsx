@@ -1,6 +1,4 @@
-import { Link } from "@tanstack/react-router"
 import { Files, Upload } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -14,6 +12,7 @@ import {
 import { ConsoleEmptyState } from "../shared/list/empty"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
+import { FileNameCell, FileOwnerCell, FileTypeCell } from "./cells"
 import { FileMenu } from "./menu"
 import { type FileRow, formatFileSize } from "./types"
 
@@ -77,11 +76,11 @@ function FileTableHead() {
     <TableHeader>
       <TableRow>
         <TableHead>Name</TableHead>
-        <TableHead>Type</TableHead>
         <TableHead>Size</TableHead>
-        <TableHead>Scope</TableHead>
-        <TableHead>Source</TableHead>
-        <TableHead>Added</TableHead>
+        <TableHead>Type</TableHead>
+        <TableHead>Created</TableHead>
+        <TableHead>Owner</TableHead>
+        <TableHead>Last Updated</TableHead>
         <TableHead className="w-10" />
       </TableRow>
     </TableHeader>
@@ -104,40 +103,28 @@ function FileTableRow({
   return (
     <TableRow>
       <TableCell className="max-w-64">
-        <Link
-          className="block truncate font-medium hover:underline"
-          params={{ fileId: file.fileId }}
-          title={file.name}
-          to="/files/$fileId"
-        >
-          {file.name}
-        </Link>
-        {file.description === undefined ? null : (
-          <p
-            className="truncate text-muted-foreground"
-            title={file.description}
-          >
-            {file.description}
-          </p>
-        )}
+        <FileNameCell file={file} />
       </TableCell>
-      <TableCell className="text-muted-foreground">{file.mimeType}</TableCell>
       <TableCell className="text-muted-foreground">
         {formatFileSize(file.size)}
       </TableCell>
       <TableCell>
-        <Badge variant={file.scope === "personal" ? "outline" : "secondary"}>
-          {file.scope === "personal" ? "Personal" : "Organization"}
-        </Badge>
-      </TableCell>
-      <TableCell className="text-muted-foreground">
-        {file.source === "run" ? "Agent run" : "Uploaded"}
+        <FileTypeCell file={file} />
       </TableCell>
       <TableCell
         className="text-muted-foreground"
         title={absoluteTime(file.createdAt)}
       >
         {relativeTime(file.createdAt, now)}
+      </TableCell>
+      <TableCell className="max-w-48">
+        <FileOwnerCell file={file} />
+      </TableCell>
+      <TableCell
+        className="text-muted-foreground"
+        title={absoluteTime(file.updatedAt)}
+      >
+        {relativeTime(file.updatedAt, now)}
       </TableCell>
       <TableCell className="text-right">
         <FileMenu
