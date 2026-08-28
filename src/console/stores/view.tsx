@@ -1,21 +1,10 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { ChevronsUpDown } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { JsonBlock } from "../shared/code"
-import { CopyButton } from "../shared/copy"
-import { DetailFrame } from "../shared/details"
-import { formatJsonText } from "../shared/json/parse"
 import { ConsolePageLayout } from "../shared/layout"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
@@ -137,7 +126,6 @@ function StoreReadyView({
         store={store}
       />
       <StoreHeading isArchived={isArchived} store={store} />
-      <SchemaSection store={store} />
       <StoreValue organizationId={organizationId} store={store} />
       <EditStoreDialog
         onOpenChange={setIsEditOpen}
@@ -151,37 +139,5 @@ function StoreReadyView({
         storeId={store.storeId}
       />
     </ConsolePageLayout>
-  )
-}
-
-/** The schema is fixed at creation, so it reads as a collapsed reference. */
-function SchemaSection({ store }: { store: StoreDetail }) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  return (
-    <Collapsible onOpenChange={setIsOpen} open={isOpen}>
-      <DetailFrame
-        action={
-          <CopyButton label="schema" value={formatJsonText(store.schema)} />
-        }
-        header={
-          <CollapsibleTrigger asChild>
-            <Button
-              className="-ml-2 text-muted-foreground"
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              <ChevronsUpDown />
-              Schema
-            </Button>
-          </CollapsibleTrigger>
-        }
-      >
-        <CollapsibleContent>
-          <JsonBlock value={store.schema} />
-        </CollapsibleContent>
-      </DetailFrame>
-    </Collapsible>
   )
 }

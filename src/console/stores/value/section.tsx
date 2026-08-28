@@ -1,7 +1,13 @@
-import { Pencil } from "lucide-react"
-import { useState } from "react"
+import { Braces, Pencil } from "lucide-react"
+import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { JsonBlock } from "../../shared/code"
+import { DialogTitle } from "@/components/ui/dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { JsonBlock, JsonDialog } from "../../shared/code"
 import { CopyButton } from "../../shared/copy"
 import { DetailFrame } from "../../shared/details"
 import { formatJsonText } from "../../shared/json/parse"
@@ -18,7 +24,7 @@ export function StoreValue({
   store: StoreDetail
 }) {
   const [isEditing, setIsEditing] = useState(false)
-  const isArchived = store.archivedAt !== undefined
+  const [isSchemaOpen, setIsSchemaOpen] = useState(false)
 
   if (isEditing) {
     return (
@@ -32,26 +38,93 @@ export function StoreValue({
   }
 
   return (
-    <DetailFrame
-      action={
-        <span className="inline-flex items-center gap-1">
-          <CopyButton label="value" value={formatJsonText(store.value)} />
-          <Button
-            disabled={isArchived}
-            onClick={() => setIsEditing(true)}
-            size="sm"
-            type="button"
-            variant="ghost"
-          >
-            <Pencil />
-            Edit
-          </Button>
-        </span>
-      }
-      header={valueHeader(store)}
-    >
-      <ValueDocument store={store} />
-    </DetailFrame>
+    <>
+      <DetailFrame
+        action={
+          <ValueActions
+            onEdit={() => setIsEditing(true)}
+            onViewSchema={() => setIsSchemaOpen(true)}
+            store={store}
+          />
+        }
+        header={valueHeader(store)}
+      >
+        <ValueDocument store={store} />
+      </DetailFrame>
+      <JsonDialog
+        description="The schema this store's value must conform to."
+        headerLeft={
+          <DialogTitle className="font-mono font-normal text-muted-foreground text-xs">
+            Schema
+          </DialogTitle>
+        }
+        onOpenChange={setIsSchemaOpen}
+        open={isSchemaOpen}
+        value={store.schema}
+      />
+    </>
+  )
+}
+
+function ValueActions({
+  onEdit,
+  onViewSchema,
+  store,
+}: {
+  onEdit: () => void
+  onViewSchema: () => void
+  store: StoreDetail
+}) {
+  const isArchived = store.archivedAt !== undefined
+
+  return (
+    <span className="inline-flex items-center gap-1">
+      <CopyButton label="value" value={formatJsonText(store.value)} />
+      <ValueActionButton
+        disabled={isArchived}
+        icon={<Pencil />}
+        label="Edit value"
+        onClick={onEdit}
+      />
+      <ValueActionButton
+        icon={<Braces />}
+        label="View schema"
+        onClick={onViewSchema}
+      />
+    </span>
+  )
+}
+
+/** Icon-only header action, in the CopyButton idiom: tooltip for sighted
+ *  pointers, aria-label for everyone else. */
+function ValueActionButton({
+  disabled,
+  icon,
+  label,
+  onClick,
+}: {
+  disabled?: boolean
+  icon: ReactNode
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label={label}
+          className="text-muted-foreground hover:text-foreground"
+          disabled={disabled}
+          onClick={onClick}
+          size="icon-xs"
+          type="button"
+          variant="ghost"
+        >
+          {icon}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   )
 }
 

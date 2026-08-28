@@ -1,8 +1,14 @@
+import { scopeLabels } from "@contracts/permissions/scope"
 import { Download, Link2, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { ScopeIcon } from "../shared/details"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
 import { MaterialActions } from "../shared/materials/actions"
-import { MaterialScopeBadge } from "../shared/materials/scope"
 import { storeDeleteDescription, type useStoreRemoval } from "./manage"
 import { type StoreDetail } from "./types"
 
@@ -69,7 +75,15 @@ export function StoreHeading({
     <div className="grid gap-1">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-medium text-lg tracking-tight">{store.name}</h2>
-        <MaterialScopeBadge scope={store.scope} />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-muted-foreground">
+              <ScopeIcon className="size-4" scope={store.scope} />
+              <span className="sr-only">{scopeLabels[store.scope]}</span>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{scopeLabels[store.scope]}</TooltipContent>
+        </Tooltip>
         {isArchived ? <Badge variant="secondary">Archived</Badge> : null}
       </div>
       {store.description === undefined ? null : (
