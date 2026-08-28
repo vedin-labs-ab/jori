@@ -1,6 +1,28 @@
-import { type Scope } from "@contracts/permissions/scope"
+import { type Scope, scopeLabels } from "@contracts/permissions/scope"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { ScopeIcon } from "../details"
 import { ScopeField } from "../scope/field"
+
+/** Muted scope icon with its label in a tooltip and for screen readers:
+ *  the material heading treatment, also the breadcrumb's scope suffix. */
+export function MaterialScopeMark({ scope }: { scope: Scope }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="shrink-0 text-muted-foreground">
+          <ScopeIcon className="size-4" scope={scope} />
+          <span className="sr-only">{scopeLabels[scope]}</span>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{scopeLabels[scope]}</TooltipContent>
+    </Tooltip>
+  )
+}
 
 export function MaterialScopeBadge({ scope }: { scope: Scope }) {
   return (
