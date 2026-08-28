@@ -2,6 +2,7 @@ import { type ConvexReactClient, useConvex } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { serializeCsv } from "@/lib/csv"
+import { downloadTextFile, toFilename } from "@/lib/download"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import {
@@ -26,8 +27,9 @@ export function useCsvExport(organizationId: string, table: TableDetail) {
       const rows = await fetchAllRows(convex, organizationId, table.tableId)
 
       downloadTextFile(
-        `${table.name.replaceAll(/[\\/:]/g, "-")}.csv`,
-        buildCsvExport(table.columns, rows)
+        toFilename(table.name, "csv"),
+        buildCsvExport(table.columns, rows),
+        "text/csv"
       )
     } catch (error) {
       showErrorToast(error, "Could not export the table.")
@@ -80,14 +82,4 @@ async function fetchAllRows(
 
     cursor = page.continueCursor
   }
-}
-
-function downloadTextFile(filename: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/csv" }))
-  const anchor = document.createElement("a")
-
-  anchor.href = url
-  anchor.download = filename
-  anchor.click()
-  URL.revokeObjectURL(url)
 }
