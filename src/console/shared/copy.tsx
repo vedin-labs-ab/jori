@@ -57,7 +57,8 @@ export function CopyButton({
 }: {
   className?: string
   label: string
-  value: string
+  /** The text to copy, or a getter for content fetched on click. */
+  value: string | (() => Promise<string>)
 }) {
   const [hasCopied, setHasCopied] = useState(false)
 
@@ -90,8 +91,11 @@ export function CopyButton({
               return
             }
 
-            void navigator.clipboard
-              ?.writeText(value)
+            const text =
+              typeof value === "string" ? Promise.resolve(value) : value()
+
+            void text
+              .then((resolved) => navigator.clipboard.writeText(resolved))
               .then(() => setHasCopied(true))
               .catch(() => undefined)
           }}
