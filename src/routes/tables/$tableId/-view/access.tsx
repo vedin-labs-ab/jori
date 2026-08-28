@@ -24,7 +24,7 @@ export function TableAccess({
       renderMember={(fallback) => (
         <TableView
           fallback={fallback}
-          tableId={tableId as GenericId<"tables">}
+          tableId={tableId as GenericId<"collections">}
         />
       )}
       renderShare={() =>

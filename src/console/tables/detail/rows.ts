@@ -15,7 +15,7 @@ import { rowPageSize, type TableRow } from "../types"
  *  keeps the visible page fresh. */
 export function useRowPages(
   organizationId: string,
-  tableId: GenericId<"tables">
+  tableId: GenericId<"collections">
 ) {
   const [cursors, setCursors] = useState<(string | null)[]>([null])
   const [pageIndex, setPageIndex] = useState(0)
@@ -72,7 +72,7 @@ export function rowFooterLabel(
  *  and the already-refreshed grid shows what won. */
 export function useRowWrites(
   organizationId: string,
-  tableId: GenericId<"tables">
+  tableId: GenericId<"collections">
 ) {
   const insert = useMutation(api.tables.console.insertRow)
   const update = useMutation(api.tables.console.updateRow)

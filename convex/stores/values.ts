@@ -1,25 +1,18 @@
 import { v } from "convex/values"
-import { assertStoreValue } from "../../contracts/stores/contract"
-import { resolveStoreWrite } from "../../contracts/stores/write"
-import { type Doc, type Id } from "../_generated/dataModel"
-import {
-  internalMutation,
-  internalQuery,
-  type MutationCtx,
-} from "../_generated/server"
-import { assertExpectedVersion } from "../materials/input"
-import { type QueryLikeCtx } from "../shared/context"
+import { internalMutation, internalQuery } from "../_generated/server"
+import { findSingletonDocument, writeDocument } from "../collections/documents"
+import { documentWrite } from "../collections/schema"
 import {
   findAccessibleStore,
   getAccessibleStore,
   summarizeStore,
 } from "./access"
-import { storeWrite } from "./schema"
+import { storeSpec } from "./spec"
 
 export const read = internalQuery({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
     personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
@@ -29,7 +22,7 @@ export const read = internalQuery({
       return null
     }
 
-    const document = await findValueDocument(ctx, store._id)
+    const document = await findSingletonDocument(ctx, store._id)
 
     return {
       ...summarizeStore(store),
@@ -39,111 +32,40 @@ export const read = internalQuery({
   },
 })
 
-/** The one write path for store values: access, archival, optimistic
- *  version, claim resolution, and schema validation all live here. */
+/** The store's single document goes through the collections chokepoint:
+ *  access, archival, optimistic version, claim resolution, and schema
+ *  validation. A held claim reports the holder instead of writing. */
 export const write = internalMutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
     personId: v.id("persons"),
     expectedVersion: v.optional(v.number()),
-    write: storeWrite,
+    write: documentWrite,
   },
   handler: async (ctx, args) => {
     const store = await getAccessibleStore(ctx, args)
+    const result = await writeDocument(ctx, storeSpec, store, {
+      write: args.write,
+      expectedVersion: args.expectedVersion,
+    })
 
-    if (store.archivedAt !== undefined) {
-      throw new Error("Store is archived. Restore it to write.")
-    }
-
-    const existing = await findValueDocument(ctx, store._id)
-    const currentVersion = existing?.version ?? 0
-
-    assertExpectedVersion(
-      args.expectedVersion,
-      currentVersion,
-      `Store ${store.name}`
-    )
-
-    const resolved = resolveStoreWrite(existing?.value, args.write)
-
-    if (resolved.kind === "held") {
+    if (result.status === "held") {
       return {
         claimed: false,
-        existing: resolved.existing,
-        version: currentVersion,
+        existing: result.existing,
+        version: result.version,
       }
     }
 
-    assertStoreValue({
-      schema: store.schema,
-      value: resolved.value,
+    const summary = {
+      storeId: store._id,
       name: store.name,
-    })
-
-    const summary =
-      existing === null
-        ? await insertValueDocument(ctx, store, resolved.value)
-        : await updateValueDocument(ctx, existing, store, resolved.value)
+      value: result.document.value as unknown,
+      version: result.document.version,
+      updatedAt: result.document.updatedAt,
+    }
 
     return args.write.type === "claim" ? { ...summary, claimed: true } : summary
   },
 })
-
-async function insertValueDocument(
-  ctx: MutationCtx,
-  store: Doc<"stores">,
-  value: unknown
-) {
-  const now = Date.now()
-
-  await ctx.db.insert("storeValues", {
-    organizationId: store.organizationId,
-    storeId: store._id,
-    value,
-    version: 1,
-    createdAt: now,
-    updatedAt: now,
-  })
-
-  return summarizeWrite(store, value, 1, now)
-}
-
-async function updateValueDocument(
-  ctx: MutationCtx,
-  existing: Doc<"storeValues">,
-  store: Doc<"stores">,
-  value: unknown
-) {
-  const version = existing.version + 1
-  const updatedAt = Date.now()
-
-  await ctx.db.patch(existing._id, { value, version, updatedAt })
-
-  return summarizeWrite(store, value, version, updatedAt)
-}
-
-function summarizeWrite(
-  store: Doc<"stores">,
-  value: unknown,
-  version: number,
-  updatedAt: number
-) {
-  return {
-    storeId: store._id,
-    name: store.name,
-    value,
-    version,
-    updatedAt,
-  }
-}
-
-export async function findValueDocument(
-  ctx: QueryLikeCtx,
-  storeId: Id<"stores">
-) {
-  return await ctx.db
-    .query("storeValues")
-    .withIndex("by_store", (index) => index.eq("storeId", storeId))
-    .first()
-}

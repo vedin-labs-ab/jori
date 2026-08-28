@@ -18,25 +18,17 @@ const tableTools = new Set([
 ])
 const shareTools = new Set(["share_table", "share_store", "share_file"])
 
-type MaterialReference = {
-  table: "stores" | "tables"
-  id: string
-}
-
+/** The collection id a store or table tool call touched, if any. */
 export function activityMaterialId(
   tool: string | undefined,
   input: Record<string, unknown> | undefined
-): MaterialReference | undefined {
+): string | undefined {
   if (tool !== undefined && storeTools.has(tool)) {
-    const id = optionalString(input?.storeId)
-
-    return id === undefined ? undefined : { table: "stores", id }
+    return optionalString(input?.storeId)
   }
 
   if (tool !== undefined && tableTools.has(tool)) {
-    const id = optionalString(input?.tableId)
-
-    return id === undefined ? undefined : { table: "tables", id }
+    return optionalString(input?.tableId)
   }
 
   return undefined
@@ -51,7 +43,7 @@ export function materialMetadata(args: {
   const target =
     reference === undefined
       ? shareFileTarget(args.tool, args.input)
-      : (args.materialNames.get(reference.id) ?? reference.id)
+      : (args.materialNames.get(reference) ?? reference)
 
   if (target === undefined) {
     return []

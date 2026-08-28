@@ -44,7 +44,7 @@ export const list = query({
 export const get = query({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
   },
   handler: async (ctx, args) => {
     const access = await checkOrganizationAccess(ctx, args.organizationId)
@@ -71,7 +71,7 @@ export const get = query({
 export const pageRows = query({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (
@@ -79,7 +79,7 @@ export const pageRows = query({
     args
   ): Promise<{
     rows: Array<{
-      rowId: Id<"tableRows">
+      rowId: Id<"documents">
       values: Record<string, unknown>
       version: number
       createdAt: number
@@ -118,7 +118,7 @@ export const create = mutation({
 export const update = mutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     columns: v.optional(v.any()),
@@ -136,7 +136,7 @@ export const update = mutation({
 export const insertRow = mutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     values: v.any(),
   },
   handler: async (ctx, args): Promise<unknown> => {
@@ -152,7 +152,7 @@ export const insertRow = mutation({
 export const insertRows = mutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     rows: v.array(v.any()),
   },
   handler: async (ctx, args): Promise<{ inserted: number }> => {
@@ -168,8 +168,8 @@ export const insertRows = mutation({
 export const updateRow = mutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
-    rowId: v.id("tableRows"),
+    tableId: v.id("collections"),
+    rowId: v.id("documents"),
     values: v.any(),
     expectedVersion: v.optional(v.number()),
   },
@@ -186,14 +186,14 @@ export const updateRow = mutation({
 export const removeRow = mutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
-    rowId: v.id("tableRows"),
+    tableId: v.id("collections"),
+    rowId: v.id("documents"),
     expectedVersion: v.optional(v.number()),
   },
   handler: async (
     ctx,
     args
-  ): Promise<{ rowId: Id<"tableRows">; deleted: true }> => {
+  ): Promise<{ rowId: Id<"documents">; deleted: true }> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.tables.rows.remove, {
@@ -206,12 +206,16 @@ export const removeRow = mutation({
 export const remove = mutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
   },
   handler: async (
     ctx,
     args
-  ): Promise<{ tableId: Id<"tables">; archived?: true; deleted?: true }> => {
+  ): Promise<{
+    tableId: Id<"collections">
+    archived?: true
+    deleted?: true
+  }> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.tables.records.remove, {
@@ -224,12 +228,12 @@ export const remove = mutation({
 export const restore = mutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
   },
   handler: async (
     ctx,
     args
-  ): Promise<{ tableId: Id<"tables">; restored: true }> => {
+  ): Promise<{ tableId: Id<"collections">; restored: true }> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.tables.records.restore, {

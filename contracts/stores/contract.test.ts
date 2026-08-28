@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { assertStoreValue, normalizeStoreSchema, storeLimits } from "./contract"
+import { normalizeStoreSchema, storeLimits } from "./contract"
 
 const schema = {
   type: "object",
@@ -40,37 +40,5 @@ describe("normalizeStoreSchema", () => {
         description: "x".repeat(storeLimits.maxSchemaBytes),
       })
     ).toThrow("exceeds")
-  })
-})
-
-describe("assertStoreValue", () => {
-  test("accepts values matching the schema", () => {
-    expect(() =>
-      assertStoreValue({
-        schema,
-        value: { dispatches: { "morning:1": { status: "sent" } } },
-        name: "dispatch-log",
-      })
-    ).not.toThrow()
-  })
-
-  test("rejects values the schema forbids", () => {
-    expect(() =>
-      assertStoreValue({
-        schema,
-        value: { unexpected: true },
-        name: "dispatch-log",
-      })
-    ).toThrow("is not allowed")
-  })
-
-  test("rejects Convex-unsafe object keys", () => {
-    expect(() =>
-      assertStoreValue({
-        schema,
-        value: { dispatches: { _bad: {} } },
-        name: "dispatch-log",
-      })
-    ).toThrow("Convex-safe")
   })
 })

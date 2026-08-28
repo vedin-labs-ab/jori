@@ -1,10 +1,21 @@
 import { type TableColumn } from "../../contracts/tables/columns"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { accessibleMaterial, filterMaterialSearch } from "../materials/access"
+import {
+  findAccessibleCollection,
+  getAccessibleCollection,
+  searchCollections,
+} from "../collections/access"
+import { type CollectionDoc } from "../collections/spec"
 import { type QueryLikeCtx } from "../shared/context"
-import { boundedNumber } from "../shared/input"
+import { tableSpec } from "./spec"
 
-const tableSearchLimit = 100
+type TableDoc = CollectionDoc<"table">
+
+type TableArgs = {
+  organizationId: string
+  tableId: Id<"collections">
+  personId: Id<"persons">
+}
 
 export async function searchTables(
   ctx: QueryLikeCtx,
@@ -16,51 +27,20 @@ export async function searchTables(
     limit?: number
   }
 ) {
-  const tables = await ctx.db
-    .query("tables")
-    .withIndex("by_organization_and_updated_at", (index) =>
-      index.eq("organizationId", args.organizationId)
-    )
-    .order("desc")
-    .take(tableSearchLimit)
-
-  return filterMaterialSearch(tables, {
-    ...args,
-    limit: boundedNumber(args.limit, 25, 1, tableSearchLimit),
-  })
+  return await searchCollections(ctx, tableSpec, args)
 }
 
 /** Load a table only if it is in the organization and visible to the person;
  *  null otherwise, so callers cannot tell missing from inaccessible. */
-export async function findAccessibleTable(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    tableId: Id<"tables">
-    personId: Id<"persons">
-  }
-) {
-  return accessibleMaterial(await ctx.db.get(args.tableId), args)
+export async function findAccessibleTable(ctx: QueryLikeCtx, args: TableArgs) {
+  return await findAccessibleCollection(ctx, tableSpec, toCollectionArgs(args))
 }
 
-export async function getAccessibleTable(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    tableId: Id<"tables">
-    personId: Id<"persons">
-  }
-) {
-  const table = await findAccessibleTable(ctx, args)
-
-  if (table === null) {
-    throw new Error("Table not found.")
-  }
-
-  return table
+export async function getAccessibleTable(ctx: QueryLikeCtx, args: TableArgs) {
+  return await getAccessibleCollection(ctx, tableSpec, toCollectionArgs(args))
 }
 
-export function summarizeTable(table: Doc<"tables">) {
+export function summarizeTable(table: TableDoc) {
   return {
     tableId: table._id,
     name: table.name,
@@ -74,12 +54,20 @@ export function summarizeTable(table: Doc<"tables">) {
   }
 }
 
-export function summarizeRow(row: Doc<"tableRows">) {
+export function summarizeRow(row: Doc<"documents">) {
   return {
     rowId: row._id,
-    values: row.values as Record<string, unknown>,
+    values: row.value as Record<string, unknown>,
     version: row.version,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+  }
+}
+
+function toCollectionArgs(args: TableArgs) {
+  return {
+    organizationId: args.organizationId,
+    collectionId: args.tableId,
+    personId: args.personId,
   }
 }

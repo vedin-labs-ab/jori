@@ -12,10 +12,9 @@ export function emptyActivityData(): Omit<ActivityData, "run"> {
   return {
     agents: [],
     approvals: [],
+    collections: [],
     files: [],
     offers: [],
-    stores: [],
-    tables: [],
     traces: [],
     waiters: [],
   }

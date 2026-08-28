@@ -28,7 +28,7 @@ export function TableView({
   tableId,
 }: {
   fallback?: ReactNode
-  tableId: GenericId<"tables">
+  tableId: GenericId<"collections">
 }) {
   return (
     <ConsolePage>
@@ -50,7 +50,7 @@ function TableViewContent({
 }: {
   fallback: ReactNode | undefined
   organizationId: string
-  tableId: GenericId<"tables">
+  tableId: GenericId<"collections">
 }) {
   const result = useQuery(api.tables.console.get, { organizationId, tableId })
 

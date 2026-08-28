@@ -41,13 +41,9 @@ const tableRegistry: Record<TableName, true> = {
   waiters: true,
   sandboxes: true,
   permissions: true,
-  tables: true,
-  tableRows: true,
-  tableShares: true,
-  stores: true,
-  storeValues: true,
-  storeShares: true,
-  fileShares: true,
+  collections: true,
+  documents: true,
+  shares: true,
 }
 
 const tables = Object.keys(tableRegistry) as TableName[]

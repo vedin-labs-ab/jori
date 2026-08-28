@@ -1,43 +1,37 @@
 import { describe, expect, test } from "vitest"
+import { tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
-import { activeShareLimit } from "../materials/shares"
+import { activeShareLimit } from "../collections/shares"
 import { mintTableShare, openTableShare, revokeTableShare } from "./share"
 
-const owner = "persons:owner" as Id<"persons">
 const stranger = "persons:stranger" as Id<"persons">
 
 async function createTable(
   database: TestDatabase,
   overrides: Record<string, unknown> = {}
 ) {
-  return (await database.insert("tables", {
-    organizationId: "org",
-    ownerId: owner,
-    scope: "organization",
-    name: "Leads",
-    description: "Open leads",
-    columns: [{ key: "title", name: "Title", type: "string" }],
-    createdAt: 1,
-    updatedAt: 1,
-    ...overrides,
-  })) as Id<"tables">
+  return (await database.insert(
+    "collections",
+    tableDoc({ description: "Open leads", ...overrides })
+  )) as Id<"collections">
 }
 
 async function createShare(
   database: TestDatabase,
-  tableId: Id<"tables">,
+  tableId: Id<"collections">,
   overrides: Record<string, unknown> = {}
 ) {
-  return (await database.insert("tableShares", {
+  return (await database.insert("shares", {
     organizationId: "org",
-    tableId,
-    createdBy: owner,
+    targetKind: "table",
+    targetId: tableId,
+    createdBy: testOwner,
     secret: "s3cret",
     createdAt: 1,
     expiresAt: Date.now() + 60_000,
     ...overrides,
-  })) as Id<"tableShares">
+  })) as Id<"shares">
 }
 
 describe("opening a table share", () => {
@@ -98,6 +92,15 @@ describe("opening a table share", () => {
     expect(await openTableShare(ctx, { tableId, secret: "s3cret" })).toBeNull()
   })
 
+  test("returns null for a store's share opened as a table", async () => {
+    const { database, ctx } = databaseContext()
+    const tableId = await createTable(database, { kind: "store", schema: {} })
+
+    await createShare(database, tableId, { targetKind: "store" })
+
+    expect(await openTableShare(ctx, { tableId, secret: "s3cret" })).toBeNull()
+  })
+
   test("returns null for unknown and malformed table ids", async () => {
     const { ctx } = databaseContext()
 
@@ -105,7 +108,10 @@ describe("opening a table share", () => {
       await openTableShare(ctx, { tableId: "garbage", secret: "s3cret" })
     ).toBeNull()
     expect(
-      await openTableShare(ctx, { tableId: "tables:404", secret: "s3cret" })
+      await openTableShare(ctx, {
+        tableId: "collections:404",
+        secret: "s3cret",
+      })
     ).toBeNull()
   })
 })
@@ -118,13 +124,14 @@ describe("minting a table share", () => {
     const minted = await mintTableShare(ctx, {
       organizationId: "org",
       tableId,
-      personId: owner,
+      personId: testOwner,
       expiresInHours: 9000,
     })
-    const shares = await database.query("tableShares").collect()
+    const shares = await database.query("shares").collect()
 
     expect(shares).toHaveLength(1)
     expect(shares[0]?.secret).toMatch(/^[0-9a-f]{64}$/)
+    expect(shares[0]?.targetKind).toBe("table")
     expect(minted.url).toContain(`#share=${shares[0]?.secret}`)
     expect(minted.expiresAt).toBeLessThanOrEqual(before + 169 * 60 * 60 * 1000)
   })
@@ -140,10 +147,10 @@ describe("minting a table share", () => {
     await mintTableShare(ctx, {
       organizationId: "org",
       tableId,
-      personId: owner,
+      personId: testOwner,
     })
 
-    const shares = await database.query("tableShares").collect()
+    const shares = await database.query("shares").collect()
 
     expect(shares).toHaveLength(activeShareLimit)
     expect(shares.some((share) => share.createdAt === 0)).toBe(false)
@@ -154,7 +161,11 @@ describe("minting a table share", () => {
     const tableId = await createTable(database, { archivedAt: 5 })
 
     await expect(
-      mintTableShare(ctx, { organizationId: "org", tableId, personId: owner })
+      mintTableShare(ctx, {
+        organizationId: "org",
+        tableId,
+        personId: testOwner,
+      })
     ).rejects.toThrow("Restore the table")
   })
 })
@@ -169,10 +180,10 @@ describe("revoking a table share", () => {
       organizationId: "org",
       tableId,
       shareId,
-      personId: owner,
+      personId: testOwner,
     })
 
-    expect(await database.query("tableShares").collect()).toHaveLength(0)
+    expect(await database.query("shares").collect()).toHaveLength(0)
     expect(await openTableShare(ctx, { tableId, secret: "s3cret" })).toBeNull()
   })
 
@@ -187,7 +198,7 @@ describe("revoking a table share", () => {
         organizationId: "org",
         tableId,
         shareId,
-        personId: owner,
+        personId: testOwner,
       })
     ).rejects.toThrow("Share link not found.")
   })

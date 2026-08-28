@@ -5,10 +5,11 @@ import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
 import { backfills } from "./backfill/schema"
 import { billingAccounts, billingEntries } from "./billing/schema"
+import { collections, documents, shares } from "./collections/schema"
 import { conversations } from "./conversations/schema"
 import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
 import { events } from "./events/schema"
-import { fileShares, files } from "./files/schema"
+import { files } from "./files/schema"
 import { integrationOffers } from "./integrations/offers/schema"
 import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
@@ -29,8 +30,6 @@ import { waiters } from "./runs/execution/waiters/schema"
 import { runs } from "./runs/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
-import { storeShares, stores, storeValues } from "./stores/schema"
-import { tableRows, tableShares, tables } from "./tables/schema"
 import { transitions } from "./transitions/schema"
 import { waitlist } from "./waitlist/schema"
 
@@ -39,7 +38,6 @@ export default defineSchema({
   allowlist,
   waitlist,
   files,
-  fileShares,
   billingAccounts,
   billingEntries,
   persons,
@@ -71,10 +69,7 @@ export default defineSchema({
   sandboxes,
   permissions,
   reactions,
-  tables,
-  tableRows,
-  tableShares,
-  stores,
-  storeValues,
-  storeShares,
+  collections,
+  documents,
+  shares,
 })

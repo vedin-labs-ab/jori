@@ -1,6 +1,5 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { shareExpiresAt } from "../../contracts/shares/expiry"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import {
@@ -10,19 +9,17 @@ import {
   query,
 } from "../_generated/server"
 import {
-  canOpenShare,
   type MintedShare,
-  mintedShare,
-  randomShareSecret,
-  shareLink,
-  sharesToRetire,
-} from "../materials/shares"
+  mintShare,
+  openShare,
+  pageShares,
+  revokeShare,
+  type ShareTarget,
+} from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
 import { canViewFile } from "./data"
 
-/** Create an independent share link; existing links keep their own expiry.
- *  A link is a read capability for this one file regardless of scope. */
 export const mint = internalMutation({
   args: {
     organizationId: v.string(),
@@ -53,29 +50,22 @@ export const revoke = mutation({
   args: {
     organizationId: v.string(),
     fileId: v.id("files"),
-    shareId: v.id("fileShares"),
+    shareId: v.id("shares"),
   },
   handler: async (ctx, args): Promise<null> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
     const file = await getViewableFile(ctx, { ...args, personId })
-    const share = await ctx.db.get(args.shareId)
 
-    if (
-      share === null ||
-      share.fileId !== file._id ||
-      share.organizationId !== file.organizationId
-    ) {
-      throw new Error("Share link not found.")
-    }
-
-    await ctx.db.delete(share._id)
+    await revokeShare(ctx, {
+      target: fileTarget(file._id),
+      organizationId: file.organizationId,
+      shareId: args.shareId,
+    })
 
     return null
   },
 })
 
-/** Expiration order is also lifecycle order: every future expiry sorts ahead
- *  of every past expiry, so one indexed cursor yields active links first. */
 export const page = query({
   args: {
     organizationId: v.string(),
@@ -84,25 +74,9 @@ export const page = query({
   },
   handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
+    const file = await getViewableFile(ctx, { ...args, personId })
 
-    await getViewableFile(ctx, { ...args, personId })
-
-    const result = await ctx.db
-      .query("fileShares")
-      .withIndex("by_file_and_expires_at", (index) =>
-        index.eq("fileId", args.fileId)
-      )
-      .order("desc")
-      .paginate(args.paginationOpts)
-
-    return {
-      ...result,
-      page: result.page.map((share) => ({
-        shareId: share._id,
-        createdAt: share.createdAt,
-        expiresAt: share.expiresAt,
-      })),
-    }
+    return await pageShares(ctx, fileTarget(file._id), args.paginationOpts)
   },
 })
 
@@ -140,30 +114,14 @@ export async function mintFileShare(
   }
 ): Promise<MintedShare> {
   const file = await getViewableFile(ctx, args)
-  const now = Date.now()
-  const secret = randomShareSecret()
-  const expiresAt = shareExpiresAt(now, args.expiresInHours)
-  const activeShares = await ctx.db
-    .query("fileShares")
-    .withIndex("by_file_and_expires_at", (index) =>
-      index.eq("fileId", file._id).gt("expiresAt", now)
-    )
-    .collect()
 
-  for (const stale of sharesToRetire(activeShares, now)) {
-    await ctx.db.delete(stale._id)
-  }
-
-  await ctx.db.insert("fileShares", {
+  return await mintShare(ctx, {
+    target: fileTarget(file._id),
     organizationId: file.organizationId,
-    fileId: file._id,
-    createdBy: args.personId,
-    secret,
-    createdAt: now,
-    expiresAt,
+    personId: args.personId,
+    urlPath: `/files/${file._id}`,
+    expiresInHours: args.expiresInHours,
   })
-
-  return mintedShare(shareLink(`/files/${file._id}`, secret), expiresAt)
 }
 
 /** Resolve a share link to its file: secret, expiry, organization, and the
@@ -179,30 +137,18 @@ export async function openFileShare(
     return null
   }
 
-  const share = await ctx.db
-    .query("fileShares")
-    .withIndex("by_file_and_secret", (index) =>
-      index.eq("fileId", fileId).eq("secret", args.secret)
-    )
-    .unique()
-
-  if (
-    share === null ||
-    !canOpenShare({
-      share,
-      material: file,
-      creatorHasAccess: canViewFile(file, {
-        organizationId: share.organizationId,
-        personId: share.createdBy,
+  const share = await openShare(ctx, {
+    target: fileTarget(file._id),
+    material: file,
+    creatorHasAccess: (createdBy) =>
+      canViewFile(file, {
+        organizationId: file.organizationId,
+        personId: createdBy,
       }),
-      secret: args.secret,
-      now: Date.now(),
-    })
-  ) {
-    return null
-  }
+    secret: args.secret,
+  })
 
-  return { file, share }
+  return share === null ? null : { file, share }
 }
 
 async function getViewableFile(
@@ -226,4 +172,8 @@ async function getViewableFile(
   }
 
   return file
+}
+
+function fileTarget(fileId: Id<"files">): ShareTarget {
+  return { kind: "file", id: fileId }
 }

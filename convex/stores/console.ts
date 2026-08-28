@@ -3,10 +3,10 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
+import { findSingletonDocument } from "../collections/documents"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { scopeValidator } from "../shared/audience"
 import { findAccessibleStore, searchStores, summarizeStore } from "./access"
-import { findValueDocument } from "./values"
 
 export const list = query({
   args: {
@@ -39,7 +39,7 @@ export const list = query({
       stores: await Promise.all(
         stores.map(async (store) => ({
           ...summarizeStore(store),
-          version: (await findValueDocument(ctx, store._id))?.version ?? 0,
+          version: (await findSingletonDocument(ctx, store._id))?.version ?? 0,
         }))
       ),
     }
@@ -49,7 +49,7 @@ export const list = query({
 export const get = query({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
   },
   handler: async (ctx, args) => {
     const access = await checkOrganizationAccess(ctx, args.organizationId)
@@ -69,7 +69,7 @@ export const get = query({
       return { status: "not_found" as const, store: null }
     }
 
-    const document = await findValueDocument(ctx, store._id)
+    const document = await findSingletonDocument(ctx, store._id)
 
     return {
       status: "ready" as const,
@@ -103,7 +103,7 @@ export const create = mutation({
 export const update = mutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
   },
@@ -120,7 +120,7 @@ export const update = mutation({
 export const writeValue = mutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
     value: v.any(),
     expectedVersion: v.optional(v.number()),
   },
@@ -140,12 +140,16 @@ export const writeValue = mutation({
 export const remove = mutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
   },
   handler: async (
     ctx,
     args
-  ): Promise<{ storeId: Id<"stores">; archived?: true; deleted?: true }> => {
+  ): Promise<{
+    storeId: Id<"collections">
+    archived?: true
+    deleted?: true
+  }> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.stores.records.remove, {
@@ -158,12 +162,12 @@ export const remove = mutation({
 export const restore = mutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
   },
   handler: async (
     ctx,
     args
-  ): Promise<{ storeId: Id<"stores">; restored: true }> => {
+  ): Promise<{ storeId: Id<"collections">; restored: true }> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.stores.records.restore, {

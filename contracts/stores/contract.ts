@@ -3,10 +3,6 @@ import {
   assertSupportedJsonSchema,
   normalizeJsonSchema,
 } from "../schema/normalize"
-import {
-  assertJsonSchemaValue,
-  type JsonSchemaObject,
-} from "../schema/validate"
 
 // A store is one named JSON document: a required JSON Schema fixed at
 // creation and a single versioned value validated against it on every write.
@@ -29,21 +25,4 @@ export function normalizeStoreSchema(value: unknown) {
   })
 
   return { schema, schemaHash: stableHash(schema) }
-}
-
-export function assertStoreValue(input: {
-  schema: JsonSchemaObject
-  value: unknown
-  name: string
-}) {
-  assertJsonSerializable({
-    label: `Store ${input.name} value`,
-    maxBytes: storeLimits.maxValueBytes,
-    value: input.value,
-  })
-  assertJsonSchemaValue({
-    label: input.name,
-    schema: input.schema,
-    value: input.value,
-  })
 }

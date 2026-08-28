@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { canAccessMaterial, type MaterialDoc } from "../../materials/access"
+import { canAccessCollection } from "../../collections/access"
 import { activityMaterialId } from "./metadata/materials"
 import { readToolInput, readToolName, readTraceData } from "./read"
 import { type ActivityData } from "./types"
@@ -23,32 +23,29 @@ export async function loadActivityData(
       loadFiles(ctx, run._id),
     ]
   )
-  const stores = await loadMaterials(ctx, run, traces, personId, "stores")
-  const tables = await loadMaterials(ctx, run, traces, personId, "tables")
+  const collections = await loadCollections(ctx, run, traces, personId)
 
   return {
     agents,
     approvals,
+    collections,
     files,
     offers,
     run,
-    stores,
-    tables,
     traces,
     waiters,
   }
 }
 
-/** Loads the tables or stores the run's tool calls referenced, keeping only
- *  those the viewer may see. */
-async function loadMaterials<Table extends "stores" | "tables">(
+/** Loads the tables and stores the run's tool calls referenced, keeping
+ *  only those the viewer may see. */
+async function loadCollections(
   ctx: QueryCtx,
   run: Doc<"runs">,
   traces: Doc<"traces">[],
-  personId: Id<"persons"> | undefined,
-  table: Table
+  personId: Id<"persons"> | undefined
 ) {
-  const ids = new Set<Id<Table>>()
+  const ids = new Set<Id<"collections">>()
 
   for (const trace of traces) {
     const data = readTraceData(trace)
@@ -56,12 +53,10 @@ async function loadMaterials<Table extends "stores" | "tables">(
       readToolName(data),
       readToolInput(data)
     )
-
-    if (reference?.table !== table) {
-      continue
-    }
-
-    const id = ctx.db.normalizeId(table, reference.id)
+    const id =
+      reference === undefined
+        ? null
+        : ctx.db.normalizeId("collections", reference)
 
     if (id !== null) {
       ids.add(id)
@@ -72,24 +67,20 @@ async function loadMaterials<Table extends "stores" | "tables">(
     }
   }
 
-  const materials = await Promise.all([...ids].map((id) => ctx.db.get(id)))
+  const collections = await Promise.all([...ids].map((id) => ctx.db.get(id)))
 
-  const visible = materials.filter((material) => {
-    if (material === null) {
+  return collections.filter((collection): collection is Doc<"collections"> => {
+    if (collection === null) {
       return false
     }
 
-    const doc = material as MaterialDoc
-
     return (
-      doc.organizationId === run.organizationId &&
+      collection.organizationId === run.organizationId &&
       (personId === undefined
-        ? doc.scope === "organization"
-        : canAccessMaterial(doc, personId))
+        ? collection.scope === "organization"
+        : canAccessCollection(collection, personId))
     )
   })
-
-  return visible as Doc<Table>[]
 }
 
 async function loadTraces(ctx: QueryCtx, runId: Id<"runs">) {

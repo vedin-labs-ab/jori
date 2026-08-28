@@ -1,21 +1,24 @@
 import { describe, expect, test } from "vitest"
-import { resolveStoreWrite } from "./write"
+import { resolveDocumentWrite } from "./write"
 
 const document = {
   meetings: { "mb:1": { status: "ready" } },
   dispatches: { "morning:2026-07-18": { status: "delivered" } },
 }
 
-describe("resolveStoreWrite", () => {
+describe("resolveDocumentWrite", () => {
   test("replace passes the value through", () => {
     expect(
-      resolveStoreWrite(document, { type: "replace", value: { fresh: true } })
+      resolveDocumentWrite(document, {
+        type: "replace",
+        value: { fresh: true },
+      })
     ).toEqual({ kind: "write", value: { fresh: true } })
   })
 
   test("merge patches the current document", () => {
     expect(
-      resolveStoreWrite(document, {
+      resolveDocumentWrite(document, {
         type: "merge",
         patch: { meetings: { "mb:1": { status: "stale" } } },
       })
@@ -30,7 +33,7 @@ describe("resolveStoreWrite", () => {
 
   test("claim wins when the path is unset and writes only that path", () => {
     expect(
-      resolveStoreWrite(document, {
+      resolveDocumentWrite(document, {
         type: "claim",
         path: ["dispatches", "morning:2026-07-19"],
         value: { status: "sending" },
@@ -48,10 +51,10 @@ describe("resolveStoreWrite", () => {
   })
 })
 
-describe("resolveStoreWrite claim edges", () => {
+describe("resolveDocumentWrite claim edges", () => {
   test("claim on an occupied path writes nothing and returns the holder", () => {
     expect(
-      resolveStoreWrite(document, {
+      resolveDocumentWrite(document, {
         type: "claim",
         path: ["dispatches", "morning:2026-07-18"],
         value: { status: "sending" },
@@ -61,7 +64,7 @@ describe("resolveStoreWrite claim edges", () => {
 
   test("claim works against an empty document", () => {
     expect(
-      resolveStoreWrite(undefined, {
+      resolveDocumentWrite(undefined, {
         type: "claim",
         path: ["dispatches", "first"],
         value: { status: "sending" },
@@ -74,10 +77,10 @@ describe("resolveStoreWrite claim edges", () => {
 
   test("claim rejects an empty path and a null value", () => {
     expect(() =>
-      resolveStoreWrite(document, { type: "claim", path: [], value: 1 })
+      resolveDocumentWrite(document, { type: "claim", path: [], value: 1 })
     ).toThrow("non-empty path")
     expect(() =>
-      resolveStoreWrite(document, {
+      resolveDocumentWrite(document, {
         type: "claim",
         path: ["dispatches", "key"],
         value: null,
