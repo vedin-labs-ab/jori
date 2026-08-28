@@ -13,7 +13,7 @@ export function TableLinksDialog({
   onOpenChange: (open: boolean) => void
   open: boolean
   organizationId: string
-  tableId: GenericId<"tables">
+  tableId: GenericId<"collections">
 }) {
   const shares = usePaginatedQuery(
     api.tables.share.page,

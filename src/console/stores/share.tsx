@@ -13,7 +13,7 @@ export function StoreLinksDialog({
   onOpenChange: (open: boolean) => void
   open: boolean
   organizationId: string
-  storeId: GenericId<"stores">
+  storeId: GenericId<"collections">
 }) {
   const shares = usePaginatedQuery(
     api.stores.share.page,

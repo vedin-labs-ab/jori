@@ -1,9 +1,10 @@
+import { assertJsonSchemaValue } from "@contracts/schema/validate"
 import {
   type TableColumn,
   type TableColumnType,
   tableLimits,
 } from "@contracts/tables/columns"
-import { assertRowValues } from "@contracts/tables/rows"
+import { compileTableSchema } from "@contracts/tables/compile"
 import { parseCsv } from "@/lib/csv"
 
 // A CSV file becomes a brand-new table: column keys are slugged from the
@@ -163,9 +164,10 @@ function inferColumnType(filled: string[]): TableColumnType {
 function planRows(columns: TableColumn[], records: CsvRecord[]): CsvTablePlan {
   const rows: CsvRow[] = []
   const issues: CsvRowIssue[] = []
+  const schema = compileTableSchema(columns)
 
   for (const record of records) {
-    const built = buildRow(columns, record.fields)
+    const built = buildRow(columns, schema, record.fields)
 
     if (typeof built === "string") {
       issues.push({ line: record.line, message: built })
@@ -183,6 +185,7 @@ function planRows(columns: TableColumn[], records: CsvRecord[]): CsvTablePlan {
 
 function buildRow(
   columns: TableColumn[],
+  schema: ReturnType<typeof compileTableSchema>,
   fields: string[]
 ): Record<string, unknown> | string {
   if (fields.length > columns.length) {
@@ -200,7 +203,7 @@ function buildRow(
   }
 
   try {
-    assertRowValues({ columns, values, label: "Row" })
+    assertJsonSchemaValue({ schema, value: values, label: "Row" })
   } catch (error) {
     return error instanceof Error ? error.message : "Failed validation."
   }

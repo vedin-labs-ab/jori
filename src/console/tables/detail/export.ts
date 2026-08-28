@@ -62,7 +62,7 @@ export function buildCsvExport(
 async function fetchAllRows(
   convex: ConvexReactClient,
   organizationId: string,
-  tableId: GenericId<"tables">
+  tableId: GenericId<"collections">
 ) {
   const rows: TableRow[] = []
   let cursor: string | null = null

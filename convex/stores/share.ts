@@ -1,7 +1,6 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { type JsonSchemaObject } from "../../contracts/schema/validate"
-import { shareExpiresAt } from "../../contracts/shares/expiry"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import {
@@ -10,26 +9,24 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { canAccessMaterial } from "../materials/access"
+import { canAccessCollection } from "../collections/access"
+import { findSingletonDocument } from "../collections/documents"
 import {
-  canOpenShare,
   type MintedShare,
-  mintedShare,
-  randomShareSecret,
-  shareLink,
-  sharesToRetire,
-} from "../materials/shares"
+  mintShare,
+  openShare,
+  pageShares,
+  revokeShare,
+  type ShareTarget,
+} from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
 import { getAccessibleStore } from "./access"
-import { findValueDocument } from "./values"
 
-/** Create an independent share link; existing links keep their own expiry.
- *  A link is a read capability for this one store regardless of scope. */
 export const mint = internalMutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
     personId: v.id("persons"),
     expiresInHours: v.optional(v.number()),
   },
@@ -39,7 +36,7 @@ export const mint = internalMutation({
 export const create = mutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
     expiresInHours: v.optional(v.number()),
   },
   handler: async (ctx, args): Promise<MintedShare> => {
@@ -55,57 +52,34 @@ export const create = mutation({
 export const revoke = mutation({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
-    shareId: v.id("storeShares"),
+    storeId: v.id("collections"),
+    shareId: v.id("shares"),
   },
   handler: async (ctx, args): Promise<null> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
     const store = await getAccessibleStore(ctx, { ...args, personId })
-    const share = await ctx.db.get(args.shareId)
 
-    if (
-      share === null ||
-      share.storeId !== store._id ||
-      share.organizationId !== store.organizationId
-    ) {
-      throw new Error("Share link not found.")
-    }
-
-    await ctx.db.delete(share._id)
+    await revokeShare(ctx, {
+      target: storeTarget(store._id),
+      organizationId: store.organizationId,
+      shareId: args.shareId,
+    })
 
     return null
   },
 })
 
-/** Expiration order is also lifecycle order: every future expiry sorts ahead
- *  of every past expiry, so one indexed cursor yields active links first. */
 export const page = query({
   args: {
     organizationId: v.string(),
-    storeId: v.id("stores"),
+    storeId: v.id("collections"),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
+    const store = await getAccessibleStore(ctx, { ...args, personId })
 
-    await getAccessibleStore(ctx, { ...args, personId })
-
-    const result = await ctx.db
-      .query("storeShares")
-      .withIndex("by_store_and_expires_at", (index) =>
-        index.eq("storeId", args.storeId)
-      )
-      .order("desc")
-      .paginate(args.paginationOpts)
-
-    return {
-      ...result,
-      page: result.page.map((share) => ({
-        shareId: share._id,
-        createdAt: share.createdAt,
-        expiresAt: share.expiresAt,
-      })),
-    }
+    return await pageShares(ctx, storeTarget(store._id), args.paginationOpts)
   },
 })
 
@@ -120,7 +94,7 @@ export const get = query({
       return null
     }
 
-    const document = await findValueDocument(ctx, opened.store._id)
+    const document = await findSingletonDocument(ctx, opened.store._id)
 
     return {
       name: opened.store.name,
@@ -137,7 +111,7 @@ export async function mintStoreShare(
   ctx: MutationCtx,
   args: {
     organizationId: string
-    storeId: Id<"stores">
+    storeId: Id<"collections">
     personId: Id<"persons">
     expiresInHours?: number
   }
@@ -148,30 +122,13 @@ export async function mintStoreShare(
     throw new Error("Restore the store before sharing it.")
   }
 
-  const now = Date.now()
-  const secret = randomShareSecret()
-  const expiresAt = shareExpiresAt(now, args.expiresInHours)
-  const activeShares = await ctx.db
-    .query("storeShares")
-    .withIndex("by_store_and_expires_at", (index) =>
-      index.eq("storeId", store._id).gt("expiresAt", now)
-    )
-    .collect()
-
-  for (const stale of sharesToRetire(activeShares, now)) {
-    await ctx.db.delete(stale._id)
-  }
-
-  await ctx.db.insert("storeShares", {
+  return await mintShare(ctx, {
+    target: storeTarget(store._id),
     organizationId: store.organizationId,
-    storeId: store._id,
-    createdBy: args.personId,
-    secret,
-    createdAt: now,
-    expiresAt,
+    personId: args.personId,
+    urlPath: `/stores/${store._id}`,
+    expiresInHours: args.expiresInHours,
   })
-
-  return mintedShare(shareLink(`/stores/${store._id}`, secret), expiresAt)
 }
 
 /** Resolve a share link to its store: secret, expiry, organization, archive
@@ -180,32 +137,23 @@ export async function openStoreShare(
   ctx: QueryLikeCtx,
   args: { storeId: string; secret: string }
 ) {
-  const storeId = ctx.db.normalizeId("stores", args.storeId)
+  const storeId = ctx.db.normalizeId("collections", args.storeId)
   const store = storeId === null ? null : await ctx.db.get(storeId)
 
-  if (storeId === null || store === null) {
+  if (store === null || store.kind !== "store") {
     return null
   }
 
-  const share = await ctx.db
-    .query("storeShares")
-    .withIndex("by_store_and_secret", (index) =>
-      index.eq("storeId", storeId).eq("secret", args.secret)
-    )
-    .unique()
+  const share = await openShare(ctx, {
+    target: storeTarget(store._id),
+    material: store,
+    creatorHasAccess: (createdBy) => canAccessCollection(store, createdBy),
+    secret: args.secret,
+  })
 
-  if (
-    share === null ||
-    !canOpenShare({
-      share,
-      material: store,
-      creatorHasAccess: canAccessMaterial(store, share.createdBy),
-      secret: args.secret,
-      now: Date.now(),
-    })
-  ) {
-    return null
-  }
+  return share === null ? null : { store, share }
+}
 
-  return { store, share }
+function storeTarget(storeId: Id<"collections">): ShareTarget {
+  return { kind: "store", id: storeId }
 }

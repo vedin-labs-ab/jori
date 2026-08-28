@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { storeDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { openStoreShare } from "./share"
@@ -6,35 +7,28 @@ import { openStoreShare } from "./share"
 // The mechanism is exercised in full against tables; these cover the
 // store-shaped bits: the same gate guards the store document.
 
-const owner = "persons:owner" as Id<"persons">
 const stranger = "persons:stranger" as Id<"persons">
 
 async function createStore(
   database: TestDatabase,
   overrides: Record<string, unknown> = {}
 ) {
-  return (await database.insert("stores", {
-    organizationId: "org",
-    ownerId: owner,
-    scope: "organization",
-    name: "Settings",
-    schema: { type: "object" },
-    schemaHash: "hash",
-    createdAt: 1,
-    updatedAt: 1,
-    ...overrides,
-  })) as Id<"stores">
+  return (await database.insert(
+    "collections",
+    storeDoc(overrides)
+  )) as Id<"collections">
 }
 
 async function createShare(
   database: TestDatabase,
-  storeId: Id<"stores">,
+  storeId: Id<"collections">,
   overrides: Record<string, unknown> = {}
 ) {
-  await database.insert("storeShares", {
+  await database.insert("shares", {
     organizationId: "org",
-    storeId,
-    createdBy: owner,
+    targetKind: "store",
+    targetId: storeId,
+    createdBy: testOwner,
     secret: "s3cret",
     createdAt: 1,
     expiresAt: Date.now() + 60_000,
@@ -75,6 +69,19 @@ describe("opening a store share", () => {
     const storeId = await createStore(database, { scope: "personal" })
 
     await createShare(database, storeId, { createdBy: stranger })
+
+    expect(await openStoreShare(ctx, { storeId, secret: "s3cret" })).toBeNull()
+  })
+
+  test("returns null for a table's share opened as a store", async () => {
+    const { database, ctx } = databaseContext()
+    const storeId = await createStore(database, {
+      kind: "table",
+      columns: [],
+      schema: undefined,
+    })
+
+    await createShare(database, storeId, { targetKind: "table" })
 
     expect(await openStoreShare(ctx, { storeId, secret: "s3cret" })).toBeNull()
   })

@@ -24,7 +24,7 @@ export function StoreAccess({
       renderMember={(fallback) => (
         <StoreView
           fallback={fallback}
-          storeId={storeId as GenericId<"stores">}
+          storeId={storeId as GenericId<"collections">}
         />
       )}
       renderShare={() =>

@@ -66,9 +66,8 @@ export type ActivityData = {
   files: Doc<"files">[]
   agents: Doc<"runs">[]
   offers: Doc<"integrationOffers">[]
+  collections: Doc<"collections">[]
   run: Doc<"runs">
-  stores: Doc<"stores">[]
-  tables: Doc<"tables">[]
   traces: Doc<"traces">[]
   waiters: Doc<"waiters">[]
 }

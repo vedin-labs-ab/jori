@@ -1,10 +1,21 @@
 import { type JsonSchemaObject } from "../../contracts/schema/validate"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { accessibleMaterial, filterMaterialSearch } from "../materials/access"
+import { type Id } from "../_generated/dataModel"
+import {
+  findAccessibleCollection,
+  getAccessibleCollection,
+  searchCollections,
+} from "../collections/access"
+import { type CollectionDoc } from "../collections/spec"
 import { type QueryLikeCtx } from "../shared/context"
-import { boundedNumber } from "../shared/input"
+import { storeSpec } from "./spec"
 
-const storeSearchLimit = 100
+type StoreDoc = CollectionDoc<"store">
+
+type StoreArgs = {
+  organizationId: string
+  storeId: Id<"collections">
+  personId: Id<"persons">
+}
 
 export async function searchStores(
   ctx: QueryLikeCtx,
@@ -16,51 +27,20 @@ export async function searchStores(
     limit?: number
   }
 ) {
-  const stores = await ctx.db
-    .query("stores")
-    .withIndex("by_organization_and_updated_at", (index) =>
-      index.eq("organizationId", args.organizationId)
-    )
-    .order("desc")
-    .take(storeSearchLimit)
-
-  return filterMaterialSearch(stores, {
-    ...args,
-    limit: boundedNumber(args.limit, 25, 1, storeSearchLimit),
-  })
+  return await searchCollections(ctx, storeSpec, args)
 }
 
 /** Load a store only if it is in the organization and visible to the person;
  *  null otherwise, so callers cannot tell missing from inaccessible. */
-export async function findAccessibleStore(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    storeId: Id<"stores">
-    personId: Id<"persons">
-  }
-) {
-  return accessibleMaterial(await ctx.db.get(args.storeId), args)
+export async function findAccessibleStore(ctx: QueryLikeCtx, args: StoreArgs) {
+  return await findAccessibleCollection(ctx, storeSpec, toCollectionArgs(args))
 }
 
-export async function getAccessibleStore(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    storeId: Id<"stores">
-    personId: Id<"persons">
-  }
-) {
-  const store = await findAccessibleStore(ctx, args)
-
-  if (store === null) {
-    throw new Error("Store not found.")
-  }
-
-  return store
+export async function getAccessibleStore(ctx: QueryLikeCtx, args: StoreArgs) {
+  return await getAccessibleCollection(ctx, storeSpec, toCollectionArgs(args))
 }
 
-export function summarizeStore(store: Doc<"stores">) {
+export function summarizeStore(store: StoreDoc) {
   return {
     storeId: store._id,
     name: store.name,
@@ -72,5 +52,13 @@ export function summarizeStore(store: Doc<"stores">) {
     createdAt: store.createdAt,
     updatedAt: store.updatedAt,
     archivedAt: store.archivedAt,
+  }
+}
+
+function toCollectionArgs(args: StoreArgs) {
+  return {
+    organizationId: args.organizationId,
+    collectionId: args.storeId,
+    personId: args.personId,
   }
 }

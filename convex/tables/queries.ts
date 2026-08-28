@@ -20,7 +20,7 @@ export const search = internalQuery({
 export const read = internalQuery({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     personId: v.id("persons"),
   },
   handler: async (ctx, args) => {

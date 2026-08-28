@@ -1,6 +1,5 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { shareFields } from "../materials/shares"
 
 export const fileScopes = v.union(
   v.literal("organization"),
@@ -29,12 +28,3 @@ export const files = defineTable({
 })
   .index("by_run", ["runId"])
   .index("by_organization_and_created_at", ["organizationId", "createdAt"])
-
-/** Each share is an independent read-only grant with its own secret and
- *  expiry; a file can have several live at once. */
-export const fileShares = defineTable({
-  ...shareFields,
-  fileId: v.id("files"),
-})
-  .index("by_file_and_expires_at", ["fileId", "expiresAt"])
-  .index("by_file_and_secret", ["fileId", "secret"])

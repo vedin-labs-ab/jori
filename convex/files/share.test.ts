@@ -33,9 +33,10 @@ async function createShare(
   fileId: Id<"files">,
   overrides: Record<string, unknown> = {}
 ) {
-  await database.insert("fileShares", {
+  await database.insert("shares", {
     organizationId: "org",
-    fileId,
+    targetKind: "file",
+    targetId: fileId,
     createdBy: owner,
     secret: "s3cret",
     createdAt: 1,

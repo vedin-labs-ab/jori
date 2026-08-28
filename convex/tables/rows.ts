@@ -1,28 +1,28 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { type TableColumn } from "../../contracts/tables/columns"
-import { applyRowPatch, assertRowValues } from "../../contracts/tables/rows"
-import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
-import { assertExpectedVersion } from "../materials/input"
-import { type QueryLikeCtx } from "../shared/context"
+import {
+  deleteDocument,
+  insertDocuments,
+  pageDocuments,
+  writeDocument,
+} from "../collections/documents"
 import { getAccessibleTable, summarizeRow } from "./access"
+import { tableSpec } from "./spec"
+
+const importBatchSize = 100
 
 export const page = internalQuery({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     personId: v.id("persons"),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     await getAccessibleTable(ctx, args)
 
-    const result = await ctx.db
-      .query("tableRows")
-      .withIndex("by_table", (index) => index.eq("tableId", args.tableId))
-      .order("desc")
-      .paginate(args.paginationOpts)
+    const result = await pageDocuments(ctx, args.tableId, args.paginationOpts)
 
     return {
       rows: result.page.map((row) => summarizeRow(row)),
@@ -32,32 +32,18 @@ export const page = internalQuery({
   },
 })
 
-/** The one write path for rows: access, archival, column validation, and
- *  per-row optimistic versioning all live here. */
 export const insert = internalMutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     personId: v.id("persons"),
     values: v.any(),
   },
   handler: async (ctx, args) => {
-    const table = await getWritableTable(ctx, args)
+    const table = await getAccessibleTable(ctx, args)
+    const [row] = await insertDocuments(ctx, tableSpec, table, [args.values])
 
-    assertValues(table, args.values)
-
-    const now = Date.now()
-    const rowId = await ctx.db.insert("tableRows", {
-      organizationId: args.organizationId,
-      tableId: args.tableId,
-      values: args.values,
-      version: 1,
-      createdAt: now,
-      updatedAt: now,
-    })
-    const row = await ctx.db.get(rowId)
-
-    if (row === null) {
+    if (row === undefined) {
       throw new Error("Row insert failed.")
     }
 
@@ -70,7 +56,7 @@ export const insert = internalMutation({
 export const insertMany = internalMutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     personId: v.id("persons"),
     rows: v.array(v.any()),
   },
@@ -81,113 +67,55 @@ export const insertMany = internalMutation({
       )
     }
 
-    const table = await getWritableTable(ctx, args)
+    const table = await getAccessibleTable(ctx, args)
+    const inserted = await insertDocuments(ctx, tableSpec, table, args.rows)
 
-    for (const values of args.rows) {
-      assertValues(table, values)
-    }
-
-    const now = Date.now()
-
-    for (const values of args.rows) {
-      await ctx.db.insert("tableRows", {
-        organizationId: args.organizationId,
-        tableId: args.tableId,
-        values,
-        version: 1,
-        createdAt: now,
-        updatedAt: now,
-      })
-    }
-
-    return { inserted: args.rows.length }
+    return { inserted: inserted.length }
   },
 })
 
-const importBatchSize = 100
-
+/** Row updates are merges: entries replace their column's value wholesale,
+ *  null clears it, and the merged row revalidates against the schema. */
 export const update = internalMutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     personId: v.id("persons"),
-    rowId: v.id("tableRows"),
+    rowId: v.id("documents"),
     values: v.any(),
     expectedVersion: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const table = await getWritableTable(ctx, args)
-    const row = await getTableRow(ctx, table, args.rowId)
+    const table = await getAccessibleTable(ctx, args)
+    const result = await writeDocument(ctx, tableSpec, table, {
+      documentId: args.rowId,
+      write: { type: "merge", patch: args.values },
+      expectedVersion: args.expectedVersion,
+    })
 
-    assertExpectedVersion(args.expectedVersion, row.version, "Row")
+    if (result.status !== "written") {
+      throw new Error("Row update failed.")
+    }
 
-    const values = applyRowPatch(row.values, args.values)
-
-    assertValues(table, values)
-
-    const version = row.version + 1
-    const updatedAt = Date.now()
-
-    await ctx.db.patch(row._id, { values, version, updatedAt })
-
-    return summarizeRow({ ...row, values, version, updatedAt })
+    return summarizeRow(result.document)
   },
 })
 
 export const remove = internalMutation({
   args: {
     organizationId: v.string(),
-    tableId: v.id("tables"),
+    tableId: v.id("collections"),
     personId: v.id("persons"),
-    rowId: v.id("tableRows"),
+    rowId: v.id("documents"),
     expectedVersion: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const table = await getWritableTable(ctx, args)
-    const row = await getTableRow(ctx, table, args.rowId)
-
-    assertExpectedVersion(args.expectedVersion, row.version, "Row")
-    await ctx.db.delete(row._id)
+    const table = await getAccessibleTable(ctx, args)
+    const row = await deleteDocument(ctx, tableSpec, table, {
+      documentId: args.rowId,
+      expectedVersion: args.expectedVersion,
+    })
 
     return { rowId: row._id, deleted: true as const }
   },
 })
-
-async function getWritableTable(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    tableId: Id<"tables">
-    personId: Id<"persons">
-  }
-) {
-  const table = await getAccessibleTable(ctx, args)
-
-  if (table.archivedAt !== undefined) {
-    throw new Error("Table is archived. Restore it to change rows.")
-  }
-
-  return table
-}
-
-async function getTableRow(
-  ctx: QueryLikeCtx,
-  table: Doc<"tables">,
-  rowId: Id<"tableRows">
-) {
-  const row = await ctx.db.get(rowId)
-
-  if (row === null || row.tableId !== table._id) {
-    throw new Error("Row not found.")
-  }
-
-  return row
-}
-
-function assertValues(table: Doc<"tables">, values: unknown) {
-  assertRowValues({
-    columns: table.columns as TableColumn[],
-    values,
-    label: `Table ${table.name} row`,
-  })
-}

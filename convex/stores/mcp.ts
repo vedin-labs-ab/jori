@@ -3,9 +3,9 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
+  normalizeCollectionScope,
   normalizeExpectedVersion,
-  normalizeMaterialScope,
-} from "../materials/input"
+} from "../collections/input"
 import {
   boundedNumber,
   type JoriToolRequest,
@@ -57,7 +57,7 @@ export async function callJoriStoreTool(
         personId,
         name: requiredString(args.name, "name"),
         description: optionalString(args.description),
-        scope: normalizeMaterialScope(args.scope),
+        scope: normalizeCollectionScope(args.scope),
         schema: args.schema,
       })
     case "read_store":
@@ -115,5 +115,5 @@ function normalizeClaim(claim: unknown) {
 }
 
 function requiredStoreId(value: unknown) {
-  return requiredString(value, "storeId") as Id<"stores">
+  return requiredString(value, "storeId") as Id<"collections">
 }

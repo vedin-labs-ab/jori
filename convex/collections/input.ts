@@ -1,7 +1,7 @@
-// Input normalization shared by every material domain: names, descriptions,
-// and the optimistic version handshake.
+// Input normalization shared by every collection kind: names, descriptions,
+// scope, and the optimistic version handshake.
 
-export function normalizeMaterialName(value: unknown) {
+export function normalizeCollectionName(value: unknown) {
   const name = typeof value === "string" ? value.trim() : ""
 
   if (name === "") {
@@ -11,7 +11,7 @@ export function normalizeMaterialName(value: unknown) {
   return name.slice(0, 120)
 }
 
-export function normalizeMaterialDescription(value: unknown) {
+export function normalizeCollectionDescription(value: unknown) {
   if (typeof value !== "string") {
     return undefined
   }
@@ -21,8 +21,8 @@ export function normalizeMaterialDescription(value: unknown) {
   return description === "" ? undefined : description.slice(0, 500)
 }
 
-/** Materials belong to the whole organization unless made personal. */
-export function normalizeMaterialScope(value: unknown) {
+/** Collections belong to the whole organization unless made personal. */
+export function normalizeCollectionScope(value: unknown) {
   return value === "personal"
     ? ("personal" as const)
     : ("organization" as const)

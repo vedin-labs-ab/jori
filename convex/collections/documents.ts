@@ -1,0 +1,228 @@
+import { type PaginationOptions } from "convex/server"
+import {
+  type DocumentWrite,
+  resolveDocumentWrite,
+} from "../../contracts/collections/write"
+import { assertJsonSerializable } from "../../contracts/json/stable"
+import { assertJsonSchemaValue } from "../../contracts/schema/validate"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { type MutationCtx } from "../_generated/server"
+import { type QueryLikeCtx } from "../shared/context"
+import { assertExpectedVersion } from "./input"
+import { type CollectionDoc, type CollectionKind, type KindSpec } from "./spec"
+
+// The one write chokepoint for collection documents: archival, optimistic
+// versioning, claim resolution, and validation against the compiled JSON
+// Schema all live here. Kind differences enter through the KindSpec.
+
+export type WriteResult =
+  | { status: "written"; document: Doc<"documents">; created: boolean }
+  | { status: "held"; existing: unknown; version: number }
+
+export async function findSingletonDocument(
+  ctx: QueryLikeCtx,
+  collectionId: Id<"collections">
+) {
+  return await ctx.db
+    .query("documents")
+    .withIndex("by_collection", (index) =>
+      index.eq("collectionId", collectionId)
+    )
+    .first()
+}
+
+async function getCollectionDocument<K extends CollectionKind>(
+  ctx: QueryLikeCtx,
+  spec: KindSpec<K>,
+  collection: CollectionDoc<K>,
+  documentId: Id<"documents">
+) {
+  const document = await ctx.db.get(documentId)
+
+  if (document === null || document.collectionId !== collection._id) {
+    throw new Error(`${spec.documentLabel(collection)} not found.`)
+  }
+
+  return document
+}
+
+export async function pageDocuments(
+  ctx: QueryLikeCtx,
+  collectionId: Id<"collections">,
+  paginationOpts: PaginationOptions
+) {
+  return await ctx.db
+    .query("documents")
+    .withIndex("by_collection", (index) =>
+      index.eq("collectionId", collectionId)
+    )
+    .order("desc")
+    .paginate(paginationOpts)
+}
+
+/** Resolve a write against its target document and persist the result.
+ *  Passing a documentId targets one of many documents; a singleton
+ *  collection targets its only document, creating it on first write. */
+export async function writeDocument<K extends CollectionKind>(
+  ctx: MutationCtx,
+  spec: KindSpec<K>,
+  collection: CollectionDoc<K>,
+  input: {
+    documentId?: Id<"documents">
+    write: DocumentWrite
+    expectedVersion?: number
+  }
+): Promise<WriteResult> {
+  assertWritable(spec, collection)
+
+  const document = await resolveTarget(ctx, spec, collection, input.documentId)
+  const version = document?.version ?? 0
+
+  assertExpectedVersion(
+    input.expectedVersion,
+    version,
+    spec.documentLabel(collection)
+  )
+
+  const resolved = resolveDocumentWrite(document?.value, input.write)
+
+  if (resolved.kind === "held") {
+    return { status: "held", existing: resolved.existing, version }
+  }
+
+  assertDocumentValue(spec, collection, resolved.value)
+
+  if (document === null) {
+    const created = await createDocument(ctx, collection._id, resolved.value)
+
+    return { status: "written", document: created, created: true }
+  }
+
+  const updatedAt = Date.now()
+  const updated = { version: version + 1, value: resolved.value, updatedAt }
+
+  await ctx.db.patch(document._id, updated)
+
+  return {
+    status: "written",
+    document: { ...document, ...updated },
+    created: false,
+  }
+}
+
+/** Batched insert: every value is validated before the first write, so a
+ *  batch either lands whole or not at all. */
+export async function insertDocuments<K extends CollectionKind>(
+  ctx: MutationCtx,
+  spec: KindSpec<K>,
+  collection: CollectionDoc<K>,
+  values: unknown[]
+) {
+  assertWritable(spec, collection)
+
+  if (spec.singleton) {
+    throw new Error(`A ${spec.label.toLowerCase()} holds a single document.`)
+  }
+
+  for (const value of values) {
+    assertDocumentValue(spec, collection, value)
+  }
+
+  const inserted: Doc<"documents">[] = []
+
+  for (const value of values) {
+    inserted.push(await createDocument(ctx, collection._id, value))
+  }
+
+  return inserted
+}
+
+export async function deleteDocument<K extends CollectionKind>(
+  ctx: MutationCtx,
+  spec: KindSpec<K>,
+  collection: CollectionDoc<K>,
+  input: { documentId: Id<"documents">; expectedVersion?: number }
+) {
+  assertWritable(spec, collection)
+
+  const document = await getCollectionDocument(
+    ctx,
+    spec,
+    collection,
+    input.documentId
+  )
+
+  assertExpectedVersion(
+    input.expectedVersion,
+    document.version,
+    spec.documentLabel(collection)
+  )
+  await ctx.db.delete(document._id)
+
+  return document
+}
+
+/** Validate one document value: within the kind's byte budget and matching
+ *  the collection's compiled JSON Schema. */
+function assertDocumentValue<K extends CollectionKind>(
+  spec: KindSpec<K>,
+  collection: CollectionDoc<K>,
+  value: unknown
+) {
+  const label = spec.documentLabel(collection)
+
+  assertJsonSerializable({
+    label: `${label} value`,
+    maxBytes: spec.maxDocumentBytes,
+    value,
+  })
+  assertJsonSchemaValue({ label, schema: spec.compile(collection), value })
+}
+
+function assertWritable<K extends CollectionKind>(
+  spec: KindSpec<K>,
+  collection: CollectionDoc<K>
+) {
+  if (collection.archivedAt !== undefined) {
+    throw new Error(`${spec.label} is archived. Restore it to write.`)
+  }
+}
+
+async function resolveTarget<K extends CollectionKind>(
+  ctx: MutationCtx,
+  spec: KindSpec<K>,
+  collection: CollectionDoc<K>,
+  documentId: Id<"documents"> | undefined
+) {
+  if (spec.singleton) {
+    return await findSingletonDocument(ctx, collection._id)
+  }
+
+  if (documentId === undefined) {
+    return null
+  }
+
+  return await getCollectionDocument(ctx, spec, collection, documentId)
+}
+
+async function createDocument(
+  ctx: MutationCtx,
+  collectionId: Id<"collections">,
+  value: unknown
+) {
+  const now = Date.now()
+  const documentId = await ctx.db.insert("documents", {
+    collectionId,
+    value,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+  })
+  const document = await ctx.db.get(documentId)
+
+  if (document === null) {
+    throw new Error("Document insert failed.")
+  }
+
+  return document
+}

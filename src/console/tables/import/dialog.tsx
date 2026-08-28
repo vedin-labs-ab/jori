@@ -215,14 +215,14 @@ async function runImport({
   }) => Promise<unknown>
   insertBatch: (args: {
     organizationId: string
-    tableId: GenericId<"tables">
+    tableId: GenericId<"collections">
     rows: Record<string, unknown>[]
   }) => Promise<unknown>
   name: string
   organizationId: string
   plan: Extract<CsvTablePlan, { status: "ready" }>
   scope: Scope
-}): Promise<GenericId<"tables"> | undefined> {
+}): Promise<GenericId<"collections"> | undefined> {
   try {
     const tableId = extractTableId(
       await create({ organizationId, name, scope, columns: plan.columns })
@@ -251,12 +251,12 @@ async function runImport({
 
 const importBatchSize = 100
 
-function extractTableId(result: unknown): GenericId<"tables"> {
+function extractTableId(result: unknown): GenericId<"collections"> {
   const tableId = isRecord(result) ? result.tableId : undefined
 
   if (typeof tableId !== "string") {
     throw new Error("Table creation failed.")
   }
 
-  return tableId as GenericId<"tables">
+  return tableId as GenericId<"collections">
 }

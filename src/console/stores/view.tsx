@@ -25,7 +25,7 @@ export function StoreView({
   storeId,
 }: {
   fallback?: ReactNode
-  storeId: GenericId<"stores">
+  storeId: GenericId<"collections">
 }) {
   return (
     <ConsolePage>
@@ -47,7 +47,7 @@ function StoreViewContent({
 }: {
   fallback: ReactNode | undefined
   organizationId: string
-  storeId: GenericId<"stores">
+  storeId: GenericId<"collections">
 }) {
   const result = useQuery(api.stores.console.get, { organizationId, storeId })
 

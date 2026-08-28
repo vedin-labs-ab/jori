@@ -1,23 +1,23 @@
 import { mergePatch, pathPatch, readPath } from "../json"
 
-/** How a store value changes: replace the document, merge an RFC 7396-style
- *  patch into it, or claim a path. */
-export type StoreWrite =
+/** How a collection document changes: replace the document, merge an
+ *  RFC 7396-style patch into it, or claim a path. */
+export type DocumentWrite =
   | { type: "replace"; value: unknown }
   | { type: "merge"; patch: unknown }
   | { type: "claim"; path: string[]; value: unknown }
 
-export type ResolvedStoreWrite =
+export type ResolvedDocumentWrite =
   | { kind: "write"; value: unknown }
   | { kind: "held"; existing: unknown }
 
 /** Resolve a write against the current document. A claim is an atomic
  *  insert-if-absent: it sets its path only when nothing is stored there yet,
  *  which is what makes at-most-once delivery possible on top of stores. */
-export function resolveStoreWrite(
+export function resolveDocumentWrite(
   current: unknown,
-  write: StoreWrite
-): ResolvedStoreWrite {
+  write: DocumentWrite
+): ResolvedDocumentWrite {
   if (write.type === "replace") {
     return { kind: "write", value: write.value }
   }

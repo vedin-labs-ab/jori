@@ -1,0 +1,213 @@
+import { type PaginationOptions } from "convex/server"
+import { shareExpiresAt } from "../../contracts/shares/expiry"
+import { shareFragment } from "../../contracts/shares/fragment"
+import { type Id } from "../_generated/dataModel"
+import { type MutationCtx } from "../_generated/server"
+import { type QueryLikeCtx } from "../shared/context"
+import { bytesToHex } from "../shared/encoding"
+import { type RuntimeEnvironment, readOrigin } from "../shared/origin"
+
+// The one share mechanism for tables, stores, and files: a secret-bearing
+// grant row minted per link, checked on every anonymous read. The target is
+// polymorphic, so every domain shares these rows and this gate.
+
+/** Bounds concurrent live links per target; minting past it retires the
+ *  oldest while expired links remain available in the console history. */
+export const activeShareLimit = 20
+
+export type ShareTarget = {
+  kind: "table" | "store" | "file"
+  id: Id<"collections"> | Id<"files">
+}
+
+export type MintedShare = { url: string; urlPath: string; expiresAt: number }
+
+/** Create an independent share link; existing links keep their own expiry.
+ *  A link is a read capability for this one target regardless of scope. */
+export async function mintShare(
+  ctx: MutationCtx,
+  args: {
+    target: ShareTarget
+    organizationId: string
+    personId: Id<"persons">
+    urlPath: string
+    expiresInHours?: number
+  }
+): Promise<MintedShare> {
+  const now = Date.now()
+  const secret = randomShareSecret()
+  const expiresAt = shareExpiresAt(now, args.expiresInHours)
+  const activeShares = await ctx.db
+    .query("shares")
+    .withIndex("by_target_and_expires_at", (index) =>
+      index
+        .eq("targetKind", args.target.kind)
+        .eq("targetId", args.target.id)
+        .gt("expiresAt", now)
+    )
+    .collect()
+
+  for (const stale of sharesToRetire(activeShares, now)) {
+    await ctx.db.delete(stale._id)
+  }
+
+  await ctx.db.insert("shares", {
+    organizationId: args.organizationId,
+    createdBy: args.personId,
+    secret,
+    createdAt: now,
+    expiresAt,
+    targetKind: args.target.kind,
+    targetId: args.target.id,
+  })
+
+  return mintedShare(shareLink(args.urlPath, secret), expiresAt)
+}
+
+export async function revokeShare(
+  ctx: MutationCtx,
+  args: {
+    target: ShareTarget
+    organizationId: string
+    shareId: Id<"shares">
+  }
+) {
+  const share = await ctx.db.get(args.shareId)
+
+  if (
+    share === null ||
+    share.targetKind !== args.target.kind ||
+    share.targetId !== args.target.id ||
+    share.organizationId !== args.organizationId
+  ) {
+    throw new Error("Share link not found.")
+  }
+
+  await ctx.db.delete(share._id)
+}
+
+/** Expiration order is also lifecycle order: every future expiry sorts ahead
+ *  of every past expiry, so one indexed cursor yields active links first. */
+export async function pageShares(
+  ctx: QueryLikeCtx,
+  target: ShareTarget,
+  paginationOpts: PaginationOptions
+) {
+  const result = await ctx.db
+    .query("shares")
+    .withIndex("by_target_and_expires_at", (index) =>
+      index.eq("targetKind", target.kind).eq("targetId", target.id)
+    )
+    .order("desc")
+    .paginate(paginationOpts)
+
+  return {
+    ...result,
+    page: result.page.map((share) => ({
+      shareId: share._id,
+      createdAt: share.createdAt,
+      expiresAt: share.expiresAt,
+    })),
+  }
+}
+
+/** Resolve a share link to its grant row: secret, expiry, organization,
+ *  archive state, and the creator's continued access all checked on every
+ *  read. Null on any failure so callers cannot probe what exists. */
+export async function openShare(
+  ctx: QueryLikeCtx,
+  args: {
+    target: ShareTarget
+    material: { organizationId: string; archivedAt?: number }
+    creatorHasAccess: (createdBy: Id<"persons">) => boolean
+    secret: string
+  }
+) {
+  const share = await ctx.db
+    .query("shares")
+    .withIndex("by_target_and_secret", (index) =>
+      index
+        .eq("targetKind", args.target.kind)
+        .eq("targetId", args.target.id)
+        .eq("secret", args.secret)
+    )
+    .unique()
+
+  if (
+    share === null ||
+    !canOpenShare({
+      share,
+      material: args.material,
+      creatorHasAccess: args.creatorHasAccess(share.createdBy),
+      secret: args.secret,
+      now: Date.now(),
+    })
+  ) {
+    return null
+  }
+
+  return share
+}
+
+export function randomShareSecret() {
+  return bytesToHex(crypto.getRandomValues(new Uint8Array(32)))
+}
+
+/** The one gate every anonymous share read passes through. */
+export function canOpenShare(args: {
+  share: { secret: string; expiresAt: number; organizationId: string }
+  material: { organizationId: string; archivedAt?: number }
+  creatorHasAccess: boolean
+  secret: string
+  now: number
+}) {
+  return (
+    args.share.secret === args.secret &&
+    args.share.expiresAt > args.now &&
+    args.share.organizationId === args.material.organizationId &&
+    args.material.archivedAt === undefined &&
+    args.creatorHasAccess
+  )
+}
+
+/** When the active set is at capacity, the oldest links make room for the one
+ *  about to be minted. Expired links are history and are never retired here. */
+export function sharesToRetire<
+  Share extends { createdAt: number; expiresAt: number },
+>(shares: Share[], now: number) {
+  const active = shares
+    .filter((share) => share.expiresAt > now)
+    .sort((left, right) => left.createdAt - right.createdAt)
+  const overflow = Math.max(0, active.length + 1 - activeShareLimit)
+
+  return active.slice(0, overflow)
+}
+
+export type ShareLink = {
+  url?: string
+  urlPath: string
+}
+
+/** What every mint returns: the shareable link plus its expiry. Without a
+ *  configured origin the path (with fragment) stands in for the URL. */
+export function mintedShare(link: ShareLink, expiresAt: number): MintedShare {
+  return { url: link.url ?? link.urlPath, urlPath: link.urlPath, expiresAt }
+}
+
+/** The target's console path plus the share secret in the fragment. */
+export function shareLink(
+  urlPath: string,
+  secret: string,
+  environment: RuntimeEnvironment = process.env
+): ShareLink {
+  const fragment = `#${shareFragment(secret)}`
+  const origin = readOrigin(environment)
+  const path = `${urlPath}${fragment}`
+
+  return origin === undefined
+    ? { urlPath: path }
+    : {
+        url: `${new URL(urlPath, origin).toString()}${fragment}`,
+        urlPath: path,
+      }
+}

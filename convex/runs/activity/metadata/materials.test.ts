@@ -8,13 +8,12 @@ const materialNames = new Map([
 
 describe("activityMaterialId", () => {
   test("resolves store and table references from tool inputs", () => {
-    expect(activityMaterialId("write_store", { storeId: "store-1" })).toEqual({
-      table: "stores",
-      id: "store-1",
-    })
-    expect(
-      activityMaterialId("insert_table_row", { tableId: "table-1" })
-    ).toEqual({ table: "tables", id: "table-1" })
+    expect(activityMaterialId("write_store", { storeId: "store-1" })).toBe(
+      "store-1"
+    )
+    expect(activityMaterialId("insert_table_row", { tableId: "table-1" })).toBe(
+      "table-1"
+    )
     expect(activityMaterialId("web_search", { query: "x" })).toBeUndefined()
     expect(activityMaterialId("read_store", undefined)).toBeUndefined()
   })

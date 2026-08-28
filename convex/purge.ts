@@ -4,8 +4,9 @@ import { type Id } from "./_generated/dataModel"
 import { internalMutation, type MutationCtx } from "./_generated/server"
 
 /**
- * One-shot purge of legacy data: the generated-apps concept and the
- * playbooks concept, both removed from the product.
+ * One-shot purge of legacy data: the generated-apps concept, the playbooks
+ * concept, and the per-domain tables/stores/shares storage replaced by the
+ * unified collections/documents/shares tables.
  *
  * Run once per environment after deploying both removals, then delete
  * this module in a follow-up commit once both environments are purged:
@@ -44,6 +45,13 @@ export const legacyTables = [
   "appCaches",
   "assets",
   "playbookPreferences",
+  "tables",
+  "tableRows",
+  "tableShares",
+  "stores",
+  "storeValues",
+  "storeShares",
+  "fileShares",
 ] as const
 
 /** Rows in these tables own a `_storage` blob that must die with them. */
