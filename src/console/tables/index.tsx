@@ -16,6 +16,7 @@ import {
   shouldIncludeArchived,
 } from "../shared/materials/archive"
 import { CreateTableDialog } from "./create"
+import { ImportTableDialog } from "./import/dialog"
 import { TableList, TableListSkeleton, TablesToolbar } from "./list"
 import { useTableRemoval } from "./manage"
 import { type TableListResult, type TableSummary } from "./types"
@@ -60,7 +61,7 @@ function TablesView({ organizationId }: { organizationId: string }) {
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<ArchiveFilter>("active")
   const [scope, setScope] = useState<ScopeFilter>("all")
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [dialog, setDialog] = useState<"create" | "import">()
   const removal = useTableRemoval(organizationId)
   const deferredQuery = useDeferredValue(query)
   const { tableList, tables } = useTableRows({
@@ -84,8 +85,9 @@ function TablesView({ organizationId }: { organizationId: string }) {
     <ConsolePageLayout>
       <TablesToolbar
         filter={filter}
-        onCreate={() => setIsCreateOpen(true)}
+        onCreate={() => setDialog("create")}
         onFilterChange={setFilterAndReset}
+        onImport={() => setDialog("import")}
         onQueryChange={setQueryAndReset}
         onScopeChange={setScopeAndReset}
         query={query}
@@ -93,14 +95,20 @@ function TablesView({ organizationId }: { organizationId: string }) {
       />
       <TablesBody
         hasFilters={hasFilters}
-        onCreate={() => setIsCreateOpen(true)}
+        onCreate={() => setDialog("create")}
+        onImport={() => setDialog("import")}
         pagination={pagination}
         removal={removal}
         tableList={tableList}
       />
       <CreateTableDialog
-        isOpen={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
+        isOpen={dialog === "create"}
+        onOpenChange={(open) => setDialog(open ? "create" : undefined)}
+        organizationId={organizationId}
+      />
+      <ImportTableDialog
+        isOpen={dialog === "import"}
+        onOpenChange={(open) => setDialog(open ? "import" : undefined)}
         organizationId={organizationId}
       />
     </ConsolePageLayout>
@@ -110,12 +118,14 @@ function TablesView({ organizationId }: { organizationId: string }) {
 function TablesBody({
   hasFilters,
   onCreate,
+  onImport,
   pagination,
   removal,
   tableList,
 }: {
   hasFilters: boolean
   onCreate: () => void
+  onImport: () => void
   pagination: ReturnType<typeof useClientPagination<TableSummary>>
   removal: ReturnType<typeof useTableRemoval>
   tableList: TableListResult | undefined
@@ -136,6 +146,7 @@ function TablesBody({
         <TableList
           hasFilters={hasFilters}
           onCreate={onCreate}
+          onImport={onImport}
           removal={removal}
           tables={pagination.visibleRows}
           unauthorizedMessage={

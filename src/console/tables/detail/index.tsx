@@ -17,7 +17,6 @@ import { AddRowDialog } from "./add"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
 import { TableHeaderActions, TableHeading } from "./header"
-import { ImportRowsDialog } from "./import"
 import { useRowPages, useRowWrites } from "./rows"
 import { TableLinksDialog } from "./share"
 
@@ -95,7 +94,7 @@ function TableViewContent({
   return <TableReadyView organizationId={organizationId} table={result.table} />
 }
 
-type TableDialog = "add" | "edit" | "import" | "share"
+type TableDialog = "add" | "edit" | "share"
 
 function TableReadyView({
   organizationId,
@@ -132,7 +131,6 @@ function TableReadyView({
         onDelete={removeAndLeaveWhenDeleted}
         onEdit={() => setDialog("edit")}
         onExport={() => void exporter.exportCsv()}
-        onImport={() => setDialog("import")}
         onShare={() => setDialog("share")}
         removal={removal}
         table={table}
@@ -189,12 +187,6 @@ function TableDialogs({
         isOpen={dialog === "add"}
         onOpenChange={closeWhenDismissed}
         onSubmit={writes.insertRow}
-      />
-      <ImportRowsDialog
-        columns={table.columns}
-        isOpen={dialog === "import"}
-        onImport={writes.importRows}
-        onOpenChange={closeWhenDismissed}
       />
       <EditTableDialog
         onOpenChange={closeWhenDismissed}

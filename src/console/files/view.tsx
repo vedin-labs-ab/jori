@@ -5,7 +5,7 @@ import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FilePreview } from "@/shared/materials/file"
+import { FilePreview } from "@/shared/materials/preview"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import {
@@ -106,19 +106,22 @@ function FileReadyView({
           type="button"
           variant="outline"
         />
+        {file.url === null ? null : (
+          <Button
+            aria-label="Download"
+            asChild
+            className="max-sm:size-7 max-sm:px-0"
+            variant="outline"
+          >
+            <a href={file.url} rel="noreferrer" target="_blank">
+              <Download />
+              <span className="max-sm:hidden">Download</span>
+            </a>
+          </Button>
+        )}
       </ConsoleHeaderActions>
       <FileHeading file={file} />
       <FilePreview mimeType={file.mimeType} name={file.name} url={file.url} />
-      {file.url === null ? null : (
-        <div>
-          <Button asChild variant="outline">
-            <a href={file.url} rel="noreferrer" target="_blank">
-              <Download />
-              Download
-            </a>
-          </Button>
-        </div>
-      )}
       <FileLinksDialog
         fileId={file.fileId}
         onOpenChange={setIsShareOpen}

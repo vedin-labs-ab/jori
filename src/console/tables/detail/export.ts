@@ -1,10 +1,15 @@
 import { type ConvexReactClient, useConvex } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useState } from "react"
+import { serializeCsv } from "@/lib/csv"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
-import { type TableDetail, type TableRow, type TableRowPage } from "../types"
-import { buildCsvExport } from "./csv"
+import {
+  type TableColumn,
+  type TableDetail,
+  type TableRow,
+  type TableRowPage,
+} from "../types"
 
 const exportPageSize = 200
 
@@ -32,6 +37,24 @@ export function useCsvExport(organizationId: string, table: TableDetail) {
   }
 
   return { exportCsv, isExporting }
+}
+
+/** CSV text for the whole table: column keys as the header, columns in
+ *  definition order, absent cells empty. */
+export function buildCsvExport(
+  columns: TableColumn[],
+  rows: { values: Record<string, unknown> }[]
+) {
+  return serializeCsv([
+    columns.map((column) => column.key),
+    ...rows.map((row) =>
+      columns.map((column) => {
+        const value = row.values[column.key]
+
+        return value === undefined ? "" : String(value)
+      })
+    ),
+  ])
 }
 
 async function fetchAllRows(
