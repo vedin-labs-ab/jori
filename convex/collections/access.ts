@@ -38,7 +38,7 @@ export function accessibleCollection<K extends CollectionKind>(
   return collection
 }
 
-export type CollectionArgs = {
+type CollectionArgs = {
   organizationId: string
   collectionId: Id<"collections">
   personId: Id<"persons">

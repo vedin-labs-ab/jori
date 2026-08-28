@@ -133,7 +133,7 @@ export async function openFileShare(
   const fileId = ctx.db.normalizeId("files", args.fileId)
   const file = fileId === null ? null : await ctx.db.get(fileId)
 
-  if (fileId === null || file === null) {
+  if (file === null) {
     return null
   }
 

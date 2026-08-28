@@ -1,4 +1,4 @@
-import { assertJsonSerializable, stableHash } from "../json/stable"
+import { assertJsonSerializable } from "../json/stable"
 import {
   assertSupportedJsonSchema,
   normalizeJsonSchema,
@@ -12,8 +12,8 @@ export const storeLimits = {
   maxValueBytes: 256 * 1024,
 }
 
-/** Normalize and check a store's JSON Schema, returning it with its
- *  content hash so readers can cheaply tell schemas apart. */
+/** Normalize a store's JSON Schema and check it is supported and within
+ *  the schema byte budget. */
 export function normalizeStoreSchema(value: unknown) {
   const schema = normalizeJsonSchema(value, "Store schema")
 
@@ -24,5 +24,5 @@ export function normalizeStoreSchema(value: unknown) {
     value: schema,
   })
 
-  return { schema, schemaHash: stableHash(schema) }
+  return schema
 }

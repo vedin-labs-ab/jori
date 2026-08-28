@@ -33,7 +33,6 @@ export async function createCollection<K extends CollectionKind>(
     authoring: unknown
   }
 ): Promise<CollectionDoc<K>> {
-  const authoring = spec.normalize(args.authoring)
   const now = Date.now()
   const collectionId = await ctx.db.insert("collections", {
     organizationId: args.organizationId,
@@ -41,8 +40,7 @@ export async function createCollection<K extends CollectionKind>(
     scope: args.scope ?? "organization",
     name: normalizeCollectionName(args.name),
     description: normalizeCollectionDescription(args.description),
-    ...(authoring as CollectionAuthoring),
-    schemaHash: stableHash(spec.compile(authoring)),
+    ...authoringFields(spec, spec.normalize(args.authoring)),
     createdAt: now,
     updatedAt: now,
   })
@@ -53,6 +51,18 @@ export async function createCollection<K extends CollectionKind>(
   }
 
   return collection
+}
+
+/** The stored kind-native fields plus the hash of the compiled schema.
+ *  Widening to the authoring union lets the result spread into the
+ *  collections row without asserting. */
+function authoringFields<K extends CollectionKind>(
+  spec: KindSpec<K>,
+  authoring: CollectionAuthoring<K>
+) {
+  const fields: CollectionAuthoring = authoring
+
+  return { ...fields, schemaHash: stableHash(spec.compile(authoring)) }
 }
 
 export async function updateCollection<K extends CollectionKind>(
@@ -68,10 +78,6 @@ export async function updateCollection<K extends CollectionKind>(
   }
 ): Promise<CollectionDoc<K> | null> {
   const collection = await getAccessibleCollection(ctx, spec, args)
-  const authoring =
-    args.authoring === undefined
-      ? undefined
-      : spec.evolve(collection, args.authoring)
 
   await ctx.db.patch(collection._id, {
     ...(args.name === undefined
@@ -80,12 +86,9 @@ export async function updateCollection<K extends CollectionKind>(
     ...(args.description === undefined
       ? {}
       : { description: normalizeCollectionDescription(args.description) }),
-    ...(authoring === undefined
+    ...(args.authoring === undefined
       ? {}
-      : {
-          ...(authoring as CollectionAuthoring),
-          schemaHash: stableHash(spec.compile(authoring)),
-        }),
+      : authoringFields(spec, spec.evolve(collection, args.authoring))),
     updatedAt: Date.now(),
   })
 

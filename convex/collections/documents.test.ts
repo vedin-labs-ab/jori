@@ -98,6 +98,17 @@ describe("singleton writes", () => {
       "holds a single document"
     )
   })
+
+  test("a many-document collection refuses writes without a target", async () => {
+    const { database, ctx } = databaseContext()
+    const table = await createTable(database)
+
+    await expect(
+      writeDocument(ctx, tableSpec, table, {
+        write: { type: "replace", value: { title: "x" } },
+      })
+    ).rejects.toThrow("requires a documentId")
+  })
 })
 
 describe("claims", () => {
