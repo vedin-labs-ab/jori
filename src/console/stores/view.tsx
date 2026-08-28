@@ -1,10 +1,9 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { ChevronsUpDown, Link2, Pencil } from "lucide-react"
+import { ChevronsUpDown } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Collapsible,
@@ -17,18 +16,14 @@ import { JsonBlock } from "../shared/code"
 import { CopyButton } from "../shared/copy"
 import { DetailFrame } from "../shared/details"
 import { formatJsonText } from "../shared/json/parse"
-import {
-  ConsoleHeaderActions,
-  ConsoleHeaderButton,
-  ConsolePageLayout,
-} from "../shared/layout"
+import { ConsolePageLayout } from "../shared/layout"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
-import { MaterialActions } from "../shared/materials/actions"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
-import { MaterialScopeBadge } from "../shared/materials/scope"
 import { EditStoreDialog } from "./edit"
-import { storeDeleteDescription, useStoreRemoval } from "./manage"
+import { exportStoreJson } from "./export"
+import { StoreHeaderActions, StoreHeading } from "./header"
+import { useStoreRemoval } from "./manage"
 import { StoreLinksDialog } from "./share"
 import { type StoreDetail } from "./types"
 import { StoreValue } from "./value/section"
@@ -136,6 +131,7 @@ function StoreReadyView({
       <StoreHeaderActions
         onDelete={removeAndLeaveWhenDeleted}
         onEdit={() => setIsEditOpen(true)}
+        onExport={() => exportStoreJson(store)}
         onShare={() => setIsShareOpen(true)}
         removal={removal}
         store={store}
@@ -155,74 +151,6 @@ function StoreReadyView({
         storeId={store.storeId}
       />
     </ConsolePageLayout>
-  )
-}
-
-function StoreHeaderActions({
-  onDelete,
-  onEdit,
-  onShare,
-  removal,
-  store,
-}: {
-  onDelete: () => void
-  onEdit: () => void
-  onShare: () => void
-  removal: ReturnType<typeof useStoreRemoval>
-  store: StoreDetail
-}) {
-  return (
-    <ConsoleHeaderActions>
-      <ConsoleHeaderButton
-        icon={<Link2 />}
-        label="Share"
-        onClick={onShare}
-        type="button"
-        variant="outline"
-      />
-      <ConsoleHeaderButton
-        icon={<Pencil />}
-        label="Edit store"
-        onClick={onEdit}
-        type="button"
-        variant="outline"
-      />
-      <MaterialActions
-        deleteDescription={storeDeleteDescription}
-        isDeleting={removal.removingStoreId === store.storeId}
-        isRestoring={removal.restoringStoreId === store.storeId}
-        material={{ name: store.name, archivedAt: store.archivedAt }}
-        noun="store"
-        onDelete={onDelete}
-        onRestore={() => void removal.restoreStore(store)}
-      />
-    </ConsoleHeaderActions>
-  )
-}
-
-function StoreHeading({
-  isArchived,
-  store,
-}: {
-  isArchived: boolean
-  store: StoreDetail
-}) {
-  return (
-    <div className="grid gap-1">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-medium text-lg tracking-tight">{store.name}</h2>
-        <MaterialScopeBadge scope={store.scope} />
-        {isArchived ? <Badge variant="secondary">Archived</Badge> : null}
-      </div>
-      {store.description === undefined ? null : (
-        <p className="text-muted-foreground text-sm">{store.description}</p>
-      )}
-      {isArchived ? (
-        <p className="text-muted-foreground text-xs">
-          Archived stores are read-only. Restore the store to write again.
-        </p>
-      ) : null}
-    </div>
   )
 }
 
