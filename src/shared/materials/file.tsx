@@ -1,8 +1,9 @@
 import { useQuery } from "convex/react"
-import { Download, FileIcon } from "lucide-react"
+import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
+import { FilePreview } from "./preview"
 import { useShareExpired } from "./share"
 import { ShareShell, ShareUnavailable } from "./shell"
 import { formatFileSize } from "./size"
@@ -49,42 +50,5 @@ export function FileShareView({
         </div>
       )}
     </ShareShell>
-  )
-}
-
-export function FilePreview({
-  mimeType,
-  name,
-  url,
-}: {
-  mimeType: string
-  name: string
-  url: string | null
-}) {
-  if (url !== null && mimeType.startsWith("image/")) {
-    return (
-      <img
-        alt={name}
-        className="max-h-[70svh] w-fit max-w-full rounded-md border"
-        src={url}
-      />
-    )
-  }
-
-  if (url !== null && mimeType === "application/pdf") {
-    return (
-      <iframe
-        className="h-[70svh] w-full rounded-md border"
-        src={url}
-        title={name}
-      />
-    )
-  }
-
-  return (
-    <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-md border bg-muted/30 text-muted-foreground">
-      <FileIcon className="size-6" />
-      <p className="text-sm">No inline preview for this file type.</p>
-    </div>
   )
 }

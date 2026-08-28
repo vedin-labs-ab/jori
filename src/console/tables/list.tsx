@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { Plus, Table2 } from "lucide-react"
+import { Plus, Table2, Upload } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,7 @@ export function TablesToolbar({
   filter,
   onCreate,
   onFilterChange,
+  onImport,
   onQueryChange,
   onScopeChange,
   query,
@@ -45,6 +46,7 @@ export function TablesToolbar({
   filter: ArchiveFilter
   onCreate: () => void
   onFilterChange: (filter: ArchiveFilter) => void
+  onImport: () => void
   onQueryChange: (query: string) => void
   onScopeChange: (scope: ScopeFilter) => void
   query: string
@@ -57,6 +59,13 @@ export function TablesToolbar({
           label="Search tables"
           onValueChange={onQueryChange}
           value={query}
+        />
+        <ConsoleHeaderButton
+          icon={<Upload />}
+          label="Import"
+          onClick={onImport}
+          type="button"
+          variant="outline"
         />
         <ConsoleHeaderButton
           icon={<Plus />}
@@ -86,12 +95,14 @@ export function TablesToolbar({
 export function TableList({
   hasFilters,
   onCreate,
+  onImport,
   removal,
   tables,
   unauthorizedMessage,
 }: {
   hasFilters: boolean
   onCreate: () => void
+  onImport: () => void
   removal: ReturnType<typeof useTableRemoval>
   tables: TableSummary[]
   unauthorizedMessage: string | undefined
@@ -109,10 +120,16 @@ export function TableList({
     return (
       <FilterableEmptyState
         action={
-          <Button onClick={onCreate} type="button">
-            <Plus />
-            New table
-          </Button>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button onClick={onCreate} type="button">
+              <Plus />
+              New table
+            </Button>
+            <Button onClick={onImport} type="button" variant="outline">
+              <Upload />
+              Import
+            </Button>
+          </div>
         }
         description="Typed tables Jori and your team keep structured records in appear here."
         hasFilters={hasFilters}

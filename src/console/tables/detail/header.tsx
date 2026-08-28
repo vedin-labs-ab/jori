@@ -1,4 +1,4 @@
-import { Download, Link2, Loader2, Pencil, Plus, Upload } from "lucide-react"
+import { Download, Link2, Loader2, Pencil, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../shared/layout"
 import { MaterialActions } from "../../shared/materials/actions"
@@ -13,7 +13,6 @@ export function TableHeaderActions({
   onDelete,
   onEdit,
   onExport,
-  onImport,
   onShare,
   removal,
   table,
@@ -24,7 +23,6 @@ export function TableHeaderActions({
   onDelete: () => void
   onEdit: () => void
   onExport: () => void
-  onImport: () => void
   onShare: () => void
   removal: ReturnType<typeof useTableRemoval>
   table: TableDetail
@@ -43,14 +41,6 @@ export function TableHeaderActions({
         icon={isExporting ? <Loader2 className="animate-spin" /> : <Download />}
         label="Export"
         onClick={onExport}
-        type="button"
-        variant="outline"
-      />
-      <ConsoleHeaderButton
-        disabled={isArchived}
-        icon={<Upload />}
-        label="Import"
-        onClick={onImport}
         type="button"
         variant="outline"
       />
