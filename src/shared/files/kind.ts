@@ -39,6 +39,16 @@ export function fileKind(mimeType: string, name: string): FileKind {
   )
 }
 
+/** Registry categories rendered as monospace text: plain text, structured
+ *  text (JSON, CSV, YAML, …), and code. */
+const textualCategories = new Set(["code", "data", "text"])
+
+/** True when the registry reads the file as text a person could open in an
+ *  editor — the files worth previewing and copying as text. */
+export function isTextualKind(mimeType: string, name: string) {
+  return textualCategories.has(fileKind(mimeType, name).category)
+}
+
 /** Strips parameters like "; charset=utf-8" before matching. */
 function normalizeMime(mimeType: string) {
   return (mimeType.split(";")[0] ?? "").trim().toLowerCase()

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
 import { fileKind } from "@/shared/files/kind"
 import { MaterialScopeBadge } from "../shared/materials/scope"
@@ -58,12 +59,24 @@ export function FileTypeCell({ file }: { file: FileRow }) {
 }
 
 /** Owner column: the uploading person for uploads; Jori itself for files an
- *  agent run saved. */
-export function FileOwnerCell({ file }: { file: FileRow }) {
+ *  agent run saved. `compact` slims the avatar and gap to the height of a
+ *  detail-frame header row. */
+export function FileOwnerCell({
+  compact = false,
+  file,
+}: {
+  compact?: boolean
+  file: FileRow
+}) {
+  const rowClassName = cn(
+    "flex min-w-0 items-center",
+    compact ? "max-w-40 gap-1.5" : "gap-2"
+  )
+
   if (file.source === "run") {
     return (
-      <div className="flex items-center gap-2">
-        <BrandIcon className="size-5" />
+      <div className={rowClassName}>
+        <BrandIcon className="size-5 shrink-0" />
         <span className="truncate">Jori</span>
       </div>
     )
@@ -72,9 +85,14 @@ export function FileOwnerCell({ file }: { file: FileRow }) {
   const name = file.ownerName ?? "Member"
 
   return (
-    <div className="flex items-center gap-2">
-      <Avatar size="sm">
-        <AvatarFallback>{initials(name)}</AvatarFallback>
+    <div className={rowClassName}>
+      <Avatar
+        className={compact ? "size-5" : undefined}
+        size={compact ? "default" : "sm"}
+      >
+        <AvatarFallback className={compact ? "text-[9px]" : undefined}>
+          {initials(name)}
+        </AvatarFallback>
       </Avatar>
       <span className="truncate">{name}</span>
     </div>

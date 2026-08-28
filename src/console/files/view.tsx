@@ -4,9 +4,11 @@ import { Download, Link2 } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { isTextualKind } from "@/shared/files/kind"
 import { FilePreview } from "@/shared/materials/preview"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
+import { CopyButton } from "../shared/copy"
 import { DetailFrame } from "../shared/details"
 import {
   ConsoleHeaderActions,
@@ -121,8 +123,16 @@ function FileReadyView({
           </Button>
         )}
       </ConsoleHeaderActions>
-      <DetailFrame contentClassName="p-2.5" header={<FileMeta file={file} />}>
-        <FilePreview mimeType={file.mimeType} name={file.name} url={file.url} />
+      <DetailFrame
+        action={<FileHeaderActions file={file} />}
+        header={<FileMeta file={file} />}
+      >
+        <FilePreview
+          mimeType={file.mimeType}
+          name={file.name}
+          url={file.url}
+          variant="flush"
+        />
       </DetailFrame>
       <FileLinksDialog
         fileId={file.fileId}
@@ -134,16 +144,55 @@ function FileReadyView({
   )
 }
 
-/** The preview frame's header line: type, size, and owner, separated by
- *  the same middots the console's inline meta rows use. */
+/** The preview frame's header line, left side: type and size, separated by
+ *  the same middot the console's inline meta rows use. */
 function FileMeta({ file }: { file: FileDetail }) {
   return (
     <div className="flex min-w-0 items-center gap-1.5 text-xs">
       <FileTypeCell file={file} />
       <span aria-hidden>·</span>
       <span className="shrink-0">{formatFileSize(file.size)}</span>
-      <span aria-hidden>·</span>
-      <FileOwnerCell file={file} />
     </div>
   )
+}
+
+/** The header's right edge: the owner, then a copy control for text-like
+ *  files, in the store value terminal's action idiom. */
+function FileHeaderActions({ file }: { file: FileDetail }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs">
+      <FileOwnerCell compact file={file} />
+      <FileCopyButton file={file} />
+    </span>
+  )
+}
+
+/** Files past this size skip the copy control; the download covers them. */
+const copySizeLimit = 5_000_000
+
+/** Copies the file's text. The inline preview caps what it fetches, so the
+ *  button refetches the whole file on click — the clipboard never receives
+ *  silently truncated content. */
+function FileCopyButton({ file }: { file: FileDetail }) {
+  const { url } = file
+
+  if (
+    url === null ||
+    file.size > copySizeLimit ||
+    !isTextualKind(file.mimeType, file.name)
+  ) {
+    return null
+  }
+
+  return <CopyButton label="file text" value={() => readFileText(url)} />
+}
+
+async function readFileText(url: string) {
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error("Could not fetch the file.")
+  }
+
+  return await response.text()
 }
