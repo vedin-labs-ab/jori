@@ -1,4 +1,3 @@
-import { type JsonSchemaObject } from "../../contracts/schema/validate"
 import {
   normalizeStoreSchema,
   storeLimits,
@@ -14,11 +13,11 @@ export const storeSpec: KindSpec<"store"> = {
   maxDocumentBytes: storeLimits.maxValueBytes,
   normalize: (input) => ({
     kind: "store",
-    schema: normalizeStoreSchema(input).schema,
+    schema: normalizeStoreSchema(input),
   }),
   evolve: () => {
     throw new Error("Store schemas are fixed at creation.")
   },
-  compile: (authoring) => authoring.schema as JsonSchemaObject,
+  compile: (authoring) => authoring.schema,
   documentLabel: (store) => `Store ${store.name}`,
 }

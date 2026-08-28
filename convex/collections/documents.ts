@@ -61,8 +61,9 @@ export async function pageDocuments(
 }
 
 /** Resolve a write against its target document and persist the result.
- *  Passing a documentId targets one of many documents; a singleton
- *  collection targets its only document, creating it on first write. */
+ *  A singleton collection targets its only document, creating it on first
+ *  write; any other collection targets one existing document by id, and
+ *  new documents enter through insertDocuments instead. */
 export async function writeDocument<K extends CollectionKind>(
   ctx: MutationCtx,
   spec: KindSpec<K>,
@@ -199,7 +200,9 @@ async function resolveTarget<K extends CollectionKind>(
   }
 
   if (documentId === undefined) {
-    return null
+    throw new Error(
+      `A ${spec.label.toLowerCase()} write requires a documentId.`
+    )
   }
 
   return await getCollectionDocument(ctx, spec, collection, documentId)
