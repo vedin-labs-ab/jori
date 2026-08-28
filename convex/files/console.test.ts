@@ -1,10 +1,11 @@
 import { expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import {
   insertUploadedFile,
   patchFileDetails,
   removeFileWithBlob,
+  toConsoleRow,
 } from "./console"
 
 const owner = "person-owner" as Id<"persons">
@@ -113,6 +114,41 @@ test("renames normalize the name and clear empty descriptions", async () => {
     description: undefined,
     updatedAt: expect.any(Number),
   })
+})
+
+test("console rows name the uploading person as the owner", async () => {
+  const ctx = {
+    db: {
+      query: vi.fn(() => ({
+        withIndex: () => ({
+          collect: async () => [{ provider: "slack", name: "Ada Lovelace" }],
+        }),
+      })),
+    },
+    storage: { getUrl: vi.fn(async () => "https://files.example/costs.csv") },
+  } as unknown as QueryCtx
+
+  const row = await toConsoleRow(ctx, { ...organizationFile(), ownerId: owner })
+
+  expect(row).toMatchObject({
+    source: "upload",
+    ownerName: "Ada Lovelace",
+    url: "https://files.example/costs.csv",
+    updatedAt: 0,
+  })
+})
+
+test("agent-saved rows carry run provenance and no owner name", async () => {
+  const ctx = {
+    storage: { getUrl: vi.fn(async () => null) },
+  } as unknown as QueryCtx
+  const runId = "run-id" as Id<"runs">
+
+  const row = await toConsoleRow(ctx, { ...organizationFile(), runId })
+
+  expect(row.source).toBe("run")
+  expect(row.runId).toBe(runId)
+  expect(row.ownerName).toBeUndefined()
 })
 
 function organizationFile(): Doc<"files"> {

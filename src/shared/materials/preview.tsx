@@ -1,5 +1,6 @@
-import { FileIcon } from "lucide-react"
+import { FileIcon, type LucideIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { fileKind } from "@/shared/files/kind"
 
 // One inline preview shared by the member file view and the anonymous
 // share view: images, PDFs, video, audio, and text-like files render in
@@ -8,18 +9,9 @@ import { useEffect, useState } from "react"
 /** Characters of text shown inline before the preview cuts off. */
 const textPreviewLimit = 100_000
 
-const textualTypes = new Set([
-  "application/javascript",
-  "application/json",
-  "application/sql",
-  "application/toml",
-  "application/typescript",
-  "application/x-javascript",
-  "application/x-sh",
-  "application/x-yaml",
-  "application/xml",
-  "application/yaml",
-])
+/** Registry categories rendered as monospace text: plain text, structured
+ *  text (JSON, CSV, YAML, …), and code. */
+const textualCategories = new Set(["code", "data", "text"])
 
 export function FilePreview({
   mimeType,
@@ -30,7 +22,8 @@ export function FilePreview({
   name: string
   url: string | null
 }) {
-  const kind = url === null ? "none" : previewKind(mimeType)
+  const icon = fileKind(mimeType, name).icon
+  const kind = url === null ? "none" : previewKind(mimeType, name)
 
   switch (kind) {
     case "image":
@@ -64,13 +57,20 @@ export function FilePreview({
         <audio className="w-full" controls src={url ?? undefined} />
       )
     case "text":
-      return url === null ? <PreviewFallback /> : <TextPreview url={url} />
+      return url === null ? (
+        <PreviewFallback icon={icon} />
+      ) : (
+        <TextPreview url={url} />
+      )
     case "none":
-      return <PreviewFallback />
+      return <PreviewFallback icon={icon} />
   }
 }
 
-function previewKind(mimeType: string) {
+/** Browsers render media by the served mime type, so those stay mime-only;
+ *  text previews are fetched by hand, so the registry's read of the file —
+ *  extension rescue included — decides what counts as text. */
+function previewKind(mimeType: string, name: string) {
   // Strip parameters like "; charset=utf-8" before matching.
   const base = (mimeType.split(";")[0] ?? "").trim().toLowerCase()
 
@@ -90,24 +90,15 @@ function previewKind(mimeType: string) {
     return "audio"
   }
 
-  return isTextual(base) ? "text" : "none"
+  return textualCategories.has(fileKind(mimeType, name).category)
+    ? "text"
+    : "none"
 }
 
-/** Text-like types rendered as monospace text: text/* (plain, CSV,
- *  markdown, HTML source, …), JSON, XML, and common code types. */
-function isTextual(base: string) {
-  return (
-    base.startsWith("text/") ||
-    textualTypes.has(base) ||
-    base.endsWith("+json") ||
-    base.endsWith("+xml")
-  )
-}
-
-function PreviewFallback() {
+function PreviewFallback({ icon: Icon }: { icon: LucideIcon }) {
   return (
     <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-md border bg-muted/30 text-muted-foreground">
-      <FileIcon className="size-6" />
+      <Icon className="size-6" />
       <p className="text-sm">No inline preview for this file type.</p>
     </div>
   )

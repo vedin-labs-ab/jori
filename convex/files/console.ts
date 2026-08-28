@@ -10,6 +10,7 @@ import {
 import { requireOrganizationAccess } from "../access"
 import { requireUserId } from "../access/users"
 import { resolvePersonByIdentity } from "../persons/identity/links"
+import { personDisplayName } from "../persons/names"
 import { optionalString, requiredString } from "../shared/input"
 import { canViewFile, type FileViewer, normalizeFileName } from "./data"
 import { fileScopes } from "./schema"
@@ -217,7 +218,10 @@ async function requireViewableFile(
   return file
 }
 
-async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
+/** Console shape of one file. `ownerName` names the uploading person; an
+ *  agent-saved file has run provenance and no owner, and the console shows
+ *  it as Jori's own. */
+export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
   return {
     fileId: file._id,
     name: file.name,
@@ -226,6 +230,10 @@ async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
     scope: file.scope,
     source: file.runId === undefined ? ("upload" as const) : ("run" as const),
     runId: file.runId,
+    ownerName:
+      file.ownerId === undefined
+        ? undefined
+        : await personDisplayName(ctx, file.ownerId),
     description: file.description,
     createdAt: file.createdAt,
     updatedAt: file.updatedAt,

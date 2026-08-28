@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { fileKind } from "@/shared/files/kind"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
 import { FilePreview } from "./preview"
@@ -35,8 +36,8 @@ export function FileShareView({
       {file.description === undefined ? null : (
         <p className="text-muted-foreground text-sm">{file.description}</p>
       )}
-      <p className="text-muted-foreground text-sm">
-        {file.mimeType} · {formatFileSize(file.size)}
+      <p className="text-muted-foreground text-sm" title={file.mimeType}>
+        {fileKind(file.mimeType, file.name).label} · {formatFileSize(file.size)}
       </p>
       <FilePreview mimeType={file.mimeType} name={file.name} url={file.url} />
       {file.url === null ? null : (

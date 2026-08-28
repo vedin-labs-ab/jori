@@ -5,6 +5,7 @@ import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { fileKind } from "@/shared/files/kind"
 import { FilePreview } from "@/shared/materials/preview"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
@@ -133,6 +134,8 @@ function FileReadyView({
 }
 
 function FileHeading({ file }: { file: FileDetail }) {
+  const kind = fileKind(file.mimeType, file.name)
+
   return (
     <div className="grid gap-1">
       <div className="flex flex-wrap items-center gap-2">
@@ -144,8 +147,8 @@ function FileHeading({ file }: { file: FileDetail }) {
       {file.description === undefined ? null : (
         <p className="text-muted-foreground text-sm">{file.description}</p>
       )}
-      <p className="text-muted-foreground text-xs">
-        {file.mimeType} · {formatFileSize(file.size)} ·{" "}
+      <p className="text-muted-foreground text-xs" title={file.mimeType}>
+        {kind.label} · {formatFileSize(file.size)} ·{" "}
         {file.source === "run" ? "Saved by Jori" : "Uploaded"}
       </p>
     </div>
