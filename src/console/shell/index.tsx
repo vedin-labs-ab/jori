@@ -17,7 +17,11 @@ import {
 import { cn } from "@/lib/utils"
 import { mainContentId, SkipToContent } from "@/shared/skip"
 import { ConsoleHeaderActionsProvider } from "../shared/layout"
-import { MaterialBreadcrumbContext } from "../shared/materials/breadcrumb"
+import {
+  type MaterialBreadcrumb,
+  MaterialBreadcrumbContext,
+} from "../shared/materials/breadcrumb"
+import { MaterialScopeMark } from "../shared/materials/scope"
 import { ConsoleSidebar } from "./navigation"
 import { getMaterialSurface, getPageTitle } from "./routes"
 
@@ -28,7 +32,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
     select: (state) => state.location.pathname,
   })
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null)
-  const [materialName, setMaterialName] = useState<string>()
+  const [material, setMaterial] = useState<MaterialBreadcrumb>()
 
   return (
     <SidebarProvider className="h-svh overflow-hidden">
@@ -46,13 +50,13 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             className="mr-2 data-vertical:h-4 data-vertical:self-auto"
             orientation="vertical"
           />
-          <ConsoleHeaderTitle materialName={materialName} pathname={pathname} />
+          <ConsoleHeaderTitle material={material} pathname={pathname} />
           <div
             className="ml-auto flex shrink-0 items-center gap-2"
             ref={setHeaderSlot}
           />
         </header>
-        <MaterialBreadcrumbContext.Provider value={setMaterialName}>
+        <MaterialBreadcrumbContext.Provider value={setMaterial}>
           <ConsoleHeaderActionsProvider slot={headerSlot}>
             <div
               className={cn(
@@ -71,13 +75,14 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 
 /** The header's name for the page. Material detail pages get a trail: the
  *  parent surface as a link, then the material's name once its view has
- *  published it. Everywhere else a one-item breadcrumb is not a trail, it
- *  is the page's name, so it is marked up as a heading. */
+ *  published it — with a muted scope icon suffix when the view publishes
+ *  a scope. Everywhere else a one-item breadcrumb is not a trail, it is
+ *  the page's name, so it is marked up as a heading. */
 function ConsoleHeaderTitle({
-  materialName,
+  material,
   pathname,
 }: {
-  materialName: string | undefined
+  material: MaterialBreadcrumb | undefined
   pathname: string
 }) {
   const surface = getMaterialSurface(pathname)
@@ -98,13 +103,16 @@ function ConsoleHeaderTitle({
             <Link to={surface.to}>{surface.label}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        {materialName === undefined ? null : (
+        {material === undefined ? null : (
           <>
             <BreadcrumbSeparator />
             <BreadcrumbItem className="min-w-0">
               <BreadcrumbPage className="truncate">
-                {materialName}
+                {material.name}
               </BreadcrumbPage>
+              {material.scope === undefined ? null : (
+                <MaterialScopeMark scope={material.scope} />
+              )}
             </BreadcrumbItem>
           </>
         )}

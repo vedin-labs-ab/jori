@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { MaterialBreadcrumbContext } from "../shared/materials/breadcrumb"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import {
+  type MaterialBreadcrumb,
+  MaterialBreadcrumbContext,
+} from "../shared/materials/breadcrumb"
 import { ConsoleShell } from "./index"
 import { consoleDocumentTitle } from "./routes"
 
@@ -64,27 +68,49 @@ test("heads a material detail page with the linked parent surface", () => {
 })
 
 test("appends the material's name once its view publishes it", () => {
-  pathname = "/tables/abc123"
+  const publish = renderWithPublisher("/tables/abc123")
 
-  let publish: ((name: string | undefined) => void) | undefined
-
-  render(
-    <ConsoleShell>
-      <MaterialBreadcrumbContext.Consumer>
-        {(value) => {
-          publish = value
-
-          return null
-        }}
-      </MaterialBreadcrumbContext.Consumer>
-    </ConsoleShell>
-  )
-  act(() => publish?.("Launch checklist"))
+  act(() => publish.current?.({ name: "Launch checklist" }))
 
   const current = screen.getByText("Launch checklist")
 
   expect(current.getAttribute("aria-current")).toBe("page")
 })
+
+test("suffixes the name with the scope icon when a scope is published", () => {
+  const publish = renderWithPublisher("/files/abc123")
+
+  act(() => publish.current?.({ name: "report.json", scope: "personal" }))
+
+  const current = screen.getByText("report.json")
+
+  expect(current.getAttribute("aria-current")).toBe("page")
+  expect(screen.getByText("Personal").className).toContain("sr-only")
+})
+
+function renderWithPublisher(path: string) {
+  pathname = path
+
+  const publish: {
+    current: ((material: MaterialBreadcrumb | undefined) => void) | undefined
+  } = { current: undefined }
+
+  render(
+    <TooltipProvider>
+      <ConsoleShell>
+        <MaterialBreadcrumbContext.Consumer>
+          {(value) => {
+            publish.current = value
+
+            return null
+          }}
+        </MaterialBreadcrumbContext.Consumer>
+      </ConsoleShell>
+    </TooltipProvider>
+  )
+
+  return publish
+}
 
 test("opens on a skip link pointing at the main element", () => {
   render(<ConsoleShell>Content</ConsoleShell>)

@@ -3,12 +3,11 @@ import { type GenericId } from "convex/values"
 import { Download, Link2 } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { fileKind } from "@/shared/files/kind"
 import { FilePreview } from "@/shared/materials/preview"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
+import { DetailFrame } from "../shared/details"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -17,6 +16,7 @@ import {
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
+import { FileOwnerCell, FileTypeCell } from "./cells"
 import { FileLinksDialog } from "./share"
 import { formatFileSize } from "./types"
 
@@ -93,7 +93,7 @@ function FileReadyView({
   organizationId: string
 }) {
   useMemberUrl()
-  useMaterialBreadcrumb(file.name)
+  useMaterialBreadcrumb(file.name, file.scope)
 
   const [isShareOpen, setIsShareOpen] = useState(false)
 
@@ -121,8 +121,9 @@ function FileReadyView({
           </Button>
         )}
       </ConsoleHeaderActions>
-      <FileHeading file={file} />
-      <FilePreview mimeType={file.mimeType} name={file.name} url={file.url} />
+      <DetailFrame contentClassName="p-2.5" header={<FileMeta file={file} />}>
+        <FilePreview mimeType={file.mimeType} name={file.name} url={file.url} />
+      </DetailFrame>
       <FileLinksDialog
         fileId={file.fileId}
         onOpenChange={setIsShareOpen}
@@ -133,24 +134,16 @@ function FileReadyView({
   )
 }
 
-function FileHeading({ file }: { file: FileDetail }) {
-  const kind = fileKind(file.mimeType, file.name)
-
+/** The preview frame's header line: type, size, and owner, separated by
+ *  the same middots the console's inline meta rows use. */
+function FileMeta({ file }: { file: FileDetail }) {
   return (
-    <div className="grid gap-1">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-medium text-lg tracking-tight">{file.name}</h2>
-        <Badge variant={file.scope === "personal" ? "outline" : "secondary"}>
-          {file.scope === "personal" ? "Personal" : "Organization"}
-        </Badge>
-      </div>
-      {file.description === undefined ? null : (
-        <p className="text-muted-foreground text-sm">{file.description}</p>
-      )}
-      <p className="text-muted-foreground text-xs" title={file.mimeType}>
-        {kind.label} · {formatFileSize(file.size)} ·{" "}
-        {file.source === "run" ? "Saved by Jori" : "Uploaded"}
-      </p>
+    <div className="flex min-w-0 items-center gap-1.5 text-xs">
+      <FileTypeCell file={file} />
+      <span aria-hidden>·</span>
+      <span className="shrink-0">{formatFileSize(file.size)}</span>
+      <span aria-hidden>·</span>
+      <FileOwnerCell file={file} />
     </div>
   )
 }
