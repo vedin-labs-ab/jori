@@ -14,10 +14,13 @@ import { folderIcon, type ListedFolder } from "../types"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
 /** The full-bleed Name/Kind/Updated table both folder surfaces share: the
- *  /folders overview lists the root folders, a folder's page its contents. */
+ *  /folders overview lists the root folders, a folder's page its contents.
+ *  Cells carry a fixed height because rows differ in tallest content — a
+ *  resource row's menu button outgrows a folder row's bare link — and
+ *  mixed row heights read as a glitch. */
 export function FolderListTable({ children }: { children: ReactNode }) {
   return (
-    <ConsoleListTable>
+    <ConsoleListTable className="[&_td]:h-10">
       <TableHeader>
         <TableRow>
           <TableHead>Name</TableHead>
