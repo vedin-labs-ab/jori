@@ -1,12 +1,4 @@
-import { scopeLabels } from "@contracts/permissions/scope"
 import { Download, Link2, Pencil } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { ScopeIcon } from "../shared/details"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
 import { MaterialActions } from "../shared/materials/actions"
 import { storeDeleteDescription, type useStoreRemoval } from "./manage"
@@ -64,39 +56,5 @@ export function StoreHeaderActions({
         onRestore={() => void removal.restoreStore(store)}
       />
     </ConsoleHeaderActions>
-  )
-}
-
-export function StoreHeading({
-  isArchived,
-  store,
-}: {
-  isArchived: boolean
-  store: StoreDetail
-}) {
-  return (
-    <div className="grid gap-1">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-medium text-lg tracking-tight">{store.name}</h2>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="text-muted-foreground">
-              <ScopeIcon className="size-4" scope={store.scope} />
-              <span className="sr-only">{scopeLabels[store.scope]}</span>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{scopeLabels[store.scope]}</TooltipContent>
-        </Tooltip>
-        {isArchived ? <Badge variant="secondary">Archived</Badge> : null}
-      </div>
-      {store.description === undefined ? null : (
-        <p className="text-muted-foreground text-sm">{store.description}</p>
-      )}
-      {isArchived ? (
-        <p className="text-muted-foreground text-xs">
-          Archived stores are read-only. Restore the store to write again.
-        </p>
-      ) : null}
-    </div>
   )
 }

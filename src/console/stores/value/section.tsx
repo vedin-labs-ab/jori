@@ -29,7 +29,6 @@ export function StoreValue({
   if (isEditing) {
     return (
       <ValueEditorSection
-        header={valueHeader(store)}
         onClose={() => setIsEditing(false)}
         organizationId={organizationId}
         store={store}
@@ -47,7 +46,6 @@ export function StoreValue({
             store={store}
           />
         }
-        header={valueHeader(store)}
       >
         <ValueDocument store={store} />
       </DetailFrame>
@@ -126,12 +124,6 @@ function ValueActionButton({
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   )
-}
-
-function valueHeader(store: StoreDetail) {
-  return store.version === 0
-    ? "Value · not written yet"
-    : `Value · v${store.version}`
 }
 
 function ValueDocument({ store }: { store: StoreDetail }) {

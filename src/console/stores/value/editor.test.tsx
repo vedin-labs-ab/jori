@@ -51,7 +51,6 @@ function renderEditor(value: unknown, version = 2) {
 
   render(
     <ValueEditorSection
-      header={`Value · v${version}`}
       onClose={() => undefined}
       organizationId="org-1"
       store={store}

@@ -17,7 +17,7 @@ import { type TableDetail } from "../types"
 import { AddRowDialog } from "./add"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
-import { TableHeaderActions, TableHeading } from "./header"
+import { TableHeaderActions } from "./header"
 import { useRowPages, useRowWrites } from "./rows"
 import { TableLinksDialog } from "./share"
 
@@ -105,7 +105,7 @@ function TableReadyView({
   table: TableDetail
 }) {
   useMemberUrl()
-  useMaterialBreadcrumb(table.name)
+  useMaterialBreadcrumb(table.name, table.scope)
 
   const navigate = useNavigate()
   const pages = useRowPages(organizationId, table.tableId)
@@ -137,7 +137,6 @@ function TableReadyView({
         removal={removal}
         table={table}
       />
-      <TableHeading isArchived={isArchived} table={table} />
       {/* The rows scroll in place so the pager stays pinned below them,
           matching the paginated console list pages. */}
       <ConsoleScrollableGrid>
