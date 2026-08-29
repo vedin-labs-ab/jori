@@ -10,8 +10,8 @@ import {
 import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
 import { ConsoleEmptyState } from "../shared/list/empty"
 import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
+import { ConsoleListLoading } from "../shared/list/loading"
 import { type RowSelection } from "../shared/list/selection"
-import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { MaterialFolderCell } from "../shared/materials/cells/folder"
 import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
@@ -41,11 +41,7 @@ export function FileTable({
   selection: RowSelection<FileRow>
 }) {
   if (isLoading) {
-    return (
-      <ConsoleListContent>
-        <ConsoleListSkeleton />
-      </ConsoleListContent>
-    )
+    return <ConsoleListLoading />
   }
 
   if (files.length === 0) {

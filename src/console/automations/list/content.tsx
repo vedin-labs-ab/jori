@@ -1,8 +1,9 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ConsoleScrollableList } from "../../shared/layout"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { type AutomationEditor } from "../editor"
 import { type AutomationList } from "../types"
-import { AutomationSkeletonList, EmptyAutomations } from "./empty"
+import { EmptyAutomations } from "./empty"
 import { AutomationRow } from "./row"
 
 // Auto-fill tracks add columns as the viewport grows instead of stretching
@@ -28,11 +29,7 @@ export function AutomationContent({
   visibleAutomations: AutomationList["automations"]
 }) {
   if (automationList === undefined) {
-    return (
-      <ConsoleScrollableList className={automationGrid}>
-        <AutomationSkeletonList />
-      </ConsoleScrollableList>
-    )
+    return <ConsoleListLoading />
   }
 
   if (automationList.status === "unauthorized") {

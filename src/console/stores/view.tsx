@@ -8,7 +8,7 @@ import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListSkeleton } from "../shared/list/skeleton"
+import { ConsoleListLoading } from "../shared/list/loading"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { EditStoreDialog } from "./edit"
@@ -56,7 +56,7 @@ function StoreViewContent({
   if (result === undefined) {
     return (
       <ConsolePageLayout>
-        <ConsoleListSkeleton />
+        <ConsoleListLoading />
       </ConsolePageLayout>
     )
   }

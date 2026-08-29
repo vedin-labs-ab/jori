@@ -9,7 +9,7 @@ import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { showErrorToast } from "../shared/error"
 import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListSkeleton } from "../shared/list/skeleton"
+import { ConsoleListLoading } from "../shared/list/loading"
 import {
   type MaterialBreadcrumb,
   useMaterialTrail,
@@ -54,7 +54,7 @@ function FolderView({
   if (detail === undefined) {
     return (
       <FolderFallback>
-        <ConsoleListSkeleton />
+        <ConsoleListLoading />
       </FolderFallback>
     )
   }

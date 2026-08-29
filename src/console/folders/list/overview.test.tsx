@@ -72,11 +72,11 @@ test("root folders land in the same table as a folder's contents", () => {
   expect(screen.queryByRole("link", { name: "Nested" })).toBeNull()
 })
 
-test("loading shows the padded skeleton instead of a table", () => {
+test("loading shows the centered spinner instead of a table", () => {
   renderList(undefined)
 
   expect(screen.queryByRole("table")).toBeNull()
-  expect(document.querySelector('[data-slot="skeleton"]')).not.toBeNull()
+  expect(document.querySelector('[data-slot="spinner"]')).not.toBeNull()
 })
 
 test("an unauthorized tree surfaces its message", () => {

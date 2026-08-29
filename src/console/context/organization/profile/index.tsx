@@ -10,7 +10,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ConsoleListLoading } from "../../../shared/list/loading"
 import { OrganizationEditDialog } from "../discovery/edit"
 import {
   hasFacts,
@@ -40,7 +40,7 @@ export function ContextProfile({
   const [reviewOpen, setReviewOpen] = useState(false)
 
   if (profile === undefined) {
-    return <Skeleton className="h-96 w-full rounded-xl" />
+    return <ConsoleListLoading />
   }
 
   const facts = profile === null || !hasFacts(profile) ? null : profile

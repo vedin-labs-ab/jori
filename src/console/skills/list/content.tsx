@@ -1,17 +1,13 @@
 import { BookOpenText, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { ConsoleScrollableGrid } from "../../shared/layout"
 import { ConsoleEmptyState } from "../../shared/list/empty"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { type Skill, type SkillFilterView } from "../types"
 import { SkillCard } from "./card"
 
-const skeletonCards = ["first", "second", "third", "fourth", "fifth", "sixth"]
-
 // Auto-fill tracks add columns as the viewport grows instead of stretching
 // cards, keeping the unbounded console frame usable at any width.
-const skillGrid = "grid-cols-[repeat(auto-fill,minmax(min(20rem,100%),1fr))]"
-
 export function SkillContent({
   filteredCount,
   isLoading,
@@ -36,11 +32,7 @@ export function SkillContent({
   view: SkillFilterView
 }) {
   if (isLoading) {
-    return (
-      <ConsoleScrollableGrid className={skillGrid}>
-        <SkillSkeletonList />
-      </ConsoleScrollableGrid>
-    )
+    return <ConsoleListLoading />
   }
 
   const isFiltering = searchTerm.trim().length > 0
@@ -137,15 +129,5 @@ function SkillEmptyState({
       icon={BookOpenText}
       title={title}
     />
-  )
-}
-
-function SkillSkeletonList() {
-  return (
-    <>
-      {skeletonCards.map((card) => (
-        <Skeleton className="h-56 w-full rounded-lg" key={card} />
-      ))}
-    </>
   )
 }

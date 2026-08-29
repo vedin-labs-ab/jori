@@ -3,9 +3,9 @@ import { useQuery } from "convex/react"
 import { Cable, Signpost } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleEmptyState } from "../../shared/list/empty"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { useNow } from "../../shared/time"
 import { ContextPage } from ".."
 import { ContextSectionTitle } from "../section"
@@ -31,7 +31,7 @@ function PlacesView({ organizationId }: { organizationId: string }) {
   const open = places.find((row) => row.id === openId) ?? null
 
   if (result === undefined) {
-    return <Skeleton className="h-28 w-full" />
+    return <ConsoleListLoading />
   }
 
   return (

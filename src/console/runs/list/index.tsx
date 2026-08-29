@@ -15,6 +15,7 @@ import {
   ConsoleScrollableGrid,
   ConsoleSearch,
 } from "../../shared/layout"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { useResettingSetter } from "../../shared/list/pagination"
 import { type ScopeFilter, scopeFilterOptions } from "../../shared/list/scope"
@@ -28,7 +29,7 @@ import {
   type RunFilter,
   runFilterOptions,
 } from "../types"
-import { EmptyExecutions, ExecutionSkeletonList } from "./empty"
+import { EmptyExecutions } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { usePageSearchSync, useSearchTarget } from "./seek"
 
@@ -174,16 +175,19 @@ function ExecutionRows({
 }) {
   const now = useExecutionClock(pagination.visibleRows)
 
+  if (pagination.isLoadingFirstPage) {
+    return <ConsoleListLoading />
+  }
+
   return (
     // auto-rows-max keeps row heights at their content size; without it the
     // overflow-hidden articles let the definite-height grid compress its
     // tracks to fit instead of overflowing into the scrollbar.
     <ConsoleScrollableGrid>
-      {pagination.isLoadingFirstPage ? <ExecutionSkeletonList /> : null}
-      {!pagination.isLoadingFirstPage && pagination.visibleRows.length === 0 ? (
+      {pagination.visibleRows.length === 0 ? (
         <EmptyExecutions hasFilters={pagination.hasFilters} />
       ) : null}
-      {!pagination.isLoadingFirstPage && pagination.visibleRows.length > 0
+      {pagination.visibleRows.length > 0
         ? pagination.visibleRows.map((execution) => (
             <ExecutionRow
               defaultOpen={execution.id === focusRunId}

@@ -3,10 +3,10 @@ import { useQuery } from "convex/react"
 import { Cable, Layers } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleFilterGroup, ConsoleFilterToggle } from "../../shared/layout"
 import { FilterableEmptyState } from "../../shared/list/empty"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { ConsoleListPager } from "../../shared/list/pager"
 import {
   useClientPagination,
@@ -58,7 +58,7 @@ function WorkstreamsView({ organizationId }: { organizationId: string }) {
       )}
       <WorkstreamFilters filter={list.filter} onFilterChange={list.setFilter} />
       {result === undefined ? (
-        <Skeleton className="h-28 w-full" />
+        <ConsoleListLoading />
       ) : (
         <WorkstreamList
           hasFilters={list.hasFilters || workstreams.length > 0}

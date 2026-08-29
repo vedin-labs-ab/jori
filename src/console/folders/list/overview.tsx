@@ -8,7 +8,7 @@ import { ConsolePage } from "../../page"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../shared/layout"
 import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
-import { ConsoleListSkeleton } from "../../shared/list/skeleton"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
 import { type FolderTreeResult } from "../types"
 import { FolderListRow, FolderListTable } from "./table"
@@ -62,7 +62,7 @@ export function RootFolderList({
   if (tree === undefined) {
     return (
       <ConsoleListContent>
-        <ConsoleListSkeleton />
+        <ConsoleListLoading />
       </ConsoleListContent>
     )
   }

@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ConsoleEmptyState } from "../../shared/list/empty"
-import { ConsoleListSkeleton } from "../../shared/list/skeleton"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { type TableColumn, type TableRow as TableRowData } from "../types"
 import { type CommitCell, RowCell } from "./cell"
 
@@ -44,7 +44,7 @@ export function RowGrid({
   rows: TableRowData[]
 }) {
   if (isLoading) {
-    return <ConsoleListSkeleton />
+    return <ConsoleListLoading />
   }
 
   if (rows.length === 0) {
