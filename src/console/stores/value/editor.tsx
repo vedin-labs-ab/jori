@@ -21,12 +21,10 @@ import { useValueEditor, type ValueEditor, type ValueEditorView } from "./state"
  *  view over the raw JSON one toggle away, saved wholesale against the
  *  version it was read at. */
 export function ValueEditorSection({
-  header,
   onClose,
   organizationId,
   store,
 }: {
-  header: string
   onClose: () => void
   organizationId: string
   store: StoreDetail
@@ -75,7 +73,7 @@ export function ValueEditorSection({
       onSubmit={() => void submit()}
     >
       <div className="flex items-center justify-between">
-        <Label>{header}</Label>
+        <Label>Value</Label>
         <Tabs
           onValueChange={(view) => editor.switchView(view as ValueEditorView)}
           value={editor.state.view}

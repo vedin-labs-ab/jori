@@ -12,7 +12,7 @@ import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { EditStoreDialog } from "./edit"
 import { exportStoreJson } from "./export"
-import { StoreHeaderActions, StoreHeading } from "./header"
+import { StoreHeaderActions } from "./header"
 import { useStoreRemoval } from "./manage"
 import { StoreLinksDialog } from "./share"
 import { type StoreDetail } from "./types"
@@ -100,7 +100,7 @@ function StoreReadyView({
   store: StoreDetail
 }) {
   useMemberUrl()
-  useMaterialBreadcrumb(store.name)
+  useMaterialBreadcrumb(store.name, store.scope)
 
   const navigate = useNavigate()
   const removal = useStoreRemoval(organizationId)
@@ -128,7 +128,6 @@ function StoreReadyView({
         removal={removal}
         store={store}
       />
-      <StoreHeading isArchived={isArchived} store={store} />
       <StoreValue organizationId={organizationId} store={store} />
       <EditStoreDialog
         onOpenChange={setIsEditOpen}
