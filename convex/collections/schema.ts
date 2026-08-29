@@ -24,6 +24,8 @@ const collectionFields = {
   organizationId: v.string(),
   scope: scopeValidator,
   ownerId: v.optional(v.id("persons")),
+  /** Filing only — folders carry no access semantics. */
+  folderId: v.optional(v.id("folders")),
   name: v.string(),
   description: v.optional(v.string()),
   /** Content hash of the compiled JSON Schema. */
@@ -48,11 +50,13 @@ export const collections = defineTable(
       schema: v.any(),
     })
   )
-).index("by_organization_and_kind_and_updated_at", [
-  "organizationId",
-  "kind",
-  "updatedAt",
-])
+)
+  .index("by_organization_and_kind_and_updated_at", [
+    "organizationId",
+    "kind",
+    "updatedAt",
+  ])
+  .index("by_folder", ["folderId"])
 
 /** One versioned document: a table's row or a store's single value. */
 export const documents = defineTable({
