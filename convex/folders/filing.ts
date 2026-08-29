@@ -1,4 +1,4 @@
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { canAccessAutomation } from "../automations/access"
@@ -18,9 +18,12 @@ export const filedResourceType = v.union(
   v.literal("automation")
 )
 
-export type FiledResourceType = "collection" | "file" | "automation"
+export type FiledResourceType = Infer<typeof filedResourceType>
 
-type FiledTable = "collections" | "files" | "automations"
+/** The tables whose rows can be filed into a folder. */
+export const filedTables = ["collections", "files", "automations"] as const
+
+type FiledTable = (typeof filedTables)[number]
 
 type FiledDoc = Doc<FiledTable>
 
