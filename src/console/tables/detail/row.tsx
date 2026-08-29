@@ -138,14 +138,14 @@ export function NewRowRow({
     return null
   }
 
-  // The affordance closes the grid: it spans exactly the grid's width and
-  // carries its own bottom and right hairlines (the last-row reset would
-  // otherwise strip them).
+  // The affordance fits its content: the cell spans the grid but stays
+  // borderless (the last-row reset already strips it), and the button
+  // carries its own closing hairlines so the box ends with the label.
   return (
     <TableRow>
-      <TableCell className="border-r border-b! p-0" colSpan={span}>
+      <TableCell className="p-0" colSpan={span}>
         <button
-          className="flex h-9 w-full items-center gap-1.5 px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
+          className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
           onClick={onAddRow}
           type="button"
         >
