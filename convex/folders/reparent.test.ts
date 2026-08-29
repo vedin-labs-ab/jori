@@ -78,6 +78,27 @@ test("filing does not touch a resource's updatedAt", async () => {
   expect((await database.get(seeded.fileId))?.updatedAt).toBe(1)
 })
 
+test("a destination that was itself deleted falls back to the root", async () => {
+  const { database, ctx } = databaseContext()
+  const parentId = await database.insert("folders", folderDoc())
+  const folderId = await database.insert("folders", folderDoc({ parentId }))
+  const childId = await database.insert(
+    "folders",
+    folderDoc({ parentId: folderId })
+  )
+  const seeded = await seedFiledResources(database, folderId)
+
+  await database.delete(parentId)
+  await removeFolder(ctx, {
+    organizationId: "org",
+    folderId: folderId as Id<"folders">,
+  })
+
+  expect((await database.get(childId))?.parentId).toBeUndefined()
+  expect((await database.get(seeded.collectionId))?.folderId).toBeUndefined()
+  expect((await database.get(seeded.fileId))?.folderId).toBeUndefined()
+})
+
 test("an overfull folder continues through the scheduler", async () => {
   const runAfter = vi.fn(async () => undefined)
   const { database, ctx } = databaseContext({ scheduler: { runAfter } })

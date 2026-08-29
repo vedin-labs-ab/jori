@@ -12,7 +12,7 @@ import { summarizeFolder, treeCap } from "./tree"
 
 /** Per-type ceiling on one folder's listed resources; generous because a
  *  folder is a curated shelf, not an archive — no cross-type pagination. */
-export const contentsCap = 200
+const contentsCap = 200
 
 type Viewer = {
   organizationId: string

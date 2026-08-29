@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { filedTables } from "./filing"
 import {
   folderDepth,
   isSelfOrDescendant,
@@ -16,9 +17,6 @@ import {
 // folders are labels for humans, and ids already carry identity.
 
 const reparentBatchSize = 200
-
-/** The tables whose rows can be filed into a folder. */
-const filedTables = ["collections", "files", "automations"] as const
 
 export async function createFolder(
   ctx: MutationCtx,
@@ -157,17 +155,28 @@ async function reparentBatch(
     parentId?: Id<"folders">
   }
 ) {
-  let overflow = await reparentChildFolders(ctx, args)
+  const target = { ...args, parentId: await liveParentId(ctx, args.parentId) }
+  let overflow = await reparentChildFolders(ctx, target)
 
   for (const table of filedTables) {
-    if (await reparentFiledRows(ctx, table, args)) {
+    if (await reparentFiledRows(ctx, table, target)) {
       overflow = true
     }
   }
 
   if (overflow) {
-    await ctx.scheduler.runAfter(0, internal.folders.records.reparent, args)
+    await ctx.scheduler.runAfter(0, internal.folders.records.reparent, target)
   }
+}
+
+/** Concurrent deletions can take the destination folder down before a batch
+ *  runs; rows then go to the root instead of dangling under a dead id. */
+async function liveParentId(ctx: MutationCtx, parentId?: Id<"folders">) {
+  if (parentId === undefined || (await ctx.db.get(parentId)) === null) {
+    return undefined
+  }
+
+  return parentId
 }
 
 async function reparentChildFolders(
