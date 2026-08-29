@@ -40,10 +40,13 @@ export function OrganizationLogo({
   Omit<ComponentProps<typeof Avatar>, "children" | "size" | "style"> & {
     style?: CSSProperties
   }) {
+  // Organizations square off with softened corners; only people stay fully
+  // round. The Avatar primitive bakes rounded-full into its root, ring,
+  // image, and fallback, so each layer is overridden here.
   if (isPending && !organization) {
     return (
       <Skeleton
-        className={cn("rounded-full", sizeClasses[size], className)}
+        className={cn("rounded-md", sizeClasses[size], className)}
         style={style}
       />
     )
@@ -54,17 +57,25 @@ export function OrganizationLogo({
 
   return (
     <Avatar
-      className={cn("rounded-full", sizeClasses[size], className)}
+      className={cn(
+        "rounded-md after:rounded-md",
+        sizeClasses[size],
+        className
+      )}
       style={style}
       {...props}
     >
       <AvatarImage
         alt={organization?.name ?? "Organization"}
+        className="rounded-md"
         src={normalizedLogo}
       />
 
       <AvatarFallback
-        className={cn("text-muted-foreground!", fallbackTextClasses[size])}
+        className={cn(
+          "rounded-md text-muted-foreground!",
+          fallbackTextClasses[size]
+        )}
       >
         {fallback || initials || <Briefcase className="size-4" />}
       </AvatarFallback>

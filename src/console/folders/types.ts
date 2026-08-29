@@ -53,8 +53,8 @@ export type MoveResourceTarget = {
   folderId?: string
 }
 
-/** What the move dialog moves: a folder re-parents through `move`, anything
- *  else re-files through `file`. */
+/** What the move dialog moves: a folder re-parents through `move`, filed
+ *  resources — one or a bulk selection — re-file through `file`. */
 export type MoveSubject =
   | { kind: "folder"; folderId: string; name: string; parentId?: string }
-  | ({ kind: "resource" } & MoveResourceTarget)
+  | { kind: "resources"; resources: MoveResourceTarget[] }

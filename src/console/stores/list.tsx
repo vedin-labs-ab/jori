@@ -2,29 +2,35 @@ import { Database, Plus } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
-  Table,
   TableBody,
   TableCell,
-  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import {
-  ConsoleFilterGroup,
   ConsoleFilterToggle,
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsoleSearch,
 } from "../shared/layout"
+import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
 import { FilterableEmptyState } from "../shared/list/empty"
+import {
+  ConsoleListContent,
+  ConsoleListTable,
+  ConsoleListToolbar,
+} from "../shared/list/frame"
 import { type ScopeFilter, scopeFilterOptions } from "../shared/list/scope"
+import { type RowSelection } from "../shared/list/selection"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { MaterialActions } from "../shared/materials/actions"
 import {
   type ArchiveFilter,
   archiveFilterOptions,
 } from "../shared/materials/archive"
+import { MaterialFolderCell } from "../shared/materials/cells/folder"
+import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import {
   StoreNameCell,
@@ -67,7 +73,7 @@ export function StoresToolbar({
           type="button"
         />
       </ConsoleHeaderActions>
-      <ConsoleFilterGroup>
+      <ConsoleListToolbar>
         <ConsoleFilterToggle
           label="Status"
           onValueChange={onFilterChange}
@@ -80,98 +86,121 @@ export function StoresToolbar({
           options={scopeFilterOptions}
           value={scope}
         />
-      </ConsoleFilterGroup>
+      </ConsoleListToolbar>
     </>
   )
 }
 
 export function StoreList({
+  folders,
   hasFilters,
   onCreate,
   onMoveToFolder,
   removal,
+  selection,
   stores,
   unauthorizedMessage,
 }: {
+  folders: FolderNames | undefined
   hasFilters: boolean
   onCreate: () => void
   onMoveToFolder: (store: StoreSummary) => void
   removal: ReturnType<typeof useStoreRemoval>
+  selection: RowSelection<StoreSummary>
   stores: StoreSummary[]
   unauthorizedMessage: string | undefined
 }) {
   if (unauthorizedMessage !== undefined) {
     return (
-      <Alert variant="destructive">
-        <AlertTitle>Could not load stores</AlertTitle>
-        <AlertDescription>{unauthorizedMessage}</AlertDescription>
-      </Alert>
+      <ConsoleListContent>
+        <Alert variant="destructive">
+          <AlertTitle>Could not load stores</AlertTitle>
+          <AlertDescription>{unauthorizedMessage}</AlertDescription>
+        </Alert>
+      </ConsoleListContent>
     )
   }
 
   if (stores.length === 0) {
     return (
-      <FilterableEmptyState
-        action={
-          <Button onClick={onCreate} type="button">
-            <Plus />
-            New store
-          </Button>
-        }
-        description="Schema-backed JSON documents Jori and your team keep state in appear here."
-        hasFilters={hasFilters}
-        icon={Database}
-        noun="stores"
-      />
+      <ConsoleListContent>
+        <FilterableEmptyState
+          action={
+            <Button onClick={onCreate} type="button">
+              <Plus />
+              New store
+            </Button>
+          }
+          description="Schema-backed JSON documents Jori and your team keep state in appear here."
+          hasFilters={hasFilters}
+          icon={Database}
+          noun="stores"
+        />
+      </ConsoleListContent>
     )
   }
 
   return (
-    <TableFrame>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Properties</TableHead>
-            <TableHead>Version</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Owner</TableHead>
-            <TableHead>Last Updated</TableHead>
-            <TableHead className="w-10" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {stores.map((store) => (
-            <StoreListRow
-              key={store.storeId}
-              onMoveToFolder={onMoveToFolder}
-              removal={removal}
-              store={store}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </TableFrame>
+    <ConsoleListTable>
+      <TableHeader>
+        <TableRow>
+          <SelectionHeadCell selection={selection} />
+          <TableHead>Name</TableHead>
+          <TableHead>Properties</TableHead>
+          <TableHead>Version</TableHead>
+          <TableHead>Folder</TableHead>
+          <TableHead>Created</TableHead>
+          <TableHead>Owner</TableHead>
+          <TableHead>Last Updated</TableHead>
+          <TableHead className="w-10" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {stores.map((store) => (
+          <StoreListRow
+            folders={folders}
+            key={store.storeId}
+            onMoveToFolder={onMoveToFolder}
+            removal={removal}
+            selection={selection}
+            store={store}
+          />
+        ))}
+      </TableBody>
+    </ConsoleListTable>
   )
 }
 
 export function StoreListSkeleton() {
-  return <ConsoleListSkeleton />
+  return (
+    <ConsoleListContent>
+      <ConsoleListSkeleton />
+    </ConsoleListContent>
+  )
 }
 
 function StoreListRow({
+  folders,
   onMoveToFolder,
   removal,
+  selection,
   store,
 }: {
+  folders: FolderNames | undefined
   onMoveToFolder: (store: StoreSummary) => void
   removal: ReturnType<typeof useStoreRemoval>
+  selection: RowSelection<StoreSummary>
   store: StoreSummary
 }) {
   const now = useNow(30_000)
 
   return (
-    <TableRow>
+    <TableRow data-state={selection.isSelected(store) ? "selected" : undefined}>
+      <SelectionRowCell
+        label={`Select ${store.name}`}
+        row={store}
+        selection={selection}
+      />
       <TableCell>
         <StoreNameCell store={store} />
       </TableCell>
@@ -180,6 +209,9 @@ function StoreListRow({
       </TableCell>
       <TableCell>
         <StoreVersionCell store={store} />
+      </TableCell>
+      <TableCell>
+        <MaterialFolderCell folderId={store.folderId} folders={folders} />
       </TableCell>
       <TableCell
         className="text-muted-foreground"

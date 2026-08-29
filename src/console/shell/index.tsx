@@ -64,14 +64,9 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           </header>
           <MaterialBreadcrumbContext.Provider value={setMaterial}>
             <ConsoleHeaderActionsProvider slot={headerSlot}>
-              <div
-                className={cn(
-                  consoleFrame,
-                  "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pt-1 pb-6"
-                )}
-              >
-                {children}
-              </div>
+              {/* Pages own their padding and scrolling: ConsolePageLayout
+                  pads and scrolls, ConsoleListLayout runs full-bleed. */}
+              <div className="flex min-h-0 flex-1 flex-col">{children}</div>
             </ConsoleHeaderActionsProvider>
           </MaterialBreadcrumbContext.Provider>
         </SidebarInset>

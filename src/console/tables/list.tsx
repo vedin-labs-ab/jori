@@ -2,29 +2,35 @@ import { Plus, Table2, Upload } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
-  Table,
   TableBody,
   TableCell,
-  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import {
-  ConsoleFilterGroup,
   ConsoleFilterToggle,
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsoleSearch,
 } from "../shared/layout"
+import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
 import { FilterableEmptyState } from "../shared/list/empty"
+import {
+  ConsoleListContent,
+  ConsoleListTable,
+  ConsoleListToolbar,
+} from "../shared/list/frame"
 import { type ScopeFilter, scopeFilterOptions } from "../shared/list/scope"
+import { type RowSelection } from "../shared/list/selection"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { MaterialActions } from "../shared/materials/actions"
 import {
   type ArchiveFilter,
   archiveFilterOptions,
 } from "../shared/materials/archive"
+import { MaterialFolderCell } from "../shared/materials/cells/folder"
+import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import {
   TableColumnsCell,
@@ -76,7 +82,7 @@ export function TablesToolbar({
           type="button"
         />
       </ConsoleHeaderActions>
-      <ConsoleFilterGroup>
+      <ConsoleListToolbar>
         <ConsoleFilterToggle
           label="Status"
           onValueChange={onFilterChange}
@@ -89,106 +95,129 @@ export function TablesToolbar({
           options={scopeFilterOptions}
           value={scope}
         />
-      </ConsoleFilterGroup>
+      </ConsoleListToolbar>
     </>
   )
 }
 
 export function TableList({
+  folders,
   hasFilters,
   onCreate,
   onImport,
   onMoveToFolder,
   removal,
+  selection,
   tables,
   unauthorizedMessage,
 }: {
+  folders: FolderNames | undefined
   hasFilters: boolean
   onCreate: () => void
   onImport: () => void
   onMoveToFolder: (table: TableSummary) => void
   removal: ReturnType<typeof useTableRemoval>
+  selection: RowSelection<TableSummary>
   tables: TableSummary[]
   unauthorizedMessage: string | undefined
 }) {
   if (unauthorizedMessage !== undefined) {
     return (
-      <Alert variant="destructive">
-        <AlertTitle>Could not load tables</AlertTitle>
-        <AlertDescription>{unauthorizedMessage}</AlertDescription>
-      </Alert>
+      <ConsoleListContent>
+        <Alert variant="destructive">
+          <AlertTitle>Could not load tables</AlertTitle>
+          <AlertDescription>{unauthorizedMessage}</AlertDescription>
+        </Alert>
+      </ConsoleListContent>
     )
   }
 
   if (tables.length === 0) {
     return (
-      <FilterableEmptyState
-        action={
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button onClick={onCreate} type="button">
-              <Plus />
-              New table
-            </Button>
-            <Button onClick={onImport} type="button" variant="outline">
-              <Upload />
-              Import
-            </Button>
-          </div>
-        }
-        description="Typed tables Jori and your team keep structured records in appear here."
-        hasFilters={hasFilters}
-        icon={Table2}
-        noun="tables"
-      />
+      <ConsoleListContent>
+        <FilterableEmptyState
+          action={
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button onClick={onCreate} type="button">
+                <Plus />
+                New table
+              </Button>
+              <Button onClick={onImport} type="button" variant="outline">
+                <Upload />
+                Import
+              </Button>
+            </div>
+          }
+          description="Typed tables Jori and your team keep structured records in appear here."
+          hasFilters={hasFilters}
+          icon={Table2}
+          noun="tables"
+        />
+      </ConsoleListContent>
     )
   }
 
   return (
-    <TableFrame>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Columns</TableHead>
-            <TableHead>Rows</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Owner</TableHead>
-            <TableHead>Last Updated</TableHead>
-            <TableHead className="w-10" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tables.map((table) => (
-            <TableListRow
-              key={table.tableId}
-              onMoveToFolder={onMoveToFolder}
-              removal={removal}
-              table={table}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </TableFrame>
+    <ConsoleListTable>
+      <TableHeader>
+        <TableRow>
+          <SelectionHeadCell selection={selection} />
+          <TableHead>Name</TableHead>
+          <TableHead>Columns</TableHead>
+          <TableHead>Rows</TableHead>
+          <TableHead>Folder</TableHead>
+          <TableHead>Created</TableHead>
+          <TableHead>Owner</TableHead>
+          <TableHead>Last Updated</TableHead>
+          <TableHead className="w-10" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {tables.map((table) => (
+          <TableListRow
+            folders={folders}
+            key={table.tableId}
+            onMoveToFolder={onMoveToFolder}
+            removal={removal}
+            selection={selection}
+            table={table}
+          />
+        ))}
+      </TableBody>
+    </ConsoleListTable>
   )
 }
 
 export function TableListSkeleton() {
-  return <ConsoleListSkeleton />
+  return (
+    <ConsoleListContent>
+      <ConsoleListSkeleton />
+    </ConsoleListContent>
+  )
 }
 
 function TableListRow({
+  folders,
   onMoveToFolder,
   removal,
+  selection,
   table,
 }: {
+  folders: FolderNames | undefined
   onMoveToFolder: (table: TableSummary) => void
   removal: ReturnType<typeof useTableRemoval>
+  selection: RowSelection<TableSummary>
   table: TableSummary
 }) {
   const now = useNow(30_000)
 
   return (
-    <TableRow>
+    <TableRow data-state={selection.isSelected(table) ? "selected" : undefined}>
+      <SelectionRowCell
+        label={`Select ${table.name}`}
+        row={table}
+        selection={selection}
+      />
       <TableCell>
         <TableNameCell table={table} />
       </TableCell>
@@ -197,6 +226,9 @@ function TableListRow({
       </TableCell>
       <TableCell>
         <TableRowsCell table={table} />
+      </TableCell>
+      <TableCell>
+        <MaterialFolderCell folderId={table.folderId} folders={folders} />
       </TableCell>
       <TableCell
         className="text-muted-foreground"

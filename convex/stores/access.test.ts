@@ -13,8 +13,8 @@ async function storedStore(
   return (await database.get(storeId)) as unknown as CollectionDoc<"store">
 }
 
-describe("counting top-level properties", () => {
-  test("counts nested objects as one property each", async () => {
+describe("counting leaf properties", () => {
+  test("recurses into nested objects, counting only their leaves", async () => {
     const { database } = databaseContext()
     const store = await storedStore(database, {
       schema: {
@@ -25,6 +25,45 @@ describe("counting top-level properties", () => {
             type: "object",
             properties: { name: { type: "string" }, email: { type: "string" } },
           },
+        },
+      },
+    })
+
+    expect(summarizeStore(store).propertyCount).toBe(3)
+  })
+
+  test("counts an array's item shape once", async () => {
+    const { database } = databaseContext()
+    const store = await storedStore(database, {
+      schema: {
+        type: "object",
+        properties: {
+          tags: { type: "array", items: { type: "string" } },
+          people: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                email: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    expect(summarizeStore(store).propertyCount).toBe(3)
+  })
+
+  test("counts a free-form object property as one slot", async () => {
+    const { database } = databaseContext()
+    const store = await storedStore(database, {
+      schema: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          metadata: { type: "object", additionalProperties: true },
         },
       },
     })

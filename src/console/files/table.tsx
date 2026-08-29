@@ -1,16 +1,19 @@
 import { Files, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  Table,
   TableBody,
   TableCell,
-  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
 import { ConsoleEmptyState } from "../shared/list/empty"
+import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
+import { type RowSelection } from "../shared/list/selection"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
+import { MaterialFolderCell } from "../shared/materials/cells/folder"
+import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { FileNameCell, FileOwnerCell, FileTypeCell } from "./cells"
 import { FileMenu } from "./menu"
@@ -18,69 +21,81 @@ import { type FileRow, formatFileSize } from "./types"
 
 export function FileTable({
   files,
+  folders,
   isLoading,
   onDelete,
   onEdit,
   onMoveToFolder,
   onUpload,
   pendingFileId,
+  selection,
 }: {
   files: FileRow[]
+  folders: FolderNames | undefined
   isLoading: boolean
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
   onUpload: () => void
   pendingFileId: FileRow["fileId"] | undefined
+  selection: RowSelection<FileRow>
 }) {
   if (isLoading) {
-    return <ConsoleListSkeleton />
+    return (
+      <ConsoleListContent>
+        <ConsoleListSkeleton />
+      </ConsoleListContent>
+    )
   }
 
   if (files.length === 0) {
     return (
-      <ConsoleEmptyState
-        action={
-          <Button onClick={onUpload} type="button">
-            <Upload />
-            Upload file
-          </Button>
-        }
-        description="Files Jori saves during runs and uploads from your team appear here."
-        icon={Files}
-        title="No files yet"
-      />
+      <ConsoleListContent>
+        <ConsoleEmptyState
+          action={
+            <Button onClick={onUpload} type="button">
+              <Upload />
+              Upload file
+            </Button>
+          }
+          description="Files Jori saves during runs and uploads from your team appear here."
+          icon={Files}
+          title="No files yet"
+        />
+      </ConsoleListContent>
     )
   }
 
   return (
-    <TableFrame>
-      <Table>
-        <FileTableHead />
-        <TableBody>
-          {files.map((file) => (
-            <FileTableRow
-              file={file}
-              isPending={pendingFileId === file.fileId}
-              key={file.fileId}
-              onDelete={onDelete}
-              onEdit={onEdit}
-              onMoveToFolder={onMoveToFolder}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </TableFrame>
+    <ConsoleListTable>
+      <FileTableHead selection={selection} />
+      <TableBody>
+        {files.map((file) => (
+          <FileTableRow
+            file={file}
+            folders={folders}
+            isPending={pendingFileId === file.fileId}
+            key={file.fileId}
+            onDelete={onDelete}
+            onEdit={onEdit}
+            onMoveToFolder={onMoveToFolder}
+            selection={selection}
+          />
+        ))}
+      </TableBody>
+    </ConsoleListTable>
   )
 }
 
-function FileTableHead() {
+function FileTableHead({ selection }: { selection: RowSelection<FileRow> }) {
   return (
     <TableHeader>
       <TableRow>
+        <SelectionHeadCell selection={selection} />
         <TableHead>Name</TableHead>
         <TableHead>Size</TableHead>
         <TableHead>Type</TableHead>
+        <TableHead>Folder</TableHead>
         <TableHead>Created</TableHead>
         <TableHead>Owner</TableHead>
         <TableHead>Last Updated</TableHead>
@@ -92,21 +107,30 @@ function FileTableHead() {
 
 function FileTableRow({
   file,
+  folders,
   isPending,
   onDelete,
   onEdit,
   onMoveToFolder,
+  selection,
 }: {
   file: FileRow
+  folders: FolderNames | undefined
   isPending: boolean
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
+  selection: RowSelection<FileRow>
 }) {
   const now = useNow(30_000)
 
   return (
-    <TableRow>
+    <TableRow data-state={selection.isSelected(file) ? "selected" : undefined}>
+      <SelectionRowCell
+        label={`Select ${file.name}`}
+        row={file}
+        selection={selection}
+      />
       <TableCell>
         <FileNameCell file={file} />
       </TableCell>
@@ -115,6 +139,9 @@ function FileTableRow({
       </TableCell>
       <TableCell>
         <FileTypeCell file={file} />
+      </TableCell>
+      <TableCell>
+        <MaterialFolderCell folderId={file.folderId} folders={folders} />
       </TableCell>
       <TableCell
         className="text-muted-foreground"

@@ -24,13 +24,7 @@ export function useCsvExport(organizationId: string, table: TableDetail) {
     setIsExporting(true)
 
     try {
-      const rows = await fetchAllRows(convex, organizationId, table.tableId)
-
-      downloadTextFile(
-        toFilename(table.name, "csv"),
-        buildCsvExport(table.columns, rows),
-        "text/csv"
-      )
+      await exportTableCsv(convex, organizationId, table)
     } catch (error) {
       showErrorToast(error, "Could not export the table.")
     } finally {
@@ -39,6 +33,39 @@ export function useCsvExport(organizationId: string, table: TableDetail) {
   }
 
   return { exportCsv, isExporting }
+}
+
+/** Export a table the caller only knows by id — the list page's bulk
+ *  download — by fetching its definition first. */
+export async function exportTableById(
+  convex: ConvexReactClient,
+  organizationId: string,
+  tableId: GenericId<"collections">
+) {
+  const result = await convex.query(api.tables.console.get, {
+    organizationId,
+    tableId,
+  })
+
+  if (result.table === null) {
+    throw new Error("Table was not found")
+  }
+
+  await exportTableCsv(convex, organizationId, result.table)
+}
+
+async function exportTableCsv(
+  convex: ConvexReactClient,
+  organizationId: string,
+  table: TableDetail
+) {
+  const rows = await fetchAllRows(convex, organizationId, table.tableId)
+
+  downloadTextFile(
+    toFilename(table.name, "csv"),
+    buildCsvExport(table.columns, rows),
+    "text/csv"
+  )
 }
 
 /** CSV text for the whole table: column keys as the header, columns in

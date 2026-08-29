@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { type RowSelection } from "../shared/list/selection"
 import { StoreList } from "./list"
 import { type useStoreRemoval } from "./manage"
 import { type StoreSummary } from "./types"
@@ -53,13 +54,27 @@ function storeSummary(overrides: Partial<StoreSummary> = {}) {
   } as StoreSummary
 }
 
+function stubSelection<Row>(): RowSelection<Row> {
+  return {
+    allSelected: false,
+    clear: () => undefined,
+    count: 0,
+    isSelected: () => false,
+    selected: [],
+    toggle: () => undefined,
+    toggleAll: () => undefined,
+  }
+}
+
 function renderList(stores: StoreSummary[]) {
   render(
     <StoreList
+      folders={undefined}
       hasFilters={false}
       onCreate={() => undefined}
       onMoveToFolder={() => undefined}
       removal={removal}
+      selection={stubSelection()}
       stores={stores}
       unauthorizedMessage={undefined}
     />

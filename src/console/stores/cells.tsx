@@ -34,8 +34,9 @@ export function StoreNameCell({ store }: { store: StoreSummary }) {
   )
 }
 
-/** Properties column: a small icon and how many top-level properties the
- *  store's schema declares. */
+/** Properties column: a small icon and how many leaf properties — actual
+ *  writable value slots — the store's schema declares, however deeply they
+ *  nest. */
 export function StorePropertiesCell({ store }: { store: StoreSummary }) {
   return (
     <IconValueCell

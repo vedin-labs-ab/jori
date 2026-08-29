@@ -1,9 +1,17 @@
-import { useMutation } from "convex/react"
+import { useConvex, useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
-import { useMaterialRemoval } from "../shared/materials/removal"
+import { countNoun, useBulkRunner } from "../shared/list/bulk"
+import { type RowSelection } from "../shared/list/selection"
+import {
+  bulkMaterialRemovalSuccess,
+  useMaterialRemoval,
+} from "../shared/materials/removal"
+import { exportTableById } from "./detail/export"
 import { type TableSummary } from "./types"
 
 type TableTarget = Pick<TableSummary, "tableId" | "name" | "archivedAt">
+
+export const tableNoun = { plural: "tables", singular: "table" }
 
 export function useTableRemoval(organizationId: string) {
   const remove = useMutation(api.tables.console.remove)
@@ -21,6 +29,48 @@ export function useTableRemoval(organizationId: string) {
     restoreTable: removal.restoreMaterial,
     restoringTableId: removal.restoringId,
   }
+}
+
+/** The selection bar's actions: each removes or exports per selected row,
+ *  through the same mutations and exporter the row-level actions use. */
+export function useTableBulk(
+  organizationId: string,
+  selection: RowSelection<TableSummary>
+) {
+  const convex = useConvex()
+  const remove = useMutation(api.tables.console.remove)
+  const runner = useBulkRunner()
+
+  function removeSelected() {
+    const rows = selection.selected
+
+    void runner.run(
+      rows,
+      (row) => remove({ organizationId, tableId: row.tableId }),
+      {
+        noun: tableNoun.plural,
+        success: bulkMaterialRemovalSuccess(rows, tableNoun),
+        verb: "remove",
+      }
+    )
+  }
+
+  function downloadSelected() {
+    const rows = selection.selected
+
+    void runner.run(
+      rows,
+      (row) => exportTableById(convex, organizationId, row.tableId),
+      {
+        intervalMs: 300,
+        noun: tableNoun.plural,
+        success: `Downloaded ${countNoun(rows.length, tableNoun)}.`,
+        verb: "download",
+      }
+    )
+  }
+
+  return { downloadSelected, isBusy: runner.isBusy, removeSelected }
 }
 
 export const tableDeleteDescription =

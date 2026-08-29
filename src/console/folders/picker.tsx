@@ -18,8 +18,9 @@ export function FolderPicker({
   /** Chrome belongs to the host: a dialog body passes its own border, a
    *  popover already has one and passes nothing. */
   className?: string
-  /** Where the subject sits today; null means outside any folder. */
-  currentId: string | null
+  /** Where the subject sits today; null means outside any folder, and
+   *  undefined means nowhere is marked — a bulk move from mixed homes. */
+  currentId: string | null | undefined
   /** Folders that must not be chosen — a moving folder's own subtree. */
   disabledIds?: ReadonlySet<string>
   folders: FolderRow[]
@@ -66,7 +67,7 @@ function PickerBranch({
   onSelect,
   selectedId,
 }: {
-  currentId: string | null
+  currentId: string | null | undefined
   depth: number
   disabledIds: ReadonlySet<string> | undefined
   node: FolderNode<FolderRow>
