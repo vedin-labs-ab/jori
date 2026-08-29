@@ -1,4 +1,6 @@
-import { Plus, Trash2 } from "lucide-react"
+import { Copy, CopyPlus, Pencil, Plus, Trash2 } from "lucide-react"
+import { type ReactNode, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,26 +10,34 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { displayCellText } from "@/shared/materials/cells"
 import { type RowSelection } from "../../shared/list/selection"
 import { type TableColumn, type TableRow as TableRowData } from "../types"
 import { type CommitCell, RowCell } from "./cell"
 
-/** One grid row: the number/select gutter, its editable cells, and the
- *  hover-revealed delete action. */
+/** One grid row: the number/select gutter and its editable cells, with
+ *  the row's actions behind a right-click context menu. */
 export function GridRow({
   columns,
   disabled,
   isFresh,
   isPending,
   number,
+  onAddRow,
   onCommit,
   onDelete,
+  onDuplicate,
   onFreshSettled,
   row,
   selection,
@@ -37,15 +47,24 @@ export function GridRow({
   isFresh: boolean
   isPending: boolean
   number: number
+  onAddRow: () => void
   onCommit: CommitCell
   onDelete: (row: TableRowData) => void
+  onDuplicate: (row: TableRowData) => void
   onFreshSettled: () => void
   row: TableRowData
   selection: RowSelection<TableRowData>
 }) {
   const spotlightKey = columns.find((column) => column.type !== "boolean")?.key
+  const [editKey, setEditKey] = useState<string>()
+  const [menuKey, setMenuKey] = useState<string>()
 
-  return (
+  function settle() {
+    setEditKey(undefined)
+    onFreshSettled()
+  }
+
+  const cells = (
     <TableRow
       className="group/row h-9"
       data-state={selection.isSelected(row) ? "selected" : undefined}
@@ -57,24 +76,134 @@ export function GridRow({
         selection={selection}
       />
       {columns.map((column) => (
-        <TableCell className="py-0" key={column.key}>
+        <TableCell
+          className="py-0"
+          key={column.key}
+          onContextMenu={() => setMenuKey(column.key)}
+        >
           <RowCell
             column={column}
             disabled={disabled || isPending}
             onCommit={onCommit}
-            onSettle={onFreshSettled}
+            onSettle={settle}
             row={row}
-            spotlight={isFresh && column.key === spotlightKey}
+            spotlight={
+              (isFresh && column.key === spotlightKey) || editKey === column.key
+            }
           />
         </TableCell>
       ))}
-      <TableCell className="p-0 text-center">
-        <DeleteRowButton
-          disabled={disabled || isPending}
-          onDelete={() => onDelete(row)}
-        />
-      </TableCell>
     </TableRow>
+  )
+
+  if (disabled) {
+    return cells
+  }
+
+  return (
+    <RowMenu
+      isPending={isPending}
+      menuColumn={columns.find((column) => column.key === menuKey)}
+      onAddRow={onAddRow}
+      onDelete={() => onDelete(row)}
+      onDuplicate={() => onDuplicate(row)}
+      onEditCell={() => setEditKey(menuKey)}
+      row={row}
+    >
+      {cells}
+    </RowMenu>
+  )
+}
+
+/** The row's right-click menu: cell actions for the cell under the
+ *  pointer, then row creation and removal. Deleting still confirms. */
+function RowMenu({
+  children,
+  isPending,
+  menuColumn,
+  onAddRow,
+  onDelete,
+  onDuplicate,
+  onEditCell,
+  row,
+}: {
+  children: ReactNode
+  isPending: boolean
+  menuColumn: TableColumn | undefined
+  onAddRow: () => void
+  onDelete: () => void
+  onDuplicate: () => void
+  onEditCell: () => void
+  row: TableRowData
+}) {
+  const [confirming, setConfirming] = useState(false)
+
+  function copyCell() {
+    if (menuColumn === undefined) {
+      return
+    }
+
+    void navigator.clipboard
+      .writeText(displayCellText(row.values[menuColumn.key]))
+      .then(() => toast.success("Cell copied."))
+  }
+
+  return (
+    <>
+      <ContextMenu>
+        <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+        <ContextMenuContent className="w-44">
+          <ContextMenuItem
+            disabled={isPending || menuColumn?.type === "boolean"}
+            onSelect={onEditCell}
+          >
+            <Pencil />
+            Edit cell
+          </ContextMenuItem>
+          <ContextMenuItem
+            disabled={menuColumn === undefined}
+            onSelect={copyCell}
+          >
+            <Copy />
+            Copy cell
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onSelect={onAddRow}>
+            <Plus />
+            New row
+          </ContextMenuItem>
+          <ContextMenuItem disabled={isPending} onSelect={onDuplicate}>
+            <CopyPlus />
+            Duplicate row
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem
+            disabled={isPending}
+            onSelect={() => setConfirming(true)}
+            variant="destructive"
+          >
+            <Trash2 />
+            Delete row
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+      <AlertDialog onOpenChange={setConfirming} open={confirming}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this row?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The row is removed from the table permanently.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onDelete} variant="destructive">
+              Delete row
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 
@@ -154,44 +283,5 @@ export function NewRowRow({
         </button>
       </TableCell>
     </TableRow>
-  )
-}
-
-function DeleteRowButton({
-  disabled,
-  onDelete,
-}: {
-  disabled: boolean
-  onDelete: () => void
-}) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          aria-label="Delete row"
-          className="md:opacity-0 md:group-focus-within/row:opacity-100 md:group-hover/row:opacity-100"
-          disabled={disabled}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
-        >
-          <Trash2 />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete this row?</AlertDialogTitle>
-          <AlertDialogDescription>
-            The row is removed from the table permanently.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onDelete} variant="destructive">
-            Delete row
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   )
 }

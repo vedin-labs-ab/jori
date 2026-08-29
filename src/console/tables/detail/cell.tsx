@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -76,6 +76,14 @@ function TextCell({
   const [draft, setDraft] = useState<string | undefined>(() =>
     spotlight && !disabled ? formatCellText(column, value) : undefined
   )
+
+  // A spotlight raised after mount — the row menu's Edit cell — opens the
+  // editor too; the initializer only covers freshly inserted rows.
+  useEffect(() => {
+    if (spotlight && !disabled) {
+      setDraft((current) => current ?? formatCellText(column, value))
+    }
+  }, [column, disabled, spotlight, value])
 
   function close() {
     setDraft(undefined)
