@@ -1,5 +1,6 @@
+import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
-import { Plus } from "lucide-react"
+import { Folder, Plus } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import {
   SidebarGroup,
@@ -58,7 +59,10 @@ function FoldersGroup({
       onExpandHover={expandOnHover}
       organizationId={organizationId}
     >
-      <SidebarGroup>
+      {/* The tree is a hover-and-drag surface with no icon-rail form, so
+          icon-collapsed mode swaps the whole group for one Folders entry
+          and navigation continues on the /folders page. */}
+      <SidebarGroup className="group-data-[collapsible=icon]:hidden">
         <FoldersLabel />
         <SidebarGroupAction
           aria-label="New folder"
@@ -84,6 +88,24 @@ function FoldersGroup({
           onDeleted={leaveDeletedFolder}
           organizationId={organizationId}
         />
+      </SidebarGroup>
+      <SidebarGroup className="hidden group-data-[collapsible=icon]:block">
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith("/folders")}
+                tooltip="Folders"
+              >
+                <Link to="/folders">
+                  <Folder />
+                  <span>Folders</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
       </SidebarGroup>
     </FolderDragProvider>
   )
