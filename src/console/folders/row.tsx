@@ -4,7 +4,6 @@ import {
   Folder,
   FolderInput,
   FolderOpen,
-  FolderPlus,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -22,6 +21,8 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { type CreationRequest } from "./create/dialogs"
+import { NewInFolderSub } from "./create/menu"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { type FolderDialogRequest } from "./manage"
 import { type FolderNode } from "./tree"
@@ -40,11 +41,13 @@ export type FolderExpansion = {
 export function FolderTreeItem({
   expansion,
   node,
+  onCreate,
   onDialog,
   pathname,
 }: {
   expansion: FolderExpansion
   node: FolderNode<FolderRow>
+  onCreate: (request: CreationRequest) => void
   onDialog: (request: FolderDialogRequest) => void
   pathname: string
 }) {
@@ -79,6 +82,7 @@ export function FolderTreeItem({
         <FolderRowMenu
           folder={node}
           isDragActive={drag.isDragActive}
+          onCreate={onCreate}
           onDialog={onDialog}
         />
       </div>
@@ -95,6 +99,7 @@ export function FolderTreeItem({
               expansion={expansion}
               key={child.folderId}
               node={child}
+              onCreate={onCreate}
               onDialog={onDialog}
               pathname={pathname}
             />
@@ -212,10 +217,12 @@ function RowChevron({
 function FolderRowMenu({
   folder,
   isDragActive,
+  onCreate,
   onDialog,
 }: {
   folder: FolderRow
   isDragActive: boolean
+  onCreate: (request: CreationRequest) => void
   onDialog: (request: FolderDialogRequest) => void
 }) {
   return (
@@ -238,17 +245,17 @@ function FolderRowMenu({
         </SidebarMenuAction>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-44" side="right">
+        <NewInFolderSub
+          onCreate={(creation) =>
+            onCreate({ creation, folderId: folder.folderId })
+          }
+          onNewFolder={() =>
+            onDialog({ type: "create", parentId: folder.folderId })
+          }
+        />
         <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
           <Pencil />
           Rename
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() =>
-            onDialog({ type: "create", parentId: folder.folderId })
-          }
-        >
-          <FolderPlus />
-          New subfolder
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
           <FolderInput />

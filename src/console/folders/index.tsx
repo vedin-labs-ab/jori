@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
-import { UploadFileDialog } from "../files/upload"
 import { ConsolePage } from "../page"
 import { showErrorToast } from "../shared/error"
 import { ConsolePageLayout, ConsoleScrollableGrid } from "../shared/layout"
@@ -15,14 +14,10 @@ import {
   type MaterialBreadcrumb,
   useMaterialTrail,
 } from "../shared/materials/breadcrumb"
-import { CreateStoreDialog } from "../stores/create"
-import { CreateTableDialog } from "../tables/create"
 import { FolderContents } from "./contents"
-import {
-  type FolderCreation,
-  FolderHeaderActions,
-  NewInFolderMenu,
-} from "./header"
+import { CreationDialogs, type FolderCreation } from "./create/dialogs"
+import { NewInFolderMenu } from "./create/menu"
+import { FolderHeaderActions } from "./header"
 import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { MoveResourceDialog } from "./move"
@@ -121,9 +116,10 @@ function FolderReadyView({
           folderId={folder.folderId}
           newMenu={
             <NewInFolderMenu
-              folderId={folder.folderId}
               onCreate={setCreation}
-              onDialog={setDialog}
+              onNewFolder={() =>
+                setDialog({ type: "create", parentId: folder.folderId })
+              }
             >
               <Button type="button">
                 <Plus />
@@ -142,10 +138,13 @@ function FolderReadyView({
         organizationId={organizationId}
       />
       <CreationDialogs
-        creation={creation}
-        folderId={folder.folderId}
         onClose={() => setCreation(undefined)}
         organizationId={organizationId}
+        request={
+          creation === undefined
+            ? undefined
+            : { creation, folderId: folder.folderId }
+        }
       />
       <MoveResourceDialog
         onClose={() => setMoving(undefined)}
@@ -169,49 +168,6 @@ function movingResource(
         name: resource.name,
         folderId: folder.folderId,
       }
-}
-
-/** The existing create dialogs with this folder pre-selected in their
- *  Folder field, so creation lands here atomically. */
-function CreationDialogs({
-  creation,
-  folderId,
-  onClose,
-  organizationId,
-}: {
-  creation: FolderCreation | undefined
-  folderId: string
-  onClose: () => void
-  organizationId: string
-}) {
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
-
-  return (
-    <>
-      <CreateTableDialog
-        initialFolderId={folderId}
-        isOpen={creation === "table"}
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-      />
-      <CreateStoreDialog
-        initialFolderId={folderId}
-        isOpen={creation === "store"}
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-      />
-      <UploadFileDialog
-        initialFolderId={folderId}
-        isOpen={creation === "file"}
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-      />
-    </>
-  )
 }
 
 function useUnfileResource(organizationId: string, folder: FolderDetail) {

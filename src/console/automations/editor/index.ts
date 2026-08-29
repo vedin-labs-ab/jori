@@ -58,10 +58,19 @@ function useAutomationForm(
   const [isSaving, setIsSaving] = useState(false)
   const onSaved = useRef<() => void>(undefined)
 
-  function openForm(automation: Automation | undefined) {
+  function openForm(
+    automation: Automation | undefined,
+    initialFolderId?: string
+  ) {
+    const values = automationFormValues(automation)
+
     onSaved.current = undefined
     setFormAutomation(automation)
-    setFormValues(automationFormValues(automation))
+    setFormValues(
+      initialFolderId === undefined
+        ? values
+        : { ...values, folderId: initialFolderId }
+    )
     setFormError(undefined)
     setIsFormOpen(true)
   }
@@ -93,8 +102,10 @@ function useAutomationForm(
     formValues,
     isFormOpen,
     isSaving,
-    openCreateForm: () => openForm(undefined),
-    openEditForm: openForm,
+    /** Creation-only: pre-selects the form's Folder field when set. */
+    openCreateForm: (initialFolderId?: string) =>
+      openForm(undefined, initialFolderId),
+    openEditForm: (automation: Automation) => openForm(automation),
     saveAutomation,
     setFormValues: createFormUpdater(setFormValues, setFormError),
     setIsFormOpen,

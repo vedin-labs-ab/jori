@@ -1,15 +1,4 @@
-import {
-  Database,
-  FolderInput,
-  FolderPlus,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Table2,
-  Trash2,
-  Upload,
-} from "lucide-react"
-import { type ReactNode } from "react"
+import { FolderInput, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -18,12 +7,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
+import { type FolderCreation } from "./create/dialogs"
+import { NewInFolderMenu, NewInFolderSub } from "./create/menu"
 import { type FolderDialogRequest } from "./manage"
 import { type FolderDetail } from "./types"
-
-/** What the folder page can create in place; everything but the subfolder
- *  opens the surface's own dialog with this folder pre-selected. */
-export type FolderCreation = "table" | "store" | "file"
 
 export function FolderHeaderActions({
   folder,
@@ -37,61 +24,25 @@ export function FolderHeaderActions({
   return (
     <ConsoleHeaderActions>
       <NewInFolderMenu
-        folderId={folder.folderId}
         onCreate={onCreate}
-        onDialog={onDialog}
+        onNewFolder={() =>
+          onDialog({ type: "create", parentId: folder.folderId })
+        }
       >
         <ConsoleHeaderButton icon={<Plus />} label="New" type="button" />
       </NewInFolderMenu>
-      <FolderPageMenu folder={folder} onDialog={onDialog} />
+      <FolderPageMenu folder={folder} onCreate={onCreate} onDialog={onDialog} />
     </ConsoleHeaderActions>
-  )
-}
-
-/** The "New" dropdown, reused as the empty state's call to action. */
-export function NewInFolderMenu({
-  children,
-  folderId,
-  onCreate,
-  onDialog,
-}: {
-  children: ReactNode
-  folderId: string
-  onCreate: (creation: FolderCreation) => void
-  onDialog: (request: FolderDialogRequest) => void
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem
-          onSelect={() => onDialog({ type: "create", parentId: folderId })}
-        >
-          <FolderPlus />
-          New folder
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onCreate("table")}>
-          <Table2 />
-          New table
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onCreate("store")}>
-          <Database />
-          New store
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onCreate("file")}>
-          <Upload />
-          Upload file
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   )
 }
 
 function FolderPageMenu({
   folder,
+  onCreate,
   onDialog,
 }: {
   folder: FolderDetail
+  onCreate: (creation: FolderCreation) => void
   onDialog: (request: FolderDialogRequest) => void
 }) {
   return (
@@ -107,6 +58,12 @@ function FolderPageMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
+        <NewInFolderSub
+          onCreate={onCreate}
+          onNewFolder={() =>
+            onDialog({ type: "create", parentId: folder.folderId })
+          }
+        />
         <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
           <Pencil />
           Rename
