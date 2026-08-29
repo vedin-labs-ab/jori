@@ -1,24 +1,24 @@
 import { useMutation, useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { Plus } from "lucide-react"
-import { useMemo, useState } from "react"
+import { type ReactNode, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { showErrorToast } from "../shared/error"
-import { ConsolePageLayout, ConsoleScrollableGrid } from "../shared/layout"
+import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import {
   type MaterialBreadcrumb,
   useMaterialTrail,
 } from "../shared/materials/breadcrumb"
-import { FolderContents } from "./contents"
 import { CreationDialogs, type FolderCreation } from "./create/dialogs"
 import { NewInFolderMenu } from "./create/menu"
 import { FolderHeaderActions } from "./header"
 import { useLeaveDeletedFolder } from "./leave"
+import { FolderContents } from "./list/contents"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { MoveResourceDialog } from "./move"
 import { type FolderDetail, type FolderResource, toFiledType } from "./types"
@@ -53,37 +53,46 @@ function FolderView({
 
   if (detail === undefined) {
     return (
-      <ConsolePageLayout>
+      <FolderFallback>
         <ConsoleListSkeleton />
-      </ConsolePageLayout>
+      </FolderFallback>
     )
   }
 
   if (detail.status === "unauthorized") {
     return (
-      <ConsolePageLayout>
+      <FolderFallback>
         <Alert variant="destructive">
           <AlertTitle>Could not load the folder</AlertTitle>
           <AlertDescription>{detail.message}</AlertDescription>
         </Alert>
-      </ConsolePageLayout>
+      </FolderFallback>
     )
   }
 
   if (folder === undefined) {
     return (
-      <ConsolePageLayout>
+      <FolderFallback>
         <Alert>
           <AlertTitle>Folder not found</AlertTitle>
           <AlertDescription>
             The folder may have been deleted or belongs to another organization.
           </AlertDescription>
         </Alert>
-      </ConsolePageLayout>
+      </FolderFallback>
     )
   }
 
   return <FolderReadyView folder={folder} organizationId={organizationId} />
+}
+
+/** What replaces the whole page before there is a folder to list. */
+function FolderFallback({ children }: { children: ReactNode }) {
+  return (
+    <ConsoleListLayout>
+      <ConsoleListContent>{children}</ConsoleListContent>
+    </ConsoleListLayout>
+  )
 }
 
 function FolderReadyView({
@@ -104,33 +113,31 @@ function FolderReadyView({
   const leaveDeletedFolder = useLeaveDeletedFolder(folder.folderId)
 
   return (
-    <ConsolePageLayout>
+    <ConsoleListLayout>
       <FolderHeaderActions
         folder={folder}
         onCreate={setCreation}
         onDialog={setDialog}
       />
-      <ConsoleScrollableGrid>
-        <FolderContents
-          contents={contents}
-          folderId={folder.folderId}
-          newMenu={
-            <NewInFolderMenu
-              onCreate={setCreation}
-              onNewFolder={() =>
-                setDialog({ type: "create", parentId: folder.folderId })
-              }
-            >
-              <Button type="button">
-                <Plus />
-                New
-              </Button>
-            </NewInFolderMenu>
-          }
-          onMove={setMoving}
-          onUnfile={unfile}
-        />
-      </ConsoleScrollableGrid>
+      <FolderContents
+        contents={contents}
+        folderId={folder.folderId}
+        newMenu={
+          <NewInFolderMenu
+            onCreate={setCreation}
+            onNewFolder={() =>
+              setDialog({ type: "create", parentId: folder.folderId })
+            }
+          >
+            <Button type="button">
+              <Plus />
+              New
+            </Button>
+          </NewInFolderMenu>
+        }
+        onMove={setMoving}
+        onUnfile={unfile}
+      />
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
@@ -151,7 +158,7 @@ function FolderReadyView({
         organizationId={organizationId}
         resource={movingResource(moving, folder)}
       />
-    </ConsolePageLayout>
+    </ConsoleListLayout>
   )
 }
 
