@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DialogForm } from "../../shared/materials/form"
-import { type TableColumn } from "../types"
+import { type TableColumn, type TableRow } from "../types"
 import { buildRowValues, type RowDraft } from "./cells"
 
 export function AddRowDialog({
@@ -25,7 +25,9 @@ export function AddRowDialog({
   columns: TableColumn[]
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
-  onSubmit: (values: Record<string, unknown>) => Promise<boolean>
+  onSubmit: (
+    values: Record<string, unknown>
+  ) => Promise<TableRow["rowId"] | null>
 }) {
   const [draft, setDraft] = useState<RowDraft>({})
   const [isSaving, setIsSaving] = useState(false)
@@ -38,7 +40,7 @@ export function AddRowDialog({
 
     setIsSaving(true)
 
-    if (await onSubmit(built.values)) {
+    if ((await onSubmit(built.values)) !== null) {
       setDraft({})
       onOpenChange(false)
     }

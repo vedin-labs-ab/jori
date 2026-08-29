@@ -13,17 +13,22 @@ export type CommitCell = (
 ) => Promise<boolean>
 
 /** One grid cell: booleans toggle in place and text-like types edit
- *  inline. Every commit carries the row version. */
+ *  inline. Every commit carries the row version. A cell spotlighted for a
+ *  freshly inserted row opens in edit mode and reports when it settles. */
 export function RowCell({
   column,
   disabled,
   onCommit,
+  onSettle,
   row,
+  spotlight = false,
 }: {
   column: TableColumn
   disabled: boolean
   onCommit: CommitCell
+  onSettle?: () => void
   row: TableRow
+  spotlight?: boolean
 }) {
   const value = row.values[column.key]
 
@@ -45,7 +50,9 @@ export function RowCell({
       column={column}
       disabled={disabled}
       onCommit={onCommit}
+      onSettle={onSettle}
       row={row}
+      spotlight={spotlight}
     />
   )
 }
@@ -54,19 +61,30 @@ function TextCell({
   column,
   disabled,
   onCommit,
+  onSettle,
   row,
+  spotlight,
 }: {
   column: TableColumn
   disabled: boolean
   onCommit: CommitCell
+  onSettle: (() => void) | undefined
   row: TableRow
+  spotlight: boolean
 }) {
-  const [draft, setDraft] = useState<string>()
   const value = row.values[column.key]
+  const [draft, setDraft] = useState<string | undefined>(() =>
+    spotlight && !disabled ? formatCellText(column, value) : undefined
+  )
+
+  function close() {
+    setDraft(undefined)
+    onSettle?.()
+  }
 
   async function commit(text: string) {
     if (text === formatCellText(column, value)) {
-      setDraft(undefined)
+      close()
 
       return
     }
@@ -80,7 +98,7 @@ function TextCell({
     }
 
     if (await onCommit(row, column.key, parsed.value)) {
-      setDraft(undefined)
+      close()
     }
   }
 
@@ -108,7 +126,7 @@ function TextCell({
         }
 
         if (event.key === "Escape") {
-          setDraft(undefined)
+          close()
         }
       }}
       value={draft}

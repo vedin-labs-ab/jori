@@ -87,7 +87,11 @@ function ColumnDraftRow({
         placeholder="Display name"
         value={draft.name}
       />
-      <ColumnTypeSelect draft={draft} onUpdate={onUpdate} />
+      <ColumnTypeSelect
+        disabled={draft.locked}
+        onTypeChange={(type) => onUpdate({ type })}
+        value={draft.type}
+      />
       <span className="flex items-center gap-1.5">
         <Checkbox
           checked={draft.required}
@@ -118,18 +122,22 @@ function ColumnDraftRow({
   )
 }
 
-function ColumnTypeSelect({
-  draft,
-  onUpdate,
+/** Shared type picker for column forms: the dialogs' draft rows and the
+ *  grid's add-column popover. */
+export function ColumnTypeSelect({
+  disabled = false,
+  onTypeChange,
+  value,
 }: {
-  draft: ColumnDraft
-  onUpdate: (patch: Partial<ColumnDraft>) => void
+  disabled?: boolean
+  onTypeChange: (type: ColumnDraft["type"]) => void
+  value: ColumnDraft["type"]
 }) {
   return (
     <Select
-      disabled={draft.locked}
-      onValueChange={(type) => onUpdate({ type: type as ColumnDraft["type"] })}
-      value={draft.type}
+      disabled={disabled}
+      onValueChange={(type) => onTypeChange(type as ColumnDraft["type"])}
+      value={value}
     >
       <SelectTrigger aria-label="Column type" className="w-full">
         <SelectValue />

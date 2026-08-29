@@ -6,19 +6,21 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../../convex/_generated/api"
 import { MoveResourceDialog } from "../../folders/move"
 import { ConsolePage } from "../../page"
-import { ConsolePageLayout, ConsoleScrollableGrid } from "../../shared/layout"
+import { ConsolePageLayout } from "../../shared/layout"
+import { ConsoleListFooter, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { useMaterialBreadcrumb } from "../../shared/materials/breadcrumb"
 import { useMemberUrl } from "../../shared/materials/fragment"
 import { EditTableDialog } from "../edit"
 import { useTableRemoval } from "../manage"
-import { type TableDetail } from "../types"
+import { rowPageSize, type TableDetail } from "../types"
 import { AddRowDialog } from "./add"
+import { ColumnAddPopover } from "./columns"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
 import { TableHeaderActions } from "./header"
-import { useRowPages, useRowWrites } from "./rows"
+import { useRowAdding, useRowPages, useRowWrites } from "./rows"
 import { TableLinksDialog } from "./share"
 
 /** Member view of one table. The share fork wraps exactly this component,
@@ -113,6 +115,9 @@ function TableReadyView({
   const exporter = useCsvExport(organizationId, table)
   const removal = useTableRemoval(organizationId)
   const [dialog, setDialog] = useState<TableDialog>()
+  const adding = useRowAdding(table.columns, writes.insertRow, () =>
+    setDialog("add")
+  )
   const isArchived = table.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
@@ -124,11 +129,11 @@ function TableReadyView({
   }
 
   return (
-    <ConsolePageLayout>
+    <ConsoleListLayout>
       <TableHeaderActions
         isArchived={isArchived}
         isExporting={exporter.isExporting}
-        onAdd={() => setDialog("add")}
+        onAdd={() => void adding.addRow()}
         onDelete={removeAndLeaveWhenDeleted}
         onEdit={() => setDialog("edit")}
         onExport={() => void exporter.exportCsv()}
@@ -137,20 +142,17 @@ function TableReadyView({
         removal={removal}
         table={table}
       />
-      {/* The rows scroll in place so the pager stays pinned below them,
-          matching the paginated console list pages. */}
-      <ConsoleScrollableGrid>
-        <RowGrid
-          columns={table.columns}
-          disabled={isArchived}
-          isLoading={pages.isLoading}
-          onCommit={writes.updateCell}
-          onDeleteRow={(row) => void writes.deleteRow(row)}
-          pendingRowId={writes.pendingRowId}
-          rows={pages.rows}
-        />
-      </ConsoleScrollableGrid>
-      <ConsoleListPager pagination={pages} />
+      <TableGrid
+        adding={adding}
+        isArchived={isArchived}
+        organizationId={organizationId}
+        pages={pages}
+        table={table}
+        writes={writes}
+      />
+      <ConsoleListFooter>
+        <ConsoleListPager pagination={pages} />
+      </ConsoleListFooter>
       <TableDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
@@ -158,7 +160,46 @@ function TableReadyView({
         table={table}
         writes={writes}
       />
-    </ConsolePageLayout>
+    </ConsoleListLayout>
+  )
+}
+
+function TableGrid({
+  adding,
+  isArchived,
+  organizationId,
+  pages,
+  table,
+  writes,
+}: {
+  adding: ReturnType<typeof useRowAdding>
+  isArchived: boolean
+  organizationId: string
+  pages: ReturnType<typeof useRowPages>
+  table: TableDetail
+  writes: ReturnType<typeof useRowWrites>
+}) {
+  return (
+    <RowGrid
+      columnAdder={
+        <ColumnAddPopover
+          disabled={isArchived}
+          organizationId={organizationId}
+          table={table}
+        />
+      }
+      columns={table.columns}
+      disabled={isArchived}
+      freshRowId={adding.freshRowId}
+      isLoading={pages.isLoading}
+      offset={pages.pageIndex * rowPageSize}
+      onAddRow={() => void adding.addRow()}
+      onCommit={writes.updateCell}
+      onDeleteRow={(row) => void writes.deleteRow(row)}
+      onFreshSettled={adding.settle}
+      pendingRowId={writes.pendingRowId}
+      rows={pages.rows}
+    />
   )
 }
 
