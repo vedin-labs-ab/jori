@@ -28,7 +28,7 @@ import { showErrorToast } from "../shared/error"
 import { DialogForm } from "../shared/materials/form"
 import { useRetained } from "../shared/retain"
 import { MoveToFolderDialog } from "./move"
-import { type FolderRow } from "./types"
+import { type ManagedFolder } from "./types"
 
 // The folder lifecycle dialogs, shared by the sidebar tree and the folder
 // page. One request value drives them all, so each caller renders a single
@@ -36,9 +36,9 @@ import { type FolderRow } from "./types"
 
 export type FolderDialogRequest =
   | { type: "create"; parentId?: string }
-  | { type: "delete"; folder: FolderRow }
-  | { type: "move"; folder: FolderRow }
-  | { type: "rename"; folder: FolderRow }
+  | { type: "delete"; folder: ManagedFolder }
+  | { type: "move"; folder: ManagedFolder }
+  | { type: "rename"; folder: ManagedFolder }
 
 export function FolderDialogs({
   dialog,
@@ -49,7 +49,7 @@ export function FolderDialogs({
   dialog: FolderDialogRequest | undefined
   onClose: () => void
   /** Ran after a delete lands, e.g. to leave the deleted folder's page. */
-  onDeleted: (folder: FolderRow) => void
+  onDeleted: (folder: ManagedFolder) => void
   organizationId: string
 }) {
   const create = useRetained(dialog?.type === "create" ? dialog : undefined)
@@ -139,7 +139,7 @@ function RenameFolderDialog({
   onOpenChange,
   organizationId,
 }: {
-  folder: FolderRow | undefined
+  folder: ManagedFolder | undefined
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
@@ -173,9 +173,9 @@ function DeleteFolderDialog({
   onOpenChange,
   organizationId,
 }: {
-  folder: FolderRow | undefined
+  folder: ManagedFolder | undefined
   isOpen: boolean
-  onDeleted: (folder: FolderRow) => void
+  onDeleted: (folder: ManagedFolder) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
@@ -186,7 +186,7 @@ function DeleteFolderDialog({
     return null
   }
 
-  async function submit(target: FolderRow) {
+  async function submit(target: ManagedFolder) {
     setIsDeleting(true)
 
     try {

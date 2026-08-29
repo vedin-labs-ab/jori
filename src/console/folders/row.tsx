@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import {
   ChevronRight,
   Folder,
+  FolderDot,
   FolderInput,
   FolderOpen,
   MoreHorizontal,
@@ -66,6 +67,7 @@ export function FolderTreeItem({
           drag={drag}
           folderId={node.folderId}
           hasChildren={hasChildren}
+          hasContents={node.hasContents}
           isActive={pathname === `/folders/${node.folderId}`}
           isExpanded={isExpanded}
           name={node.name}
@@ -114,6 +116,7 @@ function FolderRowLink({
   drag,
   folderId,
   hasChildren,
+  hasContents,
   isActive,
   isExpanded,
   name,
@@ -122,12 +125,15 @@ function FolderRowLink({
   drag: FolderRowDrag
   folderId: string
   hasChildren: boolean
+  hasContents: boolean
   isActive: boolean
   isExpanded: boolean
   name: string
   onNavigate: () => void
 }) {
-  const FolderIcon = isExpanded ? FolderOpen : Folder
+  // A dotted icon is the only cue that a collapsed folder holds anything —
+  // subfolders or filed resources; expansion keeps the open-folder icon.
+  const FolderIcon = isExpanded ? FolderOpen : hasContents ? FolderDot : Folder
 
   return (
     <SidebarMenuButton

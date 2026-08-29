@@ -2,8 +2,8 @@ import { expect, test } from "vitest"
 import { storeDoc, tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
 import { automationDoc, fileDoc, folderDoc } from "../../test/convex/folders"
-import { type Id } from "../_generated/dataModel"
-import { folderChildren, folderResources } from "./contents"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { folderChildren, folderResources, summarizeTree } from "./contents"
 
 const other = "persons:other" as Id<"persons">
 
@@ -114,4 +114,28 @@ test("archived collections stay filed but hidden", async () => {
   })
 
   expect(resources.map((resource) => resource.name)).not.toContain("Old leads")
+})
+
+test("tree rows mark the folders that hold anything", async () => {
+  const { database, ctx } = databaseContext()
+  const parentId = await database.insert("folders", folderDoc({ name: "Docs" }))
+
+  await database.insert("folders", folderDoc({ name: "Child", parentId }))
+
+  const filedId = await database.insert("folders", folderDoc({ name: "Data" }))
+
+  await database.insert("files", fileDoc({ folderId: filedId }))
+  await database.insert("folders", folderDoc({ name: "Empty" }))
+
+  const folders = (await database
+    .query("folders")
+    .collect()) as Doc<"folders">[]
+  const rows = await summarizeTree(ctx, folders)
+
+  expect(rows.map((row) => [row.name, row.hasContents])).toEqual([
+    ["Docs", true],
+    ["Child", false],
+    ["Data", true],
+    ["Empty", false],
+  ])
 })

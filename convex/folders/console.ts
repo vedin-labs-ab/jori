@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
-import { folderChildren, folderResources } from "./contents"
+import { folderChildren, folderResources, summarizeTree } from "./contents"
 import { filedResourceType, fileResource } from "./filing"
 import { createFolder, moveFolder, removeFolder, renameFolder } from "./records"
 import {
@@ -13,7 +13,8 @@ import {
 } from "./tree"
 
 /** Every folder of the organization as one flat list; the client builds the
- *  tree. Capped generously at treeCap (see tree.ts). */
+ *  tree. Each row carries hasContents so empty folders can read differently.
+ *  Capped generously at treeCap (see tree.ts). */
 export const tree = query({
   args: {
     organizationId: v.string(),
@@ -31,7 +32,10 @@ export const tree = query({
 
     const folders = await listOrganizationFolders(ctx, args.organizationId)
 
-    return { status: "ready" as const, folders: folders.map(summarizeFolder) }
+    return {
+      status: "ready" as const,
+      folders: await summarizeTree(ctx, folders),
+    }
   },
 })
 

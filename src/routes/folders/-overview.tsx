@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
-import { Folder, Plus } from "lucide-react"
+import { Folder, FolderDot, Plus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -72,13 +72,16 @@ export function RootFolders({ organizationId }: { organizationId: string }) {
 }
 
 export function RootFolderRow({ folder }: { folder: FolderRow }) {
+  // Same cue as the sidebar tree: a dotted icon marks a non-empty folder.
+  const FolderIcon = folder.hasContents ? FolderDot : Folder
+
   return (
     <Link
       className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted/50"
       params={{ folderId: folder.folderId }}
       to="/folders/$folderId"
     >
-      <Folder className="size-4 shrink-0 text-muted-foreground" />
+      <FolderIcon className="size-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0 truncate font-medium">{folder.name}</span>
     </Link>
   )

@@ -3,6 +3,7 @@ import { canAccessAutomation } from "../automations/access"
 import { canAccessCollection } from "../collections/access"
 import { canViewFile } from "../files/data"
 import { type QueryLikeCtx } from "../shared/context"
+import { filedTables } from "./filing"
 import { summarizeFolder, treeCap } from "./tree"
 
 // A folder's listing: subfolders plus the filed resources the caller may
@@ -45,6 +46,40 @@ export async function folderChildren(
     .take(treeCap)
 
   return children.map(summarizeFolder).sort(byName)
+}
+
+/** One tree row per listed folder: the summary plus a single honest signal
+ *  — whether anything sits inside it, meaning a subfolder in the listing or
+ *  any filed resource. Existence only, so each empty folder costs one cheap
+ *  indexed probe per filed table and folders with subfolders cost none. */
+export async function summarizeTree(
+  ctx: QueryLikeCtx,
+  folders: Doc<"folders">[]
+) {
+  const parentIds = new Set(folders.map((folder) => folder.parentId))
+
+  return await Promise.all(
+    folders.map(async (folder) => ({
+      ...summarizeFolder(folder),
+      hasContents:
+        parentIds.has(folder._id) || (await hasFiledResources(ctx, folder._id)),
+    }))
+  )
+}
+
+async function hasFiledResources(ctx: QueryLikeCtx, folderId: Id<"folders">) {
+  for (const table of filedTables) {
+    const filed = await ctx.db
+      .query(table)
+      .withIndex("by_folder", (index) => index.eq("folderId", folderId))
+      .first()
+
+    if (filed !== null) {
+      return true
+    }
+  }
+
+  return false
 }
 
 export async function folderResources(
