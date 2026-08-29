@@ -8,7 +8,8 @@ import {
   conflictMessage,
   isVersionConflict,
 } from "../../shared/materials/conflict"
-import { rowPageSize, type TableRow } from "../types"
+import { rowPageSize, type TableColumn, type TableRow } from "../types"
+import { buildRowValues } from "./cells"
 
 /** Cursor-stack pagination over pageRows: each visited page keeps its
  *  cursor so Previous re-reads the same window, and the reactive query
@@ -69,7 +70,8 @@ export function rowFooterLabel(
 }
 
 /** Row writes with the optimistic-version handshake: a stale write toasts
- *  and the already-refreshed grid shows what won. */
+ *  and the already-refreshed grid shows what won. Inserts hand back the new
+ *  row's id so the grid can spotlight its first cell. */
 export function useRowWrites(
   organizationId: string,
   tableId: GenericId<"collections">
@@ -79,16 +81,19 @@ export function useRowWrites(
   const remove = useMutation(api.tables.console.removeRow)
   const [pendingRowId, setPendingRowId] = useState<TableRow["rowId"]>()
 
-  const insertRow = (values: Record<string, unknown>) =>
-    run(
+  async function insertRow(values: Record<string, unknown>) {
+    const inserted = await run(
       () => insert({ organizationId, tableId, values }),
       "Could not add the row."
     )
 
+    return inserted === null ? null : (inserted as TableRow).rowId
+  }
+
   async function updateCell(row: TableRow, key: string, value: unknown) {
     setPendingRowId(row.rowId)
 
-    const ok = await run(
+    const outcome = await run(
       () =>
         update({
           organizationId,
@@ -102,13 +107,13 @@ export function useRowWrites(
 
     setPendingRowId(undefined)
 
-    return ok
+    return outcome !== null
   }
 
   async function deleteRow(row: TableRow) {
     setPendingRowId(row.rowId)
 
-    const ok = await run(
+    const outcome = await run(
       () =>
         remove({
           organizationId,
@@ -121,17 +126,54 @@ export function useRowWrites(
 
     setPendingRowId(undefined)
 
-    return ok
+    return outcome !== null
   }
 
   return { deleteRow, insertRow, pendingRowId, updateCell }
 }
 
-async function run(action: () => Promise<unknown>, fallback: string) {
-  try {
-    await action()
+/** Adding a row skips the dialog when a blank row already satisfies the
+ *  schema (no required text-like columns): it lands instantly and its
+ *  first cell opens for editing. Tables with required columns fall back
+ *  to the add-row dialog. */
+export function useRowAdding(
+  columns: TableColumn[],
+  insertRow: (
+    values: Record<string, unknown>
+  ) => Promise<TableRow["rowId"] | null>,
+  onNeedsDialog: () => void
+) {
+  const [freshRowId, setFreshRowId] = useState<TableRow["rowId"]>()
 
-    return true
+  async function addRow() {
+    const blank = buildRowValues(columns, {})
+
+    if (!blank.ok) {
+      onNeedsDialog()
+
+      return
+    }
+
+    const rowId = await insertRow(blank.values)
+
+    if (rowId !== null) {
+      setFreshRowId(rowId)
+    }
+  }
+
+  return {
+    addRow,
+    freshRowId,
+    settle: () => setFreshRowId(undefined),
+  }
+}
+
+async function run<Result>(
+  action: () => Promise<Result>,
+  fallback: string
+): Promise<Result | null> {
+  try {
+    return await action()
   } catch (error) {
     if (isVersionConflict(error)) {
       toast.error(conflictMessage("row"))
@@ -139,6 +181,6 @@ async function run(action: () => Promise<unknown>, fallback: string) {
       showErrorToast(error, fallback)
     }
 
-    return false
+    return null
   }
 }

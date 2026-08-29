@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import {
+  appendColumn,
   columnDraftsIssue,
   draftsFromColumns,
   draftsToColumns,
@@ -67,6 +68,51 @@ test("form validation flags a missing name and column problems together", () => 
     name: undefined,
     columns: undefined,
   })
+})
+
+test("appending a column keeps existing ones and adds an optional column", () => {
+  const existing: TableColumn[] = [
+    { key: "title", name: "Title", type: "string", required: true },
+  ]
+  const appended = appendColumn(existing, {
+    key: "amount",
+    name: "Amount",
+    type: "float",
+  })
+
+  expect(appended).toEqual({
+    ok: true,
+    columns: [
+      { key: "title", name: "Title", type: "string", required: true },
+      { key: "amount", name: "Amount", type: "float" },
+    ],
+  })
+})
+
+test("appending a column falls back to the key as its display name", () => {
+  const appended = appendColumn(
+    [{ key: "title", name: "Title", type: "string" }],
+    { key: "notes", name: "  ", type: "string" }
+  )
+
+  expect(appended.ok && appended.columns[1]).toEqual({
+    key: "notes",
+    name: "notes",
+    type: "string",
+  })
+})
+
+test("appending a column rejects duplicate and malformed keys", () => {
+  const existing: TableColumn[] = [
+    { key: "title", name: "Title", type: "string" },
+  ]
+
+  expect(
+    appendColumn(existing, { key: "title", name: "", type: "string" })
+  ).toEqual({ ok: false, error: 'Duplicate column key "title".' })
+  expect(appendColumn(existing, { key: "", name: "", type: "string" })).toEqual(
+    { ok: false, error: "Every column needs a key." }
+  )
 })
 
 function draft(overrides: Partial<ReturnType<typeof newColumnDraft>>) {

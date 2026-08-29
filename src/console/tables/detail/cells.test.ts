@@ -72,6 +72,27 @@ test("builds insert values, skipping empty optional columns", () => {
   })
 })
 
+// A blank draft is how "New row" decides between instant creation and the
+// add-row dialog: it creates instantly only when the blank row validates.
+
+test("a blank draft passes without required columns, defaulting booleans", () => {
+  const built = buildRowValues(
+    [column("string", { key: "title" }), column("boolean", { key: "done" })],
+    {}
+  )
+
+  expect(built).toEqual({ ok: true, values: { done: false } })
+})
+
+test("a blank draft fails against a required text-like column", () => {
+  const built = buildRowValues(
+    [column("string", { key: "title", required: true })],
+    {}
+  )
+
+  expect(built.ok).toBe(false)
+})
+
 test("build failures name the offending column", () => {
   const built = buildRowValues([column("integer", { key: "count" })], {
     count: "nope",

@@ -1,4 +1,11 @@
 import { type TableColumnType } from "@contracts/tables/columns"
+import {
+  DecimalsArrowRight,
+  Hash,
+  type LucideIcon,
+  SquareCheck,
+  Type,
+} from "lucide-react"
 import { type TableColumn } from "./types"
 
 /** A column being edited: locked drafts are existing columns, where only
@@ -18,6 +25,15 @@ export const columnTypeOptions = [
   { label: "Integer", value: "integer" },
   { label: "Boolean", value: "boolean" },
 ] as const satisfies readonly { label: string; value: TableColumnType }[]
+
+/** The one place a column type maps to its icon, shown wherever a column
+ *  header names its type. */
+export const columnTypeIcons: Record<TableColumnType, LucideIcon> = {
+  boolean: SquareCheck,
+  float: DecimalsArrowRight,
+  integer: Hash,
+  string: Type,
+}
 
 const columnKeyPattern = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
 
@@ -68,6 +84,28 @@ export function draftsToColumns(
       ...(draft.required ? { required: true } : {}),
     }
   })
+}
+
+/** Columns payload for appending one optional column to an existing table,
+ *  or the validation problem blocking it. New columns join optional so the
+ *  server's additive evolution rules accept them. */
+export function appendColumn(
+  existing: TableColumn[],
+  addition: { key: string; name: string; type: TableColumnType }
+):
+  | { ok: true; columns: ReturnType<typeof draftsToColumns> }
+  | { ok: false; error: string } {
+  const drafts = [
+    ...draftsFromColumns(existing),
+    { ...newColumnDraft(), ...addition },
+  ]
+  const issue = columnDraftsIssue(drafts)
+
+  if (issue !== undefined) {
+    return { ok: false, error: issue }
+  }
+
+  return { ok: true, columns: draftsToColumns(drafts, existing) }
 }
 
 export type TableFormErrors = { name?: string; columns?: string }
