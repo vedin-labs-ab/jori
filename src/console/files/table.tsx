@@ -107,7 +107,7 @@ function FileTableRow({
 
   return (
     <TableRow>
-      <TableCell className="max-w-64">
+      <TableCell>
         <FileNameCell file={file} />
       </TableCell>
       <TableCell className="text-muted-foreground">
@@ -122,7 +122,7 @@ function FileTableRow({
       >
         {relativeTime(file.createdAt, now)}
       </TableCell>
-      <TableCell className="max-w-48">
+      <TableCell>
         <FileOwnerCell file={file} />
       </TableCell>
       <TableCell

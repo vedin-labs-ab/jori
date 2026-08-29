@@ -172,7 +172,7 @@ function StoreListRow({
 
   return (
     <TableRow>
-      <TableCell className="max-w-64">
+      <TableCell>
         <StoreNameCell store={store} />
       </TableCell>
       <TableCell>
@@ -187,7 +187,7 @@ function StoreListRow({
       >
         {relativeTime(store.createdAt, now)}
       </TableCell>
-      <TableCell className="max-w-48">
+      <TableCell>
         <StoreOwnerCell store={store} />
       </TableCell>
       <TableCell

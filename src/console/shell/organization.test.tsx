@@ -67,6 +67,16 @@ beforeEach(() => {
 
 afterEach(cleanup)
 
+test("renders the compact trigger that hugs the name", () => {
+  render(<SidebarOrganizationSwitcher />)
+
+  const trigger = screen.getByRole("button", { name: /Vedin Labs/ })
+  // The sidebar-10 style trigger: fit-width so the chevron sits right after
+  // the name, but never wider than the sidebar so long names truncate.
+  expect(trigger.className).toContain("w-fit")
+  expect(trigger.className).toContain("max-w-full")
+})
+
 test("keeps the switcher open with a stable pending organization row", async () => {
   auth.activateOrganization.mockImplementation(
     () => new Promise(() => undefined)

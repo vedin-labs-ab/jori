@@ -145,9 +145,9 @@ function SubfolderRow({
       onPointerDownCapture={drag.onPointerDownCapture}
       ref={drag.setNodeRef}
     >
-      <TableCell className="max-w-64">
+      <TableCell>
         <Link
-          className="flex items-center gap-2 font-medium hover:underline"
+          className={resourceLinkClassName}
           draggable={false}
           params={{ folderId: folder.folderId }}
           title={folder.name}
@@ -192,7 +192,7 @@ function ResourceRow({
       onPointerDownCapture={drag.onPointerDownCapture}
       ref={drag.setNodeRef}
     >
-      <TableCell className="max-w-64">
+      <TableCell>
         <ResourceLink resource={resource} />
       </TableCell>
       <TableCell className="text-muted-foreground">
@@ -253,6 +253,13 @@ function resourcePayload(
   }
 }
 
+/** Name-cell link class for this listing. The width cap sits on the link
+ *  itself, not the table cell — browsers ignore max-width on table cells
+ *  when sizing auto-layout columns — so a long name truncates inside the
+ *  capped link instead of widening the column. */
+const resourceLinkClassName =
+  "flex max-w-64 items-center gap-2 font-medium hover:underline"
+
 /** The resource's own surface. Automations have no detail page — their list
  *  opens the editor — so an automation row lands on the list. */
 function ResourceLink({ resource }: { resource: FolderResource }) {
@@ -266,13 +273,12 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
       ) : null}
     </>
   )
-  const className = "flex items-center gap-2 font-medium hover:underline"
 
   switch (resource.type) {
     case "table":
       return (
         <Link
-          className={className}
+          className={resourceLinkClassName}
           draggable={false}
           params={{ tableId: resource.id }}
           title={resource.name}
@@ -284,7 +290,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
     case "store":
       return (
         <Link
-          className={className}
+          className={resourceLinkClassName}
           draggable={false}
           params={{ storeId: resource.id }}
           title={resource.name}
@@ -296,7 +302,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
     case "file":
       return (
         <Link
-          className={className}
+          className={resourceLinkClassName}
           draggable={false}
           params={{ fileId: resource.id }}
           title={resource.name}
@@ -308,7 +314,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
     case "automation":
       return (
         <Link
-          className={className}
+          className={resourceLinkClassName}
           draggable={false}
           title={resource.name}
           to="/automations"

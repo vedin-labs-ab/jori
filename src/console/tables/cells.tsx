@@ -2,7 +2,11 @@ import { Link } from "@tanstack/react-router"
 import { Columns3, type LucideIcon, Rows3, Table2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { countLabel } from "@/lib/count"
-import { MaterialOwnerCell } from "../shared/materials/owner"
+import {
+  MaterialNameCell,
+  materialNameLinkClassName,
+} from "../shared/materials/cells/name"
+import { MaterialOwnerCell } from "../shared/materials/cells/owner"
 import { MaterialScopeBadge } from "../shared/materials/scope"
 import { type TableSummary } from "./types"
 
@@ -11,33 +15,22 @@ import { type TableSummary } from "./types"
  *  archived ones. Organization tables carry no scope badge. */
 export function TableNameCell({ table }: { table: TableSummary }) {
   return (
-    <div className="grid gap-0.5">
-      <div className="flex items-center gap-2">
-        <Table2 aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-        <Link
-          className="truncate font-medium hover:underline"
-          params={{ tableId: table.tableId }}
-          title={table.name}
-          to="/tables/$tableId"
-        >
-          {table.name}
-        </Link>
-        {table.scope === "personal" ? (
-          <MaterialScopeBadge scope="personal" />
-        ) : null}
-        {table.archivedAt === undefined ? null : (
-          <Badge variant="secondary">Archived</Badge>
-        )}
-      </div>
-      {table.description === undefined ? null : (
-        <p
-          className="truncate pl-6 text-muted-foreground"
-          title={table.description}
-        >
-          {table.description}
-        </p>
+    <MaterialNameCell description={table.description} icon={Table2}>
+      <Link
+        className={materialNameLinkClassName}
+        params={{ tableId: table.tableId }}
+        title={table.name}
+        to="/tables/$tableId"
+      >
+        {table.name}
+      </Link>
+      {table.scope === "personal" ? (
+        <MaterialScopeBadge scope="personal" />
+      ) : null}
+      {table.archivedAt === undefined ? null : (
+        <Badge variant="secondary">Archived</Badge>
       )}
-    </div>
+    </MaterialNameCell>
   )
 }
 
