@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen } from "@testing-library/react"
-import { afterEach, beforeAll, expect, test, vi } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { makeApproval, makeExecution, renderExecutionRow } from "../fixtures"
 import { type ExecutionApproval } from "../types"
 
@@ -9,14 +9,6 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
   useQuery: () => ({ items: [], status: "loaded" }),
 }))
-
-beforeAll(() => {
-  globalThis.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
-  }
-})
 
 afterEach(() => {
   cleanup()

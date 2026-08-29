@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, expect, test, vi } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type Workstreams } from "../types"
 import { WorkstreamsPulse } from "./pulse"
@@ -21,26 +21,10 @@ const pulse = vi.hoisted(() => {
     unplaced: 1,
   }
 })
-const originalResizeObserver = globalThis.ResizeObserver
-
 vi.mock("convex/react", () => ({ useQuery: () => pulse }))
-
-class TestResizeObserver {
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-}
-
-beforeAll(() => {
-  globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver
-})
 
 afterEach(() => {
   cleanup()
-})
-
-afterAll(() => {
-  globalThis.ResizeObserver = originalResizeObserver
 })
 
 test("counts active workstream lanes without including unplaced", async () => {

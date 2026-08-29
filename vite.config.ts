@@ -59,6 +59,12 @@ const config = defineConfig({
   test: {
     exclude: [...configDefaults.exclude, ...ignoredWorkspacePaths],
     setupFiles: ["./test/setup.ts"],
+    // Complements the wider testing-library poll deadline in test/setup.ts:
+    // when full-suite runs saturate the machine, interaction-heavy jsdom
+    // tests spend seconds waiting on the scheduler, and the 5s default
+    // reports that starvation as a timeout. Headroom for a few polls per
+    // test; a genuinely hung test still fails.
+    testTimeout: 15_000,
     onConsoleLog(log, type) {
       if (type === "stderr" && reactOrAccessibilityWarning.test(log)) {
         throw new Error(`Unexpected React or accessibility warning:\n${log}`)
