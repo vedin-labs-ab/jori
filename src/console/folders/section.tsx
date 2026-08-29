@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useActiveOrganization } from "@/shared/session/auth"
 import { api } from "../../../convex/_generated/api"
+import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { type FolderExpansion, FolderTreeItem } from "./row"
 import { ancestorFolderIds, buildFolderTree } from "./tree"
@@ -41,6 +42,7 @@ function FoldersGroup({
   const folders = tree?.status === "ready" ? tree.folders : undefined
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const expansion = useFolderExpansion(activeFolderId(pathname), folders)
+  const leaveDeletedFolder = useLeaveDeletedFolder(activeFolderId(pathname))
 
   if (tree !== undefined && tree.status !== "ready") {
     return null
@@ -70,6 +72,7 @@ function FoldersGroup({
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
+        onDeleted={leaveDeletedFolder}
         organizationId={organizationId}
       />
     </SidebarGroup>
@@ -134,8 +137,13 @@ function FolderMenuItems({
   )
 }
 
-// Expansion is session UI state. The shell remounts on every route change,
-// so the set lives at module scope and each mount snapshots it.
+// Expansion is session UI state that must outlive the sidebar: each page
+// composes its own ConsolePage, so the shell remounts on every surface
+// change, and the only stable ancestor is the app root, which serves public
+// pages too and should not host console feature state. A module-scope set is
+// the smallest thing that survives; each mount snapshots it into React state
+// and every toggle writes through. Folder ids are globally unique, so
+// entries left by other organizations are inert.
 const sessionExpanded = new Set<string>()
 
 function useFolderExpansion(

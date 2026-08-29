@@ -1,4 +1,3 @@
-import { useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { Plus } from "lucide-react"
@@ -24,13 +23,13 @@ import {
   FolderHeaderActions,
   NewInFolderMenu,
 } from "./header"
+import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { MoveResourceDialog } from "./move"
 import {
   type FiledResourceType,
   type FolderDetail,
   type FolderResource,
-  type FolderRow,
   toFiledType,
 } from "./types"
 
@@ -58,8 +57,7 @@ function FolderView({
     organizationId,
     folderId,
   })
-  const folder =
-    detail?.status === "ready" ? (detail.folder ?? undefined) : undefined
+  const folder = detail?.status === "ready" ? detail.folder : undefined
 
   useMaterialTrail(useMemo(() => folderBreadcrumb(folder), [folder]))
 
@@ -105,7 +103,6 @@ function FolderReadyView({
   folder: FolderDetail
   organizationId: string
 }) {
-  const navigate = useNavigate()
   const contents = useQuery(api.folders.console.contents, {
     organizationId,
     folderId: folder.folderId,
@@ -114,22 +111,7 @@ function FolderReadyView({
   const [creation, setCreation] = useState<FolderCreation>()
   const [moving, setMoving] = useState<FolderResource>()
   const filing = useFolderFiling(organizationId, folder)
-
-  /** Deleting the folder being viewed leaves its page for the parent's. */
-  function leaveDeletedFolder(deleted: FolderRow) {
-    if (deleted.folderId !== folder.folderId) {
-      return
-    }
-
-    if (deleted.parentId === undefined) {
-      void navigate({ to: "/runs" })
-    } else {
-      void navigate({
-        to: "/folders/$folderId",
-        params: { folderId: deleted.parentId },
-      })
-    }
-  }
+  const leaveDeletedFolder = useLeaveDeletedFolder(folder.folderId)
 
   return (
     <ConsolePageLayout>

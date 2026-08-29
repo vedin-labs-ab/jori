@@ -4,7 +4,7 @@ import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
-import { MoveToFolderDialog } from "../folders/move"
+import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
@@ -141,13 +141,12 @@ function StoreReadyView({
         organizationId={organizationId}
         storeId={store.storeId}
       />
-      <MoveToFolderDialog
-        onOpenChange={setIsMoveOpen}
+      <MoveResourceDialog
+        onClose={() => setIsMoveOpen(false)}
         organizationId={organizationId}
-        subject={
+        resource={
           isMoveOpen
             ? {
-                kind: "resource",
                 resourceType: "collection",
                 resourceId: store.storeId,
                 name: store.name,

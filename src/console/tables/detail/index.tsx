@@ -4,7 +4,7 @@ import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../../convex/_generated/api"
-import { MoveToFolderDialog } from "../../folders/move"
+import { MoveResourceDialog } from "../../folders/move"
 import { ConsolePage } from "../../page"
 import { ConsolePageLayout, ConsoleScrollableGrid } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
@@ -201,13 +201,12 @@ function TableDialogs({
         organizationId={organizationId}
         tableId={table.tableId}
       />
-      <MoveToFolderDialog
-        onOpenChange={closeWhenDismissed}
+      <MoveResourceDialog
+        onClose={onClose}
         organizationId={organizationId}
-        subject={
+        resource={
           dialog === "move"
             ? {
-                kind: "resource",
                 resourceType: "collection",
                 resourceId: table.tableId,
                 name: table.name,

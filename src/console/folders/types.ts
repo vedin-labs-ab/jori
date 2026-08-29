@@ -1,13 +1,13 @@
-import { type FunctionReturnType } from "convex/server"
+import { type FunctionArgs, type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
 
-export type FolderList = FunctionReturnType<typeof api.folders.console.tree>
-export type FolderRow = FolderList["folders"][number]
+export type FolderRow = FunctionReturnType<
+  typeof api.folders.console.tree
+>["folders"][number]
 
-export type FolderDetailResult = FunctionReturnType<
-  typeof api.folders.console.get
+export type FolderDetail = NonNullable<
+  FunctionReturnType<typeof api.folders.console.get>["folder"]
 >
-export type FolderDetail = NonNullable<FolderDetailResult["folder"]>
 
 export type FolderContentsResult = FunctionReturnType<
   typeof api.folders.console.contents
@@ -15,7 +15,9 @@ export type FolderContentsResult = FunctionReturnType<
 export type FolderResource = FolderContentsResult["resources"][number]
 
 /** What `folders.console.file` files: tables and stores are collections. */
-export type FiledResourceType = "collection" | "file" | "automation"
+export type FiledResourceType = FunctionArgs<
+  typeof api.folders.console.file
+>["resourceType"]
 
 export function toFiledType(resource: FolderResource): FiledResourceType {
   return resource.type === "table" || resource.type === "store"

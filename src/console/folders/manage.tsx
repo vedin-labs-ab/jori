@@ -48,7 +48,7 @@ export function FolderDialogs({
   dialog: FolderDialogRequest | undefined
   onClose: () => void
   /** Ran after a delete lands, e.g. to leave the deleted folder's page. */
-  onDeleted?: (folder: FolderRow) => void
+  onDeleted: (folder: FolderRow) => void
   organizationId: string
 }) {
   const create = useRetained(dialog?.type === "create" ? dialog : undefined)
@@ -100,7 +100,7 @@ export function FolderDialogs({
   )
 }
 
-export function CreateFolderDialog({
+function CreateFolderDialog({
   isOpen,
   onOpenChange,
   organizationId,
@@ -174,7 +174,7 @@ function DeleteFolderDialog({
 }: {
   folder: FolderRow | undefined
   isOpen: boolean
-  onDeleted: ((folder: FolderRow) => void) | undefined
+  onDeleted: (folder: FolderRow) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
@@ -192,7 +192,7 @@ function DeleteFolderDialog({
       await remove({ organizationId, folderId: target.folderId })
       toast.success(`Deleted ${target.name}.`)
       onOpenChange(false)
-      onDeleted?.(target)
+      onDeleted(target)
     } catch (error) {
       showErrorToast(error, "Could not delete the folder.")
     } finally {
