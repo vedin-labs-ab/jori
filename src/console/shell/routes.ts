@@ -6,27 +6,59 @@ import {
   Layers,
   Library,
   ListChecks,
+  type LucideIcon,
   Table2,
 } from "lucide-react"
 
-export const consoleNavigation = [
-  { icon: ListChecks, label: "Runs", to: "/runs" },
-  { icon: CalendarClock, label: "Automations", to: "/automations" },
-  { icon: Table2, label: "Tables", to: "/tables" },
-  { icon: Database, label: "Stores", to: "/stores" },
-  { icon: Files, label: "Files", to: "/files" },
+export type ConsoleSurface = {
+  icon: LucideIcon
+  label: string
+  to: string
+}
+
+type ConsoleGroup = {
+  label?: string
+  items: readonly ConsoleSurface[]
+}
+
+/**
+ * The sidebar's structure. Runs stands alone at the top: it is the daily
+ * surface, not a member of any category. "Resources" holds exactly the four
+ * types that can be filed into folders. The platform group renders at the
+ * sidebar's bottom, above the user button — low-frequency setup and
+ * reference surfaces earn the quiet slot, not a louder label.
+ */
+export const consoleNavigation: readonly ConsoleGroup[] = [
+  { items: [{ icon: ListChecks, label: "Runs", to: "/runs" }] },
+  {
+    label: "Resources",
+    items: [
+      { icon: CalendarClock, label: "Automations", to: "/automations" },
+      { icon: Table2, label: "Tables", to: "/tables" },
+      { icon: Database, label: "Stores", to: "/stores" },
+      { icon: Files, label: "Files", to: "/files" },
+    ],
+  },
+]
+
+export const consolePlatformNavigation: readonly ConsoleSurface[] = [
   { icon: Cable, label: "Integrations", to: "/integrations" },
   { icon: Library, label: "Skills", to: "/skills" },
   { icon: Layers, label: "Context", to: "/context" },
-] as const
+]
 
 // Surfaces reached from within the sidebar's groups rather than its main
 // navigation still need a page title and a document title.
 const secondarySurfaces = [{ label: "Folders", to: "/folders" }] as const
 
+const consoleSurfaces = [
+  ...consoleNavigation.flatMap((group) => group.items),
+  ...consolePlatformNavigation,
+]
+
 export function getPageTitle(pathname: string) {
   return (
-    [...consoleNavigation, ...secondarySurfaces].find((item) =>
+    [...consoleSurfaces, ...secondarySurfaces].find((item) =>
       isNavigationActive(pathname, item.to)
     )?.label ?? "Console"
   )
@@ -39,7 +71,7 @@ const materialSurfacePaths = ["/tables", "/stores", "/files"] as const
 /** The surface a material detail page belongs to, when the path is one;
  *  list pages and non-material surfaces stay a single heading. */
 export function getMaterialSurface(pathname: string) {
-  return consoleNavigation.find(
+  return consoleSurfaces.find(
     (item) =>
       materialSurfacePaths.some((path) => path === item.to) &&
       pathname.startsWith(`${item.to}/`)
