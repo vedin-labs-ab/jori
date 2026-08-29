@@ -30,6 +30,7 @@ import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
 import { Route as FilesIndexRouteImport } from './routes/files/index'
+import { Route as FoldersIndexRouteImport } from './routes/folders/index'
 import { Route as FoldersFolderIdRouteImport } from './routes/folders/$folderId'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
@@ -146,6 +147,11 @@ const FilesIndexRoute = FilesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => FilesRoute,
 } as any)
+const FoldersIndexRoute = FoldersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FoldersRoute,
+} as any)
 const FoldersFolderIdRoute = FoldersFolderIdRouteImport.update({
   id: '/$folderId',
   path: '/$folderId',
@@ -221,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
+  '/folders/': typeof FoldersIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
@@ -234,7 +241,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
-  '/folders': typeof FoldersRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -249,6 +255,7 @@ export interface FileRoutesByTo {
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context': typeof ContextIndexRoute
   '/files': typeof FilesIndexRoute
+  '/folders': typeof FoldersIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/stores': typeof StoresIndexRoute
   '/tables': typeof TablesIndexRoute
@@ -283,6 +290,7 @@ export interface FileRoutesById {
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
+  '/folders/': typeof FoldersIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
@@ -318,6 +326,7 @@ export interface FileRouteTypes {
     | '/integrations/personal'
     | '/context/'
     | '/files/'
+    | '/folders/'
     | '/integrations/'
     | '/stores/'
     | '/tables/'
@@ -331,7 +340,6 @@ export interface FileRouteTypes {
     | '/'
     | '/automations'
     | '/console'
-    | '/folders'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -346,6 +354,7 @@ export interface FileRouteTypes {
     | '/integrations/personal'
     | '/context'
     | '/files'
+    | '/folders'
     | '/integrations'
     | '/stores'
     | '/tables'
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/integrations/personal'
     | '/context/'
     | '/files/'
+    | '/folders/'
     | '/integrations/'
     | '/stores/'
     | '/tables/'
@@ -559,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FilesIndexRouteImport
       parentRoute: typeof FilesRoute
     }
+    '/folders/': {
+      id: '/folders/'
+      path: '/'
+      fullPath: '/folders/'
+      preLoaderRoute: typeof FoldersIndexRouteImport
+      parentRoute: typeof FoldersRoute
+    }
     '/folders/$folderId': {
       id: '/folders/$folderId'
       path: '/$folderId'
@@ -661,10 +678,12 @@ const FilesRouteWithChildren = FilesRoute._addFileChildren(FilesRouteChildren)
 
 interface FoldersRouteChildren {
   FoldersFolderIdRoute: typeof FoldersFolderIdRoute
+  FoldersIndexRoute: typeof FoldersIndexRoute
 }
 
 const FoldersRouteChildren: FoldersRouteChildren = {
   FoldersFolderIdRoute: FoldersFolderIdRoute,
+  FoldersIndexRoute: FoldersIndexRoute,
 }
 
 const FoldersRouteWithChildren =
