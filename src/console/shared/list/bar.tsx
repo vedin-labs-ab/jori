@@ -22,7 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { TableCell, TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { type RowSelection } from "./selection"
+import { type RowSelection, selectionHeadState } from "./selection"
 
 /** Header checkbox: none, partial (a partly selected page shows the
  *  indeterminate minus), or all. Toggling from partial selects the rest. */
@@ -35,19 +35,11 @@ export function SelectionHeadCell<Row>({
     <TableHead className="w-8">
       <Checkbox
         aria-label="Select all rows"
-        checked={headerState(selection)}
+        checked={selectionHeadState(selection)}
         onCheckedChange={selection.toggleAll}
       />
     </TableHead>
   )
-}
-
-function headerState<Row>(selection: RowSelection<Row>) {
-  if (selection.allSelected) {
-    return true
-  }
-
-  return selection.count > 0 ? ("indeterminate" as const) : false
 }
 
 export function SelectionRowCell<Row>({

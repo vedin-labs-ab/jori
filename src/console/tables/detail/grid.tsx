@@ -1,15 +1,18 @@
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   TableBody,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { SelectionHeadCell } from "../../shared/list/bar"
 import { ConsoleListTable } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
-import { type RowSelection } from "../../shared/list/selection"
+import {
+  type RowSelection,
+  selectionHeadState,
+} from "../../shared/list/selection"
 import { columnTypeIcons } from "../draft"
 import { type TableColumn, type TableRow as TableRowData } from "../types"
 import { type CommitCell } from "./cell"
@@ -57,18 +60,26 @@ export function RowGrid({
 
   // Separate borders so the column and header hairlines stay attached to
   // their sticky cells while the grid scrolls; row separators move from
-  // the tr (invisible under border-separate) onto the cells.
+  // the tr (invisible under border-separate) onto the cells. w-auto keeps
+  // the grid exactly as wide as its columns — hairlines end where the data
+  // ends — and the centered fixed gutter opts out of the frame's
+  // first-column page padding.
   return (
-    <ConsoleListTable className="border-separate border-spacing-0 [&_tbody_tr:last-child_td]:border-b-0 [&_td:not(:last-child)]:border-r [&_td]:border-b [&_th:not(:last-child)]:border-r [&_th]:border-b [&_th]:shadow-none">
+    <ConsoleListTable className="w-auto border-separate border-spacing-0 [&_td:first-child]:pl-0 [&_td:last-child]:pr-0 [&_td:not(:last-child)]:border-r [&_td]:border-b [&_th:first-child]:pl-0 [&_th:last-child]:pr-0 [&_th:not(:last-child)]:border-r [&_th]:border-b [&_th]:shadow-none md:[&_td:first-child]:pl-0 md:[&_td:last-child]:pr-0 md:[&_th:first-child]:pl-0 md:[&_th:last-child]:pr-0">
       <TableHeader>
         <TableRow>
-          {disabled ? (
-            <TableHead className="w-10">
+          <TableHead className="w-12 min-w-12 p-0 text-center">
+            {disabled ? (
               <span className="sr-only">Row number</span>
-            </TableHead>
-          ) : (
-            <SelectionHeadCell selection={selection} />
-          )}
+            ) : (
+              <Checkbox
+                aria-label="Select all rows"
+                checked={selectionHeadState(selection)}
+                className="mx-auto"
+                onCheckedChange={selection.toggleAll}
+              />
+            )}
+          </TableHead>
           {columns.map((column) => (
             <HeadCell
               column={column}
@@ -76,9 +87,10 @@ export function RowGrid({
               onInspect={() => onInspectColumn(column)}
             />
           ))}
-          <TableHead className="w-10 text-right">
+          <TableHead className="w-10 min-w-10 p-0 text-center">
             <Button
               aria-label="New column"
+              className="mx-auto"
               disabled={disabled}
               onClick={onAddColumn}
               size="icon-sm"
@@ -130,7 +142,7 @@ function HeadCell({
 
   return (
     <TableHead
-      className="p-0"
+      className="min-w-56 p-0"
       title={`${column.type}${isRequired ? " · required" : ""}`}
     >
       <button
