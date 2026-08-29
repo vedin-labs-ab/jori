@@ -49,6 +49,34 @@ export function isTextualKind(mimeType: string, name: string) {
   return textualCategories.has(fileKind(mimeType, name).category)
 }
 
+export type PreviewKind = "audio" | "image" | "none" | "pdf" | "text" | "video"
+
+/** How a browser can present the file inline. Browsers render media by the
+ *  served mime type, so those stay mime-only; text is fetched by hand, so
+ *  the registry's read of the file — extension rescue included — decides
+ *  what counts as text. */
+export function previewKind(mimeType: string, name: string): PreviewKind {
+  const mime = normalizeMime(mimeType)
+
+  if (mime.startsWith("image/")) {
+    return "image"
+  }
+
+  if (mime === "application/pdf") {
+    return "pdf"
+  }
+
+  if (mime.startsWith("video/")) {
+    return "video"
+  }
+
+  if (mime.startsWith("audio/")) {
+    return "audio"
+  }
+
+  return isTextualKind(mimeType, name) ? "text" : "none"
+}
+
 /** Strips parameters like "; charset=utf-8" before matching. */
 function normalizeMime(mimeType: string) {
   return (mimeType.split(";")[0] ?? "").trim().toLowerCase()
