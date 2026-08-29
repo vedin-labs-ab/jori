@@ -8,12 +8,16 @@ import { type FolderRow } from "./types"
 // location is marked, and targets that would create a cycle are disabled.
 
 export function FolderPicker({
+  className,
   currentId,
   disabledIds,
   folders,
   onSelect,
   selectedId,
 }: {
+  /** Chrome belongs to the host: a dialog body passes its own border, a
+   *  popover already has one and passes nothing. */
+  className?: string
   /** Where the subject sits today; null means outside any folder. */
   currentId: string | null
   /** Folders that must not be chosen — a moving folder's own subtree. */
@@ -25,7 +29,12 @@ export function FolderPicker({
   const tree = buildFolderTree(folders)
 
   return (
-    <div className="grid max-h-64 content-start gap-0.5 overflow-y-auto rounded-md border p-1">
+    <div
+      className={cn(
+        "grid max-h-64 content-start gap-0.5 overflow-y-auto",
+        className
+      )}
+    >
       <PickerRow
         depth={0}
         icon={<FolderMinus className="size-4 shrink-0 text-muted-foreground" />}

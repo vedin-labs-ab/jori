@@ -56,7 +56,7 @@ export function FolderField({
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-(--radix-popover-trigger-width) p-2"
+          className="w-(--radix-popover-trigger-width) p-1"
         >
           {folders === undefined ? (
             <div className="grid gap-2">
