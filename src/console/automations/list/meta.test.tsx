@@ -6,19 +6,11 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react"
-import { afterEach, beforeAll, expect, test } from "vitest"
+import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { absoluteTime } from "../../shared/time"
 import { type Automation } from "../types"
 import { AutomationMeta } from "./meta"
-
-beforeAll(() => {
-  globalThis.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
-  }
-})
 
 afterEach(() => {
   cleanup()

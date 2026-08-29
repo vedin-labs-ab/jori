@@ -1,26 +1,12 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, expect, test } from "vitest"
+import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ActivityItem } from "./item"
 import { type ActivityItem as ActivityItemType } from "./types"
 
-const originalResizeObserver = globalThis.ResizeObserver
-
-beforeAll(() => {
-  globalThis.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
-  } as typeof ResizeObserver
-})
-
 afterEach(() => {
   cleanup()
-})
-
-afterAll(() => {
-  globalThis.ResizeObserver = originalResizeObserver
 })
 
 test("uses a bookmark while wait_for_agents is parked", () => {

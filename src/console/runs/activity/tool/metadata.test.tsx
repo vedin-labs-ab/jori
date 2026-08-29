@@ -1,28 +1,12 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, expect, test } from "vitest"
+import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ActivityItem } from "../item"
 import { type ActivityItem as ActivityItemType } from "../types"
 
-const originalResizeObserver = globalThis.ResizeObserver
-
-class TestResizeObserver {
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-}
-
-beforeAll(() => {
-  globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver
-})
-
 afterEach(() => {
   cleanup()
-})
-
-afterAll(() => {
-  globalThis.ResizeObserver = originalResizeObserver
 })
 
 test("keeps fetched web page metadata focused on URL and page count", () => {

@@ -1,27 +1,11 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, expect, test } from "vitest"
+import { afterEach, expect, test } from "vitest"
 import { buildPulse } from "./series"
 import { PulseViewport } from "./viewport"
 
-const originalResizeObserver = globalThis.ResizeObserver
-
-class TestResizeObserver {
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-}
-
-beforeAll(() => {
-  globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver
-})
-
 afterEach(() => {
   cleanup()
-})
-
-afterAll(() => {
-  globalThis.ResizeObserver = originalResizeObserver
 })
 
 test("fades both axes while keeping the pinned band outside vertical scroll", () => {

@@ -41,7 +41,13 @@ test("moves focus to the confirmation, so the swap is never silent", async () =>
   )
 
   expect(confirmation).not.toBeNull()
-  expect(document.activeElement).toBe(confirmation)
+
+  // The confirmation focuses itself from an effect, which React schedules
+  // after the commit findByText observes, so the focus lands a beat after
+  // the text. Poll for it instead of asserting the in-between frame.
+  await waitFor(() => {
+    expect(document.activeElement).toBe(confirmation)
+  })
 })
 
 test("points the rejected input at the reason it was rejected", async () => {

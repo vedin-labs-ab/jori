@@ -1,18 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, beforeAll, expect, test } from "vitest"
+import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type AutomationSurfaceIntegration } from "../access"
 import { type Automation } from "../types"
 import { AutomationToolSummary } from "./tools"
-
-beforeAll(() => {
-  globalThis.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
-  }
-})
 
 afterEach(() => {
   cleanup()
