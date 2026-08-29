@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 import { ConsoleFilterToggle } from "../shared/layout"
+import { DialogForm } from "../shared/materials/form"
 import { useBillingCheckout } from "./actions"
 
 const presetOptions = topUp.presetsUsd.map((preset) => ({
@@ -75,49 +76,54 @@ export function TopUpDialog({
             for auto top-ups.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-3">
-          <ConsoleFilterToggle
-            label="Amount"
-            onValueChange={setAmount}
-            options={presetOptions}
-            value={amount}
-          />
-          <div className="flex flex-col gap-1.5">
-            <InputGroup>
-              <InputGroupInput
-                aria-describedby={valid ? undefined : "top-up-amount-issue"}
-                aria-invalid={valid ? undefined : true}
-                inputMode="numeric"
-                min={topUp.minimumUsd}
-                onChange={(event) => setAmount(event.target.value)}
-                type="number"
-                value={amount}
-              />
-              <InputGroupAddon align="inline-end">
-                <InputGroupText>$</InputGroupText>
-              </InputGroupAddon>
-            </InputGroup>
-            {valid ? null : (
-              <p
-                className="text-destructive text-xs"
-                id="top-up-amount-issue"
-                role="alert"
-              >
-                Any whole amount from ${topUp.minimumUsd} to $
-                {topUp.maximumUsd.toLocaleString("en-US")}.
-              </p>
-            )}
+        <DialogForm
+          disabled={!valid || checkout.pending !== null}
+          onSubmit={() => checkout.topUp(parsed)}
+        >
+          <div className="flex flex-col gap-3">
+            <ConsoleFilterToggle
+              label="Amount"
+              onValueChange={setAmount}
+              options={presetOptions}
+              value={amount}
+            />
+            <div className="flex flex-col gap-1.5">
+              <InputGroup>
+                <InputGroupInput
+                  aria-describedby={valid ? undefined : "top-up-amount-issue"}
+                  aria-invalid={valid ? undefined : true}
+                  inputMode="numeric"
+                  min={topUp.minimumUsd}
+                  onChange={(event) => setAmount(event.target.value)}
+                  type="number"
+                  value={amount}
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupText>$</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
+              {valid ? null : (
+                <p
+                  className="text-destructive text-xs"
+                  id="top-up-amount-issue"
+                  role="alert"
+                >
+                  Any whole amount from ${topUp.minimumUsd} to $
+                  {topUp.maximumUsd.toLocaleString("en-US")}.
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={!valid || checkout.pending !== null}
-            onClick={() => checkout.topUp(parsed)}
-          >
-            Continue to checkout
-            {checkout.pending === "top-up" ? <Spinner /> : <ArrowUpRight />}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              disabled={!valid || checkout.pending !== null}
+              type="submit"
+            >
+              Continue to checkout
+              {checkout.pending === "top-up" ? <Spinner /> : <ArrowUpRight />}
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { api } from "../../../convex/_generated/api"
 import { readErrorMessage } from "../shared/error"
+import { DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
 import { SchemaEditorSection } from "./schema/editor"
 import { useSchemaEditor } from "./schema/state"
@@ -53,7 +54,10 @@ export function CreateStoreDialog({
             One JSON document validated against a schema fixed at creation.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
+        <DialogForm
+          disabled={form.isCreating}
+          onSubmit={() => void form.submit()}
+        >
           <StoreNameField form={form} />
           <MaterialScopeField
             id="store-create-scope"
@@ -63,17 +67,13 @@ export function CreateStoreDialog({
           />
           <StoreDescriptionField form={form} />
           <SchemaEditorSection editor={form.schema} idPrefix="store-create" />
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={form.isCreating}
-            onClick={() => void form.submit()}
-            type="button"
-          >
-            {form.isCreating ? <Loader2 className="animate-spin" /> : null}
-            Create store
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button disabled={form.isCreating} type="submit">
+              {form.isCreating ? <Loader2 className="animate-spin" /> : null}
+              Create store
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

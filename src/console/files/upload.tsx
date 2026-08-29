@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
+import { DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
 
 export function UploadFileDialog({
@@ -52,17 +53,21 @@ export function UploadFileDialog({
             Add a file to the workspace so Jori and your team can use it.
           </DialogDescription>
         </DialogHeader>
-        <UploadFields upload={upload} />
-        <DialogFooter>
-          <Button
-            disabled={upload.file === null || upload.isUploading}
-            onClick={() => void upload.submit()}
-            type="button"
-          >
-            {upload.isUploading ? <Loader2 className="animate-spin" /> : null}
-            Upload
-          </Button>
-        </DialogFooter>
+        <DialogForm
+          disabled={upload.file === null || upload.isUploading}
+          onSubmit={() => void upload.submit()}
+        >
+          <UploadFields upload={upload} />
+          <DialogFooter>
+            <Button
+              disabled={upload.file === null || upload.isUploading}
+              type="submit"
+            >
+              {upload.isUploading ? <Loader2 className="animate-spin" /> : null}
+              Upload
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

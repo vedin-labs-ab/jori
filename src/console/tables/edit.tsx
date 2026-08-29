@@ -17,6 +17,7 @@ import {
   MaterialDescriptionField,
   MaterialNameField,
 } from "../shared/materials/fields"
+import { DialogForm } from "../shared/materials/form"
 import { ColumnEditor } from "./columns"
 import {
   type ColumnDraft,
@@ -57,7 +58,10 @@ export function EditTableDialog({
             so current rows stay valid.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
+        <DialogForm
+          disabled={form.isSaving}
+          onSubmit={() => void form.submit()}
+        >
           <MaterialNameField
             error={form.errors.name}
             idPrefix="table-edit"
@@ -79,17 +83,13 @@ export function EditTableDialog({
               {form.errors.columns}
             </p>
           )}
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={form.isSaving}
-            onClick={() => void form.submit()}
-            type="button"
-          >
-            {form.isSaving ? <Loader2 className="animate-spin" /> : null}
-            Save changes
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button disabled={form.isSaving} type="submit">
+              {form.isSaving ? <Loader2 className="animate-spin" /> : null}
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

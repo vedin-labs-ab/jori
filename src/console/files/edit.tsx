@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DialogForm } from "../shared/materials/form"
 import { type FileRow } from "./types"
 
 export function EditFileDialog({
@@ -48,7 +49,14 @@ export function EditFileDialog({
             Rename the file or update its description.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
+        <DialogForm
+          disabled={file === undefined || name.trim() === "" || isSaving}
+          onSubmit={() => {
+            if (file !== undefined) {
+              onSave(file, { name, description })
+            }
+          }}
+        >
           <div className="grid gap-2">
             <Label htmlFor="file-edit-name">Name</Label>
             <Input
@@ -66,21 +74,16 @@ export function EditFileDialog({
               value={description}
             />
           </div>
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={file === undefined || name.trim() === "" || isSaving}
-            onClick={() => {
-              if (file !== undefined) {
-                onSave(file, { name, description })
-              }
-            }}
-            type="button"
-          >
-            {isSaving ? <Loader2 className="animate-spin" /> : null}
-            Save changes
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              disabled={file === undefined || name.trim() === "" || isSaving}
+              type="submit"
+            >
+              {isSaving ? <Loader2 className="animate-spin" /> : null}
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

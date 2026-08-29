@@ -18,6 +18,7 @@ import {
   MaterialDescriptionField,
   MaterialNameField,
 } from "../shared/materials/fields"
+import { DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
 import { ColumnEditor } from "./columns"
 import {
@@ -61,7 +62,10 @@ export function CreateTableDialog({
             Define the typed columns rows of this table must follow.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
+        <DialogForm
+          disabled={form.isCreating}
+          onSubmit={() => void form.submit()}
+        >
           <MaterialNameField
             error={form.errors.name}
             idPrefix="table-create"
@@ -89,17 +93,13 @@ export function CreateTableDialog({
               {form.errors.columns}
             </p>
           )}
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={form.isCreating}
-            onClick={() => void form.submit()}
-            type="button"
-          >
-            {form.isCreating ? <Loader2 className="animate-spin" /> : null}
-            Create table
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button disabled={form.isCreating} type="submit">
+              {form.isCreating ? <Loader2 className="animate-spin" /> : null}
+              Create table
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

@@ -12,6 +12,7 @@ import {
   conflictMessage,
   isVersionConflict,
 } from "../../shared/materials/conflict"
+import { DialogForm } from "../../shared/materials/form"
 import { type StoreDetail } from "../types"
 import { ValueFields } from "./fields"
 import { useValueEditor, type ValueEditor, type ValueEditorView } from "./state"
@@ -68,7 +69,11 @@ export function ValueEditorSection({
   }
 
   return (
-    <div className="grid gap-2">
+    <DialogForm
+      className="gap-2"
+      disabled={isSaving}
+      onSubmit={() => void submit()}
+    >
       <div className="flex items-center justify-between">
         <Label>{header}</Label>
         <Tabs
@@ -92,7 +97,7 @@ export function ValueEditorSection({
         <ValueCodeView editor={editor} />
       )}
       <div className="flex items-center gap-2">
-        <Button disabled={isSaving} onClick={() => void submit()} type="button">
+        <Button disabled={isSaving} type="submit">
           {isSaving ? <Loader2 className="animate-spin" /> : null}
           Save value
         </Button>
@@ -105,7 +110,7 @@ export function ValueEditorSection({
           Cancel
         </Button>
       </div>
-    </div>
+    </DialogForm>
   )
 }
 

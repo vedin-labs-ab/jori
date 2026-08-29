@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
+import { DialogForm } from "../shared/materials/form"
 import { useRetained } from "../shared/retain"
 import { MoveToFolderDialog } from "./move"
 import { type FolderRow } from "./types"
@@ -279,33 +280,31 @@ function FolderNameDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-2">
-          <Label htmlFor="folder-name">Name</Label>
-          <Input
-            aria-invalid={error === undefined ? undefined : true}
-            id="folder-name"
-            onChange={(event) => {
-              setName(event.target.value)
-              setError(undefined)
-            }}
-            value={name}
-          />
-          {error === undefined ? null : (
-            <p className="text-destructive text-xs" role="alert">
-              {error}
-            </p>
-          )}
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={isSaving}
-            onClick={() => void submit()}
-            type="button"
-          >
-            {isSaving ? <Loader2 className="animate-spin" /> : null}
-            {submitLabel}
-          </Button>
-        </DialogFooter>
+        <DialogForm disabled={isSaving} onSubmit={() => void submit()}>
+          <div className="grid gap-2">
+            <Label htmlFor="folder-name">Name</Label>
+            <Input
+              aria-invalid={error === undefined ? undefined : true}
+              id="folder-name"
+              onChange={(event) => {
+                setName(event.target.value)
+                setError(undefined)
+              }}
+              value={name}
+            />
+            {error === undefined ? null : (
+              <p className="text-destructive text-xs" role="alert">
+                {error}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button disabled={isSaving} type="submit">
+              {isSaving ? <Loader2 className="animate-spin" /> : null}
+              {submitLabel}
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )
