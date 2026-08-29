@@ -1,8 +1,6 @@
 import { Link } from "@tanstack/react-router"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
-import { BrandIcon } from "@/shared/brand"
 import { fileKind } from "@/shared/files/kind"
+import { MaterialOwnerCell } from "../shared/materials/owner"
 import { MaterialScopeBadge } from "../shared/materials/scope"
 import { type FileRow } from "./types"
 
@@ -59,8 +57,7 @@ export function FileTypeCell({ file }: { file: FileRow }) {
 }
 
 /** Owner column: the uploading person for uploads; Jori itself for files an
- *  agent run saved. `compact` slims the avatar and gap to the height of a
- *  detail-frame header row. */
+ *  agent run saved. */
 export function FileOwnerCell({
   compact = false,
   file,
@@ -68,42 +65,10 @@ export function FileOwnerCell({
   compact?: boolean
   file: FileRow
 }) {
-  const rowClassName = cn(
-    "flex min-w-0 items-center",
-    compact ? "max-w-40 gap-1.5" : "gap-2"
-  )
+  const owner =
+    file.source === "run"
+      ? ({ kind: "jori" } as const)
+      : ({ kind: "person", name: file.ownerName ?? "Member" } as const)
 
-  if (file.source === "run") {
-    return (
-      <div className={rowClassName}>
-        <BrandIcon className="size-5 shrink-0" />
-        <span className="truncate">Jori</span>
-      </div>
-    )
-  }
-
-  const name = file.ownerName ?? "Member"
-
-  return (
-    <div className={rowClassName}>
-      <Avatar
-        className={compact ? "size-5" : undefined}
-        size={compact ? "default" : "sm"}
-      >
-        <AvatarFallback className={compact ? "text-[9px]" : undefined}>
-          {initials(name)}
-        </AvatarFallback>
-      </Avatar>
-      <span className="truncate">{name}</span>
-    </div>
-  )
-}
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => (word[0] ?? "").toUpperCase())
-    .join("")
+  return <MaterialOwnerCell compact={compact} owner={owner} />
 }

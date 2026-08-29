@@ -105,6 +105,7 @@ import type * as broker_tools_web_index from "../broker/tools/web/index.js";
 import type * as broker_tools_web_input from "../broker/tools/web/input.js";
 import type * as broker_tools_web_output from "../broker/tools/web/output.js";
 import type * as collections_access from "../collections/access.js";
+import type * as collections_backfill from "../collections/backfill.js";
 import type * as collections_documents from "../collections/documents.js";
 import type * as collections_input from "../collections/input.js";
 import type * as collections_records from "../collections/records.js";
@@ -640,6 +641,7 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/web/input": typeof broker_tools_web_input;
   "broker/tools/web/output": typeof broker_tools_web_output;
   "collections/access": typeof collections_access;
+  "collections/backfill": typeof collections_backfill;
   "collections/documents": typeof collections_documents;
   "collections/input": typeof collections_input;
   "collections/records": typeof collections_records;

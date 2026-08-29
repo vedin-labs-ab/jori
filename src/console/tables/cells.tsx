@@ -1,0 +1,96 @@
+import { Link } from "@tanstack/react-router"
+import { Columns3, type LucideIcon, Rows3, Table2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { countLabel } from "@/lib/count"
+import { MaterialOwnerCell } from "../shared/materials/owner"
+import { MaterialScopeBadge } from "../shared/materials/scope"
+import { type TableSummary } from "./types"
+
+/** Name column: the table icon, a link to the table, and the list's badge
+ *  conventions — a scope badge for personal tables, an archived badge for
+ *  archived ones. Organization tables carry no scope badge. */
+export function TableNameCell({ table }: { table: TableSummary }) {
+  return (
+    <div className="grid gap-0.5">
+      <div className="flex items-center gap-2">
+        <Table2 aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+        <Link
+          className="truncate font-medium hover:underline"
+          params={{ tableId: table.tableId }}
+          title={table.name}
+          to="/tables/$tableId"
+        >
+          {table.name}
+        </Link>
+        {table.scope === "personal" ? (
+          <MaterialScopeBadge scope="personal" />
+        ) : null}
+        {table.archivedAt === undefined ? null : (
+          <Badge variant="secondary">Archived</Badge>
+        )}
+      </div>
+      {table.description === undefined ? null : (
+        <p
+          className="truncate pl-6 text-muted-foreground"
+          title={table.description}
+        >
+          {table.description}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/** Columns column: a small icon and the count of typed columns. */
+export function TableColumnsCell({ table }: { table: TableSummary }) {
+  return (
+    <CountCell
+      count={table.columns.length}
+      icon={Columns3}
+      label={countLabel(table.columns.length, "column")}
+    />
+  )
+}
+
+/** Rows column: a small icon and the live document count. */
+export function TableRowsCell({ table }: { table: TableSummary }) {
+  return (
+    <CountCell
+      count={table.rowCount}
+      icon={Rows3}
+      label={countLabel(table.rowCount, "row")}
+    />
+  )
+}
+
+/** Owner column: the creating person, or Jori itself when no named owner
+ *  resolves — the organization-principal run case. */
+export function TableOwnerCell({ table }: { table: TableSummary }) {
+  const owner =
+    table.ownerName === undefined
+      ? ({ kind: "jori" } as const)
+      : ({ kind: "person", name: table.ownerName } as const)
+
+  return <MaterialOwnerCell owner={owner} />
+}
+
+function CountCell({
+  count,
+  icon: Icon,
+  label,
+}: {
+  count: number
+  icon: LucideIcon
+  label: string
+}) {
+  return (
+    <div
+      className="flex items-center gap-1.5 text-muted-foreground"
+      title={label}
+    >
+      <Icon aria-hidden className="size-4 shrink-0" />
+      {count}
+      <span className="sr-only">{label}</span>
+    </div>
+  )
+}

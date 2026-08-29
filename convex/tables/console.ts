@@ -6,7 +6,11 @@ import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { scopeValidator } from "../shared/audience"
-import { findAccessibleTable, searchTables, summarizeTable } from "./access"
+import {
+  findAccessibleTable,
+  searchTables,
+  summarizeTableWithOwner,
+} from "./access"
 
 export const list = query({
   args: {
@@ -36,7 +40,9 @@ export const list = query({
 
     return {
       status: "ready" as const,
-      tables: tables.map((table) => summarizeTable(table)),
+      tables: await Promise.all(
+        tables.map(async (table) => await summarizeTableWithOwner(ctx, table))
+      ),
     }
   },
 })
@@ -64,7 +70,10 @@ export const get = query({
       return { status: "not_found" as const, table: null }
     }
 
-    return { status: "ready" as const, table: summarizeTable(table) }
+    return {
+      status: "ready" as const,
+      table: await summarizeTableWithOwner(ctx, table),
+    }
   },
 })
 
