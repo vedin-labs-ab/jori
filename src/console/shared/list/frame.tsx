@@ -47,7 +47,7 @@ export function ConsoleListContent({
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-6 md:px-6",
+        "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-3 pb-6 md:px-6",
         className
       )}
       {...props}

@@ -42,14 +42,18 @@ export function UploadList({
 
   return (
     <div className="grid gap-1.5">
-      {items.map((item) => (
-        <UploadRow
-          disabled={disabled}
-          item={item}
-          key={item.key}
-          onRemove={() => onRemove(item.key)}
-        />
-      ))}
+      {/* Long queues scroll in place so the dialog never outgrows the
+          viewport; Clear all stays pinned below the scroll region. */}
+      <div className="grid max-h-56 gap-1.5 overflow-y-auto">
+        {items.map((item) => (
+          <UploadRow
+            disabled={disabled}
+            item={item}
+            key={item.key}
+            onRemove={() => onRemove(item.key)}
+          />
+        ))}
+      </div>
       {items.length > 1 ? (
         <Button
           className="justify-self-end text-muted-foreground"
@@ -92,7 +96,7 @@ function UploadRow({
             : formatFileSize(item.file.size)}
         </AttachmentDescription>
       </AttachmentContent>
-      <AttachmentActions>
+      <AttachmentActions className="mr-1.5">
         <AttachmentAction
           aria-label={`Remove ${item.file.name}`}
           disabled={disabled}

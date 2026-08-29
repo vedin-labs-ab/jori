@@ -74,13 +74,17 @@ function UploadFields({
 }) {
   return (
     <div className="grid gap-4">
-      <FileDropzone disabled={upload.isUploading} onFiles={upload.addFiles} />
-      <UploadList
-        disabled={upload.isUploading}
-        items={upload.items}
-        onClear={upload.clear}
-        onRemove={upload.removeFile}
-      />
+      {/* The dropzone and its queue read as one control, so they sit a
+          notch tighter than the form sections around them. */}
+      <div className="grid gap-3">
+        <FileDropzone disabled={upload.isUploading} onFiles={upload.addFiles} />
+        <UploadList
+          disabled={upload.isUploading}
+          items={upload.items}
+          onClear={upload.clear}
+          onRemove={upload.removeFile}
+        />
+      </div>
       <MaterialScopeField
         id="file-upload-scope"
         noun="file"
