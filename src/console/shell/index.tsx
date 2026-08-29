@@ -45,10 +45,13 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
       <FolderDragProvider>
         <ConsoleSidebar pathname={pathname} />
         <SidebarInset className="min-h-0" id={mainContentId} tabIndex={-1}>
+          {/* Constant compact height in the shadcn dashboard-block style;
+              the sidebar-block h-16→h-12 dance made the chrome feel tall
+              and shift with sidebar state. */}
           <header
             className={cn(
               consoleFrame,
-              "flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+              "flex h-12 shrink-0 items-center gap-2 border-b"
             )}
           >
             <SidebarTrigger className="-ml-1" />
