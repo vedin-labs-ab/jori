@@ -46,3 +46,15 @@ function withToggled(ids: ReadonlySet<string>, id: string) {
 
   return next
 }
+
+/** The select-all checkbox's tri-state for a selection: all, some
+ *  (indeterminate), or none. */
+export function selectionHeadState<Row>(
+  selection: RowSelection<Row>
+): boolean | "indeterminate" {
+  if (selection.allSelected) {
+    return true
+  }
+
+  return selection.count > 0 ? ("indeterminate" as const) : false
+}

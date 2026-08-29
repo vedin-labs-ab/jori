@@ -68,7 +68,7 @@ export function GridRow({
           />
         </TableCell>
       ))}
-      <TableCell className="py-0 text-right">
+      <TableCell className="p-0 text-center">
         <DeleteRowButton
           disabled={disabled || isPending}
           onDelete={() => onDelete(row)}
@@ -93,7 +93,7 @@ function GutterCell({
 }) {
   if (disabled) {
     return (
-      <TableCell className="select-none py-0 text-muted-foreground tabular-nums">
+      <TableCell className="select-none p-0 text-center text-muted-foreground tabular-nums">
         {number}
       </TableCell>
     )
@@ -102,8 +102,8 @@ function GutterCell({
   const isActive = selection.count > 0
 
   return (
-    <TableCell className="select-none py-0">
-      <span className="flex h-9 items-center">
+    <TableCell className="select-none p-0">
+      <span className="flex h-9 items-center justify-center">
         <span
           className={cn(
             "text-muted-foreground tabular-nums",
@@ -138,11 +138,14 @@ export function NewRowRow({
     return null
   }
 
+  // The affordance closes the grid: it spans exactly the grid's width and
+  // carries its own bottom and right hairlines (the last-row reset would
+  // otherwise strip them).
   return (
     <TableRow>
-      <TableCell className="py-0" colSpan={span}>
+      <TableCell className="border-r border-b! p-0" colSpan={span}>
         <button
-          className="flex h-9 w-full items-center gap-1.5 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
+          className="flex h-9 w-full items-center gap-1.5 px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
           onClick={onAddRow}
           type="button"
         >
