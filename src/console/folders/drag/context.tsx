@@ -9,163 +9,162 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import { useMutation } from "convex/react"
-import { type GenericId } from "convex/values"
+import { useQuery } from "convex/react"
 import { Folder } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+import { useActiveOrganization } from "@/shared/session/auth"
 import { api } from "../../../../convex/_generated/api"
-import { showErrorToast } from "../../shared/error"
-import { type FolderSummary, subtreeFolderIds } from "../tree"
+import { resourcePresentation } from "../types"
+import { useDropActions } from "./drop"
 import { createHoverExpander } from "./hover"
 import {
+  blockedFolderIds,
+  type DragPayload,
+  type DropTarget,
   dragActivationDistance,
   hoverTarget,
-  planDrop,
-  rootDropId,
 } from "./plan"
-import { FolderDragContext, type FolderDragState, idleDragState } from "./state"
+import {
+  ExpandHoverContext,
+  FolderDragContext,
+  type FolderDragState,
+  idleDragState,
+} from "./state"
 
 /** How long a landed move keeps its settle cue on the moved row. */
 const settleDuration = 450
 
 // Pointer drags skip the keyboard sensor: the rows are links whose Enter
-// must navigate, so keyboard moves go through the actions menu instead.
+// must navigate, so keyboard moves go through the actions menus instead.
 const screenReaderInstructions = {
   draggable:
-    "Folder rows move with a pointer drag. To move a folder with the keyboard, open the folder's actions menu and choose Move to.",
+    "Rows move with a pointer drag. To move a folder or a filed resource with the keyboard, open the row's actions menu and choose Move to.",
 }
 
-/** Runs drag-to-move for the sidebar folder tree: rows inside register
- *  through state.ts, a ghost follows the pointer, dwelling on a row asks
- *  `onExpandHover` to open it, and a drop requests the backend move. */
+/** Runs drag-to-move and drag-to-file across the console: the sidebar
+ *  tree and the folder page's rows register through state.ts, a ghost
+ *  follows the pointer, dwelling on a sidebar row asks the tree to open
+ *  it, and a drop requests the backend move or re-file. Mounted at the
+ *  shell so one context spans both panes. */
 export function FolderDragProvider({
   children,
-  folders,
-  onExpandHover,
-  organizationId,
 }: {
   children: React.ReactNode
-  folders: readonly FolderSummary[]
-  onExpandHover: (folderId: string) => void
-  organizationId: string
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: dragActivationDistance },
     })
   )
-  const drag = useFolderDrag(folders, onExpandHover, organizationId)
+  const drag = useContentDrag()
 
   return (
     <FolderDragContext.Provider value={drag.state}>
-      <DndContext
-        accessibility={{ screenReaderInstructions }}
-        collisionDetection={pointerWithin}
-        sensors={sensors}
-        {...drag.handlers}
-      >
-        {children}
-        {drag.state.activeId === null ? null : (
-          <DragGhost name={drag.activeName} />
-        )}
-      </DndContext>
+      <ExpandHoverContext.Provider value={drag.registerExpandHover}>
+        <DndContext
+          accessibility={{ screenReaderInstructions }}
+          collisionDetection={pointerWithin}
+          sensors={sensors}
+          {...drag.handlers}
+        >
+          {children}
+          {drag.state.active === null ? null : (
+            <DragGhost payload={drag.state.active} />
+          )}
+        </DndContext>
+      </ExpandHoverContext.Provider>
     </FolderDragContext.Provider>
   )
 }
 
-function useFolderDrag(
-  folders: readonly FolderSummary[],
-  onExpandHover: (folderId: string) => void,
-  organizationId: string
-) {
-  const [activeId, setActiveId] = useState<string | null>(null)
+function useContentDrag() {
+  const folders = useFolderRows()
+  const [active, setActive] = useState<DragPayload | null>(null)
   const settle = useSettle()
-  const drop = useDropMove(organizationId, folders, settle.show)
-  const expander = useExpander(onExpandHover)
+  const drop = useDropActions(
+    useActiveOrganization().data?.id,
+    folders,
+    settle.show
+  )
+  const expander = useExpander()
   const state = useMemo<FolderDragState>(
     () => ({
-      activeId,
+      active,
       blockedIds:
-        activeId === null
+        active === null
           ? idleDragState.blockedIds
-          : subtreeFolderIds(folders, activeId),
+          : blockedFolderIds(folders, active),
       settledId: settle.settledId,
     }),
-    [activeId, folders, settle.settledId]
+    [active, folders, settle.settledId]
   )
   const finish = () => {
-    expander.reset()
-    setActiveId(null)
+    expander.expander.reset()
+    setActive(null)
   }
 
   return {
-    activeName: folders.find((row) => row.folderId === activeId)?.name,
     handlers: {
       onDragCancel: finish,
       onDragEnd: (event: DragEndEvent) => {
+        const payload = event.active.data.current as DragPayload | undefined
+
         finish()
-        void drop(String(event.active.id), event.over?.id)
+
+        if (payload !== undefined) {
+          void drop(payload, overTarget(event.over))
+        }
       },
       onDragOver: (event: DragOverEvent) =>
-        expander.hover(hoverTarget(state.blockedIds, event.over?.id)),
+        expander.expander.hover(
+          hoverTarget(state.blockedIds, overTarget(event.over))
+        ),
       onDragStart: (event: DragStartEvent) =>
-        setActiveId(String(event.active.id)),
+        setActive(
+          (event.active.data.current as DragPayload | undefined) ?? null
+        ),
     },
+    registerExpandHover: expander.registerExpandHover,
     state,
   }
 }
 
-/** Sends the planned move and reports failure the way the dialog does;
- *  invalid targets and same-parent drops resolve to no plan and no call. */
-function useDropMove(
-  organizationId: string,
-  folders: readonly FolderSummary[],
-  onMoved: (folderId: string) => void
-) {
-  const move = useMutation(api.folders.console.move)
+/** The organization's folder tree, for drop planning and blocked rows.
+ *  Convex shares the subscription with the sidebar's own tree query. */
+function useFolderRows() {
+  const organizationId = useActiveOrganization().data?.id
+  const tree = useQuery(
+    api.folders.console.tree,
+    organizationId === undefined ? "skip" : { organizationId }
+  )
 
-  return async (draggedId: string, overId: string | number | undefined) => {
-    if (overId === undefined) {
-      return
-    }
-
-    const over = String(overId)
-    const plan = planDrop(folders, draggedId, over === rootDropId ? null : over)
-
-    if (plan === undefined) {
-      return
-    }
-
-    const name = folders.find((row) => row.folderId === draggedId)?.name
-
-    try {
-      await move({
-        organizationId,
-        folderId: draggedId as GenericId<"folders">,
-        parentId: plan.parentId as GenericId<"folders"> | null,
-      })
-      onMoved(draggedId)
-    } catch (error) {
-      showErrorToast(error, `Could not move ${name ?? "the folder"}.`)
-    }
-  }
+  return useMemo(() => (tree?.status === "ready" ? tree.folders : []), [tree])
 }
 
-function useExpander(onExpandHover: (folderId: string) => void) {
-  const callback = useRef(onExpandHover)
+function overTarget(over: DragEndEvent["over"]): DropTarget | undefined {
+  return over?.data.current as DropTarget | undefined
+}
+
+/** Dwell-to-expand against whichever sidebar tree is mounted: the tree
+ *  registers its handler through ExpandHoverContext, and the expander
+ *  always calls the latest one. */
+function useExpander() {
+  const handler = useRef<(folderId: string) => void>(() => {})
   const expander = useMemo(
-    () => createHoverExpander((folderId) => callback.current(folderId)),
+    () => createHoverExpander((folderId) => handler.current(folderId)),
+    []
+  )
+  const registerExpandHover = useCallback(
+    (callback: (folderId: string) => void) => {
+      handler.current = callback
+    },
     []
   )
 
-  useEffect(() => {
-    callback.current = onExpandHover
-  })
-
   useEffect(() => () => expander.reset(), [expander])
 
-  return expander
+  return { expander, registerExpandHover }
 }
 
 function useSettle() {
@@ -186,16 +185,17 @@ function useSettle() {
 
 /** The pointer-tracking ghost: a compact chip with the row's idiom, lifted
  *  by a shadow and, when motion is welcome, a slight scale-up. Portaled to
- *  the body so the sidebar's overflow cannot clip it. */
-function DragGhost({ name }: { name: string | undefined }) {
+ *  the body so neither pane's overflow can clip it. */
+function DragGhost({ payload }: { payload: DragPayload }) {
+  const Icon =
+    payload.kind === "folder" ? Folder : resourcePresentation(payload).icon
+
   return createPortal(
     <DragOverlay dropAnimation={null}>
-      {name === undefined ? null : (
-        <div className="flex h-8 w-fit max-w-52 items-center gap-2 rounded-md border border-sidebar-border bg-sidebar px-2 text-sidebar-foreground text-xs shadow-md motion-safe:scale-105">
-          <Folder className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate">{name}</span>
-        </div>
-      )}
+      <div className="flex h-8 w-fit max-w-52 items-center gap-2 rounded-md border border-sidebar-border bg-sidebar px-2 text-sidebar-foreground text-xs shadow-md motion-safe:scale-105">
+        <Icon className="size-4 shrink-0 text-muted-foreground" />
+        <span className="truncate">{payload.name}</span>
+      </div>
     </DragOverlay>,
     document.body
   )

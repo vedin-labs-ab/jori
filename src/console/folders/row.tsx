@@ -28,6 +28,7 @@ import { type FolderNode } from "./tree"
 import { type FolderRow } from "./types"
 
 export type FolderExpansion = {
+  expand: (folderId: string) => void
   isExpanded: (folderId: string) => boolean
   toggle: (folderId: string) => void
 }
@@ -47,7 +48,7 @@ export function FolderTreeItem({
   onDialog: (request: FolderDialogRequest) => void
   pathname: string
 }) {
-  const drag = useFolderRowDrag(node.folderId)
+  const drag = useFolderRowDrag("sidebar", node.folderId, node.name)
   const hasChildren = node.children.length > 0
   const isExpanded = hasChildren && expansion.isExpanded(node.folderId)
 
@@ -65,9 +66,11 @@ export function FolderTreeItem({
           isActive={pathname === `/folders/${node.folderId}`}
           isExpanded={isExpanded}
           name={node.name}
+          onNavigate={() => expansion.expand(node.folderId)}
         />
         {hasChildren ? (
           <RowChevron
+            isDragActive={drag.isDragActive}
             isExpanded={isExpanded}
             name={node.name}
             onToggle={() => expansion.toggle(node.folderId)}
@@ -109,6 +112,7 @@ function FolderRowLink({
   isActive,
   isExpanded,
   name,
+  onNavigate,
 }: {
   drag: FolderRowDrag
   folderId: string
@@ -116,6 +120,7 @@ function FolderRowLink({
   isActive: boolean
   isExpanded: boolean
   name: string
+  onNavigate: () => void
 }) {
   const FolderIcon = isExpanded ? FolderOpen : Folder
 
@@ -135,6 +140,10 @@ function FolderRowLink({
         {...drag.attributes}
         {...drag.listeners}
         draggable={false}
+        // Navigating into a folder also reveals it in the tree. Expand
+        // only — collapsing stays the chevron's job — and the drag guard
+        // above swallows the click that can follow a short drag.
+        onClick={onNavigate}
         onClickCapture={drag.onClickCapture}
         onPointerDownCapture={drag.onPointerDownCapture}
         params={{ folderId }}
@@ -165,10 +174,12 @@ function rowDragClasses(drag: FolderRowDrag) {
 }
 
 function RowChevron({
+  isDragActive,
   isExpanded,
   name,
   onToggle,
 }: {
+  isDragActive: boolean
   isExpanded: boolean
   name: string
   onToggle: () => void
@@ -177,7 +188,15 @@ function RowChevron({
     <SidebarMenuAction
       aria-expanded={isExpanded}
       aria-label={`${isExpanded ? "Collapse" : "Expand"} ${name}`}
-      className="right-6"
+      // Same reveal pattern as the "…" menu below: hidden on pointer
+      // viewports until the row is hovered or holds keyboard focus, always
+      // shown on touch viewports — plus always shown while expanded, so an
+      // open subtree keeps its collapse handle in sight.
+      className={cn(
+        "right-6 aria-expanded:opacity-100 md:opacity-0",
+        !isDragActive &&
+          "group-has-[:focus-visible]/row:opacity-100 group-hover/row:opacity-100"
+      )}
       onClick={onToggle}
     >
       <ChevronRight
