@@ -6,6 +6,7 @@ import {
   searchCollections,
 } from "../collections/access"
 import { type CollectionDoc } from "../collections/spec"
+import { personDisplayName } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { tableSpec } from "./spec"
 
@@ -49,9 +50,25 @@ export function summarizeTable(table: TableDoc) {
     ownerId: table.ownerId,
     folderId: table.folderId,
     columns: table.columns as TableColumn[],
+    rowCount: table.documentCount ?? 0,
     createdAt: table.createdAt,
     updatedAt: table.updatedAt,
     archivedAt: table.archivedAt,
+  }
+}
+
+/** Console summary: the base summary plus the owner's display name. A table
+ *  without a resolvable named owner reads as Jori's own in the console. */
+export async function summarizeTableWithOwner(
+  ctx: QueryLikeCtx,
+  table: TableDoc
+) {
+  return {
+    ...summarizeTable(table),
+    ownerName:
+      table.ownerId === undefined
+        ? undefined
+        : await personDisplayName(ctx, table.ownerId),
   }
 }
 

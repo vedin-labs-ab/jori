@@ -159,8 +159,28 @@ export async function deleteDocument<K extends CollectionKind>(
     spec.documentLabel(collection)
   )
   await ctx.db.delete(document._id)
+  await adjustDocumentCount(ctx, collection._id, -1)
 
   return document
+}
+
+/** Cardinality only ever changes through createDocument and deleteDocument,
+ *  so the denormalized counter moves here and nowhere else. The count is
+ *  re-read so batched inserts see their own increments. */
+async function adjustDocumentCount(
+  ctx: MutationCtx,
+  collectionId: Id<"collections">,
+  delta: number
+) {
+  const collection = await ctx.db.get(collectionId)
+
+  if (collection === null) {
+    throw new Error("Collection not found while counting documents.")
+  }
+
+  await ctx.db.patch(collectionId, {
+    documentCount: Math.max(0, (collection.documentCount ?? 0) + delta),
+  })
 }
 
 /** Validate one document value: within the kind's byte budget and matching
@@ -226,6 +246,8 @@ async function createDocument(
   if (document === null) {
     throw new Error("Document insert failed.")
   }
+
+  await adjustDocumentCount(ctx, collectionId, 1)
 
   return document
 }

@@ -30,6 +30,9 @@ const collectionFields = {
   description: v.optional(v.string()),
   /** Content hash of the compiled JSON Schema. */
   schemaHash: v.string(),
+  /** Denormalized document count, kept in step by the document write
+   *  chokepoint (convex/collections/documents.ts). Read as `?? 0`. */
+  documentCount: v.optional(v.number()),
   createdAt: v.number(),
   updatedAt: v.number(),
   archivedAt: v.optional(v.number()),

@@ -1,7 +1,5 @@
-import { Link } from "@tanstack/react-router"
 import { Plus, Table2, Upload } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -12,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { countLabel } from "@/lib/count"
 import {
   ConsoleFilterGroup,
   ConsoleFilterToggle,
@@ -28,8 +25,13 @@ import {
   type ArchiveFilter,
   archiveFilterOptions,
 } from "../shared/materials/archive"
-import { MaterialScopeBadge } from "../shared/materials/scope"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
+import {
+  TableColumnsCell,
+  TableNameCell,
+  TableOwnerCell,
+  TableRowsCell,
+} from "./cells"
 import { tableDeleteDescription, type useTableRemoval } from "./manage"
 import { type TableSummary } from "./types"
 
@@ -148,8 +150,10 @@ export function TableList({
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Columns</TableHead>
-            <TableHead>Scope</TableHead>
-            <TableHead>Updated</TableHead>
+            <TableHead>Rows</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Owner</TableHead>
+            <TableHead>Last Updated</TableHead>
             <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
@@ -186,33 +190,22 @@ function TableListRow({
   return (
     <TableRow>
       <TableCell className="max-w-64">
-        <Link
-          className="block truncate font-medium hover:underline"
-          params={{ tableId: table.tableId }}
-          title={table.name}
-          to="/tables/$tableId"
-        >
-          {table.name}
-        </Link>
-        {table.description === undefined ? null : (
-          <p
-            className="truncate text-muted-foreground"
-            title={table.description}
-          >
-            {table.description}
-          </p>
-        )}
-      </TableCell>
-      <TableCell className="text-muted-foreground">
-        {countLabel(table.columns.length, "column")}
+        <TableNameCell table={table} />
       </TableCell>
       <TableCell>
-        <span className="inline-flex items-center gap-1.5">
-          <MaterialScopeBadge scope={table.scope} />
-          {table.archivedAt === undefined ? null : (
-            <Badge variant="secondary">Archived</Badge>
-          )}
-        </span>
+        <TableColumnsCell table={table} />
+      </TableCell>
+      <TableCell>
+        <TableRowsCell table={table} />
+      </TableCell>
+      <TableCell
+        className="text-muted-foreground"
+        title={absoluteTime(table.createdAt)}
+      >
+        {relativeTime(table.createdAt, now)}
+      </TableCell>
+      <TableCell className="max-w-48">
+        <TableOwnerCell table={table} />
       </TableCell>
       <TableCell
         className="text-muted-foreground"
