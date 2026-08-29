@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
+import { DialogForm } from "../../../shared/materials/form"
 import { ScopeField } from "../../../shared/scope/field"
 import { getAutomationScopeConflict } from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
@@ -110,26 +111,31 @@ export function AutomationDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <AutomationDialogFields
-          actions={actions}
-          additionalSurfaces={additionalSurfaces}
-          automation={automation}
-          instructionsError={instructionsError}
-          nameError={nameError}
-          onValuesChange={onValuesChange}
-          permissions={permissions}
-          policyKey={policyKey}
-          skills={skills}
-          organizationId={organizationId}
-          values={values}
-        />
+        {/* Form semantics only: this editor spans several sections and an
+            accidental Enter must not save it, so the explicit button stays
+            the sole way to submit. */}
+        <DialogForm>
+          <AutomationDialogFields
+            actions={actions}
+            additionalSurfaces={additionalSurfaces}
+            automation={automation}
+            instructionsError={instructionsError}
+            nameError={nameError}
+            onValuesChange={onValuesChange}
+            permissions={permissions}
+            policyKey={policyKey}
+            skills={skills}
+            organizationId={organizationId}
+            values={values}
+          />
 
-        <DialogFooter>
-          <Button type="button" onClick={onSave} disabled={isSaving}>
-            {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-            {automation === undefined ? "Create automation" : "Save changes"}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" onClick={onSave} disabled={isSaving}>
+              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+              {automation === undefined ? "Create automation" : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

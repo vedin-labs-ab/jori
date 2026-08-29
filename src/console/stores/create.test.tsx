@@ -47,6 +47,43 @@ function switchTab(name: "Code" | "Form") {
   fireEvent.mouseDown(screen.getByRole("tab", { name }), { button: 0 })
 }
 
+/** jsdom leaves out the browser's implicit Enter-to-submit, so pressing
+ *  Enter in a field is modeled by submitting the form it belongs to. */
+function pressEnter(field: HTMLElement) {
+  const form = field.closest("form")
+
+  if (form === null) {
+    throw new Error("The field is not inside a form.")
+  }
+
+  fireEvent.submit(form)
+}
+
+describe("create store enter submission", () => {
+  test("Enter in the name field runs validation before any mutation", () => {
+    renderDialog()
+    pressEnter(screen.getByLabelText("Name"))
+
+    expect(screen.getByRole("alert").textContent).toBe("Name is required.")
+    expect(createStore).not.toHaveBeenCalled()
+  })
+
+  test("Enter in a filled name field creates the store", async () => {
+    renderDialog()
+
+    const name = screen.getByLabelText("Name")
+
+    fireEvent.change(name, { target: { value: "Invoices" } })
+    pressEnter(name)
+
+    await waitFor(() => expect(createStore).toHaveBeenCalledOnce())
+    expect(createStore.mock.calls[0]?.[0]).toMatchObject({
+      organizationId: "org-1",
+      name: "Invoices",
+    })
+  })
+})
+
 describe("create store error visibility", () => {
   test("no errors show before a submit attempt", () => {
     renderDialog()

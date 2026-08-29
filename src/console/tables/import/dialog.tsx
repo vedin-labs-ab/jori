@@ -21,6 +21,7 @@ import { countLabel } from "@/lib/count"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { MaterialNameField } from "../../shared/materials/fields"
+import { DialogForm } from "../../shared/materials/form"
 import { MaterialScopeField } from "../../shared/materials/scope"
 import { type CsvTablePlan, deriveTableName, planCsvTable } from "./infer"
 import { ImportTablePreview } from "./preview"
@@ -57,19 +58,23 @@ export function ImportTableDialog({
             table is created holding every row.
           </DialogDescription>
         </DialogHeader>
-        <ImportTableFields form={form} />
-        <DialogFooter>
-          <Button
-            disabled={form.plan?.status !== "ready" || form.isImporting}
-            onClick={() => void form.submit()}
-            type="button"
-          >
-            {form.isImporting ? <Loader2 className="animate-spin" /> : null}
-            {form.plan?.status === "ready"
-              ? `Import ${countLabel(form.plan.rows.length, "row")}`
-              : "Import table"}
-          </Button>
-        </DialogFooter>
+        <DialogForm
+          disabled={form.plan?.status !== "ready" || form.isImporting}
+          onSubmit={() => void form.submit()}
+        >
+          <ImportTableFields form={form} />
+          <DialogFooter>
+            <Button
+              disabled={form.plan?.status !== "ready" || form.isImporting}
+              type="submit"
+            >
+              {form.isImporting ? <Loader2 className="animate-spin" /> : null}
+              {form.plan?.status === "ready"
+                ? `Import ${countLabel(form.plan.rows.length, "row")}`
+                : "Import table"}
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

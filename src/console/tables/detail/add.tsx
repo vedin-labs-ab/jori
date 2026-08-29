@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DialogForm } from "../../shared/materials/form"
 import { type TableColumn } from "../types"
 import { buildRowValues, type RowDraft } from "./cells"
 
@@ -61,31 +62,32 @@ export function AddRowDialog({
             Values are checked against the table's columns before saving.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid max-h-[60vh] gap-4 overflow-y-auto">
-          {columns.map((column) => (
-            <RowField
-              column={column}
-              draft={draft}
-              key={column.key}
-              onChange={(value) =>
-                setDraft((current) => ({ ...current, [column.key]: value }))
-              }
-            />
-          ))}
-        </div>
-        {built.ok || Object.keys(draft).length === 0 ? null : (
-          <p className="text-destructive text-xs">{built.error}</p>
-        )}
-        <DialogFooter>
-          <Button
-            disabled={!built.ok || isSaving}
-            onClick={() => void submit()}
-            type="button"
-          >
-            {isSaving ? <Loader2 className="animate-spin" /> : null}
-            Add row
-          </Button>
-        </DialogFooter>
+        <DialogForm
+          disabled={!built.ok || isSaving}
+          onSubmit={() => void submit()}
+        >
+          <div className="grid max-h-[60vh] gap-4 overflow-y-auto">
+            {columns.map((column) => (
+              <RowField
+                column={column}
+                draft={draft}
+                key={column.key}
+                onChange={(value) =>
+                  setDraft((current) => ({ ...current, [column.key]: value }))
+                }
+              />
+            ))}
+          </div>
+          {built.ok || Object.keys(draft).length === 0 ? null : (
+            <p className="text-destructive text-xs">{built.error}</p>
+          )}
+          <DialogFooter>
+            <Button disabled={!built.ok || isSaving} type="submit">
+              {isSaving ? <Loader2 className="animate-spin" /> : null}
+              Add row
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

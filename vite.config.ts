@@ -58,6 +58,7 @@ const config = defineConfig({
   },
   test: {
     exclude: [...configDefaults.exclude, ...ignoredWorkspacePaths],
+    setupFiles: ["./test/setup.ts"],
     onConsoleLog(log, type) {
       if (type === "stderr" && reactOrAccessibilityWarning.test(log)) {
         throw new Error(`Unexpected React or accessibility warning:\n${log}`)

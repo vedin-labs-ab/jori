@@ -14,6 +14,7 @@ import {
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
 import { MaterialDetailFields } from "../shared/materials/fields"
+import { DialogForm } from "../shared/materials/form"
 import { type StoreDetail } from "./types"
 
 /** Rename or describe the store; the schema is fixed at creation. */
@@ -75,7 +76,10 @@ export function EditStoreDialog({
             Rename the store or update its description.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
+        <DialogForm
+          disabled={name.trim() === "" || isSaving}
+          onSubmit={() => void submit()}
+        >
           <MaterialDetailFields
             description={description}
             idPrefix="store-edit"
@@ -83,17 +87,13 @@ export function EditStoreDialog({
             onDescriptionChange={setDescription}
             onNameChange={setName}
           />
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={name.trim() === "" || isSaving}
-            onClick={() => void submit()}
-            type="button"
-          >
-            {isSaving ? <Loader2 className="animate-spin" /> : null}
-            Save changes
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button disabled={name.trim() === "" || isSaving} type="submit">
+              {isSaving ? <Loader2 className="animate-spin" /> : null}
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )

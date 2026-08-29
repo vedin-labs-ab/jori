@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { IntegrationLogo } from "@/shared/logo/integration"
+import { DialogForm } from "../shared/materials/form"
 import { skillCategoryIcons } from "./metadata"
 import { type Skill, type SkillFormValues } from "./types"
 
@@ -93,7 +94,11 @@ export function SkillDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4">
+        {/* Form semantics only: the instructions textarea is the primary
+            field and Enter in the name or integrations input must not save
+            a half-written skill, so the explicit button stays the sole way
+            to submit. */}
+        <DialogForm>
           <div className="grid gap-4 sm:grid-cols-2">
             <SkillTextField
               id="skill-name"
@@ -121,14 +126,14 @@ export function SkillDialog({
             onChange={(value) => updateValue("body", value)}
             value={values.body}
           />
-        </div>
 
-        <DialogFooter>
-          <Button type="button" onClick={onSave} disabled={isSaving}>
-            {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-            Save skill
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" onClick={onSave} disabled={isSaving}>
+              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+              Save skill
+            </Button>
+          </DialogFooter>
+        </DialogForm>
       </DialogContent>
     </Dialog>
   )
