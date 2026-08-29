@@ -14,6 +14,7 @@ import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as ContextRouteImport } from './routes/context'
 import { Route as FilesRouteImport } from './routes/files'
+import { Route as FoldersRouteImport } from './routes/folders'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -29,6 +30,7 @@ import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
 import { Route as FilesIndexRouteImport } from './routes/files/index'
+import { Route as FoldersFolderIdRouteImport } from './routes/folders/$folderId'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
 import { Route as StoresIndexRouteImport } from './routes/stores/index'
@@ -62,6 +64,11 @@ const ContextRoute = ContextRouteImport.update({
 const FilesRoute = FilesRouteImport.update({
   id: '/files',
   path: '/files',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoldersRoute = FoldersRouteImport.update({
+  id: '/folders',
+  path: '/folders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationsRoute = IntegrationsRouteImport.update({
@@ -139,6 +146,11 @@ const FilesIndexRoute = FilesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => FilesRoute,
 } as any)
+const FoldersFolderIdRoute = FoldersFolderIdRouteImport.update({
+  id: '/$folderId',
+  path: '/$folderId',
+  getParentRoute: () => FoldersRoute,
+} as any)
 const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -191,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
+  '/folders': typeof FoldersRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -204,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/folders/$folderId': typeof FoldersFolderIdRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
@@ -220,6 +234,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
+  '/folders': typeof FoldersRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -230,6 +245,7 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/folders/$folderId': typeof FoldersFolderIdRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context': typeof ContextIndexRoute
   '/files': typeof FilesIndexRoute
@@ -249,6 +265,7 @@ export interface FileRoutesById {
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
+  '/folders': typeof FoldersRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -262,6 +279,7 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
+  '/folders/$folderId': typeof FoldersFolderIdRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
@@ -282,6 +300,7 @@ export interface FileRouteTypes {
     | '/console'
     | '/context'
     | '/files'
+    | '/folders'
     | '/integrations'
     | '/pricing'
     | '/privacy'
@@ -295,6 +314,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
+    | '/folders/$folderId'
     | '/integrations/personal'
     | '/context/'
     | '/files/'
@@ -311,6 +331,7 @@ export interface FileRouteTypes {
     | '/'
     | '/automations'
     | '/console'
+    | '/folders'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -321,6 +342,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
+    | '/folders/$folderId'
     | '/integrations/personal'
     | '/context'
     | '/files'
@@ -339,6 +361,7 @@ export interface FileRouteTypes {
     | '/console'
     | '/context'
     | '/files'
+    | '/folders'
     | '/integrations'
     | '/pricing'
     | '/privacy'
@@ -352,6 +375,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
+    | '/folders/$folderId'
     | '/integrations/personal'
     | '/context/'
     | '/files/'
@@ -371,6 +395,7 @@ export interface RootRouteChildren {
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
   FilesRoute: typeof FilesRouteWithChildren
+  FoldersRoute: typeof FoldersRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -420,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/files'
       fullPath: '/files'
       preLoaderRoute: typeof FilesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/folders': {
+      id: '/folders'
+      path: '/folders'
+      fullPath: '/folders'
+      preLoaderRoute: typeof FoldersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integrations': {
@@ -527,6 +559,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FilesIndexRouteImport
       parentRoute: typeof FilesRoute
     }
+    '/folders/$folderId': {
+      id: '/folders/$folderId'
+      path: '/$folderId'
+      fullPath: '/folders/$folderId'
+      preLoaderRoute: typeof FoldersFolderIdRouteImport
+      parentRoute: typeof FoldersRoute
+    }
     '/integrations/': {
       id: '/integrations/'
       path: '/'
@@ -620,6 +659,17 @@ const FilesRouteChildren: FilesRouteChildren = {
 
 const FilesRouteWithChildren = FilesRoute._addFileChildren(FilesRouteChildren)
 
+interface FoldersRouteChildren {
+  FoldersFolderIdRoute: typeof FoldersFolderIdRoute
+}
+
+const FoldersRouteChildren: FoldersRouteChildren = {
+  FoldersFolderIdRoute: FoldersFolderIdRoute,
+}
+
+const FoldersRouteWithChildren =
+  FoldersRoute._addFileChildren(FoldersRouteChildren)
+
 interface IntegrationsRouteChildren {
   IntegrationsPersonalRoute: typeof IntegrationsPersonalRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
@@ -668,6 +718,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,
   FilesRoute: FilesRouteWithChildren,
+  FoldersRoute: FoldersRouteWithChildren,
   IntegrationsRoute: IntegrationsRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,

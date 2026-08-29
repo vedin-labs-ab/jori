@@ -2,6 +2,7 @@ import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
+import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import {
   ConsoleFilterGroup,
@@ -26,6 +27,7 @@ import { useAutomationEditorHost } from "./editor/host"
 import { filterAutomationsByView, hasAutomationFilters } from "./filter"
 import { AutomationContent } from "./list/content"
 import {
+  type Automation,
   type AutomationFilter,
   type AutomationList,
   automationFilterOptions,
@@ -51,6 +53,7 @@ function AutomationListView({ organizationId }: { organizationId: string }) {
   })
   const { dialog, editor, preloadDialog } =
     useAutomationEditorHost(organizationId)
+  const [movingAutomation, setMovingAutomation] = useState<Automation>()
   const now = useNow(30_000)
   const { hasFilters, pagination } = useAutomationPagination({
     automationList,
@@ -58,18 +61,7 @@ function AutomationListView({ organizationId }: { organizationId: string }) {
     query: deferredQuery,
     scope: filters.scope,
   })
-  const setFilterAndReset = useResettingSetter(
-    filters.setFilter,
-    pagination.reset
-  )
-  const setQueryAndReset = useResettingSetter(
-    filters.setQuery,
-    pagination.reset
-  )
-  const setScopeAndReset = useResettingSetter(
-    filters.setScope,
-    pagination.reset
-  )
+  const setters = useResettingFilterSetters(filters, pagination.reset)
 
   return (
     <ConsolePageLayout>
@@ -79,9 +71,9 @@ function AutomationListView({ organizationId }: { organizationId: string }) {
         onCreateIntent={preloadDialog}
         query={filters.query}
         scope={filters.scope}
-        setFilter={setFilterAndReset}
-        setQuery={setQueryAndReset}
-        setScope={setScopeAndReset}
+        setFilter={setters.setFilter}
+        setQuery={setters.setQuery}
+        setScope={setters.setScope}
       />
       <AutomationContent
         editor={editor}
@@ -92,14 +84,31 @@ function AutomationListView({ organizationId }: { organizationId: string }) {
           void preloadDialog()
           editor.openCreateForm()
         }}
+        onMoveToFolder={setMovingAutomation}
         visibleAutomations={pagination.visibleRows}
       />
       {automationList?.status !== "unauthorized" ? (
         <ConsoleListPager pagination={pagination} />
       ) : null}
       {dialog}
+      <MoveResourceDialog
+        onClose={() => setMovingAutomation(undefined)}
+        organizationId={organizationId}
+        resource={movingResource(movingAutomation)}
+      />
     </ConsolePageLayout>
   )
+}
+
+function movingResource(automation: Automation | undefined) {
+  return automation === undefined
+    ? undefined
+    : {
+        resourceType: "automation" as const,
+        resourceId: automation.id,
+        name: automation.name,
+        folderId: automation.folderId,
+      }
 }
 
 function useAutomationFilters() {
@@ -108,6 +117,18 @@ function useAutomationFilters() {
   const [query, setQuery] = useState("")
 
   return { filter, query, scope, setFilter, setQuery, setScope }
+}
+
+/** Every filter change resets the pager back to the first page. */
+function useResettingFilterSetters(
+  filters: ReturnType<typeof useAutomationFilters>,
+  reset: () => void
+) {
+  return {
+    setFilter: useResettingSetter(filters.setFilter, reset),
+    setQuery: useResettingSetter(filters.setQuery, reset),
+    setScope: useResettingSetter(filters.setScope, reset),
+  }
 }
 
 function useAutomationPagination({

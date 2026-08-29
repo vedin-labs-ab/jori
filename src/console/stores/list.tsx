@@ -85,12 +85,14 @@ export function StoresToolbar({
 export function StoreList({
   hasFilters,
   onCreate,
+  onMoveToFolder,
   removal,
   stores,
   unauthorizedMessage,
 }: {
   hasFilters: boolean
   onCreate: () => void
+  onMoveToFolder: (store: StoreSummary) => void
   removal: ReturnType<typeof useStoreRemoval>
   stores: StoreSummary[]
   unauthorizedMessage: string | undefined
@@ -135,7 +137,12 @@ export function StoreList({
         </TableHeader>
         <TableBody>
           {stores.map((store) => (
-            <StoreListRow key={store.storeId} removal={removal} store={store} />
+            <StoreListRow
+              key={store.storeId}
+              onMoveToFolder={onMoveToFolder}
+              removal={removal}
+              store={store}
+            />
           ))}
         </TableBody>
       </Table>
@@ -148,9 +155,11 @@ export function StoreListSkeleton() {
 }
 
 function StoreListRow({
+  onMoveToFolder,
   removal,
   store,
 }: {
+  onMoveToFolder: (store: StoreSummary) => void
   removal: ReturnType<typeof useStoreRemoval>
   store: StoreSummary
 }) {
@@ -201,6 +210,7 @@ function StoreListRow({
           material={{ name: store.name, archivedAt: store.archivedAt }}
           noun="store"
           onDelete={() => void removal.removeStore(store)}
+          onMoveToFolder={() => onMoveToFolder(store)}
           onRestore={() => void removal.restoreStore(store)}
         />
       </TableCell>

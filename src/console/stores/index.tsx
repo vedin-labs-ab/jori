@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
+import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout, ConsoleScrollableGrid } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
@@ -61,6 +62,7 @@ function StoresView({ organizationId }: { organizationId: string }) {
   const [filter, setFilter] = useState<ArchiveFilter>("active")
   const [scope, setScope] = useState<ScopeFilter>("all")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [movingStore, setMovingStore] = useState<StoreSummary>()
   const removal = useStoreRemoval(organizationId)
   const deferredQuery = useDeferredValue(query)
   const { storeList, stores } = useStoreRows({
@@ -94,6 +96,7 @@ function StoresView({ organizationId }: { organizationId: string }) {
       <StoresBody
         hasFilters={hasFilters}
         onCreate={() => setIsCreateOpen(true)}
+        onMoveToFolder={setMovingStore}
         pagination={pagination}
         removal={removal}
         storeList={storeList}
@@ -103,19 +106,37 @@ function StoresView({ organizationId }: { organizationId: string }) {
         onOpenChange={setIsCreateOpen}
         organizationId={organizationId}
       />
+      <MoveResourceDialog
+        onClose={() => setMovingStore(undefined)}
+        organizationId={organizationId}
+        resource={movingResource(movingStore)}
+      />
     </ConsolePageLayout>
   )
+}
+
+function movingResource(store: StoreSummary | undefined) {
+  return store === undefined
+    ? undefined
+    : {
+        resourceType: "collection" as const,
+        resourceId: store.storeId,
+        name: store.name,
+        folderId: store.folderId,
+      }
 }
 
 function StoresBody({
   hasFilters,
   onCreate,
+  onMoveToFolder,
   pagination,
   removal,
   storeList,
 }: {
   hasFilters: boolean
   onCreate: () => void
+  onMoveToFolder: (store: StoreSummary) => void
   pagination: ReturnType<typeof useClientPagination<StoreSummary>>
   removal: ReturnType<typeof useStoreRemoval>
   storeList: StoreListResult | undefined
@@ -136,6 +157,7 @@ function StoresBody({
         <StoreList
           hasFilters={hasFilters}
           onCreate={onCreate}
+          onMoveToFolder={onMoveToFolder}
           removal={removal}
           stores={pagination.visibleRows}
           unauthorizedMessage={

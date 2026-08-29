@@ -20,10 +20,15 @@ export const consoleNavigation = [
   { icon: Layers, label: "Context", to: "/context" },
 ] as const
 
+// Surfaces reached from within the sidebar's groups rather than its main
+// navigation still need a page title and a document title.
+const secondarySurfaces = [{ label: "Folders", to: "/folders" }] as const
+
 export function getPageTitle(pathname: string) {
   return (
-    consoleNavigation.find((item) => isNavigationActive(pathname, item.to))
-      ?.label ?? "Console"
+    [...consoleNavigation, ...secondarySurfaces].find((item) =>
+      isNavigationActive(pathname, item.to)
+    )?.label ?? "Console"
   )
 }
 

@@ -22,14 +22,20 @@ import { useSchemaEditor } from "./schema/state"
 
 export function CreateStoreDialog({
   isOpen,
+  onCreated,
   onOpenChange,
   organizationId,
 }: {
   isOpen: boolean
+  /** Ran with the new store's id, e.g. to file it into a folder. */
+  onCreated?: (storeId: string) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
-  const form = useCreateStore(organizationId, () => onOpenChange(false))
+  const form = useCreateStore(organizationId, (storeId) => {
+    onOpenChange(false)
+    onCreated?.(storeId)
+  })
 
   return (
     <Dialog
@@ -110,7 +116,10 @@ function StoreDescriptionField({ form }: { form: CreateStoreForm }) {
 
 type CreateStoreForm = ReturnType<typeof useCreateStore>
 
-function useCreateStore(organizationId: string, onCreated: () => void) {
+function useCreateStore(
+  organizationId: string,
+  onCreated: (storeId: string) => void
+) {
   const create = useMutation(api.stores.console.create)
   const schema = useSchemaEditor()
   const [name, setNameState] = useState("")
@@ -139,19 +148,20 @@ function useCreateStore(organizationId: string, onCreated: () => void) {
     setIsCreating(true)
 
     try {
-      await create({
+      const created = (await create({
         organizationId,
         name,
         description: description.trim() === "" ? undefined : description,
         scope,
         schema: schemaResult.schema,
-      })
+      })) as { storeId: string }
+
       toast.success(`Created ${name.trim()}.`)
       setNameState("")
       setDescription("")
       setScope("organization")
       schema.reset()
-      onCreated()
+      onCreated(created.storeId)
     } catch (error) {
       reportCreateError(error, schema.setSubmitError)
     } finally {

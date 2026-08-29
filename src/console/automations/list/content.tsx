@@ -16,6 +16,7 @@ export function AutomationContent({
   now,
   automationList,
   onCreate,
+  onMoveToFolder,
   visibleAutomations,
 }: {
   editor: AutomationEditor
@@ -23,6 +24,7 @@ export function AutomationContent({
   now: number
   automationList: AutomationList | undefined
   onCreate: () => void
+  onMoveToFolder: (automation: AutomationList["automations"][number]) => void
   visibleAutomations: AutomationList["automations"]
 }) {
   if (automationList === undefined) {
@@ -62,6 +64,7 @@ export function AutomationContent({
           now={now}
           onDelete={editor.deleteAutomation}
           onEdit={editor.openEditForm}
+          onMoveToFolder={onMoveToFolder}
           onPausedChange={editor.setAutomationPaused}
           automation={automation}
         />

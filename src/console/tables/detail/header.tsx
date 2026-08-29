@@ -13,6 +13,7 @@ export function TableHeaderActions({
   onDelete,
   onEdit,
   onExport,
+  onMoveToFolder,
   onShare,
   removal,
   table,
@@ -23,6 +24,7 @@ export function TableHeaderActions({
   onDelete: () => void
   onEdit: () => void
   onExport: () => void
+  onMoveToFolder: () => void
   onShare: () => void
   removal: ReturnType<typeof useTableRemoval>
   table: TableDetail
@@ -65,6 +67,7 @@ export function TableHeaderActions({
         material={{ name: table.name, archivedAt: table.archivedAt }}
         noun="table"
         onDelete={onDelete}
+        onMoveToFolder={onMoveToFolder}
         onRestore={() => void removal.restoreTable(table)}
       />
     </ConsoleHeaderActions>

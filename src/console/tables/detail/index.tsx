@@ -4,6 +4,7 @@ import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../../convex/_generated/api"
+import { MoveToFolderDialog } from "../../folders/move"
 import { ConsolePage } from "../../page"
 import { ConsolePageLayout, ConsoleScrollableGrid } from "../../shared/layout"
 import { ConsoleListPager } from "../../shared/list/pager"
@@ -94,7 +95,7 @@ function TableViewContent({
   return <TableReadyView organizationId={organizationId} table={result.table} />
 }
 
-type TableDialog = "add" | "edit" | "share"
+type TableDialog = "add" | "edit" | "move" | "share"
 
 function TableReadyView({
   organizationId,
@@ -131,6 +132,7 @@ function TableReadyView({
         onDelete={removeAndLeaveWhenDeleted}
         onEdit={() => setDialog("edit")}
         onExport={() => void exporter.exportCsv()}
+        onMoveToFolder={() => setDialog("move")}
         onShare={() => setDialog("share")}
         removal={removal}
         table={table}
@@ -198,6 +200,21 @@ function TableDialogs({
         open={dialog === "share"}
         organizationId={organizationId}
         tableId={table.tableId}
+      />
+      <MoveToFolderDialog
+        onOpenChange={closeWhenDismissed}
+        organizationId={organizationId}
+        subject={
+          dialog === "move"
+            ? {
+                kind: "resource",
+                resourceType: "collection",
+                resourceId: table.tableId,
+                name: table.name,
+                folderId: table.folderId,
+              }
+            : undefined
+        }
       />
     </>
   )

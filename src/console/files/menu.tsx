@@ -1,6 +1,7 @@
 import {
   Download,
   ExternalLink,
+  FolderInput,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -31,11 +32,13 @@ export function FileMenu({
   isPending,
   onDelete,
   onEdit,
+  onMoveToFolder,
 }: {
   file: FileRow
   isPending: boolean
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
+  onMoveToFolder: (file: FileRow) => void
 }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
@@ -53,11 +56,15 @@ export function FileMenu({
             <MoreHorizontal />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-36">
+        <DropdownMenuContent align="end" className="w-44">
           <FileLinkItems file={file} />
           <DropdownMenuItem onSelect={() => onEdit(file)}>
             <Pencil />
             Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onMoveToFolder(file)}>
+            <FolderInput />
+            Move to folder…
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => setIsDeleteOpen(true)}

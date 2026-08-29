@@ -96,6 +96,7 @@ export function TableList({
   hasFilters,
   onCreate,
   onImport,
+  onMoveToFolder,
   removal,
   tables,
   unauthorizedMessage,
@@ -103,6 +104,7 @@ export function TableList({
   hasFilters: boolean
   onCreate: () => void
   onImport: () => void
+  onMoveToFolder: (table: TableSummary) => void
   removal: ReturnType<typeof useTableRemoval>
   tables: TableSummary[]
   unauthorizedMessage: string | undefined
@@ -153,7 +155,12 @@ export function TableList({
         </TableHeader>
         <TableBody>
           {tables.map((table) => (
-            <TableListRow key={table.tableId} removal={removal} table={table} />
+            <TableListRow
+              key={table.tableId}
+              onMoveToFolder={onMoveToFolder}
+              removal={removal}
+              table={table}
+            />
           ))}
         </TableBody>
       </Table>
@@ -166,9 +173,11 @@ export function TableListSkeleton() {
 }
 
 function TableListRow({
+  onMoveToFolder,
   removal,
   table,
 }: {
+  onMoveToFolder: (table: TableSummary) => void
   removal: ReturnType<typeof useTableRemoval>
   table: TableSummary
 }) {
@@ -219,6 +228,7 @@ function TableListRow({
           material={{ name: table.name, archivedAt: table.archivedAt }}
           noun="table"
           onDelete={() => void removal.removeTable(table)}
+          onMoveToFolder={() => onMoveToFolder(table)}
           onRestore={() => void removal.restoreTable(table)}
         />
       </TableCell>
