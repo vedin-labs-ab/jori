@@ -32,7 +32,8 @@ export function createDatabase() {
     get: async (id: string) => docs.get(id) ?? null,
     insert: async (table: string, doc: Record<string, unknown>) => {
       const _id = `${table}:${counter++}`
-      const stored = { ...doc, _id }
+      // Monotonic like the real system field, so keyset iteration works.
+      const stored = { _creationTime: counter, ...doc, _id }
 
       docs.set(_id, stored)
       rowsOf(table).push(stored)
