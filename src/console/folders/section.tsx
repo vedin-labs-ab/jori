@@ -15,6 +15,8 @@ import {
 import { cn } from "@/lib/utils"
 import { useActiveOrganization } from "@/shared/session/auth"
 import { api } from "../../../convex/_generated/api"
+import { CreationDialogs, type CreationRequest } from "./create/dialogs"
+import { NewInFolderMenu } from "./create/menu"
 import { useExpandHoverHandler, useRootDrop } from "./drag/state"
 import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
@@ -44,6 +46,7 @@ function FoldersGroup({
   const tree = useQuery(api.folders.console.tree, { organizationId })
   const folders = tree?.status === "ready" ? tree.folders : undefined
   const [dialog, setDialog] = useState<FolderDialogRequest>()
+  const [creation, setCreation] = useState<CreationRequest>()
   const expansion = useFolderExpansion(activeFolderId(pathname), folders)
   const leaveDeletedFolder = useLeaveDeletedFolder(activeFolderId(pathname))
 
@@ -62,18 +65,22 @@ function FoldersGroup({
           and navigation continues on the /folders page. */}
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
         <FoldersLabel />
-        <SidebarGroupAction
-          aria-label="New folder"
-          onClick={() => setDialog({ type: "create" })}
-          title="New folder"
+        {/* The "+" creates at the top level: a root folder, or a resource
+            whose dialog starts unfiled with the Folder field free to set. */}
+        <NewInFolderMenu
+          onCreate={(kind) => setCreation({ creation: kind })}
+          onNewFolder={() => setDialog({ type: "create" })}
         >
-          <Plus />
-        </SidebarGroupAction>
+          <SidebarGroupAction aria-label="New" title="New">
+            <Plus />
+          </SidebarGroupAction>
+        </NewInFolderMenu>
         <SidebarGroupContent>
           <SidebarMenu>
             <FolderMenuItems
               expansion={expansion}
               folders={folders}
+              onCreate={setCreation}
               onDialog={setDialog}
               onNewFolder={() => setDialog({ type: "create" })}
               pathname={pathname}
@@ -85,6 +92,11 @@ function FoldersGroup({
           onClose={() => setDialog(undefined)}
           onDeleted={leaveDeletedFolder}
           organizationId={organizationId}
+        />
+        <CreationDialogs
+          onClose={() => setCreation(undefined)}
+          organizationId={organizationId}
+          request={creation}
         />
       </SidebarGroup>
       <SidebarGroup className="hidden group-data-[collapsible=icon]:block">
@@ -152,12 +164,14 @@ function useExpandOnHover(
 function FolderMenuItems({
   expansion,
   folders,
+  onCreate,
   onDialog,
   onNewFolder,
   pathname,
 }: {
   expansion: FolderExpansion
   folders: FolderRow[] | undefined
+  onCreate: (request: CreationRequest) => void
   onDialog: (request: FolderDialogRequest) => void
   onNewFolder: () => void
   pathname: string
@@ -199,6 +213,7 @@ function FolderMenuItems({
           expansion={expansion}
           key={node.folderId}
           node={node}
+          onCreate={onCreate}
           onDialog={onDialog}
           pathname={pathname}
         />
