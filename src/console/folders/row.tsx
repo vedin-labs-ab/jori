@@ -51,29 +51,35 @@ export function FolderTreeItem({
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        asChild
-        isActive={pathname === `/folders/${node.folderId}`}
-        tooltip={node.name}
-      >
-        <Link params={{ folderId: node.folderId }} to="/folders/$folderId">
-          <FolderIcon />
-          <span>{node.name}</span>
-        </Link>
-      </SidebarMenuButton>
-      {hasChildren ? (
-        <SidebarMenuAction
-          aria-expanded={isExpanded}
-          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.name}`}
-          className="right-6"
-          onClick={() => expansion.toggle(node.folderId)}
+      {/* The item's own hover group spans its whole subtree, so a nested
+          row would reveal every ancestor's menu. This wrapper is the row's
+          hover boundary: actions inside reveal only when THIS row is
+          hovered, and position against it, not the subtree. */}
+      <div className="group/row relative">
+        <SidebarMenuButton
+          asChild
+          isActive={pathname === `/folders/${node.folderId}`}
+          tooltip={node.name}
         >
-          <ChevronRight
-            className={cn("transition-transform", isExpanded && "rotate-90")}
-          />
-        </SidebarMenuAction>
-      ) : null}
-      <FolderRowMenu folder={node} onDialog={onDialog} />
+          <Link params={{ folderId: node.folderId }} to="/folders/$folderId">
+            <FolderIcon />
+            <span>{node.name}</span>
+          </Link>
+        </SidebarMenuButton>
+        {hasChildren ? (
+          <SidebarMenuAction
+            aria-expanded={isExpanded}
+            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.name}`}
+            className="right-6"
+            onClick={() => expansion.toggle(node.folderId)}
+          >
+            <ChevronRight
+              className={cn("transition-transform", isExpanded && "rotate-90")}
+            />
+          </SidebarMenuAction>
+        ) : null}
+        <FolderRowMenu folder={node} onDialog={onDialog} />
+      </div>
       {isExpanded ? (
         <SidebarMenuSub>
           {node.children.map((child) => (
@@ -101,9 +107,12 @@ function FolderRowMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* Not showOnHover: that keys off the item-wide group (see the row
+            wrapper's comment); these classes replicate its reveal, scoped
+            to the row's own group. */}
         <SidebarMenuAction
           aria-label={`Open actions for ${folder.name}`}
-          showOnHover
+          className="aria-expanded:opacity-100 group-focus-within/row:opacity-100 group-hover/row:opacity-100 md:opacity-0"
         >
           <MoreHorizontal />
         </SidebarMenuAction>
