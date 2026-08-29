@@ -16,26 +16,26 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { api } from "../../../convex/_generated/api"
+import { FolderField } from "../folders/field"
 import { showErrorToast } from "../shared/error"
 import { DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
 
 export function UploadFileDialog({
+  initialFolderId,
   isOpen,
-  onCreated,
   onOpenChange,
   organizationId,
 }: {
+  /** Pre-selects the Folder field, e.g. on a folder page's "New" menu. */
+  initialFolderId?: string
   isOpen: boolean
-  /** Ran with the new file's id, e.g. to file it into a folder. */
-  onCreated?: (fileId: string) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
-  const upload = useFileUpload(organizationId, (fileId) => {
+  const upload = useFileUpload(organizationId, initialFolderId ?? null, () =>
     onOpenChange(false)
-    onCreated?.(fileId)
-  })
+  )
 
   return (
     <Dialog
@@ -57,7 +57,7 @@ export function UploadFileDialog({
           disabled={upload.file === null || upload.isUploading}
           onSubmit={() => void upload.submit()}
         >
-          <UploadFields upload={upload} />
+          <UploadFields organizationId={organizationId} upload={upload} />
           <DialogFooter>
             <Button
               disabled={upload.file === null || upload.isUploading}
@@ -73,7 +73,13 @@ export function UploadFileDialog({
   )
 }
 
-function UploadFields({ upload }: { upload: FileUpload }) {
+function UploadFields({
+  organizationId,
+  upload,
+}: {
+  organizationId: string
+  upload: FileUpload
+}) {
   return (
     <div className="grid gap-4">
       <div className="grid gap-2">
@@ -92,6 +98,12 @@ function UploadFields({ upload }: { upload: FileUpload }) {
         onScopeChange={upload.setScope}
         scope={upload.scope}
       />
+      <FolderField
+        id="file-upload-folder"
+        onChange={upload.setFolderId}
+        organizationId={organizationId}
+        value={upload.folderId}
+      />
       <div className="grid gap-2">
         <Label htmlFor="file-upload-description">Description</Label>
         <Input
@@ -109,13 +121,15 @@ type FileUpload = ReturnType<typeof useFileUpload>
 
 function useFileUpload(
   organizationId: string,
-  onUploaded: (fileId: string) => void
+  initialFolderId: string | null,
+  onUploaded: () => void
 ) {
   const generateUploadUrl = useMutation(api.files.console.uploadUrl)
   const createFile = useMutation(api.files.console.create)
   const [file, setFile] = useState<File | null>(null)
   const [description, setDescription] = useState("")
   const [scope, setScope] = useState<Scope>("organization")
+  const [folderId, setFolderId] = useState(initialFolderId)
   const [isUploading, setIsUploading] = useState(false)
 
   async function submit() {
@@ -130,18 +144,22 @@ function useFileUpload(
         await generateUploadUrl({ organizationId }),
         file
       )
-      const fileId = await createFile({
+
+      await createFile({
         organizationId,
         storageId,
         name: file.name,
         description: description.trim() === "" ? undefined : description,
         scope,
+        folderId:
+          folderId === null ? undefined : (folderId as GenericId<"folders">),
       })
 
       toast.success(`Uploaded ${file.name}.`)
       setFile(null)
       setDescription("")
-      onUploaded(fileId)
+      setFolderId(initialFolderId)
+      onUploaded()
     } catch (error) {
       showErrorToast(error, "Could not upload the file.")
     } finally {
@@ -152,10 +170,12 @@ function useFileUpload(
   return {
     description,
     file,
+    folderId,
     isUploading,
     scope,
     setDescription,
     setFile,
+    setFolderId,
     setScope,
     submit,
   }

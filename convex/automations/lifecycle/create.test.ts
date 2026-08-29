@@ -1,4 +1,6 @@
 import { expect, test, vi } from "vitest"
+import { databaseContext } from "../../../test/convex/database"
+import { folderDoc } from "../../../test/convex/folders"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { createAutomation } from "./create"
@@ -26,6 +28,75 @@ test.each([
       createdBy: "person" as Id<"persons">,
     })
   ).rejects.toThrow("configuration has changed")
+})
+
+function creationContext() {
+  const { database, ctx } = databaseContext({
+    scheduler: { runAt: vi.fn(async () => "functions:1") },
+  })
+
+  return { database, ctx }
+}
+
+function creationArgs(folderId?: Id<"folders">) {
+  return {
+    organizationId: "org",
+    name: "Digest",
+    instructions: "Send the digest to @Slack.",
+    scope: "organization" as const,
+    folderId,
+    access: {
+      integrations: [
+        { integration: "slack" as const, tools: ["conversations_add_message"] },
+      ],
+      web: false,
+    },
+    type: "cron" as const,
+    trigger: { expression: "0 9 * * *", timezone: "UTC" },
+    createdBy: "persons:owner" as Id<"persons">,
+  }
+}
+
+async function insertSlackIntegration(
+  database: ReturnType<typeof creationContext>["database"]
+) {
+  await database.insert("integrations", {
+    organizationId: "org",
+    integration: "slack",
+    scope: "organization",
+    status: "active",
+  })
+}
+
+test("creation stamps the folder when one is named", async () => {
+  const { database, ctx } = creationContext()
+
+  await insertSlackIntegration(database)
+
+  const folderId = (await database.insert(
+    "folders",
+    folderDoc()
+  )) as Id<"folders">
+  const rootward = await createAutomation(ctx, creationArgs())
+  const filed = await createAutomation(ctx, creationArgs(folderId))
+
+  expect(rootward.folderId).toBeUndefined()
+  expect(filed.folderId).toBe(folderId)
+})
+
+test("creation rejects a folder from another organization", async () => {
+  const { database, ctx } = creationContext()
+
+  await insertSlackIntegration(database)
+
+  const foreignFolder = (await database.insert(
+    "folders",
+    folderDoc({ organizationId: "elsewhere" })
+  )) as Id<"folders">
+
+  await expect(
+    createAutomation(ctx, creationArgs(foreignFolder))
+  ).rejects.toThrow("Folder was not found.")
 })
 
 function automation(input: {

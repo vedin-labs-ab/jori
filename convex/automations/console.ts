@@ -84,6 +84,7 @@ export const create = mutation({
     name: v.string(),
     instructions: v.string(),
     scope: v.optional(scopeValidator),
+    folderId: v.optional(v.id("folders")),
     access: automationSchema.accessInput,
     type: automationSchema.automationType,
     trigger: automationSchema.triggerInput,

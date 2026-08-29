@@ -44,6 +44,55 @@ test("records console uploads with storage metadata and defaults", async () => {
   })
 })
 
+test("uploads stamp the folder when creation names one", async () => {
+  const folderId = "folder-id" as Id<"folders">
+  const insert = vi.fn(async () => fileId)
+  const ctx = {
+    db: {
+      insert,
+      get: vi.fn(async () => ({
+        _id: folderId,
+        organizationId: "organization",
+      })),
+      system: {
+        get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })),
+      },
+    },
+  } as unknown as MutationCtx
+
+  await insertUploadedFile(
+    ctx,
+    { organizationId: "organization", personId: owner },
+    { storageId, name: "costs.csv", folderId }
+  )
+
+  expect(insert).toHaveBeenCalledWith(
+    "files",
+    expect.objectContaining({ folderId })
+  )
+})
+
+test("uploads reject a folder from another organization", async () => {
+  const folderId = "folder-id" as Id<"folders">
+  const ctx = {
+    db: {
+      insert: vi.fn(),
+      get: vi.fn(async () => ({ _id: folderId, organizationId: "elsewhere" })),
+      system: {
+        get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })),
+      },
+    },
+  } as unknown as MutationCtx
+
+  await expect(
+    insertUploadedFile(
+      ctx,
+      { organizationId: "organization", personId: owner },
+      { storageId, name: "costs.csv", folderId }
+    )
+  ).rejects.toThrow("Folder was not found.")
+})
+
 test("personal uploads require a resolvable owner", async () => {
   const ctx = {
     db: { system: { get: vi.fn() } },

@@ -1,5 +1,6 @@
 import { type Scope } from "@contracts/permissions/scope"
 import { useMutation } from "convex/react"
+import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -13,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../convex/_generated/api"
+import { FolderField } from "../folders/field"
 import { showErrorToast } from "../shared/error"
 import {
   MaterialDescriptionField,
@@ -30,21 +32,20 @@ import {
 } from "./draft"
 
 export function CreateTableDialog({
+  initialFolderId,
   isOpen,
-  onCreated,
   onOpenChange,
   organizationId,
 }: {
+  /** Pre-selects the Folder field, e.g. on a folder page's "New" menu. */
+  initialFolderId?: string
   isOpen: boolean
-  /** Ran with the new table's id, e.g. to file it into a folder. */
-  onCreated?: (tableId: string) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
-  const form = useCreateTable(organizationId, (tableId) => {
+  const form = useCreateTable(organizationId, initialFolderId ?? null, () =>
     onOpenChange(false)
-    onCreated?.(tableId)
-  })
+  )
 
   return (
     <Dialog
@@ -78,6 +79,12 @@ export function CreateTableDialog({
             onScopeChange={form.setScope}
             scope={form.scope}
           />
+          <FolderField
+            id="table-create-folder"
+            onChange={form.setFolderId}
+            organizationId={organizationId}
+            value={form.folderId}
+          />
           <MaterialDescriptionField
             description={form.description}
             idPrefix="table-create"
@@ -107,12 +114,14 @@ export function CreateTableDialog({
 
 function useCreateTable(
   organizationId: string,
-  onCreated: (tableId: string) => void
+  initialFolderId: string | null,
+  onCreated: () => void
 ) {
   const create = useMutation(api.tables.console.create)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [scope, setScope] = useState<Scope>("organization")
+  const [folderId, setFolderId] = useState(initialFolderId)
   const [drafts, setDrafts] = useState<ColumnDraft[]>(() => [newColumnDraft()])
   const [errors, setErrors] = useState<TableFormErrors>({})
   const [isCreating, setIsCreating] = useState(false)
@@ -129,20 +138,23 @@ function useCreateTable(
     setIsCreating(true)
 
     try {
-      const created = (await create({
+      await create({
         organizationId,
         name,
         description: description.trim() === "" ? undefined : description,
         scope,
+        folderId:
+          folderId === null ? undefined : (folderId as GenericId<"folders">),
         columns: draftsToColumns(drafts, []),
-      })) as { tableId: string }
+      })
 
       toast.success(`Created ${name.trim()}.`)
       setName("")
       setDescription("")
       setScope("organization")
+      setFolderId(initialFolderId)
       setDrafts([newColumnDraft()])
-      onCreated(created.tableId)
+      onCreated()
     } catch (error) {
       showErrorToast(error, "Could not create the table.")
     } finally {
@@ -154,10 +166,12 @@ function useCreateTable(
     description,
     drafts,
     errors,
+    folderId,
     isCreating,
     name,
     scope,
     setDescription,
+    setFolderId,
     // Validation shows only after a submit attempt; new input in a field
     // clears that field's error right away.
     setDrafts: (next: ColumnDraft[]) => {

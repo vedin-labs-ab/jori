@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from "vitest"
 import { tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
+import { folderDoc } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { tableSpec } from "../tables/spec"
 import {
@@ -35,6 +36,38 @@ describe("creating a collection", () => {
     ])
     expect(created.schemaHash).toMatch(/./)
     expect(created.scope).toBe("organization")
+    expect(created.folderId).toBeUndefined()
+  })
+
+  test("stamps the folder when creation names one", async () => {
+    const { database, ctx } = purgeContext()
+    const folderId = await database.insert("folders", folderDoc())
+
+    const created = await createCollection(ctx, tableSpec, {
+      ...principal,
+      name: "Leads",
+      folderId: folderId as Id<"folders">,
+      authoring: [{ key: "title", type: "string" }],
+    })
+
+    expect(created.folderId).toBe(folderId)
+  })
+
+  test("rejects a folder from another organization", async () => {
+    const { database, ctx } = purgeContext()
+    const foreignFolder = await database.insert(
+      "folders",
+      folderDoc({ organizationId: "elsewhere" })
+    )
+
+    await expect(
+      createCollection(ctx, tableSpec, {
+        ...principal,
+        name: "Leads",
+        folderId: foreignFolder as Id<"folders">,
+        authoring: [{ key: "title", type: "string" }],
+      })
+    ).rejects.toThrow("Folder was not found.")
   })
 })
 

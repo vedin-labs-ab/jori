@@ -4,6 +4,7 @@ import {
 } from "../../../contracts/permissions/scope"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { resolveCreationFolder } from "../../folders/tree"
 import { executionPrincipalForScope } from "../../runs/principal"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import {
@@ -27,6 +28,7 @@ type CreateAutomationArgs = {
   name: string
   instructions: string
   scope?: Scope
+  folderId?: Id<"folders">
   access: AutomationAccessInput
   type: AutomationType
   trigger: AutomationTriggerInput
@@ -101,6 +103,11 @@ async function prepareAutomation(
     instructions: normalizeRequiredText(args.instructions, "instructions"),
     scope,
     principal,
+    folderId: await resolveCreationFolder(
+      ctx,
+      args.organizationId,
+      args.folderId
+    ),
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,

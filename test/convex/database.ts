@@ -85,6 +85,7 @@ export function databaseContext(extras: Record<string, unknown> = {}) {
 
 function queryBuilder(rows: StoredDoc[]) {
   const constraints: Constraint[] = []
+  const predicates: FilterPredicate[] = []
   const index = {
     eq: (field: string, value: unknown) => {
       constraints.push({ kind: "eq", field, value })
@@ -97,10 +98,22 @@ function queryBuilder(rows: StoredDoc[]) {
       return index
     },
   }
-  const filtered = () => rows.filter((row) => matches(row, constraints))
+  const filtered = () =>
+    rows.filter(
+      (row) =>
+        matches(row, constraints) &&
+        predicates.every((predicate) => predicate(row))
+    )
   const chain = {
     withIndex: (_name: string, build?: (builder: typeof index) => unknown) => {
       build?.(index)
+
+      return chain
+    },
+    // Just the `query.eq(query.field(name), value)` shape Convex filters
+    // usually take; extend when a test needs more of the expression API.
+    filter: (build: (builder: typeof filterBuilder) => FilterPredicate) => {
+      predicates.push(build(filterBuilder))
 
       return chain
     },
@@ -125,6 +138,18 @@ function queryBuilder(rows: StoredDoc[]) {
   }
 
   return chain
+}
+
+type FilterPredicate = (row: StoredDoc) => boolean
+
+type FieldReference = { field: string }
+
+const filterBuilder = {
+  field: (field: string): FieldReference => ({ field }),
+  eq:
+    (reference: FieldReference, value: unknown): FilterPredicate =>
+    (row) =>
+      row[reference.field] === value,
 }
 
 function matches(row: StoredDoc, constraints: Constraint[]) {

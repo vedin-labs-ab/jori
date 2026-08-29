@@ -26,12 +26,7 @@ import {
 import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { MoveResourceDialog } from "./move"
-import {
-  type FiledResourceType,
-  type FolderDetail,
-  type FolderResource,
-  toFiledType,
-} from "./types"
+import { type FolderDetail, type FolderResource, toFiledType } from "./types"
 
 export function FolderPage({ folderId }: { folderId: string }) {
   return (
@@ -110,7 +105,7 @@ function FolderReadyView({
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const [creation, setCreation] = useState<FolderCreation>()
   const [moving, setMoving] = useState<FolderResource>()
-  const filing = useFolderFiling(organizationId, folder)
+  const unfile = useUnfileResource(organizationId, folder)
   const leaveDeletedFolder = useLeaveDeletedFolder(folder.folderId)
 
   return (
@@ -136,7 +131,7 @@ function FolderReadyView({
             </NewInFolderMenu>
           }
           onMove={setMoving}
-          onUnfile={filing.unfile}
+          onUnfile={unfile}
         />
       </ConsoleScrollableGrid>
       <FolderDialogs
@@ -147,7 +142,7 @@ function FolderReadyView({
       />
       <CreationDialogs
         creation={creation}
-        filing={filing}
+        folderId={folder.folderId}
         onClose={() => setCreation(undefined)}
         organizationId={organizationId}
       />
@@ -175,16 +170,16 @@ function movingResource(
       }
 }
 
-/** The existing create dialogs, composed unchanged: each reports the new
- *  resource's id, and the folder files it right after. */
+/** The existing create dialogs with this folder pre-selected in their
+ *  Folder field, so creation lands here atomically. */
 function CreationDialogs({
   creation,
-  filing,
+  folderId,
   onClose,
   organizationId,
 }: {
   creation: FolderCreation | undefined
-  filing: ReturnType<typeof useFolderFiling>
+  folderId: string
   onClose: () => void
   organizationId: string
 }) {
@@ -197,20 +192,20 @@ function CreationDialogs({
   return (
     <>
       <CreateTableDialog
+        initialFolderId={folderId}
         isOpen={creation === "table"}
-        onCreated={filing.fileCreated("collection")}
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
       />
       <CreateStoreDialog
+        initialFolderId={folderId}
         isOpen={creation === "store"}
-        onCreated={filing.fileCreated("collection")}
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
       />
       <UploadFileDialog
+        initialFolderId={folderId}
         isOpen={creation === "file"}
-        onCreated={filing.fileCreated("file")}
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
       />
@@ -218,38 +213,22 @@ function CreationDialogs({
   )
 }
 
-function useFolderFiling(organizationId: string, folder: FolderDetail) {
+function useUnfileResource(organizationId: string, folder: FolderDetail) {
   const file = useMutation(api.folders.console.file)
 
-  return {
-    /** Files a freshly created resource here. Creation already succeeded,
-     *  so a failure only means the resource stayed at the workspace root. */
-    fileCreated(resourceType: FiledResourceType) {
-      return (resourceId: string) => {
-        void file({
-          organizationId,
-          resourceType,
-          resourceId,
-          folderId: folder.folderId,
-        }).catch(() =>
-          toast.error(`Created, but it could not be filed into ${folder.name}.`)
-        )
-      }
-    },
-    unfile(resource: FolderResource) {
-      void file({
-        organizationId,
-        resourceType: toFiledType(resource),
-        resourceId: resource.id,
-        folderId: null,
-      })
-        .then(() =>
-          toast.success(`Moved ${resource.name} out of ${folder.name}.`)
-        )
-        .catch((error: unknown) =>
-          showErrorToast(error, "Could not remove it from the folder.")
-        )
-    },
+  return (resource: FolderResource) => {
+    void file({
+      organizationId,
+      resourceType: toFiledType(resource),
+      resourceId: resource.id,
+      folderId: null,
+    })
+      .then(() =>
+        toast.success(`Moved ${resource.name} out of ${folder.name}.`)
+      )
+      .catch((error: unknown) =>
+        showErrorToast(error, "Could not remove it from the folder.")
+      )
   }
 }
 

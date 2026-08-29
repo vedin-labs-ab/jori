@@ -14,6 +14,10 @@ const createTable = vi.fn()
 vi.mock("convex/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("convex/react")>()),
   useMutation: () => createTable,
+  useQuery: () => ({
+    status: "ready",
+    folders: [{ folderId: "finance", name: "Finance" }],
+  }),
 }))
 
 afterEach(cleanup)
@@ -23,14 +27,24 @@ beforeEach(() => {
   createTable.mockResolvedValue({ tableId: "table-1" })
 })
 
-function renderDialog() {
+function renderDialog(initialFolderId?: string) {
   render(
     <CreateTableDialog
+      initialFolderId={initialFolderId}
       isOpen
       onOpenChange={() => undefined}
       organizationId="org-1"
     />
   )
+}
+
+function fillRequiredFields() {
+  fireEvent.change(screen.getByLabelText("Name"), {
+    target: { value: "Invoices" },
+  })
+  fireEvent.change(screen.getByLabelText("Column key"), {
+    target: { value: "total" },
+  })
 }
 
 /** jsdom leaves out the browser's implicit Enter-to-submit, so pressing
@@ -63,19 +77,46 @@ describe("create table enter submission", () => {
 
   test("Enter in a completed form creates the table", async () => {
     renderDialog()
-    fireEvent.change(screen.getByLabelText("Name"), {
-      target: { value: "Invoices" },
-    })
-    fireEvent.change(screen.getByLabelText("Column key"), {
-      target: { value: "total" },
-    })
+    fillRequiredFields()
     pressEnter(screen.getByLabelText("Name"))
 
     await waitFor(() => expect(createTable).toHaveBeenCalledOnce())
     expect(createTable.mock.calls[0]?.[0]).toMatchObject({
       organizationId: "org-1",
       name: "Invoices",
+      folderId: undefined,
       columns: [{ key: "total", name: "total", type: "string" }],
+    })
+  })
+})
+
+describe("create table folder field", () => {
+  test("a selected folder rides along in the create payload", async () => {
+    renderDialog()
+    fillRequiredFields()
+    fireEvent.click(screen.getByLabelText("Folder"))
+    fireEvent.click(await screen.findByRole("button", { name: "Finance" }))
+    fireEvent.click(screen.getByRole("button", { name: "Create table" }))
+
+    await waitFor(() => expect(createTable).toHaveBeenCalledOnce())
+    expect(createTable.mock.calls[0]?.[0]).toMatchObject({
+      folderId: "finance",
+    })
+  })
+
+  test("initialFolderId pre-populates the field yet stays editable", async () => {
+    renderDialog("finance")
+
+    expect(screen.getByLabelText("Folder").textContent).toContain("Finance")
+
+    fireEvent.click(screen.getByLabelText("Folder"))
+    fireEvent.click(await screen.findByRole("button", { name: "No folder" }))
+    fillRequiredFields()
+    fireEvent.click(screen.getByRole("button", { name: "Create table" }))
+
+    await waitFor(() => expect(createTable).toHaveBeenCalledOnce())
+    expect(createTable.mock.calls[0]?.[0]).toMatchObject({
+      folderId: undefined,
     })
   })
 })

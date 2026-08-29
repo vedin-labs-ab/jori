@@ -22,7 +22,7 @@ import { type FolderDialogRequest } from "./manage"
 import { type FolderDetail } from "./types"
 
 /** What the folder page can create in place; everything but the subfolder
- *  is created by the surface's own dialog and then filed here. */
+ *  opens the surface's own dialog with this folder pre-selected. */
 export type FolderCreation = "table" | "store" | "file"
 
 export function FolderHeaderActions({

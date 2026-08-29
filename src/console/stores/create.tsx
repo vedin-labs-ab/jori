@@ -1,5 +1,6 @@
 import { type Scope } from "@contracts/permissions/scope"
 import { useMutation } from "convex/react"
+import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -15,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { api } from "../../../convex/_generated/api"
+import { FolderField } from "../folders/field"
 import { readErrorMessage } from "../shared/error"
 import { DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
@@ -22,21 +24,20 @@ import { SchemaEditorSection } from "./schema/editor"
 import { useSchemaEditor } from "./schema/state"
 
 export function CreateStoreDialog({
+  initialFolderId,
   isOpen,
-  onCreated,
   onOpenChange,
   organizationId,
 }: {
+  /** Pre-selects the Folder field, e.g. on a folder page's "New" menu. */
+  initialFolderId?: string
   isOpen: boolean
-  /** Ran with the new store's id, e.g. to file it into a folder. */
-  onCreated?: (storeId: string) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
-  const form = useCreateStore(organizationId, (storeId) => {
+  const form = useCreateStore(organizationId, initialFolderId ?? null, () =>
     onOpenChange(false)
-    onCreated?.(storeId)
-  })
+  )
 
   return (
     <Dialog
@@ -64,6 +65,12 @@ export function CreateStoreDialog({
             noun="store"
             onScopeChange={form.setScope}
             scope={form.scope}
+          />
+          <FolderField
+            id="store-create-folder"
+            onChange={form.setFolderId}
+            organizationId={organizationId}
+            value={form.folderId}
           />
           <StoreDescriptionField form={form} />
           <SchemaEditorSection editor={form.schema} idPrefix="store-create" />
@@ -118,7 +125,8 @@ type CreateStoreForm = ReturnType<typeof useCreateStore>
 
 function useCreateStore(
   organizationId: string,
-  onCreated: (storeId: string) => void
+  initialFolderId: string | null,
+  onCreated: () => void
 ) {
   const create = useMutation(api.stores.console.create)
   const schema = useSchemaEditor()
@@ -126,6 +134,7 @@ function useCreateStore(
   const [nameError, setNameError] = useState<string>()
   const [description, setDescription] = useState("")
   const [scope, setScope] = useState<Scope>("organization")
+  const [folderId, setFolderId] = useState(initialFolderId)
   const [isCreating, setIsCreating] = useState(false)
 
   function setName(next: string) {
@@ -148,20 +157,23 @@ function useCreateStore(
     setIsCreating(true)
 
     try {
-      const created = (await create({
+      await create({
         organizationId,
         name,
         description: description.trim() === "" ? undefined : description,
         scope,
+        folderId:
+          folderId === null ? undefined : (folderId as GenericId<"folders">),
         schema: schemaResult.schema,
-      })) as { storeId: string }
+      })
 
       toast.success(`Created ${name.trim()}.`)
       setNameState("")
       setDescription("")
       setScope("organization")
+      setFolderId(initialFolderId)
       schema.reset()
-      onCreated(created.storeId)
+      onCreated()
     } catch (error) {
       reportCreateError(error, schema.setSubmitError)
     } finally {
@@ -171,12 +183,14 @@ function useCreateStore(
 
   return {
     description,
+    folderId,
     isCreating,
     name,
     nameError,
     schema,
     scope,
     setDescription,
+    setFolderId,
     setName,
     setScope,
     submit,

@@ -1,4 +1,5 @@
 import { type Scope } from "@contracts/permissions/scope"
+import { type GenericId } from "convex/values"
 import {
   getAutomationScopeConflict,
   hasAutomationWriteSurface,
@@ -43,6 +44,7 @@ export function createAutomationArgs(
   AutomationArgs & {
     type: AutomationFormValues["type"]
     trigger: TriggerSpec
+    folderId?: GenericId<"folders">
   }
 > {
   const base = buildBaseArgs(values, options)
@@ -61,6 +63,9 @@ export function createAutomationArgs(
     args: {
       ...base.args,
       ...trigger,
+      ...(values.folderId === null
+        ? {}
+        : { folderId: values.folderId as GenericId<"folders"> }),
     },
   }
 }

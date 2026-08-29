@@ -15,6 +15,10 @@ const createStore = vi.fn()
 vi.mock("convex/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("convex/react")>()),
   useMutation: () => createStore,
+  useQuery: () => ({
+    status: "ready",
+    folders: [{ folderId: "finance", name: "Finance" }],
+  }),
 }))
 
 afterEach(cleanup)
@@ -24,9 +28,10 @@ beforeEach(() => {
   createStore.mockResolvedValue({})
 })
 
-function renderDialog() {
+function renderDialog(initialFolderId?: string) {
   render(
     <CreateStoreDialog
+      initialFolderId={initialFolderId}
       isOpen
       onOpenChange={() => undefined}
       organizationId="org-1"
@@ -81,6 +86,29 @@ describe("create store enter submission", () => {
       organizationId: "org-1",
       name: "Invoices",
     })
+  })
+})
+
+describe("create store folder field", () => {
+  test("a selected folder rides along in the create payload", async () => {
+    renderDialog()
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Invoices" },
+    })
+    fireEvent.click(screen.getByLabelText("Folder"))
+    fireEvent.click(await screen.findByRole("button", { name: "Finance" }))
+    submit()
+
+    await waitFor(() => expect(createStore).toHaveBeenCalledOnce())
+    expect(createStore.mock.calls[0]?.[0]).toMatchObject({
+      folderId: "finance",
+    })
+  })
+
+  test("initialFolderId pre-populates the field", () => {
+    renderDialog("finance")
+
+    expect(screen.getByLabelText("Folder").textContent).toContain("Finance")
   })
 })
 

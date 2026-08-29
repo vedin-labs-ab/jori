@@ -58,6 +58,19 @@ export async function requireOrganizationFolder(
   return folder
 }
 
+/** Creation-time folder guard shared by every resource create mutation: no
+ *  folder passes through as the workspace root, anything else must name a
+ *  folder of the same organization. */
+export async function resolveCreationFolder(
+  ctx: QueryLikeCtx,
+  organizationId: string,
+  folderId: Id<"folders"> | undefined
+) {
+  return folderId === undefined
+    ? undefined
+    : (await requireOrganizationFolder(ctx, organizationId, folderId))._id
+}
+
 export async function listOrganizationFolders(
   ctx: QueryLikeCtx,
   organizationId: string
