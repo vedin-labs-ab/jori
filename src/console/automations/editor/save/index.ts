@@ -33,6 +33,7 @@ export function automationFormValues(
     instructions: automation.instructions,
     ...triggerFormValues(automation),
     scope: automation.scope,
+    folderId: null,
     webSearch: automation.access.webSearch,
     surfaces: automation.access.surfaces,
   }

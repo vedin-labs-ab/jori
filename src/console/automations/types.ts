@@ -54,6 +54,9 @@ export type AutomationFormValues = {
   event: string
   eventMatch: Record<string, string>
   scope: Scope
+  /** Creation-only: where the new automation is filed; null is the root.
+   *  Edits move automations through the folder surfaces instead. */
+  folderId: string | null
   webSearch: boolean
   surfaces: AutomationSurfaceFormValue[]
 }
@@ -75,6 +78,7 @@ export const emptyAutomationForm: AutomationFormValues = {
   event: defaultEvent.value,
   eventMatch: {},
   scope: "personal",
+  folderId: null,
   webSearch: true,
   surfaces: [],
 }

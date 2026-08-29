@@ -102,6 +102,22 @@ test("creates automation args with access and source bindings", () => {
   })
 })
 
+test("a chosen folder rides along in create args only when set", () => {
+  const values: Parameters<typeof createAutomationArgs>[0] = {
+    ...emptyAutomationForm,
+    name: "Weekly release summary",
+    instructions: "Summarize @GitHub.",
+    surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
+  }
+
+  expect(createAutomationArgs(values)).toMatchObject({
+    args: expect.not.objectContaining({ folderId: expect.anything() }),
+  })
+  expect(
+    createAutomationArgs({ ...values, folderId: "finance" })
+  ).toMatchObject({ args: { folderId: "finance" } })
+})
+
 test("rejects automation access blocked by tool permissions", () => {
   expect(
     createAutomationArgs(

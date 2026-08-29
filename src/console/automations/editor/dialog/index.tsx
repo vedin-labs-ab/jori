@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
+import { FolderField } from "../../../folders/field"
 import { DialogForm } from "../../../shared/materials/form"
 import { ScopeField } from "../../../shared/scope/field"
 import { getAutomationScopeConflict } from "../../access"
@@ -174,6 +175,16 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         onValueChange={props.actions.updateScope}
         value={props.values.scope}
       />
+      {/* Creation-only: existing automations move through the folder
+          surfaces, so edits keep the field out of the way. */}
+      {props.automation === undefined ? (
+        <FolderField
+          id="automation-folder"
+          onChange={props.actions.updateFolder}
+          organizationId={props.organizationId}
+          value={props.values.folderId}
+        />
+      ) : null}
       <AutomationContextSection scope={props.values.scope} />
       <AutomationInstructionsSection
         organizationId={props.organizationId}
@@ -234,6 +245,7 @@ function createDialogActions(
             : surface
         ),
       }),
+    updateFolder: (folderId: string | null) => updateValues({ folderId }),
     updateInstructions: (
       instructions: string,
       surfaces: AutomationFormValues["surfaces"]

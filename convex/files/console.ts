@@ -9,6 +9,7 @@ import {
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { requireUserId } from "../access/users"
+import { resolveCreationFolder } from "../folders/tree"
 import { resolvePersonByIdentity } from "../persons/identity/links"
 import { personDisplayName } from "../persons/names"
 import { optionalString, requiredString } from "../shared/input"
@@ -77,6 +78,7 @@ export const create = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     scope: v.optional(fileScopes),
+    folderId: v.optional(v.id("folders")),
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
@@ -130,6 +132,7 @@ export async function insertUploadedFile(
     name: string
     description?: string
     scope?: FileScope
+    folderId?: Id<"folders">
   }
 ) {
   const scope = args.scope ?? "organization"
@@ -150,6 +153,11 @@ export async function insertUploadedFile(
     organizationId: viewer.organizationId,
     scope,
     ownerId: viewer.personId,
+    folderId: await resolveCreationFolder(
+      ctx,
+      viewer.organizationId,
+      args.folderId
+    ),
     storageId: args.storageId,
     name: normalizeFileName(args.name),
     mimeType: metadata.contentType ?? "application/octet-stream",

@@ -88,6 +88,7 @@ export const create = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     scope: v.optional(scopeValidator),
+    folderId: v.optional(v.id("folders")),
     schema: v.any(),
   },
   handler: async (ctx, args): Promise<unknown> => {

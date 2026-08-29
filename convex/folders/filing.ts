@@ -4,7 +4,7 @@ import { type MutationCtx } from "../_generated/server"
 import { canAccessAutomation } from "../automations/access"
 import { canAccessCollection } from "../collections/access"
 import { canViewFile } from "../files/data"
-import { getOrganizationFolder } from "./tree"
+import { requireOrganizationFolder } from "./tree"
 
 // Filing is one generic flow over a small registry: each entry owns the
 // per-domain edges — load the row, apply that domain's existing visibility
@@ -110,19 +110,8 @@ async function resolveTargetFolder(
   ctx: MutationCtx,
   args: { organizationId: string; folderId: Id<"folders"> | null }
 ) {
-  if (args.folderId === null) {
-    return undefined
-  }
-
-  const folder = await getOrganizationFolder(
-    ctx,
-    args.organizationId,
-    args.folderId
-  )
-
-  if (folder === null) {
-    throw new Error("Folder was not found.")
-  }
-
-  return folder._id
+  return args.folderId === null
+    ? undefined
+    : (await requireOrganizationFolder(ctx, args.organizationId, args.folderId))
+        ._id
 }

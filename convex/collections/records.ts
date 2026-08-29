@@ -3,6 +3,7 @@ import { stableHash } from "../../contracts/json/stable"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { resolveCreationFolder } from "../folders/tree"
 import { getAccessibleCollection } from "./access"
 import {
   normalizeCollectionDescription,
@@ -30,6 +31,7 @@ export async function createCollection<K extends CollectionKind>(
     name: string
     description?: string
     scope?: "organization" | "personal"
+    folderId?: Id<"folders">
     authoring: unknown
   }
 ): Promise<CollectionDoc<K>> {
@@ -38,6 +40,11 @@ export async function createCollection<K extends CollectionKind>(
     organizationId: args.organizationId,
     ownerId: args.personId,
     scope: args.scope ?? "organization",
+    folderId: await resolveCreationFolder(
+      ctx,
+      args.organizationId,
+      args.folderId
+    ),
     name: normalizeCollectionName(args.name),
     description: normalizeCollectionDescription(args.description),
     ...authoringFields(spec, spec.normalize(args.authoring)),
