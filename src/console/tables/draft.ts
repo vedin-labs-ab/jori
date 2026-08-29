@@ -108,6 +108,21 @@ export function appendColumn(
   return { ok: true, columns: draftsToColumns(drafts, existing) }
 }
 
+/** Columns payload renaming one column's display name — the only column
+ *  detail the evolution rules let an existing column change. A blank name
+ *  falls back to the key. */
+export function renameColumn(
+  existing: TableColumn[],
+  key: string,
+  name: string
+) {
+  return existing.map((column) =>
+    column.key === key
+      ? { ...column, name: name.trim() === "" ? column.key : name }
+      : column
+  )
+}
+
 export type TableFormErrors = { name?: string; columns?: string }
 
 /** Errors for a table dialog submit attempt. Dialogs show these only after
