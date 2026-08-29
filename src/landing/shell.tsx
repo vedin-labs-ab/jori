@@ -19,7 +19,7 @@ export function MarketingShell({
     <div className="flex min-h-svh flex-col bg-background text-foreground">
       <SkipToContent />
       <LandingHeader onWaitlistPage={closing !== undefined} />
-      <main className="flex-1" id={mainContentId} tabIndex={-1}>
+      <main className="flex-1 outline-none" id={mainContentId} tabIndex={-1}>
         {children}
         {closing === undefined ? null : <Closing lede={closing} />}
       </main>

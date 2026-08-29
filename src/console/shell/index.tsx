@@ -48,8 +48,11 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             selection bar) inside the inset's own stacking context, so
             full-bleed content can't outpaint the sidebar rail's hover
             strip at the boundary. */}
+        {/* outline-none: the inset is the skip link's landing target, and
+            the browser's focus ring around the whole content region reads
+            as a broken border where the fixed sidebar overlaps it. */}
         <SidebarInset
-          className="min-h-0 isolate"
+          className="isolate min-h-0 outline-none"
           id={mainContentId}
           tabIndex={-1}
         >
