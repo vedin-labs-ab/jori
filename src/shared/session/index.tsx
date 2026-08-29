@@ -7,7 +7,7 @@ import { type ComponentProps, type ReactNode } from "react"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 import { Toaster } from "@/components/ui/sonner"
-import { authClient } from "./auth"
+import { authClient, authQueryClient } from "./auth"
 import { convex } from "./client"
 
 /** Better Auth and Convex for session-aware surfaces. Routes that can avoid
@@ -24,6 +24,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
       <AuthProvider
         Link={SessionLink}
         authClient={authClient}
+        queryClient={authQueryClient}
         basePaths={{ auth: "" }}
         emailAndPassword={{ enabled: false }}
         localization={{ auth: { signIn: "Sign in" } }}

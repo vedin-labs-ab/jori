@@ -21,7 +21,10 @@ import { LaunchGate } from "./shell/gate"
 import { PublicConsoleFrame } from "./shell/public"
 
 /** Gates a console surface: a stable loader until the session, Convex auth,
- *  and active organization are each known, then exactly one target view. */
+ *  and active organization are each known, then exactly one target view.
+ *  Every gate query mounts here together so their round-trips overlap —
+ *  mounting the organization queries only after the session resolved used
+ *  to serialize the whole chain and doubled the time behind the loader. */
 export function ConsolePage({
   children,
   chrome = "shell",
@@ -32,18 +35,27 @@ export function ConsolePage({
   loadingFallback?: ReactNode
 }) {
   const session = useAuthenticatedSession()
+  const convex = useConvexSession()
+  const active = useActiveOrganization()
+  const organizations = useListOrganizations()
   const loader = loadingFallback ?? <FullscreenSkeletonLoader />
 
-  if (session.isPending) {
-    return loader
-  }
-
-  if (session.data === null || session.data === undefined) {
+  if (
+    session.isPending ||
+    session.data === null ||
+    session.data === undefined
+  ) {
     return loader
   }
 
   return (
-    <SignedInConsole chrome={chrome} loader={loader}>
+    <SignedInConsole
+      active={active}
+      chrome={chrome}
+      convex={convex}
+      loader={loader}
+      organizations={organizations}
+    >
       {children}
     </SignedInConsole>
   )
@@ -53,18 +65,20 @@ export function ConsolePage({
  *  activates the first membership when none is, and otherwise offers
  *  creation alongside any pending invitations. */
 function SignedInConsole({
+  active,
   children,
   chrome,
+  convex,
   loader,
+  organizations,
 }: {
+  active: ReturnType<typeof useActiveOrganization>
   children: (organizationId: string) => ReactNode
   chrome: "shell" | "none"
+  convex: ReturnType<typeof useConvexSession>
   loader: ReactNode
+  organizations: ReturnType<typeof useListOrganizations>
 }) {
-  const convex = useConvexSession()
-  const active = useActiveOrganization()
-  const organizations = useListOrganizations()
-
   if (convex.isLoading || active.isPending || organizations.isPending) {
     return loader
   }

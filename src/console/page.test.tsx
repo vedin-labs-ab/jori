@@ -71,7 +71,11 @@ test("keeps signed-out users behind the loader during redirect", () => {
 
   render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
 
+  // The gate queries mount alongside the session on purpose — overlapping
+  // their round-trips is what keeps the signed-in gate parallel — so a
+  // signed-out visitor fires them too, sees only the loader, and is
+  // redirected by useAuthenticate.
   expect(screen.getByText("Loading console")).toBeDefined()
-  expect(loading.activeOrganizationQueries).toBe(0)
-  expect(loading.organizationListQueries).toBe(0)
+  expect(loading.activeOrganizationQueries).toBe(1)
+  expect(loading.organizationListQueries).toBe(1)
 })
