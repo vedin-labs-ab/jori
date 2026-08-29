@@ -6,7 +6,11 @@ import { checkOrganizationAccess } from "../access"
 import { findSingletonDocument } from "../collections/documents"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { scopeValidator } from "../shared/audience"
-import { findAccessibleStore, searchStores, summarizeStore } from "./access"
+import {
+  findAccessibleStore,
+  searchStores,
+  summarizeStoreWithOwner,
+} from "./access"
 
 export const list = query({
   args: {
@@ -38,7 +42,7 @@ export const list = query({
       status: "ready" as const,
       stores: await Promise.all(
         stores.map(async (store) => ({
-          ...summarizeStore(store),
+          ...(await summarizeStoreWithOwner(ctx, store)),
           version: (await findSingletonDocument(ctx, store._id))?.version ?? 0,
         }))
       ),
@@ -74,7 +78,7 @@ export const get = query({
     return {
       status: "ready" as const,
       store: {
-        ...summarizeStore(store),
+        ...(await summarizeStoreWithOwner(ctx, store)),
         value: (document?.value ?? null) as unknown,
         version: document?.version ?? 0,
       },
