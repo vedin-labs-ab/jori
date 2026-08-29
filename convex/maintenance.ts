@@ -44,6 +44,7 @@ const tableRegistry: Record<TableName, true> = {
   collections: true,
   documents: true,
   shares: true,
+  folders: true,
 }
 
 const tables = Object.keys(tableRegistry) as TableName[]

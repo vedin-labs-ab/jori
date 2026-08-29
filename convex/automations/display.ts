@@ -19,6 +19,7 @@ export async function toAutomationDisplay(
     scope: automationScope(automation),
     type: automation.type,
     status: automation.status,
+    folderId: automation.folderId,
     trigger: await projectTrigger(ctx, automation),
     access: await projectAccess(ctx, automation.access),
     createdAt: automation.createdAt,

@@ -82,6 +82,8 @@ export const automations = defineTable({
   access,
   trigger,
   status,
+  /** Filing only — folders carry no access semantics. */
+  folderId: v.optional(v.id("folders")),
   createdBy: v.optional(v.id("persons")),
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -101,6 +103,7 @@ export const automations = defineTable({
     "status",
     "parentId",
   ])
+  .index("by_folder", ["folderId"])
 
 export type AutomationTriggerInput = Infer<typeof triggerInput>
 export type AutomationType = Infer<typeof automationType>

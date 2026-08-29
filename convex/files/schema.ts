@@ -19,6 +19,8 @@ export const fileFields = {
   mimeType: v.string(),
   size: v.number(),
   description: v.optional(v.string()),
+  /** Filing only — folders carry no access semantics. */
+  folderId: v.optional(v.id("folders")),
 }
 
 export const files = defineTable({
@@ -28,3 +30,4 @@ export const files = defineTable({
 })
   .index("by_run", ["runId"])
   .index("by_organization_and_created_at", ["organizationId", "createdAt"])
+  .index("by_folder", ["folderId"])

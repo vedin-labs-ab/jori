@@ -10,6 +10,7 @@ import { conversations } from "./conversations/schema"
 import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
 import { events } from "./events/schema"
 import { files } from "./files/schema"
+import { folders } from "./folders/schema"
 import { integrationOffers } from "./integrations/offers/schema"
 import { integrations } from "./integrations/schema"
 import { messages } from "./messages/schema"
@@ -72,4 +73,5 @@ export default defineSchema({
   collections,
   documents,
   shares,
+  folders,
 })

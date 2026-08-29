@@ -47,6 +47,7 @@ export function summarizeStore(store: StoreDoc) {
     description: store.description,
     scope: store.scope,
     ownerId: store.ownerId,
+    folderId: store.folderId,
     schema: store.schema as JsonSchemaObject,
     schemaHash: store.schemaHash,
     createdAt: store.createdAt,

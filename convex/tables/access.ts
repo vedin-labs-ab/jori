@@ -47,6 +47,7 @@ export function summarizeTable(table: TableDoc) {
     description: table.description,
     scope: table.scope,
     ownerId: table.ownerId,
+    folderId: table.folderId,
     columns: table.columns as TableColumn[],
     createdAt: table.createdAt,
     updatedAt: table.updatedAt,
