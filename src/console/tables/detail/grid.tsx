@@ -1,5 +1,4 @@
-import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ChevronDown, Plus } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   TableBody,
@@ -87,18 +86,16 @@ export function RowGrid({
               onInspect={() => onInspectColumn(column)}
             />
           ))}
-          <TableHead className="w-10 min-w-10 p-0 text-center">
-            <Button
-              aria-label="New column"
-              className="mx-auto"
+          <TableHead className="p-0">
+            <button
+              className="flex h-10 w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground disabled:opacity-50"
               disabled={disabled}
               onClick={onAddColumn}
-              size="icon-sm"
               type="button"
-              variant="ghost"
             >
-              <Plus />
-            </Button>
+              <Plus aria-hidden className="size-3.5" />
+              New column
+            </button>
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -147,13 +144,19 @@ function HeadCell({
     >
       <button
         aria-label={`${name} column details`}
-        className="flex h-10 w-full items-center gap-1.5 px-2 text-left outline-none hover:bg-muted/50 focus-visible:bg-muted/50"
+        className="group/head flex h-10 w-full items-center gap-1.5 px-2 text-left outline-none hover:bg-muted/50 focus-visible:bg-muted/50"
         onClick={onInspect}
         type="button"
       >
         <Icon aria-hidden className="size-3.5 shrink-0 text-muted-foreground" />
         <span className="max-w-56 truncate">{name}</span>
         {isRequired ? <span className="text-muted-foreground">*</span> : null}
+        {/* Hover suffix: the header opens the column's details, and the
+            chevron is the "something opens here" cue. */}
+        <ChevronDown
+          aria-hidden
+          className="ml-auto size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-150 group-hover/head:opacity-100 group-focus-visible/head:opacity-100"
+        />
       </button>
     </TableHead>
   )
