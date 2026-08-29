@@ -5,6 +5,7 @@ import {
   draftsFromColumns,
   draftsToColumns,
   newColumnDraft,
+  renameColumn,
   validateTableForm,
 } from "./draft"
 import { type TableColumn } from "./types"
@@ -113,6 +114,19 @@ test("appending a column rejects duplicate and malformed keys", () => {
   expect(appendColumn(existing, { key: "", name: "", type: "string" })).toEqual(
     { ok: false, error: "Every column needs a key." }
   )
+})
+
+test("renaming a column touches only its display name", () => {
+  const existing: TableColumn[] = [
+    { key: "title", name: "Title", type: "string", required: true },
+    { key: "amount", name: "Amount", type: "float" },
+  ]
+
+  expect(renameColumn(existing, "amount", "Total")).toEqual([
+    existing[0],
+    { key: "amount", name: "Total", type: "float" },
+  ])
+  expect(renameColumn(existing, "amount", "  ")[1]?.name).toBe("amount")
 })
 
 function draft(overrides: Partial<ReturnType<typeof newColumnDraft>>) {

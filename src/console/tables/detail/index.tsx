@@ -4,24 +4,22 @@ import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../../convex/_generated/api"
-import { MoveResourceDialog } from "../../folders/move"
 import { ConsolePage } from "../../page"
 import { ConsolePageLayout } from "../../shared/layout"
 import { ConsoleListFooter, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { ConsoleListPager } from "../../shared/list/pager"
+import { useRowSelection } from "../../shared/list/selection"
 import { useMaterialBreadcrumb } from "../../shared/materials/breadcrumb"
 import { useMemberUrl } from "../../shared/materials/fragment"
-import { EditTableDialog } from "../edit"
 import { useTableRemoval } from "../manage"
-import { rowPageSize, type TableDetail } from "../types"
-import { AddRowDialog } from "./add"
-import { ColumnAddPopover } from "./columns"
+import { rowPageSize, type TableDetail, type TableRow } from "../types"
+import { type ColumnSheetState } from "./columns"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
 import { TableHeaderActions } from "./header"
-import { useRowAdding, useRowPages, useRowWrites } from "./rows"
-import { TableLinksDialog } from "./share"
+import { type TableDialog, TableOverlays } from "./overlays"
+import { useRowAdding, useRowBulk, useRowPages, useRowWrites } from "./rows"
 
 /** Member view of one table. The share fork wraps exactly this component,
  *  so it owns everything inside the console chrome. A visitor holding a
@@ -97,7 +95,33 @@ function TableViewContent({
   return <TableReadyView organizationId={organizationId} table={result.table} />
 }
 
-type TableDialog = "add" | "edit" | "move" | "share"
+/** One bag of page state, so the view, grid, and overlays stay small. */
+function useTablePage(organizationId: string, table: TableDetail) {
+  const pages = useRowPages(organizationId, table.tableId)
+  const writes = useRowWrites(organizationId, table.tableId)
+  const selection = useRowSelection({
+    identify: (row: TableRow) => row.rowId,
+    rows: pages.rows,
+  })
+  const [dialog, setDialog] = useState<TableDialog>()
+  const [columnSheet, setColumnSheet] = useState<ColumnSheetState>()
+
+  return {
+    adding: useRowAdding(table.columns, writes.insertRow, () =>
+      setDialog("add")
+    ),
+    bulk: useRowBulk(organizationId, table.tableId, selection),
+    columnSheet,
+    dialog,
+    exporter: useCsvExport(organizationId, table),
+    pages,
+    removal: useTableRemoval(organizationId),
+    selection,
+    setColumnSheet,
+    setDialog,
+    writes,
+  }
+}
 
 function TableReadyView({
   organizationId,
@@ -110,18 +134,11 @@ function TableReadyView({
   useMaterialBreadcrumb(table.name, table.scope)
 
   const navigate = useNavigate()
-  const pages = useRowPages(organizationId, table.tableId)
-  const writes = useRowWrites(organizationId, table.tableId)
-  const exporter = useCsvExport(organizationId, table)
-  const removal = useTableRemoval(organizationId)
-  const [dialog, setDialog] = useState<TableDialog>()
-  const adding = useRowAdding(table.columns, writes.insertRow, () =>
-    setDialog("add")
-  )
+  const page = useTablePage(organizationId, table)
   const isArchived = table.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
-    void removal.removeTable(table).then((succeeded) => {
+    void page.removal.removeTable(table).then((succeeded) => {
       if (succeeded && isArchived) {
         void navigate({ to: "/tables" })
       }
@@ -132,129 +149,62 @@ function TableReadyView({
     <ConsoleListLayout>
       <TableHeaderActions
         isArchived={isArchived}
-        isExporting={exporter.isExporting}
-        onAdd={() => void adding.addRow()}
+        isExporting={page.exporter.isExporting}
+        onAdd={() => void page.adding.addRow()}
         onDelete={removeAndLeaveWhenDeleted}
-        onEdit={() => setDialog("edit")}
-        onExport={() => void exporter.exportCsv()}
-        onMoveToFolder={() => setDialog("move")}
-        onShare={() => setDialog("share")}
-        removal={removal}
+        onEdit={() => page.setDialog("edit")}
+        onExport={() => void page.exporter.exportCsv()}
+        onMoveToFolder={() => page.setDialog("move")}
+        onShare={() => page.setDialog("share")}
+        removal={page.removal}
         table={table}
       />
-      <TableGrid
-        adding={adding}
-        isArchived={isArchived}
-        organizationId={organizationId}
-        pages={pages}
-        table={table}
-        writes={writes}
-      />
+      <TableGrid isArchived={isArchived} page={page} table={table} />
       <ConsoleListFooter>
-        <ConsoleListPager pagination={pages} />
+        <ConsoleListPager pagination={page.pages} />
       </ConsoleListFooter>
-      <TableDialogs
-        dialog={dialog}
-        onClose={() => setDialog(undefined)}
+      <TableOverlays
+        bulk={page.bulk}
+        columnSheet={page.columnSheet}
+        dialog={page.dialog}
+        onCloseDialog={() => page.setDialog(undefined)}
+        onColumnSheet={page.setColumnSheet}
         organizationId={organizationId}
+        selection={page.selection}
         table={table}
-        writes={writes}
+        writes={page.writes}
       />
     </ConsoleListLayout>
   )
 }
 
 function TableGrid({
-  adding,
   isArchived,
-  organizationId,
-  pages,
+  page,
   table,
-  writes,
 }: {
-  adding: ReturnType<typeof useRowAdding>
   isArchived: boolean
-  organizationId: string
-  pages: ReturnType<typeof useRowPages>
+  page: ReturnType<typeof useTablePage>
   table: TableDetail
-  writes: ReturnType<typeof useRowWrites>
 }) {
   return (
     <RowGrid
-      columnAdder={
-        <ColumnAddPopover
-          disabled={isArchived}
-          organizationId={organizationId}
-          table={table}
-        />
-      }
       columns={table.columns}
       disabled={isArchived}
-      freshRowId={adding.freshRowId}
-      isLoading={pages.isLoading}
-      offset={pages.pageIndex * rowPageSize}
-      onAddRow={() => void adding.addRow()}
-      onCommit={writes.updateCell}
-      onDeleteRow={(row) => void writes.deleteRow(row)}
-      onFreshSettled={adding.settle}
-      pendingRowId={writes.pendingRowId}
-      rows={pages.rows}
+      freshRowId={page.adding.freshRowId}
+      isLoading={page.pages.isLoading}
+      offset={page.pages.pageIndex * rowPageSize}
+      onAddColumn={() => page.setColumnSheet({ mode: "create" })}
+      onAddRow={() => void page.adding.addRow()}
+      onCommit={page.writes.updateCell}
+      onDeleteRow={(row) => void page.writes.deleteRow(row)}
+      onFreshSettled={page.adding.settle}
+      onInspectColumn={(column) =>
+        page.setColumnSheet({ mode: "edit", key: column.key })
+      }
+      pendingRowId={page.writes.pendingRowId}
+      rows={page.pages.rows}
+      selection={page.selection}
     />
-  )
-}
-
-function TableDialogs({
-  dialog,
-  onClose,
-  organizationId,
-  table,
-  writes,
-}: {
-  dialog: TableDialog | undefined
-  onClose: () => void
-  organizationId: string
-  table: TableDetail
-  writes: ReturnType<typeof useRowWrites>
-}) {
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
-
-  return (
-    <>
-      <AddRowDialog
-        columns={table.columns}
-        isOpen={dialog === "add"}
-        onOpenChange={closeWhenDismissed}
-        onSubmit={writes.insertRow}
-      />
-      <EditTableDialog
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-        table={dialog === "edit" ? table : undefined}
-      />
-      <TableLinksDialog
-        onOpenChange={closeWhenDismissed}
-        open={dialog === "share"}
-        organizationId={organizationId}
-        tableId={table.tableId}
-      />
-      <MoveResourceDialog
-        onClose={onClose}
-        organizationId={organizationId}
-        resource={
-          dialog === "move"
-            ? {
-                resourceType: "collection",
-                resourceId: table.tableId,
-                name: table.name,
-                folderId: table.folderId,
-              }
-            : undefined
-        }
-      />
-    </>
   )
 }

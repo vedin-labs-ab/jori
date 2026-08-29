@@ -80,7 +80,8 @@ export type SelectionRemoval = {
 
 /** Floating action bar for an active selection, anchored to the bottom of
  *  a ConsoleListLayout. Removing confirms first; moving hands off to the
- *  page's move dialog. */
+ *  page's move dialog. Move and Download only render for pages that pass
+ *  them. */
 export function SelectionActionsBar({
   count,
   isBusy,
@@ -95,8 +96,8 @@ export function SelectionActionsBar({
   isBusy: boolean
   noun: { plural: string; singular: string }
   onClear: () => void
-  onDownload: () => void
-  onMove: () => void
+  onDownload?: () => void
+  onMove?: () => void
   onRemove: () => void
   removal: SelectionRemoval
 }) {
@@ -118,24 +119,28 @@ export function SelectionActionsBar({
           className="data-vertical:h-4 data-vertical:self-auto"
           orientation="vertical"
         />
-        <Button
-          disabled={isBusy}
-          onClick={onMove}
-          type="button"
-          variant="ghost"
-        >
-          <FolderInput />
-          Move
-        </Button>
-        <Button
-          disabled={isBusy}
-          onClick={onDownload}
-          type="button"
-          variant="ghost"
-        >
-          {isBusy ? <Loader2 className="animate-spin" /> : <Download />}
-          Download
-        </Button>
+        {onMove === undefined ? null : (
+          <Button
+            disabled={isBusy}
+            onClick={onMove}
+            type="button"
+            variant="ghost"
+          >
+            <FolderInput />
+            Move
+          </Button>
+        )}
+        {onDownload === undefined ? null : (
+          <Button
+            disabled={isBusy}
+            onClick={onDownload}
+            type="button"
+            variant="ghost"
+          >
+            {isBusy ? <Loader2 className="animate-spin" /> : <Download />}
+            Download
+          </Button>
+        )}
         <SelectionRemoveButton
           count={count}
           isBusy={isBusy}

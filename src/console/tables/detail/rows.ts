@@ -4,6 +4,8 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
+import { countNoun, useBulkRunner } from "../../shared/list/bulk"
+import { type RowSelection } from "../../shared/list/selection"
 import {
   conflictMessage,
   isVersionConflict,
@@ -166,6 +168,42 @@ export function useRowAdding(
     freshRowId,
     settle: () => setFreshRowId(undefined),
   }
+}
+
+export const rowNoun = { plural: "rows", singular: "row" }
+
+/** The selection bar's delete action: one per-row delete mutation per
+ *  selected row through the shared bulk runner, summarized in one toast.
+ *  Rows that disappear drop out of the selection on their own. */
+export function useRowBulk(
+  organizationId: string,
+  tableId: GenericId<"collections">,
+  selection: RowSelection<TableRow>
+) {
+  const remove = useMutation(api.tables.console.removeRow)
+  const runner = useBulkRunner()
+
+  function removeSelected() {
+    const rows = selection.selected
+
+    void runner.run(
+      rows,
+      (row) =>
+        remove({
+          organizationId,
+          tableId,
+          rowId: row.rowId,
+          expectedVersion: row.version,
+        }),
+      {
+        noun: rowNoun.plural,
+        success: `Deleted ${countNoun(rows.length, rowNoun)}.`,
+        verb: "delete",
+      }
+    )
+  }
+
+  return { isBusy: runner.isBusy, removeSelected }
 }
 
 async function run<Result>(
