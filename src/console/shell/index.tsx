@@ -44,7 +44,15 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           keeping the provider's flex layout intact. */}
       <FolderDragProvider>
         <ConsoleSidebar pathname={pathname} />
-        <SidebarInset className="min-h-0" id={mainContentId} tabIndex={-1}>
+        {/* isolate keeps page z-indexes (sticky table headers, the
+            selection bar) inside the inset's own stacking context, so
+            full-bleed content can't outpaint the sidebar rail's hover
+            strip at the boundary. */}
+        <SidebarInset
+          className="min-h-0 isolate"
+          id={mainContentId}
+          tabIndex={-1}
+        >
           {/* Constant compact height in the shadcn dashboard-block style;
               the sidebar-block h-16→h-12 dance made the chrome feel tall
               and shift with sidebar state. */}
