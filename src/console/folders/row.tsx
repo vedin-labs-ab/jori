@@ -1,10 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import {
   ChevronRight,
-  Folder,
-  FolderDot,
   FolderInput,
-  FolderOpen,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -27,7 +24,7 @@ import { NewInFolderSub } from "./create/menu"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { type FolderDialogRequest } from "./manage"
 import { type FolderNode } from "./tree"
-import { type FolderRow } from "./types"
+import { type FolderRow, folderIcon } from "./types"
 
 export type FolderExpansion = {
   expand: (folderId: string) => void
@@ -131,9 +128,7 @@ function FolderRowLink({
   name: string
   onNavigate: () => void
 }) {
-  // A dotted icon is the only cue that a collapsed folder holds anything —
-  // subfolders or filed resources; expansion keeps the open-folder icon.
-  const FolderIcon = isExpanded ? FolderOpen : hasContents ? FolderDot : Folder
+  const FolderIcon = folderIcon(hasContents, isExpanded)
 
   return (
     <SidebarMenuButton

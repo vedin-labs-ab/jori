@@ -26,25 +26,41 @@ async function seedFolder(
   return folderId
 }
 
-test("subfolders come back name-sorted", async () => {
+test("subfolders come back name-sorted, marking the ones that hold anything", async () => {
   const { database, ctx } = databaseContext()
   const folderId = await seedFolder(database)
 
-  await database.insert(
+  const zetaId = (await database.insert(
     "folders",
     folderDoc({ parentId: folderId, name: "Zeta" })
-  )
-  await database.insert(
+  )) as Id<"folders">
+  const alphaId = (await database.insert(
     "folders",
     folderDoc({ parentId: folderId, name: "Alpha" })
+  )) as Id<"folders">
+
+  await database.insert(
+    "folders",
+    folderDoc({ parentId: folderId, name: "Empty" })
   )
+  // Zeta holds only a subfolder, Alpha only a filed resource: both signals
+  // must mark a child folder on its own.
+  await database.insert(
+    "folders",
+    folderDoc({ parentId: zetaId, name: "Deep" })
+  )
+  await database.insert("files", fileDoc({ folderId: alphaId }))
 
   const children = await folderChildren(ctx, {
     organizationId: "org",
     folderId,
   })
 
-  expect(children.map((child) => child.name)).toEqual(["Alpha", "Zeta"])
+  expect(children.map((child) => [child.name, child.hasContents])).toEqual([
+    ["Alpha", true],
+    ["Empty", false],
+    ["Zeta", true],
+  ])
 })
 
 test("resources carry their type and display extras, name-sorted", async () => {

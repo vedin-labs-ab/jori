@@ -45,13 +45,14 @@ export async function folderChildren(
     )
     .take(treeCap)
 
-  return children.map(summarizeFolder).sort(byName)
+  return (await summarizeTree(ctx, children)).sort(byName)
 }
 
-/** One tree row per listed folder: the summary plus a single honest signal
- *  — whether anything sits inside it, meaning a subfolder in the listing or
- *  any filed resource. Existence only, so each empty folder costs one cheap
- *  indexed probe per filed table and folders with subfolders cost none. */
+/** One listing row per folder: the summary plus a single honest signal —
+ *  whether anything sits inside it, meaning a subfolder or any filed
+ *  resource. Existence only: a folder whose subfolder is also listed costs
+ *  nothing, the rest at most one cheap indexed probe per filed table plus
+ *  one for subfolders. */
 export async function summarizeTree(
   ctx: QueryLikeCtx,
   folders: Doc<"folders">[]
@@ -62,9 +63,24 @@ export async function summarizeTree(
     folders.map(async (folder) => ({
       ...summarizeFolder(folder),
       hasContents:
-        parentIds.has(folder._id) || (await hasFiledResources(ctx, folder._id)),
+        parentIds.has(folder._id) ||
+        (await hasFiledResources(ctx, folder._id)) ||
+        (await hasSubfolders(ctx, folder)),
     }))
   )
+}
+
+async function hasSubfolders(ctx: QueryLikeCtx, folder: Doc<"folders">) {
+  const child = await ctx.db
+    .query("folders")
+    .withIndex("by_organization_and_parent", (index) =>
+      index
+        .eq("organizationId", folder.organizationId)
+        .eq("parentId", folder._id)
+    )
+    .first()
+
+  return child !== null
 }
 
 async function hasFiledResources(ctx: QueryLikeCtx, folderId: Id<"folders">) {
