@@ -15,8 +15,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useActiveOrganization } from "@/shared/session/auth"
 import { api } from "../../../convex/_generated/api"
-import { FolderDragProvider } from "./drag/context"
-import { useRootDrop } from "./drag/state"
+import { useExpandHoverHandler, useRootDrop } from "./drag/state"
 import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { type FolderExpansion, FolderTreeItem } from "./row"
@@ -47,18 +46,17 @@ function FoldersGroup({
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const expansion = useFolderExpansion(activeFolderId(pathname), folders)
   const leaveDeletedFolder = useLeaveDeletedFolder(activeFolderId(pathname))
-  const expandOnHover = useExpandOnHover(folders, expansion)
+
+  // The drag context lives at the shell, above both panes; hand it this
+  // tree's dwell-to-expand handler so drags can descend into the sidebar.
+  useExpandHoverHandler(useExpandOnHover(folders, expansion))
 
   if (tree !== undefined && tree.status !== "ready") {
     return null
   }
 
   return (
-    <FolderDragProvider
-      folders={folders ?? []}
-      onExpandHover={expandOnHover}
-      organizationId={organizationId}
-    >
+    <>
       {/* The tree is a hover-and-drag surface with no icon-rail form, so
           icon-collapsed mode swaps the whole group for one Folders entry
           and navigation continues on the /folders page. */}
@@ -107,7 +105,7 @@ function FoldersGroup({
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
-    </FolderDragProvider>
+    </>
   )
 }
 
@@ -145,8 +143,8 @@ function useExpandOnHover(
   )
 
   return (folderId: string) => {
-    if (parentIds.has(folderId) && !expansion.isExpanded(folderId)) {
-      expansion.toggle(folderId)
+    if (parentIds.has(folderId)) {
+      expansion.expand(folderId)
     }
   }
 }
@@ -245,6 +243,14 @@ function useFolderExpansion(
   }, [activeId, folders])
 
   return {
+    // Expand-only, for actions that reveal (navigation clicks, deep
+    // links); collapsing stays exclusively the chevron's toggle.
+    expand: (folderId) => {
+      if (!sessionExpanded.has(folderId)) {
+        sessionExpanded.add(folderId)
+        setExpanded(new Set(sessionExpanded))
+      }
+    },
     isExpanded: (folderId) => expanded.has(folderId),
     toggle: (folderId) => {
       if (sessionExpanded.has(folderId)) {

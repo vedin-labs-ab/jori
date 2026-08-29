@@ -1,4 +1,6 @@
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
+import { CalendarClock, Database, type LucideIcon, Table2 } from "lucide-react"
+import { fileKind } from "@/shared/files/kind"
 import { type api } from "../../../convex/_generated/api"
 
 export type FolderRow = FunctionReturnType<
@@ -19,10 +21,27 @@ export type FiledResourceType = FunctionArgs<
   typeof api.folders.console.file
 >["resourceType"]
 
-export function toFiledType(resource: FolderResource): FiledResourceType {
-  return resource.type === "table" || resource.type === "store"
-    ? "collection"
-    : resource.type
+export function toFiledType(type: FolderResource["type"]): FiledResourceType {
+  return type === "table" || type === "store" ? "collection" : type
+}
+
+/** How a filed resource presents in lists and drag ghosts. The parameter
+ *  is structural so both full rows and drag payloads fit. */
+export function resourcePresentation(resource: {
+  type: FolderResource["type"]
+  name: string
+  mimeType?: string
+}): { icon: LucideIcon; label: string } {
+  switch (resource.type) {
+    case "table":
+      return { icon: Table2, label: "Table" }
+    case "store":
+      return { icon: Database, label: "Store" }
+    case "file":
+      return fileKind(resource.mimeType ?? "", resource.name)
+    case "automation":
+      return { icon: CalendarClock, label: "Automation" }
+  }
 }
 
 /** A filed resource as the move dialog sees it: what to re-file, plus

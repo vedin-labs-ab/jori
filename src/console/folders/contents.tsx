@@ -1,13 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import {
-  CalendarClock,
-  Database,
-  Folder,
-  FolderInput,
-  FolderMinus,
-  MoreHorizontal,
-  Table2,
-} from "lucide-react"
+import { Folder, FolderInput, FolderMinus, MoreHorizontal } from "lucide-react"
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -27,22 +19,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { fileKind } from "@/shared/files/kind"
+import { cn } from "@/lib/utils"
 import { ConsoleEmptyState } from "../shared/list/empty"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { MaterialScopeMark } from "../shared/materials/scope"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
-import { type FolderContentsResult, type FolderResource } from "./types"
+import { type ResourceDragPayload } from "./drag/plan"
+import { useFolderRowDrag, useResourceRowDrag } from "./drag/state"
+import {
+  type FolderContentsResult,
+  type FolderResource,
+  resourcePresentation,
+} from "./types"
 
 /** A folder's listing: subfolders first, then the filed resources in one
- *  name-sorted run, each linking to its own surface. */
+ *  name-sorted run, each linking to its own surface. Rows drag: subfolders
+ *  move like sidebar rows, resources file onto any folder row or unfile
+ *  onto the sidebar's group header. */
 export function FolderContents({
   contents,
+  folderId,
   newMenu,
   onMove,
   onUnfile,
 }: {
   contents: FolderContentsResult | undefined
+  /** The folder being viewed — the one filed resources already sit in. */
+  folderId: string
   /** The header's "New" menu again, as the empty state's call to action. */
   newMenu: ReactNode
   onMove: (resource: FolderResource) => void
@@ -93,6 +96,7 @@ export function FolderContents({
           ))}
           {contents.resources.map((resource) => (
             <ResourceRow
+              folderId={folderId}
               key={resource.id}
               onMove={onMove}
               onUnfile={onUnfile}
@@ -105,18 +109,46 @@ export function FolderContents({
   )
 }
 
+/** Drag styling for a listing row, mirroring the sidebar's: the source
+ *  dims, the hovered valid target takes the accent, plain hover goes quiet
+ *  while a drag runs, and a landed move fades the row in where it settled
+ *  — unless the user prefers reduced motion. */
+function rowDragClasses(drag: {
+  isDragActive: boolean
+  isDragSource: boolean
+  isDropTarget?: boolean
+  isSettling?: boolean
+}) {
+  return cn(
+    drag.isDragActive && !drag.isDropTarget && "hover:bg-transparent",
+    drag.isDragSource && "opacity-50",
+    drag.isDropTarget && "bg-accent",
+    drag.isSettling &&
+      "motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+  )
+}
+
 function SubfolderRow({
   folder,
 }: {
   folder: FolderContentsResult["folders"][number]
 }) {
+  const drag = useFolderRowDrag("contents", folder.folderId, folder.name)
   const now = useNow(30_000)
 
   return (
-    <TableRow>
+    <TableRow
+      {...drag.attributes}
+      {...drag.listeners}
+      className={rowDragClasses(drag)}
+      onClickCapture={drag.onClickCapture}
+      onPointerDownCapture={drag.onPointerDownCapture}
+      ref={drag.setNodeRef}
+    >
       <TableCell className="max-w-64">
         <Link
           className="flex items-center gap-2 font-medium hover:underline"
+          draggable={false}
           params={{ folderId: folder.folderId }}
           title={folder.name}
           to="/folders/$folderId"
@@ -138,24 +170,34 @@ function SubfolderRow({
 }
 
 function ResourceRow({
+  folderId,
   onMove,
   onUnfile,
   resource,
 }: {
+  folderId: string
   onMove: (resource: FolderResource) => void
   onUnfile: (resource: FolderResource) => void
   resource: FolderResource
 }) {
+  const drag = useResourceRowDrag(resourcePayload(resource, folderId))
   const now = useNow(30_000)
 
   return (
-    <TableRow>
+    <TableRow
+      {...drag.attributes}
+      {...drag.listeners}
+      className={rowDragClasses(drag)}
+      onClickCapture={drag.onClickCapture}
+      onPointerDownCapture={drag.onPointerDownCapture}
+      ref={drag.setNodeRef}
+    >
       <TableCell className="max-w-64">
         <ResourceLink resource={resource} />
       </TableCell>
       <TableCell className="text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
-          {resourceKindLabel(resource)}
+          {resourcePresentation(resource).label}
           {resource.status === "paused" || resource.status === "completed" ? (
             <Badge variant="secondary">
               {resource.status === "paused" ? "Paused" : "Completed"}
@@ -197,10 +239,24 @@ function ResourceRow({
   )
 }
 
+function resourcePayload(
+  resource: FolderResource,
+  folderId: string
+): ResourceDragPayload {
+  return {
+    kind: "resource",
+    type: resource.type,
+    id: resource.id,
+    name: resource.name,
+    mimeType: resource.mimeType,
+    folderId,
+  }
+}
+
 /** The resource's own surface. Automations have no detail page — their list
  *  opens the editor — so an automation row lands on the list. */
 function ResourceLink({ resource }: { resource: FolderResource }) {
-  const Icon = resourceIcon(resource)
+  const Icon = resourcePresentation(resource).icon
   const label = (
     <>
       <Icon className="size-4 shrink-0 text-muted-foreground" />
@@ -217,6 +273,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
       return (
         <Link
           className={className}
+          draggable={false}
           params={{ tableId: resource.id }}
           title={resource.name}
           to="/tables/$tableId"
@@ -228,6 +285,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
       return (
         <Link
           className={className}
+          draggable={false}
           params={{ storeId: resource.id }}
           title={resource.name}
           to="/stores/$storeId"
@@ -239,6 +297,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
       return (
         <Link
           className={className}
+          draggable={false}
           params={{ fileId: resource.id }}
           title={resource.name}
           to="/files/$fileId"
@@ -248,35 +307,14 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
       )
     case "automation":
       return (
-        <Link className={className} title={resource.name} to="/automations">
+        <Link
+          className={className}
+          draggable={false}
+          title={resource.name}
+          to="/automations"
+        >
           {label}
         </Link>
       )
-  }
-}
-
-function resourceIcon(resource: FolderResource) {
-  switch (resource.type) {
-    case "table":
-      return Table2
-    case "store":
-      return Database
-    case "file":
-      return fileKind(resource.mimeType ?? "", resource.name).icon
-    case "automation":
-      return CalendarClock
-  }
-}
-
-function resourceKindLabel(resource: FolderResource) {
-  switch (resource.type) {
-    case "table":
-      return "Table"
-    case "store":
-      return "Store"
-    case "file":
-      return fileKind(resource.mimeType ?? "", resource.name).label
-    case "automation":
-      return "Automation"
   }
 }

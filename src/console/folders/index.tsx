@@ -118,6 +118,7 @@ function FolderReadyView({
       <ConsoleScrollableGrid>
         <FolderContents
           contents={contents}
+          folderId={folder.folderId}
           newMenu={
             <NewInFolderMenu
               folderId={folder.folderId}
@@ -163,7 +164,7 @@ function movingResource(
   return resource === undefined
     ? undefined
     : {
-        resourceType: toFiledType(resource),
+        resourceType: toFiledType(resource.type),
         resourceId: resource.id,
         name: resource.name,
         folderId: folder.folderId,
@@ -219,7 +220,7 @@ function useUnfileResource(organizationId: string, folder: FolderDetail) {
   return (resource: FolderResource) => {
     void file({
       organizationId,
-      resourceType: toFiledType(resource),
+      resourceType: toFiledType(resource.type),
       resourceId: resource.id,
       folderId: null,
     })

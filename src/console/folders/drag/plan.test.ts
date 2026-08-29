@@ -1,5 +1,11 @@
 import { expect, test } from "vitest"
-import { hoverTarget, planDrop, rootDropId } from "./plan"
+import {
+  blockedFolderIds,
+  hoverTarget,
+  planDrop,
+  planFileDrop,
+  type ResourceDragPayload,
+} from "./plan"
 
 const folders = [
   { folderId: "ops", name: "Operations" },
@@ -54,18 +60,62 @@ test("blocks every descendant across the full depth-8 chain", () => {
   })
 })
 
-test("dwells on a droppable folder row", () => {
-  expect(hoverTarget(new Set(), "finance")).toBe("finance")
+const filedReport: ResourceDragPayload = {
+  kind: "resource",
+  type: "file",
+  id: "report",
+  name: "report.pdf",
+  folderId: "invoices",
+}
+
+test("plans re-filing a resource onto another folder", () => {
+  expect(planFileDrop(filedReport, "finance")).toEqual({ folderId: "finance" })
+})
+
+test("plans unfiling a resource dropped on the root header", () => {
+  expect(planFileDrop(filedReport, null)).toEqual({ folderId: null })
+})
+
+test("ignores a resource dropped on the folder it already sits in", () => {
+  expect(planFileDrop(filedReport, "invoices")).toBeUndefined()
+})
+
+test("a dragged folder is blocked from its own subtree", () => {
+  expect(
+    blockedFolderIds(folders, {
+      kind: "folder",
+      folderId: "finance",
+      name: "Finance",
+    })
+  ).toEqual(new Set(["finance", "invoices", "archive"]))
+})
+
+test("a dragged resource is blocked only from its current folder", () => {
+  expect(blockedFolderIds(folders, filedReport)).toEqual(new Set(["invoices"]))
+})
+
+test("dwells on a droppable sidebar folder row", () => {
+  expect(hoverTarget(new Set(), { folderId: "finance", expands: true })).toBe(
+    "finance"
+  )
 })
 
 test("does not dwell on the root header", () => {
-  expect(hoverTarget(new Set(), rootDropId)).toBeNull()
+  expect(hoverTarget(new Set(), { folderId: null, expands: false })).toBeNull()
 })
 
 test("does not dwell between rows", () => {
   expect(hoverTarget(new Set(), undefined)).toBeNull()
 })
 
-test("does not dwell on the dragged subtree", () => {
-  expect(hoverTarget(new Set(["finance"]), "finance")).toBeNull()
+test("does not dwell on folder-page rows, which cannot unfold", () => {
+  expect(
+    hoverTarget(new Set(), { folderId: "finance", expands: false })
+  ).toBeNull()
+})
+
+test("does not dwell on a blocked row", () => {
+  expect(
+    hoverTarget(new Set(["finance"]), { folderId: "finance", expands: true })
+  ).toBeNull()
 })
