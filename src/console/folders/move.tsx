@@ -108,6 +108,7 @@ function MoveDialogBody({
         </div>
       ) : (
         <FolderPicker
+          className="rounded-md border p-1"
           currentId={currentId}
           disabledIds={
             subject.kind === "folder"
