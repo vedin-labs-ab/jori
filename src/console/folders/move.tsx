@@ -20,8 +20,9 @@ import { FolderPicker } from "./picker"
 import { subtreeFolderIds } from "./tree"
 import { type MoveResourceTarget, type MoveSubject } from "./types"
 
-/** MoveToFolderDialog specialized for one filed resource: pass the resource
- *  to open, and it closes by clearing it. */
+/** MoveResourcesDialog specialized for exactly one resource, for hosts
+ *  whose move affordance is inherently singular (detail pages, row menus
+ *  outside a selectable list). */
 export function MoveResourceDialog({
   onClose,
   organizationId,
@@ -32,6 +33,27 @@ export function MoveResourceDialog({
   resource: MoveResourceTarget | undefined
 }) {
   return (
+    <MoveResourcesDialog
+      onClose={onClose}
+      organizationId={organizationId}
+      resources={resource === undefined ? undefined : [resource]}
+    />
+  )
+}
+
+/** MoveToFolderDialog specialized for filed resources — a single row's
+ *  "Move to folder…" and a bulk selection both pass through here. Pass the
+ *  resources to open; it closes by clearing them. */
+export function MoveResourcesDialog({
+  onClose,
+  organizationId,
+  resources,
+}: {
+  onClose: () => void
+  organizationId: string
+  resources: MoveResourceTarget[] | undefined
+}) {
+  return (
     <MoveToFolderDialog
       onOpenChange={(open) => {
         if (!open) {
@@ -40,7 +62,9 @@ export function MoveResourceDialog({
       }}
       organizationId={organizationId}
       subject={
-        resource === undefined ? undefined : { kind: "resource", ...resource }
+        resources === undefined || resources.length === 0
+          ? undefined
+          : { kind: "resources", resources }
       }
     />
   )
@@ -89,15 +113,15 @@ function MoveDialogBody({
   const tree = useQuery(api.folders.console.tree, { organizationId })
   const move = useMoveSubject(organizationId, subject, onClose)
   const currentId = currentFolderId(subject)
-  const [selectedId, setSelectedId] = useState<string | null>(currentId)
+  const [selectedId, setSelectedId] = useState<string | null>(currentId ?? null)
   const folders = tree?.status === "ready" ? tree.folders : undefined
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Move "{subject.name}"</DialogTitle>
+        <DialogTitle>Move {subjectName(subject)}</DialogTitle>
         <DialogDescription>
-          Choose the folder it should live in.
+          Choose the folder {isPlural(subject) ? "they" : "it"} should live in.
         </DialogDescription>
       </DialogHeader>
       {folders === undefined ? (
@@ -157,18 +181,22 @@ function useMoveSubject(
           parentId: folderId,
         })
       } else {
-        await fileResource({
-          organizationId,
-          resourceType: subject.resourceType,
-          resourceId: subject.resourceId,
-          folderId,
-        })
+        await Promise.all(
+          subject.resources.map((resource) =>
+            fileResource({
+              organizationId,
+              resourceType: resource.resourceType,
+              resourceId: resource.resourceId,
+              folderId,
+            })
+          )
+        )
       }
 
-      toast.success(`Moved ${subject.name}.`)
+      toast.success(`Moved ${subjectName(subject)}.`)
       onMoved()
     } catch (error) {
-      showErrorToast(error, `Could not move ${subject.name}.`)
+      showErrorToast(error, `Could not move ${subjectName(subject)}.`)
     } finally {
       setIsMoving(false)
     }
@@ -177,15 +205,42 @@ function useMoveSubject(
   return { isMoving, submit }
 }
 
+/** How the dialog names its subject: quoted for a single item, a count for
+ *  a bulk selection. */
+function subjectName(subject: MoveSubject) {
+  if (subject.kind === "folder") {
+    return `"${subject.name}"`
+  }
+
+  return subject.resources.length === 1
+    ? `"${subject.resources[0].name}"`
+    : `${subject.resources.length} items`
+}
+
+function isPlural(subject: MoveSubject) {
+  return subject.kind === "resources" && subject.resources.length > 1
+}
+
+/** Where the subject lives today, marked in the picker and blocked as a
+ *  no-op destination. Resources spread across folders have no single home,
+ *  so nothing is marked and every destination stays open. */
 function currentFolderId(subject: MoveSubject) {
-  return (
-    (subject.kind === "folder" ? subject.parentId : subject.folderId) ?? null
+  if (subject.kind === "folder") {
+    return subject.parentId ?? null
+  }
+
+  const homes = new Set(
+    subject.resources.map((resource) => resource.folderId ?? null)
   )
+
+  return homes.size === 1 ? (subject.resources[0].folderId ?? null) : undefined
 }
 
 /** Remounts the body per subject so the selection resets with it. */
 function subjectKey(subject: MoveSubject) {
   return subject.kind === "folder"
     ? `folder:${subject.folderId}`
-    : `${subject.resourceType}:${subject.resourceId}`
+    : subject.resources
+        .map((resource) => `${resource.resourceType}:${resource.resourceId}`)
+        .join("+")
 }

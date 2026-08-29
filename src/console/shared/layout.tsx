@@ -16,13 +16,18 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
+/** Standard padded console page. List pages that want the full-bleed
+ *  table treatment use ConsoleListLayout from list/frame instead. */
 export function ConsolePageLayout({
   className,
   ...props
 }: ComponentProps<"section">) {
   return (
     <section
-      className={cn("flex min-h-0 min-w-0 flex-1 flex-col gap-4", className)}
+      className={cn(
+        "flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-6 md:px-6",
+        className
+      )}
       {...props}
     />
   )

@@ -111,21 +111,21 @@ function OrganizationMenu({
   )
 }
 
-/** Compact switcher trigger in the sidebar-10 style: small logo, the name
- *  inline, and one chevron right after it. `w-fit` keeps the chevron beside
- *  the name; `max-w-full` still truncates a long organization name. In the
- *  icon-collapsed sidebar the button squares off and shows the logo alone,
- *  with the collapsed padding eased so the logo fits. */
+/** Compact switcher trigger in the sidebar-10 style: small logo and the
+ *  name inline across the sidebar's full width, with the chevron pinned to
+ *  the far end. In the icon-collapsed sidebar the button squares off and
+ *  shows the logo alone, with the collapsed padding eased so the logo
+ *  fits. */
 function OrganizationMenuTrigger({ switching }: { switching: boolean }) {
   return (
     <DropdownMenuTrigger asChild>
       <SidebarMenuButton
         aria-busy={switching}
-        className="w-fit max-w-full px-1.5 group-data-[collapsible=icon]:p-1! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        className="px-1.5 group-data-[collapsible=icon]:p-1! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         disabled={switching}
       >
         <OrganizationView className="min-w-0" hideRole hideSlug size="sm" />
-        <ChevronDown className="opacity-50 group-data-[collapsible=icon]:hidden" />
+        <ChevronDown className="ml-auto opacity-50 group-data-[collapsible=icon]:hidden" />
       </SidebarMenuButton>
     </DropdownMenuTrigger>
   )

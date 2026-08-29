@@ -67,14 +67,14 @@ beforeEach(() => {
 
 afterEach(cleanup)
 
-test("renders the compact trigger that hugs the name", () => {
+test("renders the trigger across the sidebar's full width", () => {
   render(<SidebarOrganizationSwitcher />)
 
   const trigger = screen.getByRole("button", { name: /Vedin Labs/ })
-  // The sidebar-10 style trigger: fit-width so the chevron sits right after
-  // the name, but never wider than the sidebar so long names truncate.
-  expect(trigger.className).toContain("w-fit")
-  expect(trigger.className).toContain("max-w-full")
+  // The trigger spans the sidebar (SidebarMenuButton's default width),
+  // with the chevron pushed to the far end.
+  expect(trigger.className).not.toContain("w-fit")
+  expect(trigger.querySelector("svg.ml-auto")).not.toBeNull()
 })
 
 test("keeps the switcher open with a stable pending organization row", async () => {

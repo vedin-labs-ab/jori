@@ -52,7 +52,7 @@ export function summarizeStore(store: StoreDoc) {
     folderId: store.folderId,
     schema: store.schema as JsonSchemaObject,
     schemaHash: store.schemaHash,
-    propertyCount: countTopLevelProperties(store.schema as JsonSchemaObject),
+    propertyCount: countLeafProperties(store.schema as JsonSchemaObject),
     createdAt: store.createdAt,
     updatedAt: store.updatedAt,
     archivedAt: store.archivedAt,
@@ -74,10 +74,38 @@ export async function summarizeStoreWithOwner(
   }
 }
 
-/** How many properties the schema's object root declares; nested objects
- *  count as one, and a schema without a properties object counts zero. */
-function countTopLevelProperties(schema: JsonSchemaObject) {
-  return isRecord(schema.properties) ? Object.keys(schema.properties).length : 0
+/** How many leaf properties the schema declares — the actual writable
+ *  value slots. Objects are structure and don't count themselves; arrays
+ *  count their item shape once, since repetition is data, not schema. A
+ *  schema without a properties object counts zero. */
+function countLeafProperties(schema: JsonSchemaObject) {
+  return isRecord(schema.properties) ? countChildLeaves(schema.properties) : 0
+}
+
+/** A node's slots: objects with declared properties recurse, arrays defer
+ *  to their item shape, and anything else — scalars, free-form objects,
+ *  untyped nodes — is one slot. */
+function countNodeLeaves(node: unknown): number {
+  if (!isRecord(node)) {
+    return 1
+  }
+
+  if (isRecord(node.properties)) {
+    return countChildLeaves(node.properties)
+  }
+
+  if (isRecord(node.items)) {
+    return countNodeLeaves(node.items)
+  }
+
+  return 1
+}
+
+function countChildLeaves(properties: Record<string, unknown>) {
+  return Object.values(properties).reduce<number>(
+    (total, child) => total + countNodeLeaves(child),
+    0
+  )
 }
 
 function toCollectionArgs(args: StoreArgs) {

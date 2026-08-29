@@ -1,25 +1,35 @@
 import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
-import { MoveResourceDialog } from "../folders/move"
+import { MoveResourcesDialog } from "../folders/move"
+import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
-import { ConsolePageLayout, ConsoleScrollableGrid } from "../shared/layout"
+import { SelectionActionsBar } from "../shared/list/bar"
+import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListPager } from "../shared/list/pager"
 import {
   useClientPagination,
   useResettingSetter,
 } from "../shared/list/pagination"
 import { matchesScopeFilter, type ScopeFilter } from "../shared/list/scope"
+import { type RowSelection, useRowSelection } from "../shared/list/selection"
 import {
   type ArchiveFilter,
   hasMaterialFilters,
   matchesArchiveFilter,
   shouldIncludeArchived,
 } from "../shared/materials/archive"
+import { useFolderNames } from "../shared/materials/folders"
+import { bulkMaterialRemoval } from "../shared/materials/removal"
 import { CreateTableDialog } from "./create"
 import { ImportTableDialog } from "./import/dialog"
 import { TableList, TableListSkeleton, TablesToolbar } from "./list"
-import { useTableRemoval } from "./manage"
+import {
+  tableDeleteDescription,
+  tableNoun,
+  useTableBulk,
+  useTableRemoval,
+} from "./manage"
 import { type TableListResult, type TableSummary } from "./types"
 
 export function TablesPage() {
@@ -58,12 +68,13 @@ function useTableRows({
   return { tableList, tables }
 }
 
-function TablesView({ organizationId }: { organizationId: string }) {
+/** One bag of page state, so the view and its overlays stay small. */
+function useTablesPage(organizationId: string) {
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<ArchiveFilter>("active")
   const [scope, setScope] = useState<ScopeFilter>("all")
   const [dialog, setDialog] = useState<"create" | "import">()
-  const [movingTable, setMovingTable] = useState<TableSummary>()
+  const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const removal = useTableRemoval(organizationId)
   const deferredQuery = useDeferredValue(query)
   const { tableList, tables } = useTableRows({
@@ -76,134 +87,163 @@ function TablesView({ organizationId }: { organizationId: string }) {
   const pagination = useClientPagination({
     hasFilters,
     isReady: tableList?.status === "ready",
-    itemLabel: { singular: "table", plural: "tables" },
+    itemLabel: tableNoun,
     items: tables,
   })
-  const setFilterAndReset = useResettingSetter(setFilter, pagination.reset)
-  const setQueryAndReset = useResettingSetter(setQuery, pagination.reset)
-  const setScopeAndReset = useResettingSetter(setScope, pagination.reset)
+  const selection = useRowSelection({
+    identify: (table: TableSummary) => table.tableId,
+    rows: pagination.visibleRows,
+  })
+
+  return {
+    bulk: useTableBulk(organizationId, selection),
+    dialog,
+    filter,
+    folders: useFolderNames(organizationId),
+    hasFilters,
+    moving,
+    pagination,
+    query,
+    removal,
+    scope,
+    selection,
+    setDialog,
+    setFilterAndReset: useResettingSetter(setFilter, pagination.reset),
+    setMoving,
+    setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
+    setScopeAndReset: useResettingSetter(setScope, pagination.reset),
+    tableList,
+  }
+}
+
+function TablesView({ organizationId }: { organizationId: string }) {
+  const page = useTablesPage(organizationId)
 
   return (
-    <ConsolePageLayout>
+    <ConsoleListLayout>
       <TablesToolbar
-        filter={filter}
-        onCreate={() => setDialog("create")}
-        onFilterChange={setFilterAndReset}
-        onImport={() => setDialog("import")}
-        onQueryChange={setQueryAndReset}
-        onScopeChange={setScopeAndReset}
-        query={query}
-        scope={scope}
+        filter={page.filter}
+        onCreate={() => page.setDialog("create")}
+        onFilterChange={page.setFilterAndReset}
+        onImport={() => page.setDialog("import")}
+        onQueryChange={page.setQueryAndReset}
+        onScopeChange={page.setScopeAndReset}
+        query={page.query}
+        scope={page.scope}
       />
       <TablesBody
-        hasFilters={hasFilters}
-        onCreate={() => setDialog("create")}
-        onImport={() => setDialog("import")}
-        onMoveToFolder={setMovingTable}
-        pagination={pagination}
-        removal={removal}
-        tableList={tableList}
+        folders={page.folders}
+        hasFilters={page.hasFilters}
+        onCreate={() => page.setDialog("create")}
+        onImport={() => page.setDialog("import")}
+        onMoveToFolder={(table) => page.setMoving([toMoveTarget(table)])}
+        pagination={page.pagination}
+        removal={page.removal}
+        selection={page.selection}
+        tableList={page.tableList}
       />
-      <TablesDialogs
-        dialog={dialog}
-        movingTable={movingTable}
-        onDialogChange={setDialog}
-        onMoveClose={() => setMovingTable(undefined)}
-        organizationId={organizationId}
-      />
-    </ConsolePageLayout>
+      <TablesOverlays organizationId={organizationId} page={page} />
+    </ConsoleListLayout>
   )
 }
 
-function TablesDialogs({
-  dialog,
-  movingTable,
-  onDialogChange,
-  onMoveClose,
+/** The selection bar and the page's dialogs — everything that floats over
+ *  the list. */
+function TablesOverlays({
   organizationId,
+  page,
 }: {
-  dialog: "create" | "import" | undefined
-  movingTable: TableSummary | undefined
-  onDialogChange: (dialog: "create" | "import" | undefined) => void
-  onMoveClose: () => void
   organizationId: string
+  page: ReturnType<typeof useTablesPage>
 }) {
   return (
     <>
+      <SelectionActionsBar
+        count={page.selection.count}
+        isBusy={page.bulk.isBusy}
+        noun={tableNoun}
+        onClear={page.selection.clear}
+        onDownload={page.bulk.downloadSelected}
+        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
+        onRemove={page.bulk.removeSelected}
+        removal={bulkMaterialRemoval(
+          page.selection.selected,
+          tableNoun,
+          tableDeleteDescription
+        )}
+      />
       <CreateTableDialog
-        isOpen={dialog === "create"}
-        onOpenChange={(open) => onDialogChange(open ? "create" : undefined)}
+        isOpen={page.dialog === "create"}
+        onOpenChange={(open) => page.setDialog(open ? "create" : undefined)}
         organizationId={organizationId}
       />
       <ImportTableDialog
-        isOpen={dialog === "import"}
-        onOpenChange={(open) => onDialogChange(open ? "import" : undefined)}
+        isOpen={page.dialog === "import"}
+        onOpenChange={(open) => page.setDialog(open ? "import" : undefined)}
         organizationId={organizationId}
       />
-      <MoveResourceDialog
-        onClose={onMoveClose}
+      <MoveResourcesDialog
+        onClose={() => page.setMoving(undefined)}
         organizationId={organizationId}
-        resource={movingResource(movingTable)}
+        resources={page.moving}
       />
     </>
   )
 }
 
-function movingResource(table: TableSummary | undefined) {
-  return table === undefined
-    ? undefined
-    : {
-        resourceType: "collection" as const,
-        resourceId: table.tableId,
-        name: table.name,
-        folderId: table.folderId,
-      }
+function toMoveTarget(table: TableSummary): MoveResourceTarget {
+  return {
+    resourceType: "collection",
+    resourceId: table.tableId,
+    name: table.name,
+    folderId: table.folderId,
+  }
 }
 
 function TablesBody({
+  folders,
   hasFilters,
   onCreate,
   onImport,
   onMoveToFolder,
   pagination,
   removal,
+  selection,
   tableList,
 }: {
+  folders: ReturnType<typeof useFolderNames>
   hasFilters: boolean
   onCreate: () => void
   onImport: () => void
   onMoveToFolder: (table: TableSummary) => void
   pagination: ReturnType<typeof useClientPagination<TableSummary>>
   removal: ReturnType<typeof useTableRemoval>
+  selection: RowSelection<TableSummary>
   tableList: TableListResult | undefined
 }) {
   if (tableList === undefined) {
-    return (
-      <ConsoleScrollableGrid>
-        <TableListSkeleton />
-      </ConsoleScrollableGrid>
-    )
+    return <TableListSkeleton />
   }
 
   return (
     <>
-      {/* The list scrolls in place so the pager stays pinned below it,
-          matching the other paginated console pages. */}
-      <ConsoleScrollableGrid>
-        <TableList
-          hasFilters={hasFilters}
-          onCreate={onCreate}
-          onImport={onImport}
-          onMoveToFolder={onMoveToFolder}
-          removal={removal}
-          tables={pagination.visibleRows}
-          unauthorizedMessage={
-            tableList.status === "unauthorized" ? tableList.message : undefined
-          }
-        />
-      </ConsoleScrollableGrid>
+      <TableList
+        folders={folders}
+        hasFilters={hasFilters}
+        onCreate={onCreate}
+        onImport={onImport}
+        onMoveToFolder={onMoveToFolder}
+        removal={removal}
+        selection={selection}
+        tables={pagination.visibleRows}
+        unauthorizedMessage={
+          tableList.status === "unauthorized" ? tableList.message : undefined
+        }
+      />
       {tableList.status === "ready" ? (
-        <ConsoleListPager pagination={pagination} />
+        <ConsoleListFooter>
+          <ConsoleListPager pagination={pagination} />
+        </ConsoleListFooter>
       ) : null}
     </>
   )

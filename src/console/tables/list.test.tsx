@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { type RowSelection } from "../shared/list/selection"
 import { TableList } from "./list"
 import { type useTableRemoval } from "./manage"
 import { type TableSummary } from "./types"
@@ -54,14 +55,28 @@ function tableSummary(overrides: Partial<TableSummary> = {}) {
   } as TableSummary
 }
 
+function stubSelection<Row>(): RowSelection<Row> {
+  return {
+    allSelected: false,
+    clear: () => undefined,
+    count: 0,
+    isSelected: () => false,
+    selected: [],
+    toggle: () => undefined,
+    toggleAll: () => undefined,
+  }
+}
+
 function renderList(tables: TableSummary[]) {
   render(
     <TableList
+      folders={undefined}
       hasFilters={false}
       onCreate={() => undefined}
       onImport={() => undefined}
       onMoveToFolder={() => undefined}
       removal={removal}
+      selection={stubSelection()}
       tables={tables}
       unauthorizedMessage={undefined}
     />

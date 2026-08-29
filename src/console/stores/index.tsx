@@ -1,24 +1,34 @@
 import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
-import { MoveResourceDialog } from "../folders/move"
+import { MoveResourcesDialog } from "../folders/move"
+import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
-import { ConsolePageLayout, ConsoleScrollableGrid } from "../shared/layout"
+import { SelectionActionsBar } from "../shared/list/bar"
+import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListPager } from "../shared/list/pager"
 import {
   useClientPagination,
   useResettingSetter,
 } from "../shared/list/pagination"
 import { matchesScopeFilter, type ScopeFilter } from "../shared/list/scope"
+import { type RowSelection, useRowSelection } from "../shared/list/selection"
 import {
   type ArchiveFilter,
   hasMaterialFilters,
   matchesArchiveFilter,
   shouldIncludeArchived,
 } from "../shared/materials/archive"
+import { useFolderNames } from "../shared/materials/folders"
+import { bulkMaterialRemoval } from "../shared/materials/removal"
 import { CreateStoreDialog } from "./create"
 import { StoreList, StoreListSkeleton, StoresToolbar } from "./list"
-import { useStoreRemoval } from "./manage"
+import {
+  storeDeleteDescription,
+  storeNoun,
+  useStoreBulk,
+  useStoreRemoval,
+} from "./manage"
 import { type StoreListResult, type StoreSummary } from "./types"
 
 export function StoresPage() {
@@ -57,12 +67,13 @@ function useStoreRows({
   return { storeList, stores }
 }
 
-function StoresView({ organizationId }: { organizationId: string }) {
+/** One bag of page state, so the view and its overlays stay small. */
+function useStoresPage(organizationId: string) {
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<ArchiveFilter>("active")
   const [scope, setScope] = useState<ScopeFilter>("all")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [movingStore, setMovingStore] = useState<StoreSummary>()
+  const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const removal = useStoreRemoval(organizationId)
   const deferredQuery = useDeferredValue(query)
   const { storeList, stores } = useStoreRows({
@@ -75,98 +86,153 @@ function StoresView({ organizationId }: { organizationId: string }) {
   const pagination = useClientPagination({
     hasFilters,
     isReady: storeList?.status === "ready",
-    itemLabel: { singular: "store", plural: "stores" },
+    itemLabel: storeNoun,
     items: stores,
   })
-  const setFilterAndReset = useResettingSetter(setFilter, pagination.reset)
-  const setQueryAndReset = useResettingSetter(setQuery, pagination.reset)
-  const setScopeAndReset = useResettingSetter(setScope, pagination.reset)
+  const selection = useRowSelection({
+    identify: (store: StoreSummary) => store.storeId,
+    rows: pagination.visibleRows,
+  })
+
+  return {
+    bulk: useStoreBulk(organizationId, selection),
+    filter,
+    folders: useFolderNames(organizationId),
+    hasFilters,
+    isCreateOpen,
+    moving,
+    pagination,
+    query,
+    removal,
+    scope,
+    selection,
+    setFilterAndReset: useResettingSetter(setFilter, pagination.reset),
+    setIsCreateOpen,
+    setMoving,
+    setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
+    setScopeAndReset: useResettingSetter(setScope, pagination.reset),
+    storeList,
+  }
+}
+
+function StoresView({ organizationId }: { organizationId: string }) {
+  const page = useStoresPage(organizationId)
 
   return (
-    <ConsolePageLayout>
+    <ConsoleListLayout>
       <StoresToolbar
-        filter={filter}
-        onCreate={() => setIsCreateOpen(true)}
-        onFilterChange={setFilterAndReset}
-        onQueryChange={setQueryAndReset}
-        onScopeChange={setScopeAndReset}
-        query={query}
-        scope={scope}
+        filter={page.filter}
+        onCreate={() => page.setIsCreateOpen(true)}
+        onFilterChange={page.setFilterAndReset}
+        onQueryChange={page.setQueryAndReset}
+        onScopeChange={page.setScopeAndReset}
+        query={page.query}
+        scope={page.scope}
       />
       <StoresBody
-        hasFilters={hasFilters}
-        onCreate={() => setIsCreateOpen(true)}
-        onMoveToFolder={setMovingStore}
-        pagination={pagination}
-        removal={removal}
-        storeList={storeList}
+        folders={page.folders}
+        hasFilters={page.hasFilters}
+        onCreate={() => page.setIsCreateOpen(true)}
+        onMoveToFolder={(store) => page.setMoving([toMoveTarget(store)])}
+        pagination={page.pagination}
+        removal={page.removal}
+        selection={page.selection}
+        storeList={page.storeList}
       />
-      <CreateStoreDialog
-        isOpen={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        organizationId={organizationId}
-      />
-      <MoveResourceDialog
-        onClose={() => setMovingStore(undefined)}
-        organizationId={organizationId}
-        resource={movingResource(movingStore)}
-      />
-    </ConsolePageLayout>
+      <StoresOverlays organizationId={organizationId} page={page} />
+    </ConsoleListLayout>
   )
 }
 
-function movingResource(store: StoreSummary | undefined) {
-  return store === undefined
-    ? undefined
-    : {
-        resourceType: "collection" as const,
-        resourceId: store.storeId,
-        name: store.name,
-        folderId: store.folderId,
-      }
+/** The selection bar and the page's dialogs — everything that floats over
+ *  the list. */
+function StoresOverlays({
+  organizationId,
+  page,
+}: {
+  organizationId: string
+  page: ReturnType<typeof useStoresPage>
+}) {
+  return (
+    <>
+      <SelectionActionsBar
+        count={page.selection.count}
+        isBusy={page.bulk.isBusy}
+        noun={storeNoun}
+        onClear={page.selection.clear}
+        onDownload={page.bulk.downloadSelected}
+        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
+        onRemove={page.bulk.removeSelected}
+        removal={bulkMaterialRemoval(
+          page.selection.selected,
+          storeNoun,
+          storeDeleteDescription
+        )}
+      />
+      <CreateStoreDialog
+        isOpen={page.isCreateOpen}
+        onOpenChange={page.setIsCreateOpen}
+        organizationId={organizationId}
+      />
+      <MoveResourcesDialog
+        onClose={() => page.setMoving(undefined)}
+        organizationId={organizationId}
+        resources={page.moving}
+      />
+    </>
+  )
+}
+
+function toMoveTarget(store: StoreSummary): MoveResourceTarget {
+  return {
+    resourceType: "collection",
+    resourceId: store.storeId,
+    name: store.name,
+    folderId: store.folderId,
+  }
 }
 
 function StoresBody({
+  folders,
   hasFilters,
   onCreate,
   onMoveToFolder,
   pagination,
   removal,
+  selection,
   storeList,
 }: {
+  folders: ReturnType<typeof useFolderNames>
   hasFilters: boolean
   onCreate: () => void
   onMoveToFolder: (store: StoreSummary) => void
   pagination: ReturnType<typeof useClientPagination<StoreSummary>>
   removal: ReturnType<typeof useStoreRemoval>
+  selection: RowSelection<StoreSummary>
   storeList: StoreListResult | undefined
 }) {
   if (storeList === undefined) {
-    return (
-      <ConsoleScrollableGrid>
-        <StoreListSkeleton />
-      </ConsoleScrollableGrid>
-    )
+    return <StoreListSkeleton />
   }
 
   return (
     <>
-      {/* The list scrolls in place so the pager stays pinned below it,
-          matching the other paginated console pages. */}
-      <ConsoleScrollableGrid>
-        <StoreList
-          hasFilters={hasFilters}
-          onCreate={onCreate}
-          onMoveToFolder={onMoveToFolder}
-          removal={removal}
-          stores={pagination.visibleRows}
-          unauthorizedMessage={
-            storeList.status === "unauthorized" ? storeList.message : undefined
-          }
-        />
-      </ConsoleScrollableGrid>
+      <StoreList
+        folders={folders}
+        hasFilters={hasFilters}
+        onCreate={onCreate}
+        onMoveToFolder={onMoveToFolder}
+        removal={removal}
+        selection={selection}
+        stores={pagination.visibleRows}
+        unauthorizedMessage={
+          storeList.status === "unauthorized" ? storeList.message : undefined
+        }
+      />
       {storeList.status === "ready" ? (
-        <ConsoleListPager pagination={pagination} />
+        <ConsoleListFooter>
+          <ConsoleListPager pagination={pagination} />
+        </ConsoleListFooter>
       ) : null}
     </>
   )
