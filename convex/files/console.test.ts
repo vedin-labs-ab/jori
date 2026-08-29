@@ -5,6 +5,7 @@ import {
   insertUploadedFile,
   patchFileDetails,
   removeFileWithBlob,
+  swapFileBlob,
   toConsoleRow,
 } from "./console"
 
@@ -122,6 +123,60 @@ test("deleting a file deletes its storage blob with the row", async () => {
 
   expect(storageDelete).toHaveBeenCalledWith(storageId)
   expect(rowDelete).toHaveBeenCalledWith(fileId)
+})
+
+test("replacing content swaps the blob and updates the row", async () => {
+  const nextStorageId = "storage-next" as Id<"_storage">
+  const storageDelete = vi.fn(async () => undefined)
+  const patch = vi.fn(async () => undefined)
+  const ctx = {
+    db: {
+      get: vi.fn(async () => organizationFile()),
+      patch,
+      system: { get: vi.fn(async () => ({ size: 99 })) },
+    },
+    storage: { delete: storageDelete },
+  } as unknown as MutationCtx
+
+  await swapFileBlob(
+    ctx,
+    { organizationId: "organization", personId: owner },
+    { fileId, storageId: nextStorageId }
+  )
+
+  expect(storageDelete).toHaveBeenCalledWith(storageId)
+  expect(patch).toHaveBeenCalledWith(fileId, {
+    storageId: nextStorageId,
+    size: 99,
+    updatedAt: expect.any(Number),
+  })
+})
+
+test("replacing content rejects a missing upload and hidden files", async () => {
+  const nextStorageId = "storage-next" as Id<"_storage">
+  const ctx = {
+    db: {
+      get: vi.fn(async () => personalFile()),
+      patch: vi.fn(),
+      system: { get: vi.fn(async () => null) },
+    },
+    storage: { delete: vi.fn() },
+  } as unknown as MutationCtx
+
+  await expect(
+    swapFileBlob(
+      ctx,
+      { organizationId: "organization", personId: other },
+      { fileId, storageId: nextStorageId }
+    )
+  ).rejects.toThrow("File was not found")
+  await expect(
+    swapFileBlob(
+      ctx,
+      { organizationId: "organization", personId: owner },
+      { fileId, storageId: nextStorageId }
+    )
+  ).rejects.toThrow("Uploaded file was not found in storage")
 })
 
 test("editing and deleting respect personal-file visibility", async () => {

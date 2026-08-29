@@ -20,6 +20,7 @@ import { FolderField } from "../folders/field"
 import { showErrorToast } from "../shared/error"
 import { DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
+import { uploadToStorage } from "./storage"
 
 export function UploadFileDialog({
   initialFolderId,
@@ -179,24 +180,4 @@ function useFileUpload(
     setScope,
     submit,
   }
-}
-
-async function uploadToStorage(uploadUrl: string, file: File) {
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": file.type === "" ? "application/octet-stream" : file.type,
-    },
-    body: file,
-  })
-
-  if (!response.ok) {
-    throw new Error(`Upload failed: ${await response.text()}`)
-  }
-
-  const { storageId } = (await response.json()) as {
-    storageId: GenericId<"_storage">
-  }
-
-  return storageId
 }

@@ -7,7 +7,7 @@ import {
   FileText,
 } from "lucide-react"
 import { expect, test } from "vitest"
-import { fileKind } from "./kind"
+import { fileKind, previewKind } from "./kind"
 
 test("media and documents resolve from the mime type alone", () => {
   expect(fileKind("image/png", "photo")).toMatchObject({
@@ -150,4 +150,26 @@ test("plain and unknown files keep sane fallbacks", () => {
 test("a specific mime type wins over a misleading extension", () => {
   expect(fileKind("application/pdf", "report.bin").label).toBe("PDF")
   expect(fileKind("image/png", "photo.txt").label).toBe("Image")
+})
+
+test("preview kinds route media by mime type alone", () => {
+  expect(previewKind("image/png", "photo.bin")).toBe("image")
+  expect(previewKind("image/svg+xml", "logo.svg")).toBe("image")
+  expect(previewKind("application/pdf", "report")).toBe("pdf")
+  expect(previewKind("video/mp4", "clip")).toBe("video")
+  expect(previewKind("audio/mpeg", "song")).toBe("audio")
+})
+
+test("preview kinds read text through the registry's extension rescue", () => {
+  expect(previewKind("text/plain", "notes.txt")).toBe("text")
+  expect(previewKind("application/json", "payload")).toBe("text")
+  expect(previewKind("application/octet-stream", "main.ts")).toBe("text")
+  expect(previewKind("", "script.py")).toBe("text")
+  expect(previewKind("text/markdown; charset=utf-8", "notes.md")).toBe("text")
+})
+
+test("preview kinds leave the rest to the download prompt", () => {
+  expect(previewKind("application/octet-stream", "blob")).toBe("none")
+  expect(previewKind("application/zip", "bundle.zip")).toBe("none")
+  expect(previewKind("application/msword", "letter.doc")).toBe("none")
 })

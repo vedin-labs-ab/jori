@@ -105,6 +105,22 @@ export const update = mutation({
   },
 })
 
+export const replace = mutation({
+  args: {
+    organizationId: v.string(),
+    fileId: v.id("files"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const viewer = await resolveViewer(ctx, args.organizationId, identity)
+
+    await swapFileBlob(ctx, viewer, args)
+
+    return null
+  },
+})
+
 export const remove = mutation({
   args: {
     organizationId: v.string(),
@@ -182,6 +198,29 @@ export async function patchFileDetails(
     ...(args.description === undefined
       ? {}
       : { description: optionalString(args.description) }),
+    updatedAt: Date.now(),
+  })
+}
+
+/** Swaps the file's content for a freshly uploaded blob: the row keeps its
+ *  identity while storage id, size, and updatedAt follow the new upload.
+ *  Last write wins; the replaced blob has no other owner, so it goes. */
+export async function swapFileBlob(
+  ctx: MutationCtx,
+  viewer: FileViewer,
+  args: { fileId: Id<"files">; storageId: Id<"_storage"> }
+) {
+  const file = await requireViewableFile(ctx, viewer, args.fileId)
+  const metadata = await ctx.db.system.get(args.storageId)
+
+  if (metadata === null) {
+    throw new Error("Uploaded file was not found in storage")
+  }
+
+  await ctx.storage.delete(file.storageId)
+  await ctx.db.patch(file._id, {
+    storageId: args.storageId,
+    size: metadata.size,
     updatedAt: Date.now(),
   })
 }

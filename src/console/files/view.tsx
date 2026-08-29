@@ -4,32 +4,37 @@ import { Download, Link2 } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { isTextualKind } from "@/shared/files/kind"
+import { cn } from "@/lib/utils"
+import { fileKind, previewKind } from "@/shared/files/kind"
 import { FilePreview } from "@/shared/materials/preview"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { CopyButton } from "../shared/copy"
-import { DetailFrame } from "../shared/details"
+import { SeparatorDot } from "../shared/dot"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsolePageLayout,
 } from "../shared/layout"
+import { ConsoleEmptyState } from "../shared/list/empty"
+import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
+import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { FileOwnerCell, FileTypeCell } from "./cells"
+import { FileEditor, FileToolbar } from "./editor/section"
 import { FileLinksDialog } from "./share"
-import { formatFileSize } from "./types"
+import { type FileDetail, formatFileSize } from "./types"
 
-type FileDetail = NonNullable<
-  NonNullable<ReturnType<typeof useQuery<typeof api.files.console.get>>>["file"]
->
+/** Text files past this size skip the inline editor; the download covers
+ *  them. */
+const textSizeLimit = 1024 * 1024
 
-/** Member view of one file: metadata, a preview when the browser can show
- *  one, a download, and share-link management. The share fork wraps exactly
- *  this component; a visitor holding a share secret who cannot see the file
- *  falls back to the share view. */
+/** Member view of one file: a secondary header with the file's metadata,
+ *  and the content itself filling the rest of the page — media inline, text
+ *  in an editor, and a download prompt for everything else. The share fork
+ *  wraps exactly this component; a visitor holding a share secret who
+ *  cannot see the file falls back to the share view. */
 export function FileView({
   fallback,
   fileId,
@@ -100,7 +105,7 @@ function FileReadyView({
   const [isShareOpen, setIsShareOpen] = useState(false)
 
   return (
-    <ConsolePageLayout>
+    <ConsoleListLayout>
       <ConsoleHeaderActions>
         <ConsoleHeaderButton
           icon={<Link2 />}
@@ -110,89 +115,163 @@ function FileReadyView({
           variant="outline"
         />
         {file.url === null ? null : (
-          <Button
-            aria-label="Download"
-            asChild
-            className="max-sm:size-7 max-sm:px-0"
-            variant="outline"
-          >
-            <a href={file.url} rel="noreferrer" target="_blank">
-              <Download />
-              <span className="max-sm:hidden">Download</span>
-            </a>
-          </Button>
+          <FileDownloadButton compact url={file.url} />
         )}
       </ConsoleHeaderActions>
-      <DetailFrame
-        action={<FileHeaderActions file={file} />}
-        header={<FileMeta file={file} />}
-      >
-        <FilePreview
-          mimeType={file.mimeType}
-          name={file.name}
-          url={file.url}
-          variant="flush"
-        />
-      </DetailFrame>
+      <FileBody file={file} organizationId={organizationId} />
       <FileLinksDialog
         fileId={file.fileId}
         onOpenChange={setIsShareOpen}
         open={isShareOpen}
         organizationId={organizationId}
       />
-    </ConsolePageLayout>
+    </ConsoleListLayout>
   )
 }
 
-/** The preview frame's header line, left side: type and size, separated by
- *  the same middot the console's inline meta rows use. */
-function FileMeta({ file }: { file: FileDetail }) {
+/** Routes the page body by what the file is: an editor for text, inline
+ *  media edge-to-edge, and a download prompt for the rest. */
+function FileBody({
+  file,
+  organizationId,
+}: {
+  file: FileDetail
+  organizationId: string
+}) {
+  const kind = previewKind(file.mimeType, file.name)
+
+  if (kind === "text" && file.url !== null && file.size <= textSizeLimit) {
+    return (
+      <FileEditor
+        errorFallback={
+          <FileFallback
+            description="Could not load the file's text. Download it instead."
+            file={file}
+            title="Could not load file"
+          />
+        }
+        file={file}
+        meta={<FileMeta file={file} />}
+        organizationId={organizationId}
+        url={file.url}
+      />
+    )
+  }
+
   return (
-    <div className="flex min-w-0 items-center gap-1.5 text-xs">
-      <FileTypeCell file={file} />
-      <span aria-hidden>·</span>
-      <span className="shrink-0">{formatFileSize(file.size)}</span>
+    <>
+      <FileToolbar>
+        <FileMeta file={file} />
+      </FileToolbar>
+      <FileMediaBody file={file} kind={kind} />
+    </>
+  )
+}
+
+function FileMediaBody({
+  file,
+  kind,
+}: {
+  file: FileDetail
+  kind: ReturnType<typeof previewKind>
+}) {
+  if (kind === "text") {
+    return (
+      <FileFallback
+        description={`Files over ${formatFileSize(textSizeLimit)} skip the inline editor. Download the file to work on it.`}
+        file={file}
+        title="Too large to edit here"
+      />
+    )
+  }
+
+  if (file.url === null || kind === "none") {
+    return (
+      <FileFallback
+        description="No inline view for this file type. Download it to open it locally."
+        file={file}
+        title="No inline view"
+      />
+    )
+  }
+
+  return (
+    <div className="min-h-0 flex-1">
+      <FilePreview
+        mimeType={file.mimeType}
+        name={file.name}
+        url={file.url}
+        variant="full"
+      />
     </div>
   )
 }
 
-/** The header's right edge: the owner, then a copy control for text-like
- *  files, in the store value terminal's action idiom. */
-function FileHeaderActions({ file }: { file: FileDetail }) {
+/** The secondary header's metadata line: kind, size, owner, and freshness,
+ *  separated by the console's inline-meta middots. */
+function FileMeta({ file }: { file: FileDetail }) {
+  const now = useNow(30_000)
+
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs">
+    <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
+      <FileTypeCell file={file} />
+      <SeparatorDot />
+      <span className="shrink-0">{formatFileSize(file.size)}</span>
+      <SeparatorDot />
       <FileOwnerCell compact file={file} />
-      <FileCopyButton file={file} />
-    </span>
+      <SeparatorDot className="max-sm:hidden" />
+      <span
+        className="shrink-0 max-sm:hidden"
+        title={absoluteTime(file.updatedAt)}
+      >
+        Updated {relativeTime(file.updatedAt, now)}
+      </span>
+    </div>
   )
 }
 
-/** Files past this size skip the copy control; the download covers them. */
-const copySizeLimit = 5_000_000
-
-/** Copies the file's text. The inline preview caps what it fetches, so the
- *  button refetches the whole file on click — the clipboard never receives
- *  silently truncated content. */
-function FileCopyButton({ file }: { file: FileDetail }) {
-  const { url } = file
-
-  if (
-    url === null ||
-    file.size > copySizeLimit ||
-    !isTextualKind(file.mimeType, file.name)
-  ) {
-    return null
-  }
-
-  return <CopyButton label="file text" value={() => readFileText(url)} />
+function FileFallback({
+  description,
+  file,
+  title,
+}: {
+  description: string
+  file: FileDetail
+  title: string
+}) {
+  return (
+    <ConsoleListContent className="justify-center">
+      <ConsoleEmptyState
+        action={
+          file.url === null ? undefined : <FileDownloadButton url={file.url} />
+        }
+        description={description}
+        icon={fileKind(file.mimeType, file.name).icon}
+        title={title}
+      />
+    </ConsoleListContent>
+  )
 }
 
-async function readFileText(url: string) {
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error("Could not fetch the file.")
-  }
-
-  return await response.text()
+function FileDownloadButton({
+  compact = false,
+  url,
+}: {
+  /** Collapses to an icon on small screens, for the shell header. */
+  compact?: boolean
+  url: string
+}) {
+  return (
+    <Button
+      aria-label="Download"
+      asChild
+      className={cn(compact && "max-sm:size-7 max-sm:px-0")}
+      variant="outline"
+    >
+      <a href={url} rel="noreferrer" target="_blank">
+        <Download />
+        <span className={cn(compact && "max-sm:hidden")}>Download</span>
+      </a>
+    </Button>
+  )
 }
