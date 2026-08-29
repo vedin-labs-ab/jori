@@ -100,6 +100,18 @@ test("a store without a resolved owner reads as Jori's own", () => {
   expect(screen.queryByText("Ada Lovelace")).toBeNull()
 })
 
+test("a long unbroken name renders inside a capped, truncating cell", () => {
+  const longName = "quarterly-metrics-snapshot".repeat(8)
+  renderList([storeSummary({ name: longName })])
+
+  const link = screen.getByRole("link", { name: longName })
+  expect(link.className).toContain("truncate")
+  // The cap must be inside the cell — table cells ignore max-width during
+  // auto-layout column sizing — with a shrinkable row around the link.
+  expect(link.closest(".max-w-64")).not.toBeNull()
+  expect(link.parentElement?.className).toContain("min-w-0")
+})
+
 test("personal and archived marks ride the name cell", () => {
   renderList([
     storeSummary({

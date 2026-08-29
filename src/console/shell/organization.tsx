@@ -1,5 +1,5 @@
 import { type Organization } from "better-auth/client"
-import { ChevronsUpDown, Plus, Settings } from "lucide-react"
+import { ChevronDown, Plus, Settings } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { CreateOrganizationDialog } from "@/components/auth/organization/create-organization-dialog"
@@ -111,17 +111,21 @@ function OrganizationMenu({
   )
 }
 
+/** Compact switcher trigger in the sidebar-10 style: small logo, the name
+ *  inline, and one chevron right after it. `w-fit` keeps the chevron beside
+ *  the name; `max-w-full` still truncates a long organization name. In the
+ *  icon-collapsed sidebar the button squares off and shows the logo alone,
+ *  with the collapsed padding eased so the logo fits. */
 function OrganizationMenuTrigger({ switching }: { switching: boolean }) {
   return (
     <DropdownMenuTrigger asChild>
       <SidebarMenuButton
         aria-busy={switching}
-        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        className="w-fit max-w-full px-1.5 group-data-[collapsible=icon]:p-1! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         disabled={switching}
-        size="lg"
       >
-        <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
-        <ChevronsUpDown className="ml-auto size-4" />
+        <OrganizationView className="min-w-0" hideRole hideSlug size="sm" />
+        <ChevronDown className="opacity-50" />
       </SidebarMenuButton>
     </DropdownMenuTrigger>
   )

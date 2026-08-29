@@ -2,7 +2,11 @@ import { Link } from "@tanstack/react-router"
 import { Braces, Database, History, type LucideIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { countLabel } from "@/lib/count"
-import { MaterialOwnerCell } from "../shared/materials/owner"
+import {
+  MaterialNameCell,
+  materialNameLinkClassName,
+} from "../shared/materials/cells/name"
+import { MaterialOwnerCell } from "../shared/materials/cells/owner"
 import { MaterialScopeBadge } from "../shared/materials/scope"
 import { type StoreSummary } from "./types"
 
@@ -11,36 +15,22 @@ import { type StoreSummary } from "./types"
  *  archived ones. Organization stores carry no scope badge. */
 export function StoreNameCell({ store }: { store: StoreSummary }) {
   return (
-    <div className="grid gap-0.5">
-      <div className="flex items-center gap-2">
-        <Database
-          aria-hidden
-          className="size-4 shrink-0 text-muted-foreground"
-        />
-        <Link
-          className="truncate font-medium hover:underline"
-          params={{ storeId: store.storeId }}
-          title={store.name}
-          to="/stores/$storeId"
-        >
-          {store.name}
-        </Link>
-        {store.scope === "personal" ? (
-          <MaterialScopeBadge scope="personal" />
-        ) : null}
-        {store.archivedAt === undefined ? null : (
-          <Badge variant="secondary">Archived</Badge>
-        )}
-      </div>
-      {store.description === undefined ? null : (
-        <p
-          className="truncate pl-6 text-muted-foreground"
-          title={store.description}
-        >
-          {store.description}
-        </p>
+    <MaterialNameCell description={store.description} icon={Database}>
+      <Link
+        className={materialNameLinkClassName}
+        params={{ storeId: store.storeId }}
+        title={store.name}
+        to="/stores/$storeId"
+      >
+        {store.name}
+      </Link>
+      {store.scope === "personal" ? (
+        <MaterialScopeBadge scope="personal" />
+      ) : null}
+      {store.archivedAt === undefined ? null : (
+        <Badge variant="secondary">Archived</Badge>
       )}
-    </div>
+    </MaterialNameCell>
   )
 }
 

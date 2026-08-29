@@ -189,7 +189,7 @@ function TableListRow({
 
   return (
     <TableRow>
-      <TableCell className="max-w-64">
+      <TableCell>
         <TableNameCell table={table} />
       </TableCell>
       <TableCell>
@@ -204,7 +204,7 @@ function TableListRow({
       >
         {relativeTime(table.createdAt, now)}
       </TableCell>
-      <TableCell className="max-w-48">
+      <TableCell>
         <TableOwnerCell table={table} />
       </TableCell>
       <TableCell

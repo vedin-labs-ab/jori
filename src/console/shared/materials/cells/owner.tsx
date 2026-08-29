@@ -8,7 +8,9 @@ export type MaterialOwner = { kind: "person"; name: string } | { kind: "jori" }
 
 /** Owner cell shared by the material lists: initials avatar plus the
  *  person's name, or the brand mark plus "Jori". `compact` slims the avatar
- *  and gap to the height of a detail-frame header row. */
+ *  and gap to the height of a detail-frame header row. Both variants cap
+ *  their own width, so a long name truncates instead of widening the
+ *  column — table cells ignore max-width during column sizing. */
 export function MaterialOwnerCell({
   compact = false,
   owner,
@@ -18,7 +20,7 @@ export function MaterialOwnerCell({
 }) {
   const rowClassName = cn(
     "flex min-w-0 items-center",
-    compact ? "max-w-40 gap-1.5" : "gap-2"
+    compact ? "max-w-40 gap-1.5" : "max-w-48 gap-2"
   )
 
   if (owner.kind === "jori") {

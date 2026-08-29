@@ -1,6 +1,10 @@
 import { Link } from "@tanstack/react-router"
 import { fileKind } from "@/shared/files/kind"
-import { MaterialOwnerCell } from "../shared/materials/owner"
+import {
+  MaterialNameCell,
+  materialNameLinkClassName,
+} from "../shared/materials/cells/name"
+import { MaterialOwnerCell } from "../shared/materials/cells/owner"
 import { MaterialScopeBadge } from "../shared/materials/scope"
 import { type FileRow } from "./types"
 
@@ -10,33 +14,19 @@ export function FileNameCell({ file }: { file: FileRow }) {
   const kind = fileKind(file.mimeType, file.name)
 
   return (
-    <div className="grid gap-0.5">
-      <div className="flex items-center gap-2">
-        <kind.icon
-          aria-hidden
-          className="size-4 shrink-0 text-muted-foreground"
-        />
-        <Link
-          className="truncate font-medium hover:underline"
-          params={{ fileId: file.fileId }}
-          title={file.name}
-          to="/files/$fileId"
-        >
-          {file.name}
-        </Link>
-        {file.scope === "personal" ? (
-          <MaterialScopeBadge scope="personal" />
-        ) : null}
-      </div>
-      {file.description === undefined ? null : (
-        <p
-          className="truncate pl-6 text-muted-foreground"
-          title={file.description}
-        >
-          {file.description}
-        </p>
-      )}
-    </div>
+    <MaterialNameCell description={file.description} icon={kind.icon}>
+      <Link
+        className={materialNameLinkClassName}
+        params={{ fileId: file.fileId }}
+        title={file.name}
+        to="/files/$fileId"
+      >
+        {file.name}
+      </Link>
+      {file.scope === "personal" ? (
+        <MaterialScopeBadge scope="personal" />
+      ) : null}
+    </MaterialNameCell>
   )
 }
 
