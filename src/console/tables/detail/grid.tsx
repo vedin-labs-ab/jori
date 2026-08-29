@@ -32,6 +32,7 @@ export function RowGrid({
   onAddRow,
   onCommit,
   onDeleteRow,
+  onDuplicateRow,
   onFreshSettled,
   onInspectColumn,
   pendingRowId,
@@ -47,6 +48,7 @@ export function RowGrid({
   onAddRow: () => void
   onCommit: CommitCell
   onDeleteRow: (row: TableRowData) => void
+  onDuplicateRow: (row: TableRowData) => void
   onFreshSettled: () => void
   onInspectColumn: (column: TableColumn) => void
   pendingRowId: TableRowData["rowId"] | undefined
@@ -86,7 +88,7 @@ export function RowGrid({
               onInspect={() => onInspectColumn(column)}
             />
           ))}
-          <TableHead className="p-0">
+          <TableHead className="border-r p-0">
             <button
               className="flex h-10 w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground disabled:opacity-50"
               disabled={disabled}
@@ -108,8 +110,10 @@ export function RowGrid({
             isPending={pendingRowId === row.rowId}
             key={row.rowId}
             number={offset + index + 1}
+            onAddRow={onAddRow}
             onCommit={onCommit}
             onDelete={onDeleteRow}
+            onDuplicate={onDuplicateRow}
             onFreshSettled={onFreshSettled}
             row={row}
             selection={selection}
@@ -118,7 +122,7 @@ export function RowGrid({
         <NewRowRow
           disabled={disabled}
           onAddRow={onAddRow}
-          span={columns.length + 2}
+          span={columns.length + 1}
         />
       </TableBody>
     </ConsoleListTable>

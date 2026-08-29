@@ -198,6 +198,7 @@ function TableGrid({
       onAddRow={() => void page.adding.addRow()}
       onCommit={page.writes.updateCell}
       onDeleteRow={(row) => void page.writes.deleteRow(row)}
+      onDuplicateRow={(row) => void page.writes.duplicateRow(row)}
       onFreshSettled={page.adding.settle}
       onInspectColumn={(column) =>
         page.setColumnSheet({ mode: "edit", key: column.key })

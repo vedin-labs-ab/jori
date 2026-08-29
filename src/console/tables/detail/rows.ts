@@ -131,7 +131,13 @@ export function useRowWrites(
     return outcome !== null
   }
 
-  return { deleteRow, insertRow, pendingRowId, updateCell }
+  async function duplicateRow(row: TableRow) {
+    if ((await insertRow({ ...row.values })) !== null) {
+      toast.success("Row duplicated.")
+    }
+  }
+
+  return { deleteRow, duplicateRow, insertRow, pendingRowId, updateCell }
 }
 
 /** Adding a row skips the dialog when a blank row already satisfies the
