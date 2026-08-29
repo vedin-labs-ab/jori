@@ -27,7 +27,7 @@
     "db:truncate:dev": "node --experimental-strip-types scripts/env/index.ts --env dev -- node --experimental-strip-types scripts/truncate.ts",
     "preview": "vite preview",
     "content:compile": "node --experimental-strip-types scripts/content/index.ts",
-    "test": "vitest run"
+    "test": "node --experimental-strip-types scripts/gate.ts vitest run"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
