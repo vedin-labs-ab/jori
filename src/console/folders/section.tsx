@@ -11,8 +11,11 @@ import {
   SidebarMenuItem,
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 import { useActiveOrganization } from "@/shared/session/auth"
 import { api } from "../../../convex/_generated/api"
+import { FolderDragProvider } from "./drag/context"
+import { useRootDrop } from "./drag/state"
 import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { type FolderExpansion, FolderTreeItem } from "./row"
@@ -43,40 +46,87 @@ function FoldersGroup({
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const expansion = useFolderExpansion(activeFolderId(pathname), folders)
   const leaveDeletedFolder = useLeaveDeletedFolder(activeFolderId(pathname))
+  const expandOnHover = useExpandOnHover(folders, expansion)
 
   if (tree !== undefined && tree.status !== "ready") {
     return null
   }
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Folders</SidebarGroupLabel>
-      <SidebarGroupAction
-        aria-label="New folder"
-        onClick={() => setDialog({ type: "create" })}
-        title="New folder"
-      >
-        <Plus />
-      </SidebarGroupAction>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          <FolderMenuItems
-            expansion={expansion}
-            folders={folders}
-            onDialog={setDialog}
-            onNewFolder={() => setDialog({ type: "create" })}
-            pathname={pathname}
-          />
-        </SidebarMenu>
-      </SidebarGroupContent>
-      <FolderDialogs
-        dialog={dialog}
-        onClose={() => setDialog(undefined)}
-        onDeleted={leaveDeletedFolder}
-        organizationId={organizationId}
-      />
-    </SidebarGroup>
+    <FolderDragProvider
+      folders={folders ?? []}
+      onExpandHover={expandOnHover}
+      organizationId={organizationId}
+    >
+      <SidebarGroup>
+        <FoldersLabel />
+        <SidebarGroupAction
+          aria-label="New folder"
+          onClick={() => setDialog({ type: "create" })}
+          title="New folder"
+        >
+          <Plus />
+        </SidebarGroupAction>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <FolderMenuItems
+              expansion={expansion}
+              folders={folders}
+              onDialog={setDialog}
+              onNewFolder={() => setDialog({ type: "create" })}
+              pathname={pathname}
+            />
+          </SidebarMenu>
+        </SidebarGroupContent>
+        <FolderDialogs
+          dialog={dialog}
+          onClose={() => setDialog(undefined)}
+          onDeleted={leaveDeletedFolder}
+          organizationId={organizationId}
+        />
+      </SidebarGroup>
+    </FolderDragProvider>
   )
+}
+
+/** The group label doubles as the drop target that moves a dragged folder
+ *  back to the top level. */
+function FoldersLabel() {
+  const root = useRootDrop()
+
+  return (
+    <SidebarGroupLabel
+      className={cn(
+        root.isDropTarget && "bg-sidebar-accent text-sidebar-accent-foreground"
+      )}
+      ref={root.setNodeRef}
+    >
+      Folders
+    </SidebarGroupLabel>
+  )
+}
+
+/** Opens a collapsed folder that a drag dwells on, so a drop can descend
+ *  into the tree without releasing. */
+function useExpandOnHover(
+  folders: FolderRow[] | undefined,
+  expansion: FolderExpansion
+) {
+  const parentIds = useMemo(
+    () =>
+      new Set<string>(
+        (folders ?? []).flatMap((row) =>
+          row.parentId === undefined ? [] : [row.parentId]
+        )
+      ),
+    [folders]
+  )
+
+  return (folderId: string) => {
+    if (parentIds.has(folderId) && !expansion.isExpanded(folderId)) {
+      expansion.toggle(folderId)
+    }
+  }
 }
 
 function FolderMenuItems({
