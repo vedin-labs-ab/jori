@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { SidebarFolders } from "../folders/section"
 import { SidebarUserButton } from "./account"
 import { SidebarOrganizationSwitcher } from "./organization"
 import { consoleNavigation, isNavigationActive } from "./routes"
@@ -44,6 +45,7 @@ export function ConsoleSidebar({ pathname }: { pathname: string }) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarFolders pathname={pathname} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarUserButton />

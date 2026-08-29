@@ -1,4 +1,5 @@
 import {
+  FolderInput,
   Loader2,
   MoreHorizontal,
   Pause,
@@ -20,6 +21,7 @@ export function AutomationActions({
   isDeleting,
   onDeleteRequest,
   onEdit,
+  onMoveToFolder,
   onPausedChange,
   automation,
 }: {
@@ -27,6 +29,7 @@ export function AutomationActions({
   isDeleting: boolean
   onDeleteRequest: () => void
   onEdit: (automation: Automation) => void
+  onMoveToFolder: (automation: Automation) => void
   onPausedChange: (automation: Automation, paused: boolean) => void
   automation: Automation
 }) {
@@ -52,10 +55,14 @@ export function AutomationActions({
           <MoreHorizontal />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-36">
+      <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuItem onSelect={() => onEdit(automation)}>
           <Pencil />
           Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onMoveToFolder(automation)}>
+          <FolderInput />
+          Move to folder…
         </DropdownMenuItem>
         {controlAction === undefined ? null : (
           <DropdownMenuItem

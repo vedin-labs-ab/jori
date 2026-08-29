@@ -1,5 +1,6 @@
 import {
   Archive,
+  FolderInput,
   Loader2,
   MoreHorizontal,
   RotateCcw,
@@ -39,6 +40,7 @@ export function MaterialActions({
   material,
   noun,
   onDelete,
+  onMoveToFolder,
   onRestore,
 }: {
   /** What a permanent delete takes with it, shown in the confirm dialog. */
@@ -48,6 +50,8 @@ export function MaterialActions({
   material: MaterialActionTarget
   noun: string
   onDelete: () => void
+  /** When given, the menu offers filing the material into a folder. */
+  onMoveToFolder?: () => void
   onRestore: () => void
 }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
@@ -72,7 +76,13 @@ export function MaterialActions({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-36">
+        <DropdownMenuContent align="end" className="w-44">
+          {onMoveToFolder === undefined ? null : (
+            <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
+              <FolderInput />
+              Move to folder…
+            </DropdownMenuItem>
+          )}
           {isArchived ? (
             <DropdownMenuItem disabled={isPending} onSelect={onRestore}>
               {isRestoring ? (

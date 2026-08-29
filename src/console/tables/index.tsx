@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
 import { api } from "../../../convex/_generated/api"
+import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout, ConsoleScrollableGrid } from "../shared/layout"
 import { ConsoleListPager } from "../shared/list/pager"
@@ -62,6 +63,7 @@ function TablesView({ organizationId }: { organizationId: string }) {
   const [filter, setFilter] = useState<ArchiveFilter>("active")
   const [scope, setScope] = useState<ScopeFilter>("all")
   const [dialog, setDialog] = useState<"create" | "import">()
+  const [movingTable, setMovingTable] = useState<TableSummary>()
   const removal = useTableRemoval(organizationId)
   const deferredQuery = useDeferredValue(query)
   const { tableList, tables } = useTableRows({
@@ -97,28 +99,72 @@ function TablesView({ organizationId }: { organizationId: string }) {
         hasFilters={hasFilters}
         onCreate={() => setDialog("create")}
         onImport={() => setDialog("import")}
+        onMoveToFolder={setMovingTable}
         pagination={pagination}
         removal={removal}
         tableList={tableList}
       />
-      <CreateTableDialog
-        isOpen={dialog === "create"}
-        onOpenChange={(open) => setDialog(open ? "create" : undefined)}
-        organizationId={organizationId}
-      />
-      <ImportTableDialog
-        isOpen={dialog === "import"}
-        onOpenChange={(open) => setDialog(open ? "import" : undefined)}
+      <TablesDialogs
+        dialog={dialog}
+        movingTable={movingTable}
+        onDialogChange={setDialog}
+        onMoveClose={() => setMovingTable(undefined)}
         organizationId={organizationId}
       />
     </ConsolePageLayout>
   )
 }
 
+function TablesDialogs({
+  dialog,
+  movingTable,
+  onDialogChange,
+  onMoveClose,
+  organizationId,
+}: {
+  dialog: "create" | "import" | undefined
+  movingTable: TableSummary | undefined
+  onDialogChange: (dialog: "create" | "import" | undefined) => void
+  onMoveClose: () => void
+  organizationId: string
+}) {
+  return (
+    <>
+      <CreateTableDialog
+        isOpen={dialog === "create"}
+        onOpenChange={(open) => onDialogChange(open ? "create" : undefined)}
+        organizationId={organizationId}
+      />
+      <ImportTableDialog
+        isOpen={dialog === "import"}
+        onOpenChange={(open) => onDialogChange(open ? "import" : undefined)}
+        organizationId={organizationId}
+      />
+      <MoveResourceDialog
+        onClose={onMoveClose}
+        organizationId={organizationId}
+        resource={movingResource(movingTable)}
+      />
+    </>
+  )
+}
+
+function movingResource(table: TableSummary | undefined) {
+  return table === undefined
+    ? undefined
+    : {
+        resourceType: "collection" as const,
+        resourceId: table.tableId,
+        name: table.name,
+        folderId: table.folderId,
+      }
+}
+
 function TablesBody({
   hasFilters,
   onCreate,
   onImport,
+  onMoveToFolder,
   pagination,
   removal,
   tableList,
@@ -126,6 +172,7 @@ function TablesBody({
   hasFilters: boolean
   onCreate: () => void
   onImport: () => void
+  onMoveToFolder: (table: TableSummary) => void
   pagination: ReturnType<typeof useClientPagination<TableSummary>>
   removal: ReturnType<typeof useTableRemoval>
   tableList: TableListResult | undefined
@@ -147,6 +194,7 @@ function TablesBody({
           hasFilters={hasFilters}
           onCreate={onCreate}
           onImport={onImport}
+          onMoveToFolder={onMoveToFolder}
           removal={removal}
           tables={pagination.visibleRows}
           unauthorizedMessage={

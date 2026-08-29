@@ -16,6 +16,7 @@ export function StoreHeaderActions({
   onDelete,
   onEdit,
   onExport,
+  onMoveToFolder,
   onShare,
   removal,
   store,
@@ -23,6 +24,7 @@ export function StoreHeaderActions({
   onDelete: () => void
   onEdit: () => void
   onExport: () => void
+  onMoveToFolder: () => void
   onShare: () => void
   removal: ReturnType<typeof useStoreRemoval>
   store: StoreDetail
@@ -58,6 +60,7 @@ export function StoreHeaderActions({
         material={{ name: store.name, archivedAt: store.archivedAt }}
         noun="store"
         onDelete={onDelete}
+        onMoveToFolder={onMoveToFolder}
         onRestore={() => void removal.restoreStore(store)}
       />
     </ConsoleHeaderActions>

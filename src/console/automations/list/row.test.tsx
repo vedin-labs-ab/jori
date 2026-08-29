@@ -189,6 +189,7 @@ function renderRow({
         now={now}
         onDelete={onDelete}
         onEdit={onEdit}
+        onMoveToFolder={vi.fn()}
         onPausedChange={onPausedChange}
         automation={automation}
       />

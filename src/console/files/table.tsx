@@ -21,6 +21,7 @@ export function FileTable({
   isLoading,
   onDelete,
   onEdit,
+  onMoveToFolder,
   onUpload,
   pendingFileId,
 }: {
@@ -28,6 +29,7 @@ export function FileTable({
   isLoading: boolean
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
+  onMoveToFolder: (file: FileRow) => void
   onUpload: () => void
   pendingFileId: FileRow["fileId"] | undefined
 }) {
@@ -63,6 +65,7 @@ export function FileTable({
               key={file.fileId}
               onDelete={onDelete}
               onEdit={onEdit}
+              onMoveToFolder={onMoveToFolder}
             />
           ))}
         </TableBody>
@@ -92,11 +95,13 @@ function FileTableRow({
   isPending,
   onDelete,
   onEdit,
+  onMoveToFolder,
 }: {
   file: FileRow
   isPending: boolean
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
+  onMoveToFolder: (file: FileRow) => void
 }) {
   const now = useNow(30_000)
 
@@ -132,6 +137,7 @@ function FileTableRow({
           isPending={isPending}
           onDelete={onDelete}
           onEdit={onEdit}
+          onMoveToFolder={onMoveToFolder}
         />
       </TableCell>
     </TableRow>

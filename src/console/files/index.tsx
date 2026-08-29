@@ -3,6 +3,7 @@ import { Upload } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../convex/_generated/api"
+import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { showErrorToast } from "../shared/error"
 import {
@@ -30,6 +31,7 @@ function FilesCard({ organizationId }: { organizationId: string }) {
   const pagination = useFilePagination(organizationId)
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [editFile, setEditFile] = useState<FileRow>()
+  const [movingFile, setMovingFile] = useState<FileRow>()
   const actions = useFileActions(organizationId, () => setEditFile(undefined))
 
   return (
@@ -52,6 +54,7 @@ function FilesCard({ organizationId }: { organizationId: string }) {
           isLoading={pagination.isLoading}
           onDelete={actions.deleteFile}
           onEdit={setEditFile}
+          onMoveToFolder={setMovingFile}
           onUpload={() => setIsUploadOpen(true)}
           pendingFileId={actions.pendingFileId}
         />
@@ -74,6 +77,20 @@ function FilesCard({ organizationId }: { organizationId: string }) {
           }
         }}
         onSave={actions.saveFile}
+      />
+      <MoveResourceDialog
+        onClose={() => setMovingFile(undefined)}
+        organizationId={organizationId}
+        resource={
+          movingFile === undefined
+            ? undefined
+            : {
+                resourceType: "file",
+                resourceId: movingFile.fileId,
+                name: movingFile.name,
+                folderId: movingFile.folderId,
+              }
+        }
       />
     </ConsolePageLayout>
   )

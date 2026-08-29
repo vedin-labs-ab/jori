@@ -14,6 +14,7 @@ export function AutomationRow({
   now,
   onDelete,
   onEdit,
+  onMoveToFolder,
   onPausedChange,
   automation,
 }: {
@@ -22,6 +23,7 @@ export function AutomationRow({
   now: number
   onDelete: (automation: Automation) => void
   onEdit: (automation: Automation) => void
+  onMoveToFolder: (automation: Automation) => void
   onPausedChange: (automation: Automation, paused: boolean) => void
   automation: Automation
 }) {
@@ -61,6 +63,7 @@ export function AutomationRow({
                 isDeleting={isDeleting}
                 onDeleteRequest={requestDelete}
                 onEdit={onEdit}
+                onMoveToFolder={onMoveToFolder}
                 onPausedChange={onPausedChange}
                 automation={automation}
               />

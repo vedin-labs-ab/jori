@@ -4,6 +4,7 @@ import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { api } from "../../../convex/_generated/api"
+import { MoveToFolderDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
@@ -105,6 +106,7 @@ function StoreReadyView({
   const removal = useStoreRemoval(organizationId)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isShareOpen, setIsShareOpen] = useState(false)
+  const [isMoveOpen, setIsMoveOpen] = useState(false)
   const isArchived = store.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
@@ -121,6 +123,7 @@ function StoreReadyView({
         onDelete={removeAndLeaveWhenDeleted}
         onEdit={() => setIsEditOpen(true)}
         onExport={() => exportStoreJson(store)}
+        onMoveToFolder={() => setIsMoveOpen(true)}
         onShare={() => setIsShareOpen(true)}
         removal={removal}
         store={store}
@@ -137,6 +140,21 @@ function StoreReadyView({
         open={isShareOpen}
         organizationId={organizationId}
         storeId={store.storeId}
+      />
+      <MoveToFolderDialog
+        onOpenChange={setIsMoveOpen}
+        organizationId={organizationId}
+        subject={
+          isMoveOpen
+            ? {
+                kind: "resource",
+                resourceType: "collection",
+                resourceId: store.storeId,
+                name: store.name,
+                folderId: store.folderId,
+              }
+            : undefined
+        }
       />
     </ConsolePageLayout>
   )

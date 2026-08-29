@@ -21,14 +21,20 @@ import { MaterialScopeField } from "../shared/materials/scope"
 
 export function UploadFileDialog({
   isOpen,
+  onCreated,
   onOpenChange,
   organizationId,
 }: {
   isOpen: boolean
+  /** Ran with the new file's id, e.g. to file it into a folder. */
+  onCreated?: (fileId: string) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
-  const upload = useFileUpload(organizationId, () => onOpenChange(false))
+  const upload = useFileUpload(organizationId, (fileId) => {
+    onOpenChange(false)
+    onCreated?.(fileId)
+  })
 
   return (
     <Dialog
@@ -96,7 +102,10 @@ function UploadFields({ upload }: { upload: FileUpload }) {
 
 type FileUpload = ReturnType<typeof useFileUpload>
 
-function useFileUpload(organizationId: string, onUploaded: () => void) {
+function useFileUpload(
+  organizationId: string,
+  onUploaded: (fileId: string) => void
+) {
   const generateUploadUrl = useMutation(api.files.console.uploadUrl)
   const createFile = useMutation(api.files.console.create)
   const [file, setFile] = useState<File | null>(null)
@@ -116,17 +125,18 @@ function useFileUpload(organizationId: string, onUploaded: () => void) {
         await generateUploadUrl({ organizationId }),
         file
       )
-      await createFile({
+      const fileId = await createFile({
         organizationId,
         storageId,
         name: file.name,
         description: description.trim() === "" ? undefined : description,
         scope,
       })
+
       toast.success(`Uploaded ${file.name}.`)
       setFile(null)
       setDescription("")
-      onUploaded()
+      onUploaded(fileId)
     } catch (error) {
       showErrorToast(error, "Could not upload the file.")
     } finally {

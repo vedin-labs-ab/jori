@@ -30,14 +30,20 @@ import {
 
 export function CreateTableDialog({
   isOpen,
+  onCreated,
   onOpenChange,
   organizationId,
 }: {
   isOpen: boolean
+  /** Ran with the new table's id, e.g. to file it into a folder. */
+  onCreated?: (tableId: string) => void
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
-  const form = useCreateTable(organizationId, () => onOpenChange(false))
+  const form = useCreateTable(organizationId, (tableId) => {
+    onOpenChange(false)
+    onCreated?.(tableId)
+  })
 
   return (
     <Dialog
@@ -99,7 +105,10 @@ export function CreateTableDialog({
   )
 }
 
-function useCreateTable(organizationId: string, onCreated: () => void) {
+function useCreateTable(
+  organizationId: string,
+  onCreated: (tableId: string) => void
+) {
   const create = useMutation(api.tables.console.create)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
@@ -120,19 +129,20 @@ function useCreateTable(organizationId: string, onCreated: () => void) {
     setIsCreating(true)
 
     try {
-      await create({
+      const created = (await create({
         organizationId,
         name,
         description: description.trim() === "" ? undefined : description,
         scope,
         columns: draftsToColumns(drafts, []),
-      })
+      })) as { tableId: string }
+
       toast.success(`Created ${name.trim()}.`)
       setName("")
       setDescription("")
       setScope("organization")
       setDrafts([newColumnDraft()])
-      onCreated()
+      onCreated(created.tableId)
     } catch (error) {
       showErrorToast(error, "Could not create the table.")
     } finally {

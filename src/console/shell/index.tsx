@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import { type ReactNode, useState } from "react"
+import { Fragment, type ReactNode, useState } from "react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,6 +20,7 @@ import { ConsoleHeaderActionsProvider } from "../shared/layout"
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
+  type MaterialBreadcrumbSegment,
 } from "../shared/materials/breadcrumb"
 import { MaterialScopeMark } from "../shared/materials/scope"
 import { ConsoleSidebar } from "./navigation"
@@ -74,10 +75,12 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 }
 
 /** The header's name for the page. Material detail pages get a trail: the
- *  parent surface as a link, then the material's name once its view has
- *  published it — with a muted scope icon suffix when the view publishes
- *  a scope. Everywhere else a one-item breadcrumb is not a trail, it is
- *  the page's name, so it is marked up as a heading. */
+ *  linked ancestors, then the material's name once its view has published
+ *  it — with a muted scope icon suffix when the view publishes a scope.
+ *  The ancestors default to the parent surface derived from the path; a
+ *  view may publish a full segment trail instead. Everywhere else a
+ *  one-item breadcrumb is not a trail, it is the page's name, so it is
+ *  marked up as a heading. */
 function ConsoleHeaderTitle({
   material,
   pathname,
@@ -86,8 +89,13 @@ function ConsoleHeaderTitle({
   pathname: string
 }) {
   const surface = getMaterialSurface(pathname)
+  const trail =
+    material?.trail ??
+    (surface === undefined
+      ? undefined
+      : [{ name: surface.label, to: surface.to }])
 
-  if (surface === undefined) {
+  if (trail === undefined) {
     return (
       <h1 className="min-w-0 truncate text-xs/relaxed">
         {getPageTitle(pathname)}
@@ -98,14 +106,21 @@ function ConsoleHeaderTitle({
   return (
     <Breadcrumb className="min-w-0">
       <BreadcrumbList className="flex-nowrap">
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link to={surface.to}>{surface.label}</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
+        {trail.map((segment, index) => (
+          <Fragment key={segmentKey(segment)}>
+            {index === 0 ? null : <BreadcrumbSeparator />}
+            <BreadcrumbItem className="min-w-0">
+              <BreadcrumbLink asChild className="truncate">
+                <Link params={segment.params} to={segment.to}>
+                  {segment.name}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </Fragment>
+        ))}
         {material === undefined ? null : (
           <>
-            <BreadcrumbSeparator />
+            {trail.length === 0 ? null : <BreadcrumbSeparator />}
             <BreadcrumbItem className="min-w-0">
               <BreadcrumbPage className="truncate">
                 {material.name}
@@ -119,4 +134,8 @@ function ConsoleHeaderTitle({
       </BreadcrumbList>
     </Breadcrumb>
   )
+}
+
+function segmentKey(segment: MaterialBreadcrumbSegment) {
+  return [segment.to, ...Object.values(segment.params ?? {})].join("/")
 }

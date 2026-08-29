@@ -17,8 +17,21 @@ vi.mock("@tanstack/react-router", () => ({
   }: {
     select: (state: { location: { pathname: string } }) => unknown
   }) => select({ location: { pathname } }),
-  Link: ({ to, ...props }: { to: string } & React.ComponentProps<"a">) => (
-    <a href={to} {...props} />
+  Link: ({
+    params,
+    to,
+    ...props
+  }: {
+    params?: Record<string, string>
+    to: string
+  } & React.ComponentProps<"a">) => (
+    <a
+      href={Object.values(params ?? {}).reduce(
+        (path, value) => path.replace(/\$\w+/, value),
+        to
+      )}
+      {...props}
+    />
   ),
 }))
 
@@ -86,6 +99,51 @@ test("suffixes the name with the scope icon when a scope is published", () => {
 
   expect(current.getAttribute("aria-current")).toBe("page")
   expect(screen.getByText("Personal").className).toContain("sr-only")
+})
+
+test("renders a published segment trail with the material as the page", () => {
+  const publish = renderWithPublisher("/folders/leaf1")
+
+  act(() =>
+    publish.current?.({
+      name: "Invoices",
+      trail: [
+        {
+          name: "Finance",
+          to: "/folders/$folderId",
+          params: { folderId: "root1" },
+        },
+        {
+          name: "Vendors",
+          to: "/folders/$folderId",
+          params: { folderId: "mid1" },
+        },
+      ],
+    })
+  )
+
+  const first = screen.getByRole("link", { name: "Finance" })
+  const second = screen.getByRole("link", { name: "Vendors" })
+
+  expect(first.getAttribute("href")).toBe("/folders/root1")
+  expect(second.getAttribute("href")).toBe("/folders/mid1")
+  expect(screen.getByText("Invoices").getAttribute("aria-current")).toBe("page")
+})
+
+test("a published empty trail names a root material without ancestors", () => {
+  const publish = renderWithPublisher("/folders/root1")
+
+  act(() => publish.current?.({ name: "Finance", trail: [] }))
+
+  expect(screen.getByText("Finance").getAttribute("aria-current")).toBe("page")
+  expect(screen.queryByRole("link", { name: "Folders" })).toBeNull()
+})
+
+test("titles a folder page as Folders while its trail loads", () => {
+  pathname = "/folders/abc123"
+  render(<ConsoleShell>Content</ConsoleShell>)
+
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Folders")
 })
 
 function renderWithPublisher(path: string) {
