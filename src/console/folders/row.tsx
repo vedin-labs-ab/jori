@@ -22,6 +22,7 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { type FolderDialogRequest } from "./manage"
 import { type FolderNode } from "./tree"
 import { type FolderRow } from "./types"
@@ -32,8 +33,9 @@ export type FolderExpansion = {
 }
 
 /** One sidebar tree row: the button navigates to the folder's page, the
- *  chevron expands its children into an indented sub-list, and the hover
- *  menu raises the lifecycle dialogs. */
+ *  chevron expands its children into an indented sub-list, the hover menu
+ *  raises the lifecycle dialogs, and the row drags onto other rows (or the
+ *  group header) to move the folder. */
 export function FolderTreeItem({
   expansion,
   node,
@@ -45,9 +47,9 @@ export function FolderTreeItem({
   onDialog: (request: FolderDialogRequest) => void
   pathname: string
 }) {
+  const drag = useFolderRowDrag(node.folderId)
   const hasChildren = node.children.length > 0
   const isExpanded = hasChildren && expansion.isExpanded(node.folderId)
-  const FolderIcon = isExpanded ? FolderOpen : Folder
 
   return (
     <SidebarMenuItem>
@@ -56,32 +58,35 @@ export function FolderTreeItem({
           hover boundary: actions inside reveal only when THIS row is
           hovered, and position against it, not the subtree. */}
       <div className="group/row relative">
-        <SidebarMenuButton
-          asChild
+        <FolderRowLink
+          drag={drag}
+          folderId={node.folderId}
+          hasChildren={hasChildren}
           isActive={pathname === `/folders/${node.folderId}`}
-          tooltip={node.name}
-        >
-          <Link params={{ folderId: node.folderId }} to="/folders/$folderId">
-            <FolderIcon />
-            <span>{node.name}</span>
-          </Link>
-        </SidebarMenuButton>
+          isExpanded={isExpanded}
+          name={node.name}
+        />
         {hasChildren ? (
-          <SidebarMenuAction
-            aria-expanded={isExpanded}
-            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.name}`}
-            className="right-6"
-            onClick={() => expansion.toggle(node.folderId)}
-          >
-            <ChevronRight
-              className={cn("transition-transform", isExpanded && "rotate-90")}
-            />
-          </SidebarMenuAction>
+          <RowChevron
+            isExpanded={isExpanded}
+            name={node.name}
+            onToggle={() => expansion.toggle(node.folderId)}
+          />
         ) : null}
-        <FolderRowMenu folder={node} onDialog={onDialog} />
+        <FolderRowMenu
+          folder={node}
+          isDragActive={drag.isDragActive}
+          onDialog={onDialog}
+        />
       </div>
       {isExpanded ? (
-        <SidebarMenuSub>
+        // The default sub-list insets both edges, so at the backend's
+        // depth-8 nesting cap rows would shrink from the right and lose
+        // their actions column. Keep the guide line but move the whole
+        // per-level step to the left (16px: 10px margin + 6px padding),
+        // so every row at every depth ends on the same right edge and
+        // still fits a readable name at depth 8.
+        <SidebarMenuSub className="mr-0 ml-2.5 pr-0 pl-1.5">
           {node.children.map((child) => (
             <FolderTreeItem
               expansion={expansion}
@@ -97,22 +102,118 @@ export function FolderTreeItem({
   )
 }
 
+function FolderRowLink({
+  drag,
+  folderId,
+  hasChildren,
+  isActive,
+  isExpanded,
+  name,
+}: {
+  drag: FolderRowDrag
+  folderId: string
+  hasChildren: boolean
+  isActive: boolean
+  isExpanded: boolean
+  name: string
+}) {
+  const FolderIcon = isExpanded ? FolderOpen : Folder
+
+  return (
+    <SidebarMenuButton
+      asChild
+      className={cn(
+        // The base button only clears the "…" action (pr-8); rows with a
+        // chevron column too need the name held clear of both.
+        hasChildren && "group-has-data-[sidebar=menu-action]/menu-item:pr-14",
+        rowDragClasses(drag)
+      )}
+      isActive={isActive}
+      tooltip={name}
+    >
+      <Link
+        {...drag.attributes}
+        {...drag.listeners}
+        draggable={false}
+        onClickCapture={drag.onClickCapture}
+        onPointerDownCapture={drag.onPointerDownCapture}
+        params={{ folderId }}
+        ref={drag.setNodeRef}
+        to="/folders/$folderId"
+      >
+        <FolderIcon />
+        <span className="min-w-0 truncate">{name}</span>
+      </Link>
+    </SidebarMenuButton>
+  )
+}
+
+/** Drag styling for a row: the source dims, the hovered valid target takes
+ *  the sidebar accent, plain hover goes quiet while a drag runs (passing
+ *  over a row is not acting on it), and a landed move fades the row in
+ *  where it settled — unless the user prefers reduced motion. */
+function rowDragClasses(drag: FolderRowDrag) {
+  return cn(
+    drag.isDragActive &&
+      !drag.isDropTarget &&
+      "hover:bg-transparent hover:text-current",
+    drag.isDragSource && "opacity-50",
+    drag.isDropTarget && "bg-sidebar-accent text-sidebar-accent-foreground",
+    drag.isSettling &&
+      "motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+  )
+}
+
+function RowChevron({
+  isExpanded,
+  name,
+  onToggle,
+}: {
+  isExpanded: boolean
+  name: string
+  onToggle: () => void
+}) {
+  return (
+    <SidebarMenuAction
+      aria-expanded={isExpanded}
+      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${name}`}
+      className="right-6"
+      onClick={onToggle}
+    >
+      <ChevronRight
+        className={cn(
+          "transition-transform motion-reduce:transition-none",
+          isExpanded && "rotate-90"
+        )}
+      />
+    </SidebarMenuAction>
+  )
+}
+
 function FolderRowMenu({
   folder,
+  isDragActive,
   onDialog,
 }: {
   folder: FolderRow
+  isDragActive: boolean
   onDialog: (request: FolderDialogRequest) => void
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {/* Not showOnHover: that keys off the item-wide group (see the row
-            wrapper's comment); these classes replicate its reveal, scoped
-            to the row's own group. */}
+            wrapper's comment); this reveal is scoped to the row's own
+            group. Keyboard reveal keys off focus-visible, not focus-within,
+            so a mouse click leaves no lingering "…"; while a drag passes
+            over rows the menu stays hidden entirely. */}
         <SidebarMenuAction
           aria-label={`Open actions for ${folder.name}`}
-          className="aria-expanded:opacity-100 group-focus-within/row:opacity-100 group-hover/row:opacity-100 md:opacity-0"
+          className={cn(
+            "aria-expanded:opacity-100 md:opacity-0",
+            !isDragActive &&
+              "group-has-[:focus-visible]/row:opacity-100 group-hover/row:opacity-100"
+          )}
         >
           <MoreHorizontal />
         </SidebarMenuAction>
