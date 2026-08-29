@@ -1,5 +1,5 @@
 import { type Scope } from "@contracts/permissions/scope"
-import { createContext, useContext, useEffect } from "react"
+import { createContext, useContext, useEffect, useMemo } from "react"
 
 // Material detail pages are headed by a breadcrumb trail. The console shell
 // owns the trail: by default it derives the linked parent surface from the
@@ -27,19 +27,6 @@ export const MaterialBreadcrumbContext = createContext<
   (material: MaterialBreadcrumb | undefined) => void
 >(() => undefined)
 
-/** Publish the material's display name, and optionally its scope, to the
- *  console header breadcrumb for as long as the calling detail view is
- *  mounted. */
-export function useMaterialBreadcrumb(name: string, scope?: Scope) {
-  const publish = useContext(MaterialBreadcrumbContext)
-
-  useEffect(() => {
-    publish({ name, scope })
-
-    return () => publish(undefined)
-  }, [name, scope, publish])
-}
-
 /** Publish a whole breadcrumb — ancestor segments as links, the material as
  *  the current page. Republishing follows identity, so callers memoize the
  *  material they pass. */
@@ -51,4 +38,11 @@ export function useMaterialTrail(material: MaterialBreadcrumb | undefined) {
 
     return () => publish(undefined)
   }, [material, publish])
+}
+
+/** Publish the material's display name, and optionally its scope, to the
+ *  console header breadcrumb for as long as the calling detail view is
+ *  mounted. */
+export function useMaterialBreadcrumb(name: string, scope?: Scope) {
+  useMaterialTrail(useMemo(() => ({ name, scope }), [name, scope]))
 }
