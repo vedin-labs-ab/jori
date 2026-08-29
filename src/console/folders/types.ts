@@ -11,6 +11,10 @@ export type FolderDetail = NonNullable<
   FunctionReturnType<typeof api.folders.console.get>["folder"]
 >
 
+/** What the lifecycle dialogs need of a folder; tree rows and the folder
+ *  page's detail both satisfy it. */
+export type ManagedFolder = Pick<FolderRow, "folderId" | "name" | "parentId">
+
 export type FolderContentsResult = FunctionReturnType<
   typeof api.folders.console.contents
 >

@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { type FolderRow } from "./types"
+import { type ManagedFolder } from "./types"
 
 /**
  * After a folder is deleted, its page has nothing left to show. The returned
@@ -11,7 +11,7 @@ import { type FolderRow } from "./types"
 export function useLeaveDeletedFolder(viewedFolderId: string | undefined) {
   const navigate = useNavigate()
 
-  return (deleted: FolderRow) => {
+  return (deleted: ManagedFolder) => {
     if (deleted.folderId !== viewedFolderId) {
       return
     }

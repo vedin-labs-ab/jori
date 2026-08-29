@@ -14,7 +14,14 @@ const folders = [
 ] as FolderRow[]
 
 function row(folderId: string, name: string, parentId?: string) {
-  return { folderId, name, parentId, createdAt: 1, updatedAt: 1 }
+  return {
+    folderId,
+    name,
+    parentId,
+    hasContents: false,
+    createdAt: 1,
+    updatedAt: 1,
+  }
 }
 
 test("offers No folder first, then the nested tree", () => {
