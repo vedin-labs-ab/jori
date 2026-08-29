@@ -1,4 +1,4 @@
-import { Braces, Pencil } from "lucide-react"
+import { Braces, Database, Pencil } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DialogTitle } from "@/components/ui/dialog"
@@ -11,6 +11,8 @@ import { JsonBlock, JsonDialog } from "../../shared/code"
 import { CopyButton } from "../../shared/copy"
 import { DetailFrame } from "../../shared/details"
 import { formatJsonText } from "../../shared/json/parse"
+import { ConsoleEmptyState } from "../../shared/list/empty"
+import { ConsoleListContent } from "../../shared/list/frame"
 import { type StoreDetail } from "../types"
 import { ValueEditorSection } from "./editor"
 
@@ -28,16 +30,21 @@ export function StoreValue({
 
   if (isEditing) {
     return (
-      <ValueEditorSection
-        onClose={() => setIsEditing(false)}
-        organizationId={organizationId}
-        store={store}
-      />
+      <ConsoleListContent>
+        <ValueEditorSection
+          onClose={() => setIsEditing(false)}
+          organizationId={organizationId}
+          store={store}
+        />
+      </ConsoleListContent>
     )
   }
 
   return (
     <>
+      {/* The value document is the page: the terminal frame bleeds to
+          every edge, squared off, with the page's horizontal padding
+          carried by its own header and body. */}
       <DetailFrame
         action={
           <ValueActions
@@ -46,8 +53,11 @@ export function StoreValue({
             store={store}
           />
         }
+        className="flex-1 rounded-none"
+        contentClassName="h-full"
+        headerClassName="px-4 py-2 md:px-6"
       >
-        <ValueDocument store={store} />
+        <ValueDocument onEdit={() => setIsEditing(true)} store={store} />
       </DetailFrame>
       <JsonDialog
         description="The schema this store's value must conform to."
@@ -126,14 +136,36 @@ function ValueActionButton({
   )
 }
 
-function ValueDocument({ store }: { store: StoreDetail }) {
+function ValueDocument({
+  onEdit,
+  store,
+}: {
+  onEdit: () => void
+  store: StoreDetail
+}) {
   if (store.version === 0) {
     return (
-      <p className="px-2.5 py-2 text-muted-foreground text-xs">
-        Nothing stored yet. The first write creates version 1.
-      </p>
+      <ConsoleEmptyState
+        action={
+          store.archivedAt === undefined ? (
+            <Button onClick={onEdit} type="button">
+              <Pencil />
+              Write value
+            </Button>
+          ) : undefined
+        }
+        className="h-full"
+        description="The first write creates version 1. Jori writes it from runs, or you can start it here."
+        icon={Database}
+        title="Nothing stored yet"
+      />
     )
   }
 
-  return <JsonBlock value={store.value} />
+  return (
+    <JsonBlock
+      className="h-full max-h-none px-4 py-3 md:px-6"
+      value={store.value}
+    />
+  )
 }

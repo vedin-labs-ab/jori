@@ -7,6 +7,7 @@ import { api } from "../../../convex/_generated/api"
 import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
+import { ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
@@ -118,7 +119,7 @@ function StoreReadyView({
   }
 
   return (
-    <ConsolePageLayout>
+    <ConsoleListLayout>
       <StoreHeaderActions
         onDelete={removeAndLeaveWhenDeleted}
         onEdit={() => setIsEditOpen(true)}
@@ -154,6 +155,6 @@ function StoreReadyView({
             : undefined
         }
       />
-    </ConsolePageLayout>
+    </ConsoleListLayout>
   )
 }

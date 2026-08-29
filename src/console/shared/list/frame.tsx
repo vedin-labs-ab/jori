@@ -21,7 +21,8 @@ export function ConsoleListLayout({
   )
 }
 
-/** Filter row above the table, padded to the page frame. */
+/** Filter row above the table, padded to the page frame and closed off
+ *  with a hairline before the table header starts. */
 export function ConsoleListToolbar({
   className,
   ...props
@@ -29,7 +30,7 @@ export function ConsoleListToolbar({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 md:px-6",
+        "flex flex-wrap items-center gap-x-4 gap-y-3 border-b px-4 py-3 md:px-6",
         className
       )}
       {...props}
@@ -78,14 +79,16 @@ export function ConsoleListTable({
   )
 }
 
-/** Bottom bar pinned under the table, hosting the pager. */
+/** Bottom bar pinned under the table, hosting the pager. Borderless — the
+ *  sticky table header already frames the list, and rows fade out into the
+ *  footer without a second hairline. */
 export function ConsoleListFooter({
   className,
   ...props
 }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("border-t bg-background px-4 py-2 md:px-6", className)}
+      className={cn("bg-background px-4 py-2 md:px-6", className)}
       {...props}
     />
   )

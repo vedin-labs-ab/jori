@@ -24,6 +24,8 @@ import { TableCell, TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { type RowSelection } from "./selection"
 
+/** Header checkbox: none, partial (a partly selected page shows the
+ *  indeterminate minus), or all. Toggling from partial selects the rest. */
 export function SelectionHeadCell<Row>({
   selection,
 }: {
@@ -33,15 +35,21 @@ export function SelectionHeadCell<Row>({
     <TableHead className="w-8">
       <Checkbox
         aria-label="Select all rows"
-        checked={selection.allSelected}
+        checked={headerState(selection)}
         onCheckedChange={selection.toggleAll}
       />
     </TableHead>
   )
 }
 
-/** The row checkbox stays hidden until the row is hovered, focused, part of
- *  an active selection, or on coarse pointers, keeping resting rows quiet. */
+function headerState<Row>(selection: RowSelection<Row>) {
+  if (selection.allSelected) {
+    return true
+  }
+
+  return selection.count > 0 ? ("indeterminate" as const) : false
+}
+
 export function SelectionRowCell<Row>({
   label,
   row,
@@ -56,10 +64,6 @@ export function SelectionRowCell<Row>({
       <Checkbox
         aria-label={label}
         checked={selection.isSelected(row)}
-        className={cn(
-          "opacity-0 transition-opacity duration-150 pointer-coarse:opacity-100 focus-visible:opacity-100 data-checked:opacity-100 [tr:hover_&]:opacity-100",
-          selection.count > 0 && "opacity-100"
-        )}
         onCheckedChange={() => selection.toggle(row)}
       />
     </TableCell>
@@ -110,7 +114,10 @@ export function SelectionActionsBar({
         <span className="px-2 font-medium text-xs tabular-nums">
           {count} selected
         </span>
-        <Separator className="data-vertical:h-4" orientation="vertical" />
+        <Separator
+          className="data-vertical:h-4 data-vertical:self-auto"
+          orientation="vertical"
+        />
         <Button
           disabled={isBusy}
           onClick={onMove}
@@ -136,7 +143,10 @@ export function SelectionActionsBar({
           onRemove={onRemove}
           removal={removal}
         />
-        <Separator className="data-vertical:h-4" orientation="vertical" />
+        <Separator
+          className="data-vertical:h-4 data-vertical:self-auto"
+          orientation="vertical"
+        />
         <Button
           aria-label="Clear selection"
           onClick={onClear}

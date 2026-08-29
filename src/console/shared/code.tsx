@@ -5,6 +5,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { countLabel } from "@/lib/count"
+import { cn } from "@/lib/utils"
 import { CopyButton } from "./copy"
 import { codeTokenClassName } from "./tokens"
 
@@ -63,10 +64,20 @@ export function JsonDialog({
 }
 
 /** Scrollable folding-JSON pane for detail frames and document views. */
-export function JsonBlock({ value }: { value: unknown }) {
+export function JsonBlock({
+  className,
+  value,
+}: {
+  className?: string
+  value: unknown
+}) {
   return (
     <pre
-      className={`max-h-96 min-w-0 overflow-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
+      className={cn(
+        "max-h-96 min-w-0 overflow-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed",
+        codeTokenClassName,
+        className
+      )}
     >
       <code className="block whitespace-pre-wrap break-words">
         <JsonView value={value} />
