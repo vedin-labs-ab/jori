@@ -66,8 +66,16 @@ test("strips stray legacy fields and leaves other documents alone", async () => 
 
   const next = await stripBatch(ctx, legacyTables.length, null)
 
-  expect(await database.get(strayId)).toEqual({ _id: strayId, name: "Stray" })
-  expect(await database.get(cleanId)).toEqual({ _id: cleanId, name: "Clean" })
+  expect(await database.get(strayId)).toEqual({
+    _creationTime: expect.any(Number),
+    _id: strayId,
+    name: "Stray",
+  })
+  expect(await database.get(cleanId)).toEqual({
+    _creationTime: expect.any(Number),
+    _id: cleanId,
+    name: "Clean",
+  })
   expect(next).toEqual({ phase: legacyTables.length + 1, cursor: null })
 })
 
@@ -78,6 +86,7 @@ test("strips stray trial flags from runs", async () => {
   const next = await stripBatch(ctx, legacyTables.length + 1, null)
 
   expect(await database.get(strayId)).toEqual({
+    _creationTime: expect.any(Number),
     _id: strayId,
     status: "done",
   })

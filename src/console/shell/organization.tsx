@@ -125,7 +125,7 @@ function OrganizationMenuTrigger({ switching }: { switching: boolean }) {
         disabled={switching}
       >
         <OrganizationView className="min-w-0" hideRole hideSlug size="sm" />
-        <ChevronDown className="opacity-50" />
+        <ChevronDown className="opacity-50 group-data-[collapsible=icon]:hidden" />
       </SidebarMenuButton>
     </DropdownMenuTrigger>
   )
