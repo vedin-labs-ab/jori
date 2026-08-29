@@ -1,7 +1,5 @@
-import { Link } from "@tanstack/react-router"
 import { Database, Plus } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -27,8 +25,13 @@ import {
   type ArchiveFilter,
   archiveFilterOptions,
 } from "../shared/materials/archive"
-import { MaterialScopeBadge } from "../shared/materials/scope"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
+import {
+  StoreNameCell,
+  StoreOwnerCell,
+  StorePropertiesCell,
+  StoreVersionCell,
+} from "./cells"
 import { storeDeleteDescription, type useStoreRemoval } from "./manage"
 import { type StoreSummary } from "./types"
 
@@ -129,9 +132,11 @@ export function StoreList({
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead>Scope</TableHead>
+            <TableHead>Properties</TableHead>
             <TableHead>Version</TableHead>
-            <TableHead>Updated</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Owner</TableHead>
+            <TableHead>Last Updated</TableHead>
             <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
@@ -168,33 +173,22 @@ function StoreListRow({
   return (
     <TableRow>
       <TableCell className="max-w-64">
-        <Link
-          className="block truncate font-medium hover:underline"
-          params={{ storeId: store.storeId }}
-          title={store.name}
-          to="/stores/$storeId"
-        >
-          {store.name}
-        </Link>
-        {store.description === undefined ? null : (
-          <p
-            className="truncate text-muted-foreground"
-            title={store.description}
-          >
-            {store.description}
-          </p>
-        )}
+        <StoreNameCell store={store} />
       </TableCell>
       <TableCell>
-        <span className="inline-flex items-center gap-1.5">
-          <MaterialScopeBadge scope={store.scope} />
-          {store.archivedAt === undefined ? null : (
-            <Badge variant="secondary">Archived</Badge>
-          )}
-        </span>
+        <StorePropertiesCell store={store} />
       </TableCell>
-      <TableCell className="text-muted-foreground">
-        {store.version === 0 ? "Not written yet" : `v${store.version}`}
+      <TableCell>
+        <StoreVersionCell store={store} />
+      </TableCell>
+      <TableCell
+        className="text-muted-foreground"
+        title={absoluteTime(store.createdAt)}
+      >
+        {relativeTime(store.createdAt, now)}
+      </TableCell>
+      <TableCell className="max-w-48">
+        <StoreOwnerCell store={store} />
       </TableCell>
       <TableCell
         className="text-muted-foreground"

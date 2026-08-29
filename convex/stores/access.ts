@@ -1,3 +1,4 @@
+import { isRecord } from "../../contracts/json"
 import { type JsonSchemaObject } from "../../contracts/schema/validate"
 import { type Id } from "../_generated/dataModel"
 import {
@@ -6,6 +7,7 @@ import {
   searchCollections,
 } from "../collections/access"
 import { type CollectionDoc } from "../collections/spec"
+import { personDisplayName } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { storeSpec } from "./spec"
 
@@ -50,10 +52,32 @@ export function summarizeStore(store: StoreDoc) {
     folderId: store.folderId,
     schema: store.schema as JsonSchemaObject,
     schemaHash: store.schemaHash,
+    propertyCount: countTopLevelProperties(store.schema as JsonSchemaObject),
     createdAt: store.createdAt,
     updatedAt: store.updatedAt,
     archivedAt: store.archivedAt,
   }
+}
+
+/** Console summary: the base summary plus the owner's display name. A store
+ *  without a resolvable named owner reads as Jori's own in the console. */
+export async function summarizeStoreWithOwner(
+  ctx: QueryLikeCtx,
+  store: StoreDoc
+) {
+  return {
+    ...summarizeStore(store),
+    ownerName:
+      store.ownerId === undefined
+        ? undefined
+        : await personDisplayName(ctx, store.ownerId),
+  }
+}
+
+/** How many properties the schema's object root declares; nested objects
+ *  count as one, and a schema without a properties object counts zero. */
+function countTopLevelProperties(schema: JsonSchemaObject) {
+  return isRecord(schema.properties) ? Object.keys(schema.properties).length : 0
 }
 
 function toCollectionArgs(args: StoreArgs) {
