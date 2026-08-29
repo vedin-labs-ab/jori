@@ -3,7 +3,7 @@ import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
-import { ConsoleListSkeleton } from "../../shared/list/skeleton"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { type FolderContentsResult, type FolderResource } from "../types"
 import { ResourceListRow } from "./resource"
 import { FolderListRow, FolderListTable } from "./table"
@@ -29,7 +29,7 @@ export function FolderContents({
   if (contents === undefined) {
     return (
       <ConsoleListContent>
-        <ConsoleListSkeleton />
+        <ConsoleListLoading />
       </ConsoleListContent>
     )
   }

@@ -23,7 +23,6 @@ import {
 } from "../shared/list/frame"
 import { type ScopeFilter, scopeFilterOptions } from "../shared/list/scope"
 import { type RowSelection } from "../shared/list/selection"
-import { ConsoleListSkeleton } from "../shared/list/skeleton"
 import { MaterialActions } from "../shared/materials/actions"
 import {
   type ArchiveFilter,
@@ -168,14 +167,6 @@ export function StoreList({
         ))}
       </TableBody>
     </ConsoleListTable>
-  )
-}
-
-export function StoreListSkeleton() {
-  return (
-    <ConsoleListContent>
-      <ConsoleListSkeleton />
-    </ConsoleListContent>
   )
 }
 

@@ -7,8 +7,8 @@ import { api } from "../../../../convex/_generated/api"
 import { MoveResourceDialog } from "../../folders/move"
 import { ConsolePage } from "../../page"
 import { ConsolePageLayout, ConsoleScrollableGrid } from "../../shared/layout"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { ConsoleListPager } from "../../shared/list/pager"
-import { ConsoleListSkeleton } from "../../shared/list/skeleton"
 import { useMaterialBreadcrumb } from "../../shared/materials/breadcrumb"
 import { useMemberUrl } from "../../shared/materials/fragment"
 import { EditTableDialog } from "../edit"
@@ -58,7 +58,7 @@ function TableViewContent({
   if (result === undefined) {
     return (
       <ConsolePageLayout>
-        <ConsoleListSkeleton />
+        <ConsoleListLoading />
       </ConsolePageLayout>
     )
   }

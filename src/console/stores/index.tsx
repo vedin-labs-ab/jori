@@ -6,6 +6,7 @@ import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
 import { SelectionActionsBar } from "../shared/list/bar"
 import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
+import { ConsoleListLoading } from "../shared/list/loading"
 import { ConsoleListPager } from "../shared/list/pager"
 import {
   useClientPagination,
@@ -22,7 +23,7 @@ import {
 import { useFolderNames } from "../shared/materials/folders"
 import { bulkMaterialRemoval } from "../shared/materials/removal"
 import { CreateStoreDialog } from "./create"
-import { StoreList, StoreListSkeleton, StoresToolbar } from "./list"
+import { StoreList, StoresToolbar } from "./list"
 import {
   storeDeleteDescription,
   storeNoun,
@@ -212,7 +213,7 @@ function StoresBody({
   storeList: StoreListResult | undefined
 }) {
   if (storeList === undefined) {
-    return <StoreListSkeleton />
+    return <ConsoleListLoading />
   }
 
   return (

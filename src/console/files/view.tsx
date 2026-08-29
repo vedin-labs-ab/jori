@@ -17,7 +17,7 @@ import {
 } from "../shared/layout"
 import { ConsoleEmptyState } from "../shared/list/empty"
 import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListSkeleton } from "../shared/list/skeleton"
+import { ConsoleListLoading } from "../shared/list/loading"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
@@ -69,7 +69,7 @@ function FileViewContent({
   if (result === undefined) {
     return (
       <ConsolePageLayout>
-        <ConsoleListSkeleton />
+        <ConsoleListLoading />
       </ConsolePageLayout>
     )
   }

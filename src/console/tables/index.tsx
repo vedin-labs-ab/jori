@@ -6,6 +6,7 @@ import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
 import { SelectionActionsBar } from "../shared/list/bar"
 import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
+import { ConsoleListLoading } from "../shared/list/loading"
 import { ConsoleListPager } from "../shared/list/pager"
 import {
   useClientPagination,
@@ -23,7 +24,7 @@ import { useFolderNames } from "../shared/materials/folders"
 import { bulkMaterialRemoval } from "../shared/materials/removal"
 import { CreateTableDialog } from "./create"
 import { ImportTableDialog } from "./import/dialog"
-import { TableList, TableListSkeleton, TablesToolbar } from "./list"
+import { TableList, TablesToolbar } from "./list"
 import {
   tableDeleteDescription,
   tableNoun,
@@ -222,7 +223,7 @@ function TablesBody({
   tableList: TableListResult | undefined
 }) {
   if (tableList === undefined) {
-    return <TableListSkeleton />
+    return <ConsoleListLoading />
   }
 
   return (

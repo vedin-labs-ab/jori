@@ -109,11 +109,11 @@ test("a dotted icon marks the subfolders that hold anything", () => {
   expect(plain.querySelector(".lucide-folder")).not.toBeNull()
 })
 
-test("loading shows the padded skeleton instead of a table", () => {
+test("loading shows the centered spinner instead of a table", () => {
   renderContents(undefined)
 
   expect(screen.queryByRole("table")).toBeNull()
-  expect(document.querySelector('[data-slot="skeleton"]')).not.toBeNull()
+  expect(document.querySelector('[data-slot="spinner"]')).not.toBeNull()
 })
 
 test("an unauthorized result surfaces its message", () => {
