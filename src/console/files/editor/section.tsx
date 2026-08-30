@@ -6,9 +6,9 @@ import { ConsoleListLoading } from "../../shared/list/loading"
 import { usePreloadSiblings } from "../cache/preload"
 import { type FileSiblings } from "../siblings"
 import { uploadToStorage } from "../storage"
-import { FileToolbar } from "../toolbar"
+import { FileMeta, FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
-import { type SaveStatus, useAutosave } from "./autosave"
+import { useAutosave } from "./autosave"
 import { type FileDocument, useDocument } from "./document"
 
 /** CodeMirror loads only when a text file is actually on screen, keeping
@@ -23,7 +23,6 @@ const Mirror = lazy(() =>
 export function FileEditor({
   errorFallback,
   file,
-  meta,
   organizationId,
   siblings,
   url,
@@ -31,7 +30,6 @@ export function FileEditor({
   /** Rendered when the file's text cannot be fetched. */
   errorFallback: ReactNode
   file: FileDetail
-  meta: ReactNode
   organizationId: string
   siblings: FileSiblings
   url: string
@@ -59,14 +57,11 @@ export function FileEditor({
         siblings={siblings}
         tools={
           document.state.status === "ready" ? (
-            <EditorStatus
-              savedText={document.state.saved}
-              status={autosave.status}
-            />
+            <EditorCopy savedText={document.state.saved} />
           ) : undefined
         }
       >
-        {meta}
+        <FileMeta file={file} saveStatus={autosave.status} />
       </FileToolbar>
       <EditorBody
         document={document}
@@ -83,33 +78,8 @@ export function FileEditor({
   )
 }
 
-/** Label per save state. Idle renders an empty slot; the span's minimum
- *  width keeps the toolbar from shifting as saves come and go. */
-const statusLabels: Record<SaveStatus, string> = {
-  idle: "",
-  saving: "Saving…",
-  saved: "Saved",
-  error: "Couldn't save — retrying",
-}
-
-function EditorStatus({
-  savedText,
-  status,
-}: {
-  savedText: string
-  status: SaveStatus
-}) {
-  return (
-    <>
-      <span
-        aria-live="polite"
-        className="min-w-12 whitespace-nowrap text-right text-muted-foreground text-xs"
-      >
-        {statusLabels[status]}
-      </span>
-      <CopyButton label="file text" value={async () => savedText} />
-    </>
-  )
+function EditorCopy({ savedText }: { savedText: string }) {
+  return <CopyButton label="file text" value={async () => savedText} />
 }
 
 function EditorBody({
