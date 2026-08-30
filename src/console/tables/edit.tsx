@@ -18,18 +18,10 @@ import {
   MaterialNameField,
 } from "../shared/materials/fields"
 import { DialogForm } from "../shared/materials/form"
-import { ColumnEditor } from "./columns"
-import {
-  type ColumnDraft,
-  draftsFromColumns,
-  draftsToColumns,
-  type TableFormErrors,
-  validateTableForm,
-} from "./draft"
 import { type TableDetail } from "./types"
 
-/** Rename and describe the table, and evolve its columns: existing ones may
- *  change display name only, new ones join as optional columns. */
+/** Rename and describe the table. Columns live in the grid itself — the
+ *  New column header cell and each column's details sheet. */
 export function EditTableDialog({
   onOpenChange,
   organizationId,
@@ -54,8 +46,7 @@ export function EditTableDialog({
         <DialogHeader>
           <DialogTitle>Edit table</DialogTitle>
           <DialogDescription>
-            Existing columns keep their key and type; new columns are optional
-            so current rows stay valid.
+            Rename the table or update the note that helps others find it.
           </DialogDescription>
         </DialogHeader>
         <DialogForm
@@ -73,16 +64,6 @@ export function EditTableDialog({
             idPrefix="table-edit"
             onDescriptionChange={form.setDescription}
           />
-          <ColumnEditor
-            allowRequired={false}
-            drafts={form.drafts}
-            onChange={form.setDrafts}
-          />
-          {form.errors.columns === undefined ? null : (
-            <p className="text-destructive text-xs" role="alert">
-              {form.errors.columns}
-            </p>
-          )}
           <DialogFooter>
             <Button disabled={form.isSaving} type="submit">
               {form.isSaving ? <Loader2 className="animate-spin" /> : null}
@@ -103,14 +84,12 @@ function useEditTable(
   const update = useMutation(api.tables.console.update)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [drafts, setDrafts] = useState<ColumnDraft[]>([])
-  const [errors, setErrors] = useState<TableFormErrors>({})
+  const [errors, setErrors] = useState<{ name?: string }>({})
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     setName(table?.name ?? "")
     setDescription(table?.description ?? "")
-    setDrafts(table === undefined ? [] : draftsFromColumns(table.columns))
     setErrors({})
   }, [table])
 
@@ -119,11 +98,9 @@ function useEditTable(
       return
     }
 
-    const found = validateTableForm(name, drafts)
+    if (name.trim() === "") {
+      setErrors({ name: "Give the table a name." })
 
-    setErrors(found)
-
-    if (found.name !== undefined || found.columns !== undefined) {
       return
     }
 
@@ -135,7 +112,6 @@ function useEditTable(
         tableId: table.tableId,
         name,
         description,
-        columns: draftsToColumns(drafts, table.columns),
       })
       toast.success("Table updated.")
       onSaved()
@@ -148,19 +124,14 @@ function useEditTable(
 
   return {
     description,
-    drafts,
     errors,
     isSaving,
     name,
     setDescription,
-    // Validation shows only after a submit attempt; new input in a field
-    // clears that field's error right away.
-    setDrafts: (next: ColumnDraft[]) => {
-      setErrors((current) => ({ ...current, columns: undefined }))
-      setDrafts(next)
-    },
+    // Validation shows only after a submit attempt; new input in the field
+    // clears its error right away.
     setName: (next: string) => {
-      setErrors((current) => ({ ...current, name: undefined }))
+      setErrors({})
       setName(next)
     },
     submit,

@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router"
+import { ChevronDown } from "lucide-react"
 import { Fragment, type ReactNode, useState } from "react"
 import {
   Breadcrumb,
@@ -8,6 +9,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
@@ -137,9 +142,7 @@ function ConsoleHeaderTitle({
           <>
             {trail.length === 0 ? null : <BreadcrumbSeparator />}
             <BreadcrumbItem className="min-w-0">
-              <BreadcrumbPage className="truncate">
-                {material.name}
-              </BreadcrumbPage>
+              <MaterialName material={material} />
               {material.scope === undefined ? null : (
                 <MaterialScopeMark scope={material.scope} />
               )}
@@ -148,6 +151,32 @@ function ConsoleHeaderTitle({
         )}
       </BreadcrumbList>
     </Breadcrumb>
+  )
+}
+
+/** The current material's name — plain, or the trigger of the page's own
+ *  menu when the view published one. */
+function MaterialName({ material }: { material: MaterialBreadcrumb }) {
+  if (material.menu === undefined) {
+    return <BreadcrumbPage className="truncate">{material.name}</BreadcrumbPage>
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="flex min-w-0 items-center gap-1 rounded-sm text-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+          type="button"
+        >
+          <span className="truncate">{material.name}</span>
+          <ChevronDown
+            aria-hidden
+            className="size-3 shrink-0 text-muted-foreground"
+          />
+        </button>
+      </DropdownMenuTrigger>
+      {material.menu}
+    </DropdownMenu>
   )
 }
 

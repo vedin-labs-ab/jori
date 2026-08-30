@@ -17,7 +17,7 @@ import { rowPageSize, type TableDetail, type TableRow } from "../types"
 import { type ColumnSheetState } from "./columns"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
-import { TableHeaderActions } from "./header"
+import { TableHeaderActions, TableTitleMenu } from "./header"
 import { type TableDialog, TableOverlays } from "./overlays"
 import { useRowAdding, useRowBulk, useRowPages, useRowWrites } from "./rows"
 
@@ -131,7 +131,6 @@ function TableReadyView({
   table: TableDetail
 }) {
   useMemberUrl()
-  useMaterialBreadcrumb(table.name, table.scope)
 
   const navigate = useNavigate()
   const page = useTablePage(organizationId, table)
@@ -145,19 +144,24 @@ function TableReadyView({
     })
   }
 
+  useMaterialBreadcrumb(
+    table.name,
+    table.scope,
+    <TableTitleMenu
+      onDelete={removeAndLeaveWhenDeleted}
+      onEdit={() => page.setDialog("edit")}
+      onMoveToFolder={() => page.setDialog("move")}
+      removal={page.removal}
+      table={table}
+    />
+  )
+
   return (
     <ConsoleListLayout>
       <TableHeaderActions
-        isArchived={isArchived}
         isExporting={page.exporter.isExporting}
-        onAdd={() => void page.adding.addRow()}
-        onDelete={removeAndLeaveWhenDeleted}
-        onEdit={() => page.setDialog("edit")}
         onExport={() => void page.exporter.exportCsv()}
-        onMoveToFolder={() => page.setDialog("move")}
         onShare={() => page.setDialog("share")}
-        removal={page.removal}
-        table={table}
       />
       <TableGrid isArchived={isArchived} page={page} table={table} />
       <ConsoleListFooter>
