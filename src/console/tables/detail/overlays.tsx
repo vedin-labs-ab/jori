@@ -5,7 +5,7 @@ import { EditTableDialog } from "../edit"
 import { type TableDetail, type TableRow } from "../types"
 import { AddRowDialog } from "./add"
 import { ColumnSheet, type ColumnSheetState } from "./columns"
-import { rowNoun, type useRowBulk, type useRowWrites } from "./rows"
+import { rowNoun, type useRowBulk } from "./rows"
 import { TableLinksDialog } from "./share"
 
 export type TableDialog = "add" | "edit" | "move" | "share"
@@ -16,22 +16,24 @@ export function TableOverlays({
   bulk,
   columnSheet,
   dialog,
+  onAddRow,
   onCloseDialog,
   onColumnSheet,
   organizationId,
   selection,
   table,
-  writes,
 }: {
   bulk: ReturnType<typeof useRowBulk>
   columnSheet: ColumnSheetState | undefined
   dialog: TableDialog | undefined
+  onAddRow: (
+    values: Record<string, unknown>
+  ) => Promise<TableRow["rowId"] | null>
   onCloseDialog: () => void
   onColumnSheet: (state: ColumnSheetState | undefined) => void
   organizationId: string
   selection: RowSelection<TableRow>
   table: TableDetail
-  writes: ReturnType<typeof useRowWrites>
 }) {
   return (
     <>
@@ -60,10 +62,10 @@ export function TableOverlays({
       />
       <TableDialogs
         dialog={dialog}
+        onAddRow={onAddRow}
         onClose={onCloseDialog}
         organizationId={organizationId}
         table={table}
-        writes={writes}
       />
     </>
   )
@@ -71,16 +73,18 @@ export function TableOverlays({
 
 function TableDialogs({
   dialog,
+  onAddRow,
   onClose,
   organizationId,
   table,
-  writes,
 }: {
   dialog: TableDialog | undefined
+  onAddRow: (
+    values: Record<string, unknown>
+  ) => Promise<TableRow["rowId"] | null>
   onClose: () => void
   organizationId: string
   table: TableDetail
-  writes: ReturnType<typeof useRowWrites>
 }) {
   function closeWhenDismissed(open: boolean) {
     if (!open) {
@@ -94,7 +98,7 @@ function TableDialogs({
         columns={table.columns}
         isOpen={dialog === "add"}
         onOpenChange={closeWhenDismissed}
-        onSubmit={writes.insertRow}
+        onSubmit={onAddRow}
       />
       <EditTableDialog
         onOpenChange={closeWhenDismissed}

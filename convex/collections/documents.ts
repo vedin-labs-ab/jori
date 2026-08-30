@@ -9,6 +9,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
 import { assertExpectedVersion } from "./input"
+import { type InsertAnchor, resolveInsertOrders } from "./order"
 import { type CollectionDoc, type CollectionKind, type KindSpec } from "./spec"
 
 // The one write chokepoint for collection documents: archival, optimistic
@@ -46,6 +47,9 @@ async function getCollectionDocument<K extends CollectionKind>(
   return document
 }
 
+/** Documents in grid order: ascending `order`, so the first page starts at
+ *  the top row and appends land at the end. Documents predating the order
+ *  backfill (collections/order.ts) sort first rather than vanishing. */
 export async function pageDocuments(
   ctx: QueryLikeCtx,
   collectionId: Id<"collections">,
@@ -53,10 +57,10 @@ export async function pageDocuments(
 ) {
   return await ctx.db
     .query("documents")
-    .withIndex("by_collection", (index) =>
+    .withIndex("by_collection_and_order", (index) =>
       index.eq("collectionId", collectionId)
     )
-    .order("desc")
+    .order("asc")
     .paginate(paginationOpts)
 }
 
@@ -112,12 +116,14 @@ export async function writeDocument<K extends CollectionKind>(
 }
 
 /** Batched insert: every value is validated before the first write, so a
- *  batch either lands whole or not at all. */
+ *  batch either lands whole or not at all. Without an anchor the batch
+ *  appends at the end; with one it lands beside the anchor document. */
 export async function insertDocuments<K extends CollectionKind>(
   ctx: MutationCtx,
   spec: KindSpec<K>,
   collection: CollectionDoc<K>,
-  values: unknown[]
+  values: unknown[],
+  anchor?: InsertAnchor
 ) {
   assertWritable(spec, collection)
 
@@ -129,10 +135,28 @@ export async function insertDocuments<K extends CollectionKind>(
     assertDocumentValue(spec, collection, value)
   }
 
+  const orders = await resolveInsertOrders(
+    ctx,
+    collection._id,
+    values.length,
+    anchor === undefined
+      ? undefined
+      : {
+          document: await getCollectionDocument(
+            ctx,
+            spec,
+            collection,
+            anchor.documentId
+          ),
+          placement: anchor.placement,
+        }
+  )
   const inserted: Doc<"documents">[] = []
 
-  for (const value of values) {
-    inserted.push(await createDocument(ctx, collection._id, value))
+  for (const [index, value] of values.entries()) {
+    inserted.push(
+      await createDocument(ctx, collection._id, value, orders[index])
+    )
   }
 
   return inserted
@@ -228,16 +252,23 @@ async function resolveTarget<K extends CollectionKind>(
   return await getCollectionDocument(ctx, spec, collection, documentId)
 }
 
+/** Callers without a precomputed order (the singleton first write) append. */
 async function createDocument(
   ctx: MutationCtx,
   collectionId: Id<"collections">,
-  value: unknown
+  value: unknown,
+  order?: number
 ) {
   const now = Date.now()
+  const [resolvedOrder] =
+    order === undefined
+      ? await resolveInsertOrders(ctx, collectionId, 1)
+      : [order]
   const documentId = await ctx.db.insert("documents", {
     collectionId,
     value,
     version: 1,
+    order: resolvedOrder,
     createdAt: now,
     updatedAt: now,
   })

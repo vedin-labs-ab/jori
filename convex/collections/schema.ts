@@ -61,14 +61,19 @@ export const collections = defineTable(
   ])
   .index("by_folder", ["folderId"])
 
-/** One versioned document: a table's row or a store's single value. */
+/** One versioned document: a table's row or a store's single value. Rows
+ *  sort by `order` (see collections/order.ts); every creating path stamps
+ *  it, and it is optional only so pre-order documents still validate. */
 export const documents = defineTable({
   collectionId: v.id("collections"),
   value: v.any(),
   version: v.number(),
+  order: v.optional(v.number()),
   createdAt: v.number(),
   updatedAt: v.number(),
-}).index("by_collection", ["collectionId"])
+})
+  .index("by_collection", ["collectionId"])
+  .index("by_collection_and_order", ["collectionId", "order"])
 
 /** Each share is an independent read-only grant with its own secret and
  *  expiry; a target can have several live at once. The target is

@@ -7,10 +7,18 @@ import {
   pageDocuments,
   writeDocument,
 } from "../collections/documents"
+import { insertPlacementValidator } from "../collections/order"
 import { getAccessibleTable, summarizeRow } from "./access"
 import { tableSpec } from "./spec"
 
 const importBatchSize = 100
+
+/** Places an insert beside an existing row of the same table; without an
+ *  anchor, inserts append at the bottom. */
+export const rowAnchorValidator = v.object({
+  rowId: v.id("documents"),
+  placement: insertPlacementValidator,
+})
 
 export const page = internalQuery({
   args: {
@@ -38,10 +46,19 @@ export const insert = internalMutation({
     tableId: v.id("collections"),
     personId: v.id("persons"),
     values: v.any(),
+    anchor: v.optional(rowAnchorValidator),
   },
   handler: async (ctx, args) => {
     const table = await getAccessibleTable(ctx, args)
-    const [row] = await insertDocuments(ctx, tableSpec, table, [args.values])
+    const [row] = await insertDocuments(
+      ctx,
+      tableSpec,
+      table,
+      [args.values],
+      args.anchor === undefined
+        ? undefined
+        : { documentId: args.anchor.rowId, placement: args.anchor.placement }
+    )
 
     if (row === undefined) {
       throw new Error("Row insert failed.")

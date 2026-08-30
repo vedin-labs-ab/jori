@@ -11,6 +11,7 @@ import {
   searchTables,
   summarizeTableWithOwner,
 } from "./access"
+import { rowAnchorValidator } from "./rows"
 
 export const list = query({
   args: {
@@ -148,6 +149,7 @@ export const insertRow = mutation({
     organizationId: v.string(),
     tableId: v.id("collections"),
     values: v.any(),
+    anchor: v.optional(rowAnchorValidator),
   },
   handler: async (ctx, args): Promise<unknown> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)

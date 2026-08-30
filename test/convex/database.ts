@@ -6,7 +6,14 @@ import { type MutationCtx } from "../../convex/_generated/server"
 
 export type StoredDoc = Record<string, unknown> & { _id: string }
 
-type Constraint = { kind: "eq" | "gt"; field: string; value: unknown }
+type Constraint = { kind: "eq" | "gt" | "lt"; field: string; value: unknown }
+
+// Sort keys for the named indexes ordered tests rely on. Queries through
+// any other index keep insertion order and treat order() as a no-op, as
+// tests written before ordering support expect.
+const indexSortFields: Record<string, string[]> = {
+  by_collection_and_order: ["order"],
+}
 
 export function createDatabase() {
   const docs = new Map<string, StoredDoc>()
@@ -87,6 +94,8 @@ export function databaseContext(extras: Record<string, unknown> = {}) {
 function queryBuilder(rows: StoredDoc[]) {
   const constraints: Constraint[] = []
   const predicates: FilterPredicate[] = []
+  let sortFields: string[] = []
+  let descending = false
   const index = {
     eq: (field: string, value: unknown) => {
       constraints.push({ kind: "eq", field, value })
@@ -98,15 +107,32 @@ function queryBuilder(rows: StoredDoc[]) {
 
       return index
     },
+    lt: (field: string, value: unknown) => {
+      constraints.push({ kind: "lt", field, value })
+
+      return index
+    },
   }
-  const filtered = () =>
-    rows.filter(
+  const filtered = () => {
+    const result = rows.filter(
       (row) =>
         matches(row, constraints) &&
         predicates.every((predicate) => predicate(row))
     )
+
+    if (sortFields.length === 0) {
+      return result
+    }
+
+    for (const field of [...sortFields].reverse()) {
+      result.sort((left, right) => compareValues(left[field], right[field]))
+    }
+
+    return descending ? result.reverse() : result
+  }
   const chain = {
-    withIndex: (_name: string, build?: (builder: typeof index) => unknown) => {
+    withIndex: (name: string, build?: (builder: typeof index) => unknown) => {
+      sortFields = indexSortFields[name] ?? []
       build?.(index)
 
       return chain
@@ -118,7 +144,11 @@ function queryBuilder(rows: StoredDoc[]) {
 
       return chain
     },
-    order: (_direction: string) => chain,
+    order: (direction: string) => {
+      descending = direction === "desc"
+
+      return chain
+    },
     first: async () => filtered()[0] ?? null,
     unique: async () => {
       const result = filtered()
@@ -154,9 +184,31 @@ const filterBuilder = {
 }
 
 function matches(row: StoredDoc, constraints: Constraint[]) {
-  return constraints.every((constraint) =>
-    constraint.kind === "eq"
-      ? row[constraint.field] === constraint.value
-      : (row[constraint.field] as number) > (constraint.value as number)
-  )
+  return constraints.every((constraint) => {
+    if (constraint.kind === "eq") {
+      return row[constraint.field] === constraint.value
+    }
+
+    const comparison = compareValues(row[constraint.field], constraint.value)
+
+    return constraint.kind === "gt" ? comparison > 0 : comparison < 0
+  })
+}
+
+/** Convex index ordering for the value shapes tests use: a missing field
+ *  sorts before every present value. */
+function compareValues(left: unknown, right: unknown) {
+  if (left === right) {
+    return 0
+  }
+
+  if (left === undefined) {
+    return -1
+  }
+
+  if (right === undefined) {
+    return 1
+  }
+
+  return (left as number) < (right as number) ? -1 : 1
 }

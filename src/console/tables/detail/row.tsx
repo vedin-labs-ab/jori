@@ -1,4 +1,12 @@
-import { Clipboard, Copy, CopyPlus, Pencil, Plus, Trash2 } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  Clipboard,
+  Copy,
+  CopyPlus,
+  Pencil,
+  Trash2,
+} from "lucide-react"
 import { type ReactNode, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -23,7 +31,11 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { displayCellText } from "@/shared/materials/cells"
 import { type RowSelection } from "../../shared/list/selection"
-import { type TableColumn, type TableRow as TableRowData } from "../types"
+import {
+  type RowPlacement,
+  type TableColumn,
+  type TableRow as TableRowData,
+} from "../types"
 import { type CommitCell, RowCell } from "./cell"
 import { parseCellText } from "./cells"
 
@@ -35,11 +47,11 @@ export function GridRow({
   isFresh,
   isPending,
   number,
-  onAddRow,
   onCommit,
   onDelete,
   onDuplicate,
   onFreshSettled,
+  onInsert,
   row,
   selection,
 }: {
@@ -48,11 +60,11 @@ export function GridRow({
   isFresh: boolean
   isPending: boolean
   number: number
-  onAddRow: () => void
   onCommit: CommitCell
   onDelete: (row: TableRowData) => void
   onDuplicate: (row: TableRowData) => void
   onFreshSettled: () => void
+  onInsert: (row: TableRowData, placement: RowPlacement) => void
   row: TableRowData
   selection: RowSelection<TableRowData>
 }) {
@@ -63,6 +75,10 @@ export function GridRow({
   function settle() {
     setEditKey(undefined)
     onFreshSettled()
+  }
+
+  function advance(fromKey: string, direction: 1 | -1) {
+    setEditKey(nextEditKey(columns, fromKey, direction))
   }
 
   const cells = (
@@ -85,6 +101,7 @@ export function GridRow({
           <RowCell
             column={column}
             disabled={disabled || isPending}
+            onAdvance={(direction) => advance(column.key, direction)}
             onCommit={onCommit}
             onSettle={settle}
             row={row}
@@ -105,19 +122,11 @@ export function GridRow({
     <RowMenu
       isPending={isPending}
       menuColumn={columns.find((column) => column.key === menuKey)}
-      onAddRow={onAddRow}
       onDelete={() => onDelete(row)}
       onDuplicate={() => onDuplicate(row)}
       onEditCell={() => setEditKey(menuKey)}
-      onPasteCell={(column, text) => {
-        const parsed = parseCellText(column, text)
-
-        if (parsed.ok) {
-          void onCommit(row, column.key, parsed.value)
-        } else {
-          toast.error(parsed.error)
-        }
-      }}
+      onInsert={(placement) => onInsert(row, placement)}
+      onPasteCell={(column, text) => pasteIntoCell(onCommit, row, column, text)}
       row={row}
     >
       {cells}
@@ -125,26 +134,59 @@ export function GridRow({
   )
 }
 
+/** Pasted text lands like a typed edit: parsed for the column, committed
+ *  when it fits, and toasted when it does not. */
+function pasteIntoCell(
+  onCommit: CommitCell,
+  row: TableRowData,
+  column: TableColumn,
+  text: string
+) {
+  const parsed = parseCellText(column, text)
+
+  if (parsed.ok) {
+    void onCommit(row, column.key, parsed.value)
+  } else {
+    toast.error(parsed.error)
+  }
+}
+
+/** Tab from a committed editor moves editing to the row's neighboring
+ *  text-like cell; past either end it returns undefined and the editor
+ *  stays closed. Runs after the closing cell's settle, so the later
+ *  setEditKey wins the batch. */
+function nextEditKey(
+  columns: TableColumn[],
+  fromKey: string,
+  direction: 1 | -1
+) {
+  const textColumns = columns.filter((column) => column.type !== "boolean")
+  const from = textColumns.findIndex((column) => column.key === fromKey)
+
+  return textColumns[from + direction]?.key
+}
+
 /** The row's right-click menu: cell actions for the cell under the
- *  pointer, then row creation and removal. Deleting still confirms. */
+ *  pointer, then row creation anchored to this row, and removal. Deleting
+ *  still confirms. */
 function RowMenu({
   children,
   isPending,
   menuColumn,
-  onAddRow,
   onDelete,
   onDuplicate,
   onEditCell,
+  onInsert,
   onPasteCell,
   row,
 }: {
   children: ReactNode
   isPending: boolean
   menuColumn: TableColumn | undefined
-  onAddRow: () => void
   onDelete: () => void
   onDuplicate: () => void
   onEditCell: () => void
+  onInsert: (placement: RowPlacement) => void
   onPasteCell: (column: TableColumn, text: string) => void
   row: TableRowData
 }) {
@@ -220,9 +262,13 @@ function RowMenu({
             Paste
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onSelect={onAddRow}>
-            <Plus />
-            New row
+          <ContextMenuItem onSelect={() => onInsert("above")}>
+            <ArrowUp />
+            Insert row above
+          </ContextMenuItem>
+          <ContextMenuItem onSelect={() => onInsert("below")}>
+            <ArrowDown />
+            Insert row below
           </ContextMenuItem>
           <ContextMenuItem disabled={isPending} onSelect={onDuplicate}>
             <CopyPlus />
@@ -301,39 +347,5 @@ function GutterCell({
         />
       </span>
     </TableCell>
-  )
-}
-
-/** The quiet full-width affordance below the last loaded row; the page
- *  gates instant creation against required columns before it lands here. */
-export function NewRowRow({
-  disabled,
-  onAddRow,
-  span,
-}: {
-  disabled: boolean
-  onAddRow: () => void
-  span: number
-}) {
-  if (disabled) {
-    return null
-  }
-
-  // The affordance fits its content: the button carries its own closing
-  // hairlines, and the spanning cell forces all of the grid's cell borders
-  // off (the shared [&_td] selectors out-specify plain cell classes).
-  return (
-    <TableRow className="hover:bg-transparent">
-      <TableCell className="border-0! p-0" colSpan={span}>
-        <button
-          className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
-          onClick={onAddRow}
-          type="button"
-        >
-          <Plus aria-hidden className="size-3.5" />
-          New row
-        </button>
-      </TableCell>
-    </TableRow>
   )
 }

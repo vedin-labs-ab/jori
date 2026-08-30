@@ -10,7 +10,12 @@ import {
   conflictMessage,
   isVersionConflict,
 } from "../../shared/materials/conflict"
-import { rowPageSize, type TableColumn, type TableRow } from "../types"
+import {
+  type RowInsertAnchor,
+  rowPageSize,
+  type TableColumn,
+  type TableRow,
+} from "../types"
 import { buildRowValues } from "./cells"
 
 /** Cursor-stack pagination over pageRows: each visited page keeps its
@@ -83,9 +88,12 @@ export function useRowWrites(
   const remove = useMutation(api.tables.console.removeRow)
   const [pendingRowId, setPendingRowId] = useState<TableRow["rowId"]>()
 
-  async function insertRow(values: Record<string, unknown>) {
+  async function insertRow(
+    values: Record<string, unknown>,
+    anchor?: RowInsertAnchor
+  ) {
     const inserted = await run(
-      () => insert({ organizationId, tableId, values }),
+      () => insert({ organizationId, tableId, values, anchor }),
       "Could not add the row."
     )
 
@@ -131,38 +139,41 @@ export function useRowWrites(
     return outcome !== null
   }
 
+  /** The copy lands directly below its source, visibly, so no toast. */
   async function duplicateRow(row: TableRow) {
-    if ((await insertRow({ ...row.values })) !== null) {
-      toast.success("Row duplicated.")
-    }
+    await insertRow({ ...row.values }, { rowId: row.rowId, placement: "below" })
   }
 
   return { deleteRow, duplicateRow, insertRow, pendingRowId, updateCell }
 }
 
 /** Adding a row skips the dialog when a blank row already satisfies the
- *  schema (no required text-like columns): it lands instantly and its
- *  first cell opens for editing. Tables with required columns fall back
- *  to the add-row dialog. */
+ *  schema (no required text-like columns): it lands instantly — at the
+ *  anchor, or appended without one — and its first cell opens for editing.
+ *  Tables with required columns fall back to the add-row dialog, which
+ *  keeps the anchor so its row still lands in place. */
 export function useRowAdding(
   columns: TableColumn[],
   insertRow: (
-    values: Record<string, unknown>
+    values: Record<string, unknown>,
+    anchor?: RowInsertAnchor
   ) => Promise<TableRow["rowId"] | null>,
   onNeedsDialog: () => void
 ) {
   const [freshRowId, setFreshRowId] = useState<TableRow["rowId"]>()
+  const [dialogAnchor, setDialogAnchor] = useState<RowInsertAnchor>()
 
-  async function addRow() {
+  async function addRow(anchor?: RowInsertAnchor) {
     const blank = buildRowValues(columns, {})
 
     if (!blank.ok) {
+      setDialogAnchor(anchor)
       onNeedsDialog()
 
       return
     }
 
-    const rowId = await insertRow(blank.values)
+    const rowId = await insertRow(blank.values, anchor)
 
     if (rowId !== null) {
       setFreshRowId(rowId)
@@ -173,6 +184,8 @@ export function useRowAdding(
     addRow,
     freshRowId,
     settle: () => setFreshRowId(undefined),
+    submitDialog: (values: Record<string, unknown>) =>
+      insertRow(values, dialogAnchor),
   }
 }
 
