@@ -8,7 +8,6 @@ import {
 } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { CreateStoreDialog } from "./create"
-import { fieldNameErrors } from "./schema/model"
 
 const createStore = vi.fn()
 
@@ -39,22 +38,15 @@ function renderDialog(initialFolderId?: string) {
   )
 }
 
-function addField() {
-  fireEvent.click(screen.getByRole("button", { name: "Add field" }))
+function fillName() {
+  fireEvent.change(screen.getByLabelText("Name"), {
+    target: { value: "Invoices" },
+  })
 }
 
 /** Folder and Sharing live behind the collapsed Advanced settings. */
 function expandAdvancedSettings() {
   fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
-}
-
-function submit() {
-  fireEvent.click(screen.getByRole("button", { name: "Create store" }))
-}
-
-// Radix tabs select on mousedown, not click.
-function switchTab(name: "Code" | "Form") {
-  fireEvent.mouseDown(screen.getByRole("tab", { name }), { button: 0 })
 }
 
 /** jsdom leaves out the browser's implicit Enter-to-submit, so pressing
@@ -74,36 +66,33 @@ describe("create store enter submission", () => {
     renderDialog()
     pressEnter(screen.getByLabelText("Name"))
 
-    expect(screen.getByRole("alert").textContent).toBe("Name is required.")
+    expect(screen.getByRole("alert").textContent).toBe("Give the store a name.")
     expect(createStore).not.toHaveBeenCalled()
   })
 
-  test("Enter in a filled name field creates the store", async () => {
+  test("Enter in a named form creates the store without a schema", async () => {
     renderDialog()
-
-    const name = screen.getByLabelText("Name")
-
-    fireEvent.change(name, { target: { value: "Invoices" } })
-    pressEnter(name)
+    fillName()
+    pressEnter(screen.getByLabelText("Name"))
 
     await waitFor(() => expect(createStore).toHaveBeenCalledOnce())
     expect(createStore.mock.calls[0]?.[0]).toMatchObject({
       organizationId: "org-1",
       name: "Invoices",
+      folderId: undefined,
     })
+    expect(createStore.mock.calls[0]?.[0]).not.toHaveProperty("schema")
   })
 })
 
 describe("create store folder field", () => {
   test("a selected folder rides along in the create payload", async () => {
     renderDialog()
-    fireEvent.change(screen.getByLabelText("Name"), {
-      target: { value: "Invoices" },
-    })
+    fillName()
     expandAdvancedSettings()
     fireEvent.click(screen.getByLabelText("Folder"))
     fireEvent.click(await screen.findByRole("button", { name: "Finance" }))
-    submit()
+    fireEvent.click(screen.getByRole("button", { name: "Create store" }))
 
     await waitFor(() => expect(createStore).toHaveBeenCalledOnce())
     expect(createStore.mock.calls[0]?.[0]).toMatchObject({
@@ -111,170 +100,20 @@ describe("create store folder field", () => {
     })
   })
 
-  test("initialFolderId pre-populates the field", () => {
+  test("initialFolderId pre-populates the field yet stays editable", async () => {
     renderDialog("finance")
     expandAdvancedSettings()
 
     expect(screen.getByLabelText("Folder").textContent).toContain("Finance")
-  })
-})
 
-describe("create store error visibility", () => {
-  test("no errors show before a submit attempt", () => {
-    renderDialog()
-    addField()
-
-    expect(screen.queryByRole("alert")).toBeNull()
-  })
-
-  test("submit surfaces name and field errors, and edits clear them", () => {
-    renderDialog()
-    addField()
-    submit()
-
-    const alerts = screen
-      .getAllByRole("alert")
-      .map((alert) => alert.textContent)
-
-    expect(alerts).toEqual(["Name is required.", fieldNameErrors.missing])
-    expect(createStore).not.toHaveBeenCalled()
-
-    fireEvent.change(screen.getByLabelText("Name"), {
-      target: { value: "Invoices" },
-    })
-    fireEvent.change(screen.getByLabelText("Field name"), {
-      target: { value: "total" },
-    })
-
-    expect(screen.queryByRole("alert")).toBeNull()
-  })
-})
-
-describe("create store code errors", () => {
-  test("code-view errors appear on submit and clear when the JSON changes", () => {
-    renderDialog()
-    fireEvent.change(screen.getByLabelText("Name"), {
-      target: { value: "Invoices" },
-    })
-    switchTab("Code")
-    fireEvent.change(screen.getByLabelText("Schema"), {
-      target: { value: '{ "type": "string" }' },
-    })
-    submit()
-
-    expect(
-      screen.getByText("Store schema must describe a JSON object.")
-    ).toBeDefined()
-
-    fireEvent.change(screen.getByLabelText("Schema"), {
-      target: { value: '{ "type": "object" }' },
-    })
-
-    expect(screen.queryByRole("alert")).toBeNull()
-  })
-
-  test("backend schema errors attach under the schema editor", async () => {
-    createStore.mockRejectedValue(
-      new Error("Store schema.properties.total: uses unsupported type date")
-    )
-    renderDialog()
-    fireEvent.change(screen.getByLabelText("Name"), {
-      target: { value: "Invoices" },
-    })
-    submit()
-
-    await waitFor(() => {
-      expect(screen.getByRole("alert").textContent).toContain(
-        "uses unsupported type date"
-      )
-    })
-  })
-})
-
-describe("create store submission", () => {
-  test("the form view builds the schema the mutation receives", async () => {
-    renderDialog()
-    fireEvent.change(screen.getByLabelText("Name"), {
-      target: { value: "Invoices" },
-    })
-    addField()
-    fireEvent.change(screen.getByLabelText("Field name"), {
-      target: { value: "total" },
-    })
-    fireEvent.click(screen.getByRole("switch"))
-    submit()
+    fireEvent.click(screen.getByLabelText("Folder"))
+    fireEvent.click(await screen.findByRole("button", { name: "No folder" }))
+    fillName()
+    fireEvent.click(screen.getByRole("button", { name: "Create store" }))
 
     await waitFor(() => expect(createStore).toHaveBeenCalledOnce())
     expect(createStore.mock.calls[0]?.[0]).toMatchObject({
-      name: "Invoices",
-      schema: {
-        type: "object",
-        properties: { total: { type: "string" } },
-        required: ["total"],
-      },
+      folderId: undefined,
     })
-  })
-})
-
-describe("create store form to code", () => {
-  test("switching to code shows the emitted schema", () => {
-    renderDialog()
-    addField()
-    fireEvent.change(screen.getByLabelText("Field name"), {
-      target: { value: "total" },
-    })
-    switchTab("Code")
-
-    const textarea = screen.getByLabelText("Schema") as HTMLTextAreaElement
-
-    expect(JSON.parse(textarea.value)).toEqual({
-      type: "object",
-      properties: { total: { type: "string" } },
-    })
-  })
-
-  test("switching to code with an unnamed field stays in the form", () => {
-    renderDialog()
-    addField()
-    switchTab("Code")
-
-    expect(screen.queryByLabelText("Schema")).toBeNull()
-    expect(screen.getByRole("alert").textContent).toBe(fieldNameErrors.missing)
-  })
-})
-
-describe("create store code to form", () => {
-  test("an unsupported schema keeps the code view with a note", () => {
-    renderDialog()
-    switchTab("Code")
-    fireEvent.change(screen.getByLabelText("Schema"), {
-      target: {
-        value: JSON.stringify({ type: "object", additionalProperties: false }),
-      },
-    })
-    switchTab("Form")
-
-    expect(screen.getByLabelText("Schema")).toBeDefined()
-    expect(screen.getByText(/features the form view cannot edit/)).toBeDefined()
-  })
-
-  test("a supported schema loads back into the form", () => {
-    renderDialog()
-    switchTab("Code")
-    fireEvent.change(screen.getByLabelText("Schema"), {
-      target: {
-        value: JSON.stringify({
-          type: "object",
-          properties: { total: { type: "number" } },
-          required: ["total"],
-        }),
-      },
-    })
-    switchTab("Form")
-
-    const nameInput = screen.getByLabelText("Field name") as HTMLInputElement
-
-    expect(nameInput.value).toBe("total")
-    expect(screen.getByRole("switch").getAttribute("aria-checked")).toBe("true")
   })
 })

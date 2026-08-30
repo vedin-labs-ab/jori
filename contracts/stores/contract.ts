@@ -4,8 +4,8 @@ import {
   normalizeJsonSchema,
 } from "../schema/normalize"
 
-// A store is one named JSON document: a required JSON Schema fixed at
-// creation and a single versioned value validated against it on every write.
+// A store is one named JSON document: a single versioned value, optionally
+// constrained by an authored JSON Schema that every write must satisfy.
 
 export const storeLimits = {
   maxSchemaBytes: 64 * 1024,

@@ -92,6 +92,23 @@ describe("store tool dispatch", () => {
   })
 })
 
+describe("creating without a schema", () => {
+  test("create forwards no schema when the agent omits one", async () => {
+    const runMutation = vi.fn(async () => ({}))
+
+    await callJoriStoreTool(
+      { runMutation } as unknown as ActionCtx,
+      execution,
+      { tool: "create_store", args: { name: "Scratch" } }
+    )
+
+    expect(runMutation).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ name: "Scratch", schema: undefined })
+    )
+  })
+})
+
 describe("store share dispatch", () => {
   test("share_store routes through the broker to the share mint", async () => {
     const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))

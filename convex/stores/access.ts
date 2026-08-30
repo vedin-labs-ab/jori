@@ -50,9 +50,11 @@ export function summarizeStore(store: StoreDoc) {
     scope: store.scope,
     ownerId: store.ownerId,
     folderId: store.folderId,
-    schema: store.schema as JsonSchemaObject,
+    schema: store.schema as JsonSchemaObject | undefined,
     schemaHash: store.schemaHash,
-    propertyCount: countLeafProperties(store.schema as JsonSchemaObject),
+    propertyCount: countLeafProperties(
+      store.schema as JsonSchemaObject | undefined
+    ),
     createdAt: store.createdAt,
     updatedAt: store.updatedAt,
     archivedAt: store.archivedAt,
@@ -80,8 +82,13 @@ export async function summarizeStoreWithOwner(
 /** How many leaf properties the schema declares — the actual writable
  *  value slots. Objects are structure and don't count themselves; arrays
  *  count their item shape once, since repetition is data, not schema. A
- *  schema without a properties object counts zero. */
-function countLeafProperties(schema: JsonSchemaObject) {
+ *  schema without a properties object counts zero; a store without a
+ *  schema counts nothing at all. */
+function countLeafProperties(schema: JsonSchemaObject | undefined) {
+  if (schema === undefined) {
+    return undefined
+  }
+
   return isRecord(schema.properties) ? countChildLeaves(schema.properties) : 0
 }
 

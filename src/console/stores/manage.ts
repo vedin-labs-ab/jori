@@ -31,7 +31,8 @@ export function storeListConfig(
     sorts: {
       created: (store) => store.createdAt,
       name: (store) => store.name,
-      properties: (store) => store.propertyCount,
+      // Schemaless stores sort together below every counted schema.
+      properties: (store) => store.propertyCount ?? -1,
       updated: (store) => store.updatedAt,
       version: (store) => store.version,
     },
@@ -99,4 +100,4 @@ export function useStoreBulk(
 }
 
 export const storeDeleteDescription =
-  "This permanently deletes the store, its schema, and its stored value. Anything that reads it loses access."
+  "This permanently deletes the store and its stored value. Anything that reads it loses access."

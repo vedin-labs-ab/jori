@@ -15,15 +15,13 @@ import {
 } from "@/components/ui/dialog"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
-import { readErrorMessage } from "../shared/error"
+import { showErrorToast } from "../shared/error"
 import {
   MaterialDescriptionField,
   MaterialNameField,
 } from "../shared/materials/fields"
 import { AdvancedSettings, DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
-import { SchemaEditorSection } from "./schema/editor"
-import { useSchemaEditor } from "./schema/state"
 
 export function CreateStoreDialog({
   initialFolderId,
@@ -50,11 +48,11 @@ export function CreateStoreDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create store</DialogTitle>
           <DialogDescription>
-            One JSON document validated against a schema fixed at creation.
+            Name it now — add an optional schema right in the store.
           </DialogDescription>
         </DialogHeader>
         <DialogForm
@@ -72,7 +70,6 @@ export function CreateStoreDialog({
             idPrefix="store-create"
             onDescriptionChange={form.setDescription}
           />
-          <SchemaEditorSection editor={form.schema} idPrefix="store-create" />
           <AdvancedSettings>
             <FolderField
               id="store-create-folder"
@@ -105,7 +102,6 @@ function useCreateStore(
   onCreated: () => void
 ) {
   const create = useMutation(api.stores.console.create)
-  const schema = useSchemaEditor()
   const [name, setNameState] = useState("")
   const [nameError, setNameError] = useState<string>()
   const [description, setDescription] = useState("")
@@ -113,20 +109,16 @@ function useCreateStore(
   const [folderId, setFolderId] = useState(initialFolderId)
   const [isCreating, setIsCreating] = useState(false)
 
+  // Validation shows only after a submit attempt; new input clears it.
   function setName(next: string) {
     setNameState(next)
     setNameError(undefined)
   }
 
   async function submit() {
-    const schemaResult = schema.submit()
-    const isNameMissing = name.trim() === ""
+    if (name.trim() === "") {
+      setNameError("Give the store a name.")
 
-    if (isNameMissing) {
-      setNameError("Name is required.")
-    }
-
-    if (isNameMissing || !schemaResult.ok) {
       return
     }
 
@@ -140,7 +132,6 @@ function useCreateStore(
         scope,
         folderId:
           folderId === null ? undefined : (folderId as GenericId<"folders">),
-        schema: schemaResult.schema,
       })
 
       toast.success(`Created ${name.trim()}.`)
@@ -148,10 +139,9 @@ function useCreateStore(
       setDescription("")
       setScope("organization")
       setFolderId(initialFolderId)
-      schema.reset()
       onCreated()
     } catch (error) {
-      reportCreateError(error, schema.setSubmitError)
+      showErrorToast(error, "Could not create the store.")
     } finally {
       setIsCreating(false)
     }
@@ -163,26 +153,11 @@ function useCreateStore(
     isCreating,
     name,
     nameError,
-    schema,
     scope,
     setDescription,
     setFolderId,
     setName,
     setScope,
     submit,
-  }
-}
-
-/** Schema errors attach under the schema editor; anything else toasts. */
-function reportCreateError(
-  error: unknown,
-  setSubmitError: (message: string) => void
-) {
-  const message = readErrorMessage(error, "Could not create the store.")
-
-  if (/schema/i.test(message)) {
-    setSubmitError(message)
-  } else {
-    toast.error(message)
   }
 }

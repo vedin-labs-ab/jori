@@ -36,13 +36,17 @@ export function StoreNameCell({ store }: { store: StoreSummary }) {
 
 /** Properties column: a small icon and how many leaf properties — actual
  *  writable value slots — the store's schema declares, however deeply they
- *  nest. */
+ *  nest. A store without a schema shows an em dash. */
 export function StorePropertiesCell({ store }: { store: StoreSummary }) {
   return (
     <IconValueCell
       icon={Braces}
-      label={countLabel(store.propertyCount, "property")}
-      value={store.propertyCount}
+      label={
+        store.propertyCount === undefined
+          ? "No schema"
+          : countLabel(store.propertyCount, "property")
+      }
+      value={store.propertyCount ?? "—"}
     />
   )
 }

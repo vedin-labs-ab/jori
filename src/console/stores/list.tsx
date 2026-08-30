@@ -184,7 +184,7 @@ function StoresEmptyState({
           New store
         </Button>
       }
-      description="Schema-backed JSON documents Jori and your team keep state in appear here."
+      description="JSON documents Jori and your team keep state in appear here."
       hasFilters={hasFilters}
       icon={Database}
       noun="stores"

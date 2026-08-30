@@ -17,7 +17,7 @@ import { MaterialDetailFields } from "../shared/materials/fields"
 import { DialogForm } from "../shared/materials/form"
 import { type StoreDetail } from "./types"
 
-/** Rename or describe the store; the schema is fixed at creation. */
+/** Rename or describe the store; the schema is edited on the store page. */
 export function EditStoreDialog({
   onOpenChange,
   organizationId,

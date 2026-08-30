@@ -86,6 +86,15 @@ describe("counting leaf properties", () => {
 
     expect(summarizeStore(store).propertyCount).toBe(0)
   })
+
+  test("counts nothing at all for a store without a schema", async () => {
+    const { database } = databaseContext()
+    const store = await storedStore(database, { schema: undefined })
+    const summary = summarizeStore(store)
+
+    expect(summary.schema).toBeUndefined()
+    expect(summary.propertyCount).toBeUndefined()
+  })
 })
 
 describe("resolving the owner name", () => {
