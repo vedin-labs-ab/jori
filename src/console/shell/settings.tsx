@@ -1,10 +1,10 @@
 import {
   Building2,
   CreditCard,
+  Group,
   Shield,
   UserRound,
   Users,
-  UsersRound,
 } from "lucide-react"
 import { lazy, Suspense } from "react"
 
@@ -72,7 +72,7 @@ const accountViews = [
 const organizationViews = [
   { icon: Building2, label: "General", value: "general" },
   { icon: Users, label: "People", value: "people" },
-  { icon: UsersRound, label: "Teams", value: "teams" },
+  { icon: Group, label: "Teams", value: "teams" },
   { icon: CreditCard, label: "Billing", value: "billing" },
 ] as const satisfies readonly SettingsDialogView<OrganizationSettingsView>[]
 
