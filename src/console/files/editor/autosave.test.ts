@@ -46,7 +46,7 @@ describe("autosave", () => {
     await advance(1200)
     expect(result.current.status).toBe("saved")
 
-    await advance(2000)
+    await advance(4000)
     expect(result.current.status).toBe("idle")
   })
 

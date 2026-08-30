@@ -3,6 +3,7 @@ import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import { Separator } from "@/components/ui/separator"
+import { Spinner } from "@/components/ui/spinner"
 import {
   Tooltip,
   TooltipContent,
@@ -167,15 +168,24 @@ export function FileMeta({
       </span>
       {saveStatus === undefined ? null : (
         <>
-          <Check
+          {/* The slot exists only while a save is in motion or just done:
+              collapsed it gives back its width and the flex gap, so idle
+              shows no hole where an icon might one day be. */}
+          <span
             aria-hidden
             className={cn(
-              "size-3 shrink-0 text-emerald-600 transition-all duration-300 dark:text-emerald-500",
-              saveStatus === "saved"
-                ? "scale-100 opacity-100"
-                : "scale-50 opacity-0"
+              "flex shrink-0 items-center overflow-hidden transition-all duration-300",
+              saveStatus === "idle"
+                ? "-ml-1.5 max-w-0 scale-50 opacity-0"
+                : "max-w-4 scale-100 opacity-100"
             )}
-          />
+          >
+            {saveStatus === "saved" ? (
+              <Check className="size-3 text-success" />
+            ) : (
+              <Spinner className="size-3" />
+            )}
+          </span>
           <span aria-live="polite" className="sr-only">
             {saveStatus === "saved" ? "Saved" : ""}
           </span>

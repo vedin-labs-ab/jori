@@ -16,8 +16,8 @@ const saveDelay = 1200
 /** How long a failed save waits before trying again. */
 const retryDelay = 3000
 
-/** How long "Saved" lingers before the indicator goes quiet. */
-const savedLinger = 2000
+/** How long the saved check lingers before the indicator goes quiet. */
+const savedLinger = 4000
 
 type Persist = (text: string) => Promise<boolean>
 
