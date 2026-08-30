@@ -53,14 +53,11 @@ function renderEditor(value: unknown, version = 2) {
     schema,
     value,
     archivedAt: undefined,
+    updatedAt: Date.now(),
   } as unknown as StoreDetail
 
   render(
-    <ValueEditorSection
-      onStatus={() => undefined}
-      organizationId="org-1"
-      store={store}
-    />
+    <ValueEditorSection organizationId="org-1" store={store} tools={null} />
   )
 }
 
@@ -161,25 +158,30 @@ describe("value editor submission", () => {
   })
 })
 
+describe("value editor no-op saves", () => {
+  test("a buffer back at the saved value writes nothing", async () => {
+    renderEditor({ title: "March", total: 2, paid: false })
+
+    const title = screen.getByLabelText("title")
+    fireEvent.change(title, { target: { value: "April" } })
+    fireEvent.change(title, { target: { value: "March" } })
+    await settle()
+
+    expect(writeValue).not.toHaveBeenCalled()
+  })
+})
+
 describe("value editor form and code views", () => {
-  test("switching to code serializes the form state", () => {
+  test("the code view mirrors the form state read-only", () => {
     renderEditor({ title: "March", total: 2, paid: false })
     switchTab("Code")
 
-    const textarea = screen.getByLabelText(
-      "Store value JSON"
-    ) as HTMLTextAreaElement
-
-    expect(JSON.parse(textarea.value)).toEqual({
-      title: "March",
-      total: 2,
-      paid: false,
-    })
+    expect(screen.queryByLabelText("Store value JSON")).toBeNull()
+    expect(screen.getByText('"March"')).toBeDefined()
   })
 
-  test("broken JSON keeps the code view with a note", () => {
-    renderEditor({ title: "March", total: 2, paid: false })
-    switchTab("Code")
+  test("editable code with broken JSON refuses the form view", () => {
+    renderEditor({ title: 7, total: 2, paid: false })
     fireEvent.change(screen.getByLabelText("Store value JSON"), {
       target: { value: "{ nope" },
     })
@@ -191,7 +193,7 @@ describe("value editor form and code views", () => {
     ).toBeDefined()
   })
 
-  test("a value the form cannot hold opens as code with a note", () => {
+  test("a value the form cannot hold opens as editable code with a note", () => {
     renderEditor({ title: 7, total: 2, paid: false })
 
     expect(screen.getByLabelText("Store value JSON")).toBeDefined()
