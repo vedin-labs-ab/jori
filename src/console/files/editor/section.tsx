@@ -1,5 +1,4 @@
 import { useMutation } from "convex/react"
-import { Loader2 } from "lucide-react"
 import {
   lazy,
   type ReactNode,
@@ -8,15 +7,13 @@ import {
   useRef,
   useState,
 } from "react"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
 import { CopyButton } from "../../shared/copy"
-import { showErrorToast } from "../../shared/error"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { uploadToStorage } from "../storage"
 import { FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
+import { type SaveStatus, useAutosave } from "./autosave"
 
 /** CodeMirror loads only when a text file is actually on screen, keeping
  *  it out of the main bundle and the server build. */
@@ -25,8 +22,8 @@ const Mirror = lazy(() =>
 )
 
 /** In-place editor for a text file: the content fills the page under the
- *  toolbar, and edits save wholesale as a new storage blob. Last write
- *  wins; files carry no version. */
+ *  toolbar, and edits save automatically — debounced, wholesale, as a new
+ *  storage blob. Last write wins; files carry no version. */
 export function FileEditor({
   errorFallback,
   file,
@@ -42,35 +39,22 @@ export function FileEditor({
   url: string
 }) {
   const document = useDocument(file.fileId, url)
-  const draft = useRef("")
-  const [isDirty, setIsDirty] = useState(false)
   const save = useSave(file, organizationId)
+  const autosave = useAutosave(async (text: string) => {
+    const didSave = await save(text)
 
-  async function submit() {
-    if (await save.submit(draft.current)) {
-      document.markSaved(draft.current)
-      setIsDirty(false)
+    if (didSave) {
+      document.markSaved(text)
     }
-  }
 
-  function discard() {
-    draft.current =
-      document.state.status === "ready" ? document.state.saved : ""
-    setIsDirty(false)
-    document.reseed()
-  }
+    return didSave
+  })
 
   return (
     <>
       <FileToolbar
         action={
-          <EditorActions
-            isDirty={isDirty}
-            isSaving={save.isSaving}
-            onDiscard={discard}
-            onSave={() => void submit()}
-            state={document.state}
-          />
+          <EditorStatus state={document.state} status={autosave.status} />
         }
       >
         {meta}
@@ -79,52 +63,46 @@ export function FileEditor({
         document={document}
         errorFallback={errorFallback}
         file={file}
+        onBlur={autosave.flush}
         onChange={(text) => {
-          draft.current = text
-          setIsDirty(
-            document.state.status === "ready" && text !== document.state.saved
-          )
+          if (document.state.status === "ready") {
+            autosave.change(text, text === document.state.saved)
+          }
         }}
       />
     </>
   )
 }
 
-function EditorActions({
-  isDirty,
-  isSaving,
-  onDiscard,
-  onSave,
+/** Label per save state. Idle renders an empty slot; the span's minimum
+ *  width keeps the toolbar from shifting as saves come and go. */
+const statusLabels: Record<SaveStatus, string> = {
+  idle: "",
+  saving: "Saving…",
+  saved: "Saved",
+  error: "Couldn't save — retrying",
+}
+
+function EditorStatus({
   state,
+  status,
 }: {
-  isDirty: boolean
-  isSaving: boolean
-  onDiscard: () => void
-  onSave: () => void
   state: DocumentState
+  status: SaveStatus
 }) {
   if (state.status !== "ready") {
     return null
   }
 
-  if (!isDirty) {
-    return <CopyButton label="file text" value={async () => state.saved} />
-  }
-
   return (
     <>
-      <Button
-        disabled={isSaving}
-        onClick={onDiscard}
-        type="button"
-        variant="ghost"
+      <span
+        aria-live="polite"
+        className="min-w-12 whitespace-nowrap text-right text-muted-foreground text-xs"
       >
-        Discard
-      </Button>
-      <Button disabled={isSaving} onClick={onSave} type="button">
-        {isSaving ? <Loader2 className="animate-spin" /> : null}
-        Save
-      </Button>
+        {statusLabels[status]}
+      </span>
+      <CopyButton label="file text" value={async () => state.saved} />
     </>
   )
 }
@@ -133,11 +111,13 @@ function EditorBody({
   document,
   errorFallback,
   file,
+  onBlur,
   onChange,
 }: {
   document: FileDocument
   errorFallback: ReactNode
   file: FileDetail
+  onBlur: () => void
   onChange: (text: string) => void
 }) {
   if (document.state.status === "loading") {
@@ -152,9 +132,9 @@ function EditorBody({
     <div className="flex min-h-0 flex-1 flex-col">
       <Suspense fallback={<ConsoleListLoading />}>
         <Mirror
-          key={document.state.seedKey}
           mimeType={file.mimeType}
           name={file.name}
+          onBlur={onBlur}
           onChange={onChange}
           value={document.state.seed}
         />
@@ -166,13 +146,13 @@ function EditorBody({
 type DocumentState =
   | { status: "loading" }
   | { status: "error" }
-  | { status: "ready"; saved: string; seed: string; seedKey: number }
+  | { status: "ready"; saved: string; seed: string }
 
 type FileDocument = ReturnType<typeof useDocument>
 
 /** The file's text, fetched once per file. `saved` tracks the persisted
- *  content; `seed` is what the editor was seeded with and only moves on
- *  discard, so saving never resets the caret. */
+ *  content; `seed` is what the editor was seeded with and never moves, so
+ *  saving never resets the caret. */
 function useDocument(fileId: FileDetail["fileId"], url: string) {
   const [state, setState] = useState<DocumentState>({ status: "loading" })
   const loadedId = useRef<FileDetail["fileId"] | null>(null)
@@ -194,9 +174,7 @@ function useDocument(fileId: FileDetail["fileId"], url: string) {
 
         return await response.text()
       })
-      .then((text) =>
-        setState({ status: "ready", saved: text, seed: text, seedKey: 0 })
-      )
+      .then((text) => setState({ status: "ready", saved: text, seed: text }))
       .catch(() => setState({ status: "error" }))
   }, [fileId, url])
 
@@ -206,26 +184,17 @@ function useDocument(fileId: FileDetail["fileId"], url: string) {
     )
   }
 
-  /** Reseeds the editor from the saved text, discarding local edits. */
-  function reseed() {
-    setState((current) =>
-      current.status === "ready"
-        ? { ...current, seed: current.saved, seedKey: current.seedKey + 1 }
-        : current
-    )
-  }
-
-  return { markSaved, reseed, state }
+  return { markSaved, state }
 }
 
+/** Uploads the buffer as a new storage blob and swaps it into the file.
+ *  Failures report as false; the autosave loop keeps the buffer and
+ *  retries. */
 function useSave(file: FileDetail, organizationId: string) {
   const generateUploadUrl = useMutation(api.files.console.uploadUrl)
   const replaceFile = useMutation(api.files.console.replace)
-  const [isSaving, setIsSaving] = useState(false)
 
-  async function submit(text: string) {
-    setIsSaving(true)
-
+  return async function save(text: string) {
     try {
       const storageId = await uploadToStorage(
         await generateUploadUrl({ organizationId }),
@@ -233,17 +202,10 @@ function useSave(file: FileDetail, organizationId: string) {
       )
 
       await replaceFile({ organizationId, fileId: file.fileId, storageId })
-      toast.success(`Saved ${file.name}.`)
 
       return true
-    } catch (error) {
-      showErrorToast(error, "Could not save the file.")
-
+    } catch {
       return false
-    } finally {
-      setIsSaving(false)
     }
   }
-
-  return { isSaving, submit }
 }
