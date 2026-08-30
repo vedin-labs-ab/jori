@@ -1,4 +1,3 @@
-import { type VisibilityMode } from "@contracts/permissions/visibility"
 import {
   createContext,
   type ReactNode,
@@ -9,11 +8,11 @@ import {
 
 // Material detail pages are headed by a breadcrumb trail. The console shell
 // owns the trail: by default it derives the linked parent surface from the
-// path, and the detail view publishes the material's name — and optionally
-// its scope, shown as a muted icon suffix — through this context once its
-// query resolves, so the header shows just the linked parent while the name
-// is still loading. Pages whose ancestry is data rather than a fixed surface
-// (a nested folder, say) publish the full segment trail themselves.
+// path, and the detail view publishes the material's name through this
+// context once its query resolves, so the header shows just the linked
+// parent while the name is still loading. Pages whose ancestry is data
+// rather than a fixed surface (a nested folder, say) publish the full
+// segment trail themselves.
 
 export type MaterialBreadcrumbSegment = {
   name: string
@@ -23,7 +22,6 @@ export type MaterialBreadcrumbSegment = {
 
 export type MaterialBreadcrumb = {
   name: string
-  visibility?: VisibilityMode
   /** Ancestor segments, root-first. When present, the header links these
    *  instead of the parent surface it derives from the path. */
   trail?: MaterialBreadcrumbSegment[]
@@ -50,18 +48,11 @@ export function useMaterialTrail(material: MaterialBreadcrumb | undefined) {
   }, [material, publish])
 }
 
-/** Publish the material's display name, and optionally its visibility, to
- *  the console header breadcrumb for as long as the calling detail view is
- *  mounted. */
-export function useMaterialBreadcrumb(
-  name: string,
-  visibility?: VisibilityMode,
-  menu?: ReactNode
-) {
+/** Publish the material's display name to the console header breadcrumb
+ *  for as long as the calling detail view is mounted. */
+export function useMaterialBreadcrumb(name: string, menu?: ReactNode) {
   // A menu element gets a fresh identity per caller render, so it triggers
   // a republish each time — harmless, because the shell's children keep
   // their element identity and bail out of the re-render.
-  useMaterialTrail(
-    useMemo(() => ({ name, visibility, menu }), [name, visibility, menu])
-  )
+  useMaterialTrail(useMemo(() => ({ name, menu }), [name, menu]))
 }

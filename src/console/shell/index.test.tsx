@@ -95,18 +95,6 @@ test("appends the material's name once its view publishes it", () => {
   expect(current.getAttribute("aria-current")).toBe("page")
 })
 
-test("marks non-organization visibility beside the name", () => {
-  const publish = renderWithPublisher("/files/abc123")
-
-  act(() => publish.current?.({ name: "report.json", visibility: "private" }))
-
-  const current = screen.getByText("report.json")
-
-  expect(current.getAttribute("aria-current")).toBe("page")
-  expect(screen.getByText("Only me")).toBeTruthy()
-  expect(screen.queryByText("Personal")).toBeNull()
-})
-
 test("renders a published segment trail with the material as the page", () => {
   const publish = renderWithPublisher("/folders/leaf1")
 

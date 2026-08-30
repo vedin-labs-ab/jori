@@ -108,7 +108,7 @@ function FileReadyView({
   organizationId: string
 }) {
   useMemberUrl()
-  useMaterialBreadcrumb(file.name, file.visibility.mode)
+  useMaterialBreadcrumb(file.name)
 
   const siblings = useFileSiblings(organizationId, file.fileId)
   const [isShareOpen, setIsShareOpen] = useState(false)

@@ -147,7 +147,6 @@ function TableReadyView({
 
   useMaterialBreadcrumb(
     table.name,
-    table.visibility.mode,
     <MaterialTitleMenu
       deleteDescription={tableDeleteDescription}
       isDeleting={page.removal.removingTableId === table.tableId}
