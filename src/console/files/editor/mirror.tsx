@@ -38,20 +38,24 @@ const theme = EditorView.theme({
 export function Mirror({
   mimeType,
   name,
+  onBlur,
   onChange,
   value,
 }: {
   mimeType: string
   name: string
+  onBlur: () => void
   onChange: (text: string) => void
   value: string
 }) {
   const host = useRef<HTMLDivElement>(null)
   const change = useRef(onChange)
+  const blur = useRef(onBlur)
 
   useEffect(() => {
     change.current = onChange
-  }, [onChange])
+    blur.current = onBlur
+  }, [onBlur, onChange])
 
   useEffect(() => {
     if (host.current === null) {
@@ -61,7 +65,10 @@ export function Mirror({
     let isMounted = true
     const view = new EditorView({
       parent: host.current,
-      state: EditorState.create({ doc: value, extensions: extensions(change) }),
+      state: EditorState.create({
+        doc: value,
+        extensions: extensions(change, blur),
+      }),
     })
 
     void loadLanguage(name, mimeType).then((language) => {
@@ -87,13 +94,17 @@ export function Mirror({
   )
 }
 
-function extensions(change: { current: (text: string) => void }) {
+function extensions(
+  change: { current: (text: string) => void },
+  blur: { current: () => void }
+) {
   return [
     lineNumbers(),
     history(),
     keymap.of([...defaultKeymap, ...historyKeymap]),
     syntaxHighlighting(highlight),
     theme,
+    EditorView.domEventHandlers({ blur: () => blur.current() }),
     EditorView.updateListener.of((update) => {
       if (update.docChanged) {
         change.current(update.state.doc.toString())
