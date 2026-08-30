@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { type ListControls } from "../shared/list/controls"
 import { type RowSelection } from "../shared/list/selection"
 import { TableList } from "./list"
-import { type useTableRemoval } from "./manage"
+import { tableListConfig, type useTableRemoval } from "./manage"
 import { type TableSummary } from "./types"
 
 vi.mock("@tanstack/react-router", () => ({
@@ -67,11 +68,31 @@ function stubSelection<Row>(): RowSelection<Row> {
   }
 }
 
-function renderList(tables: TableSummary[]) {
+function stubControls(overrides: Partial<ListControls> = {}): ListControls {
+  return {
+    getFacet: () => undefined,
+    hasActiveControls: false,
+    isFacetActive: () => false,
+    setFacet: () => undefined,
+    sort: undefined,
+    toggleSort: () => undefined,
+    ...overrides,
+  }
+}
+
+function renderList(
+  tables: TableSummary[],
+  {
+    controls = stubControls(),
+    hasFilters = false,
+  }: { controls?: ListControls; hasFilters?: boolean } = {}
+) {
   render(
     <TableList
+      config={tableListConfig(undefined)}
+      controls={controls}
       folders={undefined}
-      hasFilters={false}
+      hasFilters={hasFilters}
       onCreate={() => undefined}
       onImport={() => undefined}
       onMoveToFolder={() => undefined}
@@ -86,21 +107,36 @@ function renderList(tables: TableSummary[]) {
 test("lists name, counts, times, and owner columns", () => {
   renderList([tableSummary()])
 
-  for (const header of [
-    "Name",
-    "Columns",
-    "Rows",
-    "Created",
-    "Owner",
-    "Last Updated",
-  ]) {
-    expect(screen.getByRole("columnheader", { name: header })).toBeDefined()
+  for (const header of ["Name", "Columns", "Rows", "Created", "Last Updated"]) {
+    expect(screen.getByRole("button", { name: header })).toBeDefined()
   }
 
+  expect(screen.getByRole("columnheader", { name: "Owner" })).toBeDefined()
   expect(screen.getByRole("link", { name: "Leads" })).toBeDefined()
   expect(screen.getByTitle("2 columns").textContent).toContain("2")
   expect(screen.getByTitle("12 rows").textContent).toContain("12")
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
+})
+
+test("header buttons drive the sort and expose the facet menus", () => {
+  const toggleSort = vi.fn()
+  renderList([tableSummary()], { controls: stubControls({ toggleSort }) })
+
+  fireEvent.click(screen.getByRole("button", { name: "Name" }))
+  fireEvent.click(screen.getByRole("button", { name: "Rows" }))
+
+  expect(toggleSort.mock.calls).toEqual([["name"], ["rows"]])
+  expect(
+    screen.getByRole("button", { name: "Filter by status and sharing" })
+  ).toBeDefined()
+  expect(screen.getByRole("button", { name: "Folder" })).toBeDefined()
+})
+
+test("filters that match nothing keep the header controls reachable", () => {
+  renderList([], { hasFilters: true })
+
+  expect(screen.getByText("No matching tables")).toBeDefined()
+  expect(screen.getByRole("button", { name: "Name" })).toBeDefined()
 })
 
 test("a table without a resolved owner reads as Jori's own", () => {

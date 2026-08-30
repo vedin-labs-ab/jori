@@ -8,8 +8,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
-import { ConsoleEmptyState } from "../shared/list/empty"
+import {
+  facetEntries,
+  type ListConfig,
+  type ListControls,
+} from "../shared/list/controls"
+import { EmptyRow, FilterableEmptyState } from "../shared/list/empty"
 import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
+import { FilterHead, SortHead } from "../shared/list/head"
 import { ConsoleListLoading } from "../shared/list/loading"
 import { type RowSelection } from "../shared/list/selection"
 import { MaterialFolderCell } from "../shared/materials/cells/folder"
@@ -20,8 +26,11 @@ import { FileMenu } from "./menu"
 import { type FileRow, formatFileSize } from "./types"
 
 export function FileTable({
+  config,
+  controls,
   files,
   folders,
+  hasFilters,
   isLoading,
   onDelete,
   onEdit,
@@ -30,8 +39,11 @@ export function FileTable({
   pendingFileId,
   selection,
 }: {
+  config: ListConfig<FileRow>
+  controls: ListControls
   files: FileRow[]
   folders: FolderNames | undefined
+  hasFilters: boolean
   isLoading: boolean
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
@@ -44,60 +56,101 @@ export function FileTable({
     return <ConsoleListLoading />
   }
 
-  if (files.length === 0) {
+  if (files.length === 0 && !hasFilters) {
     return (
       <ConsoleListContent>
-        <ConsoleEmptyState
-          action={
-            <Button onClick={onUpload} type="button">
-              <Upload />
-              Upload file
-            </Button>
-          }
-          description="Files Jori saves during runs and uploads from your team appear here."
-          icon={Files}
-          title="No files yet"
-        />
+        <FilesEmptyState hasFilters={false} onUpload={onUpload} />
       </ConsoleListContent>
     )
   }
 
   return (
     <ConsoleListTable>
-      <FileTableHead selection={selection} />
+      <FileTableHead
+        config={config}
+        controls={controls}
+        selection={selection}
+      />
       <TableBody>
-        {files.map((file) => (
-          <FileTableRow
-            file={file}
-            folders={folders}
-            isPending={pendingFileId === file.fileId}
-            key={file.fileId}
-            onDelete={onDelete}
-            onEdit={onEdit}
-            onMoveToFolder={onMoveToFolder}
-            selection={selection}
-          />
-        ))}
+        {files.length === 0 ? (
+          <EmptyRow colSpan={9}>
+            <FilesEmptyState hasFilters onUpload={onUpload} />
+          </EmptyRow>
+        ) : (
+          files.map((file) => (
+            <FileTableRow
+              file={file}
+              folders={folders}
+              isPending={pendingFileId === file.fileId}
+              key={file.fileId}
+              onDelete={onDelete}
+              onEdit={onEdit}
+              onMoveToFolder={onMoveToFolder}
+              selection={selection}
+            />
+          ))
+        )}
       </TableBody>
     </ConsoleListTable>
   )
 }
 
-function FileTableHead({ selection }: { selection: RowSelection<FileRow> }) {
+/** The header row is the page's control surface: the kind facet rides the
+ *  Type column, folders their own, and the measured columns sort. */
+function FileTableHead({
+  config,
+  controls,
+  selection,
+}: {
+  config: ListConfig<FileRow>
+  controls: ListControls
+  selection: RowSelection<FileRow>
+}) {
   return (
     <TableHeader>
       <TableRow>
         <SelectionHeadCell selection={selection} />
-        <TableHead>Name</TableHead>
-        <TableHead>Size</TableHead>
-        <TableHead>Type</TableHead>
-        <TableHead>Folder</TableHead>
-        <TableHead>Created</TableHead>
+        <SortHead controls={controls} label="Name" sortKey="name" />
+        <SortHead controls={controls} label="Size" sortKey="size" />
+        <FilterHead
+          controls={controls}
+          facets={facetEntries(config, ["kind"])}
+          label="Type"
+        />
+        <FilterHead
+          controls={controls}
+          facets={facetEntries(config, ["folder"])}
+          label="Folder"
+        />
+        <SortHead controls={controls} label="Created" sortKey="created" />
         <TableHead>Owner</TableHead>
-        <TableHead>Last Updated</TableHead>
+        <SortHead controls={controls} label="Last Updated" sortKey="updated" />
         <TableHead className="w-10" />
       </TableRow>
     </TableHeader>
+  )
+}
+
+function FilesEmptyState({
+  hasFilters,
+  onUpload,
+}: {
+  hasFilters: boolean
+  onUpload: () => void
+}) {
+  return (
+    <FilterableEmptyState
+      action={
+        <Button onClick={onUpload} type="button">
+          <Upload />
+          Upload file
+        </Button>
+      }
+      description="Files Jori saves during runs and uploads from your team appear here."
+      hasFilters={hasFilters}
+      icon={Files}
+      noun="files"
+    />
   )
 }
 

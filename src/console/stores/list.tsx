@@ -9,25 +9,21 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  ConsoleFilterToggle,
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsoleSearch,
 } from "../shared/layout"
 import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
-import { FilterableEmptyState } from "../shared/list/empty"
 import {
-  ConsoleListContent,
-  ConsoleListTable,
-  ConsoleListToolbar,
-} from "../shared/list/frame"
-import { type ScopeFilter, scopeFilterOptions } from "../shared/list/scope"
+  facetEntries,
+  type ListConfig,
+  type ListControls,
+} from "../shared/list/controls"
+import { EmptyRow, FilterableEmptyState } from "../shared/list/empty"
+import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
+import { FilterHead, SortHead } from "../shared/list/head"
 import { type RowSelection } from "../shared/list/selection"
 import { MaterialActions } from "../shared/materials/actions"
-import {
-  type ArchiveFilter,
-  archiveFilterOptions,
-} from "../shared/materials/archive"
 import { MaterialFolderCell } from "../shared/materials/cells/folder"
 import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
@@ -41,56 +37,34 @@ import { storeDeleteDescription, type useStoreRemoval } from "./manage"
 import { type StoreSummary } from "./types"
 
 export function StoresToolbar({
-  filter,
   onCreate,
-  onFilterChange,
   onQueryChange,
-  onScopeChange,
   query,
-  scope,
 }: {
-  filter: ArchiveFilter
   onCreate: () => void
-  onFilterChange: (filter: ArchiveFilter) => void
   onQueryChange: (query: string) => void
-  onScopeChange: (scope: ScopeFilter) => void
   query: string
-  scope: ScopeFilter
 }) {
   return (
-    <>
-      <ConsoleHeaderActions>
-        <ConsoleSearch
-          label="Search stores"
-          onValueChange={onQueryChange}
-          value={query}
-        />
-        <ConsoleHeaderButton
-          icon={<Plus />}
-          label="New store"
-          onClick={onCreate}
-          type="button"
-        />
-      </ConsoleHeaderActions>
-      <ConsoleListToolbar>
-        <ConsoleFilterToggle
-          label="Status"
-          onValueChange={onFilterChange}
-          options={archiveFilterOptions}
-          value={filter}
-        />
-        <ConsoleFilterToggle
-          label="Sharing"
-          onValueChange={onScopeChange}
-          options={scopeFilterOptions}
-          value={scope}
-        />
-      </ConsoleListToolbar>
-    </>
+    <ConsoleHeaderActions>
+      <ConsoleSearch
+        label="Search stores"
+        onValueChange={onQueryChange}
+        value={query}
+      />
+      <ConsoleHeaderButton
+        icon={<Plus />}
+        label="New store"
+        onClick={onCreate}
+        type="button"
+      />
+    </ConsoleHeaderActions>
   )
 }
 
 export function StoreList({
+  config,
+  controls,
   folders,
   hasFilters,
   onCreate,
@@ -100,6 +74,8 @@ export function StoreList({
   stores,
   unauthorizedMessage,
 }: {
+  config: ListConfig<StoreSummary>
+  controls: ListControls
   folders: FolderNames | undefined
   hasFilters: boolean
   onCreate: () => void
@@ -120,53 +96,100 @@ export function StoreList({
     )
   }
 
-  if (stores.length === 0) {
+  if (stores.length === 0 && !hasFilters) {
     return (
       <ConsoleListContent>
-        <FilterableEmptyState
-          action={
-            <Button onClick={onCreate} type="button">
-              <Plus />
-              New store
-            </Button>
-          }
-          description="Schema-backed JSON documents Jori and your team keep state in appear here."
-          hasFilters={hasFilters}
-          icon={Database}
-          noun="stores"
-        />
+        <StoresEmptyState hasFilters={false} onCreate={onCreate} />
       </ConsoleListContent>
     )
   }
 
   return (
     <ConsoleListTable>
-      <TableHeader>
-        <TableRow>
-          <SelectionHeadCell selection={selection} />
-          <TableHead>Name</TableHead>
-          <TableHead>Properties</TableHead>
-          <TableHead>Version</TableHead>
-          <TableHead>Folder</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead>Owner</TableHead>
-          <TableHead>Last Updated</TableHead>
-          <TableHead className="w-10" />
-        </TableRow>
-      </TableHeader>
+      <StoreListHead
+        config={config}
+        controls={controls}
+        selection={selection}
+      />
       <TableBody>
-        {stores.map((store) => (
-          <StoreListRow
-            folders={folders}
-            key={store.storeId}
-            onMoveToFolder={onMoveToFolder}
-            removal={removal}
-            selection={selection}
-            store={store}
-          />
-        ))}
+        {stores.length === 0 ? (
+          <EmptyRow colSpan={9}>
+            <StoresEmptyState hasFilters onCreate={onCreate} />
+          </EmptyRow>
+        ) : (
+          stores.map((store) => (
+            <StoreListRow
+              folders={folders}
+              key={store.storeId}
+              onMoveToFolder={onMoveToFolder}
+              removal={removal}
+              selection={selection}
+              store={store}
+            />
+          ))
+        )}
       </TableBody>
     </ConsoleListTable>
+  )
+}
+
+/** The header row is the page's control surface: material facets ride the
+ *  Name and Folder columns, every measurable column sorts. */
+function StoreListHead({
+  config,
+  controls,
+  selection,
+}: {
+  config: ListConfig<StoreSummary>
+  controls: ListControls
+  selection: RowSelection<StoreSummary>
+}) {
+  return (
+    <TableHeader>
+      <TableRow>
+        <SelectionHeadCell selection={selection} />
+        <SortHead
+          controls={controls}
+          facets={facetEntries(config, ["status", "scope"])}
+          label="Name"
+          sortKey="name"
+        />
+        <SortHead controls={controls} label="Properties" sortKey="properties" />
+        <SortHead controls={controls} label="Version" sortKey="version" />
+        <FilterHead
+          controls={controls}
+          facets={facetEntries(config, ["folder"])}
+          label="Folder"
+        />
+        <SortHead controls={controls} label="Created" sortKey="created" />
+        <TableHead>Owner</TableHead>
+        <SortHead controls={controls} label="Last Updated" sortKey="updated" />
+        <TableHead className="w-10" />
+      </TableRow>
+    </TableHeader>
+  )
+}
+
+function StoresEmptyState({
+  hasFilters,
+  onCreate,
+}: {
+  hasFilters: boolean
+  onCreate: () => void
+}) {
+  return (
+    <FilterableEmptyState
+      action={
+        <Button onClick={onCreate} type="button">
+          <Plus />
+          New store
+        </Button>
+      }
+      description="Schema-backed JSON documents Jori and your team keep state in appear here."
+      hasFilters={hasFilters}
+      icon={Database}
+      noun="stores"
+    />
   )
 }
 

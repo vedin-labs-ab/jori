@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { type ListControls } from "../shared/list/controls"
 import { type RowSelection } from "../shared/list/selection"
 import { StoreList } from "./list"
-import { type useStoreRemoval } from "./manage"
+import { storeListConfig, type useStoreRemoval } from "./manage"
 import { type StoreSummary } from "./types"
 
 vi.mock("@tanstack/react-router", () => ({
@@ -66,11 +67,31 @@ function stubSelection<Row>(): RowSelection<Row> {
   }
 }
 
-function renderList(stores: StoreSummary[]) {
+function stubControls(overrides: Partial<ListControls> = {}): ListControls {
+  return {
+    getFacet: () => undefined,
+    hasActiveControls: false,
+    isFacetActive: () => false,
+    setFacet: () => undefined,
+    sort: undefined,
+    toggleSort: () => undefined,
+    ...overrides,
+  }
+}
+
+function renderList(
+  stores: StoreSummary[],
+  {
+    controls = stubControls(),
+    hasFilters = false,
+  }: { controls?: ListControls; hasFilters?: boolean } = {}
+) {
   render(
     <StoreList
+      config={storeListConfig(undefined)}
+      controls={controls}
       folders={undefined}
-      hasFilters={false}
+      hasFilters={hasFilters}
       onCreate={() => undefined}
       onMoveToFolder={() => undefined}
       removal={removal}
@@ -89,16 +110,36 @@ test("lists name, counts, times, and owner columns", () => {
     "Properties",
     "Version",
     "Created",
-    "Owner",
     "Last Updated",
   ]) {
-    expect(screen.getByRole("columnheader", { name: header })).toBeDefined()
+    expect(screen.getByRole("button", { name: header })).toBeDefined()
   }
 
+  expect(screen.getByRole("columnheader", { name: "Owner" })).toBeDefined()
   expect(screen.getByRole("link", { name: "Settings" })).toBeDefined()
   expect(screen.getByTitle("3 properties").textContent).toContain("3")
   expect(screen.getByTitle("7 writes").textContent).toContain("v7")
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
+})
+
+test("header buttons drive the sort and expose the facet menus", () => {
+  const toggleSort = vi.fn()
+  renderList([storeSummary()], { controls: stubControls({ toggleSort }) })
+
+  fireEvent.click(screen.getByRole("button", { name: "Properties" }))
+
+  expect(toggleSort.mock.calls).toEqual([["properties"]])
+  expect(
+    screen.getByRole("button", { name: "Filter by status and sharing" })
+  ).toBeDefined()
+  expect(screen.getByRole("button", { name: "Folder" })).toBeDefined()
+})
+
+test("filters that match nothing keep the header controls reachable", () => {
+  renderList([], { hasFilters: true })
+
+  expect(screen.getByText("No matching stores")).toBeDefined()
+  expect(screen.getByRole("button", { name: "Name" })).toBeDefined()
 })
 
 test("a never-written store reads plainly as v0", () => {

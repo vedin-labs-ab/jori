@@ -1,4 +1,4 @@
-import { useMutation } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import { Upload } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -11,12 +11,14 @@ import { showErrorToast } from "../shared/error"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
 import { SelectionActionsBar } from "../shared/list/bar"
 import { countNoun, useBulkRunner } from "../shared/list/bulk"
+import { resettingControls, useListControls } from "../shared/list/controls"
 import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListPager } from "../shared/list/pager"
+import { useClientPagination } from "../shared/list/pagination"
 import { type RowSelection, useRowSelection } from "../shared/list/selection"
 import { useFolderNames } from "../shared/materials/folders"
 import { EditFileDialog } from "./edit"
-import { useFilePagination } from "./pagination"
+import { fileListConfig } from "./list"
 import { FileTable } from "./table"
 import { type FileRow } from "./types"
 import { UploadFileDialog } from "./upload"
@@ -34,26 +36,51 @@ export function FilesPage() {
   )
 }
 
+/** The whole organization's files behind header-embedded controls: facets
+ *  and sorts narrow client-side, the shared pager windows the result. */
+function useFileList(organizationId: string) {
+  const files = useQuery(api.files.console.list, { organizationId })
+  const folders = useFolderNames(organizationId)
+  const config = fileListConfig(files ?? [], folders)
+  const controls = useListControls(config)
+  const rows = controls.apply(files ?? [])
+  const pagination = useClientPagination({
+    hasFilters: controls.hasActiveControls,
+    isReady: files !== undefined,
+    itemLabel: fileNoun,
+    items: rows,
+    totalCount: files?.length ?? 0,
+  })
+
+  return {
+    config,
+    controls: resettingControls(controls, pagination.reset),
+    folders,
+    hasFilters: controls.hasActiveControls,
+    isLoading: files === undefined,
+    pagination,
+  }
+}
+
 /** One bag of page state, so the view and its overlays stay small. */
 function useFilesPage(organizationId: string) {
-  const pagination = useFilePagination(organizationId)
+  const list = useFileList(organizationId)
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [editFile, setEditFile] = useState<FileRow>()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const actions = useFileActions(organizationId, () => setEditFile(undefined))
   const selection = useRowSelection({
     identify: (file: FileRow) => file.fileId,
-    rows: pagination.visibleRows,
+    rows: list.pagination.visibleRows,
   })
 
   return {
+    ...list,
     actions,
     bulk: useFileBulk(organizationId, selection),
     editFile,
-    folders: useFolderNames(organizationId),
     isUploadOpen,
     moving,
-    pagination,
     selection,
     setEditFile,
     setIsUploadOpen,
@@ -76,9 +103,12 @@ function FilesView({ organizationId }: { organizationId: string }) {
         />
       </ConsoleHeaderActions>
       <FileTable
+        config={page.config}
+        controls={page.controls}
         files={page.pagination.visibleRows}
         folders={page.folders}
-        isLoading={page.pagination.isLoading}
+        hasFilters={page.hasFilters}
+        isLoading={page.isLoading}
         onDelete={page.actions.deleteFile}
         onEdit={page.setEditFile}
         onMoveToFolder={(file) => page.setMoving([toMoveTarget(file)])}
@@ -86,7 +116,7 @@ function FilesView({ organizationId }: { organizationId: string }) {
         pendingFileId={page.actions.pendingFileId}
         selection={page.selection}
       />
-      {page.pagination.isLoading ? null : (
+      {page.isLoading ? null : (
         <ConsoleListFooter>
           <ConsoleListPager pagination={page.pagination} />
         </ConsoleListFooter>
