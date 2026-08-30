@@ -44,6 +44,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 data: {
                   activeOrganizationId?: null | string;
+                  activeTeamId?: null | string;
                   createdAt: number;
                   expiresAt: number;
                   ipAddress?: null | string;
@@ -94,6 +95,23 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | {
                 data: {
                   createdAt: number;
+                  name: string;
+                  organizationId: string;
+                  updatedAt?: null | number;
+                };
+                model: "team";
+              }
+            | {
+                data: {
+                  createdAt?: null | number;
+                  teamId: string;
+                  userId: string;
+                };
+                model: "teamMember";
+              }
+            | {
+                data: {
+                  createdAt: number;
                   organizationId: string;
                   role: string;
                   userId: string;
@@ -109,6 +127,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   organizationId: string;
                   role?: null | string;
                   status: string;
+                  teamId?: null | string;
                 };
                 model: "invitation";
               }
@@ -180,6 +199,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "userAgent"
                     | "userId"
                     | "activeOrganizationId"
+                    | "activeTeamId"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
@@ -305,6 +325,65 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 }>;
               }
             | {
+                model: "team";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "name"
+                    | "organizationId"
+                    | "createdAt"
+                    | "updatedAt"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "teamMember";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field: "teamId" | "userId" | "createdAt" | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
                 model: "member";
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -340,6 +419,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "organizationId"
                     | "email"
                     | "role"
+                    | "teamId"
                     | "status"
                     | "expiresAt"
                     | "createdAt"
@@ -465,6 +545,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "userAgent"
                     | "userId"
                     | "activeOrganizationId"
+                    | "activeTeamId"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
@@ -590,6 +671,65 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 }>;
               }
             | {
+                model: "team";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "name"
+                    | "organizationId"
+                    | "createdAt"
+                    | "updatedAt"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "teamMember";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field: "teamId" | "userId" | "createdAt" | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
                 model: "member";
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -625,6 +765,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "organizationId"
                     | "email"
                     | "role"
+                    | "teamId"
                     | "status"
                     | "expiresAt"
                     | "createdAt"
@@ -701,6 +842,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | "account"
             | "verification"
             | "organization"
+            | "team"
+            | "teamMember"
             | "member"
             | "invitation"
             | "jwks";
@@ -749,6 +892,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | "account"
             | "verification"
             | "organization"
+            | "team"
+            | "teamMember"
             | "member"
             | "invitation"
             | "jwks";
@@ -829,6 +974,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 model: "session";
                 update: {
                   activeOrganizationId?: null | string;
+                  activeTeamId?: null | string;
                   createdAt?: number;
                   expiresAt?: number;
                   ipAddress?: null | string;
@@ -848,6 +994,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "userAgent"
                     | "userId"
                     | "activeOrganizationId"
+                    | "activeTeamId"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
@@ -1001,6 +1148,76 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 }>;
               }
             | {
+                model: "team";
+                update: {
+                  createdAt?: number;
+                  name?: string;
+                  organizationId?: string;
+                  updatedAt?: null | number;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "name"
+                    | "organizationId"
+                    | "createdAt"
+                    | "updatedAt"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "teamMember";
+                update: {
+                  createdAt?: null | number;
+                  teamId?: string;
+                  userId?: string;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field: "teamId" | "userId" | "createdAt" | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
                 model: "member";
                 update: {
                   createdAt?: number;
@@ -1044,6 +1261,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   organizationId?: string;
                   role?: null | string;
                   status?: string;
+                  teamId?: null | string;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1051,6 +1269,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "organizationId"
                     | "email"
                     | "role"
+                    | "teamId"
                     | "status"
                     | "expiresAt"
                     | "createdAt"
@@ -1182,6 +1401,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 model: "session";
                 update: {
                   activeOrganizationId?: null | string;
+                  activeTeamId?: null | string;
                   createdAt?: number;
                   expiresAt?: number;
                   ipAddress?: null | string;
@@ -1201,6 +1421,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "userAgent"
                     | "userId"
                     | "activeOrganizationId"
+                    | "activeTeamId"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
@@ -1354,6 +1575,76 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 }>;
               }
             | {
+                model: "team";
+                update: {
+                  createdAt?: number;
+                  name?: string;
+                  organizationId?: string;
+                  updatedAt?: null | number;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "name"
+                    | "organizationId"
+                    | "createdAt"
+                    | "updatedAt"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "teamMember";
+                update: {
+                  createdAt?: null | number;
+                  teamId?: string;
+                  userId?: string;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field: "teamId" | "userId" | "createdAt" | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
                 model: "member";
                 update: {
                   createdAt?: number;
@@ -1397,6 +1688,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   organizationId?: string;
                   role?: null | string;
                   status?: string;
+                  teamId?: null | string;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
@@ -1404,6 +1696,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "organizationId"
                     | "email"
                     | "role"
+                    | "teamId"
                     | "status"
                     | "expiresAt"
                     | "createdAt"
