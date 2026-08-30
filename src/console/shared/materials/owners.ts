@@ -1,22 +1,41 @@
 import { type ListFacet } from "../list/controls"
 
+type Owned = { ownerId?: string; ownerName?: string }
+
+const joriOwner = "jori"
+
 /** Owner facet for header-embedded list controls: the owners present in
- *  the listed rows by display name, with Jori standing in for rows an
+ *  the listed rows, keyed by their person id — two people sharing a
+ *  display name stay separate options — with Jori standing in for rows an
  *  organization-principal run created. */
-export function ownerFacet<Row extends { ownerName?: string }>(
+export function ownerFacet<Row extends Owned>(
   rows: readonly Row[]
 ): ListFacet<Row> {
-  const names = [...new Set(rows.map(resolveOwner))].sort((left, right) =>
-    left.localeCompare(right)
-  )
+  const labels = new Map<string, string>()
+
+  for (const row of rows) {
+    labels.set(resolveOwner(row), ownerLabel(row))
+  }
+
+  const options = [...labels]
+    .map(([value, label]) => ({ label, value }))
+    .sort((left, right) => left.label.localeCompare(right.label))
 
   return {
     label: "Owner",
-    options: names.map((name) => ({ label: name, value: name })),
+    options,
     resolve: resolveOwner,
   }
 }
 
-function resolveOwner(row: { ownerName?: string }) {
-  return row.ownerName ?? "Jori"
+function resolveOwner(row: Owned) {
+  return row.ownerId ?? joriOwner
+}
+
+function ownerLabel(row: Owned) {
+  if (row.ownerId === undefined) {
+    return "Jori"
+  }
+
+  return row.ownerName ?? "Member"
 }

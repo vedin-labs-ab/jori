@@ -280,6 +280,7 @@ export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
     folderId: file.folderId,
     source: file.runId === undefined ? ("upload" as const) : ("run" as const),
     runId: file.runId,
+    ownerId: file.ownerId,
     ownerName: owner?.name,
     ownerImage: owner?.image,
     description: file.description,
