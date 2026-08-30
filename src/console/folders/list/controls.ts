@@ -23,6 +23,10 @@ export function useFolderListControls(resources: readonly FolderResource[]) {
     facets: { kind: kindFacet(resources) },
     sorts: {
       name: (entry) => entry.name,
+      // Resources all rank alike, so within their group an items sort
+      // leaves the name order standing.
+      items: (entry) =>
+        "type" in entry ? -1 : entry.folderCount + entry.resourceCount,
       updated: (entry) => entry.updatedAt,
     },
   }

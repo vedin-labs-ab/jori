@@ -14,7 +14,7 @@ import {
 import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
-import { type FolderTreeResult } from "../types"
+import { type FolderRootsResult } from "../types"
 import { useFolderListControls } from "./controls"
 import { FolderListRow, FolderListTable } from "./table"
 
@@ -30,7 +30,7 @@ export function FoldersOverview() {
 }
 
 function RootFolders({ organizationId }: { organizationId: string }) {
-  const tree = useQuery(api.folders.console.tree, { organizationId })
+  const roots = useQuery(api.folders.console.roots, { organizationId })
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const create = () => setDialog({ type: "create" })
 
@@ -44,7 +44,7 @@ function RootFolders({ organizationId }: { organizationId: string }) {
           type="button"
         />
       </ConsoleHeaderActions>
-      <RootFolderList onCreate={create} tree={tree} />
+      <RootFolderList onCreate={create} roots={roots} />
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
@@ -59,14 +59,14 @@ function RootFolders({ organizationId }: { organizationId: string }) {
 
 export function RootFolderList({
   onCreate,
-  tree,
+  roots,
 }: {
   onCreate: () => void
-  tree: FolderTreeResult | undefined
+  roots: FolderRootsResult | undefined
 }) {
   const list = useFolderListControls([])
 
-  if (tree === undefined) {
+  if (roots === undefined) {
     return (
       <ConsoleListContent>
         <ConsoleListLoading />
@@ -74,20 +74,18 @@ export function RootFolderList({
     )
   }
 
-  if (tree.status !== "ready") {
+  if (roots.status !== "ready") {
     return (
       <ConsoleListContent>
         <Alert variant="destructive">
           <AlertTitle>Could not load folders</AlertTitle>
-          <AlertDescription>{tree.message}</AlertDescription>
+          <AlertDescription>{roots.message}</AlertDescription>
         </Alert>
       </ConsoleListContent>
     )
   }
 
-  const roots = tree.folders.filter((folder) => folder.parentId === undefined)
-
-  if (roots.length === 0) {
+  if (roots.folders.length === 0) {
     return (
       <ConsoleListContent>
         <ConsoleEmptyState
@@ -105,12 +103,12 @@ export function RootFolderList({
     )
   }
 
-  const visible = list.narrow(roots)
+  const visible = list.narrow(roots.folders)
 
   return (
     <FolderListTable controls={list.controls} kinds={list.kinds}>
       {visible.length === 0 ? (
-        <EmptyRow colSpan={4}>
+        <EmptyRow colSpan={5}>
           <FilterableEmptyState
             description="Folders organize the tables, stores, files, and automations your team shares."
             hasFilters

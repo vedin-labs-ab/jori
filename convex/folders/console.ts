@@ -106,11 +106,47 @@ export const contents = query({
     }
 
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
+    const viewer = { organizationId: args.organizationId, personId }
 
     return {
       status: "ready" as const,
-      folders: await folderChildren(ctx, args),
-      resources: await folderResources(ctx, { ...args, personId }),
+      folders: await folderChildren(ctx, { ...viewer, parentId: folder._id }),
+      resources: await folderResources(ctx, {
+        ...viewer,
+        folderId: folder._id,
+      }),
+    }
+  },
+})
+
+/** The /folders overview's rows: the root folders with the same per-viewer
+ *  item counts a folder page gives its children. The sidebar keeps reading
+ *  the whole tree instead — counting across every folder of the
+ *  organization would not stay cheap. */
+export const roots = query({
+  args: {
+    organizationId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
+
+    if (!access.ok) {
+      return {
+        status: "unauthorized" as const,
+        message: access.message,
+        folders: [],
+      }
+    }
+
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
+
+    return {
+      status: "ready" as const,
+      folders: await folderChildren(ctx, {
+        organizationId: args.organizationId,
+        personId,
+        parentId: undefined,
+      }),
     }
   },
 })

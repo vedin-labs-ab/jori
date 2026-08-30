@@ -77,7 +77,7 @@ export function FolderContents({
   return (
     <FolderListTable controls={list.controls} kinds={list.kinds}>
       {folders.length === 0 && resources.length === 0 ? (
-        <EmptyRow colSpan={4}>
+        <EmptyRow colSpan={5}>
           <FilterableEmptyState
             description="File tables, stores, files, and automations here, or add a subfolder."
             hasFilters

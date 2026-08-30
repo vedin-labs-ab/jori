@@ -32,23 +32,63 @@ export type FolderResource = {
   status?: Doc<"automations">["status"]
 }
 
+/** The folders one level below a parent — the root when none — each carrying
+ *  the direct-child counts its listing row shows. Counting reads the same
+ *  capped ranges the child's own listing would, so the number a row shows is
+ *  the number a click reveals for this viewer. */
 export async function folderChildren(
   ctx: QueryLikeCtx,
-  args: { organizationId: string; folderId: Id<"folders"> }
+  args: {
+    organizationId: string
+    personId: Id<"persons">
+    parentId: Id<"folders"> | undefined
+  }
 ) {
   const children = await ctx.db
     .query("folders")
     .withIndex("by_organization_and_parent", (index) =>
       index
         .eq("organizationId", args.organizationId)
-        .eq("parentId", args.folderId)
+        .eq("parentId", args.parentId)
     )
     .take(treeCap)
 
-  return (await summarizeTree(ctx, children)).sort(byName)
+  return (
+    await Promise.all(children.map((child) => countChild(ctx, args, child)))
+  ).sort(byName)
 }
 
-/** One listing row per folder: the summary plus a single honest signal —
+/** Direct children only, deliberately: a deep total would be neither cheap
+ *  nor what a click shows. Resource counts run through folderResources, so
+ *  archived collections and other people's personal resources stay out of
+ *  the number exactly as they stay out of the listing. */
+async function countChild(
+  ctx: QueryLikeCtx,
+  viewer: { organizationId: string; personId: Id<"persons"> },
+  child: Doc<"folders">
+) {
+  const subfolders = await ctx.db
+    .query("folders")
+    .withIndex("by_organization_and_parent", (index) =>
+      index.eq("organizationId", child.organizationId).eq("parentId", child._id)
+    )
+    .take(treeCap)
+  const resources = await folderResources(ctx, {
+    ...viewer,
+    folderId: child._id,
+  })
+  const folderCount = subfolders.length
+  const resourceCount = resources.length
+
+  return {
+    ...summarizeFolder(child),
+    folderCount,
+    resourceCount,
+    hasContents: folderCount + resourceCount > 0,
+  }
+}
+
+/** One tree row per folder: the summary plus a single honest signal —
  *  whether anything sits inside it, meaning a subfolder or any filed
  *  resource. Existence only: a folder whose subfolder is also listed costs
  *  nothing, the rest at most one cheap indexed probe per filed table plus

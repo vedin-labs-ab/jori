@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { DndContext } from "@dnd-kit/core"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type FolderContentsResult } from "../types"
 import { FolderContents } from "./contents"
@@ -36,6 +36,8 @@ const readyContents = {
       createdAt: 1,
       updatedAt: Date.now(),
       hasContents: true,
+      folderCount: 1,
+      resourceCount: 2,
     },
     {
       folderId: "folder-2",
@@ -44,6 +46,8 @@ const readyContents = {
       createdAt: 1,
       updatedAt: Date.now(),
       hasContents: false,
+      folderCount: 0,
+      resourceCount: 0,
     },
   ],
   resources: [
@@ -79,10 +83,10 @@ function renderContents(contents: FolderContentsResult | undefined) {
   )
 }
 
-test("folders and resources share the Name/Kind/Updated table", () => {
+test("folders and resources share the Name/Kind/Items/Updated table", () => {
   renderContents(readyContents)
 
-  for (const header of ["Name", "Kind", "Updated"]) {
+  for (const header of ["Name", "Kind", "Items", "Updated"]) {
     expect(screen.getByRole("columnheader", { name: header })).toBeDefined()
   }
 
@@ -96,6 +100,30 @@ test("folders and resources share the Name/Kind/Updated table", () => {
   expect(
     screen.getByRole("button", { name: "Open actions for Leads" })
   ).toBeDefined()
+})
+
+test("folder rows count their items; resource rows carry a dash", () => {
+  renderContents(readyContents)
+
+  // Guides combines its counts into one number with the breakdown as the
+  // tooltip; empty Scratch shows an honest zero.
+  expect(screen.getByTitle("1 folder, 2 resources").textContent).toContain("3")
+  expect(screen.getByTitle("Empty folder").textContent).toContain("0")
+  expect(screen.getAllByText("—")).toHaveLength(2)
+})
+
+test("the Items header sorts folders by their count", () => {
+  renderContents(readyContents)
+
+  fireEvent.click(screen.getByRole("button", { name: "Items" }))
+
+  const names = screen
+    .getAllByRole("link")
+    .map((link) => link.textContent?.trim())
+
+  // Ascending puts empty Scratch first; resources all rank alike, so they
+  // trail in their given order.
+  expect(names).toEqual(["Scratch", "Guides", "Leads", "Digest"])
 })
 
 test("a dotted icon marks the subfolders that hold anything", () => {
