@@ -267,12 +267,12 @@ export function NewRowRow({
     return null
   }
 
-  // The affordance fits its content: the cell spans the grid but stays
-  // borderless (the last-row reset already strips it), and the button
-  // carries its own closing hairlines so the box ends with the label.
+  // The affordance fits its content: the button carries its own closing
+  // hairlines, and the spanning cell forces all of the grid's cell borders
+  // off (the shared [&_td] selectors out-specify plain cell classes).
   return (
-    <TableRow>
-      <TableCell className="p-0" colSpan={span}>
+    <TableRow className="hover:bg-transparent">
+      <TableCell className="border-0! p-0" colSpan={span}>
         <button
           className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
           onClick={onAddRow}

@@ -66,7 +66,7 @@ export function RowGrid({
   // ends — and the centered fixed gutter opts out of the frame's
   // first-column page padding.
   return (
-    <ConsoleListTable className="w-auto border-separate border-spacing-0 [&_td:first-child]:pl-0 [&_td:last-child]:pr-0 [&_td:not(:last-child)]:border-r [&_td]:border-b [&_th:first-child]:pl-0 [&_th:last-child]:pr-0 [&_th:not(:last-child)]:border-r [&_th]:border-b [&_th]:shadow-none md:[&_td:first-child]:pl-0 md:[&_td:last-child]:pr-0 md:[&_th:first-child]:pl-0 md:[&_th:last-child]:pr-0">
+    <ConsoleListTable className="w-auto border-separate border-spacing-0 [&_td:first-child]:pl-0 [&_td:last-child]:pr-0 [&_td]:border-r [&_td]:border-b [&_th:first-child]:pl-0 [&_th:last-child]:pr-0 [&_th:not(:last-child)]:border-r [&_th]:border-b [&_th]:shadow-none md:[&_td:first-child]:pl-0 md:[&_td:last-child]:pr-0 md:[&_th:first-child]:pl-0 md:[&_th:last-child]:pr-0">
       <TableHeader>
         <TableRow>
           <TableHead className="w-12 min-w-12 p-0 text-center">
