@@ -13,8 +13,9 @@ import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
 import { CopyButton } from "../../shared/copy"
 import { showErrorToast } from "../../shared/error"
-import { ConsoleListToolbar } from "../../shared/list/frame"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import { uploadToStorage } from "../storage"
+import { FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
 
 /** CodeMirror loads only when a text file is actually on screen, keeping
@@ -22,25 +23,6 @@ import { type FileDetail } from "../types"
 const Mirror = lazy(() =>
   import("./mirror").then((module) => ({ default: module.Mirror }))
 )
-
-/** Secondary header under the console breadcrumb: quiet file meta on the
- *  left, contextual actions on the right, constant height either way. */
-export function FileToolbar({
-  action,
-  children,
-}: {
-  action?: ReactNode
-  children: ReactNode
-}) {
-  return (
-    <ConsoleListToolbar className="flex-nowrap gap-x-3 py-2">
-      <div className="flex min-h-7 min-w-0 flex-1 items-center">{children}</div>
-      {action === undefined ? null : (
-        <div className="flex shrink-0 items-center gap-1.5">{action}</div>
-      )}
-    </ConsoleListToolbar>
-  )
-}
 
 /** In-place editor for a text file: the content fills the page under the
  *  toolbar, and edits save wholesale as a new storage blob. Last write
@@ -159,7 +141,7 @@ function EditorBody({
   onChange: (text: string) => void
 }) {
   if (document.state.status === "loading") {
-    return <EditorLoading />
+    return <ConsoleListLoading />
   }
 
   if (document.state.status === "error") {
@@ -167,8 +149,8 @@ function EditorBody({
   }
 
   return (
-    <div className="min-h-0 flex-1">
-      <Suspense fallback={<EditorLoading />}>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <Suspense fallback={<ConsoleListLoading />}>
         <Mirror
           key={document.state.seedKey}
           mimeType={file.mimeType}
@@ -179,10 +161,6 @@ function EditorBody({
       </Suspense>
     </div>
   )
-}
-
-function EditorLoading() {
-  return <div className="min-h-0 flex-1 animate-pulse bg-muted/20" />
 }
 
 type DocumentState =

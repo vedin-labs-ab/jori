@@ -6,7 +6,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { fileKind, previewKind } from "@/shared/files/kind"
-import { FilePreview } from "@/shared/materials/preview"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { SeparatorDot } from "../shared/dot"
@@ -22,9 +21,11 @@ import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { FileOwnerCell, FileTypeCell } from "./cells"
-import { FileEditor, FileToolbar } from "./editor/section"
+import { FileEditor } from "./editor/section"
 import { FileLinksDialog } from "./share"
+import { FileToolbar } from "./toolbar"
 import { type FileDetail, formatFileSize } from "./types"
+import { FileViewer } from "./viewer/section"
 
 /** Text files past this size skip the inline editor; the download covers
  *  them. */
@@ -129,8 +130,8 @@ function FileReadyView({
   )
 }
 
-/** Routes the page body by what the file is: an editor for text, inline
- *  media edge-to-edge, and a download prompt for the rest. */
+/** Routes the page body by what the file is: an editor for text, the
+ *  inline viewer for media, and a download prompt for the rest. */
 function FileBody({
   file,
   organizationId,
@@ -158,52 +159,49 @@ function FileBody({
     )
   }
 
+  if (kind !== "text" && kind !== "none" && file.url !== null) {
+    return (
+      <FileViewer
+        key={file.fileId}
+        kind={kind}
+        meta={<FileMeta file={file} />}
+        name={file.name}
+        url={file.url}
+      />
+    )
+  }
+
+  return <FileFallbackBody file={file} isOversizedText={kind === "text"} />
+}
+
+/** Download prompt under the toolbar for files with no inline view — and
+ *  for text files too large to edit in place. */
+function FileFallbackBody({
+  file,
+  isOversizedText,
+}: {
+  file: FileDetail
+  isOversizedText: boolean
+}) {
   return (
     <>
       <FileToolbar>
         <FileMeta file={file} />
       </FileToolbar>
-      <FileMediaBody file={file} kind={kind} />
+      {isOversizedText ? (
+        <FileFallback
+          description={`Files over ${formatFileSize(textSizeLimit)} skip the inline editor. Download the file to work on it.`}
+          file={file}
+          title="Too large to edit here"
+        />
+      ) : (
+        <FileFallback
+          description="No inline view for this file type. Download it to open it locally."
+          file={file}
+          title="No inline view"
+        />
+      )}
     </>
-  )
-}
-
-function FileMediaBody({
-  file,
-  kind,
-}: {
-  file: FileDetail
-  kind: ReturnType<typeof previewKind>
-}) {
-  if (kind === "text") {
-    return (
-      <FileFallback
-        description={`Files over ${formatFileSize(textSizeLimit)} skip the inline editor. Download the file to work on it.`}
-        file={file}
-        title="Too large to edit here"
-      />
-    )
-  }
-
-  if (file.url === null || kind === "none") {
-    return (
-      <FileFallback
-        description="No inline view for this file type. Download it to open it locally."
-        file={file}
-        title="No inline view"
-      />
-    )
-  }
-
-  return (
-    <div className="min-h-0 flex-1">
-      <FilePreview
-        mimeType={file.mimeType}
-        name={file.name}
-        url={file.url}
-        variant="full"
-      />
-    </div>
   )
 }
 

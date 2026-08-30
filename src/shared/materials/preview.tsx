@@ -1,17 +1,11 @@
 import { FileIcon, type LucideIcon } from "lucide-react"
 import { useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
 import { fileKind, previewKind } from "@/shared/files/kind"
 
-// One inline preview shared by the member file view and the anonymous
-// share view: images, PDFs, video, audio, and text-like files render in
-// place; everything else keeps the quiet download prompt.
-//
-// "standalone" (the share view) boxes each preview in its own border;
-// "full" (the console file page) fills the given region edge-to-edge,
-// centering media on a neutral surface.
-
-type PreviewVariant = "full" | "standalone"
+// The share view's inline preview: images, PDFs, video, audio, and
+// text-like files render in place as boxed blocks; everything else keeps
+// the quiet download prompt. The console file page has its own richer
+// viewer under src/console/files/viewer.
 
 /** Characters of text shown inline before the preview cuts off. */
 const textPreviewLimit = 100_000
@@ -20,136 +14,80 @@ export function FilePreview({
   mimeType,
   name,
   url,
-  variant = "standalone",
 }: {
   mimeType: string
   name: string
   url: string | null
-  variant?: PreviewVariant
 }) {
   const icon = fileKind(mimeType, name).icon
 
   if (url === null) {
-    return <PreviewFallback icon={icon} variant={variant} />
+    return <PreviewFallback icon={icon} />
   }
 
   const kind = previewKind(mimeType, name)
 
   if (kind === "none") {
-    return <PreviewFallback icon={icon} variant={variant} />
+    return <PreviewFallback icon={icon} />
   }
 
   if (kind === "text") {
     return <TextPreview url={url} />
   }
 
-  return <MediaPreview kind={kind} name={name} url={url} variant={variant} />
+  return <MediaPreview kind={kind} name={name} url={url} />
 }
 
 function MediaPreview({
   kind,
   name,
   url,
-  variant,
 }: {
   kind: "audio" | "image" | "pdf" | "video"
   name: string
   url: string
-  variant: PreviewVariant
 }) {
-  const boxed = variant === "standalone"
-
   switch (kind) {
     case "image":
       return (
-        <MediaSurface boxed={boxed}>
-          <img
-            alt={name}
-            className={cn(
-              boxed
-                ? "max-h-[70svh] w-fit max-w-full rounded-md border"
-                : "max-h-full max-w-full object-contain"
-            )}
-            src={url}
-          />
-        </MediaSurface>
+        <img
+          alt={name}
+          className="max-h-[70svh] w-fit max-w-full rounded-md border"
+          src={url}
+        />
       )
     case "pdf":
       return (
         <iframe
-          className={cn(
-            boxed ? "h-[70svh] rounded-md border" : "h-full",
-            "w-full"
-          )}
+          className="h-[70svh] w-full rounded-md border"
           src={url}
           title={name}
         />
       )
     case "video":
       return (
-        <MediaSurface boxed={boxed}>
-          {/* biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks. */}
-          <video
-            className={cn(
-              boxed
-                ? "max-h-[70svh] w-full rounded-md border bg-muted/30"
-                : "max-h-full max-w-full"
-            )}
-            controls
-            src={url}
-          />
-        </MediaSurface>
+        // biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks.
+        <video
+          className="max-h-[70svh] w-full rounded-md border bg-muted/30"
+          controls
+          src={url}
+        />
       )
     case "audio":
-      return (
-        <div className={cn(!boxed && "flex h-full items-center p-6")}>
-          {/* biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks. */}
-          <audio
-            className={cn("w-full", !boxed && "max-w-xl")}
-            controls
-            src={url}
-          />
-        </div>
-      )
+      // biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks.
+      return <audio className="w-full" controls src={url} />
   }
-}
-
-/** Full-variant media sits centered on a quiet surface; the standalone
- *  variant keeps each element as its own boxed block. */
-function MediaSurface({
-  boxed,
-  children,
-}: {
-  boxed: boolean
-  children: React.ReactNode
-}) {
-  if (boxed) {
-    return children
-  }
-
-  return (
-    <div className="flex h-full items-center justify-center bg-muted/30 p-4">
-      {children}
-    </div>
-  )
 }
 
 function PreviewFallback({
   icon: Icon,
   message = "No inline preview for this file type.",
-  variant,
 }: {
   icon: LucideIcon
   message?: string
-  variant: PreviewVariant
 }) {
   return (
-    <div
-      className={cn(
-        "flex min-h-40 flex-col items-center justify-center gap-2 text-muted-foreground",
-        variant === "standalone" ? "rounded-md border bg-muted/30" : "h-full"
-      )}
-    >
+    <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-md border bg-muted/30 text-muted-foreground">
       <Icon className="size-6" />
       <p className="text-sm">{message}</p>
     </div>
@@ -188,7 +126,6 @@ function TextPreview({ url }: { url: string }) {
       <PreviewFallback
         icon={FileIcon}
         message="Could not load a text preview."
-        variant="standalone"
       />
     )
   }
