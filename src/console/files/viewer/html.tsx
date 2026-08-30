@@ -1,5 +1,7 @@
 import { type ReactNode, useState } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CopyButton } from "../../shared/copy"
+import { fileBlobCache } from "../cache/blob"
 import { usePreloadSiblings } from "../cache/preload"
 import { useDisplayUrl } from "../cache/url"
 import { FileEditor } from "../editor/section"
@@ -7,7 +9,6 @@ import { type FileSiblings, useSiblingKeys } from "../siblings"
 import { FileMeta, FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
 import { ViewerFrame } from "./frame"
-import { OpenTool } from "./section"
 import { useViewerStatus } from "./status"
 
 type HtmlMode = "code" | "preview"
@@ -77,6 +78,26 @@ function HtmlToggle({
   )
 }
 
+/** Copy the document's source without leaving the preview: the text
+ *  comes through the blob cache the preview already warmed. */
+function HtmlCopy({ file, url }: { file: FileDetail; url: string }) {
+  return (
+    <CopyButton
+      label="file text"
+      value={async () => {
+        const cached = await fileBlobCache.load({
+          fileId: file.fileId,
+          size: file.size,
+          updatedAt: file.updatedAt,
+          url,
+        })
+
+        return await cached.blob.text()
+      }}
+    />
+  )
+}
+
 /** The rendered document under the shared toolbar. The iframe is
  *  sandboxed with scripts only: the document keeps its interactivity but
  *  runs in an opaque origin — no reach into the console's origin or
@@ -111,10 +132,10 @@ function HtmlPreview({
         siblings={siblings}
         tools={
           <>
-            {/* The live url, not the frozen one — a tab opened minutes
-                in still deserves a fresh signature. */}
-            <OpenTool url={currentUrl} />
             {tools}
+            {/* The live url, not the frozen one — a copy minutes in
+                still deserves a fresh signature. */}
+            <HtmlCopy file={file} url={currentUrl} />
           </>
         }
       >
