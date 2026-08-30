@@ -10,6 +10,8 @@ import {
 import { api } from "../../../../convex/_generated/api"
 import { CopyButton } from "../../shared/copy"
 import { ConsoleListLoading } from "../../shared/list/loading"
+import { fileBlobCache } from "../cache/blob"
+import { usePreloadSiblings } from "../cache/preload"
 import { type FileSiblings } from "../siblings"
 import { uploadToStorage } from "../storage"
 import { FileToolbar } from "../toolbar"
@@ -41,8 +43,12 @@ export function FileEditor({
   siblings: FileSiblings
   url: string
 }) {
-  const document = useDocument(file.fileId, url)
+  const document = useDocument(file, url)
   const save = useSave(file, organizationId)
+
+  // The neighbors warm only once this file's text is on screen, so
+  // preloading never competes with the view it serves.
+  usePreloadSiblings(siblings, document.state.status === "ready")
   const autosave = useAutosave(async (text: string) => {
     const didSave = await save(text)
 
@@ -156,33 +162,35 @@ type DocumentState =
 
 type FileDocument = ReturnType<typeof useDocument>
 
-/** The file's text, fetched once per file. `saved` tracks the persisted
- *  content; `seed` is what the editor was seeded with and never moves, so
- *  saving never resets the caret. */
-function useDocument(fileId: FileDetail["fileId"], url: string) {
+/** The file's text, loaded once per file through the blob cache — instant
+ *  when a visit or sibling preload already fetched it. The cache keys on
+ *  updatedAt, so a saved file never resurrects stale text on the next
+ *  visit. `saved` tracks the persisted content; `seed` is what the editor
+ *  was seeded with and never moves, so saving never resets the caret. */
+function useDocument(file: FileDetail, url: string) {
   const [state, setState] = useState<DocumentState>({ status: "loading" })
   const loadedId = useRef<FileDetail["fileId"] | null>(null)
 
   useEffect(() => {
     // The signed url rotates with every query update, so a fetched file
     // never refetches — the editor already holds the freshest local text.
-    if (loadedId.current === fileId) {
+    if (loadedId.current === file.fileId) {
       return
     }
 
-    loadedId.current = fileId
+    loadedId.current = file.fileId
     setState({ status: "loading" })
-    fetch(url)
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Could not fetch the file.")
-        }
-
-        return await response.text()
+    void fileBlobCache
+      .load({
+        fileId: file.fileId,
+        size: file.size,
+        updatedAt: file.updatedAt,
+        url,
       })
+      .then(async (cached) => await cached.blob.text())
       .then((text) => setState({ status: "ready", saved: text, seed: text }))
       .catch(() => setState({ status: "error" }))
-  }, [fileId, url])
+  }, [file, url])
 
   function markSaved(text: string) {
     setState((current) =>

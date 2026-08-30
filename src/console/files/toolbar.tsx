@@ -11,7 +11,7 @@ import {
 import { SeparatorDot } from "../shared/dot"
 import { ConsoleListToolbar } from "../shared/list/frame"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
-import { FileOwnerCell, FileTypeCell } from "./cells"
+import { FileOwnerCell } from "./cells"
 import { type FileSiblings, useFileNavigate } from "./siblings"
 import { type FileDetail, formatFileSize } from "./types"
 
@@ -129,24 +129,26 @@ function NavButton({
   )
 }
 
-/** The toolbar's metadata line: kind, size, owner, and freshness, separated
- *  by the console's inline-meta middots. */
+/** The toolbar's metadata line, provenance first: who the file belongs to,
+ *  how fresh it is, and its size, separated by the console's inline-meta
+ *  middots. The preview below already shows what the file is, so no type
+ *  label repeats it; the owner's name sits in the foreground while the
+ *  rest stays muted. */
 export function FileMeta({ file }: { file: FileDetail }) {
   const now = useNow(30_000)
 
   return (
     <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
-      <FileTypeCell file={file} />
+      <div className="min-w-0 text-foreground">
+        <FileOwnerCell compact file={file} />
+      </div>
       <SeparatorDot />
-      <span className="shrink-0">{formatFileSize(file.size)}</span>
-      <SeparatorDot />
-      <FileOwnerCell compact file={file} />
-      <SeparatorDot className="max-sm:hidden" />
-      <span
-        className="shrink-0 max-sm:hidden"
-        title={absoluteTime(file.updatedAt)}
-      >
+      <span className="shrink-0" title={absoluteTime(file.updatedAt)}>
         Updated {relativeTime(file.updatedAt, now)}
+      </span>
+      <SeparatorDot className="max-sm:hidden" />
+      <span className="shrink-0 max-sm:hidden">
+        {formatFileSize(file.size)}
       </span>
     </div>
   )
