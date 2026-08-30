@@ -79,7 +79,12 @@ export function VisibilityDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent
+        className="sm:max-w-sm"
+        // Autofocusing the field-help button pops its tooltip over the
+        // freshly opened dialog, so focus stays where the pointer is.
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Sharing</DialogTitle>
           <DialogDescription>
