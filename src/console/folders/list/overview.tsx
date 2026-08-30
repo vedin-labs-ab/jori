@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../shared/layout"
-import { ConsoleEmptyState } from "../../shared/list/empty"
+import { ConsoleEmptyState, EmptyRow } from "../../shared/list/empty"
 import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
 import { type FolderTreeResult } from "../types"
+import { useFolderListControls } from "./controls"
 import { FolderListRow, FolderListTable } from "./table"
 
 /** The folder tree's landing page: the root folders in the same full-bleed
@@ -59,6 +60,8 @@ export function RootFolderList({
   onCreate: () => void
   tree: FolderTreeResult | undefined
 }) {
+  const list = useFolderListControls([])
+
   if (tree === undefined) {
     return (
       <ConsoleListContent>
@@ -98,11 +101,17 @@ export function RootFolderList({
     )
   }
 
+  const visible = list.narrow(roots)
+
   return (
-    <FolderListTable>
-      {roots.map((folder) => (
-        <FolderListRow folder={folder} key={folder.folderId} />
-      ))}
+    <FolderListTable controls={list.controls} kinds={list.kinds}>
+      {visible.length === 0 ? (
+        <EmptyRow colSpan={4}>No matching folders</EmptyRow>
+      ) : (
+        visible.map((folder) => (
+          <FolderListRow folder={folder} key={folder.folderId} />
+        ))
+      )}
     </FolderListTable>
   )
 }

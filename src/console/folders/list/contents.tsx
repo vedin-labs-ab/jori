@@ -1,10 +1,11 @@
 import { Folder } from "lucide-react"
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ConsoleEmptyState } from "../../shared/list/empty"
+import { ConsoleEmptyState, EmptyRow } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { type FolderContentsResult, type FolderResource } from "../types"
+import { useFolderListControls } from "./controls"
 import { ResourceListRow } from "./resource"
 import { FolderListRow, FolderListTable } from "./table"
 
@@ -26,6 +27,10 @@ export function FolderContents({
   onMove: (resource: FolderResource) => void
   onUnfile: (resource: FolderResource) => void
 }) {
+  const list = useFolderListControls(
+    contents?.status === "ready" ? contents.resources : []
+  )
+
   if (contents === undefined) {
     return (
       <ConsoleListContent>
@@ -62,20 +67,29 @@ export function FolderContents({
     )
   }
 
+  const folders = list.narrow(contents.folders)
+  const resources = list.narrow(contents.resources)
+
   return (
-    <FolderListTable>
-      {contents.folders.map((folder) => (
-        <FolderListRow folder={folder} key={folder.folderId} />
-      ))}
-      {contents.resources.map((resource) => (
-        <ResourceListRow
-          folderId={folderId}
-          key={resource.id}
-          onMove={onMove}
-          onUnfile={onUnfile}
-          resource={resource}
-        />
-      ))}
+    <FolderListTable controls={list.controls} kinds={list.kinds}>
+      {folders.length === 0 && resources.length === 0 ? (
+        <EmptyRow colSpan={4}>No matching items</EmptyRow>
+      ) : (
+        <>
+          {folders.map((folder) => (
+            <FolderListRow folder={folder} key={folder.folderId} />
+          ))}
+          {resources.map((resource) => (
+            <ResourceListRow
+              folderId={folderId}
+              key={resource.id}
+              onMove={onMove}
+              onUnfile={onUnfile}
+              resource={resource}
+            />
+          ))}
+        </>
+      )}
     </FolderListTable>
   )
 }

@@ -7,7 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { type FacetEntry, type ListControls } from "../../shared/list/controls"
 import { ConsoleListTable } from "../../shared/list/frame"
+import { FilterHead, SortHead } from "../../shared/list/head"
 import { folderIcon } from "../../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../../shared/time"
 import { useFolderRowDrag } from "../drag/state"
@@ -19,14 +21,22 @@ import { nameLinkClassName, rowDragClasses } from "./style"
  *  Cells carry a fixed height because rows differ in tallest content — a
  *  resource row's menu button outgrows a folder row's bare link — and
  *  mixed row heights read as a glitch. */
-export function FolderListTable({ children }: { children: ReactNode }) {
+export function FolderListTable({
+  children,
+  controls,
+  kinds,
+}: {
+  children: ReactNode
+  controls: ListControls
+  kinds: FacetEntry[]
+}) {
   return (
     <ConsoleListTable className="[&_td]:h-10">
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Kind</TableHead>
-          <TableHead>Updated</TableHead>
+          <SortHead controls={controls} label="Name" sortKey="name" />
+          <FilterHead controls={controls} facets={kinds} label="Kind" />
+          <SortHead controls={controls} label="Updated" sortKey="updated" />
           <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
