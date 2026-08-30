@@ -10,7 +10,7 @@ import {
   updateCollection,
 } from "../collections/records"
 import { type CollectionDoc } from "../collections/spec"
-import { scopeValidator } from "../shared/audience"
+import { visibilityValidator } from "../visibility/schema"
 import { getAccessibleStore, summarizeStore } from "./access"
 import { storeSpec } from "./spec"
 
@@ -20,7 +20,7 @@ export const create = internalMutation({
     personId: v.id("persons"),
     name: v.string(),
     description: v.optional(v.string()),
-    scope: v.optional(scopeValidator),
+    visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     schema: v.optional(v.any()),
   },

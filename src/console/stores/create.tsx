@@ -1,5 +1,6 @@
-import { type Scope } from "@contracts/permissions/scope"
+import { type Visibility } from "@contracts/permissions/visibility"
 import { useMutation } from "convex/react"
+import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -21,7 +22,7 @@ import {
   MaterialNameField,
 } from "../shared/materials/fields"
 import { AdvancedSettings, DialogForm } from "../shared/materials/form"
-import { MaterialScopeField } from "../shared/materials/scope"
+import { VisibilityField } from "../shared/visibility/field"
 
 export function CreateStoreDialog({
   initialFolderId,
@@ -77,11 +78,12 @@ export function CreateStoreDialog({
               organizationId={organizationId}
               value={form.folderId}
             />
-            <MaterialScopeField
-              id="store-create-scope"
+            <VisibilityField
+              id="store-create-visibility"
               noun="store"
-              onScopeChange={form.setScope}
-              scope={form.scope}
+              onChange={form.setVisibility}
+              organizationId={organizationId}
+              value={form.visibility}
             />
           </AdvancedSettings>
           <DialogFooter>
@@ -105,7 +107,9 @@ function useCreateStore(
   const [name, setNameState] = useState("")
   const [nameError, setNameError] = useState<string>()
   const [description, setDescription] = useState("")
-  const [scope, setScope] = useState<Scope>("organization")
+  const [visibility, setVisibility] = useState<Visibility>({
+    mode: "organization",
+  })
   const [folderId, setFolderId] = useState(initialFolderId)
   const [isCreating, setIsCreating] = useState(false)
 
@@ -129,7 +133,9 @@ function useCreateStore(
         organizationId,
         name,
         description: description.trim() === "" ? undefined : description,
-        scope,
+        visibility: visibility as FunctionArgs<
+          typeof api.stores.console.create
+        >["visibility"],
         folderId:
           folderId === null ? undefined : (folderId as GenericId<"folders">),
       })
@@ -137,7 +143,7 @@ function useCreateStore(
       toast.success(`Created ${name.trim()}.`)
       setNameState("")
       setDescription("")
-      setScope("organization")
+      setVisibility({ mode: "organization" })
       setFolderId(initialFolderId)
       onCreated()
     } catch (error) {
@@ -153,11 +159,11 @@ function useCreateStore(
     isCreating,
     name,
     nameError,
-    scope,
     setDescription,
     setFolderId,
     setName,
-    setScope,
+    setVisibility,
     submit,
+    visibility,
   }
 }

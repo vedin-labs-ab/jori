@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button"
  *  a door into the member experience for viewers with an account. */
 export function ShareShell({
   children,
+  isPublic = false,
   name,
   openPath,
 }: {
   children: ReactNode
+  /** Reached through public visibility rather than a share link. */
+  isPublic?: boolean
   name: string
   openPath: string
 }) {
@@ -17,7 +20,9 @@ export function ShareShell({
     <main className="flex min-h-svh flex-col bg-background">
       <header className="flex items-center justify-between gap-3 border-b px-4 py-2.5">
         <div className="min-w-0">
-          <p className="text-muted-foreground text-xs">Shared via Jori</p>
+          <p className="text-muted-foreground text-xs">
+            {isPublic ? "Public via Jori" : "Shared via Jori"}
+          </p>
           <h1 className="truncate font-medium text-sm">{name}</h1>
         </div>
         <Button asChild size="sm" variant="outline">

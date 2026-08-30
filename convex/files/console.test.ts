@@ -1,13 +1,13 @@
 import { expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { toConsoleRow } from "./console"
 import {
   insertUploadedFile,
   patchFileDetails,
   removeFileWithBlob,
   swapFileBlob,
-  toConsoleRow,
-} from "./console"
+} from "./records"
 
 const owner = "person-owner" as Id<"persons">
 const other = "person-other" as Id<"persons">
@@ -33,8 +33,9 @@ test("records console uploads with storage metadata and defaults", async () => {
 
   expect(insert).toHaveBeenCalledWith("files", {
     organizationId: "organization",
-    scope: "organization",
+    visibility: { mode: "organization" },
     ownerId: owner,
+    folderId: undefined,
     storageId,
     name: "costs.csv",
     mimeType: "text/csv",
@@ -94,7 +95,7 @@ test("uploads reject a folder from another organization", async () => {
   ).rejects.toThrow("Folder was not found.")
 })
 
-test("personal uploads require a resolvable owner", async () => {
+test("private uploads require a resolvable owner", async () => {
   const ctx = {
     db: { system: { get: vi.fn() } },
   } as unknown as MutationCtx
@@ -103,9 +104,9 @@ test("personal uploads require a resolvable owner", async () => {
     insertUploadedFile(
       ctx,
       { organizationId: "organization" },
-      { storageId, name: "note.txt", scope: "personal" }
+      { storageId, name: "note.txt", visibility: { mode: "private" } }
     )
-  ).rejects.toThrow("Personal files need a resolvable owner")
+  ).rejects.toThrow("Private files need a resolvable owner")
 })
 
 test("deleting a file deletes its storage blob with the row", async () => {

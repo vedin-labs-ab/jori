@@ -34,7 +34,7 @@ function fileRow(overrides: Partial<FileRow> = {}) {
     name: "costs.csv",
     mimeType: "text/csv",
     size: 42,
-    scope: "organization",
+    visibility: { mode: "organization" },
     folderId: undefined,
     source: "upload",
     runId: undefined,
@@ -80,6 +80,7 @@ function renderTable(
 ) {
   render(
     <FileTable
+      onAccess={vi.fn()}
       config={fileListConfig(files, undefined)}
       controls={controls}
       files={files}

@@ -126,6 +126,49 @@ test("child counts skip what the viewer cannot see", async () => {
   })
 })
 
+test("restricted subfolders drop out of the listing for excluded viewers", async () => {
+  const { database, ctx } = databaseContext()
+  const folderId = await seedFolder(database)
+
+  await database.insert(
+    "folders",
+    folderDoc({
+      parentId: folderId,
+      name: "Leadership",
+      visibility: { mode: "people", personIds: [testOwner] },
+    })
+  )
+
+  const view = { organizationId: "org", parentId: folderId }
+  const forOwner = await folderChildren(ctx, { ...view, personId: testOwner })
+  const forOther = await folderChildren(ctx, { ...view, personId: other })
+
+  expect(forOwner.map((child) => child.name)).toContain("Leadership")
+  expect(forOther.map((child) => child.name)).not.toContain("Leadership")
+})
+
+test("a folder's visibility cascades over its filed resources", async () => {
+  const { database, ctx } = databaseContext()
+  const folderId = (await database.insert(
+    "folders",
+    folderDoc({ visibility: { mode: "private" }, createdBy: testOwner })
+  )) as Id<"folders">
+
+  await database.insert(
+    "collections",
+    tableDoc({ folderId, name: "Shared inside", scope: undefined })
+  )
+
+  const view = { organizationId: "org", folderId }
+  const forOwner = await folderResources(ctx, { ...view, personId: testOwner })
+  const forOther = await folderResources(ctx, { ...view, personId: other })
+
+  // The table itself is organization-wide, yet the only-me folder hides it
+  // from everyone but the folder's creator (who also owns the table here).
+  expect(forOwner.map((resource) => resource.name)).toContain("Shared inside")
+  expect(forOther).toEqual([])
+})
+
 test("resources carry their type and display extras, name-sorted", async () => {
   const { database, ctx } = databaseContext()
   const folderId = await seedFolder(database)

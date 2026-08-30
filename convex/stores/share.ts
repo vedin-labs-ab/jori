@@ -9,18 +9,18 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { canAccessCollection } from "../collections/access"
 import { findSingletonDocument } from "../collections/documents"
 import {
   type MintedShare,
   mintShare,
-  openShare,
+  openMaterialRead,
   pageShares,
   revokeShare,
   type ShareTarget,
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
+import { createSight } from "../visibility/sight"
 import { getAccessibleStore } from "./access"
 
 export const mint = internalMutation({
@@ -83,10 +83,11 @@ export const page = query({
   },
 })
 
-/** Anonymous share read: the secret is the whole credential. Returns null on
- *  every failure so callers cannot probe which stores exist. */
+/** Anonymous read: a share secret or the store's own public visibility is
+ *  the whole credential. Returns null on every failure so callers cannot
+ *  probe which stores exist. */
 export const get = query({
-  args: { storeId: v.string(), secret: v.string() },
+  args: { storeId: v.string(), secret: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const opened = await openStoreShare(ctx, args)
 
@@ -102,7 +103,9 @@ export const get = query({
       schema: opened.store.schema as JsonSchemaObject | undefined,
       value: (document?.value ?? null) as unknown,
       version: document?.version ?? 0,
-      expiresAt: opened.share.expiresAt,
+      access: opened.read.access,
+      expiresAt:
+        opened.read.access === "share" ? opened.read.expiresAt : undefined,
     }
   },
 })
@@ -131,11 +134,12 @@ export async function mintStoreShare(
   })
 }
 
-/** Resolve a share link to its store: secret, expiry, organization, archive
- *  state, and the creator's continued access all checked on every read. */
+/** Resolve an anonymous read to its store: a share link's secret, expiry,
+ *  organization, archive state, and the creator's continued access all
+ *  checked on every read — or the store's own public visibility. */
 export async function openStoreShare(
   ctx: QueryLikeCtx,
-  args: { storeId: string; secret: string }
+  args: { storeId: string; secret?: string }
 ) {
   const storeId = ctx.db.normalizeId("collections", args.storeId)
   const store = storeId === null ? null : await ctx.db.get(storeId)
@@ -144,14 +148,18 @@ export async function openStoreShare(
     return null
   }
 
-  const share = await openShare(ctx, {
+  const read = await openMaterialRead(ctx, {
     target: storeTarget(store._id),
     material: store,
-    creatorHasAccess: (createdBy) => canAccessCollection(store, createdBy),
+    creatorHasAccess: (createdBy) =>
+      createSight(ctx, {
+        organizationId: store.organizationId,
+        personId: createdBy,
+      }).canSee(store),
     secret: args.secret,
   })
 
-  return share === null ? null : { store, share }
+  return read === null ? null : { store, read }
 }
 
 function storeTarget(storeId: Id<"collections">): ShareTarget {

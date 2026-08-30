@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest"
+import { visibilityFromScopeInput } from "../visibility/schema"
 import {
   assertExpectedVersion,
   normalizeCollectionDescription,
   normalizeCollectionName,
-  normalizeCollectionScope,
   normalizeExpectedVersion,
 } from "./input"
 
@@ -23,11 +23,15 @@ describe("collection input normalization", () => {
     expect(normalizeCollectionDescription(undefined)).toBeUndefined()
   })
 
-  test("scope defaults to organization", () => {
-    expect(normalizeCollectionScope("personal")).toBe("personal")
-    expect(normalizeCollectionScope("organization")).toBe("organization")
-    expect(normalizeCollectionScope(undefined)).toBe("organization")
-    expect(normalizeCollectionScope("public")).toBe("organization")
+  test("agent scope input maps onto visibility", () => {
+    expect(visibilityFromScopeInput("personal")).toEqual({ mode: "private" })
+    expect(visibilityFromScopeInput("organization")).toEqual({
+      mode: "organization",
+    })
+    expect(visibilityFromScopeInput(undefined)).toEqual({
+      mode: "organization",
+    })
+    expect(visibilityFromScopeInput("public")).toEqual({ mode: "organization" })
   })
 
   test("expected versions are truncated non-negative integers", () => {

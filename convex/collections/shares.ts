@@ -6,10 +6,13 @@ import { type MutationCtx } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
 import { bytesToHex } from "../shared/encoding"
 import { type RuntimeEnvironment, readOrigin } from "../shared/origin"
+import { anonymousSight, type Gate } from "../visibility/sight"
 
-// The one share mechanism for tables, stores, and files: a secret-bearing
-// grant row minted per link, checked on every anonymous read. The target is
-// polymorphic, so every domain shares these rows and this gate.
+// The one anonymous read mechanism for tables, stores, and files: either a
+// secret-bearing share row minted per link, or the material's own public
+// visibility. The target is polymorphic, so every domain shares these rows
+// and this gate. Both paths are read-only; writes always require a signed-in
+// member who passes the visibility resolver.
 
 /** Bounds concurrent live links per target; minting past it retires the
  *  oldest while expired links remain available in the console history. */
@@ -111,16 +114,52 @@ export async function pageShares(
   }
 }
 
-/** Resolve a share link to its grant row: secret, expiry, organization,
- *  archive state, and the creator's continued access all checked on every
- *  read. Null on any failure so callers cannot probe what exists. */
-export async function openShare(
+/** How an anonymous read was let in: through a minted link, or through the
+ *  material's own public visibility. */
+export type MaterialRead =
+  | { access: "share"; expiresAt: number }
+  | { access: "public" }
+
+/** The one anonymous read gate: a valid share link opens the material, and
+ *  a material whose visibility resolves to public (its own setting and its
+ *  ancestor folders') opens with no secret at all. Null on any failure so
+ *  callers cannot probe what exists. */
+export async function openMaterialRead(
   ctx: QueryLikeCtx,
   args: {
     target: ShareTarget
+    material: Gate & { archivedAt?: number }
+    creatorHasAccess: (createdBy: Id<"persons">) => Promise<boolean>
+    secret: string | undefined
+  }
+): Promise<MaterialRead | null> {
+  if (args.secret !== undefined && args.secret !== "") {
+    const share = await openShare(ctx, args.secret, args)
+
+    if (share !== null) {
+      return { access: "share", expiresAt: share.expiresAt }
+    }
+  }
+
+  const isPublic =
+    args.material.archivedAt === undefined &&
+    (await anonymousSight(ctx, args.material.organizationId).canSee(
+      args.material
+    ))
+
+  return isPublic ? { access: "public" } : null
+}
+
+/** Resolve a share link to its grant row: secret, expiry, organization,
+ *  archive state, and the creator's continued access all checked on every
+ *  read. Null on any failure so callers cannot probe what exists. */
+async function openShare(
+  ctx: QueryLikeCtx,
+  secret: string,
+  args: {
+    target: ShareTarget
     material: { organizationId: string; archivedAt?: number }
-    creatorHasAccess: (createdBy: Id<"persons">) => boolean
-    secret: string
+    creatorHasAccess: (createdBy: Id<"persons">) => Promise<boolean>
   }
 ) {
   const share = await ctx.db
@@ -129,7 +168,7 @@ export async function openShare(
       index
         .eq("targetKind", args.target.kind)
         .eq("targetId", args.target.id)
-        .eq("secret", args.secret)
+        .eq("secret", secret)
     )
     .unique()
 
@@ -138,8 +177,8 @@ export async function openShare(
     !canOpenShare({
       share,
       material: args.material,
-      creatorHasAccess: args.creatorHasAccess(share.createdBy),
-      secret: args.secret,
+      creatorHasAccess: await args.creatorHasAccess(share.createdBy),
+      secret,
       now: Date.now(),
     })
   ) {

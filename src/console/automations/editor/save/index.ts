@@ -1,4 +1,7 @@
-import { defaultScopeForIntegrations } from "@contracts/permissions/scope"
+import {
+  defaultVisibilityForIntegrations,
+  type Visibility,
+} from "@contracts/permissions/visibility"
 import { localTimezone } from "../../../shared/time"
 import {
   type Automation,
@@ -20,21 +23,29 @@ export function automationFormValues(
       ...readAutomationPreferences(),
     }
 
-    return {
-      ...values,
-      scope: defaultScopeForIntegrations(
-        values.surfaces.map((surface) => surface.integration)
-      ),
-    }
+    const visibility = defaultVisibilityForIntegrations(
+      values.surfaces.map((surface) => surface.integration)
+    )
+
+    return { ...values, visibility, scope: derivedScope(visibility) }
   }
 
   return {
     name: automation.name,
     instructions: automation.instructions,
     ...triggerFormValues(automation),
+    visibility: automation.visibility,
     scope: automation.scope,
     folderId: null,
     webSearch: automation.access.webSearch,
     surfaces: automation.access.surfaces,
   }
+}
+
+/** The execution sharing a visibility implies: private automations run as
+ *  their person, every shared mode as the organization. */
+export function derivedScope(visibility: Visibility) {
+  return visibility.mode === "private"
+    ? ("personal" as const)
+    : ("organization" as const)
 }

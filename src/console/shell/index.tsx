@@ -29,6 +29,7 @@ import {
   MaterialBreadcrumbContext,
   type MaterialBreadcrumbSegment,
 } from "../shared/materials/breadcrumb"
+import { VisibilityMark } from "../shared/visibility/badge"
 import { ConsoleSidebar } from "./navigation"
 import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
 
@@ -95,11 +96,12 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 }
 
 /** The header's name for the page. Material detail pages get a trail: the
- *  linked ancestors, then the material's name — with a muted scope icon
- *  suffix when the view publishes a scope. The ancestors default to the
- *  parent surface derived from the path; a view may publish a full segment
- *  trail instead. Everywhere else a one-item breadcrumb is not a trail, it
- *  is the page's name, so it is marked up as a heading. */
+ *  linked ancestors, then the material's name — with a muted visibility
+ *  icon suffix when the material is anything but organization-wide. The
+ *  ancestors default to the parent surface derived from the path; a view
+ *  may publish a full segment trail instead. Everywhere else a one-item
+ *  breadcrumb is not a trail, it is the page's name, so it is marked up as
+ *  a heading. */
 function ConsoleHeaderTitle({
   material,
   pathname,
@@ -144,6 +146,12 @@ function ConsoleHeaderTitle({
         <BreadcrumbItem className="min-w-0">
           <MaterialName material={shown.material} />
         </BreadcrumbItem>
+        {shown.material.visibility === undefined ||
+        shown.material.visibility === "organization" ? null : (
+          <BreadcrumbItem>
+            <VisibilityMark visibility={shown.material.visibility} />
+          </BreadcrumbItem>
+        )}
       </BreadcrumbList>
     </Breadcrumb>
   )

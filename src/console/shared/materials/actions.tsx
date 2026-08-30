@@ -2,6 +2,7 @@ import {
   Archive,
   FolderInput,
   Loader2,
+  LockKeyhole,
   MoreHorizontal,
   Pencil,
   RotateCcw,
@@ -199,6 +200,7 @@ export function MaterialTitleMenu({
   isRestoring,
   material,
   noun,
+  onAccess,
   onDelete,
   onEdit,
   onMoveToFolder,
@@ -209,6 +211,7 @@ export function MaterialTitleMenu({
   isRestoring: boolean
   material: MaterialActionTarget
   noun: string
+  onAccess?: () => void
   onDelete: () => void
   onEdit: () => void
   onMoveToFolder: () => void
@@ -225,6 +228,12 @@ export function MaterialTitleMenu({
           <Pencil />
           Edit details
         </DropdownMenuItem>
+        {onAccess === undefined ? null : (
+          <DropdownMenuItem disabled={isPending} onSelect={onAccess}>
+            <LockKeyhole />
+            Sharing…
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
           <FolderInput />
           Move to folder…

@@ -17,31 +17,58 @@ import {
   type Integration,
   integrationLabels,
 } from "../shared/integrations"
+import { readVisibility } from "../visibility/schema"
+import { type Gate, type Sight } from "../visibility/sight"
 import { type access, type accessInput } from "./schema"
 
 export type AutomationAccess = Infer<typeof access>
 export type AutomationAccessInput = Infer<typeof accessInput>
 export type AccessLevel = "none" | "read" | "write" | "both"
 
-export function automationScope(
-  automation: Pick<Doc<"automations">, "scope">
-): Scope {
-  return automation.scope
-}
+type AutomationGateDoc = Pick<
+  Doc<"automations">,
+  "organizationId" | "visibility" | "scope" | "principal" | "createdBy"
+> &
+  Partial<Pick<Doc<"automations">, "folderId">>
 
 /**
- * Organization automations belong to every member; personal ones to the
- * person named by their execution principal.
+ * Execution sharing derived from visibility: private automations execute
+ * as their person, every shared mode as the organization.
  */
-export function canAccessAutomation(
-  automation: Pick<Doc<"automations">, "scope" | "principal">,
-  personId: Id<"persons"> | undefined
+export function automationScope(
+  automation: Pick<Doc<"automations">, "visibility" | "scope">
+): Scope {
+  return readVisibility(automation).mode === "private"
+    ? "personal"
+    : "organization"
+}
+
+/** An automation's owner: the person it executes as, or its creator. */
+export function automationOwner(
+  automation: Pick<Doc<"automations">, "principal" | "createdBy">
+): Id<"persons"> | undefined {
+  return automation.principal.kind === "person"
+    ? automation.principal.personId
+    : automation.createdBy
+}
+
+/** The visibility gate for an automation, for Sight.canSee. */
+export function automationGate(automation: AutomationGateDoc): Gate {
+  return {
+    organizationId: automation.organizationId,
+    ownerId: automationOwner(automation),
+    folderId: automation.folderId,
+    visibility: automation.visibility,
+    scope: automation.scope,
+  }
+}
+
+/** Whether the viewer behind the Sight may see the automation. */
+export async function canSeeAutomation(
+  sight: Sight,
+  automation: AutomationGateDoc
 ) {
-  return (
-    automationScope(automation) === "organization" ||
-    (automation.principal.kind === "person" &&
-      automation.principal.personId === personId)
-  )
+  return await sight.canSee(automationGate(automation))
 }
 
 export async function resolveAccessInput(

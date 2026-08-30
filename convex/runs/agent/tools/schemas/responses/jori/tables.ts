@@ -13,7 +13,15 @@ function tableSummaryProperties() {
     tableId: stringProperty("Jori table ID."),
     name: stringProperty("Table name."),
     description: stringProperty("Table description; absent when unset."),
-    scope: stringProperty("personal or organization."),
+    visibility: objectSchema({
+      description:
+        "Who may see it: only its owner (private), listed people, listed teams, the whole organization, or the public.",
+      properties: {
+        mode: stringProperty(
+          "private, people, teams, organization, or public."
+        ),
+      },
+    }),
     ownerId: stringProperty("Owning person ID."),
     columns: arrayProperty(
       "Column schema every row is validated against; row values are keyed by column name.",

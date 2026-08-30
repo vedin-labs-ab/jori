@@ -1,4 +1,11 @@
-import { FolderInput, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react"
+import {
+  FolderInput,
+  LockKeyhole,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -67,6 +74,10 @@ function FolderPageMenu({
         <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
           <Pencil />
           Rename
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onDialog({ type: "access", folder })}>
+          <LockKeyhole />
+          Sharing…
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
           <FolderInput />

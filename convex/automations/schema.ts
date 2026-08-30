@@ -4,6 +4,7 @@ import { eventMatch } from "../events/schema"
 import { executionPrincipalValidator } from "../runs/principal"
 import { scopeValidator } from "../shared/audience"
 import { accessValidator, integrationValidator } from "../shared/integrations"
+import { visibilityValidator } from "../visibility/schema"
 
 export const accessInput = v.object({
   integrations: v.array(
@@ -75,8 +76,12 @@ export const automations = defineTable({
   keyPartition: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
-  /** Personal: owner-only. Organization: every member. See contracts/permissions/scope. */
-  scope: scopeValidator,
+  /** Who may see the automation; read via visibility/schema.readVisibility.
+   *  Private automations execute as their person, shared ones as the
+   *  organization (see automations/access.automationScope). */
+  visibility: v.optional(visibilityValidator),
+  /** Legacy binary scope, mapped and cleared by visibility/migrate.ts. */
+  scope: v.optional(scopeValidator),
   principal: executionPrincipalValidator,
   type: automationType,
   access,

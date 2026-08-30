@@ -43,7 +43,7 @@ describe("store tool dispatch", () => {
       expect.anything(),
       expect.objectContaining({
         name: "Dispatch log",
-        scope: "organization",
+        visibility: { mode: "organization" },
         schema: { type: "object" },
       })
     )

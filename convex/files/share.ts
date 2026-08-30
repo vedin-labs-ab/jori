@@ -11,7 +11,7 @@ import {
 import {
   type MintedShare,
   mintShare,
-  openShare,
+  openMaterialRead,
   pageShares,
   revokeShare,
   type ShareTarget,
@@ -80,11 +80,12 @@ export const page = query({
   },
 })
 
-/** Anonymous share read: the secret is the whole credential. Returns null on
- *  every failure so callers cannot probe which files exist. Storage URLs are
- *  signed and temporary, so each read mints a fresh one. */
+/** Anonymous read: a share secret or the file's own public visibility is
+ *  the whole credential. Returns null on every failure so callers cannot
+ *  probe which files exist. Storage URLs are signed and temporary, so each
+ *  read mints a fresh one. */
 export const get = query({
-  args: { fileId: v.string(), secret: v.string() },
+  args: { fileId: v.string(), secret: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const opened = await openFileShare(ctx, args)
 
@@ -99,7 +100,9 @@ export const get = query({
       size: opened.file.size,
       createdAt: opened.file.createdAt,
       url: await ctx.storage.getUrl(opened.file.storageId),
-      expiresAt: opened.share.expiresAt,
+      access: opened.read.access,
+      expiresAt:
+        opened.read.access === "share" ? opened.read.expiresAt : undefined,
     }
   },
 })
@@ -124,11 +127,12 @@ export async function mintFileShare(
   })
 }
 
-/** Resolve a share link to its file: secret, expiry, organization, and the
- *  creator's continued visibility all checked on every read. */
+/** Resolve an anonymous read to its file: a share link's secret, expiry,
+ *  organization, and the creator's continued visibility all checked on
+ *  every read — or the file's own public visibility. */
 export async function openFileShare(
   ctx: QueryLikeCtx,
-  args: { fileId: string; secret: string }
+  args: { fileId: string; secret?: string }
 ) {
   const fileId = ctx.db.normalizeId("files", args.fileId)
   const file = fileId === null ? null : await ctx.db.get(fileId)
@@ -137,18 +141,18 @@ export async function openFileShare(
     return null
   }
 
-  const share = await openShare(ctx, {
+  const read = await openMaterialRead(ctx, {
     target: fileTarget(file._id),
     material: file,
     creatorHasAccess: (createdBy) =>
-      canViewFile(file, {
+      canViewFile(ctx, file, {
         organizationId: file.organizationId,
         personId: createdBy,
       }),
     secret: args.secret,
   })
 
-  return share === null ? null : { file, share }
+  return read === null ? null : { file, read }
 }
 
 async function getViewableFile(
@@ -163,10 +167,10 @@ async function getViewableFile(
 
   if (
     file === null ||
-    !canViewFile(file, {
+    !(await canViewFile(ctx, file, {
       organizationId: args.organizationId,
       personId: args.personId,
-    })
+    }))
   ) {
     throw new Error("File was not found")
   }

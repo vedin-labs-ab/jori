@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { canAccessCollection } from "../../collections/access"
+import { createSight, type Sight } from "../../visibility/sight"
 import { activityMaterialId } from "./metadata/materials"
 import { readToolInput, readToolName, readTraceData } from "./read"
 import { type ActivityData } from "./types"
@@ -13,6 +13,10 @@ export async function loadActivityData(
   run: Doc<"runs">,
   personId: Id<"persons"> | undefined
 ): Promise<ActivityData> {
+  const sight = createSight(ctx, {
+    organizationId: run.organizationId,
+    personId,
+  })
   const [traces, approvals, offers, waiters, agents, files] = await Promise.all(
     [
       loadTraces(ctx, run._id),
@@ -20,10 +24,10 @@ export async function loadActivityData(
       loadOffers(ctx, run._id),
       loadWaiters(ctx, run._id),
       loadAgents(ctx, run._id),
-      loadFiles(ctx, run._id),
+      loadFiles(ctx, run._id, sight),
     ]
   )
-  const collections = await loadCollections(ctx, run, traces, personId)
+  const collections = await loadCollections(ctx, traces, sight)
 
   return {
     agents,
@@ -41,9 +45,8 @@ export async function loadActivityData(
  *  only those the viewer may see. */
 async function loadCollections(
   ctx: QueryCtx,
-  run: Doc<"runs">,
   traces: Doc<"traces">[],
-  personId: Id<"persons"> | undefined
+  sight: Sight
 ) {
   const ids = new Set<Id<"collections">>()
 
@@ -68,19 +71,15 @@ async function loadCollections(
   }
 
   const collections = await Promise.all([...ids].map((id) => ctx.db.get(id)))
+  const visible: Doc<"collections">[] = []
 
-  return collections.filter((collection): collection is Doc<"collections"> => {
-    if (collection === null) {
-      return false
+  for (const collection of collections) {
+    if (collection !== null && (await sight.canSee(collection))) {
+      visible.push(collection)
     }
+  }
 
-    return (
-      collection.organizationId === run.organizationId &&
-      (personId === undefined
-        ? collection.scope === "organization"
-        : canAccessCollection(collection, personId))
-    )
-  })
+  return visible
 }
 
 async function loadTraces(ctx: QueryCtx, runId: Id<"runs">) {
@@ -148,10 +147,20 @@ async function loadAgents(ctx: QueryCtx, parentId: Id<"runs">) {
     .take(relationLimit)
 }
 
-async function loadFiles(ctx: QueryCtx, runId: Id<"runs">) {
-  return await ctx.db
+/** A run's saved files, minus any later restricted away from the viewer. */
+async function loadFiles(ctx: QueryCtx, runId: Id<"runs">, sight: Sight) {
+  const files = await ctx.db
     .query("files")
     .withIndex("by_run", (query) => query.eq("runId", runId))
     .order("asc")
     .take(relationLimit)
+  const visible: Doc<"files">[] = []
+
+  for (const file of files) {
+    if (await sight.canSee(file)) {
+      visible.push(file)
+    }
+  }
+
+  return visible
 }

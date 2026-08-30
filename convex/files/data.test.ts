@@ -1,39 +1,72 @@
 import { expect, test } from "vitest"
+import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { canViewFile, normalizeFileName } from "./data"
 
 const owner = "person-owner" as Id<"persons">
 const other = "person-other" as Id<"persons">
 
-test("organization-scoped files are visible to every member", () => {
+const { ctx } = databaseContext()
+
+test("organization files are visible to every member", async () => {
   const file = fakeFile({ scope: "organization" })
 
-  expect(canViewFile(file, { organizationId: "organization" })).toBe(true)
+  expect(await canViewFile(ctx, file, { organizationId: "organization" })).toBe(
+    true
+  )
   expect(
-    canViewFile(file, { organizationId: "organization", personId: other })
+    await canViewFile(ctx, file, {
+      organizationId: "organization",
+      personId: other,
+    })
   ).toBe(true)
 })
 
-test("personal files are visible to their owner only", () => {
+test("private files are visible to their owner only", async () => {
+  const file = fakeFile({ visibility: { mode: "private" }, ownerId: owner })
+
+  expect(
+    await canViewFile(ctx, file, {
+      organizationId: "organization",
+      personId: owner,
+    })
+  ).toBe(true)
+  expect(
+    await canViewFile(ctx, file, {
+      organizationId: "organization",
+      personId: other,
+    })
+  ).toBe(false)
+  expect(await canViewFile(ctx, file, { organizationId: "organization" })).toBe(
+    false
+  )
+})
+
+test("legacy personal scope reads as private", async () => {
   const file = fakeFile({ scope: "personal", ownerId: owner })
 
   expect(
-    canViewFile(file, { organizationId: "organization", personId: owner })
+    await canViewFile(ctx, file, {
+      organizationId: "organization",
+      personId: owner,
+    })
   ).toBe(true)
   expect(
-    canViewFile(file, { organizationId: "organization", personId: other })
+    await canViewFile(ctx, file, {
+      organizationId: "organization",
+      personId: other,
+    })
   ).toBe(false)
-  expect(canViewFile(file, { organizationId: "organization" })).toBe(false)
 })
 
-test("files never cross organizations, whatever the scope", () => {
+test("files never cross organizations, whatever the visibility", async () => {
   const file = fakeFile({ scope: "organization" })
 
-  expect(canViewFile(file, { organizationId: "another-organization" })).toBe(
-    false
-  )
   expect(
-    canViewFile(fakeFile({ scope: "personal", ownerId: owner }), {
+    await canViewFile(ctx, file, { organizationId: "another-organization" })
+  ).toBe(false)
+  expect(
+    await canViewFile(ctx, fakeFile({ scope: "personal", ownerId: owner }), {
       organizationId: "another-organization",
       personId: owner,
     })
@@ -53,7 +86,6 @@ function fakeFile(overrides: Partial<Doc<"files">>): Doc<"files"> {
     _id: "file-id",
     _creationTime: 0,
     organizationId: "organization",
-    scope: "organization",
     storageId: "storage-id",
     name: "report.pdf",
     mimeType: "application/pdf",

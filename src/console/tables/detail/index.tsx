@@ -147,13 +147,14 @@ function TableReadyView({
 
   useMaterialBreadcrumb(
     table.name,
-    table.scope,
+    table.visibility.mode,
     <MaterialTitleMenu
       deleteDescription={tableDeleteDescription}
       isDeleting={page.removal.removingTableId === table.tableId}
       isRestoring={page.removal.restoringTableId === table.tableId}
       material={{ name: table.name, archivedAt: table.archivedAt }}
       noun="table"
+      onAccess={() => page.setDialog("access")}
       onDelete={removeAndLeaveWhenDeleted}
       onEdit={() => page.setDialog("edit")}
       onMoveToFolder={() => page.setDialog("move")}

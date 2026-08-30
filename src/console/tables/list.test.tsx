@@ -40,7 +40,7 @@ function tableSummary(overrides: Partial<TableSummary> = {}) {
     tableId: "table-1",
     name: "Leads",
     description: undefined,
-    scope: "organization",
+    visibility: { mode: "organization" },
     ownerId: undefined,
     folderId: undefined,
     columns: [
@@ -144,16 +144,16 @@ test("a table without a resolved owner reads as Jori's own", () => {
   expect(screen.queryByText("Ada Lovelace")).toBeNull()
 })
 
-test("personal and archived marks ride the name cell", () => {
+test("visibility and archived marks ride the name cell", () => {
   renderList([
     tableSummary({
-      scope: "personal",
+      visibility: { mode: "private" },
       archivedAt: Date.now(),
       description: "Weekly pipeline",
     }),
   ])
 
-  expect(screen.getByText("Personal")).toBeDefined()
+  expect(screen.getByText("Only me")).toBeDefined()
   expect(screen.getByText("Archived")).toBeDefined()
   expect(screen.getByText("Weekly pipeline")).toBeDefined()
 })

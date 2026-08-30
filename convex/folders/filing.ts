@@ -1,16 +1,15 @@
 import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { canAccessAutomation } from "../automations/access"
-import { canAccessCollection } from "../collections/access"
-import { canViewFile } from "../files/data"
+import { automationGate } from "../automations/access"
+import { createSight, type Gate, type Sight } from "../visibility/sight"
 import { requireOrganizationFolder } from "./tree"
 
 // Filing is one generic flow over a small registry: each entry owns the
-// per-domain edges — load the row, apply that domain's existing visibility
-// predicate, patch its folderId — and the shared logic exists once. Folders
-// grant nothing, so filing requires access to the RESOURCE via its own
-// predicate; the folder itself is visible to every member.
+// per-domain edges — load the row, expose its visibility gate, patch its
+// folderId — and the shared logic exists once. Filing requires sight of the
+// RESOURCE and of the target folder, since a folder's visibility cascades
+// over what moves into it.
 
 export const filedResourceType = v.union(
   v.literal("collection"),
@@ -29,7 +28,7 @@ type FiledDoc = Doc<FiledTable>
 
 type FilingEntry = {
   load(ctx: MutationCtx, resourceId: string): Promise<FiledDoc | null>
-  canAccess(row: FiledDoc, personId: Id<"persons">): boolean
+  gate(row: FiledDoc): Gate
   setFolder(
     ctx: MutationCtx,
     row: FiledDoc,
@@ -42,33 +41,27 @@ type FilingEntry = {
 const registry: Record<FiledResourceType, FilingEntry> = {
   collection: {
     load: (ctx, resourceId) => loadRow(ctx, "collections", resourceId),
-    canAccess: (row, personId) =>
-      canAccessCollection(row as Doc<"collections">, personId),
+    gate: (row) => row as Doc<"collections">,
     setFolder: (ctx, row, folderId) =>
       ctx.db.patch(row._id as Id<"collections">, { folderId }),
   },
   file: {
     load: (ctx, resourceId) => loadRow(ctx, "files", resourceId),
-    canAccess: (row, personId) =>
-      canViewFile(row as Doc<"files">, {
-        organizationId: row.organizationId,
-        personId,
-      }),
+    gate: (row) => row as Doc<"files">,
     setFolder: (ctx, row, folderId) =>
       ctx.db.patch(row._id as Id<"files">, { folderId }),
   },
   automation: {
     load: (ctx, resourceId) => loadRow(ctx, "automations", resourceId),
-    canAccess: (row, personId) =>
-      canAccessAutomation(row as Doc<"automations">, personId),
+    gate: (row) => automationGate(row as Doc<"automations">),
     setFolder: (ctx, row, folderId) =>
       ctx.db.patch(row._id as Id<"automations">, { folderId }),
   },
 }
 
 /** File a resource into a folder, or unfile it with a null folderId. The
- *  acting person must be able to access the resource through its domain's
- *  predicate, and the target folder must live in the same organization. */
+ *  acting person must see the resource and the target folder; both live in
+ *  the same organization. */
 export async function fileResource(
   ctx: MutationCtx,
   args: {
@@ -79,14 +72,15 @@ export async function fileResource(
     folderId: Id<"folders"> | null
   }
 ) {
-  const folderId = await resolveTargetFolder(ctx, args)
+  const sight = createSight(ctx, args)
+  const folderId = await resolveTargetFolder(ctx, sight, args)
   const entry = registry[args.resourceType]
   const row = await entry.load(ctx, args.resourceId)
 
   if (
     row === null ||
     row.organizationId !== args.organizationId ||
-    !entry.canAccess(row, args.personId)
+    !(await sight.canSee(entry.gate(row)))
   ) {
     throw new Error("Resource was not found.")
   }
@@ -108,10 +102,22 @@ async function loadRow(
 
 async function resolveTargetFolder(
   ctx: MutationCtx,
+  sight: Sight,
   args: { organizationId: string; folderId: Id<"folders"> | null }
 ) {
-  return args.folderId === null
-    ? undefined
-    : (await requireOrganizationFolder(ctx, args.organizationId, args.folderId))
-        ._id
+  if (args.folderId === null) {
+    return undefined
+  }
+
+  const folder = await requireOrganizationFolder(
+    ctx,
+    args.organizationId,
+    args.folderId
+  )
+
+  if (!(await sight.canSeeFolder(folder))) {
+    throw new Error("Folder was not found.")
+  }
+
+  return folder._id
 }

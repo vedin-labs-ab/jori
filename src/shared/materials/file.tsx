@@ -17,9 +17,12 @@ export function FileShareView({
   secret,
 }: {
   fileId: string
-  secret: string
+  secret: string | null
 }) {
-  const file = useQuery(api.files.share.get, { fileId, secret })
+  const file = useQuery(api.files.share.get, {
+    fileId,
+    secret: secret ?? undefined,
+  })
   const isExpired = useShareExpired(file?.expiresAt)
   const openPath = `/files/${encodeURIComponent(fileId)}`
 
@@ -32,7 +35,11 @@ export function FileShareView({
   }
 
   return (
-    <ShareShell name={file.name} openPath={openPath}>
+    <ShareShell
+      isPublic={file.access === "public"}
+      name={file.name}
+      openPath={openPath}
+    >
       {file.description === undefined ? null : (
         <p className="text-muted-foreground text-sm">{file.description}</p>
       )}

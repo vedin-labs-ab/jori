@@ -3,11 +3,8 @@ import { storeDoc, tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { tableSpec } from "../tables/spec"
-import {
-  accessibleCollection,
-  canAccessCollection,
-  searchCollections,
-} from "./access"
+import { createSight } from "../visibility/sight"
+import { accessibleCollection, searchCollections } from "./access"
 import { type CollectionDoc } from "./spec"
 
 const other = "persons:other" as Id<"persons">
@@ -29,46 +26,46 @@ async function insertCollections(database: TestDatabase) {
   await database.insert("collections", storeDoc({ name: "Launch value" }))
 }
 
-describe("canAccessCollection", () => {
-  test("organization collections are visible to every member", () => {
-    expect(canAccessCollection(collection(), other)).toBe(true)
-  })
-
-  test("personal collections are visible only to their owner", () => {
-    const personal = collection({ scope: "personal" })
-
-    expect(canAccessCollection(personal, testOwner)).toBe(true)
-    expect(canAccessCollection(personal, other)).toBe(false)
-  })
-})
-
 describe("accessibleCollection", () => {
-  const args = {
-    organizationId: "org",
-    personId: other,
-    kind: "table" as const,
+  function sightFor(personId: Id<"persons">) {
+    const { ctx } = databaseContext()
+
+    return createSight(ctx, { organizationId: "org", personId })
   }
 
-  test("null for missing, foreign, invisible, and wrong-kind alike", () => {
-    expect(accessibleCollection(null, args)).toBeNull()
+  test("null for missing, foreign, invisible, and wrong-kind alike", async () => {
+    const sight = sightFor(other)
+
+    expect(await accessibleCollection(sight, null, "table")).toBeNull()
     expect(
-      accessibleCollection(collection({ organizationId: "elsewhere" }), args)
+      await accessibleCollection(
+        sight,
+        collection({ organizationId: "elsewhere" }),
+        "table"
+      )
     ).toBeNull()
     expect(
-      accessibleCollection(collection({ scope: "personal" }), args)
+      await accessibleCollection(
+        sight,
+        collection({ scope: "personal" }),
+        "table"
+      )
     ).toBeNull()
     expect(
-      accessibleCollection(
+      await accessibleCollection(
+        sight,
         storeDoc({ name: "Launch tracker" }) as CollectionDoc,
-        args
+        "table"
       )
     ).toBeNull()
   })
 
-  test("returns visible collections unchanged", () => {
+  test("returns visible collections unchanged", async () => {
     const visible = collection()
 
-    expect(accessibleCollection(visible, args)).toBe(visible)
+    expect(await accessibleCollection(sightFor(other), visible, "table")).toBe(
+      visible
+    )
   })
 })
 

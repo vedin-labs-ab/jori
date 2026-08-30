@@ -60,6 +60,7 @@ describe("automation payload", () => {
         ...emptyAutomationForm,
         name: "Shared inbox digest",
         instructions: "Summarize @Gmail.",
+        visibility: { mode: "organization" },
         scope: "organization",
         surfaces: [{ integration: "gmail", tools: ["gmail_search"] }],
       })
@@ -88,7 +89,7 @@ test("creates automation args with access and source bindings", () => {
     args: {
       name: "Weekly release summary",
       instructions: "Summarize @GitHub and post to @Slack.",
-      scope: "personal",
+      visibility: { mode: "private" },
       access: {
         integrations: [
           { integration: "github", tools: ["github_get_issue"] },

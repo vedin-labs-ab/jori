@@ -7,7 +7,7 @@ describe("owned automation invalidation", () => {
 
   test.each([
     ["instructions", { instructions: "New destination." }],
-    ["scope", { scope: "organization" as const }],
+    ["visibility", { visibility: { mode: "organization" as const } }],
     ["access", { access: { integrations: [], web: true } }],
     ["type", { type: "once" as const }],
     [

@@ -1,4 +1,4 @@
-import { type Scope } from "@contracts/permissions/scope"
+import { type VisibilityMode } from "@contracts/permissions/visibility"
 import {
   createContext,
   type ReactNode,
@@ -23,7 +23,7 @@ export type MaterialBreadcrumbSegment = {
 
 export type MaterialBreadcrumb = {
   name: string
-  scope?: Scope
+  visibility?: VisibilityMode
   /** Ancestor segments, root-first. When present, the header links these
    *  instead of the parent surface it derives from the path. */
   trail?: MaterialBreadcrumbSegment[]
@@ -50,16 +50,18 @@ export function useMaterialTrail(material: MaterialBreadcrumb | undefined) {
   }, [material, publish])
 }
 
-/** Publish the material's display name, and optionally its scope, to the
- *  console header breadcrumb for as long as the calling detail view is
+/** Publish the material's display name, and optionally its visibility, to
+ *  the console header breadcrumb for as long as the calling detail view is
  *  mounted. */
 export function useMaterialBreadcrumb(
   name: string,
-  scope?: Scope,
+  visibility?: VisibilityMode,
   menu?: ReactNode
 ) {
   // A menu element gets a fresh identity per caller render, so it triggers
   // a republish each time — harmless, because the shell's children keep
   // their element identity and bail out of the re-render.
-  useMaterialTrail(useMemo(() => ({ name, scope, menu }), [name, scope, menu]))
+  useMaterialTrail(
+    useMemo(() => ({ name, visibility, menu }), [name, visibility, menu])
+  )
 }

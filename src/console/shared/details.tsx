@@ -7,7 +7,6 @@ import {
   UserRound,
 } from "lucide-react"
 import { type ElementType, type ReactNode } from "react"
-import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -234,20 +233,7 @@ export function RelativeTime({
   )
 }
 
-/** Marks organization-scoped entities; personal is the unmarked default. */
-export function ScopeBadge({ scope }: { scope: Scope }) {
-  if (scope !== "organization") {
-    return null
-  }
-
-  return (
-    <Badge className="shrink-0" variant="outline">
-      <Building2 /> {scopeLabels.organization}
-    </Badge>
-  )
-}
-
-/** Who an entity belongs to, as an icon: the organization or one member. */
+/** Who a run belongs to, as an icon: the organization or one member. */
 export function ScopeIcon({
   className,
   scope,

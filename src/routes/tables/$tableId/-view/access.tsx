@@ -27,11 +27,7 @@ export function TableAccess({
           tableId={tableId as GenericId<"collections">}
         />
       )}
-      renderShare={() =>
-        secret === null ? null : (
-          <TableShareView secret={secret} tableId={tableId} />
-        )
-      }
+      renderShare={() => <TableShareView secret={secret} tableId={tableId} />}
       secret={secret}
     />
   )

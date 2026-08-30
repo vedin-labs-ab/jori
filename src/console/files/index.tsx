@@ -17,6 +17,7 @@ import { ConsoleListPager } from "../shared/list/pager"
 import { useClientPagination } from "../shared/list/pagination"
 import { type RowSelection, useRowSelection } from "../shared/list/selection"
 import { useFolderNames } from "../shared/materials/folders"
+import { VisibilityDialog } from "../shared/visibility/dialog"
 import { EditFileDialog } from "./edit"
 import { fileListConfig } from "./list"
 import { FileTable } from "./table"
@@ -67,6 +68,7 @@ function useFilesPage(organizationId: string) {
   const list = useFileList(organizationId)
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [editFile, setEditFile] = useState<FileRow>()
+  const [accessFile, setAccessFile] = useState<FileRow>()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const actions = useFileActions(organizationId, () => setEditFile(undefined))
   const selection = useRowSelection({
@@ -76,12 +78,14 @@ function useFilesPage(organizationId: string) {
 
   return {
     ...list,
+    accessFile,
     actions,
     bulk: useFileBulk(organizationId, selection),
     editFile,
     isUploadOpen,
     moving,
     selection,
+    setAccessFile,
     setEditFile,
     setIsUploadOpen,
     setMoving,
@@ -109,6 +113,7 @@ function FilesView({ organizationId }: { organizationId: string }) {
         folders={page.folders}
         hasFilters={page.hasFilters}
         isLoading={page.isLoading}
+        onAccess={page.setAccessFile}
         onDelete={page.actions.deleteFile}
         onEdit={page.setEditFile}
         onMoveToFolder={(file) => page.setMoving([toMoveTarget(file)])}
@@ -169,6 +174,21 @@ function FilesOverlays({
         }}
         onSave={page.actions.saveFile}
       />
+      {page.accessFile === undefined ? null : (
+        <VisibilityDialog
+          noun="file"
+          onOpenChange={(open) => {
+            if (!open) {
+              page.setAccessFile(undefined)
+            }
+          }}
+          open
+          organizationId={organizationId}
+          ownerId={page.accessFile.ownerId}
+          target={{ kind: "file", id: page.accessFile.fileId }}
+          value={page.accessFile.visibility}
+        />
+      )}
       <MoveResourcesDialog
         onClose={() => page.setMoving(undefined)}
         organizationId={organizationId}

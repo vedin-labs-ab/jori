@@ -1,7 +1,9 @@
 import { v } from "convex/values"
+import { type Doc } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
+import { createSight } from "../visibility/sight"
 import { folderChildren, folderResources, summarizeTree } from "./contents"
 import { filedResourceType, fileResource } from "./filing"
 import { createFolder, moveFolder, removeFolder, renameFolder } from "./records"
@@ -9,6 +11,7 @@ import {
   ancestorPath,
   getOrganizationFolder,
   listOrganizationFolders,
+  requireVisibleFolder,
   summarizeFolder,
 } from "./tree"
 
@@ -30,11 +33,23 @@ export const tree = query({
       }
     }
 
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
+    const sight = createSight(ctx, {
+      organizationId: args.organizationId,
+      personId,
+    })
     const folders = await listOrganizationFolders(ctx, args.organizationId)
+    const visible: Doc<"folders">[] = []
+
+    for (const folder of folders) {
+      if (await sight.canSeeFolder(folder)) {
+        visible.push(folder)
+      }
+    }
 
     return {
       status: "ready" as const,
-      folders: await summarizeTree(ctx, folders),
+      folders: await summarizeTree(ctx, visible),
     }
   },
 })
@@ -55,13 +70,18 @@ export const get = query({
       }
     }
 
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const folder = await getOrganizationFolder(
       ctx,
       args.organizationId,
       args.folderId
     )
+    const sight = createSight(ctx, {
+      organizationId: args.organizationId,
+      personId,
+    })
 
-    if (folder === null) {
+    if (folder === null || !(await sight.canSeeFolder(folder))) {
       return { status: "not_found" as const, folder: null }
     }
 
@@ -95,17 +115,21 @@ export const contents = query({
       }
     }
 
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const folder = await getOrganizationFolder(
       ctx,
       args.organizationId,
       args.folderId
     )
+    const sight = createSight(ctx, {
+      organizationId: args.organizationId,
+      personId,
+    })
 
-    if (folder === null) {
+    if (folder === null || !(await sight.canSeeFolder(folder))) {
       return { status: "not_found" as const, folders: [], resources: [] }
     }
 
-    const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const viewer = { organizationId: args.organizationId, personId }
 
     return {
@@ -171,7 +195,9 @@ export const update = mutation({
     name: v.string(),
   },
   handler: async (ctx, args) => {
-    await ensureCurrentPerson(ctx, args.organizationId)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    await requireVisibleFolder(ctx, { ...args, personId })
 
     return summarizeFolder(await renameFolder(ctx, args))
   },
@@ -184,7 +210,17 @@ export const move = mutation({
     parentId: v.union(v.id("folders"), v.null()),
   },
   handler: async (ctx, args) => {
-    await ensureCurrentPerson(ctx, args.organizationId)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    await requireVisibleFolder(ctx, { ...args, personId })
+
+    if (args.parentId !== null) {
+      await requireVisibleFolder(ctx, {
+        organizationId: args.organizationId,
+        personId,
+        folderId: args.parentId,
+      })
+    }
 
     return summarizeFolder(
       await moveFolder(ctx, {
@@ -202,7 +238,9 @@ export const remove = mutation({
     folderId: v.id("folders"),
   },
   handler: async (ctx, args) => {
-    await ensureCurrentPerson(ctx, args.organizationId)
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    await requireVisibleFolder(ctx, { ...args, personId })
     await removeFolder(ctx, args)
 
     return null

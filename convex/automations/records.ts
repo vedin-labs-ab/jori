@@ -1,9 +1,10 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
-import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
-import { canAccessAutomation } from "./access"
+import { visibilityValidator } from "../visibility/schema"
+import { createSight } from "../visibility/sight"
+import { canSeeAutomation } from "./access"
 import { canExecuteAutomationRunTools } from "./execution"
 import {
   createAutomation,
@@ -29,7 +30,7 @@ export const create = internalMutation({
     expectedParentConfigurationVersion: v.optional(v.number()),
     name: v.string(),
     instructions: v.string(),
-    scope: v.optional(scopeValidator),
+    visibility: v.optional(visibilityValidator),
     access: accessInput,
     type: automationType,
     trigger: triggerInput,
@@ -48,10 +49,16 @@ export const search = internalQuery({
   },
   handler: async (ctx, args) => {
     const automations = await searchAutomations(ctx, args)
+    const sight = createSight(ctx, args)
+    const visible: typeof automations = []
 
-    return automations.filter((automation) =>
-      canAccessAutomation(automation, args.personId)
-    )
+    for (const automation of automations) {
+      if (await canSeeAutomation(sight, automation)) {
+        visible.push(automation)
+      }
+    }
+
+    return visible
   },
 })
 
@@ -67,7 +74,7 @@ export const read = internalQuery({
     if (
       automation === null ||
       automation.organizationId !== args.organizationId ||
-      !canAccessAutomation(automation, args.personId)
+      !(await canSeeAutomation(createSight(ctx, args), automation))
     ) {
       return null
     }
@@ -92,7 +99,7 @@ export const update = internalMutation({
     automationId: v.id("automations"),
     name: v.optional(v.string()),
     instructions: v.optional(v.string()),
-    scope: v.optional(scopeValidator),
+    visibility: v.optional(visibilityValidator),
     access: v.optional(accessInput),
     type: v.optional(automationType),
     trigger: v.optional(triggerInput),
@@ -145,7 +152,7 @@ async function requireRecordAccess(
     args.automationId
   )
 
-  if (!canAccessAutomation(automation, args.personId)) {
+  if (!(await canSeeAutomation(createSight(ctx, args), automation))) {
     throw new Error("Automation not found.")
   }
 }

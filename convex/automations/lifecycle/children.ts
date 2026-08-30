@@ -1,7 +1,8 @@
-import { type Scope } from "../../../contracts/permissions/scope"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type StoredVisibility } from "../../visibility/schema"
+import { automationScope } from "../access"
 import { type AutomationType } from "../schema"
 import { cancelTrigger } from "./trigger"
 
@@ -42,15 +43,17 @@ export async function hasOwnedAutomations(
 
 export async function requireValidOwnershipUpdate(
   ctx: MutationCtx,
-  args: { scope?: Scope; type?: AutomationType },
+  args: { visibility?: StoredVisibility; type?: AutomationType },
   existing: Doc<"automations">
 ) {
   if (
     existing.parentId !== undefined &&
     ((args.type !== undefined && args.type !== "once") ||
-      (args.scope !== undefined && args.scope !== existing.scope))
+      (args.visibility !== undefined &&
+        automationScope({ visibility: args.visibility }) !==
+          automationScope(existing)))
   ) {
-    throw new Error("Owned one-time automations cannot change type or scope.")
+    throw new Error("Owned one-time automations cannot change type or sharing.")
   }
 
   if (

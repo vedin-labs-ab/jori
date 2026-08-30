@@ -25,7 +25,7 @@ describe("table tool dispatch", () => {
       personId: "person",
       name: "Leads",
       description: undefined,
-      scope: "organization",
+      visibility: { mode: "organization" },
       columns,
     })
   })

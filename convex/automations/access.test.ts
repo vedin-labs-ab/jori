@@ -1,9 +1,12 @@
 import { describe, expect, test } from "vitest"
-import { defaultScopeForIntegrations } from "../../contracts/permissions/scope"
+import { defaultVisibilityForIntegrations } from "../../contracts/permissions/visibility"
+import { databaseContext } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
+import { createSight } from "../visibility/sight"
 import {
   type AutomationAccess,
-  canAccessAutomation,
+  automationScope,
+  canSeeAutomation,
   canUseAutomationTool,
   resolveToolAccessLevel,
 } from "./access"
@@ -42,40 +45,70 @@ function automationAccess(
   }
 }
 
-describe("automation scope access", () => {
+describe("automation visibility", () => {
   const me = "me" as Id<"persons">
   const other = "other" as Id<"persons">
 
-  test("organization automations are open to every member", () => {
+  function sightFor(personId: Id<"persons">) {
+    const { ctx } = databaseContext()
+
+    return createSight(ctx, { organizationId: "org", personId })
+  }
+
+  test("organization automations are open to every member", async () => {
     expect(
-      canAccessAutomation(
-        { scope: "organization", principal: { kind: "organization" } },
-        me
-      )
+      await canSeeAutomation(sightFor(me), {
+        organizationId: "org",
+        visibility: { mode: "organization" },
+        principal: { kind: "organization" },
+        createdBy: other,
+      })
     ).toBe(true)
   })
 
-  test("personal automations are principal-owner only", () => {
+  test("private automations are principal-owner only", async () => {
+    const privateOf = (personId: Id<"persons">) => ({
+      organizationId: "org",
+      visibility: { mode: "private" as const },
+      principal: { kind: "person" as const, personId },
+      createdBy: personId,
+    })
+
+    expect(await canSeeAutomation(sightFor(me), privateOf(other))).toBe(false)
+    expect(await canSeeAutomation(sightFor(me), privateOf(me))).toBe(true)
+  })
+
+  test("legacy binary scope still reads", async () => {
     expect(
-      canAccessAutomation(
-        { scope: "personal", principal: { kind: "person", personId: other } },
-        me
-      )
+      await canSeeAutomation(sightFor(me), {
+        organizationId: "org",
+        scope: "personal",
+        principal: { kind: "person", personId: other },
+        createdBy: other,
+      })
     ).toBe(false)
-    expect(
-      canAccessAutomation(
-        { scope: "personal", principal: { kind: "person", personId: me } },
-        me
-      )
-    ).toBe(true)
   })
 
-  test("scope defaults from the tools in play", () => {
-    expect(defaultScopeForIntegrations([])).toBe("personal")
-    expect(defaultScopeForIntegrations(["gmail"])).toBe("personal")
-    expect(defaultScopeForIntegrations(["github", "slack"])).toBe(
-      "organization"
+  test("execution sharing derives from visibility", () => {
+    expect(automationScope({ visibility: { mode: "private" } })).toBe(
+      "personal"
     )
-    expect(defaultScopeForIntegrations(["slack", "gmail"])).toBe("personal")
+    expect(
+      automationScope({ visibility: { mode: "teams", teamIds: ["t1"] } })
+    ).toBe("organization")
+    expect(automationScope({ scope: "personal" })).toBe("personal")
+  })
+
+  test("visibility defaults from the tools in play", () => {
+    expect(defaultVisibilityForIntegrations([])).toEqual({ mode: "private" })
+    expect(defaultVisibilityForIntegrations(["gmail"])).toEqual({
+      mode: "private",
+    })
+    expect(defaultVisibilityForIntegrations(["github", "slack"])).toEqual({
+      mode: "organization",
+    })
+    expect(defaultVisibilityForIntegrations(["slack", "gmail"])).toEqual({
+      mode: "private",
+    })
   })
 })

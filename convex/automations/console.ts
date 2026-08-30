@@ -5,9 +5,10 @@ import { checkOrganizationAccess } from "../access"
 import { requireUserId } from "../access/users"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { resolvePersonByIdentity } from "../persons/identity/links"
-import { scopeValidator } from "../shared/audience"
 import { type QueryLikeCtx } from "../shared/context"
-import { canAccessAutomation } from "./access"
+import { visibilityValidator } from "../visibility/schema"
+import { createSight } from "../visibility/sight"
+import { canSeeAutomation } from "./access"
 import { toAutomationDisplay } from "./display"
 import {
   createAutomation,
@@ -52,12 +53,22 @@ export const list = query({
       limit: maxSearchResults,
     })
 
+    const sight = createSight(ctx, {
+      organizationId: args.organizationId,
+      personId,
+    })
+    const visible: typeof automations = []
+
+    for (const automation of automations) {
+      if (await canSeeAutomation(sight, automation)) {
+        visible.push(automation)
+      }
+    }
+
     return {
       status: "ready" as const,
       automations: await Promise.all(
-        automations
-          .filter((automation) => canAccessAutomation(automation, personId))
-          .map((automation) => toAutomationDisplay(ctx, automation))
+        visible.map((automation) => toAutomationDisplay(ctx, automation))
       ),
     }
   },
@@ -83,7 +94,7 @@ export const create = mutation({
     organizationId: v.string(),
     name: v.string(),
     instructions: v.string(),
-    scope: v.optional(scopeValidator),
+    visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     access: automationSchema.accessInput,
     type: automationSchema.automationType,
@@ -106,7 +117,7 @@ export const update = mutation({
     automationId: v.id("automations"),
     name: v.string(),
     instructions: v.string(),
-    scope: v.optional(scopeValidator),
+    visibility: v.optional(visibilityValidator),
     access: automationSchema.accessInput,
     type: v.optional(automationSchema.automationType),
     trigger: v.optional(automationSchema.triggerInput),
@@ -185,7 +196,7 @@ export const run = mutation({
   },
 })
 
-/** Ownership rule on top of organization access: personal automations are owner-only. */
+/** Visibility rule on top of organization access: the resolver decides. */
 async function requireAccessibleAutomation(
   ctx: QueryLikeCtx,
   args: { organizationId: string; automationId: Doc<"automations">["_id"] },
@@ -196,8 +207,12 @@ async function requireAccessibleAutomation(
     args.organizationId,
     args.automationId
   )
+  const sight = createSight(ctx, {
+    organizationId: args.organizationId,
+    personId,
+  })
 
-  if (!canAccessAutomation(automation, personId)) {
+  if (!(await canSeeAutomation(sight, automation))) {
     throw new Error("Automation not found.")
   }
 

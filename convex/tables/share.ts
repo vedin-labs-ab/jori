@@ -9,18 +9,18 @@ import {
   mutation,
   query,
 } from "../_generated/server"
-import { canAccessCollection } from "../collections/access"
 import { pageDocuments } from "../collections/documents"
 import {
   type MintedShare,
   mintShare,
-  openShare,
+  openMaterialRead,
   pageShares,
   revokeShare,
   type ShareTarget,
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
+import { createSight } from "../visibility/sight"
 import { getAccessibleTable, summarizeRow } from "./access"
 
 export const mint = internalMutation({
@@ -78,10 +78,11 @@ export const page = query({
   },
 })
 
-/** Anonymous share read: the secret is the whole credential. Returns null on
- *  every failure so callers cannot probe which tables exist. */
+/** Anonymous read: a share secret or the table's own public visibility is
+ *  the whole credential. Returns null on every failure so callers cannot
+ *  probe which tables exist. */
 export const get = query({
-  args: { tableId: v.string(), secret: v.string() },
+  args: { tableId: v.string(), secret: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const opened = await openTableShare(ctx, args)
 
@@ -93,7 +94,9 @@ export const get = query({
       name: opened.table.name,
       description: opened.table.description,
       columns: readStoredColumns(opened.table.columns),
-      expiresAt: opened.share.expiresAt,
+      access: opened.read.access,
+      expiresAt:
+        opened.read.access === "share" ? opened.read.expiresAt : undefined,
     }
   },
 })
@@ -103,7 +106,7 @@ export const get = query({
 export const rows = query({
   args: {
     tableId: v.string(),
-    secret: v.string(),
+    secret: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
@@ -165,11 +168,12 @@ export async function revokeTableShare(
   })
 }
 
-/** Resolve a share link to its table: secret, expiry, organization, archive
- *  state, and the creator's continued access all checked on every read. */
+/** Resolve an anonymous read to its table: a share link's secret, expiry,
+ *  organization, archive state, and the creator's continued access all
+ *  checked on every read — or the table's own public visibility. */
 export async function openTableShare(
   ctx: QueryLikeCtx,
-  args: { tableId: string; secret: string }
+  args: { tableId: string; secret?: string }
 ) {
   const tableId = ctx.db.normalizeId("collections", args.tableId)
   const table = tableId === null ? null : await ctx.db.get(tableId)
@@ -178,14 +182,18 @@ export async function openTableShare(
     return null
   }
 
-  const share = await openShare(ctx, {
+  const read = await openMaterialRead(ctx, {
     target: tableTarget(table._id),
     material: table,
-    creatorHasAccess: (createdBy) => canAccessCollection(table, createdBy),
+    creatorHasAccess: (createdBy) =>
+      createSight(ctx, {
+        organizationId: table.organizationId,
+        personId: createdBy,
+      }).canSee(table),
     secret: args.secret,
   })
 
-  return share === null ? null : { table, share }
+  return read === null ? null : { table, read }
 }
 
 function tableTarget(tableId: Id<"collections">): ShareTarget {

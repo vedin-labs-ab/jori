@@ -46,7 +46,9 @@ describe("opening a store share", () => {
     const opened = await openStoreShare(ctx, { storeId, secret: "s3cret" })
 
     expect(opened?.store.name).toBe("Settings")
-    expect(opened?.share.expiresAt).toBeGreaterThan(Date.now())
+    expect(
+      opened?.read.access === "share" ? opened.read.expiresAt : 0
+    ).toBeGreaterThan(Date.now())
   })
 
   test("returns null on a bad secret, expiry, or archived store", async () => {

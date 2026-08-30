@@ -1,15 +1,15 @@
+import { type VisibilityMode } from "../../contracts/permissions/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { canAccessAutomation } from "../automations/access"
-import { canAccessCollection } from "../collections/access"
-import { canViewFile } from "../files/data"
+import { canSeeAutomation } from "../automations/access"
 import { type QueryLikeCtx } from "../shared/context"
+import { readVisibility } from "../visibility/schema"
+import { createSight, type Sight } from "../visibility/sight"
 import { filedTables } from "./filing"
 import { summarizeFolder, treeCap } from "./tree"
 
 // A folder's listing: subfolders plus the filed resources the caller may
-// see. Folders carry no access of their own, so each resource type applies
-// its domain's predicate — a personal resource filed by its owner simply
-// does not appear for anyone else.
+// see. One Sight per request answers every row — a resource whose own
+// visibility or ancestor folders exclude the caller simply does not appear.
 
 /** Per-type ceiling on one folder's listed resources; generous because a
  *  folder is a curated shelf, not an archive — no cross-type pagination. */
@@ -25,7 +25,7 @@ export type FolderResource = {
   type: "table" | "store" | "file" | "automation"
   id: Id<"collections"> | Id<"files"> | Id<"automations">
   name: string
-  scope: "organization" | "personal"
+  visibility: VisibilityMode
   updatedAt: number
   mimeType?: string
   size?: number
@@ -52,19 +52,26 @@ export async function folderChildren(
         .eq("parentId", args.parentId)
     )
     .take(treeCap)
+  const sight = createSight(ctx, args)
+  const counted = []
 
-  return (
-    await Promise.all(children.map((child) => countChild(ctx, args, child)))
-  ).sort(byName)
+  for (const child of children) {
+    if (await sight.canSeeFolder(child)) {
+      counted.push(await countChild(ctx, sight, child))
+    }
+  }
+
+  return counted.sort(byName)
 }
 
 /** Direct children only, deliberately: a deep total would be neither cheap
- *  nor what a click shows. Resource counts run through folderResources, so
- *  archived collections and other people's personal resources stay out of
- *  the number exactly as they stay out of the listing. */
+ *  nor what a click shows. Resource counts run through the same Sight the
+ *  child's own listing would use, so archived collections and materials the
+ *  viewer may not see stay out of the number exactly as they stay out of
+ *  the listing. */
 async function countChild(
   ctx: QueryLikeCtx,
-  viewer: { organizationId: string; personId: Id<"persons"> },
+  sight: Sight,
   child: Doc<"folders">
 ) {
   const subfolders = await ctx.db
@@ -73,11 +80,16 @@ async function countChild(
       index.eq("organizationId", child.organizationId).eq("parentId", child._id)
     )
     .take(treeCap)
-  const resources = await folderResources(ctx, {
-    ...viewer,
-    folderId: child._id,
-  })
-  const folderCount = subfolders.length
+  const visibleSubfolders = []
+
+  for (const subfolder of subfolders) {
+    if (await sight.canSeeFolder(subfolder)) {
+      visibleSubfolders.push(subfolder)
+    }
+  }
+
+  const resources = await sightedResources(ctx, sight, child._id)
+  const folderCount = visibleSubfolders.length
   const resourceCount = resources.length
 
   return {
@@ -142,10 +154,18 @@ export async function folderResources(
   ctx: QueryLikeCtx,
   args: Viewer
 ): Promise<FolderResource[]> {
+  return await sightedResources(ctx, createSight(ctx, args), args.folderId)
+}
+
+async function sightedResources(
+  ctx: QueryLikeCtx,
+  sight: Sight,
+  folderId: Id<"folders">
+): Promise<FolderResource[]> {
   const resources = [
-    ...(await folderCollections(ctx, args)),
-    ...(await folderFiles(ctx, args)),
-    ...(await folderAutomations(ctx, args)),
+    ...(await folderCollections(ctx, sight, folderId)),
+    ...(await folderFiles(ctx, sight, folderId)),
+    ...(await folderAutomations(ctx, sight, folderId)),
   ]
 
   return resources.sort(byName)
@@ -155,74 +175,83 @@ export async function folderResources(
  *  views; restoring one brings it back to its folder. */
 async function folderCollections(
   ctx: QueryLikeCtx,
-  args: Viewer
+  sight: Sight,
+  folderId: Id<"folders">
 ): Promise<FolderResource[]> {
   const rows = await ctx.db
     .query("collections")
-    .withIndex("by_folder", (index) => index.eq("folderId", args.folderId))
+    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
     .take(contentsCap)
+  const listed: FolderResource[] = []
 
-  return rows
-    .filter(
-      (row) =>
-        row.organizationId === args.organizationId &&
-        row.archivedAt === undefined &&
-        canAccessCollection(row, args.personId)
-    )
-    .map((row) => ({
-      type: row.kind === "table" ? ("table" as const) : ("store" as const),
-      id: row._id,
-      name: row.name,
-      scope: row.scope,
-      updatedAt: row.updatedAt,
-    }))
+  for (const row of rows) {
+    if (row.archivedAt === undefined && (await sight.canSee(row))) {
+      listed.push({
+        type: row.kind === "table" ? "table" : "store",
+        id: row._id,
+        name: row.name,
+        visibility: readVisibility(row).mode,
+        updatedAt: row.updatedAt,
+      })
+    }
+  }
+
+  return listed
 }
 
 async function folderFiles(
   ctx: QueryLikeCtx,
-  args: Viewer
+  sight: Sight,
+  folderId: Id<"folders">
 ): Promise<FolderResource[]> {
   const rows = await ctx.db
     .query("files")
-    .withIndex("by_folder", (index) => index.eq("folderId", args.folderId))
+    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
     .take(contentsCap)
+  const listed: FolderResource[] = []
 
-  return rows
-    .filter((row) => canViewFile(row, args))
-    .map((row) => ({
-      type: "file" as const,
-      id: row._id,
-      name: row.name,
-      scope: row.scope,
-      updatedAt: row.updatedAt,
-      mimeType: row.mimeType,
-      size: row.size,
-    }))
+  for (const row of rows) {
+    if (await sight.canSee(row)) {
+      listed.push({
+        type: "file",
+        id: row._id,
+        name: row.name,
+        visibility: readVisibility(row).mode,
+        updatedAt: row.updatedAt,
+        mimeType: row.mimeType,
+        size: row.size,
+      })
+    }
+  }
+
+  return listed
 }
 
 async function folderAutomations(
   ctx: QueryLikeCtx,
-  args: Viewer
+  sight: Sight,
+  folderId: Id<"folders">
 ): Promise<FolderResource[]> {
   const rows = await ctx.db
     .query("automations")
-    .withIndex("by_folder", (index) => index.eq("folderId", args.folderId))
+    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
     .take(contentsCap)
+  const listed: FolderResource[] = []
 
-  return rows
-    .filter(
-      (row) =>
-        row.organizationId === args.organizationId &&
-        canAccessAutomation(row, args.personId)
-    )
-    .map((row) => ({
-      type: "automation" as const,
-      id: row._id,
-      name: row.name,
-      scope: row.scope,
-      updatedAt: row.updatedAt,
-      status: row.status,
-    }))
+  for (const row of rows) {
+    if (await canSeeAutomation(sight, row)) {
+      listed.push({
+        type: "automation",
+        id: row._id,
+        name: row.name,
+        visibility: readVisibility(row).mode,
+        updatedAt: row.updatedAt,
+        status: row.status,
+      })
+    }
+  }
+
+  return listed
 }
 
 function byName(left: { name: string }, right: { name: string }) {

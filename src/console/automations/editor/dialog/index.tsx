@@ -13,7 +13,7 @@ import {
 import { api } from "../../../../../convex/_generated/api"
 import { FolderField } from "../../../folders/field"
 import { DialogForm } from "../../../shared/materials/form"
-import { ScopeField } from "../../../shared/scope/field"
+import { VisibilityField } from "../../../shared/visibility/field"
 import { getAutomationScopeConflict } from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
 import { type Automation, type AutomationFormValues } from "../../types"
@@ -23,6 +23,7 @@ import {
 } from "../errors"
 import { readAdditionalAutomationSurfaces } from "../instructions/document"
 import { writeAutomationWebSearchPreference } from "../preferences"
+import { derivedScope } from "../save"
 import { AccessFields } from "./access"
 import { AutomationContextSection } from "./context"
 import { AutomationInstructionsSection } from "./instructions"
@@ -164,16 +165,14 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         onValueChange={props.actions.updateName}
         value={props.values.name}
       />
-      <ScopeField
-        help={{
-          organization:
-            "everyone can manage it. Runs use organization context and shared integrations only.",
-          personal:
-            "only you can manage it. Runs use your context and connected accounts.",
-        }}
-        id="automation-scope"
-        onValueChange={props.actions.updateScope}
-        value={props.values.scope}
+      <VisibilityField
+        allowPublic={false}
+        help="Only-me automations run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
+        id="automation-visibility"
+        noun="automation"
+        onChange={props.actions.updateVisibility}
+        organizationId={props.organizationId}
+        value={props.values.visibility}
       />
       {/* Creation-only: existing automations move through the folder
           surfaces, so edits keep the field out of the way. */}
@@ -251,8 +250,8 @@ function createDialogActions(
       surfaces: AutomationFormValues["surfaces"]
     ) => updateValues({ instructions, surfaces }),
     updateName: (name: string) => updateValues({ name }),
-    updateScope: (scope: AutomationFormValues["scope"]) =>
-      updateValues({ scope }),
+    updateVisibility: (visibility: AutomationFormValues["visibility"]) =>
+      updateValues({ visibility, scope: derivedScope(visibility) }),
     updateWebSearch: (webSearch: boolean) => {
       writeAutomationWebSearchPreference(webSearch)
       updateValues({ webSearch })
