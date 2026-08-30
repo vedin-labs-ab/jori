@@ -153,7 +153,6 @@ function StoreReadyView({
 
   useMaterialBreadcrumb(
     store.name,
-    store.visibility.mode,
     <StoreTitleMenu
       onAccess={() => setIsAccessOpen(true)}
       onDelete={removeAndLeaveWhenDeleted}

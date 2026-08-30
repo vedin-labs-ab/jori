@@ -1,9 +1,10 @@
-import { Check, ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
+  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -75,28 +76,30 @@ export function GrantPicker({
           <CommandInput placeholder={placeholder} />
           <CommandList>
             <CommandEmpty>No matches.</CommandEmpty>
-            {(options ?? []).map((option) => (
-              <CommandItem
-                key={option.id}
-                keywords={[option.name]}
-                onSelect={() => onToggle(option.id)}
-                value={option.id}
-              >
-                <Avatar className="size-5">
-                  <AvatarImage alt="" src={option.image} />
-                  <AvatarFallback className="text-[9px]">
-                    {initials(option.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate">{option.name}</span>
-                {option.hint === undefined ? null : (
-                  <span className="text-muted-foreground text-xs">
-                    {option.hint}
-                  </span>
-                )}
-                {chosen.has(option.id) ? <Check className="ml-auto" /> : null}
-              </CommandItem>
-            ))}
+            <CommandGroup>
+              {(options ?? []).map((option) => (
+                <CommandItem
+                  data-checked={chosen.has(option.id)}
+                  key={option.id}
+                  keywords={[option.name]}
+                  onSelect={() => onToggle(option.id)}
+                  value={option.id}
+                >
+                  <Avatar className="size-5">
+                    <AvatarImage alt="" src={option.image} />
+                    <AvatarFallback className="text-[9px]">
+                      {initials(option.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="truncate">{option.name}</span>
+                  {option.hint === undefined ? null : (
+                    <span className="text-muted-foreground text-xs">
+                      {option.hint}
+                    </span>
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
