@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, Check, Filter } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,16 +24,12 @@ import {
   toggledFacet,
 } from "./controls"
 
-// Header-embedded list controls: every control is a compact ghost button
-// living inside the header cell itself — no toolbar rows.
-
-// text-xs matches the table's own type scale — the Button default of
-// text-sm made these headers shout next to plain TableHead cells.
-const headButtonClassName =
-  "h-10 justify-start gap-1.5 rounded-none px-2 font-medium text-xs"
+// Header-embedded list controls: each header cell houses a small stock
+// ghost button — the cell itself is not the control. The negative margin
+// keeps the button's label on the table's text grid.
 
 /** Sortable header: the label is the button and clicking cycles the sort.
- *  A column that also filters renders a trailing facet menu icon-button. */
+ *  A column that also filters renders a trailing facet menu button. */
 export function SortHead({
   controls,
   facets,
@@ -49,10 +45,10 @@ export function SortHead({
     controls.sort?.key === sortKey ? controls.sort.direction : undefined
 
   return (
-    <TableHead aria-sort={ariaSort(direction)} className="p-0">
-      <div className="flex items-center">
+    <TableHead aria-sort={ariaSort(direction)}>
+      <div className="-ml-2 flex items-center gap-0.5">
         <Button
-          className={headButtonClassName}
+          className="font-medium"
           onClick={() => controls.toggleSort(sortKey)}
           type="button"
           variant="ghost"
@@ -64,7 +60,7 @@ export function SortHead({
           <FacetMenu controls={controls} facets={facets}>
             <Button
               aria-label={`Filter by ${facetLabels(facets)}`}
-              className="h-10 gap-1 rounded-none px-1.5"
+              className="px-1.5"
               type="button"
               variant="ghost"
             >
@@ -88,13 +84,15 @@ export function FilterHead({
   label: string
 }) {
   return (
-    <TableHead className="p-0">
-      <FacetMenu controls={controls} facets={facets}>
-        <Button className={headButtonClassName} type="button" variant="ghost">
-          {label}
-          <FilterMark controls={controls} facets={facets} />
-        </Button>
-      </FacetMenu>
+    <TableHead>
+      <div className="-ml-2 flex items-center">
+        <FacetMenu controls={controls} facets={facets}>
+          <Button className="font-medium" type="button" variant="ghost">
+            {label}
+            <FilterMark controls={controls} facets={facets} />
+          </Button>
+        </FacetMenu>
+      </div>
     </TableHead>
   )
 }
@@ -199,6 +197,7 @@ function FacetSection({
       </CommandItem>
       {facet.options.map((option) => (
         <CommandItem
+          data-checked={selection.includes(option.value)}
           key={option.value}
           onSelect={() =>
             controls.setFacet(
@@ -212,12 +211,6 @@ function FacetSection({
             <option.icon className="text-muted-foreground" />
           )}
           {option.label}
-          <Check
-            className={cn(
-              "ml-auto",
-              selection.includes(option.value) ? "opacity-100" : "opacity-0"
-            )}
-          />
         </CommandItem>
       ))}
     </CommandGroup>
