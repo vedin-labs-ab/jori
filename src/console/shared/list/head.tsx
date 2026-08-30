@@ -28,6 +28,14 @@ import {
 // ghost button — the cell itself is not the control. The negative margin
 // keeps the button's label on the table's text grid.
 
+// An active sort or filter keeps the ghost hover background, so what is
+// shaping the list stays marked after the pointer leaves.
+const activeClassName = "bg-muted text-foreground dark:bg-muted/50"
+
+function isFiltering(controls: ListControls, facets: FacetEntry[]) {
+  return facets.some((facet) => controls.isFacetActive(facet.key))
+}
+
 /** Sortable header: the label is the button and clicking cycles the sort.
  *  A column that also filters renders a trailing facet menu button. */
 export function SortHead({
@@ -48,7 +56,10 @@ export function SortHead({
     <TableHead aria-sort={ariaSort(direction)}>
       <div className="-ml-2 flex items-center gap-0.5">
         <Button
-          className="font-medium"
+          className={cn(
+            "font-medium",
+            direction !== undefined && activeClassName
+          )}
           onClick={() => controls.toggleSort(sortKey)}
           type="button"
           variant="ghost"
@@ -60,7 +71,10 @@ export function SortHead({
           <FacetMenu controls={controls} facets={facets}>
             <Button
               aria-label={`Filter by ${facetLabels(facets)}`}
-              className="px-1.5"
+              className={cn(
+                "px-1.5",
+                isFiltering(controls, facets) && activeClassName
+              )}
               type="button"
               variant="ghost"
             >
@@ -87,7 +101,14 @@ export function FilterHead({
     <TableHead>
       <div className="-ml-2 flex items-center">
         <FacetMenu controls={controls} facets={facets}>
-          <Button className="font-medium" type="button" variant="ghost">
+          <Button
+            className={cn(
+              "font-medium",
+              isFiltering(controls, facets) && activeClassName
+            )}
+            type="button"
+            variant="ghost"
+          >
             {label}
             <FilterMark controls={controls} facets={facets} />
           </Button>
@@ -141,7 +162,7 @@ function FilterMark({
         )}
       />
       {isActive && count > 0 ? (
-        <span className="text-foreground tabular-nums">{count}</span>
+        <span className="text-muted-foreground tabular-nums">{count}</span>
       ) : null}
     </>
   )
