@@ -8,6 +8,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { type SettingsDialogView } from "./types"
 
 type SettingsNavigationProps<Value extends string> = {
@@ -25,7 +27,7 @@ function SettingsSidebar<Value extends string>({
 }: SettingsNavigationProps<Value>) {
   return (
     <Sidebar className="hidden h-full border-r md:flex" collapsible="none">
-      <SidebarContent className="pt-2">
+      <SidebarContent className={cn(scrollFade, "pt-2")}>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu aria-label={label}>

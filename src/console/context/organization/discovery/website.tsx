@@ -9,6 +9,8 @@ import {
 import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { type OrganizationDiscovery } from "../types"
 import { DiscoveryProgress } from "./progress"
 import { discoveryFailed, discoveryReadyForReview } from "./progress/tasks"
@@ -119,7 +121,12 @@ export function DiscoveryWorkingStep({
         <DialogTitle>{workingTitle({ failed, ready })}</DialogTitle>
         <DialogDescription>{workingDescription(discovery)}</DialogDescription>
       </DialogHeader>
-      <div className="max-h-64 overflow-y-auto pr-1 [scrollbar-gutter:stable]">
+      <div
+        className={cn(
+          scrollFade,
+          "max-h-64 overflow-y-auto pr-1 [scrollbar-gutter:stable]"
+        )}
+      >
         {starting ? (
           <StartingExtraction />
         ) : (

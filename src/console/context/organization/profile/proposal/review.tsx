@@ -1,4 +1,6 @@
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { websiteItems } from "../../discovery/url"
 import {
   type ContextFacts,
@@ -46,7 +48,9 @@ export function ProposalReviewBody({
     sources.length + proposedSources.length > 0
 
   return (
-    <div className="grid max-h-[60vh] gap-5 overflow-y-auto pr-1">
+    <div
+      className={cn(scrollFade, "grid max-h-[60vh] gap-5 overflow-y-auto pr-1")}
+    >
       <OptionalSummary
         current={approved}
         proposed={proposed}

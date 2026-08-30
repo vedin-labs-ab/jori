@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { scrollFade } from "@/shared/fade"
 import { SidebarFolders } from "../folders/section"
 import { SidebarUserButton } from "./account"
 import { SidebarOrganizationSwitcher } from "./organization"
@@ -28,7 +29,7 @@ export function ConsoleSidebar({ pathname }: { pathname: string }) {
       <SidebarHeader>
         <SidebarOrganizationSwitcher />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className={scrollFade}>
         {consoleNavigation.map((group, index) => (
           <SidebarGroup key={group.label ?? index}>
             {group.label === undefined ? null : (

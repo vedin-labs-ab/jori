@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { DialogForm } from "../../shared/materials/form"
 import { type TableColumn, type TableRow } from "../types"
 import { buildRowValues, type RowDraft } from "./cells"
@@ -68,7 +70,12 @@ export function AddRowDialog({
           disabled={!built.ok || isSaving}
           onSubmit={() => void submit()}
         >
-          <div className="grid max-h-[60vh] gap-4 overflow-y-auto">
+          <div
+            className={cn(
+              scrollFade,
+              "grid max-h-[60vh] gap-4 overflow-y-auto"
+            )}
+          >
             {columns.map((column) => (
               <RowField
                 column={column}

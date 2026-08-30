@@ -12,6 +12,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { CopyableCodeBlock } from "../../shared/copy"
 import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
@@ -60,7 +62,12 @@ function DetailBody({ place }: { place: Place }) {
         )}
         <PlaceMeta place={place} />
       </SheetHeader>
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
+      <div
+        className={cn(
+          scrollFade,
+          "flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4"
+        )}
+      >
         {placeSections.map((section) => (
           <ClaimSection key={section} place={place} section={section} />
         ))}

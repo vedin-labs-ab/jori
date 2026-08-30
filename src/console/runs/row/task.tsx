@@ -1,4 +1,6 @@
 import { ClipboardList } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import {
   CodeBlockDetail,
   codeBlockContentClassName,
@@ -25,7 +27,7 @@ export function TaskDetail({
 
   return (
     <CodeBlockDetail
-      contentClassName={codeBlockContentClassName}
+      contentClassName={cn(scrollFade, codeBlockContentClassName)}
       icon={ClipboardList}
       label="Task"
       value={task}

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
+import { scrollFadeViewport } from "@/shared/fade"
 import { SeparatorDot } from "../dot"
 import {
   accessLabel,
@@ -51,7 +52,12 @@ export function ToolGroupSection({
         </div>
         {action}
       </div>
-      <ScrollArea className="max-h-[250px] rounded-md border [&>[data-slot=scroll-area-viewport]]:max-h-[250px]">
+      <ScrollArea
+        className={cn(
+          scrollFadeViewport,
+          "max-h-[250px] rounded-md border [&>[data-slot=scroll-area-viewport]]:max-h-[250px]"
+        )}
+      >
         {children}
       </ScrollArea>
     </section>

@@ -1,5 +1,7 @@
 import { useQuery } from "convex/react"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { scrollFadeX } from "@/shared/fade"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
 import { useShareExpired } from "./share"
@@ -55,7 +57,12 @@ function SharedJson({ empty, value }: { empty: string; value: unknown }) {
   }
 
   return (
-    <pre className="overflow-x-auto rounded-md border bg-muted/50 p-3 font-mono text-xs leading-relaxed">
+    <pre
+      className={cn(
+        scrollFadeX,
+        "overflow-x-auto rounded-md border bg-muted/50 p-3 font-mono text-xs leading-relaxed"
+      )}
+    >
       {JSON.stringify(value, null, 2)}
     </pre>
   )
