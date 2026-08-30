@@ -161,8 +161,12 @@ function MaterialName({ material }: { material: MaterialBreadcrumb }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* Zero horizontal padding at rest keeps the breadcrumb's gaps
+            optically even; hovering (or opening) grows the padding so the
+            ghost background reads as the new edge, with the Button's own
+            transition smoothing the shift. */}
         <Button
-          className="min-w-0 gap-1 px-1.5 text-foreground"
+          className="min-w-0 gap-1 px-0 text-foreground hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5"
           type="button"
           variant="ghost"
         >
