@@ -1,5 +1,5 @@
 import { type JsonSchemaObject } from "../../contracts/schema/validate"
-import { type TableColumn } from "../../contracts/tables/columns"
+import { type StoredTableColumn } from "../../contracts/tables/columns"
 import { type Doc } from "../_generated/dataModel"
 
 // The core stays kind-agnostic: everything a table or store does
@@ -15,7 +15,7 @@ export type CollectionDoc<K extends CollectionKind = CollectionKind> = Extract<
 /** The kind-native authoring schema, as stored on the collection. */
 export type CollectionAuthoring<K extends CollectionKind = CollectionKind> =
   Extract<
-    | { kind: "table"; columns: TableColumn[] }
+    | { kind: "table"; columns: StoredTableColumn[] }
     | { kind: "store"; schema: JsonSchemaObject },
     { kind: K }
   >

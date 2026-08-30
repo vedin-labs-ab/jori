@@ -100,7 +100,7 @@ export function useRowWrites(
     return inserted === null ? null : (inserted as TableRow).rowId
   }
 
-  async function updateCell(row: TableRow, key: string, value: unknown) {
+  async function updateCell(row: TableRow, columnId: string, value: unknown) {
     setPendingRowId(row.rowId)
 
     const outcome = await run(
@@ -109,7 +109,7 @@ export function useRowWrites(
           organizationId,
           tableId,
           rowId: row.rowId,
-          values: { [key]: value ?? null },
+          values: { [columnId]: value ?? null },
           expectedVersion: row.version,
         }),
       "Could not update the row."

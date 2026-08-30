@@ -7,10 +7,10 @@ import { normalizeTableColumns } from "./columns"
 import { compileTableSchema } from "./compile"
 
 const columns = normalizeTableColumns([
-  { key: "title", type: "string", required: true },
-  { key: "count", type: "integer" },
-  { key: "score", type: "float" },
-  { key: "done", type: "boolean" },
+  { id: "title", name: "Title", type: "string", required: true },
+  { id: "count", name: "Count", type: "integer" },
+  { id: "score", name: "Score", type: "float" },
+  { id: "done", name: "Done", type: "boolean" },
 ])
 
 const schema = compileTableSchema(columns)
@@ -22,7 +22,7 @@ function issues(values: unknown) {
 }
 
 describe("compileTableSchema", () => {
-  test("maps columns to a closed object schema with required keys", () => {
+  test("maps columns to a closed object schema keyed by hidden id", () => {
     expect(schema).toEqual({
       type: "object",
       additionalProperties: false,
@@ -39,7 +39,7 @@ describe("compileTableSchema", () => {
   test("omits required entirely when every column is optional", () => {
     expect(
       compileTableSchema(
-        normalizeTableColumns([{ key: "note", type: "string" }])
+        normalizeTableColumns([{ id: "note", name: "Note", type: "string" }])
       )
     ).toEqual({
       type: "object",

@@ -1,4 +1,4 @@
-import { type TableColumn } from "../../contracts/tables/columns"
+import { readStoredColumns } from "../../contracts/tables/columns"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   findAccessibleCollection,
@@ -49,7 +49,7 @@ export function summarizeTable(table: TableDoc) {
     scope: table.scope,
     ownerId: table.ownerId,
     folderId: table.folderId,
-    columns: table.columns as TableColumn[],
+    columns: readStoredColumns(table.columns),
     rowCount: table.documentCount ?? 0,
     createdAt: table.createdAt,
     updatedAt: table.updatedAt,

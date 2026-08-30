@@ -70,7 +70,7 @@ describe("create table enter submission", () => {
     expect(createTable).not.toHaveBeenCalled()
   })
 
-  test("Enter in a named form creates the table with the starter column", async () => {
+  test("Enter in a named form creates the table with no columns", async () => {
     renderDialog()
     fillName()
     pressEnter(screen.getByLabelText("Name"))
@@ -80,8 +80,8 @@ describe("create table enter submission", () => {
       organizationId: "org-1",
       name: "Invoices",
       folderId: undefined,
-      columns: [{ key: "name", name: "Name", type: "string" }],
     })
+    expect(createTable.mock.calls[0]?.[0]).not.toHaveProperty("columns")
   })
 })
 

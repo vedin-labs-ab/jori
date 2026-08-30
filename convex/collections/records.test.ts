@@ -26,13 +26,18 @@ describe("creating a collection", () => {
     const created = await createCollection(ctx, tableSpec, {
       ...principal,
       name: "  Leads  ",
-      authoring: [{ key: "title", type: "string", required: true }],
+      authoring: [{ name: "Title", type: "string", required: true }],
     })
 
     expect(created.name).toBe("Leads")
     expect(created.kind).toBe("table")
     expect(created.columns).toEqual([
-      { key: "title", name: "title", type: "string", required: true },
+      {
+        id: expect.stringMatching(/^c_/),
+        name: "Title",
+        type: "string",
+        required: true,
+      },
     ])
     expect(created.schemaHash).toMatch(/./)
     expect(created.scope).toBe("organization")
@@ -47,7 +52,7 @@ describe("creating a collection", () => {
       ...principal,
       name: "Leads",
       folderId: folderId as Id<"folders">,
-      authoring: [{ key: "title", type: "string" }],
+      authoring: [{ name: "Title", type: "string" }],
     })
 
     expect(created.folderId).toBe(folderId)
@@ -65,7 +70,7 @@ describe("creating a collection", () => {
         ...principal,
         name: "Leads",
         folderId: foreignFolder as Id<"folders">,
-        authoring: [{ key: "title", type: "string" }],
+        authoring: [{ name: "Title", type: "string" }],
       })
     ).rejects.toThrow("Folder was not found.")
   })
@@ -77,7 +82,7 @@ describe("updating a collection", () => {
     const created = await createCollection(ctx, tableSpec, {
       ...principal,
       name: "Leads",
-      authoring: [{ key: "title", type: "string" }],
+      authoring: [{ id: "title", name: "Title", type: "string" }],
     })
     // The in-memory database returns live references, so remember the hash
     // before the update mutates the stored document.
@@ -87,23 +92,24 @@ describe("updating a collection", () => {
       updateCollection(ctx, tableSpec, {
         ...principal,
         collectionId: created._id,
-        authoring: [{ key: "renamed", type: "string" }],
+        authoring: [{ id: "title", name: "Title", type: "float" }],
       })
-    ).rejects.toThrow("cannot be removed")
+    ).rejects.toThrow("keeps its string type")
 
     const updated = await updateCollection(ctx, tableSpec, {
       ...principal,
       collectionId: created._id,
       authoring: [
-        { key: "title", type: "string" },
-        { key: "count", type: "integer" },
+        { id: "title", name: "Renamed", type: "string" },
+        { id: "count", name: "Count", type: "integer" },
       ],
     })
 
-    expect(updated?.columns.map((column) => column.key)).toEqual([
+    expect(updated?.columns.map((column) => column.id)).toEqual([
       "title",
       "count",
     ])
+    expect(updated?.columns[0]?.name).toBe("Renamed")
     expect(updated?.schemaHash).not.toBe(createdHash)
   })
 })

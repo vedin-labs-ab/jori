@@ -1,87 +1,123 @@
 import { describe, expect, test } from "vitest"
-import { assertColumnEvolution, normalizeTableColumns } from "./columns"
+import {
+  assertColumnEvolution,
+  newColumnId,
+  normalizeTableColumns,
+  readStoredColumns,
+} from "./columns"
 
 describe("normalizeTableColumns", () => {
-  test("normalizes keys, names, and flags", () => {
+  test("normalizes names and flags, keeping given ids", () => {
     expect(
       normalizeTableColumns([
-        { key: "title", name: " Title ", type: "string", required: true },
-        { key: "count", type: "integer" },
-        { key: "score", type: "float" },
+        { id: "title", name: " Title ", type: "string", required: true },
+        { id: "count", name: "Count", type: "integer" },
+        { id: "score", name: "Score", type: "float" },
       ])
     ).toEqual([
-      { key: "title", name: "Title", type: "string", required: true },
-      { key: "count", name: "count", type: "integer" },
-      { key: "score", name: "score", type: "float" },
+      { id: "title", name: "Title", type: "string", required: true },
+      { id: "count", name: "Count", type: "integer" },
+      { id: "score", name: "Score", type: "float" },
     ])
   })
 
-  test("rejects empty column lists, bad keys, and duplicates", () => {
-    expect(() => normalizeTableColumns([])).toThrow("non-empty")
+  test("generates a hidden id when a column comes without one", () => {
+    const [column] = normalizeTableColumns([{ name: "Title", type: "string" }])
+
+    expect(column?.id).toMatch(/^c_[0-9a-f]{32}$/)
+    expect(column?.name).toBe("Title")
+  })
+
+  test("allows a table with no columns at all", () => {
+    expect(normalizeTableColumns([])).toEqual([])
+  })
+
+  test("rejects missing names and duplicate names, ignoring case", () => {
     expect(() =>
-      normalizeTableColumns([{ key: "1bad", type: "string" }])
-    ).toThrow("Column keys")
+      normalizeTableColumns([{ name: "  ", type: "string" }])
+    ).toThrow("Every column needs a name.")
     expect(() =>
       normalizeTableColumns([
-        { key: "title", type: "string" },
-        { key: "title", type: "float" },
+        { name: "Title", type: "string" },
+        { name: " title ", type: "float" },
       ])
-    ).toThrow("Duplicate table column key")
+    ).toThrow('A column named "title" already exists.')
+  })
+
+  test("rejects duplicate and malformed ids", () => {
+    expect(() =>
+      normalizeTableColumns([
+        { id: "twice", name: "One", type: "string" },
+        { id: "twice", name: "Two", type: "string" },
+      ])
+    ).toThrow("Duplicate table column id")
+    expect(() =>
+      normalizeTableColumns([{ id: "9bad", name: "Bad", type: "string" }])
+    ).toThrow("Column ids are internal")
   })
 
   test("rejects unknown types", () => {
     expect(() =>
-      normalizeTableColumns([{ key: "when", type: "date" }])
+      normalizeTableColumns([{ name: "When", type: "date" }])
     ).toThrow("must use one of")
     expect(() =>
-      normalizeTableColumns([{ key: "meta", type: "json" }])
+      normalizeTableColumns([{ name: "Meta", type: "json" }])
     ).toThrow("must use one of")
+  })
+})
+
+describe("newColumnId", () => {
+  test("mints distinct ids that pass normalization", () => {
+    const first = newColumnId()
+    const second = newColumnId()
+
+    expect(first).not.toBe(second)
+    expect(
+      normalizeTableColumns([{ id: first, name: "Fine", type: "string" }])
+    ).toHaveLength(1)
+  })
+})
+
+describe("readStoredColumns", () => {
+  test("reads a legacy key as the hidden id and drops the field", () => {
+    expect(
+      readStoredColumns([
+        { key: "title", name: "Title", type: "string", required: true },
+        { id: "c_1", name: "Count", type: "integer" },
+      ])
+    ).toEqual([
+      { id: "title", name: "Title", type: "string", required: true },
+      { id: "c_1", name: "Count", type: "integer" },
+    ])
   })
 })
 
 describe("assertColumnEvolution", () => {
   const current = normalizeTableColumns([
-    { key: "title", name: "Title", type: "string", required: true },
+    { id: "title", name: "Title", type: "string", required: true },
   ])
 
-  test("allows appending optional columns and renaming displays", () => {
+  test("allows renames, required toggles, additions, and removals", () => {
     expect(() =>
       assertColumnEvolution(
         current,
         normalizeTableColumns([
-          { key: "title", name: "Name", type: "string", required: true },
-          { key: "status", type: "string" },
+          { id: "title", name: "Name", type: "string" },
+          { id: "status", name: "Status", type: "string" },
         ])
       )
     ).not.toThrow()
+    expect(() => assertColumnEvolution(current, [])).not.toThrow()
   })
 
-  test("rejects removing or retyping existing columns", () => {
-    expect(() =>
-      assertColumnEvolution(
-        current,
-        normalizeTableColumns([{ key: "status", type: "string" }])
-      )
-    ).toThrow("cannot be removed")
+  test("rejects retyping an existing column", () => {
     expect(() =>
       assertColumnEvolution(
         current,
         normalizeTableColumns([
-          { key: "title", name: "Title", type: "float", required: true },
+          { id: "title", name: "Title", type: "float", required: true },
         ])
       )
-    ).toThrow("only change its display name")
-  })
-
-  test("rejects new required columns", () => {
-    expect(() =>
-      assertColumnEvolution(
-        current,
-        normalizeTableColumns([
-          { key: "title", name: "Title", type: "string", required: true },
-          { key: "status", type: "string", required: true },
-        ])
-      )
-    ).toThrow("must be optional")
+    ).toThrow("keeps its string type")
   })
 })

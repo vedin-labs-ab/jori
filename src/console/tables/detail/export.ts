@@ -68,17 +68,18 @@ async function exportTableCsv(
   )
 }
 
-/** CSV text for the whole table: column keys as the header, columns in
- *  definition order, absent cells empty. */
+/** CSV text for the whole table: column names as the header — the same
+ *  headers the grid shows — columns in definition order, absent cells
+ *  empty. */
 export function buildCsvExport(
   columns: TableColumn[],
   rows: { values: Record<string, unknown> }[]
 ) {
   return serializeCsv([
-    columns.map((column) => column.key),
+    columns.map((column) => column.name),
     ...rows.map((row) =>
       columns.map((column) => {
-        const value = row.values[column.key]
+        const value = row.values[column.id]
 
         return value === undefined ? "" : String(value)
       })

@@ -80,9 +80,9 @@ export function AddRowDialog({
               <RowField
                 column={column}
                 draft={draft}
-                key={column.key}
+                key={column.id}
                 onChange={(value) =>
-                  setDraft((current) => ({ ...current, [column.key]: value }))
+                  setDraft((current) => ({ ...current, [column.id]: value }))
                 }
               />
             ))}
@@ -111,10 +111,10 @@ function RowField({
   draft: RowDraft
   onChange: (value: string | boolean) => void
 }) {
-  const id = `row-field-${column.key}`
+  const id = `row-field-${column.id}`
   const label =
     column.required === true ? column.name : `${column.name} (optional)`
-  const entry = draft[column.key]
+  const entry = draft[column.id]
 
   if (column.type === "boolean") {
     return (

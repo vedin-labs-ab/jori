@@ -1,122 +1,90 @@
 import { expect, test } from "vitest"
 import {
   appendColumn,
-  columnDraftsIssue,
-  draftsFromColumns,
-  draftsToColumns,
+  columnNameIssue,
+  editColumn,
   newColumnDraft,
-  renameColumn,
+  removeColumn,
 } from "./draft"
 import { type TableColumn } from "./types"
 
-test("requires at least one column", () => {
-  expect(columnDraftsIssue([])).toBe("Add at least one column.")
-})
+const existing: TableColumn[] = [
+  { id: "c_title", name: "Title", type: "string", required: true },
+  { id: "c_amount", name: "Amount", type: "float" },
+]
 
-test("flags empty, malformed, and duplicate keys", () => {
-  expect(columnDraftsIssue([draft({ key: "" })])).toBe(
-    "Every column needs a key."
+test("flags empty and duplicate names, ignoring case", () => {
+  expect(columnNameIssue(existing, "  ")).toBe("Give the column a name.")
+  expect(columnNameIssue(existing, " title ")).toBe(
+    'A column named "Title" already exists.'
   )
-  expect(columnDraftsIssue([draft({ key: "9lives" })])).toContain(
-    "must start with a letter"
+  expect(columnNameIssue(existing, "Notes")).toBeUndefined()
+})
+
+test("a column keeps its own name while being edited", () => {
+  expect(columnNameIssue(existing, "Title", "c_title")).toBeUndefined()
+  expect(columnNameIssue(existing, "Amount", "c_title")).toBe(
+    'A column named "Amount" already exists.'
   )
-  expect(
-    columnDraftsIssue([draft({ key: "twice" }), draft({ key: "twice" })])
-  ).toBe('Duplicate column key "twice".')
-  expect(columnDraftsIssue([draft({ key: "fine" })])).toBeUndefined()
 })
 
-test("new drafts become columns with required only when set", () => {
-  const columns = draftsToColumns(
-    [
-      draft({ key: "title", name: "Title", required: true }),
-      draft({ key: "notes" }),
-    ],
-    []
-  )
-
-  expect(columns).toEqual([
-    { key: "title", name: "Title", type: "string", required: true },
-    { key: "notes", name: "notes", type: "string" },
-  ])
-})
-
-test("locked drafts keep everything but the display name", () => {
-  const existing: TableColumn[] = [
-    {
-      key: "amount",
-      name: "Amount",
-      type: "float",
-      required: true,
-    },
-  ]
-  const drafts = draftsFromColumns(existing)
-  const renamed = drafts.map((entry) => ({ ...entry, name: "Total" }))
-
-  expect(drafts[0]?.locked).toBe(true)
-  expect(draftsToColumns(renamed, existing)).toEqual([
-    { ...existing[0], name: "Total" },
-  ])
-})
-
-test("appending a column keeps existing ones and adds an optional column", () => {
-  const existing: TableColumn[] = [
-    { key: "title", name: "Title", type: "string", required: true },
-  ]
+test("appending generates a hidden id and keeps existing columns", () => {
   const appended = appendColumn(existing, {
-    key: "amount",
-    name: "Amount",
-    type: "float",
-  })
-
-  expect(appended).toEqual({
-    ok: true,
-    columns: [
-      { key: "title", name: "Title", type: "string", required: true },
-      { key: "amount", name: "Amount", type: "float" },
-    ],
-  })
-})
-
-test("appending a column falls back to the key as its display name", () => {
-  const appended = appendColumn(
-    [{ key: "title", name: "Title", type: "string" }],
-    { key: "notes", name: "  ", type: "string" }
-  )
-
-  expect(appended.ok && appended.columns[1]).toEqual({
-    key: "notes",
-    name: "notes",
+    name: " Notes ",
     type: "string",
+    required: false,
+  })
+
+  expect(appended.ok).toBe(true)
+
+  if (appended.ok) {
+    expect(appended.columns.slice(0, 2)).toEqual(existing)
+    expect(appended.columns[2]).toMatchObject({
+      name: "Notes",
+      type: "string",
+    })
+    expect(appended.columns[2]?.id).toMatch(/^c_/)
+    expect(appended.columns[2]?.required).toBeUndefined()
+  }
+})
+
+test("appending a required column keeps the flag", () => {
+  const appended = appendColumn([], {
+    ...newColumnDraft(),
+    name: "Title",
+    required: true,
+  })
+
+  expect(appended.ok && appended.columns[0]).toMatchObject({
+    name: "Title",
+    required: true,
   })
 })
 
-test("appending a column rejects duplicate and malformed keys", () => {
-  const existing: TableColumn[] = [
-    { key: "title", name: "Title", type: "string" },
-  ]
-
+test("appending rejects a clashing name", () => {
   expect(
-    appendColumn(existing, { key: "title", name: "", type: "string" })
-  ).toEqual({ ok: false, error: 'Duplicate column key "title".' })
-  expect(appendColumn(existing, { key: "", name: "", type: "string" })).toEqual(
-    { ok: false, error: "Every column needs a key." }
-  )
+    appendColumn(existing, { name: "title", type: "string", required: false })
+  ).toEqual({ ok: false, error: 'A column named "Title" already exists.' })
 })
 
-test("renaming a column touches only its display name", () => {
-  const existing: TableColumn[] = [
-    { key: "title", name: "Title", type: "string", required: true },
-    { key: "amount", name: "Amount", type: "float" },
-  ]
+test("editing renames and toggles required, keeping id and type", () => {
+  const edited = editColumn(existing, "c_amount", {
+    name: "Total",
+    required: true,
+  })
 
-  expect(renameColumn(existing, "amount", "Total")).toEqual([
+  expect(edited.ok && edited.columns).toEqual([
     existing[0],
-    { key: "amount", name: "Total", type: "float" },
+    { id: "c_amount", name: "Total", type: "float", required: true },
   ])
-  expect(renameColumn(existing, "amount", "  ")[1]?.name).toBe("amount")
 })
 
-function draft(overrides: Partial<ReturnType<typeof newColumnDraft>>) {
-  return { ...newColumnDraft(), ...overrides }
-}
+test("editing rejects renaming onto another column's name", () => {
+  expect(
+    editColumn(existing, "c_amount", { name: "Title", required: false })
+  ).toEqual({ ok: false, error: 'A column named "Title" already exists.' })
+})
+
+test("removing filters the column out by id", () => {
+  expect(removeColumn(existing, "c_title")).toEqual([existing[1]])
+})

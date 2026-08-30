@@ -44,8 +44,8 @@ function tableSummary(overrides: Partial<TableSummary> = {}) {
     ownerId: undefined,
     folderId: undefined,
     columns: [
-      { key: "title", name: "Title", type: "string" },
-      { key: "stage", name: "Stage", type: "string" },
+      { id: "title", name: "Title", type: "string" },
+      { id: "stage", name: "Stage", type: "string" },
     ],
     rowCount: 12,
     ownerName: "Ada Lovelace",

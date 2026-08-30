@@ -25,8 +25,8 @@ import { GridRow } from "./row"
 /** The table's rows as a full-bleed spreadsheet grid: a number/select
  *  gutter, typed column headers that open their column's details, inline
  *  cell editing, and quiet affordances for a new row below the rows and a
- *  new column past the headers. An empty table is just the grid without
- *  rows. */
+ *  new column past the headers. A table with no columns yet shows the New
+ *  column affordance as the one way forward — rows come after columns. */
 export function RowGrid({
   columns,
   disabled,
@@ -91,7 +91,7 @@ export function RowGrid({
           {columns.map((column) => (
             <HeadCell
               column={column}
-              key={column.key}
+              key={column.id}
               onInspect={() => onInspectColumn(column)}
             />
           ))}
@@ -126,11 +126,15 @@ export function RowGrid({
             selection={selection}
           />
         ))}
-        <NewRowRow
-          disabled={disabled}
-          onAddRow={onAddRow}
-          span={columns.length + 1}
-        />
+        {columns.length === 0 ? (
+          <ColumnlessRow />
+        ) : (
+          <NewRowRow
+            disabled={disabled}
+            onAddRow={onAddRow}
+            span={columns.length + 1}
+          />
+        )}
       </TableBody>
     </ConsoleListTable>
   )
@@ -170,6 +174,20 @@ function NewRowRow({
   )
 }
 
+/** What a column-less table says instead of rows: columns come first, and
+ *  the New column affordance above is the way to make one. */
+function ColumnlessRow() {
+  return (
+    <TableRow className="hover:bg-transparent">
+      <TableCell className="border-0! p-0" colSpan={2}>
+        <p className="flex h-9 items-center whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs">
+          No columns yet — add one to start entering rows.
+        </p>
+      </TableCell>
+    </TableRow>
+  )
+}
+
 /** A typed column header; clicking it opens the column's details. */
 function HeadCell({
   column,
@@ -180,7 +198,7 @@ function HeadCell({
 }) {
   const Icon = columnTypeIcons[column.type]
   const isRequired = column.required === true
-  const name = column.name === "" ? column.key : column.name
+  const name = column.name
 
   return (
     <TableHead

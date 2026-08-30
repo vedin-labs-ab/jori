@@ -1,5 +1,11 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
+import {
+  readStoredColumns,
+  type TableColumn,
+} from "../../contracts/tables/columns"
+import { nameRowValues, resolveNamedValues } from "../../contracts/tables/names"
+import { type Doc } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
 import {
   deleteDocument,
@@ -12,6 +18,11 @@ import { getAccessibleTable, summarizeRow } from "./access"
 import { tableSpec } from "./spec"
 
 const importBatchSize = 100
+
+/** The agent surface keys row values by column NAME — the only column
+ *  identity it ever sees; the console keys by hidden id, so renames never
+ *  move data. Passing "name" translates values both ways. */
+const keyedByValidator = v.optional(v.literal("name"))
 
 /** Places an insert beside an existing row of the same table; without an
  *  anchor, inserts append at the bottom. */
@@ -26,14 +37,15 @@ export const page = internalQuery({
     tableId: v.id("collections"),
     personId: v.id("persons"),
     paginationOpts: paginationOptsValidator,
+    keyedBy: keyedByValidator,
   },
   handler: async (ctx, args) => {
-    await getAccessibleTable(ctx, args)
-
+    const table = await getAccessibleTable(ctx, args)
+    const columns = readStoredColumns(table.columns)
     const result = await pageDocuments(ctx, args.tableId, args.paginationOpts)
 
     return {
-      rows: result.page.map((row) => summarizeRow(row)),
+      rows: result.page.map((row) => keyedRow(args.keyedBy, columns, row)),
       isDone: result.isDone,
       continueCursor: result.continueCursor,
     }
@@ -47,14 +59,16 @@ export const insert = internalMutation({
     personId: v.id("persons"),
     values: v.any(),
     anchor: v.optional(rowAnchorValidator),
+    keyedBy: keyedByValidator,
   },
   handler: async (ctx, args) => {
     const table = await getAccessibleTable(ctx, args)
+    const columns = readStoredColumns(table.columns)
     const [row] = await insertDocuments(
       ctx,
       tableSpec,
       table,
-      [args.values],
+      [keyedValues(args.keyedBy, columns, args.values)],
       args.anchor === undefined
         ? undefined
         : { documentId: args.anchor.rowId, placement: args.anchor.placement }
@@ -64,7 +78,7 @@ export const insert = internalMutation({
       throw new Error("Row insert failed.")
     }
 
-    return summarizeRow(row)
+    return keyedRow(args.keyedBy, columns, row)
   },
 })
 
@@ -101,12 +115,17 @@ export const update = internalMutation({
     rowId: v.id("documents"),
     values: v.any(),
     expectedVersion: v.optional(v.number()),
+    keyedBy: keyedByValidator,
   },
   handler: async (ctx, args) => {
     const table = await getAccessibleTable(ctx, args)
+    const columns = readStoredColumns(table.columns)
     const result = await writeDocument(ctx, tableSpec, table, {
       documentId: args.rowId,
-      write: { type: "merge", patch: args.values },
+      write: {
+        type: "merge",
+        patch: keyedValues(args.keyedBy, columns, args.values),
+      },
       expectedVersion: args.expectedVersion,
     })
 
@@ -114,7 +133,7 @@ export const update = internalMutation({
       throw new Error("Row update failed.")
     }
 
-    return summarizeRow(result.document)
+    return keyedRow(args.keyedBy, columns, result.document)
   },
 })
 
@@ -136,3 +155,23 @@ export const remove = internalMutation({
     return { rowId: row._id, deleted: true as const }
   },
 })
+
+function keyedValues(
+  keyedBy: "name" | undefined,
+  columns: TableColumn[],
+  values: unknown
+) {
+  return keyedBy === "name" ? resolveNamedValues(columns, values) : values
+}
+
+function keyedRow(
+  keyedBy: "name" | undefined,
+  columns: TableColumn[],
+  row: Doc<"documents">
+) {
+  const summary = summarizeRow(row)
+
+  return keyedBy === "name"
+    ? { ...summary, values: nameRowValues(columns, summary.values) }
+    : summary
+}

@@ -114,7 +114,7 @@ export const create = mutation({
     description: v.optional(v.string()),
     scope: v.optional(scopeValidator),
     folderId: v.optional(v.id("folders")),
-    columns: v.any(),
+    columns: v.optional(v.any()),
   },
   handler: async (ctx, args): Promise<unknown> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)

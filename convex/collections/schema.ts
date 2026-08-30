@@ -7,9 +7,15 @@ import { scopeValidator } from "../shared/audience"
 // store is a collection with exactly one document authored as JSON Schema.
 // Both compile to a JSON Schema, so one validator covers both.
 
-/** One typed column; mirrors contracts/tables/columns.ts TableColumn. */
+/** One typed column; mirrors contracts/tables/columns.ts. `id` is the
+ *  hidden identifier rows key their values by; it is optional (and the
+ *  legacy `key` lingers) only until the one-shot migration in
+ *  convex/tables/migrate.ts stamps every stored column, after which `id`
+ *  tightens to required and `key` disappears. Reads go through
+ *  readStoredColumns meanwhile. */
 const tableColumn = v.object({
-  key: v.string(),
+  id: v.optional(v.string()),
+  key: v.optional(v.string()),
   name: v.string(),
   type: v.union(
     v.literal("boolean"),

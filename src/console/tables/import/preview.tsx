@@ -38,7 +38,7 @@ export function ImportTablePreview({
           <TableHeader>
             <TableRow>
               {plan.columns.map((column) => (
-                <ColumnHead column={column} key={column.key} />
+                <ColumnHead column={column} key={column.id} />
               ))}
             </TableRow>
           </TableHeader>
@@ -81,12 +81,12 @@ function PreviewRow({ columns, row }: { columns: TableColumn[]; row: CsvRow }) {
   return (
     <TableRow>
       {columns.map((column) => {
-        const value = row.values[column.key]
+        const value = row.values[column.id]
 
         return (
           <TableCell
             className="max-w-48 truncate text-muted-foreground"
-            key={column.key}
+            key={column.id}
           >
             {value === undefined ? "" : String(value)}
           </TableCell>

@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { type TableColumn } from "../../contracts/tables/columns"
+import { readStoredColumns } from "../../contracts/tables/columns"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import {
@@ -92,7 +92,7 @@ export const get = query({
     return {
       name: opened.table.name,
       description: opened.table.description,
-      columns: opened.table.columns as TableColumn[],
+      columns: readStoredColumns(opened.table.columns),
       expiresAt: opened.share.expiresAt,
     }
   },

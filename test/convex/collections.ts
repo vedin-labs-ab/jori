@@ -13,7 +13,7 @@ export function tableDoc(overrides: Record<string, unknown> = {}) {
     ownerId: testOwner,
     kind: "table",
     name: "Leads",
-    columns: [{ key: "title", name: "Title", type: "string" }],
+    columns: [{ id: "title", name: "Title", type: "string" }],
     schemaHash: "hash",
     createdAt: 1,
     updatedAt: 1,
