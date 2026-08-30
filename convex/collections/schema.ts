@@ -4,8 +4,9 @@ import { scopeValidator } from "../shared/audience"
 
 // One storage core for schema-validated, versioned JSON documents. A table
 // is a collection of many documents (rows) authored as typed columns; a
-// store is a collection with exactly one document authored as JSON Schema.
-// Both compile to a JSON Schema, so one validator covers both.
+// store is a collection with exactly one document, optionally constrained
+// by an authored JSON Schema. Both compile to a JSON Schema, so one
+// validator covers both.
 
 /** One typed column; mirrors contracts/tables/columns.ts. `id` is the
  *  hidden identifier rows key their values by; it is optional (and the
@@ -45,7 +46,8 @@ const collectionFields = {
 }
 
 /** A named collection of documents, carrying its kind-native authoring
- *  schema: columns for tables, a JSON Schema for stores. */
+ *  schema: columns for tables, an optional JSON Schema for stores — a
+ *  store without one accepts any JSON object. */
 export const collections = defineTable(
   v.union(
     v.object({
@@ -56,7 +58,7 @@ export const collections = defineTable(
     v.object({
       ...collectionFields,
       kind: v.literal("store"),
-      schema: v.any(),
+      schema: v.optional(v.any()),
     })
   )
 )

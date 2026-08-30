@@ -1,17 +1,17 @@
 import { Braces, Database } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { DialogTitle } from "@/components/ui/dialog"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { JsonBlock, JsonDialog } from "../../shared/code"
+import { JsonBlock } from "../../shared/code"
 import { CopyButton } from "../../shared/copy"
 import { formatJsonText } from "../../shared/json/parse"
 import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
+import { StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"
 import { type ValueSaveStatus } from "./autosave"
 import { ValueEditorSection } from "./editor"
@@ -41,7 +41,7 @@ export function StoreValue({
           <>
             <ValueActionButton
               icon={<Braces />}
-              label="View schema"
+              label={store.schema === undefined ? "Add schema" : "Schema"}
               onClick={() => setIsSchemaOpen(true)}
             />
             <CopyButton label="value" value={formatJsonText(store.value)} />
@@ -60,16 +60,10 @@ export function StoreValue({
           />
         )}
       </ConsoleListContent>
-      <JsonDialog
-        description="The schema this store's value must conform to."
-        headerLeft={
-          <DialogTitle className="font-mono font-normal text-muted-foreground text-xs">
-            Schema
-          </DialogTitle>
-        }
+      <StoreSchemaDialog
         onOpenChange={setIsSchemaOpen}
-        open={isSchemaOpen}
-        value={store.schema}
+        organizationId={organizationId}
+        store={isSchemaOpen ? store : undefined}
       />
     </>
   )

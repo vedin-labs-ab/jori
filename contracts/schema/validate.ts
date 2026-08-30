@@ -11,6 +11,15 @@ export type SchemaValidationIssue = {
   message: string
 }
 
+const anyObjectSchema: JsonSchemaObject = { type: "object" }
+
+/** Resolve a possibly-absent authored schema to the constraint writes are
+ *  validated against. This is the one place a missing schema gets its
+ *  meaning: any JSON object is allowed. */
+export function resolveWriteSchema(schema: JsonSchemaObject | undefined) {
+  return schema ?? anyObjectSchema
+}
+
 export function assertJsonSchemaValue(input: {
   schema: JsonSchemaObject
   value: unknown

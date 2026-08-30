@@ -16,7 +16,7 @@ export type CollectionDoc<K extends CollectionKind = CollectionKind> = Extract<
 export type CollectionAuthoring<K extends CollectionKind = CollectionKind> =
   Extract<
     | { kind: "table"; columns: StoredTableColumn[] }
-    | { kind: "store"; schema: JsonSchemaObject },
+    | { kind: "store"; schema?: JsonSchemaObject },
     { kind: K }
   >
 

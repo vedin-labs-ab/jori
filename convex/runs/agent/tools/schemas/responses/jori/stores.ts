@@ -17,7 +17,8 @@ function storeSummaryProperties() {
     schema: {
       type: "object",
       additionalProperties: true,
-      description: "The JSON Schema every value write must satisfy.",
+      description:
+        "The JSON Schema every value write must satisfy; absent when the store accepts any JSON object.",
     },
     schemaHash: stringProperty("Content hash of the schema."),
     createdAt: numberProperty("Creation time in epoch milliseconds."),

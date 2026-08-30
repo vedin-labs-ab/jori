@@ -93,7 +93,7 @@ export const create = mutation({
     description: v.optional(v.string()),
     scope: v.optional(scopeValidator),
     folderId: v.optional(v.id("folders")),
-    schema: v.any(),
+    schema: v.optional(v.any()),
   },
   handler: async (ctx, args): Promise<unknown> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
@@ -116,6 +116,25 @@ export const update = mutation({
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.stores.records.update, {
+      ...args,
+      personId,
+    })
+  },
+})
+
+/** Add, replace, or remove the store's schema constraint. A schema the
+ *  current value violates is rejected, never saved over it. */
+export const writeSchema = mutation({
+  args: {
+    organizationId: v.string(),
+    storeId: v.id("collections"),
+    /** The new JSON Schema, or null to remove the constraint. */
+    schema: v.any(),
+  },
+  handler: async (ctx, args): Promise<unknown> => {
+    const personId = await ensureCurrentPerson(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.stores.records.reschema, {
       ...args,
       personId,
     })

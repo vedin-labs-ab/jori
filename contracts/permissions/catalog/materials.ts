@@ -1,9 +1,10 @@
 import { type ToolPermissionRow } from "../types"
 
 // Workspace materials: data both Jori and people read and edit under the
-// same permissions. Tables hold typed rows; stores hold one schema-backed
-// JSON document each; files hold uploaded and generated blobs. Sharing a
-// material mints a read-only link that works without signing in.
+// same permissions. Tables hold typed rows; stores hold one JSON document
+// each, optionally schema-constrained; files hold uploaded and generated
+// blobs. Sharing a material mints a read-only link that works without
+// signing in.
 
 export const materialToolPermissionRows = [
   // Tables
@@ -92,8 +93,8 @@ export const materialToolPermissionRows = [
     "jori",
     "create_store",
     "Create store",
-    "Create a schema-backed JSON store.",
-    "Create a store: one JSON document validated against a required JSON Schema on every write. Search first to avoid duplicates; the schema is fixed at creation. Stores belong to the organization unless made personal.",
+    "Create a JSON document store.",
+    "Create a store: one JSON document, optionally constrained by a JSON Schema validated on every write. Search first to avoid duplicates; a schema can be added or changed later in the console. Stores belong to the organization unless made personal.",
     "write",
   ],
   [
@@ -101,7 +102,7 @@ export const materialToolPermissionRows = [
     "write_store",
     "Write store",
     "Write data into a store's document.",
-    "Replace, merge-patch, or claim into a store's document; writes must match the store schema and stay within the 256 KiB value cap. A claim atomically sets a path only when it is still unset — claim before at-most-once actions like sending. Pass expectedVersion from a previous read to fail cleanly on concurrent writes.",
+    "Replace, merge-patch, or claim into a store's document; writes must match the store's schema when it has one and stay within the 256 KiB value cap. A claim atomically sets a path only when it is still unset — claim before at-most-once actions like sending. Pass expectedVersion from a previous read to fail cleanly on concurrent writes.",
     "write",
   ],
   [

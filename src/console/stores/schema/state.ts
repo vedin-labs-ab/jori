@@ -1,3 +1,4 @@
+import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { normalizeStoreSchema } from "@contracts/stores/contract"
 import { useState } from "react"
 import { formatJsonText, parseJsonText } from "../../shared/json/parse"
@@ -39,8 +40,32 @@ export const initialEditorState: SchemaEditorState = {
   submitError: undefined,
 }
 
-export function useSchemaEditor() {
-  const [state, setState] = useState(initialEditorState)
+const formlessNote =
+  "This schema uses JSON Schema features the form view cannot edit, so it stays as code."
+
+/** Seed the editor from an existing schema: the form view when the schema
+ *  fits it, the code view with a note otherwise. No schema starts empty. */
+export function editorStateForSchema(
+  schema: JsonSchemaObject | undefined
+): SchemaEditorState {
+  if (schema === undefined) {
+    return initialEditorState
+  }
+
+  const fields = schemaToFields(schema)
+
+  return fields === undefined
+    ? {
+        ...initialEditorState,
+        view: "code",
+        codeText: formatJsonText(schema),
+        codeNote: formlessNote,
+      }
+    : { ...initialEditorState, fields }
+}
+
+export function useSchemaEditor(initial?: JsonSchemaObject) {
+  const [state, setState] = useState(() => editorStateForSchema(initial))
 
   function submit(): SchemaSubmitResult {
     const [next, result] = submitEditor(state)
@@ -121,11 +146,7 @@ export function switchToForm(state: SchemaEditorState): SchemaEditorState {
   const fields = schemaToFields(parsed.value)
 
   if (fields === undefined) {
-    return {
-      ...state,
-      codeNote:
-        "This schema uses JSON Schema features the form view cannot edit, so it stays as code.",
-    }
+    return { ...state, codeNote: formlessNote }
   }
 
   return {

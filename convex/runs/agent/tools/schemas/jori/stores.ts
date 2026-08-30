@@ -26,7 +26,7 @@ export const storeToolInputSchemas = {
     },
   }),
   create_store: objectSchema({
-    required: ["name", "schema"],
+    required: ["name"],
     properties: {
       name: stringProperty("Short store name."),
       description: stringProperty("What the store holds and who reads it."),
@@ -35,7 +35,7 @@ export const storeToolInputSchemas = {
         type: "object",
         additionalProperties: true,
         description:
-          "JSON Schema with an object root that every value write must satisfy. Fixed at creation; fully inlined, no $ref.",
+          "Optional JSON Schema with an object root that every value write must satisfy. Omit to accept any JSON object. Fully inlined, no $ref.",
       },
     },
   }),

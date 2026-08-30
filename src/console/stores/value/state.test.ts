@@ -1,3 +1,4 @@
+import { resolveWriteSchema } from "@contracts/schema/validate"
 import { describe, expect, test } from "vitest"
 import { type ValueState } from "./convert"
 import { schemaToForm } from "./model"
@@ -150,6 +151,46 @@ describe("submitting the form view", () => {
     const [, result] = submitEditor(state, form, schema)
 
     expect(result).toEqual({ ok: true, value: { title: "abc", total: 2 } })
+  })
+})
+
+describe("editing without a schema", () => {
+  test("opens as code with the no-schema note", () => {
+    const state = initialEditorState(
+      undefined,
+      { any: 1 },
+      true,
+      valueEditorNotes.none
+    )
+
+    expect(state.view).toBe("code")
+    expect(state.codeNote).toBe(valueEditorNotes.none)
+  })
+
+  test("any JSON object submits; anything else is refused", () => {
+    const constraint = resolveWriteSchema(undefined)
+    const base = initialEditorState(
+      undefined,
+      null,
+      false,
+      valueEditorNotes.none
+    )
+    const [, good] = submitEditor(
+      { ...base, codeText: '{ "free": ["form", 1] }' },
+      undefined,
+      constraint
+    )
+
+    expect(good).toEqual({ ok: true, value: { free: ["form", 1] } })
+
+    const [next, bad] = submitEditor(
+      { ...base, codeText: '"just a string"' },
+      undefined,
+      constraint
+    )
+
+    expect(bad).toEqual({ ok: false })
+    expect(next.codeError).toContain("must be object")
   })
 })
 
