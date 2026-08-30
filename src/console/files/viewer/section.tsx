@@ -1,5 +1,13 @@
+import { ExternalLink } from "lucide-react"
 import { type ReactNode, useState } from "react"
+import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { type PreviewKind } from "@/shared/files/kind"
+import { type FileSiblings, useSiblingKeys } from "../siblings"
 import { FileToolbar } from "../toolbar"
 import { ViewerFrame, type ViewerStatus } from "./frame"
 import { ZoomableImage, ZoomTools } from "./image"
@@ -17,11 +25,13 @@ export function FileViewer({
   kind,
   meta,
   name,
+  siblings,
   url: currentUrl,
 }: {
   kind: ViewerKind
   meta: ReactNode
   name: string
+  siblings: FileSiblings
   url: string
 }) {
   // The signed url rotates with every query update; keeping the first one
@@ -33,14 +43,16 @@ export function FileViewer({
   )
   const zoom = useZoom()
 
+  // ←/→ step between files — except on a zoomed-in image, where the same
+  // keys read as panning and must not tear the person away from the file.
+  useSiblingKeys(siblings, kind !== "image" || !zoom.isZoomed)
+
   return (
     <>
       <FileToolbar
-        action={
-          kind === "image" ? (
-            <ZoomTools isReady={status === "ready"} zoom={zoom} />
-          ) : undefined
-        }
+        hasArrowKeys
+        siblings={siblings}
+        tools={viewerTools(kind, status, currentUrl, zoom)}
       >
         {meta}
       </FileToolbar>
@@ -55,6 +67,47 @@ export function FileViewer({
         />
       </ViewerFrame>
     </>
+  )
+}
+
+/** Per-kind toolbar tools: zoom for images, a full-window escape hatch for
+ *  PDFs. Audio and video carry their controls inline, so their slot stays
+ *  empty and the shared navigation stands alone. */
+function viewerTools(
+  kind: ViewerKind,
+  status: ViewerStatus,
+  url: string,
+  zoom: Zoom
+): ReactNode | undefined {
+  switch (kind) {
+    case "image":
+      return <ZoomTools isReady={status === "ready"} zoom={zoom} />
+    case "pdf":
+      // The live url, not the frozen one — a tab opened minutes in still
+      // deserves a fresh signature.
+      return <OpenTool url={url} />
+    default:
+      return undefined
+  }
+}
+
+function OpenTool({ url }: { url: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label="Open in new tab"
+          asChild
+          size="icon-sm"
+          variant="ghost"
+        >
+          <a href={url} rel="noreferrer" target="_blank">
+            <ExternalLink />
+          </a>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Open in new tab</TooltipContent>
+    </Tooltip>
   )
 }
 

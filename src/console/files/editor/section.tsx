@@ -10,6 +10,7 @@ import {
 import { api } from "../../../../convex/_generated/api"
 import { CopyButton } from "../../shared/copy"
 import { ConsoleListLoading } from "../../shared/list/loading"
+import { type FileSiblings } from "../siblings"
 import { uploadToStorage } from "../storage"
 import { FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
@@ -29,6 +30,7 @@ export function FileEditor({
   file,
   meta,
   organizationId,
+  siblings,
   url,
 }: {
   /** Rendered when the file's text cannot be fetched. */
@@ -36,6 +38,7 @@ export function FileEditor({
   file: FileDetail
   meta: ReactNode
   organizationId: string
+  siblings: FileSiblings
   url: string
 }) {
   const document = useDocument(file.fileId, url)
@@ -52,9 +55,16 @@ export function FileEditor({
 
   return (
     <>
+      {/* No arrow keys here — CodeMirror owns them for caret movement. */}
       <FileToolbar
-        action={
-          <EditorStatus state={document.state} status={autosave.status} />
+        siblings={siblings}
+        tools={
+          document.state.status === "ready" ? (
+            <EditorStatus
+              savedText={document.state.saved}
+              status={autosave.status}
+            />
+          ) : undefined
         }
       >
         {meta}
@@ -84,16 +94,12 @@ const statusLabels: Record<SaveStatus, string> = {
 }
 
 function EditorStatus({
-  state,
+  savedText,
   status,
 }: {
-  state: DocumentState
+  savedText: string
   status: SaveStatus
 }) {
-  if (state.status !== "ready") {
-    return null
-  }
-
   return (
     <>
       <span
@@ -102,7 +108,7 @@ function EditorStatus({
       >
         {statusLabels[status]}
       </span>
-      <CopyButton label="file text" value={async () => state.saved} />
+      <CopyButton label="file text" value={async () => savedText} />
     </>
   )
 }
