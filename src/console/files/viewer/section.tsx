@@ -152,20 +152,25 @@ function ViewerContent({
   switch (kind) {
     case "image":
       return (
-        <ZoomableImage
-          name={name}
-          onError={onError}
-          onReady={onReady}
-          url={url}
-          zoom={zoom}
-        />
+        // The header's spacing scale as a guarantee: a visible margin on
+        // every side says the whole picture is on screen. Zoomed content
+        // may bleed into it — that overflow is deliberate.
+        <div className="size-full p-4 md:p-6">
+          <ZoomableImage
+            name={name}
+            onError={onError}
+            onReady={onReady}
+            url={url}
+            zoom={zoom}
+          />
+        </div>
       )
     case "video":
       return (
         // Flex-centered with max constraints rather than object-contain:
         // the element shrinks to the picture, so the controls hug the
         // video and centering holds in every engine.
-        <div className="flex size-full items-center justify-center">
+        <div className="flex size-full items-center justify-center p-4 md:p-6">
           {/* biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks. */}
           <video
             className="max-h-full max-w-full"
