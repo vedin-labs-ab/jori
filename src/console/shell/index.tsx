@@ -9,6 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -28,7 +29,6 @@ import {
   MaterialBreadcrumbContext,
   type MaterialBreadcrumbSegment,
 } from "../shared/materials/breadcrumb"
-import { MaterialScopeMark } from "../shared/materials/scope"
 import { ConsoleSidebar } from "./navigation"
 import { getMaterialSurface, getPageTitle } from "./routes"
 
@@ -143,9 +143,6 @@ function ConsoleHeaderTitle({
             {trail.length === 0 ? null : <BreadcrumbSeparator />}
             <BreadcrumbItem className="min-w-0">
               <MaterialName material={material} />
-              {material.scope === undefined ? null : (
-                <MaterialScopeMark scope={material.scope} />
-              )}
             </BreadcrumbItem>
           </>
         )}
@@ -164,16 +161,17 @@ function MaterialName({ material }: { material: MaterialBreadcrumb }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          className="flex min-w-0 items-center gap-1 rounded-sm text-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+        <Button
+          className="min-w-0 gap-1 px-1.5 text-foreground"
           type="button"
+          variant="ghost"
         >
           <span className="truncate">{material.name}</span>
           <ChevronDown
             aria-hidden
-            className="size-3 shrink-0 text-muted-foreground"
+            className="size-3! shrink-0 text-muted-foreground"
           />
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       {material.menu}
     </DropdownMenu>

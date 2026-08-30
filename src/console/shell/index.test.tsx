@@ -97,7 +97,7 @@ test("appends the material's name once its view publishes it", () => {
   expect(current.getAttribute("aria-current")).toBe("page")
 })
 
-test("suffixes the name with the scope icon when a scope is published", () => {
+test("renders no scope suffix even when a scope is published", () => {
   const publish = renderWithPublisher("/files/abc123")
 
   act(() => publish.current?.({ name: "report.json", scope: "personal" }))
@@ -105,7 +105,7 @@ test("suffixes the name with the scope icon when a scope is published", () => {
   const current = screen.getByText("report.json")
 
   expect(current.getAttribute("aria-current")).toBe("page")
-  expect(screen.getByText("Personal").className).toContain("sr-only")
+  expect(screen.queryByText("Personal")).toBeNull()
 })
 
 test("renders a published segment trail with the material as the page", () => {

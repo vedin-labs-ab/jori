@@ -10,14 +10,15 @@ import { ConsoleListFooter, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { useRowSelection } from "../../shared/list/selection"
+import { MaterialTitleMenu } from "../../shared/materials/actions"
 import { useMaterialBreadcrumb } from "../../shared/materials/breadcrumb"
 import { useMemberUrl } from "../../shared/materials/fragment"
-import { useTableRemoval } from "../manage"
+import { tableDeleteDescription, useTableRemoval } from "../manage"
 import { rowPageSize, type TableDetail, type TableRow } from "../types"
 import { type ColumnSheetState } from "./columns"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
-import { TableHeaderActions, TableTitleMenu } from "./header"
+import { TableHeaderActions } from "./header"
 import { type TableDialog, TableOverlays } from "./overlays"
 import { useRowAdding, useRowBulk, useRowPages, useRowWrites } from "./rows"
 
@@ -147,12 +148,16 @@ function TableReadyView({
   useMaterialBreadcrumb(
     table.name,
     table.scope,
-    <TableTitleMenu
+    <MaterialTitleMenu
+      deleteDescription={tableDeleteDescription}
+      isDeleting={page.removal.removingTableId === table.tableId}
+      isRestoring={page.removal.restoringTableId === table.tableId}
+      material={{ name: table.name, archivedAt: table.archivedAt }}
+      noun="table"
       onDelete={removeAndLeaveWhenDeleted}
       onEdit={() => page.setDialog("edit")}
       onMoveToFolder={() => page.setDialog("move")}
-      removal={page.removal}
-      table={table}
+      onRestore={() => void page.removal.restoreTable(table)}
     />
   )
 

@@ -3,6 +3,7 @@ import {
   FolderInput,
   Loader2,
   MoreHorizontal,
+  Pencil,
   RotateCcw,
   Trash2,
 } from "lucide-react"
@@ -22,6 +23,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -186,5 +188,71 @@ export function ConfirmRemoveDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  )
+}
+
+/** The material's menu for its breadcrumb name on detail pages: edit,
+ *  file, and the confirmed archive/restore/delete lifecycle. */
+export function MaterialTitleMenu({
+  deleteDescription,
+  isDeleting,
+  isRestoring,
+  material,
+  noun,
+  onDelete,
+  onEdit,
+  onMoveToFolder,
+  onRestore,
+}: {
+  deleteDescription: string
+  isDeleting: boolean
+  isRestoring: boolean
+  material: MaterialActionTarget
+  noun: string
+  onDelete: () => void
+  onEdit: () => void
+  onMoveToFolder: () => void
+  onRestore: () => void
+}) {
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const isArchived = material.archivedAt !== undefined
+  const isPending = isDeleting || isRestoring
+
+  return (
+    <>
+      <DropdownMenuContent align="start" className="w-44">
+        <DropdownMenuItem disabled={isPending} onSelect={onEdit}>
+          <Pencil />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
+          <FolderInput />
+          Move to folder…
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {isArchived ? (
+          <DropdownMenuItem disabled={isPending} onSelect={onRestore}>
+            <RotateCcw />
+            Restore
+          </DropdownMenuItem>
+        ) : null}
+        <RemoveMenuItem
+          isArchived={isArchived}
+          isDeleting={isDeleting}
+          isPending={isPending}
+          onSelect={() => setIsConfirmOpen(true)}
+        />
+      </DropdownMenuContent>
+      <ConfirmRemoveDialog
+        deleteDescription={deleteDescription}
+        isArchived={isArchived}
+        isDeleting={isDeleting}
+        material={material}
+        noun={noun}
+        onDelete={onDelete}
+        onOpenChange={setIsConfirmOpen}
+        open={isConfirmOpen}
+      />
+    </>
   )
 }

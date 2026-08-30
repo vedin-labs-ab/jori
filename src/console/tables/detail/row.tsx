@@ -1,4 +1,4 @@
-import { Copy, CopyPlus, Pencil, Plus, Trash2 } from "lucide-react"
+import { Clipboard, Copy, CopyPlus, Pencil, Plus, Trash2 } from "lucide-react"
 import { type ReactNode, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -25,6 +25,7 @@ import { displayCellText } from "@/shared/materials/cells"
 import { type RowSelection } from "../../shared/list/selection"
 import { type TableColumn, type TableRow as TableRowData } from "../types"
 import { type CommitCell, RowCell } from "./cell"
+import { parseCellText } from "./cells"
 
 /** One grid row: the number/select gutter and its editable cells, with
  *  the row's actions behind a right-click context menu. */
@@ -108,6 +109,15 @@ export function GridRow({
       onDelete={() => onDelete(row)}
       onDuplicate={() => onDuplicate(row)}
       onEditCell={() => setEditKey(menuKey)}
+      onPasteCell={(column, text) => {
+        const parsed = parseCellText(column, text)
+
+        if (parsed.ok) {
+          void onCommit(row, column.key, parsed.value)
+        } else {
+          toast.error(parsed.error)
+        }
+      }}
       row={row}
     >
       {cells}
@@ -125,6 +135,7 @@ function RowMenu({
   onDelete,
   onDuplicate,
   onEditCell,
+  onPasteCell,
   row,
 }: {
   children: ReactNode
@@ -134,6 +145,7 @@ function RowMenu({
   onDelete: () => void
   onDuplicate: () => void
   onEditCell: () => void
+  onPasteCell: (column: TableColumn, text: string) => void
   row: TableRowData
 }) {
   const [confirming, setConfirming] = useState(false)
@@ -147,6 +159,22 @@ function RowMenu({
     void navigator.clipboard
       .writeText(displayCellText(row.values[menuColumn.key]))
       .then(() => toast.success("Cell copied."))
+  }
+
+  async function pasteCell() {
+    if (menuColumn === undefined) {
+      return
+    }
+
+    const text = await navigator.clipboard.readText().catch(() => null)
+
+    if (text === null) {
+      toast.error("Couldn't read the clipboard.")
+
+      return
+    }
+
+    onPasteCell(menuColumn, text)
   }
 
   return (
@@ -183,6 +211,13 @@ function RowMenu({
           >
             <Copy />
             Copy cell
+          </ContextMenuItem>
+          <ContextMenuItem
+            disabled={isPending || menuColumn?.type === "boolean"}
+            onSelect={() => void pasteCell()}
+          >
+            <Clipboard />
+            Paste
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem onSelect={onAddRow}>
