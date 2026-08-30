@@ -9,12 +9,13 @@ import { ConsolePage } from "../page"
 import { ConsolePageLayout } from "../shared/layout"
 import { ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListLoading } from "../shared/list/loading"
+import { MaterialTitleMenu } from "../shared/materials/actions"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { EditStoreDialog } from "./edit"
 import { exportStoreJson } from "./export"
 import { StoreHeaderActions } from "./header"
-import { useStoreRemoval } from "./manage"
+import { storeDeleteDescription, useStoreRemoval } from "./manage"
 import { StoreLinksDialog } from "./share"
 import { type StoreDetail } from "./types"
 import { StoreValue } from "./value/section"
@@ -93,6 +94,34 @@ function StoreViewContent({
   return <StoreReadyView organizationId={organizationId} store={result.store} />
 }
 
+function StoreTitleMenu({
+  onDelete,
+  onEdit,
+  onMoveToFolder,
+  removal,
+  store,
+}: {
+  onDelete: () => void
+  onEdit: () => void
+  onMoveToFolder: () => void
+  removal: ReturnType<typeof useStoreRemoval>
+  store: StoreDetail
+}) {
+  return (
+    <MaterialTitleMenu
+      deleteDescription={storeDeleteDescription}
+      isDeleting={removal.removingStoreId === store.storeId}
+      isRestoring={removal.restoringStoreId === store.storeId}
+      material={{ name: store.name, archivedAt: store.archivedAt }}
+      noun="store"
+      onDelete={onDelete}
+      onEdit={onEdit}
+      onMoveToFolder={onMoveToFolder}
+      onRestore={() => void removal.restoreStore(store)}
+    />
+  )
+}
+
 function StoreReadyView({
   organizationId,
   store,
@@ -101,7 +130,6 @@ function StoreReadyView({
   store: StoreDetail
 }) {
   useMemberUrl()
-  useMaterialBreadcrumb(store.name, store.scope)
 
   const navigate = useNavigate()
   const removal = useStoreRemoval(organizationId)
@@ -118,15 +146,23 @@ function StoreReadyView({
     })
   }
 
+  useMaterialBreadcrumb(
+    store.name,
+    store.scope,
+    <StoreTitleMenu
+      onDelete={removeAndLeaveWhenDeleted}
+      onEdit={() => setIsEditOpen(true)}
+      onMoveToFolder={() => setIsMoveOpen(true)}
+      removal={removal}
+      store={store}
+    />
+  )
+
   return (
     <ConsoleListLayout>
       <StoreHeaderActions
-        onDelete={removeAndLeaveWhenDeleted}
-        onEdit={() => setIsEditOpen(true)}
         onExport={() => exportStoreJson(store)}
-        onMoveToFolder={() => setIsMoveOpen(true)}
         onShare={() => setIsShareOpen(true)}
-        removal={removal}
         store={store}
       />
       <StoreValue organizationId={organizationId} store={store} />
