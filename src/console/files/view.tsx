@@ -18,16 +18,13 @@ import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListLoading } from "../shared/list/loading"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
+import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileEditor } from "./editor/section"
 import { FileLinksDialog } from "./share"
 import { type FileSiblings, useFileSiblings, useSiblingKeys } from "./siblings"
 import { FileMeta, FileToolbar } from "./toolbar"
 import { type FileDetail, formatFileSize } from "./types"
 import { FileViewer } from "./viewer/section"
-
-/** Text files past this size skip the inline editor; the download covers
- *  them. */
-const textSizeLimit = 1024 * 1024
 
 /** Member view of one file: a secondary header with the file's metadata,
  *  and the content itself filling the rest of the page — media inline, text
@@ -64,8 +61,19 @@ function FileViewContent({
   organizationId: string
 }) {
   const result = useQuery(api.files.console.get, { organizationId, fileId })
+  const files = useQuery(api.files.console.list, { organizationId })
 
   if (result === undefined) {
+    // While the detail query resolves — every prev/next navigation starts
+    // here — the file's row from the already-subscribed list carries the
+    // same shape, so the page renders immediately and the resolved detail
+    // replaces it without a visible swap. Only a cold direct visit waits.
+    const row = files?.find((candidate) => candidate.fileId === fileId)
+
+    if (row !== undefined) {
+      return <FileReadyView file={row} organizationId={organizationId} />
+    }
+
     return (
       <ConsolePageLayout>
         <ConsoleListLoading />
@@ -173,9 +181,9 @@ function FileBody({
     return (
       <FileViewer
         key={file.fileId}
+        file={file}
         kind={kind}
         meta={<FileMeta file={file} />}
-        name={file.name}
         siblings={siblings}
         url={file.url}
       />
@@ -204,6 +212,8 @@ function FileFallbackBody({
   siblings: FileSiblings
 }) {
   useSiblingKeys(siblings)
+  // No content to wait for here, so the neighbors warm right away.
+  usePreloadSiblings(siblings, true)
 
   return (
     <>
