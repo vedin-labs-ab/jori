@@ -136,9 +136,14 @@ function FoldersLabel() {
       )}
       ref={root.setNodeRef}
     >
+      {/* Constant geometry: the pill's room comes from padding cancelled
+          by negative margin, so the text never moves and a shell remount
+          mid-hover has nothing to replay — unlike the breadcrumb, this
+          control sits under the pointer exactly when navigation remounts
+          the sidebar. */}
       <Button
         asChild
-        className="h-6 px-0 font-normal text-sidebar-foreground/70 text-xs hover:px-1.5 focus-visible:px-1.5"
+        className="-mx-1.5 h-6 px-1.5 font-normal text-sidebar-foreground/70 text-xs"
         variant="ghost"
       >
         <Link to="/folders">Folders</Link>
