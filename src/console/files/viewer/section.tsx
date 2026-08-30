@@ -86,14 +86,19 @@ function ViewerContent({
       )
     case "video":
       return (
-        // biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks.
-        <video
-          className="size-full object-contain"
-          controls
-          onError={onError}
-          onLoadedMetadata={onReady}
-          src={url}
-        />
+        // Flex-centered with max constraints rather than object-contain:
+        // the element shrinks to the picture, so the controls hug the
+        // video and centering holds in every engine.
+        <div className="flex size-full items-center justify-center">
+          {/* biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks. */}
+          <video
+            className="max-h-full max-w-full"
+            controls
+            onError={onError}
+            onLoadedMetadata={onReady}
+            src={url}
+          />
+        </div>
       )
     case "audio":
       return (
