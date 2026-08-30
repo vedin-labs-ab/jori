@@ -75,15 +75,13 @@ test("names the page with a heading rather than a one-item breadcrumb", () => {
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
 })
 
-test("heads a material detail page with the linked parent surface", () => {
+test("shows nothing on a material detail page before its view publishes", () => {
   pathname = "/tables/abc123"
   render(<ConsoleShell>Content</ConsoleShell>)
 
-  const trail = screen.getByRole("navigation", { name: "breadcrumb" })
-  const parent = screen.getByRole("link", { name: "Tables" })
-
-  expect(trail.contains(parent)).toBe(true)
-  expect(parent.getAttribute("href")).toBe("/tables")
+  // The trail appears whole once the view publishes; assembling it in
+  // pieces read as jitter.
+  expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
   expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
 })
 
@@ -146,11 +144,29 @@ test("a published empty trail names a root material without ancestors", () => {
   expect(screen.queryByRole("link", { name: "Folders" })).toBeNull()
 })
 
-test("titles a folder page as Folders while its trail loads", () => {
+test("keeps the previous crumb while the next material page loads", () => {
+  const publish = renderWithPublisher("/folders/aaa")
+
+  act(() => publish.current?.({ name: "Reports", trail: [] }))
+  pathname = "/folders/bbb"
+  act(() => publish.current?.(undefined))
+
+  // The old trail stands in until the next page publishes — never the
+  // half-built default in between.
+  expect(screen.getByText("Reports")).toBeDefined()
+
+  act(() => publish.current?.({ name: "Archive", trail: [] }))
+
+  expect(screen.getByText("Archive")).toBeDefined()
+  expect(screen.queryByText("Reports")).toBeNull()
+})
+
+test("shows nothing on a folder page while its trail loads", () => {
   pathname = "/folders/abc123"
   render(<ConsoleShell>Content</ConsoleShell>)
 
-  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Folders")
+  expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
+  expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
 })
 
 function renderWithPublisher(path: string) {

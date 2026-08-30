@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router"
 import { ChevronDown } from "lucide-react"
-import { Fragment, type ReactNode, useState } from "react"
+import { Fragment, type ReactNode, useRef, useState } from "react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,7 +30,7 @@ import {
   type MaterialBreadcrumbSegment,
 } from "../shared/materials/breadcrumb"
 import { ConsoleSidebar } from "./navigation"
-import { getMaterialSurface, getPageTitle } from "./routes"
+import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
 
 const consoleFrame = "w-full px-4 md:px-6"
 
@@ -95,12 +95,11 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 }
 
 /** The header's name for the page. Material detail pages get a trail: the
- *  linked ancestors, then the material's name once its view has published
- *  it — with a muted scope icon suffix when the view publishes a scope.
- *  The ancestors default to the parent surface derived from the path; a
- *  view may publish a full segment trail instead. Everywhere else a
- *  one-item breadcrumb is not a trail, it is the page's name, so it is
- *  marked up as a heading. */
+ *  linked ancestors, then the material's name — with a muted scope icon
+ *  suffix when the view publishes a scope. The ancestors default to the
+ *  parent surface derived from the path; a view may publish a full segment
+ *  trail instead. Everywhere else a one-item breadcrumb is not a trail, it
+ *  is the page's name, so it is marked up as a heading. */
 function ConsoleHeaderTitle({
   material,
   pathname,
@@ -108,20 +107,23 @@ function ConsoleHeaderTitle({
   material: MaterialBreadcrumb | undefined
   pathname: string
 }) {
-  const surface = getMaterialSurface(pathname)
-  const trail =
-    material?.trail ??
-    (surface === undefined
-      ? undefined
-      : [{ name: surface.label, to: surface.to }])
+  const shown = useShownMaterial(material, pathname)
 
-  if (trail === undefined) {
-    return (
+  if (shown === undefined) {
+    // A material page before anything published renders nothing — the
+    // trail appears whole rather than assembling in front of the reader.
+    return isMaterialPage(pathname) ? null : (
       <h1 className="min-w-0 truncate text-xs/relaxed">
         {getPageTitle(pathname)}
       </h1>
     )
   }
+
+  const trail =
+    shown.material.trail ??
+    (shown.surface === undefined
+      ? []
+      : [{ name: shown.surface.label, to: shown.surface.to }])
 
   return (
     <Breadcrumb className="min-w-0">
@@ -138,17 +140,38 @@ function ConsoleHeaderTitle({
             </BreadcrumbItem>
           </Fragment>
         ))}
-        {material === undefined ? null : (
-          <>
-            {trail.length === 0 ? null : <BreadcrumbSeparator />}
-            <BreadcrumbItem className="min-w-0">
-              <MaterialName material={material} />
-            </BreadcrumbItem>
-          </>
-        )}
+        {trail.length === 0 ? null : <BreadcrumbSeparator />}
+        <BreadcrumbItem className="min-w-0">
+          <MaterialName material={shown.material} />
+        </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
   )
+}
+
+type ShownMaterial = {
+  material: MaterialBreadcrumb
+  surface: ReturnType<typeof getMaterialSurface>
+}
+
+/** The crumb the header shows: the live material when one is published,
+ *  else the crumb retained from the previous material page — so moving
+ *  between materials keeps the old trail up until the new one is ready
+ *  instead of dipping through a half-built middle state. Leaving material
+ *  pages drops the retained crumb. */
+function useShownMaterial(
+  material: MaterialBreadcrumb | undefined,
+  pathname: string
+): ShownMaterial | undefined {
+  const held = useRef<ShownMaterial>(undefined)
+
+  if (material !== undefined) {
+    held.current = { material, surface: getMaterialSurface(pathname) }
+  } else if (!isMaterialPage(pathname)) {
+    held.current = undefined
+  }
+
+  return held.current
 }
 
 /** The current material's name — plain, or the trigger of the page's own

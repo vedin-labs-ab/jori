@@ -78,6 +78,16 @@ export function getMaterialSurface(pathname: string) {
   )
 }
 
+/** Pages whose header crumb is published by the view once its data loads:
+ *  the material detail pages, and folder pages, whose whole ancestry is
+ *  data. */
+export function isMaterialPage(pathname: string) {
+  return (
+    getMaterialSurface(pathname) !== undefined ||
+    pathname.startsWith("/folders/")
+  )
+}
+
 /**
  * What the browser tab says. Console routes declare it from their own path so
  * the name comes from the same table the sidebar and the header read, and a
