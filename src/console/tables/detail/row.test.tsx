@@ -49,7 +49,7 @@ function stubSelection(): RowSelection<TableRow> {
 }
 
 function renderRow() {
-  render(
+  return render(
     <GridRow
       columns={columns}
       disabled={false}
@@ -100,6 +100,38 @@ test("Tab commits the draft and opens the next text-like cell", async () => {
     expect(screen.getByRole("textbox", { name: "Stage value" })).toBeTruthy()
   })
   expect(onCommit).toHaveBeenCalledWith(row, "title", "Call Grace")
+})
+
+test("an editor unmounting mid-edit commits its draft like a blur", () => {
+  const view = renderRow()
+
+  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.change(screen.getByRole("textbox", { name: "Title value" }), {
+    target: { value: "Call Grace" },
+  })
+  view.unmount()
+
+  expect(onCommit).toHaveBeenCalledWith(row, "title", "Call Grace")
+})
+
+test("an unmount after Escape or with an untouched draft commits nothing", () => {
+  const escaped = renderRow()
+
+  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.change(screen.getByRole("textbox", { name: "Title value" }), {
+    target: { value: "Call Grace" },
+  })
+  fireEvent.keyDown(screen.getByRole("textbox", { name: "Title value" }), {
+    key: "Escape",
+  })
+  escaped.unmount()
+
+  const untouched = renderRow()
+
+  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  untouched.unmount()
+
+  expect(onCommit).not.toHaveBeenCalled()
 })
 
 test("Shift+Tab at the row's first text cell just commits and closes", async () => {

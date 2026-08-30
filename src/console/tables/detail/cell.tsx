@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useEffect, useState } from "react"
+import { type KeyboardEvent, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -93,6 +93,10 @@ function TextCell({
     }
   }, [column, disabled, spotlight, value])
 
+  const committing = useRef<string>(undefined)
+
+  useUnmountCommit({ column, committing, draft, onCommit, row, value })
+
   function close() {
     setDraft(undefined)
     onSettle?.()
@@ -113,13 +117,19 @@ function TextCell({
       return false
     }
 
-    if (await onCommit(row, column.id, parsed.value)) {
-      close()
+    committing.current = text
 
-      return true
+    try {
+      if (await onCommit(row, column.id, parsed.value)) {
+        close()
+
+        return true
+      }
+
+      return false
+    } finally {
+      committing.current = undefined
     }
-
-    return false
   }
 
   if (draft === undefined) {
@@ -148,6 +158,49 @@ function TextCell({
       }
       value={draft}
     />
+  )
+}
+
+/** An editor that unmounts mid-edit — the virtual window scrolled on, or
+ *  the view changed — commits its draft the way a blur would, so leaving
+ *  never drops an edit silently. Escape clears the draft before unmount,
+ *  so cancels stay cancels; a draft that cannot parse reports itself
+ *  instead of vanishing. */
+function useUnmountCommit(state: {
+  column: TableColumn
+  /** The text a blur or Enter commit is already writing, so an unmount
+   *  racing that in-flight save never writes the same draft twice. */
+  committing: { current: string | undefined }
+  draft: string | undefined
+  onCommit: CommitCell
+  row: TableRow
+  value: unknown
+}) {
+  const latest = useRef(state)
+
+  latest.current = state
+
+  useEffect(
+    () => () => {
+      const { column, committing, draft, onCommit, row, value } = latest.current
+
+      if (
+        draft === undefined ||
+        draft === committing.current ||
+        draft === formatCellText(column, value)
+      ) {
+        return
+      }
+
+      const parsed = parseCellText(column, draft)
+
+      if (parsed.ok) {
+        void onCommit(row, column.id, parsed.value)
+      } else {
+        toast.error(`${column.name} kept its saved value — ${parsed.error}`)
+      }
+    },
+    []
   )
 }
 
