@@ -38,13 +38,15 @@ function renderDialog(initialFolderId?: string) {
   )
 }
 
-function fillRequiredFields() {
+function fillName() {
   fireEvent.change(screen.getByLabelText("Name"), {
     target: { value: "Invoices" },
   })
-  fireEvent.change(screen.getByLabelText("Column key"), {
-    target: { value: "total" },
-  })
+}
+
+/** Folder and Sharing live behind the collapsed Advanced settings. */
+function expandAdvancedSettings() {
+  fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
 }
 
 /** jsdom leaves out the browser's implicit Enter-to-submit, so pressing
@@ -64,20 +66,13 @@ describe("create table enter submission", () => {
     renderDialog()
     pressEnter(screen.getByLabelText("Name"))
 
-    const alerts = screen
-      .getAllByRole("alert")
-      .map((alert) => alert.textContent)
-
-    expect(alerts).toEqual([
-      "Give the table a name.",
-      "Every column needs a key.",
-    ])
+    expect(screen.getByRole("alert").textContent).toBe("Give the table a name.")
     expect(createTable).not.toHaveBeenCalled()
   })
 
-  test("Enter in a completed form creates the table", async () => {
+  test("Enter in a named form creates the table with the starter column", async () => {
     renderDialog()
-    fillRequiredFields()
+    fillName()
     pressEnter(screen.getByLabelText("Name"))
 
     await waitFor(() => expect(createTable).toHaveBeenCalledOnce())
@@ -85,7 +80,7 @@ describe("create table enter submission", () => {
       organizationId: "org-1",
       name: "Invoices",
       folderId: undefined,
-      columns: [{ key: "total", name: "total", type: "string" }],
+      columns: [{ key: "name", name: "Name", type: "string" }],
     })
   })
 })
@@ -93,7 +88,8 @@ describe("create table enter submission", () => {
 describe("create table folder field", () => {
   test("a selected folder rides along in the create payload", async () => {
     renderDialog()
-    fillRequiredFields()
+    fillName()
+    expandAdvancedSettings()
     fireEvent.click(screen.getByLabelText("Folder"))
     fireEvent.click(await screen.findByRole("button", { name: "Finance" }))
     fireEvent.click(screen.getByRole("button", { name: "Create table" }))
@@ -106,12 +102,13 @@ describe("create table folder field", () => {
 
   test("initialFolderId pre-populates the field yet stays editable", async () => {
     renderDialog("finance")
+    expandAdvancedSettings()
 
     expect(screen.getByLabelText("Folder").textContent).toContain("Finance")
 
     fireEvent.click(screen.getByLabelText("Folder"))
     fireEvent.click(await screen.findByRole("button", { name: "No folder" }))
-    fillRequiredFields()
+    fillName()
     fireEvent.click(screen.getByRole("button", { name: "Create table" }))
 
     await waitFor(() => expect(createTable).toHaveBeenCalledOnce())

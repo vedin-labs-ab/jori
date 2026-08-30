@@ -1,4 +1,10 @@
+import { ChevronDown } from "lucide-react"
 import { type FormEvent, type ReactNode } from "react"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 
 /** Form wrapper for dialog fields and footer: Enter in a single-line input
@@ -31,5 +37,20 @@ export function DialogForm({
     <form className={cn("grid gap-4", className)} onSubmit={handleSubmit}>
       {children}
     </form>
+  )
+}
+
+/** Collapsed-by-default home for a create flow's secondary fields — folder,
+ *  sharing, and the like — so the dialog leads with what actually defines
+ *  the material. Callers pass whichever fields their material carries. */
+export function AdvancedSettings({ children }: { children: ReactNode }) {
+  return (
+    <Collapsible className="grid gap-4">
+      <CollapsibleTrigger className="flex w-fit items-center gap-1.5 font-medium text-muted-foreground text-sm transition-colors hover:text-foreground [&[data-state=open]>svg]:rotate-180">
+        Advanced settings
+        <ChevronDown className="size-3.5 transition-transform duration-200 ease-out" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="grid gap-4">{children}</CollapsibleContent>
+    </Collapsible>
   )
 }

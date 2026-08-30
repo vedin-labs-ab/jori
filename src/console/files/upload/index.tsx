@@ -8,10 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { FolderField } from "../../folders/field"
-import { DialogForm } from "../../shared/materials/form"
+import { MaterialDescriptionField } from "../../shared/materials/fields"
+import { AdvancedSettings, DialogForm } from "../../shared/materials/form"
 import { MaterialScopeField } from "../../shared/materials/scope"
 import { FileDropzone } from "./dropzone"
 import { UploadList } from "./list"
@@ -85,27 +84,25 @@ function UploadFields({
           onRemove={upload.removeFile}
         />
       </div>
-      <MaterialScopeField
-        id="file-upload-scope"
-        noun="file"
-        onScopeChange={upload.setScope}
-        scope={upload.scope}
+      <MaterialDescriptionField
+        description={upload.description}
+        idPrefix="file-upload"
+        onDescriptionChange={upload.setDescription}
       />
-      <FolderField
-        id="file-upload-folder"
-        onChange={upload.setFolderId}
-        organizationId={organizationId}
-        value={upload.folderId}
-      />
-      <div className="grid gap-2">
-        <Label htmlFor="file-upload-description">Description</Label>
-        <Input
-          id="file-upload-description"
-          onChange={(event) => upload.setDescription(event.target.value)}
-          placeholder="Optional note that helps others find these"
-          value={upload.description}
+      <AdvancedSettings>
+        <FolderField
+          id="file-upload-folder"
+          onChange={upload.setFolderId}
+          organizationId={organizationId}
+          value={upload.folderId}
         />
-      </div>
+        <MaterialScopeField
+          id="file-upload-scope"
+          noun="file"
+          onScopeChange={upload.setScope}
+          scope={upload.scope}
+        />
+      </AdvancedSettings>
     </div>
   )
 }

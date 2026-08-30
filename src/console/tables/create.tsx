@@ -20,16 +20,9 @@ import {
   MaterialDescriptionField,
   MaterialNameField,
 } from "../shared/materials/fields"
-import { DialogForm } from "../shared/materials/form"
+import { AdvancedSettings, DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
-import { ColumnEditor } from "./columns"
-import {
-  type ColumnDraft,
-  draftsToColumns,
-  newColumnDraft,
-  type TableFormErrors,
-  validateTableForm,
-} from "./draft"
+import { starterColumns } from "./draft"
 
 export function CreateTableDialog({
   initialFolderId,
@@ -56,11 +49,11 @@ export function CreateTableDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create table</DialogTitle>
           <DialogDescription>
-            Define the typed columns rows of this table must follow.
+            Name it now — define its columns right in the table.
           </DialogDescription>
         </DialogHeader>
         <DialogForm
@@ -68,38 +61,30 @@ export function CreateTableDialog({
           onSubmit={() => void form.submit()}
         >
           <MaterialNameField
-            error={form.errors.name}
+            error={form.nameError}
             idPrefix="table-create"
             name={form.name}
             onNameChange={form.setName}
-          />
-          <MaterialScopeField
-            id="table-create-scope"
-            noun="table"
-            onScopeChange={form.setScope}
-            scope={form.scope}
-          />
-          <FolderField
-            id="table-create-folder"
-            onChange={form.setFolderId}
-            organizationId={organizationId}
-            value={form.folderId}
           />
           <MaterialDescriptionField
             description={form.description}
             idPrefix="table-create"
             onDescriptionChange={form.setDescription}
           />
-          <ColumnEditor
-            allowRequired
-            drafts={form.drafts}
-            onChange={form.setDrafts}
-          />
-          {form.errors.columns === undefined ? null : (
-            <p className="text-destructive text-xs" role="alert">
-              {form.errors.columns}
-            </p>
-          )}
+          <AdvancedSettings>
+            <FolderField
+              id="table-create-folder"
+              onChange={form.setFolderId}
+              organizationId={organizationId}
+              value={form.folderId}
+            />
+            <MaterialScopeField
+              id="table-create-scope"
+              noun="table"
+              onScopeChange={form.setScope}
+              scope={form.scope}
+            />
+          </AdvancedSettings>
           <DialogFooter>
             <Button disabled={form.isCreating} type="submit">
               {form.isCreating ? <Loader2 className="animate-spin" /> : null}
@@ -118,20 +103,23 @@ function useCreateTable(
   onCreated: () => void
 ) {
   const create = useMutation(api.tables.console.create)
-  const [name, setName] = useState("")
+  const [name, setNameState] = useState("")
+  const [nameError, setNameError] = useState<string>()
   const [description, setDescription] = useState("")
   const [scope, setScope] = useState<Scope>("organization")
   const [folderId, setFolderId] = useState(initialFolderId)
-  const [drafts, setDrafts] = useState<ColumnDraft[]>(() => [newColumnDraft()])
-  const [errors, setErrors] = useState<TableFormErrors>({})
   const [isCreating, setIsCreating] = useState(false)
 
+  // Validation shows only after a submit attempt; new input clears it.
+  function setName(next: string) {
+    setNameState(next)
+    setNameError(undefined)
+  }
+
   async function submit() {
-    const found = validateTableForm(name, drafts)
+    if (name.trim() === "") {
+      setNameError("Give the table a name.")
 
-    setErrors(found)
-
-    if (found.name !== undefined || found.columns !== undefined) {
       return
     }
 
@@ -145,15 +133,14 @@ function useCreateTable(
         scope,
         folderId:
           folderId === null ? undefined : (folderId as GenericId<"folders">),
-        columns: draftsToColumns(drafts, []),
+        columns: starterColumns,
       })
 
       toast.success(`Created ${name.trim()}.`)
-      setName("")
+      setNameState("")
       setDescription("")
       setScope("organization")
       setFolderId(initialFolderId)
-      setDrafts([newColumnDraft()])
       onCreated()
     } catch (error) {
       showErrorToast(error, "Could not create the table.")
@@ -164,24 +151,14 @@ function useCreateTable(
 
   return {
     description,
-    drafts,
-    errors,
     folderId,
     isCreating,
     name,
+    nameError,
     scope,
     setDescription,
     setFolderId,
-    // Validation shows only after a submit attempt; new input in a field
-    // clears that field's error right away.
-    setDrafts: (next: ColumnDraft[]) => {
-      setErrors((current) => ({ ...current, columns: undefined }))
-      setDrafts(next)
-    },
-    setName: (next: string) => {
-      setErrors((current) => ({ ...current, name: undefined }))
-      setName(next)
-    },
+    setName,
     setScope,
     submit,
   }

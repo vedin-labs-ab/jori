@@ -6,7 +6,6 @@ import {
   draftsToColumns,
   newColumnDraft,
   renameColumn,
-  validateTableForm,
 } from "./draft"
 import { type TableColumn } from "./types"
 
@@ -58,17 +57,6 @@ test("locked drafts keep everything but the display name", () => {
   expect(draftsToColumns(renamed, existing)).toEqual([
     { ...existing[0], name: "Total" },
   ])
-})
-
-test("form validation flags a missing name and column problems together", () => {
-  expect(validateTableForm("  ", [draft({ key: "" })])).toEqual({
-    name: "Give the table a name.",
-    columns: "Every column needs a key.",
-  })
-  expect(validateTableForm("Launches", [draft({ key: "title" })])).toEqual({
-    name: undefined,
-    columns: undefined,
-  })
 })
 
 test("appending a column keeps existing ones and adds an optional column", () => {
