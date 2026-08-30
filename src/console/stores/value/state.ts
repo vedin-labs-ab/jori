@@ -34,6 +34,9 @@ export type ValueEditorState = {
   codeError: string | undefined
   /** Why the editor is, or stays, in the code view. */
   codeNote: string | undefined
+  /** The code view edits only while the form cannot host the value;
+   *  once it can, code becomes a read-only mirror of the form. */
+  codeEditable: boolean
 }
 
 export type ValueSubmitResult = { ok: true; value: unknown } | { ok: false }
@@ -121,10 +124,11 @@ export function initialEditorState(
     fieldErrors: {},
     codeError: undefined,
     codeNote: undefined,
+    codeEditable: false,
   }
 
   if (form === undefined) {
-    return { ...base, view: "code", codeNote: formlessNote }
+    return { ...base, view: "code", codeEditable: true, codeNote: formlessNote }
   }
 
   if (!hasValue) {
@@ -134,7 +138,12 @@ export function initialEditorState(
   const root = valueToState(form, value)
 
   return root === undefined
-    ? { ...base, view: "code", codeNote: valueEditorNotes.value }
+    ? {
+        ...base,
+        view: "code",
+        codeEditable: true,
+        codeNote: valueEditorNotes.value,
+      }
     : { ...base, root }
 }
 
@@ -199,6 +208,7 @@ export function switchToForm(
     root,
     fieldErrors: {},
     codeNote: undefined,
+    codeEditable: false,
   }
 }
 

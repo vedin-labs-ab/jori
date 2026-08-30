@@ -13,14 +13,13 @@ import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
 import { StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"
-import { type ValueSaveStatus } from "./autosave"
 import { ValueEditorSection } from "./editor"
 import { StoreToolbar } from "./toolbar"
 
 /** The store's value under the store toolbar. The editor IS the page —
- *  the form (or code) view saves itself like the file editor does, with
- *  the toolbar meta carrying the save status. Archived stores fall back
- *  to a read-only document. */
+ *  it renders the toolbar itself, so the view toggle and save status live
+ *  in the header. Archived stores fall back to a read-only document under
+ *  a plain toolbar. */
 export function StoreValue({
   organizationId,
   store,
@@ -29,37 +28,34 @@ export function StoreValue({
   store: StoreDetail
 }) {
   const [isSchemaOpen, setIsSchemaOpen] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<ValueSaveStatus>("idle")
-  const isArchived = store.archivedAt !== undefined
+  const tools = (
+    <>
+      <ValueActionButton
+        icon={<Braces />}
+        label={store.schema === undefined ? "Add schema" : "Schema"}
+        onClick={() => setIsSchemaOpen(true)}
+      />
+      <CopyButton label="value" value={formatJsonText(store.value)} />
+    </>
+  )
 
   return (
     <>
-      <StoreToolbar
-        saveStatus={isArchived ? undefined : saveStatus}
-        store={store}
-        tools={
-          <>
-            <ValueActionButton
-              icon={<Braces />}
-              label={store.schema === undefined ? "Add schema" : "Schema"}
-              onClick={() => setIsSchemaOpen(true)}
-            />
-            <CopyButton label="value" value={formatJsonText(store.value)} />
-          </>
-        }
-      />
-      <ConsoleListContent>
-        {isArchived ? (
-          <ArchivedValue store={store} />
-        ) : (
-          <ValueEditorSection
-            key={store.storeId}
-            onStatus={setSaveStatus}
-            organizationId={organizationId}
-            store={store}
-          />
-        )}
-      </ConsoleListContent>
+      {store.archivedAt === undefined ? (
+        <ValueEditorSection
+          key={store.storeId}
+          organizationId={organizationId}
+          store={store}
+          tools={tools}
+        />
+      ) : (
+        <>
+          <StoreToolbar store={store} tools={tools} />
+          <ConsoleListContent>
+            <ArchivedValue store={store} />
+          </ConsoleListContent>
+        </>
+      )}
       <StoreSchemaDialog
         onOpenChange={setIsSchemaOpen}
         organizationId={organizationId}

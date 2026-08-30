@@ -25,10 +25,7 @@ type Loop = {
 
 /** Drives the debounced save loop. `perform` is read through a ref so the
  *  latest editor state is always the one validated and written. */
-export function useValueAutosave(
-  perform: () => Promise<ValueSaveOutcome>,
-  onStatus: (status: ValueSaveStatus) => void
-) {
+export function useValueAutosave(perform: () => Promise<ValueSaveOutcome>) {
   const [status, setStatus] = useState<ValueSaveStatus>("idle")
   const performRef = useRef(perform)
   const loopRef = useRef<Loop>({
@@ -39,8 +36,6 @@ export function useValueAutosave(
   })
 
   performRef.current = perform
-
-  useEffect(() => onStatus(status), [onStatus, status])
 
   useEffect(() => {
     const loop = loopRef.current
