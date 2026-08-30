@@ -1,5 +1,5 @@
 import { Copy, CopyPlus, Pencil, Plus, Trash2 } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -77,7 +77,7 @@ export function GridRow({
       />
       {columns.map((column) => (
         <TableCell
-          className="py-0"
+          className="p-0"
           key={column.key}
           onContextMenu={() => setMenuKey(column.key)}
         >
@@ -137,6 +137,7 @@ function RowMenu({
   row: TableRowData
 }) {
   const [confirming, setConfirming] = useState(false)
+  const editPending = useRef(false)
 
   function copyCell() {
     if (menuColumn === undefined) {
@@ -152,10 +153,26 @@ function RowMenu({
     <>
       <ContextMenu>
         <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-        <ContextMenuContent className="w-44">
+        {/* Edit cell waits for the menu to finish closing: while the menu's
+            focus lock is up it swallows the editor's autofocus, so the
+            editor opens from onCloseAutoFocus with the restore prevented
+            and the caret lands in the input. */}
+        <ContextMenuContent
+          className="w-44"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault()
+
+            if (editPending.current) {
+              editPending.current = false
+              onEditCell()
+            }
+          }}
+        >
           <ContextMenuItem
             disabled={isPending || menuColumn?.type === "boolean"}
-            onSelect={onEditCell}
+            onSelect={() => {
+              editPending.current = true
+            }}
           >
             <Pencil />
             Edit cell

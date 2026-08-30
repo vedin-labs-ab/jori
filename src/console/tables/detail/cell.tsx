@@ -34,14 +34,16 @@ export function RowCell({
 
   if (column.type === "boolean") {
     return (
-      <Checkbox
-        aria-label={`${column.name} for this row`}
-        checked={value === true}
-        disabled={disabled}
-        onCheckedChange={(checked) =>
-          void onCommit(row, column.key, checked === true)
-        }
-      />
+      <span className="flex h-9 items-center px-3">
+        <Checkbox
+          aria-label={`${column.name} for this row`}
+          checked={value === true}
+          disabled={disabled}
+          onCheckedChange={(checked) =>
+            void onCommit(row, column.key, checked === true)
+          }
+        />
+      </span>
     )
   }
 
@@ -121,11 +123,14 @@ function TextCell({
     )
   }
 
+  // The editor IS the cell: no chrome of its own, filling the cell to its
+  // edges with the ring drawn inset along them, and the text sitting
+  // exactly where the resting cell shows it.
   return (
     <Input
       autoFocus
       aria-label={`${column.name} value`}
-      className="h-7 min-w-24 px-1.5 text-xs"
+      className="h-9 min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
       onBlur={(event) => void commit(event.target.value)}
       onChange={(event) => setDraft(event.target.value)}
       onKeyDown={(event) => {
@@ -156,13 +161,15 @@ function CellButton({
   return (
     <button
       aria-label={label}
-      className="block w-full min-w-24 max-w-56 cursor-text truncate rounded-sm px-1 py-0.5 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-default disabled:hover:bg-transparent"
+      className="flex h-9 w-full min-w-24 cursor-text items-center px-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
       disabled={disabled}
       onClick={onClick}
       title={text}
       type="button"
     >
-      {text === "" ? <span className="text-muted-foreground">—</span> : text}
+      <span className="max-w-56 truncate">
+        {text === "" ? <span className="text-muted-foreground">—</span> : text}
+      </span>
     </button>
   )
 }
