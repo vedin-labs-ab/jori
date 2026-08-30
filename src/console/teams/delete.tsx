@@ -1,4 +1,3 @@
-import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import {
@@ -8,7 +7,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
@@ -49,9 +47,6 @@ export function TeamDeleteDialog({
     <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogMedia className="bg-destructive/10 text-destructive">
-            <Trash2 />
-          </AlertDialogMedia>
           <AlertDialogTitle>Delete team</AlertDialogTitle>
           <AlertDialogDescription>
             {team.name} will be deleted and its members lose the grouping.

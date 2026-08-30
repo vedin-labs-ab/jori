@@ -1,25 +1,24 @@
-import { PencilLine } from "lucide-react"
-import { type SyntheticEvent, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Field } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/shared/session/auth"
+import { DialogForm } from "../shared/materials/form"
 import { type Team } from "./row"
 
-/** Rename dialog: the team keeps its identity, only the label changes. */
+/** Rename dialog in the console's edit idiom: the team keeps its
+ *  identity, only the label changes. */
 export function TeamRenameDialog({
   team,
   open,
@@ -29,15 +28,15 @@ export function TeamRenameDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
+  const [name, setName] = useState(team.name)
   const [isPending, setIsPending] = useState(false)
 
-  async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function submit() {
+    const trimmed = name.trim()
 
-    const name = String(new FormData(event.currentTarget).get("name")).trim()
-
-    if (name === "" || name === team.name) {
+    if (trimmed === "" || trimmed === team.name) {
       onOpenChange(false)
+
       return
     }
 
@@ -45,7 +44,7 @@ export function TeamRenameDialog({
 
     const { error } = await authClient.organization.updateTeam({
       teamId: team.id,
-      data: { name },
+      data: { name: trimmed },
     })
 
     setIsPending(false)
@@ -59,40 +58,31 @@ export function TeamRenameDialog({
   }
 
   return (
-    <AlertDialog onOpenChange={onOpenChange} open={open}>
-      <AlertDialogContent>
-        <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-          <AlertDialogHeader>
-            <AlertDialogMedia>
-              <PencilLine />
-            </AlertDialogMedia>
-            <AlertDialogTitle>Rename team</AlertDialogTitle>
-            <AlertDialogDescription>
-              Give {team.name} a new name.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Rename team</DialogTitle>
+          <DialogDescription>Give {team.name} a new name.</DialogDescription>
+        </DialogHeader>
+        <DialogForm disabled={isPending} onSubmit={() => void submit()}>
           <Field>
             <Label htmlFor="team-rename-name">Name</Label>
             <Input
               autoFocus
-              defaultValue={team.name}
               disabled={isPending}
               id="team-rename-name"
-              name="name"
-              required
+              onChange={(event) => setName(event.target.value)}
+              value={name}
             />
           </Field>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-            <Button disabled={isPending} type="submit">
+          <DialogFooter>
+            <Button disabled={name.trim() === "" || isPending} type="submit">
               {isPending && <Spinner />}
               Rename team
             </Button>
-          </AlertDialogFooter>
-        </form>
-      </AlertDialogContent>
-    </AlertDialog>
+          </DialogFooter>
+        </DialogForm>
+      </DialogContent>
+    </Dialog>
   )
 }
