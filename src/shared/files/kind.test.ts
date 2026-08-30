@@ -7,7 +7,7 @@ import {
   FileText,
 } from "lucide-react"
 import { expect, test } from "vitest"
-import { fileKind, previewKind } from "./kind"
+import { fileKind, isHtmlFile, previewKind } from "./kind"
 
 test("media and documents resolve from the mime type alone", () => {
   expect(fileKind("image/png", "photo")).toMatchObject({
@@ -166,6 +166,21 @@ test("preview kinds read text through the registry's extension rescue", () => {
   expect(previewKind("application/octet-stream", "main.ts")).toBe("text")
   expect(previewKind("", "script.py")).toBe("text")
   expect(previewKind("text/markdown; charset=utf-8", "notes.md")).toBe("text")
+})
+
+test("html detection reads the mime type or the rescuing extension", () => {
+  expect(isHtmlFile("text/html", "page")).toBe(true)
+  expect(isHtmlFile("text/html; charset=utf-8", "page.txt")).toBe(true)
+  expect(isHtmlFile("application/octet-stream", "page.html")).toBe(true)
+  expect(isHtmlFile("text/plain", "page.htm")).toBe(true)
+  expect(isHtmlFile("", "index.HTML")).toBe(true)
+})
+
+test("html detection leaves other text and media alone", () => {
+  expect(isHtmlFile("text/plain", "notes.txt")).toBe(false)
+  expect(isHtmlFile("application/json", "page.html.json")).toBe(false)
+  expect(isHtmlFile("image/png", "page.html.png")).toBe(false)
+  expect(isHtmlFile("application/octet-stream", "html")).toBe(false)
 })
 
 test("preview kinds leave the rest to the download prompt", () => {
