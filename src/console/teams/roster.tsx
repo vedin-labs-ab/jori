@@ -2,7 +2,7 @@ import {
   type OrganizationAuthClient,
   useListOrganizationMembers,
 } from "@better-auth-ui/react"
-import { Check, UserRoundPlus } from "lucide-react"
+import { UserRoundPlus } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import {
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
+  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -135,22 +136,21 @@ function RosterMenu({
           <CommandInput placeholder="Search members…" />
           <CommandList>
             <CommandEmpty>No matches.</CommandEmpty>
-            {membersData?.members.map((member) => (
-              <CommandItem
-                disabled={pendingUserId !== undefined}
-                key={member.userId}
-                keywords={[member.user.name, member.user.email]}
-                onSelect={() => void toggle(member.userId)}
-                value={member.userId}
-              >
-                <span className="truncate">{member.user.name}</span>
-                {pendingUserId === member.userId ? (
-                  <Spinner className="ml-auto" />
-                ) : rosterIds.has(member.userId) ? (
-                  <Check className="ml-auto" />
-                ) : null}
-              </CommandItem>
-            ))}
+            <CommandGroup>
+              {membersData?.members.map((member) => (
+                <CommandItem
+                  data-checked={rosterIds.has(member.userId)}
+                  disabled={pendingUserId !== undefined}
+                  key={member.userId}
+                  keywords={[member.user.name, member.user.email]}
+                  onSelect={() => void toggle(member.userId)}
+                  value={member.userId}
+                >
+                  <span className="truncate">{member.user.name}</span>
+                  {pendingUserId === member.userId ? <Spinner /> : null}
+                </CommandItem>
+              ))}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

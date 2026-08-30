@@ -8,7 +8,7 @@ import {
   OrganizationActionsTableHead,
   OrganizationTableEmpty,
 } from "@/components/auth/organization/table"
-import { Section, SectionHeader } from "@/components/ui/section"
+import { Section } from "@/components/ui/section"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -32,8 +32,6 @@ export function TeamsSettings({ organizationId }: { organizationId: string }) {
 
   return (
     <Section>
-      <SectionHeader title="Teams" />
-
       <TableFrame>
         <Table aria-label="Teams" className="min-w-lg">
           <TableHeader>
