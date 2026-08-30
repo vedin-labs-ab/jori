@@ -1,5 +1,11 @@
 import { useQuery } from "convex/react"
-import { Folder, FolderDot, FolderOpen, FolderOpenDot } from "lucide-react"
+import {
+  Folder,
+  FolderDot,
+  FolderOpen,
+  FolderOpenDot,
+  FolderRoot,
+} from "lucide-react"
 import { api } from "../../../../convex/_generated/api"
 import { type ListFacet } from "../list/controls"
 
@@ -22,8 +28,8 @@ export type FolderNames = ReadonlyMap<string, FolderEntry>
 
 const noFolder = ""
 
-/** Folder facet for header-embedded list controls: every folder in the
- *  organization by name, plus the rows that live in no folder. */
+/** Folder facet for header-embedded list controls: the root — rows filed
+ *  in no folder — leads, then every folder in the organization by name. */
 export function folderFacet(
   folders: FolderNames | undefined
 ): ListFacet<{ folderId?: string }> {
@@ -37,7 +43,10 @@ export function folderFacet(
 
   return {
     label: "Folder",
-    options: [...named, { label: "No folder", value: noFolder }],
+    options: [
+      { icon: FolderRoot, label: "No folder", value: noFolder },
+      ...named,
+    ],
     resolve: (row) => row.folderId ?? noFolder,
   }
 }
