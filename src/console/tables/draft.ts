@@ -37,6 +37,13 @@ export const columnTypeIcons: Record<TableColumnType, LucideIcon> = {
 
 const columnKeyPattern = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
 
+/** The single text column every new table starts with. Creation no longer
+ *  asks for columns; the table's own editor evolves them afterward — and
+ *  since evolution is additive, the seed is the most universal column. */
+export const starterColumns: TableColumn[] = [
+  { key: "name", name: "Name", type: "string" },
+]
+
 export function newColumnDraft(): ColumnDraft {
   return {
     id: crypto.randomUUID(),
@@ -121,20 +128,6 @@ export function renameColumn(
       ? { ...column, name: name.trim() === "" ? column.key : name }
       : column
   )
-}
-
-export type TableFormErrors = { name?: string; columns?: string }
-
-/** Errors for a table dialog submit attempt. Dialogs show these only after
- *  a submit and clear a field's error as soon as it gets new input. */
-export function validateTableForm(
-  name: string,
-  drafts: ColumnDraft[]
-): TableFormErrors {
-  return {
-    name: name.trim() === "" ? "Give the table a name." : undefined,
-    columns: columnDraftsIssue(drafts),
-  }
 }
 
 /** First problem that blocks submitting the drafts, if any. */

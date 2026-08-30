@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { CreationDialogs, type CreationRequest } from "./dialogs"
 
@@ -34,6 +34,7 @@ test("a table request opens the table dialog on the requested folder", () => {
   renderDialogs({ creation: "table", folderId: "folder-1" })
 
   expect(screen.getByRole("heading", { name: "Create table" })).toBeDefined()
+  fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
   expect(screen.getByLabelText("Folder").textContent).toContain("Finance")
 })
 
@@ -47,5 +48,6 @@ test("a store request opens only the store dialog", () => {
 test("a request without a folder starts the dialog unfiled", () => {
   renderDialogs({ creation: "table" })
 
+  fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
   expect(screen.getByLabelText("Folder").textContent).toContain("No folder")
 })

@@ -43,6 +43,11 @@ function addField() {
   fireEvent.click(screen.getByRole("button", { name: "Add field" }))
 }
 
+/** Folder and Sharing live behind the collapsed Advanced settings. */
+function expandAdvancedSettings() {
+  fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
+}
+
 function submit() {
   fireEvent.click(screen.getByRole("button", { name: "Create store" }))
 }
@@ -95,6 +100,7 @@ describe("create store folder field", () => {
     fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Invoices" },
     })
+    expandAdvancedSettings()
     fireEvent.click(screen.getByLabelText("Folder"))
     fireEvent.click(await screen.findByRole("button", { name: "Finance" }))
     submit()
@@ -107,6 +113,7 @@ describe("create store folder field", () => {
 
   test("initialFolderId pre-populates the field", () => {
     renderDialog("finance")
+    expandAdvancedSettings()
 
     expect(screen.getByLabelText("Folder").textContent).toContain("Finance")
   })

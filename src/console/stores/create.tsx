@@ -13,12 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
 import { readErrorMessage } from "../shared/error"
-import { DialogForm } from "../shared/materials/form"
+import {
+  MaterialDescriptionField,
+  MaterialNameField,
+} from "../shared/materials/fields"
+import { AdvancedSettings, DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
 import { SchemaEditorSection } from "./schema/editor"
 import { useSchemaEditor } from "./schema/state"
@@ -59,21 +61,32 @@ export function CreateStoreDialog({
           disabled={form.isCreating}
           onSubmit={() => void form.submit()}
         >
-          <StoreNameField form={form} />
-          <MaterialScopeField
-            id="store-create-scope"
-            noun="store"
-            onScopeChange={form.setScope}
-            scope={form.scope}
+          <MaterialNameField
+            error={form.nameError}
+            idPrefix="store-create"
+            name={form.name}
+            onNameChange={form.setName}
           />
-          <FolderField
-            id="store-create-folder"
-            onChange={form.setFolderId}
-            organizationId={organizationId}
-            value={form.folderId}
+          <MaterialDescriptionField
+            description={form.description}
+            idPrefix="store-create"
+            onDescriptionChange={form.setDescription}
           />
-          <StoreDescriptionField form={form} />
           <SchemaEditorSection editor={form.schema} idPrefix="store-create" />
+          <AdvancedSettings>
+            <FolderField
+              id="store-create-folder"
+              onChange={form.setFolderId}
+              organizationId={organizationId}
+              value={form.folderId}
+            />
+            <MaterialScopeField
+              id="store-create-scope"
+              noun="store"
+              onScopeChange={form.setScope}
+              scope={form.scope}
+            />
+          </AdvancedSettings>
           <DialogFooter>
             <Button disabled={form.isCreating} type="submit">
               {form.isCreating ? <Loader2 className="animate-spin" /> : null}
@@ -85,43 +98,6 @@ export function CreateStoreDialog({
     </Dialog>
   )
 }
-
-function StoreNameField({ form }: { form: CreateStoreForm }) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor="store-create-name">Name</Label>
-      <div className="grid gap-1">
-        <Input
-          aria-invalid={form.nameError === undefined ? undefined : true}
-          id="store-create-name"
-          onChange={(event) => form.setName(event.target.value)}
-          value={form.name}
-        />
-        {form.nameError === undefined ? null : (
-          <p className="text-destructive text-xs" role="alert">
-            {form.nameError}
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function StoreDescriptionField({ form }: { form: CreateStoreForm }) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor="store-create-description">Description</Label>
-      <Input
-        id="store-create-description"
-        onChange={(event) => form.setDescription(event.target.value)}
-        placeholder="Optional note that helps others find it"
-        value={form.description}
-      />
-    </div>
-  )
-}
-
-type CreateStoreForm = ReturnType<typeof useCreateStore>
 
 function useCreateStore(
   organizationId: string,
