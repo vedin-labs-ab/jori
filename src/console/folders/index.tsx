@@ -196,6 +196,9 @@ function useUnfileResource(organizationId: string, folder: FolderDetail) {
   }
 }
 
+/** The folder's header crumb: the /folders overview leads the trail —
+ *  every material page starts from its parent surface — then the ancestor
+ *  folders, then the folder itself as the current page. */
 function folderBreadcrumb(
   folder: FolderDetail | undefined
 ): MaterialBreadcrumb | undefined {
@@ -205,10 +208,13 @@ function folderBreadcrumb(
 
   return {
     name: folder.name,
-    trail: folder.path.slice(0, -1).map((segment) => ({
-      name: segment.name,
-      to: "/folders/$folderId",
-      params: { folderId: segment.folderId },
-    })),
+    trail: [
+      { name: "Folders", to: "/folders" },
+      ...folder.path.slice(0, -1).map((segment) => ({
+        name: segment.name,
+        to: "/folders/$folderId",
+        params: { folderId: segment.folderId },
+      })),
+    ],
   }
 }
