@@ -101,31 +101,26 @@ export function useFileUpload(
 export type FileUpload = ReturnType<typeof useFileUpload>
 
 type UploadValues = {
-  description: string
   folderId: string | null
   scope: Scope
 }
 
-/** The Sharing, Folder, and Description fields shared by the whole batch. */
+/** The Sharing and Folder fields shared by the whole batch. */
 function useUploadFields(initialFolderId: string | null) {
-  const [description, setDescription] = useState("")
   const [scope, setScope] = useState<Scope>("organization")
   const [folderId, setFolderId] = useState(initialFolderId)
 
   function reset() {
-    setDescription("")
     setFolderId(initialFolderId)
   }
 
   return {
-    description,
     folderId,
     reset,
     scope,
-    setDescription,
     setFolderId,
     setScope,
-    values: { description, folderId, scope } satisfies UploadValues,
+    values: { folderId, scope } satisfies UploadValues,
   }
 }
 
@@ -144,8 +139,6 @@ function useUploadAction(organizationId: string) {
       organizationId,
       storageId,
       name: file.name,
-      description:
-        values.description.trim() === "" ? undefined : values.description,
       scope: values.scope,
       folderId:
         values.folderId === null

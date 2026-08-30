@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FolderField } from "../../folders/field"
-import { MaterialDescriptionField } from "../../shared/materials/fields"
 import { AdvancedSettings, DialogForm } from "../../shared/materials/form"
 import { MaterialScopeField } from "../../shared/materials/scope"
 import { FileDropzone } from "./dropzone"
@@ -84,11 +83,6 @@ function UploadFields({
           onRemove={upload.removeFile}
         />
       </div>
-      <MaterialDescriptionField
-        description={upload.description}
-        idPrefix="file-upload"
-        onDescriptionChange={upload.setDescription}
-      />
       <AdvancedSettings>
         <FolderField
           id="file-upload-folder"
