@@ -46,9 +46,13 @@ export function DialogForm({
 export function AdvancedSettings({ children }: { children: ReactNode }) {
   return (
     <Collapsible className="grid gap-4">
-      <CollapsibleTrigger className="flex w-fit items-center gap-1.5 font-medium text-muted-foreground text-sm transition-colors hover:text-foreground [&[data-state=open]>svg]:rotate-180">
+      {/* Styled as a section boundary rather than a link: small muted text
+          with a hairline running to the dialog's edge, matching the
+          platform's divider language. */}
+      <CollapsibleTrigger className="flex w-full items-center gap-2 font-medium text-muted-foreground text-xs transition-colors hover:text-foreground [&[data-state=open]>svg]:rotate-180">
         Advanced settings
-        <ChevronDown className="size-3.5 transition-transform duration-200 ease-out" />
+        <ChevronDown className="size-3 transition-transform duration-200 ease-out" />
+        <span aria-hidden className="h-px flex-1 bg-border" />
       </CollapsibleTrigger>
       <CollapsibleContent className="grid gap-4">{children}</CollapsibleContent>
     </Collapsible>
