@@ -223,7 +223,7 @@ export function MaterialTitleMenu({
       <DropdownMenuContent align="start" className="w-44">
         <DropdownMenuItem disabled={isPending} onSelect={onEdit}>
           <Pencil />
-          Edit
+          Edit details
         </DropdownMenuItem>
         <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
           <FolderInput />
