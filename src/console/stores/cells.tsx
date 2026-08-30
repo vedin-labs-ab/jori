@@ -60,8 +60,15 @@ export function StoreVersionCell({ store }: { store: StoreSummary }) {
 }
 
 /** Owner column: the creating person, or Jori itself when no named owner
- *  resolves — the organization-principal run case. */
-export function StoreOwnerCell({ store }: { store: StoreSummary }) {
+ *  resolves — the organization-principal run case. `compact` slims it to
+ *  the height of a toolbar meta line. */
+export function StoreOwnerCell({
+  compact = false,
+  store,
+}: {
+  compact?: boolean
+  store: Pick<StoreSummary, "ownerImage" | "ownerName">
+}) {
   const owner =
     store.ownerName === undefined
       ? ({ kind: "jori" } as const)
@@ -71,7 +78,7 @@ export function StoreOwnerCell({ store }: { store: StoreSummary }) {
           image: store.ownerImage,
         } as const)
 
-  return <MaterialOwnerCell owner={owner} />
+  return <MaterialOwnerCell compact={compact} owner={owner} />
 }
 
 function IconValueCell({
