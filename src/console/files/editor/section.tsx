@@ -1,12 +1,12 @@
 import { useMutation } from "convex/react"
 import { lazy, type ReactNode, Suspense } from "react"
 import { api } from "../../../../convex/_generated/api"
-import { CopyButton } from "../../shared/copy"
+
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { usePreloadSiblings } from "../cache/preload"
 import { type FileSiblings } from "../siblings"
 import { uploadToStorage } from "../storage"
-import { FileMeta, FileToolbar } from "../toolbar"
+import { FileCopy, FileMeta, FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
 import { useAutosave } from "./autosave"
 import { type FileDocument, useDocument } from "./document"
@@ -56,7 +56,23 @@ export function FileEditor({
   return (
     <>
       {/* No arrow keys here — CodeMirror owns them for caret movement. */}
-      <FileToolbar siblings={siblings} tools={editorTools(document, tools)}>
+      <FileToolbar
+        siblings={siblings}
+        tools={
+          <>
+            {tools}
+            <FileCopy
+              file={file}
+              savedText={
+                document.state.status === "ready"
+                  ? document.state.saved
+                  : undefined
+              }
+              url={url}
+            />
+          </>
+        }
+      >
         <FileMeta file={file} saveStatus={autosave.status} />
       </FileToolbar>
       <EditorBody
@@ -70,31 +86,6 @@ export function FileEditor({
           }
         }}
       />
-    </>
-  )
-}
-
-function EditorCopy({ savedText }: { savedText: string }) {
-  return <CopyButton label="file text" value={async () => savedText} />
-}
-
-/** The caller's tools stay throughout; Copy joins to their right once
- *  the text is in. Resolves to undefined when both are absent so the
- *  toolbar knows to skip its tools separator. */
-function editorTools(document: FileDocument, tools: ReactNode | undefined) {
-  const copy =
-    document.state.status === "ready" ? (
-      <EditorCopy savedText={document.state.saved} />
-    ) : undefined
-
-  if (tools === undefined) {
-    return copy
-  }
-
-  return (
-    <>
-      {tools}
-      {copy}
     </>
   )
 }

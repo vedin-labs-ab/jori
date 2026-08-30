@@ -1,11 +1,4 @@
-import { ExternalLink } from "lucide-react"
 import { type ReactNode, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { type PreviewKind } from "@/shared/files/kind"
 import { usePreloadSiblings } from "../cache/preload"
 import { useDisplayUrl } from "../cache/url"
@@ -71,7 +64,7 @@ export function FileViewer({
       <FileToolbar
         hasArrowKeys
         siblings={siblings}
-        tools={viewerTools(kind, status, currentUrl, zoom)}
+        tools={viewerTools(kind, status, zoom)}
       >
         {meta}
       </FileToolbar>
@@ -92,47 +85,17 @@ export function FileViewer({
   )
 }
 
-/** Per-kind toolbar tools: zoom for images, a full-window escape hatch for
- *  PDFs. Audio and video carry their controls inline, so their slot stays
- *  empty and the shared navigation stands alone. */
+/** Per-kind toolbar tools: zoom for images, nothing extra elsewhere —
+ *  audio and video carry their controls inline, and the framed documents
+ *  need only the shared navigation. */
 function viewerTools(
   kind: ViewerKind,
   status: ViewerStatus,
-  url: string,
   zoom: Zoom
 ): ReactNode | undefined {
-  switch (kind) {
-    case "image":
-      return <ZoomTools isReady={status === "ready"} zoom={zoom} />
-    case "pdf":
-      // The live url, not the frozen one — a tab opened minutes in still
-      // deserves a fresh signature.
-      return <OpenTool url={url} />
-    default:
-      return undefined
-  }
-}
-
-/** Full-window escape hatch shared by the framed documents — PDFs here,
- *  the HTML preview next door. */
-function OpenTool({ url }: { url: string }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          aria-label="Open in new tab"
-          asChild
-          size="icon-sm"
-          variant="ghost"
-        >
-          <a href={url} rel="noreferrer" target="_blank">
-            <ExternalLink />
-          </a>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Open in new tab</TooltipContent>
-    </Tooltip>
-  )
+  return kind === "image" ? (
+    <ZoomTools isReady={status === "ready"} zoom={zoom} />
+  ) : undefined
 }
 
 function ViewerContent({
