@@ -251,7 +251,10 @@ function ClearFooter({
   }
 
   return (
-    <div className="border-t p-1">
+    // The Command root pads all around; breaking out of it lets the
+    // separator run edge to edge while the button keeps the same 4px
+    // breathing room on every side.
+    <div className="-mx-1 -mb-1 border-t p-1">
       <Button
         className="w-full"
         onClick={() => {
