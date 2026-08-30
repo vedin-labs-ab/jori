@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { Folder, Plus } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
   SidebarGroupAction,
@@ -122,7 +123,9 @@ function FoldersGroup({
 }
 
 /** The group label doubles as the drop target that moves a dragged folder
- *  back to the top level. */
+ *  back to the top level — and its text links to the /folders overview,
+ *  resting exactly where the plain label sat and growing the ghost pill
+ *  on hover like the breadcrumb trigger. */
 function FoldersLabel() {
   const root = useRootDrop()
 
@@ -133,7 +136,13 @@ function FoldersLabel() {
       )}
       ref={root.setNodeRef}
     >
-      Folders
+      <Button
+        asChild
+        className="h-6 px-0 font-medium text-sidebar-foreground/70 text-xs hover:px-1.5 focus-visible:px-1.5"
+        variant="ghost"
+      >
+        <Link to="/folders">Folders</Link>
+      </Button>
     </SidebarGroupLabel>
   )
 }
