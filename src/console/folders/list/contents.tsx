@@ -1,7 +1,11 @@
 import { Folder } from "lucide-react"
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ConsoleEmptyState, EmptyRow } from "../../shared/list/empty"
+import {
+  ConsoleEmptyState,
+  EmptyRow,
+  FilterableEmptyState,
+} from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { type FolderContentsResult, type FolderResource } from "../types"
@@ -73,7 +77,14 @@ export function FolderContents({
   return (
     <FolderListTable controls={list.controls} kinds={list.kinds}>
       {folders.length === 0 && resources.length === 0 ? (
-        <EmptyRow colSpan={4}>No matching items</EmptyRow>
+        <EmptyRow colSpan={4}>
+          <FilterableEmptyState
+            description="File tables, stores, files, and automations here, or add a subfolder."
+            hasFilters
+            icon={Folder}
+            noun="items"
+          />
+        </EmptyRow>
       ) : (
         <>
           {folders.map((folder) => (
