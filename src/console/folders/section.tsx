@@ -138,7 +138,7 @@ function FoldersLabel() {
     >
       <Button
         asChild
-        className="h-6 px-0 font-medium text-sidebar-foreground/70 text-xs hover:px-1.5 focus-visible:px-1.5"
+        className="h-6 px-0 font-normal text-sidebar-foreground/70 text-xs hover:px-1.5 focus-visible:px-1.5"
         variant="ghost"
       >
         <Link to="/folders">Folders</Link>
