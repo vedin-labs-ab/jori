@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { createBlobCache, type FileSource, isCacheable } from "./blob"
+import {
+  createBlobCache,
+  type FileSource,
+  isCacheable,
+  revokeGrace,
+} from "./blob"
 
 const fetchMock = vi.fn()
 const revoke = vi.spyOn(URL, "revokeObjectURL")
@@ -52,6 +57,9 @@ test("an expired entry is evicted and refetched", async () => {
   vi.advanceTimersByTime(61_000)
 
   expect(cache.peek(source)).toBeNull()
+
+  vi.advanceTimersByTime(revokeGrace)
+
   expect(revoke).toHaveBeenCalledTimes(1)
 
   await cache.load(source)
@@ -95,11 +103,12 @@ test("eviction drops the least recently used idle entry, never a retained one", 
   const next = sourceOf({ fileId: "next" })
 
   const retained = await cache.load(active)
-  cache.retain(active)
+  cache.retain(retained)
   vi.advanceTimersByTime(1000)
   const evicted = await cache.load(idle)
   vi.advanceTimersByTime(1000)
   await cache.load(next)
+  vi.advanceTimersByTime(revokeGrace)
 
   expect(cache.peek(active)?.objectUrl).toBe(retained.objectUrl)
   expect(cache.peek(idle)).toBeNull()
@@ -112,16 +121,51 @@ test("a retained entry outlives its TTL and is evicted on release", async () => 
   const source = sourceOf()
 
   const cached = await cache.load(source)
-  cache.retain(source)
+  cache.retain(cached)
   vi.advanceTimersByTime(61_000)
 
   expect(cache.peek(source)?.objectUrl).toBe(cached.objectUrl)
   expect(fetchMock).toHaveBeenCalledTimes(1)
 
-  cache.release(source)
+  cache.release(cached)
 
   expect(cache.peek(source)).toBeNull()
+
+  vi.advanceTimersByTime(revokeGrace)
+
   expect(revoke).toHaveBeenCalledExactlyOnceWith(cached.objectUrl)
+})
+
+test("an entry evicted moments ago can still be pinned within the grace", async () => {
+  const cache = createBlobCache({ ttl: 60_000 })
+  const source = sourceOf()
+
+  const cached = await cache.load(source)
+  vi.advanceTimersByTime(61_000)
+
+  expect(cache.peek(source)).toBeNull()
+  expect(cache.retain(cached)).toBe(true)
+
+  vi.advanceTimersByTime(revokeGrace)
+
+  expect(revoke).not.toHaveBeenCalled()
+
+  cache.release(cached)
+
+  expect(revoke).toHaveBeenCalledExactlyOnceWith(cached.objectUrl)
+})
+
+test("pinning reports too late once the grace has passed", async () => {
+  const cache = createBlobCache({ ttl: 60_000 })
+  const source = sourceOf()
+
+  const cached = await cache.load(source)
+  vi.advanceTimersByTime(61_000)
+  cache.peek(source)
+  vi.advanceTimersByTime(revokeGrace)
+
+  expect(revoke).toHaveBeenCalledTimes(1)
+  expect(cache.retain(cached)).toBe(false)
 })
 
 test("a changed updatedAt misses the stale blob and refetches", async () => {
