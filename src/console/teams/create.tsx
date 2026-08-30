@@ -2,25 +2,24 @@ import {
   type OrganizationAuthClient,
   useHasPermission,
 } from "@better-auth-ui/react"
-import { Plus, UsersRound } from "lucide-react"
-import { type SyntheticEvent, useState } from "react"
+import { Plus } from "lucide-react"
+import { useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Field } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/shared/session/auth"
+import { DialogForm } from "../shared/materials/form"
 
 /** Header action for the Teams tab. Only shown to people the server would
  *  let create a team — owners and admins under the default role statements. */
@@ -46,7 +45,8 @@ export function TeamCreateButton() {
   )
 }
 
-/** Minimal creation dialog: a team is a name, everything else comes later. */
+/** Minimal creation dialog in the console's creation idiom: a team is a
+ *  name, everything else comes later. */
 export function TeamCreateDialog({
   open,
   onOpenChange,
@@ -54,20 +54,19 @@ export function TeamCreateDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
+  const [name, setName] = useState("")
   const [isPending, setIsPending] = useState(false)
 
-  async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const name = String(new FormData(event.currentTarget).get("name")).trim()
-
-    if (name === "") {
+  async function submit() {
+    if (name.trim() === "") {
       return
     }
 
     setIsPending(true)
 
-    const { error } = await authClient.organization.createTeam({ name })
+    const { error } = await authClient.organization.createTeam({
+      name: name.trim(),
+    })
 
     setIsPending(false)
 
@@ -75,45 +74,40 @@ export function TeamCreateDialog({
       toast.error(error.message ?? "Could not create the team.")
     } else {
       onOpenChange(false)
+      setName("")
       toast.success("Team created.")
     }
   }
 
   return (
-    <AlertDialog onOpenChange={onOpenChange} open={open}>
-      <AlertDialogContent>
-        <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-          <AlertDialogHeader>
-            <AlertDialogMedia>
-              <UsersRound />
-            </AlertDialogMedia>
-            <AlertDialogTitle>Create team</AlertDialogTitle>
-            <AlertDialogDescription>
-              Name a group of people who work together.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create team</DialogTitle>
+          <DialogDescription>
+            Name a group of people who work together.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogForm disabled={isPending} onSubmit={() => void submit()}>
           <Field>
             <Label htmlFor="team-create-name">Name</Label>
             <Input
               autoFocus
               disabled={isPending}
               id="team-create-name"
-              name="name"
+              onChange={(event) => setName(event.target.value)}
               placeholder="Engineering"
-              required
+              value={name}
             />
           </Field>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-            <Button disabled={isPending} type="submit">
+          <DialogFooter>
+            <Button disabled={name.trim() === "" || isPending} type="submit">
               {isPending && <Spinner />}
               Create team
             </Button>
-          </AlertDialogFooter>
-        </form>
-      </AlertDialogContent>
-    </AlertDialog>
+          </DialogFooter>
+        </DialogForm>
+      </DialogContent>
+    </Dialog>
   )
 }
