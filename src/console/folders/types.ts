@@ -8,11 +8,20 @@ export type FolderTreeResult = FunctionReturnType<
 >
 export type FolderRow = FolderTreeResult["folders"][number]
 
-/** What a listing row shows of a folder; tree rows and a folder's listed
- *  children both satisfy it. */
+export type FolderRootsResult = FunctionReturnType<
+  typeof api.folders.console.roots
+>
+
+/** What a listing row shows of a folder; the overview's roots and a folder
+ *  page's listed children both satisfy it. */
 export type ListedFolder = Pick<
-  FolderRow,
-  "folderId" | "hasContents" | "name" | "updatedAt"
+  FolderRootsResult["folders"][number],
+  | "folderCount"
+  | "folderId"
+  | "hasContents"
+  | "name"
+  | "resourceCount"
+  | "updatedAt"
 >
 
 export type FolderDetail = NonNullable<

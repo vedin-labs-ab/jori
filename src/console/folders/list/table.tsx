@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { Layers } from "lucide-react"
 import { type ReactNode } from "react"
 import {
   TableBody,
@@ -7,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { countLabel } from "@/lib/count"
 import { type FacetEntry, type ListControls } from "../../shared/list/controls"
 import { ConsoleListTable } from "../../shared/list/frame"
 import { FilterHead, SortHead } from "../../shared/list/head"
@@ -16,11 +18,11 @@ import { useFolderRowDrag } from "../drag/state"
 import { type ListedFolder } from "../types"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
-/** The full-bleed Name/Kind/Updated table both folder surfaces share: the
- *  /folders overview lists the root folders, a folder's page its contents.
- *  Cells carry a fixed height because rows differ in tallest content — a
- *  resource row's menu button outgrows a folder row's bare link — and
- *  mixed row heights read as a glitch. */
+/** The full-bleed Name/Kind/Items/Updated table both folder surfaces share:
+ *  the /folders overview lists the root folders, a folder's page its
+ *  contents. Cells carry a fixed height because rows differ in tallest
+ *  content — a resource row's menu button outgrows a folder row's bare
+ *  link — and mixed row heights read as a glitch. */
 export function FolderListTable({
   children,
   controls,
@@ -36,6 +38,7 @@ export function FolderListTable({
         <TableRow>
           <SortHead controls={controls} label="Name" sortKey="name" />
           <FilterHead controls={controls} facets={kinds} label="Kind" />
+          <SortHead controls={controls} label="Items" sortKey="items" />
           <SortHead controls={controls} label="Updated" sortKey="updated" />
           <TableHead className="w-10" />
         </TableRow>
@@ -75,6 +78,7 @@ export function FolderListRow({ folder }: { folder: ListedFolder }) {
         </Link>
       </TableCell>
       <TableCell className="text-muted-foreground">Folder</TableCell>
+      <ItemsCell folder={folder} />
       <TableCell
         className="text-muted-foreground"
         title={absoluteTime(folder.updatedAt)}
@@ -84,4 +88,35 @@ export function FolderListRow({ folder }: { folder: ListedFolder }) {
       <TableCell />
     </TableRow>
   )
+}
+
+/** Items column: one combined number — how many things a click would reveal,
+ *  direct subfolders plus the filed resources this viewer can see — with the
+ *  breakdown in the tooltip. */
+function ItemsCell({ folder }: { folder: ListedFolder }) {
+  const label = itemsLabel(folder)
+
+  return (
+    <TableCell>
+      <div
+        className="flex items-center gap-1.5 text-muted-foreground tabular-nums"
+        title={label}
+      >
+        <Layers aria-hidden className="size-4 shrink-0" />
+        {folder.folderCount + folder.resourceCount}
+        <span className="sr-only">{label}</span>
+      </div>
+    </TableCell>
+  )
+}
+
+function itemsLabel(folder: ListedFolder) {
+  const parts = [
+    folder.folderCount > 0 ? countLabel(folder.folderCount, "folder") : null,
+    folder.resourceCount > 0
+      ? countLabel(folder.resourceCount, "resource")
+      : null,
+  ].filter((part) => part !== null)
+
+  return parts.length === 0 ? "Empty folder" : parts.join(", ")
 }

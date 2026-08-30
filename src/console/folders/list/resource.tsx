@@ -56,6 +56,9 @@ export function ResourceListRow({
           ) : null}
         </span>
       </TableCell>
+      {/* Resources hold nothing, so the Items column carries a quiet dash —
+          an empty cell under a sortable header would read as missing data. */}
+      <TableCell className="text-muted-foreground/60">&mdash;</TableCell>
       <TableCell
         className="text-muted-foreground"
         title={absoluteTime(resource.updatedAt)}

@@ -26,7 +26,7 @@ async function seedFolder(
   return folderId
 }
 
-test("subfolders come back name-sorted, marking the ones that hold anything", async () => {
+test("subfolders come back name-sorted, counting their direct children", async () => {
   const { database, ctx } = databaseContext()
   const folderId = await seedFolder(database)
 
@@ -43,24 +43,87 @@ test("subfolders come back name-sorted, marking the ones that hold anything", as
     "folders",
     folderDoc({ parentId: folderId, name: "Empty" })
   )
-  // Zeta holds only a subfolder, Alpha only a filed resource: both signals
-  // must mark a child folder on its own.
+  // Zeta holds only a subfolder, Alpha only filed resources: both count
+  // and mark a child folder on their own. Deeper content stays out — Deep's
+  // own children would not affect Zeta's number.
   await database.insert(
     "folders",
     folderDoc({ parentId: zetaId, name: "Deep" })
   )
   await database.insert("files", fileDoc({ folderId: alphaId }))
+  await database.insert("files", fileDoc({ folderId: alphaId, name: "b.txt" }))
 
   const children = await folderChildren(ctx, {
     organizationId: "org",
-    folderId,
+    personId: other,
+    parentId: folderId,
   })
 
-  expect(children.map((child) => [child.name, child.hasContents])).toEqual([
-    ["Alpha", true],
-    ["Empty", false],
-    ["Zeta", true],
+  expect(
+    children.map((child) => [
+      child.name,
+      child.folderCount,
+      child.resourceCount,
+      child.hasContents,
+    ])
+  ).toEqual([
+    ["Alpha", 0, 2, true],
+    ["Empty", 0, 0, false],
+    ["Zeta", 1, 0, true],
   ])
+})
+
+test("root folders list the same way when no parent is given", async () => {
+  const { database, ctx } = databaseContext()
+  const rootId = (await database.insert(
+    "folders",
+    folderDoc({ name: "Docs" })
+  )) as Id<"folders">
+
+  await database.insert("folders", folderDoc({ parentId: rootId }))
+  await database.insert("files", fileDoc({ folderId: rootId }))
+
+  const roots = await folderChildren(ctx, {
+    organizationId: "org",
+    personId: other,
+    parentId: undefined,
+  })
+
+  expect(
+    roots.map((root) => [root.name, root.folderCount, root.resourceCount])
+  ).toEqual([["Docs", 1, 1]])
+})
+
+test("child counts skip what the viewer cannot see", async () => {
+  const { database, ctx } = databaseContext()
+  const folderId = await seedFolder(database)
+  const childId = (await database.insert(
+    "folders",
+    folderDoc({ parentId: folderId, name: "Mine" })
+  )) as Id<"folders">
+
+  await database.insert(
+    "files",
+    fileDoc({ folderId: childId, name: "private.txt", scope: "personal" })
+  )
+  await database.insert(
+    "collections",
+    tableDoc({ folderId: childId, name: "Old leads", archivedAt: 5 })
+  )
+
+  const view = { organizationId: "org", parentId: folderId }
+  const forOwner = await folderChildren(ctx, { ...view, personId: testOwner })
+  const forOther = await folderChildren(ctx, { ...view, personId: other })
+
+  // The owner counts the personal file; nobody counts the archived table.
+  expect(forOwner.find((child) => child.name === "Mine")).toMatchObject({
+    resourceCount: 1,
+    hasContents: true,
+  })
+  expect(forOther.find((child) => child.name === "Mine")).toMatchObject({
+    resourceCount: 0,
+    hasContents: false,
+  })
 })
 
 test("resources carry their type and display extras, name-sorted", async () => {
