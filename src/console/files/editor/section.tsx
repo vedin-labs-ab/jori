@@ -1,22 +1,15 @@
 import { useMutation } from "convex/react"
-import {
-  lazy,
-  type ReactNode,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
+import { lazy, type ReactNode, Suspense } from "react"
 import { api } from "../../../../convex/_generated/api"
 import { CopyButton } from "../../shared/copy"
 import { ConsoleListLoading } from "../../shared/list/loading"
-import { fileBlobCache } from "../cache/blob"
 import { usePreloadSiblings } from "../cache/preload"
 import { type FileSiblings } from "../siblings"
 import { uploadToStorage } from "../storage"
 import { FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
 import { type SaveStatus, useAutosave } from "./autosave"
+import { type FileDocument, useDocument } from "./document"
 
 /** CodeMirror loads only when a text file is actually on screen, keeping
  *  it out of the main bundle and the server build. */
@@ -153,52 +146,6 @@ function EditorBody({
       </Suspense>
     </div>
   )
-}
-
-type DocumentState =
-  | { status: "loading" }
-  | { status: "error" }
-  | { status: "ready"; saved: string; seed: string }
-
-type FileDocument = ReturnType<typeof useDocument>
-
-/** The file's text, loaded once per file through the blob cache — instant
- *  when a visit or sibling preload already fetched it. The cache keys on
- *  updatedAt, so a saved file never resurrects stale text on the next
- *  visit. `saved` tracks the persisted content; `seed` is what the editor
- *  was seeded with and never moves, so saving never resets the caret. */
-function useDocument(file: FileDetail, url: string) {
-  const [state, setState] = useState<DocumentState>({ status: "loading" })
-  const loadedId = useRef<FileDetail["fileId"] | null>(null)
-
-  useEffect(() => {
-    // The signed url rotates with every query update, so a fetched file
-    // never refetches — the editor already holds the freshest local text.
-    if (loadedId.current === file.fileId) {
-      return
-    }
-
-    loadedId.current = file.fileId
-    setState({ status: "loading" })
-    void fileBlobCache
-      .load({
-        fileId: file.fileId,
-        size: file.size,
-        updatedAt: file.updatedAt,
-        url,
-      })
-      .then(async (cached) => await cached.blob.text())
-      .then((text) => setState({ status: "ready", saved: text, seed: text }))
-      .catch(() => setState({ status: "error" }))
-  }, [file, url])
-
-  function markSaved(text: string) {
-    setState((current) =>
-      current.status === "ready" ? { ...current, saved: text } : current
-    )
-  }
-
-  return { markSaved, state }
 }
 
 /** Uploads the buffer as a new storage blob and swaps it into the file.

@@ -1,5 +1,5 @@
 import { ExternalLink } from "lucide-react"
-import { type ReactNode, useRef, useState } from "react"
+import { type ReactNode, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -12,9 +12,10 @@ import { useDisplayUrl } from "../cache/url"
 import { type FileSiblings, useSiblingKeys } from "../siblings"
 import { FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
-import { ViewerFrame, type ViewerStatus } from "./frame"
+import { ViewerFrame } from "./frame"
 import { ZoomableImage, ZoomTools } from "./image"
 import { useMediaKeys } from "./keys"
+import { useViewerStatus, type ViewerStatus } from "./status"
 import { useZoom, type Zoom } from "./zoom"
 
 /** The kinds the inline viewer can render; text goes to the editor and
@@ -49,10 +50,10 @@ export function FileViewer({
     updatedAt: file.updatedAt,
     url: currentUrl,
   })
-  const [mediaStatus, setMediaStatus] = useState<ViewerStatus>(
-    kind === "audio" ? "ready" : "loading"
+  const { markError, markReady, status } = useViewerStatus(
+    url,
+    kind === "audio"
   )
-  const status = url === null ? "loading" : mediaStatus
   const zoom = useZoom()
   const media = useRef<HTMLMediaElement | null>(null)
 
@@ -80,8 +81,8 @@ export function FileViewer({
             kind={kind}
             media={media}
             name={file.name}
-            onError={() => setMediaStatus("error")}
-            onReady={() => setMediaStatus("ready")}
+            onError={markError}
+            onReady={markReady}
             url={url}
             zoom={zoom}
           />

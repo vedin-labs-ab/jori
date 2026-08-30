@@ -1,8 +1,7 @@
 import { type ReactNode } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
-
-export type ViewerStatus = "error" | "loading" | "ready"
+import { type ViewerStatus } from "./status"
 
 /** The viewport every file type renders into. It claims the full content
  *  region up front and keeps the media invisible until it has loaded at
