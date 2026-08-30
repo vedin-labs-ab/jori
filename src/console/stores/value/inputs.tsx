@@ -16,12 +16,14 @@ import { type ValueField, type ValueOption } from "./model"
 
 /** The cell recipe from the table grid's inline editor. */
 const cellInputClassName =
-  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
+  // focus-visible:rounded-sm keeps the inset ring's corners inside the
+  // grid's rounded frame — a square ring in a round corner leaves a wedge.
+  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:rounded-sm focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
 
 /** The same recipe over the select trigger, which also sheds its tactile
  *  depth so it sits flush like every other cell. */
 const cellSelectClassName =
-  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent dark:hover:bg-muted/50"
+  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors focus-visible:rounded-sm not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent dark:hover:bg-muted/50"
 
 /** How every widget reports edits: the replacement state for its node and
  *  the value path that changed, so the editor can clear that path's error. */

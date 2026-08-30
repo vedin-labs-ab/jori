@@ -1,11 +1,5 @@
 // @vitest-environment jsdom
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type StoreDetail } from "../types"
 import { ValueEditorSection } from "./editor"
@@ -18,12 +12,23 @@ vi.mock("convex/react", async (importOriginal) => ({
   useMutation: () => writeValue,
 }))
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
 
 beforeEach(() => {
+  vi.useFakeTimers()
   writeValue.mockReset()
   writeValue.mockResolvedValue({})
 })
+
+/** Lets the debounce elapse and the save settle. */
+async function settle(ms = 1200) {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ms)
+  })
+}
 
 const schema = {
   type: "object",
@@ -52,15 +57,11 @@ function renderEditor(value: unknown, version = 2) {
 
   render(
     <ValueEditorSection
-      onClose={() => undefined}
+      onStatus={() => undefined}
       organizationId="org-1"
       store={store}
     />
   )
-}
-
-function submit() {
-  fireEvent.click(screen.getByRole("button", { name: "Save value" }))
 }
 
 // Radix tabs select on mousedown, not click.
@@ -69,7 +70,7 @@ function switchTab(name: "Code" | "Form") {
 }
 
 describe("value editor error visibility", () => {
-  test("errors appear on submit and clear as the field changes", () => {
+  test("an invalid draft surfaces its error and never writes", async () => {
     renderEditor({ title: "March", total: 2, paid: false })
 
     const title = screen.getByLabelText("title")
@@ -77,7 +78,7 @@ describe("value editor error visibility", () => {
 
     expect(screen.queryByRole("alert")).toBeNull()
 
-    submit()
+    await settle()
 
     expect(screen.getByRole("alert").textContent).toBe("is required")
     expect(writeValue).not.toHaveBeenCalled()
@@ -100,9 +101,9 @@ describe("value editor submission", () => {
     fireEvent.change(screen.getByLabelText("city"), {
       target: { value: "Oslo" },
     })
-    submit()
+    await settle()
 
-    await waitFor(() => expect(writeValue).toHaveBeenCalledOnce())
+    expect(writeValue).toHaveBeenCalledOnce()
     expect(writeValue.mock.calls[0]?.[0]).toEqual({
       organizationId: "org-1",
       storeId: "store-1",
@@ -129,9 +130,9 @@ describe("value editor submission", () => {
       target: { value: "billing" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Remove tags item 2" }))
-    submit()
+    await settle()
 
-    await waitFor(() => expect(writeValue).toHaveBeenCalledOnce())
+    expect(writeValue).toHaveBeenCalledOnce()
     expect(writeValue.mock.calls[0]?.[0].value).toEqual({
       title: "March",
       total: 2,
@@ -149,9 +150,9 @@ describe("value editor submission", () => {
     })
 
     fireEvent.click(screen.getByRole("button", { name: "Unset shipping" }))
-    submit()
+    await settle()
 
-    await waitFor(() => expect(writeValue).toHaveBeenCalledOnce())
+    expect(writeValue).toHaveBeenCalledOnce()
     expect(writeValue.mock.calls[0]?.[0].value).toEqual({
       title: "March",
       total: 2,

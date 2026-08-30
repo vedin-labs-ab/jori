@@ -92,6 +92,10 @@ export function useValueEditor({
           ? switchToCode(current, form)
           : switchToForm(current, form)
       ),
+    /** Reseeds the whole editor from a fresh server value — after an
+     *  external write lands while nothing local is pending. */
+    reset: (value: unknown, hasValue: boolean) =>
+      setState(initialEditorState(form, value, hasValue)),
   }
 }
 
