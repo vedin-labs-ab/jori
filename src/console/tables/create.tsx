@@ -22,7 +22,6 @@ import {
 } from "../shared/materials/fields"
 import { AdvancedSettings, DialogForm } from "../shared/materials/form"
 import { MaterialScopeField } from "../shared/materials/scope"
-import { starterColumns } from "./draft"
 
 export function CreateTableDialog({
   initialFolderId,
@@ -125,6 +124,8 @@ function useCreateTable(
 
     setIsCreating(true)
 
+    // A table is born with no columns at all; the grid's New column
+    // affordance grows the schema in place.
     try {
       await create({
         organizationId,
@@ -133,7 +134,6 @@ function useCreateTable(
         scope,
         folderId:
           folderId === null ? undefined : (folderId as GenericId<"folders">),
-        columns: starterColumns,
       })
 
       toast.success(`Created ${name.trim()}.`)

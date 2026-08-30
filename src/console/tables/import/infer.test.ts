@@ -1,18 +1,23 @@
 import { describe, expect, test } from "vitest"
-import { deriveTableName, planCsvTable, slugColumnKey } from "./infer"
+import { columnNames, deriveTableName, planCsvTable } from "./infer"
 
-describe("slugColumnKey", () => {
-  test("slugs header cells into contracts-safe keys", () => {
-    expect(slugColumnKey("First Name")).toBe("first_name")
-    expect(slugColumnKey("  Amount ($) ")).toBe("amount")
-    expect(slugColumnKey("Éclair--count")).toBe("clair_count")
+describe("columnNames", () => {
+  test("keeps header cells verbatim, trimmed", () => {
+    expect(
+      columnNames(["First Name", "  Amount ($) ", "Éclair--count"])
+    ).toEqual(["First Name", "Amount ($)", "Éclair--count"])
   })
 
-  test("forces keys to start with a letter", () => {
-    expect(slugColumnKey("2024 Sales")).toBe("c_2024_sales")
-    expect(slugColumnKey("_hidden")).toBe("hidden")
-    expect(slugColumnKey("")).toBe("column")
-    expect(slugColumnKey("!!!")).toBe("column")
+  test("names blank cells by position", () => {
+    expect(columnNames(["", "b", "  "])).toEqual(["Column 1", "b", "Column 3"])
+  })
+
+  test("dedupes colliding names deterministically, ignoring case", () => {
+    expect(columnNames(["Name", "name", "NAME"])).toEqual([
+      "Name",
+      "name 2",
+      "NAME 3",
+    ])
   })
 })
 
@@ -30,23 +35,13 @@ describe("deriveTableName", () => {
 })
 
 describe("planCsvTable columns", () => {
-  test("dedupes colliding keys deterministically", () => {
-    const plan = planCsvTable("Name,name,NAME\na,b,c\n")
-
-    expect(plan.status === "ready" && plan.columns.map((c) => c.key)).toEqual([
-      "name",
-      "name_2",
-      "name_3",
-    ])
-  })
-
-  test("keeps original headers as display names", () => {
+  test("keeps original headers as names over generated hidden ids", () => {
     const plan = planCsvTable("First Name,,2024\nAda,x,1\n")
 
     expect(plan.status === "ready" && plan.columns).toEqual([
-      { key: "first_name", name: "First Name", type: "string", required: true },
-      { key: "column", name: "column", type: "string", required: true },
-      { key: "c_2024", name: "2024", type: "integer", required: true },
+      { id: "c1", name: "First Name", type: "string", required: true },
+      { id: "c2", name: "Column 2", type: "string", required: true },
+      { id: "c3", name: "2024", type: "integer", required: true },
     ])
   })
 
@@ -64,7 +59,7 @@ describe("planCsvTable columns", () => {
     const plan = planCsvTable("value\n3\nmany\n")
 
     expect(plan.status === "ready" && plan.columns).toEqual([
-      { key: "value", name: "value", type: "string", required: true },
+      { id: "c1", name: "value", type: "string", required: true },
     ])
   })
 })
@@ -74,8 +69,8 @@ describe("planCsvTable required flags", () => {
     const plan = planCsvTable("count,name\n3,Ada\n,Grace\n5,\n")
 
     expect(plan.status === "ready" && plan.columns).toEqual([
-      { key: "count", name: "count", type: "integer" },
-      { key: "name", name: "name", type: "string" },
+      { id: "c1", name: "count", type: "integer" },
+      { id: "c2", name: "name", type: "string" },
     ])
   })
 
@@ -83,8 +78,8 @@ describe("planCsvTable required flags", () => {
     const plan = planCsvTable("a,b\n1,2\n3\n")
 
     expect(plan.status === "ready" && plan.columns).toEqual([
-      { key: "a", name: "a", type: "integer", required: true },
-      { key: "b", name: "b", type: "integer" },
+      { id: "c1", name: "a", type: "integer", required: true },
+      { id: "c2", name: "b", type: "integer" },
     ])
   })
 
@@ -92,7 +87,7 @@ describe("planCsvTable required flags", () => {
     const plan = planCsvTable("a,b\n1,\n2,\n")
 
     expect(plan.status === "ready" && plan.columns[1]).toEqual({
-      key: "b",
+      id: "c2",
       name: "b",
       type: "string",
     })
@@ -106,13 +101,13 @@ describe("planCsvTable rows", () => {
     expect(plan).toEqual({
       status: "ready",
       columns: [
-        { key: "count", name: "count", type: "integer" },
-        { key: "done", name: "done", type: "boolean", required: true },
-        { key: "note", name: "note", type: "string" },
+        { id: "c1", name: "count", type: "integer" },
+        { id: "c2", name: "done", type: "boolean", required: true },
+        { id: "c3", name: "note", type: "string" },
       ],
       rows: [
-        { line: 2, values: { count: 3, done: true, note: "hi" } },
-        { line: 5, values: { done: false } },
+        { line: 2, values: { c1: 3, c2: true, c3: "hi" } },
+        { line: 5, values: { c2: false } },
       ],
     })
   })

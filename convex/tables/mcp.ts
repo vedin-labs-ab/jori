@@ -75,6 +75,7 @@ export async function callJoriTableTool(
           numItems: boundedNumber(args.limit, 50, 1, 200),
           cursor: optionalString(args.cursor) ?? null,
         },
+        keyedBy: "name",
       })
     case "share_table":
       return await ctx.runMutation(internal.tables.share.mint, {
@@ -99,6 +100,7 @@ async function callJoriTableRowTool(
         ...principal,
         tableId: requiredTableId(args.tableId),
         values: requiredObject(args.values, "values"),
+        keyedBy: "name",
       })
     case "update_table_row":
       return await ctx.runMutation(internal.tables.rows.update, {
@@ -107,6 +109,7 @@ async function callJoriTableRowTool(
         rowId: requiredRowId(args.rowId),
         values: requiredObject(args.values, "values"),
         expectedVersion: normalizeExpectedVersion(args.expectedVersion),
+        keyedBy: "name",
       })
     case "delete_table_row":
       return await ctx.runMutation(internal.tables.rows.remove, {

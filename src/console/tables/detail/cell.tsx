@@ -8,7 +8,7 @@ import { formatCellText, parseCellText } from "./cells"
 
 export type CommitCell = (
   row: TableRow,
-  key: string,
+  columnId: string,
   value: unknown
 ) => Promise<boolean>
 
@@ -33,7 +33,7 @@ export function RowCell({
   row: TableRow
   spotlight?: boolean
 }) {
-  const value = row.values[column.key]
+  const value = row.values[column.id]
 
   if (column.type === "boolean") {
     return (
@@ -43,7 +43,7 @@ export function RowCell({
           checked={value === true}
           disabled={disabled}
           onCheckedChange={(checked) =>
-            void onCommit(row, column.key, checked === true)
+            void onCommit(row, column.id, checked === true)
           }
         />
       </span>
@@ -80,7 +80,7 @@ function TextCell({
   row: TableRow
   spotlight: boolean
 }) {
-  const value = row.values[column.key]
+  const value = row.values[column.id]
   const [draft, setDraft] = useState<string | undefined>(() =>
     spotlight && !disabled ? formatCellText(column, value) : undefined
   )
@@ -113,7 +113,7 @@ function TextCell({
       return false
     }
 
-    if (await onCommit(row, column.key, parsed.value)) {
+    if (await onCommit(row, column.id, parsed.value)) {
       close()
 
       return true

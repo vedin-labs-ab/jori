@@ -56,9 +56,9 @@ test("displays an empty marker for cleared cells", () => {
 
 test("builds insert values, skipping empty optional columns", () => {
   const columns = [
-    column("string", { key: "title", required: true }),
-    column("integer", { key: "count" }),
-    column("boolean", { key: "done" }),
+    column("string", { id: "title", required: true }),
+    column("integer", { id: "count" }),
+    column("boolean", { id: "done" }),
   ]
   const built = buildRowValues(columns, {
     title: "Task",
@@ -77,7 +77,7 @@ test("builds insert values, skipping empty optional columns", () => {
 
 test("a blank draft passes without required columns, defaulting booleans", () => {
   const built = buildRowValues(
-    [column("string", { key: "title" }), column("boolean", { key: "done" })],
+    [column("string", { id: "title" }), column("boolean", { id: "done" })],
     {}
   )
 
@@ -86,7 +86,7 @@ test("a blank draft passes without required columns, defaulting booleans", () =>
 
 test("a blank draft fails against a required text-like column", () => {
   const built = buildRowValues(
-    [column("string", { key: "title", required: true })],
+    [column("string", { id: "title", required: true })],
     {}
   )
 
@@ -94,7 +94,7 @@ test("a blank draft fails against a required text-like column", () => {
 })
 
 test("build failures name the offending column", () => {
-  const built = buildRowValues([column("integer", { key: "count" })], {
+  const built = buildRowValues([column("integer", { id: "count" })], {
     count: "nope",
   })
 
@@ -110,8 +110,8 @@ function column(
   overrides: Partial<TableColumn> = {}
 ): TableColumn {
   return {
-    key: overrides.key ?? "field",
-    name: overrides.key ?? "field",
+    id: overrides.id ?? "field",
+    name: overrides.id ?? "field",
     type,
     ...overrides,
   }

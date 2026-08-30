@@ -15,7 +15,7 @@ import { useMaterialBreadcrumb } from "../../shared/materials/breadcrumb"
 import { useMemberUrl } from "../../shared/materials/fragment"
 import { tableDeleteDescription, useTableRemoval } from "../manage"
 import { rowPageSize, type TableDetail, type TableRow } from "../types"
-import { type ColumnSheetState } from "./columns"
+import { type ColumnSheetState } from "./column/form"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
 import { TableHeaderActions } from "./header"
@@ -213,7 +213,7 @@ function TableGrid({
         void page.adding.addRow({ rowId: row.rowId, placement })
       }
       onInspectColumn={(column) =>
-        page.setColumnSheet({ mode: "edit", key: column.key })
+        page.setColumnSheet({ mode: "edit", id: column.id })
       }
       pendingRowId={page.writes.pendingRowId}
       rows={page.pages.rows}

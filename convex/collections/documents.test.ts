@@ -43,8 +43,8 @@ async function createTable(
     "collections",
     tableDoc({
       columns: [
-        { key: "title", name: "Title", type: "string", required: true },
-        { key: "count", name: "Count", type: "integer" },
+        { id: "title", name: "Title", type: "string", required: true },
+        { id: "count", name: "Count", type: "integer" },
       ],
       ...overrides,
     })

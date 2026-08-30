@@ -12,7 +12,7 @@ import { type CollectionDoc } from "./spec"
 async function createTable(database: TestDatabase) {
   const tableId = await database.insert(
     "collections",
-    tableDoc({ columns: [{ key: "title", name: "Title", type: "string" }] })
+    tableDoc({ columns: [{ id: "title", name: "Title", type: "string" }] })
   )
 
   return (await database.get(tableId)) as unknown as CollectionDoc<"table">

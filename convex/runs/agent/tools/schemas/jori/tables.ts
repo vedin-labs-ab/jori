@@ -20,20 +20,21 @@ const rowVersionProperty = numberProperty(
 )
 
 const tableColumnInput = objectSchema({
-  required: ["key", "type"],
+  required: ["name", "type"],
   properties: {
-    key: stringProperty(
-      "Stable column key rows are keyed by: a letter followed by letters, numbers, or underscores."
+    name: stringProperty(
+      "Column name — the header users see and the key row values use. Unique within the table, ignoring case."
     ),
-    name: stringProperty("Display name; defaults to the key."),
     type: {
       type: "string",
       enum: ["string", "float", "integer", "boolean"],
-      description: "Value type enforced on every row write.",
+      description:
+        "Value type enforced on every row write; fixed once the column exists.",
     },
     required: {
       type: "boolean",
-      description: "Require a value in every row.",
+      description:
+        "Require a value in every row. Only satisfiable while the table has no rows, or when every row already holds a value.",
     },
   },
 })
@@ -42,7 +43,7 @@ const rowValuesProperty = {
   type: "object",
   additionalProperties: true,
   description:
-    "Row values keyed by column key, matching the table's column types.",
+    "Row values keyed by column name, matching the table's column types.",
 }
 
 export const tableToolInputSchemas = {
@@ -57,7 +58,7 @@ export const tableToolInputSchemas = {
     },
   }),
   create_table: objectSchema({
-    required: ["name", "columns"],
+    required: ["name"],
     properties: {
       name: stringProperty("Short table name."),
       description: stringProperty("What the table tracks and who reads it."),
@@ -65,7 +66,8 @@ export const tableToolInputSchemas = {
       columns: {
         type: "array",
         items: tableColumnInput,
-        description: "Column schema, fixed apart from adding columns later.",
+        description:
+          "Starting columns; a table may also start empty and grow columns later in the console.",
       },
     },
   }),
@@ -100,7 +102,7 @@ export const tableToolInputSchemas = {
       values: {
         ...rowValuesProperty,
         description:
-          "Columns to change, keyed by column key: each entry replaces that column's value, null clears an optional column, omitted columns keep their value.",
+          "Columns to change, keyed by column name: each entry replaces that column's value, null clears an optional column, omitted columns keep their value.",
       },
       expectedVersion: rowVersionProperty,
     },

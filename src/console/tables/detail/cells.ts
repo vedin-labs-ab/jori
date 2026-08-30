@@ -43,7 +43,7 @@ export function formatCellText(column: TableColumn, value: unknown) {
   return String(value)
 }
 
-/** Text (and checkbox) drafts for a new row, keyed by column key. */
+/** Text (and checkbox) drafts for a new row, keyed by column id. */
 export type RowDraft = Record<string, string | boolean>
 
 /** Assemble insert values from an add-row draft: parse failures name their
@@ -57,10 +57,10 @@ export function buildRowValues(
   const values: Record<string, unknown> = {}
 
   for (const column of columns) {
-    const entry = draft[column.key]
+    const entry = draft[column.id]
 
     if (column.type === "boolean") {
-      values[column.key] = entry === true
+      values[column.id] = entry === true
 
       continue
     }
@@ -72,7 +72,7 @@ export function buildRowValues(
     }
 
     if (parsed.value !== undefined) {
-      values[column.key] = parsed.value
+      values[column.id] = parsed.value
     }
   }
 

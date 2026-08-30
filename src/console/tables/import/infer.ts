@@ -7,9 +7,11 @@ import {
 import { compileTableSchema } from "@contracts/tables/compile"
 import { parseCsv } from "@/lib/csv"
 
-// A CSV file becomes a brand-new table: column keys are slugged from the
-// header, each column's type and required flag are deduced from the data,
-// and every row is coerced and validated before anything is created.
+// A CSV file becomes a brand-new table: column names come straight from
+// the header (deduped, since names are unique per table), hidden ids are
+// generated here so the rows can be keyed before the table exists, each
+// column's type and required flag are deduced from the data, and every row
+// is coerced and validated before anything is created.
 
 /** One row that could not be converted; `line` is 1-based in the file. */
 export type CsvRowIssue = { line: number; message: string }
@@ -86,17 +88,18 @@ export function deriveTableName(fileName: string): string {
 }
 
 function inferColumns(header: string[], records: CsvRecord[]): TableColumn[] {
-  const keys = dedupeKeys(header.map(slugColumnKey))
+  const names = columnNames(header)
 
-  return header.map((cell, index) => {
-    const key = keys[index] ?? `column_${index + 1}`
+  return header.map((_, index) => {
     const filled = records
       .map((record) => (record.fields[index] ?? "").trim())
       .filter((value) => value !== "")
 
     return {
-      key,
-      name: cell.trim() === "" ? key : cell.trim(),
+      // Deterministic per-import ids: the rows built alongside key their
+      // values by these before the table exists.
+      id: `c${index + 1}`,
+      name: names[index] ?? `Column ${index + 1}`,
       type: inferColumnType(filled),
       // A column with a value in every record is required; empty cells
       // anywhere make it optional.
@@ -105,37 +108,29 @@ function inferColumns(header: string[], records: CsvRecord[]): TableColumn[] {
   })
 }
 
-/** Contracts-safe key for a header cell: lowercased, non-alphanumeric runs
- *  collapsed to underscores, forced to start with a letter. */
-export function slugColumnKey(cell: string): string {
-  const slug = cell
-    .trim()
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "_")
-    .replaceAll(/^_+|_+$/g, "")
-
-  if (slug === "") {
-    return "column"
-  }
-
-  return /^[a-z]/.test(slug) ? slug : `c_${slug}`
-}
-
-/** Keep keys within the 64-character contracts limit and unique, suffixing
- *  collisions with `_2`, `_3`, … in header order. */
-function dedupeKeys(keys: string[]): string[] {
+/** Column names straight from the header cells, made contracts-safe: blank
+ *  cells become "Column N", long names truncate, and collisions (names are
+ *  unique per table, ignoring case) take a numbered suffix in header
+ *  order. */
+export function columnNames(header: string[]): string[] {
   const taken = new Set<string>()
 
-  return keys.map((key) => {
-    let candidate = key.slice(0, 64)
+  return header.map((cell, index) => {
+    const base =
+      cell.trim() === ""
+        ? `Column ${index + 1}`
+        : cell.trim().slice(0, tableLimits.maxColumnNameLength).trim()
+    let candidate = base
 
-    for (let suffix = 2; taken.has(candidate); suffix += 1) {
-      const tail = `_${suffix}`
+    for (let suffix = 2; taken.has(candidate.toLowerCase()); suffix += 1) {
+      const tail = ` ${suffix}`
 
-      candidate = `${key.slice(0, 64 - tail.length)}${tail}`
+      candidate = `${base
+        .slice(0, tableLimits.maxColumnNameLength - tail.length)
+        .trim()}${tail}`
     }
 
-    taken.add(candidate)
+    taken.add(candidate.toLowerCase())
 
     return candidate
   })
@@ -198,7 +193,7 @@ function buildRow(
     const value = coerceCell(column.type, fields[index] ?? "")
 
     if (value !== undefined) {
-      values[column.key] = value
+      values[column.id] = value
     }
   }
 

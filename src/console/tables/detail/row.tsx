@@ -68,17 +68,17 @@ export function GridRow({
   row: TableRowData
   selection: RowSelection<TableRowData>
 }) {
-  const spotlightKey = columns.find((column) => column.type !== "boolean")?.key
-  const [editKey, setEditKey] = useState<string>()
-  const [menuKey, setMenuKey] = useState<string>()
+  const spotlightId = columns.find((column) => column.type !== "boolean")?.id
+  const [editId, setEditId] = useState<string>()
+  const [menuId, setMenuId] = useState<string>()
 
   function settle() {
-    setEditKey(undefined)
+    setEditId(undefined)
     onFreshSettled()
   }
 
-  function advance(fromKey: string, direction: 1 | -1) {
-    setEditKey(nextEditKey(columns, fromKey, direction))
+  function advance(fromId: string, direction: 1 | -1) {
+    setEditId(nextEditId(columns, fromId, direction))
   }
 
   const cells = (
@@ -95,18 +95,18 @@ export function GridRow({
       {columns.map((column) => (
         <TableCell
           className="p-0"
-          key={column.key}
-          onContextMenu={() => setMenuKey(column.key)}
+          key={column.id}
+          onContextMenu={() => setMenuId(column.id)}
         >
           <RowCell
             column={column}
             disabled={disabled || isPending}
-            onAdvance={(direction) => advance(column.key, direction)}
+            onAdvance={(direction) => advance(column.id, direction)}
             onCommit={onCommit}
             onSettle={settle}
             row={row}
             spotlight={
-              (isFresh && column.key === spotlightKey) || editKey === column.key
+              (isFresh && column.id === spotlightId) || editId === column.id
             }
           />
         </TableCell>
@@ -121,10 +121,10 @@ export function GridRow({
   return (
     <RowMenu
       isPending={isPending}
-      menuColumn={columns.find((column) => column.key === menuKey)}
+      menuColumn={columns.find((column) => column.id === menuId)}
       onDelete={() => onDelete(row)}
       onDuplicate={() => onDuplicate(row)}
-      onEditCell={() => setEditKey(menuKey)}
+      onEditCell={() => setEditId(menuId)}
       onInsert={(placement) => onInsert(row, placement)}
       onPasteCell={(column, text) => pasteIntoCell(onCommit, row, column, text)}
       row={row}
@@ -145,7 +145,7 @@ function pasteIntoCell(
   const parsed = parseCellText(column, text)
 
   if (parsed.ok) {
-    void onCommit(row, column.key, parsed.value)
+    void onCommit(row, column.id, parsed.value)
   } else {
     toast.error(parsed.error)
   }
@@ -154,16 +154,12 @@ function pasteIntoCell(
 /** Tab from a committed editor moves editing to the row's neighboring
  *  text-like cell; past either end it returns undefined and the editor
  *  stays closed. Runs after the closing cell's settle, so the later
- *  setEditKey wins the batch. */
-function nextEditKey(
-  columns: TableColumn[],
-  fromKey: string,
-  direction: 1 | -1
-) {
+ *  setEditId wins the batch. */
+function nextEditId(columns: TableColumn[], fromId: string, direction: 1 | -1) {
   const textColumns = columns.filter((column) => column.type !== "boolean")
-  const from = textColumns.findIndex((column) => column.key === fromKey)
+  const from = textColumns.findIndex((column) => column.id === fromId)
 
-  return textColumns[from + direction]?.key
+  return textColumns[from + direction]?.id
 }
 
 /** The row's right-click menu: cell actions for the cell under the
@@ -199,7 +195,7 @@ function RowMenu({
     }
 
     void navigator.clipboard
-      .writeText(displayCellText(row.values[menuColumn.key]))
+      .writeText(displayCellText(row.values[menuColumn.id]))
       .then(() => toast.success("Cell copied."))
   }
 

@@ -519,6 +519,7 @@ import type * as stores_values from "../stores/values.js";
 import type * as tables_access from "../tables/access.js";
 import type * as tables_console from "../tables/console.js";
 import type * as tables_mcp from "../tables/mcp.js";
+import type * as tables_migrate from "../tables/migrate.js";
 import type * as tables_queries from "../tables/queries.js";
 import type * as tables_records from "../tables/records.js";
 import type * as tables_rows from "../tables/rows.js";
@@ -1056,6 +1057,7 @@ declare const fullApi: ApiFromModules<{
   "tables/access": typeof tables_access;
   "tables/console": typeof tables_console;
   "tables/mcp": typeof tables_mcp;
+  "tables/migrate": typeof tables_migrate;
   "tables/queries": typeof tables_queries;
   "tables/records": typeof tables_records;
   "tables/rows": typeof tables_rows;

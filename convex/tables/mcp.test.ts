@@ -12,7 +12,7 @@ const execution = {
 describe("table tool dispatch", () => {
   test("create defaults scope to organization and passes columns through", async () => {
     const runMutation = vi.fn(async () => ({}))
-    const columns = [{ key: "title", type: "string", required: true }]
+    const columns = [{ name: "Title", type: "string", required: true }]
 
     await callJoriTableTool(
       { runMutation } as unknown as ActionCtx,
@@ -47,6 +47,7 @@ describe("table tool dispatch", () => {
       expect.objectContaining({
         tableId: "table",
         paginationOpts: { numItems: 10, cursor: "next" },
+        keyedBy: "name",
       })
     )
   })
@@ -67,19 +68,22 @@ describe("table row dispatch", () => {
         args: {
           tableId: "table",
           rowId: "row",
-          values: { title: "Renamed" },
+          values: { Title: "Renamed" },
           expectedVersion: 2,
         },
       }
     )
 
+    // Values are keyed by column NAME on the agent surface; the mutation
+    // resolves them to hidden column ids in-transaction.
     expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
       organizationId: "organization",
       personId: "person",
       tableId: "table",
       rowId: "row",
-      values: { title: "Renamed" },
+      values: { Title: "Renamed" },
       expectedVersion: 2,
+      keyedBy: "name",
     })
   })
 

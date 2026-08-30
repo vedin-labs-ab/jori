@@ -23,9 +23,9 @@ beforeEach(() => {
 })
 
 const columns: TableColumn[] = [
-  { key: "title", name: "Title", type: "string" },
-  { key: "done", name: "Done", type: "boolean" },
-  { key: "stage", name: "Stage", type: "string" },
+  { id: "title", name: "Title", type: "string" },
+  { id: "done", name: "Done", type: "boolean" },
+  { id: "stage", name: "Stage", type: "string" },
 ]
 
 const row: TableRow = {

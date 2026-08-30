@@ -16,11 +16,10 @@ function tableSummaryProperties() {
     scope: stringProperty("personal or organization."),
     ownerId: stringProperty("Owning person ID."),
     columns: arrayProperty(
-      "Column schema every row is validated against.",
+      "Column schema every row is validated against; row values are keyed by column name.",
       objectSchema({
         properties: {
-          key: stringProperty("Stable column key."),
-          name: stringProperty("Display name."),
+          name: stringProperty("Column name, unique within the table."),
           type: stringProperty("string, float, integer, or boolean."),
           required: booleanProperty("Whether every row needs a value."),
         },
@@ -40,7 +39,7 @@ function rowSummary(description: string): JsonSchema {
       values: {
         type: "object",
         additionalProperties: true,
-        description: "Row values keyed by column key.",
+        description: "Row values keyed by column name.",
       },
       version: numberProperty("Row version, incremented per update."),
       createdAt: numberProperty("Insert time in epoch milliseconds."),

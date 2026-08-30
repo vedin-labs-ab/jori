@@ -86,7 +86,7 @@ function SharedRows({
           <TableHeader>
             <TableRow>
               {table.columns.map((column) => (
-                <TableHead key={column.key}>{column.name}</TableHead>
+                <TableHead key={column.id}>{column.name}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
@@ -94,8 +94,8 @@ function SharedRows({
             {rows.results.map((row) => (
               <TableRow key={row.rowId}>
                 {table.columns.map((column) => (
-                  <TableCell key={column.key}>
-                    {displayCellText(row.values[column.key])}
+                  <TableCell key={column.id}>
+                    {displayCellText(row.values[column.id])}
                   </TableCell>
                 ))}
               </TableRow>

@@ -1,4 +1,4 @@
-import { type TableColumnType } from "@contracts/tables/columns"
+import { newColumnId, type TableColumnType } from "@contracts/tables/columns"
 import {
   DecimalsArrowRight,
   Hash,
@@ -8,15 +8,12 @@ import {
 } from "lucide-react"
 import { type TableColumn } from "./types"
 
-/** A column being edited: locked drafts are existing columns, where only
- *  the display name may change; the rest describe columns being added. */
+/** What the column sheet edits: everything a column shows the user. The
+ *  hidden id is generated on append and never surfaces. */
 export type ColumnDraft = {
-  id: string
-  key: string
   name: string
   type: TableColumnType
   required: boolean
-  locked: boolean
 }
 
 export const columnTypeOptions = [
@@ -35,121 +32,98 @@ export const columnTypeIcons: Record<TableColumnType, LucideIcon> = {
   string: Type,
 }
 
-const columnKeyPattern = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
-
-/** The single text column every new table starts with. Creation no longer
- *  asks for columns; the table's own editor evolves them afterward — and
- *  since evolution is additive, the seed is the most universal column. */
-export const starterColumns: TableColumn[] = [
-  { key: "name", name: "Name", type: "string" },
-]
-
 export function newColumnDraft(): ColumnDraft {
-  return {
-    id: crypto.randomUUID(),
-    key: "",
-    name: "",
-    type: "string",
-    required: false,
-    locked: false,
-  }
+  return { name: "", type: "string", required: false }
 }
 
-export function draftsFromColumns(columns: TableColumn[]): ColumnDraft[] {
-  return columns.map((column) => ({
-    id: column.key,
-    key: column.key,
-    name: column.name,
-    type: column.type,
-    required: column.required === true,
-    locked: true,
-  }))
-}
+type ColumnsResult =
+  | { ok: true; columns: TableColumn[] }
+  | { ok: false; error: string }
 
-/** The payload `create`/`update` expect. Existing columns keep their type
- *  and required flag; only the display name follows the draft. */
-export function draftsToColumns(
-  drafts: ColumnDraft[],
-  existing: TableColumn[]
-) {
-  const existingByKey = new Map(existing.map((column) => [column.key, column]))
-
-  return drafts.map((draft) => {
-    const current = draft.locked ? existingByKey.get(draft.key) : undefined
-
-    if (current !== undefined) {
-      return {
-        ...current,
-        name: draft.name.trim() === "" ? draft.key : draft.name,
-      }
-    }
-
-    return {
-      key: draft.key,
-      name: draft.name.trim() === "" ? draft.key : draft.name,
-      type: draft.type,
-      ...(draft.required ? { required: true } : {}),
-    }
-  })
-}
-
-/** Columns payload for appending one optional column to an existing table,
- *  or the validation problem blocking it. New columns join optional so the
- *  server's additive evolution rules accept them. */
+/** Columns payload appending one drafted column, or the validation problem
+ *  blocking it. */
 export function appendColumn(
   existing: TableColumn[],
-  addition: { key: string; name: string; type: TableColumnType }
-):
-  | { ok: true; columns: ReturnType<typeof draftsToColumns> }
-  | { ok: false; error: string } {
-  const drafts = [
-    ...draftsFromColumns(existing),
-    { ...newColumnDraft(), ...addition },
-  ]
-  const issue = columnDraftsIssue(drafts)
+  draft: ColumnDraft
+): ColumnsResult {
+  const issue = columnNameIssue(existing, draft.name)
 
   if (issue !== undefined) {
     return { ok: false, error: issue }
   }
 
-  return { ok: true, columns: draftsToColumns(drafts, existing) }
+  return {
+    ok: true,
+    columns: [
+      ...existing,
+      {
+        id: newColumnId(),
+        name: draft.name.trim(),
+        type: draft.type,
+        ...(draft.required ? { required: true as const } : {}),
+      },
+    ],
+  }
 }
 
-/** Columns payload renaming one column's display name — the only column
- *  detail the evolution rules let an existing column change. A blank name
- *  falls back to the key. */
-export function renameColumn(
+/** Columns payload applying everything an existing column may change: its
+ *  name, freely, and its required flag — the type is fixed for life. */
+export function editColumn(
   existing: TableColumn[],
-  key: string,
-  name: string
-) {
-  return existing.map((column) =>
-    column.key === key
-      ? { ...column, name: name.trim() === "" ? column.key : name }
-      : column
-  )
-}
+  columnId: string,
+  draft: { name: string; required: boolean }
+): ColumnsResult {
+  const issue = columnNameIssue(existing, draft.name, columnId)
 
-/** First problem that blocks submitting the drafts, if any. */
-export function columnDraftsIssue(drafts: ColumnDraft[]) {
-  if (drafts.length === 0) {
-    return "Add at least one column."
+  if (issue !== undefined) {
+    return { ok: false, error: issue }
   }
 
-  const keys = new Set<string>()
+  return {
+    ok: true,
+    columns: existing.map((column) =>
+      column.id === columnId
+        ? {
+            id: column.id,
+            name: draft.name.trim(),
+            type: column.type,
+            ...(draft.required ? { required: true as const } : {}),
+          }
+        : column
+    ),
+  }
+}
 
-  for (const draft of drafts) {
-    if (!columnKeyPattern.test(draft.key)) {
-      return draft.key.trim() === ""
-        ? "Every column needs a key."
-        : `Column key "${draft.key}" must start with a letter and use letters, numbers, or underscores.`
-    }
+/** Columns payload deleting one column; the server removes its values from
+ *  every row. */
+export function removeColumn(
+  existing: TableColumn[],
+  columnId: string
+): TableColumn[] {
+  return existing.filter((column) => column.id !== columnId)
+}
 
-    if (keys.has(draft.key)) {
-      return `Duplicate column key "${draft.key}".`
-    }
+/** Names are the only column identity users see, so they behave like CSV
+ *  headers with one rule extra: unique within the table, ignoring case. */
+export function columnNameIssue(
+  existing: TableColumn[],
+  name: string,
+  excludeColumnId?: string
+) {
+  const trimmed = name.trim()
 
-    keys.add(draft.key)
+  if (trimmed === "") {
+    return "Give the column a name."
+  }
+
+  const fold = trimmed.toLowerCase()
+  const clash = existing.find(
+    (column) =>
+      column.id !== excludeColumnId && column.name.toLowerCase() === fold
+  )
+
+  if (clash !== undefined) {
+    return `A column named "${clash.name}" already exists.`
   }
 
   return undefined

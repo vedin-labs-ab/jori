@@ -91,11 +91,7 @@ export function databaseContext(extras: Record<string, unknown> = {}) {
   }
 }
 
-function queryBuilder(rows: StoredDoc[]) {
-  const constraints: Constraint[] = []
-  const predicates: FilterPredicate[] = []
-  let sortFields: string[] = []
-  let descending = false
+function constraintBuilder(constraints: Constraint[]) {
   const index = {
     eq: (field: string, value: unknown) => {
       constraints.push({ kind: "eq", field, value })
@@ -113,6 +109,16 @@ function queryBuilder(rows: StoredDoc[]) {
       return index
     },
   }
+
+  return index
+}
+
+function queryBuilder(rows: StoredDoc[]) {
+  const constraints: Constraint[] = []
+  const predicates: FilterPredicate[] = []
+  let sortFields: string[] = []
+  let descending = false
+  const index = constraintBuilder(constraints)
   const filtered = () => {
     const result = rows.filter(
       (row) =>
@@ -161,6 +167,10 @@ function queryBuilder(rows: StoredDoc[]) {
     },
     collect: async () => filtered(),
     take: async (count: number) => filtered().slice(0, count),
+    // Convex queries are async-iterable; helpers stream rows this way.
+    async *[Symbol.asyncIterator]() {
+      yield* filtered()
+    },
     paginate: async (_opts: unknown) => ({
       page: filtered(),
       isDone: true,
