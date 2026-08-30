@@ -25,8 +25,10 @@ export const noSiblings: FileSiblings = {
 }
 
 /** The current file's neighbors in list order. `previous` is the row above
- *  (newer), `next` the row below; `position` is 1-based, or null when the
- *  file is not in the list at all. */
+ *  (newer), `next` the row below, and the ends wrap — past the last file
+ *  navigation comes back around to the first. Alone in the list, a file
+ *  has no neighbors. `position` is 1-based, or null when the file is not
+ *  in the list at all. */
 export function fileSiblings<Row extends { fileId: string }>(
   files: readonly Row[],
   fileId: Row["fileId"]
@@ -42,11 +44,15 @@ export function fileSiblings<Row extends { fileId: string }>(
     return { count: files.length, next: null, position: null, previous: null }
   }
 
+  if (files.length < 2) {
+    return { count: files.length, next: null, position: 1, previous: null }
+  }
+
   return {
     count: files.length,
-    next: files[index + 1] ?? null,
+    next: files[(index + 1) % files.length] ?? null,
     position: index + 1,
-    previous: files[index - 1] ?? null,
+    previous: files[(index - 1 + files.length) % files.length] ?? null,
   }
 }
 
