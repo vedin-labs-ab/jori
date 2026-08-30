@@ -184,6 +184,15 @@ function FilterMark({
   )
 }
 
+/** Search scores only the option labels: item identity comes from the
+ *  facet value, which may be an opaque id that must never match text the
+ *  user types. */
+function facetFilter(_value: string, search: string, keywords?: string[]) {
+  const haystack = (keywords ?? []).join(" ").toLowerCase()
+
+  return haystack.includes(search.trim().toLowerCase()) ? 1 : 0
+}
+
 function FacetMenu({
   children,
   controls,
@@ -197,7 +206,7 @@ function FacetMenu({
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent align="start" className="w-56 p-0">
-        <Command>
+        <Command filter={facetFilter}>
           {/* The reset rides beside the search rather than posing as an
               option; it only enables while narrowing is actually on. */}
           <div className="flex items-end gap-1 pr-1">
@@ -290,18 +299,26 @@ function FacetSection({
         <CommandItem
           data-checked={selection.includes(option.value)}
           key={option.value}
+          keywords={[option.label]}
           onSelect={() =>
             controls.setFacet(
               facet.key,
               toggledFacet(selection, option.value, facet.options)
             )
           }
-          value={option.label}
+          // Identity is the entity's own key — duplicate labels must stay
+          // separate options.
+          value={`${facet.key}:${option.value}`}
         >
           {option.icon === undefined ? null : (
             <option.icon className="text-muted-foreground" />
           )}
-          {option.label}
+          <span className="truncate">{option.label}</span>
+          {option.hint === undefined ? null : (
+            <span className="truncate text-[0.625rem] text-muted-foreground">
+              {option.hint}
+            </span>
+          )}
         </CommandItem>
       ))}
     </CommandGroup>

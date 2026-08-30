@@ -9,7 +9,15 @@ export type SortDirection = "asc" | "desc"
 
 export type ListSort = { direction: SortDirection; key: string }
 
-export type FacetOption = { icon?: LucideIcon; label: string; value: string }
+/** One selectable facet value. The hint disambiguates options whose
+ *  labels collide — two folders named the same, say — and renders muted
+ *  beside the label. */
+export type FacetOption = {
+  hint?: string
+  icon?: LucideIcon
+  label: string
+  value: string
+}
 
 /** One filterable dimension of a list: its menu options, how a row resolves
  *  to an option value, and the selection the page opens with — undefined

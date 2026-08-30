@@ -20,9 +20,14 @@ export function folderIcon(hasContents: boolean, isExpanded = false) {
   return hasContents ? FolderDot : Folder
 }
 
-/** What a list needs to know about a folder: its label, and whether it
- *  holds anything — the same cue the sidebar tree's icons carry. */
-export type FolderEntry = { hasContents: boolean; name: string }
+/** What a list needs to know about a folder: its label, whether it holds
+ *  anything — the same cue the sidebar tree's icons carry — and its parent,
+ *  for telling identically named folders apart. */
+export type FolderEntry = {
+  hasContents: boolean
+  name: string
+  parentId?: string
+}
 
 export type FolderNames = ReadonlyMap<string, FolderEntry>
 
@@ -33,8 +38,10 @@ const noFolder = ""
 export function folderFacet(
   folders: FolderNames | undefined
 ): ListFacet<{ folderId?: string }> {
-  const named = [...(folders ?? [])]
+  const map = folders ?? new Map<string, FolderEntry>()
+  const named = [...map]
     .map(([value, entry]) => ({
+      hint: duplicateHint(map, entry),
       icon: folderIcon(entry.hasContents),
       label: entry.name,
       value,
@@ -51,6 +58,30 @@ export function folderFacet(
   }
 }
 
+/** Identically named folders read the same in a flat menu, so each gets
+ *  its parent's name as a muted hint — Root for top-level ones. Uniquely
+ *  named folders need none. */
+function duplicateHint(
+  folders: ReadonlyMap<string, FolderEntry>,
+  entry: FolderEntry
+) {
+  let sameName = 0
+
+  for (const other of folders.values()) {
+    if (other.name === entry.name) {
+      sameName += 1
+    }
+  }
+
+  if (sameName < 2) {
+    return undefined
+  }
+
+  return entry.parentId === undefined
+    ? "Root"
+    : (folders.get(entry.parentId)?.name ?? "Root")
+}
+
 /** Folder names by id for the whole organization, for resolving list rows'
  *  folderId into a linkable label. Convex dedupes the underlying tree
  *  subscription, so every list sharing it costs one query. */
@@ -64,7 +95,11 @@ export function useFolderNames(organizationId: string) {
   return new Map(
     tree.folders.map((folder) => [
       folder.folderId as string,
-      { hasContents: folder.hasContents, name: folder.name },
+      {
+        hasContents: folder.hasContents,
+        name: folder.name,
+        parentId: folder.parentId as string | undefined,
+      },
     ])
   ) as FolderNames
 }
