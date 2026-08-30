@@ -1,3 +1,4 @@
+import { type LucideIcon } from "lucide-react"
 import { useCallback, useState } from "react"
 
 // Header-embedded sorting and filtering for client-side list pages. Each
@@ -8,7 +9,7 @@ export type SortDirection = "asc" | "desc"
 
 export type ListSort = { direction: SortDirection; key: string }
 
-export type FacetOption = { label: string; value: string }
+export type FacetOption = { icon?: LucideIcon; label: string; value: string }
 
 /** One filterable dimension of a list: its menu options, how a row resolves
  *  to an option value, and the selection the page opens with — undefined

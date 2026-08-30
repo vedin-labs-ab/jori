@@ -8,9 +8,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ConsoleListTable } from "../../shared/list/frame"
+import { folderIcon } from "../../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../../shared/time"
 import { useFolderRowDrag } from "../drag/state"
-import { folderIcon, type ListedFolder } from "../types"
+import { type ListedFolder } from "../types"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
 /** The full-bleed Name/Kind/Updated table both folder surfaces share: the

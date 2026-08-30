@@ -1,14 +1,5 @@
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
-import {
-  CalendarClock,
-  Database,
-  Folder,
-  FolderDot,
-  FolderOpen,
-  FolderOpenDot,
-  type LucideIcon,
-  Table2,
-} from "lucide-react"
+import { CalendarClock, Database, type LucideIcon, Table2 } from "lucide-react"
 import { fileKind } from "@/shared/files/kind"
 import { type api } from "../../../convex/_generated/api"
 
@@ -23,17 +14,6 @@ export type ListedFolder = Pick<
   FolderRow,
   "folderId" | "hasContents" | "name" | "updatedAt"
 >
-
-/** The icon for a folder row anywhere folders list: a dot marks a folder
- *  holding anything — subfolders or filed resources — and an open body
- *  marks expansion, orthogonally. */
-export function folderIcon(hasContents: boolean, isExpanded = false) {
-  if (isExpanded) {
-    return hasContents ? FolderOpenDot : FolderOpen
-  }
-
-  return hasContents ? FolderDot : Folder
-}
 
 export type FolderDetail = NonNullable<
   FunctionReturnType<typeof api.folders.console.get>["folder"]

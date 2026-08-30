@@ -19,12 +19,13 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { folderIcon } from "../shared/materials/folders"
 import { type CreationRequest } from "./create/dialogs"
 import { NewInFolderSub } from "./create/menu"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { type FolderDialogRequest } from "./manage"
 import { type FolderNode } from "./tree"
-import { type FolderRow, folderIcon } from "./types"
+import { type FolderRow } from "./types"
 
 export type FolderExpansion = {
   expand: (folderId: string) => void

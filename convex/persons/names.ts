@@ -1,4 +1,5 @@
 import { type Id } from "../_generated/dataModel"
+import { authComponent } from "../auth"
 import { type Actor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { canonicalPersonId } from "./data"
@@ -61,6 +62,30 @@ export async function personDisplayName(
     .collect()
 
   return preferredPersonName(identities)
+}
+
+/** Name plus avatar for showing a person in the console. The avatar is the
+ *  image the sign-in provider (Google, Microsoft) gave Better Auth, reached
+ *  through the person's linked auth identity — people known only through
+ *  observed integrations have none and render as initials. */
+export async function personDisplay(
+  ctx: QueryLikeCtx,
+  personId: Id<"persons">
+): Promise<{ name?: string; image?: string }> {
+  const identities = await ctx.db
+    .query("identities")
+    .withIndex("by_person", (index) => index.eq("personId", personId))
+    .collect()
+  const account = identities.find((row) => row.provider === "auth")
+  const user =
+    account === undefined
+      ? null
+      : await authComponent.getAnyUserById(ctx, account.externalId)
+
+  return {
+    name: preferredPersonName(identities),
+    image: user?.image ?? undefined,
+  }
 }
 
 export function preferredPersonName(

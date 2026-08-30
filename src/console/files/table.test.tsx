@@ -105,7 +105,7 @@ test("lists name, size, kind, times, and owner columns", () => {
 
   expect(screen.getByRole("button", { name: "Type" })).toBeDefined()
   expect(screen.getByRole("button", { name: "Folder" })).toBeDefined()
-  expect(screen.getByRole("columnheader", { name: "Owner" })).toBeDefined()
+  expect(screen.getByRole("button", { name: "Owner" })).toBeDefined()
   expect(screen.getByRole("link", { name: "costs.csv" })).toBeDefined()
   expect(screen.getByText("42 B")).toBeDefined()
   expect(screen.getByText("Ada Lovelace")).toBeDefined()

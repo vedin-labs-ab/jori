@@ -1,15 +1,19 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Check, Filter } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import {
@@ -23,8 +27,10 @@ import {
 // Header-embedded list controls: every control is a compact ghost button
 // living inside the header cell itself — no toolbar rows.
 
+// text-xs matches the table's own type scale — the Button default of
+// text-sm made these headers shout next to plain TableHead cells.
 const headButtonClassName =
-  "h-10 justify-start gap-1.5 rounded-none px-2 font-medium text-sm"
+  "h-10 justify-start gap-1.5 rounded-none px-2 font-medium text-xs"
 
 /** Sortable header: the label is the button and clicking cycles the sort.
  *  A column that also filters renders a trailing facet menu icon-button. */
@@ -153,62 +159,68 @@ function FacetMenu({
   facets: FacetEntry[]
 }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {facets.map((facet, index) => (
-          <FacetSection
-            controls={controls}
-            facet={facet}
-            key={facet.key}
-            withSeparator={index > 0}
-          />
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Popover>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent align="start" className="w-56 p-0">
+        <Command>
+          <CommandInput placeholder="Search…" />
+          <CommandList>
+            <CommandEmpty>No matches.</CommandEmpty>
+            {facets.map((facet) => (
+              <FacetSection controls={controls} facet={facet} key={facet.key} />
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
 
-/** One labeled facet inside the menu: an All reset above its checkboxes. */
+/** One labeled facet inside the menu: an All reset above its options, each
+ *  carrying its icon and a trailing check when selected. The list searches
+ *  and scrolls through the Command primitives, so a hundred options stay
+ *  usable. */
 function FacetSection({
   controls,
   facet,
-  withSeparator,
 }: {
   controls: ListControls
   facet: FacetEntry
-  withSeparator: boolean
 }) {
   const selection = facetSelection(controls, facet.key, facet.options)
 
   return (
-    <>
-      {withSeparator ? <DropdownMenuSeparator /> : null}
-      <DropdownMenuLabel>{facet.label}</DropdownMenuLabel>
-      <DropdownMenuItem
-        onSelect={(event) => {
-          event.preventDefault()
-          controls.setFacet(facet.key, undefined)
-        }}
+    <CommandGroup heading={facet.label}>
+      <CommandItem
+        onSelect={() => controls.setFacet(facet.key, undefined)}
+        value="All"
       >
         All
-      </DropdownMenuItem>
+      </CommandItem>
       {facet.options.map((option) => (
-        <DropdownMenuCheckboxItem
-          checked={selection.includes(option.value)}
+        <CommandItem
           key={option.value}
-          onCheckedChange={() =>
+          onSelect={() =>
             controls.setFacet(
               facet.key,
               toggledFacet(selection, option.value, facet.options)
             )
           }
-          onSelect={(event) => event.preventDefault()}
+          value={option.label}
         >
+          {option.icon === undefined ? null : (
+            <option.icon className="text-muted-foreground" />
+          )}
           {option.label}
-        </DropdownMenuCheckboxItem>
+          <Check
+            className={cn(
+              "ml-auto",
+              selection.includes(option.value) ? "opacity-100" : "opacity-0"
+            )}
+          />
+        </CommandItem>
       ))}
-    </>
+    </CommandGroup>
   )
 }
 

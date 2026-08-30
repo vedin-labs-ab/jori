@@ -19,7 +19,6 @@ import {
   useResettingSetter,
 } from "../shared/list/pagination"
 import { type RowSelection, useRowSelection } from "../shared/list/selection"
-import { shouldIncludeArchived } from "../shared/materials/archive"
 import { useFolderNames } from "../shared/materials/folders"
 import { bulkMaterialRemoval } from "../shared/materials/removal"
 import { CreateTableDialog } from "./create"
@@ -42,24 +41,17 @@ export function TablesPage() {
   )
 }
 
-function useTableRows({
-  controls,
-  organizationId,
-  query,
-}: {
-  controls: ReturnType<typeof useListControls<TableSummary>>
-  organizationId: string
-  query: string
-}) {
+function useTableRows(organizationId: string, query: string) {
   const tableList = useQuery(api.tables.console.list, {
     organizationId,
     query,
-    includeArchived: shouldIncludeArchived(controls.getFacet("status")),
+    includeArchived: false,
   })
-  const tables =
-    tableList?.status === "ready" ? controls.apply(tableList.tables) : []
 
-  return { tableList, tables }
+  return {
+    tableList,
+    rows: tableList?.status === "ready" ? tableList.tables : [],
+  }
 }
 
 /** One bag of page state, so the view and its overlays stay small. */
@@ -69,14 +61,11 @@ function useTablesPage(organizationId: string) {
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const removal = useTableRemoval(organizationId)
   const folders = useFolderNames(organizationId)
-  const config = tableListConfig(folders)
-  const controls = useListControls(config)
   const deferredQuery = useDeferredValue(query)
-  const { tableList, tables } = useTableRows({
-    controls,
-    organizationId,
-    query: deferredQuery,
-  })
+  const { tableList, rows } = useTableRows(organizationId, deferredQuery)
+  const config = tableListConfig(folders, rows)
+  const controls = useListControls(config)
+  const tables = controls.apply(rows)
   const hasFilters = query.trim() !== "" || controls.hasActiveControls
   const pagination = useClientPagination({
     hasFilters,

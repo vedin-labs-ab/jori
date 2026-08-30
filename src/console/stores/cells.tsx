@@ -65,7 +65,11 @@ export function StoreOwnerCell({ store }: { store: StoreSummary }) {
   const owner =
     store.ownerName === undefined
       ? ({ kind: "jori" } as const)
-      : ({ kind: "person", name: store.ownerName } as const)
+      : ({
+          kind: "person",
+          name: store.ownerName,
+          image: store.ownerImage,
+        } as const)
 
   return <MaterialOwnerCell owner={owner} />
 }

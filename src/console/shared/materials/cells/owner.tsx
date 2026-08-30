@@ -1,16 +1,20 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
 
 /** Who a material row belongs to: a named person, or Jori itself when an
- *  organization-principal run created it. */
-export type MaterialOwner = { kind: "person"; name: string } | { kind: "jori" }
+ *  organization-principal run created it. The image is the person's
+ *  sign-in avatar when their account links one. */
+export type MaterialOwner =
+  | { kind: "person"; name: string; image?: string }
+  | { kind: "jori" }
 
-/** Owner cell shared by the material lists: initials avatar plus the
- *  person's name, or the brand mark plus "Jori". `compact` slims the avatar
- *  and gap to the height of a detail-frame header row. Both variants cap
- *  their own width, so a long name truncates instead of widening the
- *  column — table cells ignore max-width during column sizing. */
+/** Owner cell shared by the material lists: the person's sign-in avatar
+ *  (initials when none links) plus their name, or the brand mark plus
+ *  "Jori". `compact` slims the avatar and gap to the height of a
+ *  detail-frame header row. Both variants cap their own width, so a long
+ *  name truncates instead of widening the column — table cells ignore
+ *  max-width during column sizing. */
 export function MaterialOwnerCell({
   compact = false,
   owner,
@@ -38,6 +42,9 @@ export function MaterialOwnerCell({
         className={compact ? "size-5" : undefined}
         size={compact ? "default" : "sm"}
       >
+        {owner.image === undefined ? null : (
+          <AvatarImage alt="" src={owner.image} />
+        )}
         <AvatarFallback className={compact ? "text-[9px]" : undefined}>
           {initials(owner.name)}
         </AvatarFallback>

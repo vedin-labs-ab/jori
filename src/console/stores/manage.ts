@@ -2,10 +2,9 @@ import { useConvex, useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { countNoun, useBulkRunner } from "../shared/list/bulk"
 import { type ListConfig } from "../shared/list/controls"
-import { scopeFacet } from "../shared/list/scope"
 import { type RowSelection } from "../shared/list/selection"
-import { statusFacet } from "../shared/materials/archive"
 import { type FolderNames, folderFacet } from "../shared/materials/folders"
+import { ownerFacet } from "../shared/materials/owners"
 import {
   bulkMaterialRemovalSuccess,
   useMaterialRemoval,
@@ -18,15 +17,16 @@ type StoreTarget = Pick<StoreSummary, "storeId" | "name" | "archivedAt">
 export const storeNoun = { plural: "stores", singular: "store" }
 
 /** What the store list headers sort and filter: the shared material facets
- *  plus this page's name, count, and time sorts. */
+ *  plus this page's name, count, and time sorts. Owner options come from
+ *  the listed rows themselves. */
 export function storeListConfig(
-  folders: FolderNames | undefined
+  folders: FolderNames | undefined,
+  stores: readonly StoreSummary[]
 ): ListConfig<StoreSummary> {
   return {
     facets: {
       folder: folderFacet(folders),
-      scope: scopeFacet,
-      status: statusFacet,
+      owner: ownerFacet(stores),
     },
     sorts: {
       created: (store) => store.createdAt,
