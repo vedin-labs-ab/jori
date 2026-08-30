@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils"
 import { fileKind, previewKind } from "@/shared/files/kind"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { SeparatorDot } from "../shared/dot"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -19,11 +18,10 @@ import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListLoading } from "../shared/list/loading"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
-import { absoluteTime, relativeTime, useNow } from "../shared/time"
-import { FileOwnerCell, FileTypeCell } from "./cells"
 import { FileEditor } from "./editor/section"
 import { FileLinksDialog } from "./share"
-import { FileToolbar } from "./toolbar"
+import { type FileSiblings, useFileSiblings, useSiblingKeys } from "./siblings"
+import { FileMeta, FileToolbar } from "./toolbar"
 import { type FileDetail, formatFileSize } from "./types"
 import { FileViewer } from "./viewer/section"
 
@@ -103,6 +101,7 @@ function FileReadyView({
   useMemberUrl()
   useMaterialBreadcrumb(file.name, file.scope)
 
+  const siblings = useFileSiblings(organizationId, file.fileId)
   const [isShareOpen, setIsShareOpen] = useState(false)
 
   return (
@@ -119,7 +118,11 @@ function FileReadyView({
           <FileDownloadButton compact url={file.url} />
         )}
       </ConsoleHeaderActions>
-      <FileBody file={file} organizationId={organizationId} />
+      <FileBody
+        file={file}
+        organizationId={organizationId}
+        siblings={siblings}
+      />
       <FileLinksDialog
         fileId={file.fileId}
         onOpenChange={setIsShareOpen}
@@ -135,15 +138,21 @@ function FileReadyView({
 function FileBody({
   file,
   organizationId,
+  siblings,
 }: {
   file: FileDetail
   organizationId: string
+  siblings: FileSiblings
 }) {
   const kind = previewKind(file.mimeType, file.name)
 
   if (kind === "text" && file.url !== null && file.size <= textSizeLimit) {
     return (
+      // Keyed so navigating text-to-text unmounts the old editor — the
+      // autosave loop flushes its pending draft against the old file
+      // instead of carrying it into the next one.
       <FileEditor
+        key={file.fileId}
         errorFallback={
           <FileFallback
             description="Could not load the file's text. Download it instead."
@@ -154,6 +163,7 @@ function FileBody({
         file={file}
         meta={<FileMeta file={file} />}
         organizationId={organizationId}
+        siblings={siblings}
         url={file.url}
       />
     )
@@ -166,26 +176,38 @@ function FileBody({
         kind={kind}
         meta={<FileMeta file={file} />}
         name={file.name}
+        siblings={siblings}
         url={file.url}
       />
     )
   }
 
-  return <FileFallbackBody file={file} isOversizedText={kind === "text"} />
+  return (
+    <FileFallbackBody
+      file={file}
+      isOversizedText={kind === "text"}
+      siblings={siblings}
+    />
+  )
 }
 
 /** Download prompt under the toolbar for files with no inline view — and
- *  for text files too large to edit in place. */
+ *  for text files too large to edit in place. Nothing here owns the arrow
+ *  keys, so ←/→ navigate between files. */
 function FileFallbackBody({
   file,
   isOversizedText,
+  siblings,
 }: {
   file: FileDetail
   isOversizedText: boolean
+  siblings: FileSiblings
 }) {
+  useSiblingKeys(siblings)
+
   return (
     <>
-      <FileToolbar>
+      <FileToolbar hasArrowKeys siblings={siblings}>
         <FileMeta file={file} />
       </FileToolbar>
       {isOversizedText ? (
@@ -202,29 +224,6 @@ function FileFallbackBody({
         />
       )}
     </>
-  )
-}
-
-/** The secondary header's metadata line: kind, size, owner, and freshness,
- *  separated by the console's inline-meta middots. */
-function FileMeta({ file }: { file: FileDetail }) {
-  const now = useNow(30_000)
-
-  return (
-    <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
-      <FileTypeCell file={file} />
-      <SeparatorDot />
-      <span className="shrink-0">{formatFileSize(file.size)}</span>
-      <SeparatorDot />
-      <FileOwnerCell compact file={file} />
-      <SeparatorDot className="max-sm:hidden" />
-      <span
-        className="shrink-0 max-sm:hidden"
-        title={absoluteTime(file.updatedAt)}
-      >
-        Updated {relativeTime(file.updatedAt, now)}
-      </span>
-    </div>
   )
 }
 
