@@ -1,5 +1,7 @@
 import { FileIcon, type LucideIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { fileKind, previewKind } from "@/shared/files/kind"
 
 // The share view's inline preview: images, PDFs, video, audio, and
@@ -140,7 +142,12 @@ function TextDocument({
 }) {
   return (
     <div className="grid gap-1">
-      <pre className="max-h-[70svh] min-w-0 overflow-auto rounded-md border bg-muted/30 p-4 font-mono text-xs">
+      <pre
+        className={cn(
+          scrollFade,
+          "max-h-[70svh] min-w-0 overflow-auto rounded-md border bg-muted/30 p-4 font-mono text-xs"
+        )}
+      >
         {state.text}
       </pre>
       {state.isTruncated ? (

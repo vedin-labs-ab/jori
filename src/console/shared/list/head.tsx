@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/popover"
 import { TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import {
   type FacetEntry,
   facetSelection,
@@ -211,7 +212,7 @@ function FacetMenu({
               All
             </Button>
           </div>
-          <CommandList>
+          <CommandList className={scrollFade}>
             <CommandEmpty>No matches.</CommandEmpty>
             {facets.map((facet) => (
               <FacetSection controls={controls} facet={facet} key={facet.key} />

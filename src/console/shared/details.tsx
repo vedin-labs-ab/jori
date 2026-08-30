@@ -14,13 +14,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { FieldHelp } from "@/shared/field"
 import { CopyableCodeBlock, CopyButton } from "./copy"
 import { absoluteTime } from "./time"
 
 export const codeBlockContentClassName = "max-h-[250px] overflow-y-auto"
-const codeBlockBodyClassName =
+const codeBlockBodyClassName = cn(
+  scrollFade,
   "max-h-[250px] overflow-y-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed"
+)
 
 export type DetailIcon = ElementType<{ className?: string }>
 

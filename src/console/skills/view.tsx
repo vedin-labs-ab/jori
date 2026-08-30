@@ -5,6 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { useRetained } from "../shared/retain"
 import { type Skill } from "./types"
 
@@ -26,7 +28,12 @@ export function SkillViewDialog({
             <DialogDescription>{shown.description}</DialogDescription>
           )}
         </DialogHeader>
-        <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-md border bg-muted/30 p-3 font-mono text-xs/relaxed">
+        <pre
+          className={cn(
+            scrollFade,
+            "max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-md border bg-muted/30 p-3 font-mono text-xs/relaxed"
+          )}
+        >
           {shown?.body}
         </pre>
       </DialogContent>

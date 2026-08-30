@@ -14,6 +14,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { ColumnTypeSelect } from "../columns"
@@ -78,7 +80,12 @@ export function ColumnSheet({
             void form.submit()
           }}
         >
-          <div className="grid flex-1 content-start gap-4 overflow-y-auto px-4">
+          <div
+            className={cn(
+              scrollFade,
+              "grid flex-1 content-start gap-4 overflow-y-auto px-4"
+            )}
+          >
             {isCreating ? (
               <CreateFields form={form} />
             ) : (

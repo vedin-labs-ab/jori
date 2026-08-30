@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/attachment"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { fileKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/materials/size"
 import { type QueuedUpload, type UploadStatus } from "./queue"
@@ -44,7 +46,7 @@ export function UploadList({
     <div className="grid gap-1.5">
       {/* Long queues scroll in place so the dialog never outgrows the
           viewport; Clear all stays pinned below the scroll region. */}
-      <div className="grid max-h-56 gap-1.5 overflow-y-auto">
+      <div className={cn(scrollFade, "grid max-h-56 gap-1.5 overflow-y-auto")}>
         {items.map((item) => (
           <UploadRow
             disabled={disabled}

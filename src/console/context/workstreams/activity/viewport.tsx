@@ -1,6 +1,7 @@
 import { type UIEvent, useEffect, useRef } from "react"
 import { CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { scrollFade, scrollFadeX } from "@/shared/fade"
 import { type Workstream, type Workstreams } from "../types"
 import { LaneRow, stickyLane } from "./lane"
 import { type Pulse, type PulseLane } from "./series"
@@ -17,13 +18,9 @@ type PulseViewportProps = {
 }
 
 // Preserve the pinned lane label while fading the scrollable day cells.
-// The shadcn utility still owns the scroll-aware edge values and animation.
-// Its 96px default exceeds the shortest vertical overflow (28px at 8 lanes),
-// so a 24px reveal makes every edge reach full strength within the first row.
-const scrollFadeReveal = "[--scroll-fade-reveal:24px]"
+// The shared fade classes own the scroll-aware edge values and animation.
 const horizontalFade = cn(
-  "scroll-fade-x",
-  scrollFadeReveal,
+  scrollFadeX,
   "[--scroll-fade-mask:linear-gradient(to_right,currentColor_0,currentColor_11.5rem,transparent_11.5rem,currentColor_calc(11.5rem+var(--scroll-fade-s,0px)),currentColor_calc(100%-var(--scroll-fade-e,0px)),transparent_100%)]"
 )
 
@@ -49,12 +46,7 @@ export function PulseViewport({
 
   return (
     <CardContent className="px-0">
-      <div
-        className={cn(
-          "scroll-fade-y max-h-56 overflow-y-auto",
-          scrollFadeReveal
-        )}
-      >
+      <div className={cn(scrollFade, "max-h-56 overflow-y-auto")}>
         <div
           className={cn(horizontalFade, "no-scrollbar overflow-x-auto")}
           onScroll={synchronize}

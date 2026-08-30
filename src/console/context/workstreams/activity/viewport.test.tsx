@@ -10,7 +10,7 @@ afterEach(() => {
 
 test("fades both axes while keeping the pinned band outside vertical scroll", () => {
   const { container } = renderViewport()
-  const vertical = container.querySelector(".scroll-fade-y")
+  const vertical = container.querySelector(".scroll-fade")
   const horizontal = container.querySelectorAll(".scroll-fade-x")
 
   expect(vertical).not.toBeNull()

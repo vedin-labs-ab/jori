@@ -7,6 +7,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { CopyButton } from "../../shared/copy"
 import { activityToolFailureSummary } from "./tool/summary"
 
@@ -64,7 +66,12 @@ function ActivityErrorAction({
           <div className="flex min-w-0 items-center justify-end border-b px-3 py-2">
             <CopyButton label="error" value={value} />
           </div>
-          <pre className="max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed">
+          <pre
+            className={cn(
+              scrollFade,
+              "max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed"
+            )}
+          >
             <code className="block whitespace-pre-wrap break-words">
               {value}
             </code>

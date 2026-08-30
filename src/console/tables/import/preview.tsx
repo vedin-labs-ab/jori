@@ -9,6 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { countLabel } from "@/lib/count"
+import { cn } from "@/lib/utils"
+import { scrollFadeX } from "@/shared/fade"
 import { columnTypeOptions } from "../draft"
 import { type CsvRow, type CsvRowIssue, type CsvTablePlan } from "./infer"
 
@@ -31,7 +33,7 @@ export function ImportTablePreview({
         and required flags follow the data; you can adjust columns after the
         table is created.
       </p>
-      <TableFrame className="max-h-64 overflow-auto">
+      <TableFrame className={cn(scrollFadeX, "max-h-64 overflow-auto")}>
         <Table>
           <TableHeader>
             <TableRow>

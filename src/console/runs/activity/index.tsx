@@ -2,6 +2,8 @@ import { useQuery } from "convex/react"
 import { Logs } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { countLabel } from "@/lib/count"
+import { cn } from "@/lib/utils"
+import { scrollFadeViewport } from "@/shared/fade"
 import { api } from "../../../../convex/_generated/api"
 import { DetailRow } from "../../shared/details"
 import { type ExecutionItem } from "../types"
@@ -50,7 +52,7 @@ function ActivityContent({
       <div className="text-muted-foreground text-xs">
         {countLabel(activity.items.length, "event")}
       </div>
-      <ScrollArea className="max-h-[28rem]">
+      <ScrollArea className={cn(scrollFadeViewport, "max-h-[28rem]")}>
         <div className="pr-2">
           <ActivityTimeline items={activity.items} now={now} />
         </div>

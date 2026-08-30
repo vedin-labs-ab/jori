@@ -16,6 +16,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { IntegrationChips } from "@/shared/logo/integration"
 import { api } from "../../../../../convex/_generated/api"
 import { relativeTime, useNow } from "../../../shared/time"
@@ -87,7 +89,12 @@ function DetailBody({
           </p>
         ) : null}
       </SheetHeader>
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
+      <div
+        className={cn(
+          scrollFade,
+          "flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4"
+        )}
+      >
         {detail === undefined || timeline === undefined ? (
           <Skeleton className="h-40 w-full" />
         ) : detail === null ? (

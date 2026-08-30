@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/dialog"
 import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { CopyButton } from "./copy"
 import { codeTokenClassName } from "./tokens"
 
@@ -50,7 +51,11 @@ export function JsonDialog({
             <CopyButton label="schema" value={json} />
           </div>
           <pre
-            className={`max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed ${codeTokenClassName}`}
+            className={cn(
+              scrollFade,
+              "max-h-[70vh] min-w-0 overflow-auto px-3 py-2 font-mono text-foreground text-xs leading-relaxed",
+              codeTokenClassName
+            )}
           >
             {/* Keyed by content so fold state resets when the JSON swaps. */}
             <code className="block whitespace-pre-wrap break-words" key={json}>
@@ -74,6 +79,7 @@ export function JsonBlock({
   return (
     <pre
       className={cn(
+        scrollFade,
         "max-h-96 min-w-0 overflow-auto px-2.5 py-2 font-mono text-foreground text-xs leading-relaxed",
         codeTokenClassName,
         className

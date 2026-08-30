@@ -1,5 +1,6 @@
 import { Check, Folder, FolderMinus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { buildFolderTree, type FolderNode } from "./tree"
 import { type FolderRow } from "./types"
 
@@ -32,6 +33,7 @@ export function FolderPicker({
   return (
     <div
       className={cn(
+        scrollFade,
         "grid max-h-64 content-start gap-0.5 overflow-y-auto",
         className
       )}

@@ -7,6 +7,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { SettingsMobileNav, SettingsSidebar } from "./nav"
 import { type SettingsDialogView } from "./types"
 
@@ -84,7 +86,12 @@ function SettingsDialog<Value extends string>({
               view={view}
               views={views}
             />
-            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-6">
+            <div
+              className={cn(
+                scrollFade,
+                "min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-6"
+              )}
+            >
               {children(view)}
             </div>
           </div>
