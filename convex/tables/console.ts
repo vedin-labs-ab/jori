@@ -6,7 +6,7 @@ import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { pageDocuments } from "../collections/documents"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
-import { scopeValidator } from "../shared/audience"
+import { visibilityValidator } from "../visibility/schema"
 import {
   findAccessibleTable,
   getAccessibleTable,
@@ -103,7 +103,7 @@ export const create = mutation({
     organizationId: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
-    scope: v.optional(scopeValidator),
+    visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     columns: v.optional(v.any()),
   },

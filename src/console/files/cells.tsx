@@ -5,11 +5,11 @@ import {
   materialNameLinkClassName,
 } from "../shared/materials/cells/name"
 import { MaterialOwnerCell } from "../shared/materials/cells/owner"
-import { MaterialScopeBadge } from "../shared/materials/scope"
+import { VisibilityBadge } from "../shared/visibility/badge"
 import { type FileRow } from "./types"
 
-/** Name column: the registry icon, a link to the file, and a scope badge
- *  for personal files. Organization files carry no badge. */
+/** Name column: the registry icon, a link to the file, and a visibility
+ *  badge for anything narrower or wider than the organization. */
 export function FileNameCell({ file }: { file: FileRow }) {
   const kind = fileKind(file.mimeType, file.name)
 
@@ -23,9 +23,9 @@ export function FileNameCell({ file }: { file: FileRow }) {
       >
         {file.name}
       </Link>
-      {file.scope === "personal" ? (
-        <MaterialScopeBadge scope="personal" />
-      ) : null}
+      {file.visibility.mode === "organization" ? null : (
+        <VisibilityBadge visibility={file.visibility} />
+      )}
     </MaterialNameCell>
   )
 }

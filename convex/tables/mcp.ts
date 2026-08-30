@@ -1,10 +1,7 @@
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import {
-  normalizeCollectionScope,
-  normalizeExpectedVersion,
-} from "../collections/input"
+import { normalizeExpectedVersion } from "../collections/input"
 import {
   boundedNumber,
   type JoriToolRequest,
@@ -14,6 +11,7 @@ import {
   requiredObject,
   requiredString,
 } from "../shared/input"
+import { visibilityFromScopeInput } from "../visibility/schema"
 
 const tableTools = new Set([
   "search_tables",
@@ -59,7 +57,7 @@ export async function callJoriTableTool(
         ...principal,
         name: requiredString(args.name, "name"),
         description: optionalString(args.description),
-        scope: normalizeCollectionScope(args.scope),
+        visibility: visibilityFromScopeInput(args.scope),
         columns: args.columns,
       })
     case "read_table":

@@ -1,5 +1,6 @@
-import { type Scope } from "@contracts/permissions/scope"
+import { type Visibility } from "@contracts/permissions/visibility"
 import { useMutation } from "convex/react"
+import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -102,12 +103,14 @@ export type FileUpload = ReturnType<typeof useFileUpload>
 
 type UploadValues = {
   folderId: string | null
-  scope: Scope
+  visibility: Visibility
 }
 
-/** The Sharing and Folder fields shared by the whole batch. */
+/** The Access and Folder fields shared by the whole batch. */
 function useUploadFields(initialFolderId: string | null) {
-  const [scope, setScope] = useState<Scope>("organization")
+  const [visibility, setVisibility] = useState<Visibility>({
+    mode: "organization",
+  })
   const [folderId, setFolderId] = useState(initialFolderId)
 
   function reset() {
@@ -117,10 +120,10 @@ function useUploadFields(initialFolderId: string | null) {
   return {
     folderId,
     reset,
-    scope,
     setFolderId,
-    setScope,
-    values: { folderId, scope } satisfies UploadValues,
+    setVisibility,
+    values: { folderId, visibility } satisfies UploadValues,
+    visibility,
   }
 }
 
@@ -139,7 +142,9 @@ function useUploadAction(organizationId: string) {
       organizationId,
       storageId,
       name: file.name,
-      scope: values.scope,
+      visibility: values.visibility as FunctionArgs<
+        typeof api.files.console.create
+      >["visibility"],
       folderId:
         values.folderId === null
           ? undefined

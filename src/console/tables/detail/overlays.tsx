@@ -1,6 +1,7 @@
 import { MoveResourceDialog } from "../../folders/move"
 import { SelectionActionsBar } from "../../shared/list/bar"
 import { type RowSelection } from "../../shared/list/selection"
+import { VisibilityDialog } from "../../shared/visibility/dialog"
 import { EditTableDialog } from "../edit"
 import { type TableDetail, type TableRow } from "../types"
 import { AddRowDialog } from "./add"
@@ -9,7 +10,7 @@ import { ColumnSheet } from "./column/sheet"
 import { rowNoun, type useRowBulk } from "./rows"
 import { TableLinksDialog } from "./share"
 
-export type TableDialog = "add" | "edit" | "move" | "share"
+export type TableDialog = "access" | "add" | "edit" | "move" | "share"
 
 /** Everything floating over the grid: the selection bar, the column sheet,
  *  and the page's dialogs. */
@@ -105,6 +106,15 @@ function TableDialogs({
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
         table={dialog === "edit" ? table : undefined}
+      />
+      <VisibilityDialog
+        noun="table"
+        onOpenChange={closeWhenDismissed}
+        open={dialog === "access"}
+        organizationId={organizationId}
+        ownerId={table.ownerId}
+        target={{ kind: "table", id: table.tableId }}
+        value={table.visibility}
       />
       <TableLinksDialog
         onOpenChange={closeWhenDismissed}

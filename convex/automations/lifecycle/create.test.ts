@@ -21,7 +21,7 @@ test.each([
       expectedParentConfigurationVersion,
       name: "Meeting Briefing delivery",
       instructions: "Deliver the briefing.",
-      scope: "personal",
+      visibility: { mode: "private" },
       access: { integrations: [], web: false },
       type: "once",
       trigger: { at: "2030-01-01T08:00:00Z" },

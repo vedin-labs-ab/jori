@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import {
   ChevronRight,
   FolderInput,
+  LockKeyhole,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -258,6 +259,10 @@ function FolderRowMenu({
         <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
           <Pencil />
           Rename
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onDialog({ type: "access", folder })}>
+          <LockKeyhole />
+          Sharing…
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
           <FolderInput />

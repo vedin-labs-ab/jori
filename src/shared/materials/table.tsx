@@ -22,17 +22,21 @@ type SharedTable = NonNullable<
   ReturnType<typeof useQuery<typeof api.tables.share.get>>
 >
 
-/** Views a table through a share link, without a signed-in session. The
- *  secret rides along on every reactive read, so a revoked or expired link
- *  empties the page on its own. */
+/** Views a table through a share link or its public visibility, without a
+ *  signed-in session. The secret rides along on every reactive read, so a
+ *  revoked or expired link empties the page on its own; a public table
+ *  needs no secret at all. */
 export function TableShareView({
   secret,
   tableId,
 }: {
-  secret: string
+  secret: string | null
   tableId: string
 }) {
-  const table = useQuery(api.tables.share.get, { tableId, secret })
+  const table = useQuery(api.tables.share.get, {
+    tableId,
+    secret: secret ?? undefined,
+  })
   const isExpired = useShareExpired(table?.expiresAt)
   const openPath = `/tables/${encodeURIComponent(tableId)}`
 
@@ -45,7 +49,11 @@ export function TableShareView({
   }
 
   return (
-    <ShareShell name={table.name} openPath={openPath}>
+    <ShareShell
+      isPublic={table.access === "public"}
+      name={table.name}
+      openPath={openPath}
+    >
       {table.description === undefined ? null : (
         <p className="text-muted-foreground text-sm">{table.description}</p>
       )}
@@ -59,13 +67,13 @@ function SharedRows({
   table,
   tableId,
 }: {
-  secret: string
+  secret: string | null
   table: SharedTable
   tableId: string
 }) {
   const rows = usePaginatedQuery(
     api.tables.share.rows,
-    { tableId, secret },
+    { tableId, secret: secret ?? undefined },
     { initialNumItems: rowPageSize }
   )
 

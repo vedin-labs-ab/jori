@@ -44,7 +44,10 @@ describe("opening a table share", () => {
     const opened = await openTableShare(ctx, { tableId, secret: "s3cret" })
 
     expect(opened?.table.name).toBe("Leads")
-    expect(opened?.share.secret).toBe("s3cret")
+    expect(opened?.read).toEqual({
+      access: "share",
+      expiresAt: expect.any(Number),
+    })
   })
 
   test("returns null on a bad secret", async () => {
@@ -113,6 +116,67 @@ describe("opening a table share", () => {
         secret: "s3cret",
       })
     ).toBeNull()
+  })
+})
+
+describe("public visibility reads", () => {
+  test("an anonymous read with no secret succeeds for exactly the public table", async () => {
+    const { database, ctx } = databaseContext()
+    const publicId = await createTable(database, {
+      scope: undefined,
+      visibility: { mode: "public" },
+    })
+    const organizationId = await createTable(database)
+
+    const opened = await openTableShare(ctx, { tableId: publicId })
+
+    expect(opened?.read).toEqual({ access: "public" })
+    expect(await openTableShare(ctx, { tableId: organizationId })).toBeNull()
+  })
+
+  test("an invalid secret still opens a genuinely public table", async () => {
+    const { database, ctx } = databaseContext()
+    const publicId = await createTable(database, {
+      scope: undefined,
+      visibility: { mode: "public" },
+    })
+
+    const opened = await openTableShare(ctx, {
+      tableId: publicId,
+      secret: "wrong",
+    })
+
+    expect(opened?.read).toEqual({ access: "public" })
+  })
+
+  test("a public table inside a restricted folder stays closed to anonymous reads", async () => {
+    const { database, ctx } = databaseContext()
+    const folderId = await database.insert("folders", {
+      organizationId: "org",
+      name: "Private shelf",
+      visibility: { mode: "private" },
+      createdBy: testOwner,
+      createdAt: 1,
+      updatedAt: 1,
+    })
+    const filedId = await createTable(database, {
+      scope: undefined,
+      visibility: { mode: "public" },
+      folderId,
+    })
+
+    expect(await openTableShare(ctx, { tableId: filedId })).toBeNull()
+  })
+
+  test("archived public tables do not read anonymously", async () => {
+    const { database, ctx } = databaseContext()
+    const archivedId = await createTable(database, {
+      scope: undefined,
+      visibility: { mode: "public" },
+      archivedAt: 5,
+    })
+
+    expect(await openTableShare(ctx, { tableId: archivedId })).toBeNull()
   })
 })
 

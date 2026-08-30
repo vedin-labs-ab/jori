@@ -7,12 +7,12 @@ import {
   materialNameLinkClassName,
 } from "../shared/materials/cells/name"
 import { MaterialOwnerCell } from "../shared/materials/cells/owner"
-import { MaterialScopeBadge } from "../shared/materials/scope"
+import { VisibilityBadge } from "../shared/visibility/badge"
 import { type TableSummary } from "./types"
 
 /** Name column: the table icon, a link to the table, and the list's badge
- *  conventions — a scope badge for personal tables, an archived badge for
- *  archived ones. Organization tables carry no scope badge. */
+ *  conventions — a visibility badge for anything narrower or wider than
+ *  the organization, an archived badge for archived ones. */
 export function TableNameCell({ table }: { table: TableSummary }) {
   return (
     <MaterialNameCell description={table.description} icon={Table2}>
@@ -24,9 +24,9 @@ export function TableNameCell({ table }: { table: TableSummary }) {
       >
         {table.name}
       </Link>
-      {table.scope === "personal" ? (
-        <MaterialScopeBadge scope="personal" />
-      ) : null}
+      {table.visibility.mode === "organization" ? null : (
+        <VisibilityBadge visibility={table.visibility} />
+      )}
       {table.archivedAt === undefined ? null : (
         <Badge variant="secondary">Archived</Badge>
       )}

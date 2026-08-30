@@ -2,10 +2,7 @@ import { isRecord } from "../../contracts/json"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import {
-  normalizeCollectionScope,
-  normalizeExpectedVersion,
-} from "../collections/input"
+import { normalizeExpectedVersion } from "../collections/input"
 import {
   boundedNumber,
   type JoriToolRequest,
@@ -15,6 +12,7 @@ import {
   requiredString,
   requiredStringArray,
 } from "../shared/input"
+import { visibilityFromScopeInput } from "../visibility/schema"
 
 const storeTools = new Set([
   "search_stores",
@@ -57,7 +55,7 @@ export async function callJoriStoreTool(
         personId,
         name: requiredString(args.name, "name"),
         description: optionalString(args.description),
-        scope: normalizeCollectionScope(args.scope),
+        visibility: visibilityFromScopeInput(args.scope),
         schema: args.schema,
       })
     case "read_store":

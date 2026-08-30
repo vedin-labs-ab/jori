@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ScopeBadge } from "../../shared/details"
+import { VisibilityBadge } from "../../shared/visibility/badge"
 import { type Automation } from "../types"
 import { AutomationActions } from "./actions"
 import { DeleteAutomationDialog } from "./delete"
@@ -47,7 +47,9 @@ export function AutomationRow({
                 <h3 className="truncate font-heading text-sm font-medium">
                   {automation.name}
                 </h3>
-                <ScopeBadge scope={automation.scope} />
+                {automation.visibility.mode === "organization" ? null : (
+                  <VisibilityBadge visibility={automation.visibility} />
+                )}
                 {shouldShowCompletedBadge(automation) ? (
                   <Badge className="shrink-0" variant="outline">
                     Completed

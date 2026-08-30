@@ -4,6 +4,10 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { resolveCreationFolder } from "../folders/tree"
+import {
+  normalizeStoredVisibility,
+  type StoredVisibility,
+} from "../visibility/schema"
 import { getAccessibleCollection } from "./access"
 import {
   normalizeCollectionDescription,
@@ -30,7 +34,7 @@ export async function createCollection<K extends CollectionKind>(
     personId: Id<"persons">
     name: string
     description?: string
-    scope?: "organization" | "personal"
+    visibility?: StoredVisibility
     folderId?: Id<"folders">
     authoring: unknown
   }
@@ -39,12 +43,14 @@ export async function createCollection<K extends CollectionKind>(
   const collectionId = await ctx.db.insert("collections", {
     organizationId: args.organizationId,
     ownerId: args.personId,
-    scope: args.scope ?? "organization",
-    folderId: await resolveCreationFolder(
-      ctx,
-      args.organizationId,
-      args.folderId
+    visibility: normalizeStoredVisibility(
+      args.visibility ?? { mode: "organization" }
     ),
+    folderId: await resolveCreationFolder(ctx, {
+      organizationId: args.organizationId,
+      personId: args.personId,
+      folderId: args.folderId,
+    }),
     name: normalizeCollectionName(args.name),
     description: normalizeCollectionDescription(args.description),
     ...authoringFields(spec, spec.normalize(args.authoring)),

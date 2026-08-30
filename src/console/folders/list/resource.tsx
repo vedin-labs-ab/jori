@@ -9,8 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { TableCell, TableRow } from "@/components/ui/table"
-import { MaterialScopeMark } from "../../shared/materials/scope"
 import { absoluteTime, relativeTime, useNow } from "../../shared/time"
+import { VisibilityMark } from "../../shared/visibility/badge"
 import { type ResourceDragPayload } from "../drag/plan"
 import { useResourceRowDrag } from "../drag/state"
 import { type FolderResource, resourcePresentation } from "../types"
@@ -129,9 +129,9 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
     <>
       <Icon className="size-4 shrink-0 text-muted-foreground" />
       <span className="truncate">{resource.name}</span>
-      {resource.scope === "personal" ? (
-        <MaterialScopeMark scope="personal" />
-      ) : null}
+      {resource.visibility === "organization" ? null : (
+        <VisibilityMark visibility={resource.visibility} />
+      )}
     </>
   )
 

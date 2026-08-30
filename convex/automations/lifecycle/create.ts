@@ -1,11 +1,12 @@
-import {
-  defaultScopeForIntegrations,
-  type Scope,
-} from "../../../contracts/permissions/scope"
+import { defaultVisibilityForIntegrations } from "../../../contracts/permissions/visibility"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { resolveCreationFolder } from "../../folders/tree"
 import { executionPrincipalForScope } from "../../runs/principal"
+import {
+  normalizeStoredVisibility,
+  type StoredVisibility,
+} from "../../visibility/schema"
 import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import {
   automationKeyPartition,
@@ -27,7 +28,7 @@ type CreateAutomationArgs = {
   key?: string
   name: string
   instructions: string
-  scope?: Scope
+  visibility?: StoredVisibility
   folderId?: Id<"folders">
   access: AutomationAccessInput
   type: AutomationType
@@ -68,13 +69,17 @@ async function prepareAutomation(
   args: CreateAutomationArgs,
   now: number
 ) {
-  const scope =
-    args.scope ??
-    defaultScopeForIntegrations(
-      args.access.integrations.map((entry) => entry.integration)
-    )
+  const visibility = normalizeStoredVisibility(
+    args.visibility ??
+      defaultVisibilityForIntegrations(
+        args.access.integrations.map((entry) => entry.integration)
+      )
+  )
   const key = normalizeAutomationKey(args.key)
-  const principal = executionPrincipalForScope(scope, args.createdBy)
+  const principal = executionPrincipalForScope(
+    visibility.mode === "private" ? "personal" : "organization",
+    args.createdBy
+  )
   const ownership = await resolveOwnership(ctx, {
     ownerId: args.parentId,
     expectedConfigurationVersion: args.expectedParentConfigurationVersion,
@@ -101,13 +106,13 @@ async function prepareAutomation(
       : { keyPartition: automationKeyPartition(principal) }),
     name: normalizeRequiredText(args.name, "name"),
     instructions: normalizeRequiredText(args.instructions, "instructions"),
-    scope,
+    visibility,
     principal,
-    folderId: await resolveCreationFolder(
-      ctx,
-      args.organizationId,
-      args.folderId
-    ),
+    folderId: await resolveCreationFolder(ctx, {
+      organizationId: args.organizationId,
+      personId: args.createdBy,
+      folderId: args.folderId,
+    }),
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,

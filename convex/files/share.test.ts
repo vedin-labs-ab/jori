@@ -86,6 +86,22 @@ describe("opening a file share", () => {
   })
 })
 
+describe("public file reads", () => {
+  test("a public file opens with no secret; others stay closed", async () => {
+    const { database, ctx } = databaseContext()
+    const publicId = await createFile(database, {
+      scope: undefined,
+      visibility: { mode: "public" },
+    })
+    const organizationId = await createFile(database)
+
+    expect((await openFileShare(ctx, { fileId: publicId }))?.read).toEqual({
+      access: "public",
+    })
+    expect(await openFileShare(ctx, { fileId: organizationId })).toBeNull()
+  })
+})
+
 describe("minting a file share", () => {
   test("shares the file the minting person can view", async () => {
     const { database, ctx } = databaseContext()

@@ -1,6 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration, integrationLabels } from "../shared/integrations"
+import { readVisibility } from "../visibility/schema"
 import {
   type AutomationAccess,
   automationScope,
@@ -17,6 +18,7 @@ export async function toAutomationDisplay(
     name: automation.name,
     instructions: automation.instructions,
     scope: automationScope(automation),
+    visibility: readVisibility(automation),
     type: automation.type,
     status: automation.status,
     folderId: automation.folderId,

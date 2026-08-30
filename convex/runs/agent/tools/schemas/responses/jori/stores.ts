@@ -12,7 +12,15 @@ function storeSummaryProperties() {
     storeId: stringProperty("Jori store ID."),
     name: stringProperty("Store name."),
     description: stringProperty("Store description; absent when unset."),
-    scope: stringProperty("personal or organization."),
+    visibility: objectSchema({
+      description:
+        "Who may see it: only its owner (private), listed people, listed teams, the whole organization, or the public.",
+      properties: {
+        mode: stringProperty(
+          "private, people, teams, organization, or public."
+        ),
+      },
+    }),
     ownerId: stringProperty("Owning person ID."),
     schema: {
       type: "object",

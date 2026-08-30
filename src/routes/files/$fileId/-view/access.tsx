@@ -24,11 +24,7 @@ export function FileAccess({
       renderMember={(fallback) => (
         <FileView fallback={fallback} fileId={fileId as GenericId<"files">} />
       )}
-      renderShare={() =>
-        secret === null ? null : (
-          <FileShareView fileId={fileId} secret={secret} />
-        )
-      }
+      renderShare={() => <FileShareView fileId={fileId} secret={secret} />}
       secret={secret}
     />
   )

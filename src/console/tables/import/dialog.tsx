@@ -1,7 +1,8 @@
 import { isRecord } from "@contracts/json"
-import { type Scope } from "@contracts/permissions/scope"
+import { type Visibility } from "@contracts/permissions/visibility"
 import { useNavigate } from "@tanstack/react-router"
 import { useMutation } from "convex/react"
+import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -22,7 +23,7 @@ import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { MaterialNameField } from "../../shared/materials/fields"
 import { DialogForm } from "../../shared/materials/form"
-import { MaterialScopeField } from "../../shared/materials/scope"
+import { VisibilityField } from "../../shared/visibility/field"
 import { type CsvTablePlan, deriveTableName, planCsvTable } from "./infer"
 import { ImportTablePreview } from "./preview"
 
@@ -62,7 +63,7 @@ export function ImportTableDialog({
           disabled={form.plan?.status !== "ready" || form.isImporting}
           onSubmit={() => void form.submit()}
         >
-          <ImportTableFields form={form} />
+          <ImportTableFields form={form} organizationId={organizationId} />
           <DialogFooter>
             <Button
               disabled={form.plan?.status !== "ready" || form.isImporting}
@@ -82,8 +83,10 @@ export function ImportTableDialog({
 
 function ImportTableFields({
   form,
+  organizationId,
 }: {
   form: ReturnType<typeof useImportTable>
+  organizationId: string
 }) {
   return (
     <div className="grid gap-4">
@@ -118,11 +121,12 @@ function ImportTableFields({
             name={form.name}
             onNameChange={form.setName}
           />
-          <MaterialScopeField
-            id="table-import-scope"
+          <VisibilityField
+            id="table-import-visibility"
             noun="table"
-            onScopeChange={form.setScope}
-            scope={form.scope}
+            onChange={form.setVisibility}
+            organizationId={organizationId}
+            value={form.visibility}
           />
           <ImportTablePreview plan={form.plan} />
         </>
@@ -137,14 +141,16 @@ function useImportTable(organizationId: string, onImported: () => void) {
   const insertBatch = useMutation(api.tables.console.insertRows)
   const [plan, setPlan] = useState<CsvTablePlan>()
   const [name, setName] = useState("")
-  const [scope, setScope] = useState<Scope>("organization")
+  const [visibility, setVisibility] = useState<Visibility>({
+    mode: "organization",
+  })
   const [nameError, setNameError] = useState<string>()
   const [isImporting, setIsImporting] = useState(false)
 
   function reset() {
     setPlan(undefined)
     setName("")
-    setScope("organization")
+    setVisibility({ mode: "organization" })
     setNameError(undefined)
   }
 
@@ -167,7 +173,7 @@ function useImportTable(organizationId: string, onImported: () => void) {
       name,
       organizationId,
       plan,
-      scope,
+      visibility,
     })
 
     setIsImporting(false)
@@ -185,7 +191,7 @@ function useImportTable(organizationId: string, onImported: () => void) {
     nameError,
     plan,
     reset,
-    scope,
+    visibility,
     async readFile(file: File) {
       setPlan(planCsvTable(await file.text()))
       setName(deriveTableName(file.name))
@@ -197,7 +203,7 @@ function useImportTable(organizationId: string, onImported: () => void) {
       setNameError(undefined)
       setName(next)
     },
-    setScope,
+    setVisibility,
     submit,
   }
 }
@@ -210,14 +216,11 @@ async function runImport({
   name,
   organizationId,
   plan,
-  scope,
+  visibility,
 }: {
-  create: (args: {
-    organizationId: string
-    name: string
-    scope: Scope
-    columns: unknown
-  }) => Promise<unknown>
+  create: (
+    args: FunctionArgs<typeof api.tables.console.create>
+  ) => Promise<unknown>
   insertBatch: (args: {
     organizationId: string
     tableId: GenericId<"collections">
@@ -226,11 +229,18 @@ async function runImport({
   name: string
   organizationId: string
   plan: Extract<CsvTablePlan, { status: "ready" }>
-  scope: Scope
+  visibility: Visibility
 }): Promise<GenericId<"collections"> | undefined> {
   try {
     const tableId = extractTableId(
-      await create({ organizationId, name, scope, columns: plan.columns })
+      await create({
+        organizationId,
+        name,
+        visibility: visibility as FunctionArgs<
+          typeof api.tables.console.create
+        >["visibility"],
+        columns: plan.columns,
+      })
     )
     const rows = plan.rows.map((row) => row.values)
 

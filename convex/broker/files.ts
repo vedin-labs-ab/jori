@@ -48,7 +48,7 @@ export async function handleFileUploadRequest(
       internal.files.data.record,
       {
         organizationId: context.run.organizationId,
-        scope: "organization",
+        visibility: { mode: "organization" },
         runId: context.run._id,
         storageId,
         name,

@@ -1,5 +1,6 @@
-import { type Scope } from "@contracts/permissions/scope"
+import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
+import { type api } from "../../../../../convex/_generated/api"
 import {
   getAutomationScopeConflict,
   hasAutomationWriteSurface,
@@ -19,10 +20,14 @@ import {
   type TriggerSpec,
 } from "./trigger"
 
+type AutomationVisibilityArg = FunctionArgs<
+  typeof api.automations.console.create
+>["visibility"]
+
 type AutomationArgs = {
   name: string
   instructions: string
-  scope: Scope
+  visibility: AutomationVisibilityArg
   access: {
     integrations: Array<{
       integration: AutomationFormValues["surfaces"][number]["integration"]
@@ -87,7 +92,7 @@ export function updateAutomationArgs(
   }
 
   if (
-    values.scope === existing.scope &&
+    JSON.stringify(values.visibility) === JSON.stringify(existing.visibility) &&
     !hasAutomationTriggerChanged(
       values,
       existing,
@@ -166,7 +171,7 @@ function buildBaseArgs(
     args: {
       name,
       instructions,
-      scope: values.scope,
+      visibility: values.visibility as AutomationVisibilityArg,
       access: {
         integrations: surfaces.map((surface) => ({
           integration: surface.integration,

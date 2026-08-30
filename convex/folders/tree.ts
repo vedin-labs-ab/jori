@@ -1,5 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
+import { readVisibility } from "../visibility/schema"
+import { createSight } from "../visibility/sight"
 
 // Tree shape rules shared by every folder read and write: depth, ancestry,
 // and the flat organization-wide listing the client builds its tree from.
@@ -26,6 +28,8 @@ export function summarizeFolder(folder: Doc<"folders">) {
     folderId: folder._id,
     name: folder.name,
     parentId: folder.parentId,
+    visibility: readVisibility(folder),
+    createdBy: folder.createdBy,
     createdAt: folder.createdAt,
     updatedAt: folder.updatedAt,
   }
@@ -58,17 +62,44 @@ export async function requireOrganizationFolder(
   return folder
 }
 
+/** Missing, foreign, and invisible folders read the same, so callers
+ *  cannot probe what exists behind a visibility gate. */
+export async function requireVisibleFolder(
+  ctx: QueryLikeCtx,
+  args: {
+    organizationId: string
+    personId: Id<"persons"> | undefined
+    folderId: Id<"folders">
+  }
+) {
+  const folder = await requireOrganizationFolder(
+    ctx,
+    args.organizationId,
+    args.folderId
+  )
+
+  if (!(await createSight(ctx, args).canSeeFolder(folder))) {
+    throw new Error("Folder was not found.")
+  }
+
+  return folder
+}
+
 /** Creation-time folder guard shared by every resource create mutation: no
  *  folder passes through as the workspace root, anything else must name a
- *  folder of the same organization. */
+ *  folder the creator can see. */
 export async function resolveCreationFolder(
   ctx: QueryLikeCtx,
-  organizationId: string,
-  folderId: Id<"folders"> | undefined
+  args: {
+    organizationId: string
+    personId: Id<"persons"> | undefined
+    folderId: Id<"folders"> | undefined
+  }
 ) {
-  return folderId === undefined
+  return args.folderId === undefined
     ? undefined
-    : (await requireOrganizationFolder(ctx, organizationId, folderId))._id
+    : (await requireVisibleFolder(ctx, { ...args, folderId: args.folderId }))
+        ._id
 }
 
 export async function listOrganizationFolders(

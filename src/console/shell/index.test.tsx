@@ -95,14 +95,15 @@ test("appends the material's name once its view publishes it", () => {
   expect(current.getAttribute("aria-current")).toBe("page")
 })
 
-test("renders no scope suffix even when a scope is published", () => {
+test("marks non-organization visibility beside the name", () => {
   const publish = renderWithPublisher("/files/abc123")
 
-  act(() => publish.current?.({ name: "report.json", scope: "personal" }))
+  act(() => publish.current?.({ name: "report.json", visibility: "private" }))
 
   const current = screen.getByText("report.json")
 
   expect(current.getAttribute("aria-current")).toBe("page")
+  expect(screen.getByText("Only me")).toBeTruthy()
   expect(screen.queryByText("Personal")).toBeNull()
 })
 

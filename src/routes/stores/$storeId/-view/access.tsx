@@ -27,11 +27,7 @@ export function StoreAccess({
           storeId={storeId as GenericId<"collections">}
         />
       )}
-      renderShare={() =>
-        secret === null ? null : (
-          <StoreShareView secret={secret} storeId={storeId} />
-        )
-      }
+      renderShare={() => <StoreShareView secret={secret} storeId={storeId} />}
       secret={secret}
     />
   )

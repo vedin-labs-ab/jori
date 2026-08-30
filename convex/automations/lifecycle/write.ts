@@ -1,8 +1,16 @@
-import { type Scope } from "../../../contracts/permissions/scope"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { executionPrincipalForScope } from "../../runs/principal"
-import { type AutomationAccessInput, resolveAccessInput } from "../access"
+import {
+  normalizeStoredVisibility,
+  readVisibility,
+  type StoredVisibility,
+} from "../../visibility/schema"
+import {
+  type AutomationAccessInput,
+  automationScope,
+  resolveAccessInput,
+} from "../access"
 import { automationKeyPartition, findAutomationByKey } from "../keys"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
@@ -20,7 +28,7 @@ type UpdateAutomationArgs = {
   automationId: Id<"automations">
   name?: string
   instructions?: string
-  scope?: Scope
+  visibility?: StoredVisibility
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput
@@ -73,7 +81,9 @@ export function ownedAutomationsAreStale(
   return (
     (patch.instructions !== undefined &&
       patch.instructions !== existing.instructions) ||
-    (patch.scope !== undefined && patch.scope !== existing.scope) ||
+    (patch.visibility !== undefined &&
+      JSON.stringify(patch.visibility) !==
+        JSON.stringify(readVisibility(existing))) ||
     (patch.type !== undefined && patch.type !== existing.type) ||
     (patch.access !== undefined &&
       JSON.stringify(patch.access) !== JSON.stringify(existing.access)) ||
@@ -90,9 +100,12 @@ async function buildAutomationPatch(
 ) {
   const patch: Partial<Doc<"automations">> = { updatedAt: now }
   const principal =
-    args.scope === undefined
+    args.visibility === undefined
       ? existing.principal
-      : executionPrincipalForScope(args.scope, args.updatedBy)
+      : executionPrincipalForScope(
+          automationScope({ visibility: args.visibility }),
+          args.updatedBy
+        )
 
   if (args.name !== undefined) {
     patch.name = normalizeRequiredText(args.name, "name")
@@ -148,23 +161,23 @@ async function applyPrincipalPatch(
   principal: Doc<"automations">["principal"],
   patch: Partial<Doc<"automations">>
 ) {
-  if (args.scope === undefined) {
+  if (args.visibility === undefined) {
     return
   }
 
-  if (args.access === undefined && args.scope !== existing.scope) {
+  const visibility = normalizeStoredVisibility(args.visibility)
+  const scopeChanges =
+    automationScope({ visibility }) !== automationScope(existing)
+
+  if (args.access === undefined && scopeChanges) {
     throw new Error("Changing sharing requires an updated access contract.")
   }
 
-  if (
-    args.scope !== existing.scope &&
-    existing.type === "event" &&
-    args.trigger === undefined
-  ) {
+  if (scopeChanges && existing.type === "event" && args.trigger === undefined) {
     throw new Error("Changing sharing requires an updated event trigger.")
   }
 
-  patch.scope = args.scope
+  patch.visibility = visibility
   patch.principal = principal
   await updateKeyPartition(ctx, existing, principal, patch)
 }

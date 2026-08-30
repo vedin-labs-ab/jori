@@ -9,6 +9,7 @@ import {
   maxTreeDepth,
   normalizeFolderName,
   requireOrganizationFolder,
+  requireVisibleFolder,
   subtreeHeight,
 } from "./tree"
 
@@ -28,11 +29,11 @@ export async function createFolder(
   }
 ) {
   if (args.parentId !== undefined) {
-    const parent = await requireOrganizationFolder(
-      ctx,
-      args.organizationId,
-      args.parentId
-    )
+    const parent = await requireVisibleFolder(ctx, {
+      organizationId: args.organizationId,
+      personId: args.personId,
+      folderId: args.parentId,
+    })
 
     assertDepth((await folderDepth(ctx, parent)) + 1)
   }

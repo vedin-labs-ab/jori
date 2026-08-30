@@ -5,7 +5,7 @@ import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { findSingletonDocument } from "../collections/documents"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
-import { scopeValidator } from "../shared/audience"
+import { visibilityValidator } from "../visibility/schema"
 import {
   findAccessibleStore,
   searchStores,
@@ -91,7 +91,7 @@ export const create = mutation({
     organizationId: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
-    scope: v.optional(scopeValidator),
+    visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     schema: v.optional(v.any()),
   },

@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { boundedNumber } from "../shared/input"
+import { createSight, type Sight } from "../visibility/sight"
 import {
   type CollectionDoc,
   type CollectionKind,
@@ -8,29 +9,23 @@ import {
   type KindSpec,
 } from "./spec"
 
-// Collections share one visibility model: organization-scoped collections
-// are visible to every member, personal ones only to their owner.
+// Collections share the one grant-based visibility model: who sees a
+// collection is answered by visibility/sight.ts, from the collection's own
+// setting, its ancestor folders, and the viewer's identity and teams.
 
 const searchLimit = 100
 
-export function canAccessCollection(
-  collection: { scope: "organization" | "personal"; ownerId?: Id<"persons"> },
-  personId: Id<"persons">
-) {
-  return collection.scope === "organization" || collection.ownerId === personId
-}
-
 /** Null for missing, foreign, invisible, and wrong-kind collections alike,
  *  so callers cannot tell missing from inaccessible. */
-export function accessibleCollection<K extends CollectionKind>(
+export async function accessibleCollection<K extends CollectionKind>(
+  sight: Sight,
   collection: Doc<"collections"> | null,
-  args: { organizationId: string; personId: Id<"persons">; kind: K }
-): CollectionDoc<K> | null {
+  kind: K
+): Promise<CollectionDoc<K> | null> {
   if (
     collection === null ||
-    !isCollectionKind(collection, args.kind) ||
-    collection.organizationId !== args.organizationId ||
-    !canAccessCollection(collection, args.personId)
+    !isCollectionKind(collection, kind) ||
+    !(await sight.canSee(collection))
   ) {
     return null
   }
@@ -51,10 +46,13 @@ export async function findAccessibleCollection<K extends CollectionKind>(
   spec: KindSpec<K>,
   args: CollectionArgs
 ): Promise<CollectionDoc<K> | null> {
-  return accessibleCollection(await ctx.db.get(args.collectionId), {
-    ...args,
-    kind: spec.kind,
-  })
+  const sight = createSight(ctx, args)
+
+  return await accessibleCollection(
+    sight,
+    await ctx.db.get(args.collectionId),
+    spec.kind
+  )
 }
 
 export async function getAccessibleCollection<K extends CollectionKind>(
@@ -92,19 +90,37 @@ export async function searchCollections<K extends CollectionKind>(
     )
     .order("desc")
     .take(searchLimit)
+  const sight = createSight(ctx, args)
   const query = args.query?.trim().toLowerCase()
   const limit = boundedNumber(args.limit, 25, 1, searchLimit)
+  const matches: CollectionDoc<K>[] = []
 
-  return candidates
-    .filter(
-      (collection): collection is CollectionDoc<K> =>
-        isCollectionKind(collection, spec.kind) &&
-        canAccessCollection(collection, args.personId) &&
-        (args.includeArchived === true ||
-          collection.archivedAt === undefined) &&
-        (query === undefined ||
-          query === "" ||
-          collection.name.toLowerCase().includes(query))
-    )
-    .slice(0, limit)
+  for (const collection of candidates) {
+    if (matches.length >= limit) {
+      break
+    }
+
+    if (
+      isCollectionKind(collection, spec.kind) &&
+      matchesSearch(collection, query, args.includeArchived) &&
+      (await sight.canSee(collection))
+    ) {
+      matches.push(collection)
+    }
+  }
+
+  return matches
+}
+
+function matchesSearch(
+  collection: Doc<"collections">,
+  query: string | undefined,
+  includeArchived: boolean | undefined
+) {
+  return (
+    (includeArchived === true || collection.archivedAt === undefined) &&
+    (query === undefined ||
+      query === "" ||
+      collection.name.toLowerCase().includes(query))
+  )
 }

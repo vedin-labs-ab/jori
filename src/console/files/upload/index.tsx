@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { FolderField } from "../../folders/field"
 import { AdvancedSettings, DialogForm } from "../../shared/materials/form"
-import { MaterialScopeField } from "../../shared/materials/scope"
+import { VisibilityField } from "../../shared/visibility/field"
 import { FileDropzone } from "./dropzone"
 import { UploadList } from "./list"
 import { type FileUpload, pendingUploads, useFileUpload } from "./queue"
@@ -90,11 +90,12 @@ function UploadFields({
           organizationId={organizationId}
           value={upload.folderId}
         />
-        <MaterialScopeField
-          id="file-upload-scope"
+        <VisibilityField
+          id="file-upload-visibility"
           noun="file"
-          onScopeChange={upload.setScope}
-          scope={upload.scope}
+          onChange={upload.setVisibility}
+          organizationId={organizationId}
+          value={upload.visibility}
         />
       </AdvancedSettings>
     </div>

@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { visibilityValidator } from "../visibility/schema"
 
 export const fileScopes = v.union(
   v.literal("organization"),
@@ -7,11 +8,14 @@ export const fileScopes = v.union(
 )
 
 // One stored workspace file; shared by the record mutation args. Files are
-// organization-visible by default; a personal file is visible to its owner
-// only. A runId records provenance when an agent run produced the file.
+// organization-visible by default; visibility narrows or widens that per
+// file. A runId records provenance when an agent run produced the file.
 export const fileFields = {
   organizationId: v.string(),
-  scope: fileScopes,
+  /** Who may see the file; read via visibility/schema.readVisibility. */
+  visibility: v.optional(visibilityValidator),
+  /** Legacy binary scope, mapped and cleared by visibility/migrate.ts. */
+  scope: v.optional(fileScopes),
   ownerId: v.optional(v.id("persons")),
   runId: v.optional(v.id("runs")),
   storageId: v.id("_storage"),
@@ -19,7 +23,7 @@ export const fileFields = {
   mimeType: v.string(),
   size: v.number(),
   description: v.optional(v.string()),
-  /** Filing only — folders carry no access semantics. */
+  /** Filing; ancestor folders also gate visibility (see visibility/sight). */
   folderId: v.optional(v.id("folders")),
 }
 

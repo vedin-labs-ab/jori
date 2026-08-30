@@ -8,6 +8,7 @@ import {
 import { type CollectionDoc } from "../collections/spec"
 import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
+import { readVisibility } from "../visibility/schema"
 import { tableSpec } from "./spec"
 
 type TableDoc = CollectionDoc<"table">
@@ -46,7 +47,7 @@ export function summarizeTable(table: TableDoc) {
     tableId: table._id,
     name: table.name,
     description: table.description,
-    scope: table.scope,
+    visibility: readVisibility(table),
     ownerId: table.ownerId,
     folderId: table.folderId,
     columns: readStoredColumns(table.columns),

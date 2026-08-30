@@ -40,7 +40,7 @@ describe("creating a collection", () => {
       },
     ])
     expect(created.schemaHash).toMatch(/./)
-    expect(created.scope).toBe("organization")
+    expect(created.visibility).toEqual({ mode: "organization" })
     expect(created.folderId).toBeUndefined()
   })
 

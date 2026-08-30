@@ -6,13 +6,14 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import { boundedNumber, optionalString } from "../shared/input"
+import { createSight, type Sight } from "../visibility/sight"
 import { fileFields } from "./schema"
 
 const maxFileSearchResults = 100
 const maxFilesScanned = 500
 
-/** Who is looking: organization-scoped files are visible to every member,
- *  personal files only to their owner. */
+/** Who is looking; visibility/sight.ts resolves what they may see. A
+ *  missing personId is an organization-principal execution. */
 export type FileViewer = {
   organizationId: string
   personId?: Id<"persons">
@@ -54,14 +55,22 @@ export const search = internalQuery({
       )
       .order("desc")
       .take(maxFilesScanned)
-    const matches = scanned
-      .filter(
-        (file) =>
-          canViewFile(file, args) &&
-          matchesQuery(file, query) &&
-          matchesMimeType(file, mimeType)
-      )
-      .slice(0, limit)
+    const sight = createSight(ctx, args)
+    const matches: Doc<"files">[] = []
+
+    for (const file of scanned) {
+      if (matches.length >= limit) {
+        break
+      }
+
+      if (
+        matchesQuery(file, query) &&
+        matchesMimeType(file, mimeType) &&
+        (await sight.canSee(file))
+      ) {
+        matches.push(file)
+      }
+    }
 
     return await Promise.all(
       matches.map(async (file) => await summarizeFile(ctx, file))
@@ -88,15 +97,26 @@ export const getVisible = internalQuery({
   handler: async (ctx, args) => await getVisibleFile(ctx, args),
 })
 
-export function canViewFile(file: Doc<"files">, viewer: FileViewer) {
-  if (file.organizationId !== viewer.organizationId) {
-    return false
+/** The one file predicate; a Sight built from the viewer answers it. */
+export async function canViewFile(
+  ctx: QueryCtx,
+  file: Doc<"files">,
+  viewer: FileViewer
+) {
+  return await createSight(ctx, viewer).canSee(file)
+}
+
+/** Filter form for list surfaces that already hold a Sight. */
+export async function visibleFiles(sight: Sight, files: Doc<"files">[]) {
+  const visible: Doc<"files">[] = []
+
+  for (const file of files) {
+    if (await sight.canSee(file)) {
+      visible.push(file)
+    }
   }
 
-  return (
-    file.scope === "organization" ||
-    (viewer.personId !== undefined && file.ownerId === viewer.personId)
-  )
+  return visible
 }
 
 async function getVisibleFile(
@@ -105,7 +125,11 @@ async function getVisibleFile(
 ) {
   const file = await ctx.db.get(args.fileId)
 
-  return file !== null && canViewFile(file, args) ? file : null
+  if (file === null) {
+    return null
+  }
+
+  return (await canViewFile(ctx, file, args)) ? file : null
 }
 
 function normalizeSearchText(value: string | undefined) {

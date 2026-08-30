@@ -6,10 +6,11 @@ import {
   useSession,
 } from "@/shared/session/auth"
 
-/** The dual-mode fork every material page shares: an anonymous visitor with
- *  a secret gets the read-only share view; a signed-in member gets the
- *  lazily loaded console view, falling back to the share view when the
- *  session cannot reach an organization. */
+/** The dual-mode fork every material page shares: an anonymous visitor
+ *  gets the read-only share view — which answers to a share secret or to
+ *  the material's public visibility; a signed-in member gets the lazily
+ *  loaded console view, falling back to the share view when the session
+ *  cannot reach an organization. */
 export function MaterialAccess({
   label,
   renderMember,
@@ -31,7 +32,7 @@ export function MaterialAccess({
     return loading
   }
 
-  if (secret !== null && !isSignedIn) {
+  if (!isSignedIn) {
     return renderShare()
   }
 

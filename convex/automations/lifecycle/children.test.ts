@@ -86,14 +86,18 @@ describe("ownership updates", () => {
 
     await expect(
       requireValidOwnershipUpdate(ctx, { type: "cron" }, owned)
-    ).rejects.toThrow("cannot change type or scope")
-    await expect(
-      requireValidOwnershipUpdate(ctx, { scope: "organization" }, owned)
-    ).rejects.toThrow("cannot change type or scope")
+    ).rejects.toThrow("cannot change type or sharing")
     await expect(
       requireValidOwnershipUpdate(
         ctx,
-        { scope: "personal", type: "once" },
+        { visibility: { mode: "organization" } },
+        owned
+      )
+    ).rejects.toThrow("cannot change type or sharing")
+    await expect(
+      requireValidOwnershipUpdate(
+        ctx,
+        { visibility: { mode: "private" }, type: "once" },
         owned
       )
     ).resolves.toBeUndefined()

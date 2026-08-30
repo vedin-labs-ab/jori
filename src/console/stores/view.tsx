@@ -12,6 +12,7 @@ import { ConsoleListLoading } from "../shared/list/loading"
 import { MaterialTitleMenu } from "../shared/materials/actions"
 import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
+import { VisibilityDialog } from "../shared/visibility/dialog"
 import { EditStoreDialog } from "./edit"
 import { exportStoreJson } from "./export"
 import { StoreHeaderActions } from "./header"
@@ -95,12 +96,14 @@ function StoreViewContent({
 }
 
 function StoreTitleMenu({
+  onAccess,
   onDelete,
   onEdit,
   onMoveToFolder,
   removal,
   store,
 }: {
+  onAccess: () => void
   onDelete: () => void
   onEdit: () => void
   onMoveToFolder: () => void
@@ -114,6 +117,7 @@ function StoreTitleMenu({
       isRestoring={removal.restoringStoreId === store.storeId}
       material={{ name: store.name, archivedAt: store.archivedAt }}
       noun="store"
+      onAccess={onAccess}
       onDelete={onDelete}
       onEdit={onEdit}
       onMoveToFolder={onMoveToFolder}
@@ -136,6 +140,7 @@ function StoreReadyView({
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
+  const [isAccessOpen, setIsAccessOpen] = useState(false)
   const isArchived = store.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
@@ -148,8 +153,9 @@ function StoreReadyView({
 
   useMaterialBreadcrumb(
     store.name,
-    store.scope,
+    store.visibility.mode,
     <StoreTitleMenu
+      onAccess={() => setIsAccessOpen(true)}
       onDelete={removeAndLeaveWhenDeleted}
       onEdit={() => setIsEditOpen(true)}
       onMoveToFolder={() => setIsMoveOpen(true)}
@@ -166,10 +172,60 @@ function StoreReadyView({
         store={store}
       />
       <StoreValue organizationId={organizationId} store={store} />
+      <StoreDialogs
+        isAccessOpen={isAccessOpen}
+        isEditOpen={isEditOpen}
+        isMoveOpen={isMoveOpen}
+        isShareOpen={isShareOpen}
+        organizationId={organizationId}
+        setIsAccessOpen={setIsAccessOpen}
+        setIsEditOpen={setIsEditOpen}
+        setIsMoveOpen={setIsMoveOpen}
+        setIsShareOpen={setIsShareOpen}
+        store={store}
+      />
+    </ConsoleListLayout>
+  )
+}
+
+function StoreDialogs({
+  isAccessOpen,
+  isEditOpen,
+  isMoveOpen,
+  isShareOpen,
+  organizationId,
+  setIsAccessOpen,
+  setIsEditOpen,
+  setIsMoveOpen,
+  setIsShareOpen,
+  store,
+}: {
+  isAccessOpen: boolean
+  isEditOpen: boolean
+  isMoveOpen: boolean
+  isShareOpen: boolean
+  organizationId: string
+  setIsAccessOpen: (open: boolean) => void
+  setIsEditOpen: (open: boolean) => void
+  setIsMoveOpen: (open: boolean) => void
+  setIsShareOpen: (open: boolean) => void
+  store: StoreDetail
+}) {
+  return (
+    <>
       <EditStoreDialog
         onOpenChange={setIsEditOpen}
         organizationId={organizationId}
         store={isEditOpen ? store : undefined}
+      />
+      <VisibilityDialog
+        noun="store"
+        onOpenChange={setIsAccessOpen}
+        open={isAccessOpen}
+        organizationId={organizationId}
+        ownerId={store.ownerId}
+        target={{ kind: "store", id: store.storeId }}
+        value={store.visibility}
       />
       <StoreLinksDialog
         onOpenChange={setIsShareOpen}
@@ -191,6 +247,6 @@ function StoreReadyView({
             : undefined
         }
       />
-    </ConsoleListLayout>
+    </>
   )
 }

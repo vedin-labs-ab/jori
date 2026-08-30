@@ -207,6 +207,7 @@ function automation(
       surfaces: [],
       webSearch: true,
     },
+    visibility: { mode: "organization" },
     createdAt: now,
     updatedAt: now,
     firedAt: undefined,

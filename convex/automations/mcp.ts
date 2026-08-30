@@ -3,6 +3,7 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type JoriToolRequest, readRecord } from "../shared/input"
+import { visibilityFromScopeInput } from "../visibility/schema"
 import { type AutomationAccessInput } from "./access"
 import { type AutomationTriggerInput, type AutomationType } from "./schema"
 
@@ -49,9 +50,11 @@ export async function callJoriAutomationTool(
   const args = readRecord(request.args)
 
   if (request.tool === "add_automation") {
-    const input = args as AddAutomationArgs
+    const { scope, ...input } = args as AddAutomationArgs
     return await ctx.runMutation(internal.automations.records.create, {
       ...input,
+      visibility:
+        scope === undefined ? undefined : visibilityFromScopeInput(scope),
       organizationId: execution.organizationId,
       createdBy: execution.createdBy,
       parentId: input.type === "once" ? execution.automationId : undefined,
@@ -79,8 +82,11 @@ export async function callJoriAutomationTool(
   }
 
   if (request.tool === "update_automation") {
+    const { scope, ...input } = args as UpdateAutomationArgs
     return await ctx.runMutation(internal.automations.records.update, {
-      ...(args as UpdateAutomationArgs),
+      ...input,
+      visibility:
+        scope === undefined ? undefined : visibilityFromScopeInput(scope),
       organizationId: execution.organizationId,
       personId: execution.createdBy,
     })

@@ -32,6 +32,7 @@ export function FileTable({
   folders,
   hasFilters,
   isLoading,
+  onAccess,
   onDelete,
   onEdit,
   onMoveToFolder,
@@ -45,6 +46,7 @@ export function FileTable({
   folders: FolderNames | undefined
   hasFilters: boolean
   isLoading: boolean
+  onAccess: (file: FileRow) => void
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
@@ -83,6 +85,7 @@ export function FileTable({
               folders={folders}
               isPending={pendingFileId === file.fileId}
               key={file.fileId}
+              onAccess={onAccess}
               onDelete={onDelete}
               onEdit={onEdit}
               onMoveToFolder={onMoveToFolder}
@@ -162,6 +165,7 @@ function FileTableRow({
   file,
   folders,
   isPending,
+  onAccess,
   onDelete,
   onEdit,
   onMoveToFolder,
@@ -170,6 +174,7 @@ function FileTableRow({
   file: FileRow
   folders: FolderNames | undefined
   isPending: boolean
+  onAccess: (file: FileRow) => void
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
@@ -215,6 +220,7 @@ function FileTableRow({
         <FileMenu
           file={file}
           isPending={isPending}
+          onAccess={onAccess}
           onDelete={onDelete}
           onEdit={onEdit}
           onMoveToFolder={onMoveToFolder}

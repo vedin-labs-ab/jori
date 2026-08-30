@@ -2,6 +2,7 @@ import {
   Download,
   ExternalLink,
   FolderInput,
+  LockKeyhole,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -30,12 +31,14 @@ import { type FileRow } from "./types"
 export function FileMenu({
   file,
   isPending,
+  onAccess,
   onDelete,
   onEdit,
   onMoveToFolder,
 }: {
   file: FileRow
   isPending: boolean
+  onAccess: (file: FileRow) => void
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
@@ -61,6 +64,10 @@ export function FileMenu({
           <DropdownMenuItem onSelect={() => onEdit(file)}>
             <Pencil />
             Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onAccess(file)}>
+            <LockKeyhole />
+            Sharing…
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onMoveToFolder(file)}>
             <FolderInput />

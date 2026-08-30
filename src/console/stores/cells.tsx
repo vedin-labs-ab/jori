@@ -7,7 +7,7 @@ import {
   materialNameLinkClassName,
 } from "../shared/materials/cells/name"
 import { MaterialOwnerCell } from "../shared/materials/cells/owner"
-import { MaterialScopeBadge } from "../shared/materials/scope"
+import { VisibilityBadge } from "../shared/visibility/badge"
 import { type StoreSummary } from "./types"
 
 /** Name column: the store icon, a link to the store, and the list's badge
@@ -24,9 +24,9 @@ export function StoreNameCell({ store }: { store: StoreSummary }) {
       >
         {store.name}
       </Link>
-      {store.scope === "personal" ? (
-        <MaterialScopeBadge scope="personal" />
-      ) : null}
+      {store.visibility.mode === "organization" ? null : (
+        <VisibilityBadge visibility={store.visibility} />
+      )}
       {store.archivedAt === undefined ? null : (
         <Badge variant="secondary">Archived</Badge>
       )}

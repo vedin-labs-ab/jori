@@ -40,7 +40,7 @@ function storeSummary(overrides: Partial<StoreSummary> = {}) {
     storeId: "store-1",
     name: "Settings",
     description: undefined,
-    scope: "organization",
+    visibility: { mode: "organization" },
     ownerId: undefined,
     folderId: undefined,
     schema: { type: "object" },
@@ -166,16 +166,16 @@ test("a long unbroken name renders inside a capped, truncating cell", () => {
   expect(link.parentElement?.className).toContain("min-w-0")
 })
 
-test("personal and archived marks ride the name cell", () => {
+test("visibility and archived marks ride the name cell", () => {
   renderList([
     storeSummary({
-      scope: "personal",
+      visibility: { mode: "private" },
       archivedAt: Date.now(),
       description: "Org-wide defaults",
     }),
   ])
 
-  expect(screen.getByText("Personal")).toBeDefined()
+  expect(screen.getByText("Only me")).toBeDefined()
   expect(screen.getByText("Archived")).toBeDefined()
   expect(screen.getByText("Org-wide defaults")).toBeDefined()
 })

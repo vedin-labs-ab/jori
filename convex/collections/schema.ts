@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { scopeValidator } from "../shared/audience"
+import { visibilityValidator } from "../visibility/schema"
 
 // One storage core for schema-validated, versioned JSON documents. A table
 // is a collection of many documents (rows) authored as typed columns; a
@@ -29,9 +30,12 @@ const tableColumn = v.object({
 
 const collectionFields = {
   organizationId: v.string(),
-  scope: scopeValidator,
+  /** Who may see the collection; read via visibility/schema.readVisibility. */
+  visibility: v.optional(visibilityValidator),
+  /** Legacy binary scope, mapped and cleared by visibility/migrate.ts. */
+  scope: v.optional(scopeValidator),
   ownerId: v.optional(v.id("persons")),
-  /** Filing only — folders carry no access semantics. */
+  /** Filing; ancestor folders also gate visibility (see visibility/sight). */
   folderId: v.optional(v.id("folders")),
   name: v.string(),
   description: v.optional(v.string()),

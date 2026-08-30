@@ -27,6 +27,7 @@ import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
 import { DialogForm } from "../shared/materials/form"
 import { useRetained } from "../shared/retain"
+import { FolderAccessDialog } from "./access"
 import { MoveToFolderDialog } from "./move"
 import { type ManagedFolder } from "./types"
 
@@ -35,6 +36,7 @@ import { type ManagedFolder } from "./types"
 // <FolderDialogs> and hands rows a way to raise requests.
 
 export type FolderDialogRequest =
+  | { type: "access"; folder: ManagedFolder }
   | { type: "create"; parentId?: string }
   | { type: "delete"; folder: ManagedFolder }
   | { type: "move"; folder: ManagedFolder }
@@ -55,6 +57,7 @@ export function FolderDialogs({
   const create = useRetained(dialog?.type === "create" ? dialog : undefined)
   const rename = useRetained(dialog?.type === "rename" ? dialog : undefined)
   const remove = useRetained(dialog?.type === "delete" ? dialog : undefined)
+  const access = useRetained(dialog?.type === "access" ? dialog : undefined)
 
   function closeWhenDismissed(open: boolean) {
     if (!open) {
@@ -94,6 +97,12 @@ export function FolderDialogs({
         folder={remove?.folder}
         isOpen={dialog?.type === "delete"}
         onDeleted={onDeleted}
+        onOpenChange={closeWhenDismissed}
+        organizationId={organizationId}
+      />
+      <FolderAccessDialog
+        folder={access?.folder}
+        isOpen={dialog?.type === "access"}
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
       />
