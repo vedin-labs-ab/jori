@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "convex/react"
+import { useMutation, usePaginatedQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -18,62 +18,26 @@ import {
 } from "../types"
 import { buildRowValues } from "./cells"
 
-/** Cursor-stack pagination over pageRows: each visited page keeps its
- *  cursor so Previous re-reads the same window, and the reactive query
- *  keeps the visible page fresh. */
+/** Endless-scroll pagination over pageRows: pages accumulate as the grid
+ *  scrolls, every loaded page stays reactive, and the tail page grows in
+ *  place when rows append past it. */
 export function useRowPages(
   organizationId: string,
   tableId: GenericId<"collections">
 ) {
-  const [cursors, setCursors] = useState<(string | null)[]>([null])
-  const [pageIndex, setPageIndex] = useState(0)
-  const page = useQuery(api.tables.console.pageRows, {
-    organizationId,
-    tableId,
-    paginationOpts: {
-      numItems: rowPageSize,
-      cursor: cursors[pageIndex] ?? null,
-    },
-  })
-  const rows = page?.rows ?? []
-
-  function next() {
-    if (page === undefined || page.isDone) {
-      return
-    }
-
-    setCursors((current) => [
-      ...current.slice(0, pageIndex + 1),
-      page.continueCursor,
-    ])
-    setPageIndex((current) => current + 1)
-  }
+  const { isLoading, loadMore, results, status } = usePaginatedQuery(
+    api.tables.console.pageRows,
+    { organizationId, tableId },
+    { initialNumItems: rowPageSize }
+  )
 
   return {
-    canGoNext: page !== undefined && !page.isDone,
-    footerLabel: rowFooterLabel(pageIndex, rows.length, page?.isDone),
-    isLoading: page === undefined && pageIndex === 0,
-    isReady: page !== undefined,
-    next,
-    pageIndex,
-    previous: () => setPageIndex((current) => Math.max(0, current - 1)),
-    rows,
+    isExhausted: status === "Exhausted",
+    isLoading: isLoading && results.length === 0,
+    isLoadingMore: status === "LoadingMore",
+    loadMore: () => loadMore(rowPageSize),
+    rows: results,
   }
-}
-
-export function rowFooterLabel(
-  pageIndex: number,
-  rowCount: number,
-  isDone: boolean | undefined
-) {
-  if (rowCount === 0) {
-    return undefined
-  }
-
-  const rangeStart = pageIndex * rowPageSize + 1
-  const rangeEnd = pageIndex * rowPageSize + rowCount
-
-  return `Showing rows ${rangeStart}–${rangeEnd}${isDone === true ? "" : " of more"}`
 }
 
 /** Row writes with the optimistic-version handshake: a stale write toasts

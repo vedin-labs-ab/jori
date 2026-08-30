@@ -24,7 +24,7 @@ export type TableRowPage = FunctionReturnType<
   typeof api.tables.console.pageRows
 >
 
-export type TableRow = TableRowPage["rows"][number]
+export type TableRow = TableRowPage["page"][number]
 
 export type RowPlacement = "above" | "below"
 
@@ -34,4 +34,6 @@ export type RowInsertAnchor = {
   placement: RowPlacement
 }
 
-export const rowPageSize = 25
+/** Rows fetched per page while the grid scrolls: large enough that a fast
+ *  scroll rarely outruns loading, small enough to keep each read cheap. */
+export const rowPageSize = 150

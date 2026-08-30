@@ -3,18 +3,18 @@ import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { countLabel } from "@/lib/count"
 import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
 import { ConsolePageLayout } from "../../shared/layout"
 import { ConsoleListFooter, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
-import { ConsoleListPager } from "../../shared/list/pager"
 import { useRowSelection } from "../../shared/list/selection"
 import { MaterialTitleMenu } from "../../shared/materials/actions"
 import { useMaterialBreadcrumb } from "../../shared/materials/breadcrumb"
 import { useMemberUrl } from "../../shared/materials/fragment"
 import { tableDeleteDescription, useTableRemoval } from "../manage"
-import { rowPageSize, type TableDetail, type TableRow } from "../types"
+import { type TableDetail, type TableRow } from "../types"
 import { type ColumnSheetState } from "./column/form"
 import { useCsvExport } from "./export"
 import { RowGrid } from "./grid"
@@ -170,7 +170,9 @@ function TableReadyView({
       />
       <TableGrid isArchived={isArchived} page={page} table={table} />
       <ConsoleListFooter>
-        <ConsoleListPager pagination={page.pages} />
+        <p className="text-muted-foreground text-xs">
+          {countLabel(table.rowCount, "row")}
+        </p>
       </ConsoleListFooter>
       <TableOverlays
         bulk={page.bulk}
@@ -201,8 +203,10 @@ function TableGrid({
       columns={table.columns}
       disabled={isArchived}
       freshRowId={page.adding.freshRowId}
+      isExhausted={page.pages.isExhausted}
       isLoading={page.pages.isLoading}
-      offset={page.pages.pageIndex * rowPageSize}
+      isLoadingMore={page.pages.isLoadingMore}
+      loadMore={page.pages.loadMore}
       onAddColumn={() => page.setColumnSheet({ mode: "create" })}
       onAddRow={() => void page.adding.addRow()}
       onCommit={page.writes.updateCell}

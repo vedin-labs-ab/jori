@@ -171,11 +171,21 @@ function queryBuilder(rows: StoredDoc[]) {
     async *[Symbol.asyncIterator]() {
       yield* filtered()
     },
-    paginate: async (_opts: unknown) => ({
-      page: filtered(),
-      isDone: true,
-      continueCursor: "",
-    }),
+    // Real pagination semantics over the fake's ordering: the cursor is
+    // the offset already served, so tests can walk a table window by
+    // window the way `usePaginatedQuery` does.
+    paginate: async (opts: { cursor: string | null; numItems: number }) => {
+      const all = filtered()
+      const start = opts.cursor === null ? 0 : Number(opts.cursor)
+      const page = all.slice(start, start + opts.numItems)
+      const served = start + page.length
+
+      return {
+        page,
+        isDone: served >= all.length,
+        continueCursor: String(served),
+      }
+    },
   }
 
   return chain

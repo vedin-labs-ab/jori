@@ -93,6 +93,48 @@ describe("append ordering", () => {
   })
 })
 
+describe("windowed paging", () => {
+  test("cursors walk a 10,000-row table in bounded ascending windows", async () => {
+    const { database, ctx } = databaseContext()
+    const table = await createTable(database)
+    const total = 10_000
+
+    // Seeded in reverse so the walk proves the index ordering, not luck.
+    for (let position = total; position >= 1; position--) {
+      await database.insert("documents", {
+        collectionId: table._id,
+        order: position,
+        value: { title: `row ${position}` },
+        version: 1,
+        createdAt: position,
+        updatedAt: position,
+      })
+    }
+
+    const seen: number[] = []
+    let cursor: string | null = null
+
+    for (;;) {
+      const page = await pageDocuments(ctx, table._id, {
+        numItems: 150,
+        cursor,
+      })
+
+      expect(page.page.length).toBeLessThanOrEqual(150)
+      seen.push(...page.page.map((row) => orderOf(row)))
+
+      if (page.isDone) {
+        break
+      }
+
+      cursor = page.continueCursor
+    }
+
+    expect(seen).toHaveLength(total)
+    expect(seen).toEqual([...seen].sort((left, right) => left - right))
+  })
+})
+
 describe("anchored inserts", () => {
   test("below takes the midpoint between the anchor and its next row", async () => {
     const { database, ctx } = databaseContext()
