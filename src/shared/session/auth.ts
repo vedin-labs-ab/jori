@@ -15,7 +15,7 @@ import { useConvexAuth } from "convex/react"
 /** The single Better Auth client. Jori components read session and
  *  organization state through the hooks below so tests can mock one seam. */
 export const authClient = createAuthClient({
-  plugins: [organizationClient(), convexClient()],
+  plugins: [organizationClient({ teams: { enabled: true } }), convexClient()],
 })
 
 const organizationAuthClient = authClient as OrganizationAuthClient

@@ -307,6 +307,7 @@ import type * as organization_onboarding from "../organization/onboarding.js";
 import type * as organization_profile from "../organization/profile.js";
 import type * as organization_select from "../organization/select.js";
 import type * as organization_sources from "../organization/sources.js";
+import type * as organization_teams from "../organization/teams.js";
 import type * as organization_watch from "../organization/watch.js";
 import type * as permissions_read from "../permissions/read.js";
 import type * as permissions_reference from "../permissions/reference.js";
@@ -845,6 +846,7 @@ declare const fullApi: ApiFromModules<{
   "organization/profile": typeof organization_profile;
   "organization/select": typeof organization_select;
   "organization/sources": typeof organization_sources;
+  "organization/teams": typeof organization_teams;
   "organization/watch": typeof organization_watch;
   "permissions/read": typeof permissions_read;
   "permissions/reference": typeof permissions_reference;
