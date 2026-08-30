@@ -1,4 +1,10 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Filter,
+  ListChecks,
+} from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,8 +31,8 @@ import {
 } from "./controls"
 
 // Header-embedded list controls: each header cell houses a small stock
-// ghost button — the cell itself is not the control. The negative margin
-// keeps the button's label on the table's text grid.
+// ghost button — the cell itself is not the control, and the button stays
+// inside the cell's own padding so it never crowds its neighbors.
 
 // An active sort or filter keeps the ghost hover background, so what is
 // shaping the list stays marked after the pointer leaves.
@@ -54,7 +60,7 @@ export function SortHead({
 
   return (
     <TableHead aria-sort={ariaSort(direction)}>
-      <div className="-ml-2 flex items-center gap-0.5">
+      <div className="flex items-center gap-0.5">
         <Button
           className={cn(
             "font-medium",
@@ -99,7 +105,7 @@ export function FilterHead({
 }) {
   return (
     <TableHead>
-      <div className="-ml-2 flex items-center">
+      <div className="flex items-center">
         <FacetMenu controls={controls} facets={facets}>
           <Button
             className={cn(
@@ -162,7 +168,9 @@ function FilterMark({
         )}
       />
       {isActive && count > 0 ? (
-        <span className="text-muted-foreground tabular-nums">{count}</span>
+        <span className="text-[0.625rem] text-muted-foreground tabular-nums">
+          {count}
+        </span>
       ) : null}
     </>
   )
@@ -182,7 +190,27 @@ function FacetMenu({
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent align="start" className="w-56 p-0">
         <Command>
-          <CommandInput placeholder="Search…" />
+          {/* The reset rides beside the search rather than posing as an
+              option; it only enables while narrowing is actually on. */}
+          <div className="flex items-end gap-1 pr-1">
+            <div className="min-w-0 flex-1">
+              <CommandInput placeholder="Search…" />
+            </div>
+            <Button
+              className="mt-1 h-8"
+              disabled={!isFiltering(controls, facets)}
+              onClick={() => {
+                for (const facet of facets) {
+                  controls.setFacet(facet.key, undefined)
+                }
+              }}
+              type="button"
+              variant="outline"
+            >
+              <ListChecks />
+              All
+            </Button>
+          </div>
           <CommandList>
             <CommandEmpty>No matches.</CommandEmpty>
             {facets.map((facet) => (
@@ -195,10 +223,9 @@ function FacetMenu({
   )
 }
 
-/** One labeled facet inside the menu: an All reset above its options, each
- *  carrying its icon and a trailing check when selected. The list searches
- *  and scrolls through the Command primitives, so a hundred options stay
- *  usable. */
+/** One labeled facet inside the menu: its options, each carrying its icon
+ *  and a trailing check when selected. The list searches and scrolls
+ *  through the Command primitives, so a hundred options stay usable. */
 function FacetSection({
   controls,
   facet,
@@ -210,12 +237,6 @@ function FacetSection({
 
   return (
     <CommandGroup heading={facet.label}>
-      <CommandItem
-        onSelect={() => controls.setFacet(facet.key, undefined)}
-        value="All"
-      >
-        All
-      </CommandItem>
       {facet.options.map((option) => (
         <CommandItem
           data-checked={selection.includes(option.value)}
