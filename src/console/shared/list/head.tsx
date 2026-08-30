@@ -32,12 +32,17 @@ import {
 } from "./controls"
 
 // Header-embedded list controls: each header cell houses a small stock
-// ghost button — the cell itself is not the control, and the button stays
-// inside the cell's own padding so it never crowds its neighbors.
+// ghost button — the cell itself is not the control. At rest the button
+// sheds its horizontal padding so the label sits exactly on the column's
+// text grid; hovering, focusing, opening, or being active grows the
+// padding back (the Button's own transition animates it), the same move
+// the breadcrumb trigger makes.
+const headButtonClassName =
+  "px-0 font-medium hover:px-2 focus-visible:px-2 aria-expanded:px-2"
 
 // An active sort or filter keeps the ghost hover background, so what is
 // shaping the list stays marked after the pointer leaves.
-const activeClassName = "bg-muted text-foreground dark:bg-muted/50"
+const activeClassName = "bg-muted px-2 text-foreground dark:bg-muted/50"
 
 function isFiltering(controls: ListControls, facets: FacetEntry[]) {
   return facets.some((facet) => controls.isFacetActive(facet.key))
@@ -64,7 +69,7 @@ export function SortHead({
       <div className="flex items-center gap-0.5">
         <Button
           className={cn(
-            "font-medium",
+            headButtonClassName,
             direction !== undefined && activeClassName
           )}
           onClick={() => controls.toggleSort(sortKey)}
@@ -79,7 +84,8 @@ export function SortHead({
             <Button
               aria-label={`Filter by ${facetLabels(facets)}`}
               className={cn(
-                "px-1.5",
+                "px-0 hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5",
+                isFiltering(controls, facets) && "px-1.5",
                 isFiltering(controls, facets) && activeClassName
               )}
               type="button"
@@ -110,7 +116,7 @@ export function FilterHead({
         <FacetMenu controls={controls} facets={facets}>
           <Button
             className={cn(
-              "font-medium",
+              headButtonClassName,
               isFiltering(controls, facets) && activeClassName
             )}
             type="button"
