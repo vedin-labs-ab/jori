@@ -9,25 +9,21 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  ConsoleFilterToggle,
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsoleSearch,
 } from "../shared/layout"
 import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
-import { FilterableEmptyState } from "../shared/list/empty"
 import {
-  ConsoleListContent,
-  ConsoleListTable,
-  ConsoleListToolbar,
-} from "../shared/list/frame"
-import { type ScopeFilter, scopeFilterOptions } from "../shared/list/scope"
+  facetEntries,
+  type ListConfig,
+  type ListControls,
+} from "../shared/list/controls"
+import { EmptyRow, FilterableEmptyState } from "../shared/list/empty"
+import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
+import { FilterHead, SortHead } from "../shared/list/head"
 import { type RowSelection } from "../shared/list/selection"
 import { MaterialActions } from "../shared/materials/actions"
-import {
-  type ArchiveFilter,
-  archiveFilterOptions,
-} from "../shared/materials/archive"
 import { MaterialFolderCell } from "../shared/materials/cells/folder"
 import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
@@ -41,65 +37,43 @@ import { tableDeleteDescription, type useTableRemoval } from "./manage"
 import { type TableSummary } from "./types"
 
 export function TablesToolbar({
-  filter,
   onCreate,
-  onFilterChange,
   onImport,
   onQueryChange,
-  onScopeChange,
   query,
-  scope,
 }: {
-  filter: ArchiveFilter
   onCreate: () => void
-  onFilterChange: (filter: ArchiveFilter) => void
   onImport: () => void
   onQueryChange: (query: string) => void
-  onScopeChange: (scope: ScopeFilter) => void
   query: string
-  scope: ScopeFilter
 }) {
   return (
-    <>
-      <ConsoleHeaderActions>
-        <ConsoleSearch
-          label="Search tables"
-          onValueChange={onQueryChange}
-          value={query}
-        />
-        <ConsoleHeaderButton
-          icon={<Upload />}
-          label="Import"
-          onClick={onImport}
-          type="button"
-          variant="outline"
-        />
-        <ConsoleHeaderButton
-          icon={<Plus />}
-          label="New table"
-          onClick={onCreate}
-          type="button"
-        />
-      </ConsoleHeaderActions>
-      <ConsoleListToolbar>
-        <ConsoleFilterToggle
-          label="Status"
-          onValueChange={onFilterChange}
-          options={archiveFilterOptions}
-          value={filter}
-        />
-        <ConsoleFilterToggle
-          label="Sharing"
-          onValueChange={onScopeChange}
-          options={scopeFilterOptions}
-          value={scope}
-        />
-      </ConsoleListToolbar>
-    </>
+    <ConsoleHeaderActions>
+      <ConsoleSearch
+        label="Search tables"
+        onValueChange={onQueryChange}
+        value={query}
+      />
+      <ConsoleHeaderButton
+        icon={<Upload />}
+        label="Import"
+        onClick={onImport}
+        type="button"
+        variant="outline"
+      />
+      <ConsoleHeaderButton
+        icon={<Plus />}
+        label="New table"
+        onClick={onCreate}
+        type="button"
+      />
+    </ConsoleHeaderActions>
   )
 }
 
 export function TableList({
+  config,
+  controls,
   folders,
   hasFilters,
   onCreate,
@@ -110,6 +84,8 @@ export function TableList({
   tables,
   unauthorizedMessage,
 }: {
+  config: ListConfig<TableSummary>
+  controls: ListControls
   folders: FolderNames | undefined
   hasFilters: boolean
   onCreate: () => void
@@ -131,26 +107,13 @@ export function TableList({
     )
   }
 
-  if (tables.length === 0) {
+  if (tables.length === 0 && !hasFilters) {
     return (
       <ConsoleListContent>
-        <FilterableEmptyState
-          action={
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Button onClick={onCreate} type="button">
-                <Plus />
-                New table
-              </Button>
-              <Button onClick={onImport} type="button" variant="outline">
-                <Upload />
-                Import
-              </Button>
-            </div>
-          }
-          description="Typed tables Jori and your team keep structured records in appear here."
-          hasFilters={hasFilters}
-          icon={Table2}
-          noun="tables"
+        <TablesEmptyState
+          hasFilters={false}
+          onCreate={onCreate}
+          onImport={onImport}
         />
       </ConsoleListContent>
     )
@@ -158,32 +121,102 @@ export function TableList({
 
   return (
     <ConsoleListTable>
-      <TableHeader>
-        <TableRow>
-          <SelectionHeadCell selection={selection} />
-          <TableHead>Name</TableHead>
-          <TableHead>Columns</TableHead>
-          <TableHead>Rows</TableHead>
-          <TableHead>Folder</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead>Owner</TableHead>
-          <TableHead>Last Updated</TableHead>
-          <TableHead className="w-10" />
-        </TableRow>
-      </TableHeader>
+      <TableListHead
+        config={config}
+        controls={controls}
+        selection={selection}
+      />
       <TableBody>
-        {tables.map((table) => (
-          <TableListRow
-            folders={folders}
-            key={table.tableId}
-            onMoveToFolder={onMoveToFolder}
-            removal={removal}
-            selection={selection}
-            table={table}
-          />
-        ))}
+        {tables.length === 0 ? (
+          <EmptyRow colSpan={9}>
+            <TablesEmptyState
+              hasFilters
+              onCreate={onCreate}
+              onImport={onImport}
+            />
+          </EmptyRow>
+        ) : (
+          tables.map((table) => (
+            <TableListRow
+              folders={folders}
+              key={table.tableId}
+              onMoveToFolder={onMoveToFolder}
+              removal={removal}
+              selection={selection}
+              table={table}
+            />
+          ))
+        )}
       </TableBody>
     </ConsoleListTable>
+  )
+}
+
+/** The header row is the page's control surface: material facets ride the
+ *  Name and Folder columns, every measurable column sorts. */
+function TableListHead({
+  config,
+  controls,
+  selection,
+}: {
+  config: ListConfig<TableSummary>
+  controls: ListControls
+  selection: RowSelection<TableSummary>
+}) {
+  return (
+    <TableHeader>
+      <TableRow>
+        <SelectionHeadCell selection={selection} />
+        <SortHead
+          controls={controls}
+          facets={facetEntries(config, ["status", "scope"])}
+          label="Name"
+          sortKey="name"
+        />
+        <SortHead controls={controls} label="Columns" sortKey="columns" />
+        <SortHead controls={controls} label="Rows" sortKey="rows" />
+        <FilterHead
+          controls={controls}
+          facets={facetEntries(config, ["folder"])}
+          label="Folder"
+        />
+        <SortHead controls={controls} label="Created" sortKey="created" />
+        <TableHead>Owner</TableHead>
+        <SortHead controls={controls} label="Last Updated" sortKey="updated" />
+        <TableHead className="w-10" />
+      </TableRow>
+    </TableHeader>
+  )
+}
+
+function TablesEmptyState({
+  hasFilters,
+  onCreate,
+  onImport,
+}: {
+  hasFilters: boolean
+  onCreate: () => void
+  onImport: () => void
+}) {
+  return (
+    <FilterableEmptyState
+      action={
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button onClick={onCreate} type="button">
+            <Plus />
+            New table
+          </Button>
+          <Button onClick={onImport} type="button" variant="outline">
+            <Upload />
+            Import
+          </Button>
+        </div>
+      }
+      description="Typed tables Jori and your team keep structured records in appear here."
+      hasFilters={hasFilters}
+      icon={Table2}
+      noun="tables"
+    />
   )
 }
 

@@ -1,30 +1,15 @@
 import { expect, test } from "vitest"
-import {
-  hasMaterialFilters,
-  matchesArchiveFilter,
-  shouldIncludeArchived,
-} from "./archive"
+import { shouldIncludeArchived, statusFacet } from "./archive"
 
-test("active is the default view and not a filter", () => {
-  expect(shouldIncludeArchived("active")).toBe(false)
-  expect(hasMaterialFilters("", "active", "all")).toBe(false)
+test("the status facet defaults to active rows only", () => {
+  expect(statusFacet.defaults).toEqual(["active"])
+  expect(statusFacet.resolve({ archivedAt: undefined })).toBe("active")
+  expect(statusFacet.resolve({ archivedAt: 1 })).toBe("archived")
 })
 
-test("all and archived views include archived materials", () => {
-  expect(shouldIncludeArchived("all")).toBe(true)
-  expect(shouldIncludeArchived("archived")).toBe(true)
-  expect(hasMaterialFilters("", "all", "all")).toBe(true)
-})
-
-test("matches materials against the archive facet", () => {
-  expect(matchesArchiveFilter(undefined, "active")).toBe(true)
-  expect(matchesArchiveFilter(1, "active")).toBe(false)
-  expect(matchesArchiveFilter(1, "archived")).toBe(true)
-  expect(matchesArchiveFilter(undefined, "archived")).toBe(false)
-  expect(matchesArchiveFilter(1, "all")).toBe(true)
-})
-
-test("search text and scope count as filters", () => {
-  expect(hasMaterialFilters("billing", "active", "all")).toBe(true)
-  expect(hasMaterialFilters("", "active", "personal")).toBe(true)
+test("only selections that can show archived rows fetch them", () => {
+  expect(shouldIncludeArchived(["active"])).toBe(false)
+  expect(shouldIncludeArchived(["archived"])).toBe(true)
+  expect(shouldIncludeArchived(["active", "archived"])).toBe(true)
+  expect(shouldIncludeArchived(undefined)).toBe(true)
 })

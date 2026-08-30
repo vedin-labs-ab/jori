@@ -1,37 +1,24 @@
-import { type ScopeFilter } from "../list/scope"
+import { type ListFacet } from "../list/controls"
 
-// Materials (tables, stores) archive before they delete, so their list pages
-// share one status facet: active by default, with archived reachable.
+// Materials (tables, stores) archive before they delete, so their list
+// pages share one status facet: active rows by default, with archived
+// reachable from the Name header's filter menu.
 
-export const archiveFilterOptions = [
-  { label: "All", value: "all" },
-  { label: "Active", value: "active" },
-  { label: "Archived", value: "archived" },
-] as const
-
-export type ArchiveFilter = (typeof archiveFilterOptions)[number]["value"]
-
-export function shouldIncludeArchived(filter: ArchiveFilter) {
-  return filter !== "active"
+export const statusFacet: ListFacet<{ archivedAt?: number }> = {
+  defaults: ["active"],
+  label: "Status",
+  options: [
+    { label: "Active", value: "active" },
+    { label: "Archived", value: "archived" },
+  ],
+  resolve: (material) =>
+    material.archivedAt === undefined ? "active" : "archived",
 }
 
-export function matchesArchiveFilter(
-  archivedAt: number | undefined,
-  filter: ArchiveFilter
+/** The list queries omit archived materials unless asked; any status
+ *  selection that can surface archived rows must ask for them. */
+export function shouldIncludeArchived(
+  selection: readonly string[] | undefined
 ) {
-  if (filter === "all") {
-    return true
-  }
-
-  return filter === "archived"
-    ? archivedAt !== undefined
-    : archivedAt === undefined
-}
-
-export function hasMaterialFilters(
-  query: string,
-  filter: ArchiveFilter,
-  scope: ScopeFilter
-) {
-  return query.trim() !== "" || filter !== "active" || scope !== "all"
+  return selection === undefined || selection.includes("archived")
 }

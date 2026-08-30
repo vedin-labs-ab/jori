@@ -5,6 +5,12 @@ import { MoveResourcesDialog } from "../folders/move"
 import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
 import { SelectionActionsBar } from "../shared/list/bar"
+import {
+  type ListConfig,
+  type ListControls,
+  resettingControls,
+  useListControls,
+} from "../shared/list/controls"
 import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListLoading } from "../shared/list/loading"
 import { ConsoleListPager } from "../shared/list/pager"
@@ -12,20 +18,15 @@ import {
   useClientPagination,
   useResettingSetter,
 } from "../shared/list/pagination"
-import { matchesScopeFilter, type ScopeFilter } from "../shared/list/scope"
 import { type RowSelection, useRowSelection } from "../shared/list/selection"
-import {
-  type ArchiveFilter,
-  hasMaterialFilters,
-  matchesArchiveFilter,
-  shouldIncludeArchived,
-} from "../shared/materials/archive"
+import { shouldIncludeArchived } from "../shared/materials/archive"
 import { useFolderNames } from "../shared/materials/folders"
 import { bulkMaterialRemoval } from "../shared/materials/removal"
 import { CreateStoreDialog } from "./create"
 import { StoreList, StoresToolbar } from "./list"
 import {
   storeDeleteDescription,
+  storeListConfig,
   storeNoun,
   useStoreBulk,
   useStoreRemoval,
@@ -41,29 +42,21 @@ export function StoresPage() {
 }
 
 function useStoreRows({
-  filter,
+  controls,
   organizationId,
   query,
-  scope,
 }: {
-  filter: ArchiveFilter
+  controls: ReturnType<typeof useListControls<StoreSummary>>
   organizationId: string
   query: string
-  scope: ScopeFilter
 }) {
   const storeList = useQuery(api.stores.console.list, {
     organizationId,
     query,
-    includeArchived: shouldIncludeArchived(filter),
+    includeArchived: shouldIncludeArchived(controls.getFacet("status")),
   })
   const stores =
-    storeList?.status === "ready"
-      ? storeList.stores.filter(
-          (store) =>
-            matchesArchiveFilter(store.archivedAt, filter) &&
-            matchesScopeFilter(store.scope, scope)
-        )
-      : []
+    storeList?.status === "ready" ? controls.apply(storeList.stores) : []
 
   return { storeList, stores }
 }
@@ -71,19 +64,19 @@ function useStoreRows({
 /** One bag of page state, so the view and its overlays stay small. */
 function useStoresPage(organizationId: string) {
   const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState<ArchiveFilter>("active")
-  const [scope, setScope] = useState<ScopeFilter>("all")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const removal = useStoreRemoval(organizationId)
+  const folders = useFolderNames(organizationId)
+  const config = storeListConfig(folders)
+  const controls = useListControls(config)
   const deferredQuery = useDeferredValue(query)
   const { storeList, stores } = useStoreRows({
-    filter,
+    controls,
     organizationId,
     query: deferredQuery,
-    scope,
   })
-  const hasFilters = hasMaterialFilters(query, filter, scope)
+  const hasFilters = query.trim() !== "" || controls.hasActiveControls
   const pagination = useClientPagination({
     hasFilters,
     isReady: storeList?.status === "ready",
@@ -97,21 +90,19 @@ function useStoresPage(organizationId: string) {
 
   return {
     bulk: useStoreBulk(organizationId, selection),
-    filter,
-    folders: useFolderNames(organizationId),
+    config,
+    controls: resettingControls(controls, pagination.reset),
+    folders,
     hasFilters,
     isCreateOpen,
     moving,
     pagination,
     query,
     removal,
-    scope,
     selection,
-    setFilterAndReset: useResettingSetter(setFilter, pagination.reset),
     setIsCreateOpen,
     setMoving,
     setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
-    setScopeAndReset: useResettingSetter(setScope, pagination.reset),
     storeList,
   }
 }
@@ -122,15 +113,13 @@ function StoresView({ organizationId }: { organizationId: string }) {
   return (
     <ConsoleListLayout>
       <StoresToolbar
-        filter={page.filter}
         onCreate={() => page.setIsCreateOpen(true)}
-        onFilterChange={page.setFilterAndReset}
         onQueryChange={page.setQueryAndReset}
-        onScopeChange={page.setScopeAndReset}
         query={page.query}
-        scope={page.scope}
       />
       <StoresBody
+        config={page.config}
+        controls={page.controls}
         folders={page.folders}
         hasFilters={page.hasFilters}
         onCreate={() => page.setIsCreateOpen(true)}
@@ -194,6 +183,8 @@ function toMoveTarget(store: StoreSummary): MoveResourceTarget {
 }
 
 function StoresBody({
+  config,
+  controls,
   folders,
   hasFilters,
   onCreate,
@@ -203,6 +194,8 @@ function StoresBody({
   selection,
   storeList,
 }: {
+  config: ListConfig<StoreSummary>
+  controls: ListControls
   folders: ReturnType<typeof useFolderNames>
   hasFilters: boolean
   onCreate: () => void
@@ -219,6 +212,8 @@ function StoresBody({
   return (
     <>
       <StoreList
+        config={config}
+        controls={controls}
         folders={folders}
         hasFilters={hasFilters}
         onCreate={onCreate}

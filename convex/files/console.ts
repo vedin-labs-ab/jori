@@ -1,4 +1,3 @@
-import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
@@ -16,29 +15,27 @@ import { optionalString, requiredString } from "../shared/input"
 import { canViewFile, type FileViewer, normalizeFileName } from "./data"
 import { fileScopes } from "./schema"
 
-export const page = query({
+const maxConsoleFiles = 500
+
+export const list = query({
   args: {
     organizationId: v.string(),
-    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const viewer = await resolveViewer(ctx, args.organizationId, identity)
-    const result = await ctx.db
+    const files = await ctx.db
       .query("files")
       .withIndex("by_organization_and_created_at", (index) =>
         index.eq("organizationId", args.organizationId)
       )
       .order("desc")
-      .paginate(args.paginationOpts)
-    const visible = result.page.filter((file) => canViewFile(file, viewer))
+      .take(maxConsoleFiles)
+    const visible = files.filter((file) => canViewFile(file, viewer))
 
-    return {
-      ...result,
-      page: await Promise.all(
-        visible.map(async (file) => await toConsoleRow(ctx, file))
-      ),
-    }
+    return await Promise.all(
+      visible.map(async (file) => await toConsoleRow(ctx, file))
+    )
   },
 })
 

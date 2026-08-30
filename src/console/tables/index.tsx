@@ -5,6 +5,12 @@ import { MoveResourcesDialog } from "../folders/move"
 import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
 import { SelectionActionsBar } from "../shared/list/bar"
+import {
+  type ListConfig,
+  type ListControls,
+  resettingControls,
+  useListControls,
+} from "../shared/list/controls"
 import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListLoading } from "../shared/list/loading"
 import { ConsoleListPager } from "../shared/list/pager"
@@ -12,14 +18,8 @@ import {
   useClientPagination,
   useResettingSetter,
 } from "../shared/list/pagination"
-import { matchesScopeFilter, type ScopeFilter } from "../shared/list/scope"
 import { type RowSelection, useRowSelection } from "../shared/list/selection"
-import {
-  type ArchiveFilter,
-  hasMaterialFilters,
-  matchesArchiveFilter,
-  shouldIncludeArchived,
-} from "../shared/materials/archive"
+import { shouldIncludeArchived } from "../shared/materials/archive"
 import { useFolderNames } from "../shared/materials/folders"
 import { bulkMaterialRemoval } from "../shared/materials/removal"
 import { CreateTableDialog } from "./create"
@@ -27,6 +27,7 @@ import { ImportTableDialog } from "./import/dialog"
 import { TableList, TablesToolbar } from "./list"
 import {
   tableDeleteDescription,
+  tableListConfig,
   tableNoun,
   useTableBulk,
   useTableRemoval,
@@ -42,29 +43,21 @@ export function TablesPage() {
 }
 
 function useTableRows({
-  filter,
+  controls,
   organizationId,
   query,
-  scope,
 }: {
-  filter: ArchiveFilter
+  controls: ReturnType<typeof useListControls<TableSummary>>
   organizationId: string
   query: string
-  scope: ScopeFilter
 }) {
   const tableList = useQuery(api.tables.console.list, {
     organizationId,
     query,
-    includeArchived: shouldIncludeArchived(filter),
+    includeArchived: shouldIncludeArchived(controls.getFacet("status")),
   })
   const tables =
-    tableList?.status === "ready"
-      ? tableList.tables.filter(
-          (table) =>
-            matchesArchiveFilter(table.archivedAt, filter) &&
-            matchesScopeFilter(table.scope, scope)
-        )
-      : []
+    tableList?.status === "ready" ? controls.apply(tableList.tables) : []
 
   return { tableList, tables }
 }
@@ -72,19 +65,19 @@ function useTableRows({
 /** One bag of page state, so the view and its overlays stay small. */
 function useTablesPage(organizationId: string) {
   const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState<ArchiveFilter>("active")
-  const [scope, setScope] = useState<ScopeFilter>("all")
   const [dialog, setDialog] = useState<"create" | "import">()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const removal = useTableRemoval(organizationId)
+  const folders = useFolderNames(organizationId)
+  const config = tableListConfig(folders)
+  const controls = useListControls(config)
   const deferredQuery = useDeferredValue(query)
   const { tableList, tables } = useTableRows({
-    filter,
+    controls,
     organizationId,
     query: deferredQuery,
-    scope,
   })
-  const hasFilters = hasMaterialFilters(query, filter, scope)
+  const hasFilters = query.trim() !== "" || controls.hasActiveControls
   const pagination = useClientPagination({
     hasFilters,
     isReady: tableList?.status === "ready",
@@ -98,21 +91,19 @@ function useTablesPage(organizationId: string) {
 
   return {
     bulk: useTableBulk(organizationId, selection),
+    config,
+    controls: resettingControls(controls, pagination.reset),
     dialog,
-    filter,
-    folders: useFolderNames(organizationId),
+    folders,
     hasFilters,
     moving,
     pagination,
     query,
     removal,
-    scope,
     selection,
     setDialog,
-    setFilterAndReset: useResettingSetter(setFilter, pagination.reset),
     setMoving,
     setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
-    setScopeAndReset: useResettingSetter(setScope, pagination.reset),
     tableList,
   }
 }
@@ -123,16 +114,14 @@ function TablesView({ organizationId }: { organizationId: string }) {
   return (
     <ConsoleListLayout>
       <TablesToolbar
-        filter={page.filter}
         onCreate={() => page.setDialog("create")}
-        onFilterChange={page.setFilterAndReset}
         onImport={() => page.setDialog("import")}
         onQueryChange={page.setQueryAndReset}
-        onScopeChange={page.setScopeAndReset}
         query={page.query}
-        scope={page.scope}
       />
       <TablesBody
+        config={page.config}
+        controls={page.controls}
         folders={page.folders}
         hasFilters={page.hasFilters}
         onCreate={() => page.setDialog("create")}
@@ -202,6 +191,8 @@ function toMoveTarget(table: TableSummary): MoveResourceTarget {
 }
 
 function TablesBody({
+  config,
+  controls,
   folders,
   hasFilters,
   onCreate,
@@ -212,6 +203,8 @@ function TablesBody({
   selection,
   tableList,
 }: {
+  config: ListConfig<TableSummary>
+  controls: ListControls
   folders: ReturnType<typeof useFolderNames>
   hasFilters: boolean
   onCreate: () => void
@@ -229,6 +222,8 @@ function TablesBody({
   return (
     <>
       <TableList
+        config={config}
+        controls={controls}
         folders={folders}
         hasFilters={hasFilters}
         onCreate={onCreate}

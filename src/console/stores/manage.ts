@@ -1,7 +1,11 @@
 import { useConvex, useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { countNoun, useBulkRunner } from "../shared/list/bulk"
+import { type ListConfig } from "../shared/list/controls"
+import { scopeFacet } from "../shared/list/scope"
 import { type RowSelection } from "../shared/list/selection"
+import { statusFacet } from "../shared/materials/archive"
+import { type FolderNames, folderFacet } from "../shared/materials/folders"
 import {
   bulkMaterialRemovalSuccess,
   useMaterialRemoval,
@@ -12,6 +16,27 @@ import { type StoreSummary } from "./types"
 type StoreTarget = Pick<StoreSummary, "storeId" | "name" | "archivedAt">
 
 export const storeNoun = { plural: "stores", singular: "store" }
+
+/** What the store list headers sort and filter: the shared material facets
+ *  plus this page's name, count, and time sorts. */
+export function storeListConfig(
+  folders: FolderNames | undefined
+): ListConfig<StoreSummary> {
+  return {
+    facets: {
+      folder: folderFacet(folders),
+      scope: scopeFacet,
+      status: statusFacet,
+    },
+    sorts: {
+      created: (store) => store.createdAt,
+      name: (store) => store.name,
+      properties: (store) => store.propertyCount,
+      updated: (store) => store.updatedAt,
+      version: (store) => store.version,
+    },
+  }
+}
 
 export function useStoreRemoval(organizationId: string) {
   const remove = useMutation(api.stores.console.remove)

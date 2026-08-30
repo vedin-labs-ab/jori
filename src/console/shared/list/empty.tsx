@@ -8,7 +8,26 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { TableCell, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+
+/** Keeps the header row's controls reachable when filters empty a list:
+ *  the empty state rides inside the table as one full-width row. */
+export function EmptyRow({
+  children,
+  colSpan,
+}: {
+  children: ReactNode
+  colSpan: number
+}) {
+  return (
+    <TableRow className="hover:bg-transparent">
+      <TableCell className="p-6" colSpan={colSpan}>
+        {children}
+      </TableCell>
+    </TableRow>
+  )
+}
 
 /** Empty state for filterable list pages: with filters active it asks to
  *  widen them, otherwise it introduces the domain with the given copy and
