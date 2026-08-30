@@ -31,21 +31,30 @@ describe("fileSiblings", () => {
     })
   })
 
-  test("the first file has no previous", () => {
+  test("the first file wraps back to the last", () => {
     expect(fileSiblings(files, "a")).toEqual({
       count: 3,
       next: { fileId: "b" },
       position: 1,
-      previous: null,
+      previous: { fileId: "c" },
     })
   })
 
-  test("the last file has no next", () => {
+  test("the last file wraps forward to the first", () => {
     expect(fileSiblings(files, "c")).toEqual({
       count: 3,
-      next: null,
+      next: { fileId: "a" },
       position: 3,
       previous: { fileId: "b" },
+    })
+  })
+
+  test("a lone file has nothing to wrap to", () => {
+    expect(fileSiblings([{ fileId: "a" }], "a")).toEqual({
+      count: 1,
+      next: null,
+      position: 1,
+      previous: null,
     })
   })
 
@@ -159,7 +168,7 @@ describe("useSiblingKeys", () => {
     expect(navigate).not.toHaveBeenCalled()
   })
 
-  test("stops at the ends without wrapping", () => {
+  test("stays put with no neighbors resolved", () => {
     renderHook(() => useSiblingKeys({ ...noSiblings, count: 3 }))
 
     pressKey("ArrowLeft")
