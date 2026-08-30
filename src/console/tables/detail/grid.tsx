@@ -2,6 +2,7 @@ import { ChevronDown, Plus } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -13,9 +14,13 @@ import {
   selectionHeadState,
 } from "../../shared/list/selection"
 import { columnTypeIcons } from "../draft"
-import { type TableColumn, type TableRow as TableRowData } from "../types"
+import {
+  type RowPlacement,
+  type TableColumn,
+  type TableRow as TableRowData,
+} from "../types"
 import { type CommitCell } from "./cell"
-import { GridRow, NewRowRow } from "./row"
+import { GridRow } from "./row"
 
 /** The table's rows as a full-bleed spreadsheet grid: a number/select
  *  gutter, typed column headers that open their column's details, inline
@@ -34,6 +39,7 @@ export function RowGrid({
   onDeleteRow,
   onDuplicateRow,
   onFreshSettled,
+  onInsertRow,
   onInspectColumn,
   pendingRowId,
   rows,
@@ -50,6 +56,7 @@ export function RowGrid({
   onDeleteRow: (row: TableRowData) => void
   onDuplicateRow: (row: TableRowData) => void
   onFreshSettled: () => void
+  onInsertRow: (row: TableRowData, placement: RowPlacement) => void
   onInspectColumn: (column: TableColumn) => void
   pendingRowId: TableRowData["rowId"] | undefined
   rows: TableRowData[]
@@ -110,11 +117,11 @@ export function RowGrid({
             isPending={pendingRowId === row.rowId}
             key={row.rowId}
             number={offset + index + 1}
-            onAddRow={onAddRow}
             onCommit={onCommit}
             onDelete={onDeleteRow}
             onDuplicate={onDuplicateRow}
             onFreshSettled={onFreshSettled}
+            onInsert={onInsertRow}
             row={row}
             selection={selection}
           />
@@ -126,6 +133,40 @@ export function RowGrid({
         />
       </TableBody>
     </ConsoleListTable>
+  )
+}
+
+/** The quiet full-width affordance below the last loaded row; the page
+ *  gates instant creation against required columns before it lands here. */
+function NewRowRow({
+  disabled,
+  onAddRow,
+  span,
+}: {
+  disabled: boolean
+  onAddRow: () => void
+  span: number
+}) {
+  if (disabled) {
+    return null
+  }
+
+  // The affordance fits its content: the button carries its own closing
+  // hairlines, and the spanning cell forces all of the grid's cell borders
+  // off (the shared [&_td] selectors out-specify plain cell classes).
+  return (
+    <TableRow className="hover:bg-transparent">
+      <TableCell className="border-0! p-0" colSpan={span}>
+        <button
+          className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
+          onClick={onAddRow}
+          type="button"
+        >
+          <Plus aria-hidden className="size-3.5" />
+          New row
+        </button>
+      </TableCell>
+    </TableRow>
   )
 }
 

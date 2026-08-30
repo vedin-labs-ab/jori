@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { type KeyboardEvent, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -14,10 +14,12 @@ export type CommitCell = (
 
 /** One grid cell: booleans toggle in place and text-like types edit
  *  inline. Every commit carries the row version. A cell spotlighted for a
- *  freshly inserted row opens in edit mode and reports when it settles. */
+ *  freshly inserted row opens in edit mode and reports when it settles;
+ *  Tab commits and asks the row to advance to a neighboring cell. */
 export function RowCell({
   column,
   disabled,
+  onAdvance,
   onCommit,
   onSettle,
   row,
@@ -25,6 +27,7 @@ export function RowCell({
 }: {
   column: TableColumn
   disabled: boolean
+  onAdvance?: (direction: 1 | -1) => void
   onCommit: CommitCell
   onSettle?: () => void
   row: TableRow
@@ -51,6 +54,7 @@ export function RowCell({
     <TextCell
       column={column}
       disabled={disabled}
+      onAdvance={onAdvance}
       onCommit={onCommit}
       onSettle={onSettle}
       row={row}
@@ -62,6 +66,7 @@ export function RowCell({
 function TextCell({
   column,
   disabled,
+  onAdvance,
   onCommit,
   onSettle,
   row,
@@ -69,6 +74,7 @@ function TextCell({
 }: {
   column: TableColumn
   disabled: boolean
+  onAdvance: ((direction: 1 | -1) => void) | undefined
   onCommit: CommitCell
   onSettle: (() => void) | undefined
   row: TableRow
@@ -96,7 +102,7 @@ function TextCell({
     if (text === formatCellText(column, value)) {
       close()
 
-      return
+      return true
     }
 
     const parsed = parseCellText(column, text)
@@ -104,12 +110,16 @@ function TextCell({
     if (!parsed.ok) {
       toast.error(parsed.error)
 
-      return
+      return false
     }
 
     if (await onCommit(row, column.key, parsed.value)) {
       close()
+
+      return true
     }
+
+    return false
   }
 
   if (draft === undefined) {
@@ -133,18 +143,46 @@ function TextCell({
       className="h-9 min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
       onBlur={(event) => void commit(event.target.value)}
       onChange={(event) => setDraft(event.target.value)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          void commit(draft)
-        }
-
-        if (event.key === "Escape") {
-          close()
-        }
-      }}
+      onKeyDown={(event) =>
+        handleEditorKey(event, { close, commit, onAdvance })
+      }
       value={draft}
     />
   )
+}
+
+/** Enter commits in place, Escape cancels, and Tab commits then moves
+ *  editing along the row; a draft that does not commit keeps the editor
+ *  (and any error) where it is. */
+function handleEditorKey(
+  event: KeyboardEvent<HTMLInputElement>,
+  editor: {
+    close: () => void
+    commit: (text: string) => Promise<boolean>
+    onAdvance: ((direction: 1 | -1) => void) | undefined
+  }
+) {
+  const draft = event.currentTarget.value
+
+  if (event.key === "Enter") {
+    void editor.commit(draft)
+  }
+
+  if (event.key === "Escape") {
+    editor.close()
+  }
+
+  if (event.key === "Tab") {
+    event.preventDefault()
+
+    const direction = event.shiftKey ? -1 : 1
+
+    void editor.commit(draft).then((committed) => {
+      if (committed) {
+        editor.onAdvance?.(direction)
+      }
+    })
+  }
 }
 
 function CellButton({

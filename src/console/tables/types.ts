@@ -26,4 +26,12 @@ export type TableRowPage = FunctionReturnType<
 
 export type TableRow = TableRowPage["rows"][number]
 
+export type RowPlacement = "above" | "below"
+
+/** Places an insert beside an existing row; absent, inserts append. */
+export type RowInsertAnchor = {
+  rowId: TableRow["rowId"]
+  placement: RowPlacement
+}
+
 export const rowPageSize = 25

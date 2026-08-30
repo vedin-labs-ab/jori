@@ -108,6 +108,7 @@ import type * as collections_access from "../collections/access.js";
 import type * as collections_backfill from "../collections/backfill.js";
 import type * as collections_documents from "../collections/documents.js";
 import type * as collections_input from "../collections/input.js";
+import type * as collections_order from "../collections/order.js";
 import type * as collections_records from "../collections/records.js";
 import type * as collections_shares from "../collections/shares.js";
 import type * as collections_spec from "../collections/spec.js";
@@ -644,6 +645,7 @@ declare const fullApi: ApiFromModules<{
   "collections/backfill": typeof collections_backfill;
   "collections/documents": typeof collections_documents;
   "collections/input": typeof collections_input;
+  "collections/order": typeof collections_order;
   "collections/records": typeof collections_records;
   "collections/shares": typeof collections_shares;
   "collections/spec": typeof collections_spec;

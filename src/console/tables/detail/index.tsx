@@ -176,12 +176,12 @@ function TableReadyView({
         bulk={page.bulk}
         columnSheet={page.columnSheet}
         dialog={page.dialog}
+        onAddRow={page.adding.submitDialog}
         onCloseDialog={() => page.setDialog(undefined)}
         onColumnSheet={page.setColumnSheet}
         organizationId={organizationId}
         selection={page.selection}
         table={table}
-        writes={page.writes}
       />
     </ConsoleListLayout>
   )
@@ -209,6 +209,9 @@ function TableGrid({
       onDeleteRow={(row) => void page.writes.deleteRow(row)}
       onDuplicateRow={(row) => void page.writes.duplicateRow(row)}
       onFreshSettled={page.adding.settle}
+      onInsertRow={(row, placement) =>
+        void page.adding.addRow({ rowId: row.rowId, placement })
+      }
       onInspectColumn={(column) =>
         page.setColumnSheet({ mode: "edit", key: column.key })
       }
