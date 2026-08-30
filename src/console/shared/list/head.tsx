@@ -4,6 +4,7 @@ import {
   ArrowUpDown,
   Filter,
   ListChecks,
+  ListX,
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
@@ -224,9 +225,47 @@ function FacetMenu({
               <FacetSection controls={controls} facet={facet} key={facet.key} />
             ))}
           </CommandList>
+          <ClearFooter controls={controls} facets={facets} />
         </Command>
       </PopoverContent>
     </Popover>
+  )
+}
+
+/** Pinned below the option list while anything is selected: one press
+ *  empties the selection, so picking a single option is Clear + click
+ *  instead of deselecting everything else. */
+function ClearFooter({
+  controls,
+  facets,
+}: {
+  controls: ListControls
+  facets: FacetEntry[]
+}) {
+  const hasSelection = facets.some(
+    (facet) => facetSelection(controls, facet.key, facet.options).length > 0
+  )
+
+  if (!hasSelection) {
+    return null
+  }
+
+  return (
+    <div className="border-t p-1">
+      <Button
+        className="w-full"
+        onClick={() => {
+          for (const facet of facets) {
+            controls.setFacet(facet.key, [])
+          }
+        }}
+        type="button"
+        variant="ghost"
+      >
+        <ListX className="text-muted-foreground" />
+        Clear selection
+      </Button>
+    </div>
   )
 }
 
