@@ -11,9 +11,12 @@ const rowHeight = 36
 const overscanRows = 12
 
 /** How close (in rows) the rendered window may get to the end of the
- *  loaded rows before the next page is requested — roughly a viewport,
- *  so scrolling at reading speed never reaches unloaded space. */
-const fetchAheadRows = 40
+ *  loaded rows before the next page is requested. A wheel fling covers
+ *  50–100 rows in the time one round trip takes, so the margin holds
+ *  most of a page: fast scrolling stays ahead of the network instead of
+ *  hitting the loading band at every page boundary. Still under the page
+ *  size, so a resting window never chain-loads. */
+const fetchAheadRows = 100
 
 /** Windowed rendering over the loaded rows, wired to incremental loading:
  *  only the visible rows plus overscan mount, the next page is requested
