@@ -25,6 +25,7 @@ export function FileEditor({
   file,
   organizationId,
   siblings,
+  tools,
   url,
 }: {
   /** Rendered when the file's text cannot be fetched. */
@@ -32,6 +33,8 @@ export function FileEditor({
   file: FileDetail
   organizationId: string
   siblings: FileSiblings
+  /** Extra toolbar tools slotted after Copy — the HTML view's toggle. */
+  tools?: ReactNode
   url: string
 }) {
   const document = useDocument(file, url)
@@ -53,14 +56,7 @@ export function FileEditor({
   return (
     <>
       {/* No arrow keys here — CodeMirror owns them for caret movement. */}
-      <FileToolbar
-        siblings={siblings}
-        tools={
-          document.state.status === "ready" ? (
-            <EditorCopy savedText={document.state.saved} />
-          ) : undefined
-        }
-      >
+      <FileToolbar siblings={siblings} tools={editorTools(document, tools)}>
         <FileMeta file={file} saveStatus={autosave.status} />
       </FileToolbar>
       <EditorBody
@@ -80,6 +76,27 @@ export function FileEditor({
 
 function EditorCopy({ savedText }: { savedText: string }) {
   return <CopyButton label="file text" value={async () => savedText} />
+}
+
+/** Copy appears once the text is in; the caller's tools stay throughout.
+ *  Resolves to undefined when both are absent so the toolbar knows to
+ *  skip its tools separator. */
+function editorTools(document: FileDocument, tools: ReactNode | undefined) {
+  const copy =
+    document.state.status === "ready" ? (
+      <EditorCopy savedText={document.state.saved} />
+    ) : undefined
+
+  if (tools === undefined) {
+    return copy
+  }
+
+  return (
+    <>
+      {copy}
+      {tools}
+    </>
+  )
 }
 
 function EditorBody({

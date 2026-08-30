@@ -5,7 +5,7 @@ import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { fileKind, previewKind } from "@/shared/files/kind"
+import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import {
@@ -24,6 +24,7 @@ import { FileLinksDialog } from "./share"
 import { type FileSiblings, useFileSiblings, useSiblingKeys } from "./siblings"
 import { FileMeta, FileToolbar } from "./toolbar"
 import { type FileDetail, formatFileSize } from "./types"
+import { FileHtml } from "./viewer/html"
 import { FileViewer } from "./viewer/section"
 
 /** Member view of one file: a secondary header with the file's metadata,
@@ -156,18 +157,7 @@ function FileBody({
 
   if (kind === "text" && file.url !== null && file.size <= textSizeLimit) {
     return (
-      // Keyed so navigating text-to-text unmounts the old editor — the
-      // autosave loop flushes its pending draft against the old file
-      // instead of carrying it into the next one.
-      <FileEditor
-        key={file.fileId}
-        errorFallback={
-          <FileFallback
-            description="Could not load the file's text. Download it instead."
-            file={file}
-            title="Could not load file"
-          />
-        }
+      <FileTextBody
         file={file}
         organizationId={organizationId}
         siblings={siblings}
@@ -194,6 +184,43 @@ function FileBody({
       file={file}
       isOversizedText={kind === "text"}
       siblings={siblings}
+    />
+  )
+}
+
+/** Text files open in the autosaving editor — except HTML, which opens
+ *  rendered with the same editor behind its Code toggle. Both mount keyed
+ *  by file id, so navigating text-to-text unmounts the old editor and its
+ *  autosave loop flushes the pending draft against the old file instead
+ *  of carrying it into the next one. */
+function FileTextBody({
+  file,
+  organizationId,
+  siblings,
+  url,
+}: {
+  file: FileDetail
+  organizationId: string
+  siblings: FileSiblings
+  url: string
+}) {
+  const errorFallback = (
+    <FileFallback
+      description="Could not load the file's text. Download it instead."
+      file={file}
+      title="Could not load file"
+    />
+  )
+  const Body = isHtmlFile(file.mimeType, file.name) ? FileHtml : FileEditor
+
+  return (
+    <Body
+      key={file.fileId}
+      errorFallback={errorFallback}
+      file={file}
+      organizationId={organizationId}
+      siblings={siblings}
+      url={url}
     />
   )
 }

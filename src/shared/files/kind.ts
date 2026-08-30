@@ -49,6 +49,13 @@ export function isTextualKind(mimeType: string, name: string) {
   return textualCategories.has(fileKind(mimeType, name).category)
 }
 
+/** True when the file is an HTML document a browser can render — the mime
+ *  type says text/html, or a generic mime leaves an .html/.htm extension
+ *  to decide. */
+export function isHtmlFile(mimeType: string, name: string) {
+  return fileKind(mimeType, name) === kinds.html
+}
+
 export type PreviewKind = "audio" | "image" | "none" | "pdf" | "text" | "video"
 
 /** How a browser can present the file inline. Browsers render media by the
