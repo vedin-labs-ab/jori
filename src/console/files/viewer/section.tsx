@@ -1,5 +1,5 @@
 import { ExternalLink } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -11,6 +11,7 @@ import { type FileSiblings, useSiblingKeys } from "../siblings"
 import { FileToolbar } from "../toolbar"
 import { ViewerFrame, type ViewerStatus } from "./frame"
 import { ZoomableImage, ZoomTools } from "./image"
+import { useMediaKeys } from "./keys"
 import { useZoom, type Zoom } from "./zoom"
 
 /** The kinds the inline viewer can render; text goes to the editor and
@@ -42,10 +43,13 @@ export function FileViewer({
     kind === "audio" ? "ready" : "loading"
   )
   const zoom = useZoom()
+  const media = useRef<HTMLMediaElement | null>(null)
 
   // ←/→ step between files — except on a zoomed-in image, where the same
   // keys read as panning and must not tear the person away from the file.
   useSiblingKeys(siblings, kind !== "image" || !zoom.isZoomed)
+  // Space toggles playback on audio and video, the player convention.
+  useMediaKeys(media)
 
   return (
     <>
@@ -59,6 +63,7 @@ export function FileViewer({
       <ViewerFrame status={status}>
         <ViewerContent
           kind={kind}
+          media={media}
           name={name}
           onError={() => setStatus("error")}
           onReady={() => setStatus("ready")}
@@ -113,6 +118,7 @@ function OpenTool({ url }: { url: string }) {
 
 function ViewerContent({
   kind,
+  media,
   name,
   onError,
   onReady,
@@ -120,6 +126,7 @@ function ViewerContent({
   zoom,
 }: {
   kind: ViewerKind
+  media: React.RefObject<HTMLMediaElement | null>
   name: string
   onError: () => void
   onReady: () => void
@@ -149,6 +156,9 @@ function ViewerContent({
             controls
             onError={onError}
             onLoadedMetadata={onReady}
+            ref={(element) => {
+              media.current = element
+            }}
             src={url}
           />
         </div>
@@ -157,7 +167,14 @@ function ViewerContent({
       return (
         <div className="flex size-full items-center justify-center p-6">
           {/* biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks. */}
-          <audio className="w-full max-w-xl" controls src={url} />
+          <audio
+            className="w-full max-w-xl"
+            controls
+            ref={(element) => {
+              media.current = element
+            }}
+            src={url}
+          />
         </div>
       )
     case "pdf":
