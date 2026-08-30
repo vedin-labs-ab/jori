@@ -9,15 +9,17 @@ import {
 } from "@/components/ui/tooltip"
 import { JsonBlock, JsonDialog } from "../../shared/code"
 import { CopyButton } from "../../shared/copy"
-import { DetailFrame } from "../../shared/details"
 import { formatJsonText } from "../../shared/json/parse"
 import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
 import { type StoreDetail } from "../types"
 import { ValueEditorSection } from "./editor"
+import { StoreToolbar } from "./toolbar"
 
-/** The store's current value: a formatted JSON document with an edit mode
- *  that replaces it wholesale, guarded by the version it was read at. */
+/** The store's current value under the store toolbar: a formatted JSON
+ *  document with an edit mode that replaces it wholesale, guarded by the
+ *  version it was read at. The toolbar carries the value tools and stays
+ *  mounted across both modes. */
 export function StoreValue({
   organizationId,
   store,
@@ -28,37 +30,35 @@ export function StoreValue({
   const [isEditing, setIsEditing] = useState(false)
   const [isSchemaOpen, setIsSchemaOpen] = useState(false)
 
-  if (isEditing) {
-    return (
-      <ConsoleListContent>
-        <ValueEditorSection
-          onClose={() => setIsEditing(false)}
-          organizationId={organizationId}
-          store={store}
-        />
-      </ConsoleListContent>
-    )
-  }
-
   return (
     <>
-      {/* The value document is the page: the terminal frame bleeds to
-          every edge, squared off, with the page's horizontal padding
-          carried by its own header and body. */}
-      <DetailFrame
-        action={
+      <StoreToolbar
+        store={store}
+        tools={
           <ValueActions
+            isEditing={isEditing}
             onEdit={() => setIsEditing(true)}
             onViewSchema={() => setIsSchemaOpen(true)}
             store={store}
           />
         }
-        className="flex-1 rounded-none"
-        contentClassName="h-full"
-        headerClassName="px-4 py-2 md:px-6"
-      >
-        <ValueDocument onEdit={() => setIsEditing(true)} store={store} />
-      </DetailFrame>
+      />
+      {isEditing ? (
+        <ConsoleListContent>
+          <ValueEditorSection
+            onClose={() => setIsEditing(false)}
+            organizationId={organizationId}
+            store={store}
+          />
+        </ConsoleListContent>
+      ) : (
+        // The value document is the page: the terminal surface bleeds to
+        // every edge below the toolbar, body only — the toolbar above
+        // carries what used to be its header.
+        <div className="min-h-0 flex-1 overflow-hidden bg-muted">
+          <ValueDocument onEdit={() => setIsEditing(true)} store={store} />
+        </div>
+      )}
       <JsonDialog
         description="The schema this store's value must conform to."
         headerLeft={
@@ -74,36 +74,39 @@ export function StoreValue({
   )
 }
 
+/** The value tools, in the toolbar's compact ghost idiom: inspect the
+ *  schema, copy the saved value, and enter edit mode — disabled while the
+ *  editor is open or the store is archived. */
 function ValueActions({
+  isEditing,
   onEdit,
   onViewSchema,
   store,
 }: {
+  isEditing: boolean
   onEdit: () => void
   onViewSchema: () => void
   store: StoreDetail
 }) {
-  const isArchived = store.archivedAt !== undefined
-
   return (
-    <span className="inline-flex items-center gap-1">
-      <CopyButton label="value" value={formatJsonText(store.value)} />
-      <ValueActionButton
-        disabled={isArchived}
-        icon={<Pencil />}
-        label="Edit value"
-        onClick={onEdit}
-      />
+    <>
       <ValueActionButton
         icon={<Braces />}
         label="View schema"
         onClick={onViewSchema}
       />
-    </span>
+      <CopyButton label="value" value={formatJsonText(store.value)} />
+      <ValueActionButton
+        disabled={isEditing || store.archivedAt !== undefined}
+        icon={<Pencil />}
+        label="Edit value"
+        onClick={onEdit}
+      />
+    </>
   )
 }
 
-/** Icon-only header action, in the CopyButton idiom: tooltip for sighted
+/** Icon-only toolbar action, in the CopyButton idiom: tooltip for sighted
  *  pointers, aria-label for everyone else. */
 function ValueActionButton({
   disabled,
