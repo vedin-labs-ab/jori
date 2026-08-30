@@ -169,7 +169,6 @@ function FileBody({
           />
         }
         file={file}
-        meta={<FileMeta file={file} />}
         organizationId={organizationId}
         siblings={siblings}
         url={file.url}

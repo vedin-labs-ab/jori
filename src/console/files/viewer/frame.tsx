@@ -6,16 +6,25 @@ import { type ViewerStatus } from "./status"
 /** The viewport every file type renders into. It claims the full content
  *  region up front and keeps the media invisible until it has loaded at
  *  its final size, then fades it in — so the page never shifts. Loading
- *  shows the platform's centered spinner in the meantime. */
+ *  shows the platform's centered spinner in the meantime. Media kinds get
+ *  a faint dot grid that grounds the item in the space around it. */
 export function ViewerFrame({
   children,
+  dotted = false,
   status,
 }: {
   children: ReactNode
+  dotted?: boolean
   status: ViewerStatus
 }) {
   return (
-    <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden bg-muted/30">
+    <div
+      className={cn(
+        "relative min-h-0 min-w-0 flex-1 overflow-hidden bg-muted/30",
+        dotted &&
+          "[background-image:radial-gradient(color-mix(in_oklab,var(--muted-foreground)_22%,transparent)_1px,transparent_1px)] [background-size:24px_24px]"
+      )}
+    >
       {status === "error" ? (
         <ViewerNotice>Could not load the preview.</ViewerNotice>
       ) : (

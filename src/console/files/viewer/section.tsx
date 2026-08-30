@@ -75,7 +75,7 @@ export function FileViewer({
       >
         {meta}
       </FileToolbar>
-      <ViewerFrame status={status}>
+      <ViewerFrame dotted={kind !== "pdf"} status={status}>
         {url === null ? null : (
           <ViewerContent
             kind={kind}
