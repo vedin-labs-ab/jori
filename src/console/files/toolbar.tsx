@@ -10,9 +10,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { CopyButton } from "../shared/copy"
 import { SeparatorDot } from "../shared/dot"
 import { ConsoleListToolbar } from "../shared/list/frame"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
+import { fileBlobCache } from "./cache/blob"
 import { FileOwnerCell } from "./cells"
 import { type SaveStatus } from "./editor/autosave"
 import { type FileSiblings, useFileNavigate } from "./siblings"
@@ -129,6 +131,41 @@ function NavButton({
         {keyHint === undefined ? null : <Kbd>{keyHint}</Kbd>}
       </TooltipContent>
     </Tooltip>
+  )
+}
+
+/** Copy tool for text-backed file views, present from the first paint so
+ *  it never pops in or out as views load or modes switch. The value
+ *  resolves on click: the editor's saved buffer when the caller has one,
+ *  else the stored blob through the cache the view already warmed. */
+export function FileCopy({
+  file,
+  savedText,
+  url,
+}: {
+  file: FileDetail
+  /** The editor's saved buffer, preferred over the stored blob. */
+  savedText?: string
+  url: string
+}) {
+  return (
+    <CopyButton
+      label="file text"
+      value={async () => {
+        if (savedText !== undefined) {
+          return savedText
+        }
+
+        const cached = await fileBlobCache.load({
+          fileId: file.fileId,
+          size: file.size,
+          updatedAt: file.updatedAt,
+          url,
+        })
+
+        return await cached.blob.text()
+      }}
+    />
   )
 }
 
