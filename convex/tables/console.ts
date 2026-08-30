@@ -4,11 +4,14 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
+import { pageDocuments } from "../collections/documents"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { scopeValidator } from "../shared/audience"
 import {
   findAccessibleTable,
+  getAccessibleTable,
   searchTables,
+  summarizeRow,
   summarizeTableWithOwner,
 } from "./access"
 import { rowAnchorValidator } from "./rows"
@@ -78,32 +81,20 @@ export const get = query({
   },
 })
 
+/** Row pages in the shape `usePaginatedQuery` consumes, straight off the
+ *  paginated index read so the reactive page-splitting metadata survives. */
 export const pageRows = query({
   args: {
     organizationId: v.string(),
     tableId: v.id("collections"),
     paginationOpts: paginationOptsValidator,
   },
-  handler: async (
-    ctx,
-    args
-  ): Promise<{
-    rows: Array<{
-      rowId: Id<"documents">
-      values: Record<string, unknown>
-      version: number
-      createdAt: number
-      updatedAt: number
-    }>
-    isDone: boolean
-    continueCursor: string
-  }> => {
+  handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
+    const table = await getAccessibleTable(ctx, { ...args, personId })
+    const result = await pageDocuments(ctx, table._id, args.paginationOpts)
 
-    return await ctx.runQuery(internal.tables.rows.page, {
-      ...args,
-      personId,
-    })
+    return { ...result, page: result.page.map((row) => summarizeRow(row)) }
   },
 })
 

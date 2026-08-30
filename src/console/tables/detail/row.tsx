@@ -27,7 +27,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { TableCell, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { displayCellText } from "@/shared/materials/cells"
 import { type RowSelection } from "../../shared/list/selection"
@@ -40,7 +39,9 @@ import { type CommitCell, RowCell } from "./cell"
 import { parseCellText } from "./cells"
 
 /** One grid row: the number/select gutter and its editable cells, with
- *  the row's actions behind a right-click context menu. */
+ *  the row's actions behind a right-click context menu. Rows render inside
+ *  the grid's virtual window, so each places itself on the body canvas at
+ *  the offset its index dictates. */
 export function GridRow({
   columns,
   disabled,
@@ -54,6 +55,7 @@ export function GridRow({
   onInsert,
   row,
   selection,
+  top,
 }: {
   columns: TableColumn[]
   disabled: boolean
@@ -67,6 +69,7 @@ export function GridRow({
   onInsert: (row: TableRowData, placement: RowPlacement) => void
   row: TableRowData
   selection: RowSelection<TableRowData>
+  top: number
 }) {
   const spotlightId = columns.find((column) => column.type !== "boolean")?.id
   const [editId, setEditId] = useState<string>()
@@ -82,9 +85,10 @@ export function GridRow({
   }
 
   const cells = (
-    <TableRow
-      className="group/row h-9"
+    <div
+      className="group/row absolute top-0 left-0 flex h-9 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
       data-state={selection.isSelected(row) ? "selected" : undefined}
+      style={{ transform: `translateY(${top}px)` }}
     >
       <GutterCell
         disabled={disabled}
@@ -93,8 +97,9 @@ export function GridRow({
         selection={selection}
       />
       {columns.map((column) => (
-        <TableCell
-          className="p-0"
+        // biome-ignore lint/a11y/noStaticElementInteractions: only remembers which cell the row's context menu targets — the menu itself stays the accessible path.
+        <div
+          className="w-56 shrink-0 border-r border-b"
           key={column.id}
           onContextMenu={() => setMenuId(column.id)}
         >
@@ -109,9 +114,9 @@ export function GridRow({
               (isFresh && column.id === spotlightId) || editId === column.id
             }
           />
-        </TableCell>
+        </div>
       ))}
-    </TableRow>
+    </div>
   )
 
   if (disabled) {
@@ -316,32 +321,30 @@ function GutterCell({
 }) {
   if (disabled) {
     return (
-      <TableCell className="select-none p-0 text-center text-muted-foreground tabular-nums">
+      <div className="flex h-9 w-12 shrink-0 select-none items-center justify-center border-r border-b text-muted-foreground tabular-nums">
         {number}
-      </TableCell>
+      </div>
     )
   }
 
   const isActive = selection.count > 0
 
   return (
-    <TableCell className="select-none p-0">
-      <span className="flex h-9 items-center justify-center">
-        <span
-          className={cn(
-            "text-muted-foreground tabular-nums",
-            isActive ? "hidden" : "group-hover/row:hidden"
-          )}
-        >
-          {number}
-        </span>
-        <Checkbox
-          aria-label={`Select row ${number}`}
-          checked={selection.isSelected(row)}
-          className={cn(!isActive && "hidden group-hover/row:inline-flex")}
-          onCheckedChange={() => selection.toggle(row)}
-        />
+    <div className="flex h-9 w-12 shrink-0 select-none items-center justify-center border-r border-b">
+      <span
+        className={cn(
+          "text-muted-foreground tabular-nums",
+          isActive ? "hidden" : "group-hover/row:hidden"
+        )}
+      >
+        {number}
       </span>
-    </TableCell>
+      <Checkbox
+        aria-label={`Select row ${number}`}
+        checked={selection.isSelected(row)}
+        className={cn(!isActive && "hidden group-hover/row:inline-flex")}
+        onCheckedChange={() => selection.toggle(row)}
+      />
+    </div>
   )
 }

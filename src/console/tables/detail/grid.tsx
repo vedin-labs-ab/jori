@@ -1,13 +1,7 @@
 import { ChevronDown, Plus } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { ConsoleListTable } from "../../shared/list/frame"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import {
   type RowSelection,
@@ -21,18 +15,24 @@ import {
 } from "../types"
 import { type CommitCell } from "./cell"
 import { GridRow } from "./row"
+import { useRowWindow } from "./scroll"
 
 /** The table's rows as a full-bleed spreadsheet grid: a number/select
  *  gutter, typed column headers that open their column's details, inline
  *  cell editing, and quiet affordances for a new row below the rows and a
- *  new column past the headers. A table with no columns yet shows the New
- *  column affordance as the one way forward — rows come after columns. */
+ *  new column past the headers. The grid scrolls endlessly — rows render
+ *  windowed over the loaded pages and scrolling loads the rest — so the
+ *  New row affordance appears once the bottom of the table is reached.
+ *  A table with no columns yet shows the New column affordance as the one
+ *  way forward — rows come after columns. */
 export function RowGrid({
   columns,
   disabled,
   freshRowId,
+  isExhausted,
   isLoading,
-  offset,
+  isLoadingMore,
+  loadMore,
   onAddColumn,
   onAddRow,
   onCommit,
@@ -48,8 +48,10 @@ export function RowGrid({
   columns: TableColumn[]
   disabled: boolean
   freshRowId: TableRowData["rowId"] | undefined
+  isExhausted: boolean
   isLoading: boolean
-  offset: number
+  isLoadingMore: boolean
+  loadMore: () => void
   onAddColumn: () => void
   onAddRow: () => void
   onCommit: CommitCell
@@ -62,129 +64,166 @@ export function RowGrid({
   rows: TableRowData[]
   selection: RowSelection<TableRowData>
 }) {
+  const virtual = useRowWindow({
+    freshRowId,
+    isExhausted,
+    isLoadingMore,
+    loadMore,
+    rows,
+  })
+
   if (isLoading) {
     return <ConsoleListLoading />
   }
 
-  // Separate borders so the column and header hairlines stay attached to
-  // their sticky cells while the grid scrolls; row separators move from
-  // the tr (invisible under border-separate) onto the cells. w-auto keeps
-  // the grid exactly as wide as its columns — hairlines end where the data
-  // ends — and the centered fixed gutter opts out of the frame's
-  // first-column page padding.
+  // One scrollport for both axes; the header row sticks to its top and the
+  // windowed body below it is a fixed-height canvas the mounted rows place
+  // themselves on. Hairlines ride on the cells, so they end exactly where
+  // the data ends.
   return (
-    <ConsoleListTable className="w-auto border-separate border-spacing-0 [&_td:first-child]:pl-0 [&_td:last-child]:pr-0 [&_td]:border-r [&_td]:border-b [&_th:first-child]:pl-0 [&_th:last-child]:pr-0 [&_th:not(:last-child)]:border-r [&_th]:border-b [&_th]:shadow-none md:[&_td:first-child]:pl-0 md:[&_td:last-child]:pr-0 md:[&_th:first-child]:pl-0 md:[&_th:last-child]:pr-0">
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-12 min-w-12 p-0 text-center">
-            {disabled ? (
-              <span className="sr-only">Row number</span>
-            ) : (
-              <Checkbox
-                aria-label="Select all rows"
-                checked={selectionHeadState(selection)}
-                className="mx-auto"
-                onCheckedChange={selection.toggleAll}
+    <div
+      className={cn("relative min-h-0 flex-1 overflow-auto", scrollFade)}
+      ref={virtual.scrollRef}
+    >
+      <div className="w-max text-xs">
+        <HeadRow
+          columns={columns}
+          disabled={disabled}
+          onAddColumn={onAddColumn}
+          onInspectColumn={onInspectColumn}
+          selection={selection}
+        />
+        <div className="relative" style={{ height: virtual.totalSize }}>
+          {virtual.items.map((item) => {
+            const row = rows[item.index]
+
+            return row === undefined ? null : (
+              <GridRow
+                columns={columns}
+                disabled={disabled}
+                isFresh={freshRowId === row.rowId}
+                isPending={pendingRowId === row.rowId}
+                key={row.rowId}
+                number={item.index + 1}
+                onCommit={onCommit}
+                onDelete={onDeleteRow}
+                onDuplicate={onDuplicateRow}
+                onFreshSettled={onFreshSettled}
+                onInsert={onInsertRow}
+                row={row}
+                selection={selection}
+                top={item.start}
               />
-            )}
-          </TableHead>
-          {columns.map((column) => (
-            <HeadCell
-              column={column}
-              key={column.id}
-              onInspect={() => onInspectColumn(column)}
-            />
-          ))}
-          <TableHead className="border-r p-0">
-            <button
-              className="flex h-10 w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground disabled:opacity-50"
-              disabled={disabled}
-              onClick={onAddColumn}
-              type="button"
-            >
-              <Plus aria-hidden className="size-3.5" />
-              New column
-            </button>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row, index) => (
-          <GridRow
-            columns={columns}
-            disabled={disabled}
-            isFresh={freshRowId === row.rowId}
-            isPending={pendingRowId === row.rowId}
-            key={row.rowId}
-            number={offset + index + 1}
-            onCommit={onCommit}
-            onDelete={onDeleteRow}
-            onDuplicate={onDuplicateRow}
-            onFreshSettled={onFreshSettled}
-            onInsert={onInsertRow}
-            row={row}
-            selection={selection}
-          />
-        ))}
-        {columns.length === 0 ? (
-          <ColumnlessRow />
-        ) : (
-          <NewRowRow
-            disabled={disabled}
-            onAddRow={onAddRow}
-            span={columns.length + 1}
-          />
-        )}
-      </TableBody>
-    </ConsoleListTable>
+            )
+          })}
+        </div>
+        <GridFoot
+          columns={columns}
+          disabled={disabled}
+          isExhausted={isExhausted}
+          onAddRow={onAddRow}
+        />
+      </div>
+    </div>
   )
 }
 
-/** The quiet full-width affordance below the last loaded row; the page
- *  gates instant creation against required columns before it lands here. */
-function NewRowRow({
+/** What closes the grid at the bottom: nothing while the table has no
+ *  columns (the New column affordance is the one way forward), a quiet
+ *  loading band while rows beyond the loaded window remain, or the New
+ *  row affordance once the true end of the table is on screen. */
+function GridFoot({
+  columns,
   disabled,
+  isExhausted,
   onAddRow,
-  span,
 }: {
+  columns: TableColumn[]
   disabled: boolean
+  isExhausted: boolean
   onAddRow: () => void
-  span: number
 }) {
+  if (columns.length === 0) {
+    return null
+  }
+
+  if (!isExhausted) {
+    return <BandText>Loading more rows…</BandText>
+  }
+
   if (disabled) {
     return null
   }
 
-  // The affordance fits its content: the button carries its own closing
-  // hairlines, and the spanning cell forces all of the grid's cell borders
-  // off (the shared [&_td] selectors out-specify plain cell classes).
   return (
-    <TableRow className="hover:bg-transparent">
-      <TableCell className="border-0! p-0" colSpan={span}>
-        <button
-          className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
-          onClick={onAddRow}
-          type="button"
-        >
-          <Plus aria-hidden className="size-3.5" />
-          New row
-        </button>
-      </TableCell>
-    </TableRow>
+    <button
+      className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
+      onClick={onAddRow}
+      type="button"
+    >
+      <Plus aria-hidden className="size-3.5" />
+      New row
+    </button>
   )
 }
 
-/** What a column-less table says instead of rows: columns come first, and
- *  the New column affordance above is the way to make one. */
-function ColumnlessRow() {
+/** A quiet content-width band below the last row, closed off by the same
+ *  hairlines the rows carry. */
+function BandText({ children }: { children: string }) {
   return (
-    <TableRow className="hover:bg-transparent">
-      <TableCell className="border-0! p-0" colSpan={2}>
-        <p className="flex h-9 items-center whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs">
-          No columns yet — add one to start entering rows.
-        </p>
-      </TableCell>
-    </TableRow>
+    <p className="flex h-9 w-fit items-center whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs">
+      {children}
+    </p>
+  )
+}
+
+/** The sticky header row: the select-all gutter, one typed head per
+ *  column, and the New column affordance past them. */
+function HeadRow({
+  columns,
+  disabled,
+  onAddColumn,
+  onInspectColumn,
+  selection,
+}: {
+  columns: TableColumn[]
+  disabled: boolean
+  onAddColumn: () => void
+  onInspectColumn: (column: TableColumn) => void
+  selection: RowSelection<TableRowData>
+}) {
+  return (
+    <div className="sticky top-0 z-10 flex">
+      <div className="flex h-10 w-12 shrink-0 items-center justify-center border-r border-b bg-background">
+        {disabled ? (
+          <span className="sr-only">Row number</span>
+        ) : (
+          <Checkbox
+            aria-label="Select all loaded rows"
+            checked={selectionHeadState(selection)}
+            onCheckedChange={selection.toggleAll}
+          />
+        )}
+      </div>
+      {columns.map((column) => (
+        <HeadCell
+          column={column}
+          key={column.id}
+          onInspect={() => onInspectColumn(column)}
+        />
+      ))}
+      <div className="border-r border-b bg-background">
+        <button
+          className="flex h-10 w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground disabled:opacity-50"
+          disabled={disabled}
+          onClick={onAddColumn}
+          type="button"
+        >
+          <Plus aria-hidden className="size-3.5" />
+          New column
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -201,8 +240,8 @@ function HeadCell({
   const name = column.name
 
   return (
-    <TableHead
-      className="min-w-56 p-0"
+    <div
+      className="w-56 shrink-0 border-r border-b bg-background font-medium"
       title={`${column.type}${isRequired ? " · required" : ""}`}
     >
       <button
@@ -221,6 +260,6 @@ function HeadCell({
           className="ml-auto size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-150 group-hover/head:opacity-100 group-focus-visible/head:opacity-100"
         />
       </button>
-    </TableHead>
+    </div>
   )
 }

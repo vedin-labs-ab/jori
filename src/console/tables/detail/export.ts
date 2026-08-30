@@ -102,7 +102,7 @@ async function fetchAllRows(
       paginationOpts: { numItems: exportPageSize, cursor },
     })
 
-    rows.push(...page.rows)
+    rows.push(...page.page)
 
     if (page.isDone) {
       return rows

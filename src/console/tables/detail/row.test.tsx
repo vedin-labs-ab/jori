@@ -50,24 +50,21 @@ function stubSelection(): RowSelection<TableRow> {
 
 function renderRow() {
   render(
-    <table>
-      <tbody>
-        <GridRow
-          columns={columns}
-          disabled={false}
-          isFresh={false}
-          isPending={false}
-          number={1}
-          onCommit={onCommit}
-          onDelete={() => undefined}
-          onDuplicate={() => undefined}
-          onFreshSettled={() => undefined}
-          onInsert={onInsert}
-          row={row}
-          selection={stubSelection()}
-        />
-      </tbody>
-    </table>
+    <GridRow
+      columns={columns}
+      disabled={false}
+      isFresh={false}
+      isPending={false}
+      number={1}
+      onCommit={onCommit}
+      onDelete={() => undefined}
+      onDuplicate={() => undefined}
+      onFreshSettled={() => undefined}
+      onInsert={onInsert}
+      row={row}
+      selection={stubSelection()}
+      top={0}
+    />
   )
 }
 
