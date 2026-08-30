@@ -62,7 +62,11 @@ export function TableOwnerCell({ table }: { table: TableSummary }) {
   const owner =
     table.ownerName === undefined
       ? ({ kind: "jori" } as const)
-      : ({ kind: "person", name: table.ownerName } as const)
+      : ({
+          kind: "person",
+          name: table.ownerName,
+          image: table.ownerImage,
+        } as const)
 
   return <MaterialOwnerCell owner={owner} />
 }

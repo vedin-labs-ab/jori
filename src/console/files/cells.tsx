@@ -58,7 +58,11 @@ export function FileOwnerCell({
   const owner =
     file.source === "run"
       ? ({ kind: "jori" } as const)
-      : ({ kind: "person", name: file.ownerName ?? "Member" } as const)
+      : ({
+          kind: "person",
+          name: file.ownerName ?? "Member",
+          image: file.ownerImage,
+        } as const)
 
   return <MaterialOwnerCell compact={compact} owner={owner} />
 }

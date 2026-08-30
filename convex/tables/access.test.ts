@@ -47,6 +47,28 @@ describe("resolving the owner name", () => {
     expect(summary.ownerName).toBe("Ada Lovelace")
   })
 
+  test("carries the sign-in avatar from the linked auth account", async () => {
+    // The auth component resolves users through ctx.runQuery; the stub is
+    // that component answering with the account's provider image.
+    const { database, ctx } = databaseContext({
+      runQuery: async () => ({ image: "https://lh3.example/avatar.png" }),
+    })
+
+    await database.insert("identities", {
+      organizationId: "org",
+      personId: testOwner,
+      provider: "auth",
+      externalId: "user_1",
+      name: "Ada Lovelace",
+    })
+
+    const table = await storedTable(database)
+    const summary = await summarizeTableWithOwner(ctx, table)
+
+    expect(summary.ownerName).toBe("Ada Lovelace")
+    expect(summary.ownerImage).toBe("https://lh3.example/avatar.png")
+  })
+
   test("leaves the name unset without an owner", async () => {
     const { database, ctx } = databaseContext()
     const table = await storedTable(database, { ownerId: undefined })

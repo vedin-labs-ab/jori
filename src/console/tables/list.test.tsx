@@ -89,7 +89,7 @@ function renderList(
 ) {
   render(
     <TableList
-      config={tableListConfig(undefined)}
+      config={tableListConfig(undefined, tables)}
       controls={controls}
       folders={undefined}
       hasFilters={hasFilters}
@@ -111,7 +111,7 @@ test("lists name, counts, times, and owner columns", () => {
     expect(screen.getByRole("button", { name: header })).toBeDefined()
   }
 
-  expect(screen.getByRole("columnheader", { name: "Owner" })).toBeDefined()
+  expect(screen.getByRole("button", { name: "Owner" })).toBeDefined()
   expect(screen.getByRole("link", { name: "Leads" })).toBeDefined()
   expect(screen.getByTitle("2 columns").textContent).toContain("2")
   expect(screen.getByTitle("12 rows").textContent).toContain("12")
@@ -126,10 +126,8 @@ test("header buttons drive the sort and expose the facet menus", () => {
   fireEvent.click(screen.getByRole("button", { name: "Rows" }))
 
   expect(toggleSort.mock.calls).toEqual([["name"], ["rows"]])
-  expect(
-    screen.getByRole("button", { name: "Filter by status and sharing" })
-  ).toBeDefined()
   expect(screen.getByRole("button", { name: "Folder" })).toBeDefined()
+  expect(screen.getByRole("button", { name: "Owner" })).toBeDefined()
 })
 
 test("filters that match nothing keep the header controls reachable", () => {

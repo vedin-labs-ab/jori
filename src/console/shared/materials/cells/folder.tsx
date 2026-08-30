@@ -16,7 +16,7 @@ export function MaterialFolderCell({
     return <span className="text-muted-foreground">—</span>
   }
 
-  const name = folders?.get(folderId)
+  const name = folders?.get(folderId)?.name
 
   if (name === undefined) {
     return null

@@ -148,12 +148,7 @@ function StoreListHead({
     <TableHeader>
       <TableRow>
         <SelectionHeadCell selection={selection} />
-        <SortHead
-          controls={controls}
-          facets={facetEntries(config, ["status", "scope"])}
-          label="Name"
-          sortKey="name"
-        />
+        <SortHead controls={controls} label="Name" sortKey="name" />
         <SortHead controls={controls} label="Properties" sortKey="properties" />
         <SortHead controls={controls} label="Version" sortKey="version" />
         <FilterHead
@@ -162,7 +157,11 @@ function StoreListHead({
           label="Folder"
         />
         <SortHead controls={controls} label="Created" sortKey="created" />
-        <TableHead>Owner</TableHead>
+        <FilterHead
+          controls={controls}
+          facets={facetEntries(config, ["owner"])}
+          label="Owner"
+        />
         <SortHead controls={controls} label="Last Updated" sortKey="updated" />
         <TableHead className="w-10" />
       </TableRow>
