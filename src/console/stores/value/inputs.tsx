@@ -10,8 +10,18 @@ import {
 import { type ValueState } from "./convert"
 import { type ValueField, type ValueOption } from "./model"
 
-// Leaf widgets for the value form. Each one maps a single form-state leaf
-// onto a shadcn primitive; composition and nesting live in fields.tsx.
+// Leaf widgets for the value form, in the table grid's cell-native idiom:
+// no chrome of their own, filling their cell to its edges with the focus
+// ring drawn inset along them. Composition and nesting live in fields.tsx.
+
+/** The cell recipe from the table grid's inline editor. */
+const cellInputClassName =
+  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
+
+/** The same recipe over the select trigger, which also sheds its tactile
+ *  depth so it sits flush like every other cell. */
+const cellSelectClassName =
+  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent dark:hover:bg-muted/50"
 
 /** How every widget reports edits: the replacement state for its node and
  *  the value path that changed, so the editor can clear that path's error. */
@@ -57,14 +67,16 @@ export function LeafControl({
 
   if (state.kind === "check") {
     return (
-      <CheckInput
-        ariaLabel={ariaLabel}
-        checked={state.checked}
-        id={id}
-        onCheckedChange={(checked) =>
-          onChange({ kind: "check", checked }, path)
-        }
-      />
+      <span className="flex h-9 items-center px-3">
+        <CheckInput
+          ariaLabel={ariaLabel}
+          checked={state.checked}
+          id={id}
+          onCheckedChange={(checked) =>
+            onChange({ kind: "check", checked }, path)
+          }
+        />
+      </span>
     )
   }
 
@@ -106,6 +118,7 @@ export function ScalarInput({
     <Input
       aria-invalid={invalid ? true : undefined}
       aria-label={ariaLabel}
+      className={cellInputClassName}
       id={id}
       inputMode={numeric ? "decimal" : undefined}
       onChange={(event) => onTextChange(event.target.value)}
@@ -168,7 +181,7 @@ export function ChoiceSelect({
       <SelectTrigger
         aria-invalid={invalid ? true : undefined}
         aria-label={ariaLabel}
-        className="w-full"
+        className={cellSelectClassName}
         id={id}
       >
         <SelectValue placeholder={allowUnset ? "Not set" : "Select a value"} />
@@ -197,7 +210,7 @@ function optionLabel(option: ValueOption) {
  *  reads back. */
 export function ConstantValue({ value }: { value: unknown }) {
   return (
-    <p className="py-1 font-mono text-muted-foreground text-xs">
+    <p className="flex h-9 items-center px-3 font-mono text-muted-foreground text-xs">
       {JSON.stringify(value)}
     </p>
   )

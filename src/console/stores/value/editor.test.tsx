@@ -36,6 +36,7 @@ const schema = {
       properties: { city: { type: "string" } },
       required: ["city"],
     },
+    tags: { type: "array", items: { type: "string" } },
   },
   required: ["title", "total", "paid"],
 }
@@ -112,6 +113,30 @@ describe("value editor submission", () => {
         paid: true,
         shipping: { city: "Oslo" },
       },
+    })
+  })
+
+  test("array items add, edit, and remove as grid rows", async () => {
+    renderEditor({ title: "March", total: 2, paid: false })
+
+    fireEvent.click(screen.getByRole("button", { name: "Add tags" }))
+    fireEvent.click(screen.getByRole("button", { name: "Add tags item" }))
+    fireEvent.click(screen.getByRole("button", { name: "Add tags item" }))
+    fireEvent.change(screen.getByLabelText("tags item 1"), {
+      target: { value: "ops" },
+    })
+    fireEvent.change(screen.getByLabelText("tags item 2"), {
+      target: { value: "billing" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Remove tags item 2" }))
+    submit()
+
+    await waitFor(() => expect(writeValue).toHaveBeenCalledOnce())
+    expect(writeValue.mock.calls[0]?.[0].value).toEqual({
+      title: "March",
+      total: 2,
+      paid: false,
+      tags: ["ops"],
     })
   })
 

@@ -1,4 +1,4 @@
-import { Braces, Database, Pencil } from "lucide-react"
+import { Braces, Database, SquarePen } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DialogTitle } from "@/components/ui/dialog"
@@ -98,7 +98,7 @@ function ValueActions({
       <CopyButton label="value" value={formatJsonText(store.value)} />
       <ValueActionButton
         disabled={isEditing || store.archivedAt !== undefined}
-        icon={<Pencil />}
+        icon={<SquarePen />}
         label="Edit value"
         onClick={onEdit}
       />
@@ -152,7 +152,7 @@ function ValueDocument({
         action={
           store.archivedAt === undefined ? (
             <Button onClick={onEdit} type="button">
-              <Pencil />
+              <SquarePen />
               Write value
             </Button>
           ) : undefined

@@ -1,16 +1,23 @@
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { ArrayFields } from "./arrays"
 import { emptyState, hasUnsetAffordance, type ValueState } from "./convert"
 import { type ChangeHandler, LeafControl } from "./inputs"
 import { type ValueField, type ValueProperty } from "./model"
-import { CheckRow, FieldError, PropertyLabel, UnsetRow } from "./rows"
+import {
+  ErrorRow,
+  FieldError,
+  GroupRow,
+  KeyCell,
+  RemoveButton,
+  UnsetRow,
+} from "./rows"
 import { valueRootPath } from "./state"
 
-// The schema-driven value form: object properties render as labeled rows
-// in schema order, nested objects and arrays indent the way the schema
-// builder does, and every widget writes back into one form-state tree.
-// Errors are keyed by value path and appear only after a submit attempt.
+// The schema-driven value form as one hairline key/value grid, in the
+// table editor's idiom: keys align in a fixed left column with nesting
+// indented inside it, values edit in borderless cell-native widgets, and
+// object and array structure reads from quiet group rows. Every widget
+// writes back into one form-state tree; errors are keyed by value path
+// and appear only after a submit attempt.
 
 type ObjectField = Extract<ValueField, { kind: "object" }>
 type ObjectState = Extract<ValueState, { kind: "object" }>
@@ -31,23 +38,28 @@ export function ValueFields({
   }
 
   return (
-    <ObjectFields
-      errors={errors}
-      field={form}
-      onChange={onChange}
-      path={valueRootPath}
-      state={root}
-    />
+    <div className="divide-y overflow-hidden rounded-md border">
+      <ObjectRows
+        depth={0}
+        errors={errors}
+        field={form}
+        onChange={onChange}
+        path={valueRootPath}
+        state={root}
+      />
+    </div>
   )
 }
 
-function ObjectFields({
+function ObjectRows({
+  depth,
   errors,
   field,
   onChange,
   path,
   state,
 }: {
+  depth: number
   errors: Record<string, string>
   field: ObjectField
   onChange: ChangeHandler
@@ -55,14 +67,15 @@ function ObjectFields({
   state: ObjectState
 }) {
   return (
-    <div className="grid gap-3">
+    <>
       {field.properties.length === 0 ? (
-        <p className="text-muted-foreground text-xs">
+        <p className="px-3 py-2 text-muted-foreground text-xs">
           The schema declares no fields, so the value is an empty object.
         </p>
       ) : null}
       {field.properties.map((property) => (
-        <PropertyRow
+        <PropertyRows
+          depth={depth}
           errors={errors}
           key={property.name}
           onChildChange={(child, editedPath) =>
@@ -73,8 +86,8 @@ function ObjectFields({
           state={state.children[property.name]}
         />
       ))}
-      <FieldError message={errors[path]} />
-    </div>
+      <ErrorRow message={errors[path]} />
+    </>
   )
 }
 
@@ -94,13 +107,15 @@ function withChild(
   return { kind: "object", children }
 }
 
-function PropertyRow({
+function PropertyRows({
+  depth,
   errors,
   onChildChange,
   path,
   property,
   state,
 }: {
+  depth: number
   errors: Record<string, string>
   onChildChange: (state: ValueState | undefined, editedPath: string) => void
   path: string
@@ -110,136 +125,139 @@ function PropertyRow({
   if (state === undefined) {
     return (
       <UnsetRow
+        depth={depth}
         onAdd={() => onChildChange(emptyState(property.field), path)}
         property={property}
       />
     )
   }
 
-  if (state.kind === "check") {
+  if (isComposite(property.field)) {
     return (
-      <CheckRow
-        checked={state.checked}
-        error={errors[path]}
-        onChange={onChildChange}
-        path={path}
-        property={property}
-      />
+      <>
+        <GroupRow
+          depth={depth}
+          onUnset={
+            !property.required && hasUnsetAffordance(property.field)
+              ? () => onChildChange(undefined, path)
+              : undefined
+          }
+          property={property}
+        />
+        <NestedRows
+          depth={depth + 1}
+          errors={errors}
+          field={property.field}
+          label={property.name}
+          onChange={onChildChange}
+          path={path}
+          state={state}
+        />
+      </>
     )
   }
 
-  const hasInput = state.kind === "text" || state.kind === "choice"
-
   return (
-    <div className="grid gap-1.5">
-      <span className="flex items-center gap-1">
-        <PropertyLabel
-          htmlFor={hasInput ? path : undefined}
-          property={property}
+    <div className="flex">
+      <KeyCell depth={depth} htmlFor={path} property={property} />
+      <div className="min-w-0 flex-1">
+        <LeafControl
+          field={property.field}
+          id={path}
+          invalid={errors[path] !== undefined}
+          onChange={onChildChange}
+          path={path}
+          required={property.required}
+          state={state}
         />
-        {!property.required && hasUnsetAffordance(property.field) ? (
-          <Button
-            aria-label={`Unset ${property.name}`}
-            onClick={() => onChildChange(undefined, path)}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <X />
-          </Button>
-        ) : null}
-      </span>
-      <FieldBody
-        errors={errors}
-        field={property.field}
-        id={path}
-        label={property.name}
-        onChange={onChildChange}
-        path={path}
-        required={property.required}
-        state={state}
-      />
+        <FieldError className="px-3 pb-2" message={errors[path]} />
+      </div>
+      {!property.required && hasUnsetAffordance(property.field) ? (
+        <RemoveButton
+          label={`Unset ${property.name}`}
+          onClick={() => onChildChange(undefined, path)}
+        />
+      ) : null}
     </div>
   )
 }
 
-/** The widget or nested group for one field, in either a property row or
- *  an array row. */
-function FieldBody({
-  ariaLabel,
+function isComposite(field: ValueField) {
+  return field.kind === "array" || field.kind === "object"
+}
+
+/** The rows for one nested object or array node, in either a property or
+ *  an array item. */
+function NestedRows({
+  depth,
   errors,
   field,
-  id,
   label,
   onChange,
   path,
-  required,
   state,
 }: {
-  ariaLabel?: string
+  depth: number
   errors: Record<string, string>
   field: ValueField
-  id?: string
   label: string
   onChange: ChangeHandler
   path: string
-  required: boolean
   state: ValueState
 }) {
   if (field.kind === "object" && state.kind === "object") {
     return (
-      <div className="ml-1.5 border-l pl-3">
-        <ObjectFields
-          errors={errors}
-          field={field}
-          onChange={onChange}
-          path={path}
-          state={state}
-        />
-      </div>
+      <ObjectRows
+        depth={depth}
+        errors={errors}
+        field={field}
+        onChange={onChange}
+        path={path}
+        state={state}
+      />
     )
   }
 
   if (field.kind === "array" && state.kind === "array") {
     return (
-      <div className="ml-1.5 border-l pl-3">
-        <ArrayFields
-          error={errors[path]}
-          label={label}
-          makeItem={() => emptyState(field.items)}
-          onChange={onChange}
-          path={path}
-          renderItem={(item, itemPath, itemLabel, onItemChange) => (
-            <FieldBody
-              ariaLabel={itemLabel}
+      <ArrayFields
+        composite={isComposite(field.items)}
+        depth={depth}
+        error={errors[path]}
+        label={label}
+        makeItem={() => emptyState(field.items)}
+        onChange={onChange}
+        path={path}
+        renderItem={(item, itemPath, itemLabel, onItemChange) =>
+          isComposite(field.items) ? (
+            <NestedRows
+              depth={depth + 1}
               errors={errors}
               field={field.items}
               label={itemLabel}
               onChange={onItemChange}
               path={itemPath}
-              required
               state={item}
             />
-          )}
-          state={state}
-        />
-      </div>
+          ) : (
+            <>
+              <LeafControl
+                ariaLabel={itemLabel}
+                field={field.items}
+                invalid={errors[itemPath] !== undefined}
+                onChange={onItemChange}
+                path={itemPath}
+                required
+                state={item}
+              />
+              <FieldError className="px-3 pb-2" message={errors[itemPath]} />
+            </>
+          )
+        }
+        state={state}
+      />
     )
   }
 
-  return (
-    <div className="grid gap-1.5">
-      <LeafControl
-        ariaLabel={ariaLabel}
-        field={field}
-        id={id}
-        invalid={errors[path] !== undefined}
-        onChange={onChange}
-        path={path}
-        required={required}
-        state={state}
-      />
-      <FieldError message={errors[path]} />
-    </div>
-  )
+  return null
 }
