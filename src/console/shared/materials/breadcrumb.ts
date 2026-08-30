@@ -1,5 +1,11 @@
 import { type Scope } from "@contracts/permissions/scope"
-import { createContext, useContext, useEffect, useMemo } from "react"
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react"
 
 // Material detail pages are headed by a breadcrumb trail. The console shell
 // owns the trail: by default it derives the linked parent surface from the
@@ -21,6 +27,10 @@ export type MaterialBreadcrumb = {
   /** Ancestor segments, root-first. When present, the header links these
    *  instead of the parent surface it derives from the path. */
   trail?: MaterialBreadcrumbSegment[]
+  /** A DropdownMenuContent element. When present, the shell renders the
+   *  material's name as the menu's trigger — the page's actions hang off
+   *  its own breadcrumb. */
+  menu?: ReactNode
 }
 
 export const MaterialBreadcrumbContext = createContext<
@@ -43,6 +53,13 @@ export function useMaterialTrail(material: MaterialBreadcrumb | undefined) {
 /** Publish the material's display name, and optionally its scope, to the
  *  console header breadcrumb for as long as the calling detail view is
  *  mounted. */
-export function useMaterialBreadcrumb(name: string, scope?: Scope) {
-  useMaterialTrail(useMemo(() => ({ name, scope }), [name, scope]))
+export function useMaterialBreadcrumb(
+  name: string,
+  scope?: Scope,
+  menu?: ReactNode
+) {
+  // A menu element gets a fresh identity per caller render, so it triggers
+  // a republish each time — harmless, because the shell's children keep
+  // their element identity and bail out of the re-render.
+  useMaterialTrail(useMemo(() => ({ name, scope, menu }), [name, scope, menu]))
 }

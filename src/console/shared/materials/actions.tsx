@@ -142,7 +142,7 @@ function RemoveMenuItem({
   )
 }
 
-function ConfirmRemoveDialog({
+export function ConfirmRemoveDialog({
   deleteDescription,
   isArchived,
   isDeleting,
