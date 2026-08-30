@@ -5,50 +5,27 @@ import {
   useAuthPlugin,
   useUpdateOrganization
 } from "@better-auth-ui/react"
-import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { EditableText } from "@/components/ui/editable"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldTitle
-} from "@/components/ui/field"
+import { Field, FieldGroup, FieldTitle } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 import { ChangeOrganizationLogo } from "./change-organization-logo"
-import {
-  sanitizeSlug,
-  SlugAvailabilityIndicator,
-  useSlugAvailability
-} from "./slug"
 
 export type OrganizationProfileProps = {
   className?: string
 }
 
-/** Active organization logo, name, and slug with independent editors. */
+/** Active organization logo and name with independent editors. Better
+ *  Auth's slug stays a hidden implementation detail — generated at
+ *  creation, never shown or edited. */
 export function OrganizationProfile({ className }: OrganizationProfileProps) {
   const { authClient } = useAuth()
-  const {
-    checkSlug,
-    localization: organizationLocalization,
-    slugPrefix
-  } = useAuthPlugin(organizationPlugin)
+  const { localization: organizationLocalization } =
+    useAuthPlugin(organizationPlugin)
   const { data: activeOrganization } = useActiveOrganization(
     authClient as OrganizationAuthClient
-  )
-  const [slugDraft, setSlugDraft] = useState(activeOrganization?.slug ?? "")
-
-  useEffect(() => {
-    setSlugDraft(activeOrganization?.slug ?? "")
-  }, [activeOrganization?.slug])
-
-  const slugAvailability = useSlugAvailability(
-    slugDraft,
-    activeOrganization?.slug,
-    checkSlug
   )
   const { mutateAsync: updateOrganization, isPending } = useUpdateOrganization(
     authClient as OrganizationAuthClient,
@@ -82,41 +59,6 @@ export function OrganizationProfile({ className }: OrganizationProfileProps) {
       )}
 
       <ChangeOrganizationLogo />
-
-      {activeOrganization ? (
-        <Field data-invalid={slugAvailability === "unavailable"}>
-          <FieldTitle>{organizationLocalization.slug}</FieldTitle>
-          <EditableText
-            disabled={isPending}
-            displayValue={`${slugPrefix}${activeOrganization.slug}`}
-            endContent={
-              <SlugAvailabilityIndicator status={slugAvailability} />
-            }
-            inputStart={slugPrefix || undefined}
-            label={organizationLocalization.slug}
-            onDraftChange={setSlugDraft}
-            onSave={async (slug) => {
-              await updateOrganization({ data: { slug } })
-            }}
-            placeholder={organizationLocalization.slugPlaceholder}
-            saveDisabled={
-              slugAvailability === "checking" ||
-              slugAvailability === "unavailable"
-            }
-            transform={sanitizeSlug}
-            value={activeOrganization.slug}
-          />
-          <FieldError>
-            {slugAvailability === "unavailable"
-              ? "This slug is unavailable."
-              : undefined}
-          </FieldError>
-        </Field>
-      ) : (
-        <OrganizationProfileFieldSkeleton
-          label={organizationLocalization.slug}
-        />
-      )}
     </FieldGroup>
   )
 }

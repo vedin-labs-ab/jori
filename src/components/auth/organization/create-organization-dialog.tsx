@@ -25,7 +25,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
-import { SlugField, sanitizeSlug } from "./slug-field"
 
 /** Props for the `CreateOrganizationDialog` component. */
 export type CreateOrganizationDialogProps = {
@@ -42,8 +41,6 @@ export function CreateOrganizationDialog({
     useAuthPlugin(organizationPlugin)
 
   const [name, setName] = useState("")
-  const [slug, setSlug] = useState("")
-  const [slugEdited, setSlugEdited] = useState(false)
   const [nameError, setNameError] = useState<string>()
 
   const { mutate: createOrganization, isPending: isCreating } =
@@ -53,22 +50,17 @@ export function CreateOrganizationDialog({
 
   const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
-    createOrganization({ name, slug })
+    // Better Auth requires a unique slug; Jori never shows one, so it is
+    // generated rather than asked for.
+    createOrganization({ name, slug: crypto.randomUUID() })
   }
 
   useEffect(() => {
     if (!open) {
-      setSlug("")
       setName("")
-      setSlugEdited(false)
       setNameError(undefined)
     }
   }, [open])
-
-  useEffect(() => {
-    if (slugEdited) return
-    setSlug(sanitizeSlug(name))
-  }, [name, slugEdited])
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -116,15 +108,6 @@ export function CreateOrganizationDialog({
               <FieldError>{nameError}</FieldError>
             </Field>
 
-            <SlugField
-              id="create-organization-slug"
-              value={slug}
-              onChange={(value) => {
-                setSlug(value)
-                setSlugEdited(true)
-              }}
-              disabled={isCreating}
-            />
           </div>
 
           <AlertDialogFooter>
