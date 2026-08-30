@@ -10,12 +10,12 @@ import { tables } from "./generated"
  * them here, and the customisation survives the next `auth generate`.
  *
  * The organization plugin looks a membership up by organization and user
- * together. Better Auth resolves an index by its fields joined with an
- * underscore, the way `accountId_providerId` already reads in the generated
- * file, so the name is the contract rather than a label. Without it the
- * adapter scans `member` in full and Convex warns on every call, which on a
- * table that grows with organizations times people is the document read
- * limit waiting to happen.
+ * together, and a team membership up by team and user together. Better Auth
+ * resolves an index by its fields joined with an underscore, the way
+ * `accountId_providerId` already reads in the generated file, so the name is
+ * the contract rather than a label. Without it the adapter scans the table
+ * in full and Convex warns on every call, which on tables that grow with
+ * organizations times people is the document read limit waiting to happen.
  */
 const schema = defineSchema({
   ...tables,
@@ -23,6 +23,7 @@ const schema = defineSchema({
     "organizationId",
     "userId",
   ]),
+  teamMember: tables.teamMember.index("teamId_userId", ["teamId", "userId"]),
 })
 
 export default schema

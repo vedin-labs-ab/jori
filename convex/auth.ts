@@ -32,6 +32,14 @@ function createOptions(runtime?: {
       organization({
         allowUserToCreateOrganization: runtime?.allowUserToCreateOrganization,
         sendInvitationEmail: runtime?.sendInvitationEmail,
+        // Teams are deliberate groupings, soon access-control grantees, so
+        // none exist until someone creates one: no auto default team, and an
+        // organization may go back to zero.
+        teams: {
+          allowRemovingAllTeams: true,
+          defaultTeam: { enabled: false },
+          enabled: true,
+        },
       }),
       convex({ authConfig, jwt: { definePayload } }),
     ],

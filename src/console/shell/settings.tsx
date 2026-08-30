@@ -1,4 +1,11 @@
-import { Building2, CreditCard, Shield, UserRound, Users } from "lucide-react"
+import {
+  Building2,
+  CreditCard,
+  Shield,
+  UserRound,
+  Users,
+  UsersRound,
+} from "lucide-react"
 import { lazy, Suspense } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
@@ -38,6 +45,16 @@ const SecuritySettings = lazy(() =>
     (module) => ({ default: module.SecuritySettings })
   )
 )
+const TeamCreateButton = lazy(() =>
+  import("@/console/teams/create").then((module) => ({
+    default: module.TeamCreateButton,
+  }))
+)
+const TeamsSettings = lazy(() =>
+  import("@/console/teams").then((module) => ({
+    default: module.TeamsSettings,
+  }))
+)
 
 type SettingsDialogProps = {
   open: boolean
@@ -45,7 +62,7 @@ type SettingsDialogProps = {
 }
 
 type AccountSettingsView = "account" | "security"
-type OrganizationSettingsView = "general" | "people" | "billing"
+type OrganizationSettingsView = "general" | "people" | "teams" | "billing"
 
 const accountViews = [
   { icon: UserRound, label: "Account", value: "account" },
@@ -55,6 +72,7 @@ const accountViews = [
 const organizationViews = [
   { icon: Building2, label: "General", value: "general" },
   { icon: Users, label: "People", value: "people" },
+  { icon: UsersRound, label: "Teams", value: "teams" },
   { icon: CreditCard, label: "Billing", value: "billing" },
 ] as const satisfies readonly SettingsDialogView<OrganizationSettingsView>[]
 
@@ -95,6 +113,10 @@ export function OrganizationDialog({
         view === "people" ? (
           <Suspense fallback={null}>
             <InviteMemberButton />
+          </Suspense>
+        ) : view === "teams" ? (
+          <Suspense fallback={null}>
+            <TeamCreateButton />
           </Suspense>
         ) : null
       }
@@ -137,6 +159,8 @@ function OrganizationSettingsContent({
       return <OrganizationSettings />
     case "people":
       return <OrganizationPeople />
+    case "teams":
+      return <TeamsSettings organizationId={organizationId} />
     case "billing":
       return <BillingSettings organizationId={organizationId} />
   }
