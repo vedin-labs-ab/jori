@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../shared/layout"
-import { ConsoleEmptyState, EmptyRow } from "../../shared/list/empty"
+import {
+  ConsoleEmptyState,
+  EmptyRow,
+  FilterableEmptyState,
+} from "../../shared/list/empty"
 import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
@@ -106,7 +110,14 @@ export function RootFolderList({
   return (
     <FolderListTable controls={list.controls} kinds={list.kinds}>
       {visible.length === 0 ? (
-        <EmptyRow colSpan={4}>No matching folders</EmptyRow>
+        <EmptyRow colSpan={4}>
+          <FilterableEmptyState
+            description="Folders organize the tables, stores, files, and automations your team shares."
+            hasFilters
+            icon={Folder}
+            noun="folders"
+          />
+        </EmptyRow>
       ) : (
         visible.map((folder) => (
           <FolderListRow folder={folder} key={folder.folderId} />
