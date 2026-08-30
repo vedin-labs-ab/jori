@@ -115,7 +115,7 @@ function viewerTools(
 
 /** Full-window escape hatch shared by the framed documents — PDFs here,
  *  the HTML preview next door. */
-export function OpenTool({ url }: { url: string }) {
+function OpenTool({ url }: { url: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>

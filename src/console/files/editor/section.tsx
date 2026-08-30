@@ -33,7 +33,7 @@ export function FileEditor({
   file: FileDetail
   organizationId: string
   siblings: FileSiblings
-  /** Extra toolbar tools slotted after Copy — the HTML view's toggle. */
+  /** Extra toolbar tools slotted before Copy — the HTML view's toggle. */
   tools?: ReactNode
   url: string
 }) {
@@ -78,9 +78,9 @@ function EditorCopy({ savedText }: { savedText: string }) {
   return <CopyButton label="file text" value={async () => savedText} />
 }
 
-/** Copy appears once the text is in; the caller's tools stay throughout.
- *  Resolves to undefined when both are absent so the toolbar knows to
- *  skip its tools separator. */
+/** The caller's tools stay throughout; Copy joins to their right once
+ *  the text is in. Resolves to undefined when both are absent so the
+ *  toolbar knows to skip its tools separator. */
 function editorTools(document: FileDocument, tools: ReactNode | undefined) {
   const copy =
     document.state.status === "ready" ? (
@@ -93,8 +93,8 @@ function editorTools(document: FileDocument, tools: ReactNode | undefined) {
 
   return (
     <>
-      {copy}
       {tools}
+      {copy}
     </>
   )
 }
