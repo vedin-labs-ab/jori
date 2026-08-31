@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { type Id } from "../../_generated/dataModel"
-import { internalMutation, mutation } from "../../_generated/server"
+import { internalMutation } from "../../_generated/server"
 import { linkSetupIdentity } from "../../persons/install"
 import {
   requireProviderIntegration,
@@ -8,7 +8,6 @@ import {
   saveOAuthCredentials,
 } from "../connect/credentials"
 import {
-  createSignedInstallState,
   findUserIntegrationForInstall,
   upsertIntegration,
 } from "../connect/install"
@@ -18,26 +17,6 @@ const googleIntegration = v.union(
   v.literal("gmail"),
   v.literal("googleCalendar")
 )
-
-export const createGmailInstallState = mutation({
-  args: {
-    organizationId: v.string(),
-    returnUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await createSignedInstallState(ctx, "gmail", args)
-  },
-})
-
-export const createGoogleCalendarInstallState = mutation({
-  args: {
-    organizationId: v.string(),
-    returnUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await createSignedInstallState(ctx, "googleCalendar", args)
-  },
-})
 
 export const recordOAuthInstallation = internalMutation({
   args: {

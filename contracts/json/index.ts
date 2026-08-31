@@ -31,6 +31,11 @@ export function decodeJson(value: string): JsonValue {
   return toJsonValue(parsed)
 }
 
+/** A tool result, with a missing result normalized to json null. */
+export function encodeToolResult(result: unknown): EncodedJson {
+  return encodeUnknownJson(result ?? null)
+}
+
 export function decodeJsonObject(value: string): JsonObject {
   return toJsonObject(decodeJson(value))
 }

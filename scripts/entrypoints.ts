@@ -31,7 +31,6 @@ const sanctionedGuards = [
   "getOrganizationIntegration",
   "getUserIntegration",
   "claimIntegrationOffer",
-  "buildInstallState",
   "createSignedInstallState",
   "openTableShare",
   "openStoreShare",

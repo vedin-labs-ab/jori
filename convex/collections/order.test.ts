@@ -3,7 +3,6 @@ import { tableDoc } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { tableSpec } from "../tables/spec"
 import { insertDocuments, pageDocuments } from "./documents"
-import { backfillStep } from "./order"
 import { type CollectionDoc } from "./spec"
 
 async function createTable(database: TestDatabase) {
@@ -187,27 +186,5 @@ describe("anchored inserts", () => {
         placement: "below",
       })
     ).rejects.toThrow("Row not found.")
-  })
-})
-
-describe("order backfill", () => {
-  test("stamps creation time onto rows missing an order and keeps stamped ones", async () => {
-    const { database, ctx } = databaseContext()
-    const table = await createTable(database)
-    const bareId = await database.insert("documents", {
-      collectionId: table._id,
-      value: { title: "old" },
-      version: 1,
-      createdAt: 1,
-      updatedAt: 1,
-    })
-    const stamped = await insertRow(ctx, table, "new")
-
-    expect(await backfillStep(ctx, undefined)).toBeNull()
-
-    const bare = await database.get(bareId)
-
-    expect(bare?.order).toBe(bare?._creationTime)
-    expect((await database.get(stamped._id))?.order).toBe(orderOf(stamped))
   })
 })

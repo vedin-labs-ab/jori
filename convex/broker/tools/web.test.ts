@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { encodeToolResult } from "../../../contracts/json/transport"
+import { encodeToolResult } from "../../../contracts/json"
 import { callWebTool } from "./web"
 
 const exaMock = vi.hoisted(() => ({

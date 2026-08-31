@@ -12,7 +12,6 @@ import { canSeeAutomation } from "./access"
 import { toAutomationDisplay } from "./display"
 import {
   createAutomation,
-  createAutomationRun,
   getOrganizationAutomation,
   maxSearchResults,
   pauseAutomation,
@@ -71,21 +70,6 @@ export const list = query({
         visible.map((automation) => toAutomationDisplay(ctx, automation))
       ),
     }
-  },
-})
-
-export const get = query({
-  args: {
-    organizationId: v.string(),
-    automationId: v.id("automations"),
-  },
-  handler: async (ctx, args) => {
-    const personId = await resolveCurrentPerson(ctx, args.organizationId)
-
-    return await toAutomationDisplay(
-      ctx,
-      await requireAccessibleAutomation(ctx, args, personId)
-    )
   },
 })
 
@@ -170,29 +154,6 @@ export const remove = mutation({
     await removeAutomation(ctx, args)
 
     return null
-  },
-})
-
-export const run = mutation({
-  args: {
-    organizationId: v.string(),
-    automationId: v.id("automations"),
-  },
-  handler: async (ctx, args) => {
-    const personId = await ensureCurrentPerson(ctx, args.organizationId)
-    const automation = await requireAccessibleAutomation(ctx, args, personId)
-
-    if (automation.type === "event") {
-      throw new Error("Event automations run when their event arrives.")
-    }
-
-    const runId = await createAutomationRun(ctx, {
-      automation,
-      cause: { type: "manual", personId },
-      now: Date.now(),
-    })
-
-    return { runId }
   },
 })
 

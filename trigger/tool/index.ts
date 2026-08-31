@@ -1,6 +1,5 @@
 import { type ToolSurface } from "../../contracts/integrations"
-import { type JsonObject } from "../../contracts/json"
-import { encodeToolResult } from "../../contracts/json/transport"
+import { encodeToolResult, type JsonObject } from "../../contracts/json"
 import { isVisibleCommunicationTool } from "../../contracts/runtime/surface"
 import { readFinal } from "../../contracts/runtime/tools"
 import { type RuntimeTool } from "../../contracts/runtime/worker"

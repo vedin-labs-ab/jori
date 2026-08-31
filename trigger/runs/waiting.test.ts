@@ -3,7 +3,11 @@ import {
   type RunHandoffs,
   type RuntimeTool,
 } from "../../contracts/runtime/worker"
-import { createQueuedModel, runtimeId } from "../../test/trigger"
+import {
+  createQueuedModel,
+  runtimeContext,
+  runtimeId,
+} from "../../test/trigger"
 import { type AgentRuntime } from "../runtime"
 import { runAgentLoop } from "./loop"
 
@@ -98,28 +102,10 @@ function createRuntime(handoffs: RunHandoffs[]): AgentRuntime {
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
     },
-    context: {
-      activeSurface: null,
-      drained: null,
+    context: runtimeContext({
       handoffs: bundled,
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
-      run: {
-        id: runtimeId<"runs">("run_1"),
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-      session: null,
       tools: [finishRunTool()],
-    },
+    }),
     sandbox: {},
   } as unknown as AgentRuntime
 }

@@ -1,8 +1,5 @@
 import { v } from "convex/values"
-import {
-  decodeToolInput,
-  encodeToolResult,
-} from "../../contracts/json/transport"
+import { decodeJsonObject, encodeToolResult } from "../../contracts/json"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, action } from "../_generated/server"
@@ -38,7 +35,7 @@ export const call = action({
       ctx,
       await loadBrokerContext(ctx, args.runId),
       {
-        args: decodeToolInput(args.inputJson),
+        args: decodeJsonObject(args.inputJson),
         replyTarget: args.replyTarget,
         surface: args.surface,
         tool: args.tool,
@@ -70,7 +67,7 @@ export const requestApproval = action({
       ctx,
       await loadBrokerContext(ctx, args.runId),
       {
-        args: decodeToolInput(args.inputJson),
+        args: decodeJsonObject(args.inputJson),
         surface: args.surface,
         tool: args.tool,
       }
@@ -107,7 +104,7 @@ export const executeApproval = action({
       {
         surface: claim.surface,
         tool: claim.tool,
-        args: decodeToolInput(claim.inputJson),
+        args: decodeJsonObject(claim.inputJson),
       }
     )
     const encoded = encodeToolResult(result)

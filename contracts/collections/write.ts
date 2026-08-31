@@ -7,7 +7,7 @@ export type DocumentWrite =
   | { type: "merge"; patch: unknown }
   | { type: "claim"; path: string[]; value: unknown }
 
-export type ResolvedDocumentWrite =
+type ResolvedDocumentWrite =
   | { kind: "write"; value: unknown }
   | { kind: "held"; existing: unknown }
 

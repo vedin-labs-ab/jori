@@ -3,8 +3,9 @@ import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
+import { countNoun } from "../../shared/count"
 import { showErrorToast } from "../../shared/error"
-import { countNoun, useBulkRunner } from "../../shared/list/bulk"
+import { useBulkRunner } from "../../shared/list/bulk"
 import { type RowSelection } from "../../shared/list/selection"
 import {
   conflictMessage,

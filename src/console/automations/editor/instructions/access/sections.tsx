@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label"
 import {
   groupToolsByAccess,
   type ToolAccessGroup,
+} from "@/console/shared/tools/model"
+import {
   ToolGroupSection,
   ToolGroupsFrame,
   ToolRowContent,
-} from "@/console/shared/tools"
+} from "@/console/shared/tools/readonly"
 import { cn } from "@/lib/utils"
 import { type ToolPermission } from "../../../../permissions/types"
 import { automationToolModeDescription } from "../../../access"

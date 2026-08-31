@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { toast } from "sonner"
+import { type CountedNoun, countNoun } from "../count"
 import { showErrorToast } from "../error"
 import { type SelectionRemoval } from "../list/bar"
 
 type RemovalTarget = { name: string; archivedAt?: number }
 
-type MaterialNoun = { plural: string; singular: string }
+type MaterialNoun = CountedNoun
 
 /** How a bulk removal presents, mirroring the per-row rules: an all-active
  *  selection archives, while any archived material makes the step a
@@ -43,18 +44,16 @@ export function bulkMaterialRemovalSuccess(
 ) {
   const deleted = rows.filter((row) => row.archivedAt !== undefined).length
   const archived = rows.length - deleted
-  const name = (count: number) =>
-    `${count} ${count === 1 ? noun.singular : noun.plural}`
 
   if (deleted === 0) {
-    return `Archived ${name(archived)}.`
+    return `Archived ${countNoun(archived, noun)}.`
   }
 
   if (archived === 0) {
-    return `Deleted ${name(deleted)}.`
+    return `Deleted ${countNoun(deleted, noun)}.`
   }
 
-  return `Archived ${name(archived)} and deleted ${name(deleted)}.`
+  return `Archived ${countNoun(archived, noun)} and deleted ${countNoun(deleted, noun)}.`
 }
 
 /** Archive, permanent delete, and restore for a material domain: one

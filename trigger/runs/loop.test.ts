@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { createQueuedModel, runtimeId } from "../../test/trigger"
+import { createQueuedModel, runtimeContext } from "../../test/trigger"
 import { type AgentRuntime } from "../runtime"
 import { runAgentLoop } from "./loop"
 
@@ -171,28 +171,9 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): AgentRuntime {
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
     },
-    context: {
-      activeSurface: null,
-      drained: null,
-      handoffs: { approvals: [], offers: [] },
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
-      run: {
-        id: runtimeId<"runs">("run_1"),
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-      session: null,
+    context: runtimeContext({
       tools: options.tools ?? [finishRunTool()],
-    },
+    }),
     sandbox: {},
   } as unknown as AgentRuntime
 }

@@ -1,3 +1,4 @@
+import { surfaceCommunicationTools } from "../../contracts/runtime/surface"
 import { type RuntimeContext } from "../../contracts/runtime/worker"
 import { type ModelMessage } from "../model/types"
 
@@ -50,7 +51,7 @@ function stopRepairInstruction(args: { visibleTools: string[] }) {
 }
 
 function visibleCommunicationTools(tools: RuntimeContext["tools"]) {
-  return ["send_reply", "add_reaction"].filter((tool) => hasTool(tools, tool))
+  return surfaceCommunicationTools.filter((tool) => hasTool(tools, tool))
 }
 
 function visibleCommunicationInstruction(tools: string[]) {

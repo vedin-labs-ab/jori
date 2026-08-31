@@ -1,6 +1,6 @@
 /** Deterministic JSON encoding: object keys sorted, undefined entries
  *  dropped, so equal values always encode to equal strings. */
-export function stableJson(value: unknown): string {
+function stableJson(value: unknown): string {
   if (value === null || typeof value !== "object") {
     return JSON.stringify(value) ?? "null"
   }

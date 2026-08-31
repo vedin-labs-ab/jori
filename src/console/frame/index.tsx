@@ -1,3 +1,4 @@
+import { Outlet } from "@tanstack/react-router"
 import { lazy, type ReactNode, Suspense } from "react"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
@@ -63,4 +64,15 @@ function useResolvedMode(): MaterialMode {
     isSignedIn: session.data !== null && session.data !== undefined,
     secret,
   })
+}
+
+/** A material section's route component. The frame outlives the move between
+ *  the list and one material, so the console chrome around them is mounted
+ *  once. */
+export function MaterialSection() {
+  return (
+    <MaterialFrame>
+      <Outlet />
+    </MaterialFrame>
+  )
 }

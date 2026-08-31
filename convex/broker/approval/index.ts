@@ -1,5 +1,4 @@
-import { type JsonObject } from "../../../contracts/json"
-import { encodeToolInput } from "../../../contracts/json/transport"
+import { encodeJson, type JsonObject } from "../../../contracts/json"
 import {
   getToolPermission,
   type PermissionMode,
@@ -77,7 +76,7 @@ export async function createPromptedToolApproval(
     runId: context.run._id,
     surface: request.surface,
     tool: request.tool,
-    inputJson: encodeToolInput(request.args),
+    inputJson: encodeJson(request.args),
     summary: request.summary,
     code: createApprovalCode(),
     requestedBy: createRequestedBy(context),

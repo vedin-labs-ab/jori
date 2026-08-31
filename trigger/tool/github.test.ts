@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest"
-import { runtimeId } from "../../test/trigger"
+import { runtimeContext, runtimeId } from "../../test/trigger"
 import { type AgentRuntime } from "../runtime"
 import { sandboxWorkspace } from "../sandbox/workspace"
 import { executeToolCall } from "../tool"
@@ -66,27 +66,7 @@ function createRuntime(): AgentRuntime {
         status: "approval_requested",
       })),
     } as unknown as AgentRuntime["platform"],
-    context: {
-      activeSurface: null,
-      drained: null,
-      handoffs: { approvals: [], offers: [] },
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
-      run: {
-        id: runtimeId<"runs">("run_1"),
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-      result: null,
-      session: null,
+    context: runtimeContext({
       tools: [
         {
           access: "write",
@@ -98,7 +78,7 @@ function createRuntime(): AgentRuntime {
           surface: "github",
         },
       ],
-    },
+    }),
     sandbox: {
       runCommand: vi.fn(async () => ({
         exitCode: 0,

@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
 import { CopyButton } from "../../shared/copy"
 import { SeparatorDot } from "../../shared/dot"
 import { absoluteTime, absoluteUtcTime } from "../../shared/time"
-import { ToolGroupsValue } from "../../shared/tools"
+import { ToolGroupsValue } from "../../shared/tools/groups"
 import {
   CodeBlockBody,
   DetailFrame,

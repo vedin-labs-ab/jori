@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { createQueuedModel, runtimeId } from "../../test/trigger"
+import { createQueuedModel, runtimeContext } from "../../test/trigger"
 import { type AgentRuntime } from "../runtime"
 import { runAgentLoop } from "./loop"
 
@@ -200,32 +200,14 @@ function createRuntime(options: {
       recordEvent: vi.fn(),
       sendReply: vi.fn(async () => ({ status: "sent" })),
     },
-    context: {
+    context: runtimeContext({
       activeSurface: {
         communicated: false,
         surface: options.surface ?? "slack",
         target: null,
       },
-      drained: null,
-      handoffs: { approvals: [], offers: [] },
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
-      run: {
-        id: runtimeId<"runs">("run_1"),
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-      session: null,
       tools: options.tools,
-    },
+    }),
     sandbox: {},
   } as unknown as AgentRuntime
 }

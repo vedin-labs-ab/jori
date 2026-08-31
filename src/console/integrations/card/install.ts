@@ -1,27 +1,28 @@
+import { useMutation } from "convex/react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { api } from "../../../../convex/_generated/api"
+import { type ToolSurface } from "../../permissions/types"
 import { showErrorToast } from "../../shared/error"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 
-export type CreateInstallState = (args: {
-  organizationId: string
-  returnUrl: string
-}) => Promise<string>
-
 export function useIntegrationInstall({
   connectError,
-  createInstallState,
   installPath,
+  integration,
   organizationId,
   returnPath,
 }: {
   connectError: string
-  createInstallState: CreateInstallState
   installPath: string
+  integration: Exclude<ToolSurface, "jori">
   organizationId: string
   returnPath: string
 }) {
+  const createInstallState = useMutation(
+    api.integrations.connect.install.createInstallState
+  )
   const [isConnecting, setIsConnecting] = useState(false)
 
   async function connect() {
@@ -34,6 +35,7 @@ export function useIntegrationInstall({
 
     try {
       const state = await createInstallState({
+        integration,
         organizationId,
         returnUrl: `${window.location.origin}${returnPath}`,
       })

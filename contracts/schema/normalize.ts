@@ -77,7 +77,7 @@ function normalizeSchemaNode(value: unknown, path: string): unknown {
   return normalized
 }
 
-export function validateSchemaNode(
+function validateSchemaNode(
   schema: unknown,
   path: string
 ): SchemaValidationIssue[] {

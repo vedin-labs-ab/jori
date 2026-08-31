@@ -1,5 +1,8 @@
 import { vi } from "vitest"
-import { type RuntimeId } from "../contracts/runtime/worker"
+import {
+  type RuntimeContext,
+  type RuntimeId,
+} from "../contracts/runtime/worker"
 import {
   type ModelResponse,
   type ModelRuntime,
@@ -24,6 +27,36 @@ export type QueuedModelResponse =
 
 export function runtimeId<TableName extends string>(value: string) {
   return value as RuntimeId<TableName>
+}
+
+/** A loaded run context with every field at its quiet default. */
+export function runtimeContext(
+  overrides: Partial<RuntimeContext> = {}
+): RuntimeContext {
+  return {
+    activeSurface: null,
+    drained: null,
+    handoffs: { approvals: [], offers: [] },
+    prompt: {
+      context: "context",
+      instructions: "system",
+      organization: null,
+      person: null,
+      place: null,
+      requester: null,
+    },
+    result: null,
+    run: {
+      id: runtimeId<"runs">("run_1"),
+      organizationId: "organization",
+      rootId: null,
+      sandboxId: null,
+      status: "running",
+    },
+    session: null,
+    tools: [],
+    ...overrides,
+  }
 }
 
 export function createQueuedModel(responses: QueuedModelResponse[]) {

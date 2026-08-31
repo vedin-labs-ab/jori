@@ -1,6 +1,6 @@
 export const durationUnits = ["seconds", "minutes", "hours", "days"] as const
 
-export type DurationUnit = (typeof durationUnits)[number]
+type DurationUnit = (typeof durationUnits)[number]
 
 export type Duration = {
   unit: DurationUnit

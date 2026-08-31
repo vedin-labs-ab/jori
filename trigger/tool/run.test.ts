@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { runtimeId } from "../../test/trigger"
+import { runtimeContext } from "../../test/trigger"
 import { type AgentRuntime } from "../runtime"
 import { executeToolCall } from "."
 
@@ -119,29 +119,10 @@ function createRuntime(
     platform: {
       recordEvent: vi.fn(),
     } as unknown as AgentRuntime["platform"],
-    context: {
+    context: runtimeContext({
       activeSurface: activeSurfaceState(options),
-      drained: null,
-      handoffs: { approvals: [], offers: [] },
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
-      run: {
-        id: runtimeId<"runs">("run_1"),
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-      result: null,
-      session: null,
       tools: [finishRunTool()],
-    },
+    }),
     sandbox: {} as AgentRuntime["sandbox"],
   }
 }

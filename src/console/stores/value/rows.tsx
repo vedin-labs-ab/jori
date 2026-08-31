@@ -188,7 +188,7 @@ export function AddItemRow({
           <Plus aria-hidden className="size-3.5" />
           Add item
         </button>
-        <FieldError className="px-3 pb-2" message={error} />
+        <ValueFieldError className="px-3 pb-2" message={error} />
       </div>
     </div>
   )
@@ -214,7 +214,7 @@ export function RemoveButton({
   )
 }
 
-export function FieldError({
+export function ValueFieldError({
   className,
   message,
 }: {
@@ -240,7 +240,7 @@ export function ErrorRow({ message }: { message: string | undefined }) {
 
   return (
     <div className="px-3 py-2">
-      <FieldError message={message} />
+      <ValueFieldError message={message} />
     </div>
   )
 }

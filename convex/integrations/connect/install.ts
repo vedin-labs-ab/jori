@@ -1,9 +1,17 @@
 import { type WithoutSystemFields } from "convex/server"
+import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
-import { type ActionCtx, type MutationCtx } from "../../_generated/server"
+import {
+  type ActionCtx,
+  type MutationCtx,
+  mutation,
+} from "../../_generated/server"
 import { ensureCurrentPerson } from "../../persons/account"
-import { type Integration } from "../../shared/integrations"
+import {
+  type Integration,
+  integrationValidator,
+} from "../../shared/integrations"
 import { requireReturnUrl } from "../../shared/origin"
 import { createSignedGitHubState } from "../github/signing"
 import { googleIntegrationConfigs } from "../google/config"
@@ -15,6 +23,22 @@ import { createSignedNotionState } from "../notion/signing"
 import { createSignedSlackState } from "../slack/signing"
 import { redirectWithStatus } from "./http"
 import { type ProviderInstallState } from "./signing"
+
+/**
+ * Starts any provider's install: mints the signed state the provider's
+ * callback reads back. Every provider signs the same state, so the integration
+ * is an argument rather than eight near-identical endpoints.
+ */
+export const createInstallState = mutation({
+  args: {
+    organizationId: v.string(),
+    integration: integrationValidator,
+    returnUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await createSignedInstallState(ctx, args.integration, args)
+  },
+})
 
 export async function buildInstallState(
   ctx: MutationCtx,

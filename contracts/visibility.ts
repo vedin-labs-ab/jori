@@ -41,8 +41,8 @@ export const visibilityModeMarks: Record<VisibilityMode, string> = {
   public: "Public",
 }
 
-export const organizationVisibility: Visibility = { mode: "organization" }
-export const privateVisibility: Visibility = { mode: "private" }
+const organizationVisibility: Visibility = { mode: "organization" }
+const privateVisibility: Visibility = { mode: "private" }
 
 /**
  * Sensible default: anything touching a person's own tools (or nothing at

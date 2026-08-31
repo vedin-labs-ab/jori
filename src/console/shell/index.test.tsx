@@ -11,28 +11,13 @@ import { consoleDocumentTitle } from "./routes"
 
 let pathname = "/runs"
 
-vi.mock("@tanstack/react-router", () => ({
+vi.mock("@tanstack/react-router", async () => ({
   useRouterState: ({
     select,
   }: {
     select: (state: { location: { pathname: string } }) => unknown
   }) => select({ location: { pathname } }),
-  Link: ({
-    params,
-    to,
-    ...props
-  }: {
-    params?: Record<string, string>
-    to: string
-  } & React.ComponentProps<"a">) => (
-    <a
-      href={Object.values(params ?? {}).reduce(
-        (path, value) => path.replace(/\$\w+/, value),
-        to
-      )}
-      {...props}
-    />
-  ),
+  Link: (await import("../../../test/router")).Link,
 }))
 
 vi.mock("@/components/ui/sidebar", () => ({

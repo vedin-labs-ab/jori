@@ -4,11 +4,11 @@ import { type ChangeHandler, LeafControl } from "./inputs"
 import { type ValueField, type ValueProperty } from "./model"
 import {
   ErrorRow,
-  FieldError,
   GroupRow,
   KeyCell,
   RemoveButton,
   UnsetRow,
+  ValueFieldError,
 } from "./rows"
 import { valueRootPath } from "./state"
 
@@ -170,7 +170,7 @@ function PropertyRows({
           required={property.required}
           state={state}
         />
-        <FieldError className="px-3 pb-2" message={errors[path]} />
+        <ValueFieldError className="px-3 pb-2" message={errors[path]} />
       </div>
       {!property.required && hasUnsetAffordance(property.field) ? (
         <RemoveButton
@@ -250,7 +250,10 @@ function NestedRows({
                 required
                 state={item}
               />
-              <FieldError className="px-3 pb-2" message={errors[itemPath]} />
+              <ValueFieldError
+                className="px-3 pb-2"
+                message={errors[itemPath]}
+              />
             </>
           )
         }

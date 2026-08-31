@@ -1,6 +1,5 @@
 import { expect, test } from "vitest"
-import { decodeJson } from "../../contracts/json"
-import { encodeToolResult } from "../../contracts/json/transport"
+import { decodeJson, encodeToolResult } from "../../contracts/json"
 import { runtimeSkill, runtimeSkills } from "../../test/convex/skills"
 import { loadJoriSkillTool } from "./mcp"
 
