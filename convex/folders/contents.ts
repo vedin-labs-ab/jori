@@ -4,7 +4,7 @@ import { canSeeAutomation } from "../automations/access"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 import { filedTables } from "./filing"
-import { summarizeFolder, treeCap } from "./tree"
+import { descendantFolderIds, summarizeFolder, treeCap } from "./tree"
 
 // A folder's listing: subfolders plus the filed resources the caller may
 // see. One Sight per request answers every row — a resource whose own
@@ -147,6 +147,41 @@ async function hasFiledResources(ctx: QueryLikeCtx, folderId: Id<"folders">) {
   }
 
   return false
+}
+
+/** What deleting a folder would take with it: the folders below it and
+ *  every resource filed anywhere in the subtree. Deletion is absolute, so
+ *  the counts run past Sight — archived collections and rows this viewer
+ *  cannot see die all the same, and a number that hid them would lie. The
+ *  tree caps bound the walk. parentName says where the survivors land, or
+ *  is null for a root folder, whose contents become unfiled instead. */
+export async function subtreeImpact(ctx: QueryLikeCtx, folder: Doc<"folders">) {
+  const descendants = await descendantFolderIds(
+    ctx,
+    folder.organizationId,
+    folder._id
+  )
+  let resourceCount = 0
+
+  for (const folderId of [...descendants, folder._id]) {
+    for (const table of filedTables) {
+      const rows = await ctx.db
+        .query(table)
+        .withIndex("by_folder", (index) => index.eq("folderId", folderId))
+        .collect()
+
+      resourceCount += rows.length
+    }
+  }
+
+  const parent =
+    folder.parentId === undefined ? null : await ctx.db.get(folder.parentId)
+
+  return {
+    folderCount: descendants.length,
+    parentName: parent?.name ?? null,
+    resourceCount,
+  }
 }
 
 export async function folderResources(

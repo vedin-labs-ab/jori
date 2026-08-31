@@ -1,10 +1,15 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
-import { mutation, query } from "../_generated/server"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { mutation, type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { createSight } from "../visibility/sight"
-import { folderChildren, folderResources, summarizeTree } from "./contents"
+import {
+  folderChildren,
+  folderResources,
+  subtreeImpact,
+  summarizeTree,
+} from "./contents"
 import { filedResourceType, fileResource } from "./filing"
 import { createFolder, moveFolder, removeFolder, renameFolder } from "./records"
 import {
@@ -70,26 +75,17 @@ export const get = query({
       }
     }
 
-    const personId = await resolveCurrentPerson(ctx, args.organizationId)
-    const folder = await getOrganizationFolder(
-      ctx,
-      args.organizationId,
-      args.folderId
-    )
-    const sight = createSight(ctx, {
-      organizationId: args.organizationId,
-      personId,
-    })
+    const visible = await visibleFolder(ctx, args)
 
-    if (folder === null || !(await sight.canSeeFolder(folder))) {
+    if (visible === null) {
       return { status: "not_found" as const, folder: null }
     }
 
     return {
       status: "ready" as const,
       folder: {
-        ...summarizeFolder(folder),
-        path: await ancestorPath(ctx, folder),
+        ...summarizeFolder(visible.folder),
+        path: await ancestorPath(ctx, visible.folder),
       },
     }
   },
@@ -115,29 +111,26 @@ export const contents = query({
       }
     }
 
-    const personId = await resolveCurrentPerson(ctx, args.organizationId)
-    const folder = await getOrganizationFolder(
-      ctx,
-      args.organizationId,
-      args.folderId
-    )
-    const sight = createSight(ctx, {
-      organizationId: args.organizationId,
-      personId,
-    })
+    const visible = await visibleFolder(ctx, args)
 
-    if (folder === null || !(await sight.canSeeFolder(folder))) {
+    if (visible === null) {
       return { status: "not_found" as const, folders: [], resources: [] }
     }
 
-    const viewer = { organizationId: args.organizationId, personId }
+    const viewer = {
+      organizationId: args.organizationId,
+      personId: visible.personId,
+    }
 
     return {
       status: "ready" as const,
-      folders: await folderChildren(ctx, { ...viewer, parentId: folder._id }),
+      folders: await folderChildren(ctx, {
+        ...viewer,
+        parentId: visible.folder._id,
+      }),
       resources: await folderResources(ctx, {
         ...viewer,
-        folderId: folder._id,
+        folderId: visible.folder._id,
       }),
     }
   },
@@ -232,10 +225,41 @@ export const move = mutation({
   },
 })
 
+/** What a delete would take with it, for the dialog that asks: the whole
+ *  subtree's folders and filed resources, plus where the survivors land when
+ *  the caller keeps them. */
+export const subtree = query({
+  args: {
+    organizationId: v.string(),
+    folderId: v.id("folders"),
+  },
+  handler: async (ctx, args) => {
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
+
+    if (!access.ok) {
+      return { status: "unauthorized" as const, message: access.message }
+    }
+
+    const visible = await visibleFolder(ctx, args)
+
+    if (visible === null) {
+      return { status: "not_found" as const }
+    }
+
+    return {
+      status: "ready" as const,
+      ...(await subtreeImpact(ctx, visible.folder)),
+    }
+  },
+})
+
+/** Deleting a folder deletes everything below it; the caller decides
+ *  whether the resources filed inside go too or move up to the parent. */
 export const remove = mutation({
   args: {
     organizationId: v.string(),
     folderId: v.id("folders"),
+    deleteResources: v.boolean(),
   },
   handler: async (ctx, args) => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
@@ -246,6 +270,23 @@ export const remove = mutation({
     return null
   },
 })
+
+/** The folder a console read may work with, and the person it reads as.
+ *  Missing, foreign, and invisible folders all read as null, so a caller
+ *  cannot probe what exists behind a visibility gate. */
+async function visibleFolder(
+  ctx: QueryCtx,
+  args: { organizationId: string; folderId: Id<"folders"> }
+) {
+  const { organizationId, folderId } = args
+  const personId = await resolveCurrentPerson(ctx, organizationId)
+  const folder = await getOrganizationFolder(ctx, organizationId, folderId)
+  const sight = createSight(ctx, { organizationId, personId })
+
+  return folder === null || !(await sight.canSeeFolder(folder))
+    ? null
+    : { folder, personId }
+}
 
 /** The one generic filing mutation: a null folderId unfiles. */
 export const file = mutation({

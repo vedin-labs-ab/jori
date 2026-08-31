@@ -14,14 +14,17 @@ const other = "person-other" as Id<"persons">
 const storageId = "storage-id" as Id<"_storage">
 const fileId = "file-id" as Id<"files">
 
+/** Storage metadata for an uploaded blob, as ctx.db.system reads it. */
+function uploadedBlob() {
+  return { get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })) }
+}
+
 test("records console uploads with storage metadata and defaults", async () => {
   const insert = vi.fn(async () => fileId)
   const ctx = {
     db: {
       insert,
-      system: {
-        get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })),
-      },
+      system: uploadedBlob(),
     },
   } as unknown as MutationCtx
 
@@ -57,9 +60,7 @@ test("uploads stamp the folder when creation names one", async () => {
         organizationId: "organization",
         visibility: { mode: "organization" },
       })),
-      system: {
-        get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })),
-      },
+      system: uploadedBlob(),
     },
   } as unknown as MutationCtx
 
@@ -81,9 +82,7 @@ test("uploads reject a folder from another organization", async () => {
     db: {
       insert: vi.fn(),
       get: vi.fn(async () => ({ _id: folderId, organizationId: "elsewhere" })),
-      system: {
-        get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })),
-      },
+      system: uploadedBlob(),
     },
   } as unknown as MutationCtx
 
@@ -110,13 +109,15 @@ test("private uploads require a resolvable owner", async () => {
   ).rejects.toThrow("Private files need a resolvable owner")
 })
 
-test("deleting a file deletes its storage blob with the row", async () => {
+test("deleting a file takes its blob and share links with the row", async () => {
   const storageDelete = vi.fn(async () => undefined)
   const rowDelete = vi.fn(async () => undefined)
+  const shares = [{ _id: "shares:1" }]
   const ctx = {
     db: {
       get: vi.fn(async () => organizationFile()),
       delete: rowDelete,
+      query: () => ({ withIndex: () => ({ take: async () => shares }) }),
     },
     storage: { delete: storageDelete },
   } as unknown as MutationCtx
@@ -125,6 +126,7 @@ test("deleting a file deletes its storage blob with the row", async () => {
 
   expect(storageDelete).toHaveBeenCalledWith(storageId)
   expect(rowDelete).toHaveBeenCalledWith(fileId)
+  expect(rowDelete).toHaveBeenCalledWith("shares:1")
 })
 
 test("replacing content swaps the blob and updates the row", async () => {

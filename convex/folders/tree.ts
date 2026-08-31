@@ -165,12 +165,31 @@ export async function subtreeHeight(
   organizationId: string,
   folderId: Id<"folders">
 ) {
+  return (await folderLevels(ctx, organizationId, folderId)).length + 1
+}
+
+/** Every folder below this one, deepest first. Deleting a subtree leans on
+ *  that order: a folder row outlives its own descendants, so a later pass
+ *  still reaches what is left by walking down from the root's id. */
+export async function descendantFolderIds(
+  ctx: QueryLikeCtx,
+  organizationId: string,
+  folderId: Id<"folders">
+) {
+  return (await folderLevels(ctx, organizationId, folderId)).reverse().flat()
+}
+
+/** The folder's descendants one level at a time, nearest level first. The
+ *  walk stops at the depth cap, so corrupt parent links cannot loop it. */
+async function folderLevels(
+  ctx: QueryLikeCtx,
+  organizationId: string,
+  folderId: Id<"folders">
+) {
+  const levels: Id<"folders">[][] = []
   let frontier = [folderId]
-  let height = 0
 
-  while (frontier.length > 0 && height <= maxTreeDepth) {
-    height += 1
-
+  while (frontier.length > 0 && levels.length < maxTreeDepth) {
     const next: Id<"folders">[] = []
 
     for (const id of frontier) {
@@ -184,8 +203,12 @@ export async function subtreeHeight(
       next.push(...children.map((child) => child._id))
     }
 
+    if (next.length > 0) {
+      levels.push(next)
+    }
+
     frontier = next
   }
 
-  return height
+  return levels
 }

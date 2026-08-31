@@ -16,8 +16,8 @@ import {
 } from "../shared/materials/breadcrumb"
 import { CreationDialogs, type FolderCreation } from "./create/dialogs"
 import { NewInFolderMenu } from "./create/menu"
+import { useLeaveDeletedFolder } from "./delete/leave"
 import { FolderHeaderActions } from "./header"
-import { useLeaveDeletedFolder } from "./leave"
 import { FolderContents } from "./list/contents"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { MoveResourceDialog } from "./move"
@@ -110,7 +110,10 @@ function FolderReadyView({
   const [creation, setCreation] = useState<FolderCreation>()
   const [moving, setMoving] = useState<FolderResource>()
   const unfile = useUnfileResource(organizationId, folder)
-  const leaveDeletedFolder = useLeaveDeletedFolder(folder.folderId)
+  // The page's own trail: deleting any folder on it takes this page too.
+  const leaveDeletedFolder = useLeaveDeletedFolder(
+    useMemo(() => folder.path.map((segment) => segment.folderId), [folder.path])
+  )
 
   return (
     <ConsoleListLayout>

@@ -2,14 +2,17 @@ import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { automationGate } from "../automations/access"
+import { removeAutomation } from "../automations/lifecycle"
+import { purgeCollection } from "../collections/records"
+import { purgeFile } from "../files/records"
 import { createSight, type Gate, type Sight } from "../visibility/sight"
 import { requireOrganizationFolder } from "./tree"
 
 // Filing is one generic flow over a small registry: each entry owns the
 // per-domain edges — load the row, expose its visibility gate, patch its
-// folderId — and the shared logic exists once. Filing requires sight of the
-// RESOURCE and of the target folder, since a folder's visibility cascades
-// over what moves into it.
+// folderId, delete it along with whatever only it owns — and the shared
+// logic exists once. Filing requires sight of the RESOURCE and of the target
+// folder, since a folder's visibility cascades over what moves into it.
 
 export const filedResourceType = v.union(
   v.literal("collection"),
@@ -22,7 +25,7 @@ export type FiledResourceType = Infer<typeof filedResourceType>
 /** The tables whose rows can be filed into a folder. */
 export const filedTables = ["collections", "files", "automations"] as const
 
-type FiledTable = (typeof filedTables)[number]
+export type FiledTable = (typeof filedTables)[number]
 
 type FiledDoc = Doc<FiledTable>
 
@@ -34,29 +37,76 @@ type FilingEntry = {
     row: FiledDoc,
     folderId: Id<"folders"> | undefined
   ): Promise<void>
+  /** Permanent removal of the row and everything only it owns. */
+  purge(ctx: MutationCtx, row: FiledDoc): Promise<void>
 }
 
-/** Each entry only ever receives rows its own load returned, so the
- *  narrowing casts below hold by construction. */
-const registry: Record<FiledResourceType, FilingEntry> = {
-  collection: {
+const tableByType: Record<FiledResourceType, FiledTable> = {
+  collection: "collections",
+  file: "files",
+  automation: "automations",
+}
+
+/** Each entry only ever receives rows from its own table, so the narrowing
+ *  casts below hold by construction. */
+const registry: Record<FiledTable, FilingEntry> = {
+  collections: {
     load: (ctx, resourceId) => loadRow(ctx, "collections", resourceId),
     gate: (row) => row as Doc<"collections">,
     setFolder: (ctx, row, folderId) =>
       ctx.db.patch(row._id as Id<"collections">, { folderId }),
+    purge: (ctx, row) => purgeCollection(ctx, row as Doc<"collections">),
   },
-  file: {
+  files: {
     load: (ctx, resourceId) => loadRow(ctx, "files", resourceId),
     gate: (row) => row as Doc<"files">,
     setFolder: (ctx, row, folderId) =>
       ctx.db.patch(row._id as Id<"files">, { folderId }),
+    purge: (ctx, row) => purgeFile(ctx, row as Doc<"files">),
   },
-  automation: {
+  automations: {
     load: (ctx, resourceId) => loadRow(ctx, "automations", resourceId),
     gate: (row) => automationGate(row as Doc<"automations">),
     setFolder: (ctx, row, folderId) =>
       ctx.db.patch(row._id as Id<"automations">, { folderId }),
+    purge: async (ctx, row) => {
+      const automationId = row._id as Id<"automations">
+
+      // Removing an automation removes the automations it owns, which can
+      // be filed in the same folder: one may already be gone by the time
+      // the sweep reaches its row.
+      if ((await ctx.db.get(automationId)) === null) {
+        return
+      }
+
+      await removeAutomation(ctx, {
+        organizationId: row.organizationId,
+        automationId,
+      })
+    },
   },
+}
+
+/** Refiling one row, without the sight checks a caller-driven move needs:
+ *  a folder deletion moves what it held whether or not the deleter can see
+ *  it. Organization, not content, so updatedAt stays untouched. */
+export async function refileRow(
+  ctx: MutationCtx,
+  table: FiledTable,
+  row: FiledDoc,
+  folderId: Id<"folders"> | undefined
+) {
+  await registry[table].setFolder(ctx, row, folderId)
+}
+
+/** Permanently delete one filed row and everything only it owns — the
+ *  per-domain edge of a folder deletion that takes its contents along. */
+export async function purgeRow(
+  ctx: MutationCtx,
+  table: FiledTable,
+  row: FiledDoc
+) {
+  await registry[table].purge(ctx, row)
 }
 
 /** File a resource into a folder, or unfile it with a null folderId. The
@@ -74,7 +124,7 @@ export async function fileResource(
 ) {
   const sight = createSight(ctx, args)
   const folderId = await resolveTargetFolder(ctx, sight, args)
-  const entry = registry[args.resourceType]
+  const entry = registry[tableByType[args.resourceType]]
   const row = await entry.load(ctx, args.resourceId)
 
   if (
