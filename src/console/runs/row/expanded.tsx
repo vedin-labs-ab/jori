@@ -1,5 +1,5 @@
-import { ErrorDetail, ResultDetail } from "../../shared/details"
 import { RunActivity } from "../activity"
+import { ErrorDetail, ResultDetail } from "../details"
 import { ApprovalCallout } from "../request/approval"
 import { OfferCallout } from "../request/offer"
 import { type ExecutionItem } from "../types"

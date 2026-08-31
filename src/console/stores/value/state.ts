@@ -5,7 +5,7 @@ import {
   validateJsonSchemaValue,
 } from "@contracts/schema/validate"
 import { useMemo, useState } from "react"
-import { formatJsonText, parseJsonText } from "../../shared/json/parse"
+import { formatJsonText, parseJsonText } from "../json"
 import {
   emptyState,
   stateToValue,

@@ -5,12 +5,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "../../../../convex/_generated/api"
 import { JsonBlock } from "../../shared/code"
-import { parseJsonText } from "../../shared/json/parse"
 import { ConsoleListContent } from "../../shared/list/frame"
 import {
   conflictMessage,
   isVersionConflict,
 } from "../../shared/materials/conflict"
+import { parseJsonText } from "../json"
 import { type StoreDetail } from "../types"
 import { useValueAutosave, type ValueSaveOutcome } from "./autosave"
 import { ValueFields } from "./fields"

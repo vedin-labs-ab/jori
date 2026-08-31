@@ -15,8 +15,8 @@ import {
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
 import { FieldHelp } from "@/shared/field"
-import { CopyableCodeBlock, CopyButton } from "./copy"
-import { absoluteTime } from "./time"
+import { CopyableCodeBlock, CopyButton } from "../shared/copy"
+import { absoluteTime } from "../shared/time"
 
 export const codeBlockContentClassName = "max-h-[250px] overflow-y-auto"
 const codeBlockBodyClassName = cn(

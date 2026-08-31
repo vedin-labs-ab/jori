@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { workstreamOutputSchema } from "./ops"
+import { workstreamOutputSchema } from "./contract"
 import { readWorkstreamOps } from "./parse"
 
 describe("workstream op reading", () => {

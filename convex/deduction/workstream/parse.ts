@@ -5,7 +5,7 @@ import {
   readString,
   readStringList,
 } from "../engine/judge"
-import { type WorkstreamOp } from "./ops"
+import { type WorkstreamOp } from "./contract"
 
 export function readWorkstreamOps(value: Record<string, unknown>) {
   return readOps(value, readOp)

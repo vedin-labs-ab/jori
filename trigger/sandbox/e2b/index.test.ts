@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { expect, test } from "vitest"
-import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
+import { sandboxWorkspace } from "../workspace"
 import { workspaceBootstrapCommand } from "./index"
 
 test("bootstraps the visible workspace", () => {

@@ -10,10 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { displayCellText } from "@/lib/cells"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
-import { displayCellText } from "./cells"
-import { useShareExpired } from "./share"
+import { useShareExpired } from "./link"
 import { ShareShell, ShareUnavailable } from "./shell"
 
 const rowPageSize = 50

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { useShareSecret } from "@/shared/materials/share"
 import { SessionProviders } from "@/shared/session"
+import { useShareSecret } from "@/shared/share/link"
 import { TableAccess } from "./-view/access"
 
 export const Route = createFileRoute("/tables/$tableId/")({

@@ -5,7 +5,7 @@ import {
   CodeBlockDetail,
   codeBlockContentClassName,
   DetailLink,
-} from "../../shared/details"
+} from "../details"
 
 export function TaskDetail({
   sourceUrl,

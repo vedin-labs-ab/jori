@@ -1,20 +1,20 @@
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { effortOutputSchema } from "../effort/contract"
 import {
   type EffortPassInput,
   toAllowed as toEffortAllowed,
   toPayload as toEffortPayload,
 } from "../effort/input"
-import { effortOutputSchema } from "../effort/ops"
 import { readEffortOps } from "../effort/parse"
 import { type PassScope, type PassStage } from "../schema"
+import { workstreamOutputSchema } from "../workstream/contract"
 import {
   toAllowed as toWorkstreamAllowed,
   toPayload as toWorkstreamPayload,
   type WorkstreamPassInput,
 } from "../workstream/input"
-import { workstreamOutputSchema } from "../workstream/ops"
 import { readWorkstreamOps } from "../workstream/parse"
 import { requestJudge } from "./judge"
 

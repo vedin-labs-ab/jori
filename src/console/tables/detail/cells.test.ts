@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { displayCellText } from "@/shared/materials/cells"
+import { displayCellText } from "@/lib/cells"
 import { type TableColumn } from "../types"
 import { buildRowValues, formatCellText, parseCellText } from "./cells"
 

@@ -1,13 +1,13 @@
 import { useQuery } from "convex/react"
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { formatFileSize } from "@/lib/size"
 import { fileKind } from "@/shared/files/kind"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
+import { useShareExpired } from "./link"
 import { FilePreview } from "./preview"
-import { useShareExpired } from "./share"
 import { ShareShell, ShareUnavailable } from "./shell"
-import { formatFileSize } from "./size"
 
 /** Views a file through a share link, without a signed-in session: metadata,
  *  an inline preview when the browser can show one, and a download. The

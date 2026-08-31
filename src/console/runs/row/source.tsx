@@ -3,8 +3,8 @@ import { type Scope } from "@contracts/permissions/scope"
 import { CornerDownRight, Play } from "lucide-react"
 import { type ReactNode } from "react"
 import { ProviderLogo } from "@/shared/logo/provider"
-import { ScopeDatum } from "../../shared/details"
 import { SeparatorDot } from "../../shared/dot"
+import { ScopeDatum } from "../details"
 import {
   type ExecutionDetail,
   type ExecutionDetailType,

@@ -18,16 +18,16 @@ import {
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { CopyButton } from "../../shared/copy"
+import { SeparatorDot } from "../../shared/dot"
+import { absoluteTime, absoluteUtcTime } from "../../shared/time"
+import { ToolGroupsValue } from "../../shared/tools"
 import {
   CodeBlockBody,
   DetailFrame,
   type DetailIcon,
   DetailLink,
   DetailRow,
-} from "../../shared/details"
-import { SeparatorDot } from "../../shared/dot"
-import { absoluteTime, absoluteUtcTime } from "../../shared/time"
-import { ToolGroupsValue } from "../../shared/tools"
+} from "../details"
 import { RunSectionLabel } from "../section"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
 import { RepositoryIcon } from "./metadata"

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
-import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { sandboxClonePath, sandboxWorkspacePath } from "./path"
+import { sandboxWorkspace } from "./workspace"
 
 test("uses the repository name as the default clone destination", () => {
   const input = { repository: "acme/app", value: undefined }

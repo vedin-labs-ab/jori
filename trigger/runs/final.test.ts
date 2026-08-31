@@ -2,14 +2,14 @@ import { beforeEach, expect, test, vi } from "vitest"
 import {
   type RunHandoffs,
   type RuntimeTool,
-} from "../../../contracts/runtime/worker"
+} from "../../contracts/runtime/worker"
 import {
   createQueuedModel,
   type QueuedModelResponse,
   runtimeId,
-} from "../../../test/trigger"
-import { type AgentRuntime } from "../../runtime"
-import { runAgentLoop } from "../loop"
+} from "../../test/trigger"
+import { type AgentRuntime } from "../runtime"
+import { runAgentLoop } from "./loop"
 
 const triggerWait = vi.hoisted(() => ({
   createToken: vi.fn(async () => ({ id: "waitpoint_1" })),

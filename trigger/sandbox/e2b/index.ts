@@ -1,4 +1,3 @@
-import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
 import { type RuntimeId } from "../../../contracts/runtime/worker"
 import { type RuntimePlatform } from "../../platform"
 import { compactFailure } from "../output"
@@ -15,6 +14,7 @@ import {
   type SandboxRuntime,
   type SandboxWriteFile,
 } from "../types"
+import { sandboxWorkspace } from "../workspace"
 import {
   connectSandbox,
   createSandbox,

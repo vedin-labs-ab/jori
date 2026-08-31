@@ -1,7 +1,7 @@
 import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { normalizeStoreSchema } from "@contracts/stores/contract"
 import { useState } from "react"
-import { formatJsonText, parseJsonText } from "../../shared/json/parse"
+import { formatJsonText, parseJsonText } from "../json"
 import { fieldsToSchema, schemaToFields } from "./convert"
 import { collectFieldErrors, type SchemaField } from "./model"
 

@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { id } from "../../test/convex/database"
 import { type Doc } from "../_generated/dataModel"
-import { collectPendingBatch, formatRuntimeMessage } from "./cursor"
+import { collectPendingBatch, formatRuntimeMessage } from "./batch"
 
 test("advances the cursor across non-text messages", () => {
   const batch = collectPendingBatch(

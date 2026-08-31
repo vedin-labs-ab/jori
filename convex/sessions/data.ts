@@ -8,8 +8,8 @@ import {
   defaultDrainLimit,
   maxPendingReadLimit,
   type PendingBatch,
-} from "./cursor"
-import { initialCursor } from "./cursors"
+} from "./batch"
+import { initialCursor } from "./cursor"
 import { initialRecency } from "./recency"
 
 export async function isReusableSession(

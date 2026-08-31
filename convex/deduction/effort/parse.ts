@@ -1,6 +1,6 @@
 import { isRecord } from "../../../contracts/json"
 import { readCitations, readOps, readString } from "../engine/judge"
-import { type EffortOp } from "./ops"
+import { type EffortOp } from "./contract"
 
 // Narrated dates are metadata (`observedAt`), never entry prose. Models
 // drift toward date-prefixed entries when history shows dated lines, so a
