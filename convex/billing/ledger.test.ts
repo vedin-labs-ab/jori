@@ -1,19 +1,18 @@
 import { expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { creditTopUp, debitRun } from "./ledger"
+import { creditTopUp, debitRun, resetAllowance } from "./ledger"
 
-const account = (overrides: Partial<Doc<"billingAccounts">> = {}) =>
+const account = (overrides: Partial<Doc<"accounts">> = {}) =>
   ({
     _id: "account-1",
     organizationId: "organization-1",
-    state: "active",
-    includedMicros: 1_000_000,
-    walletMicros: 500_000,
-    autoTopUpUsedMicros: 0,
+    state: { kind: "active", plan: "starter", interval: "month" },
+    micros: { allowance: 1_000_000, wallet: 500_000 },
+    topUp: { charged: { micros: 0 } },
     updatedAt: 0,
     ...overrides,
-  }) as Doc<"billingAccounts">
+  }) as Doc<"accounts">
 
 function fakeCtx(existingEntry: unknown = null) {
   const patch = vi.fn(async () => undefined)
@@ -31,19 +30,21 @@ function fakeCtx(existingEntry: unknown = null) {
   return { ctx, insert, patch }
 }
 
-test("debits drain included usage before the wallet", async () => {
+const policy = { threshold: 10_000_000, amount: 25_000_000, cap: 100_000_000 }
+
+const debit = {
+  runId: "run-1" as Id<"runs">,
+  tokens: { input: 100, output: 20 },
+  now: 42,
+}
+
+test("debits drain the allowance before the wallet", async () => {
   const { ctx, patch } = fakeCtx()
 
-  await debitRun(ctx, {
-    account: account(),
-    runId: "run-1" as Id<"runs">,
-    micros: 1_200_000,
-    now: 42,
-  })
+  await debitRun(ctx, { ...debit, account: account(), micros: 1_200_000 })
 
   expect(patch).toHaveBeenCalledWith("account-1", {
-    includedMicros: 0,
-    walletMicros: 300_000,
+    micros: { allowance: 0, wallet: 300_000 },
     updatedAt: 42,
   })
 })
@@ -52,59 +53,49 @@ test("the wallet may go negative for in-flight work", async () => {
   const { ctx, patch } = fakeCtx()
 
   await debitRun(ctx, {
-    account: account({ includedMicros: 0, walletMicros: 100_000 }),
-    runId: "run-1" as Id<"runs">,
+    ...debit,
+    account: account({ micros: { allowance: 0, wallet: 100_000 } }),
     micros: 250_000,
-    now: 42,
   })
 
   expect(patch).toHaveBeenCalledWith("account-1", {
-    includedMicros: 0,
-    walletMicros: -150_000,
+    micros: { allowance: 0, wallet: -150_000 },
     updatedAt: 42,
   })
 })
 
-test("a run accumulates into a single debit entry with attribution", async () => {
+test("a run accumulates money and tokens into a single debit entry", async () => {
   const { ctx, insert, patch } = fakeCtx({
     _id: "entry-1",
     type: "debit",
-    amountMicros: 40_000,
-    includedMicros: 40_000,
+    micros: { amount: 40_000, allowance: 40_000, balance: 1_460_000 },
+    tokens: { input: 400, output: 80 },
   })
 
-  await debitRun(ctx, {
-    account: account(),
-    runId: "run-1" as Id<"runs">,
-    micros: 60_000,
-    now: 42,
-  })
+  await debitRun(ctx, { ...debit, account: account(), micros: 60_000 })
 
   expect(insert).not.toHaveBeenCalled()
   expect(patch).toHaveBeenCalledWith("entry-1", {
-    amountMicros: 100_000,
-    includedMicros: 100_000,
-    balanceMicros: 1_440_000,
+    micros: { amount: 100_000, allowance: 100_000, balance: 1_440_000 },
+    tokens: { input: 500, output: 100 },
     timestamp: 42,
   })
 })
 
-test("debit entries record their pot split and the balance left", async () => {
+test("debit entries record their pot split, tokens, and the balance left", async () => {
   const { ctx, insert } = fakeCtx()
 
   await debitRun(ctx, {
-    account: account({ includedMicros: 50_000, walletMicros: 200_000 }),
-    runId: "run-1" as Id<"runs">,
+    ...debit,
+    account: account({ micros: { allowance: 50_000, wallet: 200_000 } }),
     micros: 80_000,
-    now: 42,
   })
 
   expect(insert).toHaveBeenCalledWith(
-    "billingEntries",
+    "transactions",
     expect.objectContaining({
-      amountMicros: 80_000,
-      includedMicros: 50_000,
-      balanceMicros: 170_000,
+      micros: { amount: 80_000, allowance: 50_000, balance: 170_000 },
+      tokens: { input: 100, output: 20 },
     })
   )
 })
@@ -123,4 +114,58 @@ test("top-ups are idempotent on the Stripe id", async () => {
   expect(credited).toBe(false)
   expect(insert).not.toHaveBeenCalled()
   expect(patch).not.toHaveBeenCalled()
+})
+
+test("top-ups land in the wallet and state the balance they leave", async () => {
+  const { ctx, insert, patch } = fakeCtx()
+
+  const credited = await creditTopUp(ctx, {
+    account: account(),
+    micros: 25_000_000,
+    stripeId: "cs_123",
+    auto: true,
+    now: 42,
+  })
+
+  expect(credited).toBe(true)
+  expect(patch).toHaveBeenCalledWith("account-1", {
+    micros: { allowance: 1_000_000, wallet: 25_500_000 },
+    updatedAt: 42,
+  })
+  expect(insert).toHaveBeenCalledWith(
+    "transactions",
+    expect.objectContaining({
+      micros: { amount: 25_000_000, balance: 26_500_000 },
+      stripeId: "cs_123",
+      auto: true,
+    })
+  )
+})
+
+test("a fresh allowance replaces the pot and gives the cap back", async () => {
+  const { ctx, insert, patch } = fakeCtx()
+
+  await resetAllowance(ctx, {
+    account: account({
+      micros: { allowance: 200_000, wallet: 500_000 },
+      topUp: { micros: policy, charged: { micros: 50_000_000 } },
+    }),
+    micros: 15_000_000,
+    source: "cycle",
+    now: 42,
+  })
+
+  expect(patch).toHaveBeenCalledWith("account-1", {
+    micros: { allowance: 15_000_000, wallet: 500_000 },
+    topUp: { micros: policy, charged: { micros: 0 } },
+    updatedAt: 42,
+  })
+  expect(insert).toHaveBeenCalledWith(
+    "transactions",
+    expect.objectContaining({
+      type: "allowance",
+      micros: { amount: 15_000_000, balance: 15_500_000 },
+      source: "cycle",
+    })
+  )
 })

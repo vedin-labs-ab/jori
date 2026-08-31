@@ -4,7 +4,7 @@ import { approvals } from "./approvals/schema"
 import { automations } from "./automations/schema"
 import { subscriptions } from "./automations/subscriptions/schema"
 import { backfills } from "./backfill/schema"
-import { billingAccounts, billingEntries } from "./billing/schema"
+import { accounts, transactions } from "./billing/schema"
 import { collections, documents, shares } from "./collections/schema"
 import { conversations } from "./conversations/schema"
 import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
@@ -39,8 +39,8 @@ export default defineSchema({
   allowlist,
   waitlist,
   files,
-  billingAccounts,
-  billingEntries,
+  accounts,
+  transactions,
   persons,
   identities,
   integrations,

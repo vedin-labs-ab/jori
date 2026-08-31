@@ -13,12 +13,12 @@ export const ensure = internalMutation({
 })
 
 export const attachCustomer = internalMutation({
-  args: { organizationId: v.string(), stripeCustomerId: v.string() },
+  args: { organizationId: v.string(), customerId: v.string() },
   handler: async (ctx, args) => {
     const account = await ensureAccount(ctx, args.organizationId)
 
     await ctx.db.patch(account._id, {
-      stripeCustomerId: args.stripeCustomerId,
+      stripe: { ...account.stripe, customerId: args.customerId },
       updatedAt: Date.now(),
     })
 

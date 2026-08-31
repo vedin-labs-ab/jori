@@ -19,15 +19,11 @@ export async function checkRunBudget(
   const account = await ensureAccount(ctx, args.organizationId)
   const now = Date.now()
 
-  if (account.state === "paused") {
+  if (account.state.kind === "paused") {
     return { ok: false, reason: "paused" }
   }
 
-  if (
-    account.state === "trial" &&
-    account.trialEndsAt !== undefined &&
-    account.trialEndsAt < now
-  ) {
+  if (account.state.kind === "trial" && account.state.endsAt < now) {
     return { ok: false, reason: "trial-ended" }
   }
 

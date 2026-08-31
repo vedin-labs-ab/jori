@@ -29,9 +29,9 @@ export function Faq() {
           Every run shows its exact cost in its receipt.
         </Definition>
         <Definition term="Is there a free trial?">
-          Yes. {trial.days} days with {formatUsd(trial.grantMicros)} of usage
-          included, no card required. It ends when the days or the usage run
-          out, whichever comes first.
+          Yes. {trial.days} days with {formatUsd(trial.allowanceMicros)} of
+          usage included, no card required. It ends when the days or the usage
+          run out, whichever comes first.
         </Definition>
         <Definition term="What happens if I cancel?">
           Automations pause and nothing is deleted. Your data, integrations, and

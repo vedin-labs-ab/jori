@@ -5,7 +5,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
 import { requireActivePlan } from "../account"
-import { billingInterval, billingPlan } from "../schema"
+import { interval, plan } from "../schema"
 import { requireString, stripeRequest } from "./client"
 import { stripePriceId } from "./config"
 
@@ -18,8 +18,8 @@ import { stripePriceId } from "./config"
 export const startPlanCheckout = action({
   args: {
     organizationId: v.string(),
-    plan: billingPlan,
-    interval: billingInterval,
+    plan,
+    interval,
     returnUrl: v.string(),
   },
   handler: async (ctx, args) => {
@@ -27,7 +27,7 @@ export const startPlanCheckout = action({
 
     const account = await ensuredAccount(ctx, args.organizationId)
 
-    if (account.stripeSubscriptionId !== undefined) {
+    if (account.stripe?.subscriptionId !== undefined) {
       throw new Error(
         "This organization already has a plan. Use Manage billing to change it."
       )
@@ -128,13 +128,13 @@ export const openPortal = action({
 
     const account = await ensuredAccount(ctx, args.organizationId)
 
-    if (account.stripeCustomerId === undefined) {
+    if (account.stripe === undefined) {
       throw new Error("Nothing to manage yet. Subscribe or top up first.")
     }
 
     const session = await stripeRequest("/v1/billing_portal/sessions", {
       params: {
-        customer: account.stripeCustomerId,
+        customer: account.stripe.customerId,
         return_url: args.returnUrl,
       },
     })
@@ -144,7 +144,7 @@ export const openPortal = action({
 })
 
 async function ensuredAccount(ctx: ActionCtx, organizationId: string) {
-  const account: Doc<"billingAccounts"> = await ctx.runMutation(
+  const account: Doc<"accounts"> = await ctx.runMutation(
     internal.billing.stripe.data.ensure,
     { organizationId }
   )
@@ -155,10 +155,10 @@ async function ensuredAccount(ctx: ActionCtx, organizationId: string) {
 async function ensuredCustomer(
   ctx: ActionCtx,
   organizationId: string,
-  account: Doc<"billingAccounts">
+  account: Doc<"accounts">
 ) {
-  if (account.stripeCustomerId !== undefined) {
-    return account.stripeCustomerId
+  if (account.stripe !== undefined) {
+    return account.stripe.customerId
   }
 
   const identity = await ctx.auth.getUserIdentity()
@@ -172,7 +172,7 @@ async function ensuredCustomer(
 
   await ctx.runMutation(internal.billing.stripe.data.attachCustomer, {
     organizationId,
-    stripeCustomerId: customerId,
+    customerId,
   })
 
   return customerId

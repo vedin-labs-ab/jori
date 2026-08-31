@@ -15,57 +15,24 @@ vi.mock("./ledger", () => ({ debitRun: vi.fn() }))
 const configuredAccount = {
   _id: "account-1",
   organizationId: "organization-1",
-  state: "trial",
-  includedMicros: 0,
-  walletMicros: 0,
-  autoTopUp: {
-    amountMicros: 25_000_000,
-    monthlyCapMicros: 100_000_000,
-    thresholdMicros: 10_000_000,
+  state: { kind: "trial", endsAt: Date.now() + 1000 },
+  micros: { allowance: 0, wallet: 0 },
+  topUp: {
+    micros: {
+      threshold: 10_000_000,
+      amount: 25_000_000,
+      cap: 100_000_000,
+    },
+    charged: { micros: 0 },
   },
-  autoTopUpUsedMicros: 0,
-  stripeCustomerId: "customer-1",
+  stripe: { customerId: "customer-1" },
   updatedAt: 0,
-} as Doc<"billingAccounts">
+} as Doc<"accounts">
 
-beforeEach(() => {
-  vi.mocked(ensureAccount).mockReset()
-  vi.mocked(holdAutoTopUp).mockReset()
-  vi.mocked(debitRun).mockReset()
-})
-
-test("a trial cannot schedule a legacy auto top-up", async () => {
-  const schedule = vi.fn()
-  vi.mocked(ensureAccount).mockResolvedValue(configuredAccount)
-
-  await meterModelUsage(
-    {
-      db: { get: vi.fn(async () => configuredAccount) },
-      scheduler: { runAfter: schedule },
-    } as unknown as MutationCtx,
-    {
-      run: {
-        _id: "run-1",
-        organizationId: configuredAccount.organizationId,
-      } as Doc<"runs">,
-      usage: { inputTokens: 1, outputTokens: 0 },
-    }
-  )
-
-  expect(holdAutoTopUp).not.toHaveBeenCalled()
-  expect(schedule).not.toHaveBeenCalled()
-})
-
-test("an active plan can schedule its configured auto top-up", async () => {
-  const account = {
-    ...configuredAccount,
-    plan: "starter" as const,
-    state: "active" as const,
-  }
-  const schedule = vi.fn()
+function meterOnce(account: Doc<"accounts">, schedule: () => void) {
   vi.mocked(ensureAccount).mockResolvedValue(account)
 
-  await meterModelUsage(
+  return meterModelUsage(
     {
       db: { get: vi.fn(async () => account) },
       scheduler: { runAfter: schedule },
@@ -75,10 +42,68 @@ test("an active plan can schedule its configured auto top-up", async () => {
         _id: "run-1",
         organizationId: account.organizationId,
       } as Doc<"runs">,
-      usage: { inputTokens: 1, outputTokens: 0 },
+      usage: { inputTokens: 1_000, outputTokens: 200 },
     }
+  )
+}
+
+beforeEach(() => {
+  vi.mocked(ensureAccount).mockReset()
+  vi.mocked(holdAutoTopUp).mockReset()
+  vi.mocked(debitRun).mockReset()
+})
+
+test("a trial cannot schedule an auto top-up", async () => {
+  const schedule = vi.fn()
+
+  await meterOnce(configuredAccount, schedule)
+
+  expect(holdAutoTopUp).not.toHaveBeenCalled()
+  expect(schedule).not.toHaveBeenCalled()
+})
+
+test("an active plan can schedule its configured auto top-up", async () => {
+  const schedule = vi.fn()
+
+  await meterOnce(
+    {
+      ...configuredAccount,
+      state: { kind: "active", plan: "starter", interval: "month" },
+    },
+    schedule
   )
 
   expect(holdAutoTopUp).toHaveBeenCalledOnce()
   expect(schedule).toHaveBeenCalledOnce()
+})
+
+test("the debit carries the tokens the amount was made of", async () => {
+  await meterOnce(configuredAccount, vi.fn())
+
+  expect(debitRun).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      micros: 11_000,
+      tokens: { input: 1_000, output: 200 },
+    })
+  )
+})
+
+test("a spent monthly cap holds the charge back", async () => {
+  const schedule = vi.fn()
+
+  await meterOnce(
+    {
+      ...configuredAccount,
+      state: { kind: "active", plan: "starter", interval: "month" },
+      topUp: {
+        ...configuredAccount.topUp,
+        charged: { micros: 90_000_000 },
+      },
+    },
+    schedule
+  )
+
+  expect(holdAutoTopUp).not.toHaveBeenCalled()
+  expect(schedule).not.toHaveBeenCalled()
 })

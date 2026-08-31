@@ -49,7 +49,7 @@ type ActivityRow = {
   runId: string | undefined
   dot: string | undefined
   signedMicros: number
-  balanceMicros: number | undefined
+  balanceMicros: number
 }
 
 const kindLabels: Record<ActivityKind, string> = {
@@ -292,34 +292,30 @@ const columns: ColumnDef<ActivityRow>[] = [
     header: () => <div className="text-right">Available</div>,
     cell: ({ row }) => (
       <div className="text-right text-muted-foreground tabular-nums">
-        {row.original.balanceMicros === undefined
-          ? null
-          : formatUsd(row.original.balanceMicros)}
+        {formatUsd(row.original.balanceMicros)}
       </div>
     ),
   },
 ]
 
+const entryKinds: Record<BillingEntry["type"], ActivityKind> = {
+  debit: "run",
+  allowance: "allowance",
+  topup: "top-up",
+}
+
 function toRow(entry: BillingEntry): ActivityRow {
   return {
     id: entry._id,
     timestamp: entry.timestamp,
-    kind: entryKind(entry),
+    kind: entryKinds[entry.type],
     label: entryLabel(entry),
     runId: entry.type === "debit" ? entry.runId : undefined,
     dot: entryDot(entry),
     signedMicros:
-      entry.type === "debit" ? -entry.amountMicros : entry.amountMicros,
-    balanceMicros: entry.balanceMicros,
+      entry.type === "debit" ? -entry.micros.amount : entry.micros.amount,
+    balanceMicros: entry.micros.balance,
   }
-}
-
-function entryKind(entry: BillingEntry): ActivityKind {
-  if (entry.type === "debit") {
-    return "run"
-  }
-
-  return entry.type === "grant" ? "allowance" : "top-up"
 }
 
 function entryLabel(entry: BillingEntry) {
@@ -335,7 +331,7 @@ function entryLabel(entry: BillingEntry) {
 }
 
 function entryDot(entry: BillingEntry) {
-  if (entry.type === "grant") {
+  if (entry.type === "allowance") {
     return entry.source === "trial" ? "bg-warning" : "bg-primary"
   }
 

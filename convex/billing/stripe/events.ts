@@ -15,7 +15,7 @@ import {
   trialRemainderMicros,
 } from "../account"
 import { addMonths } from "../cycle"
-import { creditTopUp, grantIncluded } from "../ledger"
+import { creditTopUp, resetAllowance } from "../ledger"
 import { planForPriceId } from "./config"
 
 /**
@@ -29,23 +29,15 @@ export const apply = internalMutation({
   handler: async (ctx, args) => {
     const type = readString(args.event, "type")
     const object = readRecord(readRecord(readRecord(args.event).data).object)
+    const deleted = type === "customer.subscription.deleted"
+    const paid = type === "payment_intent.succeeded"
 
     if (type === "checkout.session.completed") {
       await applyCheckoutCompleted(ctx, object)
-    } else if (
-      type === "customer.subscription.updated" ||
-      type === "customer.subscription.deleted"
-    ) {
-      await applySubscription(ctx, object, {
-        deleted: type === "customer.subscription.deleted",
-      })
-    } else if (
-      type === "payment_intent.succeeded" ||
-      type === "payment_intent.payment_failed"
-    ) {
-      await applyPaymentIntent(ctx, object, {
-        succeeded: type === "payment_intent.succeeded",
-      })
+    } else if (type === "customer.subscription.updated" || deleted) {
+      await applySubscription(ctx, object, deleted)
+    } else if (paid || type === "payment_intent.payment_failed") {
+      await applyPaymentIntent(ctx, object, paid)
     }
 
     return null
@@ -64,84 +56,83 @@ async function applyCheckoutCompleted(
   }
 
   const account = await ensureAccount(ctx, organizationId)
-  const customerId = readString(session, "customer")
+  const customerId =
+    readString(session, "customer") ?? account.stripe?.customerId
 
-  if (customerId !== undefined && account.stripeCustomerId === undefined) {
-    await ctx.db.patch(account._id, { stripeCustomerId: customerId })
+  if (customerId !== undefined && account.stripe === undefined) {
+    await ctx.db.patch(account._id, { stripe: { customerId } })
   }
 
   const kind = readString(metadata, "kind")
 
   if (kind === "plan") {
-    await applyPlanCheckout(ctx, { account, session, metadata })
+    await applyPlanCheckout(ctx, account, session, customerId)
   } else if (kind === "top-up") {
-    await applyTopUpCheckout(ctx, { account, session, metadata })
+    await applyTopUpCheckout(ctx, account, session)
   }
 }
 
 async function applyPlanCheckout(
   ctx: MutationCtx,
-  args: {
-    account: Doc<"billingAccounts">
-    session: Record<string, unknown>
-    metadata: Record<string, unknown>
-  }
+  account: Doc<"accounts">,
+  session: Record<string, unknown>,
+  customerId: string | undefined
 ) {
-  const subscriptionId = readString(args.session, "subscription")
-  const plan = planKeys.find((key) => key === args.metadata.plan)
+  const metadata = readRecord(session.metadata)
+  const subscriptionId = readString(session, "subscription")
+  const plan = planKeys.find((key) => key === metadata.plan)
   const interval = billingIntervals.find(
-    (candidate) => candidate === args.metadata.interval
+    (candidate) => candidate === metadata.interval
   )
 
-  if (subscriptionId === undefined || plan === undefined) {
-    return
-  }
-
-  // Retries of an already-applied checkout land here as a no-op.
-  if (args.account.stripeSubscriptionId === subscriptionId) {
+  // An active plan is a plan, an interval, a customer, and a subscription to
+  // bill it; a payload short of any of them is not a purchase to record.
+  // Retries of an already-applied checkout are a no-op for the same reason.
+  if (
+    subscriptionId === undefined ||
+    plan === undefined ||
+    interval === undefined ||
+    customerId === undefined ||
+    account.stripe?.subscriptionId === subscriptionId
+  ) {
     return
   }
 
   const now = Date.now()
-  const remainderMicros = trialRemainderMicros(args.account, now)
 
-  await ctx.db.patch(args.account._id, {
-    state: "active",
-    plan,
-    interval,
-    trialEndsAt: undefined,
-    autoTopUp: undefined,
-    autoTopUpHoldUntil: undefined,
-    stripeSubscriptionId: subscriptionId,
-    nextGrantAt: addMonths(now, 1),
-    updatedAt: now,
-  })
-
-  await grantIncluded(ctx, {
-    account: args.account,
-    micros: plans[plan].includedMonthlyMicros + remainderMicros,
+  await resetAllowance(ctx, {
+    account,
+    micros:
+      plans[plan].monthlyAllowanceMicros + trialRemainderMicros(account, now),
     source: "plan",
     now,
+  })
+
+  // Written after the allowance so it wins the shared `topUp` object: a fresh
+  // plan starts without whatever auto top-up the trial had configured.
+  await ctx.db.patch(account._id, {
+    state: { kind: "active", plan, interval },
+    topUp: { charged: { micros: 0 } },
+    stripe: { customerId, subscriptionId },
+    renewsAt: addMonths(now, 1),
+    updatedAt: now,
   })
 }
 
 async function applyTopUpCheckout(
   ctx: MutationCtx,
-  args: {
-    account: Doc<"billingAccounts">
-    session: Record<string, unknown>
-    metadata: Record<string, unknown>
-  }
+  account: Doc<"accounts">,
+  session: Record<string, unknown>
 ) {
-  const sessionId = readString(args.session, "id")
-  const micros = readMicros(args.metadata.micros)
+  const sessionId = readString(session, "id")
+  const micros = readMicros(readRecord(session.metadata).micros)
 
   if (sessionId === undefined || micros === undefined) {
     return
   }
 
   await creditTopUp(ctx, {
-    account: args.account,
+    account,
     micros,
     stripeId: sessionId,
     auto: false,
@@ -157,62 +148,86 @@ async function applyTopUpCheckout(
 async function applySubscription(
   ctx: MutationCtx,
   subscription: Record<string, unknown>,
-  args: { deleted: boolean }
+  deleted: boolean
 ) {
   const account = await findSubscriptionAccount(ctx, subscription)
+  const sold =
+    account === null ? undefined : subscribedPlan(account, subscription)
 
-  if (account === null) {
+  if (account === null || sold === undefined) {
     return
   }
 
   const now = Date.now()
   const status = readString(subscription, "status")
   const ended =
-    args.deleted ||
+    deleted ||
     status === "canceled" ||
     status === "unpaid" ||
     status === "incomplete_expired"
 
   if (ended) {
     await ctx.db.patch(account._id, {
-      state: "paused",
-      nextGrantAt: undefined,
-      stripeSubscriptionId: undefined,
+      state: { kind: "paused", ...sold },
+      renewsAt: undefined,
+      // The customer outlives the subscription: the saved card and the
+      // invoice history stay reachable after a cancellation.
+      stripe: account.stripe && { customerId: account.stripe.customerId },
       updatedAt: now,
     })
 
     return
   }
 
-  const priced = readSubscriptionPlan(subscription)
-  const planChanged = priced !== undefined && priced.plan !== account.plan
-  const resumed = account.state !== "active" && status === "active"
+  if (status !== "active" && status !== "past_due") {
+    return
+  }
+
+  const resumed = account.state.kind !== "active" && status === "active"
+  const planChanged =
+    account.state.kind === "active" && account.state.plan !== sold.plan
 
   await ctx.db.patch(account._id, {
-    ...(status === "active" || status === "past_due"
-      ? { state: "active" as const }
-      : {}),
-    ...(priced ?? {}),
-    ...(resumed && account.nextGrantAt === undefined
-      ? { nextGrantAt: addMonths(now, 1) }
+    state: { kind: "active", ...sold },
+    ...(resumed && account.renewsAt === undefined
+      ? { renewsAt: addMonths(now, 1) }
       : {}),
     updatedAt: now,
   })
 
-  if ((planChanged || resumed) && priced !== undefined) {
-    await grantIncluded(ctx, {
+  if (planChanged || resumed) {
+    await resetAllowance(ctx, {
       account,
-      micros: plans[priced.plan].includedMonthlyMicros,
+      micros: plans[sold.plan].monthlyAllowanceMicros,
       source: "plan",
       now,
     })
   }
 }
 
+/** Which plan a subscription change applies to: what Stripe now sells,
+ *  falling back to what the account carries. A trial that bought nothing has
+ *  neither, so there is nothing to pause or resume. */
+function subscribedPlan(
+  account: Doc<"accounts">,
+  subscription: Record<string, unknown>
+) {
+  const item = readArray(readRecord(subscription.items).data)[0]
+  const priceId = readString(readRecord(item).price, "id")
+  const state = account.state
+
+  return (
+    (priceId === undefined ? undefined : planForPriceId(priceId)) ??
+    (state.kind === "trial"
+      ? undefined
+      : { plan: state.plan, interval: state.interval })
+  )
+}
+
 async function applyPaymentIntent(
   ctx: MutationCtx,
   intent: Record<string, unknown>,
-  args: { succeeded: boolean }
+  succeeded: boolean
 ) {
   const metadata = readRecord(intent.metadata)
 
@@ -230,7 +245,7 @@ async function applyPaymentIntent(
 
   const now = Date.now()
 
-  if (!args.succeeded) {
+  if (!succeeded) {
     await holdAutoTopUp(ctx, account, now + autoTopUp.cooldownMs)
 
     return
@@ -252,9 +267,12 @@ async function applyPaymentIntent(
   })
 
   if (credited) {
+    // A successful charge spends the claim and counts against the cap.
     await ctx.db.patch(account._id, {
-      autoTopUpUsedMicros: account.autoTopUpUsedMicros + micros,
-      autoTopUpHoldUntil: undefined,
+      topUp: {
+        ...account.topUp,
+        charged: { micros: account.topUp.charged.micros + micros },
+      },
       updatedAt: now,
     })
   }
@@ -280,18 +298,11 @@ async function findSubscriptionAccount(
   }
 
   return await ctx.db
-    .query("billingAccounts")
+    .query("accounts")
     .withIndex("by_stripe_customer", (query) =>
-      query.eq("stripeCustomerId", customerId)
+      query.eq("stripe.customerId", customerId)
     )
     .unique()
-}
-
-function readSubscriptionPlan(subscription: Record<string, unknown>) {
-  const item = readArray(readRecord(subscription.items).data)[0]
-  const priceId = readString(readRecord(item).price, "id")
-
-  return priceId === undefined ? undefined : planForPriceId(priceId)
 }
 
 function readMicros(value: unknown) {

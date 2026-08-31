@@ -1,73 +1,90 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
-export const billingPlan = v.union(v.literal("starter"), v.literal("team"))
-export const billingInterval = v.union(v.literal("month"), v.literal("year"))
+export const plan = v.union(v.literal("starter"), v.literal("team"))
+export const interval = v.union(v.literal("month"), v.literal("year"))
 
 /**
- * One row per organization: plan state plus the two spendable balances, in integer
- * micro-dollars. `includedMicros` is the plan's monthly allotment and resets
- * each cycle; `walletMicros` is prepaid, rolls over, and may dip slightly
- * negative while in-flight runs finish. `autoTopUpHoldUntil` is the in-flight
- * claim for one auto top-up attempt: set while a charge is pending or cooling
- * down after a decline, so concurrent debits cannot double-charge.
+ * One row per organization: what the organization is paying for, plus the two
+ * spendable pots in integer micro-dollars. `allowance` is the monthly
+ * allotment and resets each cycle; `wallet` is prepaid, rolls over, and may
+ * dip slightly negative while in-flight runs finish.
+ *
+ * A trial knows when it ends and a plan is only a fact once one is bought, so
+ * `state` carries each with the shape it belongs to rather than leaving a
+ * reader to check optional columns against a status.
  */
-export const billingAccounts = defineTable({
+export const accounts = defineTable({
   organizationId: v.string(),
-  state: v.union(v.literal("trial"), v.literal("active"), v.literal("paused")),
-  plan: v.optional(billingPlan),
-  interval: v.optional(billingInterval),
-  trialEndsAt: v.optional(v.number()),
-  includedMicros: v.number(),
-  walletMicros: v.number(),
-  nextGrantAt: v.optional(v.number()),
-  // `thresholdMicros` is optional only because rows predating the knob lack
-  // it; readers fall back to the contract default.
-  autoTopUp: v.optional(
+  state: v.union(
+    v.object({ kind: v.literal("trial"), endsAt: v.number() }),
+    v.object({ kind: v.literal("active"), plan, interval }),
+    v.object({ kind: v.literal("paused"), plan, interval })
+  ),
+  micros: v.object({ allowance: v.number(), wallet: v.number() }),
+  /** When the next cycle allowance lands. */
+  renewsAt: v.optional(v.number()),
+  topUp: v.object({
+    /** The policy; absent when auto top-up is off. */
+    micros: v.optional(
+      v.object({
+        threshold: v.number(),
+        amount: v.number(),
+        cap: v.number(),
+      })
+    ),
+    // What auto top-up has charged against this month's cap, plus the claim
+    // one attempt owns while a charge is pending or cooling down after a
+    // decline, so concurrent debits cannot double-charge. Both outlive
+    // switching the policy off.
+    charged: v.object({
+      micros: v.number(),
+      releaseAt: v.optional(v.number()),
+    }),
+  }),
+  stripe: v.optional(
     v.object({
-      thresholdMicros: v.optional(v.number()),
-      amountMicros: v.number(),
-      monthlyCapMicros: v.number(),
+      customerId: v.string(),
+      subscriptionId: v.optional(v.string()),
     })
   ),
-  autoTopUpUsedMicros: v.number(),
-  autoTopUpHoldUntil: v.optional(v.number()),
-  stripeCustomerId: v.optional(v.string()),
-  stripeSubscriptionId: v.optional(v.string()),
   updatedAt: v.number(),
 })
   .index("by_organization", ["organizationId"])
-  .index("by_next_grant", ["nextGrantAt"])
-  .index("by_stripe_customer", ["stripeCustomerId"])
+  .index("by_renewal", ["renewsAt"])
+  .index("by_stripe_customer", ["stripe.customerId"])
 
 /**
  * The money history. Debit rows are one per run and accumulate as the run
- * progresses, so the feed reads as receipts rather than per-call noise.
+ * progresses, so the feed reads as receipts rather than per-call noise, and
+ * they carry the tokens the amount was made of: every prompt token, cached or
+ * not, and completion tokens, reasoning included — the two quantities the rate
+ * table prices. `micros.allowance` is the portion drained from the monthly
+ * pot, attributing each run to its pot, and `micros.balance` is what remained
+ * after the entry, so the feed reads as a statement.
+ *
  * `stripeId` on top-ups is the Stripe object that paid (checkout session or
  * payment intent) and doubles as the webhook idempotency key.
- *
- * `balanceMicros` is the available balance after the entry, so the feed reads
- * as a statement; `includedMicros` on debits is the portion drained from the
- * included allotment, attributing each run to its pot. Both are optional only
- * because rows written before they existed lack them.
  */
-export const billingEntries = defineTable(
+export const transactions = defineTable(
   v.union(
     v.object({
       organizationId: v.string(),
       timestamp: v.number(),
       type: v.literal("debit"),
-      amountMicros: v.number(),
-      includedMicros: v.optional(v.number()),
-      balanceMicros: v.optional(v.number()),
+      micros: v.object({
+        amount: v.number(),
+        allowance: v.number(),
+        balance: v.number(),
+      }),
+      tokens: v.object({ input: v.number(), output: v.number() }),
       runId: v.id("runs"),
     }),
     v.object({
       organizationId: v.string(),
       timestamp: v.number(),
-      type: v.literal("grant"),
-      amountMicros: v.number(),
-      balanceMicros: v.optional(v.number()),
+      type: v.literal("allowance"),
+      micros: v.object({ amount: v.number(), balance: v.number() }),
       source: v.union(
         v.literal("trial"),
         v.literal("cycle"),
@@ -78,8 +95,7 @@ export const billingEntries = defineTable(
       organizationId: v.string(),
       timestamp: v.number(),
       type: v.literal("topup"),
-      amountMicros: v.number(),
-      balanceMicros: v.optional(v.number()),
+      micros: v.object({ amount: v.number(), balance: v.number() }),
       stripeId: v.string(),
       auto: v.boolean(),
     })

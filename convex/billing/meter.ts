@@ -1,18 +1,8 @@
-import {
-  autoTopUp,
-  dollarsToMicros,
-  joriModel,
-  priceModelUsage,
-} from "../../contracts/billing"
+import { autoTopUp, joriModel, priceModelUsage } from "../../contracts/billing"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import {
-  availableMicros,
-  ensureAccount,
-  hasActivePlan,
-  holdAutoTopUp,
-} from "./account"
+import { availableMicros, ensureAccount, holdAutoTopUp } from "./account"
 import { debitRun } from "./ledger"
 
 /**
@@ -37,7 +27,16 @@ export async function meterModelUsage(
   const now = Date.now()
   const account = await ensureAccount(ctx, args.run.organizationId)
 
-  await debitRun(ctx, { account, runId: args.run._id, micros, now })
+  await debitRun(ctx, {
+    account,
+    runId: args.run._id,
+    micros,
+    tokens: {
+      input: args.usage.inputTokens,
+      output: args.usage.outputTokens,
+    },
+    now,
+  })
 
   const debited = await ctx.db.get(account._id)
 
@@ -47,43 +46,36 @@ export async function meterModelUsage(
 }
 
 /**
- * The hold field is the claim: setting it here means one charge attempt owns
- * the window, so parallel debits cannot double-charge. The Stripe edge clears
- * it on success and extends it into a cooldown on decline.
+ * The claim is the release time on the charged total: setting it here means
+ * one charge attempt owns the window, so parallel debits cannot double-charge.
+ * The Stripe edge clears it on success and extends it into a cooldown on
+ * decline.
  */
 async function maybeScheduleAutoTopUp(
   ctx: MutationCtx,
-  args: { account: Doc<"billingAccounts">; now: number }
+  args: { account: Doc<"accounts">; now: number }
 ) {
   const { account, now } = args
-  const config = account.autoTopUp
+  const policy = account.topUp.micros
+  const { micros: charged, releaseAt } = account.topUp.charged
 
   if (
-    !hasActivePlan(account) ||
-    config === undefined ||
-    account.stripeCustomerId === undefined
+    account.state.kind !== "active" ||
+    policy === undefined ||
+    account.stripe === undefined
   ) {
     return
   }
 
-  const thresholdMicros =
-    config.thresholdMicros ?? dollarsToMicros(autoTopUp.defaultThresholdUsd)
-
-  if (availableMicros(account) >= thresholdMicros) {
+  if (availableMicros(account) >= policy.threshold) {
     return
   }
 
-  if (
-    account.autoTopUpHoldUntil !== undefined &&
-    account.autoTopUpHoldUntil > now
-  ) {
+  if (releaseAt !== undefined && releaseAt > now) {
     return
   }
 
-  if (
-    account.autoTopUpUsedMicros + config.amountMicros >
-    config.monthlyCapMicros
-  ) {
+  if (charged + policy.amount > policy.cap) {
     return
   }
 
