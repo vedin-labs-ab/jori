@@ -115,3 +115,46 @@ test("renders bash commands as inline code", () => {
   expect(code.className).toContain("font-mono")
   expect(code.className).toContain("bg-muted")
 })
+
+// A run's clock re-renders every row once a second, and reading overflow
+// forces a synchronous layout. The line is measured when its text or its
+// width changes, never because the clock moved.
+test("does not re-measure overflow when only the clock changes", () => {
+  const item = activityItem({
+    metadata: [{ kind: "target", text: "src/console/runs/activity/item.tsx" }],
+    title: "Read file",
+  })
+  const view = render(
+    <TooltipProvider>
+      <ActivityItem item={item} now={1700000002000} />
+    </TooltipProvider>
+  )
+
+  let reads = 0
+  const scrollWidth = Object.getOwnPropertyDescriptor(
+    Element.prototype,
+    "scrollWidth"
+  )
+
+  Object.defineProperty(Element.prototype, "scrollWidth", {
+    configurable: true,
+    get() {
+      reads += 1
+      return 0
+    },
+  })
+
+  try {
+    view.rerender(
+      <TooltipProvider>
+        <ActivityItem item={item} now={1700000003000} />
+      </TooltipProvider>
+    )
+  } finally {
+    if (scrollWidth !== undefined) {
+      Object.defineProperty(Element.prototype, "scrollWidth", scrollWidth)
+    }
+  }
+
+  expect(reads).toBe(0)
+})

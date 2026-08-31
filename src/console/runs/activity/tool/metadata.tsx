@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  type RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
+import { forwardRef, type RefObject, useEffect, useRef, useState } from "react"
 import {
   Tooltip,
   TooltipContent,
@@ -34,8 +27,11 @@ export function ActivityToolMetadata({
 }) {
   const { title, tool } = item
   const contentRef = useRef<HTMLSpanElement>(null)
-  const isOverflowing = useOverflowingContent(contentRef)
   const metadata = displayMetadata(title, items)
+  const isOverflowing = useOverflowingContent(
+    contentRef,
+    metadata.inlineItems.map(metadataKey).join("|")
+  )
   const content = (
     <ToolMetadataContent
       items={metadata.inlineItems}
@@ -233,44 +229,44 @@ function isCountOutcome(text: string, noun: string) {
   return new RegExp(`^\\d[\\d,.]*\\s+${noun}s?$`, "i").test(text)
 }
 
-function useOverflowingContent(ref: RefObject<HTMLElement | null>) {
-  const [isOverflowing, setIsOverflowing] = useState(false)
-  const updateOverflowState = useCallback(() => {
-    const element = ref.current
-    setIsOverflowing(element === null ? false : hasOverflowingContent(element))
-  }, [ref])
-
-  useEffect(() => {
-    updateOverflowState()
-  })
+// Measuring overflow forces a synchronous layout, so it happens only when
+// something can have changed the answer: the text on the line, or the width
+// it has to fit in. A run's clock re-renders every row every second, and
+// measuring on those renders re-read layout once per line per tick.
+function useOverflowingContent(
+  ref: RefObject<HTMLElement | null>,
+  contentKey: string
+) {
+  const [measured, setMeasured] = useState({ contentKey, isOverflowing: false })
 
   useEffect(() => {
     const element = ref.current
 
     if (element === null) {
-      setIsOverflowing(false)
+      setMeasured({ contentKey, isOverflowing: false })
       return
     }
 
-    updateOverflowState()
+    const measure = () =>
+      setMeasured({ contentKey, isOverflowing: hasOverflowingContent(element) })
+
+    measure()
 
     if (typeof ResizeObserver === "undefined") {
-      if (typeof window === "undefined") {
-        return
-      }
+      window.addEventListener("resize", measure)
 
-      window.addEventListener("resize", updateOverflowState)
-
-      return () => window.removeEventListener("resize", updateOverflowState)
+      return () => window.removeEventListener("resize", measure)
     }
 
-    const observer = new ResizeObserver(updateOverflowState)
+    const observer = new ResizeObserver(measure)
     observer.observe(element)
 
     return () => observer.disconnect()
-  }, [ref, updateOverflowState])
+  }, [contentKey, ref])
 
-  return isOverflowing
+  // Text that has not been measured yet is not yet known to overflow, so it
+  // carries no tooltip until the pass above answers for it.
+  return measured.contentKey === contentKey && measured.isOverflowing
 }
 
 function hasOverflowingContent(element: HTMLElement) {
