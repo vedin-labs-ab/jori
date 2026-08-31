@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
@@ -88,7 +89,7 @@ export function AddRowDialog({
             ))}
           </div>
           {built.ok || Object.keys(draft).length === 0 ? null : (
-            <p className="text-destructive text-xs">{built.error}</p>
+            <FieldError>{built.error}</FieldError>
           )}
           <DialogFooter>
             <Button disabled={!built.ok || isSaving} type="submit">

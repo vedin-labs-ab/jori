@@ -11,6 +11,7 @@ import {
   Type,
   X,
 } from "lucide-react"
+import { FieldError } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
 import { type ValueField, type ValueProperty } from "./model"
 
@@ -188,7 +189,7 @@ export function AddItemRow({
           <Plus aria-hidden className="size-3.5" />
           Add item
         </button>
-        <ValueFieldError className="px-3 pb-2" message={error} />
+        <FieldError className="px-3 pb-2">{error}</FieldError>
       </div>
     </div>
   )
@@ -214,24 +215,6 @@ export function RemoveButton({
   )
 }
 
-export function ValueFieldError({
-  className,
-  message,
-}: {
-  className?: string
-  message: string | undefined
-}) {
-  if (message === undefined) {
-    return null
-  }
-
-  return (
-    <p className={cn("text-destructive text-xs", className)} role="alert">
-      {message}
-    </p>
-  )
-}
-
 /** A full-width strip for errors reported at a group's own path. */
 export function ErrorRow({ message }: { message: string | undefined }) {
   if (message === undefined) {
@@ -240,7 +223,7 @@ export function ErrorRow({ message }: { message: string | undefined }) {
 
   return (
     <div className="px-3 py-2">
-      <ValueFieldError message={message} />
+      <FieldError>{message}</FieldError>
     </div>
   )
 }

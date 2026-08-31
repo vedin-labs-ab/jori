@@ -1,4 +1,5 @@
 import { EditorContent } from "@tiptap/react"
+import { FieldError } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
 import { automationScopeConflictMessage } from "../../access"
 import { useAutomationInstructionsEditor } from "./editor/state"
@@ -57,13 +58,9 @@ export function AutomationInstructionsField(
         />
       </div>
       {props.error === undefined ? null : (
-        <p
-          className="text-destructive text-xs/relaxed"
-          id={errorId}
-          role="alert"
-        >
+        <FieldError id={errorId}>
           <InstructionErrorText error={props.error} />
-        </p>
+        </FieldError>
       )}
     </div>
   )

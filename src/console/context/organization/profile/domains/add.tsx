@@ -4,6 +4,7 @@ import { Plus, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
+import { FieldError } from "@/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -135,7 +136,7 @@ function AddDomainForm({
       {error === null ? null : (
         /* Zero intrinsic width so the column is sized by the button group
            alone: the hint starts at the input's left edge and wraps there. */
-        <p className="w-0 min-w-full text-destructive text-xs">{error}</p>
+        <FieldError className="w-0 min-w-full">{error}</FieldError>
       )}
     </form>
   )

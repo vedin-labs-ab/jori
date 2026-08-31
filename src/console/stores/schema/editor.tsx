@@ -1,4 +1,5 @@
 import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { FieldError } from "@/components/ui/field"
 import { JsonBlock } from "../../shared/code"
 import { SchemaFieldList } from "./fields"
 import { type SchemaEditor } from "./state"
@@ -30,11 +31,7 @@ export function SchemaEditorSection({
           onErrorClear={editor.clearFieldError}
         />
       )}
-      {submitError === undefined ? null : (
-        <p className="text-destructive text-xs" role="alert">
-          {submitError}
-        </p>
-      )}
+      <FieldError>{submitError}</FieldError>
     </div>
   )
 }

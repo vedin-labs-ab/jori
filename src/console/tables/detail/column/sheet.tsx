@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -84,11 +85,7 @@ export function ColumnSheet({
             )}
           >
             <SheetFields form={form} isCreating={isCreating} table={table} />
-            {form.error === undefined ? null : (
-              <p className="text-destructive text-xs" role="alert">
-                {form.error}
-              </p>
-            )}
+            <FieldError>{form.error}</FieldError>
           </div>
           <ColumnSheetFooter
             form={form}

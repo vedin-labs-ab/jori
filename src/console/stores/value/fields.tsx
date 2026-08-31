@@ -1,15 +1,9 @@
+import { FieldError } from "@/components/ui/field"
 import { ArrayFields } from "./arrays"
 import { emptyState, hasUnsetAffordance, type ValueState } from "./convert"
 import { type ChangeHandler, LeafControl } from "./inputs"
 import { type ValueField, type ValueProperty } from "./model"
-import {
-  ErrorRow,
-  GroupRow,
-  KeyCell,
-  RemoveButton,
-  UnsetRow,
-  ValueFieldError,
-} from "./rows"
+import { ErrorRow, GroupRow, KeyCell, RemoveButton, UnsetRow } from "./rows"
 import { valueRootPath } from "./state"
 
 // The schema-driven value form as one hairline key/value grid, in the
@@ -170,7 +164,7 @@ function PropertyRows({
           required={property.required}
           state={state}
         />
-        <ValueFieldError className="px-3 pb-2" message={errors[path]} />
+        <FieldError className="px-3 pb-2">{errors[path]}</FieldError>
       </div>
       {!property.required && hasUnsetAffordance(property.field) ? (
         <RemoveButton
@@ -250,10 +244,7 @@ function NestedRows({
                 required
                 state={item}
               />
-              <ValueFieldError
-                className="px-3 pb-2"
-                message={errors[itemPath]}
-              />
+              <FieldError className="px-3 pb-2">{errors[itemPath]}</FieldError>
             </>
           )
         }

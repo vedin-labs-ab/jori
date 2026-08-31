@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { api } from "../../../convex/_generated/api"
@@ -303,11 +304,7 @@ function FolderNameDialog({
               }}
               value={name}
             />
-            {error === undefined ? null : (
-              <p className="text-destructive text-xs" role="alert">
-                {error}
-              </p>
-            )}
+            <FieldError>{error}</FieldError>
           </div>
           <DialogFooter>
             <Button disabled={isSaving} type="submit">

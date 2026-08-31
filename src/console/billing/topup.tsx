@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { FieldError } from "@/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -108,14 +109,10 @@ export function TopUpDialog({
                 </InputGroupAddon>
               </InputGroup>
               {valid ? null : (
-                <p
-                  className="text-destructive text-xs"
-                  id="top-up-amount-issue"
-                  role="alert"
-                >
+                <FieldError id="top-up-amount-issue">
                   Any whole amount from ${topUp.minimumUsd} to $
                   {topUp.maximumUsd.toLocaleString("en-US")}.
-                </p>
+                </FieldError>
               )}
             </div>
           </div>
