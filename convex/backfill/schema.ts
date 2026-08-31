@@ -37,6 +37,4 @@ export const backfills = defineTable({
   error: v.optional(v.string()),
   startedAt: v.number(),
   endedAt: v.optional(v.number()),
-})
-  .index("by_organization", ["organizationId"])
-  .index("by_integration", ["integrationId"])
+}).index("by_organization", ["organizationId"])

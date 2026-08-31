@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { createFileContext } from "../../../../test/convex/broker"
-import { type Doc, type Id } from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
+import { type Doc } from "../../../_generated/dataModel"
 import { callGoogleTool } from "."
 
 const originalFetch = globalThis.fetch
@@ -264,22 +266,16 @@ function decodeBase64Url(value: string) {
 }
 
 function gmailIntegration(): Doc<"integrations"> {
-  return {
-    _id: "gmail-integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("gmail-integration"),
     integration: "gmail",
     scope: "user",
-    ownerId: "person" as Id<"persons">,
+    ownerId: id<"persons">("person"),
     externalId: "google-account",
     email: "sender@example.com",
     credentials: {
       tokens: { access: "access-token", refresh: "refresh-token" },
       expiresAt: Date.now() + 60_000,
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }

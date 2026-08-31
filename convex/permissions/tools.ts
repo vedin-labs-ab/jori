@@ -20,12 +20,7 @@ import {
 import { requireOrganizationAccess } from "../access"
 import { ensureCurrentPerson } from "../persons/account"
 import { listPermissionOverrides } from "./read"
-
-const permissionModeValidator = v.union(
-  v.literal("allowed"),
-  v.literal("prompted"),
-  v.literal("blocked")
-)
+import { permissionModeValidator } from "./schema"
 
 export const list = query({
   args: {

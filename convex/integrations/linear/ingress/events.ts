@@ -1,4 +1,4 @@
-import { withUnicodeEmoji } from "../../../../contracts/emoji"
+import { withUnicodeEmoji } from "../../../../contracts/emoji/convert"
 import { readRecord, readString } from "../../../shared/input"
 
 export type LinearWebhookPayload = {

@@ -38,7 +38,7 @@ export const call = action({
       ctx,
       await loadBrokerContext(ctx, args.runId),
       {
-        args: decodeToolInput(args),
+        args: decodeToolInput(args.inputJson),
         replyTarget: args.replyTarget,
         surface: args.surface,
         tool: args.tool,
@@ -70,7 +70,7 @@ export const requestApproval = action({
       ctx,
       await loadBrokerContext(ctx, args.runId),
       {
-        args: decodeToolInput(args),
+        args: decodeToolInput(args.inputJson),
         surface: args.surface,
         tool: args.tool,
       }
@@ -107,7 +107,7 @@ export const executeApproval = action({
       {
         surface: claim.surface,
         tool: claim.tool,
-        args: decodeToolInput({ inputJson: claim.inputJson }),
+        args: decodeToolInput(claim.inputJson),
       }
     )
     const encoded = encodeToolResult(result)

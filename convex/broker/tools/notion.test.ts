@@ -1,5 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { id } from "../../../test/convex/database"
+import { integrationDoc } from "../../../test/convex/integrations"
+import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { callNotionTool } from "./notion"
 
@@ -162,17 +164,10 @@ function file(): Doc<"files"> {
 }
 
 function notionIntegration(): Doc<"integrations"> {
-  return {
-    _id: "notion_integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("notion_integration"),
     integration: "notion",
-    scope: "organization",
     externalId: "workspace",
     credentials: { tokens: { access: "notion-token" } },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }

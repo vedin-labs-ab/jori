@@ -4,7 +4,6 @@ import {
   getToolPermission,
   type PermissionMode,
   resolveToolMode,
-  type ToolPermission,
   type ToolSurface,
 } from "../../contracts/permissions"
 import { isWebTool } from "../../contracts/permissions/web"
@@ -46,12 +45,11 @@ export async function handleGitHubCloneCredentialsRequest(
     "github_clone_repository",
     await request.json().catch(() => null)
   )
-  const { permission } = authorizeTool(context, {
+  authorizeTool(context, {
     surface: "github",
     tool: "github_clone_repository",
   })
   const integration = await authorizeSurfaceTool(context, {
-    permission,
     surface: "github",
     tool: "github_clone_repository",
   })
@@ -94,7 +92,7 @@ export async function callBrokerTool(
   request: BrokerToolRequest
 ): Promise<unknown> {
   if (request.surface === "jori") {
-    const { mode } = authorizeTool(context, request)
+    const mode = authorizeTool(context, request)
 
     if (request.tool === "list_capabilities") {
       return listCapabilities(context)
@@ -107,9 +105,8 @@ export async function callBrokerTool(
     return await runJoriTool(ctx, context, request)
   }
 
-  const { mode, permission } = authorizeTool(context, request)
+  const mode = authorizeTool(context, request)
   const integration = await requireSurfaceIntegration(context, {
-    permission,
     surface: request.surface,
     tool: request.tool,
   })
@@ -132,9 +129,8 @@ export async function executeApprovedTool(
     return await runJoriTool(ctx, context, request)
   }
 
-  const { permission } = authorizeTool(context, request)
+  authorizeTool(context, request)
   const integration = await requireSurfaceIntegration(context, {
-    permission,
     surface: request.surface,
     tool: request.tool,
   })
@@ -171,7 +167,6 @@ async function runProviderTool(
 async function requireSurfaceIntegration(
   context: BrokerContext,
   request: {
-    permission: ToolPermission
     surface: Exclude<ToolSurface, "jori">
     tool: string
   }
@@ -191,10 +186,7 @@ function authorizeTool(
     surface: ToolSurface
     tool: string
   }
-): {
-  mode: PermissionMode
-  permission: ToolPermission
-} {
+): PermissionMode {
   const permission = getToolPermission(request.tool)
 
   if (permission === undefined || permission.surface !== request.surface) {
@@ -225,13 +217,12 @@ function authorizeTool(
     throw new Error(`Tool is not allowed by run web access: ${request.tool}`)
   }
 
-  return { mode, permission }
+  return mode
 }
 
 async function authorizeSurfaceTool(
   context: BrokerContext,
   request: {
-    permission: ToolPermission
     surface: Exclude<ToolSurface, "jori">
     tool: string
   }

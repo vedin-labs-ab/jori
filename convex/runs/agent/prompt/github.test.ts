@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest"
-import { type Doc, type Id } from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
+import { type Doc } from "../../../_generated/dataModel"
 import { assemblePrompt } from "."
 
 describe("GitHub automation prompts", () => {
@@ -65,17 +67,9 @@ function githubAutomationRuntimeInput() {
 }
 
 function githubIntegration(): Doc<"integrations"> {
-  return {
-    _id: "github-integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("github-integration"),
     integration: "github",
-    scope: "organization",
     externalId: "github-account",
-    credentials: {},
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }

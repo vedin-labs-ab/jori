@@ -1,7 +1,5 @@
-import {
-  decodeToolResult,
-  encodeToolResult,
-} from "../../../contracts/json/transport"
+import { decodeJson } from "../../../contracts/json"
+import { encodeToolResult } from "../../../contracts/json/transport"
 import {
   type ApprovalHandoff,
   type HandoffSubject,
@@ -103,10 +101,7 @@ async function executeApprovedAction(
     approvalId: approval.id,
     runId: runtime.context.run.id,
   })
-  const result = await materializeSandboxResult(
-    runtime,
-    decodeToolResult(encoded)
-  )
+  const result = await materializeSandboxResult(runtime, decodeJson(encoded))
 
   markVisibleCommunication(runtime, approval.tool, result)
   messages.push(

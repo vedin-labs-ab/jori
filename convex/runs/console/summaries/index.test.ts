@@ -5,6 +5,8 @@ import {
   fakeQueryCtx,
   messageDisplay,
 } from "../../../../test/convex/console"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
@@ -213,19 +215,11 @@ test("keeps stored automation snapshots when the automation changes", async () =
 })
 
 function slackIntegration() {
-  return {
-    _id: "integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("integration"),
     integration: "slack",
-    scope: "organization",
     externalId: "slack-team",
-    credentials: {},
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  }
+  })
 }
 
 function githubIntegration() {

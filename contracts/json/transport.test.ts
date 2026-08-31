@@ -1,13 +1,9 @@
 import { describe, expect, test } from "vitest"
-import {
-  decodeToolInput,
-  decodeToolResult,
-  encodeToolInput,
-  encodeToolResult,
-} from "./transport"
+import { decodeJson } from "."
+import { decodeToolInput, encodeToolInput, encodeToolResult } from "./transport"
 
 describe("tool JSON transport", () => {
-  test("uses a single encoded input field", () => {
+  test("round-trips input through a single encoded string", () => {
     const input = {
       properties: {
         "Företag 😀": {
@@ -19,13 +15,10 @@ describe("tool JSON transport", () => {
       },
     }
 
-    const transport = encodeToolInput(input)
-
-    expect(Object.keys(transport)).toEqual(["inputJson"])
-    expect(decodeToolInput(transport)).toEqual(input)
+    expect(decodeToolInput(encodeToolInput(input))).toEqual(input)
   })
 
   test("normalizes undefined tool results to json null", () => {
-    expect(decodeToolResult(encodeToolResult(undefined))).toBeNull()
+    expect(decodeJson(encodeToolResult(undefined))).toBeNull()
   })
 })

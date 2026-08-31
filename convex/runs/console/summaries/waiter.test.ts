@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
+import { fakeQueryCtx } from "../../../../test/convex/console"
 import { type Doc } from "../../../_generated/dataModel"
-import { type QueryCtx } from "../../../_generated/server"
 import { summarizeRun } from "../summaries"
 
 test("summarizes active waiters for parked running runs", async () => {
@@ -9,19 +9,24 @@ test("summarizes active waiters for parked running runs", async () => {
     endedAt: undefined,
   })
   const summary = await summarizeRun(
-    fakeQueryCtx({
-      activeWaiter: {
-        _id: "waiter",
-        _creationTime: 1000,
-        organizationId: "organization",
-        runId: "run",
-        waitpointId: "waitpoint",
-        status: "waiting",
-        expiresAt: 2000,
-        createdAt: 1000,
-        updatedAt: 1000,
-      } as Doc<"waiters">,
-    }),
+    fakeQueryCtx(
+      {},
+      {
+        waiters: [
+          {
+            _id: "waiter",
+            _creationTime: 1000,
+            organizationId: "organization",
+            runId: "run",
+            waitpointId: "waitpoint",
+            status: "waiting",
+            expiresAt: 2000,
+            createdAt: 1000,
+            updatedAt: 1000,
+          } as Doc<"waiters">,
+        ],
+      }
+    ),
     run
   )
 
@@ -48,28 +53,4 @@ function testRun(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     },
     ...overrides,
   } as Doc<"runs">
-}
-
-function fakeQueryCtx(docs: { activeWaiter?: Doc<"waiters"> }) {
-  return {
-    db: {
-      get: async () => null,
-      query: (table: string) => ({
-        withIndex: () => ({
-          async *[Symbol.asyncIterator]() {},
-          first: async () =>
-            table === "waiters" ? (docs.activeWaiter ?? null) : null,
-          order: () => emptyQueryResult(),
-        }),
-      }),
-    },
-  } as unknown as QueryCtx
-}
-
-function emptyQueryResult() {
-  return {
-    async *[Symbol.asyncIterator]() {},
-    first: async () => null,
-    take: async () => [],
-  }
 }

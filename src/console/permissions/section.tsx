@@ -31,10 +31,7 @@ export function PermissionSection({
   title: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const permissions =
-    controller.permissions === undefined || controller.permissions === null
-      ? []
-      : controller.getSurfacePermissions(surface)
+  const permissions = controller.getSurfacePermissions(surface)
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>

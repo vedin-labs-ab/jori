@@ -1,4 +1,4 @@
-import { withUnicodeEmoji } from "../../../../contracts/emoji"
+import { withUnicodeEmoji } from "../../../../contracts/emoji/convert"
 import {
   type GitHubComment,
   type GitHubPullRequest,

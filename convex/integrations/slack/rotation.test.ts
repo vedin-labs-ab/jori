@@ -1,7 +1,8 @@
 import { getFunctionName } from "convex/server"
 import { afterEach, expect, test, vi } from "vitest"
+import { integrationDoc } from "../../../test/convex/integrations"
 import { internal } from "../../_generated/api"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { prepareIntegrationForRuntime } from "../runtime"
 
@@ -101,22 +102,14 @@ function slackIntegration({
 }: {
   staleBot: boolean
 }): Doc<"integrations"> {
-  return {
-    _id: "integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
     integration: "slack",
-    scope: "organization",
     externalId: "T123",
     credentials: {
       bot: slackTokenPair("bot", staleBot),
       user: slackTokenPair("user", false),
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }
 
 function slackTokenPair(kind: string, stale: boolean) {

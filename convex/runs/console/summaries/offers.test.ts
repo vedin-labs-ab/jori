@@ -1,21 +1,21 @@
 import { expect, test } from "vitest"
-import {
-  emptyQueryResult,
-  messageDisplay,
-} from "../../../../test/convex/console"
-import { type QueryCtx } from "../../../_generated/server"
+import { fakeQueryCtx, messageDisplay } from "../../../../test/convex/console"
 import { summarizeRun } from "../summaries"
 
 test("includes the latest integration offer for the run", async () => {
   const run = testRun("Create a Notion page.")
   const summary = await summarizeRun(
-    fakeQueryCtx({
-      integrationOffer: integrationOffer({
-        _id: "offer",
-        summary: "Connect Notion so Jori can create the requested page.",
-      }),
-      run,
-    }),
+    fakeQueryCtx(
+      { run },
+      {
+        integrationOffers: [
+          integrationOffer({
+            _id: "offer",
+            summary: "Connect Notion so Jori can create the requested page.",
+          }),
+        ],
+      }
+    ),
     run
   )
 
@@ -37,13 +37,15 @@ test("includes the latest integration offer for the run", async () => {
 test("uses the newest integration offer for the run", async () => {
   const run = testRun("Connect a workspace.")
   const summary = await summarizeRun(
-    fakeQueryCtx({
-      integrationOffers: [
-        integrationOffer({ _id: "old-offer", createdAt: 10 }),
-        integrationOffer({ _id: "new-offer", createdAt: 20 }),
-      ],
-      run,
-    }),
+    fakeQueryCtx(
+      { run },
+      {
+        integrationOffers: [
+          integrationOffer({ _id: "old-offer", createdAt: 10 }),
+          integrationOffer({ _id: "new-offer", createdAt: 20 }),
+        ],
+      }
+    ),
     run
   )
 
@@ -68,35 +70,6 @@ function testRun(title: string) {
       ...messageDisplay({ kind: "mention" }),
     },
   } as Parameters<typeof summarizeRun>[1]
-}
-
-function fakeQueryCtx(docs: Record<string, unknown>) {
-  return {
-    db: {
-      get: async (id: string) => docs[id] ?? null,
-      query: (table: string) => ({
-        withIndex: () =>
-          table === "integrationOffers"
-            ? fakeIntegrationOffers(docs)
-            : emptyQueryResult(),
-      }),
-    },
-  } as unknown as QueryCtx
-}
-
-function fakeIntegrationOffers(docs: Record<string, unknown>) {
-  const offers =
-    docs.integrationOffers ??
-    (docs.integrationOffer === undefined ? [] : [docs.integrationOffer])
-
-  return {
-    async *[Symbol.asyncIterator]() {
-      yield* offers as Record<string, unknown>[]
-    },
-    first: async () => null,
-    order: () => emptyQueryResult(),
-    take: async () => [],
-  }
 }
 
 function integrationOffer(overrides: Record<string, unknown>) {

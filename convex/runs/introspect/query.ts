@@ -28,7 +28,7 @@ export const searchRuns = internalQuery({
     }
 
     const candidates = await loadCandidateRuns(ctx, current, args)
-    const page = await pageRunMatches(
+    return await pageRunMatches(
       ctx,
       {
         candidates,
@@ -44,8 +44,6 @@ export const searchRuns = internalQuery({
         limit: args.limit,
       }
     )
-
-    return { cursor: page.cursor, runs: page.runs }
   },
 })
 

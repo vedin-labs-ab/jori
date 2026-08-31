@@ -11,7 +11,6 @@ export type ActivityStatus =
   | "expired"
   | "failed"
   | "pending"
-  | "requested"
   | "running"
   | "stopped"
   | "waiting"

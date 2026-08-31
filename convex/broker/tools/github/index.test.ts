@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { encodeToolResult } from "../../../../contracts/json/transport"
-import { type Doc, type Id } from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
+import { type Doc } from "../../../_generated/dataModel"
 import { callGitHubTool, createGitHubCloneCredentials } from "./index"
 
 afterEach(() => {
@@ -123,20 +125,13 @@ describe("GitHub comment tool", () => {
 })
 
 function githubIntegration(): Doc<"integrations"> {
-  return {
-    _id: "github-integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("github-integration"),
     integration: "github",
-    scope: "organization",
     externalId: "github-account",
     credentials: {
       installationId: "123",
       tokens: { access: "github-token" },
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }

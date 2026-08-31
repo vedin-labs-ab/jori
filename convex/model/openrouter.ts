@@ -22,17 +22,14 @@ type OpenRouterModelSelection =
       models: [string, ...string[]]
     }
 
-export type OpenRouterConfig = {
+type OpenRouterConfig = {
   apiKey: string
   appCategories?: string
   appTitle?: string
   httpReferer?: string
 }
 
-export type OpenRouterChatInput = Omit<
-  ChatRequest,
-  "model" | "models" | "stream"
-> &
+type OpenRouterChatInput = Omit<ChatRequest, "model" | "models" | "stream"> &
   OpenRouterModelSelection & {
     stream?: false
   }
@@ -56,19 +53,16 @@ export function requireOpenRouterConfig(): OpenRouterConfig {
   }
 }
 
-export function createOpenRouterClient(config = requireOpenRouterConfig()) {
-  return new OpenRouter(config)
-}
+function openRouterClient() {
+  cachedClient ??= new OpenRouter(requireOpenRouterConfig())
 
-export function getOpenRouterClient() {
-  cachedClient ??= createOpenRouterClient()
   return cachedClient
 }
 
 export async function sendOpenRouterChat(
   input: OpenRouterChatInput
 ): Promise<ChatResult> {
-  const result = await getOpenRouterClient().chat.send({
+  const result = await openRouterClient().chat.send({
     chatRequest: {
       ...input,
       stream: false,

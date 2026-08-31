@@ -1,21 +1,26 @@
 import { expect, test } from "vitest"
 import { getToolPermission } from "../../../../contracts/permissions"
 import {
-  emptyQueryResult,
   eventAutomationDisplay,
+  fakeQueryCtx,
   messageDisplay,
+  preparedTraceRows,
 } from "../../../../test/convex/console"
-import { type QueryCtx } from "../../../_generated/server"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
 
 test("shows stored tools for event automation runs", async () => {
   const run = testRun(eventRun(), { preparedTools: slackToolSnapshot() })
   const summary = await summarizeRun(
-    fakeQueryCtx({
-      event: event(),
-      integration: slackIntegration(),
-      run,
-    }),
+    fakeQueryCtx(
+      {
+        event: event(),
+        integration: slackIntegration(),
+        run,
+      },
+      { traces: preparedTraceRows(run) }
+    ),
     run
   )
 
@@ -26,11 +31,14 @@ test("shows stored tools for event automation runs", async () => {
 test("shows stored blocked web search for event automation runs", async () => {
   const run = testRun(eventRun(), { preparedTools: slackToolSnapshot(false) })
   const summary = await summarizeRun(
-    fakeQueryCtx({
-      event: event(),
-      integration: slackIntegration(),
-      run,
-    }),
+    fakeQueryCtx(
+      {
+        event: event(),
+        integration: slackIntegration(),
+        run,
+      },
+      { traces: preparedTraceRows(run) }
+    ),
     run
   )
 
@@ -43,11 +51,14 @@ test("shows stored tools for mention and reply runs", async () => {
       preparedTools: slackToolSnapshot(),
     })
     const summary = await summarizeRun(
-      fakeQueryCtx({
-        integration: slackIntegration(),
-        message: message(kind),
-        run,
-      }),
+      fakeQueryCtx(
+        {
+          integration: slackIntegration(),
+          message: message(kind),
+          run,
+        },
+        { traces: preparedTraceRows(run) }
+      ),
       run
     )
 
@@ -62,11 +73,14 @@ test("marks approval-required access counts in mention and reply runs", async ()
       preparedTools: slackToolSnapshot(true, "read"),
     })
     const summary = await summarizeRun(
-      fakeQueryCtx({
-        integration: slackIntegration(),
-        message: message(kind),
-        run,
-      }),
+      fakeQueryCtx(
+        {
+          integration: slackIntegration(),
+          message: message(kind),
+          run,
+        },
+        { traces: preparedTraceRows(run) }
+      ),
       run
     )
 
@@ -75,11 +89,11 @@ test("marks approval-required access counts in mention and reply runs", async ()
 })
 
 function slackIntegration() {
-  return {
-    _id: "integration",
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("integration"),
     integration: "slack",
-  }
+    externalId: "slack-team",
+  })
 }
 
 function event() {
@@ -151,7 +165,7 @@ function testRun(
     endedAt: 1000,
     ...run,
     ...overrides,
-  } as Parameters<typeof summarizeRun>[1]
+  } as Parameters<typeof summarizeRun>[1] & { preparedTools?: unknown }
 }
 
 function slackToolSnapshot(
@@ -234,33 +248,5 @@ function catalogTool(
     label: permission.label,
     ...(approvalAccess === access ? { requiresApproval: true } : {}),
     tool,
-  }
-}
-
-function fakeQueryCtx(docs: Record<string, unknown>) {
-  const preparedTools = (docs.run as { preparedTools?: unknown }).preparedTools
-
-  return {
-    db: {
-      get: async (id: string) => docs[id] ?? null,
-      query: (table: string) => fakeQuery(table, preparedTools),
-    },
-  } as unknown as QueryCtx
-}
-
-function fakeQuery(table: string, preparedTools: unknown) {
-  return {
-    withIndex: () =>
-      table === "traces"
-        ? {
-            first: async () =>
-              preparedTools === undefined
-                ? null
-                : {
-                    data: { tools: preparedTools },
-                    type: "run.prepared",
-                  },
-          }
-        : emptyQueryResult(),
   }
 }

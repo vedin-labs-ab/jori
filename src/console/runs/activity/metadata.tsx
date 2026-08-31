@@ -52,7 +52,6 @@ const statusLabels = {
   expired: "expired",
   failed: "failed",
   pending: "pending",
-  requested: "requested",
   running: "running",
   stopped: "stopped",
   waiting: "waiting",

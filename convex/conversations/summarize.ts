@@ -6,7 +6,10 @@ import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
-import { type OpenRouterChatMessage, sendOpenRouterChat } from "../model"
+import {
+  type OpenRouterChatMessage,
+  sendOpenRouterChat,
+} from "../model/openrouter"
 import { summaryOutputTokens } from "./limits"
 import { type PendingSummary, type SummaryMessage } from "./summary"
 

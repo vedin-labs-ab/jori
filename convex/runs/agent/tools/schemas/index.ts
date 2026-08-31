@@ -8,7 +8,7 @@ import { microsoftToolInputSchemas } from "./microsoft"
 import { notionToolInputSchemas } from "./notion"
 import { slackToolInputSchemas } from "./slack"
 
-export type { JsonSchema, SchemaMap } from "./fragments/common"
+export type { JsonSchema } from "./fragments/common"
 export {
   emptyObjectSchema,
   isJsonSchema,

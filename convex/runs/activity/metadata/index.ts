@@ -1,5 +1,5 @@
 import { isRecord } from "../../../../contracts/json"
-import { reactionDisplayLabel } from "../../../../contracts/reactions"
+import { reactionDisplayLabel } from "../../../../contracts/reactions/display"
 import { type Doc } from "../../../_generated/dataModel"
 import { optionalString } from "../../../shared/input"
 import {

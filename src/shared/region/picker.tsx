@@ -2,9 +2,17 @@ import { isRegion, type Region } from "@contracts/region"
 import { type ReactNode, useId } from "react"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { cn } from "@/lib/utils"
-import { regionOptions } from "./catalog"
 import { regionConfig } from "./config"
 import { regionSelectionUrl } from "./routing"
+
+const regionOptions = [
+  { flag: "🇺🇸", id: "us", label: "United States" },
+  { flag: "🇪🇺", id: "eu", label: "European Union" },
+] as const satisfies readonly {
+  flag: string
+  id: Region
+  label: string
+}[]
 
 type RegionPickerProps = {
   labelAction?: ReactNode

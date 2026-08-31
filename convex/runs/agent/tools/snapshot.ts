@@ -16,14 +16,14 @@ export function createRunToolSnapshot(input: {
 }): RunToolSnapshot {
   return {
     groups: consolidateJoriToolGroups([
-      ...lifecycleGroups(input.lifecycleTools),
-      ...activeSurfaceGroups(input.activeSurfaceTools),
+      ...joriGroups("Run", input.lifecycleTools),
+      ...joriGroups("Active surface", input.activeSurfaceTools),
       ...input.capabilities.map((capability) => ({
         surface: capability.surface,
         label: capability.label,
         tools: capability.tools,
       })),
-      ...workspaceGroups(input.sandboxTools),
+      ...joriGroups("Workspace", input.sandboxTools),
     ]),
     webSearch: input.webSearch,
   }
@@ -64,38 +64,10 @@ function isJoriGroup(group: RunToolSnapshotGroup) {
   return group.surface === "jori"
 }
 
-function lifecycleGroups(tools: RunToolSnapshotTool[] | undefined) {
+/** A Jori-surface group under `label`, or nothing when the run prepared no
+ *  tools of that kind. */
+function joriGroups(label: string, tools: RunToolSnapshotTool[] | undefined) {
   return tools === undefined || tools.length === 0
     ? []
-    : [
-        {
-          surface: "jori" as const,
-          label: "Run",
-          tools,
-        },
-      ]
-}
-
-function activeSurfaceGroups(tools: RunToolSnapshotTool[] | undefined) {
-  return tools === undefined || tools.length === 0
-    ? []
-    : [
-        {
-          surface: "jori" as const,
-          label: "Active surface",
-          tools,
-        },
-      ]
-}
-
-function workspaceGroups(tools: RunToolSnapshotTool[] | undefined) {
-  return tools === undefined || tools.length === 0
-    ? []
-    : [
-        {
-          surface: "jori" as const,
-          label: "Workspace",
-          tools,
-        },
-      ]
+    : [{ surface: "jori" as const, label, tools }]
 }
