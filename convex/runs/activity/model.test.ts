@@ -1,12 +1,11 @@
 import { expect, test } from "vitest"
-import { id } from "../../../test/convex/database"
-import { type Doc } from "../../_generated/dataModel"
+import { traceDoc } from "../../../test/convex/console"
 import { projectModelTraces } from "./model"
 
 test("projects token usage for completed model steps", () => {
   const items = projectModelTraces(
     [
-      trace({
+      traceDoc({
         data: {
           output: null,
           reasoning: null,
@@ -47,7 +46,7 @@ test("projects token usage for completed model steps", () => {
 test("projects bounded reasoning for completed model steps", () => {
   const items = projectModelTraces(
     [
-      trace({
+      traceDoc({
         data: {
           output: null,
           reasoning: `${"a".repeat(1500)}extra`,
@@ -82,7 +81,7 @@ test("does not project reasoning for failed model steps", () => {
 
   const items = projectModelTraces(
     [
-      trace({
+      traceDoc({
         data: failedData,
         sequence: 99,
         timestamp: 20,
@@ -94,18 +93,3 @@ test("does not project reasoning for failed model steps", () => {
 
   expect(items[0]).not.toHaveProperty("reasoning")
 })
-
-function trace(
-  overrides: Partial<Doc<"traces">> & Pick<Doc<"traces">, "timestamp" | "type">
-): Doc<"traces"> {
-  return {
-    _creationTime: overrides.timestamp,
-    _id: id<"traces">(`trace-${overrides.timestamp}`),
-    callId: undefined,
-    key: `trace:${overrides.timestamp}`,
-    runId: id<"runs">("run"),
-    sequence: undefined,
-    organizationId: "organization",
-    ...overrides,
-  } as Doc<"traces">
-}

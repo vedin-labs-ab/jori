@@ -42,8 +42,7 @@ export async function handleGoogleInstall(
 
 export async function handleGoogleOAuthCallback(
   ctx: ActionCtx,
-  request: Request,
-  expectedIntegration?: GoogleIntegration
+  request: Request
 ) {
   const callback = await readOAuthCallback(request, {
     parse: parseSignedGoogleState,
@@ -55,15 +54,6 @@ export async function handleGoogleOAuthCallback(
   }
 
   const { code, requestUrl, state } = callback
-
-  if (
-    expectedIntegration !== undefined &&
-    state.integration !== expectedIntegration
-  ) {
-    return new Response("Mismatched Google Workspace OAuth state", {
-      status: 400,
-    })
-  }
 
   const integration = state.integration
   const config = googleIntegrationConfigs[integration]

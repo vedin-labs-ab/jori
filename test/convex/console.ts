@@ -1,6 +1,10 @@
 import { type MessageCauseKind } from "../../convex/runs/schema"
+import { id } from "./database"
 
 type ActivityData = import("../../convex/runs/activity/types").ActivityData
+type Doc<TableName extends keyof DataModel> =
+  import("../../convex/_generated/dataModel").Doc<TableName>
+type DataModel = import("../../convex/_generated/dataModel").DataModel
 type QueryCtx = import("../../convex/_generated/server").QueryCtx
 type RunSnapshot =
   import("../../convex/_generated/dataModel").Doc<"runs">["snapshot"]
@@ -108,4 +112,47 @@ export function emptyQueryResult() {
     order: () => emptyQueryResult(),
     take: async () => [],
   }
+}
+
+/** A run row with the fields the activity projection reads; overrides
+ *  refine any of them. */
+export function runDoc(overrides: Partial<Doc<"runs">> = {}): Doc<"runs"> {
+  return {
+    _creationTime: 0,
+    _id: id<"runs">("run"),
+    cause: { type: "manual" },
+    createdAt: 0,
+    snapshot: runSnapshot("Run"),
+    status: "running",
+    organizationId: "organization",
+    ...overrides,
+  } as Doc<"runs">
+}
+
+export function runSnapshot(title: string): Doc<"runs">["snapshot"] {
+  return { context: [], source: { type: "manual" }, title }
+}
+
+/** A trace row keyed and timestamped from its own timestamp, so tests read
+ *  as a sequence of moments rather than a table of ids. */
+export function traceDoc(
+  overrides: Partial<Doc<"traces">> & Pick<Doc<"traces">, "timestamp" | "type">
+): Doc<"traces"> {
+  return {
+    _creationTime: overrides.timestamp,
+    _id: id<"traces">(`trace-${overrides.timestamp}`),
+    callId: undefined,
+    key: `trace:${overrides.timestamp}`,
+    runId: id<"runs">("run"),
+    sequence: undefined,
+    organizationId: "organization",
+    ...overrides,
+  } as Doc<"traces">
+}
+
+/** Activity projection input around a default run. */
+export function activityData(
+  overrides: Partial<ActivityData> = {}
+): ActivityData {
+  return { ...emptyActivityData(), run: runDoc(), ...overrides }
 }

@@ -3,7 +3,11 @@ import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { api } from "../../../../../convex/_generated/api"
 import { reportWebsiteStartError } from "../discovery/url"
-import { WebsiteStep, WelcomeStep, WorkingStep } from "./steps"
+import {
+  DiscoveryWorkingStep,
+  WebsiteDiscoveryStep,
+} from "../discovery/website"
+import { WelcomeStep } from "./welcome"
 
 type Step = "welcome" | "website" | "working"
 
@@ -57,17 +61,20 @@ export function OnboardingModal({
           <WelcomeStep onStart={() => setStep("website")} onSkip={dismiss} />
         ) : null}
         {step === "website" ? (
-          <WebsiteStep
-            website={website}
-            isSubmitting={isSubmitting}
+          <WebsiteDiscoveryStep
+            description="Jori reads only your public site to learn your name and how you describe yourselves."
             error={error}
-            onWebsiteChange={setWebsite}
+            inputId="onboarding-website"
+            isSubmitting={isSubmitting}
             onContinue={() => void onContinue()}
             onSkip={dismiss}
+            onWebsiteChange={setWebsite}
+            title="What's your website?"
+            website={website}
           />
         ) : null}
         {step === "working" ? (
-          <WorkingStep discovery={discovery} onClose={onClose} />
+          <DiscoveryWorkingStep discovery={discovery} onClose={onClose} />
         ) : null}
       </DialogContent>
     </Dialog>

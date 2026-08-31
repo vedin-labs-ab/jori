@@ -1,12 +1,16 @@
 import { expect, test } from "vitest"
-import { emptyActivityData } from "../../../test/convex/console"
+import {
+  activityData,
+  runDoc,
+  runSnapshot,
+  traceDoc,
+} from "../../../test/convex/console"
 import { id } from "../../../test/convex/database"
 import { type Doc } from "../../_generated/dataModel"
 import { projectActivity } from "./project"
-import { type ActivityData } from "./types"
 
 test("groups tool traces into a safe activity item", () => {
-  const items = projectActivity(data({ traces: toolTraces() }))
+  const items = projectActivity(activityData({ traces: toolTraces() }))
   const item = items.find((candidate) => candidate.kind === "tool")
 
   expect(item).toMatchObject({
@@ -29,9 +33,9 @@ test("groups tool traces into a safe activity item", () => {
 
 test("keeps in-progress model work visible", () => {
   const items = projectActivity(
-    data({
+    activityData({
       traces: [
-        trace({
+        traceDoc({
           sequence: 99,
           timestamp: 10,
           type: "model.started",
@@ -52,12 +56,12 @@ test("keeps in-progress model work visible", () => {
 
 test("projects delegated runs as agents", () => {
   const items = projectActivity(
-    data({
+    activityData({
       agents: [
-        run({
+        runDoc({
           _id: id<"runs">("agent-run"),
           parentId: id<"runs">("run"),
-          snapshot: snapshot("Draft a plan"),
+          snapshot: runSnapshot("Draft a plan"),
           status: "queued",
         }),
       ],
@@ -76,12 +80,12 @@ test("projects delegated runs as agents", () => {
 
 test("marks running delegated agents as live", () => {
   const items = projectActivity(
-    data({
+    activityData({
       agents: [
-        run({
+        runDoc({
           _id: id<"runs">("agent-run"),
           parentId: id<"runs">("run"),
-          snapshot: snapshot("Draft a plan"),
+          snapshot: runSnapshot("Draft a plan"),
           status: "running",
         }),
       ],
@@ -100,7 +104,7 @@ test("marks running delegated agents as live", () => {
 
 test("labels approved approvals as approved actions", () => {
   const items = projectActivity(
-    data({
+    activityData({
       approvals: [
         {
           _creationTime: 0,
@@ -133,7 +137,7 @@ test("labels approved approvals as approved actions", () => {
 
 test("marks active waiters as live intervals", () => {
   const items = projectActivity(
-    data({
+    activityData({
       waiters: [
         {
           _creationTime: 1000,
@@ -163,13 +167,9 @@ test("marks active waiters as live intervals", () => {
   expect(item?.endedAt).toBeUndefined()
 })
 
-function data(overrides: Partial<ActivityData>): ActivityData {
-  return { ...emptyActivityData(), run: run({}), ...overrides }
-}
-
 function toolTraces() {
   return [
-    trace({
+    traceDoc({
       data: {
         tools: {
           groups: [
@@ -192,7 +192,7 @@ function toolTraces() {
       timestamp: 1,
       type: "run.prepared",
     }),
-    trace({
+    traceDoc({
       callId: "call-1",
       data: {
         input: { path: "src/app.tsx" },
@@ -201,7 +201,7 @@ function toolTraces() {
       timestamp: 10,
       type: "tool.started",
     }),
-    trace({
+    traceDoc({
       callId: "call-1",
       data: {
         provider: null,
@@ -216,40 +216,4 @@ function toolTraces() {
       type: "tool.completed",
     }),
   ]
-}
-
-function trace(
-  overrides: Partial<Doc<"traces">> & Pick<Doc<"traces">, "timestamp" | "type">
-): Doc<"traces"> {
-  return {
-    _creationTime: overrides.timestamp,
-    _id: id<"traces">(`trace-${overrides.timestamp}`),
-    callId: undefined,
-    key: `trace:${overrides.timestamp}`,
-    runId: id<"runs">("run"),
-    sequence: undefined,
-    organizationId: "organization",
-    ...overrides,
-  } as Doc<"traces">
-}
-
-function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
-  return {
-    _creationTime: 0,
-    _id: id<"runs">("run"),
-    cause: { type: "manual" },
-    createdAt: 0,
-    snapshot: snapshot("Run"),
-    status: "running",
-    organizationId: "organization",
-    ...overrides,
-  } as Doc<"runs">
-}
-
-function snapshot(title: string): Doc<"runs">["snapshot"] {
-  return {
-    context: [],
-    source: { type: "manual" },
-    title,
-  }
 }

@@ -3,7 +3,7 @@ import { packageCommand, runCommand, runCommands, runTasks } from "./process.ts"
 await runChecks()
 
 async function runChecks() {
-  await runCommands([packageCommand("content:compile")])
+  await runCommand(packageCommand("content:compile"))
 
   await runTasks([
     runCommands([
