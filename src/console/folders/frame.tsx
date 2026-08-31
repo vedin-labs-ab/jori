@@ -6,25 +6,30 @@ import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListLoading } from "../shared/list/loading"
-import { useMaterialTrail } from "../shared/materials/breadcrumb"
+import {
+  type MaterialBreadcrumb,
+  type MaterialBreadcrumbSegment,
+  useMaterialTrail,
+} from "../shared/materials/breadcrumb"
 import { useLeaveDeletedFolder } from "./delete/leave"
 import { FolderTitleMenu } from "./header"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { type FolderDetail } from "./types"
-import { UsageOverlay } from "./usage/overlay"
-import { type UsageDays } from "./usage/types"
 
-// The folder surface: one folder, resolved once, named in the breadcrumb
-// with its own menu hanging off the name, with the lifecycle dialogs that
-// menu opens and the usage panel it leads to. What is filed here is the
-// page's own business, and arrives as children.
+// The folder surface: one folder, resolved once, placed in the breadcrumb,
+// with the lifecycle dialogs its menu opens. What each page makes of the
+// folder is its own business, and arrives as children.
+
+/** Which of the folder's pages is being framed — the crumb ends at the
+ *  folder itself, or carries on to what it costs. */
+export type FolderView = "contents" | "usage"
 
 /** Resolves the folder a page is about and hands it over, replacing the
  *  whole view while it loads or when there is nothing to show. */
 export function FolderFrame({
   children,
   folderId,
-  usage,
+  view,
 }: {
   children: (
     folder: FolderDetail,
@@ -32,8 +37,7 @@ export function FolderFrame({
     onNewFolder: () => void
   ) => ReactNode
   folderId: string
-  /** The usage panel's window, while the URL holds it open. */
-  usage: UsageDays | undefined
+  view: FolderView
 }) {
   return (
     <ConsolePage>
@@ -41,7 +45,7 @@ export function FolderFrame({
         <FolderResolver
           folderId={folderId as GenericId<"folders">}
           organizationId={organizationId}
-          usage={usage}
+          view={view}
         >
           {children}
         </FolderResolver>
@@ -54,7 +58,7 @@ function FolderResolver({
   children,
   folderId,
   organizationId,
-  usage,
+  view,
 }: {
   children: (
     folder: FolderDetail,
@@ -63,7 +67,7 @@ function FolderResolver({
   ) => ReactNode
   folderId: GenericId<"folders">
   organizationId: string
-  usage: UsageDays | undefined
+  view: FolderView
 }) {
   const detail = useQuery(api.folders.console.get, { organizationId, folderId })
   const folder = detail?.status === "ready" ? detail.folder : undefined
@@ -76,25 +80,19 @@ function FolderResolver({
     )
   )
 
-  useFolderCrumb(folder, setDialog)
+  useFolderCrumb(folder, view, setDialog)
 
   return (
     <ConsoleListLayout>
-      <UsageOverlay
-        days={usage}
-        folderId={folderId}
-        organizationId={organizationId}
-      >
-        {folder === undefined ? (
-          <ConsoleListContent>
-            <FolderFallback detail={detail} />
-          </ConsoleListContent>
-        ) : (
-          children(folder, organizationId, () =>
-            setDialog({ type: "create", parentId: folderId })
-          )
-        )}
-      </UsageOverlay>
+      {folder === undefined ? (
+        <ConsoleListContent>
+          <FolderFallback detail={detail} />
+        </ConsoleListContent>
+      ) : (
+        children(folder, organizationId, () =>
+          setDialog({ type: "create", parentId: folderId })
+        )
+      )}
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
@@ -107,31 +105,56 @@ function FolderResolver({
 
 /** The folder's header crumb: the /folders overview leads the trail — every
  *  material page starts from its parent surface — then the ancestor
- *  folders, then the folder itself, its name opening the folder's menu. */
+ *  folders. The folder's own page ends there, its name opening the folder's
+ *  menu; its usage page hangs one more crumb off the name, which becomes
+ *  the way back. */
 function useFolderCrumb(
   folder: FolderDetail | undefined,
+  view: FolderView,
   onDialog: (request: FolderDialogRequest) => void
 ) {
   useMaterialTrail(
-    useMemo(
-      () =>
-        folder === undefined
-          ? undefined
-          : {
-              menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
-              name: folder.name,
-              trail: [
-                { name: "Folders", to: "/folders" },
-                ...folder.path.slice(0, -1).map((segment) => ({
-                  name: segment.name,
-                  params: { folderId: segment.folderId },
-                  to: "/folders/$folderId",
-                })),
-              ],
-            },
-      [folder, onDialog]
-    )
+    useMemo(() => folderCrumb(folder, view, onDialog), [folder, onDialog, view])
   )
+}
+
+function folderCrumb(
+  folder: FolderDetail | undefined,
+  view: FolderView,
+  onDialog: (request: FolderDialogRequest) => void
+): MaterialBreadcrumb | undefined {
+  if (folder === undefined) {
+    return undefined
+  }
+
+  const ancestors: MaterialBreadcrumbSegment[] = [
+    { name: "Folders", to: "/folders" },
+    ...folder.path.slice(0, -1).map((segment) => ({
+      name: segment.name,
+      params: { folderId: segment.folderId },
+      to: "/folders/$folderId",
+    })),
+  ]
+
+  if (view === "usage") {
+    return {
+      name: "Usage",
+      trail: [
+        ...ancestors,
+        {
+          name: folder.name,
+          params: { folderId: folder.folderId },
+          to: "/folders/$folderId",
+        },
+      ],
+    }
+  }
+
+  return {
+    menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
+    name: folder.name,
+    trail: ancestors,
+  }
 }
 
 /** What stands in for the page before there is a folder to show it for. */

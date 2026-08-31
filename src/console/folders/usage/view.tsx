@@ -34,15 +34,26 @@ export function UsageView({
   })
 
   return (
-    <ConsoleListContent>
-      <UsageStats days={days} onDaysChange={onDaysChange} usage={usage} />
-      {usage === undefined ? (
-        <ConsoleListLoading />
-      ) : (
-        <UsageBody days={days} scoped={folderId !== undefined} usage={usage} />
-      )}
-      <UsageFootnote timezone={usage?.timezone} />
-    </ConsoleListContent>
+    <>
+      {/* The band the page is really about, held above its own scroll: the
+          window's figures and the control that sets them stay put while the
+          detail below moves. */}
+      <div className="border-b px-4 py-3 md:px-6">
+        <UsageStats days={days} onDaysChange={onDaysChange} usage={usage} />
+      </div>
+      <ConsoleListContent>
+        {usage === undefined ? (
+          <ConsoleListLoading />
+        ) : (
+          <UsageBody
+            days={days}
+            scoped={folderId !== undefined}
+            usage={usage}
+          />
+        )}
+        <UsageFootnote timezone={usage?.timezone} />
+      </ConsoleListContent>
+    </>
   )
 }
 
@@ -58,9 +69,13 @@ function UsageBody({
   if (usage.totals.micros === 0 && usage.totals.ended === 0) {
     return (
       <ConsoleEmptyState
-        description="Runs from automations filed here will show up as they spend."
+        description={
+          scoped
+            ? "Runs from automations filed here will show up as they spend."
+            : "Runs from your automations will show up here as they spend."
+        }
         icon={Coins}
-        title="No usage yet"
+        title="No usage in this window"
       />
     )
   }

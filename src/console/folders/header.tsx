@@ -17,7 +17,6 @@ import { type FolderCreation } from "./create/dialogs"
 import { NewInFolderMenu } from "./create/menu"
 import { type FolderDialogRequest } from "./manage"
 import { type FolderDetail } from "./types"
-import { defaultUsageDays } from "./usage/types"
 
 // What the folder surface puts in the console header: creating things sits
 // in the header's own actions, and everything about the folder itself hangs
@@ -53,8 +52,7 @@ export function FolderTitleMenu({
       <DropdownMenuItem asChild>
         <Link
           params={{ folderId: folder.folderId }}
-          search={{ usage: defaultUsageDays }}
-          to="/folders/$folderId"
+          to="/folders/$folderId/usage"
         >
           <Coins />
           Usage
@@ -91,7 +89,7 @@ export function FoldersTitleMenu() {
   return (
     <DropdownMenuContent align="start" className="w-44">
       <DropdownMenuItem asChild>
-        <Link search={{ usage: defaultUsageDays }} to="/folders">
+        <Link to="/folders/usage">
           <Coins />
           Usage
         </Link>

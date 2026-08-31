@@ -76,7 +76,7 @@ test("a window with nothing in it explains itself instead of drawing zeroes", ()
     })
   )
 
-  expect(screen.getByText("No usage yet")).toBeDefined()
+  expect(screen.getByText("No usage in this window")).toBeDefined()
   expect(
     screen.getByText(
       "Runs from automations filed here will show up as they spend."
@@ -100,7 +100,7 @@ test("nothing below this folder means no drill-down to offer", () => {
   expect(screen.queryByText("Subfolders")).toBeNull()
 })
 
-test("each subfolder row drills into that folder", () => {
+test("each subfolder row drills into that folder's own usage", () => {
   renderView(
     overview({
       folders: [
@@ -112,7 +112,7 @@ test("each subfolder row drills into that folder", () => {
   expect(screen.getByText("Subfolders")).toBeDefined()
   expect(
     screen.getByRole("link", { name: "Pipeline" }).getAttribute("href")
-  ).toBe("/folders/folders:2")
+  ).toBe("/folders/folders:2/usage")
 })
 
 test("the footnote says whose day a day is and what the money buys", () => {
