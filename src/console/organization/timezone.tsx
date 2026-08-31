@@ -1,5 +1,5 @@
 import { supportedTimezones } from "@contracts/timezone"
-import { useMemo } from "react"
+import { type FocusEvent, type MouseEvent, useMemo, useRef } from "react"
 import {
   Combobox,
   ComboboxContent,
@@ -32,6 +32,8 @@ export function TimezonePicker({
   onChange: (timezone: string) => void
   value: string
 }) {
+  const selectOnFocus = useSelectOnFocus()
+
   // A browser may report a zone the platform's own list omits — the older
   // aliases, Asia/Calcutta and its kind. Offer it rather than blank the
   // field on someone whose clock is named the long way round.
@@ -59,6 +61,7 @@ export function TimezonePicker({
         disabled={disabled}
         id={id}
         placeholder="Search timezones"
+        {...selectOnFocus}
       />
       <ComboboxContent>
         <ComboboxEmpty>No timezone found.</ComboboxEmpty>
@@ -101,6 +104,36 @@ export function TimezoneField({
       <p className="text-muted-foreground text-xs">{description}</p>
     </div>
   )
+}
+
+/**
+ * The field always arrives filled, so a caret dropped at the end of the
+ * current zone turns the next keystroke into "Europe/Stockholmnew" and finds
+ * nothing. Taking focus selects the zone instead, so typing searches. The
+ * combobox restores the committed zone when the list closes unpicked, so a
+ * replaced selection costs nothing.
+ */
+function useSelectOnFocus() {
+  const isTakingFocus = useRef(false)
+
+  return {
+    onBlur() {
+      isTakingFocus.current = false
+    },
+    onFocus(event: FocusEvent<HTMLInputElement>) {
+      isTakingFocus.current = true
+      event.currentTarget.select()
+    },
+    onMouseUp(event: MouseEvent<HTMLInputElement>) {
+      // A click focuses on press and collapses the selection on release.
+      // Only the release that brought focus here is worth suppressing;
+      // later clicks still place a caret.
+      if (isTakingFocus.current) {
+        isTakingFocus.current = false
+        event.preventDefault()
+      }
+    },
+  }
 }
 
 /** Zone names carry underscores where a reader expects spaces. Both the
