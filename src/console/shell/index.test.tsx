@@ -150,6 +150,15 @@ test("shows nothing on a folder page while its trail loads", () => {
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
 })
 
+test("names the organization-wide usage page like the folders it spans", () => {
+  pathname = "/folders/usage"
+  render(<ConsoleShell>Content</ConsoleShell>)
+
+  // A sibling of /folders, not a folder: no view publishes a crumb for it,
+  // so waiting for one leaves the header permanently empty.
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Folders")
+})
+
 function renderWithPublisher(path: string) {
   pathname = path
 
