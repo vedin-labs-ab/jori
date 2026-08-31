@@ -25,7 +25,7 @@ import { type CreationRequest } from "./create/dialogs"
 import { NewInFolderSub } from "./create/menu"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { type FolderDialogRequest } from "./manage"
-import { type FolderNode } from "./tree"
+import { activeFolderId, type FolderNode } from "./tree"
 import { type FolderRow } from "./types"
 
 export type FolderExpansion = {
@@ -67,7 +67,7 @@ export function FolderTreeItem({
           folderId={node.folderId}
           hasChildren={hasChildren}
           hasContents={node.hasContents}
-          isActive={pathname === `/folders/${node.folderId}`}
+          isActive={activeFolderId(pathname) === node.folderId}
           isExpanded={isExpanded}
           name={node.name}
           onNavigate={() => expansion.expand(node.folderId)}

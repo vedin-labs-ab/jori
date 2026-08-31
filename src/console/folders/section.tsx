@@ -22,7 +22,7 @@ import { useLeaveDeletedFolder } from "./delete/leave"
 import { useExpandHoverHandler, useRootDrop } from "./drag/state"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { type FolderExpansion, FolderTreeItem } from "./row"
-import { ancestorFolderIds, buildFolderTree } from "./tree"
+import { activeFolderId, ancestorFolderIds, buildFolderTree } from "./tree"
 import { type FolderRow } from "./types"
 
 /** The sidebar's Folders section: the organization's folder tree below the
@@ -309,8 +309,4 @@ function useFolderExpansion(
       setExpanded(new Set(sessionExpanded))
     },
   }
-}
-
-function activeFolderId(pathname: string) {
-  return pathname.match(/^\/folders\/([^/]+)$/)?.[1]
 }

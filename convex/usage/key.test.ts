@@ -1,6 +1,11 @@
 import { expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
-import { type UsageAttribution, usageDate, usageKey } from "./key"
+import {
+  shiftUsageDate,
+  type UsageAttribution,
+  usageDate,
+  usageKey,
+} from "./key"
 
 // A usage row is found before it is written, so its key and its date have to
 // be derivable from the run alone, identically every time.
@@ -58,4 +63,16 @@ test("a date is zero-padded so it sorts as a string", () => {
   expect(usageDate(Date.parse("2026-01-05T12:00:00.000Z"), "UTC")).toBe(
     "2026-01-05"
   )
+})
+
+test("shifting a date crosses months and leap days by the calendar", () => {
+  expect(shiftUsageDate("2026-03-01", -1)).toBe("2026-02-28")
+  expect(shiftUsageDate("2024-03-01", -1)).toBe("2024-02-29")
+  expect(shiftUsageDate("2025-12-31", 1)).toBe("2026-01-01")
+})
+
+test("shifting is blind to daylight saving, which moves clocks not days", () => {
+  // The US spring-forward night is 23 hours long; a day is still a day.
+  expect(shiftUsageDate("2026-03-07", 1)).toBe("2026-03-08")
+  expect(shiftUsageDate("2026-03-09", -6)).toBe("2026-03-03")
 })

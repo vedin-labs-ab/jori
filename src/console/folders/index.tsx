@@ -1,101 +1,34 @@
 import { useMutation, useQuery } from "convex/react"
-import { type GenericId } from "convex/values"
 import { Plus } from "lucide-react"
-import { type ReactNode, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
-import { ConsolePage } from "../page"
 import { showErrorToast } from "../shared/error"
-import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListLoading } from "../shared/list/loading"
-import {
-  type MaterialBreadcrumb,
-  useMaterialTrail,
-} from "../shared/materials/breadcrumb"
 import { CreationDialogs, type FolderCreation } from "./create/dialogs"
 import { NewInFolderMenu } from "./create/menu"
 import { useLeaveDeletedFolder } from "./delete/leave"
+import { FolderFrame } from "./frame"
 import { FolderHeaderActions } from "./header"
 import { FolderContents } from "./list/contents"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { MoveResourceDialog } from "./move"
 import { type FolderDetail, type FolderResource, toFiledType } from "./types"
+import { FolderUsageLine } from "./usage/line"
 
+/** A folder's Contents tab: everything filed here, headed by the month's
+ *  spend whenever there is any. */
 export function FolderPage({ folderId }: { folderId: string }) {
   return (
-    <ConsolePage>
-      {(organizationId) => (
-        <FolderView
-          folderId={folderId as GenericId<"folders">}
-          organizationId={organizationId}
-        />
+    <FolderFrame folderId={folderId} tab="contents">
+      {(folder, organizationId) => (
+        <FolderContentsView folder={folder} organizationId={organizationId} />
       )}
-    </ConsolePage>
+    </FolderFrame>
   )
 }
 
-function FolderView({
-  folderId,
-  organizationId,
-}: {
-  folderId: GenericId<"folders">
-  organizationId: string
-}) {
-  const detail = useQuery(api.folders.console.get, {
-    organizationId,
-    folderId,
-  })
-  const folder = detail?.status === "ready" ? detail.folder : undefined
-
-  useMaterialTrail(useMemo(() => folderBreadcrumb(folder), [folder]))
-
-  if (detail === undefined) {
-    return (
-      <FolderFallback>
-        <ConsoleListLoading />
-      </FolderFallback>
-    )
-  }
-
-  if (detail.status === "unauthorized") {
-    return (
-      <FolderFallback>
-        <Alert variant="destructive">
-          <AlertTitle>Could not load the folder</AlertTitle>
-          <AlertDescription>{detail.message}</AlertDescription>
-        </Alert>
-      </FolderFallback>
-    )
-  }
-
-  if (folder === undefined) {
-    return (
-      <FolderFallback>
-        <Alert>
-          <AlertTitle>Folder not found</AlertTitle>
-          <AlertDescription>
-            The folder may have been deleted or belongs to another organization.
-          </AlertDescription>
-        </Alert>
-      </FolderFallback>
-    )
-  }
-
-  return <FolderReadyView folder={folder} organizationId={organizationId} />
-}
-
-/** What replaces the whole page before there is a folder to list. */
-function FolderFallback({ children }: { children: ReactNode }) {
-  return (
-    <ConsoleListLayout>
-      <ConsoleListContent>{children}</ConsoleListContent>
-    </ConsoleListLayout>
-  )
-}
-
-function FolderReadyView({
+function FolderContentsView({
   folder,
   organizationId,
 }: {
@@ -116,11 +49,15 @@ function FolderReadyView({
   )
 
   return (
-    <ConsoleListLayout>
+    <>
       <FolderHeaderActions
         folder={folder}
         onCreate={setCreation}
         onDialog={setDialog}
+      />
+      <FolderUsageLine
+        folderId={folder.folderId}
+        organizationId={organizationId}
       />
       <FolderContents
         contents={contents}
@@ -161,7 +98,7 @@ function FolderReadyView({
         organizationId={organizationId}
         resource={movingResource(moving, folder)}
       />
-    </ConsoleListLayout>
+    </>
   )
 }
 
@@ -196,28 +133,5 @@ function useUnfileResource(organizationId: string, folder: FolderDetail) {
       .catch((error: unknown) =>
         showErrorToast(error, "Could not remove it from the folder.")
       )
-  }
-}
-
-/** The folder's header crumb: the /folders overview leads the trail —
- *  every material page starts from its parent surface — then the ancestor
- *  folders, then the folder itself as the current page. */
-function folderBreadcrumb(
-  folder: FolderDetail | undefined
-): MaterialBreadcrumb | undefined {
-  if (folder === undefined) {
-    return undefined
-  }
-
-  return {
-    name: folder.name,
-    trail: [
-      { name: "Folders", to: "/folders" },
-      ...folder.path.slice(0, -1).map((segment) => ({
-        name: segment.name,
-        to: "/folders/$folderId",
-        params: { folderId: segment.folderId },
-      })),
-    ],
   }
 }
