@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { isValidTimezone, utcTimezone } from "../../contracts/timezone"
 import { parseWebsiteAddress } from "../../contracts/website"
 import { type Doc } from "../_generated/dataModel"
 import {
@@ -89,27 +90,9 @@ export const declareDomain = mutation({
       throw new Error("domain must target a public website")
     }
 
-    const domain = address.key
-
-    const profile = await readProfile(ctx, args.organizationId)
-    const domains = unique([...(profile?.declared?.domains ?? []), domain])
-
-    if (profile === null) {
-      await ctx.db.insert("organizationProfile", {
-        organizationId: args.organizationId,
-        aliases: [],
-        domains: [],
-        declared: { domains },
-        updatedAt: Date.now(),
-      })
-
-      return
-    }
-
-    await ctx.db.patch(profile._id, {
-      declared: { domains },
-      updatedAt: Date.now(),
-    })
+    await writeDeclared(ctx, args.organizationId, (declared) => ({
+      domains: unique([...(declared?.domains ?? []), address.key]),
+    }))
   },
 })
 
@@ -117,20 +100,79 @@ export const retractDomain = mutation({
   args: { organizationId: v.string(), domain: v.string() },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
-    const profile = await readProfile(ctx, args.organizationId)
-    const declared = profile?.declared?.domains ?? []
-    const domains = declared.filter((entry) => entry !== args.domain)
 
-    if (profile === null || domains.length === declared.length) {
-      return
-    }
-
-    await ctx.db.patch(profile._id, {
-      declared: domains.length === 0 ? undefined : { domains },
-      updatedAt: Date.now(),
-    })
+    await writeDeclared(ctx, args.organizationId, (declared) => ({
+      domains: (declared?.domains ?? []).filter(
+        (entry) => entry !== args.domain
+      ),
+    }))
   },
 })
+
+/** The organization's own day. Every usage date is bucketed in this zone, so
+ *  moving it re-dates history — onboarding sets it once, and a later change
+ *  will have to rebuild the rollup. */
+export const declareTimezone = mutation({
+  args: { organizationId: v.string(), timezone: v.string() },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId)
+
+    if (!isValidTimezone(args.timezone)) {
+      throw new Error("timezone must be a valid IANA time zone")
+    }
+
+    await writeDeclared(ctx, args.organizationId, () => ({
+      timezone: args.timezone,
+    }))
+  },
+})
+
+export async function readOrganizationTimezone(
+  ctx: QueryLikeCtx,
+  organizationId: string
+) {
+  const profile = await readProfile(ctx, organizationId)
+
+  return profile?.declared?.timezone ?? utcTimezone
+}
+
+type Declared = Doc<"organizationProfile">["declared"]
+
+/** Each declared field is stated on its own, so a write merges rather than
+ *  replaces; the object itself exists only while something is declared. */
+async function writeDeclared(
+  ctx: MutationCtx,
+  organizationId: string,
+  change: (current: Declared) => { domains?: string[]; timezone?: string }
+) {
+  const profile = await readProfile(ctx, organizationId)
+  const declared = mergeDeclared(profile?.declared, change(profile?.declared))
+  const updatedAt = Date.now()
+
+  if (profile !== null) {
+    await ctx.db.patch(profile._id, { declared, updatedAt })
+  } else if (declared !== undefined) {
+    await ctx.db.insert("organizationProfile", {
+      organizationId,
+      aliases: [],
+      domains: [],
+      declared,
+      updatedAt,
+    })
+  }
+}
+
+function mergeDeclared(
+  current: Declared,
+  change: { domains?: string[]; timezone?: string }
+): Declared {
+  const domains = change.domains ?? current?.domains ?? []
+  const timezone = change.timezone ?? current?.timezone
+
+  return domains.length === 0 && timezone === undefined
+    ? undefined
+    : { domains, timezone }
+}
 
 export const propose = internalMutation({
   args: {

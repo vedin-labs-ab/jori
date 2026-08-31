@@ -32,6 +32,7 @@ import { runs } from "./runs/schema"
 import { sessions } from "./sessions/schema"
 import { skills } from "./skills/schema"
 import { transitions } from "./transitions/schema"
+import { usage } from "./usage/schema"
 import { waitlist } from "./waitlist/schema"
 
 export default defineSchema({
@@ -74,4 +75,5 @@ export default defineSchema({
   documents,
   shares,
   folders,
+  usage,
 })

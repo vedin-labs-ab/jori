@@ -3,6 +3,7 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { filedTables, purgeRow, refileRow } from "./filing"
+import { reparentSpend } from "./spend"
 import {
   descendantFolderIds,
   folderDepth,
@@ -174,9 +175,9 @@ type SweepArgs = {
  *  that spends its budget reschedules itself and reads the remaining work
  *  back out of the database. */
 async function sweepSubtree(ctx: MutationCtx, args: SweepArgs) {
-  const destination = args.deleteResources
-    ? undefined
-    : await liveParentId(ctx, args.parentId)
+  // Where everything that survives the deletion goes. Filed resources only
+  // follow it when the caller kept them; spend always does.
+  const destination = await liveParentId(ctx, args.parentId)
   const descendants = await descendantFolderIds(
     ctx,
     args.organizationId,
@@ -186,6 +187,7 @@ async function sweepSubtree(ctx: MutationCtx, args: SweepArgs) {
 
   for (const folderId of [...descendants, args.folderId]) {
     budget -= await emptyFolder(ctx, {
+      organizationId: args.organizationId,
       folderId,
       destination,
       deleteResources: args.deleteResources,
@@ -208,19 +210,24 @@ async function sweepSubtree(ctx: MutationCtx, args: SweepArgs) {
 
 /** Empties one folder of everything filed in it, within the pass's budget:
  *  each row either follows the deleted folder's parent or dies with it.
- *  Returns the rows touched. */
+ *  Spend is the exception — it only ever moves. Returns the rows touched. */
 async function emptyFolder(
   ctx: MutationCtx,
   args: {
+    organizationId: string
     folderId: Id<"folders">
     destination: Id<"folders"> | undefined
     deleteResources: boolean
     budget: number
   }
 ) {
-  let touched = 0
+  let touched = await reparentSpend(ctx, args)
 
   for (const table of filedTables) {
+    if (touched >= args.budget) {
+      break
+    }
+
     const rows = await ctx.db
       .query(table)
       .withIndex("by_folder", (index) => index.eq("folderId", args.folderId))
@@ -235,10 +242,6 @@ async function emptyFolder(
     }
 
     touched += rows.length
-
-    if (touched >= args.budget) {
-      break
-    }
   }
 
   return touched

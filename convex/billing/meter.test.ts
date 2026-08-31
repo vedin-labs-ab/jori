@@ -1,6 +1,7 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { recordUsageDebit } from "../usage/record"
 import { ensureAccount, holdAutoTopUp } from "./account"
 import { debitRun } from "./ledger"
 import { meterModelUsage } from "./meter"
@@ -11,6 +12,7 @@ vi.mock("./account", async (importOriginal) => ({
   holdAutoTopUp: vi.fn(),
 }))
 vi.mock("./ledger", () => ({ debitRun: vi.fn() }))
+vi.mock("../usage/record", () => ({ recordUsageDebit: vi.fn() }))
 
 const configuredAccount = {
   _id: "account-1",
@@ -51,6 +53,7 @@ beforeEach(() => {
   vi.mocked(ensureAccount).mockReset()
   vi.mocked(holdAutoTopUp).mockReset()
   vi.mocked(debitRun).mockReset()
+  vi.mocked(recordUsageDebit).mockReset()
 })
 
 test("a trial cannot schedule an auto top-up", async () => {
@@ -81,6 +84,18 @@ test("the debit carries the tokens the amount was made of", async () => {
   await meterOnce(configuredAccount, vi.fn())
 
   expect(debitRun).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      micros: 11_000,
+      tokens: { input: 1_000, output: 200 },
+    })
+  )
+})
+
+test("the rollup is credited exactly what the ledger was debited", async () => {
+  await meterOnce(configuredAccount, vi.fn())
+
+  expect(recordUsageDebit).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
       micros: 11_000,

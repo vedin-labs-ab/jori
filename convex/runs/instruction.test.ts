@@ -34,6 +34,7 @@ describe("instruction child runs", () => {
         automationId: parent.automationId,
         automationParentId: parent.automationParentId,
         automationConfigurationVersion: parent.automationConfigurationVersion,
+        folderId: parent.folderId,
         parentId: parent._id,
         rootId: parent._id,
       })
@@ -50,6 +51,7 @@ function automationRun(): Doc<"runs"> {
     automationId: "child-automation" as Id<"automations">,
     automationParentId: "owner-automation" as Id<"automations">,
     cause: { type: "time", scheduledAt: 0 },
+    folderId: "folder" as Id<"folders">,
     createdAt: 0,
     principal: {
       kind: "person",

@@ -76,6 +76,8 @@ function inheritedAutomationExecution(parent: Doc<"runs">) {
 
   return {
     automationId: parent.automationId,
+    // Delegated work costs the folder its parent costs.
+    ...(parent.folderId === undefined ? {} : { folderId: parent.folderId }),
     ...(parent.automationParentId === undefined
       ? {}
       : { automationParentId: parent.automationParentId }),

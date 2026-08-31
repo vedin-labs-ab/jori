@@ -65,6 +65,10 @@ export function readModelUsage(data: unknown): ModelUsage | undefined {
   }
 }
 
+export function readModelName(data: unknown) {
+  return optionalString(asRecord(data)?.model)
+}
+
 export function readModelReasoning(data: unknown) {
   const reasoning = optionalString(asRecord(data)?.reasoning)
 

@@ -69,7 +69,14 @@ const agentData = v.object({ child: v.id("runs") })
 const waiterData = v.object({ waiter: v.id("waiters") })
 const errorData = v.object({ error: v.string() })
 const resultData = v.object({ result: v.string() })
-const modelData = v.object({ usage, output: text, reasoning: text })
+// The model the turn actually ran on, named at the call site rather than
+// inferred later: what a run cost is priced from the model that answered it.
+const modelData = v.object({
+  model: v.string(),
+  usage,
+  output: text,
+  reasoning: text,
+})
 const toolStartedData = v.object({ tool, input: v.any() })
 const toolCompletedData = v.object({ tool, result, provider })
 const toolFailedData = v.object({ tool, input: v.any(), error: v.string() })

@@ -31,6 +31,10 @@ export async function createAutomationRun(
     })),
     status: "queued",
     createdBy: args.automation.createdBy,
+    // Attribution is stamped once, here: what the run costs answers to the
+    // folder the automation was filed in when it fired, whatever happens to
+    // the filing later.
+    folderId: args.automation.folderId,
     createdAt: args.now,
   })
 

@@ -1,3 +1,4 @@
+import { joriModel } from "../../contracts/billing"
 import { type RuntimeModelUsage } from "../../contracts/runtime/trace"
 import { nullableText } from "../model/reasoning"
 import {
@@ -75,6 +76,7 @@ function recordModelCompleted(
   return recordRuntimeEvent(runtime.platform, runtime.context, {
     attempt: args.attempt,
     data: {
+      model: joriModel,
       usage: modelUsage(args.response, args.durationMs),
       output: nullableText(args.response.content),
       reasoning: args.response.reasoning,
