@@ -1,4 +1,4 @@
-import { type Visibility } from "@contracts/permissions/visibility"
+import { type Visibility } from "@contracts/visibility"
 import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"

@@ -1,7 +1,7 @@
 import { useQuery } from "convex/react"
 import { Logs } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
 import { scrollFadeViewport } from "@/shared/fade"
 import { api } from "../../../../convex/_generated/api"

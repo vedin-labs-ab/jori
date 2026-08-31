@@ -1,5 +1,5 @@
 import { type ReactNode } from "react"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { SeparatorDot } from "../../shared/dot"
 import { ConsoleListToolbar } from "../../shared/list/frame"
 import { SaveMeta, type SaveState } from "../../shared/materials/save"

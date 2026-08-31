@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { formatFileSize } from "@/lib/size"
+import { formatFileSize } from "@/shared/files/size"
 import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
 import {
   facetEntries,

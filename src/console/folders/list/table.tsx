@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { type FacetEntry, type ListControls } from "../../shared/list/controls"
 import { ConsoleListTable } from "../../shared/list/frame"
 import { FilterHead, SortHead } from "../../shared/list/head"

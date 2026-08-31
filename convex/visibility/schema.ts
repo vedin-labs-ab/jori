@@ -2,9 +2,9 @@ import { type Infer, v } from "convex/values"
 import {
   normalizeVisibility,
   type Visibility,
-} from "../../contracts/permissions/visibility"
+} from "../../contracts/visibility"
 
-// The stored shape of contracts/permissions/visibility: who may see a
+// The stored shape of contracts/visibility: who may see a
 // material or folder. Visibility gates reading; every write additionally
 // requires organization membership, so "public" never grants anonymous
 // writes. Team ids are Better Auth `team` document ids — stable strings

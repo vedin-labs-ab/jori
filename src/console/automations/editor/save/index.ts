@@ -1,7 +1,7 @@
 import {
   defaultVisibilityForIntegrations,
   type Visibility,
-} from "@contracts/permissions/visibility"
+} from "@contracts/visibility"
 import { localTimezone } from "../../../shared/time"
 import {
   type Automation,

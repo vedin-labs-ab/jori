@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { formatFileSize } from "@/lib/size"
+import { formatFileSize } from "@/shared/files/size"
 import { CopyButton } from "../shared/copy"
 import { SeparatorDot } from "../shared/dot"
 import { ConsoleListToolbar } from "../shared/list/frame"

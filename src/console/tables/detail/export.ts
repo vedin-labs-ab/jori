@@ -1,8 +1,8 @@
 import { type ConvexReactClient, useConvex } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useState } from "react"
-import { serializeCsv } from "@/lib/csv"
-import { downloadTextFile, toFilename } from "@/lib/download"
+import { serializeCsv } from "@/console/tables/csv"
+import { downloadTextFile, toFilename } from "@/shared/files/download"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import {

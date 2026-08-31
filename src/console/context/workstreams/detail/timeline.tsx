@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Skeleton } from "@/components/ui/skeleton"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
 import { IntegrationLogoStack } from "@/shared/logo/integration"
 import { api } from "../../../../../convex/_generated/api"

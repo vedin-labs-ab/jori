@@ -1,4 +1,4 @@
-import { defaultVisibilityForIntegrations } from "../../../contracts/permissions/visibility"
+import { defaultVisibilityForIntegrations } from "../../../contracts/visibility"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { resolveCreationFolder } from "../../folders/tree"

@@ -1,4 +1,4 @@
-import { type Visibility } from "@contracts/permissions/visibility"
+import { type Visibility } from "@contracts/visibility"
 import { type GenericId } from "convex/values"
 import { ChevronDown, Loader2 } from "lucide-react"
 import { type FormEvent, type ReactNode, useState } from "react"

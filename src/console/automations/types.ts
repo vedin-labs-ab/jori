@@ -3,7 +3,7 @@ import {
   getDefaultAutomationEvent,
 } from "@contracts/automations/events"
 import { type Scope } from "@contracts/permissions/scope"
-import { type Visibility } from "@contracts/permissions/visibility"
+import { type Visibility } from "@contracts/visibility"
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
 import { type AutomationSurfaceFormValue } from "./access"

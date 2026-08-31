@@ -1,4 +1,4 @@
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 
 /** Presentation summaries for grouped execution tools. */
 export type ActivityToolKind =

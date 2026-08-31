@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogDescription,
 } from "@/components/ui/dialog"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
 import { CopyButton } from "./copy"
