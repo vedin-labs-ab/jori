@@ -15,17 +15,38 @@ import {
 import { api } from "../../convex/_generated/api"
 import { OnboardingGate } from "./context/organization/onboarding/gate"
 import { IntegrationCallbackToasts } from "./integrations/callback"
+import { OrganizationContext, useOrganizationId } from "./organization"
 import { localTimezone } from "./shared/time"
 import { ConsoleShell } from "./shell"
 import { LaunchGate } from "./shell/gate"
 import { PublicConsoleFrame } from "./shell/public"
+
+/**
+ * Gates a console surface. A page composes this without knowing whether it
+ * is the outermost console on screen: inside a frame that already resolved
+ * an organization it is a pass-through, so a material page nested in a
+ * section frame reuses that chrome rather than mounting a second one.
+ */
+export function ConsolePage(props: {
+  children: (organizationId: string) => ReactNode
+  chrome?: "shell" | "none"
+  loadingFallback?: ReactNode
+}) {
+  const framedOrganizationId = useOrganizationId()
+
+  return framedOrganizationId === undefined ? (
+    <UnframedConsolePage {...props} />
+  ) : (
+    props.children(framedOrganizationId)
+  )
+}
 
 /** Gates a console surface: a stable loader until the session, Convex auth,
  *  and active organization are each known, then exactly one target view.
  *  Every gate query mounts here together so their round-trips overlap —
  *  mounting the organization queries only after the session resolved used
  *  to serialize the whole chain and doubled the time behind the loader. */
-export function ConsolePage({
+function UnframedConsolePage({
   children,
   chrome = "shell",
   loadingFallback,
@@ -89,12 +110,12 @@ function SignedInConsole({
 
   if (active.data !== null && active.data !== undefined) {
     const content = (
-      <>
+      <OrganizationContext.Provider value={active.data.id}>
         {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
         <SessionSync organizationId={active.data.id} />
         <OnboardingGate />
         {children(active.data.id)}
-      </>
+      </OrganizationContext.Provider>
     )
 
     return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content

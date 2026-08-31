@@ -1,21 +1,27 @@
 import { parseShareFragment } from "@contracts/shares/fragment"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 
-/** Fragments only exist client-side, so resolve after mount: undefined while
- *  deciding, null for the member view, or the share secret. */
+function subscribeToHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange)
+
+  return () => window.removeEventListener("hashchange", onChange)
+}
+
+function readShareSecret() {
+  return parseShareFragment(window.location.hash)
+}
+
+/** Fragments never reach the server, so the first render of a page the
+ *  server sent cannot know the secret: undefined while deciding, null for
+ *  the member view, or the share secret. Every later render reads the hash
+ *  synchronously, so navigating to a material inside the app resolves in
+ *  the same commit rather than flashing a loading state first. */
 export function useShareSecret() {
-  const [secret, setSecret] = useState<string | null>()
+  return useSyncExternalStore(subscribeToHash, readShareSecret, readNoSecret)
+}
 
-  useEffect(() => {
-    const update = () => setSecret(parseShareFragment(window.location.hash))
-
-    update()
-    window.addEventListener("hashchange", update)
-
-    return () => window.removeEventListener("hashchange", update)
-  }, [])
-
-  return secret
+function readNoSecret() {
+  return undefined
 }
 
 /** Reactive queries empty on revocation by themselves; expiry needs a clock.

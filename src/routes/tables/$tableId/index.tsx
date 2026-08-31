@@ -1,6 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { useShareSecret } from "@/shared/share/link"
 import { TableAccess } from "./-view/access"
 
 export const Route = createFileRoute("/tables/$tableId/")({
@@ -23,11 +21,6 @@ export const Route = createFileRoute("/tables/$tableId/")({
 
 function TableRoute() {
   const { tableId } = Route.useParams()
-  const secret = useShareSecret()
 
-  if (secret === undefined) {
-    return <FullscreenSkeletonLoader aria-label="Loading table" />
-  }
-
-  return <TableAccess secret={secret} tableId={tableId} />
+  return <TableAccess tableId={tableId} />
 }
