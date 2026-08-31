@@ -35,6 +35,7 @@ type RuntimeToolTraceData =
   | { tool: RuntimeToolTraceTool }
 
 type RuntimeModelTraceData = {
+  model: string
   usage: RuntimeModelUsage
   output: string | null
   reasoning: string | null

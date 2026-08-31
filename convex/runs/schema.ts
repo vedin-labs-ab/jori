@@ -122,6 +122,10 @@ export const runs = defineTable({
   /** Outcome returned via finish_run; parents read it from wait_for_agents. */
   result: v.optional(v.string()),
   createdBy: v.optional(v.id("persons")),
+  /** The folder whose usage this run's cost answers to, resolved once from
+   *  the automation's filing when the run is created. Absent for interactive
+   *  work, which is filed nowhere and rolls up unfiled. */
+  folderId: v.optional(v.id("folders")),
   createdAt: v.number(),
   endedAt: v.optional(v.number()),
   stoppedBy: v.optional(actorValidator),
@@ -138,5 +142,10 @@ export const runs = defineTable({
   .index("by_organization_and_created_by_and_created_at", [
     "organizationId",
     "createdBy",
+    "createdAt",
+  ])
+  .index("by_organization_and_folder_and_created_at", [
+    "organizationId",
+    "folderId",
     "createdAt",
   ])

@@ -1,8 +1,9 @@
 import { expect, test, vi } from "vitest"
 import { tableDoc, testOwner } from "../../test/convex/collections"
-import { databaseContext } from "../../test/convex/database"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { automationDoc, fileDoc, folderDoc } from "../../test/convex/folders"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { recordUsageEnded } from "../usage/record"
 import { removeFolder } from "./records"
 
 // Deleting a folder deletes its whole subtree. Everything filed anywhere
@@ -207,3 +208,75 @@ test("an overfull subtree continues through the scheduler", async () => {
     deleteResources: false,
   })
 })
+
+test("a deleted folder's spend follows it rather than dying with it", async () => {
+  const { database, ctx } = deletionContext()
+  const parentId = await database.insert("folders", folderDoc())
+  const folderId = await database.insert("folders", folderDoc({ parentId }))
+  const runId = await seedSpend(database, ctx, folderId)
+
+  await remove(ctx, folderId)
+
+  expect((await database.get(runId))?.folderId).toBe(parentId)
+  expect(await spendFolders(database)).toEqual([parentId])
+})
+
+test("deleting the contents still only moves the spend", async () => {
+  const { database, ctx } = deletionContext()
+  const parentId = await database.insert("folders", folderDoc())
+  const folderId = await database.insert("folders", folderDoc({ parentId }))
+  const runId = await seedSpend(database, ctx, folderId)
+
+  await remove(ctx, folderId, true)
+
+  expect((await database.get(runId))?.folderId).toBe(parentId)
+  expect(await spendFolders(database)).toEqual([parentId])
+})
+
+test("spend left by a deleted root folder becomes unfiled", async () => {
+  const { database, ctx } = deletionContext()
+  const folderId = await database.insert("folders", folderDoc())
+  const runId = await seedSpend(database, ctx, folderId)
+
+  await remove(ctx, folderId)
+
+  expect((await database.get(runId))?.folderId).toBeUndefined()
+  expect(await spendFolders(database)).toEqual([undefined])
+})
+
+/** A completed run filed in the folder, rolled up through the real write
+ *  path so the row carries the key the re-parenting has to recompute. */
+async function seedSpend(
+  database: TestDatabase,
+  ctx: ReturnType<typeof deletionContext>["ctx"],
+  folderId: string
+) {
+  const runId = await database.insert("runs", {
+    organizationId: "org",
+    audience: "organization",
+    cause: { type: "time", scheduledAt: 0 },
+    principal: { kind: "organization" },
+    snapshot: { context: [], source: { type: "automation" }, title: "Digest" },
+    status: "completed",
+    createdAt: 1,
+    folderId,
+  })
+
+  await recordUsageEnded(ctx, {
+    run: (await database.get(runId)) as unknown as Doc<"runs">,
+    failed: false,
+  })
+
+  return runId
+}
+
+async function spendFolders(database: TestDatabase) {
+  const rows = await database
+    .query("usage")
+    .withIndex("by_organization_and_date", (index) =>
+      index.eq("organizationId", "org")
+    )
+    .collect()
+
+  return rows.map((row) => row.folderId)
+}

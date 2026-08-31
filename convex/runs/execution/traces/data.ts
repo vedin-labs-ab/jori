@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { meterModelUsage } from "../../../billing/meter"
 import { continuePendingConversationRun } from "../../../conversations/continuation"
+import { recordUsageEnded } from "../../../usage/record"
 import { wakeParentForTerminalRun } from "../waiters/data"
 import { type traceData } from "./schema"
 
@@ -150,14 +151,18 @@ async function patchRunStatus(
     return
   }
 
+  // The status guards above make this the one transition out of a live run,
+  // so the rollup increments on exactly the condition that ends it.
   if (args.type === "run.completed") {
     await ctx.db.patch(args.runId, completedRunPatch(args.data))
+    await recordUsageEnded(ctx, { run, failed: false })
   } else if (args.type === "run.failed") {
     await ctx.db.patch(args.runId, {
       status: "failed",
       error: readRunFailedError(args.data),
       endedAt: Date.now(),
     })
+    await recordUsageEnded(ctx, { run, failed: true })
   }
 }
 

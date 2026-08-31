@@ -7,6 +7,7 @@ test("projects token usage for completed model steps", () => {
     [
       traceDoc({
         data: {
+          model: "openai/gpt-5.6-sol",
           output: null,
           reasoning: null,
           usage: {
@@ -48,6 +49,7 @@ test("projects bounded reasoning for completed model steps", () => {
     [
       traceDoc({
         data: {
+          model: "openai/gpt-5.6-sol",
           output: null,
           reasoning: `${"a".repeat(1500)}extra`,
           usage: {

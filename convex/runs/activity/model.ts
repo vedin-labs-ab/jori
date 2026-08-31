@@ -1,6 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import {
   type ModelUsage,
+  readModelName,
   readModelReasoning,
   readModelUsage,
   readTraceData,
@@ -68,7 +69,7 @@ function projectModelTerminal(
     status: failed ? "failed" : "completed",
     title: failed ? "Model request failed" : "Model step completed",
     description: failed ? readTraceError(data) : modelSummary(usage),
-    details: modelDetails(usage),
+    details: modelDetails(usage, readModelName(data)),
     durationMs: usage?.durationMs,
     endedAt: trace.timestamp,
     ...(reasoning === undefined ? {} : { reasoning }),
@@ -104,12 +105,16 @@ function modelTokenUsage(
   }
 }
 
-function modelDetails(usage: ModelUsage | undefined) {
+function modelDetails(
+  usage: ModelUsage | undefined,
+  model: string | undefined
+) {
   if (usage === undefined) {
     return undefined
   }
 
   const details = [
+    model === undefined ? undefined : { label: "Model", value: model },
     metricDetail("Input tokens", usage.inputTokens),
     metricDetail("Output tokens", usage.outputTokens),
     metricDetail("Reasoning tokens", usage.reasoningTokens),

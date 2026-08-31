@@ -37,7 +37,15 @@ export const organizationProfile = defineTable({
       website: v.optional(v.string()),
     })
   ),
-  declared: v.optional(v.object({ domains: v.array(v.string()) })),
+  declared: v.optional(
+    v.object({
+      domains: v.array(v.string()),
+      /** The zone every usage date is bucketed in, so a day on a chart is the
+       *  organization's own day rather than UTC's. Set during onboarding;
+       *  changing it will require a rollup rebuild (future). */
+      timezone: v.optional(v.string()),
+    })
+  ),
   approvedAt: v.optional(v.number()),
   approvedBy: v.optional(actorValidator),
   updatedAt: v.number(),
