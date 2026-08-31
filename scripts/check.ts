@@ -12,5 +12,6 @@ async function runChecks() {
     packageCommand("check:entrypoints"),
     packageCommand("check:typecheck"),
     packageCommand("check:biome"),
+    packageCommand("check:bundle"),
   ])
 }
