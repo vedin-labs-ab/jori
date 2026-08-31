@@ -1,74 +1,59 @@
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
+import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { JsonBlock } from "../../shared/code"
 import { SchemaFieldList } from "./fields"
-import { type SchemaEditor, type SchemaEditorView } from "./state"
+import { type SchemaEditor } from "./state"
 
-/** The store schema editor: a field-list form by default, with a code view
- *  over the raw JSON Schema for anything the form cannot express. */
+/** The store schema editor: the field builder and nothing else, so every
+ *  schema the console authors is one the console can read back. A schema
+ *  written through the API may use features the rows cannot represent;
+ *  that one reads as the document it is, and removing it is the way back
+ *  to the builder. */
 export function SchemaEditorSection({
   editor,
-  idPrefix,
+  schema,
 }: {
   editor: SchemaEditor
-  idPrefix: string
+  /** The stored schema, shown when the builder cannot represent it. */
+  schema: JsonSchemaObject | undefined
 }) {
+  const { fieldErrors, fields, submitError } = editor.state
+
   return (
     <div className="grid gap-2">
-      <div className="flex items-center justify-between">
-        <Label htmlFor={`${idPrefix}-schema`}>Schema</Label>
-        <Tabs
-          onValueChange={(view) => editor.switchView(view as SchemaEditorView)}
-          value={editor.state.view}
-        >
-          <TabsList className="!h-7">
-            <TabsTrigger value="form">Form</TabsTrigger>
-            <TabsTrigger value="code">Code</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-      {editor.state.view === "form" ? (
+      {fields === undefined ? (
+        <UneditableSchema schema={schema} />
+      ) : (
         <SchemaFieldList
-          errors={editor.state.fieldErrors}
-          fields={editor.state.fields}
+          errors={fieldErrors}
+          fields={fields}
           onChange={editor.setFields}
           onErrorClear={editor.clearFieldError}
         />
-      ) : (
-        <SchemaCodeView editor={editor} idPrefix={idPrefix} />
       )}
-      {editor.state.submitError === undefined ? null : (
+      {submitError === undefined ? null : (
         <p className="text-destructive text-xs" role="alert">
-          {editor.state.submitError}
+          {submitError}
         </p>
       )}
     </div>
   )
 }
 
-function SchemaCodeView({
-  editor,
-  idPrefix,
+/** A schema outside the builder's vocabulary — enums, anyOf, a map of
+ *  values — reads rather than edits. Removing it is the only change the
+ *  dialog can still offer. */
+function UneditableSchema({
+  schema,
 }: {
-  editor: SchemaEditor
-  idPrefix: string
+  schema: JsonSchemaObject | undefined
 }) {
   return (
     <>
-      <Textarea
-        className="min-h-40 font-mono text-xs"
-        id={`${idPrefix}-schema`}
-        onChange={(event) => editor.setCodeText(event.target.value)}
-        value={editor.state.codeText}
-      />
-      {editor.state.codeError === undefined ? null : (
-        <p className="text-destructive text-xs" role="alert">
-          {editor.state.codeError}
-        </p>
-      )}
-      {editor.state.codeNote === undefined ? null : (
-        <p className="text-muted-foreground text-xs">{editor.state.codeNote}</p>
-      )}
+      <JsonBlock className="rounded-md border" value={schema} />
+      <p className="text-muted-foreground text-xs">
+        This schema uses JSON Schema features the builder cannot edit. Remove it
+        to define one here.
+      </p>
     </>
   )
 }

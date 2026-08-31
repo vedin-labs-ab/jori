@@ -1,5 +1,13 @@
-import { Plus, X } from "lucide-react"
+import { Braces, Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -18,18 +26,29 @@ import {
 } from "./model"
 
 /** One list of sibling fields; object fields and arrays of objects nest
- *  another list underneath their row. */
+ *  another list underneath their row. A schema with no fields at all is
+ *  the dialog's whole content, so the outermost list says what a field is
+ *  for; a nested list is a detail of the row above it and just offers the
+ *  button. */
 export function SchemaFieldList({
   errors,
   fields,
+  nested = false,
   onChange,
   onErrorClear,
 }: {
   errors: Record<string, string>
   fields: SchemaField[]
+  nested?: boolean
   onChange: (fields: SchemaField[]) => void
   onErrorClear: (fieldId: string) => void
 }) {
+  const addField = () => onChange([...fields, createField()])
+
+  if (fields.length === 0 && !nested) {
+    return <SchemaFieldsEmpty onAddField={addField} />
+  }
+
   return (
     <div className="grid gap-2">
       {fields.map((field) => (
@@ -44,17 +63,42 @@ export function SchemaFieldList({
           onRemove={() => onChange(fields.filter((entry) => entry !== field))}
         />
       ))}
-      <Button
-        className="w-fit"
-        onClick={() => onChange([...fields, createField()])}
-        size="sm"
-        type="button"
-        variant="outline"
-      >
-        <Plus />
-        Add field
-      </Button>
+      <AddFieldButton onClick={addField} />
     </div>
+  )
+}
+
+function SchemaFieldsEmpty({ onAddField }: { onAddField: () => void }) {
+  return (
+    <Empty className="border py-8">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Braces />
+        </EmptyMedia>
+        <EmptyTitle>No fields yet</EmptyTitle>
+        <EmptyDescription>
+          Each field becomes a property every value write must carry.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <AddFieldButton onClick={onAddField} />
+      </EmptyContent>
+    </Empty>
+  )
+}
+
+function AddFieldButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button
+      className="w-fit"
+      onClick={onClick}
+      size="sm"
+      type="button"
+      variant="outline"
+    >
+      <Plus />
+      Add field
+    </Button>
   )
 }
 
@@ -83,6 +127,7 @@ function SchemaFieldRow(props: RowProps) {
           <SchemaFieldList
             errors={errors}
             fields={field.fields}
+            nested
             onChange={(fields) => onChange({ ...field, fields })}
             onErrorClear={onErrorClear}
           />
