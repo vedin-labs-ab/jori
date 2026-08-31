@@ -1,6 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { useShareSecret } from "@/shared/share/link"
 import { StoreAccess } from "./-view/access"
 
 export const Route = createFileRoute("/stores/$storeId/")({
@@ -23,11 +21,6 @@ export const Route = createFileRoute("/stores/$storeId/")({
 
 function StoreRoute() {
   const { storeId } = Route.useParams()
-  const secret = useShareSecret()
 
-  if (secret === undefined) {
-    return <FullscreenSkeletonLoader aria-label="Loading store" />
-  }
-
-  return <StoreAccess secret={secret} storeId={storeId} />
+  return <StoreAccess storeId={storeId} />
 }

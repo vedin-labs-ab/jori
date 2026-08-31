@@ -1,6 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { useShareSecret } from "@/shared/share/link"
 import { FileAccess } from "./-view/access"
 
 export const Route = createFileRoute("/files/$fileId/")({
@@ -23,11 +21,6 @@ export const Route = createFileRoute("/files/$fileId/")({
 
 function FileRoute() {
   const { fileId } = Route.useParams()
-  const secret = useShareSecret()
 
-  if (secret === undefined) {
-    return <FullscreenSkeletonLoader aria-label="Loading file" />
-  }
-
-  return <FileAccess fileId={fileId} secret={secret} />
+  return <FileAccess fileId={fileId} />
 }
