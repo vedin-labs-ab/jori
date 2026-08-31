@@ -18,8 +18,8 @@ import { useActiveOrganization } from "@/shared/session/auth"
 import { api } from "../../../convex/_generated/api"
 import { CreationDialogs, type CreationRequest } from "./create/dialogs"
 import { NewInFolderMenu } from "./create/menu"
+import { useLeaveDeletedFolder } from "./delete/leave"
 import { useExpandHoverHandler, useRootDrop } from "./drag/state"
-import { useLeaveDeletedFolder } from "./leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { type FolderExpansion, FolderTreeItem } from "./row"
 import { ancestorFolderIds, buildFolderTree } from "./tree"
@@ -48,8 +48,11 @@ function FoldersGroup({
   const folders = tree?.status === "ready" ? tree.folders : undefined
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const [creation, setCreation] = useState<CreationRequest>()
-  const expansion = useFolderExpansion(activeFolderId(pathname), folders)
-  const leaveDeletedFolder = useLeaveDeletedFolder(activeFolderId(pathname))
+  const activeId = activeFolderId(pathname)
+  const expansion = useFolderExpansion(activeId, folders)
+  const leaveDeletedFolder = useLeaveDeletedFolder(
+    useViewedTrail(activeId, folders)
+  )
 
   // The drag context lives at the shell, above both panes; hand it this
   // tree's dwell-to-expand handler so drags can descend into the sidebar.
@@ -149,6 +152,21 @@ function FoldersLabel() {
         <Link to="/folders">Folders</Link>
       </Button>
     </SidebarGroupLabel>
+  )
+}
+
+/** The open folder and its ancestors: deleting any of them takes the open
+ *  folder with it, since a delete takes the whole subtree. */
+function useViewedTrail(
+  activeId: string | undefined,
+  folders: FolderRow[] | undefined
+) {
+  return useMemo(
+    () =>
+      activeId === undefined
+        ? []
+        : [activeId, ...ancestorFolderIds(folders ?? [], activeId)],
+    [activeId, folders]
   )
 }
 

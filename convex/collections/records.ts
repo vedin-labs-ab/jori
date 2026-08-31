@@ -133,10 +133,24 @@ export async function removeCollection<K extends CollectionKind>(
     return { collectionId: collection._id, archived: true as const }
   }
 
-  await ctx.db.delete(collection._id)
-  await purgeBatch(ctx, { collectionId: collection._id, kind: spec.kind })
+  await purgeCollection(ctx, collection)
 
   return { collectionId: collection._id, deleted: true as const }
+}
+
+/** Deletes a collection outright — the row, its documents, and its share
+ *  links. Archiving is the reversible step; this is not. Reached through
+ *  the console's delete of an archived collection, and through a folder
+ *  deletion that takes its contents with it. */
+export async function purgeCollection(
+  ctx: MutationCtx,
+  collection: CollectionDoc
+) {
+  await ctx.db.delete(collection._id)
+  await purgeBatch(ctx, {
+    collectionId: collection._id,
+    kind: collection.kind,
+  })
 }
 
 export async function restoreCollection<K extends CollectionKind>(

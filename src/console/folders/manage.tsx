@@ -3,16 +3,6 @@ import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -29,6 +19,7 @@ import { showErrorToast } from "../shared/error"
 import { DialogForm } from "../shared/materials/form"
 import { useRetained } from "../shared/retain"
 import { FolderAccessDialog } from "./access"
+import { DeleteFolderDialog } from "./delete/dialog"
 import { MoveToFolderDialog } from "./move"
 import { type ManagedFolder } from "./types"
 
@@ -173,68 +164,6 @@ function RenameFolderDialog({
       submitLabel="Rename"
       title={`Rename "${folder.name}"`}
     />
-  )
-}
-
-function DeleteFolderDialog({
-  folder,
-  isOpen,
-  onDeleted,
-  onOpenChange,
-  organizationId,
-}: {
-  folder: ManagedFolder | undefined
-  isOpen: boolean
-  onDeleted: (folder: ManagedFolder) => void
-  onOpenChange: (isOpen: boolean) => void
-  organizationId: string
-}) {
-  const remove = useMutation(api.folders.console.remove)
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  if (folder === undefined) {
-    return null
-  }
-
-  async function submit(target: ManagedFolder) {
-    setIsDeleting(true)
-
-    try {
-      await remove({ organizationId, folderId: target.folderId })
-      toast.success(`Deleted ${target.name}.`)
-      onOpenChange(false)
-      onDeleted(target)
-    } catch (error) {
-      showErrorToast(error, "Could not delete the folder.")
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
-  return (
-    <AlertDialog onOpenChange={onOpenChange} open={isOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="wrap-anywhere">
-            Delete "{folder.name}"?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Nothing inside is deleted: its subfolders and filed items move to
-            the parent folder.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isDeleting}
-            onClick={() => void submit(folder)}
-            variant="destructive"
-          >
-            Delete folder
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   )
 }
 

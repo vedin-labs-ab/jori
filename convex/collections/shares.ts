@@ -89,6 +89,25 @@ export async function revokeShare(
   await ctx.db.delete(share._id)
 }
 
+/** A link is a capability for one target, so the links die with it. The cap
+ *  sits far above activeShareLimit, leaving room for the expired links kept
+ *  as history. */
+export async function deleteTargetShares(
+  ctx: MutationCtx,
+  target: ShareTarget
+) {
+  const shares = await ctx.db
+    .query("shares")
+    .withIndex("by_target_and_expires_at", (index) =>
+      index.eq("targetKind", target.kind).eq("targetId", target.id)
+    )
+    .take(activeShareLimit * 20)
+
+  for (const share of shares) {
+    await ctx.db.delete(share._id)
+  }
+}
+
 /** Expiration order is also lifecycle order: every future expiry sorts ahead
  *  of every past expiry, so one indexed cursor yields active links first. */
 export async function pageShares(

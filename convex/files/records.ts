@@ -1,5 +1,6 @@
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { deleteTargetShares } from "../collections/shares"
 import { resolveCreationFolder } from "../folders/tree"
 import { type QueryLikeCtx } from "../shared/context"
 import { optionalString, requiredString } from "../shared/input"
@@ -101,16 +102,21 @@ export async function swapFileBlob(
   })
 }
 
-/** The blob has no owner besides the row, so the two go together. */
 export async function removeFileWithBlob(
   ctx: MutationCtx,
   viewer: FileViewer,
   fileId: Id<"files">
 ) {
-  const file = await requireViewableFile(ctx, viewer, fileId)
+  await purgeFile(ctx, await requireViewableFile(ctx, viewer, fileId))
+}
 
+/** The blob has no owner besides the row and a share link is a capability
+ *  for this one file, so all three go together. Reached through the console
+ *  and through a folder deletion that takes its contents with it. */
+export async function purgeFile(ctx: MutationCtx, file: Doc<"files">) {
   await ctx.storage.delete(file.storageId)
   await ctx.db.delete(file._id)
+  await deleteTargetShares(ctx, { kind: "file", id: file._id })
 }
 
 export async function requireViewableFile(

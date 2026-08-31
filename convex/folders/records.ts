@@ -2,8 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { filedTables } from "./filing"
+import { filedTables, purgeRow, refileRow } from "./filing"
 import {
+  descendantFolderIds,
   folderDepth,
   isSelfOrDescendant,
   maxTreeDepth,
@@ -13,11 +14,12 @@ import {
   subtreeHeight,
 } from "./tree"
 
-// Folder records: create, rename, move, and the reparenting delete. Sibling
+// Folder records: create, rename, move, and the subtree delete. Sibling
 // names are deliberately not unique — like Drive, unlike a filesystem:
 // folders are labels for humans, and ids already carry identity.
 
-const reparentBatchSize = 200
+/** Rows one pass may touch before it hands the rest to the next one. */
+const sweepBudget = 200
 
 export async function createFolder(
   ctx: MutationCtx,
@@ -113,15 +115,21 @@ export async function moveFolder(
   return await requireOrganizationFolder(ctx, args.organizationId, folder._id)
 }
 
-/** Deleting a folder reparents its contents — child folders and every filed
- *  resource — to the deleted folder's parent (the root when none), so
- *  deletion never orphans and never refuses. The first batch runs inside the
- *  deleting mutation, settling small folders atomically; larger ones finish
- *  through the house self-rescheduling batch pattern. Everything moves one
- *  level up, so depth can only shrink and needs no check. */
+/** Deleting a folder deletes its whole subtree: every folder below it goes
+ *  with it. What was filed anywhere inside either follows the deleted
+ *  folder's parent — becoming unfiled when it had none — or, when the caller
+ *  asks for it, is deleted along with the folders. The first pass runs
+ *  inside the deleting mutation, settling ordinary folders atomically; a
+ *  subtree too large for one transaction finishes through the house
+ *  self-rescheduling batch pattern. Everything that survives moves up, so
+ *  depth can only shrink and needs no check. */
 export async function removeFolder(
   ctx: MutationCtx,
-  args: { organizationId: string; folderId: Id<"folders"> }
+  args: {
+    organizationId: string
+    folderId: Id<"folders">
+    deleteResources: boolean
+  }
 ) {
   const folder = await requireOrganizationFolder(
     ctx,
@@ -129,50 +137,114 @@ export async function removeFolder(
     args.folderId
   )
 
+  // The folder leaves every listing at once; its descendants still name its
+  // id, which is exactly what the sweep walks down from.
   await ctx.db.delete(folder._id)
-  await reparentBatch(ctx, {
+  await sweepSubtree(ctx, {
     organizationId: args.organizationId,
     folderId: folder._id,
     parentId: folder.parentId,
+    deleteResources: args.deleteResources,
   })
 }
 
-export const reparent = internalMutation({
+export const sweep = internalMutation({
   args: {
     organizationId: v.string(),
     folderId: v.id("folders"),
     parentId: v.optional(v.id("folders")),
+    deleteResources: v.boolean(),
   },
   handler: async (ctx, args) => {
-    await reparentBatch(ctx, args)
+    await sweepSubtree(ctx, args)
 
     return null
   },
 })
 
-async function reparentBatch(
-  ctx: MutationCtx,
-  args: {
-    organizationId: string
-    folderId: Id<"folders">
-    parentId?: Id<"folders">
-  }
-) {
-  const target = { ...args, parentId: await liveParentId(ctx, args.parentId) }
-  let overflow = await reparentChildFolders(ctx, target)
+type SweepArgs = {
+  organizationId: string
+  folderId: Id<"folders">
+  parentId?: Id<"folders">
+  deleteResources: boolean
+}
 
-  for (const table of filedTables) {
-    if (await reparentFiledRows(ctx, table, target)) {
-      overflow = true
+/** One bounded pass over what is left of the subtree, deepest folder first
+ *  so no folder row is deleted before the descendants that name it. A pass
+ *  that spends its budget reschedules itself and reads the remaining work
+ *  back out of the database. */
+async function sweepSubtree(ctx: MutationCtx, args: SweepArgs) {
+  const destination = args.deleteResources
+    ? undefined
+    : await liveParentId(ctx, args.parentId)
+  const descendants = await descendantFolderIds(
+    ctx,
+    args.organizationId,
+    args.folderId
+  )
+  let budget = sweepBudget
+
+  for (const folderId of [...descendants, args.folderId]) {
+    budget -= await emptyFolder(ctx, {
+      folderId,
+      destination,
+      deleteResources: args.deleteResources,
+      budget,
+    })
+
+    if (budget <= 0) {
+      await ctx.scheduler.runAfter(0, internal.folders.records.sweep, args)
+
+      return
     }
-  }
 
-  if (overflow) {
-    await ctx.scheduler.runAfter(0, internal.folders.records.reparent, target)
+    // The root's row went with the deleting mutation; the rest go here,
+    // each one only once its own contents are settled.
+    if (folderId !== args.folderId) {
+      await ctx.db.delete(folderId)
+    }
   }
 }
 
-/** Concurrent deletions can take the destination folder down before a batch
+/** Empties one folder of everything filed in it, within the pass's budget:
+ *  each row either follows the deleted folder's parent or dies with it.
+ *  Returns the rows touched. */
+async function emptyFolder(
+  ctx: MutationCtx,
+  args: {
+    folderId: Id<"folders">
+    destination: Id<"folders"> | undefined
+    deleteResources: boolean
+    budget: number
+  }
+) {
+  let touched = 0
+
+  for (const table of filedTables) {
+    const rows = await ctx.db
+      .query(table)
+      .withIndex("by_folder", (index) => index.eq("folderId", args.folderId))
+      .take(args.budget - touched)
+
+    for (const row of rows) {
+      if (args.deleteResources) {
+        await purgeRow(ctx, table, row)
+      } else {
+        await refileRow(ctx, table, row, args.destination)
+      }
+    }
+
+    touched += rows.length
+
+    if (touched >= args.budget) {
+      break
+    }
+  }
+
+  return touched
+}
+
+/** Concurrent deletions can take the destination folder down before a pass
  *  runs; rows then go to the root instead of dangling under a dead id. */
 async function liveParentId(ctx: MutationCtx, parentId?: Id<"folders">) {
   if (parentId === undefined || (await ctx.db.get(parentId)) === null) {
@@ -180,50 +252,6 @@ async function liveParentId(ctx: MutationCtx, parentId?: Id<"folders">) {
   }
 
   return parentId
-}
-
-async function reparentChildFolders(
-  ctx: MutationCtx,
-  args: {
-    organizationId: string
-    folderId: Id<"folders">
-    parentId?: Id<"folders">
-  }
-) {
-  const now = Date.now()
-  const children = await ctx.db
-    .query("folders")
-    .withIndex("by_organization_and_parent", (index) =>
-      index
-        .eq("organizationId", args.organizationId)
-        .eq("parentId", args.folderId)
-    )
-    .take(reparentBatchSize)
-
-  for (const child of children) {
-    await ctx.db.patch(child._id, { parentId: args.parentId, updatedAt: now })
-  }
-
-  return children.length === reparentBatchSize
-}
-
-/** Refiling is organization, not content: updatedAt stays untouched so
- *  recency-ordered lists keep meaning "content changed". */
-async function reparentFiledRows(
-  ctx: MutationCtx,
-  table: (typeof filedTables)[number],
-  args: { folderId: Id<"folders">; parentId?: Id<"folders"> }
-) {
-  const rows = await ctx.db
-    .query(table)
-    .withIndex("by_folder", (index) => index.eq("folderId", args.folderId))
-    .take(reparentBatchSize)
-
-  for (const row of rows) {
-    await ctx.db.patch(row._id, { folderId: args.parentId })
-  }
-
-  return rows.length === reparentBatchSize
 }
 
 function assertDepth(depth: number) {
