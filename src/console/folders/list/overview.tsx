@@ -17,8 +17,6 @@ import { useMaterialTrail } from "../../shared/materials/breadcrumb"
 import { FoldersTitleMenu } from "../header"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
 import { type FolderRootsResult } from "../types"
-import { UsageOverlay } from "../usage/overlay"
-import { type UsageDays } from "../usage/types"
 import { useFolderListControls } from "./controls"
 import { FolderListRow, FolderListTable } from "./table"
 
@@ -29,23 +27,15 @@ const foldersCrumb = { menu: <FoldersTitleMenu />, name: "Folders" }
 /** The folder tree's landing page: the root folders in the same full-bleed
  *  table a folder's own page uses. The icon-collapsed sidebar links here —
  *  with the tree hidden, navigation continues in the main view. */
-export function FoldersOverview({ usage }: { usage: UsageDays | undefined }) {
+export function FoldersOverview() {
   return (
     <ConsolePage>
-      {(organizationId) => (
-        <RootFolders organizationId={organizationId} usage={usage} />
-      )}
+      {(organizationId) => <RootFolders organizationId={organizationId} />}
     </ConsolePage>
   )
 }
 
-function RootFolders({
-  organizationId,
-  usage,
-}: {
-  organizationId: string
-  usage: UsageDays | undefined
-}) {
+function RootFolders({ organizationId }: { organizationId: string }) {
   const roots = useQuery(api.folders.console.roots, { organizationId })
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const create = () => setDialog({ type: "create" })
@@ -62,9 +52,7 @@ function RootFolders({
           type="button"
         />
       </ConsoleHeaderActions>
-      <UsageOverlay days={usage} organizationId={organizationId}>
-        <RootFolderList onCreate={create} roots={roots} />
-      </UsageOverlay>
+      <RootFolderList onCreate={create} roots={roots} />
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}

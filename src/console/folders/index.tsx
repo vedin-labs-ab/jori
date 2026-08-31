@@ -12,20 +12,11 @@ import { FolderHeaderActions } from "./header"
 import { FolderContents } from "./list/contents"
 import { MoveResourceDialog } from "./move"
 import { type FolderDetail, type FolderResource, toFiledType } from "./types"
-import { FolderUsageLine } from "./usage/line"
-import { type UsageDays } from "./usage/types"
 
-/** A folder's page: everything filed here, headed by the month's spend
- *  whenever there is any. */
-export function FolderPage({
-  folderId,
-  usage,
-}: {
-  folderId: string
-  usage: UsageDays | undefined
-}) {
+/** A folder's page: everything filed here. */
+export function FolderPage({ folderId }: { folderId: string }) {
   return (
-    <FolderFrame folderId={folderId} usage={usage}>
+    <FolderFrame folderId={folderId} view="contents">
       {(folder, organizationId, onNewFolder) => (
         <FolderContentsView
           folder={folder}
@@ -57,10 +48,6 @@ function FolderContentsView({
   return (
     <>
       <FolderHeaderActions onCreate={setCreation} onNewFolder={onNewFolder} />
-      <FolderUsageLine
-        folderId={folder.folderId}
-        organizationId={organizationId}
-      />
       <FolderContents
         contents={contents}
         folderId={folder.folderId}

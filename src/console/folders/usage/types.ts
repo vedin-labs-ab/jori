@@ -20,17 +20,19 @@ export type UsageDays = (typeof usageWindowDays)[number]
  *  than once, short enough to still be about now. */
 export const defaultUsageDays: UsageDays = 30
 
-/** A parameter naming anything else falls back to the default rather than
+/** The window rides in the URL so a view can be shared or reloaded. A
+ *  parameter naming anything else falls back to the default rather than
  *  failing the route. */
 export function parseUsageDays(value: unknown): UsageDays {
   return usageWindowDays.find((days) => days === value) ?? defaultUsageDays
 }
 
-/** The usage panel rides in the URL as one parameter — present while it is
- *  open, valued with the window it shows — so the view someone found worth
- *  reading is a view they can send on. */
-export function usageSearch(value: unknown): { usage?: UsageDays } {
-  return value === undefined ? {} : { usage: parseUsageDays(value) }
+/** The route's search, normalized: the default window leaves no parameter
+ *  behind, so the plain URL is the one people share. */
+export function usageDaysSearch(value: unknown): { days?: UsageDays } {
+  const days = parseUsageDays(value)
+
+  return days === defaultUsageDays ? {} : { days }
 }
 
 /** Toggle options; the group's value is a string, as toggle values are. */
