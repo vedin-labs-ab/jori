@@ -20,7 +20,7 @@ export function AutomationInstructionsField(
   } = useAutomationInstructionsEditor(props)
 
   return (
-    <div className="grid min-w-0 gap-1">
+    <div className="grid min-w-0 gap-1.5">
       <div className="relative min-w-0">
         <div
           aria-invalid={props.error === undefined ? undefined : true}

@@ -294,20 +294,22 @@ function FolderNameDialog({
         <DialogForm disabled={isSaving} onSubmit={() => void submit()}>
           <div className="grid gap-2">
             <Label htmlFor="folder-name">Name</Label>
-            <Input
-              aria-invalid={error === undefined ? undefined : true}
-              id="folder-name"
-              onChange={(event) => {
-                setName(event.target.value)
-                setError(undefined)
-              }}
-              value={name}
-            />
-            {error === undefined ? null : (
-              <p className="text-destructive text-xs" role="alert">
-                {error}
-              </p>
-            )}
+            <div className="grid gap-1.5">
+              <Input
+                aria-invalid={error === undefined ? undefined : true}
+                id="folder-name"
+                onChange={(event) => {
+                  setName(event.target.value)
+                  setError(undefined)
+                }}
+                value={name}
+              />
+              {error === undefined ? null : (
+                <p className="text-destructive text-xs" role="alert">
+                  {error}
+                </p>
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button disabled={isSaving} type="submit">
