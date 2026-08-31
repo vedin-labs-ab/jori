@@ -13,7 +13,7 @@ export function AutomationNameField({
   return (
     <div className="grid gap-2">
       <Label htmlFor="automation-name">Name</Label>
-      <div className="grid gap-1">
+      <div className="grid gap-1.5">
         <Input
           aria-describedby={
             error === undefined ? undefined : "automation-name-error"

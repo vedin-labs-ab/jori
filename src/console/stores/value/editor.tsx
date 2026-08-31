@@ -234,23 +234,27 @@ function ValueBody({
 
   return (
     <ConsoleListContent>
-      <Textarea
-        aria-label="Store value JSON"
-        className="min-h-64 font-mono text-xs"
-        onChange={(event) => {
-          editor.setCodeText(event.target.value)
-          onEdit()
-        }}
-        value={editor.state.codeText}
-      />
-      {editor.state.codeError === undefined ? null : (
-        <p className="text-destructive text-xs" role="alert">
-          {editor.state.codeError}
-        </p>
-      )}
-      {editor.state.codeNote === undefined ? null : (
-        <p className="text-muted-foreground text-xs">{editor.state.codeNote}</p>
-      )}
+      <div className="grid gap-1.5">
+        <Textarea
+          aria-label="Store value JSON"
+          className="min-h-64 font-mono text-xs"
+          onChange={(event) => {
+            editor.setCodeText(event.target.value)
+            onEdit()
+          }}
+          value={editor.state.codeText}
+        />
+        {editor.state.codeError === undefined ? null : (
+          <p className="text-destructive text-xs" role="alert">
+            {editor.state.codeError}
+          </p>
+        )}
+        {editor.state.codeNote === undefined ? null : (
+          <p className="text-muted-foreground text-xs">
+            {editor.state.codeNote}
+          </p>
+        )}
+      </div>
     </ConsoleListContent>
   )
 }

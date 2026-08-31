@@ -19,7 +19,7 @@ export function MaterialNameField({
   return (
     <div className="grid gap-2">
       <Label htmlFor={`${idPrefix}-name`}>Name</Label>
-      <div className="grid gap-1">
+      <div className="grid gap-1.5">
         <Input
           aria-describedby={
             error === undefined ? undefined : `${idPrefix}-name-error`

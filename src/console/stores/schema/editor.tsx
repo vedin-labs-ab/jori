@@ -19,7 +19,7 @@ export function SchemaEditorSection({
   const { fieldErrors, fields, submitError } = editor.state
 
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-1.5">
       {fields === undefined ? (
         <UneditableSchema schema={schema} />
       ) : (
