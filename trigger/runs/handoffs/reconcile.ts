@@ -1,5 +1,4 @@
-import { decodeJson } from "../../../contracts/json"
-import { encodeToolResult } from "../../../contracts/json/transport"
+import { decodeJson, encodeToolResult } from "../../../contracts/json"
 import {
   type ApprovalHandoff,
   type HandoffSubject,

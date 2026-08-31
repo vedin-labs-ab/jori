@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { internalMutation, mutation } from "../../_generated/server"
+import { internalMutation } from "../../_generated/server"
 import { linkSetupIdentity } from "../../persons/install"
 import {
   requireProviderIntegration,
@@ -7,7 +7,6 @@ import {
   saveOAuthCredentials,
 } from "../connect/credentials"
 import {
-  createSignedInstallState,
   findUserIntegrationForInstall,
   upsertIntegration,
 } from "../connect/install"
@@ -17,26 +16,6 @@ const microsoftIntegration = v.union(
   v.literal("microsoftCalendar"),
   v.literal("microsoftEmail")
 )
-
-export const createMicrosoftEmailInstallState = mutation({
-  args: {
-    organizationId: v.string(),
-    returnUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await createSignedInstallState(ctx, "microsoftEmail", args)
-  },
-})
-
-export const createMicrosoftCalendarInstallState = mutation({
-  args: {
-    organizationId: v.string(),
-    returnUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await createSignedInstallState(ctx, "microsoftCalendar", args)
-  },
-})
 
 export const recordOAuthInstallation = internalMutation({
   args: {

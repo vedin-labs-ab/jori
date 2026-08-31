@@ -5,7 +5,7 @@ import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
-import { countNoun } from "../../shared/list/bulk"
+import { countNoun } from "../../shared/count"
 import { uploadToStorage } from "../storage"
 
 export type UploadStatus = "done" | "error" | "pending" | "uploading"

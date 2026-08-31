@@ -1,7 +1,7 @@
 import { type HandoffSubject } from "./handoffs"
 import { type RuntimeId } from "./ids"
 
-export type WaiterWakeReason = "resolved" | "message" | "cancelled" | "expired"
+type WaiterWakeReason = "resolved" | "message" | "cancelled" | "expired"
 
 export type WaiterSubject =
   | HandoffSubject

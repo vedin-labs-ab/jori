@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest"
-import { decodeJson, decodeJsonObject, encodeJson, toJsonValue } from "."
+import {
+  decodeJson,
+  decodeJsonObject,
+  encodeJson,
+  encodeToolResult,
+  toJsonValue,
+} from "."
 
 describe("JSON transport codec", () => {
   test("preserves arbitrary unicode object keys", () => {
@@ -28,5 +34,26 @@ describe("JSON transport codec", () => {
       "Unsupported JSON value: undefined"
     )
     expect(() => toJsonValue(Number.NaN)).toThrow("JSON numbers must be finite")
+  })
+})
+
+describe("encodeToolResult", () => {
+  test("round-trips a tool input through a single encoded string", () => {
+    const input = {
+      properties: {
+        "Företag 😀": {
+          title: [{ text: { content: "Vedin Labs" } }],
+        },
+        ÅÄÖ: {
+          rich_text: [{ text: { content: "Ready" } }],
+        },
+      },
+    }
+
+    expect(decodeJsonObject(encodeJson(input))).toEqual(input)
+  })
+
+  test("normalizes a missing tool result to json null", () => {
+    expect(decodeJson(encodeToolResult(undefined))).toBeNull()
   })
 })

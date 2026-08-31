@@ -6,11 +6,11 @@ export type SurfaceReactionTarget =
   | { type: "comment"; commentId: number }
   | { type: "issue"; issueId: string }
 
-const surfaceCommunicationTools = ["send_reply", "add_reaction"] as const
+/** Surface tools whose completion is, by itself, visible communication. */
+export const surfaceCommunicationTools = ["send_reply", "add_reaction"] as const
 
-// Surface tools whose completion is, by itself, visible communication to the
-// requester. Convex derives a run's `communicated` state from their traces;
-// the worker marks the active surface when they succeed.
+// Convex derives a run's `communicated` state from their traces; the worker
+// marks the active surface when they succeed.
 export function isSurfaceCommunicationTool(name: unknown) {
   return surfaceCommunicationTools.some((tool) => tool === name)
 }

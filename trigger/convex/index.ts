@@ -1,7 +1,6 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../../contracts/integrations"
-import { decodeJson, type JsonObject } from "../../contracts/json"
-import { encodeToolInput } from "../../contracts/json/transport"
+import { decodeJson, encodeJson, type JsonObject } from "../../contracts/json"
 import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
 import {
   type AgentRunPayload,
@@ -17,13 +16,13 @@ import {
 } from "../../contracts/runtime/worker"
 import { api } from "../../convex/_generated/api"
 import { type RuntimePlatform } from "../platform"
-import { requireConvexUrl, requireWorkerSecret } from "./config"
+import { readWorkerSecret, requireConvexUrl } from "./config"
 import { type UploadFileArgs, uploadFile } from "./files"
 import { fetchGitHubCloneCredentials, type GitHubCloneArgs } from "./github"
 
 export class JoriConvexClient implements RuntimePlatform {
   private readonly client = new ConvexHttpClient(requireConvexUrl())
-  private readonly secret = requireWorkerSecret()
+  private readonly secret = readWorkerSecret()
 
   async loadRun(payload: AgentRunPayload, attempt: number) {
     return (await this.client.action(api.runtime.context.load, {
@@ -55,7 +54,7 @@ export class JoriConvexClient implements RuntimePlatform {
     tool: string
   }) {
     const result = await this.client.action(api.runtime.tools.call, {
-      inputJson: encodeToolInput(args.input),
+      inputJson: encodeJson(args.input),
       runId: args.runId,
       secret: this.secret,
       surface: args.surface,
@@ -179,7 +178,7 @@ export class JoriConvexClient implements RuntimePlatform {
     tool: string
   }) {
     return await this.client.action(api.runtime.tools.requestApproval, {
-      inputJson: encodeToolInput(args.input),
+      inputJson: encodeJson(args.input),
       ...(args.replyTarget === undefined
         ? {}
         : { replyTarget: args.replyTarget }),

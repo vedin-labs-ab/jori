@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest"
-import { encodeToolInput } from "../../../../contracts/json/transport"
+import { encodeJson } from "../../../../contracts/json"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
 import { handleLinearApprovalDecision } from "./approvals"
@@ -72,7 +72,7 @@ function approvalDoc(): Doc<"approvals"> {
   return {
     _creationTime: 0,
     _id: "approval_1" as Id<"approvals">,
-    args: encodeToolInput({}),
+    args: encodeJson({}),
     code: "YD4UEFNV",
     createdAt: 0,
     expiresAt: 1,

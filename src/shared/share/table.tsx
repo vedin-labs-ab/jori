@@ -1,4 +1,5 @@
 import { usePaginatedQuery, useQuery } from "convex/react"
+import { type FunctionReturnType } from "convex/server"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,9 +19,7 @@ import { ShareShell, ShareUnavailable } from "./shell"
 
 const rowPageSize = 50
 
-type SharedTable = NonNullable<
-  ReturnType<typeof useQuery<typeof api.tables.share.get>>
->
+type SharedTable = NonNullable<FunctionReturnType<typeof api.tables.share.get>>
 
 /** Views a table through a share link or its public visibility, without a
  *  signed-in session. The secret rides along on every reactive read, so a

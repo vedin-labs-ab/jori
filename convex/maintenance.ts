@@ -2,52 +2,12 @@ import { ConvexError, type GenericId, v } from "convex/values"
 
 import { type DataModel } from "./_generated/dataModel"
 import { internalMutation, type MutationCtx } from "./_generated/server"
+import schema from "./schema"
 
 type TableName = keyof DataModel
 
-const tableRegistry: Record<TableName, true> = {
-  skills: true,
-  allowlist: true,
-  waitlist: true,
-  persons: true,
-  files: true,
-  billingAccounts: true,
-  billingEntries: true,
-  identities: true,
-  integrations: true,
-  integrationOffers: true,
-  messages: true,
-  places: true,
-  organizationProfile: true,
-  organizationSources: true,
-  organizationDiscovery: true,
-  reactions: true,
-  automations: true,
-  subscriptions: true,
-  events: true,
-  backfills: true,
-  runs: true,
-  conversations: true,
-  beliefs: true,
-  efforts: true,
-  evidence: true,
-  journal: true,
-  passes: true,
-  sessions: true,
-  approvals: true,
-  transitions: true,
-  traces: true,
-  outbox: true,
-  waiters: true,
-  sandboxes: true,
-  permissions: true,
-  collections: true,
-  documents: true,
-  shares: true,
-  folders: true,
-}
-
-const tables = Object.keys(tableRegistry) as TableName[]
+// Every table the schema declares, so a new table is never silently skipped.
+const tables = Object.keys(schema.tables) as TableName[]
 const defaultBatchLimit = 256
 const maxBatchLimit = 1024
 

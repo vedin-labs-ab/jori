@@ -1,14 +1,6 @@
 import { useState } from "react"
 import { toast } from "sonner"
 
-/** "3 tables" / "1 table" — counted noun for bulk toasts. */
-export function countNoun(
-  count: number,
-  noun: { plural: string; singular: string }
-) {
-  return `${count} ${count === 1 ? noun.singular : noun.plural}`
-}
-
 /** Runs one bulk step per selected item, tolerating individual failures
  *  and summarizing the outcome in one toast. `intervalMs` spaces the steps
  *  out — browsers drop file downloads fired back-to-back. */

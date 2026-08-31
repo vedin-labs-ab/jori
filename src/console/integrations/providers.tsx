@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import { type ToolPermissionController } from "../permissions/controller"
 import { IntegrationCard } from "./card"
 import { getAccountHeadline, getWorkspaceHeadline } from "./card/headline"
@@ -13,13 +13,11 @@ export function IntegrationProvider({
   permissions: ToolPermissionController
   provider: ProviderDefinition
 }) {
-  const createInstallState = useMutation(provider.install)
   const status = useQuery(provider.status, { organizationId })
 
   return (
     <IntegrationCard
       config={provider.config}
-      createInstallState={createInstallState}
       headline={providerHeadline(provider, status)}
       organizationId={organizationId}
       permissions={permissions}

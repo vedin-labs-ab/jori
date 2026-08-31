@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { encodeToolResult } from "../../../../contracts/json/transport"
+import { encodeToolResult } from "../../../../contracts/json"
 import { id } from "../../../../test/convex/database"
 import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Doc } from "../../../_generated/dataModel"

@@ -67,72 +67,92 @@ export function StatusIcon({
   status: ExecutionStatus
   waiter: WaiterIndicator
 }) {
-  const actionStatus = getActionStatus({ approval, now, offer })
-  const isWaitingForInput = actionStatus === null && waiter?.state === "waiting"
-  const label =
-    actionStatus !== null
-      ? `${executionStatuses[status].label}, ${actionStatus.label}`
-      : isWaitingForInput
-        ? waitingStatusLabel
-        : executionStatuses[status].label
+  const glyph = resolveStatusGlyph({ approval, now, offer, status, waiter })
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <span
-          aria-label={label}
+          aria-label={glyph.label}
           className="relative inline-flex size-4 shrink-0 items-center justify-center"
           role="img"
         >
           <span className="inline-flex transition-opacity duration-150 group-focus-visible/run-row:opacity-0 group-hover/run-row:opacity-0">
-            <StatusGlyph
-              actionStatus={actionStatus}
-              isWaitingForInput={isWaitingForInput}
-              status={status}
-            />
+            <StatusGlyph glyph={glyph} />
           </span>
           <ChevronsUpDown className="pointer-events-none absolute size-4 text-muted-foreground opacity-0 transition-opacity duration-150 group-focus-visible/run-row:opacity-100 group-hover/run-row:opacity-100" />
         </span>
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>{glyph.label}</TooltipContent>
     </Tooltip>
   )
 }
 
-function StatusGlyph({
-  actionStatus,
-  isWaitingForInput,
-  status,
-}: {
-  actionStatus: ActionStatus | null
-  isWaitingForInput: boolean
-  status: ExecutionStatus
-}) {
-  const statusMetadata = executionStatuses[status]
-  const Icon =
-    actionStatus !== null
-      ? actionStatus.Icon
-      : isWaitingForInput
-        ? Hourglass
-        : statusMetadata.Icon
+type StatusGlyphState = {
+  className: string
+  Icon: LucideIcon
+  isSpinning: boolean
+  label: string
+}
 
+/**
+ * What the indicator shows, decided once. A pending action speaks for the
+ * run, then a waiter, then the run's own execution status; only that last
+ * case spins.
+ */
+function resolveStatusGlyph({
+  approval,
+  now,
+  offer,
+  status,
+  waiter,
+}: {
+  approval: ApprovalIndicator
+  now: number
+  offer: OfferIndicator
+  status: ExecutionStatus
+  waiter: WaiterIndicator
+}): StatusGlyphState {
+  const execution = executionStatuses[status]
+  const actionStatus = getActionStatus({ approval, now, offer })
+
+  if (actionStatus !== null) {
+    return {
+      className: actionStatus.className,
+      Icon: actionStatus.Icon,
+      isSpinning: false,
+      label: `${execution.label}, ${actionStatus.label}`,
+    }
+  }
+
+  if (waiter?.state === "waiting") {
+    return {
+      className: execution.className,
+      Icon: Hourglass,
+      isSpinning: false,
+      label: "Waiting for input",
+    }
+  }
+
+  return {
+    className: execution.className,
+    Icon: execution.Icon,
+    isSpinning: status === "queued" || status === "running",
+    label: execution.label,
+  }
+}
+
+function StatusGlyph({ glyph }: { glyph: StatusGlyphState }) {
   return (
-    <Icon
+    <glyph.Icon
       className={cn(
         "size-4",
-        actionStatus !== null
-          ? actionStatus.className
-          : statusMetadata.className,
-        actionStatus === null &&
-          !isWaitingForInput &&
-          (status === "queued" || status === "running") &&
-          "animate-spin"
+        glyph.className,
+        glyph.isSpinning && "animate-spin"
       )}
     />
   )
 }
-
-const waitingStatusLabel = "Waiting for input"
 
 export function MetaPill({
   icon: Icon,

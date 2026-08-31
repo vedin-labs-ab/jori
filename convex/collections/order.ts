@@ -1,7 +1,6 @@
 import { v } from "convex/values"
-import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { internalMutation, type MutationCtx } from "../_generated/server"
+import { type MutationCtx } from "../_generated/server"
 
 // Documents carry a fractional `order` the grid sorts by: appends take a
 // timestamp, anchored inserts take midpoints between their neighbors, so
@@ -120,66 +119,4 @@ function spreadBetween(lower: number, upper: number, count: number) {
   const step = (upper - lower) / (count + 1)
 
   return Array.from({ length: count }, (_, index) => lower + step * (index + 1))
-}
-
-/**
- * TEMPORARY one-shot backfill: stamps `order = _creationTime` on every
- * document that predates the order field, so the ordered index reads whole
- * tables. New writes stamp `order` at the document write chokepoint
- * (collections/documents.ts).
- *
- * Run once per environment after deploying, then delete this mutation, its
- * step helper, and their tests in a follow-up commit:
- *
- *   node --experimental-strip-types scripts/env/index.ts --env dev \
- *     -- npx convex run collections/order:backfill
- *   node --experimental-strip-types scripts/env/index.ts --env prod \
- *     -- npx convex run collections/order:backfill
- *
- * Each invocation sweeps one keyset batch of the documents table (the
- * built-in by_creation_time index orders the keyset) and reschedules
- * itself until a batch comes up short.
- */
-const backfillBatchSize = 500
-
-export const backfill = internalMutation({
-  args: { after: v.optional(v.number()) },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const next = await backfillStep(ctx, args.after)
-
-    if (next !== null) {
-      await ctx.scheduler.runAfter(0, internal.collections.order.backfill, {
-        after: next,
-      })
-    }
-
-    return null
-  },
-})
-
-/** Stamps one batch; returns the next step's keyset bound, or null when
- *  the sweep is complete. */
-export async function backfillStep(
-  ctx: MutationCtx,
-  after: number | undefined
-): Promise<number | null> {
-  const documents = await ctx.db
-    .query("documents")
-    .withIndex("by_creation_time", (index) =>
-      after === undefined ? index : index.gt("_creationTime", after)
-    )
-    .take(backfillBatchSize)
-
-  for (const document of documents) {
-    if (document.order === undefined) {
-      await ctx.db.patch(document._id, { order: document._creationTime })
-    }
-  }
-
-  const last = documents[documents.length - 1]
-
-  return documents.length < backfillBatchSize || last === undefined
-    ? null
-    : last._creationTime
 }

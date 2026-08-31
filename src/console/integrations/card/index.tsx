@@ -9,7 +9,7 @@ import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"
 import { integrationsRouteFor } from "../routes"
 import { type IntegrationCardStatus } from "./headline"
-import { type CreateInstallState, useIntegrationInstall } from "./install"
+import { useIntegrationInstall } from "./install"
 import { IntegrationCardSurface, type SurfaceLogo } from "./surface"
 
 export type IntegrationCardConfig = {
@@ -31,14 +31,12 @@ type IntegrationStatus = {
 
 export function IntegrationCard({
   config,
-  createInstallState,
   headline,
   permissions,
   status,
   organizationId,
 }: {
   config: IntegrationCardConfig
-  createInstallState: CreateInstallState
   headline: string
   permissions: ToolPermissionController
   status: IntegrationStatus | undefined
@@ -46,8 +44,8 @@ export function IntegrationCard({
 }) {
   const install = useIntegrationInstall({
     connectError: config.connectError,
-    createInstallState,
     installPath: config.installPath,
+    integration: config.integration,
     organizationId,
     // Come back to the tab the card lives on, not whichever one is default.
     returnPath: integrationsRouteFor([config.integration]),

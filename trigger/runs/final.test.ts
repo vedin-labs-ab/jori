@@ -6,6 +6,7 @@ import {
 import {
   createQueuedModel,
   type QueuedModelResponse,
+  runtimeContext,
   runtimeId,
 } from "../../test/trigger"
 import { type AgentRuntime } from "../runtime"
@@ -136,32 +137,15 @@ function createRuntime(options: {
       markOfferConsumed: vi.fn(),
       recordEvent: vi.fn(),
     },
-    context: {
+    context: runtimeContext({
       activeSurface: {
         communicated: false,
         surface: "slack",
         target: null,
       },
-      drained: null,
       handoffs: bundled,
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
-      run: {
-        id: runtimeId<"runs">("run_1"),
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-      session: null,
       tools: [addReactionTool()],
-    },
+    }),
     sandbox: {},
   } as unknown as AgentRuntime
 }

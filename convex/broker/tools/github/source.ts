@@ -1,5 +1,4 @@
 import {
-  normalizeSourceChanges,
   type SourceChanges,
   type SourceFileChange,
 } from "../../../../contracts/source"
@@ -11,10 +10,6 @@ export type GitHubSourceCommit = {
   files: number
   sha: string
   treeSha: string
-}
-
-export function readSourceChanges(value: unknown) {
-  return normalizeSourceChanges(value)
 }
 
 export async function commitSourceChangesToBranch(

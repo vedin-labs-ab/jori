@@ -5,23 +5,8 @@ import { afterEach, expect, test, vi } from "vitest"
 import { type FolderContentsResult } from "../types"
 import { FolderContents } from "./contents"
 
-vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    params,
-    to,
-    ...props
-  }: {
-    params?: Record<string, string>
-    to: string
-  } & React.ComponentProps<"a">) => (
-    <a
-      href={Object.values(params ?? {}).reduce(
-        (path, value) => path.replace(/\$\w+/, value),
-        to
-      )}
-      {...props}
-    />
-  ),
+vi.mock("@tanstack/react-router", async () => ({
+  Link: (await import("../../../../test/router")).Link,
 }))
 
 afterEach(cleanup)

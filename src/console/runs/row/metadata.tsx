@@ -23,30 +23,39 @@ type MetadataProps = {
 
 type MetadataRenderer = (props: MetadataProps) => ReactNode
 
+/** Details that only pick an icon; the label carries the rest. */
+const metadataIcons: Partial<Record<ExecutionDetail["type"], LucideIcon>> = {
+  calendar_event: CalendarDays,
+  file: File,
+  folder: Folder,
+  page: File,
+  project: Square,
+  schedule: Repeat2,
+  sender: UserRound,
+  subject: Mail,
+}
+
+/** Details that reshape the label or branch on the surface they came from. */
 const metadataRenderers: Partial<
   Record<ExecutionDetail["type"], MetadataRenderer>
 > = {
-  calendar_event: EventDatum,
   channel: ChannelDatum,
-  file: FileDatum,
-  folder: FolderDatum,
   issue: IssueDatum,
-  page: PageDatum,
-  project: ProjectDatum,
   pull_request: PullRequestDatum,
   repository: RepositoryDatum,
-  schedule: ScheduleDatum,
-  sender: SenderDatum,
   status: StatusDatum,
-  subject: SubjectDatum,
 }
 
 export function SourceMetadataDatum({ detail, surface }: MetadataProps) {
   const Renderer = metadataRenderers[detail.type]
 
-  return Renderer === undefined ? null : (
-    <Renderer detail={detail} surface={surface} />
-  )
+  if (Renderer !== undefined) {
+    return <Renderer detail={detail} surface={surface} />
+  }
+
+  const icon = metadataIcons[detail.type]
+
+  return icon === undefined ? null : <IconDatum detail={detail} icon={icon} />
 }
 
 function RepositoryDatum({ detail }: MetadataProps) {
@@ -96,34 +105,6 @@ function IssueDatum({ detail, surface }: MetadataProps) {
   )
 }
 
-function EventDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={CalendarDays} />
-}
-
-function FileDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={File} />
-}
-
-function FolderDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={Folder} />
-}
-
-function PageDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={File} />
-}
-
-function ProjectDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={Square} />
-}
-
-function ScheduleDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={Repeat2} />
-}
-
-function SenderDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={UserRound} />
-}
-
 function StatusDatum({ detail }: MetadataProps) {
   return (
     <IconDatum
@@ -131,10 +112,6 @@ function StatusDatum({ detail }: MetadataProps) {
       icon={detail.label === "Paused" ? Pause : Check}
     />
   )
-}
-
-function SubjectDatum({ detail }: MetadataProps) {
-  return <IconDatum detail={detail} icon={Mail} />
 }
 
 function IconDatum({

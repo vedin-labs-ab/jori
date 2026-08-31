@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { type RuntimeId } from "../../contracts/runtime/worker"
+import { runtimeContext } from "../../test/trigger"
 import { type AgentRuntime } from "../runtime"
 import { sandboxWorkspace } from "../sandbox/workspace"
 import { materializeSandboxResult } from "./results"
@@ -48,18 +49,7 @@ function cloneRuntime(): AgentRuntime {
         username: "x-access-token",
       })),
     } as unknown as AgentRuntime["platform"],
-    context: {
-      activeSurface: null,
-      drained: null,
-      handoffs: { approvals: [], offers: [] },
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
+    context: runtimeContext({
       run: {
         id: "run_1" as RuntimeId<"runs">,
         rootId: null,
@@ -67,10 +57,7 @@ function cloneRuntime(): AgentRuntime {
         status: "running",
         organizationId: "organization",
       },
-      result: null,
-      session: null,
-      tools: [],
-    },
+    }),
     sandbox: {
       cloneRepository: vi.fn(async (input) => ({
         directory: input.directory ?? `${sandboxWorkspace}/app`,

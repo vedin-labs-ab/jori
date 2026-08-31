@@ -1,4 +1,5 @@
 import { compactRecord } from "../../../../contracts/json"
+import { normalizeSourceChanges } from "../../../../contracts/source"
 import { summarizePullRequest } from "../../../integrations/github/delivery/format"
 import {
   optionalBoolean,
@@ -13,7 +14,6 @@ import {
   createBranchWithSourceChanges,
   type GitHubSourceCommit,
   normalizeBranchName,
-  readSourceChanges,
 } from "./source"
 
 export async function commitToPullRequest(
@@ -24,7 +24,7 @@ export async function commitToPullRequest(
   const repo = requiredString(args.repo, "repo")
   const pullNumber = requiredNumber(args.pullNumber, "pullNumber")
   const message = requiredString(args.commitMessage, "commitMessage")
-  const changes = readSourceChanges(args.changes)
+  const changes = normalizeSourceChanges(args.changes)
 
   if (changes.headSha === undefined) {
     throw new Error("changes.headSha is required for pull request commits")
@@ -73,7 +73,9 @@ export async function createPullRequest(
     "base"
   )
   const changes =
-    args.changes === undefined ? undefined : readSourceChanges(args.changes)
+    args.changes === undefined
+      ? undefined
+      : normalizeSourceChanges(args.changes)
   const commit =
     changes === undefined
       ? undefined

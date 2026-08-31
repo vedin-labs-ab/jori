@@ -1,4 +1,5 @@
 import { type ToolSurface } from "../integrations"
+import { surfaceCommunicationTools } from "../runtime/surface"
 import { toolPermissionRows } from "./catalog"
 import {
   type PermissionMode,
@@ -47,8 +48,7 @@ export function summarizeToolCapabilities(
 
 export const internalRequiredToolNames = [
   "finish_run",
-  "send_reply",
-  "add_reaction",
+  ...surfaceCommunicationTools,
 ] as const
 /** Tools that need a person in the conversation, so automations never get them. */
 const interactiveToolNames = [

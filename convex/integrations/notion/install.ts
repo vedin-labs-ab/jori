@@ -1,21 +1,11 @@
 import { v } from "convex/values"
-import { internalMutation, mutation } from "../../_generated/server"
+import { internalMutation } from "../../_generated/server"
 import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
-import { createSignedInstallState, upsertIntegration } from "../connect/install"
+import { upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
-
-export const createInstallState = mutation({
-  args: {
-    organizationId: v.string(),
-    returnUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await createSignedInstallState(ctx, "notion", args)
-  },
-})
 
 export const recordOAuthInstallation = internalMutation({
   args: {

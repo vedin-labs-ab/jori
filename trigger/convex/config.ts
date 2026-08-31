@@ -6,7 +6,7 @@ export function requireConvexSiteUrl() {
   return requireEnv("CONVEX_SITE_URL", "VITE_CONVEX_SITE_URL")
 }
 
-export function requireWorkerSecret() {
+export function readWorkerSecret() {
   return requireEnv("JORI_WORKER_SECRET")
 }
 

@@ -1,6 +1,7 @@
 import { useConvex, useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
-import { countNoun, useBulkRunner } from "../shared/list/bulk"
+import { countNoun } from "../shared/count"
+import { useBulkRunner } from "../shared/list/bulk"
 import { type ListConfig } from "../shared/list/controls"
 import { type RowSelection } from "../shared/list/selection"
 import { type FolderNames, folderFacet } from "../shared/materials/folders"

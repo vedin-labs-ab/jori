@@ -14,15 +14,6 @@ export type ProviderStatus = {
 export type ProviderDefinition = {
   config: IntegrationCardConfig
   emptyHeadline?: string
-  install: FunctionReference<
-    "mutation",
-    "public",
-    {
-      organizationId: string
-      returnUrl: string
-    },
-    string
-  >
   status: FunctionReference<
     "query",
     "public",
@@ -52,7 +43,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No workspace connected",
-    install: api.integrations.slack.install.createInstallState,
     status: api.integrations.status.getSlackStatus,
     type: "workspace",
   },
@@ -74,7 +64,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No workspace connected",
-    install: api.integrations.linear.install.createInstallState,
     status: api.integrations.status.getLinearStatus,
     type: "workspace",
     useUrlHeadline: true,
@@ -97,7 +86,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No installation connected",
-    install: api.integrations.github.install.createInstallState,
     status: api.integrations.status.getGitHubStatus,
     type: "workspace",
   },
@@ -119,7 +107,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No workspace connected",
-    install: api.integrations.notion.install.createInstallState,
     status: api.integrations.status.getNotionStatus,
     type: "workspace",
   },
@@ -143,7 +130,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/gmail.svg",
       },
     },
-    install: api.integrations.google.install.createGmailInstallState,
     status: api.integrations.status.getGmailStatus,
     type: "account",
   },
@@ -164,7 +150,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/google-calendar.svg",
       },
     },
-    install: api.integrations.google.install.createGoogleCalendarInstallState,
     status: api.integrations.status.getGoogleCalendarStatus,
     type: "account",
   },
@@ -185,8 +170,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/microsoft-outlook.svg",
       },
     },
-    install:
-      api.integrations.microsoft.install.createMicrosoftEmailInstallState,
     status: api.integrations.status.getMicrosoftEmailStatus,
     type: "account",
   },
@@ -207,8 +190,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/microsoft.svg",
       },
     },
-    install:
-      api.integrations.microsoft.install.createMicrosoftCalendarInstallState,
     status: api.integrations.status.getMicrosoftCalendarStatus,
     type: "account",
   },

@@ -1,9 +1,5 @@
 import { v } from "convex/values"
-import {
-  internalMutation,
-  internalQuery,
-  mutation,
-} from "../../_generated/server"
+import { internalMutation, internalQuery } from "../../_generated/server"
 import {
   linkSetupIdentity,
   setupIdentityValidator,
@@ -12,7 +8,7 @@ import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../connect/credentials"
-import { createSignedInstallState, upsertIntegration } from "../connect/install"
+import { upsertIntegration } from "../connect/install"
 import {
   findActiveIntegrationByExternalId,
   findIntegrationByExternalId,
@@ -23,16 +19,6 @@ const tokenPairValidator = v.object({
   access: v.string(),
   refresh: v.string(),
   expiresAt: v.number(),
-})
-
-export const createInstallState = mutation({
-  args: {
-    organizationId: v.string(),
-    returnUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await createSignedInstallState(ctx, "slack", args)
-  },
 })
 
 export const getUserToken = internalQuery({

@@ -4,7 +4,7 @@ import { collapseWhitespace } from "./text"
  *  so people outside it can say so, which is signal worth collecting. */
 export const teamSizes = ["1-9", "10-24", "25-49", "50-99", "100+"] as const
 
-export type TeamSize = (typeof teamSizes)[number]
+type TeamSize = (typeof teamSizes)[number]
 
 export const teamSizeLabels = {
   "1-9": "1 to 9 people",
@@ -20,7 +20,7 @@ export const waitlistLimits = { email: 254, work: 600 } as const
 
 export type WaitlistField = "email" | "size" | "work"
 
-export type WaitlistEntry = {
+type WaitlistEntry = {
   email: string
   size: TeamSize
   work: string
@@ -28,9 +28,9 @@ export type WaitlistEntry = {
 
 /** A rejection names the field it belongs to, so the form can mark that one
  *  input invalid rather than printing a notice under the whole form. */
-export type WaitlistRejection = { field: WaitlistField; message: string }
+type WaitlistRejection = { field: WaitlistField; message: string }
 
-export function isTeamSize(value: string): value is TeamSize {
+function isTeamSize(value: string): value is TeamSize {
   return teamSizes.some((size) => size === value)
 }
 
@@ -47,7 +47,7 @@ export function normalizeEmail(value: string) {
   return /^[^\s@]+@[^\s@.]+\.[^\s@]+$/.test(email) ? email : undefined
 }
 
-export function normalizeWork(value: string) {
+function normalizeWork(value: string) {
   return collapseWhitespace(value).slice(0, waitlistLimits.work)
 }
 

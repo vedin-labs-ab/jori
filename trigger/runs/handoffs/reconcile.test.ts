@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
-import { encodeToolResult } from "../../../contracts/json/transport"
+import { encodeToolResult } from "../../../contracts/json"
 import { type RuntimeTool } from "../../../contracts/runtime/worker"
-import { runtimeId } from "../../../test/trigger"
+import { runtimeContext, runtimeId } from "../../../test/trigger"
 import { type ModelMessage } from "../../model/types"
 import { type AgentRuntime } from "../../runtime"
 import { reconcileHandoffs } from "./reconcile"
@@ -158,29 +158,7 @@ function createRuntime(options: {
         activeSurface: null,
       })),
     } as unknown as AgentRuntime["platform"],
-    context: {
-      activeSurface: null,
-      drained: null,
-      handoffs: { approvals: [], offers: [] },
-      prompt: {
-        context: "context",
-        instructions: "system",
-        organization: null,
-        place: null,
-        person: null,
-        requester: null,
-      },
-      run: {
-        id: runtimeId<"runs">("run_1"),
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-      result: null,
-      session: null,
-      tools: [],
-    },
+    context: runtimeContext(),
     sandbox: {} as AgentRuntime["sandbox"],
   }
 }
