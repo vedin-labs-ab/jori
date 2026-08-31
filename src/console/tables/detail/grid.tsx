@@ -195,9 +195,12 @@ function HeadRow({
   onInspectColumn: (column: TableColumn) => void
   selection: RowSelection<TableRowData>
 }) {
+  // The row declares the height once and the cells stretch into it, the
+  // way the data rows do. A cell that sizes itself instead lands its
+  // hairline a border-width off from its neighbours'.
   return (
-    <div className="sticky top-0 z-10 flex">
-      <div className="flex h-10 w-12 shrink-0 items-center justify-center border-r border-b bg-background">
+    <div className="sticky top-0 z-10 flex h-10">
+      <div className="flex w-12 shrink-0 items-center justify-center border-r border-b bg-background">
         {disabled ? (
           <span className="sr-only">Row number</span>
         ) : (
@@ -217,7 +220,7 @@ function HeadRow({
       ))}
       <div className="border-r border-b bg-background">
         <button
-          className="flex h-10 w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:opacity-50"
+          className="flex h-full w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:opacity-50"
           disabled={disabled}
           onClick={onAddColumn}
           type="button"
@@ -249,7 +252,7 @@ function HeadCell({
     >
       <button
         aria-label={`${name} column details`}
-        className="group/head flex h-10 w-full items-center gap-1.5 px-2 text-left outline-none hover:bg-muted/50 focus-visible:bg-muted/50"
+        className="group/head flex h-full w-full items-center gap-1.5 px-2 text-left outline-none hover:bg-muted/50 focus-visible:bg-muted/50"
         onClick={onInspect}
         type="button"
       >

@@ -37,7 +37,7 @@ export function RowCell({
 
   if (column.type === "boolean") {
     return (
-      <span className="flex h-9 items-center px-3">
+      <span className="flex h-full items-center px-3">
         <Checkbox
           aria-label={`${column.name} for this row`}
           checked={value === true}
@@ -150,7 +150,7 @@ function TextCell({
     <Input
       autoFocus
       aria-label={`${column.name} value`}
-      className="h-9 min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
+      className="h-full min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
       onBlur={(event) => void commit(event.target.value)}
       onChange={(event) => setDraft(event.target.value)}
       onKeyDown={(event) =>
@@ -252,7 +252,7 @@ function CellButton({
   return (
     <button
       aria-label={label}
-      className="flex h-9 w-full min-w-24 cursor-text items-center px-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
+      className="flex h-full w-full min-w-24 cursor-text items-center px-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
       disabled={disabled}
       onClick={onClick}
       title={text}
