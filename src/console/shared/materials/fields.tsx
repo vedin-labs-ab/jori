@@ -1,3 +1,4 @@
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FieldHelp } from "@/shared/field"
@@ -28,15 +29,7 @@ export function MaterialNameField({
         onChange={(event) => onNameChange(event.target.value)}
         value={name}
       />
-      {error === undefined ? null : (
-        <p
-          className="text-destructive text-xs/relaxed"
-          id={`${idPrefix}-name-error`}
-          role="alert"
-        >
-          {error}
-        </p>
-      )}
+      <FieldError id={`${idPrefix}-name-error`}>{error}</FieldError>
     </div>
   )
 }

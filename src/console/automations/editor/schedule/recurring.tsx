@@ -1,3 +1,4 @@
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -202,11 +203,11 @@ function RunPreview({ values }: { values: AutomationFormValues }) {
       return null
     }
 
-    return <p className="text-destructive text-xs">{preview.error}</p>
+    return <FieldError>{preview.error}</FieldError>
   }
 
   return (
-    <p className="text-muted-foreground text-xs">
+    <p className="text-muted-foreground text-xs/relaxed">
       Next run {relativeTime(preview.runAt, now)} ·{" "}
       {absoluteTime(preview.runAt)}
     </p>

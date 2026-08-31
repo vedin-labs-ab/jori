@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { countLabel } from "@/console/shared/count"
@@ -114,9 +115,7 @@ function ImportTableFields({
           the input when this arrives. Without the live region the dialog just
           silently refuses to go on. */}
       {form.plan?.status === "error" ? (
-        <p className="text-destructive text-xs" role="alert">
-          {form.plan.message}
-        </p>
+        <FieldError>{form.plan.message}</FieldError>
       ) : null}
       {form.plan !== undefined && form.plan.status !== "error" ? (
         <>

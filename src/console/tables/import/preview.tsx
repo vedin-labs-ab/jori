@@ -1,4 +1,5 @@
 import { type TableColumn } from "@contracts/tables/columns"
+import { FieldError } from "@/components/ui/field"
 import {
   Table,
   TableBody,
@@ -104,12 +105,12 @@ function ImportIssues({
   total: number
 }) {
   return (
-    <div className="grid gap-1">
-      <p className="text-destructive text-xs">
+    <FieldError className="grid gap-1">
+      <p>
         {issues.length} of {countLabel(total, "row")} cannot be imported. Fix
         the file and pick it again; nothing has been imported.
       </p>
-      <ul className="grid list-disc gap-0.5 pl-4 text-destructive text-xs">
+      <ul className="grid list-disc gap-0.5 pl-4">
         {issues.slice(0, shownIssueLimit).map((issue) => (
           <li key={`${issue.line}-${issue.message}`}>
             Line {issue.line}: {issue.message}
@@ -117,10 +118,8 @@ function ImportIssues({
         ))}
       </ul>
       {issues.length > shownIssueLimit ? (
-        <p className="text-destructive text-xs">
-          …and {issues.length - shownIssueLimit} more.
-        </p>
+        <p>…and {issues.length - shownIssueLimit} more.</p>
       ) : null}
-    </div>
+    </FieldError>
   )
 }

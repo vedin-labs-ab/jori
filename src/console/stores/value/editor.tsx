@@ -2,6 +2,7 @@ import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { useMutation } from "convex/react"
 import { lazy, type ReactNode, Suspense, useEffect, useRef } from "react"
 import { toast } from "sonner"
+import { FieldError } from "@/components/ui/field"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "../../../../convex/_generated/api"
@@ -244,11 +245,7 @@ function ValueBody({
           }}
           value={editor.state.codeText}
         />
-        {editor.state.codeError === undefined ? null : (
-          <p className="text-destructive text-xs" role="alert">
-            {editor.state.codeError}
-          </p>
-        )}
+        <FieldError>{editor.state.codeError}</FieldError>
         {editor.state.codeNote === undefined ? null : (
           <p className="text-muted-foreground text-xs">
             {editor.state.codeNote}
