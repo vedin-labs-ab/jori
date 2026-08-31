@@ -6,7 +6,7 @@ const dayMs = 24 * 60 * 60 * 1000
 
 export async function getAccount(ctx: QueryCtx, organizationId: string) {
   return await ctx.db
-    .query("billingAccounts")
+    .query("accounts")
     .withIndex("by_organization", (query) =>
       query.eq("organizationId", organizationId)
     )
@@ -15,12 +15,13 @@ export async function getAccount(ctx: QueryCtx, organizationId: string) {
 
 /**
  * Billing accounts are created lazily on first touch: the organization starts a
- * trial with the trial grant as included usage and nothing else configured.
+ * trial with the trial allowance in the monthly pot and nothing else
+ * configured.
  */
 export async function ensureAccount(
   ctx: MutationCtx,
   organizationId: string
-): Promise<Doc<"billingAccounts">> {
+): Promise<Doc<"accounts">> {
   const existing = await getAccount(ctx, organizationId)
 
   if (existing !== null) {
@@ -28,22 +29,19 @@ export async function ensureAccount(
   }
 
   const now = Date.now()
-  const accountId = await ctx.db.insert("billingAccounts", {
+  const accountId = await ctx.db.insert("accounts", {
     organizationId,
-    state: "trial",
-    trialEndsAt: now + trial.days * dayMs,
-    includedMicros: trial.grantMicros,
-    walletMicros: 0,
-    autoTopUpUsedMicros: 0,
+    state: { kind: "trial", endsAt: now + trial.days * dayMs },
+    micros: { allowance: trial.allowanceMicros, wallet: 0 },
+    topUp: { charged: { micros: 0 } },
     updatedAt: now,
   })
 
-  await ctx.db.insert("billingEntries", {
+  await ctx.db.insert("transactions", {
     organizationId,
     timestamp: now,
-    type: "grant",
-    amountMicros: trial.grantMicros,
-    balanceMicros: trial.grantMicros,
+    type: "allowance",
+    micros: { amount: trial.allowanceMicros, balance: trial.allowanceMicros },
     source: "trial",
   })
 
@@ -56,47 +54,43 @@ export async function ensureAccount(
   return account
 }
 
-export function availableMicros(account: Doc<"billingAccounts">) {
-  return account.includedMicros + account.walletMicros
+export function availableMicros(account: Doc<"accounts">) {
+  return account.micros.allowance + account.micros.wallet
 }
 
-export function hasActivePlan(account: Doc<"billingAccounts">) {
-  return account.state === "active" && account.plan !== undefined
-}
-
-export function requireActivePlan(account: Doc<"billingAccounts">) {
-  if (!hasActivePlan(account)) {
+export function requireActivePlan(account: Doc<"accounts">) {
+  if (account.state.kind !== "active") {
     throw new Error("An active plan is required to fund the wallet.")
   }
 }
 
 /**
  * Subscribing mid-trial keeps the unspent trial usage: it folds into the
- * first cycle's allotment and expires with it. An already-expired trial
+ * first cycle's allowance and expires with it. An already-expired trial
  * brings nothing along.
  */
-export function trialRemainderMicros(
-  account: Doc<"billingAccounts">,
-  now: number
-) {
-  const live =
-    account.state === "trial" &&
-    (account.trialEndsAt === undefined || account.trialEndsAt >= now)
+export function trialRemainderMicros(account: Doc<"accounts">, now: number) {
+  const live = account.state.kind === "trial" && account.state.endsAt >= now
 
-  return live ? Math.max(account.includedMicros, 0) : 0
+  return live ? Math.max(account.micros.allowance, 0) : 0
 }
 
 /**
  * Owns the auto-top-up claim window: set while a charge attempt is in
- * flight, extended into a cooldown after a decline, cleared on success.
+ * flight, extended into a cooldown after a decline, cleared on success. A
+ * patch rewrites `topUp` whole, so the policy and the charged total travel
+ * along with the claim.
  */
 export async function holdAutoTopUp(
   ctx: MutationCtx,
-  account: Doc<"billingAccounts">,
-  untilMs: number | undefined
+  account: Doc<"accounts">,
+  releaseAt: number | undefined
 ) {
   await ctx.db.patch(account._id, {
-    autoTopUpHoldUntil: untilMs,
+    topUp: {
+      ...account.topUp,
+      charged: { ...account.topUp.charged, releaseAt },
+    },
     updatedAt: Date.now(),
   })
 }

@@ -2,13 +2,13 @@ import { plans } from "../../contracts/billing"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { grantIncluded } from "./ledger"
+import { resetAllowance } from "./ledger"
 
 const batchSize = 32
 
 /**
  * Advances a billing anchor by whole months, keeping the anchor day and
- * clamping to shorter months (a Jan 31 anchor grants on Feb 28).
+ * clamping to shorter months (a Jan 31 anchor renews on Feb 28).
  */
 export function addMonths(timestamp: number, months: number) {
   const date = new Date(timestamp)
@@ -27,19 +27,19 @@ export function addMonths(timestamp: number, months: number) {
 }
 
 /**
- * Hourly heartbeat that refreshes included usage on each account's billing
- * anchor. Grants are cron-driven rather than webhook-driven so annual plans
- * still refresh monthly and a missed webhook cannot skip a cycle; unpaid
- * accounts are paused by the Stripe edge, which clears their anchor.
+ * Hourly heartbeat that refreshes the monthly allowance on each account's
+ * billing anchor. Allowances are cron-driven rather than webhook-driven so
+ * annual plans still refresh monthly and a missed webhook cannot skip a cycle;
+ * unpaid accounts are paused by the Stripe edge, which clears their anchor.
  */
 export const sweep = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now()
     const due = await ctx.db
-      .query("billingAccounts")
-      .withIndex("by_next_grant", (query) =>
-        query.gt("nextGrantAt", 0).lte("nextGrantAt", now)
+      .query("accounts")
+      .withIndex("by_renewal", (query) =>
+        query.gt("renewsAt", 0).lte("renewsAt", now)
       )
       .take(batchSize)
 
@@ -55,27 +55,31 @@ export const sweep = internalMutation({
 
 async function refreshCycle(
   ctx: MutationCtx,
-  account: Doc<"billingAccounts">,
+  account: Doc<"accounts">,
   now: number
 ) {
-  if (account.plan === undefined || account.nextGrantAt === undefined) {
-    await ctx.db.patch(account._id, { nextGrantAt: undefined })
+  const { state, renewsAt } = account
+
+  // Only an active plan renews; a trial or a paused subscription that still
+  // carries an anchor loses it here rather than earning another allowance.
+  if (state.kind !== "active" || renewsAt === undefined) {
+    await ctx.db.patch(account._id, { renewsAt: undefined })
 
     return
   }
 
-  await grantIncluded(ctx, {
+  await resetAllowance(ctx, {
     account,
-    micros: plans[account.plan].includedMonthlyMicros,
+    micros: plans[state.plan].monthlyAllowanceMicros,
     source: "cycle",
     now,
   })
 
-  let nextGrantAt = account.nextGrantAt
+  let nextRenewsAt = renewsAt
 
-  while (nextGrantAt <= now) {
-    nextGrantAt = addMonths(nextGrantAt, 1)
+  while (nextRenewsAt <= now) {
+    nextRenewsAt = addMonths(nextRenewsAt, 1)
   }
 
-  await ctx.db.patch(account._id, { nextGrantAt })
+  await ctx.db.patch(account._id, { renewsAt: nextRenewsAt })
 }

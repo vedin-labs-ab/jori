@@ -24,18 +24,15 @@ export function AutoTopUpRow({
 }) {
   const configure = useMutation(api.billing.console.configureAutoTopUp)
   const available = account?.canFundWallet ?? false
-  const config = available ? account?.autoTopUp : undefined
-  const enabled = config !== undefined
-  const thresholdUsd =
-    config?.thresholdMicros !== undefined
-      ? microsToDollars(config.thresholdMicros)
-      : autoTopUp.defaultThresholdUsd
-  const amountUsd = config
-    ? microsToDollars(config.amountMicros)
+  const policy = available ? account?.topUp.micros : undefined
+  const enabled = policy !== undefined
+  const thresholdUsd = policy
+    ? microsToDollars(policy.threshold)
+    : autoTopUp.defaultThresholdUsd
+  const amountUsd = policy
+    ? microsToDollars(policy.amount)
     : autoTopUp.defaultAmountUsd
-  const capUsd = config
-    ? microsToDollars(config.monthlyCapMicros)
-    : autoTopUp.defaultCapUsd
+  const capUsd = policy ? microsToDollars(policy.cap) : autoTopUp.defaultCapUsd
   const current = { thresholdUsd, amountUsd, monthlyCapUsd: capUsd }
   const description = available
     ? "When the balance runs low, add money automatically."
@@ -79,9 +76,9 @@ export function AutoTopUpRow({
                 value={capUsd}
               />
               <span>a month</span>
-              {account !== null && account.autoTopUpUsedMicros > 0 ? (
+              {account !== null && account.topUp.charged.micros > 0 ? (
                 <span>
-                  · {formatUsd(account.autoTopUpUsedMicros)} used so far
+                  · {formatUsd(account.topUp.charged.micros)} used so far
                 </span>
               ) : null}
             </>

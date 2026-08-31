@@ -43,7 +43,7 @@ function PlanCell({
   organizationId: string
 }) {
   const checkout = useBillingCheckout(organizationId)
-  const subscribed = account !== null && account.plan !== undefined
+  const subscribed = account !== null && account.state.kind !== "trial"
 
   return (
     <CardContent className="min-w-0 py-4">
@@ -52,7 +52,7 @@ function PlanCell({
         <span className="font-medium text-2xl tracking-tight">
           {planName(account)}
         </span>
-        {account?.state === "paused" ? (
+        {account?.state.kind === "paused" ? (
           <Badge variant="destructive">Paused</Badge>
         ) : null}
       </div>
@@ -77,11 +77,11 @@ function PlanCell({
 }
 
 function planName(account: BillingAccount | null) {
-  if (account === null || account.state === "trial") {
+  if (account === null || account.state.kind === "trial") {
     return "Trial"
   }
 
-  return account.plan === undefined ? "None" : plans[account.plan].label
+  return plans[account.state.plan].label
 }
 
 function planDetail(account: BillingAccount | null) {
@@ -89,19 +89,13 @@ function planDetail(account: BillingAccount | null) {
     return "14 days of everything Jori does. Starts with the first run."
   }
 
-  if (account.state === "trial") {
-    return account.trialEndsAt === undefined
-      ? "Everything Jori does, on the house."
-      : `Everything Jori does, until ${shortDate(account.trialEndsAt)}.`
+  if (account.state.kind === "trial") {
+    return `Everything Jori does, until ${shortDate(account.state.endsAt)}.`
   }
 
-  if (account.plan === undefined) {
-    return "Pick a plan to keep Jori working."
-  }
+  const plan = plans[account.state.plan]
 
-  const plan = plans[account.plan]
-
-  return account.interval === "year"
+  return account.state.interval === "year"
     ? `$${plan.annualPriceUsd.toLocaleString("en-US")} a year, for the whole organization.`
     : `$${plan.monthlyPriceUsd} a month, for the whole organization.`
 }
@@ -113,18 +107,18 @@ function AvailableCell({
   account: BillingAccount | null
   organizationId: string
 }) {
-  const includedMicros = Math.max(
-    account?.includedMicros ?? trial.grantMicros,
+  const remainingMicros = Math.max(
+    account?.micros.allowance ?? trial.allowanceMicros,
     0
   )
-  const walletMicros = account?.walletMicros ?? 0
+  const walletMicros = account?.micros.wallet ?? 0
   // Subscribing mid-trial folds the trial remainder into the first cycle, so
-  // the balance can exceed the plan grant; the denominator follows it.
-  const grantMicros = Math.max(
-    account === null || account.plan === undefined
-      ? trial.grantMicros
-      : plans[account.plan].includedMonthlyMicros,
-    includedMicros
+  // the balance can exceed the plan allowance; the denominator follows it.
+  const allowanceMicros = Math.max(
+    account === null || account.state.kind === "trial"
+      ? trial.allowanceMicros
+      : plans[account.state.plan].monthlyAllowanceMicros,
+    remainingMicros
   )
 
   return (
@@ -133,7 +127,7 @@ function AvailableCell({
         <div className="min-w-32 flex-1">
           <MetricLabel>Available usage</MetricLabel>
           <p className="mt-1.5 font-medium text-2xl tabular-nums tracking-tight">
-            {formatUsd(includedMicros + walletMicros)}
+            {formatUsd(remainingMicros + walletMicros)}
           </p>
         </div>
         <div className="ml-auto shrink-0">
@@ -145,17 +139,19 @@ function AvailableCell({
       </div>
       <div className="mt-1.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2.5 text-sm sm:items-center">
         <span className="text-muted-foreground">
-          {account === null || account.state === "trial" ? "Trial" : "Monthly"}
+          {account === null || account.state.kind === "trial"
+            ? "Trial"
+            : "Monthly"}
         </span>
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <Progress
             className="order-2 h-1.5 w-full sm:order-none sm:flex-1"
-            value={Math.min(100, (includedMicros / grantMicros) * 100)}
+            value={Math.min(100, (remainingMicros / allowanceMicros) * 100)}
           />
           <span className="tabular-nums sm:whitespace-nowrap">
-            {formatUsd(includedMicros)}{" "}
+            {formatUsd(remainingMicros)}{" "}
             <span className="text-muted-foreground">
-              of {formatUsd(grantMicros)} · {resetLabel(account)}
+              of {formatUsd(allowanceMicros)} · {resetLabel(account)}
             </span>
           </span>
         </div>
@@ -186,13 +182,11 @@ function resetLabel(account: BillingAccount | null) {
     return "starts with the first run"
   }
 
-  if (account.state === "trial") {
-    return account.trialEndsAt === undefined
-      ? "trial"
-      : `ends ${shortDate(account.trialEndsAt)}`
+  if (account.state.kind === "trial") {
+    return `ends ${shortDate(account.state.endsAt)}`
   }
 
-  return account.nextGrantAt === undefined
+  return account.renewsAt === undefined
     ? "resets monthly"
-    : `resets ${shortDate(account.nextGrantAt)}`
+    : `resets ${shortDate(account.renewsAt)}`
 }

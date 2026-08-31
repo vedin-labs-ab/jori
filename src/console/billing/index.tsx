@@ -47,7 +47,7 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
     return null
   }
 
-  if (account.state === "paused") {
+  if (account.state.kind === "paused") {
     return (
       <Alert variant="destructive">
         <AlertTitle>Subscription paused</AlertTitle>
@@ -60,9 +60,7 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
   }
 
   const trialEnded =
-    account.state === "trial" &&
-    account.trialEndsAt !== undefined &&
-    account.trialEndsAt < Date.now()
+    account.state.kind === "trial" && account.state.endsAt < Date.now()
 
   if (trialEnded) {
     return (
@@ -76,13 +74,13 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
     )
   }
 
-  if (account.includedMicros + account.walletMicros <= 0) {
+  if (account.micros.allowance + account.micros.wallet <= 0) {
     return (
       <Alert>
         <AlertTitle>Out of usage</AlertTitle>
         <AlertDescription>
-          New work is paused until the wallet is topped up or the included usage
-          resets.
+          New work is paused until the wallet is topped up or the monthly
+          allowance resets.
         </AlertDescription>
       </Alert>
     )

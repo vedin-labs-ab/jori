@@ -93,7 +93,7 @@ function PlanOption({
         <p className="font-medium">{details.label}</p>
         <p className="text-muted-foreground text-sm">
           {price} · up to {details.memberLimit} members ·{" "}
-          {formatUsd(details.includedMonthlyMicros)} usage included monthly
+          {formatUsd(details.monthlyAllowanceMicros)} usage included monthly
         </p>
       </div>
       <Button disabled={pending} onClick={() => onChoose(plan)}>

@@ -4,40 +4,38 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
 import { readArray, readString } from "../../shared/input"
-import { hasActivePlan } from "../account"
 import { stripeRequest } from "./client"
 
 /**
- * Charges the saved card off-session after the meter claimed the top-up hold.
+ * Charges the saved card off-session after the meter claimed the top-up.
  * Success is credited by the payment_intent webhook so every dollar enters
- * through one path; failures here push the hold into a cooldown.
+ * through one path; failures here push the claim into a cooldown.
  */
 export const execute = internalAction({
   args: { organizationId: v.string() },
   handler: async (ctx, args) => {
-    const account: Doc<"billingAccounts"> | null = await ctx.runQuery(
+    const account: Doc<"accounts"> | null = await ctx.runQuery(
       internal.billing.stripe.data.read,
       { organizationId: args.organizationId }
     )
-    const config = account?.autoTopUp
-    const customer = account?.stripeCustomerId
+    const policy = account?.topUp.micros
+    const customer = account?.stripe?.customerId
 
     if (
       account === null ||
-      !hasActivePlan(account) ||
-      config === undefined ||
+      account.state.kind !== "active" ||
+      policy === undefined ||
       customer === undefined ||
-      account.autoTopUpUsedMicros + config.amountMicros >
-        config.monthlyCapMicros
+      account.topUp.charged.micros + policy.amount > policy.cap
     ) {
       return null
     }
 
     try {
       await chargeSavedCard({
-        amountMicros: config.amountMicros,
+        amountMicros: policy.amount,
         customer,
-        holdUntil: account.autoTopUpHoldUntil ?? 0,
+        releaseAt: account.topUp.charged.releaseAt ?? 0,
         organizationId: args.organizationId,
       })
     } catch {
@@ -54,7 +52,7 @@ export const execute = internalAction({
 async function chargeSavedCard(args: {
   amountMicros: number
   customer: string
-  holdUntil: number
+  releaseAt: number
   organizationId: string
 }) {
   const methods = await stripeRequest("/v1/payment_methods", {
@@ -68,7 +66,7 @@ async function chargeSavedCard(args: {
   }
 
   await stripeRequest("/v1/payment_intents", {
-    idempotencyKey: `auto-top-up-${args.organizationId}-${args.holdUntil}`,
+    idempotencyKey: `auto-top-up-${args.organizationId}-${args.releaseAt}`,
     params: {
       amount: Math.round(args.amountMicros / (microsPerDollar / 100)),
       currency: "usd",

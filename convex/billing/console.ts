@@ -3,12 +3,7 @@ import { autoTopUp, dollarsToMicros } from "../../contracts/billing"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import {
-  ensureAccount,
-  getAccount,
-  hasActivePlan,
-  requireActivePlan,
-} from "./account"
+import { ensureAccount, getAccount, requireActivePlan } from "./account"
 
 const entryPageSize = 30
 
@@ -32,25 +27,20 @@ export const overview = query({
   },
 })
 
-function publicAccount(account: Doc<"billingAccounts">) {
+function publicAccount(account: Doc<"accounts">) {
   return {
     state: account.state,
-    plan: account.plan,
-    interval: account.interval,
-    trialEndsAt: account.trialEndsAt,
-    includedMicros: account.includedMicros,
-    walletMicros: account.walletMicros,
-    nextGrantAt: account.nextGrantAt,
-    autoTopUp: account.autoTopUp,
-    autoTopUpUsedMicros: account.autoTopUpUsedMicros,
-    hasStripeCustomer: account.stripeCustomerId !== undefined,
-    canFundWallet: hasActivePlan(account),
+    micros: account.micros,
+    renewsAt: account.renewsAt,
+    topUp: account.topUp,
+    hasStripeCustomer: account.stripe !== undefined,
+    canFundWallet: account.state.kind === "active",
   }
 }
 
 async function readEntries(ctx: QueryCtx, organizationId: string) {
   const entries = await ctx.db
-    .query("billingEntries")
+    .query("transactions")
     .withIndex("by_organization_and_timestamp", (query) =>
       query.eq("organizationId", organizationId)
     )
@@ -71,8 +61,9 @@ async function readEntries(ctx: QueryCtx, organizationId: string) {
 }
 
 /**
- * Auto top-up requires an active plan and a saved card. Disabling remains
- * available without a plan so legacy configurations can always be removed.
+ * Auto top-up requires an active plan and a saved card. Switching it off drops
+ * the policy alone: what it has already charged this month, and any live
+ * claim, outlive the knobs.
  */
 export const configureAutoTopUp = mutation({
   args: {
@@ -93,8 +84,7 @@ export const configureAutoTopUp = mutation({
 
     if (args.config === null) {
       await ctx.db.patch(account._id, {
-        autoTopUp: undefined,
-        autoTopUpHoldUntil: undefined,
+        topUp: { charged: account.topUp.charged },
         updatedAt: Date.now(),
       })
 
@@ -115,17 +105,20 @@ export const configureAutoTopUp = mutation({
       throw new Error("Pick one of the offered monthly caps.")
     }
 
-    if (account.stripeCustomerId === undefined) {
+    if (account.stripe === undefined) {
       throw new Error(
         "Add a payment method to the active plan before enabling auto top-up."
       )
     }
 
     await ctx.db.patch(account._id, {
-      autoTopUp: {
-        thresholdMicros: dollarsToMicros(args.config.thresholdUsd),
-        amountMicros: dollarsToMicros(args.config.amountUsd),
-        monthlyCapMicros: dollarsToMicros(args.config.monthlyCapUsd),
+      topUp: {
+        micros: {
+          threshold: dollarsToMicros(args.config.thresholdUsd),
+          amount: dollarsToMicros(args.config.amountUsd),
+          cap: dollarsToMicros(args.config.monthlyCapUsd),
+        },
+        charged: account.topUp.charged,
       },
       updatedAt: Date.now(),
     })

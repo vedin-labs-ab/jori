@@ -60,8 +60,8 @@ export function Shape() {
               Every integration, mentions, ask-first approvals, receipts.
             </Definition>
             <Definition term="To start">
-              {trial.days} days and {formatUsd(trial.grantMicros)} of usage, no
-              card.
+              {trial.days} days and {formatUsd(trial.allowanceMicros)} of usage,
+              no card.
             </Definition>
           </dl>
         </div>

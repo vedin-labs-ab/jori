@@ -14,7 +14,7 @@ export const plans = {
     label: "Starter",
     monthlyPriceUsd: 34,
     annualPriceUsd: 324,
-    includedMonthlyMicros: 15 * microsPerDollar,
+    monthlyAllowanceMicros: 15 * microsPerDollar,
     memberLimit: 10,
   },
   team: {
@@ -22,7 +22,7 @@ export const plans = {
     label: "Team",
     monthlyPriceUsd: 124,
     annualPriceUsd: 1188,
-    includedMonthlyMicros: 75 * microsPerDollar,
+    monthlyAllowanceMicros: 75 * microsPerDollar,
     memberLimit: 50,
   },
 } as const
@@ -37,7 +37,7 @@ export type BillingInterval = (typeof billingIntervals)[number]
 
 export const trial = {
   days: 14,
-  grantMicros: 25 * microsPerDollar,
+  allowanceMicros: 25 * microsPerDollar,
 }
 
 /**

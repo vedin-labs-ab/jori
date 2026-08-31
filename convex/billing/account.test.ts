@@ -1,23 +1,19 @@
 import { expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import {
-  hasActivePlan,
-  requireActivePlan,
-  trialRemainderMicros,
-} from "./account"
+import { requireActivePlan, trialRemainderMicros } from "./account"
 
-function account(overrides: Partial<Doc<"billingAccounts">>) {
+function account(overrides: Partial<Doc<"accounts">>) {
   return {
-    state: "trial",
-    includedMicros: 0,
-    walletMicros: 0,
+    state: { kind: "trial", endsAt: 1000 },
+    micros: { allowance: 0, wallet: 0 },
+    topUp: { charged: { micros: 0 } },
     ...overrides,
-  } as Doc<"billingAccounts">
+  } as Doc<"accounts">
 }
 
 test("a live trial carries its unspent usage into the first cycle", () => {
   const remainder = trialRemainderMicros(
-    account({ includedMicros: 9_000_000, trialEndsAt: 1000 }),
+    account({ micros: { allowance: 9_000_000, wallet: 0 } }),
     500
   )
 
@@ -26,7 +22,7 @@ test("a live trial carries its unspent usage into the first cycle", () => {
 
 test("an expired trial brings nothing along", () => {
   const remainder = trialRemainderMicros(
-    account({ includedMicros: 9_000_000, trialEndsAt: 1000 }),
+    account({ micros: { allowance: 9_000_000, wallet: 0 } }),
     2000
   )
 
@@ -35,7 +31,7 @@ test("an expired trial brings nothing along", () => {
 
 test("an overdrawn trial cannot go negative", () => {
   const remainder = trialRemainderMicros(
-    account({ includedMicros: -50_000, trialEndsAt: 1000 }),
+    account({ micros: { allowance: -50_000, wallet: 0 } }),
     500
   )
 
@@ -44,7 +40,10 @@ test("an overdrawn trial cannot go negative", () => {
 
 test("active accounts have no trial remainder", () => {
   const remainder = trialRemainderMicros(
-    account({ state: "active", includedMicros: 9_000_000 }),
+    account({
+      state: { kind: "active", plan: "starter", interval: "month" },
+      micros: { allowance: 9_000_000, wallet: 0 },
+    }),
     500
   )
 
@@ -52,15 +51,18 @@ test("active accounts have no trial remainder", () => {
 })
 
 test("wallet funding requires an active plan", () => {
-  const active = account({ state: "active", plan: "starter" })
+  const active = account({
+    state: { kind: "active", plan: "starter", interval: "month" },
+  })
+  const paused = account({
+    state: { kind: "paused", plan: "starter", interval: "month" },
+  })
 
-  expect(hasActivePlan(active)).toBe(true)
   expect(() => requireActivePlan(active)).not.toThrow()
-  expect(hasActivePlan(account({ state: "trial" }))).toBe(false)
-  expect(() => requireActivePlan(account({ state: "trial" }))).toThrow(
+  expect(() => requireActivePlan(account({}))).toThrow(
     "An active plan is required to fund the wallet."
   )
-  expect(hasActivePlan(account({ state: "paused", plan: "starter" }))).toBe(
-    false
+  expect(() => requireActivePlan(paused)).toThrow(
+    "An active plan is required to fund the wallet."
   )
 })

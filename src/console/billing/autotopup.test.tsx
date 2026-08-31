@@ -21,15 +21,16 @@ test("names each inline auto top-up control", () => {
     <AutoTopUpRow
       account={
         {
-          autoTopUp: {
-            amountMicros: 10_000_000,
-            monthlyCapMicros: 100_000_000,
-            thresholdMicros: 5_000_000,
-          },
-          autoTopUpUsedMicros: 0,
           canFundWallet: true,
-          plan: "starter",
-          state: "active",
+          state: { kind: "active", plan: "starter", interval: "month" },
+          topUp: {
+            micros: {
+              threshold: 5_000_000,
+              amount: 10_000_000,
+              cap: 100_000_000,
+            },
+            charged: { micros: 0 },
+          },
         } as BillingAccount
       }
       organizationId="organization"
@@ -54,9 +55,9 @@ test("explains why trial organizations cannot enable auto top-up", () => {
     <AutoTopUpRow
       account={
         {
-          autoTopUpUsedMicros: 0,
           canFundWallet: false,
-          state: "trial",
+          state: { kind: "trial", endsAt: Date.now() + 1000 },
+          topUp: { charged: { micros: 0 } },
         } as BillingAccount
       }
       organizationId="organization"
