@@ -5,11 +5,11 @@ import {
   stringProperty,
 } from "../fragments/common"
 
-const tableScopeProperty = {
+const tableVisibilityProperty = {
   type: "string",
-  enum: ["personal", "organization"],
+  enum: ["private", "organization"],
   description:
-    "Personal tables are owner-only. Organization tables are visible to organization members. Defaults to organization.",
+    "Private tables are owner-only. Organization tables are visible to organization members. Defaults to organization.",
 }
 
 const tableIdProperty = stringProperty("Jori table ID.")
@@ -62,7 +62,7 @@ export const tableToolInputSchemas = {
     properties: {
       name: stringProperty("Short table name."),
       description: stringProperty("What the table tracks and who reads it."),
-      scope: tableScopeProperty,
+      visibility: tableVisibilityProperty,
       columns: {
         type: "array",
         items: tableColumnInput,

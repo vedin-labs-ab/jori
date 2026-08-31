@@ -5,10 +5,10 @@ import { SourceLine } from "./source"
 
 afterEach(cleanup)
 
-test("renders only the scope for source without provider context", () => {
+test("renders only the audience for source without provider context", () => {
   const { container } = render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       source={{
         type: "automation",
       }}
@@ -18,7 +18,7 @@ test("renders only the scope for source without provider context", () => {
   expect(container.textContent).toBe("Personal")
 })
 
-test("renders nothing when the scope is omitted and context is empty", () => {
+test("renders nothing when the audience is omitted and context is empty", () => {
   const { container } = render(
     <SourceLine
       source={{
@@ -30,10 +30,10 @@ test("renders nothing when the scope is omitted and context is empty", () => {
   expect(container.textContent).toBe("")
 })
 
-test("renders the organization scope as the last item", () => {
+test("renders the organization audience as the last item", () => {
   const { container } = render(
     <SourceLine
-      scope="organization"
+      audience="organization"
       source={{
         type: "message",
         surface: "slack",
@@ -52,7 +52,7 @@ test("renders the organization scope as the last item", () => {
 test("renders provider source labels", () => {
   const { container } = render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       source={{
         type: "message",
         surface: "slack",
@@ -67,7 +67,7 @@ test("renders provider source labels", () => {
 test("renders source kind and event labels", () => {
   render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       source={{
         event: {
           label: "Issue comment created",
@@ -89,7 +89,7 @@ test("renders source kind and event labels", () => {
 test("renders Jori source labels", () => {
   const { container } = render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       source={{
         type: "automation",
         surface: "jori",
@@ -104,7 +104,7 @@ test("renders Jori source labels", () => {
 test("renders recurring automation source details", () => {
   const { container } = render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       details={[{ type: "schedule", label: "Daily at 09:00 UTC" }]}
       source={{
         kind: { label: "recurring", type: "recurring" },
@@ -126,7 +126,7 @@ test("renders recurring automation source details", () => {
 test("renders Slack channels as channel chips", () => {
   render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       details={[{ type: "channel", label: "#product" }]}
       source={{
         kind: { label: "mention", type: "mention" },
@@ -147,7 +147,7 @@ test("renders Slack channels as channel chips", () => {
 test("renders GitHub source details compactly", () => {
   render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       details={[
         { type: "repository", label: "vedin-labs/frontier" },
         { type: "pull_request", label: "#42 Add execution metadata" },
@@ -174,7 +174,7 @@ test("renders GitHub source details compactly", () => {
 test("renders stopped actors", () => {
   render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       source={{
         type: "automation",
         stop: {
@@ -191,7 +191,7 @@ test("renders stopped actors", () => {
 test("renders the subtask relation with an emphasized parent title", () => {
   const { container } = render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       source={{
         type: "manual",
         surface: "jori",
@@ -214,7 +214,7 @@ test("renders the subtask relation with an emphasized parent title", () => {
 test("renders a bare subtask when the parent title is unknown", () => {
   render(
     <SourceLine
-      scope="personal"
+      audience="personal"
       source={{
         type: "manual",
         surface: "jori",

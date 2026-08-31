@@ -13,7 +13,7 @@ test("resolves conversation and automation audiences", async () => {
       run: {},
     })
   ).resolves.toEqual({
-    scope: "organization",
+    audience: "organization",
     conversationId: id<"conversations">("conversation"),
   })
   await expect(
@@ -22,7 +22,7 @@ test("resolves conversation and automation audiences", async () => {
       run: {},
     })
   ).resolves.toEqual({
-    scope: "person",
+    audience: "person",
     conversationId: id<"conversations">("conversation"),
   })
   await expect(
@@ -30,13 +30,13 @@ test("resolves conversation and automation audiences", async () => {
       origin: { automation: automation() },
       run: {},
     })
-  ).resolves.toEqual({ scope: "person" })
+  ).resolves.toEqual({ audience: "person" })
   await expect(
     resolveRunAudience(ctx, {
       origin: { automation: automation("organization") },
       run: {},
     })
-  ).resolves.toEqual({ scope: "organization" })
+  ).resolves.toEqual({ audience: "organization" })
 })
 
 function conversation(
@@ -53,7 +53,7 @@ function conversation(
 }
 
 function automation(
-  scope: Doc<"automations">["scope"] = "personal"
+  visibility: Doc<"automations">["visibility"]["mode"] = "private"
 ): Doc<"automations"> {
   return {
     _creationTime: 0,
@@ -63,7 +63,7 @@ function automation(
     instructions: "Do it",
     name: "Automation",
     principal:
-      scope === "organization"
+      visibility === "organization"
         ? { kind: "organization" }
         : { kind: "person", personId: "person" as Id<"persons"> },
     status: "active",
@@ -71,6 +71,6 @@ function automation(
     trigger: { at: 1 },
     type: "once",
     updatedAt: 0,
-    scope,
+    visibility: { mode: visibility } as Doc<"automations">["visibility"],
   }
 }

@@ -5,7 +5,6 @@ import { type Id } from "../_generated/dataModel"
 import { createSight } from "../visibility/sight"
 import {
   type AutomationAccess,
-  automationScope,
   canSeeAutomation,
   canUseAutomationTool,
   resolveToolAccessLevel,
@@ -76,27 +75,6 @@ describe("automation visibility", () => {
 
     expect(await canSeeAutomation(sightFor(me), privateOf(other))).toBe(false)
     expect(await canSeeAutomation(sightFor(me), privateOf(me))).toBe(true)
-  })
-
-  test("legacy binary scope still reads", async () => {
-    expect(
-      await canSeeAutomation(sightFor(me), {
-        organizationId: "org",
-        scope: "personal",
-        principal: { kind: "person", personId: other },
-        createdBy: other,
-      })
-    ).toBe(false)
-  })
-
-  test("execution sharing derives from visibility", () => {
-    expect(automationScope({ visibility: { mode: "private" } })).toBe(
-      "personal"
-    )
-    expect(
-      automationScope({ visibility: { mode: "teams", teamIds: ["t1"] } })
-    ).toBe("organization")
-    expect(automationScope({ scope: "personal" })).toBe("personal")
   })
 
   test("visibility defaults from the tools in play", () => {

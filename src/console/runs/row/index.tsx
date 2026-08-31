@@ -32,14 +32,14 @@ export const ExecutionRow = memo(function ExecutionRow({
   defaultOpen = false,
   execution,
   now,
-  showScope,
+  showAudience,
   organizationId,
 }: {
   /** Deep links (billing receipts, /runs?run=...) land with the row open. */
   defaultOpen?: boolean
   execution: ExecutionItem
   now: number
-  showScope: boolean
+  showAudience: boolean
   organizationId: string
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
@@ -87,7 +87,7 @@ export const ExecutionRow = memo(function ExecutionRow({
             status={execution.status}
             waiter={execution.waiter ?? null}
           />
-          <ExecutionTitle execution={execution} showScope={showScope} />
+          <ExecutionTitle execution={execution} showAudience={showAudience} />
           <ExecutionMeta
             durationMs={durationMs}
             execution={execution}
@@ -111,16 +111,16 @@ export const ExecutionRow = memo(function ExecutionRow({
 
 function ExecutionTitle({
   execution,
-  showScope,
+  showAudience,
 }: {
   execution: ExecutionItem
-  showScope: boolean
+  showAudience: boolean
 }) {
   return (
     <RunRowContent title={execution.title}>
       <SourceLine
         details={execution.details}
-        scope={showScope ? execution.scope : undefined}
+        audience={showAudience ? execution.audience : undefined}
         source={execution.source}
       />
     </RunRowContent>

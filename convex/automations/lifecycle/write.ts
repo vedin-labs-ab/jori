@@ -1,16 +1,14 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { executionPrincipalForScope } from "../../runs/principal"
+import {
+  executesAsOrganization,
+  executionPrincipalForVisibility,
+} from "../../runs/principal"
 import {
   normalizeStoredVisibility,
-  readVisibility,
   type StoredVisibility,
 } from "../../visibility/schema"
-import {
-  type AutomationAccessInput,
-  automationScope,
-  resolveAccessInput,
-} from "../access"
+import { type AutomationAccessInput, resolveAccessInput } from "../access"
 import { automationKeyPartition, findAutomationByKey } from "../keys"
 import { type AutomationTriggerInput, type AutomationType } from "../schema"
 import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
@@ -83,7 +81,7 @@ export function ownedAutomationsAreStale(
       patch.instructions !== existing.instructions) ||
     (patch.visibility !== undefined &&
       JSON.stringify(patch.visibility) !==
-        JSON.stringify(readVisibility(existing))) ||
+        JSON.stringify(existing.visibility)) ||
     (patch.type !== undefined && patch.type !== existing.type) ||
     (patch.access !== undefined &&
       JSON.stringify(patch.access) !== JSON.stringify(existing.access)) ||
@@ -102,10 +100,7 @@ async function buildAutomationPatch(
   const principal =
     args.visibility === undefined
       ? existing.principal
-      : executionPrincipalForScope(
-          automationScope({ visibility: args.visibility }),
-          args.updatedBy
-        )
+      : executionPrincipalForVisibility(args.visibility, args.updatedBy)
 
   if (args.name !== undefined) {
     patch.name = normalizeRequiredText(args.name, "name")
@@ -166,14 +161,19 @@ async function applyPrincipalPatch(
   }
 
   const visibility = normalizeStoredVisibility(args.visibility)
-  const scopeChanges =
-    automationScope({ visibility }) !== automationScope(existing)
+  const sharingChanges =
+    executesAsOrganization(visibility) !==
+    executesAsOrganization(existing.visibility)
 
-  if (args.access === undefined && scopeChanges) {
+  if (args.access === undefined && sharingChanges) {
     throw new Error("Changing sharing requires an updated access contract.")
   }
 
-  if (scopeChanges && existing.type === "event" && args.trigger === undefined) {
+  if (
+    sharingChanges &&
+    existing.type === "event" &&
+    args.trigger === undefined
+  ) {
     throw new Error("Changing sharing requires an updated event trigger.")
   }
 
@@ -237,7 +237,7 @@ async function updateKeyPartition(
   })
 
   if (conflict !== null && conflict._id !== existing._id) {
-    throw new Error("Automation key already exists in the new scope.")
+    throw new Error("Automation key already exists for the new owner.")
   }
 
   patch.keyPartition = keyPartition

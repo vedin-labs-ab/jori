@@ -121,7 +121,7 @@ function automation(
       kind: "person",
       personId: "person" as Id<"persons">,
     },
-    scope: "personal",
+    visibility: { mode: "private" },
     status: input.status ?? "active",
     organizationId: "organization",
     trigger:

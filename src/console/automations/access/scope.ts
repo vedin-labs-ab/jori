@@ -1,23 +1,28 @@
 import { isUserScopedIntegration } from "@contracts/integrations"
-import { type Scope } from "@contracts/permissions/scope"
 import {
   type AutomationSurfaceFormValue,
   type AutomationSurfaceIntegration,
   getAutomationSurfaceLabel,
 } from "./catalog"
 
+/** How an automation executes, derived from its visibility: private runs as
+ *  its person, every shared mode as the organization. Only personal
+ *  execution can reach a person's own connections, which is what every rule
+ *  below is about. */
+export type AutomationScope = "personal" | "organization"
+
 export const automationScopeConflictMessage =
   "Organization automations can't use personal access. Remove the highlighted items or switch to Personal."
 
 export function isAutomationSurfaceAllowedForScope(
-  scope: Scope,
+  scope: AutomationScope,
   integration: AutomationSurfaceIntegration
 ) {
   return scope === "personal" || !isUserScopedIntegration(integration)
 }
 
 export function getAutomationScopeConflict(
-  scope: Scope,
+  scope: AutomationScope,
   surfaces: readonly AutomationSurfaceFormValue[]
 ) {
   const integrations = surfaces
@@ -35,7 +40,7 @@ export function getAutomationScopeConflict(
 }
 
 export function getAutomationSurfaceScopeIssue(
-  scope: Scope,
+  scope: AutomationScope,
   integration: AutomationSurfaceIntegration
 ) {
   return isAutomationSurfaceAllowedForScope(scope, integration)

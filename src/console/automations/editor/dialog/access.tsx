@@ -1,4 +1,3 @@
-import { type Scope } from "@contracts/permissions/scope"
 import { X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -6,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import {
+  type AutomationScope,
   type AutomationSurfaceFormValue,
   getAutomationSurfaceLabel,
   getAutomationSurfaceScopeIssue,
@@ -31,7 +31,7 @@ export function AccessFields({
   ) => void
   onWebSearchChange: (webSearch: boolean) => void
   permissions: AutomationPolicyPermissions
-  scope: Scope
+  scope: AutomationScope
   organizationId: string
   webSearch: boolean
 }) {
@@ -82,7 +82,7 @@ function AdditionalSurface({
   onChange: (surface: AutomationSurfaceFormValue) => void
   onRemove: (integration: AutomationSurfaceFormValue["integration"]) => void
   permissions: AutomationPolicyPermissions
-  scope: Scope
+  scope: AutomationScope
   surface: AutomationSurfaceFormValue
   organizationId: string
 }) {

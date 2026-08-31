@@ -32,33 +32,13 @@ const columnTypes = new Set<TableColumnType>([
 ])
 
 /** Ids double as row-value field names, so they must stay valid Convex
- *  object keys; pre-rename column keys already match this shape. */
+ *  object keys. */
 const columnIdPattern = /^[A-Za-z][A-Za-z0-9_]{0,63}$/
 
 /** A fresh hidden column id; generated wherever a column is born and never
  *  shown anywhere in the product. */
 export function newColumnId(): string {
   return `c_${crypto.randomUUID().replaceAll("-", "")}`
-}
-
-/** TEMPORARY: columns as stored before the key→id rename. The one-shot
- *  migration (convex/tables/migrate.ts) stamps `id` from `key`; delete
- *  this shape and readStoredColumns with it, and tighten the validator in
- *  convex/collections/schema.ts, once both environments are stamped. */
-export type StoredTableColumn = {
-  id?: string
-  key?: string
-  name: string
-  type: TableColumnType
-  required?: boolean
-}
-
-/** TEMPORARY companion to StoredTableColumn: reads a legacy key as the id. */
-export function readStoredColumns(columns: StoredTableColumn[]): TableColumn[] {
-  return columns.map(({ key, ...column }) => ({
-    ...column,
-    id: column.id ?? key ?? newColumnId(),
-  }))
 }
 
 export function normalizeTableColumns(value: unknown): TableColumn[] {

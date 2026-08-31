@@ -1,5 +1,4 @@
 import { canUseAutomationTool } from "@contracts/permissions"
-import { type Scope } from "@contracts/permissions/scope"
 import { isWebTool } from "@contracts/permissions/web"
 import { type ToolPermission } from "../../permissions/types"
 import {
@@ -9,7 +8,7 @@ import {
   isAutomationSurfaceIntegration,
 } from "./catalog"
 import { type AutomationPolicyPermissions } from "./policy"
-import { getAutomationSurfaceScopeIssue } from "./scope"
+import { type AutomationScope, getAutomationSurfaceScopeIssue } from "./scope"
 
 export type AutomationToolAccess =
   | { kind: "ready" | "builtIn" | "web" }
@@ -94,7 +93,7 @@ export function automationToolReferenceIssue({
   webSearch,
 }: {
   permissions: AutomationPolicyPermissions
-  scope: Scope
+  scope: AutomationScope
   surfaces: readonly AutomationSurfaceFormValue[]
   tool: string
   webSearch: boolean
@@ -140,7 +139,7 @@ export function automationToolScopeIssue({
   tool,
 }: {
   permissions: AutomationPolicyPermissions
-  scope: Scope
+  scope: AutomationScope
   tool: string
 }) {
   if (!Array.isArray(permissions)) {
@@ -156,7 +155,7 @@ export function automationToolScopeIssue({
 
 function automationPermissionScopeIssue(
   permission: ToolPermission,
-  scope: Scope
+  scope: AutomationScope
 ) {
   return isAutomationSurfaceIntegration(permission.surface)
     ? getAutomationSurfaceScopeIssue(scope, permission.surface)

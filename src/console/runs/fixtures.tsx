@@ -16,7 +16,7 @@ export function renderExecutionRow(item: ExecutionItem) {
       <ExecutionRow
         execution={item}
         now={1700000001000}
-        showScope={true}
+        showAudience={true}
         organizationId="organization"
       />
     </TooltipProvider>
@@ -41,7 +41,7 @@ export function makeExecution(
     id: "execution" as ExecutionItem["id"],
     offer,
     offers: offer === null ? [] : [offer],
-    scope: "personal",
+    audience: "personal",
     searchableText: "",
     source: { type: "automation", surface: "slack" },
     status: "completed",

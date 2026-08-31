@@ -17,7 +17,7 @@ async function insertCollections(database: TestDatabase) {
   await database.insert("collections", collection())
   await database.insert(
     "collections",
-    collection({ name: "Owner notes", scope: "personal" })
+    collection({ name: "Owner notes", visibility: { mode: "private" } })
   )
   await database.insert(
     "collections",
@@ -47,7 +47,7 @@ describe("accessibleCollection", () => {
     expect(
       await accessibleCollection(
         sight,
-        collection({ scope: "personal" }),
+        collection({ visibility: { mode: "private" } }),
         "table"
       )
     ).toBeNull()

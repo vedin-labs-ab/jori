@@ -4,10 +4,10 @@ import { type QueryCtx } from "../../_generated/server"
 import {
   normalizeQuery,
   parseCursor,
+  type RunAudienceFilter,
   type RunFilter,
-  type RunScopeFilter,
+  runMatchesAudienceFilter,
   runMatchesFilter,
-  runMatchesScopeFilter,
   runVisibleToPerson,
   summaryMatchesSearch,
 } from "./filters"
@@ -18,7 +18,7 @@ export async function pagePendingApprovals(
   args: {
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
-    scopeFilter: RunScopeFilter
+    audienceFilter: RunAudienceFilter
     query: string
     organizationId: string
     paginationOpts: {
@@ -38,7 +38,7 @@ export async function pagePendingApprovals(
     now,
     personId: args.personId,
     runFilter: args.runFilter,
-    scopeFilter: args.scopeFilter,
+    audienceFilter: args.audienceFilter,
     organizationId: args.organizationId,
   })) {
     const summary = await summarizeRun(ctx, run, args.personId, approval)
@@ -74,7 +74,7 @@ export async function countPendingApprovals(
     normalizedQuery: string
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
-    scopeFilter: RunScopeFilter
+    audienceFilter: RunAudienceFilter
     organizationId: string
   }
 ) {
@@ -85,7 +85,7 @@ export async function countPendingApprovals(
     now,
     personId: args.personId,
     runFilter: args.runFilter,
-    scopeFilter: args.scopeFilter,
+    audienceFilter: args.audienceFilter,
     organizationId: args.organizationId,
   })) {
     if (args.normalizedQuery === "") {
@@ -109,7 +109,7 @@ async function* pendingApprovalRuns(
     now: number
     personId: Id<"persons"> | undefined
     runFilter: RunFilter
-    scopeFilter: RunScopeFilter
+    audienceFilter: RunAudienceFilter
     organizationId: string
   }
 ) {
@@ -135,7 +135,7 @@ async function* pendingApprovalRuns(
 
     if (
       runVisibleToPerson(run, args.personId) &&
-      runMatchesScopeFilter(run, args.scopeFilter) &&
+      runMatchesAudienceFilter(run, args.audienceFilter) &&
       runMatchesFilter(run, args.runFilter)
     ) {
       yield { approval, run }

@@ -11,7 +11,7 @@ vi.mock("./audience", () => ({ resolveRunAudience: vi.fn() }))
 beforeEach(() => {
   vi.mocked(queueRun).mockReset().mockResolvedValue(null)
   vi.mocked(resolveRunAudience).mockReset().mockResolvedValue({
-    scope: "person",
+    audience: "person",
   })
 })
 
@@ -55,7 +55,7 @@ function automationRun(): Doc<"runs"> {
       kind: "person",
       personId: "person" as Id<"persons">,
     },
-    scope: "person",
+    audience: "person",
     snapshot: {
       context: [],
       source: { type: "automation" },

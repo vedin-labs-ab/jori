@@ -111,7 +111,7 @@ function automation(input: {
     name: input.id,
     parentId: input.parentId as Id<"automations"> | undefined,
     principal: { kind: "organization" },
-    scope: "organization",
+    visibility: { mode: "organization" },
     status: input.status,
     organizationId: "organization",
     trigger: { at: input.at },

@@ -68,7 +68,9 @@ describe("opening a store share", () => {
 
   test("returns null when the creator lost access to a personal store", async () => {
     const { database, ctx } = databaseContext()
-    const storeId = await createStore(database, { scope: "personal" })
+    const storeId = await createStore(database, {
+      visibility: { mode: "private" },
+    })
 
     await createShare(database, storeId, { createdBy: stranger })
 

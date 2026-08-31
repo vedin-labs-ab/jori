@@ -1,12 +1,12 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { audienceScopeValidator } from "../shared/audience"
+import { audienceValidator } from "../shared/audience"
 
 export const conversations = defineTable({
   organizationId: v.string(),
   integrationId: v.id("integrations"),
   externalId: v.string(),
-  scope: audienceScopeValidator,
+  scope: audienceValidator,
   summary: v.optional(v.string()),
   summarizedAt: v.optional(v.number()),
   functionId: v.optional(v.id("_scheduled_functions")),

@@ -55,6 +55,7 @@ test("uploads stamp the folder when creation names one", async () => {
       get: vi.fn(async () => ({
         _id: folderId,
         organizationId: "organization",
+        visibility: { mode: "organization" },
       })),
       system: {
         get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })),
@@ -261,7 +262,7 @@ function organizationFile(): Doc<"files"> {
     _id: fileId,
     _creationTime: 0,
     organizationId: "organization",
-    scope: "organization",
+    visibility: { mode: "organization" },
     storageId,
     name: "costs.csv",
     mimeType: "text/csv",
@@ -274,7 +275,7 @@ function organizationFile(): Doc<"files"> {
 function personalFile(): Doc<"files"> {
   return {
     ...organizationFile(),
-    scope: "personal",
+    visibility: { mode: "private" },
     ownerId: owner,
   } as Doc<"files">
 }

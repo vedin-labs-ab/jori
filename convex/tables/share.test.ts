@@ -88,7 +88,9 @@ describe("opening a table share", () => {
 
   test("returns null when the creator lost access to a personal table", async () => {
     const { database, ctx } = databaseContext()
-    const tableId = await createTable(database, { scope: "personal" })
+    const tableId = await createTable(database, {
+      visibility: { mode: "private" },
+    })
 
     await createShare(database, tableId, { createdBy: stranger })
 

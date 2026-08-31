@@ -1,7 +1,7 @@
-import { type Scope } from "@contracts/permissions/scope"
 import { mergeAttributes, Node } from "@tiptap/core"
 import {
   type AutomationMentionKind,
+  type AutomationScope,
   automationMentionText,
   getAutomationSurfaceLabel,
   isAutomationSurfaceIntegration,
@@ -18,13 +18,13 @@ type AutomationSurfacePolicyState =
 
 export type AutomationSurfaceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
-  getScope: () => Scope
+  getScope: () => AutomationScope
   getOrganizationId: () => string
 }
 
 export type AutomationReferenceNodeOptions = {
   getPermissions: () => AutomationPolicyPermissions
-  getScope: () => Scope
+  getScope: () => AutomationScope
   getOrganizationId: () => string
   getWebSearch: () => boolean
 }

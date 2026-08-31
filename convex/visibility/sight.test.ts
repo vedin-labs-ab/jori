@@ -14,7 +14,7 @@ const memberC = "persons:c" as Id<"persons">
 const memberD = "persons:d" as Id<"persons">
 
 function material(overrides: Record<string, unknown> = {}) {
-  return tableDoc({ scope: undefined, ...overrides }) as Doc<"collections">
+  return tableDoc(overrides) as Doc<"collections">
 }
 
 function sight(
@@ -154,21 +154,6 @@ describe("public", () => {
     expect(
       await anonymous.canSee(
         material({ visibility: { mode: "people", personIds: [memberA] } })
-      )
-    ).toBe(false)
-  })
-
-  test("legacy scope fields keep reading until the migration lands", async () => {
-    const { ctx } = databaseContext()
-
-    expect(
-      await sight(ctx, { personId: memberA }).canSee(
-        material({ visibility: undefined, scope: "organization" })
-      )
-    ).toBe(true)
-    expect(
-      await sight(ctx, { personId: memberA }).canSee(
-        material({ visibility: undefined, scope: "personal", ownerId: owner })
       )
     ).toBe(false)
   })

@@ -1,6 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
-import { readVisibility } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
 
 // Tree shape rules shared by every folder read and write: depth, ancestry,
@@ -28,7 +27,7 @@ export function summarizeFolder(folder: Doc<"folders">) {
     folderId: folder._id,
     name: folder.name,
     parentId: folder.parentId,
-    visibility: readVisibility(folder),
+    visibility: folder.visibility,
     createdBy: folder.createdBy,
     createdAt: folder.createdAt,
     updatedAt: folder.updatedAt,

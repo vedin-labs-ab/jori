@@ -119,7 +119,7 @@ function run(): Doc<"runs"> {
     _id: id<"runs">("run"),
     _creationTime: 0,
     organizationId: "organization",
-    scope: "organization",
+    audience: "organization",
     principal: { kind: "person", personId: id<"persons">("person") },
     conversationId: id<"conversations">("current-conversation"),
     cause: {

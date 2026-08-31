@@ -12,16 +12,16 @@ import {
   ConsolePageLayout,
   ConsoleSearch,
 } from "../shared/layout"
+import {
+  type AudienceFilter,
+  audienceFilterOptions,
+  matchesAudienceFilter,
+} from "../shared/list/audience"
 import { ConsoleListPager } from "../shared/list/pager"
 import {
   useClientPagination,
   useResettingSetter,
 } from "../shared/list/pagination"
-import {
-  matchesScopeFilter,
-  type ScopeFilter,
-  scopeFilterOptions,
-} from "../shared/list/scope"
 import { useNow } from "../shared/time"
 import { useAutomationEditorHost } from "./editor/host"
 import { filterAutomationsByView, hasAutomationFilters } from "./filter"
@@ -59,7 +59,7 @@ function AutomationListView({ organizationId }: { organizationId: string }) {
     automationList,
     filter: filters.filter,
     query: deferredQuery,
-    scope: filters.scope,
+    audience: filters.audience,
   })
   const setters = useResettingFilterSetters(filters, pagination.reset)
 
@@ -70,10 +70,10 @@ function AutomationListView({ organizationId }: { organizationId: string }) {
         onCreate={editor.openCreateForm}
         onCreateIntent={preloadDialog}
         query={filters.query}
-        scope={filters.scope}
+        audience={filters.audience}
         setFilter={setters.setFilter}
         setQuery={setters.setQuery}
-        setScope={setters.setScope}
+        setAudience={setters.setAudience}
       />
       <AutomationContent
         editor={editor}
@@ -113,10 +113,10 @@ function movingResource(automation: Automation | undefined) {
 
 function useAutomationFilters() {
   const [filter, setFilter] = useState<AutomationFilter>("active")
-  const [scope, setScope] = useState<ScopeFilter>("all")
+  const [audience, setAudience] = useState<AudienceFilter>("all")
   const [query, setQuery] = useState("")
 
-  return { filter, query, scope, setFilter, setQuery, setScope }
+  return { filter, query, audience, setFilter, setQuery, setAudience }
 }
 
 /** Every filter change resets the pager back to the first page. */
@@ -127,7 +127,7 @@ function useResettingFilterSetters(
   return {
     setFilter: useResettingSetter(filters.setFilter, reset),
     setQuery: useResettingSetter(filters.setQuery, reset),
-    setScope: useResettingSetter(filters.setScope, reset),
+    setAudience: useResettingSetter(filters.setAudience, reset),
   }
 }
 
@@ -135,18 +135,18 @@ function useAutomationPagination({
   automationList,
   filter,
   query,
-  scope,
+  audience,
 }: {
   automationList: AutomationList | undefined
   filter: AutomationFilter
   query: string
-  scope: ScopeFilter
+  audience: AudienceFilter
 }) {
-  const hasFilters = hasAutomationFilters(query, filter) || scope !== "all"
+  const hasFilters = hasAutomationFilters(query, filter) || audience !== "all"
   const automations =
     automationList?.status === "ready"
       ? filterAutomationsByView(automationList.automations, filter).filter(
-          (automation) => matchesScopeFilter(automation.scope, scope)
+          (automation) => matchesAudienceFilter(automation.audience, audience)
         )
       : []
   const pagination = useClientPagination({
@@ -164,19 +164,19 @@ function AutomationFilters({
   onCreate,
   onCreateIntent,
   query,
-  scope,
+  audience,
   setFilter,
   setQuery,
-  setScope,
+  setAudience,
 }: {
   filter: AutomationFilter
   onCreate: () => void
   onCreateIntent: () => void
   query: string
-  scope: ScopeFilter
+  audience: AudienceFilter
   setFilter: (filter: AutomationFilter) => void
   setQuery: (query: string) => void
-  setScope: (scope: ScopeFilter) => void
+  setAudience: (audience: AudienceFilter) => void
 }) {
   function preloadDialog() {
     void onCreateIntent()
@@ -211,9 +211,9 @@ function AutomationFilters({
         />
         <ConsoleFilterToggle
           label="Sharing"
-          onValueChange={setScope}
-          options={scopeFilterOptions}
-          value={scope}
+          onValueChange={setAudience}
+          options={audienceFilterOptions}
+          value={audience}
         />
       </ConsoleFilterGroup>
     </>

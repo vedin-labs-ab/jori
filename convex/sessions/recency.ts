@@ -74,7 +74,7 @@ async function collectContexts(
       run: {
         conversationId: args.session.conversationId,
         personId: ownerId,
-        scope: args.run.scope,
+        audience: args.run.audience,
       },
       seen,
       organizationId: args.run.organizationId,

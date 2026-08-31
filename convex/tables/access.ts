@@ -1,4 +1,3 @@
-import { readStoredColumns } from "../../contracts/tables/columns"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   findAccessibleCollection,
@@ -8,7 +7,6 @@ import {
 import { type CollectionDoc } from "../collections/spec"
 import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
-import { readVisibility } from "../visibility/schema"
 import { tableSpec } from "./spec"
 
 type TableDoc = CollectionDoc<"table">
@@ -47,10 +45,10 @@ export function summarizeTable(table: TableDoc) {
     tableId: table._id,
     name: table.name,
     description: table.description,
-    visibility: readVisibility(table),
+    visibility: table.visibility,
     ownerId: table.ownerId,
     folderId: table.folderId,
-    columns: readStoredColumns(table.columns),
+    columns: table.columns,
     rowCount: table.documentCount ?? 0,
     createdAt: table.createdAt,
     updatedAt: table.updatedAt,

@@ -104,7 +104,11 @@ test("child counts skip what the viewer cannot see", async () => {
 
   await database.insert(
     "files",
-    fileDoc({ folderId: childId, name: "private.txt", scope: "personal" })
+    fileDoc({
+      folderId: childId,
+      name: "private.txt",
+      visibility: { mode: "private" },
+    })
   )
   await database.insert(
     "collections",
@@ -195,18 +199,26 @@ test("personal resources appear only for their owner", async () => {
 
   await database.insert(
     "collections",
-    tableDoc({ folderId, name: "Private notes", scope: "personal" })
+    tableDoc({
+      folderId,
+      name: "Private notes",
+      visibility: { mode: "private" },
+    })
   )
   await database.insert(
     "files",
-    fileDoc({ folderId, name: "private.txt", scope: "personal" })
+    fileDoc({
+      folderId,
+      name: "private.txt",
+      visibility: { mode: "private" },
+    })
   )
   await database.insert(
     "automations",
     automationDoc({
       folderId,
       name: "Private digest",
-      scope: "personal",
+      visibility: { mode: "private" },
       principal: { kind: "person", personId: testOwner },
     })
   )

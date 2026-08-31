@@ -3,17 +3,25 @@ import { automationEventCatalog } from "../../contracts/automations/events"
 import { query } from "../_generated/server"
 import { findIntegrationForPrincipal } from "../integrations/resolve"
 import { resolveCurrentPerson } from "../persons/account"
-import { executionPrincipalForScope } from "../runs/principal"
-import { scopeValidator } from "../shared/audience"
+import { executionPrincipalForPerson } from "../runs/principal"
 
 export const list = query({
   args: {
     organizationId: v.string(),
-    scope: scopeValidator,
+    /** Which identity the automation being edited would run as. */
+    kind: v.union(v.literal("person"), v.literal("organization")),
   },
   handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
-    const principal = executionPrincipalForScope(args.scope, personId)
+
+    if (args.kind === "person" && personId === undefined) {
+      throw new Error("Personal automations require a person.")
+    }
+
+    const principal =
+      args.kind === "person"
+        ? executionPrincipalForPerson(personId)
+        : ({ kind: "organization" } as const)
 
     return {
       integrations: await Promise.all(

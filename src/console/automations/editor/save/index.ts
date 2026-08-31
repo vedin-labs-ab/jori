@@ -35,7 +35,7 @@ export function automationFormValues(
     instructions: automation.instructions,
     ...triggerFormValues(automation),
     visibility: automation.visibility,
-    scope: automation.scope,
+    scope: derivedScope(automation.visibility),
     folderId: null,
     webSearch: automation.access.webSearch,
     surfaces: automation.access.surfaces,

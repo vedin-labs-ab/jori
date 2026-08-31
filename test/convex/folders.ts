@@ -8,6 +8,7 @@ export function folderDoc(overrides: Record<string, unknown> = {}) {
   return {
     organizationId: "org",
     name: "Projects",
+    visibility: { mode: "organization" },
     createdBy: testOwner,
     createdAt: 1,
     updatedAt: 1,
@@ -18,7 +19,7 @@ export function folderDoc(overrides: Record<string, unknown> = {}) {
 export function fileDoc(overrides: Record<string, unknown> = {}) {
   return {
     organizationId: "org",
-    scope: "organization",
+    visibility: { mode: "organization" },
     ownerId: testOwner,
     storageId: "storage:1",
     name: "costs.csv",
@@ -35,7 +36,7 @@ export function automationDoc(overrides: Record<string, unknown> = {}) {
     organizationId: "org",
     name: "Digest",
     instructions: "Send the digest.",
-    scope: "organization",
+    visibility: { mode: "organization" },
     principal: { kind: "organization" },
     type: "cron",
     access: { integrations: [], web: false },

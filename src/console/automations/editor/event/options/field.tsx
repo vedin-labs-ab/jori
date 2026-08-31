@@ -1,5 +1,4 @@
 import { type AutomationEventIntegration } from "@contracts/automations/events"
-import { type Scope } from "@contracts/permissions/scope"
 import { useQuery } from "convex/react"
 import {
   Select,
@@ -9,7 +8,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../../../../convex/_generated/api"
-import { getAutomationSurfaceLabel } from "../../../access"
+import {
+  type AutomationScope,
+  getAutomationSurfaceLabel,
+} from "../../../access"
 import { SurfaceLogo } from "../../../access/logo"
 import { type EventIntegrationOption, getIntegrationOptions } from "."
 
@@ -21,12 +23,12 @@ export function EventIntegrationField({
 }: {
   onValueChange: (integration: AutomationEventIntegration) => void
   organizationId: string
-  scope: Scope
+  scope: AutomationScope
   value: AutomationEventIntegration
 }) {
   const connections = useQuery(api.automations.connections.list, {
     organizationId,
-    scope,
+    kind: scope === "personal" ? "person" : "organization",
   })
   const options = getIntegrationOptions(connections)
 

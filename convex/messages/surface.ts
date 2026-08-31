@@ -1,6 +1,6 @@
 import { type Doc } from "../_generated/dataModel"
 import { getSlackChannelType } from "../integrations/slack/data"
-import { type AudienceScope } from "../shared/audience"
+import { type Audience } from "../shared/audience"
 import { isUserScopedIntegration } from "../shared/integrations"
 
 export {
@@ -46,7 +46,7 @@ export function messageAudience(
 export function conversationScope(
   message: Doc<"messages">,
   integration: Doc<"integrations">
-): AudienceScope {
+): Audience {
   if (integration.integration === "slack") {
     return slackConversationScope(message)
   }
@@ -82,7 +82,7 @@ function isSlackDirectMessage(message: Doc<"messages">) {
   return channelType === "im" || channelType === "mpim"
 }
 
-function slackConversationScope(message: Doc<"messages">): AudienceScope {
+function slackConversationScope(message: Doc<"messages">): Audience {
   const channelType = getSlackChannelType(message.type)
 
   if (channelType === "channel") {

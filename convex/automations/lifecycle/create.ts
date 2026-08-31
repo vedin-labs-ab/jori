@@ -2,7 +2,7 @@ import { defaultVisibilityForIntegrations } from "../../../contracts/visibility"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { resolveCreationFolder } from "../../folders/tree"
-import { executionPrincipalForScope } from "../../runs/principal"
+import { executionPrincipalForVisibility } from "../../runs/principal"
 import {
   normalizeStoredVisibility,
   type StoredVisibility,
@@ -76,10 +76,7 @@ async function prepareAutomation(
       )
   )
   const key = normalizeAutomationKey(args.key)
-  const principal = executionPrincipalForScope(
-    visibility.mode === "private" ? "personal" : "organization",
-    args.createdBy
-  )
+  const principal = executionPrincipalForVisibility(visibility, args.createdBy)
   const ownership = await resolveOwnership(ctx, {
     ownerId: args.parentId,
     expectedConfigurationVersion: args.expectedParentConfigurationVersion,
@@ -129,7 +126,7 @@ async function resolveOwnership(
   args: {
     ownerId?: Id<"automations">
     expectedConfigurationVersion?: number
-    principal: ReturnType<typeof executionPrincipalForScope>
+    principal: ReturnType<typeof executionPrincipalForVisibility>
     organizationId: string
     type: AutomationType
   }
@@ -164,7 +161,7 @@ async function resolveOwnership(
     parent.type === "once" ||
     !sameAutomationPrincipal(parent.principal, args.principal)
   ) {
-    throw new Error("Parent automation is no longer active in this scope.")
+    throw new Error("Parent automation is no longer active for this owner.")
   }
 
   const configurationVersion = parent.configurationVersion ?? 1

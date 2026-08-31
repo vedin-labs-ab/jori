@@ -1,7 +1,5 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
-import { scopeValidator } from "../../shared/audience"
-import { runAudienceScope, runScope } from "../scope"
 
 export type RunFilter = "all" | "ongoing" | "failed" | "stopped" | "completed"
 
@@ -29,9 +27,15 @@ export const runFilterValidator = v.union(
   v.literal("completed")
 )
 
-export type RunScopeFilter = "all" | "personal" | "organization"
+/** The console's two-way audience facet: what a person keeps to themselves,
+ *  and what the whole organization sees. */
+export type RunAudienceFilter = "all" | "personal" | "organization"
 
-export const scopeFilterValidator = v.union(v.literal("all"), scopeValidator)
+export const audienceFilterValidator = v.union(
+  v.literal("all"),
+  v.literal("personal"),
+  v.literal("organization")
+)
 
 export const approvalFilterValidator = v.union(
   v.literal("any"),
@@ -43,26 +47,33 @@ export const approvalFilterValidator = v.union(
 )
 
 /**
- * The console shows organization runs to everyone; personal and
- * conversation-scoped runs only to their creator. Ownerless rows stay open.
+ * The console shows organization runs to everyone; person and conversation
+ * runs only to their creator. Ownerless rows stay open.
  */
 export function runVisibleToPerson(
   run: Doc<"runs">,
   personId: Id<"persons"> | undefined
 ) {
   return (
-    runAudienceScope(run) === "organization" ||
+    run.audience === "organization" ||
     run.createdBy === undefined ||
     run.createdBy === personId
   )
 }
 
-/** Personal/organization facet over the internal run audience scope. */
-export function runMatchesScopeFilter(
+/** Conversation runs read as personal: they belong to the thread their
+ *  creator was in, not to the organization. */
+export function runMatchesAudienceFilter(
   run: Doc<"runs">,
-  filter: RunScopeFilter
+  filter: RunAudienceFilter
 ) {
-  return filter === "all" || runScope(run) === filter
+  if (filter === "all") {
+    return true
+  }
+
+  return filter === "organization"
+    ? run.audience === "organization"
+    : run.audience !== "organization"
 }
 
 export function runMatchesFilter(run: Doc<"runs">, filter: RunFilter) {

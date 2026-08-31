@@ -2,7 +2,6 @@ import { v } from "convex/values"
 import { isRecord } from "../../contracts/json"
 import {
   normalizeTableColumns,
-  readStoredColumns,
   type TableColumn,
 } from "../../contracts/tables/columns"
 import { internal } from "../_generated/api"
@@ -123,7 +122,7 @@ export async function planColumnChange(
   }
 ) {
   const table = await getAccessibleTable(ctx, args)
-  const current = readStoredColumns(table.columns)
+  const current = table.columns
   const next = normalizeTableColumns(args.columns)
   const requiredBefore = new Set(
     current

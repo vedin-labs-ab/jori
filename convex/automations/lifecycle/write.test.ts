@@ -47,7 +47,7 @@ function automation(): Doc<"automations"> {
       kind: "person",
       personId: "person" as Id<"persons">,
     },
-    scope: "personal",
+    visibility: { mode: "private" },
     status: "active",
     organizationId: "organization",
     trigger: {

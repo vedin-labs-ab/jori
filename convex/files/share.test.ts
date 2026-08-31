@@ -16,7 +16,7 @@ async function createFile(
 ) {
   return (await database.insert("files", {
     organizationId: "org",
-    scope: "organization",
+    visibility: { mode: "organization" },
     ownerId: owner,
     storageId: "storage:1",
     name: "report.pdf",
@@ -69,7 +69,9 @@ describe("opening a file share", () => {
 
   test("returns null when the creator cannot view a personal file", async () => {
     const { database, ctx } = databaseContext()
-    const fileId = await createFile(database, { scope: "personal" })
+    const fileId = await createFile(database, {
+      visibility: { mode: "private" },
+    })
 
     await createShare(database, fileId, { createdBy: stranger })
 
@@ -118,7 +120,9 @@ describe("minting a file share", () => {
 
   test("refuses a personal file the minting person cannot view", async () => {
     const { database, ctx } = databaseContext()
-    const fileId = await createFile(database, { scope: "personal" })
+    const fileId = await createFile(database, {
+      visibility: { mode: "private" },
+    })
 
     await expect(
       mintFileShare(ctx, { organizationId: "org", fileId, personId: stranger })

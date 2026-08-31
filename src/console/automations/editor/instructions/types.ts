@@ -1,9 +1,9 @@
-import { type Scope } from "@contracts/permissions/scope"
 import { type Editor } from "@tiptap/react"
 import { type MutableRefObject } from "react"
 import {
   type AutomationMentionCatalog,
   type AutomationMentionSources,
+  type AutomationScope,
   type AutomationSurfaceFormValue,
 } from "../../access"
 import { type AutomationPolicyPermissions } from "../../access/policy"
@@ -20,7 +20,7 @@ export type AutomationInstructionsFieldProps = {
   permissions?: AutomationPolicyPermissions
   policyKey: string
   showAccessError?: boolean
-  scope: Scope
+  scope: AutomationScope
   /** Organization skill names, for `/` mentions; empty while loading. */
   skills: readonly string[]
   surfaces: AutomationSurfaceFormValue[]

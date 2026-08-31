@@ -14,7 +14,7 @@ const memberA = "persons:a" as Id<"persons">
 const memberB = "persons:b" as Id<"persons">
 
 function material(overrides: Record<string, unknown> = {}) {
-  return tableDoc({ scope: undefined, ...overrides }) as Doc<"collections">
+  return tableDoc(overrides) as Doc<"collections">
 }
 
 function sight(

@@ -1,6 +1,6 @@
 import { type Infer, v } from "convex/values"
-import { type Scope } from "../../contracts/permissions/scope"
 import { type Id } from "../_generated/dataModel"
+import { type StoredVisibility } from "../visibility/schema"
 
 export const executionPrincipalValidator = v.union(
   v.object({
@@ -14,16 +14,24 @@ export const executionPrincipalValidator = v.union(
 
 export type ExecutionPrincipal = Infer<typeof executionPrincipalValidator>
 
-export function executionPrincipalForScope(
-  scope: Scope,
+/** Private things are one person's; every shared mode belongs to the
+ *  organization and executes as it. */
+export function executesAsOrganization(visibility: StoredVisibility) {
+  return visibility.mode !== "private"
+}
+
+/** The identity a material or automation runs as, derived from who may see
+ *  it: private executes as its person, everything shared as the organization. */
+export function executionPrincipalForVisibility(
+  visibility: StoredVisibility,
   personId: Id<"persons"> | undefined
 ): ExecutionPrincipal {
-  if (scope === "organization") {
+  if (executesAsOrganization(visibility)) {
     return { kind: "organization" }
   }
 
   if (personId === undefined) {
-    throw new Error("Personal execution requires a person.")
+    throw new Error("Private execution requires a person.")
   }
 
   return { kind: "person", personId }

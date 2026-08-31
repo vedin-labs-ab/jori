@@ -1,6 +1,5 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { runAudienceScope } from "../scope"
 import { normalizeRunId, normalizeRunIds } from "./ids"
 import { type SearchRunsArgs } from "./schema"
 
@@ -111,24 +110,24 @@ function isOrganizationScope(
 ) {
   return (
     scope === "organization" ||
-    (scope === "all" && runAudienceScope(current) === "organization")
+    (scope === "all" && current.audience === "organization")
   )
 }
 
 async function queryOrganizationRuns(ctx: QueryCtx, current: Doc<"runs">) {
   return await ctx.db
     .query("runs")
-    .withIndex("by_organization_and_scope_and_created_at", (query) =>
+    .withIndex("by_organization_and_audience_and_created_at", (query) =>
       query
         .eq("organizationId", current.organizationId)
-        .eq("scope", "organization")
+        .eq("audience", "organization")
     )
     .order("desc")
     .take(runScanLimit)
 }
 
 async function queryPrivateRuns(ctx: QueryCtx, current: Doc<"runs">) {
-  if (runAudienceScope(current) === "conversation") {
+  if (current.audience === "conversation") {
     return await queryConversationRuns(ctx, current)
   }
 

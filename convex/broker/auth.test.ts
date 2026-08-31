@@ -30,7 +30,7 @@ function automationRun(): Doc<"runs"> {
       kind: "person",
       personId: "person" as Id<"persons">,
     },
-    scope: "person",
+    audience: "person",
     snapshot: {
       context: [],
       source: { type: "automation" },

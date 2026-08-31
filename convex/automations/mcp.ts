@@ -1,9 +1,8 @@
-import { type Scope } from "../../contracts/permissions/scope"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type JoriToolRequest, readRecord } from "../shared/input"
-import { visibilityFromScopeInput } from "../visibility/schema"
+import { visibilityFromInput } from "../visibility/schema"
 import { type AutomationAccessInput } from "./access"
 import { type AutomationTriggerInput, type AutomationType } from "./schema"
 
@@ -11,7 +10,7 @@ type AddAutomationArgs = {
   key?: string
   name: string
   instructions: string
-  scope?: Scope
+  visibility?: "private" | "organization"
   access: AutomationAccessInput
   type: AutomationType
   trigger: AutomationTriggerInput
@@ -31,7 +30,7 @@ type UpdateAutomationArgs = {
   automationId: Id<"automations">
   name?: string
   instructions?: string
-  scope?: Scope
+  visibility?: "private" | "organization"
   access?: AutomationAccessInput
   type?: AutomationType
   trigger?: AutomationTriggerInput
@@ -50,11 +49,11 @@ export async function callJoriAutomationTool(
   const args = readRecord(request.args)
 
   if (request.tool === "add_automation") {
-    const { scope, ...input } = args as AddAutomationArgs
+    const { visibility, ...input } = args as AddAutomationArgs
     return await ctx.runMutation(internal.automations.records.create, {
       ...input,
       visibility:
-        scope === undefined ? undefined : visibilityFromScopeInput(scope),
+        visibility === undefined ? undefined : visibilityFromInput(visibility),
       organizationId: execution.organizationId,
       createdBy: execution.createdBy,
       parentId: input.type === "once" ? execution.automationId : undefined,
@@ -82,11 +81,11 @@ export async function callJoriAutomationTool(
   }
 
   if (request.tool === "update_automation") {
-    const { scope, ...input } = args as UpdateAutomationArgs
+    const { visibility, ...input } = args as UpdateAutomationArgs
     return await ctx.runMutation(internal.automations.records.update, {
       ...input,
       visibility:
-        scope === undefined ? undefined : visibilityFromScopeInput(scope),
+        visibility === undefined ? undefined : visibilityFromInput(visibility),
       organizationId: execution.organizationId,
       personId: execution.createdBy,
     })

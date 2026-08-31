@@ -133,11 +133,11 @@ function query(recencyRun: RecencyRun) {
   }
 }
 
-function run(scope: RecencyRun["scope"]): RecencyRun {
+function run(audience: RecencyRun["audience"]): RecencyRun {
   return {
     conversationId: id<"conversations">("current-conversation"),
     personId: id<"persons">("person"),
-    scope,
+    audience,
   }
 }
 

@@ -66,7 +66,7 @@ test("filing someone else's personal resource is denied", async () => {
   )) as Id<"folders">
   const personalTable = await database.insert(
     "collections",
-    tableDoc({ scope: "personal", ownerId: testOwner })
+    tableDoc({ visibility: { mode: "private" }, ownerId: testOwner })
   )
 
   await expect(

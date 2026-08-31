@@ -2,7 +2,6 @@ import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { personDisplayName } from "../../../persons/names"
 import { getActorDisplayName } from "../../../shared/actor"
-import { runScope } from "../../scope"
 import { summarizeApproval } from "../../view/approval"
 import { runTask, runTitle, triggerLabel } from "../../view/labels"
 import { getRunContext } from "../context"
@@ -44,7 +43,7 @@ export async function summarizeRun(
   return {
     id: run._id,
     status: run.status,
-    scope: runScope(run),
+    audience: runAudienceFacet(run),
     title,
     source,
     task,
@@ -74,6 +73,14 @@ export async function summarizeRun(
       ...context,
     }),
   }
+}
+
+/** The console's two-way facet: conversation runs read as personal, since
+ *  they belong to the thread their creator was in. */
+function runAudienceFacet(run: Doc<"runs">) {
+  return run.audience === "organization"
+    ? ("organization" as const)
+    : ("personal" as const)
 }
 
 function getDuration(run: Doc<"runs">) {

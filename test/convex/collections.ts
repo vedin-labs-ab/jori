@@ -9,7 +9,7 @@ export const testOwner = "persons:owner" as PersonId
 export function tableDoc(overrides: Record<string, unknown> = {}) {
   return {
     organizationId: "org",
-    scope: "organization",
+    visibility: { mode: "organization" },
     ownerId: testOwner,
     kind: "table",
     name: "Leads",
@@ -25,7 +25,7 @@ export function tableDoc(overrides: Record<string, unknown> = {}) {
 export function storeDoc(overrides: Record<string, unknown> = {}) {
   return {
     organizationId: "org",
-    scope: "organization",
+    visibility: { mode: "organization" },
     ownerId: testOwner,
     kind: "store",
     name: "Settings",
