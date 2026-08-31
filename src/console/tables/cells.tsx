@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { Columns3, type LucideIcon, Rows3, Table2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import {
   MaterialNameCell,
   materialNameLinkClassName,

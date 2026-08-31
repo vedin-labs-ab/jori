@@ -49,7 +49,10 @@ const skippedDirectories = [
   "src/routes",
 ]
 
-const allowedSingleFileFolders = ["src/hooks"]
+// Both paths are pinned by components.json, so shadcn decides what lands
+// in them and how many files that is. App code belongs with the domain it
+// serves, not here.
+const allowedSingleFileFolders = ["src/hooks", "src/lib"]
 
 const counts = await countFolders(root)
 const namingViolations = await findNamingViolations({

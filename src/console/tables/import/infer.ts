@@ -5,7 +5,7 @@ import {
   tableLimits,
 } from "@contracts/tables/columns"
 import { compileTableSchema } from "@contracts/tables/compile"
-import { parseCsv } from "@/lib/csv"
+import { parseCsv } from "@/console/tables/csv"
 
 // A CSV file becomes a brand-new table: column names come straight from
 // the header (deduped, since names are unique per table), hidden ids are

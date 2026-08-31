@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
 import { scrollFadeX } from "@/shared/fade"
 import { columnTypeOptions } from "../draft"

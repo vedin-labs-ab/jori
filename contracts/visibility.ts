@@ -1,4 +1,4 @@
-import { type Integration, isUserScopedIntegration } from "../integrations"
+import { type Integration, isUserScopedIntegration } from "./integrations"
 
 /**
  * Who may see a material (table, store, file, automation) or a folder.

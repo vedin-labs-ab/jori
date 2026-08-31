@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
 import { ProviderLogo } from "@/shared/logo/provider"
 

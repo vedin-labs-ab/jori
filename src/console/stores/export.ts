@@ -1,6 +1,6 @@
 import { type ConvexReactClient } from "convex/react"
 import { type GenericId } from "convex/values"
-import { downloadTextFile, toFilename } from "@/lib/download"
+import { downloadTextFile, toFilename } from "@/shared/files/download"
 import { api } from "../../../convex/_generated/api"
 import { type StoreDetail } from "./types"
 

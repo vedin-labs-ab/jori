@@ -3,7 +3,7 @@ import {
   type VisibilityMode,
   visibilityModeLabels,
   visibilityModes,
-} from "@contracts/permissions/visibility"
+} from "@contracts/visibility"
 import { useState } from "react"
 import {
   AlertDialog,

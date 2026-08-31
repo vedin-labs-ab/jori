@@ -9,8 +9,8 @@ import {
 import { lazy, Suspense } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
-import { SettingsDialog } from "./settings/shell"
-import { type SettingsDialogView } from "./settings/types"
+import { SettingsDialog } from "./shell"
+import { type SettingsDialogView } from "./types"
 
 // Settings views only render once a dialog opens, so they load then too. The
 // account and organization surfaces are the console's largest views, and

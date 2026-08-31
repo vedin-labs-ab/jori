@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { displayCellText } from "@/lib/cells"
+import { displayCellText } from "@/shared/cell"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
 import { useShareExpired } from "./link"

@@ -1,4 +1,4 @@
-import { type VisibilityMode } from "../../contracts/permissions/visibility"
+import { type VisibilityMode } from "../../contracts/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { canSeeAutomation } from "../automations/access"
 import { type QueryLikeCtx } from "../shared/context"

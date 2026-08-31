@@ -27,8 +27,8 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
-import { displayCellText } from "@/lib/cells"
 import { cn } from "@/lib/utils"
+import { displayCellText } from "@/shared/cell"
 import { type RowSelection } from "../../shared/list/selection"
 import {
   type RowPlacement,

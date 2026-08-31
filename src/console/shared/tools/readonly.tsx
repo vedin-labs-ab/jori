@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
 import { scrollFadeViewport } from "@/shared/fade"
 import { SeparatorDot } from "../dot"

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { Braces, Database, History, type LucideIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { countLabel } from "@/lib/count"
+import { countLabel } from "@/console/shared/count"
 import {
   MaterialNameCell,
   materialNameLinkClassName,

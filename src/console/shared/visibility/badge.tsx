@@ -2,7 +2,7 @@ import {
   type Visibility,
   type VisibilityMode,
   visibilityModeMarks,
-} from "@contracts/permissions/visibility"
+} from "@contracts/visibility"
 import { Building2, Globe, Group, Lock, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {

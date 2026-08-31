@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/attachment"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { formatFileSize } from "@/lib/size"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
 import { fileKind } from "@/shared/files/kind"
+import { formatFileSize } from "@/shared/files/size"
 import { type QueuedUpload, type UploadStatus } from "./queue"
 
 /** Attachment states carrying the row's visual treatment: queued and

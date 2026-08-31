@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { defaultVisibilityForIntegrations } from "../../contracts/permissions/visibility"
+import { defaultVisibilityForIntegrations } from "../../contracts/visibility"
 import { databaseContext } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { createSight } from "../visibility/sight"
