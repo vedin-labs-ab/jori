@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest"
-import { storeDoc, testOwner } from "../../test/convex/collections"
+import {
+  type StoreOverrides,
+  storeDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
@@ -18,7 +22,7 @@ const totalSchema = {
 
 async function createStore(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: StoreOverrides = {}
 ) {
   return (await database.insert(
     "collections",

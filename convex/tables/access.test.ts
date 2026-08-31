@@ -1,12 +1,16 @@
 import { describe, expect, test } from "vitest"
-import { tableDoc, testOwner } from "../../test/convex/collections"
+import {
+  type TableOverrides,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type CollectionDoc } from "../collections/spec"
 import { summarizeTable, summarizeTableWithOwner } from "./access"
 
 async function storedTable(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: TableOverrides = {}
 ) {
   const tableId = await database.insert("collections", tableDoc(overrides))
 

@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest"
-import { tableDoc, testOwner } from "../../test/convex/collections"
+import {
+  type ShareOverrides,
+  storeDoc,
+  type TableOverrides,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { activeShareLimit } from "../collections/shares"
@@ -9,7 +15,7 @@ const stranger = "persons:stranger" as Id<"persons">
 
 async function createTable(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: TableOverrides = {}
 ) {
   return (await database.insert(
     "collections",
@@ -20,7 +26,7 @@ async function createTable(
 async function createShare(
   database: TestDatabase,
   tableId: Id<"collections">,
-  overrides: Record<string, unknown> = {}
+  overrides: ShareOverrides = {}
 ) {
   return (await database.insert("shares", {
     organizationId: "org",
@@ -99,7 +105,7 @@ describe("opening a table share", () => {
 
   test("returns null for a store's share opened as a table", async () => {
     const { database, ctx } = databaseContext()
-    const tableId = await createTable(database, { kind: "store", schema: {} })
+    const tableId = await database.insert("collections", storeDoc())
 
     await createShare(database, tableId, { targetKind: "store" })
 
@@ -125,7 +131,6 @@ describe("public visibility reads", () => {
   test("an anonymous read with no secret succeeds for exactly the public table", async () => {
     const { database, ctx } = databaseContext()
     const publicId = await createTable(database, {
-      scope: undefined,
       visibility: { mode: "public" },
     })
     const organizationId = await createTable(database)
@@ -139,7 +144,6 @@ describe("public visibility reads", () => {
   test("an invalid secret still opens a genuinely public table", async () => {
     const { database, ctx } = databaseContext()
     const publicId = await createTable(database, {
-      scope: undefined,
       visibility: { mode: "public" },
     })
 
@@ -162,7 +166,6 @@ describe("public visibility reads", () => {
       updatedAt: 1,
     })
     const filedId = await createTable(database, {
-      scope: undefined,
       visibility: { mode: "public" },
       folderId,
     })
@@ -173,7 +176,6 @@ describe("public visibility reads", () => {
   test("archived public tables do not read anonymously", async () => {
     const { database, ctx } = databaseContext()
     const archivedId = await createTable(database, {
-      scope: undefined,
       visibility: { mode: "public" },
       archivedAt: 5,
     })

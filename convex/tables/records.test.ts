@@ -1,16 +1,21 @@
 import { describe, expect, test } from "vitest"
-import { tableDoc, testOwner } from "../../test/convex/collections"
+import { type TableColumn } from "../../contracts/tables/columns"
+import {
+  type TableOverrides,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { planColumnChange, scrubBatch } from "./records"
 
 const principal = { organizationId: "org", personId: testOwner }
-const titleColumn = { id: "title", name: "Title", type: "string" }
-const countColumn = { id: "count", name: "Count", type: "integer" }
+const titleColumn: TableColumn = { id: "title", name: "Title", type: "string" }
+const countColumn: TableColumn = { id: "count", name: "Count", type: "integer" }
 
 async function seedTable(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: TableOverrides = {}
 ) {
   const tableId = await database.insert(
     "collections",

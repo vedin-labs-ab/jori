@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest"
-import { storeDoc, tableDoc } from "../../test/convex/collections"
+import {
+  type StoreOverrides,
+  storeDoc,
+  type TableOverrides,
+  tableDoc,
+} from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { storeSpec } from "../stores/spec"
 import { tableSpec } from "../tables/spec"
@@ -8,7 +13,7 @@ import { type CollectionDoc } from "./spec"
 
 async function createStore(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: StoreOverrides = {}
 ) {
   const storeId = await database.insert(
     "collections",
@@ -37,7 +42,7 @@ async function insertRow(
 
 async function createTable(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: TableOverrides = {}
 ) {
   const tableId = await database.insert(
     "collections",

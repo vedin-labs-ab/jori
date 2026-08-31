@@ -160,7 +160,7 @@ test("a folder's visibility cascades over its filed resources", async () => {
 
   await database.insert(
     "collections",
-    tableDoc({ folderId, name: "Shared inside", scope: undefined })
+    tableDoc({ folderId, name: "Shared inside" })
   )
 
   const view = { organizationId: "org", folderId }

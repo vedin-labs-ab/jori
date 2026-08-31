@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest"
-import { storeDoc, tableDoc, testOwner } from "../../test/convex/collections"
+import {
+  storeDoc,
+  type TableOverrides,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { tableSpec } from "../tables/spec"
@@ -9,7 +14,7 @@ import { type CollectionDoc } from "./spec"
 
 const other = "persons:other" as Id<"persons">
 
-function collection(overrides: Record<string, unknown> = {}) {
+function collection(overrides: TableOverrides = {}) {
   return tableDoc({ name: "Launch tracker", ...overrides }) as CollectionDoc
 }
 
