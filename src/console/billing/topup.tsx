@@ -90,6 +90,11 @@ export function TopUpDialog({
             <div className="flex flex-col gap-1.5">
               <InputGroup>
                 <InputGroupInput
+                  // The toggle above owns the "Amount" label, and this field
+                  // is its free-entry twin rather than a control it names. It
+                  // had no name of its own, which announced it as a bare
+                  // spinbutton on the one path in the app that charges a card.
+                  aria-label="Top-up amount in US dollars"
                   aria-describedby={valid ? undefined : "top-up-amount-issue"}
                   aria-invalid={valid ? undefined : true}
                   inputMode="numeric"

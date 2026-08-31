@@ -110,8 +110,13 @@ function ImportTableFields({
           type="file"
         />
       </div>
+      {/* Parsing resolves well after the file is chosen, so focus is still on
+          the input when this arrives. Without the live region the dialog just
+          silently refuses to go on. */}
       {form.plan?.status === "error" ? (
-        <p className="text-destructive text-xs">{form.plan.message}</p>
+        <p className="text-destructive text-xs" role="alert">
+          {form.plan.message}
+        </p>
       ) : null}
       {form.plan !== undefined && form.plan.status !== "error" ? (
         <>

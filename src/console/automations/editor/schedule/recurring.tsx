@@ -47,10 +47,18 @@ export function RecurringFields({
   return (
     <div className="grid gap-4">
       <div className="grid gap-2">
-        <span className="font-medium text-xs/relaxed leading-none">
+        {/* Named by the visible word rather than a duplicate aria-label: a
+            single-select ToggleGroup is a radiogroup, and unnamed it announces
+            only "radio group" with no clue what Daily and Weekly are choosing
+            between. */}
+        <span
+          className="font-medium text-xs/relaxed leading-none"
+          id="schedule-repeat-label"
+        >
           Repeats
         </span>
         <ToggleGroup
+          aria-labelledby="schedule-repeat-label"
           className="flex-wrap justify-start"
           onValueChange={(repeat) => {
             if (repeat !== "") {

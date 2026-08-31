@@ -45,12 +45,17 @@ export function RunRowHeader({
 export function RunRowControl({
   children,
   className,
+  expanded,
   onClick,
   onFocus,
   onPointerEnter,
 }: {
   children: ReactNode
   className?: string
+  /** Set when the control opens the run's detail. The detail mounts as a
+   *  sibling rather than inside the button, so without this the row reads as
+   *  a plain button and its open state never reaches a screen reader. */
+  expanded?: boolean
   onFocus?: FocusEventHandler<HTMLButtonElement>
   onClick?: () => void
   onPointerEnter?: PointerEventHandler<HTMLButtonElement>
@@ -66,6 +71,7 @@ export function RunRowControl({
 
   return (
     <button
+      aria-expanded={expanded}
       className={controlClassName}
       onClick={onClick}
       onFocus={onFocus}
