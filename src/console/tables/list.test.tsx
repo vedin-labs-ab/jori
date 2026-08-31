@@ -29,10 +29,10 @@ vi.mock("@tanstack/react-router", () => ({
 afterEach(cleanup)
 
 const removal = {
-  removeTable: async () => undefined,
-  removingTableId: undefined,
-  restoreTable: async () => undefined,
-  restoringTableId: undefined,
+  removeMaterial: async () => undefined,
+  removingId: undefined,
+  restoreMaterial: async () => undefined,
+  restoringId: undefined,
 } as unknown as ReturnType<typeof useTableRemoval>
 
 function tableSummary(overrides: Partial<TableSummary> = {}) {

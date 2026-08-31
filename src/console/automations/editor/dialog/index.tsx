@@ -189,7 +189,6 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         organizationId={props.organizationId}
         additionalSurfaces={props.additionalSurfaces}
         error={props.instructionsError}
-        onBlur={ignoreBlur}
         onWebSearchChange={props.actions.updateWebSearch}
         onValueChange={props.actions.updateInstructions}
         permissions={props.permissions}
@@ -257,8 +256,4 @@ function createDialogActions(
       updateValues({ webSearch })
     },
   }
-}
-
-function ignoreBlur() {
-  return undefined
 }

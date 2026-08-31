@@ -244,13 +244,13 @@ function StoreListRow({
       <TableCell className="text-right">
         <MaterialActions
           deleteDescription={storeDeleteDescription}
-          isDeleting={removal.removingStoreId === store.storeId}
-          isRestoring={removal.restoringStoreId === store.storeId}
+          isDeleting={removal.removingId === store.storeId}
+          isRestoring={removal.restoringId === store.storeId}
           material={{ name: store.name, archivedAt: store.archivedAt }}
           noun="store"
-          onDelete={() => void removal.removeStore(store)}
+          onDelete={() => void removal.removeMaterial(store)}
           onMoveToFolder={() => onMoveToFolder(store)}
-          onRestore={() => void removal.restoreStore(store)}
+          onRestore={() => void removal.restoreMaterial(store)}
         />
       </TableCell>
     </TableRow>

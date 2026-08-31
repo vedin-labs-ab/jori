@@ -51,7 +51,6 @@ export function renderInstructionsField({
       })}
       error={error}
       id="instructions"
-      onBlur={vi.fn()}
       onWebSearchChange={onWebSearchChange}
       onValueChange={onValueChange}
       placeholder="Instructions"

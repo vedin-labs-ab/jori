@@ -14,7 +14,6 @@ export type AutomationInstructionsFieldProps = {
   additionalSurfaces: AutomationSurfaceFormValue[]
   error?: string
   id: string
-  onBlur: () => void
   onWebSearchChange: (enabled: boolean) => void
   onValueChange: (value: AutomationInstructionsValue) => void
   placeholder: string
@@ -35,7 +34,6 @@ export type InstructionRefs = {
   catalog: MutableRefObject<AutomationMentionCatalog>
   editor: MutableRefObject<Editor | null>
   emittedValueKey: MutableRefObject<string | undefined>
-  onBlur: MutableRefObject<AutomationInstructionsFieldProps["onBlur"]>
   onWebSearchChange: MutableRefObject<
     AutomationInstructionsFieldProps["onWebSearchChange"]
   >

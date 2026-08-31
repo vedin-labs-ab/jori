@@ -95,37 +95,6 @@ function StoreViewContent({
   return <StoreReadyView organizationId={organizationId} store={result.store} />
 }
 
-function StoreTitleMenu({
-  onAccess,
-  onDelete,
-  onEdit,
-  onMoveToFolder,
-  removal,
-  store,
-}: {
-  onAccess: () => void
-  onDelete: () => void
-  onEdit: () => void
-  onMoveToFolder: () => void
-  removal: ReturnType<typeof useStoreRemoval>
-  store: StoreDetail
-}) {
-  return (
-    <MaterialTitleMenu
-      deleteDescription={storeDeleteDescription}
-      isDeleting={removal.removingStoreId === store.storeId}
-      isRestoring={removal.restoringStoreId === store.storeId}
-      material={{ name: store.name, archivedAt: store.archivedAt }}
-      noun="store"
-      onAccess={onAccess}
-      onDelete={onDelete}
-      onEdit={onEdit}
-      onMoveToFolder={onMoveToFolder}
-      onRestore={() => void removal.restoreStore(store)}
-    />
-  )
-}
-
 function StoreReadyView({
   organizationId,
   store,
@@ -144,7 +113,7 @@ function StoreReadyView({
   const isArchived = store.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
-    void removal.removeStore(store).then((succeeded) => {
+    void removal.removeMaterial(store).then((succeeded) => {
       if (succeeded && isArchived) {
         void navigate({ to: "/stores" })
       }
@@ -153,13 +122,17 @@ function StoreReadyView({
 
   useMaterialBreadcrumb(
     store.name,
-    <StoreTitleMenu
+    <MaterialTitleMenu
+      deleteDescription={storeDeleteDescription}
+      isDeleting={removal.removingId === store.storeId}
+      isRestoring={removal.restoringId === store.storeId}
+      material={{ name: store.name, archivedAt: store.archivedAt }}
+      noun="store"
       onAccess={() => setIsAccessOpen(true)}
       onDelete={removeAndLeaveWhenDeleted}
       onEdit={() => setIsEditOpen(true)}
       onMoveToFolder={() => setIsMoveOpen(true)}
-      removal={removal}
-      store={store}
+      onRestore={() => void removal.restoreMaterial(store)}
     />
   )
 

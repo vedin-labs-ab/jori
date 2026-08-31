@@ -271,13 +271,13 @@ function TableListRow({
       <TableCell className="text-right">
         <MaterialActions
           deleteDescription={tableDeleteDescription}
-          isDeleting={removal.removingTableId === table.tableId}
-          isRestoring={removal.restoringTableId === table.tableId}
+          isDeleting={removal.removingId === table.tableId}
+          isRestoring={removal.restoringId === table.tableId}
           material={{ name: table.name, archivedAt: table.archivedAt }}
           noun="table"
-          onDelete={() => void removal.removeTable(table)}
+          onDelete={() => void removal.removeMaterial(table)}
           onMoveToFolder={() => onMoveToFolder(table)}
-          onRestore={() => void removal.restoreTable(table)}
+          onRestore={() => void removal.restoreMaterial(table)}
         />
       </TableCell>
     </TableRow>
