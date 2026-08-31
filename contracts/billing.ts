@@ -114,15 +114,15 @@ export function resolveModelRate(model: string): ModelRate {
   )
 }
 
-export function priceModelUsage(
+export function priceModelTokens(
   model: string,
-  usage: { inputTokens: number; outputTokens: number }
+  tokens: { input: number; output: number }
 ) {
   const rate = resolveModelRate(model)
 
   return (
-    usage.inputTokens * rate.inputMicrosPerToken +
-    usage.outputTokens * rate.outputMicrosPerToken
+    tokens.input * rate.inputMicrosPerToken +
+    tokens.output * rate.outputMicrosPerToken
   )
 }
 

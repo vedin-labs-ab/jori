@@ -43,13 +43,17 @@ const result = v.union(
 )
 const usage = v.object({
   durationMs: v.number(),
-  inputTokens: v.number(),
-  inputCacheReadTokens: v.number(),
-  inputCacheWriteTokens: v.number(),
-  inputUncachedTokens: v.number(),
-  outputTokens: v.number(),
-  reasoningTokens: v.number(),
-  totalTokens: v.number(),
+  // `input` and `output` are the pair the rate table prices and the ledger
+  // stores; the rest break the input side down.
+  tokens: v.object({
+    cacheRead: v.number(),
+    cacheWrite: v.number(),
+    input: v.number(),
+    output: v.number(),
+    reasoning: v.number(),
+    total: v.number(),
+    uncached: v.number(),
+  }),
   toolCalls: v.number(),
 })
 const provider = v.union(

@@ -52,15 +52,19 @@ export function readModelUsage(data: unknown): ModelUsage | undefined {
     return undefined
   }
 
+  const tokens = asRecord(usage.tokens)
+
   return {
     durationMs: optionalNumber(usage.durationMs) ?? 0,
-    inputTokens: optionalNumber(usage.inputTokens) ?? 0,
-    inputCacheReadTokens: optionalNumber(usage.inputCacheReadTokens) ?? 0,
-    inputCacheWriteTokens: optionalNumber(usage.inputCacheWriteTokens) ?? 0,
-    inputUncachedTokens: optionalNumber(usage.inputUncachedTokens) ?? 0,
-    outputTokens: optionalNumber(usage.outputTokens) ?? 0,
-    reasoningTokens: optionalNumber(usage.reasoningTokens) ?? 0,
-    totalTokens: optionalNumber(usage.totalTokens) ?? 0,
+    tokens: {
+      cacheRead: optionalNumber(tokens?.cacheRead) ?? 0,
+      cacheWrite: optionalNumber(tokens?.cacheWrite) ?? 0,
+      input: optionalNumber(tokens?.input) ?? 0,
+      output: optionalNumber(tokens?.output) ?? 0,
+      reasoning: optionalNumber(tokens?.reasoning) ?? 0,
+      total: optionalNumber(tokens?.total) ?? 0,
+      uncached: optionalNumber(tokens?.uncached) ?? 0,
+    },
     toolCalls: optionalNumber(usage.toolCalls) ?? 0,
   }
 }

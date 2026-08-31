@@ -1,4 +1,4 @@
-import { formatUsd, joriModel, priceModelUsage } from "@contracts/billing"
+import { formatUsd, joriModel, priceModelTokens } from "@contracts/billing"
 import { Cpu } from "lucide-react"
 import { type TokenUsage, visibleTokenUsageMetrics } from "./metrics"
 
@@ -15,10 +15,7 @@ export function ActivityTokenUsage({ usage }: { usage: TokenUsage }) {
   }
 
   // The receipt line: the same list-rate pricing the ledger debits with.
-  const costMicros = priceModelUsage(joriModel, {
-    inputTokens: usage.input,
-    outputTokens: usage.output,
-  })
+  const costMicros = priceModelTokens(joriModel, usage)
 
   return (
     <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden whitespace-nowrap text-muted-foreground text-xs">

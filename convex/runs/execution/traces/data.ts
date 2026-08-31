@@ -51,7 +51,7 @@ export async function recordWorkerTrace(
       args.data !== undefined &&
       "usage" in args.data
     ) {
-      await meterModelUsage(ctx, { run, usage: args.data.usage })
+      await meterModelUsage(ctx, { run, tokens: args.data.usage.tokens })
     }
   }
 

@@ -44,7 +44,7 @@ function meterOnce(account: Doc<"accounts">, schedule: () => void) {
         _id: "run-1",
         organizationId: account.organizationId,
       } as Doc<"runs">,
-      usage: { inputTokens: 1_000, outputTokens: 200 },
+      tokens: { input: 1_000, output: 200 },
     }
   )
 }

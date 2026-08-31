@@ -4,7 +4,7 @@ import {
   formatUsd,
   joriModel,
   modelRates,
-  priceModelUsage,
+  priceModelTokens,
   resolveModelRate,
 } from "./billing"
 
@@ -16,15 +16,12 @@ test("pins one model, priced by the rate table", () => {
 test("prices usage at exact integer list rates", () => {
   // 1M input at $5/M plus 100k output at $30/M.
   expect(
-    priceModelUsage(joriModel, {
-      inputTokens: 1_000_000,
-      outputTokens: 100_000,
-    })
+    priceModelTokens(joriModel, { input: 1_000_000, output: 100_000 })
   ).toBe(dollarsToMicros(5) + dollarsToMicros(3))
 })
 
 test("a single token stays exact", () => {
-  expect(priceModelUsage(joriModel, { inputTokens: 1, outputTokens: 0 })).toBe(
+  expect(priceModelTokens(joriModel, { input: 1, output: 0 })).toBe(
     modelRates[joriModel]?.inputMicrosPerToken
   )
 })
