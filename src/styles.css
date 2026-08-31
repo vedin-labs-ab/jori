@@ -79,10 +79,18 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* Darkened from 0.556 to 0.547. Secondary text already cleared 4.5:1 on the
+     page, but it is read just as often on `--muted` and `--accent`: hovered
+     rows, badges, table headers, filter chips. On that 0.97 ground it was
+     4.34. It is now 4.51 there and 4.91 on the page. */
+  --muted-foreground: oklch(0.547 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.575 0.121 33.2);
+  /* Darkened from 0.575 to 0.565. It carries white text on the forty
+     destructive buttons in the app, and at 0.575 that pair was 4.42:1, just
+     under the 4.5 it needs. It is 4.61 now, and the far more common
+     `text-destructive` reading improves with it, 4.62 to 4.82. */
+  --destructive: oklch(0.565 0.121 33.2);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.43 0.086 167);
   --success-foreground: oklch(0.985 0 0);
@@ -99,7 +107,15 @@
   --informational-foreground: oklch(0.145 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Darkened from 0.708 to 0.647. A focus indicator is a non-text element and
+     answers to 3:1; at 0.708 it was 2.59 against the page, so every focus ring
+     drawn at full strength failed. It is 3.27 now, and 3.00 on `--muted`, the
+     other ground rings land on. The ring is still a neutral grey, one shade
+     down. It does not rescue the call sites that draw the ring at `/30` or
+     `/50`, and no value of this token can: composited over the page, `/30`
+     tops out near 2.2:1 at any lightness. Those sites have to drop the opacity
+     modifier instead. */
+  --ring: oklch(0.647 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

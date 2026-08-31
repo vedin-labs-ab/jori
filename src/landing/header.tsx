@@ -77,7 +77,16 @@ function MobileNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="sm:hidden" size="icon" variant="ghost">
+        {/* The glyph stays 28px, which is the size the header row is built
+            around, but this is the only way to reach anything on a phone and
+            28px is a thumb's worth short. The pseudo-element takes the hit box
+            out to 44 without taking any layout, the same trick the field hints
+            use. */}
+        <Button
+          className='relative after:absolute after:-inset-2 after:content-[""] sm:hidden'
+          size="icon"
+          variant="ghost"
+        >
           <Menu />
           <span className="sr-only">Open menu</span>
         </Button>

@@ -72,6 +72,7 @@ export const ExecutionRow = memo(function ExecutionRow({
         }
       >
         <RunRowControl
+          expanded={isOpen}
           onClick={() => {
             preloadExpandedExecution()
             setIsOpen((current) => !current)

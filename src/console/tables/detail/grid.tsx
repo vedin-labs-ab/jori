@@ -157,7 +157,10 @@ function GridFoot({
 
   return (
     <button
-      className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground"
+      // Inset ring rather than the bare colour shift this had: a
+      // muted-to-foreground change on 12px text is not a focus indicator, and
+      // it was indistinguishable from the hover state beside it.
+      className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       onClick={onAddRow}
       type="button"
     >
@@ -214,7 +217,7 @@ function HeadRow({
       ))}
       <div className="border-r border-b bg-background">
         <button
-          className="flex h-10 w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground disabled:opacity-50"
+          className="flex h-10 w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:opacity-50"
           disabled={disabled}
           onClick={onAddColumn}
           type="button"

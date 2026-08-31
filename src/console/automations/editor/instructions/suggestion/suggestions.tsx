@@ -49,6 +49,11 @@ export function InstructionSuggestions({
               onClick={() => onSelect(suggestion)}
               onMouseDown={(event) => event.preventDefault()}
               onMouseEnter={() => onActiveIndexChange(index)}
+              // The editor keeps focus and drives this list through
+              // aria-activedescendant, so an option must never take focus
+              // itself. Left tabbable, Tab moved focus out of the editor and
+              // desynchronised the active descendant from the real one.
+              tabIndex={-1}
               role="option"
               title={
                 suggestion.access?.kind === "unavailable"
