@@ -143,7 +143,9 @@ function queryBuilder(rows: StoredDoc[]) {
     }
 
     for (const field of [...sortFields].reverse()) {
-      result.sort((left, right) => compareValues(left[field], right[field]))
+      result.sort((left, right) =>
+        compareValues(readField(left, field), readField(right, field))
+      )
     }
 
     return descending ? result.reverse() : result
@@ -212,19 +214,35 @@ const filterBuilder = {
   eq:
     (reference: FieldReference, value: unknown): FilterPredicate =>
     (row) =>
-      row[reference.field] === value,
+      readField(row, reference.field) === value,
 }
 
 function matches(row: StoredDoc, constraints: Constraint[]) {
   return constraints.every((constraint) => {
+    const field = readField(row, constraint.field)
+
     if (constraint.kind === "eq") {
-      return row[constraint.field] === constraint.value
+      return field === constraint.value
     }
 
-    const comparison = compareValues(row[constraint.field], constraint.value)
+    const comparison = compareValues(field, constraint.value)
 
     return constraint.kind === "gt" ? comparison > 0 : comparison < 0
   })
+}
+
+/** Index fields may be nested paths ("automation.id"); a path through a
+ *  missing object reads as undefined, the way Convex indexes it. */
+function readField(row: StoredDoc, path: string): unknown {
+  return path
+    .split(".")
+    .reduce<unknown>(
+      (value, key) =>
+        typeof value === "object" && value !== null
+          ? (value as Record<string, unknown>)[key]
+          : undefined,
+      row
+    )
 }
 
 /** Convex index ordering for the value shapes tests use: a missing field

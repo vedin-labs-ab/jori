@@ -134,10 +134,10 @@ function outranksOrEquals(left: LinkMethod, right: LinkMethod) {
   return methodRank[left] >= methodRank[right]
 }
 
-function linkValue(method: LinkMethod, linkedAt: number, evidence?: string) {
+function linkValue(method: LinkMethod, at: number, evidence?: string) {
   return {
     method,
-    linkedAt,
+    at,
     ...(evidence === undefined || evidence === "" ? {} : { evidence }),
   }
 }

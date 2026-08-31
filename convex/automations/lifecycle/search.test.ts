@@ -23,7 +23,7 @@ test("default search returns active top-level automations only", async () => {
   expect(equals.mock.calls).toEqual([
     ["organizationId", "organization"],
     ["status", "active"],
-    ["parentId", undefined],
+    ["parent.id", undefined],
   ])
 })
 
@@ -52,7 +52,7 @@ test("completed search still omits owned automations", async () => {
   )
   expect(equals.mock.calls).toEqual([
     ["organizationId", "organization"],
-    ["parentId", undefined],
+    ["parent.id", undefined],
   ])
 })
 
@@ -65,7 +65,7 @@ function searchContext(rows: Doc<"automations">[]) {
       organizationId = value
     } else if (field === "status") {
       status = value
-    } else if (field === "parentId") {
+    } else if (field === "parent.id") {
       filtersByParent = true
     }
   })
@@ -80,7 +80,7 @@ function searchContext(rows: Doc<"automations">[]) {
       (row) =>
         row.organizationId === organizationId &&
         (status === undefined || row.status === status) &&
-        (!filtersByParent || row.parentId === undefined)
+        (!filtersByParent || row.parent === undefined)
     )
   )
   const withIndex = vi.fn(
@@ -109,7 +109,10 @@ function automation(input: {
     createdAt: 0,
     instructions: "Prepare the meeting.",
     name: input.id,
-    parentId: input.parentId as Id<"automations"> | undefined,
+    parent:
+      input.parentId === undefined
+        ? undefined
+        : { id: input.parentId as Id<"automations">, version: 1 },
     principal: { kind: "organization" },
     visibility: { mode: "organization" },
     status: input.status,

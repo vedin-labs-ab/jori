@@ -142,8 +142,7 @@ test("deleting the contents purges each resource through its own domain", async 
     secret: "a",
     createdAt: 1,
     expiresAt: 2,
-    targetKind: "table",
-    targetId: seeded.collectionId,
+    target: { kind: "table", id: seeded.collectionId },
   })
   const fileShareId = await database.insert("shares", {
     organizationId: "org",
@@ -151,8 +150,7 @@ test("deleting the contents purges each resource through its own domain", async 
     secret: "b",
     createdAt: 1,
     expiresAt: 2,
-    targetKind: "file",
-    targetId: seeded.fileId,
+    target: { kind: "file", id: seeded.fileId },
   })
   // Filed in the same folder as its owner: the sweep must survive reaching
   // a row its owner's removal already took.
@@ -160,7 +158,7 @@ test("deleting the contents purges each resource through its own domain", async 
     "automations",
     automationDoc({
       folderId: childId,
-      parentId: seeded.automationId,
+      parent: { id: seeded.automationId, version: 1 },
       type: "once",
     })
   )

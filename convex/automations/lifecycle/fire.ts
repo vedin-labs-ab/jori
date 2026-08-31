@@ -50,7 +50,7 @@ export async function fireAutomation(
         })
       : null
 
-    if (automation.parentId === undefined) {
+    if (automation.parent === undefined) {
       await ctx.db.patch(automation._id, {
         status: "completed",
         trigger: {

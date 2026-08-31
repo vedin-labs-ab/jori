@@ -41,8 +41,7 @@ export async function callJoriAutomationTool(
   execution: {
     organizationId: string
     createdBy?: Id<"persons">
-    automationId?: Id<"automations">
-    automationConfigurationVersion?: number
+    automation?: { id: Id<"automations">; version?: number }
   },
   request: JoriToolRequest
 ) {
@@ -56,11 +55,7 @@ export async function callJoriAutomationTool(
         visibility === undefined ? undefined : visibilityFromInput(visibility),
       organizationId: execution.organizationId,
       createdBy: execution.createdBy,
-      parentId: input.type === "once" ? execution.automationId : undefined,
-      expectedParentConfigurationVersion:
-        input.type === "once"
-          ? execution.automationConfigurationVersion
-          : undefined,
+      parent: input.type === "once" ? execution.automation : undefined,
     })
   }
 

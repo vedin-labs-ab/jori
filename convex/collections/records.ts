@@ -200,7 +200,7 @@ async function purgeBatch(
   const shares = await ctx.db
     .query("shares")
     .withIndex("by_target_and_expires_at", (index) =>
-      index.eq("targetKind", args.kind).eq("targetId", args.collectionId)
+      index.eq("target.kind", args.kind).eq("target.id", args.collectionId)
     )
     .take(purgeBatchSize)
 

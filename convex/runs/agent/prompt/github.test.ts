@@ -33,7 +33,7 @@ function githubAutomationRuntimeInput() {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automationId: "automation",
+      automation: { id: "automation" },
       snapshot: {
         title: "GitHub quip",
         source: { type: "event", surface: "github" },

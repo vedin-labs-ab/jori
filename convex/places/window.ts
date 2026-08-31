@@ -109,8 +109,7 @@ export const commit = internalMutation({
         now: Date.now(),
       }),
       profiledAt: args.profiledAt,
-      profileAt: undefined,
-      functionId: undefined,
+      debounce: undefined,
     })
   },
 })
@@ -124,10 +123,7 @@ export const clear = internalMutation({
       return
     }
 
-    await ctx.db.patch(place._id, {
-      profileAt: undefined,
-      functionId: undefined,
-    })
+    await ctx.db.patch(place._id, { debounce: undefined })
   },
 })
 

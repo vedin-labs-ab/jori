@@ -20,7 +20,7 @@ export async function getRunContext(
   const message =
     run.cause.type === "message" ? await ctx.db.get(run.cause.messageId) : null
   const automation =
-    run.automationId === undefined ? null : await ctx.db.get(run.automationId)
+    run.automation === undefined ? null : await ctx.db.get(run.automation.id)
   const event =
     run.cause.type === "event" ? await ctx.db.get(run.cause.eventId) : null
   const integration =

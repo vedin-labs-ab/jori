@@ -121,7 +121,7 @@ function sourceKind(context: RunContext) {
   }
 
   return context.automation?.type === "once" ||
-    context.run.automationParentId !== undefined
+    context.run.automation?.parentId !== undefined
     ? datum("one-shot", "one-shot")
     : undefined
 }

@@ -44,8 +44,8 @@ export async function mintShare(
     .query("shares")
     .withIndex("by_target_and_expires_at", (index) =>
       index
-        .eq("targetKind", args.target.kind)
-        .eq("targetId", args.target.id)
+        .eq("target.kind", args.target.kind)
+        .eq("target.id", args.target.id)
         .gt("expiresAt", now)
     )
     .collect()
@@ -60,8 +60,7 @@ export async function mintShare(
     secret,
     createdAt: now,
     expiresAt,
-    targetKind: args.target.kind,
-    targetId: args.target.id,
+    target: { kind: args.target.kind, id: args.target.id },
   })
 
   return mintedShareLink(args.urlPath, secret, expiresAt)
@@ -79,8 +78,8 @@ export async function revokeShare(
 
   if (
     share === null ||
-    share.targetKind !== args.target.kind ||
-    share.targetId !== args.target.id ||
+    share.target.kind !== args.target.kind ||
+    share.target.id !== args.target.id ||
     share.organizationId !== args.organizationId
   ) {
     throw new Error("Share link not found.")
@@ -99,7 +98,7 @@ export async function deleteTargetShares(
   const shares = await ctx.db
     .query("shares")
     .withIndex("by_target_and_expires_at", (index) =>
-      index.eq("targetKind", target.kind).eq("targetId", target.id)
+      index.eq("target.kind", target.kind).eq("target.id", target.id)
     )
     .take(activeShareLimit * 20)
 
@@ -118,7 +117,7 @@ export async function pageShares(
   const result = await ctx.db
     .query("shares")
     .withIndex("by_target_and_expires_at", (index) =>
-      index.eq("targetKind", target.kind).eq("targetId", target.id)
+      index.eq("target.kind", target.kind).eq("target.id", target.id)
     )
     .order("desc")
     .paginate(paginationOpts)
@@ -184,8 +183,8 @@ async function openShare(
     .query("shares")
     .withIndex("by_target_and_secret", (index) =>
       index
-        .eq("targetKind", args.target.kind)
-        .eq("targetId", args.target.id)
+        .eq("target.kind", args.target.kind)
+        .eq("target.id", args.target.id)
         .eq("secret", secret)
     )
     .unique()

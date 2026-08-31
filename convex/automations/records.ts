@@ -26,8 +26,12 @@ export const create = internalMutation({
   args: {
     organizationId: v.string(),
     ...automationBinding,
-    parentId: v.optional(v.id("automations")),
-    expectedParentConfigurationVersion: v.optional(v.number()),
+    parent: v.optional(
+      v.object({
+        id: v.id("automations"),
+        version: v.optional(v.number()),
+      })
+    ),
     name: v.string(),
     instructions: v.string(),
     visibility: v.optional(visibilityValidator),

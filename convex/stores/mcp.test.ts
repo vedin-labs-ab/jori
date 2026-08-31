@@ -27,7 +27,7 @@ describe("store tool dispatch", () => {
     })
   })
 
-  test("create defaults scope to organization", async () => {
+  test("create defaults visibility to organization", async () => {
     const runMutation = vi.fn(async () => ({}))
 
     await callJoriStoreTool(

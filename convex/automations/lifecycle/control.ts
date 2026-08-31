@@ -32,7 +32,7 @@ export async function pauseAutomation(
 
   const trigger = clearTriggerFunction(automation.trigger)
   await ctx.db.patch(automation._id, {
-    configurationVersion: (automation.configurationVersion ?? 1) + 1,
+    version: (automation.version ?? 1) + 1,
     trigger,
     status: "paused",
     updatedAt: Date.now(),

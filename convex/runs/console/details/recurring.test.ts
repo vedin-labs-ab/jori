@@ -94,7 +94,7 @@ function recurringRun(
     _id: "run",
     _creationTime: 0,
     organizationId: "organization",
-    automationId: "automation",
+    automation: { id: "automation" },
     cause: { type: "time", scheduledAt },
     instructions: "Generate a team image.",
     snapshot: {

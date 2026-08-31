@@ -42,7 +42,7 @@ function queryAutomationRows(
         index
           .eq("organizationId", args.organizationId)
           .eq("status", statusFilter)
-          .eq("parentId", undefined)
+          .eq("parent.id", undefined)
       )
       .collect()
   }
@@ -50,7 +50,7 @@ function queryAutomationRows(
   return ctx.db
     .query("automations")
     .withIndex("by_organization_and_parent", (index) =>
-      index.eq("organizationId", args.organizationId).eq("parentId", undefined)
+      index.eq("organizationId", args.organizationId).eq("parent.id", undefined)
     )
     .collect()
 }

@@ -37,8 +37,7 @@ async function createShare(
 ) {
   await database.insert("shares", {
     organizationId: "org",
-    targetKind: "file",
-    targetId: fileId,
+    target: { kind: "file", id: fileId },
     createdBy: owner,
     secret: "s3cret",
     createdAt: 1,

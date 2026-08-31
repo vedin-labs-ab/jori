@@ -11,7 +11,7 @@ test("resolves a person to their auth user ids in this organization", async () =
     personId: person,
     provider: "auth",
     externalId: "user-1",
-    link: { method: "oauth", linkedAt: 1 },
+    link: { method: "oauth", at: 1 },
     createdAt: 1,
     updatedAt: 1,
   }

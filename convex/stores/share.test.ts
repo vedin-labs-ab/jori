@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest"
 import {
+  type ShareKind,
   type ShareOverrides,
   type StoreOverrides,
   storeDoc,
@@ -28,12 +29,11 @@ async function createStore(
 async function createShare(
   database: TestDatabase,
   storeId: Id<"collections">,
-  overrides: ShareOverrides = {}
+  { kind = "store", ...overrides }: ShareOverrides & { kind?: ShareKind } = {}
 ) {
   await database.insert("shares", {
     organizationId: "org",
-    targetKind: "store",
-    targetId: storeId,
+    target: { kind, id: storeId },
     createdBy: testOwner,
     secret: "s3cret",
     createdAt: 1,
@@ -87,7 +87,7 @@ describe("opening a store share", () => {
     const { database, ctx } = databaseContext()
     const storeId = await database.insert("collections", tableDoc())
 
-    await createShare(database, storeId, { targetKind: "table" })
+    await createShare(database, storeId, { kind: "table" })
 
     expect(await openStoreShare(ctx, { storeId, secret: "s3cret" })).toBeNull()
   })

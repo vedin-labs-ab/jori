@@ -118,9 +118,11 @@ type JoriRunContext = {
   organizationId: string
   principal: ExecutionPrincipal
   _id?: Id<"runs">
-  automationId?: Id<"automations">
-  automationParentId?: Id<"automations">
-  automationConfigurationVersion?: number
+  automation?: {
+    id: Id<"automations">
+    parentId?: Id<"automations">
+    version?: number
+  }
 }
 
 function toJoriContext(run: JoriRunContext) {
@@ -128,8 +130,13 @@ function toJoriContext(run: JoriRunContext) {
     organizationId: run.organizationId,
     createdBy: executionPrincipalPersonId(run.principal),
     runId: run._id,
-    automationId: run.automationParentId ?? run.automationId,
-    automationConfigurationVersion: run.automationConfigurationVersion,
+    automation:
+      run.automation === undefined
+        ? undefined
+        : {
+            id: run.automation.parentId ?? run.automation.id,
+            version: run.automation.version,
+          },
   }
 }
 

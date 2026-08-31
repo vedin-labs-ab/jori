@@ -46,10 +46,10 @@ export async function updateAutomation(
   const now = Date.now()
   const patch = await buildAutomationPatch(ctx, args, existing, now)
   const invalidatesChildren =
-    existing.parentId === undefined && ownedAutomationsAreStale(existing, patch)
+    existing.parent === undefined && ownedAutomationsAreStale(existing, patch)
 
   if (invalidatesChildren) {
-    patch.configurationVersion = (existing.configurationVersion ?? 1) + 1
+    patch.version = (existing.version ?? 1) + 1
   }
 
   await ctx.db.patch(args.automationId, patch)

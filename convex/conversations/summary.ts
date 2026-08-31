@@ -69,9 +69,8 @@ export const commit = internalMutation({
     const summary = collapseWhitespace(args.summary)
 
     await ctx.db.patch(args.conversationId, {
-      functionId: undefined,
+      debounce: undefined,
       summarizedAt: args.summarizedAt,
-      summarizeAt: undefined,
       summary: summary === "" ? undefined : summary,
     })
   },
@@ -86,10 +85,7 @@ export const clear = internalMutation({
       return
     }
 
-    await ctx.db.patch(conversation._id, {
-      functionId: undefined,
-      summarizeAt: undefined,
-    })
+    await ctx.db.patch(conversation._id, { debounce: undefined })
   },
 })
 

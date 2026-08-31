@@ -12,7 +12,7 @@ import { summarizeRun } from "../summaries"
 
 test("uses stored automation snapshots when the automation document is unavailable", async () => {
   const run = testRun({
-    automationId: "missing-automation",
+    automation: { id: "missing-automation" },
     cause: { type: "event", eventId: "event" },
     title: "Deep analysis",
     instructions: "Perform the deep analysis.",
@@ -180,7 +180,7 @@ test("summarizes mention runs with source task links", async () => {
 
 test("keeps stored automation snapshots when the automation changes", async () => {
   const run = testRun({
-    automationId: "automation",
+    automation: { id: "automation" },
     cause: { type: "time", scheduledAt: 0 },
     instructions: "Original automation instructions.",
     snapshot: {

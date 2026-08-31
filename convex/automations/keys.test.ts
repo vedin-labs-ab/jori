@@ -48,7 +48,7 @@ test("idempotency compares semantic definitions", () => {
   expect(
     sameAutomationDefinition(definition, {
       ...definition,
-      parentId: "parent" as Id<"automations">,
+      parent: { id: "parent" as Id<"automations">, version: 1 },
     })
   ).toBe(false)
 })

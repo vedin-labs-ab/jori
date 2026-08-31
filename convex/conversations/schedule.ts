@@ -11,13 +11,13 @@ export async function scheduleConversationSummary(
 ) {
   const schedule = nextDebounceSchedule({
     now,
-    ceilingAt: conversation.summarizeAt,
+    ceilingAt: conversation.debounce?.ceilingAt,
     debounceMs: summaryDebounceMs,
     maxDelayMs: summaryMaxDelayMs,
   })
 
-  if (conversation.functionId !== undefined) {
-    await ctx.scheduler.cancel(conversation.functionId)
+  if (conversation.debounce !== undefined) {
+    await ctx.scheduler.cancel(conversation.debounce.functionId)
   }
 
   const functionId = await ctx.scheduler.runAt(
@@ -27,7 +27,6 @@ export async function scheduleConversationSummary(
   )
 
   await ctx.db.patch(conversation._id, {
-    functionId,
-    summarizeAt: schedule.ceilingAt,
+    debounce: { ceilingAt: schedule.ceilingAt, functionId },
   })
 }

@@ -99,9 +99,17 @@ export const toolSnapshot = v.object({
 
 export const runs = defineTable({
   organizationId: v.string(),
-  automationId: v.optional(v.id("automations")),
-  automationParentId: v.optional(v.id("automations")),
-  automationConfigurationVersion: v.optional(v.number()),
+  /** The automation this run answers to; absent for interactive work.
+   *  `parentId` is the durable automation owning a one-shot child, and
+   *  `version` the configuration generation the run's access was taken from —
+   *  the parent's for owned children, the automation's own otherwise. */
+  automation: v.optional(
+    v.object({
+      id: v.id("automations"),
+      parentId: v.optional(v.id("automations")),
+      version: v.optional(v.number()),
+    })
+  ),
   parentId: v.optional(v.id("runs")),
   rootId: v.optional(v.id("runs")),
   audience: audienceValidator,
