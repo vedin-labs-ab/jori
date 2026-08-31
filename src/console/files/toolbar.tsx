@@ -8,15 +8,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { formatFileSize } from "@/shared/materials/size"
 import { CopyButton } from "../shared/copy"
 import { SeparatorDot } from "../shared/dot"
 import { ConsoleListToolbar } from "../shared/list/frame"
-import { SaveMeta } from "../shared/materials/save"
+import { SaveMeta, type SaveState } from "../shared/materials/save"
 import { fileBlobCache } from "./cache/blob"
 import { FileOwnerCell } from "./cells"
-import { type SaveStatus } from "./editor/autosave"
 import { type FileSiblings, useFileNavigate } from "./siblings"
-import { type FileDetail, formatFileSize } from "./types"
+import { type FileDetail } from "./types"
 
 /** Secondary header under the console breadcrumb, shared by every file
  *  view: quiet file meta on the left; per-type tools and the constant
@@ -180,7 +180,7 @@ export function FileMeta({
   /** Editor views pass the autosave state: the Updated label shimmers
    *  while a save is in flight, a check surfaces briefly once it lands,
    *  and a failure says so in words until it clears. */
-  saveStatus?: SaveStatus
+  saveStatus?: SaveState
 }) {
   return (
     <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">

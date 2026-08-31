@@ -256,8 +256,6 @@ function cacheKey(source: FileSource) {
   return `${source.fileId}:${source.updatedAt}`
 }
 
-export type FileBlobCache = BlobCache
-
 export function createBlobCache(limits: Partial<CacheLimits> = {}) {
   return new BlobCache({ ...defaultLimits, ...limits })
 }

@@ -1,4 +1,5 @@
 import { getAutomationEventDefinition } from "@contracts/automations/events"
+import { describeCron } from "@contracts/automations/schedule/labels"
 import { Clock, Repeat2, Zap } from "lucide-react"
 import { type ReactNode } from "react"
 import {
@@ -11,7 +12,6 @@ import { FieldHelp } from "@/shared/field"
 import { absoluteTime, relativeTime } from "../../shared/time"
 import { getAutomationSurfaceLabel } from "../access"
 import { SurfaceLogo } from "../access/logo"
-import { describeCron } from "../cron"
 import { type Automation } from "../types"
 import { AutomationToolSummary } from "./tools"
 

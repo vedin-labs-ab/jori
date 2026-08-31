@@ -1,4 +1,4 @@
-import { isRecord } from "../json"
+import { isRecord, readStringArray } from "../json"
 
 // Validates JSON values against the supported JSON Schema subset described
 // in ./normalize.ts. Runtime-neutral: usable from Convex, workers, and app
@@ -260,12 +260,6 @@ function validateSize(
 
 function readSchemaArray(value: unknown) {
   return Array.isArray(value) && value.every(isRecord) ? value : undefined
-}
-
-function readStringArray(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : []
 }
 
 function isEnum(

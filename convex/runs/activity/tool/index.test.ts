@@ -1,10 +1,7 @@
 import { expect, test } from "vitest"
 import { emptyActivityData } from "../../../../test/convex/console"
-import {
-  type Doc,
-  type Id,
-  type TableNames,
-} from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
+import { type Doc } from "../../../_generated/dataModel"
 import { projectActivity } from "../project"
 import { type ActivityData } from "../types"
 
@@ -124,8 +121,4 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     organizationId: "organization",
     ...overrides,
   } as Doc<"runs">
-}
-
-function id<TableName extends TableNames>(value: string) {
-  return value as Id<TableName>
 }

@@ -35,9 +35,7 @@ export function getRuntimeSkillForIntegration(
   integration: Integration
 ) {
   const candidates = sortSkills([...skills]).filter((skill) =>
-    runtimeSkillAssociatedIntegrations(skill).some(
-      (candidate) => candidate === integration
-    )
+    skill.associatedIntegrations.some((candidate) => candidate === integration)
   )
 
   return (
@@ -47,10 +45,6 @@ export function getRuntimeSkillForIntegration(
     candidates[0] ??
     null
   )
-}
-
-export function runtimeSkillAssociatedIntegrations(skill: RuntimeSkill) {
-  return skill.associatedIntegrations
 }
 
 function resolveRuntimeSkillNames(skills: readonly RuntimeSkill[]) {

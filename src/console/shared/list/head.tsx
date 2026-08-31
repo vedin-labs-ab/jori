@@ -49,16 +49,13 @@ function isFiltering(controls: ListControls, facets: FacetEntry[]) {
   return facets.some((facet) => controls.isFacetActive(facet.key))
 }
 
-/** Sortable header: the label is the button and clicking cycles the sort.
- *  A column that also filters renders a trailing facet menu button. */
+/** Sortable header: the label is the button and clicking cycles the sort. */
 export function SortHead({
   controls,
-  facets,
   label,
   sortKey,
 }: {
   controls: ListControls
-  facets?: FacetEntry[]
   label: string
   sortKey: string
 }) {
@@ -80,22 +77,6 @@ export function SortHead({
           {label}
           <SortIcon direction={direction} />
         </Button>
-        {facets === undefined ? null : (
-          <FacetMenu controls={controls} facets={facets}>
-            <Button
-              aria-label={`Filter by ${facetLabels(facets)}`}
-              className={cn(
-                "px-0 hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5",
-                isFiltering(controls, facets) && "px-1.5",
-                isFiltering(controls, facets) && activeClassName
-              )}
-              type="button"
-              variant="ghost"
-            >
-              <FilterMark controls={controls} facets={facets} />
-            </Button>
-          </FacetMenu>
-        )}
       </div>
     </TableHead>
   )
@@ -331,8 +312,4 @@ function ariaSort(direction: SortDirection | undefined) {
   }
 
   return direction === "asc" ? ("ascending" as const) : ("descending" as const)
-}
-
-function facetLabels(facets: FacetEntry[]) {
-  return facets.map((facet) => facet.label.toLowerCase()).join(" and ")
 }

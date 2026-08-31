@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { id } from "../../../test/convex/database"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { pageRunMatches } from "./filters"
@@ -131,10 +132,4 @@ function message(messageId: Id<"messages">, text: string): Doc<"messages"> {
     text,
     type: "message",
   }
-}
-
-function id<TableName extends "integrations" | "messages" | "runs">(
-  value: string
-) {
-  return value as Id<TableName>
 }

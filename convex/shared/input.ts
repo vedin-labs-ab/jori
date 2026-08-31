@@ -12,14 +12,6 @@ export function requiredString(value: unknown, name: string) {
   return value.trim()
 }
 
-export function requiredRawString(value: unknown, name: string) {
-  if (typeof value !== "string" || value === "") {
-    throw new Error(`${name} is required`)
-  }
-
-  return value
-}
-
 export function optionalString(value: unknown) {
   return typeof value === "string" && value.trim() !== ""
     ? value.trim()

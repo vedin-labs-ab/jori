@@ -17,8 +17,6 @@ const AutomationDialog = lazy(async () => ({
   default: (await loadAutomationDialog()).AutomationDialog,
 }))
 
-export type AutomationEditorHost = ReturnType<typeof useAutomationEditorHost>
-
 /**
  * Automation editor state plus its lazily mounted dialog, shared by every
  * page that opens the create/edit flow. Render `dialog` once per page.

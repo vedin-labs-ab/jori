@@ -8,9 +8,9 @@ import {
   getAutomationSurfaceLabel,
   isAutomationSurfaceIntegration,
 } from "./catalog"
+import { type AutomationPolicyPermissions } from "./policy"
 import { getAutomationSurfaceScopeIssue } from "./scope"
 
-type AutomationToolPermissions = ToolPermission[] | null | undefined
 export type AutomationToolAccess =
   | { kind: "ready" | "builtIn" | "web" }
   | { integration: AutomationSurfaceIntegration; kind: "integration" }
@@ -18,7 +18,7 @@ export type AutomationToolAccess =
 
 export function getDefaultAutomationSurfaceTools(
   integration: AutomationSurfaceIntegration,
-  permissions: AutomationToolPermissions
+  permissions: AutomationPolicyPermissions
 ) {
   if (!Array.isArray(permissions)) {
     return []
@@ -27,14 +27,9 @@ export function getDefaultAutomationSurfaceTools(
   return permissions
     .filter(
       (permission) =>
-        permission.surface === integration &&
-        isAutomationToolSelectable(permission)
+        permission.surface === integration && canUseAutomationTool(permission)
     )
     .map((permission) => permission.tool)
-}
-
-export function isAutomationToolSelectable(permission: ToolPermission) {
-  return canUseAutomationTool(permission)
 }
 
 export function automationToolModeDescription(permission: ToolPermission) {
@@ -67,7 +62,7 @@ export function resolveAutomationToolAccess({
   surfaces?: readonly AutomationSurfaceFormValue[]
   webSearch?: boolean
 }): AutomationToolAccess {
-  if (!isAutomationToolSelectable(permission)) {
+  if (!canUseAutomationTool(permission)) {
     return {
       kind: "unavailable",
       reason: automationToolModeDescription(permission),
@@ -98,7 +93,7 @@ export function automationToolReferenceIssue({
   tool,
   webSearch,
 }: {
-  permissions: AutomationToolPermissions
+  permissions: AutomationPolicyPermissions
   scope: Scope
   surfaces: readonly AutomationSurfaceFormValue[]
   tool: string
@@ -144,7 +139,7 @@ export function automationToolScopeIssue({
   scope,
   tool,
 }: {
-  permissions: AutomationToolPermissions
+  permissions: AutomationPolicyPermissions
   scope: Scope
   tool: string
 }) {

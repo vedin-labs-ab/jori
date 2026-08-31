@@ -1,5 +1,12 @@
 import { type MutationCtx } from "../../convex/_generated/server"
 
+// dataModel only ships types, so it is referenced through import types: a
+// value-position import statement would survive transpilation and fail to
+// resolve at test runtime.
+type DataModel = import("../../convex/_generated/dataModel").DataModel
+type Id<TableName extends keyof DataModel> =
+  import("../../convex/_generated/dataModel").Id<TableName>
+
 // An in-memory stand-in for the Convex database: enough of the surface
 // (get, insert, delete, indexed queries) for query-shaped helpers to run
 // unchanged in unit tests.
@@ -231,4 +238,10 @@ function compareValues(left: unknown, right: unknown) {
   }
 
   return (left as number) < (right as number) ? -1 : 1
+}
+
+/** Casts a readable string into a typed document id. Tests seed their own
+ *  ids so assertions can name the rows they set up. */
+export function id<TableName extends keyof DataModel>(value: string) {
+  return value as Id<TableName>
 }

@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
+import { id } from "../../test/convex/database"
+import { type Doc } from "../_generated/dataModel"
 import { collectPendingReactionBatch, formatRuntimeReaction } from "./cursor"
 
 const self = { externalId: "UBOT", kind: "self" as const }
@@ -161,8 +162,4 @@ function reactionTarget(
     identifiers: ["linear:comment:comment"],
     ...overrides,
   }
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }

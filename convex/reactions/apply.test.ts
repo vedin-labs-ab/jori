@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
+import { id } from "../../test/convex/database"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { reconcileTargetReactions, recordReactionEvent } from "./apply"
 
@@ -208,10 +209,6 @@ function fieldValue(row: Record<string, unknown>, field: string) {
 
 function tableIdPrefix(table: string) {
   return table.endsWith("s") ? table.slice(0, -1) : table
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }
 
 type Seed = [string, Record<string, unknown>]

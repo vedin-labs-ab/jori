@@ -8,8 +8,6 @@ import {
   type ToolSurface,
 } from "./types"
 
-export type { ToolSurface }
-
 export type ToolPermissionController = {
   permissions: ToolPermission[] | null | undefined
   pendingTool: string | undefined

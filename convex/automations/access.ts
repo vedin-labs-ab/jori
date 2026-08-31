@@ -173,31 +173,6 @@ export function canUseAutomationTool(
   return getIntegrationTools(access, integrationId).includes(tool)
 }
 
-/**
- * Names of integrations the automation is bound to that are no longer usable
- * (disconnected, expired credentials). Runs drop these bound integrations, so
- * the automation cannot do its work until they are reconnected. Integration
- * rows survive disconnects, so bound references stay resolvable; automations
- * created before that guarantee may still hold dangling references, which are
- * omitted from display projections as well.
- */
-export async function listInactiveAccessIntegrations(
-  ctx: QueryLikeCtx,
-  access: AutomationAccess
-): Promise<Integration[]> {
-  const inactive: Integration[] = []
-
-  for (const entry of access.integrations) {
-    const integration = await ctx.db.get(entry.id)
-
-    if (integration !== null && integration.status !== "active") {
-      inactive.push(integration.integration)
-    }
-  }
-
-  return inactive
-}
-
 function normalizeAccessIntegrations(
   integrations: AutomationAccessInput["integrations"]
 ) {

@@ -2,45 +2,7 @@ import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../shared/dot"
 import { formatDuration } from "../../shared/time"
 
-export function ApprovalStatusMeta({
-  expiresAt,
-  isVisible,
-  now,
-}: {
-  expiresAt: number
-  isVisible: boolean
-  now: number
-}) {
-  return (
-    <ExpiringStatusMeta
-      expiresAt={expiresAt}
-      isVisible={isVisible}
-      label="Needs approval"
-      now={now}
-    />
-  )
-}
-
-export function OfferStatusMeta({
-  expiresAt,
-  isVisible,
-  now,
-}: {
-  expiresAt: number
-  isVisible: boolean
-  now: number
-}) {
-  return (
-    <ExpiringStatusMeta
-      expiresAt={expiresAt}
-      isVisible={isVisible}
-      label="Needs action"
-      now={now}
-    />
-  )
-}
-
-function ExpiringStatusMeta({
+export function ExpiringStatusMeta({
   expiresAt,
   isVisible,
   label,

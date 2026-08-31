@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
-import { type Doc, type Id, type TableNames } from "../_generated/dataModel"
+import { id } from "../../test/convex/database"
+import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import { resolveCancellationActor } from "./cancellation"
@@ -125,8 +126,4 @@ function userActor(): Actor {
     externalId: "U123",
     name: "Albin",
   }
-}
-
-function id<TableName extends TableNames>(value: string) {
-  return value as Id<TableName>
 }

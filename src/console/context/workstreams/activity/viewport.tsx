@@ -4,9 +4,7 @@ import { cn } from "@/lib/utils"
 import { scrollFade, scrollFadeX } from "@/shared/fade"
 import { type Workstream, type Workstreams } from "../types"
 import { LaneRow, stickyLane } from "./lane"
-import { type Pulse, type PulseLane } from "./series"
-
-type PulseDays = 14 | 30 | 60
+import { type Pulse, type PulseDays, type PulseLane } from "./series"
 
 type PulseViewportProps = {
   dayCount: PulseDays

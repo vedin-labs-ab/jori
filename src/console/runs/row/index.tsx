@@ -3,7 +3,7 @@ import { lazy, memo, Suspense, useCallback, useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RelativeTime } from "../../shared/details"
 import { formatDuration, relativeTime } from "../../shared/time"
-import { ApprovalStatusMeta, OfferStatusMeta } from "../request/status"
+import { ExpiringStatusMeta } from "../request/status"
 import { type ExecutionItem } from "../types"
 import {
   RunRowBody,
@@ -143,16 +143,18 @@ function ExecutionMeta({
   return (
     <RunRowMeta>
       {liveApproval !== null ? (
-        <ApprovalStatusMeta
+        <ExpiringStatusMeta
           expiresAt={liveApproval.expiresAt}
           isVisible={!isOpen}
+          label="Needs approval"
           now={now}
         />
       ) : null}
       {liveApproval === null && liveOffer !== null ? (
-        <OfferStatusMeta
+        <ExpiringStatusMeta
           expiresAt={liveOffer.expiresAt}
           isVisible={!isOpen}
+          label="Needs action"
           now={now}
         />
       ) : null}

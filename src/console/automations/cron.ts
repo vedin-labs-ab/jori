@@ -7,8 +7,6 @@ import { ordinal } from "@contracts/automations/schedule/labels"
 import { readErrorMessage } from "../shared/error"
 import { type AutomationFormValues, emptyAutomationForm } from "./types"
 
-export { describeCron } from "@contracts/automations/schedule/labels"
-
 type CronParts = Pick<
   AutomationFormValues,
   "cron" | "monthDay" | "repeat" | "time" | "timezone" | "weekday"

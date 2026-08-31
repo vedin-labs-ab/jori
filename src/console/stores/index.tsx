@@ -40,19 +40,6 @@ export function StoresPage() {
   )
 }
 
-function useStoreRows(organizationId: string, query: string) {
-  const storeList = useQuery(api.stores.console.list, {
-    organizationId,
-    query,
-    includeArchived: false,
-  })
-
-  return {
-    storeList,
-    rows: storeList?.status === "ready" ? storeList.stores : [],
-  }
-}
-
 /** One bag of page state, so the view and its overlays stay small. */
 function useStoresPage(organizationId: string) {
   const [query, setQuery] = useState("")
@@ -61,7 +48,12 @@ function useStoresPage(organizationId: string) {
   const removal = useStoreRemoval(organizationId)
   const folders = useFolderNames(organizationId)
   const deferredQuery = useDeferredValue(query)
-  const { storeList, rows } = useStoreRows(organizationId, deferredQuery)
+  const storeList = useQuery(api.stores.console.list, {
+    organizationId,
+    query: deferredQuery,
+    includeArchived: false,
+  })
+  const rows = storeList?.status === "ready" ? storeList.stores : []
   const config = storeListConfig(folders, rows)
   const controls = useListControls(config)
   const stores = controls.apply(rows)

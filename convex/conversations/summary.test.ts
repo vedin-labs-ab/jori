@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
+import { id } from "../../test/convex/database"
+import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { summaryOverlapMessageLimit, summarySourceMessageLimit } from "./limits"
 import { loadSummaryMessages } from "./summary"
@@ -165,10 +166,6 @@ function messageNumbers(start: number, end: number) {
 
 function texts(messages: Array<{ text: string }>) {
   return messages.map((message) => message.text)
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }
 
 type Filter = {

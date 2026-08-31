@@ -79,12 +79,9 @@ export function FullscreenLoadingProvider({
 
 export function FullscreenSkeletonLoader({
   className,
-  mode = "viewport",
   style,
   ...props
-}: ComponentProps<"div"> & {
-  mode?: "fill" | "viewport"
-}) {
+}: ComponentProps<"div">) {
   const loadingContext = useContext(FullscreenLoadingContext)
 
   if (loadingContext !== null) {
@@ -95,7 +92,6 @@ export function FullscreenSkeletonLoader({
     <FullscreenLoadingOverlay
       className={className}
       isVisible
-      mode={mode}
       style={style}
       {...props}
     />
@@ -115,12 +111,10 @@ function FullscreenLoadingSignal() {
 function FullscreenLoadingOverlay({
   className,
   isVisible,
-  mode = "viewport",
   style,
   ...props
 }: ComponentProps<"div"> & {
   isVisible: boolean
-  mode?: "fill" | "viewport"
 }) {
   return (
     <div
@@ -131,9 +125,7 @@ function FullscreenLoadingOverlay({
         isVisible
           ? "opacity-100"
           : "pointer-events-none opacity-0 transition-opacity duration-150 motion-reduce:transition-none",
-        mode === "viewport"
-          ? "fixed inset-0 z-50 min-h-svh"
-          : "h-full min-h-0 flex-1",
+        "fixed inset-0 z-50 min-h-svh",
         className
       )}
       role="status"

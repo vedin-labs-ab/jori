@@ -1,4 +1,5 @@
 import { type Infer } from "convex/values"
+import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
 import { type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { enqueueOperation } from "../outbox/data"
@@ -161,12 +162,7 @@ async function allRunsTerminal(ctx: MutationCtx, runIds: Id<"runs">[]) {
   for (const runId of runIds) {
     const run = await ctx.db.get(runId)
 
-    if (
-      run === null ||
-      (run.status !== "completed" &&
-        run.status !== "failed" &&
-        run.status !== "stopped")
-    ) {
+    if (run === null || !isTerminalRunStatus(run.status)) {
       return false
     }
   }

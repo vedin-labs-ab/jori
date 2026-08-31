@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Id } from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
 import { type MutationCtx } from "../../../_generated/server"
 import { wakeParentForTerminalRun, wakeRun } from "./data"
 
@@ -105,10 +105,6 @@ function run(runId: string, status: "completed" | "failed" | "running"): Seed {
       organizationId: "organization",
     },
   ]
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }
 
 type Seed = [string, Record<string, unknown>]
