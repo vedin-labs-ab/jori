@@ -1,7 +1,7 @@
 import { FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Paged } from "../../../shared/paging"
+import { Paged } from "../../paging"
 import { ContextSectionTitle } from "../../section"
 import { sourceLabel, type WebsiteItem, websiteItems } from "../discovery/url"
 import { type ContextFacts, type ContextSource } from "../types"

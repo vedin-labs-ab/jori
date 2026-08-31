@@ -1,8 +1,8 @@
-import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { validateReadOnlyGitArgs } from "./git"
 import { compactFailure } from "./output"
 import { shellQuote } from "./path"
 import { type SandboxRuntime } from "./types"
+import { sandboxWorkspace } from "./workspace"
 
 export async function runJsonScript(args: {
   input: Record<string, unknown>

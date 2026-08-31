@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { messageHasText, resolveMessageOwner } from "../messages/data"
-import { maxPendingReadLimit } from "../sessions/cursor"
+import { maxPendingReadLimit } from "../sessions/batch"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
 import { isMessageIntegration } from "../shared/integrations"

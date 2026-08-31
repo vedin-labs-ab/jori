@@ -10,9 +10,9 @@ import {
   requireRunningPass,
   toAllowedMaps,
 } from "../engine/wire"
+import { type WorkstreamOp, workstreamOp } from "./contract"
+import { applyCreate, applyMerge, applyStatus, applyUpdate } from "./handlers"
 import { applyAssign, type WorkstreamApplyState } from "./members"
-import { applyCreate, applyMerge, applyStatus, applyUpdate } from "./operations"
-import { type WorkstreamOp, workstreamOp } from "./ops"
 
 // Applies one workstream review atomically. This edge owns the kind: every
 // belief it writes is a workstream. Wording claims (create, update) need

@@ -9,7 +9,7 @@ import {
 } from "../engine/rules"
 import { moveEffort, writeEvidence } from "../engine/sightings"
 import { type ApplyTracking, discard } from "../engine/wire"
-import { type EffortOp } from "./ops"
+import { type EffortOp } from "./contract"
 
 export type EffortApplyState = ApplyTracking & {
   allowed: AllowedSources

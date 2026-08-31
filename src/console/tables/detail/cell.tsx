@@ -2,7 +2,7 @@ import { type KeyboardEvent, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { displayCellText } from "@/shared/materials/cells"
+import { displayCellText } from "@/lib/cells"
 import { type TableColumn, type TableRow } from "../types"
 import { formatCellText, parseCellText } from "./cells"
 

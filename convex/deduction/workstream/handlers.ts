@@ -10,8 +10,8 @@ import {
 } from "../engine/rules"
 import { moveEffort, writeEvidence } from "../engine/sightings"
 import { discard } from "../engine/wire"
+import { type WorkstreamOp } from "./contract"
 import { adoptCitedEfforts, type WorkstreamApplyState } from "./members"
-import { type WorkstreamOp } from "./ops"
 
 export async function applyCreate(
   ctx: MutationCtx,

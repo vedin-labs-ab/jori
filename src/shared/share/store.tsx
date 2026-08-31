@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { scrollFadeX } from "@/shared/fade"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
-import { useShareExpired } from "./share"
+import { useShareExpired } from "./link"
 import { ShareShell, ShareUnavailable } from "./shell"
 
 /** Views a store through a share link or its public visibility, without a

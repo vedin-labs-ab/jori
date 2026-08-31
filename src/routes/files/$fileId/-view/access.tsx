@@ -1,7 +1,7 @@
 import { type GenericId } from "convex/values"
 import { lazy } from "react"
-import { MaterialAccess } from "@/shared/materials/access"
-import { FileShareView } from "@/shared/materials/file"
+import { MaterialAccess } from "@/shared/share/access"
+import { FileShareView } from "@/shared/share/file"
 
 /** Lazy so anonymous share-link visitors do not download the member console
  *  graph after the session check establishes that there is no member. */

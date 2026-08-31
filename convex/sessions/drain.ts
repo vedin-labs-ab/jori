@@ -10,12 +10,8 @@ import {
 import { reactionSummariesForMessages } from "../reactions/summary"
 import { type QueryLikeCtx } from "../shared/context"
 import { boundedNumber } from "../shared/input"
-import {
-  defaultDrainLimit,
-  formatRuntimeMessage,
-  maxDrainLimit,
-} from "./cursor"
-import { cursorWithMessage, cursorWithReaction } from "./cursors"
+import { defaultDrainLimit, formatRuntimeMessage, maxDrainLimit } from "./batch"
+import { cursorWithMessage, cursorWithReaction } from "./cursor"
 import { readPendingBatch } from "./data"
 import { emitRecencyContexts, type RecencyEmission } from "./recency"
 

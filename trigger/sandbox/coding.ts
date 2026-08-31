@@ -1,5 +1,4 @@
 import { type CodingToolName, isCodingToolName } from "../../contracts/coding"
-import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { readWorkspaceFile } from "./files"
 import {
   boundedTimeoutMs,
@@ -13,6 +12,7 @@ import { sandboxWorkspacePath, shellQuote } from "./path"
 import { gitBashGuard, readOnlyGitCommand } from "./script"
 import { globWorkspace, grepWorkspace } from "./search"
 import { type SandboxRuntime } from "./types"
+import { sandboxWorkspace } from "./workspace"
 
 export async function executeCodingTool(args: {
   input: unknown

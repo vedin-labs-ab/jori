@@ -1,7 +1,7 @@
 import path from "node:path"
-import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
 import { shellQuote } from "../path"
 import { type SandboxRuntime, type SandboxWriteFile } from "../types"
+import { sandboxWorkspace } from "../workspace"
 import { type Hunk, parseEnvelopePatch } from "./parse"
 
 export function isEnvelopePatch(patch: string) {

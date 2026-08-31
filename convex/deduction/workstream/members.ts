@@ -4,7 +4,7 @@ import { resolveBelief, resolveEffort } from "../engine/resolve"
 import { type AllowedSources, type Sighting } from "../engine/rules"
 import { moveEffort, writeEvidence } from "../engine/sightings"
 import { type ApplyTracking, discard } from "../engine/wire"
-import { type WorkstreamOp } from "./ops"
+import { type WorkstreamOp } from "./contract"
 
 export type WorkstreamApplyState = ApplyTracking & {
   allowed: AllowedSources

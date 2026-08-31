@@ -18,6 +18,7 @@ const namingRoots = new Set([
   "convex",
   "prompts",
   "scripts",
+  "skills",
   "src",
   "test",
   "trigger",

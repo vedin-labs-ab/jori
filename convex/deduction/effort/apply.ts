@@ -10,14 +10,14 @@ import {
   requireRunningPass,
   toAllowedMaps,
 } from "../engine/wire"
+import { type EffortOp, effortOp } from "./contract"
 import {
   applyCreate,
   applyJournal,
   applyMerge,
   applyUpdate,
   type EffortApplyState,
-} from "./operations"
-import { type EffortOp, effortOp } from "./ops"
+} from "./handlers"
 
 // Applies one effort review atomically: validates every op against the
 // rules, writes efforts, evidence, and journal, and completes the pass with

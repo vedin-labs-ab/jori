@@ -1,13 +1,13 @@
 import { expect, test } from "vitest"
 import { type Id } from "../../_generated/dataModel"
 import { requestJudge } from "../engine/judge"
+import { effortOutputSchema } from "./contract"
 import {
   type EffortContext,
   type EffortPassInput,
   toPayload,
   type WindowEvent,
 } from "./input"
-import { effortOutputSchema } from "./ops"
 import { readEffortOps } from "./parse"
 
 // Live behavioral probes for the effort charter: golden scenarios run

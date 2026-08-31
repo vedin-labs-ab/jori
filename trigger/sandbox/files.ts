@@ -1,7 +1,7 @@
-import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { boundedInteger, requiredTrimmedString } from "./input"
 import { runJsonScript } from "./script"
 import { type SandboxRuntime } from "./types"
+import { sandboxWorkspace } from "./workspace"
 
 export async function readWorkspaceFile(
   sandbox: SandboxRuntime,

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { formatJsonText, parseJsonText } from "./parse"
+import { formatJsonText, parseJsonText } from "./json"
 
 test("parses valid JSON", () => {
   expect(parseJsonText('{"a": [1, true]}')).toEqual({

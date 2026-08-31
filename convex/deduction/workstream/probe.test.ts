@@ -1,13 +1,13 @@
 import { expect, test } from "vitest"
 import { type Id } from "../../_generated/dataModel"
 import { requestJudge } from "../engine/judge"
+import { workstreamOutputSchema } from "./contract"
 import {
   type EffortEntry,
   type RosterEntry,
   toPayload,
   type WorkstreamPassInput,
 } from "./input"
-import { workstreamOutputSchema } from "./ops"
 import { readWorkstreamOps } from "./parse"
 
 // Live behavioral probes for the workstream charters. Skipped unless

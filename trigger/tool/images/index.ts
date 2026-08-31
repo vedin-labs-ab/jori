@@ -1,8 +1,8 @@
 import path from "node:path"
 import { isRecord, type JsonObject } from "../../../contracts/json"
-import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "../../input"
 import { type AgentRuntime } from "../../runtime"
+import { sandboxWorkspace } from "../../sandbox/workspace"
 import { generateOpenRouterImage } from "./openrouter"
 
 type GenerateImageInput = {

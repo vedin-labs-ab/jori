@@ -1,7 +1,7 @@
-import { sandboxWorkspace } from "../../../contracts/runtime/sandbox"
 import { boundedText, compactFailure } from "../output"
 import { shellQuote } from "../path"
 import { type SandboxRuntime } from "../types"
+import { sandboxWorkspace } from "../workspace"
 
 export async function applyUnifiedPatch(
   sandbox: SandboxRuntime,

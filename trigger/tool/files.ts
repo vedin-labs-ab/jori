@@ -1,9 +1,9 @@
 import path from "node:path"
 import { type JsonObject } from "../../contracts/json"
 import { fileTooLargeError, maxFileBytes } from "../../contracts/runtime/files"
-import { sandboxWorkspace } from "../../contracts/runtime/sandbox"
 import { optionalString, requiredString } from "../input"
 import { type AgentRuntime } from "../runtime"
+import { sandboxWorkspace } from "../sandbox/workspace"
 
 const mimeTypesByExtension: Record<string, string> = {
   ".csv": "text/csv",
