@@ -29,10 +29,10 @@ vi.mock("@tanstack/react-router", () => ({
 afterEach(cleanup)
 
 const removal = {
-  removeStore: async () => undefined,
-  removingStoreId: undefined,
-  restoreStore: async () => undefined,
-  restoringStoreId: undefined,
+  removeMaterial: async () => undefined,
+  removingId: undefined,
+  restoreMaterial: async () => undefined,
+  restoringId: undefined,
 } as unknown as ReturnType<typeof useStoreRemoval>
 
 function storeSummary(overrides: Partial<StoreSummary> = {}) {

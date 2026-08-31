@@ -74,33 +74,3 @@ export function MaterialDescriptionField({
     </div>
   )
 }
-
-/** Name and description inputs shared by material create and edit dialogs. */
-export function MaterialDetailFields({
-  description,
-  idPrefix,
-  name,
-  onDescriptionChange,
-  onNameChange,
-}: {
-  description: string
-  idPrefix: string
-  name: string
-  onDescriptionChange: (description: string) => void
-  onNameChange: (name: string) => void
-}) {
-  return (
-    <>
-      <MaterialNameField
-        idPrefix={idPrefix}
-        name={name}
-        onNameChange={onNameChange}
-      />
-      <MaterialDescriptionField
-        description={description}
-        idPrefix={idPrefix}
-        onDescriptionChange={onDescriptionChange}
-      />
-    </>
-  )
-}

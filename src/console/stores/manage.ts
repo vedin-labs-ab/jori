@@ -42,19 +42,12 @@ export function storeListConfig(
 export function useStoreRemoval(organizationId: string) {
   const remove = useMutation(api.stores.console.remove)
   const restore = useMutation(api.stores.console.restore)
-  const removal = useMaterialRemoval<StoreTarget>({
+  return useMaterialRemoval<StoreTarget>({
     identify: (store) => store.storeId,
     noun: "store",
     remove: (store) => remove({ organizationId, storeId: store.storeId }),
     restore: (store) => restore({ organizationId, storeId: store.storeId }),
   })
-
-  return {
-    removeStore: removal.removeMaterial,
-    removingStoreId: removal.removingId,
-    restoreStore: removal.restoreMaterial,
-    restoringStoreId: removal.restoringId,
-  }
 }
 
 /** The selection bar's actions: each removes or exports per selected row,

@@ -9,7 +9,6 @@ import { automationInstructionMarkerErrors } from "../save/marker"
 export function AutomationInstructionsSection({
   additionalSurfaces,
   error,
-  onBlur,
   onWebSearchChange,
   onValueChange,
   permissions,
@@ -20,7 +19,6 @@ export function AutomationInstructionsSection({
 }: {
   additionalSurfaces: AutomationFormValues["surfaces"]
   error: string | undefined
-  onBlur: () => void
   onWebSearchChange: (enabled: boolean) => void
   onValueChange: (
     instructions: string,
@@ -43,7 +41,6 @@ export function AutomationInstructionsSection({
         error={error}
         id="automation-description"
         value={values.instructions}
-        onBlur={onBlur}
         onWebSearchChange={onWebSearchChange}
         onValueChange={(next) => onValueChange(next.description, next.surfaces)}
         permissions={permissions}

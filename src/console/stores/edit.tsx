@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/dialog"
 import { api } from "../../../convex/_generated/api"
 import { showErrorToast } from "../shared/error"
-import { MaterialDetailFields } from "../shared/materials/fields"
+import {
+  MaterialDescriptionField,
+  MaterialNameField,
+} from "../shared/materials/fields"
 import { DialogForm } from "../shared/materials/form"
 import { type StoreDetail } from "./types"
 
@@ -80,12 +83,15 @@ export function EditStoreDialog({
           disabled={name.trim() === "" || isSaving}
           onSubmit={() => void submit()}
         >
-          <MaterialDetailFields
-            description={description}
+          <MaterialNameField
             idPrefix="store-edit"
             name={name}
-            onDescriptionChange={setDescription}
             onNameChange={setName}
+          />
+          <MaterialDescriptionField
+            description={description}
+            idPrefix="store-edit"
+            onDescriptionChange={setDescription}
           />
           <DialogFooter>
             <Button disabled={name.trim() === "" || isSaving} type="submit">

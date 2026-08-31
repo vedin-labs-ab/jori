@@ -138,7 +138,7 @@ function TableReadyView({
   const isArchived = table.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
-    void page.removal.removeTable(table).then((succeeded) => {
+    void page.removal.removeMaterial(table).then((succeeded) => {
       if (succeeded && isArchived) {
         void navigate({ to: "/tables" })
       }
@@ -149,15 +149,15 @@ function TableReadyView({
     table.name,
     <MaterialTitleMenu
       deleteDescription={tableDeleteDescription}
-      isDeleting={page.removal.removingTableId === table.tableId}
-      isRestoring={page.removal.restoringTableId === table.tableId}
+      isDeleting={page.removal.removingId === table.tableId}
+      isRestoring={page.removal.restoringId === table.tableId}
       material={{ name: table.name, archivedAt: table.archivedAt }}
       noun="table"
       onAccess={() => page.setDialog("access")}
       onDelete={removeAndLeaveWhenDeleted}
       onEdit={() => page.setDialog("edit")}
       onMoveToFolder={() => page.setDialog("move")}
-      onRestore={() => void page.removal.restoreTable(table)}
+      onRestore={() => void page.removal.restoreMaterial(table)}
     />
   )
 

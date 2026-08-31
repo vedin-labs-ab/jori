@@ -191,7 +191,6 @@ function useInstructionRefs(
     catalog: { current: catalog },
     editor: { current: null },
     emittedValueKey: { current: undefined },
-    onBlur: { current: props.onBlur },
     onWebSearchChange: { current: props.onWebSearchChange },
     onValueChange: { current: props.onValueChange },
     permissions: { current: props.permissions },
@@ -235,7 +234,6 @@ function createEditorOptions({
     }),
     extensions: createInstructionExtensions(refs),
     immediatelyRender: false,
-    onBlur: () => refs.onBlur.current(),
     onSelectionUpdate: ({ editor }) => updateSuggestion(editor),
     onUpdate: ({ editor }) => {
       const nextValue = serializeAutomationInstructionDocument(editor.getJSON())

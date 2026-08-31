@@ -41,19 +41,12 @@ export function tableListConfig(
 export function useTableRemoval(organizationId: string) {
   const remove = useMutation(api.tables.console.remove)
   const restore = useMutation(api.tables.console.restore)
-  const removal = useMaterialRemoval<TableTarget>({
+  return useMaterialRemoval<TableTarget>({
     identify: (table) => table.tableId,
     noun: "table",
     remove: (table) => remove({ organizationId, tableId: table.tableId }),
     restore: (table) => restore({ organizationId, tableId: table.tableId }),
   })
-
-  return {
-    removeTable: removal.removeMaterial,
-    removingTableId: removal.removingId,
-    restoreTable: removal.restoreMaterial,
-    restoringTableId: removal.restoringId,
-  }
 }
 
 /** The selection bar's actions: each removes or exports per selected row,

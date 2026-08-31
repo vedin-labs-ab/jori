@@ -1,28 +1,8 @@
-import { type Visibility } from "@contracts/permissions/visibility"
 import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { type GenericId } from "convex/values"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
-import { showErrorToast } from "../shared/error"
-import {
-  MaterialDescriptionField,
-  MaterialNameField,
-} from "../shared/materials/fields"
-import { AdvancedSettings, DialogForm } from "../shared/materials/form"
-import { VisibilityField } from "../shared/visibility/field"
+import { CreateMaterialDialog } from "../shared/materials/form"
 
 export function CreateTableDialog({
   initialFolderId,
@@ -36,136 +16,31 @@ export function CreateTableDialog({
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
 }) {
-  const form = useCreateTable(organizationId, initialFolderId ?? null, () =>
-    onOpenChange(false)
-  )
+  // A table is born with no columns at all; the grid's New column
+  // affordance grows the schema in place.
+  const create = useMutation(api.tables.console.create)
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!form.isCreating) {
-          onOpenChange(open)
-        }
-      }}
-    >
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create table</DialogTitle>
-          <DialogDescription>
-            Name it now — define its columns right in the table.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogForm
-          disabled={form.isCreating}
-          onSubmit={() => void form.submit()}
-        >
-          <MaterialNameField
-            error={form.nameError}
-            idPrefix="table-create"
-            name={form.name}
-            onNameChange={form.setName}
-          />
-          <MaterialDescriptionField
-            description={form.description}
-            idPrefix="table-create"
-            onDescriptionChange={form.setDescription}
-          />
-          <AdvancedSettings>
-            <FolderField
-              id="table-create-folder"
-              onChange={form.setFolderId}
-              organizationId={organizationId}
-              value={form.folderId}
-            />
-            <VisibilityField
-              id="table-create-visibility"
-              noun="table"
-              onChange={form.setVisibility}
-              organizationId={organizationId}
-              value={form.visibility}
-            />
-          </AdvancedSettings>
-          <DialogFooter>
-            <Button disabled={form.isCreating} type="submit">
-              {form.isCreating ? <Loader2 className="animate-spin" /> : null}
-              Create table
-            </Button>
-          </DialogFooter>
-        </DialogForm>
-      </DialogContent>
-    </Dialog>
+    <CreateMaterialDialog
+      blurb="Name it now — define its columns right in the table."
+      create={(args) =>
+        create({
+          ...args,
+          // The form holds visibility with plain string ids; the mutation
+          // wants branded ones, and only the server can vouch for them.
+          visibility: args.visibility as FunctionArgs<
+            typeof api.tables.console.create
+          >["visibility"],
+        })
+      }
+      folderField={(props) => (
+        <FolderField {...props} organizationId={organizationId} />
+      )}
+      initialFolderId={initialFolderId}
+      isOpen={isOpen}
+      noun="table"
+      onOpenChange={onOpenChange}
+      organizationId={organizationId}
+    />
   )
-}
-
-function useCreateTable(
-  organizationId: string,
-  initialFolderId: string | null,
-  onCreated: () => void
-) {
-  const create = useMutation(api.tables.console.create)
-  const [name, setNameState] = useState("")
-  const [nameError, setNameError] = useState<string>()
-  const [description, setDescription] = useState("")
-  const [visibility, setVisibility] = useState<Visibility>({
-    mode: "organization",
-  })
-  const [folderId, setFolderId] = useState(initialFolderId)
-  const [isCreating, setIsCreating] = useState(false)
-
-  // Validation shows only after a submit attempt; new input clears it.
-  function setName(next: string) {
-    setNameState(next)
-    setNameError(undefined)
-  }
-
-  async function submit() {
-    if (name.trim() === "") {
-      setNameError("Give the table a name.")
-
-      return
-    }
-
-    setIsCreating(true)
-
-    // A table is born with no columns at all; the grid's New column
-    // affordance grows the schema in place.
-    try {
-      await create({
-        organizationId,
-        name,
-        description: description.trim() === "" ? undefined : description,
-        visibility: visibility as FunctionArgs<
-          typeof api.tables.console.create
-        >["visibility"],
-        folderId:
-          folderId === null ? undefined : (folderId as GenericId<"folders">),
-      })
-
-      toast.success(`Created ${name.trim()}.`)
-      setNameState("")
-      setDescription("")
-      setVisibility({ mode: "organization" })
-      setFolderId(initialFolderId)
-      onCreated()
-    } catch (error) {
-      showErrorToast(error, "Could not create the table.")
-    } finally {
-      setIsCreating(false)
-    }
-  }
-
-  return {
-    description,
-    folderId,
-    isCreating,
-    name,
-    nameError,
-    setDescription,
-    setFolderId,
-    setName,
-    setVisibility,
-    submit,
-    visibility,
-  }
 }

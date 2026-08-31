@@ -60,7 +60,6 @@ function useLatestInstructionRefs({
     refs.additionalSurfaces.current = additionalSurfaces
     refs.catalog.current = catalog
     refs.editor.current = editor
-    refs.onBlur.current = props.onBlur
     refs.onWebSearchChange.current = props.onWebSearchChange
     refs.onValueChange.current = props.onValueChange
     refs.permissions.current = props.permissions
