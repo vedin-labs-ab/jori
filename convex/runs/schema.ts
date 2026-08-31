@@ -2,7 +2,7 @@ import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { runStatuses } from "../../contracts/runtime/runs"
 import { actorValidator } from "../shared/actor"
-import { audienceScopeValidator } from "../shared/audience"
+import { audienceValidator } from "../shared/audience"
 import { accessValidator, toolSurfaceValidator } from "../shared/integrations"
 import { executionPrincipalValidator } from "./principal"
 
@@ -104,7 +104,7 @@ export const runs = defineTable({
   automationConfigurationVersion: v.optional(v.number()),
   parentId: v.optional(v.id("runs")),
   rootId: v.optional(v.id("runs")),
-  scope: v.optional(audienceScopeValidator),
+  audience: audienceValidator,
   conversationId: v.optional(v.id("conversations")),
   cause: runCause,
   principal: executionPrincipalValidator,
@@ -130,9 +130,9 @@ export const runs = defineTable({
   .index("by_parent", ["parentId"])
   .index("by_root", ["rootId"])
   .index("by_conversation_and_created_at", ["conversationId", "createdAt"])
-  .index("by_organization_and_scope_and_created_at", [
+  .index("by_organization_and_audience_and_created_at", [
     "organizationId",
-    "scope",
+    "audience",
     "createdAt",
   ])
   .index("by_organization_and_created_by_and_created_at", [

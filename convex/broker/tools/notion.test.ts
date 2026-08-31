@@ -152,7 +152,7 @@ function file(): Doc<"files"> {
     _id: "file_1",
     _creationTime: 0,
     organizationId: "organization",
-    scope: "organization",
+    visibility: { mode: "organization" },
     runId: "run_1",
     storageId: "storage_1",
     name: "ÅÄÖ-🚀.png",

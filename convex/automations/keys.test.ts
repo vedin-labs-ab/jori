@@ -67,7 +67,7 @@ function automation() {
     instructions: "Prepare the meeting.",
     name: "Prep",
     principal: { kind: "person", personId: "person" as Id<"persons"> },
-    scope: "personal",
+    visibility: { mode: "private" },
     type: "cron",
     trigger: {
       expression: "0 8 * * *",

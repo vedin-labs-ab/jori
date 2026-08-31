@@ -1,10 +1,10 @@
 import { toolSurfaceLabel } from "@contracts/integrations"
-import { type Scope } from "@contracts/permissions/scope"
 import { CornerDownRight, Play } from "lucide-react"
 import { type ReactNode } from "react"
 import { ProviderLogo } from "@/shared/logo/provider"
 import { SeparatorDot } from "../../shared/dot"
-import { ScopeDatum } from "../details"
+import { type ListAudience } from "../../shared/list/audience"
+import { AudienceDatum } from "../details"
 import {
   type ExecutionDetail,
   type ExecutionDetailType,
@@ -31,15 +31,15 @@ const sourceMetadataTypes = new Set<ExecutionDetailType>([
 
 export function SourceLine({
   details = [],
-  scope,
+  audience,
   source,
 }: {
   details?: readonly ExecutionDetail[]
-  /** Omitted when the list is already filtered to a single scope. */
-  scope?: Scope
+  /** Omitted when the list is already filtered to a single audience. */
+  audience?: ListAudience
   source: ExecutionSource
 }) {
-  const items = sourceItems(source, details, scope)
+  const items = sourceItems(source, details, audience)
 
   if (items.length === 0) {
     return null
@@ -64,7 +64,7 @@ type SourceItem = {
 function sourceItems(
   source: ExecutionSource,
   details: readonly ExecutionDetail[],
-  scope: Scope | undefined
+  audience: ListAudience | undefined
 ): SourceItem[] {
   return [
     ...optionalItem(
@@ -110,9 +110,9 @@ function sourceItems(
       )
     ),
     ...optionalItem(
-      "scope",
-      scope === undefined ? undefined : (
-        <ScopeDatum iconClassName="size-3" scope={scope} />
+      "audience",
+      audience === undefined ? undefined : (
+        <AudienceDatum audience={audience} iconClassName="size-3" />
       )
     ),
   ]

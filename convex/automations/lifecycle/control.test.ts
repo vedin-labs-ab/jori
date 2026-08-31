@@ -78,7 +78,7 @@ function parentAutomation(): Doc<"automations"> {
     configurationVersion: 7,
     name: "Meeting Briefing",
     instructions: "Plan briefings.",
-    scope: "personal",
+    visibility: { mode: "private" },
     principal: {
       kind: "person",
       personId: "person" as Id<"persons">,
@@ -105,7 +105,7 @@ function eventAutomation(): Doc<"automations"> {
     instructions: "Handle the event.",
     name: "Event automation",
     principal: { kind: "organization" },
-    scope: "organization",
+    visibility: { mode: "organization" },
     status: "active",
     organizationId: "organization",
     trigger: {

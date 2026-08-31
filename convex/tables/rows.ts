@@ -1,9 +1,6 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import {
-  readStoredColumns,
-  type TableColumn,
-} from "../../contracts/tables/columns"
+import { type TableColumn } from "../../contracts/tables/columns"
 import { nameRowValues, resolveNamedValues } from "../../contracts/tables/names"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
@@ -41,7 +38,7 @@ export const page = internalQuery({
   },
   handler: async (ctx, args) => {
     const table = await getAccessibleTable(ctx, args)
-    const columns = readStoredColumns(table.columns)
+    const columns = table.columns
     const result = await pageDocuments(ctx, args.tableId, args.paginationOpts)
 
     return {
@@ -63,7 +60,7 @@ export const insert = internalMutation({
   },
   handler: async (ctx, args) => {
     const table = await getAccessibleTable(ctx, args)
-    const columns = readStoredColumns(table.columns)
+    const columns = table.columns
     const [row] = await insertDocuments(
       ctx,
       tableSpec,
@@ -119,7 +116,7 @@ export const update = internalMutation({
   },
   handler: async (ctx, args) => {
     const table = await getAccessibleTable(ctx, args)
-    const columns = readStoredColumns(table.columns)
+    const columns = table.columns
     const result = await writeDocument(ctx, tableSpec, table, {
       documentId: args.rowId,
       write: {

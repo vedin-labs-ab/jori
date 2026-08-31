@@ -9,7 +9,6 @@ import {
 import { type CollectionDoc } from "../collections/spec"
 import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
-import { readVisibility } from "../visibility/schema"
 import { storeSpec } from "./spec"
 
 type StoreDoc = CollectionDoc<"store">
@@ -48,7 +47,7 @@ export function summarizeStore(store: StoreDoc) {
     storeId: store._id,
     name: store.name,
     description: store.description,
-    visibility: readVisibility(store),
+    visibility: store.visibility,
     ownerId: store.ownerId,
     folderId: store.folderId,
     schema: store.schema as JsonSchemaObject | undefined,

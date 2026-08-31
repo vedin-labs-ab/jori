@@ -15,10 +15,13 @@ import {
   ConsoleScrollableGrid,
   ConsoleSearch,
 } from "../../shared/layout"
+import {
+  type AudienceFilter,
+  audienceFilterOptions,
+} from "../../shared/list/audience"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { ConsoleListPager } from "../../shared/list/pager"
 import { useResettingSetter } from "../../shared/list/pagination"
-import { type ScopeFilter, scopeFilterOptions } from "../../shared/list/scope"
 import { ExecutionRow } from "../row"
 import { displayNowForRun, runClockInterval } from "../time"
 import {
@@ -38,17 +41,17 @@ export function RunsList({ organizationId }: { organizationId: string }) {
   const target = useSearchTarget()
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
   const [runFilter, setRunFilter] = useState<RunFilter>("all")
-  const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all")
+  const [audienceFilter, setAudienceFilter] = useState<AudienceFilter>("all")
   const [query, setQuery] = useState("")
   const deferredApprovalFilter = useDeferredValue(approvalFilter)
   const deferredRunFilter = useDeferredValue(runFilter)
-  const deferredScopeFilter = useDeferredValue(scopeFilter)
+  const deferredAudienceFilter = useDeferredValue(audienceFilter)
   const deferredQuery = useDeferredValue(query)
   const pagination = useExecutionPagination(
     organizationId,
     deferredRunFilter,
     deferredApprovalFilter,
-    deferredScopeFilter,
+    deferredAudienceFilter,
     deferredQuery,
     target
   )
@@ -62,8 +65,8 @@ export function RunsList({ organizationId }: { organizationId: string }) {
     setRunFilter,
     pagination.reset
   )
-  const setScopeFilterAndReset = useResettingSetter(
-    setScopeFilter,
+  const setAudienceFilterAndReset = useResettingSetter(
+    setAudienceFilter,
     pagination.reset
   )
   const setQueryAndReset = useResettingSetter(setQuery, pagination.reset)
@@ -74,16 +77,16 @@ export function RunsList({ organizationId }: { organizationId: string }) {
         approvalFilter={approvalFilter}
         query={query}
         runFilter={runFilter}
-        scopeFilter={scopeFilter}
+        audienceFilter={audienceFilter}
         setApprovalFilter={setApprovalFilterAndReset}
         setQuery={setQueryAndReset}
         setRunFilter={setRunFilterAndReset}
-        setScopeFilter={setScopeFilterAndReset}
+        setAudienceFilter={setAudienceFilterAndReset}
       />
       <ExecutionRows
         focusRunId={focusRunId}
         pagination={pagination}
-        showScope={deferredScopeFilter === "all"}
+        showAudience={deferredAudienceFilter === "all"}
         organizationId={organizationId}
       />
       <ConsoleListPager pagination={pagination} />
@@ -95,20 +98,20 @@ const ExecutionFilters = memo(function ExecutionFilters({
   approvalFilter,
   query,
   runFilter,
-  scopeFilter,
+  audienceFilter,
   setApprovalFilter,
   setQuery,
   setRunFilter,
-  setScopeFilter,
+  setAudienceFilter,
 }: {
   approvalFilter: ApprovalFilter
   query: string
   runFilter: RunFilter
-  scopeFilter: ScopeFilter
+  audienceFilter: AudienceFilter
   setApprovalFilter: (filter: ApprovalFilter) => void
   setQuery: (query: string) => void
   setRunFilter: (filter: RunFilter) => void
-  setScopeFilter: (filter: ScopeFilter) => void
+  setAudienceFilter: (filter: AudienceFilter) => void
 }) {
   return (
     <>
@@ -129,9 +132,9 @@ const ExecutionFilters = memo(function ExecutionFilters({
         />
         <ConsoleFilterToggle
           label="Sharing"
-          onValueChange={setScopeFilter}
-          options={scopeFilterOptions}
-          value={scopeFilter}
+          onValueChange={setAudienceFilter}
+          options={audienceFilterOptions}
+          value={audienceFilter}
         />
         <ConsoleFilterField label="Approval">
           <Select
@@ -165,12 +168,12 @@ const ExecutionFilters = memo(function ExecutionFilters({
 function ExecutionRows({
   focusRunId,
   pagination,
-  showScope,
+  showAudience,
   organizationId,
 }: {
   focusRunId?: string
   pagination: ExecutionPagination
-  showScope: boolean
+  showAudience: boolean
   organizationId: string
 }) {
   const now = useExecutionClock(pagination.visibleRows)
@@ -194,7 +197,7 @@ function ExecutionRows({
               execution={execution}
               key={execution.id}
               now={displayNowForRun(execution, now)}
-              showScope={showScope}
+              showAudience={showAudience}
               organizationId={organizationId}
             />
           ))

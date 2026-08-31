@@ -26,27 +26,6 @@ export const visibilityValidator = v.union(
 
 export type StoredVisibility = Infer<typeof visibilityValidator>
 
-/** Legacy rows still carry the binary scope; the one-shot migration in
- *  visibility/migrate.ts stamps `visibility` and clears `scope`, after
- *  which both optionals tighten in a follow-up commit. */
-export type VisibilityCarrier = {
-  visibility?: StoredVisibility
-  scope?: "personal" | "organization"
-}
-
-/** The single read path for a material's or folder's visibility: the
- *  stored grant when stamped, the legacy scope's mapping meanwhile, and
- *  the organization default where neither was ever set. */
-export function readVisibility(carrier: VisibilityCarrier): StoredVisibility {
-  if (carrier.visibility !== undefined) {
-    return carrier.visibility
-  }
-
-  return carrier.scope === "personal"
-    ? { mode: "private" }
-    : { mode: "organization" }
-}
-
 /** Dedupes grant lists and collapses empty ones to private before a write;
  *  the id types survive the runtime-neutral contract round-trip. */
 export function normalizeStoredVisibility(
@@ -55,10 +34,9 @@ export function normalizeStoredVisibility(
   return normalizeVisibility(visibility) as StoredVisibility
 }
 
-/** Agent-facing creation input keeps the personal/organization vocabulary:
- *  materials belong to the whole organization unless made personal, which
- *  maps to private visibility. Grants and public visibility are set by
- *  people in the console. */
-export function visibilityFromScopeInput(value: unknown): StoredVisibility {
-  return value === "personal" ? { mode: "private" } : { mode: "organization" }
+/** Agent-facing creation input offers the two visibilities an agent can
+ *  reason about: private to the requester, or the whole organization.
+ *  Grants and public visibility are set by people in the console. */
+export function visibilityFromInput(value: unknown): StoredVisibility {
+  return value === "private" ? { mode: "private" } : { mode: "organization" }
 }

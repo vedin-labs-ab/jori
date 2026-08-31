@@ -15,7 +15,7 @@ function automationRecordProperties() {
     instructions: stringProperty("Canonical Markdown instructions."),
     type: stringProperty("recurring, once, or mention."),
     status: stringProperty("active, paused, or completed."),
-    scope: stringProperty("personal or organization."),
+    audience: stringProperty("personal or organization."),
     createdAt: numberProperty("Creation time in epoch milliseconds."),
     updatedAt: numberProperty("Last update time in epoch milliseconds."),
   }

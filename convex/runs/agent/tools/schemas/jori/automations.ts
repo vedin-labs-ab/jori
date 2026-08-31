@@ -55,11 +55,11 @@ const accessSchema = () => ({
   description: "Integration and web access for each automation run.",
 })
 
-const scopeProperty = {
+const visibilityProperty = {
   type: "string",
-  enum: ["personal", "organization"],
+  enum: ["private", "organization"],
   description:
-    "Who this automation is for. personal: only the requester can see and manage it, and its runs stay theirs. organization: every member can see and manage it, and its runs are visible to the whole organization. Omit to default from the tools: anything touching the requester's own email or calendar stays personal; pure workspace-tool automations become organization.",
+    "Who this automation is for. private: only the requester can see and manage it, and its runs stay theirs. organization: every member can see and manage it, and its runs are visible to the whole organization. Omit to default from the tools: anything touching the requester's own email or calendar stays private; pure workspace-tool automations become organization.",
 }
 
 const triggerSchema = () => ({
@@ -107,11 +107,11 @@ export const automationJoriToolInputSchemas = {
     required: ["name", "instructions", "type", "trigger", "access"],
     properties: {
       key: stringProperty(
-        "Optional stable idempotency key. Reusing it in the same scope returns the existing equivalent automation and rejects conflicting configuration."
+        "Optional stable idempotency key. Reusing it for the same owner returns the existing equivalent automation and rejects conflicting configuration."
       ),
       name: stringProperty("Short automation name."),
       instructions: stringProperty(automationInstructionsDescription),
-      scope: scopeProperty,
+      visibility: visibilityProperty,
       type: {
         type: "string",
         enum: ["once", "cron", "event"],
@@ -145,7 +145,7 @@ export const automationJoriToolInputSchemas = {
       automationId: stringProperty("Jori automation ID."),
       name: stringProperty("Updated automation name."),
       instructions: stringProperty(automationInstructionsDescription),
-      scope: scopeProperty,
+      visibility: visibilityProperty,
       type: {
         type: "string",
         enum: ["once", "cron", "event"],

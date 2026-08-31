@@ -2,11 +2,10 @@ import {
   type AutomationEventIntegration,
   getDefaultAutomationEvent,
 } from "@contracts/automations/events"
-import { type Scope } from "@contracts/permissions/scope"
 import { type Visibility } from "@contracts/visibility"
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
-import { type AutomationSurfaceFormValue } from "./access"
+import { type AutomationScope, type AutomationSurfaceFormValue } from "./access"
 
 export type AutomationList = FunctionReturnType<
   typeof api.automations.console.list
@@ -57,7 +56,7 @@ export type AutomationFormValues = {
   /** Who may see the automation; scope is its derived execution sharing —
    *  private runs as its person, everything else as the organization. */
   visibility: Visibility
-  scope: Scope
+  scope: AutomationScope
   /** Creation-only: where the new automation is filed; null is the root.
    *  Edits move automations through the folder surfaces instead. */
   folderId: string | null

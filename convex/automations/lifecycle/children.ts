@@ -1,8 +1,8 @@
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { executesAsOrganization } from "../../runs/principal"
 import { type StoredVisibility } from "../../visibility/schema"
-import { automationScope } from "../access"
 import { type AutomationType } from "../schema"
 import { cancelTrigger } from "./trigger"
 
@@ -50,8 +50,8 @@ export async function requireValidOwnershipUpdate(
     existing.parentId !== undefined &&
     ((args.type !== undefined && args.type !== "once") ||
       (args.visibility !== undefined &&
-        automationScope({ visibility: args.visibility }) !==
-          automationScope(existing)))
+        executesAsOrganization(args.visibility) !==
+          executesAsOrganization(existing.visibility)))
   ) {
     throw new Error("Owned one-time automations cannot change type or sharing.")
   }

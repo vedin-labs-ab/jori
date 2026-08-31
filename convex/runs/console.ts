@@ -7,13 +7,13 @@ import {
   type ApprovalFilter,
   approvalFilterValidator,
   approvalMatchesFilter,
+  audienceFilterValidator,
   normalizeQuery,
   parseCursor,
   runFilterValidator,
+  runMatchesAudienceFilter,
   runMatchesFilter,
-  runMatchesScopeFilter,
   runVisibleToPerson,
-  scopeFilterValidator,
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
@@ -24,7 +24,7 @@ export const page = query({
   args: {
     approvalFilter: approvalFilterValidator,
     runFilter: runFilterValidator,
-    scopeFilter: scopeFilterValidator,
+    audienceFilter: audienceFilterValidator,
     query: v.string(),
     organizationId: v.string(),
     paginationOpts: paginationOptsValidator,
@@ -61,7 +61,7 @@ export const page = query({
     for await (const run of runs) {
       if (
         !runVisibleToPerson(run, personId) ||
-        !runMatchesScopeFilter(run, args.scopeFilter) ||
+        !runMatchesAudienceFilter(run, args.audienceFilter) ||
         !runMatchesFilter(run, args.runFilter)
       ) {
         continue
@@ -104,7 +104,7 @@ export const stats = query({
   args: {
     approvalFilter: approvalFilterValidator,
     runFilter: runFilterValidator,
-    scopeFilter: scopeFilterValidator,
+    audienceFilter: audienceFilterValidator,
     query: v.string(),
     organizationId: v.string(),
   },
@@ -122,7 +122,7 @@ export const stats = query({
       return {
         filteredCount: await countPendingApprovals(ctx, {
           runFilter: args.runFilter,
-          scopeFilter: args.scopeFilter,
+          audienceFilter: args.audienceFilter,
           normalizedQuery,
           personId,
           organizationId: args.organizationId,
@@ -148,7 +148,7 @@ export const stats = query({
       totalCount += 1
 
       if (
-        !runMatchesScopeFilter(run, args.scopeFilter) ||
+        !runMatchesAudienceFilter(run, args.audienceFilter) ||
         !runMatchesFilter(run, args.runFilter)
       ) {
         continue

@@ -11,7 +11,7 @@ import {
   requiredObject,
   requiredString,
 } from "../shared/input"
-import { visibilityFromScopeInput } from "../visibility/schema"
+import { visibilityFromInput } from "../visibility/schema"
 
 const tableTools = new Set([
   "search_tables",
@@ -57,7 +57,7 @@ export async function callJoriTableTool(
         ...principal,
         name: requiredString(args.name, "name"),
         description: optionalString(args.description),
-        visibility: visibilityFromScopeInput(args.scope),
+        visibility: visibilityFromInput(args.visibility),
         columns: args.columns,
       })
     case "read_table":

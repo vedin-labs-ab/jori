@@ -12,7 +12,7 @@ import {
   requiredString,
   requiredStringArray,
 } from "../shared/input"
-import { visibilityFromScopeInput } from "../visibility/schema"
+import { visibilityFromInput } from "../visibility/schema"
 
 const storeTools = new Set([
   "search_stores",
@@ -55,7 +55,7 @@ export async function callJoriStoreTool(
         personId,
         name: requiredString(args.name, "name"),
         description: optionalString(args.description),
-        visibility: visibilityFromScopeInput(args.scope),
+        visibility: visibilityFromInput(args.visibility),
         schema: args.schema,
       })
     case "read_store":

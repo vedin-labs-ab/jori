@@ -1,12 +1,8 @@
 import { type Doc } from "../_generated/dataModel"
+import { executesAsOrganization } from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration, integrationLabels } from "../shared/integrations"
-import { readVisibility } from "../visibility/schema"
-import {
-  type AutomationAccess,
-  automationScope,
-  resolveToolAccessLevel,
-} from "./access"
+import { type AutomationAccess, resolveToolAccessLevel } from "./access"
 
 export async function toAutomationDisplay(
   ctx: QueryLikeCtx,
@@ -17,8 +13,11 @@ export async function toAutomationDisplay(
     key: automation.key,
     name: automation.name,
     instructions: automation.instructions,
-    scope: automationScope(automation),
-    visibility: readVisibility(automation),
+    // Two-way facet the console filters by; visibility carries the detail.
+    audience: executesAsOrganization(automation.visibility)
+      ? ("organization" as const)
+      : ("personal" as const),
+    visibility: automation.visibility,
     type: automation.type,
     status: automation.status,
     folderId: automation.folderId,

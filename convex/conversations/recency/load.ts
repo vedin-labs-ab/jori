@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { messageIdentifiers } from "../../messages/identifiers"
-import { type AudienceScope } from "../../shared/audience"
+import { type Audience } from "../../shared/audience"
 import {
   recencyConversationLimit,
   recencyMessageLimit,
@@ -13,7 +13,7 @@ import { canIncludeRecentConversation } from "../scope"
 export type RecencyRun = {
   conversationId: Id<"conversations"> | undefined
   personId: Id<"persons"> | undefined
-  scope: AudienceScope | undefined
+  audience: Audience | undefined
 }
 
 export type RecencySummary = {
@@ -65,8 +65,8 @@ export async function loadRecentActivity(
     visited.add(conversation._id)
 
     const includable = canIncludeRecentConversation({
-      candidateScope: conversation.scope,
-      currentScope: args.run.scope,
+      candidateAudience: conversation.scope,
+      currentAudience: args.run.audience,
       personal,
     })
 

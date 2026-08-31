@@ -42,6 +42,8 @@ export async function createFolder(
   const folderId = await ctx.db.insert("folders", {
     organizationId: args.organizationId,
     name: normalizeFolderName(args.name),
+    // New folders gate nothing; people narrow them in the console.
+    visibility: { mode: "organization" },
     parentId: args.parentId,
     createdBy: args.personId,
     createdAt: now,

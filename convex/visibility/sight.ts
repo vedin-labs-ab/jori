@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
-import { readVisibility, type VisibilityCarrier } from "./schema"
+import { type StoredVisibility } from "./schema"
 import { loadPersonTeamIds } from "./viewer"
 
 // The one resolver that answers "can this viewer see this material or
@@ -27,8 +27,9 @@ export type SightArgs = {
   anonymous?: boolean
 }
 
-export type Gate = VisibilityCarrier & {
+export type Gate = {
   organizationId: string
+  visibility: StoredVisibility
   ownerId?: Id<"persons">
   folderId?: Id<"folders">
 }
@@ -104,7 +105,7 @@ async function canSeeMaterial(state: SightState, material: Gate) {
   }
 
   return (
-    (await allowsCarrier(state, material)) &&
+    (await allows(state, material)) &&
     (await chainAllows(state, material.folderId))
   )
 }
@@ -119,13 +120,15 @@ async function canSeeFolderDoc(state: SightState, folder: Doc<"folders">) {
   }
 
   return (
-    (await allowsCarrier(state, folder)) &&
-    (await chainAllows(state, folder.parentId))
+    (await allows(state, folder)) && (await chainAllows(state, folder.parentId))
   )
 }
 
-async function allowsCarrier(state: SightState, carrier: VisibilityCarrier) {
-  const visibility = readVisibility(carrier)
+async function allows(
+  state: SightState,
+  carrier: { visibility: StoredVisibility }
+) {
+  const { visibility } = carrier
 
   switch (visibility.mode) {
     case "public":
@@ -208,7 +211,7 @@ async function chainAllows(
 async function levelAllows(state: SightState, folder: Doc<"folders">) {
   return (
     (state.personId !== undefined && folder.createdBy === state.personId) ||
-    (await allowsCarrier(state, folder))
+    (await allows(state, folder))
   )
 }
 

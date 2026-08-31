@@ -6,7 +6,6 @@ import {
   resolveToolMode,
   resolveToolModes,
 } from "../../contracts/permissions"
-import { type Scope } from "../../contracts/permissions/scope"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { resolveIntegrationForPrincipal } from "../integrations/resolve"
 import { listPermissionOverrides } from "../permissions/read"
@@ -17,7 +16,6 @@ import {
   type Integration,
   integrationLabels,
 } from "../shared/integrations"
-import { readVisibility } from "../visibility/schema"
 import { type Gate, type Sight } from "../visibility/sight"
 import { type access, type accessInput } from "./schema"
 
@@ -27,21 +25,9 @@ export type AccessLevel = "none" | "read" | "write" | "both"
 
 type AutomationGateDoc = Pick<
   Doc<"automations">,
-  "organizationId" | "visibility" | "scope" | "principal" | "createdBy"
+  "organizationId" | "visibility" | "principal" | "createdBy"
 > &
   Partial<Pick<Doc<"automations">, "folderId">>
-
-/**
- * Execution sharing derived from visibility: private automations execute
- * as their person, every shared mode as the organization.
- */
-export function automationScope(
-  automation: Pick<Doc<"automations">, "visibility" | "scope">
-): Scope {
-  return readVisibility(automation).mode === "private"
-    ? "personal"
-    : "organization"
-}
 
 /** An automation's owner: the person it executes as, or its creator. */
 export function automationOwner(
@@ -59,7 +45,6 @@ export function automationGate(automation: AutomationGateDoc): Gate {
     ownerId: automationOwner(automation),
     folderId: automation.folderId,
     visibility: automation.visibility,
-    scope: automation.scope,
   }
 }
 

@@ -8,7 +8,7 @@ import {
   useState,
 } from "react"
 import { api } from "../../../../convex/_generated/api"
-import { type ScopeFilter } from "../../shared/list/scope"
+import { type AudienceFilter } from "../../shared/list/audience"
 import {
   type ApprovalFilter,
   type ExecutionItem,
@@ -21,7 +21,7 @@ export function useExecutionPagination(
   organizationId: string,
   runFilter: RunFilter,
   approvalFilter: ApprovalFilter,
-  scopeFilter: ScopeFilter,
+  audienceFilter: AudienceFilter,
   query: string,
   target?: PageTarget
 ) {
@@ -31,7 +31,7 @@ export function useExecutionPagination(
     approvalFilter,
     query,
     runFilter,
-    scopeFilter,
+    audienceFilter,
     organizationId,
   })
   const paging = derivePaging({ pageIndex, rows, stats, status: runs.status })
@@ -58,7 +58,7 @@ export function useExecutionPagination(
   const hasFilters =
     runFilter !== "all" ||
     approvalFilter !== "any" ||
-    scopeFilter !== "all" ||
+    audienceFilter !== "all" ||
     normalizedQuery !== ""
   const footerLabel = formatFooterLabel({
     filteredTotal: paging.filteredTotal,
@@ -152,13 +152,13 @@ function useExecutionPageData({
   approvalFilter,
   query,
   runFilter,
-  scopeFilter,
+  audienceFilter,
   organizationId,
 }: {
   approvalFilter: ApprovalFilter
   query: string
   runFilter: RunFilter
-  scopeFilter: ScopeFilter
+  audienceFilter: AudienceFilter
   organizationId: string
 }) {
   const normalizedQuery = query.trim().toLowerCase()
@@ -167,10 +167,10 @@ function useExecutionPageData({
       approvalFilter,
       query: normalizedQuery,
       runFilter,
-      scopeFilter,
+      audienceFilter,
       organizationId,
     }),
-    [approvalFilter, normalizedQuery, runFilter, scopeFilter, organizationId]
+    [approvalFilter, normalizedQuery, runFilter, audienceFilter, organizationId]
   )
   const runs = usePaginatedQuery(api.runs.console.page, queryArgs, {
     initialNumItems: pageSize,

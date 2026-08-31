@@ -107,7 +107,7 @@ function automation(
     status: "active",
     organizationId: "organization-id",
     type: "event",
-    scope: "personal",
+    visibility: { mode: "private" },
     trigger: {
       integrationId,
       event: event ?? "issue.comment.created",

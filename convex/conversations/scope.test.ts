@@ -4,15 +4,15 @@ import { canIncludeRecentConversation } from "./scope"
 test("includes organization recency everywhere", () => {
   expect(
     canIncludeRecentConversation({
-      candidateScope: "organization",
-      currentScope: "conversation",
+      candidateAudience: "organization",
+      currentAudience: "conversation",
       personal: false,
     })
   ).toBe(true)
   expect(
     canIncludeRecentConversation({
-      candidateScope: "organization",
-      currentScope: undefined,
+      candidateAudience: "organization",
+      currentAudience: undefined,
       personal: false,
     })
   ).toBe(true)
@@ -21,15 +21,15 @@ test("includes organization recency everywhere", () => {
 test("includes narrower recency only in the person's own person-scoped run", () => {
   expect(
     canIncludeRecentConversation({
-      candidateScope: "conversation",
-      currentScope: "person",
+      candidateAudience: "conversation",
+      currentAudience: "person",
       personal: true,
     })
   ).toBe(true)
   expect(
     canIncludeRecentConversation({
-      candidateScope: "person",
-      currentScope: "person",
+      candidateAudience: "person",
+      currentAudience: "person",
       personal: true,
     })
   ).toBe(true)
@@ -38,22 +38,22 @@ test("includes narrower recency only in the person's own person-scoped run", () 
 test("excludes narrower recency for other scopes and other persons", () => {
   expect(
     canIncludeRecentConversation({
-      candidateScope: "conversation",
-      currentScope: "conversation",
+      candidateAudience: "conversation",
+      currentAudience: "conversation",
       personal: true,
     })
   ).toBe(false)
   expect(
     canIncludeRecentConversation({
-      candidateScope: "person",
-      currentScope: "organization",
+      candidateAudience: "person",
+      currentAudience: "organization",
       personal: true,
     })
   ).toBe(false)
   expect(
     canIncludeRecentConversation({
-      candidateScope: "conversation",
-      currentScope: "person",
+      candidateAudience: "conversation",
+      currentAudience: "person",
       personal: false,
     })
   ).toBe(false)

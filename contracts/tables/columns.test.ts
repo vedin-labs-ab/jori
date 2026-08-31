@@ -3,7 +3,6 @@ import {
   assertColumnEvolution,
   newColumnId,
   normalizeTableColumns,
-  readStoredColumns,
 } from "./columns"
 
 describe("normalizeTableColumns", () => {
@@ -75,20 +74,6 @@ describe("newColumnId", () => {
     expect(
       normalizeTableColumns([{ id: first, name: "Fine", type: "string" }])
     ).toHaveLength(1)
-  })
-})
-
-describe("readStoredColumns", () => {
-  test("reads a legacy key as the hidden id and drops the field", () => {
-    expect(
-      readStoredColumns([
-        { key: "title", name: "Title", type: "string", required: true },
-        { id: "c_1", name: "Count", type: "integer" },
-      ])
-    ).toEqual([
-      { id: "title", name: "Title", type: "string", required: true },
-      { id: "c_1", name: "Count", type: "integer" },
-    ])
   })
 })
 

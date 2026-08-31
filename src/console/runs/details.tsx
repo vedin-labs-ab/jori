@@ -1,4 +1,3 @@
-import { type Scope, scopeLabels } from "@contracts/permissions/scope"
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -16,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
 import { FieldHelp } from "@/shared/field"
 import { CopyableCodeBlock, CopyButton } from "../shared/copy"
+import { type ListAudience } from "../shared/list/audience"
 import { absoluteTime } from "../shared/time"
 
 export const codeBlockContentClassName = "max-h-[250px] overflow-y-auto"
@@ -234,30 +234,38 @@ export function RelativeTime({
 }
 
 /** Who a run belongs to, as an icon: the organization or one member. */
-export function ScopeIcon({
+export function AudienceIcon({
   className,
-  scope,
+  audience,
 }: {
   className?: string
-  scope: Scope
+  audience: ListAudience
 }) {
-  const Icon = scope === "organization" ? Building2 : UserRound
+  const Icon = audience === "organization" ? Building2 : UserRound
 
   return <Icon className={className} />
 }
 
-/** Quiet inline scope marker for list metadata rows; shown for both scopes. */
-export function ScopeDatum({
+/** Quiet inline audience marker for list metadata rows; shown for both. */
+export function AudienceDatum({
   iconClassName = "size-3.5",
-  scope,
+  audience,
 }: {
   iconClassName?: string
-  scope: Scope
+  audience: ListAudience
 }) {
   return (
     <span className="inline-flex shrink-0 items-center gap-1">
-      <ScopeIcon className={cn("shrink-0", iconClassName)} scope={scope} />
-      <span className="text-foreground">{scopeLabels[scope]}</span>
+      <AudienceIcon
+        className={cn("shrink-0", iconClassName)}
+        audience={audience}
+      />
+      <span className="text-foreground">{audienceLabels[audience]}</span>
     </span>
   )
+}
+
+const audienceLabels: Record<ListAudience, string> = {
+  organization: "Organization",
+  personal: "Personal",
 }

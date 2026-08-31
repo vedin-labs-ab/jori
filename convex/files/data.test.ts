@@ -9,7 +9,7 @@ const other = "person-other" as Id<"persons">
 const { ctx } = databaseContext()
 
 test("organization files are visible to every member", async () => {
-  const file = fakeFile({ scope: "organization" })
+  const file = fakeFile({ visibility: { mode: "organization" } })
 
   expect(await canViewFile(ctx, file, { organizationId: "organization" })).toBe(
     true
@@ -42,34 +42,21 @@ test("private files are visible to their owner only", async () => {
   )
 })
 
-test("legacy personal scope reads as private", async () => {
-  const file = fakeFile({ scope: "personal", ownerId: owner })
-
-  expect(
-    await canViewFile(ctx, file, {
-      organizationId: "organization",
-      personId: owner,
-    })
-  ).toBe(true)
-  expect(
-    await canViewFile(ctx, file, {
-      organizationId: "organization",
-      personId: other,
-    })
-  ).toBe(false)
-})
-
 test("files never cross organizations, whatever the visibility", async () => {
-  const file = fakeFile({ scope: "organization" })
+  const file = fakeFile({ visibility: { mode: "organization" } })
 
   expect(
     await canViewFile(ctx, file, { organizationId: "another-organization" })
   ).toBe(false)
   expect(
-    await canViewFile(ctx, fakeFile({ scope: "personal", ownerId: owner }), {
-      organizationId: "another-organization",
-      personId: owner,
-    })
+    await canViewFile(
+      ctx,
+      fakeFile({ visibility: { mode: "private" }, ownerId: owner }),
+      {
+        organizationId: "another-organization",
+        personId: owner,
+      }
+    )
   ).toBe(false)
 })
 
@@ -92,6 +79,7 @@ function fakeFile(overrides: Partial<Doc<"files">>): Doc<"files"> {
     size: 5,
     createdAt: 0,
     updatedAt: 0,
+    visibility: { mode: "organization" },
     ...overrides,
   } as Doc<"files">
 }

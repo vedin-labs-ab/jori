@@ -2,7 +2,6 @@ import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { eventMatch } from "../events/schema"
 import { executionPrincipalValidator } from "../runs/principal"
-import { scopeValidator } from "../shared/audience"
 import { accessValidator, integrationValidator } from "../shared/integrations"
 import { visibilityValidator } from "../visibility/schema"
 
@@ -76,12 +75,9 @@ export const automations = defineTable({
   keyPartition: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
-  /** Who may see the automation; read via visibility/schema.readVisibility.
-   *  Private automations execute as their person, shared ones as the
-   *  organization (see automations/access.automationScope). */
-  visibility: v.optional(visibilityValidator),
-  /** Legacy binary scope, mapped and cleared by visibility/migrate.ts. */
-  scope: v.optional(scopeValidator),
+  /** Who may see the automation. Private automations execute as their
+   *  person, shared ones as the organization (see runs/principal). */
+  visibility: visibilityValidator,
   principal: executionPrincipalValidator,
   type: automationType,
   access,

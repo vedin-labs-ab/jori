@@ -109,7 +109,7 @@ function automation(input: {
     configurationVersion: input.configurationVersion,
     name: "Meeting Briefing",
     instructions: "Plan briefings.",
-    scope: "personal",
+    visibility: { mode: "private" },
     principal: {
       kind: "person",
       personId: "person" as Id<"persons">,

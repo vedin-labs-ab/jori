@@ -1,7 +1,6 @@
 import {
   assertColumnEvolution,
   normalizeTableColumns,
-  readStoredColumns,
   tableLimits,
 } from "../../contracts/tables/columns"
 import { compileTableSchema } from "../../contracts/tables/compile"
@@ -23,11 +22,10 @@ export const tableSpec: KindSpec<"table"> = {
   evolve: (current, next) => {
     const columns = normalizeTableColumns(next)
 
-    assertColumnEvolution(readStoredColumns(current.columns), columns)
+    assertColumnEvolution(current.columns, columns)
 
     return { kind: "table", columns }
   },
-  compile: (authoring) =>
-    compileTableSchema(readStoredColumns(authoring.columns)),
+  compile: (authoring) => compileTableSchema(authoring.columns),
   documentLabel: () => "Row",
 }

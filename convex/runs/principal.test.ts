@@ -1,23 +1,28 @@
 import { expect, test } from "vitest"
 import { type Id } from "../_generated/dataModel"
 import {
-  executionPrincipalForScope,
+  executionPrincipalForVisibility,
   executionPrincipalPersonId,
 } from "./principal"
 
-test("maps audience scope to a matching execution principal", () => {
+test("maps visibility to a matching execution principal", () => {
   const personId = "person" as Id<"persons">
 
-  expect(executionPrincipalForScope("personal", personId)).toEqual({
-    kind: "person",
-    personId,
-  })
-  expect(executionPrincipalForScope("organization", personId)).toEqual({
-    kind: "organization",
-  })
-  expect(() => executionPrincipalForScope("personal", undefined)).toThrow(
-    "requires a person"
-  )
+  expect(
+    executionPrincipalForVisibility({ mode: "private" }, personId)
+  ).toEqual({ kind: "person", personId })
+  expect(
+    executionPrincipalForVisibility({ mode: "organization" }, personId)
+  ).toEqual({ kind: "organization" })
+  expect(
+    executionPrincipalForVisibility(
+      { mode: "teams", teamIds: ["t1"] },
+      personId
+    )
+  ).toEqual({ kind: "organization" })
+  expect(() =>
+    executionPrincipalForVisibility({ mode: "private" }, undefined)
+  ).toThrow("requires a person")
 })
 
 test("only person principals resolve a person identity", () => {

@@ -101,7 +101,7 @@ function automation(
     createdBy: "person" as Id<"persons">,
     createdAt: 0,
     updatedAt: 0,
-    scope: "personal",
+    visibility: { mode: "private" },
     ...overrides,
   }
 }

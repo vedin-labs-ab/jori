@@ -5,11 +5,11 @@ import {
   stringProperty,
 } from "../fragments/common"
 
-const storeScopeProperty = {
+const storeVisibilityProperty = {
   type: "string",
-  enum: ["personal", "organization"],
+  enum: ["private", "organization"],
   description:
-    "Personal stores are owner-only. Organization stores are visible to organization members. Defaults to organization.",
+    "Private stores are owner-only. Organization stores are visible to organization members. Defaults to organization.",
 }
 
 const storeIdProperty = stringProperty("Jori store ID.")
@@ -30,7 +30,7 @@ export const storeToolInputSchemas = {
     properties: {
       name: stringProperty("Short store name."),
       description: stringProperty("What the store holds and who reads it."),
-      scope: storeScopeProperty,
+      visibility: storeVisibilityProperty,
       schema: {
         type: "object",
         additionalProperties: true,

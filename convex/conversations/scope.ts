@@ -1,9 +1,9 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { type AudienceScope } from "../shared/audience"
+import { type Audience } from "../shared/audience"
 
 export type ConversationAudience = {
   conversationId: Id<"conversations">
-  scope: AudienceScope
+  audience: Audience
 }
 
 export function conversationAudience(
@@ -11,7 +11,7 @@ export function conversationAudience(
 ): ConversationAudience {
   return {
     conversationId: conversation._id,
-    scope: conversation.scope,
+    audience: conversation.scope,
   }
 }
 
@@ -19,12 +19,12 @@ export function conversationAudience(
 // conversations are always shareable; anything narrower may only surface in a
 // run that is scoped to the very person being contextualized.
 export function canIncludeRecentConversation(args: {
-  candidateScope: AudienceScope
-  currentScope: AudienceScope | undefined
+  candidateAudience: Audience
+  currentAudience: Audience | undefined
   personal: boolean
 }) {
   return (
-    args.candidateScope === "organization" ||
-    (args.currentScope === "person" && args.personal)
+    args.candidateAudience === "organization" ||
+    (args.currentAudience === "person" && args.personal)
   )
 }

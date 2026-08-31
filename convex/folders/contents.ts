@@ -2,7 +2,6 @@ import { type VisibilityMode } from "../../contracts/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { canSeeAutomation } from "../automations/access"
 import { type QueryLikeCtx } from "../shared/context"
-import { readVisibility } from "../visibility/schema"
 import { createSight, type Sight } from "../visibility/sight"
 import { filedTables } from "./filing"
 import { summarizeFolder, treeCap } from "./tree"
@@ -190,7 +189,7 @@ async function folderCollections(
         type: row.kind === "table" ? "table" : "store",
         id: row._id,
         name: row.name,
-        visibility: readVisibility(row).mode,
+        visibility: row.visibility.mode,
         updatedAt: row.updatedAt,
       })
     }
@@ -216,7 +215,7 @@ async function folderFiles(
         type: "file",
         id: row._id,
         name: row.name,
-        visibility: readVisibility(row).mode,
+        visibility: row.visibility.mode,
         updatedAt: row.updatedAt,
         mimeType: row.mimeType,
         size: row.size,
@@ -244,7 +243,7 @@ async function folderAutomations(
         type: "automation",
         id: row._id,
         name: row.name,
-        visibility: readVisibility(row).mode,
+        visibility: row.visibility.mode,
         updatedAt: row.updatedAt,
         status: row.status,
       })

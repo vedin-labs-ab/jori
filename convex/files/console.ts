@@ -10,7 +10,7 @@ import { requireOrganizationAccess } from "../access"
 import { requireUserId } from "../access/users"
 import { resolvePersonByIdentity } from "../persons/identity/links"
 import { personDisplay } from "../persons/names"
-import { readVisibility, visibilityValidator } from "../visibility/schema"
+import { visibilityValidator } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
 import { canViewFile, type FileViewer, visibleFiles } from "./data"
 import {
@@ -166,7 +166,7 @@ export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
     name: file.name,
     mimeType: file.mimeType,
     size: file.size,
-    visibility: readVisibility(file),
+    visibility: file.visibility,
     folderId: file.folderId,
     source: file.runId === undefined ? ("upload" as const) : ("run" as const),
     runId: file.runId,

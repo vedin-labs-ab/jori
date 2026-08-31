@@ -197,7 +197,7 @@ function automation(
     organizationId: "organization",
     name: "Automation",
     instructions: "Do the work.",
-    scope: "personal",
+    visibility: { mode: "private" },
     principal: input.principal ?? {
       kind: "person",
       personId: "person" as Id<"persons">,

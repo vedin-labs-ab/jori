@@ -1,12 +1,11 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { automationScope } from "../automations/access"
 import { conversationAudience } from "../conversations/scope"
-import { type AudienceScope } from "../shared/audience"
-import { runAudienceScope } from "./scope"
+import { type Audience } from "../shared/audience"
+import { executesAsOrganization } from "./principal"
 
 export type RunAudience = {
-  scope: AudienceScope
+  audience: Audience
   conversationId?: Id<"conversations">
 }
 
@@ -41,7 +40,7 @@ export async function resolveRunAudience(
     return automationAudience(args.origin.automation)
   }
 
-  return { scope: "person" }
+  return { audience: "person" }
 }
 
 async function resolveParentAudience(
@@ -59,13 +58,15 @@ async function resolveParentAudience(
   }
 
   return {
-    scope: runAudienceScope(parent),
+    audience: parent.audience,
     conversationId: parent.conversationId,
   }
 }
 
+/** An automation that executes as the organization reaches everyone; one
+ *  that executes as its person stays that person's. */
 function automationAudience(automation: Doc<"automations">): RunAudience {
-  return automationScope(automation) === "organization"
-    ? { scope: "organization" }
-    : { scope: "person" }
+  return executesAsOrganization(automation.visibility)
+    ? { audience: "organization" }
+    : { audience: "person" }
 }

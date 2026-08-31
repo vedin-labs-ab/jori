@@ -1,6 +1,5 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { scopeValidator } from "../shared/audience"
 import { visibilityValidator } from "../visibility/schema"
 
 // One storage core for schema-validated, versioned JSON documents. A table
@@ -10,14 +9,9 @@ import { visibilityValidator } from "../visibility/schema"
 // validator covers both.
 
 /** One typed column; mirrors contracts/tables/columns.ts. `id` is the
- *  hidden identifier rows key their values by; it is optional (and the
- *  legacy `key` lingers) only until the one-shot migration in
- *  convex/tables/migrate.ts stamps every stored column, after which `id`
- *  tightens to required and `key` disappears. Reads go through
- *  readStoredColumns meanwhile. */
+ *  hidden identifier rows key their values by, never shown in the product. */
 const tableColumn = v.object({
-  id: v.optional(v.string()),
-  key: v.optional(v.string()),
+  id: v.string(),
   name: v.string(),
   type: v.union(
     v.literal("boolean"),
@@ -30,10 +24,8 @@ const tableColumn = v.object({
 
 const collectionFields = {
   organizationId: v.string(),
-  /** Who may see the collection; read via visibility/schema.readVisibility. */
-  visibility: v.optional(visibilityValidator),
-  /** Legacy binary scope, mapped and cleared by visibility/migrate.ts. */
-  scope: v.optional(scopeValidator),
+  /** Who may see the collection (see visibility/sight). */
+  visibility: visibilityValidator,
   ownerId: v.optional(v.id("persons")),
   /** Filing; ancestor folders also gate visibility (see visibility/sight). */
   folderId: v.optional(v.id("folders")),

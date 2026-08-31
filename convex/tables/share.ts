@@ -1,6 +1,5 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { readStoredColumns } from "../../contracts/tables/columns"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import {
@@ -92,7 +91,7 @@ export const get = query({
     return {
       name: opened.table.name,
       description: opened.table.description,
-      columns: readStoredColumns(opened.table.columns),
+      columns: opened.table.columns,
       access: opened.read.access,
       expiresAt:
         opened.read.access === "share" ? opened.read.expiresAt : undefined,
