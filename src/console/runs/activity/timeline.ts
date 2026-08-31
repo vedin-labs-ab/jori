@@ -24,6 +24,16 @@ export type ActivityTimelineEntry =
       type: "tool-group"
     }
 
+// A running run ticks its clock every second, and a timeline holds up to
+// five hundred entries. Only a live entry reads the clock at all, so a
+// settled one is handed a fixed value its memoized row can compare against:
+// the tick then re-renders the one row whose duration is actually counting.
+export function entryClock(entry: ActivityTimelineEntry, now: number) {
+  const isLive = entry.type === "tool-group" ? entry.isLive : entry.item.isLive
+
+  return isLive === true ? now : 0
+}
+
 export function createActivityTimeline(items: ActivityItem[]) {
   const entries: ActivityTimelineEntry[] = []
   let toolGroup: ActivityItem[] = []

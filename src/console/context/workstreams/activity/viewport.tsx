@@ -144,14 +144,21 @@ function useSynchronizedHorizontalScroll() {
     const progress = sourceMaximum === 0 ? 0 : source.scrollLeft / sourceMaximum
     pinned.current = sourceMaximum - source.scrollLeft <= 2
 
-    for (const target of scrollNodes(
-      workstreamsRef.current,
-      footerRef.current
-    )) {
-      const scrollLeft = progress * maximumScroll(target)
+    // Every geometry read happens before the first write. Writing a
+    // scrollLeft dirties the scroll state that the next read asks for, so
+    // interleaving the two makes the browser settle layout once per node
+    // on a handler that runs on every frame of a drag.
+    const moves = scrollNodes(workstreamsRef.current, footerRef.current)
+      .filter((target) => target !== source)
+      .map((target) => ({
+        current: target.scrollLeft,
+        next: progress * maximumScroll(target),
+        target,
+      }))
 
-      if (target !== source && Math.abs(target.scrollLeft - scrollLeft) > 1) {
-        target.scrollLeft = scrollLeft
+    for (const move of moves) {
+      if (Math.abs(move.current - move.next) > 1) {
+        move.target.scrollLeft = move.next
       }
     }
   }

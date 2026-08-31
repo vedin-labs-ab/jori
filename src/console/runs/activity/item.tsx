@@ -1,6 +1,6 @@
 import { integrationLabel } from "@contracts/integrations"
 import { ChevronDown, FileText, Search, Send, SmilePlus } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { memo, type ReactNode, useMemo, useState } from "react"
 import { cn } from "@/lib/utils"
 import {
   Task,
@@ -23,7 +23,11 @@ import {
   ActivitySurfaceDescription,
   TimelineRow,
 } from "./row"
-import { type ActivityTimelineEntry, createActivityTimeline } from "./timeline"
+import {
+  type ActivityTimelineEntry,
+  createActivityTimeline,
+  entryClock,
+} from "./timeline"
 import { ActivityToolMetadata } from "./tool/metadata"
 import { type ActivityItem as ActivityItemType } from "./types"
 import { ActivityTokenUsage } from "./usage"
@@ -36,7 +40,7 @@ export function ActivityTimeline({
   items: ActivityItemType[]
   now: number
 }) {
-  const entries = createActivityTimeline(items)
+  const entries = useMemo(() => createActivityTimeline(items), [items])
 
   return (
     <ol className="grid min-w-0">
@@ -46,14 +50,14 @@ export function ActivityTimeline({
           isFirst={index === 0}
           isLast={index === entries.length - 1}
           key={entry.id}
-          now={now}
+          now={entryClock(entry, now)}
         />
       ))}
     </ol>
   )
 }
 
-function ActivityTimelineRow({
+const ActivityTimelineRow = memo(function ActivityTimelineRow({
   entry,
   isFirst,
   isLast,
@@ -78,7 +82,7 @@ function ActivityTimelineRow({
       now={now}
     />
   )
-}
+})
 
 export function ActivityItem({
   isFirst = true,
