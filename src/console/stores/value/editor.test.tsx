@@ -177,12 +177,14 @@ describe("value editor no-op saves", () => {
 })
 
 describe("value editor form and code views", () => {
-  test("the code view mirrors the form state read-only", () => {
+  test("the code view mirrors the form state read-only", async () => {
+    // The mirror is a lazy chunk, so this one waits on real time.
+    vi.useRealTimers()
     renderEditor({ title: "March", total: 2, paid: false })
     switchTab("Code")
 
+    expect(await screen.findByText(/"March"/)).toBeDefined()
     expect(screen.queryByLabelText("Store value JSON")).toBeNull()
-    expect(screen.getByText('"March"')).toBeDefined()
   })
 
   test("editable code with broken JSON refuses the form view", () => {

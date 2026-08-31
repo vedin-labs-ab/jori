@@ -14,7 +14,9 @@ import { type FileDocument, useDocument } from "./document"
 /** CodeMirror loads only when a text file is actually on screen, keeping
  *  it out of the main bundle and the server build. */
 const Mirror = lazy(() =>
-  import("./mirror").then((module) => ({ default: module.Mirror }))
+  import("../../shared/mirror/view").then((module) => ({
+    default: module.Mirror,
+  }))
 )
 
 /** In-place editor for a text file: the content fills the page under the
