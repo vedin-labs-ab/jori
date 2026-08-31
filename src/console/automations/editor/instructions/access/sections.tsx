@@ -1,5 +1,5 @@
+import { canUseAutomationTool } from "@contracts/permissions"
 import { useId, useState } from "react"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -13,10 +13,7 @@ import {
 } from "@/console/shared/tools"
 import { cn } from "@/lib/utils"
 import { type ToolPermission } from "../../../../permissions/types"
-import {
-  automationToolModeDescription,
-  isAutomationToolSelectable,
-} from "../../../access/policy"
+import { automationToolModeDescription } from "../../../access"
 import {
   ToolReferencesLoader,
   ToolSchemaButton,
@@ -62,7 +59,7 @@ export function AutomationSurfaceToolGroups({
     const nextTools = new Set(selectedTools)
 
     for (const permission of groupTools) {
-      if (enabled && isAutomationToolSelectable(permission)) {
+      if (enabled && canUseAutomationTool(permission)) {
         nextTools.add(permission.tool)
         continue
       }
@@ -133,7 +130,7 @@ function EditableToolGroup({
   pendingSchemaTool: string | undefined
   selectedTools: Set<string>
 }) {
-  const selectableTools = group.tools.filter(isAutomationToolSelectable)
+  const selectableTools = group.tools.filter(canUseAutomationTool)
   const selectedCount = selectableTools.filter((permission) =>
     selectedTools.has(permission.tool)
   ).length
@@ -191,7 +188,7 @@ function EditableToolRow({
 }) {
   const checkboxId = useId()
   const descriptionId = `${checkboxId}-description`
-  const selectable = isAutomationToolSelectable(permission)
+  const selectable = canUseAutomationTool(permission)
   const disabled = !selectable && !selected
 
   return (

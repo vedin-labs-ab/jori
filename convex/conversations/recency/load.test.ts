@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../../_generated/dataModel"
+import { id } from "../../../test/convex/database"
+import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { loadRecentActivity, type RecencyRun } from "./load"
 
@@ -261,10 +262,6 @@ function sortRows(rows: Row[], direction: "asc" | "desc") {
   )
 
   return direction === "desc" ? sorted.reverse() : sorted
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }
 
 type Filter = {

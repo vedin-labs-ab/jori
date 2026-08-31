@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type Doc, type Id, type TableNames } from "../../_generated/dataModel"
+import { id } from "../../../test/convex/database"
+import { type Doc } from "../../_generated/dataModel"
 import { projectModelTraces } from "./model"
 
 test("projects token usage for completed model steps", () => {
@@ -107,8 +108,4 @@ function trace(
     organizationId: "organization",
     ...overrides,
   } as Doc<"traces">
-}
-
-function id<TableName extends TableNames>(value: string) {
-  return value as Id<TableName>
 }

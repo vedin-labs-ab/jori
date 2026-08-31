@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { id } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveRunAudience } from "./audience"
@@ -72,10 +73,4 @@ function automation(
     updatedAt: 0,
     scope,
   }
-}
-
-function id<TableName extends "automations" | "conversations" | "integrations">(
-  value: string
-) {
-  return value as Id<TableName>
 }

@@ -1,5 +1,4 @@
 import { v } from "convex/values"
-import { type Id } from "../_generated/dataModel"
 import { internalQuery } from "../_generated/server"
 import { integrationValidator } from "../shared/integrations"
 import {
@@ -23,7 +22,7 @@ export const listActiveForRuntime = internalQuery({
   },
   handler: async (ctx, args) => {
     return await listActiveIntegrationsForOwner(ctx, {
-      ownerId: args.ownerId as Id<"persons"> | undefined,
+      ownerId: args.ownerId,
       organizationId: args.organizationId,
     })
   },

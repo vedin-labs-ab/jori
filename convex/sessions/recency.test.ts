@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
+import { id } from "../../test/convex/database"
+import { type DataModel, type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { emitRecencyContexts } from "./recency"
 
@@ -262,7 +263,3 @@ type QueryFilter = {
 
 type Row = Record<string, unknown>
 type Seed = [keyof DataModel & string, Row]
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
-}

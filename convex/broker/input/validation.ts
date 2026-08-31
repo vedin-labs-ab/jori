@@ -243,7 +243,7 @@ function validateString(value: unknown, schema: JsonSchema, path: string) {
   }
 }
 
-function isJsonObject(value: unknown): value is JsonObject {
+export function isJsonObject(value: unknown): value is JsonObject {
   return isJsonSchema(value)
 }
 const hasOwn = Object.hasOwn

@@ -5,7 +5,6 @@ import {
   getRuntimeSkill,
   listRuntimeSkills,
   type RuntimeSkill,
-  runtimeSkillAssociatedIntegrations,
 } from "./runtime"
 
 type JoriSkillRun = {
@@ -53,7 +52,7 @@ export function loadJoriSkillTool(
       name: skill.name,
       category: skill.category,
       description: skill.description,
-      associatedIntegrations: runtimeSkillAssociatedIntegrations(skill),
+      associatedIntegrations: skill.associatedIntegrations,
       instructions: skill.body,
     },
   }
@@ -64,7 +63,7 @@ function skillMetadata(skills: readonly RuntimeSkill[]) {
     name: skill.name,
     category: skill.category,
     description: skill.description,
-    associatedIntegrations: runtimeSkillAssociatedIntegrations(skill),
+    associatedIntegrations: skill.associatedIntegrations,
   }))
 }
 

@@ -14,10 +14,9 @@ import { shortDate } from "../../../shared/time"
 import { ContextTitleCount } from "../../section"
 import { type Workstream, type Workstreams } from "../types"
 import { PulseFooter, PulseShell, PulseSkeleton } from "./lane"
-import { buildPulse } from "./series"
+import { buildPulse, type PulseDays } from "./series"
 import { PulseViewport } from "./viewport"
 
-type PulseDays = 14 | 30 | 60
 type PulseData = NonNullable<
   FunctionReturnType<typeof api.workstreams.pulse.read>
 >

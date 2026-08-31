@@ -1,5 +1,5 @@
 import { defineTable } from "convex/server"
-import { type Infer, v } from "convex/values"
+import { v } from "convex/values"
 
 // One row per integration import: status, cursor, and ledger in one place,
 // mirroring how deduction passes carry their own bookkeeping. Cursors are
@@ -16,7 +16,6 @@ const linearCursor = v.object({
 })
 
 export const backfillCursor = v.union(githubCursor, linearCursor)
-export type BackfillCursor = Infer<typeof backfillCursor>
 
 const backfillStatus = v.union(
   v.literal("running"),

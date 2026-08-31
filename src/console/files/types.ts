@@ -8,5 +8,3 @@ export type FileRow = NonNullable<
 export type FileDetail = NonNullable<
   NonNullable<ReturnType<typeof useQuery<typeof api.files.console.get>>>["file"]
 >
-
-export { formatFileSize } from "@/shared/materials/size"

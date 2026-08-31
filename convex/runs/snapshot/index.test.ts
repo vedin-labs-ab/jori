@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Id } from "../../_generated/dataModel"
+import { id } from "../../../test/convex/database"
+import { type Id } from "../../_generated/dataModel"
 import {
   createAutomationRunSnapshot,
   createInstructionRunSnapshot,
@@ -141,8 +142,4 @@ function message(
     data,
     createdAt: 0,
   }
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }

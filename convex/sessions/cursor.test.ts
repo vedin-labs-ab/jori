@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
+import { id } from "../../test/convex/database"
+import { type Doc } from "../_generated/dataModel"
 import { collectPendingBatch, formatRuntimeMessage } from "./cursor"
 
 test("advances the cursor across non-text messages", () => {
@@ -127,8 +128,4 @@ function message(
     createdAt: storedAt,
     ...overrides,
   }
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }

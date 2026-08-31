@@ -34,6 +34,8 @@ type PulseEntry = {
 
 export const pulseDayCount = 14
 
+export type PulseDays = 14 | 30 | 60
+
 // The activity strip's read model: one column per calendar day ending today,
 // one lane per workstream with in-window entries, and a final lane for
 // entries whose effort is not yet placed (workstreamId null). Quiet lanes

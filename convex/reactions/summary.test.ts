@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Doc, type Id } from "../_generated/dataModel"
+import { id } from "../../test/convex/database"
+import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { reactionSummariesForMessages } from "./summary"
 
@@ -123,10 +124,6 @@ function reaction(
     updatedAt: 0,
     createdAt: 0,
   }
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }
 
 type QueryFilter = {

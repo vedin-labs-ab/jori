@@ -21,7 +21,7 @@ export async function resolveSubtaskAccess(
     tools?: readonly string[]
   }
 ): Promise<Access | undefined> {
-  const parentAccess = await parentRunAccess(ctx, args.parent)
+  const parentAccess = args.parent.access
 
   if (args.tools === undefined) {
     return parentAccess
@@ -39,14 +39,6 @@ export async function resolveSubtaskAccess(
       .filter((entry) => entry.tools.length > 0),
     web: (parentAccess?.web ?? true) && args.tools.some(isWebTool),
   }
-}
-
-/** Every constrained run carries its immutable contract on the run. */
-async function parentRunAccess(
-  _ctx: QueryLikeCtx,
-  parent: Doc<"runs">
-): Promise<Access | undefined> {
-  return parent.access
 }
 
 /**

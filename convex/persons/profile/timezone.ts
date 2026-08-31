@@ -35,16 +35,3 @@ export async function readPersonTimezone(
 
   return person?.timezone ?? null
 }
-
-export async function requirePersonTimezone(
-  ctx: QueryLikeCtx,
-  personId: Id<"persons">
-) {
-  const timezone = await readPersonTimezone(ctx, personId)
-
-  if (timezone === null) {
-    throw new Error("Your timezone is required for recurring automations.")
-  }
-
-  return timezone
-}

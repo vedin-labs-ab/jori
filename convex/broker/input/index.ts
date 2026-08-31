@@ -1,9 +1,6 @@
 import { type JsonObject } from "../../../contracts/json"
-import {
-  getToolInputSchema,
-  isJsonSchema,
-} from "../../runs/agent/tools/schemas"
-import { validateSchemaValue } from "./validation"
+import { getToolInputSchema } from "../../runs/agent/tools/schemas"
+import { isJsonObject, validateSchemaValue } from "./validation"
 
 export function normalizeBrokerToolInput(
   tool: string,
@@ -64,8 +61,4 @@ function slackTimestampFields(tool: string) {
     default:
       return []
   }
-}
-
-function isJsonObject(value: unknown): value is JsonObject {
-  return isJsonSchema(value)
 }

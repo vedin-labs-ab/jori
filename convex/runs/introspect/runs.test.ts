@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { id } from "../../../test/convex/database"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { loadCandidateRuns, type SearchRunArgs } from "./runs"
@@ -104,8 +105,4 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     organizationId: "organization",
     ...overrides,
   }
-}
-
-function id<TableName extends "conversations" | "runs">(value: string) {
-  return value as Id<TableName>
 }

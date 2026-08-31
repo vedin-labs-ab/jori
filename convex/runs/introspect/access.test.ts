@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { id } from "../../../test/convex/database"
+import { type Doc } from "../../_generated/dataModel"
 import { canSee } from "./access"
 
 test("allows organization runs and only matching private buckets", () => {
@@ -60,10 +61,4 @@ function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
     organizationId: "organization",
     ...overrides,
   }
-}
-
-function id<TableName extends "conversations" | "persons" | "runs">(
-  value: string
-) {
-  return value as Id<TableName>
 }

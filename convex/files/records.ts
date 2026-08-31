@@ -1,6 +1,7 @@
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveCreationFolder } from "../folders/tree"
+import { type QueryLikeCtx } from "../shared/context"
 import { optionalString, requiredString } from "../shared/input"
 import {
   normalizeStoredVisibility,
@@ -113,7 +114,7 @@ export async function removeFileWithBlob(
 }
 
 export async function requireViewableFile(
-  ctx: MutationCtx,
+  ctx: QueryLikeCtx,
   viewer: FileViewer,
   fileId: Id<"files">
 ) {

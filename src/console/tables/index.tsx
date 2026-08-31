@@ -41,19 +41,6 @@ export function TablesPage() {
   )
 }
 
-function useTableRows(organizationId: string, query: string) {
-  const tableList = useQuery(api.tables.console.list, {
-    organizationId,
-    query,
-    includeArchived: false,
-  })
-
-  return {
-    tableList,
-    rows: tableList?.status === "ready" ? tableList.tables : [],
-  }
-}
-
 /** One bag of page state, so the view and its overlays stay small. */
 function useTablesPage(organizationId: string) {
   const [query, setQuery] = useState("")
@@ -62,7 +49,12 @@ function useTablesPage(organizationId: string) {
   const removal = useTableRemoval(organizationId)
   const folders = useFolderNames(organizationId)
   const deferredQuery = useDeferredValue(query)
-  const { tableList, rows } = useTableRows(organizationId, deferredQuery)
+  const tableList = useQuery(api.tables.console.list, {
+    organizationId,
+    query: deferredQuery,
+    includeArchived: false,
+  })
+  const rows = tableList?.status === "ready" ? tableList.tables : []
   const config = tableListConfig(folders, rows)
   const controls = useListControls(config)
   const tables = controls.apply(rows)

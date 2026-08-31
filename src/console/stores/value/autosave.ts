@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 // editor's rhythm: edits schedule a save, validation gates every write,
 // and the toolbar meta carries the status instead of explicit buttons.
 
-export type ValueSaveStatus = "idle" | "saving" | "saved" | "error"
+import { type SaveState } from "../../shared/materials/save"
 
 /** What one save attempt came to. Invalid drafts surface their inline
  *  errors and simply don't write; conflicts toast and reseed upstream. */
@@ -26,7 +26,7 @@ type Loop = {
 /** Drives the debounced save loop. `perform` is read through a ref so the
  *  latest editor state is always the one validated and written. */
 export function useValueAutosave(perform: () => Promise<ValueSaveOutcome>) {
-  const [status, setStatus] = useState<ValueSaveStatus>("idle")
+  const [status, setStatus] = useState<SaveState>("idle")
   const performRef = useRef(perform)
   const loopRef = useRef<Loop>({
     inFlight: false,

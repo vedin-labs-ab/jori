@@ -1,9 +1,6 @@
 import { expect, test } from "vitest"
-import {
-  type DataModel,
-  type Doc,
-  type Id,
-} from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
+import { type Doc } from "../../../_generated/dataModel"
 import { githubReactionTarget } from "./targets"
 
 test("builds GitHub review comment reaction targets", () => {
@@ -77,8 +74,4 @@ function message(data: Record<string, unknown>): Doc<"messages"> {
     },
     createdAt: 0,
   }
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }

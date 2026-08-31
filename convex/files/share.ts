@@ -19,6 +19,7 @@ import {
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
 import { canViewFile } from "./data"
+import { requireViewableFile } from "./records"
 
 export const mint = internalMutation({
   args: {
@@ -54,7 +55,11 @@ export const revoke = mutation({
   },
   handler: async (ctx, args): Promise<null> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
-    const file = await getViewableFile(ctx, { ...args, personId })
+    const file = await requireViewableFile(
+      ctx,
+      { ...args, personId },
+      args.fileId
+    )
 
     await revokeShare(ctx, {
       target: fileTarget(file._id),
@@ -74,7 +79,11 @@ export const page = query({
   },
   handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
-    const file = await getViewableFile(ctx, { ...args, personId })
+    const file = await requireViewableFile(
+      ctx,
+      { ...args, personId },
+      args.fileId
+    )
 
     return await pageShares(ctx, fileTarget(file._id), args.paginationOpts)
   },
@@ -116,7 +125,7 @@ export async function mintFileShare(
     expiresInHours?: number
   }
 ): Promise<MintedShare> {
-  const file = await getViewableFile(ctx, args)
+  const file = await requireViewableFile(ctx, args, args.fileId)
 
   return await mintShare(ctx, {
     target: fileTarget(file._id),
@@ -153,29 +162,6 @@ export async function openFileShare(
   })
 
   return read === null ? null : { file, read }
-}
-
-async function getViewableFile(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    fileId: Id<"files">
-    personId: Id<"persons">
-  }
-) {
-  const file = await ctx.db.get(args.fileId)
-
-  if (
-    file === null ||
-    !(await canViewFile(ctx, file, {
-      organizationId: args.organizationId,
-      personId: args.personId,
-    }))
-  ) {
-    throw new Error("File was not found")
-  }
-
-  return file
 }
 
 function fileTarget(fileId: Id<"files">): ShareTarget {

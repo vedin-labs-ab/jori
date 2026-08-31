@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { type DataModel, type Id } from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
 import { type MutationCtx } from "../../../_generated/server"
 import {
   claimReusableSandbox,
@@ -190,10 +190,6 @@ function sandbox(overrides: Record<string, unknown>) {
     conversationId: id<"conversations">("conversation-1"),
     ...overrides,
   }
-}
-
-function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }
 
 function rowTable(row: Record<string, unknown>, table: string) {

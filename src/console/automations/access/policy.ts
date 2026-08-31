@@ -1,14 +1,9 @@
+import { canUseAutomationTool } from "@contracts/permissions"
 import { type ToolPermission } from "../../permissions/types"
 import {
   type AutomationSurfaceFormValue,
   getAutomationSurfaceLabel,
 } from "./catalog"
-import { isAutomationToolSelectable } from "./tools"
-
-export {
-  automationToolModeDescription,
-  isAutomationToolSelectable,
-} from "./tools"
 
 export type AutomationPolicyPermissions = ToolPermission[] | null | undefined
 
@@ -74,7 +69,7 @@ export function isAutomationSurfacePolicyBlocked({
     return (
       permission === undefined ||
       permission.surface !== surface.integration ||
-      !isAutomationToolSelectable(permission)
+      !canUseAutomationTool(permission)
     )
   })
 }

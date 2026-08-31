@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { formatFileSize } from "@/shared/materials/size"
 import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
 import {
   facetEntries,
@@ -23,7 +24,7 @@ import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { FileNameCell, FileOwnerCell, FileTypeCell } from "./cells"
 import { FileMenu } from "./menu"
-import { type FileRow, formatFileSize } from "./types"
+import { type FileRow } from "./types"
 
 export function FileTable({
   config,

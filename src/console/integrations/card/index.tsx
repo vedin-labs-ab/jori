@@ -1,11 +1,9 @@
 import { ExternalLink, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import {
-  type ToolPermissionController,
-  type ToolSurface,
-} from "../../permissions/controller"
+import { type ToolPermissionController } from "../../permissions/controller"
 import { PermissionSection } from "../../permissions/section"
+import { type ToolSurface } from "../../permissions/types"
 import { RevealArrow } from "../../shared/dot"
 import { DisconnectDialog } from "../disconnect"
 import { useIntegrationDisconnect } from "../disconnect/controller"

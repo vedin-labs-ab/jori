@@ -2,10 +2,9 @@ import { type ReactNode } from "react"
 import { countLabel } from "@/lib/count"
 import { SeparatorDot } from "../../shared/dot"
 import { ConsoleListToolbar } from "../../shared/list/frame"
-import { SaveMeta } from "../../shared/materials/save"
+import { SaveMeta, type SaveState } from "../../shared/materials/save"
 import { StoreOwnerCell } from "../cells"
 import { type StoreDetail } from "../types"
-import { type ValueSaveStatus } from "./autosave"
 
 /** Secondary header under the console breadcrumb, in the file toolbar's
  *  idiom: quiet store meta on the left, the value tools on the right. It
@@ -18,7 +17,7 @@ export function StoreToolbar({
 }: {
   /** The value editor's autosave state: shimmers the Updated label while
    *  a save is in flight and surfaces a brief check once it lands. */
-  saveStatus?: ValueSaveStatus
+  saveStatus?: SaveState
   store: StoreDetail
   tools: ReactNode
 }) {
@@ -40,7 +39,7 @@ function StoreMeta({
   saveStatus,
   store,
 }: {
-  saveStatus?: ValueSaveStatus
+  saveStatus?: SaveState
   store: StoreDetail
 }) {
   return (

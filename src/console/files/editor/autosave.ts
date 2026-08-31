@@ -8,7 +8,7 @@ import {
 
 /** What the toolbar's save indicator shows. The debounce window stays
  *  quiet ("idle"); the indicator only speaks once a save is in flight. */
-export type SaveStatus = "idle" | "saving" | "saved" | "error"
+import { type SaveState } from "../../shared/materials/save"
 
 /** How long the buffer rests after the last keystroke before it saves. */
 const saveDelay = 1200
@@ -33,14 +33,14 @@ type Loop = {
   lingerTimer: Timer | undefined
   persist: Persist
   saveTimer: Timer | undefined
-  setStatus: Dispatch<SetStateAction<SaveStatus>>
+  setStatus: Dispatch<SetStateAction<SaveState>>
 }
 
 /** Debounced autosave: edits schedule a save of the newest buffer, failed
  *  saves keep the buffer and retry on a timer, and `flush` pushes pending
  *  edits out immediately. Unmount and tab close flush best-effort. */
 export function useAutosave(persist: Persist) {
-  const [status, setStatus] = useState<SaveStatus>("idle")
+  const [status, setStatus] = useState<SaveState>("idle")
   const loopRef = useRef<Loop | null>(null)
   loopRef.current ??= {
     draft: null,
