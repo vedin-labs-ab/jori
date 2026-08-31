@@ -234,7 +234,7 @@ function ValueBody({
 
   return (
     <ConsoleListContent>
-      <div className="grid gap-1.5">
+      <div className="grid gap-2">
         <Textarea
           aria-label="Store value JSON"
           className="min-h-64 font-mono text-xs"

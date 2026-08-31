@@ -96,7 +96,7 @@ function AddDomainForm({
 }) {
   return (
     <form
-      className="grid justify-items-end gap-1.5"
+      className="grid justify-items-end gap-2"
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()
