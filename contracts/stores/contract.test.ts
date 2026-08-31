@@ -32,10 +32,19 @@ describe("normalizeStoreSchema", () => {
     ).toThrow("unsupported type")
   })
 
+  test("rejects a schema that names no properties", () => {
+    expect(() => normalizeStoreSchema({ type: "object" })).toThrow(
+      "at least one property"
+    )
+    expect(() =>
+      normalizeStoreSchema({ type: "object", properties: {} })
+    ).toThrow("at least one property")
+  })
+
   test("caps schema size", () => {
     expect(() =>
       normalizeStoreSchema({
-        type: "object",
+        ...schema,
         description: "x".repeat(storeLimits.maxSchemaBytes),
       })
     ).toThrow("exceeds")

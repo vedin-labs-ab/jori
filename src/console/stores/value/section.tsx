@@ -1,4 +1,4 @@
-import { Braces, Database } from "lucide-react"
+import { Braces, Database, Plus } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -128,7 +128,7 @@ function ReadOnlyValue({
     <ConsoleEmptyState
       action={
         <Button onClick={onAddSchema} type="button">
-          <Braces />
+          <Plus />
           Add schema
         </Button>
       }

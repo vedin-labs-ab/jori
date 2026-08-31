@@ -50,13 +50,8 @@ function renderDialog(store: StoreDetail, onOpenChange = () => undefined) {
   )
 }
 
-// Radix tabs select on mousedown, not click.
-function switchTab(name: "Code" | "Form") {
-  fireEvent.mouseDown(screen.getByRole("tab", { name }), { button: 0 })
-}
-
 describe("seeding from the store", () => {
-  test("an existing schema loads into the form view", () => {
+  test("an existing schema loads into the builder", () => {
     renderDialog(schemaStore)
 
     const nameInput = screen.getByLabelText("Field name") as HTMLInputElement
@@ -66,27 +61,30 @@ describe("seeding from the store", () => {
     expect(screen.getByRole("switch").getAttribute("aria-checked")).toBe("true")
   })
 
-  test("a schema the form cannot hold opens as code with a note", () => {
+  test("a schema the builder cannot hold reads without editing", () => {
     renderDialog({
       ...schemaStore,
-      schema: { type: "object", additionalProperties: false },
+      schema: {
+        type: "object",
+        properties: { mode: { enum: ["fast", "slow"] } },
+      },
     } as StoreDetail)
 
-    const textarea = screen.getByRole("textbox", {
-      name: "Schema",
-    }) as HTMLTextAreaElement
-
-    expect(JSON.parse(textarea.value)).toEqual({
-      type: "object",
-      additionalProperties: false,
-    })
-    expect(screen.getByText(/features the form view cannot edit/)).toBeDefined()
+    expect(screen.queryByLabelText("Field name")).toBeNull()
+    expect(screen.getByText(/the builder cannot edit/)).toBeDefined()
+    expect(
+      screen
+        .getByRole("button", { name: "Save schema" })
+        .hasAttribute("disabled")
+    ).toBe(true)
+    expect(screen.getByRole("button", { name: "Remove schema" })).toBeDefined()
   })
 
-  test("a store without a schema opens the add flow", () => {
+  test("a store without a schema opens the add flow, empty", () => {
     renderDialog(bareStore)
 
     expect(screen.getByText("Add schema", { selector: "h2" })).toBeDefined()
+    expect(screen.getByText("No fields yet")).toBeDefined()
     expect(screen.queryByRole("button", { name: "Remove schema" })).toBeNull()
   })
 })
@@ -108,17 +106,24 @@ describe("saving the schema", () => {
     })
   })
 
-  test("code-view errors block the save inline", () => {
+  test("a schema with no fields cannot be saved at all", () => {
     renderDialog(bareStore)
-    switchTab("Code")
-    fireEvent.change(screen.getByLabelText("Schema"), {
-      target: { value: '{ "type": "string" }' },
-    })
+
+    const save = screen.getByRole("button", { name: "Save schema" })
+
+    expect(save.hasAttribute("disabled")).toBe(true)
+
+    fireEvent.click(screen.getByRole("button", { name: "Add field" }))
+
+    expect(save.hasAttribute("disabled")).toBe(false)
+  })
+
+  test("a nameless field blocks the save inline", () => {
+    renderDialog(bareStore)
+    fireEvent.click(screen.getByRole("button", { name: "Add field" }))
     fireEvent.click(screen.getByRole("button", { name: "Save schema" }))
 
-    expect(
-      screen.getByText("Store schema must describe a JSON object.")
-    ).toBeDefined()
+    expect(screen.getByText("Give this field a name.")).toBeDefined()
     expect(writeSchema).not.toHaveBeenCalled()
   })
 

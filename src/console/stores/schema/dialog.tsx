@@ -20,9 +20,10 @@ import { useSchemaEditor } from "./state"
 
 /** View and edit the store's schema in place. The schema is an optional
  *  constraint: saving one makes every value write satisfy it, removing it
- *  lets the store accept any JSON object again. The backend refuses a
- *  schema the current value violates, and that refusal surfaces under the
- *  editor so the person can fix the value or the schema. */
+ *  lets the store accept any JSON object again. An empty schema would say
+ *  the same thing as no schema, so saving waits for a field. The backend
+ *  refuses a schema the current value violates, and that refusal surfaces
+ *  under the editor so the person can fix the value or the schema. */
 export function StoreSchemaDialog({
   onOpenChange,
   organizationId,
@@ -61,6 +62,7 @@ function SchemaDialogForm({
   const hasSchema = store.schema !== undefined
   const isArchived = store.archivedAt !== undefined
   const isSaving = save.saving !== undefined
+  const isSaveBlocked = isSaving || isArchived || !editor.canSubmit
 
   function submit() {
     const result = editor.submit()
@@ -80,8 +82,8 @@ function SchemaDialogForm({
             : "Optional: once a schema is saved, every value write must satisfy it."}
         </DialogDescription>
       </DialogHeader>
-      <DialogForm disabled={isSaving || isArchived} onSubmit={submit}>
-        <SchemaEditorSection editor={editor} idPrefix="store-schema" />
+      <DialogForm disabled={isSaveBlocked} onSubmit={submit}>
+        <SchemaEditorSection editor={editor} schema={store.schema} />
         <DialogFooter>
           {hasSchema ? (
             <Button
@@ -96,7 +98,7 @@ function SchemaDialogForm({
               Remove schema
             </Button>
           ) : null}
-          <Button disabled={isSaving || isArchived} type="submit">
+          <Button disabled={isSaveBlocked} type="submit">
             {save.saving === "save" ? (
               <Loader2 className="animate-spin" />
             ) : null}
