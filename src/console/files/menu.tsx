@@ -127,7 +127,9 @@ function DeleteFileDialog({
   return (
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>Delete "{file.name}"?</AlertDialogTitle>
+        <AlertDialogTitle className="wrap-anywhere">
+          Delete "{file.name}"?
+        </AlertDialogTitle>
         <AlertDialogDescription>
           This permanently deletes the file and its stored contents. Anything
           that references it loses access.

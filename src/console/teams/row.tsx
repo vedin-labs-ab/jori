@@ -33,7 +33,11 @@ export function TeamRow({
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{team.name}</TableCell>
+      <TableCell className="font-medium">
+        {/* Capped on an inner block: table cells ignore max-width when the
+            browser sizes auto-layout columns. */}
+        <div className="max-w-64 truncate">{team.name}</div>
+      </TableCell>
 
       <TableCell>
         <TeamRoster canManage={permissions.canManageMembers} team={team} />

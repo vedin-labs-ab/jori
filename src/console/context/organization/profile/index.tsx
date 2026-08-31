@@ -52,8 +52,8 @@ export function ContextProfile({
     <>
       <Card className="gap-0 py-0 ring-inset">
         <CardHeader className="flex flex-row items-start justify-between gap-4 p-4 pb-3 sm:p-5 sm:pb-4">
-          <div className="grid gap-1">
-            <CardTitle className="text-lg">{title}</CardTitle>
+          <div className="grid min-w-0 gap-1">
+            <CardTitle className="wrap-anywhere text-lg">{title}</CardTitle>
             <p className="text-muted-foreground text-xs/relaxed">
               {approvalDescription(profile)}
             </p>

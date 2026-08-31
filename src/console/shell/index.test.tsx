@@ -12,6 +12,13 @@ import { consoleDocumentTitle } from "./routes"
 let pathname = "/runs"
 
 vi.mock("@tanstack/react-router", async () => ({
+  // The real boundary, not a stub: containment is the one shell behaviour
+  // here that a passthrough would quietly report as working.
+  CatchBoundary: (
+    await vi.importActual<typeof import("@tanstack/react-router")>(
+      "@tanstack/react-router"
+    )
+  ).CatchBoundary,
   useRouterState: ({
     select,
   }: {
@@ -178,6 +185,24 @@ test("opens on a skip link pointing at the main element", () => {
   // Focusable only by the skip link, so the keyboard lands in the content
   // instead of scrolling to it and staying in the sidebar.
   expect(document.querySelector("main")?.getAttribute("tabindex")).toBe("-1")
+})
+
+test("keeps the sidebar and header up when the page throws", () => {
+  function Broken(): never {
+    throw new Error("Run `status` is missing")
+  }
+
+  render(
+    <ConsoleShell>
+      <Broken />
+    </ConsoleShell>
+  )
+
+  // The failure is contained: the way to another page is still on screen,
+  // so recovering costs a click rather than a full reload.
+  expect(screen.getByText("This page didn't load")).toBeDefined()
+  expect(screen.getByRole("navigation", { name: "Workspace" })).toBeDefined()
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Runs")
 })
 
 test("titles the browser tab with the page, then the product", () => {

@@ -21,7 +21,9 @@ export function DeleteSkillDialog({
   return (
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>Delete "{skill.name}"?</AlertDialogTitle>
+        <AlertDialogTitle className="wrap-anywhere">
+          Delete "{skill.name}"?
+        </AlertDialogTitle>
         <AlertDialogDescription>
           This permanently deletes the skill. Jori stops applying it to new
           runs.

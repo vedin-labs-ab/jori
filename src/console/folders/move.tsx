@@ -119,7 +119,9 @@ function MoveDialogBody({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Move {subjectName(subject)}</DialogTitle>
+        <DialogTitle className="wrap-anywhere">
+          Move {subjectName(subject)}
+        </DialogTitle>
         <DialogDescription>
           Choose the folder {isPlural(subject) ? "they" : "it"} should live in.
         </DialogDescription>

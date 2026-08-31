@@ -29,6 +29,7 @@ import {
   MaterialBreadcrumbContext,
   type MaterialBreadcrumbSegment,
 } from "../shared/materials/breadcrumb"
+import { ConsolePageBoundary } from "./boundary"
 import { ConsoleSidebar } from "./navigation"
 import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
 
@@ -85,7 +86,13 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             <ConsoleHeaderActionsProvider slot={headerSlot}>
               {/* Pages own their padding and scrolling: ConsolePageLayout
                   pads and scrolls, ConsoleListLayout runs full-bleed. */}
-              <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+              <div className="flex min-h-0 flex-1 flex-col">
+                {/* Below the chrome, so a page that throws leaves the
+                    sidebar and header standing to navigate away with. */}
+                <ConsolePageBoundary pathname={pathname}>
+                  {children}
+                </ConsolePageBoundary>
+              </div>
             </ConsoleHeaderActionsProvider>
           </MaterialBreadcrumbContext.Provider>
         </SidebarInset>

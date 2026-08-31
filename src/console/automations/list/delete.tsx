@@ -27,7 +27,9 @@ export function DeleteAutomationDialog({
     <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete "{automation.name}"?</AlertDialogTitle>
+          <AlertDialogTitle className="wrap-anywhere">
+            Delete "{automation.name}"?
+          </AlertDialogTitle>
           <AlertDialogDescription>
             This permanently deletes the automation and cancels its upcoming
             runs. Past runs are kept.

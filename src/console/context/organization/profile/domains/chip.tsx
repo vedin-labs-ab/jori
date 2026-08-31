@@ -24,13 +24,13 @@ export function WebsiteChip({
   const chip = (
     <Button
       asChild
-      className="justify-start gap-2"
+      className="max-w-full justify-start gap-2"
       size="lg"
       variant="secondary"
     >
       <a href={website.href} rel="noreferrer" target="_blank">
         <Globe2 className="size-3.5" />
-        <span>{website.label}</span>
+        <span className="min-w-0 truncate">{website.label}</span>
         {badge === undefined ? null : (
           <Badge
             className="border-transparent bg-background dark:bg-background"

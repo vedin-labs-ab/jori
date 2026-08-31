@@ -214,7 +214,9 @@ function DeleteFolderDialog({
     <AlertDialog onOpenChange={onOpenChange} open={isOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete "{folder.name}"?</AlertDialogTitle>
+          <AlertDialogTitle className="wrap-anywhere">
+            Delete "{folder.name}"?
+          </AlertDialogTitle>
           <AlertDialogDescription>
             Nothing inside is deleted: its subfolders and filed items move to
             the parent folder.
