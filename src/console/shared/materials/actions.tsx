@@ -168,7 +168,7 @@ export function ConfirmRemoveDialog({
     <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
+          <AlertDialogTitle className="wrap-anywhere">
             {isArchived ? "Delete" : "Archive"} "{material.name}"?
           </AlertDialogTitle>
           <AlertDialogDescription>

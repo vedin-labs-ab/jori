@@ -69,7 +69,7 @@ function DetailBody({
   return (
     <>
       <SheetHeader>
-        <SheetTitle className="flex flex-wrap items-center gap-2">
+        <SheetTitle className="flex flex-wrap items-center gap-2 wrap-anywhere">
           <WorkstreamTitle
             aliases={
               detail === undefined || detail === null ? [] : detail.aliases

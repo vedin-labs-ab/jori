@@ -68,7 +68,7 @@ function ColumnHead({ column }: { column: TableColumn }) {
 
   return (
     <TableHead className="whitespace-nowrap">
-      <span className="block font-medium">{column.name}</span>
+      <span className="block max-w-48 truncate font-medium">{column.name}</span>
       <span className="block font-normal text-muted-foreground text-xs">
         {label}
         {column.required === true ? " · required" : ""}
