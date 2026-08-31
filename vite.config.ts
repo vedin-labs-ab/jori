@@ -14,19 +14,38 @@ const ignoredWorkspacePaths = [
   "**/node_modules/**",
 ]
 
+// `check:bundle` builds only to prove every import resolves the way the
+// bundler resolves it — CSS, fonts, assets — so it wants the compile and
+// none of the output. Nitro writes .output itself and ignores build.write,
+// so the deployable artifact stays whatever the last real build left.
+const bundleCheck = process.env.JORI_BUNDLE_CHECK !== undefined
+
 // TanStack Start emits a request handler, not a server. Nitro wraps it into
 // something a host can run, and picks its Vercel preset up from the build
 // environment, so no target is configured here.
 //
 // Tests never serve requests, and leaving the server runtime installed holds
 // the Vitest worker open past the last assertion, so it is left out there.
-const serverPlugins = process.env.VITEST === undefined ? [nitro()] : []
+// The bundle check drops it for the same reason it drops the output: Start
+// has already built both environments by the time Nitro packages them.
+const serverPlugins =
+  process.env.VITEST === undefined && !bundleCheck ? [nitro()] : []
 
 const reactOrAccessibilityWarning =
   /Blocked aria-hidden|Each child in a list should have a unique|validateDOMNesting|A component is changing an? (?:un)?controlled|Cannot update a component while rendering|does not recognize the .* prop on a DOM element|Received `(?:true|false)` for a non-boolean attribute/
 
 const config = defineConfig({
+  build: {
+    write: !bundleCheck,
+  },
   server: {
+    port: 5173,
+    strictPort: true,
+  },
+  // A build inlines VITE_JORI_* at compile time, so a preview only works
+  // when it is served from the origin those values name. Nitro would
+  // otherwise pick its own port and every origin check would fail.
+  preview: {
     port: 5173,
     strictPort: true,
   },
@@ -48,7 +67,13 @@ const config = defineConfig({
   plugins: [
     devtools({ consolePiping: { enabled: false } }),
     tailwindcss(),
-    tanstackStart(),
+    // Dev SSR emits a route-scoped stylesheet link into the document head
+    // that the client tree does not contain, so React reports a hydration
+    // mismatch on every dev page load. It collects CSS imported by route
+    // components, and the only stylesheet here is styles.css, linked from
+    // the root route as a URL — so it has nothing to collect and turning it
+    // off costs no styling while keeping the dev console honest.
+    tanstackStart({ dev: { ssrStyles: { enabled: false } } }),
     ...serverPlugins,
     viteReact(),
   ],
