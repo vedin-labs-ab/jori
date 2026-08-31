@@ -37,8 +37,8 @@ export function FolderUsageLine({
       <Link
         className="text-muted-foreground text-xs tabular-nums underline-offset-2 hover:text-foreground hover:underline"
         params={{ folderId }}
-        search={{ days: defaultUsageDays }}
-        to="/folders/$folderId/usage"
+        search={{ usage: defaultUsageDays }}
+        to="/folders/$folderId"
       >
         {formatUsd(usage.totals.micros)} ·{" "}
         {countLabel(usage.totals.ended, "run")}

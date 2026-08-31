@@ -78,18 +78,13 @@ export function getMaterialSurface(pathname: string) {
   )
 }
 
-/** The organization-wide usage page sits under /folders without being a
- *  folder — no folder id can spell "usage" — so it is named by the same
- *  heading /folders is, not by a crumb no view ever publishes. */
-const organizationUsagePath = "/folders/usage"
-
 /** Pages whose header crumb is published by the view once its data loads:
  *  the material detail pages, and folder pages, whose whole ancestry is
  *  data. */
 export function isMaterialPage(pathname: string) {
   return (
     getMaterialSurface(pathname) !== undefined ||
-    (pathname.startsWith("/folders/") && pathname !== organizationUsagePath)
+    pathname.startsWith("/folders/")
   )
 }
 

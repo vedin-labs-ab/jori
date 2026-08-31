@@ -31,7 +31,6 @@ import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
 import { Route as FilesIndexRouteImport } from './routes/files/index'
 import { Route as FoldersIndexRouteImport } from './routes/folders/index'
-import { Route as FoldersUsageRouteImport } from './routes/folders/usage'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
 import { Route as StoresIndexRouteImport } from './routes/stores/index'
@@ -39,7 +38,6 @@ import { Route as TablesIndexRouteImport } from './routes/tables/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as FilesFileIdIndexRouteImport } from './routes/files/$fileId/index'
 import { Route as FoldersFolderIdIndexRouteImport } from './routes/folders/$folderId/index'
-import { Route as FoldersFolderIdUsageRouteImport } from './routes/folders/$folderId/usage'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
 import { Route as StoresStoreIdIndexRouteImport } from './routes/stores/$storeId/index'
 import { Route as TablesTableIdIndexRouteImport } from './routes/tables/$tableId/index'
@@ -154,11 +152,6 @@ const FoldersIndexRoute = FoldersIndexRouteImport.update({
   path: '/',
   getParentRoute: () => FoldersRoute,
 } as any)
-const FoldersUsageRoute = FoldersUsageRouteImport.update({
-  id: '/usage',
-  path: '/usage',
-  getParentRoute: () => FoldersRoute,
-} as any)
 const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -192,11 +185,6 @@ const FilesFileIdIndexRoute = FilesFileIdIndexRouteImport.update({
 const FoldersFolderIdIndexRoute = FoldersFolderIdIndexRouteImport.update({
   id: '/$folderId/',
   path: '/$folderId/',
-  getParentRoute: () => FoldersRoute,
-} as any)
-const FoldersFolderIdUsageRoute = FoldersFolderIdUsageRouteImport.update({
-  id: '/$folderId/usage',
-  path: '/$folderId/usage',
   getParentRoute: () => FoldersRoute,
 } as any)
 const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
@@ -235,7 +223,6 @@ export interface FileRoutesByFullPath {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/folders/usage': typeof FoldersUsageRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
@@ -244,7 +231,6 @@ export interface FileRoutesByFullPath {
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
@@ -265,7 +251,6 @@ export interface FileRoutesByTo {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/folders/usage': typeof FoldersUsageRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context': typeof ContextIndexRoute
   '/files': typeof FilesIndexRoute
@@ -274,7 +259,6 @@ export interface FileRoutesByTo {
   '/stores': typeof StoresIndexRoute
   '/tables': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/files/$fileId': typeof FilesFileIdIndexRoute
   '/folders/$folderId': typeof FoldersFolderIdIndexRoute
@@ -302,7 +286,6 @@ export interface FileRoutesById {
   '/trust': typeof TrustRoute
   '/context/places': typeof ContextPlacesRoute
   '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/folders/usage': typeof FoldersUsageRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
@@ -311,7 +294,6 @@ export interface FileRoutesById {
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
@@ -340,7 +322,6 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
-    | '/folders/usage'
     | '/integrations/personal'
     | '/context/'
     | '/files/'
@@ -349,7 +330,6 @@ export interface FileRouteTypes {
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
-    | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
     | '/files/$fileId/'
     | '/folders/$folderId/'
@@ -370,7 +350,6 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
-    | '/folders/usage'
     | '/integrations/personal'
     | '/context'
     | '/files'
@@ -379,7 +358,6 @@ export interface FileRouteTypes {
     | '/stores'
     | '/tables'
     | '/api/auth/$'
-    | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
     | '/files/$fileId'
     | '/folders/$folderId'
@@ -406,7 +384,6 @@ export interface FileRouteTypes {
     | '/trust'
     | '/context/places'
     | '/context/workstreams'
-    | '/folders/usage'
     | '/integrations/personal'
     | '/context/'
     | '/files/'
@@ -415,7 +392,6 @@ export interface FileRouteTypes {
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
-    | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
     | '/files/$fileId/'
     | '/folders/$folderId/'
@@ -600,13 +576,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoldersIndexRouteImport
       parentRoute: typeof FoldersRoute
     }
-    '/folders/usage': {
-      id: '/folders/usage'
-      path: '/usage'
-      fullPath: '/folders/usage'
-      preLoaderRoute: typeof FoldersUsageRouteImport
-      parentRoute: typeof FoldersRoute
-    }
     '/integrations/': {
       id: '/integrations/'
       path: '/'
@@ -654,13 +623,6 @@ declare module '@tanstack/react-router' {
       path: '/$folderId'
       fullPath: '/folders/$folderId/'
       preLoaderRoute: typeof FoldersFolderIdIndexRouteImport
-      parentRoute: typeof FoldersRoute
-    }
-    '/folders/$folderId/usage': {
-      id: '/folders/$folderId/usage'
-      path: '/$folderId/usage'
-      fullPath: '/folders/$folderId/usage'
-      preLoaderRoute: typeof FoldersFolderIdUsageRouteImport
       parentRoute: typeof FoldersRoute
     }
     '/integrations/offers/$token': {
@@ -715,16 +677,12 @@ const FilesRouteChildren: FilesRouteChildren = {
 const FilesRouteWithChildren = FilesRoute._addFileChildren(FilesRouteChildren)
 
 interface FoldersRouteChildren {
-  FoldersUsageRoute: typeof FoldersUsageRoute
   FoldersIndexRoute: typeof FoldersIndexRoute
-  FoldersFolderIdUsageRoute: typeof FoldersFolderIdUsageRoute
   FoldersFolderIdIndexRoute: typeof FoldersFolderIdIndexRoute
 }
 
 const FoldersRouteChildren: FoldersRouteChildren = {
-  FoldersUsageRoute: FoldersUsageRoute,
   FoldersIndexRoute: FoldersIndexRoute,
-  FoldersFolderIdUsageRoute: FoldersFolderIdUsageRoute,
   FoldersFolderIdIndexRoute: FoldersFolderIdIndexRoute,
 }
 

@@ -92,12 +92,10 @@ export function ancestorFolderIds(
   return ancestors
 }
 
-/** The folder a console path is about, across both of its tabs. The usage
- *  overview shares the surface but is nobody's folder, so it reads as none. */
+/** The folder a console path is about. The surface's own root page is
+ *  nobody's folder, so it reads as none. */
 export function activeFolderId(pathname: string) {
-  const folderId = /^\/folders\/([^/]+)(?:\/usage)?$/.exec(pathname)?.[1]
-
-  return folderId === "usage" ? undefined : folderId
+  return /^\/folders\/([^/]+)$/.exec(pathname)?.[1]
 }
 
 function sortByName(nodes: FolderNode<FolderSummary>[]) {

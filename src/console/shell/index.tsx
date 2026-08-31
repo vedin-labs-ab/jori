@@ -193,9 +193,10 @@ function MaterialName({ material }: { material: MaterialBreadcrumb }) {
         {/* Zero horizontal padding at rest keeps the breadcrumb's gaps
             optically even; hovering (or opening) grows the padding so the
             ghost background reads as the new edge, with the Button's own
-            transition smoothing the shift. */}
+            transition smoothing the shift. The weight is the breadcrumb's,
+            not the button's: the name reads as the crumb it replaces. */}
         <Button
-          className="min-w-0 gap-1 px-0 text-foreground hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5"
+          className="min-w-0 gap-1 px-0 font-normal text-foreground hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5"
           type="button"
           variant="ghost"
         >

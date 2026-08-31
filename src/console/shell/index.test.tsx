@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
   type MaterialBreadcrumb,
@@ -150,13 +154,24 @@ test("shows nothing on a folder page while its trail loads", () => {
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
 })
 
-test("names the organization-wide usage page like the folders it spans", () => {
-  pathname = "/folders/usage"
-  render(<ConsoleShell>Content</ConsoleShell>)
+test("hangs the page's menu off its name when the view publishes one", () => {
+  const publish = renderWithPublisher("/folders")
 
-  // A sibling of /folders, not a folder: no view publishes a crumb for it,
-  // so waiting for one leaves the header permanently empty.
-  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Folders")
+  act(() =>
+    publish.current?.({
+      name: "Folders",
+      menu: (
+        <DropdownMenuContent>
+          <DropdownMenuItem>Usage</DropdownMenuItem>
+        </DropdownMenuContent>
+      ),
+    })
+  )
+
+  // Even a surface with no trail above it: the name becomes the trigger,
+  // so the heading it would otherwise be is gone.
+  expect(screen.getByRole("button", { name: "Folders" })).toBeDefined()
+  expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
 })
 
 function renderWithPublisher(path: string) {

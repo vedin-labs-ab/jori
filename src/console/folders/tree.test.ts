@@ -75,13 +75,11 @@ test("walks ancestors nearest first and survives cycles", () => {
   ).toEqual(["b"])
 })
 
-test("a folder stays the active one across both of its tabs", () => {
+test("a folder page names the folder it is about", () => {
   expect(activeFolderId("/folders/finance")).toBe("finance")
-  expect(activeFolderId("/folders/finance/usage")).toBe("finance")
 })
 
-test("the surface's own pages belong to no folder", () => {
+test("the surface's own root page belongs to no folder", () => {
   expect(activeFolderId("/folders")).toBeUndefined()
-  expect(activeFolderId("/folders/usage")).toBeUndefined()
   expect(activeFolderId("/runs")).toBeUndefined()
 })
