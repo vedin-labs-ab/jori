@@ -22,6 +22,7 @@ import {
 import { FactsBody } from "./facts"
 import { ProposalReview } from "./proposal"
 import { SourcesSection, WebsitesSection } from "./sources"
+import { TimezoneSection } from "./timezone"
 
 export function ContextProfile({
   organizationId,
@@ -141,6 +142,11 @@ function ProfileSections({
           <SourcesSection sources={sources} />
         </>
       ) : null}
+      {hasWebsites || hasSources ? <Separator /> : null}
+      <TimezoneSection
+        declared={profile?.declared?.timezone}
+        organizationId={organizationId}
+      />
     </>
   )
 }

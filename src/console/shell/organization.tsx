@@ -2,7 +2,6 @@ import { type Organization } from "better-auth/client"
 import { ChevronDown, Plus, Settings } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { CreateOrganizationDialog } from "@/components/auth/organization/create-organization-dialog"
 import { OrganizationView } from "@/components/auth/organization/organization-view"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
+import { CreateOrganizationDialog } from "@/console/organization/create"
 import {
   activateOrganization,
   useActiveOrganization,

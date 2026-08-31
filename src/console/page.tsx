@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "convex/react"
 import { type ReactNode, useEffect, useState } from "react"
-import { CreateOrganizationDialog } from "@/components/auth/organization/create-organization-dialog"
 import { UserInvitations } from "@/components/auth/organization/user-invitations"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -15,7 +14,10 @@ import {
 import { api } from "../../convex/_generated/api"
 import { OnboardingGate } from "./context/organization/onboarding/gate"
 import { IntegrationCallbackToasts } from "./integrations/callback"
-import { OrganizationContext, useOrganizationId } from "./organization"
+import { OrganizationContext, useOrganizationId } from "./organization/context"
+import { CreateOrganizationDialog } from "./organization/create"
+import { takeTimezone } from "./organization/pending"
+import { showErrorToast } from "./shared/error"
 import { localTimezone } from "./shared/time"
 import { ConsoleShell } from "./shell"
 import { LaunchGate } from "./shell/gate"
@@ -113,6 +115,7 @@ function SignedInConsole({
       <OrganizationContext.Provider value={active.data.id}>
         {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
         <SessionSync organizationId={active.data.id} />
+        <DeclareTimezone organizationId={active.data.id} />
         <OnboardingGate />
         {children(active.data.id)}
       </OrganizationContext.Provider>
@@ -210,6 +213,33 @@ function SessionSync({ organizationId }: { organizationId: string }) {
       timezone: localTimezone(),
     }).catch(() => undefined)
   }, [sync, organizationId])
+
+  return null
+}
+
+/** Spends the zone chosen while creating this organization. It waits for
+ *  this load because only now does the session token carry the claim the
+ *  mutation is scoped to; an undeclared organization counts its days in
+ *  UTC, so a failure is worth saying but not worth stopping for. */
+function DeclareTimezone({ organizationId }: { organizationId: string }) {
+  const declareTimezone = useMutation(api.organization.profile.declareTimezone)
+
+  useEffect(() => {
+    const timezone = takeTimezone(organizationId)
+
+    if (timezone === null) {
+      return
+    }
+
+    void declareTimezone({ organizationId, timezone }).catch(
+      (error: unknown) => {
+        showErrorToast(
+          error,
+          "Couldn't save your timezone. Set it from the Context page."
+        )
+      }
+    )
+  }, [declareTimezone, organizationId])
 
   return null
 }
