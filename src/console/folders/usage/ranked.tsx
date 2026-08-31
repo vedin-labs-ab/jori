@@ -113,9 +113,9 @@ export function UsageFolders({
             <Link
               className={nameLinkClassName}
               params={{ folderId: folder.folderId }}
-              search={{ days }}
+              search={{ usage: days }}
               title={folder.name}
-              to="/folders/$folderId/usage"
+              to="/folders/$folderId"
             >
               {folder.name}
             </Link>

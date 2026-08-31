@@ -1,96 +1,101 @@
+import { Link } from "@tanstack/react-router"
 import {
+  Coins,
   FolderInput,
   LockKeyhole,
-  MoreHorizontal,
   Pencil,
   Plus,
   Trash2,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
 import { type FolderCreation } from "./create/dialogs"
-import { NewInFolderMenu, NewInFolderSub } from "./create/menu"
+import { NewInFolderMenu } from "./create/menu"
 import { type FolderDialogRequest } from "./manage"
 import { type FolderDetail } from "./types"
+import { defaultUsageDays } from "./usage/types"
+
+// What the folder surface puts in the console header: creating things sits
+// in the header's own actions, and everything about the folder itself hangs
+// off its name in the breadcrumb, the way material pages do it.
 
 export function FolderHeaderActions({
-  folder,
   onCreate,
-  onDialog,
+  onNewFolder,
 }: {
-  folder: FolderDetail
   onCreate: (creation: FolderCreation) => void
-  onDialog: (request: FolderDialogRequest) => void
+  onNewFolder: () => void
 }) {
   return (
     <ConsoleHeaderActions>
-      <NewInFolderMenu
-        onCreate={onCreate}
-        onNewFolder={() =>
-          onDialog({ type: "create", parentId: folder.folderId })
-        }
-      >
+      <NewInFolderMenu onCreate={onCreate} onNewFolder={onNewFolder}>
         <ConsoleHeaderButton icon={<Plus />} label="New" type="button" />
       </NewInFolderMenu>
-      <FolderPageMenu folder={folder} onCreate={onCreate} onDialog={onDialog} />
     </ConsoleHeaderActions>
   )
 }
 
-function FolderPageMenu({
+/** The folder's menu, opened from its name in the breadcrumb: what it
+ *  costs, what it is, and what removes it. */
+export function FolderTitleMenu({
   folder,
-  onCreate,
   onDialog,
 }: {
   folder: FolderDetail
-  onCreate: (creation: FolderCreation) => void
   onDialog: (request: FolderDialogRequest) => void
 }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={`Open actions for ${folder.name}`}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
+    <DropdownMenuContent align="start" className="w-44">
+      <DropdownMenuItem asChild>
+        <Link
+          params={{ folderId: folder.folderId }}
+          search={{ usage: defaultUsageDays }}
+          to="/folders/$folderId"
         >
-          <MoreHorizontal />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <NewInFolderSub
-          onCreate={onCreate}
-          onNewFolder={() =>
-            onDialog({ type: "create", parentId: folder.folderId })
-          }
-        />
-        <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
-          <Pencil />
-          Rename
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onDialog({ type: "access", folder })}>
-          <LockKeyhole />
-          Sharing…
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
-          <FolderInput />
-          Move to…
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => onDialog({ type: "delete", folder })}
-          variant="destructive"
-        >
-          <Trash2 />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <Coins />
+          Usage
+        </Link>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
+        <Pencil />
+        Rename
+      </DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => onDialog({ type: "access", folder })}>
+        <LockKeyhole />
+        Sharing…
+      </DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
+        <FolderInput />
+        Move to…
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        onSelect={() => onDialog({ type: "delete", folder })}
+        variant="destructive"
+      >
+        <Trash2 />
+        Delete
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  )
+}
+
+/** The overview's menu. Nothing here is a folder, so the tree's own spend
+ *  is all its name has to offer. */
+export function FoldersTitleMenu() {
+  return (
+    <DropdownMenuContent align="start" className="w-44">
+      <DropdownMenuItem asChild>
+        <Link search={{ usage: defaultUsageDays }} to="/folders">
+          <Coins />
+          Usage
+        </Link>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
   )
 }

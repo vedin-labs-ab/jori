@@ -13,31 +13,47 @@ import {
 } from "../../shared/list/empty"
 import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
-import { FolderSurfaceTabs } from "../frame"
+import { useMaterialTrail } from "../../shared/materials/breadcrumb"
+import { FoldersTitleMenu } from "../header"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
 import { type FolderRootsResult } from "../types"
+import { UsageOverlay } from "../usage/overlay"
+import { type UsageDays } from "../usage/types"
 import { useFolderListControls } from "./controls"
 import { FolderListRow, FolderListTable } from "./table"
+
+// The tree's root is not a folder, so its crumb is a constant: the surface
+// name, with the one thing the whole tree can be asked about.
+const foldersCrumb = { menu: <FoldersTitleMenu />, name: "Folders" }
 
 /** The folder tree's landing page: the root folders in the same full-bleed
  *  table a folder's own page uses. The icon-collapsed sidebar links here —
  *  with the tree hidden, navigation continues in the main view. */
-export function FoldersOverview() {
+export function FoldersOverview({ usage }: { usage: UsageDays | undefined }) {
   return (
     <ConsolePage>
-      {(organizationId) => <RootFolders organizationId={organizationId} />}
+      {(organizationId) => (
+        <RootFolders organizationId={organizationId} usage={usage} />
+      )}
     </ConsolePage>
   )
 }
 
-function RootFolders({ organizationId }: { organizationId: string }) {
+function RootFolders({
+  organizationId,
+  usage,
+}: {
+  organizationId: string
+  usage: UsageDays | undefined
+}) {
   const roots = useQuery(api.folders.console.roots, { organizationId })
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const create = () => setDialog({ type: "create" })
 
+  useMaterialTrail(foldersCrumb)
+
   return (
     <ConsoleListLayout>
-      <FolderSurfaceTabs tab="contents" />
       <ConsoleHeaderActions>
         <ConsoleHeaderButton
           icon={<Plus />}
@@ -46,7 +62,9 @@ function RootFolders({ organizationId }: { organizationId: string }) {
           type="button"
         />
       </ConsoleHeaderActions>
-      <RootFolderList onCreate={create} roots={roots} />
+      <UsageOverlay days={usage} organizationId={organizationId}>
+        <RootFolderList onCreate={create} roots={roots} />
+      </UsageOverlay>
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}

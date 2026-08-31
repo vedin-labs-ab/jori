@@ -19,8 +19,8 @@ import {
 import { type FolderCreation } from "./dialogs"
 
 // The console's "New" entries — a folder plus every resource that can be
-// created in place — shared by the folder page header, its empty state, the
-// sidebar group's "+" action, and the folder "…" menus' submenu.
+// created in place — shared by the folder page's header and empty state,
+// the sidebar group's "+" action, and each tree row's menu.
 
 type NewMenuHandlers = {
   /** Ran with the resource type to create; the owner opens its dialog. */

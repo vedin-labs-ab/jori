@@ -100,7 +100,7 @@ test("nothing below this folder means no drill-down to offer", () => {
   expect(screen.queryByText("Subfolders")).toBeNull()
 })
 
-test("each subfolder row drills into that folder's own usage", () => {
+test("each subfolder row drills into that folder", () => {
   renderView(
     overview({
       folders: [
@@ -112,7 +112,7 @@ test("each subfolder row drills into that folder's own usage", () => {
   expect(screen.getByText("Subfolders")).toBeDefined()
   expect(
     screen.getByRole("link", { name: "Pipeline" }).getAttribute("href")
-  ).toBe("/folders/folders:2/usage")
+  ).toBe("/folders/folders:2")
 })
 
 test("the footnote says whose day a day is and what the money buys", () => {
