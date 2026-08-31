@@ -88,15 +88,13 @@ export const shares = defineTable({
   secret: v.string(),
   createdAt: v.number(),
   expiresAt: v.number(),
-  targetKind: v.union(
-    v.literal("table"),
-    v.literal("store"),
-    v.literal("file")
-  ),
-  targetId: v.union(v.id("collections"), v.id("files")),
+  target: v.object({
+    kind: v.union(v.literal("table"), v.literal("store"), v.literal("file")),
+    id: v.union(v.id("collections"), v.id("files")),
+  }),
 })
-  .index("by_target_and_expires_at", ["targetKind", "targetId", "expiresAt"])
-  .index("by_target_and_secret", ["targetKind", "targetId", "secret"])
+  .index("by_target_and_expires_at", ["target.kind", "target.id", "expiresAt"])
+  .index("by_target_and_secret", ["target.kind", "target.id", "secret"])
 
 /** How a document changes; mirrors contracts/collections/write.ts. */
 export const documentWrite = v.union(

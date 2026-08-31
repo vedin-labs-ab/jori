@@ -80,7 +80,7 @@ test("keeps the one-shot label after an owned automation is cleaned up", async (
   const run = testRun(
     {
       ...oneShotRun(scheduledAt),
-      automationParentId: "parent",
+      automation: { id: "automation", parentId: "parent" },
     },
     { createdAt: scheduledAt + 1000, endedAt: scheduledAt + 2000 }
   )
@@ -101,7 +101,7 @@ function oneShotRun(scheduledAt: number) {
     _id: "run",
     _creationTime: 0,
     organizationId: "organization",
-    automationId: "automation",
+    automation: { id: "automation" },
     cause: { type: "time", scheduledAt },
     instructions: "Generate a team image.",
     snapshot: {

@@ -138,7 +138,7 @@ function integrationEntry(id: string, tools: string[]) {
 function automationParent(access?: Access) {
   return {
     ...baseParent(),
-    automationId: "automation",
+    automation: { id: "automation" },
     access: access ?? contract([]),
   } as unknown as Doc<"runs">
 }

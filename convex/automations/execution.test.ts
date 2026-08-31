@@ -16,7 +16,7 @@ describe("durable automation run tool execution", () => {
     ["missing", null],
     ["paused", automation({ status: "paused" })],
     ["completed", automation({ status: "completed" })],
-    ["stale generation", automation({ configurationVersion: 3 })],
+    ["stale generation", automation({ version: 3 })],
     [
       "wrong organization",
       automation({ organizationId: "another-organization" }),
@@ -54,7 +54,7 @@ describe("owned one-time automation run tool execution", () => {
   })
 
   test("rejects a fired child after its parent changes", async () => {
-    const owner = automation({ id: "owner", configurationVersion: 3 })
+    const owner = automation({ id: "owner", version: 3 })
     const childRun = run({
       automationId: "deleted-child",
       automationParentId: owner._id,
@@ -76,7 +76,7 @@ describe("other run tool execution", () => {
   })
 
   test("derives legacy research-child ownership from the root run", async () => {
-    const owner = automation({ configurationVersion: 3 })
+    const owner = automation({ version: 3 })
     const root = run({ id: "root" })
     const researchChild = run({
       automationId: null,
@@ -129,7 +129,7 @@ function context(records: Array<Doc<"automations"> | Doc<"runs">>) {
 
 function automation(
   input: {
-    configurationVersion?: number
+    version?: number
     id?: string
     parentId?: string
     principal?: Doc<"automations">["principal"]
@@ -142,11 +142,14 @@ function automation(
     _id: (input.id ?? "automation") as Id<"automations">,
     _creationTime: 0,
     access: { integrations: [], web: false },
-    configurationVersion: input.configurationVersion ?? 2,
     createdAt: 0,
     instructions: "Do the work.",
     name: "Automation",
-    parentId: input.parentId as Id<"automations"> | undefined,
+    parent:
+      input.parentId === undefined
+        ? undefined
+        : { id: input.parentId as Id<"automations"> },
+    version: input.version ?? 2,
     principal: input.principal ?? {
       kind: "person",
       personId: "person" as Id<"persons">,
@@ -162,9 +165,9 @@ function automation(
 
 function run(
   input: {
-    automationConfigurationVersion?: number
     automationId?: string | null
     automationParentId?: string | Id<"automations">
+    automationVersion?: number
     id?: string
     parentId?: string | Id<"runs">
     rootId?: string | Id<"runs">
@@ -180,14 +183,14 @@ function run(
     _id: (input.id ?? "run") as Id<"runs">,
     _creationTime: 0,
     access: { integrations: [], web: false },
-    automationConfigurationVersion:
+    automation:
       automationId === undefined
         ? undefined
-        : (input.automationConfigurationVersion ?? 2),
-    automationId,
-    automationParentId: input.automationParentId as
-      | Id<"automations">
-      | undefined,
+        : {
+            id: automationId,
+            parentId: input.automationParentId as Id<"automations"> | undefined,
+            version: input.automationVersion ?? 2,
+          },
     cause: { type: "manual" },
     createdAt: 0,
     parentId: input.parentId as Id<"runs"> | undefined,

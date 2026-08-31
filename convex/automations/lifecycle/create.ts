@@ -23,8 +23,9 @@ import { resolveTrigger, scheduleAutomationIfNeeded } from "./trigger"
 
 type CreateAutomationArgs = {
   organizationId: string
-  parentId?: Id<"automations">
-  expectedParentConfigurationVersion?: number
+  /** The automation asking for this one, with the configuration generation
+   *  the caller believes it is on; a mismatch rejects the creation. */
+  parent?: { id: Id<"automations">; version?: number }
   key?: string
   name: string
   instructions: string
@@ -78,8 +79,7 @@ async function prepareAutomation(
   const key = normalizeAutomationKey(args.key)
   const principal = executionPrincipalForVisibility(visibility, args.createdBy)
   const ownership = await resolveOwnership(ctx, {
-    ownerId: args.parentId,
-    expectedConfigurationVersion: args.expectedParentConfigurationVersion,
+    owner: args.parent,
     principal,
     organizationId: args.organizationId,
     type: args.type,
@@ -94,9 +94,8 @@ async function prepareAutomation(
 
   return {
     organizationId: args.organizationId,
-    parentId: ownership?.parentId,
-    parentConfigurationVersion: ownership?.configurationVersion,
-    configurationVersion: 1,
+    parent: ownership,
+    version: 1,
     key,
     ...(key === undefined
       ? {}
@@ -124,14 +123,13 @@ async function prepareAutomation(
 async function resolveOwnership(
   ctx: MutationCtx,
   args: {
-    ownerId?: Id<"automations">
-    expectedConfigurationVersion?: number
+    owner?: { id: Id<"automations">; version?: number }
     principal: ReturnType<typeof executionPrincipalForVisibility>
     organizationId: string
     type: AutomationType
   }
 ) {
-  if (args.ownerId === undefined) {
+  if (args.owner === undefined) {
     return undefined
   }
 
@@ -139,14 +137,14 @@ async function resolveOwnership(
     return undefined
   }
 
-  const owner = await ctx.db.get(args.ownerId)
+  const owner = await ctx.db.get(args.owner.id)
   if (owner === null) {
     throw new Error("Parent automation is no longer available.")
   }
 
   const parent =
-    owner.type === "once" && owner.parentId !== undefined
-      ? await ctx.db.get(owner.parentId)
+    owner.type === "once" && owner.parent !== undefined
+      ? await ctx.db.get(owner.parent.id)
       : owner.type === "once"
         ? null
         : owner
@@ -164,13 +162,13 @@ async function resolveOwnership(
     throw new Error("Parent automation is no longer active for this owner.")
   }
 
-  const configurationVersion = parent.configurationVersion ?? 1
+  const version = parent.version ?? 1
 
-  if (args.expectedConfigurationVersion !== configurationVersion) {
+  if (args.owner.version !== version) {
     throw new Error("Parent automation configuration has changed.")
   }
 
-  return { parentId: parent._id, configurationVersion }
+  return { id: parent._id, version }
 }
 
 async function keyedAutomation(

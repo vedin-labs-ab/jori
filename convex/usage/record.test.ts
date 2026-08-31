@@ -142,7 +142,10 @@ test("an automation's label is carried even once the automation is gone", async 
   const { database, ctx } = databaseContext()
 
   await recordUsageEnded(ctx, {
-    run: run({ automationId, snapshot: runSnapshot("One-shot reminder") }),
+    run: run({
+      automation: { id: automationId },
+      snapshot: runSnapshot("One-shot reminder"),
+    }),
     failed: false,
   })
 
@@ -158,7 +161,7 @@ test("a live automation names the row itself", async () => {
   await database.insert("automations", { name: "Renamed digest" })
 
   await recordUsageEnded(ctx, {
-    run: run({ automationId: "automations:0" as Id<"automations"> }),
+    run: run({ automation: { id: "automations:0" as Id<"automations"> } }),
     failed: false,
   })
 

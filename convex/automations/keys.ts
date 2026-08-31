@@ -63,8 +63,7 @@ type AutomationDefinition = Pick<
   | "access"
   | "instructions"
   | "name"
-  | "parentId"
-  | "parentConfigurationVersion"
+  | "parent"
   | "principal"
   | "trigger"
   | "type"
@@ -83,8 +82,13 @@ function definitionKey(definition: AutomationDefinition) {
     },
     instructions: definition.instructions,
     name: definition.name,
-    parentId: definition.parentId ?? null,
-    parentConfigurationVersion: definition.parentConfigurationVersion ?? null,
+    parent:
+      definition.parent === undefined
+        ? null
+        : {
+            id: definition.parent.id,
+            version: definition.parent.version ?? null,
+          },
     principal: definition.principal,
     trigger: triggerKey(definition.trigger),
     type: definition.type,

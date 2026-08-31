@@ -33,7 +33,7 @@ test("pausing invalidates runs from the prior configuration", async () => {
   vi.mocked(getOrganizationAutomation).mockResolvedValue(automation)
   vi.mocked(getRequiredAutomation).mockResolvedValue({
     ...automation,
-    configurationVersion: 8,
+    version: 8,
     status: "paused",
   })
 
@@ -44,7 +44,7 @@ test("pausing invalidates runs from the prior configuration", async () => {
 
   expect(patch).toHaveBeenCalledWith(
     automation._id,
-    expect.objectContaining({ configurationVersion: 8, status: "paused" })
+    expect.objectContaining({ version: 8, status: "paused" })
   )
   expect(deleteOwnedAutomations).toHaveBeenCalledWith(ctx, automation._id)
 })
@@ -75,7 +75,7 @@ function parentAutomation(): Doc<"automations"> {
     _id: "parent" as Id<"automations">,
     _creationTime: 0,
     organizationId: "organization",
-    configurationVersion: 7,
+    version: 7,
     name: "Meeting Briefing",
     instructions: "Plan briefings.",
     visibility: { mode: "private" },

@@ -22,8 +22,7 @@ function automationRun(): Doc<"runs"> {
     _id: "run" as Id<"runs">,
     _creationTime: 0,
     access: { integrations: [], web: false },
-    automationConfigurationVersion: 2,
-    automationId: "automation" as Id<"automations">,
+    automation: { id: "automation" as Id<"automations">, version: 2 },
     cause: { type: "time", scheduledAt: 0 },
     createdAt: 0,
     principal: {

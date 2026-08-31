@@ -44,9 +44,14 @@ export const places = defineTable({
   claims: v.array(placeClaim),
   // Watermark: createdAt of the newest message the profile has seen.
   profiledAt: v.optional(v.number()),
-  // Debounce state, mirroring conversation summaries.
-  profileAt: v.optional(v.number()),
-  functionId: v.optional(v.id("_scheduled_functions")),
+  /** Debounce state while a pass is scheduled: the pending function and the
+   *  ceiling it may not be pushed past. Cleared when the pass runs. */
+  debounce: v.optional(
+    v.object({
+      ceilingAt: v.number(),
+      functionId: v.id("_scheduled_functions"),
+    })
+  ),
 }).index("by_organization_and_integration_and_external", [
   "organizationId",
   "integrationId",

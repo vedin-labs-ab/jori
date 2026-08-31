@@ -139,8 +139,7 @@ describe("removing a collection", () => {
 
     await database.insert("documents", { collectionId, value: {}, version: 1 })
     await database.insert("shares", {
-      targetKind: "table",
-      targetId: collectionId,
+      target: { kind: "table", id: collectionId },
       secret: "s",
       expiresAt: 9,
     })

@@ -70,21 +70,13 @@ export async function createInstructionRun(
 }
 
 function inheritedAutomationExecution(parent: Doc<"runs">) {
-  if (parent.automationId === undefined) {
+  if (parent.automation === undefined) {
     return {}
   }
 
   return {
-    automationId: parent.automationId,
+    automation: parent.automation,
     // Delegated work costs the folder its parent costs.
     ...(parent.folderId === undefined ? {} : { folderId: parent.folderId }),
-    ...(parent.automationParentId === undefined
-      ? {}
-      : { automationParentId: parent.automationParentId }),
-    ...(parent.automationConfigurationVersion === undefined
-      ? {}
-      : {
-          automationConfigurationVersion: parent.automationConfigurationVersion,
-        }),
   }
 }

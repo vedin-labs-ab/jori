@@ -13,8 +13,7 @@ test("automation runs own the one-time automations they create", async () => {
     {
       organizationId: "organization",
       createdBy: "person" as Id<"persons">,
-      automationId,
-      automationConfigurationVersion: 3,
+      automation: { id: automationId, version: 3 },
     },
     { tool: "add_automation", args: automationArgs("once") }
   )
@@ -22,8 +21,7 @@ test("automation runs own the one-time automations they create", async () => {
   expect(runMutation).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
-      expectedParentConfigurationVersion: 3,
-      parentId: automationId,
+      parent: { id: automationId, version: 3 },
       type: "once",
     })
   )
@@ -43,7 +41,7 @@ test("manual and durable creations stay unowned", async () => {
     {
       organizationId: "organization",
       createdBy: "person" as Id<"persons">,
-      automationId: "parent" as Id<"automations">,
+      automation: { id: "parent" as Id<"automations"> },
     },
     { tool: "add_automation", args: automationArgs("cron") }
   )
@@ -51,12 +49,12 @@ test("manual and durable creations stay unowned", async () => {
   expect(runMutation).toHaveBeenNthCalledWith(
     1,
     expect.anything(),
-    expect.objectContaining({ parentId: undefined, type: "once" })
+    expect.objectContaining({ parent: undefined, type: "once" })
   )
   expect(runMutation).toHaveBeenNthCalledWith(
     2,
     expect.anything(),
-    expect.objectContaining({ parentId: undefined, type: "cron" })
+    expect.objectContaining({ parent: undefined, type: "cron" })
   )
 })
 
@@ -71,9 +69,11 @@ test("an owned run keeps its durable parent after the child fires", async () => 
         kind: "person",
         personId: "person" as Id<"persons">,
       },
-      automationId: "fired-child" as Id<"automations">,
-      automationParentId: "parent" as Id<"automations">,
-      automationConfigurationVersion: 4,
+      automation: {
+        id: "fired-child" as Id<"automations">,
+        parentId: "parent" as Id<"automations">,
+        version: 4,
+      },
     },
     { tool: "add_automation", args: automationArgs("once") }
   )
@@ -81,8 +81,7 @@ test("an owned run keeps its durable parent after the child fires", async () => 
   expect(runMutation).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
-      parentId: "parent",
-      expectedParentConfigurationVersion: 4,
+      parent: { id: "parent", version: 4 },
       type: "once",
     })
   )

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest"
 import {
+  type ShareKind,
   type ShareOverrides,
   storeDoc,
   type TableOverrides,
@@ -26,12 +27,11 @@ async function createTable(
 async function createShare(
   database: TestDatabase,
   tableId: Id<"collections">,
-  overrides: ShareOverrides = {}
+  { kind = "table", ...overrides }: ShareOverrides & { kind?: ShareKind } = {}
 ) {
   return (await database.insert("shares", {
     organizationId: "org",
-    targetKind: "table",
-    targetId: tableId,
+    target: { kind, id: tableId },
     createdBy: testOwner,
     secret: "s3cret",
     createdAt: 1,
@@ -107,7 +107,7 @@ describe("opening a table share", () => {
     const { database, ctx } = databaseContext()
     const tableId = await database.insert("collections", storeDoc())
 
-    await createShare(database, tableId, { targetKind: "store" })
+    await createShare(database, tableId, { kind: "store" })
 
     expect(await openTableShare(ctx, { tableId, secret: "s3cret" })).toBeNull()
   })
@@ -199,7 +199,7 @@ describe("minting a table share", () => {
 
     expect(shares).toHaveLength(1)
     expect(shares[0]?.secret).toMatch(/^[0-9a-f]{64}$/)
-    expect(shares[0]?.targetKind).toBe("table")
+    expect(shares[0]?.target).toMatchObject({ kind: "table" })
     expect(minted.url).toContain(`#share=${shares[0]?.secret}`)
     expect(minted.expiresAt).toBeLessThanOrEqual(before + 169 * 60 * 60 * 1000)
   })

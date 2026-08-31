@@ -60,15 +60,8 @@ describe("one-time automation firing", () => {
   })
 
   test("drops an owned child after its parent configuration changes", async () => {
-    const child = automation({
-      parentId: "parent",
-      parentConfigurationVersion: 1,
-    })
-    const parent = automation({
-      configurationVersion: 2,
-      id: "parent",
-      type: "cron",
-    })
+    const child = automation({ parentId: "parent", parentVersion: 1 })
+    const parent = automation({ version: 2, id: "parent", type: "cron" })
     const { ctx, remove } = context([child, parent])
 
     await expect(
@@ -98,9 +91,9 @@ function context(automations: Doc<"automations">[]) {
 function automation(
   input: {
     id?: string
-    configurationVersion?: number
+    version?: number
     parentId?: string
-    parentConfigurationVersion?: number
+    parentVersion?: number
     status?: Doc<"automations">["status"]
     type?: Doc<"automations">["type"]
   } = {}
@@ -110,13 +103,16 @@ function automation(
     _creationTime: 0,
     access: { integrations: [], web: false },
     createdAt: 0,
-    configurationVersion: input.configurationVersion ?? 1,
+    version: input.version ?? 1,
     instructions: "Do the work.",
     name: "Automation",
-    parentId: input.parentId as Id<"automations"> | undefined,
-    parentConfigurationVersion:
-      input.parentConfigurationVersion ??
-      (input.parentId === undefined ? undefined : 1),
+    parent:
+      input.parentId === undefined
+        ? undefined
+        : {
+            id: input.parentId as Id<"automations">,
+            version: input.parentVersion ?? 1,
+          },
     principal: {
       kind: "person",
       personId: "person" as Id<"persons">,

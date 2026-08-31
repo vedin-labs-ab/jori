@@ -43,7 +43,7 @@ export type LinkMethod = Infer<typeof linkMethod>
 
 const identityLink = v.object({
   method: linkMethod,
-  linkedAt: v.number(),
+  at: v.number(),
   evidence: v.optional(v.string()),
 })
 

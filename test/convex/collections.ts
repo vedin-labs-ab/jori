@@ -20,6 +20,7 @@ type CollectionOverrides<TKind extends Doc<"collections">["kind"]> = Partial<
 export type TableOverrides = CollectionOverrides<"table">
 export type StoreOverrides = CollectionOverrides<"store">
 export type ShareOverrides = Partial<WithoutSystemFields<Doc<"shares">>>
+export type ShareKind = Doc<"shares">["target"]["kind"]
 
 export const testOwner = "persons:owner" as PersonId
 

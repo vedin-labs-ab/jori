@@ -20,7 +20,7 @@ export function automationRuntimeInput(webSearch = true) {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automationId: "automation",
+      automation: { id: "automation" },
       snapshot: {
         title: "Daily digest",
         source: { type: "automation" },
@@ -52,7 +52,7 @@ export function linearAutomationRuntimeInput() {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automationId: "automation",
+      automation: { id: "automation" },
       snapshot: {
         title: "Linear quip",
         source: { type: "event", surface: "linear" },
@@ -105,7 +105,7 @@ export function notionAutomationRuntimeInput() {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automationId: "automation",
+      automation: { id: "automation" },
       snapshot: {
         title: "Notion follow-up",
         source: { type: "event", surface: "notion" },

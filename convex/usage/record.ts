@@ -166,15 +166,18 @@ async function resolveAttribution(
 }
 
 async function resolveAutomation(ctx: MutationCtx, run: Doc<"runs">) {
-  if (run.automationId === undefined) {
+  if (run.automation === undefined) {
     return undefined
   }
 
-  const automation = await ctx.db.get(run.automationId)
+  const automation = await ctx.db.get(run.automation.id)
 
   // An automation run's snapshot title is the automation's name, so a
   // one-shot automation deleted the moment it fired still reads as itself.
-  return { id: run.automationId, label: automation?.name ?? run.snapshot.title }
+  return {
+    id: run.automation.id,
+    label: automation?.name ?? run.snapshot.title,
+  }
 }
 
 function sumTotals(left: UsageTotals, right: UsageTotals): UsageTotals {

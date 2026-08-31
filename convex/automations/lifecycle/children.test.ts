@@ -67,11 +67,8 @@ describe("owned automation parents", () => {
   })
 
   test("rejects a child from an older parent configuration", async () => {
-    const child = automation({
-      parentId: "parent",
-      parentConfigurationVersion: 1,
-    })
-    const parent = automation({ configurationVersion: 2 })
+    const child = automation({ parentId: "parent", parentVersion: 1 })
+    const parent = automation({ version: 2 })
 
     await expect(hasInactiveParent(parentContext(parent), child)).resolves.toBe(
       true
@@ -128,13 +125,13 @@ function cleanupContext(seed: Doc<"automations">[]) {
   const deletedIds: Id<"automations">[] = []
   const take = vi.fn(async (limit: number) =>
     [...records.values()]
-      .filter((record) => record.parentId === selectedParentId)
+      .filter((record) => record.parent?.id === selectedParentId)
       .slice(0, limit)
   )
   const first = vi.fn(
     async () =>
       [...records.values()].find(
-        (record) => record.parentId === selectedParentId
+        (record) => record.parent?.id === selectedParentId
       ) ?? null
   )
   const cancel = vi.fn(async () => undefined)
@@ -182,9 +179,9 @@ function parentContext(parent: Doc<"automations"> | null) {
 function automation(
   input: {
     id?: string
-    configurationVersion?: number
+    version?: number
     parentId?: string | Id<"automations">
-    parentConfigurationVersion?: number
+    parentVersion?: number
     principal?: Doc<"automations">["principal"]
     status?: Doc<"automations">["status"]
     trigger?: Doc<"automations">["trigger"]
@@ -203,7 +200,7 @@ function automation(
       personId: "person" as Id<"persons">,
     },
     access: { integrations: [], web: false },
-    configurationVersion: input.configurationVersion ?? 1,
+    version: input.version ?? 1,
     type: input.type ?? "cron",
     trigger: input.trigger ?? {
       expression: "0 8 * * *",
@@ -211,10 +208,13 @@ function automation(
       nextAt: 1,
     },
     status: input.status ?? "active",
-    parentId: input.parentId as Id<"automations"> | undefined,
-    parentConfigurationVersion:
-      input.parentConfigurationVersion ??
-      (input.parentId === undefined ? undefined : 1),
+    parent:
+      input.parentId === undefined
+        ? undefined
+        : {
+            id: input.parentId as Id<"automations">,
+            version: input.parentVersion ?? 1,
+          },
     createdAt: 0,
     updatedAt: 0,
   }

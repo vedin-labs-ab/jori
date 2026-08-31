@@ -156,7 +156,7 @@ function createAutomationValues(
 ) {
   return {
     automation: {
-      id: input.run.automationId,
+      id: input.run.automation?.id,
       name: input.run.snapshot.title,
       cause: input.run.cause.type,
       trigger: formatAutomationTrigger(input),

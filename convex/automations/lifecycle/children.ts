@@ -14,7 +14,7 @@ export async function deleteOwnedAutomations(
 ) {
   const children = await ctx.db
     .query("automations")
-    .withIndex("by_parent", (index) => index.eq("parentId", parentId))
+    .withIndex("by_parent", (index) => index.eq("parent.id", parentId))
     .take(cleanupBatchSize)
 
   for (const child of children) {
@@ -36,7 +36,7 @@ export async function hasOwnedAutomations(
   return (
     (await ctx.db
       .query("automations")
-      .withIndex("by_parent", (index) => index.eq("parentId", parentId))
+      .withIndex("by_parent", (index) => index.eq("parent.id", parentId))
       .first()) !== null
   )
 }
@@ -47,7 +47,7 @@ export async function requireValidOwnershipUpdate(
   existing: Doc<"automations">
 ) {
   if (
-    existing.parentId !== undefined &&
+    existing.parent !== undefined &&
     ((args.type !== undefined && args.type !== "once") ||
       (args.visibility !== undefined &&
         executesAsOrganization(args.visibility) !==
@@ -69,19 +69,18 @@ export async function hasInactiveParent(
   ctx: MutationCtx,
   automation: Doc<"automations">
 ) {
-  if (automation.parentId === undefined) {
+  if (automation.parent === undefined) {
     return false
   }
 
-  const parent = await ctx.db.get(automation.parentId)
+  const parent = await ctx.db.get(automation.parent.id)
 
   return (
     parent === null ||
     parent.status !== "active" ||
     parent.type === "once" ||
     parent.organizationId !== automation.organizationId ||
-    (automation.parentConfigurationVersion ?? 0) !==
-      (parent.configurationVersion ?? 1) ||
+    (automation.parent.version ?? 0) !== (parent.version ?? 1) ||
     !sameAutomationPrincipal(parent.principal, automation.principal)
   )
 }

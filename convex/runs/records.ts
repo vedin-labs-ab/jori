@@ -29,7 +29,7 @@ export const getInputByRun = internalQuery({
       return await getMessageInput(ctx, { run })
     }
 
-    if (run.automationId !== undefined && run.parentId === undefined) {
+    if (run.automation !== undefined && run.parentId === undefined) {
       return await getAutomationInput(ctx, { run })
     }
 
@@ -88,7 +88,7 @@ async function getAutomationInput(
     run: Doc<"runs">
   }
 ) {
-  if (args.run.automationId === undefined) {
+  if (args.run.automation === undefined) {
     return null
   }
 

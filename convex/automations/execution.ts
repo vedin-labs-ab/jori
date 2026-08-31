@@ -1,4 +1,4 @@
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { sameAutomationPrincipal } from "./lifecycle/children"
 
@@ -22,17 +22,16 @@ export async function canExecuteAutomationRunTools(
     return true
   }
 
-  const automationId = snapshot.automationParentId ?? snapshot.automationId
+  const automationId = snapshot.automation.parentId ?? snapshot.automation.id
   const automation = await ctx.db.get(automationId)
 
   if (
     automation === null ||
-    automation.parentId !== undefined ||
+    automation.parent !== undefined ||
     automation.organizationId !== run.organizationId ||
     !sameAutomationPrincipal(automation.principal, run.principal) ||
-    snapshot.automationConfigurationVersion === undefined ||
-    (automation.configurationVersion ?? 1) !==
-      snapshot.automationConfigurationVersion
+    snapshot.automation.version === undefined ||
+    (automation.version ?? 1) !== snapshot.automation.version
   ) {
     return false
   }
@@ -44,8 +43,8 @@ async function resolveAutomationRunSnapshot(
   ctx: QueryLikeCtx,
   run: Doc<"runs">
 ): Promise<AutomationRunSnapshot | null> {
-  if (run.automationId !== undefined) {
-    return { ...run, automationId: run.automationId }
+  if (run.automation !== undefined) {
+    return { ...run, automation: run.automation }
   }
 
   const rootRunId = run.rootId ?? run.parentId
@@ -56,26 +55,26 @@ async function resolveAutomationRunSnapshot(
 
   const root = await ctx.db.get(rootRunId)
 
-  return root?.automationId === undefined
+  return root?.automation === undefined
     ? null
-    : { ...root, automationId: root.automationId }
+    : { ...root, automation: root.automation }
 }
 
 type AutomationRunSnapshot = Doc<"runs"> & {
-  automationId: Id<"automations">
+  automation: NonNullable<Doc<"runs">["automation"]>
 }
 
 function isExecutableOwner(
   automation: Doc<"automations">,
-  snapshot: Pick<Doc<"runs">, "automationId" | "automationParentId">
+  snapshot: AutomationRunSnapshot
 ) {
   if (automation.type !== "once") {
     return automation.status === "active"
   }
 
   return (
-    snapshot.automationParentId === undefined &&
-    snapshot.automationId === automation._id &&
+    snapshot.automation.parentId === undefined &&
+    snapshot.automation.id === automation._id &&
     (automation.status === "active" || automation.status === "completed")
   )
 }

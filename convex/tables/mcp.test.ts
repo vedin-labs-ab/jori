@@ -10,7 +10,7 @@ const execution = {
 }
 
 describe("table tool dispatch", () => {
-  test("create defaults scope to organization and passes columns through", async () => {
+  test("create defaults visibility to organization and passes columns through", async () => {
     const runMutation = vi.fn(async () => ({}))
     const columns = [{ name: "Title", type: "string", required: true }]
 

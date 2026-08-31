@@ -126,7 +126,7 @@ function message(kind: "mention" | "reply") {
 
 function eventRun() {
   return {
-    automationId: "missing-automation",
+    automation: { id: "missing-automation" },
     cause: { type: "event", eventId: "event" },
     instructions: "Perform the deep analysis.",
     snapshot: {

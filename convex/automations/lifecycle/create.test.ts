@@ -8,8 +8,8 @@ import { createAutomation } from "./create"
 test.each([
   undefined,
   1,
-])("rejects owned work from stale parent configuration %s", async (expectedParentConfigurationVersion) => {
-  const parent = automation({ configurationVersion: 2 })
+])("rejects owned work from stale parent configuration %s", async (version) => {
+  const parent = automation({ version: 2 })
   const ctx = {
     db: { get: vi.fn(async () => parent) },
   } as unknown as MutationCtx
@@ -17,8 +17,7 @@ test.each([
   await expect(
     createAutomation(ctx, {
       organizationId: "organization",
-      parentId: parent._id,
-      expectedParentConfigurationVersion,
+      parent: { id: parent._id, version },
       name: "Meeting Briefing delivery",
       instructions: "Deliver the briefing.",
       visibility: { mode: "private" },
@@ -98,14 +97,12 @@ test("creation rejects a folder from another organization", async () => {
   ).rejects.toThrow("Folder was not found.")
 })
 
-function automation(input: {
-  configurationVersion: number
-}): Doc<"automations"> {
+function automation(input: { version: number }): Doc<"automations"> {
   return {
     _id: "parent" as Id<"automations">,
     _creationTime: 0,
     organizationId: "organization",
-    configurationVersion: input.configurationVersion,
+    version: input.version,
     name: "Meeting Briefing",
     instructions: "Plan briefings.",
     visibility: { mode: "private" },

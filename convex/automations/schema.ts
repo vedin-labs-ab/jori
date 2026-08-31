@@ -69,9 +69,18 @@ export const automationType = v.union(
 export const automations = defineTable({
   organizationId: v.string(),
   ...automationBinding,
-  parentId: v.optional(v.id("automations")),
-  configurationVersion: v.optional(v.number()),
-  parentConfigurationVersion: v.optional(v.number()),
+  /** Set on a one-shot automation an automation created: the durable owner
+   *  and the configuration generation it was owned at, so the child falls out
+   *  of validity the moment the owner is edited. */
+  parent: v.optional(
+    v.object({
+      id: v.id("automations"),
+      version: v.optional(v.number()),
+    })
+  ),
+  /** This automation's own configuration generation, bumped on every edit
+   *  that invalidates owned children and their in-flight runs. */
+  version: v.optional(v.number()),
   keyPartition: v.optional(v.string()),
   name: v.string(),
   instructions: v.string(),
@@ -96,13 +105,13 @@ export const automations = defineTable({
     "keyPartition",
     "key",
   ])
-  .index("by_parent", ["parentId"])
+  .index("by_parent", ["parent.id"])
   .index("by_organization_status", ["organizationId", "status"])
-  .index("by_organization_and_parent", ["organizationId", "parentId"])
+  .index("by_organization_and_parent", ["organizationId", "parent.id"])
   .index("by_organization_and_status_and_parent", [
     "organizationId",
     "status",
-    "parentId",
+    "parent.id",
   ])
   .index("by_folder", ["folderId"])
 

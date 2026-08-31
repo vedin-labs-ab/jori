@@ -31,9 +31,7 @@ describe("instruction child runs", () => {
     expect(insert).toHaveBeenCalledWith(
       "runs",
       expect.objectContaining({
-        automationId: parent.automationId,
-        automationParentId: parent.automationParentId,
-        automationConfigurationVersion: parent.automationConfigurationVersion,
+        automation: parent.automation,
         folderId: parent.folderId,
         parentId: parent._id,
         rootId: parent._id,
@@ -47,9 +45,11 @@ function automationRun(): Doc<"runs"> {
     _id: "parent-run" as Id<"runs">,
     _creationTime: 0,
     access: { integrations: [], web: false },
-    automationConfigurationVersion: 4,
-    automationId: "child-automation" as Id<"automations">,
-    automationParentId: "owner-automation" as Id<"automations">,
+    automation: {
+      id: "child-automation" as Id<"automations">,
+      parentId: "owner-automation" as Id<"automations">,
+      version: 4,
+    },
     cause: { type: "time", scheduledAt: 0 },
     folderId: "folder" as Id<"folders">,
     createdAt: 0,

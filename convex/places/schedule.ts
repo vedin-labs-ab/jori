@@ -11,13 +11,13 @@ export async function schedulePlaceProfile(
 ) {
   const schedule = nextDebounceSchedule({
     now,
-    ceilingAt: place.profileAt,
+    ceilingAt: place.debounce?.ceilingAt,
     debounceMs: profileDebounceMs,
     maxDelayMs: profileMaxDelayMs,
   })
 
-  if (place.functionId !== undefined) {
-    await ctx.scheduler.cancel(place.functionId)
+  if (place.debounce !== undefined) {
+    await ctx.scheduler.cancel(place.debounce.functionId)
   }
 
   const functionId = await ctx.scheduler.runAt(
@@ -27,7 +27,6 @@ export async function schedulePlaceProfile(
   )
 
   await ctx.db.patch(place._id, {
-    functionId,
-    profileAt: schedule.ceilingAt,
+    debounce: { ceilingAt: schedule.ceilingAt, functionId },
   })
 }
