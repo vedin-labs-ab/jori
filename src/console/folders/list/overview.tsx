@@ -13,6 +13,7 @@ import {
 } from "../../shared/list/empty"
 import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
+import { FolderSurfaceTabs } from "../frame"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
 import { type FolderRootsResult } from "../types"
 import { useFolderListControls } from "./controls"
@@ -36,6 +37,7 @@ function RootFolders({ organizationId }: { organizationId: string }) {
 
   return (
     <ConsoleListLayout>
+      <FolderSurfaceTabs tab="contents" />
       <ConsoleHeaderActions>
         <ConsoleHeaderButton
           icon={<Plus />}

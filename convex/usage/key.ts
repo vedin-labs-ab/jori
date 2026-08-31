@@ -41,3 +41,15 @@ export function usageDate(timestamp: number, timeZone: string) {
     new Date(timestamp)
   )
 }
+
+/** The same calendar date, whole days later or earlier. Dates are plain
+ *  calendar strings rather than instants, so the arithmetic runs at UTC
+ *  midnight where every day is exactly 24 hours long and no daylight-saving
+ *  jump can shorten one. */
+export function shiftUsageDate(date: string, days: number) {
+  const shifted = new Date(`${date}T00:00:00Z`)
+
+  shifted.setUTCDate(shifted.getUTCDate() + days)
+
+  return shifted.toISOString().slice(0, 10)
+}

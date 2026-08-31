@@ -1,5 +1,10 @@
 import { expect, test } from "vitest"
-import { ancestorFolderIds, buildFolderTree, subtreeFolderIds } from "./tree"
+import {
+  activeFolderId,
+  ancestorFolderIds,
+  buildFolderTree,
+  subtreeFolderIds,
+} from "./tree"
 
 const rows = [
   { folderId: "ops", name: "Operations" },
@@ -68,4 +73,15 @@ test("walks ancestors nearest first and survives cycles", () => {
       "a"
     )
   ).toEqual(["b"])
+})
+
+test("a folder stays the active one across both of its tabs", () => {
+  expect(activeFolderId("/folders/finance")).toBe("finance")
+  expect(activeFolderId("/folders/finance/usage")).toBe("finance")
+})
+
+test("the surface's own pages belong to no folder", () => {
+  expect(activeFolderId("/folders")).toBeUndefined()
+  expect(activeFolderId("/folders/usage")).toBeUndefined()
+  expect(activeFolderId("/runs")).toBeUndefined()
 })

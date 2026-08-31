@@ -13,7 +13,11 @@ type Id<TableName extends keyof DataModel> =
 
 export type StoredDoc = Record<string, unknown> & { _id: string }
 
-type Constraint = { kind: "eq" | "gt" | "lt"; field: string; value: unknown }
+type Constraint = {
+  kind: "eq" | "gt" | "gte" | "lt" | "lte"
+  field: string
+  value: unknown
+}
 
 // Sort keys for the named indexes ordered tests rely on. Queries through
 // any other index keep insertion order and treat order() as a no-op, as
@@ -115,8 +119,18 @@ function constraintBuilder(constraints: Constraint[]) {
 
       return index
     },
+    gte: (field: string, value: unknown) => {
+      constraints.push({ kind: "gte", field, value })
+
+      return index
+    },
     lt: (field: string, value: unknown) => {
       constraints.push({ kind: "lt", field, value })
+
+      return index
+    },
+    lte: (field: string, value: unknown) => {
+      constraints.push({ kind: "lte", field, value })
 
       return index
     },
@@ -227,8 +241,23 @@ function matches(row: StoredDoc, constraints: Constraint[]) {
 
     const comparison = compareValues(field, constraint.value)
 
-    return constraint.kind === "gt" ? comparison > 0 : comparison < 0
+    return rangeMatches(constraint.kind, comparison)
   })
+}
+
+function rangeMatches(kind: Constraint["kind"], comparison: number) {
+  switch (kind) {
+    case "eq":
+      return comparison === 0
+    case "gt":
+      return comparison > 0
+    case "gte":
+      return comparison >= 0
+    case "lt":
+      return comparison < 0
+    case "lte":
+      return comparison <= 0
+  }
 }
 
 /** Index fields may be nested paths ("automation.id"); a path through a
@@ -246,7 +275,8 @@ function readField(row: StoredDoc, path: string): unknown {
 }
 
 /** Convex index ordering for the value shapes tests use: a missing field
- *  sorts before every present value. */
+ *  sorts before every present value, and strings compare as strings so
+ *  `YYYY-MM-DD` date ranges read the way the real index reads them. */
 function compareValues(left: unknown, right: unknown) {
   if (left === right) {
     return 0
@@ -258,6 +288,10 @@ function compareValues(left: unknown, right: unknown) {
 
   if (right === undefined) {
     return 1
+  }
+
+  if (typeof left === "string" && typeof right === "string") {
+    return left < right ? -1 : 1
   }
 
   return (left as number) < (right as number) ? -1 : 1
