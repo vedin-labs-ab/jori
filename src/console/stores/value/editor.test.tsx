@@ -57,7 +57,12 @@ function renderEditor(value: unknown, version = 2) {
   } as unknown as StoreDetail
 
   render(
-    <ValueEditorSection organizationId="org-1" store={store} tools={null} />
+    <ValueEditorSection
+      organizationId="org-1"
+      schema={schema}
+      store={store}
+      tools={null}
+    />
   )
 }
 

@@ -18,8 +18,9 @@ import { StoreToolbar } from "./toolbar"
 
 /** The store's value under the store toolbar. The editor IS the page —
  *  it renders the toolbar itself, so the view toggle and save status live
- *  in the header. Archived stores fall back to a read-only document under
- *  a plain toolbar. */
+ *  in the header. A store the console does not edit — schemaless or
+ *  archived — falls back to a read-only document under a plain
+ *  toolbar. */
 export function StoreValue({
   organizationId,
   store,
@@ -28,12 +29,13 @@ export function StoreValue({
   store: StoreDetail
 }) {
   const [isSchemaOpen, setIsSchemaOpen] = useState(false)
+  const openSchema = () => setIsSchemaOpen(true)
   const tools = (
     <>
       <ValueActionButton
         icon={<Braces />}
         label={store.schema === undefined ? "Add schema" : "Schema"}
-        onClick={() => setIsSchemaOpen(true)}
+        onClick={openSchema}
       />
       <CopyButton label="value" value={formatJsonText(store.value)} />
     </>
@@ -41,10 +43,11 @@ export function StoreValue({
 
   return (
     <>
-      {store.archivedAt === undefined ? (
+      {store.schema !== undefined && store.archivedAt === undefined ? (
         <ValueEditorSection
           key={store.storeId}
           organizationId={organizationId}
+          schema={store.schema}
           store={store}
           tools={tools}
         />
@@ -52,7 +55,7 @@ export function StoreValue({
         <>
           <StoreToolbar store={store} tools={tools} />
           <ConsoleListContent>
-            <ArchivedValue store={store} />
+            <ReadOnlyValue onAddSchema={openSchema} store={store} />
           </ConsoleListContent>
         </>
       )}
@@ -95,10 +98,22 @@ function ValueActionButton({
   )
 }
 
-/** Archived stores block writes, so the value shows as the read-only
- *  document it is. */
-function ArchivedValue({ store }: { store: StoreDetail }) {
-  if (store.version === 0) {
+/** The value of a store the console does not edit: an archived store,
+ *  which refuses writes, or a schemaless one, which has no form to build.
+ *  Whatever was written still reads as the document it is; an unwritten
+ *  store says why, and a schema is the way out. */
+function ReadOnlyValue({
+  onAddSchema,
+  store,
+}: {
+  onAddSchema: () => void
+  store: StoreDetail
+}) {
+  if (store.version > 0) {
+    return <JsonBlock className="max-h-none" value={store.value} />
+  }
+
+  if (store.archivedAt !== undefined) {
     return (
       <ConsoleEmptyState
         className="h-full"
@@ -109,5 +124,18 @@ function ArchivedValue({ store }: { store: StoreDetail }) {
     )
   }
 
-  return <JsonBlock className="max-h-none" value={store.value} />
+  return (
+    <ConsoleEmptyState
+      action={
+        <Button onClick={onAddSchema} type="button">
+          <Braces />
+          Add schema
+        </Button>
+      }
+      className="h-full"
+      description="A schema gives this store an editable form. Without one, only agents and the API write the value."
+      icon={Braces}
+      title="No schema yet"
+    />
+  )
 }

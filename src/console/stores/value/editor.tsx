@@ -1,3 +1,4 @@
+import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { useMutation } from "convex/react"
 import { type ReactNode, useEffect, useRef } from "react"
 import { toast } from "sonner"
@@ -24,10 +25,14 @@ import { StoreToolbar } from "./toolbar"
  *  meta carries the save status; there is nothing to press. */
 export function ValueEditorSection({
   organizationId,
+  schema,
   store,
   tools,
 }: {
   organizationId: string
+  /** The store's schema, which the form is built from — the editor only
+   *  renders for a store that has one. */
+  schema: JsonSchemaObject
   store: StoreDetail
   /** Toolbar actions after the view toggle: schema, copy. */
   tools: ReactNode
@@ -35,7 +40,7 @@ export function ValueEditorSection({
   const write = useMutation(api.stores.console.writeValue)
   const editor = useValueEditor({
     hasValue: store.version > 0,
-    schema: store.schema,
+    schema,
     value: store.value,
   })
   const versionRef = useRef(store.version)
@@ -150,7 +155,7 @@ async function saveValue({
 }
 
 /** Form/Code in the toolbar, hidden while there is no form to toggle to:
- *  a schemaless store is code, not a choice. */
+ *  a schema the widgets cannot represent is code, not a choice. */
 function ViewToggle({ editor }: { editor: ValueEditor }) {
   if (editor.form === undefined) {
     return null
@@ -194,7 +199,8 @@ function useExternalReseed(
 
 /** The code side of the toggle. While the form is the editing surface the
  *  JSON is a read-only, highlighted mirror; only a store the form cannot
- *  host — no schema, or a value outside it — edits as raw text. */
+ *  host — a schema the widgets cannot represent, or a value outside it —
+ *  edits as raw text. */
 function ValueCodeView({
   editor,
   onEdit,

@@ -1,6 +1,5 @@
 import {
   type JsonSchemaObject,
-  resolveWriteSchema,
   type SchemaValidationIssue,
   validateJsonSchemaValue,
 } from "@contracts/schema/validate"
@@ -16,9 +15,10 @@ import { schemaToForm, type ValueField } from "./model"
 
 // State for the value editor: a form view over the schema-derived field
 // model and a code view over raw JSON, mirroring the schema builder. The
-// form is the default; a schema or value the form cannot hold — or a store
-// with no schema at all — keeps the code view with a note, and crossing
-// between views is never lossy.
+// form is the default; a schema or value the form cannot hold keeps the
+// code view with a note, and crossing between views is never lossy.
+// A store with no schema has no form to build, so it never opens the
+// editor at all.
 // Errors stay hidden until a submit or view-switch attempt, and clear for
 // a field as soon as its input changes.
 
@@ -44,7 +44,6 @@ export type ValueSubmitResult = { ok: true; value: unknown } | { ok: false }
 export type ValueEditor = ReturnType<typeof useValueEditor>
 
 export const valueEditorNotes = {
-  none: "This store has no schema to build a form from, so the value is edited as code.",
   schema:
     "This store's schema uses JSON Schema features the form view cannot edit, so the value stays as code.",
   value: "The current value does not fit the form view, so it stays as code.",
@@ -59,22 +58,16 @@ export function useValueEditor({
   value,
 }: {
   hasValue: boolean
-  schema: JsonSchemaObject | undefined
+  schema: JsonSchemaObject
   value: unknown
 }) {
-  const constraint = resolveWriteSchema(schema)
-  const formlessNote =
-    schema === undefined ? valueEditorNotes.none : valueEditorNotes.schema
-  const form = useMemo(
-    () => (schema === undefined ? undefined : schemaToForm(schema)),
-    [schema]
-  )
+  const form = useMemo(() => schemaToForm(schema), [schema])
   const [state, setState] = useState(() =>
-    initialEditorState(form, value, hasValue, formlessNote)
+    initialEditorState(form, value, hasValue)
   )
 
   function submit(): ValueSubmitResult {
-    const [next, result] = submitEditor(state, form, constraint)
+    const [next, result] = submitEditor(state, form, schema)
 
     setState(next)
 
@@ -102,7 +95,7 @@ export function useValueEditor({
       setState((current) =>
         view === "code"
           ? switchToCode(current, form)
-          : switchToForm(current, form, formlessNote)
+          : switchToForm(current, form)
       ),
     /** Reseeds the whole editor from a fresh server value — after an
      *  external write lands while nothing local is pending. */
@@ -114,8 +107,7 @@ export function useValueEditor({
 export function initialEditorState(
   form: ValueField | undefined,
   value: unknown,
-  hasValue: boolean,
-  formlessNote: string = valueEditorNotes.schema
+  hasValue: boolean
 ): ValueEditorState {
   const base: ValueEditorState = {
     view: "form",
@@ -128,7 +120,12 @@ export function initialEditorState(
   }
 
   if (form === undefined) {
-    return { ...base, view: "code", codeEditable: true, codeNote: formlessNote }
+    return {
+      ...base,
+      view: "code",
+      codeEditable: true,
+      codeNote: valueEditorNotes.schema,
+    }
   }
 
   if (!hasValue) {
@@ -176,8 +173,7 @@ export function switchToCode(
  *  the code view keeps the text and explains why. */
 export function switchToForm(
   state: ValueEditorState,
-  form: ValueField | undefined,
-  formlessNote: string = valueEditorNotes.schema
+  form: ValueField | undefined
 ): ValueEditorState {
   if (state.view === "form") {
     return state
@@ -193,7 +189,7 @@ export function switchToForm(
   }
 
   if (form === undefined) {
-    return { ...state, codeNote: formlessNote }
+    return { ...state, codeNote: valueEditorNotes.schema }
   }
 
   const root = valueToState(form, parsed.value)
