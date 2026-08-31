@@ -20,7 +20,6 @@ import {
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
-import { createSight } from "../visibility/sight"
 import { getAccessibleStore } from "./access"
 
 export const mint = internalMutation({
@@ -151,11 +150,6 @@ export async function openStoreShare(
   const read = await openMaterialRead(ctx, {
     target: storeTarget(store._id),
     material: store,
-    creatorHasAccess: (createdBy) =>
-      createSight(ctx, {
-        organizationId: store.organizationId,
-        personId: createdBy,
-      }).canSee(store),
     secret: args.secret,
   })
 
