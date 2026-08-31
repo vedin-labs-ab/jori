@@ -87,7 +87,7 @@ export function TopUpDialog({
               options={presetOptions}
               value={amount}
             />
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <InputGroup>
                 <InputGroupInput
                   // The toggle above owns the "Amount" label, and this field

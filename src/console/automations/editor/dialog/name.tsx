@@ -13,27 +13,25 @@ export function AutomationNameField({
   return (
     <div className="grid gap-2">
       <Label htmlFor="automation-name">Name</Label>
-      <div className="grid gap-1.5">
-        <Input
-          aria-describedby={
-            error === undefined ? undefined : "automation-name-error"
-          }
-          aria-invalid={error === undefined ? undefined : true}
-          id="automation-name"
-          value={value}
-          onChange={(event) => onValueChange(event.target.value)}
-          placeholder="Weekly release summary"
-        />
-        {error === undefined ? null : (
-          <p
-            className="text-destructive text-xs/relaxed"
-            id="automation-name-error"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
-      </div>
+      <Input
+        aria-describedby={
+          error === undefined ? undefined : "automation-name-error"
+        }
+        aria-invalid={error === undefined ? undefined : true}
+        id="automation-name"
+        value={value}
+        onChange={(event) => onValueChange(event.target.value)}
+        placeholder="Weekly release summary"
+      />
+      {error === undefined ? null : (
+        <p
+          className="text-destructive text-xs/relaxed"
+          id="automation-name-error"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
     </div>
   )
 }

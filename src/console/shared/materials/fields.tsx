@@ -19,26 +19,24 @@ export function MaterialNameField({
   return (
     <div className="grid gap-2">
       <Label htmlFor={`${idPrefix}-name`}>Name</Label>
-      <div className="grid gap-1.5">
-        <Input
-          aria-describedby={
-            error === undefined ? undefined : `${idPrefix}-name-error`
-          }
-          aria-invalid={error === undefined ? undefined : true}
-          id={`${idPrefix}-name`}
-          onChange={(event) => onNameChange(event.target.value)}
-          value={name}
-        />
-        {error === undefined ? null : (
-          <p
-            className="text-destructive text-xs/relaxed"
-            id={`${idPrefix}-name-error`}
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
-      </div>
+      <Input
+        aria-describedby={
+          error === undefined ? undefined : `${idPrefix}-name-error`
+        }
+        aria-invalid={error === undefined ? undefined : true}
+        id={`${idPrefix}-name`}
+        onChange={(event) => onNameChange(event.target.value)}
+        value={name}
+      />
+      {error === undefined ? null : (
+        <p
+          className="text-destructive text-xs/relaxed"
+          id={`${idPrefix}-name-error`}
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
     </div>
   )
 }
