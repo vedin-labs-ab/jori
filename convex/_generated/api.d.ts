@@ -296,7 +296,6 @@ import type * as messages_identifiers from "../messages/identifiers.js";
 import type * as messages_reply from "../messages/reply.js";
 import type * as messages_surface from "../messages/surface.js";
 import type * as messages_targets from "../messages/targets.js";
-import type * as model_index from "../model/index.js";
 import type * as model_openrouter from "../model/openrouter.js";
 import type * as model_structured from "../model/structured.js";
 import type * as organization_crawl from "../organization/crawl.js";
@@ -840,7 +839,6 @@ declare const fullApi: ApiFromModules<{
   "messages/reply": typeof messages_reply;
   "messages/surface": typeof messages_surface;
   "messages/targets": typeof messages_targets;
-  "model/index": typeof model_index;
   "model/openrouter": typeof model_openrouter;
   "model/structured": typeof model_structured;
   "organization/crawl": typeof organization_crawl;
