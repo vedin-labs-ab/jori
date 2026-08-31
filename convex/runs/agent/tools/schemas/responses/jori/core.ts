@@ -11,7 +11,6 @@ import {
   type SchemaMap,
   stringProperty,
 } from "../common"
-import { automationJoriToolResponseSchemas } from "./automations"
 import { brokerJoriToolResponseSchemas } from "./broker"
 import { runJoriToolResponseSchemas } from "./runs"
 import { workstreamJoriToolResponseSchemas } from "./workstreams"
@@ -201,5 +200,3 @@ export const coreJoriToolResponseSchemas = {
   web_search: webToolResult(),
   web_fetch: webToolResult(),
 } satisfies SchemaMap
-
-export { automationJoriToolResponseSchemas }

@@ -94,24 +94,42 @@ export function recurringDisplay(input: {
   })
 }
 
-export function fakeQueryCtx(docs: Record<string, unknown>) {
+/** A query context whose `db.get` resolves ids from `docs`, and whose
+ *  `db.query` serves the given rows for the named tables and nothing for
+ *  every other table. */
+export function fakeQueryCtx(
+  docs: Record<string, unknown>,
+  rows: Record<string, unknown[]> = {}
+) {
   return {
     db: {
       get: async (id: string) => docs[id] ?? null,
-      query: () => ({
-        withIndex: () => emptyQueryResult(),
+      query: (table: string) => ({
+        withIndex: () => queryResult(rows[table] ?? []),
       }),
     },
   } as unknown as QueryCtx
 }
 
-export function emptyQueryResult() {
+/** A query result readers can take, order, iterate, or read the first row
+ *  of, backed by one in-memory list. */
+export function queryResult(rows: unknown[]) {
   return {
-    async *[Symbol.asyncIterator]() {},
-    first: async () => null,
-    order: () => emptyQueryResult(),
-    take: async () => [],
+    async *[Symbol.asyncIterator]() {
+      yield* rows
+    },
+    first: async () => rows[0] ?? null,
+    order: () => queryResult(rows),
+    take: async (count: number) => rows.slice(0, count),
   }
+}
+
+/** The `run.prepared` trace rows the run projection reads, so the tool
+ *  snapshot stored on a run reaches the summary under test. */
+export function preparedTraceRows(run: { preparedTools?: unknown }) {
+  return run.preparedTools === undefined
+    ? []
+    : [{ data: { tools: run.preparedTools }, type: "run.prepared" }]
 }
 
 /** A run row with the fields the activity projection reads; overrides

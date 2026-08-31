@@ -1,4 +1,4 @@
-import { withUnicodeEmoji } from "../../../../contracts/emoji"
+import { withUnicodeEmoji } from "../../../../contracts/emoji/convert"
 
 // Renders raw Slack mrkdwn as the human-readable text stored on messages:
 // mention/link/special tokens become labels, entities unescape, and known

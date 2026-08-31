@@ -1,7 +1,5 @@
-import {
-  automationJoriToolResponseSchemas,
-  coreJoriToolResponseSchemas,
-} from "./core"
+import { automationJoriToolResponseSchemas } from "./automations"
+import { coreJoriToolResponseSchemas } from "./core"
 import { storeToolResponseSchemas } from "./stores"
 import { tableToolResponseSchemas } from "./tables"
 

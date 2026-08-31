@@ -1,9 +1,5 @@
 import { describe, expect, test } from "vitest"
-import {
-  assertSupportedJsonSchema,
-  normalizeJsonSchema,
-  normalizeJsonValueSchema,
-} from "./normalize"
+import { assertSupportedJsonSchema, normalizeJsonSchema } from "./normalize"
 
 describe("normalizeJsonSchema", () => {
   test("strips $schema and keeps the rest", () => {
@@ -35,12 +31,6 @@ describe("normalizeJsonSchema", () => {
     expect(() => normalizeJsonSchema("nope")).toThrow(
       "must be a JSON Schema object"
     )
-  })
-
-  test("value schemas may describe any supported root type", () => {
-    expect(normalizeJsonValueSchema({ type: "array" })).toEqual({
-      type: "array",
-    })
   })
 })
 

@@ -51,14 +51,6 @@ function fieldLabel(value: string) {
     .replace(/^./, (letter) => letter.toUpperCase())
 }
 
-export function formatToolName(name: string) {
-  return name
-    .split("_")
-    .filter((part) => part !== "")
-    .map((part) => part[0].toUpperCase() + part.slice(1))
-    .join(" ")
-}
-
 export function inputDescription(input: Record<string, unknown> | undefined) {
   if (input === undefined) {
     return undefined

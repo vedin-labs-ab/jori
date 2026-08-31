@@ -77,10 +77,6 @@ export function readToolAccess(data: unknown): ToolLabel["access"] | undefined {
   return readTool(data)?.access
 }
 
-export function readToolError(data: unknown) {
-  return readTraceError(data)
-}
-
 export function readToolInput(data: unknown) {
   return asRecord(asRecord(data)?.input)
 }

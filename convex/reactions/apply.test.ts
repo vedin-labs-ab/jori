@@ -1,6 +1,7 @@
 import { expect, test } from "vitest"
 import { id } from "../../test/convex/database"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { integrationDoc } from "../../test/convex/integrations"
+import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { reconcileTargetReactions, recordReactionEvent } from "./apply"
 
@@ -104,20 +105,11 @@ function reactionRows(ctx: FakeCtx) {
 }
 
 function githubIntegration(): Doc<"integrations"> {
-  return {
-    _id: id<"integrations">("integration"),
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
     integration: "github",
-    scope: "organization",
     externalId: "installation",
-    credentials: {},
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
     data: { appSlug: "jori", botLogin: "jori[bot]" },
-  }
+  })
 }
 
 function targetMessage(): Doc<"messages"> {

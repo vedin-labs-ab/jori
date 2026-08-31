@@ -1,4 +1,4 @@
-import { emojiForName, isEmojiText } from "../emoji"
+import { emojiForName, isEmojiText } from "../emoji/convert"
 
 export function reactionDisplayLabel(value: string | undefined) {
   if (value === undefined) {

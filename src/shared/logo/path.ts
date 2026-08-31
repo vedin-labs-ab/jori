@@ -1,12 +1,4 @@
 const providerLogos: Record<string, string> = {
-  GitHub: "/logos/integrations/github.svg",
-  Gmail: "/logos/integrations/gmail.svg",
-  "Google Calendar": "/logos/integrations/google-calendar.svg",
-  Linear: "/logos/integrations/linear.svg",
-  "Microsoft Calendar": "/logos/integrations/microsoft-calendar.svg",
-  "Outlook Mail": "/logos/integrations/microsoft-email.svg",
-  Notion: "/logos/integrations/notion.svg",
-  Slack: "/logos/integrations/slack.svg",
   github: "/logos/integrations/github.svg",
   gmail: "/logos/integrations/gmail.svg",
   googleCalendar: "/logos/integrations/google-calendar.svg",

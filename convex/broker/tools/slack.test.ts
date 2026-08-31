@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { createFileContext } from "../../../test/convex/broker"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { id } from "../../../test/convex/database"
+import { integrationDoc } from "../../../test/convex/integrations"
+import { type Doc } from "../../_generated/dataModel"
 import { callSlackTool } from "./slack"
 
 const originalFetch = globalThis.fetch
@@ -254,12 +256,9 @@ function parseSlackRequestBody(body: BodyInit | null | undefined) {
 }
 
 function slackIntegration(): Doc<"integrations"> {
-  return {
-    _id: "slack-integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("slack-integration"),
     integration: "slack",
-    scope: "organization",
     externalId: "slack-account",
     credentials: {
       bot: {
@@ -273,9 +272,5 @@ function slackIntegration(): Doc<"integrations"> {
         expiresAt: Date.now() + 3_600_000,
       },
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }

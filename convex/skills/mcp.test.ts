@@ -1,8 +1,6 @@
 import { expect, test } from "vitest"
-import {
-  decodeToolResult,
-  encodeToolResult,
-} from "../../contracts/json/transport"
+import { decodeJson } from "../../contracts/json"
+import { encodeToolResult } from "../../contracts/json/transport"
 import { runtimeSkill, runtimeSkills } from "../../test/convex/skills"
 import { loadJoriSkillTool } from "./mcp"
 
@@ -46,7 +44,7 @@ test("loads non-integration skills with JSON-safe metadata", () => {
     args: { name: "image-generation" },
   })
 
-  expect(decodeToolResult(encodeToolResult(result))).toMatchObject({
+  expect(decodeJson(encodeToolResult(result))).toMatchObject({
     status: "loaded",
     skill: {
       name: "image-generation",

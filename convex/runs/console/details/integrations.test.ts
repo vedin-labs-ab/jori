@@ -3,7 +3,8 @@ import {
   eventAutomationDisplay,
   fakeQueryCtx,
 } from "../../../../test/convex/console"
-import { type Id } from "../../../_generated/dataModel"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
 
 test("includes linked GitHub pull request details", async () => {
@@ -175,19 +176,11 @@ function linearIssueCommentEvent() {
 }
 
 function githubIntegration() {
-  return {
-    _id: "integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("integration"),
     integration: "github",
-    scope: "organization",
     externalId: "github-installation",
-    credentials: {},
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  }
+  })
 }
 
 function testRun(

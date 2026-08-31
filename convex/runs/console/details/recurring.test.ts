@@ -1,11 +1,13 @@
 import { expect, test } from "vitest"
 import { getToolPermission } from "../../../../contracts/permissions"
 import {
-  emptyQueryResult,
+  fakeQueryCtx,
+  preparedTraceRows,
   recurringDisplay,
 } from "../../../../test/convex/console"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Id } from "../../../_generated/dataModel"
-import { type QueryCtx } from "../../../_generated/server"
 import { summarizeRun } from "../summaries"
 
 test("includes recurring automation details", async () => {
@@ -22,11 +24,14 @@ test("includes recurring automation details", async () => {
     }
   )
   const summary = await summarizeRun(
-    fakeQueryCtx({
-      automation: recurringAutomation({ nextAt }),
-      integration: slackIntegration(),
-      run,
-    }),
+    fakeQueryCtx(
+      {
+        automation: recurringAutomation({ nextAt }),
+        integration: slackIntegration(),
+        run,
+      },
+      { traces: preparedTraceRows(run) }
+    ),
     run
   )
 
@@ -63,11 +68,14 @@ test("includes paused recurring automation status without next run details", asy
     { createdAt: scheduledAt + 1000, endedAt: scheduledAt + 2000 }
   )
   const summary = await summarizeRun(
-    fakeQueryCtx({
-      automation: recurringAutomation({ nextAt, status: "paused" }),
-      integration: slackIntegration(),
-      run,
-    }),
+    fakeQueryCtx(
+      {
+        automation: recurringAutomation({ nextAt, status: "paused" }),
+        integration: slackIntegration(),
+        run,
+      },
+      { traces: preparedTraceRows(run) }
+    ),
     run
   )
 
@@ -134,19 +142,11 @@ function recurringAutomation({
 }
 
 function slackIntegration() {
-  return {
-    _id: "integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("integration"),
     integration: "slack",
-    scope: "organization",
     externalId: "slack-team",
-    credentials: {},
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  }
+  })
 }
 
 function testRun(
@@ -158,7 +158,7 @@ function testRun(
     endedAt: 1000,
     ...run,
     ...overrides,
-  } as Parameters<typeof summarizeRun>[1]
+  } as Parameters<typeof summarizeRun>[1] & { preparedTools?: unknown }
 }
 
 function slackToolSnapshot() {
@@ -210,33 +210,5 @@ function catalogTool(tool: string, access: "read" | "write") {
     description: permission.description,
     label: permission.label,
     tool,
-  }
-}
-
-function fakeQueryCtx(docs: Record<string, unknown>) {
-  const preparedTools = (docs.run as { preparedTools?: unknown }).preparedTools
-
-  return {
-    db: {
-      get: async (id: string) => docs[id] ?? null,
-      query: (table: string) => fakeQuery(table, preparedTools),
-    },
-  } as unknown as QueryCtx
-}
-
-function fakeQuery(table: string, preparedTools: unknown) {
-  return {
-    withIndex: () =>
-      table === "traces"
-        ? {
-            first: async () =>
-              preparedTools === undefined
-                ? null
-                : {
-                    data: { tools: preparedTools },
-                    type: "run.prepared",
-                  },
-          }
-        : emptyQueryResult(),
   }
 }

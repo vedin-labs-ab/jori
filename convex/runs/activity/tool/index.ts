@@ -1,14 +1,15 @@
 import { type Doc } from "../../../_generated/dataModel"
-import { formatToolName, inputDescription, inputDetails } from "../format"
+import { humanizeToolName } from "../../../shared/tools/names"
+import { inputDescription, inputDetails } from "../format"
 import { toolMetadata } from "../metadata"
 import {
   readPreparedTools,
   readToolAccess,
-  readToolError,
   readToolInput,
   readToolName,
   readToolResult,
   readTraceData,
+  readTraceError,
   traceAttempt,
   traceSequence,
 } from "../read"
@@ -107,7 +108,7 @@ function toolTitle(
   label: ToolLabel | undefined,
   status: ActivityStatus
 ) {
-  const title = label?.label ?? formatToolName(name)
+  const title = label?.label ?? humanizeToolName(name)
 
   return status === "failed" ? `${title} failed` : title
 }
@@ -117,7 +118,7 @@ function toolDescription(
   terminal: unknown,
   metadata: ReturnType<typeof toolMetadata>
 ) {
-  const error = readToolError(terminal)
+  const error = readTraceError(terminal)
 
   if (error !== undefined) {
     return error
@@ -134,7 +135,7 @@ function toolDetails(started: unknown, terminal: unknown) {
   return [
     ...inputDetails(readToolInput(started)),
     ...resultDetails(readToolResult(terminal)),
-    ...errorDetails(readToolError(terminal)),
+    ...errorDetails(readTraceError(terminal)),
   ]
 }
 

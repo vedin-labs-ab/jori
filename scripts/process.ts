@@ -42,11 +42,11 @@ export async function runTasks(tasks: Promise<unknown>[]) {
   }
 }
 
-export function packageCommand(script: string): Command {
+export function packageCommand(...args: string[]): Command {
   return {
-    args: [script],
+    args,
     command: process.platform === "win32" ? "pnpm.cmd" : "pnpm",
-    label: script,
+    label: args.join(" "),
   }
 }
 

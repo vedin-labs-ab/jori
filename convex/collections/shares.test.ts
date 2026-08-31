@@ -1,9 +1,8 @@
 import { describe, expect, test } from "vitest"
 import {
   canOpenShare,
-  mintedShare,
+  mintedShareLink,
   randomShareSecret,
-  shareLink,
   sharesToRetire,
 } from "./shares"
 
@@ -94,20 +93,19 @@ describe("share secrets", () => {
 
 describe("share links", () => {
   test("carry the secret in the fragment", () => {
-    const link = shareLink("/tables/table_1", "s3cret", {
-      JORI_APP_URL: "https://jori.example",
+    expect(
+      mintedShareLink("/tables/table_1", "s3cret", 9, {
+        JORI_APP_URL: "https://jori.example",
+      })
+    ).toEqual({
+      url: "https://jori.example/tables/table_1#share=s3cret",
+      urlPath: "/tables/table_1#share=s3cret",
+      expiresAt: 9,
     })
-
-    expect(link.url).toBe("https://jori.example/tables/table_1#share=s3cret")
-    expect(link.urlPath).toBe("/tables/table_1#share=s3cret")
   })
 
   test("fall back to the path without a configured origin", () => {
-    const link = shareLink("/tables/table_1", "s3cret", {})
-
-    expect(link.url).toBeUndefined()
-    expect(link.urlPath).toBe("/tables/table_1#share=s3cret")
-    expect(mintedShare(link, 9)).toEqual({
+    expect(mintedShareLink("/tables/table_1", "s3cret", 9, {})).toEqual({
       url: "/tables/table_1#share=s3cret",
       urlPath: "/tables/table_1#share=s3cret",
       expiresAt: 9,

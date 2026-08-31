@@ -9,8 +9,6 @@ import { countLabel } from "@/lib/count"
 import { cn } from "@/lib/utils"
 import { ProviderLogo } from "@/shared/logo/provider"
 
-type ToolSurfaceLogoSize = "sm" | "md"
-
 export function ToolAccessSummary({
   surfaces,
   toolCount,
@@ -28,28 +26,24 @@ export function ToolAccessSummary({
   )
 }
 
-export function ToolCountSummary({
-  logoSize = "md",
+function ToolCountSummary({
   surfaces,
   toolCount,
 }: {
-  logoSize?: ToolSurfaceLogoSize
   surfaces: ToolSurface[]
   toolCount: number
 }) {
   return (
     <span className="flex min-w-0 items-center gap-2 text-foreground">
-      <ToolSurfaceLogoStack logoSize={logoSize} surfaces={surfaces} />
+      <ToolSurfaceLogoStack surfaces={surfaces} />
       <span className="truncate">{countLabel(toolCount, "tool")}</span>
     </span>
   )
 }
 
 function ToolSurfaceLogoStack({
-  logoSize,
   surfaces,
 }: {
-  logoSize: ToolSurfaceLogoSize
   surfaces: readonly ToolSurface[]
 }) {
   const uniqueSurfaces = [...new Set(surfaces)]
@@ -66,10 +60,7 @@ function ToolSurfaceLogoStack({
       <span className="-space-x-1 inline-flex">
         {visibleSurfaces.map((surface) => (
           <ProviderLogo
-            className={cn(
-              "shrink-0 bg-background ring-2 ring-card",
-              logoSizeClassName(logoSize)
-            )}
+            className="size-4 shrink-0 rounded-sm bg-background ring-2 ring-card"
             key={surface}
             surface={surface}
           />
@@ -99,10 +90,6 @@ function HiddenSurfaceCount({ surfaces }: { surfaces: ToolSurface[] }) {
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   )
-}
-
-function logoSizeClassName(size: ToolSurfaceLogoSize) {
-  return size === "sm" ? "size-3 rounded-xs" : "size-4 rounded-sm"
 }
 
 function WebSearchStatus({ allowed }: { allowed: boolean }) {

@@ -1,10 +1,7 @@
 import { ConvexHttpClient } from "convex/browser"
 import { type ToolSurface } from "../../contracts/integrations"
-import { type JsonObject } from "../../contracts/json"
-import {
-  decodeToolResult,
-  encodeToolInput,
-} from "../../contracts/json/transport"
+import { decodeJson, type JsonObject } from "../../contracts/json"
+import { encodeToolInput } from "../../contracts/json/transport"
 import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
 import {
   type AgentRunPayload,
@@ -58,14 +55,14 @@ export class JoriConvexClient implements RuntimePlatform {
     tool: string
   }) {
     const result = await this.client.action(api.runtime.tools.call, {
-      ...encodeToolInput(args.input),
+      inputJson: encodeToolInput(args.input),
       runId: args.runId,
       secret: this.secret,
       surface: args.surface,
       tool: args.tool,
     })
 
-    return decodeToolResult(result)
+    return decodeJson(result)
   }
 
   async executeApproval(args: {
@@ -182,7 +179,7 @@ export class JoriConvexClient implements RuntimePlatform {
     tool: string
   }) {
     return await this.client.action(api.runtime.tools.requestApproval, {
-      ...encodeToolInput(args.input),
+      inputJson: encodeToolInput(args.input),
       ...(args.replyTarget === undefined
         ? {}
         : { replyTarget: args.replyTarget }),

@@ -1,5 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { id } from "../../../test/convex/database"
+import { integrationDoc } from "../../../test/convex/integrations"
+import { type Doc } from "../../_generated/dataModel"
 import { searchSlackUsers } from "./options"
 
 const originalFetch = globalThis.fetch
@@ -80,12 +82,9 @@ function slackUser(id: string, name: string, realName: string, email?: string) {
 }
 
 function slackIntegration(): Doc<"integrations"> {
-  return {
-    _id: "slack" as Id<"integrations">,
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("slack"),
     integration: "slack",
-    scope: "organization",
     externalId: "team",
     credentials: {
       bot: {
@@ -99,10 +98,6 @@ function slackIntegration(): Doc<"integrations"> {
         expiresAt: Date.now() + 3_600_000,
       },
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
     data: { botUserId: "UBOT" },
-  }
+  })
 }

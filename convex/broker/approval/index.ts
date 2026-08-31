@@ -77,7 +77,7 @@ export async function createPromptedToolApproval(
     runId: context.run._id,
     surface: request.surface,
     tool: request.tool,
-    ...encodeToolInput(request.args),
+    inputJson: encodeToolInput(request.args),
     summary: request.summary,
     code: createApprovalCode(),
     requestedBy: createRequestedBy(context),

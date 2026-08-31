@@ -1,7 +1,8 @@
 import { getFunctionName } from "convex/server"
 import { afterEach, expect, test, vi } from "vitest"
+import { integrationDoc } from "../../test/convex/integrations"
 import { internal } from "../_generated/api"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { prepareIntegrationForRuntime } from "./runtime"
 
@@ -164,10 +165,7 @@ async function createPrivateKeyBase64() {
 }
 
 function googleIntegration(): Doc<"integrations"> {
-  return {
-    _id: "integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
     integration: "gmail",
     scope: "user",
     externalId: "google-user",
@@ -175,25 +173,13 @@ function googleIntegration(): Doc<"integrations"> {
       tokens: { access: "stale-access", refresh: "dead-refresh" },
       expiresAt: Date.now() - 60 * 1000,
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }
 
 function githubIntegration(credentials: unknown): Doc<"integrations"> {
-  return {
-    _id: "integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
     integration: "github",
-    scope: "organization",
     externalId: "98765",
-    credentials,
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+    credentials: credentials as Doc<"integrations">["credentials"],
+  })
 }

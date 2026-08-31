@@ -1,3 +1,5 @@
+import { optionalString } from "../shared/input"
+
 /** Claim readers for the Convex identity minted by Better Auth. The claim
  *  set is owned by `definePayload` in convex/auth.ts. */
 type Identity = {
@@ -25,11 +27,5 @@ export function readUserProfile(identity: Identity) {
 }
 
 export function readOrganizationClaim(identity: Record<string, unknown>) {
-  const organizationId = identity.org
-
-  return typeof organizationId === "string"
-    ? optionalString(organizationId)
-    : undefined
+  return optionalString(identity.org)
 }
-
-import { optionalString } from "../shared/input"

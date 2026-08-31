@@ -88,13 +88,11 @@ export const recordDelivery = internalMutation({
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
 
-    if (approval === null) {
-      return null
+    if (approval !== null) {
+      await recordApprovalDelivery(ctx, approval, args.delivery)
     }
 
-    const updated = await recordApprovalDelivery(ctx, approval, args.delivery)
-
-    return updated ?? { ...approval, delivery: args.delivery }
+    return null
   },
 })
 
@@ -106,13 +104,11 @@ export const recordDeliveryFailure = internalMutation({
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
 
-    if (approval === null) {
-      return null
+    if (approval !== null) {
+      await markApprovalFailed(ctx, approval, args.failure)
     }
 
-    const updated = await markApprovalFailed(ctx, approval, args.failure)
-
-    return updated ?? { ...approval, deliveryFailure: args.failure }
+    return null
   },
 })
 

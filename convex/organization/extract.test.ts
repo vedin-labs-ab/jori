@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
-import { sendOpenRouterChat } from "../model"
+import { sendOpenRouterChat } from "../model/openrouter"
 import { extractFacts } from "./extract"
 
-vi.mock("../model", () => ({
+vi.mock("../model/openrouter", () => ({
   sendOpenRouterChat: vi.fn(),
 }))
 

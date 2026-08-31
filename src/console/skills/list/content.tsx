@@ -41,7 +41,7 @@ export function SkillContent({
   return (
     <ConsoleScrollableGrid className="md:grid-cols-2 xl:grid-cols-3">
       {filteredCount === 0 ? (
-        <SkillEmptyState
+        <ConsoleEmptyState
           // Global skills are curated, not created, so only views that can
           // hold an organization skill offer the create action.
           action={
@@ -52,7 +52,9 @@ export function SkillContent({
               </Button>
             )
           }
+          className="col-span-full"
           description={emptyDescription(view, isFiltering)}
+          icon={BookOpenText}
           title={emptyTitle(view, isFiltering)}
         />
       ) : null}
@@ -78,14 +80,14 @@ function emptyTitle(view: SkillFilterView, isFiltering: boolean) {
       return "No matching skills"
     }
 
-    return `No matching ${viewLabel(view)} skills`
+    return `No matching ${view} skills`
   }
 
   if (view === "all") {
     return "No skills yet"
   }
 
-  return `No ${viewLabel(view)} skills`
+  return `No ${view} skills`
 }
 
 function emptyDescription(view: SkillFilterView, isFiltering: boolean) {
@@ -98,36 +100,4 @@ function emptyDescription(view: SkillFilterView, isFiltering: boolean) {
   }
 
   return "Add one to teach Jori how your team works."
-}
-
-function viewLabel(view: SkillFilterView) {
-  if (view === "organization") {
-    return "organization"
-  }
-
-  if (view === "global") {
-    return "global"
-  }
-
-  return ""
-}
-
-function SkillEmptyState({
-  action,
-  description,
-  title,
-}: {
-  action: React.ReactNode
-  description: string
-  title: string
-}) {
-  return (
-    <ConsoleEmptyState
-      action={action}
-      className="col-span-full"
-      description={description}
-      icon={BookOpenText}
-      title={title}
-    />
-  )
 }

@@ -31,18 +31,6 @@ export function normalizeJsonSchema(value: unknown, label = "schema") {
   return schema
 }
 
-/** Like normalizeJsonSchema, but allows any supported root type — for
- *  schemas that may describe non-object values. */
-export function normalizeJsonValueSchema(value: unknown, label = "schema") {
-  const schema = normalizeSchemaNode(value, label)
-
-  if (!isRecord(schema)) {
-    throw new Error(`${label} must be a JSON Schema object.`)
-  }
-
-  return schema
-}
-
 export function assertSupportedJsonSchema(
   schema: JsonSchemaObject,
   label = "schema"

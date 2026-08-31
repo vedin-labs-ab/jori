@@ -1,5 +1,5 @@
 import { isRecord } from "../../contracts/json"
-import { type OpenRouterChatMessage, sendOpenRouterChat } from "./index"
+import { type OpenRouterChatMessage, sendOpenRouterChat } from "./openrouter"
 
 // One structured-output call with a strict JSON schema. Model and reasoning
 // are the caller's decision: cheap mechanical work runs low, judgment calls

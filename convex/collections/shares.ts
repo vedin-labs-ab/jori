@@ -64,7 +64,7 @@ export async function mintShare(
     targetId: args.target.id,
   })
 
-  return mintedShare(shareLink(args.urlPath, secret), expiresAt)
+  return mintedShareLink(args.urlPath, secret, expiresAt)
 }
 
 export async function revokeShare(
@@ -224,31 +224,25 @@ export function sharesToRetire<
   return active.slice(0, overflow)
 }
 
-export type ShareLink = {
-  url?: string
-  urlPath: string
-}
-
-/** What every mint returns: the shareable link plus its expiry. Without a
- *  configured origin the path (with fragment) stands in for the URL. */
-export function mintedShare(link: ShareLink, expiresAt: number): MintedShare {
-  return { url: link.url ?? link.urlPath, urlPath: link.urlPath, expiresAt }
-}
-
-/** The target's console path plus the share secret in the fragment. */
-export function shareLink(
+/** What every mint returns: the target's console path with the share secret
+ *  in the fragment, plus its expiry. Without a configured origin the path
+ *  stands in for the URL. */
+export function mintedShareLink(
   urlPath: string,
   secret: string,
+  expiresAt: number,
   environment: RuntimeEnvironment = process.env
-): ShareLink {
+): MintedShare {
   const fragment = `#${shareFragment(secret)}`
-  const origin = readOrigin(environment)
   const path = `${urlPath}${fragment}`
+  const origin = readOrigin(environment)
 
-  return origin === undefined
-    ? { urlPath: path }
-    : {
-        url: `${new URL(urlPath, origin).toString()}${fragment}`,
-        urlPath: path,
-      }
+  return {
+    url:
+      origin === undefined
+        ? path
+        : `${new URL(urlPath, origin).toString()}${fragment}`,
+    urlPath: path,
+    expiresAt,
+  }
 }

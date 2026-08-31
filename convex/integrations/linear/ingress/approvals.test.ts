@@ -72,7 +72,7 @@ function approvalDoc(): Doc<"approvals"> {
   return {
     _creationTime: 0,
     _id: "approval_1" as Id<"approvals">,
-    args: encodeToolInput({}).inputJson,
+    args: encodeToolInput({}),
     code: "YD4UEFNV",
     createdAt: 0,
     expiresAt: 1,

@@ -1,1 +1,0 @@
-export { reactionDisplayLabel } from "./display"

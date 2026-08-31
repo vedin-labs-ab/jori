@@ -86,7 +86,7 @@ function createRunInstructions(
       label:
         activeSurface === null
           ? null
-          : getIntegrationLabel(activeSurface.surface),
+          : integrationLabels[activeSurface.surface],
     },
     time: {
       utc: createPromptTime(),
@@ -144,7 +144,7 @@ function createMessageValues(
       conversationSummary: conversation.summary,
       current: conversation.current,
       github: target.github,
-      integration: getIntegrationLabel(input.messageIntegration),
+      integration: integrationLabels[input.messageIntegration],
       linear: target.linear,
       surface: input.messageIntegration,
     },
@@ -188,10 +188,6 @@ function formatAutomationTrigger(
   }
 
   return "Unknown"
-}
-
-function getIntegrationLabel(integration: MessageIntegration) {
-  return integrationLabels[integration]
 }
 
 function appendInstructions(context: string, instructions: string) {
