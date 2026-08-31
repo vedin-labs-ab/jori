@@ -321,7 +321,7 @@ function GutterCell({
 }) {
   if (disabled) {
     return (
-      <div className="flex h-9 w-12 shrink-0 select-none items-center justify-center border-r border-b text-muted-foreground tabular-nums">
+      <div className="flex w-12 shrink-0 select-none items-center justify-center border-r border-b text-muted-foreground tabular-nums">
         {number}
       </div>
     )
@@ -330,7 +330,7 @@ function GutterCell({
   const isActive = selection.count > 0
 
   return (
-    <div className="flex h-9 w-12 shrink-0 select-none items-center justify-center border-r border-b">
+    <div className="flex w-12 shrink-0 select-none items-center justify-center border-r border-b">
       <span
         className={cn(
           "text-muted-foreground tabular-nums",
