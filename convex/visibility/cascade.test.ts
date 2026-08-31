@@ -1,5 +1,9 @@
 import { expect, test } from "vitest"
-import { tableDoc, testOwner } from "../../test/convex/collections"
+import {
+  type TableOverrides,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
@@ -13,7 +17,7 @@ const owner = testOwner
 const memberA = "persons:a" as Id<"persons">
 const memberB = "persons:b" as Id<"persons">
 
-function material(overrides: Record<string, unknown> = {}) {
+function material(overrides: TableOverrides = {}) {
   return tableDoc(overrides) as Doc<"collections">
 }
 

@@ -44,7 +44,12 @@ export function createDatabase() {
   return {
     normalizeId: (_table: string, id: string) => (id.includes(":") ? id : null),
     get: async (id: string) => docs.get(id) ?? null,
-    insert: async (table: string, doc: Record<string, unknown>) => {
+    // Typed like the real insert, so seeded ids flow into helpers without
+    // a cast and a wrong-table id is a typecheck failure.
+    insert: async <TableName extends keyof DataModel>(
+      table: TableName,
+      doc: Record<string, unknown>
+    ) => {
       const _id = `${table}:${counter++}`
       // Monotonic like the real system field, so keyset iteration works.
       const stored = { _creationTime: counter, ...doc, _id }
@@ -52,7 +57,7 @@ export function createDatabase() {
       docs.set(_id, stored)
       rowsOf(table).push(stored)
 
-      return _id
+      return _id as Id<TableName>
     },
     delete: async (id: string) => {
       docs.delete(id)

@@ -43,7 +43,6 @@ function creationArgs(folderId?: Id<"folders">) {
     organizationId: "org",
     name: "Digest",
     instructions: "Send the digest to @Slack.",
-    scope: "organization" as const,
     folderId,
     access: {
       integrations: [

@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest"
+import { type ShareOverrides } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
+import { type FileOverrides } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { mintFileShare, openFileShare } from "./share"
 
@@ -12,7 +14,7 @@ const stranger = "persons:stranger" as Id<"persons">
 
 async function createFile(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: FileOverrides = {}
 ) {
   return (await database.insert("files", {
     organizationId: "org",
@@ -31,7 +33,7 @@ async function createFile(
 async function createShare(
   database: TestDatabase,
   fileId: Id<"files">,
-  overrides: Record<string, unknown> = {}
+  overrides: ShareOverrides = {}
 ) {
   await database.insert("shares", {
     organizationId: "org",
@@ -92,7 +94,6 @@ describe("public file reads", () => {
   test("a public file opens with no secret; others stay closed", async () => {
     const { database, ctx } = databaseContext()
     const publicId = await createFile(database, {
-      scope: undefined,
       visibility: { mode: "public" },
     })
     const organizationId = await createFile(database)

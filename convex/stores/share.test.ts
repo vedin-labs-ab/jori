@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest"
-import { storeDoc, testOwner } from "../../test/convex/collections"
+import {
+  type ShareOverrides,
+  type StoreOverrides,
+  storeDoc,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { openStoreShare } from "./share"
@@ -11,7 +17,7 @@ const stranger = "persons:stranger" as Id<"persons">
 
 async function createStore(
   database: TestDatabase,
-  overrides: Record<string, unknown> = {}
+  overrides: StoreOverrides = {}
 ) {
   return (await database.insert(
     "collections",
@@ -22,7 +28,7 @@ async function createStore(
 async function createShare(
   database: TestDatabase,
   storeId: Id<"collections">,
-  overrides: Record<string, unknown> = {}
+  overrides: ShareOverrides = {}
 ) {
   await database.insert("shares", {
     organizationId: "org",
@@ -79,11 +85,7 @@ describe("opening a store share", () => {
 
   test("returns null for a table's share opened as a store", async () => {
     const { database, ctx } = databaseContext()
-    const storeId = await createStore(database, {
-      kind: "table",
-      columns: [],
-      schema: undefined,
-    })
+    const storeId = await database.insert("collections", tableDoc())
 
     await createShare(database, storeId, { targetKind: "table" })
 

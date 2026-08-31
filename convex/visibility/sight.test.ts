@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest"
-import { tableDoc, testOwner } from "../../test/convex/collections"
+import {
+  type TableOverrides,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { anonymousSight, createSight, type SightArgs } from "./sight"
@@ -13,7 +17,7 @@ const memberB = "persons:b" as Id<"persons">
 const memberC = "persons:c" as Id<"persons">
 const memberD = "persons:d" as Id<"persons">
 
-function material(overrides: Record<string, unknown> = {}) {
+function material(overrides: TableOverrides = {}) {
   return tableDoc(overrides) as Doc<"collections">
 }
 
@@ -60,8 +64,8 @@ describe("specific people", () => {
   test("revoking a person takes effect", async () => {
     const { ctx } = databaseContext()
     const revoked = material({
-      ...granted,
       visibility: { mode: "people", personIds: [memberA, memberB] },
+      ownerId: owner,
     })
 
     expect(await sight(ctx, { personId: memberC }).canSee(revoked)).toBe(false)

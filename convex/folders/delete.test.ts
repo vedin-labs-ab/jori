@@ -21,7 +21,7 @@ function deletionContext() {
 
 async function seedFiledResources(
   database: ReturnType<typeof databaseContext>["database"],
-  folderId: string
+  folderId: Id<"folders">
 ) {
   return {
     collectionId: await database.insert("collections", tableDoc({ folderId })),
@@ -30,7 +30,12 @@ async function seedFiledResources(
       "automations",
       automationDoc({
         folderId,
-        trigger: { expression: "0 9 * * *", timezone: "UTC", functionId: "s1" },
+        trigger: {
+          expression: "0 9 * * *",
+          timezone: "UTC",
+          nextAt: 1,
+          functionId: "s1" as Id<"_scheduled_functions">,
+        },
       })
     ),
   }
