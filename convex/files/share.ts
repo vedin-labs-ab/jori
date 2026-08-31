@@ -18,7 +18,6 @@ import {
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
-import { canViewFile } from "./data"
 import { requireViewableFile } from "./records"
 
 export const mint = internalMutation({
@@ -153,11 +152,6 @@ export async function openFileShare(
   const read = await openMaterialRead(ctx, {
     target: fileTarget(file._id),
     material: file,
-    creatorHasAccess: (createdBy) =>
-      canViewFile(ctx, file, {
-        organizationId: file.organizationId,
-        personId: createdBy,
-      }),
     secret: args.secret,
   })
 

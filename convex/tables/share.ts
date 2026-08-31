@@ -20,7 +20,6 @@ import {
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
-import { createSight } from "../visibility/sight"
 import { getAccessibleTable, summarizeRow } from "./access"
 
 export const mint = internalMutation({
@@ -185,11 +184,6 @@ export async function openTableShare(
   const read = await openMaterialRead(ctx, {
     target: tableTarget(table._id),
     material: table,
-    creatorHasAccess: (createdBy) =>
-      createSight(ctx, {
-        organizationId: table.organizationId,
-        personId: createdBy,
-      }).canSee(table),
     secret: args.secret,
   })
 

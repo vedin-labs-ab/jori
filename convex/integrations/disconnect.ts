@@ -27,7 +27,7 @@ export const disconnect = action({
   handler: async (ctx, args): Promise<Id<"integrations"> | null> => {
     await requireOrganizationAccess(ctx, args.organizationId)
 
-    const target: DisconnectTarget | null = await ctx.runQuery(
+    const target: Doc<"integrations"> | null = await ctx.runQuery(
       internal.integrations.disconnect.getDisconnectTarget,
       args
     )
@@ -39,8 +39,8 @@ export const disconnect = action({
     const began: boolean = await ctx.runMutation(
       internal.integrations.disconnect.beginDisconnect,
       {
-        credentials: target.integration.credentials,
-        integrationId: target.integration._id,
+        credentials: target.credentials,
+        integrationId: target._id,
       }
     )
 
@@ -49,24 +49,24 @@ export const disconnect = action({
     }
 
     try {
-      await revokeIntegrationAccess(target.integration)
+      await revokeIntegrationAccess(target)
     } catch (error) {
       await ctx.runMutation(internal.integrations.disconnect.cancelDisconnect, {
-        credentials: target.integration.credentials,
-        integrationId: target.integration._id,
+        credentials: target.credentials,
+        integrationId: target._id,
       })
 
       throw error
     }
 
     await ctx.runMutation(internal.integrations.disconnect.finishDisconnect, {
-      externalId: requireExternalId(target.integration),
-      ownerId: target.integration.ownerId,
-      integration: target.integration.integration,
-      organizationId: target.integration.organizationId,
+      externalId: requireExternalId(target),
+      ownerId: target.ownerId,
+      integration: target.integration,
+      organizationId: target.organizationId,
     })
 
-    return target.integration._id
+    return target._id
   },
 })
 
@@ -75,7 +75,7 @@ export const getDisconnectTarget = internalQuery({
     integration: integrationValidator,
     organizationId: v.string(),
   },
-  handler: async (ctx, args): Promise<DisconnectTarget | null> => {
+  handler: async (ctx, args): Promise<Doc<"integrations"> | null> => {
     await requireOrganizationAccess(ctx, args.organizationId)
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
     const integration = isUserScopedIntegration(args.integration)
@@ -93,7 +93,7 @@ export const getDisconnectTarget = internalQuery({
       return null
     }
 
-    return { integration } satisfies DisconnectTarget
+    return integration
   },
 })
 
@@ -159,10 +159,6 @@ export const finishDisconnect = internalMutation({
     }
   },
 })
-
-type DisconnectTarget = {
-  integration: Doc<"integrations">
-}
 
 /**
  * Google integrations share one OAuth grant per account, so revoking one

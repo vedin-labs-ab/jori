@@ -6,7 +6,7 @@ import { type MutationCtx } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
 import { bytesToHex } from "../shared/encoding"
 import { type RuntimeEnvironment, readOrigin } from "../shared/origin"
-import { anonymousSight, type Gate } from "../visibility/sight"
+import { anonymousSight, createSight, type Gate } from "../visibility/sight"
 
 // The one anonymous read mechanism for tables, stores, and files: either a
 // secret-bearing share row minted per link, or the material's own public
@@ -129,7 +129,6 @@ export async function openMaterialRead(
   args: {
     target: ShareTarget
     material: Gate & { archivedAt?: number }
-    creatorHasAccess: (createdBy: Id<"persons">) => Promise<boolean>
     secret: string | undefined
   }
 ): Promise<MaterialRead | null> {
@@ -151,15 +150,15 @@ export async function openMaterialRead(
 }
 
 /** Resolve a share link to its grant row: secret, expiry, organization,
- *  archive state, and the creator's continued access all checked on every
- *  read. Null on any failure so callers cannot probe what exists. */
+ *  archive state, and the creator's continued access — the same visibility
+ *  question every material answers — all checked on every read. Null on any
+ *  failure so callers cannot probe what exists. */
 async function openShare(
   ctx: QueryLikeCtx,
   secret: string,
   args: {
     target: ShareTarget
-    material: { organizationId: string; archivedAt?: number }
-    creatorHasAccess: (createdBy: Id<"persons">) => Promise<boolean>
+    material: Gate & { archivedAt?: number }
   }
 ) {
   const share = await ctx.db
@@ -177,7 +176,10 @@ async function openShare(
     !canOpenShare({
       share,
       material: args.material,
-      creatorHasAccess: await args.creatorHasAccess(share.createdBy),
+      creatorHasAccess: await createSight(ctx, {
+        organizationId: args.material.organizationId,
+        personId: share.createdBy,
+      }).canSee(args.material),
       secret,
       now: Date.now(),
     })
