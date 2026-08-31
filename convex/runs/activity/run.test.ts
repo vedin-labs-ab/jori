@@ -1,19 +1,17 @@
 import { expect, test } from "vitest"
-import { emptyActivityData } from "../../../test/convex/console"
+import { activityData, runDoc, traceDoc } from "../../../test/convex/console"
 import { id } from "../../../test/convex/database"
-import { type Doc } from "../../_generated/dataModel"
 import { projectActivity } from "./project"
-import { type ActivityData } from "./types"
 
 test("does not mark historical run lifecycle events as live", () => {
   const items = projectActivity(
-    data({
+    activityData({
       traces: [
-        trace({
+        traceDoc({
           timestamp: 1,
           type: "run.started",
         }),
-        trace({
+        traceDoc({
           timestamp: 20,
           type: "run.completed",
         }),
@@ -32,9 +30,9 @@ test("does not mark historical run lifecycle events as live", () => {
 
 test("does not mark stale in-progress traces as live after run completion", () => {
   const items = projectActivity(
-    data({
+    activityData({
       traces: [
-        trace({
+        traceDoc({
           data: {
             input: { command: "pnpm test" },
             tool: { access: "write", name: "bash", route: "sandbox" },
@@ -42,7 +40,7 @@ test("does not mark stale in-progress traces as live after run completion", () =
           timestamp: 10,
           type: "tool.started",
         }),
-        trace({
+        traceDoc({
           timestamp: 20,
           type: "run.completed",
         }),
@@ -61,8 +59,8 @@ test("does not mark stale in-progress traces as live after run completion", () =
 
 test("projects stopped runs as terminal activity", () => {
   const items = projectActivity(
-    data({
-      run: run({
+    activityData({
+      run: runDoc({
         status: "stopped",
         stoppedBy: {
           kind: "person",
@@ -71,7 +69,7 @@ test("projects stopped runs as terminal activity", () => {
         },
       }),
       traces: [
-        trace({
+        traceDoc({
           timestamp: 20,
           type: "run.stopped",
         }),
@@ -91,14 +89,14 @@ test("projects stopped runs as terminal activity", () => {
 
 test("does not mark stale in-progress traces as live after run stop", () => {
   const items = projectActivity(
-    data({
-      run: run({ status: "stopped" }),
+    activityData({
+      run: runDoc({ status: "stopped" }),
       traces: [
-        trace({
+        traceDoc({
           timestamp: 10,
           type: "model.started",
         }),
-        trace({
+        traceDoc({
           timestamp: 20,
           type: "run.stopped",
         }),
@@ -115,39 +113,3 @@ test("does not mark stale in-progress traces as live after run stop", () => {
     })
   )
 })
-
-function data(overrides: Partial<ActivityData>): ActivityData {
-  return { ...emptyActivityData(), run: run({}), ...overrides }
-}
-
-function trace(
-  overrides: Partial<Doc<"traces">> & Pick<Doc<"traces">, "timestamp" | "type">
-): Doc<"traces"> {
-  return {
-    _creationTime: overrides.timestamp,
-    _id: id<"traces">(`trace-${overrides.timestamp}`),
-    callId: undefined,
-    key: `trace:${overrides.timestamp}`,
-    runId: id<"runs">("run"),
-    sequence: undefined,
-    organizationId: "organization",
-    ...overrides,
-  } as Doc<"traces">
-}
-
-function run(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
-  return {
-    _creationTime: 0,
-    _id: id<"runs">("run"),
-    cause: { type: "manual" },
-    createdAt: 0,
-    snapshot: {
-      context: [],
-      source: { type: "manual" },
-      title: "Run",
-    },
-    status: "running",
-    organizationId: "organization",
-    ...overrides,
-  } as Doc<"runs">
-}

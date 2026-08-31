@@ -17,7 +17,7 @@ type Violation = Omit<PublicFunction, "block">
 // Endpoints strangers are meant to reach carry their own credential:
 // material share reads authenticate with a per-link secret through an
 // open*Share guard that checks secret, expiry, and access on every read and
-// fails closed with null (see convex/materials/shares.ts). Anything else
+// fails closed with null (see convex/collections/shares.ts). Anything else
 // strangers reach belongs on an HTTP route, where the caller's address is
 // readable and can be rate limited per caller; see convex/waitlist/http.ts.
 const sanctionedGuards = [

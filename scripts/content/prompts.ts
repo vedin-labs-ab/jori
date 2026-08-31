@@ -22,10 +22,7 @@ async function readPromptTemplates(
 
   return sortObject(
     Object.fromEntries(
-      Object.entries(sources).map(([id, source]) => [
-        id,
-        formatPromptTemplate(source),
-      ])
+      Object.entries(sources).map(([id, source]) => [id, source.trim()])
     )
   )
 }
@@ -70,10 +67,6 @@ function validatePromptId(id: string) {
       `Prompt path segment must be a single lowercase word: ${invalidSegment}`
     )
   }
-}
-
-function formatPromptTemplate(source: string) {
-  return source.trim()
 }
 
 function sortObject<Value>(

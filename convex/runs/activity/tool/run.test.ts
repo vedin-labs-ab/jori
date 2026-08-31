@@ -1,24 +1,23 @@
 import { expect, test } from "vitest"
-import { emptyActivityData } from "../../../../test/convex/console"
-import { id } from "../../../../test/convex/database"
-import { type Doc } from "../../../_generated/dataModel"
+import { activityData, traceDoc } from "../../../../test/convex/console"
 import { projectActivity } from "../project"
 import { type ToolResult } from "../read"
-import { type ActivityData } from "../types"
 
 test("projects search run metadata without identifiers", () => {
   const items = projectActivity(
-    data([
-      toolStarted("search_runs", {
-        limit: 10,
-        mode: "search",
-        query: "billing bug",
-        scope: "conversation",
-        source: "slack",
-        status: "completed",
-      }),
-      toolCompleted("search_runs", result("runs", 4)),
-    ])
+    activityData({
+      traces: [
+        toolStarted("search_runs", {
+          limit: 10,
+          mode: "search",
+          query: "billing bug",
+          scope: "conversation",
+          source: "slack",
+          status: "completed",
+        }),
+        toolCompleted("search_runs", result("runs", 4)),
+      ],
+    })
   )
 
   expect(items).toContainEqual(
@@ -37,14 +36,16 @@ test("projects search run metadata without identifiers", () => {
 
 test("projects searched runs with compact time and paginated outcome", () => {
   const items = projectActivity(
-    data([
-      toolStarted("search_runs", {
-        mode: "search",
-        scope: "organization",
-        since: Date.UTC(2026, 6, 1),
-      }),
-      toolCompleted("search_runs", result("runs", 10, true)),
-    ])
+    activityData({
+      traces: [
+        toolStarted("search_runs", {
+          mode: "search",
+          scope: "organization",
+          since: Date.UTC(2026, 6, 1),
+        }),
+        toolCompleted("search_runs", result("runs", 10, true)),
+      ],
+    })
   )
 
   expect(items).toContainEqual(
@@ -61,13 +62,15 @@ test("projects searched runs with compact time and paginated outcome", () => {
 
 test("projects no-match searched runs as recent runs", () => {
   const items = projectActivity(
-    data([
-      toolStarted("search_runs", {
-        mode: "search",
-        scope: "conversation",
-      }),
-      toolCompleted("search_runs", result("runs", 0)),
-    ])
+    activityData({
+      traces: [
+        toolStarted("search_runs", {
+          mode: "search",
+          scope: "conversation",
+        }),
+        toolCompleted("search_runs", result("runs", 0)),
+      ],
+    })
   )
 
   expect(items).toContainEqual(
@@ -84,15 +87,17 @@ test("projects no-match searched runs as recent runs", () => {
 
 test("projects legacy search sentinels as absent values", () => {
   const items = projectActivity(
-    data([
-      toolStarted("search_runs", {
-        query: "",
-        scope: "conversation",
-        since: 0,
-        until: 0,
-      }),
-      toolCompleted("search_runs", result("runs", 0)),
-    ])
+    activityData({
+      traces: [
+        toolStarted("search_runs", {
+          query: "",
+          scope: "conversation",
+          since: 0,
+          until: 0,
+        }),
+        toolCompleted("search_runs", result("runs", 0)),
+      ],
+    })
   )
 
   expect(items).toContainEqual(
@@ -109,13 +114,15 @@ test("projects legacy search sentinels as absent values", () => {
 
 test("projects explored run metadata without navigation details", () => {
   const items = projectActivity(
-    data([
-      toolStarted("search_runs", {
-        mode: "tree",
-        rootId: "hidden-run-id",
-      }),
-      toolCompleted("search_runs", result("runs", 0)),
-    ])
+    activityData({
+      traces: [
+        toolStarted("search_runs", {
+          mode: "tree",
+          rootId: "hidden-run-id",
+        }),
+        toolCompleted("search_runs", result("runs", 0)),
+      ],
+    })
   )
 
   expect(items).toContainEqual(
@@ -131,13 +138,15 @@ test("projects explored run metadata without navigation details", () => {
 
 test("projects search run activity metadata without run ids", () => {
   const items = projectActivity(
-    data([
-      toolStarted("search_run_activity", {
-        filter: ["tool", "model"],
-        runId: "hidden-run-id",
-      }),
-      toolCompleted("search_run_activity", result("items", 20, true)),
-    ])
+    activityData({
+      traces: [
+        toolStarted("search_run_activity", {
+          filter: ["tool", "model"],
+          runId: "hidden-run-id",
+        }),
+        toolCompleted("search_run_activity", result("items", 20, true)),
+      ],
+    })
   )
 
   expect(items).toContainEqual(
@@ -151,10 +160,6 @@ test("projects search run activity metadata without run ids", () => {
   )
 })
 
-function data(traces: Doc<"traces">[]): ActivityData {
-  return { ...emptyActivityData(), run: run(), traces }
-}
-
 function result(
   itemKey: "items" | "runs",
   itemCount: number,
@@ -164,7 +169,7 @@ function result(
 }
 
 function toolCompleted(name: string, traceResult: ToolResult) {
-  return trace({
+  return traceDoc({
     callId: "call-1",
     data: {
       provider: null,
@@ -177,7 +182,7 @@ function toolCompleted(name: string, traceResult: ToolResult) {
 }
 
 function toolStarted(name: string, input: Record<string, unknown>) {
-  return trace({
+  return traceDoc({
     callId: "call-1",
     data: {
       input,
@@ -186,37 +191,4 @@ function toolStarted(name: string, input: Record<string, unknown>) {
     timestamp: 10,
     type: "tool.started",
   })
-}
-
-function trace(
-  overrides: Partial<Doc<"traces">> & Pick<Doc<"traces">, "timestamp" | "type">
-): Doc<"traces"> {
-  return {
-    _creationTime: overrides.timestamp,
-    _id: id<"traces">(`trace-${overrides.timestamp}`),
-    callId: undefined,
-    key: `trace:${overrides.timestamp}`,
-    runId: id<"runs">("run"),
-    sequence: undefined,
-    organizationId: "organization",
-    ...overrides,
-  } as Doc<"traces">
-}
-
-function run(): Doc<"runs"> {
-  return {
-    _creationTime: 0,
-    _id: id<"runs">("run"),
-    principal: { kind: "organization" },
-    scope: "person",
-    cause: { type: "manual" },
-    createdAt: 0,
-    snapshot: {
-      context: [],
-      source: { type: "manual" },
-      title: "Run",
-    },
-    status: "running",
-    organizationId: "organization",
-  } as Doc<"runs">
 }

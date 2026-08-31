@@ -42,9 +42,10 @@ export function requireMicrosoftClientSecret() {
 export async function exchangeMicrosoftAuthorizationCode(args: {
   code: string
   redirectUri: string
-  tenantId?: string
 }) {
-  return await requestMicrosoftToken(args.tenantId ?? "organizations", {
+  // Installs run against the multi-tenant endpoint; the tenant the user
+  // actually belongs to arrives in the token's own claim.
+  return await requestMicrosoftToken("organizations", {
     code: args.code,
     grant_type: "authorization_code",
     redirect_uri: args.redirectUri,
@@ -63,7 +64,6 @@ export async function refreshMicrosoftAccessToken(args: {
 
 export async function fetchMicrosoftInstallationProfile(args: {
   accessToken: string
-  tenantId?: string
 }) {
   const me = (await microsoftGraphGet(args.accessToken, "/me")) as {
     id?: string
@@ -71,8 +71,7 @@ export async function fetchMicrosoftInstallationProfile(args: {
     userPrincipalName?: string
     mail?: string
   }
-  const tokenTenantId = readJwtStringClaim(args.accessToken, "tid")
-  const tenantId = args.tenantId ?? tokenTenantId
+  const tenantId = readJwtStringClaim(args.accessToken, "tid")
 
   if (me.id === undefined) {
     throw new Error("Could not read Microsoft installation user")
