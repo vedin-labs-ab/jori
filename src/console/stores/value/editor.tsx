@@ -1,22 +1,29 @@
 import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { useMutation } from "convex/react"
-import { type ReactNode, useEffect, useRef } from "react"
+import { lazy, type ReactNode, Suspense, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "../../../../convex/_generated/api"
-import { JsonBlock } from "../../shared/code"
 import { ConsoleListContent } from "../../shared/list/frame"
+import { ConsoleListLoading } from "../../shared/list/loading"
 import {
   conflictMessage,
   isVersionConflict,
 } from "../../shared/materials/conflict"
-import { parseJsonText } from "../json"
 import { type StoreDetail } from "../types"
 import { useValueAutosave, type ValueSaveOutcome } from "./autosave"
 import { ValueFields } from "./fields"
 import { useValueEditor, type ValueEditor, type ValueEditorView } from "./state"
 import { StoreToolbar } from "./toolbar"
+
+/** CodeMirror loads only once the code view is on screen, keeping it out
+ *  of the console bundle and the server build. */
+const Mirror = lazy(() =>
+  import("../../shared/mirror/view").then((module) => ({
+    default: module.Mirror,
+  }))
+)
 
 /** The store value editor is the page: a schema-driven form (with the
  *  JSON mirrored one toggle away) that saves itself — debounced,
@@ -76,21 +83,7 @@ export function ValueEditorSection({
           </>
         }
       />
-      <ConsoleListContent>
-        {editor.state.view === "form" && editor.form !== undefined ? (
-          <ValueFields
-            errors={editor.state.fieldErrors}
-            form={editor.form}
-            onChange={(root, editedPath) => {
-              editor.setRoot(root, editedPath)
-              autosave.change()
-            }}
-            root={editor.state.root}
-          />
-        ) : (
-          <ValueCodeView editor={editor} onEdit={autosave.change} />
-        )}
-      </ConsoleListContent>
+      <ValueBody editor={editor} onEdit={autosave.change} />
     </>
   )
 }
@@ -197,30 +190,50 @@ function useExternalReseed(
   }, [store.version, store.value, versionRef, lastSavedRef, isBusy])
 }
 
-/** The code side of the toggle. While the form is the editing surface the
- *  JSON is a read-only, highlighted mirror; only a store the form cannot
- *  host — a schema the widgets cannot represent, or a value outside it —
- *  edits as raw text. */
-function ValueCodeView({
+/** The surface under the toolbar: the schema-driven form, or the code the
+ *  toggle swaps to. Only a store the form cannot host — a schema the
+ *  widgets cannot represent, or a value outside it — edits as raw text;
+ *  everywhere else the code is the file editor's mirror, read-only and
+ *  full-bleed so its gutter meets the page edge. */
+function ValueBody({
   editor,
   onEdit,
 }: {
   editor: ValueEditor
   onEdit: () => void
 }) {
-  if (!editor.state.codeEditable) {
-    const parsed = parseJsonText(editor.state.codeText)
-
+  if (editor.state.view === "form" && editor.form !== undefined) {
     return (
-      <JsonBlock
-        className="max-h-none"
-        value={parsed.ok ? parsed.value : editor.state.codeText}
-      />
+      <ConsoleListContent>
+        <ValueFields
+          errors={editor.state.fieldErrors}
+          form={editor.form}
+          onChange={(root, editedPath) => {
+            editor.setRoot(root, editedPath)
+            onEdit()
+          }}
+          root={editor.state.root}
+        />
+      </ConsoleListContent>
+    )
+  }
+
+  if (!editor.state.codeEditable) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <Suspense fallback={<ConsoleListLoading />}>
+          <Mirror
+            mimeType="application/json"
+            readOnly
+            value={editor.state.codeText}
+          />
+        </Suspense>
+      </div>
     )
   }
 
   return (
-    <>
+    <ConsoleListContent>
       <Textarea
         aria-label="Store value JSON"
         className="min-h-64 font-mono text-xs"
@@ -238,6 +251,6 @@ function ValueCodeView({
       {editor.state.codeNote === undefined ? null : (
         <p className="text-muted-foreground text-xs">{editor.state.codeNote}</p>
       )}
-    </>
+    </ConsoleListContent>
   )
 }

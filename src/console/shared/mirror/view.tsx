@@ -4,16 +4,18 @@ import { EditorState, StateEffect } from "@codemirror/state"
 import { EditorView, keymap, lineNumbers } from "@codemirror/view"
 import { useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { codeTokenClassName } from "../../shared/tokens"
+import { codeTokenClassName } from "../tokens"
 import { highlight, loadLanguage } from "./language"
 
-// The CodeMirror binding, loaded lazily by the editor section so the
-// console bundle and the server build never carry it. The view is created
-// in an effect and torn down with the component.
+// The CodeMirror binding, loaded lazily by every surface that shows code
+// so the console bundle and the server build never carry it. The view is
+// created in an effect and torn down with the component. A read-only
+// mount keeps the gutter and the highlighting and drops the editing
+// extensions.
 
-/** Token colors past the shared palette, scoped to the editor: classes the
+/** Token colors past the shared palette, scoped to the mirror: classes the
  *  console's other code surfaces never emit. */
-const editorTokenClassName = cn(
+const mirrorTokenClassName = cn(
   codeTokenClassName,
   "[&_.hljs-keyword]:text-violet-600 dark:[&_.hljs-keyword]:text-violet-400",
   "[&_.hljs-title]:text-blue-600 dark:[&_.hljs-title]:text-blue-400",
@@ -37,15 +39,20 @@ const theme = EditorView.theme({
 
 export function Mirror({
   mimeType,
-  name,
+  name = "",
   onBlur,
   onChange,
+  readOnly = false,
   value,
 }: {
   mimeType: string
-  name: string
-  onBlur: () => void
-  onChange: (text: string) => void
+  /** The filename, where the code has one: it picks the language ahead of
+   *  the mime type. */
+  name?: string
+  onBlur?: () => void
+  onChange?: (text: string) => void
+  /** Shows the code without editing it: no caret, no keymap, no history. */
+  readOnly?: boolean
   value: string
 }) {
   const host = useRef<HTMLDivElement>(null)
@@ -67,7 +74,7 @@ export function Mirror({
       parent: host.current,
       state: EditorState.create({
         doc: value,
-        extensions: extensions(change, blur),
+        extensions: extensions(readOnly, change, blur),
       }),
     })
 
@@ -81,13 +88,13 @@ export function Mirror({
       isMounted = false
       view.destroy()
     }
-  }, [mimeType, name, value])
+  }, [mimeType, name, readOnly, value])
 
   return (
     <div
       className={cn(
         "h-full overflow-hidden pl-1 font-mono text-xs md:pl-3",
-        editorTokenClassName
+        mirrorTokenClassName
       )}
       ref={host}
     />
@@ -95,19 +102,28 @@ export function Mirror({
 }
 
 function extensions(
-  change: { current: (text: string) => void },
-  blur: { current: () => void }
+  readOnly: boolean,
+  change: { current: ((text: string) => void) | undefined },
+  blur: { current: (() => void) | undefined }
 ) {
+  const shared = [lineNumbers(), syntaxHighlighting(highlight), theme]
+
+  if (readOnly) {
+    return [
+      ...shared,
+      EditorState.readOnly.of(true),
+      EditorView.editable.of(false),
+    ]
+  }
+
   return [
-    lineNumbers(),
+    ...shared,
     history(),
     keymap.of([...defaultKeymap, ...historyKeymap]),
-    syntaxHighlighting(highlight),
-    theme,
-    EditorView.domEventHandlers({ blur: () => blur.current() }),
+    EditorView.domEventHandlers({ blur: () => blur.current?.() }),
     EditorView.updateListener.of((update) => {
       if (update.docChanged) {
-        change.current(update.state.doc.toString())
+        change.current?.(update.state.doc.toString())
       }
     }),
   ]
