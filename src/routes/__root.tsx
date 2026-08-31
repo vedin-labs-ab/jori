@@ -31,11 +31,8 @@ const appDescription =
   "Jori is the AI teammate your whole company shares. Hand it the work your team repeats across Slack, GitHub, and Linear; it works in the open, and it asks before it acts."
 const providerlessRouteIds = new Set([
   "/",
-  "/files/$fileId/",
   "/pricing",
   "/privacy",
-  "/stores/$storeId/",
-  "/tables/$tableId/",
   "/terms",
   "/trust",
 ])

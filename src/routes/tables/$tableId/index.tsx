@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { SessionProviders } from "@/shared/session"
 import { useShareSecret } from "@/shared/share/link"
 import { TableAccess } from "./-view/access"
 
@@ -30,9 +29,5 @@ function TableRoute() {
     return <FullscreenSkeletonLoader aria-label="Loading table" />
   }
 
-  return (
-    <SessionProviders>
-      <TableAccess secret={secret} tableId={tableId} />
-    </SessionProviders>
-  )
+  return <TableAccess secret={secret} tableId={tableId} />
 }

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
-import { SessionProviders } from "@/shared/session"
 import { useShareSecret } from "@/shared/share/link"
 import { StoreAccess } from "./-view/access"
 
@@ -30,9 +29,5 @@ function StoreRoute() {
     return <FullscreenSkeletonLoader aria-label="Loading store" />
   }
 
-  return (
-    <SessionProviders>
-      <StoreAccess secret={secret} storeId={storeId} />
-    </SessionProviders>
-  )
+  return <StoreAccess secret={secret} storeId={storeId} />
 }
