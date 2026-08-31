@@ -40,7 +40,7 @@ vi.mock("@/components/auth/organization/organization-view", () => ({
   ),
 }))
 
-vi.mock("@/components/auth/organization/create-organization-dialog", () => ({
+vi.mock("@/console/organization/create", () => ({
   CreateOrganizationDialog: () => null,
 }))
 

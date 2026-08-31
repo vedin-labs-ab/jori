@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { useOrganizationId } from "./organization"
+import { useOrganizationId } from "./organization/context"
+import { rememberTimezone } from "./organization/pending"
 import { ConsolePage } from "./page"
 
-const { loading, organization, session } = vi.hoisted(() => ({
+const { loading, mutate, organization, session } = vi.hoisted(() => ({
+  mutate: vi.fn(async () => undefined),
   loading: {
     activeOrganizationQueries: 0,
     organizationListQueries: 0,
@@ -49,8 +51,9 @@ vi.mock("@/shared/loading", () => ({
 }))
 
 vi.mock("convex/react", () => ({
-  useMutation: () => vi.fn(() => Promise.resolve()),
+  useMutation: () => mutate,
 }))
+vi.mock("./shared/time", () => ({ localTimezone: () => "Europe/Stockholm" }))
 vi.mock("./context/organization/onboarding/gate", () => ({
   OnboardingGate: () => null,
 }))
@@ -72,6 +75,8 @@ beforeEach(() => {
   organization.isResolved = false
   session.isPending = false
   session.isSignedIn = true
+  window.sessionStorage.clear()
+  mutate.mockClear()
 })
 
 afterEach(cleanup)
@@ -154,4 +159,33 @@ test("outside a console there is no organization to read", () => {
   render(<Reader />)
 
   expect(screen.getByText("none")).toBeDefined()
+})
+
+test("the zone chosen at creation is declared on the load that follows", async () => {
+  organization.isResolved = true
+  rememberTimezone("organization", "Asia/Tokyo")
+
+  render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+
+  // Only now does the session token carry the organization the mutation is
+  // scoped to, which is why the choice waited for this load.
+  await vi.waitFor(() =>
+    expect(mutate).toHaveBeenCalledWith({
+      organizationId: "organization",
+      timezone: "Asia/Tokyo",
+    })
+  )
+})
+
+test("a load with no pending choice declares nothing", () => {
+  organization.isResolved = true
+
+  render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+
+  // The person sync still runs; the declaration does not.
+  expect(mutate).toHaveBeenCalledTimes(1)
+  expect(mutate).toHaveBeenCalledWith({
+    organizationId: "organization",
+    timezone: "Europe/Stockholm",
+  })
 })

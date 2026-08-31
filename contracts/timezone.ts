@@ -1,5 +1,11 @@
 export const utcTimezone = "UTC"
 
+/** Every IANA zone this runtime knows, already sorted by the platform. The
+ *  only list a picker should offer. */
+export function supportedTimezones() {
+  return Intl.supportedValuesOf("timeZone")
+}
+
 export function isValidTimezone(value: string) {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: value })
