@@ -1,4 +1,5 @@
 import { type JsonObject } from "../../contracts/json"
+import { type RuntimeModelTokens } from "../../contracts/runtime/trace"
 
 export type ModelMessage =
   | {
@@ -29,28 +30,18 @@ export type ModelToolCall = {
   name: string
 }
 
-export type ModelUsage = {
-  inputCacheReadTokens: number
-  inputCacheWriteTokens: number
-  inputTokens: number
-  inputUncachedTokens: number
-  outputTokens: number
-  reasoningTokens: number
-  totalTokens: number
-}
-
 export type ModelResponse =
   | {
       content: string
       reasoning: string | null
-      usage: ModelUsage
+      tokens: RuntimeModelTokens
       type: "stop"
     }
   | {
       content: string | null
       reasoning: string | null
       toolCalls: ModelToolCall[]
-      usage: ModelUsage
+      tokens: RuntimeModelTokens
       type: "tool_calls"
     }
 

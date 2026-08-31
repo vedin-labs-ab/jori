@@ -20,7 +20,7 @@ import {
   type ModelTool,
   type ModelToolCall,
 } from "./types"
-import { readModelUsage } from "./usage"
+import { readModelTokens } from "./usage"
 
 // The first turn produces the start update and is optimized for latency; later
 // turns do the actual work and reason harder. Effort levels are code config.
@@ -58,13 +58,13 @@ export class OpenRouterModelRuntime implements ModelRuntime {
     })
     const toolCalls = response.toolCalls.flatMap(readToolCall)
     const reasoning = ingestReasoning(this.config.model, response.reasoningText)
-    const usage = readModelUsage(response)
+    const tokens = readModelTokens(response)
 
     if (toolCalls.length === 0) {
       return {
         content: response.text,
         reasoning,
-        usage,
+        tokens,
         type: "stop",
       }
     }
@@ -73,7 +73,7 @@ export class OpenRouterModelRuntime implements ModelRuntime {
       content: response.text === "" ? null : response.text,
       reasoning,
       toolCalls,
-      usage,
+      tokens,
       type: "tool_calls",
     }
   }

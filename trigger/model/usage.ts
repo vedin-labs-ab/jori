@@ -1,20 +1,22 @@
-import { type ModelUsage } from "./types"
+import { type RuntimeModelTokens } from "../../contracts/runtime/trace"
 
-export function readModelUsage(response: { usage?: unknown }): ModelUsage {
+export function readModelTokens(response: {
+  usage?: unknown
+}): RuntimeModelTokens {
   const usage = readRecord(response.usage)
   const inputTokenDetails = readRecord(usage?.inputTokenDetails)
   const outputTokenDetails = readRecord(usage?.outputTokenDetails)
 
   return {
-    inputTokens: readNumber(usage?.inputTokens),
-    inputCacheReadTokens: readNumber(inputTokenDetails?.cacheReadTokens),
-    inputCacheWriteTokens: readNumber(inputTokenDetails?.cacheWriteTokens),
-    inputUncachedTokens: readNumber(inputTokenDetails?.noCacheTokens),
-    outputTokens: readNumber(usage?.outputTokens),
-    reasoningTokens:
+    cacheRead: readNumber(inputTokenDetails?.cacheReadTokens),
+    cacheWrite: readNumber(inputTokenDetails?.cacheWriteTokens),
+    input: readNumber(usage?.inputTokens),
+    output: readNumber(usage?.outputTokens),
+    reasoning:
       readOptionalNumber(outputTokenDetails?.reasoningTokens) ??
       readNumber(usage?.reasoningTokens),
-    totalTokens: readNumber(usage?.totalTokens),
+    total: readNumber(usage?.totalTokens),
+    uncached: readNumber(inputTokenDetails?.noCacheTokens),
   }
 }
 

@@ -98,10 +98,10 @@ function modelTokenUsage(
   }
 
   return {
-    input: usage.inputTokens,
-    output: usage.outputTokens,
-    reasoning: usage.reasoningTokens,
-    total: usage.totalTokens,
+    input: usage.tokens.input,
+    output: usage.tokens.output,
+    reasoning: usage.tokens.reasoning,
+    total: usage.tokens.total,
   }
 }
 
@@ -115,10 +115,10 @@ function modelDetails(
 
   const details = [
     model === undefined ? undefined : { label: "Model", value: model },
-    metricDetail("Input tokens", usage.inputTokens),
-    metricDetail("Output tokens", usage.outputTokens),
-    metricDetail("Reasoning tokens", usage.reasoningTokens),
-    metricDetail("Total tokens", usage.totalTokens),
+    metricDetail("Input tokens", usage.tokens.input),
+    metricDetail("Output tokens", usage.tokens.output),
+    metricDetail("Reasoning tokens", usage.tokens.reasoning),
+    metricDetail("Total tokens", usage.tokens.total),
     metricDetail("Tool calls", usage.toolCalls),
   ].filter((detail) => detail !== undefined)
 

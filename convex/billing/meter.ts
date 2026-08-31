@@ -1,4 +1,4 @@
-import { autoTopUp, joriModel, priceModelUsage } from "../../contracts/billing"
+import { autoTopUp, joriModel, priceModelTokens } from "../../contracts/billing"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
@@ -16,10 +16,10 @@ export async function meterModelUsage(
   ctx: MutationCtx,
   args: {
     run: Doc<"runs">
-    usage: { inputTokens: number; outputTokens: number }
+    tokens: { input: number; output: number }
   }
 ) {
-  const micros = priceModelUsage(joriModel, args.usage)
+  const micros = priceModelTokens(joriModel, args.tokens)
 
   if (micros <= 0) {
     return
@@ -27,10 +27,7 @@ export async function meterModelUsage(
 
   const now = Date.now()
   const account = await ensureAccount(ctx, args.run.organizationId)
-  const tokens = {
-    input: args.usage.inputTokens,
-    output: args.usage.outputTokens,
-  }
+  const tokens = { input: args.tokens.input, output: args.tokens.output }
 
   await debitRun(ctx, { account, runId: args.run._id, micros, tokens, now })
   // The ledger stays pure money; attribution is the rollup's business, so

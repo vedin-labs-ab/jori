@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest"
-import { readModelUsage } from "./usage"
+import { readModelTokens } from "./usage"
 
 describe("model usage", () => {
   test("normalizes AI SDK token cache accounting", () => {
     expect(
-      readModelUsage({
+      readModelTokens({
         usage: {
           inputTokenDetails: {
             cacheReadTokens: 1500,
@@ -20,19 +20,19 @@ describe("model usage", () => {
         },
       })
     ).toEqual({
-      inputCacheReadTokens: 1500,
-      inputCacheWriteTokens: 400,
-      inputTokens: 2000,
-      inputUncachedTokens: 500,
-      outputTokens: 100,
-      reasoningTokens: 25,
-      totalTokens: 2100,
+      cacheRead: 1500,
+      cacheWrite: 400,
+      input: 2000,
+      output: 100,
+      reasoning: 25,
+      total: 2100,
+      uncached: 500,
     })
   })
 
   test("drops missing and invalid usage values", () => {
     expect(
-      readModelUsage({
+      readModelTokens({
         usage: {
           inputTokenDetails: {
             cacheReadTokens: Number.NaN,
@@ -42,28 +42,28 @@ describe("model usage", () => {
         },
       })
     ).toEqual({
-      inputCacheReadTokens: 0,
-      inputCacheWriteTokens: 0,
-      inputTokens: 10,
-      inputUncachedTokens: 0,
-      outputTokens: 0,
-      reasoningTokens: 0,
-      totalTokens: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+      input: 10,
+      output: 0,
+      reasoning: 0,
+      total: 0,
+      uncached: 0,
     })
   })
 
   test("returns zero defaults when no usage values are present", () => {
     const empty = {
-      inputCacheReadTokens: 0,
-      inputCacheWriteTokens: 0,
-      inputTokens: 0,
-      inputUncachedTokens: 0,
-      outputTokens: 0,
-      reasoningTokens: 0,
-      totalTokens: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+      input: 0,
+      output: 0,
+      reasoning: 0,
+      total: 0,
+      uncached: 0,
     }
 
-    expect(readModelUsage({ usage: {} })).toEqual(empty)
-    expect(readModelUsage({})).toEqual(empty)
+    expect(readModelTokens({ usage: {} })).toEqual(empty)
+    expect(readModelTokens({})).toEqual(empty)
   })
 })

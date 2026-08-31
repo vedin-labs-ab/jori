@@ -16,4 +16,8 @@ export {
   type RuntimeToolMetadataItem,
   toolFinalDescription,
 } from "./tools"
-export type { RuntimeModelUsage, RuntimeValueSummary } from "./trace"
+export type {
+  RuntimeModelTokens,
+  RuntimeModelUsage,
+  RuntimeValueSummary,
+} from "./trace"

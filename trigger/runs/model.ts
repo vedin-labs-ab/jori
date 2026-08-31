@@ -92,7 +92,7 @@ function modelUsage(
 ): RuntimeModelUsage {
   return {
     durationMs,
-    ...response.usage,
+    tokens: response.tokens,
     toolCalls: response.type === "tool_calls" ? response.toolCalls.length : 0,
   }
 }

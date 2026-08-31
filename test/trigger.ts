@@ -1,4 +1,5 @@
 import { vi } from "vitest"
+import { type RuntimeModelTokens } from "../contracts/runtime/trace"
 import {
   type RuntimeContext,
   type RuntimeId,
@@ -7,7 +8,6 @@ import {
   type ModelResponse,
   type ModelRuntime,
   type ModelToolCall,
-  type ModelUsage,
 } from "../trigger/model/types"
 
 export type QueuedModelResponse =
@@ -15,14 +15,14 @@ export type QueuedModelResponse =
       content: string
       reasoning?: string | null
       type: "stop"
-      usage?: ModelUsage
+      tokens?: RuntimeModelTokens
     }
   | {
       content: string | null
       reasoning?: string | null
       toolCalls: ModelToolCall[]
       type: "tool_calls"
-      usage?: ModelUsage
+      tokens?: RuntimeModelTokens
     }
 
 export function runtimeId<TableName extends string>(value: string) {
@@ -84,7 +84,7 @@ function queuedModelResponses(
 function queuedModelResponse(response: QueuedModelResponse): ModelResponse {
   const base = {
     reasoning: response.reasoning ?? null,
-    usage: response.usage ?? emptyUsage(),
+    tokens: response.tokens ?? emptyTokens(),
   }
 
   return response.type === "stop"
@@ -97,14 +97,14 @@ function queuedModelResponse(response: QueuedModelResponse): ModelResponse {
       }
 }
 
-function emptyUsage(): ModelUsage {
+function emptyTokens(): RuntimeModelTokens {
   return {
-    inputCacheReadTokens: 0,
-    inputCacheWriteTokens: 0,
-    inputTokens: 0,
-    inputUncachedTokens: 0,
-    outputTokens: 0,
-    reasoningTokens: 0,
-    totalTokens: 0,
+    cacheRead: 0,
+    cacheWrite: 0,
+    input: 0,
+    output: 0,
+    reasoning: 0,
+    total: 0,
+    uncached: 0,
   }
 }
