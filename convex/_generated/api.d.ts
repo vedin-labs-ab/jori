@@ -444,7 +444,6 @@ import type * as runs_introspect_query from "../runs/introspect/query.js";
 import type * as runs_introspect_runs from "../runs/introspect/runs.js";
 import type * as runs_principal from "../runs/principal.js";
 import type * as runs_records from "../runs/records.js";
-import type * as runs_scope from "../runs/scope.js";
 import type * as runs_snapshot_index from "../runs/snapshot/index.js";
 import type * as runs_snapshot_metadata from "../runs/snapshot/metadata.js";
 import type * as runs_snapshot_origin from "../runs/snapshot/origin.js";
@@ -983,7 +982,6 @@ declare const fullApi: ApiFromModules<{
   "runs/introspect/runs": typeof runs_introspect_runs;
   "runs/principal": typeof runs_principal;
   "runs/records": typeof runs_records;
-  "runs/scope": typeof runs_scope;
   "runs/snapshot/index": typeof runs_snapshot_index;
   "runs/snapshot/metadata": typeof runs_snapshot_metadata;
   "runs/snapshot/origin": typeof runs_snapshot_origin;
