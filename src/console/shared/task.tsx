@@ -64,8 +64,10 @@ export const TaskContent = ({
     )}
     {...props}
   >
-    <div className="mt-4 space-y-2 border-muted border-l-2 pl-4">
-      {children}
-    </div>
+    {/* The nesting is carried by the indent and by the disclosure control
+        above it. The runs timeline already draws its own hairline rail one
+        column to the left, so a second, heavier rule here read as a competing
+        one rather than as depth. */}
+    <div className="mt-4 space-y-2 pl-4">{children}</div>
   </CollapsibleContent>
 )

@@ -1,19 +1,17 @@
-import { Check, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import { Separator } from "@/components/ui/separator"
-import { Spinner } from "@/components/ui/spinner"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
 import { CopyButton } from "../shared/copy"
 import { SeparatorDot } from "../shared/dot"
 import { ConsoleListToolbar } from "../shared/list/frame"
-import { absoluteTime, relativeTime, useNow } from "../shared/time"
+import { SaveMeta } from "../shared/materials/save"
 import { fileBlobCache } from "./cache/blob"
 import { FileOwnerCell } from "./cells"
 import { type SaveStatus } from "./editor/autosave"
@@ -180,54 +178,17 @@ export function FileMeta({
 }: {
   file: FileDetail
   /** Editor views pass the autosave state: the Updated label shimmers
-   *  while a save is in flight (or retrying), and a small check surfaces
-   *  briefly once it lands. */
+   *  while a save is in flight, a check surfaces briefly once it lands,
+   *  and a failure says so in words until it clears. */
   saveStatus?: SaveStatus
 }) {
-  const now = useNow(30_000)
-  const isSaving = saveStatus === "saving" || saveStatus === "error"
-
   return (
     <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
       <div className="min-w-0 text-foreground">
         <FileOwnerCell compact file={file} />
       </div>
       <SeparatorDot />
-      <span
-        className={cn("shrink-0", isSaving && "shimmer")}
-        title={
-          saveStatus === "error"
-            ? "Couldn't save yet — retrying."
-            : absoluteTime(file.updatedAt)
-        }
-      >
-        Updated {relativeTime(file.updatedAt, now)}
-      </span>
-      {saveStatus === undefined ? null : (
-        <>
-          {/* The slot exists only while a save is in motion or just done:
-              collapsed it gives back its width and the flex gap, so idle
-              shows no hole where an icon might one day be. */}
-          <span
-            aria-hidden
-            className={cn(
-              "flex shrink-0 items-center overflow-hidden transition-all duration-300",
-              saveStatus === "idle"
-                ? "-ml-1.5 max-w-0 scale-50 opacity-0"
-                : "max-w-4 scale-100 opacity-100"
-            )}
-          >
-            {saveStatus === "saved" ? (
-              <Check className="size-3 text-success" />
-            ) : (
-              <Spinner className="size-3" />
-            )}
-          </span>
-          <span aria-live="polite" className="sr-only">
-            {saveStatus === "saved" ? "Saved" : ""}
-          </span>
-        </>
-      )}
+      <SaveMeta saveStatus={saveStatus} updatedAt={file.updatedAt} />
       <SeparatorDot className="max-sm:hidden" />
       <span className="shrink-0 max-sm:hidden">
         {formatFileSize(file.size)}

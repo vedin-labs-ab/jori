@@ -336,8 +336,8 @@ function entryLabel(entry: BillingEntry) {
 
 function entryDot(entry: BillingEntry) {
   if (entry.type === "grant") {
-    return entry.source === "trial" ? "bg-amber-500" : "bg-primary"
+    return entry.source === "trial" ? "bg-warning" : "bg-primary"
   }
 
-  return entry.type === "topup" ? "bg-blue-500" : undefined
+  return entry.type === "topup" ? "bg-informational" : undefined
 }
