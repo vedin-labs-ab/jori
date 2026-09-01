@@ -69,6 +69,7 @@ export function FolderDragProvider({
           {...drag.handlers}
         >
           {children}
+          {drag.dialog}
           {drag.state.active === null ? null : (
             <DragGhost payload={drag.state.active} />
           )}
@@ -105,6 +106,7 @@ function useContentDrag() {
   }
 
   return {
+    dialog: drop.dialog,
     handlers: {
       onDragCancel: finish,
       onDragEnd: (event: DragEndEvent) => {
@@ -113,7 +115,7 @@ function useContentDrag() {
         finish()
 
         if (payload !== undefined) {
-          void drop(payload, overTarget(event.over))
+          void drop.run(payload, overTarget(event.over))
         }
       },
       onDragOver: (event: DragOverEvent) =>

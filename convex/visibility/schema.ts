@@ -4,11 +4,11 @@ import {
   type Visibility,
 } from "../../contracts/visibility"
 
-// The stored shape of contracts/visibility: who may see a
-// material or folder. Visibility gates reading; every write additionally
-// requires organization membership, so "public" never grants anonymous
-// writes. Team ids are Better Auth `team` document ids — stable strings
-// owned by the auth component, resolved against live `teamMember` rows.
+// The stored shape of contracts/visibility: who may see a material or
+// folder. Every audience is inside the organization, so no stored mode
+// admits an anonymous reader. Team ids are Better Auth `team` document
+// ids — stable strings owned by the auth component, resolved against live
+// `teamMember` rows.
 
 export const visibilityValidator = v.union(
   v.object({ mode: v.literal("private") }),
@@ -20,8 +20,7 @@ export const visibilityValidator = v.union(
     mode: v.literal("teams"),
     teamIds: v.array(v.string()),
   }),
-  v.object({ mode: v.literal("organization") }),
-  v.object({ mode: v.literal("public") })
+  v.object({ mode: v.literal("organization") })
 )
 
 export type StoredVisibility = Infer<typeof visibilityValidator>
@@ -36,7 +35,7 @@ export function normalizeStoredVisibility(
 
 /** Agent-facing creation input offers the two visibilities an agent can
  *  reason about: private to the requester, or the whole organization.
- *  Grants and public visibility are set by people in the console. */
+ *  Grants are set by people in the console. */
 export function visibilityFromInput(value: unknown): StoredVisibility {
   return value === "private" ? { mode: "private" } : { mode: "organization" }
 }

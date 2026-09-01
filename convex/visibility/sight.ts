@@ -9,11 +9,15 @@ import { loadPersonTeamIds } from "./viewer"
 //
 // Semantics: a viewer sees a material when they own it, or when they are
 // allowed by the material's own visibility AND by every ancestor folder's
-// visibility. A folder behaves the same with its creator as owner. "Public"
-// allows everyone including anonymous readers; "organization" allows any
-// member; grants allow the listed people or live team members; "private"
-// allows the owner alone. The owner override keeps a person's own materials
-// visible to them wherever they are filed.
+// visibility. A folder behaves the same with its creator as owner.
+// "Organization" allows any member; grants allow the listed people or live
+// team members; "private" allows the owner alone. The owner override keeps
+// a person's own materials visible to them wherever they are filed.
+//
+// Handing a material outward is the one question the owner override does
+// not settle: canShare demands the folder chain too, so a material filed
+// into a folder that excludes people cannot leave through a link its
+// owner mints.
 
 /** Deeper chains than the folder tree allows read as broken and closed. */
 const chainCap = 16
@@ -23,8 +27,6 @@ export type SightArgs = {
   /** Absent for organization-principal executions, which act for the whole
    *  organization and see everything a plain member sees. */
   personId?: Id<"persons">
-  /** Anonymous readers see public materials only. */
-  anonymous?: boolean
 }
 
 export type Gate = {
@@ -39,6 +41,7 @@ export type Sight = {
   personId: Id<"persons"> | undefined
   canSee: (material: Gate) => Promise<boolean>
   canSeeFolder: (folder: Doc<"folders">) => Promise<boolean>
+  canShare: (material: Gate) => Promise<boolean>
 }
 
 type SightOptions = {
@@ -49,7 +52,6 @@ type SightOptions = {
 type SightState = {
   ctx: QueryLikeCtx
   organizationId: string
-  member: boolean
   personId: Id<"persons"> | undefined
   chains: Map<Id<"folders">, boolean>
   loadTeams: () => Promise<ReadonlySet<string>>
@@ -63,12 +65,10 @@ export function createSight(
   args: SightArgs,
   options: SightOptions = {}
 ): Sight {
-  const member = args.anonymous !== true
-  const personId = member ? args.personId : undefined
+  const { personId } = args
   const state: SightState = {
     ctx,
     organizationId: args.organizationId,
-    member,
     personId,
     chains: new Map(),
     loadTeams:
@@ -87,12 +87,8 @@ export function createSight(
     personId,
     canSee: (material) => canSeeMaterial(state, material),
     canSeeFolder: (folder) => canSeeFolderDoc(state, folder),
+    canShare: (material) => canShareMaterial(state, material),
   }
-}
-
-/** The share and public read paths look with no identity at all. */
-export function anonymousSight(ctx: QueryLikeCtx, organizationId: string) {
-  return createSight(ctx, { organizationId, anonymous: true })
 }
 
 async function canSeeMaterial(state: SightState, material: Gate) {
@@ -100,7 +96,7 @@ async function canSeeMaterial(state: SightState, material: Gate) {
     return false
   }
 
-  if (state.personId !== undefined && material.ownerId === state.personId) {
+  if (owns(state, material.ownerId)) {
     return true
   }
 
@@ -110,18 +106,37 @@ async function canSeeMaterial(state: SightState, material: Gate) {
   )
 }
 
+/** Minting a share link, and every later read of one: the owner override
+ *  still answers the material's own visibility, but never the chain. A
+ *  folder that restricts what it holds also stops its holder's owner from
+ *  handing it out. */
+async function canShareMaterial(state: SightState, material: Gate) {
+  if (material.organizationId !== state.organizationId) {
+    return false
+  }
+
+  return (
+    (owns(state, material.ownerId) || (await allows(state, material))) &&
+    (await chainAllows(state, material.folderId))
+  )
+}
+
 async function canSeeFolderDoc(state: SightState, folder: Doc<"folders">) {
   if (folder.organizationId !== state.organizationId) {
     return false
   }
 
-  if (state.personId !== undefined && folder.createdBy === state.personId) {
+  if (owns(state, folder.createdBy)) {
     return true
   }
 
   return (
     (await allows(state, folder)) && (await chainAllows(state, folder.parentId))
   )
+}
+
+function owns(state: SightState, ownerId: Id<"persons"> | undefined) {
+  return state.personId !== undefined && ownerId === state.personId
 }
 
 async function allows(
@@ -131,10 +146,8 @@ async function allows(
   const { visibility } = carrier
 
   switch (visibility.mode) {
-    case "public":
-      return true
     case "organization":
-      return state.member
+      return true
     case "teams":
       return state.personId === undefined
         ? false
@@ -209,10 +222,7 @@ async function chainAllows(
 }
 
 async function levelAllows(state: SightState, folder: Doc<"folders">) {
-  return (
-    (state.personId !== undefined && folder.createdBy === state.personId) ||
-    (await allows(state, folder))
-  )
+  return owns(state, folder.createdBy) || (await allows(state, folder))
 }
 
 function intersects(left: ReadonlySet<string>, right: readonly string[]) {

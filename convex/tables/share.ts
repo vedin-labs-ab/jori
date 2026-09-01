@@ -12,7 +12,7 @@ import { pageDocuments } from "../collections/documents"
 import {
   type MintedShare,
   mintShare,
-  openMaterialRead,
+  openShare,
   pageShares,
   revokeShare,
   type ShareTarget,
@@ -76,9 +76,8 @@ export const page = query({
   },
 })
 
-/** Anonymous read: a share secret or the table's own public visibility is
- *  the whole credential. Returns null on every failure so callers cannot
- *  probe which tables exist. */
+/** Anonymous read: the share secret is the whole credential. Returns null
+ *  on every failure so callers cannot probe which tables exist. */
 export const get = query({
   args: { tableId: v.string(), secret: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -92,9 +91,7 @@ export const get = query({
       name: opened.table.name,
       description: opened.table.description,
       columns: opened.table.columns,
-      access: opened.read.access,
-      expiresAt:
-        opened.read.access === "share" ? opened.read.expiresAt : undefined,
+      expiresAt: opened.expiresAt,
     }
   },
 })
@@ -141,7 +138,7 @@ export async function mintTableShare(
 
   return await mintShare(ctx, {
     target: tableTarget(table._id),
-    organizationId: table.organizationId,
+    material: table,
     personId: args.personId,
     urlPath: `/tables/${table._id}`,
     expiresInHours: args.expiresInHours,
@@ -166,9 +163,9 @@ export async function revokeTableShare(
   })
 }
 
-/** Resolve an anonymous read to its table: a share link's secret, expiry,
- *  organization, archive state, and the creator's continued access all
- *  checked on every read — or the table's own public visibility. */
+/** Resolve an anonymous read to its table: the link's secret, expiry,
+ *  organization, archive state, and the creator's continued right to share
+ *  it all checked on every read. */
 export async function openTableShare(
   ctx: QueryLikeCtx,
   args: { tableId: string; secret?: string }
@@ -180,13 +177,13 @@ export async function openTableShare(
     return null
   }
 
-  const read = await openMaterialRead(ctx, {
+  const share = await openShare(ctx, {
     target: tableTarget(table._id),
     material: table,
     secret: args.secret,
   })
 
-  return read === null ? null : { table, read }
+  return share === null ? null : { table, expiresAt: share.expiresAt }
 }
 
 function tableTarget(tableId: Id<"collections">): ShareTarget {

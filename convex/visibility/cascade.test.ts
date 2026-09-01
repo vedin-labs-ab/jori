@@ -7,11 +7,12 @@ import {
 import { databaseContext } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { anonymousSight, createSight, type SightArgs } from "./sight"
+import { createSight, type SightArgs } from "./sight"
 
 // The folder-cascade half of the resolver's verification suite: a viewer
 // must be allowed by every ancestor folder as well as by the material's own
-// visibility, with owners always seeing their own materials.
+// visibility, with owners always seeing their own materials — except when
+// they hand one out, where the chain outranks ownership.
 
 const owner = testOwner
 const memberA = "persons:a" as Id<"persons">
@@ -106,31 +107,44 @@ test("a personal resource inside a shared folder stays visible to its owner", as
   ).toBe(false)
 })
 
-test("a public material inside a restricted folder is not anonymously readable", async () => {
+test("an owner may see a material a folder hides, but may not share it", async () => {
   const { database, ctx } = databaseContext()
   const folderId = await database.insert(
     "folders",
-    folderDoc({ visibility: { mode: "private" }, createdBy: owner })
+    folderDoc({ visibility: { mode: "private" }, createdBy: memberA })
   )
   const filed = material({
-    visibility: { mode: "public" },
+    visibility: { mode: "organization" },
     ownerId: owner,
     folderId,
   })
 
-  expect(await anonymousSight(ctx, "org").canSee(filed)).toBe(false)
+  expect(await sight(ctx, { personId: owner }).canSee(filed)).toBe(true)
+  expect(await sight(ctx, { personId: owner }).canShare(filed)).toBe(false)
 
-  const publicFolderId = await database.insert(
-    "folders",
-    folderDoc({ visibility: { mode: "public" }, createdBy: owner })
-  )
-
+  // Out of the folder, the same person may hand it out again.
   expect(
-    await anonymousSight(ctx, "org").canSee({
+    await sight(ctx, { personId: owner }).canShare({
       ...filed,
-      folderId: publicFolderId as Id<"folders">,
+      folderId: undefined,
     })
   ).toBe(true)
+})
+
+test("sharing still needs the material's own visibility or ownership", async () => {
+  const { database, ctx } = databaseContext()
+  const folderId = await database.insert(
+    "folders",
+    folderDoc({ visibility: { mode: "organization" }, createdBy: owner })
+  )
+  const personal = material({
+    visibility: { mode: "private" },
+    ownerId: owner,
+    folderId,
+  })
+
+  expect(await sight(ctx, { personId: owner }).canShare(personal)).toBe(true)
+  expect(await sight(ctx, { personId: memberA }).canShare(personal)).toBe(false)
 })
 
 test("folders themselves cascade, with a creator override", async () => {

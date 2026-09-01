@@ -11,7 +11,7 @@ import {
 import {
   type MintedShare,
   mintShare,
-  openMaterialRead,
+  openShare,
   pageShares,
   revokeShare,
   type ShareTarget,
@@ -88,10 +88,9 @@ export const page = query({
   },
 })
 
-/** Anonymous read: a share secret or the file's own public visibility is
- *  the whole credential. Returns null on every failure so callers cannot
- *  probe which files exist. Storage URLs are signed and temporary, so each
- *  read mints a fresh one. */
+/** Anonymous read: the share secret is the whole credential. Returns null
+ *  on every failure so callers cannot probe which files exist. Storage URLs
+ *  are signed and temporary, so each read mints a fresh one. */
 export const get = query({
   args: { fileId: v.string(), secret: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -108,9 +107,7 @@ export const get = query({
       size: opened.file.size,
       createdAt: opened.file.createdAt,
       url: await ctx.storage.getUrl(opened.file.storageId),
-      access: opened.read.access,
-      expiresAt:
-        opened.read.access === "share" ? opened.read.expiresAt : undefined,
+      expiresAt: opened.expiresAt,
     }
   },
 })
@@ -128,16 +125,16 @@ export async function mintFileShare(
 
   return await mintShare(ctx, {
     target: fileTarget(file._id),
-    organizationId: file.organizationId,
+    material: file,
     personId: args.personId,
     urlPath: `/files/${file._id}`,
     expiresInHours: args.expiresInHours,
   })
 }
 
-/** Resolve an anonymous read to its file: a share link's secret, expiry,
- *  organization, and the creator's continued visibility all checked on
- *  every read — or the file's own public visibility. */
+/** Resolve an anonymous read to its file: the link's secret, expiry,
+ *  organization, and the creator's continued right to share it all checked
+ *  on every read. */
 export async function openFileShare(
   ctx: QueryLikeCtx,
   args: { fileId: string; secret?: string }
@@ -149,13 +146,13 @@ export async function openFileShare(
     return null
   }
 
-  const read = await openMaterialRead(ctx, {
+  const share = await openShare(ctx, {
     target: fileTarget(file._id),
     material: file,
     secret: args.secret,
   })
 
-  return read === null ? null : { file, read }
+  return share === null ? null : { file, expiresAt: share.expiresAt }
 }
 
 function fileTarget(fileId: Id<"files">): ShareTarget {

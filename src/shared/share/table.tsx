@@ -21,10 +21,9 @@ const rowPageSize = 50
 
 type SharedTable = NonNullable<FunctionReturnType<typeof api.tables.share.get>>
 
-/** Views a table through a share link or its public visibility, without a
- *  signed-in session. The secret rides along on every reactive read, so a
- *  revoked or expired link empties the page on its own; a public table
- *  needs no secret at all. */
+/** Views a table through a share link, without a signed-in session. The
+ *  secret rides along on every reactive read, so a revoked or expired link
+ *  empties the page on its own. */
 export function TableShareView({
   secret,
   tableId,
@@ -48,11 +47,7 @@ export function TableShareView({
   }
 
   return (
-    <ShareShell
-      isPublic={table.access === "public"}
-      name={table.name}
-      openPath={openPath}
-    >
+    <ShareShell name={table.name} openPath={openPath}>
       {table.description === undefined ? null : (
         <p className="text-muted-foreground text-sm">{table.description}</p>
       )}

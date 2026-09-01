@@ -8,6 +8,7 @@ import {
   testOwner,
 } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
+import { folderDoc } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { activeShareLimit } from "../collections/shares"
 import { mintTableShare, openTableShare, revokeTableShare } from "./share"
@@ -50,10 +51,7 @@ describe("opening a table share", () => {
     const opened = await openTableShare(ctx, { tableId, secret: "s3cret" })
 
     expect(opened?.table.name).toBe("Leads")
-    expect(opened?.read).toEqual({
-      access: "share",
-      expiresAt: expect.any(Number),
-    })
+    expect(opened?.expiresAt).toEqual(expect.any(Number))
   })
 
   test("returns null on a bad secret", async () => {
@@ -127,60 +125,37 @@ describe("opening a table share", () => {
   })
 })
 
-describe("public visibility reads", () => {
-  test("an anonymous read with no secret succeeds for exactly the public table", async () => {
+describe("the folder chain over a link", () => {
+  test("a link dies when the table is filed into a folder that restricts it", async () => {
     const { database, ctx } = databaseContext()
-    const publicId = await createTable(database, {
-      visibility: { mode: "public" },
-    })
-    const organizationId = await createTable(database)
+    const tableId = await createTable(database)
 
-    const opened = await openTableShare(ctx, { tableId: publicId })
+    await createShare(database, tableId)
 
-    expect(opened?.read).toEqual({ access: "public" })
-    expect(await openTableShare(ctx, { tableId: organizationId })).toBeNull()
+    const folderId = await database.insert(
+      "folders",
+      folderDoc({ visibility: { mode: "private" }, createdBy: stranger })
+    )
+
+    await database.patch(tableId, { folderId })
+
+    expect(await openTableShare(ctx, { tableId, secret: "s3cret" })).toBeNull()
+
+    // Out of the folder again, the same link opens again.
+    await database.patch(tableId, { folderId: undefined })
+
+    expect(
+      (await openTableShare(ctx, { tableId, secret: "s3cret" }))?.table.name
+    ).toBe("Leads")
   })
 
-  test("an invalid secret still opens a genuinely public table", async () => {
+  test("a read with no secret opens nothing", async () => {
     const { database, ctx } = databaseContext()
-    const publicId = await createTable(database, {
-      visibility: { mode: "public" },
-    })
+    const tableId = await createTable(database)
 
-    const opened = await openTableShare(ctx, {
-      tableId: publicId,
-      secret: "wrong",
-    })
+    await createShare(database, tableId)
 
-    expect(opened?.read).toEqual({ access: "public" })
-  })
-
-  test("a public table inside a restricted folder stays closed to anonymous reads", async () => {
-    const { database, ctx } = databaseContext()
-    const folderId = await database.insert("folders", {
-      organizationId: "org",
-      name: "Private shelf",
-      visibility: { mode: "private" },
-      createdBy: testOwner,
-      createdAt: 1,
-      updatedAt: 1,
-    })
-    const filedId = await createTable(database, {
-      visibility: { mode: "public" },
-      folderId,
-    })
-
-    expect(await openTableShare(ctx, { tableId: filedId })).toBeNull()
-  })
-
-  test("archived public tables do not read anonymously", async () => {
-    const { database, ctx } = databaseContext()
-    const archivedId = await createTable(database, {
-      visibility: { mode: "public" },
-      archivedAt: 5,
-    })
-
-    expect(await openTableShare(ctx, { tableId: archivedId })).toBeNull()
+    expect(await openTableShare(ctx, { tableId })).toBeNull()
   })
 })
 
@@ -222,6 +197,23 @@ describe("minting a table share", () => {
 
     expect(shares).toHaveLength(activeShareLimit)
     expect(shares.some((share) => share.createdAt === 0)).toBe(false)
+  })
+
+  test("refuses a table whose folder restricts it, even to its owner", async () => {
+    const { database, ctx } = databaseContext()
+    const folderId = await database.insert(
+      "folders",
+      folderDoc({ visibility: { mode: "private" }, createdBy: stranger })
+    )
+    const tableId = await createTable(database, { folderId })
+
+    await expect(
+      mintTableShare(ctx, {
+        organizationId: "org",
+        tableId,
+        personId: testOwner,
+      })
+    ).rejects.toThrow("move it out of the folder")
   })
 
   test("refuses archived tables", async () => {

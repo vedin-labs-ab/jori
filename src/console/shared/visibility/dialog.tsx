@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { api } from "../../../../convex/_generated/api"
+import { AudienceSummary } from "./audience"
 import { VisibilityField } from "./field"
 
 type SetVisibilityArgs = FunctionArgs<typeof api.visibility.console.set>
@@ -93,12 +94,17 @@ export function VisibilityDialog({
               : `Only the owner can change who sees this ${noun}.`}
           </DialogDescription>
         </DialogHeader>
-        <fieldset className="grid gap-4" disabled={!canEdit}>
+        <fieldset className="grid gap-2" disabled={!canEdit}>
           <VisibilityField
             id={`${target.kind}-visibility`}
             noun={noun}
             onChange={setDraft}
             organizationId={organizationId}
+            value={draft}
+          />
+          <AudienceSummary
+            organizationId={organizationId}
+            target={target}
             value={draft}
           />
         </fieldset>
