@@ -1,4 +1,5 @@
 import { FieldError } from "@/components/ui/field"
+import { cn } from "@/lib/utils"
 import { ArrayFields } from "./arrays"
 import { emptyState, hasUnsetAffordance, type ValueState } from "./convert"
 import { type ChangeHandler, LeafControl } from "./inputs"
@@ -12,6 +13,14 @@ import { valueRootPath } from "./state"
 // object and array structure reads from quiet group rows. Every widget
 // writes back into one form-state tree; errors are keyed by value path
 // and appear only after a submit attempt.
+
+/** A focus ring meeting the frame's right edge rounds with it: the first
+ *  row at the top corner, the last at the bottom, and every row between
+ *  square — a curve with no corner to follow read as a stray outline. The
+ *  radius is the frame's less its hairline, so the ring runs concentric
+ *  with the border it sits inside. */
+const cornerRings =
+  "[&>:first-child_:focus-visible]:rounded-tr-[calc(var(--radius-md)_-_1px)] [&>:last-child_:focus-visible]:rounded-br-[calc(var(--radius-md)_-_1px)]"
 
 type ObjectField = Extract<ValueField, { kind: "object" }>
 type ObjectState = Extract<ValueState, { kind: "object" }>
@@ -32,7 +41,9 @@ export function ValueFields({
   }
 
   return (
-    <div className="divide-y overflow-hidden rounded-md border">
+    <div
+      className={cn("divide-y overflow-hidden rounded-md border", cornerRings)}
+    >
       <ObjectRows
         depth={0}
         errors={errors}
