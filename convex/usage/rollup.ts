@@ -118,19 +118,17 @@ export function usageTotals(rows: Doc<"usage">[]): UsageTotals {
   )
 }
 
-/** The window's biggest contributors, largest first, with everything past
- *  the cap folded into one remainder so no spend goes unaccounted for. */
-export function rankContributors(rows: Doc<"usage">[], limit: number) {
-  const ranked = [...groupContributors(rows).values()].sort(byMicros)
-  const rest = ranked.slice(limit)
+/** Every contributor to the window, largest first. Ranking is cheap and
+ *  pure; how deep a list is worth carrying is the caller's decision, since
+ *  only the caller knows what each named row costs it to resolve. */
+export function rankContributors(rows: Doc<"usage">[]): UsageContributor[] {
+  return sortContributors([...groupContributors(rows).values()])
+}
 
-  return {
-    automations: ranked.slice(0, limit),
-    rest: {
-      count: rest.length,
-      micros: rest.reduce((total, entry) => total + entry.micros, 0),
-    },
-  }
+/** The ranking's order, for a caller that has changed a row and has to put
+ *  the list back in it. */
+export function sortContributors(contributors: UsageContributor[]) {
+  return [...contributors].sort(byMicros)
 }
 
 function groupContributors(rows: Doc<"usage">[]) {

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import {
-  Coins,
+  ChartNoAxesColumn,
   FolderInput,
   LockKeyhole,
   Pencil,
@@ -54,7 +54,7 @@ export function FolderTitleMenu({
           params={{ folderId: folder.folderId }}
           to="/folders/$folderId/usage"
         >
-          <Coins />
+          <ChartNoAxesColumn />
           Usage
         </Link>
       </DropdownMenuItem>
@@ -90,7 +90,7 @@ export function FoldersTitleMenu() {
     <DropdownMenuContent align="start" className="w-44">
       <DropdownMenuItem asChild>
         <Link to="/folders/usage">
-          <Coins />
+          <ChartNoAxesColumn />
           Usage
         </Link>
       </DropdownMenuItem>

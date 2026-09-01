@@ -1,6 +1,7 @@
 import { formatUsd } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { countLabel } from "../../shared/count"
 import {
@@ -9,14 +10,20 @@ import {
   type UsageFolder,
   type UsageOverview,
   usageShare,
+  usageSpendShare,
 } from "./types"
 
 // The two ranked lists the page ends on: who spent it, and where it sits.
-// Both are the same row — a caption, an amount, and a bar proportional to
-// the leader — so the eye compares them the same way.
+// Both are the same row — a caption, an amount, a bar proportional to the
+// leader, and its share of the window — so the eye compares them the same
+// way, and both open the same way when there is more than a glance's worth.
 
 const nameLinkClassName =
   "min-w-0 truncate underline-offset-2 hover:underline focus-visible:underline"
+
+/** A ranking is read from the top, so the top is what a list opens with.
+ *  Five leaves the two lists a comparable height beside each other. */
+const rankedCutoff = 5
 
 function RankedRow({
   caption,
@@ -46,21 +53,46 @@ function RankedRow({
   )
 }
 
+/** The leaders, and the rest on request. Both lists hand their rows in
+ *  already built, so the cutoff is decided in one place for both. */
+function RankedList({ rows }: { rows: ReactNode[] }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="grid gap-3">
+      <ul className="grid gap-3">
+        {expanded ? rows : rows.slice(0, rankedCutoff)}
+      </ul>
+      {rows.length <= rankedCutoff ? null : (
+        <Button
+          className="justify-self-start"
+          onClick={() => setExpanded(!expanded)}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
+          {expanded ? "Show less" : `Show all ${rows.length}`}
+        </Button>
+      )}
+    </div>
+  )
+}
+
 /** What spent the window's money. An automation that still exists is a
  *  link; one that has since been deleted keeps its caption as plain text,
  *  because its spend is history and there is nothing left to open. */
 export function UsageContributors({
   automations,
-  rest,
+  total,
 }: {
   automations: UsageContributor[]
-  rest: UsageOverview["rest"]
+  total: number
 }) {
   const leader = automations[0]?.micros ?? 0
 
   return (
-    <ul className="grid gap-3">
-      {automations.map((entry) => (
+    <RankedList
+      rows={automations.map((entry) => (
         <RankedRow
           caption={
             entry.id === undefined ? (
@@ -75,19 +107,16 @@ export function UsageContributors({
               </Link>
             )
           }
-          detail={runsDetail(entry)}
+          detail={detailOf(
+            usageSpendShare(entry.micros, total),
+            runsDetail(entry)
+          )}
           key={entry.id ?? entry.label}
           micros={entry.micros}
           share={usageShare(entry.micros, leader)}
         />
       ))}
-      {rest.count === 0 ? null : (
-        <li className="flex items-baseline justify-between gap-3 text-muted-foreground text-sm">
-          <span>+{rest.count} more</span>
-          <span className="tabular-nums">{formatUsd(rest.micros)}</span>
-        </li>
-      )}
-    </ul>
+    />
   )
 }
 
@@ -96,45 +125,56 @@ export function UsageContributors({
 export function UsageFolders({
   days,
   folders,
+  total,
   unfiled,
 }: {
   days: UsageDays
   folders: UsageFolder[]
+  total: number
   unfiled: UsageOverview["unfiled"]
 }) {
   const unfiledMicros = unfiled?.micros ?? 0
   const leader = Math.max(folders[0]?.micros ?? 0, unfiledMicros)
+  const rows = folders.map((folder) => (
+    <RankedRow
+      caption={
+        <Link
+          className={nameLinkClassName}
+          params={{ folderId: folder.folderId }}
+          search={{ days }}
+          title={folder.name}
+          to="/folders/$folderId/usage"
+        >
+          {folder.name}
+        </Link>
+      }
+      detail={usageSpendShare(folder.micros, total)}
+      key={folder.folderId}
+      micros={folder.micros}
+      share={usageShare(folder.micros, leader)}
+    />
+  ))
 
-  return (
-    <ul className="grid gap-3">
-      {folders.map((folder) => (
-        <RankedRow
-          caption={
-            <Link
-              className={nameLinkClassName}
-              params={{ folderId: folder.folderId }}
-              search={{ days }}
-              title={folder.name}
-              to="/folders/$folderId/usage"
-            >
-              {folder.name}
-            </Link>
-          }
-          key={folder.folderId}
-          micros={folder.micros}
-          share={usageShare(folder.micros, leader)}
-        />
-      ))}
-      {unfiled === null || unfiledMicros === 0 ? null : (
-        <RankedRow
-          caption={<span className="min-w-0 truncate">Unfiled</span>}
-          detail={unfiledDetail(unfiled)}
-          micros={unfiledMicros}
-          share={usageShare(unfiledMicros, leader)}
-        />
-      )}
-    </ul>
-  )
+  if (unfiled !== null && unfiledMicros > 0) {
+    rows.push(
+      <RankedRow
+        caption={<span className="min-w-0 truncate">Unfiled</span>}
+        detail={unfiledDetail(unfiled, total)}
+        key="unfiled"
+        micros={unfiledMicros}
+        share={usageShare(unfiledMicros, leader)}
+      />
+    )
+  }
+
+  return <RankedList rows={rows} />
+}
+
+/** One detail line from whichever of its parts the row actually has. */
+function detailOf(...parts: (string | undefined)[]) {
+  const written = parts.filter((part) => part !== undefined)
+
+  return written.length === 0 ? undefined : written.join(" · ")
 }
 
 function runsDetail(entry: { ended: number; failed: number }) {
@@ -149,10 +189,16 @@ function runsDetail(entry: { ended: number; failed: number }) {
 
 /** Work that answers to no folder: someone asking Jori directly, and
  *  anything whose folder was deleted with no parent left to inherit it. */
-function unfiledDetail(unfiled: { ended: number; failed: number }) {
-  const runs = runsDetail(unfiled)
+function unfiledDetail(
+  unfiled: { ended: number; failed: number; micros: number },
+  total: number
+) {
+  const detail = detailOf(
+    usageSpendShare(unfiled.micros, total),
+    runsDetail(unfiled)
+  )
 
-  return runs === undefined
+  return detail === undefined
     ? "Not filed in any folder"
-    : `${runs} · not filed in any folder`
+    : `${detail} · not filed in any folder`
 }

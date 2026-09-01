@@ -6,6 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { Skeleton } from "@/components/ui/skeleton"
 import { type UsageDay, usageDayLabel } from "./types"
 
 // Daily spend is discrete — a day either cost something or it did not — so
@@ -26,7 +27,17 @@ const runsConfig = {
  *  month is the point rather than the exact height of any one day. */
 const chartClassName = "aspect-auto h-40 w-full"
 
-export function UsageSpendChart({ series }: { series: UsageDay[] }) {
+/** Absent series means a filtered window is still on its way. The box keeps
+ *  its height while it comes, so narrowing the chart never moves the page. */
+export function UsageSpendChart({
+  series,
+}: {
+  series: UsageDay[] | undefined
+}) {
+  if (series === undefined) {
+    return <Skeleton className="h-40 w-full rounded-md" />
+  }
+
   return (
     <ChartContainer className={chartClassName} config={spendConfig}>
       <BarChart accessibilityLayer data={series} margin={chartMargin}>

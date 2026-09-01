@@ -1,19 +1,24 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { Coins } from "lucide-react"
+import { ChartNoAxesColumn } from "lucide-react"
 import { Section, SectionGroup, SectionHeader } from "@/components/ui/section"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
-import { UsageRunsChart, UsageSpendChart } from "./chart"
+import { UsageRunsChart } from "./chart"
 import { UsageContributors, UsageFolders } from "./ranked"
+import { UsageSpendSection } from "./spend"
 import { UsageStats } from "./stats"
 import { type UsageDays, type UsageOverview } from "./types"
 
 // One Usage view serves both scopes. A folder shows its own subtree and
 // drills into its subfolders; the organization shows every root folder and
 // the unfiled bucket beside them. Only the copy differs.
+
+/** What the window looked like and what it bought, side by side once the
+ *  page is wide enough to read both at a glance. */
+const chartPairClassName = "grid gap-4 md:gap-6 lg:grid-cols-2"
 
 export function UsageView({
   days,
@@ -47,7 +52,8 @@ export function UsageView({
         ) : (
           <UsageBody
             days={days}
-            scoped={folderId !== undefined}
+            folderId={folderId}
+            organizationId={organizationId}
             usage={usage}
           />
         )}
@@ -59,13 +65,17 @@ export function UsageView({
 
 function UsageBody({
   days,
-  scoped,
+  folderId,
+  organizationId,
   usage,
 }: {
   days: UsageDays
-  scoped: boolean
+  folderId?: GenericId<"folders">
+  organizationId: string
   usage: UsageOverview
 }) {
+  const scoped = folderId !== undefined
+
   if (usage.totals.micros === 0 && usage.totals.ended === 0) {
     return (
       <ConsoleEmptyState
@@ -74,7 +84,7 @@ function UsageBody({
             ? "Runs from automations filed here will show up as they spend."
             : "Runs from your automations will show up here as they spend."
         }
-        icon={Coins}
+        icon={ChartNoAxesColumn}
         title="No usage in this window"
       />
     )
@@ -82,23 +92,31 @@ function UsageBody({
 
   return (
     <SectionGroup>
-      <Section>
-        <SectionHeader
-          description="What each day cost, priced as the models charge."
-          title="Spend over time"
+      <div className={chartPairClassName}>
+        {/* Keyed by scope: sibling folders share this route, so without a
+            remount a filter chosen in one would follow the reader into the
+            next and quietly narrow a chart about somewhere else. */}
+        <UsageSpendSection
+          days={days}
+          folderId={folderId}
+          key={folderId ?? "organization"}
+          organizationId={organizationId}
+          usage={usage}
         />
-        <UsageSpendChart series={usage.series} />
-      </Section>
+        <Section className="min-w-0">
+          <SectionHeader
+            description="Runs that finished each day, with failures stacked on top."
+            title="Runs"
+          />
+          <UsageRunsChart series={usage.series} />
+        </Section>
+      </div>
       <Section>
-        <SectionHeader
-          description="Runs that finished each day, with failures stacked on top."
-          title="Runs"
+        <SectionHeader title="Automations" />
+        <UsageContributors
+          automations={usage.automations}
+          total={usage.totals.micros}
         />
-        <UsageRunsChart series={usage.series} />
-      </Section>
-      <Section>
-        <SectionHeader title="Top automations" />
-        <UsageContributors automations={usage.automations} rest={usage.rest} />
       </Section>
       <UsageFolderSection days={days} scoped={scoped} usage={usage} />
     </SectionGroup>
@@ -128,6 +146,7 @@ function UsageFolderSection({
       <UsageFolders
         days={days}
         folders={usage.folders}
+        total={usage.totals.micros}
         unfiled={usage.unfiled}
       />
     </Section>

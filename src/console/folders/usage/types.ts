@@ -1,9 +1,9 @@
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../../convex/_generated/api"
 
-// What the Usage views read, and the one control they offer. The backend
-// hands back a finished payload — zero-filled series, ranked lists, a
-// remainder — so nothing here recomputes money.
+// What the Usage views read, and the controls they offer. The backend hands
+// back a finished payload — zero-filled series, ranked lists, totals — so
+// nothing here recomputes money; the helpers below only read it back.
 
 export type UsageOverview = FunctionReturnType<
   typeof api.folders.usage.overview
@@ -44,6 +44,34 @@ export const usageWindowOptions = usageWindowDays.map((days) => ({
 /** How much of the leader a row represents, for its proportion bar. */
 export function usageShare(micros: number, leaderMicros: number) {
   return leaderMicros <= 0 ? 0 : Math.round((micros / leaderMicros) * 100)
+}
+
+/** What a row's bar cannot say: how much of the window's whole spend it is.
+ *  A share too small to round to a percent is named as small rather than
+ *  rounded to nothing, and a window that cost nothing has no shares. */
+export function usageSpendShare(micros: number, totalMicros: number) {
+  if (totalMicros <= 0 || micros <= 0) {
+    return undefined
+  }
+
+  const percent = (micros / totalMicros) * 100
+
+  return `${percent < 0.5 ? "<1" : Math.round(percent)}% of spend`
+}
+
+/** The slice the spend chart is filtered to, as the series query wants it.
+ *  A choice the current overview no longer ranks reads as no filter at all,
+ *  so changing the window cannot leave the chart on a vanished row. */
+export function usageSlice(value: string, usage: UsageOverview) {
+  const automation = usage.automations.find((entry) => entry.id === value)
+
+  if (automation?.id !== undefined) {
+    return { automationId: automation.id }
+  }
+
+  const folder = usage.folders.find((entry) => entry.folderId === value)
+
+  return folder === undefined ? undefined : { folderId: folder.folderId }
 }
 
 /** A `YYYY-MM-DD` bucket read back as the calendar day it names. Parsing
