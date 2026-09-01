@@ -25,6 +25,7 @@
     "sandbox:build:prod": "node --experimental-strip-types scripts/env/index.ts --env prod -- node --experimental-strip-types scripts/e2b.ts",
     "skills:sync:dev": "node --experimental-strip-types scripts/env/index.ts --env dev -- npx convex run skills/catalog:syncGlobalSkills",
     "skills:sync:prod": "node --experimental-strip-types scripts/env/index.ts --env prod -- npx convex run skills/catalog:syncGlobalSkills",
+    "db:seed:dev": "node --experimental-strip-types scripts/env/index.ts --env dev -- node --experimental-strip-types scripts/seed.ts",
     "db:truncate:dev": "node --experimental-strip-types scripts/env/index.ts --env dev -- node --experimental-strip-types scripts/truncate.ts",
     "preview": "vite preview",
     "content:compile": "node --experimental-strip-types scripts/content/index.ts",
