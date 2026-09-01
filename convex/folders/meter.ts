@@ -144,16 +144,28 @@ export async function readAutomationRows(
   return rows.filter((row) => row.organizationId === args.organizationId)
 }
 
-/** A subtree total per named child, biggest first. Children that cost
- *  nothing in the window stay out: the list exists to point somewhere. */
+type SubtreeTotals = { micros: number; ended: number; failed: number }
+
+/** A subtree total per named child, biggest first, carrying the same
+ *  figures a contributor does so the two rankings read alike. Children
+ *  that cost nothing in the window stay out: the list exists to point
+ *  somewhere. */
 export function folderBreakdown(rows: Doc<"usage">[], groups: Grouping[]) {
-  const microsByFolder = new Map<Id<"folders">, number>()
+  const totalsByFolder = new Map<Id<"folders">, SubtreeTotals>()
 
   for (const row of rows) {
     if (row.folderId !== undefined) {
-      const carried = microsByFolder.get(row.folderId) ?? 0
+      const carried = totalsByFolder.get(row.folderId) ?? {
+        micros: 0,
+        ended: 0,
+        failed: 0,
+      }
 
-      microsByFolder.set(row.folderId, carried + row.micros)
+      totalsByFolder.set(row.folderId, {
+        micros: carried.micros + row.micros,
+        ended: carried.ended + row.runs.ended,
+        failed: carried.failed + row.runs.failed,
+      })
     }
   }
 
@@ -162,9 +174,19 @@ export function folderBreakdown(rows: Doc<"usage">[], groups: Grouping[]) {
     .map((group) => ({
       folderId: group.folderId,
       name: group.name,
-      micros: group.ids.reduce(
-        (total, id) => total + (microsByFolder.get(id) ?? 0),
-        0
+      ...group.ids.reduce<SubtreeTotals>(
+        (total, id) => {
+          const carried = totalsByFolder.get(id)
+
+          return carried === undefined
+            ? total
+            : {
+                micros: total.micros + carried.micros,
+                ended: total.ended + carried.ended,
+                failed: total.failed + carried.failed,
+              }
+        },
+        { micros: 0, ended: 0, failed: 0 }
       ),
     }))
     .filter((entry) => entry.micros > 0)

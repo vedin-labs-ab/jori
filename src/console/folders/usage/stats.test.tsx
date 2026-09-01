@@ -33,8 +33,8 @@ test("the band leads with the window's spend and how it changed", () => {
   )
 
   expect(screen.getByText("$0.14")).toBeDefined()
-  expect(screen.getByText("35% vs previous period")).toBeDefined()
-  expect(screen.getByText("5% vs previous period")).toBeDefined()
+  expect(screen.getByText("35%")).toBeDefined()
+  expect(screen.getByText("5%")).toBeDefined()
   // Spend, runs, and the cost of a run all rose.
   expect(container.querySelectorAll("svg.lucide-arrow-up")).toHaveLength(3)
 })
@@ -44,7 +44,7 @@ test("spending less than last time reads as a fall, not a rise", () => {
     overview({ micros: 90_000, ended: 1, failed: 0 }, { micros: 100_000 })
   )
 
-  expect(screen.getByText("10% vs previous period")).toBeDefined()
+  expect(screen.getByText("10%")).toBeDefined()
   expect(container.querySelector("svg.lucide-arrow-down")).not.toBeNull()
 })
 
@@ -53,13 +53,16 @@ test("an unchanged window says so rather than showing a zero", () => {
     overview({ micros: 50_000, ended: 1, failed: 0 }, { micros: 50_000 })
   )
 
-  expect(screen.getByText("Level with the previous period")).toBeDefined()
+  expect(screen.getByText("No change")).toBeDefined()
 })
 
 test("a window with nothing before it has no change to report", () => {
-  renderStats(overview({ micros: 50_000, ended: 5, failed: 0 }))
+  const { container } = renderStats(
+    overview({ micros: 50_000, ended: 5, failed: 0 })
+  )
 
-  expect(screen.queryByText(/previous period/)).toBeNull()
+  expect(screen.queryByText(/%/)).toBeNull()
+  expect(container.querySelector("svg")).toBeNull()
 })
 
 test("failures are read as a share of the runs, and coloured once there are any", () => {
@@ -85,7 +88,7 @@ test("cost per run averages the window and moves against the one before", () => 
 
   // $0.30 a run, down from $0.50.
   expect(screen.getByText("$0.30")).toBeDefined()
-  expect(screen.getByText("40% vs previous period")).toBeDefined()
+  expect(screen.getByText("40%")).toBeDefined()
 })
 
 test("no runs means no cost per run to average", () => {

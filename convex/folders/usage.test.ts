@@ -76,19 +76,23 @@ test("a folder's total sums its whole subtree, not just its own rows", async () 
     date: "2026-03-15",
     folderId: childId,
     micros: 200,
+    ended: 1,
   })
   await seedUsage(database, {
     date: "2026-03-14",
     folderId: grandchildId,
     micros: 3000,
+    ended: 2,
+    failed: 1,
   })
 
   const usage = await read(ctx, { folderId: rootId })
 
   expect(usage.totals.micros).toBe(3210)
-  // The drill-down is per direct child, each standing for its own subtree.
+  // The drill-down is per direct child, each standing for its own subtree,
+  // runs included.
   expect(usage.folders).toEqual([
-    { folderId: childId, name: "Pipeline", micros: 3200 },
+    { folderId: childId, name: "Pipeline", micros: 3200, ended: 3, failed: 1 },
   ])
 })
 
@@ -121,8 +125,8 @@ test("the organization view ranks root folders and names the unfiled rest", asyn
   const usage = await read(ctx)
 
   expect(usage.folders).toEqual([
-    { folderId: busyId, name: "Sales", micros: 900 },
-    { folderId: quietId, name: "Ops", micros: 5 },
+    { folderId: busyId, name: "Sales", micros: 900, ended: 0, failed: 0 },
+    { folderId: quietId, name: "Ops", micros: 5, ended: 0, failed: 0 },
   ])
   expect(usage.unfiled).toMatchObject({ micros: 40, ended: 2, failed: 1 })
   expect(usage.totals.micros).toBe(945)

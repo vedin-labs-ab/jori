@@ -126,10 +126,17 @@ test("the unfiled bucket ranks as a row like any other", () => {
 
   const unfiled = rows().at(-1)
 
-  expect(cells(unfiled as HTMLElement)).toEqual(["Unfiled", "$1.00", "10%"])
+  expect(cells(unfiled as HTMLElement)).toEqual([
+    "Unfiled",
+    "4",
+    "0",
+    "$1.00",
+    "$0.25",
+    "10%",
+  ])
 })
 
-test("a folder row is a way further in, with its share beside it", () => {
+test("a folder row is a way further in, and reads like a source row", () => {
   render(
     <UsageFolders
       days={30}
@@ -139,10 +146,19 @@ test("a folder row is a way further in, with its share beside it", () => {
     />
   )
 
+  const [row] = rows()
+
   expect(
     screen.getByRole("link", { name: "Folder 0" }).getAttribute("href")
   ).toBe("/folders/folders:0/usage")
-  expect(screen.getByText("25%")).toBeDefined()
+  expect(cells(row as HTMLElement)).toEqual([
+    "Folder 0",
+    "2",
+    "0",
+    "$1.00",
+    "$0.50",
+    "25%",
+  ])
 })
 
 function folders(count: number) {
@@ -150,5 +166,7 @@ function folders(count: number) {
     folderId: `folders:${rank}` as UsageOverview["folders"][number]["folderId"],
     name: `Folder ${rank}`,
     micros: 1_000_000,
+    ended: 2,
+    failed: 0,
   }))
 }
