@@ -15,11 +15,9 @@ function tableSummaryProperties() {
     description: stringProperty("Table description; absent when unset."),
     visibility: objectSchema({
       description:
-        "Who may see it: only its owner (private), listed people, listed teams, the whole organization, or the public.",
+        "Who may see it inside the organization: only its owner (private), listed people, listed teams, or every member.",
       properties: {
-        mode: stringProperty(
-          "private, people, teams, organization, or public."
-        ),
+        mode: stringProperty("private, people, teams, or organization."),
       },
     }),
     ownerId: stringProperty("Owning person ID."),
