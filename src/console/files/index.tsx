@@ -1,34 +1,31 @@
-import { useMutation, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import { Upload } from "lucide-react"
 import { useState } from "react"
-import { toast } from "sonner"
-import { downloadUrl } from "@/shared/files/download"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
-import { countNoun } from "../shared/count"
-import { showErrorToast } from "../shared/error"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
 import { SelectionActionsBar } from "../shared/list/bar"
-import { useBulkRunner } from "../shared/list/bulk"
 import { resettingControls, useListControls } from "../shared/list/controls"
 import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListPager } from "../shared/list/pager"
 import { useClientPagination } from "../shared/list/pagination"
-import { type RowSelection, useRowSelection } from "../shared/list/selection"
+import { useRowSelection } from "../shared/list/selection"
 import { useFolderNames } from "../shared/materials/folders"
 import { VisibilityDialog } from "../shared/visibility/dialog"
 import { EditFileDialog } from "./edit"
-import { fileListConfig } from "./list"
+import {
+  fileDeleteDescription,
+  fileListConfig,
+  fileNoun,
+  toMoveTarget,
+  useFileActions,
+  useFileBulk,
+} from "./manage"
 import { FileTable } from "./table"
 import { type FileRow } from "./types"
 import { UploadFileDialog } from "./upload"
-
-const fileNoun = { plural: "files", singular: "file" }
-
-const fileDeleteDescription =
-  "This permanently deletes the files and their stored contents. Anything that references them loses access."
 
 export function FilesPage() {
   return (
@@ -71,7 +68,9 @@ function useFilesPage(organizationId: string) {
   const [editFile, setEditFile] = useState<FileRow>()
   const [accessFile, setAccessFile] = useState<FileRow>()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
-  const actions = useFileActions(organizationId, () => setEditFile(undefined))
+  const actions = useFileActions(organizationId, {
+    onSaved: () => setEditFile(undefined),
+  })
   const selection = useRowSelection({
     identify: (file: FileRow) => file.fileId,
     rows: list.pagination.visibleRows,
@@ -197,96 +196,4 @@ function FilesOverlays({
       />
     </>
   )
-}
-
-function toMoveTarget(file: FileRow): MoveResourceTarget {
-  return {
-    resourceType: "file",
-    resourceId: file.fileId,
-    name: file.name,
-    folderId: file.folderId,
-  }
-}
-
-/** The selection bar's actions: deletes run the same mutation the row menu
- *  uses, downloads reuse each row's storage URL. */
-function useFileBulk(organizationId: string, selection: RowSelection<FileRow>) {
-  const removeFile = useMutation(api.files.console.remove)
-  const runner = useBulkRunner()
-
-  function removeSelected() {
-    const rows = selection.selected
-
-    void runner.run(
-      rows,
-      (row) => removeFile({ organizationId, fileId: row.fileId }),
-      {
-        noun: fileNoun.plural,
-        success: `Deleted ${countNoun(rows.length, fileNoun)}.`,
-        verb: "delete",
-      }
-    )
-  }
-
-  function downloadSelected() {
-    const rows = selection.selected
-
-    void runner.run(
-      rows,
-      async (row) => {
-        if (row.url === null) {
-          throw new Error("File has no download URL")
-        }
-
-        downloadUrl(row.name, row.url)
-      },
-      {
-        intervalMs: 300,
-        noun: fileNoun.plural,
-        success: `Downloaded ${countNoun(rows.length, fileNoun)}.`,
-        verb: "download",
-      }
-    )
-  }
-
-  return { downloadSelected, isBusy: runner.isBusy, removeSelected }
-}
-
-function useFileActions(organizationId: string, onSaved: () => void) {
-  const updateFile = useMutation(api.files.console.update)
-  const removeFile = useMutation(api.files.console.remove)
-  const [pendingFileId, setPendingFileId] = useState<FileRow["fileId"]>()
-
-  function saveFile(
-    file: FileRow,
-    values: { name: string; description: string }
-  ) {
-    setPendingFileId(file.fileId)
-    void updateFile({
-      organizationId,
-      fileId: file.fileId,
-      name: values.name,
-      description: values.description,
-    })
-      .then(() => {
-        toast.success("File updated.")
-        onSaved()
-      })
-      .catch((error: unknown) =>
-        showErrorToast(error, "Could not update the file.")
-      )
-      .finally(() => setPendingFileId(undefined))
-  }
-
-  function deleteFile(file: FileRow) {
-    setPendingFileId(file.fileId)
-    void removeFile({ organizationId, fileId: file.fileId })
-      .then(() => toast.success(`Deleted ${file.name}.`))
-      .catch((error: unknown) =>
-        showErrorToast(error, "Could not delete the file.")
-      )
-      .finally(() => setPendingFileId(undefined))
-  }
-
-  return { deleteFile, pendingFileId, saveFile }
 }

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type ListControls } from "../shared/list/controls"
 import { type RowSelection } from "../shared/list/selection"
-import { fileListConfig } from "./list"
+import { fileListConfig } from "./manage"
 import { FileTable } from "./table"
 import { type FileRow } from "./types"
 

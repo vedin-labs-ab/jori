@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import {
   Download,
   ExternalLink,
@@ -7,7 +8,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react"
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,68 +27,186 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { MoveResourceDialog } from "../folders/move"
+import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
+import { VisibilityDialog } from "../shared/visibility/dialog"
+import { EditFileDialog } from "./edit"
+import { toMoveTarget, useFileActions } from "./manage"
 import { type FileRow } from "./types"
 
-export function FileMenu({
-  file,
-  isPending,
-  onAccess,
-  onDelete,
-  onEdit,
-  onMoveToFolder,
-}: {
+type FileActionProps = {
   file: FileRow
   isPending: boolean
   onAccess: (file: FileRow) => void
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
-}) {
+}
+
+/** The file's actions and the delete confirmation they open, with no
+ *  trigger of their own: the list row hangs them off its ⋯ button, the
+ *  detail page off its breadcrumb name. Children lead the menu, for the
+ *  links the detail page already carries in its header. */
+function FileActions({
+  align,
+  children,
+  file,
+  isPending,
+  onAccess,
+  onDelete,
+  onEdit,
+  onMoveToFolder,
+}: FileActionProps & { align: "end" | "start"; children?: ReactNode }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
   return (
     <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            aria-label={`Manage ${file.name}`}
-            disabled={isPending}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44">
-          <FileLinkItems file={file} />
-          <DropdownMenuItem onSelect={() => onEdit(file)}>
-            <Pencil />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onAccess(file)}>
-            <LockKeyhole />
-            Sharing…
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onMoveToFolder(file)}>
-            <FolderInput />
-            Move to folder…
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => setIsDeleteOpen(true)}
-            variant="destructive"
-          >
-            <Trash2 />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <DropdownMenuContent align={align} className="w-44">
+        {children}
+        <DropdownMenuItem disabled={isPending} onSelect={() => onEdit(file)}>
+          <Pencil />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={isPending} onSelect={() => onAccess(file)}>
+          <LockKeyhole />
+          Sharing…
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={isPending}
+          onSelect={() => onMoveToFolder(file)}
+        >
+          <FolderInput />
+          Move to folder…
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={isPending}
+          onSelect={() => setIsDeleteOpen(true)}
+          variant="destructive"
+        >
+          <Trash2 />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
       <DeleteFileDialog
         file={file}
         isPending={isPending}
         onDelete={() => onDelete(file)}
       />
     </AlertDialog>
+  )
+}
+
+/** The row's actions in the file list. */
+export function FileMenu(props: FileActionProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={`Manage ${props.file.name}`}
+          disabled={props.isPending}
+          size="icon-sm"
+          type="button"
+          variant="ghost"
+        >
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <FileActions align="end" {...props}>
+        <FileLinkItems file={props.file} />
+      </FileActions>
+    </DropdownMenu>
+  )
+}
+
+/** The same actions on the detail page, hung off the file's name in the
+ *  breadcrumb — the shell owns that trigger, so this publishes only the
+ *  menu, and owns the dialogs the actions open. */
+export function FileTitleMenu({
+  file,
+  organizationId,
+}: {
+  file: FileRow
+  organizationId: string
+}) {
+  const navigate = useNavigate()
+  const [dialog, setDialog] = useState<FileDialog>()
+  const actions = useFileActions(organizationId, {
+    onDeleted: () => void navigate({ to: "/files" }),
+    onSaved: () => setDialog(undefined),
+  })
+  const isPending = actions.pendingFileId === file.fileId
+
+  useMaterialBreadcrumb(
+    file.name,
+    <FileActions
+      align="start"
+      file={file}
+      isPending={isPending}
+      onAccess={() => setDialog("access")}
+      onDelete={actions.deleteFile}
+      onEdit={() => setDialog("edit")}
+      onMoveToFolder={() => setDialog("move")}
+    />
+  )
+
+  return (
+    <FileDialogs
+      dialog={dialog}
+      file={file}
+      isSaving={isPending}
+      onClose={() => setDialog(undefined)}
+      onSave={actions.saveFile}
+      organizationId={organizationId}
+    />
+  )
+}
+
+type FileDialog = "access" | "edit" | "move"
+
+function FileDialogs({
+  dialog,
+  file,
+  isSaving,
+  onClose,
+  onSave,
+  organizationId,
+}: {
+  dialog: FileDialog | undefined
+  file: FileRow
+  isSaving: boolean
+  onClose: () => void
+  onSave: (file: FileRow, values: { name: string; description: string }) => void
+  organizationId: string
+}) {
+  function closeWhenDismissed(open: boolean) {
+    if (!open) {
+      onClose()
+    }
+  }
+
+  return (
+    <>
+      <EditFileDialog
+        file={dialog === "edit" ? file : undefined}
+        isSaving={isSaving}
+        onOpenChange={closeWhenDismissed}
+        onSave={onSave}
+      />
+      <VisibilityDialog
+        noun="file"
+        onOpenChange={closeWhenDismissed}
+        open={dialog === "access"}
+        organizationId={organizationId}
+        ownerId={file.ownerId}
+        target={{ kind: "file", id: file.fileId }}
+        value={file.visibility}
+      />
+      <MoveResourceDialog
+        onClose={onClose}
+        organizationId={organizationId}
+        resource={dialog === "move" ? toMoveTarget(file) : undefined}
+      />
+    </>
   )
 }
 

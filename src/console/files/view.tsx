@@ -17,10 +17,10 @@ import {
 import { ConsoleEmptyState } from "../shared/list/empty"
 import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
 import { ConsoleListLoading } from "../shared/list/loading"
-import { useMaterialBreadcrumb } from "../shared/materials/breadcrumb"
 import { useMemberUrl } from "../shared/materials/fragment"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileEditor } from "./editor/section"
+import { FileTitleMenu } from "./menu"
 import { FileLinksDialog } from "./share"
 import { type FileSiblings, useFileSiblings, useSiblingKeys } from "./siblings"
 import { FileMeta, FileToolbar } from "./toolbar"
@@ -109,7 +109,6 @@ function FileReadyView({
   organizationId: string
 }) {
   useMemberUrl()
-  useMaterialBreadcrumb(file.name)
 
   const siblings = useFileSiblings(organizationId, file.fileId)
   const [isShareOpen, setIsShareOpen] = useState(false)
@@ -139,6 +138,7 @@ function FileReadyView({
         open={isShareOpen}
         organizationId={organizationId}
       />
+      <FileTitleMenu file={file} organizationId={organizationId} />
     </ConsoleListLayout>
   )
 }
