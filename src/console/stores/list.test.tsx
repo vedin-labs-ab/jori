@@ -156,11 +156,9 @@ test("visibility and archived marks ride the name cell", () => {
     storeSummary({
       visibility: { mode: "private" },
       archivedAt: Date.now(),
-      description: "Org-wide defaults",
     }),
   ])
 
   expect(screen.getByText("Only me")).toBeDefined()
   expect(screen.getByText("Archived")).toBeDefined()
-  expect(screen.getByText("Org-wide defaults")).toBeDefined()
 })

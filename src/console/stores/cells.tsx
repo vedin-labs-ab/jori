@@ -15,7 +15,7 @@ import { type StoreSummary } from "./types"
  *  archived ones. Organization stores carry no scope badge. */
 export function StoreNameCell({ store }: { store: StoreSummary }) {
   return (
-    <MaterialNameCell description={store.description} icon={Database}>
+    <MaterialNameCell icon={Database}>
       <Link
         className={materialNameLinkClassName}
         params={{ storeId: store.storeId }}

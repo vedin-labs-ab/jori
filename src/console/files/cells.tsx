@@ -14,7 +14,7 @@ export function FileNameCell({ file }: { file: FileRow }) {
   const kind = fileKind(file.mimeType, file.name)
 
   return (
-    <MaterialNameCell description={file.description} icon={kind.icon}>
+    <MaterialNameCell icon={kind.icon}>
       <Link
         className={materialNameLinkClassName}
         params={{ fileId: file.fileId }}

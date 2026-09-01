@@ -30,8 +30,11 @@ const theme = EditorView.theme({
   ".cm-scroller": { fontFamily: "inherit", lineHeight: "1.625" },
   ".cm-content": { caretColor: "var(--color-foreground)" },
   ".cm-cursor": { borderLeftColor: "var(--color-foreground)" },
+  // The gutter pins itself to the left edge, so it carries the page's own
+  // background rather than a transparent one: a long line scrolling past
+  // it passes behind the numbers instead of through them.
   ".cm-gutters": {
-    backgroundColor: "transparent",
+    backgroundColor: "var(--color-background)",
     borderRight: "1px solid var(--color-border)",
     color: "var(--color-muted-foreground)",
   },

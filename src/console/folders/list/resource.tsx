@@ -1,6 +1,12 @@
 import { Link } from "@tanstack/react-router"
-import { FolderInput, FolderMinus, MoreHorizontal } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import {
+  Check,
+  FolderInput,
+  FolderMinus,
+  type LucideIcon,
+  MoreHorizontal,
+  Pause,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,6 +15,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { TableCell, TableRow } from "@/components/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { absoluteTime, relativeTime, useNow } from "../../shared/time"
 import { VisibilityMark } from "../../shared/visibility/badge"
 import { type ResourceDragPayload } from "../drag/plan"
@@ -49,11 +60,7 @@ export function ResourceListRow({
       <TableCell className="text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           {resourcePresentation(resource).label}
-          {resource.status === "paused" || resource.status === "completed" ? (
-            <Badge variant="secondary">
-              {resource.status === "paused" ? "Paused" : "Completed"}
-            </Badge>
-          ) : null}
+          <ResourceStatusMark status={resource.status} />
         </span>
       </TableCell>
       {/* Resources hold nothing, so the Items column carries a quiet dash —
@@ -70,6 +77,39 @@ export function ResourceListRow({
       </TableCell>
     </TableRow>
   )
+}
+
+/** An automation that is not running says so with a muted glyph, in the
+ *  same quiet idiom as the visibility mark beside its name — a badge in a
+ *  Kind cell reads as a second kind. Active resources carry no mark. */
+function ResourceStatusMark({ status }: { status: FolderResource["status"] }) {
+  const mark = status === undefined ? undefined : statusMarks[status]
+
+  if (mark === undefined) {
+    return null
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="shrink-0">
+          <mark.icon aria-hidden className="size-3.5" />
+          <span className="sr-only">{mark.label}</span>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{mark.label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+const statusMarks: Partial<
+  Record<
+    NonNullable<FolderResource["status"]>,
+    { icon: LucideIcon; label: string }
+  >
+> = {
+  completed: { icon: Check, label: "Completed" },
+  paused: { icon: Pause, label: "Paused" },
 }
 
 function ResourceMenu({
