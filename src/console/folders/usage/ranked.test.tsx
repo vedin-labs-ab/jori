@@ -20,8 +20,13 @@ function contributors(count: number): UsageContributor[] {
   }))
 }
 
+/** The body's rows: the header row is not a ranking. */
 function rows() {
-  return screen.getAllByRole("listitem")
+  return screen.getAllByRole("row").slice(1)
+}
+
+function cells(row: HTMLElement) {
+  return [...row.querySelectorAll("td")].map((cell) => cell.textContent)
 }
 
 test("a ranking opens on its leaders and keeps the rest one click away", () => {
@@ -45,36 +50,57 @@ test("a ranking short enough to read whole offers nothing to open", () => {
   expect(screen.queryByRole("button")).toBeNull()
 })
 
-test("a row says what share of the window it is, then what it ran", () => {
+test("a source row reads its runs, its money, and its share of the window", () => {
   render(
     <UsageContributors
       automations={[
         {
           id: "automations:1" as UsageContributor["id"],
           label: "Morning digest",
-          micros: 1800,
+          micros: 1_800_000,
           ended: 12,
           failed: 2,
         },
       ]}
-      total={10_000}
+      total={10_000_000}
     />
   )
 
-  expect(screen.getByText("18% of spend · 12 runs · 2 failed")).toBeDefined()
+  const [row] = rows()
+
+  expect(cells(row as HTMLElement)).toEqual([
+    "Morning digest",
+    "12",
+    "2",
+    "$1.80",
+    "$0.15",
+    "18%",
+  ])
+  expect(screen.getByRole("link", { name: "Morning digest" })).toBeDefined()
+  expect(screen.getByText("2").className).toContain("text-destructive")
 })
 
-test("a window that cost nothing has no shares to report", () => {
+test("a window that cost nothing has no shares or averages to report", () => {
   render(
     <UsageContributors
       automations={[
-        { label: "Interactive work", micros: 0, ended: 3, failed: 0 },
+        { label: "Interactive work", micros: 0, ended: 0, failed: 0 },
       ]}
       total={0}
     />
   )
 
-  expect(screen.getByText("3 runs")).toBeDefined()
+  const [row] = rows()
+
+  expect(cells(row as HTMLElement)).toEqual([
+    "Interactive work",
+    "0",
+    "0",
+    "$0.00",
+    "—",
+    "—",
+  ])
+  expect(screen.queryByRole("link")).toBeNull()
 })
 
 test("the unfiled bucket ranks as a row like any other", () => {
@@ -82,10 +108,10 @@ test("the unfiled bucket ranks as a row like any other", () => {
     <UsageFolders
       days={30}
       folders={folders(5)}
-      total={10_000}
+      total={10_000_000}
       unfiled={
         {
-          micros: 1000,
+          micros: 1_000_000,
           ended: 4,
           failed: 0,
           tokens: { input: 0, output: 0 },
@@ -98,24 +124,31 @@ test("the unfiled bucket ranks as a row like any other", () => {
 
   fireEvent.click(screen.getByRole("button", { name: "Show all 6" }))
 
-  expect(rows()).toHaveLength(6)
-  expect(
-    screen.getByText("10% of spend · 4 runs · not filed in any folder")
-  ).toBeDefined()
+  const unfiled = rows().at(-1)
+
+  expect(cells(unfiled as HTMLElement)).toEqual(["Unfiled", "$1.00", "10%"])
 })
 
-test("a folder row carries its share where its runs would be", () => {
+test("a folder row is a way further in, with its share beside it", () => {
   render(
-    <UsageFolders days={30} folders={folders(1)} total={4000} unfiled={null} />
+    <UsageFolders
+      days={30}
+      folders={folders(1)}
+      total={4_000_000}
+      unfiled={null}
+    />
   )
 
-  expect(screen.getByText("25% of spend")).toBeDefined()
+  expect(
+    screen.getByRole("link", { name: "Folder 0" }).getAttribute("href")
+  ).toBe("/folders/folders:0/usage")
+  expect(screen.getByText("25%")).toBeDefined()
 })
 
 function folders(count: number) {
   return Array.from({ length: count }, (_unused, rank) => ({
     folderId: `folders:${rank}` as UsageOverview["folders"][number]["folderId"],
     name: `Folder ${rank}`,
-    micros: 1000,
+    micros: 1_000_000,
   }))
 }

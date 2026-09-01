@@ -1,54 +1,75 @@
 import { formatUsd } from "@contracts/billing"
+import { ArrowDown, ArrowUp } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { ConsoleFilterToggle } from "../../shared/layout"
 import {
-  parseUsageDays,
-  type UsageDays,
+  type UsageDelta,
   type UsageOverview,
-  usageWindowOptions,
+  usageCostPerRun,
+  usageDelta,
+  usagePercent,
 } from "./types"
 
-/** The band the page opens with: what the window cost, how it compares with
- *  the window before it, and how much work it bought — beside the control
- *  that sets the window. The toggle keeps its place while figures load, so
- *  changing the window never moves the control out from under the pointer. */
-export function UsageStats({
-  days,
-  onDaysChange,
-  usage,
-}: {
-  days: UsageDays
-  onDaysChange: (days: UsageDays) => void
-  usage: UsageOverview | undefined
-}) {
-  const failed = usage?.totals.failed ?? 0
+// The band the page opens with: what the window cost, how much work that
+// bought, and how each compares with the window before. The band keeps its
+// four places while figures load, so changing the window never moves the
+// page under the reader.
+
+type Totals = UsageOverview["totals"]
+
+const labels = ["Spend", "Runs", "Failed", "Cost / run"] as const
+
+export function UsageStats({ usage }: { usage: UsageOverview | undefined }) {
+  if (usage === undefined) {
+    return (
+      <Band>
+        {labels.map((label) => (
+          <Stat key={label} label={label} />
+        ))}
+      </Band>
+    )
+  }
+
+  const { totals, previous } = usage
+  const costPerRun = usageCostPerRun(totals.micros, totals.ended)
 
   return (
-    <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
-      <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
-        <Stat
-          detail={usage === undefined ? undefined : deltaLabel(usage, days)}
-          label="Spend"
-          value={usage === undefined ? "—" : formatUsd(usage.totals.micros)}
-        />
-        <Stat label="Runs" value={countValue(usage?.totals.ended)} />
-        <Stat
-          label="Failed"
-          tone={failed > 0 ? "destructive" : "muted"}
-          value={countValue(usage?.totals.failed)}
-        />
-      </div>
-      <ConsoleFilterToggle
-        label="Window"
-        onValueChange={(value) => onDaysChange(parseUsageDays(Number(value)))}
-        options={usageWindowOptions}
-        value={String(days)}
+    <Band>
+      <Stat
+        detail={deltaDetail(usageDelta(totals.micros, previous.micros))}
+        label="Spend"
+        value={formatUsd(totals.micros)}
       />
+      <Stat
+        detail={deltaDetail(usageDelta(totals.ended, previous.ended))}
+        label="Runs"
+        value={count(totals.ended)}
+      />
+      <Stat
+        detail={failedDetail(totals)}
+        label="Failed"
+        tone={totals.failed > 0 ? "destructive" : "muted"}
+        value={count(totals.failed)}
+      />
+      <Stat
+        detail={deltaDetail(costDelta(totals, previous))}
+        label="Cost / run"
+        value={costPerRun === undefined ? undefined : formatUsd(costPerRun)}
+      />
+    </Band>
+  )
+}
+
+function Band({ children }: { children: ReactNode }) {
+  return (
+    <div className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4">
+      {children}
     </div>
   )
 }
 
+/** A figure has no place for a detail it cannot state, so a missing one
+ *  leaves the line out rather than filling it with a dash. */
 function Stat({
   detail,
   label,
@@ -58,10 +79,10 @@ function Stat({
   detail?: ReactNode
   label: string
   tone?: "default" | "destructive" | "muted"
-  value: string
+  value?: string
 }) {
   return (
-    <div className="min-w-24">
+    <div className="min-w-0">
       <p className="font-medium text-muted-foreground text-xs/relaxed">
         {label}
       </p>
@@ -72,10 +93,10 @@ function Stat({
           tone === "muted" && "text-muted-foreground"
         )}
       >
-        {value}
+        {value ?? "—"}
       </p>
       {detail === undefined ? null : (
-        <p className="mt-1.5 text-muted-foreground text-xs/relaxed tabular-nums">
+        <p className="mt-1.5 flex items-center gap-1 text-muted-foreground text-xs/relaxed tabular-nums">
           {detail}
         </p>
       )}
@@ -83,20 +104,43 @@ function Stat({
   )
 }
 
-function countValue(count: number | undefined) {
-  return count === undefined ? "—" : count.toLocaleString("en-US")
+function count(value: number) {
+  return value.toLocaleString("en-US")
 }
 
 /** Signed against the window that came just before, which is the only
  *  comparison the payload carries and the only one worth a glance. */
-function deltaLabel(usage: UsageOverview, days: UsageDays) {
-  const delta = usage.totals.micros - usage.previous.micros
-
-  if (delta === 0) {
-    return `Level with the previous ${days} days`
+function deltaDetail(delta: UsageDelta | undefined): ReactNode {
+  if (delta === undefined) {
+    return undefined
   }
 
-  const amount = delta > 0 ? `+${formatUsd(delta)}` : formatUsd(delta)
+  if (delta.direction === "level") {
+    return "Level with the previous period"
+  }
 
-  return `${amount} vs the previous ${days} days`
+  const Arrow = delta.direction === "up" ? ArrowUp : ArrowDown
+
+  return (
+    <>
+      <Arrow aria-hidden className="size-3" />
+      {`${delta.percent}% vs previous period`}
+    </>
+  )
+}
+
+function failedDetail(totals: Totals) {
+  const share = usagePercent(totals.failed, totals.ended)
+
+  return share === undefined ? undefined : `${share} of runs`
+}
+
+/** Only measurable once both windows ran something. */
+function costDelta(totals: Totals, previous: Totals) {
+  const current = usageCostPerRun(totals.micros, totals.ended)
+  const before = usageCostPerRun(previous.micros, previous.ended)
+
+  return current === undefined || before === undefined
+    ? undefined
+    : usageDelta(current, before)
 }
