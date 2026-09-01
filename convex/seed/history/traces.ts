@@ -47,7 +47,12 @@ async function writeTimeline(
   await write({ type: "model.started", attempt: 1 })
 
   for (const [index, tool] of tools.entries()) {
-    await write({ type: "tool.started", attempt: 1, callId: `call_${index}` })
+    await write({
+      type: "tool.started",
+      attempt: 1,
+      callId: `call_${index}`,
+      data: { tool: toolRef(tool), input: toolInput(run) },
+    })
     await write({
       type: "tool.completed",
       attempt: 1,
@@ -139,6 +144,12 @@ function runTools(run: Doc<"runs">) {
   return (
     granted === undefined || granted.length === 0 ? defaultTools : granted
   ).slice(0, 3)
+}
+
+/** A plausible argument for the call, taken from the run itself so a trace
+ *  reads as work on this run rather than on a generic one. */
+function toolInput(run: Doc<"runs">) {
+  return { query: run.snapshot.title, limit: 25 }
 }
 
 function toolRef(tool: string) {
