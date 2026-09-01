@@ -68,21 +68,25 @@ async function writeTimeline(
   await write(terminalStep(item))
 }
 
+/** Preparation and stopping sit outside the worker's timeline, so they carry
+ *  no sequence; everything else is a numbered step. */
+const untimed = new Set(["run.prepared", "run.stopped"])
+
 /** Each step is stamped with the next timestamp and sequence, so a timeline
  *  reads in order without every call site doing the arithmetic. */
 function stepWriter(ctx: MutationCtx, seed: SeedContext, run: Doc<"runs">) {
-  let sequence = 0
+  let step = 0
 
-  return async (step: Record<string, unknown>) => {
-    sequence += 1
+  return async (trace: { type: string } & Record<string, unknown>) => {
+    step += 1
 
     await ctx.db.insert("traces", {
       organizationId: seed.organizationId,
       runId: run._id,
-      key: `${run._id}:${sequence}`,
-      timestamp: run.createdAt + sequence * 900,
-      sequence,
-      ...step,
+      key: `${run._id}:${step}`,
+      timestamp: run.createdAt + step * 900,
+      ...(untimed.has(trace.type) ? {} : { sequence: step }),
+      ...trace,
     } as never)
   }
 }
