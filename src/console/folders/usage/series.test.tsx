@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeAll, expect, test, vi } from "vitest"
-import { UsageSpendSection } from "./spend"
+import { UsageSeriesSection } from "./series"
 import { type UsageDays, type UsageOverview } from "./types"
 
 const { asked, sliced } = vi.hoisted(() => ({
@@ -20,10 +20,10 @@ vi.mock("convex/react", () => ({
 }))
 
 // Recharts needs a laid-out box jsdom never gives it; what this section owns
-// is the control beside the chart and which series the chart is handed.
+// is the control beside the charts and which series they are handed.
 vi.mock("./chart", () => ({
-  UsageSpendChart: ({ series }: { series?: { date: string }[] }) => (
-    <div data-days={series?.length ?? "loading"} data-testid="spend-chart" />
+  UsageCharts: ({ series }: { series?: { date: string }[] }) => (
+    <div data-days={series?.length ?? "loading"} data-testid="charts" />
   ),
 }))
 
@@ -64,7 +64,7 @@ function section({
   usage?: UsageOverview
 } = {}) {
   return (
-    <UsageSpendSection
+    <UsageSeriesSection
       days={days}
       folderId={folderId as never}
       organizationId="organization"
@@ -74,17 +74,17 @@ function section({
 }
 
 function choose(name: string) {
-  fireEvent.keyDown(screen.getByRole("combobox", { name: "Spend filter" }), {
+  fireEvent.keyDown(screen.getByRole("combobox", { name: "Filter" }), {
     key: "ArrowDown",
   })
   fireEvent.click(screen.getByRole("option", { name }))
 }
 
 function chartDays() {
-  return screen.getByTestId("spend-chart").dataset.days
+  return screen.getByTestId("charts").dataset.days
 }
 
-test("the unfiltered chart draws the window the overview already carries", () => {
+test("the unfiltered charts draw the window the overview already carries", () => {
   render(section())
 
   expect(chartDays()).toBe("2")
@@ -128,7 +128,7 @@ test("choosing a subfolder charts that subfolder rather than the page's", () => 
   })
 })
 
-test("the chart holds its box while a chosen slice is on its way", () => {
+test("the charts hold their boxes while a chosen slice is on its way", () => {
   render(section())
   choose("Morning digest")
 

@@ -2,67 +2,55 @@ import { formatUsd } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { countLabel } from "../../shared/count"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import {
   type UsageContributor,
   type UsageDays,
   type UsageFolder,
   type UsageOverview,
+  usageCostPerRun,
+  usagePercent,
   usageShare,
-  usageSpendShare,
 } from "./types"
 
-// The two ranked lists the page ends on: who spent it, and where it sits.
-// Both are the same row — a caption, an amount, a bar proportional to the
-// leader, and its share of the window — so the eye compares them the same
-// way, and both open the same way when there is more than a glance's worth.
+// The two tables the page ends on: what spent the window's money, and where
+// it sits. Both end on the same column — the row's share of the window, as
+// a figure and as a bar against the leader — so the eye compares them the
+// same way, and both open the same way when there is more than a glance's
+// worth.
 
-const nameLinkClassName =
-  "min-w-0 truncate underline-offset-2 hover:underline focus-visible:underline"
-
-/** A ranking is read from the top, so the top is what a list opens with.
- *  Five leaves the two lists a comparable height beside each other. */
+/** A ranking is read from the top, so the top is what a table opens with.
+ *  Five leaves the two tables a comparable height beside each other. */
 const rankedCutoff = 5
 
-function RankedRow({
-  caption,
-  detail,
-  micros,
-  share,
-}: {
-  caption: ReactNode
-  detail?: string
-  micros: number
-  share: number
-}) {
-  return (
-    <li className="grid gap-1.5">
-      <div className="flex items-baseline justify-between gap-3 text-sm">
-        {caption}
-        <span className="shrink-0 tabular-nums">{formatUsd(micros)}</span>
-      </div>
-      <Progress
-        className="[&>[data-slot=progress-indicator]]:bg-muted-foreground/40"
-        value={share}
-      />
-      {detail === undefined ? null : (
-        <p className="text-muted-foreground text-xs tabular-nums">{detail}</p>
-      )}
-    </li>
-  )
-}
+const nameLinkClassName =
+  "underline-offset-2 hover:underline focus-visible:underline"
 
-/** The leaders, and the rest on request. Both lists hand their rows in
+const figureClassName = "text-right tabular-nums"
+
+/** The leaders, and the rest on request. Both tables hand their rows in
  *  already built, so the cutoff is decided in one place for both. */
-function RankedList({ rows }: { rows: ReactNode[] }) {
+function RankedTable({ head, rows }: { head: ReactNode; rows: ReactNode[] }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="grid gap-3">
-      <ul className="grid gap-3">
-        {expanded ? rows : rows.slice(0, rankedCutoff)}
-      </ul>
+    <div className="grid gap-2">
+      {/* The section's own edge is the table's: cells shed the outer padding
+          so names sit on the title's grid and figures on the right edge. */}
+      <Table className="[&_td:first-child]:pl-0 [&_td:last-child]:pr-0 [&_th:first-child]:pl-0 [&_th:last-child]:pr-0">
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">{head}</TableRow>
+        </TableHeader>
+        <TableBody>{expanded ? rows : rows.slice(0, rankedCutoff)}</TableBody>
+      </Table>
       {rows.length <= rankedCutoff ? null : (
         <Button
           className="justify-self-start"
@@ -78,8 +66,57 @@ function RankedList({ rows }: { rows: ReactNode[] }) {
   )
 }
 
+/** The row's name takes whatever width the figures leave, and gives way
+ *  with an ellipsis rather than pushing them off the edge. */
+function NameCell({ children }: { children: ReactNode }) {
+  return <TableCell className="w-full max-w-0 truncate">{children}</TableCell>
+}
+
+function FigureHead({ children }: { children: ReactNode }) {
+  return <TableHead className={figureClassName}>{children}</TableHead>
+}
+
+function FigureCell({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <TableCell className={cn(figureClassName, className)}>{children}</TableCell>
+  )
+}
+
+/** The row's share of the window as a figure, beside a bar drawn against
+ *  the leader so the biggest row fills its cell and the rest read against
+ *  it. A window that cost nothing has no shares. */
+function ShareCell({
+  leader,
+  micros,
+  total,
+}: {
+  leader: number
+  micros: number
+  total: number
+}) {
+  return (
+    <TableCell>
+      <div className="flex items-center justify-end gap-2 tabular-nums">
+        <span>{usagePercent(micros, total) ?? "—"}</span>
+        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-muted-foreground/50"
+            style={{ width: `${usageShare(micros, leader)}%` }}
+          />
+        </div>
+      </div>
+    </TableCell>
+  )
+}
+
 /** What spent the window's money. An automation that still exists is a
- *  link; one that has since been deleted keeps its caption as plain text,
+ *  link; one that has since been deleted keeps its name as plain text,
  *  because its spend is history and there is nothing left to open. */
 export function UsageContributors({
   automations,
@@ -91,12 +128,22 @@ export function UsageContributors({
   const leader = automations[0]?.micros ?? 0
 
   return (
-    <RankedList
+    <RankedTable
+      head={
+        <>
+          <TableHead>Source</TableHead>
+          <FigureHead>Runs</FigureHead>
+          <FigureHead>Failed</FigureHead>
+          <FigureHead>Spend</FigureHead>
+          <FigureHead>Cost / run</FigureHead>
+          <FigureHead>Share</FigureHead>
+        </>
+      }
       rows={automations.map((entry) => (
-        <RankedRow
-          caption={
-            entry.id === undefined ? (
-              <span className="min-w-0 truncate">{entry.label}</span>
+        <TableRow key={entry.id ?? entry.label}>
+          <NameCell>
+            {entry.id === undefined ? (
+              entry.label
             ) : (
               <Link
                 className={nameLinkClassName}
@@ -105,23 +152,26 @@ export function UsageContributors({
               >
                 {entry.label}
               </Link>
-            )
-          }
-          detail={detailOf(
-            usageSpendShare(entry.micros, total),
-            runsDetail(entry)
-          )}
-          key={entry.id ?? entry.label}
-          micros={entry.micros}
-          share={usageShare(entry.micros, leader)}
-        />
+            )}
+          </NameCell>
+          <FigureCell>{entry.ended}</FigureCell>
+          <FigureCell className={entry.failed > 0 ? "text-destructive" : ""}>
+            {entry.failed}
+          </FigureCell>
+          <FigureCell className="font-medium">
+            {formatUsd(entry.micros)}
+          </FigureCell>
+          <FigureCell>{costPerRun(entry)}</FigureCell>
+          <ShareCell leader={leader} micros={entry.micros} total={total} />
+        </TableRow>
       ))}
     />
   )
 }
 
 /** Where the money sits one level down, each row a whole subtree and each
- *  a way further in — the same view, scoped to that folder. */
+ *  a way further in — the same view, scoped to that folder. Work that
+ *  answers to no folder ranks beside them as its own row. */
 export function UsageFolders({
   days,
   folders,
@@ -136,8 +186,8 @@ export function UsageFolders({
   const unfiledMicros = unfiled?.micros ?? 0
   const leader = Math.max(folders[0]?.micros ?? 0, unfiledMicros)
   const rows = folders.map((folder) => (
-    <RankedRow
-      caption={
+    <TableRow key={folder.folderId}>
+      <NameCell>
         <Link
           className={nameLinkClassName}
           params={{ folderId: folder.folderId }}
@@ -147,58 +197,42 @@ export function UsageFolders({
         >
           {folder.name}
         </Link>
-      }
-      detail={usageSpendShare(folder.micros, total)}
-      key={folder.folderId}
-      micros={folder.micros}
-      share={usageShare(folder.micros, leader)}
-    />
+      </NameCell>
+      <FigureCell className="font-medium">
+        {formatUsd(folder.micros)}
+      </FigureCell>
+      <ShareCell leader={leader} micros={folder.micros} total={total} />
+    </TableRow>
   ))
 
-  if (unfiled !== null && unfiledMicros > 0) {
+  if (unfiledMicros > 0) {
     rows.push(
-      <RankedRow
-        caption={<span className="min-w-0 truncate">Unfiled</span>}
-        detail={unfiledDetail(unfiled, total)}
-        key="unfiled"
-        micros={unfiledMicros}
-        share={usageShare(unfiledMicros, leader)}
-      />
+      <TableRow key="unfiled">
+        <NameCell>Unfiled</NameCell>
+        <FigureCell className="font-medium">
+          {formatUsd(unfiledMicros)}
+        </FigureCell>
+        <ShareCell leader={leader} micros={unfiledMicros} total={total} />
+      </TableRow>
     )
   }
 
-  return <RankedList rows={rows} />
-}
-
-/** One detail line from whichever of its parts the row actually has. */
-function detailOf(...parts: (string | undefined)[]) {
-  const written = parts.filter((part) => part !== undefined)
-
-  return written.length === 0 ? undefined : written.join(" · ")
-}
-
-function runsDetail(entry: { ended: number; failed: number }) {
-  if (entry.ended === 0 && entry.failed === 0) {
-    return undefined
-  }
-
-  const runs = countLabel(entry.ended, "run")
-
-  return entry.failed === 0 ? runs : `${runs} · ${entry.failed} failed`
-}
-
-/** Work that answers to no folder: someone asking Jori directly, and
- *  anything whose folder was deleted with no parent left to inherit it. */
-function unfiledDetail(
-  unfiled: { ended: number; failed: number; micros: number },
-  total: number
-) {
-  const detail = detailOf(
-    usageSpendShare(unfiled.micros, total),
-    runsDetail(unfiled)
+  return (
+    <RankedTable
+      head={
+        <>
+          <TableHead>Folder</TableHead>
+          <FigureHead>Spend</FigureHead>
+          <FigureHead>Share</FigureHead>
+        </>
+      }
+      rows={rows}
+    />
   )
+}
 
-  return detail === undefined
-    ? "Not filed in any folder"
-    : `${detail} · not filed in any folder`
+function costPerRun(entry: UsageContributor) {
+  const cost = usageCostPerRun(entry.micros, entry.ended)
+
+  return cost === undefined ? "—" : formatUsd(cost)
 }

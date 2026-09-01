@@ -2,8 +2,9 @@ import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../../convex/_generated/api"
 
 // What the Usage views read, and the controls they offer. The backend hands
-// back a finished payload — zero-filled series, ranked lists, totals — so
-// nothing here recomputes money; the helpers below only read it back.
+// back a finished payload — zero-filled series, ranked lists, totals for
+// this window and the one before — so nothing here recomputes money; the
+// helpers below only read it back as the figures the page shows.
 
 export type UsageOverview = FunctionReturnType<
   typeof api.folders.usage.overview
@@ -35,33 +36,63 @@ export function usageDaysSearch(value: unknown): { days?: UsageDays } {
   return days === defaultUsageDays ? {} : { days }
 }
 
-/** Toggle options; the group's value is a string, as toggle values are. */
+/** The window control's options; a select's value is a string. */
 export const usageWindowOptions = usageWindowDays.map((days) => ({
-  label: `${days} days`,
+  label: `Last ${days} days`,
   value: String(days),
 }))
 
-/** How much of the leader a row represents, for its proportion bar. */
+/** How much of the leader a row is, for its bar: the biggest row fills its
+ *  cell and every other is drawn against it. */
 export function usageShare(micros: number, leaderMicros: number) {
   return leaderMicros <= 0 ? 0 : Math.round((micros / leaderMicros) * 100)
 }
 
-/** What a row's bar cannot say: how much of the window's whole spend it is.
- *  A share too small to round to a percent is named as small rather than
- *  rounded to nothing, and a window that cost nothing has no shares. */
-export function usageSpendShare(micros: number, totalMicros: number) {
-  if (totalMicros <= 0 || micros <= 0) {
+/** A part of a whole as the whole percent it rounds to. A part too small
+ *  to round to one is named as small rather than rounded to nothing, and a
+ *  whole of nothing has no parts. */
+export function usagePercent(part: number, whole: number) {
+  if (whole <= 0 || part <= 0) {
     return undefined
   }
 
-  const percent = (micros / totalMicros) * 100
+  const percent = (part / whole) * 100
 
-  return `${percent < 0.5 ? "<1" : Math.round(percent)}% of spend`
+  return percent < 0.5 ? "<1%" : `${Math.round(percent)}%`
 }
 
-/** The slice the spend chart is filtered to, as the series query wants it.
- *  A choice the current overview no longer ranks reads as no filter at all,
- *  so changing the window cannot leave the chart on a vanished row. */
+export type UsageDelta = {
+  direction: "up" | "down" | "level"
+  percent: number
+}
+
+/** How far a figure moved from the window before, as a percent of what it
+ *  was. Nothing to measure against is no delta rather than an infinite one,
+ *  and a move too small to round to a percent reads as level. */
+export function usageDelta(
+  current: number,
+  previous: number
+): UsageDelta | undefined {
+  if (previous <= 0) {
+    return undefined
+  }
+
+  const percent = Math.round(((current - previous) / previous) * 100)
+
+  return {
+    direction: percent > 0 ? "up" : percent < 0 ? "down" : "level",
+    percent: Math.abs(percent),
+  }
+}
+
+/** What one run cost on average; no runs, no average. */
+export function usageCostPerRun(micros: number, ended: number) {
+  return ended > 0 ? micros / ended : undefined
+}
+
+/** The slice the charts are filtered to, as the series query wants it. A
+ *  choice the current overview no longer ranks reads as no filter at all,
+ *  so changing the window cannot leave the charts on a vanished row. */
 export function usageSlice(value: string, usage: UsageOverview) {
   const automation = usage.automations.find((entry) => entry.id === value)
 

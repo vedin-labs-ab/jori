@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { type GenericId } from "convex/values"
+import { type ComponentProps } from "react"
 import { ConsolePage } from "../../page"
 import { ConsoleListLayout } from "../../shared/list/frame"
 import { useMaterialTrail } from "../../shared/materials/breadcrumb"
@@ -52,13 +53,11 @@ export function FolderUsagePage({
 export function OrganizationUsagePage({ days }: { days: UsageDays }) {
   const navigate = useNavigate()
 
-  useMaterialTrail(organizationCrumb)
-
   return (
     <ConsolePage>
       {(organizationId) => (
         <ConsoleListLayout>
-          <UsageView
+          <OrganizationUsageView
             days={days}
             onDaysChange={(next) =>
               void navigate({
@@ -73,4 +72,12 @@ export function OrganizationUsagePage({ days }: { days: UsageDays }) {
       )}
     </ConsolePage>
   )
+}
+
+/** The crumb is published from inside the shell, which ConsolePage mounts
+ *  below the page itself: published from the page it would reach nobody. */
+function OrganizationUsageView(props: ComponentProps<typeof UsageView>) {
+  useMaterialTrail(organizationCrumb)
+
+  return <UsageView {...props} />
 }

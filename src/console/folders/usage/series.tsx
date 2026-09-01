@@ -12,19 +12,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { api } from "../../../../convex/_generated/api"
-import { UsageSpendChart } from "./chart"
+import { UsageCharts } from "./chart"
 import { type UsageDays, type UsageOverview, usageSlice } from "./types"
 
-// The one chart on this page worth narrowing. Everything else stays about
-// the whole scope — the figures above are what the window cost, not what
-// one automation cost — so the filter lives in this section's header and
-// nowhere else.
+// The one part of the page worth narrowing: the days. The figures above
+// stay about the whole scope — what the window cost, not what one
+// automation cost — so the filter lives in this section's header and
+// nowhere else, and both charts follow it together.
 
-/** The unfiltered chart, which the overview already carries: choosing it
+/** The unfiltered charts, which the overview already carries: choosing it
  *  asks the backend for nothing. */
 const everything = "everything"
 
-export function UsageSpendSection({
+export function UsageSeriesSection({
   days,
   folderId,
   organizationId,
@@ -42,7 +42,7 @@ export function UsageSpendSection({
 
   // A window the choice has fallen out of drops it for good rather than
   // holding it: coming back to the window it belonged to should find the
-  // chart where the control says it is.
+  // charts where the control says they are.
   if (choice !== everything && slice === undefined) {
     setChoice(everything)
   }
@@ -63,17 +63,17 @@ export function UsageSpendSection({
     <Section className="min-w-0">
       <SectionHeader
         action={
-          <SpendFilter
+          <SeriesFilter
             onValueChange={setChoice}
             scoped={folderId !== undefined}
             usage={usage}
             value={slice === undefined ? everything : choice}
           />
         }
-        description="What each day cost, priced as the models charge."
-        title="Spend over time"
+        description="What each day cost, priced as the models charge, and the runs it bought."
+        title="Spend and runs"
       />
-      <UsageSpendChart
+      <UsageCharts
         series={slice === undefined ? usage.series : filtered?.series}
       />
     </Section>
@@ -82,10 +82,10 @@ export function UsageSpendSection({
 
 type FilterOption = { label: string; value: string }
 
-/** The window's own contributors, in the order the lists below rank them.
+/** The window's own contributors, in the order the tables below rank them.
  *  A deleted automation is not on offer: its spend is history, and there is
  *  nothing left to watch. */
-function SpendFilter({
+function SeriesFilter({
   onValueChange,
   scoped,
   usage,
@@ -110,10 +110,10 @@ function SpendFilter({
 
   return (
     <Select onValueChange={onValueChange} value={value}>
-      <SelectTrigger aria-label="Spend filter" className="w-36" size="sm">
+      <SelectTrigger aria-label="Filter" className="w-36" size="sm">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="max-w-72">
+      <SelectContent align="end" className="max-w-72">
         <SelectGroup>
           <FilterItem label="Everything" value={everything} />
         </SelectGroup>

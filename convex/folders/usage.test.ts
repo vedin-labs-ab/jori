@@ -165,15 +165,17 @@ test("a subfolder nobody may see keeps its spend and loses its name", async () =
 test("the window before this one is what the delta measures against", async () => {
   const { database, ctx } = databaseContext()
 
-  await seedUsage(database, { date: "2026-03-15", micros: 300 })
-  await seedUsage(database, { date: "2026-03-05", micros: 100 })
+  await seedUsage(database, { date: "2026-03-15", micros: 300, ended: 2 })
+  await seedUsage(database, { date: "2026-03-05", micros: 100, ended: 5 })
   // Older than both windows, so it counts toward neither.
   await seedUsage(database, { date: "2026-03-01", micros: 999 })
 
   const usage = await read(ctx)
 
   expect(usage.totals.micros).toBe(300)
+  // Whole, so runs and cost per run can be measured against it too.
   expect(usage.previous.micros).toBe(100)
+  expect(usage.previous.ended).toBe(5)
 })
 
 test("the ranking names every contributor, not just its leaders", async () => {

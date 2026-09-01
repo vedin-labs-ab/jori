@@ -57,7 +57,7 @@ const contributorLimit = 100
 
 /**
  * One window of usage, already reduced to what the view draws: a zero-filled
- * daily series, the window's totals against the previous window's, the
+ * daily series, the window's totals beside the previous window's, the
  * ranked contributors, and the subtree totals of whatever sits one level
  * down — direct subfolders inside a folder, root folders and the unfiled
  * bucket across the organization.
@@ -224,7 +224,7 @@ async function summarize(
   return {
     series: usageSeries(current, window),
     totals: usageTotals(current),
-    previous: { micros: usageTotals(previous).micros },
+    previous: usageTotals(previous),
     automations: await nameContributors(ctx, sight, ranked),
     folders: folderBreakdown(current, args.groups),
     // Interactive work and work whose folder is gone, which only the
