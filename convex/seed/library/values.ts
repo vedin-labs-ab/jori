@@ -8,6 +8,7 @@ import { type SeedStore } from "./shape"
 export const stores: SeedStore[] = [
   {
     name: "On-call rota",
+    owner: "oskar",
     description:
       "Who is on call this week and next, and what counts as worth waking someone for. Jori reads this before it pages anyone in #incidents.",
     folder: "Engineering",
@@ -38,6 +39,7 @@ export const stores: SeedStore[] = [
   },
   {
     name: "Pricing",
+    owner: "tobias",
     description:
       "The plans as they are actually sold, including the discount Tobias may give without asking. Support and Jori both quote from this.",
     folder: "Go to market",
@@ -91,6 +93,7 @@ export const stores: SeedStore[] = [
   },
   {
     name: "How we write",
+    owner: "elin",
     description:
       "The house voice, kept short enough that people actually read it. Every automation that drafts customer-facing text is pointed at this store.",
     folder: "Go to market",
@@ -115,6 +118,7 @@ export const stores: SeedStore[] = [
   },
   {
     name: "Runway",
+    owner: "mia",
     description:
       "The board-facing numbers, kept where only the founders can read them. Updated after each month closes.",
     folder: "Board and runway",

@@ -1,7 +1,7 @@
 import { type MutationCtx } from "../_generated/server"
 import { normalizeSkillInput } from "../skills/data"
 import { clearOrganization, daysAgo, type SeedContext } from "./context"
-import { resolveOwner } from "./people"
+import { resolveOwners } from "./people"
 
 // The house procedures Vedin Labs has written down for Jori. Global skills
 // arrive from the catalog sync and belong to no organization; these are the
@@ -13,6 +13,8 @@ type SeedSkill = {
   description: string
   category: "communication" | "creation" | "operations" | "research"
   integrations?: ("github" | "linear" | "notion" | "slack")[]
+  /** Who wrote it, by the local part of their address. */
+  owner: string
   /** Days before the seed instant it was written and last edited. */
   created: number
   updated: number
@@ -22,6 +24,7 @@ type SeedSkill = {
 const skills: SeedSkill[] = [
   {
     name: "escalation-brief",
+    owner: "priya",
     description:
       "File a support escalation the way Vedin Labs writes them: customer, plan, what they cannot do, and who owns it.",
     category: "operations",
@@ -44,6 +47,7 @@ const skills: SeedSkill[] = [
   },
   {
     name: "renewal-brief",
+    owner: "tobias",
     description:
       "Prepare an account for renewal: usage, incident history, open asks, and the position to take on price.",
     category: "research",
@@ -68,6 +72,7 @@ const skills: SeedSkill[] = [
   },
   {
     name: "shipped-post",
+    owner: "elin",
     description:
       "Draft the Friday shipped post for #general from the week's merged work.",
     category: "communication",
@@ -89,6 +94,7 @@ const skills: SeedSkill[] = [
   },
   {
     name: "incident-timeline",
+    owner: "oskar",
     description:
       "Keep the #incidents thread as a timeline and turn it into a postmortem when the incident closes.",
     category: "operations",
@@ -112,7 +118,7 @@ const skills: SeedSkill[] = [
 ]
 
 export async function seedSkills(ctx: MutationCtx, seed: SeedContext) {
-  const ownerId = await resolveOwner(ctx, seed)
+  const owners = await resolveOwners(ctx, seed)
 
   await clearOrganization(ctx, ["skills"], seed.organizationId)
 
@@ -126,7 +132,7 @@ export async function seedSkills(ctx: MutationCtx, seed: SeedContext) {
         associatedIntegrations: skill.integrations,
         body: skill.body.join("\n"),
       }),
-      createdBy: ownerId,
+      createdBy: owners(skill.owner),
       createdAt: daysAgo(seed, skill.created, 12),
       updatedAt: daysAgo(seed, skill.updated, 15),
     })

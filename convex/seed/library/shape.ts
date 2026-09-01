@@ -16,6 +16,8 @@ type SeedCollection = {
   /** Days before the seed instant it was made and last written. */
   created: number
   updated: number
+  /** Who keeps it, by the local part of their address. */
+  owner: string
 }
 
 export type SeedTable = SeedCollection & {

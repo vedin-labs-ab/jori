@@ -2,7 +2,7 @@ import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../../_generated/server"
 import { type StoredVisibility } from "../../visibility/schema"
 import { clearOrganization, daysAgo, type SeedContext } from "../context"
-import { resolveOwner, resolvePeople } from "../people"
+import { resolveOwner, resolveOwners, resolvePeople } from "../people"
 
 // The filing Vedin Labs works out of. A folder's visibility cascades over
 // everything inside it, so the tree is also the access model: #founders-grade
@@ -16,30 +16,27 @@ type SeedFolder = {
   created: number
   /** Absent means organization-wide. */
   visibility?: "founders"
+  /** Who made it, by the local part of their address. */
   owner?: string
 }
 
 const tree: SeedFolder[] = [
-  { name: "Engineering", created: 118 },
-  { name: "Incidents", parent: "Engineering", created: 96 },
-  { name: "Releases", parent: "Engineering", created: 96 },
-  { name: "Product", created: 118 },
-  { name: "Go to market", created: 112 },
-  { name: "Pipeline", parent: "Go to market", created: 84 },
-  { name: "Customers", parent: "Go to market", created: 84 },
-  { name: "Support", created: 104 },
-  { name: "Operations", created: 91 },
-  { name: "Vendors", parent: "Operations", created: 62 },
-  {
-    name: "Board and runway",
-    created: 77,
-    visibility: "founders",
-    owner: "mia@vedinlabs.com",
-  },
+  { name: "Engineering", created: 118, owner: "oskar" },
+  { name: "Incidents", parent: "Engineering", created: 96, owner: "oskar" },
+  { name: "Releases", parent: "Engineering", created: 96, owner: "nadia" },
+  { name: "Product", created: 118, owner: "mia" },
+  { name: "Go to market", created: 112, owner: "tobias" },
+  { name: "Pipeline", parent: "Go to market", created: 84, owner: "tobias" },
+  { name: "Customers", parent: "Go to market", created: 84, owner: "tobias" },
+  { name: "Support", created: 104, owner: "priya" },
+  { name: "Operations", created: 91, owner: "johan" },
+  { name: "Vendors", parent: "Operations", created: 62, owner: "johan" },
+  { name: "Board and runway", created: 77, visibility: "founders" },
 ]
 
 export async function seedFolders(ctx: MutationCtx, seed: SeedContext) {
   const ownerId = await resolveOwner(ctx, seed)
+  const owners = await resolveOwners(ctx, seed)
   const people = await resolvePeople(ctx, seed)
   const founders = [ownerId, people.get("mia@vedinlabs.com")].filter(
     (personId) => personId !== undefined
@@ -59,7 +56,7 @@ export async function seedFolders(ctx: MutationCtx, seed: SeedContext) {
         visibility: folderVisibility(folder, founders),
         parentId:
           folder.parent === undefined ? undefined : written.get(folder.parent),
-        createdBy: ownerId,
+        createdBy: owners(folder.owner),
         createdAt,
         updatedAt: createdAt,
       })

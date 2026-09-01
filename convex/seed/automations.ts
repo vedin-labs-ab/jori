@@ -9,7 +9,7 @@ import {
   seedTimezone,
 } from "./context"
 import { resolveFolders } from "./library/folders"
-import { resolveOwner } from "./people"
+import { resolveOwners } from "./people"
 import { resolvePlaces, slackIntegration } from "./places"
 
 // The standing work Vedin Labs has handed to Jori. Every one of these is
@@ -22,6 +22,8 @@ type SeedAutomation = {
   name: string
   instructions: string
   folder: string
+  /** Who set it up, by the local part of their address. */
+  owner: string
   status: "active" | "paused" | "completed"
   /** A cron expression, or the Slack channel an event trigger listens to. */
   cron?: string
@@ -35,6 +37,7 @@ type SeedAutomation = {
 const automations: SeedAutomation[] = [
   {
     name: "Friday shipped post",
+    owner: "elin",
     instructions:
       "Every Friday afternoon, read what merged this week across GitHub and Linear and draft the shipped post for #general using the shipped-post skill. Leave it as a draft for Mia to send.",
     folder: "Releases",
@@ -46,6 +49,7 @@ const automations: SeedAutomation[] = [
   },
   {
     name: "Monday pipeline prep",
+    owner: "tobias",
     instructions:
       "Before the Monday review, bring the Customer accounts table up to date from the week's #gtm traffic, and list every account with no contact in fourteen days.",
     folder: "Pipeline",
@@ -57,6 +61,7 @@ const automations: SeedAutomation[] = [
   },
   {
     name: "Triage new support threads",
+    owner: "priya",
     instructions:
       "When a message lands in #support, decide whether it is a new customer problem. If it is, draft the first reply and file an escalation row using the escalation-brief skill. Never send anything yourself.",
     folder: "Support",
@@ -68,6 +73,7 @@ const automations: SeedAutomation[] = [
   },
   {
     name: "Incident postmortem draft",
+    owner: "oskar",
     instructions:
       "When an incident thread in #incidents is marked closed, draft the postmortem into Engineering / Incidents from the thread timeline, following the incident-timeline skill.",
     folder: "Incidents",
@@ -79,6 +85,7 @@ const automations: SeedAutomation[] = [
   },
   {
     name: "Monthly vendor reconciliation",
+    owner: "johan",
     instructions:
       "On the third of each month, compare the Vendor spend table against the invoices filed under Operations / Vendors and list every line that disagrees by more than five euro.",
     folder: "Vendors",
@@ -90,6 +97,7 @@ const automations: SeedAutomation[] = [
   },
   {
     name: "Quiet account nudge",
+    owner: "tobias",
     instructions:
       "Each Wednesday, find accounts with no Slack or email contact in three weeks and draft a short note to the owner naming what was last discussed.",
     folder: "Pipeline",
@@ -102,6 +110,7 @@ const automations: SeedAutomation[] = [
   },
   {
     name: "Weekly escalation sweep",
+    owner: "priya",
     instructions:
       "Every Thursday, list escalations still unresolved and post the list into #support so the weekly review has it.",
     folder: "Support",
@@ -114,7 +123,7 @@ const automations: SeedAutomation[] = [
 ]
 
 export async function seedAutomations(ctx: MutationCtx, seed: SeedContext) {
-  const ownerId = await resolveOwner(ctx, seed)
+  const owners = await resolveOwners(ctx, seed)
   const folders = await resolveFolders(ctx, seed)
   const integration = await slackIntegration(ctx, seed)
   const places = await resolvePlaces(ctx, seed)
@@ -139,7 +148,7 @@ export async function seedAutomations(ctx: MutationCtx, seed: SeedContext) {
       }),
       status: automation.status,
       folderId: folders.get(automation.folder),
-      createdBy: ownerId,
+      createdBy: owners(automation.owner),
       createdAt,
       updatedAt: createdAt,
       firedAt:

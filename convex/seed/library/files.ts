@@ -1,7 +1,7 @@
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { clearOrganization, daysAgo, type SeedContext } from "../context"
-import { resolveOwner } from "../people"
+import { resolveOwners } from "../people"
 import { resolveFolders } from "./folders"
 
 // The documents a team accumulates around the work: the postmortem the
@@ -17,12 +17,15 @@ export type SeedFile = {
   folder: string
   /** Days before the seed instant the file was saved. */
   created: number
+  /** Who saved it, by the local part of their address. */
+  owner: string
   body: string
 }
 
 export const files: SeedFile[] = [
   {
     key: "postmortem",
+    owner: "oskar",
     name: "Slack reconnect postmortem.md",
     mimeType: "text/markdown",
     description:
@@ -48,6 +51,7 @@ export const files: SeedFile[] = [
   },
   {
     key: "release",
+    owner: "elin",
     name: "March release notes.md",
     mimeType: "text/markdown",
     description:
@@ -76,6 +80,7 @@ export const files: SeedFile[] = [
   },
   {
     key: "renewal",
+    owner: "tobias",
     name: "Northwind renewal brief.md",
     mimeType: "text/markdown",
     description:
@@ -98,6 +103,7 @@ export const files: SeedFile[] = [
   },
   {
     key: "pipeline",
+    owner: "tobias",
     name: "Pipeline export.csv",
     mimeType: "text/csv",
     description:
@@ -116,6 +122,7 @@ export const files: SeedFile[] = [
   },
   {
     key: "security",
+    owner: "priya",
     name: "Holmberg security questionnaire.md",
     mimeType: "text/markdown",
     description:
@@ -140,6 +147,7 @@ export const files: SeedFile[] = [
   },
   {
     key: "invoices",
+    owner: "johan",
     name: "August vendor invoices.csv",
     mimeType: "text/csv",
     description:
@@ -166,7 +174,7 @@ export async function seedFiles(
   seed: SeedContext,
   uploads: { key: string; storageId: Id<"_storage">; size: number }[]
 ) {
-  const ownerId = await resolveOwner(ctx, seed)
+  const owners = await resolveOwners(ctx, seed)
   const folders = await resolveFolders(ctx, seed)
   const stored = new Map(uploads.map((upload) => [upload.key, upload]))
 
@@ -184,7 +192,7 @@ export async function seedFiles(
     await ctx.db.insert("files", {
       organizationId: seed.organizationId,
       visibility: { mode: "organization" },
-      ownerId,
+      ownerId: owners(file.owner),
       storageId: upload.storageId,
       name: file.name,
       mimeType: file.mimeType,
