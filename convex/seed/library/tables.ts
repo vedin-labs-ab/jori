@@ -5,7 +5,7 @@ import { createCollection } from "../../collections/records"
 import { storeSpec } from "../../stores/spec"
 import { tableSpec } from "../../tables/spec"
 import { daysAgo, type SeedContext } from "../context"
-import { resolveOwner } from "../people"
+import { resolveOwners } from "../people"
 import { commercialTables } from "./commercial"
 import { resolveFolders } from "./folders"
 import { operationsTables } from "./operations"
@@ -19,17 +19,25 @@ import { stores } from "./values"
 // rather than one that appeared at once.
 
 export async function seedCollections(ctx: MutationCtx, seed: SeedContext) {
-  const ownerId = await resolveOwner(ctx, seed)
+  const owners = await resolveOwners(ctx, seed)
   const folders = await resolveFolders(ctx, seed)
 
   await clearCollections(ctx, seed)
 
   for (const table of [...commercialTables, ...operationsTables]) {
-    await writeTable(ctx, seed, { table, ownerId, folders })
+    await writeTable(ctx, seed, {
+      table,
+      ownerId: owners(table.owner),
+      folders,
+    })
   }
 
   for (const store of stores) {
-    await writeStore(ctx, seed, { store, ownerId, folders })
+    await writeStore(ctx, seed, {
+      store,
+      ownerId: owners(store.owner),
+      folders,
+    })
   }
 
   return commercialTables.length + operationsTables.length + stores.length

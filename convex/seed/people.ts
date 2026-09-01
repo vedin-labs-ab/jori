@@ -203,3 +203,15 @@ export function slackActor(handle: string): Actor {
     email: person.email,
   }
 }
+
+/** Resolves a fixture's owner handle to a person, falling back to whoever
+ *  the organization answers to. Material is owned by the person who would
+ *  actually keep it, so a console list does not read as one person's
+ *  workspace. */
+export async function resolveOwners(ctx: QueryCtx, seed: SeedContext) {
+  const people = await resolvePeople(ctx, seed)
+  const account = await resolveOwner(ctx, seed)
+
+  return (handle: string | undefined) =>
+    people.get(`${handle}@vedinlabs.com`) ?? account
+}
