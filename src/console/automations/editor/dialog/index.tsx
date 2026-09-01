@@ -166,7 +166,6 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         value={props.values.name}
       />
       <VisibilityField
-        allowPublic={false}
         help="Only-me automations run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
         id="automation-visibility"
         noun="automation"

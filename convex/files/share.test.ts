@@ -6,8 +6,8 @@ import { type Id } from "../_generated/dataModel"
 import { mintFileShare, openFileShare } from "./share"
 
 // The mechanism is exercised in full against tables; these cover the
-// file-shaped bits: creator visibility follows the file viewer rules, and
-// files have no archived state to gate on.
+// file-shaped bits: the creator's continued access follows the file viewer
+// rules, and files have no archived state to gate on.
 
 const owner = "persons:owner" as Id<"persons">
 const stranger = "persons:stranger" as Id<"persons">
@@ -86,21 +86,6 @@ describe("opening a file share", () => {
     await createShare(database, fileId, { organizationId: "other" })
 
     expect(await openFileShare(ctx, { fileId, secret: "s3cret" })).toBeNull()
-  })
-})
-
-describe("public file reads", () => {
-  test("a public file opens with no secret; others stay closed", async () => {
-    const { database, ctx } = databaseContext()
-    const publicId = await createFile(database, {
-      visibility: { mode: "public" },
-    })
-    const organizationId = await createFile(database)
-
-    expect((await openFileShare(ctx, { fileId: publicId }))?.read).toEqual({
-      access: "public",
-    })
-    expect(await openFileShare(ctx, { fileId: organizationId })).toBeNull()
   })
 })
 

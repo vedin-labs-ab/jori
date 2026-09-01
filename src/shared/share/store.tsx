@@ -7,9 +7,8 @@ import { api } from "../../../convex/_generated/api"
 import { useShareExpired } from "./link"
 import { ShareShell, ShareUnavailable } from "./shell"
 
-/** Views a store through a share link or its public visibility, without a
- *  signed-in session: the current document, its version, and the schema it
- *  satisfies. */
+/** Views a store through a share link, without a signed-in session: the
+ *  current document, its version, and the schema it satisfies. */
 export function StoreShareView({
   secret,
   storeId,
@@ -33,11 +32,7 @@ export function StoreShareView({
   }
 
   return (
-    <ShareShell
-      isPublic={store.access === "public"}
-      name={store.name}
-      openPath={openPath}
-    >
+    <ShareShell name={store.name} openPath={openPath}>
       {store.description === undefined ? null : (
         <p className="text-muted-foreground text-sm">{store.description}</p>
       )}

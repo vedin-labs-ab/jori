@@ -35,11 +35,7 @@ export function FileShareView({
   }
 
   return (
-    <ShareShell
-      isPublic={file.access === "public"}
-      name={file.name}
-      openPath={openPath}
-    >
+    <ShareShell name={file.name} openPath={openPath}>
       {file.description === undefined ? null : (
         <p className="text-muted-foreground text-sm">{file.description}</p>
       )}

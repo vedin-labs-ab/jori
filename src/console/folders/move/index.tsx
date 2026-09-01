@@ -13,12 +13,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { api } from "../../../convex/_generated/api"
-import { showErrorToast } from "../shared/error"
-import { useRetained } from "../shared/retain"
-import { FolderPicker } from "./picker"
-import { subtreeFolderIds } from "./tree"
-import { type MoveResourceTarget, type MoveSubject } from "./types"
+import { api } from "../../../../convex/_generated/api"
+import { showErrorToast } from "../../shared/error"
+import { useRetained } from "../../shared/retain"
+import { FolderPicker } from "../picker"
+import { subtreeFolderIds } from "../tree"
+import { type MoveResourceTarget, type MoveSubject } from "../types"
+import { useFilingConfirmation } from "./confirm"
 
 /** MoveResourcesDialog specialized for exactly one resource, for hosts
  *  whose move affordance is inherently singular (detail pages, row menus
@@ -149,13 +150,14 @@ function MoveDialogBody({
       <DialogFooter>
         <Button
           disabled={selectedId === currentId || move.isMoving}
-          onClick={() => void move.submit(selectedId)}
+          onClick={() => move.submit(selectedId)}
           type="button"
         >
           {move.isMoving ? <Loader2 className="animate-spin" /> : null}
           Move
         </Button>
       </DialogFooter>
+      {move.dialog}
     </>
   )
 }
@@ -167,9 +169,10 @@ function useMoveSubject(
 ) {
   const moveFolder = useMutation(api.folders.console.move)
   const fileResource = useMutation(api.folders.console.file)
+  const confirmation = useFilingConfirmation(organizationId)
   const [isMoving, setIsMoving] = useState(false)
 
-  async function submit(destinationId: string | null) {
+  async function run(destinationId: string | null) {
     setIsMoving(true)
 
     try {
@@ -204,7 +207,33 @@ function useMoveSubject(
     }
   }
 
-  return { isMoving, submit }
+  // Only a single resource has one audience to compare; a bulk selection
+  // moves without the question.
+  function submit(destinationId: string | null) {
+    const resource = loneResource(subject)
+
+    if (resource === undefined) {
+      void run(destinationId)
+
+      return
+    }
+
+    confirmation.request({
+      resourceType: resource.resourceType,
+      resourceId: resource.resourceId,
+      name: resource.name,
+      folderId: destinationId,
+      run: () => run(destinationId),
+    })
+  }
+
+  return { dialog: confirmation.dialog, isMoving, submit }
+}
+
+function loneResource(subject: MoveSubject) {
+  return subject.kind === "resources" && subject.resources.length === 1
+    ? subject.resources[0]
+    : undefined
 }
 
 /** How the dialog names its subject: quoted for a single item, a count for

@@ -4,17 +4,6 @@ import {
   visibilityModeLabels,
   visibilityModes,
 } from "@contracts/visibility"
-import { useState } from "react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -29,11 +18,11 @@ import { GrantPicker } from "./grants"
 import { usePeopleOptions, useTeamOptions } from "./options"
 
 // The one access control every material and folder shares, in creation
-// dialogs and settings alike: a compact mode select, the grant pickers it
-// reveals, and the confirmation that gates going public.
+// dialogs and settings alike: a compact mode select and the grant pickers
+// it reveals. Every audience is inside the organization; handing something
+// to an outsider is a share link, minted elsewhere.
 
 export function VisibilityField({
-  allowPublic = true,
   help,
   id,
   noun,
@@ -41,8 +30,6 @@ export function VisibilityField({
   organizationId,
   value,
 }: {
-  /** Automations have no anonymous surface, so they omit the public mode. */
-  allowPublic?: boolean
   /** Extra per-subject sentence appended to the field help. */
   help?: string
   id: string
@@ -51,23 +38,10 @@ export function VisibilityField({
   organizationId: string
   value: Visibility
 }) {
-  const [confirmingPublic, setConfirmingPublic] = useState(false)
-  const modes = allowPublic
-    ? visibilityModes
-    : visibilityModes.filter((mode) => mode !== "public")
-
   const selectMode = (mode: VisibilityMode) => {
-    if (mode === value.mode) {
-      return
+    if (mode !== value.mode) {
+      onChange(withMode(mode, value))
     }
-
-    if (mode === "public") {
-      setConfirmingPublic(true)
-
-      return
-    }
-
-    onChange(withMode(mode, value))
   }
 
   return (
@@ -79,12 +53,6 @@ export function VisibilityField({
             Who can see this {noun}. Whoever can see it can also use and edit
             it; you always keep access to what you own.
           </p>
-          {allowPublic ? (
-            <p>
-              Public makes it readable by anyone with the link, without signing
-              in. Editing always requires organization access.
-            </p>
-          ) : null}
           {help === undefined ? null : <p>{help}</p>}
         </FieldHelp>
       </div>
@@ -93,7 +61,7 @@ export function VisibilityField({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {modes.map((mode) => (
+          {visibilityModes.map((mode) => (
             <SelectItem key={mode} value={mode}>
               <VisibilityIcon className="size-4" mode={mode} />
               {visibilityModeLabels[mode]}
@@ -105,15 +73,6 @@ export function VisibilityField({
         onChange={onChange}
         organizationId={organizationId}
         value={value}
-      />
-      <PublicConfirmation
-        noun={noun}
-        onCancel={() => setConfirmingPublic(false)}
-        onConfirm={() => {
-          setConfirmingPublic(false)
-          onChange({ mode: "public" })
-        }}
-        open={confirmingPublic}
       />
     </div>
   )
@@ -167,48 +126,7 @@ function GrantFields({
   return null
 }
 
-/** Going public is the one selection that must not happen in passing. */
-function PublicConfirmation({
-  noun,
-  onCancel,
-  onConfirm,
-  open,
-}: {
-  noun: string
-  onCancel: () => void
-  onConfirm: () => void
-  open: boolean
-}) {
-  return (
-    <AlertDialog
-      onOpenChange={(next) => {
-        if (!next) {
-          onCancel()
-        }
-      }}
-      open={open}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Make this {noun} public?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Anyone with the link can view this {noun} — no sign-in required.
-            Editing still requires organization access.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Make public</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
-
-function withMode(
-  mode: Exclude<VisibilityMode, "public">,
-  previous: Visibility
-): Visibility {
+function withMode(mode: VisibilityMode, previous: Visibility): Visibility {
   if (mode === "people") {
     return {
       mode,

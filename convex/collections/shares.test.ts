@@ -13,7 +13,7 @@ function openArgs(overrides: Partial<Parameters<typeof canOpenShare>[0]> = {}) {
   return {
     share,
     material,
-    creatorHasAccess: true,
+    creatorCanShare: true,
     secret: "s3cret",
     now: 1_000,
     ...overrides,
@@ -47,8 +47,8 @@ describe("share opening", () => {
     ).toBe(false)
   })
 
-  test("rejects shares whose creator lost access to the material", () => {
-    expect(canOpenShare(openArgs({ creatorHasAccess: false }))).toBe(false)
+  test("rejects shares whose creator may no longer hand the material out", () => {
+    expect(canOpenShare(openArgs({ creatorCanShare: false }))).toBe(false)
   })
 })
 

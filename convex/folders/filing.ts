@@ -5,6 +5,7 @@ import { automationGate } from "../automations/access"
 import { removeAutomation } from "../automations/lifecycle"
 import { purgeCollection } from "../collections/records"
 import { purgeFile } from "../files/records"
+import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Gate, type Sight } from "../visibility/sight"
 import { requireOrganizationFolder } from "./tree"
 
@@ -30,7 +31,7 @@ export type FiledTable = (typeof filedTables)[number]
 type FiledDoc = Doc<FiledTable>
 
 type FilingEntry = {
-  load(ctx: MutationCtx, resourceId: string): Promise<FiledDoc | null>
+  load(ctx: QueryLikeCtx, resourceId: string): Promise<FiledDoc | null>
   gate(row: FiledDoc): Gate
   setFolder(
     ctx: MutationCtx,
@@ -87,6 +88,19 @@ const registry: Record<FiledTable, FilingEntry> = {
   },
 }
 
+/** The visibility gate of one filed row, for surfaces that ask what a move
+ *  would do before asking for it. Null when nothing answers to that id. */
+export async function loadFiledGate(
+  ctx: QueryLikeCtx,
+  resourceType: FiledResourceType,
+  resourceId: string
+): Promise<Gate | null> {
+  const entry = registry[tableByType[resourceType]]
+  const row = await entry.load(ctx, resourceId)
+
+  return row === null ? null : entry.gate(row)
+}
+
 /** Refiling one row, without the sight checks a caller-driven move needs:
  *  a folder deletion moves what it held whether or not the deleter can see
  *  it. Organization, not content, so updatedAt stays untouched. */
@@ -141,7 +155,7 @@ export async function fileResource(
 }
 
 async function loadRow(
-  ctx: MutationCtx,
+  ctx: QueryLikeCtx,
   table: FiledTable,
   resourceId: string
 ): Promise<FiledDoc | null> {

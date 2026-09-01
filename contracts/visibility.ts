@@ -2,17 +2,16 @@ import { type Integration, isUserScopedIntegration } from "./integrations"
 
 /**
  * Who may see a material (table, store, file, automation) or a folder.
- * Visibility gates reading; writing additionally requires organization
- * membership, so "public" never grants anonymous writes. Folders cascade:
- * a viewer must be allowed by a material's own visibility and by every
- * ancestor folder's, while owners always see what they own.
+ * Every audience is inside the organization; anonymous reading happens
+ * only through a minted share link. Folders cascade: a viewer must be
+ * allowed by a material's own visibility and by every ancestor folder's,
+ * while owners always see what they own.
  */
 export type Visibility =
   | { mode: "private" }
   | { mode: "people"; personIds: string[] }
   | { mode: "teams"; teamIds: string[] }
   | { mode: "organization" }
-  | { mode: "public" }
 
 export type VisibilityMode = Visibility["mode"]
 
@@ -21,7 +20,6 @@ export const visibilityModes = [
   "people",
   "teams",
   "organization",
-  "public",
 ] as const satisfies readonly VisibilityMode[]
 
 export const visibilityModeLabels: Record<VisibilityMode, string> = {
@@ -29,7 +27,6 @@ export const visibilityModeLabels: Record<VisibilityMode, string> = {
   people: "Specific people",
   teams: "Specific teams",
   organization: "Everyone in the organization",
-  public: "Public",
 }
 
 /** Short audience name for badges and tooltips. */
@@ -38,7 +35,6 @@ export const visibilityModeMarks: Record<VisibilityMode, string> = {
   people: "Specific people",
   teams: "Specific teams",
   organization: "Organization",
-  public: "Public",
 }
 
 const organizationVisibility: Visibility = { mode: "organization" }

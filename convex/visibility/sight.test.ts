@@ -6,7 +6,7 @@ import {
 } from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { anonymousSight, createSight, type SightArgs } from "./sight"
+import { createSight, type SightArgs } from "./sight"
 
 // The resolver's verification suite: one place proves who sees what for
 // every visibility mode and for the folder cascade.
@@ -129,36 +129,11 @@ describe("everyone in the organization", () => {
     expect(await sight(ctx, { personId: memberD }).canSee(table)).toBe(true)
     // An organization-principal execution counts as a member.
     expect(await sight(ctx, {}).canSee(table)).toBe(true)
-    expect(await anonymousSight(ctx, "org").canSee(table)).toBe(false)
     expect(
       await createSight(ctx, {
         organizationId: "elsewhere",
         personId: memberD,
       }).canSee(table)
-    ).toBe(false)
-  })
-})
-
-describe("public", () => {
-  test("anonymous readers see exactly the public material and nothing else", async () => {
-    const { ctx } = databaseContext()
-    const anonymous = anonymousSight(ctx, "org")
-
-    expect(
-      await anonymous.canSee(material({ visibility: { mode: "public" } }))
-    ).toBe(true)
-    expect(
-      await anonymous.canSee(material({ visibility: { mode: "organization" } }))
-    ).toBe(false)
-    expect(
-      await anonymous.canSee(
-        material({ visibility: { mode: "private" }, ownerId: owner })
-      )
-    ).toBe(false)
-    expect(
-      await anonymous.canSee(
-        material({ visibility: { mode: "people", personIds: [memberA] } })
-      )
     ).toBe(false)
   })
 })

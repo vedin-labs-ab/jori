@@ -31,7 +31,9 @@ describe("collection input normalization", () => {
     expect(visibilityFromInput(undefined)).toEqual({
       mode: "organization",
     })
-    expect(visibilityFromInput("public")).toEqual({ mode: "organization" })
+    // Anything an agent invents that is not "private" lands on the
+    // organization, the only other audience it can ask for.
+    expect(visibilityFromInput("everyone")).toEqual({ mode: "organization" })
   })
 
   test("expected versions are truncated non-negative integers", () => {

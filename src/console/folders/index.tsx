@@ -11,6 +11,7 @@ import { FolderFrame } from "./frame"
 import { FolderHeaderActions } from "./header"
 import { FolderContents } from "./list/contents"
 import { MoveResourceDialog } from "./move"
+import { useFilingConfirmation } from "./move/confirm"
 import { type FolderDetail, type FolderResource, toFiledType } from "./types"
 
 /** A folder's page: everything filed here. */
@@ -60,7 +61,7 @@ function FolderContentsView({
           </NewInFolderMenu>
         }
         onMove={setMoving}
-        onUnfile={unfile}
+        onUnfile={unfile.request}
       />
       <CreationDialogs
         onClose={() => setCreation(undefined)}
@@ -76,6 +77,7 @@ function FolderContentsView({
         organizationId={organizationId}
         resource={movingResource(moving, folder)}
       />
+      {unfile.dialog}
     </>
   )
 }
@@ -95,21 +97,34 @@ function movingResource(
       }
 }
 
+/** Leaving a folder widens an audience as surely as entering one narrows
+ *  it, so unfiling asks the same question a move does. */
 function useUnfileResource(organizationId: string, folder: FolderDetail) {
   const file = useMutation(api.folders.console.file)
+  const confirmation = useFilingConfirmation(organizationId)
+  const unfile = async (resource: FolderResource) => {
+    try {
+      await file({
+        organizationId,
+        resourceType: toFiledType(resource.type),
+        resourceId: resource.id,
+        folderId: null,
+      })
+      toast.success(`Moved ${resource.name} out of ${folder.name}.`)
+    } catch (error) {
+      showErrorToast(error, "Could not remove it from the folder.")
+    }
+  }
 
-  return (resource: FolderResource) => {
-    void file({
-      organizationId,
-      resourceType: toFiledType(resource.type),
-      resourceId: resource.id,
-      folderId: null,
-    })
-      .then(() =>
-        toast.success(`Moved ${resource.name} out of ${folder.name}.`)
-      )
-      .catch((error: unknown) =>
-        showErrorToast(error, "Could not remove it from the folder.")
-      )
+  return {
+    dialog: confirmation.dialog,
+    request: (resource: FolderResource) =>
+      confirmation.request({
+        resourceType: toFiledType(resource.type),
+        resourceId: resource.id,
+        name: resource.name,
+        folderId: null,
+        run: () => unfile(resource),
+      }),
   }
 }

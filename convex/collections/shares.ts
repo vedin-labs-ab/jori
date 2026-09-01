@@ -6,13 +6,12 @@ import { type MutationCtx } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
 import { bytesToHex } from "../shared/encoding"
 import { type RuntimeEnvironment, readOrigin } from "../shared/origin"
-import { anonymousSight, createSight, type Gate } from "../visibility/sight"
+import { createSight, type Gate } from "../visibility/sight"
 
-// The one anonymous read mechanism for tables, stores, and files: either a
-// secret-bearing share row minted per link, or the material's own public
-// visibility. The target is polymorphic, so every domain shares these rows
-// and this gate. Both paths are read-only; writes always require a signed-in
-// member who passes the visibility resolver.
+// The one anonymous read mechanism for tables, stores, and files: a
+// secret-bearing share row minted per link. The target is polymorphic, so
+// every domain shares these rows and this gate. Reads only; writes always
+// require a signed-in member who passes the visibility resolver.
 
 /** Bounds concurrent live links per target; minting past it retires the
  *  oldest while expired links remain available in the console history. */
@@ -26,17 +25,23 @@ export type ShareTarget = {
 export type MintedShare = { url: string; urlPath: string; expiresAt: number }
 
 /** Create an independent share link; existing links keep their own expiry.
- *  A link is a read capability for this one target regardless of scope. */
+ *  A link is a read capability for this one target regardless of scope.
+ *  The minting person must be able to hand the material out: their own
+ *  access is not enough when a folder restricts what it holds. */
 export async function mintShare(
   ctx: MutationCtx,
   args: {
     target: ShareTarget
-    organizationId: string
+    material: Gate
     personId: Id<"persons">
     urlPath: string
     expiresInHours?: number
   }
 ): Promise<MintedShare> {
+  const organizationId = args.material.organizationId
+
+  await requireShareable(ctx, args.material, args.personId, args.target.kind)
+
   const now = Date.now()
   const secret = randomShareSecret()
   const expiresAt = shareExpiresAt(now, args.expiresInHours)
@@ -55,7 +60,7 @@ export async function mintShare(
   }
 
   await ctx.db.insert("shares", {
-    organizationId: args.organizationId,
+    organizationId,
     createdBy: args.personId,
     secret,
     createdAt: now,
@@ -132,53 +137,25 @@ export async function pageShares(
   }
 }
 
-/** How an anonymous read was let in: through a minted link, or through the
- *  material's own public visibility. */
-export type MaterialRead =
-  | { access: "share"; expiresAt: number }
-  | { access: "public" }
-
-/** The one anonymous read gate: a valid share link opens the material, and
- *  a material whose visibility resolves to public (its own setting and its
- *  ancestor folders') opens with no secret at all. Null on any failure so
- *  callers cannot probe what exists. */
-export async function openMaterialRead(
+/** The one anonymous read gate. Resolves a secret to its grant row —
+ *  expiry, organization, archive state, and the creator's continued right
+ *  to hand this material out, all checked on every read, so filing the
+ *  material into a restricting folder closes every outstanding link. Null
+ *  on any failure so callers cannot probe what exists. */
+export async function openShare(
   ctx: QueryLikeCtx,
   args: {
     target: ShareTarget
     material: Gate & { archivedAt?: number }
     secret: string | undefined
   }
-): Promise<MaterialRead | null> {
-  if (args.secret !== undefined && args.secret !== "") {
-    const share = await openShare(ctx, args.secret, args)
+): Promise<{ expiresAt: number } | null> {
+  const secret = args.secret
 
-    if (share !== null) {
-      return { access: "share", expiresAt: share.expiresAt }
-    }
+  if (secret === undefined || secret === "") {
+    return null
   }
 
-  const isPublic =
-    args.material.archivedAt === undefined &&
-    (await anonymousSight(ctx, args.material.organizationId).canSee(
-      args.material
-    ))
-
-  return isPublic ? { access: "public" } : null
-}
-
-/** Resolve a share link to its grant row: secret, expiry, organization,
- *  archive state, and the creator's continued access — the same visibility
- *  question every material answers — all checked on every read. Null on any
- *  failure so callers cannot probe what exists. */
-async function openShare(
-  ctx: QueryLikeCtx,
-  secret: string,
-  args: {
-    target: ShareTarget
-    material: Gate & { archivedAt?: number }
-  }
-) {
   const share = await ctx.db
     .query("shares")
     .withIndex("by_target_and_secret", (index) =>
@@ -194,10 +171,10 @@ async function openShare(
     !canOpenShare({
       share,
       material: args.material,
-      creatorHasAccess: await createSight(ctx, {
+      creatorCanShare: await createSight(ctx, {
         organizationId: args.material.organizationId,
         personId: share.createdBy,
-      }).canSee(args.material),
+      }).canShare(args.material),
       secret,
       now: Date.now(),
     })
@@ -205,7 +182,27 @@ async function openShare(
     return null
   }
 
-  return share
+  return { expiresAt: share.expiresAt }
+}
+
+/** Minting refuses what the person cannot hand out. The chain is the
+ *  reason worth naming: it is fixable by moving the material. */
+async function requireShareable(
+  ctx: MutationCtx,
+  material: Gate,
+  personId: Id<"persons">,
+  kind: ShareTarget["kind"]
+) {
+  const shareable = await createSight(ctx, {
+    organizationId: material.organizationId,
+    personId,
+  }).canShare(material)
+
+  if (!shareable) {
+    throw new Error(
+      `This ${kind} is in a folder that restricts it; move it out of the folder to share it externally.`
+    )
+  }
 }
 
 export function randomShareSecret() {
@@ -216,7 +213,7 @@ export function randomShareSecret() {
 export function canOpenShare(args: {
   share: { secret: string; expiresAt: number; organizationId: string }
   material: { organizationId: string; archivedAt?: number }
-  creatorHasAccess: boolean
+  creatorCanShare: boolean
   secret: string
   now: number
 }) {
@@ -225,7 +222,7 @@ export function canOpenShare(args: {
     args.share.expiresAt > args.now &&
     args.share.organizationId === args.material.organizationId &&
     args.material.archivedAt === undefined &&
-    args.creatorHasAccess
+    args.creatorCanShare
   )
 }
 

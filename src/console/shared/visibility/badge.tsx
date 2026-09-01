@@ -3,7 +3,7 @@ import {
   type VisibilityMode,
   visibilityModeMarks,
 } from "@contracts/visibility"
-import { Building2, Globe, Group, Lock, Users } from "lucide-react"
+import { Building2, Group, Lock, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -20,7 +20,6 @@ const visibilityIcons = {
   people: Users,
   teams: Group,
   organization: Building2,
-  public: Globe,
 } as const
 
 /** Short audience sentence for tooltips. */

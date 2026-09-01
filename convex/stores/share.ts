@@ -13,7 +13,7 @@ import { findSingletonDocument } from "../collections/documents"
 import {
   type MintedShare,
   mintShare,
-  openMaterialRead,
+  openShare,
   pageShares,
   revokeShare,
   type ShareTarget,
@@ -82,9 +82,8 @@ export const page = query({
   },
 })
 
-/** Anonymous read: a share secret or the store's own public visibility is
- *  the whole credential. Returns null on every failure so callers cannot
- *  probe which stores exist. */
+/** Anonymous read: the share secret is the whole credential. Returns null
+ *  on every failure so callers cannot probe which stores exist. */
 export const get = query({
   args: { storeId: v.string(), secret: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -102,9 +101,7 @@ export const get = query({
       schema: opened.store.schema as JsonSchemaObject | undefined,
       value: (document?.value ?? null) as unknown,
       version: document?.version ?? 0,
-      access: opened.read.access,
-      expiresAt:
-        opened.read.access === "share" ? opened.read.expiresAt : undefined,
+      expiresAt: opened.expiresAt,
     }
   },
 })
@@ -126,16 +123,16 @@ export async function mintStoreShare(
 
   return await mintShare(ctx, {
     target: storeTarget(store._id),
-    organizationId: store.organizationId,
+    material: store,
     personId: args.personId,
     urlPath: `/stores/${store._id}`,
     expiresInHours: args.expiresInHours,
   })
 }
 
-/** Resolve an anonymous read to its store: a share link's secret, expiry,
- *  organization, archive state, and the creator's continued access all
- *  checked on every read — or the store's own public visibility. */
+/** Resolve an anonymous read to its store: the link's secret, expiry,
+ *  organization, archive state, and the creator's continued right to share
+ *  it all checked on every read. */
 export async function openStoreShare(
   ctx: QueryLikeCtx,
   args: { storeId: string; secret?: string }
@@ -147,13 +144,13 @@ export async function openStoreShare(
     return null
   }
 
-  const read = await openMaterialRead(ctx, {
+  const share = await openShare(ctx, {
     target: storeTarget(store._id),
     material: store,
     secret: args.secret,
   })
 
-  return read === null ? null : { store, read }
+  return share === null ? null : { store, expiresAt: share.expiresAt }
 }
 
 function storeTarget(storeId: Id<"collections">): ShareTarget {
