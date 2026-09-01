@@ -70,7 +70,7 @@ export function UsageView({
             usage={usage}
           />
         )}
-        <UsageFootnote timezone={usage?.timezone} />
+        <UsageFootnote days={days} timezone={usage?.timezone} />
       </ConsoleListContent>
     </>
   )
@@ -176,13 +176,19 @@ function UsageBody({
   )
 }
 
-/** States the two things a number here cannot state for itself: which day
- *  a day is, and what the money is a price for. */
-function UsageFootnote({ timezone }: { timezone?: string }) {
+/** States what a figure here cannot state for itself: which day a day is,
+ *  what a change is measured against, and what the money is a price for. */
+function UsageFootnote({
+  days,
+  timezone,
+}: {
+  days: UsageDays
+  timezone?: string
+}) {
   return (
     <p className="text-muted-foreground text-xs/relaxed">
-      Days follow {timezone ?? "the organization's time zone"} · LLM usage
-      priced at provider list rates.
+      Days follow {timezone ?? "the organization's time zone"} · Changes compare
+      with the previous {days} days · LLM usage priced at provider list rates.
     </p>
   )
 }

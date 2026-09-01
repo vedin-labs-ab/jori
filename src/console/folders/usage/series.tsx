@@ -70,7 +70,6 @@ export function UsageSeriesSection({
             value={slice === undefined ? everything : choice}
           />
         }
-        description="What each day cost, priced as the models charge, and the runs it bought."
         title="Spend and runs"
       />
       <UsageCharts

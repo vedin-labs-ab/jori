@@ -22,10 +22,10 @@ import {
 } from "./types"
 
 // The two tables the page ends on: what spent the window's money, and where
-// it sits. Both end on the same column — the row's share of the window, as
-// a figure and as a bar against the leader — so the eye compares them the
-// same way, and both open the same way when there is more than a glance's
-// worth.
+// it sits. Both carry the same columns — runs, failures, spend, cost per
+// run, and the row's share of the window as a figure and a bar against the
+// leader — so the eye reads them the same way, and both open the same way
+// when there is more than a glance's worth.
 
 /** A ranking is read from the top, so the top is what a table opens with.
  *  Five leaves the two tables a comparable height beside each other. */
@@ -36,9 +36,11 @@ const nameLinkClassName =
 
 const figureClassName = "text-right tabular-nums"
 
+type RankedEntry = { ended: number; failed: number; micros: number }
+
 /** The leaders, and the rest on request. Both tables hand their rows in
  *  already built, so the cutoff is decided in one place for both. */
-function RankedTable({ head, rows }: { head: ReactNode; rows: ReactNode[] }) {
+function RankedTable({ noun, rows }: { noun: string; rows: ReactNode[] }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
@@ -47,13 +49,22 @@ function RankedTable({ head, rows }: { head: ReactNode; rows: ReactNode[] }) {
           so names sit on the title's grid and figures on the right edge. */}
       <Table className="[&_td:first-child]:pl-0 [&_td:last-child]:pr-0 [&_th:first-child]:pl-0 [&_th:last-child]:pr-0">
         <TableHeader>
-          <TableRow className="hover:bg-transparent">{head}</TableRow>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>{noun}</TableHead>
+            <FigureHead>Runs</FigureHead>
+            <FigureHead>Failed</FigureHead>
+            <FigureHead>Spend</FigureHead>
+            <FigureHead>Cost / run</FigureHead>
+            <FigureHead>Share</FigureHead>
+          </TableRow>
         </TableHeader>
         <TableBody>{expanded ? rows : rows.slice(0, rankedCutoff)}</TableBody>
       </Table>
       {rows.length <= rankedCutoff ? null : (
+        // Flush with the names at rest; hovering grows the padding back,
+        // the same move the list headers make.
         <Button
-          className="justify-self-start"
+          className="justify-self-start px-0 hover:px-2 focus-visible:px-2"
           onClick={() => setExpanded(!expanded)}
           size="sm"
           type="button"
@@ -64,12 +75,6 @@ function RankedTable({ head, rows }: { head: ReactNode; rows: ReactNode[] }) {
       )}
     </div>
   )
-}
-
-/** The row's name takes whatever width the figures leave, and gives way
- *  with an ellipsis rather than pushing them off the edge. */
-function NameCell({ children }: { children: ReactNode }) {
-  return <TableCell className="w-full max-w-0 truncate">{children}</TableCell>
 }
 
 function FigureHead({ children }: { children: ReactNode }) {
@@ -88,30 +93,45 @@ function FigureCell({
   )
 }
 
-/** The row's share of the window as a figure, beside a bar drawn against
- *  the leader so the biggest row fills its cell and the rest read against
- *  it. A window that cost nothing has no shares. */
-function ShareCell({
+/** One line of either ranking. The name takes whatever width the figures
+ *  leave and gives way with an ellipsis rather than pushing them off the
+ *  edge; the bar is drawn against the leader so the biggest row fills its
+ *  cell and the rest read against it. A window that cost nothing has no
+ *  shares, and no runs no average. */
+function RankedRow({
+  caption,
+  entry,
   leader,
-  micros,
   total,
 }: {
+  caption: ReactNode
+  entry: RankedEntry
   leader: number
-  micros: number
   total: number
 }) {
+  const cost = usageCostPerRun(entry.micros, entry.ended)
+
   return (
-    <TableCell>
-      <div className="flex items-center justify-end gap-2 tabular-nums">
-        <span>{usagePercent(micros, total) ?? "—"}</span>
-        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-muted-foreground/50"
-            style={{ width: `${usageShare(micros, leader)}%` }}
-          />
+    <TableRow>
+      <TableCell className="w-full max-w-0 truncate">{caption}</TableCell>
+      <FigureCell>{entry.ended}</FigureCell>
+      <FigureCell className={entry.failed > 0 ? "text-destructive" : ""}>
+        {entry.failed}
+      </FigureCell>
+      <FigureCell className="font-medium">{formatUsd(entry.micros)}</FigureCell>
+      <FigureCell>{cost === undefined ? "—" : formatUsd(cost)}</FigureCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-2 tabular-nums">
+          <span>{usagePercent(entry.micros, total) ?? "—"}</span>
+          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-muted-foreground/50"
+              style={{ width: `${usageShare(entry.micros, leader)}%` }}
+            />
+          </div>
         </div>
-      </div>
-    </TableCell>
+      </TableCell>
+    </TableRow>
   )
 }
 
@@ -129,20 +149,11 @@ export function UsageContributors({
 
   return (
     <RankedTable
-      head={
-        <>
-          <TableHead>Source</TableHead>
-          <FigureHead>Runs</FigureHead>
-          <FigureHead>Failed</FigureHead>
-          <FigureHead>Spend</FigureHead>
-          <FigureHead>Cost / run</FigureHead>
-          <FigureHead>Share</FigureHead>
-        </>
-      }
+      noun="Source"
       rows={automations.map((entry) => (
-        <TableRow key={entry.id ?? entry.label}>
-          <NameCell>
-            {entry.id === undefined ? (
+        <RankedRow
+          caption={
+            entry.id === undefined ? (
               entry.label
             ) : (
               <Link
@@ -152,18 +163,13 @@ export function UsageContributors({
               >
                 {entry.label}
               </Link>
-            )}
-          </NameCell>
-          <FigureCell>{entry.ended}</FigureCell>
-          <FigureCell className={entry.failed > 0 ? "text-destructive" : ""}>
-            {entry.failed}
-          </FigureCell>
-          <FigureCell className="font-medium">
-            {formatUsd(entry.micros)}
-          </FigureCell>
-          <FigureCell>{costPerRun(entry)}</FigureCell>
-          <ShareCell leader={leader} micros={entry.micros} total={total} />
-        </TableRow>
+            )
+          }
+          entry={entry}
+          key={entry.id ?? entry.label}
+          leader={leader}
+          total={total}
+        />
       ))}
     />
   )
@@ -183,11 +189,10 @@ export function UsageFolders({
   total: number
   unfiled: UsageOverview["unfiled"]
 }) {
-  const unfiledMicros = unfiled?.micros ?? 0
-  const leader = Math.max(folders[0]?.micros ?? 0, unfiledMicros)
+  const leader = Math.max(folders[0]?.micros ?? 0, unfiled?.micros ?? 0)
   const rows = folders.map((folder) => (
-    <TableRow key={folder.folderId}>
-      <NameCell>
+    <RankedRow
+      caption={
         <Link
           className={nameLinkClassName}
           params={{ folderId: folder.folderId }}
@@ -197,42 +202,25 @@ export function UsageFolders({
         >
           {folder.name}
         </Link>
-      </NameCell>
-      <FigureCell className="font-medium">
-        {formatUsd(folder.micros)}
-      </FigureCell>
-      <ShareCell leader={leader} micros={folder.micros} total={total} />
-    </TableRow>
+      }
+      entry={folder}
+      key={folder.folderId}
+      leader={leader}
+      total={total}
+    />
   ))
 
-  if (unfiledMicros > 0) {
+  if (unfiled !== null && unfiled.micros > 0) {
     rows.push(
-      <TableRow key="unfiled">
-        <NameCell>Unfiled</NameCell>
-        <FigureCell className="font-medium">
-          {formatUsd(unfiledMicros)}
-        </FigureCell>
-        <ShareCell leader={leader} micros={unfiledMicros} total={total} />
-      </TableRow>
+      <RankedRow
+        caption="Unfiled"
+        entry={unfiled}
+        key="unfiled"
+        leader={leader}
+        total={total}
+      />
     )
   }
 
-  return (
-    <RankedTable
-      head={
-        <>
-          <TableHead>Folder</TableHead>
-          <FigureHead>Spend</FigureHead>
-          <FigureHead>Share</FigureHead>
-        </>
-      }
-      rows={rows}
-    />
-  )
-}
-
-function costPerRun(entry: UsageContributor) {
-  const cost = usageCostPerRun(entry.micros, entry.ended)
-
-  return cost === undefined ? "—" : formatUsd(cost)
+  return <RankedTable noun="Folder" rows={rows} />
 }

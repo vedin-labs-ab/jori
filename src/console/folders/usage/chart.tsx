@@ -124,7 +124,11 @@ function RunsChart({ series }: { series: UsageDay[] }) {
           tickLine={false}
           width={axisWidth}
         />
-        <ChartLegend content={<ChartLegendContent />} verticalAlign="top" />
+        <ChartLegend
+          align="left"
+          content={<ChartLegendContent className="justify-start" />}
+          verticalAlign="top"
+        />
         <ChartTooltip content={() => null} cursor={cursor} />
         <Bar
           dataKey="completed"

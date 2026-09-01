@@ -108,15 +108,17 @@ function count(value: number) {
   return value.toLocaleString("en-US")
 }
 
-/** Signed against the window that came just before, which is the only
- *  comparison the payload carries and the only one worth a glance. */
+/** Against the window that came just before, which is the only comparison
+ *  the payload carries. The arrow says which way; what it is measured
+ *  against is stated once, in the page's footnote, rather than under
+ *  every figure. */
 function deltaDetail(delta: UsageDelta | undefined): ReactNode {
   if (delta === undefined) {
     return undefined
   }
 
   if (delta.direction === "level") {
-    return "Level with the previous period"
+    return "No change"
   }
 
   const Arrow = delta.direction === "up" ? ArrowUp : ArrowDown
@@ -124,7 +126,7 @@ function deltaDetail(delta: UsageDelta | undefined): ReactNode {
   return (
     <>
       <Arrow aria-hidden className="size-3" />
-      {`${delta.percent}% vs previous period`}
+      {`${delta.percent}%`}
     </>
   )
 }

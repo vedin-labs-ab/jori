@@ -114,7 +114,13 @@ test("each subfolder row drills into that folder's own usage", () => {
   renderView(
     overview({
       folders: [
-        { folderId: "folders:2" as never, name: "Pipeline", micros: 700 },
+        {
+          folderId: "folders:2" as never,
+          name: "Pipeline",
+          micros: 700,
+          ended: 2,
+          failed: 0,
+        },
       ],
     })
   )
@@ -129,6 +135,7 @@ test("the footnote says whose day a day is and what the money buys", () => {
   renderView(overview())
 
   expect(screen.getByText(/Days follow Europe\/Stockholm/)).toBeDefined()
+  expect(screen.getByText(/compare with the previous 30 days/)).toBeDefined()
   expect(screen.getByText(/priced at provider list rates/)).toBeDefined()
 })
 
