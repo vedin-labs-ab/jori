@@ -1,14 +1,15 @@
 // Resolves a released drag into the mutation it planned: folders
 // re-parent through `move`, filed resources re-file through `file`.
 // Invalid and no-op targets resolve to no call; failures surface the way
-// the move dialog's do.
+// the move dialog's do. Both kinds pass the audience confirmation first —
+// one dialog for the whole drag surface, since a drag releases once.
 
 import { useMutation } from "convex/react"
 import { type GenericId } from "convex/values"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
-import { useFilingConfirmation } from "../move/confirm"
+import { type MoveConfirmation, useMoveConfirmation } from "../move/confirm"
 import { type FolderSummary } from "../tree"
 import { toFiledType } from "../types"
 import {
@@ -20,7 +21,7 @@ import {
   type ResourceDragPayload,
 } from "./plan"
 
-/** The drop handler behind onDragEnd, plus the confirmation a re-file may
+/** The drop handler behind onDragEnd, plus the confirmation a drop may
  *  have to pass first. `onMoved` reports a landed folder move so its row
  *  can show the settle cue. */
 export function useDropActions(
@@ -28,59 +29,77 @@ export function useDropActions(
   folders: readonly FolderSummary[],
   onMoved: (folderId: string) => void
 ) {
-  const moveFolder = useMoveFolder(organizationId, folders, onMoved)
-  const fileResource = useFileResource(organizationId, folders)
+  const confirmation = useMoveConfirmation(organizationId)
+  const dropFolder = useFolderDrop(organizationId, confirmation, onMoved)
+  const dropResource = useResourceDrop(organizationId, confirmation, folders)
 
   return {
-    dialog: fileResource.dialog,
-    run: async (payload: DragPayload, target: DropTarget | undefined) => {
+    dialog: confirmation.dialog,
+    run: (payload: DragPayload, target: DropTarget | undefined) => {
       if (target === undefined) {
         return
       }
 
       if (payload.kind === "folder") {
-        await moveFolder(payload, target)
+        dropFolder(
+          payload,
+          planDrop(folders, payload.folderId, target.folderId)
+        )
       } else {
-        fileResource.request(payload, target)
+        dropResource(payload, planFileDrop(payload, target.folderId))
       }
     },
   }
 }
 
-function useMoveFolder(
+/** Re-parenting takes the folder's contents with it, so the confirmation
+ *  speaks for the whole subtree the chain above it now covers. */
+function useFolderDrop(
   organizationId: string | undefined,
-  folders: readonly FolderSummary[],
+  confirmation: MoveConfirmation,
   onMoved: (folderId: string) => void
 ) {
   const move = useMutation(api.folders.console.move)
-
-  return async (payload: FolderDragPayload, target: DropTarget) => {
-    const plan = planDrop(folders, payload.folderId, target.folderId)
-
-    if (organizationId === undefined || plan === undefined) {
-      return
-    }
-
+  const reparent = async (
+    organization: string,
+    payload: FolderDragPayload,
+    parentId: string | null
+  ) => {
     try {
       await move({
-        organizationId,
+        organizationId: organization,
         folderId: payload.folderId as GenericId<"folders">,
-        parentId: plan.parentId as GenericId<"folders"> | null,
+        parentId: parentId as GenericId<"folders"> | null,
       })
       onMoved(payload.folderId)
     } catch (error) {
       showErrorToast(error, `Could not move ${payload.name}.`)
     }
   }
+
+  return (
+    payload: FolderDragPayload,
+    plan: { parentId: string | null } | undefined
+  ) => {
+    if (organizationId === undefined || plan === undefined) {
+      return
+    }
+
+    confirmation.request({
+      subject: { kind: "folder", folderId: payload.folderId },
+      name: payload.name,
+      folderId: plan.parentId,
+      run: () => reparent(organizationId, payload, plan.parentId),
+    })
+  }
 }
 
-function useFileResource(
+function useResourceDrop(
   organizationId: string | undefined,
+  confirmation: MoveConfirmation,
   folders: readonly FolderSummary[]
 ) {
   const file = useMutation(api.folders.console.file)
-  const confirmation = useFilingConfirmation(organizationId)
-
   const refile = async (
     organization: string,
     payload: ResourceDragPayload,
@@ -99,23 +118,24 @@ function useFileResource(
     }
   }
 
-  return {
-    dialog: confirmation.dialog,
-    request: (payload: ResourceDragPayload, target: DropTarget) => {
-      const plan = planFileDrop(payload, target.folderId)
+  return (
+    payload: ResourceDragPayload,
+    plan: { folderId: string | null } | undefined
+  ) => {
+    if (organizationId === undefined || plan === undefined) {
+      return
+    }
 
-      if (organizationId === undefined || plan === undefined) {
-        return
-      }
-
-      confirmation.request({
+    confirmation.request({
+      subject: {
+        kind: "resource",
         resourceType: toFiledType(payload.type),
         resourceId: payload.id,
-        name: payload.name,
-        folderId: plan.folderId,
-        run: () => refile(organizationId, payload, plan.folderId),
-      })
-    },
+      },
+      name: payload.name,
+      folderId: plan.folderId,
+      run: () => refile(organizationId, payload, plan.folderId),
+    })
   }
 }
 

@@ -4,19 +4,22 @@ import {
   tableDoc,
   testOwner,
 } from "../../test/convex/collections"
-import { databaseContext } from "../../test/convex/database"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   compareAudiences,
+  compareMove,
   narrowingFolderName,
   type OrganizationMember,
   resolveAudience,
 } from "./audience"
+import { folderGate } from "./target"
 
 // The audience the console shows: the stored mode resolved against the
 // live organization and the folders above it, and the difference a move
-// would make to it.
+// would make to it. A folder is compared as its own gate, which is what
+// everything filed inside it inherits.
 
 const owner = testOwner
 const memberA = "persons:a" as Id<"persons">
@@ -114,6 +117,87 @@ describe("naming the narrowing folder", () => {
   })
 })
 
+describe("resolving a candidate grant", () => {
+  test("a teams grant naming no live team reaches its owner alone", async () => {
+    const { ctx } = databaseContext()
+    const reached = await resolveAudience(
+      ctx,
+      material({ visibility: { mode: "teams", teamIds: [] }, ownerId: owner }),
+      members
+    )
+
+    // What a foreign team id is filtered down to at the query boundary,
+    // resolved: nobody joins the audience on the strength of it.
+    expect(reached.map((each) => each.personId)).toEqual([owner])
+  })
+})
+
+describe("comparing a folder's audience across a re-parent", () => {
+  test("re-parenting out of a narrow folder widens the whole subtree", async () => {
+    const { database, ctx } = databaseContext()
+    const closedId = await database.insert(
+      "folders",
+      folderDoc({
+        visibility: { mode: "people", personIds: [memberA] },
+        createdBy: owner,
+      })
+    )
+    const movedId = await database.insert(
+      "folders",
+      folderDoc({
+        parentId: closedId,
+        visibility: { mode: "organization" },
+        createdBy: owner,
+      })
+    )
+
+    // Out of the closed parent and up to the top level, the folder — and
+    // so everything in it — reaches the whole organization.
+    expect(
+      await compareMove(
+        ctx,
+        await gateOf(database, movedId),
+        undefined,
+        members
+      )
+    ).toEqual({ losing: 0, gaining: 1, becomesOrganizationWide: true })
+  })
+
+  test("re-parenting into a narrow folder drops people from the subtree", async () => {
+    const { database, ctx } = databaseContext()
+    const closedId = await database.insert(
+      "folders",
+      folderDoc({
+        visibility: { mode: "people", personIds: [memberA] },
+        createdBy: owner,
+      })
+    )
+    const movedId = await database.insert(
+      "folders",
+      folderDoc({ visibility: { mode: "organization" }, createdBy: owner })
+    )
+
+    // memberB loses the folder and its contents; the creator keeps both.
+    expect(
+      await compareMove(ctx, await gateOf(database, movedId), closedId, members)
+    ).toEqual({ losing: 1, gaining: 0, becomesOrganizationWide: false })
+  })
+
+  test("a re-parent between equally open folders asks nothing", async () => {
+    const { database, ctx } = databaseContext()
+    const firstId = await database.insert("folders", folderDoc())
+    const secondId = await database.insert("folders", folderDoc())
+    const movedId = await database.insert(
+      "folders",
+      folderDoc({ parentId: firstId })
+    )
+
+    expect(
+      await compareMove(ctx, await gateOf(database, movedId), secondId, members)
+    ).toEqual({ losing: 0, gaining: 0, becomesOrganizationWide: false })
+  })
+})
+
 describe("comparing audiences across a move", () => {
   test("counts who drops out and who joins", () => {
     expect(
@@ -138,3 +222,14 @@ describe("comparing audiences across a move", () => {
     ).toEqual({ losing: 0, gaining: 0, becomesOrganizationWide: false })
   })
 })
+
+/** The stored folder, read back as the gate a move compares. */
+async function gateOf(database: TestDatabase, folderId: Id<"folders">) {
+  const folder = (await database.get(folderId)) as Doc<"folders"> | null
+
+  if (folder === null) {
+    throw new Error("missing folder")
+  }
+
+  return folderGate(folder)
+}

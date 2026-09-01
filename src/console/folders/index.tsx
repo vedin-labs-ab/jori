@@ -11,7 +11,7 @@ import { FolderFrame } from "./frame"
 import { FolderHeaderActions } from "./header"
 import { FolderContents } from "./list/contents"
 import { MoveResourceDialog } from "./move"
-import { useFilingConfirmation } from "./move/confirm"
+import { useMoveConfirmation } from "./move/confirm"
 import { type FolderDetail, type FolderResource, toFiledType } from "./types"
 
 /** A folder's page: everything filed here. */
@@ -101,7 +101,7 @@ function movingResource(
  *  it, so unfiling asks the same question a move does. */
 function useUnfileResource(organizationId: string, folder: FolderDetail) {
   const file = useMutation(api.folders.console.file)
-  const confirmation = useFilingConfirmation(organizationId)
+  const confirmation = useMoveConfirmation(organizationId)
   const unfile = async (resource: FolderResource) => {
     try {
       await file({
@@ -120,8 +120,11 @@ function useUnfileResource(organizationId: string, folder: FolderDetail) {
     dialog: confirmation.dialog,
     request: (resource: FolderResource) =>
       confirmation.request({
-        resourceType: toFiledType(resource.type),
-        resourceId: resource.id,
+        subject: {
+          kind: "resource",
+          resourceType: toFiledType(resource.type),
+          resourceId: resource.id,
+        },
         name: resource.name,
         folderId: null,
         run: () => unfile(resource),

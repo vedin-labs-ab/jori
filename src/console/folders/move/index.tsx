@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -13,13 +12,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Spinner } from "@/components/ui/spinner"
 import { api } from "../../../../convex/_generated/api"
 import { showErrorToast } from "../../shared/error"
 import { useRetained } from "../../shared/retain"
 import { FolderPicker } from "../picker"
 import { subtreeFolderIds } from "../tree"
 import { type MoveResourceTarget, type MoveSubject } from "../types"
-import { useFilingConfirmation } from "./confirm"
+import { useMoveConfirmation } from "./confirm"
 
 /** MoveResourcesDialog specialized for exactly one resource, for hosts
  *  whose move affordance is inherently singular (detail pages, row menus
@@ -149,11 +149,11 @@ function MoveDialogBody({
       )}
       <DialogFooter>
         <Button
-          disabled={selectedId === currentId || move.isMoving}
+          disabled={selectedId === currentId || move.isBusy}
           onClick={() => move.submit(selectedId)}
           type="button"
         >
-          {move.isMoving ? <Loader2 className="animate-spin" /> : null}
+          {move.isBusy ? <Spinner /> : null}
           Move
         </Button>
       </DialogFooter>
@@ -169,7 +169,7 @@ function useMoveSubject(
 ) {
   const moveFolder = useMutation(api.folders.console.move)
   const fileResource = useMutation(api.folders.console.file)
-  const confirmation = useFilingConfirmation(organizationId)
+  const confirmation = useMoveConfirmation(organizationId)
   const [isMoving, setIsMoving] = useState(false)
 
   async function run(destinationId: string | null) {
@@ -207,33 +207,54 @@ function useMoveSubject(
     }
   }
 
-  // Only a single resource has one audience to compare; a bulk selection
-  // moves without the question.
   function submit(destinationId: string | null) {
-    const resource = loneResource(subject)
+    const asked = confirmable(subject)
 
-    if (resource === undefined) {
+    if (asked === undefined) {
       void run(destinationId)
 
       return
     }
 
     confirmation.request({
-      resourceType: resource.resourceType,
-      resourceId: resource.resourceId,
-      name: resource.name,
+      ...asked,
       folderId: destinationId,
       run: () => run(destinationId),
     })
   }
 
-  return { dialog: confirmation.dialog, isMoving, submit }
+  return {
+    dialog: confirmation.dialog,
+    isBusy: isMoving || confirmation.isResolving,
+    submit,
+  }
 }
 
-function loneResource(subject: MoveSubject) {
-  return subject.kind === "resources" && subject.resources.length === 1
-    ? subject.resources[0]
-    : undefined
+/** What the move can compare an audience for: a folder, which speaks for
+ *  its contents, or one resource. A bulk selection has no single audience,
+ *  so it moves without the question. */
+function confirmable(subject: MoveSubject) {
+  if (subject.kind === "folder") {
+    return {
+      name: subject.name,
+      subject: { kind: "folder" as const, folderId: subject.folderId },
+    }
+  }
+
+  if (subject.resources.length !== 1) {
+    return undefined
+  }
+
+  const [resource] = subject.resources
+
+  return {
+    name: resource.name,
+    subject: {
+      kind: "resource" as const,
+      resourceType: resource.resourceType,
+      resourceId: resource.resourceId,
+    },
+  }
 }
 
 /** How the dialog names its subject: quoted for a single item, a count for
