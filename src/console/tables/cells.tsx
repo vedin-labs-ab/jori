@@ -15,7 +15,7 @@ import { type TableSummary } from "./types"
  *  the organization, an archived badge for archived ones. */
 export function TableNameCell({ table }: { table: TableSummary }) {
   return (
-    <MaterialNameCell description={table.description} icon={Table2}>
+    <MaterialNameCell icon={Table2}>
       <Link
         className={materialNameLinkClassName}
         params={{ tableId: table.tableId }}

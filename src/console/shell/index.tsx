@@ -57,8 +57,12 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         {/* outline-none: the inset is the skip link's landing target, and
             the browser's focus ring around the whole content region reads
             as a broken border where the fixed sidebar overlaps it. */}
+        {/* min-w-0: without it the inset takes its min-content width from
+            the page, so a wide grid or a long line of code widens the
+            whole pane instead of scrolling inside its own scrollport —
+            pushing the header's actions out past the clipped edge. */}
         <SidebarInset
-          className="isolate min-h-0 outline-none"
+          className="isolate min-h-0 min-w-0 outline-none"
           id={mainContentId}
           tabIndex={-1}
         >

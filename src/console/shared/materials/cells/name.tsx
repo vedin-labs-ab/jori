@@ -1,8 +1,8 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 
-/** Name-cell shell shared by the material list tables: the kind icon, the
- *  caller's link and badges, and an optional description subline.
+/** Name-cell shell shared by the material list tables: the kind icon and
+ *  the caller's link and badges.
  *
  *  The width cap lives on this inner block, not the table cell — browsers
  *  ignore max-width on table cells when sizing auto-layout columns, so only
@@ -10,25 +10,16 @@ import { type ReactNode } from "react"
  *  `min-w-0` row then lets the caller's `truncate` link ellipsize inside it. */
 export function MaterialNameCell({
   children,
-  description,
   icon: Icon,
 }: {
   /** The truncating name link, followed by any badges. */
   children: ReactNode
-  description?: string
   icon: LucideIcon
 }) {
   return (
-    <div className="grid max-w-64 gap-0.5">
-      <div className="flex min-w-0 items-center gap-2">
-        <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-        {children}
-      </div>
-      {description === undefined ? null : (
-        <p className="truncate pl-6 text-muted-foreground" title={description}>
-          {description}
-        </p>
-      )}
+    <div className="flex min-w-0 max-w-64 items-center gap-2">
+      <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+      {children}
     </div>
   )
 }

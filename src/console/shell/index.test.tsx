@@ -71,6 +71,15 @@ test("names the page with a heading rather than a one-item breadcrumb", () => {
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
 })
 
+test("lets the content pane shrink below its content's width", () => {
+  render(<ConsoleShell>Content</ConsoleShell>)
+
+  // Without this the pane takes its min-content width from the page, so a
+  // wide grid or a long line of code widens the pane instead of scrolling
+  // inside it — and the header's actions land past the clipped edge.
+  expect(document.querySelector("main")?.className).toContain("min-w-0")
+})
+
 test("shows nothing on a material detail page before its view publishes", () => {
   pathname = "/tables/abc123"
   render(<ConsoleShell>Content</ConsoleShell>)

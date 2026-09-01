@@ -2,6 +2,7 @@
 import { DndContext } from "@dnd-kit/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { type FolderContentsResult } from "../types"
 import { FolderContents } from "./contents"
 
@@ -58,15 +59,17 @@ const readyContents = {
 
 function renderContents(contents: FolderContentsResult | undefined) {
   render(
-    <DndContext>
-      <FolderContents
-        contents={contents}
-        folderId="folder-0"
-        newMenu={<button type="button">New</button>}
-        onMove={() => undefined}
-        onUnfile={() => undefined}
-      />
-    </DndContext>
+    <TooltipProvider>
+      <DndContext>
+        <FolderContents
+          contents={contents}
+          folderId="folder-0"
+          newMenu={<button type="button">New</button>}
+          onMove={() => undefined}
+          onUnfile={() => undefined}
+        />
+      </DndContext>
+    </TooltipProvider>
   )
 }
 
@@ -83,7 +86,10 @@ test("folders and resources share the Name/Kind/Items/Updated table", () => {
   expect(screen.getByRole("link", { name: "Leads" }).getAttribute("href")).toBe(
     "/tables/table-1"
   )
-  expect(screen.getByText("Paused")).toBeDefined()
+  // A paused automation is marked with a muted glyph, not a badge: the
+  // Kind cell says what the thing is, and a second word there reads as a
+  // second kind.
+  expect(screen.getByText("Paused").className).toContain("sr-only")
   expect(
     screen.getByRole("button", { name: "Open actions for Leads" })
   ).toBeDefined()

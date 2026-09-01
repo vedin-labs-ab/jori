@@ -134,11 +134,9 @@ test("visibility and archived marks ride the name cell", () => {
     tableSummary({
       visibility: { mode: "private" },
       archivedAt: Date.now(),
-      description: "Weekly pipeline",
     }),
   ])
 
   expect(screen.getByText("Only me")).toBeDefined()
   expect(screen.getByText("Archived")).toBeDefined()
-  expect(screen.getByText("Weekly pipeline")).toBeDefined()
 })

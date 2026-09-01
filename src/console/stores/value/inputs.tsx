@@ -16,14 +16,16 @@ import { type ValueField, type ValueOption } from "./model"
 
 /** The cell recipe from the table grid's inline editor. */
 const cellInputClassName =
-  // The ring rounds only on the right, where the grid's rounded frame
-  // curves; the left edge sits square against the key column's hairline.
-  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:rounded-r-sm focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
+  // The ring stays square: the form's frame clips its own rows, so the
+  // ring picks up the frame's curve on the first and last rows and runs
+  // straight everywhere between. Rounding it here instead drew corners
+  // mid-column, where the frame has no corner to follow.
+  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
 
 /** The same recipe over the select trigger, which also sheds its tactile
  *  depth so it sits flush like every other cell. */
 const cellSelectClassName =
-  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors focus-visible:rounded-r-sm not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent dark:hover:bg-muted/50"
+  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent dark:hover:bg-muted/50"
 
 /** How every widget reports edits: the replacement state for its node and
  *  the value path that changed, so the editor can clear that path's error. */
