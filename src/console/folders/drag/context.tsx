@@ -115,7 +115,7 @@ function useContentDrag() {
         finish()
 
         if (payload !== undefined) {
-          void drop.run(payload, overTarget(event.over))
+          drop.run(payload, overTarget(event.over))
         }
       },
       onDragOver: (event: DragOverEvent) =>

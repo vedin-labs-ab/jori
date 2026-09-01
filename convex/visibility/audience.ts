@@ -63,6 +63,23 @@ export async function resolveAudience(
   return members.filter((_, index) => verdicts[index] === true)
 }
 
+/** What moving this gate into that folder would do to who can see it: the
+ *  same audience resolved on both sides of the candidate move. A folder's
+ *  own gate answers for everything filed inside it, since the chain it
+ *  moves into cascades over its contents. */
+export async function compareMove(
+  ctx: QueryLikeCtx,
+  gate: Gate,
+  folderId: Id<"folders"> | undefined,
+  members: readonly OrganizationMember[]
+) {
+  return compareAudiences({
+    before: await resolveAudience(ctx, gate, members),
+    after: await resolveAudience(ctx, { ...gate, folderId }, members),
+    memberCount: members.length,
+  })
+}
+
 /** What a move does to an audience, in the terms the confirmation speaks:
  *  who drops out, who joins, and whether the move opens the material to
  *  the whole organization. */

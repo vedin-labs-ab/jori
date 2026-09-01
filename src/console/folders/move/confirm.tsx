@@ -1,36 +1,55 @@
 import { useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
-import { useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import { api } from "../../../../convex/_generated/api"
-import { type AudienceChange, FilingPrompt } from "./prompt"
+import { type FiledResourceType } from "../types"
+import { type AudienceChange, MovePrompt } from "./prompt"
 
-// Filing changes who can see a resource, and the folder it lands in is not
+// Moving changes who can see a resource, and the folder it lands in is not
 // where that shows. Every console move asks first when the audience moves
 // with it, in either direction, and stays out of the way when it does not.
+// A folder asks for its contents too: the chain it re-parents into cascades
+// over everything filed inside it.
 
 type MoveAudienceArgs = FunctionArgs<typeof api.visibility.console.moveAudience>
 
-export type PendingFiling = {
-  resourceType: MoveAudienceArgs["resourceType"]
-  resourceId: string
+/** What a surface hands over to be moved. Ids stay plain strings here and
+ *  are branded once, on the way into the query. */
+export type MovedSubject =
+  | { kind: "resource"; resourceType: FiledResourceType; resourceId: string }
+  | { kind: "folder"; folderId: string }
+
+export type PendingMove = {
+  subject: MovedSubject
   name: string
+  /** Where it would land: a folder, or null for the top level. */
   folderId: string | null
   /** The move itself, run once nothing — or nobody — stands in its way. */
   run: () => Promise<void>
 }
 
-/** Wraps one filing surface: hand it the move, render its dialog. */
-export function useFilingConfirmation(organizationId: string | undefined) {
-  const [pending, setPending] = useState<PendingFiling>()
+export type MoveConfirmation = {
+  dialog: ReactNode
+  /** True while the comparison is in flight. A surface holds its trigger
+   *  down until the answer decides between moving and asking, so one click
+   *  cannot become two moves. */
+  isResolving: boolean
+  request: (move: PendingMove) => void
+}
+
+/** Wraps one moving surface: hand it the move, render its dialog. */
+export function useMoveConfirmation(
+  organizationId: string | undefined
+): MoveConfirmation {
+  const [pending, setPending] = useState<PendingMove>()
   const change = useQuery(
     api.visibility.console.moveAudience,
     pending === undefined || organizationId === undefined
       ? "skip"
       : {
           organizationId,
-          resourceType: pending.resourceType,
-          resourceId: pending.resourceId,
+          subject: querySubject(pending.subject),
           folderId: pending.folderId as GenericId<"folders"> | null,
         }
   )
@@ -47,17 +66,21 @@ export function useFilingConfirmation(organizationId: string | undefined) {
   }, [change, pending])
 
   return {
-    request: (filing: PendingFiling) => {
+    isResolving: pending !== undefined && change === undefined,
+    // A move already waiting on its answer holds the surface: taking a
+    // second one would drop the first move on the floor.
+    request: (move: PendingMove) => {
       if (organizationId === undefined) {
-        void filing.run()
-      } else {
-        setPending(filing)
+        void move.run()
+      } else if (pending === undefined) {
+        setPending(move)
       }
     },
     dialog:
       pending === undefined || change === undefined || !asks(change) ? null : (
-        <FilingPrompt
+        <MovePrompt
           change={change}
+          kind={pending.subject.kind}
           name={pending.name}
           onCancel={() => setPending(undefined)}
           onConfirm={() => {
@@ -69,8 +92,14 @@ export function useFilingConfirmation(organizationId: string | undefined) {
   }
 }
 
+function querySubject(subject: MovedSubject): MoveAudienceArgs["subject"] {
+  return subject.kind === "folder"
+    ? { kind: "folder", folderId: subject.folderId as GenericId<"folders"> }
+    : subject
+}
+
 /** A move worth confirming: somebody joins the audience or drops out of it.
- *  A resource the caller cannot see answers null, and the mutation is left
+ *  A subject the caller cannot see answers null, and the mutation is left
  *  to refuse it. */
 function asks(change: AudienceChange | null): change is AudienceChange {
   return change !== null && (change.losing > 0 || change.gaining > 0)

@@ -2,6 +2,7 @@ import { type TeamMember } from "better-auth/plugins/organization"
 import { type Id } from "../_generated/dataModel"
 import { authComponent, createAdapterOptions } from "../auth"
 import { type QueryLikeCtx } from "../shared/context"
+import { type StoredVisibility } from "./schema"
 
 // Team membership resolution for visibility checks. Grants store Better
 // Auth team ids; a viewer's teams are read from live `teamMember` rows on
@@ -63,6 +64,28 @@ export function teamIdsOf(
   memberships: readonly TeamMembershipRow[]
 ): ReadonlySet<string> {
   return new Set(memberships.map((membership) => membership.teamId))
+}
+
+/** A caller-supplied grant narrowed to the teams this organization
+ *  actually has. Console drafts arrive mid-edit, so a team id from
+ *  somewhere else is dropped rather than refused — but it never reaches a
+ *  resolution, where the answer would say whether anyone here belongs to
+ *  it. Grants on their way to storage go through the throwing check in
+ *  the console mutation instead. */
+export function withinOrganizationTeams(
+  visibility: StoredVisibility,
+  organizationTeamIds: ReadonlySet<string>
+): StoredVisibility {
+  if (visibility.mode !== "teams") {
+    return visibility
+  }
+
+  return {
+    mode: "teams",
+    teamIds: visibility.teamIds.filter((teamId) =>
+      organizationTeamIds.has(teamId)
+    ),
+  }
 }
 
 const teamLimit = 100

@@ -1,12 +1,13 @@
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { requireUserId } from "../access/users"
 import { filedResourceType, loadFiledGate } from "../folders/filing"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { resolvePersonByIdentity } from "../persons/identity/links"
+import { type QueryLikeCtx } from "../shared/context"
 import {
-  compareAudiences,
+  compareMove,
   listOrganizationMembers,
   narrowingFolderName,
   resolveAudience,
@@ -16,9 +17,9 @@ import {
   type StoredVisibility,
   visibilityValidator,
 } from "./schema"
-import { createSight } from "./sight"
-import { loadTarget, targetValidator } from "./target"
-import { listOrganizationTeamIds } from "./viewer"
+import { createSight, type Gate } from "./sight"
+import { folderGate, loadTarget, targetValidator } from "./target"
+import { listOrganizationTeamIds, withinOrganizationTeams } from "./viewer"
 
 // The one console surface for changing who may see a material or folder,
 // and for showing who that turns out to be. Automations change visibility
@@ -71,7 +72,14 @@ export const audience = query({
 
     const gate = {
       ...target.gate,
-      visibility: args.visibility ?? target.gate.visibility,
+      visibility:
+        args.visibility === undefined
+          ? target.gate.visibility
+          : await candidateVisibility(
+              ctx,
+              args.organizationId,
+              args.visibility
+            ),
     }
     const members = await listOrganizationMembers(ctx, args.organizationId)
 
@@ -87,20 +95,50 @@ export const audience = query({
   },
 })
 
-/** What filing this resource into that folder would do to who can see it.
- *  The console confirms a move that changes the answer and stays quiet
- *  when it does not; null when the caller cannot see the resource, which
- *  reads the same way. */
+/** The draft the caller is asking about, cleared of team ids this
+ *  organization does not own: resolving one would answer whether some
+ *  member is on a team somewhere else. Only a teams-mode draft costs the
+ *  extra read; stored visibility was already checked on its way in. */
+async function candidateVisibility(
+  ctx: QueryLikeCtx,
+  organizationId: string,
+  visibility: StoredVisibility
+): Promise<StoredVisibility> {
+  if (visibility.mode !== "teams") {
+    return visibility
+  }
+
+  return withinOrganizationTeams(
+    visibility,
+    await listOrganizationTeamIds(ctx, organizationId)
+  )
+}
+
+/** What a move moves: a filed resource re-files, a folder re-parents and
+ *  takes everything inside it along. */
+const movedSubject = v.union(
+  v.object({
+    kind: v.literal("resource"),
+    resourceType: filedResourceType,
+    resourceId: v.string(),
+  }),
+  v.object({ kind: v.literal("folder"), folderId: v.id("folders") })
+)
+
+/** What landing in that folder would do to who can see the subject —
+ *  filing a resource there, or re-parenting a folder under it, where the
+ *  answer speaks for the folder's contents too. The console confirms a
+ *  move that changes the answer and stays quiet when it does not; null
+ *  when the caller cannot see the subject, which reads the same way. */
 export const moveAudience = query({
   args: {
     organizationId: v.string(),
-    resourceType: filedResourceType,
-    resourceId: v.string(),
+    subject: movedSubject,
     folderId: v.union(v.id("folders"), v.null()),
   },
   handler: async (ctx, args) => {
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
-    const gate = await loadFiledGate(ctx, args.resourceType, args.resourceId)
+    const gate = await loadMovedGate(ctx, args.subject)
     const sight = createSight(ctx, {
       organizationId: args.organizationId,
       personId,
@@ -114,19 +152,29 @@ export const moveAudience = query({
       return null
     }
 
-    const members = await listOrganizationMembers(ctx, args.organizationId)
-
-    return compareAudiences({
-      before: await resolveAudience(ctx, gate, members),
-      after: await resolveAudience(
-        ctx,
-        { ...gate, folderId: args.folderId ?? undefined },
-        members
-      ),
-      memberCount: members.length,
-    })
+    return await compareMove(
+      ctx,
+      gate,
+      args.folderId ?? undefined,
+      await listOrganizationMembers(ctx, args.organizationId)
+    )
   },
 })
+
+/** The gate of whatever is being moved; null when nothing answers to that
+ *  id. A folder reads through the same gate its own sharing surface uses. */
+async function loadMovedGate(
+  ctx: QueryLikeCtx,
+  subject: Infer<typeof movedSubject>
+): Promise<Gate | null> {
+  if (subject.kind === "resource") {
+    return await loadFiledGate(ctx, subject.resourceType, subject.resourceId)
+  }
+
+  const folder = await ctx.db.get(subject.folderId)
+
+  return folder === null ? null : folderGate(folder)
+}
 
 /** Change who may see one material or folder. Owned targets accept the
  *  change from their owner only; ownerless ones from any member who can

@@ -1,5 +1,5 @@
 import { type Infer, v } from "convex/values"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Gate } from "./sight"
 
@@ -15,6 +15,18 @@ export const targetValidator = v.union(
 )
 
 export type VisibilityTarget = Infer<typeof targetValidator>
+
+/** A folder as a gate of its own: its creator owns it, and its parent is
+ *  the chain above it. What holds for the folder holds for everything filed
+ *  inside it, since that chain cascades. */
+export function folderGate(folder: Doc<"folders">): Gate {
+  return {
+    organizationId: folder.organizationId,
+    visibility: folder.visibility,
+    ownerId: folder.createdBy,
+    folderId: folder.parentId,
+  }
+}
 
 export type LoadedTarget = {
   id: Id<"collections"> | Id<"files"> | Id<"folders">
@@ -40,12 +52,7 @@ export async function loadTarget(
 
     return {
       id: folder._id,
-      gate: {
-        organizationId,
-        visibility: folder.visibility,
-        ownerId: folder.createdBy,
-        folderId: folder.parentId,
-      },
+      gate: folderGate(folder),
       owner: folder.createdBy,
     }
   }
