@@ -1,6 +1,7 @@
 import { expect, test } from "vitest"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+import { automationDoc, folderDoc } from "../../test/convex/folders"
+import { seedUsage } from "../../test/convex/usage"
 import { type Id } from "../_generated/dataModel"
 import { readFolderUsage } from "./usage"
 
@@ -10,33 +11,6 @@ import { readFolderUsage } from "./usage"
 
 const now = Date.parse("2026-03-15T12:00:00.000Z")
 const viewer = "persons:viewer" as Id<"persons">
-
-type UsageRow = {
-  date: string
-  micros?: number
-  ended?: number
-  failed?: number
-  folderId?: Id<"folders">
-  automation?: { id: Id<"automations">; label: string }
-}
-
-async function seedUsage(database: TestDatabase, row: UsageRow) {
-  const { date, micros = 0, ended = 0, failed = 0, automation, folderId } = row
-
-  await database.insert("usage", {
-    organizationId: "org",
-    date,
-    key: [folderId ?? "-", automation?.id ?? "-", date].join(":"),
-    ...(folderId === undefined ? {} : { folderId }),
-    ...(automation === undefined ? {} : { automation }),
-    surface: "jori",
-    trigger: "schedule",
-    runs: { ended, failed },
-    micros,
-    tokens: { input: micros, output: 1 },
-    updatedAt: 0,
-  })
-}
 
 async function seedFolder(
   database: TestDatabase,
@@ -202,7 +176,7 @@ test("the window before this one is what the delta measures against", async () =
   expect(usage.previous.micros).toBe(100)
 })
 
-test("the ranking names eight contributors and folds the rest into one", async () => {
+test("the ranking names every contributor, not just its leaders", async () => {
   const { database, ctx } = databaseContext()
 
   for (let rank = 0; rank < 10; rank += 1) {
@@ -219,9 +193,8 @@ test("the ranking names eight contributors and folds the rest into one", async (
   const usage = await read(ctx)
 
   expect(usage.automations.map((entry) => entry.micros)).toEqual([
-    1000, 900, 800, 700, 600, 500, 400, 300,
+    1000, 900, 800, 700, 600, 500, 400, 300, 200, 100,
   ])
-  expect(usage.rest).toEqual({ count: 2, micros: 300 })
 })
 
 test("work nobody automated ranks as its own contributor", async () => {
@@ -236,9 +209,10 @@ test("work nobody automated ranks as its own contributor", async () => {
 
 test("only an automation that still exists is linkable", async () => {
   const { database, ctx } = databaseContext()
-  const liveId = (await database.insert("automations", {
-    name: "Morning digest",
-  })) as Id<"automations">
+  const liveId = (await database.insert(
+    "automations",
+    automationDoc({ name: "Morning digest" })
+  )) as Id<"automations">
 
   await seedUsage(database, {
     date: "2026-03-15",

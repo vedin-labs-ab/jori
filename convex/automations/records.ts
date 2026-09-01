@@ -4,12 +4,11 @@ import { internalMutation, internalQuery } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
 import { visibilityValidator } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
-import { canSeeAutomation } from "./access"
+import { canSeeAutomation, requireVisibleAutomation } from "./access"
 import { canExecuteAutomationRunTools } from "./execution"
 import {
   createAutomation,
   fireAutomation,
-  getOrganizationAutomation,
   removeAutomation,
   searchAutomations,
   updateAutomation,
@@ -150,13 +149,5 @@ async function requireRecordAccess(
     automationId: Doc<"automations">["_id"]
   }
 ) {
-  const automation = await getOrganizationAutomation(
-    ctx,
-    args.organizationId,
-    args.automationId
-  )
-
-  if (!(await canSeeAutomation(createSight(ctx, args), automation))) {
-    throw new Error("Automation not found.")
-  }
+  await requireVisibleAutomation(ctx, args)
 }

@@ -8,11 +8,10 @@ import { resolvePersonByIdentity } from "../persons/identity/links"
 import { type QueryLikeCtx } from "../shared/context"
 import { visibilityValidator } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
-import { canSeeAutomation } from "./access"
+import { canSeeAutomation, requireVisibleAutomation } from "./access"
 import { toAutomationDisplay } from "./display"
 import {
   createAutomation,
-  getOrganizationAutomation,
   maxSearchResults,
   pauseAutomation,
   removeAutomation,
@@ -163,19 +162,5 @@ async function requireAccessibleAutomation(
   args: { organizationId: string; automationId: Doc<"automations">["_id"] },
   personId: Doc<"persons">["_id"]
 ) {
-  const automation = await getOrganizationAutomation(
-    ctx,
-    args.organizationId,
-    args.automationId
-  )
-  const sight = createSight(ctx, {
-    organizationId: args.organizationId,
-    personId,
-  })
-
-  if (!(await canSeeAutomation(sight, automation))) {
-    throw new Error("Automation not found.")
-  }
-
-  return automation
+  return await requireVisibleAutomation(ctx, { ...args, personId })
 }

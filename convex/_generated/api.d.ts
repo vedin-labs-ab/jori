@@ -160,6 +160,7 @@ import type * as files_share from "../files/share.js";
 import type * as folders_console from "../folders/console.js";
 import type * as folders_contents from "../folders/contents.js";
 import type * as folders_filing from "../folders/filing.js";
+import type * as folders_meter from "../folders/meter.js";
 import type * as folders_records from "../folders/records.js";
 import type * as folders_spend from "../folders/spend.js";
 import type * as folders_tree from "../folders/tree.js";
@@ -728,6 +729,7 @@ declare const fullApi: ApiFromModules<{
   "folders/console": typeof folders_console;
   "folders/contents": typeof folders_contents;
   "folders/filing": typeof folders_filing;
+  "folders/meter": typeof folders_meter;
   "folders/records": typeof folders_records;
   "folders/spend": typeof folders_spend;
   "folders/tree": typeof folders_tree;

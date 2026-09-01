@@ -12,6 +12,9 @@ vi.mock("@tanstack/react-router", async () => ({
   Link: (await import("../../../../test/router")).Link,
 }))
 
+// Both the overview and the spend chart's slice read through this; the
+// view's own assertions are about the overview, and the spend chart is
+// mocked away, so one payload answers for both.
 vi.mock("convex/react", () => ({ useQuery: () => payload.current }))
 
 // The charts are Recharts, which needs a laid-out box jsdom never gives it;
@@ -42,7 +45,6 @@ function overview(overrides: Partial<UsageOverview> = {}) {
         failed: 1,
       },
     ],
-    rest: { count: 0, micros: 0 },
     folders: [],
     unfiled: null,
     timezone: "Europe/Stockholm",
@@ -91,7 +93,7 @@ test("a window with spend draws both charts and names what spent it", () => {
   expect(screen.getByTestId("spend-chart")).toBeDefined()
   expect(screen.getByTestId("runs-chart")).toBeDefined()
   expect(screen.getByRole("link", { name: "Morning digest" })).toBeDefined()
-  expect(screen.getByText("Top automations")).toBeDefined()
+  expect(screen.getByText("Automations")).toBeDefined()
 })
 
 test("nothing below this folder means no drill-down to offer", () => {

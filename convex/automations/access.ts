@@ -16,7 +16,8 @@ import {
   type Integration,
   integrationLabels,
 } from "../shared/integrations"
-import { type Gate, type Sight } from "../visibility/sight"
+import { createSight, type Gate, type Sight } from "../visibility/sight"
+import { getOrganizationAutomation } from "./lifecycle/read"
 import { type access, type accessInput } from "./schema"
 
 export type AutomationAccess = Infer<typeof access>
@@ -54,6 +55,30 @@ export async function canSeeAutomation(
   automation: AutomationGateDoc
 ) {
   return await sight.canSee(automationGate(automation))
+}
+
+/** Missing, foreign, and invisible automations read the same, so a caller
+ *  cannot probe what exists behind a visibility gate. The folder tree's
+ *  guard reads the same way for the same reason. */
+export async function requireVisibleAutomation(
+  ctx: QueryLikeCtx,
+  args: {
+    organizationId: string
+    personId?: Id<"persons">
+    automationId: Id<"automations">
+  }
+) {
+  const automation = await getOrganizationAutomation(
+    ctx,
+    args.organizationId,
+    args.automationId
+  )
+
+  if (!(await canSeeAutomation(createSight(ctx, args), automation))) {
+    throw new Error("Automation not found.")
+  }
+
+  return automation
 }
 
 export async function resolveAccessInput(
