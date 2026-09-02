@@ -43,7 +43,7 @@ const narrowed = [
   { tool: "google_gmail_send_message", mode: "prompted" as const },
   { tool: "notion_update_page", mode: "prompted" as const },
   { tool: "delete_table_row", mode: "prompted" as const },
-  { tool: "delete_automation", mode: "blocked" as const },
+  { tool: "delete_job", mode: "blocked" as const },
 ]
 
 export async function seedProfile(ctx: MutationCtx, seed: SeedContext) {

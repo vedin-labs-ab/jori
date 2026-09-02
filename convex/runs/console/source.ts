@@ -1,7 +1,7 @@
 import {
-  getAutomationEventDefinition,
-  isAutomationEventIntegration,
-} from "../../../contracts/automations/events"
+  getJobEventDefinition,
+  isJobEventIntegration,
+} from "../../../contracts/jobs/events"
 import { type Doc } from "../../_generated/dataModel"
 import { type ToolSurface } from "../../shared/integrations"
 import { type getRunContext } from "./context"
@@ -145,9 +145,9 @@ function automationEventType(context: RunContext) {
 }
 
 function sourceEventLabel(surface: ToolSurface | undefined, type: string) {
-  return surface === undefined || !isAutomationEventIntegration(surface)
+  return surface === undefined || !isJobEventIntegration(surface)
     ? type
-    : (getAutomationEventDefinition(surface, type)?.label ?? type)
+    : (getJobEventDefinition(surface, type)?.label ?? type)
 }
 
 function datum(type: string, label: string): SourceDatum {

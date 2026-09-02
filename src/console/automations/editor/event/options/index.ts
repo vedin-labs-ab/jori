@@ -1,19 +1,19 @@
 import {
-  type AutomationEventIntegration,
-  automationEventCatalog,
-} from "@contracts/automations/events"
+  type JobEventIntegration,
+  jobEventCatalog,
+} from "@contracts/jobs/events"
 
 type EventIntegrationConnectionState = {
   integrations: Array<{
     connected: boolean
-    integration: AutomationEventIntegration
+    integration: JobEventIntegration
   }>
 }
 
 export type EventIntegrationOption = {
   connected: boolean | undefined
   index: number
-  integration: AutomationEventIntegration
+  integration: JobEventIntegration
 }
 
 export function getIntegrationOptions(
@@ -26,7 +26,7 @@ export function getIntegrationOptions(
     ])
   )
 
-  return automationEventCatalog
+  return jobEventCatalog
     .map((definition, index) => ({
       connected: connectedIntegrations.get(definition.integration),
       index,

@@ -1,11 +1,11 @@
+import { type Integration } from "../../contracts/integrations"
 import {
   githubCommentEventAction,
   issueCommentEvent,
   linearCommentEventAction,
   pullRequestCommentEvent,
   pullRequestReviewCommentEvent,
-} from "../../contracts/automations/events/names"
-import { type Integration } from "../../contracts/integrations"
+} from "../../contracts/jobs/events/names"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { recordEvent } from "../events/data"

@@ -1,9 +1,9 @@
 import { type Integration } from "../../../integrations"
 import { type IntegrationOptionSource } from "../../../integrations/options"
 import {
-  type AutomationEventAvailability,
-  type AutomationEventDefinition,
-  type AutomationEventParameter,
+  type JobEventAvailability,
+  type JobEventDefinition,
+  type JobEventParameter,
 } from "./types"
 
 type ParameterOptions = {
@@ -14,15 +14,15 @@ type ParameterOptions = {
 
 export function integration<const IntegrationKey extends Integration>(
   integration: IntegrationKey,
-  events: readonly AutomationEventDefinition[]
+  events: readonly JobEventDefinition[]
 ) {
   return { integration, events }
 }
 
 export function event<const Value extends string>(
   value: Value,
-  definition: Omit<AutomationEventDefinition, "value" | "availability"> & {
-    availability?: AutomationEventAvailability
+  definition: Omit<JobEventDefinition, "value" | "availability"> & {
+    availability?: JobEventAvailability
   }
 ) {
   return {
@@ -34,7 +34,7 @@ export function event<const Value extends string>(
 
 export function pendingEvent<const Value extends string>(
   value: Value,
-  definition: Omit<AutomationEventDefinition, "value" | "availability"> & {
+  definition: Omit<JobEventDefinition, "value" | "availability"> & {
     message: string
   }
 ) {
@@ -54,7 +54,7 @@ export function optionParameter(
     source: IntegrationOptionSource
     dependsOn?: readonly string[]
   }
-): AutomationEventParameter {
+): JobEventParameter {
   return {
     type: "option",
     key,
@@ -73,7 +73,7 @@ export function textParameter(
   label: string,
   placeholder: string,
   options: ParameterOptions = {}
-): AutomationEventParameter {
+): JobEventParameter {
   return {
     type: "text",
     key,
@@ -90,7 +90,7 @@ export function emailParameter(
   label: string,
   placeholder: string,
   options: ParameterOptions = {}
-): AutomationEventParameter {
+): JobEventParameter {
   return {
     type: "email",
     key,
@@ -111,7 +111,7 @@ export function numberParameter(
     max?: number
     step?: number
   } = {}
-): AutomationEventParameter {
+): JobEventParameter {
   return {
     type: "number",
     key,

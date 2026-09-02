@@ -50,7 +50,7 @@ export const internalRequiredToolNames = [
   "finish_run",
   ...surfaceCommunicationTools,
 ] as const
-/** Tools that need a person in the conversation, so automations never get them. */
+/** Tools that need a person in the conversation, so jobs never get them. */
 const interactiveToolNames = [
   "offer_integration",
   "cancel_integration_offer",
@@ -141,10 +141,7 @@ export function isUnattendedToolMode(mode: PermissionMode) {
   return mode === "allowed" || mode === "required"
 }
 
-export function canUseAutomationTool(input: {
-  mode: PermissionMode
-  tool: string
-}) {
+export function canUseJobTool(input: { mode: PermissionMode; tool: string }) {
   return !isInteractiveTool(input.tool) && isUnattendedToolMode(input.mode)
 }
 

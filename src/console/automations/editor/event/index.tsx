@@ -1,10 +1,10 @@
 import {
-  type AutomationEventDefinition,
-  type AutomationEventIntegration,
-  automationEventCatalog,
-  getAutomationEventDefinition,
-  getDefaultAutomationEvent,
-} from "@contracts/automations/events"
+  getDefaultJobEvent,
+  getJobEventDefinition,
+  type JobEventDefinition,
+  type JobEventIntegration,
+  jobEventCatalog,
+} from "@contracts/jobs/events"
 import { Info } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Label } from "@/components/ui/label"
@@ -97,8 +97,8 @@ function EventParameterFields({
   values,
 }: {
   organizationId: string
-  integration: AutomationEventIntegration
-  event: AutomationEventDefinition
+  integration: JobEventIntegration
+  event: JobEventDefinition
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
 }) {
@@ -128,11 +128,11 @@ function onIntegrationChange({
   onValuesChange,
   values,
 }: {
-  integration: AutomationEventIntegration
+  integration: JobEventIntegration
   onValuesChange: (values: AutomationFormValues) => void
   values: AutomationFormValues
 }) {
-  const event = getDefaultAutomationEvent(integration)
+  const event = getDefaultJobEvent(integration)
 
   onValuesChange({
     ...values,
@@ -142,20 +142,15 @@ function onIntegrationChange({
   })
 }
 
-function getEventDefinitions(integration: AutomationEventIntegration) {
+function getEventDefinitions(integration: JobEventIntegration) {
   return (
-    automationEventCatalog.find(
-      (definition) => definition.integration === integration
-    )?.events ?? [getDefaultAutomationEvent(integration)]
+    jobEventCatalog.find((definition) => definition.integration === integration)
+      ?.events ?? [getDefaultJobEvent(integration)]
   )
 }
 
-function getSelectedEvent(
-  integration: AutomationEventIntegration,
-  event: string
-) {
+function getSelectedEvent(integration: JobEventIntegration, event: string) {
   return (
-    getAutomationEventDefinition(integration, event) ??
-    getDefaultAutomationEvent(integration)
+    getJobEventDefinition(integration, event) ?? getDefaultJobEvent(integration)
   )
 }

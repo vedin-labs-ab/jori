@@ -1,4 +1,4 @@
-import { automationEventMatchKey } from "../../../contracts/automations/events"
+import { jobEventMatchKey } from "../../../contracts/jobs/events"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 
@@ -12,7 +12,7 @@ export async function ensureSubscription(
   }
 ) {
   const now = Date.now()
-  const matchKey = automationEventMatchKey(args.trigger.match)
+  const matchKey = jobEventMatchKey(args.trigger.match)
   const existing = await findSubscription(ctx, args.trigger)
 
   if (existing !== null) {
@@ -60,7 +60,7 @@ export async function releaseSubscription(
 }
 
 async function findSubscription(ctx: MutationCtx, trigger: EventTrigger) {
-  const matchKey = automationEventMatchKey(trigger.match)
+  const matchKey = jobEventMatchKey(trigger.match)
   return await ctx.db
     .query("subscriptions")
     .withIndex("by_integration_event_match", (index) =>
@@ -99,8 +99,7 @@ async function hasMatchingAutomation(
       "integrationId" in trigger &&
       trigger.integrationId === args.trigger.integrationId &&
       trigger.event === args.trigger.event &&
-      automationEventMatchKey(trigger.match) ===
-        automationEventMatchKey(args.trigger.match)
+      jobEventMatchKey(trigger.match) === jobEventMatchKey(args.trigger.match)
     )
   })
 }

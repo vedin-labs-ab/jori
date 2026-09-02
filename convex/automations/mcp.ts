@@ -47,7 +47,7 @@ export async function callJoriAutomationTool(
 ) {
   const args = readRecord(request.args)
 
-  if (request.tool === "add_automation") {
+  if (request.tool === "add_job") {
     const { visibility, ...input } = args as AddAutomationArgs
     return await ctx.runMutation(internal.automations.records.create, {
       ...input,
@@ -59,7 +59,7 @@ export async function callJoriAutomationTool(
     })
   }
 
-  if (request.tool === "search_automations") {
+  if (request.tool === "search_jobs") {
     return await ctx.runQuery(internal.automations.records.search, {
       ...(args as SearchAutomationsArgs),
       organizationId: execution.organizationId,
@@ -67,7 +67,7 @@ export async function callJoriAutomationTool(
     })
   }
 
-  if (request.tool === "read_automation") {
+  if (request.tool === "read_job") {
     return await ctx.runQuery(internal.automations.records.read, {
       ...(args as ReadAutomationArgs),
       organizationId: execution.organizationId,
@@ -75,7 +75,7 @@ export async function callJoriAutomationTool(
     })
   }
 
-  if (request.tool === "update_automation") {
+  if (request.tool === "update_job") {
     const { visibility, ...input } = args as UpdateAutomationArgs
     return await ctx.runMutation(internal.automations.records.update, {
       ...input,
@@ -86,7 +86,7 @@ export async function callJoriAutomationTool(
     })
   }
 
-  if (request.tool === "delete_automation") {
+  if (request.tool === "delete_job") {
     return await ctx.runMutation(internal.automations.records.remove, {
       ...(args as ReadAutomationArgs),
       organizationId: execution.organizationId,

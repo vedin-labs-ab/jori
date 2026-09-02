@@ -1,4 +1,4 @@
-type AutomationCommentEventAction = "created" | "edited"
+type JobCommentEventAction = "created" | "edited"
 
 export const issueCommentEvent = {
   created: "issue.comment.created",
@@ -17,7 +17,7 @@ export const pullRequestReviewCommentEvent = {
 
 export function githubCommentEventAction(
   action: string | undefined
-): AutomationCommentEventAction | undefined {
+): JobCommentEventAction | undefined {
   if (action === undefined || action === "created") {
     return "created"
   }
@@ -27,7 +27,7 @@ export function githubCommentEventAction(
 
 export function linearCommentEventAction(
   action: string | undefined
-): AutomationCommentEventAction | undefined {
+): JobCommentEventAction | undefined {
   if (action === undefined || action === "create") {
     return "created"
   }

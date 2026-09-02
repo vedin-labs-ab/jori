@@ -1,4 +1,4 @@
-import { canUseAutomationTool } from "@contracts/permissions"
+import { canUseJobTool } from "@contracts/permissions"
 import { isWebTool } from "@contracts/permissions/web"
 import { type ToolPermission } from "../../permissions/types"
 import {
@@ -26,14 +26,14 @@ export function getDefaultAutomationSurfaceTools(
   return permissions
     .filter(
       (permission) =>
-        permission.surface === integration && canUseAutomationTool(permission)
+        permission.surface === integration && canUseJobTool(permission)
     )
     .map((permission) => permission.tool)
 }
 
 export function automationToolModeDescription(permission: ToolPermission) {
   if (
-    !canUseAutomationTool(permission) &&
+    !canUseJobTool(permission) &&
     (permission.mode === "allowed" || permission.mode === "required")
   ) {
     return "This tool needs an active conversation and cannot run in jobs."
@@ -61,7 +61,7 @@ export function resolveAutomationToolAccess({
   surfaces?: readonly AutomationSurfaceFormValue[]
   webSearch?: boolean
 }): AutomationToolAccess {
-  if (!canUseAutomationTool(permission)) {
+  if (!canUseJobTool(permission)) {
     return {
       kind: "unavailable",
       reason: automationToolModeDescription(permission),

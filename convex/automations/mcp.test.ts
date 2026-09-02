@@ -15,7 +15,7 @@ test("automation runs own the one-time automations they create", async () => {
       createdBy: "person" as Id<"persons">,
       automation: { id: automationId, version: 3 },
     },
-    { tool: "add_automation", args: automationArgs("once") }
+    { tool: "add_job", args: automationArgs("once") }
   )
 
   expect(runMutation).toHaveBeenCalledWith(
@@ -34,7 +34,7 @@ test("manual and durable creations stay unowned", async () => {
   await callJoriAutomationTool(
     ctx,
     { organizationId: "organization", createdBy: "person" as Id<"persons"> },
-    { tool: "add_automation", args: automationArgs("once") }
+    { tool: "add_job", args: automationArgs("once") }
   )
   await callJoriAutomationTool(
     ctx,
@@ -43,7 +43,7 @@ test("manual and durable creations stay unowned", async () => {
       createdBy: "person" as Id<"persons">,
       automation: { id: "parent" as Id<"automations"> },
     },
-    { tool: "add_automation", args: automationArgs("cron") }
+    { tool: "add_job", args: automationArgs("cron") }
   )
 
   expect(runMutation).toHaveBeenNthCalledWith(
@@ -75,7 +75,7 @@ test("an owned run keeps its durable parent after the child fires", async () => 
         version: 4,
       },
     },
-    { tool: "add_automation", args: automationArgs("once") }
+    { tool: "add_job", args: automationArgs("once") }
   )
 
   expect(runMutation).toHaveBeenCalledWith(
@@ -94,7 +94,7 @@ test("known automation IDs remain directly readable", async () => {
   await callJoriAutomationTool(
     { runQuery } as unknown as ActionCtx,
     { organizationId: "organization", createdBy: "person" as Id<"persons"> },
-    { tool: "read_automation", args: { automationId } }
+    { tool: "read_job", args: { automationId } }
   )
 
   expect(runQuery).toHaveBeenCalledWith(

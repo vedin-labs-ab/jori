@@ -1,4 +1,4 @@
-import { canUseAutomationTool } from "@contracts/permissions"
+import { canUseJobTool } from "@contracts/permissions"
 import { type ToolPermission } from "../../permissions/types"
 import {
   type AutomationSurfaceFormValue,
@@ -69,7 +69,7 @@ export function isAutomationSurfacePolicyBlocked({
     return (
       permission === undefined ||
       permission.surface !== surface.integration ||
-      !canUseAutomationTool(permission)
+      !canUseJobTool(permission)
     )
   })
 }

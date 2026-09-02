@@ -1,4 +1,4 @@
-import { linearIssueCommentEvent } from "../../../../contracts/automations/events/names"
+import { linearIssueCommentEvent } from "../../../../contracts/jobs/events/names"
 import { compactRecord } from "../../../../contracts/json"
 import { internal } from "../../../_generated/api"
 import { type ActionCtx } from "../../../_generated/server"

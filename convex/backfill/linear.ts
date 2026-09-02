@@ -1,4 +1,4 @@
-import { linearIssueLifecycleEvent } from "../../contracts/automations/events/names"
+import { linearIssueLifecycleEvent } from "../../contracts/jobs/events/names"
 import { type Doc } from "../_generated/dataModel"
 import { requireLinearCredentials } from "../integrations/linear/credentials"
 import { linearGraphql } from "../integrations/linear/graphql"

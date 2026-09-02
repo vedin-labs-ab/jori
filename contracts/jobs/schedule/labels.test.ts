@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { describeCron } from "./labels"
 
-describe("automation labels", () => {
+describe("job labels", () => {
   test("describes supported cron shapes", () => {
     expect(describeCron("0 9 * * *")).toBe("Daily at 09:00 UTC")
     expect(describeCron("30 17 * * 1-5")).toBe("Weekdays at 17:30 UTC")

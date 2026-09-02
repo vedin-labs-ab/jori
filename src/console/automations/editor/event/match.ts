@@ -1,7 +1,7 @@
 import {
-  type AutomationEventParameter,
-  automationEventParameterResetKeys,
-} from "@contracts/automations/events"
+  type JobEventParameter,
+  jobEventParameterResetKeys,
+} from "@contracts/jobs/events"
 
 export function applyEventMatchChange({
   key,
@@ -10,7 +10,7 @@ export function applyEventMatchChange({
   values,
 }: {
   key: string
-  parameters: readonly AutomationEventParameter[]
+  parameters: readonly JobEventParameter[]
   value: string
   values: Record<string, string>
 }) {
@@ -33,7 +33,7 @@ export function removeEventMatch({
   values,
 }: {
   key: string
-  parameters: readonly AutomationEventParameter[]
+  parameters: readonly JobEventParameter[]
   values: Record<string, string>
 }) {
   const nextValues = { ...values }
@@ -52,11 +52,11 @@ export function removeEventMatch({
 }
 
 function eventMatchDependents(
-  parameters: readonly AutomationEventParameter[],
+  parameters: readonly JobEventParameter[],
   changedKey: string,
   resetKeys: (
-    parameter: AutomationEventParameter
-  ) => readonly string[] = automationEventParameterResetKeys
+    parameter: JobEventParameter
+  ) => readonly string[] = jobEventParameterResetKeys
 ) {
   const dependents = new Set<string>()
   const pendingKeys = [changedKey]
@@ -86,6 +86,6 @@ function eventMatchDependents(
 }
 
 /** Keys a parameter cannot load without, unlike soft `resetsOn` scoping. */
-function hardDependencyKeys(parameter: AutomationEventParameter) {
+function hardDependencyKeys(parameter: JobEventParameter) {
   return parameter.type === "option" ? (parameter.dependsOn ?? []) : []
 }

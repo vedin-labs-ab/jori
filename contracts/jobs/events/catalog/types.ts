@@ -1,7 +1,7 @@
 import { type Integration } from "../../../integrations"
 import { type IntegrationOptionSource } from "../../../integrations/options"
 
-type AutomationEventParameterBase = {
+type JobEventParameterBase = {
   key: string
   label: string
   placeholder: string
@@ -11,40 +11,40 @@ type AutomationEventParameterBase = {
   resetsOn?: readonly string[]
 }
 
-export type AutomationEventParameter =
-  | (AutomationEventParameterBase & {
+export type JobEventParameter =
+  | (JobEventParameterBase & {
       type: "text" | "email"
     })
-  | (AutomationEventParameterBase & {
+  | (JobEventParameterBase & {
       type: "number"
       min?: number
       max?: number
       step?: number
     })
-  | (AutomationEventParameterBase & {
+  | (JobEventParameterBase & {
       type: "option"
       source: IntegrationOptionSource
       /** Match keys required before this option source can load and reset when changed. */
       dependsOn?: readonly string[]
     })
 
-export type AutomationEventAvailability = {
+export type JobEventAvailability = {
   status: "available" | "pending"
   message?: string
 }
 
-export type AutomationEventDefinition = {
+export type JobEventDefinition = {
   value: string
   label: string
   description: string
-  availability: AutomationEventAvailability
-  parameters?: readonly AutomationEventParameter[]
+  availability: JobEventAvailability
+  parameters?: readonly JobEventParameter[]
 }
 
-export type AutomationEventIntegrationDefinition = {
+export type JobEventIntegrationDefinition = {
   integration: Integration
-  events: readonly AutomationEventDefinition[]
+  events: readonly JobEventDefinition[]
 }
 
-type AutomationEventMatchValue = string | number
-export type AutomationEventMatch = Record<string, AutomationEventMatchValue>
+type JobEventMatchValue = string | number
+export type JobEventMatch = Record<string, JobEventMatchValue>

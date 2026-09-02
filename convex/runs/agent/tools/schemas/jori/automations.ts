@@ -1,4 +1,4 @@
-import { automationEventCatalog } from "../../../../../../contracts/automations/events"
+import { jobEventCatalog } from "../../../../../../contracts/jobs/events"
 import { integrations as integrationEnum } from "../../../../../shared/integrations"
 import {
   numberProperty,
@@ -10,12 +10,12 @@ import {
 const automationInstructionsDescription =
   "Canonical Markdown instructions for each run. Use @Integration for every integration whose access is granted, /skill for skills, and #tool for tools. Use txt fences for plain-text examples that should keep Jori references active; language-tagged code fences are literal. Keep the explicit access payload aligned with every referenced integration tool."
 
-const eventIntegrationEnum = automationEventCatalog.map(
+const eventIntegrationEnum = jobEventCatalog.map(
   (definition) => definition.integration
 )
 const eventEnum = [
   ...new Set(
-    automationEventCatalog.flatMap((definition) =>
+    jobEventCatalog.flatMap((definition) =>
       definition.events.map((event) => event.value)
     )
   ),
@@ -103,7 +103,7 @@ const triggerSchema = () => ({
 })
 
 export const automationJoriToolInputSchemas = {
-  add_automation: objectSchema({
+  add_job: objectSchema({
     required: ["name", "instructions", "type", "trigger", "access"],
     properties: {
       key: stringProperty(
@@ -121,7 +121,7 @@ export const automationJoriToolInputSchemas = {
       access: accessSchema(),
     },
   }),
-  search_automations: objectSchema({
+  search_jobs: objectSchema({
     properties: {
       query: stringProperty(
         "Substring matched against automation names and instructions."
@@ -133,13 +133,13 @@ export const automationJoriToolInputSchemas = {
       limit: numberProperty("Maximum number of automations to return."),
     },
   }),
-  read_automation: objectSchema({
+  read_job: objectSchema({
     required: ["automationId"],
     properties: {
       automationId: stringProperty("Jori automation ID."),
     },
   }),
-  update_automation: objectSchema({
+  update_job: objectSchema({
     required: ["automationId"],
     properties: {
       automationId: stringProperty("Jori automation ID."),
@@ -156,7 +156,7 @@ export const automationJoriToolInputSchemas = {
       access: accessSchema(),
     },
   }),
-  delete_automation: objectSchema({
+  delete_job: objectSchema({
     required: ["automationId"],
     properties: {
       automationId: stringProperty("Jori automation ID."),

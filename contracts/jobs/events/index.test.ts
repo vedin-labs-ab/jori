@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest"
 import {
-  assertAutomationEventIsAvailable,
-  automationEventParameterResetKeys,
-  getAutomationEventDefinition,
-  normalizeAutomationEventMatch,
+  assertJobEventIsAvailable,
+  getJobEventDefinition,
+  jobEventParameterResetKeys,
+  normalizeJobEventMatch,
 } from "./index"
 
-describe("automation event catalog match", () => {
+describe("job event catalog match", () => {
   test("normalizes required option and optional text match", () => {
     const definition = requireEvent(
       "github",
@@ -14,7 +14,7 @@ describe("automation event catalog match", () => {
     )
 
     expect(
-      normalizeAutomationEventMatch(definition, {
+      normalizeJobEventMatch(definition, {
         repo: " jori/app ",
         pr: "42",
         path: " src/app.ts ",
@@ -30,7 +30,7 @@ describe("automation event catalog match", () => {
     const definition = requireEvent("googleCalendar", "event.starting_soon")
 
     expect(
-      normalizeAutomationEventMatch(definition, {
+      normalizeJobEventMatch(definition, {
         calendar: "primary",
         leadMinutes: "15",
       })
@@ -41,17 +41,15 @@ describe("automation event catalog match", () => {
     const definition = requireEvent("gmail", "message.received")
 
     expect(() =>
-      normalizeAutomationEventMatch(definition, {
+      normalizeJobEventMatch(definition, {
         from: "not an email",
       })
     ).toThrow("From must be an email address.")
   })
 
-  test("keeps pending event-triggered automations explicit", () => {
+  test("keeps pending event-triggered jobs explicit", () => {
     expect(() =>
-      assertAutomationEventIsAvailable(
-        requireEvent("gmail", "message.received")
-      )
+      assertJobEventIsAvailable(requireEvent("gmail", "message.received"))
     ).toThrow(
       "Gmail event-triggered jobs need mailbox subscriptions before they can run."
     )
@@ -60,7 +58,7 @@ describe("automation event catalog match", () => {
   test("makes supported Notion webhook events available", () => {
     const definition = requireEvent("notion", "page.updated")
 
-    expect(() => assertAutomationEventIsAvailable(definition)).not.toThrow()
+    expect(() => assertJobEventIsAvailable(definition)).not.toThrow()
     expect(requireParameter(definition, "page")).toMatchObject({
       required: true,
       source: "notion.pages",
@@ -68,7 +66,7 @@ describe("automation event catalog match", () => {
   })
 })
 
-describe("automation event catalog dependencies", () => {
+describe("job event catalog dependencies", () => {
   test("declares separate created and edited comment events", () => {
     expect(requireEvent("github", "issue.comment.created")).toMatchObject({
       label: "Issue comment created",
@@ -82,16 +80,16 @@ describe("automation event catalog dependencies", () => {
     expect(requireEvent("linear", "issue.comment.edited")).toMatchObject({
       label: "Issue comment edited",
     })
-    expect(
-      getAutomationEventDefinition("github", "issue.comment.changed")
-    ).toBe(undefined)
+    expect(getJobEventDefinition("github", "issue.comment.changed")).toBe(
+      undefined
+    )
   })
 
   test("declares GitHub hard option dependencies as reset dependencies", () => {
     const definition = requireEvent("github", "issue.comment.created")
     const issue = requireParameter(definition, "issue")
 
-    expect(automationEventParameterResetKeys(issue)).toEqual(["repo"])
+    expect(jobEventParameterResetKeys(issue)).toEqual(["repo"])
   })
 
   test("declares Linear scope reset dependencies", () => {
@@ -99,11 +97,8 @@ describe("automation event catalog dependencies", () => {
     const project = requireParameter(definition, "project")
     const issue = requireParameter(definition, "issue")
 
-    expect(automationEventParameterResetKeys(project)).toEqual(["team"])
-    expect(automationEventParameterResetKeys(issue)).toEqual([
-      "team",
-      "project",
-    ])
+    expect(jobEventParameterResetKeys(project)).toEqual(["team"])
+    expect(jobEventParameterResetKeys(issue)).toEqual(["team", "project"])
   })
 
   test("declares GitHub review path reset dependencies", () => {
@@ -113,15 +108,15 @@ describe("automation event catalog dependencies", () => {
     )
     const path = requireParameter(definition, "path")
 
-    expect(automationEventParameterResetKeys(path)).toEqual(["repo", "pr"])
+    expect(jobEventParameterResetKeys(path)).toEqual(["repo", "pr"])
   })
 })
 
 function requireEvent(
-  integration: Parameters<typeof getAutomationEventDefinition>[0],
+  integration: Parameters<typeof getJobEventDefinition>[0],
   event: string
 ) {
-  const definition = getAutomationEventDefinition(integration, event)
+  const definition = getJobEventDefinition(integration, event)
 
   if (definition === undefined) {
     throw new Error(`Missing test event ${integration}.${event}`)

@@ -2,8 +2,8 @@ import { expect, test } from "vitest"
 import { automationJoriToolInputSchemas } from "./automations"
 
 test.each([
-  "add_automation",
-  "update_automation",
+  "add_job",
+  "update_job",
 ] as const)("%s explains canonical instruction syntax", (tool) => {
   const instructions = readProperties(
     automationJoriToolInputSchemas[tool]

@@ -1,7 +1,7 @@
 import {
-  type AutomationEventIntegration,
-  getDefaultAutomationEvent,
-} from "@contracts/automations/events"
+  getDefaultJobEvent,
+  type JobEventIntegration,
+} from "@contracts/jobs/events"
 import { type Visibility } from "@contracts/visibility"
 import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
@@ -50,7 +50,7 @@ export type AutomationFormValues = {
   cron: string
   timezone: string
   runAt: string
-  eventIntegration: AutomationEventIntegration
+  eventIntegration: JobEventIntegration
   event: string
   eventMatch: Record<string, string>
   /** Who may see the automation; scope is its derived execution sharing —
@@ -64,7 +64,7 @@ export type AutomationFormValues = {
   surfaces: AutomationSurfaceFormValue[]
 }
 
-const defaultEvent = getDefaultAutomationEvent()
+const defaultEvent = getDefaultJobEvent()
 
 export const emptyAutomationForm: AutomationFormValues = {
   name: "",

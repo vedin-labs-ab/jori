@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { automationEventCatalog } from "../../contracts/automations/events"
+import { jobEventCatalog } from "../../contracts/jobs/events"
 import { query } from "../_generated/server"
 import { findIntegrationForPrincipal } from "../integrations/resolve"
 import { resolveCurrentPerson } from "../persons/account"
@@ -25,7 +25,7 @@ export const list = query({
 
     return {
       integrations: await Promise.all(
-        automationEventCatalog.map(async (definition) => ({
+        jobEventCatalog.map(async (definition) => ({
           integration: definition.integration,
           connected:
             (

@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { isLinearIssueCommentEvent } from "../../../../contracts/automations/events/names"
+import { isLinearIssueCommentEvent } from "../../../../contracts/jobs/events/names"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { internalQuery } from "../../../_generated/server"
 import { findActiveIntegrationByExternalId } from "../../data"

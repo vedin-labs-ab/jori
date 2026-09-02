@@ -5,11 +5,11 @@ import {
   optionParameter,
   pendingEvent,
 } from "./builders"
-import { type AutomationEventParameter } from "./types"
+import { type JobEventParameter } from "./types"
 
 function pendingCalendarChangeEvents(args: {
   message: string
-  parameters: readonly AutomationEventParameter[]
+  parameters: readonly JobEventParameter[]
 }) {
   return [
     pendingEvent("event.created", {
@@ -41,7 +41,7 @@ const microsoftCalendarParameters = [
   }),
 ]
 
-export const pendingAutomationEventCatalog = [
+export const pendingJobEventCatalog = [
   integration("gmail", [
     pendingEvent("message.received", {
       label: "New email",

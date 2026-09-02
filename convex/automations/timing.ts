@@ -1,5 +1,5 @@
-import { automationEventMatchKey } from "../../contracts/automations/events"
-import { getNextCronRunAt } from "../../contracts/automations/schedule/cron"
+import { jobEventMatchKey } from "../../contracts/jobs/events"
+import { getNextCronRunAt } from "../../contracts/jobs/schedule/cron"
 import { type Doc } from "../_generated/dataModel"
 
 export type TimeTriggerInput =
@@ -70,7 +70,7 @@ export function isSameEventTrigger(
     "integrationId" in right &&
     left.integrationId === right.integrationId &&
     left.event === right.event &&
-    automationEventMatchKey(left.match) === automationEventMatchKey(right.match)
+    jobEventMatchKey(left.match) === jobEventMatchKey(right.match)
   )
 }
 

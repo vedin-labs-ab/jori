@@ -1,7 +1,7 @@
 import {
   issueLifecycleEvent,
   pullRequestLifecycleEvent,
-} from "../../contracts/automations/events/names"
+} from "../../contracts/jobs/events/names"
 import { type Doc } from "../_generated/dataModel"
 import { githubJson, githubJsonObject } from "../integrations/github/api"
 import { requireGitHubRuntimeToken } from "../integrations/github/credentials"

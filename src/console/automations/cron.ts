@@ -1,9 +1,9 @@
-import { classifyCron as classifyCronExpression } from "@contracts/automations/schedule/classify"
+import { classifyCron as classifyCronExpression } from "@contracts/jobs/schedule/classify"
 import {
   getNextCronRunAt,
   validateCronExpression,
-} from "@contracts/automations/schedule/cron"
-import { ordinal } from "@contracts/automations/schedule/labels"
+} from "@contracts/jobs/schedule/cron"
+import { ordinal } from "@contracts/jobs/schedule/labels"
 import { readErrorMessage } from "../shared/error"
 import { type AutomationFormValues, emptyAutomationForm } from "./types"
 

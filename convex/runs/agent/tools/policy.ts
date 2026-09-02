@@ -1,5 +1,5 @@
 import {
-  canUseAutomationTool,
+  canUseJobTool,
   canUseToolMode,
   type PermissionMode,
   resolveToolMode,
@@ -34,7 +34,7 @@ export function canUseToolPermission(input: {
   const mode = resolveToolMode(input.toolModes, input.permission.tool)
 
   return input.executionType === "automation"
-    ? canUseAutomationTool({ mode, tool: input.permission.tool })
+    ? canUseJobTool({ mode, tool: input.permission.tool })
     : canUseToolMode(mode, input.executionType)
 }
 

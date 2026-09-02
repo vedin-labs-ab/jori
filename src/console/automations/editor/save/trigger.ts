@@ -1,12 +1,12 @@
 import {
-  type AutomationEventDefinition,
-  type AutomationEventMatch,
-  assertAutomationEventIsAvailable,
-  getAutomationEventDefinition,
-  getDefaultAutomationEvent,
-  isAutomationEventIntegration,
-  normalizeAutomationEventMatch,
-} from "@contracts/automations/events"
+  assertJobEventIsAvailable,
+  getDefaultJobEvent,
+  getJobEventDefinition,
+  isJobEventIntegration,
+  type JobEventDefinition,
+  type JobEventMatch,
+  normalizeJobEventMatch,
+} from "@contracts/jobs/events"
 import { buildRecurringCron, classifyCron } from "../../cron"
 import {
   type Automation,
@@ -20,7 +20,7 @@ export type TriggerSpec =
   | {
       integration: AutomationFormValues["eventIntegration"]
       event: string
-      match?: AutomationEventMatch
+      match?: JobEventMatch
     }
 
 export function buildAutomationTriggerSpec(
@@ -42,7 +42,7 @@ export function buildAutomationTriggerSpec(
   }
 
   if (values.type === "event") {
-    const definition = getAutomationEventDefinition(
+    const definition = getJobEventDefinition(
       values.eventIntegration,
       values.event
     )
@@ -134,12 +134,12 @@ export function triggerFormValues(automation: Automation) {
   if (automation.type === "event" && "event" in trigger) {
     const triggerIntegration =
       "integration" in trigger ? trigger.integration : undefined
-    const integration = isAutomationEventIntegration(triggerIntegration)
+    const integration = isJobEventIntegration(triggerIntegration)
       ? triggerIntegration
       : emptyAutomationForm.eventIntegration
     const definition =
-      getAutomationEventDefinition(integration, trigger.event) ??
-      getDefaultAutomationEvent(integration)
+      getJobEventDefinition(integration, trigger.event) ??
+      getDefaultJobEvent(integration)
 
     return {
       type: "event" as const,
@@ -165,12 +165,12 @@ export function triggerFormValues(automation: Automation) {
 }
 
 function readAutomationEventMatch(
-  definition: AutomationEventDefinition,
+  definition: JobEventDefinition,
   value: Record<string, string>
-): { value: AutomationEventMatch | undefined } | { error: string } {
+): { value: JobEventMatch | undefined } | { error: string } {
   try {
-    assertAutomationEventIsAvailable(definition)
-    return { value: normalizeAutomationEventMatch(definition, value) }
+    assertJobEventIsAvailable(definition)
+    return { value: normalizeJobEventMatch(definition, value) }
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Invalid event match.",
