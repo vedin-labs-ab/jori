@@ -11,7 +11,7 @@ import {
 const navigate = vi.hoisted(() => vi.fn())
 
 vi.mock("@tanstack/react-router", () => ({
-  useNavigate: () => navigate,
+  useRouter: () => ({ navigate }),
 }))
 
 afterEach(() => {

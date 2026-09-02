@@ -7,7 +7,7 @@ import { fileKind, previewKind } from "@/shared/files/kind"
 // The share view's inline preview: images, PDFs, video, audio, and
 // text-like files render in place as boxed blocks; everything else keeps
 // the quiet download prompt. The console file page has its own richer
-// viewer under src/console/files/viewer.
+// viewer under src/shared/console/files/viewer.
 
 /** Characters of text shown inline before the preview cuts off. */
 const textPreviewLimit = 100_000
