@@ -39,7 +39,7 @@ export function Hero() {
           The shared drive your AI works out of.
         </h1>
         <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-          File the jobs nobody wants next to the tables and files they keep
+          Put the jobs nobody wants next to the tables and files they keep
           current. Each team keeps its own folders. Who can see a folder, and
           what it costs to run, come with it.
         </p>

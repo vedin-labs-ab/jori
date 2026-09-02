@@ -114,7 +114,7 @@ function ShareHistoryRow({
   share: ShareRow
 }) {
   return (
-    <div className="flex min-h-14 items-center gap-3 px-4 py-2.5">
+    <div className="flex min-h-12 items-center gap-3 px-4 py-2 text-sm">
       <Link2 className="size-4 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ function ShareHistoryRow({
             {active ? "Active" : "Expired"}
           </Badge>
         </div>
-        <p className="truncate text-muted-foreground">
+        <p className="truncate text-muted-foreground text-xs">
           Created {absoluteTime(share.createdAt)}
         </p>
       </div>
@@ -150,7 +150,7 @@ function ShareHistorySkeleton() {
   return (
     <div className="min-h-42 divide-y border-t" role="status">
       {[0, 1, 2].map((row) => (
-        <div className="flex min-h-14 items-center gap-3 px-4 py-2.5" key={row}>
+        <div className="flex min-h-12 items-center gap-3 px-4 py-2" key={row}>
           <Skeleton className="size-4 rounded-sm" />
           <div className="flex flex-1 flex-col gap-1.5">
             <Skeleton className="h-3 w-2/3" />

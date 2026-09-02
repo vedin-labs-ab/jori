@@ -15,7 +15,7 @@ import { jobId } from "../../demo/fixtures/jobs"
 import { grantOptions } from "../../demo/fixtures/people"
 import { demoPermissions, demoSkills } from "../../demo/fixtures/permissions"
 import { useDemoWorkspace } from "../../demo/workspace"
-import { Definition, Section } from "../../section"
+import { Definition, Section, Sigil } from "../../section"
 
 // The editor's fields pull in TipTap, which dwarfs the page, and TipTap
 // needs a document, which the server has none of: the fields arrive on
@@ -26,14 +26,22 @@ const JobEditorFields = lazy(async () => ({
 }))
 const policyKey = jobPolicyKey(demoPermissions)
 const editorClassName =
-  "min-h-[46rem] min-w-0 rounded-xl border bg-card text-card-foreground"
+  "min-h-[35rem] min-w-0 rounded-xl border bg-card text-card-foreground"
 
 /** The instructions pillar: the job editor's own fields, in place, over the
  *  brief the hero's thread runs on. */
 export function Jobs() {
   return (
     <Section
-      lede="Describe the job the way you'd brief a person. Type @ to give it access, / to load a skill, # to name a tool. Pick when it runs: a schedule, a date, or an event in Slack, GitHub, Linear, or Notion. It runs in the cloud whether or not your laptop is open."
+      lede={
+        <>
+          Describe the job the way you'd brief a person. Type{" "}
+          <Sigil kind="access" /> to give it access, <Sigil kind="skill" /> to
+          load a skill, <Sigil kind="tool" /> to name a tool. Pick when it runs:
+          a schedule, a date, or an event in Slack, GitHub, Linear, or Notion.
+          It runs in the cloud whether or not your laptop is open.
+        </>
+      }
       title="Jobs are just instructions"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">

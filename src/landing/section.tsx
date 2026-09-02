@@ -19,7 +19,7 @@ export function Section({
   children?: ReactNode
   className?: string
   id?: string
-  lede?: string
+  lede?: ReactNode
   support?: boolean
   title: string
 }) {
@@ -127,6 +127,33 @@ export function Prop({
       </figcaption>
       {children}
     </figure>
+  )
+}
+
+const sigils = {
+  access: { glyph: "@", className: "-rotate-6 bg-primary/15 text-primary" },
+  skill: { glyph: "/", className: "rotate-3 bg-warning/15 text-warning" },
+  tool: {
+    glyph: "#",
+    className: "-rotate-3 bg-informational/15 text-informational",
+  },
+}
+
+/** One of the three marks the instructions editor answers to, drawn the
+ *  way the editor draws them: a chip, each in its own colour and set at
+ *  its own slight angle so the three read as three keys. */
+export function Sigil({ kind }: { kind: keyof typeof sigils }) {
+  const sigil = sigils[kind]
+
+  return (
+    <span
+      className={cn(
+        "mx-0.5 inline-block rounded-md px-2 py-0.5 font-mono font-semibold text-[0.95em] leading-tight",
+        sigil.className
+      )}
+    >
+      {sigil.glyph}
+    </span>
   )
 }
 

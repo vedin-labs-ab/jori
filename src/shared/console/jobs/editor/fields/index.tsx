@@ -3,6 +3,7 @@ import {
   type GrantOptions,
   VisibilityField,
 } from "@/shared/console/visibility/field"
+import { AdvancedSettings } from "../../../materials/form"
 import { derivedScope, getJobScopeConflict } from "../../access"
 import { type JobPolicyPermissions } from "../../access/policy"
 import { type JobFormValues } from "../../types"
@@ -45,9 +46,10 @@ export type JobEditorFieldsProps = {
   values: JobFormValues
 }
 
-/** Everything between a job editor's header and footer — name, sharing,
- *  folder, context, instructions, access, and timing — over one set of
- *  form values. */
+/** Everything between a job editor's header and footer, over one set of
+ *  form values: the name, the brief, its access and timing, and under
+ *  Advanced settings by the footer, where it is filed, who sees it, and
+ *  the context a run resolves. */
 export function JobEditorFields(props: JobEditorFieldsProps) {
   const { onValuesChange, values } = props
   const { actions, additionalSurfaces, instructionsError, nameError } =
@@ -60,23 +62,6 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
         onValueChange={actions.updateName}
         value={values.name}
       />
-      <div className="grid gap-2">
-        <VisibilityField
-          help="Only-me jobs run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
-          id="job-visibility"
-          noun="job"
-          onChange={actions.updateVisibility}
-          options={props.grantOptions}
-          value={values.visibility}
-        />
-        {props.audience}
-      </div>
-      {props.folderField?.({
-        id: "job-folder",
-        onChange: actions.updateFolder,
-        value: values.folderId,
-      })}
-      <JobContextSection scope={values.scope} />
       <JobInstructionsSection
         additionalSurfaces={additionalSurfaces}
         error={instructionsError}
@@ -102,6 +87,25 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
         onValuesChange={onValuesChange}
         values={values}
       />
+      <AdvancedSettings>
+        {props.folderField?.({
+          id: "job-folder",
+          onChange: actions.updateFolder,
+          value: values.folderId,
+        })}
+        <div className="grid gap-2">
+          <VisibilityField
+            help="Only-me jobs run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
+            id="job-visibility"
+            noun="job"
+            onChange={actions.updateVisibility}
+            options={props.grantOptions}
+            value={values.visibility}
+          />
+          {props.audience}
+        </div>
+        <JobContextSection scope={values.scope} />
+      </AdvancedSettings>
     </div>
   )
 }

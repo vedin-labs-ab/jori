@@ -83,6 +83,13 @@ function RenewalsSharing() {
           }
         />
       </div>
+      <div className="border-t p-4 pb-3">
+        <p className="font-medium text-sm">Share links</p>
+        <p className="text-muted-foreground text-xs">
+          Anyone with a link can view this table until the link expires or is
+          revoked.
+        </p>
+      </div>
       <ClientOnly fallback={<div aria-hidden className="h-52 border-t" />}>
         <MaterialLinks onMint={onMint} onRevoke={onRevoke} shares={shares} />
       </ClientOnly>
