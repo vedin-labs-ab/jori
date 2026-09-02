@@ -6,7 +6,7 @@ import {
   MaterialNameCell,
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
-import { VisibilityBadge } from "@/shared/console/visibility/badge"
+import { VisibilityMark } from "@/shared/console/visibility/badge"
 import { ConsoleLink } from "../../shell/link"
 import { type StoreSummary } from "../types"
 
@@ -25,7 +25,7 @@ export function StoreNameCell({ store }: { store: StoreSummary }) {
         {store.name}
       </ConsoleLink>
       {store.visibility.mode === "organization" ? null : (
-        <VisibilityBadge visibility={store.visibility} />
+        <VisibilityMark visibility={store.visibility} />
       )}
       {store.archivedAt === undefined ? null : (
         <Badge variant="secondary">Archived</Badge>

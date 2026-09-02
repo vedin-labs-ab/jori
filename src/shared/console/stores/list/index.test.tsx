@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
 import { type RowSelection } from "@/shared/console/list/selection"
 import { type MaterialRemoval } from "../../materials/removal"
@@ -73,20 +74,22 @@ function renderList(
   }: { controls?: ListControls; hasFilters?: boolean } = {}
 ) {
   render(
-    <StoreList
-      config={storeListConfig(undefined, stores)}
-      controls={controls}
-      folders={undefined}
-      hasFilters={hasFilters}
-      onAccess={() => undefined}
-      onCreate={() => undefined}
-      onEdit={() => undefined}
-      onMoveToFolder={() => undefined}
-      removal={removal}
-      selection={stubSelection()}
-      stores={stores}
-      unauthorizedMessage={undefined}
-    />
+    <TooltipProvider>
+      <StoreList
+        config={storeListConfig(undefined, stores)}
+        controls={controls}
+        folders={undefined}
+        hasFilters={hasFilters}
+        onAccess={() => undefined}
+        onCreate={() => undefined}
+        onEdit={() => undefined}
+        onMoveToFolder={() => undefined}
+        removal={removal}
+        selection={stubSelection()}
+        stores={stores}
+        unauthorizedMessage={undefined}
+      />
+    </TooltipProvider>
   )
 }
 
