@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ConsoleContentGrid, ConsolePageLayout } from "@/shared/console/layout"
+import { ConsolePageLayout } from "@/shared/console/layout"
 import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
 import { NativePermissionsCard } from "./card/native"
@@ -18,7 +18,7 @@ import { type IntegrationTab, integrationTabs } from "./routes"
 // more only on wide monitors. Cards top-align at their natural height so an
 // expanded permissions list doesn't stretch its row neighbors.
 const integrationGrid =
-  "items-start grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))]"
+  "grid items-start gap-4 grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))]"
 
 export function OrganizationIntegrations() {
   return (
@@ -88,7 +88,7 @@ function ProviderGrid({
   const permissions = useToolPermissions(organizationId)
 
   return (
-    <ConsoleContentGrid className={integrationGrid}>
+    <div className={integrationGrid}>
       {providers.map((provider) => (
         <IntegrationProvider
           key={provider.config.integration}
@@ -100,6 +100,6 @@ function ProviderGrid({
       {withNativePermissions ? (
         <NativePermissionsCard controller={permissions} />
       ) : null}
-    </ConsoleContentGrid>
+    </div>
   )
 }

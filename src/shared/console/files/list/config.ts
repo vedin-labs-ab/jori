@@ -12,8 +12,8 @@ export const fileDeleteDescription =
 /** What the file list headers sort and filter: the kinds present in the
  *  data, the organization's folders, and the page's sortable columns. */
 export function fileListConfig(
-  files: readonly FileRow[],
-  folders: FolderNames | undefined
+  folders: FolderNames | undefined,
+  files: readonly FileRow[]
 ): ListConfig<FileRow> {
   return {
     facets: {

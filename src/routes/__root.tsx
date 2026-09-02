@@ -12,6 +12,7 @@ import { lazy, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Analytics } from "@/shared/analytics"
+import { readErrorMessage } from "@/shared/console/error"
 import {
   FullscreenLoadingProvider,
   FullscreenSkeletonLoader,
@@ -96,7 +97,7 @@ export const Route = createRootRoute({
 })
 
 function RootError({ error, reset }: { error: unknown; reset?: () => void }) {
-  const message = readErrorMessage(error)
+  const message = readErrorMessage(error, "Unknown application error.")
 
   return (
     <RootStateFrame
@@ -139,14 +140,6 @@ function NotFound() {
       title="Page not found"
     />
   )
-}
-
-function readErrorMessage(error: unknown) {
-  if (error instanceof Error && error.message.trim() !== "") {
-    return error.message
-  }
-
-  return "Unknown application error."
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {

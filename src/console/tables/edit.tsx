@@ -1,5 +1,6 @@
 import { useMutation } from "convex/react"
 import { EditMaterialDialog } from "@/shared/console/materials/dialogs/edit"
+import { tableEditBlurb } from "@/shared/console/tables/list/config"
 import { type TableDetail } from "@/shared/console/tables/types"
 import { api } from "../../../convex/_generated/api"
 import { useMaterialUpdate } from "../shared/materials/update"
@@ -30,7 +31,7 @@ export function EditTableDialog({
 
   return (
     <EditMaterialDialog
-      blurb="Rename the table or update the note that helps others find it."
+      blurb={tableEditBlurb}
       isSaving={edit.isSaving}
       material={table}
       noun="table"

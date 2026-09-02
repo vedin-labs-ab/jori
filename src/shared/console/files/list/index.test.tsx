@@ -66,7 +66,7 @@ function renderTable(
   render(
     <FileTable
       onAccess={vi.fn()}
-      config={fileListConfig(files, undefined)}
+      config={fileListConfig(undefined, files)}
       controls={controls}
       files={files}
       folders={undefined}

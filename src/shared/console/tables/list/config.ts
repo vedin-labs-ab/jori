@@ -29,3 +29,6 @@ export function tableListConfig(
 
 export const tableDeleteDescription =
   "This permanently deletes the table and every row in it. Anything that reads it loses access."
+
+export const tableEditBlurb =
+  "Rename the table or update the note that helps others find it."

@@ -1,5 +1,6 @@
 import { useMutation } from "convex/react"
 import { EditMaterialDialog } from "@/shared/console/materials/dialogs/edit"
+import { storeEditBlurb } from "@/shared/console/stores/list/config"
 import { type StoreDetail } from "@/shared/console/stores/types"
 import { api } from "../../../convex/_generated/api"
 import { useMaterialUpdate } from "../shared/materials/update"
@@ -29,7 +30,7 @@ export function EditStoreDialog({
 
   return (
     <EditMaterialDialog
-      blurb="Rename the store or update its description."
+      blurb={storeEditBlurb}
       isSaving={edit.isSaving}
       material={store}
       noun="store"

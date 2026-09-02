@@ -169,7 +169,7 @@ export function FilesPage() {
   const files = useMemo(() => fileRows(state), [state])
   const folders = useMemo(() => folderNames(state), [state])
   const listing = useMaterialListing({
-    config: fileListConfig(files, folders),
+    config: fileListConfig(folders, files),
     identify: (file) => file.fileId,
     noun: fileNoun,
     rows: files,
@@ -191,7 +191,7 @@ export function FilesPage() {
         />
       </ConsoleHeaderActions>
       <FileTable
-        config={fileListConfig(files, folders)}
+        config={fileListConfig(folders, files)}
         controls={listing.controls}
         files={listing.pagination.visibleRows}
         folders={folders}
