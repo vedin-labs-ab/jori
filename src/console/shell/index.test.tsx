@@ -9,7 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
-} from "../shared/materials/breadcrumb"
+} from "@/shared/console/materials/breadcrumb"
 import { ConsoleShell } from "./index"
 import { consoleDocumentTitle } from "./routes"
 

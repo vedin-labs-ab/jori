@@ -1,4 +1,3 @@
-import { useQuery } from "convex/react"
 import {
   Folder,
   FolderDot,
@@ -6,7 +5,6 @@ import {
   FolderOpenDot,
   FolderRoot,
 } from "lucide-react"
-import { api } from "../../../../convex/_generated/api"
 import { type ListFacet } from "../list/controls"
 
 /** The icon for a folder row anywhere folders show: a dot marks a folder
@@ -80,26 +78,4 @@ function duplicateHint(
   return entry.parentId === undefined
     ? "Root"
     : (folders.get(entry.parentId)?.name ?? "Root")
-}
-
-/** Folder names by id for the whole organization, for resolving list rows'
- *  folderId into a linkable label. Convex dedupes the underlying tree
- *  subscription, so every list sharing it costs one query. */
-export function useFolderNames(organizationId: string) {
-  const tree = useQuery(api.folders.console.tree, { organizationId })
-
-  if (tree?.status !== "ready") {
-    return undefined
-  }
-
-  return new Map(
-    tree.folders.map((folder) => [
-      folder.folderId as string,
-      {
-        hasContents: folder.hasContents,
-        name: folder.name,
-        parentId: folder.parentId as string | undefined,
-      },
-    ])
-  ) as FolderNames
 }

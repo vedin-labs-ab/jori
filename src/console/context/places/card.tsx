@@ -1,8 +1,8 @@
 import { placeDisplayName, placeKinds } from "@contracts/places"
 import { ChevronRight, Lock } from "lucide-react"
 import { Card } from "@/components/ui/card"
+import { relativeTime, shortDate } from "@/shared/console/time"
 import { IntegrationLogo } from "@/shared/logo/integration"
-import { relativeTime, shortDate } from "../../shared/time"
 import { type Place } from "./types"
 
 // Same three-row anatomy as workstream cards: name, one-line preview, meta.

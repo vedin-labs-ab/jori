@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
-import { SeparatorDot } from "../../shared/dot"
-import { formatDuration } from "../../shared/time"
+import { SeparatorDot } from "@/shared/console/dot"
+import { formatDuration } from "@/shared/console/time"
 
 export function ExpiringStatusMeta({
   expiresAt,

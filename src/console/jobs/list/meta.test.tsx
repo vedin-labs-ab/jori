@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { absoluteTime } from "../../shared/time"
+import { absoluteTime } from "@/shared/console/time"
 import { type Job } from "../types"
 import { JobMeta } from "./meta"
 

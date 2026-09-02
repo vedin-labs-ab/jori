@@ -3,15 +3,18 @@ import { useQuery } from "convex/react"
 import { Cable, Layers } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { api } from "../../../../convex/_generated/api"
-import { ConsoleFilterGroup, ConsoleFilterToggle } from "../../shared/layout"
-import { FilterableEmptyState } from "../../shared/list/empty"
-import { ConsoleListLoading } from "../../shared/list/loading"
-import { ConsoleListPager } from "../../shared/list/pager"
+import {
+  ConsoleFilterGroup,
+  ConsoleFilterToggle,
+} from "@/shared/console/layout"
+import { FilterableEmptyState } from "@/shared/console/list/empty"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { ConsoleListPager } from "@/shared/console/list/pager"
 import {
   useClientPagination,
   useResettingSetter,
-} from "../../shared/list/pagination"
+} from "@/shared/console/list/pagination"
+import { api } from "../../../../convex/_generated/api"
 import { ContextPage } from ".."
 import { PulseSkeleton } from "./activity/lane"
 import { WorkstreamsPulse } from "./activity/pulse"

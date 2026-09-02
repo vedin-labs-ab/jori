@@ -1,6 +1,6 @@
 import { useMutation } from "convex/react"
 import { useEffect, useMemo, useState } from "react"
-import { readErrorMessage } from "@/console/shared/error"
+import { readErrorMessage } from "@/shared/console/error"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../../convex/_generated/api"
 import { IntegrationOfferOutcome } from "./outcome"

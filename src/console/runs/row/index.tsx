@@ -1,7 +1,7 @@
 import { Timer } from "lucide-react"
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { formatDuration, relativeTime } from "../../shared/time"
+import { formatDuration, relativeTime } from "@/shared/console/time"
 import { RelativeTime } from "../details"
 import { ExpiringStatusMeta } from "../request/status"
 import { type ExecutionItem } from "../types"

@@ -5,19 +5,22 @@ import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
-import { formatFileSize } from "@/shared/files/size"
-import { api } from "../../../convex/_generated/api"
-import { ConsolePage } from "../page"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsolePageLayout,
-} from "../shared/layout"
-import { ConsoleEmptyState } from "../shared/list/empty"
-import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListLoading } from "../shared/list/loading"
-import { useMemberUrl } from "../shared/materials/fragment"
+} from "@/shared/console/layout"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
+import {
+  ConsoleListContent,
+  ConsoleListLayout,
+} from "@/shared/console/list/frame"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { useMemberUrl } from "@/shared/console/materials/fragment"
+import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
+import { formatFileSize } from "@/shared/files/size"
+import { api } from "../../../convex/_generated/api"
+import { ConsolePage } from "../page"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileEditor } from "./editor/section"
 import { FileTitleMenu } from "./menu/title"

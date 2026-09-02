@@ -5,9 +5,9 @@ import {
   ConsoleEmptyState,
   EmptyRow,
   FilterableEmptyState,
-} from "../../shared/list/empty"
-import { ConsoleListContent } from "../../shared/list/frame"
-import { ConsoleListLoading } from "../../shared/list/loading"
+} from "@/shared/console/list/empty"
+import { ConsoleListContent } from "@/shared/console/list/frame"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type FolderDialogRequest } from "../manage"
 import {
   type FolderContentsResult,

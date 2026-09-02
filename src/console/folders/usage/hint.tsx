@@ -5,8 +5,8 @@ import { type GenericId } from "convex/values"
 import { ArrowUpRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
+import { ConsoleHeaderAside } from "@/shared/console/layout"
 import { api } from "../../../../convex/_generated/api"
-import { ConsoleHeaderAside } from "../../shared/layout"
 import { defaultUsageDays } from "./types"
 
 // What a folder — or the whole tree — has cost lately, sized to sit beside

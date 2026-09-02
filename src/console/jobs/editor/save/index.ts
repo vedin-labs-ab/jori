@@ -2,7 +2,7 @@ import {
   defaultVisibilityForIntegrations,
   type Visibility,
 } from "@contracts/visibility"
-import { localTimezone } from "../../../shared/time"
+import { localTimezone } from "@/shared/console/time"
 import { emptyJobForm, type Job, type JobFormValues } from "../../types"
 import { readJobPreferences } from "../preferences"
 import { triggerFormValues } from "./trigger"

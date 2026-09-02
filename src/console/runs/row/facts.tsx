@@ -17,10 +17,10 @@ import {
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { CopyButton } from "../../shared/copy"
-import { SeparatorDot } from "../../shared/dot"
-import { absoluteTime, absoluteUtcTime } from "../../shared/time"
-import { ToolGroupsValue } from "../../shared/tools/groups"
+import { CopyButton } from "@/shared/console/copy"
+import { SeparatorDot } from "@/shared/console/dot"
+import { absoluteTime, absoluteUtcTime } from "@/shared/console/time"
+import { ToolGroupsValue } from "@/shared/console/tools/groups"
 import {
   CodeBlockBody,
   DetailFrame,

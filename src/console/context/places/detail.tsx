@@ -13,9 +13,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { CopyableCodeBlock } from "@/shared/console/copy"
+import { relativeTime, useNow } from "@/shared/console/time"
 import { scrollFade } from "@/shared/fade"
-import { CopyableCodeBlock } from "../../shared/copy"
-import { relativeTime, useNow } from "../../shared/time"
 import { ContextSectionTitle } from "../section"
 import { PlaceMeta, PlaceName } from "./card"
 import { type Place } from "./types"

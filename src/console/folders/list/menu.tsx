@@ -10,13 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
+import { menuWidth } from "@/shared/console/menu"
 import { api } from "../../../../convex/_generated/api"
 import { FileMenuItems } from "../../files/menu"
 import { DeleteFileDialog } from "../../files/menu/delete"
 import { JobRowMenu } from "../../jobs/list/actions"
 import { DeleteJobDialog } from "../../jobs/list/delete"
-import { MaterialRowMenu } from "../../shared/materials/actions/menu"
-import { menuWidth } from "../../shared/menu"
 import { storeDeleteDescription } from "../../stores/manage"
 import { tableDeleteDescription } from "../../tables/manage"
 import { type FolderResource } from "../types"

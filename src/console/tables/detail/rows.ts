@@ -2,15 +2,15 @@ import { useMutation, usePaginatedQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
-import { api } from "../../../../convex/_generated/api"
-import { countNoun } from "../../shared/count"
-import { showErrorToast } from "../../shared/error"
-import { useBulkRunner } from "../../shared/list/bulk"
-import { type RowSelection } from "../../shared/list/selection"
+import { countNoun } from "@/shared/console/count"
+import { showErrorToast } from "@/shared/console/error"
+import { useBulkRunner } from "@/shared/console/list/bulk"
+import { type RowSelection } from "@/shared/console/list/selection"
 import {
   conflictMessage,
   isVersionConflict,
-} from "../../shared/materials/conflict"
+} from "@/shared/console/materials/conflict"
+import { api } from "../../../../convex/_generated/api"
 import {
   type RowInsertAnchor,
   rowPageSize,

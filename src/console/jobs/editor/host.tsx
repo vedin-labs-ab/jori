@@ -1,6 +1,6 @@
 import { lazy, Suspense, useRef } from "react"
+import { useRetainedMount } from "@/shared/console/retain"
 import { useToolPermissions } from "../../permissions/controller"
-import { useRetainedMount } from "../../shared/retain"
 import { jobPolicyKey } from "../access/policy"
 import { useJobEditor } from "."
 

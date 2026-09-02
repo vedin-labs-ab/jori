@@ -9,13 +9,8 @@ import {
 } from "lucide-react"
 import { type ReactNode, useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import {
-  Task,
-  TaskContent,
-  TaskItem,
-  TaskTrigger,
-} from "../../../../shared/task"
-import { formatDuration } from "../../../../shared/time"
+import { Task, TaskContent, TaskItem, TaskTrigger } from "@/shared/console/task"
+import { formatDuration } from "@/shared/console/time"
 import {
   type DiscoveryItemStatus,
   type DiscoveryTask,

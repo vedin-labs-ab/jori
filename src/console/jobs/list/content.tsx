@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ConsoleScrollableList } from "../../shared/layout"
-import { ConsoleListLoading } from "../../shared/list/loading"
+import { ConsoleScrollableList } from "@/shared/console/layout"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type JobEditor } from "../editor"
 import { type JobList } from "../types"
 import { EmptyJobs } from "./empty"

@@ -3,8 +3,8 @@ import { Globe2, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
+import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../../../../convex/_generated/api"
-import { showErrorToast } from "../../../../shared/error"
 import { type WebsiteItem } from "../../discovery/url"
 
 /**

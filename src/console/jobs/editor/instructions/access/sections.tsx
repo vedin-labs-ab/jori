@@ -4,16 +4,16 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 import {
   groupToolsByAccess,
   type ToolAccessGroup,
-} from "@/console/shared/tools/model"
+} from "@/shared/console/tools/model"
 import {
   ToolGroupSection,
   ToolGroupsFrame,
   ToolRowContent,
-} from "@/console/shared/tools/readonly"
-import { cn } from "@/lib/utils"
+} from "@/shared/console/tools/readonly"
 import { type ToolPermission } from "../../../../permissions/types"
 import { jobToolModeDescription } from "../../../access"
 import {

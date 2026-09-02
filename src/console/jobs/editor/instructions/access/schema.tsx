@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button"
 import { DialogTitle } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { JsonDialog } from "@/shared/console/code"
+import { useRetained } from "@/shared/console/retain"
 import { type ToolPermission } from "../../../../permissions/types"
-import { JsonDialog } from "../../../../shared/code"
-import { useRetained } from "../../../../shared/retain"
 import {
   type ToolReferences,
   toolReferenceReady,

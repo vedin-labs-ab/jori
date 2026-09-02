@@ -10,7 +10,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Separator } from "@/components/ui/separator"
-import { ConsoleListLoading } from "../../../shared/list/loading"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { OrganizationEditDialog } from "../discovery/edit"
 import {
   hasFacts,

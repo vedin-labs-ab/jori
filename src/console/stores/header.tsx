@@ -1,5 +1,8 @@
 import { Download, Link2 } from "lucide-react"
-import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
+import {
+  ConsoleHeaderActions,
+  ConsoleHeaderButton,
+} from "@/shared/console/layout"
 import { type StoreDetail } from "./types"
 
 /** The header keeps only the primary actions; everything about the store

@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { DialogForm } from "@/shared/console/materials/form"
 import { api } from "../../../../../convex/_generated/api"
 import { FolderField } from "../../../folders/field"
-import { DialogForm } from "../../../shared/materials/form"
 import { VisibilityField } from "../../../shared/visibility/field"
 import { getJobScopeConflict } from "../../access"
 import { type JobPolicyPermissions } from "../../access/policy"

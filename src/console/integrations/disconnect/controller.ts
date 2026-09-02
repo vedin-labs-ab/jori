@@ -1,8 +1,8 @@
 import { useAction } from "convex/react"
 import { useState } from "react"
+import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../../convex/_generated/api"
 import { type ToolSurface } from "../../permissions/types"
-import { showErrorToast } from "../../shared/error"
 
 export function useIntegrationDisconnect({
   integration,

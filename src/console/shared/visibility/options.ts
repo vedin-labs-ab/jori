@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
+import { type GrantOption } from "@/shared/console/visibility/grants"
 import { api } from "../../../../convex/_generated/api"
-import { type GrantOption } from "./grants"
 
 /** The organization's grantable people, from the visibility surface. */
 export function usePeopleOptions(organizationId: string) {

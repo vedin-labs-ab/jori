@@ -6,10 +6,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { MaterialOwnerCell } from "../../shared/materials/cells/owner"
-import { materialOwner } from "../../shared/materials/owners"
-import { absoluteTime, relativeTime, useNow } from "../../shared/time"
-import { VisibilityMark } from "../../shared/visibility/badge"
+import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { materialOwner } from "@/shared/console/materials/owners"
+import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
+import { VisibilityMark } from "@/shared/console/visibility/badge"
 import { type ResourceDragPayload } from "../drag/plan"
 import { useResourceRowDrag } from "../drag/state"
 import { type FolderResource, resourcePresentation } from "../types"

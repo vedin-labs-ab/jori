@@ -1,26 +1,32 @@
 import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
-import { api } from "../../../convex/_generated/api"
-import { MoveResourcesDialog } from "../folders/move"
-import { type MoveResourceTarget } from "../folders/types"
-import { ConsolePage } from "../page"
-import { SelectionActionsBar } from "../shared/list/bar"
+import { useFolderNames } from "@/console/shared/materials/names"
+import { SelectionActionsBar } from "@/shared/console/list/bar"
 import {
   type ListConfig,
   type ListControls,
   resettingControls,
   useListControls,
-} from "../shared/list/controls"
-import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListLoading } from "../shared/list/loading"
-import { ConsoleListPager } from "../shared/list/pager"
+} from "@/shared/console/list/controls"
+import {
+  ConsoleListFooter,
+  ConsoleListLayout,
+} from "@/shared/console/list/frame"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { ConsoleListPager } from "@/shared/console/list/pager"
 import {
   useClientPagination,
   useResettingSetter,
-} from "../shared/list/pagination"
-import { type RowSelection, useRowSelection } from "../shared/list/selection"
-import { useFolderNames } from "../shared/materials/folders"
-import { bulkMaterialRemoval } from "../shared/materials/removal"
+} from "@/shared/console/list/pagination"
+import {
+  type RowSelection,
+  useRowSelection,
+} from "@/shared/console/list/selection"
+import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
+import { api } from "../../../convex/_generated/api"
+import { MoveResourcesDialog } from "../folders/move"
+import { type MoveResourceTarget } from "../folders/types"
+import { ConsolePage } from "../page"
 import { VisibilityDialog } from "../shared/visibility/dialog"
 import { CreateStoreDialog } from "./create"
 import { EditStoreDialog } from "./edit"

@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ConsoleContentGrid, ConsolePageLayout } from "@/shared/console/layout"
 import { ConsolePage } from "../page"
 import { useToolPermissions } from "../permissions/controller"
-import { ConsoleContentGrid, ConsolePageLayout } from "../shared/layout"
 import { NativePermissionsCard } from "./card/native"
 import {
   organizationProviders,

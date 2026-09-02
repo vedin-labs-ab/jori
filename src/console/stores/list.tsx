@@ -12,21 +12,24 @@ import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsoleSearch,
-} from "../shared/layout"
-import { SelectionHeadCell, SelectionRowCell } from "../shared/list/bar"
+} from "@/shared/console/layout"
+import { SelectionHeadCell, SelectionRowCell } from "@/shared/console/list/bar"
 import {
   facetEntries,
   type ListConfig,
   type ListControls,
-} from "../shared/list/controls"
-import { EmptyRow, FilterableEmptyState } from "../shared/list/empty"
-import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
-import { FilterHead, SortHead } from "../shared/list/head"
-import { type RowSelection } from "../shared/list/selection"
-import { MaterialRowMenu } from "../shared/materials/actions/menu"
-import { MaterialFolderCell } from "../shared/materials/cells/folder"
-import { type FolderNames } from "../shared/materials/folders"
-import { absoluteTime, relativeTime, useNow } from "../shared/time"
+} from "@/shared/console/list/controls"
+import { EmptyRow, FilterableEmptyState } from "@/shared/console/list/empty"
+import {
+  ConsoleListContent,
+  ConsoleListTable,
+} from "@/shared/console/list/frame"
+import { FilterHead, SortHead } from "@/shared/console/list/head"
+import { type RowSelection } from "@/shared/console/list/selection"
+import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
+import { MaterialFolderCell } from "@/shared/console/materials/cells/folder"
+import { type FolderNames } from "@/shared/console/materials/folders"
+import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
 import {
   StoreNameCell,
   StoreOwnerCell,

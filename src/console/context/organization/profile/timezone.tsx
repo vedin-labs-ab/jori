@@ -1,9 +1,9 @@
 import { utcTimezone } from "@contracts/timezone"
 import { useMutation } from "convex/react"
 import { useState } from "react"
+import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../../../convex/_generated/api"
 import { TimezonePicker } from "../../../organization/timezone"
-import { showErrorToast } from "../../../shared/error"
 import { ContextSectionTitle } from "../../section"
 
 /**

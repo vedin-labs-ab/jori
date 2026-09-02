@@ -8,8 +8,8 @@ import {
   TaskItem,
   TaskLabel,
   TaskTrigger,
-} from "../../shared/task"
-import { formatDuration } from "../../shared/time"
+} from "@/shared/console/task"
+import { formatDuration } from "@/shared/console/time"
 import { ActivityFailureDescription } from "./error"
 import {
   ActivityEntryMeta,

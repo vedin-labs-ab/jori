@@ -1,8 +1,8 @@
 import { BookOpenText, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ConsoleScrollableGrid } from "../../shared/layout"
-import { ConsoleEmptyState } from "../../shared/list/empty"
-import { ConsoleListLoading } from "../../shared/list/loading"
+import { ConsoleScrollableGrid } from "@/shared/console/layout"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type Skill, type SkillFilterView } from "../types"
 import { SkillCard } from "./card"
 

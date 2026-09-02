@@ -1,8 +1,8 @@
 import { type ReactNode } from "react"
-import { countLabel } from "@/console/shared/count"
-import { SeparatorDot } from "../../shared/dot"
-import { ConsoleListToolbar } from "../../shared/list/frame"
-import { SaveMeta, type SaveState } from "../../shared/materials/save"
+import { countLabel } from "@/shared/console/count"
+import { SeparatorDot } from "@/shared/console/dot"
+import { ConsoleListToolbar } from "@/shared/console/list/frame"
+import { SaveMeta, type SaveState } from "@/shared/console/materials/save"
 import { StoreOwnerCell } from "../cells"
 import { type StoreDetail } from "../types"
 

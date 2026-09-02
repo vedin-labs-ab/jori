@@ -9,8 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
+import { countLabel } from "@/shared/console/count"
 import { scrollFadeX } from "@/shared/fade"
 import { columnTypeOptions } from "../draft"
 import { type CsvRow, type CsvRowIssue, type CsvTablePlan } from "./infer"

@@ -9,8 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { absoluteTime, relativeTime } from "@/shared/console/time"
 import { FieldHelp } from "@/shared/field"
-import { absoluteTime, relativeTime } from "../../../shared/time"
 import {
   composeCron,
   getCrontabGuruUrl,

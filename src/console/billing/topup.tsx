@@ -20,8 +20,8 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
-import { ConsoleFilterToggle } from "../shared/layout"
-import { DialogForm } from "../shared/materials/form"
+import { ConsoleFilterToggle } from "@/shared/console/layout"
+import { DialogForm } from "@/shared/console/materials/form"
 import { useBillingCheckout } from "./actions"
 
 const presetOptions = topUp.presetsUsd.map((preset) => ({

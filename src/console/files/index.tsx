@@ -1,18 +1,27 @@
 import { useQuery } from "convex/react"
 import { Upload } from "lucide-react"
 import { useState } from "react"
+import { useFolderNames } from "@/console/shared/materials/names"
+import {
+  ConsoleHeaderActions,
+  ConsoleHeaderButton,
+} from "@/shared/console/layout"
+import { SelectionActionsBar } from "@/shared/console/list/bar"
+import {
+  resettingControls,
+  useListControls,
+} from "@/shared/console/list/controls"
+import {
+  ConsoleListFooter,
+  ConsoleListLayout,
+} from "@/shared/console/list/frame"
+import { ConsoleListPager } from "@/shared/console/list/pager"
+import { useClientPagination } from "@/shared/console/list/pagination"
+import { useRowSelection } from "@/shared/console/list/selection"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
-import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
-import { SelectionActionsBar } from "../shared/list/bar"
-import { resettingControls, useListControls } from "../shared/list/controls"
-import { ConsoleListFooter, ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListPager } from "../shared/list/pager"
-import { useClientPagination } from "../shared/list/pagination"
-import { useRowSelection } from "../shared/list/selection"
-import { useFolderNames } from "../shared/materials/folders"
 import { VisibilityDialog } from "../shared/visibility/dialog"
 import { EditFileDialog } from "./edit"
 import {

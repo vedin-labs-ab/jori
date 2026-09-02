@@ -5,7 +5,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
-import { flushRowClassName } from "../../../shared/flush"
+import { flushRowClassName } from "@/shared/console/flush"
 
 const contextLayers = [
   {

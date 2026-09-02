@@ -1,5 +1,8 @@
 import { Plus } from "lucide-react"
-import { ConsoleHeaderActions, ConsoleHeaderButton } from "../shared/layout"
+import {
+  ConsoleHeaderActions,
+  ConsoleHeaderButton,
+} from "@/shared/console/layout"
 import { type FolderCreation } from "./create/dialogs"
 import { NewInFolderMenu } from "./create/menu"
 

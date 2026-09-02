@@ -13,8 +13,8 @@ import { Field } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { DialogForm } from "@/shared/console/materials/form"
 import { authClient } from "@/shared/session/auth"
-import { DialogForm } from "../shared/materials/form"
 import { type Team } from "./row"
 
 /** Rename dialog in the console's edit idiom: the team keeps its

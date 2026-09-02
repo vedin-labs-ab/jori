@@ -1,6 +1,6 @@
+import { SelectionActionsBar } from "@/shared/console/list/bar"
+import { type RowSelection } from "@/shared/console/list/selection"
 import { MoveResourceDialog } from "../../folders/move"
-import { SelectionActionsBar } from "../../shared/list/bar"
-import { type RowSelection } from "../../shared/list/selection"
 import { VisibilityDialog } from "../../shared/visibility/dialog"
 import { EditTableDialog } from "../edit"
 import { type TableDetail, type TableRow } from "../types"
