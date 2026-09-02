@@ -65,3 +65,11 @@ export type DemoFile = MaterialBase & {
 }
 
 export type DemoMaterial = DemoTable | DemoStore | DemoFile
+
+/** Whose list a job shows in: a private job is its owner's own, anything
+ *  wider belongs to the organization. */
+export function jobAudience(visibility: { mode: string }) {
+  return visibility.mode === "private"
+    ? ("personal" as const)
+    : ("organization" as const)
+}

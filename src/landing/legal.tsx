@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, Scale, ShieldCheck } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,7 +10,27 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { MarketingShell } from "../shell"
+import { MarketingShell } from "./shell"
+
+export function PrivacyPage() {
+  return (
+    <LegalPlaceholder
+      description="We're writing this with counsel, and it'll be published before Jori opens. What Jori can access, and when it acts, is already written down."
+      icon={<ShieldCheck />}
+      title="Privacy policy"
+    />
+  )
+}
+
+export function TermsPage() {
+  return (
+    <LegalPlaceholder
+      description="We're writing these with counsel, and they'll be published before Jori opens. What Jori can access, and when it acts, is already written down."
+      icon={<Scale />}
+      title="Terms of service"
+    />
+  )
+}
 
 /**
  * A legal document that does not exist yet.
@@ -21,7 +41,7 @@ import { MarketingShell } from "../shell"
  * a page with nothing on it says so the same way every other empty surface in
  * Jori does, and offers the page that does have answers today.
  */
-export function LegalPlaceholder({
+function LegalPlaceholder({
   description,
   icon,
   title,

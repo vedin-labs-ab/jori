@@ -5,7 +5,7 @@ import {
   type FolderDialogRequest,
   type ManagedFolder,
 } from "@/shared/console/folders/types"
-import { useRetained } from "@/shared/console/retain"
+import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { folderImpact, folderMoveSubject } from "../derive/folders"
 import { type FolderId } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
@@ -29,11 +29,7 @@ export function DemoFolderDialogs({
   /** Ran after a delete lands, e.g. to leave the deleted folder's page. */
   onDeleted?: (folder: ManagedFolder) => void
 }) {
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
+  const closeWhenDismissed = closeOnDismiss(onClose)
 
   return (
     <>

@@ -5,7 +5,7 @@ import { day, hour, minute } from "./clock"
 import { folderId } from "./folders"
 import { demoId } from "./ids"
 import { teamIds } from "./people"
-import { type StoredVisibility } from "./types"
+import { jobAudience, type StoredVisibility } from "./types"
 
 type JobSurface = Job["access"]["surfaces"][number]
 
@@ -245,10 +245,7 @@ function baseJob(spec: JobSpec) {
     key: undefined,
     name: spec.name,
     instructions: spec.instructions,
-    audience:
-      visibility.mode === "private"
-        ? ("personal" as const)
-        : ("organization" as const),
+    audience: jobAudience(visibility),
     visibility,
     status: spec.status ?? ("active" as const),
     folderId: folderId(spec.folder),

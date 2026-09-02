@@ -14,8 +14,6 @@ import { reduceTables } from "./tables"
 import { type DemoAction, type DemoState } from "./types"
 import { reduceWrites } from "./writes"
 
-export type { DemoAction, DemoState, VisibilityTarget } from "./types"
-
 /** Copperline as the page first shows it, with every time an offset from
  *  the moment the page was rendered. */
 export function createWorkspace(now: number): DemoState {

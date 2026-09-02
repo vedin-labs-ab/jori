@@ -1,6 +1,6 @@
 import { EditFileDialog } from "@/shared/console/files/edit"
 import { EditMaterialDialog } from "@/shared/console/materials/dialogs/edit"
-import { useRetained } from "@/shared/console/retain"
+import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { storeEditBlurb } from "@/shared/console/stores/list/config"
 import { tableEditBlurb } from "@/shared/console/tables/list/config"
 import { fileRowOf, materialMoveSubject } from "../derive/materials"
@@ -27,11 +27,7 @@ export function MaterialDialogs({
   const retained = useRetained(request)
   const material = retained?.material
 
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
+  const closeWhenDismissed = closeOnDismiss(onClose)
 
   if (material === undefined) {
     return null

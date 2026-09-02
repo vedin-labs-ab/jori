@@ -11,6 +11,7 @@ import {
   bulkMaterialRemoval,
   bulkMaterialRemovalSuccess,
 } from "@/shared/console/materials/removal"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { materialMoveTarget } from "../derive/materials"
 import { MaterialDialogs, type MaterialRequest } from "../dialogs/materials"
 import { DemoMoveDialog } from "../dialogs/move"
@@ -81,11 +82,7 @@ export function MaterialListOverlays<
         )}
       />
       <DemoMoveDialog
-        onOpenChange={(open) => {
-          if (!open) {
-            setMoving(undefined)
-          }
-        }}
+        onOpenChange={closeOnDismiss(() => setMoving(undefined))}
         subject={
           moving === undefined || moving.length === 0
             ? undefined

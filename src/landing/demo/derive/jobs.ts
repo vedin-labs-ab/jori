@@ -11,7 +11,7 @@ import {
 } from "@/shared/console/list/audience"
 import { jobSurface } from "../fixtures/jobs"
 import { demoPermissions } from "../fixtures/permissions"
-import { type FolderId, type JobId } from "../fixtures/types"
+import { type FolderId, type JobId, jobAudience } from "../fixtures/types"
 
 /** The editor's save module, handed in by whoever loaded it: it carries
  *  the instructions codec, which the page must not pay for until a job is
@@ -80,7 +80,7 @@ function createdJob(
       ...rest,
       id,
       key: undefined,
-      audience: audienceOf(stored),
+      audience: jobAudience(stored),
       visibility: stored,
       status: "active",
       folderId: folderId as FolderId | undefined,
@@ -115,7 +115,7 @@ function updatedJob(
     job: {
       ...existing,
       ...rest,
-      audience: audienceOf(stored),
+      audience: jobAudience(stored),
       visibility: stored,
       ...(type === undefined || trigger === undefined
         ? {}
@@ -158,10 +158,6 @@ function projectAccess(access: SavedArgs["args"]["access"]): Job["access"] {
       jobSurface(entry.integration, entry.tools)
     ),
   }
-}
-
-function audienceOf(visibility: Job["visibility"]): Job["audience"] {
-  return visibility.mode === "private" ? "personal" : "organization"
 }
 
 /** A job on its own as the move dialog's subject. */

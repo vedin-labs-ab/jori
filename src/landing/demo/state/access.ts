@@ -1,3 +1,4 @@
+import { jobAudience } from "../fixtures/types"
 import { type DemoAction, type DemoState } from "./types"
 
 export function reduceAccess(state: DemoState, action: DemoAction): DemoState {
@@ -57,8 +58,7 @@ function setVisibility(
               visibility,
               // A private job runs as its person; every shared mode runs
               // as the organization, which is what the list filters by.
-              audience:
-                visibility.mode === "private" ? "personal" : "organization",
+              audience: jobAudience(visibility),
               updatedAt: at,
             }
           : job
