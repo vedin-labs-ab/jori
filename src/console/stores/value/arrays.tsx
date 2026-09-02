@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
 import { type ValueState } from "./convert"
 import { type ChangeHandler } from "./inputs"
-import { AddItemRow, IndexCell, RemoveButton } from "./rows"
+import { AddItemRow, IndexCell, RemoveButton, valueRowClassName } from "./rows"
 
 // Rows for one array value inside the key/value grid: each item gets a
 // muted position in the key column, a quiet remove control, and a ghost
@@ -121,7 +121,7 @@ function ArrayRow({
   if (composite) {
     return (
       <>
-        <div className="flex">
+        <div className={valueRowClassName}>
           <IndexCell depth={depth} index={index} />
           {remove}
         </div>
@@ -131,7 +131,7 @@ function ArrayRow({
   }
 
   return (
-    <div className="flex">
+    <div className={valueRowClassName}>
       <IndexCell depth={depth} index={index} />
       <div className="min-w-0 flex-1">{body}</div>
       {remove}
