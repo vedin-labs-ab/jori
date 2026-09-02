@@ -13,11 +13,13 @@ export type WorkstreamContext = {
   seenAt: number
 }
 
-export async function readWorkstreamRoster(
+/** The confirmed, unsuperseded workstreams seen inside the rolling window,
+ *  newest sighting first, capped. */
+export async function confirmedWorkstreams(
   ctx: QueryCtx,
-  organizationId: string
-): Promise<WorkstreamContext[]> {
-  const now = Date.now()
+  organizationId: string,
+  now: number
+) {
   const rows = await ctx.db
     .query("beliefs")
     .withIndex("by_organization_and_kind_and_status", (index) =>
@@ -35,10 +37,18 @@ export async function readWorkstreamRoster(
     )
     .sort((left, right) => right.seenAt - left.seenAt)
     .slice(0, maxRosterEntries)
-    .map((row) => ({
-      name: row.name,
-      brief: row.brief,
-      createdAt: row.createdAt,
-      seenAt: row.seenAt,
-    }))
+}
+
+export async function readWorkstreamRoster(
+  ctx: QueryCtx,
+  organizationId: string
+): Promise<WorkstreamContext[]> {
+  const rows = await confirmedWorkstreams(ctx, organizationId, Date.now())
+
+  return rows.map((row) => ({
+    name: row.name,
+    brief: row.brief,
+    createdAt: row.createdAt,
+    seenAt: row.seenAt,
+  }))
 }
