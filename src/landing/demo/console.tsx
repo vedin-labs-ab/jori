@@ -12,12 +12,13 @@ import { DemoSidebar } from "./sidebar"
  *  fixed positioning is measured against, so the sidebar, its rail, the
  *  header, and the inset all stay inside; the sidebar's own viewport
  *  heights are overridden through its slots for the same reason. On a
- *  narrow viewport the sidebar would open as a sheet over the whole page,
- *  so its trigger is left out there. */
+ *  narrow viewport the sidebar and the filter panel would open as sheets
+ *  over the whole page, so their triggers are left out there. */
 const frameClassName = cn(
   "relative overflow-hidden rounded-xl border bg-background text-left text-foreground shadow-sm [transform:translateZ(0)]",
   "[&_[data-slot=sidebar-container]]:h-full",
-  "max-md:[&_[data-slot=sidebar-trigger]]:hidden max-md:[&_[data-slot=sidebar-trigger]+[data-slot=separator]]:hidden"
+  "max-md:[&_[data-slot=sidebar-trigger]]:hidden max-md:[&_[data-slot=sidebar-trigger]+[data-slot=separator]]:hidden",
+  "max-md:[&_[data-slot=filters-trigger]]:hidden"
 )
 
 /** The console over the workspace: the same frame, sidebar, and pages the

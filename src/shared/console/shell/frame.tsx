@@ -20,6 +20,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { ConsoleFiltersProvider } from "../filters/provider"
 import { ConsoleHeaderActionsProvider } from "../layout"
 import {
   type MaterialBreadcrumb,
@@ -40,11 +41,15 @@ const consoleFrame = "w-full px-4 md:px-6"
  *  skip link's landing id only when its host hands one in, and leaves the
  *  sidebar's open state to the provider unless the host controls it: a
  *  frame shown inside another page sizes to that page, must not repeat
- *  its landing id, and must not write the member's sidebar preference. */
+ *  its landing id, and must not write the member's sidebar preference.
+ *
+ *  The filter panel's open state is held here too, so it carries across
+ *  pages; given a storage key it is remembered between visits. */
 export function ConsoleFrame({
   children,
   className,
   contentId,
+  filterStorageKey,
   onSidebarOpenChange,
   pathname,
   sidebar,
@@ -54,6 +59,8 @@ export function ConsoleFrame({
   className?: string
   /** The id the skip link lands on, set by the shell that renders one. */
   contentId?: string
+  /** Where the filter panel's open state is kept; left out, it is not. */
+  filterStorageKey?: string
   onSidebarOpenChange?: (open: boolean) => void
   pathname: string
   /** Left out, the header opens on the title: there is nothing to toggle. */
@@ -112,9 +119,11 @@ export function ConsoleFrame({
         </header>
         <MaterialBreadcrumbContext.Provider value={setMaterial}>
           <ConsoleHeaderActionsProvider slot={headerSlot}>
-            {/* Pages own their padding and scrolling: ConsolePageLayout
-                pads and scrolls, ConsoleListLayout runs full-bleed. */}
-            <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+            <ConsoleFiltersProvider storageKey={filterStorageKey}>
+              {/* Pages own their padding and scrolling: ConsolePageLayout
+                  pads and scrolls, ConsoleListLayout runs full-bleed. */}
+              <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+            </ConsoleFiltersProvider>
           </ConsoleHeaderActionsProvider>
         </MaterialBreadcrumbContext.Provider>
       </SidebarInset>

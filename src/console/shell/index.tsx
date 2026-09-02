@@ -23,6 +23,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
       <SkipToContent />
       <ConsoleFrame
         contentId={mainContentId}
+        filterStorageKey="console.filters"
         pathname={pathname}
         sidebar={
           <ConsoleSidebar

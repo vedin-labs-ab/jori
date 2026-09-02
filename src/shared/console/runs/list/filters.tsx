@@ -1,17 +1,14 @@
-import { memo } from "react"
+import { type ReactNode } from "react"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select"
-import {
-  ConsoleFilterField,
-  ConsoleFilterGroup,
-  ConsoleFilterToggle,
-  ConsoleHeaderActions,
-  ConsoleSearch,
-} from "../../layout"
+import { countActiveFilters } from "../../filters/count"
+import { ConsoleFilterField, ConsoleFilterToggle } from "../../filters/field"
+import { ConsoleFiltered } from "../../filters/layout"
+import { ConsoleSearch } from "../../layout"
 import { type AudienceFilter, audienceFilterOptions } from "../../list/audience"
 import {
   type ApprovalFilter,
@@ -21,75 +18,96 @@ import {
   runFilterOptions,
 } from "../types"
 
-/** The page's search, in the header, and the Status, Visibility, and
- *  Approval controls under it. */
-export const ExecutionFilters = memo(function ExecutionFilters({
+/** The Activity page's chrome: the search in the header, and the Status,
+ *  Visibility, and Approval facets in the filter panel, around the rows. */
+export function ExecutionFilters({
   approvalFilter,
+  audienceFilter,
+  children,
   query,
   runFilter,
-  audienceFilter,
   setApprovalFilter,
+  setAudienceFilter,
   setQuery,
   setRunFilter,
-  setAudienceFilter,
 }: {
   approvalFilter: ApprovalFilter
+  audienceFilter: AudienceFilter
+  children: ReactNode
   query: string
   runFilter: RunFilter
-  audienceFilter: AudienceFilter
   setApprovalFilter: (filter: ApprovalFilter) => void
+  setAudienceFilter: (filter: AudienceFilter) => void
   setQuery: (query: string) => void
   setRunFilter: (filter: RunFilter) => void
-  setAudienceFilter: (filter: AudienceFilter) => void
 }) {
   return (
-    <>
-      <ConsoleHeaderActions>
+    <ConsoleFiltered
+      actions={
         <ConsoleSearch
           label="Search runs"
           onValueChange={setQuery}
           placeholder="Search runs..."
           value={query}
         />
-      </ConsoleHeaderActions>
-      <ConsoleFilterGroup>
-        <ConsoleFilterToggle
-          label="Status"
-          onValueChange={setRunFilter}
-          options={runFilterOptions}
-          value={runFilter}
-        />
-        <ConsoleFilterToggle
-          label="Visibility"
-          onValueChange={setAudienceFilter}
-          options={audienceFilterOptions}
-          value={audienceFilter}
-        />
-        <ConsoleFilterField label="Approval">
-          <Select
-            onValueChange={(value) =>
-              setApprovalFilter(value as ApprovalFilter)
-            }
-            value={approvalFilter}
-          >
-            <SelectTrigger
-              aria-label="Filter by approval state"
-              className="w-fit"
-            >
-              <span className="font-medium">
-                {approvalFilterLabels[approvalFilter]}
-              </span>
-            </SelectTrigger>
-            <SelectContent align="start" position="popper">
-              {approvalFilterOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ConsoleFilterField>
-      </ConsoleFilterGroup>
-    </>
+      }
+      activeCount={countActiveFilters(
+        runFilter !== "all",
+        audienceFilter !== "all",
+        approvalFilter !== "any"
+      )}
+      onReset={() => {
+        setRunFilter("all")
+        setAudienceFilter("all")
+        setApprovalFilter("any")
+      }}
+      panel={
+        <>
+          <ConsoleFilterToggle
+            label="Status"
+            onValueChange={setRunFilter}
+            options={runFilterOptions}
+            value={runFilter}
+          />
+          <ConsoleFilterToggle
+            label="Visibility"
+            onValueChange={setAudienceFilter}
+            options={audienceFilterOptions}
+            value={audienceFilter}
+          />
+          <ApprovalField onChange={setApprovalFilter} value={approvalFilter} />
+        </>
+      }
+    >
+      {children}
+    </ConsoleFiltered>
   )
-})
+}
+
+function ApprovalField({
+  onChange,
+  value,
+}: {
+  onChange: (filter: ApprovalFilter) => void
+  value: ApprovalFilter
+}) {
+  return (
+    <ConsoleFilterField label="Approval">
+      <Select
+        onValueChange={(next) => onChange(next as ApprovalFilter)}
+        value={value}
+      >
+        <SelectTrigger aria-label="Filter by approval state" className="w-full">
+          <span className="font-medium">{approvalFilterLabels[value]}</span>
+        </SelectTrigger>
+        <SelectContent align="start" position="popper">
+          {approvalFilterOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </ConsoleFilterField>
+  )
+}

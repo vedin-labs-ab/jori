@@ -50,28 +50,29 @@ export function RunsPage({ openRunId }: { openRunId?: string }) {
   }
 
   return (
-    <ConsolePageLayout>
-      <ExecutionFilters
-        approvalFilter={filters.approvalFilter}
-        audienceFilter={filters.audienceFilter}
-        query={filters.query}
-        runFilter={filters.runFilter}
-        setApprovalFilter={(approvalFilter) => update({ approvalFilter })}
-        setAudienceFilter={(audienceFilter) => update({ audienceFilter })}
-        setQuery={(query) => update({ query })}
-        setRunFilter={(runFilter) => update({ runFilter })}
-      />
-      <ExecutionRows
-        {...slots}
-        hasFilters={hasFilters}
-        isLoading={false}
-        now={now}
-        openRunId={openRunId}
-        rows={pagination.visibleRows}
-        showAudience={filters.audienceFilter === "all"}
-      />
-      <ConsoleListPager pagination={pagination} />
-    </ConsolePageLayout>
+    <ExecutionFilters
+      approvalFilter={filters.approvalFilter}
+      audienceFilter={filters.audienceFilter}
+      query={filters.query}
+      runFilter={filters.runFilter}
+      setApprovalFilter={(approvalFilter) => update({ approvalFilter })}
+      setAudienceFilter={(audienceFilter) => update({ audienceFilter })}
+      setQuery={(query) => update({ query })}
+      setRunFilter={(runFilter) => update({ runFilter })}
+    >
+      <ConsolePageLayout>
+        <ExecutionRows
+          {...slots}
+          hasFilters={hasFilters}
+          isLoading={false}
+          now={now}
+          openRunId={openRunId}
+          rows={pagination.visibleRows}
+          showAudience={filters.audienceFilter === "all"}
+        />
+        <ConsoleListPager pagination={pagination} />
+      </ConsolePageLayout>
+    </ExecutionFilters>
   )
 }
 

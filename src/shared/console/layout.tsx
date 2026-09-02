@@ -14,7 +14,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
 /** Standard padded console page. List pages that want the full-bleed
@@ -79,12 +78,15 @@ export function ConsoleHeaderAside({ children }: { children: ReactNode }) {
   )
 }
 
+/** Icon and label on wide screens, the icon alone on small ones. Anything
+ *  handed in as children, such as a count badge, follows the label. */
 export function ConsoleHeaderButton({
+  children,
   className,
   icon,
   label,
   ...props
-}: Omit<ComponentProps<typeof Button>, "children"> & {
+}: ComponentProps<typeof Button> & {
   icon: ReactNode
   label: string
 }) {
@@ -96,77 +98,8 @@ export function ConsoleHeaderButton({
     >
       {icon}
       <span className="max-sm:hidden">{label}</span>
-    </Button>
-  )
-}
-
-/** Pairs a filter control with a muted inline label, shared across facets. */
-export function ConsoleFilterField({
-  children,
-  label,
-}: {
-  children: ReactNode
-  label: string
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="shrink-0 font-medium text-muted-foreground text-xs">
-        {label}
-      </span>
       {children}
-    </div>
-  )
-}
-
-export function ConsoleFilterToggle<Value extends string>({
-  label,
-  onValueChange,
-  options,
-  value,
-}: {
-  label?: string
-  onValueChange: (value: Value) => void
-  options: readonly { label: string; value: Value }[]
-  value: Value
-}) {
-  const toggle = (
-    <ToggleGroup
-      aria-label={label}
-      className="flex-wrap justify-start"
-      onValueChange={(next) => {
-        if (next !== "") {
-          onValueChange(next as Value)
-        }
-      }}
-      type="single"
-      value={value}
-      variant="outline"
-    >
-      {options.map((option) => (
-        <ToggleGroupItem key={option.value} value={option.value}>
-          {option.label}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  )
-
-  return label === undefined ? (
-    toggle
-  ) : (
-    <ConsoleFilterField label={label}>{toggle}</ConsoleFilterField>
-  )
-}
-
-/** Full-width row of in-content filter facets. */
-export function ConsoleFilterGroup({
-  className,
-  ...props
-}: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("flex flex-wrap items-center gap-x-4 gap-y-3", className)}
-      {...props}
-    />
+    </Button>
   )
 }
 

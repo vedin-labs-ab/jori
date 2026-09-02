@@ -1,51 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import {
-  ConsoleFilterToggle,
-  ConsoleHeaderButton,
-  ConsoleSearch,
-} from "./layout"
+import { ConsoleHeaderButton, ConsoleSearch } from "./layout"
 
 afterEach(() => {
   cleanup()
-})
-
-const filterOptions = [
-  { label: "All", value: "all" },
-  { label: "Active", value: "active" },
-] as const
-
-test("filter toggle renders every option and reports selections", () => {
-  const onValueChange = vi.fn()
-
-  render(
-    <ConsoleFilterToggle
-      onValueChange={onValueChange}
-      options={filterOptions}
-      value="all"
-    />
-  )
-
-  fireEvent.click(screen.getByRole("radio", { name: "Active" }))
-
-  expect(onValueChange).toHaveBeenCalledWith("active")
-})
-
-test("filter toggle ignores deselecting the active option", () => {
-  const onValueChange = vi.fn()
-
-  render(
-    <ConsoleFilterToggle
-      onValueChange={onValueChange}
-      options={filterOptions}
-      value="all"
-    />
-  )
-
-  fireEvent.click(screen.getByRole("radio", { name: "All" }))
-
-  expect(onValueChange).not.toHaveBeenCalled()
 })
 
 test("toolbar search labels the input and reports typed values", () => {
