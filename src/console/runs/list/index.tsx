@@ -69,25 +69,26 @@ export function RunsList({ organizationId }: { organizationId: string }) {
   const setQueryAndReset = useResettingSetter(setQuery, pagination.reset)
 
   return (
-    <ConsolePageLayout>
-      <ExecutionFilters
-        approvalFilter={approvalFilter}
-        query={query}
-        runFilter={runFilter}
-        audienceFilter={audienceFilter}
-        setApprovalFilter={setApprovalFilterAndReset}
-        setQuery={setQueryAndReset}
-        setRunFilter={setRunFilterAndReset}
-        setAudienceFilter={setAudienceFilterAndReset}
-      />
-      <RunRows
-        focusRunId={focusRunId}
-        pagination={pagination}
-        showAudience={deferredAudienceFilter === "all"}
-        organizationId={organizationId}
-      />
-      <ConsoleListPager pagination={pagination} />
-    </ConsolePageLayout>
+    <ExecutionFilters
+      approvalFilter={approvalFilter}
+      audienceFilter={audienceFilter}
+      query={query}
+      runFilter={runFilter}
+      setApprovalFilter={setApprovalFilterAndReset}
+      setAudienceFilter={setAudienceFilterAndReset}
+      setQuery={setQueryAndReset}
+      setRunFilter={setRunFilterAndReset}
+    >
+      <ConsolePageLayout>
+        <RunRows
+          focusRunId={focusRunId}
+          organizationId={organizationId}
+          pagination={pagination}
+          showAudience={deferredAudienceFilter === "all"}
+        />
+        <ConsoleListPager pagination={pagination} />
+      </ConsolePageLayout>
+    </ExecutionFilters>
   )
 }
 

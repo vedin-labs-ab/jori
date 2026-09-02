@@ -1,25 +1,16 @@
 import { useQuery } from "convex/react"
-import { Plus } from "lucide-react"
 import { useDeferredValue, useState } from "react"
 import { moveTarget } from "@/shared/console/folders/types"
 import { JobContent } from "@/shared/console/jobs/list/content"
+import { JobFilters } from "@/shared/console/jobs/list/filters"
 import {
   type Job,
   type JobFilter,
   type JobList,
-  jobFilterOptions,
 } from "@/shared/console/jobs/types"
-import {
-  ConsoleFilterGroup,
-  ConsoleFilterToggle,
-  ConsoleHeaderActions,
-  ConsoleHeaderButton,
-  ConsolePageLayout,
-  ConsoleSearch,
-} from "@/shared/console/layout"
+import { ConsolePageLayout } from "@/shared/console/layout"
 import {
   type AudienceFilter,
-  audienceFilterOptions,
   matchesAudienceFilter,
 } from "@/shared/console/list/audience"
 import { ConsoleListPager } from "@/shared/console/list/pager"
@@ -62,43 +53,45 @@ function JobListView({ organizationId }: { organizationId: string }) {
   const setters = useResettingFilterSetters(filters, pagination.reset)
 
   return (
-    <ConsolePageLayout>
-      <JobFilters
-        filter={filters.filter}
-        onCreate={editor.openCreateForm}
-        onCreateIntent={preloadDialog}
-        query={filters.query}
-        audience={filters.audience}
-        setFilter={setters.setFilter}
-        setQuery={setters.setQuery}
-        setAudience={setters.setAudience}
-      />
-      <JobContent
-        controllingJobId={editor.controllingJobId}
-        deletingJobId={editor.deletingJobId}
-        hasFilters={hasFilters}
-        now={now}
-        jobList={jobList}
-        onCreate={() => {
-          void preloadDialog()
-          editor.openCreateForm()
-        }}
-        onDelete={editor.deleteJob}
-        onEdit={editor.openEditForm}
-        onMoveToFolder={setMovingJob}
-        onPausedChange={editor.setJobPaused}
-        visibleJobs={pagination.visibleRows}
-      />
-      {jobList?.status !== "unauthorized" ? (
-        <ConsoleListPager pagination={pagination} />
-      ) : null}
-      {dialog}
-      <MoveResourceDialog
-        onClose={() => setMovingJob(undefined)}
-        organizationId={organizationId}
-        resource={movingResource(movingJob)}
-      />
-    </ConsolePageLayout>
+    <JobFilters
+      audience={filters.audience}
+      defaultStatus={defaultJobFilter}
+      onAudienceChange={setters.setAudience}
+      onCreate={editor.openCreateForm}
+      onCreateIntent={preloadDialog}
+      onQueryChange={setters.setQuery}
+      onStatusChange={setters.setFilter}
+      query={filters.query}
+      status={filters.filter}
+    >
+      <ConsolePageLayout>
+        <JobContent
+          controllingJobId={editor.controllingJobId}
+          deletingJobId={editor.deletingJobId}
+          hasFilters={hasFilters}
+          now={now}
+          jobList={jobList}
+          onCreate={() => {
+            void preloadDialog()
+            editor.openCreateForm()
+          }}
+          onDelete={editor.deleteJob}
+          onEdit={editor.openEditForm}
+          onMoveToFolder={setMovingJob}
+          onPausedChange={editor.setJobPaused}
+          visibleJobs={pagination.visibleRows}
+        />
+        {jobList?.status !== "unauthorized" ? (
+          <ConsoleListPager pagination={pagination} />
+        ) : null}
+        {dialog}
+        <MoveResourceDialog
+          onClose={() => setMovingJob(undefined)}
+          organizationId={organizationId}
+          resource={movingResource(movingJob)}
+        />
+      </ConsolePageLayout>
+    </JobFilters>
   )
 }
 
@@ -106,8 +99,10 @@ function movingResource(job: Job | undefined) {
   return job === undefined ? undefined : moveTarget("job", job.id, job)
 }
 
+const defaultJobFilter: JobFilter = "active"
+
 function useJobFilters() {
-  const [filter, setFilter] = useState<JobFilter>("active")
+  const [filter, setFilter] = useState<JobFilter>(defaultJobFilter)
   const [audience, setAudience] = useState<AudienceFilter>("all")
   const [query, setQuery] = useState("")
 
@@ -152,65 +147,4 @@ function useJobPagination({
   })
 
   return { hasFilters, pagination }
-}
-
-function JobFilters({
-  filter,
-  onCreate,
-  onCreateIntent,
-  query,
-  audience,
-  setFilter,
-  setQuery,
-  setAudience,
-}: {
-  filter: JobFilter
-  onCreate: () => void
-  onCreateIntent: () => void
-  query: string
-  audience: AudienceFilter
-  setFilter: (filter: JobFilter) => void
-  setQuery: (query: string) => void
-  setAudience: (audience: AudienceFilter) => void
-}) {
-  function preloadDialog() {
-    void onCreateIntent()
-  }
-
-  return (
-    <>
-      <ConsoleHeaderActions>
-        <ConsoleSearch
-          label="Search jobs"
-          onValueChange={setQuery}
-          value={query}
-        />
-        <ConsoleHeaderButton
-          icon={<Plus />}
-          label="New job"
-          onClick={() => {
-            preloadDialog()
-            onCreate()
-          }}
-          onFocus={preloadDialog}
-          onPointerEnter={preloadDialog}
-          type="button"
-        />
-      </ConsoleHeaderActions>
-      <ConsoleFilterGroup>
-        <ConsoleFilterToggle
-          label="Status"
-          onValueChange={setFilter}
-          options={jobFilterOptions}
-          value={filter}
-        />
-        <ConsoleFilterToggle
-          label="Visibility"
-          onValueChange={setAudience}
-          options={audienceFilterOptions}
-          value={audience}
-        />
-      </ConsoleFilterGroup>
-    </>
-  )
 }

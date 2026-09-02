@@ -14,7 +14,7 @@ import { ConsolePage } from "../page"
 import { type SkillEditor, useSkillEditor } from "./editor"
 import { filterSkills, filterSkillsByView } from "./filter"
 import { SkillContent } from "./list/content"
-import { SkillsToolbar } from "./list/toolbar"
+import { SkillFilters } from "./list/filters"
 import { type Skill, type SkillFilterView } from "./types"
 import { SkillViewDialog } from "./view"
 
@@ -65,37 +65,39 @@ function SkillsCard({ organizationId }: { organizationId: string }) {
   const setViewAndReset = useResettingSetter(filters.setView, pagination.reset)
 
   return (
-    <ConsolePageLayout>
-      <SkillsToolbar
-        isCreateDisabled={!isAccessReady}
-        onCreate={editor.openCreateForm}
-        onSearchChange={setSearchTermAndReset}
-        onViewChange={setViewAndReset}
-        searchTerm={filters.searchTerm}
-        view={filters.view}
-      />
-
-      <SkillListBody
-        editor={editor}
-        onViewSkillChange={setViewSkill}
-        pagination={pagination}
-        searchTerm={filters.searchTerm}
-        skillList={skillList}
-        visibleCount={visibleSkills?.length ?? 0}
-        view={filters.view}
-      />
-
-      <SkillDialogs
-        editor={editor}
-        onViewSkillChange={setViewSkill}
-        viewSkill={viewSkill}
-      />
-    </ConsolePageLayout>
+    <SkillFilters
+      defaultView={defaultSkillView}
+      isCreateDisabled={!isAccessReady}
+      onCreate={editor.openCreateForm}
+      onSearchChange={setSearchTermAndReset}
+      onViewChange={setViewAndReset}
+      searchTerm={filters.searchTerm}
+      view={filters.view}
+    >
+      <ConsolePageLayout>
+        <SkillListBody
+          editor={editor}
+          onViewSkillChange={setViewSkill}
+          pagination={pagination}
+          searchTerm={filters.searchTerm}
+          skillList={skillList}
+          visibleCount={visibleSkills?.length ?? 0}
+          view={filters.view}
+        />
+        <SkillDialogs
+          editor={editor}
+          onViewSkillChange={setViewSkill}
+          viewSkill={viewSkill}
+        />
+      </ConsolePageLayout>
+    </SkillFilters>
   )
 }
 
+const defaultSkillView: SkillFilterView = "organization"
+
 function useSkillFilters() {
-  const [view, setView] = useState<SkillFilterView>("organization")
+  const [view, setView] = useState<SkillFilterView>(defaultSkillView)
   const [searchTerm, setSearchTerm] = useState("")
 
   return { searchTerm, setSearchTerm, setView, view }

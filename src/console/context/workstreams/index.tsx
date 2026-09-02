@@ -3,10 +3,9 @@ import { useQuery } from "convex/react"
 import { Cable, Layers } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  ConsoleFilterGroup,
-  ConsoleFilterToggle,
-} from "@/shared/console/layout"
+import { countActiveFilters } from "@/shared/console/filters/count"
+import { ConsoleFilterToggle } from "@/shared/console/filters/field"
+import { ConsoleFiltered } from "@/shared/console/filters/layout"
 import { FilterableEmptyState } from "@/shared/console/list/empty"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { ConsoleListPager } from "@/shared/console/list/pager"
@@ -15,7 +14,8 @@ import {
   useResettingSetter,
 } from "@/shared/console/list/pagination"
 import { api } from "../../../../convex/_generated/api"
-import { ContextPage } from ".."
+import { ConsolePage } from "../../page"
+import { ContextLayout } from ".."
 import { PulseSkeleton } from "./activity/lane"
 import { WorkstreamsPulse } from "./activity/pulse"
 import { WorkstreamCard } from "./card"
@@ -31,9 +31,9 @@ import { type Workstream, type Workstreams } from "./types"
 // Jori's deduced picture of the org's work. Corrections teach the judge.
 export function ContextWorkstreams() {
   return (
-    <ContextPage tab="workstreams">
+    <ConsolePage>
       {(organizationId) => <WorkstreamsView organizationId={organizationId} />}
-    </ContextPage>
+    </ConsolePage>
   )
 }
 
@@ -49,40 +49,58 @@ function WorkstreamsView({ organizationId }: { organizationId: string }) {
   )
 
   return (
-    <div className="flex flex-col gap-4 pb-4 md:pb-6">
-      {result === undefined ? (
-        <PulseSkeleton />
-      ) : (
-        <WorkstreamsPulse
-          organizationId={organizationId}
-          workstreams={roster}
-          onOpen={openWorkstream}
+    <ConsoleFiltered
+      activeCount={countActiveFilters(list.hasFilters)}
+      onReset={() => list.setFilter(defaultWorkstreamFilter)}
+      panel={
+        <ConsoleFilterToggle
+          label="Status"
+          onValueChange={list.setFilter}
+          options={workstreamFilterOptions}
+          value={list.filter}
         />
-      )}
-      <WorkstreamFilters filter={list.filter} onFilterChange={list.setFilter} />
-      {result === undefined ? (
-        <ConsoleListLoading />
-      ) : (
-        <WorkstreamList
-          hasFilters={list.hasFilters || workstreams.length > 0}
-          workstreams={list.pagination.visibleRows}
-          onOpen={openWorkstream}
-        />
-      )}
-      {list.total > 0 ? (
-        <ConsoleListPager pagination={list.pagination} />
-      ) : null}
-      <WorkstreamDetail
-        organizationId={organizationId}
-        workstream={open}
-        onClose={() => setOpenId(null)}
-      />
-    </div>
+      }
+    >
+      <ContextLayout tab="workstreams">
+        <div className="flex flex-col gap-4 pb-4 md:pb-6">
+          {result === undefined ? (
+            <PulseSkeleton />
+          ) : (
+            <WorkstreamsPulse
+              organizationId={organizationId}
+              workstreams={roster}
+              onOpen={openWorkstream}
+            />
+          )}
+          {result === undefined ? (
+            <ConsoleListLoading />
+          ) : (
+            <WorkstreamList
+              hasFilters={list.hasFilters || workstreams.length > 0}
+              workstreams={list.pagination.visibleRows}
+              onOpen={openWorkstream}
+            />
+          )}
+          {list.total > 0 ? (
+            <ConsoleListPager pagination={list.pagination} />
+          ) : null}
+          <WorkstreamDetail
+            organizationId={organizationId}
+            workstream={open}
+            onClose={() => setOpenId(null)}
+          />
+        </div>
+      </ContextLayout>
+    </ConsoleFiltered>
   )
 }
 
+const defaultWorkstreamFilter: WorkstreamFilter = "active"
+
 function useWorkstreamPagination(workstreams: Workstreams, isReady: boolean) {
-  const [filter, setFilter] = useState<WorkstreamFilter>("active")
+  const [filter, setFilter] = useState<WorkstreamFilter>(
+    defaultWorkstreamFilter
+  )
   const filteredWorkstreams = useMemo(
     () => filterWorkstreamsByView(workstreams, filter),
     [filter, workstreams]
@@ -103,25 +121,6 @@ function useWorkstreamPagination(workstreams: Workstreams, isReady: boolean) {
     setFilter: setFilterAndReset,
     total: filteredWorkstreams.length,
   }
-}
-
-function WorkstreamFilters({
-  filter,
-  onFilterChange,
-}: {
-  filter: WorkstreamFilter
-  onFilterChange: (value: WorkstreamFilter) => void
-}) {
-  return (
-    <ConsoleFilterGroup>
-      <ConsoleFilterToggle
-        label="Status"
-        onValueChange={onFilterChange}
-        options={workstreamFilterOptions}
-        value={filter}
-      />
-    </ConsoleFilterGroup>
-  )
 }
 
 function WorkstreamList({

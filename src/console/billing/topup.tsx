@@ -20,7 +20,7 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
-import { ConsoleFilterToggle } from "@/shared/console/layout"
+import { ConsoleFilterToggle } from "@/shared/console/filters/field"
 import { DialogForm } from "@/shared/console/materials/form"
 import { useBillingCheckout } from "./actions"
 
@@ -83,6 +83,7 @@ export function TopUpDialog({
         >
           <div className="flex flex-col gap-3">
             <ConsoleFilterToggle
+              inline
               label="Amount"
               onValueChange={setAmount}
               options={presetOptions}
