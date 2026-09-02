@@ -12,7 +12,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { scrollFade } from "@/shared/fade"
 import { ConsoleLink } from "./link"
 import {
   type ConsoleSurface,
@@ -39,7 +38,7 @@ export function ConsoleSidebar({
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>{organization}</SidebarHeader>
-      <SidebarContent className={scrollFade}>
+      <SidebarContent>
         {consoleNavigation.map((group, index) => (
           <SidebarGroup key={group.label ?? index}>
             {group.label === undefined ? null : (
@@ -51,8 +50,9 @@ export function ConsoleSidebar({
           </SidebarGroup>
         ))}
         {folders}
-        {/* The quiet bottom slot (mt-auto): low-frequency setup and
-            reference surfaces, above the user button. */}
+        {/* The quiet bottom slot: low-frequency setup and reference
+            surfaces, above the user button, held in place by the folder
+            tree taking whatever height is left. */}
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <NavigationMenu
