@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useDeferredValue, useState } from "react"
+import { moveTarget } from "@/shared/console/folders/types"
 import { JobContent } from "@/shared/console/jobs/list/content"
 import {
   type Job,
@@ -102,14 +103,7 @@ function JobListView({ organizationId }: { organizationId: string }) {
 }
 
 function movingResource(job: Job | undefined) {
-  return job === undefined
-    ? undefined
-    : {
-        resourceType: "job" as const,
-        resourceId: job.id,
-        name: job.name,
-        folderId: job.folderId,
-      }
+  return job === undefined ? undefined : moveTarget("job", job.id, job)
 }
 
 function useJobFilters() {

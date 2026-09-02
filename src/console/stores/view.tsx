@@ -2,13 +2,13 @@ import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ConsolePageLayout } from "@/shared/console/layout"
+import { moveTarget } from "@/shared/console/folders/types"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
+import { MaterialPlaceholder } from "@/shared/console/materials/placeholder"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { exportStoreJson } from "@/shared/console/stores/export"
 import { StoreHeaderActions } from "@/shared/console/stores/header"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
@@ -21,6 +21,8 @@ import { EditStoreDialog } from "./edit"
 import { useStoreRemoval } from "./manage"
 import { StoreLinksDialog } from "./share"
 import { StoreValue } from "./value"
+
+type StoreDialog = "access" | "edit" | "move" | "share"
 
 /** Member view of one store. The share fork wraps exactly this component,
  *  so it owns everything inside the console chrome. A visitor holding a
@@ -57,39 +59,27 @@ function StoreViewContent({
   const result = useQuery(api.stores.console.get, { organizationId, storeId })
 
   if (result === undefined) {
-    return (
-      <ConsolePageLayout>
-        <ConsoleListLoading />
-      </ConsolePageLayout>
-    )
+    return <MaterialPlaceholder noun="store" status="loading" />
   }
 
   if (result.status === "unauthorized") {
     return (
-      fallback ?? (
-        <ConsolePageLayout>
-          <Alert variant="destructive">
-            <AlertTitle>Could not load store</AlertTitle>
-            <AlertDescription>{result.message}</AlertDescription>
-          </Alert>
-        </ConsolePageLayout>
-      )
+      <MaterialPlaceholder
+        fallback={fallback}
+        message={result.message}
+        noun="store"
+        status="unauthorized"
+      />
     )
   }
 
   if (result.status === "not_found" || result.store === null) {
     return (
-      fallback ?? (
-        <ConsolePageLayout>
-          <Alert>
-            <AlertTitle>Store not found</AlertTitle>
-            <AlertDescription>
-              The store may have been deleted or belongs to another
-              organization.
-            </AlertDescription>
-          </Alert>
-        </ConsolePageLayout>
-      )
+      <MaterialPlaceholder
+        fallback={fallback}
+        noun="store"
+        status="not_found"
+      />
     )
   }
 
@@ -107,10 +97,7 @@ function StoreReadyView({
 
   const navigate = useNavigate()
   const removal = useStoreRemoval(organizationId)
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [isShareOpen, setIsShareOpen] = useState(false)
-  const [isMoveOpen, setIsMoveOpen] = useState(false)
-  const [isAccessOpen, setIsAccessOpen] = useState(false)
+  const [dialog, setDialog] = useState<StoreDialog>()
   const isArchived = store.archivedAt !== undefined
 
   function removeAndLeaveWhenDeleted() {
@@ -129,10 +116,10 @@ function StoreReadyView({
       isRestoring={removal.restoringId === store.storeId}
       material={{ name: store.name, archivedAt: store.archivedAt }}
       noun="store"
-      onAccess={() => setIsAccessOpen(true)}
+      onAccess={() => setDialog("access")}
       onDelete={removeAndLeaveWhenDeleted}
-      onEdit={() => setIsEditOpen(true)}
-      onMoveToFolder={() => setIsMoveOpen(true)}
+      onEdit={() => setDialog("edit")}
+      onMoveToFolder={() => setDialog("move")}
       onRestore={() => void removal.restoreMaterial(store)}
     />
   )
@@ -141,20 +128,14 @@ function StoreReadyView({
     <ConsoleListLayout>
       <StoreHeaderActions
         onExport={() => exportStoreJson(store)}
-        onShare={() => setIsShareOpen(true)}
+        onShare={() => setDialog("share")}
         store={store}
       />
       <StoreValue organizationId={organizationId} store={store} />
       <StoreDialogs
-        isAccessOpen={isAccessOpen}
-        isEditOpen={isEditOpen}
-        isMoveOpen={isMoveOpen}
-        isShareOpen={isShareOpen}
+        dialog={dialog}
+        onClose={() => setDialog(undefined)}
         organizationId={organizationId}
-        setIsAccessOpen={setIsAccessOpen}
-        setIsEditOpen={setIsEditOpen}
-        setIsMoveOpen={setIsMoveOpen}
-        setIsShareOpen={setIsShareOpen}
         store={store}
       />
     </ConsoleListLayout>
@@ -162,61 +143,46 @@ function StoreReadyView({
 }
 
 function StoreDialogs({
-  isAccessOpen,
-  isEditOpen,
-  isMoveOpen,
-  isShareOpen,
+  dialog,
+  onClose,
   organizationId,
-  setIsAccessOpen,
-  setIsEditOpen,
-  setIsMoveOpen,
-  setIsShareOpen,
   store,
 }: {
-  isAccessOpen: boolean
-  isEditOpen: boolean
-  isMoveOpen: boolean
-  isShareOpen: boolean
+  dialog: StoreDialog | undefined
+  onClose: () => void
   organizationId: string
-  setIsAccessOpen: (open: boolean) => void
-  setIsEditOpen: (open: boolean) => void
-  setIsMoveOpen: (open: boolean) => void
-  setIsShareOpen: (open: boolean) => void
   store: StoreDetail
 }) {
+  const closeWhenDismissed = closeOnDismiss(onClose)
+
   return (
     <>
       <EditStoreDialog
-        onOpenChange={setIsEditOpen}
+        onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
-        store={isEditOpen ? store : undefined}
+        store={dialog === "edit" ? store : undefined}
       />
       <OrganizationVisibilityDialog
         noun="store"
-        onOpenChange={setIsAccessOpen}
-        open={isAccessOpen}
+        onOpenChange={closeWhenDismissed}
+        open={dialog === "access"}
         organizationId={organizationId}
         ownerId={store.ownerId}
         target={{ kind: "store", id: store.storeId }}
         value={store.visibility}
       />
       <StoreLinksDialog
-        onOpenChange={setIsShareOpen}
-        open={isShareOpen}
+        onOpenChange={closeWhenDismissed}
+        open={dialog === "share"}
         organizationId={organizationId}
         storeId={store.storeId}
       />
       <MoveResourceDialog
-        onClose={() => setIsMoveOpen(false)}
+        onClose={onClose}
         organizationId={organizationId}
         resource={
-          isMoveOpen
-            ? {
-                resourceType: "collection",
-                resourceId: store.storeId,
-                name: store.name,
-                folderId: store.folderId,
-              }
+          dialog === "move"
+            ? moveTarget("collection", store.storeId, store)
             : undefined
         }
       />

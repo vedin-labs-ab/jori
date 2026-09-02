@@ -7,6 +7,7 @@ import {
   type FolderContentsResult,
   type FolderDetail,
   type FolderResource,
+  moveTarget,
   toFiledType,
 } from "@/shared/console/folders/types"
 import { type Job } from "@/shared/console/jobs/types"
@@ -89,12 +90,10 @@ export function useFolderResourceActions({
           resource={
             moving === undefined
               ? undefined
-              : {
-                  resourceType: toFiledType(moving.type),
-                  resourceId: moving.id,
+              : moveTarget(toFiledType(moving.type), moving.id, {
                   name: moving.name,
                   folderId: folder.folderId,
-                }
+                })
           }
         />
         {unfile.dialog}

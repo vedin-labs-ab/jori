@@ -81,6 +81,19 @@ export type MoveResourceTarget = {
   folderId?: string
 }
 
+export function moveTarget(
+  resourceType: FiledResourceType,
+  resourceId: string,
+  material: { name: string; folderId?: string }
+): MoveResourceTarget {
+  return {
+    resourceType,
+    resourceId,
+    name: material.name,
+    folderId: material.folderId,
+  }
+}
+
 /** What the move dialog moves: a folder re-parents through `move`, filed
  *  resources — one or a bulk selection — re-file through `file`. */
 export type MoveSubject =

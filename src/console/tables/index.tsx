@@ -1,25 +1,26 @@
-import { type useFolderNames } from "@/console/shared/materials/names"
-import {
-  type ListConfig,
-  type ListControls,
-} from "@/shared/console/list/controls"
-import {
-  ConsoleListFooter,
-  ConsoleListLayout,
-} from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
-import { ConsoleListPager } from "@/shared/console/list/pager"
-import { type useClientPagination } from "@/shared/console/list/pagination"
-import { type RowSelection } from "@/shared/console/list/selection"
+import { useState } from "react"
+import { moveTarget } from "@/shared/console/folders/types"
+import { SelectionActionsBar } from "@/shared/console/list/bar"
+import { ConsoleListLayout } from "@/shared/console/list/frame"
+import { ConsoleListBody } from "@/shared/console/list/pager"
+import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { TableList, TablesToolbar } from "@/shared/console/tables/list"
 import {
-  type TableListResult,
-  type TableSummary,
-} from "@/shared/console/tables/types"
+  tableDeleteDescription,
+  tableListConfig,
+  tableNoun,
+} from "@/shared/console/tables/list/config"
+import { type TableSummary } from "@/shared/console/tables/types"
+import { api } from "../../../convex/_generated/api"
+import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
-import { TableRowDialogs, TablesOverlays } from "./dialogs"
-import { type useTableRemoval } from "./manage"
-import { toMoveTarget, useTablesPage } from "./page"
+import { useMaterialListPage } from "../shared/materials/list"
+import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
+import { CreateTableDialog } from "./create"
+import { EditTableDialog } from "./edit"
+import { ImportTableDialog } from "./import/dialog"
+import { useTableBulk, useTableRemoval } from "./manage"
 
 export function TablesPage() {
   return (
@@ -29,95 +30,141 @@ export function TablesPage() {
   )
 }
 
+function useTablesPage(organizationId: string) {
+  const [dialog, setDialog] = useState<"create" | "import">()
+  const page = useMaterialListPage({
+    config: tableListConfig,
+    identify: (table: TableSummary) => table.tableId,
+    listQuery: api.tables.console.list,
+    noun: tableNoun,
+    organizationId,
+    rowsOf: (result) => (result.status === "ready" ? result.tables : []),
+  })
+
+  return {
+    ...page,
+    bulk: useTableBulk(organizationId, page.selection),
+    dialog,
+    removal: useTableRemoval(organizationId),
+    setDialog,
+  }
+}
+
 function TablesView({ organizationId }: { organizationId: string }) {
   const page = useTablesPage(organizationId)
+  const openCreate = () => page.setDialog("create")
+  const openImport = () => page.setDialog("import")
 
   return (
     <ConsoleListLayout>
       <TablesToolbar
-        onCreate={() => page.setDialog("create")}
-        onImport={() => page.setDialog("import")}
+        onCreate={openCreate}
+        onImport={openImport}
         onQueryChange={page.setQueryAndReset}
         query={page.query}
       />
-      <TablesBody
-        config={page.config}
-        controls={page.controls}
-        folders={page.folders}
-        hasFilters={page.hasFilters}
-        onAccess={page.setSharing}
-        onCreate={() => page.setDialog("create")}
-        onEdit={page.setEditing}
-        onImport={() => page.setDialog("import")}
-        onMoveToFolder={(table) => page.setMoving([toMoveTarget(table)])}
-        pagination={page.pagination}
-        removal={page.removal}
-        selection={page.selection}
-        tableList={page.tableList}
-      />
+      <ConsoleListBody
+        isLoading={page.list === undefined}
+        pagination={page.list?.status === "ready" ? page.pagination : undefined}
+      >
+        <TableList
+          config={page.config}
+          controls={page.controls}
+          folders={page.folders}
+          hasFilters={page.hasFilters}
+          onAccess={page.setSharing}
+          onCreate={openCreate}
+          onEdit={page.setEditing}
+          onImport={openImport}
+          onMoveToFolder={(table) => page.setMoving([toMoveTarget(table)])}
+          removal={page.removal}
+          selection={page.selection}
+          tables={page.pagination.visibleRows}
+          unauthorizedMessage={
+            page.list?.status === "unauthorized" ? page.list.message : undefined
+          }
+        />
+      </ConsoleListBody>
       <TablesOverlays organizationId={organizationId} page={page} />
       <TableRowDialogs organizationId={organizationId} page={page} />
     </ConsoleListLayout>
   )
 }
 
-function TablesBody({
-  config,
-  controls,
-  folders,
-  hasFilters,
-  onAccess,
-  onCreate,
-  onEdit,
-  onImport,
-  onMoveToFolder,
-  pagination,
-  removal,
-  selection,
-  tableList,
+/** The selection bar and the page's dialogs — everything that floats over
+ *  the list. */
+function TablesOverlays({
+  organizationId,
+  page,
 }: {
-  config: ListConfig<TableSummary>
-  controls: ListControls
-  folders: ReturnType<typeof useFolderNames>
-  hasFilters: boolean
-  onAccess: (table: TableSummary) => void
-  onCreate: () => void
-  onEdit: (table: TableSummary) => void
-  onImport: () => void
-  onMoveToFolder: (table: TableSummary) => void
-  pagination: ReturnType<typeof useClientPagination<TableSummary>>
-  removal: ReturnType<typeof useTableRemoval>
-  selection: RowSelection<TableSummary>
-  tableList: TableListResult | undefined
+  organizationId: string
+  page: ReturnType<typeof useTablesPage>
 }) {
-  if (tableList === undefined) {
-    return <ConsoleListLoading />
-  }
-
   return (
     <>
-      <TableList
-        config={config}
-        controls={controls}
-        folders={folders}
-        hasFilters={hasFilters}
-        onAccess={onAccess}
-        onCreate={onCreate}
-        onEdit={onEdit}
-        onImport={onImport}
-        onMoveToFolder={onMoveToFolder}
-        removal={removal}
-        selection={selection}
-        tables={pagination.visibleRows}
-        unauthorizedMessage={
-          tableList.status === "unauthorized" ? tableList.message : undefined
-        }
+      <SelectionActionsBar
+        count={page.selection.count}
+        isBusy={page.bulk.isBusy}
+        noun={tableNoun}
+        onClear={page.selection.clear}
+        onDownload={page.bulk.downloadSelected}
+        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
+        onRemove={page.bulk.removeSelected}
+        removal={bulkMaterialRemoval(
+          page.selection.selected,
+          tableNoun,
+          tableDeleteDescription
+        )}
       />
-      {tableList.status === "ready" ? (
-        <ConsoleListFooter>
-          <ConsoleListPager pagination={pagination} />
-        </ConsoleListFooter>
-      ) : null}
+      <CreateTableDialog
+        isOpen={page.dialog === "create"}
+        onOpenChange={(open) => page.setDialog(open ? "create" : undefined)}
+        organizationId={organizationId}
+      />
+      <ImportTableDialog
+        isOpen={page.dialog === "import"}
+        onOpenChange={(open) => page.setDialog(open ? "import" : undefined)}
+        organizationId={organizationId}
+      />
+      <MoveResourcesDialog
+        onClose={() => page.setMoving(undefined)}
+        organizationId={organizationId}
+        resources={page.moving}
+      />
     </>
   )
+}
+
+/** What a row's Edit details and Sharing… open, hosted once for the list. */
+function TableRowDialogs({
+  organizationId,
+  page,
+}: {
+  organizationId: string
+  page: ReturnType<typeof useTablesPage>
+}) {
+  return (
+    <>
+      <EditTableDialog
+        onOpenChange={closeOnDismiss(() => page.setEditing(undefined))}
+        organizationId={organizationId}
+        table={page.editing}
+      />
+      {page.sharing === undefined ? null : (
+        <OrganizationVisibilityDialog
+          noun="table"
+          onOpenChange={closeOnDismiss(() => page.setSharing(undefined))}
+          open
+          organizationId={organizationId}
+          ownerId={page.sharing.ownerId}
+          target={{ kind: "table", id: page.sharing.tableId }}
+          value={page.sharing.visibility}
+        />
+      )}
+    </>
+  )
+}
+
+function toMoveTarget(table: TableSummary) {
+  return moveTarget("collection", table.tableId, table)
 }

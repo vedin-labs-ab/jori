@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
 import { type CreationRequest } from "@/shared/console/folders/types"
-import { useRetained } from "@/shared/console/retain"
+import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { UploadFileDialog } from "../../files/upload"
 import { useJobEditorHost } from "../../jobs/editor/host"
 import { CreateStoreDialog } from "../../stores/create"
@@ -24,11 +24,7 @@ export function CreationDialogs({
   const file = useRetained(request?.creation === "file" ? request : undefined)
   const job = useRetained(request?.creation === "job" ? request : undefined)
 
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
+  const closeWhenDismissed = closeOnDismiss(onClose)
 
   return (
     <>

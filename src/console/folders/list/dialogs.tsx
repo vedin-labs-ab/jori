@@ -2,7 +2,7 @@ import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { EditFileDialog } from "@/shared/console/files/edit"
 import { type FolderResource } from "@/shared/console/folders/types"
-import { useRetained } from "@/shared/console/retain"
+import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
 import { useFileActions } from "../../files/manage"
 import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
@@ -85,13 +85,13 @@ function TableDialogs({ onClose, organizationId, request }: KindDialogs) {
   return (
     <>
       <EditTableDialog
-        onOpenChange={closeWhenDismissed(onClose)}
+        onOpenChange={closeOnDismiss(onClose)}
         organizationId={organizationId}
         table={request?.kind === "edit" ? table : undefined}
       />
       <OrganizationVisibilityDialog
         noun="table"
-        onOpenChange={closeWhenDismissed(onClose)}
+        onOpenChange={closeOnDismiss(onClose)}
         open={request?.kind === "access"}
         organizationId={organizationId}
         ownerId={table.ownerId}
@@ -125,13 +125,13 @@ function StoreDialogs({ onClose, organizationId, request }: KindDialogs) {
   return (
     <>
       <EditStoreDialog
-        onOpenChange={closeWhenDismissed(onClose)}
+        onOpenChange={closeOnDismiss(onClose)}
         organizationId={organizationId}
         store={request?.kind === "edit" ? store : undefined}
       />
       <OrganizationVisibilityDialog
         noun="store"
-        onOpenChange={closeWhenDismissed(onClose)}
+        onOpenChange={closeOnDismiss(onClose)}
         open={request?.kind === "access"}
         organizationId={organizationId}
         ownerId={store.ownerId}
@@ -163,12 +163,12 @@ function FileDialogs({ onClose, organizationId, request }: KindDialogs) {
       <EditFileDialog
         file={request?.kind === "edit" ? file : undefined}
         isSaving={actions.pendingFileId !== undefined}
-        onOpenChange={closeWhenDismissed(onClose)}
+        onOpenChange={closeOnDismiss(onClose)}
         onSave={actions.saveFile}
       />
       <OrganizationVisibilityDialog
         noun="file"
-        onOpenChange={closeWhenDismissed(onClose)}
+        onOpenChange={closeOnDismiss(onClose)}
         open={request?.kind === "access"}
         organizationId={organizationId}
         ownerId={file.ownerId}
@@ -177,12 +177,4 @@ function FileDialogs({ onClose, organizationId, request }: KindDialogs) {
       />
     </>
   )
-}
-
-function closeWhenDismissed(onClose: () => void) {
-  return (open: boolean) => {
-    if (!open) {
-      onClose()
-    }
-  }
 }

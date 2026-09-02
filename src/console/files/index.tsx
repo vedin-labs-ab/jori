@@ -10,7 +10,10 @@ import {
   fileNoun,
 } from "@/shared/console/files/list/config"
 import { type FileRow } from "@/shared/console/files/types"
-import { type MoveResourceTarget } from "@/shared/console/folders/types"
+import {
+  type MoveResourceTarget,
+  moveTarget,
+} from "@/shared/console/folders/types"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -27,11 +30,12 @@ import {
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { useClientPagination } from "@/shared/console/list/pagination"
 import { useRowSelection } from "@/shared/console/list/selection"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { toMoveTarget, useFileActions, useFileBulk } from "./manage"
+import { useFileActions, useFileBulk } from "./manage"
 import { UploadFileDialog } from "./upload"
 
 export function FilesPage() {
@@ -174,21 +178,13 @@ function FilesOverlays({
           page.editFile !== undefined &&
           page.actions.pendingFileId === page.editFile.fileId
         }
-        onOpenChange={(open) => {
-          if (!open) {
-            page.setEditFile(undefined)
-          }
-        }}
+        onOpenChange={closeOnDismiss(() => page.setEditFile(undefined))}
         onSave={page.actions.saveFile}
       />
       {page.accessFile === undefined ? null : (
         <OrganizationVisibilityDialog
           noun="file"
-          onOpenChange={(open) => {
-            if (!open) {
-              page.setAccessFile(undefined)
-            }
-          }}
+          onOpenChange={closeOnDismiss(() => page.setAccessFile(undefined))}
           open
           organizationId={organizationId}
           ownerId={page.accessFile.ownerId}
@@ -203,4 +199,8 @@ function FilesOverlays({
       />
     </>
   )
+}
+
+function toMoveTarget(file: FileRow) {
+  return moveTarget("file", file.fileId, file)
 }

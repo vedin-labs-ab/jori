@@ -6,11 +6,13 @@ import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { EditFileDialog } from "@/shared/console/files/edit"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FileRow } from "@/shared/console/files/types"
+import { moveTarget } from "@/shared/console/folders/types"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { menuWidth } from "@/shared/console/menu"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { MoveResourceDialog } from "../folders/move"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { toMoveTarget, useFileActions } from "./manage"
+import { useFileActions } from "./manage"
 
 type FileDialog = "access" | "edit" | "move"
 
@@ -83,11 +85,7 @@ function FileDialogs({
   onSave: (file: FileRow, values: { name: string; description: string }) => void
   organizationId: string
 }) {
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
+  const closeWhenDismissed = closeOnDismiss(onClose)
 
   return (
     <>
@@ -109,7 +107,9 @@ function FileDialogs({
       <MoveResourceDialog
         onClose={onClose}
         organizationId={organizationId}
-        resource={dialog === "move" ? toMoveTarget(file) : undefined}
+        resource={
+          dialog === "move" ? moveTarget("file", file.fileId, file) : undefined
+        }
       />
     </>
   )
