@@ -13,20 +13,18 @@ import { Definition, Section } from "../section"
 export function Faq() {
   return (
     <Section
-      className="border-y bg-muted/50"
       lede="The short version. For access and data, the trust page goes deeper."
-      title="Questions, answered straight"
+      title="What people ask"
     >
-      <dl className="grid gap-x-16 gap-y-8 md:grid-cols-2">
+      <dl className="grid gap-x-12 gap-y-8 md:grid-cols-2">
         <Definition term="What happens when usage runs out?">
           Scheduled runs stop at zero. Interactive work carries{" "}
           {formatUsd(interactiveGraceMicros)} of grace below it, so Jori never
           goes silent halfway through answering you.
         </Definition>
         <Definition term="How is usage billed?">
-          In dollars, at the model provider's public list rates. Keeping a page
-          current costs cents a day; a deep research run can cost a few dollars.
-          Every run shows its exact cost in its receipt.
+          Keeping a page current costs cents a day. A deep research run can cost
+          a few dollars. Every run shows its exact cost in its receipt.
         </Definition>
         <Definition term="Is there a free trial?">
           Yes. {trial.days} days with {formatUsd(trial.allowanceMicros)} of

@@ -12,7 +12,6 @@ import {
   Link2,
   Share2,
   Users,
-  UsersRound,
 } from "lucide-react"
 import { Definition, Jori, Section } from "../section"
 import { Subprocessors } from "./subprocessors"
@@ -51,7 +50,7 @@ export function ScopeSection() {
 export function VisibilitySection() {
   return (
     <Section
-      lede="Only me, specific people, specific teams, or everyone in the organization, on folders and on what's inside them."
+      lede="Visibility is set on a folder or on an item, and the tree enforces it."
       support
       title="Who sees what"
     >
@@ -61,13 +60,10 @@ export function VisibilitySection() {
           a table wider than its folder changes nothing until the folder allows
           it.
         </Definition>
-        <Definition icon={UsersRound} term="Teams are an audience">
-          Group the people who work together once, under Settings. Then share a
-          folder, a table, or a job with the team, not a list of names.
-        </Definition>
-        <Definition icon={Link2} term="Links with a clock">
-          A share link opens a read-only page, carries its secret in the URL
-          fragment, and expires on a clock you choose. Revoke it whenever.
+        <Definition icon={Link2} term="Links carry their own secret">
+          A share link opens a read-only page. Its secret rides in the URL
+          fragment, it expires on a clock you choose, and you can revoke it
+          whenever.
         </Definition>
       </FactList>
     </Section>
@@ -77,7 +73,6 @@ export function VisibilitySection() {
 export function BoundariesSection() {
   return (
     <Section
-      className="border-y bg-muted/50"
       lede={
         <>
           Not settings, and not promises. The way <Jori tilt="right" /> is
@@ -144,7 +139,7 @@ export function DataSection() {
 
 function FactList({ children }: { children: React.ReactNode }) {
   return (
-    <dl className="grid grid-cols-[repeat(auto-fit,minmax(17rem,1fr))] gap-x-10 gap-y-8">
+    <dl className="grid grid-cols-[repeat(auto-fit,minmax(17rem,1fr))] gap-x-12 gap-y-8">
       {children}
     </dl>
   )

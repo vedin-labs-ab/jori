@@ -17,11 +17,11 @@ import { Prop } from "../section"
 export function UsageMeter() {
   return (
     <Prop
+      hint={<Organization />}
       label={
         <>
           <BrandIcon className="size-4" />
-          <span className="font-medium text-foreground">Usage</span>
-          <Organization className="ml-auto" />
+          Usage
         </>
       }
     >

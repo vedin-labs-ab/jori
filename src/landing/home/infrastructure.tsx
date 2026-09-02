@@ -8,7 +8,6 @@ import { Definition, Section } from "../section"
 export function Infrastructure() {
   return (
     <Section
-      className="border-y bg-muted/50"
       lede={
         <>
           Choose where your data lives. Payments settle through{" "}
@@ -30,7 +29,7 @@ export function Infrastructure() {
       support
       title="Hosted in your region"
     >
-      <dl className="grid max-w-3xl gap-8 md:grid-cols-2 lg:gap-16">
+      <dl className="grid max-w-3xl gap-x-12 gap-y-8 md:grid-cols-2">
         <Definition term="Data residency">
           Two isolated regional applications, one product. Your data lives in
           the <Region region="us" /> or the <Region region="eu" />. Region is a

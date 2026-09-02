@@ -34,7 +34,7 @@ export function Materials() {
       }
       title="Work lands where you can find it"
     >
-      <dl className="grid gap-8 md:grid-cols-3 lg:gap-12">
+      <dl className="grid gap-x-12 gap-y-8 md:grid-cols-3">
         <Definition term="Tables">
           Typed columns, a grid people edit by hand, CSV in and out.
         </Definition>

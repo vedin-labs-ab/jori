@@ -38,7 +38,7 @@ function Integrations() {
   return (
     <div>
       <p className="text-muted-foreground text-sm">
-        Modeled in depth, not just connected.
+        Each one modeled in depth, with its own tools and modes.
       </p>
       <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
         {integrations.map((integration) => (
@@ -74,9 +74,7 @@ function GitHubMention() {
       label={
         <>
           <IntegrationLogo className="size-3.5" integration="github" />
-          <span className="font-medium text-foreground">
-            copperline/payroll
-          </span>
+          copperline/payroll
         </>
       }
     >
@@ -97,11 +95,11 @@ function GitHubMention() {
 function LinearMention() {
   return (
     <Prop
+      hint="COP"
       label={
         <>
           <IntegrationLogo className="size-3.5" integration="linear" />
           <Organization />
-          <span className="ml-auto">COP</span>
         </>
       }
     >

@@ -32,7 +32,7 @@ export function Shape() {
   return (
     <>
       <section className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
-        <dl className="grid gap-x-16 gap-y-8 md:grid-cols-3">
+        <dl className="grid gap-x-12 gap-y-8 md:grid-cols-3">
           {principles.map((principle) => (
             <Definition
               icon={principle.icon}
@@ -47,12 +47,12 @@ export function Shape() {
       {/* The prose says what is not decided; the meter shows the part that
           is, which is the half a reader has to take on faith otherwise. */}
       <Section
-        lede="A run is billed at the provider's list rates, and what we keep is what efficient context management saves rather than a multiplier on top. We would rather set the organization's flat fee once we have watched real teams run, and everyone on the waitlist sees it first."
+        lede="A run is billed at the provider's list rates. We would rather set the organization's flat fee once we have watched real teams run, and everyone on the waitlist sees it first."
         support
         title="Usage is settled. The plan price isn't."
       >
         <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
-          <dl className="grid max-w-xl gap-x-10 gap-y-6 sm:grid-cols-2">
+          <dl className="grid max-w-xl gap-x-12 gap-y-8 sm:grid-cols-2">
             <Definition term="In every plan">
               Every integration, mentions, ask-first approvals, receipts.
             </Definition>

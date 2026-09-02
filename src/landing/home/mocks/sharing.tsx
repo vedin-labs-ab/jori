@@ -16,7 +16,6 @@ import { Definition, Prop, Section } from "../../section"
 export function Sharing() {
   return (
     <Section
-      className="border-y bg-muted/50"
       lede="Only me, specific people, specific teams, or everyone in the organization. Set it on an item, or set it on the folder and everything inside answers to it. For people outside, send a link that expires."
       support
       title="Share it like a drive"
@@ -60,14 +59,12 @@ function RenewalsSharing() {
   return (
     <div className="grid min-w-0 gap-6">
       <Prop
-        label={
+        hint={
           <>
-            <span className="font-medium text-foreground">Visibility</span>
-            <span>
-              Who in <Organization /> sees the Customer renewals table
-            </span>
+            Who in <Organization /> sees the Customer renewals table
           </>
         }
+        label="Visibility"
       >
         <div className="p-4">
           <VisibilityFields
@@ -88,19 +85,13 @@ function RenewalsSharing() {
         </div>
       </Prop>
       <Prop
-        label={
+        hint={
           <>
-            <span className="font-medium text-foreground">Share links</span>
-            <span>
-              The same table, for people outside <Organization />
-            </span>
+            The same table, for people outside <Organization />
           </>
         }
+        label="Share links"
       >
-        <p className="px-4 pt-3 pb-1 text-muted-foreground text-xs">
-          Anyone with a link can view this table until the link expires or is
-          revoked.
-        </p>
         <ClientOnly fallback={<div aria-hidden className="h-52 border-t" />}>
           <MaterialLinks onMint={onMint} onRevoke={onRevoke} shares={shares} />
         </ClientOnly>

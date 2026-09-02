@@ -64,14 +64,7 @@ const modeRows: readonly ModeRow[] = [
  *  descriptions cannot drift from the product. */
 function ModeMatrix() {
   return (
-    <Prop
-      label={
-        <>
-          <span className="font-medium text-foreground">Permissions</span>
-          <span>a few of the modes you set</span>
-        </>
-      }
-    >
+    <Prop hint="a few of the modes you set" label="Permissions">
       <div className="divide-y">
         {modeRows.map((row) => (
           <ModeMatrixRow key={row.tool} row={row} />
