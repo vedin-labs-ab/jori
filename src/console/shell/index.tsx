@@ -143,16 +143,9 @@ function ConsoleHeaderTitle({
       />
       {/* Beside the trail, never inside it: an aside is a note about the
           page, so a reader walking the breadcrumb's navigation should
-          reach the page's ancestry and stop. */}
-      {shown.material.aside === undefined ? null : (
-        <>
-          <Separator
-            className="mx-1 data-vertical:h-3 data-vertical:self-auto"
-            orientation="vertical"
-          />
-          {shown.material.aside}
-        </>
-      )}
+          reach the page's ancestry and stop. It draws its own divider,
+          once it has something to divide from the trail. */}
+      {shown.material.aside}
     </>
   )
 }
@@ -183,6 +176,7 @@ function MaterialTrail({
         {trail.length === 0 ? null : <BreadcrumbSeparator />}
         <BreadcrumbItem className="min-w-0">
           <MaterialName material={material} />
+          {material.suffix}
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

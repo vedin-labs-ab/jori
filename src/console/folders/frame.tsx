@@ -28,15 +28,15 @@ export type FolderView = "contents" | "usage"
 /** Resolves the folder a page is about and hands it over, replacing the
  *  whole view while it loads or when there is nothing to show. */
 export function FolderFrame({
-  aside,
   children,
   folderId,
+  suffix,
   view,
 }: {
-  /** The usage page's own aside, when it has one: the contents page's is
-   *  the frame's to make. Given the organization, which the crumb's home
-   *  in the shell header cannot read from context. */
-  aside?: (organizationId: string) => ReactNode
+  /** What follows the usage page's name in its crumb, when it has a mark
+   *  to hang there. Given the organization, which the crumb's home in the
+   *  shell header cannot read from context. */
+  suffix?: (organizationId: string) => ReactNode
   children: (
     folder: FolderDetail,
     organizationId: string,
@@ -49,9 +49,9 @@ export function FolderFrame({
     <ConsolePage>
       {(organizationId) => (
         <FolderResolver
-          aside={aside}
           folderId={folderId as GenericId<"folders">}
           organizationId={organizationId}
+          suffix={suffix}
           view={view}
         >
           {children}
@@ -62,13 +62,12 @@ export function FolderFrame({
 }
 
 function FolderResolver({
-  aside,
   children,
   folderId,
   organizationId,
+  suffix,
   view,
 }: {
-  aside?: (organizationId: string) => ReactNode
   children: (
     folder: FolderDetail,
     organizationId: string,
@@ -76,6 +75,7 @@ function FolderResolver({
   ) => ReactNode
   folderId: GenericId<"folders">
   organizationId: string
+  suffix?: (organizationId: string) => ReactNode
   view: FolderView
 }) {
   const detail = useQuery(api.folders.console.get, { organizationId, folderId })
@@ -89,7 +89,7 @@ function FolderResolver({
     )
   )
 
-  useFolderCrumb({ aside, folder, onDialog: setDialog, organizationId, view })
+  useFolderCrumb({ folder, onDialog: setDialog, organizationId, suffix, view })
 
   return (
     <ConsoleListLayout>
@@ -113,10 +113,10 @@ function FolderResolver({
 }
 
 type FolderCrumb = {
-  aside?: (organizationId: string) => ReactNode
   folder: FolderDetail | undefined
   onDialog: (request: FolderDialogRequest) => void
   organizationId: string
+  suffix?: (organizationId: string) => ReactNode
   view: FolderView
 }
 
@@ -125,25 +125,25 @@ type FolderCrumb = {
  *  folders. The folder's own page ends there, its name opening the folder's
  *  menu and its spend sitting beside it; its usage page hangs one more
  *  crumb off the name, which becomes the way back — and needs no hint,
- *  being the page the hint points at, so it brings its own aside. */
+ *  being the page the hint points at, though it may mark its own name. */
 function useFolderCrumb(args: FolderCrumb) {
-  const { aside, folder, onDialog, organizationId, view } = args
+  const { folder, onDialog, organizationId, suffix, view } = args
 
   useMaterialTrail(
     // The menu and the aside are fresh elements per call, so the crumb is
     // memoized on what they are made of rather than on themselves.
     useMemo(
-      () => folderCrumb({ aside, folder, onDialog, organizationId, view }),
-      [aside, folder, onDialog, organizationId, view]
+      () => folderCrumb({ folder, onDialog, organizationId, suffix, view }),
+      [folder, onDialog, organizationId, suffix, view]
     )
   )
 }
 
 function folderCrumb({
-  aside,
   folder,
   onDialog,
   organizationId,
+  suffix,
   view,
 }: FolderCrumb): MaterialBreadcrumb | undefined {
   if (folder === undefined) {
@@ -161,8 +161,8 @@ function folderCrumb({
 
   if (view === "usage") {
     return {
-      aside: aside?.(organizationId),
       name: "Usage",
+      suffix: suffix?.(organizationId),
       trail: [
         ...ancestors,
         {
