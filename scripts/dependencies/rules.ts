@@ -1,28 +1,6 @@
-import { cruise, type IFlattenedRuleSet } from "dependency-cruiser"
+import { type IFlattenedRuleSet } from "dependency-cruiser"
 
-const roots = [
-  "src",
-  "convex",
-  "contracts",
-  "trigger",
-  "prompts",
-  "scripts",
-  "skills",
-]
-const excludedPaths = [
-  "(^|/)[.]agents(/|$)",
-  "(^|/)[.]claude(/|$)",
-  "(^|/)[.]trigger(/|$)",
-  "(^|/)[.]tanstack(/|$)",
-  "(^|/)node_modules(/|$)",
-  "(^|/)dist(/|$)",
-  "[.]test[.](?:ts|tsx|js|jsx)$",
-  // Vendored better-auth-ui registry code, kept as installed; its internal
-  // wiring (plugin <-> settings views) is upstream's to govern.
-  "^src/components/auth(/|$)",
-].join("|")
-
-const ruleSet = {
+export const ruleSet = {
   forbidden: [
     {
       name: "no-circular",
@@ -207,29 +185,31 @@ const ruleSet = {
         path: "^src/console/",
       },
     },
+    {
+      name: "console-views-are-props-driven",
+      severity: "error",
+      comment:
+        "Console views take props and raise callbacks; the console binds them to Convex and the session.",
+      from: {
+        path: "^src/shared/console/",
+      },
+      to: {
+        path: "^(?:node_modules/convex/dist/[^/]+/react(?:/|$)|src/shared/session(?:/|$)|src/components/auth(?:/|$))",
+        dependencyTypesNot: ["type-only"],
+      },
+    },
+    {
+      name: "console-views-navigate-through-link",
+      severity: "error",
+      comment:
+        "Console views reach the router only through ConsoleLink, so the same views render under a local navigation.",
+      from: {
+        path: "^src/shared/console/",
+        pathNot: "^src/shared/console/shell/(?:link[.]tsx|location[.]ts)$",
+      },
+      to: {
+        path: "^node_modules/@tanstack/react-router(?:/|$)",
+      },
+    },
   ],
 } satisfies IFlattenedRuleSet
-
-const result = await cruise(roots, {
-  exclude: excludedPaths,
-  outputType: "err-long",
-  ruleSet,
-  tsPreCompilationDeps: "specify",
-  tsConfig: {
-    fileName: "tsconfig.json",
-  },
-  validate: true,
-})
-
-if (result.exitCode === 0) {
-  process.stdout.write("Dependency boundary check passed.\n")
-} else {
-  process.stderr.write(formatOutput(result.output))
-  process.exitCode = result.exitCode
-}
-
-function formatOutput(output: unknown) {
-  return typeof output === "string"
-    ? output
-    : `${JSON.stringify(output, null, 2)}\n`
-}

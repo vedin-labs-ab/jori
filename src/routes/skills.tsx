@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { consoleDocumentTitle } from "@/console/shell/routes"
 import { Skills } from "@/console/skills"
+import { consoleDocumentTitle } from "@/shared/console/shell/routes"
 
 export const Route = createFileRoute("/skills")({
   component: Skills,

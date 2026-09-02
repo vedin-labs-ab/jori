@@ -13,7 +13,7 @@
     "check": "node --experimental-strip-types scripts/check.ts",
     "check:biome": "biome ci --error-on-warnings .",
     "check:bundle": "env JORI_BUNDLE_CHECK=1 vite build --logLevel error",
-    "check:dependencies": "node --experimental-strip-types scripts/dependencies.ts",
+    "check:dependencies": "node --experimental-strip-types scripts/dependencies/index.ts",
     "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
     "check:fix": "biome check --write .",
     "check:structure": "node --experimental-strip-types scripts/structure/index.ts",

@@ -12,16 +12,16 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { scrollFade } from "@/shared/fade"
-import { SidebarFolders } from "../folders/section"
-import { SidebarUserButton } from "./account"
-import { SidebarOrganizationSwitcher } from "./organization"
 import {
   type ConsoleSurface,
   consoleNavigation,
   consolePlatformNavigation,
   isNavigationActive,
-} from "./routes"
+} from "@/shared/console/shell/routes"
+import { scrollFade } from "@/shared/fade"
+import { SidebarFolders } from "../folders/section"
+import { SidebarUserButton } from "./account"
+import { SidebarOrganizationSwitcher } from "./organization"
 
 export function ConsoleSidebar({ pathname }: { pathname: string }) {
   return (
