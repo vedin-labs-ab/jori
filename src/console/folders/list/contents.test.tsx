@@ -26,6 +26,8 @@ const readyContents = {
       hasContents: true,
       folderCount: 1,
       resourceCount: 2,
+      ownerId: "persons:owner",
+      ownerName: "Ada Lovelace",
     },
     {
       folderId: "folder-2",
@@ -36,6 +38,8 @@ const readyContents = {
       hasContents: false,
       folderCount: 0,
       resourceCount: 0,
+      ownerId: "persons:other",
+      ownerName: "Grace Hopper",
     },
   ],
   resources: [
@@ -45,6 +49,8 @@ const readyContents = {
       name: "Leads",
       visibility: "organization",
       updatedAt: Date.now(),
+      ownerId: "persons:owner",
+      ownerName: "Ada Lovelace",
     },
     {
       type: "automation",
@@ -73,10 +79,10 @@ function renderContents(contents: FolderContentsResult | undefined) {
   )
 }
 
-test("folders and resources share the Name/Kind/Items/Updated table", () => {
+test("folders and resources share the Name/Kind/Owner/Items/Updated table", () => {
   renderContents(readyContents)
 
-  for (const header of ["Name", "Kind", "Items", "Updated"]) {
+  for (const header of ["Name", "Kind", "Owner", "Items", "Updated"]) {
     expect(screen.getByRole("columnheader", { name: header })).toBeDefined()
   }
 
@@ -93,6 +99,16 @@ test("folders and resources share the Name/Kind/Items/Updated table", () => {
   expect(
     screen.getByRole("button", { name: "Open actions for Leads" })
   ).toBeDefined()
+})
+
+test("the Owner column reads across both row groups", () => {
+  renderContents(readyContents)
+
+  // A subfolder shows whoever made it, a filed resource its owner, and the
+  // automation — which no person owns — shows Jori.
+  expect(screen.getAllByText("Ada Lovelace")).toHaveLength(2)
+  expect(screen.getByText("Grace Hopper")).toBeDefined()
+  expect(screen.getByText("Jori")).toBeDefined()
 })
 
 test("folder rows count their items; resource rows carry a dash", () => {

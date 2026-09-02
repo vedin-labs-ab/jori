@@ -1,19 +1,19 @@
 import { expect, test } from "vitest"
-import { storeDoc, tableDoc, testOwner } from "../../test/convex/collections"
-import { databaseContext } from "../../test/convex/database"
+import {
+  ownerIdentityDoc,
+  storeDoc,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/collections"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { automationDoc, fileDoc, folderDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { folderChildren, folderResources, summarizeTree } from "./contents"
 
 const other = "persons:other" as Id<"persons">
 
-async function seedFolder(
-  database: ReturnType<typeof databaseContext>["database"]
-) {
-  const folderId = (await database.insert(
-    "folders",
-    folderDoc()
-  )) as Id<"folders">
+async function seedFolder(database: TestDatabase) {
+  const folderId = await database.insert("folders", folderDoc())
 
   await database.insert("collections", tableDoc({ folderId, name: "Leads" }))
   await database.insert("collections", storeDoc({ folderId, name: "Config" }))
@@ -30,14 +30,14 @@ test("subfolders come back name-sorted, counting their direct children", async (
   const { database, ctx } = databaseContext()
   const folderId = await seedFolder(database)
 
-  const zetaId = (await database.insert(
+  const zetaId = await database.insert(
     "folders",
     folderDoc({ parentId: folderId, name: "Zeta" })
-  )) as Id<"folders">
-  const alphaId = (await database.insert(
+  )
+  const alphaId = await database.insert(
     "folders",
     folderDoc({ parentId: folderId, name: "Alpha" })
-  )) as Id<"folders">
+  )
 
   await database.insert(
     "folders",
@@ -75,10 +75,7 @@ test("subfolders come back name-sorted, counting their direct children", async (
 
 test("root folders list the same way when no parent is given", async () => {
   const { database, ctx } = databaseContext()
-  const rootId = (await database.insert(
-    "folders",
-    folderDoc({ name: "Docs" })
-  )) as Id<"folders">
+  const rootId = await database.insert("folders", folderDoc({ name: "Docs" }))
 
   await database.insert("folders", folderDoc({ parentId: rootId }))
   await database.insert("files", fileDoc({ folderId: rootId }))
@@ -97,10 +94,10 @@ test("root folders list the same way when no parent is given", async () => {
 test("child counts skip what the viewer cannot see", async () => {
   const { database, ctx } = databaseContext()
   const folderId = await seedFolder(database)
-  const childId = (await database.insert(
+  const childId = await database.insert(
     "folders",
     folderDoc({ parentId: folderId, name: "Mine" })
-  )) as Id<"folders">
+  )
 
   await database.insert(
     "files",
@@ -153,10 +150,10 @@ test("restricted subfolders drop out of the listing for excluded viewers", async
 
 test("a folder's visibility cascades over its filed resources", async () => {
   const { database, ctx } = databaseContext()
-  const folderId = (await database.insert(
+  const folderId = await database.insert(
     "folders",
     folderDoc({ visibility: { mode: "private" }, createdBy: testOwner })
-  )) as Id<"folders">
+  )
 
   await database.insert(
     "collections",
@@ -230,6 +227,38 @@ test("personal resources appear only for their owner", async () => {
   expect(forOwner).toHaveLength(7)
   expect(forOther).toHaveLength(4)
   expect(forOther.map((resource) => resource.name)).not.toContain("private.txt")
+})
+
+test("listed rows carry their owner, and none for what Jori owns", async () => {
+  const { database, ctx } = databaseContext()
+  const folderId = await seedFolder(database)
+
+  const runFile = fileDoc({ folderId, name: "run.md", ownerId: undefined })
+
+  await database.insert("identities", ownerIdentityDoc())
+  await database.insert("folders", folderDoc({ parentId: folderId, name: "A" }))
+  await database.insert("files", runFile)
+
+  const view = { organizationId: "org", personId: other }
+  const children = await folderChildren(ctx, { ...view, parentId: folderId })
+  const resources = await folderResources(ctx, { ...view, folderId })
+
+  // A subfolder belongs to whoever created it and a filed resource to its
+  // owner; a file an agent run saved has none, an automation never has one.
+  expect(
+    [children[0], ...resources].map((row) => [
+      row?.name,
+      row?.ownerId,
+      row?.ownerName,
+    ])
+  ).toEqual([
+    ["A", testOwner, "Ada Lovelace"],
+    ["Config", testOwner, "Ada Lovelace"],
+    ["costs.csv", testOwner, "Ada Lovelace"],
+    ["Digest", undefined, undefined],
+    ["Leads", testOwner, "Ada Lovelace"],
+    ["run.md", undefined, undefined],
+  ])
 })
 
 test("archived collections stay filed but hidden", async () => {

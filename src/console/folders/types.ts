@@ -20,6 +20,9 @@ export type ListedFolder = Pick<
   | "folderId"
   | "hasContents"
   | "name"
+  | "ownerId"
+  | "ownerImage"
+  | "ownerName"
   | "resourceCount"
   | "updatedAt"
 >

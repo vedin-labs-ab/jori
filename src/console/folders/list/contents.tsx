@@ -32,7 +32,7 @@ export function FolderContents({
   onUnfile: (resource: FolderResource) => void
 }) {
   const list = useFolderListControls(
-    contents?.status === "ready" ? contents.resources : []
+    contents?.status === "ready" ? contents : { folders: [], resources: [] }
   )
 
   if (contents === undefined) {
@@ -75,9 +75,13 @@ export function FolderContents({
   const resources = list.narrow(contents.resources)
 
   return (
-    <FolderListTable controls={list.controls} kinds={list.kinds}>
+    <FolderListTable
+      controls={list.controls}
+      kinds={list.kinds}
+      owners={list.owners}
+    >
       {folders.length === 0 && resources.length === 0 ? (
-        <EmptyRow colSpan={5}>
+        <EmptyRow colSpan={6}>
           <FilterableEmptyState
             description="File tables, stores, files, and automations here, or add a subfolder."
             hasFilters
