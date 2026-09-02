@@ -4,13 +4,13 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { Section, SectionHeader } from "@/components/ui/section"
 import { cn } from "@/lib/utils"
+import { SegmentLegend, SegmentSwatch } from "./legend"
 import {
   type UsageDay,
   type UsageSegment,
   usageDayLabel,
   usageSegmentColor,
-} from "@/shared/console/folders/usage/types"
-import { SegmentLegend, SegmentSwatch } from "./legend"
+} from "./types"
 
 // Spend and runs side by side, the same size, on the same days. Both are
 // bars — a day either cost something or it did not — and each bar is

@@ -1,5 +1,4 @@
 import { formatUsd } from "@contracts/billing"
-import { Link } from "@tanstack/react-router"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -13,6 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { ConsoleLink } from "../../shell/link"
+import { SegmentSwatch } from "./legend"
 import {
   type UsageContributor,
   type UsageDays,
@@ -21,8 +22,7 @@ import {
   usagePercent,
   usageSegmentColor,
   usageShare,
-} from "@/shared/console/folders/usage/types"
-import { SegmentSwatch } from "./legend"
+} from "./types"
 
 // The two tables the page ends on: what spent the window's money, and where
 // it sits. Both carry the same columns — runs, failures, spend, cost per
@@ -162,13 +162,13 @@ export function UsageContributors({
             entry.id === undefined ? (
               entry.label
             ) : (
-              <Link
+              <ConsoleLink
                 className={nameLinkClassName}
                 title={entry.label}
                 to="/jobs"
               >
                 {entry.label}
-              </Link>
+              </ConsoleLink>
             )
           }
           entry={entry}
@@ -206,7 +206,7 @@ export function UsageFolders({
               {segment.folderId === undefined ? (
                 <span className="truncate">{segment.label}</span>
               ) : (
-                <Link
+                <ConsoleLink
                   className={cn(nameLinkClassName, "truncate")}
                   params={{ folderId: segment.folderId }}
                   search={{ days }}
@@ -214,7 +214,7 @@ export function UsageFolders({
                   to="/folders/$folderId/usage"
                 >
                   {segment.label}
-                </Link>
+                </ConsoleLink>
               )}
             </span>
           }
