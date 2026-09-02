@@ -1,3 +1,4 @@
+import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { type FiledResourceType } from "@/shared/console/folders/types"
 import { type Job } from "@/shared/console/jobs/types"
 import { type ShareRow } from "@/shared/console/materials/history"
@@ -70,6 +71,14 @@ export type MaterialAction =
       description: string
     }
   | { type: "removeMaterial"; id: string }
+  | { type: "writeStoreValue"; at: number; storeId: string; value: unknown }
+  | {
+      type: "writeStoreSchema"
+      at: number
+      storeId: string
+      schema: JsonSchemaObject | undefined
+    }
+  | { type: "writeFileText"; at: number; fileId: string; text: string }
 
 export type JobAction =
   | { type: "setJobPaused"; at: number; jobId: string; paused: boolean }

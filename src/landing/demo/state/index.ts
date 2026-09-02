@@ -12,6 +12,7 @@ import { reduceMaterials } from "./materials"
 import { reduceRuns } from "./runs"
 import { reduceTables } from "./tables"
 import { type DemoAction, type DemoState } from "./types"
+import { reduceWrites } from "./writes"
 
 export type { DemoAction, DemoState, VisibilityTarget } from "./types"
 
@@ -37,6 +38,7 @@ const reducers = [
   reduceMaterials,
   reduceRuns,
   reduceTables,
+  reduceWrites,
 ]
 
 /** Each domain answers for its own actions and leaves the rest alone. */

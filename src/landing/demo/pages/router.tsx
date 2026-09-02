@@ -5,18 +5,24 @@ import {
 } from "@/shared/console/folders/usage/types"
 import { type FolderId } from "../fixtures/types"
 import { type DemoLocation } from "../navigation"
-import { MaterialPage, PlatformPage } from "./detail"
 import { FolderPage, RootFoldersPage } from "./folders"
 import { JobsPage } from "./jobs"
 import { FilesPage, StoresPage, TablesPage } from "./lists"
+import { FilePage } from "./materials/file"
+import { StorePage } from "./materials/store"
+import { TablePage } from "./materials/table"
+import { PlatformPage } from "./platform"
 import { RunsPage } from "./runs"
-import { TablePage } from "./table"
 import { UsagePage } from "./usage"
 
-const materialLists: Record<string, () => ReactElement> = {
-  files: FilesPage,
-  stores: StoresPage,
-  tables: TablesPage,
+/** Each material surface: its list, and the page for one of its own. */
+const materialSurfaces: Record<
+  string,
+  { List: () => ReactElement; Page: (props: { id: string }) => ReactElement }
+> = {
+  files: { List: FilesPage, Page: ({ id }) => <FilePage fileId={id} /> },
+  stores: { List: StoresPage, Page: ({ id }) => <StorePage storeId={id} /> },
+  tables: { List: TablesPage, Page: ({ id }) => <TablePage tableId={id} /> },
 }
 
 /** The page for a path, the way the console's routes divide them. */
@@ -49,21 +55,13 @@ export function DemoPage({
     return <JobsPage />
   }
 
-  const List = materialLists[surface]
+  const material = materialSurfaces[surface]
 
-  if (List === undefined) {
+  if (material === undefined) {
     return <PlatformPage surface={surface} />
   }
 
-  if (id === undefined) {
-    return <List />
-  }
-
-  return surface === "tables" ? (
-    <TablePage tableId={id} />
-  ) : (
-    <MaterialPage materialId={id} />
-  )
+  return id === undefined ? <material.List /> : <material.Page id={id} />
 }
 
 /** Under /folders: the roots, the whole tree's usage, one folder, or that

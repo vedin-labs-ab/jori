@@ -1,3 +1,4 @@
+import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { type GenericId } from "convex/values"
 import { type FolderRow } from "@/shared/console/folders/types"
 import { type TableColumn, type TableRow } from "@/shared/console/tables/types"
@@ -45,7 +46,9 @@ export type DemoTable = MaterialBase & {
 export type DemoStore = MaterialBase & {
   kind: "store"
   id: CollectionId
-  propertyCount?: number
+  schema?: JsonSchemaObject
+  value: unknown
+  /** How many writes the store has taken; 0 means never written. */
   version: number
 }
 
@@ -55,6 +58,10 @@ export type DemoFile = MaterialBase & {
   mimeType: string
   size: number
   source: "run" | "upload"
+  /** A text file's content, held in memory so the editor's saves land. */
+  text?: string
+  /** A binary file's path under /demo, served as a static asset. */
+  asset?: string
 }
 
 export type DemoMaterial = DemoTable | DemoStore | DemoFile
