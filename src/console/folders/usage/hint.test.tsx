@@ -52,6 +52,13 @@ test("a figure still loading is no figure at all", () => {
   renderHint(undefined, "folders:1")
 
   // A hint that appeared a beat after the crumb would shift the header
-  // under the reader; it waits instead.
+  // under the reader; it waits instead, divider included.
   expect(screen.queryByRole("link")).toBeNull()
+  expect(document.querySelector('[data-slot="separator"]')).toBeNull()
+})
+
+test("a figure that is ready brings its divider with it", () => {
+  renderHint(500_000, "folders:1")
+
+  expect(document.querySelector('[data-slot="separator"]')).not.toBeNull()
 })

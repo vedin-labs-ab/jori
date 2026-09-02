@@ -205,6 +205,26 @@ test("hangs a published aside off the trail, outside its navigation", () => {
   ).toBeGreaterThan(0)
 })
 
+test("sets a published suffix right after the name, with no divider", () => {
+  const publish = renderWithPublisher("/folders/usage")
+
+  act(() =>
+    publish.current?.({
+      name: "Usage",
+      suffix: <button type="button">About these figures</button>,
+      trail: [],
+    })
+  )
+
+  const trail = screen.getByRole("navigation", { name: "breadcrumb" })
+  const suffix = screen.getByRole("button", { name: "About these figures" })
+
+  // A mark on the name itself, so it stays inside the crumb, and nothing
+  // stands between the two.
+  expect(trail.contains(suffix)).toBe(true)
+  expect(trail.querySelector('[data-slot="separator"]')).toBeNull()
+})
+
 function renderWithPublisher(path: string) {
   pathname = path
 

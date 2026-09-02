@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
@@ -60,6 +61,22 @@ export function ConsoleHeaderActions({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-2">{children}</div>,
         slot
       )
+}
+
+/** A note hung off the end of the header's breadcrumb, divided from it.
+ *  The note brings the divider itself rather than the shell drawing one
+ *  for it, so nothing stands alone while its content is still on its
+ *  way: a note with nothing to show yet renders nothing at all. */
+export function ConsoleHeaderAside({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <Separator
+        className="mx-1 data-vertical:h-3 data-vertical:self-auto"
+        orientation="vertical"
+      />
+      {children}
+    </>
+  )
 }
 
 export function ConsoleHeaderButton({

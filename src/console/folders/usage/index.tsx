@@ -32,10 +32,10 @@ export function FolderUsagePage({
 
   return (
     <FolderFrame
-      aside={(organizationId) => (
+      folderId={folderId}
+      suffix={(organizationId) => (
         <UsageNote days={days} organizationId={organizationId} />
       )}
-      folderId={folderId}
       view="usage"
     >
       {(folder, organizationId) => (
@@ -90,7 +90,7 @@ function OrganizationUsageView(props: ComponentProps<typeof UsageView>) {
     useMemo(
       () => ({
         ...organizationCrumb,
-        aside: <UsageNote days={days} organizationId={organizationId} />,
+        suffix: <UsageNote days={days} organizationId={organizationId} />,
       }),
       [days, organizationId]
     )

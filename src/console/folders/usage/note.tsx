@@ -9,11 +9,11 @@ import {
 import { api } from "../../../../convex/_generated/api"
 import { type UsageDays } from "./types"
 
-/** The fine print, hung off the page's crumb as its aside: which day a day
+/** The fine print, hung off the page's name in its crumb: which day a day
  *  is, what a change is measured against, and what the money is a price
  *  for. It reads the zone itself, so the crumb can carry it before any
  *  usage has loaded and from either scope alike. The organization comes as
- *  a prop: the aside is rendered in the shell's header, above the
+ *  a prop: the crumb is rendered in the shell's header, above the
  *  organization context the page's own content sits inside. */
 export function UsageNote({
   days,

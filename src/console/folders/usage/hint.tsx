@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
+import { ConsoleHeaderAside } from "../../shared/layout"
 import { defaultUsageDays } from "./types"
 
 // What a folder — or the whole tree — has cost lately, sized to sit beside
@@ -18,7 +19,7 @@ import { defaultUsageDays } from "./types"
 // the page behind it.
 
 /** A figure this small is not worth a loading state of its own: the hint
- *  shows nothing until the number is real. */
+ *  shows nothing, divider included, until the number is real. */
 export function FolderUsageHint({
   folderId,
   organizationId,
@@ -39,20 +40,22 @@ export function FolderUsageHint({
   const amount = formatUsd(spend.micros)
 
   return (
-    <UsageHintButton
-      folderId={folderId}
-      label={`Usage: ${amount} in the last ${defaultUsageDays} days`}
-    >
-      <span className="truncate tabular-nums">
-        {amount} · {defaultUsageDays} days
-      </span>
-      {/* Collapsed rather than merely transparent, so the hint claims no
+    <ConsoleHeaderAside>
+      <UsageHintButton
+        folderId={folderId}
+        label={`Usage: ${amount} in the last ${defaultUsageDays} days`}
+      >
+        <span className="truncate tabular-nums">
+          {amount} · {defaultUsageDays} days
+        </span>
+        {/* Collapsed rather than merely transparent, so the hint claims no
           width it is not using and nothing beside it shifts. */}
-      <ArrowUpRight
-        aria-hidden
-        className="h-3 w-0 shrink-0 overflow-hidden opacity-0 transition-[width,opacity] duration-150 group-focus-visible:w-3 group-focus-visible:opacity-100 group-hover:w-3 group-hover:opacity-100"
-      />
-    </UsageHintButton>
+        <ArrowUpRight
+          aria-hidden
+          className="h-3 w-0 shrink-0 overflow-hidden opacity-0 transition-[width,opacity] duration-150 group-focus-visible:w-3 group-focus-visible:opacity-100 group-hover:w-3 group-hover:opacity-100"
+        />
+      </UsageHintButton>
+    </ConsoleHeaderAside>
   )
 }
 

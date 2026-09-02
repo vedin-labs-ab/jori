@@ -30,9 +30,15 @@ export type MaterialBreadcrumb = {
    *  its own breadcrumb. */
   menu?: ReactNode
   /** A small note about the page rather than a step in its trail — what it
-   *  costs, say. The shell hangs it off the end of the trail behind a
-   *  divider, outside the breadcrumb's own navigation. */
+   *  costs, say. The shell hangs it off the end of the trail, outside the
+   *  breadcrumb's own navigation; the note wraps itself in
+   *  ConsoleHeaderAside once it has something to show, so its divider
+   *  never stands there alone. */
   aside?: ReactNode
+  /** A mark that qualifies the name itself — how to read the page, say.
+   *  The shell sets it right after the name, inside the crumb, with no
+   *  divider: it belongs to the name rather than standing beside it. */
+  suffix?: ReactNode
 }
 
 export const MaterialBreadcrumbContext = createContext<
