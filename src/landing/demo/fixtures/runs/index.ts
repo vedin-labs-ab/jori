@@ -3,7 +3,7 @@ import { type ExecutionItem } from "@/shared/console/runs/types"
 import { hour, minute } from "../clock"
 import { demoId } from "../ids"
 import { detail, mention, run, tools } from "./details"
-import { scheduledRuns } from "./scheduled"
+import { chaseRun, scheduledRuns } from "./scheduled"
 
 // Copperline's recent runs, as the Activity page lists them: every field a
 // row or its detail reads is filled in, so the same views draw them the
@@ -13,6 +13,7 @@ export const chaseRunId = demoId("runs", "chase")
 
 export function demoRuns(now: number): ExecutionItem[] {
   return [
+    chaseRun(now),
     harborRun(now),
     payrollRun(now),
     tipRun(now),

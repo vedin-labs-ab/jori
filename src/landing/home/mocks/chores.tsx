@@ -14,7 +14,7 @@ export function Chores() {
       support
       title="Hand it the work nobody wants."
     >
-      <DemoConsole className="h-[36rem]" navigation={console} sidebar={false} />
+      <DemoConsole className="h-[40rem]" navigation={console} sidebar={false} />
     </Section>
   )
 }

@@ -15,7 +15,7 @@ import { RenewalsThread } from "./thread"
  *  it is CSS, so the server's markup is the client's, and none of it runs
  *  where the reader has asked for less motion. */
 const consoleClassName = cn(
-  "h-[30rem] lg:-mr-12 xl:-mr-20",
+  "h-[36rem]",
   "motion-safe:[&_tr:has(a[href$=renewals])]:animate-in motion-safe:[&_tr:has(a[href$=renewals])]:fade-in-40",
   "motion-safe:[&_tr:has(a[href$=renewals])]:direction-alternate-reverse motion-safe:[&_tr:has(a[href$=renewals])]:repeat-2",
   "motion-safe:[&_tr:has(a[href$=renewals])]:animation-duration-400 motion-safe:[&_tr:has(a[href$=renewals])]:delay-[1900ms]",
@@ -26,8 +26,8 @@ export function Hero() {
   const console = useDemoNavigation(`/folders/${folderId("renewals")}`)
 
   return (
-    <section className="mx-auto grid w-full max-w-6xl items-center gap-14 px-6 pt-14 pb-24 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:pt-24 md:pb-32 lg:gap-16">
-      <div>
+    <section className="mx-auto w-full max-w-6xl px-6 pt-14 pb-24 md:pt-24 md:pb-32">
+      <div className="max-w-3xl">
         {/* Plain text flow rather than a flex row. As flex items, the chip and
             the sentence were separated by the row's gap on top of the space
             already inside the text and the chip's own padding, which read as
@@ -53,13 +53,15 @@ export function Hero() {
           </Button>
         </div>
       </div>
-      {/* The thread hangs off the console's lower right corner, and the
+      {/* The console takes the full width under the copy, so its sidebar,
+          breadcrumb, and every list column have the room they have in the
+          product. The thread hangs off its lower right corner, and the
           wrapper keeps room under the console for the part that hangs
           below it. Narrow, the thread docks under the console instead. */}
-      <div className="relative min-w-0 md:pb-14">
+      <div className="relative mt-14 min-w-0 md:mt-16 md:pb-16">
         <DemoConsole className={consoleClassName} navigation={console} />
         <RenewalsThread
-          className="mt-4 md:absolute md:right-0 md:bottom-0 md:mt-0 md:w-[22rem] lg:-right-4"
+          className="mt-4 md:absolute md:right-6 md:bottom-0 md:mt-0 md:w-[22rem]"
           onOpenTable={() =>
             console.navigation.navigate(`/tables/${renewalsTableId}`)
           }
