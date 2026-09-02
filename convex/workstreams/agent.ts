@@ -1,7 +1,7 @@
 import { type ObjectType, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalQuery, type QueryCtx } from "../_generated/server"
-import { maxRosterEntries, rosterRecencyMs } from "../deduction/limits"
+import { confirmedWorkstreams } from "../deduction/roster"
 import { effortNames, eventUrl } from "./read"
 
 // The agent's read over the workstream memory: the confirmed roster with each
@@ -31,7 +31,7 @@ export const readWorkstreams = internalQuery({
       maxWindowDays
     )
     const since = now - days * dayMs
-    const roster = await confirmedRoster(ctx, args.organizationId, now)
+    const roster = await confirmedWorkstreams(ctx, args.organizationId, now)
     const workstreams = await Promise.all(
       roster.map((belief) => readWindow(ctx, belief, since))
     )
@@ -39,32 +39,6 @@ export const readWorkstreams = internalQuery({
     return { now, days, workstreams }
   },
 })
-
-/** The same selection rules as the run-context roster, keeping the ids the
- *  prompt projection deliberately drops. */
-async function confirmedRoster(
-  ctx: QueryCtx,
-  organizationId: string,
-  now: number
-) {
-  const rows = await ctx.db
-    .query("beliefs")
-    .withIndex("by_organization_and_kind_and_status", (index) =>
-      index
-        .eq("organizationId", organizationId)
-        .eq("kind", "workstream")
-        .eq("status", "confirmed")
-    )
-    .collect()
-
-  return rows
-    .filter(
-      (row) =>
-        row.supersededBy === undefined && now - row.seenAt <= rosterRecencyMs
-    )
-    .sort((first, second) => second.seenAt - first.seenAt)
-    .slice(0, maxRosterEntries)
-}
 
 async function readWindow(
   ctx: QueryCtx,

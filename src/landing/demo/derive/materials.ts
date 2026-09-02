@@ -1,5 +1,4 @@
-import { isRecord } from "@contracts/json"
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { countLeafProperties } from "@contracts/schema/count"
 import {
   type FileSiblings,
   fileSiblings,
@@ -80,36 +79,6 @@ function storeSummary(material: DemoStore): StoreSummary {
     archivedAt: undefined,
     version: material.version,
   }
-}
-
-/** How many leaf properties the schema declares, counted the way the
- *  console's summary counts them: objects are structure, arrays count
- *  their item shape once, and everything else is one slot. */
-function countLeafProperties(schema: JsonSchemaObject | undefined) {
-  if (schema === undefined) {
-    return undefined
-  }
-
-  return isRecord(schema.properties) ? countChildLeaves(schema.properties) : 0
-}
-
-function countNodeLeaves(node: unknown): number {
-  if (!isRecord(node)) {
-    return 1
-  }
-
-  if (isRecord(node.properties)) {
-    return countChildLeaves(node.properties)
-  }
-
-  return isRecord(node.items) ? countNodeLeaves(node.items) : 1
-}
-
-function countChildLeaves(properties: Record<string, unknown>) {
-  return Object.values(properties).reduce<number>(
-    (total, child) => total + countNodeLeaves(child),
-    0
-  )
 }
 
 export function fileRows(state: DemoState): FileRow[] {
