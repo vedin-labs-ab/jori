@@ -14,10 +14,10 @@ import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
-import { DialogForm } from "@/shared/console/materials/form"
 import { scrollFade } from "@/shared/fade"
-import { type TableColumn, type TableRow } from "../types"
+import { DialogForm } from "../materials/form"
 import { buildRowValues, type RowDraft } from "./cells"
+import { type TableColumn, type TableRow } from "./types"
 
 export function AddRowDialog({
   columns,

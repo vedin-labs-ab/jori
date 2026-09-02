@@ -12,9 +12,9 @@ import {
   bulkMaterialRemovalSuccess,
   useMaterialRemoval,
 } from "@/shared/console/materials/removal"
+import { type TableSummary } from "@/shared/console/tables/types"
 import { api } from "../../../convex/_generated/api"
 import { exportTableById } from "./detail/export"
-import { type TableSummary } from "./types"
 
 type TableTarget = Pick<TableSummary, "tableId" | "name" | "archivedAt">
 

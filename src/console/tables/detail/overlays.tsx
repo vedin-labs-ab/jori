@@ -1,12 +1,12 @@
 import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { type RowSelection } from "@/shared/console/list/selection"
+import { AddRowDialog } from "@/shared/console/tables/add"
+import { type ColumnSheetState } from "@/shared/console/tables/sheet"
+import { type TableDetail, type TableRow } from "@/shared/console/tables/types"
 import { MoveResourceDialog } from "../../folders/move"
 import { VisibilityDialog } from "../../shared/visibility/dialog"
 import { EditTableDialog } from "../edit"
-import { type TableDetail, type TableRow } from "../types"
-import { AddRowDialog } from "./add"
-import { type ColumnSheetState } from "./column/form"
-import { ColumnSheet } from "./column/sheet"
+import { TableColumnSheet } from "./column/sheet"
 import { rowNoun, type useRowBulk } from "./rows"
 import { TableLinksDialog } from "./share"
 
@@ -52,7 +52,7 @@ export function TableOverlays({
           label: "Delete",
         }}
       />
-      <ColumnSheet
+      <TableColumnSheet
         onOpenChange={(open) => {
           if (!open) {
             onColumnSheet(undefined)

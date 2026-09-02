@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type TableColumn } from "../types"
+import { type TableColumn } from "@/shared/console/tables/types"
 import { buildCsvExport } from "./export"
 
 const columns: TableColumn[] = [

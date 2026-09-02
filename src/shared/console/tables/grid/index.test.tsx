@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { type RowSelection } from "@/shared/console/list/selection"
+import { type RowSelection } from "../../list/selection"
 import { type TableColumn, type TableRow } from "../types"
-import { RowGrid } from "./grid"
+import { RowGrid } from "."
 
 afterEach(() => {
   cleanup()

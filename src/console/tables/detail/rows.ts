@@ -10,14 +10,14 @@ import {
   conflictMessage,
   isVersionConflict,
 } from "@/shared/console/materials/conflict"
-import { api } from "../../../../convex/_generated/api"
+import { buildRowValues } from "@/shared/console/tables/cells"
 import {
   type RowInsertAnchor,
   rowPageSize,
   type TableColumn,
   type TableRow,
-} from "../types"
-import { buildRowValues } from "./cells"
+} from "@/shared/console/tables/types"
+import { api } from "../../../../convex/_generated/api"
 
 /** Endless-scroll pagination over pageRows: pages accumulate as the grid
  *  scrolls, every loaded page stays reactive, and the tail page grows in

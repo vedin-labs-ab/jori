@@ -1,4 +1,4 @@
-import { type TableColumn } from "../types"
+import { type TableColumn } from "./types"
 
 // Cell edits travel as text; these helpers translate between the text a
 // cell shows and the typed value the column stores. An empty input clears

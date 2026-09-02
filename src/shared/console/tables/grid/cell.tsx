@@ -3,8 +3,8 @@ import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { displayCellText } from "@/shared/cell"
+import { formatCellText, parseCellText } from "../cells"
 import { type TableColumn, type TableRow } from "../types"
-import { formatCellText, parseCellText } from "./cells"
 
 export type CommitCell = (
   row: TableRow,
