@@ -1,7 +1,7 @@
 import { ListFilter, X } from "lucide-react"
 import { type Ref } from "react"
 import { Button } from "@/components/ui/button"
-import { ButtonGroup } from "@/components/ui/button-group"
+import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
 import { ConsoleHeaderButton } from "../layout"
 
 /** The header's way into the panel. Off its defaults, the button fills in
@@ -43,6 +43,7 @@ export function ConsoleFilterButton({
   return (
     <ButtonGroup className="max-sm:contents">
       {trigger}
+      {active ? <ButtonGroupSeparator className="max-sm:hidden" /> : null}
       {active ? (
         <Button
           aria-label={`Clear ${activeCount === 1 ? "filter" : "filters"}`}
