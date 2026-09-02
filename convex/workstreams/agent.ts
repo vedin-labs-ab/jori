@@ -16,7 +16,7 @@ const entriesPerWorkstream = 12
 const receiptsPerEntry = 3
 const evidencePerWorkstream = 200
 
-export const readWorkstreamsArgs = {
+const readWorkstreamsArgs = {
   organizationId: v.string(),
   days: v.optional(v.number()),
 }

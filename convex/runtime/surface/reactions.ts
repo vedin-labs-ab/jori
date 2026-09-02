@@ -12,7 +12,7 @@ import { requireWorkerSecret } from "../secret"
 import { requireMessageSurfaceInput } from "./input"
 import { type ReactionAddress, resolveReactionAddress } from "./target"
 
-export const surfaceReactionTargetValidator = v.union(
+const surfaceReactionTargetValidator = v.union(
   v.object({ messageTs: v.string() }),
   v.object({ type: v.literal("comment"), commentId: v.string() }),
   v.object({ type: v.literal("issue"), issueId: v.string() }),

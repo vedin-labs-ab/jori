@@ -16,9 +16,9 @@ type Overrides<TableName extends "jobs" | "files" | "folders"> = Partial<
   WithoutSystemFields<Doc<TableName>>
 >
 
-export type FolderOverrides = Overrides<"folders">
+type FolderOverrides = Overrides<"folders">
 export type FileOverrides = Overrides<"files">
-export type JobOverrides = Overrides<"jobs">
+type JobOverrides = Overrides<"jobs">
 
 export function folderDoc(overrides: FolderOverrides = {}) {
   return {

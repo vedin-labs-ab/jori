@@ -4,7 +4,7 @@ import { conversationAudience } from "../conversations/scope"
 import { type Audience } from "../shared/audience"
 import { executesAsOrganization } from "./principal"
 
-export type RunAudience = {
+type RunAudience = {
   audience: Audience
   conversationId?: Id<"conversations">
 }

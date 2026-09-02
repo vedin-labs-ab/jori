@@ -99,7 +99,7 @@ export function LeafControl({
   return null
 }
 
-export function ScalarInput({
+function ScalarInput({
   ariaLabel,
   id,
   integer,
@@ -131,7 +131,7 @@ export function ScalarInput({
   )
 }
 
-export function CheckInput({
+function CheckInput({
   ariaLabel,
   checked,
   id,
@@ -156,7 +156,7 @@ const unsetChoice = "unset"
 
 /** One allowed value from an enum; optional fields get an explicit way
  *  back to unset, which omits the field from the value. */
-export function ChoiceSelect({
+function ChoiceSelect({
   allowUnset,
   ariaLabel,
   id,
@@ -210,7 +210,7 @@ function optionLabel(option: ValueOption) {
 
 /** A const (or null-typed) field: the schema fixes the value, so it only
  *  reads back. */
-export function ConstantValue({ value }: { value: unknown }) {
+function ConstantValue({ value }: { value: unknown }) {
   return (
     <p className="flex h-9 items-center px-3 font-mono text-muted-foreground text-xs">
       {JSON.stringify(value)}

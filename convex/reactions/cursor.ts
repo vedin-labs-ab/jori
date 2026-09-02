@@ -8,14 +8,14 @@ import {
 import { type QueryLikeCtx } from "../shared/context"
 
 export const defaultReactionDrainLimit = 20
-export const maxReactionDrainLimit = 50
-export const maxPendingReactionReadLimit = maxReactionDrainLimit + 1
+const maxReactionDrainLimit = 50
+const maxPendingReactionReadLimit = maxReactionDrainLimit + 1
 
 type ReactionCursor = NonNullable<
   NonNullable<Doc<"sessions">["cursor"]>["reaction"]
 >
 
-export type ReactionBatch = {
+type ReactionBatch = {
   cursor?: Doc<"reactions">
   hasMore: boolean
   reactions: Doc<"reactions">[]

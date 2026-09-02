@@ -2,7 +2,7 @@ import { createContext, useContext } from "react"
 import { type Job } from "@/shared/console/jobs/types"
 
 /** The one job editor on the page, opened from wherever a job is. */
-export type JobEditor = {
+type JobEditor = {
   openCreateForm: (folderId?: string) => void
   openEditForm: (job: Job) => void
 }

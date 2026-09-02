@@ -6,7 +6,7 @@ import { type MutationCtx } from "../_generated/server"
 // timestamp, anchored inserts take midpoints between their neighbors, so
 // placing a document between two others never rewrites the rows around it.
 
-export type InsertPlacement = "above" | "below"
+type InsertPlacement = "above" | "below"
 
 /** Where an insert lands relative to an existing document. */
 export type InsertAnchor = {

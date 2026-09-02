@@ -28,7 +28,7 @@ export type MailMessage = {
   hasAttachments?: boolean
 }
 
-export const maxMailBodyChars = 20_000
+const maxMailBodyChars = 20_000
 
 export function boundedMailBody(content: string, type: "text" | "html") {
   const trimmed = content.replace(/\r\n/g, "\n").trim()

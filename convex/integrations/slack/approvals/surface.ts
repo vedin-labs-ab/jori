@@ -41,7 +41,7 @@ export const sync = internalAction({
   },
 })
 
-export async function syncSlackApprovalSurface(args: {
+async function syncSlackApprovalSurface(args: {
   approval: Doc<"approvals">
   delivery: SlackApprovalDelivery
   integration: Doc<"integrations">

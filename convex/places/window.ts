@@ -12,7 +12,7 @@ import { applyProfileReview } from "./claims"
 import { profileWindowMessageLimit } from "./limits"
 import { type PlaceClaim, placeSection } from "./schema"
 
-export type ProfileMessage = {
+type ProfileMessage = {
   actor: string
   createdAt: number
   observedAt: number | null

@@ -4,7 +4,7 @@ import path from "node:path"
 import { parseEnv } from "node:util"
 import { type Environment, environmentFile, localNames } from "./names.ts"
 
-export type LoadedEnvironment = {
+type LoadedEnvironment = {
   env: NodeJS.ProcessEnv
   sources: string[]
 }

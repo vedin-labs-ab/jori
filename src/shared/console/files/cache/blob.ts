@@ -28,7 +28,7 @@ type Entry = CachedFile & {
   refCount: number
 }
 
-export type CacheLimits = {
+type CacheLimits = {
   /** Total bytes held across entries before the least recent are evicted. */
   maxBytes: number
   maxEntries: number
@@ -44,7 +44,7 @@ export const cacheSizeLimit = 50 * 1024 * 1024
  *  it — they fall back to the network URL on their own, much shorter
  *  deadline — but a stalled request must not wedge this key's in-flight
  *  slot forever, or no later visit could ever retry. */
-export const fetchTimeout = 60 * 1000
+const fetchTimeout = 60 * 1000
 
 /** How long an evicted entry's object URL stays valid. A consumer that
  *  just received the entry — resolution and retain sit a microtask or a

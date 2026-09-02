@@ -171,7 +171,7 @@ export function normalizeFileName(value: string | null | undefined) {
   return name === undefined || name === "" ? "file" : name
 }
 
-export async function summarizeFile(ctx: QueryCtx, file: Doc<"files">) {
+async function summarizeFile(ctx: QueryCtx, file: Doc<"files">) {
   return {
     fileId: file._id,
     name: file.name,

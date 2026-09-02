@@ -13,7 +13,7 @@ import { MaterialDescriptionField, MaterialNameField } from "../fields"
 import { DialogForm } from "../form"
 
 /** All an edit needs of a material; a summary and a detail both fit. */
-export type EditableMaterial = { description?: string; name: string }
+type EditableMaterial = { description?: string; name: string }
 
 export type MaterialEdit = { description: string; name: string }
 

@@ -234,7 +234,7 @@ export function RelativeTime({
 }
 
 /** Who a run belongs to, as an icon: the organization or one member. */
-export function AudienceIcon({
+function AudienceIcon({
   className,
   audience,
 }: {

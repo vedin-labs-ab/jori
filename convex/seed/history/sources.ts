@@ -2,7 +2,7 @@
 // schedule, the ones a Slack event woke, and the things people asked for by
 // hand. Days are always counted back from the seed instant.
 
-export type ScheduledSource = {
+type ScheduledSource = {
   name: string
   folder: string
   cron: string
@@ -10,7 +10,7 @@ export type ScheduledSource = {
   pausedAfter?: number
 }
 
-export type EventedSource = {
+type EventedSource = {
   name: string
   folder: string
   channel: string
@@ -18,7 +18,7 @@ export type EventedSource = {
   on: number[]
 }
 
-export type ManualSource = {
+type ManualSource = {
   title: string
   person: string
   folder?: string

@@ -40,7 +40,7 @@ const githubReactionLabels: Record<string, string> = {
   rocket: "🚀",
 }
 
-export type GitHubReactionSyncPlan = {
+type GitHubReactionSyncPlan = {
   integration: Doc<"integrations">
   targets: GitHubReactionSyncTarget[]
 }

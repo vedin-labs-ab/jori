@@ -3,8 +3,8 @@ import { renderPromptTemplate } from "../../prompts/render"
 import { type Integration } from "../shared/integrations"
 import { getRuntimeSkillForIntegration, type RuntimeSkill } from "./runtime"
 
-export type CommunicationCapability = "files" | "interactive" | "rich" | "text"
-export type CommunicationProfile = "agent-final-reply"
+type CommunicationCapability = "files" | "interactive" | "rich" | "text"
+type CommunicationProfile = "agent-final-reply"
 
 type CapabilityMap = {
   default: readonly CommunicationCapability[]

@@ -14,7 +14,7 @@ export type SourceDatum = {
   url?: string
 }
 
-export type RunSource = {
+type RunSource = {
   type: "job" | "event" | "manual" | "message"
   event?: SourceDatum
   kind?: SourceDatum

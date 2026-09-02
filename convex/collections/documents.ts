@@ -16,7 +16,7 @@ import { type CollectionDoc, type CollectionKind, type KindSpec } from "./spec"
 // versioning, claim resolution, and validation against the compiled JSON
 // Schema all live here. Kind differences enter through the KindSpec.
 
-export type WriteResult =
+type WriteResult =
   | { status: "written"; document: Doc<"documents">; created: boolean }
   | { status: "held"; existing: unknown; version: number }
 

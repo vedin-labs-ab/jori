@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /** What the sidebar shows of the active organization. */
-export type OrganizationIdentity = {
+type OrganizationIdentity = {
   logo?: string
   name: string
 }

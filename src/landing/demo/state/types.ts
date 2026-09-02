@@ -37,7 +37,7 @@ export type VisibilityTarget = {
   id: string
 }
 
-export type FolderAction =
+type FolderAction =
   | {
       type: "createFolder"
       at: number
@@ -61,7 +61,7 @@ export type FolderAction =
       folderId: FolderId | null
     }
 
-export type MaterialAction =
+type MaterialAction =
   | { type: "createMaterial"; material: DemoMaterial }
   | {
       type: "updateMaterial"
@@ -80,13 +80,13 @@ export type MaterialAction =
     }
   | { type: "writeFileText"; at: number; fileId: string; text: string }
 
-export type JobAction =
+type JobAction =
   | { type: "setJobPaused"; at: number; jobId: string; paused: boolean }
   | { type: "deleteJob"; jobId: string }
   | { type: "createJob"; job: Job }
   | { type: "updateJob"; job: Job }
 
-export type RunAction =
+type RunAction =
   | { type: "stopRun"; at: number; runId: string; actor: string }
   | {
       type: "decideApproval"
@@ -103,7 +103,7 @@ export type RunAction =
       state: "cancelled" | "connected"
     }
 
-export type TableAction =
+type TableAction =
   | {
       type: "commitCell"
       at: number
@@ -122,7 +122,7 @@ export type TableAction =
   | { type: "deleteRow"; at: number; tableId: string; rowId: string }
   | { type: "setColumns"; at: number; tableId: string; columns: TableColumn[] }
 
-export type AccessAction =
+type AccessAction =
   | {
       type: "setVisibility"
       at: number

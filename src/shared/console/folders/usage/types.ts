@@ -13,7 +13,7 @@ export type UsageDay = UsageOverview["series"][number]
 export type UsageContributor = UsageOverview["jobs"][number]
 export type UsageSegment = UsageOverview["folders"][number]
 
-export const usageWindowDays = [7, 30, 90] as const
+const usageWindowDays = [7, 30, 90] as const
 
 export type UsageDays = (typeof usageWindowDays)[number]
 

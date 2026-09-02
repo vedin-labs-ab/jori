@@ -45,7 +45,7 @@ const textualCategories = new Set(["code", "data", "text"])
 
 /** True when the registry reads the file as text a person could open in an
  *  editor — the files worth previewing and copying as text. */
-export function isTextualKind(mimeType: string, name: string) {
+function isTextualKind(mimeType: string, name: string) {
   return textualCategories.has(fileKind(mimeType, name).category)
 }
 

@@ -8,7 +8,7 @@ import { type Access, type MessageIntegration } from "../../shared/integrations"
 
 export type RuntimeIntegration = Doc<"integrations">
 
-export type MessageRuntimeInput = {
+type MessageRuntimeInput = {
   type: "message"
   messageIntegration: MessageIntegration
   run: Doc<"runs">
@@ -24,7 +24,7 @@ export type MessageRuntimeInput = {
   workstreams: WorkstreamContext[] | null
 }
 
-export type JobRuntimeInput = {
+type JobRuntimeInput = {
   type: "job"
   access: Access
   instructions: string

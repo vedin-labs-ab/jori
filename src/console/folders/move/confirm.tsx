@@ -16,7 +16,7 @@ type MoveAudienceArgs = FunctionArgs<typeof api.visibility.console.moveAudience>
 
 /** What a surface hands over to be moved. Ids stay plain strings here and
  *  are branded once, on the way into the query. */
-export type MovedSubject =
+type MovedSubject =
   | { kind: "resource"; resourceType: FiledResourceType; resourceId: string }
   | { kind: "folder"; folderId: string }
 

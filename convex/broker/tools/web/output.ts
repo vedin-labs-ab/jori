@@ -3,9 +3,9 @@ import { type ContentsOptions, type SearchResponse } from "exa-js"
 type ExaResponse = SearchResponse<ContentsOptions>
 type ExaResult = ExaResponse["results"][number]
 
-export type WebOperation = "contents" | "search"
+type WebOperation = "contents" | "search"
 
-export type WebToolResult = {
+type WebToolResult = {
   provider: {
     name: "exa"
     operation: WebOperation
@@ -22,7 +22,7 @@ export type WebToolResult = {
   truncated: boolean
 }
 
-export type WebResult = {
+type WebResult = {
   url: string
   title: string | null
   source: {

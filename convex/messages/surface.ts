@@ -14,7 +14,7 @@ export {
   replyAddress,
 } from "./targets"
 
-export type MessageAudience = {
+type MessageAudience = {
   isAddressed: boolean
   isDirect: boolean
   isMentioned: boolean

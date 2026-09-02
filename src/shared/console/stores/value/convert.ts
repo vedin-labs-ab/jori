@@ -152,7 +152,7 @@ function loadArray(items: ValueField, value: unknown): ValueState | undefined {
   return { kind: "array", items: states }
 }
 
-export type Serialized = {
+type Serialized = {
   value: unknown
   issues: SchemaValidationIssue[]
 }

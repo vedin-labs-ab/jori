@@ -170,7 +170,7 @@ export async function resolvePeople(ctx: QueryCtx, seed: SeedContext) {
 
 /** The roster keyed by the local part of each address, which is how the
  *  fixtures name people: `oskar`, not `oskar@vedinlabs.com`. */
-export const rosterByHandle = new Map(
+const rosterByHandle = new Map(
   roster.map((person) => [person.email.split("@")[0], person])
 )
 

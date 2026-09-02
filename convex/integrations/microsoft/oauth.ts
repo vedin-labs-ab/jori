@@ -5,7 +5,7 @@ import { fetchFormToken } from "../connect/oauth"
 import { microsoftGraphUrl, microsoftOAuthTokenUrl } from "./config"
 import { requireMicrosoftCredentials } from "./credentials"
 
-export type MicrosoftTokenResponse =
+type MicrosoftTokenResponse =
   | {
       access_token: string
       token_type: string

@@ -82,7 +82,7 @@ export function isJobToolReferenceError(error: string | undefined) {
   )
 }
 
-export function readJobInstructionMarkerError(
+function readJobInstructionMarkerError(
   error: string | undefined
 ): JobInstructionMarkerError | undefined {
   if (

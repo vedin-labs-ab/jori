@@ -24,7 +24,7 @@ import { schemaToForm, type ValueField } from "./model"
 
 export type ValueEditorView = "code" | "form"
 
-export type ValueEditorState = {
+type ValueEditorState = {
   view: ValueEditorView
   root: ValueState
   codeText: string
@@ -39,7 +39,7 @@ export type ValueEditorState = {
   codeEditable: boolean
 }
 
-export type ValueSubmitResult = { ok: true; value: unknown } | { ok: false }
+type ValueSubmitResult = { ok: true; value: unknown } | { ok: false }
 
 export type ValueEditor = ReturnType<typeof useValueEditor>
 

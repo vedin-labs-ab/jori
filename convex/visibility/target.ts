@@ -28,7 +28,7 @@ export function folderGate(folder: Doc<"folders">): Gate {
   }
 }
 
-export type LoadedTarget = {
+type LoadedTarget = {
   id: Id<"collections"> | Id<"files"> | Id<"folders">
   gate: Gate
   /** The person whose consent a change needs; folders answer with their

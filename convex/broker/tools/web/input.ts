@@ -12,7 +12,7 @@ const maxSearchCharacters = 4000
 const maxSearchQueryLength = 1000
 const maxDomainFilters = 20
 
-export type WebSearchInput = {
+type WebSearchInput = {
   query: string
   limit: number
   maxCharacters: number
@@ -20,7 +20,7 @@ export type WebSearchInput = {
   excludeDomains?: string[]
 }
 
-export type WebFetchInput = {
+type WebFetchInput = {
   url: string
   maxCharacters: number
   highlightQuery?: string
@@ -111,7 +111,7 @@ function normalizeDomain(value: unknown, name: string) {
   return hostname
 }
 
-export function normalizePublicHttpUrl(value: unknown, name: string) {
+function normalizePublicHttpUrl(value: unknown, name: string) {
   const rawUrl = requiredString(value, name)
   const url = parseUrl(rawUrl, name)
 

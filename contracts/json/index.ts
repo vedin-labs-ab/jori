@@ -7,7 +7,7 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive
 
 declare const encodedJsonBrand: unique symbol
 
-export type EncodedJson = string & {
+type EncodedJson = string & {
   readonly [encodedJsonBrand]: "EncodedJson"
 }
 
@@ -21,7 +21,7 @@ export function encodeJson(value: JsonValue): EncodedJson {
   return encoded as EncodedJson
 }
 
-export function encodeUnknownJson(value: unknown) {
+function encodeUnknownJson(value: unknown) {
   return encodeJson(toJsonValue(value))
 }
 

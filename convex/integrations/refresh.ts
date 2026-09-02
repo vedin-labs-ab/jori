@@ -38,7 +38,7 @@ export async function failOAuthRefresh(
   )
 }
 
-export function tokenRefreshError(
+function tokenRefreshError(
   platform: string,
   result: { error: string; error_description?: string }
 ) {

@@ -26,7 +26,7 @@ export type FiledResourceType = Infer<typeof filedResourceType>
 /** The tables whose rows can be filed into a folder. */
 export const filedTables = ["collections", "files", "jobs"] as const
 
-export type FiledTable = (typeof filedTables)[number]
+type FiledTable = (typeof filedTables)[number]
 
 type FiledDoc = Doc<FiledTable>
 

@@ -5,7 +5,7 @@ import { type Doc } from "../../_generated/dataModel"
  *  pairs rather than the single `tokens` object the others keep. */
 export const slackTokenKinds = ["bot", "user"] as const
 
-export type SlackTokenKind = (typeof slackTokenKinds)[number]
+type SlackTokenKind = (typeof slackTokenKinds)[number]
 
 export type SlackTokenPair = {
   access: string
@@ -13,7 +13,7 @@ export type SlackTokenPair = {
   expiresAt: number
 }
 
-export type SlackCredentials = Record<SlackTokenKind, SlackTokenPair>
+type SlackCredentials = Record<SlackTokenKind, SlackTokenPair>
 
 export function requireSlackCredentials(
   integration: Doc<"integrations">

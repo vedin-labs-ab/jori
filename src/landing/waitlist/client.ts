@@ -1,6 +1,6 @@
 import { type WaitlistField } from "@contracts/waitlist"
 
-export type WaitlistResult =
+type WaitlistResult =
   | { status: "joined" }
   | { status: "throttled" }
   | { status: "rejected"; field: WaitlistField; message: string }

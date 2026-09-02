@@ -8,7 +8,7 @@ import { type ApprovalDecisionResult, approvalDecisionMessage } from "./result"
 
 export type ApprovalDecision = "approved" | "denied"
 
-export type AccountApprovalDecisionArgs = {
+type AccountApprovalDecisionArgs = {
   accountId: string
   actor?: Actor
   integration: Integration
@@ -16,7 +16,7 @@ export type AccountApprovalDecisionArgs = {
   decision: ApprovalDecision
 }
 
-export type TextApprovalDecisionArgs = {
+type TextApprovalDecisionArgs = {
   accountId: string
   actor?: Actor
   actorKind?: Actor["kind"]

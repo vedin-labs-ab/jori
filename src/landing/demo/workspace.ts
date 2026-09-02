@@ -2,7 +2,7 @@ import { createContext, useContext } from "react"
 import { type DemoState } from "./state"
 import { type DemoActions } from "./state/actions"
 
-export type DemoWorkspace = {
+type DemoWorkspace = {
   actions: DemoActions
   state: DemoState
 }

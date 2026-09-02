@@ -16,7 +16,7 @@ export type CalendarEventContent = {
   attendees: string[]
 }
 
-export type CalendarEventRef = {
+type CalendarEventRef = {
   provider: "googleCalendar" | "microsoftCalendar"
   calendarId: string | undefined
   eventId: string

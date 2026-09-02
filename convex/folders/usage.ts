@@ -76,7 +76,7 @@ export const overview = query({
 
 /** How far back the breadcrumb hint counts. It is the Usage page's own
  *  default window, so following the hint lands on the figure it named. */
-export const usageHintDays: UsageWindowLength = 30
+const usageHintDays: UsageWindowLength = 30
 
 /**
  * What a scope has cost lately, and nothing else. The hint beside a

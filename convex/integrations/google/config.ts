@@ -4,7 +4,7 @@ export const googleOAuthTokenUrl = "https://oauth2.googleapis.com/token"
 export const googleOAuthRevokeUrl = "https://oauth2.googleapis.com/revoke"
 export const googleUserInfoUrl =
   "https://openidconnect.googleapis.com/v1/userinfo"
-export const googleOAuthCallbackPath = "/google/oauth/callback"
+const googleOAuthCallbackPath = "/google/oauth/callback"
 
 const googleIdentityScopes = ["openid", "email", "profile"]
 

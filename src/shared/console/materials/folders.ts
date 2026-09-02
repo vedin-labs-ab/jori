@@ -21,7 +21,7 @@ export function folderIcon(hasContents: boolean, isExpanded = false) {
 /** What a list needs to know about a folder: its label, whether it holds
  *  anything — the same cue the sidebar tree's icons carry — and its parent,
  *  for telling identically named folders apart. */
-export type FolderEntry = {
+type FolderEntry = {
   hasContents: boolean
   name: string
   parentId?: string

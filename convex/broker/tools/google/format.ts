@@ -25,7 +25,7 @@ export function getReplyRecipient(
   )
 }
 
-export function parseEmailAddress(value: unknown) {
+function parseEmailAddress(value: unknown) {
   if (typeof value !== "string" || value.trim() === "") {
     throw new Error("Cannot determine reply recipient")
   }

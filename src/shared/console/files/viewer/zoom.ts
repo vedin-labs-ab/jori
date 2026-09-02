@@ -5,7 +5,7 @@ import { useCallback, useRef, useState } from "react"
 // Every move funnels through the pure helpers below so the math stays
 // testable on its own.
 
-export type ZoomState = { scale: number; x: number; y: number }
+type ZoomState = { scale: number; x: number; y: number }
 export type Size = { height: number; width: number }
 type Point = { x: number; y: number }
 

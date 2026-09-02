@@ -113,7 +113,7 @@ export function IndexCell({ depth, index }: { depth: number; index: number }) {
 
 /** A key cell with nothing to say: closes the key column's hairline under
  *  ghost affordance rows. */
-export function BlankCell({ depth }: { depth: number }) {
+function BlankCell({ depth }: { depth: number }) {
   return (
     <span aria-hidden className={keyCellClassName}>
       <IndentSpacers depth={depth} />

@@ -9,7 +9,7 @@ import {
 } from "./config"
 import { requireGoogleCredentials } from "./credentials"
 
-export type GoogleTokenResponse =
+type GoogleTokenResponse =
   | {
       access_token: string
       expires_in: number
@@ -23,7 +23,7 @@ export type GoogleTokenResponse =
       error_description?: string
     }
 
-export type GoogleInstallationProfile = {
+type GoogleInstallationProfile = {
   id: string
   email: string
   name?: string

@@ -7,12 +7,12 @@ import { useCallback, useState } from "react"
 
 export type SortDirection = "asc" | "desc"
 
-export type ListSort = { direction: SortDirection; key: string }
+type ListSort = { direction: SortDirection; key: string }
 
 /** One selectable facet value. The hint disambiguates options whose
  *  labels collide — two folders named the same, say — and renders muted
  *  beside the label. */
-export type FacetOption = {
+type FacetOption = {
   hint?: string
   icon?: LucideIcon
   label: string
@@ -35,7 +35,7 @@ export type ListConfig<Row> = {
   sorts: Record<string, (row: Row) => string | number>
 }
 
-export type FacetSelections = Record<string, readonly string[] | undefined>
+type FacetSelections = Record<string, readonly string[] | undefined>
 
 /** The header components' view of a page's control state. */
 export type ListControls = {

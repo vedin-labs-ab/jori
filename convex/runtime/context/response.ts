@@ -25,7 +25,7 @@ import {
   type LoadedSession,
 } from "./loaders"
 
-export type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
+type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
 
 type LifecycleTools = ReturnType<typeof runLifecycleTools>
 

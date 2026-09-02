@@ -10,7 +10,7 @@ export const setupIdentityValidator = v.object({
   name: v.optional(v.string()),
 })
 
-export type SetupIdentity = {
+type SetupIdentity = {
   externalId: string
   email?: string
   name?: string

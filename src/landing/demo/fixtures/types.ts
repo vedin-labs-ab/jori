@@ -7,7 +7,7 @@ import { type TableColumn, type TableRow } from "@/shared/console/tables/types"
 // row from here and a row from the console are the same row.
 
 export type CollectionId = GenericId<"collections">
-export type FileId = GenericId<"files">
+type FileId = GenericId<"files">
 export type FolderId = GenericId<"folders">
 export type JobId = GenericId<"jobs">
 export type PersonId = GenericId<"persons">

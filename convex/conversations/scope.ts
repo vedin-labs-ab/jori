@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type Audience } from "../shared/audience"
 
-export type ConversationAudience = {
+type ConversationAudience = {
   conversationId: Id<"conversations">
   audience: Audience
 }

@@ -7,9 +7,9 @@ import {
 } from "../../../../contracts/permissions"
 
 export type ToolExecutionType = "job" | "message"
-export type RuntimeExecutionType = ToolExecutionType | "instruction"
+type RuntimeExecutionType = ToolExecutionType | "instruction"
 
-export type ToolPermissionInput = {
+type ToolPermissionInput = {
   executionType: ToolExecutionType
   permissions: ToolPermission[]
   toolModes: ReadonlyMap<string, PermissionMode>

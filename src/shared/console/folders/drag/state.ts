@@ -45,7 +45,7 @@ export function useExpandHoverHandler(handler: (folderId: string) => void) {
 
 /** The pane a row lives in; sidebar and folder-page rows for the same
  *  folder coexist, so the pane keys their dnd-kit ids apart. */
-export type DragZone = "sidebar" | "contents"
+type DragZone = "sidebar" | "contents"
 
 export type FolderRowDrag = ReturnType<typeof useFolderRowDrag>
 

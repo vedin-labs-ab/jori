@@ -26,7 +26,7 @@ export type GitHubRepository = {
   }
 }
 
-export type GitHubIssue = {
+type GitHubIssue = {
   id?: number
   number?: number
   title?: string

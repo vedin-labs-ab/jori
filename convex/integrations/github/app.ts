@@ -28,7 +28,7 @@ export type GitHubInstallationProfile = {
   app_slug?: string
 }
 
-export type GitHubInstallationToken = {
+type GitHubInstallationToken = {
   token: string
   expires_at: string
   permissions?: Record<string, string>
@@ -60,7 +60,7 @@ export async function createGitHubInstallationToken(
   )
 }
 
-export async function deleteGitHubInstallation(installationId: string) {
+async function deleteGitHubInstallation(installationId: string) {
   await githubAppRequest<void>(`/app/installations/${installationId}`, {
     method: "DELETE",
     successStatuses: [202, 404],

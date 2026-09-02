@@ -15,7 +15,7 @@ export const allowedSource = v.object({
 
 type AllowedRow = { id: string; observedAt: number; integrationId?: string }
 
-export type AllowedRows = {
+type AllowedRows = {
   events?: AllowedRow[]
   conversations?: AllowedRow[]
   efforts?: AllowedRow[]
@@ -42,7 +42,7 @@ function toMap(rows: AllowedRow[] | undefined) {
 // simply leaves its counter at zero. Discards start at the parse failures
 // the action already counted — those rows can't be described, so only
 // applier refusals land in the recorded list.
-export function statCounts(args: {
+function statCounts(args: {
   context: number
   activity: number
   invalid: number

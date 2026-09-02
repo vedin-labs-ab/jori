@@ -35,7 +35,7 @@ export function useConsolePathname() {
 }
 
 /** A destination the router can build into an href. */
-export type ConsoleDestination = {
+type ConsoleDestination = {
   to: string
   params?: Record<string, string>
 }

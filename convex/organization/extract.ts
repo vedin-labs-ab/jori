@@ -20,7 +20,7 @@ const factsSchema = {
   },
 }
 
-export type ExtractionInput = {
+type ExtractionInput = {
   primaryUrl: string
   pages: { url: string; text: string }[]
 }

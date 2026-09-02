@@ -3,9 +3,7 @@ import { Database, type LucideIcon, Table2, Workflow } from "lucide-react"
 import { fileKind } from "@/shared/files/kind"
 import { type api } from "../../../../convex/_generated/api"
 
-export type FolderTreeResult = FunctionReturnType<
-  typeof api.folders.console.tree
->
+type FolderTreeResult = FunctionReturnType<typeof api.folders.console.tree>
 export type FolderRow = FolderTreeResult["folders"][number]
 
 export type FolderRootsResult = FunctionReturnType<

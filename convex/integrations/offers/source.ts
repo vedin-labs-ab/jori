@@ -11,7 +11,7 @@ import { type IntegrationOfferSource } from "./schema"
 
 const surfaceIdentityProviders = ["github", "linear", "slack"] as const
 
-export type SurfaceIdentityProvider = (typeof surfaceIdentityProviders)[number]
+type SurfaceIdentityProvider = (typeof surfaceIdentityProviders)[number]
 
 export function integrationOfferSourceFromInput(
   input: AgentRuntimeInput

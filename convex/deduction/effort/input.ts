@@ -46,7 +46,7 @@ export type WindowEvent = {
   observedAt: number
 }
 
-export type WindowConversation = {
+type WindowConversation = {
   id: Id<"conversations">
   integrationId: Id<"integrations">
   summary: string
