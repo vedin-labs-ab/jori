@@ -18,7 +18,7 @@ import {
   toolErrorResult,
   toolResult,
 } from "./results"
-import { executeRunTool } from "./run"
+import { finishRun } from "./run"
 import { findTool, requireSurface, shouldFinishConvexTool } from "./select"
 import { executeActiveSurfaceTool } from "./surface"
 
@@ -128,10 +128,7 @@ async function executeTool(
     case "convex":
       return await executeConvexTool(runtime, tool, call)
     case "run":
-      return executeRunTool(runtime, {
-        input: call.args,
-        name: call.name,
-      })
+      return finishRun(runtime, call.args)
     case "sandbox":
       return toolResult(
         await executeCodingTool({

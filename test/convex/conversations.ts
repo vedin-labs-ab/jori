@@ -1,6 +1,3 @@
-type DataModel = import("../../convex/_generated/dataModel").DataModel
-type Id<TableName extends keyof DataModel> =
-  import("../../convex/_generated/dataModel").Id<TableName>
 type MutationCtx = import("../../convex/_generated/server").MutationCtx
 
 /**
@@ -15,10 +12,6 @@ export type Seed = [string, Record<string, unknown>]
 type FakeCtx = MutationCtx & {
   inserts: Array<{ table: string; doc: unknown }>
   patches: Array<{ id: string; patch: unknown }>
-}
-
-export function id<TableName extends keyof DataModel>(value: string) {
-  return value as Id<TableName>
 }
 
 export function inserted(ctx: FakeCtx, table: string) {

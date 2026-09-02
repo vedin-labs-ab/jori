@@ -2,7 +2,7 @@ import { isRecord } from "../../../contracts/json"
 import {
   type RuntimeModelUsage,
   type RuntimeValueSummary,
-} from "../../../contracts/runtime"
+} from "../../../contracts/runtime/trace"
 import { type Doc } from "../../_generated/dataModel"
 import { optionalNumber, optionalString } from "../../shared/input"
 import { type ToolLabel } from "./types"

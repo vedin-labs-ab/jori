@@ -1,5 +1,5 @@
 import { type ToolPermission } from "../../../../contracts/permissions"
-import { type RuntimePrompt } from "../../../../contracts/runtime"
+import { type RuntimePrompt } from "../../../../contracts/runtime/prompt"
 import { promptTemplates } from "../../../../prompts/generated"
 import { renderPromptTemplate } from "../../../../prompts/render"
 import { type RuntimeSkill } from "../../../skills/runtime"

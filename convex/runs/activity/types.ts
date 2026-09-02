@@ -1,4 +1,4 @@
-import { type RuntimeToolMetadataItem } from "../../../contracts/runtime"
+import { type RuntimeToolMetadataItem } from "../../../contracts/runtime/tools"
 import { type Doc } from "../../_generated/dataModel"
 import { type Integration, type ToolSurface } from "../../shared/integrations"
 

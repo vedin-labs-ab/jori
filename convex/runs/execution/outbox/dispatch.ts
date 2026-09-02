@@ -1,6 +1,6 @@
 import { v } from "convex/values"
-import { agentTaskId, cleanupTaskId } from "../../../../contracts/runtime"
 import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
+import { agentTaskId, cleanupTaskId } from "../../../../contracts/runtime/tasks"
 import {
   type AgentRunPayload,
   type SandboxCleanupPayload,

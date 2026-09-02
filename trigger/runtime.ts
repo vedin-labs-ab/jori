@@ -7,3 +7,7 @@ export type AgentRuntime = {
   platform: RuntimePlatform
   sandbox: SandboxRuntime
 }
+
+/** What recording and waiting need of a runtime: the platform to write
+ *  through and the context that names the run. */
+export type TraceRuntime = Pick<AgentRuntime, "context" | "platform">

@@ -1,4 +1,4 @@
-import { type RuntimePrompt } from "../../../contracts/runtime"
+import { type RuntimePrompt } from "../../../contracts/runtime/prompt"
 import {
   type DrainedSessionBatch,
   type RunHandoffs,

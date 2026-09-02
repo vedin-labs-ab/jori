@@ -1,23 +1,17 @@
 import { wait } from "@trigger.dev/sdk"
 import {
-  type RuntimeContext,
   type RuntimeId,
   type WaiterCondition,
   type WaiterWake,
 } from "../contracts/runtime/worker"
-import { type RuntimePlatform } from "./platform"
+import { type TraceRuntime } from "./runtime"
 import { recordRuntimeEvent } from "./trace/runtime"
 
 const parkGraceMs = 5000
 const minTimeoutSeconds = 5
 
-type WaitRuntime = {
-  platform: RuntimePlatform
-  context: RuntimeContext
-}
-
 export async function parkWaitpoint(
-  runtime: WaitRuntime,
+  runtime: TraceRuntime,
   args: {
     condition?: WaiterCondition
     deadline: number
@@ -68,7 +62,7 @@ function timeoutSeconds(deadline: number) {
 }
 
 async function recordWaiting(
-  runtime: WaitRuntime,
+  runtime: TraceRuntime,
   waiterId: RuntimeId<"waiters">
 ) {
   await recordRuntimeEvent(runtime.platform, runtime.context, {
@@ -80,7 +74,7 @@ async function recordWaiting(
 }
 
 async function recordResumed(
-  runtime: WaitRuntime,
+  runtime: TraceRuntime,
   waiterId: RuntimeId<"waiters">,
   wake: WaiterWake
 ) {

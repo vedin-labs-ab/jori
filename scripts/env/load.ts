@@ -18,7 +18,7 @@ type LoadedEnvironment = {
  * without editing a file.
  */
 export function loadEnvironment(environment: Environment): LoadedEnvironment {
-  const env = { ...process.env }
+  const env: NodeJS.ProcessEnv = {}
   const sources: string[] = []
 
   for (const source of environmentSources(environment)) {

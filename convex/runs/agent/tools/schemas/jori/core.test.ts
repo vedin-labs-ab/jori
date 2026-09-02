@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { toolFinalDescription } from "../../../../../../contracts/runtime"
+import { toolFinalDescription } from "../../../../../../contracts/runtime/tools"
 import { coreJoriToolInputSchemas } from "./core"
 
 test("integration offers use shared final semantics instead of wait", () => {

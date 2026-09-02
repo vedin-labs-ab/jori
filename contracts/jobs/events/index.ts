@@ -70,7 +70,7 @@ export function normalizeJobEventMatch(
   const parameters = definition.parameters ?? []
   const input = match ?? {}
 
-  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+  if (Array.isArray(input)) {
     throw new Error("Event match must be a key-value object.")
   }
 

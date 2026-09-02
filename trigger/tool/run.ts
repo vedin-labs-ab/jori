@@ -4,21 +4,8 @@ import { type AgentRuntime } from "../runtime"
 
 const maxResultLength = 8000
 
-export function executeRunTool(
-  runtime: AgentRuntime,
-  args: {
-    input: JsonObject
-    name: string
-  }
-) {
-  if (args.name === "finish_run") {
-    return finishRun(runtime, args.input)
-  }
-
-  throw new Error(`Unknown run tool: ${args.name}`)
-}
-
-function finishRun(runtime: AgentRuntime, input: JsonObject) {
+/** The one run-routed tool: the agent's own signal that the run is done. */
+export function finishRun(runtime: AgentRuntime, input: JsonObject) {
   const reason = optionalString(input.reason)
   const result = optionalString(input.result)
   const communicated = runtime.context.activeSurface?.communicated ?? false

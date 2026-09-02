@@ -1,4 +1,4 @@
-import { fileTooLargeError, maxFileBytes } from "../../contracts/runtime"
+import { fileTooLargeError, maxFileBytes } from "../../contracts/runtime/files"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"

@@ -1,4 +1,4 @@
-import { type SurfaceReactionTarget } from "../../../contracts/runtime"
+import { type SurfaceReactionTarget } from "../../../contracts/runtime/surface"
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import {

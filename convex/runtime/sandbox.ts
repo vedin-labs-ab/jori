@@ -3,7 +3,7 @@ import {
   codingToolDefinitions,
 } from "../../contracts/coding"
 import { type ToolAccess } from "../../contracts/permissions"
-import { durationUnits } from "../../contracts/runtime"
+import { durationUnits } from "../../contracts/runtime/duration"
 import {
   stringArrayProperty,
   withOptionalFieldGuidance,

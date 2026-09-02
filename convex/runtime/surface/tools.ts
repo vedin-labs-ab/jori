@@ -1,6 +1,6 @@
 import { integrationLabel } from "../../../contracts/integrations"
 import { type JsonObject } from "../../../contracts/json"
-import { finalProperty } from "../../../contracts/runtime"
+import { finalProperty } from "../../../contracts/runtime/tools"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import {
   type MessageIntegration,

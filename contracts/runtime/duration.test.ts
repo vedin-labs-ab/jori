@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { durationMilliseconds, durationUnits, isDurationUnit } from "./runtime"
+import { durationMilliseconds, durationUnits, isDurationUnit } from "./duration"
 
 describe("runtime durations", () => {
   test.each([
