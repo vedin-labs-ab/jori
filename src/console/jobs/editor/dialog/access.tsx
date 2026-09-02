@@ -9,9 +9,9 @@ import {
   getJobSurfaceScopeIssue,
   type JobScope,
   type JobSurfaceFormValue,
-} from "../../access"
-import { SurfaceLogo } from "../../access/logo"
-import { type JobPolicyPermissions } from "../../access/policy"
+} from "@/shared/console/jobs/access"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import { ProviderLogo } from "@/shared/logo/provider"
 import { JobSurfaceToolsDialog } from "../instructions/access/tools"
 
 export function AccessFields({
@@ -113,7 +113,7 @@ function AdditionalSurface({
         type="button"
         variant="outline"
       >
-        <SurfaceLogo integration={surface.integration} />
+        <ProviderLogo className="size-3.5" surface={surface.integration} />
         {label}
         <span className="text-muted-foreground tabular-nums">
           {surface.tools.length}

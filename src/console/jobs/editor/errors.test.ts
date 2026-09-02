@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { jobScopeConflictMessage } from "../access"
+import { jobScopeConflictMessage } from "@/shared/console/jobs/access"
 import { isJobFieldError, readJobInstructionsError } from "./errors"
 
 test("routes sharing conflicts to the instructions field", () => {

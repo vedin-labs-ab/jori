@@ -5,8 +5,8 @@ import {
   type JobMentionSources,
   type JobScope,
   type JobSurfaceFormValue,
-} from "../../access"
-import { type JobPolicyPermissions } from "../../access/policy"
+} from "@/shared/console/jobs/access"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
 import { type JobInstructionsValue } from "./document"
 import { type InstructionSuggestionState } from "./suggestion/suggest"
 

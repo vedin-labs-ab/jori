@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
-import { emptyJobMentionCatalog } from "../../access"
+import { emptyJobMentionCatalog } from "@/shared/console/jobs/access"
 import {
   createJobInstructionDocument,
   serializeJobInstructionDocument,

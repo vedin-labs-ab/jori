@@ -1,6 +1,6 @@
 import { canUseJobTool } from "@contracts/permissions"
 import { isWebTool } from "@contracts/permissions/web"
-import { type ToolPermission } from "../../permissions/types"
+import { type ToolPermission } from "@/shared/console/tools/model"
 import {
   getJobSurfaceLabel,
   isJobSurfaceIntegration,

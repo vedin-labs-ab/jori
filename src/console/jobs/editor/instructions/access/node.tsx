@@ -13,8 +13,8 @@ import {
   getJobSurfaceScopeIssue,
   isJobSurfaceIntegration,
   type JobSurfaceFormValue,
-} from "../../../access"
-import { isJobSurfacePolicyBlocked } from "../../../access/policy"
+} from "@/shared/console/jobs/access"
+import { isJobSurfacePolicyBlocked } from "@/shared/console/jobs/access/policy"
 import { parseJobSurfaceTools } from "../document"
 import { type JobSurfaceNodeOptions } from "../markdown/schema"
 import { JobMarkerActionButton, JobSurfaceRemoveButton } from "./remove"

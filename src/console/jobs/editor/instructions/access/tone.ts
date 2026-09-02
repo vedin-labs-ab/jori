@@ -1,5 +1,8 @@
 import { Ban, CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
-import { type getJobSurfaceAccess, type JobMentionKind } from "../../../access"
+import {
+  type getJobSurfaceAccess,
+  type JobMentionKind,
+} from "@/shared/console/jobs/access"
 
 export function getJobSurfaceAccessIcon(
   access: ReturnType<typeof getJobSurfaceAccess>,

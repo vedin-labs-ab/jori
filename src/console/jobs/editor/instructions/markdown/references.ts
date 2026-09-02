@@ -5,12 +5,12 @@ import {
   type JobSurfaceFormValue,
   type JobSurfaceIntegration,
   readJobMentions,
-} from "../../../access"
+} from "@/shared/console/jobs/access"
 import {
   isJobSurfacePolicyBlocked,
   type JobPolicyPermissions,
-} from "../../../access/policy"
-import { getDefaultJobSurfaceTools } from "../../../access/tools"
+} from "@/shared/console/jobs/access/policy"
+import { getDefaultJobSurfaceTools } from "@/shared/console/jobs/access/tools"
 import { literalMarkdownMarkName } from "./literal"
 import {
   fencedTextNodeName,

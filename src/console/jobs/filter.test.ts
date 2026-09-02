@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
+import { type Job } from "@/shared/console/jobs/types"
 import { filterJobsByView, hasJobFilters } from "./filter"
-import { type Job } from "./types"
 
 test("defaults to active jobs without treating the view as a filter", () => {
   expect(hasJobFilters("", "active")).toBe(false)

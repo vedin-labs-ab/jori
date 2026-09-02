@@ -1,4 +1,4 @@
-import { jobScopeConflictMessage } from "../access"
+import { jobScopeConflictMessage } from "@/shared/console/jobs/access"
 import { readJobInstructionMarkerError } from "./save/marker"
 
 export const jobNameErrors = {

@@ -1,6 +1,9 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction, useEffect, useRef } from "react"
-import { type JobMentionCatalog, type JobMentionSources } from "../../../access"
+import {
+  type JobMentionCatalog,
+  type JobMentionSources,
+} from "@/shared/console/jobs/access"
 import {
   createJobInstructionDocument,
   jobInstructionKey,

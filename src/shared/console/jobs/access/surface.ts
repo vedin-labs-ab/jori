@@ -1,4 +1,4 @@
-import { type ToolPermission } from "../../permissions/types"
+import { type ToolPermission } from "@/shared/console/tools/model"
 import { type JobSurfaceAccess, type JobSurfaceFormValue } from "./catalog"
 
 export function hasJobWriteSurface(

@@ -1,5 +1,5 @@
 import { type JSONContent } from "@tiptap/core"
-import { jobMentionText } from "../../../access"
+import { jobMentionText } from "@/shared/console/jobs/access"
 import { serializedCodeSpanNodeName } from "./fence"
 import {
   jobReferenceNodeName,

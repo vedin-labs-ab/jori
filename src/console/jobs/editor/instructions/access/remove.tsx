@@ -1,8 +1,8 @@
 import { X } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { type JobSurfaceIntegration } from "../../../access"
-import { SurfaceLogo } from "../../../access/logo"
+import { type JobSurfaceIntegration } from "@/shared/console/jobs/access"
+import { ProviderLogo } from "@/shared/logo/provider"
 
 /** A marker's identity segment: the kind icon that swaps to a remove
  *  button on hover or focus, next to the marker's name. */
@@ -56,7 +56,7 @@ export function JobSurfaceRemoveButton({
 }) {
   return (
     <JobMarkerRemoveButton
-      icon={<SurfaceLogo className="size-3" integration={integration} />}
+      icon={<ProviderLogo className="size-3" surface={integration} />}
       label={toolSurfaceLabel}
       onRemove={onRemove}
     />

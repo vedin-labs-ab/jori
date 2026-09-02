@@ -7,7 +7,7 @@ import {
   type JobMentionSources,
   type JobMentionSuggestion,
   maxActiveJobMentionLength,
-} from "../../../access"
+} from "@/shared/console/jobs/access"
 import { isReferenceInputAllowed } from "./context"
 
 export type InstructionSuggestionState = {

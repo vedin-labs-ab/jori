@@ -4,7 +4,7 @@ import {
 } from "@contracts/jobs/events"
 import { type Visibility } from "@contracts/visibility"
 import { type FunctionReturnType } from "convex/server"
-import { type api } from "../../../convex/_generated/api"
+import { type api } from "../../../../convex/_generated/api"
 import { type JobScope, type JobSurfaceFormValue } from "./access"
 
 export type JobList = FunctionReturnType<typeof api.jobs.console.list>

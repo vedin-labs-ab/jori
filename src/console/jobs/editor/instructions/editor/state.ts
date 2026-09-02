@@ -14,7 +14,7 @@ import {
   type JobMentionSources,
   type JobMentionSuggestion,
   jobSurfaceIntegrations,
-} from "../../../access"
+} from "@/shared/console/jobs/access"
 import {
   createJobInstructionDocument,
   jobInstructionKey,

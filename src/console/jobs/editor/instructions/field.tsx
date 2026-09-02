@@ -1,7 +1,7 @@
 import { EditorContent } from "@tiptap/react"
 import { FieldError } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
-import { jobScopeConflictMessage } from "../../access"
+import { jobScopeConflictMessage } from "@/shared/console/jobs/access"
 import { useJobInstructionsEditor } from "./editor/state"
 import { instructionMarkdownClassName } from "./editor/style"
 import { InstructionSuggestions } from "./suggestion/suggestions"

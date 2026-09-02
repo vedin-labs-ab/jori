@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { type JobFormValues } from "@/shared/console/jobs/types"
 import { localTimezone } from "@/shared/console/time"
-import { type JobFormValues } from "../../types"
 import { RecurringFields } from "../schedule/recurring"
 
 const JobDateTimePicker = lazy(async () => ({

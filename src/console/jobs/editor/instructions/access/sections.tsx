@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { jobToolModeDescription } from "@/shared/console/jobs/access"
 import {
   groupToolsByAccess,
   type ToolAccessGroup,
@@ -15,7 +16,6 @@ import {
   ToolRowContent,
 } from "@/shared/console/tools/readonly"
 import { type ToolPermission } from "../../../../permissions/types"
-import { jobToolModeDescription } from "../../../access"
 import {
   ToolReferencesLoader,
   ToolSchemaButton,

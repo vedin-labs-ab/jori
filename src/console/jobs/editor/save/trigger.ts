@@ -7,8 +7,12 @@ import {
   type JobEventMatch,
   normalizeJobEventMatch,
 } from "@contracts/jobs/events"
-import { buildRecurringCron, classifyCron } from "../../cron"
-import { emptyJobForm, type Job, type JobFormValues } from "../../types"
+import { buildRecurringCron, classifyCron } from "@/shared/console/jobs/cron"
+import {
+  emptyJobForm,
+  type Job,
+  type JobFormValues,
+} from "@/shared/console/jobs/types"
 
 export type TriggerSpec =
   | { at: string }

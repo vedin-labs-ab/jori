@@ -7,9 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getJobSurfaceLabel, type JobScope } from "@/shared/console/jobs/access"
+import { ProviderLogo } from "@/shared/logo/provider"
 import { api } from "../../../../../../convex/_generated/api"
-import { getJobSurfaceLabel, type JobScope } from "../../../access"
-import { SurfaceLogo } from "../../../access/logo"
 import { type EventIntegrationOption, getIntegrationOptions } from "."
 
 export function EventIntegrationField({
@@ -63,7 +63,7 @@ function IntegrationSelectValue({
 }) {
   return (
     <span className="pointer-events-none flex min-w-0 items-center gap-1.5">
-      <SurfaceLogo integration={integration} />
+      <ProviderLogo className="size-3.5" surface={integration} />
       <span className="truncate">{getJobSurfaceLabel(integration)}</span>
     </span>
   )
@@ -73,7 +73,7 @@ function IntegrationSelectItem({ option }: { option: EventIntegrationOption }) {
   return (
     <span className="pointer-events-none flex min-w-0 flex-1 items-center justify-between gap-3 pr-5">
       <span className="flex min-w-0 items-center gap-2">
-        <SurfaceLogo integration={option.integration} />
+        <ProviderLogo className="size-3.5" surface={option.integration} />
         <span className="truncate">
           {getJobSurfaceLabel(option.integration)}
         </span>

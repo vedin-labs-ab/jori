@@ -1,6 +1,6 @@
 import { cleanup, render } from "@testing-library/react"
 import { afterEach, beforeEach, vi } from "vitest"
-import { emptyJobForm, type JobFormValues } from "../../types"
+import { emptyJobForm, type JobFormValues } from "@/shared/console/jobs/types"
 import { EventFields } from "./index"
 
 const convexMocks = vi.hoisted(() => ({

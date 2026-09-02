@@ -1,4 +1,4 @@
-import { emptyJobForm, type JobFormValues } from "../types"
+import { emptyJobForm, type JobFormValues } from "@/shared/console/jobs/types"
 
 const webSearchKey = "jori.job.webSearch"
 

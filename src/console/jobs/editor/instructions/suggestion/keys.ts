@@ -1,6 +1,6 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
-import { type JobPolicyPermissions } from "../../../access/policy"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
 import { insertMentionSuggestion } from "./input"
 import { type InstructionSuggestionState } from "./suggest"
 
