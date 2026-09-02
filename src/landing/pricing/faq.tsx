@@ -2,7 +2,7 @@ import { formatUsd, interactiveGraceMicros, trial } from "@contracts/billing"
 import { Definition, Section } from "../section"
 
 /**
- * Four questions, and only the four.
+ * Five questions, and only the five.
  *
  * The block above says the numbers are not final, and a reader left with just
  * that fills the gap with the worst version of it: an AI product that bills
@@ -36,6 +36,11 @@ export function Faq() {
         <Definition term="What happens if I cancel?">
           Jobs pause and nothing is deleted. Your data, integrations, and
           history stay put, and everything resumes when you come back.
+        </Definition>
+        <Definition term="How do I see what a team spends?">
+          Open Usage on the team's folder. Spend rolls up by subfolder and by
+          source for the window you choose, priced at list rates, and every
+          number opens to the runs behind it.
         </Definition>
       </dl>
     </Section>

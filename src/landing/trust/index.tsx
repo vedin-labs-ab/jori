@@ -1,7 +1,12 @@
 import { PageIntro } from "../section"
 import { MarketingShell } from "../shell"
 import { ApprovalsSection, ReceiptsSection } from "./approvals"
-import { BoundariesSection, DataSection, ScopeSection } from "./facts"
+import {
+  BoundariesSection,
+  DataSection,
+  ScopeSection,
+  VisibilitySection,
+} from "./facts"
 import { ModesSection } from "./modes"
 
 export function TrustPage() {
@@ -15,6 +20,7 @@ export function TrustPage() {
       <ApprovalsSection />
       <ReceiptsSection />
       <ScopeSection />
+      <VisibilitySection />
       <BoundariesSection />
       <DataSection />
     </MarketingShell>

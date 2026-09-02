@@ -5,12 +5,14 @@ import {
   ClipboardCheck,
   FileSearch,
   Fingerprint,
+  FolderTree,
   GitBranch,
   Globe,
   KeyRound,
   Link2,
   Share2,
   Users,
+  UsersRound,
 } from "lucide-react"
 import { Definition, Section } from "../section"
 import { Subprocessors } from "./subprocessors"
@@ -28,13 +30,39 @@ export function ScopeSection() {
           integration and its access ends with it.
         </Definition>
         <Definition icon={Users} term="Personal and organization">
-          Work that touches your own tools stays scoped to you. Organization
-          work is visible to the whole team, so nothing shared happens out of
-          sight.
+          Everything Jori keeps is shared with only you, specific people,
+          specific teams, or everyone in the organization, and work shared past
+          you runs with the organization's context and integrations rather than
+          your own.
         </Definition>
         <Definition icon={GitBranch} term="Subtasks inherit less, never more">
           Jori can split a job into subtasks. A subtask can never hold access
           its parent lacks.
+        </Definition>
+      </FactList>
+    </Section>
+  )
+}
+
+export function VisibilitySection() {
+  return (
+    <Section
+      lede="Only me, specific people, specific teams, or everyone in the organization, on folders and on what's inside them."
+      support
+      title="Who sees what"
+    >
+      <FactList>
+        <Definition icon={FolderTree} term="The folder is the ceiling">
+          Nothing inside a folder reaches further than the folder does. Sharing
+          a table wider than its folder changes nothing until the folder allows
+          it.
+        </Definition>
+        <Definition icon={UsersRound} term="Teams are an audience">
+          Group people once under Settings, then share with the team.
+        </Definition>
+        <Definition icon={Link2} term="Links with a clock">
+          Share links are read-only, carry their secret in the URL fragment,
+          expire on a clock you choose, and can be revoked anytime.
         </Definition>
       </FactList>
     </Section>
@@ -66,11 +94,6 @@ export function BoundariesSection() {
         >
           Text inside emails, pages, and tickets can't redirect Jori, grant
           permission, or change the task. Only you can.
-        </Definition>
-        <Definition icon={Link2} term="Share links are view-only and mortal">
-          Page links carry their secret in the URL fragment, so it stays out of
-          server logs. They expire on a clock you choose, and you can revoke
-          them anytime.
         </Definition>
       </FactList>
     </Section>
