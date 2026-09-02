@@ -1,11 +1,11 @@
 import { type ReactNode, useState } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { type FileDetail } from "@/shared/console/files/types"
 import { usePreloadSiblings } from "../cache/preload"
 import { useDisplayUrl } from "../cache/url"
-import { FileEditor } from "../editor/section"
+import { FileEditor, type FileSave } from "../editor/section"
 import { type FileSiblings, useSiblingKeys } from "../siblings"
 import { FileCopy, FileMeta, FileToolbar } from "../toolbar"
+import { type FileDetail } from "../types"
 import { ViewerFrame } from "./frame"
 import { useViewerStatus } from "./status"
 
@@ -17,13 +17,13 @@ type HtmlMode = "code" | "preview"
 export function FileHtml({
   errorFallback,
   file,
-  organizationId,
+  onSave,
   siblings,
   url,
 }: {
   errorFallback: ReactNode
   file: FileDetail
-  organizationId: string
+  onSave: FileSave
   siblings: FileSiblings
   url: string
 }) {
@@ -35,7 +35,7 @@ export function FileHtml({
       <FileEditor
         errorFallback={errorFallback}
         file={file}
-        organizationId={organizationId}
+        onSave={onSave}
         siblings={siblings}
         tools={toggle}
         url={url}

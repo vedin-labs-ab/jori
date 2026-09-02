@@ -9,7 +9,7 @@ const navigate = vi.hoisted(() => vi.fn())
 
 vi.mock("@tanstack/react-router", () => ({
   Link: (props: React.ComponentProps<"a">) => <a {...props} />,
-  useNavigate: () => navigate,
+  useRouter: () => ({ navigate }),
 }))
 
 afterEach(() => {

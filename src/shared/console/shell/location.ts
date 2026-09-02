@@ -1,5 +1,9 @@
-import { useRouterState } from "@tanstack/react-router"
-import { createContext, useContext } from "react"
+import {
+  type AnyRouter,
+  useRouter,
+  useRouterState,
+} from "@tanstack/react-router"
+import { createContext, useCallback, useContext } from "react"
 
 // The seam between the console's views and the router. The views render
 // under the router in the console itself, and under a local navigation
@@ -28,4 +32,29 @@ export function useConsolePathname() {
   })
 
   return navigation?.pathname ?? pathname
+}
+
+/** A destination the router can build into an href. */
+export type ConsoleDestination = {
+  to: string
+  params?: Record<string, string>
+}
+
+/** Moves the console the way a plain click on a ConsoleLink would: the
+ *  local navigation takes it when one is in force, the router otherwise.
+ *  For the moves no link can carry — an arrow key, a finished action. */
+export function useConsoleNavigate() {
+  const navigation = useContext(ConsoleNavigationContext)
+  const router = useRouter<AnyRouter>()
+
+  return useCallback(
+    (destination: ConsoleDestination) => {
+      if (navigation === null) {
+        void router.navigate(destination)
+      } else {
+        navigation.navigate(router.buildLocation(destination).href)
+      }
+    },
+    [navigation, router]
+  )
 }

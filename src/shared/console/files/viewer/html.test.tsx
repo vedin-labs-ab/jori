@@ -8,7 +8,7 @@ import { FileHtml } from "./html"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: (props: React.ComponentProps<"a">) => <a {...props} />,
-  useNavigate: () => vi.fn(),
+  useRouter: () => ({ navigate: vi.fn() }),
 }))
 
 // The editor stands in for itself: the toggle only needs a mount to land
@@ -46,7 +46,7 @@ function renderHtmlView() {
       <FileHtml
         errorFallback={<div>error</div>}
         file={file}
-        organizationId="org-1"
+        onSave={() => Promise.resolve(true)}
         siblings={noSiblings}
         url={file.url ?? ""}
       />

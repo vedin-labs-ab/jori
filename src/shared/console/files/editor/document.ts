@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { type FileDetail } from "@/shared/console/files/types"
 import { type FileSource, fileBlobCache } from "../cache/blob"
+import { type FileDetail } from "../types"
 
 /** How long the editor waits for the file's text before reporting an
  *  error. Editable text is capped at 1MB, so anything slower than this is
