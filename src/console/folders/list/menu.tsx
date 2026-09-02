@@ -1,14 +1,12 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { FolderInput, FolderMinus, MoreHorizontal } from "lucide-react"
+import { FolderInput, FolderMinus } from "lucide-react"
 import { useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
@@ -16,7 +14,7 @@ import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
 import { DeleteJobDialog } from "@/shared/console/jobs/list/delete"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
-import { menuWidth } from "@/shared/console/menu"
+import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { api } from "../../../../convex/_generated/api"
@@ -96,7 +94,7 @@ function FileResourceMenu({ actions, resource }: ResourceMenu) {
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
       <DropdownMenu onOpenChange={setIsMenuOpen}>
-        <ResourceMenuTrigger name={resource.name} />
+        <RowMenuTrigger name={resource.name} />
         <DropdownMenuContent align="end" className={menuWidth}>
           <FileMenuItems
             file={{ name: resource.name, url }}
@@ -157,7 +155,7 @@ function JobResourceMenu({ actions, resource }: ResourceMenu) {
 function FilingOnlyMenu({ actions, resource }: ResourceMenu) {
   return (
     <DropdownMenu>
-      <ResourceMenuTrigger name={resource.name} />
+      <RowMenuTrigger name={resource.name} />
       <DropdownMenuContent align="end" className={menuWidth}>
         <DropdownMenuItem onSelect={() => actions.onMove(resource)}>
           <FolderInput />
@@ -169,20 +167,5 @@ function FilingOnlyMenu({ actions, resource }: ResourceMenu) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-function ResourceMenuTrigger({ name }: { name: string }) {
-  return (
-    <DropdownMenuTrigger asChild>
-      <Button
-        aria-label={`Open actions for ${name}`}
-        size="icon-sm"
-        type="button"
-        variant="ghost"
-      >
-        <MoreHorizontal />
-      </Button>
-    </DropdownMenuTrigger>
   )
 }

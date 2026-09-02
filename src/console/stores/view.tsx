@@ -6,11 +6,11 @@ import { moveTarget } from "@/shared/console/folders/types"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
+import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
+import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
-import { MaterialPlaceholder } from "@/shared/console/materials/placeholder"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { exportStoreJson } from "@/shared/console/stores/export"
-import { StoreHeaderActions } from "@/shared/console/stores/header"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { type StoreDetail } from "@/shared/console/stores/types"
 import { api } from "../../../convex/_generated/api"
@@ -126,10 +126,10 @@ function StoreReadyView({
 
   return (
     <ConsoleListLayout>
-      <StoreHeaderActions
+      <MaterialHeaderActions
+        canExport={store.version > 0}
         onExport={() => exportStoreJson(store)}
         onShare={() => setDialog("share")}
-        store={store}
       />
       <StoreValue organizationId={organizationId} store={store} />
       <StoreDialogs

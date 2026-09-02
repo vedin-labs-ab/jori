@@ -2,7 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ConsoleScrollableList } from "@/shared/console/layout"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type Job, type JobList } from "../types"
-import { EmptyJobs } from "./empty"
+import { JobsEmptyState } from "./empty"
 import { JobRow } from "./row"
 
 // Auto-fill tracks add columns as the viewport grows instead of stretching
@@ -53,7 +53,7 @@ export function JobContent({
     return (
       <ConsoleScrollableList className={jobGrid}>
         <li className="col-span-full">
-          <EmptyJobs hasFilters={hasFilters} onCreate={onCreate} />
+          <JobsEmptyState hasFilters={hasFilters} onCreate={onCreate} />
         </li>
       </ConsoleScrollableList>
     )

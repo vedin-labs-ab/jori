@@ -6,8 +6,8 @@ import { ClientOnly } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
 import { exportStoreJson } from "@/shared/console/stores/export"
-import { StoreHeaderActions } from "@/shared/console/stores/header"
 import { type SchemaWrite } from "@/shared/console/stores/schema/dialog"
 import { type StoreDetail } from "@/shared/console/stores/types"
 import { StoreValue } from "@/shared/console/stores/value/section"
@@ -32,10 +32,10 @@ export function StorePage({ storeId }: { storeId: string }) {
 
   return (
     <ConsoleListLayout>
-      <StoreHeaderActions
+      <MaterialHeaderActions
+        canExport={store.version > 0}
         onExport={() => exportStoreJson(store)}
         onShare={() => setIsShareOpen(true)}
-        store={store}
       />
       <ClientOnly fallback={<ConsoleListLoading />}>
         <StoreValue

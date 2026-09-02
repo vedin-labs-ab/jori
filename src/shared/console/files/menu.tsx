@@ -1,24 +1,14 @@
-import {
-  Download,
-  ExternalLink,
-  FolderInput,
-  FolderMinus,
-  LockKeyhole,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from "lucide-react"
+import { Download, ExternalLink, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth } from "@/shared/console/menu"
+import { MaterialCoreItems } from "@/shared/console/materials/actions"
+import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { DeleteFileDialog } from "./delete"
 import { type FileRow } from "./types"
 
@@ -50,25 +40,13 @@ export function FileMenuItems({
   return (
     <>
       {withLinks ? <FileLinkItems file={file} /> : null}
-      <DropdownMenuItem disabled={isPending} onSelect={onEdit}>
-        <Pencil />
-        Edit details
-      </DropdownMenuItem>
-      <DropdownMenuItem disabled={isPending} onSelect={onAccess}>
-        <LockKeyhole />
-        Visibility…
-      </DropdownMenuItem>
-      <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
-        <FolderInput />
-        Move to folder…
-      </DropdownMenuItem>
-      {onUnfile === undefined ? null : (
-        <DropdownMenuItem disabled={isPending} onSelect={onUnfile}>
-          <FolderMinus />
-          Remove from folder
-        </DropdownMenuItem>
-      )}
-      <DropdownMenuSeparator />
+      <MaterialCoreItems
+        isPending={isPending}
+        onAccess={onAccess}
+        onEdit={onEdit}
+        onMoveToFolder={onMoveToFolder}
+        onUnfile={onUnfile}
+      />
       <DropdownMenuItem
         disabled={isPending}
         onSelect={onRemove}
@@ -102,16 +80,7 @@ export function FileRowMenu({
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            aria-label={`Open actions for ${file.name}`}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
+        <RowMenuTrigger name={file.name} />
         <DropdownMenuContent align="end" className={menuWidth}>
           <FileMenuItems
             file={file}

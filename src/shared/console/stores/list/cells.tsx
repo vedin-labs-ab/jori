@@ -1,11 +1,11 @@
-import { Braces, Database, History, type LucideIcon } from "lucide-react"
+import { Braces, Database, History } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { countLabel } from "@/shared/console/count"
+import { MaterialMeasureCell } from "@/shared/console/materials/cells/measure"
 import {
   MaterialNameCell,
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
-import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
 import { VisibilityBadge } from "@/shared/console/visibility/badge"
 import { ConsoleLink } from "../../shell/link"
 import { type StoreSummary } from "../types"
@@ -39,7 +39,7 @@ export function StoreNameCell({ store }: { store: StoreSummary }) {
  *  nest. A store without a schema shows an em dash. */
 export function StorePropertiesCell({ store }: { store: StoreSummary }) {
   return (
-    <IconValueCell
+    <MaterialMeasureCell
       icon={Braces}
       label={
         store.propertyCount === undefined
@@ -55,53 +55,10 @@ export function StorePropertiesCell({ store }: { store: StoreSummary }) {
  *  never been written. */
 export function StoreVersionCell({ store }: { store: StoreSummary }) {
   return (
-    <IconValueCell
+    <MaterialMeasureCell
       icon={History}
       label={countLabel(store.version, "write")}
       value={`v${store.version}`}
     />
-  )
-}
-
-/** Owner column: the creating person, or Jori itself when no named owner
- *  resolves — the organization-principal run case. `compact` slims it to
- *  the height of a toolbar meta line. */
-export function StoreOwnerCell({
-  compact = false,
-  store,
-}: {
-  compact?: boolean
-  store: Pick<StoreSummary, "ownerImage" | "ownerName">
-}) {
-  const owner =
-    store.ownerName === undefined
-      ? ({ kind: "jori" } as const)
-      : ({
-          kind: "person",
-          name: store.ownerName,
-          image: store.ownerImage,
-        } as const)
-
-  return <MaterialOwnerCell compact={compact} owner={owner} />
-}
-
-function IconValueCell({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: LucideIcon
-  label: string
-  value: string | number
-}) {
-  return (
-    <div
-      className="flex items-center gap-1.5 text-muted-foreground"
-      title={label}
-    >
-      <Icon aria-hidden className="size-4 shrink-0" />
-      {value}
-      <span className="sr-only">{label}</span>
-    </div>
   )
 }

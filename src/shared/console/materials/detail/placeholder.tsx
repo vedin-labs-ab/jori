@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ConsolePageLayout } from "../layout"
-import { ConsoleListLoading } from "../list/loading"
+import { ConsolePageLayout } from "../../layout"
+import { ConsoleListLoading } from "../../list/loading"
 
 /** What a material page shows before there is a material to show: the
  *  spinner while its detail query settles, or the reason it never will. A

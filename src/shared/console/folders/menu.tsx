@@ -2,19 +2,16 @@ import {
   ChartNoAxesColumn,
   FolderInput,
   LockKeyhole,
-  MoreHorizontal,
   Pencil,
   Trash2,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth } from "../menu"
+import { menuWidth, RowMenuTrigger } from "../menu"
 import { ConsoleLink } from "../shell/link"
 import { type FolderDialogRequest, type ManagedFolder } from "./types"
 
@@ -90,16 +87,7 @@ export function FolderRowMenu({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={`Open actions for ${folder.name}`}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
-        >
-          <MoreHorizontal />
-        </Button>
-      </DropdownMenuTrigger>
+      <RowMenuTrigger name={folder.name} />
       <DropdownMenuContent align="end" className={menuWidth}>
         <FolderMenuItems folder={folder} onDialog={onDialog} />
       </DropdownMenuContent>
