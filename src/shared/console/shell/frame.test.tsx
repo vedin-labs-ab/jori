@@ -39,10 +39,18 @@ const sidebar = (
   </nav>
 )
 
-function renderFrame(pathname: string, children: ReactNode = "Content") {
+function renderFrame(
+  pathname: string,
+  children: ReactNode = "Content",
+  options: { contentId?: string; sidebar?: ReactNode } = { sidebar }
+) {
   const frame = (path: string) => (
     <TooltipProvider>
-      <ConsoleFrame pathname={path} sidebar={sidebar}>
+      <ConsoleFrame
+        contentId={options.contentId}
+        pathname={path}
+        sidebar={options.sidebar}
+      >
         {children}
       </ConsoleFrame>
     </TooltipProvider>
@@ -211,17 +219,28 @@ test("sets a published suffix right after the name, with no divider", () => {
   expect(trail.querySelector('[data-slot="separator"]')).toBeNull()
 })
 
-test("opens on a skip link pointing at the main element", () => {
-  renderFrame("/runs")
+test("carries the skip link's landing id only when handed one", () => {
+  renderFrame("/runs", "Content", { contentId: "main-content", sidebar })
 
-  const skip = screen.getByRole("link", { name: "Skip to content" })
-  const target = skip.getAttribute("href")?.replace("#", "")
+  const main = document.querySelector("main")
 
-  expect(target).toBeTruthy()
-  expect(document.querySelector("main")?.id).toBe(target)
+  expect(main?.id).toBe("main-content")
   // Focusable only by the skip link, so the keyboard lands in the content
   // instead of scrolling to it and staying in the sidebar.
-  expect(document.querySelector("main")?.getAttribute("tabindex")).toBe("-1")
+  expect(main?.getAttribute("tabindex")).toBe("-1")
+
+  cleanup()
+  renderFrame("/runs", "Content", { sidebar })
+
+  // A frame inside another page must not repeat that page's landing id.
+  expect(document.querySelector("main")?.hasAttribute("id")).toBe(false)
+})
+
+test("a frame without a sidebar has nothing to toggle", () => {
+  renderFrame("/runs", "Content", {})
+
+  expect(screen.queryByRole("button", { name: "Toggle sidebar" })).toBeNull()
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Activity")
 })
 
 /** Renders the frame around a page that publishes crumbs on demand. */

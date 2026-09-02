@@ -20,7 +20,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { mainContentId, SkipToContent } from "@/shared/skip"
 import { ConsoleHeaderActionsProvider } from "../layout"
 import {
   type MaterialBreadcrumb,
@@ -35,22 +34,41 @@ const consoleFrame = "w-full px-4 md:px-6"
 /** The console's chrome around a page: the sidebar it is handed, and the
  *  header — trigger, the page's name or breadcrumb trail, the actions slot
  *  pages portal into — over the page itself. Where the console is arrives
- *  as a prop, so the frame reads nothing from the router. */
+ *  as a prop, so the frame reads nothing from the router.
+ *
+ *  The frame fills the viewport unless a class says otherwise, carries the
+ *  skip link's landing id only when its host hands one in, and leaves the
+ *  sidebar's open state to the provider unless the host controls it: a
+ *  frame shown inside another page sizes to that page, must not repeat
+ *  its landing id, and must not write the member's sidebar preference. */
 export function ConsoleFrame({
   children,
+  className,
+  contentId,
+  onSidebarOpenChange,
   pathname,
   sidebar,
+  sidebarOpen,
 }: {
   children: ReactNode
+  className?: string
+  /** The id the skip link lands on, set by the shell that renders one. */
+  contentId?: string
+  onSidebarOpenChange?: (open: boolean) => void
   pathname: string
-  sidebar: ReactNode
+  /** Left out, the header opens on the title: there is nothing to toggle. */
+  sidebar?: ReactNode
+  sidebarOpen?: boolean
 }) {
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null)
   const [material, setMaterial] = useState<MaterialBreadcrumb>()
 
   return (
-    <SidebarProvider className="h-svh overflow-hidden">
-      <SkipToContent />
+    <SidebarProvider
+      className={cn("h-svh overflow-hidden", className)}
+      onOpenChange={onSidebarOpenChange}
+      open={sidebarOpen}
+    >
       {sidebar}
       {/* isolate keeps page z-indexes (sticky table headers, the
           selection bar) inside the inset's own stacking context, so
@@ -65,7 +83,7 @@ export function ConsoleFrame({
           pushing the header's actions out past the clipped edge. */}
       <SidebarInset
         className="isolate min-h-0 min-w-0 outline-none"
-        id={mainContentId}
+        id={contentId}
         tabIndex={-1}
       >
         {/* Constant compact height in the shadcn dashboard-block style;
@@ -77,11 +95,15 @@ export function ConsoleFrame({
             "flex h-12 shrink-0 items-center gap-2 border-b"
           )}
         >
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-            orientation="vertical"
-          />
+          {sidebar === undefined ? null : (
+            <>
+              <SidebarTrigger className="-ml-1" />
+              <Separator
+                className="mr-2 data-vertical:h-4 data-vertical:self-auto"
+                orientation="vertical"
+              />
+            </>
+          )}
           <ConsoleHeaderTitle material={material} pathname={pathname} />
           <div
             className="ml-auto flex shrink-0 items-center gap-2"

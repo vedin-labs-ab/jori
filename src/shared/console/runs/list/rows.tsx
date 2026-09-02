@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react"
 import { ConsoleScrollableGrid } from "../../layout"
 import { ConsoleListLoading } from "../../list/loading"
 import { ExecutionRow, type RunRowSlots } from "../row"
@@ -16,20 +17,27 @@ export function ExecutionRows({
   isLoading,
   now,
   onPreload,
+  openRunId,
   rows,
   showAudience,
   stop,
 }: RunRowSlots & {
-  /** Deep links (billing receipts, /runs?run=...) land with that row open. */
+  /** Deep links (billing receipts, /runs?run=...) land with that row open
+   *  and scrolled into view. */
   focusRunId?: string
   /** Whether filters narrowed the list, for the empty state's wording. */
   hasFilters: boolean
   /** The first page is still on its way. */
   isLoading: boolean
   now: number
+  /** A run shown open from the start, with nothing scrolling to it: a
+   *  page that opens on a run rather than lands on one. */
+  openRunId?: string
   rows: ExecutionItem[]
   showAudience: boolean
 }) {
+  useFocusScroll(focusRunId, rows)
+
   if (isLoading) {
     return <ConsoleListLoading />
   }
@@ -43,7 +51,9 @@ export function ExecutionRows({
       {rows.length > 0
         ? rows.map((execution) => (
             <ExecutionRow
-              defaultOpen={execution.id === focusRunId}
+              defaultOpen={
+                execution.id === focusRunId || execution.id === openRunId
+              }
               execution={execution}
               expanded={expanded}
               key={execution.id}
@@ -56,4 +66,24 @@ export function ExecutionRows({
         : null}
     </ConsoleScrollableGrid>
   )
+}
+
+/** Brings a deep link's run into view once its row is on the page, and
+ *  then leaves the scroll position alone: later pages of the same list
+ *  are the reader's to move through. */
+function useFocusScroll(focusRunId: string | undefined, rows: ExecutionItem[]) {
+  const scrolledTo = useRef<string>(undefined)
+
+  useEffect(() => {
+    if (
+      focusRunId === undefined ||
+      scrolledTo.current === focusRunId ||
+      !rows.some((run) => run.id === focusRunId)
+    ) {
+      return
+    }
+
+    scrolledTo.current = focusRunId
+    document.getElementById(focusRunId)?.scrollIntoView({ block: "center" })
+  }, [focusRunId, rows])
 }
