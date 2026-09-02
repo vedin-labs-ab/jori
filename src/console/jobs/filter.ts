@@ -1,4 +1,4 @@
-import { type Job, type JobFilter } from "./types"
+import { type Job, type JobFilter } from "@/shared/console/jobs/types"
 
 export function hasJobFilters(query: string, filter: JobFilter) {
   return query.trim() !== "" || filter !== "active"

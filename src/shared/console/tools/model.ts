@@ -1,6 +1,10 @@
 import { type ToolAccess, type ToolCapability } from "@contracts/permissions"
 
-export type { ToolAccess, ToolCapability } from "@contracts/permissions"
+export type {
+  ToolAccess,
+  ToolCapability,
+  UserVisibleToolPermission as ToolPermission,
+} from "@contracts/permissions"
 
 export type ToolAccessGroup<T extends ToolCapability> = {
   access: ToolAccess

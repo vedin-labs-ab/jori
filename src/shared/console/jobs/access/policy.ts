@@ -1,5 +1,5 @@
 import { canUseJobTool } from "@contracts/permissions"
-import { type ToolPermission } from "../../permissions/types"
+import { type ToolPermission } from "@/shared/console/tools/model"
 import { getJobSurfaceLabel, type JobSurfaceFormValue } from "./catalog"
 
 export type JobPolicyPermissions = ToolPermission[] | null | undefined

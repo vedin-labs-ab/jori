@@ -1,6 +1,13 @@
 import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useDeferredValue, useState } from "react"
+import { JobContent } from "@/shared/console/jobs/list/content"
+import {
+  type Job,
+  type JobFilter,
+  type JobList,
+  jobFilterOptions,
+} from "@/shared/console/jobs/types"
 import {
   ConsoleFilterGroup,
   ConsoleFilterToggle,
@@ -25,13 +32,6 @@ import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { useJobEditorHost } from "./editor/host"
 import { filterJobsByView, hasJobFilters } from "./filter"
-import { JobContent } from "./list/content"
-import {
-  type Job,
-  type JobFilter,
-  type JobList,
-  jobFilterOptions,
-} from "./types"
 
 export function Jobs() {
   return (
@@ -73,7 +73,8 @@ function JobListView({ organizationId }: { organizationId: string }) {
         setAudience={setters.setAudience}
       />
       <JobContent
-        editor={editor}
+        controllingJobId={editor.controllingJobId}
+        deletingJobId={editor.deletingJobId}
         hasFilters={hasFilters}
         now={now}
         jobList={jobList}
@@ -81,7 +82,10 @@ function JobListView({ organizationId }: { organizationId: string }) {
           void preloadDialog()
           editor.openCreateForm()
         }}
+        onDelete={editor.deleteJob}
+        onEdit={editor.openEditForm}
         onMoveToFolder={setMovingJob}
+        onPausedChange={editor.setJobPaused}
         visibleJobs={pagination.visibleRows}
       />
       {jobList?.status !== "unauthorized" ? (

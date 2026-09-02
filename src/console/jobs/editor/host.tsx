@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef } from "react"
+import { jobPolicyKey } from "@/shared/console/jobs/access/policy"
 import { useRetainedMount } from "@/shared/console/retain"
 import { useToolPermissions } from "../../permissions/controller"
-import { jobPolicyKey } from "../access/policy"
 import { useJobEditor } from "."
 
 let jobDialogModule: Promise<typeof import("./dialog")> | undefined

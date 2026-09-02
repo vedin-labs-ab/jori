@@ -5,8 +5,8 @@ import {
   type JobMentionKind,
   type JobScope,
   jobMentionText,
-} from "../../../access"
-import { type JobPolicyPermissions } from "../../../access/policy"
+} from "@/shared/console/jobs/access"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
 
 export const jobSurfaceNodeName = "jobSurface"
 export const jobReferenceNodeName = "jobReference"

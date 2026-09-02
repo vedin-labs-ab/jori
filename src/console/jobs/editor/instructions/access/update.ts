@@ -1,6 +1,6 @@
 import { type Transaction } from "@tiptap/pm/state"
 import { type Editor } from "@tiptap/react"
-import { type JobSurfaceIntegration } from "../../../access"
+import { type JobSurfaceIntegration } from "@/shared/console/jobs/access"
 import { jobSurfaceNodeName, parseJobSurfaceTools } from "../document"
 
 export function addIntegrationTool(

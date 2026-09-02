@@ -1,6 +1,6 @@
 import { type Node as ProseMirrorNode } from "@tiptap/pm/model"
 import { type Editor } from "@tiptap/react"
-import { type JobSurfaceFormValue } from "../../../access"
+import { type JobSurfaceFormValue } from "@/shared/console/jobs/access"
 import {
   jobSurfaceNodeName,
   parseJobSurfaceIntegration,

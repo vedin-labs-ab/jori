@@ -1,7 +1,7 @@
 import { BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { type JobMentionSuggestion } from "@/shared/console/jobs/access"
 import { ProviderLogo } from "@/shared/logo/provider"
-import { type JobMentionSuggestion } from "../../../access"
 import { type InstructionSuggestionState } from "./suggest"
 
 export function InstructionSuggestions({

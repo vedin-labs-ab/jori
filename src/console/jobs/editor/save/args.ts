@@ -1,12 +1,15 @@
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
-import { type api } from "../../../../../convex/_generated/api"
-import { getJobScopeConflict, hasJobWriteSurface } from "../../access"
+import {
+  getJobScopeConflict,
+  hasJobWriteSurface,
+} from "@/shared/console/jobs/access"
 import {
   type JobPolicyPermissions,
   validateJobPolicy,
-} from "../../access/policy"
-import { type Job, type JobFormValues } from "../../types"
+} from "@/shared/console/jobs/access/policy"
+import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
+import { type api } from "../../../../../convex/_generated/api"
 import { jobInstructionsErrors, jobNameErrors } from "../errors"
 import { jobFormValues } from "."
 import { prepareJobInstructions } from "./instructions"

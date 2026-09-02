@@ -1,6 +1,6 @@
 import { type Editor } from "@tiptap/react"
 import { expect, test, vi } from "vitest"
-import { emptyJobMentionCatalog } from "../../access"
+import { emptyJobMentionCatalog } from "@/shared/console/jobs/access"
 import {
   createJobInstructionDocument,
   jobReferenceNodeName,

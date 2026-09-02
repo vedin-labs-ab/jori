@@ -10,13 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { getJobScopeConflict } from "@/shared/console/jobs/access"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
 import { DialogForm } from "@/shared/console/materials/form"
 import { api } from "../../../../../convex/_generated/api"
 import { FolderField } from "../../../folders/field"
 import { OrganizationVisibilityField } from "../../../shared/visibility/field"
-import { getJobScopeConflict } from "../../access"
-import { type JobPolicyPermissions } from "../../access/policy"
-import { type Job, type JobFormValues } from "../../types"
 import { readJobInstructionsError, readJobNameError } from "../errors"
 import { readAdditionalJobSurfaces } from "../instructions/document"
 import { writeJobWebSearchPreference } from "../preferences"

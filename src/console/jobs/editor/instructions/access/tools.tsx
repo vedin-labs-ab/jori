@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { type JobSurfaceFormValue } from "../../../access"
-import { SurfaceLogo } from "../../../access/logo"
-import { type JobPolicyPermissions } from "../../../access/policy"
+import { type JobSurfaceFormValue } from "@/shared/console/jobs/access"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import { ProviderLogo } from "@/shared/logo/provider"
 import { JobSurfaceToolGroups } from "./sections"
 
 type JobSurfaceToolsDialogProps = {
@@ -40,7 +40,7 @@ export function JobSurfaceToolsDialog({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader className="grid grid-cols-[auto_1fr] gap-3 pr-8 text-left">
-          <SurfaceLogo className="mt-0.5 size-6" integration={integration} />
+          <ProviderLogo className="mt-0.5 size-6" surface={integration} />
           <div className="grid gap-1">
             <DialogTitle>{toolSurfaceLabel} tools</DialogTitle>
             <DialogDescription>

@@ -4,7 +4,7 @@ import {
   type JobMentionCatalog,
   type JobSurfaceFormValue,
   type JobSurfaceIntegration,
-} from "../../access"
+} from "@/shared/console/jobs/access"
 import {
   parseInstructionMarkdown,
   serializeInstructionMarkdown,

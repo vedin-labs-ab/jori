@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from "vitest"
-import { emptyJobForm } from "../../types"
+import { emptyJobForm } from "@/shared/console/jobs/types"
 import { writeJobWebSearchPreference } from "../preferences"
 import { jobFormValues } from "."
 import { createJobArgs } from "./args"

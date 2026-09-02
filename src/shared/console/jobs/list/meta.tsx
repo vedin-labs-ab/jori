@@ -10,8 +10,8 @@ import {
 import { cn } from "@/lib/utils"
 import { absoluteTime, relativeTime } from "@/shared/console/time"
 import { FieldHelp } from "@/shared/field"
+import { ProviderLogo } from "@/shared/logo/provider"
 import { getJobSurfaceLabel } from "../access"
-import { SurfaceLogo } from "../access/logo"
 import { type Job } from "../types"
 import { JobToolSummary } from "./tools"
 
@@ -151,9 +151,9 @@ function eventTriggerIcon(trigger: Extract<Job["trigger"], { event: string }>) {
   }
 
   return (
-    <SurfaceLogo
+    <ProviderLogo
       className="mt-0.5 size-3.5 rounded-sm"
-      integration={integration}
+      surface={integration}
     />
   )
 }

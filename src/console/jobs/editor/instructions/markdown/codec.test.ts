@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { createJobMentionCatalog } from "../../../access"
+import { createJobMentionCatalog } from "@/shared/console/jobs/access"
 import {
   createJobInstructionDocument,
   serializeJobInstructionDocument,

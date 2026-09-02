@@ -9,10 +9,10 @@ import {
   type FolderResource,
   toFiledType,
 } from "@/shared/console/folders/types"
+import { type Job } from "@/shared/console/jobs/types"
 import { api } from "../../../../convex/_generated/api"
 import { useFileActions } from "../../files/manage"
 import { useJobEditorHost } from "../../jobs/editor/host"
-import { type Job } from "../../jobs/types"
 import { useStoreRemoval } from "../../stores/manage"
 import { useTableRemoval } from "../../tables/manage"
 import { MoveResourceDialog } from "../move"

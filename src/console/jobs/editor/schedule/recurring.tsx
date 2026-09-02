@@ -9,16 +9,20 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { absoluteTime, relativeTime } from "@/shared/console/time"
-import { FieldHelp } from "@/shared/field"
 import {
   composeCron,
   getCrontabGuruUrl,
   monthDayOptions,
   previewRecurringRun,
   weekdayOptions,
-} from "../../cron"
-import { type JobFormValues, type RepeatMode, repeatOptions } from "../../types"
+} from "@/shared/console/jobs/cron"
+import {
+  type JobFormValues,
+  type RepeatMode,
+  repeatOptions,
+} from "@/shared/console/jobs/types"
+import { absoluteTime, relativeTime } from "@/shared/console/time"
+import { FieldHelp } from "@/shared/field"
 import { JobTimePicker } from "./time"
 
 export function RecurringFields({

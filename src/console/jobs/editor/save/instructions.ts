@@ -1,7 +1,7 @@
-import { createJobMentionCatalog } from "../../access"
-import { type JobPolicyPermissions } from "../../access/policy"
-import { jobToolReferenceIssue } from "../../access/tools"
-import { type JobFormValues } from "../../types"
+import { createJobMentionCatalog } from "@/shared/console/jobs/access"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import { jobToolReferenceIssue } from "@/shared/console/jobs/access/tools"
+import { type JobFormValues } from "@/shared/console/jobs/types"
 import {
   createJobInstructionDocument,
   serializeJobInstructionDocument,

@@ -1,6 +1,6 @@
 import { toolSurfaces } from "@contracts/integrations"
 import { describe, expect, test } from "vitest"
-import { type ToolPermission } from "../../permissions/types"
+import { type ToolPermission } from "@/shared/console/tools/model"
 import {
   createJobMentionCatalog,
   findActiveJobMention,

@@ -1,8 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ConsoleScrollableList } from "@/shared/console/layout"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
-import { type JobEditor } from "../editor"
-import { type JobList } from "../types"
+import { type Job, type JobList } from "../types"
 import { EmptyJobs } from "./empty"
 import { JobRow } from "./row"
 
@@ -11,20 +10,30 @@ import { JobRow } from "./row"
 const jobGrid = "grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))] pb-2"
 
 export function JobContent({
-  editor,
+  controllingJobId,
+  deletingJobId,
   hasFilters,
   now,
   jobList,
   onCreate,
+  onDelete,
+  onEdit,
   onMoveToFolder,
+  onPausedChange,
   visibleJobs,
 }: {
-  editor: JobEditor
+  /** The job whose pause or resume is still in flight, if any. */
+  controllingJobId: string | undefined
+  /** The job whose deletion is still in flight, if any. */
+  deletingJobId: string | undefined
   hasFilters: boolean
   now: number
   jobList: JobList | undefined
   onCreate: () => void
-  onMoveToFolder: (job: JobList["jobs"][number]) => void
+  onDelete: (job: Job) => void
+  onEdit: (job: Job) => void
+  onMoveToFolder: (job: Job) => void
+  onPausedChange: (job: Job, paused: boolean) => void
   visibleJobs: JobList["jobs"]
 }) {
   if (jobList === undefined) {
@@ -54,14 +63,14 @@ export function JobContent({
     <ConsoleScrollableList className="pb-2 lg:grid-cols-2">
       {visibleJobs.map((job) => (
         <JobRow
-          isControlling={editor.controllingJobId === job.id}
-          isDeleting={editor.deletingJobId === job.id}
+          isControlling={controllingJobId === job.id}
+          isDeleting={deletingJobId === job.id}
           key={job.id}
           now={now}
-          onDelete={editor.deleteJob}
-          onEdit={editor.openEditForm}
+          onDelete={onDelete}
+          onEdit={onEdit}
           onMoveToFolder={onMoveToFolder}
-          onPausedChange={editor.setJobPaused}
+          onPausedChange={onPausedChange}
           job={job}
         />
       ))}

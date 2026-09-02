@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { emptyJobForm } from "../../types"
+import { emptyJobForm } from "@/shared/console/jobs/types"
 import { JobDialog } from "."
 
 vi.mock("convex/react", async (importOriginal) => ({

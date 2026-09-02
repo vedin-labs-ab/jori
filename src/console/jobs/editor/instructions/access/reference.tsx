@@ -7,9 +7,12 @@ import { Ban, BookOpen, Braces, Wrench } from "lucide-react"
 import { useState } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
+import {
+  jobToolReferenceIssue,
+  jobToolScopeIssue,
+} from "@/shared/console/jobs/access/tools"
 import { useRetained } from "@/shared/console/retain"
 import { type ToolPermission } from "../../../../permissions/types"
-import { jobToolReferenceIssue, jobToolScopeIssue } from "../../../access/tools"
 import { parseJobReferenceKind } from "../document"
 import { readEditorInstructionSurfaces } from "../editor/snapshot"
 import { type JobReferenceNodeOptions } from "../markdown/schema"

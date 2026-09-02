@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
-import { emptyJobForm } from "../../types"
+import { emptyJobForm } from "@/shared/console/jobs/types"
 import { RecurringFields } from "./recurring"
 
 const noop = () => undefined

@@ -11,9 +11,9 @@ import {
   type JobMentionSources,
   type JobMentionSuggestion,
   type JobSurfaceIntegration,
-} from "../../../access"
-import { type JobPolicyPermissions } from "../../../access/policy"
-import { getDefaultJobSurfaceTools } from "../../../access/tools"
+} from "@/shared/console/jobs/access"
+import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import { getDefaultJobSurfaceTools } from "@/shared/console/jobs/access/tools"
 import { addIntegrationTool } from "../access/update"
 import {
   jobReferenceNodeName,

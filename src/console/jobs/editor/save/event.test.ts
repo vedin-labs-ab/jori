@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
-import { emptyJobForm, type JobFormValues } from "../../types"
+import { emptyJobForm, type JobFormValues } from "@/shared/console/jobs/types"
 import { createJobArgs } from "./args"
 
 describe("job event payload match", () => {

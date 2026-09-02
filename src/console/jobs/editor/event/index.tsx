@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { type JobFormValues } from "../../types"
+import { type JobFormValues } from "@/shared/console/jobs/types"
 import { EventIntegrationField } from "./options/field"
 import { EventScopeFields } from "./scope"
 
