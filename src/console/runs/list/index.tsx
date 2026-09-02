@@ -1,46 +1,18 @@
 import { useSearch } from "@tanstack/react-router"
-import {
-  lazy,
-  memo,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select"
-import {
-  ConsoleFilterField,
-  ConsoleFilterGroup,
-  ConsoleFilterToggle,
-  ConsoleHeaderActions,
-  ConsolePageLayout,
-  ConsoleScrollableGrid,
-  ConsoleSearch,
-} from "@/shared/console/layout"
-import {
-  type AudienceFilter,
-  audienceFilterOptions,
-} from "@/shared/console/list/audience"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { lazy, useDeferredValue, useMemo, useState } from "react"
+import { ConsolePageLayout } from "@/shared/console/layout"
+import { type AudienceFilter } from "@/shared/console/list/audience"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { useResettingSetter } from "@/shared/console/list/pagination"
-import { ExecutionRow, type RunRowSlots } from "@/shared/console/runs/row"
-import { displayNowForRun, runClockInterval } from "@/shared/console/runs/time"
+import { ExecutionFilters } from "@/shared/console/runs/list/filters"
+import { ExecutionRows } from "@/shared/console/runs/list/rows"
+import { type RunRowSlots } from "@/shared/console/runs/row"
+import { useExecutionClock } from "@/shared/console/runs/time"
 import {
   type ApprovalFilter,
-  approvalFilterLabels,
-  approvalFilterOptions,
-  type ExecutionItem,
   type RunFilter,
-  runFilterOptions,
 } from "@/shared/console/runs/types"
 import { StopExecution } from "../row/stop"
-import { EmptyExecutions } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { usePageSearchSync, useSearchTarget } from "./seek"
 
@@ -59,6 +31,8 @@ const ExpandedRun = lazy(async () => ({
   default: (await loadExpandedRun()).ExpandedRun,
 }))
 
+/** The Activity page: the filters, the rows they narrow, and the pager,
+ *  over cursor pagination that the URL's page and run deep links steer. */
 export function RunsList({ organizationId }: { organizationId: string }) {
   const { run: focusRunId } = useSearch({ from: "/runs" })
   const target = useSearchTarget()
@@ -106,7 +80,7 @@ export function RunsList({ organizationId }: { organizationId: string }) {
         setRunFilter={setRunFilterAndReset}
         setAudienceFilter={setAudienceFilterAndReset}
       />
-      <ExecutionRows
+      <RunRows
         focusRunId={focusRunId}
         pagination={pagination}
         showAudience={deferredAudienceFilter === "all"}
@@ -117,78 +91,10 @@ export function RunsList({ organizationId }: { organizationId: string }) {
   )
 }
 
-const ExecutionFilters = memo(function ExecutionFilters({
-  approvalFilter,
-  query,
-  runFilter,
-  audienceFilter,
-  setApprovalFilter,
-  setQuery,
-  setRunFilter,
-  setAudienceFilter,
-}: {
-  approvalFilter: ApprovalFilter
-  query: string
-  runFilter: RunFilter
-  audienceFilter: AudienceFilter
-  setApprovalFilter: (filter: ApprovalFilter) => void
-  setQuery: (query: string) => void
-  setRunFilter: (filter: RunFilter) => void
-  setAudienceFilter: (filter: AudienceFilter) => void
-}) {
-  return (
-    <>
-      <ConsoleHeaderActions>
-        <ConsoleSearch
-          label="Search runs"
-          onValueChange={setQuery}
-          placeholder="Search runs..."
-          value={query}
-        />
-      </ConsoleHeaderActions>
-      <ConsoleFilterGroup>
-        <ConsoleFilterToggle
-          label="Status"
-          onValueChange={setRunFilter}
-          options={runFilterOptions}
-          value={runFilter}
-        />
-        <ConsoleFilterToggle
-          label="Sharing"
-          onValueChange={setAudienceFilter}
-          options={audienceFilterOptions}
-          value={audienceFilter}
-        />
-        <ConsoleFilterField label="Approval">
-          <Select
-            onValueChange={(value) =>
-              setApprovalFilter(value as ApprovalFilter)
-            }
-            value={approvalFilter}
-          >
-            <SelectTrigger
-              aria-label="Filter by approval state"
-              className="w-fit"
-            >
-              <span className="font-medium">
-                {approvalFilterLabels[approvalFilter]}
-              </span>
-            </SelectTrigger>
-            <SelectContent align="start" position="popper">
-              {approvalFilterOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ConsoleFilterField>
-      </ConsoleFilterGroup>
-    </>
-  )
-})
-
-function ExecutionRows({
+/** The rows bound to the organization: the page's clock, and each row's
+ *  detail and stop control talking to Convex. Below the list, so the
+ *  clock's ticks re-render the rows alone. */
+function RunRows({
   focusRunId,
   pagination,
   showAudience,
@@ -202,31 +108,16 @@ function ExecutionRows({
   const now = useExecutionClock(pagination.visibleRows)
   const slots = useRunRowSlots(organizationId)
 
-  if (pagination.isLoadingFirstPage) {
-    return <ConsoleListLoading />
-  }
-
   return (
-    // auto-rows-max keeps row heights at their content size; without it the
-    // overflow-hidden articles let the definite-height grid compress its
-    // tracks to fit instead of overflowing into the scrollbar.
-    <ConsoleScrollableGrid>
-      {pagination.visibleRows.length === 0 ? (
-        <EmptyExecutions hasFilters={pagination.hasFilters} />
-      ) : null}
-      {pagination.visibleRows.length > 0
-        ? pagination.visibleRows.map((execution) => (
-            <ExecutionRow
-              {...slots}
-              defaultOpen={execution.id === focusRunId}
-              execution={execution}
-              key={execution.id}
-              now={displayNowForRun(execution, now)}
-              showAudience={showAudience}
-            />
-          ))
-        : null}
-    </ConsoleScrollableGrid>
+    <ExecutionRows
+      {...slots}
+      focusRunId={focusRunId}
+      hasFilters={pagination.hasFilters}
+      isLoading={pagination.isLoadingFirstPage}
+      now={now}
+      rows={pagination.visibleRows}
+      showAudience={showAudience}
+    />
   )
 }
 
@@ -250,17 +141,4 @@ function useRunRowSlots(organizationId: string) {
     }),
     [organizationId]
   )
-}
-
-function useExecutionClock(runs: ExecutionItem[]) {
-  const [now, setNow] = useState(() => Date.now())
-  const intervalMs = runClockInterval(runs, now)
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), intervalMs)
-
-    return () => window.clearInterval(interval)
-  }, [intervalMs])
-
-  return now
 }
