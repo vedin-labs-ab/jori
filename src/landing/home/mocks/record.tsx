@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react"
 import { DemoConsole } from "../../demo/console"
 import { chaseRunId } from "../../demo/fixtures/runs"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Definition, Section } from "../../section"
+import { Definition, Jori, Section } from "../../section"
 
 /** The record: the Activity page over Copperline's runs, with the chase
  *  job's run open, a live run to stop, and an approval to decide. */
@@ -12,7 +12,15 @@ export function Record() {
 
   return (
     <Section
-      lede="Most AI works in private. Jori works in the open: Activity is the first thing in the console. Every run, whether it came from a job or a mention, shows what triggered it, what it read, what it did, what it asked, and what it cost. Stop any of them from anywhere you can see it running."
+      lede={
+        <>
+          Most AI works in private. <Jori tilt="right" /> works in the open:
+          Activity is the first thing in the console. Every run, whether it came
+          from a job or a mention, shows what triggered it, what they read, what
+          they did, what they asked, and what it cost. Stop any of them from
+          anywhere you can see it running.
+        </>
+      }
       title="Everything on the record"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-16">

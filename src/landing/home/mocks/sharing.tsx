@@ -62,7 +62,7 @@ function RenewalsSharing() {
         label={
           <>
             <span className="font-medium text-foreground">Visibility</span>
-            <span>Customer renewals · Finance › Renewals</span>
+            <span>Who in Copperline sees the Customer renewals table</span>
           </>
         }
       >
@@ -88,7 +88,7 @@ function RenewalsSharing() {
         label={
           <>
             <span className="font-medium text-foreground">Share links</span>
-            <span>Customer renewals</span>
+            <span>The same table, for people outside Copperline</span>
           </>
         }
       >

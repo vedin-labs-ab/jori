@@ -1,10 +1,15 @@
 import { ModeMatrix } from "../examples/modes"
-import { Section } from "../section"
+import { Jori, Section } from "../section"
 
 export function ModesSection() {
   return (
     <Section
-      lede="Allowed, ask first, or blocked: you set what Jori can do on its own, per action, per account."
+      lede={
+        <>
+          Allowed, ask first, or blocked: you set what <Jori tilt="right" /> can
+          do on their own, per action, per account.
+        </>
+      }
       title="Every tool has a mode"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
@@ -16,7 +21,7 @@ export function ModesSection() {
           </p>
           <p className="max-w-xl">
             Answering where it's asked stays on, so Jori can always report back
-            in the thread that called it. Everything else is yours to set.
+            in the thread that called them. Everything else is yours to set.
           </p>
         </div>
         <ModeMatrix

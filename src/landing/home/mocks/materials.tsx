@@ -1,7 +1,7 @@
 import { DemoConsole } from "../../demo/console"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Definition, Section } from "../../section"
+import { Definition, Jori, Section } from "../../section"
 
 /** The materials pillar: the real grid over the table the hero's job keeps,
  *  under the crumb that says where it lives. */
@@ -10,7 +10,14 @@ export function Materials() {
 
   return (
     <Section
-      lede="A job doesn't answer in a chat window. It writes rows to a table, a value to a store, a file to a folder. You and Jori edit the same materials with the same access, so anything it keeps current is something anyone can check and correct."
+      lede={
+        <>
+          A job doesn't answer in a chat window. It writes rows to a table, a
+          value to a store, a file to a folder. You and <Jori tilt="steep" />{" "}
+          edit the same materials with the same access, so anything they keep
+          current is something anyone can check and correct.
+        </>
+      }
       title="Work lands where you can find it"
     >
       <dl className="grid gap-8 md:grid-cols-3 lg:gap-12">
@@ -23,7 +30,7 @@ export function Materials() {
         </Definition>
         <Definition term="Files">
           Anything, viewed in place: a PDF, an image, a page of notes. Jori
-          saves what it makes and marks it as its own.
+          saves what they make and marks it as their own.
         </Definition>
       </dl>
       {/* The grid keeps the product's column widths, so it takes the full

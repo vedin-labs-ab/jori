@@ -1,4 +1,4 @@
-import { PageIntro } from "../section"
+import { Jori, PageIntro } from "../section"
 import { MarketingShell } from "../shell"
 import { ApprovalsSection, ReceiptsSection } from "./approvals"
 import {
@@ -13,7 +13,13 @@ export function TrustPage() {
   return (
     <MarketingShell closing="Set the modes, watch the receipts, expand from there. Tell us what you'd hand over first.">
       <PageIntro
-        lede="Handing work to Jori means handing it your repositories, your issues, your threads, and your inbox. That access comes with controls you can see and receipts you can audit."
+        lede={
+          <>
+            Handing work to <Jori tilt="left" /> means handing them your
+            repositories, your issues, your threads, and your inbox. That access
+            comes with controls you can see and receipts you can audit.
+          </>
+        }
         title="Built to be checked."
       />
       <ModesSection />

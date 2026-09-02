@@ -1,7 +1,7 @@
 import { integrationLabels, integrations } from "@contracts/integrations"
 import { CircleDot } from "lucide-react"
 import { IntegrationLogo } from "@/shared/logo/integration"
-import { Chip, Mention, Prop, Section } from "../section"
+import { Chip, Jori, Mention, Prop, Section } from "../section"
 
 /** The surfaces: a mention in a thread is the other way in, and what comes
  *  back lands in the same folders. The two cards are message surfaces, not
@@ -9,7 +9,13 @@ import { Chip, Mention, Prop, Section } from "../section"
 export function Surfaces() {
   return (
     <Section
-      lede="Mention it in Slack, GitHub, or Linear and it answers in the thread. When the answer is a table, a store, or a file, it sends a link into the folder, readable by anyone you send it to."
+      lede={
+        <>
+          Mention <Jori tilt="right" /> in Slack, GitHub, or Linear and they
+          answer in the thread. When the answer is a table, a store, or a file,
+          they send a link into the folder, readable by anyone you send it to.
+        </>
+      }
       support
       title="Wherever you work, it's the same Jori"
     >
