@@ -1,13 +1,13 @@
-import { ErrorDetail, ResultDetail } from "@/shared/console/runs/details"
-import { ExecutionFacts } from "@/shared/console/runs/row/facts"
-import { RunRowBody } from "@/shared/console/runs/row/layout"
-import { TaskDetail } from "@/shared/console/runs/row/task"
+import { ExpandedExecution } from "@/shared/console/runs/row/expanded"
 import { type ExecutionItem } from "@/shared/console/runs/types"
 import { RunActivity } from "../activity"
-import { ApprovalCallout } from "../request/approval"
-import { OfferCallout } from "../request/offer"
+import { RunApprovals } from "../request/approval"
+import { RunOffers } from "../request/offer"
 
-export function ExpandedExecution({
+/** A run's detail bound to its organization: the shared detail view with
+ *  its approvals, offers, and log each talking to Convex. The list loads
+ *  this module lazily, so the page's own chunk carries only the rows. */
+export function ExpandedRun({
   execution,
   now,
   organizationId,
@@ -17,35 +17,30 @@ export function ExpandedExecution({
   organizationId: string
 }) {
   return (
-    <RunRowBody>
-      <TaskDetail sourceUrl={execution.source.url} task={execution.task} />
-      <ExecutionFacts details={execution.details} />
-      {execution.approvals.length > 0 ? (
-        <ApprovalCallout
+    <ExpandedExecution
+      approvals={
+        <RunApprovals
           approvals={execution.approvals}
           now={now}
           organizationId={organizationId}
         />
-      ) : null}
-      {execution.offers.length > 0 ? (
-        <OfferCallout
+      }
+      execution={execution}
+      log={
+        <RunActivity
+          now={now}
+          organizationId={organizationId}
+          runId={execution.id}
+        />
+      }
+      offers={
+        <RunOffers
           now={now}
           offers={execution.offers}
-          runId={execution.id}
           organizationId={organizationId}
+          runId={execution.id}
         />
-      ) : null}
-      {execution.result !== undefined ? (
-        <ResultDetail value={execution.result} />
-      ) : null}
-      {execution.error !== undefined ? (
-        <ErrorDetail value={execution.error} />
-      ) : null}
-      <RunActivity
-        now={now}
-        runId={execution.id}
-        organizationId={organizationId}
-      />
-    </RunRowBody>
+      }
+    />
   )
 }

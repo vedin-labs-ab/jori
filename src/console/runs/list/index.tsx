@@ -1,5 +1,12 @@
 import { useSearch } from "@tanstack/react-router"
-import { memo, useDeferredValue, useEffect, useState } from "react"
+import {
+  lazy,
+  memo,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import {
   Select,
   SelectContent,
@@ -22,6 +29,7 @@ import {
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { useResettingSetter } from "@/shared/console/list/pagination"
+import { ExecutionRow, type RunRowSlots } from "@/shared/console/runs/row"
 import { displayNowForRun, runClockInterval } from "@/shared/console/runs/time"
 import {
   type ApprovalFilter,
@@ -31,10 +39,25 @@ import {
   type RunFilter,
   runFilterOptions,
 } from "@/shared/console/runs/types"
-import { ExecutionRow } from "../row"
+import { StopExecution } from "../row/stop"
 import { EmptyExecutions } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { usePageSearchSync, useSearchTarget } from "./seek"
+
+let expandedRunModule: Promise<typeof import("../row/expanded")> | undefined
+
+function loadExpandedRun() {
+  expandedRunModule ??= import("../row/expanded")
+  return expandedRunModule
+}
+
+function preloadExpandedRun() {
+  void loadExpandedRun()
+}
+
+const ExpandedRun = lazy(async () => ({
+  default: (await loadExpandedRun()).ExpandedRun,
+}))
 
 export function RunsList({ organizationId }: { organizationId: string }) {
   const { run: focusRunId } = useSearch({ from: "/runs" })
@@ -177,6 +200,7 @@ function ExecutionRows({
   organizationId: string
 }) {
   const now = useExecutionClock(pagination.visibleRows)
+  const slots = useRunRowSlots(organizationId)
 
   if (pagination.isLoadingFirstPage) {
     return <ConsoleListLoading />
@@ -193,16 +217,38 @@ function ExecutionRows({
       {pagination.visibleRows.length > 0
         ? pagination.visibleRows.map((execution) => (
             <ExecutionRow
+              {...slots}
               defaultOpen={execution.id === focusRunId}
               execution={execution}
               key={execution.id}
               now={displayNowForRun(execution, now)}
               showAudience={showAudience}
-              organizationId={organizationId}
             />
           ))
         : null}
     </ConsoleScrollableGrid>
+  )
+}
+
+/** The row slots for one organization, held steady across ticks of the
+ *  clock so a memoized row re-renders for its own run alone: the detail
+ *  chunk, fetched once any row is about to open, and the stop control. */
+function useRunRowSlots(organizationId: string) {
+  return useMemo<RunRowSlots>(
+    () => ({
+      expanded: (execution, now) => (
+        <ExpandedRun
+          execution={execution}
+          now={now}
+          organizationId={organizationId}
+        />
+      ),
+      onPreload: preloadExpandedRun,
+      stop: (execution) => (
+        <StopExecution organizationId={organizationId} runId={execution.id} />
+      ),
+    }),
+    [organizationId]
   )
 }
 
