@@ -1,9 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import {
-  type UsageSegment,
-  usageSegmentColor,
-} from "@/shared/console/folders/usage/types"
+import { type UsageSegment, usageSegmentColor } from "./types"
 
 // The one vocabulary the charts and the folder table share: a segment's
 // colour. The swatch is the same mark in both, so a reader who learns a

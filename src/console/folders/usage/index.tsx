@@ -7,7 +7,7 @@ import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { ConsolePage } from "../../page"
 import { FolderFrame } from "../frame"
 import { UsageNote } from "./note"
-import { UsageView } from "./view"
+import { FolderUsage } from "./view"
 
 // The Usage pages, in their two scopes. Both keep the chosen window in the
 // URL, so a view someone found worth reading is a view they can send on.
@@ -39,7 +39,7 @@ export function FolderUsagePage({
       view="usage"
     >
       {({ folder, organizationId }) => (
-        <UsageView
+        <FolderUsage
           days={days}
           folderId={folder.folderId as GenericId<"folders">}
           onDaysChange={(next) =>
@@ -83,7 +83,7 @@ export function OrganizationUsagePage({ days }: { days: UsageDays }) {
 
 /** The crumb is published from inside the shell, which ConsolePage mounts
  *  below the page itself: published from the page it would reach nobody. */
-function OrganizationUsageView(props: ComponentProps<typeof UsageView>) {
+function OrganizationUsageView(props: ComponentProps<typeof FolderUsage>) {
   const { days, organizationId } = props
 
   useMaterialTrail(
@@ -96,5 +96,5 @@ function OrganizationUsageView(props: ComponentProps<typeof UsageView>) {
     )
   )
 
-  return <UsageView {...props} />
+  return <FolderUsage {...props} />
 }

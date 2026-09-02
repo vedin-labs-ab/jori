@@ -8,7 +8,7 @@ import {
   usageCostPerRun,
   usageDelta,
   usagePercent,
-} from "@/shared/console/folders/usage/types"
+} from "./types"
 
 // The band the page opens with: what the window cost, how much work that
 // bought, and how each compares with the window before. The band keeps its

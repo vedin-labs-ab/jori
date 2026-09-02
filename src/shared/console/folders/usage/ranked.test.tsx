@@ -1,14 +1,11 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import {
-  type UsageContributor,
-  type UsageSegment,
-} from "@/shared/console/folders/usage/types"
 import { UsageContributors, UsageFolders } from "./ranked"
+import { type UsageContributor, type UsageSegment } from "./types"
 
 vi.mock("@tanstack/react-router", async () => ({
-  Link: (await import("../../../../test/router")).Link,
+  Link: (await import("../../../../../test/router")).Link,
 }))
 
 afterEach(cleanup)
