@@ -1,30 +1,22 @@
-import { useQuery } from "convex/react"
 import { Logs } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { countLabel } from "@/shared/console/count"
 import { scrollFadeViewport } from "@/shared/fade"
-import { api } from "../../../../convex/_generated/api"
+import { countLabel } from "../../count"
 import { DetailRow } from "../details"
-import { type ExecutionItem } from "../types"
 import { ActivityEmpty, ActivitySkeleton } from "./empty"
 import { ActivityTimeline } from "./item"
 import { type ActivityResult } from "./types"
 
-export function RunActivity({
+/** The detail's Log row: what the run has done so far, as a timeline.
+ *  Activity still on its way shows as a skeleton. */
+export function ActivityLog({
+  activity,
   now,
-  runId,
-  organizationId,
 }: {
+  activity: ActivityResult | undefined
   now: number
-  runId: ExecutionItem["id"]
-  organizationId: string
 }) {
-  const activity = useQuery(api.runs.activity.index.list, {
-    runId,
-    organizationId,
-  })
-
   return (
     <DetailRow icon={Logs} label="Log">
       <ActivityContent activity={activity} now={now} />

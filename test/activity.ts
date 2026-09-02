@@ -1,4 +1,4 @@
-import { type ActivityItem } from "../src/console/runs/activity/types"
+import { type ActivityItem } from "../src/shared/console/runs/activity/types"
 
 /** A completed read-file tool activity, the shape run timelines render most. */
 export function activityItem(

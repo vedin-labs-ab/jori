@@ -2,14 +2,8 @@ import { integrationLabel } from "@contracts/integrations"
 import { ChevronDown, FileText, Search, Send, SmilePlus } from "lucide-react"
 import { memo, type ReactNode, useMemo, useState } from "react"
 import { cn } from "@/lib/utils"
-import {
-  Task,
-  TaskContent,
-  TaskItem,
-  TaskLabel,
-  TaskTrigger,
-} from "@/shared/console/task"
-import { formatDuration } from "@/shared/console/time"
+import { Task, TaskContent, TaskItem, TaskLabel, TaskTrigger } from "../../task"
+import { formatDuration } from "../../time"
 import { ActivityFailureDescription } from "./error"
 import {
   ActivityEntryMeta,

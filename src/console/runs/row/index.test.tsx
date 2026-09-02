@@ -4,9 +4,9 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 import {
   makeApproval,
   makeExecution,
-  renderExecutionRow,
   slackTools,
-} from "../fixtures"
+} from "@/shared/console/runs/fixtures"
+import { renderExecutionRow } from "../fixtures"
 
 vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),

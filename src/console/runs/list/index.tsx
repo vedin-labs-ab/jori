@@ -22,8 +22,7 @@ import {
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { useResettingSetter } from "@/shared/console/list/pagination"
-import { ExecutionRow } from "../row"
-import { displayNowForRun, runClockInterval } from "../time"
+import { displayNowForRun, runClockInterval } from "@/shared/console/runs/time"
 import {
   type ApprovalFilter,
   approvalFilterLabels,
@@ -31,7 +30,8 @@ import {
   type ExecutionItem,
   type RunFilter,
   runFilterOptions,
-} from "../types"
+} from "@/shared/console/runs/types"
+import { ExecutionRow } from "../row"
 import { EmptyExecutions } from "./empty"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { usePageSearchSync, useSearchTarget } from "./seek"

@@ -1,6 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { type MutableRefObject, useEffect, useMemo, useRef } from "react"
-import { type ExecutionItem, pageSize } from "../types"
+import { type ExecutionItem, pageSize } from "@/shared/console/runs/types"
 
 /** A deep-link destination: a run to reveal, or a 0-based page to restore. */
 export type PageTarget = { run: string } | { page: number }

@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { makeExecution, makeOffer, renderExecutionRow } from "../fixtures"
-import { type ExecutionOffer } from "../types"
+import { makeExecution, makeOffer } from "@/shared/console/runs/fixtures"
+import { type ExecutionOffer } from "@/shared/console/runs/types"
+import { renderExecutionRow } from "../fixtures"
 
 vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),

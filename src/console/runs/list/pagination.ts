@@ -8,13 +8,13 @@ import {
   useState,
 } from "react"
 import { type AudienceFilter } from "@/shared/console/list/audience"
-import { api } from "../../../../convex/_generated/api"
 import {
   type ApprovalFilter,
   type ExecutionItem,
   pageSize,
   type RunFilter,
-} from "../types"
+} from "@/shared/console/runs/types"
+import { api } from "../../../../convex/_generated/api"
 import { type PageTarget, useSeekTarget } from "./seek"
 
 export function useExecutionPagination(

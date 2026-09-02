@@ -4,12 +4,15 @@ import { AlertCircle, Check, Clock3, Loader2, UserPen, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { showErrorToast } from "@/shared/console/error"
+import { useRunRequestCarousel } from "@/shared/console/runs/request/carousel"
+import {
+  type RunRequestMeta,
+  RunRequestSection,
+} from "@/shared/console/runs/request/section"
+import { type ExecutionApproval } from "@/shared/console/runs/types"
 import { absoluteTime, expirationLabel } from "@/shared/console/time"
 import { ProviderLogo } from "@/shared/logo/provider"
 import { api } from "../../../../convex/_generated/api"
-import { type ExecutionApproval } from "../types"
-import { useRunRequestCarousel } from "./carousel"
-import { type RunRequestMeta, RunRequestSection } from "./section"
 
 type ApprovalDecisionArgs = FunctionArgs<typeof api.approvals.console.decide>
 

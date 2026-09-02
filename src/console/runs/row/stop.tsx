@@ -19,8 +19,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { showErrorToast } from "@/shared/console/error"
+import { type ExecutionItem } from "@/shared/console/runs/types"
 import { api } from "../../../../convex/_generated/api"
-import { type ExecutionItem } from "../types"
 
 export function StopExecution({
   className,
