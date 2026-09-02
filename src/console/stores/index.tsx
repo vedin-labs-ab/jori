@@ -21,7 +21,9 @@ import {
 import { type RowSelection, useRowSelection } from "../shared/list/selection"
 import { useFolderNames } from "../shared/materials/folders"
 import { bulkMaterialRemoval } from "../shared/materials/removal"
+import { VisibilityDialog } from "../shared/visibility/dialog"
 import { CreateStoreDialog } from "./create"
+import { EditStoreDialog } from "./edit"
 import { StoreList, StoresToolbar } from "./list"
 import {
   storeDeleteDescription,
@@ -44,7 +46,9 @@ export function StoresPage() {
 function useStoresPage(organizationId: string) {
   const [query, setQuery] = useState("")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [editing, setEditing] = useState<StoreSummary>()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
+  const [sharing, setSharing] = useState<StoreSummary>()
   const removal = useStoreRemoval(organizationId)
   const folders = useFolderNames(organizationId)
   const deferredQuery = useDeferredValue(query)
@@ -73,6 +77,7 @@ function useStoresPage(organizationId: string) {
     bulk: useStoreBulk(organizationId, selection),
     config,
     controls: resettingControls(controls, pagination.reset),
+    editing,
     folders,
     hasFilters,
     isCreateOpen,
@@ -81,8 +86,11 @@ function useStoresPage(organizationId: string) {
     query,
     removal,
     selection,
+    setEditing,
     setIsCreateOpen,
     setMoving,
+    setSharing,
+    sharing,
     setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
     storeList,
   }
@@ -103,7 +111,9 @@ function StoresView({ organizationId }: { organizationId: string }) {
         controls={page.controls}
         folders={page.folders}
         hasFilters={page.hasFilters}
+        onAccess={page.setSharing}
         onCreate={() => page.setIsCreateOpen(true)}
+        onEdit={page.setEditing}
         onMoveToFolder={(store) => page.setMoving([toMoveTarget(store)])}
         pagination={page.pagination}
         removal={page.removal}
@@ -111,6 +121,7 @@ function StoresView({ organizationId }: { organizationId: string }) {
         storeList={page.storeList}
       />
       <StoresOverlays organizationId={organizationId} page={page} />
+      <StoreRowDialogs organizationId={organizationId} page={page} />
     </ConsoleListLayout>
   )
 }
@@ -154,6 +165,44 @@ function StoresOverlays({
   )
 }
 
+/** What a row's Edit details and Sharing… open, hosted once for the list. */
+function StoreRowDialogs({
+  organizationId,
+  page,
+}: {
+  organizationId: string
+  page: ReturnType<typeof useStoresPage>
+}) {
+  return (
+    <>
+      <EditStoreDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            page.setEditing(undefined)
+          }
+        }}
+        organizationId={organizationId}
+        store={page.editing}
+      />
+      {page.sharing === undefined ? null : (
+        <VisibilityDialog
+          noun="store"
+          onOpenChange={(open) => {
+            if (!open) {
+              page.setSharing(undefined)
+            }
+          }}
+          open
+          organizationId={organizationId}
+          ownerId={page.sharing.ownerId}
+          target={{ kind: "store", id: page.sharing.storeId }}
+          value={page.sharing.visibility}
+        />
+      )}
+    </>
+  )
+}
+
 function toMoveTarget(store: StoreSummary): MoveResourceTarget {
   return {
     resourceType: "collection",
@@ -168,7 +217,9 @@ function StoresBody({
   controls,
   folders,
   hasFilters,
+  onAccess,
   onCreate,
+  onEdit,
   onMoveToFolder,
   pagination,
   removal,
@@ -179,7 +230,9 @@ function StoresBody({
   controls: ListControls
   folders: ReturnType<typeof useFolderNames>
   hasFilters: boolean
+  onAccess: (store: StoreSummary) => void
   onCreate: () => void
+  onEdit: (store: StoreSummary) => void
   onMoveToFolder: (store: StoreSummary) => void
   pagination: ReturnType<typeof useClientPagination<StoreSummary>>
   removal: ReturnType<typeof useStoreRemoval>
@@ -197,7 +250,9 @@ function StoresBody({
         controls={controls}
         folders={folders}
         hasFilters={hasFilters}
+        onAccess={onAccess}
         onCreate={onCreate}
+        onEdit={onEdit}
         onMoveToFolder={onMoveToFolder}
         removal={removal}
         selection={selection}

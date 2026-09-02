@@ -17,15 +17,16 @@ import { folderIcon } from "../../shared/materials/folders"
 import { materialOwner } from "../../shared/materials/owners"
 import { absoluteTime, relativeTime, useNow } from "../../shared/time"
 import { useFolderRowDrag } from "../drag/state"
+import { type FolderDialogRequest } from "../manage"
+import { FolderRowMenu } from "../menu"
 import { type ListedFolder } from "../types"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
 /** The full-bleed table both folder surfaces share: the /folders overview
  *  lists the root folders, a folder's page its contents. Identity columns
- *  lead — what a row is, and whose it is — and the measures follow. Cells
- *  carry a fixed height because rows differ in tallest content — a
- *  resource row's menu button outgrows a folder row's bare link — and
- *  mixed row heights read as a glitch. */
+ *  lead — what a row is, and whose it is — the measures follow, and the
+ *  last column carries every row's own menu. Cells hold a fixed height so
+ *  the menu button cannot make one row taller than its neighbours. */
 export function FolderListTable({
   children,
   controls,
@@ -58,7 +59,13 @@ export function FolderListTable({
  *  and drags like a sidebar row. A dotted icon marks a folder holding
  *  anything, matching the sidebar tree's cue, and the Owner cell shows
  *  whoever made it. */
-export function FolderListRow({ folder }: { folder: ListedFolder }) {
+export function FolderListRow({
+  folder,
+  onDialog,
+}: {
+  folder: ListedFolder
+  onDialog: (request: FolderDialogRequest) => void
+}) {
   const drag = useFolderRowDrag("contents", folder.folderId, folder.name)
   const now = useNow(30_000)
   const FolderIcon = folderIcon(folder.hasContents)
@@ -95,7 +102,9 @@ export function FolderListRow({ folder }: { folder: ListedFolder }) {
       >
         {relativeTime(folder.updatedAt, now)}
       </TableCell>
-      <TableCell />
+      <TableCell className="text-right">
+        <FolderRowMenu folder={folder} onDialog={onDialog} />
+      </TableCell>
     </TableRow>
   )
 }

@@ -1,14 +1,24 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { MaterialActions } from "./actions"
+import { MaterialRowMenu } from "./menu"
 
 afterEach(() => {
   cleanup()
 })
 
+test("a row offers the whole material menu, in order", () => {
+  renderMenu({ archivedAt: undefined })
+
+  openMenu()
+
+  expect(
+    screen.getAllByRole("menuitem").map((item) => item.textContent)
+  ).toEqual(["Edit details", "Sharing…", "Move to folder…", "Archive"])
+})
+
 test("active materials offer archive only", () => {
-  renderActions({ archivedAt: undefined })
+  renderMenu({ archivedAt: undefined })
 
   openMenu()
 
@@ -20,7 +30,7 @@ test("active materials offer archive only", () => {
 test("archived materials offer restore and permanent delete", () => {
   const onRestore = vi.fn()
 
-  renderActions({ archivedAt: 1, onRestore })
+  renderMenu({ archivedAt: 1, onRestore })
 
   openMenu()
   expect(screen.getByRole("menuitem", { name: "Delete" })).toBeDefined()
@@ -32,7 +42,7 @@ test("archived materials offer restore and permanent delete", () => {
 test("archive confirms before calling back", () => {
   const onDelete = vi.fn()
 
-  renderActions({ archivedAt: undefined, onDelete })
+  renderMenu({ archivedAt: undefined, onDelete })
 
   openMenu()
   fireEvent.click(screen.getByRole("menuitem", { name: "Archive" }))
@@ -44,24 +54,51 @@ test("archive confirms before calling back", () => {
   expect(onDelete).toHaveBeenCalledOnce()
 })
 
-function renderActions({
+test("a folder listing adds unfiling right after the move", () => {
+  const onUnfile = vi.fn()
+
+  renderMenu({ archivedAt: undefined, onUnfile })
+
+  openMenu()
+  const labels = screen.getAllByRole("menuitem").map((item) => item.textContent)
+
+  expect(labels).toEqual([
+    "Edit details",
+    "Sharing…",
+    "Move to folder…",
+    "Remove from folder",
+    "Archive",
+  ])
+
+  fireEvent.click(screen.getByRole("menuitem", { name: "Remove from folder" }))
+
+  expect(onUnfile).toHaveBeenCalledOnce()
+})
+
+function renderMenu({
   archivedAt,
   onDelete = () => undefined,
   onRestore = () => undefined,
+  onUnfile,
 }: {
   archivedAt: number | undefined
   onDelete?: () => void
   onRestore?: () => void
+  onUnfile?: () => void
 }) {
   return render(
-    <MaterialActions
+    <MaterialRowMenu
       deleteDescription="Deletes everything."
       isDeleting={false}
       isRestoring={false}
       material={{ name: "Invoices", archivedAt }}
       noun="table"
+      onAccess={() => undefined}
       onDelete={onDelete}
+      onEdit={() => undefined}
+      onMoveToFolder={() => undefined}
       onRestore={onRestore}
+      onUnfile={onUnfile}
     />
   )
 }

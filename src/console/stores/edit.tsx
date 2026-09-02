@@ -20,6 +20,12 @@ import {
 import { DialogForm } from "../shared/materials/form"
 import { type StoreDetail } from "./types"
 
+/** All an edit needs of a store; its summary and its detail both fit. */
+export type EditableStore = Pick<
+  StoreDetail,
+  "description" | "name" | "storeId"
+>
+
 /** Rename or describe the store; the schema is edited on the store page. */
 export function EditStoreDialog({
   onOpenChange,
@@ -28,7 +34,7 @@ export function EditStoreDialog({
 }: {
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
-  store: StoreDetail | undefined
+  store: EditableStore | undefined
 }) {
   const update = useMutation(api.stores.console.update)
   const [name, setName] = useState("")

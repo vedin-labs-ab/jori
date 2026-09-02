@@ -12,8 +12,8 @@ import {
   useMaterialTrail,
 } from "../shared/materials/breadcrumb"
 import { useLeaveDeletedFolder } from "./delete/leave"
-import { FolderTitleMenu } from "./header"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
+import { FolderTitleMenu } from "./menu"
 import { type FolderDetail } from "./types"
 import { FolderUsageHint } from "./usage/hint"
 
@@ -25,6 +25,15 @@ import { FolderUsageHint } from "./usage/hint"
  *  folder itself, or carries on to what it costs. */
 export type FolderView = "contents" | "usage"
 
+/** What a framed folder page is handed: the folder itself, the organization
+ *  it belongs to, and the two ways into the dialogs the frame hosts. */
+export type FramedFolder = {
+  folder: FolderDetail
+  onDialog: (request: FolderDialogRequest) => void
+  onNewFolder: () => void
+  organizationId: string
+}
+
 /** Resolves the folder a page is about and hands it over, replacing the
  *  whole view while it loads or when there is nothing to show. */
 export function FolderFrame({
@@ -33,15 +42,11 @@ export function FolderFrame({
   suffix,
   view,
 }: {
+  children: (framed: FramedFolder) => ReactNode
   /** What follows the usage page's name in its crumb, when it has a mark
    *  to hang there. Given the organization, which the crumb's home in the
    *  shell header cannot read from context. */
   suffix?: (organizationId: string) => ReactNode
-  children: (
-    folder: FolderDetail,
-    organizationId: string,
-    onNewFolder: () => void
-  ) => ReactNode
   folderId: string
   view: FolderView
 }) {
@@ -68,11 +73,7 @@ function FolderResolver({
   suffix,
   view,
 }: {
-  children: (
-    folder: FolderDetail,
-    organizationId: string,
-    onNewFolder: () => void
-  ) => ReactNode
+  children: (framed: FramedFolder) => ReactNode
   folderId: GenericId<"folders">
   organizationId: string
   suffix?: (organizationId: string) => ReactNode
@@ -98,9 +99,12 @@ function FolderResolver({
           <FolderFallback detail={detail} />
         </ConsoleListContent>
       ) : (
-        children(folder, organizationId, () =>
-          setDialog({ type: "create", parentId: folderId })
-        )
+        children({
+          folder,
+          onDialog: setDialog,
+          onNewFolder: () => setDialog({ type: "create", parentId: folderId }),
+          organizationId,
+        })
       )}
       <FolderDialogs
         dialog={dialog}

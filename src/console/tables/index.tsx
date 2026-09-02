@@ -21,7 +21,9 @@ import {
 import { type RowSelection, useRowSelection } from "../shared/list/selection"
 import { useFolderNames } from "../shared/materials/folders"
 import { bulkMaterialRemoval } from "../shared/materials/removal"
+import { VisibilityDialog } from "../shared/visibility/dialog"
 import { CreateTableDialog } from "./create"
+import { EditTableDialog } from "./edit"
 import { ImportTableDialog } from "./import/dialog"
 import { TableList, TablesToolbar } from "./list"
 import {
@@ -45,7 +47,9 @@ export function TablesPage() {
 function useTablesPage(organizationId: string) {
   const [query, setQuery] = useState("")
   const [dialog, setDialog] = useState<"create" | "import">()
+  const [editing, setEditing] = useState<TableSummary>()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
+  const [sharing, setSharing] = useState<TableSummary>()
   const removal = useTableRemoval(organizationId)
   const folders = useFolderNames(organizationId)
   const deferredQuery = useDeferredValue(query)
@@ -75,6 +79,7 @@ function useTablesPage(organizationId: string) {
     config,
     controls: resettingControls(controls, pagination.reset),
     dialog,
+    editing,
     folders,
     hasFilters,
     moving,
@@ -83,7 +88,10 @@ function useTablesPage(organizationId: string) {
     removal,
     selection,
     setDialog,
+    setEditing,
     setMoving,
+    setSharing,
+    sharing,
     setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
     tableList,
   }
@@ -105,7 +113,9 @@ function TablesView({ organizationId }: { organizationId: string }) {
         controls={page.controls}
         folders={page.folders}
         hasFilters={page.hasFilters}
+        onAccess={page.setSharing}
         onCreate={() => page.setDialog("create")}
+        onEdit={page.setEditing}
         onImport={() => page.setDialog("import")}
         onMoveToFolder={(table) => page.setMoving([toMoveTarget(table)])}
         pagination={page.pagination}
@@ -114,6 +124,7 @@ function TablesView({ organizationId }: { organizationId: string }) {
         tableList={page.tableList}
       />
       <TablesOverlays organizationId={organizationId} page={page} />
+      <TableRowDialogs organizationId={organizationId} page={page} />
     </ConsoleListLayout>
   )
 }
@@ -162,6 +173,44 @@ function TablesOverlays({
   )
 }
 
+/** What a row's Edit details and Sharing… open, hosted once for the list. */
+function TableRowDialogs({
+  organizationId,
+  page,
+}: {
+  organizationId: string
+  page: ReturnType<typeof useTablesPage>
+}) {
+  return (
+    <>
+      <EditTableDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            page.setEditing(undefined)
+          }
+        }}
+        organizationId={organizationId}
+        table={page.editing}
+      />
+      {page.sharing === undefined ? null : (
+        <VisibilityDialog
+          noun="table"
+          onOpenChange={(open) => {
+            if (!open) {
+              page.setSharing(undefined)
+            }
+          }}
+          open
+          organizationId={organizationId}
+          ownerId={page.sharing.ownerId}
+          target={{ kind: "table", id: page.sharing.tableId }}
+          value={page.sharing.visibility}
+        />
+      )}
+    </>
+  )
+}
+
 function toMoveTarget(table: TableSummary): MoveResourceTarget {
   return {
     resourceType: "collection",
@@ -176,7 +225,9 @@ function TablesBody({
   controls,
   folders,
   hasFilters,
+  onAccess,
   onCreate,
+  onEdit,
   onImport,
   onMoveToFolder,
   pagination,
@@ -188,7 +239,9 @@ function TablesBody({
   controls: ListControls
   folders: ReturnType<typeof useFolderNames>
   hasFilters: boolean
+  onAccess: (table: TableSummary) => void
   onCreate: () => void
+  onEdit: (table: TableSummary) => void
   onImport: () => void
   onMoveToFolder: (table: TableSummary) => void
   pagination: ReturnType<typeof useClientPagination<TableSummary>>
@@ -207,7 +260,9 @@ function TablesBody({
         controls={controls}
         folders={folders}
         hasFilters={hasFilters}
+        onAccess={onAccess}
         onCreate={onCreate}
+        onEdit={onEdit}
         onImport={onImport}
         onMoveToFolder={onMoveToFolder}
         removal={removal}

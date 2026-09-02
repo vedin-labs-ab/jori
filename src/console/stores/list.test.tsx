@@ -77,7 +77,9 @@ function renderList(
       controls={controls}
       folders={undefined}
       hasFilters={hasFilters}
+      onAccess={() => undefined}
       onCreate={() => undefined}
+      onEdit={() => undefined}
       onMoveToFolder={() => undefined}
       removal={removal}
       selection={stubSelection()}
@@ -161,4 +163,17 @@ test("visibility and archived marks ride the name cell", () => {
 
   expect(screen.getByText("Only me")).toBeDefined()
   expect(screen.getByText("Archived")).toBeDefined()
+})
+
+test("a row offers the store's whole menu, the way its page does", () => {
+  renderList([storeSummary()])
+
+  fireEvent.pointerDown(
+    screen.getByRole("button", { name: "Open actions for Settings" }),
+    { button: 0, ctrlKey: false }
+  )
+
+  expect(
+    screen.getAllByRole("menuitem").map((item) => item.textContent)
+  ).toEqual(["Edit details", "Sharing…", "Move to folder…", "Archive"])
 })

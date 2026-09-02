@@ -23,7 +23,7 @@ import { MaterialFolderCell } from "../shared/materials/cells/folder"
 import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
 import { FileNameCell, FileOwnerCell, FileTypeCell } from "./cells"
-import { FileMenu } from "./menu"
+import { FileRowMenu } from "./menu"
 import { type FileRow } from "./types"
 
 export function FileTable({
@@ -218,7 +218,7 @@ function FileTableRow({
         {relativeTime(file.updatedAt, now)}
       </TableCell>
       <TableCell className="text-right">
-        <FileMenu
+        <FileRowMenu
           file={file}
           isPending={isPending}
           onAccess={onAccess}

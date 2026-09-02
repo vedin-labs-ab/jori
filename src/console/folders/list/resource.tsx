@@ -1,19 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import {
-  Check,
-  FolderInput,
-  FolderMinus,
-  type LucideIcon,
-  MoreHorizontal,
-  Pause,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Check, type LucideIcon, Pause } from "lucide-react"
 import { TableCell, TableRow } from "@/components/ui/table"
 import {
   Tooltip,
@@ -27,21 +13,21 @@ import { VisibilityMark } from "../../shared/visibility/badge"
 import { type ResourceDragPayload } from "../drag/plan"
 import { useResourceRowDrag } from "../drag/state"
 import { type FolderResource, resourcePresentation } from "../types"
+import { type FolderResourceActions } from "./actions"
+import { ResourceRowMenu } from "./menu"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
 /** One filed resource in a folder's listing, linking to its own surface.
  *  The row drags: resources file onto any folder row or unfile onto the
  *  sidebar's group header. */
 export function ResourceListRow({
+  actions,
   folderId,
-  onMove,
-  onUnfile,
   resource,
 }: {
+  actions: FolderResourceActions
   /** The folder being viewed — the one the resource already sits in. */
   folderId: string
-  onMove: (resource: FolderResource) => void
-  onUnfile: (resource: FolderResource) => void
   resource: FolderResource
 }) {
   const drag = useResourceRowDrag(resourcePayload(resource, folderId))
@@ -78,7 +64,7 @@ export function ResourceListRow({
         {relativeTime(resource.updatedAt, now)}
       </TableCell>
       <TableCell className="text-right">
-        <ResourceMenu onMove={onMove} onUnfile={onUnfile} resource={resource} />
+        <ResourceRowMenu actions={actions} resource={resource} />
       </TableCell>
     </TableRow>
   )
@@ -115,41 +101,6 @@ const statusMarks: Partial<
 > = {
   completed: { icon: Check, label: "Completed" },
   paused: { icon: Pause, label: "Paused" },
-}
-
-function ResourceMenu({
-  onMove,
-  onUnfile,
-  resource,
-}: {
-  onMove: (resource: FolderResource) => void
-  onUnfile: (resource: FolderResource) => void
-  resource: FolderResource
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={`Open actions for ${resource.name}`}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
-        >
-          <MoreHorizontal />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onSelect={() => onMove(resource)}>
-          <FolderInput />
-          Move to folder…
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onUnfile(resource)}>
-          <FolderMinus />
-          Remove from folder
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
 }
 
 function resourcePayload(

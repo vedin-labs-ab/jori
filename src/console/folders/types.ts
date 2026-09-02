@@ -16,6 +16,7 @@ export type FolderRootsResult = FunctionReturnType<
  *  page's listed children both satisfy it. */
 export type ListedFolder = Pick<
   FolderRootsResult["folders"][number],
+  | "createdBy"
   | "folderCount"
   | "folderId"
   | "hasContents"
@@ -23,8 +24,10 @@ export type ListedFolder = Pick<
   | "ownerId"
   | "ownerImage"
   | "ownerName"
+  | "parentId"
   | "resourceCount"
   | "updatedAt"
+  | "visibility"
 >
 
 export type FolderDetail = NonNullable<

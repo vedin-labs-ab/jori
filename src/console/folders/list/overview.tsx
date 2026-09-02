@@ -14,8 +14,8 @@ import {
 import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import { useMaterialTrail } from "../../shared/materials/breadcrumb"
-import { FoldersTitleMenu } from "../header"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
+import { FoldersTitleMenu } from "../menu"
 import { type FolderRootsResult } from "../types"
 import { FolderUsageHint } from "../usage/hint"
 import { useFolderListControls } from "./controls"
@@ -60,12 +60,12 @@ function RootFolders({ organizationId }: { organizationId: string }) {
           type="button"
         />
       </ConsoleHeaderActions>
-      <RootFolderList onCreate={create} roots={roots} />
+      <RootFolderList onCreate={create} onDialog={setDialog} roots={roots} />
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
-        // Only the create dialog is reachable from this page, so a deletion
-        // can never need navigation away.
+        // Root folders delete from their own rows here; the page they leave
+        // behind is the listing itself, so nothing has to navigate away.
         onDeleted={() => undefined}
         organizationId={organizationId}
       />
@@ -75,9 +75,11 @@ function RootFolders({ organizationId }: { organizationId: string }) {
 
 export function RootFolderList({
   onCreate,
+  onDialog,
   roots,
 }: {
   onCreate: () => void
+  onDialog: (request: FolderDialogRequest) => void
   roots: FolderRootsResult | undefined
 }) {
   const list = useFolderListControls({
@@ -141,7 +143,11 @@ export function RootFolderList({
         </EmptyRow>
       ) : (
         visible.map((folder) => (
-          <FolderListRow folder={folder} key={folder.folderId} />
+          <FolderListRow
+            folder={folder}
+            key={folder.folderId}
+            onDialog={onDialog}
+          />
         ))
       )}
     </FolderListTable>

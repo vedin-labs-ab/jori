@@ -1,0 +1,222 @@
+// @vitest-environment jsdom
+import { DndContext } from "@dnd-kit/core"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { type FolderDialogRequest } from "../manage"
+import { type FolderContentsResult } from "../types"
+import { type FolderResourceActions } from "./actions"
+import { FolderContents } from "./contents"
+
+// What a folder listing's rows offer: each kind's own menu, with the one
+// item only a listing can carry — leaving the folder — sitting right after
+// the move that would put it in another one.
+
+vi.mock("@tanstack/react-router", async () => ({
+  Link: (await import("../../../../test/router")).Link,
+}))
+
+vi.mock("convex/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("convex/react")>()),
+  useMutation: () => () => Promise.resolve({}),
+  useQuery: () => undefined,
+}))
+
+afterEach(cleanup)
+
+test("a filed table offers the menu its own list row offers, plus unfiling", () => {
+  const actions = stubActions()
+
+  renderRows({ resources: [tableResource] }, { actions })
+  openActions("Leads")
+
+  expect(itemLabels()).toEqual([
+    "Edit details",
+    "Sharing…",
+    "Move to folder…",
+    "Remove from folder",
+    "Archive",
+  ])
+
+  fireEvent.click(screen.getByRole("menuitem", { name: "Sharing…" }))
+
+  expect(actions.onAccess).toHaveBeenCalledOnce()
+})
+
+test("a subfolder row opens the folder's own menu", () => {
+  const onDialog = vi.fn()
+
+  renderRows({ folders: [folderRow] }, { onDialog })
+  openActions("Guides")
+
+  expect(itemLabels()).toEqual([
+    "Usage",
+    "Rename",
+    "Sharing…",
+    "Move to folder…",
+    "Delete",
+  ])
+
+  fireEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
+
+  expect(onDialog).toHaveBeenCalledWith({
+    type: "rename",
+    folder: expect.objectContaining({ folderId: "folder-1" }),
+  })
+})
+
+test("a filed file offers its own menu; the links resolve on demand", () => {
+  renderRows({ resources: [fileResource] })
+  openActions("costs.csv")
+
+  // Open and Download wait on the file's URL, which a listing row does not
+  // carry; everything the row already knows is there at once.
+  expect(itemLabels()).toEqual([
+    "Edit details",
+    "Sharing…",
+    "Move to folder…",
+    "Remove from folder",
+    "Delete",
+  ])
+})
+
+test("a filed automation offers the menu its own page offers", () => {
+  const automation = {
+    id: "automation-1",
+    name: "Digest",
+    status: "paused",
+    type: "cron",
+  } as ReturnType<FolderResourceActions["automationOf"]>
+
+  renderRows(
+    { resources: [automationResource] },
+    { actions: stubActions({ automationOf: () => automation }) }
+  )
+  openActions("Digest")
+
+  expect(itemLabels()).toEqual([
+    "Edit",
+    "Move to folder…",
+    "Remove from folder",
+    "Resume",
+    "Delete",
+  ])
+})
+
+test("an automation still being resolved offers only what the filing knows", () => {
+  renderRows({ resources: [automationResource] })
+  openActions("Digest")
+
+  expect(itemLabels()).toEqual(["Move to folder…", "Remove from folder"])
+})
+
+const folderRow = {
+  folderId: "folder-1",
+  name: "Guides",
+  parentId: "folder-0",
+  visibility: { mode: "organization" },
+  createdBy: "persons:owner",
+  createdAt: 1,
+  updatedAt: Date.now(),
+  hasContents: true,
+  folderCount: 0,
+  resourceCount: 0,
+  ownerId: "persons:owner",
+  ownerName: "Ada Lovelace",
+}
+
+const tableResource = {
+  type: "table",
+  id: "table-1",
+  name: "Leads",
+  visibility: "organization",
+  updatedAt: Date.now(),
+}
+
+const fileResource = {
+  type: "file",
+  id: "file-1",
+  name: "costs.csv",
+  mimeType: "text/csv",
+  visibility: "organization",
+  updatedAt: Date.now(),
+}
+
+const automationResource = {
+  type: "automation",
+  id: "automation-1",
+  name: "Digest",
+  visibility: "organization",
+  status: "paused",
+  updatedAt: Date.now(),
+}
+
+/** The rows only ever raise requests, so the page's live wiring stands in
+ *  as a bag of spies. */
+function stubActions(
+  overrides: Partial<FolderResourceActions> = {}
+): FolderResourceActions {
+  return {
+    automationOf: () => undefined,
+    editor: {} as FolderResourceActions["editor"],
+    files: {
+      deleteFile: () => undefined,
+      pendingFileId: undefined,
+      saveFile: () => undefined,
+    },
+    onAccess: vi.fn(),
+    onEdit: vi.fn(),
+    onMove: vi.fn(),
+    onUnfile: vi.fn(),
+    organizationId: "org-1",
+    removal: {
+      isDeleting: () => false,
+      isRestoring: () => false,
+      remove: vi.fn(),
+      restore: vi.fn(),
+    },
+    ...overrides,
+  }
+}
+
+function renderRows(
+  listed: { folders?: unknown[]; resources?: unknown[] },
+  {
+    actions = stubActions(),
+    onDialog = () => undefined,
+  }: {
+    actions?: FolderResourceActions
+    onDialog?: (request: FolderDialogRequest) => void
+  } = {}
+) {
+  render(
+    <TooltipProvider>
+      <DndContext>
+        <FolderContents
+          actions={actions}
+          contents={
+            {
+              status: "ready",
+              folders: listed.folders ?? [],
+              resources: listed.resources ?? [],
+            } as unknown as FolderContentsResult
+          }
+          folderId="folder-0"
+          newMenu={<button type="button">New</button>}
+          onDialog={onDialog}
+        />
+      </DndContext>
+    </TooltipProvider>
+  )
+}
+
+function openActions(name: string) {
+  fireEvent.pointerDown(
+    screen.getByRole("button", { name: `Open actions for ${name}` }),
+    { button: 0, ctrlKey: false }
+  )
+}
+
+function itemLabels() {
+  return screen.getAllByRole("menuitem").map((item) => item.textContent)
+}

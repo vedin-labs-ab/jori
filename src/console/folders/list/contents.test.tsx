@@ -4,10 +4,17 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type FolderContentsResult } from "../types"
+import { type FolderResourceActions } from "./actions"
 import { FolderContents } from "./contents"
 
 vi.mock("@tanstack/react-router", async () => ({
   Link: (await import("../../../../test/router")).Link,
+}))
+
+vi.mock("convex/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("convex/react")>()),
+  useMutation: () => () => Promise.resolve({}),
+  useQuery: () => undefined,
 }))
 
 afterEach(cleanup)
@@ -63,16 +70,25 @@ const readyContents = {
   ],
 } as FolderContentsResult
 
+/** What the rows can do is covered in menu.test.tsx; this file is about
+ *  the table they sit in. */
+const inertActions = {
+  automationOf: () => undefined,
+  files: { pendingFileId: undefined },
+  organizationId: "org-1",
+  removal: { isDeleting: () => false, isRestoring: () => false },
+} as unknown as FolderResourceActions
+
 function renderContents(contents: FolderContentsResult | undefined) {
   render(
     <TooltipProvider>
       <DndContext>
         <FolderContents
+          actions={inertActions}
           contents={contents}
           folderId="folder-0"
           newMenu={<button type="button">New</button>}
-          onMove={() => undefined}
-          onUnfile={() => undefined}
+          onDialog={() => undefined}
         />
       </DndContext>
     </TooltipProvider>
