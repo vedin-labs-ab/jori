@@ -145,9 +145,10 @@ test("a folder row is a way further in, reads like a source row, and wears its c
 
   const [row] = rows()
 
+  // The row carries the window into the folder's own usage page.
   expect(
     screen.getByRole("link", { name: "Folder 0" }).getAttribute("href")
-  ).toBe("/folders/folders:0/usage")
+  ).toBe("/folders/folders:0/usage?days=30")
   expect(cells(row as HTMLElement)).toEqual([
     "Folder 0",
     "2",
