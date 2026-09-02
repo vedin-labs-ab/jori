@@ -5,9 +5,9 @@ import {
   Files,
   Layers,
   Library,
-  ListChecks,
   type LucideIcon,
   Table2,
+  Timeline,
 } from "lucide-react"
 
 export type ConsoleSurface = {
@@ -22,14 +22,14 @@ type ConsoleGroup = {
 }
 
 /**
- * The sidebar's structure. Runs stands alone at the top: it is the daily
+ * The sidebar's structure. Activity stands alone at the top: it is the daily
  * surface, not a member of any category. "Resources" holds exactly the four
  * types that can be filed into folders. The platform group renders at the
  * sidebar's bottom, above the user button — low-frequency setup and
  * reference surfaces earn the quiet slot, not a louder label.
  */
 export const consoleNavigation: readonly ConsoleGroup[] = [
-  { items: [{ icon: ListChecks, label: "Runs", to: "/runs" }] },
+  { items: [{ icon: Timeline, label: "Activity", to: "/runs" }] },
   {
     label: "Resources",
     items: [
@@ -94,7 +94,7 @@ export function isMaterialPage(pathname: string) {
  * page can never be called one thing in the app and another in history.
  *
  * The page comes first: a tab strip with eight consoles open truncates from
- * the right, and "Runs" is the half worth keeping.
+ * the right, and "Activity" is the half worth keeping.
  */
 export function consoleDocumentTitle(pathname: string) {
   return `${getPageTitle(pathname)} · Jori`

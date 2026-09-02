@@ -20,9 +20,9 @@ export function ActivityEmpty() {
         <Logs />
       </EmptyMedia>
       <EmptyHeader>
-        <EmptyTitle>No activity yet</EmptyTitle>
+        <EmptyTitle>Nothing logged yet</EmptyTitle>
         <EmptyDescription>
-          Activity appears when the run starts executing.
+          The log fills in once the run starts executing.
         </EmptyDescription>
       </EmptyHeader>
     </Empty>
