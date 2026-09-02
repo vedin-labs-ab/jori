@@ -34,3 +34,8 @@ export function parseHref(href: string): DemoLocation {
     search: Object.fromEntries(url.searchParams),
   }
 }
+
+/** A mock console's navigation as its host holds it: where the console
+ *  is, and the navigation that moves it, so something outside the box (a
+ *  chip in a thread) can send the console somewhere too. */
+export type DemoNavigation = ReturnType<typeof useDemoNavigation>

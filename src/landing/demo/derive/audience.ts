@@ -13,9 +13,15 @@ import { materialOf } from "./materials"
 
 type Gate = { owner: PersonId | undefined; visibility: Visibility }
 
+/** What an audience is resolved for: something in the workspace, or a
+ *  draft not in it yet, filed (or not) in a folder. */
+export type AudienceTarget =
+  | VisibilityTarget
+  | { kind: "draft"; folderId: string | null }
+
 export function resolveAudience(
   state: DemoState,
-  target: VisibilityTarget,
+  target: AudienceTarget,
   visibility: Visibility
 ): ResolvedAudience {
   const chain = folderChain(state, target)
@@ -44,7 +50,7 @@ export function resolveAudience(
 }
 
 /** The folders above the target, nearest first. */
-function folderChain(state: DemoState, target: VisibilityTarget) {
+function folderChain(state: DemoState, target: AudienceTarget) {
   const filedIn = filedFolderId(state, target)
   const ids =
     target.kind === "folder"
@@ -62,8 +68,12 @@ function folderChain(state: DemoState, target: VisibilityTarget) {
 
 function filedFolderId(
   state: DemoState,
-  target: VisibilityTarget
+  target: AudienceTarget
 ): FolderId | undefined {
+  if (target.kind === "draft") {
+    return (target.folderId as FolderId | null) ?? undefined
+  }
+
   if (target.kind === "job") {
     return state.jobs.find((job) => job.id === target.id)?.folderId
   }
@@ -71,12 +81,12 @@ function filedFolderId(
   return materialOf(state, target.id)?.folderId
 }
 
-function ownerOf(state: DemoState, target: VisibilityTarget) {
+function ownerOf(state: DemoState, target: AudienceTarget) {
   if (target.kind === "folder") {
     return folderOf(state, target.id)?.createdBy
   }
 
-  if (target.kind === "job") {
+  if (target.kind === "job" || target.kind === "draft") {
     return undefined
   }
 

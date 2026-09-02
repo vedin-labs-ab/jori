@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { AudienceSentence } from "@/shared/console/visibility/audience"
 import { SharingDialog } from "@/shared/console/visibility/dialog"
 import { VisibilityField } from "@/shared/console/visibility/field"
-import { resolveAudience } from "../derive/audience"
+import { type AudienceTarget, resolveAudience } from "../derive/audience"
 import { grantOptions, viewerId } from "../fixtures/people"
 import { type VisibilityTarget } from "../state/types"
 import { useDemoWorkspace } from "../workspace"
@@ -63,7 +63,7 @@ export function DemoAudience({
   target,
   value,
 }: {
-  target: VisibilityTarget
+  target: AudienceTarget
   value: Visibility
 }) {
   const { state } = useDemoWorkspace()

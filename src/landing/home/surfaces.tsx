@@ -1,36 +1,20 @@
 import { integrationLabels, integrations } from "@contracts/integrations"
 import { CircleDot } from "lucide-react"
 import { IntegrationLogo } from "@/shared/logo/integration"
-import { Chip, Definition, Mention, Prop, Section } from "../section"
+import { Chip, Mention, Prop, Section } from "../section"
 
-/** The multiplayer pillar, never named as one: one memory reachable from
- *  every surface is the demonstration. The mention props carry the "answers
- *  in the thread" half beside the terms that claim it. */
+/** The surfaces: a mention in a thread is the other way in, and what comes
+ *  back lands in the same folders. The two cards are message surfaces, not
+ *  console screens, so they stay drawn. */
 export function Surfaces() {
   return (
     <Section
-      id="everywhere"
-      lede="Mention it in Slack, GitHub, or Linear. Email it. Open the console. Every surface reaches the same teammate with the same memory, so nothing gets re-explained and nothing is stuck in one person's tab."
+      lede="Mention it in Slack, GitHub, or Linear and it answers in the thread. When the answer is a table, a store, or a file, it sends a link into the folder, readable by anyone you send it to."
+      support
       title="Wherever you work, it's the same Jori"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
-        <div>
-          <dl className="space-y-8">
-            <Definition term="One memory">
-              What one person teaches it, the whole company keeps. Corrections
-              stick, and context carries over between surfaces.
-            </Definition>
-            <Definition term="Answers in the thread">
-              Mention Jori where the work came up and the one-off job gets done
-              right there, not in a separate tool someone has to open.
-            </Definition>
-            <Definition term="Sharper the longer it runs">
-              Every run adds to what Jori knows about your company. This is the
-              part a new tool can't copy on the day you switch.
-            </Definition>
-          </dl>
-          <Integrations />
-        </div>
+        <Integrations />
         <div className="grid gap-4">
           <LinearMention />
           <GitHubMention />
@@ -45,7 +29,7 @@ export function Surfaces() {
  *  reading as a short list. */
 function Integrations() {
   return (
-    <div className="mt-12">
+    <div>
       <p className="text-muted-foreground text-sm">
         Modeled in depth, not just connected.
       </p>
@@ -75,11 +59,8 @@ function Integrations() {
 //
 // Two, and deliberately two. Four cards spent the page's least differentiated
 // claim four times over, and three of them were the same question wearing
-// different chrome.
-//
-// Linear rather than Slack for the second, because the jobs section
-// below is already a Slack thread. A third tool on the page is worth more
-// here than a third look at the same one.
+// different chrome. Linear and GitHub rather than Slack, because the hero is
+// already a Slack thread.
 function GitHubMention() {
   return (
     <Prop

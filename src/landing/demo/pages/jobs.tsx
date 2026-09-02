@@ -28,7 +28,7 @@ const itemLabel = { singular: "job", plural: "jobs" }
 const initialFilters: JobFilters = {
   audience: "all",
   query: "",
-  status: "active",
+  status: "all",
 }
 
 /** The Jobs page over the workspace: the filters, the cards, the pager,
