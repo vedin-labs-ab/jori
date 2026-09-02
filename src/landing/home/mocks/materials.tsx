@@ -10,7 +10,7 @@ export function Materials() {
 
   return (
     <Section
-      lede="A job doesn't answer in a chat window. It writes rows to a table, a value to a store, a file to a folder. You and Jori edit the same materials under the same sharing, so anything it keeps current is something anyone can check and correct."
+      lede="A job doesn't answer in a chat window. It writes rows to a table, a value to a store, a file to a folder. You and Jori edit the same materials with the same access, so anything it keeps current is something anyone can check and correct."
       title="Work lands where you can find it"
     >
       <dl className="grid gap-8 md:grid-cols-3 lg:gap-12">
@@ -18,8 +18,8 @@ export function Materials() {
           Typed columns, a grid people edit by hand, CSV in and out.
         </Definition>
         <Definition term="Stores">
-          One JSON document, with a schema if you want one. The state a job
-          carries between runs.
+          One JSON document under a schema you define. The state a job carries
+          between runs.
         </Definition>
         <Definition term="Files">
           Anything, viewed in place: a PDF, an image, a page of notes. Jori

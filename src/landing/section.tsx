@@ -85,7 +85,7 @@ export function Definition({
 }: {
   children: ReactNode
   icon?: LucideIcon
-  term: string
+  term: ReactNode
 }) {
   return (
     <div>
@@ -131,11 +131,14 @@ export function Prop({
 }
 
 const sigils = {
-  access: { glyph: "@", className: "-rotate-6 bg-primary/15 text-primary" },
-  skill: { glyph: "/", className: "rotate-3 bg-warning/15 text-warning" },
+  access: {
+    glyph: "@",
+    className: "-rotate-[8deg] bg-primary/15 text-primary",
+  },
+  skill: { glyph: "/", className: "rotate-[6deg] bg-warning/15 text-warning" },
   tool: {
     glyph: "#",
-    className: "-rotate-3 bg-informational/15 text-informational",
+    className: "-rotate-[6deg] bg-chart-1/15 text-chart-1",
   },
 }
 

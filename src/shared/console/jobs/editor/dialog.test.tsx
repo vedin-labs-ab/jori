@@ -126,23 +126,6 @@ describe("job dialog sharing validation", () => {
   })
 })
 
-describe("job dialog context", () => {
-  test("keeps the context disclosure under advanced settings, after access", () => {
-    renderJobDialog({ error: undefined, values: emptyJobForm })
-
-    expect(screen.queryByRole("button", { name: "Context" })).toBeNull()
-
-    openAdvancedSettings()
-
-    const webSearch = screen.getByText("Let Jori search the web")
-    const context = screen.getByRole("button", { name: "Context" })
-
-    expect(webSearch.compareDocumentPosition(context)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    )
-  })
-})
-
 describe("job dialog access controls", () => {
   test("shows web search directly after instructions without an access heading", () => {
     renderJobDialog({

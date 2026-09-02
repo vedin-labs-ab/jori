@@ -10,7 +10,7 @@ import { folderImpact, folderMoveSubject } from "../derive/folders"
 import { type FolderId } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
 import { DemoMoveDialog } from "./move"
-import { DemoSharingDialog } from "./sharing"
+import { DemoVisibilityDialog } from "./visibility"
 
 type DialogProps = {
   dialog: FolderDialogRequest | undefined
@@ -50,7 +50,10 @@ export function DemoFolderDialogs({
         onDeleted={onDeleted}
         onOpenChange={closeWhenDismissed}
       />
-      <FolderSharingDialog dialog={dialog} onOpenChange={closeWhenDismissed} />
+      <FolderVisibilityDialog
+        dialog={dialog}
+        onOpenChange={closeWhenDismissed}
+      />
     </>
   )
 }
@@ -136,7 +139,7 @@ function RemoveFolderDialog({
   )
 }
 
-function FolderSharingDialog({ dialog, onOpenChange }: DialogProps) {
+function FolderVisibilityDialog({ dialog, onOpenChange }: DialogProps) {
   const access = useRetained(dialog?.type === "access" ? dialog : undefined)
 
   if (access === undefined) {
@@ -144,7 +147,7 @@ function FolderSharingDialog({ dialog, onOpenChange }: DialogProps) {
   }
 
   return (
-    <DemoSharingDialog
+    <DemoVisibilityDialog
       noun="folder"
       onOpenChange={onOpenChange}
       open={dialog?.type === "access"}

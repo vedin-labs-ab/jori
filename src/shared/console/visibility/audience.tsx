@@ -1,5 +1,6 @@
 import { type Visibility } from "@contracts/visibility"
 import { type FunctionReturnType } from "convex/server"
+import { Folder } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
@@ -19,15 +20,19 @@ type AudienceProps = {
   viewerId: string | null
 }
 
-/** The line under a sharing field: who the draft reaches, and the folder
- *  that narrowed it when one did. */
+/** The line under a visibility field: who the draft reaches, and the
+ *  folder that narrowed it when one did. */
 export function AudienceLine({ audience, mode, viewerId }: AudienceProps) {
   return (
-    <p className="text-muted-foreground text-sm">
+    <p className="text-muted-foreground text-xs">
       <AudienceSentence audience={audience} mode={mode} viewerId={viewerId} />
-      {audience.narrowedBy === null || mode === "organization"
-        ? null
-        : ` Narrowed to ${audience.narrowedBy} by the folder it's in.`}
+      {audience.narrowedBy === null || mode === "organization" ? null : (
+        <>
+          {" "}
+          Narrowed to <NarrowingFolder name={audience.narrowedBy} /> by the
+          folder it's in.
+        </>
+      )}
     </p>
   )
 }
@@ -37,9 +42,14 @@ export function AudienceLine({ audience, mode, viewerId }: AudienceProps) {
  *  audiences are counted, with the names a hover away. */
 export function AudienceSentence({ audience, mode, viewerId }: AudienceProps) {
   if (mode === "organization") {
-    return audience.narrowedBy === null
-      ? "Visible to everyone in the organization."
-      : `Visible to everyone who can see ${audience.narrowedBy}.`
+    return audience.narrowedBy === null ? (
+      "Visible to everyone in the organization."
+    ) : (
+      <>
+        Visible to everyone who can see{" "}
+        <NarrowingFolder name={audience.narrowedBy} />.
+      </>
+    )
   }
 
   const { people } = audience
@@ -56,6 +66,17 @@ export function AudienceSentence({ audience, mode, viewerId }: AudienceProps) {
     <>
       Visible to <PeopleCount people={people} />.
     </>
+  )
+}
+
+/** The folder doing the narrowing, marked as a folder so it can be found
+ *  in the sentence at a glance. */
+function NarrowingFolder({ name }: { name: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 align-bottom">
+      <Folder aria-hidden className="size-3.5 shrink-0" />
+      <span className="font-medium text-foreground">{name}</span>
+    </span>
   )
 }
 

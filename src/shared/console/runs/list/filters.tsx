@@ -21,7 +21,7 @@ import {
   runFilterOptions,
 } from "../types"
 
-/** The page's search, in the header, and the Status, Sharing, and
+/** The page's search, in the header, and the Status, Visibility, and
  *  Approval controls under it. */
 export const ExecutionFilters = memo(function ExecutionFilters({
   approvalFilter,
@@ -60,7 +60,7 @@ export const ExecutionFilters = memo(function ExecutionFilters({
           value={runFilter}
         />
         <ConsoleFilterToggle
-          label="Sharing"
+          label="Visibility"
           onValueChange={setAudienceFilter}
           options={audienceFilterOptions}
           value={audienceFilter}

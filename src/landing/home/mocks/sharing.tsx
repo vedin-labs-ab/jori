@@ -1,9 +1,9 @@
 import { ClientOnly } from "@tanstack/react-router"
 import { MaterialLinks } from "@/shared/console/materials/links"
-import { SharingFields } from "@/shared/console/visibility/dialog"
+import { VisibilityFields } from "@/shared/console/visibility/dialog"
 import { VisibilityField } from "@/shared/console/visibility/field"
 import { materialOf } from "../../demo/derive/materials"
-import { DemoAudience } from "../../demo/dialogs/sharing"
+import { DemoAudience } from "../../demo/dialogs/visibility"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { grantOptions } from "../../demo/fixtures/people"
 import { useDemoShares, useShareActions } from "../../demo/shares"
@@ -61,13 +61,13 @@ function RenewalsSharing() {
       className="min-w-0"
       label={
         <>
-          <span className="font-medium text-foreground">Sharing</span>
+          <span className="font-medium text-foreground">Visibility</span>
           <span>Customer renewals · Finance › Renewals</span>
         </>
       }
     >
       <div className="p-4">
-        <SharingFields
+        <VisibilityFields
           audience={<DemoAudience target={target} value={table.visibility} />}
           canEdit
           field={

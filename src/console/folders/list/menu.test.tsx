@@ -35,13 +35,13 @@ test("a filed table offers the menu its own list row offers, plus unfiling", () 
 
   expect(itemLabels()).toEqual([
     "Edit details",
-    "Sharing…",
+    "Visibility…",
     "Move to folder…",
     "Remove from folder",
     "Archive",
   ])
 
-  fireEvent.click(screen.getByRole("menuitem", { name: "Sharing…" }))
+  fireEvent.click(screen.getByRole("menuitem", { name: "Visibility…" }))
 
   expect(actions.onAccess).toHaveBeenCalledOnce()
 })
@@ -55,7 +55,7 @@ test("a subfolder row opens the folder's own menu", () => {
   expect(itemLabels()).toEqual([
     "Usage",
     "Rename",
-    "Sharing…",
+    "Visibility…",
     "Move to folder…",
     "Delete",
   ])
@@ -76,7 +76,7 @@ test("a filed file offers its own menu; the links resolve on demand", () => {
   // carry; everything the row already knows is there at once.
   expect(itemLabels()).toEqual([
     "Edit details",
-    "Sharing…",
+    "Visibility…",
     "Move to folder…",
     "Remove from folder",
     "Delete",

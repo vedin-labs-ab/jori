@@ -31,8 +31,9 @@ export function ToolReferencesLoader(props: ToolReferenceLoaderProps) {
 }
 
 /** Row action revealed on hover: opens the tool's wire schemas. Pending
- *  mirrors the Advanced settings idiom — spinner in the icon slot and a
- *  disabled trigger — for the rare click that beats the data. */
+ *  mirrors the Advanced settings idiom, a spinner in the icon slot and a
+ *  disabled trigger, for the rare click that beats the data. Without a
+ *  host to serve schemas there is nothing to open, so nothing is offered. */
 export function ToolSchemaButton({
   onClick,
   onWarm,
@@ -45,6 +46,12 @@ export function ToolSchemaButton({
   pending: boolean
   toolLabel: string
 }) {
+  const hasHost = useContext(ToolReferenceContext) !== undefined
+
+  if (!hasHost) {
+    return null
+  }
+
   return (
     <Button
       aria-label={`View the ${toolLabel} schema`}

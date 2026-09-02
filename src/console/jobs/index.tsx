@@ -211,7 +211,7 @@ function JobFilters({
           value={filter}
         />
         <ConsoleFilterToggle
-          label="Sharing"
+          label="Visibility"
           onValueChange={setAudience}
           options={audienceFilterOptions}
           value={audience}

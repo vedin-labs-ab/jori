@@ -14,7 +14,7 @@ test("a row offers the whole material menu, in order", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Edit details", "Sharing…", "Move to folder…", "Archive"])
+  ).toEqual(["Edit details", "Visibility…", "Move to folder…", "Archive"])
 })
 
 test("active materials offer archive only", () => {
@@ -64,7 +64,7 @@ test("a folder listing adds unfiling right after the move", () => {
 
   expect(labels).toEqual([
     "Edit details",
-    "Sharing…",
+    "Visibility…",
     "Move to folder…",
     "Remove from folder",
     "Archive",

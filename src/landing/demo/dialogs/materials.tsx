@@ -5,7 +5,7 @@ import { fileRowOf, materialMoveSubject } from "../derive/materials"
 import { type DemoMaterial } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
 import { DemoMoveDialog } from "./move"
-import { DemoSharingDialog } from "./sharing"
+import { DemoVisibilityDialog } from "./visibility"
 
 /** What a material's menu can open: its details, its sharing, or a move. */
 export type MaterialRequest = {
@@ -48,7 +48,7 @@ export function MaterialDialogs({
         onOpenChange={closeWhenDismissed}
         open={request?.kind === "edit"}
       />
-      <DemoSharingDialog
+      <DemoVisibilityDialog
         noun={material.kind}
         onOpenChange={closeWhenDismissed}
         open={request?.kind === "access"}

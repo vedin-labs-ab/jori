@@ -5,7 +5,7 @@ import {
   tableNoun,
 } from "@/shared/console/tables/list/config"
 import { MoveResourcesDialog } from "../folders/move"
-import { VisibilityDialog } from "../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { CreateTableDialog } from "./create"
 import { EditTableDialog } from "./edit"
 import { ImportTableDialog } from "./import/dialog"
@@ -75,7 +75,7 @@ export function TableRowDialogs({
         table={page.editing}
       />
       {page.sharing === undefined ? null : (
-        <VisibilityDialog
+        <OrganizationVisibilityDialog
           noun="table"
           onOpenChange={(open) => {
             if (!open) {

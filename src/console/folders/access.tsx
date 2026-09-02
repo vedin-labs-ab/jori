@@ -1,5 +1,5 @@
 import { type ManagedFolder } from "@/shared/console/folders/types"
-import { VisibilityDialog } from "../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 
 /** Access settings for one folder, raised from its menus. The folder's
  *  visibility cascades over everything filed inside it, so this is where a
@@ -20,7 +20,7 @@ export function FolderAccessDialog({
   }
 
   return (
-    <VisibilityDialog
+    <OrganizationVisibilityDialog
       noun="folder"
       onOpenChange={onOpenChange}
       open={isOpen}

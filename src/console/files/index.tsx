@@ -30,7 +30,7 @@ import { useRowSelection } from "@/shared/console/list/selection"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
-import { VisibilityDialog } from "../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { toMoveTarget, useFileActions, useFileBulk } from "./manage"
 import { UploadFileDialog } from "./upload"
 
@@ -182,7 +182,7 @@ function FilesOverlays({
         onSave={page.actions.saveFile}
       />
       {page.accessFile === undefined ? null : (
-        <VisibilityDialog
+        <OrganizationVisibilityDialog
           noun="file"
           onOpenChange={(open) => {
             if (!open) {

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { SharingDialog } from "@/shared/console/visibility/dialog"
+import { VisibilityDialog } from "@/shared/console/visibility/dialog"
 import { api } from "../../../../convex/_generated/api"
 import { AudienceSummary } from "./audience"
 import { OrganizationVisibilityField } from "./field"
@@ -15,7 +15,7 @@ export type VisibilityTarget = SetVisibilityArgs["target"]
 /** The sharing dialog bound to one material or folder: its draft, the
  *  organization's grantees, and the one visibility mutation that saves
  *  it. Owned targets accept changes from their owner only. */
-export function VisibilityDialog({
+export function OrganizationVisibilityDialog({
   noun,
   onOpenChange,
   open,
@@ -69,7 +69,7 @@ export function VisibilityDialog({
   }
 
   return (
-    <SharingDialog
+    <VisibilityDialog
       audience={
         <AudienceSummary
           organizationId={organizationId}

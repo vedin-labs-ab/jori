@@ -5,7 +5,7 @@ import { rowNoun } from "@/shared/console/tables/adding"
 import { type ColumnSheetState } from "@/shared/console/tables/sheet"
 import { type TableDetail, type TableRow } from "@/shared/console/tables/types"
 import { MoveResourceDialog } from "../../folders/move"
-import { VisibilityDialog } from "../../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
 import { EditTableDialog } from "../edit"
 import { TableColumnSheet } from "./column/sheet"
 import { type useRowBulk } from "./rows"
@@ -108,7 +108,7 @@ function TableDialogs({
         organizationId={organizationId}
         table={dialog === "edit" ? table : undefined}
       />
-      <VisibilityDialog
+      <OrganizationVisibilityDialog
         noun="table"
         onOpenChange={closeWhenDismissed}
         open={dialog === "access"}

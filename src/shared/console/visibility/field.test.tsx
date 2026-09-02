@@ -26,7 +26,7 @@ function renderField(onChange: (visibility: unknown) => void) {
 }
 
 function openModeSelect() {
-  fireEvent.click(screen.getByRole("combobox", { name: "Sharing" }))
+  fireEvent.click(screen.getByRole("combobox", { name: "Visibility" }))
 }
 
 test("every offered mode keeps the audience inside the organization", () => {
