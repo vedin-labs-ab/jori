@@ -29,6 +29,10 @@ export type MaterialBreadcrumb = {
    *  material's name as the menu's trigger — the page's actions hang off
    *  its own breadcrumb. */
   menu?: ReactNode
+  /** A small note about the page rather than a step in its trail — what it
+   *  costs, say. The shell hangs it off the end of the trail behind a
+   *  divider, outside the breadcrumb's own navigation. */
+  aside?: ReactNode
 }
 
 export const MaterialBreadcrumbContext = createContext<

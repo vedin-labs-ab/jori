@@ -109,7 +109,8 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
  *  linked ancestors, then the material's name. The ancestors default to
  *  the parent surface derived from the path; a view may publish a full
  *  segment trail instead. Everywhere else a one-item breadcrumb is not a
- *  trail, it is the page's name, so it is marked up as a heading. */
+ *  trail, it is the page's name, so it is marked up as a heading. A view
+ *  may hang a small aside off the end, divided from the trail. */
 function ConsoleHeaderTitle({
   material,
   pathname,
@@ -129,12 +130,41 @@ function ConsoleHeaderTitle({
     )
   }
 
-  const trail =
-    shown.material.trail ??
-    (shown.surface === undefined
-      ? []
-      : [{ name: shown.surface.label, to: shown.surface.to }])
+  return (
+    <>
+      <MaterialTrail
+        material={shown.material}
+        trail={
+          shown.material.trail ??
+          (shown.surface === undefined
+            ? []
+            : [{ name: shown.surface.label, to: shown.surface.to }])
+        }
+      />
+      {/* Beside the trail, never inside it: an aside is a note about the
+          page, so a reader walking the breadcrumb's navigation should
+          reach the page's ancestry and stop. */}
+      {shown.material.aside === undefined ? null : (
+        <>
+          <Separator
+            className="mx-1 data-vertical:h-3 data-vertical:self-auto"
+            orientation="vertical"
+          />
+          {shown.material.aside}
+        </>
+      )}
+    </>
+  )
+}
 
+/** The linked ancestors, then the material itself as the current page. */
+function MaterialTrail({
+  material,
+  trail,
+}: {
+  material: MaterialBreadcrumb
+  trail: MaterialBreadcrumbSegment[]
+}) {
   return (
     <Breadcrumb className="min-w-0">
       <BreadcrumbList className="flex-nowrap">
@@ -152,7 +182,7 @@ function ConsoleHeaderTitle({
         ))}
         {trail.length === 0 ? null : <BreadcrumbSeparator />}
         <BreadcrumbItem className="min-w-0">
-          <MaterialName material={shown.material} />
+          <MaterialName material={material} />
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

@@ -1,14 +1,15 @@
 import { expect, test } from "vitest"
-import { databaseContext } from "../../test/convex/database"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { automationDoc, folderDoc } from "../../test/convex/folders"
 import { seedUsage } from "../../test/convex/usage"
 import { type Id } from "../_generated/dataModel"
-import { readFolderUsage } from "./usage"
+import { readFolderSpend, readFolderUsage } from "./usage"
 
-// What the metering layer decides: which of the window's contributors the
-// viewer may name, and how far the folder division goes before the rest is
-// folded together. The moment is the same fixed one the overview's tests
-// stand at: a seven-day window ending 2026-03-15.
+// What the metering layer decides: which rows a scope's window reads, which
+// of its contributors the viewer may name, and how far the folder division
+// goes before the rest is folded together. The moment is the same fixed one
+// the overview's tests stand at: a seven-day window ending 2026-03-15, or
+// the hint's fixed month reaching back to 2026-02-14.
 
 const now = Date.parse("2026-03-15T12:00:00.000Z")
 const viewer = "persons:viewer" as Id<"persons">
@@ -24,6 +25,16 @@ function read(ctx: ReturnType<typeof databaseContext>["ctx"]) {
 
 function readRanking(ctx: ReturnType<typeof databaseContext>["ctx"]) {
   return read(ctx).then((usage) => usage.automations)
+}
+
+async function seedFolder(
+  database: TestDatabase,
+  overrides: Parameters<typeof folderDoc>[0] = {}
+) {
+  return (await database.insert(
+    "folders",
+    folderDoc(overrides)
+  )) as Id<"folders">
 }
 
 test("an automation nobody may see keeps its money and loses its name", async () => {
@@ -88,10 +99,7 @@ test("the division names as many folders as the palette has colours", async () =
   const { database, ctx } = databaseContext()
 
   for (let rank = 0; rank < 10; rank += 1) {
-    const folderId = (await database.insert(
-      "folders",
-      folderDoc({ name: `Folder ${rank}` })
-    )) as Id<"folders">
+    const folderId = await seedFolder(database, { name: `Folder ${rank}` })
 
     await seedUsage(database, {
       date: "2026-03-15",
@@ -119,4 +127,47 @@ test("the division names as many folders as the palette has colours", async () =
   })
   expect(day?.segments.other).toEqual({ micros: 183, ended: 2, failed: 0 })
   expect(Object.keys(day?.segments ?? {})).toHaveLength(9)
+})
+
+test("the hint counts one fixed month of the folder's whole subtree", async () => {
+  const { database, ctx } = databaseContext()
+  const rootId = await seedFolder(database, { name: "Sales" })
+  const childId = await seedFolder(database, {
+    name: "Pipeline",
+    parentId: rootId,
+  })
+
+  await seedUsage(database, { date: "2026-03-15", folderId: rootId, micros: 5 })
+  await seedUsage(database, {
+    date: "2026-03-01",
+    folderId: childId,
+    micros: 700,
+  })
+  // Filed elsewhere, and older than the month: neither counts here.
+  await seedUsage(database, { date: "2026-03-15", micros: 40 })
+  await seedUsage(database, {
+    date: "2026-02-01",
+    folderId: childId,
+    micros: 999,
+  })
+
+  expect(
+    await readFolderSpend(ctx, {
+      organizationId: "org",
+      folderId: rootId,
+      now,
+    })
+  ).toEqual({ micros: 705 })
+})
+
+test("the hint over the whole organization counts the unfiled rest too", async () => {
+  const { database, ctx } = databaseContext()
+  const folderId = await seedFolder(database)
+
+  await seedUsage(database, { date: "2026-03-15", folderId, micros: 60 })
+  await seedUsage(database, { date: "2026-02-20", micros: 7 })
+
+  expect(await readFolderSpend(ctx, { organizationId: "org", now })).toEqual({
+    micros: 67,
+  })
 })

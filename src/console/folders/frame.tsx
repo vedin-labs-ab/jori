@@ -15,6 +15,7 @@ import { useLeaveDeletedFolder } from "./delete/leave"
 import { FolderTitleMenu } from "./header"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { type FolderDetail } from "./types"
+import { FolderUsageHint } from "./usage/hint"
 
 // The folder surface: one folder, resolved once, placed in the breadcrumb,
 // with the lifecycle dialogs its menu opens. What each page makes of the
@@ -80,7 +81,7 @@ function FolderResolver({
     )
   )
 
-  useFolderCrumb(folder, view, setDialog)
+  useFolderCrumb({ folder, onDialog: setDialog, organizationId, view })
 
   return (
     <ConsoleListLayout>
@@ -103,26 +104,38 @@ function FolderResolver({
   )
 }
 
+type FolderCrumb = {
+  folder: FolderDetail | undefined
+  onDialog: (request: FolderDialogRequest) => void
+  organizationId: string
+  view: FolderView
+}
+
 /** The folder's header crumb: the /folders overview leads the trail — every
  *  material page starts from its parent surface — then the ancestor
  *  folders. The folder's own page ends there, its name opening the folder's
- *  menu; its usage page hangs one more crumb off the name, which becomes
- *  the way back. */
-function useFolderCrumb(
-  folder: FolderDetail | undefined,
-  view: FolderView,
-  onDialog: (request: FolderDialogRequest) => void
-) {
+ *  menu and its spend sitting beside it; its usage page hangs one more
+ *  crumb off the name, which becomes the way back — and needs no hint,
+ *  being the page the hint points at. */
+function useFolderCrumb(args: FolderCrumb) {
+  const { folder, onDialog, organizationId, view } = args
+
   useMaterialTrail(
-    useMemo(() => folderCrumb(folder, view, onDialog), [folder, onDialog, view])
+    // The menu and the aside are fresh elements per call, so the crumb is
+    // memoized on what they are made of rather than on themselves.
+    useMemo(
+      () => folderCrumb({ folder, onDialog, organizationId, view }),
+      [folder, onDialog, organizationId, view]
+    )
   )
 }
 
-function folderCrumb(
-  folder: FolderDetail | undefined,
-  view: FolderView,
-  onDialog: (request: FolderDialogRequest) => void
-): MaterialBreadcrumb | undefined {
+function folderCrumb({
+  folder,
+  onDialog,
+  organizationId,
+  view,
+}: FolderCrumb): MaterialBreadcrumb | undefined {
   if (folder === undefined) {
     return undefined
   }
@@ -151,6 +164,12 @@ function folderCrumb(
   }
 
   return {
+    aside: (
+      <FolderUsageHint
+        folderId={folder.folderId as GenericId<"folders">}
+        organizationId={organizationId}
+      />
+    ),
     menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
     name: folder.name,
     trail: ancestors,

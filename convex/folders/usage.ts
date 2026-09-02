@@ -20,10 +20,10 @@ import {
   type Grouping,
   nameContributors,
   readGroupings,
-  readWindowRows,
+  readScopeRows,
   segmentFolders,
 } from "./meter"
-import { requireVisibleFolder } from "./tree"
+import { descendantFolderIds, requireVisibleFolder } from "./tree"
 
 // What a folder — or the whole organization — has cost. The folder surface
 // reads the usage rollup, never the other way around: deleting a folder
@@ -68,18 +68,78 @@ export const overview = query({
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
 
-    const scope = {
-      ...args,
-      personId: await resolveCurrentPerson(ctx, args.organizationId),
-    }
+    const personId = await requireVisibleScope(ctx, args)
 
-    if (args.folderId !== undefined) {
-      await requireVisibleFolder(ctx, { ...scope, folderId: args.folderId })
-    }
-
-    return await readFolderUsage(ctx, { ...scope, now: Date.now() })
+    return await readFolderUsage(ctx, { ...args, personId, now: Date.now() })
   },
 })
+
+/** How far back the breadcrumb hint counts. It is the Usage page's own
+ *  default window, so following the hint lands on the figure it named. */
+export const usageHintDays: UsageWindowLength = 30
+
+/**
+ * What a scope has cost lately, and nothing else. The hint beside a
+ * breadcrumb is one number, so it reads one window with no division, no
+ * ranking, and no previous window to measure against — the overview's
+ * expensive parts are exactly what a header cannot afford.
+ */
+export const spend = query({
+  args: {
+    organizationId: v.string(),
+    folderId: v.optional(v.id("folders")),
+  },
+  handler: async (ctx, args) => {
+    await requireOrganizationAccess(ctx, args.organizationId)
+    await requireVisibleScope(ctx, args)
+
+    return await readFolderSpend(ctx, { ...args, now: Date.now() })
+  },
+})
+
+/** Who is asking, and whether the scope is theirs to ask about. Spend is
+ *  org-wide money every member already sees itemized in billing, so the
+ *  only gate past the organization is the folder the scope names. The
+ *  organization guard stays in each handler, where the entrypoint check
+ *  can see it. */
+async function requireVisibleScope(
+  ctx: QueryLikeCtx,
+  args: { organizationId: string; folderId?: Id<"folders"> }
+) {
+  const personId = await resolveCurrentPerson(ctx, args.organizationId)
+
+  if (args.folderId !== undefined) {
+    await requireVisibleFolder(ctx, {
+      ...args,
+      folderId: args.folderId,
+      personId,
+    })
+  }
+
+  return personId
+}
+
+/** The hint's whole body, taking the present as an argument the way the
+ *  overview does, so a test can stand anywhere in the calendar. */
+export async function readFolderSpend(
+  ctx: QueryLikeCtx,
+  args: {
+    organizationId: string
+    folderId?: Id<"folders">
+    now: number
+  }
+) {
+  const timezone = await readOrganizationTimezone(ctx, args.organizationId)
+  const window = usageWindowOf(usageHintDays, timezone, args.now)
+  const rows = await readScopeRows(ctx, {
+    organizationId: args.organizationId,
+    folderIds: await scopeFolderIds(ctx, args),
+    from: window.start,
+    to: window.end,
+  })
+
+  return { micros: usageTotals(rows).micros }
+}
 
 /** The overview's whole body once the caller has been let in, taking the
  *  present as an argument so a test can stand anywhere in the calendar. */
@@ -100,7 +160,15 @@ export async function readFolderUsage(
     ...args,
     parentId: args.folderId,
   })
-  const rows = await readWindowRows(ctx, { ...args, groups, window })
+  const rows = await readScopeRows(ctx, {
+    organizationId: args.organizationId,
+    folderIds:
+      args.folderId === undefined
+        ? undefined
+        : [args.folderId, ...groups.flatMap((group) => group.ids)],
+    from: window.previousStart,
+    to: window.end,
+  })
 
   return {
     ...(await summarize(ctx, sight, {
@@ -144,4 +212,18 @@ async function summarize(
     automations: await nameContributors(ctx, sight, ranked),
     folders: segments,
   }
+}
+
+/** The ids a scope sums over: a folder together with everything below it,
+ *  or none at all for the organization, whose rows are already one range. */
+async function scopeFolderIds(
+  ctx: QueryLikeCtx,
+  args: { organizationId: string; folderId?: Id<"folders"> }
+) {
+  return args.folderId === undefined
+    ? undefined
+    : [
+        args.folderId,
+        ...(await descendantFolderIds(ctx, args.organizationId, args.folderId)),
+      ]
 }

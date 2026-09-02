@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { Folder, Plus } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../../convex/_generated/api"
@@ -17,12 +17,9 @@ import { useMaterialTrail } from "../../shared/materials/breadcrumb"
 import { FoldersTitleMenu } from "../header"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
 import { type FolderRootsResult } from "../types"
+import { FolderUsageHint } from "../usage/hint"
 import { useFolderListControls } from "./controls"
 import { FolderListRow, FolderListTable } from "./table"
-
-// The tree's root is not a folder, so its crumb is a constant: the surface
-// name, with the one thing the whole tree can be asked about.
-const foldersCrumb = { menu: <FoldersTitleMenu />, name: "Folders" }
 
 /** The folder tree's landing page: the root folders in the same full-bleed
  *  table a folder's own page uses. The icon-collapsed sidebar links here —
@@ -40,7 +37,18 @@ function RootFolders({ organizationId }: { organizationId: string }) {
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const create = () => setDialog({ type: "create" })
 
-  useMaterialTrail(foldersCrumb)
+  // The tree's root is not a folder, so its crumb is the surface name, the
+  // one thing the whole tree can be asked about, and what all of it costs.
+  useMaterialTrail(
+    useMemo(
+      () => ({
+        aside: <FolderUsageHint organizationId={organizationId} />,
+        menu: <FoldersTitleMenu />,
+        name: "Folders",
+      }),
+      [organizationId]
+    )
+  )
 
   return (
     <ConsoleListLayout>
