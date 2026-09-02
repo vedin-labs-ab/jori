@@ -6,7 +6,6 @@ import {
   sortContributors,
   type UsageContributor,
   type UsageFigures,
-  type UsageWindow,
 } from "../usage/rollup"
 import { type Sight } from "../visibility/sight"
 import { descendantFolderIds, treeCap } from "./tree"
@@ -68,38 +67,49 @@ export async function readGroupings(
   return groups
 }
 
-/** Both windows in one read, so the delta costs nothing extra. Folder
- *  totals are leaf rows summed over the subtree, so a folder scope reads
- *  the folder's own rows plus every descendant's; the organization scope
- *  is a single range that already includes the unfiled bucket. */
-export async function readWindowRows(
+/** Every row one scope wrote between two dates, in one read — so a view
+ *  that draws two windows pays for one range. Folder totals are leaf rows
+ *  summed over the subtree, so a folder scope names its own id and every
+ *  id below it; naming none is the organization, a single range that
+ *  already includes the unfiled bucket. */
+export async function readScopeRows(
   ctx: QueryLikeCtx,
   args: {
     organizationId: string
-    folderId?: Id<"folders">
-    groups: Grouping[]
-    window: UsageWindow
+    folderIds: Id<"folders">[] | undefined
+    from: string
+    to: string
   }
 ) {
-  const { window } = args
-
-  if (args.folderId === undefined) {
+  if (args.folderIds === undefined) {
     return await ctx.db
       .query("usage")
       .withIndex("by_organization_and_date", (index) =>
         index
           .eq("organizationId", args.organizationId)
-          .gte("date", window.previousStart)
-          .lte("date", window.end)
+          .gte("date", args.from)
+          .lte("date", args.to)
       )
       .take(usageRowCap)
   }
 
-  return await readFolderRows(
-    ctx,
-    [args.folderId, ...args.groups.flatMap((group) => group.ids)],
-    { from: window.previousStart, to: window.end }
-  )
+  const rows: Doc<"usage">[] = []
+
+  for (const folderId of args.folderIds) {
+    rows.push(
+      ...(await ctx.db
+        .query("usage")
+        .withIndex("by_folder_and_date", (index) =>
+          index
+            .eq("folderId", folderId)
+            .gte("date", args.from)
+            .lte("date", args.to)
+        )
+        .take(usageRowCap))
+    )
+  }
+
+  return rows
 }
 
 /** Work filed at the scope itself rather than in anything below it: the
@@ -221,30 +231,6 @@ function bySpend(left: UsageSegment, right: UsageSegment) {
   return right.micros === left.micros
     ? left.label.localeCompare(right.label)
     : right.micros - left.micros
-}
-
-async function readFolderRows(
-  ctx: QueryLikeCtx,
-  folderIds: Id<"folders">[],
-  range: { from: string; to: string }
-) {
-  const rows: Doc<"usage">[] = []
-
-  for (const folderId of folderIds) {
-    rows.push(
-      ...(await ctx.db
-        .query("usage")
-        .withIndex("by_folder_and_date", (index) =>
-          index
-            .eq("folderId", folderId)
-            .gte("date", range.from)
-            .lte("date", range.to)
-        )
-        .take(usageRowCap))
-    )
-  }
-
-  return rows
 }
 
 /** Work whose automation the viewer may not see, gathered under one

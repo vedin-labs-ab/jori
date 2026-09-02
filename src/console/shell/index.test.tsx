@@ -183,6 +183,28 @@ test("hangs the page's menu off its name when the view publishes one", () => {
   expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
 })
 
+test("hangs a published aside off the trail, outside its navigation", () => {
+  const publish = renderWithPublisher("/folders/root1")
+
+  act(() =>
+    publish.current?.({
+      aside: <a href="/folders/root1/usage">$12.40 · 30 days</a>,
+      name: "Finance",
+      trail: [],
+    })
+  )
+
+  const trail = screen.getByRole("navigation", { name: "breadcrumb" })
+  const aside = screen.getByRole("link", { name: "$12.40 · 30 days" })
+
+  // A note about the page, not a step in its ancestry: a reader walking
+  // the breadcrumb reaches the folder and stops.
+  expect(trail.contains(aside)).toBe(false)
+  expect(
+    trail.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeGreaterThan(0)
+})
+
 function renderWithPublisher(path: string) {
   pathname = path
 
