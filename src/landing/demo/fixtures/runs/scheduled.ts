@@ -5,24 +5,18 @@ import { detail, recurring, run, schedule, tools } from "./details"
 
 /** The runs Copperline's scheduled jobs left behind. */
 export function scheduledRuns(now: number): ExecutionItem[] {
-  return [
-    chaseRun(now),
-    watchRun(now),
-    competitorRun(now),
-    digestRun(now),
-    releaseRun(now),
-  ]
+  return [watchRun(now), competitorRun(now), digestRun(now), releaseRun(now)]
 }
 
-/** The run the record section opens on. */
-function chaseRun(now: number) {
+/** The run the record section opens on: the newest, so it sits on top. */
+export function chaseRun(now: number) {
   return run(now, {
     id: "chase",
     title: "Chase overdue invoices",
     task: chaseInstructions,
     result:
       "Three reminders sent: Harbor House, Beacon Works, Larkspur Hotels. Rows updated.",
-    startedAgo: 2 * hour + 10 * minute,
+    startedAgo: minute,
     durationMs: 48_000,
     source: recurring(),
     details: [
