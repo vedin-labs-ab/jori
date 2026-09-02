@@ -80,17 +80,17 @@ test("a filed file offers its own menu; the links resolve on demand", () => {
   ])
 })
 
-test("a filed automation offers the menu its own page offers", () => {
-  const automation = {
-    id: "automation-1",
+test("a filed job offers the menu its own page offers", () => {
+  const job = {
+    id: "job-1",
     name: "Digest",
     status: "paused",
     type: "cron",
-  } as ReturnType<FolderResourceActions["automationOf"]>
+  } as ReturnType<FolderResourceActions["jobOf"]>
 
   renderRows(
-    { resources: [automationResource] },
-    { actions: stubActions({ automationOf: () => automation }) }
+    { resources: [jobResource] },
+    { actions: stubActions({ jobOf: () => job }) }
   )
   openActions("Digest")
 
@@ -103,8 +103,8 @@ test("a filed automation offers the menu its own page offers", () => {
   ])
 })
 
-test("an automation still being resolved offers only what the filing knows", () => {
-  renderRows({ resources: [automationResource] })
+test("a job still being resolved offers only what the filing knows", () => {
+  renderRows({ resources: [jobResource] })
   openActions("Digest")
 
   expect(itemLabels()).toEqual(["Move to folder…", "Remove from folder"])
@@ -142,9 +142,9 @@ const fileResource = {
   updatedAt: Date.now(),
 }
 
-const automationResource = {
+const jobResource = {
   type: "job",
-  id: "automation-1",
+  id: "job-1",
   name: "Digest",
   visibility: "organization",
   status: "paused",
@@ -157,7 +157,7 @@ function stubActions(
   overrides: Partial<FolderResourceActions> = {}
 ): FolderResourceActions {
   return {
-    automationOf: () => undefined,
+    jobOf: () => undefined,
     editor: {} as FolderResourceActions["editor"],
     files: {
       deleteFile: () => undefined,

@@ -141,10 +141,7 @@ function UsageBody({
             description="Each row is a job, or work asked for directly."
             title="Spend by source"
           />
-          <UsageContributors
-            automations={usage.jobs}
-            total={usage.totals.micros}
-          />
+          <UsageContributors jobs={usage.jobs} total={usage.totals.micros} />
         </Section>
         {hasFolders ? (
           <Section className="min-w-0">

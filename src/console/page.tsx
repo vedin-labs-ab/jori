@@ -189,7 +189,7 @@ function CreateOrganizationView() {
             Create your organization.
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Integrations, automations, and permissions are shared with your team
+            Integrations, jobs, and permissions are shared with your team
             through an organization.
           </p>
         </div>

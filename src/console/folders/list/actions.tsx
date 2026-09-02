@@ -3,9 +3,9 @@ import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { api } from "../../../../convex/_generated/api"
-import { useAutomationEditorHost } from "../../automations/editor/host"
-import { type Automation } from "../../automations/types"
 import { useFileActions } from "../../files/manage"
+import { useJobEditorHost } from "../../jobs/editor/host"
+import { type Job } from "../../jobs/types"
 import { showErrorToast } from "../../shared/error"
 import { useStoreRemoval } from "../../stores/manage"
 import { useTableRemoval } from "../../tables/manage"
@@ -25,9 +25,9 @@ import { FolderResourceDialogs, type ResourceRequest } from "./dialogs"
 // the state and renders the overlays exactly once.
 
 export type FolderResourceActions = {
-  /** The listed automation as its own page knows it, once resolved. */
-  automationOf: (resource: FolderResource) => Automation | undefined
-  editor: ReturnType<typeof useAutomationEditorHost>["editor"]
+  /** The listed job as its own page knows it, once resolved. */
+  jobOf: (resource: FolderResource) => Job | undefined
+  editor: ReturnType<typeof useJobEditorHost>["editor"]
   files: ReturnType<typeof useFileActions>
   onAccess: (resource: FolderResource) => void
   onEdit: (resource: FolderResource) => void
@@ -58,15 +58,15 @@ export function useFolderResourceActions({
   const [request, setRequest] = useState<ResourceRequest>()
   const [moving, setMoving] = useState<FolderResource>()
   const resources = contents?.status === "ready" ? contents.resources : []
-  const automations = useListedAutomations(organizationId, resources)
-  const host = useAutomationEditorHost(organizationId)
+  const jobs = useListedJobs(organizationId, resources)
+  const host = useJobEditorHost(organizationId)
   const files = useFileActions(organizationId)
   const removal = useMaterialResourceRemoval(organizationId)
   const unfile = useUnfileResource(organizationId, folder)
 
   return {
     actions: {
-      automationOf: (resource) => automations.get(resource.id),
+      jobOf: (resource) => jobs.get(resource.id),
       editor: host.editor,
       files,
       onAccess: (resource) => setRequest({ kind: "access", resource }),
@@ -138,17 +138,17 @@ function useMaterialResourceRemoval(
   }
 }
 
-/** Automations have no per-row query of their own, so a folder holding one
+/** Jobs have no per-row query of their own, so a folder holding one
  *  reads the same list its page does and picks its rows out of it. Folders
- *  without automations ask for nothing. */
-function useListedAutomations(
+ *  without jobs ask for nothing. */
+function useListedJobs(
   organizationId: string,
   resources: readonly FolderResource[]
 ) {
-  const hasAutomations = resources.some((resource) => resource.type === "job")
+  const hasJobs = resources.some((resource) => resource.type === "job")
   const listed = useQuery(
     api.jobs.console.list,
-    hasAutomations
+    hasJobs
       ? { organizationId, query: "", statusFilter: "all" as const }
       : "skip"
   )
@@ -156,9 +156,9 @@ function useListedAutomations(
   return useMemo(
     () =>
       new Map(
-        (listed?.status === "ready" ? listed.jobs : []).map((automation) => [
-          automation.id as string,
-          automation,
+        (listed?.status === "ready" ? listed.jobs : []).map((job) => [
+          job.id as string,
+          job,
         ])
       ),
     [listed]

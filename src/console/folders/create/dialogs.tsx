@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react"
-import { useAutomationEditorHost } from "../../automations/editor/host"
 import { UploadFileDialog } from "../../files/upload"
+import { useJobEditorHost } from "../../jobs/editor/host"
 import { useRetained } from "../../shared/retain"
 import { CreateStoreDialog } from "../../stores/create"
 import { CreateTableDialog } from "../../tables/create"
 
 /** What the folder surfaces can create in place, each through the same
  *  dialog its own list page uses. */
-export type FolderCreation = "table" | "store" | "file" | "automation"
+export type FolderCreation = "table" | "store" | "file" | "job"
 
 export type CreationRequest = {
   creation: FolderCreation
@@ -31,9 +31,7 @@ export function CreationDialogs({
   const table = useRetained(request?.creation === "table" ? request : undefined)
   const store = useRetained(request?.creation === "store" ? request : undefined)
   const file = useRetained(request?.creation === "file" ? request : undefined)
-  const automation = useRetained(
-    request?.creation === "automation" ? request : undefined
-  )
+  const job = useRetained(request?.creation === "job" ? request : undefined)
 
   function closeWhenDismissed(open: boolean) {
     if (!open) {
@@ -64,10 +62,10 @@ export function CreationDialogs({
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
       />
-      {automation === undefined ? null : (
-        <AutomationCreation
-          folderId={automation.folderId}
-          isOpen={request?.creation === "automation"}
+      {job === undefined ? null : (
+        <JobCreation
+          folderId={job.folderId}
+          isOpen={request?.creation === "job"}
           onClose={onClose}
           organizationId={organizationId}
         />
@@ -76,11 +74,11 @@ export function CreationDialogs({
   )
 }
 
-/** The automations' create flow is the shared editor, not a plain dialog.
- *  The first automation request mounts its host (which lazily loads the
+/** The jobs' create flow is the shared editor, not a plain dialog.
+ *  The first job request mounts its host (which lazily loads the
  *  editor chunk), each request opens a fresh create form with the folder
  *  pre-selected, and the dialog's own close reports back. */
-function AutomationCreation({
+function JobCreation({
   folderId,
   isOpen,
   onClose,
@@ -91,7 +89,7 @@ function AutomationCreation({
   onClose: () => void
   organizationId: string
 }) {
-  const { dialog, editor } = useAutomationEditorHost(organizationId)
+  const { dialog, editor } = useJobEditorHost(organizationId)
   const { isFormOpen, openCreateForm } = editor
   const wasRequested = useRef(false)
   const wasFormOpen = useRef(false)

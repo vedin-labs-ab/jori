@@ -7,13 +7,13 @@ import {
 } from "./oauth"
 
 beforeEach(() => {
-  window.history.replaceState({}, "", "/automations?page=2")
+  window.history.replaceState({}, "", "/jobs?page=2")
 })
 
 test("keeps social sign-in failures inside Jori", () => {
   const errorURL = new URL(signInErrorCallbackURL("google"))
 
-  expect(errorURL.pathname).toBe("/automations")
+  expect(errorURL.pathname).toBe("/jobs")
   expect(errorURL.searchParams.get("authProvider")).toBe("google")
 })
 
@@ -34,7 +34,7 @@ test("cleans consumed callback state without losing page search", () => {
   window.history.replaceState(
     {},
     "",
-    "/automations?page=2&authProvider=google&error=access_denied"
+    "/jobs?page=2&authProvider=google&error=access_denied"
   )
 
   clearOAuthFeedback()

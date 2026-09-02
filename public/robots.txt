@@ -6,11 +6,11 @@
 # travels by hand rather than by search.
 User-agent: *
 Disallow: /api/
-Disallow: /automations
 Disallow: /console
 Disallow: /context
 Disallow: /files
 Disallow: /integrations
+Disallow: /jobs
 Disallow: /runs
 Disallow: /sign-in
 Disallow: /sign-out

@@ -17,7 +17,7 @@ afterEach(() => {
 })
 
 describe("execution row one-shot details", () => {
-  test("renders one-shot automation details", async () => {
+  test("renders one-shot job details", async () => {
     renderExecutionRow(
       oneShotExecution({
         details: [slackToolsDetail(), { type: "web_search", label: "Allowed" }],
@@ -29,8 +29,10 @@ describe("execution row one-shot details", () => {
     await screen.findByText("Tools")
 
     expect(screen.getByText("Jori")).toBeDefined()
+    // The row builds its chips from the source and the details, never from
+    // the trigger label, and a source without a kind has no cadence to show.
     expect(screen.queryByText("Scheduled")).toBeNull()
-    expect(screen.queryByText("One-shot")).toBeNull()
+    expect(screen.queryByText("one-shot")).toBeNull()
     expect(screen.getByText("Tools")).toBeDefined()
     expect(
       screen.getByRole("button", { name: "Open Slack tools" })
@@ -71,6 +73,6 @@ function oneShotExecution({ details }: Pick<ExecutionItem, "details">) {
     source: { type: "job", surface: "jori" },
     task: "Generate a team image.",
     title: "Daily image",
-    trigger: "Time automation",
+    trigger: "Scheduled",
   })
 }
