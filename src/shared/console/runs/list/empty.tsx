@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react"
-import { FilterableEmptyState } from "@/shared/console/list/empty"
+import { FilterableEmptyState } from "../../list/empty"
 
 export function EmptyExecutions({ hasFilters }: { hasFilters: boolean }) {
   return (
