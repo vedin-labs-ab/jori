@@ -1,0 +1,170 @@
+import { getNextCronRunAt } from "@contracts/jobs/schedule/cron"
+import { type MoveSubject } from "@/shared/console/folders/types"
+import {
+  createJobArgs,
+  updateJobArgs,
+} from "@/shared/console/jobs/editor/save/args"
+import {
+  type Job,
+  type JobFilter,
+  type JobFormValues,
+} from "@/shared/console/jobs/types"
+import {
+  type AudienceFilter,
+  matchesAudienceFilter,
+} from "@/shared/console/list/audience"
+import { jobSurface } from "../fixtures/jobs"
+import { demoPermissions } from "../fixtures/permissions"
+import { type FolderId, type JobId } from "../fixtures/types"
+
+export type JobFilters = {
+  audience: AudienceFilter
+  query: string
+  status: JobFilter
+}
+
+/** The Jobs page's filters over the workspace's jobs, the way the list
+ *  query narrows them: a status, a sharing facet, and a search. */
+export function filterJobs(jobs: Job[], filters: JobFilters) {
+  const query = filters.query.trim().toLowerCase()
+
+  return jobs.filter(
+    (job) =>
+      (filters.status === "all" || job.status === filters.status) &&
+      matchesAudienceFilter(job.audience, filters.audience) &&
+      (query === "" ||
+        `${job.name} ${job.instructions}`.toLowerCase().includes(query))
+  )
+}
+
+export function hasJobFilters(filters: JobFilters) {
+  return (
+    filters.status !== "active" ||
+    filters.audience !== "all" ||
+    filters.query.trim() !== ""
+  )
+}
+
+type SaveResult = { job: Job } | { error: string }
+
+/** A job from the editor's values, through the same validation the console
+ *  saves through: a new job with the id it is handed, or an existing one
+ *  updated. */
+export function jobFromValues(
+  values: JobFormValues,
+  options: { existing?: Job; id: JobId; at: number }
+): SaveResult {
+  return options.existing === undefined
+    ? createdJob(values, options.id, options.at)
+    : updatedJob(values, options.existing, options.at)
+}
+
+function createdJob(values: JobFormValues, id: JobId, at: number): SaveResult {
+  const result = createJobArgs(values, { permissions: demoPermissions })
+
+  if ("error" in result) {
+    return result
+  }
+
+  const { access, folderId, trigger, type, visibility, ...rest } = result.args
+  const stored = visibility ?? { mode: "organization" as const }
+
+  return {
+    job: {
+      ...rest,
+      id,
+      key: undefined,
+      audience: audienceOf(stored),
+      visibility: stored,
+      status: "active",
+      folderId: folderId as FolderId | undefined,
+      type,
+      trigger: projectTrigger(trigger, at),
+      access: projectAccess(access),
+      createdAt: at,
+      updatedAt: at,
+      firedAt: undefined,
+    },
+  }
+}
+
+function updatedJob(
+  values: JobFormValues,
+  existing: Job,
+  at: number
+): SaveResult {
+  const result = updateJobArgs(values, existing, {
+    permissions: demoPermissions,
+  })
+
+  if ("error" in result) {
+    return result
+  }
+
+  const { access, trigger, type, visibility, ...rest } = result.args
+  const stored = visibility ?? existing.visibility
+
+  return {
+    job: {
+      ...existing,
+      ...rest,
+      audience: audienceOf(stored),
+      visibility: stored,
+      ...(type === undefined || trigger === undefined
+        ? {}
+        : { type, trigger: projectTrigger(trigger, at) }),
+      access: projectAccess(access),
+      updatedAt: at,
+    },
+  }
+}
+
+type SavedArgs = Exclude<ReturnType<typeof createJobArgs>, { error: string }>
+type SavedTrigger = SavedArgs["args"]["trigger"]
+
+function projectTrigger(trigger: SavedTrigger, at: number): Job["trigger"] {
+  if ("expression" in trigger) {
+    return {
+      ...trigger,
+      nextAt: getNextCronRunAt(trigger.expression, at, trigger.timezone),
+    }
+  }
+
+  if ("at" in trigger) {
+    return { at: Date.parse(trigger.at) }
+  }
+
+  return {
+    integration: trigger.integration,
+    event: trigger.event,
+    match: trigger.match,
+  }
+}
+
+function projectAccess(access: SavedArgs["args"]["access"]): Job["access"] {
+  return {
+    webSearch: access.web,
+    surfaces: access.integrations.map((entry) =>
+      jobSurface(entry.integration, entry.tools)
+    ),
+  }
+}
+
+function audienceOf(visibility: Job["visibility"]): Job["audience"] {
+  return visibility.mode === "private" ? "personal" : "organization"
+}
+
+/** A job on its own as the move dialog's subject. */
+export function jobMoveSubject(job: Job): MoveSubject {
+  return {
+    kind: "resources",
+    resources: [
+      {
+        resourceType: "job",
+        resourceId: job.id,
+        name: job.name,
+        folderId: job.folderId,
+      },
+    ],
+  }
+}
