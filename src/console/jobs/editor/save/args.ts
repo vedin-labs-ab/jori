@@ -8,12 +8,15 @@ import {
   type JobPolicyPermissions,
   validateJobPolicy,
 } from "@/shared/console/jobs/access/policy"
+import {
+  jobInstructionMarkerErrors,
+  jobInstructionsErrors,
+  jobNameErrors,
+} from "@/shared/console/jobs/editor/errors"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
 import { type api } from "../../../../../convex/_generated/api"
-import { jobInstructionsErrors, jobNameErrors } from "../errors"
 import { jobFormValues } from "."
 import { prepareJobInstructions } from "./instructions"
-import { jobInstructionMarkerErrors } from "./marker"
 import {
   buildJobTriggerSpec,
   hasJobTriggerChanged,

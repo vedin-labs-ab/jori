@@ -14,7 +14,6 @@ test("marks personal additional access invalid for organization sharing", () => 
       onWebSearchChange={vi.fn()}
       permissions={undefined}
       scope="organization"
-      organizationId="organization"
       webSearch={false}
     />
   )

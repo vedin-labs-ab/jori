@@ -1,10 +1,12 @@
 import { Label } from "@/components/ui/label"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import {
+  isJobToolReferenceError,
+  jobInstructionMarkerErrors,
+} from "@/shared/console/jobs/editor/errors"
+import { JobInstructionsField } from "@/shared/console/jobs/editor/instructions/field"
 import { type JobFormValues } from "@/shared/console/jobs/types"
 import { FieldHelp } from "@/shared/field"
-import { isJobToolReferenceError } from "../errors"
-import { JobInstructionsField } from "../instructions/field"
-import { jobInstructionMarkerErrors } from "../save/marker"
 
 export function JobInstructionsSection({
   additionalSurfaces,
@@ -14,7 +16,6 @@ export function JobInstructionsSection({
   permissions,
   policyKey,
   skills,
-  organizationId,
   values,
 }: {
   additionalSurfaces: JobFormValues["surfaces"]
@@ -27,7 +28,6 @@ export function JobInstructionsSection({
   permissions?: JobPolicyPermissions
   policyKey: string
   skills: readonly string[]
-  organizationId: string
   values: JobFormValues
 }) {
   return (
@@ -50,7 +50,6 @@ export function JobInstructionsSection({
         scope={values.scope}
         skills={skills}
         surfaces={values.surfaces}
-        organizationId={organizationId}
         webSearch={values.webSearch}
       />
     </div>

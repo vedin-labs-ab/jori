@@ -11,8 +11,8 @@ import {
   type JobSurfaceFormValue,
 } from "@/shared/console/jobs/access"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import { JobSurfaceToolsDialog } from "@/shared/console/jobs/editor/instructions/access/tools"
 import { ProviderLogo } from "@/shared/logo/provider"
-import { JobSurfaceToolsDialog } from "../instructions/access/tools"
 
 export function AccessFields({
   additionalSurfaces,
@@ -21,7 +21,6 @@ export function AccessFields({
   onWebSearchChange,
   permissions,
   scope,
-  organizationId,
   webSearch,
 }: {
   additionalSurfaces: JobSurfaceFormValue[]
@@ -32,7 +31,6 @@ export function AccessFields({
   onWebSearchChange: (webSearch: boolean) => void
   permissions: JobPolicyPermissions
   scope: JobScope
-  organizationId: string
   webSearch: boolean
 }) {
   return (
@@ -61,7 +59,6 @@ export function AccessFields({
                 permissions={permissions}
                 scope={scope}
                 surface={surface}
-                organizationId={organizationId}
               />
             ))}
           </div>
@@ -77,14 +74,12 @@ function AdditionalSurface({
   permissions,
   scope,
   surface,
-  organizationId,
 }: {
   onChange: (surface: JobSurfaceFormValue) => void
   onRemove: (integration: JobSurfaceFormValue["integration"]) => void
   permissions: JobPolicyPermissions
   scope: JobScope
   surface: JobSurfaceFormValue
-  organizationId: string
 }) {
   const [open, setOpen] = useState(false)
   const label = getJobSurfaceLabel(surface.integration)
@@ -140,7 +135,6 @@ function AdditionalSurface({
         onToolsChange={(tools) => onChange({ ...surface, tools })}
         open={open}
         permissions={permissions}
-        organizationId={organizationId}
         tools={surface.tools}
         toolSurfaceLabel={label}
       />

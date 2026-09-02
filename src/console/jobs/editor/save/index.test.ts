@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, test } from "vitest"
+import { jobInstructionMarkerErrors } from "@/shared/console/jobs/editor/errors"
 import { emptyJobForm } from "@/shared/console/jobs/types"
 import { writeJobWebSearchPreference } from "../preferences"
 import { jobFormValues } from "."
 import { createJobArgs } from "./args"
-import { jobInstructionMarkerErrors } from "./marker"
 
 afterEach(() => {
   localStorage.clear()

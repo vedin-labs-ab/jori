@@ -12,14 +12,18 @@ import {
 } from "@/components/ui/dialog"
 import { getJobScopeConflict } from "@/shared/console/jobs/access"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import {
+  readJobInstructionsError,
+  readJobNameError,
+} from "@/shared/console/jobs/editor/errors"
+import { readAdditionalJobSurfaces } from "@/shared/console/jobs/editor/instructions/document"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
 import { DialogForm } from "@/shared/console/materials/form"
 import { api } from "../../../../../convex/_generated/api"
 import { FolderField } from "../../../folders/field"
 import { OrganizationVisibilityField } from "../../../shared/visibility/field"
-import { readJobInstructionsError, readJobNameError } from "../errors"
-import { readAdditionalJobSurfaces } from "../instructions/document"
 import { writeJobWebSearchPreference } from "../preferences"
+import { ToolReferenceProvider } from "../references"
 import { derivedScope } from "../save"
 import { AccessFields } from "./access"
 import { JobContextSection } from "./context"
@@ -87,53 +91,55 @@ export function JobDialog({
   )
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (isSaving) {
-          return
-        }
+    <ToolReferenceProvider organizationId={organizationId}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (isSaving) {
+            return
+          }
 
-        onOpenChange(open)
-      }}
-    >
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>
-            {job === undefined ? "New job" : "Edit job"}
-          </DialogTitle>
-          <DialogDescription>
-            Tell Jori what to do, what it can access, and when to run.
-          </DialogDescription>
-        </DialogHeader>
+          onOpenChange(open)
+        }}
+      >
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>
+              {job === undefined ? "New job" : "Edit job"}
+            </DialogTitle>
+            <DialogDescription>
+              Tell Jori what to do, what it can access, and when to run.
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Form semantics only: this editor spans several sections and an
+          {/* Form semantics only: this editor spans several sections and an
             accidental Enter must not save it, so the explicit button stays
             the sole way to submit. */}
-        <DialogForm>
-          <JobDialogFields
-            actions={actions}
-            additionalSurfaces={additionalSurfaces}
-            job={job}
-            instructionsError={instructionsError}
-            nameError={nameError}
-            onValuesChange={onValuesChange}
-            permissions={permissions}
-            policyKey={policyKey}
-            skills={skills}
-            organizationId={organizationId}
-            values={values}
-          />
+          <DialogForm>
+            <JobDialogFields
+              actions={actions}
+              additionalSurfaces={additionalSurfaces}
+              job={job}
+              instructionsError={instructionsError}
+              nameError={nameError}
+              onValuesChange={onValuesChange}
+              permissions={permissions}
+              policyKey={policyKey}
+              skills={skills}
+              organizationId={organizationId}
+              values={values}
+            />
 
-          <DialogFooter>
-            <Button type="button" onClick={onSave} disabled={isSaving}>
-              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-              {job === undefined ? "Create job" : "Save changes"}
-            </Button>
-          </DialogFooter>
-        </DialogForm>
-      </DialogContent>
-    </Dialog>
+            <DialogFooter>
+              <Button type="button" onClick={onSave} disabled={isSaving}>
+                {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+                {job === undefined ? "Create job" : "Save changes"}
+              </Button>
+            </DialogFooter>
+          </DialogForm>
+        </DialogContent>
+      </Dialog>
+    </ToolReferenceProvider>
   )
 }
 
@@ -179,7 +185,6 @@ function JobDialogFields(props: DialogFieldsProps) {
       ) : null}
       <JobContextSection scope={props.values.scope} />
       <JobInstructionsSection
-        organizationId={props.organizationId}
         additionalSurfaces={props.additionalSurfaces}
         error={props.instructionsError}
         onWebSearchChange={props.actions.updateWebSearch}
@@ -196,7 +201,6 @@ function JobDialogFields(props: DialogFieldsProps) {
         onWebSearchChange={props.actions.updateWebSearch}
         permissions={props.permissions}
         scope={props.values.scope}
-        organizationId={props.organizationId}
         webSearch={props.values.webSearch}
       />
       <JobTiming
