@@ -13,7 +13,7 @@ export const usageTrigger = v.union(
 
 /**
  * One day of metered work per attribution tuple. Every breakdown the console
- * will offer — folder, automation, person, surface — is a grouping of these
+ * will offer — folder, job, person, surface — is a grouping of these
  * rows rather than a table of its own, so no two dimensions can disagree.
  *
  * Rows are a cache: `runs` and `transactions` stay the truth and a rebuild
@@ -33,11 +33,9 @@ export const usage = defineTable({
   /** Absent is the unfiled bucket: interactive work, and work whose folder
    *  was deleted with no ancestor left to inherit it. */
   folderId: v.optional(v.id("folders")),
-  /** Carries its own label because automations are hard-deleted — one-shot
+  /** Carries its own label because jobs are hard-deleted — one-shot
    *  ones as soon as they fire. The id alone would leave an unnamed row. */
-  automation: v.optional(
-    v.object({ id: v.id("automations"), label: v.string() })
-  ),
+  job: v.optional(v.object({ id: v.id("jobs"), label: v.string() })),
   personId: v.optional(v.id("persons")),
   surface: toolSurfaceValidator,
   trigger: usageTrigger,
@@ -50,4 +48,4 @@ export const usage = defineTable({
   .index("by_organization_and_key_and_date", ["organizationId", "key", "date"])
   .index("by_organization_and_date", ["organizationId", "date"])
   .index("by_folder_and_date", ["folderId", "date"])
-  .index("by_automation_and_date", ["automation.id", "date"])
+  .index("by_job_and_date", ["job.id", "date"])

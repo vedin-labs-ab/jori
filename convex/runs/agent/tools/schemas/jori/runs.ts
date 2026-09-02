@@ -8,7 +8,7 @@ import {
 } from "../fragments/common"
 
 const runScopeEnum = ["conversation", "organization", "all"]
-const runSourceEnum = ["slack", "github", "linear", "automation"]
+const runSourceEnum = ["slack", "github", "linear", "job"]
 const activityFilterEnum = [
   "tool",
   "model",

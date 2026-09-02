@@ -150,33 +150,33 @@ function findBucket(ctx: MutationCtx, identity: BucketIdentity) {
 }
 
 /** Read off the run, never joined at read time: a run carries the folder it
- *  was filed under when it was created, and the automation carries its own
- *  label because the automation row may already be gone. */
+ *  was filed under when it was created, and the job carries its own
+ *  label because the job row may already be gone. */
 async function resolveAttribution(
   ctx: MutationCtx,
   run: Doc<"runs">
 ): Promise<UsageAttribution> {
   return {
     folderId: run.folderId,
-    automation: await resolveAutomation(ctx, run),
+    job: await resolveJob(ctx, run),
     personId: run.createdBy,
     surface: run.snapshot.source.surface ?? "jori",
     trigger: triggersByCause[run.cause.type],
   }
 }
 
-async function resolveAutomation(ctx: MutationCtx, run: Doc<"runs">) {
-  if (run.automation === undefined) {
+async function resolveJob(ctx: MutationCtx, run: Doc<"runs">) {
+  if (run.job === undefined) {
     return undefined
   }
 
-  const automation = await ctx.db.get(run.automation.id)
+  const job = await ctx.db.get(run.job.id)
 
-  // An automation run's snapshot title is the automation's name, so a
-  // one-shot automation deleted the moment it fired still reads as itself.
+  // A job run's snapshot title is the job's name, so a
+  // one-shot job deleted the moment it fired still reads as itself.
   return {
-    id: run.automation.id,
-    label: automation?.name ?? run.snapshot.title,
+    id: run.job.id,
+    label: job?.name ?? run.snapshot.title,
   }
 }
 

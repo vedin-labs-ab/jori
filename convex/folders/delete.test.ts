@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { automationDoc, fileDoc, folderDoc } from "../../test/convex/folders"
+import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { recordUsageEnded } from "../usage/record"
 import { removeFolder } from "./records"
@@ -27,9 +27,9 @@ async function seedFiledResources(
   return {
     collectionId: await database.insert("collections", tableDoc({ folderId })),
     fileId: await database.insert("files", fileDoc({ folderId })),
-    automationId: await database.insert(
-      "automations",
-      automationDoc({
+    jobId: await database.insert(
+      "jobs",
+      jobDoc({
         folderId,
         trigger: {
           expression: "0 9 * * *",
@@ -79,7 +79,7 @@ test("deleting takes every subfolder and lifts the contents to the parent", asyn
   expect(await database.get(grandchildId)).toBeNull()
   expect((await database.get(seeded.collectionId))?.folderId).toBe(parentId)
   expect((await database.get(seeded.fileId))?.folderId).toBe(parentId)
-  expect((await database.get(seeded.automationId))?.folderId).toBe(parentId)
+  expect((await database.get(seeded.jobId))?.folderId).toBe(parentId)
   expect((await database.get(deepFileId))?.folderId).toBe(parentId)
 })
 
@@ -97,7 +97,7 @@ test("deleting a root folder leaves the contents unfiled", async () => {
   expect(await database.get(childId)).toBeNull()
   expect((await database.get(seeded.collectionId))?.folderId).toBeUndefined()
   expect((await database.get(seeded.fileId))?.folderId).toBeUndefined()
-  expect((await database.get(seeded.automationId))?.folderId).toBeUndefined()
+  expect((await database.get(seeded.jobId))?.folderId).toBeUndefined()
 })
 
 test("refiling does not touch a resource's updatedAt", async () => {
@@ -154,11 +154,11 @@ test("deleting the contents purges each resource through its own domain", async 
   })
   // Filed in the same folder as its owner: the sweep must survive reaching
   // a row its owner's removal already took.
-  const ownedAutomationId = await database.insert(
-    "automations",
-    automationDoc({
+  const ownedJobId = await database.insert(
+    "jobs",
+    jobDoc({
       folderId: childId,
-      parent: { id: seeded.automationId, version: 1 },
+      parent: { id: seeded.jobId, version: 1 },
       type: "once",
     })
   )
@@ -171,8 +171,8 @@ test("deleting the contents purges each resource through its own domain", async 
   expect(await database.get(seeded.fileId)).toBeNull()
   expect(await database.get(fileShareId)).toBeNull()
   expect(storage.delete).toHaveBeenCalledWith("storage:1")
-  expect(await database.get(seeded.automationId)).toBeNull()
-  expect(await database.get(ownedAutomationId)).toBeNull()
+  expect(await database.get(seeded.jobId)).toBeNull()
+  expect(await database.get(ownedJobId)).toBeNull()
   expect(scheduler.cancel).toHaveBeenCalledWith("s1")
 })
 
@@ -254,7 +254,7 @@ async function seedSpend(
     audience: "organization",
     cause: { type: "time", scheduledAt: 0 },
     principal: { kind: "organization" },
-    snapshot: { context: [], source: { type: "automation" }, title: "Digest" },
+    snapshot: { context: [], source: { type: "job" }, title: "Digest" },
     status: "completed",
     createdAt: 1,
     folderId,

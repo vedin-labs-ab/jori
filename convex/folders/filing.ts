@@ -1,10 +1,10 @@
 import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { automationGate } from "../automations/access"
-import { removeAutomation } from "../automations/lifecycle"
 import { purgeCollection } from "../collections/records"
 import { purgeFile } from "../files/records"
+import { jobGate } from "../jobs/access"
+import { removeJob } from "../jobs/lifecycle"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Gate, type Sight } from "../visibility/sight"
 import { requireOrganizationFolder } from "./tree"
@@ -18,13 +18,13 @@ import { requireOrganizationFolder } from "./tree"
 export const filedResourceType = v.union(
   v.literal("collection"),
   v.literal("file"),
-  v.literal("automation")
+  v.literal("job")
 )
 
 export type FiledResourceType = Infer<typeof filedResourceType>
 
 /** The tables whose rows can be filed into a folder. */
-export const filedTables = ["collections", "files", "automations"] as const
+export const filedTables = ["collections", "files", "jobs"] as const
 
 export type FiledTable = (typeof filedTables)[number]
 
@@ -45,7 +45,7 @@ type FilingEntry = {
 const tableByType: Record<FiledResourceType, FiledTable> = {
   collection: "collections",
   file: "files",
-  automation: "automations",
+  job: "jobs",
 }
 
 /** Each entry only ever receives rows from its own table, so the narrowing
@@ -65,24 +65,24 @@ const registry: Record<FiledTable, FilingEntry> = {
       ctx.db.patch(row._id as Id<"files">, { folderId }),
     purge: (ctx, row) => purgeFile(ctx, row as Doc<"files">),
   },
-  automations: {
-    load: (ctx, resourceId) => loadRow(ctx, "automations", resourceId),
-    gate: (row) => automationGate(row as Doc<"automations">),
+  jobs: {
+    load: (ctx, resourceId) => loadRow(ctx, "jobs", resourceId),
+    gate: (row) => jobGate(row as Doc<"jobs">),
     setFolder: (ctx, row, folderId) =>
-      ctx.db.patch(row._id as Id<"automations">, { folderId }),
+      ctx.db.patch(row._id as Id<"jobs">, { folderId }),
     purge: async (ctx, row) => {
-      const automationId = row._id as Id<"automations">
+      const jobId = row._id as Id<"jobs">
 
-      // Removing an automation removes the automations it owns, which can
+      // Removing a job removes the jobs it owns, which can
       // be filed in the same folder: one may already be gone by the time
       // the sweep reaches its row.
-      if ((await ctx.db.get(automationId)) === null) {
+      if ((await ctx.db.get(jobId)) === null) {
         return
       }
 
-      await removeAutomation(ctx, {
+      await removeJob(ctx, {
         organizationId: row.organizationId,
-        automationId,
+        jobId,
       })
     },
   },

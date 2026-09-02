@@ -17,7 +17,7 @@ import { type LinearGraphqlBody, linearGraphql } from "./graphql"
 export async function searchLinearTeams(args: OptionLoaderArgs) {
   const result = await linearOptionsGraphql(args, {
     query: `
-      query JoriAutomationTeams($first: Int!) {
+      query JoriJobTeams($first: Int!) {
         teams(first: $first) { nodes { id key name } }
       }
     `,
@@ -38,7 +38,7 @@ export async function searchLinearTeams(args: OptionLoaderArgs) {
 export async function searchLinearProjects(args: OptionLoaderArgs) {
   const result = await linearOptionsGraphql(args, {
     query: `
-      query JoriAutomationProjects($first: Int!) {
+      query JoriJobProjects($first: Int!) {
         projects(first: $first) {
           nodes { id name state teams { nodes { id key name } } }
         }
@@ -109,13 +109,13 @@ function issueSearchBody(query: string) {
 
   return query === ""
     ? {
-        query: `query JoriAutomationIssues($first: Int!) {
+        query: `query JoriJobIssues($first: Int!) {
           issues(first: $first) { ${fields} }
         }`,
         variables: { first: maxOptions },
       }
     : {
-        query: `query JoriAutomationIssues($first: Int!, $query: String!) {
+        query: `query JoriJobIssues($first: Int!, $query: String!) {
           issues(first: $first, filter: { title: { containsIgnoreCase: $query } }) {
             ${fields}
           }

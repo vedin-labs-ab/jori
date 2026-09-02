@@ -39,8 +39,8 @@ export const issueProject = internalQuery({
       return { status: "ready", integration, required: false }
     }
 
-    const automations = await ctx.db
-      .query("automations")
+    const jobs = await ctx.db
+      .query("jobs")
       .withIndex("by_organization_status", (query) =>
         query
           .eq("organizationId", integration.organizationId)
@@ -51,9 +51,9 @@ export const issueProject = internalQuery({
     return {
       status: "ready",
       integration,
-      required: automations.some((automation) =>
+      required: jobs.some((job) =>
         shouldHydrateLinearIssueProject({
-          automation,
+          job,
           integrationId: integration._id,
           event: args.event,
           match: args.match,
@@ -64,7 +64,7 @@ export const issueProject = internalQuery({
 })
 
 export function shouldHydrateLinearIssueProject(args: {
-  automation: Doc<"automations">
+  job: Doc<"jobs">
   integrationId: Id<"integrations">
   event: string
   match: {
@@ -72,10 +72,10 @@ export function shouldHydrateLinearIssueProject(args: {
     team?: string
   }
 }) {
-  const trigger = args.automation.trigger
+  const trigger = args.job.trigger
 
   if (
-    args.automation.type !== "event" ||
+    args.job.type !== "event" ||
     !("integrationId" in trigger) ||
     trigger.integrationId !== args.integrationId ||
     trigger.event !== args.event ||
@@ -92,7 +92,7 @@ export function shouldHydrateLinearIssueProject(args: {
 
 function matchAllowsKnownValue(
   match: NonNullable<
-    Extract<Doc<"automations">["trigger"], { event: string }>["match"]
+    Extract<Doc<"jobs">["trigger"], { event: string }>["match"]
   >,
   key: string,
   value: string | undefined

@@ -67,7 +67,7 @@ export const files: SeedFile[] = [
       "",
       "## Usage",
       "",
-      "A page for what Jori costs, broken down by folder, automation, and person. Days are bucketed in your organization's own timezone rather than UTC.",
+      "A page for what Jori costs, broken down by folder, job, and person. Days are bucketed in your organization's own timezone rather than UTC.",
       "",
       "## Shared workspaces",
       "",

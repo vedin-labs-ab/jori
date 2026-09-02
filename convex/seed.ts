@@ -1,11 +1,11 @@
 import { v } from "convex/values"
 import { internalMutation } from "./_generated/server"
-import { seedAutomations } from "./seed/automations"
 import { seedContext } from "./seed/context"
 import { seedDeduction } from "./seed/history/beliefs"
 import { seedRuns } from "./seed/history/runs"
 import { seedTraces } from "./seed/history/traces"
 import { seedUsage } from "./seed/history/usage"
+import { seedJobs } from "./seed/jobs"
 import { files, seedFiles } from "./seed/library/files"
 import { seedFolders } from "./seed/library/folders"
 import { seedCollections } from "./seed/library/tables"
@@ -83,8 +83,8 @@ export const library = internalMutation({
   },
 })
 
-/** The standing work: the organization's own skills, and the automations that
- *  carry them. Automations are written without a scheduled function, so the
+/** The standing work: the organization's own skills, and the jobs that
+ *  carry them. Jobs are written without a scheduled function, so the
  *  console shows a schedule and nothing fires. */
 export const work = internalMutation({
   args: organization,
@@ -93,7 +93,7 @@ export const work = internalMutation({
 
     return {
       skills: await seedSkills(ctx, seed),
-      automations: await seedAutomations(ctx, seed),
+      jobs: await seedJobs(ctx, seed),
     }
   },
 })

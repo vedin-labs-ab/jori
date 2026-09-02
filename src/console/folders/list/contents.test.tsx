@@ -60,7 +60,7 @@ const readyContents = {
       ownerName: "Ada Lovelace",
     },
     {
-      type: "automation",
+      type: "job",
       id: "automation-1",
       name: "Digest",
       visibility: "organization",

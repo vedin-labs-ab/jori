@@ -7,10 +7,8 @@ import { type FunctionReturnType } from "convex/server"
 import { type api } from "../../../convex/_generated/api"
 import { type AutomationScope, type AutomationSurfaceFormValue } from "./access"
 
-export type AutomationList = FunctionReturnType<
-  typeof api.automations.console.list
->
-export type Automation = AutomationList["automations"][number]
+export type AutomationList = FunctionReturnType<typeof api.jobs.console.list>
+export type Automation = AutomationList["jobs"][number]
 
 export function automationControlAction(automation: Automation) {
   if (automation.type === "once" || automation.status === "completed") {

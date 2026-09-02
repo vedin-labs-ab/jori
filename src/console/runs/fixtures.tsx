@@ -43,7 +43,7 @@ export function makeExecution(
     offers: offer === null ? [] : [offer],
     audience: "personal",
     searchableText: "",
-    source: { type: "automation", surface: "slack" },
+    source: { type: "job", surface: "slack" },
     status: "completed",
     task: "Handle the requested actions.",
     title: "Execution test",

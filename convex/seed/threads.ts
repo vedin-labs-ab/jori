@@ -223,7 +223,7 @@ const company: SeedMessage[] = [
     channel: "design",
     at: [8, 10, 35],
     author: "nadia",
-    text: "The usage chart reads well until a single automation dominates a day, and then the other bars collapse to nothing. Worth a log scale toggle or a cap.",
+    text: "The usage chart reads well until a single job dominates a day, and then the other bars collapse to nothing. Worth a log scale toggle or a cap.",
   },
   {
     channel: "founders",

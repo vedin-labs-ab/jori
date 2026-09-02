@@ -49,8 +49,8 @@ export const slackMessageDeliveryValidator = v.object({
 
 /**
  * A resolved tool contract: which tools a run may use per integration, and
- * whether web tools are available. Automations always carry one; runs
- * without an automation may carry their own, and omitting it grants the
+ * whether web tools are available. Jobs always carry one; runs
+ * without a job may carry their own, and omitting it grants the
  * full tool surface.
  */
 export const accessValidator = v.object({

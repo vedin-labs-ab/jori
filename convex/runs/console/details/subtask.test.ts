@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import {
-  automationDisplay,
   fakeQueryCtx,
+  jobDisplay,
   recurringDisplay,
 } from "../../../../test/convex/console"
 import { summarizeRun } from "../summaries"
@@ -63,7 +63,7 @@ function subtaskRun(overrides: Record<string, unknown> = {}) {
     instructions: "Research the attendees and draft the dossier.",
     snapshot: {
       title: "Dossier: Acme sync",
-      ...automationDisplay({ source: { type: "manual" } }),
+      ...jobDisplay({ source: { type: "manual" } }),
     },
     status: "completed",
     createdAt: 0,

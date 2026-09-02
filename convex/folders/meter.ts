@@ -1,5 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { canSeeAutomation } from "../automations/access"
+import { canSeeJob } from "../jobs/access"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   addFigures,
@@ -233,12 +233,12 @@ function bySpend(left: UsageSegment, right: UsageSegment) {
     : right.micros - left.micros
 }
 
-/** Work whose automation the viewer may not see, gathered under one
- *  caption. The automation's own name sits on every row it wrote, so a
- *  row's caption is no safer to show than the automation itself. */
-const hiddenLabel = "Automations you cannot see"
+/** Work whose job the viewer may not see, gathered under one
+ *  caption. The job's own name sits on every row it wrote, so a
+ *  row's caption is no safer to show than the job itself. */
+const hiddenLabel = "Jobs you cannot see"
 
-/** A deleted automation keeps the caption its rows carry — its spend is
+/** A deleted job keeps the caption its rows carry — its spend is
  *  history and there is nothing left to open — and loses its id, so the
  *  console neither links it nor offers it to the chart's filter. One the
  *  viewer merely may not see loses its caption too and folds into a single
@@ -257,14 +257,14 @@ export async function nameContributors(
   }
 
   for (const { id, ...contributor } of contributors) {
-    const automation = id === undefined ? null : await ctx.db.get(id)
+    const job = id === undefined ? null : await ctx.db.get(id)
 
-    if (automation !== null && !(await canSeeAutomation(sight, automation))) {
+    if (job !== null && !(await canSeeJob(sight, job))) {
       hidden.micros += contributor.micros
       hidden.ended += contributor.ended
       hidden.failed += contributor.failed
     } else {
-      named.push(automation === null ? contributor : { ...contributor, id })
+      named.push(job === null ? contributor : { ...contributor, id })
     }
   }
 

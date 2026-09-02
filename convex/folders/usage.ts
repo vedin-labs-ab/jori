@@ -33,7 +33,7 @@ import { descendantFolderIds, requireVisibleFolder } from "./tree"
 // Every member sees this. Spend is org-wide money, already itemized for
 // every member in billing, so a folder's cost is not the thing to hide.
 // Names are. A folder a member cannot see keeps its spend in the totals and
-// stays out of the breakdown, and an automation a member cannot see does
+// stays out of the breakdown, and a job a member cannot see does
 // the same: its money still counts, but it is folded into one unnamed row
 // rather than listed, and its own series is not hers to ask for.
 
@@ -206,7 +206,7 @@ async function summarize(
     series: usageSeries(current, window, segmentOf),
     totals: usageTotals(current),
     previous: usageTotals(previous),
-    automations: await nameContributors(ctx, sight, ranked),
+    jobs: await nameContributors(ctx, sight, ranked),
     folders: segments,
   }
 }

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { automationDoc, folderDoc } from "../../test/convex/folders"
+import { folderDoc, jobDoc } from "../../test/convex/folders"
 import { seedUsage } from "../../test/convex/usage"
 import { type Id } from "../_generated/dataModel"
 import { readFolderUsage } from "./usage"
@@ -225,54 +225,54 @@ test("the ranking names every contributor, not just its leaders", async () => {
     await seedUsage(database, {
       date: "2026-03-15",
       micros: (10 - rank) * 100,
-      automation: {
-        id: `automations:${rank}` as Id<"automations">,
-        label: `Automation ${rank}`,
+      job: {
+        id: `jobs:${rank}` as Id<"jobs">,
+        label: `Job ${rank}`,
       },
     })
   }
 
   const usage = await read(ctx)
 
-  expect(usage.automations.map((entry) => entry.micros)).toEqual([
+  expect(usage.jobs.map((entry) => entry.micros)).toEqual([
     1000, 900, 800, 700, 600, 500, 400, 300, 200, 100,
   ])
 })
 
-test("work nobody automated ranks as its own contributor", async () => {
+test("work no job did ranks as its own contributor", async () => {
   const { database, ctx } = databaseContext()
 
   await seedUsage(database, { date: "2026-03-15", micros: 60, ended: 3 })
 
-  expect(await read(ctx).then((usage) => usage.automations)).toEqual([
+  expect(await read(ctx).then((usage) => usage.jobs)).toEqual([
     { label: "Interactive work", micros: 60, ended: 3, failed: 0 },
   ])
 })
 
-test("only an automation that still exists is linkable", async () => {
+test("only a job that still exists is linkable", async () => {
   const { database, ctx } = databaseContext()
   const liveId = (await database.insert(
-    "automations",
-    automationDoc({ name: "Morning digest" })
-  )) as Id<"automations">
+    "jobs",
+    jobDoc({ name: "Morning digest" })
+  )) as Id<"jobs">
 
   await seedUsage(database, {
     date: "2026-03-15",
     micros: 90,
-    automation: { id: liveId, label: "Morning digest" },
+    job: { id: liveId, label: "Morning digest" },
   })
   await seedUsage(database, {
     date: "2026-03-15",
     micros: 20,
-    automation: {
-      id: "automations:gone" as Id<"automations">,
+    job: {
+      id: "jobs:gone" as Id<"jobs">,
       label: "One-shot reminder",
     },
   })
 
   const usage = await read(ctx)
 
-  expect(usage.automations).toEqual([
+  expect(usage.jobs).toEqual([
     { id: liveId, label: "Morning digest", micros: 90, ended: 0, failed: 0 },
     { label: "One-shot reminder", micros: 20, ended: 0, failed: 0 },
   ])

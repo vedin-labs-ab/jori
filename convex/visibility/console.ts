@@ -22,7 +22,7 @@ import { folderGate, loadTarget, targetValidator } from "./target"
 import { listOrganizationTeamIds, withinOrganizationTeams } from "./viewer"
 
 // The one console surface for changing who may see a material or folder,
-// and for showing who that turns out to be. Automations change visibility
+// and for showing who that turns out to be. Jobs change visibility
 // through their editor instead, which also re-derives their execution
 // principal.
 

@@ -13,7 +13,7 @@ import {
   failOfferAndRedirect,
 } from "../connect/install"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
-import { readNotionAutomationEvents } from "./events"
+import { readNotionJobEvents } from "./events"
 import {
   exchangeNotionAuthorizationCode,
   readNotionSetupIdentity,
@@ -113,7 +113,7 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
     return unauthorizedResponse()
   }
 
-  for (const event of readNotionAutomationEvents(payload)) {
+  for (const event of readNotionJobEvents(payload)) {
     const data = normalizeEventData(
       "notion",
       await enrichNotionEventData(ctx, {

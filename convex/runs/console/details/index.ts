@@ -10,7 +10,7 @@ export function runDetailSummary(input: {
   stoppedBy: string | undefined
   tools: Parameters<typeof toolDetails>[0]
 }) {
-  // A manual run's snapshot context is the automation's schedule/status and a
+  // A manual run's snapshot context is the job's schedule/status and a
   // subtask's is its parent's origin; neither says anything about this run.
   const snapshotContext =
     isManualTrigger(input.run) || isSubtaskRun(input.run)

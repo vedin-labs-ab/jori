@@ -68,7 +68,7 @@ describe("execution row one-shot details", () => {
 function oneShotExecution({ details }: Pick<ExecutionItem, "details">) {
   return makeExecution({
     details,
-    source: { type: "automation", surface: "jori" },
+    source: { type: "job", surface: "jori" },
     task: "Generate a team image.",
     title: "Daily image",
     trigger: "Time automation",

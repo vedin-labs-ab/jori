@@ -11,7 +11,7 @@ import {
 import { createInstructionRunSnapshot } from "./snapshot"
 
 /**
- * A manual run from bare instructions — no automation behind it. `access`
+ * A manual run from bare instructions — no job behind it. `access`
  * narrows the run to an explicit tool contract; omitted, the run gets the
  * caller's full tool surface.
  */
@@ -44,7 +44,7 @@ export async function createInstructionRun(
       : {
           parentId: parent._id,
           rootId: parent.rootId ?? parent._id,
-          ...inheritedAutomationExecution(parent),
+          ...inheritedJobExecution(parent),
         }),
     cause: { type: "manual", personId: args.createdBy },
     principal:
@@ -69,13 +69,13 @@ export async function createInstructionRun(
   return runId
 }
 
-function inheritedAutomationExecution(parent: Doc<"runs">) {
-  if (parent.automation === undefined) {
+function inheritedJobExecution(parent: Doc<"runs">) {
+  if (parent.job === undefined) {
     return {}
   }
 
   return {
-    automation: parent.automation,
+    job: parent.job,
     // Delegated work costs the folder its parent costs.
     ...(parent.folderId === undefined ? {} : { folderId: parent.folderId }),
   }

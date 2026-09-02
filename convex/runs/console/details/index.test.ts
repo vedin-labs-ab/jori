@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
 import {
-  automationDisplay,
-  eventAutomationDisplay,
+  eventJobDisplay,
   fakeQueryCtx,
+  jobDisplay,
 } from "../../../../test/convex/console"
 import { id } from "../../../../test/convex/database"
 import { integrationDoc } from "../../../../test/convex/integrations"
@@ -101,7 +101,7 @@ function manualRun(title: string, task: string) {
     instructions: task,
     snapshot: {
       title,
-      ...automationDisplay({
+      ...jobDisplay({
         source: { type: "manual" },
       }),
     },
@@ -118,7 +118,7 @@ function eventRun(title: string, task: string) {
     instructions: task,
     snapshot: {
       title,
-      ...eventAutomationDisplay({
+      ...eventJobDisplay({
         surface: "github",
         context: [
           {

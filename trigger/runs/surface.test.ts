@@ -19,7 +19,7 @@ test("active surface stops are repaired back to finish_run", async () => {
       toolCalls: [
         {
           args: {
-            reason: "The requester only needed the automation to run.",
+            reason: "The requester only needed the job to run.",
           },
           id: "call_1",
           name: "finish_run",

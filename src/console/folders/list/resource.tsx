@@ -168,7 +168,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
           {label}
         </Link>
       )
-    case "automation":
+    case "job":
       return (
         <Link
           className={nameLinkClassName}

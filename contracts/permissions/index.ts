@@ -128,7 +128,7 @@ export function resolveToolMode(
 
 export function canUseToolMode(
   mode: PermissionMode,
-  executionType: "automation" | "message"
+  executionType: "job" | "message"
 ) {
   if (mode === "blocked") {
     return false

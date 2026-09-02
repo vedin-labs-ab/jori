@@ -7,7 +7,7 @@ import { evented, manual, scheduled } from "./sources"
 
 // Sixty days of work, derived rather than listed. Scheduled work is walked
 // forward with the same cron reader the product schedules with, so a run
-// history lands exactly on the days its automation would have fired;
+// history lands exactly on the days its job would have fired;
 // message-caused work comes from the Slack lines that actually addressed
 // Jori. Variation is hashed from each item's own identity, so a re-seed
 // produces the same history rather than a new one.
@@ -24,8 +24,8 @@ export type WorkItem = {
   trigger: "schedule" | "event" | "message" | "manual"
   surface: ToolSurface
   status: "completed" | "failed" | "stopped" | "running"
-  /** The automation's name, absent for interactive work. */
-  automation?: string
+  /** The job's name, absent for interactive work. */
+  job?: string
   folder?: string
   /** The person who asked, by email; absent for scheduled work. */
   person?: string
@@ -41,7 +41,7 @@ export type WorkItem = {
 
 /** The identity an evented run and the event that woke it agree on. */
 export function eventKey(item: WorkItem) {
-  return `${item.automation ?? ""}:${item.at}`
+  return `${item.job ?? ""}:${item.at}`
 }
 
 export function workItems(seed: SeedContext): WorkItem[] {
@@ -71,7 +71,7 @@ function scheduledItems(seed: SeedContext) {
           title: source.name,
           trigger: "schedule",
           surface: "jori",
-          automation: source.name,
+          job: source.name,
           folder: source.folder,
           status: "completed",
           durationMs: 0,
@@ -94,7 +94,7 @@ function eventedItems(seed: SeedContext) {
         title: source.name,
         trigger: "event",
         surface: "slack",
-        automation: source.name,
+        job: source.name,
         folder: source.folder,
         channel: source.channel,
         status: "completed",

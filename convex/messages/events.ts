@@ -15,7 +15,7 @@ import { getSlackChannelId } from "../integrations/slack/data"
 import { type Actor } from "../shared/actor"
 import { readNumber, readRecord, readString, readValue } from "../shared/input"
 
-type AutomationEventMessage = {
+type JobEventMessage = {
   externalId: string
   actor?: Actor
   text?: string
@@ -23,7 +23,7 @@ type AutomationEventMessage = {
   observedAt?: number
 }
 
-type AutomationEventRecord = {
+type JobEventRecord = {
   key: string
   type: string
   match?: EventMatch
@@ -33,15 +33,15 @@ type AutomationEventRecord = {
   observedAt?: number
 }
 
-export async function recordAutomationEvent(
+export async function recordJobEvent(
   ctx: MutationCtx,
   input: {
     integration: Doc<"integrations">
-    message: AutomationEventMessage
+    message: JobEventMessage
     now: number
   }
 ) {
-  for (const event of readAutomationEventsForMessage(input)) {
+  for (const event of readJobEventsForMessage(input)) {
     await recordEvent(ctx, {
       integration: input.integration,
       key: event.key,
@@ -56,26 +56,26 @@ export async function recordAutomationEvent(
   }
 }
 
-export function readAutomationEventsForMessage(input: {
+export function readJobEventsForMessage(input: {
   integration: Pick<Doc<"integrations">, "integration">
-  message: AutomationEventMessage
-}): AutomationEventRecord[] {
+  message: JobEventMessage
+}): JobEventRecord[] {
   if (input.integration.integration === "slack") {
-    return readSlackAutomationEvents(input.message)
+    return readSlackJobEvents(input.message)
   }
 
   if (input.integration.integration === "github") {
-    return readGitHubAutomationEvents(input.message)
+    return readGitHubJobEvents(input.message)
   }
 
   if (input.integration.integration === "linear") {
-    return readLinearAutomationEvents(input.message)
+    return readLinearJobEvents(input.message)
   }
 
   return []
 }
 
-function readSlackAutomationEvents(message: AutomationEventMessage) {
+function readSlackJobEvents(message: JobEventMessage) {
   const channelId = getSlackChannelId(message.data)
 
   if (channelId === undefined) {
@@ -90,7 +90,7 @@ function readSlackAutomationEvents(message: AutomationEventMessage) {
   ]
 }
 
-function readGitHubAutomationEvents(message: AutomationEventMessage) {
+function readGitHubJobEvents(message: JobEventMessage) {
   const data = readRecord(message.data)
   const eventType = readString(data, "eventType")
 
@@ -106,7 +106,7 @@ function readGitHubAutomationEvents(message: AutomationEventMessage) {
 }
 
 function readGitHubIssueCommentEvent(
-  message: AutomationEventMessage,
+  message: JobEventMessage,
   data: Record<string, unknown>
 ) {
   const repo = readNestedString(data, "repository", "fullName")
@@ -142,7 +142,7 @@ function readGitHubIssueCommentEvent(
 }
 
 function readGitHubPullRequestReviewCommentEvent(
-  message: AutomationEventMessage,
+  message: JobEventMessage,
   data: Record<string, unknown>
 ) {
   const repo = readNestedString(data, "repository", "fullName")
@@ -165,7 +165,7 @@ function readGitHubPullRequestReviewCommentEvent(
   ]
 }
 
-function readLinearAutomationEvents(message: AutomationEventMessage) {
+function readLinearJobEvents(message: JobEventMessage) {
   const data = readRecord(message.data)
   const issueId = readString(data, "issueId")
   const action = linearCommentEventAction(readString(data, "action"))
@@ -188,9 +188,9 @@ function readLinearAutomationEvents(message: AutomationEventMessage) {
 
 function baseEvent(
   integration: Integration,
-  message: AutomationEventMessage,
-  event: Pick<AutomationEventRecord, "match" | "type">
-): AutomationEventRecord {
+  message: JobEventMessage,
+  event: Pick<JobEventRecord, "match" | "type">
+): JobEventRecord {
   return {
     key: message.externalId,
     type: event.type,

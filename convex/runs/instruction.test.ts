@@ -16,8 +16,8 @@ beforeEach(() => {
 })
 
 describe("instruction child runs", () => {
-  test("inherit their automation execution generation", async () => {
-    const parent = automationRun()
+  test("inherit their job execution generation", async () => {
+    const parent = jobRun()
     const insert = vi.fn(async () => "child" as Id<"runs">)
     const ctx = { db: { insert } } as unknown as MutationCtx
 
@@ -31,7 +31,7 @@ describe("instruction child runs", () => {
     expect(insert).toHaveBeenCalledWith(
       "runs",
       expect.objectContaining({
-        automation: parent.automation,
+        job: parent.job,
         folderId: parent.folderId,
         parentId: parent._id,
         rootId: parent._id,
@@ -40,14 +40,14 @@ describe("instruction child runs", () => {
   })
 })
 
-function automationRun(): Doc<"runs"> {
+function jobRun(): Doc<"runs"> {
   return {
     _id: "parent-run" as Id<"runs">,
     _creationTime: 0,
     access: { integrations: [], web: false },
-    automation: {
-      id: "child-automation" as Id<"automations">,
-      parentId: "owner-automation" as Id<"automations">,
+    job: {
+      id: "child-job" as Id<"jobs">,
+      parentId: "owner-job" as Id<"jobs">,
       version: 4,
     },
     cause: { type: "time", scheduledAt: 0 },
@@ -60,7 +60,7 @@ function automationRun(): Doc<"runs"> {
     audience: "person",
     snapshot: {
       context: [],
-      source: { type: "automation" },
+      source: { type: "job" },
       title: "Meeting Briefing",
     },
     status: "running",

@@ -151,7 +151,7 @@ function printUsage() {
   writeStdout(
     "people, Slack places and traffic, folders, tables, stores, files,"
   )
-  writeStdout("skills, automations, sixty days of runs, usage, and deduction.")
+  writeStdout("skills, jobs, sixty days of runs, usage, and deduction.")
   writeStdout("")
   writeStdout(
     "The organization defaults to the only one the deployment holds a profile for."

@@ -16,12 +16,12 @@ export type AutomationEditor = ReturnType<typeof useAutomationEditor>
 const loadAutomationArgs = () => import("./save/args")
 
 type AutomationPersistence = {
-  create: ReactMutation<typeof api.automations.console.create>
+  create: ReactMutation<typeof api.jobs.console.create>
   formAutomation: Automation | undefined
   formValues: AutomationFormValues
   permissions?: AutomationPolicyPermissions
   organizationId: string
-  update: ReactMutation<typeof api.automations.console.update>
+  update: ReactMutation<typeof api.jobs.console.update>
 }
 
 export function useAutomationEditor(
@@ -39,8 +39,8 @@ export function useAutomationEditor(
 /** The persistence endpoints a form save can land on. */
 function useAutomationSavers() {
   return {
-    create: useMutation(api.automations.console.create),
-    update: useMutation(api.automations.console.update),
+    create: useMutation(api.jobs.console.create),
+    update: useMutation(api.jobs.console.update),
   }
 }
 
@@ -168,19 +168,19 @@ async function persistAutomation({
 
   await update({
     organizationId,
-    automationId: formAutomation.id,
+    jobId: formAutomation.id,
     ...result.args,
   })
 }
 
 function useAutomationDeletion(organizationId: string) {
-  const remove = useMutation(api.automations.console.remove)
+  const remove = useMutation(api.jobs.console.remove)
   const [deletingAutomationId, setDeletingAutomationId] = useState<string>()
 
   async function deleteAutomation(automation: Automation) {
     setDeletingAutomationId(automation.id)
     try {
-      await remove({ organizationId, automationId: automation.id })
+      await remove({ organizationId, jobId: automation.id })
     } catch (error) {
       showErrorToast(error, "Couldn't delete the job.")
     } finally {
@@ -192,8 +192,8 @@ function useAutomationDeletion(organizationId: string) {
 }
 
 function useAutomationControl(organizationId: string) {
-  const pause = useMutation(api.automations.console.pause)
-  const resume = useMutation(api.automations.console.resume)
+  const pause = useMutation(api.jobs.console.pause)
+  const resume = useMutation(api.jobs.console.resume)
   const [controllingAutomationId, setControllingAutomationId] =
     useState<string>()
 
@@ -201,7 +201,7 @@ function useAutomationControl(organizationId: string) {
     setControllingAutomationId(automation.id)
     try {
       const mutation = paused ? pause : resume
-      await mutation({ organizationId, automationId: automation.id })
+      await mutation({ organizationId, jobId: automation.id })
     } catch (error) {
       showErrorToast(
         error,

@@ -19,8 +19,7 @@ export async function getRunContext(
   const approvals = prioritizeApprovals(runApprovals, runApproval)
   const message =
     run.cause.type === "message" ? await ctx.db.get(run.cause.messageId) : null
-  const automation =
-    run.automation === undefined ? null : await ctx.db.get(run.automation.id)
+  const job = run.job === undefined ? null : await ctx.db.get(run.job.id)
   const event =
     run.cause.type === "event" ? await ctx.db.get(run.cause.eventId) : null
   const integration =
@@ -41,7 +40,7 @@ export async function getRunContext(
     activeWaiter,
     approvalDeliveryIntegrations,
     approvals,
-    automation,
+    job,
     event,
     integration,
     integrationOffers,

@@ -6,7 +6,7 @@ import {
   testOwner,
 } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { automationDoc, fileDoc, folderDoc } from "../../test/convex/folders"
+import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { folderChildren, folderResources, summarizeTree } from "./contents"
 
@@ -19,8 +19,8 @@ async function seedFolder(database: TestDatabase) {
   await database.insert("collections", storeDoc({ folderId, name: "Config" }))
   await database.insert("files", fileDoc({ folderId, name: "costs.csv" }))
   await database.insert(
-    "automations",
-    automationDoc({ folderId, name: "Digest", status: "paused" })
+    "jobs",
+    jobDoc({ folderId, name: "Digest", status: "paused" })
   )
 
   return folderId
@@ -183,7 +183,7 @@ test("resources carry their type and display extras, name-sorted", async () => {
   expect(resources.map((resource) => [resource.type, resource.name])).toEqual([
     ["store", "Config"],
     ["file", "costs.csv"],
-    ["automation", "Digest"],
+    ["job", "Digest"],
     ["table", "Leads"],
   ])
   expect(resources[1]).toMatchObject({ mimeType: "text/csv", size: 42 })
@@ -211,8 +211,8 @@ test("personal resources appear only for their owner", async () => {
     })
   )
   await database.insert(
-    "automations",
-    automationDoc({
+    "jobs",
+    jobDoc({
       folderId,
       name: "Private digest",
       visibility: { mode: "private" },
@@ -244,7 +244,7 @@ test("listed rows carry their owner, and none for what Jori owns", async () => {
   const resources = await folderResources(ctx, { ...view, folderId })
 
   // A subfolder belongs to whoever created it and a filed resource to its
-  // owner; a file an agent run saved has none, an automation never has one.
+  // owner; a file an agent run saved has none, a job never has one.
   expect(
     [children[0], ...resources].map((row) => [
       row?.name,

@@ -50,7 +50,7 @@ test("finish_run completes after visible communication", async () => {
   })
 })
 
-test("finish_run completes automation runs without a reason", async () => {
+test("finish_run completes job runs without a reason", async () => {
   const runtime = createRuntime({ activeSurface: null })
 
   const result = await executeToolCall({

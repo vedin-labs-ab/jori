@@ -40,9 +40,9 @@ function overview(overrides: Partial<UsageOverview> = {}) {
       failed: 0,
       tokens: { input: 0, output: 0 },
     },
-    automations: [
+    jobs: [
       {
-        id: "automations:1",
+        id: "jobs:1",
         label: "Morning digest",
         micros: 900,
         ended: 3,
@@ -82,7 +82,7 @@ test("a window with nothing in it explains itself instead of drawing zeroes", ()
         failed: 0,
         tokens: { input: 0, output: 0 },
       },
-      automations: [],
+      jobs: [],
     })
   )
 

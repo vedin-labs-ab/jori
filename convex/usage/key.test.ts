@@ -11,7 +11,7 @@ import {
 // be derivable from the run alone, identically every time.
 
 const folderId = "folder-1" as Id<"folders">
-const automationId = "automation-1" as Id<"automations">
+const jobId = "job-1" as Id<"jobs">
 const personId = "person-1" as Id<"persons">
 
 function attribution(
@@ -25,22 +25,22 @@ test("the key names every dimension a breakdown can group by", () => {
     usageKey(
       attribution({
         folderId,
-        automation: { id: automationId, label: "Morning digest" },
+        job: { id: jobId, label: "Morning digest" },
         personId,
         surface: "slack",
         trigger: "message",
       })
     )
-  ).toBe("folder-1:automation-1:person-1:slack:message")
+  ).toBe("folder-1:job-1:person-1:slack:message")
 })
 
-test("work with no folder, automation, or person keys as unfiled", () => {
+test("work with no folder, job, or person keys as unfiled", () => {
   expect(usageKey(attribution({ trigger: "manual" }))).toBe("-:-:-:jori:manual")
 })
 
-test("renaming an automation does not move its rows", () => {
+test("renaming a job does not move its rows", () => {
   const named = (label: string) =>
-    usageKey(attribution({ automation: { id: automationId, label } }))
+    usageKey(attribution({ job: { id: jobId, label } }))
 
   expect(named("Morning digest")).toBe(named("Daily digest"))
 })

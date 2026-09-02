@@ -2,7 +2,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { toolSurfaceLabel } from "../../shared/integrations"
 
 type RunLabelContext = {
-  automation?: Doc<"automations"> | null
+  job?: Doc<"jobs"> | null
   message?: Doc<"messages"> | null
   run: Doc<"runs">
 }
@@ -15,7 +15,7 @@ export function runTask(context: RunLabelContext) {
   return (
     context.run.instructions ??
     context.message?.text ??
-    context.automation?.instructions ??
+    context.job?.instructions ??
     context.run.snapshot.title
   )
 }
@@ -32,7 +32,7 @@ export function triggerLabel(context: RunLabelContext) {
   }
 
   if (context.run.cause.type === "time") {
-    return "Time automation"
+    return "Scheduled"
   }
 
   return context.run.parentId === undefined ? "Manual" : "Agent"

@@ -25,8 +25,8 @@ export function AutomationContent({
   now: number
   automationList: AutomationList | undefined
   onCreate: () => void
-  onMoveToFolder: (automation: AutomationList["automations"][number]) => void
-  visibleAutomations: AutomationList["automations"]
+  onMoveToFolder: (automation: AutomationList["jobs"][number]) => void
+  visibleAutomations: AutomationList["jobs"]
 }) {
   if (automationList === undefined) {
     return <ConsoleListLoading />

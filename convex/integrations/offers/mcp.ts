@@ -28,7 +28,7 @@ export async function callIntegrationOfferTool(
     throw new Error(`Unknown integration offer tool: ${request.tool}`)
   }
 
-  if (context.input.type === "automation") {
+  if (context.input.type === "job") {
     throw new Error("Integration offers require an interactive run.")
   }
 

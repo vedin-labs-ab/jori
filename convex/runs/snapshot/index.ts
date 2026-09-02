@@ -1,7 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type Access } from "../../shared/integrations"
 import { type MessageCauseKind, type RunSnapshot } from "../schema"
-import { automationSnapshotBody, messageSnapshotBody } from "./source"
+import { jobSnapshotBody, messageSnapshotBody } from "./source"
 
 type RunSnapshotInput = {
   access?: Access
@@ -9,20 +9,20 @@ type RunSnapshotInput = {
   snapshot: RunSnapshot
 }
 
-export function createAutomationRunSnapshot(input: {
-  automation: Doc<"automations">
+export function createJobRunSnapshot(input: {
+  job: Doc<"jobs">
   event?: Doc<"events"> | null
   integration?: Doc<"integrations"> | null
 }): RunSnapshotInput {
   return {
-    access: input.automation.access,
+    access: input.job.access,
     instructions: normalizeRequiredRunText(
-      input.automation.instructions,
+      input.job.instructions,
       "Run instructions"
     ),
     snapshot: {
-      title: normalizeRequiredRunText(input.automation.name, "Run title"),
-      ...automationSnapshotBody(input),
+      title: normalizeRequiredRunText(input.job.name, "Run title"),
+      ...jobSnapshotBody(input),
     },
   }
 }

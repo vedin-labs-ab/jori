@@ -143,7 +143,7 @@ const fileResource = {
 }
 
 const automationResource = {
-  type: "automation",
+  type: "job",
   id: "automation-1",
   name: "Digest",
   visibility: "organization",

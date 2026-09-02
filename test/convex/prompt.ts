@@ -2,12 +2,12 @@ import { type ToolPermission } from "../../contracts/permissions"
 import { type RuntimeIntegration } from "../../convex/runs/agent/input"
 import { type assemblePrompt } from "../../convex/runs/agent/prompt"
 
-export function automationRuntimeInput(webSearch = true) {
+export function jobRuntimeInput(webSearch = true) {
   const github = promptIntegration("github")
   const slack = promptIntegration("slack")
 
   return {
-    type: "automation",
+    type: "job",
     instructions: "Post the daily digest.",
     access: {
       integrations: [
@@ -20,10 +20,10 @@ export function automationRuntimeInput(webSearch = true) {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automation: { id: "automation" },
+      job: { id: "job" },
       snapshot: {
         title: "Daily digest",
-        source: { type: "automation" },
+        source: { type: "job" },
         context: [],
       },
       cause: {
@@ -38,11 +38,11 @@ export function automationRuntimeInput(webSearch = true) {
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }
 
-export function linearAutomationRuntimeInput() {
+export function linearJobRuntimeInput() {
   const linear = promptIntegration("linear")
 
   return {
-    type: "automation",
+    type: "job",
     instructions: "Reply with a short quip.",
     access: {
       integrations: [{ id: linear._id, tools: ["linear_add_comment"] }],
@@ -52,7 +52,7 @@ export function linearAutomationRuntimeInput() {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automation: { id: "automation" },
+      job: { id: "job" },
       snapshot: {
         title: "Linear quip",
         source: { type: "event", surface: "linear" },
@@ -86,11 +86,11 @@ export function linearAutomationRuntimeInput() {
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }
 
-export function notionAutomationRuntimeInput() {
+export function notionJobRuntimeInput() {
   const notion = promptIntegration("notion")
 
   return {
-    type: "automation",
+    type: "job",
     instructions: "Summarize the changed Notion page.",
     access: {
       integrations: [
@@ -105,7 +105,7 @@ export function notionAutomationRuntimeInput() {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automation: { id: "automation" },
+      job: { id: "job" },
       snapshot: {
         title: "Notion follow-up",
         source: { type: "event", surface: "notion" },

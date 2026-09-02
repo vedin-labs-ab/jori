@@ -10,7 +10,7 @@ import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
-test("includes recurring automation details", async () => {
+test("includes recurring job details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 9)
   const nextAt = Date.UTC(2026, 5, 15, 9)
   const run = testRun(
@@ -26,7 +26,7 @@ test("includes recurring automation details", async () => {
   const summary = await summarizeRun(
     fakeQueryCtx(
       {
-        automation: recurringAutomation({ nextAt }),
+        job: recurringJob({ nextAt }),
         integration: slackIntegration(),
         run,
       },
@@ -37,7 +37,7 @@ test("includes recurring automation details", async () => {
 
   expect(summary.source).toEqual({
     kind: { label: "recurring", type: "recurring" },
-    type: "automation",
+    type: "job",
     surface: "jori",
   })
   expect(summary.details).toEqual([
@@ -58,7 +58,7 @@ test("includes recurring automation details", async () => {
   ])
 })
 
-test("includes paused recurring automation status without next run details", async () => {
+test("includes paused recurring job status without next run details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 9)
   const nextAt = Date.UTC(2026, 5, 15, 9)
   const run = testRun(
@@ -70,7 +70,7 @@ test("includes paused recurring automation status without next run details", asy
   const summary = await summarizeRun(
     fakeQueryCtx(
       {
-        automation: recurringAutomation({ nextAt, status: "paused" }),
+        job: recurringJob({ nextAt, status: "paused" }),
         integration: slackIntegration(),
         run,
       },
@@ -94,7 +94,7 @@ function recurringRun(
     _id: "run",
     _creationTime: 0,
     organizationId: "organization",
-    automation: { id: "automation" },
+    job: { id: "job" },
     cause: { type: "time", scheduledAt },
     instructions: "Generate a team image.",
     snapshot: {
@@ -105,7 +105,7 @@ function recurringRun(
   }
 }
 
-function recurringAutomation({
+function recurringJob({
   nextAt,
   status = "active",
 }: {
@@ -113,7 +113,7 @@ function recurringAutomation({
   status?: "active" | "paused"
 }) {
   return {
-    _id: "automation",
+    _id: "job",
     _creationTime: 0,
     organizationId: "organization",
     name: "Daily image",

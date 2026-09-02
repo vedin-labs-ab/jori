@@ -20,7 +20,7 @@ export function executesAsOrganization(visibility: StoredVisibility) {
   return visibility.mode !== "private"
 }
 
-/** The identity a material or automation runs as, derived from who may see
+/** The identity a material or job runs as, derived from who may see
  *  it: private executes as its person, everything shared as the organization. */
 export function executionPrincipalForVisibility(
   visibility: StoredVisibility,

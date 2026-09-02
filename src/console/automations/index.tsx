@@ -46,7 +46,7 @@ export function Automations() {
 function AutomationListView({ organizationId }: { organizationId: string }) {
   const filters = useAutomationFilters()
   const deferredQuery = useDeferredValue(filters.query)
-  const automationList = useQuery(api.automations.console.list, {
+  const automationList = useQuery(api.jobs.console.list, {
     organizationId,
     query: deferredQuery,
     statusFilter: filters.filter,
@@ -104,7 +104,7 @@ function movingResource(automation: Automation | undefined) {
   return automation === undefined
     ? undefined
     : {
-        resourceType: "automation" as const,
+        resourceType: "job" as const,
         resourceId: automation.id,
         name: automation.name,
         folderId: automation.folderId,
@@ -145,7 +145,7 @@ function useAutomationPagination({
   const hasFilters = hasAutomationFilters(query, filter) || audience !== "all"
   const automations =
     automationList?.status === "ready"
-      ? filterAutomationsByView(automationList.automations, filter).filter(
+      ? filterAutomationsByView(automationList.jobs, filter).filter(
           (automation) => matchesAudienceFilter(automation.audience, audience)
         )
       : []

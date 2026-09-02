@@ -27,19 +27,19 @@ type SourceContextMetadataType =
   | "sender"
   | "subject"
 
-export function automationSnapshotBody(input: {
-  automation: Doc<"automations">
+export function jobSnapshotBody(input: {
+  job: Doc<"jobs">
   event?: Doc<"events"> | null
   integration?: Doc<"integrations"> | null
 }): RunSnapshotBody {
-  if (input.automation.type === "event") {
-    return eventAutomationDisplay({
+  if (input.job.type === "event") {
+    return eventJobDisplay({
       event: input.event ?? null,
       integration: input.integration ?? null,
     })
   }
 
-  return timeAutomationDisplay(input.automation)
+  return timeJobDisplay(input.job)
 }
 
 export function messageSnapshotBody(input: {
@@ -71,7 +71,7 @@ export function messageSnapshotBody(input: {
   }
 }
 
-function eventAutomationDisplay(input: {
+function eventJobDisplay(input: {
   event: Doc<"events"> | null
   integration: Doc<"integrations"> | null
 }): RunSnapshotBody {
@@ -99,7 +99,7 @@ function eventAutomationDisplay(input: {
 
   return {
     source: {
-      type: "automation",
+      type: "job",
       ...(integration === undefined ? {} : { surface: integration }),
       ...(sourceUrl === undefined ? {} : { url: sourceUrl }),
     },
@@ -107,16 +107,14 @@ function eventAutomationDisplay(input: {
   }
 }
 
-function timeAutomationDisplay(
-  automation: Doc<"automations">
-): RunSnapshotBody {
-  const trigger = automation.trigger
-  const isRecurring = automation.type === "cron" && "expression" in trigger
+function timeJobDisplay(job: Doc<"jobs">): RunSnapshotBody {
+  const trigger = job.trigger
+  const isRecurring = job.type === "cron" && "expression" in trigger
 
   if (!isRecurring) {
     return {
       source: {
-        type: "automation",
+        type: "job",
         surface: "jori",
       },
       context: [],
@@ -125,11 +123,11 @@ function timeAutomationDisplay(
 
   return {
     source: {
-      type: "automation",
+      type: "job",
       surface: "jori",
     },
-    context: timeAutomationContext({
-      status: automation.status,
+    context: timeJobContext({
+      status: job.status,
       trigger,
     }),
   }
@@ -148,9 +146,9 @@ function snapshotContext(input: {
   ]).flatMap(toSnapshotContext)
 }
 
-function timeAutomationContext(input: {
-  status: Doc<"automations">["status"]
-  trigger: Extract<Doc<"automations">["trigger"], { nextAt: number }>
+function timeJobContext(input: {
+  status: Doc<"jobs">["status"]
+  trigger: Extract<Doc<"jobs">["trigger"], { nextAt: number }>
 }) {
   return compactDetails([
     detail("schedule", cronScheduleLabel(input.trigger.expression)),
@@ -159,7 +157,7 @@ function timeAutomationContext(input: {
       : undefined,
     input.status === "active"
       ? undefined
-      : detail("status", automationStatusLabel(input.status)),
+      : detail("status", jobStatusLabel(input.status)),
   ]).flatMap(toSnapshotContext)
 }
 
@@ -173,7 +171,7 @@ function sourceMetadataDetails(metadata: SourceMetadataItem[]) {
   )
 }
 
-function automationStatusLabel(status: Doc<"automations">["status"]) {
+function jobStatusLabel(status: Doc<"jobs">["status"]) {
   if (status === "paused") {
     return "Paused"
   }

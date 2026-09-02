@@ -16,7 +16,7 @@ type RunFilters = {
   current: Doc<"runs">
   query?: string
   since?: number
-  source?: "slack" | "github" | "linear" | "automation"
+  source?: "slack" | "github" | "linear" | "job"
   status?: Doc<"runs">["status"]
   until?: number
 }
@@ -134,8 +134,8 @@ function matchesSource(run: Doc<"runs">, source: RunFilters["source"]) {
     return true
   }
 
-  return source === "automation"
-    ? run.snapshot.source.type === "automation"
+  return source === "job"
+    ? run.snapshot.source.type === "job"
     : run.snapshot.source.surface === source
 }
 

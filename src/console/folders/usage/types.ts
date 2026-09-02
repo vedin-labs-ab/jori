@@ -10,7 +10,7 @@ export type UsageOverview = FunctionReturnType<
   typeof api.folders.usage.overview
 >
 export type UsageDay = UsageOverview["series"][number]
-export type UsageContributor = UsageOverview["automations"][number]
+export type UsageContributor = UsageOverview["jobs"][number]
 export type UsageSegment = UsageOverview["folders"][number]
 
 export const usageWindowDays = [7, 30, 90] as const

@@ -21,7 +21,7 @@ import {
 } from "./trigger"
 
 type AutomationVisibilityArg = FunctionArgs<
-  typeof api.automations.console.create
+  typeof api.jobs.console.create
 >["visibility"]
 
 type AutomationArgs = {

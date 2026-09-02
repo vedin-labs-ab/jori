@@ -15,7 +15,7 @@ export type SourceDatum = {
 }
 
 export type RunSource = {
-  type: "automation" | "event" | "manual" | "message"
+  type: "job" | "event" | "manual" | "message"
   event?: SourceDatum
   kind?: SourceDatum
   parent?: {
@@ -34,7 +34,7 @@ export type RunSource = {
 /**
  * A run a person kicked off by hand ("Try once" / "Run now"), as opposed to a
  * scheduled, event, or agent-spawned run. Its schedule and status describe the
- * automation, not this run, so the projection drops them.
+ * job, not this run, so the projection drops them.
  */
 export function isManualTrigger(run: Doc<"runs">) {
   return run.cause.type === "manual" && run.parentId === undefined
@@ -114,14 +114,13 @@ function sourceKind(context: RunContext) {
   }
 
   if (
-    context.automation?.type === "cron" ||
+    context.job?.type === "cron" ||
     context.run.snapshot.context.some((detail) => detail.type === "schedule")
   ) {
     return datum("recurring", "recurring")
   }
 
-  return context.automation?.type === "once" ||
-    context.run.automation?.parentId !== undefined
+  return context.job?.type === "once" || context.run.job?.parentId !== undefined
     ? datum("one-shot", "one-shot")
     : undefined
 }
@@ -131,15 +130,15 @@ function sourceEvent(context: RunContext) {
     return undefined
   }
 
-  const type = context.event?.type ?? automationEventType(context)
+  const type = context.event?.type ?? jobEventType(context)
 
   return type === undefined
     ? undefined
     : datum(type, sourceEventLabel(context.run.snapshot.source.surface, type))
 }
 
-function automationEventType(context: RunContext) {
-  const trigger = context.automation?.trigger
+function jobEventType(context: RunContext) {
+  const trigger = context.job?.trigger
 
   return trigger !== undefined && "event" in trigger ? trigger.event : undefined
 }

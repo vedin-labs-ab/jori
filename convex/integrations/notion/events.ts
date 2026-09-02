@@ -17,7 +17,7 @@ type NotionParent = {
   type: string
 }
 
-export type NotionAutomationEvent = {
+export type NotionJobEvent = {
   workspaceId: string
   key: string
   type: "comment.created" | "page.updated"
@@ -33,9 +33,7 @@ const pageUpdateEvents = new Set([
   "page.properties_updated",
 ])
 
-export function readNotionAutomationEvents(
-  payload: unknown
-): NotionAutomationEvent[] {
+export function readNotionJobEvents(payload: unknown): NotionJobEvent[] {
   const event = readNotionEvent(payload)
 
   if (event === null) {
@@ -51,7 +49,7 @@ function readPageUpdatedEvent(event: NotionEvent) {
   }
 
   return [
-    createAutomationEvent(event, {
+    createJobEvent(event, {
       type: "page.updated",
       pageId: event.entity.id,
       match: { page: event.entity.id },
@@ -72,7 +70,7 @@ function readCommentCreatedEvent(event: NotionEvent) {
   }
 
   return [
-    createAutomationEvent(event, {
+    createJobEvent(event, {
       type: "comment.created",
       pageId,
       match: { page: pageId },
@@ -84,22 +82,22 @@ function readCommentCreatedEvent(event: NotionEvent) {
   ]
 }
 
-function createAutomationEvent(
+function createJobEvent(
   event: NotionEvent,
-  automationEvent: {
-    type: NotionAutomationEvent["type"]
+  jobEvent: {
+    type: NotionJobEvent["type"]
     pageId: string
     match: Record<string, string>
     data: Record<string, unknown>
   }
-): NotionAutomationEvent {
+): NotionJobEvent {
   return {
     workspaceId: event.workspaceId,
-    key: `notion:${event.workspaceId}:${event.id}:${automationEvent.type}`,
-    type: automationEvent.type,
-    match: automationEvent.match,
+    key: `notion:${event.workspaceId}:${event.id}:${jobEvent.type}`,
+    type: jobEvent.type,
+    match: jobEvent.match,
     actor: event.actor,
-    pageId: automationEvent.pageId,
+    pageId: jobEvent.pageId,
     data: {
       notionEventId: event.id,
       notionEventType: event.type,
@@ -111,7 +109,7 @@ function createAutomationEvent(
       apiVersion: event.apiVersion,
       entity: event.entity,
       parent: event.parent,
-      ...automationEvent.data,
+      ...jobEvent.data,
     },
     observedAt: event.observedAt,
   }

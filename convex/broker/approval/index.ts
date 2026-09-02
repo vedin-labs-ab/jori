@@ -40,8 +40,8 @@ export async function createPromptedToolApproval(
   instruction: string
   status: "approval_requested"
 }> {
-  if (context.input.type === "automation") {
-    throw new Error("Automations cannot request approval during a run")
+  if (context.input.type === "job") {
+    throw new Error("Jobs cannot request approval during a run")
   }
 
   const request = parsePromptedToolApproval(args)

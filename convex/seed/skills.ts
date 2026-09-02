@@ -61,7 +61,7 @@ const skills: SeedSkill[] = [
       "",
       "**Numbers.** Seats, plan, MRR, and the renewal date from the Customer accounts table. Add active seats over the last 30 days.",
       "",
-      "**Usage.** Which teams use Jori and what for. Name the automations that actually run.",
+      "**Usage.** Which teams use Jori and what for. Name the jobs that actually run.",
       "",
       "**History.** Every escalation this account raised, and how it ended. Incidents that touched them count even if they never noticed.",
       "",

@@ -23,7 +23,7 @@ const summaries: Record<string, string> = {
   general:
     "Elin joined on marketing. The week's shipped list covered per-folder permissions, the Slack reconnect fix, and the usage page behind a flag.",
   design:
-    "Critique on the folder move dialog and the usage chart, where a single dominant automation flattens every other bar.",
+    "Critique on the folder move dialog and the usage chart, where a single dominant job flattens every other bar.",
   founders:
     "Runway stands at eighteen months; the next hire is a second support person rather than a third engineer.",
 }

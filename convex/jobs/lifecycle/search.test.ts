@@ -1,0 +1,124 @@
+import { expect, test, vi } from "vitest"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { type QueryCtx } from "../../_generated/server"
+import { searchJobs } from "./search"
+
+test("default search returns active top-level jobs only", async () => {
+  const rows = [
+    job({ id: "parent", status: "active", at: 100 }),
+    job({ id: "child", status: "active", at: 50, parentId: "parent" }),
+    job({ id: "paused", status: "paused", at: 75 }),
+  ]
+  const { ctx, equals, withIndex } = searchContext(rows)
+
+  const result = await searchJobs(ctx, {
+    organizationId: "organization",
+  })
+
+  expect(result.map((item) => item._id)).toEqual(["parent"])
+  expect(withIndex).toHaveBeenCalledWith(
+    "by_organization_and_status_and_parent",
+    expect.any(Function)
+  )
+  expect(equals.mock.calls).toEqual([
+    ["organizationId", "organization"],
+    ["status", "active"],
+    ["parent.id", undefined],
+  ])
+})
+
+test("completed search still omits owned jobs", async () => {
+  const rows = [
+    job({ id: "active", status: "active", at: 100 }),
+    job({ id: "completed", status: "completed", at: 200 }),
+    job({
+      id: "completed-child",
+      status: "completed",
+      at: 50,
+      parentId: "active",
+    }),
+  ]
+  const { ctx, equals, withIndex } = searchContext(rows)
+
+  const result = await searchJobs(ctx, {
+    organizationId: "organization",
+    includeCompleted: true,
+  })
+
+  expect(result.map((item) => item._id)).toEqual(["active", "completed"])
+  expect(withIndex).toHaveBeenCalledWith(
+    "by_organization_and_parent",
+    expect.any(Function)
+  )
+  expect(equals.mock.calls).toEqual([
+    ["organizationId", "organization"],
+    ["parent.id", undefined],
+  ])
+})
+
+function searchContext(rows: Doc<"jobs">[]) {
+  let organizationId: unknown
+  let status: unknown
+  let filtersByParent = false
+  const equals = vi.fn((field: string, value: unknown) => {
+    if (field === "organizationId") {
+      organizationId = value
+    } else if (field === "status") {
+      status = value
+    } else if (field === "parent.id") {
+      filtersByParent = true
+    }
+  })
+  const index = {
+    eq: (field: string, value: unknown) => {
+      equals(field, value)
+      return index
+    },
+  }
+  const collect = vi.fn(async () =>
+    rows.filter(
+      (row) =>
+        row.organizationId === organizationId &&
+        (status === undefined || row.status === status) &&
+        (!filtersByParent || row.parent === undefined)
+    )
+  )
+  const withIndex = vi.fn(
+    (_name: string, range: (value: typeof index) => typeof index) => {
+      range(index)
+      return { collect }
+    }
+  )
+  const ctx = {
+    db: { query: vi.fn(() => ({ withIndex })) },
+  } as unknown as QueryCtx
+
+  return { ctx, equals, withIndex }
+}
+
+function job(input: {
+  id: string
+  status: Doc<"jobs">["status"]
+  at: number
+  parentId?: string
+}): Doc<"jobs"> {
+  return {
+    _id: input.id as Id<"jobs">,
+    _creationTime: 0,
+    access: { integrations: [], web: false },
+    createdAt: 0,
+    instructions: "Prepare the meeting.",
+    name: input.id,
+    parent:
+      input.parentId === undefined
+        ? undefined
+        : { id: input.parentId as Id<"jobs">, version: 1 },
+    principal: { kind: "organization" },
+    visibility: { mode: "organization" },
+    status: input.status,
+    organizationId: "organization",
+    trigger: { at: input.at },
+    type: "once",
+    updatedAt: 0,
+  }
+}

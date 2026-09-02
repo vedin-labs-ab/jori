@@ -10,7 +10,7 @@ import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
-test("includes one-shot automation access details", async () => {
+test("includes one-shot job access details", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
   const run = testRun(oneShotRun(scheduledAt), {
     createdAt: scheduledAt + 1000,
@@ -20,7 +20,7 @@ test("includes one-shot automation access details", async () => {
   const summary = await summarizeRun(
     fakeQueryCtx(
       {
-        automation: oneShotAutomation(scheduledAt),
+        job: oneShotJob(scheduledAt),
         integration: slackIntegration(),
         run,
       },
@@ -31,7 +31,7 @@ test("includes one-shot automation access details", async () => {
 
   expect(summary.source).toEqual({
     kind: { label: "one-shot", type: "one-shot" },
-    type: "automation",
+    type: "job",
     surface: "jori",
   })
   expect(summary.details).toEqual([
@@ -50,7 +50,7 @@ test("includes one-shot automation access details", async () => {
   ])
 })
 
-test("marks one-shot automation web search as blocked when disabled", async () => {
+test("marks one-shot job web search as blocked when disabled", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
   const run = testRun(oneShotRun(scheduledAt), {
     createdAt: scheduledAt + 1000,
@@ -60,7 +60,7 @@ test("marks one-shot automation web search as blocked when disabled", async () =
   const summary = await summarizeRun(
     fakeQueryCtx(
       {
-        automation: oneShotAutomation(scheduledAt, false),
+        job: oneShotJob(scheduledAt, false),
         integration: slackIntegration(),
         run,
       },
@@ -75,23 +75,23 @@ test("marks one-shot automation web search as blocked when disabled", async () =
   })
 })
 
-test("keeps the one-shot label after an owned automation is cleaned up", async () => {
+test("keeps the one-shot label after an owned job is cleaned up", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
   const run = testRun(
     {
       ...oneShotRun(scheduledAt),
-      automation: { id: "automation", parentId: "parent" },
+      job: { id: "job", parentId: "parent" },
     },
     { createdAt: scheduledAt + 1000, endedAt: scheduledAt + 2000 }
   )
   const summary = await summarizeRun(
-    fakeQueryCtx({ automation: null, run }, { traces: preparedTraceRows(run) }),
+    fakeQueryCtx({ job: null, run }, { traces: preparedTraceRows(run) }),
     run
   )
 
   expect(summary.source).toEqual({
     kind: { label: "one-shot", type: "one-shot" },
-    type: "automation",
+    type: "job",
     surface: "jori",
   })
 })
@@ -101,7 +101,7 @@ function oneShotRun(scheduledAt: number) {
     _id: "run",
     _creationTime: 0,
     organizationId: "organization",
-    automation: { id: "automation" },
+    job: { id: "job" },
     cause: { type: "time", scheduledAt },
     instructions: "Generate a team image.",
     snapshot: {
@@ -112,9 +112,9 @@ function oneShotRun(scheduledAt: number) {
   }
 }
 
-function oneShotAutomation(scheduledAt: number, webSearch = true) {
+function oneShotJob(scheduledAt: number, webSearch = true) {
   return {
-    _id: "automation",
+    _id: "job",
     _creationTime: 0,
     organizationId: "organization",
     name: "Daily image",

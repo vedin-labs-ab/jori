@@ -1,8 +1,5 @@
 import { expect, test } from "vitest"
-import {
-  eventAutomationDisplay,
-  fakeQueryCtx,
-} from "../../../../test/convex/console"
+import { eventJobDisplay, fakeQueryCtx } from "../../../../test/convex/console"
 import { id } from "../../../../test/convex/database"
 import { integrationDoc } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
@@ -67,7 +64,7 @@ test("formats Linear issue details with a colon", async () => {
 })
 
 function eventRun(input: {
-  snapshot: ReturnType<typeof eventAutomationDisplay>
+  snapshot: ReturnType<typeof eventJobDisplay>
   task: string
   title: string
 }) {
@@ -86,7 +83,7 @@ function eventRun(input: {
 }
 
 function githubDisplay() {
-  return eventAutomationDisplay({
+  return eventJobDisplay({
     surface: "github",
     context: [
       {
@@ -109,7 +106,7 @@ function githubDisplay() {
 }
 
 function linearDisplay() {
-  return eventAutomationDisplay({
+  return eventJobDisplay({
     surface: "linear",
     context: [
       {

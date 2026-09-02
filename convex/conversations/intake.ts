@@ -10,7 +10,7 @@ import {
   type ObservedMessage,
   observedMessageArgs,
 } from "../messages/data"
-import { recordAutomationEvent } from "../messages/events"
+import { recordJobEvent } from "../messages/events"
 import { messageAudience } from "../messages/surface"
 import { resolveActor } from "../persons/resolve"
 import {
@@ -71,7 +71,7 @@ export const record = internalMutation({
     }
 
     if (isPersonActor(message.actor)) {
-      await recordAutomationEvent(ctx, { integration, message: observed, now })
+      await recordJobEvent(ctx, { integration, message: observed, now })
     }
 
     const conversation = await messageRunConversation(ctx, {
