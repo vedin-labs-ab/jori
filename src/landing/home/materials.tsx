@@ -45,7 +45,7 @@ export function Materials() {
   )
 }
 
-/** A table an automation keeps and a person can correct, which is the whole
+/** A table a job keeps and a person can correct, which is the whole
  *  section's claim in one prop. Only the at-risk row earns a tone: the table
  *  exists for the row somebody has to act on. */
 function RenewalsTable() {
@@ -65,7 +65,7 @@ function RenewalsTable() {
         ))}
       </div>
       <p className="border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
-        Kept current by an automation. Anyone can correct a cell.
+        Kept current by a job. Anyone can correct a cell.
       </p>
     </Prop>
   )

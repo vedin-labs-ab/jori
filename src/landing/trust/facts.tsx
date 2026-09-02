@@ -58,8 +58,7 @@ export function BoundariesSection() {
           that needs your sign-off waits for a run with you in it.
         </Definition>
         <Definition icon={Globe} term="The web is off until you turn it on">
-          Web search and fetch are granted per playbook and per automation,
-          never assumed.
+          Web search and fetch are granted per job, never assumed.
         </Definition>
         <Definition
           icon={FileSearch}

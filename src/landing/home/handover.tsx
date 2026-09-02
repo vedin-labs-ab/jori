@@ -5,8 +5,8 @@ import { BrandIcon } from "@/shared/brand"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { Mention, Prop } from "../section"
 
-/** Where an automation comes from: someone hands over the job they keep
- *  doing, and Jori sets it up in the same thread. */
+/** Where a job comes from: someone hands over the work they keep doing by
+ *  hand, and Jori sets it up in the same thread. */
 export function Handover() {
   return (
     <Prop

@@ -34,7 +34,7 @@ export function Faq() {
           run out, whichever comes first.
         </Definition>
         <Definition term="What happens if I cancel?">
-          Automations pause and nothing is deleted. Your data, integrations, and
+          Jobs pause and nothing is deleted. Your data, integrations, and
           history stay put, and everything resumes when you come back.
         </Definition>
       </dl>

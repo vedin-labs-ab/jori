@@ -1,10 +1,10 @@
 import { MarketingShell } from "../shell"
-import { Automations } from "./automations"
 import { Catalog } from "./catalog"
 import { Contrast } from "./contrast"
 import { Control } from "./control"
 import { Hero } from "./hero"
 import { Infrastructure } from "./infrastructure"
+import { Jobs } from "./jobs"
 import { Materials } from "./materials"
 import { Surfaces } from "./surfaces"
 
@@ -19,7 +19,7 @@ export function Landing() {
       <Hero />
       <Contrast />
       <Surfaces />
-      <Automations />
+      <Jobs />
       <Materials />
       <Catalog />
       <Control />

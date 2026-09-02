@@ -77,7 +77,7 @@ function Integrations() {
 // claim four times over, and three of them were the same question wearing
 // different chrome.
 //
-// Linear rather than Slack for the second, because the automations section
+// Linear rather than Slack for the second, because the jobs section
 // below is already a Slack thread. A third tool on the page is worth more
 // here than a third look at the same one.
 function GitHubMention() {
