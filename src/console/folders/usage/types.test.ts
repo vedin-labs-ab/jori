@@ -1,21 +1,14 @@
 import { expect, test } from "vitest"
 import {
-  type UsageOverview,
+  type UsageSegment,
   usageCostPerRun,
   usageDelta,
   usagePercent,
-  usageSlice,
+  usageSegmentColor,
 } from "./types"
 
-function overview(overrides: Partial<UsageOverview> = {}) {
-  return {
-    automations: [
-      { id: "automations:1", label: "Morning digest", micros: 900 },
-      { label: "One-shot reminder", micros: 20 },
-    ],
-    folders: [{ folderId: "folders:1", name: "Sales", micros: 700 }],
-    ...overrides,
-  } as UsageOverview
+function segment(key: string): UsageSegment {
+  return { key, label: key, micros: 0, ended: 0, failed: 0 }
 }
 
 test("a share reads as the whole percent it rounds to", () => {
@@ -52,22 +45,8 @@ test("cost per run averages over the runs that ended", () => {
   expect(usageCostPerRun(900, 0)).toBeUndefined()
 })
 
-test("a chosen automation asks the series query for that automation", () => {
-  expect(usageSlice("automations:1", overview())).toEqual({
-    automationId: "automations:1",
-  })
-})
-
-test("a chosen folder asks for that folder's subtree", () => {
-  expect(usageSlice("folders:1", overview())).toEqual({
-    folderId: "folders:1",
-  })
-})
-
-test("a choice the window no longer ranks falls back to everything", () => {
-  expect(usageSlice("everything", overview())).toBeUndefined()
-  expect(usageSlice("folders:gone", overview())).toBeUndefined()
-  // A deleted automation keeps its row but loses its id, so it was never
-  // on offer and cannot be selected back into the charts.
-  expect(usageSlice("One-shot reminder", overview())).toBeUndefined()
+test("a segment wears the colour of its rank, and the rest wears none", () => {
+  expect(usageSegmentColor(segment("folders:1"), 0)).toBe("var(--chart-1)")
+  expect(usageSegmentColor(segment("direct"), 7)).toBe("var(--chart-8)")
+  expect(usageSegmentColor(segment("other"), 8)).toBe("var(--muted-foreground)")
 })

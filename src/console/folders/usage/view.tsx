@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { CalendarDays, ChartNoAxesColumn } from "lucide-react"
+import { CalendarDays, ChartNoAxesColumn, Info } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Section, SectionGroup, SectionHeader } from "@/components/ui/section"
 import {
   Select,
@@ -9,14 +10,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleHeaderActions } from "../../shared/layout"
 import { ConsoleEmptyState } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
+import { UsageCharts } from "./chart"
 import { UsageContributors, UsageFolders } from "./ranked"
-import { UsageSeriesSection } from "./series"
 import { UsageStats } from "./stats"
 import {
   parseUsageDays,
@@ -52,6 +58,7 @@ export function UsageView({
       {/* The window sits in the header with the page's other controls, so
           the band below is figures alone. */}
       <ConsoleHeaderActions>
+        <UsageNote days={days} timezone={usage?.timezone} />
         <WindowSelect days={days} onDaysChange={onDaysChange} />
       </ConsoleHeaderActions>
       {/* Held above the page's own scroll: the window's figures stay put
@@ -63,14 +70,8 @@ export function UsageView({
         {usage === undefined ? (
           <ConsoleListLoading />
         ) : (
-          <UsageBody
-            days={days}
-            folderId={folderId}
-            organizationId={organizationId}
-            usage={usage}
-          />
+          <UsageBody days={days} folderId={folderId} usage={usage} />
         )}
-        <UsageFootnote days={days} timezone={usage?.timezone} />
       </ConsoleListContent>
     </>
   )
@@ -106,17 +107,18 @@ function WindowSelect({
 function UsageBody({
   days,
   folderId,
-  organizationId,
   usage,
 }: {
   days: UsageDays
   folderId?: GenericId<"folders">
-  organizationId: string
   usage: UsageOverview
 }) {
   const scoped = folderId !== undefined
-  const hasFolders =
-    usage.folders.length > 0 || (usage.unfiled?.micros ?? 0) > 0
+  // A scope with nothing below it divides into itself alone, which is no
+  // division; the charts still draw, in one colour.
+  const hasFolders = usage.folders.some(
+    (segment) => segment.folderId !== undefined
+  )
 
   if (usage.totals.micros === 0 && usage.totals.ended === 0) {
     return (
@@ -134,16 +136,7 @@ function UsageBody({
 
   return (
     <SectionGroup>
-      {/* Keyed by scope: sibling folders share this route, so without a
-          remount a filter chosen in one would follow the reader into the
-          next and quietly narrow charts about somewhere else. */}
-      <UsageSeriesSection
-        days={days}
-        folderId={folderId}
-        key={folderId ?? "organization"}
-        organizationId={organizationId}
-        usage={usage}
-      />
+      <UsageCharts segments={usage.folders} series={usage.series} />
       {/* Who spent it and where it sits, side by side once the page is wide
           enough to read both at a glance — and the whole width when there
           is nowhere further down to point to. */}
@@ -165,9 +158,8 @@ function UsageBody({
             />
             <UsageFolders
               days={days}
-              folders={usage.folders}
+              segments={usage.folders}
               total={usage.totals.micros}
-              unfiled={usage.unfiled}
             />
           </Section>
         ) : null}
@@ -177,18 +169,28 @@ function UsageBody({
 }
 
 /** States what a figure here cannot state for itself: which day a day is,
- *  what a change is measured against, and what the money is a price for. */
-function UsageFootnote({
-  days,
-  timezone,
-}: {
-  days: UsageDays
-  timezone?: string
-}) {
+ *  what a change is measured against, and what the money is a price for.
+ *  Fine print, so it waits behind a mark rather than sitting under the
+ *  tables. */
+function UsageNote({ days, timezone }: { days: UsageDays; timezone?: string }) {
   return (
-    <p className="text-muted-foreground text-xs/relaxed">
-      Days follow {timezone ?? "the organization's time zone"} · Changes compare
-      with the previous {days} days · LLM usage priced at provider list rates.
-    </p>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label="About these figures"
+          className="text-muted-foreground hover:text-foreground"
+          size="icon-xs"
+          type="button"
+          variant="ghost"
+        >
+          <Info />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        Days follow {timezone ?? "the organization's time zone"}. Changes
+        compare with the previous {days} days. LLM usage is priced at provider
+        list rates.
+      </TooltipContent>
+    </Tooltip>
   )
 }

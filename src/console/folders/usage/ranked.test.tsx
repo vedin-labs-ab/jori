@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { UsageContributors, UsageFolders } from "./ranked"
-import { type UsageContributor, type UsageOverview } from "./types"
+import { type UsageContributor, type UsageSegment } from "./types"
 
 vi.mock("@tanstack/react-router", async () => ({
   Link: (await import("../../../../test/router")).Link,
@@ -103,20 +103,21 @@ test("a window that cost nothing has no shares or averages to report", () => {
   expect(screen.queryByRole("link")).toBeNull()
 })
 
-test("the unfiled bucket ranks as a row like any other", () => {
+test("the scope's own bucket ranks as a row like any other, with no way in", () => {
   render(
     <UsageFolders
       days={30}
-      folders={folders(5)}
-      total={10_000_000}
-      unfiled={
+      segments={[
+        ...segments(5),
         {
+          key: "direct",
+          label: "Unfiled",
           micros: 1_000_000,
           ended: 4,
           failed: 0,
-          tokens: { input: 0, output: 0 },
-        } as UsageOverview["unfiled"]
-      }
+        },
+      ]}
+      total={10_000_000}
     />
   )
 
@@ -134,17 +135,11 @@ test("the unfiled bucket ranks as a row like any other", () => {
     "$0.25",
     "10%",
   ])
+  expect(screen.queryByRole("link", { name: "Unfiled" })).toBeNull()
 })
 
-test("a folder row is a way further in, and reads like a source row", () => {
-  render(
-    <UsageFolders
-      days={30}
-      folders={folders(1)}
-      total={4_000_000}
-      unfiled={null}
-    />
-  )
+test("a folder row is a way further in, reads like a source row, and wears its colour", () => {
+  render(<UsageFolders days={30} segments={segments(1)} total={4_000_000} />)
 
   const [row] = rows()
 
@@ -159,12 +154,18 @@ test("a folder row is a way further in, and reads like a source row", () => {
     "$0.50",
     "25%",
   ])
+  expect(
+    (row as HTMLElement)
+      .querySelector("span[aria-hidden]")
+      ?.getAttribute("style")
+  ).toContain("var(--chart-1)")
 })
 
-function folders(count: number) {
+function segments(count: number): UsageSegment[] {
   return Array.from({ length: count }, (_unused, rank) => ({
-    folderId: `folders:${rank}` as UsageOverview["folders"][number]["folderId"],
-    name: `Folder ${rank}`,
+    key: `folders:${rank}`,
+    folderId: `folders:${rank}` as UsageSegment["folderId"],
+    label: `Folder ${rank}`,
     micros: 1_000_000,
     ended: 2,
     failed: 0,

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { ConsoleHeaderActionsProvider } from "../../shared/layout"
 import { type UsageOverview } from "./types"
 import { UsageView } from "./view"
@@ -13,9 +14,6 @@ vi.mock("@tanstack/react-router", async () => ({
   Link: (await import("../../../../test/router")).Link,
 }))
 
-// Both the overview and the charts' slice read through this; the view's
-// own assertions are about the overview, and the charts are mocked away,
-// so one payload answers for both.
 vi.mock("convex/react", () => ({ useQuery: () => payload.current }))
 
 // The charts are Recharts, which needs a laid-out box jsdom never gives it;
@@ -28,7 +26,9 @@ afterEach(cleanup)
 
 function overview(overrides: Partial<UsageOverview> = {}) {
   return {
-    series: [{ date: "2026-03-15", micros: 900, ended: 3, failed: 1 }],
+    series: [
+      { date: "2026-03-15", micros: 900, ended: 3, failed: 1, segments: {} },
+    ],
     totals: {
       micros: 900,
       ended: 3,
@@ -50,8 +50,9 @@ function overview(overrides: Partial<UsageOverview> = {}) {
         failed: 1,
       },
     ],
-    folders: [],
-    unfiled: null,
+    folders: [
+      { key: "direct", label: "Filed here", micros: 900, ended: 3, failed: 1 },
+    ],
     timezone: "Europe/Stockholm",
     ...overrides,
   } as UsageOverview
@@ -63,14 +64,16 @@ function renderView(usage: UsageOverview | undefined) {
   // The window control portals into the shell's header; here the document
   // itself stands in for that slot.
   render(
-    <ConsoleHeaderActionsProvider slot={document.body}>
-      <UsageView
-        days={30}
-        folderId={"folders:1" as never}
-        onDaysChange={() => undefined}
-        organizationId="organization"
-      />
-    </ConsoleHeaderActionsProvider>
+    <TooltipProvider>
+      <ConsoleHeaderActionsProvider slot={document.body}>
+        <UsageView
+          days={30}
+          folderId={"folders:1" as never}
+          onDaysChange={() => undefined}
+          organizationId="organization"
+        />
+      </ConsoleHeaderActionsProvider>
+    </TooltipProvider>
   )
 }
 
@@ -104,10 +107,11 @@ test("a window with spend draws the charts and names what spent it", () => {
   expect(screen.getByText("Spend by source")).toBeDefined()
 })
 
-test("nothing below this folder means no drill-down to offer", () => {
+test("nothing below this folder means no division to offer", () => {
   renderView(overview())
 
   expect(screen.queryByText("Spend by subfolder")).toBeNull()
+  expect(screen.getByTestId("charts")).toBeDefined()
 })
 
 test("each subfolder row drills into that folder's own usage", () => {
@@ -115,8 +119,9 @@ test("each subfolder row drills into that folder's own usage", () => {
     overview({
       folders: [
         {
+          key: "folders:2",
           folderId: "folders:2" as never,
-          name: "Pipeline",
+          label: "Pipeline",
           micros: 700,
           ended: 2,
           failed: 0,
@@ -131,12 +136,13 @@ test("each subfolder row drills into that folder's own usage", () => {
   ).toBe("/folders/folders:2/usage")
 })
 
-test("the footnote says whose day a day is and what the money buys", () => {
+test("the fine print waits behind a mark in the header", () => {
   renderView(overview())
 
-  expect(screen.getByText(/Days follow Europe\/Stockholm/)).toBeDefined()
-  expect(screen.getByText(/compare with the previous 30 days/)).toBeDefined()
-  expect(screen.getByText(/priced at provider list rates/)).toBeDefined()
+  expect(
+    screen.getByRole("button", { name: "About these figures" })
+  ).toBeDefined()
+  expect(screen.queryByText(/Days follow/)).toBeNull()
 })
 
 test("loading keeps the window control and shows the spinner", () => {

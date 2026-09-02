@@ -89,11 +89,29 @@ test("a folder's total sums its whole subtree, not just its own rows", async () 
   const usage = await read(ctx, { folderId: rootId })
 
   expect(usage.totals.micros).toBe(3210)
-  // The drill-down is per direct child, each standing for its own subtree,
-  // runs included.
+  // The division is per direct child, each standing for its own subtree,
+  // runs included, beside the folder's own rows.
   expect(usage.folders).toEqual([
-    { folderId: childId, name: "Pipeline", micros: 3200, ended: 3, failed: 1 },
+    {
+      key: childId,
+      folderId: childId,
+      label: "Pipeline",
+      micros: 3200,
+      ended: 3,
+      failed: 1,
+    },
+    { key: "direct", label: "Filed here", micros: 10, ended: 0, failed: 0 },
   ])
+  // And each day is divided the same way.
+  expect(
+    usage.series.find((day) => day.date === "2026-03-14")?.segments
+  ).toEqual({ [childId]: { micros: 3000, ended: 2, failed: 1 } })
+  expect(
+    usage.series.find((day) => day.date === "2026-03-15")?.segments
+  ).toEqual({
+    [childId]: { micros: 200, ended: 1, failed: 0 },
+    direct: { micros: 10, ended: 0, failed: 0 },
+  })
 })
 
 test("the organization view ranks root folders and names the unfiled rest", async () => {
@@ -125,14 +143,28 @@ test("the organization view ranks root folders and names the unfiled rest", asyn
   const usage = await read(ctx)
 
   expect(usage.folders).toEqual([
-    { folderId: busyId, name: "Sales", micros: 900, ended: 0, failed: 0 },
-    { folderId: quietId, name: "Ops", micros: 5, ended: 0, failed: 0 },
+    {
+      key: busyId,
+      folderId: busyId,
+      label: "Sales",
+      micros: 900,
+      ended: 0,
+      failed: 0,
+    },
+    { key: "direct", label: "Unfiled", micros: 40, ended: 2, failed: 1 },
+    {
+      key: quietId,
+      folderId: quietId,
+      label: "Ops",
+      micros: 5,
+      ended: 0,
+      failed: 0,
+    },
   ])
-  expect(usage.unfiled).toMatchObject({ micros: 40, ended: 2, failed: 1 })
   expect(usage.totals.micros).toBe(945)
 })
 
-test("a folder view has no unfiled bucket to show", async () => {
+test("a folder view divides into its own rows, not the unfiled rest", async () => {
   const { database, ctx } = databaseContext()
   const folderId = await seedFolder(database)
 
@@ -141,7 +173,9 @@ test("a folder view has no unfiled bucket to show", async () => {
 
   const usage = await read(ctx, { folderId })
 
-  expect(usage.unfiled).toBeNull()
+  expect(usage.folders).toEqual([
+    { key: "direct", label: "Filed here", micros: 7, ended: 0, failed: 0 },
+  ])
   expect(usage.totals.micros).toBe(7)
 })
 
@@ -163,7 +197,9 @@ test("a subfolder nobody may see keeps its spend and loses its name", async () =
   const usage = await read(ctx, { folderId: rootId })
 
   expect(usage.totals.micros).toBe(800)
-  expect(usage.folders).toEqual([])
+  expect(usage.folders).toEqual([
+    { key: "other", label: "Other", micros: 800, ended: 0, failed: 0 },
+  ])
 })
 
 test("the window before this one is what the delta measures against", async () => {

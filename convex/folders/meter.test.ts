@@ -3,163 +3,28 @@ import { databaseContext } from "../../test/convex/database"
 import { automationDoc, folderDoc } from "../../test/convex/folders"
 import { seedUsage } from "../../test/convex/usage"
 import { type Id } from "../_generated/dataModel"
-import { readFolderUsage, readUsageSlice } from "./usage"
+import { readFolderUsage } from "./usage"
 
-// What the metering layer decides: which rows one slice of a window reads,
-// and which of the window's contributors the viewer may name. The moment is
-// the same fixed one the overview's tests stand at: a seven-day window
-// ending 2026-03-15 runs 03-09 to 03-15, and 03-05 belongs to the window
-// before it.
+// What the metering layer decides: which of the window's contributors the
+// viewer may name, and how far the folder division goes before the rest is
+// folded together. The moment is the same fixed one the overview's tests
+// stand at: a seven-day window ending 2026-03-15.
 
 const now = Date.parse("2026-03-15T12:00:00.000Z")
 const viewer = "persons:viewer" as Id<"persons">
-const digest = "automations:digest" as Id<"automations">
 
-function readSlice(
-  ctx: ReturnType<typeof databaseContext>["ctx"],
-  args: { automationId?: Id<"automations">; folderId?: Id<"folders"> }
-) {
-  return readUsageSlice(ctx, { organizationId: "org", days: 7, now, ...args })
-}
-
-function readRanking(ctx: ReturnType<typeof databaseContext>["ctx"]) {
+function read(ctx: ReturnType<typeof databaseContext>["ctx"]) {
   return readFolderUsage(ctx, {
     organizationId: "org",
     personId: viewer,
     days: 7,
     now,
-  }).then((usage) => usage.automations)
+  })
 }
 
-function microsOn(
-  series: { date: string; micros: number }[],
-  date: string
-): number {
-  return series.find((day) => day.date === date)?.micros ?? 0
+function readRanking(ctx: ReturnType<typeof databaseContext>["ctx"]) {
+  return read(ctx).then((usage) => usage.automations)
 }
-
-test("an automation's slice counts that automation and nothing else", async () => {
-  const { database, ctx } = databaseContext()
-
-  await seedUsage(database, {
-    date: "2026-03-15",
-    micros: 700,
-    automation: { id: digest, label: "Morning digest" },
-  })
-  await seedUsage(database, {
-    date: "2026-03-15",
-    micros: 4000,
-    automation: {
-      id: "automations:other" as Id<"automations">,
-      label: "Sweep",
-    },
-  })
-
-  const { series } = await readSlice(ctx, { automationId: digest })
-
-  expect(series).toHaveLength(7)
-  expect(microsOn(series, "2026-03-15")).toBe(700)
-})
-
-test("another organization's rows never answer for this one's automation", async () => {
-  const { database, ctx } = databaseContext()
-
-  await seedUsage(database, {
-    date: "2026-03-15",
-    micros: 50,
-    automation: { id: digest, label: "Morning digest" },
-  })
-  // The automation index is keyed by the automation alone, so this row sits
-  // in the very same range the read walks.
-  await seedUsage(database, {
-    date: "2026-03-15",
-    organizationId: "intruder",
-    micros: 9000,
-    automation: { id: digest, label: "Morning digest" },
-  })
-
-  const { series } = await readSlice(ctx, { automationId: digest })
-
-  expect(microsOn(series, "2026-03-15")).toBe(50)
-})
-
-test("a folder's slice sums its whole subtree", async () => {
-  const { database, ctx } = databaseContext()
-  const rootId = (await database.insert(
-    "folders",
-    folderDoc({ name: "Sales" })
-  )) as Id<"folders">
-  const childId = (await database.insert(
-    "folders",
-    folderDoc({ name: "Pipeline", parentId: rootId })
-  )) as Id<"folders">
-
-  await seedUsage(database, {
-    date: "2026-03-14",
-    folderId: rootId,
-    micros: 20,
-  })
-  await seedUsage(database, {
-    date: "2026-03-14",
-    folderId: childId,
-    micros: 300,
-  })
-  await seedUsage(database, { date: "2026-03-14", micros: 8000 })
-
-  const { series } = await readSlice(ctx, { folderId: rootId })
-
-  expect(microsOn(series, "2026-03-14")).toBe(320)
-})
-
-test("a slice stops at the window, with no previous one folded in", async () => {
-  const { database, ctx } = databaseContext()
-
-  await seedUsage(database, {
-    date: "2026-03-05",
-    micros: 400,
-    automation: { id: digest, label: "Morning digest" },
-  })
-
-  const { series } = await readSlice(ctx, { automationId: digest })
-
-  expect(series.map((day) => day.date).at(0)).toBe("2026-03-09")
-  expect(series.every((day) => day.micros === 0)).toBe(true)
-})
-
-test("naming both a folder and an automation charts the overlap", async () => {
-  const { database, ctx } = databaseContext()
-  const folderId = (await database.insert(
-    "folders",
-    folderDoc()
-  )) as Id<"folders">
-
-  // The automation spends on both sides of the folder boundary, and the
-  // folder holds work of its own; only their overlap is this chart's.
-  await seedUsage(database, {
-    date: "2026-03-15",
-    folderId,
-    micros: 11,
-    automation: { id: digest, label: "Morning digest" },
-  })
-  await seedUsage(database, {
-    date: "2026-03-15",
-    micros: 6000,
-    automation: { id: digest, label: "Morning digest" },
-  })
-  await seedUsage(database, { date: "2026-03-15", folderId, micros: 400 })
-
-  const { series } = await readSlice(ctx, { automationId: digest, folderId })
-
-  expect(microsOn(series, "2026-03-15")).toBe(11)
-})
-
-test("a slice of neither refuses rather than charting a line of zeroes", async () => {
-  const { ctx } = databaseContext()
-
-  await expect(readSlice(ctx, {})).rejects.toThrow(
-    "Name an automation or a folder to chart."
-  )
-})
 
 test("an automation nobody may see keeps its money and loses its name", async () => {
   const { database, ctx } = databaseContext()
@@ -217,4 +82,41 @@ test("the ranking stops well short of the row cap", async () => {
 
   expect(ranking).toHaveLength(100)
   expect(ranking.at(-1)?.micros).toBe(2)
+})
+
+test("the division names as many folders as the palette has colours", async () => {
+  const { database, ctx } = databaseContext()
+
+  for (let rank = 0; rank < 10; rank += 1) {
+    const folderId = (await database.insert(
+      "folders",
+      folderDoc({ name: `Folder ${rank}` })
+    )) as Id<"folders">
+
+    await seedUsage(database, {
+      date: "2026-03-15",
+      folderId,
+      micros: 100 - rank,
+      ended: 1,
+    })
+  }
+
+  const usage = await read(ctx)
+  const [day] = usage.series.filter((entry) => entry.date === "2026-03-15")
+
+  // Eight named, biggest first, and the two smallest folded into the rest —
+  // in the ranking and on the day alike.
+  expect(usage.folders).toHaveLength(9)
+  expect(usage.folders.slice(0, 8).map((segment) => segment.label)).toEqual(
+    Array.from({ length: 8 }, (_unused, rank) => `Folder ${rank}`)
+  )
+  expect(usage.folders.at(-1)).toEqual({
+    key: "other",
+    label: "Other",
+    micros: 91 + 92,
+    ended: 2,
+    failed: 0,
+  })
+  expect(day?.segments.other).toEqual({ micros: 183, ended: 2, failed: 0 })
+  expect(Object.keys(day?.segments ?? {})).toHaveLength(9)
 })

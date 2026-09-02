@@ -28,6 +28,9 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-chart-8: var(--chart-8);
+  --color-chart-7: var(--chart-7);
+  --color-chart-6: var(--chart-6);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -116,11 +119,19 @@
      tops out near 2.2:1 at any lightness. Those sites have to drop the opacity
      modifier instead. */
   --ring: oklch(0.647 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Categorical series, in the order a chart hands them out. Eight hues
+     from the shadcn scale, spread around the wheel so neighbours differ,
+     with chroma brought down to sit beside the console's own semantic
+     colours rather than shout over them. Not for state: the semantic set
+     above stays the only vocabulary for that. */
+  --chart-1: oklch(0.62 0.16 259);
+  --chart-2: oklch(0.74 0.15 75);
+  --chart-3: oklch(0.66 0.13 162);
+  --chart-4: oklch(0.62 0.17 293);
+  --chart-5: oklch(0.68 0.12 215);
+  --chart-6: oklch(0.66 0.16 352);
+  --chart-7: oklch(0.72 0.16 130);
+  --chart-8: oklch(0.66 0.18 322);
   --radius: 0.625rem;
   --tactile-depth: 2px;
   --sidebar: oklch(0.985 0 0);
@@ -159,11 +170,14 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --chart-1: oklch(0.72 0.14 255);
+  --chart-2: oklch(0.82 0.15 84);
+  --chart-3: oklch(0.76 0.13 163);
+  --chart-4: oklch(0.72 0.15 293);
+  --chart-5: oklch(0.78 0.12 212);
+  --chart-6: oklch(0.74 0.15 350);
+  --chart-7: oklch(0.82 0.16 129);
+  --chart-8: oklch(0.74 0.16 322);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
