@@ -24,6 +24,8 @@ export type JobFolderField = (props: {
 }) => ReactNode
 
 export type JobEditorFieldsProps = {
+  /** Who the sharing reaches, said under the sharing field by the host. */
+  audience?: ReactNode
   /** The last save's error, shown on the field it belongs to. */
   error: string | undefined
   /** The Event tab's fields, bound by the host. */
@@ -58,14 +60,17 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
         onValueChange={actions.updateName}
         value={values.name}
       />
-      <VisibilityField
-        help="Only-me jobs run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
-        id="job-visibility"
-        noun="job"
-        onChange={actions.updateVisibility}
-        options={props.grantOptions}
-        value={values.visibility}
-      />
+      <div className="grid gap-2">
+        <VisibilityField
+          help="Only-me jobs run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
+          id="job-visibility"
+          noun="job"
+          onChange={actions.updateVisibility}
+          options={props.grantOptions}
+          value={values.visibility}
+        />
+        {props.audience}
+      </div>
       {props.folderField?.({
         id: "job-folder",
         onChange: actions.updateFolder,

@@ -119,7 +119,7 @@ test("each subfolder row drills into that folder's own usage", () => {
   expect(screen.getByText("Spend by subfolder")).toBeDefined()
   expect(
     screen.getByRole("link", { name: "Pipeline" }).getAttribute("href")
-  ).toBe("/folders/folders:2/usage")
+  ).toBe("/folders/folders:2/usage?days=30")
 })
 
 test("loading keeps the window control and shows the spinner", () => {

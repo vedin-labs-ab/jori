@@ -1,21 +1,24 @@
+import { type ReactNode } from "react"
+import { type RouteParams, type RouteSearch, resolveHref } from "./routing"
+
 /**
- * A stand-in for TanStack Router's `Link`, for component tests that render a
- * link but do not mount a router. Substitutes route params positionally, the
- * way the real router resolves `$param` segments.
+ * Stand-ins for TanStack Router's components, for component tests that
+ * render a link but do not mount a router: `Link` resolves its href the way
+ * the router would, and `ClientOnly` renders its children at once, since a
+ * test is the client. The hook stand-ins live in `test/routing.ts`.
  */
+
 export const Link = ({
   params,
+  search,
   to,
   ...props
 }: {
-  params?: Record<string, string>
+  params?: RouteParams
+  search?: RouteSearch
   to: string
 } & React.ComponentProps<"a">) => (
-  <a
-    href={Object.values(params ?? {}).reduce(
-      (path, value) => path.replace(/\$\w+/, value),
-      to
-    )}
-    {...props}
-  />
+  <a href={resolveHref(to, params, search).href} {...props} />
 )
+
+export const ClientOnly = ({ children }: { children: ReactNode }) => children
