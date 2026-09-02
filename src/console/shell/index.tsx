@@ -27,11 +27,15 @@ import {
   MaterialBreadcrumbContext,
   type MaterialBreadcrumbSegment,
 } from "@/shared/console/materials/breadcrumb"
+import {
+  getMaterialSurface,
+  getPageTitle,
+  isMaterialPage,
+} from "@/shared/console/shell/routes"
 import { mainContentId, SkipToContent } from "@/shared/skip"
 import { FolderDragProvider } from "../folders/drag/context"
 import { ConsolePageBoundary } from "./boundary"
 import { ConsoleSidebar } from "./navigation"
-import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
 
 const consoleFrame = "w-full px-4 md:px-6"
 

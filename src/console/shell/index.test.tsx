@@ -10,8 +10,8 @@ import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
 } from "@/shared/console/materials/breadcrumb"
+import { consoleDocumentTitle } from "@/shared/console/shell/routes"
 import { ConsoleShell } from "./index"
-import { consoleDocumentTitle } from "./routes"
 
 let pathname = "/runs"
 

@@ -4,7 +4,7 @@
 
 - Ensure `pnpm run check` and `pnpm run test` pass before handoff. Together they are the handoff gate.
 - Use Biome only for linting and formatting.
-- Before making code changes, read `biome.jsonc`, `scripts/dependencies.ts`, and `scripts/structure/index.ts`; shape the implementation to satisfy formatting, dependency boundary, and folder structure constraints from the start.
+- Before making code changes, read `biome.jsonc`, `scripts/dependencies/index.ts`, and `scripts/structure/index.ts`; shape the implementation to satisfy formatting, dependency boundary, and folder structure constraints from the start.
 - Do not weaken or bypass checks to make them pass unless explicitly instructed.
 
 ### Change Workflow
