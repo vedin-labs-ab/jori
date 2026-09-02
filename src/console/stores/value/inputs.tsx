@@ -16,9 +16,8 @@ import { type ValueField, type ValueOption } from "./model"
 
 /** The cell recipe from the table grid's inline editor. */
 const cellInputClassName =
-  // Square by default; the form's frame rounds the ring's right corners
-  // on the rows that meet its own (see fields.tsx). Rounding here drew
-  // corners mid-column, where the frame has no corner to follow.
+  // Square throughout: the grid is full-bleed and has no curved frame, so
+  // a rounded ring would draw corners nothing else follows.
   "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
 
 /** The same recipe over the select trigger, which also sheds its tactile

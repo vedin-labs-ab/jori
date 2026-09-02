@@ -20,6 +20,11 @@ import { type ValueField, type ValueProperty } from "./model"
 // affordances in the table grid's ghost idiom, and error strips. The
 // recursive composition lives in fields.tsx.
 
+/** One row of the grid, carrying the hairline that closes it. Hairlines
+ *  ride on the rows the way the table grid's do, so they run the width of
+ *  the page and stop exactly where the form stops. */
+export const valueRowClassName = "flex border-b"
+
 /** The key column: fixed width so values align into one editing column,
  *  with nesting indented inside it. */
 const keyCellClassName =
@@ -128,7 +133,7 @@ export function GroupRow({
   property: ValueProperty
 }) {
   return (
-    <div className="flex">
+    <div className={valueRowClassName}>
       <KeyCell depth={depth} property={property} />
       {onUnset === undefined ? null : (
         <RemoveButton label={`Unset ${property.name}`} onClick={onUnset} />
@@ -149,7 +154,7 @@ export function UnsetRow({
   property: ValueProperty
 }) {
   return (
-    <div className="flex">
+    <div className={valueRowClassName}>
       <KeyCell depth={depth} property={property} />
       <button
         aria-label={`Add ${property.name}`}
@@ -177,7 +182,7 @@ export function AddItemRow({
   onAdd: () => void
 }) {
   return (
-    <div className="flex">
+    <div className={valueRowClassName}>
       <BlankCell depth={depth} />
       <div className="min-w-0 flex-1">
         <button
@@ -222,7 +227,7 @@ export function ErrorRow({ message }: { message: string | undefined }) {
   }
 
   return (
-    <div className="px-3 py-2">
+    <div className="border-b px-3 py-2">
       <FieldError>{message}</FieldError>
     </div>
   )

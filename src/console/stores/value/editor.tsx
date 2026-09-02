@@ -5,8 +5,9 @@ import { toast } from "sonner"
 import { FieldError } from "@/components/ui/field"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { api } from "../../../../convex/_generated/api"
-import { ConsoleListContent } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
 import {
   conflictMessage,
@@ -192,10 +193,10 @@ function useExternalReseed(
 }
 
 /** The surface under the toolbar: the schema-driven form, or the code the
- *  toggle swaps to. Only a store the form cannot host — a schema the
- *  widgets cannot represent, or a value outside it — edits as raw text;
- *  everywhere else the code is the file editor's mirror, read-only and
- *  full-bleed so its gutter meets the page edge. */
+ *  toggle swaps to. Every branch runs full-bleed against the page frame,
+ *  the way the table grid does. Only a store the form cannot host — a
+ *  schema the widgets cannot represent, or a value outside it — edits as
+ *  raw text; everywhere else the code is the file editor's mirror. */
 function ValueBody({
   editor,
   onEdit,
@@ -205,7 +206,7 @@ function ValueBody({
 }) {
   if (editor.state.view === "form" && editor.form !== undefined) {
     return (
-      <ConsoleListContent>
+      <div className={cn("relative min-h-0 flex-1 overflow-auto", scrollFade)}>
         <ValueFields
           errors={editor.state.fieldErrors}
           form={editor.form}
@@ -215,7 +216,7 @@ function ValueBody({
           }}
           root={editor.state.root}
         />
-      </ConsoleListContent>
+      </div>
     )
   }
 
@@ -233,25 +234,42 @@ function ValueBody({
     )
   }
 
+  return <CodeEditor editor={editor} onEdit={onEdit} />
+}
+
+/** Raw JSON for the stores the form cannot host. A textarea has no gutter
+ *  to meet the page edge with, so it takes the page's own horizontal
+ *  padding instead and its first column lines up under the toolbar's
+ *  text. A slim strip below says why the last save was refused, and why
+ *  this store edits as text at all. */
+function CodeEditor({
+  editor,
+  onEdit,
+}: {
+  editor: ValueEditor
+  onEdit: () => void
+}) {
+  const { codeError, codeNote } = editor.state
+
   return (
-    <ConsoleListContent>
-      <div className="grid gap-2">
-        <Textarea
-          aria-label="Store value JSON"
-          className="min-h-64 font-mono text-xs"
-          onChange={(event) => {
-            editor.setCodeText(event.target.value)
-            onEdit()
-          }}
-          value={editor.state.codeText}
-        />
-        <FieldError>{editor.state.codeError}</FieldError>
-        {editor.state.codeNote === undefined ? null : (
-          <p className="text-muted-foreground text-xs">
-            {editor.state.codeNote}
-          </p>
-        )}
-      </div>
-    </ConsoleListContent>
+    <>
+      <Textarea
+        aria-label="Store value JSON"
+        className="min-h-0 flex-1 resize-none rounded-none border-0 px-4 py-3 font-mono text-xs shadow-none ring-inset focus-visible:ring-2 focus-visible:ring-ring/50 md:px-6"
+        onChange={(event) => {
+          editor.setCodeText(event.target.value)
+          onEdit()
+        }}
+        value={editor.state.codeText}
+      />
+      {codeError === undefined && codeNote === undefined ? null : (
+        <div className="grid gap-1 border-t px-4 py-2 md:px-6">
+          <FieldError>{codeError}</FieldError>
+          {codeNote === undefined ? null : (
+            <p className="text-muted-foreground text-xs">{codeNote}</p>
+          )}
+        </div>
+      )}
+    </>
   )
 }
