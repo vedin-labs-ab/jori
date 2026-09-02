@@ -1,11 +1,10 @@
 import { ListFilter } from "lucide-react"
 import { type Ref } from "react"
-import { Badge } from "@/components/ui/badge"
 import { ConsoleHeaderButton } from "../layout"
 
 /** The header's way into the panel. Off its defaults, the button fills in
- *  and carries the count of facets in play; the badge hides with the label
- *  on small screens, where the name still says how many. */
+ *  and carries the count of facets in play as a muted suffix; it hides
+ *  with the label on small screens, where the name still says how many. */
 export function ConsoleFilterButton({
   activeCount,
   onClick,
@@ -32,9 +31,9 @@ export function ConsoleFilterButton({
       variant={active ? "secondary" : "outline"}
     >
       {active ? (
-        <Badge className="max-sm:hidden" variant="secondary">
+        <span className="text-muted-foreground tabular-nums max-sm:hidden">
           {activeCount}
-        </Badge>
+        </span>
       ) : null}
     </ConsoleHeaderButton>
   )

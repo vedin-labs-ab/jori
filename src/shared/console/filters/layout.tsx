@@ -103,9 +103,10 @@ function FilterAside({
       </aside>
       <button
         aria-label="Toggle filters"
+        // The sidebar rail's own treatment: a 2px line that fills on hover.
         className={cn(
-          "-translate-x-1/2 absolute inset-y-0 left-0 z-20 hidden w-4 md:flex",
-          "after:absolute after:inset-y-0 after:left-1/2 after:w-px hover:after:bg-sidebar-border",
+          "-translate-x-1/2 absolute inset-y-0 left-0 z-20 hidden w-4 transition-all ease-linear md:flex",
+          "after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border",
           open ? "cursor-e-resize" : "cursor-w-resize"
         )}
         data-slot="filters-rail"
