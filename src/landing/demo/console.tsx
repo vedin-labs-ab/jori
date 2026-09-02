@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { DemoDragProvider } from "./drag"
-import { useDemoNavigation } from "./navigation"
+import { type DemoNavigation } from "./navigation"
 import { DemoPage } from "./pages/router"
 import { DemoSidebar } from "./sidebar"
 
@@ -20,25 +20,24 @@ const frameClassName = cn(
   "max-md:[&_[data-slot=sidebar-trigger]]:hidden max-md:[&_[data-slot=sidebar-trigger]+[data-slot=separator]]:hidden"
 )
 
-/** The console over the workspace, opened on a path: the same frame,
- *  sidebar, and pages the console renders, under a navigation of its own,
- *  so every link inside moves this box and nothing else. */
+/** The console over the workspace: the same frame, sidebar, and pages the
+ *  console renders, under the navigation its host holds, so every link
+ *  inside moves this box and nothing else. */
 export function DemoConsole({
   className,
+  navigation: { location, navigation },
   openRunId,
-  path,
   sidebar = true,
 }: {
   /** The box's size; the frame fills whatever it is given. */
   className?: string
+  /** Where the console is and how it moves, from `useDemoNavigation`. */
+  navigation: DemoNavigation
   /** The run the Activity page shows open from the start. */
   openRunId?: string
-  /** Where the console starts: a path and, if any, its search. */
-  path: string
   /** Left out, the header opens on the title and the pages fill the box. */
   sidebar?: boolean
 }) {
-  const { location, navigation } = useDemoNavigation(path)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
