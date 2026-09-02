@@ -8,8 +8,6 @@ import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
 import { api } from "../../../../convex/_generated/api"
 import { jobFormValues } from "./save"
 
-export type JobEditor = ReturnType<typeof useJobEditor>
-
 /** The mutation-args builders reach the markdown codec, which ships with the
  *  editor dialog. Loading them at save time keeps that weight off the pages
  *  that only mount the host. */

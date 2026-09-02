@@ -1,25 +1,22 @@
-import { lazy, Suspense } from "react"
+import { lazy, type ReactNode, Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RecurringFields } from "@/shared/console/jobs/editor/schedule/recurring"
-import { type JobFormValues } from "@/shared/console/jobs/types"
 import { localTimezone } from "@/shared/console/time"
+import { type JobFormValues } from "../../types"
+import { RecurringFields } from "../schedule/recurring"
 
 const JobDateTimePicker = lazy(async () => ({
-  default: (await import("@/shared/console/jobs/editor/schedule/picker"))
-    .JobDateTimePicker,
-}))
-
-const EventFields = lazy(async () => ({
-  default: (await import("../event")).EventFields,
+  default: (await import("../schedule/picker")).JobDateTimePicker,
 }))
 
 export function JobTiming({
-  organizationId,
+  eventFields,
   showRunPreview,
   onValuesChange,
   values,
 }: {
-  organizationId: string
+  /** The Event tab's fields, bound by the host: which integrations are
+   *  connected and what they offer is its to know. */
+  eventFields: ReactNode
   showRunPreview: boolean
   onValuesChange: (values: JobFormValues) => void
   values: JobFormValues
@@ -58,13 +55,7 @@ export function JobTiming({
         </Suspense>
       </TabsContent>
       <TabsContent value="event">
-        <Suspense fallback={<TimingFallback />}>
-          <EventFields
-            organizationId={organizationId}
-            onValuesChange={onValuesChange}
-            values={values}
-          />
-        </Suspense>
+        <Suspense fallback={<TimingFallback />}>{eventFields}</Suspense>
       </TabsContent>
     </Tabs>
   )

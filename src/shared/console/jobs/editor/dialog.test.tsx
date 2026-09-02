@@ -1,13 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
-import { afterEach, describe, expect, test, vi } from "vitest"
-import { emptyJobForm } from "@/shared/console/jobs/types"
-import { JobDialog } from "."
-
-vi.mock("convex/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("convex/react")>()),
-  useQuery: () => ({ status: "ready", skills: [] }),
-}))
+import { afterEach, describe, expect, test } from "vitest"
+import { emptyJobForm, type Job } from "../types"
+import { JobEditorDialog } from "./dialog"
 
 afterEach(cleanup)
 
@@ -183,24 +178,52 @@ describe("job dialog access controls", () => {
   })
 })
 
+describe("job dialog folder", () => {
+  test("offers the folder field to a new job only", () => {
+    renderJobDialog({ error: undefined, values: emptyJobForm })
+
+    expect(screen.getByLabelText("Folder")).toBeDefined()
+
+    cleanup()
+    renderJobDialog({
+      error: undefined,
+      job: { id: "job" } as unknown as Job,
+      values: emptyJobForm,
+    })
+
+    expect(screen.queryByLabelText("Folder")).toBeNull()
+  })
+})
+
 function renderJobDialog({
   error,
+  job,
   values,
 }: {
   error: string | undefined
+  job?: Job
   values: typeof emptyJobForm
 }) {
   return render(
-    <JobDialog
-      job={undefined}
+    <JobEditorDialog
       error={error}
+      eventFields={null}
+      folderField={(field) => (
+        <label>
+          Folder
+          <input id={field.id} readOnly value={field.value ?? ""} />
+        </label>
+      )}
+      grantOptions={{ people: undefined, teams: undefined }}
       isOpen={true}
       isSaving={false}
+      job={job}
       onOpenChange={() => undefined}
       onSave={() => undefined}
       onValuesChange={() => undefined}
+      permissions={undefined}
       policyKey="test"
-      organizationId="organization"
+      skills={[]}
       values={values}
     />
   )
