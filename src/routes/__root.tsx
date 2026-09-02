@@ -23,12 +23,12 @@ import appCss from "../styles.css?url"
 const appTitle = "Jori"
 /** Link previews fetch this from outside the app, so it cannot be a path. */
 const appImage = new URL("/brand/og.jpg", regionConfig.publicOrigin).toString()
-/** Opens on the identity, because "shared" is the half of the sentence no
- *  other result claims: every competitor sells a per-seat assistant. The
- *  share image carries the same line, so a preview reads as one thought
- *  rather than as a picture with an unrelated caption. */
+/** Opens on the identity, because "shared drive" is the half of the
+ *  sentence no other result claims: every competitor sells a per-seat
+ *  assistant. The share image carries the same line, so a preview reads as
+ *  one thought rather than as a picture with an unrelated caption. */
 const appDescription =
-  "Jori is the AI teammate your whole company shares. Hand it the work your team repeats across Slack, GitHub, and Linear; it works in the open, and it asks before it acts."
+  "Jori is the shared drive your AI works out of: jobs, tables, stores, and files in folders your teams share, with sharing and spend attached to every folder."
 const providerlessRouteIds = new Set([
   "/",
   "/pricing",

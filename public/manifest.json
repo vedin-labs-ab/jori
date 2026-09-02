@@ -1,7 +1,7 @@
 {
   "short_name": "Jori",
   "name": "Jori",
-  "description": "An AI teammate for the work your team repeats.",
+  "description": "A shared drive for AI jobs and the data they keep.",
   "icons": [
     {
       "src": "/brand/favicon/favicon.ico",

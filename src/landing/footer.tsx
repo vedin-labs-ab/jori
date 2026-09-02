@@ -21,7 +21,7 @@ export function LandingFooter() {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <BrandLink />
           <p className="text-muted-foreground text-sm">
-            The AI teammate your whole company shares.
+            The shared drive your AI works out of.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
