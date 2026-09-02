@@ -6,7 +6,8 @@ import {
   messageMatchesReplyTargetIdentifier,
   messageReplyTargetIdentifier,
 } from "./identifiers"
-import { conversationScope, messageAudience, replyAddress } from "./surface"
+import { conversationScope, messageAudience } from "./surface"
+import { replyAddress } from "./targets"
 
 describe("Slack message identifiers", () => {
   test("exposes Slack actor and message identifiers when available", () => {

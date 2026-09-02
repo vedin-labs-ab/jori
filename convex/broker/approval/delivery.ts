@@ -8,7 +8,7 @@ import {
   slackCardTarget,
 } from "../../integrations/slack/delivery/cards"
 import { sendSurfaceReply } from "../../messages/reply"
-import { replyAddress } from "../../messages/surface"
+import { replyAddress } from "../../messages/targets"
 import {
   type AgentRuntimeInput,
   findRunIntegration,

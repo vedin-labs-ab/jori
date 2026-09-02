@@ -2,8 +2,9 @@ import {
   type SourceChanges,
   type SourceFileChange,
 } from "../../../../contracts/source"
+import { githubJsonObject } from "../../../integrations/github/api"
 import { readRecord } from "../../../shared/input"
-import { encodeGitHubPath, githubJsonObject, repositoryPath } from "./client"
+import { encodeGitHubPath, repositoryPath } from "./client"
 
 export type GitHubSourceCommit = {
   baseSha?: string

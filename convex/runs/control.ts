@@ -1,5 +1,4 @@
 import { v } from "convex/values"
-import { type Id } from "../_generated/dataModel"
 import { mutation } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { readUserProfile } from "../access/users"
@@ -24,19 +23,12 @@ export const stop = mutation({
       throw new Error("Run not found.")
     }
 
-    await stopRunTree(ctx, run, stoppedByActor(personId, identity))
+    await stopRunTree(
+      ctx,
+      run,
+      createPersonActor(personId, readUserProfile(identity))
+    )
 
     return null
   },
 })
-
-function stoppedByActor(
-  personId: Id<"persons">,
-  identity: {
-    email?: string
-    name?: string
-    subject?: string
-  }
-) {
-  return createPersonActor(personId, readUserProfile(identity))
-}

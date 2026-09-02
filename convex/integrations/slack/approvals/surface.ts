@@ -5,15 +5,9 @@ import { internalAction } from "../../../_generated/server"
 import { type ApprovalSurfaceTarget } from "../../../approvals/surface"
 import { getActorDisplayName } from "../../../shared/actor"
 import { getToolLabel } from "../../../shared/tools/labels"
+import { createSlackCard, slackCardBodyLimit } from "../card"
 import { updateSlackMessage } from "../delivery/messages"
-import {
-  createApprovalCard,
-  formatSlackTime,
-  toSlackTimestamp,
-  truncateSlackText,
-} from "./cards"
-
-const cardBodyLimit = 200
+import { formatSlackTime, toSlackTimestamp, truncateSlackText } from "../format"
 
 type SlackApprovalDelivery = NonNullable<Doc<"approvals">["delivery"]>
 
@@ -60,11 +54,11 @@ export function createSlackApprovalSurfaceMessage(approval: Doc<"approvals">) {
   return {
     text: fallbackText(approval),
     blocks: [
-      createApprovalCard({
-        icon: icon(approval.status),
+      createSlackCard({
+        icon: { type: "icon", name: icon(approval.status) },
         title: title(approval),
         subtitle: getToolLabel(approval.tool),
-        body: truncateSlackText(approval.summary, cardBodyLimit),
+        body: truncateSlackText(approval.summary, slackCardBodyLimit),
         subtext: subtext(approval),
       }),
     ],

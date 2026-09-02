@@ -12,7 +12,7 @@ import {
   type SlackBlock,
 } from "../integrations/slack/delivery/messages"
 import { type AgentRuntimeInput } from "../runs/agent/input"
-import { type ReplyAddress } from "./surface"
+import { type ReplyAddress } from "./targets"
 
 export async function sendSurfaceReply(
   ctx: ActionCtx,

@@ -1,5 +1,7 @@
 import { type JsonObject } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
+import { githubJson, githubJsonObject } from "../../../integrations/github/api"
+import { requireGitHubRuntimeToken } from "../../../integrations/github/credentials"
 import {
   addGitHubCommentReaction,
   addIssueComment,
@@ -21,13 +23,7 @@ import {
   requiredNumber,
   requiredString,
 } from "../../../shared/input"
-import {
-  encodeGitHubPath,
-  githubJson,
-  githubJsonObject,
-  repositoryPath,
-  requireGitHubRuntimeToken,
-} from "./client"
+import { encodeGitHubPath, repositoryPath } from "./client"
 import { commitToPullRequest, createPullRequest } from "./publish"
 import {
   listPullRequestFiles,

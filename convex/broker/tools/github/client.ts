@@ -1,12 +1,5 @@
-import {
-  githubJson,
-  githubJsonObject,
-  githubRepositoryPath,
-} from "../../../integrations/github/api"
-import { requireGitHubRuntimeToken } from "../../../integrations/github/credentials"
+import { githubRepositoryPath } from "../../../integrations/github/api"
 import { requiredString } from "../../../shared/input"
-
-export { githubJson, githubJsonObject, requireGitHubRuntimeToken }
 
 export function encodeGitHubPath(value: string) {
   return value.split("/").map(encodeURIComponent).join("/")

@@ -45,14 +45,12 @@ export async function handleGitHubCloneCredentialsRequest(
     "github_clone_repository",
     await request.json().catch(() => null)
   )
-  authorizeTool(context, {
-    surface: "github",
+  const cloneTool = {
+    surface: "github" as const,
     tool: "github_clone_repository",
-  })
-  const integration = await authorizeSurfaceTool(context, {
-    surface: "github",
-    tool: "github_clone_repository",
-  })
+  }
+  authorizeTool(context, cloneTool)
+  const integration = await authorizeSurfaceTool(context, cloneTool)
 
   if (integration === null) {
     return unauthorizedResponse()

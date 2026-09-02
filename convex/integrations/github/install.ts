@@ -1,5 +1,9 @@
 import { v } from "convex/values"
 import { internalMutation } from "../../_generated/server"
+import {
+  requireProviderIntegration,
+  saveOAuthCredentials,
+} from "../connect/credentials"
 import { upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
 import { requireGitHubCredentials } from "./credentials"
@@ -55,26 +59,19 @@ export const updateInstallationCredentials = internalMutation({
     expiresAt: v.number(),
   },
   handler: async (ctx, args) => {
-    const integration = await ctx.db.get(args.integrationId)
-
-    if (integration === null || integration.integration !== "github") {
-      throw new Error("GitHub integration not found")
-    }
-
+    const integration = await requireProviderIntegration(ctx, {
+      integrationId: args.integrationId,
+      provider: "github",
+      label: "GitHub",
+    })
     const existingCredentials = requireGitHubCredentials(integration)
-    const credentials = {
+
+    return await saveOAuthCredentials(ctx, args.integrationId, {
       installationId: existingCredentials.installationId,
       tokens: {
         access: args.accessToken,
       },
       expiresAt: args.expiresAt,
-    }
-
-    await ctx.db.patch(args.integrationId, {
-      credentials,
-      updatedAt: Date.now(),
     })
-
-    return credentials
   },
 })

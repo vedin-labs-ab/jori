@@ -3,17 +3,6 @@ import { getSlackChannelType } from "../integrations/slack/data"
 import { type Audience } from "../shared/audience"
 import { isUserScopedIntegration } from "../shared/integrations"
 
-export {
-  messageActorIds,
-  messageIdentifiers,
-  messageReplyTargetIdentifier,
-} from "./identifiers"
-export {
-  type ReplyAddress,
-  type ReplyTargetIdentifier,
-  replyAddress,
-} from "./targets"
-
 type MessageAudience = {
   isAddressed: boolean
   isDirect: boolean

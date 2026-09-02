@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react"
+import { api } from "../../../convex/_generated/api"
 import { type ToolPermissionController } from "../permissions/controller"
 import { IntegrationCard } from "./card"
 import { getAccountHeadline, getWorkspaceHeadline } from "./card/headline"
@@ -13,7 +14,10 @@ export function IntegrationProvider({
   permissions: ToolPermissionController
   provider: ProviderDefinition
 }) {
-  const status = useQuery(provider.status, { organizationId })
+  const status = useQuery(api.integrations.status.get, {
+    organizationId,
+    integration: provider.config.integration,
+  })
 
   return (
     <IntegrationCard

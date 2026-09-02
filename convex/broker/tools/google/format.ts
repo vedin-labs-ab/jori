@@ -2,7 +2,7 @@ import { base64EncodeBytes, base64UrlEncode } from "../../../shared/encoding"
 import { optionalString, readArray, readRecord } from "../../../shared/input"
 
 export function getHeader(message: Record<string, unknown>, name: string) {
-  const payload = readObject(message.payload)
+  const payload = readRecord(message.payload)
   const value = readArray(payload.headers)
     .map(readRecord)
     .find(
@@ -155,10 +155,4 @@ function messageAddressHeaders(name: string, addresses: string[] | undefined) {
 
 export function getCalendarId(args: Record<string, unknown>) {
   return optionalString(args.calendarId) ?? "primary"
-}
-
-function readObject(value: unknown) {
-  return typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : {}
 }

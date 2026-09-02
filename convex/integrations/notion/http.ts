@@ -42,7 +42,7 @@ export async function handleNotionOAuthCallback(
   const stateValue = requestUrl.searchParams.get("state")
 
   if (requestUrl.searchParams.get("error") !== null && stateValue !== null) {
-    return await redirectFromCallbackState(stateValue, "error")
+    return await redirectToCallbackError(stateValue)
   }
 
   const callback = await readOAuthCallback(request, {
@@ -144,14 +144,11 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
   return Response.json({ ok: true })
 }
 
-async function redirectFromCallbackState(
-  stateValue: string,
-  status: "connected" | "error"
-) {
+async function redirectToCallbackError(stateValue: string) {
   try {
     const state = await parseSignedNotionState(stateValue)
 
-    return redirectWithStatus(state.returnUrl, "notion", status)
+    return redirectWithStatus(state.returnUrl, "notion", "error")
   } catch {
     return new Response("Invalid Notion OAuth state", { status: 400 })
   }

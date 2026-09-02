@@ -4,7 +4,7 @@ import { detail, uniqueDetails } from "../../detail"
 import { isManualTrigger, isSubtaskRun } from "../source"
 import { toolDetails } from "../tools"
 
-export function runDetailSummary(input: {
+export function runDetails(input: {
   approval: Doc<"approvals"> | null
   run: Doc<"runs">
   stoppedBy: string | undefined
@@ -17,15 +17,13 @@ export function runDetailSummary(input: {
       ? []
       : input.run.snapshot.context
 
-  return {
-    details: uniqueDetails([
-      stoppedDetail(input.run, input.stoppedBy),
-      decisionDetail(input.approval),
-      ...(input.run.cause.type === "time" ? snapshotContext : []),
-      ...toolDetails(input.tools),
-      ...(input.run.cause.type === "time" ? [] : snapshotContext),
-    ]),
-  }
+  return uniqueDetails([
+    stoppedDetail(input.run, input.stoppedBy),
+    decisionDetail(input.approval),
+    ...(input.run.cause.type === "time" ? snapshotContext : []),
+    ...toolDetails(input.tools),
+    ...(input.run.cause.type === "time" ? [] : snapshotContext),
+  ])
 }
 
 function stoppedDetail(run: Doc<"runs">, stoppedBy: string | undefined) {

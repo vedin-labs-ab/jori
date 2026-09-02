@@ -10,7 +10,7 @@ import { unauthorizedResponse } from "../../../shared/http"
 import { readCallbackState, redirectWithStatus } from "../../connect/http"
 import {
   completeIntegrationOffer,
-  failIntegrationOffer,
+  failOfferAndRedirect,
 } from "../../connect/install"
 import {
   fetchGitHubInstallationProfile,
@@ -69,12 +69,12 @@ export async function handleGitHubInstallCallback(
   try {
     profile = await fetchGitHubInstallationProfile(installationId)
   } catch {
-    await failIntegrationOffer(ctx, {
-      integrationOfferId: state.integrationOfferId,
+    return await failOfferAndRedirect(ctx, {
+      callbackParam: "github",
       error: "GitHub installation profile could not be loaded.",
+      integrationOfferId: state.integrationOfferId,
+      returnUrl: state.returnUrl,
     })
-
-    return redirectWithStatus(state.returnUrl, "github", "error")
   }
 
   const integrationId = await ctx.runMutation(

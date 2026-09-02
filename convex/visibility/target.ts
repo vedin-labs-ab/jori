@@ -67,11 +67,17 @@ async function loadMaterialTarget(
 ): Promise<LoadedTarget> {
   const material = await ctx.db.get(target.id)
 
+  // Files carry no kind; every collection carries the kind its target names.
+  const isTargetKind =
+    material !== null &&
+    (target.kind === "file"
+      ? !("kind" in material)
+      : "kind" in material && material.kind === target.kind)
+
   if (
     material === null ||
     material.organizationId !== organizationId ||
-    "kind" in material !== (target.kind !== "file") ||
-    ("kind" in material && material.kind !== target.kind)
+    !isTargetKind
   ) {
     throw new Error("Not found.")
   }

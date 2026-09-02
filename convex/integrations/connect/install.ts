@@ -165,20 +165,6 @@ export async function completeIntegrationOffer(
   await ctx.runMutation(internal.integrations.offers.updates.complete, args)
 }
 
-export async function failIntegrationOffer(
-  ctx: ActionCtx,
-  args: {
-    integrationOfferId?: Id<"integrationOffers">
-    error?: string
-  }
-) {
-  if (args.integrationOfferId === undefined) {
-    return
-  }
-
-  await ctx.runMutation(internal.integrations.offers.updates.complete, args)
-}
-
 export async function failOfferAndRedirect(
   ctx: ActionCtx,
   args: {
@@ -188,10 +174,12 @@ export async function failOfferAndRedirect(
     returnUrl: string
   }
 ) {
-  await failIntegrationOffer(ctx, {
-    integrationOfferId: args.integrationOfferId,
-    error: args.error,
-  })
+  if (args.integrationOfferId !== undefined) {
+    await ctx.runMutation(internal.integrations.offers.updates.complete, {
+      integrationOfferId: args.integrationOfferId,
+      error: args.error,
+    })
+  }
 
   return redirectWithStatus(args.returnUrl, args.callbackParam, "error")
 }

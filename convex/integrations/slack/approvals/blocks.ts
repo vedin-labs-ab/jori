@@ -1,14 +1,8 @@
 import { type ToolSurface } from "../../../shared/integrations"
 import { getToolLabel } from "../../../shared/tools/labels"
+import { createSlackCard, slackCardBodyLimit } from "../card"
 import { type SlackBlock } from "../delivery/messages"
-import {
-  createApprovalCard,
-  formatSlackTime,
-  toSlackTimestamp,
-  truncateSlackText,
-} from "./cards"
-
-const slackCardBodyLimit = 200
+import { formatSlackTime, toSlackTimestamp, truncateSlackText } from "../format"
 
 export type SlackApprovalInteraction = {
   accountId: string
@@ -45,8 +39,8 @@ function createSlackApprovalBlocks(args: {
   expiresAt: number
 }): SlackBlock[] {
   return [
-    createApprovalCard({
-      icon: "edit",
+    createSlackCard({
+      icon: { type: "icon", name: "edit" },
       title: "Approval required",
       subtitle: getToolLabel(args.tool),
       body: truncateSlackText(args.summary, slackCardBodyLimit),

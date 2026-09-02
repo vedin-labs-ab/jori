@@ -7,14 +7,10 @@ type RuntimeIntegration = Doc<"integrations">
 
 /** Exchange a little before the provider's stated expiry so a token cannot
  *  lapse partway through a run that is already in flight. */
-const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000
+const tokenRefreshBufferMs = 5 * 60 * 1000
 
 export function hasFreshTokenExpiration(expiresAt: number) {
-  return expiresAt > Date.now() + TOKEN_REFRESH_BUFFER_MS
-}
-
-export function hasFreshOAuthToken(credentials: { expiresAt: number }) {
-  return hasFreshTokenExpiration(credentials.expiresAt)
+  return expiresAt > Date.now() + tokenRefreshBufferMs
 }
 
 // OAuth providers signal a permanently dead grant (revoked consent, expired
