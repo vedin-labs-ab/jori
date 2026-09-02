@@ -73,6 +73,26 @@ Complexity compounds quickly. Be deliberate in preventing it.
 - Desktop-optimized, fully responsive and adaptive.
 - Never use gradients.
 
+## Landing Mocks
+
+The landing page shows the console itself, not pictures of it. Every product
+visual on `src/landing` is a console view from `src/shared/console` rendered
+over fixture data from `src/landing/demo`, inside the same shell, list, and
+dialog primitives the console uses.
+
+- `src/shared/console` holds views: props in, callbacks out. No Convex hooks,
+  no session, no router state; links go through `ConsoleLink`. The dependency
+  check enforces this.
+- `src/console` binds those views to Convex, auth, and the router. A page is a
+  binding around a view, never a second copy of it.
+- `src/landing/demo` binds the same views to an in-memory workspace
+  (Copperline) with the same callbacks, so the mocks stay navigable.
+
+When a console view changes, the landing follows on its own. When a console
+surface gets a new view, write it in the kit and bind it twice. Never draw a
+console lookalike by hand in `src/landing`, and never import `src/console`
+from it.
+
 ## Convex
 
 This project uses Convex as its backend.
