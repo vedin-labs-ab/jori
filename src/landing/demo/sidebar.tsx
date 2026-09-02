@@ -10,9 +10,8 @@ import { SidebarOrganization } from "@/shared/console/shell/organization"
 import { DemoCreationDialogs } from "./dialogs/creation"
 import { DemoFolderDialogs } from "./dialogs/folders"
 import { useDemoExpansion } from "./expansion"
+import { organization } from "./fixtures/organization"
 import { useDemoFolders } from "./workspace"
-
-const organization = { name: "Copperline" }
 
 /** The console's sidebar over the workspace: Copperline at its head, the
  *  navigation, and the folder tree with the dialogs its rows raise. */

@@ -6,6 +6,7 @@ import { materialOf } from "../../demo/derive/materials"
 import { DemoAudience } from "../../demo/dialogs/visibility"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { grantOptions } from "../../demo/fixtures/people"
+import { Organization } from "../../demo/organization"
 import { useDemoShares, useShareActions } from "../../demo/shares"
 import { useDemoWorkspace } from "../../demo/workspace"
 import { Definition, Prop, Section } from "../../section"
@@ -62,7 +63,9 @@ function RenewalsSharing() {
         label={
           <>
             <span className="font-medium text-foreground">Visibility</span>
-            <span>Who in Copperline sees the Customer renewals table</span>
+            <span>
+              Who in <Organization /> sees the Customer renewals table
+            </span>
           </>
         }
       >
@@ -88,7 +91,9 @@ function RenewalsSharing() {
         label={
           <>
             <span className="font-medium text-foreground">Share links</span>
-            <span>The same table, for people outside Copperline</span>
+            <span>
+              The same table, for people outside <Organization />
+            </span>
           </>
         }
       >
