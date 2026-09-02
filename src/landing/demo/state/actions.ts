@@ -111,9 +111,13 @@ function jobActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
       dispatch({ type: "setJobPaused", at: Date.now(), jobId: job.id, paused }),
     deleteJob: (job: Job) => dispatch({ type: "deleteJob", jobId: job.id }),
     /** Saves the editor's values as a new job or over an existing one, and
-     *  answers with the validation error when there is one. */
-    saveJob: (values: JobFormValues, existing?: Job) => {
+     *  answers with the validation error when there is one. The save module
+     *  arrives on first use: it carries the instructions codec, and the
+     *  editor that needs it has loaded by the time anyone can save. */
+    saveJob: async (values: JobFormValues, existing?: Job) => {
+      const args = await import("@/shared/console/jobs/editor/save/args")
       const result = jobFromValues(values, {
+        args,
         existing,
         id: mint("jobs"),
         at: Date.now(),

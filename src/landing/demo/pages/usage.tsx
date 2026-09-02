@@ -9,6 +9,7 @@ import {
   useMaterialTrail,
 } from "@/shared/console/materials/breadcrumb"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
+import { NearViewport } from "../../viewport"
 import { folderDetail } from "../derive/folders"
 import { usageOverview } from "../derive/usage"
 import { demoTimezone } from "../fixtures/jobs"
@@ -46,20 +47,25 @@ export function UsagePage({
 
   return (
     <ConsoleListLayout>
-      <ClientOnly fallback={<ConsoleListLoading />}>
-        <Suspense fallback={<ConsoleListLoading />}>
-          <UsageView
-            days={days}
-            folderId={folderId}
-            onDaysChange={(next) =>
-              navigation?.navigate(
-                `${folderId === undefined ? "/folders/usage" : `/folders/${folderId}/usage`}?days=${next}`
-              )
-            }
-            usage={usage}
-          />
-        </Suspense>
-      </ClientOnly>
+      <NearViewport
+        className="flex min-h-0 min-w-0 flex-1 flex-col"
+        fallback={<ConsoleListLoading />}
+      >
+        <ClientOnly fallback={<ConsoleListLoading />}>
+          <Suspense fallback={<ConsoleListLoading />}>
+            <UsageView
+              days={days}
+              folderId={folderId}
+              onDaysChange={(next) =>
+                navigation?.navigate(
+                  `${folderId === undefined ? "/folders/usage" : `/folders/${folderId}/usage`}?days=${next}`
+                )
+              }
+              usage={usage}
+            />
+          </Suspense>
+        </ClientOnly>
+      </NearViewport>
     </ConsoleListLayout>
   )
 }
