@@ -1,6 +1,7 @@
 import { integrationLabels, integrations } from "@contracts/integrations"
 import { CircleDot } from "lucide-react"
 import { IntegrationLogo } from "@/shared/logo/integration"
+import { Organization } from "../demo/organization"
 import { Chip, Jori, Mention, Prop, Section } from "../section"
 
 /** The surfaces: a mention in a thread is the other way in, and what comes
@@ -99,7 +100,7 @@ function LinearMention() {
       label={
         <>
           <IntegrationLogo className="size-3.5" integration="linear" />
-          <span className="font-medium text-foreground">Copperline</span>
+          <Organization />
           <span className="ml-auto">COP</span>
         </>
       }

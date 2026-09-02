@@ -1,5 +1,6 @@
 import { Progress } from "@/components/ui/progress"
 import { BrandIcon } from "@/shared/brand"
+import { Organization } from "../demo/organization"
 import { Prop } from "../section"
 
 /**
@@ -20,7 +21,7 @@ export function UsageMeter() {
         <>
           <BrandIcon className="size-4" />
           <span className="font-medium text-foreground">Usage</span>
-          <span className="ml-auto">Copperline</span>
+          <Organization className="ml-auto" />
         </>
       }
     >

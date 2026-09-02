@@ -3,6 +3,7 @@ import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
 import { IntegrationLogo } from "@/shared/logo/integration"
+import { Organization } from "../../demo/organization"
 import { Mention, Prop } from "../../section"
 
 /** Each message enters once, the reply after the ask, and neither moves
@@ -27,7 +28,7 @@ export function RenewalsThread({
         <>
           <IntegrationLogo className="size-3.5" integration="slack" />
           <span className="font-medium text-foreground">#finance</span>
-          <span>Copperline</span>
+          <Organization />
         </>
       }
     >
