@@ -9,7 +9,6 @@ import { Jori, Prop, Section } from "../section"
 export function ApprovalsSection() {
   return (
     <Section
-      className="border-y bg-muted/50"
       lede={
         <>
           Set a tool to ask first and <Jori tilt="slight" /> requests before
@@ -57,8 +56,8 @@ export function ReceiptsSection() {
             links back to the run that started it.
           </p>
           <p className="max-w-xl">
-            Receipts aren't a report Jori writes about their own work. They're
-            the record of what actually ran.
+            A receipt is the record of what ran, not a summary written
+            afterwards.
           </p>
         </div>
         {/* The record itself rather than a drawing of one: the console's
@@ -94,16 +93,7 @@ const lines = [
  *  behalf, with the decision still theirs. */
 function ReleaseApprovalCard() {
   return (
-    <Prop
-      label={
-        <>
-          <span className="font-medium text-foreground">
-            Approval requested
-          </span>
-          <span>#eng · Slack</span>
-        </>
-      }
-    >
+    <Prop hint="#eng on Slack" label="Approval requested">
       <div className="px-5 py-4">
         <p className="flex items-center gap-2 font-medium text-sm">
           <ProviderLogo className="size-4" surface="linear" />

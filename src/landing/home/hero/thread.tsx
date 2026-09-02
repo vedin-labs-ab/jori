@@ -24,11 +24,11 @@ export function RenewalsThread({
   return (
     <Prop
       className={cn("shadow-lg", className)}
+      hint={<Organization />}
       label={
         <>
           <IntegrationLogo className="size-3.5" integration="slack" />
-          <span className="font-medium text-foreground">#finance</span>
-          <Organization />
+          #finance
         </>
       }
     >

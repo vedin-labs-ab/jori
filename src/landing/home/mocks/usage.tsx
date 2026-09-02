@@ -15,12 +15,12 @@ export function Usage() {
           folder's total and a job's total is one row. Open Usage on any folder
           and see spend by subfolder and by source over the window you choose,
           priced at the provider's list rates. Not a report{" "}
-          <Jori tilt="slight" /> writes about their own work. The tree.
+          <Jori tilt="slight" /> writes about their own work.
         </>
       }
       title="Every folder has a bill"
     >
-      <dl className="grid gap-8 md:grid-cols-3 lg:gap-12">
+      <dl className="grid gap-x-12 gap-y-8 md:grid-cols-3">
         <Definition term="By team">
           Engineering, Marketing, Finance: whatever your folders are called,
           that's what the bill is called.

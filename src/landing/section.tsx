@@ -110,10 +110,14 @@ export function Definition({
 export function Prop({
   children,
   className,
+  hint,
   label,
 }: {
   children: ReactNode
   className?: string
+  /** What the label is showing, after a dot: the audience, the source, the
+   *  workspace. */
+  hint?: ReactNode
   label: ReactNode
 }) {
   return (
@@ -124,7 +128,15 @@ export function Prop({
       )}
     >
       <figcaption className="flex items-center gap-2 border-b bg-muted/50 px-4 py-2.5 text-muted-foreground text-xs">
-        {label}
+        <span className="inline-flex shrink-0 items-center gap-1.5 font-medium text-foreground">
+          {label}
+        </span>
+        {hint === undefined ? null : (
+          <>
+            <span aria-hidden>·</span>
+            <span className="min-w-0 truncate">{hint}</span>
+          </>
+        )}
       </figcaption>
       {children}
     </figure>
