@@ -32,7 +32,7 @@ test("progressively discloses the context supplied to automation runs", () => {
   ).toContain("sm:grid-cols-3")
   expect(screen.getByText("Account identities")).toBeDefined()
   expect(screen.getByText("Run identifiers")).toBeDefined()
-  expect(screen.getByText("Automation identifiers")).toBeDefined()
+  expect(screen.getByText("Job identifiers")).toBeDefined()
   expect(screen.getByText("Context is resolved for each run.")).toBeDefined()
 })
 

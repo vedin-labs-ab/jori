@@ -75,7 +75,7 @@ export async function requireVisibleAutomation(
   )
 
   if (!(await canSeeAutomation(createSight(ctx, args), automation))) {
-    throw new Error("Automation not found.")
+    throw new Error("Job not found.")
   }
 
   return automation
@@ -168,7 +168,7 @@ function requireAutomationTool(
 
   if (!isUnattendedToolMode(mode)) {
     throw new Error(
-      `${permission.label} is ${permissionModeLabel(mode)} and cannot run in automations.`
+      `${permission.label} is ${permissionModeLabel(mode)} and cannot run in jobs.`
     )
   }
 

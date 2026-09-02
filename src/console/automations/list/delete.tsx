@@ -31,8 +31,8 @@ export function DeleteAutomationDialog({
             Delete "{automation.name}"?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently deletes the automation and cancels its upcoming
-            runs. Past runs are kept.
+            This permanently deletes the job and cancels its upcoming runs. Past
+            runs are kept.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -42,7 +42,7 @@ export function DeleteAutomationDialog({
             onClick={onDelete}
             variant="destructive"
           >
-            Delete automation
+            Delete job
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

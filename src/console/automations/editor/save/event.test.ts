@@ -81,7 +81,7 @@ describe("automation event payload validation", () => {
       )
     ).toEqual({
       error:
-        "Gmail event-triggered automations need mailbox subscriptions before they can run.",
+        "Gmail event-triggered jobs need mailbox subscriptions before they can run.",
     })
   })
 
@@ -97,7 +97,7 @@ describe("automation event payload validation", () => {
           surfaces: [{ integration: "slack", tools: slackTools() }],
         })
       )
-    ).toEqual({ error: "Choose a supported automation event." })
+    ).toEqual({ error: "Choose a supported job event." })
   })
 })
 

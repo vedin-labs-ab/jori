@@ -68,6 +68,6 @@ export function isAutomationToolReferenceError(error: string | undefined) {
     error?.startsWith("Enable web access to use #") === true ||
     error?.endsWith("requires Personal sharing.") === true ||
     (error?.startsWith("#") === true &&
-      error.endsWith("is not available in automations."))
+      error.endsWith("is not available in jobs."))
   )
 }

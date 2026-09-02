@@ -1,10 +1,10 @@
 import {
-  CalendarClock,
   Database,
   File,
   FolderPlus,
   Plus,
   Table2,
+  Workflow,
 } from "lucide-react"
 import { type ReactNode } from "react"
 import {
@@ -34,7 +34,7 @@ const resourceEntries = [
   { creation: "table", icon: Table2, label: "Table" },
   { creation: "store", icon: Database, label: "Store" },
   { creation: "file", icon: File, label: "File" },
-  { creation: "automation", icon: CalendarClock, label: "Automation" },
+  { creation: "automation", icon: Workflow, label: "Job" },
 ] as const
 
 /** "New" as a submenu, the first entry of the folder "…" menus. */

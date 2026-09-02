@@ -154,7 +154,7 @@ function buildBaseArgs(
 
     if (policyError !== undefined) {
       return {
-        error: policyError.includes("not available for automations")
+        error: policyError.includes("not available for jobs")
           ? automationInstructionMarkerErrors.unavailableAccess
           : policyError,
       }

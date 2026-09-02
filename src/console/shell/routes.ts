@@ -1,6 +1,5 @@
 import {
   Cable,
-  CalendarClock,
   Database,
   Files,
   Layers,
@@ -8,6 +7,7 @@ import {
   type LucideIcon,
   Table2,
   Timeline,
+  Workflow,
 } from "lucide-react"
 
 export type ConsoleSurface = {
@@ -33,7 +33,7 @@ export const consoleNavigation: readonly ConsoleGroup[] = [
   {
     label: "Resources",
     items: [
-      { icon: CalendarClock, label: "Automations", to: "/automations" },
+      { icon: Workflow, label: "Jobs", to: "/automations" },
       { icon: Table2, label: "Tables", to: "/tables" },
       { icon: Database, label: "Stores", to: "/stores" },
       { icon: Files, label: "Files", to: "/files" },
