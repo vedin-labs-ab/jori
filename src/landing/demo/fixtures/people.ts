@@ -41,7 +41,7 @@ export const people: readonly DemoPerson[] = [
 export const teams = [
   { id: teamIds.engineering, name: "Engineering" },
   { id: teamIds.marketing, name: "Marketing" },
-  { id: teamIds.finance, name: "Finance" },
+  { id: teamIds.finance, name: "Billing" },
   { id: teamIds.design, name: "Design" },
 ] as const
 

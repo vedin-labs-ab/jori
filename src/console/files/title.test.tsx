@@ -26,7 +26,7 @@ vi.mock("./manage", () => ({
 vi.mock("@/shared/console/files/edit", () => ({ EditFileDialog: () => null }))
 vi.mock("../folders/move", () => ({ MoveResourceDialog: () => null }))
 vi.mock("../shared/visibility/dialog", () => ({
-  VisibilityDialog: () => null,
+  OrganizationVisibilityDialog: () => null,
 }))
 
 afterEach(cleanup)
