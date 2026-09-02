@@ -7,6 +7,7 @@ import {
   type RuntimeId,
 } from "../../contracts/runtime/worker"
 import { type RuntimePlatform } from "../platform"
+import { type TraceRuntime } from "../runtime"
 import { recordRuntimeEvent } from "./runtime"
 
 export async function recordToolResultActivity(args: {
@@ -31,7 +32,7 @@ export async function recordToolResultActivity(args: {
 }
 
 export async function recordApprovalResolved(
-  runtime: ActivityRuntime,
+  runtime: TraceRuntime,
   approval: ApprovalHandoff
 ) {
   await recordRuntimeEvent(runtime.platform, runtime.context, {
@@ -43,7 +44,7 @@ export async function recordApprovalResolved(
 }
 
 export async function recordOfferResolved(
-  runtime: ActivityRuntime,
+  runtime: TraceRuntime,
   offer: OfferHandoff
 ) {
   await recordRuntimeEvent(runtime.platform, runtime.context, {
@@ -62,11 +63,6 @@ type ToolResultEvent = {
     | "approval.requested"
     | "file.saved"
     | "offer.requested"
-}
-
-type ActivityRuntime = {
-  platform: RuntimePlatform
-  context: RuntimeContext
 }
 
 function toolResultEvent(

@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { isSurfaceCommunicationTool } from "../../contracts/runtime"
+import { isSurfaceCommunicationTool } from "../../contracts/runtime/surface"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {

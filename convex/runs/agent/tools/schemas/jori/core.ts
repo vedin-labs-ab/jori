@@ -1,4 +1,4 @@
-import { finalProperty } from "../../../../../../contracts/runtime"
+import { finalProperty } from "../../../../../../contracts/runtime/tools"
 import { shareExpiry } from "../../../../../../contracts/shares/expiry"
 import { integrations as integrationEnum } from "../../../../../shared/integrations"
 import {

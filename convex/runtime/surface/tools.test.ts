@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { toolFinalDescription } from "../../../contracts/runtime"
+import { toolFinalDescription } from "../../../contracts/runtime/tools"
 import { activeSurfaceTools } from "./tools"
 
 test("exposes reply and reaction active surface tools", () => {

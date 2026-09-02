@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { withApprovalSchema } from "./approvals"
-import { toolFinalDescription } from "./runtime"
+import { toolFinalDescription } from "./runtime/tools"
 
 test("approval-wrapped tools use the shared final field", () => {
   const schema = withApprovalSchema({

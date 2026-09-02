@@ -1,5 +1,5 @@
 import { isRecord, type JsonObject, readStringArray } from "./json"
-import { finalProperty } from "./runtime"
+import { finalProperty } from "./runtime/tools"
 
 const approvalTtlSeconds = 30 * 60
 export const approvalTtlMs = approvalTtlSeconds * 1000

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest"
 import {
   fakeMutationCtx,
-  id,
   inserted,
   type Seed,
 } from "../../test/convex/conversations"
+import { id } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { startMessageRun } from "./data"
 
