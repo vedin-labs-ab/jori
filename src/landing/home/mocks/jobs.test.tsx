@@ -1,6 +1,12 @@
 /* @vitest-environment jsdom */
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { DemoWorkspaceProvider } from "../../demo/provider"
 import { Chores } from "./chores"
@@ -34,5 +40,7 @@ test("seeds the editor with the chase brief and files a job from it", async () =
 
   fireEvent.click(screen.getByRole("button", { name: "Create job" }))
 
-  expect(await screen.findAllByText("Chase overdue invoices")).toHaveLength(2)
+  await waitFor(() =>
+    expect(screen.getAllByText("Chase overdue invoices")).toHaveLength(2)
+  )
 })

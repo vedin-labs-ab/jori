@@ -16,6 +16,7 @@ import { grantOptions } from "../../demo/fixtures/people"
 import { demoPermissions, demoSkills } from "../../demo/fixtures/permissions"
 import { useDemoWorkspace } from "../../demo/workspace"
 import { Definition, Section, Sigil } from "../../section"
+import { NearViewport } from "../../viewport"
 
 // The editor's fields pull in TipTap, which dwarfs the page, and TipTap
 // needs a document, which the server has none of: the fields arrive on
@@ -59,11 +60,13 @@ export function Jobs() {
             who sees it, and where its runs are counted.
           </Definition>
         </dl>
-        <ClientOnly fallback={<EditorPlaceholder />}>
-          <Suspense fallback={<EditorPlaceholder />}>
-            <ChaseEditor />
-          </Suspense>
-        </ClientOnly>
+        <NearViewport className="min-w-0" fallback={<EditorPlaceholder />}>
+          <ClientOnly fallback={<EditorPlaceholder />}>
+            <Suspense fallback={<EditorPlaceholder />}>
+              <ChaseEditor />
+            </Suspense>
+          </ClientOnly>
+        </NearViewport>
       </div>
     </Section>
   )
@@ -89,8 +92,8 @@ function ChaseEditor() {
   })
   const [error, setError] = useState<string>()
   const folders = useMemo(() => folderRows(state), [state])
-  const create = () => {
-    const problem = actions.saveJob(values)
+  const create = async () => {
+    const problem = await actions.saveJob(values)
 
     if (problem === undefined) {
       toast.success(`Created ${values.name}.`)

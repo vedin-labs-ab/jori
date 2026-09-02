@@ -123,8 +123,8 @@ function useEditorForm(actions: DemoActions) {
       [open]
     ),
     openEditForm: useCallback((target: Job) => open(target), [open]),
-    save: () => {
-      const problem = actions.saveJob(values, job)
+    save: async () => {
+      const problem = await actions.saveJob(values, job)
 
       if (problem === undefined) {
         setIsOpen(false)

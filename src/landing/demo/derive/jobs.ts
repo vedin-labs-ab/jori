@@ -1,10 +1,6 @@
 import { getNextCronRunAt } from "@contracts/jobs/schedule/cron"
 import { type MoveSubject } from "@/shared/console/folders/types"
 import {
-  createJobArgs,
-  updateJobArgs,
-} from "@/shared/console/jobs/editor/save/args"
-import {
   type Job,
   type JobFilter,
   type JobFormValues,
@@ -16,6 +12,11 @@ import {
 import { jobSurface } from "../fixtures/jobs"
 import { demoPermissions } from "../fixtures/permissions"
 import { type FolderId, type JobId } from "../fixtures/types"
+
+/** The editor's save module, handed in by whoever loaded it: it carries
+ *  the instructions codec, which the page must not pay for until a job is
+ *  actually saved. */
+export type JobArgs = typeof import("@/shared/console/jobs/editor/save/args")
 
 export type JobFilters = {
   audience: AudienceFilter
@@ -52,15 +53,20 @@ type SaveResult = { job: Job } | { error: string }
  *  updated. */
 export function jobFromValues(
   values: JobFormValues,
-  options: { existing?: Job; id: JobId; at: number }
+  options: { args: JobArgs; existing?: Job; id: JobId; at: number }
 ): SaveResult {
   return options.existing === undefined
-    ? createdJob(values, options.id, options.at)
-    : updatedJob(values, options.existing, options.at)
+    ? createdJob(options.args, values, options.id, options.at)
+    : updatedJob(options.args, values, options.existing, options.at)
 }
 
-function createdJob(values: JobFormValues, id: JobId, at: number): SaveResult {
-  const result = createJobArgs(values, { permissions: demoPermissions })
+function createdJob(
+  args: JobArgs,
+  values: JobFormValues,
+  id: JobId,
+  at: number
+): SaveResult {
+  const result = args.createJobArgs(values, { permissions: demoPermissions })
 
   if ("error" in result) {
     return result
@@ -89,11 +95,12 @@ function createdJob(values: JobFormValues, id: JobId, at: number): SaveResult {
 }
 
 function updatedJob(
+  args: JobArgs,
   values: JobFormValues,
   existing: Job,
   at: number
 ): SaveResult {
-  const result = updateJobArgs(values, existing, {
+  const result = args.updateJobArgs(values, existing, {
     permissions: demoPermissions,
   })
 
@@ -119,7 +126,10 @@ function updatedJob(
   }
 }
 
-type SavedArgs = Exclude<ReturnType<typeof createJobArgs>, { error: string }>
+type SavedArgs = Exclude<
+  ReturnType<JobArgs["createJobArgs"]>,
+  { error: string }
+>
 type SavedTrigger = SavedArgs["args"]["trigger"]
 
 function projectTrigger(trigger: SavedTrigger, at: number): Job["trigger"] {

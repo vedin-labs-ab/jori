@@ -1,19 +1,28 @@
-import { type ReactElement } from "react"
+import { lazy, type ReactElement, Suspense } from "react"
 import {
   parseUsageDays,
   type UsageDays,
 } from "@/shared/console/folders/usage/types"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type FolderId } from "../fixtures/types"
 import { type DemoLocation } from "../navigation"
 import { FolderPage, RootFoldersPage } from "./folders"
 import { JobsPage } from "./jobs"
 import { FilesPage, StoresPage, TablesPage } from "./lists"
-import { FilePage } from "./materials/file"
-import { StorePage } from "./materials/store"
 import { TablePage } from "./materials/table"
 import { PlatformPage } from "./platform"
 import { RunsPage } from "./runs"
 import { UsagePage } from "./usage"
+
+// A store's editor and a file's viewer carry CodeMirror and the schema
+// builder, which dwarf the rest of the demo, so their pages arrive only
+// when a link leads to one.
+const StorePage = lazy(async () => ({
+  default: (await import("./materials/store")).StorePage,
+}))
+const FilePage = lazy(async () => ({
+  default: (await import("./materials/file")).FilePage,
+}))
 
 /** Each material surface: its list, and the page for one of its own. */
 const materialSurfaces: Record<
@@ -61,7 +70,13 @@ export function DemoPage({
     return <PlatformPage surface={surface} />
   }
 
-  return id === undefined ? <material.List /> : <material.Page id={id} />
+  return id === undefined ? (
+    <material.List />
+  ) : (
+    <Suspense fallback={<ConsoleListLoading />}>
+      <material.Page id={id} />
+    </Suspense>
+  )
 }
 
 /** Under /folders: the roots, the whole tree's usage, one folder, or that
