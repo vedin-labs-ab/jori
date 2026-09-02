@@ -1,4 +1,5 @@
 import { type ListFacet } from "../list/controls"
+import { type MaterialOwner } from "./cells/owner"
 
 type Owned = { ownerId?: string; ownerName?: string }
 
@@ -26,6 +27,19 @@ export function ownerFacet<Row extends Owned>(
     options,
     resolve: resolveOwner,
   }
+}
+
+/** How an owned row shows in an Owner cell, by the same rule the facet
+ *  labels it with — so filtering to an option keeps exactly the rows whose
+ *  cell reads that way. A row no person owns is Jori's own work. */
+export function materialOwner(
+  row: Owned & { ownerImage?: string }
+): MaterialOwner {
+  if (row.ownerId === undefined) {
+    return { kind: "jori" }
+  }
+
+  return { kind: "person", name: ownerLabel(row), image: row.ownerImage }
 }
 
 function resolveOwner(row: Owned) {

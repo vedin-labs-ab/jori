@@ -27,6 +27,8 @@ function folderRow(overrides: Record<string, unknown>) {
     hasContents: false,
     folderCount: 0,
     resourceCount: 0,
+    ownerId: "persons:owner",
+    ownerName: "Ada Lovelace",
     ...overrides,
   }
 }
@@ -47,12 +49,14 @@ test("root folders land in the same table as a folder's contents", () => {
     ],
   } as FolderRootsResult)
 
-  for (const header of ["Name", "Kind", "Items", "Updated"]) {
+  for (const header of ["Name", "Kind", "Owner", "Items", "Updated"]) {
     expect(screen.getByRole("columnheader", { name: header })).toBeDefined()
   }
 
   const root = screen.getByRole("link", { name: "Guides" })
   expect(root.getAttribute("href")).toBe("/folders/folder-1")
+  // The Owner column names whoever created the folder.
+  expect(screen.getByText("Ada Lovelace")).toBeDefined()
   expect(root.querySelector(".lucide-folder-dot")).not.toBeNull()
   // One combined number; the tooltip carries the breakdown.
   const items = screen.getByTitle("2 folders, 3 resources")

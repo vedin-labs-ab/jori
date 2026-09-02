@@ -12,25 +12,30 @@ import { countLabel } from "@/console/shared/count"
 import { type FacetEntry, type ListControls } from "../../shared/list/controls"
 import { ConsoleListTable } from "../../shared/list/frame"
 import { FilterHead, SortHead } from "../../shared/list/head"
+import { MaterialOwnerCell } from "../../shared/materials/cells/owner"
 import { folderIcon } from "../../shared/materials/folders"
+import { materialOwner } from "../../shared/materials/owners"
 import { absoluteTime, relativeTime, useNow } from "../../shared/time"
 import { useFolderRowDrag } from "../drag/state"
 import { type ListedFolder } from "../types"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
-/** The full-bleed Name/Kind/Items/Updated table both folder surfaces share:
- *  the /folders overview lists the root folders, a folder's page its
- *  contents. Cells carry a fixed height because rows differ in tallest
- *  content — a resource row's menu button outgrows a folder row's bare
- *  link — and mixed row heights read as a glitch. */
+/** The full-bleed table both folder surfaces share: the /folders overview
+ *  lists the root folders, a folder's page its contents. Identity columns
+ *  lead — what a row is, and whose it is — and the measures follow. Cells
+ *  carry a fixed height because rows differ in tallest content — a
+ *  resource row's menu button outgrows a folder row's bare link — and
+ *  mixed row heights read as a glitch. */
 export function FolderListTable({
   children,
   controls,
   kinds,
+  owners,
 }: {
   children: ReactNode
   controls: ListControls
   kinds: FacetEntry[]
+  owners: FacetEntry[]
 }) {
   return (
     <ConsoleListTable className="[&_td]:h-10">
@@ -38,6 +43,7 @@ export function FolderListTable({
         <TableRow>
           <SortHead controls={controls} label="Name" sortKey="name" />
           <FilterHead controls={controls} facets={kinds} label="Kind" />
+          <FilterHead controls={controls} facets={owners} label="Owner" />
           <SortHead controls={controls} label="Items" sortKey="items" />
           <SortHead controls={controls} label="Updated" sortKey="updated" />
           <TableHead className="w-10" />
@@ -50,7 +56,8 @@ export function FolderListTable({
 
 /** One folder row, wherever folders list: it links to the folder's page
  *  and drags like a sidebar row. A dotted icon marks a folder holding
- *  anything, matching the sidebar tree's cue. */
+ *  anything, matching the sidebar tree's cue, and the Owner cell shows
+ *  whoever made it. */
 export function FolderListRow({ folder }: { folder: ListedFolder }) {
   const drag = useFolderRowDrag("contents", folder.folderId, folder.name)
   const now = useNow(30_000)
@@ -78,6 +85,9 @@ export function FolderListRow({ folder }: { folder: ListedFolder }) {
         </Link>
       </TableCell>
       <TableCell className="text-muted-foreground">Folder</TableCell>
+      <TableCell>
+        <MaterialOwnerCell owner={materialOwner(folder)} />
+      </TableCell>
       <ItemsCell folder={folder} />
       <TableCell
         className="text-muted-foreground"

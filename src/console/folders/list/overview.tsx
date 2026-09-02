@@ -80,7 +80,10 @@ export function RootFolderList({
   onCreate: () => void
   roots: FolderRootsResult | undefined
 }) {
-  const list = useFolderListControls([])
+  const list = useFolderListControls({
+    folders: roots?.status === "ready" ? roots.folders : [],
+    resources: [],
+  })
 
   if (roots === undefined) {
     return (
@@ -122,9 +125,13 @@ export function RootFolderList({
   const visible = list.narrow(roots.folders)
 
   return (
-    <FolderListTable controls={list.controls} kinds={list.kinds}>
+    <FolderListTable
+      controls={list.controls}
+      kinds={list.kinds}
+      owners={list.owners}
+    >
       {visible.length === 0 ? (
-        <EmptyRow colSpan={5}>
+        <EmptyRow colSpan={6}>
           <FilterableEmptyState
             description="Folders organize the tables, stores, files, and automations your team shares."
             hasFilters

@@ -88,6 +88,30 @@ export async function personDisplay(
   }
 }
 
+/** Console rows with their owner's display attached, resolved once per
+ *  distinct person rather than once per row: a listing is usually a
+ *  handful of people over many rows, and every lookup reads that person's
+ *  identities and linked account. A row no person owns keeps an absent
+ *  name, which the console reads as Jori's own work. */
+export async function withOwnerDisplays<
+  Row extends { ownerId?: Id<"persons"> },
+>(ctx: QueryLikeCtx, rows: Row[]) {
+  const displays = new Map<Id<"persons">, { name?: string; image?: string }>()
+
+  for (const ownerId of new Set(rows.map((row) => row.ownerId))) {
+    if (ownerId !== undefined) {
+      displays.set(ownerId, await personDisplay(ctx, ownerId))
+    }
+  }
+
+  return rows.map((row) => {
+    const display =
+      row.ownerId === undefined ? undefined : displays.get(row.ownerId)
+
+    return { ...row, ownerName: display?.name, ownerImage: display?.image }
+  })
+}
+
 export function preferredPersonName(
   identities: Array<{ name?: string; provider: IdentityProvider }>
 ) {

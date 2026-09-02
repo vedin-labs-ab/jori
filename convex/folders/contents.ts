@@ -1,6 +1,7 @@
 import { type VisibilityMode } from "../../contracts/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { canSeeAutomation } from "../automations/access"
+import { withOwnerDisplays } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 import { filedTables } from "./filing"
@@ -26,6 +27,11 @@ export type FolderResource = {
   name: string
   visibility: VisibilityMode
   updatedAt: number
+  /** Who the row belongs to. Absent for the kinds no person owns — an
+   *  automation, or a file an agent run saved — which read as Jori's own. */
+  ownerId?: Id<"persons">
+  ownerName?: string
+  ownerImage?: string
   mimeType?: string
   size?: number
   status?: Doc<"automations">["status"]
@@ -60,7 +66,7 @@ export async function folderChildren(
     }
   }
 
-  return counted.sort(byName)
+  return await withOwnerDisplays(ctx, counted.sort(byName))
 }
 
 /** Direct children only, deliberately: a deep total would be neither cheap
@@ -93,6 +99,9 @@ async function countChild(
 
   return {
     ...summarizeFolder(child),
+    // A folder belongs to whoever made it, under the same field name its
+    // filed resources use, so one Owner column reads both row groups.
+    ownerId: child.createdBy,
     folderCount,
     resourceCount,
     hasContents: folderCount + resourceCount > 0,
@@ -184,11 +193,20 @@ export async function subtreeImpact(ctx: QueryLikeCtx, folder: Doc<"folders">) {
   }
 }
 
+/** A folder's listed resources. Owner displays are attached here rather
+ *  than inside sightedResources, which the child counts also run: counting
+ *  needs a length, not a name. */
 export async function folderResources(
   ctx: QueryLikeCtx,
   args: Viewer
 ): Promise<FolderResource[]> {
-  return await sightedResources(ctx, createSight(ctx, args), args.folderId)
+  const resources = await sightedResources(
+    ctx,
+    createSight(ctx, args),
+    args.folderId
+  )
+
+  return await withOwnerDisplays(ctx, resources)
 }
 
 async function sightedResources(
@@ -226,6 +244,7 @@ async function folderCollections(
         name: row.name,
         visibility: row.visibility.mode,
         updatedAt: row.updatedAt,
+        ownerId: row.ownerId,
       })
     }
   }
@@ -252,6 +271,8 @@ async function folderFiles(
         name: row.name,
         visibility: row.visibility.mode,
         updatedAt: row.updatedAt,
+        // An agent run saves a file without an owner; it reads as Jori's.
+        ownerId: row.ownerId,
         mimeType: row.mimeType,
         size: row.size,
       })
@@ -261,6 +282,8 @@ async function folderFiles(
   return listed
 }
 
+/** Automations carry no owner: a shared one runs as the organization, so
+ *  the listing shows every automation as Jori's own work. */
 async function folderAutomations(
   ctx: QueryLikeCtx,
   sight: Sight,

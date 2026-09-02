@@ -5,6 +5,7 @@ import {
   type ListFacet,
   useListControls,
 } from "../../shared/list/controls"
+import { ownerFacet } from "../../shared/materials/owners"
 import {
   type FolderResource,
   type ListedFolder,
@@ -15,12 +16,20 @@ import {
  *  resources both carry a name, a time, and a kind. */
 type FolderListEntry = ListedFolder | FolderResource
 
-/** Header controls for the shared folder table: name and time sorts plus a
- *  kind facet spanning Folder and whatever resource kinds are listed. The
- *  two row groups apply separately so subfolders keep leading. */
-export function useFolderListControls(resources: readonly FolderResource[]) {
+/** Header controls for the shared folder table: name and time sorts, a
+ *  kind facet spanning Folder and whatever resource kinds are listed, and
+ *  an owner facet over both groups at once — one column filters subfolders
+ *  and filed resources alike. The two row groups apply separately so
+ *  subfolders keep leading. */
+export function useFolderListControls(listed: {
+  folders: readonly ListedFolder[]
+  resources: readonly FolderResource[]
+}) {
   const config: ListConfig<FolderListEntry> = {
-    facets: { kind: kindFacet(resources) },
+    facets: {
+      kind: kindFacet(listed.resources),
+      owner: ownerFacet([...listed.folders, ...listed.resources]),
+    },
     sorts: {
       name: (entry) => entry.name,
       // Resources all rank alike, so within their group an items sort
@@ -35,6 +44,7 @@ export function useFolderListControls(resources: readonly FolderResource[]) {
   return {
     controls,
     kinds: facetEntries(config, ["kind"]),
+    owners: facetEntries(config, ["owner"]),
     narrow<Row extends FolderListEntry>(rows: readonly Row[]): Row[] {
       // apply only filters and reorders, so the rows keep their type.
       return controls.apply(rows) as Row[]

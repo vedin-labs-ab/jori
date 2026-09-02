@@ -20,6 +20,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { MaterialOwnerCell } from "../../shared/materials/cells/owner"
+import { materialOwner } from "../../shared/materials/owners"
 import { absoluteTime, relativeTime, useNow } from "../../shared/time"
 import { VisibilityMark } from "../../shared/visibility/badge"
 import { type ResourceDragPayload } from "../drag/plan"
@@ -62,6 +64,9 @@ export function ResourceListRow({
           {resourcePresentation(resource).label}
           <ResourceStatusMark status={resource.status} />
         </span>
+      </TableCell>
+      <TableCell>
+        <MaterialOwnerCell owner={materialOwner(resource)} />
       </TableCell>
       {/* Resources hold nothing, so the Items column carries a quiet dash —
           an empty cell under a sortable header would read as missing data. */}
