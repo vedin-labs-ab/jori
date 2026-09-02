@@ -1,5 +1,4 @@
 import { type JsonSchemaObject } from "@contracts/schema/validate"
-import { useMutation } from "convex/react"
 import { lazy, type ReactNode, Suspense, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import { FieldError } from "@/components/ui/field"
@@ -11,13 +10,19 @@ import {
   conflictMessage,
   isVersionConflict,
 } from "@/shared/console/materials/conflict"
-import { type StoreDetail } from "@/shared/console/stores/types"
 import { scrollFade } from "@/shared/fade"
-import { api } from "../../../../convex/_generated/api"
+import { type StoreDetail } from "../types"
 import { useValueAutosave, type ValueSaveOutcome } from "./autosave"
 import { ValueFields } from "./fields"
 import { useValueEditor, type ValueEditor, type ValueEditorView } from "./state"
 import { StoreToolbar } from "./toolbar"
+
+/** How the store's value is written: the whole value, against the
+ *  version it was edited from. */
+export type ValueWrite = (
+  value: unknown,
+  expectedVersion: number
+) => Promise<unknown>
 
 /** CodeMirror loads only once the code view is on screen, keeping it out
  *  of the console bundle and the server build. */
@@ -33,12 +38,14 @@ const Mirror = lazy(() =>
  *  the store toolbar too, so the view toggle sits in the header and the
  *  meta carries the save status; there is nothing to press. */
 export function ValueEditorSection({
-  organizationId,
+  onWrite,
   schema,
   store,
   tools,
 }: {
-  organizationId: string
+  /** Writes the value wholesale against the version the editor last saw;
+   *  a rejection that is a version conflict reseeds from upstream. */
+  onWrite: ValueWrite
   /** The store's schema, which the form is built from — the editor only
    *  renders for a store that has one. */
   schema: JsonSchemaObject
@@ -46,7 +53,6 @@ export function ValueEditorSection({
   /** Toolbar actions after the view toggle: schema, copy. */
   tools: ReactNode
 }) {
-  const write = useMutation(api.stores.console.writeValue)
   const editor = useValueEditor({
     hasValue: store.version > 0,
     schema,
@@ -60,14 +66,7 @@ export function ValueEditorSection({
   )
 
   performRef.current = () =>
-    saveValue({
-      editor,
-      lastSavedRef,
-      organizationId,
-      store,
-      versionRef,
-      write,
-    })
+    saveValue({ editor, lastSavedRef, onWrite, versionRef })
 
   const autosave = useValueAutosave(() => performRef.current())
 
@@ -98,22 +97,13 @@ export function ValueEditorSection({
 async function saveValue({
   editor,
   lastSavedRef,
-  organizationId,
-  store,
+  onWrite,
   versionRef,
-  write,
 }: {
   editor: ValueEditor
   lastSavedRef: { current: string }
-  organizationId: string
-  store: StoreDetail
+  onWrite: ValueWrite
   versionRef: { current: number }
-  write: (args: {
-    organizationId: string
-    storeId: StoreDetail["storeId"]
-    value: unknown
-    expectedVersion: number
-  }) => Promise<unknown>
 }): Promise<ValueSaveOutcome> {
   const result = editor.submit()
 
@@ -128,12 +118,7 @@ async function saveValue({
   }
 
   try {
-    await write({
-      organizationId,
-      storeId: store.storeId,
-      value: result.value,
-      expectedVersion: versionRef.current,
-    })
+    await onWrite(result.value, versionRef.current)
     versionRef.current += 1
     lastSavedRef.current = serialized
 

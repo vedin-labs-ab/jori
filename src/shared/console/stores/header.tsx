@@ -3,7 +3,7 @@ import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
 } from "@/shared/console/layout"
-import { type StoreDetail } from "@/shared/console/stores/types"
+import { type StoreDetail } from "./types"
 
 /** The header keeps only the primary actions; everything about the store
  *  itself hangs off its name in the breadcrumb. */

@@ -1,4 +1,3 @@
-import { useMutation } from "convex/react"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -13,10 +12,13 @@ import {
 } from "@/components/ui/dialog"
 import { readErrorMessage } from "@/shared/console/error"
 import { DialogForm } from "@/shared/console/materials/form"
-import { type StoreDetail } from "@/shared/console/stores/types"
-import { api } from "../../../../convex/_generated/api"
+import { type StoreDetail } from "../types"
 import { SchemaEditorSection } from "./editor"
 import { useSchemaEditor } from "./state"
+
+/** How a schema change is persisted: the new schema, or null to remove
+ *  the constraint. A rejection's message shows under the editor. */
+export type SchemaWrite = (schema: unknown) => Promise<unknown>
 
 /** View and edit the store's schema in place. The schema is an optional
  *  constraint: saving one makes every value write satisfy it, removing it
@@ -26,11 +28,11 @@ import { useSchemaEditor } from "./state"
  *  under the editor so the person can fix the value or the schema. */
 export function StoreSchemaDialog({
   onOpenChange,
-  organizationId,
+  onWrite,
   store,
 }: {
   onOpenChange: (isOpen: boolean) => void
-  organizationId: string
+  onWrite: SchemaWrite
   store: StoreDetail | undefined
 }) {
   return (
@@ -39,7 +41,7 @@ export function StoreSchemaDialog({
         {store === undefined ? null : (
           <SchemaDialogForm
             onClose={() => onOpenChange(false)}
-            organizationId={organizationId}
+            onWrite={onWrite}
             store={store}
           />
         )}
@@ -50,15 +52,15 @@ export function StoreSchemaDialog({
 
 function SchemaDialogForm({
   onClose,
-  organizationId,
+  onWrite,
   store,
 }: {
   onClose: () => void
-  organizationId: string
+  onWrite: SchemaWrite
   store: StoreDetail
 }) {
   const editor = useSchemaEditor(store.schema)
-  const save = useSchemaSave(organizationId, store, editor, onClose)
+  const save = useSchemaSave(onWrite, editor, onClose)
   const hasSchema = store.schema !== undefined
   const isArchived = store.archivedAt !== undefined
   const isSaving = save.saving !== undefined
@@ -114,19 +116,17 @@ function SchemaDialogForm({
  *  backend rejecting the schema or the current value violating it — attach
  *  under the editor rather than toasting. */
 function useSchemaSave(
-  organizationId: string,
-  store: StoreDetail,
+  onWrite: SchemaWrite,
   editor: ReturnType<typeof useSchemaEditor>,
   onClose: () => void
 ) {
-  const writeSchema = useMutation(api.stores.console.writeSchema)
   const [saving, setSaving] = useState<"remove" | "save">()
 
   async function write(schema: unknown, success: string) {
     setSaving(schema === null ? "remove" : "save")
 
     try {
-      await writeSchema({ organizationId, storeId: store.storeId, schema })
+      await onWrite(schema)
       toast.success(success)
       onClose()
     } catch (error) {
