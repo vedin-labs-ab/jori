@@ -2,6 +2,7 @@ import { useRouterState } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleSidebar } from "@/shared/console/shell/navigation"
+import { mainContentId, SkipToContent } from "@/shared/skip"
 import { ConsoleFolderDrag } from "../folders/drag/context"
 import { SidebarFolders } from "../folders/section"
 import { SidebarUserButton } from "./account"
@@ -19,7 +20,9 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
     // One drag context above both panes, so folder-page rows can drop
     // onto the sidebar tree and vice versa. Renders no DOM of its own.
     <ConsoleFolderDrag>
+      <SkipToContent />
       <ConsoleFrame
+        contentId={mainContentId}
         pathname={pathname}
         sidebar={
           <ConsoleSidebar

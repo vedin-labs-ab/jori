@@ -52,6 +52,17 @@ vi.mock("@/shared/console/shell/navigation", () => ({
 
 afterEach(cleanup)
 
+test("opens on a skip link pointing at the main element", () => {
+  render(<ConsoleShell>Content</ConsoleShell>)
+
+  const skip = screen.getByRole("link", { name: "Skip to content" })
+  const target = skip.getAttribute("href")?.replace("#", "")
+
+  expect(target).toBeTruthy()
+  expect(document.querySelector("main")?.id).toBe(target)
+  expect(document.querySelector("main")?.getAttribute("tabindex")).toBe("-1")
+})
+
 test("keeps the sidebar and header up when the page throws", () => {
   function Broken(): never {
     throw new Error("Run `status` is missing")

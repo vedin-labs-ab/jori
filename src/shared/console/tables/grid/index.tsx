@@ -12,7 +12,7 @@ import {
 } from "../types"
 import { type CommitCell } from "./cell"
 import { GridRow } from "./row"
-import { useRowWindow } from "./scroll"
+import { type GridRect, useRowWindow } from "./scroll"
 
 /** The table's rows as a full-bleed spreadsheet grid: a number/select
  *  gutter, typed column headers that open their column's details, inline
@@ -26,6 +26,7 @@ export function RowGrid({
   columns,
   disabled,
   freshRowId,
+  initialRect,
   isExhausted,
   isLoading,
   isLoadingMore,
@@ -45,6 +46,8 @@ export function RowGrid({
   columns: TableColumn[]
   disabled: boolean
   freshRowId: TableRowData["rowId"] | undefined
+  /** The box to assume before measuring one; see useRowWindow. */
+  initialRect?: GridRect
   isExhausted: boolean
   isLoading: boolean
   isLoadingMore: boolean
@@ -63,6 +66,7 @@ export function RowGrid({
 }) {
   const virtual = useRowWindow({
     freshRowId,
+    initialRect,
     isExhausted,
     isLoadingMore,
     loadMore,

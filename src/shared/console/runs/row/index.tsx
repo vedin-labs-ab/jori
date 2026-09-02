@@ -1,5 +1,5 @@
 import { Timer } from "lucide-react"
-import { memo, type ReactNode, Suspense, useEffect, useState } from "react"
+import { memo, type ReactNode, Suspense, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatDuration, relativeTime } from "../../time"
 import { RelativeTime } from "../details"
@@ -39,7 +39,7 @@ export const ExecutionRow = memo(function ExecutionRow({
   showAudience,
   stop,
 }: RunRowSlots & {
-  /** Deep links (billing receipts, /runs?run=...) land with the row open. */
+  /** Whether the row opens on mount; the list decides which row does. */
   defaultOpen?: boolean
   execution: ExecutionItem
   now: number
@@ -51,12 +51,6 @@ export const ExecutionRow = memo(function ExecutionRow({
     execution.status === "queued" || execution.status === "running"
   const approvalIndicator = actionApprovalIndicator(execution, now)
   const offerIndicator = actionOfferIndicator(execution, now)
-
-  useEffect(() => {
-    if (defaultOpen) {
-      document.getElementById(execution.id)?.scrollIntoView({ block: "center" })
-    }
-  }, [defaultOpen, execution.id])
 
   return (
     <RunRowFrame id={execution.id}>

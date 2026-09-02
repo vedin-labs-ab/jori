@@ -83,6 +83,10 @@ export function FolderDragProvider({
         <DndContext
           accessibility={{ screenReaderInstructions }}
           collisionDetection={pointerWithin}
+          // dnd-kit numbers its contexts from a module counter, which a
+          // server and its client count differently; a fixed id keeps
+          // the rows' aria-describedby the same on both.
+          id="folders"
           sensors={sensors}
           {...drag.handlers}
         >

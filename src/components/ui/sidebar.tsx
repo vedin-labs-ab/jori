@@ -41,6 +41,11 @@ type SidebarContextProps = {
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
 
 function storedSidebarOpen() {
+  // A server render has no storage to read; the client reads it on mount.
+  if (typeof window === "undefined") {
+    return undefined
+  }
+
   const stored = window.localStorage.getItem(SIDEBAR_STORAGE_KEY)
   return stored === null ? undefined : stored === "true"
 }
@@ -79,13 +84,15 @@ function SidebarProvider({
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value
+
+      // A controlled sidebar belongs to its host, so only the provider's
+      // own state is the preference worth remembering across page loads.
       if (setOpenProp) {
         setOpenProp(openState)
-      } else {
-        _setOpen(openState)
+        return
       }
 
-      // Persist the preference across page loads.
+      _setOpen(openState)
       window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(openState))
     },
     [setOpenProp, open]

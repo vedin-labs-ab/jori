@@ -18,18 +18,25 @@ const overscanRows = 12
  *  size, so a resting window never chain-loads. */
 const fetchAheadRows = 100
 
+/** The box the grid assumes before it can measure one. Nothing mounts
+ *  into a box of no size, so a server render, which never measures,
+ *  places rows only when handed a rect to fill. */
+export type GridRect = { height: number; width: number }
+
 /** Windowed rendering over the loaded rows, wired to incremental loading:
  *  only the visible rows plus overscan mount, the next page is requested
  *  before the window reaches the end of the loaded ones, and a freshly
  *  inserted row is scrolled into view so its spotlight can land. */
 export function useRowWindow({
   freshRowId,
+  initialRect,
   isExhausted,
   isLoadingMore,
   loadMore,
   rows,
 }: {
   freshRowId: TableRow["rowId"] | undefined
+  initialRect?: GridRect
   isExhausted: boolean
   isLoadingMore: boolean
   loadMore: () => void
@@ -40,6 +47,7 @@ export function useRowWindow({
     count: rows.length,
     estimateSize: () => rowHeight,
     getScrollElement: () => scrollRef.current,
+    initialRect,
     overscan: overscanRows,
   })
   const items = virtualizer.getVirtualItems()
