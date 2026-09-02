@@ -45,7 +45,7 @@ export function MaterialOwnerCell({
         {owner.image === undefined ? null : (
           <AvatarImage alt="" src={owner.image} />
         )}
-        <AvatarFallback className={compact ? "text-[9px]" : "text-[10px]"}>
+        <AvatarFallback className={compact ? "text-[9px]" : undefined}>
           {initials(owner.name)}
         </AvatarFallback>
       </Avatar>
