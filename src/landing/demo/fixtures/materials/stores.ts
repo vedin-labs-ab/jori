@@ -8,6 +8,8 @@ import { type DemoStore } from "../types"
  *  knows about the rollout, and what the renewals job is watching. Both
  *  sit under a plain-shape schema, so the form edits the value and the
  *  builder edits the schema. */
+export const watchStoreId = demoId("collections", "watch")
+
 export function demoStores(now: number): DemoStore[] {
   return [
     {

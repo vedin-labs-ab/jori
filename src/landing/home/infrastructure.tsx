@@ -14,7 +14,7 @@ export function Infrastructure() {
         <>
           Choose where your data lives, US or EU. Payments settle through{" "}
           <a
-            className="inline-block align-middle transition-opacity hover:opacity-70"
+            className="relative -top-[0.1em] inline-block align-middle transition-opacity hover:opacity-70"
             href="https://stripe.com"
             rel="noreferrer"
             target="_blank"

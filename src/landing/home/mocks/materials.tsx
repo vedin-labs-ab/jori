@@ -1,12 +1,24 @@
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DemoConsole } from "../../demo/console"
+import { notesFileId } from "../../demo/fixtures/materials/files"
+import { watchStoreId } from "../../demo/fixtures/materials/stores"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { useDemoNavigation } from "../../demo/navigation"
 import { Definition, Jori, Section } from "../../section"
 
-/** The materials pillar: the real grid over the table the hero's job keeps,
- *  under the crumb that says where it lives. */
+/** One of each material the hero's job touches, at the page the console
+ *  gives it, so the switch above the frame is a shortcut into the same
+ *  console the crumb inside it walks. */
+const pages = [
+  { label: "Customer renewals", path: `/tables/${renewalsTableId}` },
+  { label: "Renewals watch state", path: `/stores/${watchStoreId}` },
+  { label: "Release notes 2.14.md", path: `/files/${notesFileId}` },
+]
+
+/** The materials pillar: the console's own page for a table, a store, and
+ *  a file, one at a time, under the crumb that says where each lives. */
 export function Materials() {
-  const console = useDemoNavigation(`/tables/${renewalsTableId}`)
+  const console = useDemoNavigation(pages[0].path)
 
   return (
     <Section
@@ -33,11 +45,24 @@ export function Materials() {
           saves what they make and marks it as their own.
         </Definition>
       </dl>
-      {/* The grid keeps the product's column widths, so it takes the full
+      {/* The pages keep the product's widths, so the frame takes the full
           width under the definitions rather than a column beside them:
           every column of the table the hero's job keeps stays in view. */}
+      <Tabs
+        className="mt-12"
+        onValueChange={(path) => console.navigation.navigate(path)}
+        value={console.location.pathname}
+      >
+        <TabsList>
+          {pages.map((page) => (
+            <TabsTrigger key={page.path} value={page.path}>
+              {page.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
       <DemoConsole
-        className="mt-12 h-[24rem]"
+        className="mt-4 h-[26rem]"
         navigation={console}
         sidebar={false}
       />
