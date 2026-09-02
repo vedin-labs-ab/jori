@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { AdvancedSettings, DialogForm } from "@/shared/console/materials/form"
 import { FolderField } from "../../folders/field"
-import { VisibilityField } from "../../shared/visibility/field"
+import { OrganizationVisibilityField } from "../../shared/visibility/field"
 import { FileDropzone } from "./dropzone"
 import { UploadList } from "./list"
 import { type FileUpload, pendingUploads, useFileUpload } from "./queue"
@@ -90,7 +90,7 @@ function UploadFields({
           organizationId={organizationId}
           value={upload.folderId}
         />
-        <VisibilityField
+        <OrganizationVisibilityField
           id="file-upload-visibility"
           noun="file"
           onChange={upload.setVisibility}

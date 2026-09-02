@@ -13,7 +13,7 @@ import {
 import { DialogForm } from "@/shared/console/materials/form"
 import { api } from "../../../../../convex/_generated/api"
 import { FolderField } from "../../../folders/field"
-import { VisibilityField } from "../../../shared/visibility/field"
+import { OrganizationVisibilityField } from "../../../shared/visibility/field"
 import { getJobScopeConflict } from "../../access"
 import { type JobPolicyPermissions } from "../../access/policy"
 import { type Job, type JobFormValues } from "../../types"
@@ -159,7 +159,7 @@ function JobDialogFields(props: DialogFieldsProps) {
         onValueChange={props.actions.updateName}
         value={props.values.name}
       />
-      <VisibilityField
+      <OrganizationVisibilityField
         help="Only-me jobs run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
         id="job-visibility"
         noun="job"

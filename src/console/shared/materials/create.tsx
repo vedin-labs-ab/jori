@@ -18,7 +18,7 @@ import {
   MaterialNameField,
 } from "@/shared/console/materials/fields"
 import { AdvancedSettings, DialogForm } from "@/shared/console/materials/form"
-import { VisibilityField } from "../visibility/field"
+import { OrganizationVisibilityField } from "../visibility/field"
 
 /** The create flow every material kind shares: name, description, and the
  *  advanced folder and sharing fields. Only the noun, the blurb under the
@@ -93,7 +93,7 @@ export function CreateMaterialDialog({
               onChange: form.setFolderId,
               value: form.folderId,
             })}
-            <VisibilityField
+            <OrganizationVisibilityField
               id={`${idPrefix}-visibility`}
               noun={noun}
               onChange={form.setVisibility}
