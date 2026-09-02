@@ -1,13 +1,12 @@
-import { useEffect, useMemo } from "react"
+import { useEffect } from "react"
 import { toast } from "sonner"
 import { FolderPickerField } from "@/shared/console/folders/field"
 import { type CreationRequest } from "@/shared/console/folders/types"
 import { CreateMaterialDialog } from "@/shared/console/materials/dialogs/create"
-import { useRetained } from "@/shared/console/retain"
-import { folderRows } from "../derive/folders"
+import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { useJobEditor } from "../editor"
 import { grantOptions } from "../fixtures/people"
-import { useDemoWorkspace } from "../workspace"
+import { useDemoFolders, useDemoWorkspace } from "../workspace"
 
 const blurbs = {
   table: "Name it now — define its columns right in the table.",
@@ -63,8 +62,8 @@ export function DemoCreateMaterialDialog({
   /** Open while set; the last one is kept through the close animation. */
   request: CreationRequest | undefined
 }) {
-  const { actions, state } = useDemoWorkspace()
-  const folders = useMemo(() => folderRows(state), [state])
+  const { actions } = useDemoWorkspace()
+  const folders = useDemoFolders()
   const retained = useRetained(request)
 
   return (
@@ -83,11 +82,7 @@ export function DemoCreateMaterialDialog({
       isOpen={request !== undefined}
       key={`${kind}:${retained?.folderId}`}
       noun={kind}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
+      onOpenChange={closeOnDismiss(onClose)}
     />
   )
 }

@@ -40,6 +40,7 @@ export function useMaterialListing<Row extends { name: string }>({
   const selection = useRowSelection({ identify, rows: pagination.visibleRows })
 
   return {
+    config,
     controls: resettingControls(controls, pagination.reset),
     hasFilters,
     pagination,

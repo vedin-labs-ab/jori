@@ -1,3 +1,4 @@
+import { toolSurfaceLabel } from "@contracts/integrations"
 import {
   getToolPermission,
   summarizeToolCapabilities,
@@ -107,7 +108,7 @@ export function tools(
 ): ExecutionDetail {
   const detailGroups = groups.map(([type, names]) => ({
     type,
-    label: surfaceLabel(type),
+    label: toolSurfaceLabel(type),
     tools: names.map(capability),
   }))
 
@@ -139,14 +140,4 @@ function groupLabel(group: { label: string; tools: ExecutionDetailTool[] }) {
   ]
     .filter((part) => part !== undefined)
     .join(" · ")
-}
-
-function surfaceLabel(surface: string) {
-  if (surface === "jori") {
-    return "Jori"
-  }
-
-  return surface === "github"
-    ? "GitHub"
-    : `${surface[0].toUpperCase()}${surface.slice(1)}`
 }

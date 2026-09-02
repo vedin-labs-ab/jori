@@ -1,6 +1,7 @@
-import { createContext, useContext } from "react"
-import { type DemoState } from "./state"
+import { createContext, useContext, useMemo } from "react"
+import { folderRows } from "./derive/folders"
 import { type DemoActions } from "./state/actions"
+import { type DemoState } from "./state/types"
 
 type DemoWorkspace = {
   actions: DemoActions
@@ -19,4 +20,12 @@ export function useDemoWorkspace() {
   }
 
   return workspace
+}
+
+/** The workspace's folders as the console's tree rows, derived once per
+ *  state. */
+export function useDemoFolders() {
+  const { state } = useDemoWorkspace()
+
+  return useMemo(() => folderRows(state), [state])
 }

@@ -10,6 +10,7 @@ import {
   useRowSelection,
 } from "@/shared/console/list/selection"
 import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { AddRowDialog } from "@/shared/console/tables/add"
 import { rowNoun, useRowAdding } from "@/shared/console/tables/adding"
 import { useColumnSheetForm } from "@/shared/console/tables/column"
@@ -84,11 +85,7 @@ function useGridState(table: TableDetail) {
   )
   const adding = useRowAdding(table.columns, insertRow, () => setDialog("add"))
   const columnForm = useColumnSheetForm({
-    onOpenChange: (open) => {
-      if (!open) {
-        setColumnSheet(undefined)
-      }
-    },
+    onOpenChange: closeOnDismiss(() => setColumnSheet(undefined)),
     onSave: (columns) => {
       actions.setColumns(table.tableId, columns)
 
@@ -178,11 +175,7 @@ function GridDialogs({ grid, table }: { grid: GridState; table: TableDetail }) {
     <>
       <ColumnSheet
         form={grid.columnForm}
-        onOpenChange={(open) => {
-          if (!open) {
-            grid.setColumnSheet(undefined)
-          }
-        }}
+        onOpenChange={closeOnDismiss(() => grid.setColumnSheet(undefined))}
         state={grid.columnSheet}
         table={table}
       />

@@ -71,7 +71,7 @@ export function TablesPage() {
         query={listing.query}
       />
       <TableList
-        config={tableListConfig(folders, tables)}
+        config={listing.config}
         controls={listing.controls}
         folders={folders}
         hasFilters={listing.hasFilters}
@@ -130,7 +130,7 @@ export function StoresPage() {
         query={listing.query}
       />
       <StoreList
-        config={storeListConfig(folders, stores)}
+        config={listing.config}
         controls={listing.controls}
         folders={folders}
         hasFilters={listing.hasFilters}
@@ -191,7 +191,7 @@ export function FilesPage() {
         />
       </ConsoleHeaderActions>
       <FileTable
-        config={fileListConfig(folders, files)}
+        config={listing.config}
         controls={listing.controls}
         files={listing.pagination.visibleRows}
         folders={folders}

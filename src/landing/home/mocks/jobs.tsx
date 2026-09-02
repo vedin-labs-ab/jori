@@ -1,5 +1,5 @@
 import { ClientOnly } from "@tanstack/react-router"
-import { lazy, Suspense, useMemo, useState } from "react"
+import { lazy, Suspense, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -8,13 +8,12 @@ import { jobPolicyKey } from "@/shared/console/jobs/access/policy"
 import { jobFormValues } from "@/shared/console/jobs/editor/save"
 import { type JobFormValues } from "@/shared/console/jobs/types"
 import { DialogForm } from "@/shared/console/materials/form"
-import { folderRows } from "../../demo/derive/folders"
 import { DemoEventFields } from "../../demo/dialogs/editor"
 import { DemoAudience } from "../../demo/dialogs/visibility"
 import { jobId } from "../../demo/fixtures/jobs"
 import { grantOptions } from "../../demo/fixtures/people"
 import { demoPermissions, demoSkills } from "../../demo/fixtures/permissions"
-import { useDemoWorkspace } from "../../demo/workspace"
+import { useDemoFolders, useDemoWorkspace } from "../../demo/workspace"
 import { Definition, Section, Sigil } from "../../section"
 import { NearViewport } from "../../viewport"
 
@@ -91,7 +90,7 @@ function ChaseEditor() {
     }
   })
   const [error, setError] = useState<string>()
-  const folders = useMemo(() => folderRows(state), [state])
+  const folders = useDemoFolders()
   const create = async () => {
     const problem = await actions.saveJob(values)
 

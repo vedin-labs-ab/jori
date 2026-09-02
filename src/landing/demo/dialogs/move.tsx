@@ -1,10 +1,8 @@
-import { useMemo } from "react"
 import { MoveDialog } from "@/shared/console/folders/dialogs/move"
 import { type MoveSubject } from "@/shared/console/folders/types"
-import { folderRows } from "../derive/folders"
 import { type FolderId } from "../fixtures/types"
 import { type DemoActions } from "../state/actions"
-import { useDemoWorkspace } from "../workspace"
+import { useDemoFolders, useDemoWorkspace } from "../workspace"
 
 /** The move dialog over the workspace: a folder re-parents, filed
  *  resources re-file, and the move lands at once. */
@@ -15,8 +13,8 @@ export function DemoMoveDialog({
   onOpenChange: (open: boolean) => void
   subject: MoveSubject | undefined
 }) {
-  const { actions, state } = useDemoWorkspace()
-  const folders = useMemo(() => folderRows(state), [state])
+  const { actions } = useDemoWorkspace()
+  const folders = useDemoFolders()
 
   return (
     <MoveDialog

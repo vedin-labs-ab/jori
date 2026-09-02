@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { FolderTree } from "@/shared/console/folders/section"
 import { activeFolderId } from "@/shared/console/folders/tree"
 import {
@@ -7,19 +7,17 @@ import {
 } from "@/shared/console/folders/types"
 import { ConsoleSidebar } from "@/shared/console/shell/navigation"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
-import { folderRows } from "./derive/folders"
 import { DemoCreationDialogs } from "./dialogs/creation"
 import { DemoFolderDialogs } from "./dialogs/folders"
 import { useDemoExpansion } from "./expansion"
-import { useDemoWorkspace } from "./workspace"
+import { useDemoFolders } from "./workspace"
 
 const organization = { name: "Copperline" }
 
 /** The console's sidebar over the workspace: Copperline at its head, the
  *  navigation, and the folder tree with the dialogs its rows raise. */
 export function DemoSidebar({ pathname }: { pathname: string }) {
-  const { state } = useDemoWorkspace()
-  const folders = useMemo(() => folderRows(state), [state])
+  const folders = useDemoFolders()
   const expansion = useDemoExpansion(activeFolderId(pathname), folders)
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const [creation, setCreation] = useState<CreationRequest>()

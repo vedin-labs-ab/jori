@@ -19,12 +19,11 @@ import { jobPolicyKey } from "@/shared/console/jobs/access/policy"
 import { jobFormValues } from "@/shared/console/jobs/editor/save"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
 import { useRetainedMount } from "@/shared/console/retain"
-import { folderRows } from "../derive/folders"
 import { JobEditorContext } from "../editor"
 import { grantOptions } from "../fixtures/people"
 import { demoPermissions, demoSkills } from "../fixtures/permissions"
 import { type DemoActions } from "../state/actions"
-import { useDemoWorkspace } from "../workspace"
+import { useDemoFolders, useDemoWorkspace } from "../workspace"
 
 // The dialog pulls in the TipTap editor, which dwarfs every page using it.
 // Loading it lazily keeps the editor out of the page's own chunk.
@@ -38,7 +37,7 @@ const policyKey = jobPolicyKey(demoPermissions)
 /** One job editor for the whole page, opened from wherever a job is: the
  *  console's dialog over the workspace, mounted on first open. */
 export function DemoJobEditor({ children }: { children: ReactNode }) {
-  const { actions, state } = useDemoWorkspace()
+  const { actions } = useDemoWorkspace()
   const form = useEditorForm(actions)
   const isMounted = useRetainedMount(form.isOpen)
   const editor = useMemo(
@@ -48,7 +47,7 @@ export function DemoJobEditor({ children }: { children: ReactNode }) {
     }),
     [form.openCreateForm, form.openEditForm]
   )
-  const folders = useMemo(() => folderRows(state), [state])
+  const folders = useDemoFolders()
 
   return (
     <JobEditorContext.Provider value={editor}>

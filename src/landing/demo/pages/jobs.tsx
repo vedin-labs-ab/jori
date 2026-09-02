@@ -13,6 +13,7 @@ import {
 import { audienceFilterOptions } from "@/shared/console/list/audience"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { useClientPagination } from "@/shared/console/list/pagination"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { useNow } from "@/shared/console/time"
 import {
   filterJobs,
@@ -81,11 +82,7 @@ export function JobsPage() {
       />
       <ConsoleListPager pagination={pagination} />
       <DemoMoveDialog
-        onOpenChange={(open) => {
-          if (!open) {
-            setMoving(undefined)
-          }
-        }}
+        onOpenChange={closeOnDismiss(() => setMoving(undefined))}
         subject={moving === undefined ? undefined : jobMoveSubject(moving)}
       />
     </ConsolePageLayout>
