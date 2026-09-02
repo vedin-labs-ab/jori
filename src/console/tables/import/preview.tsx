@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { countLabel } from "@/shared/console/count"
+import { columnTypeOptions } from "@/shared/console/tables/draft"
 import { scrollFadeX } from "@/shared/fade"
-import { columnTypeOptions } from "../draft"
 import { type CsvRow, type CsvRowIssue, type CsvTablePlan } from "./infer"
 
 const previewRowLimit = 5

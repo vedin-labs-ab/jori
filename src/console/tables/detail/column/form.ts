@@ -2,29 +2,31 @@ import { useMutation } from "convex/react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { showErrorToast } from "@/shared/console/error"
-import { api } from "../../../../../convex/_generated/api"
 import {
   appendColumn,
   type ColumnDraft,
   editColumn,
   newColumnDraft,
   removeColumn,
-} from "../../draft"
-import { type TableColumn, type TableDetail } from "../../types"
+} from "@/shared/console/tables/draft"
+import {
+  type ColumnSheetForm,
+  type ColumnSheetState,
+} from "@/shared/console/tables/sheet"
+import {
+  type TableColumn,
+  type TableDetail,
+} from "@/shared/console/tables/types"
+import { api } from "../../../../../convex/_generated/api"
 
-/** What the column sheet shows: a new column being created, or an existing
- *  column addressed by its hidden id, so a concurrent schema change keeps
- *  the sheet honest. */
-export type ColumnSheetState = { mode: "create" } | { mode: "edit"; id: string }
-
-export type ColumnSheetForm = ReturnType<typeof useColumnSheet>
-
+/** The column sheet's form over the table's schema: appending, editing, or
+ *  deleting one column is one update of every column. */
 export function useColumnSheet(
   organizationId: string,
   table: TableDetail,
   state: ColumnSheetState | undefined,
   onOpenChange: (isOpen: boolean) => void
-) {
+): ColumnSheetForm {
   const updateTable = useMutation(api.tables.console.update)
   const [draft, setDraft] = useState(newColumnDraft)
   const [error, setError] = useState<string>()

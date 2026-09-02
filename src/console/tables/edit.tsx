@@ -17,8 +17,8 @@ import {
   MaterialNameField,
 } from "@/shared/console/materials/fields"
 import { DialogForm } from "@/shared/console/materials/form"
+import { type TableDetail } from "@/shared/console/tables/types"
 import { api } from "../../../convex/_generated/api"
-import { type TableDetail } from "./types"
 
 /** All an edit needs of a table; its summary and its detail both fit. */
 export type EditableTable = Pick<

@@ -29,6 +29,7 @@ import { type RowSelection } from "@/shared/console/list/selection"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { MaterialFolderCell } from "@/shared/console/materials/cells/folder"
 import { type FolderNames } from "@/shared/console/materials/folders"
+import { type TableSummary } from "@/shared/console/tables/types"
 import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
 import {
   TableColumnsCell,
@@ -37,7 +38,6 @@ import {
   TableRowsCell,
 } from "./cells"
 import { tableDeleteDescription, type useTableRemoval } from "./manage"
-import { type TableSummary } from "./types"
 
 export function TablesToolbar({
   onCreate,

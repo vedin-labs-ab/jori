@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { displayCellText } from "@/shared/cell"
-import { type TableColumn } from "../types"
 import { buildRowValues, formatCellText, parseCellText } from "./cells"
+import { type TableColumn } from "./types"
 
 test("parses text cells verbatim", () => {
   expect(parseCellText(column("string"), "hello")).toEqual({

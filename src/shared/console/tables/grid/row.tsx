@@ -29,14 +29,14 @@ import {
 } from "@/components/ui/context-menu"
 import { cn } from "@/lib/utils"
 import { displayCellText } from "@/shared/cell"
-import { type RowSelection } from "@/shared/console/list/selection"
+import { type RowSelection } from "../../list/selection"
+import { parseCellText } from "../cells"
 import {
   type RowPlacement,
   type TableColumn,
   type TableRow as TableRowData,
 } from "../types"
 import { type CommitCell, RowCell } from "./cell"
-import { parseCellText } from "./cells"
 
 /** One grid row: the number/select gutter and its editable cells, with
  *  the row's actions behind a right-click context menu. Rows render inside

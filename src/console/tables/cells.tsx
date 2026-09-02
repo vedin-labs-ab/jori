@@ -7,8 +7,8 @@ import {
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
 import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { type TableSummary } from "@/shared/console/tables/types"
 import { VisibilityBadge } from "@/shared/console/visibility/badge"
-import { type TableSummary } from "./types"
 
 /** Name column: the table icon, a link to the table, and the list's badge
  *  conventions — a visibility badge for anything narrower or wider than

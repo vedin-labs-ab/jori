@@ -11,12 +11,15 @@ import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { type useClientPagination } from "@/shared/console/list/pagination"
 import { type RowSelection } from "@/shared/console/list/selection"
+import {
+  type TableListResult,
+  type TableSummary,
+} from "@/shared/console/tables/types"
 import { ConsolePage } from "../page"
 import { TableRowDialogs, TablesOverlays } from "./dialogs"
 import { TableList, TablesToolbar } from "./list"
 import { type useTableRemoval } from "./manage"
 import { toMoveTarget, useTablesPage } from "./page"
-import { type TableListResult, type TableSummary } from "./types"
 
 export function TablesPage() {
   return (

@@ -3,14 +3,14 @@ import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { serializeCsv } from "@/console/tables/csv"
 import { showErrorToast } from "@/shared/console/error"
-import { downloadTextFile, toFilename } from "@/shared/files/download"
-import { api } from "../../../../convex/_generated/api"
 import {
   type TableColumn,
   type TableDetail,
   type TableRow,
   type TableRowPage,
-} from "../types"
+} from "@/shared/console/tables/types"
+import { downloadTextFile, toFilename } from "@/shared/files/download"
+import { api } from "../../../../convex/_generated/api"
 
 const exportPageSize = 200
 

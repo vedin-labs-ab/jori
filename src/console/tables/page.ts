@@ -11,6 +11,7 @@ import {
   useResettingSetter,
 } from "@/shared/console/list/pagination"
 import { useRowSelection } from "@/shared/console/list/selection"
+import { type TableSummary } from "@/shared/console/tables/types"
 import { api } from "../../../convex/_generated/api"
 import {
   tableListConfig,
@@ -18,7 +19,6 @@ import {
   useTableBulk,
   useTableRemoval,
 } from "./manage"
-import { type TableSummary } from "./types"
 
 export type TablesPageState = ReturnType<typeof useTablesPage>
 
