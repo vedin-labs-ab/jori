@@ -1,5 +1,5 @@
 import { type Organization } from "better-auth/client"
-import { ChevronDown, Plus, Settings } from "lucide-react"
+import { Plus, Settings } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { OrganizationView } from "@/components/auth/organization/organization-view"
@@ -12,9 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { CreateOrganizationDialog } from "@/console/organization/create"
+import { SidebarOrganization } from "@/shared/console/shell/organization"
 import {
   activateOrganization,
   useActiveOrganization,
@@ -41,6 +42,7 @@ export function SidebarOrganizationSwitcher() {
   return (
     <>
       <OrganizationMenu
+        active={active.data ?? undefined}
         isMobile={isMobile}
         onCreate={() => setCreating(true)}
         onManage={() => setManaging(true)}
@@ -60,11 +62,13 @@ export function SidebarOrganizationSwitcher() {
 }
 
 function OrganizationMenu({
+  active,
   isMobile,
   onCreate,
   onManage,
   organizations,
 }: {
+  active: Organization | undefined
   isMobile: boolean
   onCreate: () => void
   onManage: () => void
@@ -90,7 +94,7 @@ function OrganizationMenu({
       open={open}
       onOpenChange={(nextOpen) => !switching && setOpen(nextOpen)}
     >
-      <OrganizationMenuTrigger switching={switching} />
+      <OrganizationMenuTrigger active={active} switching={switching} />
       <DropdownMenuContent
         align="start"
         aria-busy={switching}
@@ -111,22 +115,25 @@ function OrganizationMenu({
   )
 }
 
-/** Compact switcher trigger in the sidebar-10 style: small logo and the
- *  name inline across the sidebar's full width, with the chevron pinned to
- *  the far end. In the icon-collapsed sidebar the button squares off and
- *  shows the logo alone, with the collapsed padding eased so the logo
- *  fits. */
-function OrganizationMenuTrigger({ switching }: { switching: boolean }) {
+/** The shared trigger, showing the active organization. */
+function OrganizationMenuTrigger({
+  active,
+  switching,
+}: {
+  active: Organization | undefined
+  switching: boolean
+}) {
   return (
     <DropdownMenuTrigger asChild>
-      <SidebarMenuButton
+      <SidebarOrganization
         aria-busy={switching}
-        className="px-1.5 group-data-[collapsible=icon]:p-1! data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         disabled={switching}
-      >
-        <OrganizationView className="min-w-0" hideRole hideSlug size="sm" />
-        <ChevronDown className="ml-auto opacity-50 group-data-[collapsible=icon]:hidden" />
-      </SidebarMenuButton>
+        organization={
+          active === undefined
+            ? undefined
+            : { logo: active.logo ?? undefined, name: active.name }
+        }
+      />
     </DropdownMenuTrigger>
   )
 }
