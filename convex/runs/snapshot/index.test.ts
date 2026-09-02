@@ -2,15 +2,15 @@ import { expect, test } from "vitest"
 import { id } from "../../../test/convex/database"
 import { type Id } from "../../_generated/dataModel"
 import {
-  createAutomationRunSnapshot,
   createInstructionRunSnapshot,
+  createJobRunSnapshot,
   createMessageRunSnapshot,
 } from "./index"
 
-test("stores automation display data directly", () => {
+test("stores job display data directly", () => {
   expect(
-    createAutomationRunSnapshot({
-      automation: automation({
+    createJobRunSnapshot({
+      job: job({
         name: "Daily digest",
         instructions: "Summarize Slack and send the digest.",
         type: "once",
@@ -23,7 +23,7 @@ test("stores automation display data directly", () => {
     snapshot: {
       title: "Daily digest",
       source: {
-        type: "automation",
+        type: "job",
         surface: "jori",
       },
       context: [],
@@ -85,14 +85,14 @@ test("rejects empty run titles", () => {
   ).toThrow("Run title cannot be empty.")
 })
 
-function automation(
+function job(
   overrides: Pick<
-    Parameters<typeof createAutomationRunSnapshot>[0]["automation"],
+    Parameters<typeof createJobRunSnapshot>[0]["job"],
     "instructions" | "name" | "trigger" | "type"
   >
-): Parameters<typeof createAutomationRunSnapshot>[0]["automation"] {
+): Parameters<typeof createJobRunSnapshot>[0]["job"] {
   return {
-    _id: id<"automations">("automation"),
+    _id: id<"jobs">("job"),
     _creationTime: 0,
     organizationId: "organization",
     access: { integrations: [], web: false },

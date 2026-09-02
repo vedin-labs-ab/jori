@@ -73,13 +73,13 @@ export const stores: SeedStore[] = [
           name: "Starter",
           perSeat: 29,
           minimumSeats: 5,
-          includes: "Slack, one automation, 30 days of run history",
+          includes: "Slack, one job, 30 days of run history",
         },
         {
           name: "Growth",
           perSeat: 35,
           minimumSeats: 20,
-          includes: "Every integration, unlimited automations, shared tables",
+          includes: "Every integration, unlimited jobs, shared tables",
         },
         {
           name: "Enterprise",
@@ -95,7 +95,7 @@ export const stores: SeedStore[] = [
     name: "How we write",
     owner: "elin",
     description:
-      "The house voice, kept short enough that people actually read it. Every automation that drafts customer-facing text is pointed at this store.",
+      "The house voice, kept short enough that people actually read it. Every job that drafts customer-facing text is pointed at this store.",
     folder: "Go to market",
     created: 71,
     updated: 26,

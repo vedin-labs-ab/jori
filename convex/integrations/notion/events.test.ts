@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
-import { readNotionAutomationEvents } from "./events"
+import { readNotionJobEvents } from "./events"
 
 test("projects Notion page content updates to page events", () => {
-  const events = readNotionAutomationEvents(
+  const events = readNotionJobEvents(
     notionPayload({
       type: "page.content_updated",
       entity: { id: "page-id", type: "page" },
@@ -33,7 +33,7 @@ test("projects Notion page content updates to page events", () => {
 })
 
 test("projects Notion data source child page updates to page events", () => {
-  const events = readNotionAutomationEvents(
+  const events = readNotionJobEvents(
     notionPayload({
       type: "page.properties_updated",
       entity: { id: "page-id", type: "page" },
@@ -58,7 +58,7 @@ test("projects Notion data source child page updates to page events", () => {
 })
 
 test("projects Notion created comments to page comment events", () => {
-  const events = readNotionAutomationEvents(
+  const events = readNotionJobEvents(
     notionPayload({
       type: "comment.created",
       entity: { id: "comment-id", type: "comment" },
@@ -85,12 +85,12 @@ test("projects Notion created comments to page comment events", () => {
 
 test("ignores unsupported Notion payloads", () => {
   expect(
-    readNotionAutomationEvents({
+    readNotionJobEvents({
       verification_token: "secret_token",
     })
   ).toEqual([])
   expect(
-    readNotionAutomationEvents(
+    readNotionJobEvents(
       notionPayload({
         type: "comment.updated",
         entity: { id: "comment-id", type: "comment" },
@@ -98,7 +98,7 @@ test("ignores unsupported Notion payloads", () => {
     )
   ).toEqual([])
   expect(
-    readNotionAutomationEvents(
+    readNotionJobEvents(
       notionPayload({
         type: "data_source.content_updated",
         entity: { id: "data-source-id", type: "data_source" },
@@ -106,7 +106,7 @@ test("ignores unsupported Notion payloads", () => {
     )
   ).toEqual([])
   expect(
-    readNotionAutomationEvents(
+    readNotionJobEvents(
       notionPayload({
         type: "page.created",
         entity: { id: "page-id", type: "page" },

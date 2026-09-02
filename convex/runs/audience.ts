@@ -15,7 +15,7 @@ type RunAudienceInput = {
 }
 
 type RunOrigin = {
-  automation?: Doc<"automations">
+  job?: Doc<"jobs">
   conversation?: Doc<"conversations">
 }
 
@@ -36,8 +36,8 @@ export async function resolveRunAudience(
     return conversationAudience(args.origin.conversation)
   }
 
-  if (args.origin?.automation !== undefined) {
-    return automationAudience(args.origin.automation)
+  if (args.origin?.job !== undefined) {
+    return jobAudience(args.origin.job)
   }
 
   return { audience: "person" }
@@ -63,10 +63,10 @@ async function resolveParentAudience(
   }
 }
 
-/** An automation that executes as the organization reaches everyone; one
+/** A job that executes as the organization reaches everyone; one
  *  that executes as its person stays that person's. */
-function automationAudience(automation: Doc<"automations">): RunAudience {
-  return executesAsOrganization(automation.visibility)
+function jobAudience(job: Doc<"jobs">): RunAudience {
+  return executesAsOrganization(job.visibility)
     ? { audience: "organization" }
     : { audience: "person" }
 }

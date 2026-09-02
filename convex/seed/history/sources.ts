@@ -1,4 +1,4 @@
-// Where sixty days of work comes from: the automations that fired on a
+// Where sixty days of work comes from: the jobs that fired on a
 // schedule, the ones a Slack event woke, and the things people asked for by
 // hand. Days are always counted back from the seed instant.
 

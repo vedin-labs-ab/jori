@@ -3,14 +3,14 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { resolveSubtaskAccess } from "./access"
 
-test("inherits the automation contract when tools are omitted", async () => {
+test("inherits the job contract when tools are omitted", async () => {
   const access = contract([integrationEntry("gmail-id", ["search_messages"])], {
     web: true,
   })
-  const parent = automationParent(access)
+  const parent = jobParent(access)
 
   expect(
-    await resolveSubtaskAccess(fakeCtx({ automation: { access } }), {
+    await resolveSubtaskAccess(fakeCtx({ job: { access } }), {
       parent,
     })
   ).toEqual(access)
@@ -114,8 +114,8 @@ test("a full-surface parent grants requested catalog tools of its integrations",
   })
 })
 
-test("uses the run snapshot when the parent automation is gone", async () => {
-  const parent = automationParent()
+test("uses the run snapshot when the parent job is gone", async () => {
+  const parent = jobParent()
 
   await expect(resolveSubtaskAccess(fakeCtx(), { parent })).resolves.toEqual(
     contract([])
@@ -135,10 +135,10 @@ function integrationEntry(id: string, tools: string[]) {
   return { id: id as Id<"integrations">, tools }
 }
 
-function automationParent(access?: Access) {
+function jobParent(access?: Access) {
   return {
     ...baseParent(),
-    automation: { id: "automation" },
+    job: { id: "job" },
     access: access ?? contract([]),
   } as unknown as Doc<"runs">
 }
@@ -175,14 +175,12 @@ function activeIntegration(id: string, integration: string) {
 }
 
 function fakeCtx(
-  docs: { automation?: { access: Access }; integrations?: unknown[] } = {}
+  docs: { job?: { access: Access }; integrations?: unknown[] } = {}
 ) {
   return {
     db: {
       get: async (id: string) =>
-        id === "automation" && docs.automation !== undefined
-          ? docs.automation
-          : null,
+        id === "job" && docs.job !== undefined ? docs.job : null,
       query: () => ({
         withIndex: () => ({
           take: async () => docs.integrations ?? [],

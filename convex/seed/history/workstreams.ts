@@ -210,7 +210,7 @@ export const workstreams: SeedWorkstream[] = [
   {
     name: "Usage and cost visibility",
     brief:
-      "A page for what Jori costs, broken down by folder, automation, and person. Behind a flag for Vedin Labs only; the day bucket was moved to the organization's own timezone before it ships.",
+      "A page for what Jori costs, broken down by folder, job, and person. Behind a flag for Vedin Labs only; the day bucket was moved to the organization's own timezone before it ships.",
     aliases: ["Usage page"],
     status: "proposed",
     seen: 6,
@@ -218,7 +218,7 @@ export const workstreams: SeedWorkstream[] = [
       {
         name: "Usage page review",
         summary:
-          "Reviewing the first version: timezone bucketing was corrected, and the chart still collapses when one automation dominates a day.",
+          "Reviewing the first version: timezone bucketing was corrected, and the chart still collapses when one job dominates a day.",
         channel: "product",
         why: "Mia named the timezone bucket as the one thing to change before shipping, and Nadia raised the chart scaling in design the same week.",
         anchors: ["usage page", "timezone bucket", "log scale"],
@@ -228,7 +228,7 @@ export const workstreams: SeedWorkstream[] = [
         journal: [
           [
             8,
-            "Nadia: a single dominant automation flattens every other bar. Worth a log scale or a cap.",
+            "Nadia: a single dominant job flattens every other bar. Worth a log scale or a cap.",
           ],
           [
             6,

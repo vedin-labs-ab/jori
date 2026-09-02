@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { automationDoc, folderDoc } from "../../test/convex/folders"
+import { folderDoc, jobDoc } from "../../test/convex/folders"
 import { seedUsage } from "../../test/convex/usage"
 import { type Id } from "../_generated/dataModel"
 import { readFolderSpend, readFolderUsage } from "./usage"
@@ -24,7 +24,7 @@ function read(ctx: ReturnType<typeof databaseContext>["ctx"]) {
 }
 
 function readRanking(ctx: ReturnType<typeof databaseContext>["ctx"]) {
-  return read(ctx).then((usage) => usage.automations)
+  return read(ctx).then((usage) => usage.jobs)
 }
 
 async function seedFolder(
@@ -37,36 +37,36 @@ async function seedFolder(
   )) as Id<"folders">
 }
 
-test("an automation nobody may see keeps its money and loses its name", async () => {
+test("a job nobody may see keeps its money and loses its name", async () => {
   const { database, ctx } = databaseContext()
   const openId = (await database.insert(
-    "automations",
-    automationDoc({ name: "Morning digest" })
-  )) as Id<"automations">
+    "jobs",
+    jobDoc({ name: "Morning digest" })
+  )) as Id<"jobs">
   const closedId = (await database.insert(
-    "automations",
-    automationDoc({ name: "Board briefing", visibility: { mode: "private" } })
-  )) as Id<"automations">
+    "jobs",
+    jobDoc({ name: "Board briefing", visibility: { mode: "private" } })
+  )) as Id<"jobs">
 
   await seedUsage(database, {
     date: "2026-03-15",
     micros: 100,
     ended: 1,
-    automation: { id: openId, label: "Morning digest" },
+    job: { id: openId, label: "Morning digest" },
   })
   await seedUsage(database, {
     date: "2026-03-15",
     micros: 900,
     ended: 4,
     failed: 1,
-    automation: { id: closedId, label: "Board briefing" },
+    job: { id: closedId, label: "Board briefing" },
   })
 
   expect(await readRanking(ctx)).toEqual([
-    // The row carries the private automation's own name, so the caption is
-    // no safer to show than the automation itself.
+    // The row carries the private job's own name, so the caption is
+    // no safer to show than the job itself.
     {
-      label: "Automations you cannot see",
+      label: "Jobs you cannot see",
       micros: 900,
       ended: 4,
       failed: 1,
@@ -82,9 +82,9 @@ test("the ranking stops well short of the row cap", async () => {
     await seedUsage(database, {
       date: "2026-03-15",
       micros: 101 - rank,
-      automation: {
-        id: `automations:${rank}` as Id<"automations">,
-        label: `Automation ${rank}`,
+      job: {
+        id: `jobs:${rank}` as Id<"jobs">,
+        label: `Job ${rank}`,
       },
     })
   }

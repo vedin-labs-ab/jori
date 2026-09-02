@@ -9,8 +9,8 @@ import {
 import { isWebTool } from "../../contracts/permissions/web"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { canUseAutomationTool } from "../automations/access"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
+import { canUseJobTool } from "../jobs/access"
 import { findRunIntegration, inputAccess } from "../runs/agent/input"
 import { toolExecutionType } from "../runs/agent/tools/policy"
 import {
@@ -202,7 +202,7 @@ function authorizeTool(
   const executionType = toolExecutionType(context.input.type)
 
   if (!canUseToolMode(mode, executionType)) {
-    if (mode === "prompted" && context.input.type === "automation") {
+    if (mode === "prompted" && context.input.type === "job") {
       throw new Error(
         `Tool requires approval and cannot run in jobs: ${request.tool}`
       )
@@ -232,11 +232,7 @@ async function authorizeSurfaceTool(
   const access = inputAccess(context.input)
 
   if (integration !== null && access !== undefined) {
-    const isSelected = canUseAutomationTool(
-      access,
-      integration._id,
-      request.tool
-    )
+    const isSelected = canUseJobTool(access, integration._id, request.tool)
 
     if (!isSelected) {
       throw new Error(`Tool is not allowed by run access: ${request.tool}`)

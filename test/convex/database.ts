@@ -260,7 +260,7 @@ function rangeMatches(kind: Constraint["kind"], comparison: number) {
   }
 }
 
-/** Index fields may be nested paths ("automation.id"); a path through a
+/** Index fields may be nested paths ("job.id"); a path through a
  *  missing object reads as undefined, the way Convex indexes it. */
 function readField(row: StoredDoc, path: string): unknown {
   return path

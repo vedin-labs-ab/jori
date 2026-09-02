@@ -9,8 +9,8 @@ import {
 } from "../../../shared/integrations"
 import { type AgentRuntimeInput } from "../input"
 
-type AutomationEvent = NonNullable<
-  Extract<AgentRuntimeInput, { type: "automation" }>["event"]
+type JobEvent = NonNullable<
+  Extract<AgentRuntimeInput, { type: "job" }>["event"]
 >
 
 export function createMessageTargetValues(
@@ -23,10 +23,7 @@ export function createMessageTargetValues(
   }
 }
 
-export function formatEvent(
-  event: AutomationEvent,
-  integration: string | undefined
-) {
+export function formatEvent(event: JobEvent, integration: string | undefined) {
   const metadata = formatTargetLines([
     targetLine("Type", event.type),
     targetLine("Integration", formatIntegrationLabel(integration)),

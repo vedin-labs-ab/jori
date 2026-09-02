@@ -1,8 +1,6 @@
 import { defineSchema } from "convex/server"
 import { allowlist } from "./access/schema"
 import { approvals } from "./approvals/schema"
-import { automations } from "./automations/schema"
-import { subscriptions } from "./automations/subscriptions/schema"
 import { backfills } from "./backfill/schema"
 import { accounts, transactions } from "./billing/schema"
 import { collections, documents, shares } from "./collections/schema"
@@ -13,6 +11,8 @@ import { files } from "./files/schema"
 import { folders } from "./folders/schema"
 import { integrationOffers } from "./integrations/offers/schema"
 import { integrations } from "./integrations/schema"
+import { jobs } from "./jobs/schema"
+import { subscriptions } from "./jobs/subscriptions/schema"
 import { messages } from "./messages/schema"
 import {
   organizationDiscovery,
@@ -51,7 +51,7 @@ export default defineSchema({
   organizationProfile,
   organizationSources,
   organizationDiscovery,
-  automations,
+  jobs,
   subscriptions,
   events,
   backfills,

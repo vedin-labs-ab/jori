@@ -38,7 +38,7 @@ export function assemblePrompt(
     skills: runtimeSkills,
   })
   const context = createContext(input, activeSurface, options.recovery ?? null)
-  const offerIntegration = input.type !== "automation"
+  const offerIntegration = input.type !== "job"
 
   const instructions = renderPromptTemplate(
     promptTemplates["agent/instructions"],
@@ -47,10 +47,10 @@ export function assemblePrompt(
         approvals: optionalPromptBlock(
           createApprovalInstructions(promptedTools)
         ),
-        automation: optionalPromptBlock(
-          input.type === "automation"
+        job: optionalPromptBlock(
+          input.type === "job"
             ? renderPromptTemplate(
-                promptTemplates["agent/instructions/automation"],
+                promptTemplates["agent/instructions/job"],
                 {}
               )
             : ""

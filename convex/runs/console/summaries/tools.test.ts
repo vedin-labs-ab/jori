@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { getToolPermission } from "../../../../contracts/permissions"
 import {
-  eventAutomationDisplay,
+  eventJobDisplay,
   fakeQueryCtx,
   messageDisplay,
   preparedTraceRows,
@@ -10,7 +10,7 @@ import { id } from "../../../../test/convex/database"
 import { integrationDoc } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
 
-test("shows stored tools for event automation runs", async () => {
+test("shows stored tools for event job runs", async () => {
   const run = testRun(eventRun(), { preparedTools: slackToolSnapshot() })
   const summary = await summarizeRun(
     fakeQueryCtx(
@@ -28,7 +28,7 @@ test("shows stored tools for event automation runs", async () => {
   expect(summary.details).toContainEqual(webSearchDetail("Allowed"))
 })
 
-test("shows stored blocked web search for event automation runs", async () => {
+test("shows stored blocked web search for event job runs", async () => {
   const run = testRun(eventRun(), { preparedTools: slackToolSnapshot(false) })
   const summary = await summarizeRun(
     fakeQueryCtx(
@@ -126,12 +126,12 @@ function message(kind: "mention" | "reply") {
 
 function eventRun() {
   return {
-    automation: { id: "missing-automation" },
+    job: { id: "missing-job" },
     cause: { type: "event", eventId: "event" },
     instructions: "Perform the deep analysis.",
     snapshot: {
       title: "Deep analysis",
-      ...eventAutomationDisplay({
+      ...eventJobDisplay({
         context: [{ type: "channel", label: "C123" }],
         surface: "slack",
       }),

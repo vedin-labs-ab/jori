@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
-import { automationDoc, fileDoc, folderDoc } from "../../test/convex/folders"
+import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { fileResource } from "./filing"
 
@@ -18,7 +18,7 @@ test("each resource type files into a folder and unfiles with null", async () =>
   const rows = {
     collection: await database.insert("collections", tableDoc()),
     file: await database.insert("files", fileDoc()),
-    automation: await database.insert("automations", automationDoc()),
+    job: await database.insert("jobs", jobDoc()),
   } as const
 
   for (const [resourceType, resourceId] of Object.entries(rows)) {
@@ -114,14 +114,14 @@ test("foreign and unknown resources read as missing", async () => {
     folderDoc()
   )) as Id<"folders">
   const foreign = await database.insert(
-    "automations",
-    automationDoc({ organizationId: "elsewhere" })
+    "jobs",
+    jobDoc({ organizationId: "elsewhere" })
   )
 
   await expect(
     fileResource(ctx, {
       ...acting,
-      resourceType: "automation",
+      resourceType: "job",
       resourceId: foreign,
       folderId,
     })

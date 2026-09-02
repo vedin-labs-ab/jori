@@ -49,8 +49,8 @@ export function foundOutcome(result: ToolResult | undefined) {
 
 export function sourceLabel(value: string | undefined) {
   switch (value) {
-    case "automation":
-      return "Automation"
+    case "job":
+      return "Job"
     case "github":
       return "GitHub"
     case "linear":

@@ -9,7 +9,7 @@ import { recordUsageDebit, recordUsageEnded, reparentUsage } from "./record"
 
 const folderId = "folder-1" as Id<"folders">
 const otherFolderId = "folder-2" as Id<"folders">
-const automationId = "automation-1" as Id<"automations">
+const jobId = "job-1" as Id<"jobs">
 
 function run(overrides: Partial<Doc<"runs">> = {}): Doc<"runs"> {
   return {
@@ -19,7 +19,7 @@ function run(overrides: Partial<Doc<"runs">> = {}): Doc<"runs"> {
     audience: "organization",
     cause: { type: "time", scheduledAt: 0 },
     principal: { kind: "organization" },
-    snapshot: { context: [], source: { type: "automation" }, title: "Digest" },
+    snapshot: { context: [], source: { type: "job" }, title: "Digest" },
     status: "running",
     createdAt: 0,
     ...overrides,
@@ -138,36 +138,34 @@ test("the cause of the work becomes the trigger dimension", async () => {
   ])
 })
 
-test("an automation's label is carried even once the automation is gone", async () => {
+test("a job's label is carried even once the job is gone", async () => {
   const { database, ctx } = databaseContext()
 
   await recordUsageEnded(ctx, {
     run: run({
-      automation: { id: automationId },
+      job: { id: jobId },
       snapshot: runSnapshot("One-shot reminder"),
     }),
     failed: false,
   })
 
-  expect((await readBuckets(database))[0]?.automation).toEqual({
-    id: automationId,
+  expect((await readBuckets(database))[0]?.job).toEqual({
+    id: jobId,
     label: "One-shot reminder",
   })
 })
 
-test("a live automation names the row itself", async () => {
+test("a live job names the row itself", async () => {
   const { database, ctx } = databaseContext()
 
-  await database.insert("automations", { name: "Renamed digest" })
+  await database.insert("jobs", { name: "Renamed digest" })
 
   await recordUsageEnded(ctx, {
-    run: run({ automation: { id: "automations:0" as Id<"automations"> } }),
+    run: run({ job: { id: "jobs:0" as Id<"jobs"> } }),
     failed: false,
   })
 
-  expect((await readBuckets(database))[0]?.automation?.label).toBe(
-    "Renamed digest"
-  )
+  expect((await readBuckets(database))[0]?.job?.label).toBe("Renamed digest")
 })
 
 test("a deleted folder's spend moves to the destination", async () => {
@@ -224,5 +222,5 @@ test("a deleted root folder's spend becomes unfiled", async () => {
 })
 
 function runSnapshot(title: string): Doc<"runs">["snapshot"] {
-  return { context: [], source: { type: "automation" }, title }
+  return { context: [], source: { type: "job" }, title }
 }

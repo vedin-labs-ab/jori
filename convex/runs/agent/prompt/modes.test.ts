@@ -1,24 +1,24 @@
 import { describe, expect, test } from "vitest"
-import { automationRuntimeInput } from "../../../../test/convex/prompt"
+import { jobRuntimeInput } from "../../../../test/convex/prompt"
 import { assemblePrompt } from "."
 
 describe("trigger modes", () => {
-  test("names a manually started automation run", () => {
-    const input = automationRuntimeInput()
+  test("names a manually started job run", () => {
+    const input = jobRuntimeInput()
 
-    if (input.type !== "automation") {
-      throw new Error("Expected automation input.")
+    if (input.type !== "job") {
+      throw new Error("Expected job input.")
     }
 
     input.run.cause = { type: "manual" } as typeof input.run.cause
 
     expect(assemblePrompt(input).context).toContain(
-      'The requester started this automation run manually ("run now").'
+      'The requester started this job run manually ("run now").'
     )
   })
 
   test("tells a delegated run to return its outcome", () => {
-    const base = automationRuntimeInput()
+    const base = jobRuntimeInput()
     const input = {
       type: "instruction" as const,
       run: { ...base.run, parentId: "parent" },
@@ -39,19 +39,19 @@ describe("trigger modes", () => {
   })
 })
 
-describe("automation operating contract", () => {
-  test("renders for automation runs and stays out elsewhere", () => {
-    const automation = assemblePrompt(automationRuntimeInput()).instructions
+describe("job operating contract", () => {
+  test("renders for job runs and stays out elsewhere", () => {
+    const job = assemblePrompt(jobRuntimeInput()).instructions
 
-    expect(automation).toContain("# Automation")
-    expect(automation).toContain(
+    expect(job).toContain("# Job")
+    expect(job).toContain(
       "A manually started run produces its outcome now and creates no scheduled deliveries."
     )
-    expect(automation).toContain("Deliver each outcome at most once.")
-    expect(automation).toContain("finishing quietly")
-    expect(automation).toContain("never present partial work as complete")
+    expect(job).toContain("Deliver each outcome at most once.")
+    expect(job).toContain("finishing quietly")
+    expect(job).toContain("never present partial work as complete")
 
-    const base = automationRuntimeInput()
+    const base = jobRuntimeInput()
     const instruction = assemblePrompt({
       type: "instruction",
       run: base.run,
@@ -64,13 +64,13 @@ describe("automation operating contract", () => {
       workstreams: null,
     } as unknown as Parameters<typeof assemblePrompt>[0]).instructions
 
-    expect(instruction).not.toContain("# Automation")
+    expect(instruction).not.toContain("# Job")
   })
 })
 
 describe("recovery context", () => {
   test("lists prior-attempt write actions on retries only", () => {
-    const input = automationRuntimeInput()
+    const input = jobRuntimeInput()
     const recovered = assemblePrompt(input, {
       recovery: {
         attempt: 2,

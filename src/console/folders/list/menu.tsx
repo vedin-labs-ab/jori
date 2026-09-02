@@ -39,7 +39,7 @@ export function ResourceRowMenu({
       return <MaterialResourceMenu actions={actions} resource={resource} />
     case "file":
       return <FileResourceMenu actions={actions} resource={resource} />
-    case "automation":
+    case "job":
       return <AutomationResourceMenu actions={actions} resource={resource} />
   }
 }

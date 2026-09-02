@@ -9,12 +9,12 @@ import { seedEvents } from "./events"
 import { eventKey, type WorkItem, workItems } from "./work"
 
 // One run per piece of work, written the way the runtime would have left it
-// behind: an automation run carries the automation it answers to and the
+// behind: a job run carries the job it answers to and the
 // folder its cost is filed under, interactive work carries neither. Nothing
 // here is queued or running, so no worker can pick a seeded run up.
 
 type RunRefs = {
-  automations: Map<string, Doc<"automations">>
+  jobs: Map<string, Doc<"jobs">>
   conversations: Map<string, Id<"conversations">>
   events: Map<string, Id<"events">>
   folders: Map<string, Id<"folders">>
@@ -49,16 +49,13 @@ export async function seedRuns(ctx: MutationCtx, seed: SeedContext) {
 }
 
 function buildRun(seed: SeedContext, item: WorkItem, refs: RunRefs) {
-  const automation = refs.automations.get(item.automation ?? "")
+  const job = refs.jobs.get(item.job ?? "")
   const personId = refs.people.get(item.person ?? "")
   const conversationId = refs.conversations.get(item.channel ?? "")
 
   return {
     organizationId: seed.organizationId,
-    automation:
-      automation === undefined
-        ? undefined
-        : { id: automation._id, version: automation.version },
+    job: job === undefined ? undefined : { id: job._id, version: job.version },
     audience:
       item.trigger === "message"
         ? ("conversation" as const)
@@ -69,8 +66,8 @@ function buildRun(seed: SeedContext, item: WorkItem, refs: RunRefs) {
       personId === undefined || item.trigger !== "manual"
         ? ({ kind: "organization" } as const)
         : ({ kind: "person", personId } as const),
-    instructions: automation?.instructions,
-    access: automation?.access,
+    instructions: job?.instructions,
+    access: job?.access,
     snapshot: buildSnapshot(item),
     status: item.status,
     error: item.error,
@@ -115,16 +112,16 @@ function buildSnapshot(item: WorkItem): RunSnapshot {
   return {
     title: item.title,
     source: {
-      type: item.trigger === "schedule" ? "automation" : item.trigger,
+      type: item.trigger === "schedule" ? "job" : item.trigger,
       surface: item.surface,
     },
     context: [
       ...(item.channel === undefined
         ? []
         : [{ type: "channel" as const, label: `#${item.channel}` }]),
-      ...(item.automation === undefined
+      ...(item.job === undefined
         ? []
-        : [{ type: "schedule" as const, label: item.automation }]),
+        : [{ type: "schedule" as const, label: item.job }]),
     ],
   }
 }
@@ -134,8 +131,8 @@ async function resolveRefs(
   seed: SeedContext,
   events: Map<string, Id<"events">>
 ): Promise<RunRefs> {
-  const automations = await ctx.db
-    .query("automations")
+  const jobs = await ctx.db
+    .query("jobs")
     .withIndex("by_organization", (index) =>
       index.eq("organizationId", seed.organizationId)
     )
@@ -150,7 +147,7 @@ async function resolveRefs(
   )
 
   return {
-    automations: new Map(automations.map((row) => [row.name, row])),
+    jobs: new Map(jobs.map((row) => [row.name, row])),
     conversations: new Map(
       [...places].flatMap(([name, place]) => {
         const conversationId = byExternalId.get(place.externalId)

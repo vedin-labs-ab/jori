@@ -1,8 +1,5 @@
 import { describe, expect, test } from "vitest"
-import {
-  automationRuntimeInput,
-  runtimeInput,
-} from "../../../../test/convex/prompt"
+import { jobRuntimeInput, runtimeInput } from "../../../../test/convex/prompt"
 import { assemblePrompt } from "."
 
 describe("finish guidance", () => {
@@ -19,8 +16,8 @@ describe("finish guidance", () => {
     expectNoSyntheticBlankLines(prompt)
   })
 
-  test("uses plain finish_run guidance for automation runs", () => {
-    const prompt = assemblePrompt(automationRuntimeInput()).instructions
+  test("uses plain finish_run guidance for job runs", () => {
+    const prompt = assemblePrompt(jobRuntimeInput()).instructions
 
     expect(prompt).toContain(
       "Finish the run when no useful work remains by calling `finish_run`."

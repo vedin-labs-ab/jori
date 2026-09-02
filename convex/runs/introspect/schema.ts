@@ -18,7 +18,7 @@ const runSource = v.union(
   v.literal("slack"),
   v.literal("github"),
   v.literal("linear"),
-  v.literal("automation")
+  v.literal("job")
 )
 
 const activityFilter = v.union(

@@ -52,13 +52,13 @@ describe("openrouter client", () => {
   test("allows OpenRouter attribution overrides", () => {
     process.env.OPENROUTER_API_KEY = "key"
     process.env.CONVEX_SITE_URL = "https://convex.example"
-    process.env.OPENROUTER_APP_CATEGORIES = "automation"
+    process.env.OPENROUTER_APP_CATEGORIES = "job"
     process.env.OPENROUTER_APP_TITLE = "Custom Jori"
     process.env.OPENROUTER_HTTP_REFERER = "https://app.example"
 
     expect(requireOpenRouterConfig()).toEqual({
       apiKey: "key",
-      appCategories: "automation",
+      appCategories: "job",
       appTitle: "Custom Jori",
       httpReferer: "https://app.example",
     })

@@ -4,9 +4,9 @@ import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Doc } from "../../../_generated/dataModel"
 import { assemblePrompt } from "."
 
-describe("GitHub automation prompts", () => {
+describe("GitHub job prompts", () => {
   test("renders review comment target context", () => {
-    const prompt = assemblePrompt(githubAutomationRuntimeInput()).context
+    const prompt = assemblePrompt(githubJobRuntimeInput()).context
 
     expect(prompt).toContain("- Type: pull_request.review_comment.edited")
     expect(prompt).toContain("- Integration: GitHub")
@@ -19,11 +19,11 @@ describe("GitHub automation prompts", () => {
   })
 })
 
-function githubAutomationRuntimeInput() {
+function githubJobRuntimeInput() {
   const github = githubIntegration()
 
   return {
-    type: "automation",
+    type: "job",
     instructions: "Reply with a short quip.",
     access: {
       integrations: [{ id: github._id, tools: ["github_add_issue_comment"] }],
@@ -33,7 +33,7 @@ function githubAutomationRuntimeInput() {
       _id: "run",
       _creationTime: 0,
       organizationId: "organization",
-      automation: { id: "automation" },
+      job: { id: "job" },
       snapshot: {
         title: "GitHub quip",
         source: { type: "event", surface: "github" },

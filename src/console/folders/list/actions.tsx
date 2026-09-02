@@ -145,11 +145,9 @@ function useListedAutomations(
   organizationId: string,
   resources: readonly FolderResource[]
 ) {
-  const hasAutomations = resources.some(
-    (resource) => resource.type === "automation"
-  )
+  const hasAutomations = resources.some((resource) => resource.type === "job")
   const listed = useQuery(
-    api.automations.console.list,
+    api.jobs.console.list,
     hasAutomations
       ? { organizationId, query: "", statusFilter: "all" as const }
       : "skip"
@@ -158,9 +156,10 @@ function useListedAutomations(
   return useMemo(
     () =>
       new Map(
-        (listed?.status === "ready" ? listed.automations : []).map(
-          (automation) => [automation.id as string, automation]
-        )
+        (listed?.status === "ready" ? listed.jobs : []).map((automation) => [
+          automation.id as string,
+          automation,
+        ])
       ),
     [listed]
   )

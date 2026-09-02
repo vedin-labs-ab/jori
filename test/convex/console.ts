@@ -24,26 +24,26 @@ export function emptyActivityData(): Omit<ActivityData, "run"> {
   }
 }
 
-export function automationDisplay(
+export function jobDisplay(
   overrides: Partial<RunSnapshotInput> = {}
 ): RunSnapshotInput {
   return {
     source: {
-      type: "automation",
+      type: "job",
     },
     context: [],
     ...overrides,
   }
 }
 
-export function eventAutomationDisplay(input: {
+export function eventJobDisplay(input: {
   context?: RunSnapshot["context"]
   surface?: NonNullable<RunSnapshot["source"]["surface"]>
   url?: string
 }): RunSnapshotInput {
-  return automationDisplay({
+  return jobDisplay({
     source: {
-      type: "automation",
+      type: "job",
       surface: input.surface,
       ...(input.url === undefined ? {} : { url: input.url }),
     },
@@ -70,9 +70,9 @@ export function messageDisplay(input: {
 }
 
 export function oneShotDisplay(): RunSnapshotInput {
-  return automationDisplay({
+  return jobDisplay({
     source: {
-      type: "automation",
+      type: "job",
       surface: "jori",
     },
   })
@@ -82,9 +82,9 @@ export function recurringDisplay(input: {
   context?: RunSnapshot["context"]
   schedule?: string
 }): RunSnapshotInput {
-  return automationDisplay({
+  return jobDisplay({
     source: {
-      type: "automation",
+      type: "job",
       surface: "jori",
     },
     context: [

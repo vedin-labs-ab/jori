@@ -152,7 +152,7 @@ export const commercialTables: SeedTable[] = [
         "Bergqvist Media",
         "2026-07-29",
         "Medium",
-        "Automation fired twice on the same Linear webhook",
+        "Job fired twice on the same Linear webhook",
         "Oskar Hedlund",
         true,
       ],

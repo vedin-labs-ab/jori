@@ -26,7 +26,7 @@ export function EventIntegrationField({
   scope: AutomationScope
   value: JobEventIntegration
 }) {
-  const connections = useQuery(api.automations.connections.list, {
+  const connections = useQuery(api.jobs.connections.list, {
     organizationId,
     kind: scope === "personal" ? "person" : "organization",
   })

@@ -7,7 +7,7 @@ import { type TestDatabase } from "./database"
 // dataModel only ships types, so it is referenced through import types: a
 // value-position import statement would survive transpilation and fail to
 // resolve at test runtime.
-type Id<TableName extends "automations" | "folders"> =
+type Id<TableName extends "jobs" | "folders"> =
   import("../../convex/_generated/dataModel").Id<TableName>
 
 export type UsageRow = {
@@ -17,7 +17,7 @@ export type UsageRow = {
   ended?: number
   failed?: number
   folderId?: Id<"folders">
-  automation?: { id: Id<"automations">; label: string }
+  job?: { id: Id<"jobs">; label: string }
 }
 
 export async function seedUsage(database: TestDatabase, row: UsageRow) {
@@ -27,16 +27,16 @@ export async function seedUsage(database: TestDatabase, row: UsageRow) {
     micros = 0,
     ended = 0,
     failed = 0,
-    automation,
+    job,
     folderId,
   } = row
 
   await database.insert("usage", {
     organizationId,
     date,
-    key: [folderId ?? "-", automation?.id ?? "-", date].join(":"),
+    key: [folderId ?? "-", job?.id ?? "-", date].join(":"),
     ...(folderId === undefined ? {} : { folderId }),
-    ...(automation === undefined ? {} : { automation }),
+    ...(job === undefined ? {} : { job }),
     surface: "jori",
     trigger: "schedule",
     runs: { ended, failed },

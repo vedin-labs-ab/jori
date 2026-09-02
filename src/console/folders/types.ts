@@ -69,7 +69,7 @@ export function resourcePresentation(resource: {
       return { icon: Database, label: "Store" }
     case "file":
       return fileKind(resource.mimeType ?? "", resource.name)
-    case "automation":
+    case "job":
       return { icon: Workflow, label: "Job" }
   }
 }

@@ -39,22 +39,22 @@ export type UsageTotals = {
   tokens: { input: number; output: number }
 }
 
-/** One line of the ranking. The id is carried only while the automation
+/** One line of the ranking. The id is carried only while the job
  *  itself still exists, so a caption is a link exactly when opening it
  *  would lead somewhere. */
 export type UsageContributor = {
-  id?: Id<"automations">
+  id?: Id<"jobs">
   label: string
   micros: number
   ended: number
   failed: number
 }
 
-/** Work with no automation behind it: someone asked Jori directly. It
- *  ranks beside the automations so the list still adds up to the total. */
+/** Work with no job behind it: someone asked Jori directly. It
+ *  ranks beside the jobs so the list still adds up to the total. */
 const interactiveLabel = "Interactive work"
 
-/** Its own grouping key, which no automation id can collide with. */
+/** Its own grouping key, which no job id can collide with. */
 const interactiveKey = ""
 
 /** The window ends today in the organization's own zone and reaches back
@@ -155,27 +155,27 @@ export function sortContributors(contributors: UsageContributor[]) {
 }
 
 function groupContributors(rows: Doc<"usage">[]) {
-  const byAutomation = new Map<string, UsageContributor>()
+  const byJob = new Map<string, UsageContributor>()
 
   for (const row of rows) {
-    const key = row.automation?.id ?? interactiveKey
-    const entry = byAutomation.get(key) ?? blankContributor(row)
+    const key = row.job?.id ?? interactiveKey
+    const entry = byJob.get(key) ?? blankContributor(row)
 
     // Rows outlive renames, so the caption follows whichever row was
     // written last rather than whichever was read first.
-    entry.label = row.automation?.label ?? interactiveLabel
+    entry.label = row.job?.label ?? interactiveLabel
     entry.micros += row.micros
     entry.ended += row.runs.ended
     entry.failed += row.runs.failed
-    byAutomation.set(key, entry)
+    byJob.set(key, entry)
   }
 
-  return byAutomation
+  return byJob
 }
 
 function blankContributor(row: Doc<"usage">): UsageContributor {
   return {
-    ...(row.automation === undefined ? {} : { id: row.automation.id }),
+    ...(row.job === undefined ? {} : { id: row.job.id }),
     label: interactiveLabel,
     micros: 0,
     ended: 0,

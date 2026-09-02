@@ -54,12 +54,12 @@ test("uses user-facing descriptions in capability listings", () => {
   expect(cloneTool?.description).not.toContain("/home/user")
 })
 
-test("limits automation run tools to selected unattended access", () => {
+test("limits job run tools to selected unattended access", () => {
   const github = integration("github")
   const capabilities = listCapabilities(
     context({
       connectedIntegrations: [github, integration("slack")],
-      input: automationInput(github, ["github_get_issue"]),
+      input: jobInput(github, ["github_get_issue"]),
       toolModes: new Map([["github_get_pull_request", "prompted"]]),
     })
   )
@@ -81,12 +81,12 @@ test("limits automation run tools to selected unattended access", () => {
   )
 })
 
-test("hides interactive tools from automation runs", () => {
+test("hides interactive tools from job runs", () => {
   const github = integration("github")
-  const automation = listCapabilities(
+  const job = listCapabilities(
     context({
       connectedIntegrations: [github],
-      input: automationInput(github, ["github_get_issue"]),
+      input: jobInput(github, ["github_get_issue"]),
       toolModes: new Map(),
     })
   )
@@ -98,23 +98,23 @@ test("hides interactive tools from automation runs", () => {
     })
   )
 
-  expect(joriTools(automation)).not.toContain("offer_integration")
+  expect(joriTools(job)).not.toContain("offer_integration")
   expect(joriTools(message)).toContain("offer_integration")
 })
 
-test("hides web tools from automation runs without web access", () => {
+test("hides web tools from job runs without web access", () => {
   const github = integration("github")
   const blocked = listCapabilities(
     context({
       connectedIntegrations: [github],
-      input: automationInput(github, ["github_get_issue"], false),
+      input: jobInput(github, ["github_get_issue"], false),
       toolModes: new Map(),
     })
   )
   const allowed = listCapabilities(
     context({
       connectedIntegrations: [github],
-      input: automationInput(github, ["github_get_issue"], true),
+      input: jobInput(github, ["github_get_issue"], true),
       toolModes: new Map(),
     })
   )
@@ -158,13 +158,13 @@ function messageInput(integrations: Doc<"integrations">[]): AgentRuntimeInput {
   }
 }
 
-function automationInput(
+function jobInput(
   integration: Doc<"integrations">,
   tools: string[],
   web = false
 ): AgentRuntimeInput {
   return {
-    type: "automation",
+    type: "job",
     access: {
       integrations: [{ id: integration._id, tools }],
       web,

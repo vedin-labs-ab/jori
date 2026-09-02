@@ -4,25 +4,25 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { loadRunBrokerContext } from "./auth"
 
-test("stops an invalidated automation run before loading tool context", async () => {
+test("stops an invalidated job run before loading tool context", async () => {
   const runQuery = vi.fn(async () => false)
   const ctx = { runQuery } as unknown as ActionCtx
-  const run = automationRun()
+  const run = jobRun()
 
   await expect(loadRunBrokerContext(ctx, run)).resolves.toBeNull()
   expect(runQuery).toHaveBeenCalledTimes(1)
   expect(runQuery).toHaveBeenCalledWith(
-    internal.automations.records.canExecuteRunTools,
+    internal.jobs.records.canExecuteRunTools,
     { runId: run._id }
   )
 })
 
-function automationRun(): Doc<"runs"> {
+function jobRun(): Doc<"runs"> {
   return {
     _id: "run" as Id<"runs">,
     _creationTime: 0,
     access: { integrations: [], web: false },
-    automation: { id: "automation" as Id<"automations">, version: 2 },
+    job: { id: "job" as Id<"jobs">, version: 2 },
     cause: { type: "time", scheduledAt: 0 },
     createdAt: 0,
     principal: {
@@ -32,8 +32,8 @@ function automationRun(): Doc<"runs"> {
     audience: "person",
     snapshot: {
       context: [],
-      source: { type: "automation" },
-      title: "Automation",
+      source: { type: "job" },
+      title: "Job",
     },
     status: "running",
     organizationId: "organization",

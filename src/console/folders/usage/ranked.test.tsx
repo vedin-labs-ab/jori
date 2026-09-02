@@ -59,7 +59,7 @@ test("a source row reads its runs, its money, and its share of the window", () =
     <UsageContributors
       automations={[
         {
-          id: "automations:1" as UsageContributor["id"],
+          id: "jobs:1" as UsageContributor["id"],
           label: "Morning digest",
           micros: 1_800_000,
           ended: 12,

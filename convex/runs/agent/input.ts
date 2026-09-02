@@ -24,8 +24,8 @@ export type MessageRuntimeInput = {
   workstreams: WorkstreamContext[] | null
 }
 
-export type AutomationRuntimeInput = {
-  type: "automation"
+export type JobRuntimeInput = {
+  type: "job"
   access: Access
   instructions: string
   run: Doc<"runs">
@@ -51,7 +51,7 @@ export type InstructionRuntimeInput = {
 }
 
 export type AgentRuntimeInput =
-  | AutomationRuntimeInput
+  | JobRuntimeInput
   | InstructionRuntimeInput
   | MessageRuntimeInput
 

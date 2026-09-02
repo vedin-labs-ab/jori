@@ -4,7 +4,6 @@ import {
   cancelApprovalRequest,
   isCancelApprovalTool,
 } from "../approvals/cancel"
-import { callJoriAutomationTool } from "../automations/mcp"
 import { callJoriFileTool, isJoriFileTool } from "../files/mcp"
 import {
   callIntegrationOfferTool,
@@ -13,6 +12,7 @@ import {
   isIntegrationOfferTool,
 } from "../integrations/offers/mcp"
 import { tryDeliverSlackIntegrationOffer } from "../integrations/slack/offers/delivery"
+import { callJoriJobTool } from "../jobs/mcp"
 import {
   callRunIntrospectionTool,
   isRunIntrospectionTool,
@@ -72,7 +72,7 @@ export async function callJoriTool(
     return await callWorkstreamTool(ctx, run, request)
   }
 
-  return await callJoriAutomationTool(ctx, toJoriContext(run), request)
+  return await callJoriJobTool(ctx, toJoriContext(run), request)
 }
 
 function isBrokerScopedJoriTool(tool: string) {
@@ -118,9 +118,9 @@ type JoriRunContext = {
   organizationId: string
   principal: ExecutionPrincipal
   _id?: Id<"runs">
-  automation?: {
-    id: Id<"automations">
-    parentId?: Id<"automations">
+  job?: {
+    id: Id<"jobs">
+    parentId?: Id<"jobs">
     version?: number
   }
 }
@@ -130,12 +130,12 @@ function toJoriContext(run: JoriRunContext) {
     organizationId: run.organizationId,
     createdBy: executionPrincipalPersonId(run.principal),
     runId: run._id,
-    automation:
-      run.automation === undefined
+    job:
+      run.job === undefined
         ? undefined
         : {
-            id: run.automation.parentId ?? run.automation.id,
-            version: run.automation.version,
+            id: run.job.parentId ?? run.job.id,
+            version: run.job.version,
           },
   }
 }

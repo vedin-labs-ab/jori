@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { readAutomationEventsForMessage } from "./events"
+import { readJobEventsForMessage } from "./events"
 
-describe("Slack and GitHub message automation event projection", () => {
+describe("Slack and GitHub message job event projection", () => {
   test("projects Slack messages to channel message events", () => {
     expect(
-      readAutomationEventsForMessage({
+      readJobEventsForMessage({
         integration: integration("slack"),
         message: {
           externalId: "slack:T123:1",
@@ -22,7 +22,7 @@ describe("Slack and GitHub message automation event projection", () => {
 
   test("projects GitHub issue comments to created issue match", () => {
     expect(
-      readAutomationEventsForMessage({
+      readJobEventsForMessage({
         integration: integration("github"),
         message: {
           externalId: "github:1:delivery",
@@ -45,7 +45,7 @@ describe("Slack and GitHub message automation event projection", () => {
 
   test("projects GitHub pull request comments to edited pull request match", () => {
     expect(
-      readAutomationEventsForMessage({
+      readJobEventsForMessage({
         integration: integration("github"),
         message: {
           externalId: "github:1:delivery",
@@ -67,10 +67,10 @@ describe("Slack and GitHub message automation event projection", () => {
   })
 })
 
-describe("review and Linear message automation event projection", () => {
+describe("review and Linear message job event projection", () => {
   test("projects GitHub review comments to pull request path match", () => {
     expect(
-      readAutomationEventsForMessage({
+      readJobEventsForMessage({
         integration: integration("github"),
         message: {
           externalId: "github:1:review",
@@ -93,7 +93,7 @@ describe("review and Linear message automation event projection", () => {
 
   test("projects Linear created comments with team and project match", () => {
     expect(
-      readAutomationEventsForMessage({
+      readJobEventsForMessage({
         integration: integration("linear"),
         message: {
           externalId: "linear:org:comment",
@@ -119,7 +119,7 @@ describe("review and Linear message automation event projection", () => {
 
   test("projects Linear updated comments as edited events", () => {
     expect(
-      readAutomationEventsForMessage({
+      readJobEventsForMessage({
         integration: integration("linear"),
         message: {
           externalId: "linear:org:comment",

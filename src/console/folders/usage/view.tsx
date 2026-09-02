@@ -142,7 +142,7 @@ function UsageBody({
             title="Spend by source"
           />
           <UsageContributors
-            automations={usage.automations}
+            automations={usage.jobs}
             total={usage.totals.micros}
           />
         </Section>

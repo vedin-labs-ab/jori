@@ -15,7 +15,7 @@ import { type SeededRun } from "./runs"
 
 type Bucket = Pick<
   Doc<"usage">,
-  | "automation"
+  | "job"
   | "date"
   | "folderId"
   | "key"
@@ -61,20 +61,17 @@ export async function seedUsage(
 /** The tuple a run's day is filed under, read off the run exactly as the
  *  product reads it. */
 async function attribute(ctx: MutationCtx, run: Doc<"runs">) {
-  const automation =
-    run.automation === undefined
-      ? undefined
-      : await ctx.db.get(run.automation.id)
+  const job = run.job === undefined ? undefined : await ctx.db.get(run.job.id)
 
   return {
     date: usageDate(run.createdAt, seedTimezone),
     folderId: run.folderId,
-    automation:
-      run.automation === undefined
+    job:
+      run.job === undefined
         ? undefined
         : {
-            id: run.automation.id,
-            label: automation?.name ?? run.snapshot.title,
+            id: run.job.id,
+            label: job?.name ?? run.snapshot.title,
           },
     personId: run.createdBy,
     surface: run.snapshot.source.surface ?? ("jori" as const),

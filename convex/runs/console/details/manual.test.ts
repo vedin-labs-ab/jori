@@ -3,14 +3,14 @@ import { type Id } from "../../../_generated/dataModel"
 import { type QueryCtx } from "../../../_generated/server"
 import { summarizeRun } from "../summaries"
 
-// A "Run now" / "Try once" run carries the automation's schedule + status in
+// A "Run now" / "Try once" run carries the job's schedule + status in
 // its snapshot, but it was triggered by hand, not by the schedule.
 test("a manual run drops the schedule and reads 'you' for the viewer", async () => {
   const run = manualRun("albin")
   const summary = await summarizeRun(fakeCtx({ run }), run, asPerson("albin"))
 
   expect(summary.source).toEqual({
-    type: "automation",
+    type: "job",
     surface: "jori",
     trigger: { actor: { type: "user", label: "you" } },
   })
@@ -56,7 +56,7 @@ function manualRun(personId: string) {
     cause: { type: "manual", personId },
     snapshot: {
       title: "Morning brief",
-      source: { type: "automation", surface: "jori" },
+      source: { type: "job", surface: "jori" },
       context: [
         { type: "schedule", label: "Weekdays at 06:00 UTC" },
         { type: "status", label: "Paused" },

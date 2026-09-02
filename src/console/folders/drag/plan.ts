@@ -22,7 +22,7 @@ export type FolderDragPayload = {
 
 export type ResourceDragPayload = {
   kind: "resource"
-  type: "table" | "store" | "file" | "automation"
+  type: "table" | "store" | "file" | "job"
   id: string
   name: string
   mimeType?: string

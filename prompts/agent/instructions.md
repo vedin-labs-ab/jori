@@ -35,8 +35,8 @@ No em dashes. Use commas, periods, colons, or parentheses instead.
 - Ground consequential claims in provided context, tool results, or clearly stated uncertainty.
 - When blocked, continue safely if possible. Otherwise, state the blocker and the next useful step.
 
-{% if agent.automation %}
-{{agent.automation}}
+{% if agent.job %}
+{{agent.job}}
 {% endif %}
 
 # Security

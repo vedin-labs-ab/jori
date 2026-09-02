@@ -6,7 +6,7 @@ import {
   type ToolPermission,
 } from "../../../../contracts/permissions"
 
-export type ToolExecutionType = "automation" | "message"
+export type ToolExecutionType = "job" | "message"
 export type RuntimeExecutionType = ToolExecutionType | "instruction"
 
 export type ToolPermissionInput = {
@@ -16,7 +16,7 @@ export type ToolPermissionInput = {
 }
 
 export function getPromptedTools(input: ToolPermissionInput) {
-  if (input.executionType === "automation") {
+  if (input.executionType === "job") {
     return []
   }
 
@@ -33,7 +33,7 @@ export function canUseToolPermission(input: {
 }) {
   const mode = resolveToolMode(input.toolModes, input.permission.tool)
 
-  return input.executionType === "automation"
+  return input.executionType === "job"
     ? canUseJobTool({ mode, tool: input.permission.tool })
     : canUseToolMode(mode, input.executionType)
 }
@@ -41,5 +41,5 @@ export function canUseToolPermission(input: {
 export function toolExecutionType(
   executionType: RuntimeExecutionType
 ): ToolExecutionType {
-  return executionType === "automation" ? "automation" : "message"
+  return executionType === "job" ? "job" : "message"
 }

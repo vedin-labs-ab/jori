@@ -1,7 +1,7 @@
 import { sha256Hex } from "../../shared/crypto"
 
 // Calendar events carry a server-computed identity so every reader — planner
-// runs and delivery automations — sees the same key and change
+// runs and delivery jobs — sees the same key and change
 // detector for the same provider data, with no client-side hashing.
 
 /** Content that identifies change. Providers extract these from their native

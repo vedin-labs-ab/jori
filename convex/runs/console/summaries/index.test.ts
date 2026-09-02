@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
 import {
-  automationDisplay,
-  eventAutomationDisplay,
+  eventJobDisplay,
   fakeQueryCtx,
+  jobDisplay,
   messageDisplay,
 } from "../../../../test/convex/console"
 import { id } from "../../../../test/convex/database"
@@ -10,15 +10,15 @@ import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
-test("uses stored automation snapshots when the automation document is unavailable", async () => {
+test("uses stored job snapshots when the job document is unavailable", async () => {
   const run = testRun({
-    automation: { id: "missing-automation" },
+    job: { id: "missing-job" },
     cause: { type: "event", eventId: "event" },
     title: "Deep analysis",
     instructions: "Perform the deep analysis.",
     snapshot: {
       title: "Deep analysis",
-      ...eventAutomationDisplay({
+      ...eventJobDisplay({
         context: [{ type: "channel", label: "C123" }],
         surface: "slack",
       }),
@@ -31,7 +31,7 @@ test("uses stored automation snapshots when the automation document is unavailab
   expect(summary.searchableText).toContain("perform the deep analysis")
   expect("promptUrl" in summary).toBe(false)
   expect(summary.source).toEqual({
-    type: "automation",
+    type: "job",
     surface: "slack",
   })
   expect(summary.details).toContainEqual({ type: "channel", label: "C123" })
@@ -66,7 +66,7 @@ test("summarizes event source labels from already-loaded event context", async (
     cause: { type: "event", eventId: "event" },
     snapshot: {
       title: "Review the pull request comment.",
-      ...eventAutomationDisplay({
+      ...eventJobDisplay({
         context: [{ type: "repository", label: "frontier" }],
         surface: "github",
       }),
@@ -94,7 +94,7 @@ test("summarizes event source labels from already-loaded event context", async (
       type: "pull_request.review_comment.created",
     },
     surface: "github",
-    type: "automation",
+    type: "job",
   })
 })
 
@@ -178,24 +178,24 @@ test("summarizes mention runs with source task links", async () => {
   ])
 })
 
-test("keeps stored automation snapshots when the automation changes", async () => {
+test("keeps stored job snapshots when the job changes", async () => {
   const run = testRun({
-    automation: { id: "automation" },
+    job: { id: "job" },
     cause: { type: "time", scheduledAt: 0 },
-    instructions: "Original automation instructions.",
+    instructions: "Original job instructions.",
     snapshot: {
-      title: "Original automation name",
-      ...automationDisplay(),
+      title: "Original job name",
+      ...jobDisplay(),
     },
   })
   const summary = await summarizeRun(
     fakeQueryCtx({
-      automation: {
-        _id: "automation",
+      job: {
+        _id: "job",
         _creationTime: 0,
         organizationId: "organization",
-        name: "Updated automation name",
-        instructions: "Updated automation instructions.",
+        name: "Updated job name",
+        instructions: "Updated job instructions.",
         trigger: { type: "time" },
         access: { integrations: [] },
         createdBy: "person" as Id<"persons">,
@@ -207,10 +207,10 @@ test("keeps stored automation snapshots when the automation changes", async () =
     run
   )
 
-  expect(summary.title).toBe("Original automation name")
-  expect(summary.task).toBe("Original automation instructions.")
+  expect(summary.title).toBe("Original job name")
+  expect(summary.task).toBe("Original job instructions.")
   expect(summary.source).toEqual({
-    type: "automation",
+    type: "job",
   })
 })
 

@@ -1,6 +1,6 @@
 import { type VisibilityMode } from "../../contracts/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { canSeeAutomation } from "../automations/access"
+import { canSeeJob } from "../jobs/access"
 import { withOwnerDisplays } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
@@ -22,19 +22,19 @@ type Viewer = {
 }
 
 export type FolderResource = {
-  type: "table" | "store" | "file" | "automation"
-  id: Id<"collections"> | Id<"files"> | Id<"automations">
+  type: "table" | "store" | "file" | "job"
+  id: Id<"collections"> | Id<"files"> | Id<"jobs">
   name: string
   visibility: VisibilityMode
   updatedAt: number
   /** Who the row belongs to. Absent for the kinds no person owns — an
-   *  automation, or a file an agent run saved — which read as Jori's own. */
+   *  job, or a file an agent run saved — which read as Jori's own. */
   ownerId?: Id<"persons">
   ownerName?: string
   ownerImage?: string
   mimeType?: string
   size?: number
-  status?: Doc<"automations">["status"]
+  status?: Doc<"jobs">["status"]
 }
 
 /** The folders one level below a parent — the root when none — each carrying
@@ -217,7 +217,7 @@ async function sightedResources(
   const resources = [
     ...(await folderCollections(ctx, sight, folderId)),
     ...(await folderFiles(ctx, sight, folderId)),
-    ...(await folderAutomations(ctx, sight, folderId)),
+    ...(await folderJobs(ctx, sight, folderId)),
   ]
 
   return resources.sort(byName)
@@ -282,23 +282,23 @@ async function folderFiles(
   return listed
 }
 
-/** Automations carry no owner: a shared one runs as the organization, so
- *  the listing shows every automation as Jori's own work. */
-async function folderAutomations(
+/** Jobs carry no owner: a shared one runs as the organization, so
+ *  the listing shows every job as Jori's own work. */
+async function folderJobs(
   ctx: QueryLikeCtx,
   sight: Sight,
   folderId: Id<"folders">
 ): Promise<FolderResource[]> {
   const rows = await ctx.db
-    .query("automations")
+    .query("jobs")
     .withIndex("by_folder", (index) => index.eq("folderId", folderId))
     .take(contentsCap)
   const listed: FolderResource[] = []
 
   for (const row of rows) {
-    if (await canSeeAutomation(sight, row)) {
+    if (await canSeeJob(sight, row)) {
       listed.push({
-        type: "automation",
+        type: "job",
         id: row._id,
         name: row.name,
         visibility: row.visibility.mode,

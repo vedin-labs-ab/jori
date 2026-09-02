@@ -2,7 +2,7 @@ import { type WithoutSystemFields } from "convex/server"
 import { testOwner } from "./collections"
 
 // Row fixtures for folder unit tests running against the in-memory
-// database: folders themselves plus filable files and automations.
+// database: folders themselves plus filable files and jobs.
 // Collection rows come from ./collections. Overrides refine any field of
 // the row, so a field the schema has retired fails typecheck instead of
 // passing silently.
@@ -10,15 +10,15 @@ import { testOwner } from "./collections"
 // dataModel only ships types, so it is referenced through import types: a
 // value-position import statement would survive transpilation and fail to
 // resolve at test runtime.
-type Doc<TableName extends "automations" | "files" | "folders"> =
+type Doc<TableName extends "jobs" | "files" | "folders"> =
   import("../../convex/_generated/dataModel").Doc<TableName>
-type Overrides<TableName extends "automations" | "files" | "folders"> = Partial<
+type Overrides<TableName extends "jobs" | "files" | "folders"> = Partial<
   WithoutSystemFields<Doc<TableName>>
 >
 
 export type FolderOverrides = Overrides<"folders">
 export type FileOverrides = Overrides<"files">
-export type AutomationOverrides = Overrides<"automations">
+export type JobOverrides = Overrides<"jobs">
 
 export function folderDoc(overrides: FolderOverrides = {}) {
   return {
@@ -47,7 +47,7 @@ export function fileDoc(overrides: FileOverrides = {}) {
   }
 }
 
-export function automationDoc(overrides: AutomationOverrides = {}) {
+export function jobDoc(overrides: JobOverrides = {}) {
   return {
     organizationId: "org",
     name: "Digest",

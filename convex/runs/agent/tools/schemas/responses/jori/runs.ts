@@ -21,7 +21,7 @@ function runSummarySchema(): JsonSchema {
       trigger: stringProperty("What triggered the run."),
       audience: stringProperty("Audience of the run."),
       status: enumProperty(runStatuses, "Where the run is in its lifecycle."),
-      source: stringProperty("Surface or automation the run came from."),
+      source: stringProperty("Surface or job the run came from."),
       context: arrayProperty("Context labels for the run.", {
         type: "object",
         additionalProperties: true,

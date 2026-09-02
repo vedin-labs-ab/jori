@@ -29,8 +29,8 @@ export const getInputByRun = internalQuery({
       return await getMessageInput(ctx, { run })
     }
 
-    if (run.automation !== undefined && run.parentId === undefined) {
-      return await getAutomationInput(ctx, { run })
+    if (run.job !== undefined && run.parentId === undefined) {
+      return await getJobInput(ctx, { run })
     }
 
     return await getInstructionInput(ctx, { run })
@@ -82,13 +82,13 @@ async function getMessageInput(
   }
 }
 
-async function getAutomationInput(
+async function getJobInput(
   ctx: QueryCtx,
   args: {
     run: Doc<"runs">
   }
 ) {
-  if (args.run.automation === undefined) {
+  if (args.run.job === undefined) {
     return null
   }
 
@@ -122,7 +122,7 @@ async function getAutomationInput(
   )
 
   return {
-    type: "automation" as const,
+    type: "job" as const,
     access,
     instructions,
     run: args.run,

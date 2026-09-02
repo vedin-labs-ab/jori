@@ -4,7 +4,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveRunAudience } from "./audience"
 
-test("resolves conversation and automation audiences", async () => {
+test("resolves conversation and job audiences", async () => {
   const ctx = { db: { get: async () => null } } as unknown as MutationCtx
 
   await expect(
@@ -27,13 +27,13 @@ test("resolves conversation and automation audiences", async () => {
   })
   await expect(
     resolveRunAudience(ctx, {
-      origin: { automation: automation() },
+      origin: { job: job() },
       run: {},
     })
   ).resolves.toEqual({ audience: "person" })
   await expect(
     resolveRunAudience(ctx, {
-      origin: { automation: automation("organization") },
+      origin: { job: job("organization") },
       run: {},
     })
   ).resolves.toEqual({ audience: "organization" })
@@ -52,16 +52,16 @@ function conversation(
   }
 }
 
-function automation(
-  visibility: Doc<"automations">["visibility"]["mode"] = "private"
-): Doc<"automations"> {
+function job(
+  visibility: Doc<"jobs">["visibility"]["mode"] = "private"
+): Doc<"jobs"> {
   return {
     _creationTime: 0,
-    _id: id<"automations">("automation"),
+    _id: id<"jobs">("job"),
     access: { integrations: [], web: false },
     createdAt: 0,
     instructions: "Do it",
-    name: "Automation",
+    name: "Job",
     principal:
       visibility === "organization"
         ? { kind: "organization" }
@@ -71,6 +71,6 @@ function automation(
     trigger: { at: 1 },
     type: "once",
     updatedAt: 0,
-    visibility: { mode: visibility } as Doc<"automations">["visibility"],
+    visibility: { mode: visibility } as Doc<"jobs">["visibility"],
   }
 }

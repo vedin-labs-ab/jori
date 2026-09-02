@@ -99,11 +99,11 @@ function createRunInstructions(
 }
 
 function createTriggerPart(input: AgentRuntimeInput) {
-  if (input.type === "automation") {
+  if (input.type === "job") {
     return appendInstructions(
       renderPromptTemplate(
-        promptTemplates["agent/context/trigger/automation"],
-        createAutomationValues(input)
+        promptTemplates["agent/context/trigger/job"],
+        createJobValues(input)
       ),
       input.instructions
     )
@@ -151,15 +151,13 @@ function createMessageValues(
   }
 }
 
-function createAutomationValues(
-  input: Extract<AgentRuntimeInput, { type: "automation" }>
-) {
+function createJobValues(input: Extract<AgentRuntimeInput, { type: "job" }>) {
   return {
-    automation: {
-      id: input.run.automation?.id,
+    job: {
+      id: input.run.job?.id,
       name: input.run.snapshot.title,
       cause: input.run.cause.type,
-      trigger: formatAutomationTrigger(input),
+      trigger: formatJobTrigger(input),
     },
     event:
       input.event === null
@@ -170,9 +168,7 @@ function createAutomationValues(
   }
 }
 
-function formatAutomationTrigger(
-  input: Extract<AgentRuntimeInput, { type: "automation" }>
-) {
+function formatJobTrigger(input: Extract<AgentRuntimeInput, { type: "job" }>) {
   const cause = input.run.cause
 
   if (cause.type === "time") {

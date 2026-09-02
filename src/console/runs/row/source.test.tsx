@@ -10,7 +10,7 @@ test("renders only the audience for source without provider context", () => {
     <SourceLine
       audience="personal"
       source={{
-        type: "automation",
+        type: "job",
       }}
     />
   )
@@ -22,7 +22,7 @@ test("renders nothing when the audience is omitted and context is empty", () => 
   const { container } = render(
     <SourceLine
       source={{
-        type: "automation",
+        type: "job",
       }}
     />
   )
@@ -75,7 +75,7 @@ test("renders source kind and event labels", () => {
         },
         kind: { label: "mention", type: "mention" },
         surface: "github",
-        type: "automation",
+        type: "job",
       }}
     />
   )
@@ -91,7 +91,7 @@ test("renders Jori source labels", () => {
     <SourceLine
       audience="personal"
       source={{
-        type: "automation",
+        type: "job",
         surface: "jori",
       }}
     />
@@ -109,7 +109,7 @@ test("renders recurring automation source details", () => {
       source={{
         kind: { label: "recurring", type: "recurring" },
         surface: "jori",
-        type: "automation",
+        type: "job",
       }}
     />
   )
@@ -159,7 +159,7 @@ test("renders GitHub source details compactly", () => {
           type: "pull_request.review_comment.created",
         },
         surface: "github",
-        type: "automation",
+        type: "job",
       }}
     />
   )
@@ -176,7 +176,7 @@ test("renders stopped actors", () => {
     <SourceLine
       audience="personal"
       source={{
-        type: "automation",
+        type: "job",
         stop: {
           actor: { type: "user", label: "albin@example.com" },
         },

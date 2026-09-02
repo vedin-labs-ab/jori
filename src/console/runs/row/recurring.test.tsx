@@ -19,7 +19,7 @@ test("renders recurring automation details", async () => {
       title: "Daily image",
       source: {
         kind: { label: "recurring", type: "recurring" },
-        type: "automation",
+        type: "job",
         surface: "jori",
       },
       details: [

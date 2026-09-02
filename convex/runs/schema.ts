@@ -37,7 +37,7 @@ const runSnapshot = v.object({
   title: v.string(),
   source: v.object({
     type: v.union(
-      v.literal("automation"),
+      v.literal("job"),
       v.literal("event"),
       v.literal("manual"),
       v.literal("message")
@@ -99,14 +99,14 @@ export const toolSnapshot = v.object({
 
 export const runs = defineTable({
   organizationId: v.string(),
-  /** The automation this run answers to; absent for interactive work.
-   *  `parentId` is the durable automation owning a one-shot child, and
+  /** The job this run answers to; absent for interactive work.
+   *  `parentId` is the durable job owning a one-shot child, and
    *  `version` the configuration generation the run's access was taken from —
-   *  the parent's for owned children, the automation's own otherwise. */
-  automation: v.optional(
+   *  the parent's for owned children, the job's own otherwise. */
+  job: v.optional(
     v.object({
-      id: v.id("automations"),
-      parentId: v.optional(v.id("automations")),
+      id: v.id("jobs"),
+      parentId: v.optional(v.id("jobs")),
       version: v.optional(v.number()),
     })
   ),
@@ -118,7 +118,7 @@ export const runs = defineTable({
   principal: executionPrincipalValidator,
   instructions: v.optional(v.string()),
   /**
-   * Tool contract for this run. Automation and child runs snapshot their
+   * Tool contract for this run. Job and child runs snapshot their
    * access; unbound interactive runs may omit it to use the principal's full
    * tool surface.
    */
@@ -131,7 +131,7 @@ export const runs = defineTable({
   result: v.optional(v.string()),
   createdBy: v.optional(v.id("persons")),
   /** The folder whose usage this run's cost answers to, resolved once from
-   *  the automation's filing when the run is created. Absent for interactive
+   *  the job's filing when the run is created. Absent for interactive
    *  work, which is filed nowhere and rolls up unfiled. */
   folderId: v.optional(v.id("folders")),
   createdAt: v.number(),

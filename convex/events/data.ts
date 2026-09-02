@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { startEventAutomations } from "../automations/lifecycle"
+import { startEventJobs } from "../jobs/lifecycle"
 import { actorIdentityProvider } from "../persons/identity/schema"
 import { resolveActor } from "../persons/resolve"
 import { normalizeEventData } from "./payload"
@@ -36,12 +36,12 @@ export async function recordEvent(
   return {
     status: "recorded",
     eventId: event._id,
-    runIds: await startEventAutomations(ctx, { event, now }),
+    runIds: await startEventJobs(ctx, { event, now }),
   }
 }
 
-// Historical imports feed deduction, never automations: replaying a month of
-// activity through event triggers would fire every automation retroactively.
+// Historical imports feed deduction, never jobs: replaying a month of
+// activity through event triggers would fire every job retroactively.
 // observedAt is required because backfilled rows are the one case where the
 // ingestion-time fallback would date all of history as today.
 export async function recordBackfillEvent(
