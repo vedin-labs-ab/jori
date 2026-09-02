@@ -27,7 +27,7 @@ type SlackResponse = {
 // a single-use refresh token for the bot and the authed user separately. Both
 // are optional on the wire so a response missing them fails at the install
 // site with a clear message rather than silently storing half a credential.
-export type SlackTokenResponse =
+type SlackTokenResponse =
   | {
       ok: true
       access_token: string
@@ -53,7 +53,7 @@ export type SlackTokenResponse =
     }
 
 /** A rotation exchange answers with one flat pair, whichever token was sent. */
-export type SlackRefreshResponse =
+type SlackRefreshResponse =
   | {
       ok: true
       access_token: string
@@ -87,7 +87,7 @@ export function requireSlackClientId() {
   return requireEnvironmentVariable("SLACK_CLIENT_ID")
 }
 
-export function requireSlackClientSecret() {
+function requireSlackClientSecret() {
   return requireEnvironmentVariable("SLACK_CLIENT_SECRET")
 }
 

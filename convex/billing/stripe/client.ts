@@ -2,7 +2,7 @@ import { requireStripeSecretKey } from "./config"
 
 const baseUrl = "https://api.stripe.com"
 
-export type StripeParams = {
+type StripeParams = {
   [key: string]: string | number | boolean | StripeParams | undefined
 }
 
@@ -60,7 +60,7 @@ function readStripeError(payload: Record<string, unknown>) {
 }
 
 /** Stripe's bracket form encoding: nested objects become `parent[child]`. */
-export function encodeForm(
+function encodeForm(
   params: StripeParams,
   prefix = "",
   form = new URLSearchParams()

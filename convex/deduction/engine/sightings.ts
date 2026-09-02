@@ -37,7 +37,7 @@ type EvidenceReference = ReturnType<typeof toReference>
 
 // The integration behind a citation, resolved once at write time so reads
 // never walk the reference chain. Effort references carry none.
-export async function citedIntegration(
+async function citedIntegration(
   ctx: MutationCtx,
   reference: EvidenceReference
 ): Promise<Integration | undefined> {
@@ -111,7 +111,7 @@ export async function moveEffort(
   }
 }
 
-export async function stampEffortRows(
+async function stampEffortRows(
   ctx: MutationCtx,
   effortId: Id<"efforts">,
   workstreamId: Id<"beliefs"> | undefined

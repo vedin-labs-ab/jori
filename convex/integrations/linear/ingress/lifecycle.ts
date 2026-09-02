@@ -8,7 +8,7 @@ import { type EventData } from "../../../events/schema"
 import { type Actor, createIntegrationActor } from "../../../shared/actor"
 import { type LinearWebhookPayload } from "./events"
 
-export type LinearLifecycleEvent = {
+type LinearLifecycleEvent = {
   accountId: string
   key: string
   type: string

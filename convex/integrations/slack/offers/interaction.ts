@@ -11,7 +11,7 @@ import { readFirstAction, readNestedString } from "../ingress/actions"
 export const integrationOfferOpenActionId = "jori_integration_offer_open"
 export const integrationOfferCancelActionId = "jori_integration_offer_cancel"
 
-export type SlackIntegrationOfferCancelInteraction = {
+type SlackIntegrationOfferCancelInteraction = {
   accountId: string
   actorId?: string
   channelId: string

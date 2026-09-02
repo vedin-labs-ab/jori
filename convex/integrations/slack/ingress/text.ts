@@ -3,7 +3,7 @@ import { withUnicodeEmoji } from "../../../../contracts/emoji/convert"
 // Renders raw Slack mrkdwn as the human-readable text stored on messages:
 // mention/link/special tokens become labels, entities unescape, and known
 // emoji shortcodes become unicode.
-export type SlackTextEntities = {
+type SlackTextEntities = {
   channels: ReadonlyMap<string, string>
   users: ReadonlyMap<string, string>
 }

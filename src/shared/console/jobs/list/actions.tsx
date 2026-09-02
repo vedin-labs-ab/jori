@@ -23,7 +23,7 @@ import { type Job, jobControlAction } from "../types"
 // edits all of it — schedule, instructions, access — so the item
 // is plain "Edit" rather than the materials' "Edit details".
 
-export type JobMenuActions = {
+type JobMenuActions = {
   isControlling: boolean
   isDeleting: boolean
   onDeleteRequest: () => void
@@ -35,7 +35,7 @@ export type JobMenuActions = {
   job: Job
 }
 
-export function JobMenuItems({
+function JobMenuItems({
   isControlling,
   isDeleting,
   onDeleteRequest,

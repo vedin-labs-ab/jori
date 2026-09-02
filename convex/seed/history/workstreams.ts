@@ -21,7 +21,7 @@ export type SeedEffort = {
   journal: [days: number, entry: string][]
 }
 
-export type SeedWorkstream = {
+type SeedWorkstream = {
   name: string
   brief: string
   aliases: string[]

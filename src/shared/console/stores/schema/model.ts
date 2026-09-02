@@ -10,7 +10,7 @@ export type FieldItemType =
   | "object"
   | "string"
 
-export type FieldType = FieldItemType | "array"
+type FieldType = FieldItemType | "array"
 
 export type SchemaField = {
   id: string

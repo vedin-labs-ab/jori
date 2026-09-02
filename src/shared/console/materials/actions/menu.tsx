@@ -14,7 +14,7 @@ import { ConfirmRemoveDialog } from "./confirm"
 // name in the breadcrumb, a list row off its "…" button. Both own the
 // confirmation the archive and delete steps pass through.
 
-export type MaterialMenuProps = MaterialMenuActions & {
+type MaterialMenuProps = MaterialMenuActions & {
   /** What a permanent delete takes with it, shown in the confirm dialog. */
   deleteDescription: string
   noun: string

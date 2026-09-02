@@ -8,7 +8,7 @@ import { collectFieldErrors, type SchemaField } from "./model"
 // cross between. Name errors stay hidden until a submit attempt and clear
 // as soon as the offending input changes.
 
-export type SchemaEditorState = {
+type SchemaEditorState = {
   /** The builder's rows, or undefined for a stored schema whose features
    *  the rows cannot represent. */
   fields: SchemaField[] | undefined
@@ -18,14 +18,14 @@ export type SchemaEditorState = {
   submitError: string | undefined
 }
 
-export type SchemaSubmitResult = { ok: true; schema: unknown } | { ok: false }
+type SchemaSubmitResult = { ok: true; schema: unknown } | { ok: false }
 
 export type SchemaEditor = ReturnType<typeof useSchemaEditor>
 
 /** Seed the builder from an existing schema. No schema starts with no
  *  rows; one written outside the builder starts with none at all, and
  *  only reads. */
-export function editorStateForSchema(
+function editorStateForSchema(
   schema: JsonSchemaObject | undefined
 ): SchemaEditorState {
   return {

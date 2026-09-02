@@ -1,4 +1,4 @@
-export type SlackCardIcon =
+type SlackCardIcon =
   | {
       name: string
       type: "icon"
@@ -9,7 +9,7 @@ export type SlackCardIcon =
       type: "image"
     }
 
-export type SlackCardText = {
+type SlackCardText = {
   text: string
   type: "mrkdwn"
   verbatim: false
@@ -38,7 +38,7 @@ export function createSlackCard(args: {
   }
 }
 
-export function markdownText(text: string): SlackCardText {
+function markdownText(text: string): SlackCardText {
   return {
     type: "mrkdwn",
     text,

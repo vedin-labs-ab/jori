@@ -2,7 +2,7 @@ import { interactiveGraceMicros } from "../../contracts/billing"
 import { type MutationCtx } from "../_generated/server"
 import { availableMicros, ensureAccount } from "./account"
 
-export type RunBudget =
+type RunBudget =
   | { ok: true }
   | { ok: false; reason: "trial-ended" | "paused" | "out-of-usage" }
 

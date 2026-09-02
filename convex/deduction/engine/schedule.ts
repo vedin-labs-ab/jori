@@ -8,7 +8,7 @@ import {
 } from "../limits"
 import { type PassScope, type PassStage } from "../schema"
 
-export type PassWindow = { start: number; end: number }
+type PassWindow = { start: number; end: number }
 
 // Only the effort stage reads raw activity in volume, so only it walks the
 // bootstrap in chunks; belief stages read the bounded effort layer and can

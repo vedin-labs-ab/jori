@@ -2,11 +2,11 @@ import { jobEventMatchKey } from "../../contracts/jobs/events"
 import { getNextCronRunAt } from "../../contracts/jobs/schedule/cron"
 import { type Doc } from "../_generated/dataModel"
 
-export type TimeTriggerInput =
+type TimeTriggerInput =
   | { type: "once"; at: string }
   | { type: "cron"; expression: string; timezone: string }
 
-export type TimeTrigger =
+type TimeTrigger =
   | Extract<Doc<"jobs">["trigger"], { at: number }>
   | Extract<Doc<"jobs">["trigger"], { nextAt: number }>
 

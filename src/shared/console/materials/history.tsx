@@ -16,7 +16,7 @@ import { absoluteTime, useNow } from "../time"
 export const sharePageSize = 8
 
 export type ShareRow = { shareId: string; createdAt: number; expiresAt: number }
-export type ShareStatus =
+type ShareStatus =
   | "LoadingFirstPage"
   | "CanLoadMore"
   | "LoadingMore"

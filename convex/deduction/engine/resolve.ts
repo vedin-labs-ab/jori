@@ -71,7 +71,7 @@ export async function loadBeliefSupport(
   return records
 }
 
-export async function loadEffortSupport(
+async function loadEffortSupport(
   ctx: QueryCtx,
   effortId: Id<"efforts">
 ): Promise<SupportRecord[]> {

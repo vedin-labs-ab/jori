@@ -29,7 +29,7 @@ import { FolderUsageHint } from "./usage/hint"
 
 /** Which of the folder's pages is being framed — the crumb ends at the
  *  folder itself, or carries on to what it costs. */
-export type FolderView = "contents" | "usage"
+type FolderView = "contents" | "usage"
 
 /** What a framed folder page is handed: the folder itself, the organization
  *  it belongs to, and the two ways into the dialogs the frame hosts. */

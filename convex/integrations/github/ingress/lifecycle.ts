@@ -8,7 +8,7 @@ import { type ActionCtx } from "../../../_generated/server"
 import { type EventData } from "../../../events/schema"
 import { type Actor, createIntegrationActor } from "../../../shared/actor"
 
-export type GitHubLifecycleEvent = {
+type GitHubLifecycleEvent = {
   accountId: string
   key: string
   type: string

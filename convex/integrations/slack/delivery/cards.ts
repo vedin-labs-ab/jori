@@ -3,7 +3,7 @@ import { readString } from "../../../shared/input"
 import { getSlackChannelId, getSlackMessageTs, getSlackThreadTs } from "../data"
 import { postSlackMessage, type SlackBlock } from "./messages"
 
-export type SlackCardTarget = {
+type SlackCardTarget = {
   channelId: string
   threadTs?: string
 }

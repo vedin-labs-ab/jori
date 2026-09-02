@@ -1,4 +1,4 @@
-export type ProviderCallbackStatus = "connected" | "error"
+type ProviderCallbackStatus = "connected" | "error"
 
 const callbackStateMaxAgeMs = 10 * 60 * 1000
 

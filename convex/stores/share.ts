@@ -106,7 +106,7 @@ export const get = query({
   },
 })
 
-export async function mintStoreShare(
+async function mintStoreShare(
   ctx: MutationCtx,
   args: {
     organizationId: string

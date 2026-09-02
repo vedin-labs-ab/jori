@@ -14,7 +14,7 @@ export type Team = {
   members: RosterMember[]
 }
 
-export type TeamPermissions = {
+type TeamPermissions = {
   canDelete: boolean
   canManageMembers: boolean
   canUpdate: boolean

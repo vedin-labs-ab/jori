@@ -1,6 +1,6 @@
 import { type Doc } from "../_generated/dataModel"
 
-export type ApprovalDecisionStatus =
+type ApprovalDecisionStatus =
   | "approved"
   | "cancelled"
   | "closed"

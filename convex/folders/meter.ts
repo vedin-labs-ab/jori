@@ -114,7 +114,7 @@ export async function readScopeRows(
 
 /** Work filed at the scope itself rather than in anything below it: the
  *  unfiled bucket across the organization, a folder's own rows inside one. */
-export const directSegment = "direct"
+const directSegment = "direct"
 
 /** Everything the chart cannot name: children past the palette, and
  *  children the viewer may not see, whose spend still has to land. */

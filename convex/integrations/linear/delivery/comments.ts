@@ -3,7 +3,7 @@ import { readRecord, requiredString } from "../../../shared/input"
 import { requireLinearCredentials } from "../credentials"
 import { linearGraphql } from "../graphql"
 
-export type LinearCommentTarget =
+type LinearCommentTarget =
   | {
       id: string
       issueId: string

@@ -1,7 +1,7 @@
 // The stores JSON editors share one contract: a parse either yields the
 // value or a message the field can show inline.
 
-export type JsonParseResult =
+type JsonParseResult =
   | { ok: true; value: unknown }
   | { ok: false; error: string }
 

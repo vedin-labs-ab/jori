@@ -7,7 +7,7 @@ import { WaitlistForm } from "./waitlist/form"
 
 /** The anchor every call to action points at. `MarketingShell` is what puts it
  *  on a page, so whether it exists is a fact the shell already knows. */
-export const waitlistAnchor = "waitlist"
+const waitlistAnchor = "waitlist"
 
 // Every marketing page ends on the same handshake.
 export function Closing({ lede }: { lede: string }) {

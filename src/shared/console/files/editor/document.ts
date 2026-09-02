@@ -8,7 +8,7 @@ import { type FileDetail } from "../types"
  *  always beats an error notice. */
 export const documentDeadline = 10_000
 
-export type DocumentState =
+type DocumentState =
   | { status: "error" }
   | { status: "loading" }
   | { status: "ready"; saved: string; seed: string }

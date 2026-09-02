@@ -10,7 +10,7 @@ import { linearOAuthRevokeUrl, linearOAuthTokenUrl } from "./config"
 import { requireLinearCredentials } from "./credentials"
 import { linearGraphql } from "./graphql"
 
-export type LinearTokenResponse =
+type LinearTokenResponse =
   | {
       access_token: string
       token_type: string
@@ -23,7 +23,7 @@ export type LinearTokenResponse =
       error_description?: string
     }
 
-export type LinearInstallationProfile = {
+type LinearInstallationProfile = {
   botId: string
   botName?: string
   organization: {

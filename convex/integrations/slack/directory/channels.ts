@@ -56,7 +56,7 @@ export async function resolveSlackChannelNames(
   return names
 }
 
-export async function fetchSlackChannelContext(
+async function fetchSlackChannelContext(
   integration: Doc<"integrations">,
   channelId: string
 ): Promise<SlackChannelContext | undefined> {

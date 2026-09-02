@@ -16,7 +16,7 @@ export type RecencyRun = {
   audience: Audience | undefined
 }
 
-export type RecencySummary = {
+type RecencySummary = {
   kind: "summary"
   ageMs: number
   conversationId: Id<"conversations">
@@ -25,7 +25,7 @@ export type RecencySummary = {
   summary: string
 }
 
-export type RecencyReference = {
+type RecencyReference = {
   kind: "reference"
   conversationId: Id<"conversations">
   identifiers: string[]

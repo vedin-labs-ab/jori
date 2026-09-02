@@ -1,6 +1,6 @@
 import { readProviderDataString } from "../connect/response"
 
-export type SlackChannelType = "channel" | "group" | "im" | "mpim" | "unknown"
+type SlackChannelType = "channel" | "group" | "im" | "mpim" | "unknown"
 
 export function getSlackBotUserId(data: unknown) {
   return readProviderDataString(data, "botUserId")

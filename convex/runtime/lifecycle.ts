@@ -3,7 +3,7 @@ import { type ToolAccess } from "../../contracts/permissions"
 import { withOptionalFieldGuidance } from "../runs/agent/tools/schemas"
 import { nativeToolUsage } from "./permissions/native"
 
-export type RunLifecycleTool = {
+type RunLifecycleTool = {
   access: ToolAccess
   description: string
   inputSchema: JsonObject

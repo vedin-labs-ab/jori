@@ -4,9 +4,7 @@ import { type TableColumn } from "./types"
 // cell shows and the typed value the column stores. An empty input clears
 // the cell (rows never store null), which required columns reject up front.
 
-export type CellParse =
-  | { ok: true; value: unknown }
-  | { ok: false; error: string }
+type CellParse = { ok: true; value: unknown } | { ok: false; error: string }
 
 /** Parsed value for a cell input; `value: undefined` means "clear". */
 export function parseCellText(column: TableColumn, text: string): CellParse {

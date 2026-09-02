@@ -40,7 +40,7 @@ export function AudienceLine({ audience, mode, viewerId }: AudienceProps) {
 /** Organization-wide reads as itself only where nothing narrows it; inside
  *  a narrowing folder the honest audience is that folder's. Grant-shaped
  *  audiences are counted, with the names a hover away. */
-export function AudienceSentence({ audience, mode, viewerId }: AudienceProps) {
+function AudienceSentence({ audience, mode, viewerId }: AudienceProps) {
   if (mode === "organization") {
     return audience.narrowedBy === null ? (
       "Visible to everyone in the organization."

@@ -6,7 +6,7 @@ import { type JsonObject } from "../../../contracts/json"
 import { type ToolSurface } from "../../shared/integrations"
 import { normalizeBrokerToolInput } from "../input"
 
-export type PromptedToolApproval = {
+type PromptedToolApproval = {
   surface: ToolSurface
   tool: string
   args: JsonObject

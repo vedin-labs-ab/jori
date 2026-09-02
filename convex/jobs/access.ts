@@ -22,7 +22,7 @@ import { type access, type accessInput } from "./schema"
 
 export type JobAccess = Infer<typeof access>
 export type JobAccessInput = Infer<typeof accessInput>
-export type AccessLevel = "none" | "read" | "write" | "both"
+type AccessLevel = "none" | "read" | "write" | "both"
 
 type JobGateDoc = Pick<
   Doc<"jobs">,
@@ -31,7 +31,7 @@ type JobGateDoc = Pick<
   Partial<Pick<Doc<"jobs">, "folderId">>
 
 /** A job's owner: the person it executes as, or its creator. */
-export function jobOwner(
+function jobOwner(
   job: Pick<Doc<"jobs">, "principal" | "createdBy">
 ): Id<"persons"> | undefined {
   return job.principal.kind === "person"
@@ -106,7 +106,7 @@ export async function resolveAccessInput(
   }
 }
 
-export async function requireJobAccessPolicy(
+async function requireJobAccessPolicy(
   ctx: QueryLikeCtx,
   args: {
     integrations: Array<{

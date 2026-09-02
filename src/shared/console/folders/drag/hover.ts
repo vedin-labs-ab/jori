@@ -4,7 +4,7 @@
 /** How long a drag dwells on a folder row before it auto-expands. */
 export const expandHoverDelay = 600
 
-export type HoverExpander = {
+type HoverExpander = {
   hover: (folderId: string | null) => void
   reset: () => void
 }

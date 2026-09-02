@@ -3,7 +3,7 @@
 // describes, the pricing argument the workstream cites. Every line is
 // backdated, so the deduction sweep sees a window it has already reviewed.
 
-export type SeedMessage = {
+type SeedMessage = {
   channel: string
   /** When it was said: days before the seed instant, then hour and minute. */
   at: [days: number, hour: number, minute: number]

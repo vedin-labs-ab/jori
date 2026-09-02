@@ -34,10 +34,7 @@ export function formatEvent(event: JobEvent, integration: string | undefined) {
   return text === null ? metadata : `${metadata}\n${text}`
 }
 
-export function targetLine(
-  label: string,
-  value: string | number | null | undefined
-) {
+function targetLine(label: string, value: string | number | null | undefined) {
   if (value === null || value === undefined || value === "") {
     return null
   }
@@ -45,7 +42,7 @@ export function targetLine(
   return `- ${label}: ${value}`
 }
 
-export function formatTargetLines(lines: Array<string | null>) {
+function formatTargetLines(lines: Array<string | null>) {
   const present = lines.filter((line) => line !== null)
 
   return present.length === 0 ? "- None" : present.join("\n")

@@ -9,7 +9,7 @@ import { type EffortOp } from "./contract"
 const entryDatePrefix =
   /^\s*\d{4}-\d{2}-\d{2}(?:\s*(?:to|through|[–—-])\s*\d{4}-\d{2}-\d{2})?\s*[:–—-]\s*/
 
-export function readEntry(value: unknown) {
+function readEntry(value: unknown) {
   const entry = readString(value)?.replace(entryDatePrefix, "")
 
   return entry === undefined || entry === "" ? undefined : entry

@@ -13,7 +13,7 @@ import { useZoom, type Zoom } from "./zoom"
 
 /** The kinds the inline viewer can render; text goes to the editor and
  *  everything else to the download fallback. */
-export type ViewerKind = Exclude<PreviewKind, "none" | "text">
+type ViewerKind = Exclude<PreviewKind, "none" | "text">
 
 /** Inline viewer for media files: the shared toolbar over one frame that
  *  every kind renders into. The frame holds the media hidden until it has

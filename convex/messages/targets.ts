@@ -8,7 +8,7 @@ import { readDataNumber, readDataObject, readDataString } from "../shared/data"
 
 export type ReplyTargetIdentifier = string
 
-export type LinearReplyTarget =
+type LinearReplyTarget =
   | {
       id: string
       issueId: string

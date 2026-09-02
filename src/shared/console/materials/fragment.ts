@@ -5,7 +5,7 @@ type MaterialLocation = Pick<Location, "hash" | "pathname" | "search">
 
 /** A successful member view no longer needs the capability secret carried
  *  in the URL fragment; drop it so copied URLs stay clean. */
-export function memberMaterialUrl(location: MaterialLocation) {
+function memberMaterialUrl(location: MaterialLocation) {
   if (parseShareFragment(location.hash) === null) {
     return null
   }

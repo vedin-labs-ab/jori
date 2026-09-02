@@ -17,7 +17,7 @@ type NotionParent = {
   type: string
 }
 
-export type NotionJobEvent = {
+type NotionJobEvent = {
   workspaceId: string
   key: string
   type: "comment.created" | "page.updated"

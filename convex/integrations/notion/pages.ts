@@ -74,7 +74,7 @@ export function notionPageTitle(object: Record<string, unknown>) {
   return undefined
 }
 
-export async function fetchNotionPageContext(
+async function fetchNotionPageContext(
   integration: Doc<"integrations">,
   pageId: string
 ): Promise<NotionPageContext | undefined> {

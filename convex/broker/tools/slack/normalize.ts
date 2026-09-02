@@ -18,7 +18,7 @@ export type SlackMessage = {
   edited?: boolean
 }
 
-export function slackMessage(message: Record<string, unknown>): SlackMessage {
+function slackMessage(message: Record<string, unknown>): SlackMessage {
   const reactions = readArray(message.reactions)
     .map(readRecord)
     .map((reaction) => ({

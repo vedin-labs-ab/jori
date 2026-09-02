@@ -17,7 +17,7 @@ import { JobTiming } from "./timing"
 /** The Folder field's contract: the fields say where it sits and what it
  *  edits; the host supplies the picker, since the folder tree is its to
  *  query. */
-export type JobFolderField = (props: {
+type JobFolderField = (props: {
   id: string
   onChange: (folderId: string | null) => void
   value: string | null

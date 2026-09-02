@@ -11,7 +11,7 @@ type Id<TableName extends keyof DataModel> =
 // (get, insert, delete, indexed queries) for query-shaped helpers to run
 // unchanged in unit tests.
 
-export type StoredDoc = Record<string, unknown> & { _id: string }
+type StoredDoc = Record<string, unknown> & { _id: string }
 
 type Constraint = {
   kind: "eq" | "gt" | "gte" | "lt" | "lte"
@@ -26,7 +26,7 @@ const indexSortFields: Record<string, string[]> = {
   by_collection_and_order: ["order"],
 }
 
-export function createDatabase() {
+function createDatabase() {
   const docs = new Map<string, StoredDoc>()
   const tables = new Map<string, StoredDoc[]>()
   let counter = 0

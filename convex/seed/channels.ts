@@ -5,7 +5,7 @@ import { type PlaceClaim, type PlaceVisibility } from "../places/schema"
 // before answering in a channel, so they are written the way the profiler
 // writes them: one durable norm per line, confirmed against recent traffic.
 
-export type SeedChannel = {
+type SeedChannel = {
   externalId: string
   name: string
   visibility: PlaceVisibility

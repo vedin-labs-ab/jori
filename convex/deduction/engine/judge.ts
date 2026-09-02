@@ -42,7 +42,7 @@ export const nullableStringList = {
   items: { type: "string" },
 }
 
-export type CitationKind = "event" | "conversation" | "effort"
+type CitationKind = "event" | "conversation" | "effort"
 
 // A citation schema listing exactly the source kinds this stage may cite:
 // the wire contract is the first place the layering rule is stated.

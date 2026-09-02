@@ -44,7 +44,7 @@ export async function githubJsonArray(
   return result
 }
 
-export function githubHeaders(token: string) {
+function githubHeaders(token: string) {
   return {
     authorization: `Bearer ${token}`,
     accept: "application/vnd.github+json",

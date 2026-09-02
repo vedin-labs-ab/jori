@@ -12,7 +12,7 @@ import { type StoredVisibility } from "./schema"
 const identityLimit = 25
 const membershipLimit = 100
 
-export type TeamMembershipRow = Pick<TeamMember, "teamId">
+type TeamMembershipRow = Pick<TeamMember, "teamId">
 
 /** The Better Auth team ids a person belongs to, via their linked auth
  *  identities. People without a signed-in identity belong to no teams. */

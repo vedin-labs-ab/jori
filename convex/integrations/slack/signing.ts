@@ -6,7 +6,7 @@ import {
   parseSignedState,
 } from "../connect/signing"
 
-export function requireSlackSigningSecret() {
+function requireSlackSigningSecret() {
   return requireEnvironmentVariable("SLACK_SIGNING_SECRET")
 }
 

@@ -9,7 +9,7 @@ import { resolveFolders } from "./folders"
 // prepared from. Bodies live here so the seed can upload them to storage;
 // what lands in the files table is the row that points at them.
 
-export type SeedFile = {
+type SeedFile = {
   key: string
   name: string
   mimeType: string

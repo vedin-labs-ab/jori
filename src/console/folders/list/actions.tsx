@@ -39,7 +39,7 @@ export type FolderResourceActions = {
 
 /** Archiving and restoring a filed table or store, addressed by the listing
  *  row rather than by each kind's own summary. */
-export type MaterialResourceRemoval = {
+type MaterialResourceRemoval = {
   isDeleting: (resource: FolderResource) => boolean
   isRestoring: (resource: FolderResource) => boolean
   remove: (resource: FolderResource) => void

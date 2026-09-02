@@ -16,7 +16,7 @@ import { demoTimezone } from "../jobs"
 // with its surface and kind, facts with their icons, and the tools it was
 // prepared with, grouped by surface with their catalog descriptions.
 
-export type RunSpec = {
+type RunSpec = {
   id: string
   title: string
   task: string

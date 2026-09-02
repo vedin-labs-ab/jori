@@ -26,7 +26,7 @@ export function useDemoNavigation(initialPathname: string) {
   return { location, navigation }
 }
 
-export function parseHref(href: string): DemoLocation {
+function parseHref(href: string): DemoLocation {
   const url = new URL(href, "https://demo.invalid")
 
   return {

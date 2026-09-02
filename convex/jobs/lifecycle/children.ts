@@ -26,7 +26,7 @@ export async function deleteOwnedJobs(ctx: MutationCtx, parentId: Id<"jobs">) {
   }
 }
 
-export async function hasOwnedJobs(ctx: MutationCtx, parentId: Id<"jobs">) {
+async function hasOwnedJobs(ctx: MutationCtx, parentId: Id<"jobs">) {
   return (
     (await ctx.db
       .query("jobs")
