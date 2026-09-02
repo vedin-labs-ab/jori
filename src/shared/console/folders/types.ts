@@ -89,6 +89,18 @@ export type MoveSubject =
   | { kind: "folder"; folderId: string; name: string; parentId?: string }
   | { kind: "resources"; resources: MoveResourceTarget[] }
 
+/** How a move names its subject: quoted for a single item, a count for a
+ *  bulk selection. */
+export function subjectName(subject: MoveSubject) {
+  if (subject.kind === "folder") {
+    return `"${subject.name}"`
+  }
+
+  return subject.resources.length === 1
+    ? `"${subject.resources[0].name}"`
+    : `${subject.resources.length} items`
+}
+
 /** What the folder surfaces can create in place, each through the same
  *  dialog its own list page uses. */
 export type FolderCreation = "table" | "store" | "file" | "job"

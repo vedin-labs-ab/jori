@@ -51,10 +51,7 @@ export function SharingDialog({
               : `Only the owner can change who sees this ${noun}.`}
           </DialogDescription>
         </DialogHeader>
-        <fieldset className="grid gap-2" disabled={!canEdit}>
-          {field}
-          {audience}
-        </fieldset>
+        <SharingFields audience={audience} canEdit={canEdit} field={field} />
         <DialogFooter>
           <Button
             onClick={() => onOpenChange(false)}
@@ -74,5 +71,25 @@ export function SharingDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+/** The dialog's body on its own: the sharing field over who the draft
+ *  reaches, for a page that shows sharing in place rather than in a
+ *  dialog. Disabled as one, since neither says anything without the other. */
+export function SharingFields({
+  audience,
+  canEdit,
+  field,
+}: {
+  audience: ReactNode
+  canEdit: boolean
+  field: ReactNode
+}) {
+  return (
+    <fieldset className="grid gap-2" disabled={!canEdit}>
+      {field}
+      {audience}
+    </fieldset>
   )
 }

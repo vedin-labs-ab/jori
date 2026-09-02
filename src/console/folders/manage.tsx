@@ -1,29 +1,15 @@
 import { useMutation } from "convex/react"
 import { type GenericId } from "convex/values"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { FieldError } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { showErrorToast } from "@/shared/console/error"
+import { FolderNameDialog } from "@/shared/console/folders/dialogs/name"
 import {
   type FolderDialogRequest,
   type ManagedFolder,
 } from "@/shared/console/folders/types"
-import { DialogForm } from "@/shared/console/materials/form"
 import { useRetained } from "@/shared/console/retain"
 import { api } from "../../../convex/_generated/api"
 import { FolderAccessDialog } from "./access"
-import { DeleteFolderDialog } from "./delete/dialog"
+import { DeleteFolder } from "./delete/dialog"
 import { MoveToFolderDialog } from "./move"
 
 // The folder lifecycle dialogs, shared by the sidebar tree and the folder
@@ -81,7 +67,7 @@ export function FolderDialogs({
             : undefined
         }
       />
-      <DeleteFolderDialog
+      <DeleteFolder
         folder={remove?.folder}
         isOpen={dialog?.type === "delete"}
         onDeleted={onDeleted}
@@ -160,85 +146,5 @@ function RenameFolderDialog({
       submitLabel="Rename"
       title={`Rename "${folder.name}"`}
     />
-  )
-}
-
-/** Name-only form shared by create and rename; the name is validated on
- *  submit, like the other material dialogs. */
-function FolderNameDialog({
-  initialName,
-  isOpen,
-  onOpenChange,
-  onSubmit,
-  submitLabel,
-  title,
-}: {
-  initialName: string
-  isOpen: boolean
-  onOpenChange: (isOpen: boolean) => void
-  onSubmit: (name: string) => Promise<void>
-  submitLabel: string
-  title: string
-}) {
-  const [name, setName] = useState(initialName)
-  const [error, setError] = useState<string>()
-  const [isSaving, setIsSaving] = useState(false)
-
-  async function submit() {
-    if (name.trim() === "") {
-      setError("Name is required.")
-
-      return
-    }
-
-    setIsSaving(true)
-
-    try {
-      await onSubmit(name.trim())
-      setName(initialName)
-      onOpenChange(false)
-    } catch (submitError) {
-      showErrorToast(submitError, "Could not save the folder.")
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (!isSaving) {
-          onOpenChange(open)
-        }
-      }}
-      open={isOpen}
-    >
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <DialogForm disabled={isSaving} onSubmit={() => void submit()}>
-          <div className="grid gap-2">
-            <Label htmlFor="folder-name">Name</Label>
-            <Input
-              aria-invalid={error === undefined ? undefined : true}
-              id="folder-name"
-              onChange={(event) => {
-                setName(event.target.value)
-                setError(undefined)
-              }}
-              value={name}
-            />
-            <FieldError>{error}</FieldError>
-          </div>
-          <DialogFooter>
-            <Button disabled={isSaving} type="submit">
-              {isSaving ? <Loader2 className="animate-spin" /> : null}
-              {submitLabel}
-            </Button>
-          </DialogFooter>
-        </DialogForm>
-      </DialogContent>
-    </Dialog>
   )
 }

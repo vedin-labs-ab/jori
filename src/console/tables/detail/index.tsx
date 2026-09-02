@@ -14,6 +14,7 @@ import { useRowSelection } from "@/shared/console/list/selection"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
+import { useRowAdding } from "@/shared/console/tables/adding"
 import { RowGrid } from "@/shared/console/tables/grid"
 import { TableHeaderActions } from "@/shared/console/tables/header"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
@@ -24,7 +25,7 @@ import { ConsolePage } from "../../page"
 import { useTableRemoval } from "../manage"
 import { useCsvExport } from "./export"
 import { type TableDialog, TableOverlays } from "./overlays"
-import { useRowAdding, useRowBulk, useRowPages, useRowWrites } from "./rows"
+import { useRowBulk, useRowPages, useRowWrites } from "./rows"
 
 /** Member view of one table. The share fork wraps exactly this component,
  *  so it owns everything inside the console chrome. A visitor holding a
