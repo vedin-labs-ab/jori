@@ -1,11 +1,11 @@
 import { type ReactNode, useState } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { type FileDetail } from "@/shared/console/files/types"
 import { usePreloadSiblings } from "../cache/preload"
 import { useDisplayUrl } from "../cache/url"
 import { FileEditor } from "../editor/section"
 import { type FileSiblings, useSiblingKeys } from "../siblings"
 import { FileCopy, FileMeta, FileToolbar } from "../toolbar"
-import { type FileDetail } from "../types"
 import { ViewerFrame } from "./frame"
 import { useViewerStatus } from "./status"
 

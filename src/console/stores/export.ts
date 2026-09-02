@@ -1,8 +1,8 @@
 import { type ConvexReactClient } from "convex/react"
 import { type GenericId } from "convex/values"
+import { type StoreDetail } from "@/shared/console/stores/types"
 import { downloadTextFile, toFilename } from "@/shared/files/download"
 import { api } from "../../../convex/_generated/api"
-import { type StoreDetail } from "./types"
 
 /** The store's current value as pretty-printed JSON, newline-terminated. */
 export function buildJsonExport(value: unknown) {

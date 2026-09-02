@@ -3,8 +3,8 @@ import { countLabel } from "@/shared/console/count"
 import { SeparatorDot } from "@/shared/console/dot"
 import { ConsoleListToolbar } from "@/shared/console/list/frame"
 import { SaveMeta, type SaveState } from "@/shared/console/materials/save"
-import { StoreOwnerCell } from "../cells"
-import { type StoreDetail } from "../types"
+import { StoreOwnerCell } from "@/shared/console/stores/list/cells"
+import { type StoreDetail } from "@/shared/console/stores/types"
 
 /** Secondary header under the console breadcrumb, in the file toolbar's
  *  idiom: quiet store meta on the left, the value tools on the right. It

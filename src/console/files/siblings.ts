@@ -1,8 +1,8 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { useCallback, useEffect, useMemo } from "react"
+import { type FileRow } from "@/shared/console/files/types"
 import { api } from "../../../convex/_generated/api"
-import { type FileRow } from "./types"
 
 // Previous/next navigation between files on the detail page. Siblings come
 // from the same list query the files page subscribes to, in its canonical

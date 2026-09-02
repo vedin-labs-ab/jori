@@ -30,14 +30,15 @@ import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { MaterialFolderCell } from "@/shared/console/materials/cells/folder"
 import { type FolderNames } from "@/shared/console/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
+import { type MaterialRemoval } from "../../materials/removal"
+import { type StoreSummary } from "../types"
 import {
   StoreNameCell,
   StoreOwnerCell,
   StorePropertiesCell,
   StoreVersionCell,
 } from "./cells"
-import { storeDeleteDescription, type useStoreRemoval } from "./manage"
-import { type StoreSummary } from "./types"
+import { storeDeleteDescription } from "./config"
 
 export function StoresToolbar({
   onCreate,
@@ -87,7 +88,7 @@ export function StoreList({
   onCreate: () => void
   onEdit: (store: StoreSummary) => void
   onMoveToFolder: (store: StoreSummary) => void
-  removal: ReturnType<typeof useStoreRemoval>
+  removal: MaterialRemoval<StoreSummary>
   selection: RowSelection<StoreSummary>
   stores: StoreSummary[]
   unauthorizedMessage: string | undefined
@@ -214,7 +215,7 @@ function StoreListRow({
   onAccess: (store: StoreSummary) => void
   onEdit: (store: StoreSummary) => void
   onMoveToFolder: (store: StoreSummary) => void
-  removal: ReturnType<typeof useStoreRemoval>
+  removal: MaterialRemoval<StoreSummary>
   selection: RowSelection<StoreSummary>
   store: StoreSummary
 }) {

@@ -19,8 +19,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { menuWidth } from "@/shared/console/menu"
-import { type FileRow } from "../types"
 import { DeleteFileDialog } from "./delete"
+import { type FileRow } from "./types"
 
 // The canonical menu for a file, as items only. The list row and a folder
 // listing's row lead with the links to the file itself; the detail page

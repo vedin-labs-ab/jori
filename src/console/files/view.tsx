@@ -5,6 +5,7 @@ import { type ReactNode, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { type FileDetail } from "@/shared/console/files/types"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -23,11 +24,10 @@ import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileEditor } from "./editor/section"
-import { FileTitleMenu } from "./menu/title"
 import { FileLinksDialog } from "./share"
 import { type FileSiblings, useFileSiblings, useSiblingKeys } from "./siblings"
+import { FileTitleMenu } from "./title"
 import { FileMeta, FileToolbar } from "./toolbar"
-import { type FileDetail } from "./types"
 import { FileHtml } from "./viewer/html"
 import { FileViewer } from "./viewer/section"
 

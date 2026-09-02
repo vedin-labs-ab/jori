@@ -56,6 +56,15 @@ export function bulkMaterialRemovalSuccess(
   return `Archived ${countNoun(archived, noun)} and deleted ${countNoun(deleted, noun)}.`
 }
 
+/** Archive, permanent delete, and restore as the row menus consume them:
+ *  the two actions, and the id of whichever row each is busy with. */
+export type MaterialRemoval<Target> = {
+  removeMaterial: (target: Target) => Promise<boolean>
+  removingId: string | undefined
+  restoreMaterial: (target: Target) => Promise<boolean>
+  restoringId: string | undefined
+}
+
 /** Archive, permanent delete, and restore for a material domain: one
  *  pending id keeps the busy row's actions quiet, removing an active
  *  material archives it, and removing an archived one deletes it. */
@@ -69,7 +78,7 @@ export function useMaterialRemoval<Target extends RemovalTarget>({
   noun: string
   remove: (target: Target) => Promise<unknown>
   restore: (target: Target) => Promise<unknown>
-}) {
+}): MaterialRemoval<Target> {
   const [removingId, setRemovingId] = useState<string>()
   const [restoringId, setRestoringId] = useState<string>()
 

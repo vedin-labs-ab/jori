@@ -4,11 +4,12 @@ import { afterEach, expect, test, vi } from "vitest"
 import { type ListControls } from "@/shared/console/list/controls"
 import { type RowSelection } from "@/shared/console/list/selection"
 import { type TableSummary } from "@/shared/console/tables/types"
-import { TableList } from "./list"
-import { tableListConfig, type useTableRemoval } from "./manage"
+import { type MaterialRemoval } from "../../materials/removal"
+import { TableList } from "."
+import { tableListConfig } from "./config"
 
 vi.mock("@tanstack/react-router", async () => ({
-  Link: (await import("../../../test/router")).Link,
+  Link: (await import("../../../../../test/router")).Link,
 }))
 
 afterEach(cleanup)
@@ -18,7 +19,7 @@ const removal = {
   removingId: undefined,
   restoreMaterial: async () => undefined,
   restoringId: undefined,
-} as unknown as ReturnType<typeof useTableRemoval>
+} as unknown as MaterialRemoval<TableSummary>
 
 function tableSummary(overrides: Partial<TableSummary> = {}) {
   return {

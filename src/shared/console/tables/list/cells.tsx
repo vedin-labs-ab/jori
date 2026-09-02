@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import { Columns3, type LucideIcon, Rows3, Table2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { countLabel } from "@/shared/console/count"
@@ -9,6 +8,7 @@ import {
 import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
 import { type TableSummary } from "@/shared/console/tables/types"
 import { VisibilityBadge } from "@/shared/console/visibility/badge"
+import { ConsoleLink } from "../../shell/link"
 
 /** Name column: the table icon, a link to the table, and the list's badge
  *  conventions — a visibility badge for anything narrower or wider than
@@ -16,14 +16,14 @@ import { VisibilityBadge } from "@/shared/console/visibility/badge"
 export function TableNameCell({ table }: { table: TableSummary }) {
   return (
     <MaterialNameCell icon={Table2}>
-      <Link
+      <ConsoleLink
         className={materialNameLinkClassName}
         params={{ tableId: table.tableId }}
         title={table.name}
         to="/tables/$tableId"
       >
         {table.name}
-      </Link>
+      </ConsoleLink>
       {table.visibility.mode === "organization" ? null : (
         <VisibilityBadge visibility={table.visibility} />
       )}

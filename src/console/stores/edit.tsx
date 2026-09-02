@@ -17,8 +17,8 @@ import {
   MaterialNameField,
 } from "@/shared/console/materials/fields"
 import { DialogForm } from "@/shared/console/materials/form"
+import { type StoreDetail } from "@/shared/console/stores/types"
 import { api } from "../../../convex/_generated/api"
-import { type StoreDetail } from "./types"
 
 /** All an edit needs of a store; its summary and its detail both fit. */
 export type EditableStore = Pick<

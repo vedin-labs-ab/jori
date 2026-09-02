@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { type StoreDetail } from "../types"
+import { type StoreDetail } from "@/shared/console/stores/types"
 import { StoreValue } from "./section"
 
 vi.mock("convex/react", async (importOriginal) => ({

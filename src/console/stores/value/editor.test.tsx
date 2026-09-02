@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { type StoreDetail } from "../types"
+import { type StoreDetail } from "@/shared/console/stores/types"
 import { ValueEditorSection } from "./editor"
 import { valueEditorNotes } from "./state"
 

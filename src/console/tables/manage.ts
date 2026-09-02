@@ -1,46 +1,17 @@
 import { useConvex, useMutation } from "convex/react"
 import { countNoun } from "@/shared/console/count"
 import { useBulkRunner } from "@/shared/console/list/bulk"
-import { type ListConfig } from "@/shared/console/list/controls"
 import { type RowSelection } from "@/shared/console/list/selection"
-import {
-  type FolderNames,
-  folderFacet,
-} from "@/shared/console/materials/folders"
-import { ownerFacet } from "@/shared/console/materials/owners"
 import {
   bulkMaterialRemovalSuccess,
   useMaterialRemoval,
 } from "@/shared/console/materials/removal"
+import { tableNoun } from "@/shared/console/tables/list/config"
 import { type TableSummary } from "@/shared/console/tables/types"
 import { api } from "../../../convex/_generated/api"
 import { exportTableById } from "./detail/export"
 
 type TableTarget = Pick<TableSummary, "tableId" | "name" | "archivedAt">
-
-export const tableNoun = { plural: "tables", singular: "table" }
-
-/** What the table list headers sort and filter: the shared material facets
- *  plus this page's name, count, and time sorts. Owner options come from
- *  the listed rows themselves. */
-export function tableListConfig(
-  folders: FolderNames | undefined,
-  tables: readonly TableSummary[]
-): ListConfig<TableSummary> {
-  return {
-    facets: {
-      folder: folderFacet(folders),
-      owner: ownerFacet(tables),
-    },
-    sorts: {
-      columns: (table) => table.columns.length,
-      created: (table) => table.createdAt,
-      name: (table) => table.name,
-      rows: (table) => table.rowCount,
-      updated: (table) => table.updatedAt,
-    },
-  }
-}
 
 export function useTableRemoval(organizationId: string) {
   const remove = useMutation(api.tables.console.remove)
@@ -94,6 +65,3 @@ export function useTableBulk(
 
   return { downloadSelected, isBusy: runner.isBusy, removeSelected }
 }
-
-export const tableDeleteDescription =
-  "This permanently deletes the table and every row in it. Anything that reads it loses access."

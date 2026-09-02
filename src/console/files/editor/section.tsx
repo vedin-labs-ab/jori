@@ -1,12 +1,12 @@
 import { useMutation } from "convex/react"
 import { lazy, type ReactNode, Suspense } from "react"
+import { type FileDetail } from "@/shared/console/files/types"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { api } from "../../../../convex/_generated/api"
 import { usePreloadSiblings } from "../cache/preload"
 import { type FileSiblings } from "../siblings"
 import { uploadToStorage } from "../storage"
 import { FileCopy, FileMeta, FileToolbar } from "../toolbar"
-import { type FileDetail } from "../types"
 import { useAutosave } from "./autosave"
 import { type FileDocument, useDocument } from "./document"
 

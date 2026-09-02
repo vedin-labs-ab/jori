@@ -11,9 +11,9 @@ import {
   conflictMessage,
   isVersionConflict,
 } from "@/shared/console/materials/conflict"
+import { type StoreDetail } from "@/shared/console/stores/types"
 import { scrollFade } from "@/shared/fade"
 import { api } from "../../../../convex/_generated/api"
-import { type StoreDetail } from "../types"
 import { useValueAutosave, type ValueSaveOutcome } from "./autosave"
 import { ValueFields } from "./fields"
 import { useValueEditor, type ValueEditor, type ValueEditorView } from "./state"

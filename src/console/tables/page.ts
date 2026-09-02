@@ -11,14 +11,10 @@ import {
   useResettingSetter,
 } from "@/shared/console/list/pagination"
 import { useRowSelection } from "@/shared/console/list/selection"
+import { tableListConfig, tableNoun } from "@/shared/console/tables/list/config"
 import { type TableSummary } from "@/shared/console/tables/types"
 import { api } from "../../../convex/_generated/api"
-import {
-  tableListConfig,
-  tableNoun,
-  useTableBulk,
-  useTableRemoval,
-} from "./manage"
+import { useTableBulk, useTableRemoval } from "./manage"
 
 export type TablesPageState = ReturnType<typeof useTablesPage>
 

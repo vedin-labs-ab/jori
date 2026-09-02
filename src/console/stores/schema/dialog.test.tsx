@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { type StoreDetail } from "../types"
+import { type StoreDetail } from "@/shared/console/stores/types"
 import { StoreSchemaDialog } from "./dialog"
 
 const writeSchema = vi.fn()

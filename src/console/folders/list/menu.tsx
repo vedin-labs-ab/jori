@@ -10,16 +10,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteFileDialog } from "@/shared/console/files/delete"
+import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
 import { DeleteJobDialog } from "@/shared/console/jobs/list/delete"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth } from "@/shared/console/menu"
+import { storeDeleteDescription } from "@/shared/console/stores/list/config"
+import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { api } from "../../../../convex/_generated/api"
-import { FileMenuItems } from "../../files/menu"
-import { DeleteFileDialog } from "../../files/menu/delete"
-import { storeDeleteDescription } from "../../stores/manage"
-import { tableDeleteDescription } from "../../tables/manage"
 import { type FolderResourceActions } from "./actions"
 
 // A filed resource offers the same menu here that it offers on its own
