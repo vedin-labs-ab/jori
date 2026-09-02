@@ -1,10 +1,11 @@
 import { useNavigate } from "@tanstack/react-router"
 import { type GenericId } from "convex/values"
-import { type ComponentProps } from "react"
+import { type ComponentProps, useMemo } from "react"
 import { ConsolePage } from "../../page"
 import { ConsoleListLayout } from "../../shared/list/frame"
 import { useMaterialTrail } from "../../shared/materials/breadcrumb"
 import { FolderFrame } from "../frame"
+import { UsageNote } from "./note"
 import { type UsageDays } from "./types"
 import { UsageView } from "./view"
 
@@ -30,7 +31,13 @@ export function FolderUsagePage({
   const navigate = useNavigate()
 
   return (
-    <FolderFrame folderId={folderId} view="usage">
+    <FolderFrame
+      aside={(organizationId) => (
+        <UsageNote days={days} organizationId={organizationId} />
+      )}
+      folderId={folderId}
+      view="usage"
+    >
       {(folder, organizationId) => (
         <UsageView
           days={days}
@@ -77,7 +84,17 @@ export function OrganizationUsagePage({ days }: { days: UsageDays }) {
 /** The crumb is published from inside the shell, which ConsolePage mounts
  *  below the page itself: published from the page it would reach nobody. */
 function OrganizationUsageView(props: ComponentProps<typeof UsageView>) {
-  useMaterialTrail(organizationCrumb)
+  const { days, organizationId } = props
+
+  useMaterialTrail(
+    useMemo(
+      () => ({
+        ...organizationCrumb,
+        aside: <UsageNote days={days} organizationId={organizationId} />,
+      }),
+      [days, organizationId]
+    )
+  )
 
   return <UsageView {...props} />
 }

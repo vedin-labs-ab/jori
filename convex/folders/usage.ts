@@ -170,15 +170,12 @@ export async function readFolderUsage(
     to: window.end,
   })
 
-  return {
-    ...(await summarize(ctx, sight, {
-      groups,
-      rows,
-      scope: args.folderId,
-      window,
-    })),
-    timezone,
-  }
+  return await summarize(ctx, sight, {
+    groups,
+    rows,
+    scope: args.folderId,
+    window,
+  })
 }
 
 async function summarize(

@@ -2,10 +2,12 @@ import { formatUsd } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
 import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import {
   Table,
   TableBody,
   TableCell,
+  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
@@ -45,10 +47,8 @@ function RankedTable({ noun, rows }: { noun: string; rows: ReactNode[] }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="grid gap-2">
-      {/* The section's own edge is the table's: cells shed the outer padding
-          so names sit on the title's grid and figures on the right edge. */}
-      <Table className="[&_td:first-child]:pl-0 [&_td:last-child]:pr-0 [&_th:first-child]:pl-0 [&_th:last-child]:pr-0">
+    <TableFrame>
+      <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead>{noun}</TableHead>
@@ -59,22 +59,29 @@ function RankedTable({ noun, rows }: { noun: string; rows: ReactNode[] }) {
             <FigureHead>Share</FigureHead>
           </TableRow>
         </TableHeader>
-        <TableBody>{expanded ? rows : rows.slice(0, rankedCutoff)}</TableBody>
+        <TableBody>
+          {expanded ? rows : rows.slice(0, rankedCutoff)}
+          {rows.length <= rankedCutoff ? null : (
+            // The way to the rest is the table's last line, inside its
+            // frame: flush with the names at rest, and hovering grows the
+            // padding back, the same move the list headers make.
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={6}>
+                <Button
+                  className="px-0 hover:px-2 focus-visible:px-2"
+                  onClick={() => setExpanded(!expanded)}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  {expanded ? "Show less" : `Show all ${rows.length}`}
+                </Button>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
       </Table>
-      {rows.length <= rankedCutoff ? null : (
-        // Flush with the names at rest; hovering grows the padding back,
-        // the same move the list headers make.
-        <Button
-          className="justify-self-start px-0 hover:px-2 focus-visible:px-2"
-          onClick={() => setExpanded(!expanded)}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          {expanded ? "Show less" : `Show all ${rows.length}`}
-        </Button>
-      )}
-    </div>
+    </TableFrame>
   )
 }
 
@@ -95,10 +102,11 @@ function FigureCell({
 }
 
 /** One line of either ranking. The name takes whatever width the figures
- *  leave and gives way with an ellipsis rather than pushing them off the
- *  edge; the bar is drawn against the leader so the biggest row fills its
- *  cell and the rest read against it. A window that cost nothing has no
- *  shares, and no runs no average. */
+ *  leave, down to a floor past which the table scrolls instead, and gives
+ *  way with an ellipsis rather than pushing them off the edge; the bar is
+ *  drawn against the leader so the biggest row fills its cell and the rest
+ *  read against it. A window that cost nothing has no shares, and no runs
+ *  no average. */
 function RankedRow({
   caption,
   entry,
@@ -114,7 +122,9 @@ function RankedRow({
 
   return (
     <TableRow>
-      <TableCell className="w-full max-w-0 truncate">{caption}</TableCell>
+      <TableCell className="w-full min-w-36 max-w-0 truncate">
+        {caption}
+      </TableCell>
       <FigureCell>{entry.ended}</FigureCell>
       <FigureCell className={entry.failed > 0 ? "text-destructive" : ""}>
         {entry.failed}
@@ -124,12 +134,7 @@ function RankedRow({
       <TableCell>
         <div className="flex items-center justify-end gap-2 tabular-nums">
           <span>{usagePercent(entry.micros, total) ?? "—"}</span>
-          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-muted-foreground/50"
-              style={{ width: `${usageShare(entry.micros, leader)}%` }}
-            />
-          </div>
+          <Progress className="w-16" value={usageShare(entry.micros, leader)} />
         </div>
       </TableCell>
     </TableRow>

@@ -293,7 +293,6 @@ test("the window's days are the organization's days, not UTC's", async () => {
 
   const usage = await read(ctx)
 
-  expect(usage.timezone).toBe("Pacific/Kiritimati")
   expect(usage.series.at(0)?.date).toBe("2026-03-10")
   expect(usage.series.at(-1)?.date).toBe("2026-03-16")
 })

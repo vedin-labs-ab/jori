@@ -20,9 +20,13 @@ function contributors(count: number): UsageContributor[] {
   }))
 }
 
-/** The body's rows: the header row is not a ranking. */
+/** The ranking's rows: neither the header nor the line that opens the
+ *  rest is one. */
 function rows() {
-  return screen.getAllByRole("row").slice(1)
+  return screen
+    .getAllByRole("row")
+    .slice(1)
+    .filter((row) => row.querySelector("button") === null)
 }
 
 function cells(row: HTMLElement) {

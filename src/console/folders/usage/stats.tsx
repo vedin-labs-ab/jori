@@ -121,11 +121,15 @@ function deltaDetail(delta: UsageDelta | undefined): ReactNode {
     return "No change"
   }
 
-  const Arrow = delta.direction === "up" ? ArrowUp : ArrowDown
-
+  // The arrow alone takes a colour: which way a figure went is the glance,
+  // and the number beside it stays as quiet as the rest of the line.
   return (
     <>
-      <Arrow aria-hidden className="size-3" />
+      {delta.direction === "up" ? (
+        <ArrowUp aria-hidden className="size-3 text-primary" />
+      ) : (
+        <ArrowDown aria-hidden className="size-3 text-destructive" />
+      )}
       {`${delta.percent}%`}
     </>
   )

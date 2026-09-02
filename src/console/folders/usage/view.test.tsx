@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { ConsoleHeaderActionsProvider } from "../../shared/layout"
 import { type UsageOverview } from "./types"
 import { UsageView } from "./view"
@@ -53,7 +52,6 @@ function overview(overrides: Partial<UsageOverview> = {}) {
     folders: [
       { key: "direct", label: "Filed here", micros: 900, ended: 3, failed: 1 },
     ],
-    timezone: "Europe/Stockholm",
     ...overrides,
   } as UsageOverview
 }
@@ -64,16 +62,14 @@ function renderView(usage: UsageOverview | undefined) {
   // The window control portals into the shell's header; here the document
   // itself stands in for that slot.
   render(
-    <TooltipProvider>
-      <ConsoleHeaderActionsProvider slot={document.body}>
-        <UsageView
-          days={30}
-          folderId={"folders:1" as never}
-          onDaysChange={() => undefined}
-          organizationId="organization"
-        />
-      </ConsoleHeaderActionsProvider>
-    </TooltipProvider>
+    <ConsoleHeaderActionsProvider slot={document.body}>
+      <UsageView
+        days={30}
+        folderId={"folders:1" as never}
+        onDaysChange={() => undefined}
+        organizationId="organization"
+      />
+    </ConsoleHeaderActionsProvider>
   )
 }
 
@@ -134,15 +130,6 @@ test("each subfolder row drills into that folder's own usage", () => {
   expect(
     screen.getByRole("link", { name: "Pipeline" }).getAttribute("href")
   ).toBe("/folders/folders:2/usage")
-})
-
-test("the fine print waits behind a mark in the header", () => {
-  renderView(overview())
-
-  expect(
-    screen.getByRole("button", { name: "About these figures" })
-  ).toBeDefined()
-  expect(screen.queryByText(/Days follow/)).toBeNull()
 })
 
 test("loading keeps the window control and shows the spinner", () => {
