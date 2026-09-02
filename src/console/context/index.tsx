@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ConsolePageLayout } from "@/shared/console/layout"
 import { ConsolePage } from "../page"
-import { ConsolePageLayout } from "../shared/layout"
 
 const contextTabs = [
   { label: "Organization", to: "/context", value: "organization" },

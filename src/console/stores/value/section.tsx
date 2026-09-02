@@ -6,10 +6,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { JsonBlock } from "../../shared/code"
-import { CopyButton } from "../../shared/copy"
-import { ConsoleEmptyState } from "../../shared/list/empty"
-import { ConsoleListContent } from "../../shared/list/frame"
+import { JsonBlock } from "@/shared/console/code"
+import { CopyButton } from "@/shared/console/copy"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
+import { ConsoleListContent } from "@/shared/console/list/frame"
 import { formatJsonText } from "../json"
 import { StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"

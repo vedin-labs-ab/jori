@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { ConsoleHeaderActionsProvider } from "../../shared/layout"
+import { ConsoleHeaderActionsProvider } from "@/shared/console/layout"
 import { type UsageOverview } from "./types"
 import { UsageView } from "./view"
 

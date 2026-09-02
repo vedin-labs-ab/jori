@@ -5,7 +5,7 @@ import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
   ConsoleSearch,
-} from "../../shared/layout"
+} from "@/shared/console/layout"
 import { type SkillFilterView, skillFilterOptions } from "../types"
 
 export function SkillsToolbar({

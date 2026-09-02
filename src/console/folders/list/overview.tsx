@@ -3,17 +3,23 @@ import { Folder, Plus } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { api } from "../../../../convex/_generated/api"
-import { ConsolePage } from "../../page"
-import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../shared/layout"
+import {
+  ConsoleHeaderActions,
+  ConsoleHeaderButton,
+} from "@/shared/console/layout"
 import {
   ConsoleEmptyState,
   EmptyRow,
   FilterableEmptyState,
-} from "../../shared/list/empty"
-import { ConsoleListContent, ConsoleListLayout } from "../../shared/list/frame"
-import { ConsoleListLoading } from "../../shared/list/loading"
-import { useMaterialTrail } from "../../shared/materials/breadcrumb"
+} from "@/shared/console/list/empty"
+import {
+  ConsoleListContent,
+  ConsoleListLayout,
+} from "@/shared/console/list/frame"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
+import { api } from "../../../../convex/_generated/api"
+import { ConsolePage } from "../../page"
 import { type FolderDialogRequest, FolderDialogs } from "../manage"
 import { FoldersTitleMenu } from "../menu"
 import { type FolderRootsResult } from "../types"

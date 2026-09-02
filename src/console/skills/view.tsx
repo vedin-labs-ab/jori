@@ -6,8 +6,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { useRetained } from "@/shared/console/retain"
 import { scrollFade } from "@/shared/fade"
-import { useRetained } from "../shared/retain"
 import { type Skill } from "./types"
 
 export function SkillViewDialog({

@@ -14,14 +14,14 @@ import {
   ConsolePageLayout,
   ConsoleScrollableGrid,
   ConsoleSearch,
-} from "../../shared/layout"
+} from "@/shared/console/layout"
 import {
   type AudienceFilter,
   audienceFilterOptions,
-} from "../../shared/list/audience"
-import { ConsoleListLoading } from "../../shared/list/loading"
-import { ConsoleListPager } from "../../shared/list/pager"
-import { useResettingSetter } from "../../shared/list/pagination"
+} from "@/shared/console/list/audience"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { ConsoleListPager } from "@/shared/console/list/pager"
+import { useResettingSetter } from "@/shared/console/list/pagination"
 import { ExecutionRow } from "../row"
 import { displayNowForRun, runClockInterval } from "../time"
 import {

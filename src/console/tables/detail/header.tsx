@@ -1,5 +1,8 @@
 import { Download, Link2, Loader2 } from "lucide-react"
-import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../shared/layout"
+import {
+  ConsoleHeaderActions,
+  ConsoleHeaderButton,
+} from "@/shared/console/layout"
 
 /** The header keeps only the primary actions; everything about the table
  *  itself hangs off its name in the breadcrumb. */

@@ -14,8 +14,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { countLabel } from "@/console/shared/count"
 import { cn } from "@/lib/utils"
+import { countLabel } from "@/shared/console/count"
 import { type PulseCell, type PulseLane } from "./series"
 
 // Contribution-graph intensity steps. Placed activity ramps the brand

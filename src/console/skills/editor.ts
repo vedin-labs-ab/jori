@@ -1,7 +1,7 @@
 import { type ReactMutation, useMutation } from "convex/react"
 import { useState } from "react"
+import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../convex/_generated/api"
-import { showErrorToast } from "../shared/error"
 import { emptySkillForm, type Skill, type SkillFormValues } from "./types"
 
 export type SkillEditor = ReturnType<typeof useSkillEditor>

@@ -1,17 +1,20 @@
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { countNoun } from "@/shared/console/count"
+import { showErrorToast } from "@/shared/console/error"
+import { useBulkRunner } from "@/shared/console/list/bulk"
+import { type ListConfig, type ListFacet } from "@/shared/console/list/controls"
+import { type RowSelection } from "@/shared/console/list/selection"
+import {
+  type FolderNames,
+  folderFacet,
+} from "@/shared/console/materials/folders"
+import { ownerFacet } from "@/shared/console/materials/owners"
 import { downloadUrl } from "@/shared/files/download"
 import { type FileKind, fileKind } from "@/shared/files/kind"
 import { api } from "../../../convex/_generated/api"
 import { type MoveResourceTarget } from "../folders/types"
-import { countNoun } from "../shared/count"
-import { showErrorToast } from "../shared/error"
-import { useBulkRunner } from "../shared/list/bulk"
-import { type ListConfig, type ListFacet } from "../shared/list/controls"
-import { type RowSelection } from "../shared/list/selection"
-import { type FolderNames, folderFacet } from "../shared/materials/folders"
-import { ownerFacet } from "../shared/materials/owners"
 import { type FileRow } from "./types"
 
 /** What the file list headers sort and filter: the kinds present in the

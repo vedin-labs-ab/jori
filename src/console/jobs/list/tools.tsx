@@ -1,4 +1,4 @@
-import { ToolAccessSummary } from "../../shared/tools/summary"
+import { ToolAccessSummary } from "@/shared/console/tools/summary"
 import { type Job } from "../types"
 
 export function JobToolSummary({ job }: { job: Job }) {

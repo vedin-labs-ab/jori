@@ -1,7 +1,7 @@
 import { type ReactNode, Suspense } from "react"
+import { ConsolePageLayout } from "@/shared/console/layout"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { ConsolePage } from "../page"
-import { ConsolePageLayout } from "../shared/layout"
-import { ConsoleListLoading } from "../shared/list/loading"
 
 /**
  * The member half of a material frame. Imported lazily, so a visitor who

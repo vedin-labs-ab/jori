@@ -12,9 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { VisibilityIcon } from "@/shared/console/visibility/badge"
+import { GrantPicker } from "@/shared/console/visibility/grants"
 import { FieldHelp } from "@/shared/field"
-import { VisibilityIcon } from "./badge"
-import { GrantPicker } from "./grants"
 import { usePeopleOptions, useTeamOptions } from "./options"
 
 // The one access control every material and folder shares, in creation

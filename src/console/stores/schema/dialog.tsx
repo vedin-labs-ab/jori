@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { readErrorMessage } from "@/shared/console/error"
+import { DialogForm } from "@/shared/console/materials/form"
 import { api } from "../../../../convex/_generated/api"
-import { readErrorMessage } from "../../shared/error"
-import { DialogForm } from "../../shared/materials/form"
 import { type StoreDetail } from "../types"
 import { SchemaEditorSection } from "./editor"
 import { useSchemaEditor } from "./state"

@@ -6,13 +6,13 @@ import { FieldError } from "@/components/ui/field"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { scrollFade } from "@/shared/fade"
-import { api } from "../../../../convex/_generated/api"
-import { ConsoleListLoading } from "../../shared/list/loading"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import {
   conflictMessage,
   isVersionConflict,
-} from "../../shared/materials/conflict"
+} from "@/shared/console/materials/conflict"
+import { scrollFade } from "@/shared/fade"
+import { api } from "../../../../convex/_generated/api"
 import { type StoreDetail } from "../types"
 import { useValueAutosave, type ValueSaveOutcome } from "./autosave"
 import { ValueFields } from "./fields"
@@ -22,7 +22,7 @@ import { StoreToolbar } from "./toolbar"
 /** CodeMirror loads only once the code view is on screen, keeping it out
  *  of the console bundle and the server build. */
 const Mirror = lazy(() =>
-  import("../../shared/mirror/view").then((module) => ({
+  import("@/shared/console/mirror/view").then((module) => ({
     default: module.Mirror,
   }))
 )

@@ -8,8 +8,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { absoluteTime, relativeTime } from "@/shared/console/time"
 import { FieldHelp } from "@/shared/field"
-import { absoluteTime, relativeTime } from "../../shared/time"
 import { getJobSurfaceLabel } from "../access"
 import { SurfaceLogo } from "../access/logo"
 import { type Job } from "../types"

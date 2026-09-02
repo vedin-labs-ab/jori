@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { localTimezone } from "../../../shared/time"
+import { localTimezone } from "@/shared/console/time"
 import { type JobFormValues } from "../../types"
 import { RecurringFields } from "../schedule/recurring"
 

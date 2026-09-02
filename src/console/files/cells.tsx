@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router"
-import { fileKind } from "@/shared/files/kind"
 import {
   MaterialNameCell,
   materialNameLinkClassName,
-} from "../shared/materials/cells/name"
-import { MaterialOwnerCell } from "../shared/materials/cells/owner"
-import { VisibilityBadge } from "../shared/visibility/badge"
+} from "@/shared/console/materials/cells/name"
+import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { VisibilityBadge } from "@/shared/console/visibility/badge"
+import { fileKind } from "@/shared/files/kind"
 import { type FileRow } from "./types"
 
 /** Name column: the registry icon, a link to the file, and a visibility

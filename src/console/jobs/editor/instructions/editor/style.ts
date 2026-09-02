@@ -1,4 +1,4 @@
-import { codeTokenClassName } from "../../../../shared/tokens"
+import { codeTokenClassName } from "@/shared/console/tokens"
 
 export const instructionMarkdownClassName = [
   "[&_.tiptap]:min-h-24 [&_.tiptap]:min-w-0 [&_.tiptap]:max-w-full [&_.tiptap]:overflow-x-hidden [&_.tiptap]:px-2 [&_.tiptap]:py-2 [&_.tiptap]:break-words [&_.tiptap]:whitespace-pre-wrap [&_.tiptap]:leading-6 [&_.tiptap]:outline-none [&_.tiptap]:[overflow-wrap:anywhere]",

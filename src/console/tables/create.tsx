@@ -1,8 +1,8 @@
 import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
+import { CreateMaterialDialog } from "@/console/shared/materials/create"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
-import { CreateMaterialDialog } from "../shared/materials/form"
 
 export function CreateTableDialog({
   initialFolderId,

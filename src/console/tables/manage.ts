@@ -1,15 +1,18 @@
 import { useConvex, useMutation } from "convex/react"
-import { api } from "../../../convex/_generated/api"
-import { countNoun } from "../shared/count"
-import { useBulkRunner } from "../shared/list/bulk"
-import { type ListConfig } from "../shared/list/controls"
-import { type RowSelection } from "../shared/list/selection"
-import { type FolderNames, folderFacet } from "../shared/materials/folders"
-import { ownerFacet } from "../shared/materials/owners"
+import { countNoun } from "@/shared/console/count"
+import { useBulkRunner } from "@/shared/console/list/bulk"
+import { type ListConfig } from "@/shared/console/list/controls"
+import { type RowSelection } from "@/shared/console/list/selection"
+import {
+  type FolderNames,
+  folderFacet,
+} from "@/shared/console/materials/folders"
+import { ownerFacet } from "@/shared/console/materials/owners"
 import {
   bulkMaterialRemovalSuccess,
   useMaterialRemoval,
-} from "../shared/materials/removal"
+} from "@/shared/console/materials/removal"
+import { api } from "../../../convex/_generated/api"
 import { exportTableById } from "./detail/export"
 import { type TableSummary } from "./types"
 

@@ -2,15 +2,18 @@ import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { api } from "../../../convex/_generated/api"
-import { ConsolePage } from "../page"
-import { ConsoleListContent, ConsoleListLayout } from "../shared/list/frame"
-import { ConsoleListLoading } from "../shared/list/loading"
+import {
+  ConsoleListContent,
+  ConsoleListLayout,
+} from "@/shared/console/list/frame"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import {
   type MaterialBreadcrumb,
   type MaterialBreadcrumbSegment,
   useMaterialTrail,
-} from "../shared/materials/breadcrumb"
+} from "@/shared/console/materials/breadcrumb"
+import { api } from "../../../convex/_generated/api"
+import { ConsolePage } from "../page"
 import { useLeaveDeletedFolder } from "./delete/leave"
 import { type FolderDialogRequest, FolderDialogs } from "./manage"
 import { FolderTitleMenu } from "./menu"

@@ -7,8 +7,8 @@ import {
   useRef,
   useState,
 } from "react"
+import { type AudienceFilter } from "@/shared/console/list/audience"
 import { api } from "../../../../convex/_generated/api"
-import { type AudienceFilter } from "../../shared/list/audience"
 import {
   type ApprovalFilter,
   type ExecutionItem,

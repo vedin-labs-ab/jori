@@ -1,8 +1,7 @@
 import { useMutation } from "convex/react"
 import { lazy, type ReactNode, Suspense } from "react"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { api } from "../../../../convex/_generated/api"
-
-import { ConsoleListLoading } from "../../shared/list/loading"
 import { usePreloadSiblings } from "../cache/preload"
 import { type FileSiblings } from "../siblings"
 import { uploadToStorage } from "../storage"
@@ -14,7 +13,7 @@ import { type FileDocument, useDocument } from "./document"
 /** CodeMirror loads only when a text file is actually on screen, keeping
  *  it out of the main bundle and the server build. */
 const Mirror = lazy(() =>
-  import("../../shared/mirror/view").then((module) => ({
+  import("@/shared/console/mirror/view").then((module) => ({
     default: module.Mirror,
   }))
 )

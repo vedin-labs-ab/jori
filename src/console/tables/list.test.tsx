@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { type ListControls } from "../shared/list/controls"
-import { type RowSelection } from "../shared/list/selection"
+import { type ListControls } from "@/shared/console/list/controls"
+import { type RowSelection } from "@/shared/console/list/selection"
 import { TableList } from "./list"
 import { tableListConfig, type useTableRemoval } from "./manage"
 import { type TableSummary } from "./types"

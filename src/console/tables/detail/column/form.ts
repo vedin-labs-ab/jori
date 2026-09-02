@@ -1,8 +1,8 @@
 import { useMutation } from "convex/react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../../../convex/_generated/api"
-import { showErrorToast } from "../../../shared/error"
 import {
   appendColumn,
   type ColumnDraft,

@@ -18,8 +18,8 @@ import { Field } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { DialogForm } from "@/shared/console/materials/form"
 import { authClient } from "@/shared/session/auth"
-import { DialogForm } from "../shared/materials/form"
 
 /** Header action for the Teams tab. Only shown to people the server would
  *  let create a team — owners and admins under the default role statements. */

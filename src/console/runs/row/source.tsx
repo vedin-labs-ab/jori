@@ -1,9 +1,9 @@
 import { toolSurfaceLabel } from "@contracts/integrations"
 import { CornerDownRight, Play } from "lucide-react"
 import { type ReactNode } from "react"
+import { SeparatorDot } from "@/shared/console/dot"
+import { type ListAudience } from "@/shared/console/list/audience"
 import { ProviderLogo } from "@/shared/logo/provider"
-import { SeparatorDot } from "../../shared/dot"
-import { type ListAudience } from "../../shared/list/audience"
 import { AudienceDatum } from "../details"
 import {
   type ExecutionDetail,

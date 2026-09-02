@@ -4,8 +4,8 @@ import {
   type ListConfig,
   type ListFacet,
   useListControls,
-} from "../../shared/list/controls"
-import { ownerFacet } from "../../shared/materials/owners"
+} from "@/shared/console/list/controls"
+import { ownerFacet } from "@/shared/console/materials/owners"
 import {
   type FolderResource,
   type ListedFolder,

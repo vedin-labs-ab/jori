@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth } from "../../shared/menu"
+import { menuWidth } from "@/shared/console/menu"
 import { type Job, jobControlAction } from "../types"
 
 // The canonical menu for a job, as items only. Editing a job

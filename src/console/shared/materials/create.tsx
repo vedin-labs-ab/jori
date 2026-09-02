@@ -1,14 +1,9 @@
 import { type Visibility } from "@contracts/visibility"
 import { type GenericId } from "convex/values"
-import { ChevronDown, Loader2 } from "lucide-react"
-import { type FormEvent, type ReactNode, useState } from "react"
+import { Loader2 } from "lucide-react"
+import { type ReactNode, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 import {
   Dialog,
   DialogContent,
@@ -17,62 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
-import { showErrorToast } from "../error"
+import { showErrorToast } from "@/shared/console/error"
+import {
+  MaterialDescriptionField,
+  MaterialNameField,
+} from "@/shared/console/materials/fields"
+import { AdvancedSettings, DialogForm } from "@/shared/console/materials/form"
 import { VisibilityField } from "../visibility/field"
-import { MaterialDescriptionField, MaterialNameField } from "./fields"
-
-/** Form wrapper for dialog fields and footer: Enter in a single-line input
- *  submits through the same handler as the primary button, and Enter in a
- *  textarea keeps inserting newlines. Pass the primary button's `disabled`
- *  expression so Enter stays inert exactly when the button is; keep the
- *  primary button `type="submit"` and every other button `type="button"`.
- *  Omit `onSubmit` for editors that deliberately stay button-only: the form
- *  semantics remain, and Enter never submits. */
-export function DialogForm({
-  children,
-  className,
-  disabled = false,
-  onSubmit,
-}: {
-  children: ReactNode
-  className?: string
-  disabled?: boolean
-  onSubmit?: () => void
-}) {
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!disabled) {
-      onSubmit?.()
-    }
-  }
-
-  return (
-    <form className={cn("grid gap-4", className)} onSubmit={handleSubmit}>
-      {children}
-    </form>
-  )
-}
-
-/** Collapsed-by-default home for a create flow's secondary fields — folder,
- *  sharing, and the like — so the dialog leads with what actually defines
- *  the material. Callers pass whichever fields their material carries. */
-export function AdvancedSettings({ children }: { children: ReactNode }) {
-  return (
-    <Collapsible className="grid gap-4">
-      {/* Styled as a section boundary rather than a link: small muted text
-          with a hairline running to the dialog's edge, matching the
-          platform's divider language. */}
-      <CollapsibleTrigger className="flex w-full items-center gap-2 font-medium text-muted-foreground text-xs transition-colors hover:text-foreground [&[data-state=open]>svg]:rotate-180">
-        Advanced settings
-        <ChevronDown className="size-3 transition-transform duration-200 ease-out" />
-        <span aria-hidden className="h-px flex-1 bg-border" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="grid gap-4">{children}</CollapsibleContent>
-    </Collapsible>
-  )
-}
 
 /** The create flow every material kind shares: name, description, and the
  *  advanced folder and sharing fields. Only the noun, the blurb under the

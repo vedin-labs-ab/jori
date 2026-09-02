@@ -13,8 +13,8 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { folderIcon } from "../shared/materials/folders"
-import { menuWidth } from "../shared/menu"
+import { folderIcon } from "@/shared/console/materials/folders"
+import { menuWidth } from "@/shared/console/menu"
 import { type CreationRequest } from "./create/dialogs"
 import { NewInFolderSub } from "./create/menu"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"

@@ -8,7 +8,7 @@ import {
 
 /** What the toolbar's save indicator shows. The debounce window stays
  *  quiet ("idle"); the indicator only speaks once a save is in flight. */
-import { type SaveState } from "../../shared/materials/save"
+import { type SaveState } from "@/shared/console/materials/save"
 
 /** How long the buffer rests after the last keystroke before it saves. */
 const saveDelay = 1200

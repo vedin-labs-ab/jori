@@ -2,8 +2,8 @@ import { CatchBoundary, type ErrorComponentProps } from "@tanstack/react-router"
 import { RefreshCw, TriangleAlert } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
-import { readErrorMessage } from "../shared/error"
-import { ConsoleEmptyState } from "../shared/list/empty"
+import { readErrorMessage } from "@/shared/console/error"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
 
 /**
  * Contains a page failure to the page.

@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { AdvancedSettings, DialogForm } from "@/shared/console/materials/form"
 import { FolderField } from "../../folders/field"
-import { AdvancedSettings, DialogForm } from "../../shared/materials/form"
 import { VisibilityField } from "../../shared/visibility/field"
 import { FileDropzone } from "./dropzone"
 import { UploadList } from "./list"

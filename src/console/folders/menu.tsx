@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth } from "../shared/menu"
+import { menuWidth } from "@/shared/console/menu"
 import { type FolderDialogRequest } from "./manage"
 import { type ManagedFolder } from "./types"
 

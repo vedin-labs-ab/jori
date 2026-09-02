@@ -1,9 +1,6 @@
 import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useDeferredValue, useState } from "react"
-import { api } from "../../../convex/_generated/api"
-import { MoveResourceDialog } from "../folders/move"
-import { ConsolePage } from "../page"
 import {
   ConsoleFilterGroup,
   ConsoleFilterToggle,
@@ -11,18 +8,21 @@ import {
   ConsoleHeaderButton,
   ConsolePageLayout,
   ConsoleSearch,
-} from "../shared/layout"
+} from "@/shared/console/layout"
 import {
   type AudienceFilter,
   audienceFilterOptions,
   matchesAudienceFilter,
-} from "../shared/list/audience"
-import { ConsoleListPager } from "../shared/list/pager"
+} from "@/shared/console/list/audience"
+import { ConsoleListPager } from "@/shared/console/list/pager"
 import {
   useClientPagination,
   useResettingSetter,
-} from "../shared/list/pagination"
-import { useNow } from "../shared/time"
+} from "@/shared/console/list/pagination"
+import { useNow } from "@/shared/console/time"
+import { api } from "../../../convex/_generated/api"
+import { MoveResourceDialog } from "../folders/move"
+import { ConsolePage } from "../page"
 import { useJobEditorHost } from "./editor/host"
 import { filterJobsByView, hasJobFilters } from "./filter"
 import { JobContent } from "./list/content"

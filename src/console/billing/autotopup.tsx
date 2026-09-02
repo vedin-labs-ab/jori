@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../convex/_generated/api"
-import { showErrorToast } from "../shared/error"
 import { type BillingAccount } from "./actions"
 
 /** One sentence with the three knobs inline: trigger, amount, monthly cap. */

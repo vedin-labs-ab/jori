@@ -1,12 +1,12 @@
 import { ChevronDown, Plus } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
-import { scrollFade } from "@/shared/fade"
-import { ConsoleListLoading } from "../../shared/list/loading"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import {
   type RowSelection,
   selectionHeadState,
-} from "../../shared/list/selection"
+} from "@/shared/console/list/selection"
+import { scrollFade } from "@/shared/fade"
 import { columnTypeIcons } from "../draft"
 import {
   type RowPlacement,

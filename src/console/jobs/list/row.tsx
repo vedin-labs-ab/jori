@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { VisibilityBadge } from "../../shared/visibility/badge"
+import { VisibilityBadge } from "@/shared/console/visibility/badge"
 import { type Job } from "../types"
 import { JobRowMenu } from "./actions"
 import { DeleteJobDialog } from "./delete"

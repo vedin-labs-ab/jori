@@ -4,7 +4,7 @@ import {
   validateCronExpression,
 } from "@contracts/jobs/schedule/cron"
 import { ordinal } from "@contracts/jobs/schedule/labels"
-import { readErrorMessage } from "../shared/error"
+import { readErrorMessage } from "@/shared/console/error"
 import { emptyJobForm, type JobFormValues } from "./types"
 
 type CronParts = Pick<

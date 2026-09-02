@@ -8,11 +8,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { CopyButton } from "@/shared/console/copy"
+import { SeparatorDot } from "@/shared/console/dot"
+import { ConsoleListToolbar } from "@/shared/console/list/frame"
+import { SaveMeta, type SaveState } from "@/shared/console/materials/save"
 import { formatFileSize } from "@/shared/files/size"
-import { CopyButton } from "../shared/copy"
-import { SeparatorDot } from "../shared/dot"
-import { ConsoleListToolbar } from "../shared/list/frame"
-import { SaveMeta, type SaveState } from "../shared/materials/save"
 import { fileBlobCache } from "./cache/blob"
 import { FileOwnerCell } from "./cells"
 import { type FileSiblings, useFileNavigate } from "./siblings"

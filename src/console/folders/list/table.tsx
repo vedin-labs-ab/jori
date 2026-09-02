@@ -8,14 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { countLabel } from "@/console/shared/count"
-import { type FacetEntry, type ListControls } from "../../shared/list/controls"
-import { ConsoleListTable } from "../../shared/list/frame"
-import { FilterHead, SortHead } from "../../shared/list/head"
-import { MaterialOwnerCell } from "../../shared/materials/cells/owner"
-import { folderIcon } from "../../shared/materials/folders"
-import { materialOwner } from "../../shared/materials/owners"
-import { absoluteTime, relativeTime, useNow } from "../../shared/time"
+import { countLabel } from "@/shared/console/count"
+import {
+  type FacetEntry,
+  type ListControls,
+} from "@/shared/console/list/controls"
+import { ConsoleListTable } from "@/shared/console/list/frame"
+import { FilterHead, SortHead } from "@/shared/console/list/head"
+import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { folderIcon } from "@/shared/console/materials/folders"
+import { materialOwner } from "@/shared/console/materials/owners"
+import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
 import { useFolderRowDrag } from "../drag/state"
 import { type FolderDialogRequest } from "../manage"
 import { FolderRowMenu } from "../menu"

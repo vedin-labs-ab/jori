@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router"
 import { Braces, Database, History, type LucideIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { countLabel } from "@/console/shared/count"
+import { countLabel } from "@/shared/console/count"
 import {
   MaterialNameCell,
   materialNameLinkClassName,
-} from "../shared/materials/cells/name"
-import { MaterialOwnerCell } from "../shared/materials/cells/owner"
-import { VisibilityBadge } from "../shared/visibility/badge"
+} from "@/shared/console/materials/cells/name"
+import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { VisibilityBadge } from "@/shared/console/visibility/badge"
 import { type StoreSummary } from "./types"
 
 /** Name column: the store icon, a link to the store, and the list's badge

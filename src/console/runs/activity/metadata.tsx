@@ -24,7 +24,7 @@ import {
   Wrench,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { formatDuration } from "../../shared/time"
+import { formatDuration } from "@/shared/console/time"
 import { MetaPill } from "../row/status"
 import {
   type ActivityItem,

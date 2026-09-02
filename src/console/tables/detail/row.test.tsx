@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { type RowSelection } from "../../shared/list/selection"
+import { type RowSelection } from "@/shared/console/list/selection"
 import { type TableColumn, type TableRow } from "../types"
 import { GridRow } from "./row"
 

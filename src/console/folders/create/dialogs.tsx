@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
+import { useRetained } from "@/shared/console/retain"
 import { UploadFileDialog } from "../../files/upload"
 import { useJobEditorHost } from "../../jobs/editor/host"
-import { useRetained } from "../../shared/retain"
 import { CreateStoreDialog } from "../../stores/create"
 import { CreateTableDialog } from "../../tables/create"
 

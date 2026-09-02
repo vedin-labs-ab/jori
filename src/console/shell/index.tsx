@@ -21,14 +21,14 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { mainContentId, SkipToContent } from "@/shared/skip"
-import { FolderDragProvider } from "../folders/drag/context"
-import { ConsoleHeaderActionsProvider } from "../shared/layout"
+import { ConsoleHeaderActionsProvider } from "@/shared/console/layout"
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
   type MaterialBreadcrumbSegment,
-} from "../shared/materials/breadcrumb"
+} from "@/shared/console/materials/breadcrumb"
+import { mainContentId, SkipToContent } from "@/shared/skip"
+import { FolderDragProvider } from "../folders/drag/context"
 import { ConsolePageBoundary } from "./boundary"
 import { ConsoleSidebar } from "./navigation"
 import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"

@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/context-menu"
 import { cn } from "@/lib/utils"
 import { displayCellText } from "@/shared/cell"
-import { type RowSelection } from "../../shared/list/selection"
+import { type RowSelection } from "@/shared/console/list/selection"
 import {
   type RowPlacement,
   type TableColumn,

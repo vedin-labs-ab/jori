@@ -1,5 +1,5 @@
 import { parseWebsiteAddress, type WebsiteAddress } from "@contracts/website"
-import { showErrorToast } from "../../../shared/error"
+import { showErrorToast } from "@/shared/console/error"
 import { type ContextFacts } from "../types"
 
 export type WebsiteItem = WebsiteAddress & {

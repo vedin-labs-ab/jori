@@ -1,4 +1,4 @@
-import { shortDate } from "../../../shared/time"
+import { shortDate } from "@/shared/console/time"
 
 type PulseDay = {
   key: string

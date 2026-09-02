@@ -8,7 +8,7 @@ import {
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
-} from "../../shared/materials/breadcrumb"
+} from "@/shared/console/materials/breadcrumb"
 import { type FileRow } from "../types"
 import { FileTitleMenu } from "./title"
 

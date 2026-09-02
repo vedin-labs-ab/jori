@@ -17,10 +17,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { relativeTime, useNow } from "@/shared/console/time"
 import { scrollFade } from "@/shared/fade"
 import { IntegrationChips } from "@/shared/logo/integration"
 import { api } from "../../../../../convex/_generated/api"
-import { relativeTime, useNow } from "../../../shared/time"
 import { ContextSectionTitle } from "../../section"
 import { WorkstreamStatusCue } from "../status"
 import { type Workstream } from "../types"

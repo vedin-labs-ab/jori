@@ -32,8 +32,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { RevealArrow } from "../shared/dot"
-import { absoluteTime } from "../shared/time"
+import { RevealArrow } from "@/shared/console/dot"
+import { absoluteTime } from "@/shared/console/time"
 import { type BillingOverview } from "./actions"
 import { BillingActivityEmpty } from "./empty"
 

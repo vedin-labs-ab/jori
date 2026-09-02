@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DialogForm } from "../shared/materials/form"
+import { DialogForm } from "@/shared/console/materials/form"
 import { type FileRow } from "./types"
 
 export function EditFileDialog({

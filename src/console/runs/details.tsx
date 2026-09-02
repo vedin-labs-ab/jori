@@ -12,11 +12,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { CopyableCodeBlock, CopyButton } from "@/shared/console/copy"
+import { type ListAudience } from "@/shared/console/list/audience"
+import { absoluteTime } from "@/shared/console/time"
 import { scrollFade } from "@/shared/fade"
 import { FieldHelp } from "@/shared/field"
-import { CopyableCodeBlock, CopyButton } from "../shared/copy"
-import { type ListAudience } from "../shared/list/audience"
-import { absoluteTime } from "../shared/time"
 
 export const codeBlockContentClassName = "max-h-[250px] overflow-y-auto"
 const codeBlockBodyClassName = cn(
