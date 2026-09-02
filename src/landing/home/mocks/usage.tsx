@@ -1,6 +1,6 @@
 import { DemoConsole } from "../../demo/console"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Definition, Section } from "../../section"
+import { Definition, Jori, Section } from "../../section"
 
 /** The bill: the organization's Usage page, window select and all, over
  *  Copperline's tree. The three terms name what the page is cut by. */
@@ -9,7 +9,15 @@ export function Usage() {
 
   return (
     <Section
-      lede="Spend is attributed where the job is filed, so a team's total is a folder's total and a job's total is one row. Open Usage on any folder and see spend by subfolder and by source over the window you choose, priced at the provider's list rates. Not a report Jori writes about itself. The tree."
+      lede={
+        <>
+          Spend is attributed where the job is filed, so a team's total is a
+          folder's total and a job's total is one row. Open Usage on any folder
+          and see spend by subfolder and by source over the window you choose,
+          priced at the provider's list rates. Not a report{" "}
+          <Jori tilt="slight" /> writes about their own work. The tree.
+        </>
+      }
       title="Every folder has a bill"
     >
       <dl className="grid gap-8 md:grid-cols-3 lg:gap-12">

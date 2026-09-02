@@ -1,6 +1,7 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import { BrandIcon } from "@/shared/brand"
 
 /**
  * Two rhythms, and only two. A lead section carries an argument the page is
@@ -63,7 +64,7 @@ export function Section({
   )
 }
 
-export function PageIntro({ lede, title }: { lede: string; title: string }) {
+export function PageIntro({ lede, title }: { lede: ReactNode; title: string }) {
   return (
     <section className="mx-auto w-full max-w-6xl px-6 pt-14 md:pt-24">
       <div className="max-w-2xl">
@@ -156,6 +157,30 @@ export function Sigil({ kind }: { kind: keyof typeof sigils }) {
       )}
     >
       {sigil.glyph}
+    </span>
+  )
+}
+
+const tilts = {
+  left: "-rotate-[7deg]",
+  right: "rotate-[6deg]",
+  slight: "-rotate-[4deg]",
+  steep: "rotate-[9deg]",
+}
+
+/** Jori named in prose: the mark and the name, set in the foreground so the
+ *  name reads as a person in a muted paragraph. The mark leans a little,
+ *  a different way each time, like a hand-set stamp. */
+export function Jori({ tilt = "left" }: { tilt?: keyof typeof tilts }) {
+  return (
+    <span className="whitespace-nowrap font-semibold text-foreground">
+      <BrandIcon
+        className={cn(
+          "mr-[0.3em] inline-block size-[0.95em] align-[-0.15em]",
+          tilts[tilt]
+        )}
+      />
+      Jori
     </span>
   )
 }

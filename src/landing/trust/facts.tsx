@@ -14,13 +14,18 @@ import {
   Users,
   UsersRound,
 } from "lucide-react"
-import { Definition, Section } from "../section"
+import { Definition, Jori, Section } from "../section"
 import { Subprocessors } from "./subprocessors"
 
 export function ScopeSection() {
   return (
     <Section
-      lede="Jori works with the accounts you connect, with the access you grant. Nothing else."
+      lede={
+        <>
+          <Jori tilt="left" /> works with the accounts you connect, with the
+          access you grant. Nothing else.
+        </>
+      }
       support
       title="It acts as you, never past you"
     >

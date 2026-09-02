@@ -114,7 +114,7 @@ function ShareHistoryRow({
   share: ShareRow
 }) {
   return (
-    <div className="flex min-h-12 items-center gap-3 px-4 py-2 text-sm">
+    <div className="flex min-h-12 items-center gap-3 px-4 py-2 text-xs">
       <Link2 className="size-4 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ function ShareHistoryRow({
             {active ? "Active" : "Expired"}
           </Badge>
         </div>
-        <p className="truncate text-muted-foreground text-xs">
+        <p className="truncate text-muted-foreground">
           Created {absoluteTime(share.createdAt)}
         </p>
       </div>

@@ -14,14 +14,14 @@ export function Infrastructure() {
         <>
           Choose where your data lives, US or EU. Payments settle through{" "}
           <a
-            className="inline-block align-[-0.2em]"
+            className="inline-block align-middle transition-opacity hover:opacity-70"
             href="https://stripe.com"
             rel="noreferrer"
             target="_blank"
           >
             <img
               alt="Stripe"
-              className="inline-block h-[1.2em]"
+              className="inline-block h-[1.15em]"
               src="/logos/subprocessors/stripe.svg"
             />
           </a>{" "}
@@ -29,7 +29,7 @@ export function Infrastructure() {
         </>
       }
       support
-      title="Runs where you need it"
+      title="Hosted in your region"
     >
       <dl className="grid max-w-3xl gap-8 md:grid-cols-2 lg:gap-16">
         <Definition
