@@ -35,7 +35,7 @@ export function AutomationContent({
   if (automationList.status === "unauthorized") {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Automation access unavailable</AlertTitle>
+        <AlertTitle>Job access unavailable</AlertTitle>
         <AlertDescription>{automationList.message}</AlertDescription>
       </Alert>
     )

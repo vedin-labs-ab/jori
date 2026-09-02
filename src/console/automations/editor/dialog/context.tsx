@@ -20,7 +20,7 @@ const contextLayers = [
     label: "Run",
     items: [
       "Run identifiers",
-      "Automation identifiers",
+      "Job identifiers",
       "Current time",
       "Trigger details",
       "Event details",

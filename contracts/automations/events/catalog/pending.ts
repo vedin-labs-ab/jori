@@ -47,7 +47,7 @@ export const pendingAutomationEventCatalog = [
       label: "New email",
       description: "Runs when a new Gmail message arrives.",
       message:
-        "Gmail event-triggered automations need mailbox subscriptions before they can run.",
+        "Gmail event-triggered jobs need mailbox subscriptions before they can run.",
       parameters: [
         optionParameter("label", "Label", "Search Gmail labels", {
           source: "gmail.labels",
@@ -64,7 +64,7 @@ export const pendingAutomationEventCatalog = [
       label: "New email",
       description: "Runs when a new Outlook message arrives.",
       message:
-        "Outlook Mail event-triggered automations need Microsoft Graph subscriptions before they can run.",
+        "Outlook Mail event-triggered jobs need Microsoft Graph subscriptions before they can run.",
       parameters: [
         optionParameter("folder", "Folder", "Search Outlook folders", {
           source: "microsoftEmail.folders",
@@ -79,14 +79,14 @@ export const pendingAutomationEventCatalog = [
   integration("googleCalendar", [
     ...pendingCalendarChangeEvents({
       message:
-        "Google Calendar event-triggered automations need calendar subscriptions before they can run.",
+        "Google Calendar event-triggered jobs need calendar subscriptions before they can run.",
       parameters: googleCalendarParameters,
     }),
     pendingEvent("event.starting_soon", {
       label: "Event starting soon",
       description: "Runs before an event starts on the selected calendar.",
       message:
-        "Google Calendar starting-soon automations need scheduled calendar checks before they can run.",
+        "Google Calendar starting-soon jobs need scheduled calendar checks before they can run.",
       parameters: [
         ...googleCalendarParameters,
         numberParameter("leadMinutes", "Lead time", "15", {
@@ -102,14 +102,14 @@ export const pendingAutomationEventCatalog = [
   integration("microsoftCalendar", [
     ...pendingCalendarChangeEvents({
       message:
-        "Microsoft Calendar event-triggered automations need Microsoft Graph subscriptions before they can run.",
+        "Microsoft Calendar event-triggered jobs need Microsoft Graph subscriptions before they can run.",
       parameters: microsoftCalendarParameters,
     }),
     pendingEvent("event.starting_soon", {
       label: "Event starting soon",
       description: "Runs before an event starts on the selected calendar.",
       message:
-        "Microsoft Calendar starting-soon automations need scheduled calendar checks before they can run.",
+        "Microsoft Calendar starting-soon jobs need scheduled calendar checks before they can run.",
       parameters: [
         ...microsoftCalendarParameters,
         numberParameter("leadMinutes", "Lead time", "15", {

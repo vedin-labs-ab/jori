@@ -53,7 +53,7 @@ describe("automation event catalog match", () => {
         requireEvent("gmail", "message.received")
       )
     ).toThrow(
-      "Gmail event-triggered automations need mailbox subscriptions before they can run."
+      "Gmail event-triggered jobs need mailbox subscriptions before they can run."
     )
   })
 

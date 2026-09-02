@@ -12,7 +12,7 @@ import {
 export type AutomationScope = "personal" | "organization"
 
 export const automationScopeConflictMessage =
-  "Organization automations can't use personal access. Remove the highlighted items or switch to Personal."
+  "Organization jobs can't use personal access. Remove the highlighted items or switch to Personal."
 
 export function isAutomationSurfaceAllowedForScope(
   scope: AutomationScope,

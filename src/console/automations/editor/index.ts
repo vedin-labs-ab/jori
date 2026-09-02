@@ -127,7 +127,7 @@ function reportSaveError(
   error: unknown,
   setFormError: (message: string) => void
 ) {
-  const message = readErrorMessage(error, "Couldn't save the automation.")
+  const message = readErrorMessage(error, "Couldn't save the job.")
 
   if (isAutomationFieldError(message)) {
     setFormError(message)
@@ -182,7 +182,7 @@ function useAutomationDeletion(organizationId: string) {
     try {
       await remove({ organizationId, automationId: automation.id })
     } catch (error) {
-      showErrorToast(error, "Couldn't delete the automation.")
+      showErrorToast(error, "Couldn't delete the job.")
     } finally {
       setDeletingAutomationId(undefined)
     }
@@ -205,9 +205,7 @@ function useAutomationControl(organizationId: string) {
     } catch (error) {
       showErrorToast(
         error,
-        paused
-          ? "Couldn't pause the automation."
-          : "Couldn't resume the automation."
+        paused ? "Couldn't pause the job." : "Couldn't resume the job."
       )
     } finally {
       setControllingAutomationId(undefined)

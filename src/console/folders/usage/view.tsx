@@ -118,8 +118,8 @@ function UsageBody({
       <ConsoleEmptyState
         description={
           scoped
-            ? "Runs from automations filed here will show up as they spend."
-            : "Runs from your automations will show up here as they spend."
+            ? "Runs from jobs filed here will show up as they spend."
+            : "Runs from your jobs will show up here as they spend."
         }
         icon={ChartNoAxesColumn}
         title="No usage in this window"
@@ -138,7 +138,7 @@ function UsageBody({
       >
         <Section className="min-w-0">
           <SectionHeader
-            description="Each row is an automation, or work asked for directly."
+            description="Each row is a job, or work asked for directly."
             title="Spend by source"
           />
           <UsageContributors

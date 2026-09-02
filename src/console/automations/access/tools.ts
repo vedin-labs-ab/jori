@@ -36,11 +36,11 @@ export function automationToolModeDescription(permission: ToolPermission) {
     !canUseAutomationTool(permission) &&
     (permission.mode === "allowed" || permission.mode === "required")
   ) {
-    return "This tool needs an active conversation and cannot run in automations."
+    return "This tool needs an active conversation and cannot run in jobs."
   }
 
   if (permission.mode === "prompted") {
-    return "Requires approval in Integrations and cannot run in automations."
+    return "Requires approval in Integrations and cannot run in jobs."
   }
 
   if (permission.mode === "blocked") {
@@ -48,7 +48,7 @@ export function automationToolModeDescription(permission: ToolPermission) {
   }
 
   return permission.mode === "required"
-    ? "Allowed for automations."
+    ? "Allowed in jobs."
     : "Allowed in Integrations."
 }
 
@@ -105,7 +105,7 @@ export function automationToolReferenceIssue({
   const permission = permissions.find((item) => item.tool === tool)
 
   if (permission === undefined) {
-    return `#${tool} is not an available automation tool.`
+    return `#${tool} is not an available job tool.`
   }
 
   const scopeIssue = automationPermissionScopeIssue(permission, scope)
@@ -127,7 +127,7 @@ export function automationToolReferenceIssue({
     return `Enable web access to use #${tool}.`
   }
   if (access.kind === "unavailable") {
-    return `#${tool} is not available in automations.`
+    return `#${tool} is not available in jobs.`
   }
 
   return undefined

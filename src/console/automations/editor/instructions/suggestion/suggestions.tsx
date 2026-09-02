@@ -100,15 +100,15 @@ function selectionAddsAccess(suggestion: AutomationMentionSuggestion) {
 function emptySuggestionMessage(state: InstructionSuggestionState) {
   if (state.active.kind === "tool") {
     if (state.empty === "loading") {
-      return "Loading automation tools..."
+      return "Loading job tools..."
     }
     if (state.empty === "unavailable") {
-      return "Automation tools are unavailable right now."
+      return "Job tools are unavailable right now."
     }
 
     return state.active.query === ""
-      ? "No automation tools are available."
-      : "No matching automation tools."
+      ? "No job tools are available."
+      : "No matching job tools."
   }
 
   if (state.active.kind === "skill") {

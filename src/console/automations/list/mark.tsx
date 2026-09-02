@@ -35,7 +35,7 @@ export function AutomationStatusMark({
   if (action === undefined) {
     return (
       <span
-        aria-label={`${automationStatusLabel(automation)} automation`}
+        aria-label={`${automationStatusLabel(automation)} job`}
         className={statusMarkClassName}
         role="img"
       >

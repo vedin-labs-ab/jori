@@ -30,11 +30,11 @@ export function validateAutomationPolicy({
   surfaces: AutomationSurfaceFormValue[]
 }) {
   if (permissions === undefined) {
-    return "Automation permissions are still loading."
+    return "Job permissions are still loading."
   }
 
   if (permissions === null) {
-    return "Sign in again to manage automation permissions."
+    return "Sign in again to manage job permissions."
   }
 
   const blockedSurface = surfaces.find((surface) =>
@@ -45,7 +45,7 @@ export function validateAutomationPolicy({
     return undefined
   }
 
-  return `${getAutomationSurfaceLabel(blockedSurface.integration)} has tools that are not available for automations.`
+  return `${getAutomationSurfaceLabel(blockedSurface.integration)} has tools that are not available for jobs.`
 }
 
 export function isAutomationSurfacePolicyBlocked({

@@ -10,7 +10,7 @@ export async function getOrganizationAutomation(
   const automation = await ctx.db.get(automationId)
 
   if (automation === null || automation.organizationId !== organizationId) {
-    throw new Error("Automation not found.")
+    throw new Error("Job not found.")
   }
 
   return automation
@@ -23,7 +23,7 @@ export async function getRequiredAutomation(
   const automation = await ctx.db.get(automationId)
 
   if (automation === null) {
-    throw new Error("Automation not found.")
+    throw new Error("Job not found.")
   }
 
   return automation

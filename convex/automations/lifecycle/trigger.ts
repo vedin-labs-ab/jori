@@ -32,7 +32,7 @@ export async function resolveTrigger(
     )
 
     if (definition === undefined) {
-      throw new Error("Choose a supported automation event.")
+      throw new Error("Choose a supported job event.")
     }
 
     assertAutomationEventIsAvailable(definition)

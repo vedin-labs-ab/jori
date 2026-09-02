@@ -3,7 +3,7 @@ export const automationInstructionMarkerErrors = {
   noMarkers: "Mention at least one integration in the instructions.",
   noWrite: "Give at least one mentioned integration a write tool.",
   unavailableAccess:
-    "Some selected integration tools are not available for automations.",
+    "Some selected integration tools are not available for jobs.",
 } as const
 
 type AutomationInstructionMarkerError =

@@ -48,7 +48,7 @@ export function buildAutomationTriggerSpec(
     )
 
     if (definition === undefined) {
-      return { error: "Choose a supported automation event." }
+      return { error: "Choose a supported job event." }
     }
 
     const match = readAutomationEventMatch(definition, values.eventMatch)

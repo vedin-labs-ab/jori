@@ -106,7 +106,7 @@ export function AutomationDialog({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
-            {automation === undefined ? "New automation" : "Edit automation"}
+            {automation === undefined ? "New job" : "Edit job"}
           </DialogTitle>
           <DialogDescription>
             Tell Jori what to do, what it can access, and when to run.
@@ -134,7 +134,7 @@ export function AutomationDialog({
           <DialogFooter>
             <Button type="button" onClick={onSave} disabled={isSaving}>
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-              {automation === undefined ? "Create automation" : "Save changes"}
+              {automation === undefined ? "Create job" : "Save changes"}
             </Button>
           </DialogFooter>
         </DialogForm>
@@ -166,9 +166,9 @@ function AutomationDialogFields(props: DialogFieldsProps) {
         value={props.values.name}
       />
       <VisibilityField
-        help="Only-me automations run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
+        help="Only-me jobs run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
         id="automation-visibility"
-        noun="automation"
+        noun="job"
         onChange={props.actions.updateVisibility}
         organizationId={props.organizationId}
         value={props.values.visibility}

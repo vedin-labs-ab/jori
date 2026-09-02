@@ -152,7 +152,7 @@ function useAutomationPagination({
   const pagination = useClientPagination({
     hasFilters,
     isReady: automationList?.status === "ready",
-    itemLabel: { singular: "automation", plural: "automations" },
+    itemLabel: { singular: "job", plural: "jobs" },
     items: automations,
   })
 
@@ -186,13 +186,13 @@ function AutomationFilters({
     <>
       <ConsoleHeaderActions>
         <ConsoleSearch
-          label="Search automations"
+          label="Search jobs"
           onValueChange={setQuery}
           value={query}
         />
         <ConsoleHeaderButton
           icon={<Plus />}
-          label="New automation"
+          label="New job"
           onClick={() => {
             preloadDialog()
             onCreate()

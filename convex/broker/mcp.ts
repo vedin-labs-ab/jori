@@ -204,7 +204,7 @@ function authorizeTool(
   if (!canUseToolMode(mode, executionType)) {
     if (mode === "prompted" && context.input.type === "automation") {
       throw new Error(
-        `Tool requires approval and cannot run in automations: ${request.tool}`
+        `Tool requires approval and cannot run in jobs: ${request.tool}`
       )
     }
 
