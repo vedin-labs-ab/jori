@@ -77,10 +77,10 @@ export function Hero() {
  *  as the products they are rather than a list of words. */
 function Surface({ logo, name }: { logo: string; name: string }) {
   return (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap text-foreground">
+    <span className="whitespace-nowrap text-foreground">
       <img
         alt=""
-        className="size-3.5 rounded-sm"
+        className="mr-1 inline-block size-3.5 rounded-sm align-[-0.2em]"
         src={`/logos/integrations/${logo}.svg`}
       />
       {name}
