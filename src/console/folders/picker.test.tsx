@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { subtreeFolderIds } from "@/shared/console/folders/tree"
+import { type FolderRow } from "@/shared/console/folders/types"
 import { FolderPicker } from "./picker"
-import { subtreeFolderIds } from "./tree"
-import { type FolderRow } from "./types"
 
 afterEach(cleanup)
 

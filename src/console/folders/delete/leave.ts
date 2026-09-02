@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { type ManagedFolder } from "../types"
+import { type ManagedFolder } from "@/shared/console/folders/types"
 
 /**
  * After a folder is deleted, its page has nothing left to show — and neither

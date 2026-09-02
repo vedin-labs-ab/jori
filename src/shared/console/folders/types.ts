@@ -1,7 +1,7 @@
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
 import { Database, type LucideIcon, Table2, Workflow } from "lucide-react"
 import { fileKind } from "@/shared/files/kind"
-import { type api } from "../../../convex/_generated/api"
+import { type api } from "../../../../convex/_generated/api"
 
 export type FolderTreeResult = FunctionReturnType<
   typeof api.folders.console.tree
@@ -88,3 +88,23 @@ export type MoveResourceTarget = {
 export type MoveSubject =
   | { kind: "folder"; folderId: string; name: string; parentId?: string }
   | { kind: "resources"; resources: MoveResourceTarget[] }
+
+/** What the folder surfaces can create in place, each through the same
+ *  dialog its own list page uses. */
+export type FolderCreation = "table" | "store" | "file" | "job"
+
+export type CreationRequest = {
+  creation: FolderCreation
+  /** Pre-selects the dialogs' Folder field; undefined starts at the root. */
+  folderId?: string
+}
+
+/** What a folder's menus ask of the lifecycle dialogs. One request value
+ *  drives them all, so each surface renders a single set of dialogs and
+ *  hands its rows a way to raise requests. */
+export type FolderDialogRequest =
+  | { type: "access"; folder: ManagedFolder }
+  | { type: "create"; parentId?: string }
+  | { type: "delete"; folder: ManagedFolder }
+  | { type: "move"; folder: ManagedFolder }
+  | { type: "rename"; folder: ManagedFolder }

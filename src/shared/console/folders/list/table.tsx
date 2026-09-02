@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import { Layers } from "lucide-react"
 import { type ReactNode } from "react"
 import {
@@ -8,21 +7,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { countLabel } from "@/shared/console/count"
-import {
-  type FacetEntry,
-  type ListControls,
-} from "@/shared/console/list/controls"
-import { ConsoleListTable } from "@/shared/console/list/frame"
-import { FilterHead, SortHead } from "@/shared/console/list/head"
-import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
-import { folderIcon } from "@/shared/console/materials/folders"
-import { materialOwner } from "@/shared/console/materials/owners"
-import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
+import { countLabel } from "../../count"
+import { type FacetEntry, type ListControls } from "../../list/controls"
+import { ConsoleListTable } from "../../list/frame"
+import { FilterHead, SortHead } from "../../list/head"
+import { MaterialOwnerCell } from "../../materials/cells/owner"
+import { folderIcon } from "../../materials/folders"
+import { materialOwner } from "../../materials/owners"
+import { ConsoleLink } from "../../shell/link"
+import { absoluteTime, relativeTime, useNow } from "../../time"
 import { useFolderRowDrag } from "../drag/state"
-import { type FolderDialogRequest } from "../manage"
 import { FolderRowMenu } from "../menu"
-import { type ListedFolder } from "../types"
+import { type FolderDialogRequest, type ListedFolder } from "../types"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
 /** The full-bleed table both folder surfaces share: the /folders overview
@@ -83,7 +79,7 @@ export function FolderListRow({
       ref={drag.setNodeRef}
     >
       <TableCell>
-        <Link
+        <ConsoleLink
           className={nameLinkClassName}
           draggable={false}
           params={{ folderId: folder.folderId }}
@@ -92,7 +88,7 @@ export function FolderListRow({
         >
           <FolderIcon className="size-4 shrink-0 text-muted-foreground" />
           <span className="truncate">{folder.name}</span>
-        </Link>
+        </ConsoleLink>
       </TableCell>
       <TableCell className="text-muted-foreground">Folder</TableCell>
       <TableCell>

@@ -16,8 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { showErrorToast } from "@/shared/console/error"
+import { type ManagedFolder } from "@/shared/console/folders/types"
 import { api } from "../../../../convex/_generated/api"
-import { type ManagedFolder } from "../types"
 
 // Deleting a folder takes its whole subtree, so the dialog states the size
 // of that subtree before it asks. Contents survive by moving up to the

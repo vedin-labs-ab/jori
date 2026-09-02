@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import {
   ChartNoAxesColumn,
   FolderInput,
@@ -15,9 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth } from "@/shared/console/menu"
-import { type FolderDialogRequest } from "./manage"
-import { type ManagedFolder } from "./types"
+import { menuWidth } from "../menu"
+import { ConsoleLink } from "../shell/link"
+import { type FolderDialogRequest, type ManagedFolder } from "./types"
 
 // The canonical menu for a folder, as items only: what it costs, what it
 // is, and what removes it. The breadcrumb, the sidebar tree row, and a
@@ -33,13 +32,13 @@ export function FolderMenuItems({
   return (
     <>
       <DropdownMenuItem asChild>
-        <Link
+        <ConsoleLink
           params={{ folderId: folder.folderId }}
           to="/folders/$folderId/usage"
         >
           <ChartNoAxesColumn />
           Usage
-        </Link>
+        </ConsoleLink>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
@@ -114,10 +113,10 @@ export function FoldersTitleMenu() {
   return (
     <DropdownMenuContent align="start" className={menuWidth}>
       <DropdownMenuItem asChild>
-        <Link to="/folders/usage">
+        <ConsoleLink to="/folders/usage">
           <ChartNoAxesColumn />
           Usage
-        </Link>
+        </ConsoleLink>
       </DropdownMenuItem>
     </DropdownMenuContent>
   )

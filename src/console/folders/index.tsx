@@ -2,13 +2,15 @@ import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { NewInFolderMenu } from "@/shared/console/folders/create"
+import { FolderHeaderActions } from "@/shared/console/folders/header"
+import { FolderContents } from "@/shared/console/folders/list/contents"
+import { type FolderCreation } from "@/shared/console/folders/types"
 import { api } from "../../../convex/_generated/api"
-import { CreationDialogs, type FolderCreation } from "./create/dialogs"
-import { NewInFolderMenu } from "./create/menu"
+import { CreationDialogs } from "./create/dialogs"
 import { FolderFrame, type FramedFolder } from "./frame"
-import { FolderHeaderActions } from "./header"
 import { useFolderResourceActions } from "./list/actions"
-import { FolderContents } from "./list/contents"
+import { ResourceRowMenu } from "./list/menu"
 
 /** A folder's page: everything filed here. */
 export function FolderPage({ folderId }: { folderId: string }) {
@@ -36,7 +38,6 @@ function FolderContentsView({ framed }: { framed: FramedFolder }) {
     <>
       <FolderHeaderActions onCreate={setCreation} onNewFolder={onNewFolder} />
       <FolderContents
-        actions={resources.actions}
         contents={contents}
         folderId={folder.folderId}
         newMenu={
@@ -48,6 +49,9 @@ function FolderContentsView({ framed }: { framed: FramedFolder }) {
           </NewInFolderMenu>
         }
         onDialog={onDialog}
+        resourceMenu={(resource) => (
+          <ResourceRowMenu actions={resources.actions} resource={resource} />
+        )}
       />
       <CreationDialogs
         onClose={() => setCreation(undefined)}

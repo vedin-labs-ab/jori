@@ -14,11 +14,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { showErrorToast } from "@/shared/console/error"
+import { subtreeFolderIds } from "@/shared/console/folders/tree"
+import {
+  type MoveResourceTarget,
+  type MoveSubject,
+} from "@/shared/console/folders/types"
 import { useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
 import { FolderPicker } from "../picker"
-import { subtreeFolderIds } from "../tree"
-import { type MoveResourceTarget, type MoveSubject } from "../types"
 import { useMoveConfirmation } from "./confirm"
 
 /** MoveResourcesDialog specialized for exactly one resource, for hosts

@@ -2,6 +2,11 @@ import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { FolderTitleMenu } from "@/shared/console/folders/menu"
+import {
+  type FolderDetail,
+  type FolderDialogRequest,
+} from "@/shared/console/folders/types"
 import {
   ConsoleListContent,
   ConsoleListLayout,
@@ -15,9 +20,7 @@ import {
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useLeaveDeletedFolder } from "./delete/leave"
-import { type FolderDialogRequest, FolderDialogs } from "./manage"
-import { FolderTitleMenu } from "./menu"
-import { type FolderDetail } from "./types"
+import { FolderDialogs } from "./manage"
 import { FolderUsageHint } from "./usage/hint"
 
 // The folder surface: one folder, resolved once, placed in the breadcrumb,

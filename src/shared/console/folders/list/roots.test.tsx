@@ -2,18 +2,11 @@
 import { DndContext } from "@dnd-kit/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { type FolderDialogRequest } from "../manage"
-import { type FolderRootsResult } from "../types"
-import { RootFolderList } from "./overview"
+import { type FolderDialogRequest, type FolderRootsResult } from "../types"
+import { RootFolderList } from "./roots"
 
 vi.mock("@tanstack/react-router", async () => ({
-  Link: (await import("../../../../test/router")).Link,
-}))
-
-vi.mock("convex/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("convex/react")>()),
-  useMutation: () => () => Promise.resolve({}),
-  useQuery: () => undefined,
+  Link: (await import("../../../../../test/router")).Link,
 }))
 
 afterEach(cleanup)

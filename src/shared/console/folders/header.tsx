@@ -1,10 +1,7 @@
 import { Plus } from "lucide-react"
-import {
-  ConsoleHeaderActions,
-  ConsoleHeaderButton,
-} from "@/shared/console/layout"
-import { type FolderCreation } from "./create/dialogs"
-import { NewInFolderMenu } from "./create/menu"
+import { ConsoleHeaderActions, ConsoleHeaderButton } from "../layout"
+import { NewInFolderMenu } from "./create"
+import { type FolderCreation } from "./types"
 
 // What the folder surface puts in the console header: creating things sits
 // in the header's own actions, and everything about the folder itself hangs

@@ -16,7 +16,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { type FolderCreation } from "./dialogs"
+import { type FolderCreation } from "./types"
 
 // The console's "New" entries — a folder plus every resource that can be
 // created in place — shared by the folder page's header and empty state,

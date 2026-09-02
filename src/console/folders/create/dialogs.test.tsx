@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { CreationDialogs, type CreationRequest } from "./dialogs"
+import { type CreationRequest } from "@/shared/console/folders/types"
+import { CreationDialogs } from "./dialogs"
 
 vi.mock("convex/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("convex/react")>()),

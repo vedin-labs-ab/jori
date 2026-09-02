@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { type ManagedFolder } from "../types"
+import { type ManagedFolder } from "@/shared/console/folders/types"
 import { DeleteFolderDialog } from "./dialog"
 
 // The dialog is the only place the subtree's size is stated, and the only

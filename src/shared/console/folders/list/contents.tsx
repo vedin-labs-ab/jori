@@ -5,16 +5,15 @@ import {
   ConsoleEmptyState,
   EmptyRow,
   FilterableEmptyState,
-} from "@/shared/console/list/empty"
-import { ConsoleListContent } from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
-import { type FolderDialogRequest } from "../manage"
+} from "../../list/empty"
+import { ConsoleListContent } from "../../list/frame"
+import { ConsoleListLoading } from "../../list/loading"
 import {
   type FolderContentsResult,
+  type FolderDialogRequest,
   type FolderResource,
   type ListedFolder,
 } from "../types"
-import { type FolderResourceActions } from "./actions"
 import { useFolderListControls } from "./controls"
 import { ResourceListRow } from "./resource"
 import { FolderListRow, FolderListTable } from "./table"
@@ -23,19 +22,20 @@ import { FolderListRow, FolderListTable } from "./table"
  *  name-sorted run, in the shared full-bleed table. The states that replace
  *  the table sit in the padded content region instead. */
 export function FolderContents({
-  actions,
   contents,
   folderId,
   newMenu,
   onDialog,
+  resourceMenu,
 }: {
-  actions: FolderResourceActions
   contents: FolderContentsResult | undefined
   /** The folder being viewed — the one filed resources already sit in. */
   folderId: string
   /** The header's "New" menu again, as the empty state's call to action. */
   newMenu: ReactNode
   onDialog: (request: FolderDialogRequest) => void
+  /** A filed resource's own menu, trigger and all. */
+  resourceMenu: (resource: FolderResource) => ReactNode
 }) {
   const list = useFolderListControls(
     contents?.status === "ready" ? contents : { folders: [], resources: [] }
@@ -84,10 +84,10 @@ export function FolderContents({
       owners={list.owners}
     >
       <FolderContentRows
-        actions={actions}
         folderId={folderId}
         folders={list.narrow(contents.folders)}
         onDialog={onDialog}
+        resourceMenu={resourceMenu}
         resources={list.narrow(contents.resources)}
       />
     </FolderListTable>
@@ -97,16 +97,16 @@ export function FolderContents({
 /** The listing's two row groups, subfolders first — or the one row that
  *  stands in when the header filters leave nothing behind. */
 function FolderContentRows({
-  actions,
   folderId,
   folders,
   onDialog,
+  resourceMenu,
   resources,
 }: {
-  actions: FolderResourceActions
   folderId: string
   folders: ListedFolder[]
   onDialog: (request: FolderDialogRequest) => void
+  resourceMenu: (resource: FolderResource) => ReactNode
   resources: FolderResource[]
 }) {
   if (folders.length === 0 && resources.length === 0) {
@@ -133,9 +133,9 @@ function FolderContentRows({
       ))}
       {resources.map((resource) => (
         <ResourceListRow
-          actions={actions}
           folderId={folderId}
           key={resource.id}
+          menu={resourceMenu(resource)}
           resource={resource}
         />
       ))}

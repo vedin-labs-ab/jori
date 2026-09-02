@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
+import { type UsageOverview } from "@/shared/console/folders/usage/types"
 import { UsageStats } from "./stats"
-import { type UsageOverview } from "./types"
 
 afterEach(cleanup)
 

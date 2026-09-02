@@ -6,8 +6,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { type UsageDays } from "@/shared/console/folders/usage/types"
 import { api } from "../../../../convex/_generated/api"
-import { type UsageDays } from "./types"
 
 /** The fine print, hung off the page's name in its crumb: which day a day
  *  is, what a change is measured against, and what the money is a price

@@ -3,7 +3,7 @@ import { OrganizationUsagePage } from "@/console/folders/usage"
 import {
   defaultUsageDays,
   usageDaysSearch,
-} from "@/console/folders/usage/types"
+} from "@/shared/console/folders/usage/types"
 
 // A static segment, so it wins over /folders/$folderId; no folder id can
 // spell "usage".
