@@ -9,11 +9,11 @@ import {
   type RowSelection,
   useRowSelection,
 } from "@/shared/console/list/selection"
+import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
 import { AddRowDialog } from "@/shared/console/tables/add"
 import { rowNoun, useRowAdding } from "@/shared/console/tables/adding"
 import { useColumnSheetForm } from "@/shared/console/tables/column"
 import { RowGrid } from "@/shared/console/tables/grid"
-import { TableHeaderActions } from "@/shared/console/tables/header"
 import {
   ColumnSheet,
   type ColumnSheetState,
@@ -51,7 +51,7 @@ export function TableGrid({ rows, table }: GridProps) {
 
   return (
     <ConsoleListLayout>
-      <TableHeaderActions
+      <MaterialHeaderActions
         isExporting={false}
         onExport={() => undefined}
         onShare={() => grid.setDialog("share")}

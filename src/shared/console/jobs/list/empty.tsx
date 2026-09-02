@@ -2,7 +2,7 @@ import { Plus, Workflow } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FilterableEmptyState } from "@/shared/console/list/empty"
 
-export function EmptyJobs({
+export function JobsEmptyState({
   hasFilters,
   onCreate,
 }: {

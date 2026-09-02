@@ -10,11 +10,11 @@ import {
 import { useRowSelection } from "@/shared/console/list/selection"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
+import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
+import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
-import { MaterialPlaceholder } from "@/shared/console/materials/placeholder"
 import { useRowAdding } from "@/shared/console/tables/adding"
 import { RowGrid } from "@/shared/console/tables/grid"
-import { TableHeaderActions } from "@/shared/console/tables/header"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { type ColumnSheetState } from "@/shared/console/tables/sheet"
 import { type TableDetail, type TableRow } from "@/shared/console/tables/types"
@@ -154,7 +154,7 @@ function TableReadyView({
 
   return (
     <ConsoleListLayout>
-      <TableHeaderActions
+      <MaterialHeaderActions
         isExporting={page.exporter.isExporting}
         onExport={() => void page.exporter.exportCsv()}
         onShare={() => page.setDialog("share")}

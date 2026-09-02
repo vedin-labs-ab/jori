@@ -1,11 +1,8 @@
-import { MoreHorizontal } from "lucide-react"
 import { useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
@@ -13,7 +10,7 @@ import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
 import { DeleteJobDialog } from "@/shared/console/jobs/list/delete"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
-import { menuWidth } from "@/shared/console/menu"
+import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { jobMoveSubject } from "../derive/jobs"
@@ -87,16 +84,7 @@ function FileResourceMenu({ material }: { material: DemoMaterial }) {
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            aria-label={`Open actions for ${material.name}`}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
+        <RowMenuTrigger name={material.name} />
         <DropdownMenuContent align="end" className={menuWidth}>
           <FileMenuItems
             file={{ name: material.name, url: null }}

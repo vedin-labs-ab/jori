@@ -2,8 +2,9 @@ import { type ReactNode } from "react"
 import { countLabel } from "@/shared/console/count"
 import { SeparatorDot } from "@/shared/console/dot"
 import { ConsoleListToolbar } from "@/shared/console/list/frame"
+import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { summaryOwner } from "@/shared/console/materials/owners"
 import { SaveMeta, type SaveState } from "@/shared/console/materials/save"
-import { StoreOwnerCell } from "../list/cells"
 import { type StoreDetail } from "../types"
 
 /** Secondary header under the console breadcrumb, in the file toolbar's
@@ -45,7 +46,7 @@ function StoreMeta({
   return (
     <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
       <div className="min-w-0 text-foreground">
-        <StoreOwnerCell compact store={store} />
+        <MaterialOwnerCell compact owner={summaryOwner(store)} />
       </div>
       <SeparatorDot />
       <SaveMeta saveStatus={saveStatus} updatedAt={store.updatedAt} />

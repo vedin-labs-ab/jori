@@ -1,11 +1,11 @@
-import { Columns3, type LucideIcon, Rows3, Table2 } from "lucide-react"
+import { Columns3, Rows3, Table2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { countLabel } from "@/shared/console/count"
+import { MaterialMeasureCell } from "@/shared/console/materials/cells/measure"
 import {
   MaterialNameCell,
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
-import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
 import { type TableSummary } from "@/shared/console/tables/types"
 import { VisibilityBadge } from "@/shared/console/visibility/badge"
 import { ConsoleLink } from "../../shell/link"
@@ -37,10 +37,10 @@ export function TableNameCell({ table }: { table: TableSummary }) {
 /** Columns column: a small icon and the count of typed columns. */
 export function TableColumnsCell({ table }: { table: TableSummary }) {
   return (
-    <CountCell
-      count={table.columns.length}
+    <MaterialMeasureCell
       icon={Columns3}
       label={countLabel(table.columns.length, "column")}
+      value={table.columns.length}
     />
   )
 }
@@ -48,46 +48,10 @@ export function TableColumnsCell({ table }: { table: TableSummary }) {
 /** Rows column: a small icon and the live document count. */
 export function TableRowsCell({ table }: { table: TableSummary }) {
   return (
-    <CountCell
-      count={table.rowCount}
+    <MaterialMeasureCell
       icon={Rows3}
       label={countLabel(table.rowCount, "row")}
+      value={table.rowCount}
     />
-  )
-}
-
-/** Owner column: the creating person, or Jori itself when no named owner
- *  resolves — the organization-principal run case. */
-export function TableOwnerCell({ table }: { table: TableSummary }) {
-  const owner =
-    table.ownerName === undefined
-      ? ({ kind: "jori" } as const)
-      : ({
-          kind: "person",
-          name: table.ownerName,
-          image: table.ownerImage,
-        } as const)
-
-  return <MaterialOwnerCell owner={owner} />
-}
-
-function CountCell({
-  count,
-  icon: Icon,
-  label,
-}: {
-  count: number
-  icon: LucideIcon
-  label: string
-}) {
-  return (
-    <div
-      className="flex items-center gap-1.5 text-muted-foreground"
-      title={label}
-    >
-      <Icon aria-hidden className="size-4 shrink-0" />
-      {count}
-      <span className="sr-only">{label}</span>
-    </div>
   )
 }

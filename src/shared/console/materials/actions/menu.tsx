@@ -1,12 +1,9 @@
-import { MoreHorizontal } from "lucide-react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth } from "../../menu"
+import { menuWidth, RowMenuTrigger } from "../../menu"
 import { type MaterialMenuActions, MaterialMenuItems } from "."
 import { ConfirmRemoveDialog } from "./confirm"
 
@@ -43,16 +40,7 @@ export function MaterialRowMenu(props: MaterialMenuProps) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            aria-label={`Open actions for ${props.material.name}`}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-          >
-            <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
+        <RowMenuTrigger name={props.material.name} />
         <DropdownMenuContent align="end" className={menuWidth}>
           <MaterialMenuItems {...props} onRemove={confirm.request} />
         </DropdownMenuContent>

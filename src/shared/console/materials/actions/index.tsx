@@ -46,6 +46,46 @@ export function MaterialMenuItems({
 
   return (
     <>
+      <MaterialCoreItems
+        isPending={isPending}
+        onAccess={onAccess}
+        onEdit={onEdit}
+        onMoveToFolder={onMoveToFolder}
+        onUnfile={onUnfile}
+      />
+      {isArchived ? (
+        <DropdownMenuItem disabled={isPending} onSelect={onRestore}>
+          {isRestoring ? <Loader2 className="animate-spin" /> : <RotateCcw />}
+          {isRestoring ? "Restoring" : "Restore"}
+        </DropdownMenuItem>
+      ) : null}
+      <RemoveMenuItem
+        isArchived={isArchived}
+        isDeleting={isDeleting}
+        isPending={isPending}
+        onSelect={onRemove}
+      />
+    </>
+  )
+}
+
+/** The items every material offers before the lifecycle ones, files
+ *  included: details, sharing, and filing, then the separator. */
+export function MaterialCoreItems({
+  isPending,
+  onAccess,
+  onEdit,
+  onMoveToFolder,
+  onUnfile,
+}: {
+  isPending: boolean
+  onAccess: () => void
+  onEdit: () => void
+  onMoveToFolder: () => void
+  onUnfile?: () => void
+}) {
+  return (
+    <>
       <DropdownMenuItem disabled={isPending} onSelect={onEdit}>
         <Pencil />
         Edit details
@@ -65,18 +105,6 @@ export function MaterialMenuItems({
         </DropdownMenuItem>
       )}
       <DropdownMenuSeparator />
-      {isArchived ? (
-        <DropdownMenuItem disabled={isPending} onSelect={onRestore}>
-          {isRestoring ? <Loader2 className="animate-spin" /> : <RotateCcw />}
-          {isRestoring ? "Restoring" : "Restore"}
-        </DropdownMenuItem>
-      ) : null}
-      <RemoveMenuItem
-        isArchived={isArchived}
-        isDeleting={isDeleting}
-        isPending={isPending}
-        onSelect={onRemove}
-      />
     </>
   )
 }

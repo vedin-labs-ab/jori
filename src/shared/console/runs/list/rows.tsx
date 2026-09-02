@@ -4,7 +4,7 @@ import { ConsoleListLoading } from "../../list/loading"
 import { ExecutionRow, type RunRowSlots } from "../row"
 import { displayNowForRun } from "../time"
 import { type ExecutionItem } from "../types"
-import { EmptyExecutions } from "./empty"
+import { RunsEmptyState } from "./empty"
 
 /** The page's rows: a spinner until the first page lands, the empty
  *  state when nothing matches, and otherwise one row per run in a stack
@@ -47,7 +47,7 @@ export function ExecutionRows({
     // overflow-hidden articles let the definite-height grid compress its
     // tracks to fit instead of overflowing into the scrollbar.
     <ConsoleScrollableGrid>
-      {rows.length === 0 ? <EmptyExecutions hasFilters={hasFilters} /> : null}
+      {rows.length === 0 ? <RunsEmptyState hasFilters={hasFilters} /> : null}
       {rows.length > 0
         ? rows.map((execution) => (
             <ExecutionRow

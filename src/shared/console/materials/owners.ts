@@ -53,3 +53,18 @@ function ownerLabel(row: Owned) {
 
   return row.ownerName ?? "Member"
 }
+
+/** How a table or store summary shows in an Owner cell: the person the
+ *  query resolved, or Jori when it resolved none. Keyed by the resolved
+ *  name rather than the id, so a summary whose owner did not resolve
+ *  reads as Jori's own. */
+export function summaryOwner(row: {
+  ownerImage?: string
+  ownerName?: string
+}): MaterialOwner {
+  if (row.ownerName === undefined) {
+    return { kind: "jori" }
+  }
+
+  return { kind: "person", name: row.ownerName, image: row.ownerImage }
+}

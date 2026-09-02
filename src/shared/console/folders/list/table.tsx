@@ -11,6 +11,7 @@ import { countLabel } from "../../count"
 import { type FacetEntry, type ListControls } from "../../list/controls"
 import { ConsoleListTable } from "../../list/frame"
 import { FilterHead, SortHead } from "../../list/head"
+import { MaterialMeasureCell } from "../../materials/cells/measure"
 import { MaterialOwnerCell } from "../../materials/cells/owner"
 import { folderIcon } from "../../materials/folders"
 import { materialOwner } from "../../materials/owners"
@@ -116,14 +117,12 @@ function ItemsCell({ folder }: { folder: ListedFolder }) {
 
   return (
     <TableCell>
-      <div
-        className="flex items-center gap-1.5 text-muted-foreground tabular-nums"
-        title={label}
-      >
-        <Layers aria-hidden className="size-4 shrink-0" />
-        {folder.folderCount + folder.resourceCount}
-        <span className="sr-only">{label}</span>
-      </div>
+      <MaterialMeasureCell
+        className="tabular-nums"
+        icon={Layers}
+        label={label}
+        value={folder.folderCount + folder.resourceCount}
+      />
     </TableCell>
   )
 }

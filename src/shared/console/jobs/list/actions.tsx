@@ -2,21 +2,18 @@ import {
   FolderInput,
   FolderMinus,
   Loader2,
-  MoreHorizontal,
   Pause,
   Pencil,
   Play,
   Trash2,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth } from "@/shared/console/menu"
+import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { type Job, jobControlAction } from "../types"
 
 // The canonical menu for a job, as items only. Editing a job
@@ -112,16 +109,7 @@ function JobControlItem({
 export function JobRowMenu(props: JobMenuActions) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={`Open actions for ${props.job.name}`}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
-        >
-          <MoreHorizontal />
-        </Button>
-      </DropdownMenuTrigger>
+      <RowMenuTrigger name={props.job.name} />
       <DropdownMenuContent align="end" className={menuWidth}>
         <JobMenuItems {...props} />
       </DropdownMenuContent>

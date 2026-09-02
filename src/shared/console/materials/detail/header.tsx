@@ -1,14 +1,17 @@
 import { Download, Link2, Loader2 } from "lucide-react"
-import { ConsoleHeaderActions, ConsoleHeaderButton } from "../layout"
+import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../layout"
 
-/** The header keeps only the primary actions; everything about the table
- *  itself hangs off its name in the breadcrumb. */
-export function TableHeaderActions({
-  isExporting,
+/** A material page's header keeps only the primary actions; everything
+ *  about the material itself hangs off its name in the breadcrumb. */
+export function MaterialHeaderActions({
+  canExport = true,
+  isExporting = false,
   onExport,
   onShare,
 }: {
-  isExporting: boolean
+  /** False while there is nothing to export yet, e.g. a never-written store. */
+  canExport?: boolean
+  isExporting?: boolean
   onExport: () => void
   onShare: () => void
 }) {
@@ -22,7 +25,7 @@ export function TableHeaderActions({
         variant="outline"
       />
       <ConsoleHeaderButton
-        disabled={isExporting}
+        disabled={!canExport || isExporting}
         icon={isExporting ? <Loader2 className="animate-spin" /> : <Download />}
         label="Export"
         onClick={onExport}
