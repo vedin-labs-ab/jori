@@ -1,8 +1,10 @@
 import { Timer } from "lucide-react"
-import { lazy, memo, Suspense, useCallback, useEffect, useState } from "react"
+import { memo, type ReactNode, Suspense, useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { RelativeTime } from "@/shared/console/runs/details"
-import { ExpiringStatusMeta } from "@/shared/console/runs/request/status"
+import { formatDuration, relativeTime } from "../../time"
+import { RelativeTime } from "../details"
+import { ExpiringStatusMeta } from "../request/status"
+import { type ExecutionItem } from "../types"
 import {
   RunRowBody,
   RunRowContent,
@@ -10,42 +12,40 @@ import {
   RunRowFrame,
   RunRowHeader,
   RunRowMeta,
-} from "@/shared/console/runs/row/layout"
-import { SourceLine } from "@/shared/console/runs/row/source"
-import { MetaPill, StatusIcon } from "@/shared/console/runs/row/status"
-import { type ExecutionItem } from "@/shared/console/runs/types"
-import { formatDuration, relativeTime } from "@/shared/console/time"
-import { StopExecution } from "./stop"
+} from "./layout"
+import { SourceLine } from "./source"
+import { MetaPill, StatusIcon } from "./status"
 
-let expandedExecutionModule: Promise<typeof import("./expanded")> | undefined
-
-function loadExpandedExecution() {
-  expandedExecutionModule ??= import("./expanded")
-  return expandedExecutionModule
+/** What the list hands every row: the run's detail once the row opens,
+ *  and the control that stops it while it is still going. Both are
+ *  functions of the run rather than elements, so a memoized row sees the
+ *  same props from one tick of the clock to the next. */
+export type RunRowSlots = {
+  /** The run's detail, mounted once the row is opened. */
+  expanded: (execution: ExecutionItem, now: number) => ReactNode
+  /** Raised as the row is hovered, focused, or clicked, ahead of the
+   *  detail mounting, so a lazily loaded detail can fetch in time. */
+  onPreload?: () => void
+  /** The control that stops the run, shown while it is queued or running. */
+  stop?: (execution: ExecutionItem) => ReactNode
 }
-
-const ExpandedExecution = lazy(async () => ({
-  default: (await loadExpandedExecution()).ExpandedExecution,
-}))
 
 export const ExecutionRow = memo(function ExecutionRow({
   defaultOpen = false,
   execution,
+  expanded,
   now,
+  onPreload,
   showAudience,
-  organizationId,
-}: {
+  stop,
+}: RunRowSlots & {
   /** Deep links (billing receipts, /runs?run=...) land with the row open. */
   defaultOpen?: boolean
   execution: ExecutionItem
   now: number
   showAudience: boolean
-  organizationId: string
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
-  const preloadExpandedExecution = useCallback(() => {
-    void loadExpandedExecution()
-  }, [])
   const durationMs = durationFor(execution, now)
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
@@ -60,25 +60,15 @@ export const ExecutionRow = memo(function ExecutionRow({
 
   return (
     <RunRowFrame id={execution.id}>
-      <RunRowHeader
-        action={
-          isOngoing ? (
-            <StopExecution
-              className="mr-3 shrink-0"
-              runId={execution.id}
-              organizationId={organizationId}
-            />
-          ) : undefined
-        }
-      >
+      <RunRowHeader action={isOngoing ? stop?.(execution) : undefined}>
         <RunRowControl
           expanded={isOpen}
           onClick={() => {
-            preloadExpandedExecution()
+            onPreload?.()
             setIsOpen((current) => !current)
           }}
-          onFocus={preloadExpandedExecution}
-          onPointerEnter={preloadExpandedExecution}
+          onFocus={onPreload}
+          onPointerEnter={onPreload}
         >
           <StatusIcon
             approval={approvalIndicator}
@@ -98,11 +88,7 @@ export const ExecutionRow = memo(function ExecutionRow({
       </RunRowHeader>
       {isOpen ? (
         <Suspense fallback={<ExpandedExecutionFallback />}>
-          <ExpandedExecution
-            execution={execution}
-            now={now}
-            organizationId={organizationId}
-          />
+          {expanded(execution, now)}
         </Suspense>
       ) : null}
     </RunRowFrame>

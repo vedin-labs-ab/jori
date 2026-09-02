@@ -1,15 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen } from "@testing-library/react"
-import { afterEach, expect, test, vi } from "vitest"
-import { makeApproval, makeExecution } from "@/shared/console/runs/fixtures"
-import { type ExecutionApproval } from "@/shared/console/runs/types"
-import { renderExecutionRow } from "../fixtures"
-
-vi.mock("convex/react", () => ({
-  useAction: () => vi.fn(),
-  useMutation: () => vi.fn(),
-  useQuery: () => ({ items: [], status: "loaded" }),
-}))
+import { afterEach, expect, test } from "vitest"
+import { makeApproval, makeExecution } from "../fixtures"
+import { renderExecutionRow } from "../row/harness"
+import { type ExecutionApproval } from "../types"
 
 afterEach(() => {
   cleanup()
