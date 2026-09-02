@@ -58,6 +58,7 @@ function RenewalsSharing() {
 
   return (
     <Prop
+      className="min-w-0"
       label={
         <>
           <span className="font-medium text-foreground">Sharing</span>

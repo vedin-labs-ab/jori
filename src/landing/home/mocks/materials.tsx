@@ -14,7 +14,10 @@ export function Materials() {
       title="Work lands where you can find it"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-16">
-        <div>
+        {/* min-w-0: a grid item's floor is its content's narrowest width,
+            and the grid inside has a wide one, so without it the column
+            would push past the viewport on a phone. */}
+        <div className="min-w-0">
           <DemoConsole
             className="h-[22rem]"
             navigation={console}

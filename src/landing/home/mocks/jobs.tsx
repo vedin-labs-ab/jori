@@ -26,7 +26,7 @@ const JobEditorFields = lazy(async () => ({
 }))
 const policyKey = jobPolicyKey(demoPermissions)
 const editorClassName =
-  "min-h-[46rem] rounded-xl border bg-card text-card-foreground"
+  "min-h-[46rem] min-w-0 rounded-xl border bg-card text-card-foreground"
 
 /** The instructions pillar: the job editor's own fields, in place, over the
  *  brief the hero's thread runs on. */
