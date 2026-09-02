@@ -55,12 +55,7 @@ export function FolderTree({
           and navigation continues on the /folders page. The group takes
           the height the navigation above and below it leaves, and scrolls
           on its own, so a long tree never pushes the platform group away. */}
-      <SidebarGroup
-        className={cn(
-          "min-h-28 flex-1 overflow-y-auto group-data-[collapsible=icon]:hidden",
-          scrollFade
-        )}
-      >
+      <SidebarGroup className="min-h-28 flex-1 group-data-[collapsible=icon]:hidden">
         <FoldersLabel />
         {/* The "+" creates at the top level: a root folder, or a resource
             whose dialog starts unfiled with the Folder field free to set. */}
@@ -72,7 +67,10 @@ export function FolderTree({
             <Plus />
           </SidebarGroupAction>
         </NewInFolderMenu>
-        <SidebarGroupContent>
+        {/* The label and the "+" stay put; only the rows scroll. */}
+        <SidebarGroupContent
+          className={cn("min-h-0 flex-1 overflow-y-auto", scrollFade)}
+        >
           <SidebarMenu>
             <FolderTreeItems
               expansion={expansion}
