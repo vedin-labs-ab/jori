@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
 import { type RowSelection } from "@/shared/console/list/selection"
 import { type TableSummary } from "@/shared/console/tables/types"
@@ -74,21 +75,23 @@ function renderList(
   }: { controls?: ListControls; hasFilters?: boolean } = {}
 ) {
   render(
-    <TableList
-      config={tableListConfig(undefined, tables)}
-      controls={controls}
-      folders={undefined}
-      hasFilters={hasFilters}
-      onAccess={() => undefined}
-      onCreate={() => undefined}
-      onEdit={() => undefined}
-      onImport={() => undefined}
-      onMoveToFolder={() => undefined}
-      removal={removal}
-      selection={stubSelection()}
-      tables={tables}
-      unauthorizedMessage={undefined}
-    />
+    <TooltipProvider>
+      <TableList
+        config={tableListConfig(undefined, tables)}
+        controls={controls}
+        folders={undefined}
+        hasFilters={hasFilters}
+        onAccess={() => undefined}
+        onCreate={() => undefined}
+        onEdit={() => undefined}
+        onImport={() => undefined}
+        onMoveToFolder={() => undefined}
+        removal={removal}
+        selection={stubSelection()}
+        tables={tables}
+        unauthorizedMessage={undefined}
+      />
+    </TooltipProvider>
   )
 }
 

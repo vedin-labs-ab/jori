@@ -3,7 +3,7 @@ import {
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
 import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
-import { VisibilityBadge } from "@/shared/console/visibility/badge"
+import { VisibilityMark } from "@/shared/console/visibility/badge"
 import { fileKind } from "@/shared/files/kind"
 import { ConsoleLink } from "../../shell/link"
 import { type FileRow } from "../types"
@@ -24,7 +24,7 @@ export function FileNameCell({ file }: { file: FileRow }) {
         {file.name}
       </ConsoleLink>
       {file.visibility.mode === "organization" ? null : (
-        <VisibilityBadge visibility={file.visibility} />
+        <VisibilityMark visibility={file.visibility} />
       )}
     </MaterialNameCell>
   )

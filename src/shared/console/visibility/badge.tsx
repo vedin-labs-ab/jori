@@ -4,7 +4,6 @@ import {
   visibilityModeMarks,
 } from "@contracts/visibility"
 import { Building2, Group, Lock, Users } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -52,9 +51,10 @@ export function VisibilityIcon({
 }
 
 /** Muted visibility icon with the audience in a tooltip and for screen
- *  readers: the list-row and breadcrumb treatment. Organization-wide is
- *  the default and stays unmarked in lists, so callers usually render this
- *  for every other mode. */
+ *  readers: the one treatment every list row and breadcrumb uses, so a
+ *  team-scoped folder and a team-scoped table wear the same mark.
+ *  Organization-wide is the default and stays unmarked in lists, so
+ *  callers render this for every other mode. */
 export function VisibilityMark({
   visibility,
 }: {
@@ -78,22 +78,6 @@ export function VisibilityMark({
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
-  )
-}
-
-export function VisibilityBadge({
-  visibility,
-}: {
-  visibility: Visibility | VisibilityMode
-}) {
-  const value: Visibility =
-    typeof visibility === "string" ? modeOnly(visibility) : visibility
-
-  return (
-    <Badge variant={value.mode === "organization" ? "secondary" : "outline"}>
-      <VisibilityIcon className="size-3" mode={value.mode} />
-      {visibilityModeMarks[value.mode]}
-    </Badge>
   )
 }
 

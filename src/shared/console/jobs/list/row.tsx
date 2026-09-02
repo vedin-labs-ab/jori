@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { VisibilityBadge } from "@/shared/console/visibility/badge"
+import { VisibilityMark } from "@/shared/console/visibility/badge"
 import { type Job } from "../types"
 import { JobRowMenu } from "./actions"
 import { DeleteJobDialog } from "./delete"
@@ -48,7 +48,7 @@ export function JobRow({
                   {job.name}
                 </h3>
                 {job.visibility.mode === "organization" ? null : (
-                  <VisibilityBadge visibility={job.visibility} />
+                  <VisibilityMark visibility={job.visibility} />
                 )}
                 {shouldShowCompletedBadge(job) ? (
                   <Badge className="shrink-0" variant="outline">
