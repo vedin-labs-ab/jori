@@ -50,6 +50,12 @@ export function ConsoleFiltered({
       <ConsoleHeaderActions>
         <ConsoleFilterButton
           activeCount={activeCount}
+          onClear={() => {
+            // The clear control leaves with the count, so focus goes to
+            // the button that stays.
+            onReset()
+            buttonRef.current?.focus()
+          }}
           onClick={toggle}
           open={open}
           ref={buttonRef}

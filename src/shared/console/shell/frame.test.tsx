@@ -14,6 +14,11 @@ import {
 import { ConsoleFrame } from "./frame"
 
 vi.mock("@tanstack/react-router", async () => ({
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: { location: { pathname: string } }) => unknown
+  }) => select({ location: { pathname: "/" } }),
   Link: (await import("../../../../test/router")).Link,
 }))
 

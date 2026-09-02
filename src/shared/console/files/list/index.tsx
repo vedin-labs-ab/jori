@@ -13,11 +13,11 @@ import {
   type ListConfig,
   type ListControls,
 } from "@/shared/console/list/controls"
-import { EmptyRow, FilterableEmptyState } from "@/shared/console/list/empty"
 import {
-  ConsoleListContent,
-  ConsoleListTable,
-} from "@/shared/console/list/frame"
+  ConsoleListEmpty,
+  FilterableEmptyState,
+} from "@/shared/console/list/empty"
+import { ConsoleListTable } from "@/shared/console/list/frame"
 import { FilterHead, SortHead } from "@/shared/console/list/head"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type RowSelection } from "@/shared/console/list/selection"
@@ -64,26 +64,22 @@ export function FileTable({
 
   if (files.length === 0 && !hasFilters) {
     return (
-      <ConsoleListContent>
+      <ConsoleListEmpty>
         <FilesEmptyState hasFilters={false} onUpload={onUpload} />
-      </ConsoleListContent>
+      </ConsoleListEmpty>
     )
   }
 
   return (
-    <ConsoleListTable>
-      <FileTableHead
-        config={config}
-        controls={controls}
-        selection={selection}
-      />
-      <TableBody>
-        {files.length === 0 ? (
-          <EmptyRow colSpan={9}>
-            <FilesEmptyState hasFilters onUpload={onUpload} />
-          </EmptyRow>
-        ) : (
-          files.map((file) => (
+    <>
+      <ConsoleListTable fill={files.length > 0}>
+        <FileTableHead
+          config={config}
+          controls={controls}
+          selection={selection}
+        />
+        <TableBody>
+          {files.map((file) => (
             <FileTableRow
               file={file}
               folders={folders}
@@ -95,10 +91,15 @@ export function FileTable({
               onMoveToFolder={onMoveToFolder}
               selection={selection}
             />
-          ))
-        )}
-      </TableBody>
-    </ConsoleListTable>
+          ))}
+        </TableBody>
+      </ConsoleListTable>
+      {files.length === 0 ? (
+        <ConsoleListEmpty>
+          <FilesEmptyState hasFilters onUpload={onUpload} />
+        </ConsoleListEmpty>
+      ) : null}
+    </>
   )
 }
 

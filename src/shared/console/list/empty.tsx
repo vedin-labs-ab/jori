@@ -9,7 +9,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { TableCell, TableRow } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
 
 /** Keeps the header row's controls reachable when filters empty a list:
  *  the empty state rides inside the table as one full-width row. */
@@ -26,6 +25,17 @@ export function EmptyRow({
         {children}
       </TableCell>
     </TableRow>
+  )
+}
+
+/** The region an empty list leaves: whatever height the page has left,
+ *  with the state centered in it, so every list page reads the same when
+ *  there is nothing to show. */
+export function ConsoleListEmpty({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-6 md:px-6">
+      {children}
+    </div>
   )
 }
 
@@ -75,7 +85,7 @@ export function ConsoleEmptyState({
   title: string
 }) {
   return (
-    <Empty className={cn("min-h-48 rounded-md", className)}>
+    <Empty className={className}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Icon />
