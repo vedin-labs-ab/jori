@@ -68,7 +68,7 @@ export function ShareHistory<Share extends ShareRow>({
 
   return (
     <>
-      <div className="min-h-42 divide-y border-t">
+      <div className="divide-y border-t">
         {shares.results.map((share) => (
           <ShareHistoryRow
             active={share.expiresAt > now}

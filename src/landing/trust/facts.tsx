@@ -27,7 +27,7 @@ export function ScopeSection() {
         </>
       }
       support
-      title="It acts as you, never past you"
+      title="Acts as you, never past you"
     >
       <FactList>
         <Definition icon={Fingerprint} term="Your accounts, your identity">
@@ -35,10 +35,9 @@ export function ScopeSection() {
           integration and its access ends with it.
         </Definition>
         <Definition icon={Users} term="Personal and organization">
-          Everything Jori keeps is shared with only you, specific people,
-          specific teams, or everyone in the organization, and work shared past
-          you runs with the organization's context and integrations rather than
-          your own.
+          Everything Jori keeps is visible to only you, specific people,
+          specific teams, or everyone in the organization. Work shared past you
+          runs with the organization's context and integrations, not your own.
         </Definition>
         <Definition icon={GitBranch} term="Subtasks inherit less, never more">
           Jori can split a job into subtasks. A subtask can never hold access
@@ -63,11 +62,12 @@ export function VisibilitySection() {
           it.
         </Definition>
         <Definition icon={UsersRound} term="Teams are an audience">
-          Group people once under Settings, then share with the team.
+          Group the people who work together once, under Settings. Then share a
+          folder, a table, or a job with the team, not a list of names.
         </Definition>
         <Definition icon={Link2} term="Links with a clock">
-          Share links are read-only, carry their secret in the URL fragment,
-          expire on a clock you choose, and can be revoked anytime.
+          A share link opens a read-only page, carries its secret in the URL
+          fragment, and expires on a clock you choose. Revoke it whenever.
         </Definition>
       </FactList>
     </Section>
@@ -78,7 +78,12 @@ export function BoundariesSection() {
   return (
     <Section
       className="border-y bg-muted/50"
-      lede="Not settings, and not promises. The way it's built."
+      lede={
+        <>
+          Not settings, and not promises. The way <Jori tilt="right" /> is
+          built.
+        </>
+      }
       support
       title="Some things are structural"
     >
@@ -124,8 +129,8 @@ export function DataSection() {
           Your data is never used to train models.
         </Definition>
         <Definition icon={BadgeCheck} term="GDPR">
-          Jori is built to operate in line with GDPR. Data processing agreements
-          are available from launch.
+          Jori is built to comply with GDPR. Data processing agreements are
+          available from launch.
         </Definition>
         {/* TODO: add the retention commitment here once decided. */}
         <Definition icon={ClipboardCheck} term="Audits">
