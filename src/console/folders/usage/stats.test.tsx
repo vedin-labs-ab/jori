@@ -35,8 +35,12 @@ test("the band leads with the window's spend and how it changed", () => {
   expect(screen.getByText("$0.14")).toBeDefined()
   expect(screen.getByText("35%")).toBeDefined()
   expect(screen.getByText("5%")).toBeDefined()
-  // Spend, runs, and the cost of a run all rose.
-  expect(container.querySelectorAll("svg.lucide-arrow-up")).toHaveLength(3)
+  // Spend, runs, and the cost of a run all rose, and the arrow says so in
+  // the colour the console uses for things going well.
+  const arrows = container.querySelectorAll("svg.lucide-arrow-up")
+
+  expect(arrows).toHaveLength(3)
+  expect(arrows[0]?.classList.contains("text-primary")).toBe(true)
 })
 
 test("spending less than last time reads as a fall, not a rise", () => {
@@ -45,7 +49,11 @@ test("spending less than last time reads as a fall, not a rise", () => {
   )
 
   expect(screen.getByText("10%")).toBeDefined()
-  expect(container.querySelector("svg.lucide-arrow-down")).not.toBeNull()
+  expect(
+    container
+      .querySelector("svg.lucide-arrow-down")
+      ?.classList.contains("text-destructive")
+  ).toBe(true)
 })
 
 test("an unchanged window says so rather than showing a zero", () => {

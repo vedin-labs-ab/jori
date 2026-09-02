@@ -1,4 +1,5 @@
 import { formatUsd } from "@contracts/billing"
+import { useState } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { Section, SectionHeader } from "@/components/ui/section"
@@ -39,19 +40,34 @@ export function UsageCharts({
   segments: UsageSegment[]
   series: UsageDay[]
 }) {
+  // Segments lifted out of both charts by their legend entries. Held here
+  // rather than in the URL: it is a way of looking, not a view to send on.
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set())
+  const toggle = (key: string) =>
+    setHidden((current) => {
+      const next = new Set(current)
+
+      if (!next.delete(key)) {
+        next.add(key)
+      }
+
+      return next
+    })
+  const chart = { hidden, segments, series }
+
   return (
     <>
       <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         <Section className="min-w-0">
           <SectionHeader title="Spend" />
-          <StackedChart measure="micros" segments={segments} series={series} />
+          <StackedChart measure="micros" {...chart} />
         </Section>
         <Section className="min-w-0">
           <SectionHeader title="Runs" />
-          <StackedChart measure="ended" segments={segments} series={series} />
+          <StackedChart measure="ended" {...chart} />
         </Section>
       </div>
-      <SegmentLegend segments={segments} />
+      <SegmentLegend hidden={hidden} onToggle={toggle} segments={segments} />
     </>
   )
 }
@@ -60,10 +76,12 @@ export function UsageCharts({
  *  rides along under the segment keys, so the tooltip can state the whole
  *  as well as its parts. */
 function StackedChart({
+  hidden,
   measure,
   segments,
   series,
 }: {
+  hidden: ReadonlySet<string>
   measure: Measure
   segments: UsageSegment[]
   series: UsageDay[]
@@ -107,7 +125,12 @@ function StackedChart({
             const day = payload?.[0]?.payload?.day as UsageDay | undefined
 
             return active && day !== undefined ? (
-              <DayTooltip day={day} measure={measure} segments={segments} />
+              <DayTooltip
+                day={day}
+                hidden={hidden}
+                measure={measure}
+                segments={segments}
+              />
             ) : null
           }}
           cursor={cursor}
@@ -116,6 +139,7 @@ function StackedChart({
           <Bar
             dataKey={segment.key}
             fill={usageSegmentColor(segment, rank)}
+            hide={hidden.has(segment.key)}
             key={segment.key}
             stackId={measure}
           />
@@ -125,22 +149,25 @@ function StackedChart({
   )
 }
 
-/** The day, whole and divided: its parts in rank order, quiet parts left
- *  out, and the whole beneath. Runs also say how many went wrong, which
- *  is the one figure the stacks do not carry. */
+/** The day as drawn: its shown parts in rank order, quiet parts left out,
+ *  and their sum beneath, which is the bar's height. Runs also say how
+ *  many went wrong — the one figure the stacks do not carry — while every
+ *  part is shown, since it belongs to the whole day. */
 function DayTooltip({
   day,
+  hidden,
   measure,
   segments,
 }: {
   day: UsageDay
+  hidden: ReadonlySet<string>
   measure: Measure
   segments: UsageSegment[]
 }) {
   const parts = segments.flatMap((segment, rank) => {
     const value = day.segments[segment.key]?.[measure] ?? 0
 
-    return value === 0
+    return value === 0 || hidden.has(segment.key)
       ? []
       : [
           {
@@ -150,6 +177,7 @@ function DayTooltip({
           },
         ]
   })
+  const total = parts.reduce((sum, part) => sum + part.value, 0)
 
   return (
     <div className="grid min-w-40 gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs/relaxed shadow-xl">
@@ -164,8 +192,8 @@ function DayTooltip({
         </div>
       )}
       <Figure className="border-t pt-1.5" label="Total">
-        {formatMeasure(measure, day[measure])}
-        {measure === "ended" && day.failed > 0 ? (
+        {formatMeasure(measure, total)}
+        {measure === "ended" && hidden.size === 0 && day.failed > 0 ? (
           <span className="text-destructive"> · {day.failed} failed</span>
         ) : null}
       </Figure>

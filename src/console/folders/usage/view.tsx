@@ -1,7 +1,6 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { CalendarDays, ChartNoAxesColumn, Info } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { CalendarDays, ChartNoAxesColumn } from "lucide-react"
 import { Section, SectionGroup, SectionHeader } from "@/components/ui/section"
 import {
   Select,
@@ -10,11 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { api } from "../../../../convex/_generated/api"
 import { ConsoleHeaderActions } from "../../shared/layout"
@@ -58,7 +52,6 @@ export function UsageView({
       {/* The window sits in the header with the page's other controls, so
           the band below is figures alone. */}
       <ConsoleHeaderActions>
-        <UsageNote days={days} timezone={usage?.timezone} />
         <WindowSelect days={days} onDaysChange={onDaysChange} />
       </ConsoleHeaderActions>
       {/* Held above the page's own scroll: the window's figures stay put
@@ -144,7 +137,10 @@ function UsageBody({
         className={cn("grid gap-4 md:gap-6", hasFolders && "lg:grid-cols-2")}
       >
         <Section className="min-w-0">
-          <SectionHeader title="Spend by source" />
+          <SectionHeader
+            description="Each row is an automation, or work asked for directly."
+            title="Spend by source"
+          />
           <UsageContributors
             automations={usage.automations}
             total={usage.totals.micros}
@@ -165,32 +161,5 @@ function UsageBody({
         ) : null}
       </div>
     </SectionGroup>
-  )
-}
-
-/** States what a figure here cannot state for itself: which day a day is,
- *  what a change is measured against, and what the money is a price for.
- *  Fine print, so it waits behind a mark rather than sitting under the
- *  tables. */
-function UsageNote({ days, timezone }: { days: UsageDays; timezone?: string }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          aria-label="About these figures"
-          className="text-muted-foreground hover:text-foreground"
-          size="icon-xs"
-          type="button"
-          variant="ghost"
-        >
-          <Info />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        Days follow {timezone ?? "the organization's time zone"}. Changes
-        compare with the previous {days} days. LLM usage is priced at provider
-        list rates.
-      </TooltipContent>
-    </Tooltip>
   )
 }
