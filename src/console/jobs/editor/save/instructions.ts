@@ -1,12 +1,12 @@
 import { createJobMentionCatalog } from "@/shared/console/jobs/access"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
 import { jobToolReferenceIssue } from "@/shared/console/jobs/access/tools"
-import { type JobFormValues } from "@/shared/console/jobs/types"
 import {
   createJobInstructionDocument,
   serializeJobInstructionDocument,
-} from "../instructions/document"
-import { readInstructionReferences } from "../instructions/markdown/references"
+} from "@/shared/console/jobs/editor/instructions/document"
+import { readInstructionReferences } from "@/shared/console/jobs/editor/instructions/markdown/references"
+import { type JobFormValues } from "@/shared/console/jobs/types"
 
 export function prepareJobInstructions(
   values: Pick<

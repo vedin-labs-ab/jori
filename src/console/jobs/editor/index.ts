@@ -3,9 +3,9 @@ import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { readErrorMessage, showErrorToast } from "@/shared/console/error"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
+import { isJobFieldError } from "@/shared/console/jobs/editor/errors"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
 import { api } from "../../../../convex/_generated/api"
-import { isJobFieldError } from "./errors"
 import { jobFormValues } from "./save"
 
 export type JobEditor = ReturnType<typeof useJobEditor>
