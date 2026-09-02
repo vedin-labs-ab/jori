@@ -1,7 +1,7 @@
 import { type Visibility } from "@contracts/visibility"
 import { useEffect, useState } from "react"
 import { AudienceLine } from "@/shared/console/visibility/audience"
-import { SharingDialog } from "@/shared/console/visibility/dialog"
+import { VisibilityDialog } from "@/shared/console/visibility/dialog"
 import { VisibilityField } from "@/shared/console/visibility/field"
 import { type AudienceTarget, resolveAudience } from "../derive/audience"
 import { grantOptions, viewerId } from "../fixtures/people"
@@ -10,7 +10,7 @@ import { useDemoWorkspace } from "../workspace"
 
 /** The sharing dialog over the workspace: a draft of who may see the
  *  target, said back as the people it reaches, saved in place. */
-export function DemoSharingDialog({
+export function DemoVisibilityDialog({
   noun,
   onOpenChange,
   open,
@@ -33,7 +33,7 @@ export function DemoSharingDialog({
   }, [open, value])
 
   return (
-    <SharingDialog
+    <VisibilityDialog
       audience={<DemoAudience target={target} value={draft} />}
       canEdit
       field={

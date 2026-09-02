@@ -125,7 +125,7 @@ function JobsToolbar({
           value={filters.status}
         />
         <ConsoleFilterToggle
-          label="Sharing"
+          label="Visibility"
           onValueChange={(audience) => onChange({ audience })}
           options={audienceFilterOptions}
           value={filters.audience}

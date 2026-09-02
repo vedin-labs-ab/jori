@@ -52,7 +52,7 @@ export function MaterialMenuItems({
       </DropdownMenuItem>
       <DropdownMenuItem disabled={isPending} onSelect={onAccess}>
         <LockKeyhole />
-        Sharing…
+        Visibility…
       </DropdownMenuItem>
       <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
         <FolderInput />

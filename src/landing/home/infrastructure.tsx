@@ -1,3 +1,4 @@
+import { RegionFlag } from "@/shared/region/flags"
 import { Definition, Section } from "../section"
 
 /** Residency and price, folded into one quiet section: procurement facts,
@@ -12,7 +13,17 @@ export function Infrastructure() {
       title="Runs where you need it"
     >
       <dl className="grid max-w-3xl gap-8 md:grid-cols-2 lg:gap-16">
-        <Definition term="US and EU residency">
+        <Definition
+          term={
+            <>
+              <span className="inline-flex gap-1">
+                <RegionFlag region="us" />
+                <RegionFlag region="eu" />
+              </span>
+              US and EU residency
+            </>
+          }
+        >
           Two isolated regional applications, one product. Region is where your
           data lives, not a checkbox on a form.
         </Definition>

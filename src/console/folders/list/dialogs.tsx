@@ -5,7 +5,7 @@ import { type FolderResource } from "@/shared/console/folders/types"
 import { useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
 import { useFileActions } from "../../files/manage"
-import { VisibilityDialog } from "../../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
 import { EditStoreDialog } from "../../stores/edit"
 import { EditTableDialog } from "../../tables/edit"
 
@@ -89,7 +89,7 @@ function TableDialogs({ onClose, organizationId, request }: KindDialogs) {
         organizationId={organizationId}
         table={request?.kind === "edit" ? table : undefined}
       />
-      <VisibilityDialog
+      <OrganizationVisibilityDialog
         noun="table"
         onOpenChange={closeWhenDismissed(onClose)}
         open={request?.kind === "access"}
@@ -129,7 +129,7 @@ function StoreDialogs({ onClose, organizationId, request }: KindDialogs) {
         organizationId={organizationId}
         store={request?.kind === "edit" ? store : undefined}
       />
-      <VisibilityDialog
+      <OrganizationVisibilityDialog
         noun="store"
         onOpenChange={closeWhenDismissed(onClose)}
         open={request?.kind === "access"}
@@ -166,7 +166,7 @@ function FileDialogs({ onClose, organizationId, request }: KindDialogs) {
         onOpenChange={closeWhenDismissed(onClose)}
         onSave={actions.saveFile}
       />
-      <VisibilityDialog
+      <OrganizationVisibilityDialog
         noun="file"
         onOpenChange={closeWhenDismissed(onClose)}
         open={request?.kind === "access"}

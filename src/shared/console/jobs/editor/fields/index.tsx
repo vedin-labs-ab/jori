@@ -10,7 +10,6 @@ import { type JobFormValues } from "../../types"
 import { readJobInstructionsError, readJobNameError } from "../errors"
 import { readAdditionalJobSurfaces } from "../instructions/document"
 import { AccessFields } from "./access"
-import { JobContextSection } from "./context"
 import { JobInstructionsSection } from "./instructions"
 import { JobNameField } from "./name"
 import { JobTiming } from "./timing"
@@ -48,8 +47,7 @@ export type JobEditorFieldsProps = {
 
 /** Everything between a job editor's header and footer, over one set of
  *  form values: the name, the brief, its access and timing, and under
- *  Advanced settings by the footer, where it is filed, who sees it, and
- *  the context a run resolves. */
+ *  Advanced settings by the footer, where it is filed and who sees it. */
 export function JobEditorFields(props: JobEditorFieldsProps) {
   const { onValuesChange, values } = props
   const { actions, additionalSurfaces, instructionsError, nameError } =
@@ -104,7 +102,6 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
           />
           {props.audience}
         </div>
-        <JobContextSection scope={values.scope} />
       </AdvancedSettings>
     </div>
   )

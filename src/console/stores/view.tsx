@@ -14,7 +14,7 @@ import { type StoreDetail } from "@/shared/console/stores/types"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
-import { VisibilityDialog } from "../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { EditStoreDialog } from "./edit"
 import { exportStoreJson } from "./export"
 import { StoreHeaderActions } from "./header"
@@ -191,7 +191,7 @@ function StoreDialogs({
         organizationId={organizationId}
         store={isEditOpen ? store : undefined}
       />
-      <VisibilityDialog
+      <OrganizationVisibilityDialog
         noun="store"
         onOpenChange={setIsAccessOpen}
         open={isAccessOpen}

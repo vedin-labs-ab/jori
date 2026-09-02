@@ -53,8 +53,8 @@ export function VisibilityField({
   return (
     <div className="grid gap-2">
       <div className="flex items-center gap-1.5">
-        <Label htmlFor={id}>Sharing</Label>
-        <FieldHelp label="Sharing help">
+        <Label htmlFor={id}>Visibility</Label>
+        <FieldHelp label="Visibility help">
           <p>
             Who can see this {noun}. Whoever can see it can also use and edit
             it; you always keep access to what you own.

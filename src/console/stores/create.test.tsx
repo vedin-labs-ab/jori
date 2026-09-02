@@ -44,7 +44,7 @@ function fillName() {
   })
 }
 
-/** Folder and Sharing live behind the collapsed Advanced settings. */
+/** Folder and Visibility live behind the collapsed Advanced settings. */
 function expandAdvancedSettings() {
   fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
 }

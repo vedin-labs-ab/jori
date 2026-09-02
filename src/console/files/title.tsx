@@ -9,7 +9,7 @@ import { type FileRow } from "@/shared/console/files/types"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { menuWidth } from "@/shared/console/menu"
 import { MoveResourceDialog } from "../folders/move"
-import { VisibilityDialog } from "../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { toMoveTarget, useFileActions } from "./manage"
 
 type FileDialog = "access" | "edit" | "move"
@@ -97,7 +97,7 @@ function FileDialogs({
         onOpenChange={closeWhenDismissed}
         onSave={onSave}
       />
-      <VisibilityDialog
+      <OrganizationVisibilityDialog
         noun="file"
         onOpenChange={closeWhenDismissed}
         open={dialog === "access"}

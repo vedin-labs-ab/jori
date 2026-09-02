@@ -62,7 +62,11 @@ export function VisibilityMark({
 }) {
   const value: Visibility =
     typeof visibility === "string" ? modeOnly(visibility) : visibility
-  const label = `${visibilityModeMarks[value.mode]}${detailSuffix(value)}`
+  // A bare mode says nothing about how many it names, so it stays a mode.
+  const label =
+    typeof visibility === "string"
+      ? visibilityModeMarks[visibility]
+      : `${visibilityModeMarks[value.mode]}${detailSuffix(value)}`
 
   return (
     <Tooltip>

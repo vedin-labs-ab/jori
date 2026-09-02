@@ -76,7 +76,7 @@ test("offers the file's management actions, in order", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Edit details", "Sharing…", "Move to folder…", "Delete"])
+  ).toEqual(["Edit details", "Visibility…", "Move to folder…", "Delete"])
 })
 
 test("leaves the links to the header the detail page already has", () => {

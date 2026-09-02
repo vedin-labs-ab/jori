@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
 
-/** Post-creation access settings for one material or folder, opened from
+/** Post-creation visibility settings for one material or folder, opened from
  *  its menu or edit surface: the sharing field over who it reaches, and
  *  the way to keep or drop the draft. Owned targets accept changes from
  *  their owner only, so the dialog disables itself for everyone else. */
-export function SharingDialog({
+export function VisibilityDialog({
   audience,
   canEdit,
   field,
@@ -44,14 +44,14 @@ export function SharingDialog({
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Sharing</DialogTitle>
+          <DialogTitle>Visibility</DialogTitle>
           <DialogDescription>
             {canEdit
               ? `Choose who can see this ${noun}.`
               : `Only the owner can change who sees this ${noun}.`}
           </DialogDescription>
         </DialogHeader>
-        <SharingFields audience={audience} canEdit={canEdit} field={field} />
+        <VisibilityFields audience={audience} canEdit={canEdit} field={field} />
         <DialogFooter>
           <Button
             onClick={() => onOpenChange(false)}
@@ -77,7 +77,7 @@ export function SharingDialog({
 /** The dialog's body on its own: the sharing field over who the draft
  *  reaches, for a page that shows sharing in place rather than in a
  *  dialog. Disabled as one, since neither says anything without the other. */
-export function SharingFields({
+export function VisibilityFields({
   audience,
   canEdit,
   field,

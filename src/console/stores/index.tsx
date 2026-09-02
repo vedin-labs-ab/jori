@@ -37,7 +37,7 @@ import {
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
-import { VisibilityDialog } from "../shared/visibility/dialog"
+import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { CreateStoreDialog } from "./create"
 import { EditStoreDialog } from "./edit"
 import { useStoreBulk, useStoreRemoval } from "./manage"
@@ -193,7 +193,7 @@ function StoreRowDialogs({
         store={page.editing}
       />
       {page.sharing === undefined ? null : (
-        <VisibilityDialog
+        <OrganizationVisibilityDialog
           noun="store"
           onOpenChange={(open) => {
             if (!open) {
