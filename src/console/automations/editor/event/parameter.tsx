@@ -1,4 +1,4 @@
-import { type AutomationEventParameter } from "@contracts/automations/events"
+import { type JobEventParameter } from "@contracts/jobs/events"
 import { Input } from "@/components/ui/input"
 import { EventOptionField } from "./resource"
 
@@ -12,8 +12,8 @@ export function EventParameterControl({
   onValueChange,
 }: {
   organizationId: string
-  parameter: AutomationEventParameter
-  parameters: readonly AutomationEventParameter[]
+  parameter: JobEventParameter
+  parameters: readonly JobEventParameter[]
   values: Record<string, string>
   id: string
   className?: string
@@ -57,8 +57,8 @@ export function EventParameterControl({
 }
 
 function missingDependencyLabel(
-  parameter: AutomationEventParameter,
-  parameters: readonly AutomationEventParameter[],
+  parameter: JobEventParameter,
+  parameters: readonly JobEventParameter[],
   values: Record<string, string>
 ) {
   if (parameter.type !== "option") {

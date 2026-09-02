@@ -1,4 +1,4 @@
-import { getNextCronRunAt } from "../../contracts/automations/schedule/cron"
+import { getNextCronRunAt } from "../../contracts/jobs/schedule/cron"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Access } from "../shared/integrations"

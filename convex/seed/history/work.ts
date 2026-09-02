@@ -1,5 +1,5 @@
-import { getNextCronRunAt } from "../../../contracts/automations/schedule/cron"
 import { joriModel, modelRates } from "../../../contracts/billing"
+import { getNextCronRunAt } from "../../../contracts/jobs/schedule/cron"
 import { type ToolSurface } from "../../shared/integrations"
 import { dayMs, type SeedContext, seedTimezone } from "../context"
 import { threads } from "../threads"

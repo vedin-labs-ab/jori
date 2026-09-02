@@ -1,76 +1,70 @@
 import { type Integration } from "../../integrations"
-import { automationEventCatalog } from "./catalog"
+import { jobEventCatalog } from "./catalog"
 import {
-  type AutomationEventDefinition,
-  type AutomationEventMatch,
-  type AutomationEventParameter,
+  type JobEventDefinition,
+  type JobEventMatch,
+  type JobEventParameter,
 } from "./catalog/types"
 
-export { automationEventCatalog } from "./catalog"
+export { jobEventCatalog } from "./catalog"
 export type {
-  AutomationEventDefinition,
-  AutomationEventMatch,
-  AutomationEventParameter,
+  JobEventDefinition,
+  JobEventMatch,
+  JobEventParameter,
 } from "./catalog/types"
 
 const pendingIntegrationDelivery =
   "Event delivery for this integration is not available yet."
 
-export type AutomationEventIntegration =
-  (typeof automationEventCatalog)[number]["integration"]
+export type JobEventIntegration =
+  (typeof jobEventCatalog)[number]["integration"]
 
-const automationEventIntegrations = automationEventCatalog.map(
+const jobEventIntegrations = jobEventCatalog.map(
   (definition) => definition.integration
 )
 
-function getAutomationEventIntegrationDefinition(integration: Integration) {
-  return automationEventCatalog.find(
+function getJobEventIntegrationDefinition(integration: Integration) {
+  return jobEventCatalog.find(
     (definition) => definition.integration === integration
   )
 }
 
-function getAutomationEventDefinitions(integration: Integration) {
-  return getAutomationEventIntegrationDefinition(integration)?.events ?? []
+function getJobEventDefinitions(integration: Integration) {
+  return getJobEventIntegrationDefinition(integration)?.events ?? []
 }
 
-export function getAutomationEventDefinition(
-  integration: Integration,
-  value: string
-) {
-  return getAutomationEventDefinitions(integration).find(
+export function getJobEventDefinition(integration: Integration, value: string) {
+  return getJobEventDefinitions(integration).find(
     (definition) => definition.value === value
   )
 }
 
-export function getDefaultAutomationEvent(
-  integration: Integration = automationEventCatalog[0].integration
+export function getDefaultJobEvent(
+  integration: Integration = jobEventCatalog[0].integration
 ) {
-  const integrationDefinition =
-    getAutomationEventIntegrationDefinition(integration)
+  const integrationDefinition = getJobEventIntegrationDefinition(integration)
 
-  return integrationDefinition?.events[0] ?? automationEventCatalog[0].events[0]
+  return integrationDefinition?.events[0] ?? jobEventCatalog[0].events[0]
 }
 
-export function isAutomationEventIntegration(
+export function isJobEventIntegration(
   integration: unknown
-): integration is AutomationEventIntegration {
+): integration is JobEventIntegration {
   return (
     typeof integration === "string" &&
-    automationEventIntegrations.some((candidate) => candidate === integration)
+    jobEventIntegrations.some((candidate) => candidate === integration)
   )
 }
 
-export function automationEventParameterResetKeys(
-  parameter: AutomationEventParameter
-) {
+export function jobEventParameterResetKeys(parameter: JobEventParameter) {
   return [
     ...(parameter.type === "option" ? (parameter.dependsOn ?? []) : []),
     ...(parameter.resetsOn ?? []),
   ]
 }
 
-export function normalizeAutomationEventMatch(
-  definition: AutomationEventDefinition,
+export function normalizeJobEventMatch(
+  definition: JobEventDefinition,
   match: Record<string, unknown> | undefined
 ) {
   const parameters = definition.parameters ?? []
@@ -82,13 +76,10 @@ export function normalizeAutomationEventMatch(
 
   assertKnownMatchKeys(parameters, input)
 
-  const normalized: AutomationEventMatch = {}
+  const normalized: JobEventMatch = {}
 
   for (const parameter of parameters) {
-    const value = normalizeAutomationEventParameter(
-      parameter,
-      input[parameter.key]
-    )
+    const value = normalizeJobEventParameter(parameter, input[parameter.key])
 
     if (value === undefined) {
       if (parameter.required) {
@@ -103,9 +94,7 @@ export function normalizeAutomationEventMatch(
   return Object.keys(normalized).length === 0 ? undefined : normalized
 }
 
-export function assertAutomationEventIsAvailable(
-  definition: AutomationEventDefinition
-) {
+export function assertJobEventIsAvailable(definition: JobEventDefinition) {
   if (definition.availability.status === "available") {
     return
   }
@@ -113,9 +102,7 @@ export function assertAutomationEventIsAvailable(
   throw new Error(definition.availability.message ?? pendingIntegrationDelivery)
 }
 
-export function automationEventMatchKey(
-  match: AutomationEventMatch | undefined
-) {
+export function jobEventMatchKey(match: JobEventMatch | undefined) {
   if (match === undefined || Object.keys(match).length === 0) {
     return undefined
   }
@@ -126,7 +113,7 @@ export function automationEventMatchKey(
 }
 
 function assertKnownMatchKeys(
-  parameters: readonly AutomationEventParameter[],
+  parameters: readonly JobEventParameter[],
   match: Record<string, unknown>
 ) {
   const knownKeys = new Set(parameters.map((parameter) => parameter.key))
@@ -138,8 +125,8 @@ function assertKnownMatchKeys(
   }
 }
 
-function normalizeAutomationEventParameter(
-  parameter: AutomationEventParameter,
+function normalizeJobEventParameter(
+  parameter: JobEventParameter,
   value: unknown
 ) {
   if (parameter.type === "number") {
@@ -162,7 +149,7 @@ function normalizeAutomationEventParameter(
 }
 
 function normalizeNumberParameter(
-  parameter: Extract<AutomationEventParameter, { type: "number" }>,
+  parameter: Extract<JobEventParameter, { type: "number" }>,
   value: unknown
 ) {
   const numberValue =

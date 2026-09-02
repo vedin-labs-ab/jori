@@ -1,7 +1,7 @@
 import {
   linearIssueLifecycleEvent,
   linearProjectLifecycleEvent,
-} from "../../../../contracts/automations/events/names"
+} from "../../../../contracts/jobs/events/names"
 import { internal } from "../../../_generated/api"
 import { type ActionCtx } from "../../../_generated/server"
 import { type EventData } from "../../../events/schema"

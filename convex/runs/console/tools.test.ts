@@ -3,7 +3,7 @@ import { getToolPermission } from "../../../contracts/permissions"
 import { toolDetails } from "./tools"
 
 test("omits empty access counts from tool labels", () => {
-  const joriTool = catalogTool("add_automation", "write")
+  const joriTool = catalogTool("add_job", "write")
   const readTool = catalogTool("github_get_issue", "read")
   const writeTool = catalogTool("conversations_add_message", "write")
 

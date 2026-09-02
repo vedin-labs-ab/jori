@@ -34,7 +34,7 @@ function automationRecord(
 }
 
 export const automationJoriToolResponseSchemas = {
-  add_automation: automationRecord(
+  add_job: automationRecord(
     "The automation record. An existing automation with the same key and identical configuration is returned instead of a duplicate.",
     {
       created: booleanProperty(
@@ -42,20 +42,18 @@ export const automationJoriToolResponseSchemas = {
       ),
     }
   ),
-  search_automations: arrayProperty(
+  search_jobs: arrayProperty(
     "Visible automations matching the query.",
     automationRecord("Automation record with trigger and access.")
   ),
-  read_automation: {
+  read_job: {
     ...automationRecord(
       "The automation record with trigger and access; null when not found."
     ),
     type: ["object", "null"],
   },
-  update_automation: automationRecord(
-    "The automation record after the update."
-  ),
-  delete_automation: objectSchema({
+  update_job: automationRecord("The automation record after the update."),
+  delete_job: objectSchema({
     required: ["deleted", "automationId"],
     properties: {
       deleted: { type: "boolean", const: true },

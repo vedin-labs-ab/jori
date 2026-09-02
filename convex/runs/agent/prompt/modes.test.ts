@@ -79,7 +79,7 @@ describe("recovery context", () => {
             name: "google_gmail_send_message",
             detail: '{"subject":"Morning Briefing"}',
           },
-          { name: "add_automation", detail: null },
+          { name: "add_job", detail: null },
         ],
       },
     }).context
@@ -89,7 +89,7 @@ describe("recovery context", () => {
     expect(recovered).toContain(
       '- google_gmail_send_message — {"subject":"Morning Briefing"}'
     )
-    expect(recovered).toContain("- add_automation\n")
+    expect(recovered).toContain("- add_job\n")
     expect(recovered).toContain("Never repeat one")
     expect(assemblePrompt(input).context).not.toContain("# Recovery")
   })

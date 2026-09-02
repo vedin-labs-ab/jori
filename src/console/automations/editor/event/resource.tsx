@@ -1,10 +1,10 @@
-import { type AutomationEventParameter } from "@contracts/automations/events"
+import { type JobEventParameter } from "@contracts/jobs/events"
 import { IntegrationOptionPicker } from "@/console/integrations/options"
 import { cn } from "@/lib/utils"
 
 type EventOptionFieldProps = {
   organizationId: string
-  parameter: Extract<AutomationEventParameter, { type: "option" }>
+  parameter: Extract<JobEventParameter, { type: "option" }>
   match: Record<string, string>
   disabled: boolean
   disabledMessage: string | undefined

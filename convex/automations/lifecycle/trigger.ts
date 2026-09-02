@@ -1,8 +1,8 @@
 import {
-  assertAutomationEventIsAvailable,
-  getAutomationEventDefinition,
-  normalizeAutomationEventMatch,
-} from "../../../contracts/automations/events"
+  assertJobEventIsAvailable,
+  getJobEventDefinition,
+  normalizeJobEventMatch,
+} from "../../../contracts/jobs/events"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
@@ -26,7 +26,7 @@ export async function resolveTrigger(
       throw new Error("Event automations need an event trigger.")
     }
 
-    const definition = getAutomationEventDefinition(
+    const definition = getJobEventDefinition(
       args.trigger.integration,
       args.trigger.event
     )
@@ -35,9 +35,9 @@ export async function resolveTrigger(
       throw new Error("Choose a supported job event.")
     }
 
-    assertAutomationEventIsAvailable(definition)
+    assertJobEventIsAvailable(definition)
 
-    const match = normalizeAutomationEventMatch(definition, args.trigger.match)
+    const match = normalizeJobEventMatch(definition, args.trigger.match)
 
     return {
       integrationId: (

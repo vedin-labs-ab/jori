@@ -4,7 +4,7 @@ import {
   pullRequestReviewCommentEvent,
 } from "../names"
 import { event, integration, optionParameter, textParameter } from "./builders"
-import { type AutomationEventParameter } from "./types"
+import { type JobEventParameter } from "./types"
 
 const githubIssueCommentParameters = [
   optionParameter("repo", "Repository", "Search repositories", {
@@ -69,7 +69,7 @@ function commentEvents(args: {
   }
   label: string
   target: string
-  parameters: readonly AutomationEventParameter[]
+  parameters: readonly JobEventParameter[]
 }) {
   return [
     event(args.values.created, {
@@ -85,7 +85,7 @@ function commentEvents(args: {
   ]
 }
 
-export const availableAutomationEventCatalog = [
+export const availableJobEventCatalog = [
   integration("slack", [
     event("message.created", {
       label: "New channel message",

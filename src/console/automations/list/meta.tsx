@@ -1,5 +1,5 @@
-import { getAutomationEventDefinition } from "@contracts/automations/events"
-import { describeCron } from "@contracts/automations/schedule/labels"
+import { getJobEventDefinition } from "@contracts/jobs/events"
+import { describeCron } from "@contracts/jobs/schedule/labels"
 import { Clock, Repeat2, Zap } from "lucide-react"
 import { type ReactNode } from "react"
 import {
@@ -173,7 +173,7 @@ function eventTriggerDetail(
   const eventLabel =
     integration === undefined
       ? trigger.event
-      : (getAutomationEventDefinition(integration, trigger.event)?.label ??
+      : (getJobEventDefinition(integration, trigger.event)?.label ??
         trigger.event)
   const source =
     integration === undefined

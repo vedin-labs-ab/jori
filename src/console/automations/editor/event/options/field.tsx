@@ -1,4 +1,4 @@
-import { type AutomationEventIntegration } from "@contracts/automations/events"
+import { type JobEventIntegration } from "@contracts/jobs/events"
 import { useQuery } from "convex/react"
 import {
   Select,
@@ -21,10 +21,10 @@ export function EventIntegrationField({
   scope,
   value,
 }: {
-  onValueChange: (integration: AutomationEventIntegration) => void
+  onValueChange: (integration: JobEventIntegration) => void
   organizationId: string
   scope: AutomationScope
-  value: AutomationEventIntegration
+  value: JobEventIntegration
 }) {
   const connections = useQuery(api.automations.connections.list, {
     organizationId,
@@ -35,7 +35,7 @@ export function EventIntegrationField({
   return (
     <Select
       onValueChange={(integration) =>
-        onValueChange(integration as AutomationEventIntegration)
+        onValueChange(integration as JobEventIntegration)
       }
       value={value}
     >
@@ -62,7 +62,7 @@ export function EventIntegrationField({
 function IntegrationSelectValue({
   integration,
 }: {
-  integration: AutomationEventIntegration
+  integration: JobEventIntegration
 }) {
   return (
     <span className="pointer-events-none flex min-w-0 items-center gap-1.5">

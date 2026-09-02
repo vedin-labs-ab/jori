@@ -1,7 +1,7 @@
 import { type Integration, isUserScopedIntegration } from "./integrations"
 
 /**
- * Who may see a material (table, store, file, automation) or a folder.
+ * Who may see a material (table, store, file, job) or a folder.
  * Every audience is inside the organization; anonymous reading happens
  * only through a minted share link. Folders cascade: a viewer must be
  * allowed by a material's own visibility and by every ancestor folder's,

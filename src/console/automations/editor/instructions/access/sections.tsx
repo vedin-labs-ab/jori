@@ -1,4 +1,4 @@
-import { canUseAutomationTool } from "@contracts/permissions"
+import { canUseJobTool } from "@contracts/permissions"
 import { useId, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -61,7 +61,7 @@ export function AutomationSurfaceToolGroups({
     const nextTools = new Set(selectedTools)
 
     for (const permission of groupTools) {
-      if (enabled && canUseAutomationTool(permission)) {
+      if (enabled && canUseJobTool(permission)) {
         nextTools.add(permission.tool)
         continue
       }
@@ -132,7 +132,7 @@ function EditableToolGroup({
   pendingSchemaTool: string | undefined
   selectedTools: Set<string>
 }) {
-  const selectableTools = group.tools.filter(canUseAutomationTool)
+  const selectableTools = group.tools.filter(canUseJobTool)
   const selectedCount = selectableTools.filter((permission) =>
     selectedTools.has(permission.tool)
   ).length
@@ -190,7 +190,7 @@ function EditableToolRow({
 }) {
   const checkboxId = useId()
   const descriptionId = `${checkboxId}-description`
-  const selectable = canUseAutomationTool(permission)
+  const selectable = canUseJobTool(permission)
   const disabled = !selectable && !selected
 
   return (

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { type AutomationEventParameter } from "@contracts/automations/events"
+import { type JobEventParameter } from "@contracts/jobs/events"
 import {
   cleanup,
   fireEvent,
@@ -27,7 +27,7 @@ const channelParameter = {
   placeholder: "Search channels",
   required: true,
   source: "slack.channels",
-} satisfies Extract<AutomationEventParameter, { type: "option" }>
+} satisfies Extract<JobEventParameter, { type: "option" }>
 
 beforeEach(() => {
   Object.assign(HTMLElement.prototype, {

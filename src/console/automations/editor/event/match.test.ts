@@ -1,7 +1,7 @@
 import {
-  type AutomationEventDefinition,
-  getAutomationEventDefinition,
-} from "@contracts/automations/events"
+  getJobEventDefinition,
+  type JobEventDefinition,
+} from "@contracts/jobs/events"
 import { describe, expect, test } from "vitest"
 import { applyEventMatchChange, removeEventMatch } from "./match"
 
@@ -150,10 +150,10 @@ describe("automation event match removal", () => {
 })
 
 function requireEvent(
-  integration: Parameters<typeof getAutomationEventDefinition>[0],
+  integration: Parameters<typeof getJobEventDefinition>[0],
   event: string
-): AutomationEventDefinition {
-  const definition = getAutomationEventDefinition(integration, event)
+): JobEventDefinition {
+  const definition = getJobEventDefinition(integration, event)
 
   if (definition === undefined) {
     throw new Error(`Missing test event ${integration}.${event}`)

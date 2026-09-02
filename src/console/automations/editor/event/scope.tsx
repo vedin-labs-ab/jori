@@ -1,7 +1,7 @@
 import {
-  type AutomationEventDefinition,
-  type AutomationEventParameter,
-} from "@contracts/automations/events"
+  type JobEventDefinition,
+  type JobEventParameter,
+} from "@contracts/jobs/events"
 import { Plus, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,7 @@ export function EventScopeFields({
   values,
 }: {
   organizationId: string
-  event: AutomationEventDefinition
+  event: JobEventDefinition
   onValuesChange: (values: Record<string, string>) => void
   values: Record<string, string>
 }) {
@@ -99,7 +99,7 @@ function AddConditionMenu({
   available,
   onAdd,
 }: {
-  available: readonly AutomationEventParameter[]
+  available: readonly JobEventParameter[]
   onAdd: (key: string) => void
 }) {
   return (
@@ -145,8 +145,8 @@ function ScopeField({
   onRemove,
 }: {
   organizationId: string
-  parameter: AutomationEventParameter
-  parameters: readonly AutomationEventParameter[]
+  parameter: JobEventParameter
+  parameters: readonly JobEventParameter[]
   removable: boolean
   values: Record<string, string>
   onValueChange: (value: string) => void
@@ -199,7 +199,7 @@ function ScopeField({
 }
 
 function conditionKeysWithValues(
-  conditions: readonly AutomationEventParameter[],
+  conditions: readonly JobEventParameter[],
   values: Record<string, string>
 ) {
   return conditions
