@@ -26,7 +26,7 @@ export function RunActivity({
   })
 
   return (
-    <DetailRow icon={Logs} label="Activity">
+    <DetailRow icon={Logs} label="Log">
       <ActivityContent activity={activity} now={now} />
     </DetailRow>
   )

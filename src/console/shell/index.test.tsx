@@ -54,7 +54,7 @@ vi.mock("../folders/drag/context", () => ({
 vi.mock("./navigation", () => ({
   ConsoleSidebar: () => (
     <nav aria-label="Workspace">
-      <a href="/runs">Runs</a>
+      <a href="/runs">Activity</a>
     </nav>
   ),
 }))
@@ -67,7 +67,7 @@ afterEach(() => {
 test("names the page with a heading rather than a one-item breadcrumb", () => {
   render(<ConsoleShell>Content</ConsoleShell>)
 
-  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Runs")
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Activity")
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
 })
 
@@ -235,10 +235,10 @@ test("keeps the sidebar and header up when the page throws", () => {
   // so recovering costs a click rather than a full reload.
   expect(screen.getByText("This page didn't load")).toBeDefined()
   expect(screen.getByRole("navigation", { name: "Workspace" })).toBeDefined()
-  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Runs")
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Activity")
 })
 
 test("titles the browser tab with the page, then the product", () => {
-  expect(consoleDocumentTitle("/runs")).toBe("Runs · Jori")
+  expect(consoleDocumentTitle("/runs")).toBe("Activity · Jori")
   expect(consoleDocumentTitle("/context/places")).toBe("Context · Jori")
 })
