@@ -2,7 +2,6 @@ import { type Validator, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { requireVisibleAutomation } from "../automations/access"
 import { readOrganizationTimezone } from "../organization/profile"
 import { resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
@@ -18,13 +17,11 @@ import {
 } from "../usage/rollup"
 import { createSight, type Sight } from "../visibility/sight"
 import {
-  folderBreakdown,
   type Grouping,
   nameContributors,
-  readAutomationRows,
   readGroupings,
-  readSubtreeRows,
   readWindowRows,
+  segmentFolders,
 } from "./meter"
 import { requireVisibleFolder } from "./tree"
 
@@ -40,7 +37,7 @@ import { requireVisibleFolder } from "./tree"
 // the same: its money still counts, but it is folded into one unnamed row
 // rather than listed, and its own series is not hers to ask for.
 
-/** The windows both queries offer, built from the lengths the rollup knows
+/** The windows the query offers, built from the lengths the rollup knows
  *  how to make rather than restated beside them: a length added there is
  *  accepted here, and one removed there stops being accepted, with no
  *  second list to keep in step. */
@@ -56,11 +53,11 @@ const usageDays = v.union(
 const contributorLimit = 100
 
 /**
- * One window of usage, already reduced to what the view draws: a zero-filled
- * daily series, the window's totals beside the previous window's, the
- * ranked contributors, and the subtree totals of whatever sits one level
- * down — direct subfolders inside a folder, root folders and the unfiled
- * bucket across the organization.
+ * One window of usage, already reduced to what the view draws: the window's
+ * totals beside the previous window's, the ranked contributors, and the
+ * scope divided one level down — root folders and the unfiled bucket across
+ * the organization, subfolders and the folder's own rows inside one — both
+ * as a ranking and as a zero-filled daily series stacked by that division.
  */
 export const overview = query({
   args: {
@@ -81,42 +78,6 @@ export const overview = query({
     }
 
     return await readFolderUsage(ctx, { ...scope, now: Date.now() })
-  },
-})
-
-/**
- * One slice of the same window, for the spend chart's filter: a subtree's
- * days, one automation's, or one automation's within a subtree. Only the
- * series comes back — the figures above the chart stay about the whole
- * scope.
- */
-export const series = query({
-  args: {
-    organizationId: v.string(),
-    folderId: v.optional(v.id("folders")),
-    automationId: v.optional(v.id("automations")),
-    days: usageDays,
-  },
-  handler: async (ctx, args) => {
-    await requireOrganizationAccess(ctx, args.organizationId)
-
-    const scope = {
-      ...args,
-      personId: await resolveCurrentPerson(ctx, args.organizationId),
-    }
-
-    if (args.folderId !== undefined) {
-      await requireVisibleFolder(ctx, { ...scope, folderId: args.folderId })
-    }
-
-    if (args.automationId !== undefined) {
-      await requireVisibleAutomation(ctx, {
-        ...scope,
-        automationId: args.automationId,
-      })
-    }
-
-    return await readUsageSlice(ctx, { ...args, now: Date.now() })
   },
 })
 
@@ -145,61 +106,11 @@ export async function readFolderUsage(
     ...(await summarize(ctx, sight, {
       groups,
       rows,
-      scoped: args.folderId !== undefined,
+      scope: args.folderId,
       window,
     })),
     timezone,
   }
-}
-
-/** The slice query's body. A folder narrows to its subtree and an
- *  automation to its own rows; naming both narrows to the intersection,
- *  which is what a folder page's filter means when it offers an automation
- *  that only spends part of its money here. */
-export async function readUsageSlice(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    folderId?: Id<"folders">
-    automationId?: Id<"automations">
-    days: UsageWindowLength
-    now: number
-  }
-) {
-  const timezone = await readOrganizationTimezone(ctx, args.organizationId)
-  const window = usageWindowOf(args.days, timezone, args.now)
-
-  return {
-    series: usageSeries(await readSliceRows(ctx, { ...args, window }), window),
-  }
-}
-
-async function readSliceRows(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    folderId?: Id<"folders">
-    automationId?: Id<"automations">
-    window: UsageWindow
-  }
-): Promise<Doc<"usage">[]> {
-  const { automationId, folderId } = args
-
-  if (folderId !== undefined) {
-    const rows = await readSubtreeRows(ctx, { ...args, folderId })
-
-    return automationId === undefined
-      ? rows
-      : rows.filter((row) => row.automation?.id === automationId)
-  }
-
-  if (automationId === undefined) {
-    // A slice of nothing would come back as a plausible line of zeroes, and
-    // a public entrypoint should refuse rather than answer wrongly.
-    throw new Error("Name an automation or a folder to chart.")
-  }
-
-  return await readAutomationRows(ctx, { ...args, automationId })
 }
 
 async function summarize(
@@ -208,7 +119,7 @@ async function summarize(
   args: {
     groups: Grouping[]
     rows: Doc<"usage">[]
-    scoped: boolean
+    scope: Id<"folders"> | undefined
     window: UsageWindow
   }
 ) {
@@ -220,17 +131,17 @@ async function summarize(
     isWithin(row.date, window.previousStart, window.previousEnd)
   )
   const ranked = rankContributors(current).slice(0, contributorLimit)
+  const { segments, segmentOf } = segmentFolders(
+    current,
+    args.groups,
+    args.scope
+  )
 
   return {
-    series: usageSeries(current, window),
+    series: usageSeries(current, window, segmentOf),
     totals: usageTotals(current),
     previous: usageTotals(previous),
     automations: await nameContributors(ctx, sight, ranked),
-    folders: folderBreakdown(current, args.groups),
-    // Interactive work and work whose folder is gone, which only the
-    // organization-wide view has a place for.
-    unfiled: args.scoped
-      ? null
-      : usageTotals(current.filter((row) => row.folderId === undefined)),
+    folders: segments,
   }
 }

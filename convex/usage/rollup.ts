@@ -19,11 +19,17 @@ export type UsageWindow = {
   previousEnd: string
 }
 
-export type UsageDay = {
-  date: string
+export type UsageFigures = {
   micros: number
   ended: number
   failed: number
+}
+
+/** One day, whole and divided: the figures for the day, and the same
+ *  figures for each segment the caller groups its rows into. */
+export type UsageDay = UsageFigures & {
+  date: string
+  segments: Record<string, UsageFigures>
 }
 
 export type UsageTotals = {
@@ -75,10 +81,12 @@ export function isWithin(date: string, from: string, to: string) {
 
 /** One point per day of the window, quiet days included: skipping them
  *  would compress a silent week into a single gap and make the chart lie
- *  about how spend is spread. */
+ *  about how spend is spread. Each row lands on its day twice, in the
+ *  day's own figures and in the segment `segmentOf` files it under. */
 export function usageSeries(
   rows: Doc<"usage">[],
-  window: UsageWindow
+  window: UsageWindow,
+  segmentOf: (row: Doc<"usage">) => string
 ): UsageDay[] {
   const byDate = new Map<string, UsageDay>()
 
@@ -87,20 +95,35 @@ export function usageSeries(
     date <= window.end;
     date = shiftUsageDate(date, 1)
   ) {
-    byDate.set(date, { date, micros: 0, ended: 0, failed: 0 })
+    byDate.set(date, { date, micros: 0, ended: 0, failed: 0, segments: {} })
   }
 
   for (const row of rows) {
     const day = byDate.get(row.date)
 
     if (day !== undefined) {
-      day.micros += row.micros
-      day.ended += row.runs.ended
-      day.failed += row.runs.failed
+      const key = segmentOf(row)
+
+      addFigures(day, row)
+      day.segments[key] = addFigures(
+        day.segments[key] ?? { micros: 0, ended: 0, failed: 0 },
+        row
+      )
     }
   }
 
   return [...byDate.values()]
+}
+
+export function addFigures<Figures extends UsageFigures>(
+  figures: Figures,
+  row: Doc<"usage">
+) {
+  figures.micros += row.micros
+  figures.ended += row.runs.ended
+  figures.failed += row.runs.failed
+
+  return figures
 }
 
 export function usageTotals(rows: Doc<"usage">[]): UsageTotals {

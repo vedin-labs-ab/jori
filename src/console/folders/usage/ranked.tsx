@@ -11,13 +11,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { SegmentSwatch } from "./legend"
 import {
   type UsageContributor,
   type UsageDays,
-  type UsageFolder,
-  type UsageOverview,
+  type UsageSegment,
   usageCostPerRun,
   usagePercent,
+  usageSegmentColor,
   usageShare,
 } from "./types"
 
@@ -175,52 +176,49 @@ export function UsageContributors({
   )
 }
 
-/** Where the money sits one level down, each row a whole subtree and each
- *  a way further in — the same view, scoped to that folder. Work that
- *  answers to no folder ranks beside them as its own row. */
+/** Where the money sits one level down, in the charts' own colours: each
+ *  folder row a whole subtree and a way further in — the same view, scoped
+ *  to that folder — beside the scope's own rows and the unnamed rest. */
 export function UsageFolders({
   days,
-  folders,
+  segments,
   total,
-  unfiled,
 }: {
   days: UsageDays
-  folders: UsageFolder[]
+  segments: UsageSegment[]
   total: number
-  unfiled: UsageOverview["unfiled"]
 }) {
-  const leader = Math.max(folders[0]?.micros ?? 0, unfiled?.micros ?? 0)
-  const rows = folders.map((folder) => (
-    <RankedRow
-      caption={
-        <Link
-          className={nameLinkClassName}
-          params={{ folderId: folder.folderId }}
-          search={{ days }}
-          title={folder.name}
-          to="/folders/$folderId/usage"
-        >
-          {folder.name}
-        </Link>
-      }
-      entry={folder}
-      key={folder.folderId}
-      leader={leader}
-      total={total}
+  const leader = segments[0]?.micros ?? 0
+
+  return (
+    <RankedTable
+      noun="Folder"
+      rows={segments.map((segment, rank) => (
+        <RankedRow
+          caption={
+            <span className="flex items-center gap-2">
+              <SegmentSwatch color={usageSegmentColor(segment, rank)} />
+              {segment.folderId === undefined ? (
+                <span className="truncate">{segment.label}</span>
+              ) : (
+                <Link
+                  className={cn(nameLinkClassName, "truncate")}
+                  params={{ folderId: segment.folderId }}
+                  search={{ days }}
+                  title={segment.label}
+                  to="/folders/$folderId/usage"
+                >
+                  {segment.label}
+                </Link>
+              )}
+            </span>
+          }
+          entry={segment}
+          key={segment.key}
+          leader={leader}
+          total={total}
+        />
+      ))}
     />
-  ))
-
-  if (unfiled !== null && unfiled.micros > 0) {
-    rows.push(
-      <RankedRow
-        caption="Unfiled"
-        entry={unfiled}
-        key="unfiled"
-        leader={leader}
-        total={total}
-      />
-    )
-  }
-
-  return <RankedTable noun="Folder" rows={rows} />
+  )
 }

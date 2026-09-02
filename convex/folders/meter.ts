@@ -2,19 +2,20 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { canSeeAutomation } from "../automations/access"
 import { type QueryLikeCtx } from "../shared/context"
 import {
+  addFigures,
   sortContributors,
   type UsageContributor,
+  type UsageFigures,
   type UsageWindow,
 } from "../usage/rollup"
 import { type Sight } from "../visibility/sight"
 import { descendantFolderIds, treeCap } from "./tree"
 
 // How a folder scope meters: which usage rows it reads, how those rows
-// divide between the folders one level down, and which of the two it may
-// name. Every question the Usage views ask is a date range over one of three
-// indexes — the organization, a folder subtree, or a single automation — so
-// picking the range is most of the work, and the viewer's sight decides the
-// rest.
+// divide between the folders one level down, and which of them it may name.
+// Every question the Usage views ask is a date range over the organization
+// or a folder subtree, so picking the range is most of the work, and the
+// viewer's sight decides the rest.
 
 /** Ninety days of a heavily metered organization is thousands of rows, not
  *  tens of thousands. The cap keeps one slow read from becoming unbounded. */
@@ -101,100 +102,125 @@ export async function readWindowRows(
   )
 }
 
-/** One folder's whole subtree across the shown window alone, which is all a
- *  filtered chart draws: it has no delta to measure. */
-export async function readSubtreeRows(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    folderId: Id<"folders">
-    window: UsageWindow
-  }
-) {
-  const ids = await descendantFolderIds(ctx, args.organizationId, args.folderId)
+/** Work filed at the scope itself rather than in anything below it: the
+ *  unfiled bucket across the organization, a folder's own rows inside one. */
+export const directSegment = "direct"
 
-  return await readFolderRows(ctx, [args.folderId, ...ids], {
-    from: args.window.start,
-    to: args.window.end,
-  })
+/** Everything the chart cannot name: children past the palette, and
+ *  children the viewer may not see, whose spend still has to land. */
+export const otherSegment = "other"
+
+/** How many segments the console can tell apart: its chart palette has
+ *  this many colours, and a ninth would wear one of the first eight. */
+const segmentLimit = 8
+
+export type UsageSegment = UsageFigures & {
+  key: string
+  label: string
+  /** Only a folder that still exists and may be named is a way further
+   *  in; the direct and other segments lead nowhere. */
+  folderId?: Id<"folders">
 }
 
-/** One automation's rows. The automation index is keyed by the automation
- *  alone, so a row belonging to another organization would answer this
- *  range as readily as one of the caller's; the organization is checked on
- *  every row rather than assumed from the id. */
-export async function readAutomationRows(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    automationId: Id<"automations">
-    window: UsageWindow
-  }
-) {
-  const rows = await ctx.db
-    .query("usage")
-    .withIndex("by_automation_and_date", (index) =>
-      index
-        .eq("automation.id", args.automationId)
-        .gte("date", args.window.start)
-        .lte("date", args.window.end)
-    )
-    .take(usageRowCap)
-
-  return rows.filter((row) => row.organizationId === args.organizationId)
+type Segmentation = {
+  segments: UsageSegment[]
+  segmentOf: (row: Doc<"usage">) => string
 }
 
-type SubtreeTotals = { micros: number; ended: number; failed: number }
+/**
+ * The scope's rows divided one level down, biggest first: each named
+ * child's whole subtree, the scope's own rows, and one unnamed rest. The
+ * same division serves the folder table and the charts' stacks, so a
+ * row's colour means the same thing in both. Segments that cost nothing
+ * stay out: the list exists to point somewhere.
+ */
+export function segmentFolders(
+  rows: Doc<"usage">[],
+  groups: Grouping[],
+  scope: Id<"folders"> | undefined
+): Segmentation {
+  const groupOf = new Map<Id<"folders">, Grouping>()
 
-/** A subtree total per named child, biggest first, carrying the same
- *  figures a contributor does so the two rankings read alike. Children
- *  that cost nothing in the window stay out: the list exists to point
- *  somewhere. */
-export function folderBreakdown(rows: Doc<"usage">[], groups: Grouping[]) {
-  const totalsByFolder = new Map<Id<"folders">, SubtreeTotals>()
-
-  for (const row of rows) {
-    if (row.folderId !== undefined) {
-      const carried = totalsByFolder.get(row.folderId) ?? {
-        micros: 0,
-        ended: 0,
-        failed: 0,
-      }
-
-      totalsByFolder.set(row.folderId, {
-        micros: carried.micros + row.micros,
-        ended: carried.ended + row.runs.ended,
-        failed: carried.failed + row.runs.failed,
-      })
+  for (const group of groups) {
+    for (const id of group.ids) {
+      groupOf.set(id, group)
     }
   }
 
-  return groups
-    .filter((group) => group.visible)
-    .map((group) => ({
-      folderId: group.folderId,
-      name: group.name,
-      ...group.ids.reduce<SubtreeTotals>(
-        (total, id) => {
-          const carried = totalsByFolder.get(id)
+  const keyOf = (row: Doc<"usage">) => {
+    if (row.folderId === undefined || row.folderId === scope) {
+      return directSegment
+    }
 
-          return carried === undefined
-            ? total
-            : {
-                micros: total.micros + carried.micros,
-                ended: total.ended + carried.ended,
-                failed: total.failed + carried.failed,
-              }
-        },
-        { micros: 0, ended: 0, failed: 0 }
-      ),
-    }))
-    .filter((entry) => entry.micros > 0)
-    .sort((left, right) =>
-      right.micros === left.micros
-        ? left.name.localeCompare(right.name)
-        : right.micros - left.micros
-    )
+    const group = groupOf.get(row.folderId)
+
+    return group === undefined || !group.visible ? otherSegment : group.folderId
+  }
+  const figures = new Map<string, UsageSegment>()
+  const other = blankSegment(otherSegment, "Other")
+
+  for (const row of rows) {
+    const key = keyOf(row)
+
+    if (key === otherSegment) {
+      addFigures(other, row)
+    } else {
+      figures.set(
+        key,
+        addFigures(figures.get(key) ?? openSegment(key, groupOf, scope), row)
+      )
+    }
+  }
+
+  const ranked = [...figures.values()]
+    .filter((segment) => segment.micros > 0)
+    .sort(bySpend)
+  const named = ranked.slice(0, segmentLimit)
+  const namedKeys = new Set(named.map((segment) => segment.key))
+
+  for (const segment of ranked.slice(segmentLimit)) {
+    other.micros += segment.micros
+    other.ended += segment.ended
+    other.failed += segment.failed
+  }
+
+  return {
+    segments: other.micros > 0 ? [...named, other] : named,
+    segmentOf: (row) => {
+      const key = keyOf(row)
+
+      return namedKeys.has(key) ? key : otherSegment
+    },
+  }
+}
+
+/** A segment the first time a row lands in it: the scope's own bucket,
+ *  named for what it holds, or a child's, which is a way further in. */
+function openSegment(
+  key: string,
+  groupOf: Map<Id<"folders">, Grouping>,
+  scope: Id<"folders"> | undefined
+): UsageSegment {
+  if (key === directSegment) {
+    return blankSegment(key, scope === undefined ? "Unfiled" : "Filed here")
+  }
+
+  const group = groupOf.get(key as Id<"folders">)
+
+  return {
+    ...blankSegment(key, group?.name ?? "Other"),
+    folderId: key as Id<"folders">,
+  }
+}
+
+function blankSegment(key: string, label: string): UsageSegment {
+  return { key, label, micros: 0, ended: 0, failed: 0 }
+}
+
+function bySpend(left: UsageSegment, right: UsageSegment) {
+  return right.micros === left.micros
+    ? left.label.localeCompare(right.label)
+    : right.micros - left.micros
 }
 
 async function readFolderRows(

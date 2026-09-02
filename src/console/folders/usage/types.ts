@@ -11,7 +11,7 @@ export type UsageOverview = FunctionReturnType<
 >
 export type UsageDay = UsageOverview["series"][number]
 export type UsageContributor = UsageOverview["automations"][number]
-export type UsageFolder = UsageOverview["folders"][number]
+export type UsageSegment = UsageOverview["folders"][number]
 
 export const usageWindowDays = [7, 30, 90] as const
 
@@ -90,19 +90,17 @@ export function usageCostPerRun(micros: number, ended: number) {
   return ended > 0 ? micros / ended : undefined
 }
 
-/** The slice the charts are filtered to, as the series query wants it. A
- *  choice the current overview no longer ranks reads as no filter at all,
- *  so changing the window cannot leave the charts on a vanished row. */
-export function usageSlice(value: string, usage: UsageOverview) {
-  const automation = usage.automations.find((entry) => entry.id === value)
+/** The rest that the charts cannot name, which the backend always ranks
+ *  last and the console draws in no colour of its own. */
+const otherSegment = "other"
 
-  if (automation?.id !== undefined) {
-    return { automationId: automation.id }
-  }
-
-  const folder = usage.folders.find((entry) => entry.folderId === value)
-
-  return folder === undefined ? undefined : { folderId: folder.folderId }
+/** A segment's colour is its rank: the palette is handed out in the order
+ *  the backend ranks the segments, so the table, the legend and the stacks
+ *  agree without any of them holding a map. */
+export function usageSegmentColor(segment: UsageSegment, rank: number) {
+  return segment.key === otherSegment
+    ? "var(--muted-foreground)"
+    : `var(--chart-${rank + 1})`
 }
 
 /** A `YYYY-MM-DD` bucket read back as the calendar day it names. Parsing
