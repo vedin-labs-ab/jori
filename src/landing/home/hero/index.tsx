@@ -56,7 +56,7 @@ export function Hero() {
       {/* The thread hangs off the console's lower right corner, and the
           wrapper keeps room under the console for the part that hangs
           below it. Narrow, the thread docks under the console instead. */}
-      <div className="relative md:pb-14">
+      <div className="relative min-w-0 md:pb-14">
         <DemoConsole className={consoleClassName} navigation={console} />
         <RenewalsThread
           className="mt-4 md:absolute md:right-0 md:bottom-0 md:mt-0 md:w-[22rem] lg:-right-4"
