@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 import { ConsoleScrollableGrid } from "../../layout"
+import { ConsoleListEmpty } from "../../list/empty"
 import { ConsoleListLoading } from "../../list/loading"
 import { ExecutionRow, type RunRowSlots } from "../row"
 import { displayNowForRun } from "../time"
@@ -42,28 +43,33 @@ export function ExecutionRows({
     return <ConsoleListLoading />
   }
 
+  if (rows.length === 0) {
+    return (
+      <ConsoleListEmpty>
+        <RunsEmptyState hasFilters={hasFilters} />
+      </ConsoleListEmpty>
+    )
+  }
+
   return (
     // auto-rows-max keeps row heights at their content size; without it the
     // overflow-hidden articles let the definite-height grid compress its
     // tracks to fit instead of overflowing into the scrollbar.
     <ConsoleScrollableGrid>
-      {rows.length === 0 ? <RunsEmptyState hasFilters={hasFilters} /> : null}
-      {rows.length > 0
-        ? rows.map((execution) => (
-            <ExecutionRow
-              defaultOpen={
-                execution.id === focusRunId || execution.id === openRunId
-              }
-              execution={execution}
-              expanded={expanded}
-              key={execution.id}
-              now={displayNowForRun(execution, now)}
-              onPreload={onPreload}
-              showAudience={showAudience}
-              stop={stop}
-            />
-          ))
-        : null}
+      {rows.map((execution) => (
+        <ExecutionRow
+          defaultOpen={
+            execution.id === focusRunId || execution.id === openRunId
+          }
+          execution={execution}
+          expanded={expanded}
+          key={execution.id}
+          now={displayNowForRun(execution, now)}
+          onPreload={onPreload}
+          showAudience={showAudience}
+          stop={stop}
+        />
+      ))}
     </ConsoleScrollableGrid>
   )
 }

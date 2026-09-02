@@ -1,13 +1,13 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ConsoleScrollableList } from "@/shared/console/layout"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { ConsoleListEmpty } from "../../list/empty"
 import { type Job, type JobList } from "../types"
 import { JobsEmptyState } from "./empty"
 import { JobRow } from "./row"
 
 // Auto-fill tracks add columns as the viewport grows instead of stretching
 // cards, keeping the unbounded console frame usable at any width.
-const jobGrid = "grid-cols-[repeat(auto-fill,minmax(min(28rem,100%),1fr))] pb-2"
 
 export function JobContent({
   controllingJobId,
@@ -51,11 +51,9 @@ export function JobContent({
 
   if (visibleJobs.length === 0) {
     return (
-      <ConsoleScrollableList className={jobGrid}>
-        <li className="col-span-full">
-          <JobsEmptyState hasFilters={hasFilters} onCreate={onCreate} />
-        </li>
-      </ConsoleScrollableList>
+      <ConsoleListEmpty>
+        <JobsEmptyState hasFilters={hasFilters} onCreate={onCreate} />
+      </ConsoleListEmpty>
     )
   }
 

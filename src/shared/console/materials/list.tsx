@@ -15,7 +15,7 @@ import {
   type ListConfig,
   type ListControls,
 } from "../list/controls"
-import { EmptyRow, FilterableEmptyState } from "../list/empty"
+import { ConsoleListEmpty, FilterableEmptyState } from "../list/empty"
 import { ConsoleListContent, ConsoleListTable } from "../list/frame"
 import { FilterHead, SortHead } from "../list/head"
 import { type RowSelection } from "../list/selection"
@@ -94,32 +94,33 @@ export function MaterialList<Row extends MaterialListRow>(
 
   if (rows.length === 0 && !hasFilters) {
     return (
-      <ConsoleListContent>
+      <ConsoleListEmpty>
         <MaterialEmptyState hasFilters={false} kind={kind} />
-      </ConsoleListContent>
+      </ConsoleListEmpty>
     )
   }
 
   return (
-    <ConsoleListTable>
-      <MaterialListHead
-        config={config}
-        controls={controls}
-        measures={kind.measures}
-        selection={selection}
-      />
-      <TableBody>
-        {rows.length === 0 ? (
-          <EmptyRow colSpan={9}>
-            <MaterialEmptyState hasFilters kind={kind} />
-          </EmptyRow>
-        ) : (
-          rows.map((row) => (
+    <>
+      <ConsoleListTable fill={rows.length > 0}>
+        <MaterialListHead
+          config={config}
+          controls={controls}
+          measures={kind.measures}
+          selection={selection}
+        />
+        <TableBody>
+          {rows.map((row) => (
             <MaterialListRow key={kind.identify(row)} row={row} {...props} />
-          ))
-        )}
-      </TableBody>
-    </ConsoleListTable>
+          ))}
+        </TableBody>
+      </ConsoleListTable>
+      {rows.length === 0 ? (
+        <ConsoleListEmpty>
+          <MaterialEmptyState hasFilters kind={kind} />
+        </ConsoleListEmpty>
+      ) : null}
+    </>
   )
 }
 

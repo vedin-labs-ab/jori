@@ -5,8 +5,9 @@ export type ConsoleFiltersState = {
   setOpen: (open: boolean) => void
 }
 
-/** Whether the filter panel is open, held by the frame so it survives
- *  moving between console pages. */
+/** Whether the filter panel is open on the page the console is on, held
+ *  by the frame so each page keeps its own answer while the console moves
+ *  between them. */
 export const ConsoleFiltersContext = createContext<ConsoleFiltersState | null>(
   null
 )

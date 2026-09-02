@@ -10,9 +10,18 @@ import {
 import { useState } from "react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { ConsoleHeaderActionsProvider } from "../layout"
+import { ConsoleNavigationContext } from "../shell/location"
 import { ConsoleFilterToggle } from "./field"
 import { ConsoleFiltered } from "./layout"
 import { ConsoleFiltersProvider } from "./provider"
+
+vi.mock("@tanstack/react-router", () => ({
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: { location: { pathname: string } }) => unknown
+  }) => select({ location: { pathname: "/things" } }),
+}))
 
 const mobile = vi.hoisted(() => ({ current: false }))
 
@@ -34,7 +43,7 @@ afterEach(cleanup)
 
 /** Renders a page with one facet under a header slot and the frame's
  *  provider, and hands back the controls the tests reach for. */
-function renderPage(storageKey?: string) {
+function renderPage(storageKey?: string, pathname = "/things") {
   function FilteredPage() {
     const [slot, setSlot] = useState<HTMLElement | null>(null)
     const [status, setStatus] = useState<Status>("all")
@@ -43,23 +52,27 @@ function renderPage(storageKey?: string) {
       <>
         <header ref={setSlot} />
         <ConsoleHeaderActionsProvider slot={slot}>
-          <ConsoleFiltersProvider storageKey={storageKey}>
-            <ConsoleFiltered
-              actions={<input aria-label="Search things" />}
-              activeCount={status === "all" ? 0 : 1}
-              onReset={() => setStatus("all")}
-              panel={
-                <ConsoleFilterToggle
-                  label="Status"
-                  onValueChange={setStatus}
-                  options={statusOptions}
-                  value={status}
-                />
-              }
-            >
-              <p>Things</p>
-            </ConsoleFiltered>
-          </ConsoleFiltersProvider>
+          <ConsoleNavigationContext.Provider
+            value={{ navigate: () => undefined, pathname }}
+          >
+            <ConsoleFiltersProvider storageKey={storageKey}>
+              <ConsoleFiltered
+                actions={<input aria-label="Search things" />}
+                activeCount={status === "all" ? 0 : 1}
+                onReset={() => setStatus("all")}
+                panel={
+                  <ConsoleFilterToggle
+                    label="Status"
+                    onValueChange={setStatus}
+                    options={statusOptions}
+                    value={status}
+                  />
+                }
+              >
+                <p>Things</p>
+              </ConsoleFiltered>
+            </ConsoleFiltersProvider>
+          </ConsoleNavigationContext.Provider>
         </ConsoleHeaderActionsProvider>
       </>
     )
@@ -143,8 +156,12 @@ test("facets off their default count on the button and reset together", () => {
   fireEvent.click(screen.getByRole("radio", { name: "Active" }))
 
   expect(button().getAttribute("aria-label")).toBe("Filters, 1 active")
-  expect(within(button()).getByText("1")).toBeDefined()
   expect(button().dataset.variant).toBe("secondary")
+
+  const clear = screen.getByRole("button", { name: "Clear filter" })
+
+  expect(within(clear).getByText("1")).toBeDefined()
+  expect(clear.dataset.variant).toBe("secondary")
 
   fireEvent.click(screen.getByRole("button", { name: "Reset" }))
 
@@ -158,7 +175,9 @@ test("the open state is remembered under the frame's storage key", async () => {
 
   fireEvent.click(button())
 
-  expect(window.localStorage.getItem("test.filters")).toBe("true")
+  expect(window.localStorage.getItem("test.filters")).toBe(
+    JSON.stringify({ "/things": true })
+  )
 
   cleanup()
 
@@ -196,4 +215,34 @@ test("below md the panel opens as a sheet over the content", () => {
   expect(document.activeElement).toBe(
     within(sheet).getByRole("button", { name: "Close filters" })
   )
+})
+
+test("each page keeps its own open state", () => {
+  const first = renderPage("test.filters", "/runs/abc")
+
+  fireEvent.click(first.button())
+  expect(first.aside()?.dataset.state).toBe("open")
+  cleanup()
+
+  const other = renderPage("test.filters", "/jobs")
+
+  expect(other.aside()?.dataset.state).toBe("closed")
+  cleanup()
+
+  const back = renderPage("test.filters", "/runs")
+
+  expect(back.aside()?.dataset.state).toBe("open")
+})
+
+test("the count beside the button clears the filters on its own", () => {
+  const { button } = renderPage()
+
+  fireEvent.click(button())
+  fireEvent.click(screen.getByRole("radio", { name: "Active" }))
+  fireEvent.click(screen.getByRole("button", { name: "Clear filter" }))
+
+  expect(screen.getByRole("radio", { name: "All" }).dataset.state).toBe("on")
+  expect(screen.queryByRole("button", { name: /Clear/ })).toBeNull()
+  expect(button().dataset.variant).toBe("outline")
+  expect(document.activeElement).toBe(button())
 })

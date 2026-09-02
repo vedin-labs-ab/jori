@@ -61,10 +61,20 @@ export function ConsoleListContent({
  *  stops scrolling so this container stays the only scrollport. */
 export function ConsoleListTable({
   className,
+  fill = true,
   ...props
-}: ComponentProps<typeof Table>) {
+}: ComponentProps<typeof Table> & {
+  /** Off, the table keeps to its rows so an empty region can take the
+   *  rest of the page under its header. */
+  fill?: boolean
+}) {
   return (
-    <div className="relative min-h-0 flex-1 overflow-auto [&>[data-slot=table-container]]:overflow-visible">
+    <div
+      className={cn(
+        "relative min-h-0 overflow-auto [&>[data-slot=table-container]]:overflow-visible",
+        fill ? "flex-1" : "shrink-0"
+      )}
+    >
       <Table
         className={cn(
           "[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-background",
