@@ -1,3 +1,4 @@
+import { Database, File, Table2 } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DemoConsole } from "../../demo/console"
 import { notesFileId } from "../../demo/fixtures/materials/files"
@@ -7,12 +8,13 @@ import { useDemoNavigation } from "../../demo/navigation"
 import { Definition, Jori, Section } from "../../section"
 
 /** One of each material the hero's job touches, at the page the console
- *  gives it, so the switch above the frame is a shortcut into the same
- *  console the crumb inside it walks. */
+ *  gives it, named for its kind with the icon the console files it under,
+ *  so the switch above the frame teaches the three apart while it walks
+ *  the same console the crumb inside it does. */
 const pages = [
-  { label: "Customer renewals", path: `/tables/${renewalsTableId}` },
-  { label: "Renewals watch state", path: `/stores/${watchStoreId}` },
-  { label: "Release notes 2.14.md", path: `/files/${notesFileId}` },
+  { icon: Table2, label: "Table", path: `/tables/${renewalsTableId}` },
+  { icon: Database, label: "Store", path: `/stores/${watchStoreId}` },
+  { icon: File, label: "File", path: `/files/${notesFileId}` },
 ]
 
 /** The materials pillar: the console's own page for a table, a store, and
@@ -56,6 +58,7 @@ export function Materials() {
         <TabsList>
           {pages.map((page) => (
             <TabsTrigger key={page.path} value={page.path}>
+              <page.icon />
               {page.label}
             </TabsTrigger>
           ))}

@@ -33,7 +33,9 @@ export function Hero() {
             already inside the text and the chip's own padding, which read as
             a wider space than the ones between the words after it. */}
         <p className="text-muted-foreground text-sm">
-          <Mention /> answers in Slack, GitHub, and Linear, and files the result
+          <Mention /> answers in <Surface logo="slack" name="Slack" />,{" "}
+          <Surface logo="github" name="GitHub" />,{" "}
+          <Surface logo="linear" name="Linear" />, and more
         </p>
         <h1 className="mt-5 font-medium text-5xl text-balance tracking-tight sm:text-6xl lg:text-7xl">
           The shared drive your AI works out of.
@@ -68,5 +70,20 @@ export function Hero() {
         />
       </div>
     </section>
+  )
+}
+
+/** A surface Jori answers on, named beside its own mark so the three read
+ *  as the products they are rather than a list of words. */
+function Surface({ logo, name }: { logo: string; name: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 whitespace-nowrap text-foreground">
+      <img
+        alt=""
+        className="size-3.5 rounded-sm"
+        src={`/logos/integrations/${logo}.svg`}
+      />
+      {name}
+    </span>
   )
 }
