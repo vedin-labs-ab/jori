@@ -3,6 +3,12 @@ import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { showErrorToast } from "@/shared/console/error"
+import {
+  type FolderContentsResult,
+  type FolderDetail,
+  type FolderResource,
+  toFiledType,
+} from "@/shared/console/folders/types"
 import { api } from "../../../../convex/_generated/api"
 import { useFileActions } from "../../files/manage"
 import { useJobEditorHost } from "../../jobs/editor/host"
@@ -11,12 +17,6 @@ import { useStoreRemoval } from "../../stores/manage"
 import { useTableRemoval } from "../../tables/manage"
 import { MoveResourceDialog } from "../move"
 import { useMoveConfirmation } from "../move/confirm"
-import {
-  type FolderContentsResult,
-  type FolderDetail,
-  type FolderResource,
-  toFiledType,
-} from "../types"
 import { FolderResourceDialogs, type ResourceRequest } from "./dialogs"
 
 // Everything a folder listing's rows can do to what is filed in them,

@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { type FolderResource } from "@/shared/console/folders/types"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth } from "@/shared/console/menu"
 import { api } from "../../../../convex/_generated/api"
@@ -19,7 +20,6 @@ import { JobRowMenu } from "../../jobs/list/actions"
 import { DeleteJobDialog } from "../../jobs/list/delete"
 import { storeDeleteDescription } from "../../stores/manage"
 import { tableDeleteDescription } from "../../tables/manage"
-import { type FolderResource } from "../types"
 import { type FolderResourceActions } from "./actions"
 
 // A filed resource offers the same menu here that it offers on its own

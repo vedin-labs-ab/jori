@@ -1,33 +1,33 @@
-import { Link } from "@tanstack/react-router"
 import { Check, type LucideIcon, Pause } from "lucide-react"
+import { type ReactNode } from "react"
 import { TableCell, TableRow } from "@/components/ui/table"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
-import { materialOwner } from "@/shared/console/materials/owners"
-import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
-import { VisibilityMark } from "@/shared/console/visibility/badge"
+import { MaterialOwnerCell } from "../../materials/cells/owner"
+import { materialOwner } from "../../materials/owners"
+import { ConsoleLink } from "../../shell/link"
+import { absoluteTime, relativeTime, useNow } from "../../time"
+import { VisibilityMark } from "../../visibility/badge"
 import { type ResourceDragPayload } from "../drag/plan"
 import { useResourceRowDrag } from "../drag/state"
 import { type FolderResource, resourcePresentation } from "../types"
-import { type FolderResourceActions } from "./actions"
-import { ResourceRowMenu } from "./menu"
 import { nameLinkClassName, rowDragClasses } from "./style"
 
 /** One filed resource in a folder's listing, linking to its own surface.
  *  The row drags: resources file onto any folder row or unfile onto the
- *  sidebar's group header. */
+ *  sidebar's group header. Its menu, trigger and all, is handed in: what
+ *  a filed resource can be asked to do is its own kind's business. */
 export function ResourceListRow({
-  actions,
   folderId,
+  menu,
   resource,
 }: {
-  actions: FolderResourceActions
   /** The folder being viewed — the one the resource already sits in. */
   folderId: string
+  menu: ReactNode
   resource: FolderResource
 }) {
   const drag = useResourceRowDrag(resourcePayload(resource, folderId))
@@ -63,9 +63,7 @@ export function ResourceListRow({
       >
         {relativeTime(resource.updatedAt, now)}
       </TableCell>
-      <TableCell className="text-right">
-        <ResourceRowMenu actions={actions} resource={resource} />
-      </TableCell>
+      <TableCell className="text-right">{menu}</TableCell>
     </TableRow>
   )
 }
@@ -134,7 +132,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
   switch (resource.type) {
     case "table":
       return (
-        <Link
+        <ConsoleLink
           className={nameLinkClassName}
           draggable={false}
           params={{ tableId: resource.id }}
@@ -142,11 +140,11 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
           to="/tables/$tableId"
         >
           {label}
-        </Link>
+        </ConsoleLink>
       )
     case "store":
       return (
-        <Link
+        <ConsoleLink
           className={nameLinkClassName}
           draggable={false}
           params={{ storeId: resource.id }}
@@ -154,11 +152,11 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
           to="/stores/$storeId"
         >
           {label}
-        </Link>
+        </ConsoleLink>
       )
     case "file":
       return (
-        <Link
+        <ConsoleLink
           className={nameLinkClassName}
           draggable={false}
           params={{ fileId: resource.id }}
@@ -166,18 +164,18 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
           to="/files/$fileId"
         >
           {label}
-        </Link>
+        </ConsoleLink>
       )
     case "job":
       return (
-        <Link
+        <ConsoleLink
           className={nameLinkClassName}
           draggable={false}
           title={resource.name}
           to="/jobs"
         >
           {label}
-        </Link>
+        </ConsoleLink>
       )
   }
 }

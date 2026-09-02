@@ -13,7 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { SegmentSwatch } from "./legend"
 import {
   type UsageContributor,
   type UsageDays,
@@ -22,7 +21,8 @@ import {
   usagePercent,
   usageSegmentColor,
   usageShare,
-} from "./types"
+} from "@/shared/console/folders/usage/types"
+import { SegmentSwatch } from "./legend"
 
 // The two tables the page ends on: what spent the window's money, and where
 // it sits. Both carry the same columns — runs, failures, spend, cost per

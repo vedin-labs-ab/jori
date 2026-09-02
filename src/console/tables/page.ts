@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
 import { useFolderNames } from "@/console/shared/materials/names"
+import { type MoveResourceTarget } from "@/shared/console/folders/types"
 import {
   resettingControls,
   useListControls,
@@ -11,7 +12,6 @@ import {
 } from "@/shared/console/list/pagination"
 import { useRowSelection } from "@/shared/console/list/selection"
 import { api } from "../../../convex/_generated/api"
-import { type MoveResourceTarget } from "../folders/types"
 import {
   tableListConfig,
   tableNoun,

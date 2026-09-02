@@ -35,7 +35,7 @@ vi.mock("@/components/ui/separator", () => ({ Separator: () => null }))
 // The drag provider and the sidebar's signed-in parts need Convex and auth
 // providers; the shell's binding under test does not.
 vi.mock("../folders/drag/context", () => ({
-  FolderDragProvider: ({ children }: { children: React.ReactNode }) => (
+  ConsoleFolderDrag: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
   ),
 }))

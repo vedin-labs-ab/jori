@@ -2,6 +2,7 @@ import { useQuery } from "convex/react"
 import { Upload } from "lucide-react"
 import { useState } from "react"
 import { useFolderNames } from "@/console/shared/materials/names"
+import { type MoveResourceTarget } from "@/shared/console/folders/types"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -20,7 +21,6 @@ import { useClientPagination } from "@/shared/console/list/pagination"
 import { useRowSelection } from "@/shared/console/list/selection"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
-import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
 import { VisibilityDialog } from "../shared/visibility/dialog"
 import { EditFileDialog } from "./edit"

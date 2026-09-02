@@ -3,7 +3,7 @@ import { FolderUsagePage } from "@/console/folders/usage"
 import {
   defaultUsageDays,
   usageDaysSearch,
-} from "@/console/folders/usage/types"
+} from "@/shared/console/folders/usage/types"
 
 // Recharts is heavy and only the usage routes draw with it; the file-based
 // route splits it into its own chunk, so a folder's contents never load it.

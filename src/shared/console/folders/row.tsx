@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
@@ -13,21 +12,19 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { folderIcon } from "@/shared/console/materials/folders"
-import { menuWidth } from "@/shared/console/menu"
-import { type CreationRequest } from "./create/dialogs"
-import { NewInFolderSub } from "./create/menu"
+import { folderIcon } from "../materials/folders"
+import { menuWidth } from "../menu"
+import { ConsoleLink } from "../shell/link"
+import { NewInFolderSub } from "./create"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
-import { type FolderDialogRequest } from "./manage"
+import { type FolderExpansion } from "./expansion"
 import { FolderMenuItems } from "./menu"
 import { activeFolderId, type FolderNode } from "./tree"
-import { type FolderRow } from "./types"
-
-export type FolderExpansion = {
-  expand: (folderId: string) => void
-  isExpanded: (folderId: string) => boolean
-  toggle: (folderId: string) => void
-}
+import {
+  type CreationRequest,
+  type FolderDialogRequest,
+  type FolderRow,
+} from "./types"
 
 /** One sidebar tree row: the button navigates to the folder's page, the
  *  chevron expands its children into an indented sub-list, the hover menu
@@ -139,7 +136,7 @@ function FolderRowLink({
       isActive={isActive}
       tooltip={name}
     >
-      <Link
+      <ConsoleLink
         {...drag.attributes}
         {...drag.listeners}
         draggable={false}
@@ -155,7 +152,7 @@ function FolderRowLink({
       >
         <FolderIcon />
         <span className="min-w-0 truncate">{name}</span>
-      </Link>
+      </ConsoleLink>
     </SidebarMenuButton>
   )
 }

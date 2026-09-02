@@ -1,8 +1,8 @@
 import { Check, Folder, FolderMinus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { buildFolderTree, type FolderNode } from "@/shared/console/folders/tree"
+import { type FolderRow } from "@/shared/console/folders/types"
 import { scrollFade } from "@/shared/fade"
-import { buildFolderTree, type FolderNode } from "./tree"
-import { type FolderRow } from "./types"
 
 // Compact fully-expanded folder tree for the move dialog: "No folder" at
 // the top, then every folder indented by depth. The subject's current

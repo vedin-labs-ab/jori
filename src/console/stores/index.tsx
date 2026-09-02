@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
 import { useDeferredValue, useState } from "react"
 import { useFolderNames } from "@/console/shared/materials/names"
+import { type MoveResourceTarget } from "@/shared/console/folders/types"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
 import {
   type ListConfig,
@@ -25,7 +26,6 @@ import {
 import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
-import { type MoveResourceTarget } from "../folders/types"
 import { ConsolePage } from "../page"
 import { VisibilityDialog } from "../shared/visibility/dialog"
 import { CreateStoreDialog } from "./create"

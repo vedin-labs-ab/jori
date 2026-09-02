@@ -2,8 +2,8 @@ import { useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useEffect, useState } from "react"
+import { type FiledResourceType } from "@/shared/console/folders/types"
 import { api } from "../../../../convex/_generated/api"
-import { type FiledResourceType } from "../types"
 import { type AudienceChange, MovePrompt } from "./prompt"
 
 // Moving changes who can see a resource, and the folder it lands in is not
@@ -27,6 +27,8 @@ export type PendingMove = {
   folderId: string | null
   /** The move itself, run once nothing — or nobody — stands in its way. */
   run: () => Promise<void>
+  /** Ran instead when the person declines the move. */
+  decline?: () => void
 }
 
 export type MoveConfirmation = {
@@ -35,7 +37,10 @@ export type MoveConfirmation = {
    *  down until the answer decides between moving and asking, so one click
    *  cannot become two moves. */
   isResolving: boolean
-  request: (move: PendingMove) => void
+  /** Takes the move, or refuses it — false — while another is still
+   *  waiting on its answer: taking a second one would drop the first move
+   *  on the floor. */
+  request: (move: PendingMove) => boolean
 }
 
 /** Wraps one moving surface: hand it the move, render its dialog. */
@@ -67,14 +72,20 @@ export function useMoveConfirmation(
 
   return {
     isResolving: pending !== undefined && change === undefined,
-    // A move already waiting on its answer holds the surface: taking a
-    // second one would drop the first move on the floor.
     request: (move: PendingMove) => {
       if (organizationId === undefined) {
         void move.run()
-      } else if (pending === undefined) {
-        setPending(move)
+
+        return true
       }
+
+      if (pending !== undefined) {
+        return false
+      }
+
+      setPending(move)
+
+      return true
     },
     dialog:
       pending === undefined || change === undefined || !asks(change) ? null : (
@@ -82,7 +93,10 @@ export function useMoveConfirmation(
           change={change}
           kind={pending.subject.kind}
           name={pending.name}
-          onCancel={() => setPending(undefined)}
+          onCancel={() => {
+            setPending(undefined)
+            pending.decline?.()
+          }}
           onConfirm={() => {
             setPending(undefined)
             void pending.run()

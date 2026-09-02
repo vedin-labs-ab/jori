@@ -3,18 +3,11 @@ import { DndContext } from "@dnd-kit/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { type FolderContentsResult } from "../types"
-import { type FolderResourceActions } from "./actions"
+import { type FolderContentsResult, type FolderResource } from "../types"
 import { FolderContents } from "./contents"
 
 vi.mock("@tanstack/react-router", async () => ({
-  Link: (await import("../../../../test/router")).Link,
-}))
-
-vi.mock("convex/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("convex/react")>()),
-  useMutation: () => () => Promise.resolve({}),
-  useQuery: () => undefined,
+  Link: (await import("../../../../../test/router")).Link,
 }))
 
 afterEach(cleanup)
@@ -70,25 +63,26 @@ const readyContents = {
   ],
 } as FolderContentsResult
 
-/** What the rows can do is covered in menu.test.tsx; this file is about
- *  the table they sit in. */
-const inertActions = {
-  jobOf: () => undefined,
-  files: { pendingFileId: undefined },
-  organizationId: "org-1",
-  removal: { isDeleting: () => false, isRestoring: () => false },
-} as unknown as FolderResourceActions
+/** What a filed resource can do is its own kind's business, handed in as
+ *  its menu; this file is about the table the rows sit in. */
+function resourceMenu(resource: FolderResource) {
+  return (
+    <button aria-label={`Open actions for ${resource.name}`} type="button">
+      …
+    </button>
+  )
+}
 
 function renderContents(contents: FolderContentsResult | undefined) {
   render(
     <TooltipProvider>
       <DndContext>
         <FolderContents
-          actions={inertActions}
           contents={contents}
           folderId="folder-0"
           newMenu={<button type="button">New</button>}
           onDialog={() => undefined}
+          resourceMenu={resourceMenu}
         />
       </DndContext>
     </TooltipProvider>

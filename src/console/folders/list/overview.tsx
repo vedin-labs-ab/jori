@@ -1,31 +1,19 @@
 import { useQuery } from "convex/react"
-import { Folder, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useMemo, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { RootFolderList } from "@/shared/console/folders/list/roots"
+import { FoldersTitleMenu } from "@/shared/console/folders/menu"
+import { type FolderDialogRequest } from "@/shared/console/folders/types"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
 } from "@/shared/console/layout"
-import {
-  ConsoleEmptyState,
-  EmptyRow,
-  FilterableEmptyState,
-} from "@/shared/console/list/empty"
-import {
-  ConsoleListContent,
-  ConsoleListLayout,
-} from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
-import { type FolderDialogRequest, FolderDialogs } from "../manage"
-import { FoldersTitleMenu } from "../menu"
-import { type FolderRootsResult } from "../types"
+import { FolderDialogs } from "../manage"
 import { FolderUsageHint } from "../usage/hint"
-import { useFolderListControls } from "./controls"
-import { FolderListRow, FolderListTable } from "./table"
 
 /** The folder tree's landing page: the root folders in the same full-bleed
  *  table a folder's own page uses. The icon-collapsed sidebar links here —
@@ -76,86 +64,5 @@ function RootFolders({ organizationId }: { organizationId: string }) {
         organizationId={organizationId}
       />
     </ConsoleListLayout>
-  )
-}
-
-export function RootFolderList({
-  onCreate,
-  onDialog,
-  roots,
-}: {
-  onCreate: () => void
-  onDialog: (request: FolderDialogRequest) => void
-  roots: FolderRootsResult | undefined
-}) {
-  const list = useFolderListControls({
-    folders: roots?.status === "ready" ? roots.folders : [],
-    resources: [],
-  })
-
-  if (roots === undefined) {
-    return (
-      <ConsoleListContent>
-        <ConsoleListLoading />
-      </ConsoleListContent>
-    )
-  }
-
-  if (roots.status !== "ready") {
-    return (
-      <ConsoleListContent>
-        <Alert variant="destructive">
-          <AlertTitle>Could not load folders</AlertTitle>
-          <AlertDescription>{roots.message}</AlertDescription>
-        </Alert>
-      </ConsoleListContent>
-    )
-  }
-
-  if (roots.folders.length === 0) {
-    return (
-      <ConsoleListContent>
-        <ConsoleEmptyState
-          action={
-            <Button onClick={onCreate} type="button">
-              <Plus />
-              New folder
-            </Button>
-          }
-          description="Folders organize the tables, stores, files, and jobs your team shares."
-          icon={Folder}
-          title="No folders yet"
-        />
-      </ConsoleListContent>
-    )
-  }
-
-  const visible = list.narrow(roots.folders)
-
-  return (
-    <FolderListTable
-      controls={list.controls}
-      kinds={list.kinds}
-      owners={list.owners}
-    >
-      {visible.length === 0 ? (
-        <EmptyRow colSpan={6}>
-          <FilterableEmptyState
-            description="Folders organize the tables, stores, files, and jobs your team shares."
-            hasFilters
-            icon={Folder}
-            noun="folders"
-          />
-        </EmptyRow>
-      ) : (
-        visible.map((folder) => (
-          <FolderListRow
-            folder={folder}
-            key={folder.folderId}
-            onDialog={onDialog}
-          />
-        ))
-      )}
-    </FolderListTable>
   )
 }

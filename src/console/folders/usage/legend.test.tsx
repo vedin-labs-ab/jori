@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { type UsageSegment } from "@/shared/console/folders/usage/types"
 import { SegmentLegend } from "./legend"
-import { type UsageSegment } from "./types"
 
 afterEach(cleanup)
 

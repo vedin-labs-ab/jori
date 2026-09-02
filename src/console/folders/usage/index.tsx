@@ -1,12 +1,12 @@
 import { useNavigate } from "@tanstack/react-router"
 import { type GenericId } from "convex/values"
 import { type ComponentProps, useMemo } from "react"
+import { type UsageDays } from "@/shared/console/folders/usage/types"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { ConsolePage } from "../../page"
 import { FolderFrame } from "../frame"
 import { UsageNote } from "./note"
-import { type UsageDays } from "./types"
 import { UsageView } from "./view"
 
 // The Usage pages, in their two scopes. Both keep the chosen window in the

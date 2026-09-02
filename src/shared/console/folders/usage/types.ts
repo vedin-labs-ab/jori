@@ -1,5 +1,5 @@
 import { type FunctionReturnType } from "convex/server"
-import { type api } from "../../../../convex/_generated/api"
+import { type api } from "../../../../../convex/_generated/api"
 
 // What the Usage views read, and the controls they offer. The backend hands
 // back a finished payload — zero-filled series, ranked lists, totals for

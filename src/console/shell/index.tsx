@@ -2,7 +2,7 @@ import { useRouterState } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleSidebar } from "@/shared/console/shell/navigation"
-import { FolderDragProvider } from "../folders/drag/context"
+import { ConsoleFolderDrag } from "../folders/drag/context"
 import { SidebarFolders } from "../folders/section"
 import { SidebarUserButton } from "./account"
 import { ConsolePageBoundary } from "./boundary"
@@ -18,7 +18,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   return (
     // One drag context above both panes, so folder-page rows can drop
     // onto the sidebar tree and vice versa. Renders no DOM of its own.
-    <FolderDragProvider>
+    <ConsoleFolderDrag>
       <ConsoleFrame
         pathname={pathname}
         sidebar={
@@ -36,6 +36,6 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           {children}
         </ConsolePageBoundary>
       </ConsoleFrame>
-    </FolderDragProvider>
+    </ConsoleFolderDrag>
   )
 }

@@ -1,5 +1,5 @@
+import { type ManagedFolder } from "@/shared/console/folders/types"
 import { VisibilityDialog } from "../shared/visibility/dialog"
-import { type ManagedFolder } from "./types"
 
 /** Access settings for one folder, raised from its menus. The folder's
  *  visibility cascades over everything filed inside it, so this is where a

@@ -1,5 +1,6 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
+import { type FolderResource } from "@/shared/console/folders/types"
 import { useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
 import { EditFileDialog } from "../../files/edit"
@@ -7,7 +8,6 @@ import { useFileActions } from "../../files/manage"
 import { VisibilityDialog } from "../../shared/visibility/dialog"
 import { EditStoreDialog } from "../../stores/edit"
 import { EditTableDialog } from "../../tables/edit"
-import { type FolderResource } from "../types"
 
 // Editing and sharing a filed resource asks for more than a listing row
 // carries — a description, a full audience — so each kind resolves its own

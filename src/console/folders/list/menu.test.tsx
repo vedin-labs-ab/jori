@@ -3,10 +3,13 @@ import { DndContext } from "@dnd-kit/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { type FolderDialogRequest } from "../manage"
-import { type FolderContentsResult } from "../types"
+import { FolderContents } from "@/shared/console/folders/list/contents"
+import {
+  type FolderContentsResult,
+  type FolderDialogRequest,
+} from "@/shared/console/folders/types"
 import { type FolderResourceActions } from "./actions"
-import { FolderContents } from "./contents"
+import { ResourceRowMenu } from "./menu"
 
 // What a folder listing's rows offer: each kind's own menu, with the one
 // item only a listing can carry — leaving the folder — sitting right after
@@ -193,7 +196,6 @@ function renderRows(
     <TooltipProvider>
       <DndContext>
         <FolderContents
-          actions={actions}
           contents={
             {
               status: "ready",
@@ -204,6 +206,9 @@ function renderRows(
           folderId="folder-0"
           newMenu={<button type="button">New</button>}
           onDialog={onDialog}
+          resourceMenu={(resource) => (
+            <ResourceRowMenu actions={actions} resource={resource} />
+          )}
         />
       </DndContext>
     </TooltipProvider>

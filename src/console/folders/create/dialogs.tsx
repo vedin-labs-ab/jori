@@ -1,19 +1,10 @@
 import { useEffect, useRef } from "react"
+import { type CreationRequest } from "@/shared/console/folders/types"
 import { useRetained } from "@/shared/console/retain"
 import { UploadFileDialog } from "../../files/upload"
 import { useJobEditorHost } from "../../jobs/editor/host"
 import { CreateStoreDialog } from "../../stores/create"
 import { CreateTableDialog } from "../../tables/create"
-
-/** What the folder surfaces can create in place, each through the same
- *  dialog its own list page uses. */
-export type FolderCreation = "table" | "store" | "file" | "job"
-
-export type CreationRequest = {
-  creation: FolderCreation
-  /** Pre-selects the dialogs' Folder field; undefined starts at the root. */
-  folderId?: string
-}
 
 /** The resource creation dialogs, shared by the folder page and the sidebar
  *  tree. One request value drives them all; each dialog keeps its last

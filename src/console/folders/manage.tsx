@@ -15,24 +15,20 @@ import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { showErrorToast } from "@/shared/console/error"
+import {
+  type FolderDialogRequest,
+  type ManagedFolder,
+} from "@/shared/console/folders/types"
 import { DialogForm } from "@/shared/console/materials/form"
 import { useRetained } from "@/shared/console/retain"
 import { api } from "../../../convex/_generated/api"
 import { FolderAccessDialog } from "./access"
 import { DeleteFolderDialog } from "./delete/dialog"
 import { MoveToFolderDialog } from "./move"
-import { type ManagedFolder } from "./types"
 
 // The folder lifecycle dialogs, shared by the sidebar tree and the folder
 // page. One request value drives them all, so each caller renders a single
 // <FolderDialogs> and hands rows a way to raise requests.
-
-export type FolderDialogRequest =
-  | { type: "access"; folder: ManagedFolder }
-  | { type: "create"; parentId?: string }
-  | { type: "delete"; folder: ManagedFolder }
-  | { type: "move"; folder: ManagedFolder }
-  | { type: "rename"; folder: ManagedFolder }
 
 export function FolderDialogs({
   dialog,
