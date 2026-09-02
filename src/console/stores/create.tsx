@@ -1,8 +1,10 @@
 import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { CreateMaterialDialog } from "@/console/shared/materials/create"
+import { type GenericId } from "convex/values"
+import { CreateMaterialDialog } from "@/shared/console/materials/dialogs/create"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
+import { useGrantOptions } from "../shared/visibility/options"
 
 export function CreateStoreDialog({
   initialFolderId,
@@ -17,6 +19,7 @@ export function CreateStoreDialog({
   organizationId: string
 }) {
   const create = useMutation(api.stores.console.create)
+  const grantOptions = useGrantOptions(organizationId)
 
   return (
     <CreateMaterialDialog
@@ -24,8 +27,10 @@ export function CreateStoreDialog({
       create={(args) =>
         create({
           ...args,
-          // The form holds visibility with plain string ids; the mutation
-          // wants branded ones, and only the server can vouch for them.
+          organizationId,
+          // The form holds ids as plain strings; the mutation wants branded
+          // ones, and only the server can vouch for them.
+          folderId: args.folderId as GenericId<"folders"> | undefined,
           visibility: args.visibility as FunctionArgs<
             typeof api.stores.console.create
           >["visibility"],
@@ -34,11 +39,11 @@ export function CreateStoreDialog({
       folderField={(props) => (
         <FolderField {...props} organizationId={organizationId} />
       )}
+      grantOptions={grantOptions}
       initialFolderId={initialFolderId}
       isOpen={isOpen}
       noun="store"
       onOpenChange={onOpenChange}
-      organizationId={organizationId}
     />
   )
 }

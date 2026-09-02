@@ -57,10 +57,28 @@ export function MaterialLinksDialog<Share extends ShareRow>({
             revoked.
           </DialogDescription>
         </DialogHeader>
-        <MintRow onMint={onMint} />
-        <ShareHistory onRevoke={onRevoke} shares={shares} />
+        <MaterialLinks onMint={onMint} onRevoke={onRevoke} shares={shares} />
       </DialogContent>
     </Dialog>
+  )
+}
+
+/** The dialog's body on its own — minting, then the links so far — for a
+ *  page that shows the links in place rather than behind a dialog. */
+export function MaterialLinks<Share extends ShareRow>({
+  onMint,
+  onRevoke,
+  shares,
+}: {
+  onMint: (expiresInHours: number) => Promise<MintedLink>
+  onRevoke: (share: Share) => Promise<unknown>
+  shares: SharePages<Share>
+}) {
+  return (
+    <>
+      <MintRow onMint={onMint} />
+      <ShareHistory onRevoke={onRevoke} shares={shares} />
+    </>
   )
 }
 

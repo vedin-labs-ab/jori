@@ -1,8 +1,10 @@
 import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { CreateMaterialDialog } from "@/console/shared/materials/create"
+import { type GenericId } from "convex/values"
+import { CreateMaterialDialog } from "@/shared/console/materials/dialogs/create"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
+import { useGrantOptions } from "../shared/visibility/options"
 
 export function CreateTableDialog({
   initialFolderId,
@@ -19,6 +21,7 @@ export function CreateTableDialog({
   // A table is born with no columns at all; the grid's New column
   // affordance grows the schema in place.
   const create = useMutation(api.tables.console.create)
+  const grantOptions = useGrantOptions(organizationId)
 
   return (
     <CreateMaterialDialog
@@ -26,8 +29,10 @@ export function CreateTableDialog({
       create={(args) =>
         create({
           ...args,
-          // The form holds visibility with plain string ids; the mutation
-          // wants branded ones, and only the server can vouch for them.
+          organizationId,
+          // The form holds ids as plain strings; the mutation wants branded
+          // ones, and only the server can vouch for them.
+          folderId: args.folderId as GenericId<"folders"> | undefined,
           visibility: args.visibility as FunctionArgs<
             typeof api.tables.console.create
           >["visibility"],
@@ -36,11 +41,11 @@ export function CreateTableDialog({
       folderField={(props) => (
         <FolderField {...props} organizationId={organizationId} />
       )}
+      grantOptions={grantOptions}
       initialFolderId={initialFolderId}
       isOpen={isOpen}
       noun="table"
       onOpenChange={onOpenChange}
-      organizationId={organizationId}
     />
   )
 }

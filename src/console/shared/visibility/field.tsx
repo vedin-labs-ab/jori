@@ -1,6 +1,6 @@
 import { type ComponentProps } from "react"
 import { VisibilityField } from "@/shared/console/visibility/field"
-import { usePeopleOptions, useTeamOptions } from "./options"
+import { useGrantOptions } from "./options"
 
 /** The sharing field offering the organization's own people and teams. */
 export function OrganizationVisibilityField({
@@ -9,8 +9,7 @@ export function OrganizationVisibilityField({
 }: Omit<ComponentProps<typeof VisibilityField>, "options"> & {
   organizationId: string
 }) {
-  const people = usePeopleOptions(organizationId)
-  const teams = useTeamOptions(organizationId)
-
-  return <VisibilityField {...field} options={{ people, teams }} />
+  return (
+    <VisibilityField {...field} options={useGrantOptions(organizationId)} />
+  )
 }

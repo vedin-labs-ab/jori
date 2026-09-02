@@ -1,14 +1,9 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, test } from "vitest"
+import { describe, expect, test } from "vitest"
 import { jobInstructionMarkerErrors } from "@/shared/console/jobs/editor/errors"
 import { emptyJobForm } from "@/shared/console/jobs/types"
-import { writeJobWebSearchPreference } from "../preferences"
 import { jobFormValues } from "."
 import { createJobArgs } from "./args"
-
-afterEach(() => {
-  localStorage.clear()
-})
 
 describe("job payload", () => {
   test("defaults new jobs to web search", () => {
@@ -17,10 +12,8 @@ describe("job payload", () => {
     })
   })
 
-  test("uses stored job access preferences for new jobs", () => {
-    writeJobWebSearchPreference(false)
-
-    expect(jobFormValues(undefined)).toMatchObject({
+  test("starts a new job from the web-search choice it is handed", () => {
+    expect(jobFormValues(undefined, { webSearch: false })).toMatchObject({
       webSearch: false,
     })
   })

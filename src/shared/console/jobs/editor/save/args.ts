@@ -14,7 +14,7 @@ import {
   jobNameErrors,
 } from "@/shared/console/jobs/editor/errors"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
-import { type api } from "../../../../../convex/_generated/api"
+import { type api } from "../../../../../../convex/_generated/api"
 import { jobFormValues } from "."
 import { prepareJobInstructions } from "./instructions"
 import {

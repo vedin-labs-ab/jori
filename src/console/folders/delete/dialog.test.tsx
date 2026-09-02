@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type ManagedFolder } from "@/shared/console/folders/types"
-import { DeleteFolderDialog } from "./dialog"
+import { DeleteFolder } from "./dialog"
 
 // The dialog is the only place the subtree's size is stated, and the only
 // gate in front of a delete that cannot be undone.
@@ -40,7 +40,7 @@ const folder = {
 
 function renderDialog() {
   render(
-    <DeleteFolderDialog
+    <DeleteFolder
       folder={folder}
       isOpen
       onDeleted={() => undefined}

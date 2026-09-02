@@ -1,5 +1,4 @@
 import { type Visibility } from "@contracts/visibility"
-import { type GenericId } from "convex/values"
 import { Loader2 } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { toast } from "sonner"
@@ -12,49 +11,56 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { showErrorToast } from "@/shared/console/error"
-import {
-  MaterialDescriptionField,
-  MaterialNameField,
-} from "@/shared/console/materials/fields"
-import { AdvancedSettings, DialogForm } from "@/shared/console/materials/form"
-import { OrganizationVisibilityField } from "../visibility/field"
+import { showErrorToast } from "../../error"
+import { type GrantOptions, VisibilityField } from "../../visibility/field"
+import { MaterialDescriptionField, MaterialNameField } from "../fields"
+import { AdvancedSettings, DialogForm } from "../form"
+
+/** What a create flow hands its host: the name and note, where the
+ *  material is filed (undefined is the root), and who may see it. */
+export type CreateMaterialArgs = {
+  description?: string
+  folderId?: string
+  name: string
+  visibility: Visibility
+}
 
 /** The create flow every material kind shares: name, description, and the
  *  advanced folder and sharing fields. Only the noun, the blurb under the
- *  title, and the mutation differ between kinds. */
+ *  title, and what a save runs differ between kinds. */
 export function CreateMaterialDialog({
   blurb,
   create,
   folderField,
+  grantOptions,
   initialFolderId,
   isOpen,
   noun,
   onOpenChange,
-  organizationId,
 }: {
   blurb: string
+  /** Creates the material; a rejection is shown as the failure. */
   create: (args: CreateMaterialArgs) => Promise<unknown>
-  /** The folder picker, supplied by the page: this module sits below the
+  /** The folder picker, supplied by the host: this module sits below the
    *  folders domain and may not reach into it. */
   folderField: (props: {
     id: string
     onChange: (folderId: string | null) => void
     value: string | null
   }) => ReactNode
+  /** Who the sharing field may offer. */
+  grantOptions: GrantOptions
   /** Pre-selects the Folder field, e.g. on a folder page's "New" menu. */
   initialFolderId?: string
   isOpen: boolean
   noun: string
   onOpenChange: (isOpen: boolean) => void
-  organizationId: string
 }) {
   const form = useCreateMaterial({
     create,
     initialFolderId: initialFolderId ?? null,
     noun,
     onCreated: () => onOpenChange(false),
-    organizationId,
   })
   const idPrefix = `${noun}-create`
 
@@ -93,11 +99,11 @@ export function CreateMaterialDialog({
               onChange: form.setFolderId,
               value: form.folderId,
             })}
-            <OrganizationVisibilityField
+            <VisibilityField
               id={`${idPrefix}-visibility`}
               noun={noun}
               onChange={form.setVisibility}
-              organizationId={organizationId}
+              options={grantOptions}
               value={form.visibility}
             />
           </AdvancedSettings>
@@ -113,26 +119,16 @@ export function CreateMaterialDialog({
   )
 }
 
-type CreateMaterialArgs = {
-  description?: string
-  folderId?: GenericId<"folders">
-  name: string
-  organizationId: string
-  visibility?: Visibility
-}
-
 function useCreateMaterial({
   create,
   initialFolderId,
   noun,
   onCreated,
-  organizationId,
 }: {
   create: (args: CreateMaterialArgs) => Promise<unknown>
   initialFolderId: string | null
   noun: string
   onCreated: () => void
-  organizationId: string
 }) {
   const [name, setNameState] = useState("")
   const [nameError, setNameError] = useState<string>()
@@ -160,12 +156,10 @@ function useCreateMaterial({
 
     try {
       await create({
-        organizationId,
         name,
         description: description.trim() === "" ? undefined : description,
         visibility,
-        folderId:
-          folderId === null ? undefined : (folderId as GenericId<"folders">),
+        folderId: folderId ?? undefined,
       })
 
       toast.success(`Created ${name.trim()}.`)

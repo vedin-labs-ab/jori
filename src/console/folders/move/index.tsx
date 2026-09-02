@@ -2,26 +2,14 @@ import { useMutation, useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
 import { showErrorToast } from "@/shared/console/error"
-import { subtreeFolderIds } from "@/shared/console/folders/tree"
+import { MoveDialog } from "@/shared/console/folders/dialogs/move"
 import {
   type MoveResourceTarget,
   type MoveSubject,
+  subjectName,
 } from "@/shared/console/folders/types"
-import { useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
-import { FolderPicker } from "../picker"
 import { useMoveConfirmation } from "./confirm"
 
 /** MoveResourcesDialog specialized for exactly one resource, for hosts
@@ -74,10 +62,11 @@ export function MoveResourcesDialog({
   )
 }
 
-/** Shared "Move to folder…" dialog: folders re-parent through `move`, filed
- *  resources re-file through `file`. Open it by passing a subject; pass
- *  undefined to close (the last subject is retained for the close
- *  animation). */
+/** The shared "Move to folder…" dialog bound to Convex: the organization's
+ *  tree to choose from, and the moves themselves — folders re-parent
+ *  through `move`, filed resources re-file through `file` — behind the
+ *  audience confirmation. Open it by passing a subject; pass undefined to
+ *  close. */
 export function MoveToFolderDialog({
   onOpenChange,
   organizationId,
@@ -87,79 +76,20 @@ export function MoveToFolderDialog({
   organizationId: string
   subject: MoveSubject | undefined
 }) {
-  const retained = useRetained(subject)
-
-  return (
-    <Dialog onOpenChange={onOpenChange} open={subject !== undefined}>
-      <DialogContent className="sm:max-w-md">
-        {retained === undefined ? null : (
-          <MoveDialogBody
-            key={subjectKey(retained)}
-            onClose={() => onOpenChange(false)}
-            organizationId={organizationId}
-            subject={retained}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function MoveDialogBody({
-  onClose,
-  organizationId,
-  subject,
-}: {
-  onClose: () => void
-  organizationId: string
-  subject: MoveSubject
-}) {
   const tree = useQuery(api.folders.console.tree, { organizationId })
-  const move = useMoveSubject(organizationId, subject, onClose)
-  const currentId = currentFolderId(subject)
-  const [selectedId, setSelectedId] = useState<string | null>(currentId ?? null)
-  const folders = tree?.status === "ready" ? tree.folders : undefined
+  const move = useMoveSubject(organizationId, subject, () =>
+    onOpenChange(false)
+  )
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle className="wrap-anywhere">
-          Move {subjectName(subject)}
-        </DialogTitle>
-        <DialogDescription>
-          Choose the folder {isPlural(subject) ? "they" : "it"} should live in.
-        </DialogDescription>
-      </DialogHeader>
-      {folders === undefined ? (
-        <div className="grid gap-2 rounded-md border p-2">
-          <Skeleton className="h-6" />
-          <Skeleton className="h-6" />
-          <Skeleton className="h-6" />
-        </div>
-      ) : (
-        <FolderPicker
-          className="rounded-md border p-1"
-          currentId={currentId}
-          disabledIds={
-            subject.kind === "folder"
-              ? subtreeFolderIds(folders, subject.folderId)
-              : undefined
-          }
-          folders={folders}
-          onSelect={setSelectedId}
-          selectedId={selectedId}
-        />
-      )}
-      <DialogFooter>
-        <Button
-          disabled={selectedId === currentId || move.isBusy}
-          onClick={() => move.submit(selectedId)}
-          type="button"
-        >
-          {move.isBusy ? <Spinner /> : null}
-          Move
-        </Button>
-      </DialogFooter>
+      <MoveDialog
+        folders={tree?.status === "ready" ? tree.folders : undefined}
+        isBusy={move.isBusy}
+        onMove={move.submit}
+        onOpenChange={onOpenChange}
+        subject={subject}
+      />
       {move.dialog}
     </>
   )
@@ -167,7 +97,7 @@ function MoveDialogBody({
 
 function useMoveSubject(
   organizationId: string,
-  subject: MoveSubject,
+  subject: MoveSubject | undefined,
   onMoved: () => void
 ) {
   const moveFolder = useMutation(api.folders.console.move)
@@ -175,22 +105,22 @@ function useMoveSubject(
   const confirmation = useMoveConfirmation(organizationId)
   const [isMoving, setIsMoving] = useState(false)
 
-  async function run(destinationId: string | null) {
+  async function run(moved: MoveSubject, destinationId: string | null) {
     setIsMoving(true)
 
     try {
       const folderId =
         destinationId === null ? null : (destinationId as GenericId<"folders">)
 
-      if (subject.kind === "folder") {
+      if (moved.kind === "folder") {
         await moveFolder({
           organizationId,
-          folderId: subject.folderId as GenericId<"folders">,
+          folderId: moved.folderId as GenericId<"folders">,
           parentId: folderId,
         })
       } else {
         await Promise.all(
-          subject.resources.map((resource) =>
+          moved.resources.map((resource) =>
             fileResource({
               organizationId,
               resourceType: resource.resourceType,
@@ -201,20 +131,24 @@ function useMoveSubject(
         )
       }
 
-      toast.success(`Moved ${subjectName(subject)}.`)
+      toast.success(`Moved ${subjectName(moved)}.`)
       onMoved()
     } catch (error) {
-      showErrorToast(error, `Could not move ${subjectName(subject)}.`)
+      showErrorToast(error, `Could not move ${subjectName(moved)}.`)
     } finally {
       setIsMoving(false)
     }
   }
 
   function submit(destinationId: string | null) {
+    if (subject === undefined) {
+      return
+    }
+
     const asked = confirmable(subject)
 
     if (asked === undefined) {
-      void run(destinationId)
+      void run(subject, destinationId)
 
       return
     }
@@ -222,7 +156,7 @@ function useMoveSubject(
     confirmation.request({
       ...asked,
       folderId: destinationId,
-      run: () => run(destinationId),
+      run: () => run(subject, destinationId),
     })
   }
 
@@ -258,44 +192,4 @@ function confirmable(subject: MoveSubject) {
       resourceId: resource.resourceId,
     },
   }
-}
-
-/** How the dialog names its subject: quoted for a single item, a count for
- *  a bulk selection. */
-function subjectName(subject: MoveSubject) {
-  if (subject.kind === "folder") {
-    return `"${subject.name}"`
-  }
-
-  return subject.resources.length === 1
-    ? `"${subject.resources[0].name}"`
-    : `${subject.resources.length} items`
-}
-
-function isPlural(subject: MoveSubject) {
-  return subject.kind === "resources" && subject.resources.length > 1
-}
-
-/** Where the subject lives today, marked in the picker and blocked as a
- *  no-op destination. Resources spread across folders have no single home,
- *  so nothing is marked and every destination stays open. */
-function currentFolderId(subject: MoveSubject) {
-  if (subject.kind === "folder") {
-    return subject.parentId ?? null
-  }
-
-  const homes = new Set(
-    subject.resources.map((resource) => resource.folderId ?? null)
-  )
-
-  return homes.size === 1 ? (subject.resources[0].folderId ?? null) : undefined
-}
-
-/** Remounts the body per subject so the selection resets with it. */
-function subjectKey(subject: MoveSubject) {
-  return subject.kind === "folder"
-    ? `folder:${subject.folderId}`
-    : subject.resources
-        .map((resource) => `${resource.resourceType}:${resource.resourceId}`)
-        .join("+")
 }
