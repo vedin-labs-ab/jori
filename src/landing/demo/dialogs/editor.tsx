@@ -1,4 +1,4 @@
-import { Info } from "lucide-react"
+import { Plug } from "lucide-react"
 import {
   lazy,
   type ReactNode,
@@ -7,7 +7,13 @@ import {
   useMemo,
   useState,
 } from "react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { FolderPickerField } from "@/shared/console/folders/field"
 import { jobPolicyKey } from "@/shared/console/jobs/access/policy"
 import { jobFormValues } from "@/shared/console/jobs/editor/save"
@@ -77,13 +83,18 @@ export function DemoJobEditor({ children }: { children: ReactNode }) {
  *  organization's connections, which the demo has none of. */
 export function DemoEventFields() {
   return (
-    <Alert className="py-2">
-      <Info className="size-4" />
-      <AlertDescription className="text-xs">
-        Event triggers are set in the console, against the integrations your
-        organization has connected: Slack, GitHub, Linear, and Notion.
-      </AlertDescription>
-    </Alert>
+    <Empty className="border border-dashed py-8">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Plug />
+        </EmptyMedia>
+        <EmptyTitle>Events start in the console</EmptyTitle>
+        <EmptyDescription>
+          Connect Slack, GitHub, Linear, or Notion there, then pick the event a
+          job answers to.
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   )
 }
 

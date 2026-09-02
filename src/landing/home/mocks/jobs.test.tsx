@@ -29,7 +29,7 @@ test("seeds the editor with the chase brief and files a job from it", async () =
     await screen.findByRole("button", { name: "Advanced settings" })
   )
   expect(await screen.findByRole("button", { name: "6 people" })).toBeDefined()
-  expect(screen.getByText(/Narrowed to Finance/)).toBeDefined()
+  expect(screen.getByText(/Narrowed to/).textContent).toContain("Finance")
   expect(screen.getAllByText("Chase overdue invoices")).toHaveLength(1)
 
   fireEvent.click(screen.getByRole("button", { name: "Create job" }))

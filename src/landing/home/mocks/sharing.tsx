@@ -57,42 +57,49 @@ function RenewalsSharing() {
   const target = { kind: "table" as const, id: table.id }
 
   return (
-    <Prop
-      className="min-w-0"
-      label={
-        <>
-          <span className="font-medium text-foreground">Visibility</span>
-          <span>Customer renewals · Finance › Renewals</span>
-        </>
-      }
-    >
-      <div className="p-4">
-        <VisibilityFields
-          audience={<DemoAudience target={target} value={table.visibility} />}
-          canEdit
-          field={
-            <VisibilityField
-              id="renewals-sharing"
-              noun="table"
-              onChange={(visibility) =>
-                actions.setVisibility(target, visibility)
-              }
-              options={grantOptions}
-              value={table.visibility}
-            />
-          }
-        />
-      </div>
-      <div className="border-t p-4 pb-3">
-        <p className="font-medium text-sm">Share links</p>
-        <p className="text-muted-foreground text-xs">
+    <div className="grid min-w-0 gap-6">
+      <Prop
+        label={
+          <>
+            <span className="font-medium text-foreground">Visibility</span>
+            <span>Customer renewals · Finance › Renewals</span>
+          </>
+        }
+      >
+        <div className="p-4">
+          <VisibilityFields
+            audience={<DemoAudience target={target} value={table.visibility} />}
+            canEdit
+            field={
+              <VisibilityField
+                id="renewals-visibility"
+                noun="table"
+                onChange={(visibility) =>
+                  actions.setVisibility(target, visibility)
+                }
+                options={grantOptions}
+                value={table.visibility}
+              />
+            }
+          />
+        </div>
+      </Prop>
+      <Prop
+        label={
+          <>
+            <span className="font-medium text-foreground">Share links</span>
+            <span>Customer renewals</span>
+          </>
+        }
+      >
+        <p className="px-4 pt-3 pb-1 text-muted-foreground text-xs">
           Anyone with a link can view this table until the link expires or is
           revoked.
         </p>
-      </div>
-      <ClientOnly fallback={<div aria-hidden className="h-52 border-t" />}>
-        <MaterialLinks onMint={onMint} onRevoke={onRevoke} shares={shares} />
-      </ClientOnly>
-    </Prop>
+        <ClientOnly fallback={<div aria-hidden className="h-52 border-t" />}>
+          <MaterialLinks onMint={onMint} onRevoke={onRevoke} shares={shares} />
+        </ClientOnly>
+      </Prop>
+    </div>
   )
 }

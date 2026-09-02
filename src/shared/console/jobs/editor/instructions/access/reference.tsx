@@ -4,7 +4,7 @@ import {
   useEditorState,
 } from "@tiptap/react"
 import { Ban, BookOpen, Braces, Wrench } from "lucide-react"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { useRetained } from "@/shared/console/retain"
@@ -16,7 +16,11 @@ import { type JobReferenceNodeOptions } from "../markdown/schema"
 import { JobMarkerActionButton, JobMarkerRemoveButton } from "./remove"
 import { ToolReferencesLoader, ToolSchemaDialog } from "./schema"
 import { jobReferenceToneClassNames } from "./tone"
-import { type ToolReferences, toolReferenceReady } from "./wire"
+import {
+  ToolReferenceContext,
+  type ToolReferences,
+  toolReferenceReady,
+} from "./wire"
 
 export function JobReferenceNodeView({
   deleteNode,
@@ -134,12 +138,17 @@ function ToolSchemaPane({
   permission: ToolPermission
   separatorClassName: string
 }) {
+  const hasHost = useContext(ToolReferenceContext) !== undefined
   const [shown, setShown] = useState<ToolPermission>()
   const [warm, setWarm] = useState(false)
   const [references, setReferences] = useState<ToolReferences>()
   const engaged = useRetained(shown) !== undefined || warm
   const pending =
     shown !== undefined && !toolReferenceReady(references, shown.tool)
+
+  if (!hasHost) {
+    return null
+  }
 
   return (
     <>
