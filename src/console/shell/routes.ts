@@ -33,7 +33,7 @@ export const consoleNavigation: readonly ConsoleGroup[] = [
   {
     label: "Resources",
     items: [
-      { icon: Workflow, label: "Jobs", to: "/automations" },
+      { icon: Workflow, label: "Jobs", to: "/jobs" },
       { icon: Table2, label: "Tables", to: "/tables" },
       { icon: Database, label: "Stores", to: "/stores" },
       { icon: Files, label: "Files", to: "/files" },

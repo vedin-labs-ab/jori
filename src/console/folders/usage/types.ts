@@ -17,7 +17,7 @@ export const usageWindowDays = [7, 30, 90] as const
 
 export type UsageDays = (typeof usageWindowDays)[number]
 
-/** A month by default: long enough for a weekly automation to show up more
+/** A month by default: long enough for a weekly job to show up more
  *  than once, short enough to still be about now. */
 export const defaultUsageDays: UsageDays = 30
 

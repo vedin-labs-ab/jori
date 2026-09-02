@@ -141,22 +141,22 @@ function RankedRow({
   )
 }
 
-/** What spent the window's money. An automation that still exists is a
+/** What spent the window's money. A job that still exists is a
  *  link; one that has since been deleted keeps its name as plain text,
  *  because its spend is history and there is nothing left to open. */
 export function UsageContributors({
-  automations,
+  jobs,
   total,
 }: {
-  automations: UsageContributor[]
+  jobs: UsageContributor[]
   total: number
 }) {
-  const leader = automations[0]?.micros ?? 0
+  const leader = jobs[0]?.micros ?? 0
 
   return (
     <RankedTable
       noun="Source"
-      rows={automations.map((entry) => (
+      rows={jobs.map((entry) => (
         <RankedRow
           caption={
             entry.id === undefined ? (
@@ -165,7 +165,7 @@ export function UsageContributors({
               <Link
                 className={nameLinkClassName}
                 title={entry.label}
-                to="/automations"
+                to="/jobs"
               >
                 {entry.label}
               </Link>

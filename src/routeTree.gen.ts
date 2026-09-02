@@ -10,12 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as ContextRouteImport } from './routes/context'
 import { Route as FilesRouteImport } from './routes/files'
 import { Route as FoldersRouteImport } from './routes/folders'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RunsRouteImport } from './routes/runs'
@@ -49,11 +49,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AutomationsRoute = AutomationsRouteImport.update({
-  id: '/automations',
-  path: '/automations',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/console',
   path: '/console',
@@ -77,6 +72,11 @@ const FoldersRoute = FoldersRouteImport.update({
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -217,12 +217,12 @@ const TablesTableIdIndexRoute = TablesTableIdIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
   '/folders': typeof FoldersRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
+  '/jobs': typeof JobsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -253,8 +253,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
+  '/jobs': typeof JobsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -284,12 +284,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/automations': typeof AutomationsRoute
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
   '/folders': typeof FoldersRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
+  '/jobs': typeof JobsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -322,12 +322,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/automations'
     | '/console'
     | '/context'
     | '/files'
     | '/folders'
     | '/integrations'
+    | '/jobs'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -358,8 +358,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/automations'
     | '/console'
+    | '/jobs'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -388,12 +388,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/automations'
     | '/console'
     | '/context'
     | '/files'
     | '/folders'
     | '/integrations'
+    | '/jobs'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -425,12 +425,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AutomationsRoute: typeof AutomationsRoute
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
   FilesRoute: typeof FilesRouteWithChildren
   FoldersRoute: typeof FoldersRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRouteWithChildren
+  JobsRoute: typeof JobsRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RunsRoute: typeof RunsRoute
@@ -451,13 +451,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/automations': {
-      id: '/automations'
-      path: '/automations'
-      fullPath: '/automations'
-      preLoaderRoute: typeof AutomationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/console': {
@@ -493,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -775,12 +775,12 @@ const TablesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AutomationsRoute: AutomationsRoute,
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,
   FilesRoute: FilesRouteWithChildren,
   FoldersRoute: FoldersRouteWithChildren,
   IntegrationsRoute: IntegrationsRouteWithChildren,
+  JobsRoute: JobsRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RunsRoute: RunsRoute,

@@ -134,13 +134,13 @@ test("header buttons keep their accessible label when compact", () => {
   render(
     <ConsoleHeaderButton
       icon={<svg aria-hidden />}
-      label="New automation"
+      label="New job"
       type="button"
     />
   )
 
-  const button = screen.getByRole("button", { name: "New automation" })
-  const label = screen.getByText("New automation")
+  const button = screen.getByRole("button", { name: "New job" })
+  const label = screen.getByText("New job")
 
   expect(button.className).toContain("max-sm:size-7")
   expect(label.className).toContain("max-sm:hidden")

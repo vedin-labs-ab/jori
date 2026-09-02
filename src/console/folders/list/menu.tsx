@@ -11,10 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { api } from "../../../../convex/_generated/api"
-import { AutomationRowMenu } from "../../automations/list/actions"
-import { DeleteAutomationDialog } from "../../automations/list/delete"
 import { FileMenuItems } from "../../files/menu"
 import { DeleteFileDialog } from "../../files/menu/delete"
+import { JobRowMenu } from "../../jobs/list/actions"
+import { DeleteJobDialog } from "../../jobs/list/delete"
 import { MaterialRowMenu } from "../../shared/materials/actions/menu"
 import { menuWidth } from "../../shared/menu"
 import { storeDeleteDescription } from "../../stores/manage"
@@ -40,7 +40,7 @@ export function ResourceRowMenu({
     case "file":
       return <FileResourceMenu actions={actions} resource={resource} />
     case "job":
-      return <AutomationResourceMenu actions={actions} resource={resource} />
+      return <JobResourceMenu actions={actions} resource={resource} />
   }
 }
 
@@ -119,34 +119,34 @@ function FileResourceMenu({ actions, resource }: ResourceMenu) {
   )
 }
 
-/** Until the automation itself is in hand, the row offers only what the
+/** Until the job itself is in hand, the row offers only what the
  *  filing alone can answer for. */
-function AutomationResourceMenu({ actions, resource }: ResourceMenu) {
+function JobResourceMenu({ actions, resource }: ResourceMenu) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const automation = actions.automationOf(resource)
+  const job = actions.jobOf(resource)
 
-  if (automation === undefined) {
+  if (job === undefined) {
     return <FilingOnlyMenu actions={actions} resource={resource} />
   }
 
   return (
     <>
-      <AutomationRowMenu
-        automation={automation}
-        isControlling={actions.editor.controllingAutomationId === automation.id}
-        isDeleting={actions.editor.deletingAutomationId === automation.id}
+      <JobRowMenu
+        job={job}
+        isControlling={actions.editor.controllingJobId === job.id}
+        isDeleting={actions.editor.deletingJobId === job.id}
         onDeleteRequest={() => setIsDeleteOpen(true)}
         onEdit={actions.editor.openEditForm}
         onMoveToFolder={() => actions.onMove(resource)}
         onPausedChange={(target, paused) =>
-          void actions.editor.setAutomationPaused(target, paused)
+          void actions.editor.setJobPaused(target, paused)
         }
         onUnfile={() => actions.onUnfile(resource)}
       />
-      <DeleteAutomationDialog
-        automation={automation}
-        isDeleting={actions.editor.deletingAutomationId === automation.id}
-        onDelete={() => void actions.editor.deleteAutomation(automation)}
+      <DeleteJobDialog
+        job={job}
+        isDeleting={actions.editor.deletingJobId === job.id}
+        onDelete={() => void actions.editor.deleteJob(job)}
         onOpenChange={setIsDeleteOpen}
         open={isDeleteOpen}
       />

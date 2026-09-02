@@ -70,7 +70,7 @@ export function ResourceListRow({
   )
 }
 
-/** An automation that is not running says so with a muted glyph, in the
+/** A job that is not running says so with a muted glyph, in the
  *  same quiet idiom as the visibility mark beside its name — a badge in a
  *  Kind cell reads as a second kind. Active resources carry no mark. */
 function ResourceStatusMark({ status }: { status: FolderResource["status"] }) {
@@ -117,8 +117,8 @@ function resourcePayload(
   }
 }
 
-/** The resource's own surface. Automations have no detail page — their list
- *  opens the editor — so an automation row lands on the list. */
+/** The resource's own surface. Jobs have no detail page — their list
+ *  opens the editor — so a job row lands on the list. */
 function ResourceLink({ resource }: { resource: FolderResource }) {
   const Icon = resourcePresentation(resource).icon
   const label = (
@@ -174,7 +174,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
           className={nameLinkClassName}
           draggable={false}
           title={resource.name}
-          to="/automations"
+          to="/jobs"
         >
           {label}
         </Link>

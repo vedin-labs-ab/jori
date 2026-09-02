@@ -12,8 +12,8 @@ afterEach(cleanup)
 
 function contributors(count: number): UsageContributor[] {
   return Array.from({ length: count }, (_unused, rank) => ({
-    id: `automations:${rank}` as UsageContributor["id"],
-    label: `Automation ${rank}`,
+    id: `jobs:${rank}` as UsageContributor["id"],
+    label: `Digest ${rank}`,
     micros: (count - rank) * 100,
     ended: 1,
     failed: 0,
@@ -34,7 +34,7 @@ function cells(row: HTMLElement) {
 }
 
 test("a ranking opens on its leaders and keeps the rest one click away", () => {
-  render(<UsageContributors automations={contributors(7)} total={2800} />)
+  render(<UsageContributors jobs={contributors(7)} total={2800} />)
 
   expect(rows()).toHaveLength(5)
 
@@ -48,7 +48,7 @@ test("a ranking opens on its leaders and keeps the rest one click away", () => {
 })
 
 test("a ranking short enough to read whole offers nothing to open", () => {
-  render(<UsageContributors automations={contributors(5)} total={1500} />)
+  render(<UsageContributors jobs={contributors(5)} total={1500} />)
 
   expect(rows()).toHaveLength(5)
   expect(screen.queryByRole("button")).toBeNull()
@@ -57,7 +57,7 @@ test("a ranking short enough to read whole offers nothing to open", () => {
 test("a source row reads its runs, its money, and its share of the window", () => {
   render(
     <UsageContributors
-      automations={[
+      jobs={[
         {
           id: "jobs:1" as UsageContributor["id"],
           label: "Morning digest",
@@ -87,9 +87,7 @@ test("a source row reads its runs, its money, and its share of the window", () =
 test("a window that cost nothing has no shares or averages to report", () => {
   render(
     <UsageContributors
-      automations={[
-        { label: "Interactive work", micros: 0, ended: 0, failed: 0 },
-      ]}
+      jobs={[{ label: "Interactive work", micros: 0, ended: 0, failed: 0 }]}
       total={0}
     />
   )

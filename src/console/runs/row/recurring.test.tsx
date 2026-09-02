@@ -11,10 +11,10 @@ afterEach(() => {
   cleanup()
 })
 
-test("renders recurring automation details", async () => {
+test("renders recurring job details", async () => {
   renderExecutionRow(
     makeExecution({
-      trigger: "Time automation",
+      trigger: "Scheduled",
       task: "Generate a team image.",
       title: "Daily image",
       source: {

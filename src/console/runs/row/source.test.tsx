@@ -101,7 +101,7 @@ test("renders Jori source labels", () => {
   expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
 })
 
-test("renders recurring automation source details", () => {
+test("renders recurring job source details", () => {
   const { container } = render(
     <SourceLine
       audience="personal"

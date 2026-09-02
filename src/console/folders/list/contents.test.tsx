@@ -61,7 +61,7 @@ const readyContents = {
     },
     {
       type: "job",
-      id: "automation-1",
+      id: "job-1",
       name: "Digest",
       visibility: "organization",
       updatedAt: Date.now(),
@@ -73,7 +73,7 @@ const readyContents = {
 /** What the rows can do is covered in menu.test.tsx; this file is about
  *  the table they sit in. */
 const inertActions = {
-  automationOf: () => undefined,
+  jobOf: () => undefined,
   files: { pendingFileId: undefined },
   organizationId: "org-1",
   removal: { isDeleting: () => false, isRestoring: () => false },
@@ -108,7 +108,7 @@ test("folders and resources share the Name/Kind/Owner/Items/Updated table", () =
   expect(screen.getByRole("link", { name: "Leads" }).getAttribute("href")).toBe(
     "/tables/table-1"
   )
-  // A paused automation is marked with a muted glyph, not a badge: the
+  // A paused job is marked with a muted glyph, not a badge: the
   // Kind cell says what the thing is, and a second word there reads as a
   // second kind.
   expect(screen.getByText("Paused").className).toContain("sr-only")
@@ -121,7 +121,7 @@ test("the Owner column reads across both row groups", () => {
   renderContents(readyContents)
 
   // A subfolder shows whoever made it, a filed resource its owner, and the
-  // automation — which no person owns — shows Jori.
+  // job — which no person owns — shows Jori.
   expect(screen.getAllByText("Ada Lovelace")).toHaveLength(2)
   expect(screen.getByText("Grace Hopper")).toBeDefined()
   expect(screen.getByText("Jori")).toBeDefined()
