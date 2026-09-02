@@ -25,9 +25,9 @@ export function ApprovalsSection() {
         <div className="text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
             Every request carries a code. Approve it from the console, or reply
-            where the work is: type approve YD4UEFNV in the thread and the
-            action runs. Deny it, or let it expire, and it never does. Jori
-            doesn't retry on their own.
+            with the code in the thread where the work is, and the action runs.
+            Deny it, or let it expire, and it never does. Jori doesn't retry on
+            their own.
           </p>
         </div>
         <ReleaseApprovalCard />

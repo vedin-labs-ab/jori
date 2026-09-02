@@ -1,6 +1,6 @@
 import { formatUsd, trial } from "@contracts/billing"
 import { Receipt, Users, Wallet } from "lucide-react"
-import { Definition } from "../section"
+import { Definition, Section } from "../section"
 import { UsageMeter } from "./usage"
 
 /** What is settled about pricing is its shape, not its numbers. Publishing the
@@ -23,39 +23,36 @@ const principles = [
   },
   {
     icon: Wallet,
-    title: "Nothing to be surprised by",
+    title: "No surprise invoice",
     body: "Usage draws from prepaid credit rather than a metered invoice. Auto top-up is opt-in and capped, and the console keeps a live tally.",
   },
 ] as const
 
 export function Shape() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
-      <dl className="grid gap-x-16 gap-y-8 md:grid-cols-3">
-        {principles.map((principle) => (
-          <Definition
-            icon={principle.icon}
-            key={principle.title}
-            term={principle.title}
-          >
-            {principle.body}
-          </Definition>
-        ))}
-      </dl>
+    <>
+      <section className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
+        <dl className="grid gap-x-16 gap-y-8 md:grid-cols-3">
+          {principles.map((principle) => (
+            <Definition
+              icon={principle.icon}
+              key={principle.title}
+              term={principle.title}
+            >
+              {principle.body}
+            </Definition>
+          ))}
+        </dl>
+      </section>
       {/* The prose says what is not decided; the meter shows the part that
           is, which is the half a reader has to take on faith otherwise. */}
-      <div className="mt-20 grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
-        <div>
-          <h2 className="max-w-xl font-medium text-2xl text-balance tracking-tight">
-            Usage is settled. The plan price isn't.
-          </h2>
-          <p className="mt-3 max-w-xl text-muted-foreground leading-relaxed">
-            A run is billed at the provider's list rates, and what we keep is
-            what efficient context management saves rather than a multiplier on
-            top. We would rather set the organization's flat fee once we have
-            watched real teams run, and everyone on the waitlist sees it first.
-          </p>
-          <dl className="mt-8 grid max-w-xl gap-x-10 gap-y-6 sm:grid-cols-2">
+      <Section
+        lede="A run is billed at the provider's list rates, and what we keep is what efficient context management saves rather than a multiplier on top. We would rather set the organization's flat fee once we have watched real teams run, and everyone on the waitlist sees it first."
+        support
+        title="Usage is settled. The plan price isn't."
+      >
+        <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
+          <dl className="grid max-w-xl gap-x-10 gap-y-6 sm:grid-cols-2">
             <Definition term="In every plan">
               Every integration, mentions, ask-first approvals, receipts.
             </Definition>
@@ -64,9 +61,9 @@ export function Shape() {
               no card.
             </Definition>
           </dl>
+          <UsageMeter />
         </div>
-        <UsageMeter />
-      </div>
-    </section>
+      </Section>
+    </>
   )
 }

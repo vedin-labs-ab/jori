@@ -38,6 +38,14 @@ export function ReleaseApprovalCard() {
           <span className={buttonVariants({ variant: "outline" })}>Deny</span>
         </div>
       </div>
+      {/* The code is the thread's own way to answer, so it sits with the
+          request rather than in the prose beside it. */}
+      <p className="border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
+        Or reply in the thread:{" "}
+        <code className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-[0.9em] text-foreground">
+          approve YD4UEFNV
+        </code>
+      </p>
     </Prop>
   )
 }
