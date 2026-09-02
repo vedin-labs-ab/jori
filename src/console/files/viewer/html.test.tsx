@@ -2,8 +2,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { type FileDetail } from "@/shared/console/files/types"
 import { noSiblings } from "../siblings"
-import { type FileDetail } from "../types"
 import { FileHtml } from "./html"
 
 vi.mock("@tanstack/react-router", () => ({

@@ -3,12 +3,12 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type ListControls } from "@/shared/console/list/controls"
 import { type RowSelection } from "@/shared/console/list/selection"
-import { fileListConfig } from "./manage"
-import { FileTable } from "./table"
-import { type FileRow } from "./types"
+import { type FileRow } from "../types"
+import { FileTable } from "."
+import { fileListConfig } from "./config"
 
 vi.mock("@tanstack/react-router", async () => ({
-  Link: (await import("../../../test/router")).Link,
+  Link: (await import("../../../../../test/router")).Link,
 }))
 
 afterEach(cleanup)

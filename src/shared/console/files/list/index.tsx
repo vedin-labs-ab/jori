@@ -25,9 +25,9 @@ import { MaterialFolderCell } from "@/shared/console/materials/cells/folder"
 import { type FolderNames } from "@/shared/console/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
 import { formatFileSize } from "@/shared/files/size"
+import { FileRowMenu } from "../menu"
+import { type FileRow } from "../types"
 import { FileNameCell, FileOwnerCell, FileTypeCell } from "./cells"
-import { FileRowMenu } from "./menu"
-import { type FileRow } from "./types"
 
 export function FileTable({
   config,

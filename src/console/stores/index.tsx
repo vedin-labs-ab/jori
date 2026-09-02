@@ -24,21 +24,23 @@ import {
   useRowSelection,
 } from "@/shared/console/list/selection"
 import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
+import { StoreList, StoresToolbar } from "@/shared/console/stores/list"
+import {
+  storeDeleteDescription,
+  storeListConfig,
+  storeNoun,
+} from "@/shared/console/stores/list/config"
+import {
+  type StoreListResult,
+  type StoreSummary,
+} from "@/shared/console/stores/types"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { VisibilityDialog } from "../shared/visibility/dialog"
 import { CreateStoreDialog } from "./create"
 import { EditStoreDialog } from "./edit"
-import { StoreList, StoresToolbar } from "./list"
-import {
-  storeDeleteDescription,
-  storeListConfig,
-  storeNoun,
-  useStoreBulk,
-  useStoreRemoval,
-} from "./manage"
-import { type StoreListResult, type StoreSummary } from "./types"
+import { useStoreBulk, useStoreRemoval } from "./manage"
 
 export function StoresPage() {
   return (

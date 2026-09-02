@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import { Braces, Database, History, type LucideIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { countLabel } from "@/shared/console/count"
@@ -8,7 +7,8 @@ import {
 } from "@/shared/console/materials/cells/name"
 import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
 import { VisibilityBadge } from "@/shared/console/visibility/badge"
-import { type StoreSummary } from "./types"
+import { ConsoleLink } from "../../shell/link"
+import { type StoreSummary } from "../types"
 
 /** Name column: the store icon, a link to the store, and the list's badge
  *  conventions — a scope badge for personal stores, an archived badge for
@@ -16,14 +16,14 @@ import { type StoreSummary } from "./types"
 export function StoreNameCell({ store }: { store: StoreSummary }) {
   return (
     <MaterialNameCell icon={Database}>
-      <Link
+      <ConsoleLink
         className={materialNameLinkClassName}
         params={{ storeId: store.storeId }}
         title={store.name}
         to="/stores/$storeId"
       >
         {store.name}
-      </Link>
+      </ConsoleLink>
       {store.visibility.mode === "organization" ? null : (
         <VisibilityBadge visibility={store.visibility} />
       )}

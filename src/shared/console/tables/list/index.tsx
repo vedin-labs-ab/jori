@@ -31,13 +31,14 @@ import { MaterialFolderCell } from "@/shared/console/materials/cells/folder"
 import { type FolderNames } from "@/shared/console/materials/folders"
 import { type TableSummary } from "@/shared/console/tables/types"
 import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
+import { type MaterialRemoval } from "../../materials/removal"
 import {
   TableColumnsCell,
   TableNameCell,
   TableOwnerCell,
   TableRowsCell,
 } from "./cells"
-import { tableDeleteDescription, type useTableRemoval } from "./manage"
+import { tableDeleteDescription } from "./config"
 
 export function TablesToolbar({
   onCreate,
@@ -98,7 +99,7 @@ export function TableList({
   onEdit: (table: TableSummary) => void
   onImport: () => void
   onMoveToFolder: (table: TableSummary) => void
-  removal: ReturnType<typeof useTableRemoval>
+  removal: MaterialRemoval<TableSummary>
   selection: RowSelection<TableSummary>
   tables: TableSummary[]
   unauthorizedMessage: string | undefined
@@ -241,7 +242,7 @@ function TableListRow({
   onAccess: (table: TableSummary) => void
   onEdit: (table: TableSummary) => void
   onMoveToFolder: (table: TableSummary) => void
-  removal: ReturnType<typeof useTableRemoval>
+  removal: MaterialRemoval<TableSummary>
   selection: RowSelection<TableSummary>
   table: TableSummary
 }) {

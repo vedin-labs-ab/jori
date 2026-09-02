@@ -1,47 +1,17 @@
 import { useConvex, useMutation } from "convex/react"
 import { countNoun } from "@/shared/console/count"
 import { useBulkRunner } from "@/shared/console/list/bulk"
-import { type ListConfig } from "@/shared/console/list/controls"
 import { type RowSelection } from "@/shared/console/list/selection"
-import {
-  type FolderNames,
-  folderFacet,
-} from "@/shared/console/materials/folders"
-import { ownerFacet } from "@/shared/console/materials/owners"
 import {
   bulkMaterialRemovalSuccess,
   useMaterialRemoval,
 } from "@/shared/console/materials/removal"
+import { storeNoun } from "@/shared/console/stores/list/config"
+import { type StoreSummary } from "@/shared/console/stores/types"
 import { api } from "../../../convex/_generated/api"
 import { exportStoreById } from "./export"
-import { type StoreSummary } from "./types"
 
 type StoreTarget = Pick<StoreSummary, "storeId" | "name" | "archivedAt">
-
-export const storeNoun = { plural: "stores", singular: "store" }
-
-/** What the store list headers sort and filter: the shared material facets
- *  plus this page's name, count, and time sorts. Owner options come from
- *  the listed rows themselves. */
-export function storeListConfig(
-  folders: FolderNames | undefined,
-  stores: readonly StoreSummary[]
-): ListConfig<StoreSummary> {
-  return {
-    facets: {
-      folder: folderFacet(folders),
-      owner: ownerFacet(stores),
-    },
-    sorts: {
-      created: (store) => store.createdAt,
-      name: (store) => store.name,
-      // Schemaless stores sort together below every counted schema.
-      properties: (store) => store.propertyCount ?? -1,
-      updated: (store) => store.updatedAt,
-      version: (store) => store.version,
-    },
-  }
-}
 
 export function useStoreRemoval(organizationId: string) {
   const remove = useMutation(api.stores.console.remove)
@@ -95,6 +65,3 @@ export function useStoreBulk(
 
   return { downloadSelected, isBusy: runner.isBusy, removeSelected }
 }
-
-export const storeDeleteDescription =
-  "This permanently deletes the store and its stored value. Anything that reads it loses access."

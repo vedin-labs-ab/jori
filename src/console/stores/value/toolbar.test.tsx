@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
-import { type StoreDetail } from "../types"
+import { type StoreDetail } from "@/shared/console/stores/types"
 import { StoreToolbar } from "./toolbar"
 
 afterEach(cleanup)

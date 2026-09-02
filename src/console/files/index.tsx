@@ -2,6 +2,14 @@ import { useQuery } from "convex/react"
 import { Upload } from "lucide-react"
 import { useState } from "react"
 import { useFolderNames } from "@/console/shared/materials/names"
+import { EditFileDialog } from "@/shared/console/files/edit"
+import { FileTable } from "@/shared/console/files/list"
+import {
+  fileDeleteDescription,
+  fileListConfig,
+  fileNoun,
+} from "@/shared/console/files/list/config"
+import { type FileRow } from "@/shared/console/files/types"
 import { type MoveResourceTarget } from "@/shared/console/folders/types"
 import {
   ConsoleHeaderActions,
@@ -23,17 +31,7 @@ import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { VisibilityDialog } from "../shared/visibility/dialog"
-import { EditFileDialog } from "./edit"
-import {
-  fileDeleteDescription,
-  fileListConfig,
-  fileNoun,
-  toMoveTarget,
-  useFileActions,
-  useFileBulk,
-} from "./manage"
-import { FileTable } from "./table"
-import { type FileRow } from "./types"
+import { toMoveTarget, useFileActions, useFileBulk } from "./manage"
 import { UploadFileDialog } from "./upload"
 
 export function FilesPage() {

@@ -3,12 +3,13 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type ListControls } from "@/shared/console/list/controls"
 import { type RowSelection } from "@/shared/console/list/selection"
-import { StoreList } from "./list"
-import { storeListConfig, type useStoreRemoval } from "./manage"
-import { type StoreSummary } from "./types"
+import { type MaterialRemoval } from "../../materials/removal"
+import { type StoreSummary } from "../types"
+import { StoreList } from "."
+import { storeListConfig } from "./config"
 
 vi.mock("@tanstack/react-router", async () => ({
-  Link: (await import("../../../test/router")).Link,
+  Link: (await import("../../../../../test/router")).Link,
 }))
 
 afterEach(cleanup)
@@ -18,7 +19,7 @@ const removal = {
   removingId: undefined,
   restoreMaterial: async () => undefined,
   restoringId: undefined,
-} as unknown as ReturnType<typeof useStoreRemoval>
+} as unknown as MaterialRemoval<StoreSummary>
 
 function storeSummary(overrides: Partial<StoreSummary> = {}) {
   return {

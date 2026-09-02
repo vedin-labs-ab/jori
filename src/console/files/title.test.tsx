@@ -5,17 +5,17 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { type FileRow } from "@/shared/console/files/types"
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
 } from "@/shared/console/materials/breadcrumb"
-import { type FileRow } from "../types"
 import { FileTitleMenu } from "./title"
 
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => vi.fn() }))
 // The actions and the dialogs they open are the list page's, already
 // covered there; this is about what the breadcrumb offers.
-vi.mock("../manage", () => ({
+vi.mock("./manage", () => ({
   toMoveTarget: () => undefined,
   useFileActions: () => ({
     deleteFile: vi.fn(),
@@ -23,9 +23,9 @@ vi.mock("../manage", () => ({
     saveFile: vi.fn(),
   }),
 }))
-vi.mock("../edit", () => ({ EditFileDialog: () => null }))
-vi.mock("../../folders/move", () => ({ MoveResourceDialog: () => null }))
-vi.mock("../../shared/visibility/dialog", () => ({
+vi.mock("@/shared/console/files/edit", () => ({ EditFileDialog: () => null }))
+vi.mock("../folders/move", () => ({ MoveResourceDialog: () => null }))
+vi.mock("../shared/visibility/dialog", () => ({
   VisibilityDialog: () => null,
 }))
 

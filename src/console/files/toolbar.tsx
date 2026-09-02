@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/tooltip"
 import { CopyButton } from "@/shared/console/copy"
 import { SeparatorDot } from "@/shared/console/dot"
+import { FileOwnerCell } from "@/shared/console/files/list/cells"
+import { type FileDetail } from "@/shared/console/files/types"
 import { ConsoleListToolbar } from "@/shared/console/list/frame"
 import { SaveMeta, type SaveState } from "@/shared/console/materials/save"
 import { formatFileSize } from "@/shared/files/size"
 import { fileBlobCache } from "./cache/blob"
-import { FileOwnerCell } from "./cells"
 import { type FileSiblings, useFileNavigate } from "./siblings"
-import { type FileDetail } from "./types"
 
 /** Secondary header under the console breadcrumb, shared by every file
  *  view: quiet file meta on the left; per-type tools and the constant

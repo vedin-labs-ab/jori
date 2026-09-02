@@ -1,11 +1,14 @@
 import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
+import {
+  tableDeleteDescription,
+  tableNoun,
+} from "@/shared/console/tables/list/config"
 import { MoveResourcesDialog } from "../folders/move"
 import { VisibilityDialog } from "../shared/visibility/dialog"
 import { CreateTableDialog } from "./create"
 import { EditTableDialog } from "./edit"
 import { ImportTableDialog } from "./import/dialog"
-import { tableDeleteDescription, tableNoun } from "./manage"
 import { type TablesPageState, toMoveTarget } from "./page"
 
 /** The selection bar and the page's dialogs — everything that floats over

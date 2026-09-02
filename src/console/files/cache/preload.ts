@@ -1,7 +1,7 @@
 import { useEffect } from "react"
+import { type FileRow } from "@/shared/console/files/types"
 import { previewKind } from "@/shared/files/kind"
 import { type FileSiblings } from "../siblings"
-import { type FileRow } from "../types"
 import { type FileSource, fileBlobCache, isCacheable } from "./blob"
 
 /** Text files past this size skip the inline editor; the download covers

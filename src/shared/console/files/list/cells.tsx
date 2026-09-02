@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import {
   MaterialNameCell,
   materialNameLinkClassName,
@@ -6,7 +5,8 @@ import {
 import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
 import { VisibilityBadge } from "@/shared/console/visibility/badge"
 import { fileKind } from "@/shared/files/kind"
-import { type FileRow } from "./types"
+import { ConsoleLink } from "../../shell/link"
+import { type FileRow } from "../types"
 
 /** Name column: the registry icon, a link to the file, and a visibility
  *  badge for anything narrower or wider than the organization. */
@@ -15,14 +15,14 @@ export function FileNameCell({ file }: { file: FileRow }) {
 
   return (
     <MaterialNameCell icon={kind.icon}>
-      <Link
+      <ConsoleLink
         className={materialNameLinkClassName}
         params={{ fileId: file.fileId }}
         title={file.name}
         to="/files/$fileId"
       >
         {file.name}
-      </Link>
+      </ConsoleLink>
       {file.visibility.mode === "organization" ? null : (
         <VisibilityBadge visibility={file.visibility} />
       )}
