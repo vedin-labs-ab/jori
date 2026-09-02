@@ -24,7 +24,7 @@ import { showErrorToast } from "@/shared/console/error"
 import { MaterialNameField } from "@/shared/console/materials/fields"
 import { DialogForm } from "@/shared/console/materials/form"
 import { api } from "../../../../convex/_generated/api"
-import { VisibilityField } from "../../shared/visibility/field"
+import { OrganizationVisibilityField } from "../../shared/visibility/field"
 import { type CsvTablePlan, deriveTableName, planCsvTable } from "./infer"
 import { ImportTablePreview } from "./preview"
 
@@ -125,7 +125,7 @@ function ImportTableFields({
             name={form.name}
             onNameChange={form.setName}
           />
-          <VisibilityField
+          <OrganizationVisibilityField
             id="table-import-visibility"
             noun="table"
             onChange={form.setVisibility}

@@ -3,28 +3,18 @@ import { useMutation, useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Spinner } from "@/components/ui/spinner"
+import { SharingDialog } from "@/shared/console/visibility/dialog"
 import { api } from "../../../../convex/_generated/api"
 import { AudienceSummary } from "./audience"
-import { VisibilityField } from "./field"
+import { OrganizationVisibilityField } from "./field"
 
 type SetVisibilityArgs = FunctionArgs<typeof api.visibility.console.set>
 
 export type VisibilityTarget = SetVisibilityArgs["target"]
 
-/** Post-creation access settings for one material or folder, opened from
- *  its menu or edit surface. Saves through the one visibility mutation;
- *  owned targets accept changes from their owner only, so the dialog
- *  disables itself for everyone else. */
+/** The sharing dialog bound to one material or folder: its draft, the
+ *  organization's grantees, and the one visibility mutation that saves
+ *  it. Owned targets accept changes from their owner only. */
 export function VisibilityDialog({
   noun,
   onOpenChange,
@@ -79,53 +69,29 @@ export function VisibilityDialog({
   }
 
   return (
-    <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent
-        className="sm:max-w-sm"
-        // Autofocusing the field-help button pops its tooltip over the
-        // freshly opened dialog, so focus stays where the pointer is.
-        onOpenAutoFocus={(event) => event.preventDefault()}
-      >
-        <DialogHeader>
-          <DialogTitle>Sharing</DialogTitle>
-          <DialogDescription>
-            {canEdit
-              ? `Choose who can see this ${noun}.`
-              : `Only the owner can change who sees this ${noun}.`}
-          </DialogDescription>
-        </DialogHeader>
-        <fieldset className="grid gap-2" disabled={!canEdit}>
-          <VisibilityField
-            id={`${target.kind}-visibility`}
-            noun={noun}
-            onChange={setDraft}
-            organizationId={organizationId}
-            value={draft}
-          />
-          <AudienceSummary
-            organizationId={organizationId}
-            target={target}
-            value={draft}
-          />
-        </fieldset>
-        <DialogFooter>
-          <Button
-            onClick={() => onOpenChange(false)}
-            type="button"
-            variant="outline"
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={!canEdit || isSaving}
-            onClick={() => void save()}
-            type="button"
-          >
-            {isSaving ? <Spinner /> : null}
-            Save
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <SharingDialog
+      audience={
+        <AudienceSummary
+          organizationId={organizationId}
+          target={target}
+          value={draft}
+        />
+      }
+      canEdit={canEdit}
+      field={
+        <OrganizationVisibilityField
+          id={`${target.kind}-visibility`}
+          noun={noun}
+          onChange={setDraft}
+          organizationId={organizationId}
+          value={draft}
+        />
+      }
+      isSaving={isSaving}
+      noun={noun}
+      onOpenChange={onOpenChange}
+      onSave={() => void save()}
+      open={open}
+    />
   )
 }

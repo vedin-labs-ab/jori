@@ -3,10 +3,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { VisibilityField } from "./field"
 
-vi.mock("convex/react", () => ({
-  useQuery: () => undefined,
-}))
-
 beforeEach(() => {
   Object.assign(HTMLElement.prototype, {
     hasPointerCapture: () => false,
@@ -23,7 +19,7 @@ function renderField(onChange: (visibility: unknown) => void) {
       id="test-visibility"
       noun="table"
       onChange={onChange}
-      organizationId="org-1"
+      options={{ people: undefined, teams: undefined }}
       value={{ mode: "organization" }}
     />
   )
