@@ -2,18 +2,16 @@ import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { countLabel } from "@/shared/console/count"
-import { ConsolePageLayout } from "@/shared/console/layout"
 import {
   ConsoleListFooter,
   ConsoleListLayout,
 } from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { useRowSelection } from "@/shared/console/list/selection"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
+import { MaterialPlaceholder } from "@/shared/console/materials/placeholder"
 import { useRowAdding } from "@/shared/console/tables/adding"
 import { RowGrid } from "@/shared/console/tables/grid"
 import { TableHeaderActions } from "@/shared/console/tables/header"
@@ -62,39 +60,27 @@ function TableViewContent({
   const result = useQuery(api.tables.console.get, { organizationId, tableId })
 
   if (result === undefined) {
-    return (
-      <ConsolePageLayout>
-        <ConsoleListLoading />
-      </ConsolePageLayout>
-    )
+    return <MaterialPlaceholder noun="table" status="loading" />
   }
 
   if (result.status === "unauthorized") {
     return (
-      fallback ?? (
-        <ConsolePageLayout>
-          <Alert variant="destructive">
-            <AlertTitle>Could not load table</AlertTitle>
-            <AlertDescription>{result.message}</AlertDescription>
-          </Alert>
-        </ConsolePageLayout>
-      )
+      <MaterialPlaceholder
+        fallback={fallback}
+        message={result.message}
+        noun="table"
+        status="unauthorized"
+      />
     )
   }
 
   if (result.status === "not_found" || result.table === null) {
     return (
-      fallback ?? (
-        <ConsolePageLayout>
-          <Alert>
-            <AlertTitle>Table not found</AlertTitle>
-            <AlertDescription>
-              The table may have been deleted or belongs to another
-              organization.
-            </AlertDescription>
-          </Alert>
-        </ConsolePageLayout>
-      )
+      <MaterialPlaceholder
+        fallback={fallback}
+        noun="table"
+        status="not_found"
+      />
     )
   }
 

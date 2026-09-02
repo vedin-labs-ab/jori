@@ -1,5 +1,7 @@
+import { moveTarget } from "@/shared/console/folders/types"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { type RowSelection } from "@/shared/console/list/selection"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { AddRowDialog } from "@/shared/console/tables/add"
 import { rowNoun } from "@/shared/console/tables/adding"
 import { type ColumnSheetState } from "@/shared/console/tables/sheet"
@@ -54,11 +56,7 @@ export function TableOverlays({
         }}
       />
       <TableColumnSheet
-        onOpenChange={(open) => {
-          if (!open) {
-            onColumnSheet(undefined)
-          }
-        }}
+        onOpenChange={closeOnDismiss(() => onColumnSheet(undefined))}
         organizationId={organizationId}
         state={columnSheet}
         table={table}
@@ -89,11 +87,7 @@ function TableDialogs({
   organizationId: string
   table: TableDetail
 }) {
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
+  const closeWhenDismissed = closeOnDismiss(onClose)
 
   return (
     <>
@@ -128,12 +122,7 @@ function TableDialogs({
         organizationId={organizationId}
         resource={
           dialog === "move"
-            ? {
-                resourceType: "collection",
-                resourceId: table.tableId,
-                name: table.name,
-                folderId: table.folderId,
-              }
+            ? moveTarget("collection", table.tableId, table)
             : undefined
         }
       />

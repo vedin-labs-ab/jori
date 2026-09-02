@@ -30,3 +30,15 @@ export function useRetainedMount(isOpen: boolean) {
 
   return isOpen || hasOpened
 }
+
+/**
+ * An onOpenChange handler for a dialog whose host owns the open state:
+ * opening never arrives here, so only a dismissal has anything to do.
+ */
+export function closeOnDismiss(close: () => void) {
+  return (open: boolean) => {
+    if (!open) {
+      close()
+    }
+  }
+}

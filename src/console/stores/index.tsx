@@ -1,42 +1,21 @@
-import { useQuery } from "convex/react"
-import { useDeferredValue, useState } from "react"
-import { useFolderNames } from "@/console/shared/materials/names"
-import { type MoveResourceTarget } from "@/shared/console/folders/types"
+import { useState } from "react"
+import { moveTarget } from "@/shared/console/folders/types"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
-import {
-  type ListConfig,
-  type ListControls,
-  resettingControls,
-  useListControls,
-} from "@/shared/console/list/controls"
-import {
-  ConsoleListFooter,
-  ConsoleListLayout,
-} from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
-import { ConsoleListPager } from "@/shared/console/list/pager"
-import {
-  useClientPagination,
-  useResettingSetter,
-} from "@/shared/console/list/pagination"
-import {
-  type RowSelection,
-  useRowSelection,
-} from "@/shared/console/list/selection"
+import { ConsoleListLayout } from "@/shared/console/list/frame"
+import { ConsoleListBody } from "@/shared/console/list/pager"
 import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
+import { closeOnDismiss } from "@/shared/console/retain"
 import { StoreList, StoresToolbar } from "@/shared/console/stores/list"
 import {
   storeDeleteDescription,
   storeListConfig,
   storeNoun,
 } from "@/shared/console/stores/list/config"
-import {
-  type StoreListResult,
-  type StoreSummary,
-} from "@/shared/console/stores/types"
+import { type StoreSummary } from "@/shared/console/stores/types"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
+import { useMaterialListPage } from "../shared/materials/list"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { CreateStoreDialog } from "./create"
 import { EditStoreDialog } from "./edit"
@@ -50,84 +29,58 @@ export function StoresPage() {
   )
 }
 
-/** One bag of page state, so the view and its overlays stay small. */
 function useStoresPage(organizationId: string) {
-  const [query, setQuery] = useState("")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [editing, setEditing] = useState<StoreSummary>()
-  const [moving, setMoving] = useState<MoveResourceTarget[]>()
-  const [sharing, setSharing] = useState<StoreSummary>()
-  const removal = useStoreRemoval(organizationId)
-  const folders = useFolderNames(organizationId)
-  const deferredQuery = useDeferredValue(query)
-  const storeList = useQuery(api.stores.console.list, {
-    organizationId,
-    query: deferredQuery,
-    includeArchived: false,
-  })
-  const rows = storeList?.status === "ready" ? storeList.stores : []
-  const config = storeListConfig(folders, rows)
-  const controls = useListControls(config)
-  const stores = controls.apply(rows)
-  const hasFilters = query.trim() !== "" || controls.hasActiveControls
-  const pagination = useClientPagination({
-    hasFilters,
-    isReady: storeList?.status === "ready",
-    itemLabel: storeNoun,
-    items: stores,
-  })
-  const selection = useRowSelection({
+  const page = useMaterialListPage({
+    config: storeListConfig,
     identify: (store: StoreSummary) => store.storeId,
-    rows: pagination.visibleRows,
+    listQuery: api.stores.console.list,
+    noun: storeNoun,
+    organizationId,
+    rowsOf: (result) => (result.status === "ready" ? result.stores : []),
   })
 
   return {
-    bulk: useStoreBulk(organizationId, selection),
-    config,
-    controls: resettingControls(controls, pagination.reset),
-    editing,
-    folders,
-    hasFilters,
+    ...page,
+    bulk: useStoreBulk(organizationId, page.selection),
     isCreateOpen,
-    moving,
-    pagination,
-    query,
-    removal,
-    selection,
-    setEditing,
+    removal: useStoreRemoval(organizationId),
     setIsCreateOpen,
-    setMoving,
-    setSharing,
-    sharing,
-    setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
-    storeList,
   }
 }
 
 function StoresView({ organizationId }: { organizationId: string }) {
   const page = useStoresPage(organizationId)
+  const openCreate = () => page.setIsCreateOpen(true)
 
   return (
     <ConsoleListLayout>
       <StoresToolbar
-        onCreate={() => page.setIsCreateOpen(true)}
+        onCreate={openCreate}
         onQueryChange={page.setQueryAndReset}
         query={page.query}
       />
-      <StoresBody
-        config={page.config}
-        controls={page.controls}
-        folders={page.folders}
-        hasFilters={page.hasFilters}
-        onAccess={page.setSharing}
-        onCreate={() => page.setIsCreateOpen(true)}
-        onEdit={page.setEditing}
-        onMoveToFolder={(store) => page.setMoving([toMoveTarget(store)])}
-        pagination={page.pagination}
-        removal={page.removal}
-        selection={page.selection}
-        storeList={page.storeList}
-      />
+      <ConsoleListBody
+        isLoading={page.list === undefined}
+        pagination={page.list?.status === "ready" ? page.pagination : undefined}
+      >
+        <StoreList
+          config={page.config}
+          controls={page.controls}
+          folders={page.folders}
+          hasFilters={page.hasFilters}
+          onAccess={page.setSharing}
+          onCreate={openCreate}
+          onEdit={page.setEditing}
+          onMoveToFolder={(store) => page.setMoving([toMoveTarget(store)])}
+          removal={page.removal}
+          selection={page.selection}
+          stores={page.pagination.visibleRows}
+          unauthorizedMessage={
+            page.list?.status === "unauthorized" ? page.list.message : undefined
+          }
+        />
+      </ConsoleListBody>
       <StoresOverlays organizationId={organizationId} page={page} />
       <StoreRowDialogs organizationId={organizationId} page={page} />
     </ConsoleListLayout>
@@ -184,22 +137,14 @@ function StoreRowDialogs({
   return (
     <>
       <EditStoreDialog
-        onOpenChange={(open) => {
-          if (!open) {
-            page.setEditing(undefined)
-          }
-        }}
+        onOpenChange={closeOnDismiss(() => page.setEditing(undefined))}
         organizationId={organizationId}
         store={page.editing}
       />
       {page.sharing === undefined ? null : (
         <OrganizationVisibilityDialog
           noun="store"
-          onOpenChange={(open) => {
-            if (!open) {
-              page.setSharing(undefined)
-            }
-          }}
+          onOpenChange={closeOnDismiss(() => page.setSharing(undefined))}
           open
           organizationId={organizationId}
           ownerId={page.sharing.ownerId}
@@ -211,69 +156,6 @@ function StoreRowDialogs({
   )
 }
 
-function toMoveTarget(store: StoreSummary): MoveResourceTarget {
-  return {
-    resourceType: "collection",
-    resourceId: store.storeId,
-    name: store.name,
-    folderId: store.folderId,
-  }
-}
-
-function StoresBody({
-  config,
-  controls,
-  folders,
-  hasFilters,
-  onAccess,
-  onCreate,
-  onEdit,
-  onMoveToFolder,
-  pagination,
-  removal,
-  selection,
-  storeList,
-}: {
-  config: ListConfig<StoreSummary>
-  controls: ListControls
-  folders: ReturnType<typeof useFolderNames>
-  hasFilters: boolean
-  onAccess: (store: StoreSummary) => void
-  onCreate: () => void
-  onEdit: (store: StoreSummary) => void
-  onMoveToFolder: (store: StoreSummary) => void
-  pagination: ReturnType<typeof useClientPagination<StoreSummary>>
-  removal: ReturnType<typeof useStoreRemoval>
-  selection: RowSelection<StoreSummary>
-  storeList: StoreListResult | undefined
-}) {
-  if (storeList === undefined) {
-    return <ConsoleListLoading />
-  }
-
-  return (
-    <>
-      <StoreList
-        config={config}
-        controls={controls}
-        folders={folders}
-        hasFilters={hasFilters}
-        onAccess={onAccess}
-        onCreate={onCreate}
-        onEdit={onEdit}
-        onMoveToFolder={onMoveToFolder}
-        removal={removal}
-        selection={selection}
-        stores={pagination.visibleRows}
-        unauthorizedMessage={
-          storeList.status === "unauthorized" ? storeList.message : undefined
-        }
-      />
-      {storeList.status === "ready" ? (
-        <ConsoleListFooter>
-          <ConsoleListPager pagination={pagination} />
-        </ConsoleListFooter>
-      ) : null}
-    </>
-  )
+function toMoveTarget(store: StoreSummary) {
+  return moveTarget("collection", store.storeId, store)
 }

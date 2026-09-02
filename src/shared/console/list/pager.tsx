@@ -1,10 +1,13 @@
 import { Loader2 } from "lucide-react"
+import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination"
+import { ConsoleListFooter } from "./frame"
+import { ConsoleListLoading } from "./loading"
 
 type ConsolePagerState = {
   canGoNext: boolean
@@ -60,5 +63,32 @@ export function ConsoleListPager({
         </PaginationContent>
       </Pagination>
     </div>
+  )
+}
+
+/** The list region over its query: a spinner until the first result, then
+ *  the list, with the pager underneath once there are rows to page. */
+export function ConsoleListBody({
+  children,
+  isLoading,
+  pagination,
+}: {
+  children: ReactNode
+  isLoading: boolean
+  pagination: ConsolePagerState | undefined
+}) {
+  if (isLoading) {
+    return <ConsoleListLoading />
+  }
+
+  return (
+    <>
+      {children}
+      {pagination === undefined ? null : (
+        <ConsoleListFooter>
+          <ConsoleListPager pagination={pagination} />
+        </ConsoleListFooter>
+      )}
+    </>
   )
 }

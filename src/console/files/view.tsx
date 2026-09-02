@@ -1,14 +1,12 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { FileBody } from "@/shared/console/files/body"
 import { FileHeaderActions } from "@/shared/console/files/header"
 import { type FileDetail } from "@/shared/console/files/types"
-import { ConsolePageLayout } from "@/shared/console/layout"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
+import { MaterialPlaceholder } from "@/shared/console/materials/placeholder"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useFileSave } from "./save"
@@ -63,25 +61,12 @@ function FileViewContent({
       return <FileReadyView file={row} organizationId={organizationId} />
     }
 
-    return (
-      <ConsolePageLayout>
-        <ConsoleListLoading />
-      </ConsolePageLayout>
-    )
+    return <MaterialPlaceholder noun="file" status="loading" />
   }
 
   if (result.status === "not_found" || result.file === null) {
     return (
-      fallback ?? (
-        <ConsolePageLayout>
-          <Alert>
-            <AlertTitle>File not found</AlertTitle>
-            <AlertDescription>
-              The file may have been deleted or belongs to another organization.
-            </AlertDescription>
-          </Alert>
-        </ConsolePageLayout>
-      )
+      <MaterialPlaceholder fallback={fallback} noun="file" status="not_found" />
     )
   }
 

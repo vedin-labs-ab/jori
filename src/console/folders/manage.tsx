@@ -6,7 +6,7 @@ import {
   type FolderDialogRequest,
   type ManagedFolder,
 } from "@/shared/console/folders/types"
-import { useRetained } from "@/shared/console/retain"
+import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { api } from "../../../convex/_generated/api"
 import { FolderAccessDialog } from "./access"
 import { DeleteFolder } from "./delete/dialog"
@@ -33,11 +33,7 @@ export function FolderDialogs({
   const remove = useRetained(dialog?.type === "delete" ? dialog : undefined)
   const access = useRetained(dialog?.type === "access" ? dialog : undefined)
 
-  function closeWhenDismissed(open: boolean) {
-    if (!open) {
-      onClose()
-    }
-  }
+  const closeWhenDismissed = closeOnDismiss(onClose)
 
   return (
     <>
