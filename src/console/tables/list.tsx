@@ -23,7 +23,7 @@ import { EmptyRow, FilterableEmptyState } from "../shared/list/empty"
 import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
 import { FilterHead, SortHead } from "../shared/list/head"
 import { type RowSelection } from "../shared/list/selection"
-import { MaterialActions } from "../shared/materials/actions"
+import { MaterialRowMenu } from "../shared/materials/actions/menu"
 import { MaterialFolderCell } from "../shared/materials/cells/folder"
 import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
@@ -76,7 +76,9 @@ export function TableList({
   controls,
   folders,
   hasFilters,
+  onAccess,
   onCreate,
+  onEdit,
   onImport,
   onMoveToFolder,
   removal,
@@ -88,7 +90,9 @@ export function TableList({
   controls: ListControls
   folders: FolderNames | undefined
   hasFilters: boolean
+  onAccess: (table: TableSummary) => void
   onCreate: () => void
+  onEdit: (table: TableSummary) => void
   onImport: () => void
   onMoveToFolder: (table: TableSummary) => void
   removal: ReturnType<typeof useTableRemoval>
@@ -140,6 +144,8 @@ export function TableList({
             <TableListRow
               folders={folders}
               key={table.tableId}
+              onAccess={onAccess}
+              onEdit={onEdit}
               onMoveToFolder={onMoveToFolder}
               removal={removal}
               selection={selection}
@@ -221,12 +227,16 @@ function TablesEmptyState({
 
 function TableListRow({
   folders,
+  onAccess,
+  onEdit,
   onMoveToFolder,
   removal,
   selection,
   table,
 }: {
   folders: FolderNames | undefined
+  onAccess: (table: TableSummary) => void
+  onEdit: (table: TableSummary) => void
   onMoveToFolder: (table: TableSummary) => void
   removal: ReturnType<typeof useTableRemoval>
   selection: RowSelection<TableSummary>
@@ -269,13 +279,15 @@ function TableListRow({
         {relativeTime(table.updatedAt, now)}
       </TableCell>
       <TableCell className="text-right">
-        <MaterialActions
+        <MaterialRowMenu
           deleteDescription={tableDeleteDescription}
           isDeleting={removal.removingId === table.tableId}
           isRestoring={removal.restoringId === table.tableId}
           material={{ name: table.name, archivedAt: table.archivedAt }}
           noun="table"
+          onAccess={() => onAccess(table)}
           onDelete={() => void removal.removeMaterial(table)}
+          onEdit={() => onEdit(table)}
           onMoveToFolder={() => onMoveToFolder(table)}
           onRestore={() => void removal.restoreMaterial(table)}
         />

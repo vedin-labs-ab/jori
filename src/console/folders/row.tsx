@@ -1,16 +1,9 @@
 import { Link } from "@tanstack/react-router"
-import {
-  ChevronRight,
-  FolderInput,
-  LockKeyhole,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from "lucide-react"
+import { ChevronRight, MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -21,10 +14,12 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { folderIcon } from "../shared/materials/folders"
+import { menuWidth } from "../shared/menu"
 import { type CreationRequest } from "./create/dialogs"
 import { NewInFolderSub } from "./create/menu"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { type FolderDialogRequest } from "./manage"
+import { FolderMenuItems } from "./menu"
 import { activeFolderId, type FolderNode } from "./tree"
 import { type FolderRow } from "./types"
 
@@ -80,7 +75,7 @@ export function FolderTreeItem({
             onToggle={() => expansion.toggle(node.folderId)}
           />
         ) : null}
-        <FolderRowMenu
+        <FolderTreeMenu
           folder={node}
           isDragActive={drag.isDragActive}
           onCreate={onCreate}
@@ -217,7 +212,10 @@ function RowChevron({
   )
 }
 
-function FolderRowMenu({
+/** The tree row's menu: the canonical folder menu, led by the way into
+ *  creating something here — the sidebar has no other New affordance, while
+ *  the folder page carries one in its header. */
+function FolderTreeMenu({
   folder,
   isDragActive,
   onCreate,
@@ -247,7 +245,7 @@ function FolderRowMenu({
           <MoreHorizontal />
         </SidebarMenuAction>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-44" side="right">
+      <DropdownMenuContent align="start" className={menuWidth} side="right">
         <NewInFolderSub
           onCreate={(creation) =>
             onCreate({ creation, folderId: folder.folderId })
@@ -256,25 +254,8 @@ function FolderRowMenu({
             onDialog({ type: "create", parentId: folder.folderId })
           }
         />
-        <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
-          <Pencil />
-          Rename
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onDialog({ type: "access", folder })}>
-          <LockKeyhole />
-          Sharing…
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
-          <FolderInput />
-          Move to…
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => onDialog({ type: "delete", folder })}
-          variant="destructive"
-        >
-          <Trash2 />
-          Delete
-        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <FolderMenuItems folder={folder} onDialog={onDialog} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

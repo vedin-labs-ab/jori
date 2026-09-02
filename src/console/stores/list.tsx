@@ -23,7 +23,7 @@ import { EmptyRow, FilterableEmptyState } from "../shared/list/empty"
 import { ConsoleListContent, ConsoleListTable } from "../shared/list/frame"
 import { FilterHead, SortHead } from "../shared/list/head"
 import { type RowSelection } from "../shared/list/selection"
-import { MaterialActions } from "../shared/materials/actions"
+import { MaterialRowMenu } from "../shared/materials/actions/menu"
 import { MaterialFolderCell } from "../shared/materials/cells/folder"
 import { type FolderNames } from "../shared/materials/folders"
 import { absoluteTime, relativeTime, useNow } from "../shared/time"
@@ -67,7 +67,9 @@ export function StoreList({
   controls,
   folders,
   hasFilters,
+  onAccess,
   onCreate,
+  onEdit,
   onMoveToFolder,
   removal,
   selection,
@@ -78,7 +80,9 @@ export function StoreList({
   controls: ListControls
   folders: FolderNames | undefined
   hasFilters: boolean
+  onAccess: (store: StoreSummary) => void
   onCreate: () => void
+  onEdit: (store: StoreSummary) => void
   onMoveToFolder: (store: StoreSummary) => void
   removal: ReturnType<typeof useStoreRemoval>
   selection: RowSelection<StoreSummary>
@@ -121,6 +125,8 @@ export function StoreList({
             <StoreListRow
               folders={folders}
               key={store.storeId}
+              onAccess={onAccess}
+              onEdit={onEdit}
               onMoveToFolder={onMoveToFolder}
               removal={removal}
               selection={selection}
@@ -194,12 +200,16 @@ function StoresEmptyState({
 
 function StoreListRow({
   folders,
+  onAccess,
+  onEdit,
   onMoveToFolder,
   removal,
   selection,
   store,
 }: {
   folders: FolderNames | undefined
+  onAccess: (store: StoreSummary) => void
+  onEdit: (store: StoreSummary) => void
   onMoveToFolder: (store: StoreSummary) => void
   removal: ReturnType<typeof useStoreRemoval>
   selection: RowSelection<StoreSummary>
@@ -242,13 +252,15 @@ function StoreListRow({
         {relativeTime(store.updatedAt, now)}
       </TableCell>
       <TableCell className="text-right">
-        <MaterialActions
+        <MaterialRowMenu
           deleteDescription={storeDeleteDescription}
           isDeleting={removal.removingId === store.storeId}
           isRestoring={removal.restoringId === store.storeId}
           material={{ name: store.name, archivedAt: store.archivedAt }}
           noun="store"
+          onAccess={() => onAccess(store)}
           onDelete={() => void removal.removeMaterial(store)}
+          onEdit={() => onEdit(store)}
           onMoveToFolder={() => onMoveToFolder(store)}
           onRestore={() => void removal.restoreMaterial(store)}
         />

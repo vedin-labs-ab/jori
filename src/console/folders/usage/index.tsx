@@ -38,7 +38,7 @@ export function FolderUsagePage({
       )}
       view="usage"
     >
-      {(folder, organizationId) => (
+      {({ folder, organizationId }) => (
         <UsageView
           days={days}
           folderId={folder.folderId as GenericId<"folders">}

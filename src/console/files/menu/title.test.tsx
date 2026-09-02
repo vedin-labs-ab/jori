@@ -8,14 +8,14 @@ import {
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
-} from "../shared/materials/breadcrumb"
-import { FileTitleMenu } from "./menu"
-import { type FileRow } from "./types"
+} from "../../shared/materials/breadcrumb"
+import { type FileRow } from "../types"
+import { FileTitleMenu } from "./title"
 
 vi.mock("@tanstack/react-router", () => ({ useNavigate: () => vi.fn() }))
 // The actions and the dialogs they open are the list page's, already
 // covered there; this is about what the breadcrumb offers.
-vi.mock("./manage", () => ({
+vi.mock("../manage", () => ({
   toMoveTarget: () => undefined,
   useFileActions: () => ({
     deleteFile: vi.fn(),
@@ -23,9 +23,11 @@ vi.mock("./manage", () => ({
     saveFile: vi.fn(),
   }),
 }))
-vi.mock("./edit", () => ({ EditFileDialog: () => null }))
-vi.mock("../folders/move", () => ({ MoveResourceDialog: () => null }))
-vi.mock("../shared/visibility/dialog", () => ({ VisibilityDialog: () => null }))
+vi.mock("../edit", () => ({ EditFileDialog: () => null }))
+vi.mock("../../folders/move", () => ({ MoveResourceDialog: () => null }))
+vi.mock("../../shared/visibility/dialog", () => ({
+  VisibilityDialog: () => null,
+}))
 
 afterEach(cleanup)
 
@@ -69,16 +71,17 @@ test("publishes the file's name for the breadcrumb", () => {
   expect(renderTitleMenu()?.name).toBe("costs.csv")
 })
 
-test("offers the file's management actions", () => {
+test("offers the file's management actions, in order", () => {
   renderTitleMenu()
 
-  for (const label of ["Edit", "Sharing…", "Move to folder…", "Delete"]) {
-    expect(screen.getByRole("menuitem", { name: label })).toBeDefined()
-  }
+  expect(
+    screen.getAllByRole("menuitem").map((item) => item.textContent)
+  ).toEqual(["Edit details", "Sharing…", "Move to folder…", "Delete"])
 })
 
-test("leaves the download to the header the detail page already has", () => {
+test("leaves the links to the header the detail page already has", () => {
   renderTitleMenu()
 
   expect(screen.queryByRole("menuitem", { name: "Download" })).toBeNull()
+  expect(screen.queryByRole("menuitem", { name: "Open" })).toBeNull()
 })

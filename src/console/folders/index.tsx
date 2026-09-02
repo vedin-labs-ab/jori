@@ -1,55 +1,42 @@
-import { useMutation, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useState } from "react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { api } from "../../../convex/_generated/api"
-import { showErrorToast } from "../shared/error"
 import { CreationDialogs, type FolderCreation } from "./create/dialogs"
 import { NewInFolderMenu } from "./create/menu"
-import { FolderFrame } from "./frame"
+import { FolderFrame, type FramedFolder } from "./frame"
 import { FolderHeaderActions } from "./header"
+import { useFolderResourceActions } from "./list/actions"
 import { FolderContents } from "./list/contents"
-import { MoveResourceDialog } from "./move"
-import { useMoveConfirmation } from "./move/confirm"
-import { type FolderDetail, type FolderResource, toFiledType } from "./types"
 
 /** A folder's page: everything filed here. */
 export function FolderPage({ folderId }: { folderId: string }) {
   return (
     <FolderFrame folderId={folderId} view="contents">
-      {(folder, organizationId, onNewFolder) => (
-        <FolderContentsView
-          folder={folder}
-          onNewFolder={onNewFolder}
-          organizationId={organizationId}
-        />
-      )}
+      {(framed) => <FolderContentsView framed={framed} />}
     </FolderFrame>
   )
 }
 
-function FolderContentsView({
-  folder,
-  onNewFolder,
-  organizationId,
-}: {
-  folder: FolderDetail
-  onNewFolder: () => void
-  organizationId: string
-}) {
+function FolderContentsView({ framed }: { framed: FramedFolder }) {
+  const { folder, onDialog, onNewFolder, organizationId } = framed
   const contents = useQuery(api.folders.console.contents, {
     organizationId,
     folderId: folder.folderId,
   })
   const [creation, setCreation] = useState<FolderCreation>()
-  const [moving, setMoving] = useState<FolderResource>()
-  const unfile = useUnfileResource(organizationId, folder)
+  const resources = useFolderResourceActions({
+    contents,
+    folder,
+    organizationId,
+  })
 
   return (
     <>
       <FolderHeaderActions onCreate={setCreation} onNewFolder={onNewFolder} />
       <FolderContents
+        actions={resources.actions}
         contents={contents}
         folderId={folder.folderId}
         newMenu={
@@ -60,8 +47,7 @@ function FolderContentsView({
             </Button>
           </NewInFolderMenu>
         }
-        onMove={setMoving}
-        onUnfile={unfile.request}
+        onDialog={onDialog}
       />
       <CreationDialogs
         onClose={() => setCreation(undefined)}
@@ -72,62 +58,7 @@ function FolderContentsView({
             : { creation, folderId: folder.folderId }
         }
       />
-      <MoveResourceDialog
-        onClose={() => setMoving(undefined)}
-        organizationId={organizationId}
-        resource={movingResource(moving, folder)}
-      />
-      {unfile.dialog}
+      {resources.dialogs}
     </>
   )
-}
-
-/** Resources listed here sit in this folder by definition. */
-function movingResource(
-  resource: FolderResource | undefined,
-  folder: FolderDetail
-) {
-  return resource === undefined
-    ? undefined
-    : {
-        resourceType: toFiledType(resource.type),
-        resourceId: resource.id,
-        name: resource.name,
-        folderId: folder.folderId,
-      }
-}
-
-/** Leaving a folder widens an audience as surely as entering one narrows
- *  it, so unfiling asks the same question a move does. */
-function useUnfileResource(organizationId: string, folder: FolderDetail) {
-  const file = useMutation(api.folders.console.file)
-  const confirmation = useMoveConfirmation(organizationId)
-  const unfile = async (resource: FolderResource) => {
-    try {
-      await file({
-        organizationId,
-        resourceType: toFiledType(resource.type),
-        resourceId: resource.id,
-        folderId: null,
-      })
-      toast.success(`Moved ${resource.name} out of ${folder.name}.`)
-    } catch (error) {
-      showErrorToast(error, "Could not remove it from the folder.")
-    }
-  }
-
-  return {
-    dialog: confirmation.dialog,
-    request: (resource: FolderResource) =>
-      confirmation.request({
-        subject: {
-          kind: "resource",
-          resourceType: toFiledType(resource.type),
-          resourceId: resource.id,
-        },
-        name: resource.name,
-        folderId: null,
-        run: () => unfile(resource),
-      }),
-  }
 }

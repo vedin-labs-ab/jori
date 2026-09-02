@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { DndContext } from "@dnd-kit/core"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { type FolderDialogRequest } from "../manage"
 import { type FolderRootsResult } from "../types"
 import { RootFolderList } from "./overview"
 
@@ -22,6 +23,8 @@ function folderRow(overrides: Record<string, unknown>) {
     folderId: "folder-1",
     name: "Guides",
     parentId: undefined,
+    visibility: { mode: "organization" },
+    createdBy: "persons:owner",
     createdAt: 1,
     updatedAt: Date.now(),
     hasContents: false,
@@ -33,10 +36,17 @@ function folderRow(overrides: Record<string, unknown>) {
   }
 }
 
-function renderList(roots: FolderRootsResult | undefined) {
+function renderList(
+  roots: FolderRootsResult | undefined,
+  onDialog: (request: FolderDialogRequest) => void = () => undefined
+) {
   render(
     <DndContext>
-      <RootFolderList onCreate={() => undefined} roots={roots} />
+      <RootFolderList
+        onCreate={() => undefined}
+        onDialog={onDialog}
+        roots={roots}
+      />
     </DndContext>
   )
 }
@@ -86,4 +96,28 @@ test("no folders yet introduces the surface with a create action", () => {
 
   expect(screen.getByText("No folders yet")).toBeDefined()
   expect(screen.getByRole("button", { name: /New folder/ })).toBeDefined()
+})
+
+test("a root folder row opens the folder's own menu", () => {
+  const onDialog = vi.fn()
+
+  renderList(
+    { status: "ready", folders: [folderRow({})] } as FolderRootsResult,
+    onDialog
+  )
+  fireEvent.pointerDown(
+    screen.getByRole("button", { name: "Open actions for Guides" }),
+    { button: 0, ctrlKey: false }
+  )
+
+  expect(
+    screen.getAllByRole("menuitem").map((item) => item.textContent)
+  ).toEqual(["Usage", "Rename", "Sharing…", "Move to folder…", "Delete"])
+
+  fireEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
+
+  expect(onDialog).toHaveBeenCalledWith({
+    type: "rename",
+    folder: expect.objectContaining({ folderId: "folder-1" }),
+  })
 })

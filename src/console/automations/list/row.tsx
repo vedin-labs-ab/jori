@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { VisibilityBadge } from "../../shared/visibility/badge"
 import { type Automation } from "../types"
-import { AutomationActions } from "./actions"
+import { AutomationRowMenu } from "./actions"
 import { DeleteAutomationDialog } from "./delete"
 import { AutomationStatusMark } from "./mark"
 import { AutomationMeta } from "./meta"
@@ -60,7 +60,7 @@ export function AutomationRow({
                   </Badge>
                 ) : null}
               </div>
-              <AutomationActions
+              <AutomationRowMenu
                 isControlling={isControlling}
                 isDeleting={isDeleting}
                 onDeleteRequest={requestDelete}

@@ -8,7 +8,13 @@ import {
 } from "../../shared/list/empty"
 import { ConsoleListContent } from "../../shared/list/frame"
 import { ConsoleListLoading } from "../../shared/list/loading"
-import { type FolderContentsResult, type FolderResource } from "../types"
+import { type FolderDialogRequest } from "../manage"
+import {
+  type FolderContentsResult,
+  type FolderResource,
+  type ListedFolder,
+} from "../types"
+import { type FolderResourceActions } from "./actions"
 import { useFolderListControls } from "./controls"
 import { ResourceListRow } from "./resource"
 import { FolderListRow, FolderListTable } from "./table"
@@ -17,19 +23,19 @@ import { FolderListRow, FolderListTable } from "./table"
  *  name-sorted run, in the shared full-bleed table. The states that replace
  *  the table sit in the padded content region instead. */
 export function FolderContents({
+  actions,
   contents,
   folderId,
   newMenu,
-  onMove,
-  onUnfile,
+  onDialog,
 }: {
+  actions: FolderResourceActions
   contents: FolderContentsResult | undefined
   /** The folder being viewed — the one filed resources already sit in. */
   folderId: string
   /** The header's "New" menu again, as the empty state's call to action. */
   newMenu: ReactNode
-  onMove: (resource: FolderResource) => void
-  onUnfile: (resource: FolderResource) => void
+  onDialog: (request: FolderDialogRequest) => void
 }) {
   const list = useFolderListControls(
     contents?.status === "ready" ? contents : { folders: [], resources: [] }
@@ -71,40 +77,68 @@ export function FolderContents({
     )
   }
 
-  const folders = list.narrow(contents.folders)
-  const resources = list.narrow(contents.resources)
-
   return (
     <FolderListTable
       controls={list.controls}
       kinds={list.kinds}
       owners={list.owners}
     >
-      {folders.length === 0 && resources.length === 0 ? (
-        <EmptyRow colSpan={6}>
-          <FilterableEmptyState
-            description="File tables, stores, files, and jobs here, or add a subfolder."
-            hasFilters
-            icon={Folder}
-            noun="items"
-          />
-        </EmptyRow>
-      ) : (
-        <>
-          {folders.map((folder) => (
-            <FolderListRow folder={folder} key={folder.folderId} />
-          ))}
-          {resources.map((resource) => (
-            <ResourceListRow
-              folderId={folderId}
-              key={resource.id}
-              onMove={onMove}
-              onUnfile={onUnfile}
-              resource={resource}
-            />
-          ))}
-        </>
-      )}
+      <FolderContentRows
+        actions={actions}
+        folderId={folderId}
+        folders={list.narrow(contents.folders)}
+        onDialog={onDialog}
+        resources={list.narrow(contents.resources)}
+      />
     </FolderListTable>
+  )
+}
+
+/** The listing's two row groups, subfolders first — or the one row that
+ *  stands in when the header filters leave nothing behind. */
+function FolderContentRows({
+  actions,
+  folderId,
+  folders,
+  onDialog,
+  resources,
+}: {
+  actions: FolderResourceActions
+  folderId: string
+  folders: ListedFolder[]
+  onDialog: (request: FolderDialogRequest) => void
+  resources: FolderResource[]
+}) {
+  if (folders.length === 0 && resources.length === 0) {
+    return (
+      <EmptyRow colSpan={6}>
+        <FilterableEmptyState
+          description="File tables, stores, files, and jobs here, or add a subfolder."
+          hasFilters
+          icon={Folder}
+          noun="items"
+        />
+      </EmptyRow>
+    )
+  }
+
+  return (
+    <>
+      {folders.map((folder) => (
+        <FolderListRow
+          folder={folder}
+          key={folder.folderId}
+          onDialog={onDialog}
+        />
+      ))}
+      {resources.map((resource) => (
+        <ResourceListRow
+          actions={actions}
+          folderId={folderId}
+          key={resource.id}
+          resource={resource}
+        />
+      ))}
+    </>
   )
 }

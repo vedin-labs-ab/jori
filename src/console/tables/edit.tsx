@@ -20,6 +20,12 @@ import {
 import { DialogForm } from "../shared/materials/form"
 import { type TableDetail } from "./types"
 
+/** All an edit needs of a table; its summary and its detail both fit. */
+export type EditableTable = Pick<
+  TableDetail,
+  "description" | "name" | "tableId"
+>
+
 /** Rename and describe the table. Columns live in the grid itself — the
  *  New column header cell and each column's details sheet. */
 export function EditTableDialog({
@@ -29,7 +35,7 @@ export function EditTableDialog({
 }: {
   onOpenChange: (isOpen: boolean) => void
   organizationId: string
-  table: TableDetail | undefined
+  table: EditableTable | undefined
 }) {
   const form = useEditTable(organizationId, table, () => onOpenChange(false))
 
@@ -78,7 +84,7 @@ export function EditTableDialog({
 
 function useEditTable(
   organizationId: string,
-  table: TableDetail | undefined,
+  table: EditableTable | undefined,
   onSaved: () => void
 ) {
   const update = useMutation(api.tables.console.update)

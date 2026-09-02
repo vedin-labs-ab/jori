@@ -112,7 +112,7 @@ export function useFileActions(
       .finally(() => setPendingFileId(undefined))
   }
 
-  function deleteFile(file: FileRow) {
+  function deleteFile(file: Pick<FileRow, "fileId" | "name">) {
     setPendingFileId(file.fileId)
     void removeFile({ organizationId, fileId: file.fileId })
       .then(() => {

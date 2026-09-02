@@ -116,6 +116,21 @@ test("resumes paused event automation from status icon", () => {
   )
 })
 
+test("the action menu offers the automation's whole menu", () => {
+  renderRow({
+    automation: automation({
+      type: "cron",
+      trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: now + day },
+    }),
+  })
+
+  openActions()
+
+  expect(
+    screen.getAllByRole("menuitem").map((item) => item.textContent)
+  ).toEqual(["Edit", "Move to folder…", "Pause", "Delete"])
+})
+
 test("opens the shared delete dialog from the action menu", () => {
   renderRow({
     automation: automation({
