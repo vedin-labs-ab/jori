@@ -69,7 +69,6 @@ import type * as broker_tools_google_index from "../broker/tools/google/index.js
 import type * as broker_tools_google_mail from "../broker/tools/google/mail.js";
 import type * as broker_tools_google_read from "../broker/tools/google/read.js";
 import type * as broker_tools_index from "../broker/tools/index.js";
-import type * as broker_tools_linear_client from "../broker/tools/linear/client.js";
 import type * as broker_tools_linear_index from "../broker/tools/linear/index.js";
 import type * as broker_tools_mail from "../broker/tools/mail.js";
 import type * as broker_tools_microsoft_calendar from "../broker/tools/microsoft/calendar.js";
@@ -150,7 +149,6 @@ import type * as integrations_connect_credentials from "../integrations/connect/
 import type * as integrations_connect_http from "../integrations/connect/http.js";
 import type * as integrations_connect_install from "../integrations/connect/install.js";
 import type * as integrations_connect_oauth from "../integrations/connect/oauth.js";
-import type * as integrations_connect_response from "../integrations/connect/response.js";
 import type * as integrations_connect_signing from "../integrations/connect/signing.js";
 import type * as integrations_data from "../integrations/data.js";
 import type * as integrations_disconnect from "../integrations/disconnect.js";
@@ -182,7 +180,6 @@ import type * as integrations_google_options from "../integrations/google/option
 import type * as integrations_google_signing from "../integrations/google/signing.js";
 import type * as integrations_linear_config from "../integrations/linear/config.js";
 import type * as integrations_linear_credentials from "../integrations/linear/credentials.js";
-import type * as integrations_linear_data from "../integrations/linear/data.js";
 import type * as integrations_linear_delivery_comments from "../integrations/linear/delivery/comments.js";
 import type * as integrations_linear_delivery_reactions from "../integrations/linear/delivery/reactions.js";
 import type * as integrations_linear_graphql from "../integrations/linear/graphql.js";
@@ -238,7 +235,6 @@ import type * as integrations_revoke_oauth from "../integrations/revoke/oauth.js
 import type * as integrations_runtime from "../integrations/runtime.js";
 import type * as integrations_slack_api from "../integrations/slack/api.js";
 import type * as integrations_slack_approvals_blocks from "../integrations/slack/approvals/blocks.js";
-import type * as integrations_slack_approvals_cards from "../integrations/slack/approvals/cards.js";
 import type * as integrations_slack_approvals_index from "../integrations/slack/approvals/index.js";
 import type * as integrations_slack_approvals_surface from "../integrations/slack/approvals/surface.js";
 import type * as integrations_slack_card from "../integrations/slack/card.js";
@@ -640,7 +636,6 @@ declare const fullApi: ApiFromModules<{
   "broker/tools/google/mail": typeof broker_tools_google_mail;
   "broker/tools/google/read": typeof broker_tools_google_read;
   "broker/tools/index": typeof broker_tools_index;
-  "broker/tools/linear/client": typeof broker_tools_linear_client;
   "broker/tools/linear/index": typeof broker_tools_linear_index;
   "broker/tools/mail": typeof broker_tools_mail;
   "broker/tools/microsoft/calendar": typeof broker_tools_microsoft_calendar;
@@ -721,7 +716,6 @@ declare const fullApi: ApiFromModules<{
   "integrations/connect/http": typeof integrations_connect_http;
   "integrations/connect/install": typeof integrations_connect_install;
   "integrations/connect/oauth": typeof integrations_connect_oauth;
-  "integrations/connect/response": typeof integrations_connect_response;
   "integrations/connect/signing": typeof integrations_connect_signing;
   "integrations/data": typeof integrations_data;
   "integrations/disconnect": typeof integrations_disconnect;
@@ -753,7 +747,6 @@ declare const fullApi: ApiFromModules<{
   "integrations/google/signing": typeof integrations_google_signing;
   "integrations/linear/config": typeof integrations_linear_config;
   "integrations/linear/credentials": typeof integrations_linear_credentials;
-  "integrations/linear/data": typeof integrations_linear_data;
   "integrations/linear/delivery/comments": typeof integrations_linear_delivery_comments;
   "integrations/linear/delivery/reactions": typeof integrations_linear_delivery_reactions;
   "integrations/linear/graphql": typeof integrations_linear_graphql;
@@ -809,7 +802,6 @@ declare const fullApi: ApiFromModules<{
   "integrations/runtime": typeof integrations_runtime;
   "integrations/slack/api": typeof integrations_slack_api;
   "integrations/slack/approvals/blocks": typeof integrations_slack_approvals_blocks;
-  "integrations/slack/approvals/cards": typeof integrations_slack_approvals_cards;
   "integrations/slack/approvals/index": typeof integrations_slack_approvals_index;
   "integrations/slack/approvals/surface": typeof integrations_slack_approvals_surface;
   "integrations/slack/card": typeof integrations_slack_card;
