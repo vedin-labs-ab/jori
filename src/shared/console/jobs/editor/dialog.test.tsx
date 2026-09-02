@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
 import { emptyJobForm, type Job } from "../types"
 import { JobEditorDialog } from "./dialog"
@@ -121,13 +127,17 @@ describe("job dialog sharing validation", () => {
 })
 
 describe("job dialog context", () => {
-  test("places the context disclosure before instructions", () => {
+  test("keeps the context disclosure under advanced settings, after access", () => {
     renderJobDialog({ error: undefined, values: emptyJobForm })
 
-    const context = screen.getByRole("button", { name: "Context" })
-    const instructions = screen.getByText("Instructions")
+    expect(screen.queryByRole("button", { name: "Context" })).toBeNull()
 
-    expect(context.compareDocumentPosition(instructions)).toBe(
+    openAdvancedSettings()
+
+    const webSearch = screen.getByText("Let Jori search the web")
+    const context = screen.getByRole("button", { name: "Context" })
+
+    expect(webSearch.compareDocumentPosition(context)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     )
   })
@@ -181,6 +191,7 @@ describe("job dialog access controls", () => {
 describe("job dialog folder", () => {
   test("offers the folder field to a new job only", () => {
     renderJobDialog({ error: undefined, values: emptyJobForm })
+    openAdvancedSettings()
 
     expect(screen.getByLabelText("Folder")).toBeDefined()
 
@@ -190,10 +201,15 @@ describe("job dialog folder", () => {
       job: { id: "job" } as unknown as Job,
       values: emptyJobForm,
     })
+    openAdvancedSettings()
 
     expect(screen.queryByLabelText("Folder")).toBeNull()
   })
 })
+
+function openAdvancedSettings() {
+  fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
+}
 
 function renderJobDialog({
   error,

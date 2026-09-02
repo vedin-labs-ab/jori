@@ -19,7 +19,7 @@ test("says who the table reaches and revokes its live link in place", () => {
     </DemoWorkspaceProvider>
   )
 
-  expect(screen.getByText("Visible to 6 people.")).toBeDefined()
+  expect(screen.getByRole("button", { name: "6 people" })).toBeDefined()
   expect(screen.getByText(/Narrowed to Finance/)).toBeDefined()
 
   fireEvent.click(screen.getByRole("button", { name: "Revoke" }))

@@ -34,10 +34,6 @@ export function Materials() {
         navigation={console}
         sidebar={false}
       />
-      <p className="mt-3 text-muted-foreground text-sm">
-        Kept current by a job. Anyone who can see the folder can correct a cell,
-        and the correction sticks.
-      </p>
     </Section>
   )
 }

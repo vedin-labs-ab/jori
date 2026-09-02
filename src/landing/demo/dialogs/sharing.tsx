@@ -1,6 +1,6 @@
 import { type Visibility } from "@contracts/visibility"
 import { useEffect, useState } from "react"
-import { AudienceSentence } from "@/shared/console/visibility/audience"
+import { AudienceLine } from "@/shared/console/visibility/audience"
 import { SharingDialog } from "@/shared/console/visibility/dialog"
 import { VisibilityField } from "@/shared/console/visibility/field"
 import { type AudienceTarget, resolveAudience } from "../derive/audience"
@@ -70,15 +70,6 @@ export function DemoAudience({
   const audience = resolveAudience(state, target, value)
 
   return (
-    <p className="text-muted-foreground text-sm">
-      <AudienceSentence
-        audience={audience}
-        mode={value.mode}
-        viewerId={viewerId}
-      />
-      {audience.narrowedBy === null || value.mode === "organization"
-        ? null
-        : ` Narrowed to ${audience.narrowedBy} by the folder it's in.`}
-    </p>
+    <AudienceLine audience={audience} mode={value.mode} viewerId={viewerId} />
   )
 }
