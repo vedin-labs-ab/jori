@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { activityItem } from "../../../../../test/activity"
+import { activityItem } from "../../../../../../test/activity"
 import { ActivityItem } from "../item"
 
 afterEach(() => {

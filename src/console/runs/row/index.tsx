@@ -1,10 +1,8 @@
 import { Timer } from "lucide-react"
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { formatDuration, relativeTime } from "@/shared/console/time"
-import { RelativeTime } from "../details"
-import { ExpiringStatusMeta } from "../request/status"
-import { type ExecutionItem } from "../types"
+import { RelativeTime } from "@/shared/console/runs/details"
+import { ExpiringStatusMeta } from "@/shared/console/runs/request/status"
 import {
   RunRowBody,
   RunRowContent,
@@ -12,9 +10,11 @@ import {
   RunRowFrame,
   RunRowHeader,
   RunRowMeta,
-} from "./layout"
-import { SourceLine } from "./source"
-import { MetaPill, StatusIcon } from "./status"
+} from "@/shared/console/runs/row/layout"
+import { SourceLine } from "@/shared/console/runs/row/source"
+import { MetaPill, StatusIcon } from "@/shared/console/runs/row/status"
+import { type ExecutionItem } from "@/shared/console/runs/types"
+import { formatDuration, relativeTime } from "@/shared/console/time"
 import { StopExecution } from "./stop"
 
 let expandedExecutionModule: Promise<typeof import("./expanded")> | undefined

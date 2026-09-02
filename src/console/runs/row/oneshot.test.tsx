@@ -1,12 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, test, vi } from "vitest"
-import {
-  makeExecution,
-  renderExecutionRow,
-  slackToolsDetail,
-} from "../fixtures"
-import { type ExecutionItem } from "../types"
+import { makeExecution, slackToolsDetail } from "@/shared/console/runs/fixtures"
+import { type ExecutionItem } from "@/shared/console/runs/types"
+import { renderExecutionRow } from "../fixtures"
 
 vi.mock("convex/react", () => ({
   useQuery: () => ({ items: [], status: "loaded" }),

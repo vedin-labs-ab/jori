@@ -1,11 +1,11 @@
+import { ErrorDetail, ResultDetail } from "@/shared/console/runs/details"
+import { ExecutionFacts } from "@/shared/console/runs/row/facts"
+import { RunRowBody } from "@/shared/console/runs/row/layout"
+import { TaskDetail } from "@/shared/console/runs/row/task"
+import { type ExecutionItem } from "@/shared/console/runs/types"
 import { RunActivity } from "../activity"
-import { ErrorDetail, ResultDetail } from "../details"
 import { ApprovalCallout } from "../request/approval"
 import { OfferCallout } from "../request/offer"
-import { type ExecutionItem } from "../types"
-import { ExecutionFacts } from "./facts"
-import { RunRowBody } from "./layout"
-import { TaskDetail } from "./task"
 
 export function ExpandedExecution({
   execution,

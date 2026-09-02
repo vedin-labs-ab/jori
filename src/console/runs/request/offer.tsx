@@ -12,12 +12,18 @@ import {
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { showErrorToast } from "@/shared/console/error"
+import { useRunRequestCarousel } from "@/shared/console/runs/request/carousel"
+import {
+  type RunRequestMeta,
+  RunRequestSection,
+} from "@/shared/console/runs/request/section"
+import {
+  type ExecutionItem,
+  type ExecutionOffer,
+} from "@/shared/console/runs/types"
 import { absoluteTime, expirationLabel } from "@/shared/console/time"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { api } from "../../../../convex/_generated/api"
-import { type ExecutionItem, type ExecutionOffer } from "../types"
-import { useRunRequestCarousel } from "./carousel"
-import { type RunRequestMeta, RunRequestSection } from "./section"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 

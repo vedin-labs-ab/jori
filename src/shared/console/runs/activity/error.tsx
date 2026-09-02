@@ -8,8 +8,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-import { CopyButton } from "@/shared/console/copy"
 import { scrollFade } from "@/shared/fade"
+import { CopyButton } from "../../copy"
 import { activityToolFailureSummary } from "./tool/summary"
 
 export function ActivityFailureDescription({
