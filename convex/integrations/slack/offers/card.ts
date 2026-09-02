@@ -4,14 +4,12 @@ import {
   type Integration,
   integrationLabel,
 } from "../../../shared/integrations"
-import { createSlackCard } from "../card"
+import { createSlackCard, slackCardBodyLimit } from "../card"
 import { formatSlackTime, toSlackTimestamp, truncateSlackText } from "../format"
 import {
   integrationOfferCancelActionId,
   integrationOfferOpenActionId,
 } from "./interaction"
-
-const integrationOfferSummaryLimit = 200
 
 type SlackIntegrationOfferStatus =
   | "cancelled"
@@ -33,7 +31,7 @@ export function createSlackIntegrationOfferMessage(args: {
   const label = integrationLabel(args.integration)
   const status = args.status ?? "pending"
   const title = offerTitle({ actor: args.actor, label, status })
-  const summary = truncateSlackText(args.summary, integrationOfferSummaryLimit)
+  const summary = truncateSlackText(args.summary, slackCardBodyLimit)
 
   return {
     text: [title, summary, offerFallback(status, label, args.expiresAt)].join(

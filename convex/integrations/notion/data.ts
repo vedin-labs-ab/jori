@@ -7,12 +7,8 @@ import {
   actorValidator,
   getActorExternalId,
 } from "../../shared/actor"
-import { readProviderDataString } from "../connect/response"
+import { readDataString } from "../../shared/data"
 import { findActiveIntegrationByExternalId } from "../data"
-
-export function getNotionBotId(data: unknown) {
-  return readProviderDataString(data, "botId")
-}
 
 export const recordWebhookEvent = internalMutation({
   args: {
@@ -58,7 +54,7 @@ export const recordWebhookEvent = internalMutation({
 
 function isNotionBotEvent(actor: Actor | undefined, data: unknown) {
   const actorId = getActorExternalId(actor)
-  const botId = getNotionBotId(data)
+  const botId = readDataString(data, "botId")
 
   return actorId !== undefined && botId !== undefined && actorId === botId
 }

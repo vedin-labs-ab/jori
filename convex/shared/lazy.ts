@@ -1,6 +1,6 @@
 import { type ActionCtx, httpAction } from "../_generated/server"
 
-type LazyHandler = (
+export type LazyHandler = (
   ctx: ActionCtx,
   request: Request
 ) => Promise<Response> | Response

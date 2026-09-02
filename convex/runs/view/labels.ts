@@ -7,10 +7,6 @@ type RunLabelContext = {
   run: Doc<"runs">
 }
 
-export function runTitle(context: RunLabelContext) {
-  return context.run.snapshot.title
-}
-
 export function runTask(context: RunLabelContext) {
   return (
     context.run.instructions ??
@@ -23,12 +19,14 @@ export function runTask(context: RunLabelContext) {
 export function triggerLabel(context: RunLabelContext) {
   const surface = context.run.snapshot.source.surface
 
-  if (context.run.cause.type === "message") {
-    return `${surface === undefined ? "Provider" : toolSurfaceLabel(surface)} message`
-  }
+  if (
+    context.run.cause.type === "message" ||
+    context.run.cause.type === "event"
+  ) {
+    const origin =
+      surface === undefined ? "Provider" : toolSurfaceLabel(surface)
 
-  if (context.run.cause.type === "event") {
-    return `${surface === undefined ? "Provider" : toolSurfaceLabel(surface)} event`
+    return `${origin} ${context.run.cause.type}`
   }
 
   if (context.run.cause.type === "time") {

@@ -1,25 +1,14 @@
-import { type FunctionReference } from "convex/server"
-import { api } from "../../../convex/_generated/api"
+import { type FunctionReturnType } from "convex/server"
+import { type api } from "../../../convex/_generated/api"
 import { type IntegrationCardConfig } from "./card"
-import { type IntegrationCardStatus } from "./card/headline"
 
-export type ProviderStatus = {
-  email?: string
-  externalId: string
-  name?: string
-  status: Exclude<IntegrationCardStatus, undefined>
-  url?: string
-} | null
+export type ProviderStatus = FunctionReturnType<
+  typeof api.integrations.status.get
+>
 
 export type ProviderDefinition = {
   config: IntegrationCardConfig
   emptyHeadline?: string
-  status: FunctionReference<
-    "query",
-    "public",
-    { organizationId: string },
-    ProviderStatus
-  >
   type: "account" | "workspace"
   useUrlHeadline?: boolean
 }
@@ -43,7 +32,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No workspace connected",
-    status: api.integrations.status.getSlackStatus,
     type: "workspace",
   },
   {
@@ -64,7 +52,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No workspace connected",
-    status: api.integrations.status.getLinearStatus,
     type: "workspace",
     useUrlHeadline: true,
   },
@@ -86,7 +73,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No installation connected",
-    status: api.integrations.status.getGitHubStatus,
     type: "workspace",
   },
   {
@@ -107,7 +93,6 @@ export const organizationProviders = [
       },
     },
     emptyHeadline: "No workspace connected",
-    status: api.integrations.status.getNotionStatus,
     type: "workspace",
   },
 ] satisfies ProviderDefinition[]
@@ -130,7 +115,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/gmail.svg",
       },
     },
-    status: api.integrations.status.getGmailStatus,
     type: "account",
   },
   {
@@ -150,7 +134,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/google-calendar.svg",
       },
     },
-    status: api.integrations.status.getGoogleCalendarStatus,
     type: "account",
   },
   {
@@ -170,7 +153,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/microsoft-outlook.svg",
       },
     },
-    status: api.integrations.status.getMicrosoftEmailStatus,
     type: "account",
   },
   {
@@ -190,7 +172,6 @@ export const personalProviders = [
         src: "https://svgl.app/library/microsoft.svg",
       },
     },
-    status: api.integrations.status.getMicrosoftCalendarStatus,
     type: "account",
   },
 ] satisfies ProviderDefinition[]

@@ -15,6 +15,9 @@ type SlackCardText = {
   verbatim: false
 }
 
+/** How much of a card body Slack shows before it needs truncating. */
+export const slackCardBodyLimit = 200
+
 export function createSlackCard(args: {
   actions?: Record<string, unknown>[]
   body: string

@@ -1,8 +1,8 @@
 import { type Doc } from "../_generated/dataModel"
 import { isGitHubSelfActor } from "../integrations/github/data"
-import { getLinearBotId } from "../integrations/linear/data"
 import { getSlackBotUserId } from "../integrations/slack/data"
 import { type Actor, getActorExternalId, withActorKind } from "../shared/actor"
+import { readDataString } from "../shared/data"
 
 /** Mark an observed actor as "self" when it is the integration's own bot. */
 export function normalizeSelfActor(
@@ -25,7 +25,7 @@ function selfActorId(
   integration: Pick<Doc<"integrations">, "data" | "integration">
 ) {
   if (integration.integration === "linear") {
-    return getLinearBotId(integration.data)
+    return readDataString(integration.data, "botId")
   }
 
   if (integration.integration === "slack") {

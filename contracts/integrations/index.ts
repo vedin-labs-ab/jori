@@ -83,10 +83,5 @@ export function isMicrosoftIntegration(integration: Integration) {
 }
 
 export function isUserScopedIntegration(integration: Integration) {
-  return (
-    integration === "gmail" ||
-    integration === "googleCalendar" ||
-    integration === "microsoftCalendar" ||
-    integration === "microsoftEmail"
-  )
+  return isGoogleIntegration(integration) || isMicrosoftIntegration(integration)
 }

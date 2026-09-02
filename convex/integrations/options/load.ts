@@ -1,4 +1,5 @@
 import {
+  type IntegrationOption,
   type IntegrationOptionMatch,
   type IntegrationOptionSource,
 } from "../../../contracts/integrations/options"
@@ -25,7 +26,7 @@ import { OptionUnavailable } from "./common"
 export type IntegrationOptionSearchResult =
   | {
       status: "ready"
-      options: Awaited<ReturnType<typeof loadIntegrationOptions>>
+      options: IntegrationOption[]
     }
   | {
       status: "unavailable"
@@ -41,7 +42,7 @@ export async function searchIntegrationOptions(args: {
   try {
     return {
       status: "ready",
-      options: await loadIntegrationOptions(args),
+      options: await optionSources[args.source].load(args),
     }
   } catch (error) {
     return {
@@ -49,95 +50,85 @@ export async function searchIntegrationOptions(args: {
       message:
         error instanceof OptionUnavailable
           ? error.message
-          : optionUnavailableMessage(args.source),
+          : optionSources[args.source].unavailable,
     }
   }
 }
 
-async function loadIntegrationOptions(args: {
+type OptionLoader = (args: {
   integration: Doc<"integrations">
-  source: IntegrationOptionSource
   query: string
   match: IntegrationOptionMatch | undefined
-}) {
-  const loaderArgs = {
-    integration: args.integration,
-    query: args.query,
-    match: args.match,
-  }
+}) => Promise<IntegrationOption[]>
 
-  if (args.source === "slack.channels") {
-    return await searchSlackChannels(loaderArgs)
-  }
-  if (args.source === "slack.users") {
-    return await searchSlackUsers(loaderArgs)
-  }
-  if (args.source === "github.repositories") {
-    return await searchGitHubRepositories(loaderArgs)
-  }
-  if (args.source === "github.issues") {
-    return await searchGitHubIssues(loaderArgs)
-  }
-  if (args.source === "github.pullRequests") {
-    return await searchGitHubPullRequests(loaderArgs)
-  }
-  if (args.source === "linear.teams") {
-    return await searchLinearTeams(loaderArgs)
-  }
-  if (args.source === "linear.projects") {
-    return await searchLinearProjects(loaderArgs)
-  }
-  if (args.source === "linear.issues") {
-    return await searchLinearIssues(loaderArgs)
-  }
-  if (args.source === "gmail.labels") {
-    return await searchGmailLabels(loaderArgs)
-  }
-  if (args.source === "microsoftEmail.folders") {
-    return await searchMicrosoftMailFolders(loaderArgs)
-  }
-  if (args.source === "googleCalendar.calendars") {
-    return await searchGoogleCalendars(loaderArgs)
-  }
-  if (args.source === "microsoftCalendar.calendars") {
-    return await searchMicrosoftCalendars(loaderArgs)
-  }
-  if (args.source === "notion.pages") {
-    return await searchNotionObjects(loaderArgs)
-  }
-
-  return []
-}
-
-function optionUnavailableMessage(source: IntegrationOptionSource) {
-  const messages: Record<IntegrationOptionSource, string> = {
-    "slack.channels":
+/** Each source's loader, and what to say when it cannot answer. */
+const optionSources: Record<
+  IntegrationOptionSource,
+  { load: OptionLoader; unavailable: string }
+> = {
+  "slack.channels": {
+    load: searchSlackChannels,
+    unavailable:
       "Could not load Slack channels. Check the Slack connection and try again.",
-    "slack.users":
+  },
+  "slack.users": {
+    load: searchSlackUsers,
+    unavailable:
       "Could not load Slack people. Check the Slack connection and try again.",
-    "github.repositories":
+  },
+  "github.repositories": {
+    load: searchGitHubRepositories,
+    unavailable:
       "Could not load GitHub repositories. Check the GitHub connection and try again.",
-    "github.issues":
+  },
+  "github.issues": {
+    load: searchGitHubIssues,
+    unavailable:
       "Could not load GitHub issues. Check the GitHub connection and try again.",
-    "github.pullRequests":
+  },
+  "github.pullRequests": {
+    load: searchGitHubPullRequests,
+    unavailable:
       "Could not load GitHub pull requests. Check the GitHub connection and try again.",
-    "linear.teams":
+  },
+  "linear.teams": {
+    load: searchLinearTeams,
+    unavailable:
       "Could not load Linear teams. Check the Linear connection and try again.",
-    "linear.projects":
+  },
+  "linear.projects": {
+    load: searchLinearProjects,
+    unavailable:
       "Could not load Linear projects. Check the Linear connection and try again.",
-    "linear.issues":
+  },
+  "linear.issues": {
+    load: searchLinearIssues,
+    unavailable:
       "Could not load Linear issues. Check the Linear connection and try again.",
-    "gmail.labels":
+  },
+  "gmail.labels": {
+    load: searchGmailLabels,
+    unavailable:
       "Could not load Gmail labels. Check the Gmail connection and try again.",
-    "microsoftEmail.folders":
+  },
+  "microsoftEmail.folders": {
+    load: searchMicrosoftMailFolders,
+    unavailable:
       "Could not load Outlook folders. Check the Outlook connection and try again.",
-    "googleCalendar.calendars":
+  },
+  "googleCalendar.calendars": {
+    load: searchGoogleCalendars,
+    unavailable:
       "Could not load Google calendars. Check the Google Calendar connection and try again.",
-    "microsoftCalendar.calendars":
+  },
+  "microsoftCalendar.calendars": {
+    load: searchMicrosoftCalendars,
+    unavailable:
       "Could not load Microsoft calendars. Check the Microsoft Calendar connection and try again.",
-    "notion.pages":
+  },
+  "notion.pages": {
+    load: searchNotionObjects,
+    unavailable:
       "Could not load Notion pages. Check the Notion connection and try again.",
-  }
-
-  return messages[source]
+  },
 }

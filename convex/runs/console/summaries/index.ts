@@ -3,9 +3,9 @@ import { type QueryCtx } from "../../../_generated/server"
 import { personDisplayName } from "../../../persons/names"
 import { getActorDisplayName } from "../../../shared/actor"
 import { summarizeApproval } from "../../view/approval"
-import { runTask, runTitle, triggerLabel } from "../../view/labels"
+import { runTask, triggerLabel } from "../../view/labels"
 import { getRunContext } from "../context"
-import { runDetailSummary } from "../details"
+import { runDetails } from "../details"
 import { summarizeRunOffer } from "../offers"
 import { isManualTrigger, runSource, sourceSearchText } from "../source"
 
@@ -18,12 +18,12 @@ export async function summarizeRun(
   requestedApproval?: Doc<"approvals">
 ) {
   const context = await getRunContext(ctx, run, requestedApproval)
-  const title = runTitle(context)
+  const title = run.snapshot.title
   const task = runTask(context)
   const stoppedByLabel = getActorDisplayName(run.stoppedBy)
   const triggeredByLabel = await manualTriggerLabel(ctx, run, viewerPersonId)
   const source = runSource(context, stoppedByLabel, triggeredByLabel)
-  const detailSummary = runDetailSummary({
+  const details = runDetails({
     approval: context.requestedApproval,
     run: context.run,
     stoppedBy: stoppedByLabel,
@@ -49,7 +49,7 @@ export async function summarizeRun(
     task,
     trigger: triggerLabel(context),
     createdAt: run.createdAt,
-    details: detailSummary.details,
+    details,
     endedAt: run.endedAt,
     durationMs: getDuration(run),
     error: run.error,

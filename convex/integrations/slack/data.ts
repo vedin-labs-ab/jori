@@ -1,21 +1,21 @@
-import { readProviderDataString } from "../connect/response"
+import { readDataObject, readDataString } from "../../shared/data"
 
 type SlackChannelType = "channel" | "group" | "im" | "mpim" | "unknown"
 
 export function getSlackBotUserId(data: unknown) {
-  return readProviderDataString(data, "botUserId")
+  return readDataString(data, "botUserId")
 }
 
 export function getSlackChannelId(data: unknown) {
-  return readProviderDataString(data, "channel", "id")
+  return readDataString(readDataObject(data, "channel"), "id")
 }
 
 export function getSlackMessageTs(data: unknown) {
-  return readProviderDataString(data, "ts")
+  return readDataString(data, "ts")
 }
 
 export function getSlackThreadTs(data: unknown) {
-  return readProviderDataString(data, "thread", "ts")
+  return readDataString(readDataObject(data, "thread"), "ts")
 }
 
 export function getSlackChannelType(type: string): SlackChannelType {

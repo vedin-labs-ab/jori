@@ -1,4 +1,5 @@
 import { compactRecord } from "../../../../contracts/json"
+import { githubJson, githubJsonObject } from "../../../integrations/github/api"
 import {
   summarizeComment,
   summarizePullRequest,
@@ -11,7 +12,7 @@ import {
   readRecord,
   requiredNumber,
 } from "../../../shared/input"
-import { githubJson, githubJsonObject, repositoryPath } from "./client"
+import { repositoryPath } from "./client"
 import { normalizeBranchName } from "./source"
 
 export async function listPullRequestFiles(

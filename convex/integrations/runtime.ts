@@ -15,7 +15,6 @@ import { requireMicrosoftCredentials } from "./microsoft/credentials"
 import { refreshMicrosoftAccessToken } from "./microsoft/oauth"
 import {
   failOAuthRefresh,
-  hasFreshOAuthToken,
   hasFreshTokenExpiration,
   withCredentials,
 } from "./refresh"
@@ -96,7 +95,7 @@ async function prepareLinearIntegrationForRuntime(
 ) {
   const credentials = requireLinearCredentials(integration)
 
-  if (hasFreshOAuthToken(credentials)) {
+  if (hasFreshTokenExpiration(credentials.expiresAt)) {
     return integration
   }
 
@@ -126,7 +125,7 @@ async function prepareGoogleIntegrationForRuntime(
 ) {
   const credentials = requireGoogleCredentials(integration)
 
-  if (hasFreshOAuthToken(credentials)) {
+  if (hasFreshTokenExpiration(credentials.expiresAt)) {
     return integration
   }
 
@@ -161,7 +160,7 @@ async function prepareMicrosoftIntegrationForRuntime(
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 
-  if (hasFreshOAuthToken(credentials)) {
+  if (hasFreshTokenExpiration(credentials.expiresAt)) {
     return integration
   }
 
@@ -217,7 +216,7 @@ async function prepareSlackIntegrationForRuntime(
 ) {
   const credentials = requireSlackCredentials(integration)
   const stale = slackTokenKinds.filter(
-    (kind) => !hasFreshOAuthToken(credentials[kind])
+    (kind) => !hasFreshTokenExpiration(credentials[kind].expiresAt)
   )
 
   if (stale.length === 0) {

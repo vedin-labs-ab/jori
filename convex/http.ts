@@ -1,7 +1,7 @@
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
 import { requireEnvironmentVariable } from "./shared/environment"
-import { lazyHttpAction } from "./shared/lazy"
+import { type LazyHandler, lazyHttpAction } from "./shared/lazy"
 
 // Every handler module loads on first request through lazyHttpAction: the
 // combined static graph (Better Auth plus every integration) does not fit
@@ -32,234 +32,193 @@ http.route({
 http.route({ pathPrefix: "/api/auth/", method: "GET", handler: handleAuth })
 http.route({ pathPrefix: "/api/auth/", method: "POST", handler: handleAuth })
 
-http.route({
-  path: "/jori/github/clone-credentials",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./broker/mcp"),
-    (module) => module.handleGitHubCloneCredentialsRequest
-  ),
-})
+route(
+  "/jori/github/clone-credentials",
+  "POST",
+  () => import("./broker/mcp"),
+  (module) => module.handleGitHubCloneCredentialsRequest
+)
 
-http.route({
-  path: "/jori/files",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./broker/files"),
-    (module) => module.handleFileUploadRequest
-  ),
-})
+route(
+  "/jori/files",
+  "POST",
+  () => import("./broker/files"),
+  (module) => module.handleFileUploadRequest
+)
 
-http.route({
-  path: "/waitlist",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./waitlist/http"),
-    (module) => module.handleWaitlistRequest
-  ),
-})
+route(
+  "/waitlist",
+  "POST",
+  () => import("./waitlist/http"),
+  (module) => module.handleWaitlistRequest
+)
 
-http.route({
-  path: "/waitlist",
-  method: "OPTIONS",
-  handler: lazyHttpAction(
-    () => import("./waitlist/http"),
-    (module) => (_ctx, request) => module.handleWaitlistPreflight(request)
-  ),
-})
+route(
+  "/waitlist",
+  "OPTIONS",
+  () => import("./waitlist/http"),
+  (module) => (_ctx, request) => module.handleWaitlistPreflight(request)
+)
 
-http.route({
-  path: "/stripe/events",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./billing/stripe/http"),
-    (module) => module.handleStripeEvents
-  ),
-})
+route(
+  "/stripe/events",
+  "POST",
+  () => import("./billing/stripe/http"),
+  (module) => module.handleStripeEvents
+)
 
-http.route({
-  path: "/github/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/github/ingress/http"),
-    (module) => (_ctx, request) => module.handleGitHubInstall(request)
-  ),
-})
+route(
+  "/github/install",
+  "GET",
+  () => import("./integrations/github/ingress/http"),
+  (module) => (_ctx, request) => module.handleGitHubInstall(request)
+)
 
-http.route({
-  path: "/github/install/callback",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/github/ingress/http"),
-    (module) => module.handleGitHubInstallCallback
-  ),
-})
+route(
+  "/github/install/callback",
+  "GET",
+  () => import("./integrations/github/ingress/http"),
+  (module) => module.handleGitHubInstallCallback
+)
 
-http.route({
-  path: "/github/events",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./integrations/github/ingress/http"),
-    (module) => module.handleGitHubEvents
-  ),
-})
+route(
+  "/github/events",
+  "POST",
+  () => import("./integrations/github/ingress/http"),
+  (module) => module.handleGitHubEvents
+)
 
-http.route({
-  path: "/gmail/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/google/http"),
-    (module) => (_ctx, request) => module.handleGoogleInstall(request, "gmail")
-  ),
-})
+route(
+  "/gmail/install",
+  "GET",
+  () => import("./integrations/google/http"),
+  (module) => (_ctx, request) => module.handleGoogleInstall(request, "gmail")
+)
 
-http.route({
-  path: "/google/oauth/callback",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/google/http"),
-    (module) => module.handleGoogleOAuthCallback
-  ),
-})
+route(
+  "/google/oauth/callback",
+  "GET",
+  () => import("./integrations/google/http"),
+  (module) => module.handleGoogleOAuthCallback
+)
 
-http.route({
-  path: "/google-calendar/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/google/http"),
-    (module) => (_ctx, request) =>
-      module.handleGoogleInstall(request, "googleCalendar")
-  ),
-})
+route(
+  "/google-calendar/install",
+  "GET",
+  () => import("./integrations/google/http"),
+  (module) => (_ctx, request) =>
+    module.handleGoogleInstall(request, "googleCalendar")
+)
 
-http.route({
-  path: "/slack/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/slack/http"),
-    (module) => (_ctx, request) => module.handleSlackInstall(request)
-  ),
-})
+route(
+  "/slack/install",
+  "GET",
+  () => import("./integrations/slack/http"),
+  (module) => (_ctx, request) => module.handleSlackInstall(request)
+)
 
-http.route({
-  path: "/slack/oauth/callback",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/slack/http"),
-    (module) => module.handleSlackOAuthCallback
-  ),
-})
+route(
+  "/slack/oauth/callback",
+  "GET",
+  () => import("./integrations/slack/http"),
+  (module) => module.handleSlackOAuthCallback
+)
 
-http.route({
-  path: "/slack/events",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./integrations/slack/http"),
-    (module) => module.handleSlackEvents
-  ),
-})
+route(
+  "/slack/events",
+  "POST",
+  () => import("./integrations/slack/http"),
+  (module) => module.handleSlackEvents
+)
 
-http.route({
-  path: "/slack/interactions",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./integrations/slack/http"),
-    (module) => module.handleSlackInteractions
-  ),
-})
+route(
+  "/slack/interactions",
+  "POST",
+  () => import("./integrations/slack/http"),
+  (module) => module.handleSlackInteractions
+)
 
-http.route({
-  path: "/linear/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/linear/ingress/http"),
-    (module) => (_ctx, request) => module.handleLinearInstall(request)
-  ),
-})
+route(
+  "/linear/install",
+  "GET",
+  () => import("./integrations/linear/ingress/http"),
+  (module) => (_ctx, request) => module.handleLinearInstall(request)
+)
 
-http.route({
-  path: "/linear/oauth/callback",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/linear/ingress/http"),
-    (module) => module.handleLinearOAuthCallback
-  ),
-})
+route(
+  "/linear/oauth/callback",
+  "GET",
+  () => import("./integrations/linear/ingress/http"),
+  (module) => module.handleLinearOAuthCallback
+)
 
-http.route({
-  path: "/linear/events",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./integrations/linear/ingress/http"),
-    (module) => module.handleLinearEvents
-  ),
-})
+route(
+  "/linear/events",
+  "POST",
+  () => import("./integrations/linear/ingress/http"),
+  (module) => module.handleLinearEvents
+)
 
-http.route({
-  path: "/notion/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/notion/http"),
-    (module) => (_ctx, request) => module.handleNotionInstall(request)
-  ),
-})
+route(
+  "/notion/install",
+  "GET",
+  () => import("./integrations/notion/http"),
+  (module) => (_ctx, request) => module.handleNotionInstall(request)
+)
 
-http.route({
-  path: "/notion/oauth/callback",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/notion/http"),
-    (module) => module.handleNotionOAuthCallback
-  ),
-})
+route(
+  "/notion/oauth/callback",
+  "GET",
+  () => import("./integrations/notion/http"),
+  (module) => module.handleNotionOAuthCallback
+)
 
-http.route({
-  path: "/notion/events",
-  method: "POST",
-  handler: lazyHttpAction(
-    () => import("./integrations/notion/http"),
-    (module) => module.handleNotionEvents
-  ),
-})
+route(
+  "/notion/events",
+  "POST",
+  () => import("./integrations/notion/http"),
+  (module) => module.handleNotionEvents
+)
 
-http.route({
-  path: "/microsoft-email/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/microsoft/http"),
-    (module) => (_ctx, request) =>
-      module.handleMicrosoftInstall(request, "microsoftEmail")
-  ),
-})
+route(
+  "/microsoft-email/install",
+  "GET",
+  () => import("./integrations/microsoft/http"),
+  (module) => (_ctx, request) =>
+    module.handleMicrosoftInstall(request, "microsoftEmail")
+)
 
-http.route({
-  path: "/microsoft-email/oauth/callback",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/microsoft/http"),
-    (module) => (ctx, request) =>
-      module.handleMicrosoftOAuthCallback(ctx, request, "microsoftEmail")
-  ),
-})
+route(
+  "/microsoft-email/oauth/callback",
+  "GET",
+  () => import("./integrations/microsoft/http"),
+  (module) => (ctx, request) =>
+    module.handleMicrosoftOAuthCallback(ctx, request, "microsoftEmail")
+)
 
-http.route({
-  path: "/microsoft-calendar/install",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/microsoft/http"),
-    (module) => (_ctx, request) =>
-      module.handleMicrosoftInstall(request, "microsoftCalendar")
-  ),
-})
+route(
+  "/microsoft-calendar/install",
+  "GET",
+  () => import("./integrations/microsoft/http"),
+  (module) => (_ctx, request) =>
+    module.handleMicrosoftInstall(request, "microsoftCalendar")
+)
 
-http.route({
-  path: "/microsoft-calendar/oauth/callback",
-  method: "GET",
-  handler: lazyHttpAction(
-    () => import("./integrations/microsoft/http"),
-    (module) => (ctx, request) =>
-      module.handleMicrosoftOAuthCallback(ctx, request, "microsoftCalendar")
-  ),
-})
+route(
+  "/microsoft-calendar/oauth/callback",
+  "GET",
+  () => import("./integrations/microsoft/http"),
+  (module) => (ctx, request) =>
+    module.handleMicrosoftOAuthCallback(ctx, request, "microsoftCalendar")
+)
+
+function route<Module>(
+  path: string,
+  method: "GET" | "OPTIONS" | "POST",
+  load: () => Promise<Module>,
+  pick: (module: Module) => LazyHandler
+) {
+  http.route({ path, method, handler: lazyHttpAction(load, pick) })
+}
 
 export default http

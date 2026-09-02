@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { type PlaceSection, placeSections } from "../../contracts/places"
+import { debounceValidator } from "../shared/debounce"
 
 // Sections a place profile is organized by: what the place is for, who is
 // active there, how people write, how work recurs, and what Jori is asked to
@@ -44,14 +45,7 @@ export const places = defineTable({
   claims: v.array(placeClaim),
   // Watermark: createdAt of the newest message the profile has seen.
   profiledAt: v.optional(v.number()),
-  /** Debounce state while a pass is scheduled: the pending function and the
-   *  ceiling it may not be pushed past. Cleared when the pass runs. */
-  debounce: v.optional(
-    v.object({
-      ceilingAt: v.number(),
-      functionId: v.id("_scheduled_functions"),
-    })
-  ),
+  debounce: debounceValidator,
 }).index("by_organization_and_integration_and_external", [
   "organizationId",
   "integrationId",

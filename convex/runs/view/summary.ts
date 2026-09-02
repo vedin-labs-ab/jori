@@ -1,6 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { runTask, runTitle, triggerLabel } from "./labels"
+import { runTask, triggerLabel } from "./labels"
 
 export async function projectRunSummary(ctx: QueryCtx, run: Doc<"runs">) {
   const context = {
@@ -11,7 +11,7 @@ export async function projectRunSummary(ctx: QueryCtx, run: Doc<"runs">) {
 
   return {
     runId: run._id,
-    title: runTitle(context),
+    title: run.snapshot.title,
     task: runTask(context),
     trigger: triggerLabel(context),
     audience: run.audience,

@@ -3,13 +3,13 @@ import { type Doc } from "../../../_generated/dataModel"
 import { requireLinearCredentials } from "../../../integrations/linear/credentials"
 import { postLinearComment } from "../../../integrations/linear/delivery/comments"
 import { addLinearReaction } from "../../../integrations/linear/delivery/reactions"
+import { linearGraphql } from "../../../integrations/linear/graphql"
 import {
   boundedNumber,
   readArray,
   readRecord,
   requiredString,
 } from "../../../shared/input"
-import { linearGraphql } from "./client"
 
 export async function callLinearTool(
   integration: Doc<"integrations">,
@@ -23,8 +23,10 @@ export async function callLinearTool(
   }
 
   if (tool === "linear_get_issue") {
-    const result = await linearGraphql(credentials.tokens.access, {
-      query: `
+    const result = await linearGraphql<Record<string, unknown>>(
+      credentials.tokens.access,
+      {
+        query: `
         query JoriIssue($id: String!) {
           issue(id: $id) {
             id
@@ -51,15 +53,18 @@ export async function callLinearTool(
           }
         }
       `,
-      variables: { id: requiredString(args.issueId, "issueId") },
-    })
+        variables: { id: requiredString(args.issueId, "issueId") },
+      }
+    )
 
     return readRecord(result.data).issue ?? null
   }
 
   if (tool === "linear_list_comments") {
-    const result = await linearGraphql(credentials.tokens.access, {
-      query: `
+    const result = await linearGraphql<Record<string, unknown>>(
+      credentials.tokens.access,
+      {
+        query: `
         query JoriIssueComments($id: String!, $first: Int!) {
           issue(id: $id) {
             id
@@ -77,11 +82,12 @@ export async function callLinearTool(
           }
         }
       `,
-      variables: {
-        id: requiredString(args.issueId, "issueId"),
-        first: boundedNumber(args.first, 25, 1, 50),
-      },
-    })
+        variables: {
+          id: requiredString(args.issueId, "issueId"),
+          first: boundedNumber(args.first, 25, 1, 50),
+        },
+      }
+    )
 
     return readArray(
       readRecord(readRecord(readRecord(result.data).issue).comments).nodes
@@ -130,7 +136,7 @@ async function getLinearIssueSummaryByIdentifier(token: string, query: string) {
     return null
   }
 
-  const result = await linearGraphql(token, {
+  const result = await linearGraphql<Record<string, unknown>>(token, {
     query: `
       query JoriIssueSummary($id: String!) {
         issue(id: $id) {
@@ -165,7 +171,7 @@ async function searchLinearIssues(
 ) {
   const query = normalizeSearchQuery(requiredString(args.query, "query"))
   const exactIssue = await getLinearIssueSummaryByIdentifier(token, query)
-  const result = await linearGraphql(token, {
+  const result = await linearGraphql<Record<string, unknown>>(token, {
     query: `
         query JoriIssueSearch($query: String!, $first: Int!) {
           issues(

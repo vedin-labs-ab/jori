@@ -1,5 +1,6 @@
 import { compactRecord } from "../../../../contracts/json"
 import { normalizeSourceChanges } from "../../../../contracts/source"
+import { githubJsonObject } from "../../../integrations/github/api"
 import { summarizePullRequest } from "../../../integrations/github/delivery/format"
 import {
   optionalBoolean,
@@ -8,7 +9,7 @@ import {
   requiredNumber,
   requiredString,
 } from "../../../shared/input"
-import { githubJsonObject, repositoryPath } from "./client"
+import { repositoryPath } from "./client"
 import {
   commitSourceChangesToBranch,
   createBranchWithSourceChanges,

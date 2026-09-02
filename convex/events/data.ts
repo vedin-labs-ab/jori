@@ -24,19 +24,18 @@ export async function recordEvent(
   | { status: "duplicate"; eventId: Id<"events"> }
   | { status: "recorded"; eventId: Id<"events">; runIds: Id<"runs">[] }
 > {
-  const existing = await findEventByKey(ctx, args)
+  const inserted = await insertUniqueEvent(ctx, args)
 
-  if (existing !== null) {
-    return { status: "duplicate", eventId: existing._id }
+  if (inserted.status === "duplicate") {
+    return inserted
   }
 
-  const now = args.now ?? Date.now()
-  const event = await insertEvent(ctx, args)
-
   return {
-    status: "recorded",
-    eventId: event._id,
-    runIds: await startEventJobs(ctx, { event, now }),
+    ...inserted,
+    runIds: await startEventJobs(ctx, {
+      event: inserted.event,
+      now: args.now ?? Date.now(),
+    }),
   }
 }
 
@@ -51,6 +50,18 @@ export async function recordBackfillEvent(
   | { status: "duplicate"; eventId: Id<"events"> }
   | { status: "recorded"; eventId: Id<"events"> }
 > {
+  const { event: _event, ...result } = await insertUniqueEvent(ctx, args)
+
+  return result
+}
+
+async function insertUniqueEvent(
+  ctx: MutationCtx,
+  args: EventInput
+): Promise<
+  | { status: "duplicate"; eventId: Id<"events">; event?: undefined }
+  | { status: "recorded"; eventId: Id<"events">; event: Doc<"events"> }
+> {
   const existing = await findEventByKey(ctx, args)
 
   if (existing !== null) {
@@ -59,7 +70,7 @@ export async function recordBackfillEvent(
 
   const event = await insertEvent(ctx, args)
 
-  return { status: "recorded", eventId: event._id }
+  return { status: "recorded", eventId: event._id, event }
 }
 
 async function findEventByKey(
