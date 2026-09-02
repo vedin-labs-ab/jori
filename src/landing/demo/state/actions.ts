@@ -1,3 +1,4 @@
+import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { shareFragment } from "@contracts/shares/fragment"
 import { type Visibility } from "@contracts/visibility"
 import { type Dispatch } from "react"
@@ -95,6 +96,12 @@ function materialActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
     updateMaterial: (id: string, values: MaterialEdit) =>
       dispatch({ type: "updateMaterial", at: Date.now(), id, ...values }),
     removeMaterial: (id: string) => dispatch({ type: "removeMaterial", id }),
+    writeStoreValue: (storeId: string, value: unknown) =>
+      dispatch({ type: "writeStoreValue", at: Date.now(), storeId, value }),
+    writeStoreSchema: (storeId: string, schema: JsonSchemaObject | undefined) =>
+      dispatch({ type: "writeStoreSchema", at: Date.now(), storeId, schema }),
+    writeFileText: (fileId: string, text: string) =>
+      dispatch({ type: "writeFileText", at: Date.now(), fileId, text }),
   }
 }
 
@@ -248,5 +255,5 @@ function newMaterial(
 
   return kind === "table"
     ? { ...base, kind, columns: [], rows: [] }
-    : { ...base, kind, version: 0 }
+    : { ...base, kind, value: null, version: 0 }
 }

@@ -23,8 +23,8 @@ import {
   type TableDetail,
   type TableRow,
 } from "@/shared/console/tables/types"
-import { DemoLinksDialog } from "../dialogs/links"
-import { useDemoWorkspace } from "../workspace"
+import { DemoLinksDialog } from "../../dialogs/links"
+import { useDemoWorkspace } from "../../workspace"
 
 /** The box the grid assumes before it can measure one, so a server render
  *  places the first rows rather than an empty canvas. */

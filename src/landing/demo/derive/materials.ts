@@ -1,19 +1,32 @@
-import { type FileRow } from "@/shared/console/files/types"
+import { isRecord } from "@contracts/json"
+import { type JsonSchemaObject } from "@contracts/schema/validate"
+import {
+  type FileSiblings,
+  fileSiblings,
+} from "@/shared/console/files/siblings"
+import { type FileDetail, type FileRow } from "@/shared/console/files/types"
 import {
   type MoveResourceTarget,
   type MoveSubject,
 } from "@/shared/console/folders/types"
-import { type StoreSummary } from "@/shared/console/stores/types"
+import {
+  type StoreDetail,
+  type StoreSummary,
+} from "@/shared/console/stores/types"
 import {
   type TableDetail,
   type TableSummary,
 } from "@/shared/console/tables/types"
 import { personName } from "../fixtures/people"
-import { type DemoFile, type DemoMaterial } from "../fixtures/types"
+import {
+  type DemoFile,
+  type DemoMaterial,
+  type DemoStore,
+} from "../fixtures/types"
 import { type DemoState } from "../state/types"
 
-// The material lists' rows and one table's detail, read off the workspace
-// the way the console's queries summarize their documents.
+// The material lists' rows and one material's detail, read off the
+// workspace the way the console's queries summarize their documents.
 
 export function materialOf(state: DemoState, id: string) {
   return state.materials.find((material) => material.id === id)
@@ -42,19 +55,60 @@ export function tableRows(state: DemoState, tableId: string) {
 
 export function storeSummaries(state: DemoState): StoreSummary[] {
   return state.materials.flatMap((material) =>
-    material.kind === "store"
-      ? [
-          {
-            ...owned(material),
-            storeId: material.id,
-            schema: undefined,
-            schemaHash: "demo",
-            propertyCount: material.propertyCount,
-            archivedAt: undefined,
-            version: material.version,
-          },
-        ]
-      : []
+    material.kind === "store" ? [storeSummary(material)] : []
+  )
+}
+
+export function storeDetail(
+  state: DemoState,
+  storeId: string
+): StoreDetail | undefined {
+  const material = materialOf(state, storeId)
+
+  return material?.kind === "store"
+    ? { ...storeSummary(material), value: material.value }
+    : undefined
+}
+
+function storeSummary(material: DemoStore): StoreSummary {
+  return {
+    ...owned(material),
+    storeId: material.id,
+    schema: material.schema,
+    schemaHash: "demo",
+    propertyCount: countLeafProperties(material.schema),
+    archivedAt: undefined,
+    version: material.version,
+  }
+}
+
+/** How many leaf properties the schema declares, counted the way the
+ *  console's summary counts them: objects are structure, arrays count
+ *  their item shape once, and everything else is one slot. */
+function countLeafProperties(schema: JsonSchemaObject | undefined) {
+  if (schema === undefined) {
+    return undefined
+  }
+
+  return isRecord(schema.properties) ? countChildLeaves(schema.properties) : 0
+}
+
+function countNodeLeaves(node: unknown): number {
+  if (!isRecord(node)) {
+    return 1
+  }
+
+  if (isRecord(node.properties)) {
+    return countChildLeaves(node.properties)
+  }
+
+  return isRecord(node.items) ? countNodeLeaves(node.items) : 1
+}
+
+function countChildLeaves(properties: Record<string, unknown>) {
+  return Object.values(properties).reduce<number>(
+    (total, child) => total + countNodeLeaves(child),
+    0
   )
 }
 
@@ -64,7 +118,29 @@ export function fileRows(state: DemoState): FileRow[] {
   )
 }
 
-/** A file as its list row: the demo has no storage, so no download url. */
+/** A file's detail is its row: the console's queries answer both with
+ *  the same shape. */
+export function fileDetail(
+  state: DemoState,
+  fileId: string
+): FileDetail | undefined {
+  const material = materialOf(state, fileId)
+
+  return material?.kind === "file" ? fileRowOf(material) : undefined
+}
+
+/** The file's neighbors in the list's canonical order, newest first. */
+export function fileSiblingsOf(state: DemoState, fileId: string): FileSiblings {
+  const rows = fileRows(state).sort(
+    (left, right) => right.createdAt - left.createdAt
+  )
+
+  return fileSiblings(rows, fileId as FileRow["fileId"])
+}
+
+/** A file as its list row. The url is what the viewer fetches: text held
+ *  in memory travels as a data url, so an edit changes what the next
+ *  visit reads; a binary file points at the asset that backs it. */
 export function fileRowOf(material: DemoFile): FileRow {
   return {
     ...owned(material),
@@ -73,8 +149,16 @@ export function fileRowOf(material: DemoFile): FileRow {
     size: material.size,
     source: material.source,
     runId: undefined,
-    url: null,
+    url: fileUrl(material),
   }
+}
+
+function fileUrl(material: DemoFile) {
+  if (material.text !== undefined) {
+    return `data:${material.mimeType};charset=utf-8,${encodeURIComponent(material.text)}`
+  }
+
+  return material.asset ?? null
 }
 
 function tableSummary(
