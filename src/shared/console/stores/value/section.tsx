@@ -10,10 +10,10 @@ import { JsonBlock } from "@/shared/console/code"
 import { CopyButton } from "@/shared/console/copy"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { ConsoleListContent } from "@/shared/console/list/frame"
-import { type StoreDetail } from "@/shared/console/stores/types"
 import { formatJsonText } from "../json"
-import { StoreSchemaDialog } from "../schema/dialog"
-import { ValueEditorSection } from "./editor"
+import { type SchemaWrite, StoreSchemaDialog } from "../schema/dialog"
+import { type StoreDetail } from "../types"
+import { ValueEditorSection, type ValueWrite } from "./editor"
 import { StoreToolbar } from "./toolbar"
 
 /** The store's value under the store toolbar. The editor IS the page —
@@ -22,10 +22,14 @@ import { StoreToolbar } from "./toolbar"
  *  archived — falls back to a read-only document under a plain
  *  toolbar. */
 export function StoreValue({
-  organizationId,
+  onWriteSchema,
+  onWriteValue,
   store,
 }: {
-  organizationId: string
+  /** Replaces the store's schema; null removes it. A rejection's message
+   *  surfaces under the schema editor. */
+  onWriteSchema: SchemaWrite
+  onWriteValue: ValueWrite
   store: StoreDetail
 }) {
   const [isSchemaOpen, setIsSchemaOpen] = useState(false)
@@ -46,7 +50,7 @@ export function StoreValue({
       {store.schema !== undefined && store.archivedAt === undefined ? (
         <ValueEditorSection
           key={store.storeId}
-          organizationId={organizationId}
+          onWrite={onWriteValue}
           schema={store.schema}
           store={store}
           tools={tools}
@@ -61,7 +65,7 @@ export function StoreValue({
       )}
       <StoreSchemaDialog
         onOpenChange={setIsSchemaOpen}
-        organizationId={organizationId}
+        onWrite={onWriteSchema}
         store={isSchemaOpen ? store : undefined}
       />
     </>

@@ -7,15 +7,10 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { type StoreDetail } from "@/shared/console/stores/types"
+import { type StoreDetail } from "../types"
 import { StoreSchemaDialog } from "./dialog"
 
 const writeSchema = vi.fn()
-
-vi.mock("convex/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("convex/react")>()),
-  useMutation: () => writeSchema,
-}))
 
 afterEach(cleanup)
 
@@ -44,7 +39,7 @@ function renderDialog(store: StoreDetail, onOpenChange = () => undefined) {
   render(
     <StoreSchemaDialog
       onOpenChange={onOpenChange}
-      organizationId="org-1"
+      onWrite={writeSchema}
       store={store}
     />
   )
@@ -100,9 +95,8 @@ describe("saving the schema", () => {
 
     await waitFor(() => expect(writeSchema).toHaveBeenCalledOnce())
     expect(writeSchema.mock.calls[0]?.[0]).toEqual({
-      organizationId: "org-1",
-      storeId: "store-1",
-      schema: { type: "object", properties: { total: { type: "string" } } },
+      type: "object",
+      properties: { total: { type: "string" } },
     })
   })
 
@@ -150,11 +144,7 @@ describe("removing the schema", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove schema" }))
 
     await waitFor(() => expect(writeSchema).toHaveBeenCalledOnce())
-    expect(writeSchema.mock.calls[0]?.[0]).toEqual({
-      organizationId: "org-1",
-      storeId: "store-1",
-      schema: null,
-    })
+    expect(writeSchema.mock.calls[0]?.[0]).toBeNull()
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
   })
 })

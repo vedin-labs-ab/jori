@@ -1,16 +1,11 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { type StoreDetail } from "@/shared/console/stores/types"
+import { type StoreDetail } from "../types"
 import { ValueEditorSection } from "./editor"
 import { valueEditorNotes } from "./state"
 
 const writeValue = vi.fn()
-
-vi.mock("convex/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("convex/react")>()),
-  useMutation: () => writeValue,
-}))
 
 afterEach(() => {
   cleanup()
@@ -58,7 +53,7 @@ function renderEditor(value: unknown, version = 2) {
 
   render(
     <ValueEditorSection
-      organizationId="org-1"
+      onWrite={writeValue}
       schema={schema}
       store={store}
       tools={null}
@@ -106,17 +101,15 @@ describe("value editor submission", () => {
     await settle()
 
     expect(writeValue).toHaveBeenCalledOnce()
-    expect(writeValue.mock.calls[0]?.[0]).toEqual({
-      organizationId: "org-1",
-      storeId: "store-1",
-      expectedVersion: 2,
-      value: {
+    expect(writeValue.mock.calls[0]).toEqual([
+      {
         title: "March",
         total: 3.5,
         paid: true,
         shipping: { city: "Oslo" },
       },
-    })
+      2,
+    ])
   })
 
   test("array items add, edit, and remove as grid rows", async () => {
@@ -135,7 +128,7 @@ describe("value editor submission", () => {
     await settle()
 
     expect(writeValue).toHaveBeenCalledOnce()
-    expect(writeValue.mock.calls[0]?.[0].value).toEqual({
+    expect(writeValue.mock.calls[0]?.[0]).toEqual({
       title: "March",
       total: 2,
       paid: false,
@@ -155,7 +148,7 @@ describe("value editor submission", () => {
     await settle()
 
     expect(writeValue).toHaveBeenCalledOnce()
-    expect(writeValue.mock.calls[0]?.[0].value).toEqual({
+    expect(writeValue.mock.calls[0]?.[0]).toEqual({
       title: "March",
       total: 2,
       paid: true,

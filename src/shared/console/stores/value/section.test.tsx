@@ -1,14 +1,9 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, expect, test, vi } from "vitest"
+import { afterEach, expect, test } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { type StoreDetail } from "@/shared/console/stores/types"
+import { type StoreDetail } from "../types"
 import { StoreValue } from "./section"
-
-vi.mock("convex/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("convex/react")>()),
-  useMutation: () => vi.fn(),
-}))
 
 afterEach(cleanup)
 
@@ -27,7 +22,11 @@ function renderValue(overrides: Partial<StoreDetail>) {
 
   render(
     <TooltipProvider>
-      <StoreValue organizationId="org-1" store={store} />
+      <StoreValue
+        onWriteSchema={() => Promise.resolve()}
+        onWriteValue={() => Promise.resolve()}
+        store={store}
+      />
     </TooltipProvider>
   )
 }
