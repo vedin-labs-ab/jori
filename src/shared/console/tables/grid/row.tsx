@@ -28,9 +28,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { cn } from "@/lib/utils"
-import { displayCellText } from "@/shared/cell"
 import { type RowSelection } from "../../list/selection"
-import { parseCellText } from "../cells"
+import { displayCellText, parseCellText } from "../cells"
 import {
   type RowPlacement,
   type TableColumn,

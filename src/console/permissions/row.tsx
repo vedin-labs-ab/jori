@@ -1,15 +1,15 @@
 import {
+  type ConfigurablePermissionMode,
+  type PermissionMode,
+} from "@contracts/permissions"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  type ConfigurablePermissionMode,
-  type PermissionMode,
-  type ToolPermission,
-} from "./types"
+import { type ToolPermission } from "@/shared/console/tools/model"
 
 const modeLabels: Record<PermissionMode, string> = {
   required: "Required",

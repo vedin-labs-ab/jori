@@ -1,6 +1,10 @@
 import { expect, test } from "vitest"
-import { displayCellText } from "@/shared/cell"
-import { buildRowValues, formatCellText, parseCellText } from "./cells"
+import {
+  buildRowValues,
+  displayCellText,
+  formatCellText,
+  parseCellText,
+} from "./cells"
 import { type TableColumn } from "./types"
 
 test("parses text cells verbatim", () => {

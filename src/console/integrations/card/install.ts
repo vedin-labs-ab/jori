@@ -1,9 +1,9 @@
+import { type ToolSurface } from "@contracts/permissions"
 import { useMutation } from "convex/react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../../convex/_generated/api"
-import { type ToolSurface } from "../../permissions/types"
 
 const convexSiteUrl = import.meta.env.VITE_CONVEX_SITE_URL
 

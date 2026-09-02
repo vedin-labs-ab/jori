@@ -1,6 +1,8 @@
 import { EditFileDialog } from "@/shared/console/files/edit"
 import { EditMaterialDialog } from "@/shared/console/materials/dialogs/edit"
 import { useRetained } from "@/shared/console/retain"
+import { storeEditBlurb } from "@/shared/console/stores/list/config"
+import { tableEditBlurb } from "@/shared/console/tables/list/config"
 import { fileRowOf, materialMoveSubject } from "../derive/materials"
 import { type DemoMaterial } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
@@ -12,11 +14,6 @@ export type MaterialRequest = {
   kind: "access" | "edit" | "move"
   material: DemoMaterial
 }
-
-const blurbs = {
-  table: "Rename the table or update the note that helps others find it.",
-  store: "Rename the store or update its description.",
-} as const
 
 /** The dialogs a material's menu opens, over the workspace. The last
  *  material is kept so a closing dialog does not empty mid-animation. */
@@ -95,7 +92,7 @@ function MaterialEditDialog({
 
   return (
     <EditMaterialDialog
-      blurb={blurbs[material.kind]}
+      blurb={material.kind === "table" ? tableEditBlurb : storeEditBlurb}
       isSaving={false}
       material={open ? material : undefined}
       noun={material.kind}

@@ -142,10 +142,11 @@ function canonicalHostRedirect(
 
 /** What the visitor typed, as the deployment's proxy reports it. */
 function resolveRequestHost(request: Request, requestUrl: URL) {
-  return (
-    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ??
-    requestUrl.host
-  )
+  return forwardedHost(request) ?? requestUrl.host
+}
+
+function forwardedHost(request: Request) {
+  return request.headers.get("x-forwarded-host")?.split(",")[0]?.trim()
 }
 
 function resolveRequestOrigin(request: Request, config: RegionConfig) {
@@ -159,14 +160,11 @@ function resolveRequestOrigin(request: Request, config: RegionConfig) {
     return directOrigin
   }
 
-  const forwardedHost = request.headers
-    .get("x-forwarded-host")
-    ?.split(",")[0]
-    ?.trim()
+  const host = forwardedHost(request)
 
-  if (forwardedHost !== undefined) {
+  if (host !== undefined) {
     const forwardedOrigin = [...allowedOrigins].find(
-      (origin) => new URL(origin).host === forwardedHost
+      (origin) => new URL(origin).host === host
     )
 
     if (forwardedOrigin !== undefined) {

@@ -1,3 +1,8 @@
+import {
+  type ConfigurablePermissionMode,
+  type ToolAccess,
+  type ToolSurface,
+} from "@contracts/permissions"
 import { ChevronDown, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -9,15 +14,10 @@ import {
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "@/shared/console/dot"
 import { flushRowClassName } from "@/shared/console/flush"
+import { type ToolPermission } from "@/shared/console/tools/model"
 import { LoadingMessage } from "@/shared/loading"
 import { type ToolPermissionController } from "./controller"
 import { PermissionRow } from "./row"
-import {
-  type ConfigurablePermissionMode,
-  type ToolAccess,
-  type ToolPermission,
-  type ToolSurface,
-} from "./types"
 
 export function PermissionSection({
   controller,

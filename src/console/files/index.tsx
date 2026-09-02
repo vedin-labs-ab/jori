@@ -47,7 +47,7 @@ export function FilesPage() {
 function useFileList(organizationId: string) {
   const files = useQuery(api.files.console.list, { organizationId })
   const folders = useFolderNames(organizationId)
-  const config = fileListConfig(files ?? [], folders)
+  const config = fileListConfig(folders, files ?? [])
   const controls = useListControls(config)
   const rows = controls.apply(files ?? [])
   const pagination = useClientPagination({

@@ -248,13 +248,6 @@ function ConsoleSearchField({
   )
 }
 
-export function ConsoleContentGrid({
-  className,
-  ...props
-}: ComponentProps<"div">) {
-  return <div className={cn("grid gap-4", className)} {...props} />
-}
-
 /** Scroll-in-place stack: the div and ul forms differ only in semantics. */
 const scrollableStack =
   "grid min-h-0 flex-1 auto-rows-max content-start gap-3 overflow-y-auto"

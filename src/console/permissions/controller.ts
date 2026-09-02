@@ -1,12 +1,12 @@
+import {
+  type ConfigurablePermissionMode,
+  type ToolSurface,
+} from "@contracts/permissions"
 import { useMutation, useQuery } from "convex/react"
 import { useState } from "react"
 import { showErrorToast } from "@/shared/console/error"
+import { type ToolPermission } from "@/shared/console/tools/model"
 import { api } from "../../../convex/_generated/api"
-import {
-  type ConfigurablePermissionMode,
-  type ToolPermission,
-  type ToolSurface,
-} from "./types"
 
 export type ToolPermissionController = {
   permissions: ToolPermission[] | null | undefined

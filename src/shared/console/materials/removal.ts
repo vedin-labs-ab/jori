@@ -6,14 +6,12 @@ import { type SelectionRemoval } from "../list/bar"
 
 type RemovalTarget = { name: string; archivedAt?: number }
 
-type MaterialNoun = CountedNoun
-
 /** How a bulk removal presents, mirroring the per-row rules: an all-active
  *  selection archives, while any archived material makes the step a
  *  permanent delete. */
 export function bulkMaterialRemoval(
   rows: { archivedAt?: number }[],
-  noun: MaterialNoun,
+  noun: CountedNoun,
   deleteDescription: string
 ): SelectionRemoval {
   const archived = rows.filter((row) => row.archivedAt !== undefined).length
@@ -40,7 +38,7 @@ export function bulkMaterialRemoval(
  *  mix of active and archived materials. */
 export function bulkMaterialRemovalSuccess(
   rows: { archivedAt?: number }[],
-  noun: MaterialNoun
+  noun: CountedNoun
 ) {
   const deleted = rows.filter((row) => row.archivedAt !== undefined).length
   const archived = rows.length - deleted
