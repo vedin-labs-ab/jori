@@ -12,6 +12,7 @@ import {
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { scrollFade } from "@/shared/fade"
 import { ConsoleLink } from "../shell/link"
 import { NewInFolderMenu } from "./create"
 import { useExpandHoverHandler, useRootDrop } from "./drag/state"
@@ -51,8 +52,15 @@ export function FolderTree({
     <>
       {/* The tree is a hover-and-drag surface with no icon-rail form, so
           icon-collapsed mode swaps the whole group for one Folders entry
-          and navigation continues on the /folders page. */}
-      <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          and navigation continues on the /folders page. The group takes
+          the height the navigation above and below it leaves, and scrolls
+          on its own, so a long tree never pushes the platform group away. */}
+      <SidebarGroup
+        className={cn(
+          "min-h-28 flex-1 overflow-y-auto group-data-[collapsible=icon]:hidden",
+          scrollFade
+        )}
+      >
         <FoldersLabel />
         {/* The "+" creates at the top level: a root folder, or a resource
             whose dialog starts unfiled with the Folder field free to set. */}
