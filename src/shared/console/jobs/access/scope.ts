@@ -1,4 +1,5 @@
 import { isUserScopedIntegration } from "@contracts/integrations"
+import { type Visibility } from "@contracts/visibility"
 import {
   getJobSurfaceLabel,
   type JobSurfaceFormValue,
@@ -44,4 +45,10 @@ export function getJobSurfaceScopeIssue(
   return isJobSurfaceAllowedForScope(scope, integration)
     ? undefined
     : `${getJobSurfaceLabel(integration)} requires Personal sharing.`
+}
+
+/** The execution sharing a visibility implies: private jobs run as
+ *  their person, every shared mode as the organization. */
+export function derivedScope(visibility: Visibility): JobScope {
+  return visibility.mode === "private" ? "personal" : "organization"
 }

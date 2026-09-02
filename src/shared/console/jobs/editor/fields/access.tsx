@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { ProviderLogo } from "@/shared/logo/provider"
 import {
   getJobSurfaceLabel,
   getJobSurfaceScopeIssue,
   type JobScope,
   type JobSurfaceFormValue,
-} from "@/shared/console/jobs/access"
-import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
-import { JobSurfaceToolsDialog } from "@/shared/console/jobs/editor/instructions/access/tools"
-import { ProviderLogo } from "@/shared/logo/provider"
+} from "../../access"
+import { type JobPolicyPermissions } from "../../access/policy"
+import { JobSurfaceToolsDialog } from "../instructions/access/tools"
 
 export function AccessFields({
   additionalSurfaces,

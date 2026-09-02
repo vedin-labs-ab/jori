@@ -1,7 +1,5 @@
-import {
-  defaultVisibilityForIntegrations,
-  type Visibility,
-} from "@contracts/visibility"
+import { defaultVisibilityForIntegrations } from "@contracts/visibility"
+import { derivedScope } from "@/shared/console/jobs/access"
 import {
   emptyJobForm,
   type Job,
@@ -38,12 +36,4 @@ export function jobFormValues(job: Job | undefined): JobFormValues {
     webSearch: job.access.webSearch,
     surfaces: job.access.surfaces,
   }
-}
-
-/** The execution sharing a visibility implies: private jobs run as
- *  their person, every shared mode as the organization. */
-export function derivedScope(visibility: Visibility) {
-  return visibility.mode === "private"
-    ? ("personal" as const)
-    : ("organization" as const)
 }

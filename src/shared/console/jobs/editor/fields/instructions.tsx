@@ -1,12 +1,9 @@
 import { Label } from "@/components/ui/label"
-import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
-import {
-  isJobToolReferenceError,
-  jobInstructionMarkerErrors,
-} from "@/shared/console/jobs/editor/errors"
-import { JobInstructionsField } from "@/shared/console/jobs/editor/instructions/field"
-import { type JobFormValues } from "@/shared/console/jobs/types"
 import { FieldHelp } from "@/shared/field"
+import { type JobPolicyPermissions } from "../../access/policy"
+import { type JobFormValues } from "../../types"
+import { isJobToolReferenceError, jobInstructionMarkerErrors } from "../errors"
+import { JobInstructionsField } from "../instructions/field"
 
 export function JobInstructionsSection({
   additionalSurfaces,
