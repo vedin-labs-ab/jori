@@ -4,8 +4,8 @@ import { type FolderId } from "../fixtures/types"
 import { type DemoActions } from "../state/actions"
 import { useDemoFolders, useDemoWorkspace } from "../workspace"
 
-/** The move dialog over the workspace: a folder re-parents, filed
- *  resources re-file, and the move lands at once. */
+/** The move dialog over the workspace: folders re-parent, resources
+ *  re-file, and the move lands at once. */
 export function DemoMoveDialog({
   onOpenChange,
   subject,
@@ -38,10 +38,8 @@ function move(
   subject: MoveSubject,
   destination: FolderId | null
 ) {
-  if (subject.kind === "folder") {
-    actions.moveFolder(subject.folderId as FolderId, destination)
-
-    return
+  for (const folder of subject.folders) {
+    actions.moveFolder(folder.folderId as FolderId, destination)
   }
 
   for (const resource of subject.resources) {

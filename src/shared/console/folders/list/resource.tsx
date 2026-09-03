@@ -1,47 +1,61 @@
 import { Check, type LucideIcon, Pause } from "lucide-react"
 import { type ReactNode } from "react"
-import { TableCell, TableRow } from "@/components/ui/table"
+import { TableCell } from "@/components/ui/table"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { SelectionRowCell } from "../../list/bar"
+import { type RowSelection } from "../../list/selection"
 import { MaterialOwnerCell } from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
 import { VisibilityMark } from "../../visibility/badge"
-import { type ResourceDragPayload } from "../drag/plan"
+import { type ResourceDragItem } from "../drag/plan"
+import { DraggableTableRow } from "../drag/row"
 import { useResourceRowDrag } from "../drag/state"
 import { type FolderResource, resourcePresentation } from "../types"
-import { nameLinkClassName, rowDragClasses } from "./style"
+import { type FolderListEntry, resourceDragItem } from "./controls"
+import { nameLinkClassName } from "./style"
 
 /** One filed resource in a folder's listing, linking to its own surface.
  *  The row drags: resources file onto any folder row or unfile onto the
- *  sidebar's group header. Its menu, trigger and all, is handed in: what
- *  a filed resource can be asked to do is its own kind's business. */
+ *  sidebar's group header, and a selected row takes the rest of the
+ *  selected resources with it. Its menu, trigger and all, is handed in:
+ *  what a filed resource can be asked to do is its own kind's business. */
 export function ResourceListRow({
   folderId,
   menu,
   resource,
+  selected,
+  selection,
 }: {
   /** The folder being viewed — the one the resource already sits in. */
   folderId: string
   menu: ReactNode
   resource: FolderResource
+  /** The selected resources, as a drag would carry them. */
+  selected: readonly ResourceDragItem[]
+  selection: RowSelection<FolderListEntry>
 }) {
-  const drag = useResourceRowDrag(resourcePayload(resource, folderId))
+  const drag = useResourceRowDrag(
+    resourceDragItem(resource, folderId),
+    selected
+  )
   const now = useNow(30_000)
 
   return (
-    <TableRow
-      {...drag.attributes}
-      {...drag.listeners}
-      className={rowDragClasses(drag)}
-      onClickCapture={drag.onClickCapture}
-      onPointerDownCapture={drag.onPointerDownCapture}
-      ref={drag.setNodeRef}
+    <DraggableTableRow
+      data-state={selection.isSelected(resource) ? "selected" : undefined}
+      drag={drag}
     >
+      <SelectionRowCell
+        label={`Select ${resource.name}`}
+        row={resource}
+        selection={selection}
+      />
       <TableCell>
         <ResourceLink resource={resource} />
       </TableCell>
@@ -64,7 +78,7 @@ export function ResourceListRow({
         {relativeTime(resource.updatedAt, now)}
       </TableCell>
       <TableCell className="text-right">{menu}</TableCell>
-    </TableRow>
+    </DraggableTableRow>
   )
 }
 
@@ -99,20 +113,6 @@ const statusMarks: Partial<
 > = {
   completed: { icon: Check, label: "Completed" },
   paused: { icon: Pause, label: "Paused" },
-}
-
-function resourcePayload(
-  resource: FolderResource,
-  folderId: string
-): ResourceDragPayload {
-  return {
-    kind: "resource",
-    type: resource.type,
-    id: resource.id,
-    name: resource.name,
-    mimeType: resource.mimeType,
-    folderId,
-  }
 }
 
 /** The resource's own surface. */

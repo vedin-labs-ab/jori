@@ -2,6 +2,7 @@ import { getNextCronRunAt } from "@contracts/jobs/schedule/cron"
 import {
   type MoveResourceTarget,
   type MoveSubject,
+  resourceSubject,
 } from "@/shared/console/folders/types"
 import {
   type Job,
@@ -179,5 +180,5 @@ export function jobMoveTarget(job: Job): MoveResourceTarget {
 
 /** A job on its own as the move dialog's subject. */
 export function jobMoveSubject(job: Job): MoveSubject {
-  return { kind: "resources", resources: [jobMoveTarget(job)] }
+  return resourceSubject([jobMoveTarget(job)])
 }

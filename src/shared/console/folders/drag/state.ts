@@ -1,28 +1,31 @@
 // The drag state rows subscribe to, plus their dnd-kit wiring. The
-// provider in context.tsx owns the state; sidebar folder rows, folder-page
-// rows, and the group header register as sources and targets here.
+// provider in provider.tsx owns the state; sidebar folder rows, folder-page
+// rows, material list rows, and the group header register as sources and
+// targets here.
 
 import { useDraggable, useDroppable } from "@dnd-kit/core"
 import { createContext, useContext, useEffect, useRef } from "react"
 import {
   type DragPayload,
   type DropTarget,
-  type ResourceDragPayload,
+  type ResourceDragItem,
+  resourcesPayload,
   rootDropId,
 } from "./plan"
 
 export type FolderDragState = {
   /** The payload being dragged, or null while idle. */
   active: DragPayload | null
-  /** Folder rows that must refuse the drop (see blockedFolderIds). */
-  blockedIds: ReadonlySet<string>
+  /** Targets that must refuse the drop, the top level as null (see
+   *  blockedTargets). */
+  blockedIds: ReadonlySet<string | null>
   /** The folder whose move just landed, held briefly for a settle cue. */
   settledId: string | null
 }
 
 export const idleDragState: FolderDragState = {
   active: null,
-  blockedIds: new Set<string>(),
+  blockedIds: new Set<string | null>(),
   settledId: null,
 }
 
@@ -48,6 +51,10 @@ export function useExpandHoverHandler(handler: (folderId: string) => void) {
 type DragZone = "sidebar" | "contents"
 
 export type FolderRowDrag = ReturnType<typeof useFolderRowDrag>
+
+/** What every drag source hands its element: dnd-kit's attributes and
+ *  listeners, the click guards, and the node ref. */
+export type DragSource = ReturnType<typeof useDragSource>
 
 /** Wires one folder row as drag source and drop target. Spread
  *  `attributes` and `listeners` onto the row element along with the click
@@ -81,22 +88,29 @@ export function useFolderRowDrag(
   }
 }
 
-/** Wires one folder-page resource row as a drag source only: resources
- *  drop onto folder rows, they take no drops themselves. */
-export function useResourceRowDrag(payload: ResourceDragPayload) {
+/** Wires one resource row as a drag source only: resources drop onto
+ *  folder rows, they take no drops themselves. Started on a selected row,
+ *  the drag carries the whole selection. */
+export function useResourceRowDrag(
+  item: ResourceDragItem,
+  selected: readonly ResourceDragItem[]
+) {
   const { active } = useContext(FolderDragContext)
-  const source = useDragSource(`resource-${payload.id}`, payload)
+  const source = useDragSource(
+    `resource-${item.type}-${item.id}`,
+    resourcesPayload(item, selected)
+  )
 
   return { ...source, isDragActive: active !== null }
 }
 
 /** Wires the "Folders" group header as the move-to-top-level target. */
 export function useRootDrop() {
-  const { active } = useContext(FolderDragContext)
+  const { active, blockedIds } = useContext(FolderDragContext)
   const droppable = useDroppable({
     id: rootDropId,
     data: dropTarget(null, "sidebar"),
-    disabled: active === null,
+    disabled: active === null || blockedIds.has(null),
   })
 
   return { isDropTarget: droppable.isOver, setNodeRef: droppable.setNodeRef }

@@ -1,8 +1,10 @@
 // Resolves a released drag into the mutation it planned: folders
-// re-parent through `move`, filed resources re-file through `file`.
-// Invalid and no-op targets resolve to no call; failures surface the way
-// the move dialog's do. Both kinds pass the audience confirmation first —
-// one dialog for the whole drag surface, since a drag releases once.
+// re-parent through `move`, resources re-file through `file`. Invalid and
+// no-op targets resolve to no call; failures surface the way the move
+// dialog's do. A folder and a single resource pass the audience
+// confirmation first — one dialog for the whole drag surface, since a
+// drag releases once; a selection has no single audience, so it moves
+// without the question, the way the move dialog's bulk move does.
 
 import { useMutation } from "convex/react"
 import { type GenericId } from "convex/values"
@@ -15,7 +17,7 @@ import {
   type FolderDragPayload,
   planDrop,
   planFileDrop,
-  type ResourceDragPayload,
+  type ResourceDragItem,
 } from "@/shared/console/folders/drag/plan"
 import { type FolderDrop } from "@/shared/console/folders/drag/provider"
 import { type FolderSummary } from "@/shared/console/folders/tree"
@@ -35,7 +37,7 @@ export function useDropActions(
 ): { dialog: ReactNode; run: FolderDrop } {
   const confirmation = useMoveConfirmation(organizationId)
   const dropFolder = useFolderDrop(organizationId, confirmation)
-  const dropResource = useResourceDrop(organizationId, confirmation, folders)
+  const dropResources = useResourcesDrop(organizationId, confirmation, folders)
 
   return {
     dialog: confirmation.dialog,
@@ -45,7 +47,7 @@ export function useDropActions(
             payload,
             planDrop(folders, payload.folderId, target.folderId)
           )
-        : dropResource(payload, planFileDrop(payload, target.folderId)),
+        : dropResources(planFileDrop(payload, target.folderId)),
   }
 }
 
@@ -96,7 +98,7 @@ function useFolderDrop(
   }
 }
 
-function useResourceDrop(
+function useResourcesDrop(
   organizationId: string | undefined,
   confirmation: MoveConfirmation,
   folders: readonly FolderSummary[]
@@ -104,32 +106,42 @@ function useResourceDrop(
   const file = useMutation(api.folders.console.file)
   const refile = async (
     organization: string,
-    payload: ResourceDragPayload,
+    items: ResourceDragItem[],
     folderId: string | null
   ) => {
     try {
-      await file({
-        organizationId: organization,
-        resourceType: toFiledType(payload.type),
-        resourceId: payload.id,
-        folderId: folderId as GenericId<"folders"> | null,
-      })
-      toast.success(filedMessage(payload.name, folderId, folders))
+      await Promise.all(
+        items.map((item) =>
+          file({
+            organizationId: organization,
+            resourceType: toFiledType(item.type),
+            resourceId: item.id,
+            folderId: folderId as GenericId<"folders"> | null,
+          })
+        )
+      )
+      toast.success(filedMessage(items, folderId, folders))
 
       return true
     } catch (error) {
-      showErrorToast(error, `Could not move ${payload.name}.`)
+      showErrorToast(error, `Could not move ${itemsName(items)}.`)
 
       return false
     }
   }
 
   return (
-    payload: ResourceDragPayload,
-    plan: { folderId: string | null } | undefined
+    plan: { folderId: string | null; items: ResourceDragItem[] } | undefined
   ) => {
     if (organizationId === undefined || plan === undefined) {
       return Promise.resolve(false)
+    }
+
+    const run = () => refile(organizationId, plan.items, plan.folderId)
+    const [item] = plan.items
+
+    if (plan.items.length !== 1 || item === undefined) {
+      return run()
     }
 
     return confirmed(
@@ -137,13 +149,13 @@ function useResourceDrop(
       {
         subject: {
           kind: "resource",
-          resourceType: toFiledType(payload.type),
-          resourceId: payload.id,
+          resourceType: toFiledType(item.type),
+          resourceId: item.id,
         },
-        name: payload.name,
+        name: item.name,
         folderId: plan.folderId,
       },
-      () => refile(organizationId, payload, plan.folderId)
+      run
     )
   }
 }
@@ -169,14 +181,21 @@ function confirmed(
   })
 }
 
+function itemsName(items: ResourceDragItem[]) {
+  return items.length === 1 ? items[0].name : `${items.length} items`
+}
+
 function filedMessage(
-  name: string,
+  items: ResourceDragItem[],
   folderId: string | null,
   folders: readonly FolderSummary[]
 ) {
   const folder = folders.find((row) => row.folderId === folderId)
+  const name = itemsName(items)
 
-  return folderId === null
-    ? `Moved ${name} out of the folder.`
-    : `Moved ${name} to ${folder?.name ?? "the folder"}.`
+  if (folderId === null) {
+    return `Moved ${name} out of ${items.length === 1 ? "the folder" : "their folders"}.`
+  }
+
+  return `Moved ${name} to ${folder?.name ?? "the folder"}.`
 }

@@ -1,6 +1,7 @@
 import { Plus, Table2, Upload } from "lucide-react"
 import { type ComponentProps } from "react"
 import { Button } from "@/components/ui/button"
+import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -56,6 +57,13 @@ export function TablesToolbar({
 
 const identify = (table: TableSummary) => table.tableId
 
+const drag = (table: TableSummary): ResourceDragItem => ({
+  type: "table",
+  id: table.tableId,
+  name: table.name,
+  folderId: table.folderId,
+})
+
 const columns = materialColumns<TableSummary>([
   measureColumn("Columns", "columns", (table) => (
     <TableColumnsCell table={table} />
@@ -97,6 +105,7 @@ export function TableList({
         columns,
         description:
           "Typed tables Jori and your team keep structured records in appear here.",
+        drag,
         icon: Table2,
         identify,
         menu: materialRowMenu(

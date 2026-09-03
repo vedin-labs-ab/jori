@@ -2,7 +2,7 @@ import { useContext, useMemo, useState } from "react"
 import { JobDetail } from "@/shared/console/jobs/detail"
 import { JobHeaderActions } from "@/shared/console/jobs/detail/header"
 import { JobInstructions } from "@/shared/console/jobs/detail/instructions"
-import { JobTitleMenu } from "@/shared/console/jobs/list/actions"
+import { JobLead, JobTitleMenu } from "@/shared/console/jobs/list/actions"
 import { type Job } from "@/shared/console/jobs/types"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { ConsoleListPager } from "@/shared/console/list/pager"
@@ -88,6 +88,7 @@ function useJobCrumb(job: Job, onMoveToFolder: () => void) {
       isControlling={false}
       isDeleting={false}
       job={job}
+      lead={<JobLead job={job} />}
       onDelete={(target) => {
         actions.deleteJob(target)
         navigation?.navigate("/jobs")

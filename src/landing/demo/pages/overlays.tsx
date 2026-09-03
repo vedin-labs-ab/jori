@@ -1,7 +1,10 @@
 import { type ReactNode, useState } from "react"
 import { toast } from "sonner"
 import { type CountedNoun } from "@/shared/console/count"
-import { type MoveResourceTarget } from "@/shared/console/folders/types"
+import {
+  type MoveResourceTarget,
+  resourceSubject,
+} from "@/shared/console/folders/types"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListFooter } from "@/shared/console/list/frame"
 import { ConsoleListPager } from "@/shared/console/list/pager"
@@ -86,7 +89,7 @@ export function MaterialListOverlays<
         subject={
           moving === undefined || moving.length === 0
             ? undefined
-            : { kind: "resources", resources: moving }
+            : resourceSubject(moving)
         }
       />
       <MaterialDialogs onClose={onCloseRequest} request={request} />

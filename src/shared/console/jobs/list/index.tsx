@@ -1,6 +1,7 @@
 import { Plus, Workflow } from "lucide-react"
 import { type ComponentProps } from "react"
 import { Button } from "@/components/ui/button"
+import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
   folderColumn,
   ownerColumn,
@@ -30,6 +31,13 @@ export type JobListActions = {
 }
 
 const identify = (job: Job) => job.id
+
+const drag = (job: Job): ResourceDragItem => ({
+  type: "job",
+  id: job.id,
+  name: job.name,
+  folderId: job.folderId,
+})
 
 /** After the name: how the job starts, what it may touch, where it is
  *  filed and whose it is, then when it last ran and when it runs next. */
@@ -70,6 +78,7 @@ export function JobList({
         columns,
         description:
           "Create a job for recurring, one-time, or event-triggered work.",
+        drag,
         icon: Workflow,
         identify,
         menu: (job) => (

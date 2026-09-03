@@ -9,8 +9,6 @@ import {
   type FolderResource,
   type FolderRootsResult,
   type FolderRow,
-  type ManagedFolder,
-  type MoveSubject,
 } from "@/shared/console/folders/types"
 import { type FolderNames } from "@/shared/console/materials/folders"
 import { personName } from "../fixtures/people"
@@ -174,14 +172,4 @@ function hasContents(state: DemoState, folderId: FolderId) {
 
 function byName(left: { name: string }, right: { name: string }) {
   return left.name.localeCompare(right.name)
-}
-
-/** A folder as the move dialog's subject. */
-export function folderMoveSubject(folder: ManagedFolder): MoveSubject {
-  return {
-    kind: "folder",
-    folderId: folder.folderId,
-    name: folder.name,
-    parentId: folder.parentId,
-  }
 }

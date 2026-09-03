@@ -13,12 +13,18 @@ import { Spinner } from "@/components/ui/spinner"
 import { useRetained } from "../../retain"
 import { FolderPicker } from "../picker"
 import { subtreeFolderIds } from "../tree"
-import { type FolderRow, type MoveSubject, subjectName } from "../types"
+import {
+  type FolderRow,
+  type MoveSubject,
+  subjectName,
+  subjectSize,
+} from "../types"
 
-/** The "Move to folder…" dialog: folders re-parent, filed resources — one
- *  or a bulk selection — re-file. Open it by passing a subject; pass
- *  undefined to close (the last subject is retained for the close
- *  animation). Where the move lands is the host's to run. */
+/** The "Move to folder…" dialog: folders re-parent, filed resources
+ *  re-file — one row, or a selection of either or both. Open it by
+ *  passing a subject; pass undefined to close (the last subject is
+ *  retained for the close animation). Where the move lands is the host's
+ *  to run. */
 export function MoveDialog({
   folders,
   isBusy,
@@ -75,7 +81,8 @@ function MoveDialogBody({
           Move {subjectName(subject)}
         </DialogTitle>
         <DialogDescription>
-          Choose the folder {isPlural(subject) ? "they" : "it"} should live in.
+          Choose the folder {subjectSize(subject) > 1 ? "they" : "it"} should
+          live in.
         </DialogDescription>
       </DialogHeader>
       {folders === undefined ? (
@@ -88,11 +95,7 @@ function MoveDialogBody({
         <FolderPicker
           className="rounded-md border p-1"
           currentId={currentId}
-          disabledIds={
-            subject.kind === "folder"
-              ? subtreeFolderIds(folders, subject.folderId)
-              : undefined
-          }
+          disabledIds={disabledFolderIds(folders, subject)}
           folders={folders}
           onSelect={setSelectedId}
           selectedId={selectedId}
@@ -112,30 +115,37 @@ function MoveDialogBody({
   )
 }
 
-function isPlural(subject: MoveSubject) {
-  return subject.kind === "resources" && subject.resources.length > 1
+/** Where the subject lives today, marked in the picker and blocked as a
+ *  no-op destination. Items spread across folders have no single home, so
+ *  nothing is marked and every destination stays open. */
+function currentFolderId(subject: MoveSubject) {
+  const homes = new Set([
+    ...subject.folders.map((folder) => folder.parentId ?? null),
+    ...subject.resources.map((resource) => resource.folderId ?? null),
+  ])
+
+  return homes.size === 1 ? [...homes][0] : undefined
 }
 
-/** Where the subject lives today, marked in the picker and blocked as a
- *  no-op destination. Resources spread across folders have no single home,
- *  so nothing is marked and every destination stays open. */
-function currentFolderId(subject: MoveSubject) {
-  if (subject.kind === "folder") {
-    return subject.parentId ?? null
+/** A moving folder's own subtree: dropping it there would create a cycle. */
+function disabledFolderIds(folders: FolderRow[], subject: MoveSubject) {
+  if (subject.folders.length === 0) {
+    return undefined
   }
 
-  const homes = new Set(
-    subject.resources.map((resource) => resource.folderId ?? null)
+  return new Set(
+    subject.folders.flatMap((folder) => [
+      ...subtreeFolderIds(folders, folder.folderId),
+    ])
   )
-
-  return homes.size === 1 ? (subject.resources[0].folderId ?? null) : undefined
 }
 
 /** Remounts the body per subject so the selection resets with it. */
 function subjectKey(subject: MoveSubject) {
-  return subject.kind === "folder"
-    ? `folder:${subject.folderId}`
-    : subject.resources
-        .map((resource) => `${resource.resourceType}:${resource.resourceId}`)
-        .join("+")
+  return [
+    ...subject.folders.map((folder) => `folder:${folder.folderId}`),
+    ...subject.resources.map(
+      (resource) => `${resource.resourceType}:${resource.resourceId}`
+    ),
+  ].join("+")
 }

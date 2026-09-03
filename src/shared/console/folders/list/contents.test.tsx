@@ -5,6 +5,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type FolderContentsResult, type FolderResource } from "../types"
 import { FolderContents } from "./contents"
+import { type FolderSelectionActions } from "./select"
 
 vi.mock("@tanstack/react-router", async () => ({
   Link: (await import("../../../../../test/router")).Link,
@@ -73,7 +74,14 @@ function resourceMenu(resource: FolderResource) {
   )
 }
 
-function renderContents(contents: FolderContentsResult | undefined) {
+function renderContents(
+  contents: FolderContentsResult | undefined,
+  selectionActions: FolderSelectionActions = {
+    isBusy: false,
+    onMove: vi.fn(),
+    onRemove: vi.fn(),
+  }
+) {
   render(
     <TooltipProvider>
       <DndContext>
@@ -83,6 +91,7 @@ function renderContents(contents: FolderContentsResult | undefined) {
           newMenu={<button type="button">New</button>}
           onDialog={() => undefined}
           resourceMenu={resourceMenu}
+          selectionActions={selectionActions}
         />
       </DndContext>
     </TooltipProvider>
@@ -185,4 +194,75 @@ test("an empty folder offers the New menu", () => {
   expect(screen.getByText("Empty folder")).toBeDefined()
   expect(screen.getByRole("button", { name: "New" })).toBeDefined()
   expect(screen.queryByRole("table")).toBeNull()
+})
+
+test("every row drags, and rows select into one bar over both groups", () => {
+  const selectionActions = {
+    isBusy: false,
+    onMove: vi.fn(),
+    onRemove: vi.fn(),
+  }
+
+  renderContents(readyContents, selectionActions)
+
+  // Folders and resources alike are drag sources, cursor and all.
+  for (const name of ["Guides", "Leads", "Digest"]) {
+    const row = screen.getByRole("link", { name }).closest("tr")
+
+    expect(row?.className).toContain("cursor-grab")
+    expect(row?.getAttribute("aria-roledescription")).toBe("draggable")
+  }
+
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select Guides" }))
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select Digest" }))
+
+  expect(screen.getByText("2 selected")).toBeDefined()
+  fireEvent.click(screen.getByRole("button", { name: "Move" }))
+
+  // A mixed selection still moves: the folder re-parents, the job
+  // re-files out of the folder being viewed.
+  expect(selectionActions.onMove).toHaveBeenCalledWith({
+    folders: [{ folderId: "folder-1", name: "Guides", parentId: "folder-0" }],
+    resources: [
+      {
+        resourceType: "job",
+        resourceId: "job-1",
+        name: "Digest",
+        folderId: "folder-0",
+      },
+    ],
+  })
+})
+
+test("removing a selection names what happens to each part of it", () => {
+  const selectionActions = {
+    isBusy: false,
+    onMove: vi.fn(),
+    onRemove: vi.fn(),
+  }
+
+  renderContents(readyContents, selectionActions)
+
+  // Tables alone archive, the way their own menus do.
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select Leads" }))
+  expect(screen.getByRole("button", { name: "Archive" })).toBeDefined()
+
+  // A folder in the selection makes the step a delete.
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select Guides" }))
+  fireEvent.click(screen.getByRole("button", { name: "Delete" }))
+
+  expect(screen.getByText("Delete 2 items?")).toBeDefined()
+  expect(
+    screen.getByText(/Folders are deleted with their subfolders/)
+  ).toBeDefined()
+  expect(
+    screen.getByText(/Tables and stores are archived instead/)
+  ).toBeDefined()
+
+  fireEvent.click(screen.getByRole("button", { name: "Delete" }))
+
+  expect(selectionActions.onRemove).toHaveBeenCalledWith({
+    folders: [expect.objectContaining({ folderId: "folder-1" })],
+    resources: [expect.objectContaining({ id: "table-1" })],
+  })
 })

@@ -39,12 +39,14 @@ import { type FolderId } from "../fixtures/types"
 import { type DemoState } from "../state/types"
 import { useDemoWorkspace } from "../workspace"
 import { DemoResourceMenu } from "./menu"
+import { useDemoFolderSelection } from "./select"
 
 /** The tree's landing page: the root folders in the shared table. */
 export function RootFoldersPage() {
   const { state } = useDemoWorkspace()
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const roots = useMemo(() => rootFolders(state), [state])
+  const selection = useDemoFolderSelection()
   const create = () => setDialog({ type: "create" })
 
   useMaterialTrail(
@@ -72,8 +74,14 @@ export function RootFoldersPage() {
           type="button"
         />
       </ConsoleHeaderActions>
-      <RootFolderList onCreate={create} onDialog={setDialog} roots={roots} />
+      <RootFolderList
+        onCreate={create}
+        onDialog={setDialog}
+        roots={roots}
+        selectionActions={selection.actions}
+      />
       <DemoFolderDialogs dialog={dialog} onClose={() => setDialog(undefined)} />
+      {selection.dialog}
     </ConsoleListLayout>
   )
 }
@@ -107,6 +115,7 @@ function FolderContentsPage({ folder }: { folder: FolderDetail }) {
   const navigation = useContext(ConsoleNavigationContext)
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const [creation, setCreation] = useState<FolderCreation>()
+  const selection = useDemoFolderSelection()
   const contents = useMemo(
     () => folderContents(state, folder.folderId as FolderId),
     [state, folder.folderId]
@@ -134,6 +143,7 @@ function FolderContentsPage({ folder }: { folder: FolderDetail }) {
         }
         onDialog={setDialog}
         resourceMenu={(resource) => <DemoResourceMenu resource={resource} />}
+        selectionActions={selection.actions}
       />
       <DemoFolderDialogs
         dialog={dialog}
@@ -155,6 +165,7 @@ function FolderContentsPage({ folder }: { folder: FolderDetail }) {
             : { creation, folderId: folder.folderId }
         }
       />
+      {selection.dialog}
     </ConsoleListLayout>
   )
 }

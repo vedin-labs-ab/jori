@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type FolderDialogRequest, type FolderRootsResult } from "../types"
 import { RootFolderList } from "./roots"
+import { type FolderSelectionActions } from "./select"
 
 vi.mock("@tanstack/react-router", async () => ({
   Link: (await import("../../../../../test/router")).Link,
@@ -31,7 +32,13 @@ function folderRow(overrides: Record<string, unknown>) {
 
 function renderList(
   roots: FolderRootsResult | undefined,
-  onDialog: (request: FolderDialogRequest) => void = () => undefined
+  {
+    onDialog = () => undefined,
+    selectionActions = stubSelectionActions(),
+  }: {
+    onDialog?: (request: FolderDialogRequest) => void
+    selectionActions?: FolderSelectionActions
+  } = {}
 ) {
   render(
     <DndContext>
@@ -39,9 +46,14 @@ function renderList(
         onCreate={() => undefined}
         onDialog={onDialog}
         roots={roots}
+        selectionActions={selectionActions}
       />
     </DndContext>
   )
+}
+
+function stubSelectionActions(): FolderSelectionActions {
+  return { isBusy: false, onMove: vi.fn(), onRemove: vi.fn() }
 }
 
 test("root folders land in the same table as a folder's contents", () => {
@@ -96,7 +108,7 @@ test("a root folder row opens the folder's own menu", () => {
 
   renderList(
     { status: "ready", folders: [folderRow({})] } as FolderRootsResult,
-    onDialog
+    { onDialog }
   )
   fireEvent.pointerDown(
     screen.getByRole("button", { name: "Open actions for Guides" }),
@@ -112,5 +124,46 @@ test("a root folder row opens the folder's own menu", () => {
   expect(onDialog).toHaveBeenCalledWith({
     type: "rename",
     folder: expect.objectContaining({ folderId: "folder-1" }),
+  })
+})
+
+test("selecting root folders offers a move and a delete over them", () => {
+  const selectionActions = stubSelectionActions()
+
+  renderList(
+    {
+      status: "ready",
+      folders: [
+        folderRow({}),
+        folderRow({ folderId: "folder-2", name: "Playbooks" }),
+      ],
+    } as FolderRootsResult,
+    { selectionActions }
+  )
+
+  expect(screen.queryByRole("toolbar")).toBeNull()
+
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select all rows" }))
+
+  expect(screen.getByText("2 selected")).toBeDefined()
+  fireEvent.click(screen.getByRole("button", { name: "Move" }))
+
+  expect(selectionActions.onMove).toHaveBeenCalledWith({
+    folders: [
+      { folderId: "folder-1", name: "Guides", parentId: undefined },
+      { folderId: "folder-2", name: "Playbooks", parentId: undefined },
+    ],
+    resources: [],
+  })
+
+  fireEvent.click(screen.getByRole("button", { name: "Delete" }))
+  fireEvent.click(screen.getByRole("button", { name: "Delete" }))
+
+  expect(selectionActions.onRemove).toHaveBeenCalledWith({
+    folders: [
+      expect.objectContaining({ folderId: "folder-1" }),
+      expect.objectContaining({ folderId: "folder-2" }),
+    ],
+    resources: [],
   })
 })

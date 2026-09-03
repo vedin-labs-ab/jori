@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
-import { type MoveResourceTarget } from "@/shared/console/folders/types"
+import {
+  type MoveResourceTarget,
+  resourceSubject,
+} from "@/shared/console/folders/types"
 import { JobList } from "@/shared/console/jobs/list"
 import {
   jobBulkRemoval,
@@ -139,7 +142,7 @@ export function JobsPage() {
           subject={
             moving === undefined || moving.length === 0
               ? undefined
-              : { kind: "resources", resources: moving }
+              : resourceSubject(moving)
           }
         />
       </ConsoleListLayout>

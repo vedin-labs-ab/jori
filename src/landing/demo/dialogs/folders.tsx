@@ -3,10 +3,11 @@ import { DeleteFolderDialog } from "@/shared/console/folders/dialogs/delete"
 import { FolderNameDialog } from "@/shared/console/folders/dialogs/name"
 import {
   type FolderDialogRequest,
+  folderSubject,
   type ManagedFolder,
 } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
-import { folderImpact, folderMoveSubject } from "../derive/folders"
+import { folderImpact } from "../derive/folders"
 import { type FolderId } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
 import { DemoMoveDialog } from "./move"
@@ -38,7 +39,7 @@ export function DemoFolderDialogs({
       <DemoMoveDialog
         onOpenChange={closeWhenDismissed}
         subject={
-          dialog?.type === "move" ? folderMoveSubject(dialog.folder) : undefined
+          dialog?.type === "move" ? folderSubject(dialog.folder) : undefined
         }
       />
       <RemoveFolderDialog

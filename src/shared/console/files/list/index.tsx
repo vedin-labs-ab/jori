@@ -7,6 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
+import { DraggableTableRow } from "@/shared/console/folders/drag/row"
+import { useResourceRowDrag } from "@/shared/console/folders/drag/state"
 import { SelectionHeadCell, SelectionRowCell } from "@/shared/console/list/bar"
 import {
   facetEntries,
@@ -70,6 +73,8 @@ export function FileTable({
     )
   }
 
+  const selected = selection.selected.map(fileDragItem)
+
   return (
     <>
       <ConsoleListTable fill={files.length > 0}>
@@ -89,6 +94,7 @@ export function FileTable({
               onDelete={onDelete}
               onEdit={onEdit}
               onMoveToFolder={onMoveToFolder}
+              selected={selected}
               selection={selection}
             />
           ))}
@@ -166,6 +172,19 @@ function FilesEmptyState({
   )
 }
 
+/** A file as a drag carries it. */
+function fileDragItem(file: FileRow): ResourceDragItem {
+  return {
+    type: "file",
+    id: file.fileId,
+    name: file.name,
+    mimeType: file.mimeType,
+    folderId: file.folderId,
+  }
+}
+
+/** One file's row: it drags onto a folder, and a selected row takes the
+ *  rest of the selection with it. */
 function FileTableRow({
   file,
   folders,
@@ -174,6 +193,7 @@ function FileTableRow({
   onDelete,
   onEdit,
   onMoveToFolder,
+  selected,
   selection,
 }: {
   file: FileRow
@@ -183,12 +203,17 @@ function FileTableRow({
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
+  selected: readonly ResourceDragItem[]
   selection: RowSelection<FileRow>
 }) {
+  const drag = useResourceRowDrag(fileDragItem(file), selected)
   const now = useNow(30_000)
 
   return (
-    <TableRow data-state={selection.isSelected(file) ? "selected" : undefined}>
+    <DraggableTableRow
+      data-state={selection.isSelected(file) ? "selected" : undefined}
+      drag={drag}
+    >
       <SelectionRowCell
         label={`Select ${file.name}`}
         row={file}
@@ -231,6 +256,6 @@ function FileTableRow({
           onMoveToFolder={onMoveToFolder}
         />
       </TableCell>
-    </TableRow>
+    </DraggableTableRow>
   )
 }

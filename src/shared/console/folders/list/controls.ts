@@ -5,23 +5,51 @@ import {
   type ListFacet,
   useListControls,
 } from "../../list/controls"
+import { useRowSelection } from "../../list/selection"
 import { ownerFacet } from "../../materials/owners"
+import { type ResourceDragItem } from "../drag/plan"
 import {
   type FolderResource,
   type ListedFolder,
   resourcePresentation,
 } from "../types"
 
-/** Rows the folder listing sorts and filters: subfolders and filed
- *  resources both carry a name, a time, and a kind. */
-type FolderListEntry = ListedFolder | FolderResource
+/** Rows the folder listing sorts, filters, and selects: subfolders and
+ *  filed resources both carry a name, a time, and a kind. */
+export type FolderListEntry = ListedFolder | FolderResource
 
-/** Header controls for the shared folder table: name and time sorts, a
- *  kind facet spanning Folder and whatever resource kinds are listed, and
- *  an owner facet over both groups at once — one column filters subfolders
- *  and filed resources alike. The two row groups apply separately so
- *  subfolders keep leading. */
-export function useFolderListControls(listed: {
+export function isFolderEntry(entry: FolderListEntry): entry is ListedFolder {
+  return !("type" in entry)
+}
+
+/** One id space over both row groups, for the selection. */
+export function entryId(entry: FolderListEntry) {
+  return isFolderEntry(entry)
+    ? `folder:${entry.folderId}`
+    : `${entry.type}:${entry.id}`
+}
+
+/** A filed resource as a drag carries it; `folderId` is the folder being
+ *  viewed, where it already sits. */
+export function resourceDragItem(
+  resource: FolderResource,
+  folderId: string
+): ResourceDragItem {
+  return {
+    type: resource.type,
+    id: resource.id,
+    name: resource.name,
+    mimeType: resource.mimeType,
+    folderId,
+  }
+}
+
+/** The shared folder table's page state: name and time sorts, a kind facet
+ *  spanning Folder and whatever resource kinds are listed, an owner facet
+ *  over both groups at once — one column filters subfolders and filed
+ *  resources alike — and a selection over what the filters leave. The two
+ *  row groups narrow separately so subfolders keep leading. */
+export function useFolderListing(listed: {
   folders: readonly ListedFolder[]
   resources: readonly FolderResource[]
 }) {
@@ -40,15 +68,21 @@ export function useFolderListControls(listed: {
     },
   }
   const controls = useListControls(config)
+  // apply only filters and reorders, so the rows keep their type.
+  const folders = controls.apply(listed.folders) as ListedFolder[]
+  const resources = controls.apply(listed.resources) as FolderResource[]
+  const selection = useRowSelection<FolderListEntry>({
+    identify: entryId,
+    rows: [...folders, ...resources],
+  })
 
   return {
     controls,
+    folders,
     kinds: facetEntries(config, ["kind"]),
     owners: facetEntries(config, ["owner"]),
-    narrow<Row extends FolderListEntry>(rows: readonly Row[]): Row[] {
-      // apply only filters and reorders, so the rows keep their type.
-      return controls.apply(rows) as Row[]
-    },
+    resources,
+    selection,
   }
 }
 
