@@ -4,11 +4,7 @@ minimumReleaseAge: 0
 
 overrides:
   '@opentelemetry/core': 2.9.0
-  '@trigger.dev/core>socket.io': 4.8.3
-  '@trigger.dev/core>socket.io-client': 4.8.3
   'giget>tar': 7.5.20
-  'trigger.dev>esbuild': 0.28.1
-  'trigger.dev>socket.io-client': 4.8.3
   tsconfck: 3.1.6
   ws: 8.21.1
 
