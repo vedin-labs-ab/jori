@@ -21,7 +21,7 @@ test("opens a job's page: its crumb, brief, trigger, and runs", async () => {
   // The crumb and the Folder row both lead to the folder it is filed in.
   expect(screen.getByRole("link", { name: "Jobs" })).toBeDefined()
   expect(screen.getAllByRole("link", { name: "Renewals" })).toHaveLength(1)
-  expect(screen.getByText("Recurring")).toBeDefined()
+  expect(screen.getByText("Weekly")).toBeDefined()
   // The trigger's schedule, and the run's own note of it under Runs.
   expect(screen.getAllByText(/Mondays at 08:00/)).toHaveLength(2)
   expect(container.querySelector('[data-job-surface="slack"]')).not.toBeNull()

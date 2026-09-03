@@ -1,6 +1,8 @@
 import { classifyCron } from "./classify"
 
-const weekdayLabels: Record<string, string> = {
+/** Weekday names by cron day-of-week, for anything that reads a schedule
+ *  back to a person. */
+export const weekdayLabels: Record<string, string> = {
   "0": "Sunday",
   "1": "Monday",
   "2": "Tuesday",

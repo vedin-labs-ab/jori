@@ -116,13 +116,14 @@ function JobTriggerLine({ job, now }: { job: Job; now: number }) {
   return (
     <DetailLine>
       <DetailValue>{trigger.title}</DetailValue>
-      <SeparatorDot className="text-muted-foreground/60" />
-      <span
-        className="min-w-0 truncate text-muted-foreground"
-        title={trigger.detailTitle}
-      >
-        {trigger.detail}
-      </span>
+      {trigger.full === undefined && trigger.detail === undefined ? null : (
+        <>
+          <SeparatorDot className="text-muted-foreground/60" />
+          <span className="min-w-0 truncate text-muted-foreground">
+            {trigger.full ?? trigger.detail}
+          </span>
+        </>
+      )}
       {next === undefined && job.status === "active" ? null : (
         <>
           <SeparatorDot className="text-muted-foreground/60" />

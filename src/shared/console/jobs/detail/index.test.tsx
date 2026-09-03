@@ -65,8 +65,8 @@ test("reads like a run's opened detail: brief, trigger, access, filing", () => {
 
   expect(screen.getByText("Instructions")).toBeDefined()
   expect(screen.getByText("The brief.")).toBeDefined()
-  expect(screen.getByText("Recurring")).toBeDefined()
-  expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
+  expect(screen.getByText("Daily")).toBeDefined()
+  expect(screen.getByText("09:00 UTC")).toBeDefined()
   expect(screen.getByText("Next in 1d")).toBeDefined()
   expect(screen.getByText("Tool")).toBeDefined()
   expect(screen.getByRole("button", { name: "Open Slack tools" })).toBeDefined()

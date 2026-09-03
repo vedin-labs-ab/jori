@@ -35,21 +35,26 @@ export function JobNameCell({ job }: { job: Job }) {
   )
 }
 
-/** Trigger column: the kind and its detail on one line — "Recurring ·
- *  Fridays at 16:00", "Event · GitHub", "One-time · Sep 12". */
+/** Trigger column, cadence first: "Weekly · Fri 15:00", "Monthly · 3rd
+ *  08:00", "Event · Slack", "Once · Sep 12". The zone and the spelled-out
+ *  day wait in the cell's title, and on the job's own page. */
 export function JobTriggerCell({ job }: { job: Job }) {
   const trigger = jobTriggerSummary(job)
 
   return (
     <span className="flex min-w-0 max-w-64 items-center gap-1.5">
       <span className="shrink-0 font-medium">{trigger.title}</span>
-      <SeparatorDot className="shrink-0 text-muted-foreground/60" />
-      <span
-        className="min-w-0 truncate text-muted-foreground"
-        title={trigger.detailTitle}
-      >
-        {trigger.detail}
-      </span>
+      {trigger.detail === undefined ? null : (
+        <>
+          <SeparatorDot className="shrink-0 text-muted-foreground/60" />
+          <span
+            className="min-w-0 truncate text-muted-foreground"
+            title={trigger.full}
+          >
+            {trigger.detail}
+          </span>
+        </>
+      )}
     </span>
   )
 }
