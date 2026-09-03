@@ -92,9 +92,17 @@ function RenewalsSharing() {
         }
         label="Share links"
       >
-        <ClientOnly fallback={<div aria-hidden className="h-52 border-t" />}>
-          <MaterialLinks onMint={onMint} onRevoke={onRevoke} shares={shares} />
-        </ClientOnly>
+        {/* The dialog body draws its own top rule under the dialog's
+            header; here the card's caption already draws that line. */}
+        <div className="[&>*:first-child]:border-t-0">
+          <ClientOnly fallback={<div aria-hidden className="h-52" />}>
+            <MaterialLinks
+              onMint={onMint}
+              onRevoke={onRevoke}
+              shares={shares}
+            />
+          </ClientOnly>
+        </div>
       </Prop>
     </div>
   )
