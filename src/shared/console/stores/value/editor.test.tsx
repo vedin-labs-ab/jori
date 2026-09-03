@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type StoreDetail } from "../types"
-import { ValueEditorSection } from "./editor"
+import { ValueEditorSection, type ValueEditorState } from "./editor"
 import { valueEditorNotes } from "./state"
 
 const writeValue = vi.fn()
@@ -56,14 +56,20 @@ function renderEditor(value: unknown, version = 2) {
       onWrite={writeValue}
       schema={schema}
       store={store}
-      tools={null}
+      onState={(state) => {
+        published = state
+      }}
     />
   )
 }
 
 // Radix tabs select on mousedown, not click.
+/** The last state the editor published: how the page's menu would switch
+ *  the view. */
+let published: ValueEditorState | undefined
+
 function switchTab(name: "Code" | "Form") {
-  fireEvent.mouseDown(screen.getByRole("tab", { name }), { button: 0 })
+  act(() => published?.switchView(name === "Code" ? "code" : "form"))
 }
 
 describe("value editor error visibility", () => {

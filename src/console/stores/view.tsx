@@ -5,7 +5,6 @@ import { type ReactNode, useState } from "react"
 import { moveTarget } from "@/shared/console/folders/types"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
-import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
@@ -108,12 +107,13 @@ function StoreReadyView({
     })
   }
 
-  useMaterialBreadcrumb(
-    store.name,
+  // The view publishes the crumb itself, since its own items lead the menu.
+  const titleMenu = (lead: ReactNode) => (
     <MaterialTitleMenu
       deleteDescription={storeDeleteDescription}
       isDeleting={removal.removingId === store.storeId}
       isRestoring={removal.restoringId === store.storeId}
+      lead={lead}
       material={{ name: store.name, archivedAt: store.archivedAt }}
       noun="store"
       onAccess={() => setDialog("access")}
@@ -131,7 +131,11 @@ function StoreReadyView({
         onExport={() => exportStoreJson(store)}
         onShare={() => setDialog("share")}
       />
-      <StoreValue organizationId={organizationId} store={store} />
+      <StoreValue
+        organizationId={organizationId}
+        store={store}
+        titleMenu={titleMenu}
+      />
       <StoreDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}

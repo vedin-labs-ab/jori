@@ -17,15 +17,24 @@ test("opens a store's form and keeps a value edited in memory", async () => {
   const version = (await screen.findByLabelText("version")) as HTMLInputElement
 
   expect(version.value).toBe("2.14")
-  expect(screen.getByText("v37")).toBeDefined()
   expect(screen.getByRole("link", { name: "Engineering" })).toBeDefined()
+
+  // Provenance moved off the page into the menu on the store's name.
+  const title = screen.getByRole("button", { name: "Release state" })
+
+  fireEvent.pointerDown(title)
+  fireEvent.click(title)
+  expect(await screen.findByText(/^v37 · /)).toBeDefined()
+  fireEvent.keyDown(document.activeElement ?? title, { key: "Escape" })
 
   fireEvent.change(screen.getByLabelText("rolloutPercent"), {
     target: { value: "50" },
   })
 
   // The autosave lands after its debounce and bumps the version.
-  expect(await screen.findByText("v38")).toBeDefined()
+  fireEvent.pointerDown(title)
+  fireEvent.click(title)
+  expect(await screen.findByText(/^v38 · /)).toBeDefined()
   expect(
     (screen.getByLabelText("rolloutPercent") as HTMLInputElement).value
   ).toBe("50")

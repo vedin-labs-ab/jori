@@ -3,7 +3,7 @@ import {
   validateJsonSchemaValue,
 } from "@contracts/schema/validate"
 import { ClientOnly } from "@tanstack/react-router"
-import { useMemo, useState } from "react"
+import { type ReactNode, useMemo, useState } from "react"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
@@ -13,8 +13,10 @@ import { type StoreDetail } from "@/shared/console/stores/types"
 import { StoreValue } from "@/shared/console/stores/value/section"
 import { materialOf, storeDetail } from "../../derive/materials"
 import { DemoLinksDialog } from "../../dialogs/links"
+import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import { useDemoWorkspace } from "../../workspace"
-import { CollectionTitle, MaterialMissing } from "./chrome"
+import { CollectionMenu, MaterialMissing } from "./chrome"
+import { materialCrumb } from "./crumb"
 
 /** One store's page over the workspace: the console's value editor,
  *  saving into memory, under the header actions and the crumb the
@@ -25,10 +27,20 @@ export function StorePage({ storeId }: { storeId: string }) {
   const material = materialOf(state, storeId)
   const store = useMemo(() => storeDetail(state, storeId), [state, storeId])
   const [isShareOpen, setIsShareOpen] = useState(false)
+  const [request, setRequest] = useState<MaterialRequest>()
+  const crumb = useMemo(
+    () =>
+      material?.kind === "store" ? materialCrumb(state, material) : undefined,
+    [material, state]
+  )
 
   if (store === undefined || material?.kind !== "store") {
     return <MaterialMissing noun="store" />
   }
+
+  const titleMenu = (lead: ReactNode) => (
+    <CollectionMenu lead={lead} material={material} onRequest={setRequest} />
+  )
 
   return (
     <ConsoleListLayout>
@@ -45,7 +57,9 @@ export function StorePage({ storeId }: { storeId: string }) {
 
             return Promise.resolve()
           }}
+          crumb={crumb}
           store={store}
+          titleMenu={titleMenu}
         />
       </ClientOnly>
       <DemoLinksDialog
@@ -54,7 +68,10 @@ export function StorePage({ storeId }: { storeId: string }) {
         onOpenChange={setIsShareOpen}
         open={isShareOpen}
       />
-      <CollectionTitle material={material} />
+      <MaterialDialogs
+        onClose={() => setRequest(undefined)}
+        request={request}
+      />
     </ConsoleListLayout>
   )
 }
