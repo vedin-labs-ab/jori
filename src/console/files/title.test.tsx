@@ -46,7 +46,7 @@ test("leads with the view's lines, then the file's management actions, in order"
   expect(screen.getByText("Updated just now")).toBeDefined()
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Edit details", "Visibility…", "Move to folder…", "Delete"])
+  ).toEqual(["Rename…", "Visibility…", "Move to folder…", "Delete"])
 })
 
 test("leaves the links to the header the detail page already has", () => {

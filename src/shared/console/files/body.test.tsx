@@ -103,7 +103,7 @@ function renderBody(overrides: Partial<FileDetail>) {
           titleMenu={(lead) => (
             <DropdownMenuContent>
               {lead}
-              <div>Edit details</div>
+              <div>Rename…</div>
             </DropdownMenuContent>
           )}
         />
@@ -140,7 +140,7 @@ test("the title menu leads with provenance and a copy, then the host's items", a
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
   expect(screen.getByText(/^Updated just now · 2 KB$/)).toBeDefined()
   expect(screen.queryByRole("menuitemradio")).toBeNull()
-  expect(screen.getByText("Edit details")).toBeDefined()
+  expect(screen.getByText("Rename…")).toBeDefined()
 
   // The editor's saved buffer, not the stored blob.
   fireEvent.click(screen.getByRole("menuitem", { name: "Copy text" }))

@@ -20,7 +20,7 @@ import { DeleteJobDialog } from "./delete"
 
 // The canonical menu for a job, as items only. Editing a job edits all of
 // it — schedule, instructions, access, visibility — so the item is plain
-// "Edit" rather than the materials' "Edit details". Two triggers hold it:
+// "Edit" rather than the materials' "Rename…". Two triggers hold it:
 // the page hangs it off the job's name in the breadcrumb, a list row off
 // its "…" button. Both own the confirmation the delete passes through.
 
