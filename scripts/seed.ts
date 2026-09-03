@@ -156,6 +156,9 @@ function printUsage() {
   writeStdout(
     "The organization defaults to the only one the deployment holds a profile for."
   )
+  writeStdout(
+    "Places, traffic, jobs, and events hang off a connected Slack integration and are left out without one."
+  )
 }
 
 function writeStdout(message: string) {
