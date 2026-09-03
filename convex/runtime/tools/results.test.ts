@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { type RuntimeId } from "../../contracts/runtime/worker"
-import { runtimeContext } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { sandboxWorkspace } from "../sandbox/workspace"
+import { sandboxWorkspace } from "../../../contracts/coding"
+import { createRuntime } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
+import { type SandboxRuntime } from "../sandbox/types"
 import { materializeSandboxResult } from "./results"
 
 test("materializes GitHub clone descriptors as Git working copies", async () => {
@@ -41,23 +41,7 @@ test("materializes GitHub clone descriptors as Git working copies", async () => 
 })
 
 function cloneRuntime(): AgentRuntime {
-  return {
-    platform: {
-      fetchGitHubCloneCredentials: vi.fn(async () => ({
-        remoteUrl: "https://github.com/acme/app.git",
-        token: "secret-token",
-        username: "x-access-token",
-      })),
-    } as unknown as AgentRuntime["platform"],
-    context: runtimeContext({
-      run: {
-        id: "run_1" as RuntimeId<"runs">,
-        rootId: null,
-        sandboxId: null,
-        status: "running",
-        organizationId: "organization",
-      },
-    }),
+  return createRuntime({
     sandbox: {
       cloneRepository: vi.fn(async (input) => ({
         directory: input.directory ?? `${sandboxWorkspace}/app`,
@@ -66,6 +50,6 @@ function cloneRuntime(): AgentRuntime {
         remoteUrl: input.remoteUrl,
         repository: input.repository,
       })),
-    } as unknown as AgentRuntime["sandbox"],
-  }
+    } as unknown as SandboxRuntime,
+  })
 }

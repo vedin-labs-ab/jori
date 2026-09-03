@@ -1,20 +1,17 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { runtimeContext, runtimeId } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall } from "./index"
+import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
 
 beforeEach(() => {
   vi.clearAllMocks()
 })
 
 test("prompted tools request approval without executing", async () => {
-  const runtime = createRuntime()
+  const runtime = toolRuntime()
 
-  const { content } = await executeToolCall({
-    attempt: 1,
+  const { content } = await runTool({
     call: promptedToolCall(),
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(content)).toEqual({
@@ -33,7 +30,7 @@ test("prompted tools request approval without executing", async () => {
 })
 
 test("prompted tools carry the active reply target into approval delivery", async () => {
-  const runtime = createRuntime({
+  const runtime = toolRuntime({
     activeSurface: {
       communicated: false,
       surface: "linear",
@@ -41,11 +38,9 @@ test("prompted tools carry the active reply target into approval delivery", asyn
     },
   })
 
-  await executeToolCall({
-    attempt: 1,
+  await runTool({
     call: promptedToolCall(),
     runtime,
-    sequence: 100,
   })
 
   expect(runtime.platform.requestApproval).toHaveBeenCalledWith(
@@ -56,10 +51,9 @@ test("prompted tools carry the active reply target into approval delivery", asyn
 })
 
 test("prompted tools can finish the tool step with final", async () => {
-  const runtime = createRuntime()
+  const runtime = toolRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       ...promptedToolCall(),
       args: {
@@ -68,7 +62,6 @@ test("prompted tools can finish the tool step with final", async () => {
       },
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(true)
@@ -84,10 +77,9 @@ test("prompted tools can finish the tool step with final", async () => {
 })
 
 test("prompted tools reject invalid final before requesting approval", async () => {
-  const runtime = createRuntime()
+  const runtime = toolRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       ...promptedToolCall(),
       args: {
@@ -96,7 +88,6 @@ test("prompted tools reject invalid final before requesting approval", async () 
       },
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
@@ -107,18 +98,16 @@ test("prompted tools reject invalid final before requesting approval", async () 
 })
 
 test("tool failures are returned to the agent instead of thrown", async () => {
-  const runtime = createRuntime({
+  const runtime = toolRuntime({
     mode: "allowed",
   })
   runtime.platform.callTool = vi.fn(async () => {
     throw new Error("Provider rejected the request")
   })
 
-  const { content } = await executeToolCall({
-    attempt: 1,
+  const { content } = await runTool({
     call: simpleToolCall(),
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(content)).toEqual({
@@ -143,23 +132,13 @@ test("tool failures are returned to the agent instead of thrown", async () => {
   )
 })
 
-function createRuntime(
+function toolRuntime(
   options: {
     activeSurface?: AgentRuntime["context"]["activeSurface"]
     mode?: "allowed" | "prompted"
   } = {}
 ): AgentRuntime {
-  return {
-    platform: {
-      callTool: vi.fn(),
-      recordEvent: vi.fn(),
-      requestApproval: vi.fn(async () => ({
-        approvalId: runtimeId<"approvals">("approval_1"),
-        code: "ABC123",
-        instruction: "Approval requested.",
-        status: "approval_requested",
-      })),
-    } as unknown as AgentRuntime["platform"],
+  return createRuntime({
     context: runtimeContext({
       activeSurface: options.activeSurface ?? null,
       tools: [
@@ -174,8 +153,7 @@ function createRuntime(
         },
       ],
     }),
-    sandbox: {} as AgentRuntime["sandbox"],
-  }
+  })
 }
 
 function promptedToolCall() {

@@ -1,5 +1,5 @@
-import { isRecord, type JsonObject } from "../../contracts/json"
-import { type AgentRuntime } from "../runtime"
+import { isRecord, type JsonObject } from "../../../contracts/json"
+import { type AgentRuntime } from "../platform"
 
 export function toolResult(value: unknown, finished = false) {
   return { finished, value }

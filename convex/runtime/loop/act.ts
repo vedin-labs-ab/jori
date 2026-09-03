@@ -1,250 +1,250 @@
-import {
-  type HandoffSubject,
-  type RuntimeContext,
-} from "../../contracts/runtime/worker"
-import {
-  type ModelMessage,
-  type ModelResponse,
-  type ModelRuntime,
-  type ModelToolCall,
-} from "../model/types"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall, modelTools } from "../tool"
-import { recordRuntimeEvent } from "../trace/runtime"
-import { pendingHandoffSubjects } from "./handoffs/pending"
-import { applyHandoffs, reconcileHandoffs } from "./handoffs/reconcile"
-import {
-  appendSessionMessages,
-  promptMessages,
-  seedSessionMessages,
-} from "./messages"
-import { completeModelStep } from "./model"
-import { appendStopRepair } from "./repair"
-import { parkRun } from "./waiter"
+import { encodeToolResult, type JsonObject } from "../../../contracts/json"
+import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
+import { type WaiterWake } from "../../../contracts/runtime/waiters"
+import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
+import { type AgentRuntime } from "../platform"
+import { executeToolCall } from "../tools/index"
+import { recordRuntimeEvent } from "../trace/record"
+import { reconcileHandoffs } from "./handoffs"
+import { isParked, parkHandoffs } from "./park"
+import { stopRepairMessages } from "./repair"
+import { appendSessionMessages } from "./transcript"
 
-type AgentLoopOutput = {
-  message: ""
-  status: "completed" | "failed" | "stopped"
+export type ActOutcome =
+  | { status: "completed" | "continue" | "failed" | "stopped" }
+  | { eventId: string; status: "parked" }
+
+type PendingCall = {
+  args: JsonObject
+  id: string
+  index: number
+  name: string
 }
-type YieldKind = "finish" | "stop"
-type YieldOutcome = "finished" | "continue" | "aborted"
 
-const maxModelSteps = 30
-const maxModelStepsError = "Model loop exceeded the maximum step count."
+type ToolRun =
+  | { sequence: number; status: "finished" | "ran" }
+  | { eventId: string; status: "parked" }
+
+export const maxTurns = 30
+
+const maxTurnsError = "Model loop exceeded the maximum step count."
 const toolSequenceOffset = 100
 
-export async function runAgentLoop(args: {
-  attempt: number
-  model: ModelRuntime
+/**
+ * One turn's tool calls, then whatever the turn settles into. The transcript
+ * is the whole state: the calls still to run are the assistant's calls with
+ * no tool row yet, so a resumed step picks up exactly where it stopped.
+ */
+export async function runAct(args: {
   runtime: AgentRuntime
-}): Promise<AgentLoopOutput> {
-  const messages: ModelMessage[] = promptMessages(args.runtime.context.prompt)
+  turn: number
+  wake?: WaiterWake
+}): Promise<ActOutcome> {
+  const { runtime, turn, wake } = args
 
-  // The context load already fetched the handoffs and drained the first
-  // session batch, so a fresh run reaches the model with no extra reads.
-  await applyHandoffs(args.runtime, messages, args.runtime.context.handoffs)
-  await seedSessionMessages(args.runtime, messages)
-
-  let drainPending = false
-
-  for (let step = 1; step <= maxModelSteps; step += 1) {
-    if (drainPending) {
-      await appendSessionMessages(args.runtime, messages)
-    }
-
-    const tools = modelTools(args.runtime.context.tools)
-    const response = await completeModelStep({
-      attempt: args.attempt,
-      firstTurn: step === 1,
-      messages,
-      model: args.model,
-      runtime: args.runtime,
-      step,
-      tools,
-    })
-    const result =
-      response.type === "stop"
-        ? settled(
-            await settleYield(args.runtime, messages, "stop", response.content)
-          )
-        : await runModelToolStep(args, messages, response, step)
-
-    if (result.outcome === "finished") {
-      return { message: "", status: "completed" }
-    }
-
-    if (result.outcome === "aborted") {
-      return { message: "", status: "stopped" }
-    }
-
-    drainPending = result.drainPending
+  if (
+    isTerminalRunStatus(runtime.context.run.status) ||
+    wake?.reason === "cancelled"
+  ) {
+    return { status: "stopped" }
   }
 
-  await failRun(args.runtime, args.attempt)
-  return { message: "", status: "failed" }
-}
+  const tail = await runtime.platform.tailTranscript()
+  const assistant = tail.assistant
 
-type StepResult = {
-  drainPending: boolean
-  outcome: YieldOutcome
-}
+  if (assistant === null || assistant.role !== "assistant") {
+    throw new Error("The turn has no assistant message to act on.")
+  }
 
-// Yield settlement drains messages as part of reconciling, so the next step
-// starts fresh; a plain tool step leaves the drain to the next iteration.
-function settled(outcome: YieldOutcome): StepResult {
-  return { drainPending: false, outcome }
-}
-
-async function runModelToolStep(
-  args: { attempt: number; runtime: AgentRuntime },
-  messages: ModelMessage[],
-  response: Extract<ModelResponse, { type: "tool_calls" }>,
-  step: number
-): Promise<StepResult> {
-  reportUndeliveredText(args.runtime, response, step)
-  messages.push({
-    content: response.content,
-    role: "assistant",
-    toolCalls: response.toolCalls,
-  })
-  const tools = await runToolCalls(args.runtime, messages, response.toolCalls, {
-    attempt: args.attempt,
-    step,
+  const outcome = await actOnTurn(runtime, assistant.toolCalls ?? [], {
+    results: tail.results,
+    turn,
+    wake,
   })
 
-  if (!tools.finished) {
-    return { drainPending: true, outcome: "continue" }
+  // A turn that would go on past the last one fails instead, whatever the
+  // model answered with.
+  if (outcome.status === "continue" && turn >= maxTurns) {
+    await failRun(runtime)
+
+    return { status: "failed" }
   }
 
-  const outcome = await settleYield(args.runtime, messages, "finish")
-
-  if (outcome === "finished") {
-    await completeRun(args.runtime, tools.sequence + 1, args.attempt)
-  }
-
-  return settled(outcome)
+  return outcome
 }
 
-function reportUndeliveredText(
+async function actOnTurn(
   runtime: AgentRuntime,
-  response: Extract<ModelResponse, { type: "tool_calls" }>,
-  step: number
-) {
-  if (response.content === null || response.content.trim() === "") {
-    return
+  calls: AssistantCalls,
+  args: { results: TranscriptMessage[]; turn: number; wake?: WaiterWake }
+): Promise<ActOutcome> {
+  const { turn, wake } = args
+
+  if (calls.length === 0) {
+    return await settle(runtime, "stop", turn * toolSequenceOffset)
   }
 
-  console.warn("Assistant text outside a tool call was not delivered.", {
-    length: response.content.length,
-    runId: runtime.context.run.id,
-    step,
-    tools: response.toolCalls.map((call) => call.name),
-  })
-}
+  const pending = pendingCalls(calls, args.results)
 
-async function settleYield(
-  runtime: AgentRuntime,
-  messages: ModelMessage[],
-  kind: YieldKind,
-  content?: string
-): Promise<YieldOutcome> {
-  let refreshSubjects: HandoffSubject[] = []
-
-  for (;;) {
-    const { pending, progressed } = await reconcileHandoffs(
+  // Nothing pending on a wake means the run parked while settling, not
+  // inside a call, so it settles again now that the wait is over.
+  if (pending.length === 0 && wake !== undefined) {
+    return await settle(
       runtime,
-      messages,
-      refreshSubjects
+      "finish",
+      turn * toolSequenceOffset + calls.length
     )
-    refreshSubjects = []
-
-    if (progressed) {
-      return "continue"
-    }
-
-    if (pending.length === 0) {
-      return finalizeYield(messages, runtime.context, kind, content)
-    }
-
-    const wake = await parkRun(runtime, pending)
-
-    if (wake.reason === "cancelled") {
-      return "aborted"
-    }
-
-    refreshSubjects = pendingHandoffSubjects(pending)
-  }
-}
-
-function finalizeYield(
-  messages: ModelMessage[],
-  context: RuntimeContext,
-  kind: YieldKind,
-  content?: string
-): YieldOutcome {
-  if (kind === "finish") {
-    return "finished"
   }
 
-  appendStopRepair(messages, content ?? "", context)
+  const tools = await runToolCalls(runtime, { pending, turn, wake })
 
-  return "continue"
+  if (tools.status === "parked") {
+    return tools
+  }
+
+  if (tools.status === "finished") {
+    return await settle(runtime, "finish", tools.sequence + 1)
+  }
+
+  await appendSessionMessages(runtime)
+
+  return { status: "continue" }
 }
 
 async function runToolCalls(
   runtime: AgentRuntime,
-  messages: ModelMessage[],
-  calls: ModelToolCall[],
-  meta: { attempt: number; step: number }
-) {
-  let index = 0
+  args: { pending: PendingCall[]; turn: number; wake?: WaiterWake }
+): Promise<ToolRun> {
+  let sequence = args.turn * toolSequenceOffset
+  // The wake belongs to the first call still pending: that is the call the
+  // run parked on.
+  let wake = args.wake
 
-  for (const call of calls) {
-    const sequence = meta.step * toolSequenceOffset + index
+  for (const [position, call] of args.pending.entries()) {
+    sequence = args.turn * toolSequenceOffset + call.index
+
     const result = await executeToolCall({
-      attempt: meta.attempt,
-      call,
+      call: { args: call.args, id: call.id, name: call.name },
       runtime,
       sequence,
+      ...(wake === undefined ? {} : { wake }),
     })
 
-    messages.push({
-      content: result.content,
+    wake = undefined
+
+    if (isParked(result)) {
+      return { eventId: result.parked.eventId, status: "parked" }
+    }
+
+    await runtime.platform.appendTranscript([
+      {
+        content: result.content,
+        role: "tool",
+        toolCallId: call.id,
+        toolName: call.name,
+      },
+    ])
+
+    if (result.finished) {
+      await skipCalls(runtime, args.pending.slice(position + 1))
+
+      return { sequence, status: "finished" }
+    }
+  }
+
+  return { sequence, status: "ran" }
+}
+
+/** Calls after the one that finished the run never execute, but the model's
+ *  message still names them, and every call it names needs an answer before
+ *  the transcript can go back to a model. */
+async function skipCalls(runtime: AgentRuntime, calls: PendingCall[]) {
+  if (calls.length === 0) {
+    return
+  }
+
+  await runtime.platform.appendTranscript(
+    calls.map((call) => ({
+      content: encodeToolResult({
+        reason: "The run finished before this call ran.",
+        status: "skipped",
+      }),
       role: "tool",
       toolCallId: call.id,
       toolName: call.name,
-    })
+    }))
+  )
+}
 
-    if (result.finished) {
-      return { finished: true, sequence }
+/**
+ * What the turn amounts to once its calls are done: settled handoffs and
+ * fresh session messages are progress worth another turn, an open handoff is
+ * something to wait for, and neither means the turn's own outcome stands.
+ */
+async function settle(
+  runtime: AgentRuntime,
+  kind: "finish" | "stop",
+  sequence: number
+): Promise<ActOutcome> {
+  for (;;) {
+    const { pending, progressed } = await reconcileHandoffs(runtime)
+
+    if (progressed) {
+      return { status: "continue" }
     }
 
-    index += 1
+    if (pending.length === 0) {
+      return await finalize(runtime, kind, sequence)
+    }
+
+    const parked = await parkHandoffs(runtime, pending)
+
+    if (isParked(parked)) {
+      return { eventId: parked.parked.eventId, status: "parked" }
+    }
+  }
+}
+
+async function finalize(
+  runtime: AgentRuntime,
+  kind: "finish" | "stop",
+  sequence: number
+): Promise<ActOutcome> {
+  if (kind === "finish") {
+    await recordRuntimeEvent(runtime.platform, runtime.context, {
+      sequence,
+      type: "run.completed",
+    })
+
+    return { status: "completed" }
   }
 
-  return { finished: false, sequence: meta.step * toolSequenceOffset + index }
+  await runtime.platform.appendTranscript(stopRepairMessages(runtime.context))
+
+  return { status: "continue" }
 }
 
-async function completeRun(
-  runtime: AgentRuntime,
-  sequence: number,
-  attempt: number
-) {
-  const result = runtime.context.result
+type AssistantCalls = NonNullable<
+  Extract<TranscriptMessage, { role: "assistant" }>["toolCalls"]
+>
 
-  await recordRuntimeEvent(runtime.platform, runtime.context, {
-    attempt,
-    sequence,
-    type: "run.completed",
-    ...(result === null ? {} : { data: { result } }),
-  })
+function pendingCalls(
+  calls: AssistantCalls,
+  results: TranscriptMessage[]
+): PendingCall[] {
+  const recorded = new Set(
+    results.map((row) => (row.role === "tool" ? row.toolCallId : ""))
+  )
+
+  return calls
+    .map((call, index) => ({ ...call, index }))
+    .filter((call) => !recorded.has(call.id))
 }
 
-async function failRun(runtime: AgentRuntime, attempt: number) {
+async function failRun(runtime: AgentRuntime) {
   await recordRuntimeEvent(runtime.platform, runtime.context, {
-    attempt,
-    data: { error: maxModelStepsError },
-    sequence: maxModelSteps * toolSequenceOffset + toolSequenceOffset,
+    data: { error: maxTurnsError },
+    sequence: maxTurns * toolSequenceOffset + toolSequenceOffset,
     type: "run.failed",
   })
 }

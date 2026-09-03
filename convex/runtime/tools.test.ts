@@ -4,9 +4,8 @@ import {
   optionalFieldGuidance,
   schemaHasOptionalFields,
 } from "../runs/agent/tools/schemas"
-import { runLifecycleTools } from "./lifecycle"
+import { runLifecycleTools, sandboxTools } from "./native"
 import { visibleNativeToolSnapshots } from "./permissions/native"
-import { sandboxTools } from "./sandbox"
 import { activeSurfaceTools } from "./surface/tools"
 
 test("runtime tool schemas with optional fields share omission guidance", () => {

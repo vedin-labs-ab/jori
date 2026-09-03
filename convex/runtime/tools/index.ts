@@ -1,11 +1,12 @@
-import { type ToolSurface } from "../../contracts/integrations"
-import { encodeToolResult, type JsonObject } from "../../contracts/json"
-import { isVisibleCommunicationTool } from "../../contracts/runtime/surface"
-import { readFinal } from "../../contracts/runtime/tools"
-import { type RuntimeTool } from "../../contracts/runtime/worker"
+import { type ToolSurface } from "../../../contracts/integrations"
+import { encodeToolResult, type JsonObject } from "../../../contracts/json"
+import { type RuntimeTool } from "../../../contracts/runtime/context"
+import { isVisibleCommunicationTool } from "../../../contracts/runtime/surface"
+import { readFinal } from "../../../contracts/runtime/tools"
+import { type WaiterWake } from "../../../contracts/runtime/waiters"
+import { isParked, type Parked } from "../loop/park"
 import { type ModelToolCall } from "../model/types"
-import { type AgentRuntime } from "../runtime"
-import { executeCodingTool } from "../sandbox/coding"
+import { type AgentRuntime } from "../platform"
 import { recordToolResultActivity } from "../trace/activity"
 import { errorDetails } from "../trace/events"
 import { recordToolEvent, toolTraceDetails } from "../trace/tool"
@@ -19,30 +20,40 @@ import {
   toolResult,
 } from "./results"
 import { finishRun } from "./run"
+import { executeSandboxTool } from "./sandbox"
 import { findTool, requireSurface, shouldFinishConvexTool } from "./select"
 import { executeActiveSurfaceTool } from "./surface"
 
-type ToolCallResult = {
+export type ToolCallResult = {
   content: string
   finished: boolean
 }
 
+type ToolCallArgs = {
+  call: ModelToolCall
+  runtime: AgentRuntime
+  sequence: number
+  wake?: WaiterWake
+}
+
+type ToolExecution = { finished: boolean; value: unknown }
+
 export async function executeToolCall(
   args: ToolCallArgs
-): Promise<ToolCallResult> {
+): Promise<ToolCallResult | Parked> {
   const tool = findTool(args.runtime.context.tools, args.call.name)
   // Recorded concurrently with the tool execution and joined before the
   // outcome trace, so the started trace always lands first and a failed
-  // trace write still aborts the attempt.
+  // trace write still aborts the step.
   const startedPending = recordToolEvent(eventArgs(args), tool, "tool.started")
   const onParked = async () => {
     await startedPending
     await recordToolEvent(eventArgs(args), tool, "tool.waiting")
   }
-  let result: Awaited<ReturnType<typeof executeTool>>
+  let result: ToolExecution | Parked
 
   try {
-    result = await executeTool(args.runtime, tool, args.call, onParked)
+    result = await executeTool(args, tool, onParked)
   } catch (error) {
     await startedPending
 
@@ -51,20 +62,15 @@ export async function executeToolCall(
 
   await startedPending
 
-  return await recordToolSuccess(args, tool, result)
-}
-
-type ToolCallArgs = {
-  attempt: number
-  call: ModelToolCall
-  runtime: AgentRuntime
-  sequence: number
+  // A parked call has no outcome yet: the run resumes into this same call
+  // and records the outcome then.
+  return isParked(result) ? result : await recordToolSuccess(args, tool, result)
 }
 
 async function recordToolSuccess(
   args: ToolCallArgs,
   tool: RuntimeTool,
-  result: Awaited<ReturnType<typeof executeTool>>
+  result: ToolExecution
 ): Promise<ToolCallResult> {
   try {
     await recordToolResultActivity({
@@ -114,11 +120,12 @@ export function modelTools(tools: RuntimeTool[]) {
 }
 
 async function executeTool(
-  runtime: AgentRuntime,
+  args: ToolCallArgs,
   tool: RuntimeTool,
-  call: ModelToolCall,
   onParked: () => Promise<void>
-) {
+): Promise<ToolExecution | Parked> {
+  const { call, runtime, wake } = args
+
   switch (tool.route) {
     case "surface":
       return await executeActiveSurfaceTool(runtime, {
@@ -128,20 +135,30 @@ async function executeTool(
     case "convex":
       return await executeConvexTool(runtime, tool, call)
     case "run":
-      return finishRun(runtime, call.args)
+      return await finishRun(runtime, call.args)
     case "sandbox":
-      return toolResult(
-        await executeCodingTool({
+      return parkedOrResult(
+        await executeSandboxTool(runtime, {
           input: call.args,
-          sandbox: runtime.sandbox,
-          tool: tool.name,
+          name: tool.name,
+          onParked,
+          wake,
         })
       )
     case "agent":
-      return toolResult(
-        await executeAgentTool(runtime, call.name, call.args, onParked)
+      return parkedOrResult(
+        await executeAgentTool(runtime, {
+          input: call.args,
+          name: call.name,
+          onParked,
+          wake,
+        })
       )
   }
+}
+
+function parkedOrResult(outcome: unknown): ToolExecution | Parked {
+  return isParked(outcome) ? outcome : toolResult(outcome)
 }
 
 async function executeConvexTool(
@@ -164,6 +181,7 @@ async function executeConvexTool(
   const finished = shouldFinishConvexTool(toolName, call.args)
   const result = await callConvexTool(runtime, surface, toolName, call.args)
   markVisibleCommunication(runtime, toolName, result)
+
   return toolResult(result, finished)
 }
 
@@ -232,14 +250,8 @@ async function callConvexTool(
   return await materializeSandboxResult(runtime, result)
 }
 
-function eventArgs(args: {
-  attempt: number
-  call: ModelToolCall
-  runtime: AgentRuntime
-  sequence: number
-}) {
+function eventArgs(args: ToolCallArgs) {
   return {
-    attempt: args.attempt,
     call: args.call,
     platform: args.runtime.platform,
     context: args.runtime.context,

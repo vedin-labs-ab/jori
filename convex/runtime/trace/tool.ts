@@ -1,14 +1,16 @@
-import { type JsonValue } from "../../contracts/json"
-import { type RuntimeValueSummary } from "../../contracts/runtime/trace"
+import { type JsonValue } from "../../../contracts/json"
 import {
   type RuntimeContext,
   type RuntimeTool,
+} from "../../../contracts/runtime/context"
+import {
   type RuntimeToolProviderTrace,
   type RuntimeToolTraceTool,
-} from "../../contracts/runtime/worker"
+} from "../../../contracts/runtime/events"
+import { type RuntimeValueSummary } from "../../../contracts/runtime/trace"
 import { type ModelToolCall } from "../model/types"
 import { type RuntimePlatform } from "../platform"
-import { recordRuntimeEvent } from "./runtime"
+import { recordRuntimeEvent } from "./record"
 
 const maxToolInputBytes = 32 * 1024
 const textEncoder = new TextEncoder()
@@ -83,7 +85,6 @@ export async function recordToolEvent(
   details?: RuntimeToolCompletedDetails | RuntimeToolFailedDetails
 ) {
   await recordRuntimeEvent(args.platform, args.context, {
-    attempt: args.attempt,
     callId: args.call.id,
     data: toolTraceData(tool, type, args.call.args, details),
     sequence: args.sequence,
@@ -230,7 +231,6 @@ function hasMoreItems(record: Record<string, unknown>) {
 }
 
 type ToolEventArgs = {
-  attempt: number
   call: ModelToolCall
   platform: RuntimePlatform
   context: RuntimeContext

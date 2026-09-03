@@ -1,38 +1,15 @@
 import { v } from "convex/values"
-import { type AgentRunStatus } from "../../contracts/runtime/worker"
-import { internal } from "../_generated/api"
+import { type AgentRunStatus } from "../../contracts/runtime/runs"
 import { type Id } from "../_generated/dataModel"
-import { action, internalMutation, query } from "../_generated/server"
+import { internalMutation, internalQuery } from "../_generated/server"
 import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
 import { runStatus } from "../runs/schema"
 import { stopRunTree } from "../runs/tree"
-import { requireWorkerSecret } from "./secret"
 
-export const create = action({
-  args: {
-    parentId: v.id("runs"),
-    secret: v.string(),
-    task: v.string(),
-    title: v.string(),
-    tools: v.optional(v.array(v.string())),
-  },
-  returns: v.object({
-    runId: v.id("runs"),
-  }),
-  handler: async (ctx, args): Promise<{ runId: Id<"runs"> }> => {
-    requireWorkerSecret(args.secret)
+const maxAgents = 20
 
-    return (await ctx.runMutation(internal.runtime.agents.insert, {
-      parentId: args.parentId,
-      task: args.task,
-      title: args.title,
-      tools: args.tools,
-    })) as { runId: Id<"runs"> }
-  },
-})
-
-export const insert = internalMutation({
+export const create = internalMutation({
   args: {
     parentId: v.id("runs"),
     task: v.string(),
@@ -66,30 +43,7 @@ export const insert = internalMutation({
   },
 })
 
-export const stop = action({
-  args: {
-    parentId: v.id("runs"),
-    runId: v.id("runs"),
-    secret: v.string(),
-  },
-  returns: v.object({
-    runId: v.id("runs"),
-    status: v.string(),
-  }),
-  handler: async (
-    ctx,
-    args
-  ): Promise<{ runId: Id<"runs">; status: string }> => {
-    requireWorkerSecret(args.secret)
-
-    return (await ctx.runMutation(internal.runtime.agents.stopChild, {
-      parentId: args.parentId,
-      runId: args.runId,
-    })) as { runId: Id<"runs">; status: string }
-  },
-})
-
-export const stopChild = internalMutation({
+export const stop = internalMutation({
   args: {
     parentId: v.id("runs"),
     runId: v.id("runs"),
@@ -113,11 +67,10 @@ export const stopChild = internalMutation({
   },
 })
 
-export const readChildren = query({
+export const readChildren = internalQuery({
   args: {
     parentId: v.id("runs"),
     runIds: v.array(v.id("runs")),
-    secret: v.string(),
   },
   returns: v.array(
     v.object({
@@ -129,10 +82,8 @@ export const readChildren = query({
     })
   ),
   handler: async (ctx, args): Promise<AgentRunStatus[]> => {
-    requireWorkerSecret(args.secret)
-
-    if (args.runIds.length === 0 || args.runIds.length > 20) {
-      throw new Error("Agent waits require 1-20 child runs.")
+    if (args.runIds.length === 0 || args.runIds.length > maxAgents) {
+      throw new Error(`Agent waits require 1-${maxAgents} child runs.`)
     }
 
     const children = []

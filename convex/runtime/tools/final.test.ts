@@ -1,14 +1,12 @@
 import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { runtimeContext } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall } from "."
+import { type RuntimeTool } from "../../../contracts/runtime/context"
+import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
 
 test("send_reply can finish the run after a successful final reply", async () => {
-  const runtime = createRuntime()
+  const runtime = surfaceRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         final: true,
@@ -18,7 +16,6 @@ test("send_reply can finish the run after a successful final reply", async () =>
       name: "send_reply",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(true)
@@ -31,13 +28,12 @@ test("send_reply can finish the run after a successful final reply", async () =>
 })
 
 test("send_reply final does not finish when delivery fails", async () => {
-  const runtime = createRuntime()
+  const runtime = surfaceRuntime()
   vi.mocked(runtime.platform.sendReply).mockRejectedValueOnce(
     new Error("Reply failed")
   )
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         final: true,
@@ -47,7 +43,6 @@ test("send_reply final does not finish when delivery fails", async () => {
       name: "send_reply",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(false)
@@ -59,10 +54,9 @@ test("send_reply final does not finish when delivery fails", async () => {
 })
 
 test("send_reply rejects invalid final before sending", async () => {
-  const runtime = createRuntime()
+  const runtime = surfaceRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         final: "true",
@@ -72,7 +66,6 @@ test("send_reply rejects invalid final before sending", async () => {
       name: "send_reply",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
@@ -84,10 +77,9 @@ test("send_reply rejects invalid final before sending", async () => {
 })
 
 test("add_reaction can finish the run after a successful final reaction", async () => {
-  const runtime = createRuntime({ tools: [addReactionTool()] })
+  const runtime = surfaceRuntime({ tools: [addReactionTool()] })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         final: true,
@@ -98,7 +90,6 @@ test("add_reaction can finish the run after a successful final reaction", async 
       name: "add_reaction",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(true)
@@ -110,13 +101,8 @@ test("add_reaction can finish the run after a successful final reaction", async 
   })
 })
 
-function createRuntime(options: { tools?: RuntimeTool[] } = {}): AgentRuntime {
-  return {
-    platform: {
-      addReaction: vi.fn(async () => ({ status: "added" })),
-      recordEvent: vi.fn(),
-      sendReply: vi.fn(async () => ({ status: "sent" })),
-    } as unknown as AgentRuntime["platform"],
+function surfaceRuntime(options: { tools?: RuntimeTool[] } = {}): AgentRuntime {
+  return createRuntime({
     context: runtimeContext({
       activeSurface: {
         communicated: false,
@@ -125,8 +111,7 @@ function createRuntime(options: { tools?: RuntimeTool[] } = {}): AgentRuntime {
       },
       tools: options.tools ?? [sendReplyTool()],
     }),
-    sandbox: {} as AgentRuntime["sandbox"],
-  }
+  })
 }
 
 function sendReplyTool(): RuntimeTool {

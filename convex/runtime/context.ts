@@ -1,267 +1,96 @@
-import { v } from "convex/values"
-import { isTerminalRunStatus } from "../../contracts/runtime/runs"
-import {
-  type DrainedSessionBatch,
-  type RunHandoffs,
-  type RuntimeContext,
-  type RuntimeContextReload,
-} from "../../contracts/runtime/worker"
-import { api, internal } from "../_generated/api"
+import { type RuntimeContext } from "../../contracts/runtime/context"
+import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
-import { type ActionCtx, action, internalMutation } from "../_generated/server"
+import { type ActionCtx } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
-import { type PromptRecovery } from "../runs/agent/prompt/context"
-import { recordTrace } from "../runs/execution/traces/write"
-import { toolSnapshot } from "../runs/schema"
-import { drainSession } from "../sessions/drain"
-import { runtimeSkillNames } from "../skills/runtime"
+import { type RuntimeSkill, runtimeSkillNames } from "../skills/runtime"
 import {
   type LoadedRun,
   type LoadedSession,
-  loadRunSession,
   loadRuntimeSkills,
   loadSandboxReference,
 } from "./context/loaders"
+import { runtimeResponse, runtimeToolSnapshot } from "./context/response"
+import { runLifecycleTools } from "./native"
 import {
-  buildRuntimePrompt,
-  runtimeResponse,
-  runtimeToolSnapshot,
-  runtimeTools,
-} from "./context/response"
-import { runLifecycleTools } from "./lifecycle"
-import { runtimePermissions } from "./permissions/index"
-import { requireWorkerSecret } from "./secret"
-import { syncSessionReactions } from "./sessions"
+  type RuntimePermissions,
+  runtimePermissions,
+} from "./permissions/index"
 import { loadActiveSurface } from "./surface"
 
-type PreparedRun = {
-  drained: DrainedSessionBatch | null
-  person: string | null
+// Spelled out rather than inferred: the step actions that call loadRuntime
+// are themselves part of the generated api, and an inferred type would send
+// TypeScript around that circle.
+export type LoadedRuntime = {
+  activeSurface: Awaited<ReturnType<typeof loadActiveSurface>>
+  context: RuntimeContext
+  input: AgentRuntimeInput
+  lifecycleTools: ReturnType<typeof runLifecycleTools>
+  permissions: RuntimePermissions
+  run: LoadedRun
+  session: LoadedSession
+  skills: RuntimeSkill[]
+  tools: ReturnType<typeof runtimeToolSnapshot>
 }
 
-async function prepareWorkerRun(
+/**
+ * Everything a step needs to know about a run, rebuilt from the database on
+ * every step. Nothing is carried between steps but the run id, so a resumed
+ * step reads the same records a fresh one does.
+ */
+export async function loadRuntime(
   ctx: ActionCtx,
-  args: {
-    attempt: number
-    runId: Id<"runs">
-    session: LoadedSession
-    tools: ReturnType<typeof runtimeToolSnapshot>
-  }
-) {
-  return (await ctx.runMutation(internal.runtime.context.prepareRun, {
-    attempt: args.attempt,
-    runId: args.runId,
-    ...(args.session === null ? {} : { sessionId: args.session._id }),
-    tools: args.tools,
-  })) as PreparedRun | null
-}
+  runId: Id<"runs">
+): Promise<LoadedRuntime> {
+  const { input, run, session } = await loadRunRecords(ctx, runId)
+  const skills = await loadRuntimeSkills(ctx, run.organizationId)
+  const [sandbox, permissions, activeSurface] = await Promise.all([
+    loadSandboxReference(ctx, { runId, status: run.status }),
+    runtimePermissions(ctx, input, runtimeSkillNames(skills)),
+    loadActiveSurface(ctx, {
+      input,
+      runId,
+      target: session?.target ?? null,
+    }),
+  ])
+  const lifecycleTools = runLifecycleTools()
 
-async function loadWorkerHandoffs(
-  ctx: ActionCtx,
-  args: { runId: Id<"runs">; secret: string }
-) {
-  return (await ctx.runQuery(
-    api.runtime.waiters.handoffs.load,
-    args
-  )) as RunHandoffs
-}
-
-export const load = action({
-  args: {
-    attempt: v.number(),
-    runId: v.id("runs"),
-    secret: v.string(),
-  },
-  returns: v.any(),
-  handler: async (ctx, args): Promise<RuntimeContext> => {
-    requireWorkerSecret(args.secret)
-
-    const { session, run, skills, input } = await loadRunRecords(ctx, args)
-
-    const skillNames = runtimeSkillNames(skills)
-    const [sandbox, permissions, activeSurface, handoffs, recovery] =
-      await Promise.all([
-        loadSandboxReference(ctx, { runId: args.runId, status: run.status }),
-        runtimePermissions(ctx, input, skillNames),
-        loadActiveSurface(ctx, input, args.runId),
-        loadWorkerHandoffs(ctx, {
-          runId: args.runId,
-          secret: args.secret,
-        }),
-        loadRecovery(ctx, args.runId, args.attempt),
-      ])
-    const lifecycleTools = runLifecycleTools()
-
-    const prepared = await prepareWorkerRun(ctx, {
-      attempt: args.attempt,
-      runId: args.runId,
-      session,
-      tools: runtimeToolSnapshot(
-        input,
-        activeSurface,
-        lifecycleTools,
-        permissions
-      ),
-    })
-
-    return runtimeResponse({
+  return {
+    activeSurface,
+    context: runtimeResponse({
       activeSurface,
-      drained: prepared?.drained ?? null,
-      handoffs,
       input,
       lifecycleTools,
       permissions,
-      prompt: buildRuntimePrompt(input, activeSurface, permissions, skills, {
-        person: prepared?.person ?? null,
-        recovery,
-      }),
       run,
       sandbox,
       session,
-    })
-  },
-})
-
-/** The run's stored records, with the reaction sync ordered before the
- *  input read so the prompt renders current reactions. */
-async function loadRunRecords(ctx: ActionCtx, args: { runId: Id<"runs"> }) {
-  const [session, run] = (await Promise.all([
-    ctx.runQuery(internal.sessions.data.getByRun, { runId: args.runId }),
-    ctx.runQuery(internal.runs.records.get, { runId: args.runId }),
-  ])) as [LoadedSession, LoadedRun | null]
-
-  if (run === null) {
-    throw new Error("Runtime context not found.")
-  }
-
-  const [skills] = await Promise.all([
-    loadRuntimeSkills(ctx, run.organizationId),
-    session === null
-      ? Promise.resolve()
-      : syncSessionReactions(ctx, session._id),
-  ])
-
-  const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
-    runId: args.runId,
-  })) as AgentRuntimeInput | null
-
-  if (input === null) {
-    throw new Error("Runtime context not found.")
-  }
-
-  return { session, run, skills, input }
-}
-
-/** Retries rebuild the model context from scratch; earlier attempts' write
- *  actions ride along so a retry never repeats a completed side effect. */
-async function loadRecovery(
-  ctx: ActionCtx,
-  runId: Id<"runs">,
-  attempt: number
-): Promise<PromptRecovery | null> {
-  if (attempt <= 1) {
-    return null
-  }
-
-  const actions = (await ctx.runQuery(
-    internal.runs.execution.traces.recovery.listActions,
-    { runId }
-  )) as PromptRecovery["actions"]
-
-  return actions.length === 0 ? null : { attempt, actions }
-}
-
-export const reload = action({
-  args: {
-    runId: v.id("runs"),
-    secret: v.string(),
-  },
-  returns: v.any(),
-  handler: async (ctx, args): Promise<RuntimeContextReload> => {
-    requireWorkerSecret(args.secret)
-
-    const session = await loadRunSession(ctx, args.runId)
-
-    const input = (await ctx.runQuery(internal.runs.records.getInputByRun, {
-      runId: args.runId,
-    })) as AgentRuntimeInput | null
-
-    if (input === null) {
-      throw new Error("Runtime context not found.")
-    }
-
-    const skills = await loadRuntimeSkills(ctx, input.run.organizationId)
-    const permissions = await runtimePermissions(
-      ctx,
+    }),
+    input,
+    lifecycleTools,
+    permissions,
+    run,
+    session,
+    skills,
+    tools: runtimeToolSnapshot(
       input,
-      runtimeSkillNames(skills)
-    )
-    const activeSurface = await loadActiveSurface(ctx, input, args.runId)
-    const lifecycleTools = runLifecycleTools()
+      activeSurface,
+      lifecycleTools,
+      permissions
+    ),
+  }
+}
 
-    return {
-      prompt: buildRuntimePrompt(input, activeSurface, permissions, skills, {
-        person: session?.recency?.requester ?? null,
-      }),
-      activeSurface: activeSurface.state,
-      tools: runtimeTools(lifecycleTools, activeSurface, permissions),
-    }
-  },
-})
+async function loadRunRecords(ctx: ActionCtx, runId: Id<"runs">) {
+  const [session, run, input] = (await Promise.all([
+    ctx.runQuery(internal.sessions.data.getByRun, { runId }),
+    ctx.runQuery(internal.runs.records.get, { runId }),
+    ctx.runQuery(internal.runs.records.getInputByRun, { runId }),
+  ])) as [LoadedSession, LoadedRun | null, AgentRuntimeInput | null]
 
-// Prepares the run in one transaction: the prepared and started traces, the
-// status flip to running, and the initial session drain land together so the
-// worker starts its loop with zero extra round trips and a failed prepare
-// consumes nothing. Alongside the drained batch it returns the requester's
-// stored person context — rendered by this drain on the first attempt,
-// re-served from the session on retries — for the prompt prefix.
-export const prepareRun = internalMutation({
-  args: {
-    attempt: v.number(),
-    runId: v.id("runs"),
-    sessionId: v.optional(v.id("sessions")),
-    tools: toolSnapshot,
-  },
-  returns: v.any(),
-  handler: async (ctx, args) => {
-    const run = await ctx.db.get(args.runId)
+  if (run === null || input === null) {
+    throw new Error("Runtime context not found.")
+  }
 
-    if (run === null) {
-      return null
-    }
-
-    await recordTrace(ctx, {
-      run,
-      key: `run:${args.runId}:prepared`,
-      type: "run.prepared",
-      data: {
-        tools: args.tools,
-      },
-    })
-
-    if (isTerminalRunStatus(run.status)) {
-      return null
-    }
-
-    await recordTrace(ctx, {
-      attempt: args.attempt,
-      key: `${args.runId}:0:run.started:attempt-${args.attempt}`,
-      run,
-      sequence: 0,
-      type: "run.started",
-    })
-
-    if (run.status === "queued") {
-      await ctx.db.patch(args.runId, { status: "running" })
-    }
-
-    if (args.sessionId === undefined) {
-      return { drained: null, person: null }
-    }
-
-    const drained = await drainSession(ctx, { sessionId: args.sessionId })
-    const session = await ctx.db.get(args.sessionId)
-
-    return { drained, person: session?.recency?.requester ?? null }
-  },
-})
+  return { input, run, session }
+}

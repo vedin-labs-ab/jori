@@ -1,14 +1,13 @@
-import { isRecord } from "../../contracts/json"
+import { isRecord } from "../../../contracts/json"
+import { type RuntimeContext } from "../../../contracts/runtime/context"
+import { type RuntimeEventTraceData } from "../../../contracts/runtime/events"
 import {
   type ApprovalHandoff,
   type OfferHandoff,
-  type RuntimeContext,
-  type RuntimeEventTraceData,
-  type RuntimeId,
-} from "../../contracts/runtime/worker"
-import { type RuntimePlatform } from "../platform"
-import { type TraceRuntime } from "../runtime"
-import { recordRuntimeEvent } from "./runtime"
+} from "../../../contracts/runtime/handoffs"
+import { type RuntimeId } from "../../../contracts/runtime/ids"
+import { type RuntimePlatform, type TraceRuntime } from "../platform"
+import { recordRuntimeEvent } from "./record"
 
 export async function recordToolResultActivity(args: {
   platform: RuntimePlatform

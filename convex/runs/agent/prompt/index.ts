@@ -11,7 +11,6 @@ import {
   createRequesterMessage,
   defaultActiveSurface,
   type PromptActiveSurface,
-  type PromptRecovery,
 } from "./context"
 import { createOrganizationMessage } from "./organization"
 import { createPlaceMessage } from "./place"
@@ -23,7 +22,6 @@ export function assemblePrompt(
     activeSurface?: PromptActiveSurface | null
     person?: string | null
     promptedTools?: ToolPermission[]
-    recovery?: PromptRecovery | null
     skills?: readonly RuntimeSkill[]
   } = {}
 ): RuntimePrompt {
@@ -37,7 +35,7 @@ export function assemblePrompt(
     omittedNames: omittedSkillNames(communication),
     skills: runtimeSkills,
   })
-  const context = createContext(input, activeSurface, options.recovery ?? null)
+  const context = createContext(input, activeSurface)
   const offerIntegration = input.type !== "job"
 
   const instructions = renderPromptTemplate(

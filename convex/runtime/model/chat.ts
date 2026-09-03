@@ -34,8 +34,11 @@ export class OpenRouterModel implements ModelRuntime {
     const result = await sendOpenRouterChat({
       messages: toChatMessages(args.messages),
       model: joriModel,
-      toolChoice: args.tools.length === 0 ? "none" : "auto",
-      tools: args.tools.map(toChatTool),
+      // An empty tool list is left out rather than sent: providers differ on
+      // whether an empty array is a request without tools or a bad request.
+      ...(args.tools.length === 0
+        ? {}
+        : { toolChoice: "auto" as const, tools: args.tools.map(toChatTool) }),
       ...createOpenRouterModelSettings(args.firstTurn),
     })
 

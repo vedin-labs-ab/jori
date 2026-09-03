@@ -1,18 +1,29 @@
-import { type ToolSurface } from "../contracts/integrations"
-import { type JsonObject, type JsonValue } from "../contracts/json"
-import { type SurfaceReactionTarget } from "../contracts/runtime/surface"
+import { type ToolSurface } from "../../contracts/integrations"
+import { type JsonObject, type JsonValue } from "../../contracts/json"
 import {
-  type AgentRunPayload,
-  type AgentRunStatus,
   type DrainedSessionBatch,
-  type HandoffSubject,
-  type RunHandoffs,
   type RuntimeContext,
-  type RuntimeContextReload,
-  type RuntimeEventInput,
-  type RuntimeId,
-  type WaiterCondition,
-} from "../contracts/runtime/worker"
+} from "../../contracts/runtime/context"
+import { type RuntimeEventRecord } from "../../contracts/runtime/events"
+import { type RunHandoffs } from "../../contracts/runtime/handoffs"
+import { type RuntimeId } from "../../contracts/runtime/ids"
+import { type AgentRunStatus } from "../../contracts/runtime/runs"
+import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
+import { type WaiterCondition } from "../../contracts/runtime/waiters"
+import { internal } from "../_generated/api"
+import { type ActionCtx } from "../_generated/server"
+import { type TranscriptMessage } from "../runs/execution/transcript/schema"
+import { type SandboxRuntime } from "./sandbox/types"
+import { drainRunSession } from "./sessions"
+import { sendRunReply } from "./surface"
+import { addRunReaction } from "./surface/reactions"
+import {
+  callRunTool,
+  executeRunApproval,
+  fetchRunCloneCredentials,
+  requestRunApproval,
+} from "./tools/broker"
+import { uploadRunFile } from "./tools/files"
 
 export type UploadedFile = {
   fileId: RuntimeId<"files">
@@ -28,110 +39,230 @@ export type GitHubCloneCredentials = {
   username: string
 }
 
+export type ParkedWaiter = {
+  eventId: string
+  waiterId: RuntimeId<"waiters">
+}
+
+/** What a waiter remembers of the command it is parked on, so the tool can
+ *  collect that command's output after the wake. */
+export type ParkedCommand = {
+  condition?: WaiterCondition
+  token?: string
+}
+
+export type TranscriptTail = {
+  assistant: TranscriptMessage | null
+  results: TranscriptMessage[]
+}
+
+type RunId = RuntimeId<"runs">
+type RunRef = { runId: RunId }
+type WaiterRef = { waiterId: RuntimeId<"waiters"> }
+type SessionRef = { sessionId: RuntimeId<"sessions"> }
+type ApprovalRef = { approvalId: RuntimeId<"approvals"> }
+type OfferRef = { integrationOfferId: RuntimeId<"integrationOffers"> }
+type ChildRunArgs = { parentId: RunId; runId: RunId }
+type AgentRunsArgs = { parentId: RunId; runIds: RunId[] }
+type CloneArgs = RunRef & { owner: string; repo: string }
+type ParkArgs = {
+  condition?: WaiterCondition
+  expiresAt: number
+  token?: string
+}
+type ReactionArgs = RunRef & { reaction: string; target: SurfaceReactionTarget }
+
+type ReplyArgs = RunRef & {
+  blocks?: JsonObject[]
+  target?: string
+  text: string
+}
+
+type ToolCallArgs = RunRef & {
+  input: JsonObject
+  surface: ToolSurface
+  tool: string
+}
+
+type ApprovalArgs = ToolCallArgs & { replyTarget?: string }
+
+type AgentRunArgs = {
+  parentId: RunId
+  task: string
+  title: string
+  tools?: string[]
+}
+
+type UploadArgs = RunRef & {
+  bytes: Uint8Array
+  mimeType: string
+  name: string
+}
+
+/**
+ * Everything a step of the loop does to the world outside its own process.
+ * The loop, the tools and the traces see only this port, so they stay
+ * testable against an in-memory fake.
+ */
 export type RuntimePlatform = {
-  addReaction(args: {
-    reaction: string
-    runId: RuntimeId<"runs">
-    target: SurfaceReactionTarget
-  }): Promise<unknown>
-  callTool(args: {
-    input: JsonObject
-    runId: RuntimeId<"runs">
-    surface: ToolSurface
-    tool: string
-  }): Promise<JsonValue>
-  createAgentRun(args: {
-    parentId: RuntimeId<"runs">
-    task: string
-    title: string
-    tools?: string[]
-  }): Promise<unknown>
-  createWaiter(args: {
-    runId: RuntimeId<"runs">
-    sessionId?: RuntimeId<"sessions">
-    waitpointId: string
-    expiresAt: number
-    condition?: WaiterCondition
-  }): Promise<RuntimeId<"waiters">>
-  drainSessionMessages(args: {
-    limit?: number
-    sessionId: RuntimeId<"sessions">
-  }): Promise<DrainedSessionBatch>
-  executeApproval(args: {
-    approvalId: RuntimeId<"approvals">
-    runId: RuntimeId<"runs">
-  }): Promise<string>
-  expireWaiter(args: { waiterId: RuntimeId<"waiters"> }): Promise<void>
-  fetchGitHubCloneCredentials(args: {
-    owner: string
-    repo: string
-    runId: RuntimeId<"runs">
-  }): Promise<GitHubCloneCredentials>
-  loadRun(payload: AgentRunPayload, attempt: number): Promise<RuntimeContext>
-  loadRunHandoffs(args: { runId: RuntimeId<"runs"> }): Promise<RunHandoffs>
-  loadRunHandoffSubjects(args: {
-    subjects: HandoffSubject[]
-  }): Promise<RunHandoffs>
-  markApprovalConsumed(args: {
-    approvalId: RuntimeId<"approvals">
-  }): Promise<void>
-  markOfferConsumed(args: {
-    integrationOfferId: RuntimeId<"integrationOffers">
-  }): Promise<void>
-  markSandboxCleaned(args: {
-    error?: string
-    externalId: string
-  }): Promise<void>
-  readAgentRuns(args: {
-    parentId: RuntimeId<"runs">
-    runIds: RuntimeId<"runs">[]
-  }): Promise<AgentRunStatus[]>
-  stopAgentRun(args: {
-    parentId: RuntimeId<"runs">
-    runId: RuntimeId<"runs">
-  }): Promise<unknown>
-  recordEvent(args: {
-    attempt?: number
-    callId?: string
-    data?: RuntimeEventInput["data"]
-    key: string
-    runId: RuntimeId<"runs">
-    sequence: number
-    type: RuntimeEventInput["type"]
-  }): Promise<void>
-  releaseSandbox(args: {
-    externalId: string
-    runId: RuntimeId<"runs">
-  }): Promise<{ expiresAt: number } | null>
-  reloadContext(args: {
-    runId: RuntimeId<"runs">
-  }): Promise<RuntimeContextReload>
-  requestApproval(args: {
-    input: JsonObject
-    replyTarget?: string
-    runId: RuntimeId<"runs">
-    surface: ToolSurface
-    tool: string
-  }): Promise<unknown>
-  reserveExpiredSandboxCleanup(args: {
-    expiresAt: number
-    externalId: string
-    runId: RuntimeId<"runs">
-  }): Promise<boolean>
-  sendReply(args: {
-    blocks?: JsonObject[]
-    runId: RuntimeId<"runs">
-    target?: string
-    text: string
-  }): Promise<unknown>
-  uploadFile(args: {
-    bytes: Uint8Array
-    mimeType: string
-    name: string
-    runId: RuntimeId<"runs">
-  }): Promise<UploadedFile>
-  upsertSandbox(args: {
-    externalId: string
-    runId: RuntimeId<"runs">
-  }): Promise<void>
+  addReaction(args: ReactionArgs): Promise<unknown>
+  appendTranscript(messages: TranscriptMessage[]): Promise<void>
+  callTool(args: ToolCallArgs): Promise<JsonValue>
+  createAgentRun(args: AgentRunArgs): Promise<unknown>
+  drainSession(args: SessionRef): Promise<DrainedSessionBatch>
+  executeApproval(args: ApprovalRef & RunRef): Promise<string>
+  fetchGitHubCloneCredentials(args: CloneArgs): Promise<GitHubCloneCredentials>
+  finishRun(args: { result: string }): Promise<void>
+  listTranscript(): Promise<TranscriptMessage[]>
+  loadRunHandoffs(args: RunRef): Promise<RunHandoffs>
+  markApprovalConsumed(args: ApprovalRef): Promise<void>
+  markOfferConsumed(args: OfferRef): Promise<void>
+  park(args: ParkArgs): Promise<ParkedWaiter>
+  readAgentRuns(args: AgentRunsArgs): Promise<AgentRunStatus[]>
+  readWaiter(args: WaiterRef): Promise<ParkedCommand | null>
+  recordEvent(args: RuntimeEventRecord): Promise<void>
+  requestApproval(args: ApprovalArgs): Promise<unknown>
+  resolveWaiter(args: WaiterRef): Promise<void>
+  retarget(args: { target: string }): Promise<void>
+  sendReply(args: ReplyArgs): Promise<unknown>
+  stopAgentRun(args: ChildRunArgs): Promise<unknown>
+  tailTranscript(): Promise<TranscriptTail>
+  uploadFile(args: UploadArgs): Promise<UploadedFile>
+}
+
+export type AgentRuntime = {
+  context: RuntimeContext
+  platform: RuntimePlatform
+  sandbox: SandboxRuntime
+}
+
+/** What recording and waiting need of a runtime: the platform to write
+ *  through and the context that names the run. */
+export type TraceRuntime = Pick<AgentRuntime, "context" | "platform">
+
+/** The port over one step action: each call is either a helper running in
+ *  this action or a single query or mutation on the run's own records. */
+export class ActionPlatform implements RuntimePlatform {
+  constructor(
+    private readonly ctx: ActionCtx,
+    private readonly context: RuntimeContext
+  ) {}
+
+  addReaction = (args: ReactionArgs) => addRunReaction(this.ctx, args)
+
+  appendTranscript = async (messages: TranscriptMessage[]) => {
+    await this.mutation(internal.runs.execution.transcript.records.append, {
+      messages,
+      runId: this.runId,
+    })
+  }
+
+  callTool = (args: ToolCallArgs) => callRunTool(this.ctx, args)
+
+  createAgentRun = (args: AgentRunArgs) =>
+    this.mutation(internal.runtime.agents.create, args)
+
+  drainSession = (args: SessionRef) => drainRunSession(this.ctx, args.sessionId)
+
+  executeApproval = (args: ApprovalRef & RunRef) =>
+    executeRunApproval(this.ctx, args)
+
+  fetchGitHubCloneCredentials = (args: CloneArgs) =>
+    fetchRunCloneCredentials(this.ctx, args)
+
+  finishRun = async (args: { result: string }) => {
+    await this.mutation(internal.runs.records.finish, {
+      result: args.result,
+      runId: this.runId,
+    })
+  }
+
+  listTranscript = () =>
+    this.query(internal.runs.execution.transcript.records.list, {
+      runId: this.runId,
+    })
+
+  loadRunHandoffs = (args: RunRef) =>
+    this.query(internal.runs.execution.waiters.handoffs.load, args)
+
+  markApprovalConsumed = async (args: ApprovalRef) => {
+    await this.mutation(
+      internal.runs.execution.waiters.handoffs.consumeApproval,
+      args
+    )
+  }
+
+  markOfferConsumed = async (args: OfferRef) => {
+    await this.mutation(
+      internal.runs.execution.waiters.handoffs.consumeOffer,
+      args
+    )
+  }
+
+  park = (args: ParkArgs) =>
+    this.mutation(internal.runs.execution.waiters.records.park, {
+      ...args,
+      ...(this.context.session === null
+        ? {}
+        : { sessionId: this.context.session.id }),
+      runId: this.runId,
+    })
+
+  readAgentRuns = (args: AgentRunsArgs) =>
+    this.query(internal.runtime.agents.readChildren, args)
+
+  readWaiter = (args: WaiterRef) =>
+    this.query(
+      internal.runs.execution.waiters.records.get,
+      args
+    ) as Promise<ParkedCommand | null>
+
+  recordEvent = async (args: RuntimeEventRecord) => {
+    await this.mutation(internal.runs.execution.traces.records.record, args)
+  }
+
+  requestApproval = (args: ApprovalArgs) => requestRunApproval(this.ctx, args)
+
+  resolveWaiter = async (args: WaiterRef) => {
+    await this.mutation(internal.runs.execution.waiters.records.resolve, args)
+  }
+
+  retarget = async (args: { target: string }) => {
+    const session = this.context.session
+
+    if (session !== null) {
+      await this.mutation(internal.sessions.data.retarget, {
+        sessionId: session.id,
+        target: args.target,
+      })
+    }
+  }
+
+  sendReply = (args: ReplyArgs) => sendRunReply(this.ctx, args)
+
+  stopAgentRun = (args: ChildRunArgs) =>
+    this.mutation(internal.runtime.agents.stop, args)
+
+  tailTranscript = () =>
+    this.query(internal.runs.execution.transcript.records.tail, {
+      runId: this.runId,
+    })
+
+  uploadFile = (args: UploadArgs) =>
+    uploadRunFile(this.ctx, {
+      ...args,
+      organizationId: this.context.run.organizationId,
+    })
+
+  private get runId() {
+    return this.context.run.id
+  }
+
+  private get query() {
+    return this.ctx.runQuery
+  }
+
+  private get mutation() {
+    return this.ctx.runMutation
+  }
 }

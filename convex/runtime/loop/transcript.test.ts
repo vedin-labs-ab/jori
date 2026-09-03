@@ -1,17 +1,21 @@
-import { expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 import {
   type RuntimeInteraction,
   type RuntimeMessage,
-} from "../../contracts/runtime/worker"
-import { runtimeId } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
+} from "../../../contracts/runtime/context"
+import { createPlatform } from "../../../test/platform"
+import {
+  createRuntime,
+  runtimeContext,
+  runtimeId,
+  runtimePrompt,
+} from "../../../test/runtime"
 import {
   appendSessionMessages,
   formatSessionInteraction,
   formatSessionMessage,
   promptMessages,
-  replacePromptMessages,
-} from "./messages"
+} from "./transcript"
 
 test("formats drained messages like conversation messages", () => {
   const formatted = formatSessionMessage(runtimeMessage())
@@ -39,10 +43,10 @@ Reacted ✅ to Jori's message: "I can proceed with option B."
 \`\`\``)
 })
 
-test("updates the active surface target from drained messages", async () => {
-  const runtime = {
-    platform: {
-      drainSessionMessages: vi.fn(async () => ({
+test("appends drained messages to the transcript", async () => {
+  const platform = createPlatform({
+    sessions: [
+      {
         hasMore: false,
         messages: [
           runtimeMessage({
@@ -50,45 +54,73 @@ test("updates the active surface target from drained messages", async () => {
             replyTarget: "linear:thread:comment-id",
           }),
         ],
-      })),
-    },
-    context: {
-      activeSurface: {
-        communicated: false,
-        surface: "linear",
-        target: "linear:issue:issue-id",
       },
+    ],
+  })
+  const runtime = createRuntime({
+    context: runtimeContext({
       session: { id: runtimeId<"sessions">("session") },
-    },
-  } as unknown as AgentRuntime
-  const messages: Array<{ content: string; role: "user" }> = []
+    }),
+    platform,
+  })
 
-  await expect(appendSessionMessages(runtime, messages)).resolves.toBe(true)
-  expect(runtime.context.activeSurface?.target).toBe("linear:thread:comment-id")
+  await expect(appendSessionMessages(runtime)).resolves.toBe(true)
+  expect(platform.transcript).toHaveLength(1)
+  expect(platform.transcript[0]?.content).toContain("Here's what I've got.")
 })
 
 test("appends person context before drained batch items", async () => {
-  const runtime = {
-    platform: {
-      drainSessionMessages: vi.fn(async () => ({
+  const platform = createPlatform({
+    sessions: [
+      {
         contexts: ["# Recent activity — Albin"],
         hasMore: false,
         messages: [runtimeMessage({ source: "person" })],
-      })),
-    },
-    context: {
-      activeSurface: null,
+      },
+    ],
+  })
+  const runtime = createRuntime({
+    context: runtimeContext({
       session: { id: runtimeId<"sessions">("session") },
-    },
-  } as unknown as AgentRuntime
-  const messages: Array<{ content: string; role: "user" }> = []
+    }),
+    platform,
+  })
 
-  await expect(appendSessionMessages(runtime, messages)).resolves.toBe(true)
-  expect(messages[0]).toEqual({
+  await expect(appendSessionMessages(runtime)).resolves.toBe(true)
+  expect(platform.transcript[0]).toEqual({
     content: "# Recent activity — Albin",
     role: "user",
   })
-  expect(messages).toHaveLength(2)
+  expect(platform.transcript).toHaveLength(2)
+})
+
+test("builds the prompt prefix from the present context messages in order", () => {
+  expect(promptMessages(barePrompt)).toEqual([
+    { content: "instructions", role: "system" },
+    { content: "context", role: "user" },
+  ])
+  expect(promptMessages(fullPrompt)).toEqual([
+    { content: "instructions", role: "system" },
+    { content: "organization", role: "user" },
+    { content: "requester", role: "user" },
+    { content: "place", role: "user" },
+    { content: "person", role: "user" },
+    { content: "context", role: "user" },
+  ])
+  expect(promptMessages({ ...barePrompt, person: "person" })).toEqual([
+    { content: "instructions", role: "system" },
+    { content: "person", role: "user" },
+    { content: "context", role: "user" },
+  ])
+})
+
+const barePrompt = runtimePrompt({ instructions: "instructions" })
+const fullPrompt = runtimePrompt({
+  instructions: "instructions",
+  organization: "organization",
+  person: "person",
+  place: "place",
+  requester: "requester",
 })
 
 function runtimeMessage(
@@ -134,74 +166,3 @@ function runtimeInteraction(
     ...overrides,
   }
 }
-
-const fullPrompt = {
-  context: "context",
-  instructions: "instructions",
-  organization: "organization",
-  place: "place",
-  person: "person",
-  requester: "requester",
-}
-const barePrompt = {
-  context: "context",
-  instructions: "instructions",
-  organization: null,
-  place: null,
-  person: null,
-  requester: null,
-}
-
-test("builds the prompt prefix from the present context messages in order", () => {
-  expect(promptMessages(barePrompt)).toEqual([
-    { content: "instructions", role: "system" },
-    { content: "context", role: "user" },
-  ])
-  expect(promptMessages(fullPrompt)).toEqual([
-    { content: "instructions", role: "system" },
-    { content: "organization", role: "user" },
-    { content: "requester", role: "user" },
-    { content: "place", role: "user" },
-    { content: "person", role: "user" },
-    { content: "context", role: "user" },
-  ])
-  expect(promptMessages({ ...barePrompt, person: "person" })).toEqual([
-    { content: "instructions", role: "system" },
-    { content: "person", role: "user" },
-    { content: "context", role: "user" },
-  ])
-})
-
-test("replaces the prompt prefix in place across all shapes", () => {
-  const history = { content: "history", role: "user" as const }
-  const next = {
-    context: "new context",
-    instructions: "new instructions",
-    organization: "new organization",
-    place: "new place",
-    person: "new person",
-    requester: "new requester",
-  }
-
-  const grew = [...promptMessages(barePrompt), history]
-  replacePromptMessages(grew, barePrompt, next)
-  expect(grew).toEqual([...promptMessages(next), history])
-
-  const shrank = [...promptMessages(fullPrompt), history]
-  replacePromptMessages(shrank, fullPrompt, {
-    ...next,
-    organization: null,
-    place: null,
-    person: null,
-    requester: null,
-  })
-  expect(shrank).toEqual([
-    { content: "new instructions", role: "system" },
-    { content: "new context", role: "user" },
-    history,
-  ])
-
-  const malformed = [history]
-  replacePromptMessages(malformed, barePrompt, next)
-  expect(malformed).toEqual([history])
-})

@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { runtimeContext } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall } from "../tool"
+import { type RuntimeTool } from "../../../contracts/runtime/context"
+import { createPlatform } from "../../../test/platform"
+import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
 
 test.each([
   [
@@ -30,49 +30,45 @@ test.each([
     "slack_add_reaction",
   ],
 ] as const)("%s reaction tools do not mark the active surface communicated", async (surface, tool, args, name) => {
-  const runtime = createRuntime({
+  const runtime = communicationRuntime({
     result: { ok: true },
     surface,
     tool,
   })
 
-  await executeToolCall({
-    attempt: 1,
+  await runTool({
     call: {
       args,
       id: "call_1",
       name,
     },
     runtime,
-    sequence: 100,
   })
 
   expect(runtime.context.activeSurface?.communicated).toBe(false)
 })
 
 test("delivered integration offers mark the active surface communicated", async () => {
-  const runtime = createRuntime({
+  const runtime = communicationRuntime({
     result: { delivery: { status: "delivered", surface: "slack" } },
     surface: "slack",
     tool: integrationOfferTool(),
   })
 
-  await executeToolCall({
-    attempt: 1,
+  await runTool({
     call: {
       args: { integration: "gmail", summary: "Gmail is needed here." },
       id: "call_1",
       name: "offer_integration",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(runtime.context.activeSurface?.communicated).toBe(true)
 })
 
 test("final integration offers finish the tool step", async () => {
-  const runtime = createRuntime({
+  const runtime = communicationRuntime({
     result: {
       delivery: { status: "delivered", surface: "slack" },
     },
@@ -80,8 +76,7 @@ test("final integration offers finish the tool step", async () => {
     tool: integrationOfferTool(),
   })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         final: true,
@@ -92,7 +87,6 @@ test("final integration offers finish the tool step", async () => {
       name: "offer_integration",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(true)
@@ -104,14 +98,13 @@ test.each([
   ["not delivered", { delivery: { status: "created" } }],
   ["already connected", { status: "connected" }],
 ] as const)("integration offers do not finish without final when %s", async (_label, result) => {
-  const runtime = createRuntime({
+  const runtime = communicationRuntime({
     result,
     surface: "slack",
     tool: integrationOfferTool(),
   })
 
-  const output = await executeToolCall({
-    attempt: 1,
+  const output = await runTool({
     call: {
       args: {
         integration: "gmail",
@@ -121,43 +114,42 @@ test.each([
       name: "offer_integration",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(output.finished).toBe(false)
 })
 
 test("undelivered integration offers do not mark visible communication", async () => {
-  const runtime = createRuntime({
+  const runtime = communicationRuntime({
     result: { delivery: { status: "created" } },
     surface: "slack",
     tool: integrationOfferTool(),
   })
 
-  await executeToolCall({
-    attempt: 1,
+  await runTool({
     call: {
       args: { integration: "gmail", summary: "Gmail is needed here." },
       id: "call_1",
       name: "offer_integration",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(runtime.context.activeSurface?.communicated).toBe(false)
 })
 
-function createRuntime(options: {
+function communicationRuntime(options: {
   result: unknown
   surface?: "github" | "linear" | "slack"
   tool: RuntimeTool
 }): AgentRuntime {
-  return {
-    platform: {
-      callTool: vi.fn(async () => options.result),
-      recordEvent: vi.fn(),
-    } as unknown as AgentRuntime["platform"],
+  const platform = createPlatform()
+
+  platform.callTool = vi.fn(
+    async () => options.result
+  ) as typeof platform.callTool
+
+  return createRuntime({
     context: runtimeContext({
       activeSurface: {
         communicated: false,
@@ -166,8 +158,8 @@ function createRuntime(options: {
       },
       tools: [options.tool],
     }),
-    sandbox: {} as AgentRuntime["sandbox"],
-  }
+    platform,
+  })
 }
 
 function providerTool(

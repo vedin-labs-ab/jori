@@ -6,7 +6,6 @@ import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type RuntimeSkill } from "../../skills/runtime"
-import { syncSessionReactions } from "../sessions"
 
 export type LoadedRun = {
   _id: Id<"runs">
@@ -17,24 +16,13 @@ export type LoadedSandbox = { externalId: string } | null
 export type LoadedSession = {
   _id: Id<"sessions">
   recency?: { requester?: string }
+  target?: string
 } | null
-
-export async function loadRunSession(ctx: ActionCtx, runId: Id<"runs">) {
-  const session = (await ctx.runQuery(internal.sessions.data.getByRun, {
-    runId,
-  })) as LoadedSession
-
-  if (session !== null) {
-    await syncSessionReactions(ctx, session._id)
-  }
-
-  return session
-}
 
 export async function loadRuntimeSkills(
   ctx: ActionCtx,
   organizationId: string
-) {
+): Promise<RuntimeSkill[]> {
   return (await ctx.runQuery(internal.skills.catalog.listForRuntime, {
     organizationId,
   })) as RuntimeSkill[]

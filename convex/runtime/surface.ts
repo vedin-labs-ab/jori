@@ -4,20 +4,15 @@ import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   type ActionCtx,
-  action,
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import {
-  messageMatchesReplyTargetIdentifier,
-  messageReplyTargetIdentifier,
-} from "../messages/identifiers"
+import { messageMatchesReplyTargetIdentifier } from "../messages/identifiers"
 import { optionalSlackBlocks, sendSurfaceReply } from "../messages/reply"
 import { replyAddress } from "../messages/targets"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { optionalString, requiredString } from "../shared/input"
 import { type MessageIntegration } from "../shared/integrations"
-import { requireWorkerSecret } from "./secret"
 import { requireMessageSurfaceInput } from "./surface/input"
 import { findVisibleMessage } from "./surface/target"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
@@ -32,28 +27,36 @@ type ActiveSurface = {
   target: string | null
 }
 
+/** The reply target lives on the session, which the drain moves as the
+ *  conversation moves, so a run started in a channel follows it into a
+ *  thread without recomputing it from the first message. */
 export async function loadActiveSurface(
   ctx: ActionCtx,
-  input: AgentRuntimeInput,
-  runId: Id<"runs">
+  args: {
+    input: AgentRuntimeInput
+    runId: Id<"runs">
+    target: string | null
+  }
 ): Promise<{
   state: ActiveSurface | null
   tools: ActiveSurfaceTool[]
 }> {
+  const input = args.input
+
   if (input.type !== "message" || replyAddress(input.message) === null) {
     return { state: null, tools: [] }
   }
 
   const current: ActiveSurfaceState = await ctx.runQuery(
     internal.runtime.surface.state,
-    { runId }
+    { runId: args.runId }
   )
 
   return {
     state: {
       communicated: current.communicated,
       surface: input.messageIntegration,
-      target: messageReplyTargetIdentifier(input.message),
+      target: args.target,
     },
     tools: activeSurfaceTools(input.messageIntegration),
   }
@@ -94,52 +97,54 @@ export const canUseReplyTarget = internalQuery({
   },
 })
 
-export const sendReply = action({
+export async function sendRunReply(
+  ctx: ActionCtx,
   args: {
-    runId: v.id("runs"),
-    secret: v.string(),
-    text: v.string(),
-    blocks: v.optional(v.array(v.any())),
-    target: v.optional(v.string()),
-  },
-  returns: v.object({
-    status: v.literal("sent"),
-  }),
-  handler: async (ctx, args) => {
-    requireWorkerSecret(args.secret)
+    blocks?: unknown[]
+    runId: Id<"runs">
+    target?: string
+    text: string
+  }
+) {
+  const input = await requireMessageSurfaceInput(ctx, {
+    runId: args.runId,
+    surface: "reply",
+  })
 
-    const input = await requireMessageSurfaceInput(ctx, {
-      runId: args.runId,
-      surface: "reply",
-    })
+  const target = normalizeReplyTarget(args.target)
+  const address = replyAddress(input.message, target)
 
-    const target = normalizeReplyTarget(args.target)
-    const address = replyAddress(input.message, target)
+  if (address === null) {
+    throw new Error("Run has no active reply target.")
+  }
 
-    if (address === null) {
-      throw new Error("Run has no active reply target.")
-    }
+  if (
+    target !== undefined &&
+    !(await canReplyTo(ctx, input.message._id, target))
+  ) {
+    throw new Error(
+      "send_reply target is not available in the active conversation."
+    )
+  }
 
-    if (
-      target !== undefined &&
-      !(await ctx.runQuery(internal.runtime.surface.canUseReplyTarget, {
-        messageId: input.message._id,
-        target,
-      }))
-    ) {
-      throw new Error(
-        "send_reply target is not available in the active conversation."
-      )
-    }
+  await sendSurfaceReply(ctx, input, address, {
+    blocks: optionalSlackBlocks(args.blocks),
+    text: requiredString(args.text, "text"),
+  })
 
-    await sendSurfaceReply(ctx, input, address, {
-      blocks: optionalSlackBlocks(args.blocks),
-      text: requiredString(args.text, "text"),
-    })
+  return { status: "sent" as const }
+}
 
-    return { status: "sent" as const }
-  },
-})
+async function canReplyTo(
+  ctx: ActionCtx,
+  messageId: Id<"messages">,
+  target: string
+) {
+  return await ctx.runQuery(internal.runtime.surface.canUseReplyTarget, {
+    messageId,
+    target,
+  })
+}
 
 function normalizeReplyTarget(value: unknown) {
   const target = optionalString(value)

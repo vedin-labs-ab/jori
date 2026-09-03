@@ -1,12 +1,10 @@
-import { v } from "convex/values"
-import { type DrainedSessionBatch } from "../../contracts/runtime/worker"
+import { type DrainedSessionBatch } from "../../contracts/runtime/context"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
-import { type ActionCtx, action } from "../_generated/server"
+import { type ActionCtx } from "../_generated/server"
 import { githubReactionSnapshots } from "../integrations/github/ingress/reactions"
 import { slackReactionSnapshots } from "../integrations/slack/reactions/session"
 import { type ReactionSnapshotPlan } from "../reactions/data"
-import { requireWorkerSecret } from "./secret"
 
 type ReactionSyncStatus = "failed" | "skipped" | "synced"
 
@@ -26,27 +24,16 @@ const reactionSnapshotSources: ReactionSnapshotSource[] = [
   slackReactionSnapshots,
 ]
 
-export const drain = action({
-  args: {
-    limit: v.optional(v.number()),
-    secret: v.string(),
-    sessionId: v.id("sessions"),
-  },
-  returns: v.any(),
-  handler: async (ctx, args): Promise<DrainedSessionBatch> => {
-    requireWorkerSecret(args.secret)
+/** Reactions are synced before the drain reads, so fresh reactions are part
+ *  of the batch the model sees. */
+export async function drainRunSession(
+  ctx: ActionCtx,
+  sessionId: Id<"sessions">
+): Promise<DrainedSessionBatch> {
+  await syncSessionReactions(ctx, sessionId)
 
-    // Reactions must be synced before the drain reads so fresh reactions are
-    // part of the drained batch; doing both here keeps the worker round trip
-    // to one call.
-    await syncSessionReactions(ctx, args.sessionId)
-
-    return await ctx.runMutation(internal.sessions.drain.messages, {
-      limit: args.limit,
-      sessionId: args.sessionId,
-    })
-  },
-})
+  return await ctx.runMutation(internal.sessions.drain.messages, { sessionId })
+}
 
 export async function syncSessionReactions(
   ctx: ActionCtx,

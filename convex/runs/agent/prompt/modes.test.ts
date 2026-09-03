@@ -67,30 +67,3 @@ describe("job operating contract", () => {
     expect(instruction).not.toContain("# Job")
   })
 })
-
-describe("recovery context", () => {
-  test("lists prior-attempt write actions on retries only", () => {
-    const input = jobRuntimeInput()
-    const recovered = assemblePrompt(input, {
-      recovery: {
-        attempt: 2,
-        actions: [
-          {
-            name: "google_gmail_send_message",
-            detail: '{"subject":"Morning Briefing"}',
-          },
-          { name: "add_job", detail: null },
-        ],
-      },
-    }).context
-
-    expect(recovered).toContain("# Recovery")
-    expect(recovered).toContain("This is attempt 2 of this run")
-    expect(recovered).toContain(
-      '- google_gmail_send_message — {"subject":"Morning Briefing"}'
-    )
-    expect(recovered).toContain("- add_job\n")
-    expect(recovered).toContain("Never repeat one")
-    expect(assemblePrompt(input).context).not.toContain("# Recovery")
-  })
-})

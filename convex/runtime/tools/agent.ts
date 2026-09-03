@@ -1,17 +1,18 @@
-import { type JsonObject } from "../../contracts/json"
+import { type JsonObject } from "../../../contracts/json"
 import {
   type Duration,
   durationMilliseconds,
   isDurationUnit,
-} from "../../contracts/runtime/duration"
-import { isTerminalRunStatus } from "../../contracts/runtime/runs"
+} from "../../../contracts/runtime/duration"
+import { type RuntimeId } from "../../../contracts/runtime/ids"
 import {
   type AgentRunStatus,
-  type RuntimeId,
-} from "../../contracts/runtime/worker"
-import { optionalStringList, requiredString } from "../input"
-import { type AgentRuntime } from "../runtime"
-import { parkWaitpoint } from "../waiter"
+  isTerminalRunStatus,
+} from "../../../contracts/runtime/runs"
+import { type WaiterWake } from "../../../contracts/runtime/waiters"
+import { optionalStringArray, requiredString } from "../../shared/input"
+import { isParked, park, recordResumed } from "../loop/park"
+import { type AgentRuntime } from "../platform"
 
 const maxAgents = 20
 const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
@@ -21,70 +22,95 @@ const defaultTimeoutMs = durationMilliseconds({ unit: "minutes", value: 15 })
 /** The agent-route tools: delegate, join, and stop child runs. */
 export async function executeAgentTool(
   runtime: AgentRuntime,
-  name: string,
-  input: JsonObject,
-  onParked: () => Promise<void>
+  args: {
+    input: JsonObject
+    name: string
+    onParked: () => Promise<void>
+    wake?: WaiterWake
+  }
 ) {
-  if (name === "wait_for_agents") {
-    return await waitForAgents(runtime, input, onParked)
+  const input = args.input
+
+  if (args.name === "wait_for_agents") {
+    return await waitForAgents(runtime, args)
   }
 
-  if (name === "start_agent") {
+  if (args.name === "start_agent") {
     return await runtime.platform.createAgentRun({
       parentId: runtime.context.run.id,
       task: requiredString(input.task, "task"),
       title: requiredString(input.title, "title"),
-      tools: optionalStringList(input.tools),
+      tools:
+        input.tools === undefined
+          ? undefined
+          : optionalStringArray(input.tools),
     })
   }
 
-  if (name === "stop_agent") {
+  if (args.name === "stop_agent") {
     return await runtime.platform.stopAgentRun({
       parentId: runtime.context.run.id,
       runId: requiredString(input.runId, "runId") as RuntimeId<"runs">,
     })
   }
 
-  throw new Error(`Unknown agent tool: ${name}`)
+  throw new Error(`Unknown agent tool: ${args.name}`)
 }
 
 async function waitForAgents(
   runtime: AgentRuntime,
-  input: JsonObject,
-  onParked?: () => Promise<void>
+  args: {
+    input: JsonObject
+    onParked: () => Promise<void>
+    wake?: WaiterWake
+  }
 ) {
-  const runIds = readRunIds(input.runIds)
-  const timeoutMs = readTimeoutMilliseconds(input.timeout)
+  const runIds = readRunIds(args.input.runIds)
+  const timeoutMs = readTimeoutMilliseconds(args.input.timeout)
   const readRuns = async () =>
     await runtime.platform.readAgentRuns({
       parentId: runtime.context.run.id,
       runIds,
     })
 
-  let runs = await readRuns()
+  if (args.wake !== undefined) {
+    return await resumeWait(runtime, args.wake, await readRuns())
+  }
+
+  const runs = await readRuns()
 
   if (allTerminal(runs)) {
     return { reason: "completed", runs }
   }
 
-  const wake = await parkWaitpoint(runtime, {
+  const outcome = await park(runtime, {
     condition: { kind: "runs", runIds },
     deadline: Date.now() + timeoutMs,
-    onParked,
+    onParked: args.onParked,
     resolved: async () => allTerminal(await readRuns()),
   })
 
-  runs = await readRuns()
+  return isParked(outcome)
+    ? outcome
+    : { reason: "completed", runs: await readRuns() }
+}
 
-  return {
-    reason:
-      allTerminal(runs) || wake.reason === "resolved"
-        ? "completed"
-        : wake.reason === "expired"
-          ? "timeout"
-          : "interrupted",
-    runs,
+async function resumeWait(
+  runtime: AgentRuntime,
+  wake: WaiterWake,
+  runs: AgentRunStatus[]
+) {
+  await recordResumed(runtime, wake)
+
+  return { reason: wakeReason(wake, runs), runs }
+}
+
+function wakeReason(wake: WaiterWake, runs: AgentRunStatus[]) {
+  if (allTerminal(runs) || wake.reason === "resolved") {
+    return "completed"
   }
+
+  return wake.reason === "expired" ? "timeout" : "interrupted"
 }
 
 function readRunIds(value: unknown) {

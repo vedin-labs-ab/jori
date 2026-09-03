@@ -1,31 +1,21 @@
-import { surfaceCommunicationTools } from "../../contracts/runtime/surface"
-import { type RuntimeContext } from "../../contracts/runtime/worker"
-import { type ModelMessage } from "../model/types"
+import { type RuntimeContext } from "../../../contracts/runtime/context"
+import { surfaceCommunicationTools } from "../../../contracts/runtime/surface"
+import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 
-export function appendStopRepair(
-  messages: ModelMessage[],
-  content: string,
+// A run that stops without finishing gets one instruction back: words
+// outside a tool call reach no one, so say it where it lands or finish.
+// The assistant's own stop text is already a transcript row.
+export function stopRepairMessages(
   context: RuntimeContext
-) {
-  if (!isEmptyStop(content)) {
-    messages.push({
-      content,
-      role: "assistant",
-    })
-  }
-
-  messages.push({
-    content: stopRepairInstruction({
-      visibleTools: visibleCommunicationTools(context.tools),
-    }),
-    role: "user",
-  })
-}
-
-function isEmptyStop(content: string) {
-  const normalized = content.trim()
-
-  return normalized === "" || normalized === '""' || normalized === "''"
+): TranscriptMessage[] {
+  return [
+    {
+      content: stopRepairInstruction({
+        visibleTools: visibleCommunicationTools(context.tools),
+      }),
+      role: "user",
+    },
+  ]
 }
 
 function hasTool(tools: RuntimeContext["tools"], name: string) {
