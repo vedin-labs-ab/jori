@@ -1,22 +1,20 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type FileDetail } from "@/shared/console/files/types"
 import { noSiblings } from "../siblings"
-import { FileHtml } from "./html"
+import { FileHtml, type HtmlMode } from "./html"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: (props: React.ComponentProps<"a">) => <a {...props} />,
   useRouter: () => ({ navigate: vi.fn() }),
 }))
 
-// The editor stands in for itself: the toggle only needs a mount to land
-// in, and the stub surfaces the tools slot the toggle arrives through.
+// The editor stands in for itself: the code mode only needs a mount to
+// land in.
 vi.mock("../editor/section", () => ({
-  FileEditor: ({ tools }: { tools?: React.ReactNode }) => (
-    <div data-testid="editor">{tools}</div>
-  ),
+  FileEditor: () => <div data-testid="editor" />,
 }))
 
 vi.mock("../cache/url", () => ({
@@ -40,13 +38,15 @@ const file = {
   url: "https://files.test/page",
 } as unknown as FileDetail
 
-function renderHtmlView() {
+function renderHtmlView(mode: HtmlMode) {
   render(
     <TooltipProvider>
       <FileHtml
         errorFallback={<div>error</div>}
         file={file}
+        mode={mode}
         onSave={() => Promise.resolve(true)}
+        onState={() => undefined}
         siblings={noSiblings}
         url={file.url ?? ""}
       />
@@ -54,39 +54,20 @@ function renderHtmlView() {
   )
 }
 
-// Radix tabs select on mousedown, not click.
-function switchMode(name: "Code" | "Preview") {
-  fireEvent.mouseDown(screen.getByRole("tab", { name }), { button: 0 })
-}
-
-test("opens rendered by default, scripts-only sandbox on the frame", () => {
-  renderHtmlView()
+test("renders the document in a scripts-only sandbox", () => {
+  renderHtmlView("preview")
 
   const frame = screen.getByTitle("page.html")
 
   expect(frame.tagName).toBe("IFRAME")
   expect(frame.getAttribute("sandbox")).toBe("allow-scripts")
   expect(frame.getAttribute("src")).toBe("https://files.test/page")
-  expect(
-    screen.getByRole("tab", { name: "Preview" }).getAttribute("aria-selected")
-  ).toBe("true")
   expect(screen.queryByTestId("editor")).toBeNull()
 })
 
-test("the toggle switches to the editor and back to the preview", () => {
-  renderHtmlView()
-
-  switchMode("Code")
+test("code mode drops into the editor", () => {
+  renderHtmlView("code")
 
   expect(screen.getByTestId("editor")).toBeDefined()
   expect(screen.queryByTitle("page.html")).toBeNull()
-  // The toggle rides along into the editor's toolbar slot.
-  expect(
-    screen.getByRole("tab", { name: "Code" }).getAttribute("aria-selected")
-  ).toBe("true")
-
-  switchMode("Preview")
-
-  expect(screen.getByTitle("page.html")).toBeDefined()
-  expect(screen.queryByTestId("editor")).toBeNull()
 })

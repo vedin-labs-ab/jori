@@ -1,13 +1,15 @@
 import { ClientOnly } from "@tanstack/react-router"
-import { useMemo, useState } from "react"
+import { type ReactNode, useMemo, useState } from "react"
 import { FileBody } from "@/shared/console/files/body"
 import { FileHeaderActions } from "@/shared/console/files/header"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { fileDetail, fileSiblingsOf, materialOf } from "../../derive/materials"
 import { DemoLinksDialog } from "../../dialogs/links"
+import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import { useDemoWorkspace } from "../../workspace"
-import { FileTitle, MaterialMissing } from "./chrome"
+import { FileMenu, MaterialMissing } from "./chrome"
+import { materialCrumb } from "./crumb"
 
 /** One file's page over the workspace: the console's viewer or editor,
  *  with edits saved into memory, under the header actions and the crumb
@@ -19,16 +21,27 @@ export function FilePage({ fileId }: { fileId: string }) {
   const file = useMemo(() => fileDetail(state, fileId), [state, fileId])
   const siblings = useMemo(() => fileSiblingsOf(state, fileId), [state, fileId])
   const [isShareOpen, setIsShareOpen] = useState(false)
+  const [request, setRequest] = useState<MaterialRequest>()
+  const crumb = useMemo(
+    () =>
+      material?.kind === "file" ? materialCrumb(state, material) : undefined,
+    [material, state]
+  )
 
   if (file === undefined || material?.kind !== "file") {
     return <MaterialMissing noun="file" />
   }
+
+  const titleMenu = (lead: ReactNode) => (
+    <FileMenu lead={lead} material={material} onRequest={setRequest} />
+  )
 
   return (
     <ConsoleListLayout>
       <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url} />
       <ClientOnly fallback={<ConsoleListLoading />}>
         <FileBody
+          crumb={crumb}
           file={file}
           onSave={(text) => {
             actions.writeFileText(file.fileId, text)
@@ -36,6 +49,7 @@ export function FilePage({ fileId }: { fileId: string }) {
             return Promise.resolve(true)
           }}
           siblings={siblings}
+          titleMenu={titleMenu}
         />
       </ClientOnly>
       <DemoLinksDialog
@@ -44,7 +58,10 @@ export function FilePage({ fileId }: { fileId: string }) {
         onOpenChange={setIsShareOpen}
         open={isShareOpen}
       />
-      <FileTitle material={material} />
+      <MaterialDialogs
+        onClose={() => setRequest(undefined)}
+        request={request}
+      />
     </ConsoleListLayout>
   )
 }

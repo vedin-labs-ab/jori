@@ -1,52 +1,97 @@
+import { type ReactNode, useMemo, useState } from "react"
 import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
 import { ConsoleEmptyState } from "../list/empty"
 import { ConsoleListContent } from "../list/frame"
+import {
+  type MaterialBreadcrumb,
+  useMaterialTrail,
+} from "../materials/breadcrumb"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
-import { FileEditor, type FileSave } from "./editor/section"
+import { FileDock } from "./dock"
+import {
+  FileEditor,
+  type FileEditorState,
+  type FileSave,
+} from "./editor/section"
 import { FileDownloadButton } from "./header"
+import { FileLead } from "./menu"
 import { type FileSiblings, useSiblingKeys } from "./siblings"
-import { FileMeta, FileToolbar } from "./toolbar"
 import { type FileDetail } from "./types"
-import { FileHtml } from "./viewer/html"
+import { FileHtml, type HtmlMode } from "./viewer/html"
 import { FileViewer } from "./viewer/section"
 
-/** The file page under its header: a secondary toolbar with the file's
- *  metadata, and the content itself filling the rest — media inline, text
- *  in an editor, and a download prompt for everything else. */
-export function FileBody({
-  file,
-  onSave,
-  siblings,
-}: {
+/** The file page under its header: the content itself filling the page —
+ *  media inline, text in an editor, and a download prompt for everything
+ *  else — with the dock floating over its foot. The page's chrome hangs
+ *  off the file's name in the breadcrumb: its provenance, the view's own
+ *  tools, and the actions every file shares, which the host supplies as
+ *  the menu around this view's own lines. Keyed by the file, so a step to
+ *  a neighbor starts every view fresh. */
+export function FileBody(props: {
+  /** Where the file lives, for the breadcrumb: the trail above its name. */
+  crumb?: Pick<MaterialBreadcrumb, "trail">
   file: FileDetail
   /** Persists the text editor's buffer; see `FileSave`. */
   onSave: FileSave
   siblings: FileSiblings
+  /** The menu hung off the file's name, given this view's lines to lead
+   *  with. */
+  titleMenu: (lead: ReactNode) => ReactNode
 }) {
-  const kind = previewKind(file.mimeType, file.name)
+  return <FileContent key={props.file.fileId} {...props} />
+}
 
-  if (kind === "text" && file.url !== null && file.size <= textSizeLimit) {
+function FileContent({
+  crumb,
+  file,
+  onSave,
+  siblings,
+  titleMenu,
+}: Parameters<typeof FileBody>[0]) {
+  const [editor, setEditor] = useState<FileEditorState>()
+  const [htmlMode, setHtmlMode] = useState<HtmlMode>("preview")
+  const kind = previewKind(file.mimeType, file.name)
+  const text =
+    kind === "text" && file.url !== null && file.size <= textSizeLimit
+      ? { isHtml: isHtmlFile(file.mimeType, file.name), url: file.url }
+      : undefined
+
+  useFileCrumb({
+    crumb,
+    file,
+    menu: titleMenu(
+      <FileLead
+        copy={
+          text === undefined
+            ? undefined
+            : { savedText: editor?.savedText, url: text.url }
+        }
+        file={file}
+        onViewChange={text?.isHtml ? setHtmlMode : undefined}
+        view={text?.isHtml ? htmlMode : undefined}
+      />
+    ),
+    saveStatus: editor?.saveStatus,
+  })
+
+  if (text !== undefined) {
     return (
       <FileTextBody
         file={file}
+        htmlMode={htmlMode}
+        isHtml={text.isHtml}
         onSave={onSave}
+        onState={setEditor}
         siblings={siblings}
-        url={file.url}
+        url={text.url}
       />
     )
   }
 
   if (kind !== "text" && kind !== "none" && file.url !== null) {
     return (
-      <FileViewer
-        key={file.fileId}
-        file={file}
-        kind={kind}
-        meta={<FileMeta file={file} />}
-        siblings={siblings}
-        url={file.url}
-      />
+      <FileViewer file={file} kind={kind} siblings={siblings} url={file.url} />
     )
   }
 
@@ -59,19 +104,44 @@ export function FileBody({
   )
 }
 
+/** Publishes the file's crumb: its trail, its name with the menu hung off
+ *  it, and the save signal right after the name while a save is in
+ *  motion. */
+function useFileCrumb({
+  crumb,
+  file,
+  menu,
+  saveStatus,
+}: {
+  crumb: Pick<MaterialBreadcrumb, "trail"> | undefined
+  file: FileDetail
+  menu: ReactNode
+  saveStatus: FileEditorState["saveStatus"] | undefined
+}) {
+  useMaterialTrail(
+    useMemo(
+      () => ({ ...crumb, menu, name: file.name, saveStatus }),
+      [crumb, file.name, menu, saveStatus]
+    )
+  )
+}
+
 /** Text files open in the autosaving editor — except HTML, which opens
- *  rendered with the same editor behind its Code toggle. Both mount keyed
- *  by file id, so navigating text-to-text unmounts the old editor and its
- *  autosave loop flushes the pending draft against the old file instead
- *  of carrying it into the next one. */
+ *  rendered with the same editor behind the menu's Code view. */
 function FileTextBody({
   file,
+  htmlMode,
+  isHtml,
   onSave,
+  onState,
   siblings,
   url,
 }: {
   file: FileDetail
+  htmlMode: HtmlMode
+  isHtml: boolean
   onSave: FileSave
+  onState: (state: FileEditorState | undefined) => void
   siblings: FileSiblings
   url: string
 }) {
@@ -82,23 +152,36 @@ function FileTextBody({
       title="Could not load file"
     />
   )
-  const Body = isHtmlFile(file.mimeType, file.name) ? FileHtml : FileEditor
+
+  if (isHtml) {
+    return (
+      <FileHtml
+        errorFallback={errorFallback}
+        file={file}
+        mode={htmlMode}
+        onSave={onSave}
+        onState={onState}
+        siblings={siblings}
+        url={url}
+      />
+    )
+  }
 
   return (
-    <Body
-      key={file.fileId}
+    <FileEditor
       errorFallback={errorFallback}
       file={file}
       onSave={onSave}
+      onState={onState}
       siblings={siblings}
       url={url}
     />
   )
 }
 
-/** Download prompt under the toolbar for files with no inline view — and
- *  for text files too large to edit in place. Nothing here owns the arrow
- *  keys, so ←/→ navigate between files. */
+/** Download prompt for files with no inline view — and for text files too
+ *  large to edit in place. Nothing here owns the arrow keys, so ←/→
+ *  navigate between files. */
 function FileFallbackBody({
   file,
   isOversizedText,
@@ -114,9 +197,6 @@ function FileFallbackBody({
 
   return (
     <>
-      <FileToolbar hasArrowKeys siblings={siblings}>
-        <FileMeta file={file} />
-      </FileToolbar>
       {isOversizedText ? (
         <FileFallback
           description={`Files over ${formatFileSize(textSizeLimit)} skip the inline editor. Download the file to work on it.`}
@@ -130,6 +210,7 @@ function FileFallbackBody({
           title="No inline view"
         />
       )}
+      <FileDock hasArrowKeys siblings={siblings} />
     </>
   )
 }

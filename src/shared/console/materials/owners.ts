@@ -68,3 +68,21 @@ export function summaryOwner(row: {
 
   return { kind: "person", name: row.ownerName, image: row.ownerImage }
 }
+
+/** How a file shows in an Owner cell: the uploading person for uploads;
+ *  Jori itself for files an agent run saved. */
+export function fileOwner(file: {
+  ownerImage?: string
+  ownerName?: string
+  source: "run" | "upload"
+}): MaterialOwner {
+  if (file.source === "run") {
+    return { kind: "jori" }
+  }
+
+  return {
+    kind: "person",
+    name: file.ownerName ?? "Member",
+    image: file.ownerImage,
+  }
+}

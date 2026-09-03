@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
@@ -9,10 +10,11 @@ import { MaterialPlaceholder } from "@/shared/console/materials/detail/placehold
 import { useMemberUrl } from "@/shared/console/materials/fragment"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
+import { useFileActions } from "./manage"
 import { useFileSave } from "./save"
 import { FileLinksDialog } from "./share"
 import { useFileSiblings } from "./siblings"
-import { FileTitleMenu } from "./title"
+import { type FileDialog, FileDialogs, FileTitleMenu } from "./title"
 
 /** Member view of one file: the header actions, the file's body, and the
  *  dialogs, over the detail query. The share fork wraps exactly this
@@ -82,21 +84,51 @@ function FileReadyView({
 }) {
   useMemberUrl()
 
+  const navigate = useNavigate()
   const siblings = useFileSiblings(organizationId, file.fileId)
   const save = useFileSave(organizationId, file)
   const [isShareOpen, setIsShareOpen] = useState(false)
+  const [dialog, setDialog] = useState<FileDialog>()
+  const actions = useFileActions(organizationId, {
+    onDeleted: () => void navigate({ to: "/files" }),
+    onSaved: () => setDialog(undefined),
+  })
+  const isPending = actions.pendingFileId === file.fileId
+
+  // The view publishes the crumb itself, since its own lines lead the menu.
+  const titleMenu = (lead: ReactNode) => (
+    <FileTitleMenu
+      file={file}
+      isPending={isPending}
+      lead={lead}
+      onDelete={() => actions.deleteFile(file)}
+      onOpen={setDialog}
+    />
+  )
 
   return (
     <ConsoleListLayout>
       <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url} />
-      <FileBody file={file} onSave={save} siblings={siblings} />
+      <FileBody
+        file={file}
+        onSave={save}
+        siblings={siblings}
+        titleMenu={titleMenu}
+      />
       <FileLinksDialog
         fileId={file.fileId}
         onOpenChange={setIsShareOpen}
         open={isShareOpen}
         organizationId={organizationId}
       />
-      <FileTitleMenu file={file} organizationId={organizationId} />
+      <FileDialogs
+        dialog={dialog}
+        file={file}
+        isSaving={isPending}
+        onClose={() => setDialog(undefined)}
+        onSave={actions.saveFile}
+        organizationId={organizationId}
+      />
     </ConsoleListLayout>
   )
 }

@@ -2,8 +2,8 @@ import { type ReactNode, useRef } from "react"
 import { type PreviewKind } from "@/shared/files/kind"
 import { usePreloadSiblings } from "../cache/preload"
 import { useDisplayUrl } from "../cache/url"
+import { FileDock } from "../dock"
 import { type FileSiblings, useSiblingKeys } from "../siblings"
-import { FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
 import { ViewerFrame } from "./frame"
 import { ZoomableImage, ZoomTools } from "./image"
@@ -15,20 +15,18 @@ import { useZoom, type Zoom } from "./zoom"
  *  everything else to the download fallback. */
 type ViewerKind = Exclude<PreviewKind, "none" | "text">
 
-/** Inline viewer for media files: the shared toolbar over one frame that
- *  every kind renders into. The frame holds the media hidden until it has
- *  loaded at its final size, so the reveal never shifts the page. Mount
- *  keyed by file id so state starts fresh per file. */
+/** Inline viewer for media files: one frame that every kind renders into,
+ *  with the dock floating over it. The frame holds the media hidden until
+ *  it has loaded at its final size, so the reveal never shifts the page.
+ *  Mount keyed by file id so state starts fresh per file. */
 export function FileViewer({
   file,
   kind,
-  meta,
   siblings,
   url: currentUrl,
 }: {
   file: FileDetail
   kind: ViewerKind
-  meta: ReactNode
   siblings: FileSiblings
   url: string
 }) {
@@ -61,13 +59,6 @@ export function FileViewer({
 
   return (
     <>
-      <FileToolbar
-        hasArrowKeys
-        siblings={siblings}
-        tools={viewerTools(kind, status, zoom)}
-      >
-        {meta}
-      </FileToolbar>
       <ViewerFrame dotted={kind !== "pdf"} status={status}>
         {url === null ? null : (
           <ViewerContent
@@ -81,13 +72,18 @@ export function FileViewer({
           />
         )}
       </ViewerFrame>
+      <FileDock
+        hasArrowKeys
+        siblings={siblings}
+        tools={viewerTools(kind, status, zoom)}
+      />
     </>
   )
 }
 
-/** Per-kind toolbar tools: zoom for images, nothing extra elsewhere —
- *  audio and video carry their controls inline, and the framed documents
- *  need only the shared navigation. */
+/** Per-kind dock tools: zoom for images, nothing extra elsewhere — audio
+ *  and video carry their controls inline, and the framed documents need
+ *  only the shared navigation. */
 function viewerTools(
   kind: ViewerKind,
   status: ViewerStatus,
