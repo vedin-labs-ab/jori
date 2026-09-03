@@ -13,7 +13,7 @@ import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
 import { VisibilityMark } from "../../visibility/badge"
-import { type ResourceDragItem } from "../drag/plan"
+import { type DragPayload } from "../drag/plan"
 import { DraggableTableRow } from "../drag/row"
 import { useResourceRowDrag } from "../drag/state"
 import { type FolderResource, resourcePresentation } from "../types"
@@ -36,8 +36,8 @@ export function ResourceListRow({
   folderId: string
   menu: ReactNode
   resource: FolderResource
-  /** The selected resources, as a drag would carry them. */
-  selected: readonly ResourceDragItem[]
+  /** The selection, as a drag would carry it. */
+  selected: DragPayload
   selection: RowSelection<FolderListEntry>
 }) {
   const drag = useResourceRowDrag(

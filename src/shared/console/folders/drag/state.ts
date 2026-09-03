@@ -6,10 +6,14 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core"
 import { createContext, useContext, useEffect, useRef } from "react"
 import {
+  carriedPayload,
   type DragPayload,
   type DropTarget,
+  emptyPayload,
+  type FolderDragItem,
+  folderPayload,
   type ResourceDragItem,
-  resourcesPayload,
+  resourcePayload,
   rootDropId,
 } from "./plan"
 
@@ -19,14 +23,14 @@ export type FolderDragState = {
   /** Targets that must refuse the drop, the top level as null (see
    *  blockedTargets). */
   blockedIds: ReadonlySet<string | null>
-  /** The folder whose move just landed, held briefly for a settle cue. */
-  settledId: string | null
+  /** The folders whose move just landed, held briefly for a settle cue. */
+  settledIds: ReadonlySet<string>
 }
 
 export const idleDragState: FolderDragState = {
   active: null,
   blockedIds: new Set<string | null>(),
-  settledId: null,
+  settledIds: new Set<string>(),
 }
 
 export const FolderDragContext = createContext(idleDragState)
@@ -58,29 +62,30 @@ export type DragSource = ReturnType<typeof useDragSource>
 
 /** Wires one folder row as drag source and drop target. Spread
  *  `attributes` and `listeners` onto the row element along with the click
- *  guards, and give it `setNodeRef`. */
+ *  guards, and give it `setNodeRef`. Started on a selected row, the drag
+ *  carries the whole selection; the sidebar has none, so its rows travel
+ *  alone. */
 export function useFolderRowDrag(
   zone: DragZone,
-  folderId: string,
-  name: string
+  folder: FolderDragItem,
+  selected: DragPayload = emptyPayload
 ) {
-  const { active, blockedIds, settledId } = useContext(FolderDragContext)
-  const source = useDragSource(`${zone}-folder-${folderId}`, {
-    kind: "folder",
-    folderId,
-    name,
-  })
+  const { active, blockedIds, settledIds } = useContext(FolderDragContext)
+  const source = useDragSource(
+    `${zone}-folder-${folder.folderId}`,
+    carriedPayload(folderPayload(folder), selected)
+  )
   const droppable = useDroppable({
-    id: `${zone}-drop-${folderId}`,
-    data: dropTarget(folderId, zone),
-    disabled: active === null || blockedIds.has(folderId),
+    id: `${zone}-drop-${folder.folderId}`,
+    data: dropTarget(folder.folderId, zone),
+    disabled: active === null || blockedIds.has(folder.folderId),
   })
 
   return {
     ...source,
     isDragActive: active !== null,
     isDropTarget: droppable.isOver,
-    isSettling: settledId === folderId,
+    isSettling: settledIds.has(folder.folderId),
     setNodeRef: (node: HTMLElement | null) => {
       source.setNodeRef(node)
       droppable.setNodeRef(node)
@@ -93,12 +98,12 @@ export function useFolderRowDrag(
  *  the drag carries the whole selection. */
 export function useResourceRowDrag(
   item: ResourceDragItem,
-  selected: readonly ResourceDragItem[]
+  selected: DragPayload
 ) {
   const { active } = useContext(FolderDragContext)
   const source = useDragSource(
     `resource-${item.type}-${item.id}`,
-    resourcesPayload(item, selected)
+    carriedPayload(resourcePayload(item), selected)
   )
 
   return { ...source, isDragActive: active !== null }

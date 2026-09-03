@@ -1,18 +1,12 @@
-import { useMutation, useQuery } from "convex/react"
-import { type GenericId } from "convex/values"
-import { useState } from "react"
-import { toast } from "sonner"
-import { showErrorToast } from "@/shared/console/error"
+import { useQuery } from "convex/react"
 import { MoveDialog } from "@/shared/console/folders/dialogs/move"
 import {
   type MoveResourceTarget,
   type MoveSubject,
   resourceSubject,
-  subjectName,
-  subjectSize,
 } from "@/shared/console/folders/types"
 import { api } from "../../../../convex/_generated/api"
-import { useMoveConfirmation } from "./confirm"
+import { useMoveRun } from "./run"
 
 /** MoveResourcesDialog specialized for exactly one resource, for hosts
  *  whose move affordance is inherently singular (detail pages, row menus
@@ -65,10 +59,8 @@ export function MoveResourcesDialog({
 }
 
 /** The shared "Move to folder…" dialog bound to Convex: the organization's
- *  tree to choose from, and the moves themselves — folders re-parent
- *  through `move`, filed resources re-file through `file` — behind the
- *  audience confirmation. Open it by passing a subject; pass undefined to
- *  close. */
+ *  tree to choose from, and the move itself. Open it by passing a subject;
+ *  pass undefined to close. */
 export function MoveToFolderDialog({
   onOpenChange,
   organizationId,
@@ -79,120 +71,26 @@ export function MoveToFolderDialog({
   subject: MoveSubject | undefined
 }) {
   const tree = useQuery(api.folders.console.tree, { organizationId })
-  const move = useMoveSubject(organizationId, subject, () =>
-    onOpenChange(false)
-  )
+  const move = useMoveRun(organizationId)
 
   return (
     <>
       <MoveDialog
         folders={tree?.status === "ready" ? tree.folders : undefined}
         isBusy={move.isBusy}
-        onMove={move.submit}
+        onMove={(destinationId) => {
+          if (subject !== undefined) {
+            void move.run(subject, destinationId).then((landed) => {
+              if (landed) {
+                onOpenChange(false)
+              }
+            })
+          }
+        }}
         onOpenChange={onOpenChange}
         subject={subject}
       />
       {move.dialog}
     </>
   )
-}
-
-function useMoveSubject(
-  organizationId: string,
-  subject: MoveSubject | undefined,
-  onMoved: () => void
-) {
-  const moveFolder = useMutation(api.folders.console.move)
-  const fileResource = useMutation(api.folders.console.file)
-  const confirmation = useMoveConfirmation(organizationId)
-  const [isMoving, setIsMoving] = useState(false)
-
-  async function run(moved: MoveSubject, destinationId: string | null) {
-    setIsMoving(true)
-
-    try {
-      const folderId =
-        destinationId === null ? null : (destinationId as GenericId<"folders">)
-
-      await Promise.all([
-        ...moved.folders.map((folder) =>
-          moveFolder({
-            organizationId,
-            folderId: folder.folderId as GenericId<"folders">,
-            parentId: folderId,
-          })
-        ),
-        ...moved.resources.map((resource) =>
-          fileResource({
-            organizationId,
-            resourceType: resource.resourceType,
-            resourceId: resource.resourceId,
-            folderId,
-          })
-        ),
-      ])
-
-      toast.success(`Moved ${subjectName(moved)}.`)
-      onMoved()
-    } catch (error) {
-      showErrorToast(error, `Could not move ${subjectName(moved)}.`)
-    } finally {
-      setIsMoving(false)
-    }
-  }
-
-  function submit(destinationId: string | null) {
-    if (subject === undefined) {
-      return
-    }
-
-    const asked = confirmable(subject)
-
-    if (asked === undefined) {
-      void run(subject, destinationId)
-
-      return
-    }
-
-    confirmation.request({
-      ...asked,
-      folderId: destinationId,
-      run: () => run(subject, destinationId),
-    })
-  }
-
-  return {
-    dialog: confirmation.dialog,
-    isBusy: isMoving || confirmation.isResolving,
-    submit,
-  }
-}
-
-/** What the move can compare an audience for: one folder, which speaks
- *  for its contents, or one resource. A bulk selection has no single
- *  audience, so it moves without the question. */
-function confirmable(subject: MoveSubject) {
-  if (subjectSize(subject) !== 1) {
-    return undefined
-  }
-
-  const [folder] = subject.folders
-
-  if (folder !== undefined) {
-    return {
-      name: folder.name,
-      subject: { kind: "folder" as const, folderId: folder.folderId },
-    }
-  }
-
-  const [resource] = subject.resources
-
-  return {
-    name: resource.name,
-    subject: {
-      kind: "resource" as const,
-      resourceType: resource.resourceType,
-      resourceId: resource.resourceId,
-    },
-  }
 }

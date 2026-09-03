@@ -7,7 +7,11 @@ import {
 } from "../../list/controls"
 import { useRowSelection } from "../../list/selection"
 import { ownerFacet } from "../../materials/owners"
-import { type ResourceDragItem } from "../drag/plan"
+import {
+  type DragPayload,
+  type FolderDragItem,
+  type ResourceDragItem,
+} from "../drag/plan"
 import {
   type FolderResource,
   type ListedFolder,
@@ -41,6 +45,27 @@ export function resourceDragItem(
     name: resource.name,
     mimeType: resource.mimeType,
     folderId,
+  }
+}
+
+/** A listed folder as a drag carries it. */
+export function folderDragItem(folder: ListedFolder): FolderDragItem {
+  return { folderId: folder.folderId, name: folder.name }
+}
+
+/** The selection as a drag started on one of its rows carries it;
+ *  `folderId` is the folder being viewed, where the resources sit. */
+export function selectionPayload(
+  selected: readonly FolderListEntry[],
+  folderId: string | undefined
+): DragPayload {
+  return {
+    folders: selected.filter(isFolderEntry).map(folderDragItem),
+    resources: selected.flatMap((entry) =>
+      isFolderEntry(entry) || folderId === undefined
+        ? []
+        : [resourceDragItem(entry, folderId)]
+    ),
   }
 }
 
