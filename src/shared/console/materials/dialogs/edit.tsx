@@ -9,16 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { MaterialDescriptionField, MaterialNameField } from "../fields"
+import { MaterialNameField } from "../fields"
 import { DialogForm } from "../form"
 
 /** All an edit needs of a material; a summary and a detail both fit. */
-type EditableMaterial = { description?: string; name: string }
+type EditableMaterial = { name: string }
 
-export type MaterialEdit = { description: string; name: string }
+export type MaterialEdit = { name: string }
 
-/** Rename and describe a table or a store. Everything else about them —
- *  columns, schema, value — is edited on their own pages. */
+/** Rename a table, a store, or a file. Everything else about them —
+ *  columns, schema, value, content — is edited on their own pages. */
 export function EditMaterialDialog({
   blurb,
   isSaving,
@@ -47,7 +47,7 @@ export function EditMaterialDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit {noun}</DialogTitle>
           <DialogDescription>{blurb}</DialogDescription>
@@ -68,11 +68,6 @@ export function EditMaterialDialog({
             name={form.name}
             onNameChange={form.setName}
           />
-          <MaterialDescriptionField
-            description={form.description}
-            idPrefix={idPrefix}
-            onDescriptionChange={form.setDescription}
-          />
           <DialogFooter>
             <Button disabled={isSaving} type="submit">
               {isSaving ? <Loader2 className="animate-spin" /> : null}
@@ -90,20 +85,16 @@ export function EditMaterialDialog({
  *  right away. */
 function useMaterialEdit(material: EditableMaterial | undefined, noun: string) {
   const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
   const [nameError, setNameError] = useState<string>()
 
   useEffect(() => {
     setName(material?.name ?? "")
-    setDescription(material?.description ?? "")
     setNameError(undefined)
   }, [material])
 
   return {
-    description,
     name,
     nameError,
-    setDescription,
     setName: (next: string) => {
       setNameError(undefined)
       setName(next)
@@ -115,7 +106,7 @@ function useMaterialEdit(material: EditableMaterial | undefined, noun: string) {
         return undefined
       }
 
-      return { description, name }
+      return { name }
     },
   }
 }

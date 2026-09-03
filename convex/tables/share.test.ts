@@ -21,7 +21,7 @@ async function createTable(
 ) {
   return (await database.insert(
     "collections",
-    tableDoc({ description: "Open leads", ...overrides })
+    tableDoc(overrides)
   )) as Id<"collections">
 }
 

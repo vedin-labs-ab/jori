@@ -10,7 +10,7 @@ import { EditStoreDialog } from "../../stores/edit"
 import { EditTableDialog } from "../../tables/edit"
 
 // Editing and sharing a filed resource asks for more than a listing row
-// carries — a description, a full audience — so each kind resolves its own
+// carries — a full audience, for one — so each kind resolves its own
 // row through the query its own page already uses, and the dialog opens on
 // what comes back. The resolved row is retained so closing animates out.
 

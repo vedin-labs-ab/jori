@@ -6,7 +6,6 @@ import { postWorkerEndpoint } from "./http"
 
 export type UploadFileArgs = {
   bytes: Uint8Array
-  description?: string
   mimeType: string
   name: string
   runId: RuntimeId<"runs">
@@ -18,10 +17,6 @@ export async function uploadFile(
 ): Promise<UploadedFile> {
   const url = new URL("/jori/files", requireConvexSiteUrl())
   url.searchParams.set("name", args.name)
-
-  if (args.description !== undefined) {
-    url.searchParams.set("description", args.description)
-  }
 
   return parseUploadedFile(
     await postWorkerEndpoint({

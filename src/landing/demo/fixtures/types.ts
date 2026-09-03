@@ -27,7 +27,6 @@ export type DemoFolder = {
 
 type MaterialBase = {
   name: string
-  description?: string
   folderId?: FolderId
   visibility: StoredVisibility
   /** Absent for what an agent run made, which reads as Jori's own. */

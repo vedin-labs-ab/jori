@@ -72,7 +72,6 @@ function store(
     kind: "store" as const,
     id: demoId("collections", key),
     name,
-    description: "What the job carries between runs.",
     folderId: folderId(folder),
     visibility: { mode: "organization" as const },
     createdAt: now - 25 * day,

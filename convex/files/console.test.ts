@@ -43,7 +43,6 @@ test("records console uploads with storage metadata and defaults", async () => {
     name: "costs.csv",
     mimeType: "text/csv",
     size: 42,
-    description: undefined,
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
   })
@@ -202,7 +201,7 @@ test("editing and deleting respect personal-file visibility", async () => {
   ).rejects.toThrow("File was not found")
 })
 
-test("renames normalize the name and clear empty descriptions", async () => {
+test("renames normalize the name", async () => {
   const patch = vi.fn(async () => undefined)
   const ctx = {
     db: {
@@ -214,12 +213,11 @@ test("renames normalize the name and clear empty descriptions", async () => {
   await patchFileDetails(
     ctx,
     { organizationId: "organization", personId: owner },
-    { fileId, name: "  drafts/renamed.txt ", description: "" }
+    { fileId, name: "  drafts/renamed.txt " }
   )
 
   expect(patch).toHaveBeenCalledWith(fileId, {
     name: "renamed.txt",
-    description: undefined,
     updatedAt: expect.any(Number),
   })
 })

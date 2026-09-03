@@ -61,7 +61,6 @@ export const tableToolInputSchemas = {
     required: ["name"],
     properties: {
       name: stringProperty("Short table name."),
-      description: stringProperty("What the table tracks and who reads it."),
       visibility: tableVisibilityProperty,
       columns: {
         type: "array",

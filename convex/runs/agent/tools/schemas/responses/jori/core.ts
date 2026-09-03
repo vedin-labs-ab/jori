@@ -23,7 +23,6 @@ function fileSummaryProperties() {
     size: numberProperty("File size in bytes."),
     createdAt: numberProperty("Creation time in epoch milliseconds."),
     url: nullableStringProperty("Temporary download URL, when available."),
-    description: stringProperty("File description, when one was saved."),
   }
 }
 

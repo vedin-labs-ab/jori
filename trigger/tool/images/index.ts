@@ -8,7 +8,6 @@ import { generateOpenRouterImage } from "./openrouter"
 type GenerateImageInput = {
   prompt: string
   save: {
-    description?: string
     name?: string
   }
 }
@@ -33,7 +32,6 @@ export async function generateImageFile(
 
   const file = await runtime.platform.uploadFile({
     bytes: generated.bytes,
-    description: request.save.description,
     mimeType: generated.mimeType,
     name,
     runId: runtime.context.run.id,
@@ -70,7 +68,6 @@ function normalizeSaveInput(value: unknown): GenerateImageInput["save"] {
   }
 
   return {
-    description: optionalString(value.description),
     name: optionalString(value.name),
   }
 }

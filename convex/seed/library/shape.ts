@@ -10,7 +10,6 @@ export type SeedColumn = [name: string, type: TableColumnType]
 
 type SeedCollection = {
   name: string
-  description: string
   /** The folder it is filed in, by name. */
   folder: string
   /** Days before the seed instant it was made and last written. */

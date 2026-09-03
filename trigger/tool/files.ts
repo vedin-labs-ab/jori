@@ -37,7 +37,6 @@ export async function saveSandboxFile(
 
   return await runtime.platform.uploadFile({
     bytes,
-    description: optionalString(input.description),
     mimeType: optionalString(input.mimeType) ?? inferMimeType(filePath),
     name: optionalString(input.name) ?? path.posix.basename(filePath),
     runId: runtime.context.run.id,

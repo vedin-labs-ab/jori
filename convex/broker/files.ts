@@ -8,7 +8,6 @@ import {
   jsonError,
   unauthorizedResponse,
 } from "../shared/http"
-import { optionalString } from "../shared/input"
 import { authenticateBrokerRequest } from "./auth"
 
 export async function handleFileUploadRequest(
@@ -34,7 +33,6 @@ export async function handleFileUploadRequest(
 
   const mimeType = normalizeMimeType(request.headers.get("content-type"))
   const name = normalizeFileName(requestUrl.searchParams.get("name"))
-  const description = optionalString(requestUrl.searchParams.get("description"))
   let storageId: Id<"_storage"> | undefined
 
   try {
@@ -54,7 +52,6 @@ export async function handleFileUploadRequest(
         name,
         mimeType,
         size: bytes.byteLength,
-        description,
       }
     )
     const url = await ctx.storage.getUrl(storageId)

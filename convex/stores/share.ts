@@ -97,7 +97,6 @@ export const get = query({
 
     return {
       name: opened.store.name,
-      description: opened.store.description,
       schema: opened.store.schema as JsonSchemaObject | undefined,
       value: (document?.value ?? null) as unknown,
       version: document?.version ?? 0,

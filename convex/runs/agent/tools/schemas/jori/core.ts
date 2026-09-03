@@ -66,7 +66,6 @@ export const coreJoriToolInputSchemas = {
       mimeType: stringProperty(
         "Optional content type, for example image/png or application/pdf."
       ),
-      description: stringProperty("Optional short description of the file."),
     },
   }),
   generate_image: objectSchema({
@@ -76,7 +75,6 @@ export const coreJoriToolInputSchemas = {
       save: objectSchema({
         properties: {
           name: stringProperty("Optional generated image filename."),
-          description: stringProperty("Optional file description."),
         },
       }),
     },
@@ -84,7 +82,7 @@ export const coreJoriToolInputSchemas = {
   search_files: objectSchema({
     properties: {
       query: stringProperty(
-        "Substring matched against file names, descriptions, and content types."
+        "Substring matched against file names and content types."
       ),
       mimeType: stringProperty(
         "Optional content type filter, for example image/png or image/."

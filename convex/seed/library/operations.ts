@@ -7,8 +7,6 @@ export const operationsTables: SeedTable[] = [
   {
     name: "Release checklist",
     owner: "nadia",
-    description:
-      "The steps every release goes through. Copied forward each time; the notes column is where the exceptions get written down.",
     folder: "Releases",
     created: 94,
     updated: 6,
@@ -56,8 +54,6 @@ export const operationsTables: SeedTable[] = [
   {
     name: "Vendor spend",
     owner: "johan",
-    description:
-      "What Vedin Labs pays for every month, and when each contract comes up again. Johan reconciles it against the card statement.",
     folder: "Vendors",
     created: 60,
     updated: 11,

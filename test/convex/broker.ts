@@ -28,7 +28,6 @@ export function createFileContext() {
         name: "kitten.png",
         mimeType: "image/png",
         size: 5,
-        description: "A small generated image.",
         createdAt: 0,
         updatedAt: 0,
       })),

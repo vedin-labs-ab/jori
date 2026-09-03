@@ -46,7 +46,6 @@ export function summarizeStore(store: StoreDoc) {
   return {
     storeId: store._id,
     name: store.name,
-    description: store.description,
     visibility: store.visibility,
     ownerId: store.ownerId,
     folderId: store.folderId,

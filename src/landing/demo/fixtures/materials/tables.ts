@@ -42,7 +42,6 @@ function renewalsTable(now: number): DemoTable {
     kind: "table",
     id: renewalsTableId,
     name: "Customer renewals",
-    description: "Every renewal in the next quarter, with who owes what.",
     folderId: folderId("renewals"),
     visibility: { mode: "teams", teamIds: [teamIds.finance] },
     ownerId: personId("maya"),
@@ -59,7 +58,6 @@ function flakyTests(now: number) {
   return table(now, {
     key: "flaky",
     name: "Flaky tests",
-    description: "Tests that failed more than once this month.",
     folder: "engineering",
     columns: [
       column("test", "Test", "string", true),
@@ -81,7 +79,6 @@ function competitorMoves(now: number) {
   return table(now, {
     key: "competitors",
     name: "Competitor moves",
-    description: "Pricing and packaging changes the watch has seen.",
     folder: "marketing",
     columns: [
       column("company", "Company", "string", true),
@@ -107,7 +104,6 @@ function vendorInvoices(now: number) {
   return table(now, {
     key: "invoices",
     name: "Vendor invoices",
-    description: "What Copperline owes, and what it has paid.",
     folder: "finance",
     owner: "priya",
     columns: [
@@ -130,7 +126,6 @@ function table(
   spec: {
     key: string
     name: string
-    description: string
     folder: string
     owner?: string
     columns: TableColumn[]
@@ -142,7 +137,6 @@ function table(
     kind: "table",
     id: demoId("collections", spec.key),
     name: spec.name,
-    description: spec.description,
     folderId: folderId(spec.folder),
     visibility: { mode: "organization" },
     ownerId: spec.owner === undefined ? undefined : personId(spec.owner),

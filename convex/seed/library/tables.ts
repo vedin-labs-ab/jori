@@ -57,7 +57,6 @@ async function writeTable(
     organizationId: seed.organizationId,
     personId: args.ownerId,
     name: args.table.name,
-    description: args.table.description,
     folderId: args.folders.get(args.table.folder),
     authoring: columns,
   })
@@ -85,7 +84,6 @@ async function writeStore(
     organizationId: seed.organizationId,
     personId: args.ownerId,
     name: args.store.name,
-    description: args.store.description,
     folderId: args.folders.get(args.store.folder),
     authoring: args.store.schema ?? null,
   })

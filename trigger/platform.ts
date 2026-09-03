@@ -126,7 +126,6 @@ export type RuntimePlatform = {
   }): Promise<unknown>
   uploadFile(args: {
     bytes: Uint8Array
-    description?: string
     mimeType: string
     name: string
     runId: RuntimeId<"runs">

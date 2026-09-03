@@ -15,7 +15,6 @@ export const fileFields = {
   name: v.string(),
   mimeType: v.string(),
   size: v.number(),
-  description: v.optional(v.string()),
   /** Filing; ancestor folders also gate visibility (see visibility/sight). */
   folderId: v.optional(v.id("folders")),
 }

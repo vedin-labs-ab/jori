@@ -26,7 +26,6 @@ function tableSummary(overrides: Partial<TableSummary> = {}) {
   return {
     tableId: "table-1",
     name: "Leads",
-    description: undefined,
     visibility: { mode: "organization" },
     ownerId: undefined,
     folderId: undefined,

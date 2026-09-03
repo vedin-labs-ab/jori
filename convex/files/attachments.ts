@@ -9,7 +9,6 @@ export type FileAttachment = {
   name: string
   mimeType: string
   size: number
-  description?: string
   bytes: Uint8Array
 }
 
@@ -74,7 +73,6 @@ async function readAttachment(
     name: input.name ?? file.name,
     mimeType: input.mimeType ?? file.mimeType,
     size: file.size,
-    description: file.description,
     bytes: new Uint8Array(await blob.arrayBuffer()),
   }
 }
