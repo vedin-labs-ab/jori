@@ -1,4 +1,4 @@
-import { type RuntimeInteraction } from "../../contracts/runtime/worker"
+import { type RuntimeInteraction } from "../../contracts/runtime/context"
 import { type Doc } from "../_generated/dataModel"
 import {
   getActorDisplayName,

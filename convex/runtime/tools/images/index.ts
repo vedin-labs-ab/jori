@@ -1,8 +1,7 @@
-import path from "node:path"
-import { isRecord, type JsonObject } from "../../../contracts/json"
-import { optionalString, requiredString } from "../../input"
-import { type AgentRuntime } from "../../runtime"
-import { sandboxWorkspace } from "../../sandbox/workspace"
+import { sandboxWorkspace } from "../../../../contracts/coding"
+import { isRecord, type JsonObject } from "../../../../contracts/json"
+import { optionalString, requiredString } from "../../../shared/input"
+import { type AgentRuntime } from "../../platform"
 import { generateOpenRouterImage } from "./openrouter"
 
 type GenerateImageInput = {
@@ -76,10 +75,17 @@ function imageFileName(name: string | undefined, mimeType: string) {
   const extension = extensionForMimeType(mimeType)
   const fallback = `image-${new Date().toISOString().replace(/[:.]/g, "-")}`
   const baseName = sanitizeFileName(name ?? fallback)
-  const parsed = path.posix.parse(baseName)
-  const stem = parsed.name === "" ? fallback : parsed.name
+  const stem = fileStem(baseName)
 
-  return `${stem}${extension}`
+  return `${stem === "" ? fallback : stem}${extension}`
+}
+
+/** The name without its extension, so a caller-provided "hero.png" does not
+ *  become "hero.png.png". */
+function fileStem(name: string) {
+  const dot = name.lastIndexOf(".")
+
+  return dot <= 0 ? name : name.slice(0, dot)
 }
 
 function extensionForMimeType(mimeType: string) {

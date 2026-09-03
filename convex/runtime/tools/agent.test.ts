@@ -1,14 +1,13 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { runtimeContext, runtimeId } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall } from "../tool"
+import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
 
 beforeEach(() => {
   vi.clearAllMocks()
 })
 
 test("start_agent forwards its explicit title", async () => {
-  const runtime = createRuntime()
+  const runtime = agentRuntime()
   const call = {
     args: {
       task: "Research the attendees.",
@@ -19,11 +18,9 @@ test("start_agent forwards its explicit title", async () => {
     name: "start_agent",
   }
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call,
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({ runId: "run_child" })
@@ -36,38 +33,34 @@ test("start_agent forwards its explicit title", async () => {
 })
 
 test("start_agent rejects a missing title before creating a run", async () => {
-  const runtime = createRuntime()
+  const runtime = agentRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: { task: "Research the attendees." },
       id: "call_1",
       name: "start_agent",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
-    error: { message: "Missing title" },
+    error: { message: "title is required" },
     status: "error",
   })
   expect(runtime.platform.createAgentRun).not.toHaveBeenCalled()
 })
 
 test("stop_agent stops a direct child through the platform", async () => {
-  const runtime = createRuntime()
+  const runtime = agentRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: { runId: "run_child" },
       id: "call_1",
       name: "stop_agent",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
@@ -80,18 +73,8 @@ test("stop_agent stops a direct child through the platform", async () => {
   })
 })
 
-function createRuntime(): AgentRuntime {
-  return {
-    platform: {
-      createAgentRun: vi.fn(async () => ({
-        runId: runtimeId<"runs">("run_child"),
-      })),
-      stopAgentRun: vi.fn(async () => ({
-        runId: runtimeId<"runs">("run_child"),
-        status: "stopped",
-      })),
-      recordEvent: vi.fn(),
-    } as unknown as AgentRuntime["platform"],
+function agentRuntime(): AgentRuntime {
+  return createRuntime({
     context: runtimeContext({
       tools: [
         {
@@ -112,6 +95,5 @@ function createRuntime(): AgentRuntime {
         },
       ],
     }),
-    sandbox: {} as AgentRuntime["sandbox"],
-  }
+  })
 }

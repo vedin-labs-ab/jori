@@ -1,10 +1,8 @@
-import { type MessageIntegration, type ToolSurface } from "../../integrations"
-import { type JsonObject } from "../../json"
-import { type ToolAccess } from "../../permissions"
-import { type RuntimePrompt } from "../prompt"
-import { type AgentRunStatus } from "./agents"
-import { type RunHandoffs } from "./handoffs"
+import { type MessageIntegration, type ToolSurface } from "../integrations"
+import { type JsonObject } from "../json"
+import { type ToolAccess } from "../permissions"
 import { type RuntimeId } from "./ids"
+import { type RunStatus } from "./runs"
 
 export type ActiveSurface = {
   communicated: boolean
@@ -31,18 +29,18 @@ export type RuntimeTool = {
   tool?: string
 }
 
+/**
+ * What one step of a run needs to know about it. Every step rebuilds this
+ * from the database, so it holds only what the loaders read: no prompt, no
+ * history, no handoffs.
+ */
 export type RuntimeContext = {
   activeSurface: ActiveSurface | null
-  drained: DrainedSessionBatch | null
-  handoffs: RunHandoffs
-  prompt: RuntimePrompt
-  /** Set by finish_run during the loop; recorded with run.completed. */
-  result: string | null
   run: {
     id: RuntimeId<"runs">
     rootId: RuntimeId<"runs"> | null
     sandboxId: string | null
-    status: AgentRunStatus["status"]
+    status: RunStatus
     organizationId: string
   }
   session: {
@@ -50,11 +48,6 @@ export type RuntimeContext = {
   } | null
   tools: RuntimeTool[]
 }
-
-export type RuntimeContextReload = Pick<
-  RuntimeContext,
-  "activeSurface" | "prompt" | "tools"
->
 
 export type DrainedSessionBatch = {
   contexts?: string[]

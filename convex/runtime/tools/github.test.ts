@@ -1,14 +1,13 @@
 import { expect, test, vi } from "vitest"
-import { runtimeContext, runtimeId } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { sandboxWorkspace } from "../sandbox/workspace"
-import { executeToolCall } from "../tool"
+import { sandboxWorkspace } from "../../../contracts/coding"
+import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
+import { type SandboxRuntime } from "../sandbox/types"
 
 test("prompted GitHub commit tools include collected workspace changes", async () => {
-  const runtime = createRuntime()
+  const runtime = commitRuntime()
 
-  const { content } = await executeToolCall({
-    attempt: 1,
+  const { content } = await runTool({
     call: {
       args: {
         commitMessage: "Replace console references",
@@ -21,7 +20,6 @@ test("prompted GitHub commit tools include collected workspace changes", async (
       name: "github_commit_to_pull_request",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(content)).toMatchObject({ status: "approval_requested" })
@@ -54,18 +52,8 @@ test("prompted GitHub commit tools include collected workspace changes", async (
   })
 })
 
-function createRuntime(): AgentRuntime {
-  return {
-    platform: {
-      callTool: vi.fn(),
-      recordEvent: vi.fn(),
-      requestApproval: vi.fn(async () => ({
-        approvalId: runtimeId<"approvals">("approval_1"),
-        code: "ABC123",
-        instruction: "Approval requested.",
-        status: "approval_requested",
-      })),
-    } as unknown as AgentRuntime["platform"],
+function commitRuntime(): AgentRuntime {
+  return createRuntime({
     context: runtimeContext({
       tools: [
         {
@@ -79,21 +67,19 @@ function createRuntime(): AgentRuntime {
         },
       ],
     }),
+    // The subject here is the input the tool prepares, so the sandbox only
+    // has to answer with the changes the collection script would print.
     sandbox: {
       runCommand: vi.fn(async () => ({
         exitCode: 0,
         stderr: "",
         stdout: JSON.stringify({
           files: [
-            {
-              content: "website\n",
-              operation: "upsert",
-              path: "PRODUCT.md",
-            },
+            { content: "website\n", operation: "upsert", path: "PRODUCT.md" },
           ],
           headSha: "a".repeat(40),
         }),
       })),
-    } as unknown as AgentRuntime["sandbox"],
-  }
+    } as unknown as SandboxRuntime,
+  })
 }

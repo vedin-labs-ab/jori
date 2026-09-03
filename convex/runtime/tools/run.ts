@@ -1,11 +1,13 @@
-import { type JsonObject } from "../../contracts/json"
-import { optionalString } from "../input"
-import { type AgentRuntime } from "../runtime"
+import { type JsonObject } from "../../../contracts/json"
+import { optionalString } from "../../shared/input"
+import { type AgentRuntime } from "../platform"
 
 const maxResultLength = 8000
 
-/** The one run-routed tool: the agent's own signal that the run is done. */
-export function finishRun(runtime: AgentRuntime, input: JsonObject) {
+/** The one run-routed tool: the agent's own signal that the run is done.
+ *  The outcome is stored on the run itself, so the parent reads it back
+ *  from there rather than from this turn's state. */
+export async function finishRun(runtime: AgentRuntime, input: JsonObject) {
   const reason = optionalString(input.reason)
   const result = optionalString(input.result)
   const communicated = runtime.context.activeSurface?.communicated ?? false
@@ -27,7 +29,7 @@ export function finishRun(runtime: AgentRuntime, input: JsonObject) {
   }
 
   if (result !== undefined) {
-    runtime.context.result = result
+    await runtime.platform.finishRun({ result })
   }
 
   return {

@@ -2,15 +2,15 @@ import {
   type JsonObject,
   readStringArray,
   toJsonObject,
-} from "../../contracts/json"
+} from "../../../contracts/json"
 import {
   maxSourceChangeFileBytes,
   maxSourceChangeFiles,
   maxSourceChangeTreeBytes,
   normalizeSourceChanges,
-} from "../../contracts/source"
-import { optionalString, requiredString } from "../input"
-import { type AgentRuntime } from "../runtime"
+} from "../../../contracts/source"
+import { optionalString, requiredString } from "../../shared/input"
+import { type AgentRuntime } from "../platform"
 import { sandboxClonePath } from "../sandbox/path"
 
 const sourceChangeTools = new Set([

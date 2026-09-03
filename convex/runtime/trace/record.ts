@@ -1,18 +1,16 @@
+import { type RuntimeContext } from "../../../contracts/runtime/context"
 import {
-  type RuntimeContext,
   type RuntimeErrorTraceData,
   type RuntimeEventInput,
   type RuntimeEventTraceData,
   type RuntimeEventType,
-  type RuntimeResultTraceData,
-} from "../../contracts/runtime/worker"
+} from "../../../contracts/runtime/events"
 import { type RuntimePlatform } from "../platform"
 import { runtimeEvent } from "./events"
 
 type RuntimeEventBase = Omit<RuntimeEventInput, "data" | "runId" | "type">
 type RuntimeEventArgs =
   | (RuntimeEventBase & {
-      data?: RuntimeResultTraceData
       type: "run.completed"
     })
   | (RuntimeEventBase & {

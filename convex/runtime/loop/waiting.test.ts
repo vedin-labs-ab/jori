@@ -1,49 +1,29 @@
-import { beforeEach, expect, test, vi } from "vitest"
-import {
-  type RunHandoffs,
-  type RuntimeTool,
-} from "../../contracts/runtime/worker"
+import { expect, test } from "vitest"
+import { type RuntimeTool } from "../../../contracts/runtime/context"
+import { type RunHandoffs } from "../../../contracts/runtime/handoffs"
+import { createPlatform } from "../../../test/platform"
 import {
   createQueuedModel,
+  createRuntime,
+  runLoop,
   runtimeContext,
   runtimeId,
-} from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { runAgentLoop } from "./loop"
-
-const triggerWait = vi.hoisted(() => ({
-  createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
-  forToken: vi.fn(),
-}))
-
-vi.mock("@trigger.dev/sdk", () => ({
-  wait: {
-    createToken: triggerWait.createToken,
-    forToken: triggerWait.forToken,
-  },
-}))
-
-beforeEach(() => {
-  triggerWait.createToken.mockClear()
-  triggerWait.forToken.mockReset()
-  triggerWait.forToken.mockResolvedValue({
-    ok: true,
-    output: { reason: "cancelled" },
-  })
-})
+} from "../../../test/runtime"
 
 test("thinks after one handoff resolves before parking on another", async () => {
-  const runtime = createRuntime([
-    emptyHandoffs(),
-    {
-      approvals: [approvalHandoff("denied")],
-      offers: [offerHandoff("pending")],
-    },
-    {
-      approvals: [],
-      offers: [offerHandoff("pending")],
-    },
-  ])
+  const platform = createPlatform({
+    handoffs: [
+      {
+        approvals: [approvalHandoff("denied")],
+        offers: [offerHandoff()],
+      },
+      { approvals: [], offers: [offerHandoff()] },
+    ],
+  })
+  const runtime = createRuntime({
+    context: runtimeContext({ tools: [finishRunTool()] }),
+    platform,
+  })
   const model = createQueuedModel([
     {
       content: null,
@@ -57,10 +37,15 @@ test("thinks after one handoff resolves before parking on another", async () => 
     },
   ])
 
-  await expect(runAgentLoop({ attempt: 1, model, runtime })).resolves.toEqual({
-    message: "",
-    status: "stopped",
-  })
+  await expect(
+    runLoop({
+      model,
+      runtime,
+      wakes: [
+        { reason: "cancelled", waiter: runtimeId<"waiters">("waiter_1") },
+      ],
+    })
+  ).resolves.toBe("stopped")
 
   expect(model.complete).toHaveBeenCalledTimes(2)
   expect(model.complete.mock.calls[1]?.[0].messages).toContainEqual(
@@ -72,53 +57,14 @@ test("thinks after one handoff resolves before parking on another", async () => 
   expect(runtime.platform.markApprovalConsumed).toHaveBeenCalledWith({
     approvalId: "approval_1",
   })
-  expect(runtime.platform.createWaiter).toHaveBeenCalledWith({
-    expiresAt: 2000,
-    runId: "run_1",
-    waitpointId: "waitpoint_1",
-  })
-  expect(triggerWait.createToken).toHaveBeenCalledWith(
-    expect.objectContaining({ tags: ["run_1"] })
-  )
-  expect(triggerWait.forToken).toHaveBeenCalledWith({ id: "waitpoint_1" })
+  expect(runtime.platform.park).toHaveBeenCalledWith({ expiresAt: 2000 })
 })
 
-function createRuntime(handoffs: RunHandoffs[]): AgentRuntime {
-  // The context load bundles the first handoff snapshot; later reconciles
-  // fetch the rest.
-  const bundled = handoffs.shift() ?? emptyHandoffs()
-  const loadRunHandoffs = vi.fn(async () => {
-    return handoffs.shift() ?? emptyHandoffs()
-  })
-
-  return {
-    platform: {
-      callTool: vi.fn(async () => ({ status: "sent" })),
-      createWaiter: vi.fn(async () => runtimeId<"waiters">("waiter_1")),
-      expireWaiter: vi.fn(),
-      loadRunHandoffs,
-      markApprovalConsumed: vi.fn(),
-      markOfferConsumed: vi.fn(),
-      recordEvent: vi.fn(),
-      sendReply: vi.fn(async () => ({ status: "sent" })),
-    },
-    context: runtimeContext({
-      handoffs: bundled,
-      tools: [finishRunTool()],
-    }),
-    sandbox: {},
-  } as unknown as AgentRuntime
-}
-
-function emptyHandoffs(): RunHandoffs {
-  return { approvals: [], offers: [] }
-}
-
-function approvalHandoff(status: "denied") {
+function approvalHandoff(status: "denied"): RunHandoffs["approvals"][number] {
   return {
     id: runtimeId<"approvals">("approval_1"),
     status,
-    surface: "notion" as const,
+    surface: "notion",
     tool: "notion_create_page",
     summary: "Create launch notes.",
     code: "ABC123",
@@ -126,11 +72,11 @@ function approvalHandoff(status: "denied") {
   }
 }
 
-function offerHandoff(status: "pending") {
+function offerHandoff(): RunHandoffs["offers"][number] {
   return {
     id: runtimeId<"integrationOffers">("offer_1"),
     integration: "notion",
-    status,
+    status: "pending",
     summary: null,
     expiresAt: 2000,
   }

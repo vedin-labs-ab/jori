@@ -37,7 +37,9 @@ export class RemoteSandbox implements SandboxRuntime {
       })
     )
 
-    return "handle" in outcome ? outcome.handle : outcome.result
+    // The action answers with one of the two; Convex types the pair as
+    // optional fields, so the handle decides which one this was.
+    return outcome.handle ?? outcome.result
   }
 
   async finishCommand(

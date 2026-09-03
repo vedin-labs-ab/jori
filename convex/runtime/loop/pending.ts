@@ -3,7 +3,7 @@ import {
   type HandoffSubject,
   type OfferHandoff,
   type RunHandoffs,
-} from "../../../contracts/runtime/worker"
+} from "../../../contracts/runtime/handoffs"
 
 export type PendingHandoff = {
   expiresAt: number
@@ -23,8 +23,4 @@ export function isPendingApproval(approval: ApprovalHandoff) {
 
 export function isPendingOffer(offer: OfferHandoff) {
   return offer.status === "pending" || offer.status === "claimed"
-}
-
-export function pendingHandoffSubjects(pending: PendingHandoff[]) {
-  return pending.map((handoff) => handoff.subject)
 }

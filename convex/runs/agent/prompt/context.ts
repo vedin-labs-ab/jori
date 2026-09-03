@@ -41,26 +41,12 @@ export function createRequesterMessage(input: AgentRuntimeInput) {
   })
 }
 
-/** Write actions an earlier attempt completed; a retry must not repeat them. */
-export type PromptRecovery = {
-  attempt: number
-  actions: { name: string; detail: string | null }[]
-}
-
 export function createContext(
   input: AgentRuntimeInput,
-  activeSurface: PromptActiveSurface | null,
-  recovery: PromptRecovery | null = null
+  activeSurface: PromptActiveSurface | null
 ) {
   return [
     createRunInstructions(input, activeSurface),
-    ...(recovery === null
-      ? []
-      : [
-          renderPromptTemplate(promptTemplates["agent/context/recovery"], {
-            recovery,
-          }),
-        ]),
     createTriggerPart(input),
   ].join("\n\n")
 }

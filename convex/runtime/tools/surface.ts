@@ -1,8 +1,8 @@
-import { type JsonObject } from "../../contracts/json"
-import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
-import { readFinal } from "../../contracts/runtime/tools"
-import { optionalString, requiredString } from "../input"
-import { type AgentRuntime } from "../runtime"
+import { type JsonObject } from "../../../contracts/json"
+import { type SurfaceReactionTarget } from "../../../contracts/runtime/surface"
+import { readFinal } from "../../../contracts/runtime/tools"
+import { optionalString, requiredString } from "../../shared/input"
+import { type AgentRuntime } from "../platform"
 
 export async function executeActiveSurfaceTool(
   runtime: AgentRuntime,
@@ -36,7 +36,13 @@ async function sendActiveReply(runtime: AgentRuntime, input: JsonObject) {
   })
 
   activeSurface.communicated = true
-  activeSurface.target = explicitTarget ?? activeSurface.target
+
+  // An explicit target moves the conversation, so the session follows it and
+  // later turns reply where this one did.
+  if (explicitTarget !== undefined) {
+    activeSurface.target = explicitTarget
+    await runtime.platform.retarget({ target: explicitTarget })
+  }
 
   return {
     finished,

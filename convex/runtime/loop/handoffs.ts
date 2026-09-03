@@ -1,40 +1,32 @@
 import { decodeJson, encodeToolResult } from "../../../contracts/json"
 import {
   type ApprovalHandoff,
-  type HandoffSubject,
   type OfferHandoff,
   type RunHandoffs,
-} from "../../../contracts/runtime/worker"
-import { type ModelMessage } from "../../model/types"
-import { type AgentRuntime } from "../../runtime"
-import { markVisibleCommunication } from "../../tool"
-import { materializeSandboxResult } from "../../tool/results"
-import {
-  recordApprovalResolved,
-  recordOfferResolved,
-} from "../../trace/activity"
-import { appendSessionMessages, replacePromptMessages } from "../messages"
+} from "../../../contracts/runtime/handoffs"
+import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
+import { type AgentRuntime } from "../platform"
+import { markVisibleCommunication } from "../tools/index"
+import { materializeSandboxResult } from "../tools/results"
+import { recordApprovalResolved, recordOfferResolved } from "../trace/activity"
 import {
   isPendingApproval,
   isPendingOffer,
   type PendingHandoff,
 } from "./pending"
+import { appendSessionMessages } from "./transcript"
 
-export async function reconcileHandoffs(
-  runtime: AgentRuntime,
-  messages: ModelMessage[],
-  subjects: HandoffSubject[] = []
-) {
-  const [subjectHandoffs, runHandoffs] = await Promise.all([
-    loadSubjectHandoffs(runtime, subjects),
-    runtime.platform.loadRunHandoffs({ runId: runtime.context.run.id }),
-  ])
-  const applied = await applyHandoffs(
-    runtime,
-    messages,
-    mergeHandoffs(subjectHandoffs, runHandoffs)
-  )
-  const messageProgressed = await appendSessionMessages(runtime, messages)
+/**
+ * Bring the run's approvals and integration offers up to date: execute what
+ * was approved, note what was refused, and report what is still open. A
+ * settled handoff is progress, so the run thinks again instead of waiting.
+ */
+export async function reconcileHandoffs(runtime: AgentRuntime) {
+  const handoffs = await runtime.platform.loadRunHandoffs({
+    runId: runtime.context.run.id,
+  })
+  const applied = await applyHandoffs(runtime, handoffs)
+  const messageProgressed = await appendSessionMessages(runtime)
 
   return {
     pending: applied.pending,
@@ -42,25 +34,27 @@ export async function reconcileHandoffs(
   }
 }
 
-// Applies already-loaded handoffs without fetching or draining; run entry
-// uses this with the handoffs bundled into the runtime context load.
 export async function applyHandoffs(
   runtime: AgentRuntime,
-  messages: ModelMessage[],
   handoffs: RunHandoffs
 ) {
+  const notes: TranscriptMessage[] = []
   let progressed = false
 
   for (const approval of handoffs.approvals) {
-    if (await reconcileApproval(runtime, messages, approval)) {
+    if (await reconcileApproval(runtime, notes, approval)) {
       progressed = true
     }
   }
 
   for (const offer of handoffs.offers) {
-    if (await reconcileOffer(runtime, messages, offer)) {
+    if (await reconcileOffer(runtime, notes, offer)) {
       progressed = true
     }
+  }
+
+  if (notes.length > 0) {
+    await runtime.platform.appendTranscript(notes)
   }
 
   return {
@@ -71,7 +65,7 @@ export async function applyHandoffs(
 
 async function reconcileApproval(
   runtime: AgentRuntime,
-  messages: ModelMessage[],
+  notes: TranscriptMessage[],
   approval: ApprovalHandoff
 ) {
   if (isPendingApproval(approval)) {
@@ -81,19 +75,19 @@ async function reconcileApproval(
   await recordApprovalResolved(runtime, approval)
 
   if (approval.status === "approved") {
-    await executeApprovedAction(runtime, messages, approval)
+    notes.push(await executeApprovedAction(runtime, approval))
+
     return true
   }
 
   await runtime.platform.markApprovalConsumed({ approvalId: approval.id })
-  messages.push(userNote(approvalOutcomeNote(approval)))
+  notes.push(userNote(approvalOutcomeNote(approval)))
 
   return true
 }
 
 async function executeApprovedAction(
   runtime: AgentRuntime,
-  messages: ModelMessage[],
   approval: ApprovalHandoff
 ) {
   const encoded = await runtime.platform.executeApproval({
@@ -103,16 +97,15 @@ async function executeApprovedAction(
   const result = await materializeSandboxResult(runtime, decodeJson(encoded))
 
   markVisibleCommunication(runtime, approval.tool, result)
-  messages.push(
-    userNote(
-      `Approved action \`${approval.tool}\` (${approval.code}) ran. Result: ${encodeToolResult(result)}`
-    )
+
+  return userNote(
+    `Approved action \`${approval.tool}\` (${approval.code}) ran. Result: ${encodeToolResult(result)}`
   )
 }
 
 async function reconcileOffer(
   runtime: AgentRuntime,
-  messages: ModelMessage[],
+  notes: TranscriptMessage[],
   offer: OfferHandoff
 ) {
   if (isPendingOffer(offer)) {
@@ -122,98 +115,35 @@ async function reconcileOffer(
   await recordOfferResolved(runtime, offer)
   await runtime.platform.markOfferConsumed({ integrationOfferId: offer.id })
 
-  if (offer.status === "connected") {
-    await refreshRuntimeContext(runtime, messages)
-    messages.push(
-      userNote(
-        `${offer.integration} is now connected and its tools are available. Continue with the request.`
-      )
+  // The next model step rebuilds the prompt and the tool list from the
+  // database, so a newly connected integration needs no refresh here.
+  notes.push(
+    userNote(
+      offer.status === "connected"
+        ? `${offer.integration} is now connected and its tools are available. Continue with the request.`
+        : offerOutcomeNote(offer)
     )
-    return true
-  }
-
-  messages.push(userNote(offerOutcomeNote(offer)))
+  )
 
   return true
-}
-
-async function refreshRuntimeContext(
-  runtime: AgentRuntime,
-  messages: ModelMessage[]
-) {
-  const reloaded = await runtime.platform.reloadContext({
-    runId: runtime.context.run.id,
-  })
-
-  const previous = runtime.context.prompt
-
-  runtime.context.tools = reloaded.tools
-  runtime.context.activeSurface = reloaded.activeSurface
-  runtime.context.prompt = reloaded.prompt
-
-  replacePromptMessages(messages, previous, reloaded.prompt)
 }
 
 function pendingHandoffs(handoffs: RunHandoffs): PendingHandoff[] {
   const approvals = handoffs.approvals
     .filter(isPendingApproval)
-    .map((approval) =>
-      pendingHandoff({ id: approval.id, kind: "approval" }, approval.expiresAt)
-    )
-  const offers = handoffs.offers
-    .filter(isPendingOffer)
-    .map((offer) =>
-      pendingHandoff({ id: offer.id, kind: "offer" }, offer.expiresAt)
-    )
+    .map((approval) => ({
+      expiresAt: approval.expiresAt,
+      subject: { id: approval.id, kind: "approval" as const },
+    }))
+  const offers = handoffs.offers.filter(isPendingOffer).map((offer) => ({
+    expiresAt: offer.expiresAt,
+    subject: { id: offer.id, kind: "offer" as const },
+  }))
 
   return [...approvals, ...offers]
 }
 
-function pendingHandoff(
-  subject: HandoffSubject,
-  expiresAt: number
-): PendingHandoff {
-  return { expiresAt, subject }
-}
-
-async function loadSubjectHandoffs(
-  runtime: AgentRuntime,
-  subjects: HandoffSubject[]
-) {
-  return subjects.length === 0
-    ? emptyHandoffs()
-    : await runtime.platform.loadRunHandoffSubjects({ subjects })
-}
-
-function mergeHandoffs(primary: RunHandoffs, secondary: RunHandoffs) {
-  return {
-    approvals: mergeById(primary.approvals, secondary.approvals),
-    offers: mergeById(primary.offers, secondary.offers),
-  }
-}
-
-function mergeById<Item extends { id: string }>(
-  primary: Item[],
-  secondary: Item[]
-) {
-  const seen = new Set<string>()
-  const merged: Item[] = []
-
-  for (const item of [...primary, ...secondary]) {
-    if (!seen.has(item.id)) {
-      seen.add(item.id)
-      merged.push(item)
-    }
-  }
-
-  return merged
-}
-
-function emptyHandoffs(): RunHandoffs {
-  return { approvals: [], offers: [] }
-}
-
-function userNote(content: string): ModelMessage {
+function userNote(content: string): TranscriptMessage {
   return { content, role: "user" }
 }
 

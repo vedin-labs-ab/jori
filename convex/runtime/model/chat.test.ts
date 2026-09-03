@@ -86,7 +86,7 @@ test("sends the transcript as one system message and the turns after it", async 
   })
 })
 
-test("reasons harder after the first turn and forbids tools when there are none", async () => {
+test("reasons harder after the first turn and sends no tool list when there are none", async () => {
   openRouter.send.mockResolvedValue(
     chatResult({ content: "Done.", role: "assistant" })
   )
@@ -98,12 +98,10 @@ test("reasons harder after the first turn and forbids tools when there are none"
   })
 
   expect(openRouter.send).toHaveBeenCalledWith(
-    expect.objectContaining({
-      reasoning: { effort: "medium" },
-      toolChoice: "none",
-      tools: [],
-    })
+    expect.objectContaining({ reasoning: { effort: "medium" } })
   )
+  expect(openRouter.send.mock.lastCall?.[0]).not.toHaveProperty("tools")
+  expect(openRouter.send.mock.lastCall?.[0]).not.toHaveProperty("toolChoice")
 })
 
 test("reads a stop response with its reasoning and tokens", async () => {

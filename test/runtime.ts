@@ -1,14 +1,24 @@
 import { vi } from "vitest"
+import { type RuntimeContext } from "../contracts/runtime/context"
+import { type RuntimeId } from "../contracts/runtime/ids"
+import { type RuntimePrompt } from "../contracts/runtime/prompt"
 import { type RuntimeModelTokens } from "../contracts/runtime/trace"
-import {
-  type RuntimeContext,
-  type RuntimeId,
-} from "../contracts/runtime/worker"
+import { type WaiterWake } from "../contracts/runtime/waiters"
+import { maxTurns, runAct } from "../convex/runtime/loop/act"
+import { runModelTurn } from "../convex/runtime/loop/model"
+import { isParked } from "../convex/runtime/loop/park"
 import {
   type ModelResponse,
   type ModelRuntime,
   type ModelToolCall,
-} from "../trigger/model/types"
+} from "../convex/runtime/model/types"
+import {
+  type AgentRuntime,
+  type RuntimePlatform,
+} from "../convex/runtime/platform"
+import { type SandboxRuntime } from "../convex/runtime/sandbox/types"
+import { executeToolCall } from "../convex/runtime/tools/index"
+import { createPlatform, createSandbox } from "./platform"
 
 export type QueuedModelResponse =
   | {
@@ -35,17 +45,6 @@ export function runtimeContext(
 ): RuntimeContext {
   return {
     activeSurface: null,
-    drained: null,
-    handoffs: { approvals: [], offers: [] },
-    prompt: {
-      context: "context",
-      instructions: "system",
-      organization: null,
-      person: null,
-      place: null,
-      requester: null,
-    },
-    result: null,
     run: {
       id: runtimeId<"runs">("run_1"),
       organizationId: "organization",
@@ -59,8 +58,88 @@ export function runtimeContext(
   }
 }
 
+export function runtimePrompt(
+  overrides: Partial<RuntimePrompt> = {}
+): RuntimePrompt {
+  return {
+    context: "context",
+    instructions: "system",
+    organization: null,
+    person: null,
+    place: null,
+    requester: null,
+    ...overrides,
+  }
+}
+
+export function createRuntime(
+  options: {
+    context?: RuntimeContext
+    platform?: RuntimePlatform
+    sandbox?: SandboxRuntime
+  } = {}
+): AgentRuntime {
+  return {
+    context: options.context ?? runtimeContext(),
+    platform: options.platform ?? createPlatform(),
+    sandbox: options.sandbox ?? createSandbox(),
+  }
+}
+
+/** One tool call that is expected to answer within the step. */
+export async function runTool(args: {
+  call: ModelToolCall
+  runtime: AgentRuntime
+  sequence?: number
+  wake?: WaiterWake
+}) {
+  const outcome = await executeToolCall({ sequence: 100, ...args })
+
+  if (isParked(outcome)) {
+    throw new Error("The tool call parked unexpectedly.")
+  }
+
+  return outcome
+}
+
+/** The workflow handler, in process: model then act per turn, feeding a
+ *  queued wake into act whenever it parks. */
+export async function runLoop(args: {
+  model: ModelRuntime
+  prompt?: RuntimePrompt
+  runtime: AgentRuntime
+  wakes?: WaiterWake[]
+}) {
+  const wakes = [...(args.wakes ?? [])]
+
+  for (let turn = 1; turn <= maxTurns; turn += 1) {
+    await runModelTurn({
+      model: args.model,
+      prompt: args.prompt ?? runtimePrompt(),
+      runtime: args.runtime,
+      turn,
+    })
+
+    let outcome = await runAct({ runtime: args.runtime, turn })
+
+    while (outcome.status === "parked") {
+      outcome = await runAct({
+        runtime: args.runtime,
+        turn,
+        wake: nextWake(wakes),
+      })
+    }
+
+    if (outcome.status !== "continue") {
+      return outcome.status
+    }
+  }
+
+  return "failed" as const
+}
+
 export function createQueuedModel(responses: QueuedModelResponse[]) {
-  const queue = queuedModelResponses(responses)
+  const queue = responses.map(queuedModelResponse)
 
   return {
     complete: vi.fn<ModelRuntime["complete"]>(async () => {
@@ -75,10 +154,14 @@ export function createQueuedModel(responses: QueuedModelResponse[]) {
   } satisfies ModelRuntime
 }
 
-function queuedModelResponses(
-  responses: QueuedModelResponse[]
-): ModelResponse[] {
-  return responses.map(queuedModelResponse)
+function nextWake(wakes: WaiterWake[]): WaiterWake {
+  const wake = wakes.shift()
+
+  if (wake === undefined) {
+    throw new Error("No wake queued for a parked run.")
+  }
+
+  return wake
 }
 
 function queuedModelResponse(response: QueuedModelResponse): ModelResponse {

@@ -1,38 +1,24 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { runtimeContext, runtimeId } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall } from "../tool"
-
-const triggerWait = vi.hoisted(() => ({
-  createToken: vi.fn(async () => ({ id: "waitpoint_1" })),
-  forToken: vi.fn(),
-}))
-
-vi.mock("@trigger.dev/sdk", () => ({
-  wait: {
-    createToken: triggerWait.createToken,
-    forToken: triggerWait.forToken,
-  },
-}))
+import { createPlatform } from "../../../test/platform"
+import {
+  createRuntime,
+  runTool,
+  runtimeContext,
+  runtimeId,
+} from "../../../test/runtime"
+import { isParked } from "../loop/park"
+import { type AgentRuntime } from "../platform"
+import { executeToolCall } from "./index"
 
 beforeEach(() => {
   vi.clearAllMocks()
 })
 
 test("wait_for_agents returns immediately when every child is terminal", async () => {
-  const runtime = createRuntime()
-  runtime.platform.readAgentRuns = vi.fn(async () => [
-    {
-      runId: runtimeId<"runs">("run_child"),
-      title: "Research attendees",
-      status: "completed" as const,
-      error: null,
-      result: "Two attendees confirmed; no open commitments.",
-    },
-  ])
+  const runtime = waitRuntime()
+  runtime.platform.readAgentRuns = vi.fn(async () => [agentRun("completed")])
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         runIds: ["run_child"],
@@ -42,38 +28,22 @@ test("wait_for_agents returns immediately when every child is terminal", async (
       name: "wait_for_agents",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
     reason: "completed",
-    runs: [
-      {
-        runId: "run_child",
-        title: "Research attendees",
-        status: "completed",
-        error: null,
-        result: "Two attendees confirmed; no open commitments.",
-      },
-    ],
+    runs: [agentRun("completed")],
   })
+  expect(runtime.platform.park).not.toHaveBeenCalled()
 })
 
 test("wait_for_agents defaults a missing timeout to 15 minutes", async () => {
   const now = Date.parse("2026-07-13T08:00:00.000Z")
-  const runtime = createRuntime()
-  runtime.platform.readAgentRuns = vi
-    .fn()
-    .mockResolvedValueOnce([agentRun("running")])
-    .mockResolvedValue([agentRun("completed")])
-  runtime.platform.createWaiter = vi.fn(async () =>
-    runtimeId<"waiters">("waiter_1")
-  )
-  runtime.platform.expireWaiter = vi.fn()
+  const runtime = waitRuntime()
+  runtime.platform.readAgentRuns = vi.fn(async () => [agentRun("running")])
   const clock = vi.spyOn(Date, "now").mockReturnValue(now)
 
   await executeToolCall({
-    attempt: 1,
     call: {
       args: { runIds: ["run_child"] },
       id: "call_1",
@@ -84,55 +54,43 @@ test("wait_for_agents defaults a missing timeout to 15 minutes", async () => {
   })
 
   clock.mockRestore()
-  expect(runtime.platform.createWaiter).toHaveBeenCalledWith(
+  expect(runtime.platform.park).toHaveBeenCalledWith(
     expect.objectContaining({ expiresAt: now + 15 * 60 * 1000 })
   )
 })
 
-test("wait_for_agents turns a relative timeout into a waitpoint expiry", async () => {
+test("wait_for_agents parks on its children and reports the wake", async () => {
   const now = Date.parse("2026-07-13T08:00:00.000Z")
-  const runtime = createRuntime()
-  const running = agentRun("running")
-  const completed = agentRun("completed")
-  runtime.platform.readAgentRuns = vi
-    .fn()
-    .mockResolvedValueOnce([running])
-    .mockResolvedValue([completed])
-  runtime.platform.createWaiter = vi.fn(async () =>
-    runtimeId<"waiters">("waiter_1")
-  )
-  runtime.platform.expireWaiter = vi.fn()
+  const runtime = waitRuntime()
+  let children = [agentRun("running")]
+  runtime.platform.readAgentRuns = vi.fn(async () => children)
   const clock = vi.spyOn(Date, "now").mockReturnValue(now)
 
-  const result = await executeToolCall({
-    attempt: 1,
-    call: {
-      args: {
-        runIds: ["run_child"],
-        timeout: { unit: "minutes", value: 15 },
-      },
-      id: "call_1",
-      name: "wait_for_agents",
-    },
+  const parked = await executeToolCall({
+    call: waitCall(),
     runtime,
     sequence: 100,
   })
 
   clock.mockRestore()
-  expect(JSON.parse(result.content)).toEqual({
-    reason: "completed",
-    runs: [completed],
-  })
-  expect(runtime.platform.createWaiter).toHaveBeenCalledWith({
+  expect(isParked(parked)).toBe(true)
+  expect(runtime.platform.park).toHaveBeenCalledWith({
     condition: { kind: "runs", runIds: ["run_child"] },
     expiresAt: now + 15 * 60 * 1000,
-    runId: "run_1",
-    waitpointId: "waitpoint_1",
   })
-  expect(runtime.platform.expireWaiter).toHaveBeenCalledWith({
-    waiterId: "waiter_1",
+
+  children = [agentRun("completed")]
+
+  const result = await runTool({
+    call: waitCall(),
+    runtime,
+    wake: { reason: "resolved", waiter: runtimeId<"waiters">("waiter_1") },
   })
-  expect(triggerWait.forToken).not.toHaveBeenCalled()
+
+  expect(JSON.parse(result.content)).toEqual({
+    reason: "completed",
+    runs: [agentRun("completed")],
+  })
   expect(
     vi
       .mocked(runtime.platform.recordEvent)
@@ -141,16 +99,34 @@ test("wait_for_agents turns a relative timeout into a waitpoint expiry", async (
     "tool.started",
     "run.waiting",
     "tool.waiting",
+    "tool.started",
     "run.resumed",
     "tool.completed",
   ])
 })
 
-test("wait_for_agents rejects timeouts outside its bounds", async () => {
-  const runtime = createRuntime()
+test("wait_for_agents resolves in place when the children finish first", async () => {
+  const runtime = waitRuntime()
+  runtime.platform.readAgentRuns = vi
+    .fn()
+    .mockResolvedValueOnce([agentRun("running")])
+    .mockResolvedValue([agentRun("completed")])
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({ call: waitCall(), runtime })
+
+  expect(JSON.parse(result.content)).toEqual({
+    reason: "completed",
+    runs: [agentRun("completed")],
+  })
+  expect(runtime.platform.resolveWaiter).toHaveBeenCalledWith({
+    waiterId: "waiter_1",
+  })
+})
+
+test("wait_for_agents rejects timeouts outside its bounds", async () => {
+  const runtime = waitRuntime()
+
+  const result = await runTool({
     call: {
       args: {
         runIds: ["run_child"],
@@ -160,7 +136,6 @@ test("wait_for_agents rejects timeouts outside its bounds", async () => {
       name: "wait_for_agents",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
@@ -169,11 +144,19 @@ test("wait_for_agents rejects timeouts outside its bounds", async () => {
   })
 })
 
-function createRuntime(): AgentRuntime {
+function waitCall() {
   return {
-    platform: {
-      recordEvent: vi.fn(),
-    } as unknown as AgentRuntime["platform"],
+    args: {
+      runIds: ["run_child"],
+      timeout: { unit: "minutes", value: 15 },
+    },
+    id: "call_1",
+    name: "wait_for_agents",
+  }
+}
+
+function waitRuntime(): AgentRuntime {
+  return createRuntime({
     context: runtimeContext({
       tools: [
         {
@@ -186,8 +169,8 @@ function createRuntime(): AgentRuntime {
         },
       ],
     }),
-    sandbox: {} as AgentRuntime["sandbox"],
-  }
+    platform: createPlatform(),
+  })
 }
 
 function agentRun(status: "completed" | "running") {

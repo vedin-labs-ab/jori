@@ -79,12 +79,9 @@ export type RuntimeEventInput = {
   type: RuntimeEventType
 }
 
-export type RuntimeEventRecord = Omit<
-  RuntimeEventInput,
-  "data" | "keyId" | "sequence" | "type"
-> & {
-  data?: RuntimeEventTraceData | { tools: unknown }
+/** One trace as the runtime hands it over: the same event with its key
+ *  resolved. The prepared trace is written by the run's own mutation and
+ *  never travels this way. */
+export type RuntimeEventRecord = Omit<RuntimeEventInput, "keyId"> & {
   key: string
-  sequence?: number
-  type: RuntimeEventType | "run.prepared"
 }

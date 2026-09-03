@@ -1,11 +1,14 @@
-import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { createQueuedModel, runtimeContext } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { runAgentLoop } from "./loop"
+import { expect, test } from "vitest"
+import { type RuntimeTool } from "../../../contracts/runtime/context"
+import {
+  createQueuedModel,
+  createRuntime,
+  runLoop,
+  runtimeContext,
+} from "../../../test/runtime"
 
 test("active surface stops are repaired back to finish_run", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     tools: [
       runtimeTool("send_reply", "surface"),
       runtimeTool("add_reaction", "surface"),
@@ -29,7 +32,7 @@ test("active surface stops are repaired back to finish_run", async () => {
     },
   ])
 
-  await runAgentLoop({ attempt: 1, model, runtime })
+  await runLoop({ model, runtime })
 
   expect(model.complete).toHaveBeenCalledTimes(2)
   expect(model.complete).toHaveBeenLastCalledWith(
@@ -59,7 +62,7 @@ test("active surface stops are repaired back to finish_run", async () => {
 })
 
 test("active surface repair uses send_reply even with provider reactions", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     surface: "github",
     tools: [
       runtimeTool("send_reply", "surface"),
@@ -84,7 +87,7 @@ test("active surface repair uses send_reply even with provider reactions", async
     },
   ])
 
-  await runAgentLoop({ attempt: 1, model, runtime })
+  await runLoop({ model, runtime })
 
   expect(model.complete).toHaveBeenLastCalledWith(
     expect.objectContaining({
@@ -111,7 +114,7 @@ test("active surface repair uses send_reply even with provider reactions", async
 })
 
 test("active surface replies complete only after finish_run", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     tools: [
       runtimeTool("send_reply", "surface"),
       runtimeTool("finish_run", "run"),
@@ -139,7 +142,7 @@ test("active surface replies complete only after finish_run", async () => {
     },
   ])
 
-  await runAgentLoop({ attempt: 1, model, runtime })
+  await runLoop({ model, runtime })
 
   expect(runtime.platform.sendReply).toHaveBeenCalledWith({
     blocks: undefined,
@@ -152,7 +155,7 @@ test("active surface replies complete only after finish_run", async () => {
 })
 
 test("active surface final replies complete without finish_run", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     tools: [
       runtimeTool("send_reply", "surface"),
       runtimeTool("finish_run", "run"),
@@ -175,7 +178,7 @@ test("active surface final replies complete without finish_run", async () => {
     },
   ])
 
-  await runAgentLoop({ attempt: 1, model, runtime })
+  await runLoop({ model, runtime })
 
   expect(model.complete).toHaveBeenCalledTimes(1)
   expect(runtime.platform.sendReply).toHaveBeenCalledWith({
@@ -188,18 +191,11 @@ test("active surface final replies complete without finish_run", async () => {
   )
 })
 
-function createRuntime(options: {
+function surfaceRuntime(options: {
   surface?: "github" | "linear" | "slack"
   tools: RuntimeTool[]
-}): AgentRuntime {
-  return {
-    platform: {
-      addReaction: vi.fn(async () => ({ status: "added" })),
-      callTool: vi.fn(),
-      loadRunHandoffs: vi.fn(async () => ({ approvals: [], offers: [] })),
-      recordEvent: vi.fn(),
-      sendReply: vi.fn(async () => ({ status: "sent" })),
-    },
+}) {
+  return createRuntime({
     context: runtimeContext({
       activeSurface: {
         communicated: false,
@@ -208,8 +204,7 @@ function createRuntime(options: {
       },
       tools: options.tools,
     }),
-    sandbox: {},
-  } as unknown as AgentRuntime
+  })
 }
 
 function runtimeTool(

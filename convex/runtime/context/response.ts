@@ -1,23 +1,18 @@
-import { type RuntimePrompt } from "../../../contracts/runtime/prompt"
 import {
-  type DrainedSessionBatch,
-  type RunHandoffs,
   type RuntimeContext,
   type RuntimeTool,
-} from "../../../contracts/runtime/worker"
+} from "../../../contracts/runtime/context"
 import { type AgentRuntimeInput, inputAccess } from "../../runs/agent/input"
 import { assemblePrompt } from "../../runs/agent/prompt"
-import { type PromptRecovery } from "../../runs/agent/prompt/context"
 import {
   getPromptedTools,
   toolExecutionType,
 } from "../../runs/agent/tools/policy"
 import { createRunToolSnapshot } from "../../runs/agent/tools/snapshot"
 import { type RuntimeSkill } from "../../skills/runtime"
-import { type runLifecycleTools } from "../lifecycle"
+import { type runLifecycleTools, sandboxTools } from "../native"
 import { type RuntimePermissions } from "../permissions/index"
 import { visibleNativeToolSnapshots } from "../permissions/native"
-import { sandboxTools } from "../sandbox"
 import { type loadActiveSurface } from "../surface"
 import {
   type LoadedRun,
@@ -34,7 +29,7 @@ export function buildRuntimePrompt(
   activeSurface: LoadedActiveSurface,
   permissions: RuntimePermissions,
   skills: RuntimeSkill[],
-  options: { person: string | null; recovery?: PromptRecovery | null }
+  options: { person: string | null }
 ) {
   return assemblePrompt(input, {
     activeSurface: activeSurface.state,
@@ -44,7 +39,6 @@ export function buildRuntimePrompt(
       permissions: permissions.all,
       toolModes: permissions.toolModes,
     }),
-    recovery: options.recovery ?? null,
     skills,
   })
 }
@@ -66,18 +60,15 @@ export function runtimeToolSnapshot(
 
 export function runtimeResponse(args: {
   activeSurface: LoadedActiveSurface
-  drained: DrainedSessionBatch | null
-  handoffs: RunHandoffs
   input: AgentRuntimeInput
   lifecycleTools: LifecycleTools
   permissions: RuntimePermissions
-  prompt: RuntimePrompt
   run: LoadedRun
   sandbox: LoadedSandbox
   session: LoadedSession
 }): RuntimeContext {
   return {
-    prompt: args.prompt,
+    activeSurface: args.activeSurface.state,
     run: {
       id: args.input.run._id,
       rootId: args.input.run.rootId ?? null,
@@ -91,10 +82,6 @@ export function runtimeResponse(args: {
         : {
             id: args.session._id,
           },
-    activeSurface: args.activeSurface.state,
-    drained: args.drained ?? null,
-    handoffs: args.handoffs,
-    result: null,
     tools: runtimeTools(
       args.lifecycleTools,
       args.activeSurface,

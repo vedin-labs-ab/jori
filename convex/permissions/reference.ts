@@ -7,8 +7,7 @@ import {
   type JsonSchema,
 } from "../runs/agent/tools/schemas"
 import { getToolResponseSchema } from "../runs/agent/tools/schemas/responses"
-import { runLifecycleTools } from "../runtime/lifecycle"
-import { sandboxTools } from "../runtime/sandbox"
+import { runLifecycleTools, sandboxTools } from "../runtime/native"
 import { activeSurfaceToolReferenceSchemas } from "../runtime/surface/tools"
 
 /** What a tool call looks like on the wire: the request schema the agent

@@ -1,6 +1,8 @@
 import { v } from "convex/values"
+import { type SurfaceReactionTarget } from "../../../contracts/runtime/surface"
 import { internal } from "../../_generated/api"
-import { type ActionCtx, action, internalQuery } from "../../_generated/server"
+import { type Id } from "../../_generated/dataModel"
+import { type ActionCtx, internalQuery } from "../../_generated/server"
 import { requireGitHubRuntimeToken } from "../../integrations/github/credentials"
 import { addGitHubCommentReaction } from "../../integrations/github/delivery/comments"
 import { addLinearReaction } from "../../integrations/linear/delivery/reactions"
@@ -8,7 +10,6 @@ import { prepareIntegrationForRuntime } from "../../integrations/runtime"
 import { addSlackMessageReaction } from "../../integrations/slack/delivery/messages"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { requiredString } from "../../shared/input"
-import { requireWorkerSecret } from "../secret"
 import { requireMessageSurfaceInput } from "./input"
 import { type ReactionAddress, resolveReactionAddress } from "./target"
 
@@ -19,48 +20,42 @@ const surfaceReactionTargetValidator = v.union(
   v.object({ type: v.literal("comment"), commentId: v.number() })
 )
 
-export const add = action({
+export async function addRunReaction(
+  ctx: ActionCtx,
   args: {
-    reaction: v.string(),
-    runId: v.id("runs"),
-    secret: v.string(),
-    target: surfaceReactionTargetValidator,
-  },
-  returns: v.object({
-    status: v.literal("added"),
-  }),
-  handler: async (ctx, args) => {
-    requireWorkerSecret(args.secret)
+    reaction: string
+    runId: Id<"runs">
+    target: SurfaceReactionTarget
+  }
+) {
+  const input = await requireMessageSurfaceInput(ctx, {
+    runId: args.runId,
+    surface: "reaction",
+  })
 
-    const input = await requireMessageSurfaceInput(ctx, {
-      runId: args.runId,
-      surface: "reaction",
-    })
-
-    const address = (await ctx.runQuery(
-      internal.runtime.surface.reactions.resolve,
-      {
-        messageId: input.message._id,
-        target: args.target,
-      }
-    )) as ReactionAddress | null
-
-    if (address === null) {
-      throw new Error(
-        "add_reaction target is not available in the active conversation."
-      )
+  const address = (await ctx.runQuery(
+    internal.runtime.surface.reactions.resolve,
+    {
+      messageId: input.message._id,
+      target: args.target,
     }
+  )) as ReactionAddress | null
 
-    await sendReaction(
-      ctx,
-      input,
-      address,
-      requiredString(args.reaction, "reaction")
+  if (address === null) {
+    throw new Error(
+      "add_reaction target is not available in the active conversation."
     )
+  }
 
-    return { status: "added" as const }
-  },
-})
+  await sendReaction(
+    ctx,
+    input,
+    address,
+    requiredString(args.reaction, "reaction")
+  )
+
+  return { status: "added" as const }
+}
 
 export const resolve = internalQuery({
   args: {

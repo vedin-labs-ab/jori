@@ -1,6 +1,4 @@
 export const promptTemplates = {
-  "agent/context/recovery":
-    "# Recovery\n\nThis is attempt {{recovery.attempt}} of this run: an earlier attempt stopped before finishing, and the write actions below already completed. Never repeat one — do not resend a message or email, re-create a job, or redo any delivery listed here. Verify current state where it matters, then finish the remaining work.\n\nCompleted actions:\n{% for action in recovery.actions %}\n- {{action.name}}{% if action.detail %} — {{action.detail}}{% endif %}{% endfor %}",
   "agent/context/run":
     "# Run\n\nRun ID: {{run.id}}\nRun started at: {{time.utc}}.\n{% if time.local %}Requester local time: {{time.local}}.\n{% endif %}\n{% if surface.active %}\nActive surface: `{{surface.label}}`\n{% endif %}",
   "agent/context/trigger/instruction":

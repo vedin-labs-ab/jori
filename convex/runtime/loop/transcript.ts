@@ -1,20 +1,20 @@
-import { type RuntimePrompt } from "../../contracts/runtime/prompt"
 import {
   type DrainedSessionBatch,
   type RuntimeInteraction,
   type RuntimeMessage,
-} from "../../contracts/runtime/worker"
-import { collapseWhitespace } from "../../contracts/text"
-import { promptTemplates } from "../../prompts/generated"
-import { renderPromptTemplate } from "../../prompts/render"
-import { type ModelMessage } from "../model/types"
-import { type AgentRuntime } from "../runtime"
+} from "../../../contracts/runtime/context"
+import { type RuntimePrompt } from "../../../contracts/runtime/prompt"
+import { collapseWhitespace } from "../../../contracts/text"
+import { promptTemplates } from "../../../prompts/generated"
+import { renderPromptTemplate } from "../../../prompts/render"
+import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
+import { type AgentRuntime } from "../platform"
 
-// The prompt prefix every run starts with: instructions as the system
+// The prompt prefix every turn starts with: instructions as the system
 // message, then the organization, requester, place, and person contexts
 // (when present) and the run context as user messages, broad to narrow.
-// Everything after the prefix is history.
-export function promptMessages(prompt: RuntimePrompt): ModelMessage[] {
+// It is rebuilt each turn and never stored; the transcript holds only history.
+export function promptMessages(prompt: RuntimePrompt): TranscriptMessage[] {
   const contexts = [
     prompt.organization,
     prompt.requester,
@@ -27,23 +27,6 @@ export function promptMessages(prompt: RuntimePrompt): ModelMessage[] {
     ...contexts.map((content) => ({ content, role: "user" as const })),
     { content: prompt.context, role: "user" },
   ]
-}
-
-// Replaces the prompt prefix in place when the runtime context reloads,
-// preserving the history that follows. The previous prompt says how long the
-// prefix currently is; the next prompt says what it becomes.
-export function replacePromptMessages(
-  messages: ModelMessage[],
-  previous: RuntimePrompt,
-  next: RuntimePrompt
-) {
-  const length = promptMessages(previous).length
-
-  if (messages.length < length || messages[0]?.role !== "system") {
-    return
-  }
-
-  messages.splice(0, length, ...promptMessages(next))
 }
 
 export function formatSessionMessage(message: RuntimeMessage) {
@@ -79,10 +62,25 @@ export function formatSessionInteraction(interaction: RuntimeInteraction) {
   })
 }
 
-export async function appendSessionMessages(
-  runtime: AgentRuntime,
-  messages: ModelMessage[]
-) {
+/** One drained batch as transcript rows. Person context precedes the batch
+ *  so a new speaker's bundle lands before their first message. */
+export function drainedBatchMessages(
+  batch: DrainedSessionBatch
+): TranscriptMessage[] {
+  return [
+    ...(batch.contexts ?? []),
+    ...sessionItems(batch).map((item) =>
+      item.type === "message"
+        ? formatSessionMessage(item.message)
+        : formatSessionInteraction(item.interaction)
+    ),
+  ].map((content) => ({ content, role: "user" as const }))
+}
+
+/** Drain the session to the end of what has arrived and append it. The run
+ *  reads its own history back from the transcript, so nothing is held in
+ *  memory between steps. */
+export async function appendSessionMessages(runtime: AgentRuntime) {
   const session = runtime.context.session
 
   if (session === null) {
@@ -93,70 +91,17 @@ export async function appendSessionMessages(
   let hasMore = true
 
   while (hasMore) {
-    const drained = await runtime.platform.drainSessionMessages({
+    const drained = await runtime.platform.drainSession({
       sessionId: session.id,
     })
+    const messages = drainedBatchMessages(drained)
 
     hasMore = drained.hasMore
 
-    if (appendDrainedBatch(runtime, messages, drained)) {
+    if (messages.length > 0) {
+      await runtime.platform.appendTranscript(messages)
       appended = true
     }
-  }
-
-  return appended
-}
-
-// Appends the batch the runtime context load already drained, then keeps
-// draining only when that batch was cut short.
-export async function seedSessionMessages(
-  runtime: AgentRuntime,
-  messages: ModelMessage[]
-) {
-  const drained = runtime.context.drained
-
-  if (drained === null) {
-    return false
-  }
-
-  const appended = appendDrainedBatch(runtime, messages, drained)
-
-  if (!drained.hasMore) {
-    return appended
-  }
-
-  const more = await appendSessionMessages(runtime, messages)
-
-  return appended || more
-}
-
-function appendDrainedBatch(
-  runtime: AgentRuntime,
-  messages: ModelMessage[],
-  drained: DrainedSessionBatch
-) {
-  let appended = false
-
-  // Person context precedes the batch so a new speaker's bundle lands
-  // before their first message.
-  for (const content of drained.contexts ?? []) {
-    messages.push({ content, role: "user" })
-    appended = true
-  }
-
-  for (const item of sessionItems(drained)) {
-    if (item.type === "message") {
-      updateActiveSurfaceTarget(runtime, item.message)
-    }
-
-    messages.push({
-      content:
-        item.type === "message"
-          ? formatSessionMessage(item.message)
-          : formatSessionInteraction(item.interaction),
-      role: "user",
-    })
-    appended = true
   }
 
   return appended
@@ -207,15 +152,4 @@ function truncatePreview(value: string) {
   return normalized.length <= limit
     ? normalized
     : `${normalized.slice(0, limit - 3)}...`
-}
-
-function updateActiveSurfaceTarget(
-  runtime: AgentRuntime,
-  message: RuntimeMessage
-) {
-  const activeSurface = runtime.context.activeSurface
-
-  if (activeSurface !== null && message.replyTarget !== null) {
-    activeSurface.target = message.replyTarget
-  }
 }

@@ -1,21 +1,18 @@
-import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { runtimeContext } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall } from "."
+import { expect, test } from "vitest"
+import { type RuntimeTool } from "../../../contracts/runtime/context"
+import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
 
 test("finish_run requires a reason when an active surface has no communication", async () => {
-  const runtime = createRuntime()
+  const runtime = finishRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {},
       id: "call_1",
       name: "finish_run",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(false)
@@ -29,17 +26,15 @@ test("finish_run requires a reason when an active surface has no communication",
 })
 
 test("finish_run completes after visible communication", async () => {
-  const runtime = createRuntime({ communicated: true })
+  const runtime = finishRuntime({ communicated: true })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {},
       id: "call_1",
       name: "finish_run",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(true)
@@ -51,17 +46,15 @@ test("finish_run completes after visible communication", async () => {
 })
 
 test("finish_run completes job runs without a reason", async () => {
-  const runtime = createRuntime({ activeSurface: null })
+  const runtime = finishRuntime({ activeSurface: null })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {},
       id: "call_1",
       name: "finish_run",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(true)
@@ -72,59 +65,53 @@ test("finish_run completes job runs without a reason", async () => {
   })
 })
 
-test("finish_run stores its result on the context for the parent", async () => {
-  const runtime = createRuntime({ activeSurface: null })
+test("finish_run stores its result on the run for the parent", async () => {
+  const runtime = finishRuntime({ activeSurface: null })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: { result: "Summary of the delegated work." },
       id: "call_1",
       name: "finish_run",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(true)
-  expect(runtime.context.result).toBe("Summary of the delegated work.")
+  expect(runtime.platform.finishRun).toHaveBeenCalledWith({
+    result: "Summary of the delegated work.",
+  })
 })
 
 test("finish_run rejects an oversized result", async () => {
-  const runtime = createRuntime({ activeSurface: null })
+  const runtime = finishRuntime({ activeSurface: null })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: { result: "x".repeat(8001) },
       id: "call_1",
       name: "finish_run",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(false)
-  expect(runtime.context.result).toBeNull()
+  expect(runtime.platform.finishRun).not.toHaveBeenCalled()
   expect(result.content).toContain("at most 8000 characters")
 })
 
-function createRuntime(
+function finishRuntime(
   options: {
     activeSurface?: AgentRuntime["context"]["activeSurface"]
     communicated?: boolean
   } = {}
 ): AgentRuntime {
-  return {
-    platform: {
-      recordEvent: vi.fn(),
-    } as unknown as AgentRuntime["platform"],
+  return createRuntime({
     context: runtimeContext({
       activeSurface: activeSurfaceState(options),
       tools: [finishRunTool()],
     }),
-    sandbox: {} as AgentRuntime["sandbox"],
-  }
+  })
 }
 
 function activeSurfaceState(options: {

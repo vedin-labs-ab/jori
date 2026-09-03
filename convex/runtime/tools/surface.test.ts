@@ -1,14 +1,12 @@
-import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../contracts/runtime/worker"
-import { runtimeContext } from "../../test/trigger"
-import { type AgentRuntime } from "../runtime"
-import { executeToolCall } from "."
+import { expect, test } from "vitest"
+import { type RuntimeTool } from "../../../contracts/runtime/context"
+import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { type AgentRuntime } from "../platform"
 
 test("send_reply routes through Convex and marks the active surface communicated", async () => {
-  const runtime = createRuntime()
+  const runtime = surfaceRuntime()
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         blocks: [{ text: { text: "Done", type: "mrkdwn" }, type: "section" }],
@@ -18,7 +16,6 @@ test("send_reply routes through Convex and marks the active surface communicated
       name: "send_reply",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(false)
@@ -32,7 +29,7 @@ test("send_reply routes through Convex and marks the active surface communicated
 })
 
 test("send_reply forwards the active Linear target by default", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     activeSurface: {
       communicated: false,
       surface: "linear",
@@ -40,15 +37,13 @@ test("send_reply forwards the active Linear target by default", async () => {
     },
   })
 
-  await executeToolCall({
-    attempt: 1,
+  await runTool({
     call: {
       args: { text: "Done" },
       id: "call_1",
       name: "send_reply",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(runtime.platform.sendReply).toHaveBeenCalledWith({
@@ -60,7 +55,7 @@ test("send_reply forwards the active Linear target by default", async () => {
 })
 
 test("send_reply can target a specific Linear comment", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     activeSurface: {
       communicated: false,
       surface: "linear",
@@ -68,15 +63,13 @@ test("send_reply can target a specific Linear comment", async () => {
     },
   })
 
-  await executeToolCall({
-    attempt: 1,
+  await runTool({
     call: {
       args: { commentId: "new-comment-id", text: "Comment-level update" },
       id: "call_1",
       name: "send_reply",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(runtime.platform.sendReply).toHaveBeenCalledWith({
@@ -91,10 +84,9 @@ test("send_reply can target a specific Linear comment", async () => {
 })
 
 test("add_reaction routes through Convex and marks the active surface communicated", async () => {
-  const runtime = createRuntime({ tools: [addReactionTool()] })
+  const runtime = surfaceRuntime({ tools: [addReactionTool()] })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         reaction: "white_check_mark",
@@ -104,7 +96,6 @@ test("add_reaction routes through Convex and marks the active surface communicat
       name: "add_reaction",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(result.finished).toBe(false)
@@ -118,7 +109,7 @@ test("add_reaction routes through Convex and marks the active surface communicat
 })
 
 test("add_reaction validates GitHub reaction targets before calling Convex", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     activeSurface: {
       communicated: false,
       surface: "github",
@@ -127,8 +118,7 @@ test("add_reaction validates GitHub reaction targets before calling Convex", asy
     tools: [addReactionTool()],
   })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         reaction: "+1",
@@ -138,7 +128,6 @@ test("add_reaction validates GitHub reaction targets before calling Convex", asy
       name: "add_reaction",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
@@ -151,7 +140,7 @@ test("add_reaction validates GitHub reaction targets before calling Convex", asy
 })
 
 test("add_reaction validates GitHub reaction values before calling Convex", async () => {
-  const runtime = createRuntime({
+  const runtime = surfaceRuntime({
     activeSurface: {
       communicated: false,
       surface: "github",
@@ -160,8 +149,7 @@ test("add_reaction validates GitHub reaction values before calling Convex", asyn
     tools: [addReactionTool()],
   })
 
-  const result = await executeToolCall({
-    attempt: 1,
+  const result = await runTool({
     call: {
       args: {
         reaction: "thumbsup",
@@ -171,7 +159,6 @@ test("add_reaction validates GitHub reaction values before calling Convex", asyn
       name: "add_reaction",
     },
     runtime,
-    sequence: 100,
   })
 
   expect(JSON.parse(result.content)).toEqual({
@@ -184,19 +171,14 @@ test("add_reaction validates GitHub reaction values before calling Convex", asyn
   expect(runtime.platform.addReaction).not.toHaveBeenCalled()
 })
 
-function createRuntime(
+function surfaceRuntime(
   options: {
     activeSurface?: AgentRuntime["context"]["activeSurface"]
     communicated?: boolean
     tools?: RuntimeTool[]
   } = {}
 ): AgentRuntime {
-  return {
-    platform: {
-      addReaction: vi.fn(async () => ({ status: "added" })),
-      recordEvent: vi.fn(),
-      sendReply: vi.fn(async () => ({ status: "sent" })),
-    } as unknown as AgentRuntime["platform"],
+  return createRuntime({
     context: runtimeContext({
       activeSurface: options.activeSurface ?? {
         communicated: options.communicated ?? false,
@@ -205,8 +187,7 @@ function createRuntime(
       },
       tools: options.tools ?? [sendReplyTool()],
     }),
-    sandbox: {} as AgentRuntime["sandbox"],
-  }
+  })
 }
 
 function sendReplyTool(): RuntimeTool {
