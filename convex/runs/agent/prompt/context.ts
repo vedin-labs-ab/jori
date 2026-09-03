@@ -74,14 +74,24 @@ function createRunInstructions(
           ? null
           : integrationLabels[activeSurface.surface],
     },
-    time: {
-      utc: createPromptTime(),
-      local:
-        typeof input.timezone === "string"
-          ? createLocalPromptTime(input.timezone)
-          : null,
-    },
+    time: promptTime(input),
   })
+}
+
+/** The run's clock is the moment it was created, not the moment a turn runs.
+ *  The prompt prefix is rebuilt for every model call, and the provider only
+ *  serves a cached prefix that matches byte for byte, so a timestamp that
+ *  moved with each turn would re-bill the whole transcript every time. */
+function promptTime(input: AgentRuntimeInput) {
+  const startedAt = new Date(input.run.createdAt)
+
+  return {
+    utc: createPromptTime(startedAt),
+    local:
+      typeof input.timezone === "string"
+        ? createLocalPromptTime(input.timezone, startedAt)
+        : null,
+  }
 }
 
 function createTriggerPart(input: AgentRuntimeInput) {
