@@ -56,7 +56,6 @@ export async function callJoriTableTool(
       return await ctx.runMutation(internal.tables.records.create, {
         ...principal,
         name: requiredString(args.name, "name"),
-        description: optionalString(args.description),
         visibility: visibilityFromInput(args.visibility),
         columns: args.columns,
       })

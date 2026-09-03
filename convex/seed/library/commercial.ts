@@ -9,8 +9,6 @@ export const commercialTables: SeedTable[] = [
   {
     name: "Customer accounts",
     owner: "tobias",
-    description:
-      "Every paying account, its plan, and who owns the relationship. Jori keeps seats and health current from Slack and the billing exports.",
     folder: "Customers",
     created: 108,
     updated: 4,
@@ -110,8 +108,6 @@ export const commercialTables: SeedTable[] = [
   {
     name: "Support escalations",
     owner: "priya",
-    description:
-      "Anything support could not close on its own. Opened by Priya, filed by Jori from the #support thread, closed by whoever fixed it.",
     folder: "Support",
     created: 101,
     updated: 2,
@@ -177,8 +173,6 @@ export const commercialTables: SeedTable[] = [
   {
     name: "Feature requests",
     owner: "mia",
-    description:
-      "What customers have actually asked for, with the account that asked and how often it has come back.",
     folder: "Product",
     created: 112,
     updated: 8,

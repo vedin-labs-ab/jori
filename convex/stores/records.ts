@@ -19,7 +19,6 @@ export const create = internalMutation({
     organizationId: v.string(),
     personId: v.id("persons"),
     name: v.string(),
-    description: v.optional(v.string()),
     visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     schema: v.optional(v.any()),
@@ -40,7 +39,6 @@ export const update = internalMutation({
     storeId: v.id("collections"),
     personId: v.id("persons"),
     name: v.optional(v.string()),
-    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const store = await updateCollection(ctx, storeSpec, {
@@ -48,7 +46,6 @@ export const update = internalMutation({
       collectionId: args.storeId,
       personId: args.personId,
       name: args.name,
-      description: args.description,
     })
 
     return store === null ? null : summarizeStore(store)

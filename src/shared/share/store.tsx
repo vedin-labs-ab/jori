@@ -33,9 +33,6 @@ export function StoreShareView({
 
   return (
     <ShareShell name={store.name} openPath={openPath}>
-      {store.description === undefined ? null : (
-        <p className="text-muted-foreground text-sm">{store.description}</p>
-      )}
       <section className="grid gap-2">
         <div className="flex items-center gap-2">
           <h2 className="font-medium text-sm">Document</h2>

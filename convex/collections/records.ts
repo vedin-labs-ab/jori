@@ -9,10 +9,7 @@ import {
   type StoredVisibility,
 } from "../visibility/schema"
 import { getAccessibleCollection } from "./access"
-import {
-  normalizeCollectionDescription,
-  normalizeCollectionName,
-} from "./input"
+import { normalizeCollectionName } from "./input"
 import {
   type CollectionAuthoring,
   type CollectionDoc,
@@ -33,7 +30,6 @@ export async function createCollection<K extends CollectionKind>(
     organizationId: string
     personId: Id<"persons">
     name: string
-    description?: string
     visibility?: StoredVisibility
     folderId?: Id<"folders">
     authoring: unknown
@@ -52,7 +48,6 @@ export async function createCollection<K extends CollectionKind>(
       folderId: args.folderId,
     }),
     name: normalizeCollectionName(args.name),
-    description: normalizeCollectionDescription(args.description),
     ...authoringFields(spec, spec.normalize(args.authoring)),
     createdAt: now,
     updatedAt: now,
@@ -86,7 +81,6 @@ export async function updateCollection<K extends CollectionKind>(
     collectionId: Id<"collections">
     personId: Id<"persons">
     name?: string
-    description?: string
     authoring?: unknown
   }
 ): Promise<CollectionDoc<K> | null> {
@@ -96,9 +90,6 @@ export async function updateCollection<K extends CollectionKind>(
     ...(args.name === undefined
       ? {}
       : { name: normalizeCollectionName(args.name) }),
-    ...(args.description === undefined
-      ? {}
-      : { description: normalizeCollectionDescription(args.description) }),
     ...(args.authoring === undefined
       ? {}
       : authoringFields(spec, spec.evolve(collection, args.authoring))),

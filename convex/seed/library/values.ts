@@ -9,8 +9,6 @@ export const stores: SeedStore[] = [
   {
     name: "On-call rota",
     owner: "oskar",
-    description:
-      "Who is on call this week and next, and what counts as worth waking someone for. Jori reads this before it pages anyone in #incidents.",
     folder: "Engineering",
     created: 88,
     updated: 3,
@@ -40,8 +38,6 @@ export const stores: SeedStore[] = [
   {
     name: "Pricing",
     owner: "tobias",
-    description:
-      "The plans as they are actually sold, including the discount Tobias may give without asking. Support and Jori both quote from this.",
     folder: "Go to market",
     created: 106,
     updated: 19,
@@ -94,8 +90,6 @@ export const stores: SeedStore[] = [
   {
     name: "How we write",
     owner: "elin",
-    description:
-      "The house voice, kept short enough that people actually read it. Every job that drafts customer-facing text is pointed at this store.",
     folder: "Go to market",
     created: 71,
     updated: 26,
@@ -119,8 +113,6 @@ export const stores: SeedStore[] = [
   {
     name: "Runway",
     owner: "mia",
-    description:
-      "The board-facing numbers, kept where only the founders can read them. Updated after each month closes.",
     folder: "Board and runway",
     created: 76,
     updated: 14,

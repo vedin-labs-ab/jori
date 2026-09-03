@@ -68,7 +68,6 @@ type MaterialAction =
       at: number
       id: string
       name: string
-      description: string
     }
   | { type: "removeMaterial"; id: string }
   | { type: "writeStoreValue"; at: number; storeId: string; value: unknown }

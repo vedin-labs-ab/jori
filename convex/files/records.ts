@@ -3,7 +3,7 @@ import { type MutationCtx } from "../_generated/server"
 import { deleteTargetShares } from "../collections/shares"
 import { resolveCreationFolder } from "../folders/tree"
 import { type QueryLikeCtx } from "../shared/context"
-import { optionalString, requiredString } from "../shared/input"
+import { requiredString } from "../shared/input"
 import {
   normalizeStoredVisibility,
   type StoredVisibility,
@@ -21,7 +21,6 @@ export async function insertUploadedFile(
   args: {
     storageId: Id<"_storage">
     name: string
-    description?: string
     visibility?: StoredVisibility
     folderId?: Id<"folders">
   }
@@ -55,7 +54,6 @@ export async function insertUploadedFile(
     name: normalizeFileName(args.name),
     mimeType: metadata.contentType ?? "application/octet-stream",
     size: metadata.size,
-    description: optionalString(args.description),
     createdAt: now,
     updatedAt: now,
   })
@@ -64,7 +62,7 @@ export async function insertUploadedFile(
 export async function patchFileDetails(
   ctx: MutationCtx,
   viewer: FileViewer,
-  args: { fileId: Id<"files">; name?: string; description?: string }
+  args: { fileId: Id<"files">; name?: string }
 ) {
   const file = await requireViewableFile(ctx, viewer, args.fileId)
 
@@ -72,9 +70,6 @@ export async function patchFileDetails(
     ...(args.name === undefined
       ? {}
       : { name: normalizeFileName(requiredString(args.name, "name")) }),
-    ...(args.description === undefined
-      ? {}
-      : { description: optionalString(args.description) }),
     updatedAt: Date.now(),
   })
 }

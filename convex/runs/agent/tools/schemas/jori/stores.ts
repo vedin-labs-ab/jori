@@ -29,7 +29,6 @@ export const storeToolInputSchemas = {
     required: ["name"],
     properties: {
       name: stringProperty("Short store name."),
-      description: stringProperty("What the store holds and who reads it."),
       visibility: storeVisibilityProperty,
       schema: {
         type: "object",

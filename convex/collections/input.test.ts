@@ -2,7 +2,6 @@ import { describe, expect, test } from "vitest"
 import { visibilityFromInput } from "../visibility/schema"
 import {
   assertExpectedVersion,
-  normalizeCollectionDescription,
   normalizeCollectionName,
   normalizeExpectedVersion,
 } from "./input"
@@ -13,14 +12,6 @@ describe("collection input normalization", () => {
     expect(normalizeCollectionName("x".repeat(200))).toHaveLength(120)
     expect(() => normalizeCollectionName("   ")).toThrow("name is required")
     expect(() => normalizeCollectionName(42)).toThrow("name is required")
-  })
-
-  test("descriptions collapse to undefined when empty", () => {
-    expect(normalizeCollectionDescription("  What it holds ")).toBe(
-      "What it holds"
-    )
-    expect(normalizeCollectionDescription("   ")).toBeUndefined()
-    expect(normalizeCollectionDescription(undefined)).toBeUndefined()
   })
 
   test("agent visibility input maps onto stored visibility", () => {

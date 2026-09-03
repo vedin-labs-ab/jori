@@ -13,7 +13,6 @@ type SeedFile = {
   key: string
   name: string
   mimeType: string
-  description: string
   folder: string
   /** Days before the seed instant the file was saved. */
   created: number
@@ -28,8 +27,6 @@ export const files: SeedFile[] = [
     owner: "oskar",
     name: "Slack reconnect postmortem.md",
     mimeType: "text/markdown",
-    description:
-      "Why rotated Slack refresh tokens were dropped for nine days, and the two follow-ups it left open.",
     folder: "Incidents",
     created: 24,
     body: [
@@ -54,8 +51,6 @@ export const files: SeedFile[] = [
     owner: "elin",
     name: "March release notes.md",
     mimeType: "text/markdown",
-    description:
-      "What shipped in the March release and what moved to April, as sent to customers.",
     folder: "Releases",
     created: 9,
     body: [
@@ -83,8 +78,6 @@ export const files: SeedFile[] = [
     owner: "tobias",
     name: "Northwind renewal brief.md",
     mimeType: "text/markdown",
-    description:
-      "Account history, open asks, and the position to take into the Northwind Systems renewal.",
     folder: "Customers",
     created: 16,
     body: [
@@ -106,8 +99,6 @@ export const files: SeedFile[] = [
     owner: "tobias",
     name: "Pipeline export.csv",
     mimeType: "text/csv",
-    description:
-      "Weekly pipeline snapshot exported for the Monday review, straight from the CRM.",
     folder: "Pipeline",
     created: 5,
     body: [
@@ -125,8 +116,6 @@ export const files: SeedFile[] = [
     owner: "priya",
     name: "Holmberg security questionnaire.md",
     mimeType: "text/markdown",
-    description:
-      "Answers to the Holmberg Retail security review, pending sign-off before it goes back.",
     folder: "Support",
     created: 11,
     body: [
@@ -150,8 +139,6 @@ export const files: SeedFile[] = [
     owner: "johan",
     name: "August vendor invoices.csv",
     mimeType: "text/csv",
-    description:
-      "August vendor charges reconciled against the card statement, for the monthly close.",
     folder: "Vendors",
     created: 7,
     body: [
@@ -197,7 +184,6 @@ export async function seedFiles(
       name: file.name,
       mimeType: file.mimeType,
       size: upload.size,
-      description: file.description,
       folderId: folders.get(file.folder),
       createdAt,
       updatedAt: createdAt,

@@ -30,7 +30,6 @@ const collectionFields = {
   /** Filing; ancestor folders also gate visibility (see visibility/sight). */
   folderId: v.optional(v.id("folders")),
   name: v.string(),
-  description: v.optional(v.string()),
   /** Content hash of the compiled JSON Schema. */
   schemaHash: v.string(),
   /** Denormalized document count, kept in step by the document write

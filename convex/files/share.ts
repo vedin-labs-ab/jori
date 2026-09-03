@@ -102,7 +102,6 @@ export const get = query({
 
     return {
       name: opened.file.name,
-      description: opened.file.description,
       mimeType: opened.file.mimeType,
       size: opened.file.size,
       createdAt: opened.file.createdAt,

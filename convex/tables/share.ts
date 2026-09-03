@@ -89,7 +89,6 @@ export const get = query({
 
     return {
       name: opened.table.name,
-      description: opened.table.description,
       columns: opened.table.columns,
       expiresAt: opened.expiresAt,
     }

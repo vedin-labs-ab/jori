@@ -31,4 +31,5 @@ export function storeListConfig(
 export const storeDeleteDescription =
   "This permanently deletes the store and its stored value. Anything that reads it loses access."
 
-export const storeEditBlurb = "Rename the store or update its description."
+export const storeEditBlurb =
+  "Give the store a new name. The schema is edited on the store page."

@@ -1,5 +1,5 @@
-// Input normalization shared by every collection kind: names, descriptions,
-// and the optimistic version handshake.
+// Input normalization shared by every collection kind: names and the
+// optimistic version handshake.
 
 export function normalizeCollectionName(value: unknown) {
   const name = typeof value === "string" ? value.trim() : ""
@@ -9,16 +9,6 @@ export function normalizeCollectionName(value: unknown) {
   }
 
   return name.slice(0, 120)
-}
-
-export function normalizeCollectionDescription(value: unknown) {
-  if (typeof value !== "string") {
-    return undefined
-  }
-
-  const description = value.trim()
-
-  return description === "" ? undefined : description.slice(0, 500)
 }
 
 export function normalizeExpectedVersion(value: unknown) {

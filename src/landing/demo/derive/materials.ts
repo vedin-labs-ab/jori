@@ -146,7 +146,6 @@ function tableSummary(
 function owned(material: DemoMaterial) {
   return {
     name: material.name,
-    description: material.description,
     visibility: material.visibility,
     ownerId: material.ownerId,
     folderId: material.folderId,

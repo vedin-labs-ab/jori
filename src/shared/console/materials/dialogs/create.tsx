@@ -13,20 +13,19 @@ import {
 } from "@/components/ui/dialog"
 import { showErrorToast } from "../../error"
 import { type GrantOptions, VisibilityField } from "../../visibility/field"
-import { MaterialDescriptionField, MaterialNameField } from "../fields"
+import { MaterialNameField } from "../fields"
 import { AdvancedSettings, DialogForm } from "../form"
 
-/** What a create flow hands its host: the name and note, where the
- *  material is filed (undefined is the root), and who may see it. */
+/** What a create flow hands its host: the name, where the material is
+ *  filed (undefined is the root), and who may see it. */
 export type CreateMaterialArgs = {
-  description?: string
   folderId?: string
   name: string
   visibility: Visibility
 }
 
-/** The create flow every material kind shares: name, description, and the
- *  advanced folder and sharing fields. Only the noun, the blurb under the
+/** The create flow every material kind shares: the name and the advanced
+ *  folder and sharing fields. Only the noun, the blurb under the
  *  title, and what a save runs differ between kinds. */
 export function CreateMaterialDialog({
   blurb,
@@ -88,11 +87,6 @@ export function CreateMaterialDialog({
             name={form.name}
             onNameChange={form.setName}
           />
-          <MaterialDescriptionField
-            description={form.description}
-            idPrefix={idPrefix}
-            onDescriptionChange={form.setDescription}
-          />
           <AdvancedSettings>
             {folderField({
               id: `${idPrefix}-folder`,
@@ -132,7 +126,6 @@ function useCreateMaterial({
 }) {
   const [name, setNameState] = useState("")
   const [nameError, setNameError] = useState<string>()
-  const [description, setDescription] = useState("")
   const [visibility, setVisibility] = useState<Visibility>({
     mode: "organization",
   })
@@ -155,16 +148,10 @@ function useCreateMaterial({
     setIsCreating(true)
 
     try {
-      await create({
-        name,
-        description: description.trim() === "" ? undefined : description,
-        visibility,
-        folderId: folderId ?? undefined,
-      })
+      await create({ name, visibility, folderId: folderId ?? undefined })
 
       toast.success(`Created ${name.trim()}.`)
       setNameState("")
-      setDescription("")
       setVisibility({ mode: "organization" })
       setFolderId(initialFolderId)
       onCreated()
@@ -176,12 +163,10 @@ function useCreateMaterial({
   }
 
   return {
-    description,
     folderId,
     isCreating,
     name,
     nameError,
-    setDescription,
     setFolderId,
     setName,
     setVisibility,

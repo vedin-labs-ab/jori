@@ -5,7 +5,7 @@ import { EditFileDialog } from "./edit"
 import { type FileRow } from "./types"
 
 const onSave = vi.fn()
-const file = { name: "notes.txt", description: "Meeting notes" } as FileRow
+const file = { name: "notes.txt" } as FileRow
 
 afterEach(cleanup)
 
@@ -44,10 +44,7 @@ describe("edit file enter submission", () => {
     pressEnter(name)
 
     expect(onSave).toHaveBeenCalledOnce()
-    expect(onSave).toHaveBeenCalledWith(file, {
-      name: "minutes.txt",
-      description: "Meeting notes",
-    })
+    expect(onSave).toHaveBeenCalledWith(file, { name: "minutes.txt" })
   })
 
   test("Enter stays inert while the name is empty", () => {

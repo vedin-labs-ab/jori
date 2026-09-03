@@ -36,9 +36,6 @@ export function FileShareView({
 
   return (
     <ShareShell name={file.name} openPath={openPath}>
-      {file.description === undefined ? null : (
-        <p className="text-muted-foreground text-sm">{file.description}</p>
-      )}
       <p className="text-muted-foreground text-sm" title={file.mimeType}>
         {fileKind(file.mimeType, file.name).label} · {formatFileSize(file.size)}
       </p>

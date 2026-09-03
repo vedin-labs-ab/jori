@@ -11,7 +11,6 @@ function storeSummaryProperties() {
   return {
     storeId: stringProperty("Jori store ID."),
     name: stringProperty("Store name."),
-    description: stringProperty("Store description; absent when unset."),
     visibility: objectSchema({
       description:
         "Who may see it inside the organization: only its owner (private), listed people, listed teams, or every member.",

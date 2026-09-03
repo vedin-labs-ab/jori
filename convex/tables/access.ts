@@ -44,7 +44,6 @@ export function summarizeTable(table: TableDoc) {
   return {
     tableId: table._id,
     name: table.name,
-    description: table.description,
     visibility: table.visibility,
     ownerId: table.ownerId,
     folderId: table.folderId,

@@ -6,9 +6,9 @@ import { api } from "../../../convex/_generated/api"
 import { useMaterialUpdate } from "../shared/materials/update"
 
 /** All an edit needs of a store; its summary and its detail both fit. */
-type EditableStore = Pick<StoreDetail, "description" | "name" | "storeId">
+type EditableStore = Pick<StoreDetail, "name" | "storeId">
 
-/** Rename or describe the store; the schema is edited on the store page. */
+/** Rename the store; the schema is edited on the store page. */
 export function EditStoreDialog({
   onOpenChange,
   organizationId,

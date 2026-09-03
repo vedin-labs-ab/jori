@@ -145,7 +145,7 @@ describe("upload queue", () => {
 })
 
 describe("upload submission", () => {
-  test("each file lands as its own create call without a description", async () => {
+  test("each file lands as its own create call", async () => {
     const { notes, photo } = makeFiles()
 
     renderUploadHarness()
@@ -160,9 +160,5 @@ describe("upload submission", () => {
       "notes.txt",
       "photo.png",
     ])
-
-    for (const payload of payloads) {
-      expect("description" in payload).toBe(false)
-    }
   })
 })

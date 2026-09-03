@@ -12,7 +12,6 @@ function tableSummaryProperties() {
   return {
     tableId: stringProperty("Jori table ID."),
     name: stringProperty("Table name."),
-    description: stringProperty("Table description; absent when unset."),
     visibility: objectSchema({
       description:
         "Who may see it inside the organization: only its owner (private), listed people, listed teams, or every member.",

@@ -90,7 +90,6 @@ export const create = mutation({
   args: {
     organizationId: v.string(),
     name: v.string(),
-    description: v.optional(v.string()),
     visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     schema: v.optional(v.any()),
@@ -110,7 +109,6 @@ export const update = mutation({
     organizationId: v.string(),
     storeId: v.id("collections"),
     name: v.optional(v.string()),
-    description: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<unknown> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)

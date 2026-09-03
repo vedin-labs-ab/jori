@@ -78,7 +78,6 @@ export const create = mutation({
     organizationId: v.string(),
     storageId: v.id("_storage"),
     name: v.string(),
-    description: v.optional(v.string()),
     visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
   },
@@ -95,7 +94,6 @@ export const update = mutation({
     organizationId: v.string(),
     fileId: v.id("files"),
     name: v.optional(v.string()),
-    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
@@ -173,7 +171,6 @@ export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
     ownerId: file.ownerId,
     ownerName: owner?.name,
     ownerImage: owner?.image,
-    description: file.description,
     createdAt: file.createdAt,
     updatedAt: file.updatedAt,
     url: await ctx.storage.getUrl(file.storageId),

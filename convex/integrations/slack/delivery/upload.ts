@@ -33,9 +33,6 @@ async function uploadSlackFile(token: string, file: FileAttachment) {
   const ticket = await slackFormApi(token, "files.getUploadURLExternal", {
     filename: file.name,
     length: file.bytes.byteLength,
-    ...(file.description === undefined || !file.mimeType.startsWith("image/")
-      ? {}
-      : { alt_txt: file.description.slice(0, 1000) }),
   })
   const uploadUrl = requiredSlackResultString(ticket, "upload_url")
   const fileId = requiredSlackResultString(ticket, "file_id")

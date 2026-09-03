@@ -24,7 +24,6 @@ function fileRow(overrides: Partial<FileRow> = {}) {
     source: "upload",
     runId: undefined,
     ownerName: "Ada Lovelace",
-    description: undefined,
     createdAt: Date.now() - 3_600_000,
     updatedAt: Date.now(),
     url: "https://files.example/costs.csv",

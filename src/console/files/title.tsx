@@ -6,6 +6,7 @@ import { EditFileDialog } from "@/shared/console/files/edit"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FileRow } from "@/shared/console/files/types"
 import { moveTarget } from "@/shared/console/folders/types"
+import { type MaterialEdit } from "@/shared/console/materials/dialogs/edit"
 import { menuWidth } from "@/shared/console/menu"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { MoveResourceDialog } from "../folders/move"
@@ -66,7 +67,7 @@ export function FileDialogs({
   file: FileRow
   isSaving: boolean
   onClose: () => void
-  onSave: (file: FileRow, values: { name: string; description: string }) => void
+  onSave: (file: FileRow, values: MaterialEdit) => void
   organizationId: string
 }) {
   const closeWhenDismissed = closeOnDismiss(onClose)

@@ -23,7 +23,6 @@ export const create = internalMutation({
     organizationId: v.string(),
     personId: v.id("persons"),
     name: v.string(),
-    description: v.optional(v.string()),
     visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     columns: v.optional(v.any()),
@@ -44,7 +43,6 @@ export const update = internalMutation({
     tableId: v.id("collections"),
     personId: v.id("persons"),
     name: v.optional(v.string()),
-    description: v.optional(v.string()),
     columns: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
@@ -57,7 +55,6 @@ export const update = internalMutation({
       collectionId: args.tableId,
       personId: args.personId,
       name: args.name,
-      description: args.description,
       authoring: change?.next,
     })
 

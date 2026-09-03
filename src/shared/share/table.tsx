@@ -48,9 +48,6 @@ export function TableShareView({
 
   return (
     <ShareShell name={table.name} openPath={openPath}>
-      {table.description === undefined ? null : (
-        <p className="text-muted-foreground text-sm">{table.description}</p>
-      )}
       <SharedRows secret={secret} table={table} tableId={tableId} />
     </ShareShell>
   )

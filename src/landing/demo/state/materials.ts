@@ -15,7 +15,6 @@ export function reduceMaterials(
             ? {
                 ...material,
                 name: action.name,
-                description: action.description,
                 updatedAt: action.at,
               }
             : material

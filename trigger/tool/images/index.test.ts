@@ -46,7 +46,6 @@ test("generates an image through OpenRouter and saves it as a file", async () =>
   const result = await generateImageFile(runtime.runtime, {
     prompt: "A clean product hero image for Jori.",
     save: {
-      description: "Product hero",
       name: "hero",
     },
   })
@@ -64,7 +63,6 @@ test("generates an image through OpenRouter and saves it as a file", async () =>
   ])
   expect(runtime.uploadFile).toHaveBeenCalledWith({
     bytes: imageBytes,
-    description: "Product hero",
     mimeType: "image/png",
     name: "hero.png",
     runId: "run_1",

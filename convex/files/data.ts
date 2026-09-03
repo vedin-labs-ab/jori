@@ -141,8 +141,8 @@ function matchesQuery(file: Doc<"files">, query: string | undefined) {
     return true
   }
 
-  return [file.name, file.description, file.mimeType].some(
-    (value) => value?.toLowerCase().includes(query) === true
+  return [file.name, file.mimeType].some((value) =>
+    value.toLowerCase().includes(query)
   )
 }
 
@@ -179,8 +179,5 @@ async function summarizeFile(ctx: QueryCtx, file: Doc<"files">) {
     size: file.size,
     createdAt: file.createdAt,
     url: await ctx.storage.getUrl(file.storageId),
-    ...(file.description === undefined
-      ? {}
-      : { description: file.description }),
   }
 }

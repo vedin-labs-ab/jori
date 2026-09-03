@@ -249,7 +249,6 @@ function newMaterial(
   const base = {
     id,
     name: args.name.trim(),
-    description: args.description,
     folderId: args.folderId as FolderId | undefined,
     visibility: args.visibility as StoredVisibility,
     ownerId: viewerId,

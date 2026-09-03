@@ -54,7 +54,6 @@ export async function callJoriStoreTool(
         organizationId,
         personId,
         name: requiredString(args.name, "name"),
-        description: optionalString(args.description),
         visibility: visibilityFromInput(args.visibility),
         schema: args.schema,
       })

@@ -6,9 +6,9 @@ import { api } from "../../../convex/_generated/api"
 import { useMaterialUpdate } from "../shared/materials/update"
 
 /** All an edit needs of a table; its summary and its detail both fit. */
-type EditableTable = Pick<TableDetail, "description" | "name" | "tableId">
+type EditableTable = Pick<TableDetail, "name" | "tableId">
 
-/** Rename and describe the table. Columns live in the grid itself — the
+/** Rename the table. Columns live in the grid itself — the
  *  New column header cell and each column's details sheet. */
 export function EditTableDialog({
   onOpenChange,

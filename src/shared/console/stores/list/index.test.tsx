@@ -26,7 +26,6 @@ function storeSummary(overrides: Partial<StoreSummary> = {}) {
   return {
     storeId: "store-1",
     name: "Settings",
-    description: undefined,
     visibility: { mode: "organization" },
     ownerId: undefined,
     folderId: undefined,

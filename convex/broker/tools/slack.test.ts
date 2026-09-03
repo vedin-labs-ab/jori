@@ -131,11 +131,7 @@ describe("Slack files", () => {
     expect(result).toEqual({ status: "sent" })
     expect(calls).toHaveLength(3)
     expect(calls[0]).toMatchObject({
-      body: {
-        alt_txt: "A small generated image.",
-        filename: "kitten.png",
-        length: "5",
-      },
+      body: { filename: "kitten.png", length: "5" },
       headers: { "content-type": "application/x-www-form-urlencoded" },
       url: "https://slack.com/api/files.getUploadURLExternal",
     })
