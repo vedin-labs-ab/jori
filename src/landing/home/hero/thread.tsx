@@ -52,13 +52,20 @@ export function RenewalsThread({
           time="09:12"
         >
           Done. One row added, marked at risk.{" "}
+          {/* A job named inside a sentence, read the way the console reads
+              the name of anything you can open: the mark says what it is,
+              the weight sets it apart, and the underline waits for a
+              pointer. Inline rather than a flex row, so the mark rides the
+              sentence's baseline instead of setting the line's height. */}
           <button
-            className="inline-flex items-center gap-1 rounded-sm font-medium underline decoration-muted-foreground/50 underline-offset-2 transition-colors hover:decoration-foreground"
+            className="group whitespace-nowrap rounded-sm font-medium"
             onClick={onOpenJob}
             type="button"
           >
-            <Workflow className="size-3.5 text-muted-foreground" />
-            Renewals watch
+            <Workflow className="mr-1 inline-block size-3.5 align-[-0.2em] text-muted-foreground" />
+            <span className="underline-offset-2 group-focus-visible:underline group-hover:underline">
+              Renewals watch
+            </span>
           </button>{" "}
           will keep it current.
           <button
