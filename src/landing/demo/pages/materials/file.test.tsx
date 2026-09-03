@@ -24,7 +24,7 @@ test("opens a text file in the editor with its content", async () => {
   expect(
     await screen.findByText(/Usage-based billing for hotels and venues/)
   ).toBeDefined()
-  expect(screen.getByRole("link", { name: "Engineering" })).toBeDefined()
+  expect(screen.getByRole("link", { name: "Files" })).toBeDefined()
   expect(screen.getByRole("link", { name: "Download" })).toBeDefined()
   expect(screen.getByText("4 of 4")).toBeDefined()
 })

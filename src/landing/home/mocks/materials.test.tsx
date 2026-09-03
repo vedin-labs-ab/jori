@@ -32,7 +32,7 @@ function first<Item>(items: Item[]): Item {
   return item
 }
 
-test("shows the renewals under their trail and keeps a corrected cell", async () => {
+test("shows the renewals under Tables and keeps a corrected cell", async () => {
   render(
     <DemoWorkspaceProvider>
       <Materials />
@@ -41,7 +41,7 @@ test("shows the renewals under their trail and keeps a corrected cell", async ()
 
   expect(await screen.findByText("Harbor House")).toBeDefined()
   expect(screen.getByText("Larkspur Hotels")).toBeDefined()
-  expect(screen.getByRole("link", { name: "Renewals" })).toBeDefined()
+  expect(screen.getByRole("link", { name: "Tables" })).toBeDefined()
 
   fireEvent.click(
     first(screen.getAllByRole("button", { name: "Edit Customer" }))

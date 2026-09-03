@@ -6,6 +6,7 @@ import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { menuWidth } from "@/shared/console/menu"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
@@ -18,7 +19,6 @@ import {
   type DemoTable,
 } from "../../fixtures/types"
 import { useDemoWorkspace } from "../../workspace"
-import { useMaterialCrumb } from "./crumb"
 
 // What every material page shares with the console's: the crumb that says
 // where the material lives, the menu the console hangs off its name, and
@@ -52,8 +52,8 @@ export function MaterialMissing({
 export function CollectionTitle({ material }: { material: DemoTable }) {
   const [request, setRequest] = useState<MaterialRequest>()
 
-  useMaterialCrumb(
-    material,
+  useMaterialBreadcrumb(
+    material.name,
     useMemo(
       () => <CollectionMenu material={material} onRequest={setRequest} />,
       [material]

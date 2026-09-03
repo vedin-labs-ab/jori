@@ -3,10 +3,7 @@ import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
 import { ConsoleEmptyState } from "../list/empty"
 import { ConsoleListContent } from "../list/frame"
-import {
-  type MaterialBreadcrumb,
-  useMaterialTrail,
-} from "../materials/breadcrumb"
+import { useMaterialTrail } from "../materials/breadcrumb"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileDock } from "./dock"
 import {
@@ -29,8 +26,6 @@ import { FileViewer } from "./viewer/section"
  *  the menu around this view's own lines. Keyed by the file, so a step to
  *  a neighbor starts every view fresh. */
 export function FileBody(props: {
-  /** Where the file lives, for the breadcrumb: the trail above its name. */
-  crumb?: Pick<MaterialBreadcrumb, "trail">
   file: FileDetail
   /** Persists the text editor's buffer; see `FileSave`. */
   onSave: FileSave
@@ -43,7 +38,6 @@ export function FileBody(props: {
 }
 
 function FileContent({
-  crumb,
   file,
   onSave,
   siblings,
@@ -58,7 +52,6 @@ function FileContent({
       : undefined
 
   useFileCrumb({
-    crumb,
     file,
     menu: titleMenu(
       <FileLead
@@ -104,24 +97,21 @@ function FileContent({
   )
 }
 
-/** Publishes the file's crumb: its trail, its name with the menu hung off
- *  it, and the save signal right after the name while a save is in
- *  motion. */
+/** Publishes the file's crumb: its name with the menu hung off it, and
+ *  the save state the shell shows in the name while a save is in motion. */
 function useFileCrumb({
-  crumb,
   file,
   menu,
   saveStatus,
 }: {
-  crumb: Pick<MaterialBreadcrumb, "trail"> | undefined
   file: FileDetail
   menu: ReactNode
   saveStatus: FileEditorState["saveStatus"] | undefined
 }) {
   useMaterialTrail(
     useMemo(
-      () => ({ ...crumb, menu, name: file.name, saveStatus }),
-      [crumb, file.name, menu, saveStatus]
+      () => ({ menu, name: file.name, saveStatus }),
+      [file.name, menu, saveStatus]
     )
   )
 }

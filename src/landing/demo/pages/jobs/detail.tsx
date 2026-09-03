@@ -7,10 +7,7 @@ import { type Job } from "@/shared/console/jobs/types"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { useClientPagination } from "@/shared/console/list/pagination"
-import {
-  folderTrail,
-  useMaterialTrail,
-} from "@/shared/console/materials/breadcrumb"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { ExecutionRows } from "@/shared/console/runs/list/rows"
@@ -47,7 +44,7 @@ function JobReadyPage({ job }: { job: Job }) {
   const folders = useMemo(() => folderNames(state), [state])
   const now = useNow(30_000)
 
-  useJobCrumb(job, folders, () => setIsMoving(true))
+  useJobCrumb(job, () => setIsMoving(true))
 
   return (
     <ConsolePageLayout>
@@ -78,37 +75,28 @@ function JobReadyPage({ job }: { job: Job }) {
   )
 }
 
-/** The job's crumb: its folder's trail when it is filed, so the page says
- *  where the job lives, and the Jobs surface otherwise, with the menu the
- *  console hangs off its name. Deleting leaves for the list. */
-function useJobCrumb(
-  job: Job,
-  folders: ReturnType<typeof folderNames>,
-  onMoveToFolder: () => void
-) {
+/** The job's crumb: the Jobs surface, then its name with the menu the
+ *  console hangs off it. Deleting leaves for the list. */
+function useJobCrumb(job: Job, onMoveToFolder: () => void) {
   const { actions } = useDemoWorkspace()
   const editor = useJobEditor()
   const navigation = useContext(ConsoleNavigationContext)
-  const trail = folderTrail(folders, job.folderId)
 
-  useMaterialTrail({
-    name: job.name,
-    trail: trail.length === 0 ? undefined : trail,
-    menu: (
-      <JobTitleMenu
-        isControlling={false}
-        isDeleting={false}
-        job={job}
-        onDelete={(target) => {
-          actions.deleteJob(target)
-          navigation?.navigate("/jobs")
-        }}
-        onEdit={editor.openEditForm}
-        onMoveToFolder={onMoveToFolder}
-        onPausedChange={actions.setJobPaused}
-      />
-    ),
-  })
+  useMaterialBreadcrumb(
+    job.name,
+    <JobTitleMenu
+      isControlling={false}
+      isDeleting={false}
+      job={job}
+      onDelete={(target) => {
+        actions.deleteJob(target)
+        navigation?.navigate("/jobs")
+      }}
+      onEdit={editor.openEditForm}
+      onMoveToFolder={onMoveToFolder}
+      onPausedChange={actions.setJobPaused}
+    />
+  )
 }
 
 /** The job's runs out of the workspace, newest first, paged like the

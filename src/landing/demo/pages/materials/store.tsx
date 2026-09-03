@@ -16,7 +16,6 @@ import { DemoLinksDialog } from "../../dialogs/links"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import { useDemoWorkspace } from "../../workspace"
 import { CollectionMenu, MaterialMissing } from "./chrome"
-import { materialCrumb } from "./crumb"
 
 /** One store's page over the workspace: the console's value editor,
  *  saving into memory, under the header actions and the crumb the
@@ -28,11 +27,6 @@ export function StorePage({ storeId }: { storeId: string }) {
   const store = useMemo(() => storeDetail(state, storeId), [state, storeId])
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [request, setRequest] = useState<MaterialRequest>()
-  const crumb = useMemo(
-    () =>
-      material?.kind === "store" ? materialCrumb(state, material) : undefined,
-    [material, state]
-  )
 
   if (store === undefined || material?.kind !== "store") {
     return <MaterialMissing noun="store" />
@@ -57,7 +51,6 @@ export function StorePage({ storeId }: { storeId: string }) {
 
             return Promise.resolve()
           }}
-          crumb={crumb}
           store={store}
           titleMenu={titleMenu}
         />

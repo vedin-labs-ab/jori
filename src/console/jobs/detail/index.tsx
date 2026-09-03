@@ -9,10 +9,7 @@ import { JobHeaderActions } from "@/shared/console/jobs/detail/header"
 import { JobTitleMenu } from "@/shared/console/jobs/list/actions"
 import { type Job } from "@/shared/console/jobs/types"
 import { ConsolePageLayout } from "@/shared/console/layout"
-import {
-  folderTrail,
-  useMaterialTrail,
-} from "@/shared/console/materials/breadcrumb"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useDocumentTitle } from "@/shared/console/shell/title"
 import { useNow } from "@/shared/console/time"
@@ -155,21 +152,17 @@ function useJobCrumb(
   setPaused: (job: Job, paused: boolean) => void
 ) {
   const { editor } = page.host
-  const trail = folderTrail(page.folders, job.folderId)
 
-  useMaterialTrail({
-    name: job.name,
-    trail: trail.length === 0 ? undefined : trail,
-    menu: (
-      <JobTitleMenu
-        isControlling={editor.controllingJobId === job.id}
-        isDeleting={editor.deletingJobId === job.id}
-        job={job}
-        onDelete={page.removeAndLeave}
-        onEdit={editor.openEditForm}
-        onMoveToFolder={() => page.setIsMoving(true)}
-        onPausedChange={setPaused}
-      />
-    ),
-  })
+  useMaterialBreadcrumb(
+    job.name,
+    <JobTitleMenu
+      isControlling={editor.controllingJobId === job.id}
+      isDeleting={editor.deletingJobId === job.id}
+      job={job}
+      onDelete={page.removeAndLeave}
+      onEdit={editor.openEditForm}
+      onMoveToFolder={() => page.setIsMoving(true)}
+      onPausedChange={setPaused}
+    />
+  )
 }

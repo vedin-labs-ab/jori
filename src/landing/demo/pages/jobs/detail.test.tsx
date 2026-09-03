@@ -19,7 +19,8 @@ test("opens a job's page: its crumb, brief, trigger, and runs", async () => {
 
   expect(await screen.findByText("Instructions")).toBeDefined()
   // The crumb and the Folder row both lead to the folder it is filed in.
-  expect(screen.getAllByRole("link", { name: "Renewals" })).toHaveLength(2)
+  expect(screen.getByRole("link", { name: "Jobs" })).toBeDefined()
+  expect(screen.getAllByRole("link", { name: "Renewals" })).toHaveLength(1)
   expect(screen.getByText("Recurring")).toBeDefined()
   // The trigger's schedule, and the run's own note of it under Runs.
   expect(screen.getAllByText(/Mondays at 08:00/)).toHaveLength(2)
