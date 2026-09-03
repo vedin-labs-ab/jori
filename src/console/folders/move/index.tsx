@@ -7,7 +7,9 @@ import { MoveDialog } from "@/shared/console/folders/dialogs/move"
 import {
   type MoveResourceTarget,
   type MoveSubject,
+  resourceSubject,
   subjectName,
+  subjectSize,
 } from "@/shared/console/folders/types"
 import { api } from "../../../../convex/_generated/api"
 import { useMoveConfirmation } from "./confirm"
@@ -56,7 +58,7 @@ export function MoveResourcesDialog({
       subject={
         resources === undefined || resources.length === 0
           ? undefined
-          : { kind: "resources", resources }
+          : resourceSubject(resources)
       }
     />
   )
@@ -112,24 +114,23 @@ function useMoveSubject(
       const folderId =
         destinationId === null ? null : (destinationId as GenericId<"folders">)
 
-      if (moved.kind === "folder") {
-        await moveFolder({
-          organizationId,
-          folderId: moved.folderId as GenericId<"folders">,
-          parentId: folderId,
-        })
-      } else {
-        await Promise.all(
-          moved.resources.map((resource) =>
-            fileResource({
-              organizationId,
-              resourceType: resource.resourceType,
-              resourceId: resource.resourceId,
-              folderId,
-            })
-          )
-        )
-      }
+      await Promise.all([
+        ...moved.folders.map((folder) =>
+          moveFolder({
+            organizationId,
+            folderId: folder.folderId as GenericId<"folders">,
+            parentId: folderId,
+          })
+        ),
+        ...moved.resources.map((resource) =>
+          fileResource({
+            organizationId,
+            resourceType: resource.resourceType,
+            resourceId: resource.resourceId,
+            folderId,
+          })
+        ),
+      ])
 
       toast.success(`Moved ${subjectName(moved)}.`)
       onMoved()
@@ -167,19 +168,21 @@ function useMoveSubject(
   }
 }
 
-/** What the move can compare an audience for: a folder, which speaks for
- *  its contents, or one resource. A bulk selection has no single audience,
- *  so it moves without the question. */
+/** What the move can compare an audience for: one folder, which speaks
+ *  for its contents, or one resource. A bulk selection has no single
+ *  audience, so it moves without the question. */
 function confirmable(subject: MoveSubject) {
-  if (subject.kind === "folder") {
-    return {
-      name: subject.name,
-      subject: { kind: "folder" as const, folderId: subject.folderId },
-    }
+  if (subjectSize(subject) !== 1) {
+    return undefined
   }
 
-  if (subject.resources.length !== 1) {
-    return undefined
+  const [folder] = subject.folders
+
+  if (folder !== undefined) {
+    return {
+      name: folder.name,
+      subject: { kind: "folder" as const, folderId: folder.folderId },
+    }
   }
 
   const [resource] = subject.resources

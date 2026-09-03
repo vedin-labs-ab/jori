@@ -209,6 +209,11 @@ function renderRows(
           resourceMenu={(resource) => (
             <ResourceRowMenu actions={actions} resource={resource} />
           )}
+          selectionActions={{
+            isBusy: false,
+            onMove: () => undefined,
+            onRemove: () => undefined,
+          }}
         />
       </DndContext>
     </TooltipProvider>

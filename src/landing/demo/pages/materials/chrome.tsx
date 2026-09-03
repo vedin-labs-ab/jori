@@ -11,6 +11,8 @@ import { menuWidth } from "@/shared/console/menu"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
+import { TableLead } from "@/shared/console/tables/menu"
+import { type TableDetail } from "@/shared/console/tables/types"
 import { fileRowOf } from "../../derive/materials"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import {
@@ -46,17 +48,29 @@ export function MaterialMissing({
 }
 
 /** A table's name in the breadcrumb, with the menu the console gives
- *  one, and the dialogs the menu opens. A store's or a file's view
- *  publishes its own crumb, since its items lead the menu; those take
- *  `CollectionMenu` and `FileMenu`. */
-export function CollectionTitle({ material }: { material: DemoTable }) {
+ *  one — led by the table's provenance — and the dialogs the menu opens.
+ *  A store's or a file's view publishes its own crumb, since its items
+ *  lead the menu; those take `CollectionMenu` and `FileMenu`. */
+export function CollectionTitle({
+  material,
+  table,
+}: {
+  material: DemoTable
+  table: TableDetail
+}) {
   const [request, setRequest] = useState<MaterialRequest>()
 
   useMaterialBreadcrumb(
     material.name,
     useMemo(
-      () => <CollectionMenu material={material} onRequest={setRequest} />,
-      [material]
+      () => (
+        <CollectionMenu
+          lead={<TableLead table={table} />}
+          material={material}
+          onRequest={setRequest}
+        />
+      ),
+      [material, table]
     )
   )
 

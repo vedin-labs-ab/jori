@@ -5,7 +5,7 @@ import { type FolderId } from "./fixtures/types"
 import { useDemoWorkspace } from "./workspace"
 
 /** The console's drag surface over the workspace: dropping a folder row on
- *  another re-parents it, dropping a filed resource re-files it. */
+ *  another re-parents it, dropping resources re-files them. */
 export function DemoDragProvider({ children }: { children: ReactNode }) {
   const { actions, state } = useDemoWorkspace()
 
@@ -32,11 +32,11 @@ export function DemoDragProvider({ children }: { children: ReactNode }) {
 
         const plan = planFileDrop(payload, target.folderId)
 
-        if (plan !== undefined) {
+        for (const item of plan?.items ?? []) {
           actions.fileResource(
-            payload.type,
-            payload.id,
-            plan.folderId as FolderId | null
+            item.type,
+            item.id,
+            plan?.folderId as FolderId | null
           )
         }
 

@@ -16,6 +16,7 @@ import { useMemberUrl } from "@/shared/console/materials/fragment"
 import { useRowAdding } from "@/shared/console/tables/adding"
 import { RowGrid } from "@/shared/console/tables/grid"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
+import { TableLead } from "@/shared/console/tables/menu"
 import { type ColumnSheetState } from "@/shared/console/tables/sheet"
 import { type TableDetail, type TableRow } from "@/shared/console/tables/types"
 import { api } from "../../../../convex/_generated/api"
@@ -142,6 +143,7 @@ function TableReadyView({
       deleteDescription={tableDeleteDescription}
       isDeleting={page.removal.removingId === table.tableId}
       isRestoring={page.removal.restoringId === table.tableId}
+      lead={<TableLead table={table} />}
       material={{ name: table.name, archivedAt: table.archivedAt }}
       noun="table"
       onAccess={() => page.setDialog("access")}

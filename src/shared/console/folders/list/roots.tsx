@@ -9,22 +9,26 @@ import {
 import { ConsoleListContent } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
 import { type FolderDialogRequest, type FolderRootsResult } from "../types"
-import { useFolderListControls } from "./controls"
-import { FolderListRow, FolderListTable } from "./table"
+import { FolderSelectionBar } from "./bar"
+import { useFolderListing } from "./controls"
+import { type FolderSelectionActions } from "./select"
+import { FolderListRow, FolderListTable, folderTableColumns } from "./table"
 
 /** The root folders in the same full-bleed table a folder's own page uses,
- *  or what stands in for them: a spinner, the refusal, or the invitation
- *  to make the first one. */
+ *  with the selection's dock over it — or what stands in for them: a
+ *  spinner, the refusal, or the invitation to make the first one. */
 export function RootFolderList({
   onCreate,
   onDialog,
   roots,
+  selectionActions,
 }: {
   onCreate: () => void
   onDialog: (request: FolderDialogRequest) => void
   roots: FolderRootsResult | undefined
+  selectionActions: FolderSelectionActions
 }) {
-  const list = useFolderListControls({
+  const list = useFolderListing({
     folders: roots?.status === "ready" ? roots.folders : [],
     resources: [],
   })
@@ -66,32 +70,39 @@ export function RootFolderList({
     )
   }
 
-  const visible = list.narrow(roots.folders)
-
   return (
-    <FolderListTable
-      controls={list.controls}
-      kinds={list.kinds}
-      owners={list.owners}
-    >
-      {visible.length === 0 ? (
-        <EmptyRow colSpan={6}>
-          <FilterableEmptyState
-            description="Folders organize the tables, stores, files, and jobs your team shares."
-            hasFilters
-            icon={Folder}
-            noun="folders"
-          />
-        </EmptyRow>
-      ) : (
-        visible.map((folder) => (
-          <FolderListRow
-            folder={folder}
-            key={folder.folderId}
-            onDialog={onDialog}
-          />
-        ))
-      )}
-    </FolderListTable>
+    <>
+      <FolderListTable
+        controls={list.controls}
+        kinds={list.kinds}
+        owners={list.owners}
+        selection={list.selection}
+      >
+        {list.folders.length === 0 ? (
+          <EmptyRow colSpan={folderTableColumns}>
+            <FilterableEmptyState
+              description="Folders organize the tables, stores, files, and jobs your team shares."
+              hasFilters
+              icon={Folder}
+              noun="folders"
+            />
+          </EmptyRow>
+        ) : (
+          list.folders.map((folder) => (
+            <FolderListRow
+              folder={folder}
+              key={folder.folderId}
+              onDialog={onDialog}
+              selection={list.selection}
+            />
+          ))
+        )}
+      </FolderListTable>
+      <FolderSelectionBar
+        actions={selectionActions}
+        folderId={undefined}
+        selection={list.selection}
+      />
+    </>
   )
 }

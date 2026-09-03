@@ -9,6 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { type CountedNoun } from "../count"
+import { type ResourceDragItem } from "../folders/drag/plan"
+import { DraggableTableRow } from "../folders/drag/row"
+import { useResourceRowDrag } from "../folders/drag/state"
 import { SelectionHeadCell, SelectionRowCell } from "../list/bar"
 import {
   facetEntries,
@@ -25,7 +28,8 @@ import { type FolderNames } from "./folders"
 // The list a table, a store, or a job page shows: a selection column, the
 // name, whatever columns the kind declares, and the row's menu, with the
 // facets and sorts riding the column heads and the empty state's offer
-// telling one kind's list from another's.
+// telling one kind's list from another's. Every row drags onto a folder;
+// a selected row takes the rest of the selection with it.
 
 export type MaterialListRow = { name: string }
 
@@ -50,6 +54,8 @@ export type MaterialListKind<Row> = {
   action: ReactNode
   columns: readonly MaterialColumn<Row>[]
   description: string
+  /** The row as a drag carries it. */
+  drag: (row: Row) => ResourceDragItem
   icon: LucideIcon
   identify: (row: Row) => string
   /** The row's menu, trigger and all. */
@@ -73,6 +79,7 @@ export function MaterialList<Row extends MaterialListRow>(
   props: MaterialListProps<Row>
 ) {
   const { config, controls, hasFilters, kind, rows, selection } = props
+  const selected = selection.selected.map(kind.drag)
 
   if (props.unauthorizedMessage !== undefined) {
     return (
@@ -104,7 +111,12 @@ export function MaterialList<Row extends MaterialListRow>(
         />
         <TableBody>
           {rows.map((row) => (
-            <MaterialListRow key={kind.identify(row)} row={row} {...props} />
+            <MaterialListRow
+              key={kind.identify(row)}
+              row={row}
+              selected={selected}
+              {...props}
+            />
           ))}
         </TableBody>
       </ConsoleListTable>
@@ -203,13 +215,21 @@ function MaterialListRow<Row extends MaterialListRow>({
   folders,
   kind,
   row,
+  selected,
   selection,
-}: MaterialListProps<Row> & { row: Row }) {
+}: MaterialListProps<Row> & {
+  row: Row
+  selected: readonly ResourceDragItem[]
+}) {
+  const drag = useResourceRowDrag(kind.drag(row), selected)
   const now = useNow(30_000)
   const context = { folders, now }
 
   return (
-    <TableRow data-state={selection.isSelected(row) ? "selected" : undefined}>
+    <DraggableTableRow
+      data-state={selection.isSelected(row) ? "selected" : undefined}
+      drag={drag}
+    >
       <SelectionRowCell
         label={`Select ${row.name}`}
         row={row}
@@ -220,6 +240,6 @@ function MaterialListRow<Row extends MaterialListRow>({
         <TableCell key={column.label}>{column.cell(row, context)}</TableCell>
       ))}
       <TableCell className="text-right">{kind.menu(row)}</TableCell>
-    </TableRow>
+    </DraggableTableRow>
   )
 }

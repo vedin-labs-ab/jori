@@ -8,25 +8,34 @@ import {
 } from "../../list/empty"
 import { ConsoleListContent } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
+import { type RowSelection } from "../../list/selection"
 import {
   type FolderContentsResult,
   type FolderDialogRequest,
   type FolderResource,
   type ListedFolder,
 } from "../types"
-import { useFolderListControls } from "./controls"
+import { FolderSelectionBar } from "./bar"
+import {
+  type FolderListEntry,
+  resourceDragItem,
+  useFolderListing,
+} from "./controls"
 import { ResourceListRow } from "./resource"
-import { FolderListRow, FolderListTable } from "./table"
+import { type FolderSelectionActions, splitSelection } from "./select"
+import { FolderListRow, FolderListTable, folderTableColumns } from "./table"
 
 /** A folder's listing: subfolders first, then the filed resources in one
- *  name-sorted run, in the shared full-bleed table. The states that replace
- *  the table sit in the padded content region instead. */
+ *  name-sorted run, in the shared full-bleed table, with the selection's
+ *  dock over it. The states that replace the table sit in the padded
+ *  content region instead. */
 export function FolderContents({
   contents,
   folderId,
   newMenu,
   onDialog,
   resourceMenu,
+  selectionActions,
 }: {
   contents: FolderContentsResult | undefined
   /** The folder being viewed — the one filed resources already sit in. */
@@ -36,11 +45,8 @@ export function FolderContents({
   onDialog: (request: FolderDialogRequest) => void
   /** A filed resource's own menu, trigger and all. */
   resourceMenu: (resource: FolderResource) => ReactNode
+  selectionActions: FolderSelectionActions
 }) {
-  const list = useFolderListControls(
-    contents?.status === "ready" ? contents : { folders: [], resources: [] }
-  )
-
   if (contents === undefined) {
     return (
       <ConsoleListContent>
@@ -78,19 +84,61 @@ export function FolderContents({
   }
 
   return (
-    <FolderListTable
-      controls={list.controls}
-      kinds={list.kinds}
-      owners={list.owners}
-    >
-      <FolderContentRows
+    <FolderListing
+      folderId={folderId}
+      folders={contents.folders}
+      // Keyed on the folder: a selection is of this listing, and does
+      // not follow the person into the next folder they open.
+      key={folderId}
+      onDialog={onDialog}
+      resourceMenu={resourceMenu}
+      resources={contents.resources}
+      selectionActions={selectionActions}
+    />
+  )
+}
+
+/** The table and the dock over its selection, for a folder with contents. */
+function FolderListing({
+  folderId,
+  folders,
+  onDialog,
+  resourceMenu,
+  resources,
+  selectionActions,
+}: {
+  folderId: string
+  folders: readonly ListedFolder[]
+  onDialog: (request: FolderDialogRequest) => void
+  resourceMenu: (resource: FolderResource) => ReactNode
+  resources: readonly FolderResource[]
+  selectionActions: FolderSelectionActions
+}) {
+  const list = useFolderListing({ folders, resources })
+
+  return (
+    <>
+      <FolderListTable
+        controls={list.controls}
+        kinds={list.kinds}
+        owners={list.owners}
+        selection={list.selection}
+      >
+        <FolderContentRows
+          folderId={folderId}
+          folders={list.folders}
+          onDialog={onDialog}
+          resourceMenu={resourceMenu}
+          resources={list.resources}
+          selection={list.selection}
+        />
+      </FolderListTable>
+      <FolderSelectionBar
+        actions={selectionActions}
         folderId={folderId}
-        folders={list.narrow(contents.folders)}
-        onDialog={onDialog}
-        resourceMenu={resourceMenu}
-        resources={list.narrow(contents.resources)}
+        selection={list.selection}
       />
-    </FolderListTable>
+    </>
   )
 }
 
@@ -102,16 +150,22 @@ function FolderContentRows({
   onDialog,
   resourceMenu,
   resources,
+  selection,
 }: {
   folderId: string
   folders: ListedFolder[]
   onDialog: (request: FolderDialogRequest) => void
   resourceMenu: (resource: FolderResource) => ReactNode
   resources: FolderResource[]
+  selection: RowSelection<FolderListEntry>
 }) {
+  const selected = splitSelection(selection.selected).resources.map(
+    (resource) => resourceDragItem(resource, folderId)
+  )
+
   if (folders.length === 0 && resources.length === 0) {
     return (
-      <EmptyRow colSpan={6}>
+      <EmptyRow colSpan={folderTableColumns}>
         <FilterableEmptyState
           description="File tables, stores, files, and jobs here, or add a subfolder."
           hasFilters
@@ -129,6 +183,7 @@ function FolderContentRows({
           folder={folder}
           key={folder.folderId}
           onDialog={onDialog}
+          selection={selection}
         />
       ))}
       {resources.map((resource) => (
@@ -137,6 +192,8 @@ function FolderContentRows({
           key={resource.id}
           menu={resourceMenu(resource)}
           resource={resource}
+          selected={selected}
+          selection={selection}
         />
       ))}
     </>

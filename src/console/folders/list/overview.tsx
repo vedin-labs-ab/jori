@@ -14,6 +14,7 @@ import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
 import { FolderDialogs } from "../manage"
 import { FolderUsageHint } from "../usage/hint"
+import { useFolderSelectionActions } from "./select"
 
 /** The folder tree's landing page: the root folders in the same full-bleed
  *  table a folder's own page uses. The icon-collapsed sidebar links here —
@@ -30,6 +31,7 @@ function RootFolders({ organizationId }: { organizationId: string }) {
   const roots = useQuery(api.folders.console.roots, { organizationId })
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const create = () => setDialog({ type: "create" })
+  const selection = useFolderSelectionActions(organizationId)
 
   // The tree's root is not a folder, so its crumb is the surface name, the
   // one thing the whole tree can be asked about, and what all of it costs.
@@ -54,7 +56,12 @@ function RootFolders({ organizationId }: { organizationId: string }) {
           type="button"
         />
       </ConsoleHeaderActions>
-      <RootFolderList onCreate={create} onDialog={setDialog} roots={roots} />
+      <RootFolderList
+        onCreate={create}
+        onDialog={setDialog}
+        roots={roots}
+        selectionActions={selection.actions}
+      />
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
@@ -63,6 +70,7 @@ function RootFolders({ organizationId }: { organizationId: string }) {
         onDeleted={() => undefined}
         organizationId={organizationId}
       />
+      {selection.dialog}
     </ConsoleListLayout>
   )
 }

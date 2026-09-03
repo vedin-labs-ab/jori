@@ -157,12 +157,14 @@ function FolderRowLink({
   )
 }
 
-/** Drag styling for a row: the source dims, the hovered valid target takes
- *  the sidebar accent, plain hover goes quiet while a drag runs (passing
+/** Drag styling for a row: the whole row is the handle, so it offers the
+ *  open hand; the source dims, the hovered valid target takes the sidebar
+ *  accent, plain hover goes quiet while a drag runs (passing
  *  over a row is not acting on it), and a landed move fades the row in
  *  where it settled — unless the user prefers reduced motion. */
 function rowDragClasses(drag: FolderRowDrag) {
   return cn(
+    "cursor-grab",
     drag.isDragActive &&
       !drag.isDropTarget &&
       "hover:bg-transparent hover:text-current",

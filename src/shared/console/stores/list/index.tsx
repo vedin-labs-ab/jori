@@ -1,6 +1,7 @@
 import { Database, Plus } from "lucide-react"
 import { type ComponentProps } from "react"
 import { Button } from "@/components/ui/button"
+import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -47,6 +48,13 @@ export function StoresToolbar({
 
 const identify = (store: StoreSummary) => store.storeId
 
+const drag = (store: StoreSummary): ResourceDragItem => ({
+  type: "store",
+  id: store.storeId,
+  name: store.name,
+  folderId: store.folderId,
+})
+
 const columns = materialColumns<StoreSummary>([
   measureColumn("Properties", "properties", (store) => (
     <StorePropertiesCell store={store} />
@@ -82,6 +90,7 @@ export function StoreList({
         columns,
         description:
           "JSON documents Jori and your team keep state in appear here.",
+        drag,
         icon: Database,
         identify,
         menu: materialRowMenu(

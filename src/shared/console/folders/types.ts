@@ -94,22 +94,46 @@ export function moveTarget(
   }
 }
 
-/** What the move dialog moves: a folder re-parents through `move`, filed
- *  resources — one or a bulk selection — re-file through `file`. */
-export type MoveSubject =
-  | { kind: "folder"; folderId: string; name: string; parentId?: string }
-  | { kind: "resources"; resources: MoveResourceTarget[] }
+/** A folder as the move dialog sees it: what to re-parent, plus where it
+ *  currently sits so the picker can mark it. */
+export type MoveFolderTarget = {
+  folderId: string
+  name: string
+  parentId?: string
+}
+
+/** What the move dialog moves: folders re-parent through `move`, filed
+ *  resources re-file through `file` — one row from a menu or a drag, or a
+ *  whole selection of either or both. */
+export type MoveSubject = {
+  folders: MoveFolderTarget[]
+  resources: MoveResourceTarget[]
+}
+
+export function folderSubject(
+  folder: Pick<ManagedFolder, "folderId" | "name" | "parentId">
+): MoveSubject {
+  const { folderId, name, parentId } = folder
+
+  return { folders: [{ folderId, name, parentId }], resources: [] }
+}
+
+export function resourceSubject(resources: MoveResourceTarget[]): MoveSubject {
+  return { folders: [], resources }
+}
+
+export function subjectSize(subject: MoveSubject) {
+  return subject.folders.length + subject.resources.length
+}
 
 /** How a move names its subject: quoted for a single item, a count for a
  *  bulk selection. */
 export function subjectName(subject: MoveSubject) {
-  if (subject.kind === "folder") {
-    return `"${subject.name}"`
-  }
+  const [first] = [...subject.folders, ...subject.resources]
 
-  return subject.resources.length === 1
-    ? `"${subject.resources[0].name}"`
-    : `${subject.resources.length} items`
+  return subjectSize(subject) === 1 && first !== undefined
+    ? `"${first.name}"`
+    : `${subjectSize(subject)} items`
 }
 
 /** What the folder surfaces can create in place, each through the same

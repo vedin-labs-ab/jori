@@ -8,40 +8,51 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { countLabel } from "../../count"
+import { SelectionHeadCell, SelectionRowCell } from "../../list/bar"
 import { type FacetEntry, type ListControls } from "../../list/controls"
 import { ConsoleListTable } from "../../list/frame"
 import { FilterHead, SortHead } from "../../list/head"
+import { type RowSelection } from "../../list/selection"
 import { MaterialMeasureCell } from "../../materials/cells/measure"
 import { MaterialOwnerCell } from "../../materials/cells/owner"
 import { folderIcon } from "../../materials/folders"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
+import { DraggableTableRow } from "../drag/row"
 import { useFolderRowDrag } from "../drag/state"
 import { FolderRowMenu } from "../menu"
 import { type FolderDialogRequest, type ListedFolder } from "../types"
-import { nameLinkClassName, rowDragClasses } from "./style"
+import { type FolderListEntry } from "./controls"
+import { nameLinkClassName } from "./style"
+
+/** How many columns the table spans, for a row that stands in for all. */
+export const folderTableColumns = 7
 
 /** The full-bleed table both folder surfaces share: the /folders overview
- *  lists the root folders, a folder's page its contents. Identity columns
- *  lead — what a row is, and whose it is — the measures follow, and the
- *  last column carries every row's own menu. Cells hold a fixed height so
- *  the menu button cannot make one row taller than its neighbours. */
+ *  lists the root folders, a folder's page its contents. The selection
+ *  column leads, then identity — what a row is, and whose it is — the
+ *  measures follow, and the last column carries every row's own menu.
+ *  Cells hold a fixed height so the menu button cannot make one row
+ *  taller than its neighbours. */
 export function FolderListTable({
   children,
   controls,
   kinds,
   owners,
+  selection,
 }: {
   children: ReactNode
   controls: ListControls
   kinds: FacetEntry[]
   owners: FacetEntry[]
+  selection: RowSelection<FolderListEntry>
 }) {
   return (
     <ConsoleListTable className="[&_td]:h-10">
       <TableHeader>
         <TableRow>
+          <SelectionHeadCell selection={selection} />
           <SortHead controls={controls} label="Name" sortKey="name" />
           <FilterHead controls={controls} facets={kinds} label="Kind" />
           <FilterHead controls={controls} facets={owners} label="Owner" />
@@ -56,29 +67,32 @@ export function FolderListTable({
 }
 
 /** One folder row, wherever folders list: it links to the folder's page
- *  and drags like a sidebar row. A dotted icon marks a folder holding
- *  anything, matching the sidebar tree's cue, and the Owner cell shows
- *  whoever made it. */
+ *  and drags like a sidebar row — alone, never as part of a selection. A
+ *  dotted icon marks a folder holding anything, matching the sidebar
+ *  tree's cue, and the Owner cell shows whoever made it. */
 export function FolderListRow({
   folder,
   onDialog,
+  selection,
 }: {
   folder: ListedFolder
   onDialog: (request: FolderDialogRequest) => void
+  selection: RowSelection<FolderListEntry>
 }) {
   const drag = useFolderRowDrag("contents", folder.folderId, folder.name)
   const now = useNow(30_000)
   const FolderIcon = folderIcon(folder.hasContents)
 
   return (
-    <TableRow
-      {...drag.attributes}
-      {...drag.listeners}
-      className={rowDragClasses(drag)}
-      onClickCapture={drag.onClickCapture}
-      onPointerDownCapture={drag.onPointerDownCapture}
-      ref={drag.setNodeRef}
+    <DraggableTableRow
+      data-state={selection.isSelected(folder) ? "selected" : undefined}
+      drag={drag}
     >
+      <SelectionRowCell
+        label={`Select ${folder.name}`}
+        row={folder}
+        selection={selection}
+      />
       <TableCell>
         <ConsoleLink
           className={nameLinkClassName}
@@ -105,7 +119,7 @@ export function FolderListRow({
       <TableCell className="text-right">
         <FolderRowMenu folder={folder} onDialog={onDialog} />
       </TableCell>
-    </TableRow>
+    </DraggableTableRow>
   )
 }
 

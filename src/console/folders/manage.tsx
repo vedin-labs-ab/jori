@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { FolderNameDialog } from "@/shared/console/folders/dialogs/name"
 import {
   type FolderDialogRequest,
+  folderSubject,
   type ManagedFolder,
 } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
@@ -53,14 +54,7 @@ export function FolderDialogs({
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
         subject={
-          dialog?.type === "move"
-            ? {
-                kind: "folder",
-                folderId: dialog.folder.folderId,
-                name: dialog.folder.name,
-                parentId: dialog.folder.parentId,
-              }
-            : undefined
+          dialog?.type === "move" ? folderSubject(dialog.folder) : undefined
         }
       />
       <DeleteFolder

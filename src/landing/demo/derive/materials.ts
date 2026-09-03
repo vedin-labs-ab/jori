@@ -7,6 +7,7 @@ import { type FileDetail, type FileRow } from "@/shared/console/files/types"
 import {
   type MoveResourceTarget,
   type MoveSubject,
+  resourceSubject,
 } from "@/shared/console/folders/types"
 import {
   type StoreDetail,
@@ -169,5 +170,5 @@ export function materialMoveTarget(material: DemoMaterial): MoveResourceTarget {
 
 /** A material on its own as the move dialog's subject. */
 export function materialMoveSubject(material: DemoMaterial): MoveSubject {
-  return { kind: "resources", resources: [materialMoveTarget(material)] }
+  return resourceSubject([materialMoveTarget(material)])
 }

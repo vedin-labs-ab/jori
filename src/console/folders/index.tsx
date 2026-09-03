@@ -11,6 +11,7 @@ import { CreationDialogs } from "./create/dialogs"
 import { FolderFrame, type FramedFolder } from "./frame"
 import { useFolderResourceActions } from "./list/actions"
 import { ResourceRowMenu } from "./list/menu"
+import { useFolderSelectionActions } from "./list/select"
 
 /** A folder's page: everything filed here. */
 export function FolderPage({ folderId }: { folderId: string }) {
@@ -33,6 +34,7 @@ function FolderContentsView({ framed }: { framed: FramedFolder }) {
     folder,
     organizationId,
   })
+  const selection = useFolderSelectionActions(organizationId)
 
   return (
     <>
@@ -52,6 +54,7 @@ function FolderContentsView({ framed }: { framed: FramedFolder }) {
         resourceMenu={(resource) => (
           <ResourceRowMenu actions={resources.actions} resource={resource} />
         )}
+        selectionActions={selection.actions}
       />
       <CreationDialogs
         onClose={() => setCreation(undefined)}
@@ -63,6 +66,7 @@ function FolderContentsView({ framed }: { framed: FramedFolder }) {
         }
       />
       {resources.dialogs}
+      {selection.dialog}
     </>
   )
 }

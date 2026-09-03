@@ -19,7 +19,7 @@ export function TablePage({ tableId }: { tableId: string }) {
   return (
     <>
       <TableGrid rows={rows} table={table} />
-      <CollectionTitle material={material} />
+      <CollectionTitle material={material} table={table} />
     </>
   )
 }
