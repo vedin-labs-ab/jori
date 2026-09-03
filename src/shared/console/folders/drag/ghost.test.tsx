@@ -39,13 +39,15 @@ test("a pile fronts the first row, counts the rest, and fans two behind", () => 
     behind.every((card) => card.getAttribute("aria-hidden") === "true")
   ).toBe(true)
 
+  // Deepest first in the DOM, so each card paints under the one in front
+  // of it: the furthest turns furthest and fades most.
   expect(behind.map((card) => card.textContent)).toEqual([
-    "Leads",
     "report.pdf",
+    "Leads",
   ])
-  expect(behind[0].className).toContain("-rotate-3")
-  expect(behind[1].className).toContain("-rotate-6")
-  expect(behind[0].className).toContain("opacity-90")
-  expect(behind[1].className).toContain("opacity-80")
+  expect(behind[0].className).toContain("-rotate-6")
+  expect(behind[0].className).toContain("opacity-80")
+  expect(behind[1].className).toContain("-rotate-3")
+  expect(behind[1].className).toContain("opacity-90")
   expect(screen.queryByText("Digest")).toBeNull()
 })

@@ -29,18 +29,21 @@ export function DragGhost({ payload }: { payload: DragPayload }) {
 
   return (
     <div className="relative motion-safe:scale-105">
-      {behind.map((item, index) => (
-        <GhostCard
-          aria-hidden
-          className={cn(
-            "absolute inset-0 w-full origin-left",
-            pileLayers[index]
-          )}
-          data-ghost="behind"
-          item={item}
-          key={item.key}
-        />
-      ))}
+      {/* Deepest first: siblings paint in order, so the furthest card has
+          to go down before the ones in front of it, or it covers them and
+          the pile reads back to front. */}
+      {behind
+        .map((item, depth) => ({ item, layer: pileLayers[depth] }))
+        .reverse()
+        .map(({ item, layer }) => (
+          <GhostCard
+            aria-hidden
+            className={cn("absolute inset-0 w-full origin-left", layer)}
+            data-ghost="behind"
+            item={item}
+            key={item.key}
+          />
+        ))}
       <GhostCard className="relative" item={front}>
         {others > 0 ? (
           <span className="shrink-0 text-muted-foreground">+{others}</span>
