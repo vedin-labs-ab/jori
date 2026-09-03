@@ -41,7 +41,7 @@ export const step = internalAction({
     const { OpenRouterModel } = await import("../model/chat")
 
     await runModelTurn({
-      model: new OpenRouterModel(),
+      model: new OpenRouterModel(loaded.run._id),
       prompt: buildRuntimePrompt(
         loaded.input,
         loaded.activeSurface,

@@ -26,6 +26,11 @@ const defaultReasoningEffort = "medium"
 type ModelSettings = Pick<ChatRequest, "provider" | "reasoning">
 
 export class OpenRouterModel implements ModelRuntime {
+  /** The session is the run: OpenRouter routes every call that shares it to
+   *  the same provider, so the prompt prefix cached by one turn is there for
+   *  the next. */
+  constructor(private readonly session: string) {}
+
   async complete(args: {
     firstTurn: boolean
     messages: ModelMessage[]
@@ -34,6 +39,7 @@ export class OpenRouterModel implements ModelRuntime {
     const result = await sendOpenRouterChat({
       messages: toChatMessages(args.messages),
       model: joriModel,
+      sessionId: this.session,
       // An empty tool list is left out rather than sent: providers differ on
       // whether an empty array is a request without tools or a bad request.
       ...(args.tools.length === 0
