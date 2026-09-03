@@ -1,8 +1,7 @@
 import { type JsonSchemaObject } from "@contracts/schema/validate"
-import { lazy, type ReactNode, Suspense, useEffect, useRef } from "react"
+import { lazy, Suspense, useCallback, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import { FieldError } from "@/components/ui/field"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
@@ -10,12 +9,12 @@ import {
   conflictMessage,
   isVersionConflict,
 } from "@/shared/console/materials/conflict"
+import { type SaveState } from "@/shared/console/materials/save"
 import { scrollFade } from "@/shared/fade"
 import { type StoreDetail } from "../types"
 import { useValueAutosave, type ValueSaveOutcome } from "./autosave"
 import { ValueFields } from "./fields"
 import { useValueEditor, type ValueEditor, type ValueEditorView } from "./state"
-import { StoreToolbar } from "./toolbar"
 
 /** How the store's value is written: the whole value, against the
  *  version it was edited from. */
@@ -33,16 +32,19 @@ const Mirror = lazy(() =>
 )
 
 /** The store value editor is the page: a schema-driven form (with the
- *  JSON mirrored one toggle away) that saves itself — debounced,
- *  validated first, wholesale against the version it last saw. It renders
- *  the store toolbar too, so the view toggle sits in the header and the
- *  meta carries the save status; there is nothing to press. */
+ *  JSON mirrored one view away) that saves itself — debounced, validated
+ *  first, wholesale against the version it last saw. There is nothing to
+ *  press; the page hangs the view choice and the save signal off the
+ *  store's name in the breadcrumb. */
 export function ValueEditorSection({
+  onState,
   onWrite,
   schema,
   store,
-  tools,
 }: {
+  /** The view the value is in, how to change it, and what the autosave is
+   *  doing, for the page's own chrome. */
+  onState: (state: ValueEditorState) => void
   /** Writes the value wholesale against the version the editor last saw;
    *  a rejection that is a version conflict reseeds from upstream. */
   onWrite: ValueWrite
@@ -50,8 +52,6 @@ export function ValueEditorSection({
    *  renders for a store that has one. */
   schema: JsonSchemaObject
   store: StoreDetail
-  /** Toolbar actions after the view toggle: schema, copy. */
-  tools: ReactNode
 }) {
   const editor = useValueEditor({
     hasValue: store.version > 0,
@@ -71,22 +71,46 @@ export function ValueEditorSection({
   const autosave = useValueAutosave(() => performRef.current())
 
   useExternalReseed(store, editor, versionRef, lastSavedRef, autosave.isBusy)
+  usePublishedState(onState, {
+    saveStatus: autosave.status,
+    switchView: useStable(editor.switchView),
+    view: editor.form === undefined ? undefined : editor.state.view,
+  })
 
-  return (
-    <>
-      <StoreToolbar
-        saveStatus={autosave.status}
-        store={store}
-        tools={
-          <>
-            <ViewToggle editor={editor} />
-            {tools}
-          </>
-        }
-      />
-      <ValueBody editor={editor} onEdit={autosave.change} />
-    </>
-  )
+  return <ValueBody editor={editor} onEdit={autosave.change} />
+}
+
+/** What the page's chrome needs from the editor. A store whose form the
+ *  widgets cannot build has no view to choose, so it reports none. */
+export type ValueEditorState = {
+  saveStatus: SaveState
+  switchView: (view: ValueEditorView) => void
+  view?: ValueEditorView
+}
+
+/** One identity for a function the editor rebuilds every render, so the
+ *  page gets a report only when the state it carries changes. */
+function useStable<Arguments extends unknown[]>(
+  callback: (...args: Arguments) => void
+) {
+  const ref = useRef(callback)
+
+  ref.current = callback
+
+  return useCallback((...args: Arguments) => ref.current(...args), [])
+}
+
+/** Hands the page the editor's state as it changes, without making the
+ *  editor re-render on its own report. */
+function usePublishedState(
+  onState: (state: ValueEditorState) => void,
+  state: ValueEditorState
+) {
+  const { saveStatus, switchView, view } = state
+
+  useEffect(() => {
+    onState({ saveStatus, switchView, view })
+  }, [onState, saveStatus, switchView, view])
 }
 
 /** One save attempt: validate, skip a buffer already at the saved value —
@@ -132,26 +156,6 @@ async function saveValue({
 
     throw error
   }
-}
-
-/** Form/Code in the toolbar, hidden while there is no form to toggle to:
- *  a schema the widgets cannot represent is code, not a choice. */
-function ViewToggle({ editor }: { editor: ValueEditor }) {
-  if (editor.form === undefined) {
-    return null
-  }
-
-  return (
-    <Tabs
-      onValueChange={(view) => editor.switchView(view as ValueEditorView)}
-      value={editor.state.view}
-    >
-      <TabsList className="!h-7">
-        <TabsTrigger value="form">Form</TabsTrigger>
-        <TabsTrigger value="code">Code</TabsTrigger>
-      </TabsList>
-    </Tabs>
-  )
 }
 
 /** A write that landed elsewhere — another tab, an agent — reseeds the

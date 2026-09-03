@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { copyText } from "./text"
 
 const copyResetDelayMs = 1200
 
@@ -91,13 +92,11 @@ export function CopyButton({
               return
             }
 
-            const text =
-              typeof value === "string" ? Promise.resolve(value) : value()
-
-            void text
-              .then((resolved) => navigator.clipboard.writeText(resolved))
-              .then(() => setHasCopied(true))
-              .catch(() => undefined)
+            void copyText(value).then((copied) => {
+              if (copied) {
+                setHasCopied(true)
+              }
+            })
           }}
           size="icon-xs"
           type="button"

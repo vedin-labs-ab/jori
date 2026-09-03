@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,13 +19,19 @@ type MaterialMenuProps = MaterialMenuActions & {
 }
 
 /** The material's menu for its breadcrumb name on detail pages; the shell
- *  owns the trigger, so this publishes the content only. */
-export function MaterialTitleMenu(props: MaterialMenuProps) {
+ *  owns the trigger, so this publishes the content only. A page whose
+ *  own tools live here too hands them in as the lead, ahead of the
+ *  actions every material shares. */
+export function MaterialTitleMenu({
+  lead,
+  ...props
+}: MaterialMenuProps & { lead?: ReactNode }) {
   const confirm = useRemoveConfirmation(props)
 
   return (
     <>
       <DropdownMenuContent align="start" className={menuWidth}>
+        {lead}
         <MaterialMenuItems {...props} onRemove={confirm.request} />
       </DropdownMenuContent>
       {confirm.dialog}

@@ -1,67 +1,81 @@
 import { Braces, Database, Plus } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useCallback, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { JsonBlock } from "@/shared/console/code"
-import { CopyButton } from "@/shared/console/copy"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { ConsoleListContent } from "@/shared/console/list/frame"
-import { formatJsonText } from "../json"
+import {
+  type MaterialBreadcrumb,
+  useMaterialTrail,
+} from "@/shared/console/materials/breadcrumb"
+import { SaveSignal } from "@/shared/console/materials/save"
+import { StoreMenuItems } from "../menu"
 import { type SchemaWrite, StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"
-import { ValueEditorSection, type ValueWrite } from "./editor"
-import { StoreToolbar } from "./toolbar"
+import {
+  ValueEditorSection,
+  type ValueEditorState,
+  type ValueWrite,
+} from "./editor"
 
-/** The store's value under the store toolbar. The editor IS the page —
- *  it renders the toolbar itself, so the view toggle and save status live
- *  in the header. A store the console does not edit — schemaless or
- *  archived — falls back to a read-only document under a plain
- *  toolbar. */
+/** The store's value as the whole page. The page's chrome hangs off the
+ *  store's name in the breadcrumb: the view the value is read in, the
+ *  schema, a copy, and the actions every material shares, which the host
+ *  supplies as the menu around this view's own items. A store the console
+ *  does not edit — schemaless or archived — reads as a document. */
 export function StoreValue({
+  crumb,
   onWriteSchema,
   onWriteValue,
   store,
+  titleMenu,
 }: {
+  /** Where the store lives, for the breadcrumb: the trail above its name. */
+  crumb?: Pick<MaterialBreadcrumb, "trail">
   /** Replaces the store's schema; null removes it. A rejection's message
    *  surfaces under the schema editor. */
   onWriteSchema: SchemaWrite
   onWriteValue: ValueWrite
   store: StoreDetail
+  /** The menu hung off the store's name, given this view's items to lead
+   *  with. */
+  titleMenu: (lead: ReactNode) => ReactNode
 }) {
   const [isSchemaOpen, setIsSchemaOpen] = useState(false)
-  const openSchema = () => setIsSchemaOpen(true)
-  const tools = (
-    <>
-      <ValueActionButton
-        icon={<Braces />}
-        label={store.schema === undefined ? "Add schema" : "Schema"}
-        onClick={openSchema}
+  const [editor, setEditor] = useState<ValueEditorState>()
+  const openSchema = useCallback(() => setIsSchemaOpen(true), [])
+  // An archived store refuses writes, so its schema builds no form.
+  const schema = store.archivedAt === undefined ? store.schema : undefined
+  const isEditable = schema !== undefined
+
+  useStoreCrumb({
+    crumb,
+    menu: titleMenu(
+      <StoreMenuItems
+        onSchema={openSchema}
+        onViewChange={editor?.switchView}
+        store={store}
+        view={isEditable ? editor?.view : undefined}
       />
-      <CopyButton label="value" value={formatJsonText(store.value)} />
-    </>
-  )
+    ),
+    saveStatus: isEditable ? editor?.saveStatus : undefined,
+    store,
+  })
 
   return (
     <>
-      {store.schema !== undefined && store.archivedAt === undefined ? (
+      {schema !== undefined ? (
         <ValueEditorSection
           key={store.storeId}
+          onState={setEditor}
           onWrite={onWriteValue}
-          schema={store.schema}
+          schema={schema}
           store={store}
-          tools={tools}
         />
       ) : (
-        <>
-          <StoreToolbar store={store} tools={tools} />
-          <ConsoleListContent>
-            <ReadOnlyValue onAddSchema={openSchema} store={store} />
-          </ConsoleListContent>
-        </>
+        <ConsoleListContent>
+          <ReadOnlyValue onAddSchema={openSchema} store={store} />
+        </ConsoleListContent>
       )}
       <StoreSchemaDialog
         onOpenChange={setIsSchemaOpen}
@@ -72,33 +86,30 @@ export function StoreValue({
   )
 }
 
-/** Icon-only toolbar action, in the CopyButton idiom: tooltip for sighted
- *  pointers, aria-label for everyone else. */
-function ValueActionButton({
-  icon,
-  label,
-  onClick,
+/** Publishes the store's crumb: its trail, its name with the menu hung
+ *  off it, and the save signal right after the name while a save is in
+ *  motion. */
+function useStoreCrumb({
+  crumb,
+  menu,
+  saveStatus,
+  store,
 }: {
-  icon: ReactNode
-  label: string
-  onClick: () => void
+  crumb: Pick<MaterialBreadcrumb, "trail"> | undefined
+  menu: ReactNode
+  saveStatus: ValueEditorState["saveStatus"] | undefined
+  store: StoreDetail
 }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          aria-label={label}
-          className="text-muted-foreground hover:text-foreground"
-          onClick={onClick}
-          size="icon-xs"
-          type="button"
-          variant="ghost"
-        >
-          {icon}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+  useMaterialTrail(
+    useMemo(
+      () => ({
+        ...crumb,
+        menu,
+        name: store.name,
+        suffix: <SaveSignal saveStatus={saveStatus} />,
+      }),
+      [crumb, menu, saveStatus, store.name]
+    )
   )
 }
 

@@ -6,25 +6,19 @@ import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
-import {
-  type MaterialBreadcrumb,
-  useMaterialTrail,
-} from "@/shared/console/materials/breadcrumb"
 import { menuWidth } from "@/shared/console/menu"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
-import { folderOf, folderTrail } from "../../derive/folders"
 import { fileRowOf } from "../../derive/materials"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import {
   type DemoFile,
-  type DemoMaterial,
   type DemoStore,
   type DemoTable,
 } from "../../fixtures/types"
-import { type DemoState } from "../../state/types"
 import { useDemoWorkspace } from "../../workspace"
+import { useMaterialCrumb } from "./crumb"
 
 // What every material page shares with the console's: the crumb that says
 // where the material lives, the menu the console hangs off its name, and
@@ -51,47 +45,59 @@ export function MaterialMissing({
   )
 }
 
-/** A table's or a store's name in the breadcrumb, with the menu the
- *  console gives one, and the dialogs the menu opens. Deleting leaves
- *  for the surface's list, the way the console does. */
-export function CollectionTitle({
-  material,
-}: {
-  material: DemoStore | DemoTable
-}) {
-  const { actions } = useDemoWorkspace()
-  const navigation = useContext(ConsoleNavigationContext)
+/** A table's name in the breadcrumb, with the menu the console gives
+ *  one, and the dialogs the menu opens. A store's view publishes its own
+ *  crumb, since its items lead the menu; it takes `CollectionMenu`. */
+export function CollectionTitle({ material }: { material: DemoTable }) {
   const [request, setRequest] = useState<MaterialRequest>()
-  const isTable = material.kind === "table"
 
   useMaterialCrumb(
     material,
     useMemo(
-      () => (
-        <MaterialTitleMenu
-          deleteDescription={
-            isTable ? tableDeleteDescription : storeDeleteDescription
-          }
-          isDeleting={false}
-          isRestoring={false}
-          material={{ name: material.name, archivedAt: undefined }}
-          noun={isTable ? "table" : "store"}
-          onAccess={() => setRequest({ kind: "access", material })}
-          onDelete={() => {
-            actions.removeMaterial(material.id)
-            navigation?.navigate(isTable ? "/tables" : "/stores")
-          }}
-          onEdit={() => setRequest({ kind: "edit", material })}
-          onMoveToFolder={() => setRequest({ kind: "move", material })}
-          onRestore={() => undefined}
-        />
-      ),
-      [actions, isTable, material, navigation]
+      () => <CollectionMenu material={material} onRequest={setRequest} />,
+      [material]
     )
   )
 
   return (
     <MaterialDialogs onClose={() => setRequest(undefined)} request={request} />
+  )
+}
+
+/** The menu the console hangs off a table's or a store's name. Deleting
+ *  leaves for the surface's list, the way the console does. */
+export function CollectionMenu({
+  lead,
+  material,
+  onRequest,
+}: {
+  lead?: ReactNode
+  material: DemoStore | DemoTable
+  onRequest: (request: MaterialRequest) => void
+}) {
+  const { actions } = useDemoWorkspace()
+  const navigation = useContext(ConsoleNavigationContext)
+  const isTable = material.kind === "table"
+
+  return (
+    <MaterialTitleMenu
+      deleteDescription={
+        isTable ? tableDeleteDescription : storeDeleteDescription
+      }
+      isDeleting={false}
+      isRestoring={false}
+      lead={lead}
+      material={{ name: material.name, archivedAt: undefined }}
+      noun={isTable ? "table" : "store"}
+      onAccess={() => onRequest({ kind: "access", material })}
+      onDelete={() => {
+        actions.removeMaterial(material.id)
+        navigation?.navigate(isTable ? "/tables" : "/stores")
+      }}
+      onEdit={() => onRequest({ kind: "edit", material })}
+      onMoveToFolder={() => onRequest({ kind: "move", material })}
+      onRestore={() => undefined}
+    />
   )
 }
 
@@ -136,41 +142,4 @@ export function FileTitle({ material }: { material: DemoFile }) {
   return (
     <MaterialDialogs onClose={() => setRequest(undefined)} request={request} />
   )
-}
-
-/** Publishes the material's crumb with the menu hung off its name. */
-function useMaterialCrumb(material: DemoMaterial, menu: ReactNode) {
-  const { state } = useDemoWorkspace()
-
-  useMaterialTrail(
-    useMemo(
-      () => ({ ...materialCrumb(state, material), menu }),
-      [material, menu, state]
-    )
-  )
-}
-
-/** The material's crumb: its folder's own trail when it is filed, so the
- *  page says where the material lives, and the surface's otherwise. */
-function materialCrumb(
-  state: DemoState,
-  material: DemoMaterial
-): MaterialBreadcrumb {
-  const folder =
-    material.folderId === undefined
-      ? undefined
-      : folderOf(state, material.folderId)
-
-  return {
-    name: material.name,
-    ...(folder === undefined
-      ? {}
-      : {
-          trail: folderTrail(state, folder).map((segment) => ({
-            name: segment.name,
-            params: { folderId: segment.folderId },
-            to: "/folders/$folderId",
-          })),
-        }),
-  }
 }

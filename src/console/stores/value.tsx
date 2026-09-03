@@ -1,4 +1,5 @@
 import { useMutation } from "convex/react"
+import { type ReactNode } from "react"
 import { type StoreDetail } from "@/shared/console/stores/types"
 import { StoreValue as StoreValueView } from "@/shared/console/stores/value/section"
 import { api } from "../../../convex/_generated/api"
@@ -9,9 +10,11 @@ import { api } from "../../../convex/_generated/api"
 export function StoreValue({
   organizationId,
   store,
+  titleMenu,
 }: {
   organizationId: string
   store: StoreDetail
+  titleMenu: (lead: ReactNode) => ReactNode
 }) {
   const writeValue = useMutation(api.stores.console.writeValue)
   const writeSchema = useMutation(api.stores.console.writeSchema)
@@ -30,6 +33,7 @@ export function StoreValue({
         })
       }
       store={store}
+      titleMenu={titleMenu}
     />
   )
 }
