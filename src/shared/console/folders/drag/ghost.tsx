@@ -15,9 +15,10 @@ const pileDepth = 2
 
 /** The decorative cards' place behind the front, per layer: how far each
  *  turns about the front card's left edge, lifting its right end, and how
- *  much it fades. Nothing here animates, so the turn holds under reduced
+ *  much it fades. One even step back per layer, from the front card's own
+ *  full strength. Nothing here animates, so the turn holds under reduced
  *  motion — it is what makes the cards behind visible at all. */
-const pileLayers = ["-rotate-3 opacity-85", "-rotate-6 opacity-70"]
+const pileLayers = ["-rotate-3 opacity-90", "-rotate-6 opacity-80"]
 
 type GhostItem = { key: string; name: string; icon: LucideIcon }
 
