@@ -1,8 +1,5 @@
 import { toolSurfaceLabel } from "@contracts/integrations"
-import {
-  getToolPermission,
-  summarizeToolCapabilities,
-} from "@contracts/permissions"
+import { summarizeToolCapabilities } from "@contracts/permissions"
 import { makeExecution } from "@/shared/console/runs/fixtures"
 import {
   type ExecutionDetail,
@@ -10,8 +7,9 @@ import {
   type ExecutionItem,
   type ExecutionSource,
 } from "@/shared/console/runs/types"
+import { toolCapability } from "@/shared/console/tools/model"
 import { demoId } from "../ids"
-import { demoTimezone } from "../jobs"
+import { demoTimezone, jobId } from "../jobs"
 
 // What a run is made of, built the way the console projects it: a source
 // with its surface and kind, facts with their icons, and the tools it was
@@ -30,6 +28,8 @@ type RunSpec = {
   source: ExecutionSource
   details: ExecutionDetail[]
   approval?: ExecutionItem["approval"]
+  /** The key of the job the run came from; its name is the run's title. */
+  job?: string
 }
 
 export function run(now: number, spec: RunSpec): ExecutionItem {
@@ -53,6 +53,8 @@ export function run(now: number, spec: RunSpec): ExecutionItem {
     endedAt,
     durationMs: endedAt === undefined ? undefined : spec.durationMs,
     source: spec.source,
+    job:
+      spec.job === undefined ? null : { id: jobId(spec.job), name: spec.title },
     trigger: spec.source.type === "job" ? "Schedule" : "Mention",
     details: spec.details,
     approval: spec.approval ?? null,
@@ -109,24 +111,13 @@ export function tools(
   const detailGroups = groups.map(([type, names]) => ({
     type,
     label: toolSurfaceLabel(type),
-    tools: names.map(capability),
+    tools: names.map(toolCapability),
   }))
 
   return {
     type: "tools",
     label: detailGroups.map(groupLabel).join(" · "),
     groups: detailGroups,
-  }
-}
-
-function capability(tool: string): ExecutionDetailTool {
-  const permission = getToolPermission(tool)
-
-  return {
-    access: permission?.access ?? "read",
-    description: permission?.description ?? "",
-    label: permission?.label ?? tool,
-    tool,
   }
 }
 

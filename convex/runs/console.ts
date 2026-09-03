@@ -27,6 +27,8 @@ export const page = query({
     audienceFilter: audienceFilterValidator,
     query: v.string(),
     organizationId: v.string(),
+    /** Set, the page is one job's runs alone. */
+    jobId: v.optional(v.id("jobs")),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
@@ -46,12 +48,7 @@ export const page = query({
     const rows: RunSummary[] = []
     let matchingIndex = 0
     let hasMore = false
-    const runs = ctx.db
-      .query("runs")
-      .withIndex("by_organization", (index) =>
-        index.eq("organizationId", args.organizationId)
-      )
-      .order("desc")
+    const runs = organizationRuns(ctx, args.organizationId, args.jobId)
 
     const shouldMatchSummary = needsSummary(
       args.approvalFilter,
@@ -107,6 +104,7 @@ export const stats = query({
     audienceFilter: audienceFilterValidator,
     query: v.string(),
     organizationId: v.string(),
+    jobId: v.optional(v.id("jobs")),
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
@@ -126,19 +124,15 @@ export const stats = query({
           normalizedQuery,
           personId,
           organizationId: args.organizationId,
+          jobId: args.jobId,
         }),
-        totalCount: await countRuns(ctx, args.organizationId, personId),
+        totalCount: await countRuns(ctx, args, personId),
       }
     }
 
     let filteredCount = 0
     let totalCount = 0
-    const runs = ctx.db
-      .query("runs")
-      .withIndex("by_organization", (index) =>
-        index.eq("organizationId", args.organizationId)
-      )
-      .order("desc")
+    const runs = organizationRuns(ctx, args.organizationId, args.jobId)
 
     for await (const run of runs) {
       if (!runVisibleToPerson(run, personId)) {
@@ -170,17 +164,32 @@ export const stats = query({
   },
 })
 
-async function countRuns(
+/** The organization's runs newest first, or one job's when asked. */
+function organizationRuns(
   ctx: QueryCtx,
   organizationId: string,
+  jobId: Id<"jobs"> | undefined
+) {
+  const runs = ctx.db.query("runs")
+  const indexed =
+    jobId === undefined
+      ? runs.withIndex("by_organization", (index) =>
+          index.eq("organizationId", organizationId)
+        )
+      : runs.withIndex("by_organization_and_job_and_created_at", (index) =>
+          index.eq("organizationId", organizationId).eq("job.id", jobId)
+        )
+
+  return indexed.order("desc")
+}
+
+async function countRuns(
+  ctx: QueryCtx,
+  args: { organizationId: string; jobId?: Id<"jobs"> },
   personId: Id<"persons"> | undefined
 ) {
   let count = 0
-  const runs = ctx.db
-    .query("runs")
-    .withIndex("by_organization", (index) =>
-      index.eq("organizationId", organizationId)
-    )
+  const runs = organizationRuns(ctx, args.organizationId, args.jobId)
 
   for await (const run of runs) {
     if (runVisibleToPerson(run, personId)) {

@@ -1,4 +1,5 @@
 import { usePaginatedQuery, useQuery } from "convex/react"
+import { type GenericId } from "convex/values"
 import {
   type MutableRefObject,
   useCallback,
@@ -17,23 +18,26 @@ import {
 import { api } from "../../../../convex/_generated/api"
 import { type PageTarget, useSeekTarget } from "./seek"
 
+/** What the page lists: the organization's runs under the Activity
+ *  page's filters, or one job's alone. */
+export type ExecutionQuery = {
+  approvalFilter: ApprovalFilter
+  audienceFilter: AudienceFilter
+  jobId?: string
+  organizationId: string
+  query: string
+  runFilter: RunFilter
+}
+
 export function useExecutionPagination(
-  organizationId: string,
-  runFilter: RunFilter,
-  approvalFilter: ApprovalFilter,
-  audienceFilter: AudienceFilter,
-  query: string,
+  executionQuery: ExecutionQuery,
   target?: PageTarget
 ) {
+  const { approvalFilter, audienceFilter, runFilter } = executionQuery
   const [pageIndex, setPageIndex] = useState(0)
   const advanceAfterLoad = useRef(false)
-  const { normalizedQuery, rows, runs, stats } = useExecutionPageData({
-    approvalFilter,
-    query,
-    runFilter,
-    audienceFilter,
-    organizationId,
-  })
+  const { normalizedQuery, rows, runs, stats } =
+    useExecutionPageData(executionQuery)
   const paging = derivePaging({ pageIndex, rows, stats, status: runs.status })
   const { canLoadMore, canUseNextLoadedPage, isLoadingMore, visibleRows } =
     paging
@@ -150,27 +154,30 @@ function usePageNavigation({
 
 function useExecutionPageData({
   approvalFilter,
+  audienceFilter,
+  jobId,
+  organizationId,
   query,
   runFilter,
-  audienceFilter,
-  organizationId,
-}: {
-  approvalFilter: ApprovalFilter
-  query: string
-  runFilter: RunFilter
-  audienceFilter: AudienceFilter
-  organizationId: string
-}) {
+}: ExecutionQuery) {
   const normalizedQuery = query.trim().toLowerCase()
   const queryArgs = useMemo(
     () => ({
       approvalFilter,
+      audienceFilter,
+      jobId: jobId as GenericId<"jobs"> | undefined,
+      organizationId,
       query: normalizedQuery,
       runFilter,
-      audienceFilter,
-      organizationId,
     }),
-    [approvalFilter, normalizedQuery, runFilter, audienceFilter, organizationId]
+    [
+      approvalFilter,
+      audienceFilter,
+      jobId,
+      normalizedQuery,
+      organizationId,
+      runFilter,
+    ]
   )
   const runs = usePaginatedQuery(api.runs.console.page, queryArgs, {
     initialNumItems: pageSize,

@@ -25,8 +25,10 @@ import {
   CodeBlockBody,
   DetailFrame,
   type DetailIcon,
+  DetailLine,
   DetailLink,
   DetailRow,
+  DetailValue,
 } from "../details"
 import { RunSectionLabel } from "../section"
 import { type ExecutionDetail, type ExecutionDetailType } from "../types"
@@ -146,14 +148,7 @@ function InlineFactContent({
   compact: boolean
 }) {
   return (
-    <div
-      className={cn(
-        "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs",
-        !compact && "py-1.5"
-      )}
-    >
-      {children}
-    </div>
+    <DetailLine className={cn(!compact && "py-1.5")}>{children}</DetailLine>
   )
 }
 
@@ -229,11 +224,7 @@ function FactValue({ detail }: { detail: ExecutionDetail }) {
   }
 
   if (detail.url === undefined) {
-    return (
-      <span className="min-w-0 max-w-full truncate font-medium text-foreground">
-        {detail.label}
-      </span>
-    )
+    return <DetailValue>{detail.label}</DetailValue>
   }
 
   return <DetailLink href={detail.url}>{detail.label}</DetailLink>

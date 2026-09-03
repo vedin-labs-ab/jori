@@ -7,7 +7,7 @@ import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type FolderId } from "../fixtures/types"
 import { type DemoLocation } from "../navigation"
 import { FolderPage, RootFoldersPage } from "./folders"
-import { JobsPage } from "./jobs"
+import { JobsPage } from "./jobs/list"
 import { FilesPage, StoresPage, TablesPage } from "./lists"
 import { TablePage } from "./materials/table"
 import { PlatformPage } from "./platform"
@@ -15,13 +15,16 @@ import { RunsPage } from "./runs"
 import { UsagePage } from "./usage"
 
 // A store's editor and a file's viewer carry CodeMirror and the schema
-// builder, which dwarf the rest of the demo, so their pages arrive only
-// when a link leads to one.
+// builder, and a job's page the brief's markdown codec, which dwarf the
+// rest of the demo, so their pages arrive only when a link leads to one.
 const StorePage = lazy(async () => ({
   default: (await import("./materials/store")).StorePage,
 }))
 const FilePage = lazy(async () => ({
   default: (await import("./materials/file")).FilePage,
+}))
+const JobPage = lazy(async () => ({
+  default: (await import("./jobs/detail")).JobPage,
 }))
 
 /** Each material surface: its list, and the page for one of its own. */
@@ -30,6 +33,7 @@ const materialSurfaces: Record<
   { List: () => ReactElement; Page: (props: { id: string }) => ReactElement }
 > = {
   files: { List: FilesPage, Page: ({ id }) => <FilePage fileId={id} /> },
+  jobs: { List: JobsPage, Page: ({ id }) => <JobPage jobId={id} /> },
   stores: { List: StoresPage, Page: ({ id }) => <StorePage storeId={id} /> },
   tables: { List: TablesPage, Page: ({ id }) => <TablePage tableId={id} /> },
 }
@@ -58,10 +62,6 @@ export function DemoPage({
 
   if (surface === "runs") {
     return <RunsPage openRunId={openRunId} />
-  }
-
-  if (surface === "jobs") {
-    return <JobsPage />
   }
 
   const material = materialSurfaces[surface]

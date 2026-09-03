@@ -2,6 +2,7 @@ import { type ReactNode } from "react"
 import { ErrorDetail, ResultDetail } from "../details"
 import { type ExecutionItem } from "../types"
 import { ExecutionFacts } from "./facts"
+import { JobFact } from "./job"
 import { RunRowBody } from "./layout"
 import { TaskDetail } from "./task"
 
@@ -26,6 +27,7 @@ export function ExpandedExecution({
   return (
     <RunRowBody>
       <TaskDetail sourceUrl={execution.source.url} task={execution.task} />
+      {execution.job === null ? null : <JobFact job={execution.job} />}
       <ExecutionFacts details={execution.details} />
       {execution.approvals.length > 0 ? approvals : null}
       {execution.offers.length > 0 ? offers : null}

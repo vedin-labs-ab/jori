@@ -1,12 +1,22 @@
 import { type Doc } from "../_generated/dataModel"
+import { personDisplay } from "../persons/names"
 import { executesAsOrganization } from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Integration, integrationLabels } from "../shared/integrations"
-import { type JobAccess, resolveToolAccessLevel } from "./access"
+import { type JobAccess, jobOwner, resolveToolAccessLevel } from "./access"
 
 export async function toJobDisplay(ctx: QueryLikeCtx, job: Doc<"jobs">) {
+  const ownerId = jobOwner(job)
+  const owner =
+    ownerId === undefined ? undefined : await personDisplay(ctx, ownerId)
+
   return {
     id: job._id,
+    // Who the job answers to, for the list's Owner column and the page's
+    // "Created by": the person it runs as, else whoever made it.
+    ownerId,
+    ownerName: owner?.name,
+    ownerImage: owner?.image,
     key: job.key,
     name: job.name,
     instructions: job.instructions,

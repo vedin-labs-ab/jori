@@ -64,17 +64,21 @@ export function getPageTitle(pathname: string) {
   )
 }
 
-// The material surfaces whose member detail pages live one level below the
-// list, so the header names them with a trail instead of a single heading.
-const materialSurfacePaths = ["/tables", "/stores", "/files"] as const
+// The surfaces whose member detail pages live one level below the list,
+// so the header names them with a trail instead of a single heading, each
+// with the noun a tab wears before the member's own name has loaded.
+const materialNouns: Record<string, string> = {
+  "/files": "File",
+  "/jobs": "Job",
+  "/stores": "Store",
+  "/tables": "Table",
+}
 
 /** The surface a material detail page belongs to, when the path is one;
  *  list pages and non-material surfaces stay a single heading. */
 export function getMaterialSurface(pathname: string) {
   return consoleSurfaces.find(
-    (item) =>
-      materialSurfacePaths.some((path) => path === item.to) &&
-      pathname.startsWith(`${item.to}/`)
+    (item) => item.to in materialNouns && pathname.startsWith(`${item.to}/`)
   )
 }
 
@@ -97,7 +101,11 @@ export function isMaterialPage(pathname: string) {
  * the right, and "Activity" is the half worth keeping.
  */
 export function consoleDocumentTitle(pathname: string) {
-  return `${getPageTitle(pathname)} · Jori`
+  const surface = getMaterialSurface(pathname)
+  const page =
+    surface === undefined ? getPageTitle(pathname) : materialNouns[surface.to]
+
+  return `${page} · Jori`
 }
 
 export function isNavigationActive(pathname: string, to: string) {

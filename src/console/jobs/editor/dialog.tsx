@@ -1,14 +1,13 @@
-import { useQuery } from "convex/react"
-import { lazy, useEffect, useMemo } from "react"
+import { lazy, useEffect } from "react"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
 import { JobEditorDialog } from "@/shared/console/jobs/editor/dialog"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
-import { api } from "../../../../convex/_generated/api"
 import { FolderField } from "../../folders/field"
 import {
   usePeopleOptions,
   useTeamOptions,
 } from "../../shared/visibility/options"
+import { useSkillNames } from "../skills"
 import { writeJobWebSearchPreference } from "./preferences"
 import { ToolReferenceProvider } from "./references"
 
@@ -89,20 +88,6 @@ export function JobDialog({
         values={values}
       />
     </ToolReferenceProvider>
-  )
-}
-
-function useSkillNames(organizationId: string) {
-  const skillList = useQuery(api.skills.catalog.list, { organizationId })
-
-  return useMemo(
-    () =>
-      skillList !== undefined &&
-      !Array.isArray(skillList) &&
-      skillList.status === "ready"
-        ? skillList.skills.map((skill) => skill.name)
-        : [],
-    [skillList]
   )
 }
 

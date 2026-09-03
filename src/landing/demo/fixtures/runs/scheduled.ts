@@ -12,6 +12,7 @@ export function scheduledRuns(now: number): ExecutionItem[] {
 export function chaseRun(now: number) {
   return run(now, {
     id: "chase",
+    job: "chase",
     title: "Chase overdue invoices",
     task: chaseInstructions,
     result:
@@ -34,6 +35,7 @@ export function chaseRun(now: number) {
 function watchRun(now: number) {
   return run(now, {
     id: "watch",
+    job: "watch",
     title: "Renewals watch",
     task: "Every morning, read the Customer renewals table and keep each row's status current.",
     result: "No renewals moved. Harbor House stays at risk.",
@@ -55,6 +57,7 @@ function watchRun(now: number) {
 function competitorRun(now: number) {
   return run(now, {
     id: "competitor",
+    job: "competitor",
     title: "Competitor watch",
     task: "Every morning, check the companies in the Competitor moves table for pricing or packaging changes.",
     error:
@@ -77,6 +80,7 @@ function digestRun(now: number) {
 
   return run(now, {
     id: "digest",
+    job: "digest",
     title: "Design review digest",
     task: "Every weekday morning, collect the design comments from Linear and post a digest.",
     status: "stopped",
@@ -101,6 +105,7 @@ function digestRun(now: number) {
 function releaseRun(now: number) {
   return run(now, {
     id: "release",
+    job: "release",
     title: "Weekly release summary",
     task: "Every Friday afternoon, read what merged in GitHub this week and what closed in Linear, then post a short summary to Slack.",
     result:

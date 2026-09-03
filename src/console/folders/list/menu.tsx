@@ -12,7 +12,6 @@ import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
-import { DeleteJobDialog } from "@/shared/console/jobs/list/delete"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
@@ -120,7 +119,6 @@ function FileResourceMenu({ actions, resource }: ResourceMenu) {
 /** Until the job itself is in hand, the row offers only what the
  *  filing alone can answer for. */
 function JobResourceMenu({ actions, resource }: ResourceMenu) {
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const job = actions.jobOf(resource)
 
   if (job === undefined) {
@@ -128,27 +126,18 @@ function JobResourceMenu({ actions, resource }: ResourceMenu) {
   }
 
   return (
-    <>
-      <JobRowMenu
-        job={job}
-        isControlling={actions.editor.controllingJobId === job.id}
-        isDeleting={actions.editor.deletingJobId === job.id}
-        onDeleteRequest={() => setIsDeleteOpen(true)}
-        onEdit={actions.editor.openEditForm}
-        onMoveToFolder={() => actions.onMove(resource)}
-        onPausedChange={(target, paused) =>
-          void actions.editor.setJobPaused(target, paused)
-        }
-        onUnfile={() => actions.onUnfile(resource)}
-      />
-      <DeleteJobDialog
-        job={job}
-        isDeleting={actions.editor.deletingJobId === job.id}
-        onDelete={() => void actions.editor.deleteJob(job)}
-        onOpenChange={setIsDeleteOpen}
-        open={isDeleteOpen}
-      />
-    </>
+    <JobRowMenu
+      job={job}
+      isControlling={actions.editor.controllingJobId === job.id}
+      isDeleting={actions.editor.deletingJobId === job.id}
+      onDelete={(target) => void actions.editor.deleteJob(target)}
+      onEdit={actions.editor.openEditForm}
+      onMoveToFolder={() => actions.onMove(resource)}
+      onPausedChange={(target, paused) =>
+        void actions.editor.setJobPaused(target, paused)
+      }
+      onUnfile={() => actions.onUnfile(resource)}
+    />
   )
 }
 

@@ -6,6 +6,14 @@ import {
   ConsoleHeaderButton,
   ConsoleSearch,
 } from "@/shared/console/layout"
+import {
+  type MaterialListActions,
+  materialRowMenu,
+} from "@/shared/console/materials/actions/list"
+import {
+  materialColumns,
+  measureColumn,
+} from "@/shared/console/materials/cells/columns"
 import { MaterialList } from "@/shared/console/materials/list"
 import { type TableSummary } from "@/shared/console/tables/types"
 import { TableColumnsCell, TableNameCell, TableRowsCell } from "./cells"
@@ -46,16 +54,30 @@ export function TablesToolbar({
   )
 }
 
+const identify = (table: TableSummary) => table.tableId
+
+const columns = materialColumns<TableSummary>([
+  measureColumn("Columns", "columns", (table) => (
+    <TableColumnsCell table={table} />
+  )),
+  measureColumn("Rows", "rows", (table) => <TableRowsCell table={table} />),
+])
+
 export function TableList({
+  onAccess,
   onCreate,
+  onEdit,
   onImport,
+  onMoveToFolder,
+  removal,
   tables,
   ...props
-}: Omit<ComponentProps<typeof MaterialList<TableSummary>>, "kind" | "rows"> & {
-  onCreate: () => void
-  onImport: () => void
-  tables: TableSummary[]
-}) {
+}: Omit<ComponentProps<typeof MaterialList<TableSummary>>, "kind" | "rows"> &
+  MaterialListActions<TableSummary> & {
+    onCreate: () => void
+    onImport: () => void
+    tables: TableSummary[]
+  }) {
   return (
     <MaterialList
       {...props}
@@ -72,23 +94,19 @@ export function TableList({
             </Button>
           </div>
         ),
-        deleteDescription: tableDeleteDescription,
+        columns,
         description:
           "Typed tables Jori and your team keep structured records in appear here.",
         icon: Table2,
-        identify: (table) => table.tableId,
-        measures: [
+        identify,
+        menu: materialRowMenu(
           {
-            cell: (table) => <TableColumnsCell table={table} />,
-            label: "Columns",
-            sortKey: "columns",
+            deleteDescription: tableDeleteDescription,
+            identify,
+            noun: tableNoun.singular,
           },
-          {
-            cell: (table) => <TableRowsCell table={table} />,
-            label: "Rows",
-            sortKey: "rows",
-          },
-        ],
+          { onAccess, onEdit, onMoveToFolder, removal }
+        ),
         nameCell: (table) => <TableNameCell table={table} />,
         noun: tableNoun,
       }}

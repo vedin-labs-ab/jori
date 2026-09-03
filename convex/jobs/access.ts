@@ -31,7 +31,7 @@ type JobGateDoc = Pick<
   Partial<Pick<Doc<"jobs">, "folderId">>
 
 /** A job's owner: the person it executes as, or its creator. */
-function jobOwner(
+export function jobOwner(
   job: Pick<Doc<"jobs">, "principal" | "createdBy">
 ): Id<"persons"> | undefined {
   return job.principal.kind === "person"

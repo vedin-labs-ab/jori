@@ -6,6 +6,14 @@ import {
   ConsoleHeaderButton,
   ConsoleSearch,
 } from "@/shared/console/layout"
+import {
+  type MaterialListActions,
+  materialRowMenu,
+} from "@/shared/console/materials/actions/list"
+import {
+  materialColumns,
+  measureColumn,
+} from "@/shared/console/materials/cells/columns"
 import { MaterialList } from "@/shared/console/materials/list"
 import { type StoreSummary } from "../types"
 import { StoreNameCell, StorePropertiesCell, StoreVersionCell } from "./cells"
@@ -37,14 +45,30 @@ export function StoresToolbar({
   )
 }
 
+const identify = (store: StoreSummary) => store.storeId
+
+const columns = materialColumns<StoreSummary>([
+  measureColumn("Properties", "properties", (store) => (
+    <StorePropertiesCell store={store} />
+  )),
+  measureColumn("Version", "version", (store) => (
+    <StoreVersionCell store={store} />
+  )),
+])
+
 export function StoreList({
+  onAccess,
   onCreate,
+  onEdit,
+  onMoveToFolder,
+  removal,
   stores,
   ...props
-}: Omit<ComponentProps<typeof MaterialList<StoreSummary>>, "kind" | "rows"> & {
-  onCreate: () => void
-  stores: StoreSummary[]
-}) {
+}: Omit<ComponentProps<typeof MaterialList<StoreSummary>>, "kind" | "rows"> &
+  MaterialListActions<StoreSummary> & {
+    onCreate: () => void
+    stores: StoreSummary[]
+  }) {
   return (
     <MaterialList
       {...props}
@@ -55,23 +79,19 @@ export function StoreList({
             New store
           </Button>
         ),
-        deleteDescription: storeDeleteDescription,
+        columns,
         description:
           "JSON documents Jori and your team keep state in appear here.",
         icon: Database,
-        identify: (store) => store.storeId,
-        measures: [
+        identify,
+        menu: materialRowMenu(
           {
-            cell: (store) => <StorePropertiesCell store={store} />,
-            label: "Properties",
-            sortKey: "properties",
+            deleteDescription: storeDeleteDescription,
+            identify,
+            noun: storeNoun.singular,
           },
-          {
-            cell: (store) => <StoreVersionCell store={store} />,
-            label: "Version",
-            sortKey: "version",
-          },
-        ],
+          { onAccess, onEdit, onMoveToFolder, removal }
+        ),
         nameCell: (store) => <StoreNameCell store={store} />,
         noun: storeNoun,
       }}

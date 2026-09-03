@@ -1,5 +1,8 @@
 import { getNextCronRunAt } from "@contracts/jobs/schedule/cron"
-import { type MoveSubject } from "@/shared/console/folders/types"
+import {
+  type MoveResourceTarget,
+  type MoveSubject,
+} from "@/shared/console/folders/types"
 import {
   type Job,
   type JobFilter,
@@ -10,6 +13,7 @@ import {
   matchesAudienceFilter,
 } from "@/shared/console/list/audience"
 import { jobSurface } from "../fixtures/jobs"
+import { personName, viewerId } from "../fixtures/people"
 import { demoPermissions } from "../fixtures/permissions"
 import { type FolderId, type JobId, jobAudience } from "../fixtures/types"
 
@@ -79,6 +83,9 @@ function createdJob(
     job: {
       ...rest,
       id,
+      ownerId: viewerId,
+      ownerName: personName(viewerId),
+      ownerImage: undefined,
       key: undefined,
       audience: jobAudience(stored),
       visibility: stored,
@@ -160,17 +167,17 @@ function projectAccess(access: SavedArgs["args"]["access"]): Job["access"] {
   }
 }
 
+/** A job as one of the move dialog's resources. */
+export function jobMoveTarget(job: Job): MoveResourceTarget {
+  return {
+    resourceType: "job",
+    resourceId: job.id,
+    name: job.name,
+    folderId: job.folderId,
+  }
+}
+
 /** A job on its own as the move dialog's subject. */
 export function jobMoveSubject(job: Job): MoveSubject {
-  return {
-    kind: "resources",
-    resources: [
-      {
-        resourceType: "job",
-        resourceId: job.id,
-        name: job.name,
-        folderId: job.folderId,
-      },
-    ],
-  }
+  return { kind: "resources", resources: [jobMoveTarget(job)] }
 }

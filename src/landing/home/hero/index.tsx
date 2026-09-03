@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { GetStarted } from "../../cta"
 import { DemoConsole } from "../../demo/console"
 import { folderId } from "../../demo/fixtures/folders"
+import { jobId } from "../../demo/fixtures/jobs"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { useDemoNavigation } from "../../demo/navigation"
 import { Mention } from "../../section"
@@ -64,6 +65,9 @@ export function Hero() {
         <DemoConsole className={consoleClassName} navigation={console} />
         <RenewalsThread
           className="mt-4 md:absolute md:right-6 md:bottom-0 md:mt-0 md:w-[22rem]"
+          onOpenJob={() =>
+            console.navigation.navigate(`/jobs/${jobId("watch")}`)
+          }
           onOpenTable={() =>
             console.navigation.navigate(`/tables/${renewalsTableId}`)
           }

@@ -4,7 +4,7 @@ import { type Job } from "@/shared/console/jobs/types"
 import { day, hour, minute } from "./clock"
 import { folderId } from "./folders"
 import { demoId } from "./ids"
-import { teamIds } from "./people"
+import { personId, personName, teamIds } from "./people"
 import { jobAudience, type StoredVisibility } from "./types"
 
 type JobSurface = Job["access"]["surfaces"][number]
@@ -47,7 +47,8 @@ const linearReading = jobSurface("linear", [
   "linear_list_comments",
 ])
 
-/** Copperline's eight jobs, filed by the team that owns each. */
+/** Copperline's eight jobs, filed by the team that owns each and made by
+ *  someone on it. */
 export function demoJobs(now: number): Job[] {
   return [
     releaseSummary(now),
@@ -64,6 +65,7 @@ export function demoJobs(now: number): Job[] {
 function releaseSummary(now: number) {
   return cronJob(now, {
     key: "release",
+    owner: "jonas",
     name: "Weekly release summary",
     folder: "engineering",
     expression: "0 16 * * 5",
@@ -82,6 +84,7 @@ function releaseSummary(now: number) {
 function flakyTestTriage(now: number) {
   return eventJob({
     key: "flaky",
+    owner: "liv",
     name: "Flaky test triage",
     folder: "engineering",
     integration: "github",
@@ -103,6 +106,7 @@ function flakyTestTriage(now: number) {
 function ticketTriage(now: number) {
   return eventJob({
     key: "triage",
+    owner: "ravi",
     name: "Ticket triage",
     folder: "engineering",
     integration: "linear",
@@ -124,6 +128,7 @@ function ticketTriage(now: number) {
 function competitorWatch(now: number) {
   return cronJob(now, {
     key: "competitor",
+    owner: "ida",
     name: "Competitor watch",
     folder: "marketing",
     expression: "0 7 * * *",
@@ -139,6 +144,7 @@ function competitorWatch(now: number) {
 function changelog(now: number) {
   return cronJob(now, {
     key: "changelog",
+    owner: "omar",
     name: "Changelog",
     folder: "marketing",
     expression: "0 10 * * 4",
@@ -160,6 +166,7 @@ function changelog(now: number) {
 function renewalsWatch(now: number) {
   return cronJob(now, {
     key: "watch",
+    owner: "maya",
     name: "Renewals watch",
     folder: "renewals",
     expression: "0 7 * * *",
@@ -174,6 +181,7 @@ function renewalsWatch(now: number) {
 function chaseOverdueInvoices(now: number) {
   return cronJob(now, {
     key: "chase",
+    owner: "priya",
     name: "Chase overdue invoices",
     folder: "renewals",
     expression: "0 8 * * 1",
@@ -188,6 +196,7 @@ function chaseOverdueInvoices(now: number) {
 function designReviewDigest(now: number) {
   return cronJob(now, {
     key: "digest",
+    owner: "hanna",
     name: "Design review digest",
     folder: "design",
     expression: "0 9 * * 1-5",
@@ -202,6 +211,7 @@ function designReviewDigest(now: number) {
 
 type JobSpec = {
   key: string
+  owner: string
   name: string
   folder: string
   instructions: string
@@ -240,8 +250,13 @@ function eventJob(spec: JobSpec & { integration: "github" | "linear" }): Job {
 function baseJob(spec: JobSpec) {
   const visibility = spec.visibility ?? { mode: "organization" as const }
 
+  const ownerId = personId(spec.owner)
+
   return {
     id: jobId(spec.key),
+    ownerId,
+    ownerName: personName(ownerId),
+    ownerImage: undefined,
     key: undefined,
     name: spec.name,
     instructions: spec.instructions,

@@ -21,6 +21,7 @@ export async function pagePendingApprovals(
     audienceFilter: RunAudienceFilter
     query: string
     organizationId: string
+    jobId?: Id<"jobs">
     paginationOpts: {
       cursor: string | null
       numItems: number
@@ -40,6 +41,7 @@ export async function pagePendingApprovals(
     runFilter: args.runFilter,
     audienceFilter: args.audienceFilter,
     organizationId: args.organizationId,
+    jobId: args.jobId,
   })) {
     const summary = await summarizeRun(ctx, run, args.personId, approval)
 
@@ -76,6 +78,7 @@ export async function countPendingApprovals(
     runFilter: RunFilter
     audienceFilter: RunAudienceFilter
     organizationId: string
+    jobId?: Id<"jobs">
   }
 ) {
   const now = Date.now()
@@ -87,6 +90,7 @@ export async function countPendingApprovals(
     runFilter: args.runFilter,
     audienceFilter: args.audienceFilter,
     organizationId: args.organizationId,
+    jobId: args.jobId,
   })) {
     if (args.normalizedQuery === "") {
       count += 1
@@ -111,6 +115,7 @@ async function* pendingApprovalRuns(
     runFilter: RunFilter
     audienceFilter: RunAudienceFilter
     organizationId: string
+    jobId: Id<"jobs"> | undefined
   }
 ) {
   const seenRunIds = new Set<string>()
@@ -126,6 +131,7 @@ async function* pendingApprovalRuns(
     if (
       run === null ||
       run.organizationId !== args.organizationId ||
+      (args.jobId !== undefined && run.job?.id !== args.jobId) ||
       isTerminalRunStatus(run.status)
     ) {
       continue
