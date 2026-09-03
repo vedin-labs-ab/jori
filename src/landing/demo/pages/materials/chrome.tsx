@@ -46,8 +46,9 @@ export function MaterialMissing({
 }
 
 /** A table's name in the breadcrumb, with the menu the console gives
- *  one, and the dialogs the menu opens. A store's view publishes its own
- *  crumb, since its items lead the menu; it takes `CollectionMenu`. */
+ *  one, and the dialogs the menu opens. A store's or a file's view
+ *  publishes its own crumb, since its items lead the menu; those take
+ *  `CollectionMenu` and `FileMenu`. */
 export function CollectionTitle({ material }: { material: DemoTable }) {
   const [request, setRequest] = useState<MaterialRequest>()
 
@@ -101,45 +102,44 @@ export function CollectionMenu({
   )
 }
 
-/** A file's name in the breadcrumb, with the file menu less the links the
- *  page's header already carries, and the dialogs the menu opens. */
-export function FileTitle({ material }: { material: DemoFile }) {
+/** The menu the console hangs off a file's name, less the links the
+ *  page's header already carries, led by the view's own lines. Deleting
+ *  leaves for the files list, the way the console does. */
+export function FileMenu({
+  lead,
+  material,
+  onRequest,
+}: {
+  lead: ReactNode
+  material: DemoFile
+  onRequest: (request: MaterialRequest) => void
+}) {
   const { actions } = useDemoWorkspace()
   const navigation = useContext(ConsoleNavigationContext)
-  const [request, setRequest] = useState<MaterialRequest>()
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
-  useMaterialCrumb(
-    material,
-    useMemo(
-      () => (
-        <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
-          <DropdownMenuContent align="start" className={menuWidth}>
-            <FileMenuItems
-              file={fileRowOf(material)}
-              isPending={false}
-              onAccess={() => setRequest({ kind: "access", material })}
-              onEdit={() => setRequest({ kind: "edit", material })}
-              onMoveToFolder={() => setRequest({ kind: "move", material })}
-              onRemove={() => setIsDeleteOpen(true)}
-              withLinks={false}
-            />
-          </DropdownMenuContent>
-          <DeleteFileDialog
-            file={material}
-            isPending={false}
-            onDelete={() => {
-              actions.removeMaterial(material.id)
-              navigation?.navigate("/files")
-            }}
-          />
-        </AlertDialog>
-      ),
-      [actions, isDeleteOpen, material, navigation]
-    )
-  )
-
   return (
-    <MaterialDialogs onClose={() => setRequest(undefined)} request={request} />
+    <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
+      <DropdownMenuContent align="start" className={menuWidth}>
+        {lead}
+        <FileMenuItems
+          file={fileRowOf(material)}
+          isPending={false}
+          onAccess={() => onRequest({ kind: "access", material })}
+          onEdit={() => onRequest({ kind: "edit", material })}
+          onMoveToFolder={() => onRequest({ kind: "move", material })}
+          onRemove={() => setIsDeleteOpen(true)}
+          withLinks={false}
+        />
+      </DropdownMenuContent>
+      <DeleteFileDialog
+        file={material}
+        isPending={false}
+        onDelete={() => {
+          actions.removeMaterial(material.id)
+          navigation?.navigate("/files")
+        }}
+      />
+    </AlertDialog>
   )
 }

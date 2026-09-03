@@ -3,6 +3,7 @@ import {
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
 import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { fileOwner } from "@/shared/console/materials/owners"
 import { VisibilityMark } from "@/shared/console/visibility/badge"
 import { fileKind } from "@/shared/files/kind"
 import { ConsoleLink } from "../../shell/link"
@@ -55,14 +56,5 @@ export function FileOwnerCell({
   compact?: boolean
   file: FileRow
 }) {
-  const owner =
-    file.source === "run"
-      ? ({ kind: "jori" } as const)
-      : ({
-          kind: "person",
-          name: file.ownerName ?? "Member",
-          image: file.ownerImage,
-        } as const)
-
-  return <MaterialOwnerCell compact={compact} owner={owner} />
+  return <MaterialOwnerCell compact={compact} owner={fileOwner(file)} />
 }

@@ -1,5 +1,4 @@
 import { Braces, Copy } from "lucide-react"
-import { type ReactNode } from "react"
 import {
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -8,9 +7,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { copyText } from "@/shared/console/copy/text"
-import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
+import { MenuProvenance } from "@/shared/console/materials/actions/note"
 import { summaryOwner } from "@/shared/console/materials/owners"
-import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
 import { formatJsonText } from "./json"
 import { type StoreDetail } from "./types"
 import { type ValueEditorView } from "./value/state"
@@ -39,7 +37,12 @@ export function StoreMenuItems({
 }) {
   return (
     <>
-      <StoreProvenance store={store} />
+      {/* v0 honestly means never written. */}
+      <MenuProvenance
+        detail={`v${store.version}`}
+        owner={summaryOwner(store)}
+        updatedAt={store.updatedAt}
+      />
       <DropdownMenuSeparator />
       {view === undefined || onViewChange === undefined ? null : (
         <>
@@ -67,34 +70,5 @@ export function StoreMenuItems({
       </DropdownMenuItem>
       <DropdownMenuSeparator />
     </>
-  )
-}
-
-/** Provenance as the menu's first line, the way the toolbar read it:
- *  the owner in the foreground, then how fresh the value is and which
- *  version it stands at. v0 honestly means never written. */
-function StoreProvenance({ store }: { store: StoreDetail }) {
-  const now = useNow(30_000)
-
-  return (
-    <MenuNote>
-      <div className="font-medium text-foreground">
-        <MaterialOwnerCell compact owner={summaryOwner(store)} />
-      </div>
-      <span className="tabular-nums" title={absoluteTime(store.updatedAt)}>
-        Updated {relativeTime(store.updatedAt, now)} · v{store.version}
-      </span>
-    </MenuNote>
-  )
-}
-
-/** Lines the menu shows rather than offers: no hover, no focus, no
- *  selection. Set on the items' own inset so the text lines up with
- *  their labels. */
-function MenuNote({ children }: { children: ReactNode }) {
-  return (
-    <div className="grid gap-0.5 px-2 py-1.5 text-muted-foreground text-xs">
-      {children}
-    </div>
   )
 }

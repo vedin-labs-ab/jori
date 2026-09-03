@@ -1,8 +1,9 @@
-import { lazy, type ReactNode, Suspense } from "react"
+import { lazy, type ReactNode, Suspense, useEffect } from "react"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { type SaveState } from "@/shared/console/materials/save"
 import { usePreloadSiblings } from "../cache/preload"
+import { FileDock } from "../dock"
 import { type FileSiblings } from "../siblings"
-import { FileCopy, FileMeta, FileToolbar } from "../toolbar"
 import { type FileDetail } from "../types"
 import { useAutosave } from "./autosave"
 import { type FileDocument, useDocument } from "./document"
@@ -19,24 +20,33 @@ const Mirror = lazy(() =>
  *  whether it landed. A false keeps the buffer and retries. */
 export type FileSave = (text: string) => Promise<boolean>
 
+/** What the page's chrome needs from the editor: what the autosave is
+ *  doing, for the file's name, and the text as last saved, for a copy.
+ *  The text is absent until the file has loaded. */
+export type FileEditorState = {
+  saveStatus: SaveState
+  savedText: string | undefined
+}
+
 /** In-place editor for a text file: the content fills the page under the
- *  toolbar, and edits save automatically — debounced, wholesale, through
- *  `onSave`. Last write wins; files carry no version. */
+ *  breadcrumb, and edits save automatically — debounced, wholesale,
+ *  through `onSave`. Last write wins; files carry no version. */
 export function FileEditor({
   errorFallback,
   file,
   onSave,
+  onState,
   siblings,
-  tools,
   url,
 }: {
   /** Rendered when the file's text cannot be fetched. */
   errorFallback: ReactNode
   file: FileDetail
   onSave: FileSave
+  /** Reports the editor's state as it changes, and withdraws it when the
+   *  editor leaves the page. */
+  onState: (state: FileEditorState | undefined) => void
   siblings: FileSiblings
-  /** Extra toolbar tools slotted before Copy — the HTML view's toggle. */
-  tools?: ReactNode
   url: string
 }) {
   const document = useDocument(file, url)
@@ -54,28 +64,14 @@ export function FileEditor({
     return didSave
   })
 
+  usePublishedState(onState, {
+    saveStatus: autosave.status,
+    savedText:
+      document.state.status === "ready" ? document.state.saved : undefined,
+  })
+
   return (
     <>
-      {/* No arrow keys here — CodeMirror owns them for caret movement. */}
-      <FileToolbar
-        siblings={siblings}
-        tools={
-          <>
-            {tools}
-            <FileCopy
-              file={file}
-              savedText={
-                document.state.status === "ready"
-                  ? document.state.saved
-                  : undefined
-              }
-              url={url}
-            />
-          </>
-        }
-      >
-        <FileMeta file={file} saveStatus={autosave.status} />
-      </FileToolbar>
       <EditorBody
         document={document}
         errorFallback={errorFallback}
@@ -87,8 +83,26 @@ export function FileEditor({
           }
         }}
       />
+      {/* No arrow keys here — CodeMirror owns them for caret movement. */}
+      <FileDock siblings={siblings} />
     </>
   )
+}
+
+/** Hands the page the editor's state as it changes, without making the
+ *  editor re-render on its own report, and takes it back on unmount so
+ *  a view without an editor carries no save signal. */
+function usePublishedState(
+  onState: (state: FileEditorState | undefined) => void,
+  state: FileEditorState
+) {
+  const { saveStatus, savedText } = state
+
+  useEffect(() => {
+    onState({ saveStatus, savedText })
+  }, [onState, saveStatus, savedText])
+
+  useEffect(() => () => onState(undefined), [onState])
 }
 
 function EditorBody({

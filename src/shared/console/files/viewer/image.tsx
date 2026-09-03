@@ -16,12 +16,12 @@ import { cn } from "@/lib/utils"
 import { type Zoom, zoomStep } from "./zoom"
 
 // The image half of the viewer: a contain-fitted image that zooms with the
-// toolbar buttons, the wheel (pinch included), and double-click, and pans
+// dock's buttons, the wheel (pinch included), and double-click, and pans
 // by dragging once zoomed. All state lives in the shared zoom hook so the
-// toolbar and the canvas stay one machine.
+// dock and the canvas stay one machine.
 
-/** Toolbar controls for the image viewer. Rendered from the start — the
- *  toolbar never reflows — and enabled once the image is on screen. */
+/** The dock's controls for the image viewer. Rendered from the start — the
+ *  dock never reflows — and enabled once the image is on screen. */
 export function ZoomTools({ isReady, zoom }: { isReady: boolean; zoom: Zoom }) {
   return (
     <>
@@ -65,7 +65,7 @@ function ZoomButton({
           aria-label={label}
           disabled={disabled}
           onClick={onClick}
-          size="icon-sm"
+          size="icon"
           type="button"
           variant="ghost"
         >

@@ -1,5 +1,4 @@
-import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
@@ -7,70 +6,55 @@ import { EditFileDialog } from "@/shared/console/files/edit"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FileRow } from "@/shared/console/files/types"
 import { moveTarget } from "@/shared/console/folders/types"
-import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { menuWidth } from "@/shared/console/menu"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { MoveResourceDialog } from "../folders/move"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { useFileActions } from "./manage"
 
-type FileDialog = "access" | "edit" | "move"
+export type FileDialog = "access" | "edit" | "move"
 
 /** The file's actions hung off its name in the breadcrumb — the shell owns
- *  that trigger, so this publishes only the menu, and owns the dialogs the
- *  actions open. Open and Download are left out: the detail page's header
- *  already carries both. */
+ *  that trigger and the view publishes the crumb, so this is only the
+ *  menu's content, led by the view's own lines, and the confirmation the
+ *  delete passes through. Open and Download are left out: the detail
+ *  page's header already carries both. */
 export function FileTitleMenu({
   file,
-  organizationId,
+  isPending,
+  lead,
+  onDelete,
+  onOpen,
 }: {
   file: FileRow
-  organizationId: string
+  isPending: boolean
+  lead: ReactNode
+  onDelete: () => void
+  /** Opens one of the dialogs the page renders; see `FileDialogs`. */
+  onOpen: (dialog: FileDialog) => void
 }) {
-  const navigate = useNavigate()
-  const [dialog, setDialog] = useState<FileDialog>()
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const actions = useFileActions(organizationId, {
-    onDeleted: () => void navigate({ to: "/files" }),
-    onSaved: () => setDialog(undefined),
-  })
-  const isPending = actions.pendingFileId === file.fileId
 
-  useMaterialBreadcrumb(
-    file.name,
+  return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
       <DropdownMenuContent align="start" className={menuWidth}>
+        {lead}
         <FileMenuItems
           file={file}
           isPending={isPending}
-          onAccess={() => setDialog("access")}
-          onEdit={() => setDialog("edit")}
-          onMoveToFolder={() => setDialog("move")}
+          onAccess={() => onOpen("access")}
+          onEdit={() => onOpen("edit")}
+          onMoveToFolder={() => onOpen("move")}
           onRemove={() => setIsDeleteOpen(true)}
           withLinks={false}
         />
       </DropdownMenuContent>
-      <DeleteFileDialog
-        file={file}
-        isPending={isPending}
-        onDelete={() => actions.deleteFile(file)}
-      />
+      <DeleteFileDialog file={file} isPending={isPending} onDelete={onDelete} />
     </AlertDialog>
-  )
-
-  return (
-    <FileDialogs
-      dialog={dialog}
-      file={file}
-      isSaving={isPending}
-      onClose={() => setDialog(undefined)}
-      onSave={actions.saveFile}
-      organizationId={organizationId}
-    />
   )
 }
 
-function FileDialogs({
+/** The dialogs the title menu opens, rendered by the page. */
+export function FileDialogs({
   dialog,
   file,
   isSaving,

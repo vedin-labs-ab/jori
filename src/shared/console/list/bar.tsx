@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Separator } from "@/components/ui/separator"
 import { TableCell, TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { Dock, DockDivider } from "../dock"
 import { type RowSelection, selectionHeadState } from "./selection"
 
 /** Header checkbox: none, partial (a partly selected page shows the
@@ -70,10 +70,9 @@ export type SelectionRemoval = {
   label: string
 }
 
-/** Floating action bar for an active selection, anchored to the bottom of
- *  a ConsoleListLayout. Removing confirms first; moving hands off to the
- *  page's move dialog. Move and Download only render for pages that pass
- *  them. */
+/** The console's dock, for an active selection. Removing confirms first;
+ *  moving hands off to the page's move dialog. Move and Download only
+ *  render for pages that pass them. */
 export function SelectionActionsBar({
   count,
   isBusy,
@@ -98,63 +97,51 @@ export function SelectionActionsBar({
   }
 
   return (
-    <div className="-translate-x-1/2 absolute bottom-4 left-1/2 z-20 fade-in-0 slide-in-from-bottom-2 animate-in duration-200">
-      <div
-        aria-label="Selection actions"
-        className="flex items-center gap-1 rounded-lg border bg-background p-1 shadow-md"
-        role="toolbar"
-      >
-        <span className="px-2 font-medium text-xs tabular-nums">
-          {count} selected
-        </span>
-        <Separator
-          className="data-vertical:h-4 data-vertical:self-auto"
-          orientation="vertical"
-        />
-        {onMove === undefined ? null : (
-          <Button
-            disabled={isBusy}
-            onClick={onMove}
-            type="button"
-            variant="ghost"
-          >
-            <FolderInput />
-            Move
-          </Button>
-        )}
-        {onDownload === undefined ? null : (
-          <Button
-            disabled={isBusy}
-            onClick={onDownload}
-            type="button"
-            variant="ghost"
-          >
-            {isBusy ? <Loader2 className="animate-spin" /> : <Download />}
-            Download
-          </Button>
-        )}
-        <SelectionRemoveButton
-          count={count}
-          isBusy={isBusy}
-          noun={noun}
-          onRemove={onRemove}
-          removal={removal}
-        />
-        <Separator
-          className="data-vertical:h-4 data-vertical:self-auto"
-          orientation="vertical"
-        />
+    <Dock className="gap-1" label="Selection actions">
+      <span className="px-2 font-medium text-xs tabular-nums">
+        {count} selected
+      </span>
+      <DockDivider />
+      {onMove === undefined ? null : (
         <Button
-          aria-label="Clear selection"
-          onClick={onClear}
-          size="icon"
+          disabled={isBusy}
+          onClick={onMove}
           type="button"
           variant="ghost"
         >
-          <X />
+          <FolderInput />
+          Move
         </Button>
-      </div>
-    </div>
+      )}
+      {onDownload === undefined ? null : (
+        <Button
+          disabled={isBusy}
+          onClick={onDownload}
+          type="button"
+          variant="ghost"
+        >
+          {isBusy ? <Loader2 className="animate-spin" /> : <Download />}
+          Download
+        </Button>
+      )}
+      <SelectionRemoveButton
+        count={count}
+        isBusy={isBusy}
+        noun={noun}
+        onRemove={onRemove}
+        removal={removal}
+      />
+      <DockDivider />
+      <Button
+        aria-label="Clear selection"
+        onClick={onClear}
+        size="icon"
+        type="button"
+        variant="ghost"
+      >
+        <X />
+      </Button>
+    </Dock>
   )
 }
 
