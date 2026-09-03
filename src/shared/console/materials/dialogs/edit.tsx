@@ -18,7 +18,7 @@ type EditableMaterial = { name: string }
 export type MaterialEdit = { name: string }
 
 /** Rename a table, a store, or a file. Everything else about them —
- *  columns, schema, value, content — is edited on their own pages. */
+ *  columns, schema, value, content. Is edited on their own pages. */
 export function EditMaterialDialog({
   blurb,
   isSaving,
