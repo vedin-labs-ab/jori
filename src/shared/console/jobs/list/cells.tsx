@@ -1,4 +1,4 @@
-import { Pause } from "lucide-react"
+import { Pause, Workflow } from "lucide-react"
 import { SeparatorDot } from "../../dot"
 import { RowMark } from "../../list/mark"
 import {
@@ -8,14 +8,15 @@ import {
 import { ConsoleLink } from "../../shell/link"
 import { VisibilityMark } from "../../visibility/badge"
 import { type Job } from "../types"
-import { jobTriggerSummary, jobTypeIcon } from "./trigger"
+import { jobTriggerSummary } from "./trigger"
 
-/** Name column: the job's kind as its icon, a link to the job's page, the
- *  visibility mark for anything narrower than the organization, and the
- *  pause mark while the job is paused. */
+/** Name column: the mark every surface files jobs under, a link to the
+ *  job's page, the visibility mark for anything narrower than the
+ *  organization, and the pause mark while the job is paused. What the job
+ *  waits on is the Trigger column's to say. */
 export function JobNameCell({ job }: { job: Job }) {
   return (
-    <MaterialNameCell icon={jobTypeIcon(job)}>
+    <MaterialNameCell icon={Workflow}>
       <ConsoleLink
         className={materialNameLinkClassName}
         params={{ jobId: job.id }}
