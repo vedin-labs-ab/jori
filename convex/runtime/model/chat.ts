@@ -18,12 +18,16 @@ import {
   type ModelToolCall,
 } from "./types"
 
-// The first turn produces the start update and is optimized for latency; later
-// turns do the actual work and reason harder. Effort levels are code config.
-const firstTurnReasoningEffort = "low"
-const defaultReasoningEffort = "medium"
+// One effort for every turn: the provider's prompt cache does not carry
+// across an effort change, so a cheaper first turn cost a full re-read of
+// the prompt on the second.
+const reasoningEffort = "medium"
 
-type ModelSettings = Pick<ChatRequest, "provider" | "reasoning">
+const modelSettings: Pick<ChatRequest, "provider" | "reasoning"> = {
+  // Providers that silently drop tool definitions cannot run the loop.
+  provider: { requireParameters: true },
+  reasoning: { effort: reasoningEffort },
+}
 
 export class OpenRouterModel implements ModelRuntime {
   /** The session is the run: OpenRouter routes every call that shares it to
@@ -32,7 +36,6 @@ export class OpenRouterModel implements ModelRuntime {
   constructor(private readonly session: string) {}
 
   async complete(args: {
-    firstTurn: boolean
     messages: ModelMessage[]
     tools: ModelTool[]
   }): Promise<ModelResponse> {
@@ -45,20 +48,10 @@ export class OpenRouterModel implements ModelRuntime {
       ...(args.tools.length === 0
         ? {}
         : { toolChoice: "auto" as const, tools: args.tools.map(toChatTool) }),
-      ...createOpenRouterModelSettings(args.firstTurn),
+      ...modelSettings,
     })
 
     return readModelResponse(result)
-  }
-}
-
-function createOpenRouterModelSettings(firstTurn: boolean): ModelSettings {
-  return {
-    // Providers that silently drop tool definitions cannot run the loop.
-    provider: { requireParameters: true },
-    reasoning: {
-      effort: firstTurn ? firstTurnReasoningEffort : defaultReasoningEffort,
-    },
   }
 }
 

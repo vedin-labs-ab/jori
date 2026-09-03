@@ -81,7 +81,6 @@ export async function runModelTurn(args: {
   }
 
   const response = await completeModelStep({
-    firstTurn: args.turn === 1,
     messages: [
       ...promptMessages(args.prompt),
       ...(await runtime.platform.listTranscript()),
@@ -97,7 +96,6 @@ export async function runModelTurn(args: {
 }
 
 export async function completeModelStep(args: {
-  firstTurn: boolean
   messages: TranscriptMessage[]
   model: ModelRuntime
   runtime: AgentRuntime
@@ -122,7 +120,6 @@ export async function completeModelStep(args: {
 
   try {
     response = await args.model.complete({
-      firstTurn: args.firstTurn,
       messages: args.messages,
       tools: args.tools,
     })

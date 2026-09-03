@@ -44,7 +44,6 @@ test("sends the transcript as one system message and the turns after it", async 
   ]
 
   await new OpenRouterModel("run_1").complete({
-    firstTurn: true,
     messages,
     tools: [readTool],
   })
@@ -72,7 +71,7 @@ test("sends the transcript as one system message and the turns after it", async 
     model: joriModel,
     sessionId: "run_1",
     provider: { requireParameters: true },
-    reasoning: { effort: "low" },
+    reasoning: { effort: "medium" },
     toolChoice: "auto",
     tools: [
       {
@@ -87,13 +86,12 @@ test("sends the transcript as one system message and the turns after it", async 
   })
 })
 
-test("reasons harder after the first turn and sends no tool list when there are none", async () => {
+test("sends no tool list when there are none", async () => {
   openRouter.send.mockResolvedValue(
     chatResult({ content: "Done.", role: "assistant" })
   )
 
   await new OpenRouterModel("run_1").complete({
-    firstTurn: false,
     messages: [{ content: "Ship the release.", role: "user" }],
     tools: [],
   })
@@ -125,7 +123,6 @@ test("reads a stop response with its reasoning and tokens", async () => {
 
   expect(
     await new OpenRouterModel("run_1").complete({
-      firstTurn: false,
       messages: [{ content: "Ship the release.", role: "user" }],
       tools: [readTool],
     })
@@ -167,7 +164,6 @@ test("parses tool calls and reports empty text as no content", async () => {
 
   expect(
     await new OpenRouterModel("run_1").complete({
-      firstTurn: false,
       messages: [{ content: "Ship the release.", role: "user" }],
       tools: [readTool],
     })
@@ -203,7 +199,6 @@ test("drops a call whose arguments are not a JSON object", async () => {
 
   expect(
     await new OpenRouterModel("run_1").complete({
-      firstTurn: false,
       messages: [{ content: "Ship the release.", role: "user" }],
       tools: [readTool],
     })
