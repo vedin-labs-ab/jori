@@ -4,13 +4,15 @@ import { FolderPickerField } from "@/shared/console/folders/field"
 import { type CreationRequest } from "@/shared/console/folders/types"
 import { CreateMaterialDialog } from "@/shared/console/materials/dialogs/create"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
+import { storeCreateBlurb } from "@/shared/console/stores/list/config"
+import { tableCreateBlurb } from "@/shared/console/tables/list/config"
 import { useJobEditor } from "../editor"
 import { grantOptions } from "../fixtures/people"
 import { useDemoFolders, useDemoWorkspace } from "../workspace"
 
 const blurbs = {
-  table: "Name it now — define its columns right in the table.",
-  store: "Name it now — add an optional schema right in the store.",
+  table: tableCreateBlurb,
+  store: storeCreateBlurb,
 } as const
 
 /** The resource creation dialogs, shared by the folder page and the sidebar
