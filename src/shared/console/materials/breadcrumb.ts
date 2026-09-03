@@ -6,6 +6,7 @@ import {
   useMemo,
 } from "react"
 import { type FolderNames } from "./folders"
+import { type SaveState } from "./save"
 
 // Material detail pages are headed by a breadcrumb trail. The console shell
 // owns the trail: by default it derives the linked parent surface from the
@@ -40,6 +41,11 @@ export type MaterialBreadcrumb = {
    *  The shell sets it right after the name, inside the crumb, with no
    *  divider: it belongs to the name rather than standing beside it. */
   suffix?: ReactNode
+  /** What the page's autosave is doing, for a page that saves as it goes.
+   *  The shell shows it in the name itself: the name shimmers while a
+   *  save is in flight, and the menu's chevron gives way to the save's
+   *  own glyph until the moment has passed. */
+  saveStatus?: SaveState
 }
 
 export const MaterialBreadcrumbContext = createContext<

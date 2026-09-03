@@ -27,6 +27,7 @@ import {
   MaterialBreadcrumbContext,
   type MaterialBreadcrumbSegment,
 } from "../materials/breadcrumb"
+import { SaveIcon, type SaveState } from "../materials/save"
 import { ConsoleLink } from "./link"
 import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
 
@@ -254,15 +255,50 @@ function MaterialName({ material }: { material: MaterialBreadcrumb }) {
           type="button"
           variant="ghost"
         >
-          <span className="truncate">{material.name}</span>
-          <ChevronDown
-            aria-hidden
-            className="size-3! shrink-0 text-muted-foreground"
-          />
+          {/* A save in flight shimmers the name; the chevron steps aside
+              for the save's own glyph while there is one to show. */}
+          <span
+            className={cn(
+              "truncate",
+              material.saveStatus === "saving" && "shimmer"
+            )}
+          >
+            {material.name}
+          </span>
+          {material.saveStatus === undefined ||
+          material.saveStatus === "idle" ? (
+            <ChevronDown
+              aria-hidden
+              className="size-3! shrink-0 text-muted-foreground"
+            />
+          ) : (
+            <span aria-hidden className="flex shrink-0 [&_svg]:size-3!">
+              <SaveIcon saveStatus={material.saveStatus} />
+            </span>
+          )}
         </Button>
       </DropdownMenuTrigger>
       {material.menu}
+      <SaveAnnouncement saveStatus={material.saveStatus} />
     </DropdownMenu>
+  )
+}
+
+/** What the glyph says, for those who cannot see it change. A failure
+ *  interrupts; a save that landed waits its turn. */
+function SaveAnnouncement({ saveStatus }: { saveStatus?: SaveState }) {
+  if (saveStatus === undefined || saveStatus === "idle") {
+    return null
+  }
+
+  return (
+    <span
+      aria-live={saveStatus === "error" ? "assertive" : "polite"}
+      className="sr-only"
+    >
+      {saveStatus === "error" ? "Couldn't save. Retrying." : null}
+      {saveStatus === "saved" ? "Saved" : null}
+    </span>
   )
 }
 

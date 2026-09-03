@@ -8,7 +8,6 @@ import {
   type MaterialBreadcrumb,
   useMaterialTrail,
 } from "@/shared/console/materials/breadcrumb"
-import { SaveSignal } from "@/shared/console/materials/save"
 import { StoreMenuItems } from "../menu"
 import { type SchemaWrite, StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"
@@ -106,7 +105,7 @@ function useStoreCrumb({
         ...crumb,
         menu,
         name: store.name,
-        suffix: <SaveSignal saveStatus={saveStatus} />,
+        saveStatus,
       }),
       [crumb, menu, saveStatus, store.name]
     )
