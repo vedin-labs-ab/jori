@@ -119,8 +119,8 @@ test("lists the trigger, tools, folder, owner, and run columns", () => {
   const link = screen.getByRole("link", { name: "Weekly digest" })
 
   expect(link.getAttribute("href")).toBe("/jobs/job-1")
-  expect(screen.getByText("Recurring")).toBeDefined()
-  expect(screen.getByTitle("Daily at 09:00 UTC")).toBeDefined()
+  expect(screen.getByText("Daily")).toBeDefined()
+  expect(screen.getByTitle("09:00 UTC")).toBeDefined()
   expect(screen.getByText("1 tool")).toBeDefined()
   expect(screen.getByRole("link", { name: "Renewals" })).toBeDefined()
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
@@ -153,7 +153,7 @@ test("event and one-time triggers read as their source and their date", () => {
   expect(
     screen.getByRole("button", { name: "Event: Issue comment created" })
   ).toBeDefined()
-  expect(screen.getByText("One-time")).toBeDefined()
+  expect(screen.getByText("Once")).toBeDefined()
   // An event job runs when something happens, so it has no next run.
   expect(screen.getAllByText("—")).toHaveLength(1)
 })

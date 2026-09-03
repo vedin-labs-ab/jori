@@ -1,5 +1,6 @@
 import { getJobEventDefinition } from "@contracts/jobs/events"
-import { describeCron } from "@contracts/jobs/schedule/labels"
+import { classifyCron } from "@contracts/jobs/schedule/classify"
+import { ordinal, weekdayLabels } from "@contracts/jobs/schedule/labels"
 import {
   CalendarClock,
   CalendarSync,
@@ -19,12 +20,14 @@ import { type Job } from "../types"
 
 type EventTrigger = Extract<Job["trigger"], { event: string }>
 
-/** How a job starts, in two parts: its kind, and the schedule, event
- *  source, or moment behind it, with a fuller title where the detail
- *  is abbreviated. */
+/** How a job starts, read cadence first: the title is the word a reader
+ *  scans a column of jobs by, the detail is what that word leaves out,
+ *  and the fuller form spells the same fact out with its zone. */
 export type JobTriggerSummary = {
-  detail: ReactNode
-  detailTitle: string | undefined
+  /** Compact enough for a list cell; absent when the title says it all. */
+  detail?: ReactNode
+  /** The list's tooltip, and the line on the job's own page. */
+  full?: string
   title: string
 }
 
@@ -32,30 +35,68 @@ export function jobTriggerSummary(job: Job): JobTriggerSummary {
   const trigger = job.trigger
 
   if (job.type === "cron" && "expression" in trigger) {
-    const detail =
-      describeCron(trigger.expression, trigger.timezone) ??
-      `${trigger.expression} ${trigger.timezone}`
-
-    return { detail, detailTitle: detail, title: "Recurring" }
+    return cronSummary(trigger.expression, trigger.timezone)
   }
 
   if (job.type === "event" && "event" in trigger) {
-    return {
-      detail: eventTriggerDetail(trigger),
-      detailTitle: undefined,
-      title: "Event",
-    }
+    return { detail: eventTriggerDetail(trigger), title: "Event" }
   }
 
   if ("at" in trigger) {
     return {
       detail: shortDate(trigger.at),
-      detailTitle: absoluteTime(trigger.at),
-      title: "One-time",
+      full: absoluteTime(trigger.at),
+      title: "Once",
     }
   }
 
-  return { detail: "Once", detailTitle: undefined, title: "One-time" }
+  return { title: "Once" }
+}
+
+/** A schedule named by its cadence, with the day and time it lands on
+ *  beside it: "Weekly · Fri 15:00". The zone waits in the fuller form,
+ *  since a column of jobs almost always shares one, and an expression the
+ *  words cannot hold stays an expression. */
+function cronSummary(
+  expression: string | undefined,
+  timezone: string
+): JobTriggerSummary {
+  const cron = classifyCron(expression)
+
+  if (cron === null) {
+    return {
+      detail: expression,
+      full: `${expression ?? ""} ${timezone}`.trim(),
+      title: "Custom",
+    }
+  }
+
+  const zoned = `${cron.time} ${timezone}`
+  const weekday = weekdayLabels[cron.dayOfWeek ?? ""]
+
+  if (cron.repeat === "weekly" && weekday !== undefined) {
+    return {
+      detail: `${weekday.slice(0, 3)} ${cron.time}`,
+      full: `${weekday}s at ${zoned}`,
+      title: "Weekly",
+    }
+  }
+
+  if (cron.repeat === "monthly" && cron.dayOfMonth !== undefined) {
+    const day = ordinal(Number(cron.dayOfMonth))
+
+    return {
+      detail: `${day} ${cron.time}`,
+      full: `${day} at ${zoned}`,
+      title: "Monthly",
+    }
+  }
+
+  return {
+    detail: cron.time,
+    full: zoned,
+    title: cron.repeat === "weekdays" ? "Weekdays" : "Daily",
+  }
 }
 
 /** The source the event comes from, its mark first, and the event's own
