@@ -35,7 +35,6 @@ function renderValue(overrides: Partial<StoreDetail>) {
           <DropdownMenuTrigger>{crumb?.name}</DropdownMenuTrigger>
           {crumb?.menu}
         </DropdownMenu>
-        {crumb?.suffix}
         {children}
       </MaterialBreadcrumbContext.Provider>
     )
@@ -105,7 +104,7 @@ test("the title menu leads with provenance, then the store's own tools", () => {
   openMenu()
 
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
-  expect(screen.getByText(/^v3 · /)).toBeDefined()
+  expect(screen.getByText(/· v3$/)).toBeDefined()
   expect(screen.queryByRole("menuitemradio")).toBeNull()
   expect(screen.getByRole("menuitem", { name: "Add schema…" })).toBeDefined()
   expect(screen.getByRole("menuitem", { name: "Copy value" })).toBeDefined()

@@ -79,8 +79,8 @@ function StoreProvenance({ store }: { store: StoreDetail }) {
   return (
     <MenuNote>
       <MaterialOwnerCell compact owner={summaryOwner(store)} />
-      <span className="ml-auto shrink-0 tabular-nums">
-        v{store.version} · {relativeTime(store.updatedAt, now)}
+      <span className="tabular-nums">
+        Updated {relativeTime(store.updatedAt, now)} · v{store.version}
       </span>
     </MenuNote>
   )
@@ -90,7 +90,7 @@ function StoreProvenance({ store }: { store: StoreDetail }) {
  *  selection. */
 function MenuNote({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center gap-2 px-2 py-1.5 text-muted-foreground text-xs">
+    <div className="grid gap-1 px-2 py-1.5 text-muted-foreground text-xs">
       {children}
     </div>
   )

@@ -74,36 +74,10 @@ export function SaveMeta({
   )
 }
 
-/** The save's state beside a page's name, for a page whose provenance
- *  lives in a menu: nothing at rest, the spinner while a save is in
- *  flight, a check as it lands, and the warning with its words when it
- *  didn't. */
-export function SaveSignal({ saveStatus }: { saveStatus?: SaveState }) {
-  if (saveStatus === undefined || saveStatus === "idle") {
-    return null
-  }
-
-  return (
-    <span className="inline-flex shrink-0 items-center gap-1 text-xs">
-      <SaveIcon saveStatus={saveStatus} />
-      {saveStatus === "error" ? (
-        <span className="font-medium text-destructive">Not saved</span>
-      ) : null}
-      <span
-        aria-live={saveStatus === "error" ? "assertive" : "polite"}
-        className="sr-only"
-      >
-        {saveStatus === "error" ? "Couldn't save. Retrying." : null}
-        {saveStatus === "saved" ? "Saved" : null}
-      </span>
-    </span>
-  )
-}
-
 /** One glyph per state, in the console's semantic colours: a check for a
  *  save that landed, a warning for one that didn't, and the spinner for
  *  every moment in between. */
-function SaveIcon({ saveStatus }: { saveStatus: SaveState }) {
+export function SaveIcon({ saveStatus }: { saveStatus: SaveState }) {
   if (saveStatus === "error") {
     return <TriangleAlert className="size-3 text-destructive" />
   }

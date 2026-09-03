@@ -24,7 +24,7 @@ test("opens a store's form and keeps a value edited in memory", async () => {
 
   fireEvent.pointerDown(title)
   fireEvent.click(title)
-  expect(await screen.findByText(/^v37 · /)).toBeDefined()
+  expect(await screen.findByText(/· v37$/)).toBeDefined()
   fireEvent.keyDown(document.activeElement ?? title, { key: "Escape" })
 
   fireEvent.change(screen.getByLabelText("rolloutPercent"), {
@@ -34,7 +34,7 @@ test("opens a store's form and keeps a value edited in memory", async () => {
   // The autosave lands after its debounce and bumps the version.
   fireEvent.pointerDown(title)
   fireEvent.click(title)
-  expect(await screen.findByText(/^v38 · /)).toBeDefined()
+  expect(await screen.findByText(/· v38$/)).toBeDefined()
   expect(
     (screen.getByLabelText("rolloutPercent") as HTMLInputElement).value
   ).toBe("50")
