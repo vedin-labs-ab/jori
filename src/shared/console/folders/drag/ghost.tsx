@@ -6,20 +6,18 @@ import { type DragPayload, payloadSize } from "./plan"
 // The pointer-tracking ghost: a compact card with the row's idiom, lifted
 // by a shadow and, when motion is welcome, a slight scale-up. A drag
 // carrying more than one row shows the first row's card in front, counts
-// the rest after its name, and fans up to two more cards out behind it —
-// pivoting on the bottom-left corner, each a little up, right, turned,
-// and dimmer — so the pile reads as several things held together.
+// the rest after its name, and fans up to two more cards out behind it,
+// each turned a little further about the front card's left edge, so the
+// pile reads as several things held in one hand.
 
 /** How many cards may show behind the front one. */
 const pileDepth = 2
 
-/** The decorative cards' place behind the front, per layer: the offset
- *  and turn about the bottom-left corner, and how much they fade. The turn
- *  is left out under reduced motion. */
-const pileLayers = [
-  "translate-x-[6px] -translate-y-[4px] rotate-3 opacity-85 motion-reduce:rotate-0",
-  "translate-x-[12px] -translate-y-[8px] rotate-6 opacity-70 motion-reduce:rotate-0",
-]
+/** The decorative cards' place behind the front, per layer: how far each
+ *  turns about the front card's left edge, lifting its right end, and how
+ *  much it fades. Nothing here animates, so the turn holds under reduced
+ *  motion — it is what makes the cards behind visible at all. */
+const pileLayers = ["-rotate-3 opacity-85", "-rotate-6 opacity-70"]
 
 type GhostItem = { key: string; name: string; icon: LucideIcon }
 
@@ -34,7 +32,7 @@ export function DragGhost({ payload }: { payload: DragPayload }) {
         <GhostCard
           aria-hidden
           className={cn(
-            "absolute inset-0 w-full origin-bottom-left",
+            "absolute inset-0 w-full origin-left",
             pileLayers[index]
           )}
           data-ghost="behind"
