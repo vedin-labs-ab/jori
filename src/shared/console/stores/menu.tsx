@@ -10,7 +10,7 @@ import {
 import { copyText } from "@/shared/console/copy/text"
 import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
 import { summaryOwner } from "@/shared/console/materials/owners"
-import { relativeTime, useNow } from "@/shared/console/time"
+import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
 import { formatJsonText } from "./json"
 import { type StoreDetail } from "./types"
 import { type ValueEditorView } from "./value/state"
@@ -78,19 +78,22 @@ function StoreProvenance({ store }: { store: StoreDetail }) {
 
   return (
     <MenuNote>
-      <MaterialOwnerCell compact owner={summaryOwner(store)} />
-      <span className="tabular-nums">
+      <div className="font-medium text-foreground">
+        <MaterialOwnerCell compact owner={summaryOwner(store)} />
+      </div>
+      <span className="tabular-nums" title={absoluteTime(store.updatedAt)}>
         Updated {relativeTime(store.updatedAt, now)} · v{store.version}
       </span>
     </MenuNote>
   )
 }
 
-/** A line the menu shows rather than offers: no hover, no focus, no
- *  selection. */
+/** Lines the menu shows rather than offers: no hover, no focus, no
+ *  selection. Set on the items' own inset so the text lines up with
+ *  their labels. */
 function MenuNote({ children }: { children: ReactNode }) {
   return (
-    <div className="grid gap-1 px-2 py-1.5 text-muted-foreground text-xs">
+    <div className="grid gap-0.5 px-2 py-1.5 text-muted-foreground text-xs">
       {children}
     </div>
   )
