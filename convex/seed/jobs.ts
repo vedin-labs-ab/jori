@@ -10,7 +10,7 @@ import {
 } from "./context"
 import { resolveFolders } from "./library/folders"
 import { resolveOwners } from "./people"
-import { resolvePlaces, slackIntegration } from "./places"
+import { findSlackIntegration, resolvePlaces } from "./places"
 
 // The standing work Vedin Labs has handed to Jori. Every one of these is
 // written without a scheduled function id, which is what actually makes a
@@ -125,10 +125,15 @@ const jobs: SeedJob[] = [
 export async function seedJobs(ctx: MutationCtx, seed: SeedContext) {
   const owners = await resolveOwners(ctx, seed)
   const folders = await resolveFolders(ctx, seed)
-  const integration = await slackIntegration(ctx, seed)
+  const integration = await findSlackIntegration(ctx, seed)
   const places = await resolvePlaces(ctx, seed)
 
   await clearOrganization(ctx, ["jobs"], seed.organizationId)
+
+  // Every seeded job works through Slack, so without it there are none.
+  if (integration === null) {
+    return 0
+  }
 
   for (const job of jobs) {
     const createdAt = daysAgo(seed, job.created, 12)

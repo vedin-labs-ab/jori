@@ -2,7 +2,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { clearOrganization, daysAgo, type SeedContext } from "./context"
 import { requireSeedPerson, resolvePeople, slackActor } from "./people"
-import { resolvePlaces, slackIntegration } from "./places"
+import { findSlackIntegration, resolvePlaces } from "./places"
 import { threads } from "./threads"
 
 // The observed side of the workspace: one conversation per channel and the
@@ -29,7 +29,7 @@ const summaries: Record<string, string> = {
 }
 
 export async function seedMessages(ctx: MutationCtx, seed: SeedContext) {
-  const integration = await slackIntegration(ctx, seed)
+  const integration = await findSlackIntegration(ctx, seed)
   const places = await resolvePlaces(ctx, seed)
   const people = await resolvePeople(ctx, seed)
 
@@ -38,6 +38,10 @@ export async function seedMessages(ctx: MutationCtx, seed: SeedContext) {
     ["messages", "conversations"],
     seed.organizationId
   )
+
+  if (integration === null) {
+    return 0
+  }
 
   for (const [name, place] of places) {
     await ctx.db.insert("conversations", {

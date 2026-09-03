@@ -2,7 +2,7 @@ import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { clearOrganization, type SeedContext } from "../context"
 import { slackActor } from "../people"
-import { resolvePlaces, slackIntegration } from "../places"
+import { findSlackIntegration, resolvePlaces } from "../places"
 import { eventKey, type WorkItem } from "./work"
 
 // The webhook deliveries behind event-triggered runs. Only the work that an
@@ -19,11 +19,15 @@ export async function seedEvents(
   seed: SeedContext,
   items: WorkItem[]
 ) {
-  const integration = await slackIntegration(ctx, seed)
+  const integration = await findSlackIntegration(ctx, seed)
   const places = await resolvePlaces(ctx, seed)
   const events = new Map<string, Id<"events">>()
 
   await clearOrganization(ctx, ["events"], seed.organizationId)
+
+  if (integration === null) {
+    return events
+  }
 
   for (const item of items) {
     const place = places.get(item.channel ?? "")
