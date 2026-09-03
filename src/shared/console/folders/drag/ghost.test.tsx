@@ -43,8 +43,8 @@ test("a pile fronts the first row, counts the rest, and fans two behind", () => 
     "Leads",
     "report.pdf",
   ])
-  expect(behind[0].className).toContain("rotate-3")
-  expect(behind[1].className).toContain("rotate-6")
+  expect(behind[0].className).toContain("-rotate-3")
+  expect(behind[1].className).toContain("-rotate-6")
   expect(behind[1].className).toContain("opacity-70")
   expect(screen.queryByText("Digest")).toBeNull()
 })
