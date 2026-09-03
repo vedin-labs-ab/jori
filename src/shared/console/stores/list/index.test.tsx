@@ -178,5 +178,5 @@ test("a row offers the store's whole menu, the way its page does", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Edit details", "Visibility…", "Move to folder…", "Archive"])
+  ).toEqual(["Rename…", "Visibility…", "Move to folder…", "Archive"])
 })

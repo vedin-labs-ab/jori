@@ -126,7 +126,7 @@ function StoresOverlays({
   )
 }
 
-/** What a row's Edit details and Sharing… open, hosted once for the list. */
+/** What a row's Rename… and Sharing… open, hosted once for the list. */
 function StoreRowDialogs({
   organizationId,
   page,

@@ -88,7 +88,7 @@ export function MaterialCoreItems({
     <>
       <DropdownMenuItem disabled={isPending} onSelect={onEdit}>
         <Pencil />
-        Edit details
+        Rename…
       </DropdownMenuItem>
       <DropdownMenuItem disabled={isPending} onSelect={onAccess}>
         <LockKeyhole />

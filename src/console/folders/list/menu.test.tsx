@@ -34,7 +34,7 @@ test("a filed table offers the menu its own list row offers, plus unfiling", () 
   openActions("Leads")
 
   expect(itemLabels()).toEqual([
-    "Edit details",
+    "Rename…",
     "Visibility…",
     "Move to folder…",
     "Remove from folder",
@@ -75,7 +75,7 @@ test("a filed file offers its own menu; the links resolve on demand", () => {
   // Open and Download wait on the file's URL, which a listing row does not
   // carry; everything the row already knows is there at once.
   expect(itemLabels()).toEqual([
-    "Edit details",
+    "Rename…",
     "Visibility…",
     "Move to folder…",
     "Remove from folder",

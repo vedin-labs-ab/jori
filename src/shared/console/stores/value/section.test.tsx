@@ -62,7 +62,7 @@ function renderValue(overrides: Partial<StoreDetail>) {
           titleMenu={(lead) => (
             <DropdownMenuContent>
               {lead}
-              <div>Edit details</div>
+              <div>Rename…</div>
             </DropdownMenuContent>
           )}
         />
@@ -108,7 +108,7 @@ test("the title menu leads with provenance, then the store's own tools", () => {
   expect(screen.queryByRole("menuitemradio")).toBeNull()
   expect(screen.getByRole("menuitem", { name: "Add schema…" })).toBeDefined()
   expect(screen.getByRole("menuitem", { name: "Copy value" })).toBeDefined()
-  expect(screen.getByText("Edit details")).toBeDefined()
+  expect(screen.getByText("Rename…")).toBeDefined()
 })
 
 test("a store with a form offers the view in the menu and copies its value", async () => {
