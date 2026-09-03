@@ -1,13 +1,6 @@
 {
   "include": ["**/*.ts", "**/*.tsx", "vite.config.ts"],
-  "exclude": [
-    ".agents",
-    ".claude",
-    ".trigger",
-    ".tanstack",
-    "dist",
-    "node_modules"
-  ],
+  "exclude": [".agents", ".claude", ".tanstack", "dist", "node_modules"],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

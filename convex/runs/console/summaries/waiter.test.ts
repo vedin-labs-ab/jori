@@ -18,7 +18,7 @@ test("summarizes active waiters for parked running runs", async () => {
             _creationTime: 1000,
             organizationId: "organization",
             runId: "run",
-            waitpointId: "waitpoint",
+            eventId: "event",
             status: "waiting",
             expiresAt: 2000,
             createdAt: 1000,

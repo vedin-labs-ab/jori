@@ -21,7 +21,6 @@ const namingRoots = new Set([
   "skills",
   "src",
   "test",
-  "trigger",
 ])
 const conventionalSourcePaths = new Set([
   "convex/auth.config.ts",

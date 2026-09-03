@@ -1,8 +1,8 @@
+import { sandboxWorkspace } from "../../../contracts/coding"
 import { validateReadOnlyGitArgs } from "./git"
 import { compactFailure } from "./output"
 import { shellQuote } from "./path"
 import { type SandboxRuntime } from "./types"
-import { sandboxWorkspace } from "./workspace"
 
 export async function runJsonScript(args: {
   input: Record<string, unknown>
@@ -21,6 +21,47 @@ export async function runJsonScript(args: {
   }
 
   return parseResult(result.stdout)
+}
+
+const commandRoot = "/tmp/jori/commands"
+
+export function workspaceBootstrapCommand() {
+  return [
+    "set -eu",
+    `mkdir -p ${shellQuote(sandboxWorkspace)}`,
+    `chmod 755 ${shellQuote(sandboxWorkspace)}`,
+  ].join("\n")
+}
+
+/** Where a backgrounded command leaves its stdout, stderr and exit code for
+ *  the action that collects it after the run wakes. */
+export function commandDirectory(token: string) {
+  return `${commandRoot}/${token}`
+}
+
+/** A long command outlives the action that started it, so it writes its own
+ *  output aside and posts its token back when it is done. The run parks on
+ *  that callback rather than holding a connection open. */
+export function commandWrapperScript(args: {
+  callbackUrl: string
+  command: string
+  token: string
+}) {
+  const directory = commandDirectory(args.token)
+  const body = shellQuote(JSON.stringify({ token: args.token }))
+
+  return [
+    `mkdir -p ${shellQuote(directory)}`,
+    // A subshell keeps the command's own `exit` from skipping the two lines
+    // that report it finished.
+    "(",
+    args.command,
+    `) >${shellQuote(`${directory}/out`)} 2>${shellQuote(`${directory}/err`)}`,
+    `printf '%s' "$?" >${shellQuote(`${directory}/exit`)}`,
+    // The waiter expires on its own, so a callback that cannot be delivered
+    // must not turn into a failed command.
+    `curl -fsS -m 10 -X POST -H 'content-type: application/json' --data ${body} ${shellQuote(args.callbackUrl)} >/dev/null 2>&1 || true`,
+  ].join("\n")
 }
 
 export function temporaryGitCredentialPath(label: string) {

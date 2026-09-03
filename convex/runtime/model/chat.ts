@@ -1,18 +1,15 @@
 import {
-  createOpenRouter,
-  type OpenRouterChatSettings,
-} from "@openrouter/ai-sdk-provider"
-import {
-  type ModelMessage as AiModelMessage,
-  generateText,
-  jsonSchema,
-  type ToolSet,
-  tool,
-} from "ai"
-import { joriModel } from "../../contracts/billing"
-import { toJsonObject } from "../../contracts/json"
-import { requireOpenRouterRuntimeConfig } from "../openrouter"
+  type ChatFunctionTool,
+  type ChatMessages,
+  type ChatRequest,
+  type ChatResult,
+  type ChatToolCall,
+} from "@openrouter/sdk/models"
+import { joriModel } from "../../../contracts/billing"
+import { decodeJsonObject, type JsonObject } from "../../../contracts/json"
+import { sendOpenRouterChat } from "../../model/openrouter"
 import { ingestReasoning } from "./reasoning"
+import { readModelTokens } from "./tokens"
 import {
   type ModelMessage,
   type ModelResponse,
@@ -20,176 +17,154 @@ import {
   type ModelTool,
   type ModelToolCall,
 } from "./types"
-import { readModelTokens } from "./usage"
 
 // The first turn produces the start update and is optimized for latency; later
 // turns do the actual work and reason harder. Effort levels are code config.
 const firstTurnReasoningEffort = "low"
 const defaultReasoningEffort = "medium"
-const agentProviderRouting = {
-  require_parameters: true,
-} satisfies NonNullable<OpenRouterChatSettings["provider"]>
 
-export class OpenRouterModelRuntime implements ModelRuntime {
-  private readonly config = {
-    ...requireOpenRouterRuntimeConfig(),
-    model: joriModel,
-  }
-  private readonly provider = createOpenRouter({
-    apiKey: this.config.apiKey,
-    appName: this.config.appName,
-    appUrl: this.config.appUrl,
-  })
+type ModelSettings = Pick<ChatRequest, "provider" | "reasoning">
 
+export class OpenRouterModel implements ModelRuntime {
   async complete(args: {
     firstTurn: boolean
     messages: ModelMessage[]
     tools: ModelTool[]
   }): Promise<ModelResponse> {
-    const prompt = toAiPrompt(args.messages)
-    const response = await generateText({
-      ...prompt,
-      model: this.provider.chat(
-        this.config.model,
-        createOpenRouterModelSettings(args.firstTurn)
-      ),
+    const result = await sendOpenRouterChat({
+      messages: toChatMessages(args.messages),
+      model: joriModel,
       toolChoice: args.tools.length === 0 ? "none" : "auto",
-      tools: toAiTools(args.tools),
+      tools: args.tools.map(toChatTool),
+      ...createOpenRouterModelSettings(args.firstTurn),
     })
-    const toolCalls = response.toolCalls.flatMap(readToolCall)
-    const reasoning = ingestReasoning(this.config.model, response.reasoningText)
-    const tokens = readModelTokens(response)
 
-    if (toolCalls.length === 0) {
-      return {
-        content: response.text,
-        reasoning,
-        tokens,
-        type: "stop",
-      }
-    }
-
-    return {
-      content: response.text === "" ? null : response.text,
-      reasoning,
-      toolCalls,
-      tokens,
-      type: "tool_calls",
-    }
+    return readModelResponse(result)
   }
 }
 
-export function createOpenRouterModelSettings(
-  firstTurn: boolean
-): OpenRouterChatSettings {
+function createOpenRouterModelSettings(firstTurn: boolean): ModelSettings {
   return {
-    provider: agentProviderRouting,
+    // Providers that silently drop tool definitions cannot run the loop.
+    provider: { requireParameters: true },
     reasoning: {
       effort: firstTurn ? firstTurnReasoningEffort : defaultReasoningEffort,
     },
   }
 }
 
-type NonSystemModelMessage = Exclude<ModelMessage, { role: "system" }>
+function readModelResponse(result: ChatResult): ModelResponse {
+  const choice = result.choices[0]
 
-function toAiPrompt(messages: ModelMessage[]) {
-  const system: string[] = []
-  const promptMessages: NonSystemModelMessage[] = []
+  if (choice === undefined) {
+    throw new Error("The model returned no choices.")
+  }
 
-  for (const message of messages) {
-    if (message.role === "system") {
-      system.push(message.content)
-    } else {
-      promptMessages.push(message)
-    }
+  const content = readText(choice.message.content)
+  const reasoning = ingestReasoning(joriModel, choice.message.reasoning)
+  const tokens = readModelTokens(result.usage)
+  const toolCalls = (choice.message.toolCalls ?? []).flatMap(readToolCall)
+
+  if (toolCalls.length === 0) {
+    return { content, reasoning, tokens, type: "stop" }
   }
 
   return {
-    messages: promptMessages.map(toAiMessage),
-    ...(system.length === 0 ? {} : { system: system.join("\n\n") }),
+    content: content === "" ? null : content,
+    reasoning,
+    toolCalls,
+    tokens,
+    type: "tool_calls",
   }
 }
 
-function toAiMessage(message: NonSystemModelMessage): AiModelMessage {
+// Only plain text carries meaning to the loop, so structured content parts
+// read as no text at all.
+function readText(content: unknown) {
+  return typeof content === "string" ? content : ""
+}
+
+function toChatMessages(messages: ModelMessage[]): ChatMessages[] {
+  const instructions: string[] = []
+  const turns: ChatMessages[] = []
+
+  for (const message of messages) {
+    if (message.role === "system") {
+      instructions.push(message.content)
+      continue
+    }
+
+    turns.push(toChatMessage(message))
+  }
+
+  if (instructions.length === 0) {
+    return turns
+  }
+
+  return [{ content: instructions.join("\n\n"), role: "system" }, ...turns]
+}
+
+function toChatMessage(message: ModelMessage): ChatMessages {
   if (message.role === "assistant") {
     return {
-      content: assistantContent(message),
+      content: message.content,
       role: "assistant",
+      toolCalls: message.toolCalls?.map(toChatToolCall),
     }
   }
 
   if (message.role === "tool") {
     return {
-      content: [
-        {
-          output: {
-            type: "text",
-            value: message.content,
-          },
-          toolCallId: message.toolCallId,
-          toolName: message.toolName,
-          type: "tool-result",
-        },
-      ],
+      content: message.content,
       role: "tool",
+      toolCallId: message.toolCallId,
     }
   }
 
+  return { content: message.content, role: message.role }
+}
+
+function toChatToolCall(toolCall: ModelToolCall): ChatToolCall {
   return {
-    content: message.content,
-    role: "user",
+    function: {
+      arguments: JSON.stringify(toolCall.args),
+      name: toolCall.name,
+    },
+    id: toolCall.id,
+    type: "function",
   }
 }
 
-function assistantContent(
-  message: Extract<ModelMessage, { role: "assistant" }>
-) {
-  const text = message.content ?? ""
-  const toolCalls = message.toolCalls?.map((toolCall) => ({
-    input: toolCall.args,
-    toolCallId: toolCall.id,
-    toolName: toolCall.name,
-    type: "tool-call" as const,
-  }))
-
-  return toolCalls === undefined || toolCalls.length === 0
-    ? text
-    : [...(text === "" ? [] : [{ text, type: "text" as const }]), ...toolCalls]
+function toChatTool(modelTool: ModelTool): ChatFunctionTool {
+  return {
+    function: {
+      description: modelTool.description,
+      name: modelTool.name,
+      parameters: modelTool.inputSchema,
+    },
+    type: "function",
+  }
 }
 
-function toAiTools(tools: ModelTool[]): ToolSet {
-  return Object.fromEntries(
-    tools.map((modelTool) => [
-      modelTool.name,
-      tool({
-        description: modelTool.description,
-        inputSchema: jsonSchema(modelTool.inputSchema),
-      }),
-    ])
-  )
-}
+function readToolCall(toolCall: ChatToolCall): ModelToolCall[] {
+  const args = readToolArguments(toolCall.function.arguments)
 
-function readToolCall(toolCall: {
-  input: unknown
-  invalid?: boolean
-  toolCallId: string
-  toolName: string
-}): ModelToolCall[] {
-  if (toolCall.invalid === true) {
+  // Arguments that are not a JSON object name no input any tool can run, so
+  // the call is dropped instead of repaired.
+  if (args === undefined) {
     return []
   }
 
-  return [
-    {
-      args: readToolInput(toolCall.input),
-      id: toolCall.toolCallId,
-      name: toolCall.toolName,
-    },
-  ]
+  return [{ args, id: toolCall.id, name: toolCall.function.name }]
 }
 
-function readToolInput(value: unknown) {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? toJsonObject(value)
-    : {}
+function readToolArguments(value: string): JsonObject | undefined {
+  // Tools without parameters are called with an empty argument string.
+  const text = value.trim() === "" ? "{}" : value
+
+  try {
+    return decodeJsonObject(text)
+  } catch {
+    return undefined
+  }
 }

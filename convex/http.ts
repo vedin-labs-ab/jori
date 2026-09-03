@@ -33,17 +33,10 @@ http.route({ pathPrefix: "/api/auth/", method: "GET", handler: handleAuth })
 http.route({ pathPrefix: "/api/auth/", method: "POST", handler: handleAuth })
 
 route(
-  "/jori/github/clone-credentials",
+  "/jori/commands",
   "POST",
-  () => import("./broker/mcp"),
-  (module) => module.handleGitHubCloneCredentialsRequest
-)
-
-route(
-  "/jori/files",
-  "POST",
-  () => import("./broker/files"),
-  (module) => module.handleFileUploadRequest
+  () => import("./runs/execution/waiters/http"),
+  (module) => module.handleCommandCallback
 )
 
 route(

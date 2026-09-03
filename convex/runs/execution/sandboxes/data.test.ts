@@ -1,10 +1,12 @@
 import { expect, test } from "vitest"
 import { id } from "../../../../test/convex/database"
+import { type Doc } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import {
   claimReusableSandbox,
   releaseIdleSandbox,
   reserveExpiredSandboxCleanup,
+  settleRunSandbox,
   upsertSandbox,
 } from "./data"
 
@@ -36,6 +38,16 @@ test("releases and claims idle sandboxes by conversation", async () => {
     status: "idle",
     conversationId: "conversation-1",
   })
+  expect(ctx.scheduled).toEqual([
+    {
+      at: lease?.expiresAt,
+      args: {
+        expiresAt: lease?.expiresAt,
+        externalId: "sandbox-external",
+        runId: "run-1",
+      },
+    },
+  ])
 
   ctx.rows.set("run-2", run("run-2", "running"))
   ctx.rows.set("session-2", session("session-2", "run-2", "conversation-1"))
@@ -83,17 +95,44 @@ test("expired cleanup only reserves matching idle leases", async () => {
   expect(row(ctx, "sandbox-1")).not.toHaveProperty("expiresAt")
 })
 
+test("a failed run's sandbox is killed rather than left idle", async () => {
+  const ctx = fakeMutationCtx([
+    ["runs", run("run-1", "failed")],
+    ["sandboxes", sandbox({ runId: "run-1", status: "active" })],
+  ])
+
+  await expect(
+    settleRunSandbox(ctx, ctx.rows.get("run-1") as unknown as Doc<"runs">)
+  ).resolves.toBeNull()
+
+  expect(ctx.scheduled).toEqual([
+    { at: 0, args: { externalId: "sandbox-external", runId: "run-1" } },
+  ])
+  expect(row(ctx, "sandbox-1")).toMatchObject({ status: "active" })
+})
+
 type Seed = [string, Record<string, unknown>]
 
 type FakeCtx = MutationCtx & {
   rows: Map<string, Record<string, unknown>>
+  scheduled: Array<{ at: number; args: unknown }>
 }
 
 function fakeMutationCtx(seed: Seed[] = []): FakeCtx {
   const rows = new Map(seed.map(([, doc]) => [String(doc._id), doc]))
+  const scheduled: Array<{ at: number; args: unknown }> = []
 
   return {
     rows,
+    scheduled,
+    scheduler: {
+      runAfter: async (at: number, _reference: unknown, args: unknown) => {
+        scheduled.push({ at, args })
+      },
+      runAt: async (at: number, _reference: unknown, args: unknown) => {
+        scheduled.push({ at, args })
+      },
+    },
     db: {
       get: async (rowId: string) => rows.get(rowId) ?? null,
       insert: async (table: string, doc: Record<string, unknown>) => {
@@ -160,7 +199,7 @@ function row(ctx: FakeCtx, rowId: string) {
   return ctx.rows.get(rowId)
 }
 
-function run(idValue: string, status: "completed" | "running") {
+function run(idValue: string, status: "completed" | "failed" | "running") {
   return {
     _id: id<"runs">(idValue),
     _creationTime: 0,

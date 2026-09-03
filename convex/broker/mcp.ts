@@ -14,68 +14,15 @@ import { canUseJobTool } from "../jobs/access"
 import { findRunIntegration, inputAccess } from "../runs/agent/input"
 import { toolExecutionType } from "../runs/agent/tools/policy"
 import {
-  formatProviderError,
-  jsonError,
-  unauthorizedResponse,
-} from "../shared/http"
-import { requiredString } from "../shared/input"
-import {
   type ApprovalBrokerContext,
   createPromptedToolApproval,
 } from "./approval"
-import { authenticateBrokerRequest } from "./auth"
 import { listCapabilities } from "./capabilities"
 import { normalizeBrokerToolInput } from "./input"
 import { callJoriTool } from "./jori"
-import { callProviderTool, createGitHubCloneCredentials } from "./tools"
+import { callProviderTool } from "./tools"
 
 type BrokerContext = ApprovalBrokerContext
-
-export async function handleGitHubCloneCredentialsRequest(
-  ctx: ActionCtx,
-  request: Request
-) {
-  const context = await authenticateBrokerRequest(ctx, request)
-
-  if (context === null) {
-    return unauthorizedResponse()
-  }
-
-  const args = normalizeBrokerToolInput(
-    "github_clone_repository",
-    await request.json().catch(() => null)
-  )
-  const cloneTool = {
-    surface: "github" as const,
-    tool: "github_clone_repository",
-  }
-  authorizeTool(context, cloneTool)
-  const integration = await authorizeSurfaceTool(context, cloneTool)
-
-  if (integration === null) {
-    return unauthorizedResponse()
-  }
-
-  try {
-    return Response.json(
-      createGitHubCloneCredentials({
-        integration,
-        owner: requiredString(args.owner, "owner"),
-        repo: requiredString(args.repo, "repo"),
-      }),
-      {
-        headers: {
-          "cache-control": "no-store",
-        },
-      }
-    )
-  } catch (error) {
-    return jsonError(
-      formatProviderError(error, "GitHub clone credentials request failed"),
-      400
-    )
-  }
-}
 
 type BrokerToolRequest = {
   surface: ToolSurface
@@ -178,7 +125,7 @@ async function requireSurfaceIntegration(
   return integration
 }
 
-function authorizeTool(
+export function authorizeTool(
   context: BrokerContext,
   request: {
     surface: ToolSurface
@@ -218,7 +165,7 @@ function authorizeTool(
   return mode
 }
 
-async function authorizeSurfaceTool(
+export async function authorizeSurfaceTool(
   context: BrokerContext,
   request: {
     surface: Exclude<ToolSurface, "jori">

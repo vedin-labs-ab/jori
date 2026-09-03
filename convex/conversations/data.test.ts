@@ -1,4 +1,4 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import {
   fakeMutationCtx,
   inserted,
@@ -6,7 +6,12 @@ import {
 } from "../../test/convex/conversations"
 import { id } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { startRun } from "../runs/execution/workflow"
 import { startMessageRun } from "./data"
+
+// Starting a run hands it to the workflow component, which needs a real
+// backend; these tests are about the rows the start writes.
+vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 
 const expectedCursor = {
   message: { createdAt: 0, messageId: "message" },
@@ -38,16 +43,7 @@ test("starts new conversation message runs as mentions", async () => {
       runId: "runs-1",
     }),
   ])
-  expect(inserted(ctx, "outbox")).toEqual([
-    expect.objectContaining({
-      key: "run:runs-1",
-      operation: expect.objectContaining({
-        runId: "runs-1",
-        type: "run.start",
-      }),
-      status: "pending",
-    }),
-  ])
+  expect(startRun).toHaveBeenCalledWith(ctx, "runs-1")
 })
 
 test("continues active conversation sessions without starting another run", async () => {

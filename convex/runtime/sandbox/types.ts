@@ -8,6 +8,14 @@ export type SandboxCommandResult = {
   exitCode: number
   stderr: string
   stdout: string
+  timedOut?: true
+}
+
+/** A command still running in the sandbox: the pid to kill it by, and the
+ *  secret its wrapper posts back with once it finishes. */
+export type SandboxCommandHandle = {
+  pid: number
+  token: string
 }
 
 export type SandboxCloneRepositoryInput = {
@@ -19,21 +27,31 @@ export type SandboxCloneRepositoryInput = {
   username: string
 }
 
+export type SandboxCloneResult = {
+  directory: string
+  git: true
+  ref?: string
+  remoteUrl: string
+  repository: string
+}
+
 export type SandboxWriteFile = {
   content: string | Uint8Array
   path: string
 }
 
 export type SandboxRuntime = {
-  cleanup(): Promise<void>
-  cloneRepository(input: SandboxCloneRepositoryInput): Promise<{
-    directory: string
-    git: true
-    ref?: string
-    remoteUrl: string
-    repository: string
-  }>
+  cloneRepository(
+    input: SandboxCloneRepositoryInput
+  ): Promise<SandboxCloneResult>
+  finishCommand(
+    handle: SandboxCommandHandle,
+    options: { kill: boolean }
+  ): Promise<SandboxCommandResult>
   readFile(path: string): Promise<Uint8Array>
   runCommand(input: SandboxCommandInput): Promise<SandboxCommandResult>
+  startCommand(
+    input: SandboxCommandInput
+  ): Promise<SandboxCommandResult | SandboxCommandHandle>
   writeFiles(files: SandboxWriteFile[]): Promise<void>
 }

@@ -24,9 +24,9 @@ import { identities } from "./persons/identity/schema"
 import { persons } from "./persons/schema"
 import { places } from "./places/schema"
 import { reactions } from "./reactions/schema"
-import { outbox } from "./runs/execution/outbox/schema"
 import { sandboxes } from "./runs/execution/sandboxes/schema"
 import { traces } from "./runs/execution/traces/schema"
+import { transcript } from "./runs/execution/transcript/schema"
 import { waiters } from "./runs/execution/waiters/schema"
 import { runs } from "./runs/schema"
 import { sessions } from "./sessions/schema"
@@ -66,7 +66,7 @@ export default defineSchema({
   approvals,
   transitions,
   traces,
-  outbox,
+  transcript,
   waiters,
   sandboxes,
   permissions,

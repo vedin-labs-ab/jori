@@ -1,3 +1,8 @@
+/** The one directory the coding tools work inside. The sandbox template
+ *  creates it and every tool path resolves against it, so both sides of the
+ *  sandbox read the name from here. */
+export const sandboxWorkspace = "/home/user/workspace"
+
 type CodingToolDefinition = {
   description: string
   inputSchema: Record<string, unknown>

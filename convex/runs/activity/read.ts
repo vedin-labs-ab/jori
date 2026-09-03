@@ -37,10 +37,6 @@ export function readTraceData(trace: Doc<"traces">) {
   return "data" in trace ? trace.data : undefined
 }
 
-export function traceAttempt(trace: Doc<"traces">) {
-  return "attempt" in trace ? trace.attempt : 0
-}
-
 export function traceSequence(trace: Doc<"traces">) {
   return "sequence" in trace ? trace.sequence : undefined
 }

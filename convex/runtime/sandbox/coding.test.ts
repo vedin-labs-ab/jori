@@ -1,25 +1,9 @@
-import { spawnSync } from "node:child_process"
 import fs from "node:fs"
-import os from "node:os"
 import path from "node:path"
-import { afterEach, expect, test } from "vitest"
-import { executeCodingTool } from "./coding"
-import { sandboxClonePath } from "./path"
-import {
-  type SandboxCloneRepositoryInput,
-  type SandboxCommandInput,
-  type SandboxRuntime,
-  type SandboxWriteFile,
-} from "./types"
-import { sandboxWorkspace } from "./workspace"
-
-const roots: string[] = []
-
-afterEach(() => {
-  for (const root of roots.splice(0)) {
-    fs.rmSync(root, { force: true, recursive: true })
-  }
-})
+import { expect, test } from "vitest"
+import { createGitSandbox, createLocalSandbox } from "../../../test/sandbox"
+import { executeCodingTool, finishBash, isParkedCommand } from "./coding"
+import { type SandboxRuntime } from "./types"
 
 test("reads a bounded line range from a workspace file", async () => {
   const sandbox = createLocalSandbox({
@@ -190,91 +174,30 @@ test("guards git writes inside bash commands", async () => {
   })
 })
 
-function createLocalSandbox(files: Record<string, string>) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "jori-tools-"))
-  roots.push(root)
+test("parks a slow bash command and collects it on the wake", async () => {
+  const sandbox = createLocalSandbox({ "src/file.txt": "ok" }, true)
 
-  for (const [file, content] of Object.entries(files)) {
-    const target = path.join(root, file)
-    fs.mkdirSync(path.dirname(target), { recursive: true })
-    fs.writeFileSync(target, content)
-  }
+  await expect(
+    finishBash(sandbox, await parkBash(sandbox, "cat src/file.txt"), {
+      kill: false,
+    })
+  ).resolves.toMatchObject({ exitCode: 0, stdout: "ok" })
+  // A killed command never wrote its exit code, so it reads as a timeout.
+  await expect(
+    finishBash(sandbox, await parkBash(sandbox, "true"), { kill: true })
+  ).resolves.toMatchObject({ exitCode: 124 })
+})
 
-  return new LocalSandbox(root)
-}
-
-function createGitSandbox() {
-  const sandbox = createLocalSandbox({ "file.txt": "hello\n" })
-  runGit(sandbox.root, "init")
-  runGit(sandbox.root, "config", "user.email", "jori@example.com")
-  runGit(sandbox.root, "config", "user.name", "Jori")
-  runGit(sandbox.root, "add", "file.txt")
-  runGit(sandbox.root, "commit", "-m", "initial")
-
-  return sandbox
-}
-
-function runGit(cwd: string, ...args: string[]) {
-  const result = spawnSync("git", args, {
-    cwd,
-    encoding: "utf8",
+async function parkBash(sandbox: SandboxRuntime, command: string) {
+  const outcome = await executeCodingTool({
+    input: { command },
+    sandbox,
+    tool: "bash",
   })
 
-  if (result.status !== 0) {
-    throw new Error(result.stderr)
-  }
-}
-
-class LocalSandbox implements SandboxRuntime {
-  constructor(readonly root: string) {}
-
-  async runCommand(input: SandboxCommandInput) {
-    const result = spawnSync("bash", ["-lc", this.mapCommand(input.command)], {
-      cwd: this.mapPath(input.cwd ?? sandboxWorkspace),
-      encoding: "utf8",
-      timeout: input.timeoutMs,
-    })
-
-    return {
-      exitCode: result.status ?? 1,
-      stderr: result.stderr,
-      stdout: result.stdout,
-    }
+  if (!isParkedCommand(outcome)) {
+    throw new Error("Expected the command to park.")
   }
 
-  async readFile(pathValue: string) {
-    return fs.readFileSync(this.mapPath(pathValue))
-  }
-
-  async writeFiles(files: SandboxWriteFile[]) {
-    for (const file of files) {
-      const target = this.mapPath(file.path)
-      fs.mkdirSync(path.dirname(target), { recursive: true })
-      fs.writeFileSync(target, file.content)
-    }
-  }
-
-  async cleanup() {}
-
-  async cloneRepository(input: SandboxCloneRepositoryInput) {
-    return {
-      directory: sandboxClonePath({
-        repository: input.repository,
-        value: input.directory,
-      }),
-      git: true as const,
-      remoteUrl: input.remoteUrl,
-      repository: input.repository,
-    }
-  }
-
-  private mapCommand(command: string) {
-    return command.replaceAll(sandboxWorkspace, this.root)
-  }
-
-  private mapPath(pathValue: string) {
-    return pathValue.startsWith(sandboxWorkspace)
-      ? pathValue.replace(sandboxWorkspace, this.root)
-      : pathValue
-  }
+  return outcome.parked
 }

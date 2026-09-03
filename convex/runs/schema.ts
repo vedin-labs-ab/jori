@@ -125,7 +125,8 @@ export const runs = defineTable({
   access: v.optional(accessValidator),
   snapshot: runSnapshot,
   status: runStatus,
-  workerId: v.optional(v.string()),
+  /** The durable workflow running this run, cleared when it completes. */
+  workflowId: v.optional(v.string()),
   error: v.optional(v.string()),
   /** Outcome returned via finish_run; parents read it from wait_for_agents. */
   result: v.optional(v.string()),

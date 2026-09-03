@@ -1,17 +1,84 @@
+import {
+  createEvent,
+  type EventId,
+  sendEvent,
+  type WorkflowId,
+} from "@convex-dev/workflow"
 import { type Infer } from "convex/values"
 import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
-import { type Id } from "../../../_generated/dataModel"
+import { components, internal } from "../../../_generated/api"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
-import { enqueueOperation } from "../outbox/data"
 import {
   type waiterCondition,
   type waiterReason,
   type waiterSubject,
+  waiterWake,
 } from "./schema"
 
 type WaiterReason = Infer<typeof waiterReason>
 type WaiterSubject = Infer<typeof waiterSubject>
 type WaiterCondition = Infer<typeof waiterCondition>
+type WaiterWake = Infer<typeof waiterWake>
+
+const eventName = "wake"
+
+/**
+ * Park a run: one workflow event the handler awaits, one scheduled expiry, and
+ * one row naming both. Every later transition goes through `settleWaiter`, so
+ * the event is sent exactly once.
+ */
+export async function parkRun(
+  ctx: MutationCtx,
+  args: {
+    runId: Id<"runs">
+    sessionId?: Id<"sessions">
+    expiresAt: number
+    condition?: WaiterCondition
+    token?: string
+  }
+) {
+  const run = await ctx.db.get(args.runId)
+
+  if (run === null) {
+    throw new Error("Run not found.")
+  }
+
+  if (run.workflowId === undefined) {
+    throw new Error("Run has no workflow to park.")
+  }
+
+  await cancelStaleWaiters(ctx, args.runId)
+  await validateCondition(ctx, run, args.condition)
+
+  const eventId = await createEvent(ctx, components.workflow, {
+    name: eventName,
+    workflowId: run.workflowId as WorkflowId,
+  })
+  const now = Date.now()
+  const waiterId = await ctx.db.insert("waiters", {
+    organizationId: run.organizationId,
+    runId: args.runId,
+    ...(args.sessionId === undefined ? {} : { sessionId: args.sessionId }),
+    eventId,
+    ...(args.token === undefined ? {} : { token: args.token }),
+    status: "waiting",
+    expiresAt: args.expiresAt,
+    ...(args.condition === undefined ? {} : { condition: args.condition }),
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  await ctx.db.patch(waiterId, {
+    functionId: await ctx.scheduler.runAt(
+      args.expiresAt,
+      internal.runs.execution.waiters.records.expire,
+      { waiterId }
+    ),
+  })
+
+  return { waiterId, eventId }
+}
 
 export async function wakeRun(
   ctx: MutationCtx,
@@ -59,6 +126,103 @@ export async function wakeParentForTerminalRun(
   })
 }
 
+/** A command reports back over HTTP with the token it was started with. */
+export async function wakeCommandWaiter(ctx: MutationCtx, token: string) {
+  const waiter = await ctx.db
+    .query("waiters")
+    .withIndex("by_token", (query) => query.eq("token", token))
+    .first()
+
+  if (waiter === null || waiter.status !== "waiting") {
+    return false
+  }
+
+  return await wakeWaiter(ctx, waiter, { reason: "resolved" })
+}
+
+export async function wakeWaiter(
+  ctx: MutationCtx,
+  waiter: Doc<"waiters">,
+  args: { reason: WaiterReason; subject?: WaiterSubject }
+) {
+  return await settleWaiter(ctx, waiter, { ...args, status: "woken" })
+}
+
+/** The run re-checked its condition and found the wait already satisfied, so
+ *  it never awaited the event. Close the waiter without sending one. */
+export async function resolveWaiter(ctx: MutationCtx, waiterId: Id<"waiters">) {
+  const waiter = await ctx.db.get(waiterId)
+
+  if (waiter === null || waiter.status !== "waiting") {
+    return null
+  }
+
+  await closeWaiter(ctx, waiter, { reason: "resolved", status: "woken" })
+
+  return null
+}
+
+export async function expireWaiter(ctx: MutationCtx, waiterId: Id<"waiters">) {
+  const waiter = await ctx.db.get(waiterId)
+
+  if (waiter !== null) {
+    await settleWaiter(ctx, waiter, { reason: "expired", status: "expired" })
+  }
+
+  return null
+}
+
+async function settleWaiter(
+  ctx: MutationCtx,
+  waiter: Doc<"waiters">,
+  args: {
+    reason: WaiterReason
+    status: "expired" | "woken"
+    subject?: WaiterSubject
+  }
+) {
+  if (waiter.status !== "waiting") {
+    return false
+  }
+
+  await closeWaiter(ctx, waiter, args)
+
+  const value: WaiterWake = {
+    reason: args.reason,
+    waiter: waiter._id,
+    ...(args.subject === undefined ? {} : { subject: args.subject }),
+  }
+
+  await sendEvent(ctx, components.workflow, {
+    id: waiter.eventId as EventId<typeof eventName>,
+    validator: waiterWake,
+    value,
+  })
+
+  return true
+}
+
+async function closeWaiter(
+  ctx: MutationCtx,
+  waiter: Doc<"waiters">,
+  args: {
+    reason: WaiterReason
+    status: "cancelled" | "expired" | "woken"
+    subject?: WaiterSubject
+  }
+) {
+  await ctx.db.patch(waiter._id, {
+    status: args.status,
+    reason: args.reason,
+    subject: args.subject,
+    updatedAt: Date.now(),
+  })
+
+  if (waiter.functionId !== undefined) {
+    await ctx.scheduler.cancel(waiter.functionId)
+  }
+}
+
 async function findActiveWaiter(ctx: MutationCtx, runId: Id<"runs">) {
   return await ctx.db
     .query("waiters")
@@ -66,54 +230,6 @@ async function findActiveWaiter(ctx: MutationCtx, runId: Id<"runs">) {
       query.eq("runId", runId).eq("status", "waiting")
     )
     .first()
-}
-
-export async function createWaiter(
-  ctx: MutationCtx,
-  args: {
-    runId: Id<"runs">
-    sessionId?: Id<"sessions">
-    waitpointId: string
-    expiresAt: number
-    condition?: WaiterCondition
-  }
-): Promise<Id<"waiters">> {
-  const run = await ctx.db.get(args.runId)
-
-  if (run === null) {
-    throw new Error("Run not found.")
-  }
-
-  await cancelStaleWaiters(ctx, args.runId)
-  await validateCondition(ctx, run, args.condition)
-
-  const now = Date.now()
-
-  return await ctx.db.insert("waiters", {
-    organizationId: run.organizationId,
-    runId: args.runId,
-    ...(args.sessionId === undefined ? {} : { sessionId: args.sessionId }),
-    waitpointId: args.waitpointId,
-    status: "waiting",
-    expiresAt: args.expiresAt,
-    ...(args.condition === undefined ? {} : { condition: args.condition }),
-    createdAt: now,
-    updatedAt: now,
-  })
-}
-
-export async function expireWaiter(ctx: MutationCtx, waiterId: Id<"waiters">) {
-  const waiter = await ctx.db.get(waiterId)
-
-  if (waiter !== null && waiter.status === "waiting") {
-    await ctx.db.patch(waiter._id, {
-      status: "expired",
-      reason: "expired",
-      updatedAt: Date.now(),
-    })
-  }
-
-  return null
 }
 
 async function cancelStaleWaiters(ctx: MutationCtx, runId: Id<"runs">) {
@@ -124,10 +240,9 @@ async function cancelStaleWaiters(ctx: MutationCtx, runId: Id<"runs">) {
     )
 
   for await (const waiter of stale) {
-    await ctx.db.patch(waiter._id, {
-      status: "cancelled",
+    await closeWaiter(ctx, waiter, {
       reason: "cancelled",
-      updatedAt: Date.now(),
+      status: "cancelled",
     })
   }
 }
@@ -137,7 +252,7 @@ async function validateCondition(
   run: { _id: Id<"runs">; organizationId: string },
   condition: WaiterCondition | undefined
 ) {
-  if (condition === undefined) {
+  if (condition === undefined || condition.kind === "command") {
     return
   }
 
@@ -166,31 +281,6 @@ async function allRunsTerminal(ctx: MutationCtx, runIds: Id<"runs">[]) {
       return false
     }
   }
-
-  return true
-}
-
-async function wakeWaiter(
-  ctx: MutationCtx,
-  waiter: NonNullable<Awaited<ReturnType<typeof findActiveWaiter>>>,
-  args: { reason: WaiterReason; subject?: WaiterSubject }
-) {
-  await ctx.db.patch(waiter._id, {
-    status: "woken",
-    reason: args.reason,
-    subject: args.subject,
-    updatedAt: Date.now(),
-  })
-  await enqueueOperation(ctx, {
-    organizationId: waiter.organizationId,
-    key: `waiter:${waiter._id}:wake`,
-    operation: {
-      type: "waiter.wake",
-      waiterId: waiter._id,
-      reason: args.reason,
-      ...(args.subject === undefined ? {} : { subject: args.subject }),
-    },
-  })
 
   return true
 }

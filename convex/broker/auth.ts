@@ -3,36 +3,9 @@ import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { executionPrincipalPersonId } from "../runs/principal"
-import { timingSafeEqual } from "../shared/crypto"
-import { readEnvironmentVariable } from "../shared/environment"
 import { type ApprovalBrokerContext } from "./approval"
 
 type BrokerContext = ApprovalBrokerContext
-
-export async function authenticateBrokerRequest(
-  ctx: ActionCtx,
-  request: Request
-): Promise<BrokerContext | null> {
-  const runId = request.headers.get("x-jori-run-id")
-  const secret = request.headers.get("x-jori-worker-secret")?.trim()
-
-  if (
-    runId === null ||
-    runId.trim() === "" ||
-    secret === undefined ||
-    !isWorkerSecret(secret)
-  ) {
-    return null
-  }
-
-  const run = await ctx
-    .runQuery(internal.runs.records.get, {
-      runId: runId as Doc<"runs">["_id"],
-    })
-    .catch(() => null)
-
-  return run?.status === "running" ? await loadRunBrokerContext(ctx, run) : null
-}
 
 export async function loadRunBrokerContext(
   ctx: ActionCtx,
@@ -74,10 +47,4 @@ export async function loadRunBrokerContext(
     run,
     toolModes: resolveToolModes(permissions),
   }
-}
-
-function isWorkerSecret(secret: string) {
-  const expected = readEnvironmentVariable("JORI_WORKER_SECRET")
-
-  return expected !== undefined && timingSafeEqual(secret, expected)
 }

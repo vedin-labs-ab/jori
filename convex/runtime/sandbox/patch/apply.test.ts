@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
+import { sandboxWorkspace } from "../../../../contracts/coding"
 import { type SandboxRuntime, type SandboxWriteFile } from "../types"
-import { sandboxWorkspace } from "../workspace"
 import { applyWorkspacePatch } from "./apply"
 
 test("routes Begin Patch envelopes through file operations", async () => {

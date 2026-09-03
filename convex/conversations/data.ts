@@ -3,8 +3,8 @@ import { type MutationCtx } from "../_generated/server"
 import { checkRunBudget } from "../billing/guard"
 import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/audience"
-import { queueRun } from "../runs/execution/outbox/data"
 import { wakeRun } from "../runs/execution/waiters/data"
+import { startRun } from "../runs/execution/workflow"
 import { executionPrincipalForPerson } from "../runs/principal"
 import { type MessageCauseKind } from "../runs/schema"
 import { createMessageRunSnapshot } from "../runs/snapshot"
@@ -148,7 +148,7 @@ async function startNewMessageRun(
     now: args.now,
   })
 
-  await queueRun(ctx, runId)
+  await startRun(ctx, runId)
 
   return {
     status: "started" as const,

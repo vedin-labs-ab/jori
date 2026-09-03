@@ -1,7 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { resolveRunAudience } from "../../runs/audience"
-import { queueRun } from "../../runs/execution/outbox/data"
+import { startRun } from "../../runs/execution/workflow"
 import { createJobRunSnapshot } from "../../runs/snapshot"
 
 export async function createJobRun(
@@ -44,7 +44,7 @@ export async function createJobRun(
     firedAt: args.now,
     updatedAt: args.now,
   })
-  await queueRun(ctx, runId)
+  await startRun(ctx, runId)
 
   return runId
 }

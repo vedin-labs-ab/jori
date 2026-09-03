@@ -1,7 +1,12 @@
 import { v } from "convex/values"
 import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { internalQuery, type MutationCtx } from "../_generated/server"
+import {
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+} from "../_generated/server"
+import { messageReplyTargetIdentifier } from "../messages/identifiers"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   collectPendingBatch,
@@ -39,6 +44,7 @@ export async function startSession(
     cursor: initialCursor(args.message, args.now),
     recency: initialRecency(args.message),
     runId: args.runId,
+    target: messageReplyTargetIdentifier(args.message) ?? undefined,
     updatedAt: args.now,
   }
 
@@ -104,6 +110,24 @@ export async function readPendingBatch(
     candidates.length > maxPendingReadLimit
   )
 }
+
+/** Move the session's reply target, as `send_reply` does when it answers
+ *  somewhere other than where the run last spoke. */
+export const retarget = internalMutation({
+  args: {
+    sessionId: v.id("sessions"),
+    target: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.sessionId, {
+      target: args.target,
+      updatedAt: Date.now(),
+    })
+
+    return null
+  },
+})
 
 export const getByRun = internalQuery({
   args: {

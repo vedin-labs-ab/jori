@@ -27,7 +27,6 @@ const sanctionedGuards = [
   "ensureCurrentPerson",
   "ensureCurrentPersonFromAction",
   "resolveCurrentPerson",
-  "requireWorkerSecret",
   "getOrganizationIntegration",
   "getUserIntegration",
   "claimIntegrationOffer",
@@ -140,8 +139,8 @@ function formatViolations(violations: Violation[]) {
       (violation) => `  - ${violation.file}:${violation.line} ${violation.name}`
     ),
     "",
-    "Use requireOrganizationAccess (console callers) or requireWorkerSecret",
-    "(worker callers), or register the function as internal instead.",
+    "Use requireOrganizationAccess for console callers, or register the",
+    "function as internal instead.",
     "",
   ].join("\n")
 }

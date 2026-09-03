@@ -43,19 +43,17 @@ async function writeTimeline(
   const write = stepWriter(ctx, seed, run)
 
   await write({ type: "run.prepared", data: { tools: toolSnapshot(tools) } })
-  await write({ type: "run.started", attempt: 1 })
-  await write({ type: "model.started", attempt: 1 })
+  await write({ type: "run.started" })
+  await write({ type: "model.started" })
 
   for (const [index, tool] of tools.entries()) {
     await write({
       type: "tool.started",
-      attempt: 1,
       callId: `call_${index}`,
       data: { tool: toolRef(tool), input: toolInput(run) },
     })
     await write({
       type: "tool.completed",
-      attempt: 1,
       callId: `call_${index}`,
       data: {
         tool: toolRef(tool),
@@ -67,7 +65,6 @@ async function writeTimeline(
 
   await write({
     type: "model.completed",
-    attempt: 1,
     data: modelData(item),
   })
   await write(terminalStep(item))
@@ -100,14 +97,9 @@ function terminalStep(item: WorkItem) {
   return item.status === "failed"
     ? {
         type: "run.failed",
-        attempt: 1,
         data: { error: item.error ?? "The run failed." },
       }
-    : {
-        type: "run.completed",
-        attempt: 1,
-        data: { result: item.title },
-      }
+    : { type: "run.completed" }
 }
 
 function modelData(item: WorkItem) {

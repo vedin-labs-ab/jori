@@ -8,7 +8,6 @@
     "dev": "node --experimental-strip-types scripts/dev.ts",
     "dev:web": "vite",
     "dev:convex": "node --experimental-strip-types scripts/env/index.ts --env dev -- npx convex dev",
-    "dev:trigger": "node --experimental-strip-types scripts/env/index.ts --env dev -- npx trigger dev --env-file .env.local",
     "build": "vite build",
     "check": "node --experimental-strip-types scripts/check.ts",
     "check:biome": "biome ci --error-on-warnings .",

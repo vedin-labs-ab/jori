@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 import { defaultBuildLogger, Template } from "e2b"
-import { sandboxWorkspace } from "../trigger/sandbox/workspace.ts"
+import { sandboxWorkspace } from "../contracts/coding.ts"
 
 const cliConfigPath = join(homedir(), ".e2b", "config.json")
 const e2bSandboxTemplate = requireTemplateName()

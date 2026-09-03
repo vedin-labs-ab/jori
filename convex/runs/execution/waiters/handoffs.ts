@@ -1,18 +1,44 @@
 import { v } from "convex/values"
-import {
-  type ApprovalHandoff,
-  type HandoffSubject,
-  type OfferHandoff,
-  type RunHandoffs,
-} from "../../../../contracts/runtime/worker"
+import { type RunHandoffs } from "../../../../contracts/runtime/handoffs"
 import { type Doc, type Id } from "../../../_generated/dataModel"
-import { type MutationCtx, type QueryCtx } from "../../../_generated/server"
+import {
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+  type QueryCtx,
+} from "../../../_generated/server"
 
 const scanLimit = 200
-export const handoffSubject = v.union(
-  v.object({ kind: v.literal("approval"), id: v.id("approvals") }),
-  v.object({ kind: v.literal("offer"), id: v.id("integrationOffers") })
-)
+
+export const load = internalQuery({
+  args: {
+    runId: v.id("runs"),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<RunHandoffs> => {
+    return await loadRunHandoffs(ctx, args.runId)
+  },
+})
+
+export const consumeApproval = internalMutation({
+  args: {
+    approvalId: v.id("approvals"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    return await consumeApprovalHandoff(ctx, args.approvalId)
+  },
+})
+
+export const consumeOffer = internalMutation({
+  args: {
+    integrationOfferId: v.id("integrationOffers"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    return await consumeOfferHandoff(ctx, args.integrationOfferId)
+  },
+})
 
 export async function loadRunHandoffs(
   ctx: QueryCtx,
@@ -68,50 +94,11 @@ async function loadOfferHandoffs(ctx: QueryCtx, runId: Id<"runs">) {
   return offers.filter(isUnconsumed).map(toOfferHandoff)
 }
 
-export async function loadSubjectHandoffs(
-  ctx: QueryCtx,
-  subjects: HandoffSubject[]
-): Promise<RunHandoffs> {
-  const approvals: ApprovalHandoff[] = []
-  const offers: OfferHandoff[] = []
-
-  for (const subject of subjects) {
-    if (subject.kind === "approval") {
-      const handoff = toUnconsumedHandoff(
-        await ctx.db.get(subject.id),
-        toApprovalHandoff
-      )
-
-      if (handoff !== null) {
-        approvals.push(handoff)
-      }
-    } else {
-      const handoff = toUnconsumedHandoff(
-        await ctx.db.get(subject.id),
-        toOfferHandoff
-      )
-
-      if (handoff !== null) {
-        offers.push(handoff)
-      }
-    }
-  }
-
-  return { approvals, offers }
-}
-
 function isUnconsumed(record: { consumedAt?: number }) {
   return record.consumedAt === undefined
 }
 
-function toUnconsumedHandoff<Source extends { consumedAt?: number }, Handoff>(
-  record: Source | null,
-  toHandoff: (record: Source) => Handoff
-) {
-  return record !== null && isUnconsumed(record) ? toHandoff(record) : null
-}
-
-function toApprovalHandoff(approval: Doc<"approvals">): ApprovalHandoff {
+function toApprovalHandoff(approval: Doc<"approvals">) {
   return {
     id: approval._id,
     status: approval.status,
@@ -123,7 +110,7 @@ function toApprovalHandoff(approval: Doc<"approvals">): ApprovalHandoff {
   }
 }
 
-function toOfferHandoff(offer: Doc<"integrationOffers">): OfferHandoff {
+function toOfferHandoff(offer: Doc<"integrationOffers">) {
   return {
     id: offer._id,
     integration: offer.integration,

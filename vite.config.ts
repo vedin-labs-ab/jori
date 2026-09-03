@@ -8,7 +8,6 @@ import { configDefaults, defineConfig } from "vitest/config"
 const ignoredWorkspacePaths = [
   "**/.agents/**",
   "**/.claude/**",
-  "**/.trigger/**",
   "**/.tanstack/**",
   "**/dist/**",
   "**/node_modules/**",

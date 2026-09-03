@@ -1,4 +1,4 @@
-import { type ToolSurface } from "../../integrations"
+import { type ToolSurface } from "../integrations"
 import { type RuntimeId } from "./ids"
 
 export type HandoffSubject =

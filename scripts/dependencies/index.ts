@@ -1,19 +1,10 @@
 import { cruise } from "dependency-cruiser"
 import { ruleSet } from "./rules.ts"
 
-const roots = [
-  "src",
-  "convex",
-  "contracts",
-  "trigger",
-  "prompts",
-  "scripts",
-  "skills",
-]
+const roots = ["src", "convex", "contracts", "prompts", "scripts", "skills"]
 const excludedPaths = [
   "(^|/)[.]agents(/|$)",
   "(^|/)[.]claude(/|$)",
-  "(^|/)[.]trigger(/|$)",
   "(^|/)[.]tanstack(/|$)",
   // The repository's own build output only: packages ship their code
   // under dist too, and excluding those would hide the edges into them

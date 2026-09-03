@@ -39,7 +39,6 @@ const skippedDirectories = [
   ".claude",
   ".git",
   ".output",
-  ".trigger",
   ".tanstack",
   "dist",
   "node_modules",

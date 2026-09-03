@@ -2,10 +2,10 @@
  * Who else touches the data, and for what.
  *
  * Real marks, from each vendor's own assets: Convex, Resend, OpenRouter, and
- * PostHog publish an SVG; Trigger.dev and E2B publish only raster, so those
- * are their official PNGs. Each one is fitted into the same square box rather
- * than cropped or stretched to fill it — PostHog's hedgehog is wider than it
- * is tall, and a mark redrawn to match its neighbours is no longer the mark.
+ * PostHog publish an SVG; E2B publishes only raster, so that one is its
+ * official PNG. Each one is fitted into the same square box rather than
+ * cropped or stretched to fill it — PostHog's hedgehog is wider than it is
+ * tall, and a mark redrawn to match its neighbours is no longer the mark.
  */
 const subprocessors = [
   {
@@ -13,12 +13,6 @@ const subprocessors = [
     name: "Convex",
     url: "https://convex.dev",
     purpose: "Stores the data, including sign-in sessions.",
-  },
-  {
-    logo: "/logos/subprocessors/trigger.png",
-    name: "Trigger.dev",
-    url: "https://trigger.dev",
-    purpose: "Executes runs.",
   },
   {
     logo: "/logos/subprocessors/e2b.png",

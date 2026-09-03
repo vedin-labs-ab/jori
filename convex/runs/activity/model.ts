@@ -6,7 +6,6 @@ import {
   readModelUsage,
   readTraceData,
   readTraceError,
-  traceAttempt,
   traceSequence,
 } from "./read"
 import {
@@ -135,7 +134,7 @@ function metricDetail(
 }
 
 function modelTraceKey(trace: Doc<"traces">) {
-  return `${traceAttempt(trace)}:${traceSequence(trace) ?? trace.timestamp}`
+  return String(traceSequence(trace) ?? trace.timestamp)
 }
 
 function isTerminalModelTrace(trace: Doc<"traces">) {
