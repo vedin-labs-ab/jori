@@ -29,14 +29,12 @@ export function environmentFile(environment: Environment) {
 
 /** Local variables the wrapper refuses to run without.
  *
- *  Production is one deploy key plus the Trigger.dev project ref. The Vercel
- *  CLI carries its own credentials and reads the linked project from
- *  `.vercel/`, and the Trigger.dev CLI authenticates from `npx trigger login`
- *  (or `TRIGGER_ACCESS_TOKEN` where no login session exists), so hosting
- *  credentials are not restated here. */
+ *  Production is one deploy key. The Vercel CLI carries its own credentials
+ *  and reads the linked project from `.vercel/`, so hosting credentials are
+ *  not restated here. */
 export const localNames: Record<Environment, readonly string[]> = {
   dev: ["CONVEX_DEPLOYMENT"],
-  prod: ["CONVEX_DEPLOY_KEY", "TRIGGER_PROJECT_REF"],
+  prod: ["CONVEX_DEPLOY_KEY"],
 }
 
 /** Variables the Convex deployment itself must hold before it can serve a
@@ -45,34 +43,20 @@ export const localNames: Record<Environment, readonly string[]> = {
  *  This is the set the public product needs: marketing, sign-in, the
  *  waitlist, and agent runs. Sign-in requires both social providers because
  *  `createAuth` resolves every credential on each auth request, so a missing
- *  Microsoft secret breaks Google sign-in too. Runs need the Trigger.dev
- *  secret key to dispatch, the worker secret to authenticate workers, and
- *  the model key to deduce. Features add their names here as they come
- *  online. */
+ *  Microsoft secret breaks Google sign-in too. Runs execute inside the
+ *  deployment, so they need the model key to deduce and the E2B key and
+ *  template name to open a sandbox. Features add their names here as they
+ *  come online. */
 export const deploymentNames = [
   "BETTER_AUTH_SECRET",
+  "E2B_API_KEY",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
   "JORI_APP_URL",
+  "JORI_E2B_TEMPLATE",
   "JORI_REGION",
-  "JORI_WORKER_SECRET",
   "MICROSOFT_CLIENT_ID",
   "MICROSOFT_CLIENT_SECRET",
   "OPENROUTER_API_KEY",
   "RESEND_API_KEY",
-  "TRIGGER_DEV_API_KEY",
-] as const
-
-/** Variables the deployed Trigger.dev workers need at run time, verified by
- *  name against the target Trigger.dev environment before every production
- *  deploy. Values live in the Trigger.dev dashboard; the check reads only
- *  names. Development is exempt: there the worker is the local CLI, which
- *  reads these from `.env.local` directly. */
-export const workerNames = [
-  "CONVEX_SITE_URL",
-  "CONVEX_URL",
-  "E2B_API_KEY",
-  "JORI_E2B_TEMPLATE",
-  "JORI_WORKER_SECRET",
-  "OPENROUTER_API_KEY",
 ] as const

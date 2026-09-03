@@ -1,4 +1,9 @@
-import { type CodingToolName, isCodingToolName } from "../../contracts/coding"
+import {
+  type CodingToolName,
+  isCodingToolName,
+  sandboxWorkspace,
+} from "../../../contracts/coding"
+import { isRecord } from "../../../contracts/json"
 import { readWorkspaceFile } from "./files"
 import {
   boundedTimeoutMs,
@@ -11,8 +16,11 @@ import { applyWorkspacePatch } from "./patch/apply"
 import { sandboxWorkspacePath, shellQuote } from "./path"
 import { gitBashGuard, readOnlyGitCommand } from "./script"
 import { globWorkspace, grepWorkspace } from "./search"
-import { type SandboxRuntime } from "./types"
-import { sandboxWorkspace } from "./workspace"
+import {
+  type SandboxCommandHandle,
+  type SandboxCommandResult,
+  type SandboxRuntime,
+} from "./types"
 
 export async function executeCodingTool(args: {
   input: unknown
@@ -28,6 +36,32 @@ export async function executeCodingTool(args: {
     sandbox: args.sandbox,
     tool: args.tool,
   })
+}
+
+/** What bash answers with when its command outlived the grace window: the
+ *  tool layer parks the run on the handle and collects it on the wake. */
+export type ParkedCommand = { parked: SandboxCommandHandle }
+
+export function isParkedCommand(value: unknown): value is ParkedCommand {
+  return (
+    isRecord(value) &&
+    isRecord(value.parked) &&
+    typeof value.parked.pid === "number"
+  )
+}
+
+/** How long the run waits on a parked command. The tool layer parks to the
+ *  same bound the command was started with, so it reads it from here. */
+export function bashTimeoutMs(input: unknown) {
+  return boundedTimeoutMs(normalizeToolInput(input).timeoutMs)
+}
+
+export async function finishBash(
+  sandbox: SandboxRuntime,
+  handle: SandboxCommandHandle,
+  options: { kill: boolean }
+) {
+  return commandOutput(await sandbox.finishCommand(handle, options))
 }
 
 async function executeKnownCodingTool(args: {
@@ -64,25 +98,24 @@ async function runGit(sandbox: SandboxRuntime, input: Record<string, unknown>) {
   return commandOutput(result)
 }
 
+/** A shell command can outlast a turn, so bash starts it and takes whichever
+ *  the sandbox has: the finished output, or a handle the run parks on until
+ *  the command calls back. */
 async function runBash(
   sandbox: SandboxRuntime,
   input: Record<string, unknown>
 ) {
   const cwd = sandboxWorkspacePath(optionalTrimmedString(input.cwd))
-  const result = await sandbox.runCommand({
+  const outcome = await sandbox.startCommand({
     command: bashCommand(cwd, requiredTrimmedString(input.command, "command")),
     cwd: sandboxWorkspace,
-    timeoutMs: boundedTimeoutMs(input.timeoutMs),
+    timeoutMs: bashTimeoutMs(input),
   })
 
-  return commandOutput(result)
+  return "pid" in outcome ? { parked: outcome } : commandOutput(outcome)
 }
 
-function commandOutput(result: {
-  exitCode: number
-  stderr: string
-  stdout: string
-}) {
+function commandOutput(result: SandboxCommandResult) {
   const stdout = boundedText(result.stdout)
   const stderr = boundedText(result.stderr)
 

@@ -1,16 +1,11 @@
-import { type JsonValue } from "../../json"
-import { type ToolAccess } from "../../permissions"
-import { type RuntimeModelUsage, type RuntimeValueSummary } from "../trace"
+import { type JsonValue } from "../json"
+import { type ToolAccess } from "../permissions"
 import { type RuntimeTool } from "./context"
 import { type RuntimeId } from "./ids"
+import { type RuntimeModelUsage, type RuntimeValueSummary } from "./trace"
 
 export type RuntimeErrorTraceData = {
   error: string
-}
-
-/** Outcome a run returned via finish_run; recorded with run.completed. */
-export type RuntimeResultTraceData = {
-  result: string
 }
 
 export type RuntimeToolTraceTool = {
@@ -52,7 +47,6 @@ export type RuntimeEventTraceData =
   | RuntimeErrorTraceData
   | RuntimeModelTraceData
   | RuntimeRelationTraceData
-  | RuntimeResultTraceData
   | RuntimeToolTraceData
 
 export type RuntimeEventType =
@@ -77,7 +71,6 @@ export type RuntimeEventType =
   | "tool.waiting"
 
 export type RuntimeEventInput = {
-  attempt?: number
   callId?: string
   data?: RuntimeEventTraceData
   keyId?: string

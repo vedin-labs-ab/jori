@@ -1,183 +1,245 @@
-import { type RuntimeId } from "../../../contracts/runtime/worker"
-import { type RuntimePlatform } from "../../platform"
-import { compactFailure } from "../output"
-import { sandboxClonePath, shellQuote } from "../path"
+"use node"
+
+import { v } from "convex/values"
+import { internal } from "../../_generated/api"
+import { type Id } from "../../_generated/dataModel"
+import { type ActionCtx, internalAction } from "../../_generated/server"
+import { commandWrapperScript } from "./script"
 import {
-  gitCloneCommand,
-  gitCredentialHelperScript,
-  temporaryGitCredentialPath,
-} from "../script"
-import {
-  type SandboxCloneRepositoryInput,
-  type SandboxCommandInput,
-  type SandboxCommandResult,
-  type SandboxRuntime,
-  type SandboxWriteFile,
-} from "../types"
-import { sandboxWorkspace } from "../workspace"
-import {
+  cloneIntoSandbox,
+  collectCommandOutput,
   connectSandbox,
   createSandbox,
-  type E2BSandbox,
-  killE2BSandbox,
+  defaultCommandTimeoutMs,
+  killSandbox,
   normalizeCommandResult,
   runSandboxCommand,
+  waitForCommand,
 } from "./support"
 
-export class E2BSandboxRuntime implements SandboxRuntime {
-  private sandbox: E2BSandbox | undefined
-  private sandboxId: string | null
-  private workspaceReady = false
+/** How long a command may hold its action open before the run parks on it.
+ *  Most tool commands finish well inside this. */
+const commandGraceMs = 120_000
+/** Room for the callback and the collection after the command's own deadline,
+ *  so the sandbox does not pause with the output still unread. */
+const sandboxHeadroomMs = 5 * 60 * 1000
 
-  constructor(
-    private readonly platform: RuntimePlatform,
-    private readonly runId: RuntimeId<"runs">,
-    sandboxId: string | null
-  ) {
-    this.sandboxId = sandboxId
-  }
+const sandboxTarget = {
+  runId: v.id("runs"),
+  sandboxId: v.union(v.string(), v.null()),
+}
+const commandInput = v.object({
+  command: v.string(),
+  cwd: v.optional(v.string()),
+  timeoutMs: v.optional(v.number()),
+})
+const commandResult = v.object({
+  exitCode: v.number(),
+  stderr: v.string(),
+  stdout: v.string(),
+  timedOut: v.optional(v.literal(true)),
+})
+const commandHandle = v.object({ pid: v.number(), token: v.string() })
 
-  async runCommand(input: SandboxCommandInput): Promise<SandboxCommandResult> {
-    const sandbox = await this.ensureSandbox()
-    const result = await runSandboxCommand(sandbox, input)
+export const command = internalAction({
+  args: { ...sandboxTarget, input: commandInput },
+  returns: v.object({ result: commandResult, sandboxId: v.string() }),
+  handler: async (ctx, args) => {
+    const sandbox = await openSandbox(ctx, args)
+    const result = await runSandboxCommand(sandbox, args.input)
 
-    return normalizeCommandResult(result)
-  }
+    return {
+      result: normalizeCommandResult(result),
+      sandboxId: sandbox.sandboxId,
+    }
+  },
+})
 
-  async readFile(path: string) {
-    const sandbox = await this.ensureSandbox()
+export const start = internalAction({
+  args: { ...sandboxTarget, input: commandInput, token: v.string() },
+  returns: v.union(
+    v.object({ result: commandResult, sandboxId: v.string() }),
+    v.object({ handle: commandHandle, sandboxId: v.string() })
+  ),
+  handler: async (ctx, args) => {
+    const sandbox = await openSandbox(ctx, args)
+    const timeoutMs = args.input.timeoutMs ?? defaultCommandTimeoutMs
+    const sandboxId = sandbox.sandboxId
 
-    return await sandbox.files.read(path, { format: "bytes" })
-  }
+    await sandbox.setTimeout(timeoutMs + sandboxHeadroomMs)
 
-  async writeFiles(files: SandboxWriteFile[]) {
-    const sandbox = await this.ensureSandbox()
-
-    await writeSandboxFiles(sandbox, files)
-  }
-
-  async cloneRepository(input: SandboxCloneRepositoryInput) {
-    const directory = sandboxClonePath({
-      repository: input.repository,
-      value: input.directory,
-    })
-    const tokenPath = temporaryGitCredentialPath("token")
-    const helperPath = temporaryGitCredentialPath("helper")
-
-    await this.writeFiles([
-      { content: input.token, path: tokenPath },
-      {
-        content: gitCredentialHelperScript(tokenPath, input.username),
-        path: helperPath,
-      },
-    ])
-
-    const result = await this.runCommand({
-      command: gitCloneCommand({
-        directory,
-        ref: input.ref,
-        helperPath,
-        remoteUrl: input.remoteUrl,
-        tokenPath,
+    const handle = await sandbox.commands.run(
+      commandWrapperScript({
+        callbackUrl: commandCallbackUrl(),
+        command: args.input.command,
+        token: args.token,
       }),
-    })
+      { background: true, cwd: args.input.cwd, timeoutMs }
+    )
 
-    if (result.exitCode !== 0) {
-      throw new Error(compactFailure(result))
+    if (!(await waitForCommand(handle, commandGraceMs))) {
+      await handle.disconnect()
+
+      return { handle: { pid: handle.pid, token: args.token }, sandboxId }
     }
 
     return {
-      directory,
-      git: true as const,
-      ...(input.ref === undefined ? {} : { ref: input.ref }),
-      remoteUrl: input.remoteUrl,
-      repository: input.repository,
+      result: await collectCommandOutput(sandbox, args.token),
+      sandboxId,
     }
-  }
+  },
+})
 
-  async cleanup() {
-    if (this.sandboxId === null) {
-      return
+export const finish = internalAction({
+  args: { ...sandboxTarget, handle: commandHandle, kill: v.boolean() },
+  returns: v.object({ result: commandResult, sandboxId: v.string() }),
+  handler: async (ctx, args) => {
+    const sandbox = await openSandbox(ctx, args)
+
+    if (args.kill) {
+      await sandbox.commands.kill(args.handle.pid)
     }
 
-    await killE2BSandbox({
-      platform: this.platform,
-      sandboxId: this.sandboxId,
-    })
-    this.sandbox = undefined
-    this.sandboxId = null
-    this.workspaceReady = false
-  }
+    return {
+      result: await collectCommandOutput(sandbox, args.handle.token),
+      sandboxId: sandbox.sandboxId,
+    }
+  },
+})
 
-  async release() {
-    if (this.sandboxId === null) {
+export const read = internalAction({
+  args: { ...sandboxTarget, path: v.string() },
+  returns: v.object({ content: v.bytes(), sandboxId: v.string() }),
+  handler: async (ctx, args) => {
+    const sandbox = await openSandbox(ctx, args)
+    const content = await sandbox.files.read(args.path, { format: "bytes" })
+
+    return {
+      content: new Uint8Array(content).buffer,
+      sandboxId: sandbox.sandboxId,
+    }
+  },
+})
+
+export const write = internalAction({
+  args: {
+    ...sandboxTarget,
+    files: v.array(
+      v.object({ content: v.union(v.string(), v.bytes()), path: v.string() })
+    ),
+  },
+  returns: v.object({ sandboxId: v.string() }),
+  handler: async (ctx, args) => {
+    const sandbox = await openSandbox(ctx, args)
+
+    await sandbox.files.write(
+      args.files.map((file) => ({ data: file.content, path: file.path }))
+    )
+
+    return { sandboxId: sandbox.sandboxId }
+  },
+})
+
+export const clone = internalAction({
+  args: {
+    ...sandboxTarget,
+    input: v.object({
+      directory: v.optional(v.union(v.string(), v.null())),
+      ref: v.optional(v.string()),
+      remoteUrl: v.string(),
+      repository: v.string(),
+      token: v.string(),
+      username: v.string(),
+    }),
+  },
+  returns: v.object({
+    result: v.object({
+      directory: v.string(),
+      git: v.literal(true),
+      ref: v.optional(v.string()),
+      remoteUrl: v.string(),
+      repository: v.string(),
+    }),
+    sandboxId: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const sandbox = await openSandbox(ctx, args)
+
+    return {
+      result: await cloneIntoSandbox(sandbox, args.input),
+      sandboxId: sandbox.sandboxId,
+    }
+  },
+})
+
+export const kill = internalAction({
+  args: {
+    expiresAt: v.optional(v.number()),
+    externalId: v.string(),
+    runId: v.id("runs"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    if (!(await reserveCleanup(ctx, args))) {
       return null
     }
 
-    const lease = await this.platform.releaseSandbox({
-      externalId: this.sandboxId,
-      runId: this.runId,
+    await killSandbox(args.externalId)
+    await ctx.runMutation(internal.runs.execution.sandboxes.records.cleaned, {
+      externalId: args.externalId,
     })
 
-    return lease === null
-      ? null
-      : { expiresAt: lease.expiresAt, sandboxId: this.sandboxId }
-  }
+    return null
+  },
+})
 
-  private async ensureSandbox() {
-    if (this.sandbox === undefined) {
-      this.sandbox =
-        this.sandboxId === null
-          ? await createSandbox(this.runId)
-          : await connectSandbox(this.sandboxId)
-      this.sandboxId = this.sandbox.sandboxId
-      await this.platform.upsertSandbox({
-        externalId: this.sandbox.sandboxId,
-        runId: this.runId,
-      })
-    }
-
-    await this.ensureWorkspace()
-
-    return this.sandbox
-  }
-
-  private async ensureWorkspace() {
-    if (this.workspaceReady || this.sandbox === undefined) {
-      return
-    }
-
-    const result = await runSandboxCommand(this.sandbox, {
-      command: workspaceBootstrapCommand(),
-    })
-
-    if (result.exitCode !== 0) {
-      throw new Error(compactFailure(normalizeCommandResult(result)))
-    }
-
-    this.workspaceReady = true
-  }
-}
-
-async function writeSandboxFiles(
-  sandbox: E2BSandbox,
-  files: SandboxWriteFile[]
+/** An expiry names the lease this kill was scheduled for, so a sandbox that
+ *  was claimed again in the meantime keeps running. A kill without one is the
+ *  end of a run and takes the sandbox with it. */
+async function reserveCleanup(
+  ctx: ActionCtx,
+  args: { expiresAt?: number; externalId: string; runId: Id<"runs"> }
 ) {
-  await sandbox.files.write(
-    files.map((file) => ({
-      data:
-        file.content instanceof Uint8Array
-          ? new Uint8Array(file.content).buffer
-          : file.content,
-      path: file.path,
-    }))
+  if (args.expiresAt === undefined) {
+    return true
+  }
+
+  return await ctx.runMutation(
+    internal.runs.execution.sandboxes.records.reserve,
+    {
+      expiresAt: args.expiresAt,
+      externalId: args.externalId,
+      runId: args.runId,
+    }
   )
 }
 
-export function workspaceBootstrapCommand() {
-  return [
-    "set -eu",
-    `mkdir -p ${shellQuote(sandboxWorkspace)}`,
-    `chmod 755 ${shellQuote(sandboxWorkspace)}`,
-  ].join("\n")
+/** The actions are stateless, so each one either reconnects to the sandbox the
+ *  caller names or creates the run's first and records it. */
+async function openSandbox(
+  ctx: ActionCtx,
+  args: { runId: Id<"runs">; sandboxId: string | null }
+) {
+  if (args.sandboxId !== null) {
+    return await connectSandbox(args.sandboxId)
+  }
+
+  const sandbox = await createSandbox(args.runId)
+
+  await ctx.runMutation(internal.runs.execution.sandboxes.records.upsert, {
+    externalId: sandbox.sandboxId,
+    runId: args.runId,
+  })
+
+  return sandbox
+}
+
+function commandCallbackUrl() {
+  const site = process.env.CONVEX_SITE_URL?.trim()
+
+  if (site === undefined || site === "") {
+    throw new Error("Missing CONVEX_SITE_URL")
+  }
+
+  return `${site}/jori/commands`
 }

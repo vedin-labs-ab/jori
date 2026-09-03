@@ -1,5 +1,6 @@
 import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
-import { type Id } from "../../../_generated/dataModel"
+import { internal } from "../../../_generated/api"
+import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { type QueryLikeCtx } from "../../../shared/context"
 
@@ -92,8 +93,45 @@ export async function releaseIdleSandbox(ctx: MutationCtx, args: SandboxRun) {
     status: "idle",
     updatedAt: Date.now(),
   })
+  // The lease and the kill that ends it are set together, so an idle sandbox
+  // never outlives the row that claims it.
+  await ctx.scheduler.runAt(expiresAt, internal.runtime.sandbox.e2b.kill, {
+    externalId: args.externalId,
+    runId: args.runId,
+    expiresAt,
+  })
 
   return { expiresAt }
+}
+
+/**
+ * End a finished run's hold on its sandbox. A completed conversation run
+ * leaves it idle for the next message to reuse; anything else, and any
+ * sandbox the lease cannot cover, is killed now.
+ */
+export async function settleRunSandbox(ctx: MutationCtx, run: Doc<"runs">) {
+  const sandbox = await findRetainedSandbox(ctx, run._id)
+
+  if (sandbox === null) {
+    return null
+  }
+
+  const released =
+    run.status === "completed" && sandbox.conversationId !== undefined
+      ? await releaseIdleSandbox(ctx, {
+          externalId: sandbox.externalId,
+          runId: run._id,
+        })
+      : null
+
+  if (released === null) {
+    await ctx.scheduler.runAfter(0, internal.runtime.sandbox.e2b.kill, {
+      externalId: sandbox.externalId,
+      runId: run._id,
+    })
+  }
+
+  return null
 }
 
 export async function reserveExpiredSandboxCleanup(

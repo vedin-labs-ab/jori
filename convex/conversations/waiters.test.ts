@@ -1,4 +1,4 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import {
   fakeMutationCtx,
   inserted,
@@ -7,6 +7,10 @@ import {
 import { id } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { startMessageRun } from "./data"
+
+// Starting a run hands it to the workflow component, which needs a real
+// backend; these tests are about the rows the start writes.
+vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 
 test("starts reply runs when a waiter wake never resumed the run", async () => {
   const currentConversation = conversation()
@@ -141,7 +145,7 @@ function waiter(
       status,
       organizationId: "organization",
       updatedAt,
-      waitpointId: "waitpoint",
+      eventId: "event",
     },
   ]
 }

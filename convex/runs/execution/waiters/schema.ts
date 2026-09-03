@@ -15,9 +15,17 @@ export const waiterSubject = v.union(
   v.object({ kind: v.literal("run"), id: v.id("runs") })
 )
 
-export const waiterCondition = v.object({
-  kind: v.literal("runs"),
-  runIds: v.array(v.id("runs")),
+export const waiterCondition = v.union(
+  v.object({ kind: v.literal("runs"), runIds: v.array(v.id("runs")) }),
+  v.object({ kind: v.literal("command"), pid: v.number() })
+)
+
+/** The value the workflow event carries, so the resumed step knows why it
+ *  woke and which waiter to name in its trace. */
+export const waiterWake = v.object({
+  reason: waiterReason,
+  subject: v.optional(waiterSubject),
+  waiter: v.id("waiters"),
 })
 
 const waiterStatus = v.union(
@@ -31,7 +39,12 @@ export const waiters = defineTable({
   organizationId: v.string(),
   runId: v.id("runs"),
   sessionId: v.optional(v.id("sessions")),
-  waitpointId: v.string(),
+  /** The workflow event the run's handler awaits while this waiter is open. */
+  eventId: v.string(),
+  /** The scheduled expiry, cancelled when the waiter wakes for another reason. */
+  functionId: v.optional(v.id("_scheduled_functions")),
+  /** The callback secret a sandbox command posts back with. */
+  token: v.optional(v.string()),
   status: waiterStatus,
   expiresAt: v.number(),
   condition: v.optional(waiterCondition),
@@ -39,4 +52,6 @@ export const waiters = defineTable({
   subject: v.optional(waiterSubject),
   createdAt: v.number(),
   updatedAt: v.number(),
-}).index("by_run_and_status", ["runId", "status"])
+})
+  .index("by_run_and_status", ["runId", "status"])
+  .index("by_token", ["token"])

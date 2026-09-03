@@ -1,26 +1,230 @@
-import { describe, expect, test } from "vitest"
-import { createOpenRouterModelSettings } from "./openrouter"
+import {
+  type ChatAssistantMessage,
+  type ChatResult,
+} from "@openrouter/sdk/models"
+import { expect, test, vi } from "vitest"
+import { joriModel } from "../../../contracts/billing"
+import { OpenRouterModel } from "./chat"
+import { type ModelMessage, type ModelTool } from "./types"
 
-describe("OpenRouter model runtime settings", () => {
-  test("uses low reasoning for the first turn (the start update)", () => {
-    expect(createOpenRouterModelSettings(true)).toEqual({
-      provider: {
-        require_parameters: true,
-      },
-      reasoning: {
-        effort: "low",
-      },
-    })
+const openRouter = vi.hoisted(() => ({
+  send: vi.fn(),
+}))
+
+vi.mock("../../model/openrouter", () => ({
+  sendOpenRouterChat: openRouter.send,
+}))
+
+const readTool: ModelTool = {
+  description: "Read a file.",
+  inputSchema: { properties: { path: { type: "string" } }, type: "object" },
+  name: "read",
+}
+
+test("sends the transcript as one system message and the turns after it", async () => {
+  openRouter.send.mockResolvedValue(
+    chatResult({ content: "Done.", role: "assistant" })
+  )
+
+  const messages: ModelMessage[] = [
+    { content: "You are Jori.", role: "system" },
+    { content: "The workspace is Copperline.", role: "system" },
+    { content: "Ship the release.", role: "user" },
+    {
+      content: "Reading the notes.",
+      role: "assistant",
+      toolCalls: [{ args: { path: "notes.md" }, id: "call_1", name: "read" }],
+    },
+    {
+      content: "release checklist",
+      role: "tool",
+      toolCallId: "call_1",
+      toolName: "read",
+    },
+  ]
+
+  await new OpenRouterModel().complete({
+    firstTurn: true,
+    messages,
+    tools: [readTool],
   })
 
-  test("uses medium reasoning for the rest of the run", () => {
-    expect(createOpenRouterModelSettings(false)).toEqual({
-      provider: {
-        require_parameters: true,
+  expect(openRouter.send).toHaveBeenCalledWith({
+    messages: [
+      {
+        content: "You are Jori.\n\nThe workspace is Copperline.",
+        role: "system",
       },
-      reasoning: {
-        effort: "medium",
+      { content: "Ship the release.", role: "user" },
+      {
+        content: "Reading the notes.",
+        role: "assistant",
+        toolCalls: [
+          {
+            function: { arguments: '{"path":"notes.md"}', name: "read" },
+            id: "call_1",
+            type: "function",
+          },
+        ],
       },
-    })
+      { content: "release checklist", role: "tool", toolCallId: "call_1" },
+    ],
+    model: joriModel,
+    provider: { requireParameters: true },
+    reasoning: { effort: "low" },
+    toolChoice: "auto",
+    tools: [
+      {
+        function: {
+          description: "Read a file.",
+          name: "read",
+          parameters: readTool.inputSchema,
+        },
+        type: "function",
+      },
+    ],
   })
 })
+
+test("reasons harder after the first turn and forbids tools when there are none", async () => {
+  openRouter.send.mockResolvedValue(
+    chatResult({ content: "Done.", role: "assistant" })
+  )
+
+  await new OpenRouterModel().complete({
+    firstTurn: false,
+    messages: [{ content: "Ship the release.", role: "user" }],
+    tools: [],
+  })
+
+  expect(openRouter.send).toHaveBeenCalledWith(
+    expect.objectContaining({
+      reasoning: { effort: "medium" },
+      toolChoice: "none",
+      tools: [],
+    })
+  )
+})
+
+test("reads a stop response with its reasoning and tokens", async () => {
+  openRouter.send.mockResolvedValue(
+    chatResult(
+      {
+        content: "The release is out.",
+        reasoning: "checked the checklist",
+        role: "assistant",
+      },
+      {
+        completionTokens: 40,
+        completionTokensDetails: { reasoningTokens: 12 },
+        promptTokens: 900,
+        promptTokensDetails: { cachedTokens: 700 },
+        totalTokens: 940,
+      }
+    )
+  )
+
+  expect(
+    await new OpenRouterModel().complete({
+      firstTurn: false,
+      messages: [{ content: "Ship the release.", role: "user" }],
+      tools: [readTool],
+    })
+  ).toEqual({
+    content: "The release is out.",
+    reasoning: "checked the checklist",
+    tokens: {
+      cacheRead: 700,
+      cacheWrite: 0,
+      input: 900,
+      output: 40,
+      reasoning: 12,
+      total: 940,
+      uncached: 200,
+    },
+    type: "stop",
+  })
+})
+
+test("parses tool calls and reports empty text as no content", async () => {
+  openRouter.send.mockResolvedValue(
+    chatResult({
+      content: "",
+      role: "assistant",
+      toolCalls: [
+        {
+          function: { arguments: '{"path":"notes.md"}', name: "read" },
+          id: "call_1",
+          type: "function",
+        },
+        {
+          function: { arguments: "  ", name: "list" },
+          id: "call_2",
+          type: "function",
+        },
+      ],
+    })
+  )
+
+  expect(
+    await new OpenRouterModel().complete({
+      firstTurn: false,
+      messages: [{ content: "Ship the release.", role: "user" }],
+      tools: [readTool],
+    })
+  ).toMatchObject({
+    content: null,
+    toolCalls: [
+      { args: { path: "notes.md" }, id: "call_1", name: "read" },
+      { args: {}, id: "call_2", name: "list" },
+    ],
+    type: "tool_calls",
+  })
+})
+
+test("drops a call whose arguments are not a JSON object", async () => {
+  openRouter.send.mockResolvedValue(
+    chatResult({
+      content: "Trying to read.",
+      role: "assistant",
+      toolCalls: [
+        {
+          function: { arguments: "{ not json", name: "read" },
+          id: "call_1",
+          type: "function",
+        },
+        {
+          function: { arguments: '"notes.md"', name: "read" },
+          id: "call_2",
+          type: "function",
+        },
+      ],
+    })
+  )
+
+  expect(
+    await new OpenRouterModel().complete({
+      firstTurn: false,
+      messages: [{ content: "Ship the release.", role: "user" }],
+      tools: [readTool],
+    })
+  ).toMatchObject({
+    content: "Trying to read.",
+    type: "stop",
+  })
+})
+
+function chatResult(
+  message: ChatAssistantMessage,
+  usage?: ChatResult["usage"]
+): ChatResult {
+  return {
+    choices: [{ finishReason: "stop", index: 0, message }],
+    created: 0,
+    id: "gen_1",
+    model: joriModel,
+    object: "chat.completion",
+    systemFingerprint: null,
+    usage,
+  }
+}

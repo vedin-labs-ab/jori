@@ -1,7 +1,6 @@
-import path from "node:path"
-import { shellQuote } from "../path"
+import { sandboxWorkspace } from "../../../../contracts/coding"
+import { isAbsolutePosix, joinPosix, normalizePosix, shellQuote } from "../path"
 import { type SandboxRuntime, type SandboxWriteFile } from "../types"
-import { sandboxWorkspace } from "../workspace"
 import { type Hunk, parseEnvelopePatch } from "./parse"
 
 export function isEnvelopePatch(patch: string) {
@@ -107,18 +106,18 @@ function findSequence(lines: string[], pattern: string[], from: number) {
 }
 
 function resolveTarget(cwd: string, filePath: string) {
-  const normalized = path.posix.normalize(filePath.trim())
+  const normalized = normalizePosix(filePath.trim())
 
   if (
     normalized === "." ||
     normalized === ".." ||
     normalized.startsWith("../") ||
-    path.posix.isAbsolute(normalized)
+    isAbsolutePosix(normalized)
   ) {
     throw new Error(`Patch path escapes the Jori workspace: ${filePath}`)
   }
 
-  return path.posix.join(cwd, normalized)
+  return joinPosix(cwd, normalized)
 }
 
 async function readCurrentFile(

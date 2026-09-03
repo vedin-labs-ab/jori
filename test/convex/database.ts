@@ -24,6 +24,7 @@ type Constraint = {
 // tests written before ordering support expect.
 const indexSortFields: Record<string, string[]> = {
   by_collection_and_order: ["order"],
+  by_run_and_order: ["order"],
 }
 
 function createDatabase() {

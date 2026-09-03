@@ -10,7 +10,6 @@ import {
   readToolResult,
   readTraceData,
   readTraceError,
-  traceAttempt,
   traceSequence,
 } from "../read"
 import {
@@ -198,10 +197,7 @@ function toolLabels(traces: Doc<"traces">[]) {
 }
 
 function toolTraceKey(trace: Doc<"traces">, name: string) {
-  return (
-    traceCallId(trace) ??
-    `${traceAttempt(trace)}:${traceSequence(trace) ?? 0}:${name}`
-  )
+  return traceCallId(trace) ?? `${traceSequence(trace) ?? 0}:${name}`
 }
 
 function traceCallId(trace: Doc<"traces">) {

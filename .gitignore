@@ -6,7 +6,6 @@ dist-ssr
 .env*
 !.env.*.example
 .tanstack
-.trigger/
 .wrangler
 .output
 .vercel

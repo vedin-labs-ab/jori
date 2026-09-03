@@ -1,35 +1,21 @@
-import { type RuntimeModelTokens } from "../../contracts/runtime/trace"
+import { type ChatUsage } from "@openrouter/sdk/models"
+import { type RuntimeModelTokens } from "../../../contracts/runtime/trace"
 
-export function readModelTokens(response: {
-  usage?: unknown
-}): RuntimeModelTokens {
-  const usage = readRecord(response.usage)
-  const inputTokenDetails = readRecord(usage?.inputTokenDetails)
-  const outputTokenDetails = readRecord(usage?.outputTokenDetails)
+// OpenRouter reports prompt tokens inclusive of the cached ones, so the
+// uncached count is the remainder.
+export function readModelTokens(
+  usage: ChatUsage | undefined
+): RuntimeModelTokens {
+  const input = usage?.promptTokens ?? 0
+  const cacheRead = usage?.promptTokensDetails?.cachedTokens ?? 0
 
   return {
-    cacheRead: readNumber(inputTokenDetails?.cacheReadTokens),
-    cacheWrite: readNumber(inputTokenDetails?.cacheWriteTokens),
-    input: readNumber(usage?.inputTokens),
-    output: readNumber(usage?.outputTokens),
-    reasoning:
-      readOptionalNumber(outputTokenDetails?.reasoningTokens) ??
-      readNumber(usage?.reasoningTokens),
-    total: readNumber(usage?.totalTokens),
-    uncached: readNumber(inputTokenDetails?.noCacheTokens),
+    cacheRead,
+    cacheWrite: usage?.promptTokensDetails?.cacheWriteTokens ?? 0,
+    input,
+    output: usage?.completionTokens ?? 0,
+    reasoning: usage?.completionTokensDetails?.reasoningTokens ?? 0,
+    total: usage?.totalTokens ?? 0,
+    uncached: Math.max(0, input - cacheRead),
   }
-}
-
-function readRecord(value: unknown) {
-  return typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : undefined
-}
-
-function readNumber(value: unknown) {
-  return readOptionalNumber(value) ?? 0
-}
-
-function readOptionalNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }

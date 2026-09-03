@@ -1,6 +1,10 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
-import { internalQuery, type QueryCtx } from "../_generated/server"
+import {
+  internalMutation,
+  internalQuery,
+  type QueryCtx,
+} from "../_generated/server"
 import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForPrincipal } from "../integrations/data"
 import { recentConversation } from "../messages/history"
@@ -189,6 +193,21 @@ export const get = internalQuery({
   },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.runId)
+  },
+})
+
+/** The outcome a run reported through `finish_run`; its parent reads it back
+ *  from `wait_for_agents`. The tool layer caps the text before it gets here. */
+export const finish = internalMutation({
+  args: {
+    runId: v.id("runs"),
+    result: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.runId, { result: args.result })
+
+    return null
   },
 })
 

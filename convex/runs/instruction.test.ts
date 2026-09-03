@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveRunAudience } from "./audience"
-import { queueRun } from "./execution/outbox/data"
+import { startRun } from "./execution/workflow"
 import { createInstructionRun } from "./instruction"
 
-vi.mock("./execution/outbox/data", () => ({ queueRun: vi.fn() }))
+vi.mock("./execution/workflow", () => ({ startRun: vi.fn() }))
 vi.mock("./audience", () => ({ resolveRunAudience: vi.fn() }))
 
 beforeEach(() => {
-  vi.mocked(queueRun).mockReset().mockResolvedValue(null)
+  vi.mocked(startRun).mockReset().mockResolvedValue(null)
   vi.mocked(resolveRunAudience).mockReset().mockResolvedValue({
     audience: "person",
   })

@@ -1,4 +1,4 @@
-import { type RuntimeMessage } from "../../contracts/runtime/worker"
+import { type RuntimeMessage } from "../../contracts/runtime/context"
 import { type Doc } from "../_generated/dataModel"
 import { messageHasText } from "../messages/data"
 import {

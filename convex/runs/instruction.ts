@@ -3,7 +3,7 @@ import { type MutationCtx } from "../_generated/server"
 import { requireRunBudget } from "../billing/guard"
 import { type Access } from "../shared/integrations"
 import { resolveRunAudience } from "./audience"
-import { queueRun } from "./execution/outbox/data"
+import { startRun } from "./execution/workflow"
 import {
   type ExecutionPrincipal,
   executionPrincipalForPerson,
@@ -64,7 +64,7 @@ export async function createInstructionRun(
     createdAt: Date.now(),
   })
 
-  await queueRun(ctx, runId)
+  await startRun(ctx, runId)
 
   return runId
 }

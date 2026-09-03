@@ -20,6 +20,9 @@ export const sessions = defineTable({
       reaction: v.optional(reactionSubcursor),
     })
   ),
+  /** The address replies go to: the run's first message, then the last
+   *  drained message that named one, then whatever `send_reply` last used. */
+  target: v.optional(v.string()),
   recency: v.optional(
     v.object({
       due: v.array(v.id("persons")),

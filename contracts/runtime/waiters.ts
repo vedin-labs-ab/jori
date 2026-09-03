@@ -8,12 +8,14 @@ export type WaiterSubject =
   | { kind: "message"; id: RuntimeId<"messages"> }
   | { kind: "run"; id: RuntimeId<"runs"> }
 
-export type WaiterCondition = {
-  kind: "runs"
-  runIds: RuntimeId<"runs">[]
-}
+/** What the run is parked on. Child runs resolve when every named run is
+ *  terminal; a command resolves when the sandbox reports its pid finished. */
+export type WaiterCondition =
+  | { kind: "runs"; runIds: RuntimeId<"runs">[] }
+  | { kind: "command"; pid: number }
 
 export type WaiterWake = {
   reason: WaiterWakeReason
   subject?: WaiterSubject
+  waiter: RuntimeId<"waiters">
 }

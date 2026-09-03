@@ -1,5 +1,4 @@
-import path from "node:path"
-import { sandboxWorkspace } from "./workspace"
+import { sandboxWorkspace } from "../../../contracts/coding"
 
 export function sandboxWorkspacePath(value: string | undefined) {
   return value === undefined || value.trim() === ""
@@ -24,13 +23,13 @@ export function sandboxClonePath(args: {
 
 function sandboxPath(value: string, options: { allowRoot?: boolean } = {}) {
   const filePath = resolveSandboxPath(value)
-  const relative = path.posix.relative(sandboxWorkspace, filePath)
+  const relative = relativePosix(sandboxWorkspace, filePath)
 
   if (relative === "" && options.allowRoot === true) {
     return filePath
   }
 
-  if (isEscapingSandbox(relative)) {
+  if (relative === "" || relative.startsWith("..")) {
     throw new Error("Sandbox path must be inside the Jori workspace.")
   }
 
@@ -40,17 +39,9 @@ function sandboxPath(value: string, options: { allowRoot?: boolean } = {}) {
 function resolveSandboxPath(value: string) {
   const normalized = value.trim() === "" ? "." : value.trim()
 
-  return normalized.startsWith("/")
-    ? path.posix.normalize(normalized)
-    : path.posix.resolve(sandboxWorkspace, normalized)
-}
-
-function isEscapingSandbox(relative: string) {
-  return (
-    relative === "" ||
-    relative.startsWith("..") ||
-    path.posix.isAbsolute(relative)
-  )
+  return isAbsolutePosix(normalized)
+    ? normalizePosix(normalized)
+    : joinPosix(sandboxWorkspace, normalized)
 }
 
 function repositoryDirectory(repository: string) {
@@ -66,4 +57,67 @@ function repositoryDirectory(repository: string) {
 
 export function shellQuote(value: string) {
   return `'${value.replaceAll("'", "'\\''")}'`
+}
+
+/** The sandbox filesystem is always posix, and these modules run in the Convex
+ *  V8 runtime where node:path does not exist, so the few path operations the
+ *  tools need are plain string work. */
+export function isAbsolutePosix(value: string) {
+  return value.startsWith("/")
+}
+
+export function normalizePosix(value: string) {
+  const absolute = isAbsolutePosix(value)
+  const segments: string[] = []
+
+  for (const segment of value.split("/")) {
+    if (segment === "" || segment === ".") {
+      continue
+    }
+
+    if (segment !== "..") {
+      segments.push(segment)
+    } else if (segments.length > 0 && segments.at(-1) !== "..") {
+      segments.pop()
+    } else if (!absolute) {
+      segments.push("..")
+    }
+  }
+
+  const joined = segments.join("/")
+
+  if (absolute) {
+    return `/${joined}`
+  }
+
+  return joined === "" ? "." : joined
+}
+
+export function joinPosix(...parts: string[]) {
+  return normalizePosix(parts.filter((part) => part !== "").join("/"))
+}
+
+export function relativePosix(from: string, to: string) {
+  const fromSegments = pathSegments(from)
+  const toSegments = pathSegments(to)
+  let shared = 0
+
+  while (
+    shared < fromSegments.length &&
+    shared < toSegments.length &&
+    fromSegments[shared] === toSegments[shared]
+  ) {
+    shared += 1
+  }
+
+  return [
+    ...fromSegments.slice(shared).map(() => ".."),
+    ...toSegments.slice(shared),
+  ].join("/")
+}
+
+function pathSegments(value: string) {
+  return normalizePosix(value)
+    .split("/")
+    .filter((segment) => segment !== "" && segment !== ".")
 }

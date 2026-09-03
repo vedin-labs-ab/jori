@@ -3,14 +3,14 @@ import { jobDoc } from "../../../test/convex/folders"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { resolveRunAudience } from "../../runs/audience"
-import { queueRun } from "../../runs/execution/outbox/data"
+import { startRun } from "../../runs/execution/workflow"
 import { createJobRun } from "./run"
 
-vi.mock("../../runs/execution/outbox/data", () => ({ queueRun: vi.fn() }))
+vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 vi.mock("../../runs/audience", () => ({ resolveRunAudience: vi.fn() }))
 
 beforeEach(() => {
-  vi.mocked(queueRun).mockReset().mockResolvedValue(null)
+  vi.mocked(startRun).mockReset().mockResolvedValue(null)
   vi.mocked(resolveRunAudience)
     .mockReset()
     .mockResolvedValue({ audience: "organization" })

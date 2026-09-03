@@ -1,4 +1,4 @@
-import { isRecord } from "../../contracts/json"
+import { isRecord } from "../../../contracts/json"
 
 export function normalizeToolInput(value: unknown): Record<string, unknown> {
   return isRecord(value) ? value : {}

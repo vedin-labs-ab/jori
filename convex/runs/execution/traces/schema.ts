@@ -9,8 +9,7 @@ const base = {
   timestamp: v.number(),
 }
 const timeline = { ...base, sequence: v.number() }
-const worker = { ...timeline, attempt: v.number() }
-const call = { ...worker, callId: v.string() }
+const call = { ...timeline, callId: v.string() }
 
 const tool = v.object({
   name: v.string(),
@@ -72,7 +71,6 @@ const fileData = v.object({ file: v.id("files") })
 const agentData = v.object({ child: v.id("runs") })
 const waiterData = v.object({ waiter: v.id("waiters") })
 const errorData = v.object({ error: v.string() })
-const resultData = v.object({ result: v.string() })
 // The model the turn actually ran on, named at the call site rather than
 // inferred later: what a run cost is priced from the model that answered it.
 const modelData = v.object({
@@ -134,26 +132,25 @@ const runResumed = v.object({
   data: waiterData,
 })
 
-const runStarted = v.object({ ...worker, type: v.literal("run.started") })
+const runStarted = v.object({ ...timeline, type: v.literal("run.started") })
 const runCompleted = v.object({
-  ...worker,
+  ...timeline,
   type: v.literal("run.completed"),
-  data: v.optional(resultData),
 })
 const runFailed = v.object({
-  ...worker,
+  ...timeline,
   type: v.literal("run.failed"),
   data: errorData,
 })
 
-const modelStarted = v.object({ ...worker, type: v.literal("model.started") })
+const modelStarted = v.object({ ...timeline, type: v.literal("model.started") })
 const modelCompleted = v.object({
-  ...worker,
+  ...timeline,
   type: v.literal("model.completed"),
   data: modelData,
 })
 const modelFailed = v.object({
-  ...worker,
+  ...timeline,
   type: v.literal("model.failed"),
   data: errorData,
 })
@@ -210,7 +207,6 @@ export const traceData = v.union(
   agentData,
   waiterData,
   errorData,
-  resultData,
   modelData,
   toolStartedData,
   toolCompletedData,

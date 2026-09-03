@@ -27,9 +27,9 @@ suffixed with it.
   so a push from a worktree silently replaces whatever another task just
   verified. `pnpm check` and `pnpm test` are the gate instead.
 - A change that genuinely needs a live backend — a schema migration, an HTTP
-  action, webhook ingress — verifies against a Convex preview deployment and a
-  Trigger.dev preview branch named after the task branch. Both expire on their
-  own; neither touches a shared environment.
+  action, webhook ingress — verifies against a Convex preview deployment named
+  after the task branch. It expires on its own and never touches a shared
+  environment.
 - After a task branch lands on `main`, the development deployment picks the
   change up from the `pnpm dev` watcher. `pnpm deploy:dev` is only needed to
   push without that watcher running.
@@ -98,11 +98,4 @@ from it.
 This project uses Convex as its backend.
 
 When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first**.  
-This file defines the correct usage patterns and overrides any prior assumptions.
-
-## Trigger.dev
-
-This project uses Trigger.dev for long-running agent execution and background task orchestration.
-
-When working on Trigger.dev code, **always read `trigger/ai/guidelines.md` first**.  
 This file defines the correct usage patterns and overrides any prior assumptions.

@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process"
 import { createInterface } from "node:readline/promises"
 import { loadEnvironment } from "./env/load.ts"
-import { deploymentNames, workerNames } from "./env/names.ts"
+import { deploymentNames } from "./env/names.ts"
 import { packageCommand, runCommand, toolCommand } from "./process.ts"
 
 const environment = "prod"
@@ -26,19 +26,10 @@ async function deployProduction() {
   await runCommand(packageCommand("test"))
 
   requireDeploymentVariables(env)
-  requireWorkerVariables(env)
 
-  // Each layer deploys before the one that calls it: Convex dispatches runs
-  // that expect the task code to exist, so the workers lead, and the frontend
-  // is served against the Convex functions, so the backend leads it in turn.
-  // In-flight runs are safe either way: Trigger.dev pins every run to the
-  // deployment version it started on.
-  await step(env, "Deploying Trigger.dev", [
-    "trigger",
-    "deploy",
-    "--env",
-    environment,
-  ])
+  // Each layer deploys before the one that calls it: the frontend is served
+  // against the Convex functions, so the backend leads it, and the skills
+  // sync runs on the functions it was just deployed with.
   await step(env, "Deploying Convex", ["convex", "deploy", "--yes"])
   await step(env, "Deploying frontend", ["vercel", "deploy", "--prod", "--yes"])
   await step(env, "Syncing skills", [
@@ -114,26 +105,6 @@ function requireDeploymentVariables(env: NodeJS.ProcessEnv) {
     deploymentNames.filter((name) => !present.has(name)),
     "The production Convex deployment",
     "Set each one with: npx convex env set <NAME> <value>"
-  )
-}
-
-/**
- * Every variable the deployed workers need at run time, checked against the
- * Trigger.dev environment. The CLI prints names with values hidden, so only
- * names ever reach this process; each is matched as a whole word to keep a
- * similarly named variable from standing in for it.
- */
-function requireWorkerVariables(env: NodeJS.ProcessEnv) {
-  const output = commandOutput(
-    env,
-    ["trigger", "env", "list", "--env", environment],
-    "Reading the production Trigger.dev environment failed."
-  )
-
-  reportMissing(
-    workerNames.filter((name) => !new RegExp(`\\b${name}\\b`).test(output)),
-    "The production Trigger.dev environment",
-    "Set each one in the Trigger.dev dashboard for the prod environment."
   )
 }
 

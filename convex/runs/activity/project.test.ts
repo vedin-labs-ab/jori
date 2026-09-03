@@ -148,7 +148,7 @@ test("marks active waiters as live intervals", () => {
           status: "waiting",
           organizationId: "organization",
           updatedAt: 1000,
-          waitpointId: "waitpoint",
+          eventId: "event",
         } as Doc<"waiters">,
       ],
     })

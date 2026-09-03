@@ -1,22 +1,10 @@
-import { type JsonObject } from "../../contracts/json"
-import { type RuntimeModelTokens } from "../../contracts/runtime/trace"
+import { type JsonObject } from "../../../contracts/json"
+import { type RuntimeModelTokens } from "../../../contracts/runtime/trace"
+import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 
-export type ModelMessage =
-  | {
-      content: string
-      role: "system" | "user"
-    }
-  | {
-      content: string | null
-      role: "assistant"
-      toolCalls?: ModelToolCall[]
-    }
-  | {
-      content: string
-      role: "tool"
-      toolCallId: string
-      toolName: string
-    }
+// The model sees exactly what the transcript stores. One shape for both keeps
+// a saved turn and a replayed turn from drifting apart.
+export type ModelMessage = TranscriptMessage
 
 export type ModelTool = {
   description: string

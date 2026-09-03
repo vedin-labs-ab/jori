@@ -1,5 +1,8 @@
 import { v } from "convex/values"
-import { type DrainedSessionBatch } from "../../contracts/runtime/worker"
+import {
+  type DrainedSessionBatch,
+  type RuntimeMessage,
+} from "../../contracts/runtime/context"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
@@ -51,30 +54,50 @@ export async function drainSession(
     message: batch.cursor,
     reaction: reactions.cursor,
   })
+  const messages = await formatRuntimeMessages(ctx, batch.messages)
 
-  await patchSession(ctx, session, cursor, emission)
+  await patchSession(ctx, session, {
+    cursor,
+    emission,
+    target: lastReplyTarget(messages),
+  })
 
   return {
     contexts: emission === null ? [] : emission.contexts,
     hasMore: batch.hasMore || reactions.hasMore,
     interactions: reactions.reactions.map(formatRuntimeReaction),
-    messages: await formatRuntimeMessages(ctx, batch.messages),
+    messages,
   }
+}
+
+/** The run answers where the conversation last spoke, so a thread that moves
+ *  mid-run takes the reply with it. */
+function lastReplyTarget(messages: RuntimeMessage[]) {
+  return messages.reduce<string | undefined>(
+    (target, message) => message.replyTarget ?? target,
+    undefined
+  )
 }
 
 async function patchSession(
   ctx: MutationCtx,
   session: Doc<"sessions">,
-  cursor: Doc<"sessions">["cursor"] | undefined,
-  emission: RecencyEmission | null
+  updates: {
+    cursor: Doc<"sessions">["cursor"] | undefined
+    emission: RecencyEmission | null
+    target: string | undefined
+  }
 ) {
-  if (cursor === undefined && emission === null) {
+  const { cursor, emission, target } = updates
+
+  if (cursor === undefined && emission === null && target === undefined) {
     return
   }
 
   await ctx.db.patch(session._id, {
     ...(cursor === undefined ? {} : { cursor }),
     ...(emission === null ? {} : { recency: emission.recency }),
+    ...(target === undefined ? {} : { target }),
     updatedAt: Date.now(),
   })
 }

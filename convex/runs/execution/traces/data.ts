@@ -4,19 +4,16 @@ import { type MutationCtx } from "../../../_generated/server"
 import { meterModelUsage } from "../../../billing/meter"
 import { continuePendingConversationRun } from "../../../conversations/continuation"
 import { recordUsageEnded } from "../../../usage/record"
+import { stopRunChildren } from "../../tree"
 import { wakeParentForTerminalRun } from "../waiters/data"
 import { type traceData } from "./schema"
+import { recordTrace } from "./write"
 
 type TraceData = Infer<typeof traceData>
-type TraceInsert = WithoutSystemFields<Doc<"traces">>
-type WithoutSystemFields<Row> = Row extends unknown
-  ? Omit<Row, "_creationTime" | "_id">
-  : never
 
 export async function recordWorkerTrace(
   ctx: MutationCtx,
   args: {
-    attempt?: number
     callId?: string
     data?: TraceData
     key: string
@@ -45,6 +42,10 @@ export async function recordWorkerTrace(
     await patchSessionStatus(ctx, args)
     if (args.type === "run.completed" || args.type === "run.failed") {
       await wakeParentForTerminalRun(ctx, args.runId)
+      // A terminal run takes its delegated subtree with it: children exist
+      // for their parent, so nothing keeps running for a consumer that is
+      // gone.
+      await stopRunChildren(ctx, args.runId)
     }
     if (
       args.type === "model.completed" &&
@@ -56,56 +57,6 @@ export async function recordWorkerTrace(
   }
 
   return { created }
-}
-
-export async function recordTrace(
-  ctx: MutationCtx,
-  args: {
-    attempt?: number
-    callId?: string
-    data?: TraceData
-    key: string
-    run: Doc<"runs">
-    sequence?: number
-    timestamp?: number
-    type: Doc<"traces">["type"]
-  }
-) {
-  const existing = await ctx.db
-    .query("traces")
-    .withIndex("by_key", (query) => query.eq("key", args.key))
-    .first()
-
-  if (existing !== null) {
-    return false
-  }
-
-  await ctx.db.insert("traces", traceInsert(args))
-
-  return true
-}
-
-function traceInsert(args: {
-  attempt?: number
-  callId?: string
-  data?: TraceData
-  key: string
-  run: Doc<"runs">
-  sequence?: number
-  timestamp?: number
-  type: Doc<"traces">["type"]
-}): TraceInsert {
-  return {
-    organizationId: args.run.organizationId,
-    runId: args.run._id,
-    key: args.key,
-    type: args.type,
-    ...(args.sequence === undefined ? {} : { sequence: args.sequence }),
-    ...(args.attempt === undefined ? {} : { attempt: args.attempt }),
-    ...(args.callId === undefined ? {} : { callId: args.callId }),
-    ...(args.data === undefined ? {} : { data: args.data }),
-    timestamp: args.timestamp ?? Date.now(),
-  } as TraceInsert
 }
 
 async function patchSessionStatus(
@@ -154,7 +105,7 @@ async function patchRunStatus(
   // The status guards above make this the one transition out of a live run,
   // so the rollup increments on exactly the condition that ends it.
   if (args.type === "run.completed") {
-    await ctx.db.patch(args.runId, completedRunPatch(args.data))
+    await ctx.db.patch(args.runId, completedRunPatch())
     await recordUsageEnded(ctx, { run, failed: false })
   } else if (args.type === "run.failed") {
     await ctx.db.patch(args.runId, {
@@ -166,14 +117,12 @@ async function patchRunStatus(
   }
 }
 
-function completedRunPatch(data: TraceData | undefined) {
-  const result = readRunResult(data)
-
+// The outcome itself is written by `finish_run`, not read back off the trace.
+function completedRunPatch() {
   return {
     status: "completed" as const,
     error: undefined,
     endedAt: Date.now(),
-    ...(result === undefined ? {} : { result }),
   }
 }
 
@@ -183,12 +132,4 @@ function readRunFailedError(data: TraceData | undefined) {
   }
 
   return data.error
-}
-
-function readRunResult(data: TraceData | undefined) {
-  return data !== undefined &&
-    "result" in data &&
-    typeof data.result === "string"
-    ? data.result
-    : undefined
 }

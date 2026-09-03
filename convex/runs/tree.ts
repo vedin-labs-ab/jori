@@ -3,8 +3,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import { recordUsageEnded } from "../usage/record"
-import { enqueueCancellation } from "./execution/outbox/data"
-import { recordTrace } from "./execution/traces/data"
+import { recordTrace } from "./execution/traces/write"
 import { wakeParentForTerminalRun, wakeRun } from "./execution/waiters/data"
 
 // Delegation implies lifetime containment: a child run never outlives its
@@ -63,5 +62,4 @@ async function stopRun(
   await recordUsageEnded(ctx, { run, failed: false })
   await wakeRun(ctx, { runId: run._id, reason: "cancelled" })
   await wakeParentForTerminalRun(ctx, run._id)
-  await enqueueCancellation(ctx, run._id)
 }

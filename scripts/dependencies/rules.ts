@@ -22,7 +22,7 @@ export const ruleSet = {
         path: "^contracts/",
       },
       to: {
-        path: "^(?:src|convex|trigger|prompts|scripts)(?:/|$)",
+        path: "^(?:src|convex|prompts|scripts)(?:/|$)",
       },
     },
     {
@@ -34,32 +34,19 @@ export const ruleSet = {
         path: "^src/",
       },
       to: {
-        path: "^(?:convex|trigger|prompts|scripts)(?:/|$)",
+        path: "^(?:convex|prompts|scripts)(?:/|$)",
         pathNot: "^convex/_generated/",
       },
     },
     {
       name: "convex-does-not-import-app-or-scripts",
       severity: "error",
-      comment: "Convex code must not depend on app, Trigger, or tooling code.",
+      comment: "Convex code must not depend on app or tooling code.",
       from: {
         path: "^convex/",
       },
       to: {
-        path: "^(?:src|trigger|scripts)(?:/|$)",
-      },
-    },
-    {
-      name: "trigger-does-not-import-app-backend-or-scripts",
-      severity: "error",
-      comment:
-        "Trigger worker code may use contracts, prompts, and generated Convex API refs, not app, backend, or script internals.",
-      from: {
-        path: "^trigger/",
-      },
-      to: {
-        path: "^(?:src|convex|scripts)(?:/|$)",
-        pathNot: "^convex/_generated/",
+        path: "^(?:src|scripts)(?:/|$)",
       },
     },
     {
@@ -102,18 +89,6 @@ export const ruleSet = {
       },
       to: {
         path: "^convex/workstreams/",
-      },
-    },
-    {
-      name: "trigger-core-does-not-import-convex-adapter",
-      severity: "error",
-      comment:
-        "Only task composition may bind Trigger core ports to the Convex adapter.",
-      from: {
-        path: "^trigger/(?!convex(?:/|$)|tasks(?:/|$))",
-      },
-      to: {
-        path: "^trigger/convex/",
       },
     },
     {
