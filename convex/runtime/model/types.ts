@@ -35,7 +35,6 @@ export type ModelResponse =
 
 export type ModelRuntime = {
   complete(args: {
-    firstTurn: boolean
     messages: ModelMessage[]
     tools: ModelTool[]
   }): Promise<ModelResponse>
