@@ -2,9 +2,10 @@ import { vi } from "vitest"
 import { type RuntimeContext } from "../contracts/runtime/context"
 import { type RuntimeId } from "../contracts/runtime/ids"
 import { type RuntimePrompt } from "../contracts/runtime/prompt"
+import { maxRunTurns } from "../contracts/runtime/runs"
 import { type RuntimeModelTokens } from "../contracts/runtime/trace"
 import { type WaiterWake } from "../contracts/runtime/waiters"
-import { maxTurns, runAct } from "../convex/runtime/loop/act"
+import { runAct } from "../convex/runtime/loop/act"
 import { runModelTurn } from "../convex/runtime/loop/model"
 import { isParked } from "../convex/runtime/loop/park"
 import {
@@ -112,7 +113,7 @@ export async function runLoop(args: {
 }) {
   const wakes = [...(args.wakes ?? [])]
 
-  for (let turn = 1; turn <= maxTurns; turn += 1) {
+  for (let turn = 1; turn <= maxRunTurns; turn += 1) {
     await runModelTurn({
       model: args.model,
       prompt: args.prompt ?? runtimePrompt(),

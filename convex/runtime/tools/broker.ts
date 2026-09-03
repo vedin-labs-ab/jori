@@ -9,19 +9,16 @@ import {
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import {
-  type ApprovalBrokerContext,
-  createPromptedToolApproval,
-} from "../../broker/approval"
+import { type ApprovalBrokerContext } from "../../broker/approval"
 import { loadRunBrokerContext } from "../../broker/auth"
-import {
-  authorizeSurfaceTool,
-  authorizeTool,
-  callBrokerTool,
-  executeApprovedTool,
-} from "../../broker/mcp"
-import { createGitHubCloneCredentials } from "../../broker/tools"
 import { type GitHubCloneCredentials } from "../platform"
+
+// The broker carries every provider's tool implementation, more than the act
+// step's module graph can hold within the runtime's evaluation memory
+// alongside the loop itself, so it loads on the first call that needs it.
+async function broker() {
+  return await import("../../broker/mcp")
+}
 
 type ApprovalClaim =
   | { state: "done"; result: string }
@@ -45,6 +42,7 @@ export async function callRunTool(
     tool: string
   }
 ): Promise<JsonValue> {
+  const { callBrokerTool } = await broker()
   const result = await callBrokerTool(
     ctx,
     await loadBrokerContext(ctx, args.runId),
@@ -64,6 +62,8 @@ export async function requestRunApproval(
     tool: string
   }
 ) {
+  const { createPromptedToolApproval } = await import("../../broker/approval")
+
   return await createPromptedToolApproval(
     ctx,
     await loadBrokerContext(ctx, args.runId),
@@ -100,6 +100,7 @@ export async function executeRunApproval(
     return encodeToolResult(claimNotReadyResult(claim.state))
   }
 
+  const { executeApprovedTool } = await broker()
   const result = await executeApprovedTool(
     ctx,
     await loadBrokerContext(ctx, args.runId),
@@ -125,7 +126,12 @@ export async function fetchRunCloneCredentials(
   ctx: ActionCtx,
   args: { owner: string; repo: string; runId: Id<"runs"> }
 ): Promise<GitHubCloneCredentials> {
-  const context = await loadBrokerContext(ctx, args.runId)
+  const [context, { authorizeSurfaceTool, authorizeTool }, tools] =
+    await Promise.all([
+      loadBrokerContext(ctx, args.runId),
+      broker(),
+      import("../../broker/tools"),
+    ])
 
   authorizeTool(context, cloneRequest)
 
@@ -135,7 +141,7 @@ export async function fetchRunCloneCredentials(
     throw new Error("No active github integration is available")
   }
 
-  return createGitHubCloneCredentials({
+  return tools.createGitHubCloneCredentials({
     integration,
     owner: args.owner,
     repo: args.repo,

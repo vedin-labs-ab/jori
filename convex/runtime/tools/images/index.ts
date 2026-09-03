@@ -2,7 +2,6 @@ import { sandboxWorkspace } from "../../../../contracts/coding"
 import { isRecord, type JsonObject } from "../../../../contracts/json"
 import { optionalString, requiredString } from "../../../shared/input"
 import { type AgentRuntime } from "../../platform"
-import { generateOpenRouterImage } from "./openrouter"
 
 type GenerateImageInput = {
   prompt: string
@@ -18,6 +17,9 @@ export async function generateImageFile(
   input: JsonObject
 ) {
   const request = normalizeGenerateImageInput(input)
+  // The OpenRouter client is the model step's weight; the act step only
+  // loads it when an image is actually asked for.
+  const { generateOpenRouterImage } = await import("./openrouter")
   const generated = await generateOpenRouterImage(request.prompt)
   const name = imageFileName(request.save.name, generated.mimeType)
   const workspacePath = `${generatedImageDirectory}/${name}`
