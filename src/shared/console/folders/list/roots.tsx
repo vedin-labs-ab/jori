@@ -10,7 +10,7 @@ import { ConsoleListContent } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
 import { type FolderDialogRequest, type FolderRootsResult } from "../types"
 import { FolderSelectionBar } from "./bar"
-import { useFolderListing } from "./controls"
+import { selectionPayload, useFolderListing } from "./controls"
 import { type FolderSelectionActions } from "./select"
 import { FolderListRow, FolderListTable, folderTableColumns } from "./table"
 
@@ -93,6 +93,7 @@ export function RootFolderList({
               folder={folder}
               key={folder.folderId}
               onDialog={onDialog}
+              selected={selectionPayload(list.selection.selected, undefined)}
               selection={list.selection}
             />
           ))

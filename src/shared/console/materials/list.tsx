@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { type CountedNoun } from "../count"
-import { type ResourceDragItem } from "../folders/drag/plan"
+import { type DragPayload, type ResourceDragItem } from "../folders/drag/plan"
 import { DraggableTableRow } from "../folders/drag/row"
 import { useResourceRowDrag } from "../folders/drag/state"
 import { SelectionHeadCell, SelectionRowCell } from "../list/bar"
@@ -79,7 +79,10 @@ export function MaterialList<Row extends MaterialListRow>(
   props: MaterialListProps<Row>
 ) {
   const { config, controls, hasFilters, kind, rows, selection } = props
-  const selected = selection.selected.map(kind.drag)
+  const selected: DragPayload = {
+    folders: [],
+    resources: selection.selected.map(kind.drag),
+  }
 
   if (props.unauthorizedMessage !== undefined) {
     return (
@@ -219,7 +222,7 @@ function MaterialListRow<Row extends MaterialListRow>({
   selection,
 }: MaterialListProps<Row> & {
   row: Row
-  selected: readonly ResourceDragItem[]
+  selected: DragPayload
 }) {
   const drag = useResourceRowDrag(kind.drag(row), selected)
   const now = useNow(30_000)

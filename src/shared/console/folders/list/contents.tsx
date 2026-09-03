@@ -18,11 +18,11 @@ import {
 import { FolderSelectionBar } from "./bar"
 import {
   type FolderListEntry,
-  resourceDragItem,
+  selectionPayload,
   useFolderListing,
 } from "./controls"
 import { ResourceListRow } from "./resource"
-import { type FolderSelectionActions, splitSelection } from "./select"
+import { type FolderSelectionActions } from "./select"
 import { FolderListRow, FolderListTable, folderTableColumns } from "./table"
 
 /** A folder's listing: subfolders first, then the filed resources in one
@@ -159,9 +159,7 @@ function FolderContentRows({
   resources: FolderResource[]
   selection: RowSelection<FolderListEntry>
 }) {
-  const selected = splitSelection(selection.selected).resources.map(
-    (resource) => resourceDragItem(resource, folderId)
-  )
+  const selected = selectionPayload(selection.selected, folderId)
 
   if (folders.length === 0 && resources.length === 0) {
     return (
@@ -183,6 +181,7 @@ function FolderContentRows({
           folder={folder}
           key={folder.folderId}
           onDialog={onDialog}
+          selected={selected}
           selection={selection}
         />
       ))}

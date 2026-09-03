@@ -43,7 +43,10 @@ export function FolderTreeItem({
   onDialog: (request: FolderDialogRequest) => void
   pathname: string
 }) {
-  const drag = useFolderRowDrag("sidebar", node.folderId, node.name)
+  const drag = useFolderRowDrag("sidebar", {
+    folderId: node.folderId,
+    name: node.name,
+  })
   const hasChildren = node.children.length > 0
   const isExpanded = hasChildren && expansion.isExpanded(node.folderId)
 

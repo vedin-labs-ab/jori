@@ -7,7 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
+import {
+  type DragPayload,
+  type ResourceDragItem,
+} from "@/shared/console/folders/drag/plan"
 import { DraggableTableRow } from "@/shared/console/folders/drag/row"
 import { useResourceRowDrag } from "@/shared/console/folders/drag/state"
 import { SelectionHeadCell, SelectionRowCell } from "@/shared/console/list/bar"
@@ -73,7 +76,10 @@ export function FileTable({
     )
   }
 
-  const selected = selection.selected.map(fileDragItem)
+  const selected: DragPayload = {
+    folders: [],
+    resources: selection.selected.map(fileDragItem),
+  }
 
   return (
     <>
@@ -203,7 +209,7 @@ function FileTableRow({
   onDelete: (file: FileRow) => void
   onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
-  selected: readonly ResourceDragItem[]
+  selected: DragPayload
   selection: RowSelection<FileRow>
 }) {
   const drag = useResourceRowDrag(fileDragItem(file), selected)

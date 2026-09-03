@@ -9,7 +9,6 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import { Folder } from "lucide-react"
 import {
   type ReactNode,
   useCallback,
@@ -20,9 +19,9 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { type FolderSummary } from "../tree"
-import { resourcePresentation } from "../types"
 import { useDraggingBody } from "./body"
 import { snapCenterToCursor } from "./center"
+import { DragGhost } from "./ghost"
 import { createHoverExpander } from "./hover"
 import {
   blockedTargets,
@@ -38,7 +37,7 @@ import {
   idleDragState,
 } from "./state"
 
-/** How long a landed move keeps its settle cue on the moved row. */
+/** How long a landed move keeps its settle cue on the moved rows. */
 const settleDuration = 450
 
 // Pointer drags skip the keyboard sensor: the rows are links whose Enter
@@ -48,14 +47,24 @@ const screenReaderInstructions = {
     "Rows move with a pointer drag. To move a folder or a resource with the keyboard, open the row's actions menu and choose Move to folder.",
 }
 
-/** What a released drag asks of its host: the move or re-filing that the
- *  payload and target name. Resolves once the request has run — or been
- *  declined — to whether the payload landed, so a moved folder's row can
- *  show its settle cue. */
+/** What a released drag asks of its host: the move that the payload and
+ *  target name. Resolves once the request has run — or been declined —
+ *  to whether the payload landed, so a moved folder's row can show its
+ *  settle cue. */
 export type FolderDrop = (
   payload: DragPayload,
   target: DropTarget
 ) => Promise<boolean>
+
+/** The overlay's wrapper, pinned to the viewport's origin and shrunk to
+ *  the front card, so the centering modifier can place it from the
+ *  pointer's own coordinates alone. */
+const overlayStyle = {
+  left: 0,
+  top: 0,
+  width: "fit-content",
+  height: "fit-content",
+}
 
 /** Runs drag-to-move and drag-to-file across the console: the sidebar
  *  tree, the folder pages, and the material lists register through
@@ -95,9 +104,22 @@ export function FolderDragProvider({
           {...drag.handlers}
         >
           {children}
-          {drag.state.active === null ? null : (
-            <DragGhost payload={drag.state.active} />
-          )}
+          {drag.state.active === null
+            ? null
+            : createPortal(
+                // Portaled to the body so neither pane's overflow can clip
+                // it, centered under the cursor, and never in the way of
+                // the pointer's own hit-testing.
+                <DragOverlay
+                  className="pointer-events-none"
+                  dropAnimation={null}
+                  modifiers={[snapCenterToCursor]}
+                  style={overlayStyle}
+                >
+                  <DragGhost payload={drag.state.active} />
+                </DragOverlay>,
+                document.body
+              )}
         </DndContext>
       </ExpandHoverContext.Provider>
     </FolderDragContext.Provider>
@@ -115,9 +137,9 @@ function useContentDrag(folders: readonly FolderSummary[], onDrop: FolderDrop) {
         active === null
           ? idleDragState.blockedIds
           : blockedTargets(folders, active),
-      settledId: settle.settledId,
+      settledIds: settle.settledIds,
     }),
-    [active, folders, settle.settledId]
+    [active, folders, settle.settledIds]
   )
   const finish = () => {
     expander.expander.reset()
@@ -125,8 +147,8 @@ function useContentDrag(folders: readonly FolderSummary[], onDrop: FolderDrop) {
   }
   const drop = (payload: DragPayload, target: DropTarget) =>
     onDrop(payload, target).then((landed) => {
-      if (landed && payload.kind === "folder") {
-        settle.show(payload.folderId)
+      if (landed && payload.folders.length > 0) {
+        settle.show(payload.folders.map((folder) => folder.folderId))
       }
     })
 
@@ -183,63 +205,22 @@ function useExpander() {
 }
 
 function useSettle() {
-  const [settledId, setSettledId] = useState<string | null>(null)
+  const [settledIds, setSettledIds] = useState<ReadonlySet<string>>(
+    idleDragState.settledIds
+  )
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => () => clearTimeout(timer.current), [])
 
   return {
-    settledId,
-    show: (folderId: string) => {
+    settledIds,
+    show: (folderIds: string[]) => {
       clearTimeout(timer.current)
-      setSettledId(folderId)
-      timer.current = setTimeout(() => setSettledId(null), settleDuration)
+      setSettledIds(new Set(folderIds))
+      timer.current = setTimeout(
+        () => setSettledIds(idleDragState.settledIds),
+        settleDuration
+      )
     },
   }
-}
-
-/** The overlay's wrapper, pinned to the viewport's origin and shrunk to
- *  the chip, so the centering modifier can place it from the pointer's
- *  own coordinates alone. */
-const overlayStyle = {
-  left: 0,
-  top: 0,
-  width: "fit-content",
-  height: "fit-content",
-}
-
-/** The pointer-tracking ghost: a compact chip with the row's idiom, lifted
- *  by a shadow and, when motion is welcome, a slight scale-up. A drag
- *  carrying a selection names its first row and counts the rest. Portaled
- *  to the body so neither pane's overflow can clip it, centered under the
- *  cursor, and never in the way of the pointer's own hit-testing. */
-function DragGhost({ payload }: { payload: DragPayload }) {
-  const [name, Icon, others] =
-    payload.kind === "folder"
-      ? [payload.name, Folder, 0]
-      : [
-          payload.items[0].name,
-          resourcePresentation(payload.items[0]).icon,
-          payload.items.length - 1,
-        ]
-
-  return createPortal(
-    <DragOverlay
-      className="pointer-events-none"
-      dropAnimation={null}
-      modifiers={[snapCenterToCursor]}
-      style={overlayStyle}
-    >
-      <div className="flex h-8 w-fit max-w-64 items-center gap-2 rounded-md border border-sidebar-border bg-sidebar px-2 text-sidebar-foreground text-xs shadow-md motion-safe:scale-105">
-        <Icon className="size-4 shrink-0 text-muted-foreground" />
-        <span className="truncate">{name}</span>
-        {others > 0 ? (
-          <span className="shrink-0 rounded-sm bg-sidebar-accent px-1 text-sidebar-accent-foreground tabular-nums">
-            +{others}
-          </span>
-        ) : null}
-      </div>
-    </DragOverlay>,
-    document.body
-  )
 }

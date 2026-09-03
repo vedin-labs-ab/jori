@@ -1,33 +1,23 @@
-// Resolves a released drag into the mutation it planned: folders
-// re-parent through `move`, resources re-file through `file`. Invalid and
-// no-op targets resolve to no call; failures surface the way the move
-// dialog's do. A folder and a single resource pass the audience
-// confirmation first — one dialog for the whole drag surface, since a
-// drag releases once; a selection has no single audience, so it moves
-// without the question, the way the move dialog's bulk move does.
+// Resolves a released drag into the move it planned and hands it to the
+// same run every console move uses: folders re-parent, resources re-file,
+// a single folder or resource passes the audience confirmation first, and
+// invalid and no-op targets resolve to no call.
 
-import { useMutation } from "convex/react"
-import { type GenericId } from "convex/values"
 import { type ReactNode } from "react"
-import { toast } from "sonner"
-import { showErrorToast } from "@/shared/console/error"
 import {
   type DragPayload,
+  type DragPlan,
   type DropTarget,
-  type FolderDragPayload,
   planDrop,
-  planFileDrop,
-  type ResourceDragItem,
 } from "@/shared/console/folders/drag/plan"
 import { type FolderDrop } from "@/shared/console/folders/drag/provider"
 import { type FolderSummary } from "@/shared/console/folders/tree"
-import { toFiledType } from "@/shared/console/folders/types"
-import { api } from "../../../../convex/_generated/api"
 import {
-  type MoveConfirmation,
-  type PendingMove,
-  useMoveConfirmation,
-} from "../move/confirm"
+  type MoveSubject,
+  moveTarget,
+  toFiledType,
+} from "@/shared/console/folders/types"
+import { useMoveRun } from "../move/run"
 
 /** The drop handler behind the drag provider, plus the confirmation a
  *  drop may have to pass first. */
@@ -35,167 +25,36 @@ export function useDropActions(
   organizationId: string | undefined,
   folders: readonly FolderSummary[]
 ): { dialog: ReactNode; run: FolderDrop } {
-  const confirmation = useMoveConfirmation(organizationId)
-  const dropFolder = useFolderDrop(organizationId, confirmation)
-  const dropResources = useResourcesDrop(organizationId, confirmation, folders)
+  const move = useMoveRun(organizationId)
 
   return {
-    dialog: confirmation.dialog,
-    run: (payload: DragPayload, target: DropTarget) =>
-      payload.kind === "folder"
-        ? dropFolder(
-            payload,
-            planDrop(folders, payload.folderId, target.folderId)
-          )
-        : dropResources(planFileDrop(payload, target.folderId)),
+    dialog: move.dialog,
+    run: (payload: DragPayload, target: DropTarget) => {
+      const plan = planDrop(folders, payload, target.folderId)
+
+      return plan === undefined
+        ? Promise.resolve(false)
+        : move.run(planSubject(folders, plan), plan.folderId)
+    },
   }
 }
 
-/** Re-parenting takes the folder's contents with it, so the confirmation
- *  speaks for the whole subtree the chain above it now covers. */
-function useFolderDrop(
-  organizationId: string | undefined,
-  confirmation: MoveConfirmation
-) {
-  const move = useMutation(api.folders.console.move)
-  const reparent = async (
-    organization: string,
-    payload: FolderDragPayload,
-    parentId: string | null
-  ) => {
-    try {
-      await move({
-        organizationId: organization,
-        folderId: payload.folderId as GenericId<"folders">,
-        parentId: parentId as GenericId<"folders"> | null,
-      })
-
-      return true
-    } catch (error) {
-      showErrorToast(error, `Could not move ${payload.name}.`)
-
-      return false
-    }
+/** The plan as the move run takes it: where each folder sits today comes
+ *  from the tree, where each resource sits from the row it was picked up
+ *  from. */
+function planSubject(
+  folders: readonly FolderSummary[],
+  plan: DragPlan
+): MoveSubject {
+  return {
+    folders: plan.folders.map((folder) => ({
+      folderId: folder.folderId,
+      name: folder.name,
+      parentId: folders.find((row) => row.folderId === folder.folderId)
+        ?.parentId,
+    })),
+    resources: plan.resources.map((item) =>
+      moveTarget(toFiledType(item.type), item.id, item)
+    ),
   }
-
-  return (
-    payload: FolderDragPayload,
-    plan: { parentId: string | null } | undefined
-  ) => {
-    if (organizationId === undefined || plan === undefined) {
-      return Promise.resolve(false)
-    }
-
-    return confirmed(
-      confirmation,
-      {
-        subject: { kind: "folder", folderId: payload.folderId },
-        name: payload.name,
-        folderId: plan.parentId,
-      },
-      () => reparent(organizationId, payload, plan.parentId)
-    )
-  }
-}
-
-function useResourcesDrop(
-  organizationId: string | undefined,
-  confirmation: MoveConfirmation,
-  folders: readonly FolderSummary[]
-) {
-  const file = useMutation(api.folders.console.file)
-  const refile = async (
-    organization: string,
-    items: ResourceDragItem[],
-    folderId: string | null
-  ) => {
-    try {
-      await Promise.all(
-        items.map((item) =>
-          file({
-            organizationId: organization,
-            resourceType: toFiledType(item.type),
-            resourceId: item.id,
-            folderId: folderId as GenericId<"folders"> | null,
-          })
-        )
-      )
-      toast.success(filedMessage(items, folderId, folders))
-
-      return true
-    } catch (error) {
-      showErrorToast(error, `Could not move ${itemsName(items)}.`)
-
-      return false
-    }
-  }
-
-  return (
-    plan: { folderId: string | null; items: ResourceDragItem[] } | undefined
-  ) => {
-    if (organizationId === undefined || plan === undefined) {
-      return Promise.resolve(false)
-    }
-
-    const run = () => refile(organizationId, plan.items, plan.folderId)
-    const [item] = plan.items
-
-    if (plan.items.length !== 1 || item === undefined) {
-      return run()
-    }
-
-    return confirmed(
-      confirmation,
-      {
-        subject: {
-          kind: "resource",
-          resourceType: toFiledType(item.type),
-          resourceId: item.id,
-        },
-        name: item.name,
-        folderId: plan.folderId,
-      },
-      run
-    )
-  }
-}
-
-/** Puts a move through the confirmation and resolves to what came of it:
- *  the move's own answer once it ran, or false when it was declined — or
- *  refused, because another move was still waiting on its answer. */
-function confirmed(
-  confirmation: MoveConfirmation,
-  move: Omit<PendingMove, "decline" | "run">,
-  run: () => Promise<boolean>
-) {
-  return new Promise<boolean>((resolve) => {
-    const taken = confirmation.request({
-      ...move,
-      decline: () => resolve(false),
-      run: () => run().then(resolve),
-    })
-
-    if (!taken) {
-      resolve(false)
-    }
-  })
-}
-
-function itemsName(items: ResourceDragItem[]) {
-  return items.length === 1 ? items[0].name : `${items.length} items`
-}
-
-function filedMessage(
-  items: ResourceDragItem[],
-  folderId: string | null,
-  folders: readonly FolderSummary[]
-) {
-  const folder = folders.find((row) => row.folderId === folderId)
-  const name = itemsName(items)
-
-  if (folderId === null) {
-    return `Moved ${name} out of ${items.length === 1 ? "the folder" : "their folders"}.`
-  }
-
-  return `Moved ${name} to ${folder?.name ?? "the folder"}.`
 }

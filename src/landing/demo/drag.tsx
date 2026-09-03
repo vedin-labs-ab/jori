@@ -1,11 +1,11 @@
 import { type ReactNode } from "react"
-import { planDrop, planFileDrop } from "@/shared/console/folders/drag/plan"
+import { planDrop } from "@/shared/console/folders/drag/plan"
 import { FolderDragProvider } from "@/shared/console/folders/drag/provider"
 import { type FolderId } from "./fixtures/types"
 import { useDemoWorkspace } from "./workspace"
 
-/** The console's drag surface over the workspace: dropping a folder row on
- *  another re-parents it, dropping resources re-files them. */
+/** The console's drag surface over the workspace: dropped folders
+ *  re-parent, dropped resources re-file, and the move lands at once. */
 export function DemoDragProvider({ children }: { children: ReactNode }) {
   const { actions, state } = useDemoWorkspace()
 
@@ -13,34 +13,23 @@ export function DemoDragProvider({ children }: { children: ReactNode }) {
     <FolderDragProvider
       folders={state.folders}
       onDrop={(payload, target) => {
-        if (payload.kind === "folder") {
-          const plan = planDrop(
-            state.folders,
-            payload.folderId,
-            target.folderId
-          )
+        const plan = planDrop(state.folders, payload, target.folderId)
 
-          if (plan !== undefined) {
-            actions.moveFolder(
-              payload.folderId as FolderId,
-              plan.parentId as FolderId | null
-            )
-          }
-
-          return Promise.resolve(plan !== undefined)
+        if (plan === undefined) {
+          return Promise.resolve(false)
         }
 
-        const plan = planFileDrop(payload, target.folderId)
+        const destination = plan.folderId as FolderId | null
 
-        for (const item of plan?.items ?? []) {
-          actions.fileResource(
-            item.type,
-            item.id,
-            plan?.folderId as FolderId | null
-          )
+        for (const folder of plan.folders) {
+          actions.moveFolder(folder.folderId as FolderId, destination)
         }
 
-        return Promise.resolve(plan !== undefined)
+        for (const resource of plan.resources) {
+          actions.fileResource(resource.type, resource.id, destination)
+        }
+
+        return Promise.resolve(true)
       }}
     >
       {children}

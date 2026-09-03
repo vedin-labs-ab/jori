@@ -11,20 +11,17 @@ export const rootDropId = "folders-root"
 /** Pointer travel in pixels before a drag starts; keeps clicks clicking. */
 export const dragActivationDistance = 6
 
-/** What a drag carries: a folder re-parents, resources re-file. A resource
- *  drag carries one row, or every selected row when the row picked up was
- *  part of the selection; folders always travel alone. */
-export type DragPayload = FolderDragPayload | ResourcesDragPayload
-
-export type FolderDragPayload = {
-  kind: "folder"
-  folderId: string
-  name: string
+/** What a drag carries: folders that re-parent and resources that re-file
+ *  — one row, or every selected row when the row picked up was part of
+ *  the selection, folders and resources together. */
+export type DragPayload = {
+  folders: FolderDragItem[]
+  resources: ResourceDragItem[]
 }
 
-export type ResourcesDragPayload = {
-  kind: "resources"
-  items: ResourceDragItem[]
+export type FolderDragItem = {
+  folderId: string
+  name: string
 }
 
 export type ResourceDragItem = {
@@ -36,17 +33,64 @@ export type ResourceDragItem = {
   folderId?: string
 }
 
-/** The resources a drag started on `item` carries: the whole selection
- *  when the item is part of it, else the item alone. */
-export function resourcesPayload(
-  item: ResourceDragItem,
-  selected: readonly ResourceDragItem[]
-): ResourcesDragPayload {
-  const isSelected = selected.some(
-    (candidate) => candidate.type === item.type && candidate.id === item.id
-  )
+export const emptyPayload: DragPayload = { folders: [], resources: [] }
 
-  return { kind: "resources", items: isSelected ? [...selected] : [item] }
+export function folderPayload(folder: FolderDragItem): DragPayload {
+  return { folders: [folder], resources: [] }
+}
+
+export function resourcePayload(resource: ResourceDragItem): DragPayload {
+  return { folders: [], resources: [resource] }
+}
+
+/** How many rows a drag carries. */
+export function payloadSize(payload: DragPayload) {
+  return payload.folders.length + payload.resources.length
+}
+
+/** What a drag started on one row carries: the whole selection when the
+ *  row is part of it — with that row brought to the front — else the row
+ *  alone. */
+export function carriedPayload(
+  grabbed: DragPayload,
+  selected: DragPayload
+): DragPayload {
+  const [folder] = grabbed.folders
+  const [resource] = grabbed.resources
+
+  if (folder !== undefined && selected.folders.some(sameFolder(folder))) {
+    return {
+      folders: [
+        folder,
+        ...selected.folders.filter((other) => !sameFolder(folder)(other)),
+      ],
+      resources: selected.resources,
+    }
+  }
+
+  if (
+    resource !== undefined &&
+    selected.resources.some(sameResource(resource))
+  ) {
+    return {
+      folders: selected.folders,
+      resources: [
+        resource,
+        ...selected.resources.filter((other) => !sameResource(resource)(other)),
+      ],
+    }
+  }
+
+  return grabbed
+}
+
+function sameFolder(folder: FolderDragItem) {
+  return (other: FolderDragItem) => other.folderId === folder.folderId
+}
+
+function sameResource(resource: ResourceDragItem) {
+  return (other: ResourceDragItem) =>
+    other.type === resource.type && other.id === resource.id
 }
 
 /** What every drop target names: folder rows name their folder, the group
@@ -57,73 +101,73 @@ export type DropTarget = {
   expands: boolean
 }
 
-/** Targets that must refuse the drag, the top level as null: a dragged
- *  folder's own subtree (dropping there would create a cycle) and the
- *  place it already sits; for resources, the one home they all share —
- *  leaving anything where it is would be a silent no-op. */
+/** Targets that must refuse the drag, the top level as null: every
+ *  dragged folder's own subtree (dropping there would create a cycle) and
+ *  the place it already sits, plus the one home the dragged resources all
+ *  share — leaving anything where it is would be a silent no-op. */
 export function blockedTargets(
   folders: readonly FolderSummary[],
   payload: DragPayload
 ): ReadonlySet<string | null> {
-  if (payload.kind === "folder") {
-    const dragged = folders.find((row) => row.folderId === payload.folderId)
+  const blocked = new Set<string | null>()
 
-    return new Set<string | null>([
-      ...subtreeFolderIds(folders, payload.folderId),
-      dragged?.parentId ?? null,
-    ])
+  for (const dragged of payload.folders) {
+    for (const folderId of subtreeFolderIds(folders, dragged.folderId)) {
+      blocked.add(folderId)
+    }
+
+    blocked.add(parentOf(folders, dragged.folderId))
   }
 
-  const home = sharedHome(payload.items)
+  const home = sharedHome(payload.resources)
 
-  return home === undefined ? new Set() : new Set([home])
+  if (home !== undefined) {
+    blocked.add(home)
+  }
+
+  return blocked
 }
 
-/** The one folder every item sits in (null when all are unfiled), or
- *  undefined when they come from different places. */
-function sharedHome(items: readonly ResourceDragItem[]) {
-  const homes = new Set(items.map((item) => item.folderId ?? null))
+function parentOf(folders: readonly FolderSummary[], folderId: string) {
+  return folders.find((row) => row.folderId === folderId)?.parentId ?? null
+}
+
+/** The one folder every resource sits in (null when all are unfiled), or
+ *  undefined when there are none or they come from different places. */
+function sharedHome(resources: readonly ResourceDragItem[]) {
+  const homes = new Set(resources.map((item) => item.folderId ?? null))
 
   return homes.size === 1 ? [...homes][0] : undefined
 }
 
-/** The move a folder drop should request, or undefined when nothing should
- *  happen: the target sits in the dragged folder's own subtree (a cycle),
- *  or the folder already lives there (a silent no-op). */
+/** The move a drop should request: the folders that can re-parent into
+ *  the target (not into their own subtree, not where they already are)
+ *  and the resources that do not already sit there, or undefined when
+ *  nothing would move. A null target is the top level. */
 export function planDrop(
   folders: readonly FolderSummary[],
-  draggedId: string,
+  payload: DragPayload,
   targetId: string | null
-): { parentId: string | null } | undefined {
-  const dragged = folders.find((row) => row.folderId === draggedId)
-
-  if (dragged === undefined) {
-    return undefined
-  }
-
-  if (targetId !== null && subtreeFolderIds(folders, draggedId).has(targetId)) {
-    return undefined
-  }
-
-  if ((dragged.parentId ?? null) === targetId) {
-    return undefined
-  }
-
-  return { parentId: targetId }
-}
-
-/** The re-filing a resource drop should request: the items that do not
- *  already sit in the target, or undefined when none would move. A null
- *  target unfiles them back to the flat lists. */
-export function planFileDrop(
-  payload: ResourcesDragPayload,
-  targetFolderId: string | null
-): { folderId: string | null; items: ResourceDragItem[] } | undefined {
-  const items = payload.items.filter(
-    (item) => (item.folderId ?? null) !== targetFolderId
+): DragPlan | undefined {
+  const moving = payload.folders.filter(
+    (dragged) =>
+      folders.some((row) => row.folderId === dragged.folderId) &&
+      parentOf(folders, dragged.folderId) !== targetId &&
+      (targetId === null ||
+        !subtreeFolderIds(folders, dragged.folderId).has(targetId))
+  )
+  const filing = payload.resources.filter(
+    (item) => (item.folderId ?? null) !== targetId
   )
 
-  return items.length === 0 ? undefined : { folderId: targetFolderId, items }
+  return moving.length === 0 && filing.length === 0
+    ? undefined
+    : { folderId: targetId, folders: moving, resources: filing }
+}
+
+export type DragPlan = DragPayload & {
+  /** Where everything lands: a folder, or null for the top level. */
+  folderId: string | null
 }
 
 /** The folder a dwell-to-expand timer should run against: the hovered

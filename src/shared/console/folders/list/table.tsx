@@ -19,6 +19,7 @@ import { folderIcon } from "../../materials/folders"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
+import { type DragPayload } from "../drag/plan"
 import { DraggableTableRow } from "../drag/row"
 import { useFolderRowDrag } from "../drag/state"
 import { FolderRowMenu } from "../menu"
@@ -67,19 +68,27 @@ export function FolderListTable({
 }
 
 /** One folder row, wherever folders list: it links to the folder's page
- *  and drags like a sidebar row — alone, never as part of a selection. A
- *  dotted icon marks a folder holding anything, matching the sidebar
- *  tree's cue, and the Owner cell shows whoever made it. */
+ *  and drags like a sidebar row, and a selected row takes the rest of the
+ *  selection — folders and resources alike — with it. A dotted icon marks
+ *  a folder holding anything, matching the sidebar tree's cue, and the
+ *  Owner cell shows whoever made it. */
 export function FolderListRow({
   folder,
   onDialog,
+  selected,
   selection,
 }: {
   folder: ListedFolder
   onDialog: (request: FolderDialogRequest) => void
+  /** The selection, as a drag would carry it. */
+  selected: DragPayload
   selection: RowSelection<FolderListEntry>
 }) {
-  const drag = useFolderRowDrag("contents", folder.folderId, folder.name)
+  const drag = useFolderRowDrag(
+    "contents",
+    { folderId: folder.folderId, name: folder.name },
+    selected
+  )
   const now = useNow(30_000)
   const FolderIcon = folderIcon(folder.hasContents)
 
