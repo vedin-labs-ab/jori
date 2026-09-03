@@ -13,6 +13,8 @@ import { type WaiterCondition } from "../../contracts/runtime/waiters"
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
 import { type TranscriptMessage } from "../runs/execution/transcript/schema"
+import { type LoadedRuntime } from "./context"
+import { RemoteSandbox } from "./sandbox/remote"
 import { type SandboxRuntime } from "./sandbox/types"
 import { drainRunSession } from "./sessions"
 import { sendRunReply } from "./surface"
@@ -139,6 +141,23 @@ export type AgentRuntime = {
 /** What recording and waiting need of a runtime: the platform to write
  *  through and the context that names the run. */
 export type TraceRuntime = Pick<AgentRuntime, "context" | "platform">
+
+/** The runtime a step hands its loop: this action as the platform, and the
+ *  run's sandbox reached through Node actions. */
+export function createAgentRuntime(
+  ctx: ActionCtx,
+  loaded: LoadedRuntime
+): AgentRuntime {
+  return {
+    context: loaded.context,
+    platform: new ActionPlatform(ctx, loaded.context),
+    sandbox: new RemoteSandbox(
+      ctx,
+      loaded.run._id,
+      loaded.context.run.sandboxId
+    ),
+  }
+}
 
 /** The port over one step action: each call is either a helper running in
  *  this action or a single query or mutation on the run's own records. */

@@ -1,19 +1,61 @@
+import { v } from "convex/values"
 import { joriModel } from "../../../contracts/billing"
 import { type RuntimePrompt } from "../../../contracts/runtime/prompt"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type RuntimeModelUsage } from "../../../contracts/runtime/trace"
+import { internalAction } from "../../_generated/server"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
+import { loadRuntime } from "../context"
+import { buildRuntimePrompt } from "../context/response"
 import { nullableText } from "../model/reasoning"
 import {
   type ModelResponse,
   type ModelRuntime,
   type ModelTool,
 } from "../model/types"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime, createAgentRuntime } from "../platform"
+import { syncSessionReactions } from "../sessions"
 import { modelTools } from "../tools/index"
 import { formatError } from "../trace/events"
 import { recordRuntimeEvent } from "../trace/record"
 import { promptMessages } from "./transcript"
+
+/** One turn's model call, as a workflow step. Reactions are synced first so
+ *  the prompt renders the conversation as it stands. */
+export const step = internalAction({
+  args: {
+    runId: v.id("runs"),
+    turn: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    const loaded = await loadRuntime(ctx, args.runId)
+
+    if (loaded.session !== null) {
+      await syncSessionReactions(ctx, loaded.session._id)
+    }
+
+    // The OpenRouter client is the heaviest module in the loop; loading it on
+    // the call keeps this step's static graph within the runtime's
+    // evaluation memory, as the act step does for the broker.
+    const { OpenRouterModel } = await import("../model/chat")
+
+    await runModelTurn({
+      model: new OpenRouterModel(),
+      prompt: buildRuntimePrompt(
+        loaded.input,
+        loaded.activeSurface,
+        loaded.permissions,
+        loaded.skills,
+        { person: loaded.session?.recency?.requester ?? null }
+      ),
+      runtime: createAgentRuntime(ctx, loaded),
+      turn: args.turn,
+    })
+
+    return null
+  },
+})
 
 /**
  * One turn's model call. The prompt prefix is rebuilt here and the history

@@ -23,3 +23,6 @@ export type AgentRunStatus = {
   /** Outcome the child returned via finish_run; null until it completes. */
   result: string | null
 }
+
+/** Model turns a run may take before it is failed as looping. */
+export const maxRunTurns = 30

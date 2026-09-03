@@ -1,8 +1,15 @@
+import { v } from "convex/values"
 import { encodeToolResult, type JsonObject } from "../../../contracts/json"
-import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
+import {
+  isTerminalRunStatus,
+  maxRunTurns,
+} from "../../../contracts/runtime/runs"
 import { type WaiterWake } from "../../../contracts/runtime/waiters"
+import { internalAction } from "../../_generated/server"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
-import { type AgentRuntime } from "../platform"
+import { waiterWake } from "../../runs/execution/waiters/schema"
+import { loadRuntime } from "../context"
+import { type AgentRuntime, createAgentRuntime } from "../platform"
 import { executeToolCall } from "../tools/index"
 import { recordRuntimeEvent } from "../trace/record"
 import { reconcileHandoffs } from "./handoffs"
@@ -25,7 +32,36 @@ type ToolRun =
   | { sequence: number; status: "finished" | "ran" }
   | { eventId: string; status: "parked" }
 
-export const maxTurns = 30
+const actOutcome = v.union(
+  v.object({
+    status: v.union(
+      v.literal("completed"),
+      v.literal("continue"),
+      v.literal("failed"),
+      v.literal("stopped")
+    ),
+  }),
+  v.object({ eventId: v.string(), status: v.literal("parked") })
+)
+
+/** One turn's tool calls and their settlement, as a workflow step. */
+export const step = internalAction({
+  args: {
+    runId: v.id("runs"),
+    turn: v.number(),
+    wake: v.optional(waiterWake),
+  },
+  returns: actOutcome,
+  handler: async (ctx, args): Promise<ActOutcome> => {
+    const loaded = await loadRuntime(ctx, args.runId)
+
+    return await runAct({
+      runtime: createAgentRuntime(ctx, loaded),
+      turn: args.turn,
+      ...(args.wake === undefined ? {} : { wake: args.wake }),
+    })
+  },
+})
 
 const maxTurnsError = "Model loop exceeded the maximum step count."
 const toolSequenceOffset = 100
@@ -64,7 +100,7 @@ export async function runAct(args: {
 
   // A turn that would go on past the last one fails instead, whatever the
   // model answered with.
-  if (outcome.status === "continue" && turn >= maxTurns) {
+  if (outcome.status === "continue" && turn >= maxRunTurns) {
     await failRun(runtime)
 
     return { status: "failed" }
@@ -244,7 +280,7 @@ function pendingCalls(
 async function failRun(runtime: AgentRuntime) {
   await recordRuntimeEvent(runtime.platform, runtime.context, {
     data: { error: maxTurnsError },
-    sequence: maxTurns * toolSequenceOffset + toolSequenceOffset,
+    sequence: maxRunTurns * toolSequenceOffset + toolSequenceOffset,
     type: "run.failed",
   })
 }

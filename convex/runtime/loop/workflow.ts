@@ -6,13 +6,15 @@ import {
 } from "@convex-dev/workflow"
 import { vResultValidator } from "@convex-dev/workpool"
 import { v } from "convex/values"
-import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
+import {
+  isTerminalRunStatus,
+  maxRunTurns,
+} from "../../../contracts/runtime/runs"
 import { components, internal } from "../../_generated/api"
 import { internalMutation } from "../../_generated/server"
 import { settleRunSandbox } from "../../runs/execution/sandboxes/data"
 import { recordWorkerTrace } from "../../runs/execution/traces/data"
 import { waiterWake } from "../../runs/execution/waiters/schema"
-import { maxTurns } from "./act"
 
 type AgentOutcome = "completed" | "failed" | "skipped" | "stopped"
 
@@ -46,7 +48,7 @@ export const agent = workflow
     ),
   })
   .handler(async (step, args): Promise<AgentOutcome> => {
-    const opened = await step.runAction(internal.runtime.loop.turn.open, args, {
+    const opened = await step.runAction(internal.runtime.loop.open.step, args, {
       retry: true,
     })
 
@@ -54,15 +56,15 @@ export const agent = workflow
       return "skipped"
     }
 
-    for (let turn = 1; turn <= maxTurns; turn += 1) {
+    for (let turn = 1; turn <= maxRunTurns; turn += 1) {
       await step.runAction(
-        internal.runtime.loop.turn.model,
+        internal.runtime.loop.model.step,
         { runId: args.runId, turn },
         { retry: true }
       )
 
       let outcome = await step.runAction(
-        internal.runtime.loop.turn.act,
+        internal.runtime.loop.act.step,
         { runId: args.runId, turn },
         { retry: true }
       )
@@ -74,7 +76,7 @@ export const agent = workflow
         })
 
         outcome = await step.runAction(
-          internal.runtime.loop.turn.act,
+          internal.runtime.loop.act.step,
           { runId: args.runId, turn, wake },
           { retry: true }
         )
