@@ -7,6 +7,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react"
+import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,15 +16,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { type Job, jobControlAction } from "../types"
+import { DeleteJobDialog } from "./delete"
 
-// The canonical menu for a job, as items only. Editing a job
-// edits all of it — schedule, instructions, access — so the item
-// is plain "Edit" rather than the materials' "Edit details".
+// The canonical menu for a job, as items only. Editing a job edits all of
+// it — schedule, instructions, access, visibility — so the item is plain
+// "Edit" rather than the materials' "Edit details". Two triggers hold it:
+// the page hangs it off the job's name in the breadcrumb, a list row off
+// its "…" button. Both own the confirmation the delete passes through.
 
-type JobMenuActions = {
+export type JobMenuActions = {
   isControlling: boolean
   isDeleting: boolean
-  onDeleteRequest: () => void
+  onDelete: (job: Job) => void
   onEdit: (job: Job) => void
   onMoveToFolder: (job: Job) => void
   onPausedChange: (job: Job, paused: boolean) => void
@@ -41,7 +45,7 @@ function JobMenuItems({
   onPausedChange,
   onUnfile,
   job,
-}: JobMenuActions) {
+}: Omit<JobMenuActions, "onDelete"> & { onDeleteRequest: () => void }) {
   return (
     <>
       <DropdownMenuItem onSelect={() => onEdit(job)}>
@@ -104,15 +108,51 @@ function JobControlItem({
   )
 }
 
-/** The same menu on a list row, trigger and all. The confirmation the
- *  delete opens stays with the host, which knows what it deletes. */
-export function JobRowMenu(props: JobMenuActions) {
+/** The job's menu for its breadcrumb name on its page; the shell owns
+ *  the trigger, so this publishes the content only. */
+export function JobTitleMenu(props: JobMenuActions) {
+  const confirm = useDeleteConfirmation(props)
+
   return (
-    <DropdownMenu>
-      <RowMenuTrigger name={props.job.name} />
-      <DropdownMenuContent align="end" className={menuWidth}>
-        <JobMenuItems {...props} />
+    <>
+      <DropdownMenuContent align="start" className={menuWidth}>
+        <JobMenuItems {...props} onDeleteRequest={confirm.request} />
       </DropdownMenuContent>
-    </DropdownMenu>
+      {confirm.dialog}
+    </>
   )
+}
+
+/** The same menu on a list row, trigger and all. */
+export function JobRowMenu(props: JobMenuActions) {
+  const confirm = useDeleteConfirmation(props)
+
+  return (
+    <>
+      <DropdownMenu>
+        <RowMenuTrigger name={props.job.name} />
+        <DropdownMenuContent align="end" className={menuWidth}>
+          <JobMenuItems {...props} onDeleteRequest={confirm.request} />
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {confirm.dialog}
+    </>
+  )
+}
+
+function useDeleteConfirmation({ isDeleting, job, onDelete }: JobMenuActions) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return {
+    request: () => setIsOpen(true),
+    dialog: (
+      <DeleteJobDialog
+        isDeleting={isDeleting}
+        job={job}
+        onDelete={() => onDelete(job)}
+        onOpenChange={setIsOpen}
+        open={isOpen}
+      />
+    ),
+  }
 }

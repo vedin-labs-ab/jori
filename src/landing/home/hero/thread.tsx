@@ -1,4 +1,4 @@
-import { Table2 } from "lucide-react"
+import { Table2, Workflow } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
@@ -15,9 +15,12 @@ const entrance =
  *  answer in the folder, with a link back to it. */
 export function RenewalsThread({
   className,
+  onOpenJob,
   onOpenTable,
 }: {
   className?: string
+  /** Opens the job the reply says will keep the row current. */
+  onOpenJob: () => void
   /** Opens the table the reply filed into. */
   onOpenTable: () => void
 }) {
@@ -48,8 +51,16 @@ export function RenewalsThread({
           isJori
           time="09:12"
         >
-          Done. One row added, marked at risk. Renewals watch will keep it
-          current.
+          Done. One row added, marked at risk.{" "}
+          <button
+            className="inline-flex items-center gap-1 rounded-sm font-medium underline decoration-muted-foreground/50 underline-offset-2 transition-colors hover:decoration-foreground"
+            onClick={onOpenJob}
+            type="button"
+          >
+            <Workflow className="size-3.5 text-muted-foreground" />
+            Renewals watch
+          </button>{" "}
+          will keep it current.
           <button
             className="mt-2 flex w-fit items-center gap-1.5 rounded-md border bg-background px-2 py-1 font-medium text-xs transition-colors hover:bg-muted"
             onClick={onOpenTable}

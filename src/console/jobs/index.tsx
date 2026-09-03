@@ -1,29 +1,19 @@
-import { useQuery } from "convex/react"
-import { useDeferredValue, useState } from "react"
-import { moveTarget } from "@/shared/console/folders/types"
-import { JobContent } from "@/shared/console/jobs/list/content"
+import { useState } from "react"
+import {
+  type MoveResourceTarget,
+  moveTarget,
+} from "@/shared/console/folders/types"
+import { JobList } from "@/shared/console/jobs/list"
+import { jobNoun } from "@/shared/console/jobs/list/config"
 import { JobFilters } from "@/shared/console/jobs/list/filters"
-import {
-  type Job,
-  type JobFilter,
-  type JobList,
-} from "@/shared/console/jobs/types"
-import { ConsolePageLayout } from "@/shared/console/layout"
-import {
-  type AudienceFilter,
-  matchesAudienceFilter,
-} from "@/shared/console/list/audience"
-import { ConsoleListPager } from "@/shared/console/list/pager"
-import {
-  useClientPagination,
-  useResettingSetter,
-} from "@/shared/console/list/pagination"
-import { useNow } from "@/shared/console/time"
-import { api } from "../../../convex/_generated/api"
-import { MoveResourceDialog } from "../folders/move"
+import { type Job } from "@/shared/console/jobs/types"
+import { SelectionActionsBar } from "@/shared/console/list/bar"
+import { ConsoleListLayout } from "@/shared/console/list/frame"
+import { ConsoleListBody } from "@/shared/console/list/pager"
+import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { useJobEditorHost } from "./editor/host"
-import { filterJobsByView, hasJobFilters } from "./filter"
+import { defaultJobFilter, useJobBulk, useJobListPage } from "./list"
 
 export function Jobs() {
   return (
@@ -33,118 +23,105 @@ export function Jobs() {
   )
 }
 
+function useJobsPage(organizationId: string) {
+  const page = useJobListPage(organizationId)
+  const [moving, setMoving] = useState<MoveResourceTarget[]>()
+
+  return {
+    ...page,
+    bulk: useJobBulk(organizationId, page.selection),
+    host: useJobEditorHost(organizationId),
+    moving,
+    setMoving,
+  }
+}
+
 function JobListView({ organizationId }: { organizationId: string }) {
-  const filters = useJobFilters()
-  const deferredQuery = useDeferredValue(filters.query)
-  const jobList = useQuery(api.jobs.console.list, {
-    organizationId,
-    query: deferredQuery,
-    statusFilter: filters.filter,
-  })
-  const { dialog, editor, preloadDialog } = useJobEditorHost(organizationId)
-  const [movingJob, setMovingJob] = useState<Job>()
-  const now = useNow(30_000)
-  const { hasFilters, pagination } = useJobPagination({
-    jobList,
-    filter: filters.filter,
-    query: deferredQuery,
-    audience: filters.audience,
-  })
-  const setters = useResettingFilterSetters(filters, pagination.reset)
+  const page = useJobsPage(organizationId)
+  const { editor, preloadDialog } = page.host
+  const create = () => {
+    void preloadDialog()
+    editor.openCreateForm()
+  }
 
   return (
     <JobFilters
-      audience={filters.audience}
+      audience={page.audience}
       defaultStatus={defaultJobFilter}
-      onAudienceChange={setters.setAudience}
+      onAudienceChange={page.setAudience}
       onCreate={editor.openCreateForm}
       onCreateIntent={preloadDialog}
-      onQueryChange={setters.setQuery}
-      onStatusChange={setters.setFilter}
-      query={filters.query}
-      status={filters.filter}
+      onQueryChange={page.setQuery}
+      onStatusChange={page.setFilter}
+      query={page.query}
+      status={page.filter}
     >
-      <ConsolePageLayout>
-        <JobContent
-          controllingJobId={editor.controllingJobId}
-          deletingJobId={editor.deletingJobId}
-          hasFilters={hasFilters}
-          now={now}
-          jobList={jobList}
-          onCreate={() => {
-            void preloadDialog()
-            editor.openCreateForm()
-          }}
-          onDelete={editor.deleteJob}
-          onEdit={editor.openEditForm}
-          onMoveToFolder={setMovingJob}
-          onPausedChange={editor.setJobPaused}
-          visibleJobs={pagination.visibleRows}
-        />
-        {jobList?.status !== "unauthorized" ? (
-          <ConsoleListPager pagination={pagination} />
-        ) : null}
-        {dialog}
-        <MoveResourceDialog
-          onClose={() => setMovingJob(undefined)}
-          organizationId={organizationId}
-          resource={movingResource(movingJob)}
-        />
-      </ConsolePageLayout>
+      <ConsoleListLayout>
+        <ConsoleListBody
+          isLoading={page.list === undefined}
+          pagination={
+            page.list?.status === "ready" ? page.pagination : undefined
+          }
+        >
+          <JobList
+            config={page.config}
+            controllingJobId={editor.controllingJobId}
+            controls={page.controls}
+            deletingJobId={editor.deletingJobId}
+            folders={page.folders}
+            hasFilters={page.hasFilters}
+            jobs={page.pagination.visibleRows}
+            onCreate={create}
+            onDelete={(job) => void editor.deleteJob(job)}
+            onEdit={editor.openEditForm}
+            onMoveToFolder={(job) => page.setMoving([toMoveTarget(job)])}
+            onPausedChange={(job, paused) =>
+              void editor.setJobPaused(job, paused)
+            }
+            selection={page.selection}
+            unauthorizedMessage={
+              page.list?.status === "unauthorized"
+                ? page.list.message
+                : undefined
+            }
+          />
+        </ConsoleListBody>
+        <JobsOverlays organizationId={organizationId} page={page} />
+      </ConsoleListLayout>
     </JobFilters>
   )
 }
 
-function movingResource(job: Job | undefined) {
-  return job === undefined ? undefined : moveTarget("job", job.id, job)
-}
-
-const defaultJobFilter: JobFilter = "active"
-
-function useJobFilters() {
-  const [filter, setFilter] = useState<JobFilter>(defaultJobFilter)
-  const [audience, setAudience] = useState<AudienceFilter>("all")
-  const [query, setQuery] = useState("")
-
-  return { filter, query, audience, setFilter, setQuery, setAudience }
-}
-
-/** Every filter change resets the pager back to the first page. */
-function useResettingFilterSetters(
-  filters: ReturnType<typeof useJobFilters>,
-  reset: () => void
-) {
-  return {
-    setFilter: useResettingSetter(filters.setFilter, reset),
-    setQuery: useResettingSetter(filters.setQuery, reset),
-    setAudience: useResettingSetter(filters.setAudience, reset),
-  }
-}
-
-function useJobPagination({
-  jobList,
-  filter,
-  query,
-  audience,
+/** The selection bar and the page's dialogs — everything that floats over
+ *  the list. */
+function JobsOverlays({
+  organizationId,
+  page,
 }: {
-  jobList: JobList | undefined
-  filter: JobFilter
-  query: string
-  audience: AudienceFilter
+  organizationId: string
+  page: ReturnType<typeof useJobsPage>
 }) {
-  const hasFilters = hasJobFilters(query, filter) || audience !== "all"
-  const jobs =
-    jobList?.status === "ready"
-      ? filterJobsByView(jobList.jobs, filter).filter((job) =>
-          matchesAudienceFilter(job.audience, audience)
-        )
-      : []
-  const pagination = useClientPagination({
-    hasFilters,
-    isReady: jobList?.status === "ready",
-    itemLabel: { singular: "job", plural: "jobs" },
-    items: jobs,
-  })
+  return (
+    <>
+      <SelectionActionsBar
+        count={page.selection.count}
+        isBusy={page.bulk.isBusy}
+        noun={jobNoun}
+        onClear={page.selection.clear}
+        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
+        onRemove={page.bulk.removeSelected}
+        removal={page.bulk.removal}
+      />
+      <MoveResourcesDialog
+        onClose={() => page.setMoving(undefined)}
+        organizationId={organizationId}
+        resources={page.moving}
+      />
+      {page.host.dialog}
+    </>
+  )
+}
 
-  return { hasFilters, pagination }
+function toMoveTarget(job: Job) {
+  return moveTarget("job", job.id, job)
 }

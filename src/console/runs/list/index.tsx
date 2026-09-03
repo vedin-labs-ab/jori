@@ -1,35 +1,19 @@
 import { useSearch } from "@tanstack/react-router"
-import { lazy, useDeferredValue, useMemo, useState } from "react"
+import { useDeferredValue, useState } from "react"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { type AudienceFilter } from "@/shared/console/list/audience"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { useResettingSetter } from "@/shared/console/list/pagination"
 import { ExecutionFilters } from "@/shared/console/runs/list/filters"
 import { ExecutionRows } from "@/shared/console/runs/list/rows"
-import { type RunRowSlots } from "@/shared/console/runs/row"
 import { useExecutionClock } from "@/shared/console/runs/time"
 import {
   type ApprovalFilter,
   type RunFilter,
 } from "@/shared/console/runs/types"
-import { StopExecution } from "../row/stop"
 import { type ExecutionPagination, useExecutionPagination } from "./pagination"
 import { usePageSearchSync, useSearchTarget } from "./seek"
-
-let expandedRunModule: Promise<typeof import("../row/expanded")> | undefined
-
-function loadExpandedRun() {
-  expandedRunModule ??= import("../row/expanded")
-  return expandedRunModule
-}
-
-function preloadExpandedRun() {
-  void loadExpandedRun()
-}
-
-const ExpandedRun = lazy(async () => ({
-  default: (await loadExpandedRun()).ExpandedRun,
-}))
+import { useRunRowSlots } from "./slots"
 
 /** The Activity page: the filters, the rows they narrow, and the pager,
  *  over cursor pagination that the URL's page and run deep links steer. */
@@ -45,11 +29,13 @@ export function RunsList({ organizationId }: { organizationId: string }) {
   const deferredAudienceFilter = useDeferredValue(audienceFilter)
   const deferredQuery = useDeferredValue(query)
   const pagination = useExecutionPagination(
-    organizationId,
-    deferredRunFilter,
-    deferredApprovalFilter,
-    deferredAudienceFilter,
-    deferredQuery,
+    {
+      approvalFilter: deferredApprovalFilter,
+      audienceFilter: deferredAudienceFilter,
+      organizationId,
+      query: deferredQuery,
+      runFilter: deferredRunFilter,
+    },
     target
   )
 
@@ -119,27 +105,5 @@ function RunRows({
       rows={pagination.visibleRows}
       showAudience={showAudience}
     />
-  )
-}
-
-/** The row slots for one organization, held steady across ticks of the
- *  clock so a memoized row re-renders for its own run alone: the detail
- *  chunk, fetched once any row is about to open, and the stop control. */
-function useRunRowSlots(organizationId: string) {
-  return useMemo<RunRowSlots>(
-    () => ({
-      expanded: (execution, now) => (
-        <ExpandedRun
-          execution={execution}
-          now={now}
-          organizationId={organizationId}
-        />
-      ),
-      onPreload: preloadExpandedRun,
-      stop: (execution) => (
-        <StopExecution organizationId={organizationId} runId={execution.id} />
-      ),
-    }),
-    [organizationId]
   )
 }

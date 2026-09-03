@@ -8,7 +8,6 @@ import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
-import { DeleteJobDialog } from "@/shared/console/jobs/list/delete"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
@@ -114,7 +113,6 @@ function FileResourceMenu({ material }: { material: DemoMaterial }) {
 function JobResourceMenu({ resource }: { resource: FolderResource }) {
   const { actions, state } = useDemoWorkspace()
   const editor = useJobEditor()
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
   const job = state.jobs.find((candidate) => candidate.id === resource.id)
 
@@ -128,18 +126,11 @@ function JobResourceMenu({ resource }: { resource: FolderResource }) {
         isControlling={false}
         isDeleting={false}
         job={job}
-        onDeleteRequest={() => setIsDeleteOpen(true)}
+        onDelete={actions.deleteJob}
         onEdit={editor.openEditForm}
         onMoveToFolder={() => setIsMoveOpen(true)}
         onPausedChange={actions.setJobPaused}
         onUnfile={() => actions.fileResource("job", job.id, null)}
-      />
-      <DeleteJobDialog
-        isDeleting={false}
-        job={job}
-        onDelete={() => actions.deleteJob(job)}
-        onOpenChange={setIsDeleteOpen}
-        open={isDeleteOpen}
       />
       <DemoMoveDialog
         onOpenChange={setIsMoveOpen}

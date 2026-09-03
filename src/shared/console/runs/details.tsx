@@ -194,6 +194,36 @@ export function DetailLink({
   )
 }
 
+/** A detail's inline value: its facts wrapping on one line, in the detail
+ *  text size. Runs and jobs set every plain row's value in this. */
+export function DetailLine({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs",
+        className
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
+/** One plain term of a detail, set in the foreground weight. */
+export function DetailValue({ children }: { children: ReactNode }) {
+  return (
+    <span className="min-w-0 max-w-full truncate font-medium text-foreground">
+      {children}
+    </span>
+  )
+}
+
 export function DetailRow({
   children,
   icon: Icon,

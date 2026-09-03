@@ -115,8 +115,7 @@ function resourcePayload(
   }
 }
 
-/** The resource's own surface. Jobs have no detail page — their list
- *  opens the editor — so a job row lands on the list. */
+/** The resource's own surface. */
 function ResourceLink({ resource }: { resource: FolderResource }) {
   const Icon = resourcePresentation(resource).icon
   const label = (
@@ -171,8 +170,9 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
         <ConsoleLink
           className={nameLinkClassName}
           draggable={false}
+          params={{ jobId: resource.id }}
           title={resource.name}
-          to="/jobs"
+          to="/jobs/$jobId"
         >
           {label}
         </ConsoleLink>

@@ -157,3 +157,8 @@ export const runs = defineTable({
     "folderId",
     "createdAt",
   ])
+  .index("by_organization_and_job_and_created_at", [
+    "organizationId",
+    "job.id",
+    "createdAt",
+  ])

@@ -3,40 +3,15 @@ import {
   type VisibilityMode,
   visibilityModeMarks,
 } from "@contracts/visibility"
-import { Building2, Group, Lock, Users } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { visibilityIcon, visibilityLabel } from "./marks"
 
 // The quiet visibility vocabulary every material surface shares: one icon
-// per mode, named in a tooltip. Teams wear the same grouped-objects icon
-// as the settings nav, keeping them apart from people at a glance.
-
-const visibilityIcons = {
-  private: Lock,
-  people: Users,
-  teams: Group,
-  organization: Building2,
-} as const
-
-/** Short audience sentence for tooltips. */
-function describeVisibility(visibility: Visibility) {
-  if (visibility.mode === "people") {
-    const count = visibility.personIds.length
-
-    return count === 1 ? "1 person" : `${count} people`
-  }
-
-  if (visibility.mode === "teams") {
-    const count = visibility.teamIds.length
-
-    return count === 1 ? "1 team" : `${count} teams`
-  }
-
-  return visibilityModeMarks[visibility.mode]
-}
+// per mode, named in a tooltip.
 
 export function VisibilityIcon({
   className,
@@ -45,7 +20,7 @@ export function VisibilityIcon({
   className?: string
   mode: VisibilityMode
 }) {
-  const Icon = visibilityIcons[mode]
+  const Icon = visibilityIcon(mode)
 
   return <Icon className={className} aria-hidden />
 }
@@ -66,7 +41,7 @@ export function VisibilityMark({
   const label =
     typeof visibility === "string"
       ? visibilityModeMarks[visibility]
-      : `${visibilityModeMarks[value.mode]}${detailSuffix(value)}`
+      : visibilityLabel(value)
 
   return (
     <Tooltip>
@@ -79,14 +54,6 @@ export function VisibilityMark({
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   )
-}
-
-function detailSuffix(visibility: Visibility) {
-  if (visibility.mode === "people" || visibility.mode === "teams") {
-    return ` · ${describeVisibility(visibility)}`
-  }
-
-  return ""
 }
 
 function modeOnly(mode: VisibilityMode): Visibility {

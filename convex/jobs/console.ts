@@ -70,6 +70,43 @@ export const list = query({
   },
 })
 
+/** One job, for its page. Missing, foreign, and invisible jobs all read
+ *  as not found, so the page cannot probe what sits behind a gate. */
+export const get = query({
+  args: {
+    organizationId: v.string(),
+    jobId: v.id("jobs"),
+  },
+  handler: async (ctx, args) => {
+    const access = await checkOrganizationAccess(ctx, args.organizationId)
+
+    if (!access.ok) {
+      return { status: "unauthorized" as const, message: access.message }
+    }
+
+    const personId = await resolvePersonByIdentity(ctx, {
+      organizationId: args.organizationId,
+      provider: "auth",
+      externalId: requireUserId(access.identity),
+    })
+    const job = await ctx.db.get(args.jobId)
+    const sight = createSight(ctx, {
+      organizationId: args.organizationId,
+      personId,
+    })
+
+    if (
+      job === null ||
+      job.organizationId !== args.organizationId ||
+      !(await canSeeJob(sight, job))
+    ) {
+      return { status: "not_found" as const }
+    }
+
+    return { status: "ready" as const, job: await toJobDisplay(ctx, job) }
+  },
+})
+
 export const create = mutation({
   args: {
     organizationId: v.string(),

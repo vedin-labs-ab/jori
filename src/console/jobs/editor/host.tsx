@@ -32,6 +32,8 @@ export function useJobEditorHost(organizationId: string) {
 
   return {
     editor,
+    /** The organization's tool policy, for everything that reads a brief. */
+    permissions: permissions.permissions,
     // Awaitable so flows that swap into the editor can wait for the chunk;
     // fire-and-forget callers (hover warmup) just ignore the promise.
     preloadDialog: () => loadJobDialog().then(() => undefined),

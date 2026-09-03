@@ -15,7 +15,6 @@ import { Route as ContextRouteImport } from './routes/context'
 import { Route as FilesRouteImport } from './routes/files'
 import { Route as FoldersRouteImport } from './routes/folders'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RunsRouteImport } from './routes/runs'
@@ -34,6 +33,7 @@ import { Route as FoldersIndexRouteImport } from './routes/folders/index'
 import { Route as FoldersUsageRouteImport } from './routes/folders/usage'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
 import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
+import { Route as JobsIndexRouteImport } from './routes/jobs/index'
 import { Route as StoresIndexRouteImport } from './routes/stores/index'
 import { Route as TablesIndexRouteImport } from './routes/tables/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -41,6 +41,7 @@ import { Route as FilesFileIdIndexRouteImport } from './routes/files/$fileId/ind
 import { Route as FoldersFolderIdIndexRouteImport } from './routes/folders/$folderId/index'
 import { Route as FoldersFolderIdUsageRouteImport } from './routes/folders/$folderId/usage'
 import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
+import { Route as JobsJobIdIndexRouteImport } from './routes/jobs/$jobId/index'
 import { Route as StoresStoreIdIndexRouteImport } from './routes/stores/$storeId/index'
 import { Route as TablesTableIdIndexRouteImport } from './routes/tables/$tableId/index'
 
@@ -72,11 +73,6 @@ const FoldersRoute = FoldersRouteImport.update({
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JobsRoute = JobsRouteImport.update({
-  id: '/jobs',
-  path: '/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -169,6 +165,11 @@ const IntegrationsPersonalRoute = IntegrationsPersonalRouteImport.update({
   path: '/personal',
   getParentRoute: () => IntegrationsRoute,
 } as any)
+const JobsIndexRoute = JobsIndexRouteImport.update({
+  id: '/jobs/',
+  path: '/jobs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoresIndexRoute = StoresIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -204,6 +205,11 @@ const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
   path: '/offers/$token',
   getParentRoute: () => IntegrationsRoute,
 } as any)
+const JobsJobIdIndexRoute = JobsJobIdIndexRouteImport.update({
+  id: '/jobs/$jobId/',
+  path: '/jobs/$jobId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoresStoreIdIndexRoute = StoresStoreIdIndexRouteImport.update({
   id: '/$storeId/',
   path: '/$storeId/',
@@ -222,7 +228,6 @@ export interface FileRoutesByFullPath {
   '/files': typeof FilesRouteWithChildren
   '/folders': typeof FoldersRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
-  '/jobs': typeof JobsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -241,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/files/': typeof FilesIndexRoute
   '/folders/': typeof FoldersIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/jobs/': typeof JobsIndexRoute
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -248,13 +254,13 @@ export interface FileRoutesByFullPath {
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
+  '/jobs/$jobId/': typeof JobsJobIdIndexRoute
   '/stores/$storeId/': typeof StoresStoreIdIndexRoute
   '/tables/$tableId/': typeof TablesTableIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/console': typeof ConsoleRoute
-  '/jobs': typeof JobsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -271,6 +277,7 @@ export interface FileRoutesByTo {
   '/files': typeof FilesIndexRoute
   '/folders': typeof FoldersIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
+  '/jobs': typeof JobsIndexRoute
   '/stores': typeof StoresIndexRoute
   '/tables': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/files/$fileId': typeof FilesFileIdIndexRoute
   '/folders/$folderId': typeof FoldersFolderIdIndexRoute
+  '/jobs/$jobId': typeof JobsJobIdIndexRoute
   '/stores/$storeId': typeof StoresStoreIdIndexRoute
   '/tables/$tableId': typeof TablesTableIdIndexRoute
 }
@@ -289,7 +297,6 @@ export interface FileRoutesById {
   '/files': typeof FilesRouteWithChildren
   '/folders': typeof FoldersRouteWithChildren
   '/integrations': typeof IntegrationsRouteWithChildren
-  '/jobs': typeof JobsRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/runs': typeof RunsRoute
@@ -308,6 +315,7 @@ export interface FileRoutesById {
   '/files/': typeof FilesIndexRoute
   '/folders/': typeof FoldersIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
+  '/jobs/': typeof JobsIndexRoute
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
+  '/jobs/$jobId/': typeof JobsJobIdIndexRoute
   '/stores/$storeId/': typeof StoresStoreIdIndexRoute
   '/tables/$tableId/': typeof TablesTableIdIndexRoute
 }
@@ -327,7 +336,6 @@ export interface FileRouteTypes {
     | '/files'
     | '/folders'
     | '/integrations'
-    | '/jobs'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -346,6 +354,7 @@ export interface FileRouteTypes {
     | '/files/'
     | '/folders/'
     | '/integrations/'
+    | '/jobs/'
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
@@ -353,13 +362,13 @@ export interface FileRouteTypes {
     | '/integrations/offers/$token'
     | '/files/$fileId/'
     | '/folders/$folderId/'
+    | '/jobs/$jobId/'
     | '/stores/$storeId/'
     | '/tables/$tableId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/console'
-    | '/jobs'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -376,6 +385,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/folders'
     | '/integrations'
+    | '/jobs'
     | '/stores'
     | '/tables'
     | '/api/auth/$'
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/integrations/offers/$token'
     | '/files/$fileId'
     | '/folders/$folderId'
+    | '/jobs/$jobId'
     | '/stores/$storeId'
     | '/tables/$tableId'
   id:
@@ -393,7 +404,6 @@ export interface FileRouteTypes {
     | '/files'
     | '/folders'
     | '/integrations'
-    | '/jobs'
     | '/pricing'
     | '/privacy'
     | '/runs'
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | '/files/'
     | '/folders/'
     | '/integrations/'
+    | '/jobs/'
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
@@ -419,6 +430,7 @@ export interface FileRouteTypes {
     | '/integrations/offers/$token'
     | '/files/$fileId/'
     | '/folders/$folderId/'
+    | '/jobs/$jobId/'
     | '/stores/$storeId/'
     | '/tables/$tableId/'
   fileRoutesById: FileRoutesById
@@ -430,7 +442,6 @@ export interface RootRouteChildren {
   FilesRoute: typeof FilesRouteWithChildren
   FoldersRoute: typeof FoldersRouteWithChildren
   IntegrationsRoute: typeof IntegrationsRouteWithChildren
-  JobsRoute: typeof JobsRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RunsRoute: typeof RunsRoute
@@ -441,7 +452,9 @@ export interface RootRouteChildren {
   TablesRoute: typeof TablesRouteWithChildren
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
+  JobsIndexRoute: typeof JobsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  JobsJobIdIndexRoute: typeof JobsJobIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -486,13 +499,6 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/jobs': {
-      id: '/jobs'
-      path: '/jobs'
-      fullPath: '/jobs'
-      preLoaderRoute: typeof JobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -621,6 +627,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntegrationsPersonalRouteImport
       parentRoute: typeof IntegrationsRoute
     }
+    '/jobs/': {
+      id: '/jobs/'
+      path: '/jobs'
+      fullPath: '/jobs/'
+      preLoaderRoute: typeof JobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stores/': {
       id: '/stores/'
       path: '/'
@@ -669,6 +682,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/integrations/offers/$token'
       preLoaderRoute: typeof IntegrationsOffersTokenRouteImport
       parentRoute: typeof IntegrationsRoute
+    }
+    '/jobs/$jobId/': {
+      id: '/jobs/$jobId/'
+      path: '/jobs/$jobId'
+      fullPath: '/jobs/$jobId/'
+      preLoaderRoute: typeof JobsJobIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/stores/$storeId/': {
       id: '/stores/$storeId/'
@@ -780,7 +800,6 @@ const rootRouteChildren: RootRouteChildren = {
   FilesRoute: FilesRouteWithChildren,
   FoldersRoute: FoldersRouteWithChildren,
   IntegrationsRoute: IntegrationsRouteWithChildren,
-  JobsRoute: JobsRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RunsRoute: RunsRoute,
@@ -791,7 +810,9 @@ const rootRouteChildren: RootRouteChildren = {
   TablesRoute: TablesRouteWithChildren,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
+  JobsIndexRoute: JobsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  JobsJobIdIndexRoute: JobsJobIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

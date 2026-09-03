@@ -45,8 +45,17 @@ test("opens the console on the folder the thread files into", () => {
   ).toBeGreaterThan(0)
   expect(screen.getByText("Chase overdue invoices")).toBeDefined()
   expect(
-    screen.getByText("Renewals watch will keep it current.", { exact: false })
+    screen.getByText("will keep it current.", { exact: false })
   ).toBeDefined()
+})
+
+test("the reply's job chip opens the job's page", async () => {
+  renderHero()
+
+  fireEvent.click(screen.getByRole("button", { name: "Renewals watch" }))
+
+  expect(await screen.findByText("Instructions")).toBeDefined()
+  expect(screen.getByRole("heading", { name: "Runs" })).toBeDefined()
 })
 
 test("the reply's chip opens the table it filed into", async () => {

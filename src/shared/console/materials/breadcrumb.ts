@@ -5,6 +5,7 @@ import {
   useEffect,
   useMemo,
 } from "react"
+import { type FolderNames } from "./folders"
 
 // Material detail pages are headed by a breadcrumb trail. The console shell
 // owns the trail: by default it derives the linked parent surface from the
@@ -65,4 +66,34 @@ export function useMaterialBreadcrumb(name: string, menu?: ReactNode) {
   // a republish each time — harmless, because the shell's children keep
   // their element identity and bail out of the re-render.
   useMaterialTrail(useMemo(() => ({ name, menu }), [name, menu]))
+}
+
+/** The linked ancestors of something filed in a folder, root first, read
+ *  off the organization's folder names: nothing for what is filed nowhere,
+ *  and nothing yet while the names are still loading. */
+export function folderTrail(
+  folders: FolderNames | undefined,
+  folderId: string | undefined
+): MaterialBreadcrumbSegment[] {
+  const segments: MaterialBreadcrumbSegment[] = []
+  const seen = new Set<string>()
+  let current = folderId
+
+  while (current !== undefined && !seen.has(current)) {
+    const folder = folders?.get(current)
+
+    if (folder === undefined) {
+      break
+    }
+
+    seen.add(current)
+    segments.unshift({
+      name: folder.name,
+      params: { folderId: current },
+      to: "/folders/$folderId",
+    })
+    current = folder.parentId
+  }
+
+  return segments
 }

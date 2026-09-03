@@ -24,6 +24,7 @@ export function makeExecution(
     error: undefined,
     result: undefined,
     id: "execution" as ExecutionItem["id"],
+    job: null,
     offer,
     offers: offer === null ? [] : [offer],
     audience: "personal",

@@ -1,4 +1,8 @@
-import { type ToolAccess, type ToolCapability } from "@contracts/permissions"
+import {
+  getToolPermission,
+  type ToolAccess,
+  type ToolCapability,
+} from "@contracts/permissions"
 
 export type {
   ToolAccess,
@@ -22,4 +26,17 @@ export function groupToolsByAccess<T extends ToolCapability>(tools: T[]) {
 
 export function accessLabel(access: ToolAccess) {
   return access === "read" ? "Read" : "Write"
+}
+
+/** A tool as the catalog describes it, for listing what a job or a run
+ *  may call; a tool the catalog no longer knows keeps its name. */
+export function toolCapability(tool: string): ToolCapability {
+  const permission = getToolPermission(tool)
+
+  return {
+    access: permission?.access ?? "read",
+    description: permission?.description ?? "",
+    label: permission?.label ?? tool,
+    tool,
+  }
 }

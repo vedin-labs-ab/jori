@@ -1,0 +1,115 @@
+import { type JSONContent } from "@tiptap/core"
+import { BookOpen, Wrench } from "lucide-react"
+import { type ReactNode } from "react"
+import { cn } from "@/lib/utils"
+import { ProviderLogo } from "@/shared/logo/provider"
+import {
+  getJobSurfaceAccess,
+  getJobSurfaceAccessLabel,
+  getJobSurfaceLabel,
+} from "../../access"
+import { type JobPolicyPermissions } from "../../access/policy"
+import {
+  getJobSurfaceAccessIcon,
+  getJobSurfaceToneClassNames,
+  jobReferenceToneClassNames,
+} from "../../editor/instructions/access/tone"
+import {
+  parseJobReferenceKind,
+  parseJobSurfaceIntegration,
+  parseJobSurfaceTools,
+} from "../../editor/instructions/document"
+
+// The editor's pills with nothing to press: the same construction and
+// tones, so a brief reads the same on the page as in the editor.
+
+const markerClassName =
+  "mx-0.5 inline-flex h-5 items-center overflow-hidden rounded-sm border align-middle text-[0.625rem]/none"
+
+/** An integration mention: its mark and name, then its access and how
+ *  many of its tools the job may call. */
+export function SurfaceMarker({
+  node,
+  permissions,
+}: {
+  node: JSONContent
+  permissions: JobPolicyPermissions
+}) {
+  const integration = parseJobSurfaceIntegration(node.attrs?.integration)
+
+  if (integration === null) {
+    return null
+  }
+
+  const tools = parseJobSurfaceTools(node.attrs?.tools)
+  const access = getJobSurfaceAccess({ integration, tools }, permissions)
+  const tone = getJobSurfaceToneClassNames(access, false)
+  const Icon = getJobSurfaceAccessIcon(access, false)
+  const accessLabel = getJobSurfaceAccessLabel(access)
+
+  return (
+    <span
+      className={cn(markerClassName, tone.surface)}
+      data-job-surface={integration}
+      title={
+        tools.length === 0
+          ? accessLabel
+          : `${accessLabel}: ${tools.length} enabled`
+      }
+    >
+      <MarkerName
+        icon={<ProviderLogo className="size-3" surface={integration} />}
+        label={getJobSurfaceLabel(integration)}
+      />
+      <span
+        aria-hidden="true"
+        className={cn("w-[0.5px] shrink-0 self-stretch", tone.separator)}
+      />
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 px-1 font-medium",
+          tone.scopeIcon
+        )}
+      >
+        <Icon className="size-3" />
+        {tools.length > 0 ? (
+          <span className="tabular-nums">{tools.length}</span>
+        ) : null}
+      </span>
+    </span>
+  )
+}
+
+/** A skill or tool mention: its kind's icon and its name. */
+export function ReferenceMarker({ node }: { node: JSONContent }) {
+  const kind = parseJobReferenceKind(node.attrs?.kind)
+  const id = node.attrs?.id
+
+  if (kind === null || typeof id !== "string") {
+    return null
+  }
+
+  const tone = jobReferenceToneClassNames[kind]
+  const Icon = kind === "skill" ? BookOpen : Wrench
+
+  return (
+    <span
+      className={cn(markerClassName, tone.surface)}
+      data-job-reference={kind}
+    >
+      <MarkerName
+        icon={<Icon aria-hidden="true" className={cn("size-3", tone.icon)} />}
+        label={id}
+      />
+    </span>
+  )
+}
+
+function MarkerName({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <span className="flex items-center gap-1 px-1 font-medium">
+      <span className="grid w-4 place-items-center">{icon}</span>
+      <span className="whitespace-nowrap">{label}</span>
+    </span>
+  )
+}

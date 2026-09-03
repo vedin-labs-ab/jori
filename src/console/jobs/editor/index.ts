@@ -172,12 +172,17 @@ function useJobDeletion(organizationId: string) {
   const remove = useMutation(api.jobs.console.remove)
   const [deletingJobId, setDeletingJobId] = useState<string>()
 
+  /** Whether the job is gone, so a page showing it knows to leave. */
   async function deleteJob(job: Job) {
     setDeletingJobId(job.id)
     try {
       await remove({ organizationId, jobId: job.id })
+
+      return true
     } catch (error) {
       showErrorToast(error, "Couldn't delete the job.")
+
+      return false
     } finally {
       setDeletingJobId(undefined)
     }

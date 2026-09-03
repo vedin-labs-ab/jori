@@ -46,6 +46,7 @@ export async function summarizeRun(
     audience: runAudienceFacet(run),
     title,
     source,
+    job: runJob(context.job),
     task,
     trigger: triggerLabel(context),
     createdAt: run.createdAt,
@@ -58,14 +59,7 @@ export async function summarizeRun(
     approvals,
     offer: offers.at(0) ?? null,
     offers,
-    waiter:
-      context.activeWaiter === null
-        ? null
-        : {
-            id: context.activeWaiter._id,
-            expiresAt: context.activeWaiter.expiresAt,
-            state: "waiting" as const,
-          },
+    waiter: activeWaiter(context.activeWaiter),
     searchableText: searchableText({
       title,
       source,
@@ -73,6 +67,22 @@ export async function summarizeRun(
       ...context,
     }),
   }
+}
+
+/** The job behind the run, for the row's link to its page; absent for
+ *  interactive work and for a job since deleted. */
+function runJob(job: Doc<"jobs"> | null) {
+  return job === null ? null : { id: job._id, name: job.name }
+}
+
+function activeWaiter(waiter: Doc<"waiters"> | null) {
+  return waiter === null
+    ? null
+    : {
+        id: waiter._id,
+        expiresAt: waiter.expiresAt,
+        state: "waiting" as const,
+      }
 }
 
 /** The console's two-way facet: conversation runs read as personal, since

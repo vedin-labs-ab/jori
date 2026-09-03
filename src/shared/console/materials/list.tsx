@@ -19,44 +19,41 @@ import { ConsoleListEmpty, FilterableEmptyState } from "../list/empty"
 import { ConsoleListContent, ConsoleListTable } from "../list/frame"
 import { FilterHead, SortHead } from "../list/head"
 import { type RowSelection } from "../list/selection"
-import { absoluteTime, relativeTime, useNow } from "../time"
-import { MaterialRowMenu } from "./actions/menu"
-import { MaterialFolderCell } from "./cells/folder"
-import { MaterialOwnerCell } from "./cells/owner"
+import { useNow } from "../time"
 import { type FolderNames } from "./folders"
-import { summaryOwner } from "./owners"
-import { type MaterialRemoval } from "./removal"
 
-// The list a table or a store page shows: the same eight columns, facets,
-// empty states, and row menu for every material, with the two measured
-// columns between Name and Folder and the empty state's offer telling one
-// material's list from another's.
+// The list a table, a store, or a job page shows: a selection column, the
+// name, whatever columns the kind declares, and the row's menu, with the
+// facets and sorts riding the column heads and the empty state's offer
+// telling one kind's list from another's.
 
-export type MaterialListRow = {
-  archivedAt?: number
-  createdAt: number
-  folderId?: string
-  name: string
-  ownerImage?: string
-  ownerName?: string
-  updatedAt: number
+export type MaterialListRow = { name: string }
+
+/** What a cell may read besides its row: the organization's folder names,
+ *  and the clock relative times are told against. */
+export type MaterialCellContext = {
+  folders: FolderNames | undefined
+  now: number
 }
 
-type MaterialMeasure<Row> = {
-  cell: (row: Row) => ReactNode
+/** One column between Name and the menu. Its head sorts the list, opens
+ *  the named facets, or — left plain — only labels the column. */
+export type MaterialColumn<Row> = {
+  cell: (row: Row, context: MaterialCellContext) => ReactNode
+  head?: { facets: readonly string[] } | { sortKey: string }
   label: string
-  sortKey: string
 }
 
 /** What tells one material list from another. */
 export type MaterialListKind<Row> = {
   /** What the empty state offers: the page's create actions. */
   action: ReactNode
-  deleteDescription: string
+  columns: readonly MaterialColumn<Row>[]
   description: string
   icon: LucideIcon
   identify: (row: Row) => string
-  measures: [MaterialMeasure<Row>, MaterialMeasure<Row>]
+  /** The row's menu, trigger and all. */
+  menu: (row: Row) => ReactNode
   nameCell: (row: Row) => ReactNode
   noun: CountedNoun
 }
@@ -67,10 +64,6 @@ type MaterialListProps<Row> = {
   folders: FolderNames | undefined
   hasFilters: boolean
   kind: MaterialListKind<Row>
-  onAccess: (row: Row) => void
-  onEdit: (row: Row) => void
-  onMoveToFolder: (row: Row) => void
-  removal: MaterialRemoval<Row>
   rows: Row[]
   selection: RowSelection<Row>
   unauthorizedMessage: string | undefined
@@ -104,9 +97,9 @@ export function MaterialList<Row extends MaterialListRow>(
     <>
       <ConsoleListTable fill={rows.length > 0}>
         <MaterialListHead
+          columns={kind.columns}
           config={config}
           controls={controls}
-          measures={kind.measures}
           selection={selection}
         />
         <TableBody>
@@ -124,17 +117,17 @@ export function MaterialList<Row extends MaterialListRow>(
   )
 }
 
-/** The header row is the page's control surface: material facets ride the
- *  Folder and Owner columns, every measurable column sorts. */
+/** The header row is the page's control surface: the name always sorts,
+ *  and every other column does what its head declares. */
 function MaterialListHead<Row>({
+  columns,
   config,
   controls,
-  measures,
   selection,
 }: {
+  columns: readonly MaterialColumn<Row>[]
   config: ListConfig<Row>
   controls: ListControls
-  measures: MaterialListKind<Row>["measures"]
   selection: RowSelection<Row>
 }) {
   return (
@@ -142,29 +135,49 @@ function MaterialListHead<Row>({
       <TableRow>
         <SelectionHeadCell selection={selection} />
         <SortHead controls={controls} label="Name" sortKey="name" />
-        {measures.map((measure) => (
-          <SortHead
+        {columns.map((column) => (
+          <ColumnHead
+            column={column}
+            config={config}
             controls={controls}
-            key={measure.sortKey}
-            label={measure.label}
-            sortKey={measure.sortKey}
+            key={column.label}
           />
         ))}
-        <FilterHead
-          controls={controls}
-          facets={facetEntries(config, ["folder"])}
-          label="Folder"
-        />
-        <SortHead controls={controls} label="Created" sortKey="created" />
-        <FilterHead
-          controls={controls}
-          facets={facetEntries(config, ["owner"])}
-          label="Owner"
-        />
-        <SortHead controls={controls} label="Last Updated" sortKey="updated" />
         <TableHead className="w-10" />
       </TableRow>
     </TableHeader>
+  )
+}
+
+function ColumnHead<Row>({
+  column,
+  config,
+  controls,
+}: {
+  column: MaterialColumn<Row>
+  config: ListConfig<Row>
+  controls: ListControls
+}) {
+  if (column.head === undefined) {
+    return <TableHead>{column.label}</TableHead>
+  }
+
+  if ("sortKey" in column.head) {
+    return (
+      <SortHead
+        controls={controls}
+        label={column.label}
+        sortKey={column.head.sortKey}
+      />
+    )
+  }
+
+  return (
+    <FilterHead
+      controls={controls}
+      facets={facetEntries(config, column.head.facets)}
+      label={column.label}
+    />
   )
 }
 
@@ -189,15 +202,11 @@ function MaterialEmptyState<Row>({
 function MaterialListRow<Row extends MaterialListRow>({
   folders,
   kind,
-  onAccess,
-  onEdit,
-  onMoveToFolder,
-  removal,
   row,
   selection,
 }: MaterialListProps<Row> & { row: Row }) {
   const now = useNow(30_000)
-  const id = kind.identify(row)
+  const context = { folders, now }
 
   return (
     <TableRow data-state={selection.isSelected(row) ? "selected" : undefined}>
@@ -207,41 +216,10 @@ function MaterialListRow<Row extends MaterialListRow>({
         selection={selection}
       />
       <TableCell>{kind.nameCell(row)}</TableCell>
-      {kind.measures.map((measure) => (
-        <TableCell key={measure.sortKey}>{measure.cell(row)}</TableCell>
+      {kind.columns.map((column) => (
+        <TableCell key={column.label}>{column.cell(row, context)}</TableCell>
       ))}
-      <TableCell>
-        <MaterialFolderCell folderId={row.folderId} folders={folders} />
-      </TableCell>
-      <TableCell
-        className="text-muted-foreground"
-        title={absoluteTime(row.createdAt)}
-      >
-        {relativeTime(row.createdAt, now)}
-      </TableCell>
-      <TableCell>
-        <MaterialOwnerCell owner={summaryOwner(row)} />
-      </TableCell>
-      <TableCell
-        className="text-muted-foreground"
-        title={absoluteTime(row.updatedAt)}
-      >
-        {relativeTime(row.updatedAt, now)}
-      </TableCell>
-      <TableCell className="text-right">
-        <MaterialRowMenu
-          deleteDescription={kind.deleteDescription}
-          isDeleting={removal.removingId === id}
-          isRestoring={removal.restoringId === id}
-          material={{ name: row.name, archivedAt: row.archivedAt }}
-          noun={kind.noun.singular}
-          onAccess={() => onAccess(row)}
-          onDelete={() => void removal.removeMaterial(row)}
-          onEdit={() => onEdit(row)}
-          onMoveToFolder={() => onMoveToFolder(row)}
-          onRestore={() => void removal.restoreMaterial(row)}
-        />
-      </TableCell>
+      <TableCell className="text-right">{kind.menu(row)}</TableCell>
     </TableRow>
   )
 }

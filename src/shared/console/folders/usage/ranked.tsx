@@ -164,8 +164,9 @@ export function UsageContributors({
             ) : (
               <ConsoleLink
                 className={nameLinkClassName}
+                params={{ jobId: entry.id }}
                 title={entry.label}
-                to="/jobs"
+                to="/jobs/$jobId"
               >
                 {entry.label}
               </ConsoleLink>
