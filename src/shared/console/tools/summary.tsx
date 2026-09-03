@@ -1,14 +1,19 @@
 import { type ToolSurface, toolSurfaceLabel } from "@contracts/integrations"
-import { Globe, GlobeOff } from "lucide-react"
+import { Globe } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
 import { countLabel } from "@/shared/console/count"
+import { SeparatorDot } from "@/shared/console/dot"
+import { RowMark } from "@/shared/console/list/mark"
 import { ProviderLogo } from "@/shared/logo/provider"
 
+/** What a job can reach, on one line: the marks of the integrations it
+ *  was given, how many of their tools, and the globe when it may also
+ *  reach the web. The web is off unless someone turned it on, so a row
+ *  says nothing when it is off and marks the exception when it is on. */
 export function ToolAccessSummary({
   surfaces,
   toolCount,
@@ -19,24 +24,15 @@ export function ToolAccessSummary({
   webSearch: boolean
 }) {
   return (
-    <span className="grid min-w-0 gap-1.5">
-      <ToolCountSummary surfaces={surfaces} toolCount={toolCount} />
-      <WebSearchStatus allowed={webSearch} />
-    </span>
-  )
-}
-
-function ToolCountSummary({
-  surfaces,
-  toolCount,
-}: {
-  surfaces: ToolSurface[]
-  toolCount: number
-}) {
-  return (
     <span className="flex min-w-0 items-center gap-2 text-foreground">
       <ToolSurfaceLogoStack surfaces={surfaces} />
       <span className="truncate">{countLabel(toolCount, "tool")}</span>
+      {webSearch ? (
+        <>
+          <SeparatorDot className="shrink-0 text-muted-foreground/60" />
+          <RowMark icon={<Globe />} label="Web access allowed" />
+        </>
+      ) : null}
     </span>
   )
 }
@@ -89,22 +85,5 @@ function HiddenSurfaceCount({ surfaces }: { surfaces: ToolSurface[] }) {
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
-  )
-}
-
-function WebSearchStatus({ allowed }: { allowed: boolean }) {
-  const Icon = allowed ? Globe : GlobeOff
-  const stateClassName = allowed ? "text-primary" : "text-destructive"
-
-  return (
-    <span className="flex min-w-0 items-center gap-2">
-      <Icon className="size-4 shrink-0 text-muted-foreground" />
-      <span className="min-w-0 truncate text-foreground">
-        Web{" "}
-        <span className={cn("font-medium", stateClassName)}>
-          {allowed ? "allowed" : "blocked"}
-        </span>
-      </span>
-    </span>
   )
 }
