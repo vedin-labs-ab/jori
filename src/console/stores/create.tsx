@@ -2,6 +2,7 @@ import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { CreateMaterialDialog } from "@/shared/console/materials/dialogs/create"
+import { storeCreateBlurb } from "@/shared/console/stores/list/config"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
 import { useGrantOptions } from "../shared/visibility/options"
@@ -23,7 +24,7 @@ export function CreateStoreDialog({
 
   return (
     <CreateMaterialDialog
-      blurb="Name it now — add an optional schema right in the store."
+      blurb={storeCreateBlurb}
       create={(args) =>
         create({
           ...args,

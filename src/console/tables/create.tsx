@@ -2,6 +2,7 @@ import { useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { CreateMaterialDialog } from "@/shared/console/materials/dialogs/create"
+import { tableCreateBlurb } from "@/shared/console/tables/list/config"
 import { api } from "../../../convex/_generated/api"
 import { FolderField } from "../folders/field"
 import { useGrantOptions } from "../shared/visibility/options"
@@ -25,7 +26,7 @@ export function CreateTableDialog({
 
   return (
     <CreateMaterialDialog
-      blurb="Name it now — define its columns right in the table."
+      blurb={tableCreateBlurb}
       create={(args) =>
         create({
           ...args,
