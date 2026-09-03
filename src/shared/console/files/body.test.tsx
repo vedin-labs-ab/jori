@@ -76,9 +76,6 @@ function renderBody(overrides: Partial<FileDetail>) {
           {crumb?.menu}
         </DropdownMenu>
         <output data-testid="save">{crumb?.saveStatus}</output>
-        <output data-testid="trail">
-          {crumb?.trail?.map((segment) => segment.name).join("/")}
-        </output>
         {children}
       </MaterialBreadcrumbContext.Provider>
     )
@@ -100,7 +97,6 @@ function renderBody(overrides: Partial<FileDetail>) {
     <TooltipProvider>
       <Header>
         <FileBody
-          crumb={{ trail: [{ name: "Engineering", to: "/folders/$folderId" }] }}
           file={file}
           onSave={() => Promise.resolve(true)}
           siblings={siblings}
@@ -126,11 +122,10 @@ function openMenu(name: string) {
   fireEvent.click(trigger)
 }
 
-test("publishes the file's crumb: its trail, its name, and the editor's save", () => {
+test("publishes the file's crumb: its name and the editor's save", () => {
   renderBody({})
 
   expect(screen.getByTestId("editor")).toBeDefined()
-  expect(screen.getByTestId("trail").textContent).toBe("Engineering")
   expect(screen.getByTestId("save").textContent).toBe("saving")
 })
 

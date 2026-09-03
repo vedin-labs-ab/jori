@@ -49,8 +49,9 @@ test("a row's name opens the job's page inside the same console", async () => {
   fireEvent.click(screen.getByRole("link", { name: "Chase overdue invoices" }))
 
   expect(await screen.findByText("Instructions")).toBeDefined()
-  // The crumb and the Folder row both lead to the folder it is filed in.
-  expect(screen.getAllByRole("link", { name: "Renewals" })).toHaveLength(2)
+  // The crumb leads back to Jobs; the Folder row to where it is filed.
+  expect(screen.getByRole("link", { name: "Jobs" })).toBeDefined()
+  expect(screen.getAllByRole("link", { name: "Renewals" })).toHaveLength(1)
 })
 
 function openActions(name: string) {

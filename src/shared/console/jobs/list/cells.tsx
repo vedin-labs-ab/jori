@@ -1,5 +1,6 @@
-import { Badge } from "@/components/ui/badge"
+import { Pause } from "lucide-react"
 import { SeparatorDot } from "../../dot"
+import { RowMark } from "../../list/mark"
 import {
   MaterialNameCell,
   materialNameLinkClassName,
@@ -10,8 +11,8 @@ import { type Job } from "../types"
 import { jobTriggerSummary, jobTypeIcon } from "./trigger"
 
 /** Name column: the job's kind as its icon, a link to the job's page, the
- *  visibility mark for anything narrower than the organization, and a
- *  badge while the job is paused. */
+ *  visibility mark for anything narrower than the organization, and the
+ *  pause mark while the job is paused. */
 export function JobNameCell({ job }: { job: Job }) {
   return (
     <MaterialNameCell icon={jobTypeIcon(job)}>
@@ -27,7 +28,7 @@ export function JobNameCell({ job }: { job: Job }) {
         <VisibilityMark visibility={job.visibility} />
       )}
       {job.status === "paused" ? (
-        <Badge variant="secondary">Paused</Badge>
+        <RowMark icon={<Pause />} label="Paused" />
       ) : null}
     </MaterialNameCell>
   )

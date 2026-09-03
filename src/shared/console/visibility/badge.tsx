@@ -3,11 +3,7 @@ import {
   type VisibilityMode,
   visibilityModeMarks,
 } from "@contracts/visibility"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { RowMark } from "../list/mark"
 import { visibilityIcon, visibilityLabel } from "./marks"
 
 // The quiet visibility vocabulary every material surface shares: one icon
@@ -43,17 +39,7 @@ export function VisibilityMark({
       ? visibilityModeMarks[visibility]
       : visibilityLabel(value)
 
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="shrink-0 text-muted-foreground">
-          <VisibilityIcon className="size-4" mode={value.mode} />
-          <span className="sr-only">{label}</span>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
-  )
+  return <RowMark icon={<VisibilityIcon mode={value.mode} />} label={label} />
 }
 
 function modeOnly(mode: VisibilityMode): Visibility {

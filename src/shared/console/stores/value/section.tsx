@@ -4,10 +4,7 @@ import { Button } from "@/components/ui/button"
 import { JsonBlock } from "@/shared/console/code"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { ConsoleListContent } from "@/shared/console/list/frame"
-import {
-  type MaterialBreadcrumb,
-  useMaterialTrail,
-} from "@/shared/console/materials/breadcrumb"
+import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { StoreMenuItems } from "../menu"
 import { type SchemaWrite, StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"
@@ -23,14 +20,11 @@ import {
  *  supplies as the menu around this view's own items. A store the console
  *  does not edit — schemaless or archived — reads as a document. */
 export function StoreValue({
-  crumb,
   onWriteSchema,
   onWriteValue,
   store,
   titleMenu,
 }: {
-  /** Where the store lives, for the breadcrumb: the trail above its name. */
-  crumb?: Pick<MaterialBreadcrumb, "trail">
   /** Replaces the store's schema; null removes it. A rejection's message
    *  surfaces under the schema editor. */
   onWriteSchema: SchemaWrite
@@ -48,7 +42,6 @@ export function StoreValue({
   const isEditable = schema !== undefined
 
   useStoreCrumb({
-    crumb,
     menu: titleMenu(
       <StoreMenuItems
         onSchema={openSchema}
@@ -85,29 +78,21 @@ export function StoreValue({
   )
 }
 
-/** Publishes the store's crumb: its trail, its name with the menu hung
- *  off it, and the save signal right after the name while a save is in
- *  motion. */
+/** Publishes the store's crumb: its name with the menu hung off it, and
+ *  the save state the shell shows in the name while a save is in motion. */
 function useStoreCrumb({
-  crumb,
   menu,
   saveStatus,
   store,
 }: {
-  crumb: Pick<MaterialBreadcrumb, "trail"> | undefined
   menu: ReactNode
   saveStatus: ValueEditorState["saveStatus"] | undefined
   store: StoreDetail
 }) {
   useMaterialTrail(
     useMemo(
-      () => ({
-        ...crumb,
-        menu,
-        name: store.name,
-        saveStatus,
-      }),
-      [crumb, menu, saveStatus, store.name]
+      () => ({ menu, name: store.name, saveStatus }),
+      [menu, saveStatus, store.name]
     )
   )
 }

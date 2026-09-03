@@ -17,7 +17,7 @@ test("opens a store's form and keeps a value edited in memory", async () => {
   const version = (await screen.findByLabelText("version")) as HTMLInputElement
 
   expect(version.value).toBe("2.14")
-  expect(screen.getByRole("link", { name: "Engineering" })).toBeDefined()
+  expect(screen.getByRole("link", { name: "Stores" })).toBeDefined()
 
   // Provenance moved off the page into the menu on the store's name.
   const title = screen.getByRole("button", { name: "Release state" })

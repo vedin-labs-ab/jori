@@ -9,7 +9,6 @@ import { DemoLinksDialog } from "../../dialogs/links"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import { useDemoWorkspace } from "../../workspace"
 import { FileMenu, MaterialMissing } from "./chrome"
-import { materialCrumb } from "./crumb"
 
 /** One file's page over the workspace: the console's viewer or editor,
  *  with edits saved into memory, under the header actions and the crumb
@@ -22,11 +21,6 @@ export function FilePage({ fileId }: { fileId: string }) {
   const siblings = useMemo(() => fileSiblingsOf(state, fileId), [state, fileId])
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [request, setRequest] = useState<MaterialRequest>()
-  const crumb = useMemo(
-    () =>
-      material?.kind === "file" ? materialCrumb(state, material) : undefined,
-    [material, state]
-  )
 
   if (file === undefined || material?.kind !== "file") {
     return <MaterialMissing noun="file" />
@@ -41,7 +35,6 @@ export function FilePage({ fileId }: { fileId: string }) {
       <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url} />
       <ClientOnly fallback={<ConsoleListLoading />}>
         <FileBody
-          crumb={crumb}
           file={file}
           onSave={(text) => {
             actions.writeFileText(file.fileId, text)

@@ -74,7 +74,9 @@ export function AddRowDialog({
           <div
             className={cn(
               scrollFade,
-              "grid max-h-[60vh] gap-4 overflow-y-auto"
+              // The fields scroll inside the dialog; the inset gives their focus
+              // rings room, so a ring at the edge is not clipped by the scrollport.
+              "-mx-1 -my-1 grid max-h-[60vh] gap-4 overflow-y-auto px-1 py-1"
             )}
           >
             {columns.map((column) => (
