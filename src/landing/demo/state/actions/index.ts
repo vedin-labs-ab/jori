@@ -11,30 +11,27 @@ import {
   type RowInsertAnchor,
   type TableColumn,
 } from "@/shared/console/tables/types"
-import { jobFromValues } from "../derive/jobs"
-import { hour } from "../fixtures/clock"
-import { demoId } from "../fixtures/ids"
-import { personName, viewerId } from "../fixtures/people"
+import { jobFromValues } from "../../derive/jobs"
+import { hour } from "../../fixtures/clock"
+import { type DemoMint, demoId } from "../../fixtures/ids"
+import { personName, viewerId } from "../../fixtures/people"
 import {
   type CollectionId,
   type DemoMaterial,
   type FolderId,
   type StoredVisibility,
-} from "../fixtures/types"
-import { type DemoAction, type VisibilityTarget } from "./types"
+} from "../../fixtures/types"
+import { type DemoAction, type VisibilityTarget } from "../types"
+import { chatActions } from "./chat"
 
 export type DemoActions = ReturnType<typeof createActions>
-
-type Mint = <Table extends string>(
-  table: Table
-) => ReturnType<typeof demoId<Table>>
 
 /** Everything the views' callbacks can ask of the workspace, each a plain
  *  update dispatched with the moment it happened. Ids come from a counter,
  *  so a session's additions read in the order they were made. */
 export function createActions(dispatch: Dispatch<DemoAction>) {
   let counter = 0
-  const mint: Mint = (table) => {
+  const mint: DemoMint = (table) => {
     counter += 1
 
     return demoId(table, `new-${counter}`)
@@ -47,10 +44,11 @@ export function createActions(dispatch: Dispatch<DemoAction>) {
     ...runActions(dispatch),
     ...tableActions(dispatch, mint),
     ...accessActions(dispatch, mint),
+    ...chatActions(dispatch, mint),
   }
 }
 
-function folderActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
+function folderActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
   return {
     createFolder: (name: string, parentId?: FolderId) => {
       const folderId = mint("folders")
@@ -86,7 +84,7 @@ function folderActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
   }
 }
 
-function materialActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
+function materialActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
   return {
     createMaterial: (kind: "table" | "store", args: CreateMaterialArgs) =>
       dispatch({
@@ -105,7 +103,7 @@ function materialActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
   }
 }
 
-function jobActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
+function jobActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
   return {
     setJobPaused: (job: Job, paused: boolean) =>
       dispatch({ type: "setJobPaused", at: Date.now(), jobId: job.id, paused }),
@@ -164,7 +162,7 @@ function runActions(dispatch: Dispatch<DemoAction>) {
   }
 }
 
-function tableActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
+function tableActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
   return {
     commitCell: (
       tableId: string,
@@ -205,7 +203,7 @@ function tableActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
   }
 }
 
-function accessActions(dispatch: Dispatch<DemoAction>, mint: Mint) {
+function accessActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
   return {
     setVisibility: (target: VisibilityTarget, visibility: Visibility) =>
       dispatch({

@@ -11,12 +11,13 @@ import { DemoCreationDialogs } from "./dialogs/creation"
 import { DemoFolderDialogs } from "./dialogs/folders"
 import { useDemoExpansion } from "./expansion"
 import { organization } from "./fixtures/organization"
-import { useDemoFolders } from "./workspace"
+import { useDemoFolders, useDemoWorkspace } from "./workspace"
 
 /** The console's sidebar over the workspace: Copperline at its head, the
  *  navigation, and the folder tree with the dialogs its rows raise. */
 export function DemoSidebar({ pathname }: { pathname: string }) {
   const folders = useDemoFolders()
+  const { state } = useDemoWorkspace()
   const expansion = useDemoExpansion(activeFolderId(pathname), folders)
   const [dialog, setDialog] = useState<FolderDialogRequest>()
   const [creation, setCreation] = useState<CreationRequest>()
@@ -25,6 +26,7 @@ export function DemoSidebar({ pathname }: { pathname: string }) {
     <>
       <ConsoleSidebar
         account={null}
+        chats={state.chat.conversations}
         folders={
           <FolderTree
             expansion={expansion}

@@ -1,0 +1,80 @@
+import {
+  type ChatReference,
+  type ReferenceTarget,
+} from "@/shared/console/chat/types"
+import { type ActivityItem } from "@/shared/console/runs/activity/types"
+import { log } from "../fixtures/runs/steps"
+import { type DemoState } from "../state/types"
+import { folderOf, folderTrail } from "./folders"
+
+/** A reply's target as the workspace resolves it: the material, job,
+ *  folder, or run by that id, with where it is filed as the detail. */
+export function resolveReference(
+  state: DemoState,
+  target: ReferenceTarget
+): ChatReference | undefined {
+  const { id, kind } = target
+
+  switch (kind) {
+    case "folder": {
+      const folder = folderOf(state, id)
+
+      return folder === undefined
+        ? undefined
+        : { kind, id, name: folder.name, detail: trail(state, folder.parentId) }
+    }
+    case "job": {
+      const job = state.jobs.find((candidate) => candidate.id === id)
+
+      return job === undefined
+        ? undefined
+        : { kind, id, name: job.name, detail: trail(state, job.folderId) }
+    }
+    case "run": {
+      const run = state.runs.find((candidate) => candidate.id === id)
+
+      return run === undefined ? undefined : { kind, id, name: run.title }
+    }
+    default: {
+      const material = state.materials.find(
+        (candidate) => candidate.id === id && candidate.kind === kind
+      )
+
+      return material === undefined
+        ? undefined
+        : {
+            kind,
+            id,
+            name: material.name,
+            detail: trail(state, material.folderId),
+          }
+    }
+  }
+}
+
+/** Where something is filed, as the folders from the root down. */
+function trail(state: DemoState, folderId: string | undefined) {
+  const folder = folderId === undefined ? undefined : folderOf(state, folderId)
+
+  return folder === undefined
+    ? undefined
+    : folderTrail(state, folder)
+        .map((segment) => segment.name)
+        .join(" › ")
+}
+
+/** What the live run has done so far: it started, read the table, and is
+ *  thinking about what it read. */
+export function liveActivity(startedAt: number): ActivityItem[] {
+  return log(startedAt, "chat", [
+    { kind: "start" },
+    {
+      kind: "tool",
+      tool: "list_table_rows",
+      ms: 300,
+      target: "Customer renewals",
+      outcome: "4 rows",
+    },
+    { kind: "live" },
+  ]).items
+}

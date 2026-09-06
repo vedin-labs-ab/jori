@@ -4,9 +4,11 @@ import { replaceCompletedMention } from "../suggestion/input"
 import { handleSuggestionKey } from "../suggestion/keys"
 import { type InstructionSuggestionState } from "../suggestion/suggest"
 import { type InstructionRefs } from "../types"
+import { instructionContentClassName } from "./style"
 
-const editorContentClassName =
-  "whitespace-pre-wrap break-words text-foreground selection:bg-informational/20"
+// TipTap adds its own class to the element; naming it here too keeps the
+// prose scale's selectors stable whether the editor or the brief renders.
+const editorContentClassName = `${instructionContentClassName} whitespace-pre-wrap break-words text-foreground selection:bg-informational/20`
 
 export function createEditorProps({
   error,

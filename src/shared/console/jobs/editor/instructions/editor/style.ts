@@ -1,21 +1,16 @@
-import { codeTokenClassName } from "@/shared/console/tokens"
+import { markdownProseClassName } from "@/shared/console/markdown/style"
 
+/** The editor's frame around the shared prose scale: the content's own
+ *  box, and the two instruction-only blocks — a plain-text fence and a
+ *  literal markdown run — that the brief renders and a chat never does.
+ *  The scale itself rides on the content element; see props.ts and the
+ *  read-only brief. */
 export const instructionMarkdownClassName = [
   "[&_.tiptap]:min-h-24 [&_.tiptap]:min-w-0 [&_.tiptap]:max-w-full [&_.tiptap]:overflow-x-hidden [&_.tiptap]:px-2 [&_.tiptap]:py-2 [&_.tiptap]:break-words [&_.tiptap]:whitespace-pre-wrap [&_.tiptap]:leading-6 [&_.tiptap]:outline-none [&_.tiptap]:[overflow-wrap:anywhere]",
-  "[&_.tiptap>*:first-child]:mt-0 [&_.tiptap>*:last-child]:mb-0",
-  "[&_.tiptap_p]:my-1 [&_.tiptap_p]:min-h-6 [&_.tiptap_p]:max-w-full [&_.tiptap_p]:break-words [&_.tiptap_p]:leading-6 [&_.tiptap_p]:[overflow-wrap:anywhere]",
-  "[&_.tiptap_h1]:mt-3 [&_.tiptap_h1]:mb-1 [&_.tiptap_h1]:font-semibold [&_.tiptap_h1]:text-base [&_.tiptap_h1]:leading-6",
-  "[&_.tiptap_h2]:mt-3 [&_.tiptap_h2]:mb-1 [&_.tiptap_h2]:font-semibold [&_.tiptap_h2]:text-sm [&_.tiptap_h2]:leading-6",
-  "[&_.tiptap_h3]:mt-2 [&_.tiptap_h3]:mb-1 [&_.tiptap_h3]:font-semibold [&_.tiptap_h3]:text-xs [&_.tiptap_h3]:leading-6",
-  "[&_.tiptap_h4]:mt-2 [&_.tiptap_h4]:font-medium [&_.tiptap_h5]:mt-2 [&_.tiptap_h5]:font-medium [&_.tiptap_h6]:mt-2 [&_.tiptap_h6]:font-medium",
-  "[&_.tiptap_ul]:my-1 [&_.tiptap_ul]:list-disc [&_.tiptap_ul]:pl-5 [&_.tiptap_ol]:my-1 [&_.tiptap_ol]:list-decimal [&_.tiptap_ol]:pl-5 [&_.tiptap_li]:pl-0.5",
-  "[&_.tiptap_blockquote]:my-2 [&_.tiptap_blockquote]:border-l-2 [&_.tiptap_blockquote]:border-border [&_.tiptap_blockquote]:pl-3 [&_.tiptap_blockquote]:text-muted-foreground",
-  "[&_.tiptap_hr]:my-3 [&_.tiptap_hr]:border-border",
-  "[&_.tiptap_a]:text-foreground [&_.tiptap_a]:underline [&_.tiptap_a]:decoration-muted-foreground/50 [&_.tiptap_a]:underline-offset-2",
-  "[&_.tiptap_code]:rounded-sm [&_.tiptap_code]:bg-muted [&_.tiptap_code]:px-1 [&_.tiptap_code]:py-0.5 [&_.tiptap_code]:font-mono [&_.tiptap_code]:text-[0.9em]",
-  "[&_.tiptap_pre]:my-2 [&_.tiptap_pre]:max-w-full [&_.tiptap_pre]:overflow-x-auto [&_.tiptap_pre]:rounded-md [&_.tiptap_pre]:border [&_.tiptap_pre]:bg-muted/40 [&_.tiptap_pre]:px-3 [&_.tiptap_pre]:py-2 [&_.tiptap_pre]:whitespace-pre",
-  "[&_.tiptap_pre_code]:bg-transparent [&_.tiptap_pre_code]:p-0 [&_.tiptap_pre_code]:text-xs",
   "[&_.tiptap_pre[data-instruction-text]]:overflow-x-hidden [&_.tiptap_pre[data-instruction-text]]:break-words [&_.tiptap_pre[data-instruction-text]]:whitespace-pre-wrap [&_.tiptap_pre[data-instruction-text]]:[overflow-wrap:anywhere]",
   "[&_.tiptap_[data-markdown-literal]]:font-mono [&_.tiptap_[data-markdown-literal]]:text-muted-foreground",
-  codeTokenClassName,
 ].join(" ")
+
+/** What the editor's content element and the read-only brief both carry:
+ *  TipTap's class, which the frame above addresses, and the prose scale. */
+export const instructionContentClassName = `tiptap ${markdownProseClassName}`
