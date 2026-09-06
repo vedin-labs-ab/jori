@@ -150,7 +150,7 @@ export function runtimeInput(
 ) {
   return {
     type: "message",
-    messageIntegration: integration,
+    surface: integration,
     run: {
       _id: "run",
       _creationTime: 0,
@@ -170,8 +170,8 @@ export function runtimeInput(
       _id: "message",
       _creationTime: 0,
       organizationId: "organization",
+      surface: integration,
       integrationId: `${integration}-integration`,
-      integration,
       externalId: "external-message",
       conversationId: "conversation",
       type: "message.channels",

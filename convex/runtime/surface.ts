@@ -12,7 +12,7 @@ import { optionalSlackBlocks, sendSurfaceReply } from "../messages/reply"
 import { replyAddress } from "../messages/targets"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { optionalString, requiredString } from "../shared/input"
-import { type MessageIntegration } from "../shared/integrations"
+import { type MessageSurface } from "../shared/integrations"
 import { requireMessageSurfaceInput } from "./surface/input"
 import { findVisibleMessage } from "./surface/target"
 import { type ActiveSurfaceTool, activeSurfaceTools } from "./surface/tools"
@@ -23,7 +23,7 @@ type ActiveSurfaceState = {
 
 type ActiveSurface = {
   communicated: boolean
-  surface: MessageIntegration
+  surface: MessageSurface
   target: string | null
 }
 
@@ -55,10 +55,10 @@ export async function loadActiveSurface(
   return {
     state: {
       communicated: current.communicated,
-      surface: input.messageIntegration,
+      surface: input.surface,
       target: args.target,
     },
-    tools: activeSurfaceTools(input.messageIntegration),
+    tools: activeSurfaceTools(input.surface),
   }
 }
 
@@ -101,6 +101,7 @@ export async function sendRunReply(
   ctx: ActionCtx,
   args: {
     blocks?: unknown[]
+    parts?: unknown[]
     runId: Id<"runs">
     target?: string
     text: string
@@ -129,6 +130,7 @@ export async function sendRunReply(
 
   await sendSurfaceReply(ctx, input, address, {
     blocks: optionalSlackBlocks(args.blocks),
+    parts: args.parts,
     text: requiredString(args.text, "text"),
   })
 

@@ -42,12 +42,6 @@ export const pending = internalQuery({
       return null
     }
 
-    const integration = await ctx.db.get(conversation.integrationId)
-
-    if (integration === null) {
-      return null
-    }
-
     const readAt = Date.now()
 
     return {

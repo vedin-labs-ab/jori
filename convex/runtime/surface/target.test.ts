@@ -25,7 +25,7 @@ test("resolves Linear comment and issue reaction targets", async () => {
   const trigger = message({
     conversationId: "issue-id",
     data: { issueId: "issue-id" },
-    integration: "linear",
+    surface: "linear",
   })
 
   await expect(
@@ -34,7 +34,7 @@ test("resolves Linear comment and issue reaction targets", async () => {
         message({
           conversationId: "issue-id",
           data: { commentId: "comment-id", issueId: "issue-id" },
-          integration: "linear",
+          surface: "linear",
         }),
       ]),
       trigger,
@@ -64,7 +64,7 @@ test("resolves GitHub comment reaction subject from comment kind", async () => {
           repository: { fullName: "acme/app" },
           comment: { id: "456", kind: "pull_request_review" },
         },
-        integration: "github",
+        surface: "github",
       }),
       { type: "comment", commentId: 456 }
     )
@@ -107,7 +107,7 @@ function message(overrides: Partial<Doc<"messages">>) {
     _creationTime: 0,
     organizationId: "organization",
     integrationId: "integration",
-    integration: "slack",
+    surface: "slack",
     type: "message.channels",
     externalId: "external",
     mentioned: false,

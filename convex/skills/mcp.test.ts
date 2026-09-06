@@ -13,7 +13,7 @@ test("loads an available runtime skill", () => {
     status: "loaded",
     skill: {
       name: "slack",
-      associatedIntegrations: ["slack"],
+      surfaces: ["slack"],
       instructions: expect.stringContaining(
         "Format Slack messages with Slack `mrkdwn`"
       ),
@@ -47,7 +47,7 @@ test("loads non-integration skills with JSON-safe metadata", () => {
     status: "loaded",
     skill: {
       name: "image-generation",
-      associatedIntegrations: [],
+      surfaces: [],
       instructions: expect.stringContaining("Call `generate_image`"),
     },
   })

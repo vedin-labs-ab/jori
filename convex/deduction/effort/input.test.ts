@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import {
   isReadableConversation,
   readWindowConversation,
@@ -96,16 +96,17 @@ function eventDoc(overrides: Partial<Doc<"events">>): Doc<"events"> {
 
 function conversationDoc(
   overrides: Partial<Doc<"conversations">>
-): Doc<"conversations"> {
+): Doc<"conversations"> & { integrationId: Id<"integrations"> } {
   return {
     _id: "conversation-1",
     _creationTime: 1_000,
     organizationId: "organization",
+    surface: "slack",
     integrationId: "integration-1",
     externalId: "C123",
     scope: "organization",
     summary: "#payments: cutover slipping to Jul 20",
     summarizedAt: 5_000,
     ...overrides,
-  } as Doc<"conversations">
+  } as Doc<"conversations"> & { integrationId: Id<"integrations"> }
 }

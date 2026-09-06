@@ -74,7 +74,6 @@ export function formatRuntimeMessage(
     id: message._id,
     identifiers: messageIdentifiers(message),
     createdAt: message.createdAt,
-    integration: message.integration,
     mentioned: message.mentioned,
     observedAt: message.observedAt ?? null,
     reactions: reactions ?? null,

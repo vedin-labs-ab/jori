@@ -51,6 +51,8 @@ export function sourceLabel(value: string | undefined) {
   switch (value) {
     case "job":
       return "Job"
+    case "jori":
+      return "Jori"
     case "github":
       return "GitHub"
     case "linear":

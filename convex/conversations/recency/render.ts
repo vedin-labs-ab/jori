@@ -1,7 +1,7 @@
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import { formatAge } from "../../../prompts/time"
-import { integrationLabels } from "../../shared/integrations"
+import { messageSurfaceLabel } from "../../shared/integrations"
 import { type RecencyEntry } from "./load"
 
 export function renderPersonContext(args: {
@@ -22,6 +22,6 @@ function recencyItem(entry: RecencyEntry) {
     identifiers:
       entry.identifiers.length === 0 ? null : entry.identifiers.join(", "),
     summary: entry.kind === "summary" ? entry.summary : null,
-    surface: integrationLabels[entry.integration],
+    surface: messageSurfaceLabel(entry.surface),
   }
 }

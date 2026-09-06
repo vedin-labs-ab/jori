@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { checkRunBudget } from "../billing/guard"
+import { consoleMessageFolderId } from "../messages/console"
 import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/audience"
 import { wakeRun } from "../runs/execution/waiters/data"
@@ -14,7 +15,9 @@ import { findConversation } from "./resolve"
 
 type StartMessageRunArgs = {
   conversation: Doc<"conversations"> | null
-  integration: Doc<"integrations">
+  // Console runs have no integration; their conversation always exists
+  // before the run starts.
+  integration: Doc<"integrations"> | null
   message: Doc<"messages">
   createdBy: Id<"persons"> | undefined
   externalId: string
@@ -57,9 +60,10 @@ async function insertConversation(
 ) {
   const conversationId = await ctx.db.insert("conversations", {
     organizationId: args.integration.organizationId,
+    surface: args.message.surface,
     integrationId: args.integration._id,
     externalId: args.externalId,
-    scope: conversationScope(args.message, args.integration),
+    scope: conversationScope(args.message),
   })
   const conversation = await ctx.db.get(conversationId)
 
@@ -120,7 +124,7 @@ async function startNewMessageRun(
   // Mentions are interactive work: they get the grace floor. Continuing an
   // active session never lands here, so in-flight threads are not cut off.
   const budget = await checkRunBudget(ctx, {
-    organizationId: args.integration.organizationId,
+    organizationId: args.message.organizationId,
     interactive: true,
   })
 
@@ -133,12 +137,7 @@ async function startNewMessageRun(
 
   const kind = session === null ? "mention" : "reply"
   const conversation =
-    args.conversation ??
-    (await insertConversation(ctx, {
-      externalId: args.externalId,
-      integration: args.integration,
-      message: args.message,
-    }))
+    args.conversation ?? (await insertProviderConversation(ctx, args))
   const runId = await insertRun(ctx, { ...args, conversation, kind })
 
   const sessionId = await startSession(ctx, {
@@ -159,10 +158,25 @@ async function startNewMessageRun(
   }
 }
 
+async function insertProviderConversation(
+  ctx: MutationCtx,
+  args: StartMessageRunArgs
+) {
+  if (args.integration === null) {
+    throw new Error("Console conversations are created before their run.")
+  }
+
+  return await insertConversation(ctx, {
+    externalId: args.externalId,
+    integration: args.integration,
+    message: args.message,
+  })
+}
+
 async function insertRun(
   ctx: MutationCtx,
   args: {
-    integration: Doc<"integrations">
+    integration: Doc<"integrations"> | null
     message: Doc<"messages">
     conversation: Doc<"conversations">
     createdBy: Id<"persons"> | undefined
@@ -170,8 +184,10 @@ async function insertRun(
     kind: MessageCauseKind
   }
 ) {
+  const folderId = await consoleFolderId(ctx, args.conversation)
+
   return await ctx.db.insert("runs", {
-    organizationId: args.integration.organizationId,
+    organizationId: args.message.organizationId,
     cause: {
       type: "message",
       messageId: args.message._id,
@@ -187,8 +203,35 @@ async function insertRun(
       origin: { conversation: args.conversation },
       run: { createdBy: args.createdBy },
     })),
+    ...(folderId === undefined ? {} : { folderId }),
     status: "queued",
     createdBy: args.createdBy,
     createdAt: args.now,
   })
+}
+
+/** A console conversation opened from a folder files every run it starts
+ *  under that folder; the context rides on the person's first message. */
+async function consoleFolderId(
+  ctx: MutationCtx,
+  conversation: Doc<"conversations">
+) {
+  if (conversation.surface !== "console") {
+    return undefined
+  }
+
+  const first = await ctx.db
+    .query("messages")
+    .withIndex(
+      "by_organization_and_integration_and_conversation_and_created_at",
+      (query) =>
+        query
+          .eq("organizationId", conversation.organizationId)
+          .eq("integrationId", undefined)
+          .eq("conversationId", conversation.externalId)
+    )
+    .order("asc")
+    .first()
+
+  return consoleMessageFolderId(first?.data)
 }

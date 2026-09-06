@@ -1,4 +1,7 @@
-import { type AgentRuntimeInput } from "../../runs/agent/input"
+import {
+  type AgentRuntimeInput,
+  requireInputIntegration,
+} from "../../runs/agent/input"
 import {
   type Actor,
   getActorDisplayName,
@@ -23,9 +26,18 @@ export function integrationOfferSourceFromInput(
     }
   }
 
+  // A console request is Jori's own: no provider identity to carry over.
+  if (input.surface === "console") {
+    return {
+      surface: "jori",
+      messageId: input.message._id,
+      runId: input.run._id,
+    }
+  }
+
   return {
-    surface: input.messageIntegration,
-    integrationId: input.integration._id,
+    surface: input.surface,
+    integrationId: requireInputIntegration(input)._id,
     messageId: input.message._id,
     runId: input.run._id,
     ...sourceActorFields(input.message.actor),

@@ -1,10 +1,12 @@
-import { integrationLabel } from "../../../contracts/integrations"
 import { type JsonObject } from "../../../contracts/json"
 import { finalProperty } from "../../../contracts/runtime/tools"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import {
   type MessageIntegration,
+  type MessageSurface,
   messageIntegrations,
+  messageSurfaceLabel,
+  messageSurfaces,
 } from "../../shared/integrations"
 import { nativeToolUsage } from "../permissions/native"
 
@@ -16,10 +18,13 @@ export type ActiveSurfaceTool = {
   route: "surface"
 }
 
+/** Every surface replies; only providers carry reactions. */
 export function activeSurfaceTools(
-  surface: MessageIntegration
+  surface: MessageSurface
 ): ActiveSurfaceTool[] {
-  return [sendReplyTool(surface), addReactionTool(surface)]
+  return surface === "console"
+    ? [sendReplyTool(surface)]
+    : [sendReplyTool(surface), addReactionTool(surface)]
 }
 
 /** Request schemas for the schema viewer, built from the same per-surface
@@ -29,25 +34,26 @@ export function activeSurfaceToolReferenceSchemas(): Record<
   JsonObject
 > {
   return {
-    send_reply: surfaceToolVariants(sendReplySchema),
-    add_reaction: surfaceToolVariants(addReactionSchema),
+    send_reply: surfaceToolVariants(messageSurfaces, sendReplySchema),
+    add_reaction: surfaceToolVariants(messageIntegrations, addReactionSchema),
   }
 }
 
-function surfaceToolVariants(
-  build: (surface: MessageIntegration) => JsonObject
+function surfaceToolVariants<Surface extends MessageSurface>(
+  surfaces: readonly Surface[],
+  build: (surface: Surface) => JsonObject
 ): JsonObject {
   return {
     description:
       "The request shape follows the surface the run is replying on.",
-    oneOf: messageIntegrations.map((surface) => ({
-      title: integrationLabel(surface),
+    oneOf: surfaces.map((surface) => ({
+      title: messageSurfaceLabel(surface),
       ...withOptionalFieldGuidance(build(surface)),
     })),
   }
 }
 
-function sendReplyTool(surface: MessageIntegration): ActiveSurfaceTool {
+function sendReplyTool(surface: MessageSurface): ActiveSurfaceTool {
   return {
     access: "write",
     description: nativeToolUsage("send_reply", "surface"),
@@ -67,7 +73,7 @@ function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
   }
 }
 
-function sendReplySchema(surface: MessageIntegration): JsonObject {
+function sendReplySchema(surface: MessageSurface): JsonObject {
   const properties: Record<string, JsonObject> = {
     text: {
       type: "string",

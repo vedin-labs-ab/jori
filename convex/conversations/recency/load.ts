@@ -21,7 +21,7 @@ type RecencySummary = {
   ageMs: number
   conversationId: Id<"conversations">
   identifiers: string[]
-  integration: Doc<"messages">["integration"]
+  surface: Doc<"messages">["surface"]
   summary: string
 }
 
@@ -29,7 +29,7 @@ type RecencyReference = {
   kind: "reference"
   conversationId: Id<"conversations">
   identifiers: string[]
-  integration: Doc<"messages">["integration"]
+  surface: Doc<"messages">["surface"]
 }
 
 export type RecencyEntry = RecencyReference | RecencySummary
@@ -127,7 +127,7 @@ function summaryEntry(
     ageMs: Math.max(0, now - conversation.summarizedAt),
     conversationId: conversation._id,
     identifiers: recencyIdentifiers(conversation, message),
-    integration: message.integration,
+    surface: message.surface,
     summary: conversation.summary,
   }
 }
@@ -140,7 +140,7 @@ function referenceEntry(
     kind: "reference",
     conversationId: conversation._id,
     identifiers: recencyIdentifiers(conversation, message),
-    integration: message.integration,
+    surface: message.surface,
   }
 }
 

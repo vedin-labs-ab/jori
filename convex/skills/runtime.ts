@@ -1,9 +1,8 @@
-import { type SkillCategory } from "../../contracts/skills"
-import { type Integration } from "../shared/integrations"
+import { type SkillCategory, type SkillSurface } from "../../contracts/skills"
 import { sortSkills } from "./data"
 
 export type RuntimeSkill = {
-  associatedIntegrations: readonly Integration[]
+  surfaces: readonly SkillSurface[]
   body: string
   category: SkillCategory
   communication?: {
@@ -30,12 +29,12 @@ export function getRuntimeSkill(skills: readonly RuntimeSkill[], name: string) {
   )
 }
 
-export function getRuntimeSkillForIntegration(
+export function getRuntimeSkillForSurface(
   skills: readonly RuntimeSkill[],
-  integration: Integration
+  surface: SkillSurface
 ) {
   const candidates = sortSkills([...skills]).filter((skill) =>
-    skill.associatedIntegrations.some((candidate) => candidate === integration)
+    skill.surfaces.some((candidate) => candidate === surface)
   )
 
   return (

@@ -22,7 +22,7 @@ export function runtimeSkills(
       name: "slack",
       category: "communication",
       description: "Format Slack replies.",
-      associatedIntegrations: ["slack"],
+      surfaces: ["slack"],
       communication: {
         parts: {
           text: slackTextGuidance,
@@ -47,7 +47,7 @@ export function runtimeSkill(
   return {
     organizationId: null,
     category: "creation",
-    associatedIntegrations: [],
+    surfaces: [],
     ...skill,
   }
 }

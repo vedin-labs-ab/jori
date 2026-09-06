@@ -1,5 +1,4 @@
-import { type Integration } from "@contracts/integrations"
-import { type SkillCategory } from "@contracts/skills"
+import { type SkillCategory, type SkillSurface } from "@contracts/skills"
 import { type GenericId } from "convex/values"
 
 export type Skill = {
@@ -7,7 +6,7 @@ export type Skill = {
   organizationId: string | null
   name: string
   category: SkillCategory
-  associatedIntegrations: Integration[]
+  surfaces: SkillSurface[]
   description: string
   body: string
   createdAt: number
@@ -18,7 +17,7 @@ export type Skill = {
 export type SkillFormValues = {
   name: string
   category: SkillCategory
-  associatedIntegrations: Integration[]
+  surfaces: SkillSurface[]
   description: string
   body: string
 }
@@ -34,7 +33,7 @@ export const skillFilterOptions = [
 export const emptySkillForm: SkillFormValues = {
   name: "",
   category: "operations",
-  associatedIntegrations: [],
+  surfaces: [],
   description: "",
   body: "",
 }

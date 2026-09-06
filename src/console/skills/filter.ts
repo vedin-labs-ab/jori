@@ -1,4 +1,4 @@
-import { integrationLabel } from "@contracts/integrations"
+import { skillSurfaceLabel } from "@contracts/skills"
 import { type Skill, type SkillFilterView } from "./types"
 
 export function filterSkills(skills: Skill[], searchTerm: string) {
@@ -25,7 +25,7 @@ function skillSearchText(skill: Skill) {
     skill.category,
     skill.description,
     skill.body,
-    ...skill.associatedIntegrations.map(integrationLabel),
+    ...skill.surfaces.map(skillSurfaceLabel),
   ]
     .join(" ")
     .toLowerCase()

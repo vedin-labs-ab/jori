@@ -46,6 +46,7 @@ function conversation(
     _creationTime: 0,
     _id: id<"conversations">("conversation"),
     externalId: "external",
+    surface: "slack",
     integrationId: id<"integrations">("integration"),
     scope,
     organizationId: "organization",

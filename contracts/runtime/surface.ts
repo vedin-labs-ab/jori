@@ -1,4 +1,4 @@
-import { type ToolSurface } from "../integrations"
+import { type MessageSurface } from "../integrations"
 
 export type SurfaceReactionTarget =
   | { messageTs: string }
@@ -20,7 +20,7 @@ export function isSurfaceCommunicationTool(name: unknown) {
 export function isVisibleCommunicationTool(
   toolName: string,
   result: unknown,
-  activeSurface: ToolSurface
+  activeSurface: MessageSurface
 ) {
   return (
     toolName === "offer_integration" &&
@@ -28,7 +28,10 @@ export function isVisibleCommunicationTool(
   )
 }
 
-function deliveredOnActiveSurface(result: unknown, activeSurface: ToolSurface) {
+function deliveredOnActiveSurface(
+  result: unknown,
+  activeSurface: MessageSurface
+) {
   if (typeof result !== "object" || result === null || Array.isArray(result)) {
     return false
   }

@@ -50,7 +50,6 @@ test("appends drained messages to the transcript", async () => {
         hasMore: false,
         messages: [
           runtimeMessage({
-            integration: "linear",
             replyTarget: "linear:thread:comment-id",
           }),
         ],
@@ -136,7 +135,6 @@ function runtimeMessage(
       "internal:message:message",
       "slack:message:1782231485.491049",
     ],
-    integration: "slack",
     mentioned: false,
     observedAt: Date.parse("2026-06-22T09:34:35.618Z"),
     reactions: null,

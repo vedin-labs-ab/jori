@@ -8,6 +8,7 @@ import {
   type SkillCategory,
   skillCategories,
   skillCategoryLabel,
+  skillIntegrations,
 } from "@contracts/skills"
 import { Info, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -48,7 +49,7 @@ import { type Skill, type SkillFormValues } from "./types"
 
 type SkillTextFieldName = Exclude<
   keyof SkillFormValues,
-  "associatedIntegrations" | "category"
+  "category" | "surfaces"
 >
 
 export function SkillDialog({
@@ -113,10 +114,16 @@ export function SkillDialog({
             />
           </div>
           <AssociatedIntegrationsField
-            onChange={(associatedIntegrations) =>
-              onValuesChange({ ...values, associatedIntegrations })
+            onChange={(integrations) =>
+              onValuesChange({
+                ...values,
+                surfaces: [
+                  ...values.surfaces.filter((surface) => surface === "console"),
+                  ...integrations,
+                ],
+              })
             }
-            selectedIntegrations={values.associatedIntegrations}
+            selectedIntegrations={skillIntegrations(values.surfaces)}
           />
           <SkillDescriptionField
             onChange={(value) => updateValue("description", value)}

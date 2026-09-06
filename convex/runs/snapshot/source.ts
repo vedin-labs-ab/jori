@@ -42,20 +42,26 @@ export function jobSnapshotBody(input: {
   return timeJobDisplay(input.job)
 }
 
+// A console message is Jori's own surface: nothing to link back to and no
+// provider context to describe, so its source reads as Jori.
 export function messageSnapshotBody(input: {
-  integration: Doc<"integrations">
+  integration: Doc<"integrations"> | null
   kind: MessageCauseKind
   message: Doc<"messages">
 }): RunSnapshotBody {
+  if (input.message.surface === "console") {
+    return { source: { type: "message", surface: "jori" }, context: [] }
+  }
+
   const metadata = createSourceMetadata({
     data: input.message.data,
     event: input.message.type,
-    integration: input.message.integration,
+    integration: input.message.surface,
   })
   const details = snapshotContext({
     data: input.message.data,
     integration: input.integration,
-    integrationKey: input.message.integration,
+    integrationKey: input.message.surface,
     metadata,
     text: input.message.text,
   })
@@ -64,7 +70,7 @@ export function messageSnapshotBody(input: {
   return {
     source: {
       type: "message",
-      surface: input.message.integration,
+      surface: input.message.surface,
       ...(sourceUrl === undefined ? {} : { url: sourceUrl }),
     },
     context: details.filter((item) => !isPayloadDetail(item)),

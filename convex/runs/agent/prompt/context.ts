@@ -7,14 +7,15 @@ import {
 import { replyAddress } from "../../../messages/targets"
 import {
   integrationLabels,
-  type MessageIntegration,
+  type MessageSurface,
+  messageSurfaceLabel,
 } from "../../../shared/integrations"
 import { type AgentRuntimeInput } from "../input"
 import { createMessageConversationValues } from "./conversation"
 import { createMessageTargetValues, formatEvent } from "./target"
 
 export type PromptActiveSurface = {
-  surface: MessageIntegration
+  surface: MessageSurface
 }
 
 export function createRequesterMessage(input: AgentRuntimeInput) {
@@ -55,7 +56,7 @@ export function defaultActiveSurface(
   input: AgentRuntimeInput
 ): PromptActiveSurface | null {
   return input.type === "message" && replyAddress(input.message) !== null
-    ? { surface: input.messageIntegration }
+    ? { surface: input.surface }
     : null
 }
 
@@ -72,7 +73,7 @@ function createRunInstructions(
       label:
         activeSurface === null
           ? null
-          : integrationLabels[activeSurface.surface],
+          : messageSurfaceLabel(activeSurface.surface),
     },
     time: promptTime(input),
   })
@@ -128,10 +129,7 @@ function createTriggerPart(input: AgentRuntimeInput) {
 function createMessageValues(
   input: Extract<AgentRuntimeInput, { type: "message" }>
 ) {
-  const target = createMessageTargetValues(
-    input.messageIntegration,
-    input.message.data
-  )
+  const target = createMessageTargetValues(input.surface, input.message.data)
   const conversation = createMessageConversationValues(input)
 
   return {
@@ -140,9 +138,9 @@ function createMessageValues(
       conversationSummary: conversation.summary,
       current: conversation.current,
       github: target.github,
-      integration: integrationLabels[input.messageIntegration],
+      integration: messageSurfaceLabel(input.surface),
       linear: target.linear,
-      surface: input.messageIntegration,
+      surface: input.surface,
     },
   }
 }

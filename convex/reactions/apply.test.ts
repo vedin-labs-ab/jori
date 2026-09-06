@@ -118,7 +118,7 @@ function targetMessage(): Doc<"messages"> {
     _creationTime: 0,
     organizationId: "organization",
     integrationId: id<"integrations">("integration"),
-    integration: "github",
+    surface: "github",
     type: "comment.issue.created",
     externalId: "message",
     mentioned: false,

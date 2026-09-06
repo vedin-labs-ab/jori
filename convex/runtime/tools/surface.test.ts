@@ -108,6 +108,29 @@ test("add_reaction routes through Convex and marks the active surface communicat
   })
 })
 
+test("add_reaction is refused on the console surface", async () => {
+  const runtime = surfaceRuntime({
+    activeSurface: { communicated: false, surface: "console", target: null },
+    tools: [addReactionTool()],
+  })
+
+  const result = await runTool({
+    call: {
+      args: { reaction: "+1", target: { messageTs: "123.456" } },
+      id: "call_1",
+      name: "add_reaction",
+    },
+    runtime,
+  })
+
+  expect(JSON.parse(result.content)).toEqual({
+    error: { message: "Reactions are not available in the console." },
+    status: "error",
+  })
+  expect(runtime.platform.addReaction).not.toHaveBeenCalled()
+  expect(runtime.context.activeSurface?.communicated).toBe(false)
+})
+
 test("add_reaction validates GitHub reaction targets before calling Convex", async () => {
   const runtime = surfaceRuntime({
     activeSurface: {

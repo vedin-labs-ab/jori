@@ -1,10 +1,13 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
-import { skillCategories } from "../../contracts/skills"
-import { integrationValidator } from "../shared/integrations"
+import { skillCategories, skillSurfaces } from "../../contracts/skills"
 
 export const skillCategoryValidator = v.union(
   ...skillCategories.map((category) => v.literal(category))
+)
+
+export const skillSurfaceValidator = v.union(
+  ...skillSurfaces.map((surface) => v.literal(surface))
 )
 
 export const skills = defineTable({
@@ -12,7 +15,7 @@ export const skills = defineTable({
   name: v.string(),
   description: v.string(),
   category: skillCategoryValidator,
-  associatedIntegrations: v.optional(v.array(integrationValidator)),
+  surfaces: v.optional(v.array(skillSurfaceValidator)),
   communication: v.optional(
     v.object({
       parts: v.record(v.string(), v.string()),

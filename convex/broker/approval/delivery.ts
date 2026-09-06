@@ -65,6 +65,11 @@ async function deliverApproval(
   context: ApprovalDeliveryContext,
   args: ApprovalDeliveryArgs
 ) {
+  // The console shows the approval on the run itself; nothing to send.
+  if (context.input.type === "message" && context.input.surface === "console") {
+    return
+  }
+
   const slackDelivery = getSlackApprovalDelivery(context)
 
   if (slackDelivery !== null) {
@@ -112,7 +117,7 @@ async function deliverTextApproval(
 
   if (address === null) {
     throw new Error(
-      `Cannot resolve a ${input.messageIntegration} reply target for approval delivery.`
+      `Cannot resolve a ${input.surface} reply target for approval delivery.`
     )
   }
 
@@ -148,7 +153,7 @@ function getSlackApprovalDelivery(
 }
 
 function getSlackTarget(input: AgentRuntimeInput) {
-  if (input.type !== "message" || input.messageIntegration !== "slack") {
+  if (input.type !== "message" || input.surface !== "slack") {
     return null
   }
 
@@ -158,10 +163,12 @@ function getSlackTarget(input: AgentRuntimeInput) {
 function deliverySurface(
   context: ApprovalDeliveryContext,
   args: ApprovalDeliveryArgs
-) {
-  return context.input.type === "message"
-    ? context.input.messageIntegration
-    : args.surface
+): ToolSurface {
+  if (context.input.type !== "message") {
+    return args.surface
+  }
+
+  return context.input.surface === "console" ? "jori" : context.input.surface
 }
 
 function deliveryOperation(context: ApprovalDeliveryContext) {

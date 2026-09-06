@@ -9,16 +9,15 @@ import {
 } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { ensureCurrentPerson } from "../persons/account"
-import { integrationValidator } from "../shared/integrations"
 import {
   normalizeSkillInput,
   requireUniqueOrganizationSkillName,
   sortSkills,
 } from "./data"
-import { skillCategoryValidator } from "./schema"
+import { skillCategoryValidator, skillSurfaceValidator } from "./schema"
 
 type SeedSkill = {
-  associatedIntegrations?: readonly string[]
+  surfaces?: readonly string[]
   category: string
   communication?: {
     parts: Record<string, string>
@@ -53,7 +52,7 @@ export const list = query({
         name: skill.name,
         description: skill.description,
         category: skill.category,
-        associatedIntegrations: skill.associatedIntegrations ?? [],
+        surfaces: skill.surfaces ?? [],
         body: skill.body,
         createdAt: skill.createdAt,
         updatedAt: skill.updatedAt,
@@ -71,7 +70,7 @@ export const create = mutation({
     organizationId: v.string(),
     name: v.string(),
     category: skillCategoryValidator,
-    associatedIntegrations: v.array(integrationValidator),
+    surfaces: v.array(skillSurfaceValidator),
     description: v.string(),
     body: v.string(),
   },
@@ -92,7 +91,7 @@ export const create = mutation({
       organizationId: args.organizationId,
       name: input.name,
       category: input.category,
-      associatedIntegrations: input.associatedIntegrations,
+      surfaces: input.surfaces,
       description: input.description,
       body: input.body,
       createdBy: personId,
@@ -108,7 +107,7 @@ export const update = mutation({
     skillId: v.id("skills"),
     name: v.string(),
     category: skillCategoryValidator,
-    associatedIntegrations: v.array(integrationValidator),
+    surfaces: v.array(skillSurfaceValidator),
     description: v.string(),
     body: v.string(),
   },
@@ -134,7 +133,7 @@ export const update = mutation({
     await ctx.db.patch(args.skillId, {
       name: input.name,
       category: input.category,
-      associatedIntegrations: input.associatedIntegrations,
+      surfaces: input.surfaces,
       description: input.description,
       body: input.body,
       updatedAt: Date.now(),
@@ -172,7 +171,7 @@ export const listForRuntime = internalQuery({
       organizationId: skill.organizationId,
       name: skill.name,
       category: skill.category,
-      associatedIntegrations: skill.associatedIntegrations ?? [],
+      surfaces: skill.surfaces ?? [],
       description: skill.description,
       ...(skill.communication === undefined
         ? {}
@@ -221,7 +220,7 @@ export const syncGlobalSkills = internalMutation({
           organizationId: null,
           name: input.name,
           category: input.category,
-          associatedIntegrations: input.associatedIntegrations,
+          surfaces: input.surfaces,
           ...(input.communication === undefined
             ? {}
             : { communication: input.communication }),
@@ -235,7 +234,7 @@ export const syncGlobalSkills = internalMutation({
 
       await ctx.db.patch(existingSkill._id, {
         category: input.category,
-        associatedIntegrations: input.associatedIntegrations,
+        surfaces: input.surfaces,
         communication: input.communication,
         description: input.description,
         body: input.body,

@@ -138,6 +138,31 @@ test("the cause of the work becomes the trigger dimension", async () => {
   ])
 })
 
+test("a console message run rolls up under Jori as a message", async () => {
+  const { database, ctx } = databaseContext()
+
+  await recordUsageEnded(ctx, {
+    run: run({
+      cause: {
+        type: "message",
+        messageId: "message" as Id<"messages">,
+        kind: "mention",
+      },
+      snapshot: {
+        context: [],
+        source: { type: "message", surface: "jori" },
+        title: "Plan the launch",
+      },
+    }),
+    failed: false,
+  })
+
+  expect((await readBuckets(database))[0]).toMatchObject({
+    surface: "jori",
+    trigger: "message",
+  })
+})
+
 test("a job's label is carried even once the job is gone", async () => {
   const { database, ctx } = databaseContext()
 

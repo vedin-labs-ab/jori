@@ -5,7 +5,7 @@ import {
 } from "../../../shared/data"
 import {
   integrationLabels,
-  type MessageIntegration,
+  type MessageSurface,
 } from "../../../shared/integrations"
 import { type AgentRuntimeInput } from "../input"
 
@@ -14,12 +14,12 @@ type JobEvent = NonNullable<
 >
 
 export function createMessageTargetValues(
-  integration: MessageIntegration,
+  surface: MessageSurface,
   data: unknown
 ) {
   return {
-    github: integration === "github" ? getGitHubTargetValues(data) : null,
-    linear: integration === "linear" ? getLinearTargetValues(data) : null,
+    github: surface === "github" ? getGitHubTargetValues(data) : null,
+    linear: surface === "linear" ? getLinearTargetValues(data) : null,
   }
 }
 

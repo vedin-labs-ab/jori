@@ -28,7 +28,7 @@ export function createJobRunSnapshot(input: {
 }
 
 export function createMessageRunSnapshot(input: {
-  integration: Doc<"integrations">
+  integration: Doc<"integrations"> | null
   kind: MessageCauseKind
   message: Doc<"messages">
 }): RunSnapshotInput {

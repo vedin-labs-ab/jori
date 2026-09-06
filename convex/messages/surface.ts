@@ -1,7 +1,6 @@
 import { type Doc } from "../_generated/dataModel"
 import { getSlackChannelType } from "../integrations/slack/data"
 import { type Audience } from "../shared/audience"
-import { isUserScopedIntegration } from "../shared/integrations"
 
 type MessageAudience = {
   isAddressed: boolean
@@ -9,53 +8,36 @@ type MessageAudience = {
   isMentioned: boolean
 }
 
-export function messageAudience(
-  message: Doc<"messages">,
-  integration: Doc<"integrations">
-): MessageAudience {
-  if (message.integration === "slack") {
-    return slackMessageAudience(message, integration)
-  }
-
-  if (message.integration === "github" || message.integration === "linear") {
-    return {
-      isAddressed: message.mentioned,
-      isDirect: false,
-      isMentioned: message.mentioned,
-    }
-  }
-
-  return {
-    isAddressed: false,
-    isDirect: false,
-    isMentioned: message.mentioned,
+export function messageAudience(message: Doc<"messages">): MessageAudience {
+  switch (message.surface) {
+    case "console":
+      // Typing to Jori in the console is always a direct address.
+      return { isAddressed: true, isDirect: true, isMentioned: true }
+    case "slack":
+      return slackMessageAudience(message)
+    case "github":
+    case "linear":
+      return {
+        isAddressed: message.mentioned,
+        isDirect: false,
+        isMentioned: message.mentioned,
+      }
   }
 }
 
-export function conversationScope(
-  message: Doc<"messages">,
-  integration: Doc<"integrations">
-): Audience {
-  if (integration.integration === "slack") {
-    return slackConversationScope(message)
+export function conversationScope(message: Doc<"messages">): Audience {
+  switch (message.surface) {
+    case "console":
+      return "person"
+    case "slack":
+      return slackConversationScope(message)
+    case "github":
+    case "linear":
+      return "organization"
   }
-
-  if (
-    integration.integration === "github" ||
-    integration.integration === "linear"
-  ) {
-    return "organization"
-  }
-
-  return isUserScopedIntegration(integration.integration)
-    ? "person"
-    : "conversation"
 }
 
-function slackMessageAudience(
-  message: Doc<"messages">,
-  _integration: Doc<"integrations">
-): MessageAudience {
+function slackMessageAudience(message: Doc<"messages">): MessageAudience {
   const isDirect = isSlackDirectMessage(message)
 
   return {

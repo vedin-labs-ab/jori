@@ -114,7 +114,7 @@ function message(kind: "mention" | "reply") {
     _creationTime: 0,
     organizationId: "organization",
     integrationId: "integration",
-    integration: "slack",
+    surface: "slack",
     type: "message.channels",
     externalId: `slack:${kind}`,
     mentioned: kind === "mention",
