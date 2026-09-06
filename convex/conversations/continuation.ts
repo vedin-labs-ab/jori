@@ -4,7 +4,6 @@ import { messageHasText, resolveMessageOwner } from "../messages/data"
 import { maxPendingReadLimit } from "../sessions/batch"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
-import { isMessageIntegration } from "../shared/integrations"
 import { startMessageRun } from "./data"
 
 export async function continuePendingConversationRun(
@@ -50,14 +49,11 @@ async function continueSession(
     return
   }
 
-  const integration = await ctx.db.get(conversation.integrationId)
+  const integration = await conversationIntegration(ctx, conversation)
 
-  if (integration === null || integration.status !== "active") {
-    await stopSession(ctx, session, now)
-    return
-  }
-
-  if (!isMessageIntegration(pending.message.integration)) {
+  // A provider conversation whose integration is gone or inactive cannot
+  // continue; the console has none to lose.
+  if (conversation.surface !== "console" && integration?.status !== "active") {
     await stopSession(ctx, session, now)
     return
   }
@@ -66,8 +62,8 @@ async function continueSession(
     integration,
     message: pending.message,
     createdBy: await resolveMessageOwner(ctx, {
-      integration: pending.message.integration,
-      organizationId: integration.organizationId,
+      surface: pending.message.surface,
+      organizationId: conversation.organizationId,
       message: pending.message,
     }),
     externalId: conversation.externalId,
@@ -75,6 +71,15 @@ async function continueSession(
     replaceActiveSession: true,
     conversation,
   })
+}
+
+async function conversationIntegration(
+  ctx: MutationCtx,
+  conversation: Doc<"conversations">
+) {
+  return conversation.integrationId === undefined
+    ? null
+    : await ctx.db.get(conversation.integrationId)
 }
 
 async function readPendingContinuationMessage(

@@ -1,4 +1,4 @@
-import { skillCategoryLabel } from "@contracts/skills"
+import { skillCategoryLabel, skillIntegrations } from "@contracts/skills"
 import { BookOpenText, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -52,7 +52,7 @@ export function SkillCard({
 
       <div className="mt-auto flex min-h-14 flex-wrap items-center justify-between gap-3 border-t bg-muted/25 px-4 py-3 sm:px-5">
         <IntegrationLogoStack
-          integrations={skill.associatedIntegrations}
+          integrations={skillIntegrations(skill.surfaces)}
           size="md"
         />
         <div className="ml-auto flex items-center gap-3">

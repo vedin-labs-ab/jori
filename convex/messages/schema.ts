@@ -1,12 +1,14 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { actorValidator } from "../shared/actor"
-import { integrationValidator } from "../shared/integrations"
+import { messageSurfaceValidator } from "../shared/integrations"
 
 export const messages = defineTable({
   organizationId: v.string(),
-  integrationId: v.id("integrations"),
-  integration: integrationValidator,
+  surface: messageSurfaceValidator,
+  // Present exactly when the surface is a provider; console messages have
+  // no integration row and index under an undefined integration.
+  integrationId: v.optional(v.id("integrations")),
   type: v.string(),
   externalId: v.string(),
   mentioned: v.boolean(),

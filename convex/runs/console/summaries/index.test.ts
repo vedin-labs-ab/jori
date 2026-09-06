@@ -117,7 +117,7 @@ test("uses source message text for message tasks", async () => {
         _creationTime: 0,
         organizationId: "organization",
         integrationId: "integration",
-        integration: "slack",
+        surface: "slack",
         type: "message.channels",
         externalId: "slack:message",
         mentioned: false,

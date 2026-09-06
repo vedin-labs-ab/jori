@@ -3,7 +3,7 @@ import { type QueryLikeCtx } from "../shared/context"
 
 type ConversationKey = {
   externalId: string
-  integrationId: Id<"integrations">
+  integrationId: Id<"integrations"> | undefined
   organizationId: string
 }
 
@@ -36,4 +36,38 @@ export async function findMessageConversation(
     integrationId: message.integrationId,
     externalId: message.conversationId,
   })
+}
+
+/** A console conversation is its creator's alone: anything else, foreign,
+ *  provider-backed, or missing, reads as not found. */
+export async function findVisibleConsoleConversation(
+  ctx: QueryLikeCtx,
+  args: {
+    conversationId: Id<"conversations">
+    organizationId: string
+    personId: Id<"persons"> | undefined
+  }
+) {
+  const conversation = await ctx.db.get(args.conversationId)
+
+  return conversation !== null &&
+    conversation.organizationId === args.organizationId &&
+    conversation.surface === "console" &&
+    args.personId !== undefined &&
+    conversation.createdBy === args.personId
+    ? conversation
+    : null
+}
+
+export async function requireVisibleConsoleConversation(
+  ctx: QueryLikeCtx,
+  args: Parameters<typeof findVisibleConsoleConversation>[1]
+) {
+  const conversation = await findVisibleConsoleConversation(ctx, args)
+
+  if (conversation === null) {
+    throw new Error("Conversation not found.")
+  }
+
+  return conversation
 }

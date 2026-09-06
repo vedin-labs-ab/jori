@@ -9,7 +9,7 @@ describe("integration offer source", () => {
   test("captures the current message surface and actor identity", () => {
     const input = {
       type: "message",
-      messageIntegration: "slack",
+      surface: "slack",
       run: { _id: "run_1" },
       integration: { _id: "integration_1" },
       message: {

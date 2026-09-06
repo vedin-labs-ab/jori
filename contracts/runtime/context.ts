@@ -1,4 +1,4 @@
-import { type MessageIntegration, type ToolSurface } from "../integrations"
+import { type MessageSurface, type ToolSurface } from "../integrations"
 import { type JsonObject } from "../json"
 import { type ToolAccess } from "../permissions"
 import { type RuntimeId } from "./ids"
@@ -6,7 +6,7 @@ import { type RunStatus } from "./runs"
 
 export type ActiveSurface = {
   communicated: boolean
-  surface: MessageIntegration
+  surface: MessageSurface
   target: string | null
 }
 
@@ -63,7 +63,6 @@ export type RuntimeMessage = {
   createdAt: number
   id: RuntimeId<"messages">
   identifiers: string[]
-  integration: string
   mentioned: boolean
   observedAt: number | null
   reactions: string | null

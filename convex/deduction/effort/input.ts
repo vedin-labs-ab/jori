@@ -175,10 +175,14 @@ async function loadConversations(
 }
 
 // The one privacy gate on judge input: only organization-scoped conversations with
-// a non-empty summary are readable.
-export function isReadableConversation(row: Doc<"conversations">) {
+// a non-empty summary are readable. Console conversations are one person's
+// and never carry an integration, so they never pass.
+export function isReadableConversation(
+  row: Doc<"conversations">
+): row is Doc<"conversations"> & { integrationId: Id<"integrations"> } {
   return (
     row.scope === "organization" &&
+    row.integrationId !== undefined &&
     row.summary !== undefined &&
     row.summary !== "" &&
     row.summarizedAt !== undefined
@@ -186,7 +190,7 @@ export function isReadableConversation(row: Doc<"conversations">) {
 }
 
 export function readWindowConversation(
-  row: Doc<"conversations">
+  row: Doc<"conversations"> & { integrationId: Id<"integrations"> }
 ): WindowConversation {
   return {
     id: row._id,

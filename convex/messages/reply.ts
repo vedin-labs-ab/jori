@@ -1,3 +1,4 @@
+import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { requireGitHubRuntimeToken } from "../integrations/github/credentials"
@@ -11,35 +12,63 @@ import {
   postSlackMessage,
   type SlackBlock,
 } from "../integrations/slack/delivery/messages"
-import { type AgentRuntimeInput } from "../runs/agent/input"
+import {
+  type AgentRuntimeInput,
+  requireInputIntegration,
+} from "../runs/agent/input"
 import { type ReplyAddress } from "./targets"
+
+type MessageInput = Extract<AgentRuntimeInput, { type: "message" }>
 
 export async function sendSurfaceReply(
   ctx: ActionCtx,
-  input: Extract<AgentRuntimeInput, { type: "message" }>,
+  input: MessageInput,
   address: ReplyAddress,
   args: {
     blocks?: SlackBlock[]
+    parts?: unknown[]
     text: string
   }
 ) {
-  const integration = await prepareIntegrationForRuntime(ctx, {
-    integration: input.integration,
-  })
-
   switch (address.type) {
+    case "console":
+      await ctx.runMutation(internal.messages.console.reply, {
+        conversationId: address.conversationId,
+        parts: args.parts,
+        text: args.text,
+      })
+      return
     case "slack":
-      await sendSlackReply(integration, address, args)
+      await sendSlackReply(
+        await prepareReplyIntegration(ctx, input),
+        address,
+        args
+      )
       return
     case "linear":
-      await sendLinearReply(integration, address, args.text)
+      await sendLinearReply(
+        await prepareReplyIntegration(ctx, input),
+        address,
+        args.text
+      )
       return
     case "github":
-      await sendGitHubReply(integration, address, args.text)
+      await sendGitHubReply(
+        await prepareReplyIntegration(ctx, input),
+        address,
+        args.text
+      )
       return
   }
 
   assertNever(address)
+}
+
+/** Provider replies go out with fresh credentials; the console needs none. */
+async function prepareReplyIntegration(ctx: ActionCtx, input: MessageInput) {
+  return await prepareIntegrationForRuntime(ctx, {
+    integration: requireInputIntegration(input),
+  })
 }
 
 export function optionalSlackBlocks(value: unknown): SlackBlock[] | undefined {

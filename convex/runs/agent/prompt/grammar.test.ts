@@ -30,7 +30,7 @@ test("organization and person context share one message grammar", () => {
         ageMs: 60_000,
         conversationId: "recent" as Id<"conversations">,
         identifiers: ["internal:conversation:recent"],
-        integration: "slack",
+        surface: "slack",
         kind: "summary",
         summary: "Asked about payments.",
       },

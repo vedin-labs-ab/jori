@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { toolFinalDescription } from "../../../contracts/runtime/tools"
-import { activeSurfaceTools } from "./tools"
+import { activeSurfaceToolReferenceSchemas, activeSurfaceTools } from "./tools"
 
 test("exposes reply and reaction active surface tools", () => {
   expect(activeSurfaceTools("slack").map((tool) => tool.name)).toEqual([
@@ -15,6 +15,28 @@ test("exposes reply and reaction active surface tools", () => {
     "send_reply",
     "add_reaction",
   ])
+})
+
+test("the console replies but never reacts", () => {
+  expect(activeSurfaceTools("console").map((tool) => tool.name)).toEqual([
+    "send_reply",
+  ])
+  expect(activeSurfaceTools("console")[0]?.inputSchema).toMatchObject({
+    required: ["text"],
+    properties: { text: { type: "string" } },
+  })
+  expect(activeSurfaceTools("console")[0]?.inputSchema).not.toMatchObject({
+    properties: { blocks: expect.anything() },
+  })
+
+  const reference = activeSurfaceToolReferenceSchemas()
+  const titles = (schema: unknown) =>
+    ((schema as { oneOf: Array<{ title: string }> }).oneOf ?? []).map(
+      (variant) => variant.title
+    )
+
+  expect(titles(reference.send_reply)).toContain("Console")
+  expect(titles(reference.add_reaction)).not.toContain("Console")
 })
 
 test("exposes Linear comment targeting only on the Linear active surface", () => {

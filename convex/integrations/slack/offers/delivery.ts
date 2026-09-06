@@ -57,13 +57,13 @@ function getSlackTarget(context: OfferContext) {
     return null
   }
 
-  if (context.input.messageIntegration !== "slack") {
+  const integration = context.input.integration
+
+  if (context.input.surface !== "slack" || integration === null) {
     return null
   }
 
   const target = slackCardTarget(context.input.message.data)
 
-  return target === null
-    ? null
-    : { integration: context.input.integration, ...target }
+  return target === null ? null : { integration, ...target }
 }

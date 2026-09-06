@@ -1,4 +1,4 @@
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { messageReactionTargetKey } from "../messages/identifiers"
 import { type Actor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
@@ -37,7 +37,7 @@ function uniqueMessageTargets(messages: Doc<"messages">[]) {
   const targets = new Map<
     string,
     {
-      integrationId: Doc<"messages">["integrationId"]
+      integrationId: Id<"integrations">
       key: string
       messageIds: string[]
     }
@@ -46,7 +46,7 @@ function uniqueMessageTargets(messages: Doc<"messages">[]) {
   for (const message of messages) {
     const key = messageReactionTargetKey(message)
 
-    if (key === undefined) {
+    if (key === undefined || message.integrationId === undefined) {
       continue
     }
 
@@ -71,7 +71,7 @@ function uniqueMessageTargets(messages: Doc<"messages">[]) {
 async function activeReactionsForTarget(
   ctx: QueryLikeCtx,
   target: {
-    integrationId: Doc<"messages">["integrationId"]
+    integrationId: Id<"integrations">
     key: string
   }
 ): Promise<ActiveReaction[]> {

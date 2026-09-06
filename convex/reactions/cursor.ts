@@ -1,5 +1,5 @@
 import { type RuntimeInteraction } from "../../contracts/runtime/context"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   getActorDisplayName,
   getActorExternalId,
@@ -32,7 +32,8 @@ export async function readPendingReactions(
 
   const conversation = await ctx.db.get(session.conversationId)
 
-  if (conversation === null) {
+  // Only provider surfaces carry reactions.
+  if (conversation?.integrationId === undefined) {
     return { hasMore: false, reactions: [] }
   }
 
@@ -41,6 +42,7 @@ export async function readPendingReactions(
     limit: maxPendingReactionReadLimit + 1,
     session,
     conversation,
+    integrationId: conversation.integrationId,
   })
   const scanned = candidates.slice(0, maxPendingReactionReadLimit)
 
@@ -134,6 +136,7 @@ async function queryConversationReactions(
     limit: number
     session: Doc<"sessions">
     conversation: Doc<"conversations">
+    integrationId: Id<"integrations">
   }
 ) {
   return await ctx.db
@@ -143,7 +146,7 @@ async function queryConversationReactions(
       (query) => {
         const scoped = query
           .eq("organizationId", args.conversation.organizationId)
-          .eq("integrationId", args.conversation.integrationId)
+          .eq("integrationId", args.integrationId)
           .eq("target.conversationId", args.conversation.externalId)
 
         const cursor = args.session.cursor?.reaction

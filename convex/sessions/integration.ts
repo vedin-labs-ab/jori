@@ -19,7 +19,7 @@ export async function activeSessionIntegration(
 
   const conversation = await ctx.db.get(session.conversationId)
 
-  if (conversation === null) {
+  if (conversation?.integrationId === undefined) {
     return null
   }
 

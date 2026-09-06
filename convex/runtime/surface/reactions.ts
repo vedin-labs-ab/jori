@@ -8,7 +8,10 @@ import { addGitHubCommentReaction } from "../../integrations/github/delivery/com
 import { addLinearReaction } from "../../integrations/linear/delivery/reactions"
 import { prepareIntegrationForRuntime } from "../../integrations/runtime"
 import { addSlackMessageReaction } from "../../integrations/slack/delivery/messages"
-import { type AgentRuntimeInput } from "../../runs/agent/input"
+import {
+  type AgentRuntimeInput,
+  requireInputIntegration,
+} from "../../runs/agent/input"
 import { requiredString } from "../../shared/input"
 import { requireMessageSurfaceInput } from "./input"
 import { type ReactionAddress, resolveReactionAddress } from "./target"
@@ -79,7 +82,7 @@ async function sendReaction(
   reaction: string
 ) {
   const integration = await prepareIntegrationForRuntime(ctx, {
-    integration: input.integration,
+    integration: requireInputIntegration(input),
   })
 
   switch (address.type) {

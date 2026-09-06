@@ -59,7 +59,7 @@ function message(data: Record<string, unknown>): Doc<"messages"> {
     _creationTime: 0,
     organizationId: "organization",
     integrationId: id<"integrations">("integration"),
-    integration: "github",
+    surface: "github",
     type: "comment.pull_request.created",
     externalId: "github:message",
     mentioned: false,

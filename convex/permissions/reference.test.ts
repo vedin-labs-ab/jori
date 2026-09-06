@@ -67,18 +67,26 @@ test("native agent tools resolve with authored responses", () => {
 })
 
 test("surface tools resolve one labeled request variant per surface", () => {
-  for (const tool of ["send_reply", "add_reaction"]) {
+  // Every surface replies; only providers react.
+  const expected = {
+    send_reply: ["Console", "GitHub", "Linear", "Slack"],
+    add_reaction: ["GitHub", "Linear", "Slack"],
+  }
+
+  for (const [tool, titles] of Object.entries(expected)) {
     const reference = resolveToolReference(tool)
     const variants = Array.isArray(reference.request.oneOf)
       ? reference.request.oneOf
       : []
-    const titles = variants.map((variant) =>
-      typeof variant === "object" && variant !== null
-        ? (variant as { title?: string }).title
-        : undefined
-    )
 
-    expect(titles, tool).toEqual(["GitHub", "Linear", "Slack"])
+    expect(
+      variants.map((variant) =>
+        typeof variant === "object" && variant !== null
+          ? (variant as { title?: string }).title
+          : undefined
+      ),
+      tool
+    ).toEqual(titles)
   }
 
   expect(resolveToolReference("send_reply").response).toMatchObject({

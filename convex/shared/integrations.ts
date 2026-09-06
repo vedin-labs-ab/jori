@@ -2,6 +2,7 @@ import { type Infer, v } from "convex/values"
 import {
   integrations,
   messageIntegrations,
+  messageSurfaces,
   toolSurfaces,
 } from "../../contracts/integrations"
 
@@ -13,10 +14,14 @@ export {
   integrations,
   isGoogleIntegration,
   isMessageIntegration,
+  isMessageSurface,
   isMicrosoftIntegration,
   isUserScopedIntegration,
   type MessageIntegration,
+  type MessageSurface,
   messageIntegrations,
+  messageSurfaceLabel,
+  messageSurfaces,
   providerForIntegration,
   type ToolSurface,
   toolSurfaceLabel,
@@ -33,6 +38,10 @@ export const toolSurfaceValidator = v.union(
 
 export const messageIntegrationValidator = v.union(
   ...messageIntegrations.map((integration) => v.literal(integration))
+)
+
+export const messageSurfaceValidator = v.union(
+  ...messageSurfaces.map((surface) => v.literal(surface))
 )
 
 // Where a Slack surface message (approval prompt, integration offer) was delivered,

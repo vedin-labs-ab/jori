@@ -26,19 +26,16 @@ export async function resolveReactionAddress(
   message: Doc<"messages">,
   target: SurfaceReactionTarget
 ): Promise<ReactionAddress | null> {
-  if (message.integration === "slack") {
-    return await resolveSlackAddress(ctx, message, target)
+  switch (message.surface) {
+    case "console":
+      return null
+    case "slack":
+      return await resolveSlackAddress(ctx, message, target)
+    case "linear":
+      return await resolveLinearAddress(ctx, message, target)
+    case "github":
+      return await resolveGitHubAddress(ctx, message, target)
   }
-
-  if (message.integration === "linear") {
-    return await resolveLinearAddress(ctx, message, target)
-  }
-
-  if (message.integration === "github") {
-    return await resolveGitHubAddress(ctx, message, target)
-  }
-
-  return null
 }
 
 async function resolveSlackAddress(

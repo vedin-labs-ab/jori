@@ -1,4 +1,4 @@
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   getSlackChannelId,
   getSlackMessageTs,
@@ -20,6 +20,10 @@ type LinearReplyTarget =
     }
 
 export type ReplyAddress =
+  | {
+      type: "console"
+      conversationId: Id<"conversations">
+    }
   | {
       type: "github"
       kind: "issue" | "review"
@@ -47,30 +51,36 @@ export function replyAddress(
     return replyAddressForTarget(message, target)
   }
 
-  if (message.integration === "github") {
-    return githubReplyAddress(message)
+  switch (message.surface) {
+    case "console":
+      return consoleReplyAddress(message)
+    case "github":
+      return githubReplyAddress(message)
+    case "linear":
+      return linearReplyAddress(message)
+    case "slack":
+      return slackReplyAddress(message)
   }
-
-  if (message.integration === "linear") {
-    return linearReplyAddress(message)
-  }
-
-  if (message.integration === "slack") {
-    return slackReplyAddress(message)
-  }
-
-  return null
 }
 
 function replyAddressForTarget(
   message: Doc<"messages">,
   target: ReplyTargetIdentifier
 ) {
-  if (message.integration === "linear") {
+  if (message.surface === "linear") {
     return linearReplyAddressForTarget(message, target)
   }
 
   return null
+}
+
+// A console message's conversation key is the conversation's own id, so the
+// reply lands back in the same thread without a provider address.
+function consoleReplyAddress(message: Doc<"messages">): ReplyAddress {
+  return {
+    type: "console",
+    conversationId: message.conversationId as Id<"conversations">,
+  }
 }
 
 function linearReplyAddressForTarget(

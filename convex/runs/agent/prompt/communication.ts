@@ -20,7 +20,7 @@ export function createCommunicationInstructions(
   }
 
   return createCommunicationGuidance({
-    integration: input.messageIntegration,
+    surface: input.surface,
     profile: "agent-final-reply",
     skills,
   })

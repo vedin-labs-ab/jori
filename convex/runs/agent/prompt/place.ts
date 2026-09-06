@@ -14,17 +14,21 @@ import { type AgentRuntimeInput } from "../input"
 // is generic; the heading speaks the surface's own language via the shared
 // place vocabulary in contracts.
 export function createPlaceMessage(input: AgentRuntimeInput) {
-  if (input.type !== "message" || input.place === null) {
+  if (
+    input.type !== "message" ||
+    input.place === null ||
+    input.surface === "console"
+  ) {
     return ""
   }
 
-  const kind = placeKinds[input.messageIntegration]
+  const kind = placeKinds[input.surface]
 
   return renderPromptTemplate(promptTemplates["agent/place"], {
     place: {
       label: kind.label,
       noun: kind.noun,
-      name: placeDisplayName(input.messageIntegration, input.place.name),
+      name: placeDisplayName(input.surface, input.place.name),
       sections: sectionValues(input.place),
     },
   })

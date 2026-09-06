@@ -92,7 +92,7 @@ function message(): Doc<"messages"> {
     _creationTime: 0,
     organizationId: "organization",
     integrationId: id<"integrations">("integration"),
-    integration: "slack",
+    surface: "slack",
     type: "message.channels",
     externalId: "message",
     mentioned: false,

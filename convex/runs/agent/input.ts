@@ -4,15 +4,16 @@ import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
 import { type RequesterContext } from "../../persons/profile/context"
 import { type PlaceContext } from "../../places/context"
-import { type Access, type MessageIntegration } from "../../shared/integrations"
+import { type Access, type MessageSurface } from "../../shared/integrations"
 
 export type RuntimeIntegration = Doc<"integrations">
 
 type MessageRuntimeInput = {
   type: "message"
-  messageIntegration: MessageIntegration
+  surface: MessageSurface
   run: Doc<"runs">
-  integration: RuntimeIntegration
+  /** The row the message arrived through; null on the console surface. */
+  integration: RuntimeIntegration | null
   integrations: RuntimeIntegration[]
   message: Doc<"messages">
   conversation: RecentConversation
@@ -65,6 +66,16 @@ export function findRunIntegration(
         integration.status === "active" && integration.integration === surface
     ) ?? null
   )
+}
+
+export function requireInputIntegration(
+  input: Extract<AgentRuntimeInput, { type: "message" }>
+) {
+  if (input.integration === null) {
+    throw new Error(`The ${input.surface} surface has no integration.`)
+  }
+
+  return input.integration
 }
 
 export function inputAccess(input: AgentRuntimeInput): Access | undefined {

@@ -57,13 +57,12 @@ async function getMessageInput(
     return null
   }
 
-  const integration = await ctx.db.get(message.integrationId)
+  const integration =
+    message.surface === "console"
+      ? null
+      : await readMessageIntegration(ctx, message)
 
-  if (
-    integration === null ||
-    integration.organizationId !== args.run.organizationId ||
-    !isMessageIntegration(integration.integration)
-  ) {
+  if (message.surface !== "console" && integration === null) {
     return null
   }
 
@@ -72,7 +71,7 @@ async function getMessageInput(
 
   return {
     type: "message" as const,
-    messageIntegration: integration.integration,
+    surface: message.surface,
     run: args.run,
     message,
     integration,
@@ -84,6 +83,21 @@ async function getMessageInput(
     timezone: personContext.timezone,
     workstreams: await readWorkstreamRoster(ctx, args.run.organizationId),
   }
+}
+
+/** The row a provider message arrived through, when it still belongs to the
+ *  message's organization and is a surface that carries conversations. */
+async function readMessageIntegration(ctx: QueryCtx, message: Doc<"messages">) {
+  const integration =
+    message.integrationId === undefined
+      ? null
+      : await ctx.db.get(message.integrationId)
+
+  return integration !== null &&
+    integration.organizationId === message.organizationId &&
+    isMessageIntegration(integration.integration)
+    ? integration
+    : null
 }
 
 async function getJobInput(

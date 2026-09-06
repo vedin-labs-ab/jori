@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   messageActorIds,
   messageIdentifiers,
@@ -36,7 +36,7 @@ describe("Linear message identifiers", () => {
         commentId: "comment-id",
         issueId: "issue-id",
       },
-      integration: "linear",
+      surface: "linear",
     })
 
     expect(messageActorIds(linearMessage)).toEqual([
@@ -66,7 +66,7 @@ describe("Linear message identifiers", () => {
         issueId: "issue-id",
         parentCommentId: "thread-id",
       },
-      integration: "linear",
+      surface: "linear",
     })
 
     expect(messageActorIds(linearMessage)).toEqual([
@@ -84,79 +84,72 @@ describe("Linear message identifiers", () => {
   })
 })
 
+describe("console message identifiers", () => {
+  test("carries only the internal identifier and no provider actor ids", () => {
+    const consoleMessage = message({
+      actor: { kind: "person", personId: "person" as Id<"persons"> },
+      conversationId: "conversation-id",
+      integrationId: undefined,
+      surface: "console",
+      type: "console.message",
+    })
+
+    expect(messageIdentifiers(consoleMessage)).toEqual([
+      "internal:message:message",
+    ])
+    expect(messageActorIds(consoleMessage)).toEqual([])
+    expect(messageReplyTargetIdentifier(consoleMessage)).toBeNull()
+  })
+})
+
 describe("message surface audience", () => {
   test("detects GitHub and Linear Jori mentions", () => {
     expect(
-      messageAudience(
-        message({ integration: "github", mentioned: true }),
-        integration({})
-      )
+      messageAudience(message({ surface: "github", mentioned: true }))
+    ).toMatchObject({ isAddressed: true, isDirect: false })
+    expect(
+      messageAudience(message({ surface: "linear", mentioned: true }))
     ).toMatchObject({ isAddressed: true, isDirect: false })
     expect(
       messageAudience(
-        message({ integration: "linear", mentioned: true }),
-        integration({})
-      )
-    ).toMatchObject({ isAddressed: true, isDirect: false })
-    expect(
-      messageAudience(
-        message({ integration: "github", text: "Follow-up for Jori" }),
-        integration({})
+        message({ surface: "github", text: "Follow-up for Jori" })
       )
     ).toMatchObject({ isAddressed: false, isDirect: false })
   })
 
   test("treats Slack mentions and direct messages as addressed separately", () => {
     expect(
-      messageAudience(
-        message({ mentioned: true, type: "message.channels" }),
-        integration({})
-      )
+      messageAudience(message({ mentioned: true, type: "message.channels" }))
     ).toMatchObject({ isAddressed: true, isDirect: false })
+    expect(messageAudience(message({ type: "message.im" }))).toMatchObject({
+      isAddressed: true,
+      isDirect: true,
+    })
+  })
+
+  test("treats every console message as a direct address", () => {
     expect(
-      messageAudience(message({ type: "message.im" }), integration({}))
-    ).toMatchObject({ isAddressed: true, isDirect: true })
+      messageAudience(message({ surface: "console", type: "console.message" }))
+    ).toEqual({ isAddressed: true, isDirect: true, isMentioned: true })
   })
 })
 
 describe("conversation scope", () => {
   test("classifies audience scope per surface", () => {
-    expect(
-      conversationScope(
-        message({ type: "message.channels" }),
-        integration({ integration: "slack" })
-      )
-    ).toBe("organization")
-    expect(
-      conversationScope(
-        message({ type: "message.groups" }),
-        integration({ integration: "slack" })
-      )
-    ).toBe("conversation")
-    expect(
-      conversationScope(
-        message({ type: "message.mpim" }),
-        integration({ integration: "slack" })
-      )
-    ).toBe("conversation")
-    expect(
-      conversationScope(
-        message({ type: "message.im" }),
-        integration({ integration: "slack" })
-      )
-    ).toBe("person")
-    expect(
-      conversationScope(
-        message({ integration: "github" }),
-        integration({ integration: "github" })
-      )
-    ).toBe("organization")
-    expect(
-      conversationScope(
-        message({ integration: "gmail" }),
-        integration({ integration: "gmail" })
-      )
-    ).toBe("person")
+    expect(conversationScope(message({ type: "message.channels" }))).toBe(
+      "organization"
+    )
+    expect(conversationScope(message({ type: "message.groups" }))).toBe(
+      "conversation"
+    )
+    expect(conversationScope(message({ type: "message.mpim" }))).toBe(
+      "conversation"
+    )
+    expect(conversationScope(message({ type: "message.im" }))).toBe("person")
+    expect(conversationScope(message({ surface: "github" }))).toBe(
+      "organization"
+    )
+    expect(conversationScope(message({ surface: "console" }))).toBe("person")
   })
 })
 
@@ -165,7 +158,7 @@ describe("message surface targets", () => {
     expect(
       replyAddress(
         message({
-          integration: "github",
+          surface: "github",
           data: {
             repository: { fullName: "acme/app" },
             issueNumber: 12,
@@ -180,14 +173,12 @@ describe("message surface targets", () => {
       issueNumber: 12,
     })
     expect(
-      replyAddress(
-        message({ integration: "linear", data: { issueId: "ISS-1" } })
-      )
+      replyAddress(message({ surface: "linear", data: { issueId: "ISS-1" } }))
     ).toEqual({ type: "linear", target: { id: "ISS-1", type: "issue" } })
     expect(
       replyAddress(
         message({
-          integration: "linear",
+          surface: "linear",
           data: { issueId: "ISS-1", parentCommentId: "comment-id" },
         })
       )
@@ -197,13 +188,27 @@ describe("message surface targets", () => {
     })
     expect(
       replyAddress(
-        message({ integration: "linear", data: { issueId: "ISS-1" } }),
+        message({ surface: "linear", data: { issueId: "ISS-1" } }),
         "linear:thread:comment-id"
       )
     ).toEqual({
       type: "linear",
       target: { id: "comment-id", issueId: "ISS-1", type: "comment" },
     })
+  })
+
+  test("replies to a console message in its own conversation", () => {
+    expect(
+      replyAddress(
+        message({ surface: "console", conversationId: "conversation-id" })
+      )
+    ).toEqual({ type: "console", conversationId: "conversation-id" })
+    expect(
+      replyAddress(
+        message({ surface: "console", conversationId: "conversation-id" }),
+        "linear:thread:comment-id"
+      )
+    ).toBeNull()
   })
 })
 
@@ -213,7 +218,7 @@ function message(overrides: Partial<Doc<"messages">>) {
     _creationTime: 0,
     organizationId: "organization",
     integrationId: "integration",
-    integration: "slack",
+    surface: "slack",
     externalId: "external",
     mentioned: false,
     conversationId: "conversation",
@@ -222,11 +227,4 @@ function message(overrides: Partial<Doc<"messages">>) {
     createdAt: 0,
     ...overrides,
   } as Doc<"messages">
-}
-
-function integration(overrides: Partial<Doc<"integrations">>) {
-  return {
-    data: {},
-    ...overrides,
-  } as Doc<"integrations">
 }

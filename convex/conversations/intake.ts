@@ -131,6 +131,7 @@ async function insertObservedMessage(
     message: observed,
     personId: createdBy,
     placeId: place?._id,
+    surface: args.integration,
   })
 
   return { createdBy, message, observed, place }
@@ -182,7 +183,7 @@ async function messageRunConversation(
     return null
   }
 
-  const audience = messageAudience(args.message, args.integration)
+  const audience = messageAudience(args.message)
 
   if (!messageHasText(args.message)) {
     return null

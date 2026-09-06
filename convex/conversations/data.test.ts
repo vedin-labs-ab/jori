@@ -110,11 +110,70 @@ test("starts existing conversations without sessions as mentions", async () => {
   ])
 })
 
+test("console runs carry no integration and file under the opening folder", async () => {
+  const conversation = consoleConversationDoc()
+  const opening = {
+    ...message("Summarize this folder."),
+    _id: id<"messages">("message-opening"),
+    surface: "console" as const,
+    integrationId: undefined,
+    conversationId: conversation.externalId,
+    data: { context: { kind: "folder", id: "folder-1" } },
+    createdAt: 100,
+  }
+  const ctx = fakeMutationCtx([
+    ["conversations", conversation],
+    ["messages", opening],
+  ])
+
+  const result = await startMessageRun(ctx, {
+    conversation,
+    integration: null,
+    message: {
+      ...message("Now draft the update."),
+      surface: "console",
+      integrationId: undefined,
+      conversationId: conversation.externalId,
+    },
+    createdBy: "person" as Id<"persons">,
+    externalId: conversation.externalId,
+    now: 1000,
+  })
+
+  expect(result.status).toBe("started")
+  expect(inserted(ctx, "conversations")).toEqual([])
+  expect(inserted(ctx, "runs")).toEqual([
+    expect.objectContaining({
+      audience: "person",
+      conversationId: conversation._id,
+      folderId: "folder-1",
+      principal: { kind: "person", personId: "person" },
+      snapshot: expect.objectContaining({
+        source: { type: "message", surface: "jori" },
+      }),
+    }),
+  ])
+})
+
+function consoleConversationDoc(): Doc<"conversations"> {
+  return {
+    _id: id<"conversations">("conversation-doc"),
+    _creationTime: 0,
+    organizationId: "organization",
+    surface: "console",
+    externalId: "conversation-doc",
+    scope: "person",
+    createdBy: "person" as Id<"persons">,
+    updatedAt: 0,
+  }
+}
+
 function conversationDoc(): Doc<"conversations"> {
   return {
     _id: id<"conversations">("conversation-doc"),
     _creationTime: 0,
     organizationId: "organization",
+    surface: "slack",
     integrationId: id<"integrations">("integration"),
     externalId: "conversation",
     scope: "organization",
@@ -157,7 +216,7 @@ function message(text: string, data?: unknown) {
     _creationTime: 0,
     organizationId: "organization",
     integrationId: id<"integrations">("integration"),
-    integration: "slack",
+    surface: "slack",
     type: "message.channels",
     externalId: "slack:message",
     mentioned: false,

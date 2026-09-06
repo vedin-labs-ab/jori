@@ -3,7 +3,10 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveActor } from "../persons/resolve"
 import { type Actor, actorValidator } from "../shared/actor"
-import { type MessageIntegration } from "../shared/integrations"
+import {
+  type MessageIntegration,
+  type MessageSurface,
+} from "../shared/integrations"
 import { messageDataReactionTargetKey } from "./identifiers"
 
 export const observedMessageArgs = {
@@ -52,13 +55,14 @@ export async function insertMessage(
     message: ObservedMessage
     personId: Id<"persons"> | undefined
     placeId: Id<"places"> | undefined
+    surface: MessageIntegration
   }
 ): Promise<Doc<"messages">> {
   const now = Date.now()
   const messageId = await ctx.db.insert("messages", {
     organizationId: input.integration.organizationId,
+    surface: input.surface,
     integrationId: input.integration._id,
-    integration: input.integration.integration,
     type: input.message.type,
     externalId: input.message.externalId,
     mentioned: input.message.mentioned ?? false,
@@ -66,10 +70,7 @@ export async function insertMessage(
     personId: input.personId,
     conversationId: input.message.conversationId,
     placeId: input.placeId,
-    targetKey: messageDataReactionTargetKey(
-      input.integration.integration,
-      input.message.data
-    ),
+    targetKey: messageDataReactionTargetKey(input.surface, input.message.data),
     text: input.message.text,
     data: input.message.data,
     observedAt: input.message.observedAt,
@@ -84,10 +85,12 @@ export async function insertMessage(
   return message
 }
 
+/** Console messages are stamped with their person at write time; a provider
+ *  message without one is resolved through its observed actor. */
 export async function resolveMessageOwner(
   ctx: MutationCtx,
   input: {
-    integration: MessageIntegration
+    surface: MessageSurface
     message: ObservedMessage | Doc<"messages">
     organizationId: string
   }
@@ -96,9 +99,13 @@ export async function resolveMessageOwner(
     return input.message.personId
   }
 
+  if (input.surface === "console") {
+    return undefined
+  }
+
   return await resolveActor(ctx, {
     organizationId: input.organizationId,
-    provider: input.integration,
+    provider: input.surface,
     actor: input.message.actor,
   })
 }

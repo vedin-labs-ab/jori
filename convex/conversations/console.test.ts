@@ -1,0 +1,247 @@
+import { expect, test, vi } from "vitest"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
+import { type Doc, type Id } from "../_generated/dataModel"
+import {
+  listConsoleConversations,
+  readLiveRun,
+  sendConsoleMessage,
+} from "./console"
+import { findVisibleConsoleConversation } from "./resolve"
+
+// Starting a run hands it to the workflow component, which needs a real
+// backend; these tests are about the rows a console message writes.
+vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
+
+const organizationId = "org"
+const folderId = "folders:7" as Id<"folders">
+const paginationOpts = { cursor: null, numItems: 10 }
+
+test("the first message opens a person-scoped conversation and starts a run", async () => {
+  const { database, ctx } = databaseContext()
+  const personId = await person(database)
+
+  const result = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: { name: "Albin" },
+    text: "\nPlan the launch\nWith three milestones.",
+  })
+
+  expect(result.status).toBe("started")
+
+  const conversation = await database.get(result.conversationId)
+  const message = await database.get(result.messageId)
+  const [run] = await rows<Doc<"runs">>(database, "runs")
+
+  expect(conversation).toMatchObject({
+    surface: "console",
+    scope: "person",
+    externalId: result.conversationId,
+    title: "Plan the launch",
+    createdBy: personId,
+  })
+  expect(conversation).not.toHaveProperty("integrationId")
+  expect(message).toMatchObject({
+    surface: "console",
+    type: "console.message",
+    mentioned: true,
+    conversationId: result.conversationId,
+    actor: { kind: "person", personId, name: "Albin" },
+    personId,
+    text: "Plan the launch\nWith three milestones.",
+  })
+  expect(message).not.toHaveProperty("integrationId")
+  expect(run).toMatchObject({
+    organizationId,
+    audience: "person",
+    conversationId: result.conversationId,
+    cause: { type: "message", messageId: result.messageId, kind: "mention" },
+    principal: { kind: "person", personId },
+    snapshot: {
+      title: "Plan the launch",
+      source: { type: "message", surface: "jori" },
+      context: [],
+    },
+  })
+  expect(run).not.toHaveProperty("folderId")
+})
+
+test("a conversation opened from a folder files every run under it", async () => {
+  const { database, ctx } = databaseContext()
+  const personId = await person(database)
+
+  const first = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Summarize this folder.",
+    context: { kind: "folder", id: folderId },
+  })
+  await finishRun(database)
+  const second = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    conversationId: first.conversationId,
+    text: "Now draft the update.",
+  })
+
+  expect(second.conversationId).toBe(first.conversationId)
+  expect(
+    (await rows<Doc<"runs">>(database, "runs")).map((run) => run.folderId)
+  ).toEqual([folderId, folderId])
+})
+
+test("a blocked budget keeps the message without a run", async () => {
+  const { database, ctx } = databaseContext()
+  const personId = await person(database)
+
+  await database.insert("accounts", {
+    organizationId,
+    state: { kind: "paused" },
+    micros: { allowance: 0, wallet: 0 },
+    topUp: { charged: { micros: 0 } },
+    updatedAt: 0,
+  })
+
+  const result = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Anyone there?",
+  })
+
+  expect(result.status).toBe("blocked")
+  expect(await database.get(result.messageId)).not.toBeNull()
+  expect(await rows(database, "runs")).toEqual([])
+  expect(await readLiveRun(ctx, await conversation(database, result))).toBe(
+    null
+  )
+})
+
+test("lists a person's own conversations, most recently active first", async () => {
+  const { database, ctx } = databaseContext()
+  const personId = await person(database)
+  const otherPersonId = await person(database)
+
+  vi.useFakeTimers()
+  vi.setSystemTime(1_000)
+  const older = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Older",
+  })
+  vi.setSystemTime(2_000)
+  const newer = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Newer",
+  })
+  vi.setSystemTime(3_000)
+  await sendConsoleMessage(ctx, {
+    organizationId,
+    personId: otherPersonId,
+    profile: {},
+    text: "Someone else's",
+  })
+  vi.useRealTimers()
+
+  const result = await listConsoleConversations(ctx, {
+    organizationId,
+    personId,
+    paginationOpts,
+  })
+
+  expect(result.page).toEqual([
+    { id: newer.conversationId, title: "Newer", updatedAt: 2_000 },
+    { id: older.conversationId, title: "Older", updatedAt: 1_000 },
+  ])
+})
+
+test("only the creator sees a console conversation", async () => {
+  const { database, ctx } = databaseContext()
+  const personId = await person(database)
+  const otherPersonId = await person(database)
+  const sent = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Private thought.",
+  })
+  const args = { conversationId: sent.conversationId, organizationId }
+
+  expect(
+    await findVisibleConsoleConversation(ctx, { ...args, personId })
+  ).toMatchObject({ _id: sent.conversationId })
+  expect(
+    await findVisibleConsoleConversation(ctx, {
+      ...args,
+      personId: otherPersonId,
+    })
+  ).toBeNull()
+  expect(
+    await findVisibleConsoleConversation(ctx, {
+      ...args,
+      organizationId: "other-org",
+      personId,
+    })
+  ).toBeNull()
+  await expect(
+    sendConsoleMessage(ctx, {
+      organizationId,
+      personId: otherPersonId,
+      profile: {},
+      conversationId: sent.conversationId,
+      text: "Let me in.",
+    })
+  ).rejects.toThrow("Conversation not found.")
+})
+
+test("reports the run attached to the conversation's session", async () => {
+  const { database, ctx } = databaseContext()
+  const personId = await person(database)
+  const sent = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Go.",
+  })
+  const [run] = await rows<Doc<"runs">>(database, "runs")
+
+  expect(await readLiveRun(ctx, await conversation(database, sent))).toEqual({
+    id: run._id,
+    status: "queued",
+  })
+})
+
+async function person(database: TestDatabase) {
+  return await database.insert("persons", { organizationId })
+}
+
+async function conversation(
+  database: TestDatabase,
+  sent: { conversationId: Id<"conversations"> }
+) {
+  const conversation = await database.get(sent.conversationId)
+
+  if (conversation === null) {
+    throw new Error("Conversation not found.")
+  }
+
+  return conversation as unknown as Doc<"conversations">
+}
+
+async function finishRun(database: TestDatabase) {
+  for (const run of await rows<Doc<"runs">>(database, "runs")) {
+    await database.patch(run._id, { status: "completed" })
+  }
+}
+
+async function rows<T>(database: TestDatabase, table: string) {
+  return (await database
+    .query(table)
+    .withIndex("by_id")
+    .collect()) as unknown as T[]
+}

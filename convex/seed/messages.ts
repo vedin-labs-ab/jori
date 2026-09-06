@@ -46,6 +46,7 @@ export async function seedMessages(ctx: MutationCtx, seed: SeedContext) {
   for (const [name, place] of places) {
     await ctx.db.insert("conversations", {
       organizationId: seed.organizationId,
+      surface: "slack",
       integrationId: integration._id,
       externalId: place.externalId,
       scope: place.visibility === "private" ? "conversation" : "organization",
@@ -78,8 +79,8 @@ async function writeMessages(
 
     await ctx.db.insert("messages", {
       organizationId: seed.organizationId,
+      surface: "slack",
       integrationId: refs.integration._id,
-      integration: "slack",
       type: "message",
       externalId: slackTimestamp(at, index),
       mentioned: message.mentioned ?? false,

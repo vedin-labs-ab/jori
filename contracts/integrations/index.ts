@@ -15,14 +15,27 @@ export const toolSurfaces = ["jori", ...integrations] as const
 // and can host an active run surface.
 export const messageIntegrations = ["github", "linear", "slack"] as const
 
+// Where a conversation happens: a message integration, or the web console,
+// which carries conversations without an integration row behind them.
+export const messageSurfaces = ["console", ...messageIntegrations] as const
+
 export type Integration = (typeof integrations)[number]
 export type ToolSurface = (typeof toolSurfaces)[number]
 export type MessageIntegration = (typeof messageIntegrations)[number]
+export type MessageSurface = (typeof messageSurfaces)[number]
+
+export function isIntegration(value: string): value is Integration {
+  return integrations.some((integration) => integration === value)
+}
 
 export function isMessageIntegration(
   value: string
 ): value is MessageIntegration {
   return messageIntegrations.some((integration) => integration === value)
+}
+
+export function isMessageSurface(value: string): value is MessageSurface {
+  return messageSurfaces.some((surface) => surface === value)
 }
 
 export const integrationProviders = {
@@ -54,6 +67,13 @@ const toolSurfaceLabels = {
   ...integrationLabels,
 } satisfies Record<ToolSurface, string>
 
+const messageSurfaceLabels = {
+  console: "Console",
+  github: integrationLabels.github,
+  linear: integrationLabels.linear,
+  slack: integrationLabels.slack,
+} satisfies Record<MessageSurface, string>
+
 export function integrationLabel(integration: string | undefined) {
   if (integration === undefined) {
     return "Unknown integration"
@@ -68,6 +88,10 @@ export function toolSurfaceLabel(surface: string | undefined) {
   }
 
   return toolSurfaceLabels[surface as ToolSurface] ?? surface
+}
+
+export function messageSurfaceLabel(surface: MessageSurface) {
+  return messageSurfaceLabels[surface]
 }
 
 export function providerForIntegration(integration: Integration) {

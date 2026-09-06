@@ -3,8 +3,12 @@ import {
   integrationLabel,
   integrations,
   isGoogleIntegration,
+  isMessageSurface,
   isMicrosoftIntegration,
   isUserScopedIntegration,
+  messageIntegrations,
+  messageSurfaceLabel,
+  messageSurfaces,
   providerForIntegration,
   toolSurfaceLabel,
   toolSurfaces,
@@ -28,6 +32,16 @@ describe("integration catalog", () => {
     expect(integrations).not.toContain("jori")
     expect(toolSurfaceLabel("jori")).toBe("Jori")
     expect(integrationLabel("gmail")).toBe("Gmail")
+  })
+
+  test("models the console as a message surface, not an integration", () => {
+    expect(messageSurfaces).toEqual(["console", ...messageIntegrations])
+    expect(integrations).not.toContain("console")
+    expect(toolSurfaces).not.toContain("console")
+    expect(isMessageSurface("console")).toBe(true)
+    expect(isMessageSurface("gmail")).toBe(false)
+    expect(messageSurfaceLabel("console")).toBe("Console")
+    expect(messageSurfaceLabel("slack")).toBe("Slack")
   })
 
   test("marks only personal account integrations as user scoped", () => {

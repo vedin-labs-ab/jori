@@ -1,14 +1,14 @@
+import { type SkillSurface } from "../../contracts/skills"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
-import { type Integration } from "../shared/integrations"
-import { getRuntimeSkillForIntegration, type RuntimeSkill } from "./runtime"
+import { getRuntimeSkillForSurface, type RuntimeSkill } from "./runtime"
 
 type CommunicationCapability = "files" | "interactive" | "rich" | "text"
 type CommunicationProfile = "agent-final-reply"
 
 type CapabilityMap = {
   default: readonly CommunicationCapability[]
-} & Partial<Record<Integration, readonly CommunicationCapability[]>>
+} & Partial<Record<SkillSurface, readonly CommunicationCapability[]>>
 
 type ProfileDefinition = {
   capabilities: CapabilityMap
@@ -22,16 +22,20 @@ export type CommunicationGuidance = {
 
 const profiles = {
   "agent-final-reply": {
-    capabilities: { default: ["text"], slack: ["text", "rich"] },
+    capabilities: {
+      default: ["text"],
+      console: ["text", "rich", "interactive"],
+      slack: ["text", "rich"],
+    },
   },
 } as const satisfies Record<CommunicationProfile, ProfileDefinition>
 
 export function createCommunicationGuidance(args: {
-  integration: Integration
+  surface: SkillSurface
   profile: CommunicationProfile
   skills: readonly RuntimeSkill[]
 }): CommunicationGuidance {
-  const skill = getRuntimeSkillForIntegration(args.skills, args.integration)
+  const skill = getRuntimeSkillForSurface(args.skills, args.surface)
   const profile = profiles[args.profile]
 
   return {
@@ -44,14 +48,14 @@ export function createCommunicationGuidance(args: {
         ? ""
         : createFormatBlock(
             skill,
-            capabilitiesFor(profile.capabilities, args.integration)
+            capabilitiesFor(profile.capabilities, args.surface)
           ),
     skill,
   }
 }
 
-function capabilitiesFor(map: CapabilityMap, integration: Integration) {
-  return map[integration] ?? map.default
+function capabilitiesFor(map: CapabilityMap, surface: SkillSurface) {
+  return map[surface] ?? map.default
 }
 
 function createFormatBlock(

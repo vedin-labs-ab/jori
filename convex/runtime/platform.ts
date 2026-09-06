@@ -76,6 +76,7 @@ type ReactionArgs = RunRef & { reaction: string; target: SurfaceReactionTarget }
 
 type ReplyArgs = RunRef & {
   blocks?: JsonObject[]
+  parts?: JsonObject[]
   target?: string
   text: string
 }

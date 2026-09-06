@@ -129,7 +129,7 @@ export async function seedSkills(ctx: MutationCtx, seed: SeedContext) {
         name: skill.name,
         description: skill.description,
         category: skill.category,
-        associatedIntegrations: skill.integrations,
+        surfaces: skill.integrations,
         body: skill.body.join("\n"),
       }),
       createdBy: owners(skill.owner),

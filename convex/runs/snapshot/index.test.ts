@@ -60,6 +60,28 @@ test("snapshots message source details and source link", () => {
   })
 })
 
+test("console messages read as Jori's own surface with no context", () => {
+  expect(
+    createMessageRunSnapshot({
+      integration: null,
+      kind: "mention",
+      message: {
+        ...message("Plan the launch.\nThree milestones."),
+        surface: "console",
+        integrationId: undefined,
+        type: "console.message",
+        data: { context: { kind: "folder", id: "folders:1" } },
+      },
+    })
+  ).toEqual({
+    snapshot: {
+      title: "Plan the launch.",
+      source: { type: "message", surface: "jori" },
+      context: [],
+    },
+  })
+})
+
 test("instruction runs describe only themselves", () => {
   expect(
     createInstructionRunSnapshot({
@@ -133,7 +155,7 @@ function message(
     _creationTime: 0,
     organizationId: "organization",
     integrationId: id<"integrations">("integration"),
-    integration: "slack",
+    surface: "slack",
     type: "message.channels",
     externalId: "slack:message",
     mentioned: false,

@@ -29,7 +29,8 @@ async function sendActiveReply(runtime: AgentRuntime, input: JsonObject) {
   const target = explicitTarget ?? activeSurface.target
 
   const result = await runtime.platform.sendReply({
-    blocks: optionalBlocks(input.blocks),
+    blocks: optionalObjects(input.blocks, "blocks"),
+    parts: optionalObjects(input.parts, "parts"),
     runId: runtime.context.run.id,
     text: requiredString(input.text, "text"),
     ...(target === null ? {} : { target }),
@@ -83,13 +84,13 @@ function optionalReplyTarget(input: JsonObject, surface: string) {
   return commentId === undefined ? undefined : `linear:thread:${commentId}`
 }
 
-function optionalBlocks(value: unknown) {
+function optionalObjects(value: unknown, name: string) {
   if (value === undefined || value === null) {
     return undefined
   }
 
   if (!Array.isArray(value) || !value.every(isJsonObject)) {
-    throw new Error("blocks must be an array of Block Kit block objects")
+    throw new Error(`${name} must be an array of objects`)
   }
 
   return value.length === 0 ? undefined : value
@@ -110,6 +111,10 @@ function requireActiveSurface(runtime: AgentRuntime) {
 }
 
 function requiredReaction(value: unknown, surface: string) {
+  if (surface === "console") {
+    throw new Error("Reactions are not available in the console.")
+  }
+
   const reaction = requiredString(value, "reaction")
 
   if (surface === "github" && !githubReactions.has(reaction)) {
@@ -125,6 +130,10 @@ function requiredReactionTarget(
   value: unknown,
   surface: string
 ): SurfaceReactionTarget {
+  if (surface === "console") {
+    throw new Error("Reactions are not available in the console.")
+  }
+
   const target = requiredObject(value, "target")
 
   if (surface === "slack") {

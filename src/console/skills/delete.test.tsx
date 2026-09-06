@@ -56,7 +56,7 @@ test("skill deletion prevents conflicting actions while pending", () => {
 function skill(): Skill {
   return {
     _id: "skill_1",
-    associatedIntegrations: [],
+    surfaces: [],
     body: "Keep launch notes concise.",
     category: "communication",
     createdAt: 1,

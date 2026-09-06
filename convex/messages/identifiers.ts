@@ -7,6 +7,7 @@ import {
 } from "../integrations/slack/data"
 import { type ActorKind, getActorExternalId } from "../shared/actor"
 import { readDataObject, readDataString } from "../shared/data"
+import { type MessageSurface } from "../shared/integrations"
 
 export function messageIdentifiers(message: Doc<"messages">) {
   return [
@@ -24,46 +25,42 @@ export function messageReactionTargetKey(message: Doc<"messages">) {
     return message.targetKey
   }
 
-  return messageDataReactionTargetKey(message.integration, message.data)
+  return messageDataReactionTargetKey(message.surface, message.data)
 }
 
 export function messageDataReactionTargetKey(
-  integration: string,
+  surface: MessageSurface,
   data: unknown
 ) {
-  if (integration === "linear") {
-    return linearTargetKey(data)
+  switch (surface) {
+    case "console":
+      return undefined
+    case "linear":
+      return linearTargetKey(data)
+    case "slack":
+      return slackTargetKey(data)
+    case "github":
+      return githubTargetKey(data)
   }
-
-  if (integration === "slack") {
-    return slackTargetKey(data)
-  }
-
-  if (integration === "github") {
-    return githubTargetKey(data)
-  }
-
-  return undefined
 }
 
+// Console messages carry no provider identifiers: the person behind one is
+// the canonical `personId`, and nothing outside Jori can address it.
 export function messageActorIds(message: Doc<"messages">) {
-  if (message.integration === "github") {
-    return githubActorId(message.actor)
+  switch (message.surface) {
+    case "console":
+      return []
+    case "github":
+      return githubActorId(message.actor)
+    case "linear":
+      return actorId(message, linearActorIdPrefix)
+    case "slack":
+      return actorId(message, slackActorIdPrefix)
   }
-
-  if (message.integration === "linear") {
-    return actorId(message, linearActorIdPrefix)
-  }
-
-  if (message.integration === "slack") {
-    return actorId(message, slackActorIdPrefix)
-  }
-
-  return []
 }
 
 export function messageReplyTargetIdentifier(message: Doc<"messages">) {
-  if (message.integration === "linear") {
+  if (message.surface === "linear") {
     return linearReplyTargetIdentifier(message)
   }
 
@@ -84,19 +81,16 @@ export function messageMatchesReplyTargetIdentifier(
 }
 
 function surfaceIdentifiers(message: Doc<"messages">) {
-  if (message.integration === "linear") {
-    return linearIdentifiers(message)
+  switch (message.surface) {
+    case "console":
+      return []
+    case "linear":
+      return linearIdentifiers(message)
+    case "slack":
+      return slackIdentifiers(message)
+    case "github":
+      return githubIdentifiers(message)
   }
-
-  if (message.integration === "slack") {
-    return slackIdentifiers(message)
-  }
-
-  if (message.integration === "github") {
-    return githubIdentifiers(message)
-  }
-
-  return []
 }
 
 function linearIdentifiers(message: Doc<"messages">) {

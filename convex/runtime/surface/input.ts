@@ -18,7 +18,7 @@ export async function requireMessageSurfaceInput(
     throw new Error(`Run has no active ${args.surface} surface.`)
   }
 
-  if (input.integration.status !== "active") {
+  if (input.integration !== null && input.integration.status !== "active") {
     throw new Error(`Active ${args.surface} integration is not active.`)
   }
 

@@ -86,7 +86,7 @@ async function loadEffortSupport(
   for (const row of rows) {
     const source = await loadSource(ctx, row)
 
-    if (source !== null) {
+    if (source?.integrationId !== undefined) {
       records.push({
         observedAt: row.observedAt,
         integrationId: source.integrationId,

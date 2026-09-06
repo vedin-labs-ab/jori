@@ -52,7 +52,7 @@ export function loadJoriSkillTool(
       name: skill.name,
       category: skill.category,
       description: skill.description,
-      associatedIntegrations: skill.associatedIntegrations,
+      surfaces: skill.surfaces,
       instructions: skill.body,
     },
   }
@@ -63,7 +63,7 @@ function skillMetadata(skills: readonly RuntimeSkill[]) {
     name: skill.name,
     category: skill.category,
     description: skill.description,
-    associatedIntegrations: skill.associatedIntegrations,
+    surfaces: skill.surfaces,
   }))
 }
 

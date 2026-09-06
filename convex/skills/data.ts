@@ -1,6 +1,9 @@
-import { isSkillCategory } from "../../contracts/skills"
+import {
+  isSkillCategory,
+  isSkillSurface,
+  type SkillSurface,
+} from "../../contracts/skills"
 import { type MutationCtx } from "../_generated/server"
-import { type Integration, integrations } from "../shared/integrations"
 
 type SkillCommunication = {
   parts: Record<string, string>
@@ -11,10 +14,9 @@ const skillCommunicationPartNamePattern = /^[a-z]+$/
 const skillNameMaxLength = 64
 const skillDescriptionMaxLength = 320
 const skillBodyMaxLength = 24_000
-const integrationNames = new Set<string>(integrations)
 
 export function normalizeSkillInput(input: {
-  associatedIntegrations?: readonly string[]
+  surfaces?: readonly string[]
   category: string
   communication?: SkillCommunication
   name: string
@@ -25,9 +27,7 @@ export function normalizeSkillInput(input: {
   const category = input.category.trim()
   const description = input.description.trim()
   const body = input.body.trim()
-  const associatedIntegrations = normalizeAssociatedIntegrations(
-    input.associatedIntegrations ?? []
-  )
+  const surfaces = normalizeSurfaces(input.surfaces ?? [])
   const communication = normalizeCommunication(input.communication)
 
   if (!skillNamePattern.test(name) || name.length > skillNameMaxLength) {
@@ -55,7 +55,7 @@ export function normalizeSkillInput(input: {
     name,
     category,
     description,
-    associatedIntegrations,
+    surfaces,
     ...(communication === undefined ? {} : { communication }),
     body,
   }
@@ -94,18 +94,16 @@ export function sortSkills<
   })
 }
 
-function normalizeAssociatedIntegrations(
-  values: readonly string[]
-): Integration[] {
-  const result: Integration[] = []
+function normalizeSurfaces(values: readonly string[]): SkillSurface[] {
+  const result: SkillSurface[] = []
 
   for (const value of values) {
-    if (!integrationNames.has(value)) {
-      throw new Error("Skill integration is not supported.")
+    if (!isSkillSurface(value)) {
+      throw new Error("Skill surface is not supported.")
     }
 
-    if (!result.includes(value as Integration)) {
-      result.push(value as Integration)
+    if (!result.includes(value)) {
+      result.push(value)
     }
   }
 
