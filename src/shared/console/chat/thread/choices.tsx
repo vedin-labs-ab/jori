@@ -1,5 +1,5 @@
 import { type ReplyChoice } from "@contracts/replies/parts"
-import { Suggestion, Suggestions } from "@/components/ui/suggestion"
+import { Suggestion } from "@/components/ui/suggestion"
 import { choiceValue } from "./answers"
 
 /** Next steps offered after a reply, each sent as the person's next
@@ -12,18 +12,15 @@ export function ChoiceChips({
   options: ReplyChoice[]
 }) {
   return (
-    <Suggestions
-      aria-label="Next steps"
-      className="w-full flex-wrap"
-      role="group"
-    >
+    <ul aria-label="Next steps" className="flex flex-wrap gap-2">
       {options.map((option) => (
-        <Suggestion
-          key={choiceValue(option)}
-          onClick={() => onChoose([choiceValue(option)], option.label)}
-          suggestion={option.label}
-        />
+        <li key={choiceValue(option)}>
+          <Suggestion
+            onClick={() => onChoose([choiceValue(option)], option.label)}
+            suggestion={option.label}
+          />
+        </li>
       ))}
-    </Suggestions>
+    </ul>
   )
 }
