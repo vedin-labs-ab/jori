@@ -4,9 +4,17 @@ import { requireOpenRouterConfig, sendOpenRouterChat } from "./openrouter"
 
 const sdk = vi.hoisted(() => ({ send: vi.fn() }))
 
-vi.mock("@openrouter/sdk", () => ({
-  OpenRouter: class {
-    chat = { send: sdk.send }
+vi.mock("@openrouter/sdk/core", () => ({ OpenRouterCore: class {} }))
+
+// The standalone function answers a result; the mock takes the request the
+// way the root client's method did and wraps its answer.
+vi.mock("@openrouter/sdk/funcs/chatSend", () => ({
+  chatSend: async (_client: unknown, request: unknown) => {
+    try {
+      return { ok: true, value: await sdk.send(request) }
+    } catch (error) {
+      return { error, ok: false }
+    }
   },
 }))
 

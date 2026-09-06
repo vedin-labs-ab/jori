@@ -1,4 +1,5 @@
-import { OpenRouter } from "@openrouter/sdk"
+import { OpenRouterCore } from "@openrouter/sdk/core"
+import { chatSend } from "@openrouter/sdk/funcs/chatSend"
 import {
   type ChatMessages,
   type ChatRequest,
@@ -36,7 +37,10 @@ type OpenRouterChatInput = Omit<ChatRequest, "model" | "models" | "stream"> &
 
 export type OpenRouterChatMessage = ChatMessages
 
-let cachedClient: OpenRouter | undefined
+// The SDK's root client evaluates every model schema it knows on import,
+// more than a loop step's memory can hold beside the loop itself. The core
+// client with the one standalone function loads the chat schemas alone.
+let cachedClient: OpenRouterCore | undefined
 
 export function requireOpenRouterConfig(): OpenRouterConfig {
   return {
@@ -54,9 +58,21 @@ export function requireOpenRouterConfig(): OpenRouterConfig {
 }
 
 function openRouterClient() {
-  cachedClient ??= new OpenRouter(requireOpenRouterConfig())
+  cachedClient ??= new OpenRouterCore(requireOpenRouterConfig())
 
   return cachedClient
+}
+
+/** The standalone function answers a result instead of throwing; the SDK's
+ *  own error is thrown here, as the root client's method would have. */
+async function send(chatRequest: ChatRequest) {
+  const result = await chatSend(openRouterClient(), { chatRequest })
+
+  if (!result.ok) {
+    throw result.error
+  }
+
+  return result.value
 }
 
 /**
@@ -73,9 +89,7 @@ export async function sendOpenRouterChat(
   let received = false
 
   try {
-    const result = await openRouterClient().chat.send({
-      chatRequest: { ...input, stream: true },
-    })
+    const result = await send({ ...input, stream: true })
 
     if ("choices" in result) {
       return result
@@ -93,9 +107,7 @@ export async function sendOpenRouterChat(
     }
   }
 
-  const result = await openRouterClient().chat.send({
-    chatRequest: { ...input, stream: false },
-  })
+  const result = await send({ ...input, stream: false })
 
   if ("choices" in result) {
     return result
