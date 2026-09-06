@@ -4,7 +4,6 @@ import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { readRunDraft, writeRunDraft } from "../runs/execution/drafts/data"
 import {
-  consoleMessageFolderId,
   insertConsoleMessage,
   insertConsoleReply,
   pageConsoleMessages,
@@ -93,16 +92,6 @@ test("replies only land in console conversations", async () => {
   await expect(
     insertConsoleReply(ctx, { conversationId, runId, text: "Hello" })
   ).rejects.toThrow("Console conversation not found.")
-})
-
-test("reads the folder a message was sent from", () => {
-  expect(
-    consoleMessageFolderId({ context: { kind: "folder", id: "folders:1" } })
-  ).toBe("folders:1")
-  expect(consoleMessageFolderId({ context: { kind: "file", id: "f" } })).toBe(
-    undefined
-  )
-  expect(consoleMessageFolderId(undefined)).toBe(undefined)
 })
 
 async function consoleConversation(

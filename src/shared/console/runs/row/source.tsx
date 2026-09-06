@@ -19,6 +19,7 @@ const sourceMetadataTypes = new Set<ExecutionDetailType>([
   "file",
   "folder",
   "issue",
+  "job",
   "page",
   "project",
   "pull_request",
@@ -26,7 +27,9 @@ const sourceMetadataTypes = new Set<ExecutionDetailType>([
   "schedule",
   "sender",
   "status",
+  "store",
   "subject",
+  "table",
 ])
 
 export function SourceLine({

@@ -10,13 +10,20 @@ export function createMessageConversationValues(input: MessageInput) {
   const entries = input.conversation.entries.filter(
     (entry) => entry.id !== input.message._id
   )
+  // The history's own entry for the current message carries what only a
+  // read of the database could add: the line for a console context.
+  const context = input.conversation.entries.find(
+    (entry) => entry.id === input.message._id
+  )?.context
 
   return {
     body:
       entries.length === 0
         ? null
         : entries.map(formatMessageEntry).join("\n\n"),
-    current: formatMessageEntry(messageEntry(input.message)),
+    current: formatMessageEntry(
+      messageEntry(input.message, undefined, context ?? undefined)
+    ),
     summary: formatConversationSummary(input),
   }
 }
@@ -32,6 +39,7 @@ function formatMessageEntry(entry: PromptMessageEntry) {
     message: {
       actor: entry.actor ?? "unknown",
       actorIds: formatEntryIds(entry.actorIds),
+      context: entry.context,
       identifiers: formatEntryIds(entry.identifiers),
       observedAt: new Date(observed).toISOString(),
       reactions: entry.reactions,

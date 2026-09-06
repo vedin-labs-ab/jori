@@ -56,6 +56,20 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   expect(screen.queryByRole("radio")).toBeNull()
 })
 
+test("stopping the run leaves a quiet notice under the ask", async () => {
+  render(<DemoConsoleAt path="/chat" />)
+
+  const field = await screen.findByRole("textbox", { name: "Message" })
+
+  fireEvent.change(field, { target: { value: "Chase the unpaid renewals" } })
+  fireEvent.keyDown(field, { key: "Enter" })
+  fireEvent.click(await screen.findByRole("button", { name: "Stop" }))
+
+  expect(screen.getByText("Jori stopped before finishing")).toBeDefined()
+  expect(screen.queryByText("Working")).toBeNull()
+  expect(screen.getByRole("button", { name: "Send message" })).toBeDefined()
+})
+
 test("opens the seeded conversation with its table and next steps", async () => {
   render(<DemoConsoleAt path={`/chat/${renewalsConversationId}`} />)
 

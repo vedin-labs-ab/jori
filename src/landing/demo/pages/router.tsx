@@ -1,4 +1,5 @@
 import { lazy, type ReactElement, Suspense } from "react"
+import { parseContextSearch } from "@/shared/console/chat/pane/context"
 import {
   parseUsageDays,
   type UsageDays,
@@ -76,7 +77,7 @@ export function DemoPage({
     return (
       <Suspense fallback={<ConsoleListLoading />}>
         {id === undefined ? (
-          <ChatHomePage />
+          <ChatHomePage context={parseContextSearch(search.context)} />
         ) : (
           <ConversationPage conversationId={id} />
         )}

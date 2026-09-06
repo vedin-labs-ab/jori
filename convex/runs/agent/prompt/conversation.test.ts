@@ -32,6 +32,48 @@ test("renders recent conversation context without duplicating the trigger", () =
   expect(prompt).toContain("Current message:")
 })
 
+test("a console message's context reads as its own line, on the current message too", () => {
+  const input = runtimeInput("slack", {
+    channel: { id: "C123" },
+    ts: "123.456",
+  })
+
+  if (input.type !== "message") {
+    throw new Error("Expected message input.")
+  }
+
+  input.conversation = {
+    entries: [
+      entry({
+        context:
+          "Opened about table «Renewals» (tableId: collections:renewals)",
+        createdAt: 1_000,
+        id: "opening",
+        text: "Which renewals are at risk?",
+      }),
+      entry({
+        context: "Opened about folder «Finance» (folderId: folders:finance)",
+        createdAt: 4_000,
+        id: "message",
+        text: "Not the trigger's own text.",
+      }),
+    ],
+    hasMoreMessages: false,
+  }
+
+  const prompt = assemblePrompt(input).context
+
+  expect(prompt).toContain(
+    "- 1970-01-01T00:00:01.000Z | person | Albin\nOpened about table «Renewals» (tableId: collections:renewals)\n```text\nWhich renewals are at risk?"
+  )
+  // The current message keeps the trigger's own text and borrows only the
+  // line the history's read of the database could add.
+  expect(prompt).toContain(
+    "Opened about folder «Finance» (folderId: folders:finance)\n```text\nPlease help."
+  )
+  expect(prompt).not.toContain("Not the trigger's own text.")
+})
+
 test("omits the recent messages block without prior conversation", () => {
   const prompt = assemblePrompt(
     runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
@@ -152,6 +194,7 @@ function entry(
   return {
     actor: "Albin",
     actorIds: [],
+    context: null,
     createdAt: 0,
     identifiers: [],
     observedAt: null,

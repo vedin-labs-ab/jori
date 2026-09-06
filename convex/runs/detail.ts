@@ -10,6 +10,7 @@ export type ExecutionDetailType =
   | "file"
   | "folder"
   | "issue"
+  | "job"
   | "message"
   | "next"
   | "page"
@@ -20,7 +21,9 @@ export type ExecutionDetailType =
   | "sender"
   | "status"
   | "stopped"
+  | "store"
   | "subject"
+  | "table"
   | "tools"
   | "web_search"
 

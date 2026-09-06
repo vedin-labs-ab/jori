@@ -165,13 +165,73 @@ test("a live run and its draft are one turn of Jori's, and chips wait for it", (
 
   expect(screen.queryByRole("button", { name: "Remind them" })).toBeNull()
 
-  // The finished reply wears one mark, the live turn one more: the
-  // progress and the draft share it rather than reading as two messages.
+  // The progress and the draft are one turn rather than two messages, and
+  // that turn continues the reply above it — a run starts from the
+  // person's message, so a reply standing last under a live run is the
+  // run's own heads-up — under the one mark the reply wears.
   const turn = screen.getByText("Looking at").closest("[aria-busy]")
 
-  expect(screen.getAllByTitle("Jori logo")).toHaveLength(2)
-  expect(turn?.querySelectorAll("title")).toHaveLength(1)
+  expect(screen.getAllByTitle("Jori logo")).toHaveLength(1)
+  expect(turn?.querySelectorAll("title")).toHaveLength(0)
   expect(turn?.textContent).toContain("Working on it")
+})
+
+test("the working row stands on its own, with its mark, after the person's message", () => {
+  renderThread({
+    messages: [ask],
+    live: { id: "runs_1", status: "running" },
+  })
+
+  expect(screen.getAllByTitle("Jori logo")).toHaveLength(1)
+  expect(
+    screen
+      .getByText("Working on it")
+      .closest("[aria-busy], .flex")
+      ?.querySelectorAll("title")
+  ).toHaveLength(1)
+})
+
+test("a run that failed or was stopped says so under the last turn, with the way to it", () => {
+  renderThread({
+    messages: [ask],
+    live: {
+      id: "runs_1",
+      status: "failed",
+      error: "Sandbox timed out\nat step 3",
+      endedAt: now - 30_000,
+    },
+  })
+
+  const notice = screen.getByRole("status")
+
+  expect(notice.textContent).toContain("Jori couldn't finish")
+  expect(notice.textContent).toContain("Sandbox timed out")
+  expect(notice.textContent).not.toContain("at step 3")
+  expect(
+    screen
+      .getByRole("link", { name: /See the run in Activity/ })
+      .getAttribute("href")
+  ).toBe("/runs?run=runs_1")
+  expect(screen.queryByText("Working on it")).toBeNull()
+
+  cleanup()
+  renderThread({
+    messages: [ask],
+    live: { id: "runs_2", status: "stopped", endedAt: now - 30_000 },
+  })
+
+  expect(screen.getByRole("status").textContent).toBe(
+    "Jori stopped before finishingSee the run in Activity"
+  )
+
+  // A reply that landed after the end is the answer; nothing to say.
+  cleanup()
+  renderThread({
+    messages: [ask, reply],
+    live: { id: "runs_3", status: "stopped", endedAt: now - 120_000 },
+  })
+
+  expect(screen.queryByRole("status")).toBeNull()
 })
 
 test("answering a question composes the message from the labels, then the card locks", () => {

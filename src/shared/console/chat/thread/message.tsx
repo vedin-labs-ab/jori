@@ -58,22 +58,30 @@ function ContextLine({ reference }: { reference: ChatReference }) {
 }
 
 /** Jori's turn: flat and full-width under the mark, never clamped. A
- *  reply still arriving says so to assistive technology. */
+ *  reply still arriving says so to assistive technology. A turn that
+ *  continues the one above it — the run still working after a heads-up —
+ *  wears no mark of its own and tucks under that message, inset the same. */
 export function JoriMessage({
   children,
   className,
+  continued = false,
   streaming = false,
 }: {
   children: ReactNode
   className?: string
+  continued?: boolean
   streaming?: boolean
 }) {
   return (
     <div
       aria-busy={streaming ? true : undefined}
-      className={cn("flex items-start gap-3", className)}
+      className={cn("flex items-start gap-3", continued && "-mt-3", className)}
     >
-      <BrandIcon className="mt-0.5 size-5" />
+      {continued ? (
+        <div aria-hidden className="size-5 shrink-0" />
+      ) : (
+        <BrandIcon className="mt-0.5 size-5" />
+      )}
       <div className="grid min-w-0 flex-1 gap-3">{children}</div>
     </div>
   )

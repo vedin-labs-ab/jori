@@ -27,6 +27,7 @@ function entry(
   return {
     actor,
     actorIds: [],
+    context: null,
     createdAt,
     id,
     identifiers: [],

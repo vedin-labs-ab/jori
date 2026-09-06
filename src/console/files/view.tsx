@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { FileBody } from "@/shared/console/files/body"
 import { FileHeaderActions } from "@/shared/console/files/header"
 import { type FileDetail } from "@/shared/console/files/types"
@@ -108,7 +109,9 @@ function FileReadyView({
 
   return (
     <ConsoleListLayout>
-      <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url} />
+      <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url}>
+        <AskJoriAction target={{ kind: "file", id: file.fileId }} />
+      </FileHeaderActions>
       <FileBody
         file={file}
         onSave={save}

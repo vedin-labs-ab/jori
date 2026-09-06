@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { moveTarget } from "@/shared/console/folders/types"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
@@ -130,7 +131,9 @@ function StoreReadyView({
         canExport={store.version > 0}
         onExport={() => exportStoreJson(store)}
         onShare={() => setDialog("share")}
-      />
+      >
+        <AskJoriAction target={{ kind: "store", id: store.storeId }} />
+      </MaterialHeaderActions>
       <StoreValue
         organizationId={organizationId}
         store={store}

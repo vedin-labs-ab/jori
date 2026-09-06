@@ -34,15 +34,25 @@ export function referenceTargets(messages: ChatMessage[]) {
   return [...targets.values()]
 }
 
-/** Resolves the thread's references in one query. Targets already named
- *  stay named while a new one is looked up, and a target not yet answered
- *  shows as its kind until it is; one the viewer may not see, or that is
- *  gone, resolves to nothing, which the cards read as unavailable. */
+/** Resolves the thread's references in one query; see `useReferenceTargets`. */
 export function useReferences(
   organizationId: string,
   messages: ChatMessage[]
 ): ResolveReference {
-  const targets = useMemo(() => referenceTargets(messages), [messages])
+  return useReferenceTargets(
+    organizationId,
+    useMemo(() => referenceTargets(messages), [messages])
+  )
+}
+
+/** Resolves the targets in one query. Targets already named stay named
+ *  while a new one is looked up, and a target not yet answered shows as
+ *  its kind until it is; one the viewer may not see, or that is gone,
+ *  resolves to nothing, which the cards read as unavailable. */
+export function useReferenceTargets(
+  organizationId: string,
+  targets: ReferenceTarget[]
+): ResolveReference {
   const resolved = useQuery(
     api.messages.references.resolve,
     targets.length === 0 ? "skip" : { organizationId, targets }

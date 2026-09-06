@@ -1,19 +1,26 @@
 import { useMutation, useQuery } from "convex/react"
-import { type FunctionReturnType } from "convex/server"
+import { type FunctionArgs, type FunctionReturnType } from "convex/server"
 import { type GenericId } from "convex/values"
 import { ChatComposer } from "@/shared/console/chat/composer"
-import { referenceDestination } from "@/shared/console/chat/presentation"
+import { ChatPane } from "@/shared/console/chat/pane"
+import { useReplyReferences } from "@/shared/console/chat/pane/auto"
+import { usePaneTabs } from "@/shared/console/chat/pane/tabs"
 import { ChatThread } from "@/shared/console/chat/thread"
-import { type ChatRun, isLiveRun } from "@/shared/console/chat/types"
+import {
+  type ChatRun,
+  isLiveRun,
+  type ReferenceTarget,
+  type ResolveReference,
+} from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
-import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { useDocumentTitle } from "@/shared/console/shell/title"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useConversationMessages } from "./messages"
+import { ConversationPaneBody } from "./pane"
 import { ChatProgress } from "./progress"
 import { useReferences } from "./references"
 import { useSendMessage } from "./send"
@@ -22,9 +29,12 @@ type LiveConversation = Extract<
   FunctionReturnType<typeof api.conversations.console.live>,
   { status: "ready" }
 >
+type SendAnswer = FunctionArgs<typeof api.conversations.console.send>["answer"]
 
 /** One conversation with Jori: its turns, the run answering the latest
- *  one, and the composer that sends into it. */
+ *  one, the composer that sends into it, and beside them the pane the
+ *  reply's resources open in. Keyed by the conversation, so a move to
+ *  another starts its pane afresh. */
 export function ConversationPage({
   conversationId,
 }: {
@@ -35,6 +45,7 @@ export function ConversationPage({
       {(organizationId) => (
         <ConversationContent
           conversationId={conversationId}
+          key={conversationId}
           organizationId={organizationId}
         />
       )}
@@ -92,59 +103,101 @@ function ConversationThread({
   live: LiveConversation
   organizationId: string
 }) {
-  const run = live.run
-  const isLive = isLiveRun(run)
-  const now = useNow(isLive ? 1000 : 60_000)
   const page = useConversationMessages(organizationId, conversationId)
   const send = useSendMessage(organizationId)
-  const stop = useStopRun(organizationId, run)
+  const stop = useStopRun(organizationId, live.run)
   const resolveReference = useReferences(organizationId, page.messages)
-  const navigate = useConsoleNavigate()
+  const { autoOpen, openTarget, pane } = usePaneTabs()
 
   useDocumentTitle(live.title === "" ? undefined : `${live.title} · Jori`)
   useMaterialBreadcrumb(live.title)
+  useReplyReferences(conversationId, page.messages, autoOpen)
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <ChatThread
-        draft={live.draft}
-        hasMore={page.hasMore}
-        isLoading={page.isLoading}
-        live={run}
-        messages={page.messages}
-        now={now}
-        onChoose={(messageId, part, values, text) =>
+    <ChatPane
+      {...pane}
+      body={(target) => (
+        <ConversationPaneBody organizationId={organizationId} target={target} />
+      )}
+      resolve={resolveReference}
+    >
+      <ConversationTurns
+        live={live}
+        onOpenReference={openTarget}
+        onStop={stop}
+        organizationId={organizationId}
+        page={page}
+        resolveReference={resolveReference}
+        send={(text, answer) =>
           void send({
             conversationId,
             text,
-            answer: {
-              messageId: messageId as GenericId<"messages">,
-              part,
-              values,
-            },
+            ...(answer === undefined ? {} : { answer }),
           })
         }
-        onLoadMore={page.loadMore}
-        onOpenReference={(target) => navigate(referenceDestination(target))}
-        progress={
-          isLive ? (
-            <ChatProgress
-              now={now}
-              onStop={stop}
-              organizationId={organizationId}
-              run={run}
-            />
-          ) : null
-        }
-        resolveReference={resolveReference}
       />
       <ChatComposer
         autoFocus
-        live={run}
+        live={live.run}
         onSend={(text) => void send({ conversationId, text })}
         onStop={stop}
       />
-    </div>
+    </ChatPane>
+  )
+}
+
+/** The conversation's turns and, while Jori answers, the run's progress
+ *  bound to Convex under the latest one. */
+function ConversationTurns({
+  live,
+  onOpenReference,
+  onStop,
+  organizationId,
+  page,
+  resolveReference,
+  send,
+}: {
+  live: LiveConversation
+  onOpenReference: (target: ReferenceTarget) => void
+  onStop: () => void
+  organizationId: string
+  page: ReturnType<typeof useConversationMessages>
+  resolveReference: ResolveReference
+  send: (text: string, answer?: SendAnswer) => void
+}) {
+  const run = live.run
+  const isLive = isLiveRun(run)
+  const now = useNow(isLive ? 1000 : 60_000)
+
+  return (
+    <ChatThread
+      draft={live.draft}
+      hasMore={page.hasMore}
+      isLoading={page.isLoading}
+      live={run}
+      messages={page.messages}
+      now={now}
+      onChoose={(messageId, part, values, text) =>
+        send(text, {
+          messageId: messageId as GenericId<"messages">,
+          part,
+          values,
+        })
+      }
+      onLoadMore={page.loadMore}
+      onOpenReference={onOpenReference}
+      progress={
+        isLive ? (
+          <ChatProgress
+            now={now}
+            onStop={onStop}
+            organizationId={organizationId}
+            run={run}
+          />
+        ) : null
+      }
+      resolveReference={resolveReference}
+    />
   )
 }
 

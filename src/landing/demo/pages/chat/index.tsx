@@ -1,3 +1,4 @@
+import { type MessageContext } from "@contracts/replies/answers"
 import { useCallback } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatHome } from "@/shared/console/chat/home"
@@ -28,13 +29,18 @@ import { useReplyStream } from "./stream"
 const noMessages: ChatMessage[] = []
 
 /** Where a chat starts, over the workspace: the first message opens a
- *  conversation and the console moves to it. */
-export function ChatHomePage() {
+ *  conversation and the console moves to it. Opened from a resource's
+ *  page, the resource is the composer's chip and goes with the message. */
+export function ChatHomePage({ context }: { context?: MessageContext }) {
   const { actions, state } = useDemoWorkspace()
   const navigate = useConsoleNavigate()
   const now = useNow(60_000)
+  const reference =
+    context === undefined ? undefined : resolveReference(state, context)
   const send = (text: string) => {
-    const conversationId = actions.sendChatMessage(text)
+    const conversationId = actions.sendChatMessage(text, undefined, {
+      context: reference === undefined ? undefined : context,
+    })
 
     navigate(conversationDestination(conversationId))
   }
@@ -42,7 +48,14 @@ export function ChatHomePage() {
   return (
     <ChatHome
       composer={
-        <ChatComposer autoFocus live={null} onSend={send} onStop={() => {}} />
+        <ChatComposer
+          autoFocus
+          context={reference}
+          live={null}
+          onClearContext={() => navigate({ to: "/chat" })}
+          onSend={send}
+          onStop={() => {}}
+        />
       }
       now={now}
       onSuggestion={send}
@@ -113,7 +126,7 @@ function Conversation({ conversationId }: { conversationId: string }) {
         onLoadMore={() => {}}
         onOpenReference={openTarget}
         progress={
-          live === null ? null : (
+          live === null || !isLiveRun(live.run) ? null : (
             <LiveProgress live={live} now={now} onStop={actions.stopChatRun} />
           )
         }

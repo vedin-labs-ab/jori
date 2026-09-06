@@ -1,4 +1,5 @@
 import { useContext, useMemo, useState } from "react"
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { JobDetail } from "@/shared/console/jobs/detail"
 import { JobHeaderActions } from "@/shared/console/jobs/detail/header"
@@ -54,7 +55,9 @@ function JobReadyPage({ job }: { job: Job }) {
         job={job}
         onEdit={editor.openEditForm}
         onPausedChange={actions.setJobPaused}
-      />
+      >
+        <AskJoriAction target={{ kind: "job", id: job.id }} />
+      </JobHeaderActions>
       <JobDetail
         folders={folders}
         instructions={

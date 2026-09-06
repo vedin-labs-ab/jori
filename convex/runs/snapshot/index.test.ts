@@ -60,18 +60,20 @@ test("snapshots message source details and source link", () => {
   })
 })
 
-test("console messages read as Jori's own surface with no context", () => {
+test("console messages read as Jori's own surface, with what the chat was opened about", () => {
+  const consoleMessage = {
+    ...message("Plan the launch.\nThree milestones."),
+    surface: "console" as const,
+    integrationId: undefined,
+    type: "console.message",
+    data: { context: { kind: "folder", id: "folders:1" } },
+  }
+
   expect(
     createMessageRunSnapshot({
       integration: null,
       kind: "mention",
-      message: {
-        ...message("Plan the launch.\nThree milestones."),
-        surface: "console",
-        integrationId: undefined,
-        type: "console.message",
-        data: { context: { kind: "folder", id: "folders:1" } },
-      },
+      message: consoleMessage,
     })
   ).toEqual({
     snapshot: {
@@ -80,6 +82,23 @@ test("console messages read as Jori's own surface with no context", () => {
       context: [],
     },
   })
+  expect(
+    createMessageRunSnapshot({
+      context: { kind: "table", id: "collections:1", name: "Renewals" },
+      integration: null,
+      kind: "mention",
+      message: consoleMessage,
+    }).snapshot.context
+  ).toEqual([{ type: "table", label: "Renewals" }])
+  // A run is on the Activity page already; it gets no chip.
+  expect(
+    createMessageRunSnapshot({
+      context: { kind: "run", id: "runs:1", name: "Chase the renewals" },
+      integration: null,
+      kind: "mention",
+      message: consoleMessage,
+    }).snapshot.context
+  ).toEqual([])
 })
 
 test("instruction runs describe only themselves", () => {

@@ -6,24 +6,32 @@ import { audienceValidator } from "../shared/audience"
 import { accessValidator, toolSurfaceValidator } from "../shared/integrations"
 import { executionPrincipalValidator } from "./principal"
 
+/** The details a run's snapshot keeps as its context chips. */
+export const runSnapshotContextTypes = [
+  "calendar_event",
+  "channel",
+  "comment",
+  "email",
+  "file",
+  "folder",
+  "issue",
+  "job",
+  "message",
+  "next",
+  "page",
+  "project",
+  "pull_request",
+  "repository",
+  "schedule",
+  "sender",
+  "status",
+  "store",
+  "subject",
+  "table",
+] as const
+
 const runSnapshotContextType = v.union(
-  v.literal("calendar_event"),
-  v.literal("channel"),
-  v.literal("comment"),
-  v.literal("email"),
-  v.literal("file"),
-  v.literal("folder"),
-  v.literal("issue"),
-  v.literal("message"),
-  v.literal("next"),
-  v.literal("page"),
-  v.literal("project"),
-  v.literal("pull_request"),
-  v.literal("repository"),
-  v.literal("schedule"),
-  v.literal("sender"),
-  v.literal("status"),
-  v.literal("subject")
+  ...runSnapshotContextTypes.map((type) => v.literal(type))
 )
 
 const runSnapshotContext = v.object({

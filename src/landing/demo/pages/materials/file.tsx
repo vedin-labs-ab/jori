@@ -1,5 +1,6 @@
 import { ClientOnly } from "@tanstack/react-router"
 import { type ReactNode, useMemo, useState } from "react"
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { FileBody } from "@/shared/console/files/body"
 import { FileHeaderActions } from "@/shared/console/files/header"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
@@ -32,7 +33,9 @@ export function FilePage({ fileId }: { fileId: string }) {
 
   return (
     <ConsoleListLayout>
-      <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url} />
+      <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url}>
+        <AskJoriAction target={{ kind: "file", id: file.fileId }} />
+      </FileHeaderActions>
       <ClientOnly fallback={<ConsoleListLoading />}>
         <FileBody
           file={file}

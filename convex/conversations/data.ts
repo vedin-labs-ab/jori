@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { checkRunBudget } from "../billing/guard"
-import { consoleMessageFolderId } from "../messages/console"
+import { resolveConsoleContext } from "../messages/references"
 import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/audience"
 import { wakeRun } from "../runs/execution/waiters/data"
@@ -10,6 +10,7 @@ import { executionPrincipalForPerson } from "../runs/principal"
 import { type MessageCauseKind } from "../runs/schema"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { findSession, isReusableSession, startSession } from "../sessions/data"
+import { createSight } from "../visibility/sight"
 import { isFreshRunWithoutWaiter } from "./fresh"
 import { findConversation } from "./resolve"
 
@@ -184,7 +185,12 @@ async function insertRun(
     kind: MessageCauseKind
   }
 ) {
-  const folderId = await consoleFolderId(ctx, args.conversation)
+  const context = await consoleRunContext(
+    ctx,
+    args.conversation,
+    args.createdBy
+  )
+  const folderId = context?.folderId
 
   return await ctx.db.insert("runs", {
     organizationId: args.message.organizationId,
@@ -195,6 +201,7 @@ async function insertRun(
     },
     principal: executionPrincipalForPerson(args.createdBy),
     ...createMessageRunSnapshot({
+      context,
       integration: args.integration,
       kind: args.kind,
       message: args.message,
@@ -210,11 +217,14 @@ async function insertRun(
   })
 }
 
-/** A console conversation opened from a folder files every run it starts
- *  under that folder; the context rides on the person's first message. */
-async function consoleFolderId(
+/** What a console conversation was opened about, as the person who
+ *  opened it sees it: the context rides on their first message, and every
+ *  run the conversation starts is filed under its folder — the folder
+ *  itself, or the one the resource is filed in. */
+async function consoleRunContext(
   ctx: MutationCtx,
-  conversation: Doc<"conversations">
+  conversation: Doc<"conversations">,
+  personId: Id<"persons"> | undefined
 ) {
   if (conversation.surface !== "console") {
     return undefined
@@ -232,6 +242,10 @@ async function consoleFolderId(
     )
     .order("asc")
     .first()
+  const sight = createSight(ctx, {
+    organizationId: conversation.organizationId,
+    personId,
+  })
 
-  return consoleMessageFolderId(first?.data)
+  return await resolveConsoleContext(ctx, sight, first?.data)
 }

@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type ResolvedContext } from "../../messages/references"
 import {
   compactDetails,
   detail,
@@ -6,7 +7,11 @@ import {
   type ExecutionDetailType,
   uniqueDetails,
 } from "../detail"
-import { type MessageCauseKind, type RunSnapshot } from "../schema"
+import {
+  type MessageCauseKind,
+  type RunSnapshot,
+  runSnapshotContextTypes,
+} from "../schema"
 import { createSourceMetadata, type SourceMetadataItem } from "./metadata"
 import { originDetails } from "./origin"
 import { cronScheduleLabel } from "./schedule"
@@ -43,14 +48,19 @@ export function jobSnapshotBody(input: {
 }
 
 // A console message is Jori's own surface: nothing to link back to and no
-// provider context to describe, so its source reads as Jori.
+// provider context to describe, so its source reads as Jori, and its one
+// chip is what the conversation was opened about, when it was.
 export function messageSnapshotBody(input: {
+  context?: ResolvedContext
   integration: Doc<"integrations"> | null
   kind: MessageCauseKind
   message: Doc<"messages">
 }): RunSnapshotBody {
   if (input.message.surface === "console") {
-    return { source: { type: "message", surface: "jori" }, context: [] }
+    return {
+      source: { type: "message", surface: "jori" },
+      context: consoleContext(input.context),
+    }
   }
 
   const metadata = createSourceMetadata({
@@ -75,6 +85,16 @@ export function messageSnapshotBody(input: {
     },
     context: details.filter((item) => !isPayloadDetail(item)),
   }
+}
+
+/** The chip for a chat's context: the folder or the filed resource by its
+ *  name. A run has no chip of its own; the Activity page is where it is. */
+function consoleContext(context: ResolvedContext | undefined) {
+  return context === undefined || context.kind === "run"
+    ? []
+    : compactDetails([detail(context.kind, context.name)]).flatMap(
+        toSnapshotContext
+      )
 }
 
 function eventJobDisplay(input: {
@@ -241,23 +261,5 @@ function toSnapshotContext(detail: ExecutionDetail): SnapshotContext[] {
 function isSnapshotContextType(
   type: ExecutionDetailType
 ): type is SnapshotContextType {
-  return (
-    type === "calendar_event" ||
-    type === "channel" ||
-    type === "comment" ||
-    type === "email" ||
-    type === "file" ||
-    type === "folder" ||
-    type === "issue" ||
-    type === "message" ||
-    type === "next" ||
-    type === "page" ||
-    type === "project" ||
-    type === "pull_request" ||
-    type === "repository" ||
-    type === "schedule" ||
-    type === "sender" ||
-    type === "status" ||
-    type === "subject"
-  )
+  return (runSnapshotContextTypes as readonly string[]).includes(type)
 }
