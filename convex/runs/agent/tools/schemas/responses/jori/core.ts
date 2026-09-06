@@ -32,12 +32,9 @@ function skillMetadataSchema(): JsonSchema {
       name: stringProperty("Skill name."),
       category: stringProperty("Skill category."),
       description: stringProperty("What the skill covers."),
-      associatedIntegrations: arrayProperty(
-        "Integrations the skill leans on.",
-        {
-          type: "string",
-        }
-      ),
+      surfaces: arrayProperty("Surfaces the skill applies to.", {
+        type: "string",
+      }),
     },
   })
 }
@@ -119,10 +116,9 @@ export const coreJoriToolResponseSchemas = {
               name: stringProperty("Skill name."),
               category: stringProperty("Skill category."),
               description: stringProperty("What the skill covers."),
-              associatedIntegrations: arrayProperty(
-                "Integrations the skill leans on.",
-                { type: "string" }
-              ),
+              surfaces: arrayProperty("Surfaces the skill applies to.", {
+                type: "string",
+              }),
               instructions: stringProperty("Full skill instructions."),
             },
           }),

@@ -1,5 +1,10 @@
-import { type JsonObject } from "../../../contracts/json"
+import { type JsonObject, toJsonObject } from "../../../contracts/json"
+import { replyPartsSchema } from "../../../contracts/replies/parts"
 import { finalProperty } from "../../../contracts/runtime/tools"
+import {
+  communicationCapabilities,
+  replyPartKinds,
+} from "../../messages/capabilities"
 import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import {
   type MessageIntegration,
@@ -73,7 +78,11 @@ function addReactionTool(surface: MessageIntegration): ActiveSurfaceTool {
   }
 }
 
+/** The reply request: text first, then what the surface's capabilities let
+ *  the reply carry, then any addressing the surface needs. */
 function sendReplySchema(surface: MessageSurface): JsonObject {
+  const capabilities = communicationCapabilities(surface)
+  const kinds = replyPartKinds(surface)
   const properties: Record<string, JsonObject> = {
     text: {
       type: "string",
@@ -82,13 +91,17 @@ function sendReplySchema(surface: MessageSurface): JsonObject {
     final: finalProperty(),
   }
 
-  if (surface === "slack") {
+  if (capabilities.includes("blocks")) {
     properties.blocks = {
       type: "array",
       description:
         "Optional Slack Block Kit blocks. Always include concise fallback text.",
       items: { type: "object", additionalProperties: true },
     }
+  }
+
+  if (kinds.length > 0) {
+    properties.parts = toJsonObject(replyPartsSchema(kinds))
   }
 
   if (surface === "linear") {

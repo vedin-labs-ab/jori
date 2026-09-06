@@ -189,6 +189,40 @@ export function runtimeInput(
   } as unknown as Parameters<typeof assemblePrompt>[0]
 }
 
+/** A message typed to Jori in the web console: no integration behind it,
+ *  keyed by the conversation's own id. */
+export function consoleRuntimeInput() {
+  return {
+    type: "message",
+    surface: "console",
+    run: {
+      _id: "run",
+      _creationTime: 0,
+      organizationId: "organization",
+      cause: { type: "message", messageId: "message", kind: "mention" },
+      createdAt: 0,
+    },
+    integration: null,
+    integrations: [],
+    conversation: { entries: [], hasMoreMessages: false },
+    place: null,
+    message: {
+      _id: "message",
+      _creationTime: 0,
+      organizationId: "organization",
+      surface: "console",
+      externalId: "external-message",
+      conversationId: "conversation",
+      type: "console.message",
+      mentioned: true,
+      actor: { externalId: "person", kind: "person", name: "Albin Vedin" },
+      text: "Please help.",
+      observedAt: 1_000,
+      createdAt: 0,
+    },
+  } as unknown as Parameters<typeof assemblePrompt>[0]
+}
+
 export function promptedTool(): ToolPermission {
   return {
     surface: "notion",

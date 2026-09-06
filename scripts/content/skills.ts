@@ -1,9 +1,14 @@
 import { readdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
-import { isSkillCategory, type SkillCategory } from "../../contracts/skills.ts"
+import {
+  isSkillCategory,
+  isSkillSurface,
+  type SkillCategory,
+  type SkillSurface,
+} from "../../contracts/skills.ts"
 
 type Skill = {
-  associatedIntegrations?: string[]
+  surfaces?: SkillSurface[]
   body: string
   category: SkillCategory
   communication?: {
@@ -14,7 +19,7 @@ type Skill = {
 }
 
 type ParsedSkill = {
-  associatedIntegrations?: string[]
+  surfaces?: SkillSurface[]
   category: SkillCategory
   description: string
   name: string
@@ -22,8 +27,9 @@ type ParsedSkill = {
 }
 
 type Frontmatter = Partial<
-  Pick<Skill, "associatedIntegrations" | "name" | "description"> & {
+  Pick<Skill, "name" | "description"> & {
     category: string
+    surfaces: string[]
   }
 >
 
@@ -71,9 +77,7 @@ async function readSkill(directory: string): Promise<Skill> {
     name: parsed.name,
     description: parsed.description,
     category: parsed.category,
-    ...(parsed.associatedIntegrations === undefined
-      ? {}
-      : { associatedIntegrations: parsed.associatedIntegrations }),
+    ...(parsed.surfaces === undefined ? {} : { surfaces: parsed.surfaces }),
     ...(parts === undefined ? {} : { communication: { parts } }),
     body,
   }
@@ -138,16 +142,25 @@ function parseSkill(content: string, filePath: string): ParsedSkill {
     )
   }
 
+  const surfaces = parseSurfaces(metadata.surfaces ?? [], filePath)
+
   return {
     name: metadata.name,
     description: metadata.description,
     category: metadata.category,
-    ...(metadata.associatedIntegrations === undefined ||
-    metadata.associatedIntegrations.length === 0
-      ? {}
-      : { associatedIntegrations: metadata.associatedIntegrations }),
+    ...(surfaces.length === 0 ? {} : { surfaces }),
     overview,
   }
+}
+
+function parseSurfaces(values: string[], filePath: string) {
+  return values.map((value) => {
+    if (!isSkillSurface(value)) {
+      throw new Error(`${filePath} has an unsupported surface: ${value}`)
+    }
+
+    return value
+  })
 }
 
 function parseFrontmatter(value: string, filePath: string): Frontmatter {
@@ -163,8 +176,8 @@ function parseFrontmatter(value: string, filePath: string): Frontmatter {
     const key = line.slice(0, index).trim()
     const rawValue = line.slice(index + 1).trim()
 
-    if (key === "associatedIntegrations") {
-      result.associatedIntegrations = parseList(rawValue)
+    if (key === "surfaces") {
+      result.surfaces = parseList(rawValue)
       continue
     }
 

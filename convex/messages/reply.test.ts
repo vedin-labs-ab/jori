@@ -1,10 +1,14 @@
 import { expect, test, vi } from "vitest"
+import { type ReplyPart } from "../../contracts/replies/parts"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { sendSurfaceReply } from "./reply"
 
 const conversationId = "conversations:1" as Id<"conversations">
+const parts: ReplyPart[] = [
+  { kind: "reference", target: { kind: "file", id: "files:1" } },
+]
 
 test("a console reply is written into the conversation through a mutation", async () => {
   const runMutation = vi.fn(async () => "messages:2")
@@ -14,12 +18,12 @@ test("a console reply is written into the conversation through a mutation", asyn
     ctx,
     consoleInput(),
     { type: "console", conversationId },
-    { parts: [{ type: "text", text: "Done." }], text: "Done." }
+    { parts, text: "Done." }
   )
 
   expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
     conversationId,
-    parts: [{ type: "text", text: "Done." }],
+    parts,
     text: "Done.",
   })
 })

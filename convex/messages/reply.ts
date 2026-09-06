@@ -1,3 +1,4 @@
+import { type ReplyPart } from "../../contracts/replies/parts"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
@@ -26,7 +27,7 @@ export async function sendSurfaceReply(
   address: ReplyAddress,
   args: {
     blocks?: SlackBlock[]
-    parts?: unknown[]
+    parts?: ReplyPart[]
     text: string
   }
 ) {

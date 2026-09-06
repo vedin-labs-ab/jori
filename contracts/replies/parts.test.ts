@@ -1,0 +1,128 @@
+import { expect, test } from "vitest"
+import {
+  parseReplyParts,
+  readReplyParts,
+  replyPartKinds,
+  replyPartLimits,
+  replyPartsSchema,
+} from "./parts"
+
+const reference = {
+  kind: "reference",
+  target: { kind: "table", id: "collections_1" },
+}
+const choices = {
+  kind: "choices",
+  options: [{ label: "Yes" }, { label: "No", value: "no" }],
+}
+
+test("reads references and choices in order", () => {
+  expect(readReplyParts([reference, choices], replyPartKinds)).toEqual([
+    reference,
+    choices,
+  ])
+  expect(readReplyParts(undefined, replyPartKinds)).toEqual([])
+  expect(readReplyParts(null, replyPartKinds)).toEqual([])
+})
+
+test("only the kinds a surface accepts are admitted", () => {
+  expect(() => readReplyParts([choices], ["reference"])).toThrow(
+    /parts.0: does not match any allowed shape/
+  )
+})
+
+test("a reference needs a known kind and a non-empty id", () => {
+  expect(() =>
+    readReplyParts(
+      [{ kind: "reference", target: { kind: "page", id: "x" } }],
+      replyPartKinds
+    )
+  ).toThrow(/does not match any allowed shape/)
+  expect(() =>
+    readReplyParts(
+      [{ kind: "reference", target: { kind: "file", id: "" } }],
+      replyPartKinds
+    )
+  ).toThrow()
+})
+
+test("a part carries nothing beyond its schema", () => {
+  expect(() =>
+    readReplyParts([{ ...reference, extra: true }], replyPartKinds)
+  ).toThrow()
+  expect(() =>
+    readReplyParts(
+      [{ kind: "choices", options: [{ label: "Yes", icon: "check" }] }],
+      replyPartKinds
+    )
+  ).toThrow()
+})
+
+test("choices need at least one option and at most the limit", () => {
+  expect(() =>
+    readReplyParts([{ kind: "choices", options: [] }], replyPartKinds)
+  ).toThrow()
+  expect(() =>
+    readReplyParts(
+      [
+        {
+          kind: "choices",
+          options: Array.from(
+            { length: replyPartLimits.options + 1 },
+            (_, index) => ({ label: `Option ${index}` })
+          ),
+        },
+      ],
+      replyPartKinds
+    )
+  ).toThrow()
+  expect(() =>
+    readReplyParts(
+      [{ kind: "choices", options: [{ label: "" }] }],
+      replyPartKinds
+    )
+  ).toThrow()
+  expect(() =>
+    readReplyParts(
+      [{ kind: "choices", options: [{ label: "Yes" }], select: "all" }],
+      replyPartKinds
+    )
+  ).toThrow()
+})
+
+test("a reply holds at most six references and one choices part", () => {
+  const references = Array.from({ length: 7 }, () => reference)
+
+  // The schema caps the list at seven, the sum of both limits; the split
+  // between kinds is checked after.
+  expect(() =>
+    readReplyParts([...references, reference], replyPartKinds)
+  ).toThrow(/must contain at most/)
+  expect(() => readReplyParts(references, replyPartKinds)).toThrow(
+    /at most 6 references/
+  )
+  expect(() =>
+    readReplyParts(
+      [...references.slice(0, 5), choices, choices],
+      replyPartKinds
+    )
+  ).toThrow(/at most one choices part/)
+})
+
+test("the schema offers only the kinds asked for", () => {
+  const schema = replyPartsSchema(["reference"])
+
+  expect(schema.maxItems).toBe(
+    replyPartLimits.references + replyPartLimits.choices
+  )
+  expect(schema.items).toMatchObject({
+    anyOf: [{ properties: { kind: { const: "reference" } } }],
+  })
+})
+
+test("stored parts that no longer validate read as nothing", () => {
+  expect(parseReplyParts({ parts: [reference] })).toEqual([reference])
+  expect(parseReplyParts({ parts: [{ kind: "reference" }] })).toEqual([])
+  expect(parseReplyParts({})).toEqual([])
+  expect(parseReplyParts("parts")).toEqual([])
+})

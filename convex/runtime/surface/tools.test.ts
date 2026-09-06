@@ -21,13 +21,6 @@ test("the console replies but never reacts", () => {
   expect(activeSurfaceTools("console").map((tool) => tool.name)).toEqual([
     "send_reply",
   ])
-  expect(activeSurfaceTools("console")[0]?.inputSchema).toMatchObject({
-    required: ["text"],
-    properties: { text: { type: "string" } },
-  })
-  expect(activeSurfaceTools("console")[0]?.inputSchema).not.toMatchObject({
-    properties: { blocks: expect.anything() },
-  })
 
   const reference = activeSurfaceToolReferenceSchemas()
   const titles = (schema: unknown) =>
@@ -37,6 +30,55 @@ test("the console replies but never reacts", () => {
 
   expect(titles(reference.send_reply)).toContain("Console")
   expect(titles(reference.add_reaction)).not.toContain("Console")
+})
+
+test("a console reply carries text first, then references and choices", () => {
+  const schema = tool("console", "send_reply")?.inputSchema
+  const properties = schema?.properties as Record<string, unknown>
+
+  expect(schema).toMatchObject({
+    required: ["text"],
+    properties: {
+      text: { type: "string" },
+      parts: {
+        type: "array",
+        maxItems: 7,
+        items: {
+          anyOf: [
+            { properties: { kind: { const: "reference" } } },
+            { properties: { kind: { const: "choices" } } },
+          ],
+        },
+      },
+    },
+  })
+  expect(Object.keys(properties)[0]).toBe("text")
+  expect(properties).not.toHaveProperty("blocks")
+  expect(properties).not.toHaveProperty("commentId")
+  expect(
+    (
+      activeSurfaceToolReferenceSchemas().send_reply as {
+        oneOf: Array<{ title: string }>
+      }
+    ).oneOf.find((variant) => variant.title === "Console")
+  ).toEqual({ title: "Console", ...schema })
+})
+
+test("Slack replies carry blocks and no parts", () => {
+  const properties = tool("slack", "send_reply")?.inputSchema.properties
+
+  expect(properties).toMatchObject({ blocks: { type: "array" } })
+  expect(properties).not.toHaveProperty("parts")
+})
+
+test.each([
+  "github",
+  "linear",
+] as const)("%s replies carry neither blocks nor parts", (surface) => {
+  const properties = tool(surface, "send_reply")?.inputSchema.properties
+
+  expect(properties).not.toHaveProperty("blocks")
+  expect(properties).not.toHaveProperty("parts")
 })
 
 test("exposes Linear comment targeting only on the Linear active surface", () => {

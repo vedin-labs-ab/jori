@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type ReplyPart } from "../../contracts/replies/parts"
 import { isSurfaceCommunicationTool } from "../../contracts/runtime/surface"
 import { internal } from "../_generated/api"
 import { type Doc, type Id } from "../_generated/dataModel"
@@ -101,7 +102,7 @@ export async function sendRunReply(
   ctx: ActionCtx,
   args: {
     blocks?: unknown[]
-    parts?: unknown[]
+    parts?: ReplyPart[]
     runId: Id<"runs">
     target?: string
     text: string
