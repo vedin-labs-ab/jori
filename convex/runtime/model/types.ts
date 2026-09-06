@@ -1,5 +1,6 @@
 import { type JsonObject } from "../../../contracts/json"
 import { type RuntimeModelTokens } from "../../../contracts/runtime/trace"
+import { type ChatDelta, type ChatToolCallDelta } from "../../model/stream"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 
 // The model sees exactly what the transcript stores. One shape for both keeps
@@ -33,9 +34,15 @@ export type ModelResponse =
       type: "tool_calls"
     }
 
+/** What the model has added since the last delta, offered while a
+ *  completion streams; the response at the end holds the whole. */
+export type ModelDelta = ChatDelta
+export type ModelToolCallDelta = ChatToolCallDelta
+
 export type ModelRuntime = {
   complete(args: {
     messages: ModelMessage[]
+    onDelta?: (delta: ModelDelta) => void
     tools: ModelTool[]
   }): Promise<ModelResponse>
 }

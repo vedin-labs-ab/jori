@@ -70,6 +70,7 @@ function answers() {
   return {
     addReaction: vi.fn(async () => ({ status: "added" })),
     callTool: vi.fn(async () => ({ status: "sent" })),
+    clearDraft: vi.fn(async () => undefined),
     createAgentRun: vi.fn(async () => ({
       runId: runtimeId<"runs">("run_child"),
     })),
@@ -105,6 +106,7 @@ function answers() {
       size: 1,
       url: null,
     })),
+    writeDraft: vi.fn(async () => undefined),
   }
 }
 

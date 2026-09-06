@@ -5,6 +5,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
 import { requireVisibleConsoleConversation } from "../conversations/resolve"
 import { resolveCurrentPerson } from "../persons/account"
+import { clearRunDraft } from "../runs/execution/drafts/data"
 import { type Actor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { readDataObject, readDataString } from "../shared/data"
@@ -28,6 +29,7 @@ export const consoleContextValidator = v.object({
 export const reply = internalMutation({
   args: {
     conversationId: v.id("conversations"),
+    runId: v.id("runs"),
     text: v.string(),
     parts: v.optional(v.array(v.record(v.string(), v.any()))),
   },
@@ -81,13 +83,15 @@ export async function pageConsoleMessages(
   return { ...result, page: result.page.map(consoleMessageView) }
 }
 
-/** Jori's reply into a console conversation, written as the self actor,
- *  with its parts stored under the message's data. */
+/** Jori's reply into a console conversation, written as the self actor. The
+ *  run's draft was this reply taking shape, so the message replaces it in
+ *  the same transaction. */
 export async function insertConsoleReply(
   ctx: MutationCtx,
   args: {
     conversationId: Id<"conversations">
     parts?: ReplyPart[]
+    runId: Id<"runs">
     text: string
   }
 ) {
@@ -97,7 +101,7 @@ export async function insertConsoleReply(
     throw new Error("Console conversation not found.")
   }
 
-  return await insertConsoleMessage(ctx, {
+  const message = await insertConsoleMessage(ctx, {
     actor: { kind: "self", externalId: "console" },
     conversation,
     data: args.parts === undefined ? undefined : { parts: args.parts },
@@ -105,6 +109,10 @@ export async function insertConsoleReply(
     now: Date.now(),
     text: args.text,
   })
+
+  await clearRunDraft(ctx, args.runId)
+
+  return message
 }
 
 export async function insertConsoleMessage(

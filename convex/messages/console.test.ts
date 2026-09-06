@@ -2,6 +2,7 @@ import { expect, test } from "vitest"
 import { type ReplyPart } from "../../contracts/replies/parts"
 import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { readRunDraft, writeRunDraft } from "../runs/execution/drafts/data"
 import {
   consoleMessageFolderId,
   insertConsoleMessage,
@@ -14,6 +15,7 @@ const parts: ReplyPart[] = [
   { kind: "reference", target: { kind: "table", id: "collections_1" } },
   { kind: "choices", options: [{ label: "Open it" }] },
 ]
+const runId = "runs:1" as Id<"runs">
 
 test("pages a conversation newest first with each side's role", async () => {
   const { database, ctx } = databaseContext()
@@ -27,12 +29,15 @@ test("pages a conversation newest first with each side's role", async () => {
     now: 1_000,
     text: "What changed this week?",
   })
+  await writeRunDraft(ctx, { runId, text: "Three", turn: 1 })
   const reply = await insertConsoleReply(ctx, {
     conversationId: conversation._id,
     parts,
+    runId,
     text: "Three things.",
   })
 
+  expect(await readRunDraft(ctx, runId)).toBeNull()
   expect(question).toMatchObject({
     surface: "console",
     type: "console.message",
@@ -86,7 +91,7 @@ test("replies only land in console conversations", async () => {
   })
 
   await expect(
-    insertConsoleReply(ctx, { conversationId, text: "Hello" })
+    insertConsoleReply(ctx, { conversationId, runId, text: "Hello" })
   ).rejects.toThrow("Console conversation not found.")
 })
 

@@ -11,6 +11,7 @@ import { sendOpenRouterChat } from "../../model/openrouter"
 import { ingestReasoning } from "./reasoning"
 import { readModelTokens } from "./tokens"
 import {
+  type ModelDelta,
   type ModelMessage,
   type ModelResponse,
   type ModelRuntime,
@@ -37,19 +38,24 @@ export class OpenRouterModel implements ModelRuntime {
 
   async complete(args: {
     messages: ModelMessage[]
+    onDelta?: (delta: ModelDelta) => void
     tools: ModelTool[]
   }): Promise<ModelResponse> {
-    const result = await sendOpenRouterChat({
-      messages: toChatMessages(args.messages),
-      model: joriModel,
-      sessionId: this.session,
-      // An empty tool list is left out rather than sent: providers differ on
-      // whether an empty array is a request without tools or a bad request.
-      ...(args.tools.length === 0
-        ? {}
-        : { toolChoice: "auto" as const, tools: args.tools.map(toChatTool) }),
-      ...modelSettings,
-    })
+    const result = await sendOpenRouterChat(
+      {
+        messages: toChatMessages(args.messages),
+        model: joriModel,
+        sessionId: this.session,
+        // An empty tool list is left out rather than sent: providers differ
+        // on whether an empty array is a request without tools or a bad
+        // request.
+        ...(args.tools.length === 0
+          ? {}
+          : { toolChoice: "auto" as const, tools: args.tools.map(toChatTool) }),
+        ...modelSettings,
+      },
+      args.onDelta
+    )
 
     return readModelResponse(result)
   }

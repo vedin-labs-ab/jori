@@ -1,9 +1,10 @@
 import { expect, test, vi } from "vitest"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { writeRunDraft } from "../runs/execution/drafts/data"
 import {
   listConsoleConversations,
-  readLiveRun,
+  readLiveState,
   sendConsoleMessage,
 } from "./console"
 import { findVisibleConsoleConversation } from "./resolve"
@@ -114,9 +115,9 @@ test("a blocked budget keeps the message without a run", async () => {
   expect(result.status).toBe("blocked")
   expect(await database.get(result.messageId)).not.toBeNull()
   expect(await rows(database, "runs")).toEqual([])
-  expect(await readLiveRun(ctx, await conversation(database, result))).toBe(
-    null
-  )
+  expect(
+    await readLiveState(ctx, await conversation(database, result))
+  ).toEqual({ run: null, draft: null })
 })
 
 test("lists a person's own conversations, most recently active first", async () => {
@@ -199,7 +200,7 @@ test("only the creator sees a console conversation", async () => {
   ).rejects.toThrow("Conversation not found.")
 })
 
-test("reports the run attached to the conversation's session", async () => {
+test("reports the session's run and the reply it is drafting", async () => {
   const { database, ctx } = databaseContext()
   const personId = await person(database)
   const sent = await sendConsoleMessage(ctx, {
@@ -209,10 +210,18 @@ test("reports the run attached to the conversation's session", async () => {
     text: "Go.",
   })
   const [run] = await rows<Doc<"runs">>(database, "runs")
+  const live = await conversation(database, sent)
 
-  expect(await readLiveRun(ctx, await conversation(database, sent))).toEqual({
-    id: run._id,
-    status: "queued",
+  expect(await readLiveState(ctx, live)).toEqual({
+    run: { id: run._id, status: "queued" },
+    draft: null,
+  })
+
+  await writeRunDraft(ctx, { runId: run._id, text: "On it", turn: 1 })
+
+  expect(await readLiveState(ctx, live)).toEqual({
+    run: { id: run._id, status: "queued" },
+    draft: "On it",
   })
 })
 

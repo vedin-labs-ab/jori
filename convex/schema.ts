@@ -24,6 +24,7 @@ import { identities } from "./persons/identity/schema"
 import { persons } from "./persons/schema"
 import { places } from "./places/schema"
 import { reactions } from "./reactions/schema"
+import { drafts } from "./runs/execution/drafts/schema"
 import { sandboxes } from "./runs/execution/sandboxes/schema"
 import { traces } from "./runs/execution/traces/schema"
 import { transcript } from "./runs/execution/transcript/schema"
@@ -67,6 +68,7 @@ export default defineSchema({
   transitions,
   traces,
   transcript,
+  drafts,
   waiters,
   sandboxes,
   permissions,

@@ -48,42 +48,45 @@ test("sends the transcript as one system message and the turns after it", async 
     tools: [readTool],
   })
 
-  expect(openRouter.send).toHaveBeenCalledWith({
-    messages: [
-      {
-        content: "You are Jori.\n\nThe workspace is Copperline.",
-        role: "system",
-      },
-      { content: "Ship the release.", role: "user" },
-      {
-        content: "Reading the notes.",
-        role: "assistant",
-        toolCalls: [
-          {
-            function: { arguments: '{"path":"notes.md"}', name: "read" },
-            id: "call_1",
-            type: "function",
-          },
-        ],
-      },
-      { content: "release checklist", role: "tool", toolCallId: "call_1" },
-    ],
-    model: joriModel,
-    sessionId: "run_1",
-    provider: { requireParameters: true },
-    reasoning: { effort: "medium" },
-    toolChoice: "auto",
-    tools: [
-      {
-        function: {
-          description: "Read a file.",
-          name: "read",
-          parameters: readTool.inputSchema,
+  expect(openRouter.send).toHaveBeenCalledWith(
+    {
+      messages: [
+        {
+          content: "You are Jori.\n\nThe workspace is Copperline.",
+          role: "system",
         },
-        type: "function",
-      },
-    ],
-  })
+        { content: "Ship the release.", role: "user" },
+        {
+          content: "Reading the notes.",
+          role: "assistant",
+          toolCalls: [
+            {
+              function: { arguments: '{"path":"notes.md"}', name: "read" },
+              id: "call_1",
+              type: "function",
+            },
+          ],
+        },
+        { content: "release checklist", role: "tool", toolCallId: "call_1" },
+      ],
+      model: joriModel,
+      sessionId: "run_1",
+      provider: { requireParameters: true },
+      reasoning: { effort: "medium" },
+      toolChoice: "auto",
+      tools: [
+        {
+          function: {
+            description: "Read a file.",
+            name: "read",
+            parameters: readTool.inputSchema,
+          },
+          type: "function",
+        },
+      ],
+    },
+    undefined
+  )
 })
 
 test("sends no tool list when there are none", async () => {
@@ -97,10 +100,26 @@ test("sends no tool list when there are none", async () => {
   })
 
   expect(openRouter.send).toHaveBeenCalledWith(
-    expect.objectContaining({ reasoning: { effort: "medium" } })
+    expect.objectContaining({ reasoning: { effort: "medium" } }),
+    undefined
   )
   expect(openRouter.send.mock.lastCall?.[0]).not.toHaveProperty("tools")
   expect(openRouter.send.mock.lastCall?.[0]).not.toHaveProperty("toolChoice")
+})
+
+test("hands the delta listener to the transport", async () => {
+  openRouter.send.mockResolvedValue(
+    chatResult({ content: "Done.", role: "assistant" })
+  )
+  const onDelta = vi.fn()
+
+  await new OpenRouterModel("run_1").complete({
+    messages: [{ content: "Ship the release.", role: "user" }],
+    onDelta,
+    tools: [],
+  })
+
+  expect(openRouter.send).toHaveBeenCalledWith(expect.anything(), onDelta)
 })
 
 test("reads a stop response with its reasoning and tokens", async () => {
