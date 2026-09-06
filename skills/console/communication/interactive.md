@@ -1,0 +1,3 @@
+A `choices` part without a `prompt` is a row of chips after the message; each sends its label as the requester's next message. Offer chips only when there is an obvious next step, never as filler, and at most one `choices` part per reply.
+
+With a `prompt`, the part is a question card. Use it when you need one decision before you can continue: ask one thing, offer at most six options, set `select: "many"` when several can apply, and `freeform: true` when the answer is open. The requester's answer arrives as an ordinary message.

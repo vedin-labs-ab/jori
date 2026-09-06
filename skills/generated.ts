@@ -1,4 +1,20 @@
 export const skills = {
+  console: {
+    name: "console",
+    description:
+      "Format console replies as Markdown with reference cards for the resources involved and choices the requester answers in one click.",
+    category: "communication",
+    surfaces: ["console"],
+    communication: {
+      parts: {
+        text: "Write the text first. It is the reply; parts hang off it, and a reader who sees nothing else should still have the answer.\n\nThe console renders Markdown:\n\n- Headings sparingly; most replies need none.\n- Tables are welcome when rows and columns make something easier to compare.\n- Fence code with a language.\n- Links as `[label](url)`.\n- No Slack `mrkdwn`: no `<url|label>` links, `*single-asterisk bold*`, or `<@id>` mentions.",
+        rich: "Add a `reference` part for every resource you created or changed, and for any the requester should open next. Use the id a tool returned, with its kind (`file`, `table`, `store`, `job`, `folder`, `run`). At most six per reply.\n\nNever describe a resource in prose that a reference could show: name it in the text, and let the card carry where it is and what it is.",
+        interactive:
+          "A `choices` part without a `prompt` is a row of chips after the message; each sends its label as the requester's next message. Offer chips only when there is an obvious next step, never as filler, and at most one `choices` part per reply.\n\nWith a `prompt`, the part is a question card. Use it when you need one decision before you can continue: ask one thing, offer at most six options, set `select: \"many\"` when several can apply, and `freeform: true` when the answer is open. The requester's answer arrives as an ordinary message.",
+      },
+    },
+    body: "## Text\n\nWrite the text first. It is the reply; parts hang off it, and a reader who sees nothing else should still have the answer.\n\nThe console renders Markdown:\n\n- Headings sparingly; most replies need none.\n- Tables are welcome when rows and columns make something easier to compare.\n- Fence code with a language.\n- Links as `[label](url)`.\n- No Slack `mrkdwn`: no `<url|label>` links, `*single-asterisk bold*`, or `<@id>` mentions.\n\n## Rich\n\nAdd a `reference` part for every resource you created or changed, and for any the requester should open next. Use the id a tool returned, with its kind (`file`, `table`, `store`, `job`, `folder`, `run`). At most six per reply.\n\nNever describe a resource in prose that a reference could show: name it in the text, and let the card carry where it is and what it is.\n\n## Interactive\n\nA `choices` part without a `prompt` is a row of chips after the message; each sends its label as the requester's next message. Offer chips only when there is an obvious next step, never as filler, and at most one `choices` part per reply.\n\nWith a `prompt`, the part is a question card. Use it when you need one decision before you can continue: ask one thing, offer at most six options, set `select: \"many\"` when several can apply, and `freeform: true` when the answer is open. The requester's answer arrives as an ordinary message.",
+  },
   "image-generation": {
     name: "image-generation",
     description:
@@ -11,7 +27,7 @@ export const skills = {
     description:
       "Format Slack replies with native `text`, Slack `mrkdwn`, documented Block Kit blocks, links, mentions, and escaping.",
     category: "communication",
-    associatedIntegrations: ["slack"],
+    surfaces: ["slack"],
     communication: {
       parts: {
         text: "Most replies are a line or two of plain `mrkdwn`. Reach for structure only when it earns its place.\n\nFormat Slack messages with Slack `mrkdwn`, never GitHub Markdown: no `[label](url)` links, `**double-asterisk bold**`, `# headings`, HTML, or pipe tables.\n\nUse Slack-native formatting:\n\n- `*bold*`, `_italic_`, `` `code` ``, and `>` quotes\n- Links as `<https://example.com|label>`\n- Direct mentions as `<@U123>` only with a real Slack user ID\n- Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax; emoji shortcodes don't render inside code",

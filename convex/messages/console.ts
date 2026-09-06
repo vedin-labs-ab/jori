@@ -1,5 +1,6 @@
 import { type PaginationOptions, paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
+import { type ReplyPart } from "../../contracts/replies/parts"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
 import { requireVisibleConsoleConversation } from "../conversations/resolve"
@@ -22,15 +23,22 @@ export const consoleContextValidator = v.object({
   id: v.id("folders"),
 })
 
+// The parts arrive validated against the reply contract by the tool that
+// sent them; here they are objects to store.
 export const reply = internalMutation({
   args: {
     conversationId: v.id("conversations"),
     text: v.string(),
-    parts: v.optional(v.array(v.any())),
+    parts: v.optional(v.array(v.record(v.string(), v.any()))),
   },
   returns: v.id("messages"),
   handler: async (ctx, args) => {
-    return (await insertConsoleReply(ctx, args))._id
+    const message = await insertConsoleReply(ctx, {
+      ...args,
+      parts: args.parts as ReplyPart[] | undefined,
+    })
+
+    return message._id
   },
 })
 
@@ -73,12 +81,13 @@ export async function pageConsoleMessages(
   return { ...result, page: result.page.map(consoleMessageView) }
 }
 
-/** Jori's reply into a console conversation, written as the self actor. */
+/** Jori's reply into a console conversation, written as the self actor,
+ *  with its parts stored under the message's data. */
 export async function insertConsoleReply(
   ctx: MutationCtx,
   args: {
     conversationId: Id<"conversations">
-    parts?: unknown[]
+    parts?: ReplyPart[]
     text: string
   }
 ) {

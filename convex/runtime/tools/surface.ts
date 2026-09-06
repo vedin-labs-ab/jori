@@ -1,7 +1,13 @@
 import { type JsonObject } from "../../../contracts/json"
+import { readReplyParts } from "../../../contracts/replies/parts"
 import { type SurfaceReactionTarget } from "../../../contracts/runtime/surface"
 import { readFinal } from "../../../contracts/runtime/tools"
+import { replyPartKinds } from "../../messages/capabilities"
 import { optionalString, requiredString } from "../../shared/input"
+import {
+  type MessageSurface,
+  messageSurfaceLabel,
+} from "../../shared/integrations"
 import { type AgentRuntime } from "../platform"
 
 export async function executeActiveSurfaceTool(
@@ -29,8 +35,8 @@ async function sendActiveReply(runtime: AgentRuntime, input: JsonObject) {
   const target = explicitTarget ?? activeSurface.target
 
   const result = await runtime.platform.sendReply({
-    blocks: optionalObjects(input.blocks, "blocks"),
-    parts: optionalObjects(input.parts, "parts"),
+    blocks: optionalBlocks(input.blocks),
+    parts: optionalReplyParts(input.parts, activeSurface.surface),
     runId: runtime.context.run.id,
     text: requiredString(input.text, "text"),
     ...(target === null ? {} : { target }),
@@ -84,16 +90,36 @@ function optionalReplyTarget(input: JsonObject, surface: string) {
   return commentId === undefined ? undefined : `linear:thread:${commentId}`
 }
 
-function optionalObjects(value: unknown, name: string) {
+function optionalBlocks(value: unknown) {
   if (value === undefined || value === null) {
     return undefined
   }
 
   if (!Array.isArray(value) || !value.every(isJsonObject)) {
-    throw new Error(`${name} must be an array of objects`)
+    throw new Error("blocks must be an array of objects")
   }
 
   return value.length === 0 ? undefined : value
+}
+
+/** Parts are checked against the surface's own contract here, so a
+ *  malformed part comes back to the model as this call's error. */
+function optionalReplyParts(value: unknown, surface: MessageSurface) {
+  if (value === undefined || value === null) {
+    return undefined
+  }
+
+  const kinds = replyPartKinds(surface)
+
+  if (kinds.length === 0) {
+    throw new Error(
+      `parts are not available on ${messageSurfaceLabel(surface)}`
+    )
+  }
+
+  const parts = readReplyParts(value, kinds)
+
+  return parts.length === 0 ? undefined : parts
 }
 
 function isJsonObject(value: unknown): value is JsonObject {

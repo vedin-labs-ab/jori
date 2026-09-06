@@ -1,5 +1,6 @@
 import { type ToolSurface } from "../../contracts/integrations"
 import { type JsonObject, type JsonValue } from "../../contracts/json"
+import { type ReplyPart } from "../../contracts/replies/parts"
 import {
   type DrainedSessionBatch,
   type RuntimeContext,
@@ -76,7 +77,7 @@ type ReactionArgs = RunRef & { reaction: string; target: SurfaceReactionTarget }
 
 type ReplyArgs = RunRef & {
   blocks?: JsonObject[]
-  parts?: JsonObject[]
+  parts?: ReplyPart[]
   target?: string
   text: string
 }

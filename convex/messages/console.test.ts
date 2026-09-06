@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { type ReplyPart } from "../../contracts/replies/parts"
 import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
@@ -9,6 +10,10 @@ import {
 } from "./console"
 
 const personId = "persons:1" as Id<"persons">
+const parts: ReplyPart[] = [
+  { kind: "reference", target: { kind: "table", id: "collections_1" } },
+  { kind: "choices", options: [{ label: "Open it" }] },
+]
 
 test("pages a conversation newest first with each side's role", async () => {
   const { database, ctx } = databaseContext()
@@ -24,7 +29,7 @@ test("pages a conversation newest first with each side's role", async () => {
   })
   const reply = await insertConsoleReply(ctx, {
     conversationId: conversation._id,
-    parts: [{ type: "text", text: "Three things." }],
+    parts,
     text: "Three things.",
   })
 
@@ -38,7 +43,7 @@ test("pages a conversation newest first with each side's role", async () => {
     surface: "console",
     actor: { kind: "self", externalId: "console" },
     mentioned: false,
-    data: { parts: [{ type: "text", text: "Three things." }] },
+    data: { parts },
   })
   expect(reply).not.toHaveProperty("personId")
   expect(reply.externalId).not.toBe(question.externalId)
@@ -57,7 +62,7 @@ test("pages a conversation newest first with each side's role", async () => {
       id: reply._id,
       role: "jori",
       text: "Three things.",
-      data: { parts: [{ type: "text", text: "Three things." }] },
+      data: { parts },
       createdAt: reply.createdAt,
     },
     {

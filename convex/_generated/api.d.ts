@@ -287,6 +287,7 @@ import type * as jobs_subscriptions_data from "../jobs/subscriptions/data.js";
 import type * as jobs_timing from "../jobs/timing.js";
 import type * as maintenance from "../maintenance.js";
 import type * as messages_actor from "../messages/actor.js";
+import type * as messages_capabilities from "../messages/capabilities.js";
 import type * as messages_console from "../messages/console.js";
 import type * as messages_data from "../messages/data.js";
 import type * as messages_events from "../messages/events.js";
@@ -894,6 +895,7 @@ declare const fullApi: ApiFromModules<{
   "jobs/timing": typeof jobs_timing;
   maintenance: typeof maintenance;
   "messages/actor": typeof messages_actor;
+  "messages/capabilities": typeof messages_capabilities;
   "messages/console": typeof messages_console;
   "messages/data": typeof messages_data;
   "messages/events": typeof messages_events;

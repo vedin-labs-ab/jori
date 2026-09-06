@@ -1,6 +1,6 @@
 import { replyAddress } from "../../../messages/targets"
 import {
-  type CommunicationGuidance,
+  type CommunicationInstructions,
   createCommunicationGuidance,
 } from "../../../skills/communication"
 import { type RuntimeSkill } from "../../../skills/runtime"
@@ -10,7 +10,7 @@ export function createCommunicationInstructions(
   input: AgentRuntimeInput,
   skills: readonly RuntimeSkill[],
   options: { activeSurface: boolean }
-): CommunicationGuidance | null {
+): CommunicationInstructions | null {
   if (
     !options.activeSurface ||
     input.type !== "message" ||
@@ -19,9 +19,5 @@ export function createCommunicationInstructions(
     return null
   }
 
-  return createCommunicationGuidance({
-    surface: input.surface,
-    profile: "agent-final-reply",
-    skills,
-  })
+  return createCommunicationGuidance({ surface: input.surface, skills })
 }
