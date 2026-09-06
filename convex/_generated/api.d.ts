@@ -134,6 +134,7 @@ import type * as files_attachments from "../files/attachments.js";
 import type * as files_console from "../files/console.js";
 import type * as files_data from "../files/data.js";
 import type * as files_mcp from "../files/mcp.js";
+import type * as files_names from "../files/names.js";
 import type * as files_records from "../files/records.js";
 import type * as files_share from "../files/share.js";
 import type * as folders_console from "../folders/console.js";
@@ -749,6 +750,7 @@ declare const fullApi: ApiFromModules<{
   "files/console": typeof files_console;
   "files/data": typeof files_data;
   "files/mcp": typeof files_mcp;
+  "files/names": typeof files_names;
   "files/records": typeof files_records;
   "files/share": typeof files_share;
   "folders/console": typeof folders_console;

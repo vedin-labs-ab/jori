@@ -8,7 +8,8 @@ import {
   normalizeStoredVisibility,
   type StoredVisibility,
 } from "../visibility/schema"
-import { canViewFile, type FileViewer, normalizeFileName } from "./data"
+import { canViewFile, type FileViewer } from "./data"
+import { normalizeFileName } from "./names"
 
 // File record writes shared by the console mutations: upload, details,
 // blob replacement, and removal. Every write starts from a viewable file.

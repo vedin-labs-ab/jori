@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { canViewFile, normalizeFileName } from "./data"
+import { canViewFile } from "./data"
 
 const owner = "person-owner" as Id<"persons">
 const other = "person-other" as Id<"persons">
@@ -58,14 +58,6 @@ test("files never cross organizations, whatever the visibility", async () => {
       }
     )
   ).toBe(false)
-})
-
-test("normalizes stored names to a safe single path segment", () => {
-  expect(normalizeFileName("  reports/q3/summary.pdf ")).toBe("summary.pdf")
-  expect(normalizeFileName("multi\nline\rname.txt")).toBe("multi line name.txt")
-  expect(normalizeFileName("")).toBe("file")
-  expect(normalizeFileName(null)).toBe("file")
-  expect(normalizeFileName("a".repeat(200))).toHaveLength(160)
 })
 
 function fakeFile(overrides: Partial<Doc<"files">>): Doc<"files"> {

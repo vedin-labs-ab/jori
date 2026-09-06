@@ -158,19 +158,6 @@ function matchesMimeType(file: Doc<"files">, mimeType: string | undefined) {
     : fileMimeType === mimeType
 }
 
-/** Keeps stored names to a safe single path segment; shared by the broker
- *  upload endpoint and the console. */
-export function normalizeFileName(value: string | null | undefined) {
-  const name = value
-    ?.trim()
-    .split(/[\\/]/)
-    .at(-1)
-    ?.replace(/[\r\n]/g, " ")
-    .slice(0, 160)
-
-  return name === undefined || name === "" ? "file" : name
-}
-
 async function summarizeFile(ctx: QueryCtx, file: Doc<"files">) {
   return {
     fileId: file._id,
