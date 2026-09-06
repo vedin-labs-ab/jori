@@ -105,7 +105,7 @@ function ChatsGroup({
     <SidebarGroup>
       <SidebarGroupLabel>Chats</SidebarGroupLabel>
       <SidebarGroupContent>
-        <ScrollArea className={cn(scrollFadeViewport, "max-h-24")}>
+        <ChatsScroll clamp={chats.length > visibleChats}>
           <SidebarMenu>
             {chats.map((chat) => (
               <SidebarMenuItem key={chat.id}>
@@ -121,9 +121,32 @@ function ChatsGroup({
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
-        </ScrollArea>
+        </ChatsScroll>
       </SidebarGroupContent>
     </SidebarGroup>
+  )
+}
+
+/** Three chats sit in the open; more than that scroll inside the same
+ *  height. A scroll viewport only scrolls with a definite height, so the
+ *  clamp is a height, not a maximum. */
+const visibleChats = 3
+
+function ChatsScroll({
+  children,
+  clamp,
+}: {
+  children: ReactNode
+  clamp: boolean
+}) {
+  if (!clamp) {
+    return children
+  }
+
+  return (
+    <ScrollArea className={cn(scrollFadeViewport, "h-24")}>
+      {children}
+    </ScrollArea>
   )
 }
 

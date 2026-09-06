@@ -13,8 +13,12 @@ export function useDocumentTitle(title: string | undefined) {
 
     document.title = title
 
+    // The router's head sets the next page's title before this cleanup
+    // runs, so restoring blindly would put the old title back over it.
     return () => {
-      document.title = previous
+      if (document.title === title) {
+        document.title = previous
+      }
     }
   }, [title])
 }
