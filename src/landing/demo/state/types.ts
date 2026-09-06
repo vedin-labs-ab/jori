@@ -1,4 +1,9 @@
+import {
+  type ChoicesAnswer,
+  type MessageContext,
+} from "@contracts/replies/answers"
 import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type ChatRun } from "@/shared/console/chat/types"
 import { type FiledResourceType } from "@/shared/console/folders/types"
 import { type Job } from "@/shared/console/jobs/types"
 import { type ShareRow } from "@/shared/console/materials/history"
@@ -9,6 +14,7 @@ import {
   type TableColumn,
   type TableRow,
 } from "@/shared/console/tables/types"
+import { type DemoConversation, type DemoReply } from "../fixtures/chat"
 import {
   type DemoFolder,
   type DemoMaterial,
@@ -22,6 +28,7 @@ import { type UsageRow } from "../fixtures/usage"
  *  section shows in the next. */
 export type DemoState = {
   activity: Record<string, ActivityResult>
+  chat: DemoChat
   folders: DemoFolder[]
   jobs: Job[]
   materials: DemoMaterial[]
@@ -29,6 +36,23 @@ export type DemoState = {
   runs: ExecutionItem[]
   shares: Record<string, ShareRow[]>
   usage: UsageRow[]
+}
+
+/** The conversations had, newest first, and the one run a chat can have
+ *  going: which conversation it answers, what it will say, and how much
+ *  of that it has said. */
+export type DemoChat = {
+  conversations: DemoConversation[]
+  live: DemoLiveReply | null
+}
+
+export type DemoLiveReply = {
+  conversationId: string
+  run: ChatRun
+  reply: DemoReply
+  startedAt: number
+  /** Characters of the reply revealed so far; negative while working. */
+  revealed: number
 }
 
 /** What a visibility applies to: a folder, a material, or a job. */
@@ -131,8 +155,24 @@ type AccessAction =
   | { type: "mintShare"; materialId: string; share: ShareRow }
   | { type: "revokeShare"; materialId: string; shareId: string }
 
+type ChatAction =
+  | {
+      type: "sendChatMessage"
+      at: number
+      conversationId: string
+      messageId: string
+      runId: string
+      text: string
+      context?: MessageContext
+      answer?: ChoicesAnswer
+      reply: DemoReply
+    }
+  | { type: "advanceChatReply"; at: number }
+  | { type: "stopChatRun"; at: number }
+
 export type DemoAction =
   | AccessAction
+  | ChatAction
   | FolderAction
   | JobAction
   | MaterialAction

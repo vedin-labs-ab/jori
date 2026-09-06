@@ -1,3 +1,4 @@
+import { demoConversations } from "../fixtures/chat"
 import { demoFolders } from "../fixtures/folders"
 import { demoJobs } from "../fixtures/jobs"
 import { demoMaterials } from "../fixtures/materials"
@@ -6,6 +7,7 @@ import { demoActivity } from "../fixtures/runs/activity"
 import { demoShares } from "../fixtures/shares"
 import { demoUsage } from "../fixtures/usage"
 import { reduceAccess } from "./access"
+import { reduceChat } from "./chat"
 import { reduceFolders } from "./folders"
 import { reduceJobs } from "./jobs"
 import { reduceMaterials } from "./materials"
@@ -19,6 +21,7 @@ import { reduceWrites } from "./writes"
 export function createWorkspace(now: number): DemoState {
   return {
     activity: demoActivity(now),
+    chat: { conversations: demoConversations(now), live: null },
     folders: demoFolders(now),
     jobs: demoJobs(now),
     materials: demoMaterials(now),
@@ -31,6 +34,7 @@ export function createWorkspace(now: number): DemoState {
 
 const reducers = [
   reduceAccess,
+  reduceChat,
   reduceFolders,
   reduceJobs,
   reduceMaterials,

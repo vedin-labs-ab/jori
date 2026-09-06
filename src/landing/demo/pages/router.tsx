@@ -26,6 +26,14 @@ const FilePage = lazy(async () => ({
 const JobPage = lazy(async () => ({
   default: (await import("./jobs/detail")).JobPage,
 }))
+// The chat carries the markdown renderer with its grammars and the
+// thread's primitives, so its pages arrive the same way.
+const ChatHomePage = lazy(async () => ({
+  default: (await import("./chat")).ChatHomePage,
+}))
+const ConversationPage = lazy(async () => ({
+  default: (await import("./chat")).ConversationPage,
+}))
 
 /** Each material surface: its list, and the page for one of its own. */
 const materialSurfaces: Record<
@@ -62,6 +70,18 @@ export function DemoPage({
 
   if (surface === "runs") {
     return <RunsPage openRunId={openRunId} />
+  }
+
+  if (surface === "chat") {
+    return (
+      <Suspense fallback={<ConsoleListLoading />}>
+        {id === undefined ? (
+          <ChatHomePage />
+        ) : (
+          <ConversationPage conversationId={id} />
+        )}
+      </Suspense>
+    )
   }
 
   const material = materialSurfaces[surface]

@@ -128,9 +128,11 @@ describe("job instructions field layout", () => {
     )
     const removePane = buttonGroup?.querySelector("[data-job-remove-content]")
 
+    const content = field.container.querySelector(".tiptap")
+
     expect(editorFrame?.className).toContain("[&_.tiptap]:leading-6")
-    expect(editorFrame?.className).toContain("[&_.tiptap_p]:min-h-6")
-    expect(editorFrame?.className).toContain("[&_.tiptap_p]:leading-6")
+    expect(content?.className).toContain("[&_p]:min-h-6")
+    expect(content?.className).toContain("[&_p]:leading-6")
     expect(badgeWrapper?.className).toContain("align-middle")
     expect(buttonGroup?.className).toContain("align-middle")
     expect(buttonGroup?.className).toContain("h-5")

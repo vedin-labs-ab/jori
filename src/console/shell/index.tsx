@@ -28,6 +28,8 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         sidebar={
           <ConsoleSidebar
             account={<SidebarUserButton />}
+            // The person's chats arrive with the chat binding.
+            chats={[]}
             folders={<SidebarFolders pathname={pathname} />}
             organization={<SidebarOrganizationSwitcher />}
             pathname={pathname}

@@ -5,15 +5,20 @@ import {
   Layers,
   Library,
   type LucideIcon,
+  Plus,
   Table2,
   Timeline,
   Workflow,
 } from "lucide-react"
+import { type ComponentProps } from "react"
+import { type ConsoleLink } from "./link"
 
 export type ConsoleSurface = {
   icon: LucideIcon
   label: string
   to: string
+  /** Active on the path itself alone, not on the pages under it. */
+  exact?: boolean
 }
 
 type ConsoleGroup = {
@@ -22,14 +27,21 @@ type ConsoleGroup = {
 }
 
 /**
- * The sidebar's structure. Activity stands alone at the top: it is the daily
- * surface, not a member of any category. "Resources" holds exactly the four
- * types that can be filed into folders. The platform group renders at the
- * sidebar's bottom, above the user button — low-frequency setup and
- * reference surfaces earn the quiet slot, not a louder label.
+ * The sidebar's structure. New chat and Activity stand alone at the top:
+ * the place to ask, then the daily surface, and neither a member of any
+ * category. The person's own chats follow them, then "Resources", which
+ * holds exactly the four types that can be filed into folders. The platform
+ * group renders at the sidebar's bottom, above the user button —
+ * low-frequency setup and reference surfaces earn the quiet slot, not a
+ * louder label.
  */
 export const consoleNavigation: readonly ConsoleGroup[] = [
-  { items: [{ icon: Timeline, label: "Activity", to: "/runs" }] },
+  {
+    items: [
+      { icon: Plus, label: "New chat", to: "/chat", exact: true },
+      { icon: Timeline, label: "Activity", to: "/runs" },
+    ],
+  },
   {
     label: "Resources",
     items: [
@@ -49,7 +61,10 @@ export const consolePlatformNavigation: readonly ConsoleSurface[] = [
 
 // Surfaces reached from within the sidebar's groups rather than its main
 // navigation still need a page title and a document title.
-const secondarySurfaces = [{ label: "Folders", to: "/folders" }] as const
+const secondarySurfaces = [
+  { label: "Chat", to: "/chat" },
+  { label: "Folders", to: "/folders" },
+] as const
 
 const consoleSurfaces = [
   ...consoleNavigation.flatMap((group) => group.items),
@@ -59,7 +74,7 @@ const consoleSurfaces = [
 export function getPageTitle(pathname: string) {
   return (
     [...consoleSurfaces, ...secondarySurfaces].find((item) =>
-      isNavigationActive(pathname, item.to)
+      isNavigationActive(pathname, item.to, "exact" in item && item.exact)
     )?.label ?? "Console"
   )
 }
@@ -108,6 +123,20 @@ export function consoleDocumentTitle(pathname: string) {
   return `${page} · Jori`
 }
 
-export function isNavigationActive(pathname: string, to: string) {
-  return pathname === to || pathname.startsWith(`${to}/`)
+export function isNavigationActive(
+  pathname: string,
+  to: string,
+  exact = false
+) {
+  return pathname === to || (!exact && pathname.startsWith(`${to}/`))
+}
+
+/** A conversation's page. The console's route for it lands with the chat
+ *  binding; until it does the router cannot name the path, so this is the
+ *  one place a destination is written as a path the router does not
+ *  check. */
+export function conversationDestination(
+  conversationId: string
+): Pick<ComponentProps<typeof ConsoleLink>, "to"> {
+  return { to: `/chat/${conversationId}` }
 }

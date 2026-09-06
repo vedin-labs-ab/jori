@@ -8,7 +8,10 @@ import {
 } from "../../access"
 import { type JobPolicyPermissions } from "../../access/policy"
 import { createJobInstructionDocument } from "../../editor/instructions/document"
-import { instructionMarkdownClassName } from "../../editor/instructions/editor/style"
+import {
+  instructionContentClassName,
+  instructionMarkdownClassName,
+} from "../../editor/instructions/editor/style"
 import { type Job } from "../../types"
 import { InstructionNodes } from "./nodes"
 
@@ -39,7 +42,7 @@ export function JobInstructions({
     >
       {/* The editor's styles address its content by TipTap's class; the
           same class puts this read-only copy under them. */}
-      <div className="tiptap">
+      <div className={instructionContentClassName}>
         <InstructionNodes
           nodes={document.content ?? []}
           permissions={permissions}
