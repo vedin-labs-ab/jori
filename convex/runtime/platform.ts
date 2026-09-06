@@ -103,6 +103,8 @@ type UploadArgs = RunRef & {
   name: string
 }
 
+type DraftArgs = { text: string; turn: number }
+
 /**
  * Everything a step of the loop does to the world outside its own process.
  * The loop, the tools and the traces see only this port, so they stay
@@ -112,6 +114,7 @@ export type RuntimePlatform = {
   addReaction(args: ReactionArgs): Promise<unknown>
   appendTranscript(messages: TranscriptMessage[]): Promise<void>
   callTool(args: ToolCallArgs): Promise<JsonValue>
+  clearDraft(): Promise<void>
   createAgentRun(args: AgentRunArgs): Promise<unknown>
   drainSession(args: SessionRef): Promise<DrainedSessionBatch>
   executeApproval(args: ApprovalRef & RunRef): Promise<string>
@@ -132,6 +135,7 @@ export type RuntimePlatform = {
   stopAgentRun(args: ChildRunArgs): Promise<unknown>
   tailTranscript(): Promise<TranscriptTail>
   uploadFile(args: UploadArgs): Promise<UploadedFile>
+  writeDraft(args: DraftArgs): Promise<void>
 }
 
 export type AgentRuntime = {
@@ -179,6 +183,12 @@ export class ActionPlatform implements RuntimePlatform {
   }
 
   callTool = (args: ToolCallArgs) => callRunTool(this.ctx, args)
+
+  clearDraft = async () => {
+    await this.mutation(internal.runs.execution.drafts.records.clear, {
+      runId: this.runId,
+    })
+  }
 
   createAgentRun = (args: AgentRunArgs) =>
     this.mutation(internal.runtime.agents.create, args)
@@ -274,6 +284,13 @@ export class ActionPlatform implements RuntimePlatform {
       ...args,
       organizationId: this.context.run.organizationId,
     })
+
+  writeDraft = async (args: DraftArgs) => {
+    await this.mutation(internal.runs.execution.drafts.records.write, {
+      ...args,
+      runId: this.runId,
+    })
+  }
 
   private get runId() {
     return this.context.run.id

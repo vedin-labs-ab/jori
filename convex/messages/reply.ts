@@ -36,6 +36,7 @@ export async function sendSurfaceReply(
       await ctx.runMutation(internal.messages.console.reply, {
         conversationId: address.conversationId,
         parts: args.parts,
+        runId: input.run._id,
         text: args.text,
       })
       return

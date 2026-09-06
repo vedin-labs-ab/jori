@@ -5,6 +5,7 @@ import { meterModelUsage } from "../../../billing/meter"
 import { continuePendingConversationRun } from "../../../conversations/continuation"
 import { recordUsageEnded } from "../../../usage/record"
 import { stopRunChildren } from "../../tree"
+import { clearRunDraft } from "../drafts/data"
 import { wakeParentForTerminalRun } from "../waiters/data"
 import { type traceData } from "./schema"
 import { recordTrace } from "./write"
@@ -46,6 +47,8 @@ export async function recordWorkerTrace(
       // for their parent, so nothing keeps running for a consumer that is
       // gone.
       await stopRunChildren(ctx, args.runId)
+      // A reply still in the making has no turn left to finish it.
+      await clearRunDraft(ctx, args.runId)
     }
     if (
       args.type === "model.completed" &&

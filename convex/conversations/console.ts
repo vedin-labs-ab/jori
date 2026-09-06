@@ -14,6 +14,7 @@ import {
   resolveCurrentPerson,
 } from "../persons/account"
 import { resolvePersonByIdentity } from "../persons/identity/links"
+import { readRunDraft } from "../runs/execution/drafts/data"
 import { findSession } from "../sessions/data"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
@@ -72,7 +73,8 @@ export const list = query({
   },
 })
 
-/** The run currently attached to the conversation's session, if any. */
+/** The run currently attached to the conversation's session, if any, and
+ *  the reply it is composing. */
 export const live = query({
   args: {
     organizationId: v.string(),
@@ -100,7 +102,7 @@ export const live = query({
 
     return {
       status: "ready" as const,
-      run: await readLiveRun(ctx, conversation),
+      ...(await readLiveState(ctx, conversation)),
     }
   },
 })
@@ -169,7 +171,9 @@ export async function listConsoleConversations(
   return { ...result, page: result.page.map(conversationView) }
 }
 
-export async function readLiveRun(
+/** The session's run and the draft of the reply it is writing, which is
+ *  there exactly while a reply streams. */
+export async function readLiveState(
   ctx: QueryLikeCtx,
   conversation: Doc<"conversations">
 ) {
@@ -177,7 +181,14 @@ export async function readLiveRun(
   const run =
     session?.runId === undefined ? null : await ctx.db.get(session.runId)
 
-  return run === null ? null : { id: run._id, status: run.status }
+  if (run === null) {
+    return { run: null, draft: null }
+  }
+
+  return {
+    run: { id: run._id, status: run.status },
+    draft: await readRunDraft(ctx, run._id),
+  }
 }
 
 // The conversation's key is its own id, so console messages resolve their

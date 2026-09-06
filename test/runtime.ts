@@ -181,7 +181,7 @@ function queuedModelResponse(response: QueuedModelResponse): ModelResponse {
       }
 }
 
-function emptyTokens(): RuntimeModelTokens {
+export function emptyTokens(): RuntimeModelTokens {
   return {
     cacheRead: 0,
     cacheWrite: 0,

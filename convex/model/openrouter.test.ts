@@ -1,5 +1,14 @@
-import { afterEach, describe, expect, test } from "vitest"
-import { requireOpenRouterConfig } from "./openrouter"
+import { type ChatResult, type ChatStreamChunk } from "@openrouter/sdk/models"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { requireOpenRouterConfig, sendOpenRouterChat } from "./openrouter"
+
+const sdk = vi.hoisted(() => ({ send: vi.fn() }))
+
+vi.mock("@openrouter/sdk", () => ({
+  OpenRouter: class {
+    chat = { send: sdk.send }
+  },
+}))
 
 const environmentNames = [
   "CONVEX_SITE_URL",
@@ -64,3 +73,107 @@ describe("openrouter client", () => {
     })
   })
 })
+
+describe("openrouter chat", () => {
+  const request = {
+    messages: [{ content: "Hi", role: "user" as const }],
+    model: "openai/gpt-5",
+  }
+
+  beforeEach(() => {
+    process.env.OPENROUTER_API_KEY = "key"
+    sdk.send.mockReset()
+  })
+
+  test("streams the request and folds the chunks", async () => {
+    const onDelta = vi.fn()
+
+    sdk.send.mockResolvedValue(stream([chunk("Hel"), chunk("lo", "stop")]))
+
+    const result = await sendOpenRouterChat(request, onDelta)
+
+    expect(sdk.send).toHaveBeenCalledTimes(1)
+    expect(sdk.send).toHaveBeenCalledWith({
+      chatRequest: { ...request, stream: true },
+    })
+    expect(result.choices[0]?.message.content).toBe("Hello")
+    expect(onDelta).toHaveBeenCalledTimes(2)
+  })
+
+  test("takes a whole result answered to a stream request", async () => {
+    sdk.send.mockResolvedValue(whole("Done."))
+
+    expect(await sendOpenRouterChat(request)).toEqual(whole("Done."))
+    expect(sdk.send).toHaveBeenCalledTimes(1)
+  })
+
+  test("asks again without streaming when no stream opens", async () => {
+    sdk.send
+      .mockRejectedValueOnce(new Error("Streaming is not supported"))
+      .mockResolvedValueOnce(whole("Done."))
+
+    expect(await sendOpenRouterChat(request)).toEqual(whole("Done."))
+    expect(sdk.send).toHaveBeenCalledTimes(2)
+    expect(sdk.send).toHaveBeenLastCalledWith({
+      chatRequest: { ...request, stream: false },
+    })
+  })
+
+  test("a stream that breaks after its first chunk fails the call", async () => {
+    sdk.send.mockResolvedValue(
+      (async function* () {
+        yield chunk("Hel")
+        throw new Error("Connection reset")
+      })()
+    )
+
+    await expect(sendOpenRouterChat(request)).rejects.toThrow(
+      "Connection reset"
+    )
+    expect(sdk.send).toHaveBeenCalledTimes(1)
+  })
+
+  test("a plain answer to the second request is still required", async () => {
+    sdk.send
+      .mockRejectedValueOnce(new Error("Streaming is not supported"))
+      .mockResolvedValueOnce(stream([]))
+
+    await expect(sendOpenRouterChat(request)).rejects.toThrow(
+      "OpenRouter returned a stream for a non-streaming request"
+    )
+  })
+})
+
+async function* stream(chunks: ChatStreamChunk[]) {
+  yield* chunks
+}
+
+function chunk(
+  content: string,
+  finishReason: "stop" | null = null
+): ChatStreamChunk {
+  return {
+    choices: [{ delta: { content }, finishReason, index: 0 }],
+    created: 1,
+    id: "gen_1",
+    model: "openai/gpt-5",
+    object: "chat.completion.chunk",
+  }
+}
+
+function whole(content: string): ChatResult {
+  return {
+    choices: [
+      {
+        finishReason: "stop",
+        index: 0,
+        message: { content, role: "assistant" },
+      },
+    ],
+    created: 1,
+    id: "gen_1",
+    model: "openai/gpt-5",
+    object: "chat.completion",
+    systemFingerprint: null,
+  }
+}

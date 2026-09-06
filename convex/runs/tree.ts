@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import { recordUsageEnded } from "../usage/record"
+import { clearRunDraft } from "./execution/drafts/data"
 import { recordTrace } from "./execution/traces/write"
 import { wakeParentForTerminalRun, wakeRun } from "./execution/waiters/data"
 
@@ -60,6 +61,7 @@ async function stopRun(
   // Only live runs reach here, so the count rides the one patch that ends
   // this run. A stop is an ending, not a failure.
   await recordUsageEnded(ctx, { run, failed: false })
+  await clearRunDraft(ctx, run._id)
   await wakeRun(ctx, { runId: run._id, reason: "cancelled" })
   await wakeParentForTerminalRun(ctx, run._id)
 }

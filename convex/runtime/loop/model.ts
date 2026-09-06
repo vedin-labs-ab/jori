@@ -18,6 +18,7 @@ import { syncSessionReactions } from "../sessions"
 import { modelTools } from "../tools/index"
 import { formatError } from "../trace/events"
 import { recordRuntimeEvent } from "../trace/record"
+import { type Draft, openDraft } from "./draft"
 import { promptMessages } from "./transcript"
 
 /** One turn's model call, as a workflow step. Reactions are synced first so
@@ -104,6 +105,7 @@ export async function completeModelStep(args: {
 }) {
   const sequence = modelSequence(args.turn)
   const startedAt = Date.now()
+  const draft = openDraft(args.runtime, args.turn)
   // Recorded concurrently with the model call and joined before the outcome
   // trace, so the started trace always lands first and a failed trace write
   // still aborts the step.
@@ -119,12 +121,10 @@ export async function completeModelStep(args: {
   let response: ModelResponse
 
   try {
-    response = await args.model.complete({
-      messages: args.messages,
-      tools: args.tools,
-    })
+    response = await completeModel(args, draft)
   } catch (error) {
     await startedPending.catch(() => undefined)
+    await draft?.discard()
     await recordRuntimeEvent(args.runtime.platform, args.runtime.context, {
       data: { error: formatError(error) },
       sequence,
@@ -134,6 +134,7 @@ export async function completeModelStep(args: {
   }
 
   await startedPending
+  await draft?.close(response)
   await recordModelCompleted(args.runtime, {
     durationMs: Date.now() - startedAt,
     response,
@@ -141,6 +142,23 @@ export async function completeModelStep(args: {
   })
 
   return response
+}
+
+async function completeModel(
+  args: {
+    messages: TranscriptMessage[]
+    model: ModelRuntime
+    tools: ModelTool[]
+  },
+  draft: Draft | null
+) {
+  await draft?.reset()
+
+  return await args.model.complete({
+    messages: args.messages,
+    tools: args.tools,
+    ...(draft === null ? {} : { onDelta: draft.onDelta }),
+  })
 }
 
 function assistantMessage(response: ModelResponse): TranscriptMessage {

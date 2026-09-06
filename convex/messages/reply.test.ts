@@ -24,6 +24,7 @@ test("a console reply is written into the conversation through a mutation", asyn
   expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
     conversationId,
     parts,
+    runId: "runs:1",
     text: "Done.",
   })
 })
