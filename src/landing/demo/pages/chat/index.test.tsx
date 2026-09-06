@@ -38,7 +38,9 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   ).toBeDefined()
   expect(screen.getByRole("button", { name: "Stop" })).toBeDefined()
 
-  // The reply arrives, with the job it names and its question.
+  // The thinking shows first, then the reply arrives, with the job it
+  // names and its question.
+  expect(await screen.findByText("Thinking")).toBeDefined()
   expect(await screen.findByText(/Leave/, {}, { timeout: 8000 })).toBeDefined()
   expect(
     await screen.findByRole("button", { name: /^Renewals watch/ })

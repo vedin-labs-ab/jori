@@ -189,8 +189,9 @@ export async function listConsoleConversations(
 }
 
 /** The session's run — how it stands, and how it ended when it did not
- *  finish — and the draft of the reply it is writing, which is there
- *  exactly while a reply streams. */
+ *  finish — and the draft of the reply it is writing: the reasoning while
+ *  the model thinks, then the text, and nothing before either has been
+ *  said. */
 export async function readLiveState(
   ctx: QueryLikeCtx,
   conversation: Doc<"conversations">

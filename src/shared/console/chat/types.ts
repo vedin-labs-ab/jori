@@ -45,6 +45,13 @@ export type ChatRun = {
   endedAt?: number
 }
 
+/** The turn Jori is writing: the reasoning while the model thinks, then
+ *  the reply's text as far as it has come. */
+export type ChatDraft = {
+  reasoning: string
+  text: string
+}
+
 /** What a reference part or a message's context points at. */
 export type ReferenceTarget = {
   kind: ReferenceKind

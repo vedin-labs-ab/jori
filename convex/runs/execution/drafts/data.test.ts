@@ -10,13 +10,32 @@ test("a run's draft is one row, rewritten whole and gone when cleared", async ()
 
   expect(await readRunDraft(ctx, runId)).toBeNull()
 
-  await writeRunDraft(ctx, { runId, text: "On", turn: 1 })
-  await writeRunDraft(ctx, { runId, text: "On it.", turn: 1 })
+  await writeRunDraft(ctx, { runId, reasoning: "Checking.", text: "", turn: 1 })
+  await writeRunDraft(ctx, {
+    runId,
+    reasoning: "Checking.",
+    text: "On",
+    turn: 1,
+  })
+  await writeRunDraft(ctx, {
+    runId,
+    reasoning: "Checking.",
+    text: "On it.",
+    turn: 1,
+  })
 
   expect(await rows(database)).toEqual([
-    expect.objectContaining({ runId, text: "On it.", turn: 1 }),
+    expect.objectContaining({
+      runId,
+      reasoning: "Checking.",
+      text: "On it.",
+      turn: 1,
+    }),
   ])
-  expect(await readRunDraft(ctx, runId)).toBe("On it.")
+  expect(await readRunDraft(ctx, runId)).toEqual({
+    reasoning: "Checking.",
+    text: "On it.",
+  })
 
   await clearRunDraft(ctx, runId)
   await clearRunDraft(ctx, runId)
@@ -25,11 +44,26 @@ test("a run's draft is one row, rewritten whole and gone when cleared", async ()
   expect(await readRunDraft(ctx, runId)).toBeNull()
 })
 
+test("a row with nothing said yet reads as no draft", async () => {
+  const { ctx } = databaseContext()
+
+  await writeRunDraft(ctx, { runId, reasoning: " \n", text: "", turn: 1 })
+
+  expect(await readRunDraft(ctx, runId)).toBeNull()
+
+  await writeRunDraft(ctx, { runId, reasoning: "Reading", text: "", turn: 1 })
+
+  expect(await readRunDraft(ctx, runId)).toEqual({
+    reasoning: "Reading",
+    text: "",
+  })
+})
+
 test("a later turn takes the row over", async () => {
   const { database, ctx } = databaseContext()
 
-  await writeRunDraft(ctx, { runId, text: "First", turn: 1 })
-  await writeRunDraft(ctx, { runId, text: "Se", turn: 2 })
+  await writeRunDraft(ctx, { runId, reasoning: "", text: "First", turn: 1 })
+  await writeRunDraft(ctx, { runId, reasoning: "", text: "Se", turn: 2 })
 
   expect(await rows(database)).toEqual([
     expect.objectContaining({ text: "Se", turn: 2 }),

@@ -1,4 +1,4 @@
-import { type ChatMessage } from "@/shared/console/chat/types"
+import { type ChatDraft, type ChatMessage } from "@/shared/console/chat/types"
 import { type DemoConversation } from "../fixtures/chat"
 import { type DemoAction, type DemoChat, type DemoState } from "./types"
 
@@ -82,8 +82,8 @@ function stopped(chat: DemoChat, at: number): DemoChat {
       }
 }
 
-/** The run reveals the next stretch of its reply, or, once the whole
- *  reply is out, files it as Jori's message and ends. */
+/** The run reveals the next stretch of its reply, thinking first, or,
+ *  once the whole reply is out, files it as Jori's message and ends. */
 function advanced(chat: DemoChat, at: number): DemoChat {
   const { live } = chat
 
@@ -93,7 +93,7 @@ function advanced(chat: DemoChat, at: number): DemoChat {
 
   const revealed = Math.max(0, live.revealed) + revealStep
 
-  if (revealed < live.reply.text.length) {
+  if (revealed < live.reply.reasoning.length + live.reply.text.length) {
     return { ...chat, live: { ...live, revealed } }
   }
 
@@ -119,13 +119,26 @@ function advanced(chat: DemoChat, at: number): DemoChat {
   }
 }
 
-/** The reply's text so far, or nothing while the run is still working. */
-export function liveDraft(chat: DemoChat, conversationId: string) {
+/** The turn so far, thinking then text, or nothing while the run is still
+ *  working. */
+export function liveDraft(
+  chat: DemoChat,
+  conversationId: string
+): ChatDraft | null {
   const { live } = chat
 
-  return live === null ||
+  if (
+    live === null ||
     live.conversationId !== conversationId ||
     live.revealed < 0
-    ? null
-    : live.reply.text.slice(0, live.revealed)
+  ) {
+    return null
+  }
+
+  const { reasoning, text } = live.reply
+
+  return {
+    reasoning: reasoning.slice(0, live.revealed),
+    text: text.slice(0, Math.max(0, live.revealed - reasoning.length)),
+  }
 }

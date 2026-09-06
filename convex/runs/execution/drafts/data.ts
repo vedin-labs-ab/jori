@@ -2,16 +2,37 @@ import { type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { type QueryLikeCtx } from "../../../shared/context"
 
-/** The run's draft text as it stands, or nothing when no reply is being
- *  composed. */
-export async function readRunDraft(ctx: QueryLikeCtx, runId: Id<"runs">) {
-  return (await findRunDraft(ctx, runId))?.text ?? null
+/** What a run has said of its reply so far: the reasoning it is thinking
+ *  through, then the text. */
+export type RunDraft = {
+  reasoning: string
+  text: string
 }
 
-/** Replace the run's draft with the text so far. */
+/** The run's draft as it stands, or nothing when no reply is being
+ *  composed. A row that says nothing yet, neither text nor reasoning, reads
+ *  as no draft too, so the console never shows an empty turn. */
+export async function readRunDraft(
+  ctx: QueryLikeCtx,
+  runId: Id<"runs">
+): Promise<RunDraft | null> {
+  const draft = await findRunDraft(ctx, runId)
+
+  if (draft === null) {
+    return null
+  }
+
+  const reasoning = draft.reasoning ?? ""
+
+  return draft.text === "" && reasoning.trim() === ""
+    ? null
+    : { reasoning, text: draft.text }
+}
+
+/** Replace the run's draft with the reply so far. */
 export async function writeRunDraft(
   ctx: MutationCtx,
-  args: { runId: Id<"runs">; text: string; turn: number }
+  args: RunDraft & { runId: Id<"runs">; turn: number }
 ) {
   const existing = await findRunDraft(ctx, args.runId)
   const updatedAt = Date.now()
@@ -23,6 +44,7 @@ export async function writeRunDraft(
   }
 
   await ctx.db.patch(existing._id, {
+    reasoning: args.reasoning,
     text: args.text,
     turn: args.turn,
     updatedAt,

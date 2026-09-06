@@ -12,6 +12,7 @@ import {
 import { ConsoleListLoading } from "../../list/loading"
 import { Markdown } from "../../markdown"
 import {
+  type ChatDraft,
   type ChatMessage,
   type ChatRun,
   endedWithoutReply,
@@ -21,6 +22,7 @@ import {
 } from "../types"
 import { answeredParts, answerKey } from "./answers"
 import { ChoiceChips } from "./choices"
+import { ChatDraftTurn } from "./draft"
 import { JoriMessage, PersonMessage } from "./message"
 import { RunNotice } from "./notice"
 import { QuestionCard } from "./question"
@@ -56,8 +58,8 @@ export function ChatThread({
   progress,
   resolveReference,
 }: {
-  /** The reply's text so far, while one is streaming. */
-  draft: string | null
+  /** The turn so far, while one is streaming. */
+  draft: ChatDraft | null
   hasMore: boolean
   isLoading: boolean
   live: ChatRun | null
@@ -173,7 +175,7 @@ function ThreadTail({
   messages,
   progress,
 }: {
-  draft: string | null
+  draft: ChatDraft | null
   live: ChatRun | null
   messages: ChatMessage[]
   progress: ReactNode
@@ -188,7 +190,7 @@ function ThreadTail({
           streaming={draft !== null}
         >
           {isLive ? progress : null}
-          {draft === null ? null : <Markdown streaming text={draft} />}
+          {draft === null ? null : <ChatDraftTurn draft={draft} />}
         </JoriMessage>
       </MessageScrollerItem>
     )

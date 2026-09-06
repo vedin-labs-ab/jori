@@ -217,11 +217,13 @@ test("reports the session's run and the reply it is drafting", async () => {
     draft: null,
   })
 
-  await writeRunDraft(ctx, { runId: run._id, text: "On it", turn: 1 })
+  const draft = { reasoning: "Reading the notes.", text: "On it" }
+
+  await writeRunDraft(ctx, { ...draft, runId: run._id, turn: 1 })
 
   expect(await readLiveState(ctx, live)).toEqual({
     run: { id: run._id, status: "queued" },
-    draft: "On it",
+    draft,
   })
 
   // A run that did not finish says how it ended, so the thread can.

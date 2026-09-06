@@ -7,6 +7,7 @@ export const write = internalMutation({
     runId: v.id("runs"),
     turn: v.number(),
     text: v.string(),
+    reasoning: v.string(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
