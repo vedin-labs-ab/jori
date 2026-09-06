@@ -1,4 +1,5 @@
 import { useEffect } from "react"
+import { isLiveRun } from "@/shared/console/chat/types"
 import { type DemoActions } from "../../state/actions"
 import { type DemoLiveReply } from "../../state/types"
 
@@ -13,7 +14,8 @@ export function useReplyStream(
   live: DemoLiveReply | null,
   actions: DemoActions
 ) {
-  const revealed = live?.revealed
+  const revealed =
+    live !== null && isLiveRun(live.run) ? live.revealed : undefined
 
   useEffect(() => {
     if (revealed === undefined) {

@@ -14,7 +14,6 @@ import { findVisibleConsoleConversation } from "./resolve"
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 
 const organizationId = "org"
-const folderId = "folders:7" as Id<"folders">
 const paginationOpts = { cursor: null, numItems: 10 }
 
 test("the first message opens a person-scoped conversation and starts a run", async () => {
@@ -65,32 +64,6 @@ test("the first message opens a person-scoped conversation and starts a run", as
     },
   })
   expect(run).not.toHaveProperty("folderId")
-})
-
-test("a conversation opened from a folder files every run under it", async () => {
-  const { database, ctx } = databaseContext()
-  const personId = await person(database)
-
-  const first = await sendConsoleMessage(ctx, {
-    organizationId,
-    personId,
-    profile: {},
-    text: "Summarize this folder.",
-    context: { kind: "folder", id: folderId },
-  })
-  await finishRun(database)
-  const second = await sendConsoleMessage(ctx, {
-    organizationId,
-    personId,
-    profile: {},
-    conversationId: first.conversationId,
-    text: "Now draft the update.",
-  })
-
-  expect(second.conversationId).toBe(first.conversationId)
-  expect(
-    (await rows<Doc<"runs">>(database, "runs")).map((run) => run.folderId)
-  ).toEqual([folderId, folderId])
 })
 
 test("an answer to a reply's choices travels with the message", async () => {
@@ -249,6 +222,20 @@ test("reports the session's run and the reply it is drafting", async () => {
   expect(await readLiveState(ctx, live)).toEqual({
     run: { id: run._id, status: "queued" },
     draft: "On it",
+  })
+
+  // A run that did not finish says how it ended, so the thread can.
+  await database.patch(run._id, {
+    status: "failed",
+    error: "Sandbox timed out",
+    endedAt: 5_000,
+  })
+
+  expect((await readLiveState(ctx, live)).run).toEqual({
+    id: run._id,
+    status: "failed",
+    error: "Sandbox timed out",
+    endedAt: 5_000,
   })
 })
 

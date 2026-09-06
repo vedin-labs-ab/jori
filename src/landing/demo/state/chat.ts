@@ -12,7 +12,7 @@ export function reduceChat(state: DemoState, action: DemoAction): DemoState {
     case "advanceChatReply":
       return { ...state, chat: advanced(state.chat, action.at) }
     case "stopChatRun":
-      return { ...state, chat: { ...state.chat, live: null } }
+      return { ...state, chat: stopped(state.chat, action.at) }
     default:
       return state
   }
@@ -63,6 +63,23 @@ function sent(
       revealed: -1,
     },
   }
+}
+
+/** The person stops the run: it ends as stopped, its reply unsent, and
+ *  the thread says so until the next message starts another. */
+function stopped(chat: DemoChat, at: number): DemoChat {
+  const { live } = chat
+
+  return live === null
+    ? chat
+    : {
+        ...chat,
+        live: {
+          ...live,
+          run: { ...live.run, status: "stopped", endedAt: at },
+          revealed: -1,
+        },
+      }
 }
 
 /** The run reveals the next stretch of its reply, or, once the whole

@@ -1,4 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type ResolvedContext } from "../../messages/references"
 import { type Access } from "../../shared/integrations"
 import { type MessageCauseKind, type RunSnapshot } from "../schema"
 import { jobSnapshotBody, messageSnapshotBody } from "./source"
@@ -28,6 +29,8 @@ export function createJobRunSnapshot(input: {
 }
 
 export function createMessageRunSnapshot(input: {
+  /** What a console conversation was opened about, once resolved. */
+  context?: ResolvedContext
   integration: Doc<"integrations"> | null
   kind: MessageCauseKind
   message: Doc<"messages">

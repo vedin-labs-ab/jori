@@ -4,7 +4,8 @@ import {
   inserted,
   type Seed,
 } from "../../test/convex/conversations"
-import { id } from "../../test/convex/database"
+import { databaseContext, id } from "../../test/convex/database"
+import { folderDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { startRun } from "../runs/execution/workflow"
 import { startMessageRun } from "./data"
@@ -110,63 +111,64 @@ test("starts existing conversations without sessions as mentions", async () => {
   ])
 })
 
-test("console runs carry no integration and file under the opening folder", async () => {
-  const conversation = consoleConversationDoc()
-  const opening = {
-    ...message("Summarize this folder."),
-    _id: id<"messages">("message-opening"),
+test("console runs carry no integration and file under the opening folder, named in the snapshot", async () => {
+  const { database, ctx } = databaseContext()
+  const organizationId = "organization"
+  const personId = await database.insert("persons", { organizationId })
+  const folderId = await database.insert(
+    "folders",
+    folderDoc({ organizationId, createdBy: personId })
+  )
+  const conversationId = await database.insert("conversations", {
+    organizationId,
+    surface: "console",
+    externalId: "",
+    scope: "person",
+    createdBy: personId,
+    updatedAt: 0,
+  })
+
+  await database.patch(conversationId, { externalId: conversationId })
+
+  const conversation = (await database.get(
+    conversationId
+  )) as unknown as Doc<"conversations">
+  const consoleMessage = (text: string, createdAt: number) => ({
+    ...message(text),
     surface: "console" as const,
     integrationId: undefined,
     conversationId: conversation.externalId,
-    data: { context: { kind: "folder", id: "folder-1" } },
-    createdAt: 100,
-  }
-  const ctx = fakeMutationCtx([
-    ["conversations", conversation],
-    ["messages", opening],
-  ])
+    createdAt,
+  })
+
+  await database.insert("messages", {
+    ...consoleMessage("Summarize this folder.", 100),
+    data: { context: { kind: "folder", id: folderId } },
+  })
 
   const result = await startMessageRun(ctx, {
     conversation,
     integration: null,
-    message: {
-      ...message("Now draft the update."),
-      surface: "console",
-      integrationId: undefined,
-      conversationId: conversation.externalId,
-    },
-    createdBy: "person" as Id<"persons">,
+    message: consoleMessage("Now draft the update.", 1000),
+    createdBy: personId,
     externalId: conversation.externalId,
     now: 1000,
   })
 
   expect(result.status).toBe("started")
-  expect(inserted(ctx, "conversations")).toEqual([])
-  expect(inserted(ctx, "runs")).toEqual([
+  expect(await database.query("runs").withIndex("by_id").collect()).toEqual([
     expect.objectContaining({
       audience: "person",
       conversationId: conversation._id,
-      folderId: "folder-1",
-      principal: { kind: "person", personId: "person" },
+      folderId,
+      principal: { kind: "person", personId },
       snapshot: expect.objectContaining({
         source: { type: "message", surface: "jori" },
+        context: [{ type: "folder", label: "Projects" }],
       }),
     }),
   ])
 })
-
-function consoleConversationDoc(): Doc<"conversations"> {
-  return {
-    _id: id<"conversations">("conversation-doc"),
-    _creationTime: 0,
-    organizationId: "organization",
-    surface: "console",
-    externalId: "conversation-doc",
-    scope: "person",
-    createdBy: "person" as Id<"persons">,
-    updatedAt: 0,
-  }
-}
 
 function conversationDoc(): Doc<"conversations"> {
   return {

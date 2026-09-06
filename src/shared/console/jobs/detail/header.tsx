@@ -1,16 +1,19 @@
 import { Loader2, Pause, Pencil, Play } from "lucide-react"
+import { type ReactNode } from "react"
 import { ConsoleHeaderActions, ConsoleHeaderButton } from "../../layout"
 import { type Job, jobControlAction } from "../types"
 
 /** A job page's header keeps the two actions worth a button: pausing or
- *  resuming the job, and opening its editor. Everything else hangs off
- *  its name in the breadcrumb. */
+ *  resuming the job, and opening its editor, after whatever the host adds.
+ *  Everything else hangs off its name in the breadcrumb. */
 export function JobHeaderActions({
+  children,
   isControlling,
   job,
   onEdit,
   onPausedChange,
 }: {
+  children?: ReactNode
   isControlling: boolean
   job: Job
   onEdit: (job: Job) => void
@@ -20,6 +23,7 @@ export function JobHeaderActions({
 
   return (
     <ConsoleHeaderActions>
+      {children}
       {control === undefined ? null : (
         <ConsoleHeaderButton
           disabled={isControlling}

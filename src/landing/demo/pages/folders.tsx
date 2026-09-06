@@ -3,6 +3,7 @@ import { Plus } from "lucide-react"
 import { useContext, useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { NewInFolderMenu } from "@/shared/console/folders/create"
 import { FolderHeaderActions } from "@/shared/console/folders/header"
 import { FolderContents } from "@/shared/console/folders/list/contents"
@@ -129,7 +130,9 @@ function FolderContentsPage({ folder }: { folder: FolderDetail }) {
 
   return (
     <ConsoleListLayout>
-      <FolderHeaderActions onCreate={setCreation} onNewFolder={onNewFolder} />
+      <FolderHeaderActions onCreate={setCreation} onNewFolder={onNewFolder}>
+        <AskJoriAction target={{ kind: "folder", id: folder.folderId }} />
+      </FolderHeaderActions>
       <FolderContents
         contents={contents}
         folderId={folder.folderId}

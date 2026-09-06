@@ -2,6 +2,7 @@ import {
   CalendarDays,
   Check,
   CircleDotDashed,
+  Database,
   File,
   Folder,
   GitPullRequestArrow,
@@ -10,7 +11,9 @@ import {
   Pause,
   Repeat2,
   Square,
+  Table2,
   UserRound,
+  Workflow,
 } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
@@ -28,11 +31,14 @@ const metadataIcons: Partial<Record<ExecutionDetail["type"], LucideIcon>> = {
   calendar_event: CalendarDays,
   file: File,
   folder: Folder,
+  job: Workflow,
   page: File,
   project: Square,
   schedule: Repeat2,
   sender: UserRound,
+  store: Database,
   subject: Mail,
+  table: Table2,
 }
 
 /** Details that reshape the label or branch on the surface they came from. */

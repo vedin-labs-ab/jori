@@ -4,7 +4,13 @@ import { databaseContext } from "../../test/convex/database"
 import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { createSight } from "../visibility/sight"
-import { type ReferenceTarget, resolveReferenceTarget } from "./references"
+import {
+  consoleContextLine,
+  normalizeConsoleContext,
+  type ReferenceTarget,
+  resolveConsoleContext,
+  resolveReferenceTarget,
+} from "./references"
 
 const other = "persons:other" as Id<"persons">
 
@@ -48,12 +54,17 @@ async function seed() {
     createSight(ctx, { organizationId: "org", personId })
   const resolveAs = (personId: Id<"persons">, target: ReferenceTarget) =>
     resolveReferenceTarget(ctx, sightOf(personId), target)
+  const resolveContextAs = (personId: Id<"persons">, data: unknown) =>
+    resolveConsoleContext(ctx, sightOf(personId), data)
 
   return {
+    ctx,
+    financeId,
     foreignRunId,
     jobId,
     renewalsId,
     resolveAs,
+    resolveContextAs,
     runId,
     secretId,
     tableId,
@@ -131,4 +142,67 @@ test("invisible, missing, and mistyped targets come back unavailable without a n
   expect(
     await resolveAs(other, { kind: "job", id: "not-an-id" })
   ).toMatchObject({ unavailable: true })
+})
+
+test("a context's id is kept only in its kind's own table", async () => {
+  const { ctx, tableId } = await seed()
+
+  expect(normalizeConsoleContext(ctx, { kind: "table", id: tableId })).toEqual({
+    kind: "table",
+    id: tableId,
+  })
+  expect(normalizeConsoleContext(ctx, { kind: "job", id: "nope" })).toBeNull()
+})
+
+test("a filed resource's context resolves to its name and folder; a folder's to itself", async () => {
+  const { financeId, renewalsId, resolveContextAs, tableId } = await seed()
+
+  expect(
+    await resolveContextAs(testOwner, {
+      context: { kind: "table", id: tableId },
+    })
+  ).toEqual({
+    kind: "table",
+    id: tableId,
+    name: "Customer renewals",
+    folderId: renewalsId,
+  })
+  expect(
+    await resolveContextAs(testOwner, {
+      context: { kind: "folder", id: financeId },
+    })
+  ).toEqual({
+    kind: "folder",
+    id: financeId,
+    name: "Finance",
+    folderId: financeId,
+  })
+})
+
+test("a context the person may not see, or no context, resolves to nothing", async () => {
+  const { resolveContextAs, secretId } = await seed()
+
+  expect(
+    await resolveContextAs(other, { context: { kind: "file", id: secretId } })
+  ).toBeUndefined()
+  expect(
+    await resolveContextAs(testOwner, {
+      context: { kind: "file", id: secretId },
+    })
+  ).toMatchObject({ name: "secret.csv" })
+  expect(await resolveContextAs(testOwner, undefined)).toBeUndefined()
+  expect(
+    await resolveContextAs(testOwner, { context: { kind: "video" } })
+  ).toBeUndefined()
+})
+
+test("the model's line names the target with the id its tools take", () => {
+  const context = { kind: "table", id: "collections:7" } as const
+
+  expect(consoleContextLine(context, { ...context, name: "Renewals" })).toBe(
+    "Opened about table «Renewals» (tableId: collections:7)"
+  )
+  expect(consoleContextLine(context, undefined)).toBe(
+    "Opened about a table that is no longer available (tableId: collections:7)"
+  )
 })

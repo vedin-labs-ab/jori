@@ -4,6 +4,7 @@ import {
 } from "@contracts/schema/validate"
 import { ClientOnly } from "@tanstack/react-router"
 import { type ReactNode, useMemo, useState } from "react"
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
@@ -42,7 +43,9 @@ export function StorePage({ storeId }: { storeId: string }) {
         canExport={store.version > 0}
         onExport={() => exportStoreJson(store)}
         onShare={() => setIsShareOpen(true)}
-      />
+      >
+        <AskJoriAction target={{ kind: "store", id: store.storeId }} />
+      </MaterialHeaderActions>
       <ClientOnly fallback={<ConsoleListLoading />}>
         <StoreValue
           onWriteSchema={schemaWrite(store, actions.writeStoreSchema)}

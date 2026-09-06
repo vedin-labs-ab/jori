@@ -1,8 +1,8 @@
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { lazy, Suspense, useState } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useState } from "react"
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { moveTarget } from "@/shared/console/folders/types"
 import { JobDetail } from "@/shared/console/jobs/detail"
 import { JobHeaderActions } from "@/shared/console/jobs/detail/header"
@@ -12,21 +12,11 @@ import { ConsolePageLayout } from "@/shared/console/layout"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useDocumentTitle } from "@/shared/console/shell/title"
-import { useNow } from "@/shared/console/time"
 import { api } from "../../../../convex/_generated/api"
 import { MoveResourceDialog } from "../../folders/move"
 import { ConsolePage } from "../../page"
-import { useFolderNames } from "../../shared/materials/names"
 import { useJobEditorHost } from "../editor/host"
-import { useSkillNames } from "../skills"
-import { JobRuns } from "./runs"
-
-// The brief's renderer carries the markdown codec, so it arrives with
-// the first job page rather than with every console chunk.
-const JobInstructions = lazy(async () => ({
-  default: (await import("@/shared/console/jobs/detail/instructions"))
-    .JobInstructions,
-}))
+import { useJobOverview } from "./overview"
 
 /** Member view of one job: its overview and its runs, inside the console
  *  chrome, with the editor its Edit opens. */
@@ -77,10 +67,9 @@ function useJobPage(organizationId: string, job: Job) {
   const [isMoving, setIsMoving] = useState(false)
 
   return {
-    folders: useFolderNames(organizationId),
     host,
     isMoving,
-    now: useNow(30_000),
+    overview: useJobOverview(organizationId, job, host.permissions),
     /** Leaves for the list once the job is gone; a failed delete stays. */
     removeAndLeave: () => {
       void host.editor.deleteJob(job).then((deleted) => {
@@ -90,7 +79,6 @@ function useJobPage(organizationId: string, job: Job) {
       })
     },
     setIsMoving,
-    skills: useSkillNames(organizationId),
   }
 }
 
@@ -116,22 +104,10 @@ function JobReadyView({
         job={job}
         onEdit={editor.openEditForm}
         onPausedChange={setPaused}
-      />
-      <JobDetail
-        folders={page.folders}
-        instructions={
-          <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-            <JobInstructions
-              job={job}
-              permissions={page.host.permissions}
-              skills={page.skills}
-            />
-          </Suspense>
-        }
-        job={job}
-        now={page.now}
-        runs={<JobRuns jobId={job.id} organizationId={organizationId} />}
-      />
+      >
+        <AskJoriAction target={{ kind: "job", id: job.id }} />
+      </JobHeaderActions>
+      <JobDetail {...page.overview} />
       <MoveResourceDialog
         onClose={() => page.setIsMoving(false)}
         organizationId={organizationId}

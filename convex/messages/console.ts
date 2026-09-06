@@ -8,7 +8,7 @@ import { resolveCurrentPerson } from "../persons/account"
 import { clearRunDraft } from "../runs/execution/drafts/data"
 import { type Actor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
-import { readDataObject, readDataString } from "../shared/data"
+import { type referenceTargetValidator } from "./references"
 
 // Console messages: what a person types to Jori in the web console and what
 // Jori writes back. They live in the same `messages` table as provider
@@ -16,13 +16,6 @@ import { readDataObject, readDataString } from "../shared/data"
 // them.
 
 export const consoleMessageType = "console.message"
-
-/** What a person's message was sent from, so the run it starts is filed
- *  where the person was working. */
-export const consoleContextValidator = v.object({
-  kind: v.literal("folder"),
-  id: v.id("folders"),
-})
 
 /** The choices part a person's message answers: the reply holding it, the
  *  part's index, and the values chosen. Kept with the message so the
@@ -35,7 +28,7 @@ export const consoleAnswerValidator = v.object({
 
 /** What a person's message carries besides its text, or nothing. */
 export function consoleMessageData(input: {
-  context?: Infer<typeof consoleContextValidator>
+  context?: Infer<typeof referenceTargetValidator>
   answer?: Infer<typeof consoleAnswerValidator>
 }) {
   const data = {
@@ -170,14 +163,6 @@ export async function insertConsoleMessage(
   await ctx.db.patch(input.conversation._id, { updatedAt: input.now })
 
   return message
-}
-
-export function consoleMessageFolderId(data: unknown) {
-  const context = readDataObject(data, "context")
-
-  return readDataString(context, "kind") === "folder"
-    ? (readDataString(context, "id") as Id<"folders"> | undefined)
-    : undefined
 }
 
 function consoleMessageView(message: Doc<"messages">) {

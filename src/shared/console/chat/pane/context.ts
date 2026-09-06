@@ -1,21 +1,15 @@
 import { type MessageContext } from "@contracts/replies/answers"
 import { type ReferenceKind, referenceKinds } from "@contracts/replies/parts"
-import { type ComponentProps } from "react"
-import { type ConsoleLink } from "../../shell/link"
 
 // A chat opened from a resource's page carries that resource as its
 // context, in the search: `/chat?context=<kind>:<id>`. The route's search
 // validation reads it back with the parser here.
 
-/** A new chat about the target. The console's route for the chat lands
- *  with the chat binding; until it does the router cannot name the path
- *  or type its search, so, like `conversationDestination`, this is
- *  written as a destination the router does not check. Once the route
- *  validates `context`, the action can spell both out as typed props. */
-export function chatDestination(
-  target: MessageContext
-): Pick<ComponentProps<typeof ConsoleLink>, "search" | "to"> {
-  return { to: "/chat", search: contextSearch(target) as never }
+/** A new chat about the target, as a typed link the router checks: the
+ *  chat's route takes `context` as the string spelled here and validates
+ *  it into a `MessageContext` on arrival. */
+export function chatDestination(target: MessageContext) {
+  return { to: "/chat", search: contextSearch(target) } as const
 }
 
 export function contextSearch(target: MessageContext): { context: string } {

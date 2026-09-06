@@ -36,6 +36,9 @@ export function formatSessionMessage(message: RuntimeMessage) {
     message: {
       actor: message.actor ?? "unknown",
       actorIds: message.actorIds.join(", "),
+      // A chat's context rides on the message that opens it, which is the
+      // run's trigger; a message drained mid-run was sent about nothing.
+      context: null,
       identifiers: message.identifiers.join(", "),
       observedAt: new Date(observed).toISOString(),
       reactions: message.reactions,

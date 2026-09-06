@@ -6,10 +6,13 @@ import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { readUserProfile, requireUserId } from "../access/users"
 import {
   consoleAnswerValidator,
-  consoleContextValidator,
   consoleMessageData,
   insertConsoleMessage,
 } from "../messages/console"
+import {
+  normalizeConsoleContext,
+  referenceTargetValidator,
+} from "../messages/references"
 import {
   accountArgs,
   ensureAccountPerson,
@@ -32,7 +35,7 @@ type ConsoleSendArgs = {
   profile: { name?: string; email?: string }
   conversationId?: Id<"conversations">
   text: string
-  context?: Infer<typeof consoleContextValidator>
+  context?: Infer<typeof referenceTargetValidator>
   answer?: Infer<typeof consoleAnswerValidator>
 }
 
@@ -46,7 +49,7 @@ export const send = mutation({
     organizationId: v.string(),
     conversationId: v.optional(v.id("conversations")),
     text: v.string(),
-    context: v.optional(consoleContextValidator),
+    context: v.optional(referenceTargetValidator),
     answer: v.optional(consoleAnswerValidator),
   },
   handler: async (ctx, args) => {
@@ -122,6 +125,15 @@ export async function sendConsoleMessage(
     throw new Error("Message text cannot be empty.")
   }
 
+  const context =
+    args.context === undefined
+      ? undefined
+      : normalizeConsoleContext(ctx, args.context)
+
+  if (context === null) {
+    throw new Error(`Context id is not a ${args.context?.kind}.`)
+  }
+
   const now = Date.now()
   const conversation =
     args.conversationId === undefined
@@ -134,7 +146,7 @@ export async function sendConsoleMessage(
   const message = await insertConsoleMessage(ctx, {
     actor: createPersonActor(args.personId, args.profile),
     conversation,
-    data: consoleMessageData(args),
+    data: consoleMessageData({ ...args, context }),
     mentioned: true,
     now,
     text,
@@ -176,8 +188,9 @@ export async function listConsoleConversations(
   return { ...result, page: result.page.map(conversationView) }
 }
 
-/** The session's run and the draft of the reply it is writing, which is
- *  there exactly while a reply streams. */
+/** The session's run — how it stands, and how it ended when it did not
+ *  finish — and the draft of the reply it is writing, which is there
+ *  exactly while a reply streams. */
 export async function readLiveState(
   ctx: QueryLikeCtx,
   conversation: Doc<"conversations">
@@ -191,7 +204,12 @@ export async function readLiveState(
   }
 
   return {
-    run: { id: run._id, status: run.status },
+    run: {
+      id: run._id,
+      status: run.status,
+      ...(run.error === undefined ? {} : { error: run.error }),
+      ...(run.endedAt === undefined ? {} : { endedAt: run.endedAt }),
+    },
     draft: await readRunDraft(ctx, run._id),
   }
 }

@@ -1,3 +1,4 @@
+import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { countLabel } from "@/shared/console/count"
 import {
   ConsoleListFooter,
@@ -25,7 +26,9 @@ export function TableGrid({
         isExporting={false}
         onExport={() => undefined}
         onShare={grid.openShare}
-      />
+      >
+        <AskJoriAction target={{ kind: "table", id: table.tableId }} />
+      </MaterialHeaderActions>
       <RowGrid {...grid.props} />
       <ConsoleListFooter>
         <p className="text-muted-foreground text-xs">

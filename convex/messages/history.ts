@@ -1,3 +1,4 @@
+import { readMessageContext } from "../../contracts/replies/answers"
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { reactionSummariesForMessages } from "../reactions/summary"
@@ -6,13 +7,17 @@ import {
   getActorDisplayName,
   getActorKind,
 } from "../shared/actor"
+import { createSight } from "../visibility/sight"
 import { messageActorIds, messageIdentifiers } from "./identifiers"
+import { consoleContextLine, resolveConsoleContext } from "./references"
 
 const recentConversationLimit = 16
 
 export type ConversationEntry = {
   actor: string | null
   actorIds: string[]
+  /** What a console message was sent about, as one line for the model. */
+  context: string | null
   createdAt: number
   id: string
   identifiers: string[]
@@ -34,8 +39,14 @@ export async function recentConversation(
 ): Promise<RecentConversation> {
   const messages = await recentMessages(ctx, message)
   const reactions = await reactionSummariesForMessages(ctx, messages)
-  const entries = messages.map((entry) =>
-    messageEntry(entry, reactions.get(entry._id))
+  const entries = await Promise.all(
+    messages.map(async (entry) =>
+      messageEntry(
+        entry,
+        reactions.get(entry._id),
+        await messageContextLine(ctx, entry)
+      )
+    )
   )
 
   return {
@@ -46,11 +57,13 @@ export async function recentConversation(
 
 export function messageEntry(
   message: Doc<"messages">,
-  reactions?: string
+  reactions?: string,
+  context?: string
 ): ConversationEntry {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     actorIds: messageActorIds(message),
+    context: context ?? null,
     createdAt: message.createdAt,
     id: message._id,
     identifiers: messageIdentifiers(message),
@@ -69,6 +82,27 @@ export function mergeRecentConversation(entries: ConversationEntry[]) {
         left.createdAt - right.createdAt || left.id.localeCompare(right.id)
     )
     .slice(-recentConversationLimit)
+}
+
+/** The line a console message's context makes, read as the person who
+ *  sent it sees the target; nothing for a message sent about nothing. */
+async function messageContextLine(ctx: QueryCtx, message: Doc<"messages">) {
+  const context =
+    message.surface === "console" ? readMessageContext(message.data) : undefined
+
+  if (context === undefined) {
+    return undefined
+  }
+
+  const sight = createSight(ctx, {
+    organizationId: message.organizationId,
+    personId: message.personId,
+  })
+
+  return consoleContextLine(
+    context,
+    await resolveConsoleContext(ctx, sight, message.data)
+  )
 }
 
 async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {

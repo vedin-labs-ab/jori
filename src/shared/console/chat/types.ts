@@ -39,6 +39,10 @@ export type ChatRunStatus =
 export type ChatRun = {
   id: string
   status: ChatRunStatus
+  /** Why a failed run failed, as the run recorded it. */
+  error?: string
+  /** When the run ended, once it has. */
+  endedAt?: number
 }
 
 /** What a reference part or a message's context points at. */
@@ -66,4 +70,22 @@ export type ResolveReference = (
  *  composer offers to stop it. */
 export function isLiveRun(run: ChatRun | null): run is ChatRun {
   return run !== null && (run.status === "queued" || run.status === "running")
+}
+
+/** Whether the run ended without Jori's reply landing: it failed or was
+ *  stopped, and no message of Jori's followed its end. A heads-up sent
+ *  before the end does not count as the reply. */
+export function endedWithoutReply(
+  messages: ChatMessage[],
+  run: ChatRun | null
+): run is ChatRun {
+  if (run === null || (run.status !== "failed" && run.status !== "stopped")) {
+    return false
+  }
+
+  const endedAt = run.endedAt ?? 0
+
+  return !messages.some(
+    (message) => message.role === "jori" && message.createdAt > endedAt
+  )
 }

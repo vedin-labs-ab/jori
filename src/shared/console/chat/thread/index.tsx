@@ -14,6 +14,7 @@ import { Markdown } from "../../markdown"
 import {
   type ChatMessage,
   type ChatRun,
+  endedWithoutReply,
   isLiveRun,
   type ReferenceTarget,
   type ResolveReference,
@@ -21,6 +22,7 @@ import {
 import { answeredParts, answerKey } from "./answers"
 import { ChoiceChips } from "./choices"
 import { JoriMessage, PersonMessage } from "./message"
+import { RunNotice } from "./notice"
 import { QuestionCard } from "./question"
 import { ReferenceCard } from "./reference"
 
@@ -86,17 +88,7 @@ export function ChatThread({
           >
             <AnchorOnTurn anchorId={anchorId} />
             {hasMore ? (
-              <div className="flex justify-center">
-                <Button
-                  disabled={isLoading}
-                  onClick={onLoadMore}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  Show earlier messages
-                </Button>
-              </div>
+              <EarlierMessages isLoading={isLoading} onLoadMore={onLoadMore} />
             ) : null}
             {isLoading && messages.length === 0 ? <ConsoleListLoading /> : null}
             {messages.map((message) => (
@@ -132,23 +124,81 @@ export function ChatThread({
                 )}
               </MessageScrollerItem>
             ))}
-            {/* One turn of Jori's while the run works: what it is doing,
-                then the reply as far as it has come, under a single mark.
-                When the reply lands the turn is the message above. */}
-            {isLive || draft !== null ? (
-              <MessageScrollerItem>
-                <JoriMessage streaming={draft !== null}>
-                  {isLive ? progress : null}
-                  {draft === null ? null : <Markdown streaming text={draft} />}
-                </JoriMessage>
-              </MessageScrollerItem>
-            ) : null}
+            <ThreadTail
+              draft={draft}
+              live={live}
+              messages={messages}
+              progress={progress}
+            />
           </MessageScrollerContent>
         </MessageScrollerViewport>
         <MessageScrollerButton aria-label="Scroll to latest" />
       </MessageScroller>
     </MessageScrollerProvider>
   )
+}
+
+/** The way to the page before the oldest one loaded. */
+function EarlierMessages({
+  isLoading,
+  onLoadMore,
+}: {
+  isLoading: boolean
+  onLoadMore: () => void
+}) {
+  return (
+    <div className="flex justify-center">
+      <Button
+        disabled={isLoading}
+        onClick={onLoadMore}
+        size="sm"
+        type="button"
+        variant="ghost"
+      >
+        Show earlier messages
+      </Button>
+    </div>
+  )
+}
+
+/** After the messages: one turn of Jori's while the run works — what it
+ *  is doing, then the reply as far as it has come, under a single mark —
+ *  or, when the run ended without the reply, the notice that says so. A
+ *  run starts from the person's message, so a message of Jori's standing
+ *  last under a live run is that run's own heads-up, and the work goes on
+ *  under it rather than as a new turn. */
+function ThreadTail({
+  draft,
+  live,
+  messages,
+  progress,
+}: {
+  draft: string | null
+  live: ChatRun | null
+  messages: ChatMessage[]
+  progress: ReactNode
+}) {
+  const isLive = isLiveRun(live)
+
+  if (isLive || draft !== null) {
+    return (
+      <MessageScrollerItem>
+        <JoriMessage
+          continued={messages.at(-1)?.role === "jori"}
+          streaming={draft !== null}
+        >
+          {isLive ? progress : null}
+          {draft === null ? null : <Markdown streaming text={draft} />}
+        </JoriMessage>
+      </MessageScrollerItem>
+    )
+  }
+
+  return endedWithoutReply(messages, live) ? (
+    <MessageScrollerItem>
+      <RunNotice run={live} />
+    </MessageScrollerItem>
+  ) : null
 }
 
 /** A reply's parts in order: each reference as a card, then its choices
