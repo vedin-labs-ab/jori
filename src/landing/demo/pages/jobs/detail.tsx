@@ -1,4 +1,5 @@
 import { useContext, useMemo, useState } from "react"
+import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { JobDetail } from "@/shared/console/jobs/detail"
 import { JobHeaderActions } from "@/shared/console/jobs/detail/header"
 import { JobInstructions } from "@/shared/console/jobs/detail/instructions"
@@ -72,6 +73,41 @@ function JobReadyPage({ job }: { job: Job }) {
         subject={isMoving ? jobMoveSubject(job) : undefined}
       />
     </ConsolePageLayout>
+  )
+}
+
+/** The job in the chat's pane: the console's overview and the job's
+ *  runs, without the page's header and crumb. Arrives with this module,
+ *  which the pane loads only once a job is opened in it. */
+export function JobPaneBody({ jobId }: { jobId: string }) {
+  const { state } = useDemoWorkspace()
+  const job = state.jobs.find((candidate) => candidate.id === jobId)
+  const folders = useMemo(() => folderNames(state), [state])
+  const now = useNow(30_000)
+
+  if (job === undefined) {
+    return null
+  }
+
+  return (
+    <ChatPaneBody
+      material={{
+        kind: "job",
+        detail: {
+          folders,
+          instructions: (
+            <JobInstructions
+              job={job}
+              permissions={demoPermissions}
+              skills={demoSkills}
+            />
+          ),
+          job,
+          now,
+          runs: <JobRuns jobId={job.id} />,
+        },
+      }}
+    />
   )
 }
 

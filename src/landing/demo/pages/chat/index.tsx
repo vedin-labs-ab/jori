@@ -1,9 +1,12 @@
 import { useCallback } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatHome } from "@/shared/console/chat/home"
-import { referenceDestination } from "@/shared/console/chat/presentation"
+import { ChatPane } from "@/shared/console/chat/pane"
+import { useReplyReferences } from "@/shared/console/chat/pane/auto"
+import { usePaneTabs } from "@/shared/console/chat/pane/tabs"
 import { ChatThread } from "@/shared/console/chat/thread"
 import {
+  type ChatMessage,
   type ChatRun,
   isLiveRun,
   type ReferenceTarget,
@@ -17,8 +20,12 @@ import { useNow } from "@/shared/console/time"
 import { liveActivity, resolveReference } from "../../derive/chat"
 import { chatSuggestions } from "../../fixtures/chat"
 import { liveDraft } from "../../state/chat"
+import { type DemoLiveReply } from "../../state/types"
 import { useDemoWorkspace } from "../../workspace"
+import { DemoPaneBody } from "./pane"
 import { useReplyStream } from "./stream"
+
+const noMessages: ChatMessage[] = []
 
 /** Where a chat starts, over the workspace: the first message opens a
  *  conversation and the console moves to it. */
@@ -45,16 +52,21 @@ export function ChatHomePage() {
   )
 }
 
-/** One conversation over the workspace: its turns, the run that answers
- *  the latest one with its log folded under the working row, and the
- *  composer bound to send into it. */
+/** One conversation over the workspace. Keyed by the conversation, so a
+ *  move to another starts its pane afresh. */
 export function ConversationPage({
   conversationId,
 }: {
   conversationId: string
 }) {
+  return <Conversation conversationId={conversationId} key={conversationId} />
+}
+
+/** The conversation's turns, the run that answers the latest one with
+ *  its log folded under the working row, the composer bound to send into
+ *  it, and beside them the pane the reply's resources open in. */
+function Conversation({ conversationId }: { conversationId: string }) {
   const { actions, state } = useDemoWorkspace()
-  const navigate = useConsoleNavigate()
   const conversation = state.chat.conversations.find(
     (candidate) => candidate.id === conversationId
   )
@@ -66,16 +78,26 @@ export function ConversationPage({
     (target: ReferenceTarget) => resolveReference(state, target),
     [state]
   )
+  const { autoOpen, openTarget, pane } = usePaneTabs()
 
   useReplyStream(live, actions)
   useMaterialBreadcrumb(conversation?.title ?? "")
+  useReplyReferences(
+    conversationId,
+    conversation?.messages ?? noMessages,
+    autoOpen
+  )
 
   if (conversation === undefined) {
     return null
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <ChatPane
+      {...pane}
+      body={(target) => <DemoPaneBody target={target} />}
+      resolve={resolve}
+    >
       <ChatThread
         draft={liveDraft(state.chat, conversationId)}
         hasMore={false}
@@ -89,18 +111,10 @@ export function ConversationPage({
           })
         }
         onLoadMore={() => {}}
-        onOpenReference={(target) => navigate(referenceDestination(target))}
+        onOpenReference={openTarget}
         progress={
           live === null ? null : (
-            <ChatWorking
-              onStop={actions.stopChatRun}
-              progress={
-                <ActivityTimeline
-                  items={liveActivity(live.startedAt)}
-                  now={now}
-                />
-              }
-            />
+            <LiveProgress live={live} now={now} onStop={actions.stopChatRun} />
           )
         }
         resolveReference={resolve}
@@ -111,6 +125,26 @@ export function ConversationPage({
         onSend={(text) => actions.sendChatMessage(text, conversationId)}
         onStop={actions.stopChatRun}
       />
-    </div>
+    </ChatPane>
+  )
+}
+
+/** What the live run is doing, folded under the working row. */
+function LiveProgress({
+  live,
+  now,
+  onStop,
+}: {
+  live: DemoLiveReply
+  now: number
+  onStop: () => void
+}) {
+  return (
+    <ChatWorking
+      onStop={onStop}
+      progress={
+        <ActivityTimeline items={liveActivity(live.startedAt)} now={now} />
+      }
+    />
   )
 }

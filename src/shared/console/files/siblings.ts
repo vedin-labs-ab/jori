@@ -111,12 +111,15 @@ export function allowsArrowNavigation(event: ArrowKeyEvent): boolean {
 
 /** Window-level ←/→ navigation to the previous/next file. Callers pass
  *  `isEnabled` to gate by state — the image viewer only while fully zoomed
- *  out — and text-editor pages never mount this at all. */
+ *  out — and text-editor pages never mount this at all. A file with no
+ *  neighbors — alone in its list, or shown outside it — binds nothing. */
 export function useSiblingKeys(siblings: FileSiblings, isEnabled = true) {
   const goToFile = useFileNavigate()
 
   useEffect(() => {
-    if (!isEnabled) {
+    const hasNeighbors = siblings.previous !== null || siblings.next !== null
+
+    if (!(isEnabled && hasNeighbors)) {
       return
     }
 

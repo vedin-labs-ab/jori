@@ -41,7 +41,7 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   // The reply arrives, with the job it names and its question.
   expect(await screen.findByText(/Leave/, {}, { timeout: 8000 })).toBeDefined()
   expect(
-    await screen.findByRole("button", { name: /Renewals watch/ })
+    await screen.findByRole("button", { name: /^Renewals watch/ })
   ).toBeDefined()
   expect(
     screen.getByText("Post a summary to #finance when it is done?")
