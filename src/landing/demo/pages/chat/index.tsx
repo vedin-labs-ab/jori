@@ -1,6 +1,7 @@
 import { useCallback } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatHome } from "@/shared/console/chat/home"
+import { referenceDestination } from "@/shared/console/chat/presentation"
 import { ChatThread } from "@/shared/console/chat/thread"
 import {
   type ChatRun,
@@ -8,8 +9,10 @@ import {
   type ReferenceTarget,
 } from "@/shared/console/chat/types"
 import { ChatWorking } from "@/shared/console/chat/working"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { ActivityTimeline } from "@/shared/console/runs/activity/item"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
+import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
 import { liveActivity, resolveReference } from "../../derive/chat"
 import { chatSuggestions } from "../../fixtures/chat"
@@ -26,7 +29,7 @@ export function ChatHomePage() {
   const send = (text: string) => {
     const conversationId = actions.sendChatMessage(text)
 
-    navigate({ to: `/chat/${conversationId}` })
+    navigate(conversationDestination(conversationId))
   }
 
   return (
@@ -65,6 +68,7 @@ export function ConversationPage({
   )
 
   useReplyStream(live, actions)
+  useMaterialBreadcrumb(conversation?.title ?? "")
 
   if (conversation === undefined) {
     return null
@@ -85,7 +89,7 @@ export function ConversationPage({
           })
         }
         onLoadMore={() => {}}
-        onOpenReference={(target) => navigate({ to: targetPath(target) })}
+        onOpenReference={(target) => navigate(referenceDestination(target))}
         progress={
           live === null ? null : (
             <ChatWorking
@@ -109,10 +113,4 @@ export function ConversationPage({
       />
     </div>
   )
-}
-
-/** The console page for a reply's target: a run opens the Activity page,
- *  everything else its own page. */
-function targetPath(target: ReferenceTarget) {
-  return target.kind === "run" ? "/runs" : `/${target.kind}s/${target.id}`
 }

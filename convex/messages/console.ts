@@ -1,5 +1,5 @@
 import { type PaginationOptions, paginationOptsValidator } from "convex/server"
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { type ReplyPart } from "../../contracts/replies/parts"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
@@ -23,6 +23,28 @@ export const consoleContextValidator = v.object({
   kind: v.literal("folder"),
   id: v.id("folders"),
 })
+
+/** The choices part a person's message answers: the reply holding it, the
+ *  part's index, and the values chosen. Kept with the message so the
+ *  console shows the question answered. */
+export const consoleAnswerValidator = v.object({
+  messageId: v.id("messages"),
+  part: v.number(),
+  values: v.array(v.string()),
+})
+
+/** What a person's message carries besides its text, or nothing. */
+export function consoleMessageData(input: {
+  context?: Infer<typeof consoleContextValidator>
+  answer?: Infer<typeof consoleAnswerValidator>
+}) {
+  const data = {
+    ...(input.context === undefined ? {} : { context: input.context }),
+    ...(input.answer === undefined ? {} : { answer: input.answer }),
+  }
+
+  return Object.keys(data).length === 0 ? undefined : data
+}
 
 // The parts arrive validated against the reply contract by the tool that
 // sent them; here they are objects to store.

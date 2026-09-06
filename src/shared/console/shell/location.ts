@@ -35,9 +35,10 @@ export function useConsolePathname() {
 }
 
 /** A destination the router can build into an href. */
-type ConsoleDestination = {
+export type ConsoleDestination = {
   to: string
   params?: Record<string, string>
+  search?: Record<string, unknown>
 }
 
 /** Moves the console the way a plain click on a ConsoleLink would: the

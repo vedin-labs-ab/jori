@@ -156,7 +156,7 @@ test("a chip after the latest reply sends its label; chips leave once a later me
   expect(screen.queryByRole("button", { name: "Show the table" })).toBeNull()
 })
 
-test("chips wait while a run is live or a reply is streaming", () => {
+test("a live run and its draft are one turn of Jori's, and chips wait for it", () => {
   renderThread({
     messages: [ask, reply],
     live: { id: "runs_1", status: "running" },
@@ -164,8 +164,14 @@ test("chips wait while a run is live or a reply is streaming", () => {
   })
 
   expect(screen.queryByRole("button", { name: "Remind them" })).toBeNull()
-  expect(screen.getByText("Working on it")).toBeDefined()
-  expect(screen.getByText("Looking at")).toBeDefined()
+
+  // The finished reply wears one mark, the live turn one more: the
+  // progress and the draft share it rather than reading as two messages.
+  const turn = screen.getByText("Looking at").closest("[aria-busy]")
+
+  expect(screen.getAllByTitle("Jori logo")).toHaveLength(2)
+  expect(turn?.querySelectorAll("title")).toHaveLength(1)
+  expect(turn?.textContent).toContain("Working on it")
 })
 
 test("answering a question composes the message from the labels, then the card locks", () => {

@@ -5,7 +5,9 @@ import { type MutationCtx, mutation, query } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { readUserProfile, requireUserId } from "../access/users"
 import {
+  consoleAnswerValidator,
   consoleContextValidator,
+  consoleMessageData,
   insertConsoleMessage,
 } from "../messages/console"
 import {
@@ -31,6 +33,7 @@ type ConsoleSendArgs = {
   conversationId?: Id<"conversations">
   text: string
   context?: Infer<typeof consoleContextValidator>
+  answer?: Infer<typeof consoleAnswerValidator>
 }
 
 const titleMaxLength = 80
@@ -44,6 +47,7 @@ export const send = mutation({
     conversationId: v.optional(v.id("conversations")),
     text: v.string(),
     context: v.optional(consoleContextValidator),
+    answer: v.optional(consoleAnswerValidator),
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
@@ -73,8 +77,8 @@ export const list = query({
   },
 })
 
-/** The run currently attached to the conversation's session, if any, and
- *  the reply it is composing. */
+/** The conversation's title, the run currently attached to its session,
+ *  if any, and the reply that run is composing. */
 export const live = query({
   args: {
     organizationId: v.string(),
@@ -102,6 +106,7 @@ export const live = query({
 
     return {
       status: "ready" as const,
+      title: conversation.title ?? "",
       ...(await readLiveState(ctx, conversation)),
     }
   },
@@ -129,7 +134,7 @@ export async function sendConsoleMessage(
   const message = await insertConsoleMessage(ctx, {
     actor: createPersonActor(args.personId, args.profile),
     conversation,
-    data: args.context === undefined ? undefined : { context: args.context },
+    data: consoleMessageData(args),
     mentioned: true,
     now,
     text,

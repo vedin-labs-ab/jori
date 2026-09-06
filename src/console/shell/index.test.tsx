@@ -40,6 +40,7 @@ vi.mock("../folders/drag/context", () => ({
   ),
 }))
 vi.mock("../folders/section", () => ({ SidebarFolders: () => null }))
+vi.mock("../chat/recent", () => ({ useSidebarChats: () => [] }))
 vi.mock("./account", () => ({ SidebarUserButton: () => null }))
 vi.mock("./organization", () => ({ SidebarOrganizationSwitcher: () => null }))
 vi.mock("@/shared/console/shell/navigation", () => ({

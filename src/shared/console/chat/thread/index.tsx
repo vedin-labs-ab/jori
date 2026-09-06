@@ -38,9 +38,9 @@ export type ChooseHandler = (
 
 /** A conversation, oldest first, anchored on the person's latest turn so
  *  the reply grows under it. What the run is doing arrives from the host
- *  as `progress` and shows under that turn while the run is live; the
- *  reply being written arrives as `draft` and shows as Jori's message
- *  until the finished one takes its place. */
+ *  as `progress` and the reply being written as `draft`; together they
+ *  are one turn of Jori's under that anchor, until the finished message
+ *  takes its place. */
 export function ChatThread({
   draft,
   hasMore,
@@ -64,7 +64,7 @@ export function ChatThread({
   onChoose: ChooseHandler
   onLoadMore: () => void
   onOpenReference: (target: ReferenceTarget) => void
-  /** What the live run is doing: the working row, its log, its requests. */
+  /** What the live run is doing: the working line, its log, its requests. */
   progress: ReactNode
   resolveReference: ResolveReference
 }) {
@@ -132,16 +132,17 @@ export function ChatThread({
                 )}
               </MessageScrollerItem>
             ))}
-            {isLive ? (
-              <MessageScrollerItem>{progress}</MessageScrollerItem>
-            ) : null}
-            {draft === null ? null : (
+            {/* One turn of Jori's while the run works: what it is doing,
+                then the reply as far as it has come, under a single mark.
+                When the reply lands the turn is the message above. */}
+            {isLive || draft !== null ? (
               <MessageScrollerItem>
-                <JoriMessage streaming>
-                  <Markdown streaming text={draft} />
+                <JoriMessage streaming={draft !== null}>
+                  {isLive ? progress : null}
+                  {draft === null ? null : <Markdown streaming text={draft} />}
                 </JoriMessage>
               </MessageScrollerItem>
-            )}
+            ) : null}
           </MessageScrollerContent>
         </MessageScrollerViewport>
         <MessageScrollerButton aria-label="Scroll to latest" />
