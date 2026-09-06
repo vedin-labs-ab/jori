@@ -6,7 +6,7 @@ import {
   runtimeContext,
 } from "../../../test/runtime"
 import { type ModelResponse } from "../model/types"
-import { createDraftWriter, openDraft } from "./draft"
+import { createDraftWriter, type DraftContent, openDraft } from "./draft"
 
 afterEach(() => {
   vi.useRealTimers()
@@ -15,33 +15,52 @@ afterEach(() => {
 
 test("writes at once, then no sooner than the interval after the last write", async () => {
   vi.useFakeTimers()
-  const write = vi.fn(async (_text: string) => undefined)
+  const write = vi.fn(async (_content: DraftContent) => undefined)
   const writer = createDraftWriter(write)
 
-  writer.update("Hel")
+  writer.update(reply("Hel"))
   expect(write).toHaveBeenCalledTimes(1)
 
   await vi.advanceTimersByTimeAsync(0)
-  writer.update("Hello wor")
+  writer.update(reply("Hello wor"))
   await vi.advanceTimersByTimeAsync(249)
   expect(write).toHaveBeenCalledTimes(1)
 
   await vi.advanceTimersByTimeAsync(1)
   expect(write).toHaveBeenCalledTimes(2)
-  expect(write).toHaveBeenLastCalledWith("Hello wor")
+  expect(write).toHaveBeenLastCalledWith(reply("Hello wor"))
 })
 
 test("a clause boundary is written without waiting", async () => {
   vi.useFakeTimers()
-  const write = vi.fn(async (_text: string) => undefined)
+  const write = vi.fn(async (_content: DraftContent) => undefined)
   const writer = createDraftWriter(write)
 
-  writer.update("Hel")
+  writer.update(reply("Hel"))
   await vi.advanceTimersByTimeAsync(0)
-  writer.update("Hello,")
+  writer.update(reply("Hello,"))
 
   expect(write).toHaveBeenCalledTimes(2)
-  expect(write).toHaveBeenLastCalledWith("Hello,")
+  expect(write).toHaveBeenLastCalledWith(reply("Hello,"))
+})
+
+test("reasoning under a still reply waits its interval", async () => {
+  vi.useFakeTimers()
+  const write = vi.fn(async (_content: DraftContent) => undefined)
+  const writer = createDraftWriter(write)
+
+  writer.update({ reasoning: "Reading", text: "Hello." })
+  await vi.advanceTimersByTimeAsync(0)
+  writer.update({ reasoning: "Reading the notes.", text: "Hello." })
+  await vi.advanceTimersByTimeAsync(249)
+
+  expect(write).toHaveBeenCalledTimes(1)
+
+  await vi.advanceTimersByTimeAsync(1)
+  expect(write).toHaveBeenLastCalledWith({
+    reasoning: "Reading the notes.",
+    text: "Hello.",
+  })
 })
 
 test("one write is in flight at a time and the newest text follows it", async () => {
@@ -49,16 +68,16 @@ test("one write is in flight at a time and the newest text follows it", async ()
   const { land, write } = deferredWrites()
   const writer = createDraftWriter(write)
 
-  writer.update("a")
-  writer.update("ab")
-  writer.update("abc")
+  writer.update(reply("a"))
+  writer.update(reply("ab"))
+  writer.update(reply("abc"))
   expect(write).toHaveBeenCalledTimes(1)
 
   land()
   await vi.advanceTimersByTimeAsync(250)
 
   expect(write).toHaveBeenCalledTimes(2)
-  expect(write).toHaveBeenLastCalledWith("abc")
+  expect(write).toHaveBeenLastCalledWith(reply("abc"))
 })
 
 test("settling waits for the write in flight and takes no more", async () => {
@@ -66,15 +85,15 @@ test("settling waits for the write in flight and takes no more", async () => {
   const { land, write } = deferredWrites()
   const writer = createDraftWriter(write)
 
-  writer.update("a")
-  writer.update("ab")
+  writer.update(reply("a"))
+  writer.update(reply("ab"))
 
   const settled = writer.settle()
 
   land()
-  expect(await settled).toBe("a")
+  expect(await settled).toEqual(reply("a"))
 
-  writer.update("abc")
+  writer.update(reply("abc"))
   await vi.advanceTimersByTimeAsync(1_000)
   expect(write).toHaveBeenCalledTimes(1)
 })
@@ -83,18 +102,18 @@ test("a failed write is logged and the next text still goes out", async () => {
   vi.useFakeTimers()
   const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined)
   const write = vi
-    .fn(async (_text: string) => undefined)
+    .fn(async (_content: DraftContent) => undefined)
     .mockRejectedValueOnce(new Error("Offline"))
   const writer = createDraftWriter(write)
 
-  writer.update("a")
+  writer.update(reply("a"))
   await vi.advanceTimersByTimeAsync(0)
   expect(warn).toHaveBeenCalledWith("Draft write failed.", { error: "Offline" })
 
-  writer.update("ab")
+  writer.update(reply("ab"))
   await vi.advanceTimersByTimeAsync(250)
-  expect(write).toHaveBeenLastCalledWith("ab")
-  expect(await writer.settle()).toBe("ab")
+  expect(write).toHaveBeenLastCalledWith(reply("ab"))
+  expect(await writer.settle()).toEqual(reply("ab"))
 })
 
 test("only the console has a draft", () => {
@@ -125,10 +144,36 @@ test("the draft follows the first reply call and no other", async () => {
   await draft.close(replyResponse("Hi there."))
 
   expect(platform.spies.writeDraft.mock.calls).toEqual([
-    [{ text: "Hi", turn: 2 }],
-    [{ text: "Hi there.", turn: 2 }],
+    [{ reasoning: "", text: "Hi", turn: 2 }],
+    [{ reasoning: "", text: "Hi there.", turn: 2 }],
   ])
   expect(platform.clearDraft).not.toHaveBeenCalled()
+})
+
+test("reasoning streams into the draft, kept to its tail, and stays under the reply", async () => {
+  vi.useFakeTimers()
+  const platform = createPlatform()
+  const draft = requireDraft(platform, 1)
+
+  draft.onDelta({ reasoning: "a".repeat(1_500) })
+  await vi.advanceTimersByTimeAsync(0)
+  draft.onDelta({ reasoning: "b".repeat(1_000) })
+  draft.onDelta({ reasoning: "" })
+  await vi.advanceTimersByTimeAsync(250)
+  draft.onDelta({
+    toolCalls: [
+      { argumentsDelta: '{"text":"Hi.', index: 0, name: "send_reply" },
+    ],
+  })
+  await draft.close(replyResponse("Hi."))
+
+  const tail = "a".repeat(1_000) + "b".repeat(1_000)
+
+  expect(platform.spies.writeDraft.mock.calls).toEqual([
+    [{ reasoning: "a".repeat(1_500), text: "", turn: 1 }],
+    [{ reasoning: tail, text: "", turn: 1 }],
+    [{ reasoning: tail, text: "Hi.", turn: 1 }],
+  ])
 })
 
 test("a turn without a reply, a reset, and a discard all leave nothing", async () => {
@@ -148,13 +193,17 @@ test("a turn without a reply, a reset, and a discard all leave nothing", async (
   expect(platform.writeDraft).not.toHaveBeenCalled()
 })
 
+function reply(text: string): DraftContent {
+  return { reasoning: "", text }
+}
+
 function deferredWrites() {
   const pending: Array<() => void> = []
 
   return {
     land: () => pending.shift()?.(),
     write: vi.fn(
-      (_text: string) =>
+      (_content: DraftContent) =>
         new Promise<void>((resolve) => {
           pending.push(resolve)
         })

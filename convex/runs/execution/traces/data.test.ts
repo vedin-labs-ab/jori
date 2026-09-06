@@ -12,7 +12,7 @@ test.each([
   const { database, ctx } = databaseContext()
   const runId = await liveRun(database)
 
-  await writeRunDraft(ctx, { runId, text: "Nearly", turn: 3 })
+  await writeRunDraft(ctx, { runId, reasoning: "", text: "Nearly", turn: 3 })
   await recordWorkerTrace(ctx, {
     ...trace,
     key: `${runId}:300:${trace.type}`,
@@ -30,7 +30,7 @@ test("a stopped run leaves no draft behind", async () => {
   const { database, ctx } = databaseContext()
   const runId = await liveRun(database)
 
-  await writeRunDraft(ctx, { runId, text: "Nearly", turn: 3 })
+  await writeRunDraft(ctx, { runId, reasoning: "", text: "Nearly", turn: 3 })
   await stopRunTree(ctx, (await database.get(runId)) as Doc<"runs">)
 
   expect(await database.get(runId)).toMatchObject({ status: "stopped" })

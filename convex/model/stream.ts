@@ -7,10 +7,12 @@ import {
   type ChatUsage,
 } from "@openrouter/sdk/models"
 
-/** What one chunk of a streamed completion adds: assistant text, and
- *  fragments of tool call arguments, each named by the call's index. */
+/** What one chunk of a streamed completion adds: assistant text, the
+ *  model's reasoning, and fragments of tool call arguments, each named by
+ *  the call's index. */
 export type ChatDelta = {
   content?: string
+  reasoning?: string
   toolCalls?: ChatToolCallDelta[]
 }
 
@@ -98,20 +100,22 @@ function foldChunk(fold: StreamFold, chunk: ChatStreamChunk): ChatDelta | null {
 
   const folded = fold.choice
   const content = choice.delta.content ?? ""
+  const reasoning = choice.delta.reasoning ?? ""
   const toolCalls = (choice.delta.toolCalls ?? []).map((fragment) =>
     foldToolCall(folded.toolCalls, fragment)
   )
 
   folded.content += content
   folded.finishReason = choice.finishReason ?? folded.finishReason
-  folded.reasoning += choice.delta.reasoning ?? ""
+  folded.reasoning += reasoning
 
-  if (content === "" && toolCalls.length === 0) {
+  if (content === "" && reasoning === "" && toolCalls.length === 0) {
     return null
   }
 
   return {
     ...(content === "" ? {} : { content }),
+    ...(reasoning === "" ? {} : { reasoning }),
     ...(toolCalls.length === 0 ? {} : { toolCalls }),
   }
 }

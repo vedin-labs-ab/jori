@@ -51,7 +51,8 @@ export type DemoLiveReply = {
   run: ChatRun
   reply: DemoReply
   startedAt: number
-  /** Characters of the reply revealed so far; negative while working. */
+  /** Characters of the reply revealed so far, its thinking before its
+   *  text; negative while working. */
   revealed: number
 }
 

@@ -13,8 +13,10 @@ export type DemoConversation = ChatConversation & {
   messages: ChatMessage[]
 }
 
-/** What Jori answers with: the text, and the parts after it. */
+/** What Jori answers with: the thinking first, then the text, and the
+ *  parts after it. */
 export type DemoReply = {
+  reasoning: string
   text: string
   parts: ReplyPart[]
 }
@@ -87,6 +89,11 @@ export function demoConversations(now: number): DemoConversation[] {
  *  the job that will keep it current, and one question before starting. */
 export function demoReply(text: string): DemoReply {
   return {
+    reasoning: [
+      `The renewals table has what "${text}" needs: current rows with owners and dates.`,
+      "Draft from those rows, post back here, and leave a job to keep the table current.",
+      "One thing to settle first: whether the summary goes to #finance.",
+    ].join("\n"),
     text: [
       `Taking that on. I read the renewals table against "${text}" and there is enough there to work from.`,
       "",

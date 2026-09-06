@@ -103,7 +103,7 @@ type UploadArgs = RunRef & {
   name: string
 }
 
-type DraftArgs = { text: string; turn: number }
+type DraftArgs = { reasoning: string; text: string; turn: number }
 
 /**
  * Everything a step of the loop does to the world outside its own process.

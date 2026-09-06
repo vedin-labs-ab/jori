@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
+  type ChatDraft,
   type ChatMessage,
   type ChatReference,
   type ChatRun,
@@ -86,7 +87,7 @@ function renderThread({
   onChoose = vi.fn<ChooseHandler>(),
   onOpenReference = vi.fn<(target: ReferenceTarget) => void>(),
 }: {
-  draft?: string | null
+  draft?: ChatDraft | null
   live?: ChatRun | null
   messages: ChatMessage[]
   onChoose?: ChooseHandler
@@ -160,7 +161,7 @@ test("a live run and its draft are one turn of Jori's, and chips wait for it", (
   renderThread({
     messages: [ask, reply],
     live: { id: "runs_1", status: "running" },
-    draft: "Looking at",
+    draft: { reasoning: "Reading the renewals table.", text: "Looking at" },
   })
 
   expect(screen.queryByRole("button", { name: "Remind them" })).toBeNull()
@@ -174,6 +175,17 @@ test("a live run and its draft are one turn of Jori's, and chips wait for it", (
   expect(screen.getAllByTitle("Jori logo")).toHaveLength(1)
   expect(turn?.querySelectorAll("title")).toHaveLength(0)
   expect(turn?.textContent).toContain("Working on it")
+  expect(screen.getByRole("button", { name: "Thought" })).toBeDefined()
+})
+
+test("before the reply's text, the turn shows the thinking as it streams", () => {
+  renderThread({
+    messages: [ask, reply],
+    live: { id: "runs_1", status: "running" },
+    draft: { reasoning: "Reading the renewals table.", text: "" },
+  })
+
+  expect(screen.getByText("Reading the renewals table.")).toBeDefined()
 })
 
 test("the working row stands on its own, with its mark, after the person's message", () => {

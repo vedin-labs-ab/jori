@@ -25,6 +25,7 @@ test("the model step starts blank, streams the reply, and leaves it for the act 
 
   expect(platform.clearDraft).toHaveBeenCalledTimes(1)
   expect(platform.writeDraft).toHaveBeenCalledWith({
+    reasoning: "",
     text: "Hi there.",
     turn: 1,
   })
@@ -65,7 +66,11 @@ test("a failed model call clears its draft", async () => {
     runModelTurn({ model, prompt: runtimePrompt(), runtime, turn: 1 })
   ).rejects.toThrow("Connection reset")
 
-  expect(platform.writeDraft).toHaveBeenCalledWith({ text: "Hi", turn: 1 })
+  expect(platform.writeDraft).toHaveBeenCalledWith({
+    reasoning: "",
+    text: "Hi",
+    turn: 1,
+  })
   expect(platform.clearDraft).toHaveBeenCalledTimes(2)
   expect(platform.recordEvent).toHaveBeenLastCalledWith(
     expect.objectContaining({ type: "model.failed" })

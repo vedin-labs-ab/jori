@@ -28,7 +28,7 @@ test("pages a conversation newest first with each side's role", async () => {
     now: 1_000,
     text: "What changed this week?",
   })
-  await writeRunDraft(ctx, { runId, text: "Three", turn: 1 })
+  await writeRunDraft(ctx, { runId, reasoning: "", text: "Three", turn: 1 })
   const reply = await insertConsoleReply(ctx, {
     conversationId: conversation._id,
     parts,

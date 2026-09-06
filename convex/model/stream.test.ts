@@ -41,12 +41,14 @@ test("folds chunks into the result a plain call returns", async () => {
   })
 })
 
-test("offers what each chunk adds, and nothing for chunks that add no text", async () => {
+test("offers what each chunk adds, and nothing for chunks that add nothing", async () => {
   const onDelta = vi.fn<(delta: ChatDelta) => void>()
 
   await foldChatStream(stream(toolCallChunks()), onDelta)
 
   expect(onDelta.mock.calls.map(([delta]) => delta)).toEqual([
+    { reasoning: "Think" },
+    { reasoning: "ing." },
     { content: "Hel" },
     { content: "lo" },
     { toolCalls: [{ argumentsDelta: "", index: 0, name: "send_reply" }] },

@@ -8,7 +8,7 @@ import {
 import { joriModel } from "../../../contracts/billing"
 import { decodeJsonObject, type JsonObject } from "../../../contracts/json"
 import { sendOpenRouterChat } from "../../model/openrouter"
-import { ingestReasoning } from "./reasoning"
+import { ingestReasoning, readsReasoning } from "./reasoning"
 import { readModelTokens } from "./tokens"
 import {
   type ModelDelta,
@@ -54,10 +54,27 @@ export class OpenRouterModel implements ModelRuntime {
           : { toolChoice: "auto" as const, tools: args.tools.map(toChatTool) }),
         ...modelSettings,
       },
-      args.onDelta
+      args.onDelta === undefined ? undefined : deltaListener(args.onDelta)
     )
 
     return readModelResponse(result)
+  }
+}
+
+// The draft shows reasoning under the rule the response keeps it by, so a
+// model whose raw reasoning is dropped at the end never streams it either.
+function deltaListener(onDelta: (delta: ModelDelta) => void) {
+  if (readsReasoning(joriModel)) {
+    return onDelta
+  }
+
+  return ({ content, toolCalls }: ModelDelta) => {
+    if (content !== undefined || toolCalls !== undefined) {
+      onDelta({
+        ...(content === undefined ? {} : { content }),
+        ...(toolCalls === undefined ? {} : { toolCalls }),
+      })
+    }
   }
 }
 
