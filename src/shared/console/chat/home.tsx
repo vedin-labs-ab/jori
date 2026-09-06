@@ -1,6 +1,6 @@
 import { MessageSquare } from "lucide-react"
 import { type ReactNode } from "react"
-import { Suggestion, Suggestions } from "@/components/ui/suggestion"
+import { Suggestion } from "@/components/ui/suggestion"
 import { ConsoleEmptyState } from "../list/empty"
 import { ConsoleLink } from "../shell/link"
 import { conversationDestination } from "../shell/routes"
@@ -31,19 +31,16 @@ export function ChatHome({
         <div className="-mx-4 md:-mx-6 grid gap-3">
           {composer}
           {suggestions.length === 0 ? null : (
-            <Suggestions
+            <ul
               aria-label="Suggestions"
-              className="w-full flex-wrap px-4 md:px-6"
-              role="group"
+              className="flex flex-wrap gap-2 px-4 md:px-6"
             >
               {suggestions.map((suggestion) => (
-                <Suggestion
-                  key={suggestion}
-                  onClick={onSuggestion}
-                  suggestion={suggestion}
-                />
+                <li key={suggestion}>
+                  <Suggestion onClick={onSuggestion} suggestion={suggestion} />
+                </li>
               ))}
-            </Suggestions>
+            </ul>
           )}
         </div>
         <RecentConversations now={now} recent={recent} />
