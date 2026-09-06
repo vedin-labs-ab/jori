@@ -22,6 +22,7 @@ import {
   consoleNavigation,
   consolePlatformNavigation,
   conversationDestination,
+  conversationPathname,
   isNavigationActive,
 } from "./routes"
 
@@ -110,7 +111,7 @@ function ChatsGroup({
               <SidebarMenuItem key={chat.id}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === conversationDestination(chat.id).to}
+                  isActive={pathname === conversationPathname(chat.id)}
                   tooltip={chat.title}
                 >
                   <ConsoleLink {...conversationDestination(chat.id)}>

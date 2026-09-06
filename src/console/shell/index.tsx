@@ -3,6 +3,7 @@ import { type ReactNode } from "react"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleSidebar } from "@/shared/console/shell/navigation"
 import { mainContentId, SkipToContent } from "@/shared/skip"
+import { useSidebarChats } from "../chat/recent"
 import { ConsoleFolderDrag } from "../folders/drag/context"
 import { SidebarFolders } from "../folders/section"
 import { SidebarUserButton } from "./account"
@@ -15,6 +16,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
+  const chats = useSidebarChats()
 
   return (
     // One drag context above both panes, so folder-page rows can drop
@@ -28,8 +30,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         sidebar={
           <ConsoleSidebar
             account={<SidebarUserButton />}
-            // The person's chats arrive with the chat binding.
-            chats={[]}
+            chats={chats}
             folders={<SidebarFolders pathname={pathname} />}
             organization={<SidebarOrganizationSwitcher />}
             pathname={pathname}

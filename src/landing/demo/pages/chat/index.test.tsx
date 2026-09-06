@@ -27,10 +27,15 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   fireEvent.change(field, { target: { value: "Chase the unpaid renewals" } })
   fireEvent.keyDown(field, { key: "Enter" })
 
-  // The console moves to the new conversation, where the ask stands and
-  // the run works under it with its log folded away.
+  // The console moves to the new conversation, named in the header, where
+  // the ask stands and the run works under it with its log folded away.
   expect(await screen.findByText("Working")).toBeDefined()
-  expect(screen.getByText("Chase the unpaid renewals")).toBeDefined()
+  expect(screen.getByRole("link", { current: "page" }).textContent).toBe(
+    "Chase the unpaid renewals"
+  )
+  expect(
+    screen.getByText("Chase the unpaid renewals", { selector: "div" })
+  ).toBeDefined()
   expect(screen.getByRole("button", { name: "Stop" })).toBeDefined()
 
   // The reply arrives, with the job it names and its question.
@@ -86,9 +91,11 @@ test("the sidebar leads with New chat and lists the conversations under Activity
   fireEvent.keyDown(field, { key: "Enter" })
 
   expect(await screen.findByText("Working")).toBeDefined()
+  // The header names the conversation too, as the current page; the
+  // sidebar's row is the link that moves.
   expect(
     screen
-      .getByRole("link", { name: "Summarize last week" })
+      .getByRole("link", { name: "Summarize last week", current: false })
       .getAttribute("data-active")
   ).toBe("true")
   expect(

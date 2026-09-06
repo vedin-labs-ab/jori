@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as ContextRouteImport } from './routes/context'
 import { Route as FilesRouteImport } from './routes/files'
@@ -25,6 +26,7 @@ import { Route as StoresRouteImport } from './routes/stores'
 import { Route as TablesRouteImport } from './routes/tables'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
+import { Route as ChatIndexRouteImport } from './routes/chat/index'
 import { Route as ContextIndexRouteImport } from './routes/context/index'
 import { Route as ContextPlacesRouteImport } from './routes/context/places'
 import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
@@ -37,6 +39,7 @@ import { Route as JobsIndexRouteImport } from './routes/jobs/index'
 import { Route as StoresIndexRouteImport } from './routes/stores/index'
 import { Route as TablesIndexRouteImport } from './routes/tables/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ChatConversationIdIndexRouteImport } from './routes/chat/$conversationId/index'
 import { Route as FilesFileIdIndexRouteImport } from './routes/files/$fileId/index'
 import { Route as FoldersFolderIdIndexRouteImport } from './routes/folders/$folderId/index'
 import { Route as FoldersFolderIdUsageRouteImport } from './routes/folders/$folderId/usage'
@@ -48,6 +51,11 @@ import { Route as TablesTableIdIndexRouteImport } from './routes/tables/$tableId
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsoleRoute = ConsoleRouteImport.update({
@@ -125,6 +133,11 @@ const TrustRoute = TrustRouteImport.update({
   path: '/trust',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatIndexRoute = ChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChatRoute,
+} as any)
 const ContextIndexRoute = ContextIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -185,6 +198,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatConversationIdIndexRoute = ChatConversationIdIndexRouteImport.update({
+  id: '/$conversationId/',
+  path: '/$conversationId/',
+  getParentRoute: () => ChatRoute,
+} as any)
 const FilesFileIdIndexRoute = FilesFileIdIndexRouteImport.update({
   id: '/$fileId/',
   path: '/$fileId/',
@@ -223,6 +241,7 @@ const TablesTableIdIndexRoute = TablesTableIdIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
@@ -242,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/folders/usage': typeof FoldersUsageRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
+  '/chat/': typeof ChatIndexRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
   '/folders/': typeof FoldersIndexRoute
@@ -252,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
+  '/chat/$conversationId/': typeof ChatConversationIdIndexRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
   '/jobs/$jobId/': typeof JobsJobIdIndexRoute
@@ -273,6 +294,7 @@ export interface FileRoutesByTo {
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/folders/usage': typeof FoldersUsageRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
+  '/chat': typeof ChatIndexRoute
   '/context': typeof ContextIndexRoute
   '/files': typeof FilesIndexRoute
   '/folders': typeof FoldersIndexRoute
@@ -283,6 +305,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
+  '/chat/$conversationId': typeof ChatConversationIdIndexRoute
   '/files/$fileId': typeof FilesFileIdIndexRoute
   '/folders/$folderId': typeof FoldersFolderIdIndexRoute
   '/jobs/$jobId': typeof JobsJobIdIndexRoute
@@ -292,6 +315,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
   '/console': typeof ConsoleRoute
   '/context': typeof ContextRouteWithChildren
   '/files': typeof FilesRouteWithChildren
@@ -311,6 +335,7 @@ export interface FileRoutesById {
   '/context/workstreams': typeof ContextWorkstreamsRoute
   '/folders/usage': typeof FoldersUsageRoute
   '/integrations/personal': typeof IntegrationsPersonalRoute
+  '/chat/': typeof ChatIndexRoute
   '/context/': typeof ContextIndexRoute
   '/files/': typeof FilesIndexRoute
   '/folders/': typeof FoldersIndexRoute
@@ -321,6 +346,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
+  '/chat/$conversationId/': typeof ChatConversationIdIndexRoute
   '/files/$fileId/': typeof FilesFileIdIndexRoute
   '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
   '/jobs/$jobId/': typeof JobsJobIdIndexRoute
@@ -331,6 +357,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/chat'
     | '/console'
     | '/context'
     | '/files'
@@ -350,6 +377,7 @@ export interface FileRouteTypes {
     | '/context/workstreams'
     | '/folders/usage'
     | '/integrations/personal'
+    | '/chat/'
     | '/context/'
     | '/files/'
     | '/folders/'
@@ -360,6 +388,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
+    | '/chat/$conversationId/'
     | '/files/$fileId/'
     | '/folders/$folderId/'
     | '/jobs/$jobId/'
@@ -381,6 +410,7 @@ export interface FileRouteTypes {
     | '/context/workstreams'
     | '/folders/usage'
     | '/integrations/personal'
+    | '/chat'
     | '/context'
     | '/files'
     | '/folders'
@@ -391,6 +421,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
+    | '/chat/$conversationId'
     | '/files/$fileId'
     | '/folders/$folderId'
     | '/jobs/$jobId'
@@ -399,6 +430,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/chat'
     | '/console'
     | '/context'
     | '/files'
@@ -418,6 +450,7 @@ export interface FileRouteTypes {
     | '/context/workstreams'
     | '/folders/usage'
     | '/integrations/personal'
+    | '/chat/'
     | '/context/'
     | '/files/'
     | '/folders/'
@@ -428,6 +461,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
+    | '/chat/$conversationId/'
     | '/files/$fileId/'
     | '/folders/$folderId/'
     | '/jobs/$jobId/'
@@ -437,6 +471,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChatRoute: typeof ChatRouteWithChildren
   ConsoleRoute: typeof ConsoleRoute
   ContextRoute: typeof ContextRouteWithChildren
   FilesRoute: typeof FilesRouteWithChildren
@@ -464,6 +499,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/console': {
@@ -571,6 +613,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrustRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/': {
+      id: '/chat/'
+      path: '/'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof ChatIndexRouteImport
+      parentRoute: typeof ChatRoute
+    }
     '/context/': {
       id: '/context/'
       path: '/'
@@ -655,6 +704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$conversationId/': {
+      id: '/chat/$conversationId/'
+      path: '/$conversationId'
+      fullPath: '/chat/$conversationId/'
+      preLoaderRoute: typeof ChatConversationIdIndexRouteImport
+      parentRoute: typeof ChatRoute
+    }
     '/files/$fileId/': {
       id: '/files/$fileId/'
       path: '/$fileId'
@@ -706,6 +762,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface ChatRouteChildren {
+  ChatIndexRoute: typeof ChatIndexRoute
+  ChatConversationIdIndexRoute: typeof ChatConversationIdIndexRoute
+}
+
+const ChatRouteChildren: ChatRouteChildren = {
+  ChatIndexRoute: ChatIndexRoute,
+  ChatConversationIdIndexRoute: ChatConversationIdIndexRoute,
+}
+
+const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
 
 interface ContextRouteChildren {
   ContextPlacesRoute: typeof ContextPlacesRoute
@@ -795,6 +863,7 @@ const TablesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChatRoute: ChatRouteWithChildren,
   ConsoleRoute: ConsoleRoute,
   ContextRoute: ContextRouteWithChildren,
   FilesRoute: FilesRouteWithChildren,

@@ -12,9 +12,9 @@ function caughtBeforeLoad() {
   return undefined
 }
 
-test("the console entry path forwards to the runs list", () => {
+test("the console entry path forwards to the chat", () => {
   const thrown = caughtBeforeLoad()
 
   expect(isRedirect(thrown)).toBe(true)
-  expect((thrown as { options: { to?: string } }).options.to).toBe("/runs")
+  expect((thrown as { options: { to?: string } }).options.to).toBe("/chat")
 })

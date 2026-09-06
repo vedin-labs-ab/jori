@@ -10,8 +10,6 @@ import {
   Timeline,
   Workflow,
 } from "lucide-react"
-import { type ComponentProps } from "react"
-import { type ConsoleLink } from "./link"
 
 export type ConsoleSurface = {
   icon: LucideIcon
@@ -98,12 +96,13 @@ export function getMaterialSurface(pathname: string) {
 }
 
 /** Pages whose header crumb is published by the view once its data loads:
- *  the material detail pages, and folder pages, whose whole ancestry is
- *  data. */
+ *  the material detail pages, folder pages, whose whole ancestry is data,
+ *  and a conversation's page, named by its title. */
 export function isMaterialPage(pathname: string) {
   return (
     getMaterialSurface(pathname) !== undefined ||
-    pathname.startsWith("/folders/")
+    pathname.startsWith("/folders/") ||
+    pathname.startsWith("/chat/")
   )
 }
 
@@ -131,12 +130,12 @@ export function isNavigationActive(
   return pathname === to || (!exact && pathname.startsWith(`${to}/`))
 }
 
-/** A conversation's page. The console's route for it lands with the chat
- *  binding; until it does the router cannot name the path, so this is the
- *  one place a destination is written as a path the router does not
- *  check. */
-export function conversationDestination(
-  conversationId: string
-): Pick<ComponentProps<typeof ConsoleLink>, "to"> {
-  return { to: `/chat/${conversationId}` }
+/** A conversation's page, as a typed link the router checks. */
+export function conversationDestination(conversationId: string) {
+  return { to: "/chat/$conversationId", params: { conversationId } } as const
+}
+
+/** The path a conversation's page has, for telling the active one. */
+export function conversationPathname(conversationId: string) {
+  return `/chat/${conversationId}`
 }

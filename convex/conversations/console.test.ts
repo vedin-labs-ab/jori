@@ -93,6 +93,33 @@ test("a conversation opened from a folder files every run under it", async () =>
   ).toEqual([folderId, folderId])
 })
 
+test("an answer to a reply's choices travels with the message", async () => {
+  const { database, ctx } = databaseContext()
+  const personId = await person(database)
+  const first = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Post the summary?",
+  })
+  await finishRun(database)
+  const answer = { messageId: first.messageId, part: 0, values: ["post"] }
+
+  const second = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    conversationId: first.conversationId,
+    text: "Yes, post it",
+    answer,
+  })
+
+  expect(await database.get(second.messageId)).toMatchObject({
+    text: "Yes, post it",
+    data: { answer },
+  })
+})
+
 test("a blocked budget keeps the message without a run", async () => {
   const { database, ctx } = databaseContext()
   const personId = await person(database)
