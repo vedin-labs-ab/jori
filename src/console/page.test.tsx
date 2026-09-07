@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { useOrganizationId } from "./organization/context"
 import { rememberTimezone } from "./organization/pending"
@@ -12,6 +12,7 @@ const { loading, mutate, organization, session } = vi.hoisted(() => ({
     organizationListQueries: 0,
   },
   organization: {
+    id: "organization",
     isResolved: false,
   },
   session: {
@@ -26,7 +27,7 @@ vi.mock("@/shared/session/auth", () => ({
     loading.activeOrganizationQueries += 1
 
     return organization.isResolved
-      ? { data: { id: "organization" }, isPending: false }
+      ? { data: { id: organization.id }, isPending: false }
       : { data: undefined, isPending: true }
   },
   useConvexSession: () =>
@@ -73,10 +74,11 @@ beforeEach(() => {
   loading.activeOrganizationQueries = 0
   loading.organizationListQueries = 0
   organization.isResolved = false
+  organization.id = "organization"
   session.isPending = false
   session.isSignedIn = true
   window.sessionStorage.clear()
-  mutate.mockClear()
+  mutate.mockReset().mockResolvedValue(undefined)
 })
 
 afterEach(cleanup)
@@ -103,15 +105,15 @@ test("keeps signed-out users behind the loader during redirect", () => {
   expect(loading.organizationListQueries).toBe(1)
 })
 
-test("hands the resolved organization to the page", () => {
+test("hands the initialized organization to the page", async () => {
   organization.isResolved = true
 
   render(<ConsolePage>{(id) => <div>{id}</div>}</ConsolePage>)
 
-  expect(screen.getByText("organization")).toBeDefined()
+  expect(await screen.findByText("organization")).toBeDefined()
 })
 
-test("a page inside a resolved console reuses that chrome", () => {
+test("a page inside an initialized console reuses that chrome", async () => {
   organization.isResolved = true
 
   render(
@@ -122,11 +124,11 @@ test("a page inside a resolved console reuses that chrome", () => {
 
   // One shell, not two: the inner page recognises the frame around it, so a
   // material page nested in a section frame does not rebuild the console.
+  expect(await screen.findByText("organization")).toBeDefined()
   expect(screen.getAllByTestId("shell")).toHaveLength(1)
-  expect(screen.getByText("organization")).toBeDefined()
 })
 
-test("a nested page re-runs none of the gate queries", () => {
+test("a nested page re-runs none of the gate queries", async () => {
   organization.isResolved = true
 
   render(
@@ -135,11 +137,12 @@ test("a nested page re-runs none of the gate queries", () => {
     </ConsolePage>
   )
 
+  await screen.findByText("Console")
   expect(loading.activeOrganizationQueries).toBe(1)
   expect(loading.organizationListQueries).toBe(1)
 })
 
-test("the organization is readable without the render prop", () => {
+test("the organization is readable without the render prop", async () => {
   organization.isResolved = true
 
   function Reader() {
@@ -148,7 +151,7 @@ test("the organization is readable without the render prop", () => {
 
   render(<ConsolePage>{() => <Reader />}</ConsolePage>)
 
-  expect(screen.getByText("organization")).toBeDefined()
+  expect(await screen.findByText("organization")).toBeDefined()
 })
 
 test("outside a console there is no organization to read", () => {
@@ -177,10 +180,11 @@ test("the zone chosen at creation is declared on the load that follows", async (
   )
 })
 
-test("a load with no pending choice declares nothing", () => {
+test("a load with no pending choice declares nothing", async () => {
   organization.isResolved = true
 
   render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+  await screen.findByText("Console")
 
   // The person sync still runs; the declaration does not.
   expect(mutate).toHaveBeenCalledTimes(1)
@@ -189,3 +193,60 @@ test("a load with no pending choice declares nothing", () => {
     timezone: "Europe/Stockholm",
   })
 })
+
+test.each([
+  "shell",
+  "none",
+] as const)("holds the %s console and its render prop until identity sync commits", async (chrome) => {
+  organization.isResolved = true
+  const sync = pendingSync()
+  mutate.mockReturnValueOnce(sync.promise)
+  const children = vi.fn(() => <div>Console</div>)
+
+  render(<ConsolePage chrome={chrome}>{children}</ConsolePage>)
+
+  expect(screen.getByText("Loading console")).toBeDefined()
+  expect(screen.queryByTestId("shell")).toBeNull()
+  expect(children).not.toHaveBeenCalled()
+  await act(async () => sync.resolve(undefined))
+  expect(screen.getByText("Console")).toBeDefined()
+  expect(children).toHaveBeenCalledWith("organization")
+})
+
+test("failed initialization stays closed and can be retried", async () => {
+  organization.isResolved = true
+  mutate.mockRejectedValueOnce(new Error("Identity transaction failed"))
+  render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+
+  const retry = await screen.findByRole("button", { name: "Try again" })
+  expect(screen.queryByTestId("shell")).toBeNull()
+  expect(screen.queryByText("Console")).toBeNull()
+  fireEvent.click(retry)
+  expect(await screen.findByText("Console")).toBeDefined()
+  expect(mutate).toHaveBeenCalledTimes(2)
+})
+
+test("a previous organization's completion cannot open the next console", async () => {
+  organization.isResolved = true
+  const first = pendingSync()
+  const second = pendingSync()
+  mutate.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise)
+  const page = render(<ConsolePage>{(id) => <div>{id}</div>}</ConsolePage>)
+
+  organization.id = "next-organization"
+  page.rerender(<ConsolePage>{(id) => <div>{id}</div>}</ConsolePage>)
+  await act(async () => first.resolve(undefined))
+  expect(screen.getByText("Loading console")).toBeDefined()
+  expect(screen.queryByTestId("shell")).toBeNull()
+  await act(async () => second.resolve(undefined))
+  expect(screen.getByText("next-organization")).toBeDefined()
+})
+
+function pendingSync() {
+  let resolve: (value: undefined) => void = () => undefined
+  const promise = new Promise<undefined>((complete) => {
+    resolve = complete
+  })
+
+  return { promise, resolve }
+}
