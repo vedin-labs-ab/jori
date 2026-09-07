@@ -2,6 +2,7 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { requireStripeWebhookSecret } from "./config"
+import { readCheckoutSubscription } from "./fulfillment"
 
 const toleranceSeconds = 5 * 60
 
@@ -13,8 +14,11 @@ export async function handleStripeEvents(ctx: ActionCtx, request: Request) {
     return new Response("Invalid signature", { status: 400 })
   }
 
+  const event: unknown = JSON.parse(body)
+  const subscription = await readCheckoutSubscription(event)
   await ctx.runMutation(internal.billing.stripe.events.apply, {
-    event: JSON.parse(body),
+    event,
+    ...(subscription === undefined ? {} : { subscription }),
   })
 
   return new Response(null, { status: 200 })

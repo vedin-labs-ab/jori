@@ -1,17 +1,13 @@
 import { v } from "convex/values"
-import {
-  autoTopUp,
-  billingIntervals,
-  planKeys,
-  plans,
-} from "../../../contracts/billing"
+import { autoTopUp, plans } from "../../../contracts/billing"
 import { type Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { readArray, readRecord, readString } from "../../shared/input"
-import { getAccount, holdAutoTopUp, trialRemainderMicros } from "../account"
+import { getAccount, holdAutoTopUp } from "../account"
 import { addMonths } from "../cycle"
 import { creditTopUp, resetAllowance } from "../ledger"
 import { belongsToRegion, planForPriceId } from "./config"
+import { applyPlanCheckout, isCheckoutSuccess } from "./fulfillment"
 
 /**
  * The single place Stripe state enters Jori. Each event is applied in one
@@ -20,7 +16,7 @@ import { belongsToRegion, planForPriceId } from "./config"
  * no-ops.
  */
 export const apply = internalMutation({
-  args: { event: v.any() },
+  args: { event: v.any(), subscription: v.optional(v.any()) },
   handler: async (ctx, args) => {
     const type = readString(args.event, "type")
     const object = readRecord(readRecord(readRecord(args.event).data).object)
@@ -30,8 +26,8 @@ export const apply = internalMutation({
     const deleted = type === "customer.subscription.deleted"
     const paid = type === "payment_intent.succeeded"
 
-    if (type === "checkout.session.completed") {
-      await applyCheckoutCompleted(ctx, object)
+    if (isCheckoutSuccess(type)) {
+      await applyCheckoutCompleted(ctx, object, readRecord(args.subscription))
     } else if (type === "customer.subscription.updated" || deleted) {
       await applySubscription(ctx, object, deleted)
     } else if (paid || type === "payment_intent.payment_failed") {
@@ -44,7 +40,8 @@ export const apply = internalMutation({
 
 async function applyCheckoutCompleted(
   ctx: MutationCtx,
-  session: Record<string, unknown>
+  session: Record<string, unknown>,
+  subscription: Record<string, unknown>
 ) {
   const metadata = readRecord(session.metadata)
   const organizationId = readString(metadata, "organizationId")
@@ -67,57 +64,10 @@ async function applyCheckoutCompleted(
   const kind = readString(metadata, "kind")
 
   if (kind === "plan") {
-    await applyPlanCheckout(ctx, account, session, customerId)
+    await applyPlanCheckout(ctx, account, session, subscription)
   } else if (kind === "top-up") {
     await applyTopUpCheckout(ctx, account, session)
   }
-}
-
-async function applyPlanCheckout(
-  ctx: MutationCtx,
-  account: Doc<"accounts">,
-  session: Record<string, unknown>,
-  customerId: string | undefined
-) {
-  const metadata = readRecord(session.metadata)
-  const subscriptionId = readString(session, "subscription")
-  const plan = planKeys.find((key) => key === metadata.plan)
-  const interval = billingIntervals.find(
-    (candidate) => candidate === metadata.interval
-  )
-
-  // An active plan is a plan, an interval, a customer, and a subscription to
-  // bill it; a payload short of any of them is not a purchase to record.
-  // Retries of an already-applied checkout are a no-op for the same reason.
-  if (
-    subscriptionId === undefined ||
-    plan === undefined ||
-    interval === undefined ||
-    customerId === undefined ||
-    account.stripe?.subscriptionId === subscriptionId
-  ) {
-    return
-  }
-
-  const now = Date.now()
-
-  await resetAllowance(ctx, {
-    account,
-    micros:
-      plans[plan].monthlyAllowanceMicros + trialRemainderMicros(account, now),
-    source: "plan",
-    now,
-  })
-
-  // Written after the allowance so it wins the shared `topUp` object: a fresh
-  // plan starts without whatever auto top-up the trial had configured.
-  await ctx.db.patch(account._id, {
-    state: { kind: "active", plan, interval },
-    topUp: { charged: { micros: 0 } },
-    stripe: { customerId, subscriptionId },
-    renewsAt: addMonths(now, 1),
-    updatedAt: now,
-  })
 }
 
 async function applyTopUpCheckout(
@@ -152,6 +102,11 @@ async function applySubscription(
   deleted: boolean
 ) {
   const account = await findSubscriptionAccount(ctx, subscription)
+  // Delayed payments can mark a subscription active before funds settle.
+  // Only a paid checkout may attach the first subscription to an account.
+  if (account?.stripe?.subscriptionId !== readString(subscription, "id")) {
+    return
+  }
   const sold =
     account === null ? undefined : subscribedPlan(account, subscription)
 
