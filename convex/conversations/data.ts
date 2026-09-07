@@ -211,6 +211,9 @@ async function insertRun(
       run: { createdBy: args.createdBy },
     })),
     ...(folderId === undefined ? {} : { folderId }),
+    ...(args.conversation.model === undefined
+      ? {}
+      : { model: args.conversation.model }),
     status: "queued",
     createdBy: args.createdBy,
     createdAt: args.now,

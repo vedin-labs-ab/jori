@@ -1,5 +1,5 @@
-import { joriModel } from "../../contracts/billing"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { runModel, runSelection } from "../model/selection"
 import { modelWindow } from "../model/window"
 import { readRunDraft } from "../runs/execution/drafts/data"
 import { findSession } from "../sessions/data"
@@ -26,7 +26,8 @@ export type LiveContext = {
  * The session's run — how it stands, and how it ended when it did not
  * finish — the draft of the reply it is writing (the reasoning while the
  * model thinks, then the text, and nothing before either has been said),
- * and the context use of the thread's current or most recent run.
+ * the context use of the thread's current or most recent run, and the
+ * selection the thread's next run will use.
  */
 export async function readLiveState(
   ctx: QueryLikeCtx,
@@ -41,6 +42,7 @@ export async function readLiveState(
     run: run === null ? null : liveRun(run),
     draft: run === null ? null : await readRunDraft(ctx, run._id),
     context: latest === null ? null : await readLiveContext(ctx, latest),
+    model: runSelection(conversation),
   }
 }
 
@@ -57,7 +59,8 @@ async function readLiveContext(
   ctx: QueryLikeCtx,
   run: Doc<"runs">
 ): Promise<LiveContext> {
-  const window = await modelWindow(ctx, joriModel)
+  const model = runModel(run)
+  const window = await modelWindow(ctx, model)
   const turn = run.turnTokens
   const compaction = run.compaction
 
@@ -65,7 +68,7 @@ async function readLiveContext(
     condensed:
       compaction?.clearedBefore !== undefined ||
       compaction?.summary !== undefined,
-    model: joriModel,
+    model,
     runId: run._id,
     turn:
       turn === undefined

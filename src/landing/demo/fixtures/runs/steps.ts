@@ -1,3 +1,4 @@
+import { defaultSelection } from "@contracts/models/selection"
 import { getToolPermission } from "@contracts/permissions"
 import {
   type ActivityItem,
@@ -142,6 +143,7 @@ function thought(
     endedAt: at + step.ms,
     startedAt: at,
     tokenUsage: {
+      model: defaultSelection.model,
       input: step.input,
       output: step.output,
       reasoning: 0,

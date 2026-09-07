@@ -17,10 +17,15 @@ const personId = "person-1" as Id<"persons">
 function attribution(
   overrides: Partial<UsageAttribution> = {}
 ): UsageAttribution {
-  return { surface: "jori", trigger: "schedule", ...overrides }
+  return {
+    surface: "jori",
+    trigger: "schedule",
+    model: "openai/gpt-x",
+    ...overrides,
+  }
 }
 
-test("the key names every dimension a breakdown can group by", () => {
+test("the key names every dimension a breakdown can group by, the model last", () => {
   expect(
     usageKey(
       attribution({
@@ -31,11 +36,13 @@ test("the key names every dimension a breakdown can group by", () => {
         trigger: "message",
       })
     )
-  ).toBe("folder-1:job-1:person-1:slack:message")
+  ).toBe("folder-1:job-1:person-1:slack:message:openai/gpt-x")
 })
 
 test("work with no folder, job, or person keys as unfiled", () => {
-  expect(usageKey(attribution({ trigger: "manual" }))).toBe("-:-:-:jori:manual")
+  expect(usageKey(attribution({ trigger: "manual" }))).toBe(
+    "-:-:-:jori:manual:openai/gpt-x"
+  )
 })
 
 test("renaming a job does not move its rows", () => {

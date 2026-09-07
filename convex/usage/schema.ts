@@ -39,6 +39,9 @@ export const usage = defineTable({
   personId: v.optional(v.id("persons")),
   surface: toolSurfaceValidator,
   trigger: usageTrigger,
+  /** The model the work ran on: a debit's is the model that answered the
+   *  turn; a run's end lands under the model the run was set to. */
+  model: v.string(),
   /** Stopped runs count as ended, not failed; in-flight runs as neither. */
   runs: v.object({ ended: v.number(), failed: v.number() }),
   micros: v.number(),

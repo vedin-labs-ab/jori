@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { joriModel } from "../../../contracts/billing"
+import { defaultSelection } from "../../../contracts/models/selection"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import {
@@ -162,7 +162,7 @@ export const open = internalMutation({
       scope: args.scope,
       status: "running",
       window,
-      prompt: { version: promptVersion(args), model: joriModel },
+      prompt: { version: promptVersion(args), model: defaultSelection.model },
       startedAt: now,
     })
 

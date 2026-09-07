@@ -1,5 +1,6 @@
+import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatHome } from "@/shared/console/chat/home"
 import { ChatPane } from "@/shared/console/chat/pane"
@@ -19,7 +20,11 @@ import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
 import { liveActivity, resolveReference } from "../../derive/chat"
-import { chatContext, chatSuggestions } from "../../fixtures/chat"
+import {
+  chatContext,
+  chatSelection,
+  chatSuggestions,
+} from "../../fixtures/chat"
 import { liveDraft } from "../../state/chat"
 import { type DemoLiveReply } from "../../state/types"
 import { useDemoWorkspace } from "../../workspace"
@@ -35,6 +40,7 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
   const { actions, state } = useDemoWorkspace()
   const navigate = useConsoleNavigate()
   const now = useNow(60_000)
+  const [selection, setSelection] = useState<ModelSelection>(chatSelection)
   const reference =
     context === undefined ? undefined : resolveReference(state, context)
   const send = (text: string) => {
@@ -53,8 +59,10 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
           context={reference}
           live={null}
           onClearContext={() => navigate({ to: "/chat" })}
+          onSelect={setSelection}
           onSend={send}
           onStop={() => {}}
+          selection={selection}
         />
       }
       now={now}
@@ -134,8 +142,8 @@ function Conversation({ conversationId }: { conversationId: string }) {
   )
 }
 
-/** The composer bound to send into the conversation, and to stop the
- *  run answering it. */
+/** The composer bound to send into the conversation, to stop the run
+ *  answering it, and to hold the model the next one runs on. */
 function DemoComposer({
   conversationId,
   run,
@@ -144,13 +152,16 @@ function DemoComposer({
   run: ChatRun | null
 }) {
   const { actions } = useDemoWorkspace()
+  const [selection, setSelection] = useState<ModelSelection>(chatSelection)
 
   return (
     <ChatComposer
       autoFocus
       live={run}
+      onSelect={setSelection}
       onSend={(text) => actions.sendChatMessage(text, conversationId)}
       onStop={actions.stopChatRun}
+      selection={selection}
       usage={chatContext}
     />
   )

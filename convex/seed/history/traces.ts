@@ -1,4 +1,4 @@
-import { joriModel } from "../../../contracts/billing"
+import { defaultSelection } from "../../../contracts/models/selection"
 import { getToolPermission } from "../../../contracts/permissions"
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
@@ -107,7 +107,7 @@ function modelData(item: WorkItem) {
   const uncached = item.tokens.input - cacheRead
 
   return {
-    model: joriModel,
+    model: defaultSelection.model,
     usage: {
       durationMs: item.durationMs,
       tokens: {

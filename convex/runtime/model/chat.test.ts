@@ -3,7 +3,7 @@ import {
   type ChatResult,
 } from "@openrouter/sdk/models"
 import { expect, test, vi } from "vitest"
-import { joriModel } from "../../../contracts/billing"
+import { defaultSelection } from "../../../contracts/models/selection"
 import { OpenRouterModel } from "./chat"
 import { type ModelMessage, type ModelTool } from "./types"
 
@@ -12,6 +12,7 @@ const openRouter = vi.hoisted(() => ({
 }))
 
 vi.mock("../../model/openrouter", () => ({
+  providerPreferences: () => ({ requireParameters: true }),
   sendOpenRouterChat: openRouter.send,
 }))
 
@@ -69,7 +70,7 @@ test("sends the transcript as one system message and the turns after it", async 
         },
         { content: "release checklist", role: "tool", toolCallId: "call_1" },
       ],
-      model: joriModel,
+      model: defaultSelection.model,
       sessionId: "run_1",
       provider: { requireParameters: true },
       reasoning: { effort: "medium" },
@@ -85,6 +86,30 @@ test("sends the transcript as one system message and the turns after it", async 
         },
       ],
     },
+    undefined
+  )
+})
+
+test("the run's selection names the model and its effort; the default is standard", async () => {
+  openRouter.send.mockResolvedValue(
+    chatResult({ content: "Done.", role: "assistant" })
+  )
+  const premium = { model: "openai/gpt-6-astra", effort: "high" } as const
+  const model = new OpenRouterModel("run_1", premium)
+
+  expect(model.model).toBe("openai/gpt-6-astra")
+  expect(new OpenRouterModel("run_1").model).toBe(defaultSelection.model)
+
+  await model.complete({
+    messages: [{ content: "Ship the release.", role: "user" }],
+    tools: [],
+  })
+
+  expect(openRouter.send).toHaveBeenCalledWith(
+    expect.objectContaining({
+      model: "openai/gpt-6-astra",
+      reasoning: { effort: "high" },
+    }),
     undefined
   )
 })
@@ -235,7 +260,7 @@ function chatResult(
     choices: [{ finishReason: "stop", index: 0, message }],
     created: 0,
     id: "gen_1",
-    model: joriModel,
+    model: defaultSelection.model,
     object: "chat.completion",
     systemFingerprint: null,
     usage,

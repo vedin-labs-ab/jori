@@ -13,6 +13,7 @@ import {
   normalizeConsoleContext,
   referenceTargetValidator,
 } from "../messages/references"
+import { modelSelectionValidator } from "../model/selection"
 import {
   accountArgs,
   ensureAccountPerson,
@@ -37,13 +38,15 @@ type ConsoleSendArgs = {
   text: string
   context?: Infer<typeof referenceTargetValidator>
   answer?: Infer<typeof consoleAnswerValidator>
+  model?: Infer<typeof modelSelectionValidator>
 }
 
 const titleMaxLength = 80
 
 /** A person's message to Jori from the console. The first message opens the
- *  conversation; every message is recorded, then handed to the same run
- *  start Slack mentions use, so a blocked budget keeps the message. */
+ *  conversation, with the model selection it was sent under; every message
+ *  is recorded, then handed to the same run start Slack mentions use, so a
+ *  blocked budget keeps the message. */
 export const send = mutation({
   args: {
     organizationId: v.string(),
@@ -51,6 +54,7 @@ export const send = mutation({
     text: v.string(),
     context: v.optional(referenceTargetValidator),
     answer: v.optional(consoleAnswerValidator),
+    model: v.optional(modelSelectionValidator),
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
@@ -64,6 +68,24 @@ export const send = mutation({
       personId,
       profile: readUserProfile(identity),
     })
+  },
+})
+
+/** The model and effort the conversation's next run uses. A run already
+ *  answering keeps the selection it started on. */
+export const choose = mutation({
+  args: {
+    organizationId: v.string(),
+    conversationId: v.id("conversations"),
+    model: modelSelectionValidator,
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const personId = await resolveCurrentPerson(ctx, args.organizationId)
+
+    await chooseConversationModel(ctx, { ...args, personId })
+
+    return null
   },
 })
 
@@ -81,8 +103,9 @@ export const list = query({
 })
 
 /** The conversation's title, the run currently attached to its session,
- *  if any, the reply that run is composing, and how much of the model's
- *  window the thread's latest run is using. */
+ *  if any, the reply that run is composing, how much of the model's
+ *  window the thread's latest run is using, and the selection its next
+ *  run will use. */
 export const live = query({
   args: {
     organizationId: v.string(),
@@ -175,6 +198,20 @@ export async function sendConsoleMessage(
   }
 }
 
+export async function chooseConversationModel(
+  ctx: MutationCtx,
+  args: {
+    organizationId: string
+    conversationId: Id<"conversations">
+    personId: Id<"persons">
+    model: Infer<typeof modelSelectionValidator>
+  }
+) {
+  const conversation = await requireVisibleConsoleConversation(ctx, args)
+
+  await ctx.db.patch(conversation._id, { model: args.model })
+}
+
 export async function listConsoleConversations(
   ctx: QueryLikeCtx,
   args: {
@@ -205,6 +242,7 @@ async function createConsoleConversation(
     organizationId: string
     personId: Id<"persons">
     text: string
+    model?: Infer<typeof modelSelectionValidator>
     now: number
   }
 ) {
@@ -216,6 +254,7 @@ async function createConsoleConversation(
     title: conversationTitle(args.text),
     createdBy: args.personId,
     updatedAt: args.now,
+    ...(args.model === undefined ? {} : { model: args.model }),
   })
 
   await ctx.db.patch(conversationId, { externalId: conversationId })

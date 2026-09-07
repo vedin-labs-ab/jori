@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
+import { modelSelectionValidator } from "../model/selection"
 import { audienceValidator } from "../shared/audience"
 import { debounceValidator } from "../shared/debounce"
 import { messageSurfaceValidator } from "../shared/integrations"
@@ -19,6 +20,9 @@ export const conversations = defineTable({
   title: v.optional(v.string()),
   createdBy: v.optional(v.id("persons")),
   updatedAt: v.optional(v.number()),
+  /** The model and effort the conversation's next run uses; absent, the
+   *  default selection. Only console conversations carry one. */
+  model: v.optional(modelSelectionValidator),
   summary: v.optional(v.string()),
   summarizedAt: v.optional(v.number()),
   debounce: debounceValidator,

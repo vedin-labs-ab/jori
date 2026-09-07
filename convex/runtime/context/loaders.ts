@@ -1,3 +1,4 @@
+import { type ModelSelection } from "../../../contracts/models/selection"
 import {
   isTerminalRunStatus,
   type RunStatus,
@@ -9,6 +10,7 @@ import { type RuntimeSkill } from "../../skills/runtime"
 
 export type LoadedRun = {
   _id: Id<"runs">
+  model?: ModelSelection
   status: RunStatus
   organizationId: string
 }

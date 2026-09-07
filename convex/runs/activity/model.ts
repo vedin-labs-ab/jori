@@ -73,7 +73,7 @@ function projectModelTerminal(
     endedAt: trace.timestamp,
     ...(reasoning === undefined ? {} : { reasoning }),
     startedAt: started?.timestamp ?? trace.timestamp,
-    tokenUsage: modelTokenUsage(usage),
+    tokenUsage: modelTokenUsage(usage, readModelName(data)),
   }
 }
 
@@ -90,13 +90,15 @@ function modelSummary(usage: ModelUsage | undefined) {
 }
 
 function modelTokenUsage(
-  usage: ModelUsage | undefined
+  usage: ModelUsage | undefined,
+  model: string | undefined
 ): ActivityTokenUsage | undefined {
   if (usage === undefined) {
     return undefined
   }
 
   return {
+    ...(model === undefined ? {} : { model }),
     input: usage.tokens.input,
     output: usage.tokens.output,
     reasoning: usage.tokens.reasoning,

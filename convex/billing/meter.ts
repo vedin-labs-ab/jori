@@ -1,25 +1,28 @@
-import { autoTopUp, joriModel, priceModelTokens } from "../../contracts/billing"
+import { autoTopUp, priceTokens } from "../../contracts/billing"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { liveModelRate } from "../model/rate"
 import { recordUsageDebit } from "../usage/record"
 import { availableMicros, ensureAccount, holdAutoTopUp } from "./account"
 import { debitRun } from "./ledger"
 
 /**
- * Called for every completed model turn: price the tokens at list rates,
- * debit the organization, and kick off an auto top-up when the balance has sunk
- * below the threshold. In-flight work is never interrupted here; the run
- * budget guard handles new work.
+ * Called for every completed model turn: price the tokens at the list
+ * rate of the model that answered, debit the organization, and kick off an
+ * auto top-up when the balance has sunk below the threshold. In-flight work
+ * is never interrupted here; the run budget guard handles new work and the
+ * loop's per-turn check the turns after the first.
  */
 export async function meterModelUsage(
   ctx: MutationCtx,
   args: {
+    model: string
     run: Doc<"runs">
     tokens: { input: number; output: number }
   }
 ) {
-  const micros = priceModelTokens(joriModel, args.tokens)
+  const micros = priceTokens(await liveModelRate(ctx, args.model), args.tokens)
 
   if (micros <= 0) {
     return
@@ -32,7 +35,12 @@ export async function meterModelUsage(
   await debitRun(ctx, { account, runId: args.run._id, micros, tokens, now })
   // The ledger stays pure money; attribution is the rollup's business, so
   // the dependency points this way and never back.
-  await recordUsageDebit(ctx, { run: args.run, micros, tokens })
+  await recordUsageDebit(ctx, {
+    run: args.run,
+    model: args.model,
+    micros,
+    tokens,
+  })
 
   const debited = await ctx.db.get(account._id)
 

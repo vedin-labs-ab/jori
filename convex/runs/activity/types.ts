@@ -31,6 +31,8 @@ export type ActivityDetail = {
 }
 
 export type ActivityTokenUsage = {
+  /** The model the step ran on, which its cost is priced from. */
+  model?: string
   input: number
   output: number
   reasoning: number

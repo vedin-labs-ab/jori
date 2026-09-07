@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { runStatuses } from "../../contracts/runtime/runs"
+import { modelSelectionValidator } from "../model/selection"
 import { actorValidator } from "../shared/actor"
 import { audienceValidator } from "../shared/audience"
 import { accessValidator, toolSurfaceValidator } from "../shared/integrations"
@@ -162,6 +163,10 @@ export const runs = defineTable({
    */
   access: v.optional(accessValidator),
   snapshot: runSnapshot,
+  /** The model and effort the run's turns use, stamped from the console
+   *  conversation's choice when the run is created; absent, the run uses
+   *  the default selection, as every job and provider run does. */
+  model: v.optional(modelSelectionValidator),
   status: runStatus,
   /** The durable workflow running this run, cleared when it completes. */
   workflowId: v.optional(v.string()),

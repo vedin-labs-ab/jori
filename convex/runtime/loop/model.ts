@@ -1,5 +1,4 @@
 import { v } from "convex/values"
-import { joriModel } from "../../../contracts/billing"
 import { type RuntimePrompt } from "../../../contracts/runtime/prompt"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type RuntimeModelUsage } from "../../../contracts/runtime/trace"
@@ -43,7 +42,7 @@ export const step = internalAction({
     const { OpenRouterModel } = await import("../model/chat")
 
     await runModelTurn({
-      model: new OpenRouterModel(loaded.run._id),
+      model: new OpenRouterModel(loaded.run._id, loaded.run.model),
       prompt: buildRuntimePrompt(
         loaded.input,
         loaded.activeSurface,
@@ -151,6 +150,7 @@ export async function completeModelStep(args: {
   await draft?.close(response)
   await recordModelCompleted(args.runtime, {
     durationMs: Date.now() - startedAt,
+    model: args.model.model,
     response,
     sequence,
   })
@@ -212,13 +212,14 @@ function recordModelCompleted(
   runtime: AgentRuntime,
   args: {
     durationMs: number
+    model: string
     response: ModelResponse
     sequence: number
   }
 ) {
   return recordRuntimeEvent(runtime.platform, runtime.context, {
     data: {
-      model: joriModel,
+      model: args.model,
       usage: modelUsage(args.response, args.durationMs),
       output: nullableText(args.response.content),
       reasoning: args.response.reasoning,

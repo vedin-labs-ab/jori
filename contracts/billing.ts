@@ -6,6 +6,8 @@
  * pricing stays exact integer math end to end.
  */
 
+import { type ModelRate, modelRate } from "./models/catalog"
+
 export const microsPerDollar = 1_000_000
 
 export const plans = {
@@ -72,68 +74,29 @@ export const autoTopUp = {
 }
 
 /**
- * The model Jori runs on. One choice, stated once, for every call Jori makes:
- * the agent, the deduction judge, conversation summaries, place profiles,
- * and organization discovery.
- *
- * Model selection is deliberately not deployment configuration. It decides
- * what Jori costs and how its output behaves, so it belongs in code and in
- * review, and it lives here because the rate table below has to be keyed by
- * it: a model Jori can call but cannot price is not a thing that should exist.
+ * Usage is priced at the provider's public list rates for the model that
+ * answered, from the catalog in `models/`. Input covers every prompt
+ * token, cached or not; the spread against cached actuals is the usage
+ * margin. Output covers completion tokens, reasoning included. Rates can
+ * be fractions of a micro-dollar, so the amount rounds to whole micros.
  */
-export const joriModel = "openai/gpt-5.6-sol"
-
-type ModelRate = {
-  inputMicrosPerToken: number
-  outputMicrosPerToken: number
-}
-
-/**
- * Provider list rates. Input covers every prompt token, cached or not; the
- * spread against cached actuals is the usage margin. Output covers completion
- * tokens, reasoning included.
- */
-export const modelRates: Record<string, ModelRate> = {
-  [joriModel]: { inputMicrosPerToken: 5, outputMicrosPerToken: 30 },
-}
-
-/**
- * The window assumed for a model whose row the daily refresh has not
- * written yet: 128k tokens, the smallest window a frontier model has
- * shipped with since 2024. Compaction thresholds read against it, so a
- * guess that is too small condenses a run early while one that is too
- * large lets a prompt grow until the provider rejects it; small is the
- * safe error.
- */
-export const modelContextFallback = { contextLength: 128_000 }
-
-/** A model missing from the rate table bills at the highest configured rate
- *  so a routing change can never silently undercharge. */
-export function resolveModelRate(model: string): ModelRate {
-  const known = modelRates[model]
-
-  if (known !== undefined) {
-    return known
-  }
-
-  return Object.values(modelRates).reduce((left, right) =>
-    left.inputMicrosPerToken + left.outputMicrosPerToken >=
-    right.inputMicrosPerToken + right.outputMicrosPerToken
-      ? left
-      : right
+export function priceTokens(
+  rate: ModelRate,
+  tokens: { input: number; output: number }
+) {
+  return Math.round(
+    tokens.input * rate.inputMicrosPerToken +
+      tokens.output * rate.outputMicrosPerToken
   )
 }
 
+/** The catalog's rate for the model; a model outside the catalog throws
+ *  rather than bill at a guess. */
 export function priceModelTokens(
   model: string,
   tokens: { input: number; output: number }
 ) {
-  const rate = resolveModelRate(model)
-
-  return (
-    tokens.input * rate.inputMicrosPerToken +
-    tokens.output * rate.outputMicrosPerToken
-  )
+  return priceTokens(modelRate(model), tokens)
 }
 
 export function dollarsToMicros(usd: number) {

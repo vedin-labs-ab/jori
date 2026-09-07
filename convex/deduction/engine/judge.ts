@@ -1,5 +1,5 @@
-import { joriModel } from "../../../contracts/billing"
 import { isRecord } from "../../../contracts/json"
+import { defaultSelection } from "../../../contracts/models/selection"
 import {
   type PromptTemplateId,
   promptTemplates,
@@ -19,7 +19,7 @@ export async function requestJudge(options: {
   payload: unknown
 }): Promise<Record<string, unknown>> {
   return await requestStructured({
-    model: joriModel,
+    model: defaultSelection.model,
     reasoning: judgeReasoning,
     schemaName: options.schemaName,
     schema: options.schema,

@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
-import { joriModel, modelContextFallback } from "../../contracts/billing"
+import { catalogModel } from "../../contracts/models/catalog"
+import { defaultSelection } from "../../contracts/models/selection"
 import {
   consoleContext,
   conversationOf,
@@ -32,6 +33,7 @@ test("reports the session's run and the reply it is drafting", async () => {
     run: { id: run._id, status: "queued" },
     draft: null,
     context: emptyContext(run._id),
+    model: defaultSelection,
   })
 
   const draft = { reasoning: "Reading the notes.", text: "On it" }
@@ -42,6 +44,7 @@ test("reports the session's run and the reply it is drafting", async () => {
     run: { id: run._id, status: "queued" },
     draft,
     context: emptyContext(run._id),
+    model: defaultSelection,
   })
 
   // A run that did not finish says how it ended, so the thread can.
@@ -81,14 +84,15 @@ test("the thread's context use reads off its latest run, even once the session l
     },
   })
   await database.insert("models", {
-    model: joriModel,
+    model: defaultSelection.model,
     contextLength: 200_000,
+    rate: catalogModel(defaultSelection.model).rate,
     fetchedAt: 1,
   })
 
   const expected = {
     condensed: false,
-    model: joriModel,
+    model: defaultSelection.model,
     runId: run._id,
     turn: { cached: 40_000, input: 61_000, output: 900, reasoning: 300 },
     usedTokens: 61_000,
@@ -107,6 +111,7 @@ test("the thread's context use reads off its latest run, even once the session l
     run: null,
     draft: null,
     context: expected,
+    model: defaultSelection,
   })
 
   // A run that condensed its transcript says so; a clearing that found
@@ -135,16 +140,16 @@ test("a thread with no run yet has no context to show", async () => {
 
   expect(
     await readLiveState(ctx, await conversationOf(database, { conversationId }))
-  ).toEqual({ run: null, draft: null, context: null })
+  ).toEqual({ run: null, draft: null, context: null, model: defaultSelection })
 })
 
 function emptyContext(runId: Id<"runs">) {
   return {
     condensed: false,
-    model: joriModel,
+    model: defaultSelection.model,
     runId,
     turn: null,
     usedTokens: 0,
-    windowTokens: modelContextFallback.contextLength,
+    windowTokens: catalogModel(defaultSelection.model).contextLength,
   }
 }

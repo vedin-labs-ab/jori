@@ -11,6 +11,7 @@ test("omits zero-value token usage metrics", () => {
   render(
     <ActivityTokenUsage
       usage={{
+        model: "openai/gpt-5.6-sol",
         input: 8000,
         output: 37,
         reasoning: 0,
@@ -19,7 +20,8 @@ test("omits zero-value token usage metrics", () => {
     />
   )
 
-  expect(screen.getByText("in 8K · out 37 · total 8K · $0.04")).toBeDefined()
+  // 8k input at $2/M plus 37 output at $10/M, priced from the step's model.
+  expect(screen.getByText("in 8K · out 37 · total 8K · $0.02")).toBeDefined()
   expect(screen.queryByText(/reasoning 0/)).toBeNull()
 })
 

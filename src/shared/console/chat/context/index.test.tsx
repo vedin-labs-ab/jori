@@ -25,7 +25,7 @@ test("the ring names the share and the tokens, and opens the last turn's receipt
   expect(row("Output")).toBe("900")
   expect(row("Reasoning")).toBe("300")
   expect(row("Cached")).toBe("40K")
-  expect(row("Cost")).toBe("$0.33")
+  expect(row("Cost")).toBe("$0.13")
 })
 
 test("the tone warms at 70% and turns to the destructive color at 85%", () => {

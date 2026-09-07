@@ -1,4 +1,5 @@
 import { expect, test, vi } from "vitest"
+import { defaultSelection } from "../../contracts/models/selection"
 import {
   consoleContext,
   conversationOf,
@@ -122,7 +123,7 @@ test("a blocked budget keeps the message without a run", async () => {
   expect(await rows(database, "runs")).toEqual([])
   expect(
     await readLiveState(ctx, await conversationOf(database, result))
-  ).toEqual({ run: null, draft: null, context: null })
+  ).toEqual({ run: null, draft: null, context: null, model: defaultSelection })
 })
 
 test("lists a person's own conversations, most recently active first", async () => {
