@@ -9,7 +9,6 @@ import {
   rows,
 } from "../../test/convex/conversations"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { writeRunDraft } from "../runs/execution/drafts/data"
 import { sendConsoleMessage } from "./console"
 import { readLiveState } from "./live"
 
@@ -17,7 +16,7 @@ import { readLiveState } from "./live"
 // backend; these tests are about what the thread reads back.
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 
-test("reports the session's run and the reply it is drafting", async () => {
+test("reports the session's run, and how it ended when it did not finish", async () => {
   const { database, ctx } = consoleContext()
   const personId = await person(database)
   const sent = await sendConsoleMessage(ctx, {
@@ -31,18 +30,6 @@ test("reports the session's run and the reply it is drafting", async () => {
 
   expect(await readLiveState(ctx, live)).toEqual({
     run: { id: run._id, status: "queued" },
-    draft: null,
-    context: emptyContext(run._id),
-    model: defaultSelection,
-  })
-
-  const draft = { reasoning: "Reading the notes.", text: "On it" }
-
-  await writeRunDraft(ctx, { ...draft, runId: run._id, turn: 1 })
-
-  expect(await readLiveState(ctx, live)).toEqual({
-    run: { id: run._id, status: "queued" },
-    draft,
     context: emptyContext(run._id),
     model: defaultSelection,
   })
@@ -109,7 +96,6 @@ test("the thread's context use reads off its latest run, even once the session l
 
   expect(await readLiveState(ctx, live)).toEqual({
     run: null,
-    draft: null,
     context: expected,
     model: defaultSelection,
   })
@@ -140,7 +126,7 @@ test("a thread with no run yet has no context to show", async () => {
 
   expect(
     await readLiveState(ctx, await conversationOf(database, { conversationId }))
-  ).toEqual({ run: null, draft: null, context: null, model: defaultSelection })
+  ).toEqual({ run: null, context: null, model: defaultSelection })
 })
 
 function emptyContext(runId: Id<"runs">) {

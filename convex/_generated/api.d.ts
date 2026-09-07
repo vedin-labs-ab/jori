@@ -93,6 +93,7 @@ import type * as conversations_console from "../conversations/console.js";
 import type * as conversations_continuation from "../conversations/continuation.js";
 import type * as conversations_create from "../conversations/create.js";
 import type * as conversations_data from "../conversations/data.js";
+import type * as conversations_draft from "../conversations/draft.js";
 import type * as conversations_fresh from "../conversations/fresh.js";
 import type * as conversations_intake from "../conversations/intake.js";
 import type * as conversations_limits from "../conversations/limits.js";
@@ -725,6 +726,7 @@ declare const fullApi: ApiFromModules<{
   "conversations/continuation": typeof conversations_continuation;
   "conversations/create": typeof conversations_create;
   "conversations/data": typeof conversations_data;
+  "conversations/draft": typeof conversations_draft;
   "conversations/fresh": typeof conversations_fresh;
   "conversations/intake": typeof conversations_intake;
   "conversations/limits": typeof conversations_limits;

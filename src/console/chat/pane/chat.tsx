@@ -1,11 +1,15 @@
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { type GenericId } from "convex/values"
+import { useCallback } from "react"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
+import { type ChooseHandler } from "@/shared/console/chat/thread"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { useLatestCallback } from "@/shared/console/retain"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../../convex/_generated/api"
+import { ConversationDraft } from "../draft"
 import { useConversationMessages } from "../messages"
 import { useReferences } from "../references"
 import { sendAnswer, useSendMessage } from "../send"
@@ -64,30 +68,36 @@ function PaneTurns({
   organizationId: string
 }) {
   const page = useConversationMessages(organizationId, conversationId)
-  const send = useSendMessage(organizationId)
+  const send = useLatestCallback(useSendMessage(organizationId))
   const resolveReference = useReferences(organizationId, page.messages)
   const now = useNow(60_000)
+  const onChoose = useCallback<ChooseHandler>(
+    (messageId, answers, text) =>
+      sendAnswer(send, {
+        conversationId,
+        text,
+        answer: { messageId: messageId as GenericId<"messages">, answers },
+      }),
+    [conversationId, send]
+  )
 
   return (
     <ChatPaneBody
       material={{
         kind: "chat",
         thread: {
-          draft: live.draft,
+          draft: (
+            <ConversationDraft
+              conversationId={conversationId}
+              organizationId={organizationId}
+            />
+          ),
           hasMore: page.hasMore,
           isLoading: page.isLoading,
           live: live.run,
           messages: page.messages,
           now,
-          onChoose: (messageId, answers, text) =>
-            sendAnswer(send, {
-              conversationId,
-              text,
-              answer: {
-                messageId: messageId as GenericId<"messages">,
-                answers,
-              },
-            }),
+          onChoose,
           onLoadMore: page.loadMore,
           onOpenReference,
           resolveReference,

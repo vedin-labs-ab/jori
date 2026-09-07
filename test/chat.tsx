@@ -3,6 +3,7 @@ import { vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
 import { ChatThread, type ChooseHandler } from "@/shared/console/chat/thread"
+import { ChatDraftTurn } from "@/shared/console/chat/thread/draft"
 import {
   type ChatDraft,
   type ChatMessage,
@@ -95,7 +96,7 @@ export function renderThread({
   return render(
     <TooltipProvider>
       <ChatThread
-        draft={draft}
+        draft={draft === null ? undefined : <ChatDraftTurn draft={draft} />}
         hasMore={false}
         isLoading={false}
         live={live}

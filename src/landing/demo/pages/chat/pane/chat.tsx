@@ -5,8 +5,8 @@ import { type ChatRun, type ReferenceTarget } from "@/shared/console/chat/types"
 import { useNow } from "@/shared/console/time"
 import { resolveReference } from "../../../derive/chat"
 import { chatContext } from "../../../fixtures/chat"
-import { liveDraft } from "../../../state/chat"
 import { useDemoWorkspace } from "../../../workspace"
+import { DemoDraft } from "../draft"
 
 /** Another conversation's turns out of the workspace, with the reply
  *  being written to it as far as it has come. */
@@ -39,7 +39,9 @@ export function DemoPaneChat({
       material={{
         kind: "chat",
         thread: {
-          draft: liveDraft(state.chat, conversationId),
+          draft: (
+            <DemoDraft chat={state.chat} conversationId={conversationId} />
+          ),
           hasMore: false,
           isLoading: false,
           live: run,

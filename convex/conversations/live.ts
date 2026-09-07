@@ -1,7 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { runModel, runSelection } from "../model/selection"
 import { modelWindow } from "../model/window"
-import { readRunDraft } from "../runs/execution/drafts/data"
 import { findSession } from "../sessions/data"
 import { type QueryLikeCtx } from "../shared/context"
 
@@ -24,10 +23,10 @@ type LiveContext = {
 
 /**
  * The session's run — how it stands, and how it ended when it did not
- * finish — the draft of the reply it is writing (the reasoning while the
- * model thinks, then the text, and nothing before either has been said),
- * the context use of the thread's current or most recent run, and the
- * selection the thread's next run will use.
+ * finish — the context use of the thread's current or most recent run,
+ * and the selection the thread's next run will use. The reply the run is
+ * writing is `conversations.draft.get`'s, read apart from this so its
+ * every write re-renders the turn alone.
  */
 export async function readLiveState(
   ctx: QueryLikeCtx,
@@ -40,7 +39,6 @@ export async function readLiveState(
 
   return {
     run: run === null ? null : liveRun(run),
-    draft: run === null ? null : await readRunDraft(ctx, run._id),
     context: latest === null ? null : await readLiveContext(ctx, latest),
     model: runSelection(conversation),
   }

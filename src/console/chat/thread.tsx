@@ -1,11 +1,12 @@
 import { useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
+import { useCallback } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatPane } from "@/shared/console/chat/pane"
 import { useReplyReferences } from "@/shared/console/chat/pane/auto"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
-import { ChatThread } from "@/shared/console/chat/thread"
+import { ChatThread, type ChooseHandler } from "@/shared/console/chat/thread"
 import {
   isLiveRun,
   type ReferenceTarget,
@@ -21,12 +22,14 @@ import {
   useConversation,
   useThreadChrome,
 } from "./conversation"
+import { ConversationDraft } from "./draft"
 import { type useConversationMessages } from "./messages"
 import { ConversationPaneBody } from "./pane"
 import { ChatProgress } from "./progress"
 import { sendAnswer } from "./send"
 
 type SendAnswer = FunctionArgs<typeof api.conversations.console.send>["answer"]
+type SendMessage = (text: string, answer?: SendAnswer) => void
 
 /** One conversation with Jori: its turns, the run answering the latest
  *  one, the composer that sends into it, and beside them the pane the
@@ -91,6 +94,9 @@ function ConversationContent({
   )
 }
 
+/** The page's handlers keep their identity across renders, so the
+ *  memoized composer, pane, and turns under them stay put while the run
+ *  state and the draft move. */
 function ConversationThread({
   conversationId,
   live,
@@ -101,29 +107,24 @@ function ConversationThread({
   organizationId: string
 }) {
   const thread = useConversation(organizationId, conversationId, live)
-  const { pane, page, resolveReference } = thread
+  const { openTarget, page, resolveReference } = thread
+  const handlers = useThreadHandlers(organizationId, conversationId, thread)
 
   useThreadChrome(live.title)
   useReplyReferences(conversationId, page.messages, thread.autoOpen)
 
   return (
     <ChatPane
-      {...pane}
-      body={paneBody(organizationId, thread.openTarget)}
+      {...thread.pane}
+      body={handlers.body}
       composer={
         <ChatComposer
           autoFocus
-          live={live.run}
+          isLive={isLiveRun(live.run)}
           mentions={thread.mentions}
           onMention={thread.mentioned.open}
           onSelect={thread.choose}
-          onSend={(text, references) =>
-            thread.send({
-              conversationId,
-              text,
-              ...(references.length === 0 ? {} : { references }),
-            })
-          }
+          onSend={handlers.sendText}
           onStop={thread.stop}
           onUnmention={thread.releaseTarget}
           resolve={resolveReference}
@@ -134,39 +135,62 @@ function ConversationThread({
       resolve={resolveReference}
     >
       <ConversationTurns
+        conversationId={conversationId}
         live={live}
         mentions={thread.mentions}
-        onOpenReference={thread.openTarget}
+        onOpenReference={openTarget}
         organizationId={organizationId}
         page={page}
         resolveReference={resolveReference}
-        send={(text, answer) =>
-          sendAnswer(thread.send, {
-            conversationId,
-            text,
-            ...(answer === undefined ? {} : { answer }),
-          })
-        }
+        send={handlers.sendMessage}
       />
     </ChatPane>
   )
 }
 
-/** The pane's body for whatever tab is active, bound to the organization
- *  and to the pane's own way of opening what a body names. */
-function paneBody(organizationId: string, onOpenReference: OpenTarget) {
-  return (target: ReferenceTarget) => (
-    <ConversationPaneBody
-      onOpenReference={onOpenReference}
-      organizationId={organizationId}
-      target={target}
-    />
-  )
+/** The pane's body for a target, the composer's send, and the turns'
+ *  send, each made once per conversation. */
+function useThreadHandlers(
+  organizationId: string,
+  conversationId: GenericId<"conversations">,
+  { openTarget, send }: ReturnType<typeof useConversation>
+) {
+  return {
+    body: useCallback(
+      (target: ReferenceTarget) => (
+        <ConversationPaneBody
+          onOpenReference={openTarget}
+          organizationId={organizationId}
+          target={target}
+        />
+      ),
+      [openTarget, organizationId]
+    ),
+    sendText: useCallback(
+      (text: string, references: ReferenceTarget[]) =>
+        send({
+          conversationId,
+          text,
+          ...(references.length === 0 ? {} : { references }),
+        }),
+      [conversationId, send]
+    ),
+    sendMessage: useCallback<SendMessage>(
+      (text, answer) =>
+        sendAnswer(send, {
+          conversationId,
+          text,
+          ...(answer === undefined ? {} : { answer }),
+        }),
+      [conversationId, send]
+    ),
+  }
 }
 
 /** The conversation's turns and, while Jori answers, the run's progress
- *  bound to Convex under the latest one. */
+ *  and its draft bound to Convex under the latest one. */
 function ConversationTurns({
+  conversationId,
   live,
   mentions,
   onOpenReference,
@@ -175,35 +199,43 @@ function ConversationTurns({
   resolveReference,
   send,
 }: {
+  conversationId: GenericId<"conversations">
   live: LiveConversation
   mentions: MentionSources
   onOpenReference: OpenTarget
   organizationId: string
   page: ReturnType<typeof useConversationMessages>
   resolveReference: ResolveReference
-  send: (text: string, answer?: SendAnswer) => void
+  send: SendMessage
 }) {
   const run = live.run
-  const isLive = isLiveRun(run)
-  const now = useNow(isLive ? 1000 : 60_000)
+  const now = useNow(60_000)
+  const onChoose = useCallback<ChooseHandler>(
+    (messageId, answers, text) =>
+      send(text, { messageId: messageId as GenericId<"messages">, answers }),
+    [send]
+  )
 
   return (
     <ChatThread
-      draft={live.draft}
+      draft={
+        <ConversationDraft
+          conversationId={conversationId}
+          organizationId={organizationId}
+        />
+      }
       hasMore={page.hasMore}
       isLoading={page.isLoading}
       live={run}
       mentions={mentions}
       messages={page.messages}
       now={now}
-      onChoose={(messageId, answers, text) =>
-        send(text, { messageId: messageId as GenericId<"messages">, answers })
-      }
+      onChoose={onChoose}
       onLoadMore={page.loadMore}
       onOpenReference={onOpenReference}
       progress={
-        isLive ? (
-          <ChatProgress now={now} organizationId={organizationId} run={run} />
+        isLiveRun(run) ? (
+          <ChatProgress organizationId={organizationId} run={run} />
         ) : null
       }
       resolveReference={resolveReference}
