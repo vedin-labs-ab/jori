@@ -46,9 +46,9 @@ export const chatSelection: ModelSelection = defaultSelection
 
 /** What the home page offers to ask first. */
 export const chatSuggestions: readonly ChatSuggestion[] = [
-  { icon: TriangleAlert, text: "Which renewals are at risk this month?" },
+  { icon: TriangleAlert, text: "Which renewals are at risk?" },
   { icon: History, text: "What did the payroll fix change?" },
-  { icon: Mail, text: "Draft reminders for the unpaid vendor invoices" },
+  { icon: Mail, text: "Remind vendors of unpaid invoices" },
   { icon: Workflow, text: "Summarize last week's runs" },
 ]
 

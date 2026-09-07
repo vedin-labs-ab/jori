@@ -62,7 +62,7 @@ test("offers the suggestions and lists the recent conversations by time", () => 
   expect(
     screen.getByRole("link", { name: /Flaky payroll test/ }).textContent
   ).toContain("2d ago")
-  expect(screen.queryByText(/more…/)).toBeNull()
+  expect(screen.queryByText(/See all/)).toBeNull()
 })
 
 test("four chats show; the rest are a search away", () => {
@@ -88,7 +88,7 @@ test("four chats show; the rest are a search away", () => {
   expect(screen.getAllByRole("link")).toHaveLength(4)
   expect(screen.queryByRole("link", { name: /Chat e/ })).toBeNull()
 
-  fireEvent.click(screen.getByRole("button", { name: "and 2 more…" }))
+  fireEvent.click(screen.getByRole("button", { name: "See all 6 chats" }))
   fireEvent.click(screen.getByRole("option", { name: "Chat f" }))
 
   expect(navigate).toHaveBeenCalledWith("/chat/conversations_f")
