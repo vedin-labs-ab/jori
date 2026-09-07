@@ -50,6 +50,17 @@ export const ruleSet = {
       },
     },
     {
+      name: "exa-stays-in-search-adapter",
+      severity: "error",
+      comment:
+        "Search consumers use the regional provider-neutral client, not Exa SDK types or transport.",
+      from: {
+        path: "^convex/",
+        pathNot: "^convex/search/(?:exa|response)[.]ts$",
+      },
+      to: { path: "^node_modules/exa-js(?:/|$)" },
+    },
+    {
       name: "integrations-do-not-import-broker",
       severity: "error",
       comment: "Integration adapters should be below broker tool adapters.",
