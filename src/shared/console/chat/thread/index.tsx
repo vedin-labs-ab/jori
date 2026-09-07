@@ -23,7 +23,7 @@ import {
 import { answeredParts, answerKey } from "./answers"
 import { ChoiceChips } from "./choices"
 import { ChatDraftTurn } from "./draft"
-import { JoriMessage, PersonMessage } from "./message"
+import { JoriMessage, MessageActions, PersonMessage } from "./message"
 import { RunNotice } from "./notice"
 import { QuestionCard } from "./question"
 import { ReferenceCard } from "./reference"
@@ -122,6 +122,7 @@ export function ChatThread({
                         message.id === lastId && !isLive && draft === null
                       }
                     />
+                    <MessageActions message={message} now={now} />
                   </JoriMessage>
                 )}
               </MessageScrollerItem>

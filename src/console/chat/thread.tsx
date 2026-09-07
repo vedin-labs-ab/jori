@@ -119,6 +119,14 @@ function ConversationThread({
       body={(target) => (
         <ConversationPaneBody organizationId={organizationId} target={target} />
       )}
+      composer={
+        <ChatComposer
+          autoFocus
+          live={live.run}
+          onSend={(text) => void send({ conversationId, text })}
+          onStop={stop}
+        />
+      }
       resolve={resolveReference}
     >
       <ConversationTurns
@@ -135,12 +143,6 @@ function ConversationThread({
             ...(answer === undefined ? {} : { answer }),
           })
         }
-      />
-      <ChatComposer
-        autoFocus
-        live={live.run}
-        onSend={(text) => void send({ conversationId, text })}
-        onStop={stop}
       />
     </ChatPane>
   )

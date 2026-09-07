@@ -1,7 +1,13 @@
 import { type ReactNode } from "react"
 import { ExpandableText } from "@/components/ui/expandable-text"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
+import { CopyButton } from "../../copy"
 import { absoluteTime, relativeTime } from "../../time"
 import { referencePresentation } from "../presentation"
 import { type ChatMessage, type ChatReference } from "../types"
@@ -20,7 +26,7 @@ export function PersonMessage({
   now: number
 }) {
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="group/message flex flex-col items-end">
       <div className="min-w-0 max-w-[75%] rounded-lg bg-muted px-3 py-2 text-sm">
         {context === undefined ? null : <ContextLine reference={context} />}
         <ExpandableText maxLines={8}>
@@ -29,15 +35,7 @@ export function PersonMessage({
           </div>
         </ExpandableText>
       </div>
-      <time
-        className="text-muted-foreground text-xs"
-        dateTime={new Date(message.createdAt).toISOString()}
-        title={absoluteTime(message.createdAt)}
-      >
-        {/* A message sent since the clock last ticked is "just now", not
-            a moment in the future. */}
-        {relativeTime(message.createdAt, Math.max(now, message.createdAt))}
-      </time>
+      <MessageActions message={message} now={now} />
     </div>
   )
 }
@@ -75,7 +73,11 @@ export function JoriMessage({
   return (
     <div
       aria-busy={streaming ? true : undefined}
-      className={cn("flex items-start gap-3", continued && "-mt-3", className)}
+      className={cn(
+        "group/message flex items-start gap-3",
+        continued && "-mt-3",
+        className
+      )}
     >
       {continued ? (
         <div aria-hidden className="size-5 shrink-0" />
@@ -83,6 +85,40 @@ export function JoriMessage({
         <BrandIcon className="mt-0.5 size-5" />
       )}
       <div className="grid min-w-0 flex-1 gap-3">{children}</div>
+    </div>
+  )
+}
+
+/** Under a finished message, what can be done with it: a copy of its
+ *  text, and when it was sent. The row keeps its place but shows only
+ *  while the pointer is over the message or the focus is in the row, so
+ *  a thread reads as words alone until one is pointed at. Jori's parts
+ *  are cards, so the copy takes the text and nothing else. */
+export function MessageActions({
+  message,
+  now,
+}: {
+  message: ChatMessage
+  now: number
+}) {
+  return (
+    <div className="-mx-1 flex items-center gap-1 text-muted-foreground text-xs opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/message:opacity-100">
+      <CopyButton label="message" value={message.text} />
+      {/* The time is a button only so a keyboard reaches the moment it
+          stands for; there is nothing to press. */}
+      <Tooltip>
+        <TooltipTrigger
+          className="cursor-default rounded-sm px-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          type="button"
+        >
+          <time dateTime={new Date(message.createdAt).toISOString()}>
+            {/* A message sent since the clock last ticked is "just now",
+                not a moment in the future. */}
+            {relativeTime(message.createdAt, Math.max(now, message.createdAt))}
+          </time>
+        </TooltipTrigger>
+        <TooltipContent>{absoluteTime(message.createdAt)}</TooltipContent>
+      </Tooltip>
     </div>
   )
 }

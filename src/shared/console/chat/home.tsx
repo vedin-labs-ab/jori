@@ -1,7 +1,5 @@
-import { MessageSquare } from "lucide-react"
 import { type ReactNode } from "react"
 import { Suggestion } from "@/components/ui/suggestion"
-import { ConsoleEmptyState } from "../list/empty"
 import { ConsoleLink } from "../shell/link"
 import { conversationDestination } from "../shell/routes"
 import { relativeTime } from "../time"
@@ -9,7 +7,8 @@ import { chatColumnClassName } from "./thread"
 import { type ChatConversation } from "./types"
 
 /** Where a chat starts: the ask, a few things worth asking, and the
- *  conversations already had. The composer arrives bound from the host. */
+ *  conversations already had, when there are any. The composer arrives
+ *  bound from the host. */
 export function ChatHome({
   composer,
   now,
@@ -43,7 +42,9 @@ export function ChatHome({
             </ul>
           )}
         </div>
-        <RecentConversations now={now} recent={recent} />
+        {recent.length === 0 ? null : (
+          <RecentConversations now={now} recent={recent} />
+        )}
       </div>
     </div>
   )
@@ -56,17 +57,6 @@ function RecentConversations({
   now: number
   recent: ChatConversation[]
 }) {
-  if (recent.length === 0) {
-    return (
-      <ConsoleEmptyState
-        className="border"
-        description="Conversations with Jori are kept here to come back to."
-        icon={MessageSquare}
-        title="No conversations yet"
-      />
-    )
-  }
-
   return (
     <section aria-labelledby="chat-recent" className="grid gap-2">
       <h3

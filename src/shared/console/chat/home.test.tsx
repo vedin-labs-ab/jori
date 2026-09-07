@@ -54,7 +54,7 @@ test("offers the suggestions and lists the recent conversations by time", () => 
   ).toContain("2d ago")
 })
 
-test("without conversations it says so", () => {
+test("without conversations there is no recent section at all", () => {
   render(
     <ChatHome
       composer={null}
@@ -65,5 +65,7 @@ test("without conversations it says so", () => {
     />
   )
 
-  expect(screen.getByText("No conversations yet")).toBeDefined()
+  expect(screen.queryByText("Recent")).toBeNull()
+  expect(screen.queryByText(/No conversations/)).toBeNull()
+  expect(screen.queryByRole("region")).toBeNull()
 })

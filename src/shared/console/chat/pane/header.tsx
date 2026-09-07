@@ -1,5 +1,5 @@
 import { ArrowUpRight, ChevronDown } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -8,26 +8,24 @@ import {
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
 import { type MaterialBreadcrumb } from "../../materials/breadcrumb"
-import { SaveIcon } from "../../materials/save"
+import { SaveIcon, type SaveState } from "../../materials/save"
 import { ConsoleLink } from "../../shell/link"
 import { referencePresentation } from "../presentation"
 import { type ChatReference, type ReferenceTarget } from "../types"
 import { targetDestination } from "./routes"
-import { type PanePreference } from "./tabs"
 
-/** Under the strip, what the active tab holds: the target's icon and
- *  name, its kind, and the way to its own page, so the pane is never the
- *  end of the road. A view that hangs a menu off its name — a store's, a
- *  file's — gets it here, where the page would have it in the crumb. */
+/** Under the strip, what the active tab holds: the target's icon, its
+ *  name as the way to its own page, and its kind, so the pane is never
+ *  the end of the road. A view that hangs a menu off its name — a
+ *  store's, a file's — gets it here, on a chevron beside the name, where
+ *  the page would have it in the crumb. */
 export function PaneHeader({
   crumb,
-  onHint,
   reference,
   target,
 }: {
   /** What the body published for the shell's breadcrumb, caught here. */
   crumb: MaterialBreadcrumb | undefined
-  onHint: ((preference: PanePreference) => void) | undefined
   reference: ChatReference | undefined
   target: ReferenceTarget
 }) {
@@ -35,118 +33,94 @@ export function PaneHeader({
   const Icon = presentation.icon
   const isUnavailable =
     reference === undefined || reference.unavailable === true
+  const name = crumb?.name ?? reference?.name ?? presentation.label
 
   return (
-    <div className="grid shrink-0 gap-2 border-b px-4 py-2">
-      <div className="flex min-w-0 items-center gap-2 text-sm">
-        <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-        <PaneName
-          crumb={crumb}
-          name={crumb?.name ?? reference?.name ?? presentation.label}
+    <div className="flex min-w-0 shrink-0 items-center gap-2 border-b px-4 py-2 text-sm">
+      <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+      {isUnavailable ? (
+        <span className="min-w-0 truncate font-medium">{name}</span>
+      ) : (
+        <PageLink
+          name={name}
+          saving={crumb?.saveStatus === "saving"}
+          target={target}
         />
-        <SeparatorDot className="text-muted-foreground/60" />
-        <span className="shrink-0 text-muted-foreground text-xs">
-          {isUnavailable ? "No longer available" : presentation.label}
-        </span>
-        {isUnavailable ? null : (
-          <Button
-            asChild
-            className="ml-auto shrink-0"
-            size="sm"
-            variant="ghost"
-          >
-            <ConsoleLink {...targetDestination(target)}>
-              Open page
-              <ArrowUpRight />
-            </ConsoleLink>
-          </Button>
-        )}
-      </div>
-      {onHint === undefined ? null : <PaneHint onChoose={onHint} />}
+      )}
+      {crumb?.menu === undefined ? null : (
+        <PaneMenu menu={crumb.menu} name={name} saveStatus={crumb.saveStatus} />
+      )}
+      <SeparatorDot className="text-muted-foreground/60" />
+      <span className="shrink-0 text-muted-foreground text-xs">
+        {isUnavailable ? "No longer available" : presentation.label}
+      </span>
     </div>
   )
 }
 
-/** The name — plain, or the trigger of the menu the body published, with
- *  the save's own glyph in the chevron's place while a save is in motion. */
-function PaneName({
-  crumb,
+/** The name as the link to the target's page: no padding at rest, so the
+ *  header's gaps stay optically even, growing on hover as the arrow that
+ *  says where it goes opens beside it. Collapsed rather than merely
+ *  transparent, so the arrow claims no width it is not using. */
+function PageLink({
   name,
+  saving,
+  target,
 }: {
-  crumb: MaterialBreadcrumb | undefined
   name: string
+  saving: boolean
+  target: ReferenceTarget
 }) {
-  if (crumb?.menu === undefined) {
-    return <span className="min-w-0 truncate font-medium">{name}</span>
-  }
+  return (
+    <Button
+      asChild
+      className="group min-w-0 gap-1 px-0 font-medium text-foreground text-sm hover:px-1.5 focus-visible:px-1.5"
+      variant="ghost"
+    >
+      <ConsoleLink {...targetDestination(target)}>
+        <span className={cn("truncate", saving && "shimmer")}>{name}</span>
+        <ArrowUpRight
+          aria-hidden
+          className="h-3.5 w-0 shrink-0 overflow-hidden opacity-0 transition-[width,opacity] duration-150 group-focus-visible:w-3.5 group-focus-visible:opacity-100 group-hover:w-3.5 group-hover:opacity-100"
+        />
+      </ConsoleLink>
+    </Button>
+  )
+}
 
-  const isIdle = crumb.saveStatus === undefined || crumb.saveStatus === "idle"
+/** The trigger of the menu the body published: a chevron, with the
+ *  save's own glyph in its place while a save is in motion. */
+function PaneMenu({
+  menu,
+  name,
+  saveStatus,
+}: {
+  menu: ReactNode
+  name: string
+  saveStatus: SaveState | undefined
+}) {
+  const isIdle = saveStatus === undefined || saveStatus === "idle"
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          className="min-w-0 gap-1 px-0 font-medium text-foreground text-sm hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5"
+          aria-label={`${name} menu`}
+          className="text-muted-foreground"
+          size="icon-xs"
           type="button"
           variant="ghost"
         >
-          <span
-            className={cn(
-              "truncate",
-              crumb.saveStatus === "saving" && "shimmer"
-            )}
-          >
-            {name}
-          </span>
           {isIdle ? (
-            <ChevronDown
-              aria-hidden
-              className="size-3! shrink-0 text-muted-foreground"
-            />
+            <ChevronDown aria-hidden className="size-3!" />
           ) : (
-            <span aria-hidden className="flex shrink-0 [&_svg]:size-3!">
-              <SaveIcon saveStatus={crumb.saveStatus ?? "idle"} />
+            <span aria-hidden className="flex [&_svg]:size-3!">
+              <SaveIcon saveStatus={saveStatus ?? "idle"} />
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      {crumb.menu}
+      {menu}
     </DropdownMenu>
-  )
-}
-
-/** Said once per browser, the first time a reply opens the pane: what
- *  just happened, and the two ways to have it from here on. */
-function PaneHint({
-  onChoose,
-}: {
-  onChoose: (preference: PanePreference) => void
-}) {
-  return (
-    <Alert>
-      <AlertTitle>New resources open beside your chat.</AlertTitle>
-      <AlertDescription>
-        What a reply is about opens here as you read it. Keep that, or open
-        resources yourself from their cards.
-      </AlertDescription>
-      <div className="mt-1 flex gap-2">
-        <Button
-          onClick={() => onChoose("keep")}
-          size="xs"
-          type="button"
-          variant="outline"
-        >
-          Keep this
-        </Button>
-        <Button
-          onClick={() => onChoose("manual")}
-          size="xs"
-          type="button"
-          variant="ghost"
-        >
-          Open manually
-        </Button>
-      </div>
-    </Alert>
   )
 }

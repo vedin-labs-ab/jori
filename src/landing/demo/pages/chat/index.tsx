@@ -109,6 +109,7 @@ function Conversation({ conversationId }: { conversationId: string }) {
     <ChatPane
       {...pane}
       body={(target) => <DemoPaneBody target={target} />}
+      composer={<DemoComposer conversationId={conversationId} run={run} />}
       resolve={resolve}
     >
       <ChatThread
@@ -125,36 +126,52 @@ function Conversation({ conversationId }: { conversationId: string }) {
         }
         onLoadMore={() => {}}
         onOpenReference={openTarget}
-        progress={
-          live === null || !isLiveRun(live.run) ? null : (
-            <LiveProgress live={live} now={now} onStop={actions.stopChatRun} />
-          )
-        }
+        progress={<LiveProgress live={live} now={now} />}
         resolveReference={resolve}
-      />
-      <ChatComposer
-        autoFocus
-        live={run}
-        onSend={(text) => actions.sendChatMessage(text, conversationId)}
-        onStop={actions.stopChatRun}
       />
     </ChatPane>
   )
 }
 
-/** What the live run is doing, folded under the working row. */
+/** The composer bound to send into the conversation, and to stop the
+ *  run answering it. */
+function DemoComposer({
+  conversationId,
+  run,
+}: {
+  conversationId: string
+  run: ChatRun | null
+}) {
+  const { actions } = useDemoWorkspace()
+
+  return (
+    <ChatComposer
+      autoFocus
+      live={run}
+      onSend={(text) => actions.sendChatMessage(text, conversationId)}
+      onStop={actions.stopChatRun}
+    />
+  )
+}
+
+/** What the live run is doing, folded under the working row; nothing
+ *  while no run is live. */
 function LiveProgress({
   live,
   now,
-  onStop,
 }: {
-  live: DemoLiveReply
+  live: DemoLiveReply | null
   now: number
-  onStop: () => void
 }) {
+  const { actions } = useDemoWorkspace()
+
+  if (live === null || !isLiveRun(live.run)) {
+    return null
+  }
+
   return (
     <ChatWorking
-      onStop={onStop}
+      onStop={actions.stopChatRun}
       progress={
         <ActivityTimeline items={liveActivity(live.startedAt)} now={now} />
       }

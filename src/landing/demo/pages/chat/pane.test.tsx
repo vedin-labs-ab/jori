@@ -38,7 +38,9 @@ test("a reference card opens its table beside the chat, with the way to its page
   ).toBeDefined()
   expect(within(pane).getByText("4 rows")).toBeDefined()
   expect(
-    within(pane).getByRole("link", { name: "Open page" }).getAttribute("href")
+    within(pane)
+      .getByRole("link", { name: "Customer renewals" })
+      .getAttribute("href")
   ).toBe("/tables/collections_renewals")
   // The thread's own rendering of the table stays where it was.
   expect(
@@ -67,14 +69,19 @@ test("a reply opens the job it names, and the hint asks once how to go on", asyn
 
   expect(tab.dataset.state).toBe("active")
   expect(await within(pane).findByText("Instructions")).toBeDefined()
-  expect(
-    within(pane).getByText("New resources open beside your chat.")
-  ).toBeDefined()
 
-  fireEvent.click(within(pane).getByRole("button", { name: "Open manually" }))
+  // The hint floats over the chat, not in the pane.
+  const hint = screen.getByRole("toolbar", {
+    name: "Resources beside the chat",
+  })
+
+  expect(hint.textContent).toContain("New resources open beside your chat.")
+  expect(within(pane).queryByText(/New resources/)).toBeNull()
+
+  fireEvent.click(within(hint).getByRole("button", { name: "Open manually" }))
 
   expect(window.localStorage.getItem("jori.chat.pane")).toBe("manual")
   expect(
-    within(pane).queryByText("New resources open beside your chat.")
+    screen.queryByRole("toolbar", { name: "Resources beside the chat" })
   ).toBeNull()
 })
