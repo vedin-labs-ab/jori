@@ -29,7 +29,13 @@ export type PaneState = {
 }
 
 export type PaneAction =
-  | { type: "open"; target: ReferenceTarget; auto: boolean }
+  | {
+      type: "open"
+      target: ReferenceTarget
+      auto: boolean
+      /** Keep the tab from the start, the way a double click does. */
+      pinned?: boolean
+    }
   | { type: "activate"; target: ReferenceTarget }
   | { type: "pin"; target: ReferenceTarget }
   | { type: "close"; target: ReferenceTarget }
@@ -48,7 +54,7 @@ export const initialPaneState: PaneState = {
 export function reducePane(state: PaneState, action: PaneAction): PaneState {
   switch (action.type) {
     case "open":
-      return opened(state, action.target, action.auto)
+      return opened(state, action.target, action.auto, action.pinned === true)
     case "activate":
       return hasTab(state, action.target)
         ? { ...state, active: action.target, open: true }
@@ -77,19 +83,29 @@ export function reducePane(state: PaneState, action: PaneAction): PaneState {
 
 /** A target the strip holds comes to the front; a new one takes the
  *  preview tab's place, or joins the strip when every tab is pinned. A
- *  reply's own opening respects a dismissal; the person's lifts it. */
+ *  reply's own opening respects a dismissal; the person's lifts it. An
+ *  opening that keeps pins the tab it finds or makes. */
 function opened(
   state: PaneState,
   target: ReferenceTarget,
-  auto: boolean
+  auto: boolean,
+  pinned: boolean
 ): PaneState {
   if (auto && state.dismissed) {
     return state
   }
 
+  const tabs = hasTab(state, target)
+    ? state.tabs
+    : withTarget(state.tabs, target)
+
   return {
     ...state,
-    tabs: hasTab(state, target) ? state.tabs : withTarget(state.tabs, target),
+    tabs: pinned
+      ? tabs.map((tab) =>
+          isSameTarget(tab.target, target) ? { ...tab, pinned: true } : tab
+        )
+      : tabs,
     active: target,
     open: true,
     dismissed: auto ? state.dismissed : false,

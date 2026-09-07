@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/message-scroller"
 import { ConsoleListLoading } from "../../list/loading"
 import { Markdown } from "../../markdown"
+import { type OpenTarget } from "../pane/tabs"
 import {
   type ChatContextUsage,
   type ChatDraft,
@@ -20,7 +21,6 @@ import {
   type ChatRun,
   endedWithoutReply,
   isLiveRun,
-  type ReferenceTarget,
   type ResolveReference,
 } from "../types"
 import { answeredParts } from "./answers"
@@ -73,7 +73,7 @@ export function ChatThread({
   now: number
   onChoose: ChooseHandler
   onLoadMore: () => void
-  onOpenReference: (target: ReferenceTarget) => void
+  onOpenReference: OpenTarget
   /** What the live run is doing: the working line, its log, its requests. */
   progress: ReactNode
   resolveReference: ResolveReference
@@ -231,7 +231,7 @@ function ReplyParts({
   answered: Map<string, Map<number, string[]>>
   message: ChatMessage
   onChoose: ChooseHandler
-  onOpenReference: (target: ReferenceTarget) => void
+  onOpenReference: OpenTarget
   resolveReference: ResolveReference
   showChips: boolean
 }) {

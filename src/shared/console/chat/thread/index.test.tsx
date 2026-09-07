@@ -2,12 +2,12 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { type OpenTarget } from "../pane/tabs"
 import {
   type ChatDraft,
   type ChatMessage,
   type ChatReference,
   type ChatRun,
-  type ReferenceTarget,
 } from "../types"
 import { ChatThread, type ChooseHandler } from "."
 
@@ -85,13 +85,13 @@ function renderThread({
   live = null,
   messages,
   onChoose = vi.fn<ChooseHandler>(),
-  onOpenReference = vi.fn<(target: ReferenceTarget) => void>(),
+  onOpenReference = vi.fn<OpenTarget>(),
 }: {
   draft?: ChatDraft | null
   live?: ChatRun | null
   messages: ChatMessage[]
   onChoose?: ChooseHandler
-  onOpenReference?: (target: ReferenceTarget) => void
+  onOpenReference?: OpenTarget
 }) {
   return render(
     <TooltipProvider>
@@ -115,7 +115,7 @@ function renderThread({
 }
 
 test("renders both turns: the ask in its bubble with its context, the reply as prose with its cards", () => {
-  const onOpenReference = vi.fn<(target: ReferenceTarget) => void>()
+  const onOpenReference = vi.fn<OpenTarget>()
 
   renderThread({ messages: [ask, reply], onOpenReference })
 
@@ -129,6 +129,16 @@ test("renders both turns: the ask in its bubble with its context, the reply as p
     kind: "table",
     id: "collections_renewals",
   })
+
+  // A double click keeps the resource, the way a tab's does.
+  fireEvent.doubleClick(
+    screen.getByRole("button", { name: /Customer renewals/ })
+  )
+
+  expect(onOpenReference).toHaveBeenLastCalledWith(
+    { kind: "table", id: "collections_renewals" },
+    { pinned: true }
+  )
   // The job the host could not resolve is named by its kind and opens
   // nothing.
   expect(screen.getByText("Job")).toBeDefined()
