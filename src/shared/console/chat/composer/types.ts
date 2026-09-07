@@ -23,6 +23,9 @@ export type ComposerEditorArgs = {
   disabled: boolean
   /** Takes each resource as it is put in, however it was picked. */
   onMention: ((target: MessageContext) => void) | undefined
+  /** Takes each resource as its chip leaves the text, by deletion; a
+   *  message sent takes its chips with it without a word. */
+  onUnmention: ((target: MessageContext) => void) | undefined
   onSend: (text: string, references: MessageContext[]) => void
   /** Whether a message may leave now. */
   open: boolean
@@ -38,7 +41,11 @@ export type ComposerRefs = {
   /** The names of the resources put in as chips, by `kind:id`, so a chip
    *  keeps its name after the picker's list has moved on. */
   names: Map<string, string>
+  /** The resources the text holds now, by `kind:id`, so a deletion is
+   *  seen for the chip it took. */
+  mentioned: Map<string, MessageContext>
   onMention: MutableRefObject<ComposerEditorArgs["onMention"]>
+  onUnmention: MutableRefObject<ComposerEditorArgs["onUnmention"]>
   onSend: MutableRefObject<ComposerEditorArgs["onSend"]>
   open: MutableRefObject<boolean>
   resolve: MutableRefObject<ResolveReference | undefined>

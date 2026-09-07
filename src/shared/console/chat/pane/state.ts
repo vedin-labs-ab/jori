@@ -39,6 +39,8 @@ export type PaneAction =
   | { type: "activate"; target: ReferenceTarget }
   | { type: "pin"; target: ReferenceTarget }
   | { type: "close"; target: ReferenceTarget }
+  /** Close the target's tab only while it is a preview. */
+  | { type: "release"; target: ReferenceTarget }
   | { type: "closeBeside"; target: ReferenceTarget; side: PaneSide }
   | { type: "closeAll" }
   | { type: "setOpen"; open: boolean }
@@ -70,6 +72,12 @@ export function reducePane(state: PaneState, action: PaneAction): PaneState {
       }
     case "close":
       return closed(state, action.target)
+    case "release":
+      return state.tabs.some(
+        (tab) => isSameTarget(tab.target, action.target) && !tab.pinned
+      )
+        ? closed(state, action.target)
+        : state
     case "closeBeside":
       return closedBeside(state, action.target, action.side)
     case "closeAll":

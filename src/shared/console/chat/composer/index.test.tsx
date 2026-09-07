@@ -190,7 +190,48 @@ test("the other sigils name skills, tools, and integrations, and Escape closes t
   expect(onSend).toHaveBeenCalledWith("/triage then #search_files in @sl", [])
 })
 
-test("a chip can be removed like any character, and a typed token becomes a chip at its boundary", async () => {
+test("a resource's chip deleted is a resource let go of; one sent is not", async () => {
+  const onUnmention = vi.fn()
+  const { field, onSend } = await renderComposer({ onUnmention })
+
+  typeInto(
+    field,
+    "Run +[table:collections_renewals] and +[job:jobs_digest] now"
+  )
+
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Remove Customer renewals" })
+  )
+
+  expect(onUnmention).toHaveBeenCalledWith({
+    kind: "table",
+    id: "collections_renewals",
+  })
+
+  fireEvent.keyDown(field, { key: "Enter" })
+
+  expect(onUnmention).toHaveBeenCalledTimes(1)
+  expect(onSend).toHaveBeenCalledWith(
+    expect.stringContaining("+[job:jobs_digest]"),
+    [{ kind: "job", id: "jobs_digest" }]
+  )
+})
+
+test("the shortcut band folds under the frame and comes back, as the browser remembers", async () => {
+  await renderComposer()
+
+  fireEvent.click(screen.getByRole("button", { name: "Hide shortcuts" }))
+
+  expect(screen.queryByRole("button", { name: "Hide shortcuts" })).toBeNull()
+  expect(window.localStorage.getItem("jori.chat.hints")).toBe("closed")
+
+  fireEvent.click(screen.getByRole("button", { name: "Show shortcuts" }))
+
+  expect(screen.getByRole("button", { name: "Hide shortcuts" })).toBeDefined()
+  expect(window.localStorage.getItem("jori.chat.hints")).toBe("open")
+})
+
+test("a chip can be removed and a typed token becomes a chip at its boundary", async () => {
   const { field, onSend } = await renderComposer()
 
   typeInto(field, "Run /triage now")
@@ -210,7 +251,13 @@ test("a click on the frame beside the controls puts the caret in the field", asy
   field.blur()
   expect(document.activeElement).not.toBe(field)
 
-  fireEvent.click(screen.getByText("resources"))
+  const controls = document.querySelector("[data-slot=input-group-addon]")
+
+  if (controls === null) {
+    throw new Error("The controls row is missing.")
+  }
+
+  fireEvent.click(controls)
 
   // The editor takes focus on the next frame.
   await waitFor(() => expect(document.activeElement).toBe(field))

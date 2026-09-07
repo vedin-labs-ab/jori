@@ -1,3 +1,5 @@
+import { useCallback, useState } from "react"
+
 // The browser's storage holds the small choices a person makes about the
 // console — a pane preference, a closed sidebar group — and can be
 // missing or refuse: a private window, cleared site data, a browser set
@@ -17,4 +19,21 @@ export function writeStorage(key: string, value: string) {
   } catch {
     // Storage that refuses a write only loses the preference.
   }
+}
+
+/** An open-or-closed choice the browser remembers under `key`: open
+ *  unless it was closed. */
+export function useStoredOpen(key: string) {
+  const [open, setOpen] = useState(() => readStorage(key) !== "closed")
+
+  return [
+    open,
+    useCallback(
+      (next: boolean) => {
+        writeStorage(key, next ? "open" : "closed")
+        setOpen(next)
+      },
+      [key]
+    ),
+  ] as const
 }

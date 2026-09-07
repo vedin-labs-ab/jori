@@ -158,6 +158,8 @@ export function sendDraft(editor: Editor | null, refs: ComposerRefs) {
     return
   }
 
+  // The chips leave with the message, not by deletion.
+  refs.mentioned = new Map()
   refs.onSend.current(draft.text, draft.references)
   editor.commands.clearContent(true)
 }
