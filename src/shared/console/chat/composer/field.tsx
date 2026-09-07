@@ -41,7 +41,12 @@ export function ComposerField({
 
 function emptySuggestionMessage({
   active,
+  empty,
 }: NonNullable<ReturnType<typeof useComposerEditor>["suggestion"]>) {
+  if (empty === "loading") {
+    return "Looking…"
+  }
+
   switch (active.kind) {
     case "integration":
       return active.query === ""

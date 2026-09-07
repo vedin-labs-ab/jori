@@ -19,13 +19,17 @@ export function useMentionSources(organizationId: string): MentionSources {
   const [query, setQuery] = useState<string | null>(null)
   const skills = useQuery(api.skills.catalog.list, { organizationId })
   const permissions = useQuery(api.permissions.tools.list, { organizationId })
-  const resources = useRetainedResources(organizationId, useSettledQuery(query))
+  const { resources, searching } = useRetainedResources(
+    organizationId,
+    useSettledQuery(query)
+  )
 
   return useMemo(
     () => ({
       integrations,
       onSearch: setQuery,
       resources,
+      searching,
       skills: (skills?.skills ?? []).map((skill) => skill.name),
       tools: (permissions ?? [])
         .filter((permission) => permission.mode !== "blocked")
@@ -34,7 +38,7 @@ export function useMentionSources(organizationId: string): MentionSources {
           tool: permission.tool,
         })),
     }),
-    [permissions, resources, skills]
+    [permissions, resources, searching, skills]
   )
 }
 
@@ -76,5 +80,8 @@ function useRetainedResources(organizationId: string, query: string | null) {
     setRetained(listed.resources)
   }
 
-  return retained
+  return {
+    resources: retained,
+    searching: query !== null && listed === undefined,
+  }
 }

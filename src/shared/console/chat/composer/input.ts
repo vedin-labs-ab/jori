@@ -16,7 +16,8 @@ import { serializeComposerDocument } from "./codec"
 import { type ComposerRefs, type SetComposerSuggestion } from "./types"
 
 /** The listbox's keys first while it is open; then Enter sends, unless
- *  Shift holds it to a line break or an input method is composing. */
+ *  Shift holds it to a line break, an input method is composing, or a
+ *  lookup for the token under the caret is still on its way. */
 export function handleComposerKey({
   event,
   refs,
@@ -41,7 +42,11 @@ export function handleComposerKey({
 
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
     event.preventDefault()
-    sendDraft(refs, setPending)
+
+    if (refs.latest.current.suggestion?.empty !== "loading") {
+      sendDraft(refs, setPending)
+    }
+
     return true
   }
 
