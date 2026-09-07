@@ -166,8 +166,9 @@ Customers use the same Connect flow in either instance.
 [Notion webhooks](https://developers.notion.com/reference/webhooks).
 
 These registrations are configuration evidence, not completed connection
-tests. GitHub private keys, Slack event subscriptions and public distribution,
-and Notion webhook subscriptions remain pending. Production ingress and live
+tests. GitHub app authentication is verified, but webhook persistence remains
+unverified. Slack event subscriptions and public distribution, and Notion
+webhook subscriptions remain pending. Production ingress and live
 OAuth/event tests must verify that each connection works only through its
 matching instance. See [release verification](release.md) for current readiness.
 
