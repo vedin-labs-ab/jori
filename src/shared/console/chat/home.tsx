@@ -1,5 +1,6 @@
-import { ArrowRight, type LucideIcon, MessageSquare } from "lucide-react"
+import { ArrowRight, MessagesSquare } from "lucide-react"
 import { type ReactNode } from "react"
+import { Suggestion } from "@/components/ui/suggestion"
 import { cn } from "@/lib/utils"
 import { ChatsPicker } from "../shell/chats"
 import { ConsoleLink } from "../shell/link"
@@ -45,19 +46,7 @@ export function ChatHome({
         </h2>
         {composer}
         {suggestions.length === 0 ? null : (
-          <HomeSection id="chat-suggested" title="Suggested">
-            {suggestions.map(({ icon, text }) => (
-              <li key={text}>
-                <button
-                  className={rowClassName}
-                  onClick={() => onSuggestion(text)}
-                  type="button"
-                >
-                  <RowContent icon={icon}>{text}</RowContent>
-                </button>
-              </li>
-            ))}
-          </HomeSection>
+          <Suggestions onSuggestion={onSuggestion} suggestions={suggestions} />
         )}
         {recent.length === 0 ? null : (
           <RecentConversations now={now} recent={recent} />
@@ -67,8 +56,42 @@ export function ChatHome({
   )
 }
 
-/** The chats had most recently, a few of them; the rest are a search
- *  away, in the same list the sidebar's rail opens. */
+/** A few asks as pills on one line, each behind its domain's icon. The
+ *  line is the column, so the third pill steps aside where the column is
+ *  too narrow for three, and what still overflows scrolls under a fade
+ *  rather than wrapping. */
+function Suggestions({
+  onSuggestion,
+  suggestions,
+}: {
+  onSuggestion: (text: string) => void
+  suggestions: readonly ChatSuggestion[]
+}) {
+  return (
+    <ul
+      aria-label="Suggestions"
+      className={cn(
+        chatColumnClassName,
+        "@container flex flex-nowrap justify-center gap-2 overflow-x-auto"
+      )}
+    >
+      {suggestions.map(({ icon: Icon, text }, index) => (
+        <li
+          className={cn("shrink-0", index >= 2 && "hidden @xl:block")}
+          key={text}
+        >
+          <Suggestion onClick={onSuggestion} suggestion={text}>
+            <Icon aria-hidden className="text-muted-foreground" />
+            {text}
+          </Suggestion>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/** The chats had most recently, a few of them, and after them the way to
+ *  every one, in the same searchable list the sidebar's rail opens. */
 function RecentConversations({
   now,
   recent,
@@ -77,97 +100,66 @@ function RecentConversations({
   recent: ChatConversation[]
 }) {
   const shown = recent.slice(0, shownRecent)
-  const more = recent.length - shown.length
 
-  return (
-    <HomeSection
-      footer={
-        more === 0 ? null : (
-          <ChatsPicker chats={recent} side="bottom">
-            <button
-              className="w-fit rounded-sm px-3 py-1 text-muted-foreground text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
-              type="button"
-            >
-              and {more} more…
-            </button>
-          </ChatsPicker>
-        )
-      }
-      id="chat-recent"
-      title="Recent"
-    >
-      {shown.map((conversation) => (
-        <li key={conversation.id}>
-          <ConsoleLink
-            className={rowClassName}
-            {...conversationDestination(conversation.id)}
-          >
-            <RowContent
-              icon={MessageSquare}
-              meta={relativeTime(conversation.updatedAt, now)}
-            >
-              {conversation.title}
-            </RowContent>
-          </ConsoleLink>
-        </li>
-      ))}
-    </HomeSection>
-  )
-}
-
-/** A quiet heading over a list of rows, and after them whatever the
- *  section has to say about the rest. */
-function HomeSection({
-  children,
-  footer,
-  id,
-  title,
-}: {
-  children: ReactNode
-  footer?: ReactNode
-  id: string
-  title: string
-}) {
   return (
     <section
-      aria-labelledby={id}
+      aria-labelledby="chat-recent"
       className={cn(chatColumnClassName, "grid gap-1")}
     >
-      <h3 className="px-3 font-medium text-muted-foreground text-xs" id={id}>
-        {title}
+      <h3
+        className="px-3 font-medium text-muted-foreground text-xs"
+        id="chat-recent"
+      >
+        Recent
       </h3>
-      <ul className="divide-y">{children}</ul>
-      {footer}
+      <ul className="divide-y">
+        {shown.map((conversation) => (
+          <li key={conversation.id}>
+            <ConsoleLink
+              className={rowClassName}
+              {...conversationDestination(conversation.id)}
+            >
+              <span className="min-w-0 flex-1 truncate">
+                {conversation.title}
+              </span>
+              <span className="shrink-0 text-muted-foreground text-xs">
+                {relativeTime(conversation.updatedAt, now)}
+              </span>
+              <RowArrow />
+            </ConsoleLink>
+          </li>
+        ))}
+        {recent.length === shown.length ? null : (
+          <li>
+            <ChatsPicker chats={recent} side="bottom">
+              <button
+                className={cn(rowClassName, "text-muted-foreground")}
+                type="button"
+              >
+                <MessagesSquare aria-hidden className="size-4 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">
+                  See all {recent.length} chats
+                </span>
+                <RowArrow />
+              </button>
+            </ChatsPicker>
+          </li>
+        )}
+      </ul>
     </section>
   )
 }
 
+/** A row that goes somewhere: its text on one line, and the arrow that
+ *  appears under the pointer to say so. */
 const rowClassName =
-  "group/row flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
+  "group/row flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
 
-/** What every row holds: the domain's icon, the text on one line, what
- *  the row has to say at the right, and the arrow that appears under the
- *  pointer to say the row goes somewhere. */
-function RowContent({
-  children,
-  icon: Icon,
-  meta,
-}: {
-  children: string
-  icon: LucideIcon
-  meta?: string
-}) {
+function RowArrow() {
   return (
-    <>
-      <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-      <span className="min-w-0 flex-1 truncate">{children}</span>
-      {meta === undefined ? null : (
-        <span className="shrink-0 text-muted-foreground text-xs">{meta}</span>
-      )}
-      <ArrowRight
-        aria-hidden
-        className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-focus-visible/row:opacity-100 group-hover/row:opacity-100"
-      />
-    </>
+    <ArrowRight
+      aria-hidden
+      className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-focus-visible/row:opacity-100 group-hover/row:opacity-100"
+    />
   )
 }

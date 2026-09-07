@@ -17,22 +17,22 @@ export type ChatSuggestion = {
   text: string
 }
 
-/** The asks people bring most, written from the person's side; the home
- *  shows a few at a time and cycles the rest through the composer's
- *  placeholder. */
+/** The asks people bring most, written from the person's side and kept
+ *  short enough for three to share one line; the home shows a few at a
+ *  time and cycles the rest through the composer's placeholder. */
 export const chatSuggestionPool: readonly ChatSuggestion[] = [
-  { icon: History, text: "Summarize what changed this week" },
-  { icon: CalendarClock, text: "Set up a weekly digest for my team" },
-  { icon: TriangleAlert, text: "Which jobs failed recently?" },
-  { icon: Table2, text: "Draft a job that watches a table for changes" },
-  { icon: Mail, text: "Draft replies to the emails waiting on me" },
-  { icon: FileText, text: "Write up last week's incident as a postmortem" },
-  { icon: BellRing, text: "Remind owners of the steps overdue this week" },
-  { icon: Workflow, text: "Show me what every job did today" },
+  { icon: History, text: "What changed this week?" },
+  { icon: CalendarClock, text: "Set up a weekly digest" },
+  { icon: TriangleAlert, text: "Which jobs failed?" },
+  { icon: Table2, text: "Watch a table for changes" },
+  { icon: Mail, text: "Draft replies to my emails" },
+  { icon: FileText, text: "Write last week's postmortem" },
+  { icon: BellRing, text: "Remind owners of overdue steps" },
+  { icon: Workflow, text: "What did the jobs do today?" },
 ]
 
-/** How many suggestions the home shows: enough to spark an ask, few
- *  enough that each keeps to one line. */
+/** How many suggestions the home shows at most: three share the column
+ *  at its widest, and the third steps aside where it would not fit. */
 export const shownSuggestions = 3
 
 /** The pool from `start`, wrapping, so successive visits see different
