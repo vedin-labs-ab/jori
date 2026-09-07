@@ -1,4 +1,4 @@
-import { ArrowUpRight, ChevronDown } from "lucide-react"
+import { ArrowUpRight, MoreHorizontal } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,8 +17,8 @@ import { targetDestination } from "./routes"
 /** Under the strip, what the active tab holds: the target's icon, its
  *  name as the way to its own page, and its kind, so the pane is never
  *  the end of the road. A view that hangs a menu off its name — a
- *  store's, a file's — gets it here, on a chevron beside the name, where
- *  the page would have it in the crumb. */
+ *  store's, a file's — gets it here, on the "…" at the header's far
+ *  right, under the strip's own control. */
 export function PaneHeader({
   crumb,
   reference,
@@ -47,21 +47,23 @@ export function PaneHeader({
           target={target}
         />
       )}
-      {crumb?.menu === undefined ? null : (
-        <PaneMenu menu={crumb.menu} name={name} saveStatus={crumb.saveStatus} />
-      )}
       <SeparatorDot className="text-muted-foreground/60" />
       <span className="shrink-0 text-muted-foreground text-xs">
         {isUnavailable ? "No longer available" : presentation.label}
       </span>
+      {crumb?.menu === undefined ? null : (
+        <PaneMenu menu={crumb.menu} name={name} saveStatus={crumb.saveStatus} />
+      )}
     </div>
   )
 }
 
 /** The name as the link to the target's page: no padding at rest, so the
  *  header's gaps stay optically even, growing on hover as the arrow that
- *  says where it goes opens beside it. Collapsed rather than merely
- *  transparent, so the arrow claims no width it is not using. */
+ *  says where it goes opens beside it. The arrow's box and the gap
+ *  before it are both collapsed at rest, so the arrow claims no width it
+ *  is not using; the button's own sizing of bare icons is why the arrow
+ *  sizes itself and the box does the collapsing. */
 function PageLink({
   name,
   saving,
@@ -74,22 +76,26 @@ function PageLink({
   return (
     <Button
       asChild
-      className="group min-w-0 gap-1 px-0 font-medium text-foreground text-sm hover:px-1.5 focus-visible:px-1.5"
+      className="group min-w-0 gap-0 px-0 font-medium text-foreground text-sm hover:px-1.5 focus-visible:px-1.5"
       variant="ghost"
     >
       <ConsoleLink {...targetDestination(target)}>
         <span className={cn("truncate", saving && "shimmer")}>{name}</span>
-        <ArrowUpRight
+        <span
           aria-hidden
-          className="h-3.5 w-0 shrink-0 overflow-hidden opacity-0 transition-[width,opacity] duration-150 group-focus-visible:w-3.5 group-focus-visible:opacity-100 group-hover:w-3.5 group-hover:opacity-100"
-        />
+          className="flex w-0 shrink-0 overflow-hidden opacity-0 transition-[width,margin,opacity] duration-150 group-focus-visible:ml-1 group-focus-visible:w-3.5 group-focus-visible:opacity-100 group-hover:ml-1 group-hover:w-3.5 group-hover:opacity-100"
+        >
+          <ArrowUpRight className="size-3.5" />
+        </span>
       </ConsoleLink>
     </Button>
   )
 }
 
-/** The trigger of the menu the body published: a chevron, with the
- *  save's own glyph in its place while a save is in motion. */
+/** The trigger of the menu the body published: the "…" every console
+ *  row opens its actions from, at the far right where the strip has its
+ *  control, with the save's own glyph in its place while a save is in
+ *  motion. Its margin sets its glyph on the strip's. */
 function PaneMenu({
   menu,
   name,
@@ -106,15 +112,15 @@ function PaneMenu({
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={`${name} menu`}
-          className="text-muted-foreground"
-          size="icon-xs"
+          className="-mr-2 ml-auto text-muted-foreground"
+          size="icon-sm"
           type="button"
           variant="ghost"
         >
           {isIdle ? (
-            <ChevronDown aria-hidden className="size-3!" />
+            <MoreHorizontal aria-hidden />
           ) : (
-            <span aria-hidden className="flex [&_svg]:size-3!">
+            <span aria-hidden className="flex">
               <SaveIcon saveStatus={saveStatus ?? "idle"} />
             </span>
           )}

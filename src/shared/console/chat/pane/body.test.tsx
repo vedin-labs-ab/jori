@@ -68,8 +68,8 @@ test("a store's value shows in the pane, with its menu on the pane's name and no
   // The editor arrives on its own; the value reads as the document it is.
   expect(await screen.findByText('"form"')).toBeDefined()
 
-  // The name is the way to the store's page; its menu hangs off the
-  // chevron beside it. Radix opens on pointer down; the point is away
+  // The name is the way to the store's page; its menu hangs off the "…"
+  // at the header's far right. Radix opens on pointer down; the point is away
   // from the origin, where every jsdom box sits, so the panel handle
   // does not take the press.
   expect(
