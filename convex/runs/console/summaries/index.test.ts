@@ -4,9 +4,12 @@ import {
   fakeQueryCtx,
   jobDisplay,
   messageDisplay,
+  testRun,
 } from "../../../../test/convex/console"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
+import {
+  githubIntegration,
+  slackIntegration,
+} from "../../../../test/convex/integrations"
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
@@ -213,30 +216,3 @@ test("keeps stored job snapshots when the job changes", async () => {
     type: "job",
   })
 })
-
-function slackIntegration() {
-  return integrationDoc({
-    _id: id<"integrations">("integration"),
-    integration: "slack",
-    externalId: "slack-team",
-  })
-}
-
-function githubIntegration() {
-  return {
-    ...slackIntegration(),
-    integration: "github",
-  }
-}
-
-function testRun(overrides: Record<string, unknown>) {
-  return {
-    _id: "run",
-    _creationTime: 0,
-    organizationId: "organization",
-    status: "completed",
-    createdAt: 0,
-    endedAt: 1000,
-    ...overrides,
-  } as Parameters<typeof summarizeRun>[1]
-}

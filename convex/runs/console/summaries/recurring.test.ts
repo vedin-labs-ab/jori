@@ -1,12 +1,15 @@
 import { expect, test } from "vitest"
-import { getToolPermission } from "../../../../contracts/permissions"
 import {
   fakeQueryCtx,
   preparedTraceRows,
   recurringDisplay,
+  testRun,
 } from "../../../../test/convex/console"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
+import { slackIntegration } from "../../../../test/convex/integrations"
+import {
+  slackDisplayTools,
+  slackToolSnapshot,
+} from "../../../../test/convex/tools"
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
@@ -138,77 +141,5 @@ function recurringJob({
     createdAt: 0,
     updatedAt: 0,
     firedAt: nextAt,
-  }
-}
-
-function slackIntegration() {
-  return integrationDoc({
-    _id: id<"integrations">("integration"),
-    integration: "slack",
-    externalId: "slack-team",
-  })
-}
-
-function testRun(
-  run: Record<string, unknown>,
-  overrides: Record<string, unknown> = {}
-) {
-  return {
-    status: "completed",
-    endedAt: 1000,
-    ...run,
-    ...overrides,
-  } as Parameters<typeof summarizeRun>[1] & { preparedTools?: unknown }
-}
-
-function slackToolSnapshot() {
-  return {
-    groups: [
-      {
-        surface: "slack",
-        label: "Slack",
-        tools: slackSnapshotTools(),
-      },
-    ],
-    webSearch: true,
-  }
-}
-
-function slackSnapshotTools() {
-  return [
-    {
-      access: "write" as const,
-      description: "Post a Slack message.",
-      label: "Send message",
-      tool: "conversations_add_message",
-    },
-    {
-      access: "read" as const,
-      description: "Read Slack channel messages.",
-      label: "Read channel history",
-      tool: "conversations_history",
-    },
-  ]
-}
-
-function slackDisplayTools() {
-  return [
-    catalogTool("conversations_add_message", "write"),
-    catalogTool("conversations_history", "read"),
-  ]
-}
-
-function catalogTool(tool: string, access: "read" | "write") {
-  const permission = getToolPermission(tool)
-
-  if (permission === undefined) {
-    throw new Error(`Missing permission: ${tool}`)
-  }
-
-  return {
-    access,
-    description: permission.description,
-    label: permission.label,
-    tool,
   }
 }

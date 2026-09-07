@@ -3,11 +3,11 @@ import { defaultSelection } from "../../contracts/models/selection"
 import {
   consoleContext,
   conversationOf,
+  finishRun,
   organizationId,
   person,
   rows,
 } from "../../test/convex/conversations"
-import { type TestDatabase } from "../../test/convex/database"
 import { type Doc } from "../_generated/dataModel"
 import { chooseConversationModel, sendConsoleMessage } from "./console"
 import { readLiveState } from "./live"
@@ -88,9 +88,3 @@ test("choosing a model changes what the conversation's next run starts on", asyn
     (await readLiveState(ctx, await conversationOf(database, sent))).model
   ).toEqual(basic)
 })
-
-async function finishRun(database: TestDatabase) {
-  for (const run of await rows<Doc<"runs">>(database, "runs")) {
-    await database.patch(run._id, { status: "completed" })
-  }
-}

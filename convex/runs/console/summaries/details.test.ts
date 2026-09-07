@@ -3,9 +3,9 @@ import {
   eventJobDisplay,
   fakeQueryCtx,
   jobDisplay,
+  testRun,
 } from "../../../../test/convex/console"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
+import { githubIntegration } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
 
 test("includes stopped details for stopped runs", async () => {
@@ -169,24 +169,4 @@ function githubIssueCommentEvent() {
       },
     },
   }
-}
-
-function githubIntegration() {
-  return integrationDoc({
-    _id: id<"integrations">("integration"),
-    integration: "github",
-    externalId: "github-installation",
-  })
-}
-
-function testRun(
-  run: Record<string, unknown>,
-  overrides: Record<string, unknown> = {}
-) {
-  return {
-    status: "completed",
-    endedAt: 1000,
-    ...run,
-    ...overrides,
-  } as Parameters<typeof summarizeRun>[1]
 }

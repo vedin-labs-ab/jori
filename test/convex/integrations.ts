@@ -25,3 +25,19 @@ export function integrationDoc(
     ...overrides,
   } as Doc<"integrations">
 }
+
+export function slackIntegration() {
+  return integrationDoc({
+    _id: id<"integrations">("integration"),
+    integration: "slack",
+    externalId: "slack-team",
+  })
+}
+
+export function githubIntegration() {
+  return integrationDoc({
+    _id: id<"integrations">("integration"),
+    integration: "github",
+    externalId: "github-installation",
+  })
+}

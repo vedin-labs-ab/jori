@@ -1,13 +1,16 @@
 import { expect, test } from "vitest"
-import { getToolPermission } from "../../../../contracts/permissions"
 import {
   eventJobDisplay,
   fakeQueryCtx,
   messageDisplay,
   preparedTraceRows,
+  testRun,
 } from "../../../../test/convex/console"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
+import { slackIntegration } from "../../../../test/convex/integrations"
+import {
+  slackDisplayTools,
+  slackToolSnapshot,
+} from "../../../../test/convex/tools"
 import { summarizeRun } from "../summaries"
 
 test("shows stored tools for event job runs", async () => {
@@ -87,15 +90,6 @@ test("marks approval-required access counts in mention and reply runs", async ()
     expect(summary.details).toContainEqual(slackToolsDetail("read"))
   }
 })
-
-function slackIntegration() {
-  return integrationDoc({
-    _id: id<"integrations">("integration"),
-    integration: "slack",
-    externalId: "slack-team",
-  })
-}
-
 function event() {
   return {
     _id: "event",
@@ -151,39 +145,6 @@ function messageRun(kind: "mention" | "reply") {
     },
   }
 }
-
-function testRun(
-  run: Record<string, unknown>,
-  overrides: Record<string, unknown> = {}
-) {
-  return {
-    _id: "run",
-    _creationTime: 0,
-    organizationId: "organization",
-    status: "completed",
-    createdAt: 0,
-    endedAt: 1000,
-    ...run,
-    ...overrides,
-  } as Parameters<typeof summarizeRun>[1] & { preparedTools?: unknown }
-}
-
-function slackToolSnapshot(
-  webSearch = true,
-  approvalAccess?: "read" | "write"
-) {
-  return {
-    groups: [
-      {
-        surface: "slack",
-        label: "Slack",
-        tools: slackSnapshotTools(approvalAccess),
-      },
-    ],
-    webSearch,
-  }
-}
-
 function slackToolsDetail(approvalAccess?: "read" | "write") {
   return {
     type: "tools",
@@ -202,51 +163,5 @@ function webSearchDetail(label: "Allowed" | "Blocked") {
   return {
     type: "web_search",
     label,
-  }
-}
-
-function slackSnapshotTools(approvalAccess?: "read" | "write") {
-  return [
-    {
-      access: "write" as const,
-      description: "Post a Slack message.",
-      label: "Send message",
-      ...(approvalAccess === "write" ? { requiresApproval: true } : {}),
-      tool: "conversations_add_message",
-    },
-    {
-      access: "read" as const,
-      description: "Read Slack channel messages.",
-      label: "Read channel history",
-      ...(approvalAccess === "read" ? { requiresApproval: true } : {}),
-      tool: "conversations_history",
-    },
-  ]
-}
-
-function slackDisplayTools(approvalAccess?: "read" | "write") {
-  return [
-    catalogTool("conversations_add_message", "write", approvalAccess),
-    catalogTool("conversations_history", "read", approvalAccess),
-  ]
-}
-
-function catalogTool(
-  tool: string,
-  access: "read" | "write",
-  approvalAccess?: "read" | "write"
-) {
-  const permission = getToolPermission(tool)
-
-  if (permission === undefined) {
-    throw new Error(`Missing permission: ${tool}`)
-  }
-
-  return {
-    access,
-    description: permission.description,
-    label: permission.label,
-    ...(approvalAccess === access ? { requiresApproval: true } : {}),
-    tool,
   }
 }

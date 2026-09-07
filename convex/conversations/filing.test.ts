@@ -1,7 +1,12 @@
 import { expect, test, vi } from "vitest"
 import { tableDoc } from "../../test/convex/collections"
-import { consoleContext } from "../../test/convex/conversations"
-import { type TestDatabase } from "../../test/convex/database"
+import {
+  consoleContext,
+  finishRun,
+  organizationId,
+  person,
+  rows,
+} from "../../test/convex/conversations"
 import { folderDoc } from "../../test/convex/folders"
 import { type Doc } from "../_generated/dataModel"
 import { sendConsoleMessage } from "./console"
@@ -10,8 +15,6 @@ import { sendConsoleMessage } from "./console"
 // was opened from, or the one its resource is filed in. Starting a run
 // hands it to the workflow component, which needs a real backend.
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
-
-const organizationId = "org"
 
 test("a conversation opened from a folder files every run under it", async () => {
   const { database, ctx } = consoleContext()
@@ -85,20 +88,3 @@ test("a context whose id is not of its kind is refused before anything is kept",
   ).rejects.toThrow("Context id is not a job.")
   expect(await rows(database, "messages")).toEqual([])
 })
-
-async function person(database: TestDatabase) {
-  return await database.insert("persons", { organizationId })
-}
-
-async function finishRun(database: TestDatabase) {
-  for (const run of await rows<Doc<"runs">>(database, "runs")) {
-    await database.patch(run._id, { status: "completed" })
-  }
-}
-
-async function rows<T>(database: TestDatabase, table: string) {
-  return (await database
-    .query(table)
-    .withIndex("by_id")
-    .collect()) as unknown as T[]
-}

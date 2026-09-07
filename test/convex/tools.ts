@@ -1,3 +1,5 @@
+import { getToolPermission } from "../../contracts/permissions"
+
 type IntegrationDoc =
   import("../../convex/_generated/dataModel").Doc<"integrations">
 type PersonId = import("../../convex/_generated/dataModel").Id<"persons">
@@ -57,5 +59,73 @@ function credentials(integration: string) {
   return {
     tokens: { access: "access-token", refresh: "refresh-token" },
     expiresAt: Date.now() + 60_000,
+  }
+}
+
+type ToolAccess = "read" | "write"
+
+/** A tool as the catalog describes it, with the approval mark when its
+ *  access is the one that needs approving. */
+export function catalogTool(
+  tool: string,
+  access: ToolAccess,
+  approvalAccess?: ToolAccess
+) {
+  const permission = getToolPermission(tool)
+
+  if (permission === undefined) {
+    throw new Error(`Missing permission: ${tool}`)
+  }
+
+  return {
+    access,
+    description: permission.description,
+    label: permission.label,
+    ...(approvalAccess === access ? { requiresApproval: true } : {}),
+    tool,
+  }
+}
+
+/** The two Slack tools as a run's prepared snapshot stores them. */
+export function slackSnapshotTools(approvalAccess?: ToolAccess) {
+  return [
+    {
+      access: "write" as const,
+      description: "Post a Slack message.",
+      label: "Send message",
+      ...(approvalAccess === "write" ? { requiresApproval: true } : {}),
+      tool: "conversations_add_message",
+    },
+    {
+      access: "read" as const,
+      description: "Read Slack channel messages.",
+      label: "Read channel history",
+      ...(approvalAccess === "read" ? { requiresApproval: true } : {}),
+      tool: "conversations_history",
+    },
+  ]
+}
+
+/** The same two tools as the console shows them. */
+export function slackDisplayTools(approvalAccess?: ToolAccess) {
+  return [
+    catalogTool("conversations_add_message", "write", approvalAccess),
+    catalogTool("conversations_history", "read", approvalAccess),
+  ]
+}
+
+export function slackToolSnapshot(
+  webSearch = true,
+  approvalAccess?: ToolAccess
+) {
+  return {
+    groups: [
+      {
+        surface: "slack",
+        label: "Slack",
+        tools: slackSnapshotTools(approvalAccess),
+      },
+    ],
+    webSearch,
   }
 }

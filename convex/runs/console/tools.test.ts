@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { getToolPermission } from "../../../contracts/permissions"
+import { catalogTool } from "../../../test/convex/tools"
 import { toolDetails } from "./tools"
 
 test("omits empty access counts from tool labels", () => {
@@ -135,21 +135,6 @@ function testTool(
     access,
     description,
     label,
-    tool,
-  }
-}
-
-function catalogTool(tool: string, access: "read" | "write") {
-  const permission = getToolPermission(tool)
-
-  if (permission === undefined) {
-    throw new Error(`Missing permission: ${tool}`)
-  }
-
-  return {
-    access,
-    description: permission.description,
-    label: permission.label,
     tool,
   }
 }

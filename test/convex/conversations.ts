@@ -152,3 +152,10 @@ export async function rows<Row>(database: TestDatabase, table: string) {
     .withIndex("by_id")
     .collect()) as unknown as Row[]
 }
+
+/** Ends every run, so the next message opens a new one. */
+export async function finishRun(database: TestDatabase) {
+  for (const run of await rows<Doc<"runs">>(database, "runs")) {
+    await database.patch(run._id, { status: "completed" })
+  }
+}
