@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MenuProvenance } from "@/shared/console/materials/actions/note"
 import { materialOwner } from "@/shared/console/materials/owners"
-import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
+import { MenuLead, menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { type Job, jobControlAction } from "../types"
 import { DeleteJobDialog } from "./delete"
 import { jobTriggerSummary } from "./trigger"
@@ -115,14 +115,11 @@ function JobControlItem({
  *  it is, and how it starts. */
 export function JobLead({ job }: { job: Job }) {
   return (
-    <>
-      <MenuProvenance
-        detail={jobTriggerSummary(job).title}
-        owner={materialOwner(job)}
-        updatedAt={job.updatedAt}
-      />
-      <DropdownMenuSeparator />
-    </>
+    <MenuProvenance
+      detail={jobTriggerSummary(job).title}
+      owner={materialOwner(job)}
+      updatedAt={job.updatedAt}
+    />
   )
 }
 
@@ -138,7 +135,7 @@ export function JobTitleMenu({
   return (
     <>
       <DropdownMenuContent align="start" className={menuWidth}>
-        {lead}
+        <MenuLead>{lead}</MenuLead>
         <JobMenuItems {...props} onDeleteRequest={confirm.request} />
       </DropdownMenuContent>
       {confirm.dialog}

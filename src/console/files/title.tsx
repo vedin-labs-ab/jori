@@ -7,7 +7,7 @@ import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FileRow } from "@/shared/console/files/types"
 import { moveTarget } from "@/shared/console/folders/types"
 import { type MaterialEdit } from "@/shared/console/materials/dialogs/edit"
-import { menuWidth } from "@/shared/console/menu"
+import { MenuLead, menuWidth } from "@/shared/console/menu"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { MoveResourceDialog } from "../folders/move"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
@@ -38,7 +38,7 @@ export function FileTitleMenu({
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
       <DropdownMenuContent align="start" className={menuWidth}>
-        {lead}
+        <MenuLead>{lead}</MenuLead>
         <FileMenuItems
           file={file}
           isPending={isPending}
