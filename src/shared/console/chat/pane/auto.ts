@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { type ChatMessage, type ReferenceTarget } from "../types"
+import { type ChatMessage, lastMessage, type ReferenceTarget } from "../types"
 
 /** Opens the first resource a new reply names, once per reply. Only a
  *  reply that lands while the conversation is on screen counts: what the
@@ -10,7 +10,7 @@ export function useReplyReferences(
   messages: ChatMessage[],
   autoOpen: (target: ReferenceTarget) => void
 ) {
-  const reply = latestReply(messages)
+  const reply = lastMessage(messages, "jori")
   const replyId = reply?.id
   const target = useRef<ReferenceTarget>(undefined)
   const seen = useRef<{
@@ -37,18 +37,6 @@ export function useReplyReferences(
       autoOpen(target.current)
     }
   }, [autoOpen, conversationId, replyId])
-}
-
-function latestReply(messages: ChatMessage[]) {
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    const message = messages[index]
-
-    if (message?.role === "jori") {
-      return message
-    }
-  }
-
-  return undefined
 }
 
 function firstReference(message: ChatMessage) {

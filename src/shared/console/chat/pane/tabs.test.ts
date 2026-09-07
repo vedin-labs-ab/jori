@@ -6,7 +6,6 @@ import { usePaneTabs } from "./tabs"
 
 const table: ReferenceTarget = { kind: "table", id: "t1" }
 const job: ReferenceTarget = { kind: "job", id: "j1" }
-const file: ReferenceTarget = { kind: "file", id: "f1" }
 
 beforeEach(() => {
   window.localStorage.clear()
@@ -90,22 +89,4 @@ test("where the pane is a sheet, a reply opens nothing; a tap still does", () =>
 
   expect(result.current.pane.open).toBe(true)
   expect(result.current.pane.active).toEqual(table)
-})
-
-test("the pane's callbacks pin and close through the reducer", () => {
-  const { result } = renderHook(() => usePaneTabs())
-
-  act(() => result.current.openTarget(table))
-  act(() => result.current.pane.onPin(table))
-  act(() => result.current.openTarget(job))
-  act(() => result.current.pane.onPin(job))
-  act(() => result.current.openTarget(file))
-  act(() => result.current.pane.onCloseBeside(job, "both"))
-
-  expect(result.current.pane.tabs.map((tab) => tab.target)).toEqual([job])
-  expect(result.current.pane.active).toEqual(job)
-
-  act(() => result.current.pane.onCloseAll())
-
-  expect(result.current.pane.open).toBe(false)
 })

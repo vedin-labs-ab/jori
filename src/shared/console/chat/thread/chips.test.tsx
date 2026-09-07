@@ -2,17 +2,17 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { message, now } from "../../../../../test/chat"
 import {
   createMentionCatalog,
   emptyMentionSources,
 } from "../../mentions/sources"
 import { type OpenTarget } from "../pane/tabs"
-import { type ChatMessage, type ResolveReference } from "../types"
+import { type ResolveReference } from "../types"
 import { PersonMessage } from "./message"
 
 afterEach(cleanup)
 
-const now = 1_700_000_000_000
 const catalog = createMentionCatalog({
   ...emptyMentionSources,
   integrations: ["slack"],
@@ -25,21 +25,19 @@ const resolve: ResolveReference = (target) =>
     : undefined
 
 function renderAsk(text: string, onOpen: OpenTarget = vi.fn()) {
-  const message: ChatMessage = {
+  const ask = message({
     id: "m1",
     role: "person",
     text,
-    parts: [],
     references: [{ kind: "table", id: "t1" }],
-    createdAt: now,
-  }
+  })
 
   render(
     <TooltipProvider>
       <PersonMessage
         catalog={catalog}
         context={undefined}
-        message={message}
+        message={ask}
         now={now}
         onOpenReference={onOpen}
         resolveReference={resolve}

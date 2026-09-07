@@ -4,7 +4,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ChatContextUsage, type ChatMessage } from "../types"
 import { ChatThread } from "."
-import { CondensedNotice } from "./condensed"
+import { CondensedNotice } from "./notice"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
