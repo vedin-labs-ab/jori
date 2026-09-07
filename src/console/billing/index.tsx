@@ -90,8 +90,10 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
 }
 
 const billingReturnToasts: Record<string, string> = {
-  subscribed: "Plan activated. Jori is on the clock.",
-  "topped-up": "Wallet topped up.",
+  subscribed:
+    "Checkout submitted. Your plan updates once payment is confirmed.",
+  "topped-up":
+    "Top-up submitted. Your balance updates once payment is confirmed.",
 }
 
 function useBillingReturnToasts() {
@@ -106,7 +108,7 @@ function useBillingReturnToasts() {
     const message = billingReturnToasts[status]
 
     if (message !== undefined) {
-      toast.success(message, { id: `billing-${status}` })
+      toast.info(message, { id: `billing-${status}` })
     }
 
     url.searchParams.delete("billing")

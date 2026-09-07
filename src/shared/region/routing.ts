@@ -51,15 +51,10 @@ export function handleRegionRequest(
   )
 }
 
-export function regionSelectionUrl(
-  config: RegionConfig,
-  region: Region,
-  returnTo: string
-) {
+export function regionSelectionUrl(config: RegionConfig, region: Region) {
   requireEnabledRegion(config, region)
   const url = new URL(`/region/${region}`, config.publicOrigin)
 
-  url.searchParams.set("returnTo", normalizeReturnPath(returnTo))
   return url.toString()
 }
 
@@ -99,10 +94,8 @@ function handleRegionSelection(
     return textResponse("Region not available.", 404)
   }
 
-  const returnTo = normalizeReturnPath(requestUrl.searchParams.get("returnTo"))
-
   return redirectResponse(
-    regionalUrl(config, candidate, returnTo),
+    regionalUrl(config, candidate),
     config.publicOrigin,
     candidate
   )
@@ -182,6 +175,7 @@ function redirectResponse(
 ) {
   const headers = new Headers({
     "Cache-Control": "private, no-store",
+    "Referrer-Policy": "no-referrer",
     Location: location,
     Vary: "Cookie, CF-IPCountry, X-Vercel-IP-Country",
   })

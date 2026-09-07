@@ -75,6 +75,13 @@ route(
 )
 
 route(
+  "/github/oauth/callback",
+  "GET",
+  () => import("./integrations/github/ingress/http"),
+  (module) => module.handleGitHubOAuthCallback
+)
+
+route(
   "/github/events",
   "POST",
   () => import("./integrations/github/ingress/http"),

@@ -45,7 +45,7 @@ export async function handleNotionOAuthCallback(
     return await redirectToCallbackError(stateValue)
   }
 
-  const callback = await readOAuthCallback(request, {
+  const callback = await readOAuthCallback(ctx, request, {
     parse: parseSignedNotionState,
     label: "Notion OAuth",
   })

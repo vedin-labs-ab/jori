@@ -6,12 +6,16 @@ import {
   parseSignedState,
 } from "../connect/signing"
 
-export async function createSignedGitHubState(state: ProviderInstallState) {
+export type GitHubInstallState = ProviderInstallState & {
+  installationId?: string
+}
+
+export async function createSignedGitHubState(state: GitHubInstallState) {
   return await createSignedState(requireGitHubWebhookSecret(), state)
 }
 
 export async function parseSignedGitHubState(value: string) {
-  return await parseSignedState<ProviderInstallState>({
+  return await parseSignedState<GitHubInstallState>({
     secret: requireGitHubWebhookSecret(),
     value,
     errorLabel: "GitHub",

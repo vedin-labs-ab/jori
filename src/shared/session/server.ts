@@ -13,7 +13,7 @@ function requireViteEnv(name: "VITE_CONVEX_URL" | "VITE_CONVEX_SITE_URL") {
 /** Server-side auth utilities. `handler` proxies /api/auth/* to the Better
  *  Auth routes on the Convex deployment so sessions live in first-party
  *  cookies on the app origin. */
-export const { handler } = convexBetterAuthReactStart({
+export const { handler, getToken } = convexBetterAuthReactStart({
   convexUrl: requireViteEnv("VITE_CONVEX_URL"),
   convexSiteUrl: requireViteEnv("VITE_CONVEX_SITE_URL"),
 })

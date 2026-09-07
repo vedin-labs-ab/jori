@@ -2,6 +2,13 @@ import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { integrationValidator } from "../shared/integrations"
 
+export const integrationInstalls = defineTable({
+  organizationId: v.string(),
+  identity: v.string(),
+  sessionId: v.string(),
+  expiresAt: v.number(),
+}).index("by_expiresAt", ["expiresAt"])
+
 const integrationScope = v.union(v.literal("organization"), v.literal("user"))
 // Rows are never deleted: disconnect and expiry are status transitions, so
 // jobs bound to an integration id heal when it is reconnected.

@@ -8,6 +8,7 @@ import {
   Sandbox,
 } from "e2b"
 import { type Id } from "../../_generated/dataModel"
+import { sandboxConnection, sandboxTemplate } from "./e2b/connection"
 import { compactFailure } from "./output"
 import { sandboxClonePath } from "./path"
 import {
@@ -26,6 +27,8 @@ import {
 export type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
 
 export const defaultCommandTimeoutMs = 20 * 60 * 1000
+export const sandboxCleanupFailure =
+  "Sandbox cleanup failed. Check this deployment's E2B connection and retry cleanup."
 
 const defaultSandboxTimeoutMs = 60 * 60 * 1000
 /** The exit code GNU timeout reports, so a command cut short reads the way a
@@ -33,8 +36,8 @@ const defaultSandboxTimeoutMs = 60 * 60 * 1000
 const timedOutExitCode = 124
 
 export async function createSandbox(runId: Id<"runs">) {
-  const sandbox = await Sandbox.create(requireSandboxTemplate(), {
-    apiKey: requireE2BApiKey(),
+  const sandbox = await Sandbox.create(sandboxTemplate(), {
+    ...sandboxConnection(),
     allowInternetAccess: true,
     lifecycle: {
       autoResume: true,
@@ -62,17 +65,21 @@ export async function createSandbox(runId: Id<"runs">) {
 
 export async function connectSandbox(sandboxId: string) {
   return await Sandbox.connect(sandboxId, {
-    apiKey: requireE2BApiKey(),
+    ...sandboxConnection(),
     timeoutMs: defaultSandboxTimeoutMs,
   })
 }
 
 export async function killSandbox(sandboxId: string) {
-  // A sandbox that already timed out or was killed is the outcome this asks
-  // for, so its absence is not a failure.
-  await Sandbox.kill(sandboxId, { apiKey: requireE2BApiKey() }).catch(
-    () => false
-  )
+  const connection = sandboxConnection()
+  try {
+    // The SDK returns false for an absent sandbox. Authentication, transport
+    // and provider errors must fail so the caller cannot mark it cleaned.
+    await Sandbox.kill(sandboxId, { ...connection, requestTimeoutMs: 30_000 })
+  } catch {
+    // Provider error text may contain sandbox metadata or credentials.
+    throw new Error(sandboxCleanupFailure)
+  }
 }
 
 export async function runSandboxCommand(
@@ -215,20 +222,4 @@ async function readCommandFile(sandbox: E2BSandbox, path: string) {
 
     throw error
   }
-}
-
-/** Template names are global to the E2B team, so each environment names its
- *  own; the default is the one a development deployment builds. */
-function requireSandboxTemplate() {
-  return process.env.JORI_E2B_TEMPLATE?.trim() || "jori-sandbox"
-}
-
-function requireE2BApiKey() {
-  const apiKey = process.env.E2B_API_KEY?.trim()
-
-  if (apiKey === undefined || apiKey === "") {
-    throw new Error("Missing E2B_API_KEY")
-  }
-
-  return apiKey
 }

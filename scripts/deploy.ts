@@ -1,11 +1,13 @@
 import { spawnSync } from "node:child_process"
 import { createInterface } from "node:readline/promises"
-import { loadEnvironment } from "./env/load.ts"
+import { verifyFrontend } from "./env/frontend.ts"
 import { deploymentNames } from "./env/names.ts"
+import { loadTarget, readTargetArguments } from "./env/target.ts"
 import { packageCommand, runCommand, toolCommand } from "./process.ts"
 
 const environment = "prod"
 const branch = "main"
+const region = readTargetArguments(process.argv.slice(2))
 
 await deployProduction()
 
@@ -19,13 +21,14 @@ async function deployProduction() {
   requireBranch()
   requirePushedBranch()
 
-  const { env } = loadEnvironment(environment)
+  const env = loadTarget(environment, region)
 
   await requireConfirmation()
   await runCommand(packageCommand("check"))
   await runCommand(packageCommand("test"))
 
   requireDeploymentVariables(env)
+  verifyFrontend(env, region)
 
   // Each layer deploys before the one that calls it: the frontend is served
   // against the Convex functions, so the backend leads it, and the skills
@@ -76,12 +79,12 @@ async function requireConfirmation() {
     output: process.stdout,
   })
   const answer = await readline.question(
-    `Deploy ${revision} to production? Type "${environment}" to continue: `
+    `Deploy ${revision} to ${environment}-${region}? Type "${environment}-${region}" to continue: `
   )
 
   readline.close()
 
-  if (answer.trim() !== environment) {
+  if (answer.trim() !== `${environment}-${region}`) {
     throw new Error("Deploy cancelled.")
   }
 }
@@ -94,7 +97,7 @@ async function requireConfirmation() {
 function requireDeploymentVariables(env: NodeJS.ProcessEnv) {
   const output = commandOutput(
     env,
-    ["convex", "env", "list"],
+    ["convex", "env", "list", "--names-only"],
     "Reading the production Convex environment failed."
   )
   const present = new Set(
@@ -106,6 +109,26 @@ function requireDeploymentVariables(env: NodeJS.ProcessEnv) {
     "The production Convex deployment",
     "Set each one with: npx convex env set <NAME> <value>"
   )
+  requireBackendIdentity(env)
+}
+
+function requireBackendIdentity(env: NodeJS.ProcessEnv) {
+  const actualRegion = commandOutput(
+    env,
+    ["convex", "env", "get", "JORI_REGION"],
+    "Cannot verify backend region"
+  ).trim()
+  if (actualRegion !== region) {
+    throw new Error("Convex region identity does not match the target")
+  }
+  const actualOrigin = commandOutput(
+    env,
+    ["convex", "env", "get", "JORI_APP_URL"],
+    "Cannot verify backend origin"
+  ).trim()
+  if (actualOrigin !== env[`VITE_JORI_${region.toUpperCase()}_ORIGIN`]) {
+    throw new Error("Backend origin does not match the regional frontend")
+  }
 }
 
 function commandOutput(

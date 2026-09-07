@@ -4,6 +4,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
 import { nitro } from "nitro/vite"
 import { configDefaults, defineConfig } from "vitest/config"
+import { isRegion } from "./contracts/region"
 
 const ignoredWorkspacePaths = [
   "**/.agents/**",
@@ -28,7 +29,22 @@ const bundleCheck = process.env.JORI_BUNDLE_CHECK !== undefined
 // The bundle check drops it for the same reason it drops the output: Start
 // has already built both environments by the time Nitro packages them.
 const serverPlugins =
-  process.env.VITEST === undefined && !bundleCheck ? [nitro()] : []
+  process.env.VITEST === undefined && !bundleCheck
+    ? [nitro(hostingOptions())]
+    : []
+
+function hostingOptions() {
+  if (process.env.VERCEL !== "1") {
+    return {}
+  }
+  const region = process.env.VITE_JORI_REGION
+  if (!isRegion(region)) {
+    throw new Error("Vercel builds require VITE_JORI_REGION")
+  }
+  return {
+    vercel: { functions: { regions: [region === "eu" ? "dub1" : "iad1"] } },
+  }
+}
 
 const reactOrAccessibilityWarning =
   /Blocked aria-hidden|Each child in a list should have a unique|validateDOMNesting|A component is changing an? (?:un)?controlled|Cannot update a component while rendering|does not recognize the .* prop on a DOM element|Received `(?:true|false)` for a non-boolean attribute/

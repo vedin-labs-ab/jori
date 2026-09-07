@@ -8,6 +8,7 @@ export const sandboxes = defineTable({
   status: v.union(
     v.literal("active"),
     v.literal("idle"),
+    v.literal("cleaning"),
     v.literal("cleaned"),
     v.literal("failed")
   ),

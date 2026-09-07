@@ -4,6 +4,5 @@
     "deploymentEnabled": {
       "main": false
     }
-  },
-  "regions": ["iad1"]
+  }
 }

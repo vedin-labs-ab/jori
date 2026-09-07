@@ -60,8 +60,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
         await ctx.runQuery(internal.access.allowlist.check, {
           email: user.email,
         }),
-      // Dynamic import: the delivery edge references app components
-      // (Resend), which must stay out of the component adapter's bundle.
+      // App delivery functions stay out of the component adapter's bundle.
       sendInvitationEmail: async (invitation) => {
         const { sendInvitation } = await import("./access/invitation")
 
@@ -132,6 +131,7 @@ function definePayload({
     email: user.email,
     name: user.name,
     region: requireRegion(),
+    ...(typeof session.id === "string" ? { sid: session.id } : {}),
     ...(typeof organizationId === "string" ? { org: organizationId } : {}),
   }
 }

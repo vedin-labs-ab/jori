@@ -6,11 +6,12 @@ import { accounts, transactions } from "./billing/schema"
 import { collections, documents, shares } from "./collections/schema"
 import { conversations } from "./conversations/schema"
 import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
+import { emailSubmissions } from "./email/schema"
 import { events } from "./events/schema"
 import { files } from "./files/schema"
 import { folders } from "./folders/schema"
 import { integrationOffers } from "./integrations/offers/schema"
-import { integrations } from "./integrations/schema"
+import { integrationInstalls, integrations } from "./integrations/schema"
 import { jobs } from "./jobs/schema"
 import { subscriptions } from "./jobs/subscriptions/schema"
 import { messages } from "./messages/schema"
@@ -38,6 +39,7 @@ import { usage } from "./usage/schema"
 import { waitlist } from "./waitlist/schema"
 
 export default defineSchema({
+  emailSubmissions,
   skills,
   allowlist,
   waitlist,
@@ -47,6 +49,7 @@ export default defineSchema({
   persons,
   identities,
   integrations,
+  integrationInstalls,
   integrationOffers,
   messages,
   models,

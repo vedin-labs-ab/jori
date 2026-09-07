@@ -39,7 +39,7 @@ export async function handleSlackOAuthCallback(
   ctx: ActionCtx,
   request: Request
 ) {
-  const callback = await readOAuthCallback(request, {
+  const callback = await readOAuthCallback(ctx, request, {
     parse: parseSignedSlackState,
     label: "Slack OAuth",
   })

@@ -1,3 +1,4 @@
+import { modelAvailabilityReason } from "@contracts/models/availability"
 import { useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
@@ -24,6 +25,7 @@ import {
 } from "./conversation"
 import { ConversationDraft } from "./draft"
 import { type useConversationMessages } from "./messages"
+import { useAvailableModels } from "./models"
 import { ConversationPaneBody } from "./pane"
 import { ChatProgress } from "./progress"
 import { sendAnswer } from "./send"
@@ -107,6 +109,8 @@ function ConversationThread({
   organizationId: string
 }) {
   const thread = useConversation(organizationId, conversationId, live)
+  const availableModels = useAvailableModels()
+  const unavailable = modelAvailabilityReason(availableModels, live.model)
   const { openTarget, page, resolveReference } = thread
   const handlers = useThreadHandlers(organizationId, conversationId, thread)
 
@@ -120,6 +124,8 @@ function ConversationThread({
       composer={
         <ChatComposer
           autoFocus
+          availableModels={availableModels}
+          disabled={unavailable !== undefined}
           isLive={isLiveRun(live.run)}
           mentions={thread.mentions}
           onMention={thread.mentioned.open}
@@ -128,6 +134,7 @@ function ConversationThread({
           onStop={thread.stop}
           onUnmention={thread.releaseTarget}
           resolve={resolveReference}
+          reason={unavailable}
           selection={live.model}
           usage={live.context}
         />

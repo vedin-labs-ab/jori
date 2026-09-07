@@ -44,7 +44,7 @@ export async function handleGoogleOAuthCallback(
   ctx: ActionCtx,
   request: Request
 ) {
-  const callback = await readOAuthCallback(request, {
+  const callback = await readOAuthCallback(ctx, request, {
     parse: parseSignedGoogleState,
     label: "Google Workspace OAuth",
   })

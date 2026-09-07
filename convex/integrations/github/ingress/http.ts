@@ -7,7 +7,12 @@ import {
 } from "../../../approvals/runtime"
 import { type Actor, createIntegrationActor } from "../../../shared/actor"
 import { unauthorizedResponse } from "../../../shared/http"
-import { readCallbackState, redirectWithStatus } from "../../connect/http"
+import { privateRedirect, regionalCallback } from "../../connect/handoff"
+import {
+  readCallbackState,
+  readOAuthCallback,
+  redirectWithStatus,
+} from "../../connect/http"
 import {
   completeIntegrationOffer,
   failOfferAndRedirect,
@@ -17,7 +22,15 @@ import {
   type GitHubInstallationProfile,
 } from "../app"
 import { githubAppInstallBaseUrl, requireGitHubAppSlug } from "../config"
-import { parseSignedGitHubState, verifyGitHubRequest } from "../signing"
+import {
+  githubAuthorizationUrl,
+  verifyGitHubInstallationAccess,
+} from "../oauth"
+import {
+  createSignedGitHubState,
+  parseSignedGitHubState,
+  verifyGitHubRequest,
+} from "../signing"
 import { getGitHubMessage } from "./events"
 import { recordGitHubLifecycleEvent } from "./lifecycle"
 import { type GitHubWebhookPayload } from "./types"
@@ -42,11 +55,19 @@ export async function handleGitHubInstallCallback(
   ctx: ActionCtx,
   request: Request
 ) {
+  const handoff = await regionalCallback(ctx, request)
+  if (handoff !== null) {
+    return handoff
+  }
   const requestUrl = new URL(request.url)
   const installationId = requestUrl.searchParams.get("installation_id")
   const stateValue = requestUrl.searchParams.get("state")
 
-  if (installationId === null || stateValue === null) {
+  if (
+    installationId === null ||
+    !/^\d+$/.test(installationId) ||
+    stateValue === null
+  ) {
     return new Response("Missing GitHub installation parameters", {
       status: 400,
     })
@@ -62,11 +83,40 @@ export async function handleGitHubInstallCallback(
     return parsed.response
   }
 
-  const state = parsed.state
+  const state = await createSignedGitHubState({
+    ...parsed.state,
+    installationId,
+  })
+  return privateRedirect(
+    githubAuthorizationUrl(`${requestUrl.origin}/github/oauth/callback`, state)
+  )
+}
+
+export async function handleGitHubOAuthCallback(
+  ctx: ActionCtx,
+  request: Request
+) {
+  const callback = await readOAuthCallback(ctx, request, {
+    parse: parseSignedGitHubState,
+    label: "GitHub authorization",
+  })
+  if (!callback.ok) {
+    return callback.response
+  }
+  const { state, code, requestUrl } = callback
+  const installationId = state.installationId
+  if (installationId === undefined || !/^\d+$/.test(installationId)) {
+    return new Response("Missing GitHub installation", { status: 400 })
+  }
 
   let profile: Awaited<ReturnType<typeof fetchGitHubInstallationProfile>>
 
   try {
+    await verifyGitHubInstallationAccess({
+      code,
+      installationId,
+      redirectUri: `${requestUrl.origin}/github/oauth/callback`,
+    })
     profile = await fetchGitHubInstallationProfile(installationId)
   } catch {
     return await failOfferAndRedirect(ctx, {

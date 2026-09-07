@@ -1,12 +1,10 @@
-import { OpenRouterCore } from "@openrouter/sdk/core"
-import { modelsGet } from "@openrouter/sdk/funcs/modelsGet"
 import { type Model, type PublicPricing } from "@openrouter/sdk/models"
 import { v } from "convex/values"
 import { microsPerDollar } from "../../contracts/billing"
-import { type ModelRate, models } from "../../contracts/models/catalog"
+import { isModelSlug, type ModelRate } from "../../contracts/models/catalog"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
-import { requireOpenRouterConfig } from "./openrouter"
+import { eligibleModels } from "./eligibility"
 
 type FetchedListing = {
   contextLength: number
@@ -22,18 +20,20 @@ export const run = internalAction({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    const client = new OpenRouterCore(requireOpenRouterConfig())
+    const models = (await eligibleModels()).filter((model) =>
+      isModelSlug(model.id)
+    )
     const failures: string[] = []
 
-    for (const { slug } of models) {
+    for (const model of models) {
       try {
         await ctx.runMutation(
           internal.model.window.upsert,
-          await fetchModelListing(client, slug)
+          readModelListing(model.id, model)
         )
       } catch (error) {
-        failures.push(slug)
-        console.error("Model refresh failed.", { model: slug, error })
+        failures.push(model.id)
+        console.error("Model refresh failed.", { model: model.id, error })
       }
     }
 
@@ -44,26 +44,6 @@ export const run = internalAction({
     return null
   },
 })
-
-/** One standalone SDK call per model: the core client with the models-get
- *  function alone, never the root client, which evaluates every schema on
- *  import. */
-async function fetchModelListing(
-  client: OpenRouterCore,
-  model: string
-): Promise<FetchedListing> {
-  const separator = model.indexOf("/")
-  const result = await modelsGet(client, {
-    author: model.slice(0, separator),
-    slug: model.slice(separator + 1),
-  })
-
-  if (!result.ok) {
-    throw result.error
-  }
-
-  return readModelListing(model, result.value.data)
-}
 
 /**
  * The listing names the model's own window and the window of the provider

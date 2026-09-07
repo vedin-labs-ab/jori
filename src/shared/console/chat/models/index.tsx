@@ -1,5 +1,6 @@
 import {
   catalogModel,
+  type ModelSlug,
   type ModelVendor,
   modelLabel,
   modelVendors,
@@ -59,14 +60,21 @@ const vendorOrder: ModelVendor[] = ["openai", "anthropic"]
  * mark. Changing it any time is fine; the next run takes it.
  */
 export function ModelPicker({
+  availableModels,
   onSelect,
   selection,
 }: {
+  availableModels: readonly ModelSlug[] | undefined
   onSelect: (selection: ModelSelection) => void
   selection: ModelSelection
 }) {
   const tier = selectionTier(selection)
   const Icon = tier === null ? null : tierIcons[tier]
+  const choose = (next: ModelSelection) => {
+    if (availableModels?.includes(next.model)) {
+      onSelect(next)
+    }
+  }
 
   return (
     <DropdownMenu>
@@ -74,6 +82,9 @@ export function ModelPicker({
         <InputGroupButton
           aria-label={`Model: ${modelLabel(selection.model)}, ${effortLabels[selection.effort]} reasoning`}
           className="gap-1.5 text-muted-foreground"
+          disabled={
+            availableModels === undefined || availableModels.length === 0
+          }
           size="sm"
           variant="ghost"
         >
@@ -90,32 +101,43 @@ export function ModelPicker({
         <DropdownMenuGroup>
           <DropdownMenuLabel>Recommendations</DropdownMenuLabel>
           <DropdownMenuRadioGroup
-            onValueChange={(next) => onSelect(tiers[next as ModelTier])}
+            onValueChange={(next) => choose(tiers[next as ModelTier])}
             value={tier ?? ""}
           >
-            {tierOrder.map((candidate) => (
-              <TierItem key={candidate} tier={candidate} />
-            ))}
+            {tierOrder
+              .filter((candidate) =>
+                availableModels?.includes(tiers[candidate].model)
+              )
+              .map((candidate) => (
+                <TierItem key={candidate} tier={candidate} />
+              ))}
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel>More models</DropdownMenuLabel>
-          {vendorOrder.map((vendor) => (
-            <DropdownMenuSub key={vendor}>
-              <DropdownMenuSubTrigger>
-                <VendorLogo vendor={vendor} />
-                {modelVendors[vendor]}
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-56">
-                <VendorModels
-                  onSelect={onSelect}
-                  selection={selection}
-                  vendor={vendor}
-                />
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          ))}
+          {vendorOrder
+            .filter((vendor) =>
+              vendorModels(vendor).some((model) =>
+                availableModels?.includes(model.slug)
+              )
+            )
+            .map((vendor) => (
+              <DropdownMenuSub key={vendor}>
+                <DropdownMenuSubTrigger>
+                  <VendorLogo vendor={vendor} />
+                  {modelVendors[vendor]}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="w-56">
+                  <VendorModels
+                    availableModels={availableModels ?? []}
+                    onSelect={choose}
+                    selection={selection}
+                    vendor={vendor}
+                  />
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
@@ -130,7 +152,7 @@ export function ModelPicker({
           <DropdownMenuSubContent className="w-40">
             <DropdownMenuRadioGroup
               onValueChange={(effort) =>
-                onSelect(withEffort(selection, effort as ReasoningEffort))
+                choose(withEffort(selection, effort as ReasoningEffort))
               }
               value={selection.effort}
             >
@@ -167,10 +189,12 @@ function TierItem({ tier }: { tier: ModelTier }) {
 /** A vendor's models, the chosen one marked with the tier it makes, if
  *  any. Picking a model keeps the effort in force. */
 function VendorModels({
+  availableModels,
   onSelect,
   selection,
   vendor,
 }: {
+  availableModels: readonly ModelSlug[]
   onSelect: (selection: ModelSelection) => void
   selection: ModelSelection
   vendor: ModelVendor
@@ -184,16 +208,18 @@ function VendorModels({
       }
       value={selection.model}
     >
-      {vendorModels(vendor).map((model) => (
-        <DropdownMenuRadioItem key={model.slug} value={model.slug}>
-          {model.label}
-          {model.slug === selection.model && tier !== null ? (
-            <span className="ml-auto text-muted-foreground">
-              {tierLabels[tier]}
-            </span>
-          ) : null}
-        </DropdownMenuRadioItem>
-      ))}
+      {vendorModels(vendor)
+        .filter((model) => availableModels.includes(model.slug))
+        .map((model) => (
+          <DropdownMenuRadioItem key={model.slug} value={model.slug}>
+            {model.label}
+            {model.slug === selection.model && tier !== null ? (
+              <span className="ml-auto text-muted-foreground">
+                {tierLabels[tier]}
+              </span>
+            ) : null}
+          </DropdownMenuRadioItem>
+        ))}
     </DropdownMenuRadioGroup>
   )
 }

@@ -39,6 +39,7 @@ import { Route as JobsIndexRouteImport } from './routes/jobs/index'
 import { Route as StoresIndexRouteImport } from './routes/stores/index'
 import { Route as TablesIndexRouteImport } from './routes/tables/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiIntegrationsCallbackRouteImport } from './routes/api/integrations/callback'
 import { Route as ChatConversationIdIndexRouteImport } from './routes/chat/$conversationId/index'
 import { Route as FilesFileIdIndexRouteImport } from './routes/files/$fileId/index'
 import { Route as FoldersFolderIdIndexRouteImport } from './routes/folders/$folderId/index'
@@ -198,6 +199,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIntegrationsCallbackRoute = ApiIntegrationsCallbackRouteImport.update({
+  id: '/api/integrations/callback',
+  path: '/api/integrations/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatConversationIdIndexRoute = ChatConversationIdIndexRouteImport.update({
   id: '/$conversationId/',
   path: '/$conversationId/',
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/integrations/callback': typeof ApiIntegrationsCallbackRoute
   '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/chat/$conversationId/': typeof ChatConversationIdIndexRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/stores': typeof StoresIndexRoute
   '/tables': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/integrations/callback': typeof ApiIntegrationsCallbackRoute
   '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/chat/$conversationId': typeof ChatConversationIdIndexRoute
@@ -344,6 +352,7 @@ export interface FileRoutesById {
   '/stores/': typeof StoresIndexRoute
   '/tables/': typeof TablesIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/integrations/callback': typeof ApiIntegrationsCallbackRoute
   '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
   '/chat/$conversationId/': typeof ChatConversationIdIndexRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
+    | '/api/integrations/callback'
     | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
     | '/chat/$conversationId/'
@@ -419,6 +429,7 @@ export interface FileRouteTypes {
     | '/stores'
     | '/tables'
     | '/api/auth/$'
+    | '/api/integrations/callback'
     | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
     | '/chat/$conversationId'
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | '/stores/'
     | '/tables/'
     | '/api/auth/$'
+    | '/api/integrations/callback'
     | '/folders/$folderId/usage'
     | '/integrations/offers/$token'
     | '/chat/$conversationId/'
@@ -489,6 +501,7 @@ export interface RootRouteChildren {
   TrustRoute: typeof TrustRoute
   JobsIndexRoute: typeof JobsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiIntegrationsCallbackRoute: typeof ApiIntegrationsCallbackRoute
   JobsJobIdIndexRoute: typeof JobsJobIdIndexRoute
 }
 
@@ -704,6 +717,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/integrations/callback': {
+      id: '/api/integrations/callback'
+      path: '/api/integrations/callback'
+      fullPath: '/api/integrations/callback'
+      preLoaderRoute: typeof ApiIntegrationsCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat/$conversationId/': {
       id: '/chat/$conversationId/'
       path: '/$conversationId'
@@ -881,6 +901,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrustRoute: TrustRoute,
   JobsIndexRoute: JobsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiIntegrationsCallbackRoute: ApiIntegrationsCallbackRoute,
   JobsJobIdIndexRoute: JobsJobIdIndexRoute,
 }
 export const routeTree = rootRouteImport

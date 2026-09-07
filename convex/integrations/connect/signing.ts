@@ -3,6 +3,7 @@ import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { base64UrlDecode, base64UrlEncode } from "../../shared/encoding"
 
 export type ProviderInstallState = {
+  attemptId: Id<"integrationInstalls">
   organizationId: string
   createdBy: Id<"persons">
   returnUrl: string

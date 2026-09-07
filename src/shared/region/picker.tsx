@@ -31,9 +31,7 @@ export function RegionPicker({
       return
     }
 
-    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`
-
-    window.location.assign(regionSelectionUrl(regionConfig, region, returnTo))
+    window.location.assign(regionSelectionUrl(regionConfig, region))
   }
 
   // Inline, the region reads from the option itself, so the label is for

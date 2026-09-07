@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { parseEnv } from "node:util"
+import { type Region } from "../../contracts/region.ts"
 import { type Environment, environmentFile, localNames } from "./names.ts"
 
 type LoadedEnvironment = {
@@ -17,11 +18,14 @@ type LoadedEnvironment = {
  * always wins, which is what lets a one-off command point somewhere else
  * without editing a file.
  */
-export function loadEnvironment(environment: Environment): LoadedEnvironment {
+export function loadEnvironment(
+  environment: Environment,
+  region?: Region
+): LoadedEnvironment {
   const env: NodeJS.ProcessEnv = {}
   const sources: string[] = []
 
-  for (const source of environmentSources(environment)) {
+  for (const source of environmentSources(environment, region)) {
     if (!existsSync(source)) {
       continue
     }
@@ -32,17 +36,19 @@ export function loadEnvironment(environment: Environment): LoadedEnvironment {
 
   Object.assign(env, process.env)
 
-  const missing = localNames[environment].filter((name) => isEmpty(env[name]))
+  const required =
+    region === undefined ? localNames[environment] : ["CONVEX_DEPLOYMENT"]
+  const missing = required.filter((name) => isEmpty(env[name]))
 
   if (missing.length > 0) {
-    throw new Error(missingMessage(environment, missing, sources))
+    throw new Error(missingMessage(environment, missing, sources, region))
   }
 
   return { env, sources }
 }
 
-function environmentSources(environment: Environment) {
-  const fileName = environmentFile(environment)
+function environmentSources(environment: Environment, region?: Region) {
+  const fileName = environmentFile(environment, region)
   const candidates = [
     primaryCheckoutPath(fileName),
     path.join(process.cwd(), fileName),
@@ -76,12 +82,13 @@ function isEmpty(value: string | undefined) {
 function missingMessage(
   environment: Environment,
   missing: readonly string[],
-  sources: readonly string[]
+  sources: readonly string[],
+  region?: Region
 ) {
   return [
     `Missing ${environment} environment: ${missing.join(", ")}`,
     `Loaded: ${sources.length === 0 ? "no env files" : sources.join(", ")}`,
-    `Add the missing values to ${environmentFile(environment)} in this`,
+    `Add the missing values to ${environmentFile(environment, region)} in this`,
     "checkout or the primary checkout.",
   ].join("\n")
 }

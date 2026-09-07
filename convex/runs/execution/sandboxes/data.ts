@@ -7,7 +7,6 @@ import { type QueryLikeCtx } from "../../../shared/context"
 const idleSandboxLeaseMs = 5 * 60 * 1000
 
 type SandboxRun = { externalId: string; runId: Id<"runs"> }
-type ExpiredSandboxCleanup = SandboxRun & { expiresAt: number }
 
 async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
   return await ctx.db
@@ -19,7 +18,10 @@ async function findActiveSandbox(ctx: QueryLikeCtx, runId: Id<"runs">) {
     .first()
 }
 
-async function findSandboxByExternalId(ctx: QueryLikeCtx, externalId: string) {
+export async function findSandboxByExternalId(
+  ctx: QueryLikeCtx,
+  externalId: string
+) {
   return await ctx.db
     .query("sandboxes")
     .withIndex("by_external_id", (query) => query.eq("externalId", externalId))
@@ -128,49 +130,6 @@ export async function settleRunSandbox(ctx: MutationCtx, run: Doc<"runs">) {
     await ctx.scheduler.runAfter(0, internal.runtime.sandbox.e2b.kill, {
       externalId: sandbox.externalId,
       runId: run._id,
-    })
-  }
-
-  return null
-}
-
-export async function reserveExpiredSandboxCleanup(
-  ctx: MutationCtx,
-  args: ExpiredSandboxCleanup
-) {
-  const existing = await findSandboxByExternalId(ctx, args.externalId)
-
-  if (
-    existing === null ||
-    existing.status !== "idle" ||
-    existing.runId !== args.runId ||
-    existing.expiresAt !== args.expiresAt ||
-    existing.expiresAt > Date.now()
-  ) {
-    return false
-  }
-
-  await ctx.db.patch(existing._id, {
-    expiresAt: undefined,
-    status: "cleaned",
-    updatedAt: Date.now(),
-  })
-
-  return true
-}
-
-export async function markSandboxCleaned(
-  ctx: MutationCtx,
-  args: { error?: string; externalId: string }
-) {
-  const existing = await findSandboxByExternalId(ctx, args.externalId)
-
-  if (existing !== null) {
-    await ctx.db.patch(existing._id, {
-      error: args.error,
-      expiresAt: undefined,
-      status: args.error === undefined ? "cleaned" : "failed",
-      updatedAt: Date.now(),
     })
   }
 

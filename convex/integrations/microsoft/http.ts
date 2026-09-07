@@ -48,7 +48,7 @@ export async function handleMicrosoftOAuthCallback(
   integration: MicrosoftIntegration
 ) {
   const config = microsoftIntegrationConfigs[integration]
-  const callback = await readOAuthCallback(request, {
+  const callback = await readOAuthCallback(ctx, request, {
     parse: parseSignedMicrosoftState,
     label: "Microsoft OAuth",
   })

@@ -61,6 +61,12 @@ export function createRegionConfig(
     throw new Error("Enabled regions must use distinct origins.")
   }
 
+  if (enabled.size > 1 && enabledOrigins.includes(publicOrigin)) {
+    throw new Error(
+      "The public origin must be separate from regional instances."
+    )
+  }
+
   return { current, enabled, origins, publicOrigin }
 }
 
