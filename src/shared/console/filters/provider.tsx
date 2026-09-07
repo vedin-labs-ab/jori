@@ -5,6 +5,7 @@ import {
   useMemo,
   useState,
 } from "react"
+import { readStorage, writeStorage } from "@/shared/storage"
 import { useConsolePathname } from "../shell/location"
 import { ConsoleFiltersContext } from "./context"
 
@@ -62,9 +63,7 @@ function pageKey(pathname: string) {
 
 function readStored(storageKey: string): OpenByPage {
   try {
-    const stored: unknown = JSON.parse(
-      window.localStorage.getItem(storageKey) ?? "{}"
-    )
+    const stored: unknown = JSON.parse(readStorage(storageKey) ?? "{}")
 
     return typeof stored === "object" && stored !== null
       ? (stored as OpenByPage)
@@ -75,9 +74,5 @@ function readStored(storageKey: string): OpenByPage {
 }
 
 function writeStored(storageKey: string, openByPage: OpenByPage) {
-  try {
-    window.localStorage.setItem(storageKey, JSON.stringify(openByPage))
-  } catch {
-    // Storage that refuses a write only loses the preference.
-  }
+  writeStorage(storageKey, JSON.stringify(openByPage))
 }

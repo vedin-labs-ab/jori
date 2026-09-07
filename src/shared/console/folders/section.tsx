@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
+import { groupLabelButton } from "../shell/group"
 import { ConsoleLink } from "../shell/link"
 import { NewInFolderMenu } from "./create"
 import { useExpandHoverHandler, useRootDrop } from "./drag/state"
@@ -107,8 +108,7 @@ export function FolderTree({
 
 /** The group label doubles as the drop target that moves a dragged folder
  *  back to the top level — and its text links to the /folders overview,
- *  resting exactly where the plain label sat and growing the ghost pill
- *  on hover like the breadcrumb trigger. */
+ *  in the control the other groups toggle from. */
 function FoldersLabel() {
   const root = useRootDrop()
 
@@ -119,16 +119,7 @@ function FoldersLabel() {
       )}
       ref={root.setNodeRef}
     >
-      {/* Constant geometry: the pill's room comes from padding cancelled
-          by negative margin, so the text never moves and a shell remount
-          mid-hover has nothing to replay — unlike the breadcrumb, this
-          control sits under the pointer exactly when navigation remounts
-          the sidebar. */}
-      <Button
-        asChild
-        className="-mx-1.5 h-6 px-1.5 font-normal text-sidebar-foreground/70 text-xs"
-        variant="ghost"
-      >
+      <Button asChild className={groupLabelButton} variant="ghost">
         <ConsoleLink to="/folders">Folders</ConsoleLink>
       </Button>
     </SidebarGroupLabel>

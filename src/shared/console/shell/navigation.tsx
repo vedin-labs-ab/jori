@@ -6,7 +6,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -16,6 +15,7 @@ import {
 import { cn } from "@/lib/utils"
 import { scrollFadeViewport } from "@/shared/fade"
 import { type ChatConversation } from "../chat/types"
+import { CollapsibleGroup } from "./group"
 import { ConsoleLink } from "./link"
 import {
   type ConsoleSurface,
@@ -31,7 +31,8 @@ import {
  *  in the quiet bottom slot, between the organization at its head and
  *  the account in its footer. The three parts that know who is signed in
  *  arrive as slots; the chats arrive as rows, since the sidebar draws
- *  them the way it draws its own items. */
+ *  them the way it draws its own items. A labelled group closes from its
+ *  label, for the room. */
 export function ConsoleSidebar({
   account,
   chats,
@@ -52,14 +53,20 @@ export function ConsoleSidebar({
       <SidebarContent>
         {consoleNavigation.map((group, index) => (
           <Fragment key={group.label ?? index}>
-            <SidebarGroup>
-              {group.label === undefined ? null : (
-                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-              )}
-              <SidebarGroupContent>
+            {group.label === undefined ? (
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <NavigationMenu items={group.items} pathname={pathname} />
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ) : (
+              <CollapsibleGroup
+                label={group.label}
+                name={group.label.toLowerCase()}
+              >
                 <NavigationMenu items={group.items} pathname={pathname} />
-              </SidebarGroupContent>
-            </SidebarGroup>
+              </CollapsibleGroup>
+            )}
             {/* The chats follow the first group: under New chat and
                 Activity, above the resources. */}
             {index === 0 ? (
@@ -102,28 +109,25 @@ function ChatsGroup({
   }
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Chats</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <ChatsScroll clamp={chats.length > visibleChats}>
-          <SidebarMenu>
-            {chats.map((chat) => (
-              <SidebarMenuItem key={chat.id}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === conversationPathname(chat.id)}
-                  tooltip={chat.title}
-                >
-                  <ConsoleLink {...conversationDestination(chat.id)}>
-                    <span>{chat.title}</span>
-                  </ConsoleLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </ChatsScroll>
-      </SidebarGroupContent>
-    </SidebarGroup>
+    <CollapsibleGroup label="Chats" name="chats">
+      <ChatsScroll clamp={chats.length > visibleChats}>
+        <SidebarMenu>
+          {chats.map((chat) => (
+            <SidebarMenuItem key={chat.id}>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === conversationPathname(chat.id)}
+                tooltip={chat.title}
+              >
+                <ConsoleLink {...conversationDestination(chat.id)}>
+                  <span>{chat.title}</span>
+                </ConsoleLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </ChatsScroll>
+    </CollapsibleGroup>
   )
 }
 
