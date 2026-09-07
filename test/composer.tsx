@@ -27,7 +27,6 @@ export async function renderComposer(
   render(
     <TooltipProvider>
       <ChatComposer
-        live={null}
         mentions={mentionSources}
         onSend={onSend}
         onStop={vi.fn()}

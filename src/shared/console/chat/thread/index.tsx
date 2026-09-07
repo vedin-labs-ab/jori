@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo } from "react"
+import { memo, type ReactNode, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
   MessageScroller,
@@ -20,7 +20,6 @@ import {
 import { type OpenTarget } from "../pane/tabs"
 import {
   type ChatContextUsage,
-  type ChatDraft,
   type ChatMessage,
   type ChatRun,
   endedWithoutReply,
@@ -29,7 +28,6 @@ import {
 } from "../types"
 import { answeredParts, answeringMessages } from "./answers"
 import { CondensedNotice } from "./condensed"
-import { ChatDraftTurn } from "./draft"
 import { JoriMessage, MessageActions, PersonMessage } from "./message"
 import { RunNotice } from "./notice"
 import { type ChooseHandler, ReplyParts } from "./parts"
@@ -43,7 +41,9 @@ export type { ChooseHandler } from "./parts"
  *  the reply grows under it. What the run is doing arrives from the host
  *  as `progress` and the reply being written as `draft`; together they
  *  are one turn of Jori's under that anchor, until the finished message
- *  takes its place. */
+ *  takes its place. Each finished turn is memoized, so the host's
+ *  callbacks must keep their identity for the list to stay put while the
+ *  tail changes. */
 export function ChatThread({
   draft,
   hasMore,
@@ -59,8 +59,11 @@ export function ChatThread({
   resolveReference,
   usage,
 }: {
-  /** The turn so far, while one is streaming. */
-  draft: ChatDraft | null
+  /** The reply as far as it has come, as `ChatDraftTurn` or a component
+   *  the host binds to its draft. A node rather than the text, so the
+   *  writes that land every few hundred milliseconds re-render the turn
+   *  being written and not the messages above it. */
+  draft?: ReactNode
   hasMore: boolean
   isLoading: boolean
   live: ChatRun | null
@@ -117,9 +120,7 @@ export function ChatThread({
                     onChoose={onChoose}
                     onOpenReference={onOpenReference}
                     resolveReference={resolveReference}
-                    showChips={
-                      message.id === lastId && !isLive && draft === null
-                    }
+                    showChips={message.id === lastId && !isLive}
                   />
                 </MessageScrollerItem>
               )
@@ -144,8 +145,10 @@ export function ChatThread({
 }
 
 /** One message as its side shows it: the person's in a bubble with its
- *  context and its chips, Jori's as prose with its parts under the mark. */
-function Turn({
+ *  context and its chips, Jori's as prose with its parts under the mark.
+ *  Rendered once per message and left alone while the thread's tail
+ *  changes under it. */
+const Turn = memo(function Turn({
   answered,
   catalog,
   message,
@@ -195,7 +198,7 @@ function Turn({
       <MessageActions message={message} now={now} />
     </JoriMessage>
   )
-}
+})
 
 /** The way to the page before the oldest one loaded. */
 function EarlierMessages({
@@ -225,29 +228,29 @@ function EarlierMessages({
  *  or, when the run ended without the reply, the notice that says so. A
  *  run starts from the person's message, so a message of Jori's standing
  *  last under a live run is that run's own heads-up, and the work goes on
- *  under it rather than as a new turn. */
+ *  under it rather than as a new turn. A host that shows the draft alone
+ *  has a turn with nothing in it until the draft says something; the
+ *  item hides itself for as long as that is so, without the thread
+ *  having to read the draft. */
 function ThreadTail({
   draft,
   live,
   messages,
   progress,
 }: {
-  draft: ChatDraft | null
+  draft: ReactNode
   live: ChatRun | null
   messages: ChatMessage[]
   progress: ReactNode
 }) {
   const isLive = isLiveRun(live)
 
-  if ((isLive && progress !== undefined) || draft !== null) {
+  if (isLive && (progress !== undefined || draft !== undefined)) {
     return (
-      <MessageScrollerItem>
-        <JoriMessage
-          continued={messages.at(-1)?.role === "jori"}
-          streaming={draft !== null}
-        >
-          {isLive ? progress : null}
-          {draft === null ? null : <ChatDraftTurn draft={draft} />}
+      <MessageScrollerItem className="has-[[data-slot=turn]:empty]:hidden">
+        <JoriMessage continued={messages.at(-1)?.role === "jori"} streaming>
+          {progress}
+          {draft}
         </JoriMessage>
       </MessageScrollerItem>
     )

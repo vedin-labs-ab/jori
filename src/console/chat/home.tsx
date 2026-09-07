@@ -75,7 +75,6 @@ function ChatHomeContent({
         <ChatComposer
           autoFocus
           context={reference.reference}
-          live={null}
           mentions={mentions}
           onClearContext={reference.clear}
           onSelect={setSelection}

@@ -32,7 +32,7 @@ function ExpandableText({
   const contentId = React.useId()
   const [expanded, setExpanded] = React.useState(defaultExpanded)
   const { contentRef, controlRef, controlWidth, truncated } =
-    useClampOverflow(expanded)
+    useClampOverflow(expanded, children)
   const interactive = !expanded && truncated
 
   const expandFromText = () => {
@@ -101,7 +101,7 @@ function ExpandableText({
   )
 }
 
-function useClampOverflow(expanded: boolean) {
+function useClampOverflow(expanded: boolean, content: React.ReactNode) {
   const contentRef = React.useRef<HTMLDivElement>(null)
   const controlRef = React.useRef<HTMLButtonElement>(null)
   const [truncated, setTruncated] = React.useState(false)
@@ -119,8 +119,8 @@ function useClampOverflow(expanded: boolean) {
   }, [expanded])
 
   // Content edits rarely resize the clamped box, so a ResizeObserver alone
-  // would miss them; re-measure on every commit as well.
-  React.useLayoutEffect(measure)
+  // would miss them; re-measure when the content changes as well.
+  React.useLayoutEffect(measure, [measure, content])
 
   React.useLayoutEffect(() => {
     const content = contentRef.current

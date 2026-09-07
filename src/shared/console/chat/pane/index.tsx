@@ -1,4 +1,4 @@
-import { type ReactNode, type RefObject, useRef, useState } from "react"
+import { memo, type ReactNode, type RefObject, useRef, useState } from "react"
 import {
   ResizableHandle,
   ResizablePanel,
@@ -116,7 +116,10 @@ export function ChatPane({
   )
 }
 
-function PanePanel({
+/** The strip and the active target's content. Memoized, so the thread
+ *  beside it changing is not a render of the pane; the host's `body`
+ *  must keep its identity for that to hold. */
+const PanePanel = memo(function PanePanel({
   body,
   closeRef,
   ...strip
@@ -150,7 +153,7 @@ function PanePanel({
       )}
     </aside>
   )
-}
+})
 
 /** The header and body for one target. The body's view may publish a
  *  breadcrumb the way it does on its page; the pane catches it here and

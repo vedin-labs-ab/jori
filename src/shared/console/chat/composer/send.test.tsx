@@ -106,10 +106,7 @@ test("the shortcut band and its peek name the band they control", async () => {
 
 test("while a run is live the control stops it instead of sending", async () => {
   const onStop = vi.fn()
-  const { field, onSend } = await renderComposer({
-    live: { id: "runs_1", status: "running" },
-    onStop,
-  })
+  const { field, onSend } = await renderComposer({ isLive: true, onStop })
 
   expect(screen.queryByRole("button", { name: "Send message" })).toBeNull()
 

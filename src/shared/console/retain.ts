@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 /**
  * Keeps the last defined value so dialog content survives the close
@@ -41,4 +41,22 @@ export function closeOnDismiss(close: () => void) {
       close()
     }
   }
+}
+
+/**
+ * The latest `callback` behind one identity, so a memoized child that
+ * takes it is not re-rendered by every render of the host that makes it.
+ * For handlers only: the identity is stable, the call reaches whatever
+ * was passed last.
+ */
+export function useLatestCallback<Args extends unknown[], Result>(
+  callback: (...args: Args) => Result
+) {
+  const latest = useRef(callback)
+
+  useEffect(() => {
+    latest.current = callback
+  })
+
+  return useCallback((...args: Args) => latest.current(...args), [])
 }

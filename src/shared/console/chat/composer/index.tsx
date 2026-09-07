@@ -1,6 +1,6 @@
 import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
-import { type FormEvent, type MouseEvent, useEffect, useId } from "react"
+import { type FormEvent, type MouseEvent, memo, useEffect, useId } from "react"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 import { useStoredOpen } from "@/shared/storage"
 import {
@@ -11,8 +11,6 @@ import { chatColumnClassName } from "../thread"
 import {
   type ChatContextUsage,
   type ChatReference,
-  type ChatRun,
-  isLiveRun,
   type ResolveReference,
 } from "../types"
 import { useComposerEditor } from "./editor"
@@ -26,12 +24,14 @@ import { ComposerFooter, HintsPeek } from "./footer"
  *  answering a send the draft waits in the field behind a spinner.
  *  Disabled with a reason, it says why under the field. The model picker
  *  stands with the context ring, left of it, when the host offers a
- *  selection; changing it mid-chat is fine, the next run takes it. */
-export function ChatComposer({
+ *  selection; changing it mid-chat is fine, the next run takes it.
+ *  Memoized: the host's handlers must keep their identity, and then a
+ *  change in the thread beside it leaves the editor alone. */
+export const ChatComposer = memo(function ChatComposer({
   autoFocus = false,
   context,
   disabled = false,
-  live,
+  isLive = false,
   mentions = emptyMentionSources,
   onClearContext,
   onMention,
@@ -49,7 +49,8 @@ export function ChatComposer({
   /** The resource the chat is about, shown as a chip the person can drop. */
   context?: ChatReference
   disabled?: boolean
-  live: ChatRun | null
+  /** A run is answering: the send control is the stop control. */
+  isLive?: boolean
   /** What can be mentioned: the host's lists, and its search. */
   mentions?: MentionSources
   onClearContext?: () => void
@@ -79,7 +80,6 @@ export function ChatComposer({
 }) {
   const reasonId = useId()
   const hints = useHintsBand()
-  const isLive = isLiveRun(live)
   const shownReason =
     disabled && reason !== undefined
       ? { id: reasonId, text: reason }
@@ -140,7 +140,7 @@ export function ChatComposer({
       )}
     </form>
   )
-}
+})
 
 /** The send control pressed: the draft goes, and the page stays. */
 function sendOnSubmit(event: FormEvent, send: () => void) {

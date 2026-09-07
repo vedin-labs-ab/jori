@@ -69,7 +69,6 @@ function thread(usage: ChatContextUsage) {
   return (
     <TooltipProvider>
       <ChatThread
-        draft={null}
         hasMore={false}
         isLoading={false}
         live={null}

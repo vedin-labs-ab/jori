@@ -8,6 +8,7 @@ import {
 } from "@/shared/console/runs/activity/empty"
 import { ActivityTimeline } from "@/shared/console/runs/activity/item"
 import { type ActivityResult } from "@/shared/console/runs/activity/types"
+import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
 import { RunApprovals } from "../runs/request/approval"
 import { RunOffers } from "../runs/request/offer"
@@ -18,17 +19,17 @@ const calloutClassName = "overflow-hidden rounded-lg border bg-background"
  *  run's log folded under it, and the approvals and connections it is
  *  waiting on as callouts under that, each talking to the same functions
  *  the Activity page's rows use. Mounted only while the run is live, so
- *  the subscriptions end with it. */
+ *  the subscriptions end with it, as does the clock that keeps the log's
+ *  durations moving: a second here re-renders this row and nothing else. */
 export function ChatProgress({
-  now,
   organizationId,
   run,
 }: {
-  now: number
   organizationId: string
   run: ChatRun
 }) {
   const runId = run.id as GenericId<"runs">
+  const now = useNow(1000)
   const summary = useQuery(api.runs.console.live.get, { organizationId, runId })
   const activity = useQuery(api.runs.activity.index.list, {
     organizationId,

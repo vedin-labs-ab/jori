@@ -33,9 +33,9 @@ import {
   chatSelection,
   chatSuggestions,
 } from "../../fixtures/chat"
-import { liveDraft } from "../../state/chat"
 import { type DemoLiveReply, type DemoState } from "../../state/types"
 import { useDemoWorkspace } from "../../workspace"
+import { DemoDraft } from "./draft"
 import { DemoPaneBody } from "./pane"
 import { useReplyStream } from "./stream"
 
@@ -72,7 +72,6 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
         <ChatComposer
           autoFocus
           context={reference}
-          live={null}
           mentions={mentions}
           onClearContext={() => navigate({ to: "/chat" })}
           onSelect={setSelection}
@@ -145,7 +144,7 @@ function Conversation({ conversationId }: { conversationId: string }) {
       resolve={resolve}
     >
       <ChatThread
-        draft={liveDraft(state.chat, conversationId)}
+        draft={<DemoDraft chat={state.chat} conversationId={conversationId} />}
         hasMore={false}
         isLoading={false}
         live={run}
@@ -198,7 +197,7 @@ function DemoComposer({
   return (
     <ChatComposer
       autoFocus
-      live={run}
+      isLive={isLiveRun(run)}
       mentions={mentions}
       onSelect={setSelection}
       onSend={(text, references) => {

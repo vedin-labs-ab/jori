@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { memo, useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { BlockTokens } from "./blocks"
 import { parseMarkdown } from "./parse"
@@ -6,8 +6,10 @@ import { markdownProseClassName } from "./style"
 
 /** Markdown laid out at the console's prose scale. While `streaming`, the
  *  text is read as the reply it is becoming, so an open fence or a table
- *  header renders as code or a table before its closing line arrives. */
-export function Markdown({
+ *  header renders as code or a table before its closing line arrives.
+ *  Memoized: a finished message's text never changes, and parsing it
+ *  again for a render of the thread would be the thread's whole cost. */
+export const Markdown = memo(function Markdown({
   className,
   streaming = false,
   text,
@@ -35,7 +37,7 @@ export function Markdown({
       <BlockTokens tokens={tokens} />
     </div>
   )
-}
+})
 
 let hasPrefetchedGrammars = false
 

@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react"
+import { Fragment, memo, type ReactNode } from "react"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import {
   Tooltip,
@@ -25,8 +25,9 @@ const resourceCatalog: MentionCatalog = { resource: true }
 /** A person's turn: contained, on the right, and clamped when it runs
  *  long, so a pasted brief does not push the reply off the screen. The
  *  resource the chat was opened about sits above the words; what the
- *  words mention stands in them as chips. */
-export function PersonMessage({
+ *  words mention stands in them as chips. Memoized, since the clamp
+ *  measures itself on every render it gets. */
+export const PersonMessage = memo(function PersonMessage({
   catalog = resourceCatalog,
   context,
   message,
@@ -61,7 +62,7 @@ export function PersonMessage({
       <MessageActions message={message} now={now} />
     </div>
   )
-}
+})
 
 function ContextLine({ reference }: { reference: ChatReference }) {
   const { icon: Icon, label } = referencePresentation(
@@ -107,7 +108,9 @@ export function JoriMessage({
       ) : (
         <BrandIcon className="mt-0.5 size-5" />
       )}
-      <div className="grid min-w-0 flex-1 gap-3 text-sm">{children}</div>
+      <div className="grid min-w-0 flex-1 gap-3 text-sm" data-slot="turn">
+        {children}
+      </div>
     </div>
   )
 }

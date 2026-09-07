@@ -6,6 +6,7 @@ import { type OpenTarget, usePaneTabs } from "@/shared/console/chat/pane/tabs"
 import { type ChatRun, type ReferenceTarget } from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
+import { useLatestCallback } from "@/shared/console/retain"
 import { useDocumentTitle } from "@/shared/console/shell/title"
 import { api } from "../../../convex/_generated/api"
 import { useMentionSources } from "./mentions"
@@ -21,7 +22,8 @@ export type LiveConversation = Extract<
 
 /** Everything a conversation's page binds: its messages, the ways to
  *  send into it and to stop its run, what it may mention, its pane, and
- *  the names of what it refers to. */
+ *  the names of what it refers to. The handlers keep their identity, so
+ *  the memoized views they reach stay put. */
 export function useConversation(
   organizationId: string,
   conversationId: GenericId<"conversations">,
@@ -45,7 +47,7 @@ export function useConversation(
       page.messages,
       mentioned.targets
     ),
-    send: useSendMessage(organizationId),
+    send: useLatestCallback(useSendMessage(organizationId)),
     stop: useStopRun(organizationId, live.run),
   }
 }
@@ -84,14 +86,15 @@ export function useThreadChrome(title: string) {
 /** Stops the live run the way the Activity page does; a failure says so. */
 function useStopRun(organizationId: string, run: ChatRun | null) {
   const stop = useMutation(api.runs.control.stop)
+  const runId = run === null ? undefined : (run.id as GenericId<"runs">)
 
-  return () => {
-    if (run === null) {
+  return useCallback(() => {
+    if (runId === undefined) {
       return
     }
 
-    void stop({ organizationId, runId: run.id as GenericId<"runs"> }).catch(
-      (error: unknown) => showErrorToast(error, "Couldn't stop the run.")
+    void stop({ organizationId, runId }).catch((error: unknown) =>
+      showErrorToast(error, "Couldn't stop the run.")
     )
-  }
+  }, [organizationId, runId, stop])
 }
