@@ -1,12 +1,11 @@
 import { integrationLabel } from "@contracts/integrations"
-import { BookOpen, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ProviderLogo } from "@/shared/logo/provider"
 import { MentionChip } from "../mentions/chip"
+import { MentionKindIcon } from "../mentions/icon"
 import { type MentionKind, parseResourceMention } from "../mentions/scan"
 import { mentionTones } from "../mentions/tone"
 import { referencePresentation } from "./presentation"
-import { type ReferenceTarget, type ResolveReference } from "./types"
+import { type ReferenceTarget, type ResolveReference, targetKey } from "./types"
 
 /** One of a chat's mentions as a chip, in the composer and in the thread
  *  alike: a resource by the name the host resolves it to, or as its kind
@@ -42,7 +41,13 @@ export function ChatMentionChip({
 
   return (
     <MentionChip
-      icon={<NamedMentionIcon id={id} kind={kind} />}
+      icon={
+        <MentionKindIcon
+          className={cn("size-3", mentionTones[kind].icon)}
+          id={id}
+          kind={kind}
+        />
+      }
       kind={kind}
       label={kind === "integration" ? integrationLabel(id) : id}
       onRemove={onRemove}
@@ -78,7 +83,7 @@ function ResourceMentionChip({
   return (
     <MentionChip
       className={cn(unavailable && "text-muted-foreground line-through")}
-      data-mention-target={`${target.kind}:${target.id}`}
+      data-mention-target={targetKey(target)}
       icon={
         <Icon
           aria-hidden="true"
@@ -103,31 +108,4 @@ function ResourceMentionChip({
       }
     />
   )
-}
-
-function NamedMentionIcon({
-  id,
-  kind,
-}: {
-  id: string
-  kind: Exclude<MentionKind, "resource">
-}) {
-  switch (kind) {
-    case "integration":
-      return <ProviderLogo className="size-3" surface={id} />
-    case "skill":
-      return (
-        <BookOpen
-          aria-hidden="true"
-          className={cn("size-3", mentionTones.skill.icon)}
-        />
-      )
-    case "tool":
-      return (
-        <Wrench
-          aria-hidden="true"
-          className={cn("size-3", mentionTones.tool.icon)}
-        />
-      )
-  }
 }

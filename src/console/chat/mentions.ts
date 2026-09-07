@@ -30,7 +30,6 @@ export function useMentionSources(organizationId: string): MentionSources {
       tools: (permissions ?? [])
         .filter((permission) => permission.mode !== "blocked")
         .map((permission) => ({
-          label: permission.label,
           surface: permission.surface,
           tool: permission.tool,
         })),

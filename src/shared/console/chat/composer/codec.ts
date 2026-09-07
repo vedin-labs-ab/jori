@@ -8,7 +8,7 @@ import {
 import {
   type MentionCatalog,
   parseResourceMention,
-  readMentions,
+  splitByMentions,
 } from "../../mentions/scan"
 import { mentionNodeContent } from "../../mentions/suggest/insert"
 
@@ -53,25 +53,15 @@ export function serializeComposerDocument(
 
 /** One line's inline nodes: its text, with each recognized token as a
  *  mention node. */
-export function parseComposerLine(line: string, catalog: MentionCatalog) {
-  const content: JSONContent[] = []
-  let cursor = 0
-
-  for (const mention of readMentions(line, catalog)) {
-    appendText(content, line.slice(cursor, mention.start))
-    content.push(mentionNodeContent(mention, undefined))
-    cursor = mention.end
-  }
-
-  appendText(content, line.slice(cursor))
-
-  return content
-}
-
-function appendText(content: JSONContent[], text: string) {
-  if (text !== "") {
-    content.push({ type: "text", text })
-  }
+export function parseComposerLine(
+  line: string,
+  catalog: MentionCatalog
+): JSONContent[] {
+  return splitByMentions(line, catalog).map((segment) =>
+    "mention" in segment
+      ? mentionNodeContent(segment.mention, undefined)
+      : { type: "text", text: segment.text }
+  )
 }
 
 function serializeInline(

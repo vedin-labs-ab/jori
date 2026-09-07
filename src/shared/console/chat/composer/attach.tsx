@@ -24,6 +24,7 @@ import {
   resourceSuggestion,
 } from "../../mentions/sources"
 import { referencePresentation } from "../presentation"
+import { targetKey } from "../types"
 
 /** The kinds the menu lists, in the order they are reached for. */
 const attachKinds: readonly ReferenceKind[] = [
@@ -223,10 +224,7 @@ function ResourceItem({
   const { icon: Icon } = referencePresentation(resource.kind, resource.name)
 
   return (
-    <CommandItem
-      onSelect={() => onPick(resource)}
-      value={`${resource.kind}:${resource.id}`}
-    >
+    <CommandItem onSelect={() => onPick(resource)} value={targetKey(resource)}>
       <Icon aria-hidden="true" className="text-muted-foreground" />
       <span className="min-w-0 truncate">{resource.name}</span>
     </CommandItem>

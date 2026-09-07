@@ -8,9 +8,8 @@ import {
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { type ChatReference, type ReferenceTarget } from "../types"
+import { type ChatReference, type ReferenceTarget, targetKey } from "../types"
 import { ChatPane, type ChatPaneProps } from "."
-import { targetKey } from "./routes"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),

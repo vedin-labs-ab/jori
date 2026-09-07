@@ -60,6 +60,16 @@ export type ReferenceTarget = {
   id: string
 }
 
+/** One string per target — `kind:id`, as a resource token carries it —
+ *  for keys, tab values, and mention ids. */
+export function targetKey(target: ReferenceTarget) {
+  return `${target.kind}:${target.id}`
+}
+
+export function isSameTarget(left: ReferenceTarget, right: ReferenceTarget) {
+  return left.kind === right.kind && left.id === right.id
+}
+
 /** A target as the host resolved it, for the card that shows it. */
 export type ChatReference = {
   kind: ReferenceKind

@@ -2,7 +2,6 @@ import {
   type Mention,
   type MentionCatalog,
   type MentionEntry,
-  mentionSigils,
   type NamedMentionKind,
   readMentions,
   sortMentionTokens,
@@ -16,12 +15,6 @@ import { jobSurfaceIntegrations } from "./catalog"
 
 export const jobMentionKinds = ["integration", "skill", "tool"] as const
 export type JobMentionKind = (typeof jobMentionKinds)[number]
-
-export const jobMentionSigils = {
-  integration: mentionSigils.integration,
-  skill: mentionSigils.skill,
-  tool: mentionSigils.tool,
-} as const satisfies Record<JobMentionKind, string>
 
 export type JobMentionCatalog = Record<
   NamedMentionKind,

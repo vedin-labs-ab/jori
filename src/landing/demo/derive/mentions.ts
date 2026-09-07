@@ -17,7 +17,6 @@ export function mentionSources(state: DemoState): MentionSources {
     tools: demoPermissions
       .filter((permission) => permission.mode !== "blocked")
       .map((permission) => ({
-        label: permission.label,
         surface: permission.surface,
         tool: permission.tool,
       })),

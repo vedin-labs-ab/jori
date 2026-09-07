@@ -2,7 +2,6 @@ import {
   type ActiveMention,
   findActiveMention,
 } from "@/shared/console/mentions/active"
-import { mentionText } from "@/shared/console/mentions/node"
 import {
   maxSuggestions,
   normalizeFuzzyAlias,
@@ -55,11 +54,6 @@ export type JobMentionSources = {
 }
 
 export type ActiveJobMention = ActiveMention & { kind: JobMentionKind }
-
-/** The canonical text a mention serializes to inside instructions. */
-export function jobMentionText(kind: JobMentionKind, id: string) {
-  return mentionText(kind, id)
-}
 
 /** The sigil-started token the cursor is inside, if any. */
 export function findActiveJobMention(

@@ -1,11 +1,6 @@
-import { type MessageContext } from "@contracts/replies/answers"
 import { type Editor, useEditor } from "@tiptap/react"
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
-import {
-  type MentionCatalog,
-  mentionKinds,
-  resourceMentionId,
-} from "../../mentions/scan"
+import { mentionKinds } from "../../mentions/scan"
 import {
   createMentionCatalog,
   type MentionSources,
@@ -15,7 +10,7 @@ import {
 import { useAutocompleteA11y } from "../../mentions/suggest/a11y"
 import { updateSuggestionIndex } from "../../mentions/suggest/keys"
 import { getSuggestionState } from "../../mentions/suggest/state"
-import { type ResolveReference } from "../types"
+import { type ResolveReference, targetKey } from "../types"
 import { serializeComposerDocument } from "./codec"
 import { createComposerExtensions } from "./extensions"
 import {
@@ -43,12 +38,19 @@ export function useComposerEditor(args: ComposerEditorArgs) {
     () => createMentionCatalog(args.sources),
     [args.sources]
   )
-  const refs = useComposerRefs(args, catalog)
   const listboxId = useId()
+  const [refs] = useState<ComposerRefs>(() => ({
+    latest: { current: { args, catalog, editor: null, suggestion: null } },
+    mentioned: new Map(),
+    names: new Map(),
+    sending: false,
+  }))
   const { editor, isEmpty, pending, setPending, setSuggestion, suggestion } =
     useComposerInstance(refs)
 
-  useLatestRefs(refs, args, catalog, editor, suggestion)
+  // The handlers were made once; this is what they read of this render.
+  refs.latest.current = { args, catalog, editor, suggestion }
+
   useAutocompleteA11y({ editor, listboxId, suggestion })
   useResourceSearch(args.sources, suggestion)
   useEffect(() => {
@@ -58,15 +60,14 @@ export function useComposerEditor(args: ComposerEditorArgs) {
   return {
     canSend: args.open && !isEmpty && !pending,
     editor,
-    insertMention: (item: MentionSuggestion) =>
-      insertMention(editor, refs, item),
+    insertMention: (item: MentionSuggestion) => insertMention(refs, item),
     isEmpty,
     listboxId,
     /** A send the host is still answering; the draft waits in the field. */
     pending,
     selectSuggestion: (item: MentionSuggestion) =>
-      selectSuggestion(editor, refs, suggestion, item, setSuggestion),
-    send: () => sendDraft(editor, refs, setPending),
+      selectSuggestion(refs, item, setSuggestion),
+    send: () => sendDraft(refs, setPending),
     setActiveSuggestionIndex: (activeIndex: number) =>
       updateSuggestionIndex(activeIndex, setSuggestion),
     suggestion,
@@ -86,11 +87,14 @@ function useComposerInstance(refs: ComposerRefs) {
     (editor: Editor) =>
       setSuggestion(
         getSuggestionState(editor, {
-          activeIndex: refs.suggestion.current?.activeIndex ?? 0,
+          activeIndex: refs.latest.current.suggestion?.activeIndex ?? 0,
           kinds: mentionKinds,
           placement: "above",
           suggest: (active) => ({
-            suggestions: suggestMentions(active, refs.sources.current),
+            suggestions: suggestMentions(
+              active,
+              refs.latest.current.args.sources
+            ),
           }),
         })
       ),
@@ -116,48 +120,6 @@ function useComposerInstance(refs: ComposerRefs) {
   }
 }
 
-function useComposerRefs(
-  args: ComposerEditorArgs,
-  catalog: MentionCatalog
-): ComposerRefs {
-  const [refs] = useState<ComposerRefs>(() => ({
-    catalog: { current: catalog },
-    editor: { current: null },
-    mentioned: new Map<string, MessageContext>(),
-    names: new Map(),
-    onMention: { current: args.onMention },
-    onSend: { current: args.onSend },
-    onUnmention: { current: args.onUnmention },
-    open: { current: args.open },
-    resolve: { current: args.resolve },
-    sending: false,
-    sources: { current: args.sources },
-    suggestion: { current: null },
-  }))
-
-  return refs
-}
-
-function useLatestRefs(
-  refs: ComposerRefs,
-  args: ComposerEditorArgs,
-  catalog: MentionCatalog,
-  editor: Editor | null,
-  suggestion: ComposerSuggestionState | null
-) {
-  useEffect(() => {
-    refs.catalog.current = catalog
-    refs.editor.current = editor
-    refs.onMention.current = args.onMention
-    refs.onUnmention.current = args.onUnmention
-    refs.onSend.current = args.onSend
-    refs.open.current = args.open
-    refs.resolve.current = args.resolve
-    refs.sources.current = args.sources
-    refs.suggestion.current = suggestion
-  }, [args, catalog, editor, refs, suggestion])
-}
-
 /** Tells the host what is being looked for under `+`, so it can narrow
  *  the resources it offers, and that nothing is once the listbox closes. */
 function useResourceSearch(
@@ -177,15 +139,14 @@ function useResourceSearch(
  *  list, then the host's resolver. */
 function resolveMention(refs: ComposerRefs): ResolveReference {
   return (target) => {
+    const { resolve, sources } = refs.latest.current.args
     const name =
-      refs.names.get(resourceMentionId(target)) ??
-      refs.sources.current.resources.find(
+      refs.names.get(targetKey(target)) ??
+      sources.resources.find(
         (resource) => resource.kind === target.kind && resource.id === target.id
       )?.name
 
-    return name === undefined
-      ? refs.resolve.current?.(target)
-      : { ...target, name }
+    return name === undefined ? resolve?.(target) : { ...target, name }
   }
 }
 
@@ -215,10 +176,10 @@ function createEditorOptions({
       handleKeyDown: (_view, event) =>
         handleComposerKey({ event, refs, setPending, setSuggestion }),
       handlePaste: (view, event) =>
-        insertPastedText(view, event, refs.catalog.current),
+        insertPastedText(view, event, refs.latest.current.catalog),
       handleTextInput: (view, from, to, text) =>
         completeTypedMention({
-          catalog: refs.catalog.current,
+          catalog: refs.latest.current.catalog,
           from,
           text,
           to,
@@ -244,14 +205,14 @@ function createEditorOptions({
 function noteUnmentions(editor: Editor, refs: ComposerRefs) {
   const held = new Map(
     serializeComposerDocument(editor.getJSON()).references.map((target) => [
-      `${target.kind}:${target.id}`,
+      targetKey(target),
       target,
     ])
   )
 
   for (const [key, target] of refs.mentioned) {
     if (!held.has(key)) {
-      refs.onUnmention.current?.(target)
+      refs.latest.current.args.onUnmention?.(target)
     }
   }
 

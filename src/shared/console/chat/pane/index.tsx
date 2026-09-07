@@ -11,10 +11,9 @@ import {
   MaterialBreadcrumbContext,
 } from "../../materials/breadcrumb"
 import { referencePresentation } from "../presentation"
-import { type ChatReference, type ReferenceTarget } from "../types"
+import { type ChatReference, type ReferenceTarget, targetKey } from "../types"
 import { PaneHeader } from "./header"
 import { PaneHint } from "./hint"
-import { targetKey } from "./routes"
 import { PaneStrip, type PaneStripProps } from "./strip"
 import { type PanePreference, usePaneSheet } from "./tabs"
 

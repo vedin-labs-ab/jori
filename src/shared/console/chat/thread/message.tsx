@@ -1,4 +1,4 @@
-import { Fragment, memo, type ReactNode } from "react"
+import { memo, type ReactNode } from "react"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import {
   Tooltip,
@@ -8,7 +8,7 @@ import {
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
 import { CopyButton } from "../../copy"
-import { type MentionCatalog, readMentions } from "../../mentions/scan"
+import { type MentionCatalog, splitByMentions } from "../../mentions/scan"
 import { absoluteTime, relativeTime } from "../../time"
 import { ChatMentionChip } from "../mentions"
 import { type OpenTarget } from "../pane/tabs"
@@ -164,31 +164,17 @@ function MentionedText({
   resolve: ResolveReference | undefined
   text: string
 }) {
-  const mentions = readMentions(text, catalog)
-
-  if (mentions.length === 0) {
-    return text
-  }
-
-  const segments = []
-  let cursor = 0
-
-  for (const mention of mentions) {
-    segments.push(
-      <Fragment key={mention.start}>
-        {text.slice(cursor, mention.start)}
-        <ChatMentionChip
-          id={mention.id}
-          kind={mention.kind}
-          onOpen={onOpen === undefined ? undefined : (target) => onOpen(target)}
-          resolve={resolve}
-        />
-      </Fragment>
+  return splitByMentions(text, catalog).map((segment) =>
+    "mention" in segment ? (
+      <ChatMentionChip
+        id={segment.mention.id}
+        key={segment.mention.start}
+        kind={segment.mention.kind}
+        onOpen={onOpen === undefined ? undefined : (target) => onOpen(target)}
+        resolve={resolve}
+      />
+    ) : (
+      segment.text
     )
-    cursor = mention.end
-  }
-
-  segments.push(text.slice(cursor))
-
-  return segments
+  )
 }

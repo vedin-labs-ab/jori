@@ -14,7 +14,7 @@ export const mentionSources: MentionSources = {
     { kind: "chat", id: "conversations_1", name: "Last week's sync" },
   ],
   skills: ["triage", "release-notes"],
-  tools: [{ label: "Search files", surface: "jori", tool: "search_files" }],
+  tools: [{ surface: "jori", tool: "search_files" }],
 }
 
 /** The composer mounted the way a page mounts it, with its field found

@@ -4,6 +4,7 @@ import {
   type ReferenceKind,
   resourceTokenPattern,
 } from "@contracts/replies/parts"
+import { targetKey } from "../chat/types"
 
 // Mentions are explicit, sigil-prefixed tokens — `@Gmail`, `/meeting-prep`,
 // `#send_message`, `+[table:k17…]`. Prose is never scanned for bare names,
@@ -46,7 +47,7 @@ export type MentionCatalog = Partial<
 
 export type Mention = {
   end: number
-  /** The name for a named kind; `kind:id` for a resource. */
+  /** The name for a named kind; the target's key for a resource. */
   id: string
   kind: MentionKind
   start: number
@@ -84,6 +85,31 @@ export function readMentions(text: string, catalog: MentionCatalog): Mention[] {
   }
 
   return mentions
+}
+
+/** The text as its mentions divide it: the words between them and each
+ *  mention where it stands, with no empty run of words. */
+export function splitByMentions(
+  text: string,
+  catalog: MentionCatalog
+): Array<{ text: string } | { mention: Mention }> {
+  const segments: Array<{ text: string } | { mention: Mention }> = []
+  let cursor = 0
+
+  for (const mention of readMentions(text, catalog)) {
+    if (mention.start > cursor) {
+      segments.push({ text: text.slice(cursor, mention.start) })
+    }
+
+    segments.push({ mention })
+    cursor = mention.end
+  }
+
+  if (cursor < text.length) {
+    segments.push({ text: text.slice(cursor) })
+  }
+
+  return segments
 }
 
 /** A finished token at the very end of the text, as typing a boundary
@@ -125,12 +151,6 @@ export function sortMentionTokens(tokens: readonly string[]) {
   )
 }
 
-/** A resource's mention id: the kind and the id, as the token carries
- *  them. */
-export function resourceMentionId(target: MessageContext) {
-  return `${target.kind}:${target.id}`
-}
-
 /** The target a resource mention names, or nothing for an id of another
  *  shape. */
 export function parseResourceMention(id: unknown): MessageContext | null {
@@ -146,7 +166,7 @@ function matchResourceMention(text: string, sigilIndex: number) {
 
   return {
     end: sigilIndex + match[0].length,
-    id: resourceMentionId({
+    id: targetKey({
       kind: match[1].toLowerCase() as ReferenceKind,
       id: match[2],
     }),

@@ -2,7 +2,6 @@ import { expect, test } from "vitest"
 import {
   createMentionCatalog,
   type MentionSources,
-  mentionOptions,
   suggestMentions,
 } from "./sources"
 
@@ -20,12 +19,8 @@ const sources: MentionSources = {
   ],
   skills: ["triage", "release-notes"],
   tools: [
-    { label: "Search files", surface: "jori", tool: "search_files" },
-    {
-      label: "Send message",
-      surface: "slack",
-      tool: "conversations_add_message",
-    },
+    { surface: "jori", tool: "search_files" },
+    { surface: "slack", tool: "conversations_add_message" },
   ],
 }
 
@@ -69,13 +64,17 @@ test("each sigil suggests its own kind, names starting with the query first, six
 })
 
 test("a resource suggestion carries its target and its kind's noun", () => {
-  expect(mentionOptions("resource", sources)[0]).toEqual({
-    detail: "Table",
-    id: "table:t1",
-    kind: "resource",
-    label: "Customer renewals",
-    target: { kind: "table", id: "t1" },
-  })
+  expect(suggestMentions({ kind: "resource", query: "cust" }, sources)).toEqual(
+    [
+      {
+        detail: "Table",
+        id: "table:t1",
+        kind: "resource",
+        label: "Customer renewals",
+        target: { kind: "table", id: "t1" },
+      },
+    ]
+  )
 })
 
 test("the catalog recognizes every name offered, and any resource token", () => {

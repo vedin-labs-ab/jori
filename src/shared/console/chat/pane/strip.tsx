@@ -6,9 +6,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { scrollFadeX } from "@/shared/fade"
 import { referencePresentation } from "../presentation"
-import { type ReferenceTarget, type ResolveReference } from "../types"
+import {
+  type ReferenceTarget,
+  type ResolveReference,
+  targetKey,
+} from "../types"
 import { PaneTabMenu } from "./menu"
-import { targetKey } from "./routes"
 import { type PaneSide, type PaneTab } from "./state"
 
 export type PaneStripProps = {

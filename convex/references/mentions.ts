@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import {
-  type MessageContext,
+  type MentionResource,
   mentionsPerKind,
 } from "../../contracts/replies/answers"
 import { type ReferenceKind } from "../../contracts/replies/parts"
@@ -27,8 +27,6 @@ import { createSight, type Sight } from "../visibility/sight"
  *  browse of everything reads the newest few and no further. */
 const scanLimit = 200
 const browseLimit = mentionsPerKind * 2
-
-export type MentionResource = MessageContext & { name: string }
 
 type Viewer = { personId: Id<"persons">; sight: Sight }
 

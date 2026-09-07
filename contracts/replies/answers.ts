@@ -8,6 +8,9 @@ import { type ReferenceKind, referenceKinds } from "./parts"
 
 export type MessageContext = { kind: ReferenceKind; id: string }
 
+/** A resource a message can mention, named for the composer's picker. */
+export type MentionResource = MessageContext & { name: string }
+
 /** How many of a kind the composer's picker is offered; the search
  *  narrows within. A kind at the cap reads as "25+" in the picker. */
 export const mentionsPerKind = 25
