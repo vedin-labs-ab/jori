@@ -106,7 +106,10 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
   const verificationToken = readVerificationToken(payload)
 
   if (verificationToken !== undefined) {
-    return Response.json({ ok: true, verification_token: verificationToken })
+    await ctx.runMutation(internal.integrations.notion.setup.index.capture, {
+      token: verificationToken,
+    })
+    return Response.json({ ok: true })
   }
 
   if (!(await verifyNotionWebhookRequest(request, body))) {
