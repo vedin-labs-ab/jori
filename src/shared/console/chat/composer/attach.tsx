@@ -1,3 +1,4 @@
+import { mentionsPerKind } from "@contracts/replies/answers"
 import { type ReferenceKind } from "@contracts/replies/parts"
 import { ArrowLeft, Plus } from "lucide-react"
 import { useState } from "react"
@@ -68,7 +69,7 @@ export function AttachMenu({
     >
       <PopoverTrigger asChild>
         <InputGroupButton
-          aria-label="Attach a resource"
+          aria-label="Mention a resource"
           className="text-muted-foreground"
           size="icon-sm"
           variant="ghost"
@@ -84,7 +85,7 @@ export function AttachMenu({
               setQuery(next)
               sources.onSearch?.(next)
             }}
-            placeholder="Search resources"
+            placeholder="Search resources…"
             value={query}
           />
           <CommandList>
@@ -111,7 +112,8 @@ export function AttachMenu({
   )
 }
 
-/** The menu's first page: a row per kind, with how many it holds. */
+/** The menu's first page: a row per kind, with how many it holds; a kind
+ *  the host capped says there are more than it shows. */
 function KindRows({
   onChoose,
   resources,
@@ -134,7 +136,7 @@ function KindRows({
             <Icon aria-hidden="true" className="text-muted-foreground" />
             {pluralLabel(kind)}
             <CommandShortcut className="text-xs tabular-nums tracking-normal">
-              {count}
+              {count >= mentionsPerKind ? `${mentionsPerKind}+` : count}
             </CommandShortcut>
           </CommandItem>
         )

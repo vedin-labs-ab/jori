@@ -45,7 +45,40 @@ export function useComposerEditor(args: ComposerEditorArgs) {
   )
   const refs = useComposerRefs(args, catalog)
   const listboxId = useId()
+  const { editor, isEmpty, pending, setPending, setSuggestion, suggestion } =
+    useComposerInstance(refs)
+
+  useLatestRefs(refs, args, catalog, editor, suggestion)
+  useAutocompleteA11y({ editor, listboxId, suggestion })
+  useResourceSearch(args.sources, suggestion)
+  useEffect(() => {
+    editor?.setEditable(!args.disabled)
+  }, [args.disabled, editor])
+
+  return {
+    canSend: args.open && !isEmpty && !pending,
+    editor,
+    insertMention: (item: MentionSuggestion) =>
+      insertMention(editor, refs, item),
+    isEmpty,
+    listboxId,
+    /** A send the host is still answering; the draft waits in the field. */
+    pending,
+    selectSuggestion: (item: MentionSuggestion) =>
+      selectSuggestion(editor, refs, suggestion, item, setSuggestion),
+    send: () => sendDraft(editor, refs, setPending),
+    setActiveSuggestionIndex: (activeIndex: number) =>
+      updateSuggestionIndex(activeIndex, setSuggestion),
+    suggestion,
+  }
+}
+
+/** The editor, made once, and the state its handlers write: whether the
+ *  field is empty, whether a send is on its way, and the listbox under
+ *  the caret. */
+function useComposerInstance(refs: ComposerRefs) {
   const [isEmpty, setIsEmpty] = useState(true)
+  const [pending, setPending] = useState(false)
   const [suggestion, setSuggestion] = useState<ComposerSuggestionState | null>(
     null
   )
@@ -64,29 +97,21 @@ export function useComposerEditor(args: ComposerEditorArgs) {
     [refs]
   )
   const [options] = useState(() =>
-    createEditorOptions({ refs, setIsEmpty, setSuggestion, updateSuggestion })
+    createEditorOptions({
+      refs,
+      setIsEmpty,
+      setPending,
+      setSuggestion,
+      updateSuggestion,
+    })
   )
-  const editor = useEditor(options)
-
-  useLatestRefs(refs, args, catalog, editor, suggestion)
-  useAutocompleteA11y({ editor, listboxId, suggestion })
-  useResourceSearch(args.sources, suggestion)
-  useEffect(() => {
-    editor?.setEditable(!args.disabled)
-  }, [args.disabled, editor])
 
   return {
-    canSend: args.open && !isEmpty,
-    editor,
-    insertMention: (item: MentionSuggestion) =>
-      insertMention(editor, refs, item),
+    editor: useEditor(options),
     isEmpty,
-    listboxId,
-    selectSuggestion: (item: MentionSuggestion) =>
-      selectSuggestion(editor, refs, suggestion, item, setSuggestion),
-    send: () => sendDraft(editor, refs),
-    setActiveSuggestionIndex: (activeIndex: number) =>
-      updateSuggestionIndex(activeIndex, setSuggestion),
+    pending,
+    setPending,
+    setSuggestion,
     suggestion,
   }
 }
@@ -105,6 +130,7 @@ function useComposerRefs(
     onUnmention: { current: args.onUnmention },
     open: { current: args.open },
     resolve: { current: args.resolve },
+    sending: false,
     sources: { current: args.sources },
     suggestion: { current: null },
   }))
@@ -168,11 +194,13 @@ function resolveMention(refs: ComposerRefs): ResolveReference {
 function createEditorOptions({
   refs,
   setIsEmpty,
+  setPending,
   setSuggestion,
   updateSuggestion,
 }: {
   refs: ComposerRefs
   setIsEmpty: (isEmpty: boolean) => void
+  setPending: (pending: boolean) => void
   setSuggestion: SetComposerSuggestion
   updateSuggestion: (editor: Editor) => void
 }): Parameters<typeof useEditor>[0] {
@@ -180,7 +208,6 @@ function createEditorOptions({
     editorProps: {
       attributes: {
         "aria-autocomplete": "list",
-        "aria-expanded": "false",
         "aria-label": "Message",
         "aria-multiline": "true",
         class: contentClassName,
@@ -188,7 +215,7 @@ function createEditorOptions({
         role: "textbox",
       },
       handleKeyDown: (_view, event) =>
-        handleComposerKey({ event, refs, setSuggestion }),
+        handleComposerKey({ event, refs, setPending, setSuggestion }),
       handlePaste: (view, event) =>
         insertPastedText(view, event, refs.catalog.current),
       handleTextInput: (view, from, to, text) =>

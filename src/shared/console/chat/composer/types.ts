@@ -26,7 +26,9 @@ export type ComposerEditorArgs = {
   /** Takes each resource as its chip leaves the text, by deletion; a
    *  message sent takes its chips with it without a word. */
   onUnmention: ((target: MessageContext) => void) | undefined
-  onSend: (text: string, references: MessageContext[]) => void
+  /** Takes the message; answering with a promise holds the draft in the
+   *  field until it settles. */
+  onSend: (text: string, references: MessageContext[]) => unknown
   /** Whether a message may leave now. */
   open: boolean
   resolve: ResolveReference | undefined
@@ -44,6 +46,8 @@ export type ComposerRefs = {
   /** The resources the text holds now, by `kind:id`, so a deletion is
    *  seen for the chip it took. */
   mentioned: Map<string, MessageContext>
+  /** A send the host is still answering, so a second Enter waits. */
+  sending: boolean
   onMention: MutableRefObject<ComposerEditorArgs["onMention"]>
   onUnmention: MutableRefObject<ComposerEditorArgs["onUnmention"]>
   onSend: MutableRefObject<ComposerEditorArgs["onSend"]>

@@ -16,6 +16,7 @@ export function ChoiceChips({
       {options.map((option) => (
         <li key={choiceValue(option)}>
           <Suggestion
+            className="pointer-coarse:h-9"
             onClick={() => onChoose([choiceValue(option)], option.label)}
             suggestion={option.label}
           />

@@ -2,8 +2,10 @@ import { type Editor } from "@tiptap/react"
 import { useEffect } from "react"
 import { type SuggestionState } from "./state"
 
-/** Keeps the editor's combobox attributes in step with the listbox: what
- *  it controls, whether it is expanded, and which option is active. */
+/** Keeps the editor's autocomplete attributes in step with the listbox:
+ *  what it controls and which option is active. The field is a textbox,
+ *  not a combobox, so it says nothing of being expanded; the listbox's
+ *  presence says that. */
 export function useAutocompleteA11y({
   editor,
   listboxId,
@@ -23,7 +25,6 @@ export function useAutocompleteA11y({
     if (suggestion === null) {
       element.removeAttribute("aria-activedescendant")
       element.removeAttribute("aria-controls")
-      element.setAttribute("aria-expanded", "false")
       return
     }
 
@@ -36,6 +37,5 @@ export function useAutocompleteA11y({
       )
     }
     element.setAttribute("aria-controls", listboxId)
-    element.setAttribute("aria-expanded", "true")
   }, [editor, listboxId, suggestion])
 }

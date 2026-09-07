@@ -1,5 +1,8 @@
 import { v } from "convex/values"
-import { type MessageContext } from "../../contracts/replies/answers"
+import {
+  type MessageContext,
+  mentionsPerKind,
+} from "../../contracts/replies/answers"
 import { type ReferenceKind } from "../../contracts/replies/parts"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
@@ -19,8 +22,6 @@ import { createSight, type Sight } from "../visibility/sight"
 // predicate its own page uses, so the picker never offers what a
 // reference would then refuse to open.
 
-/** How many of a kind the picker holds; the search narrows within. */
-const perKind = 25
 /** How many rows a kind is read from before the search and the sight
  *  narrow them. */
 const scanLimit = 200
@@ -95,7 +96,7 @@ async function listCollections(
 ) {
   const args = {
     organizationId: viewer.sight.organizationId,
-    limit: perKind,
+    limit: mentionsPerKind,
     personId: viewer.personId,
     query: search,
   }
@@ -186,5 +187,5 @@ function named<Row extends { _id: string }>(
   return rows
     .map((row) => ({ kind, id: row._id, name: nameOf(row) }))
     .filter((resource) => resource.name.toLowerCase().includes(search))
-    .slice(0, perKind)
+    .slice(0, mentionsPerKind)
 }

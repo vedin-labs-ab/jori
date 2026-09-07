@@ -55,20 +55,19 @@ function ChatHomeContent({
   const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
   const { placeholder, suggestions } = useHomeSuggestions()
   // A blocked budget still opens the conversation with the message in it,
-  // so the console moves there either way; only a failure stays.
+  // so the console moves there either way; a failure rejects, and the
+  // composer keeps the draft while the toast says why.
   const start = (text: string, references: MessageContext[] = []) =>
-    void send({
+    send({
       text,
       model: selection,
       ...(references.length === 0 ? {} : { references }),
       ...(reference.context === undefined
         ? {}
         : { context: reference.context }),
-    }).then((result) => {
-      if (result !== undefined) {
-        navigate(conversationDestination(result.conversationId))
-      }
-    })
+    }).then((result) =>
+      navigate(conversationDestination(result.conversationId))
+    )
 
   return (
     <ChatHome
@@ -88,7 +87,7 @@ function ChatHomeContent({
       }
       now={now}
       onSuggestion={start}
-      recent={recent ?? []}
+      recent={recent}
       suggestions={suggestions}
     />
   )

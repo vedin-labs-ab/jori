@@ -1,10 +1,10 @@
 import { Check, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Dock, DockDivider } from "../../dock"
 import { type PanePreference } from "./tabs"
 
@@ -14,7 +14,8 @@ const explanation =
 /** Said once per browser, the first time a reply opens the pane: what
  *  just happened, and the two ways to have it from here on. It floats
  *  over the foot of the thread the way a selection's bar floats over a
- *  list, clear of the composer, and leaves with the answer. */
+ *  list, clear of the composer, and leaves with the answer. The why is
+ *  behind the info mark, opened by a press so a touch can read it. */
 export function PaneHint({
   onChoose,
 }: {
@@ -22,23 +23,23 @@ export function PaneHint({
 }) {
   return (
     <Dock className="gap-1" label="Resources beside the chat">
-      <span className="flex items-center gap-1.5 whitespace-nowrap pr-2 pl-1 text-xs">
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <span className="flex min-w-0 items-center gap-1.5 pr-2 pl-1 text-xs">
+        <Popover>
+          <PopoverTrigger asChild>
             <Button
               aria-label="About resources opening beside the chat"
-              className="size-6 text-muted-foreground"
+              className="size-6 shrink-0 text-muted-foreground"
               size="icon-xs"
               type="button"
               variant="ghost"
             >
               <Info />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-72 text-pretty" side="top">
+          </PopoverTrigger>
+          <PopoverContent className="max-w-72 text-pretty" side="top">
             {explanation}
-          </TooltipContent>
-        </Tooltip>
+          </PopoverContent>
+        </Popover>
         New resources open beside your chat.
       </span>
       <DockDivider />

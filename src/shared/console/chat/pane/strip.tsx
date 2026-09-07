@@ -124,8 +124,11 @@ function PaneTabItem({
   )
   const Icon = presentation.icon
   const name = reference?.name ?? presentation.label
+  // A touch has no pointer to rest on the tab, so its controls stay
+  // shown, and larger.
   const revealed =
-    "opacity-0 group-focus-within/tab:opacity-100 group-hover/tab:opacity-100 focus-visible:opacity-100"
+    "opacity-0 group-focus-within/tab:opacity-100 group-hover/tab:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+  const control = "text-muted-foreground pointer-coarse:size-7"
 
   return (
     <ContextMenu>
@@ -152,7 +155,7 @@ function PaneTabItem({
           <Button
             aria-label={tab.pinned ? `Unpin ${name}` : `Pin ${name}`}
             aria-pressed={tab.pinned}
-            className={cn("text-muted-foreground", !tab.pinned && revealed)}
+            className={cn(control, !tab.pinned && revealed)}
             onClick={() => onPin(tab.target)}
             size="icon-xs"
             type="button"
@@ -162,7 +165,7 @@ function PaneTabItem({
           </Button>
           <Button
             aria-label={`Close ${name}`}
-            className={cn("text-muted-foreground", revealed)}
+            className={cn(control, revealed)}
             onClick={() => onClose(tab.target)}
             size="icon-xs"
             type="button"

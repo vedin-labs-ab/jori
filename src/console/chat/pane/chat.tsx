@@ -8,7 +8,7 @@ import { useNow } from "@/shared/console/time"
 import { api } from "../../../../convex/_generated/api"
 import { useConversationMessages } from "../messages"
 import { useReferences } from "../references"
-import { useSendMessage } from "../send"
+import { sendAnswer, useSendMessage } from "../send"
 
 type LiveConversation = Extract<
   FunctionReturnType<typeof api.conversations.console.live>,
@@ -80,7 +80,7 @@ function PaneTurns({
           messages: page.messages,
           now,
           onChoose: (messageId, answers, text) =>
-            void send({
+            sendAnswer(send, {
               conversationId,
               text,
               answer: {

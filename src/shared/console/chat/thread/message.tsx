@@ -115,7 +115,8 @@ export function JoriMessage({
 /** Under a finished message, what can be done with it: a copy of its
  *  text, and when it was sent. The row keeps its place but shows only
  *  while the pointer is over the message or the focus is in the row, so
- *  a thread reads as words alone until one is pointed at. Jori's parts
+ *  a thread reads as words alone until one is pointed at; a finger has
+ *  no pointer to rest, so under one the row stays shown. Jori's parts
  *  are cards, so the copy takes the text and nothing else. */
 export function MessageActions({
   message,
@@ -125,13 +126,13 @@ export function MessageActions({
   now: number
 }) {
   return (
-    <div className="-mx-1 flex items-center gap-1 text-muted-foreground text-xs opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/message:opacity-100">
+    <div className="-mx-1 flex items-center gap-1 text-muted-foreground text-xs opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/message:opacity-100 pointer-coarse:opacity-100">
       <CopyButton label="message" value={message.text} />
       {/* The time is a button only so a keyboard reaches the moment it
           stands for; there is nothing to press. */}
       <Tooltip>
         <TooltipTrigger
-          className="cursor-default rounded-sm px-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="cursor-default rounded-sm px-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
           type="button"
         >
           <time dateTime={new Date(message.createdAt).toISOString()}>

@@ -10,9 +10,9 @@ import { type ReferenceTarget, type ResolveReference } from "./types"
 
 /** One of a chat's mentions as a chip, in the composer and in the thread
  *  alike: a resource by the name the host resolves it to, or as its kind
- *  when the host cannot; a skill, a tool, or an integration by name. In
- *  the composer the chip can be removed; in a message a resource opens
- *  beside the chat. */
+ *  when the host cannot, struck through and said to be gone; a skill, a
+ *  tool, or an integration by name. In the composer the chip can be
+ *  removed; in a message a resource opens beside the chat. */
 export function ChatMentionChip({
   id,
   kind,
@@ -77,7 +77,7 @@ function ResourceMentionChip({
 
   return (
     <MentionChip
-      className={cn(unavailable && "text-muted-foreground")}
+      className={cn(unavailable && "text-muted-foreground line-through")}
       data-mention-target={`${target.kind}:${target.id}`}
       icon={
         <Icon
@@ -96,6 +96,11 @@ function ResourceMentionChip({
       onRemove={onRemove}
       selected={selected}
       title={unavailable ? "No longer available" : presentation.label}
+      trailing={
+        unavailable ? (
+          <span className="sr-only">(no longer available)</span>
+        ) : undefined
+      }
     />
   )
 }

@@ -87,7 +87,7 @@ function MentionName({
 
   return (
     <button
-      className="flex cursor-pointer items-center gap-1 self-stretch px-1 font-medium outline-none transition-colors hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring/30"
+      className="flex cursor-pointer items-center gap-1 self-stretch px-1 font-medium outline-none transition-colors hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring"
       onClick={onOpen}
       type="button"
     >
@@ -115,7 +115,7 @@ export function MentionRemoveButton({
     >
       <button
         aria-label={`Remove ${label}`}
-        className="group/x grid w-6 place-items-center self-stretch outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30 lg:w-4"
+        className="group/x grid w-6 place-items-center self-stretch outline-none focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring lg:w-4"
         onClick={(event) => {
           event.preventDefault()
           event.stopPropagation()
@@ -160,7 +160,7 @@ export function MentionActionButton({
     <button
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex items-center gap-1 self-stretch px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring/30",
+        "inline-flex items-center gap-1 self-stretch px-1 font-medium opacity-70 outline-none transition-opacity duration-150 ease-out hover:opacity-100 focus-visible:relative focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring",
         className
       )}
       onClick={(event) => {

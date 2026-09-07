@@ -21,12 +21,10 @@ const calloutClassName = "overflow-hidden rounded-lg border bg-background"
  *  the subscriptions end with it. */
 export function ChatProgress({
   now,
-  onStop,
   organizationId,
   run,
 }: {
   now: number
-  onStop: () => void
   organizationId: string
   run: ChatRun
 }) {
@@ -39,10 +37,7 @@ export function ChatProgress({
 
   return (
     <>
-      <ChatWorking
-        onStop={onStop}
-        progress={<Log activity={activity} now={now} />}
-      />
+      <ChatWorking progress={<Log activity={activity} now={now} />} />
       {summary === null || summary === undefined ? null : (
         <>
           {summary.approvals.length === 0 ? null : (

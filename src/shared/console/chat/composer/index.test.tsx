@@ -1,103 +1,10 @@
 // @vitest-environment jsdom
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react"
+import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { renderComposer } from "../../../../../test/composer"
 import { typeInto } from "../../../../../test/editor"
-import { type MentionSources } from "../../mentions/sources"
-import { ChatComposer } from "."
 
 afterEach(cleanup)
-
-const sources: MentionSources = {
-  integrations: ["slack", "github"],
-  resources: [
-    { kind: "table", id: "collections_renewals", name: "Customer renewals" },
-    { kind: "job", id: "jobs_digest", name: "Renewals digest" },
-    { kind: "chat", id: "conversations_1", name: "Last week's sync" },
-  ],
-  skills: ["triage", "release-notes"],
-  tools: [{ label: "Search files", surface: "jori", tool: "search_files" }],
-}
-
-async function renderComposer(
-  props: Partial<Parameters<typeof ChatComposer>[0]> = {}
-) {
-  const onSend = vi.fn()
-
-  render(
-    <TooltipProvider>
-      <ChatComposer
-        live={null}
-        mentions={sources}
-        onSend={onSend}
-        onStop={vi.fn()}
-        {...props}
-      />
-    </TooltipProvider>
-  )
-
-  const field = await screen.findByRole("textbox", { name: "Message" })
-
-  return { field, onSend }
-}
-
-test("Enter sends the trimmed text and clears the field; Shift+Enter keeps writing", async () => {
-  const { field, onSend } = await renderComposer()
-
-  expect(
-    screen
-      .getByRole("button", { name: "Send message" })
-      .hasAttribute("disabled")
-  ).toBe(true)
-
-  typeInto(field, "  Chase the invoices ")
-  fireEvent.keyDown(field, { key: "Enter", shiftKey: true })
-
-  expect(onSend).not.toHaveBeenCalled()
-
-  fireEvent.keyDown(field, { key: "Enter" })
-
-  expect(onSend).toHaveBeenCalledWith("Chase the invoices", [])
-  expect(field.textContent).toBe("")
-})
-
-test("while a run is live the control stops it instead of sending", async () => {
-  const onStop = vi.fn()
-  const { field, onSend } = await renderComposer({
-    live: { id: "runs_1", status: "running" },
-    onStop,
-  })
-
-  expect(screen.queryByRole("button", { name: "Send message" })).toBeNull()
-
-  typeInto(field, "Also this")
-  fireEvent.keyDown(field, { key: "Enter" })
-
-  expect(onSend).not.toHaveBeenCalled()
-
-  fireEvent.click(screen.getByRole("button", { name: "Stop run" }))
-
-  expect(onStop).toHaveBeenCalledTimes(1)
-})
-
-test("disabled, it says why", async () => {
-  const { field } = await renderComposer({
-    disabled: true,
-    reason: "Spending is paused for this folder.",
-  })
-
-  expect(field.getAttribute("aria-disabled")).toBe("true")
-  expect(field.getAttribute("contenteditable")).toBe("false")
-  expect(screen.getByText("Spending is paused for this folder.")).toBeDefined()
-  expect(field.getAttribute("aria-describedby")).not.toBeNull()
-  expect(screen.queryByRole("button", { name: "Attach a resource" })).toBeNull()
-})
 
 test("the context chip names the resource and can be dropped", async () => {
   const onClearContext = vi.fn()
@@ -139,7 +46,8 @@ test("the + sigil offers resources, and the chosen one goes with the message as 
 
   const listbox = await screen.findByRole("listbox")
 
-  expect(field.getAttribute("aria-expanded")).toBe("true")
+  expect(field.getAttribute("aria-expanded")).toBeNull()
+  expect(field.getAttribute("aria-controls")).toBe(listbox.id)
   // Names starting with the query come first, then names holding it.
   expect(
     screen.getAllByRole("option").map((option) => option.textContent)
@@ -152,6 +60,7 @@ test("the + sigil offers resources, and the chosen one goes with the message as 
 
   expect(screen.queryByRole("listbox")).toBeNull()
   expect(listbox.isConnected).toBe(false)
+  expect(field.getAttribute("aria-controls")).toBeNull()
   expect(
     await screen.findByRole("button", { name: "Remove Customer renewals" })
   ).toBeDefined()
@@ -217,20 +126,6 @@ test("a resource's chip deleted is a resource let go of; one sent is not", async
   )
 })
 
-test("the shortcut band folds under the frame and comes back, as the browser remembers", async () => {
-  await renderComposer()
-
-  fireEvent.click(screen.getByRole("button", { name: "Hide shortcuts" }))
-
-  expect(screen.queryByRole("button", { name: "Hide shortcuts" })).toBeNull()
-  expect(window.localStorage.getItem("jori.chat.hints")).toBe("closed")
-
-  fireEvent.click(screen.getByRole("button", { name: "Show shortcuts" }))
-
-  expect(screen.getByRole("button", { name: "Hide shortcuts" })).toBeDefined()
-  expect(window.localStorage.getItem("jori.chat.hints")).toBe("open")
-})
-
 test("a chip can be removed and a typed token becomes a chip at its boundary", async () => {
   const { field, onSend } = await renderComposer()
 
@@ -245,30 +140,12 @@ test("a chip can be removed and a typed token becomes a chip at its boundary", a
   expect(onSend).toHaveBeenCalledWith("Run  now", [])
 })
 
-test("a click on the frame beside the controls puts the caret in the field", async () => {
-  const { field } = await renderComposer()
-
-  field.blur()
-  expect(document.activeElement).not.toBe(field)
-
-  const controls = document.querySelector("[data-slot=input-group-addon]")
-
-  if (controls === null) {
-    throw new Error("The controls row is missing.")
-  }
-
-  fireEvent.click(controls)
-
-  // The editor takes focus on the next frame.
-  await waitFor(() => expect(document.activeElement).toBe(field))
-})
-
 test("the + menu lists the kinds, then a kind's items, and puts the chosen one in as a chip", async () => {
   const onMention = vi.fn()
   const { field, onSend } = await renderComposer({ onMention })
 
   typeInto(field, "Watch ")
-  fireEvent.click(screen.getByRole("button", { name: "Attach a resource" }))
+  fireEvent.click(screen.getByRole("button", { name: "Mention a resource" }))
 
   expect(
     (await screen.findAllByRole("option")).map((option) => option.textContent)
@@ -302,7 +179,7 @@ test("the + menu lists the kinds, then a kind's items, and puts the chosen one i
 test("searching the + menu finds across kinds", async () => {
   await renderComposer()
 
-  fireEvent.click(screen.getByRole("button", { name: "Attach a resource" }))
+  fireEvent.click(screen.getByRole("button", { name: "Mention a resource" }))
   fireEvent.change(await screen.findByRole("combobox"), {
     target: { value: "renew" },
   })

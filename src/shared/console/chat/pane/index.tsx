@@ -5,7 +5,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
-import { useIsMobile } from "@/hooks/use-mobile"
 import { ConsoleEmptyState } from "../../list/empty"
 import {
   type MaterialBreadcrumb,
@@ -17,7 +16,7 @@ import { PaneHeader } from "./header"
 import { PaneHint } from "./hint"
 import { targetKey } from "./routes"
 import { PaneStrip, type PaneStripProps } from "./strip"
-import { type PanePreference } from "./tabs"
+import { type PanePreference, usePaneSheet } from "./tabs"
 
 /** The chat column keeps at least this much, in pixels. */
 const chatMinWidth = 384
@@ -40,8 +39,9 @@ export type ChatPaneProps = PaneStripProps & {
 
 /** The chat with a workspace beside it: the resources a conversation is
  *  about, open in tabs to the right of the thread with room for a table.
- *  Wide, the two share the width across a handle; below `md` the pane
- *  covers the chat as a sheet, and Escape puts it away. */
+ *  Wide, the two share the width across a handle; below `lg` the pane
+ *  covers the chat as a sheet, and Escape puts it away. The composer
+ *  keeps clear of a phone's home bar. */
 export function ChatPane({
   body,
   children,
@@ -50,7 +50,7 @@ export function ChatPane({
   open,
   ...strip
 }: ChatPaneProps) {
-  const isMobile = useIsMobile()
+  const isSheet = usePaneSheet()
   const closeRef = useRef<HTMLButtonElement>(null)
   const isShown = open && strip.tabs.length > 0
   const chat = (
@@ -59,12 +59,14 @@ export function ChatPane({
         {children}
         {onHint === undefined ? null : <PaneHint onChoose={onHint} />}
       </div>
-      <div className="pb-4">{composer}</div>
+      <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {composer}
+      </div>
     </>
   )
   const panel = <PanePanel body={body} closeRef={closeRef} {...strip} />
 
-  if (isMobile) {
+  if (isSheet) {
     return (
       <>
         {chat}

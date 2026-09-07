@@ -24,10 +24,12 @@ import {
 export function handleComposerKey({
   event,
   refs,
+  setPending,
   setSuggestion,
 }: {
   event: KeyboardEvent
   refs: ComposerRefs
+  setPending: (pending: boolean) => void
   setSuggestion: SetComposerSuggestion
 }) {
   const handled = handleSuggestionKey({
@@ -50,7 +52,7 @@ export function handleComposerKey({
 
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
     event.preventDefault()
-    sendDraft(refs.editor.current, refs)
+    sendDraft(refs.editor.current, refs, setPending)
     return true
   }
 
@@ -145,10 +147,17 @@ export function completeTypedMention({
 }
 
 /** The draft leaves as text with its tokens and the resources they
- *  name, and the field clears; nothing leaves while sending is closed or
- *  the draft is blank. */
-export function sendDraft(editor: Editor | null, refs: ComposerRefs) {
-  if (editor === null || !refs.open.current) {
+ *  name; nothing leaves while sending is closed or the draft is blank. A
+ *  host that answers with a promise keeps the draft in the field until
+ *  the message has landed, and the field clears on success alone: a send
+ *  that fails leaves the words where they were for another try, and the
+ *  host says why. */
+export function sendDraft(
+  editor: Editor | null,
+  refs: ComposerRefs,
+  setPending: (pending: boolean) => void
+) {
+  if (editor === null || !refs.open.current || refs.sending) {
     return
   }
 
@@ -158,8 +167,30 @@ export function sendDraft(editor: Editor | null, refs: ComposerRefs) {
     return
   }
 
-  // The chips leave with the message, not by deletion.
+  const result = refs.onSend.current(draft.text, draft.references)
+
+  if (!(result instanceof Promise)) {
+    clearDraft(editor, refs)
+
+    return
+  }
+
+  refs.sending = true
+  setPending(true)
+  result
+    .then(
+      () => clearDraft(editor, refs),
+      () => undefined
+    )
+    .finally(() => {
+      refs.sending = false
+      setPending(false)
+    })
+}
+
+/** The chips leave with the message, not by deletion, so the host hears
+ *  of no unmention. */
+function clearDraft(editor: Editor, refs: ComposerRefs) {
   refs.mentioned = new Map()
-  refs.onSend.current(draft.text, draft.references)
   editor.commands.clearContent(true)
 }

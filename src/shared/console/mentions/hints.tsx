@@ -4,10 +4,17 @@ import { type MentionKind, mentionSigils } from "./scan"
 export type SigilHint = { kind: MentionKind; label: string }
 
 /** The sigils an editor answers to, each as its key and what it reaches:
- *  `@ integrations · / skills · # tools`. Quiet, for the edge of a field. */
-export function SigilHints({ hints }: { hints: readonly SigilHint[] }) {
+ *  `@ integrations · / skills · # tools`. Quiet, for the edge of a field;
+ *  named by `id` for a control that shows and hides it. */
+export function SigilHints({
+  hints,
+  id,
+}: {
+  hints: readonly SigilHint[]
+  id?: string
+}) {
   return (
-    <span className="flex min-w-0 items-center gap-2">
+    <span className="flex min-w-0 items-center gap-2" id={id}>
       {hints.map((hint, index) => (
         <Fragment key={hint.kind}>
           {index === 0 ? null : <span aria-hidden="true">·</span>}
