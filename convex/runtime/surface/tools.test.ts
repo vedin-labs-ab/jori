@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { replyPartLimits } from "../../../contracts/replies/parts"
 import { toolFinalDescription } from "../../../contracts/runtime/tools"
 import { activeSurfaceToolReferenceSchemas, activeSurfaceTools } from "./tools"
 
@@ -42,7 +43,10 @@ test("a console reply carries text first, then references and choices", () => {
       text: { type: "string" },
       parts: {
         type: "array",
-        maxItems: 7,
+        maxItems:
+          replyPartLimits.references +
+          replyPartLimits.questions +
+          replyPartLimits.chips,
         items: {
           anyOf: [
             { properties: { kind: { const: "reference" } } },
