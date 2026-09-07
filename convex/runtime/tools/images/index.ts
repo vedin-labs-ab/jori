@@ -17,10 +17,13 @@ export async function generateImageFile(
   input: JsonObject
 ) {
   const request = normalizeGenerateImageInput(input)
-  // The OpenRouter client is the model step's weight; the act step only
-  // loads it when an image is actually asked for.
-  const { generateOpenRouterImage } = await import("./openrouter")
-  const generated = await generateOpenRouterImage(request.prompt)
+  const { generateVertexImage } = await import("./vertex")
+  const result = await generateVertexImage(request.prompt)
+  await runtime.platform.recordUsage(result.usage)
+  const generated = result.image
+  if (generated === null) {
+    throw new Error("Vertex did not return a generated image.")
+  }
   const name = imageFileName(request.save.name, generated.mimeType)
   const workspacePath = `${generatedImageDirectory}/${name}`
 
@@ -41,12 +44,12 @@ export async function generateImageFile(
   return {
     image: {
       ...file,
-      model: generated.model,
+      model: result.usage.model,
       path: workspacePath,
     },
     provider: {
-      name: "openrouter",
-      requestId: generated.requestId,
+      name: result.usage.provider,
+      requestId: result.usage.requestId,
     },
     status: "ok",
   }

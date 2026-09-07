@@ -153,3 +153,11 @@ export function formatUsd(micros: number): string {
     maximumFractionDigits: 2,
   })}`
 }
+/** Provider-priced work outside the main model turn. No customer content. */
+export type ProviderUsage = {
+  provider: string
+  requestId: string
+  model: string
+  micros: number
+  tokens: { input: number; output: number }
+}

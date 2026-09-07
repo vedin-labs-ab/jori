@@ -1,3 +1,4 @@
+import { type ProviderUsage } from "../../contracts/billing"
 import { type ToolSurface } from "../../contracts/integrations"
 import { type JsonObject, type JsonValue } from "../../contracts/json"
 import { type ReplyPart } from "../../contracts/replies/parts"
@@ -6,11 +7,16 @@ import {
   type RuntimeContext,
 } from "../../contracts/runtime/context"
 import { type RuntimeEventRecord } from "../../contracts/runtime/events"
+import { type UploadedFile } from "../../contracts/runtime/files"
 import { type RunHandoffs } from "../../contracts/runtime/handoffs"
 import { type RuntimeId } from "../../contracts/runtime/ids"
 import { type AgentRunStatus } from "../../contracts/runtime/runs"
 import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
-import { type WaiterCondition } from "../../contracts/runtime/waiters"
+import {
+  type ParkedCommand,
+  type ParkedWaiter,
+  type WaiterCondition,
+} from "../../contracts/runtime/waiters"
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
 import { type TranscriptMessage } from "../runs/execution/transcript/schema"
@@ -28,30 +34,10 @@ import {
 } from "./tools/broker"
 import { uploadRunFile } from "./tools/files"
 
-export type UploadedFile = {
-  fileId: RuntimeId<"files">
-  mimeType: string
-  name: string
-  size: number
-  url: string | null
-}
-
 export type GitHubCloneCredentials = {
   remoteUrl: string
   token: string
   username: string
-}
-
-export type ParkedWaiter = {
-  eventId: string
-  waiterId: RuntimeId<"waiters">
-}
-
-/** What a waiter remembers of the command it is parked on, so the tool can
- *  collect that command's output after the wake. */
-export type ParkedCommand = {
-  condition?: WaiterCondition
-  token?: string
 }
 
 export type TranscriptTail = {
@@ -128,6 +114,7 @@ export type RuntimePlatform = {
   readAgentRuns(args: AgentRunsArgs): Promise<AgentRunStatus[]>
   readWaiter(args: WaiterRef): Promise<ParkedCommand | null>
   recordEvent(args: RuntimeEventRecord): Promise<void>
+  recordUsage(args: ProviderUsage): Promise<void>
   requestApproval(args: ApprovalArgs): Promise<unknown>
   resolveWaiter(args: WaiterRef): Promise<void>
   retarget(args: { target: string }): Promise<void>
@@ -250,6 +237,13 @@ export class ActionPlatform implements RuntimePlatform {
 
   recordEvent = async (args: RuntimeEventRecord) => {
     await this.mutation(internal.runs.execution.traces.records.record, args)
+  }
+
+  recordUsage = async (args: ProviderUsage) => {
+    await this.mutation(internal.billing.usage.records.record, {
+      ...args,
+      runId: this.runId,
+    })
   }
 
   requestApproval = (args: ApprovalArgs) => requestRunApproval(this.ctx, args)
