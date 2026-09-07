@@ -18,9 +18,9 @@ customer data was used in these probes.
 | PostHog | Separate EU Cloud project `233772`, named `jori-production-eu`, and US Cloud project `530551`, named `jori-production-us`. IP discard enabled in both. Autocapture, web vitals, dead clicks and heatmaps disabled and read back in both; US session recording, console capture and network capture also disabled and read back. Synthetic regional events appeared only in their matching projects. | Verify actual frontend request destinations and browser collection behavior |
 | Exa | Separate EU/US search keys installed only in matching Convex deployments; both returned 200 to a synthetic search. Development retains its own key. | Deployed tool test; global processing remains an accepted exception |
 | E2B | Separate development, production EU and production US projects and keys installed. All three templates built; matching keys created sandboxes, executed a harmless command and deleted them. Both EU/US cross-project template access attempts were denied. Account only offers `us-west-1`. | Verify deployed Jori sandbox creation, execution and cleanup; US execution remains a documented exception |
-| Google | Separate regional OAuth clients, secrets and frontend/integration callbacks configured. Consent-screen scopes still contain older broad Calendar, Drive and `gmail.modify` scopes, rather than the current code's Gmail and Calendar scopes. Audience inspection confirmed External/Testing status, restricted to test users. | Align consent-screen scopes with `gmail.readonly`, `gmail.compose`, `gmail.send`, `calendar.events` and `calendar.calendarlist.readonly`; verify API enablement and live sign-in/connections; complete publishing and verification before general availability |
+| Google | Separate regional OAuth clients, secrets and frontend/integration callbacks configured. Project `jori-503709` consent scopes saved and read back to match current code; broad Drive, Calendar and `gmail.modify` scopes removed. Gmail and Calendar APIs confirmed enabled. Audience remains External/Testing, restricted to test users. | Live sign-in and connection tests; publishing and verification before general availability |
 | Microsoft | Separate organizational-account registrations and 180-day secrets installed. Three callbacks per region configured. Both have delegated User.Read, offline_access, Mail.ReadWrite, Mail.Send and Calendars.ReadWrite; no tenant-wide consent granted. | Live sign-in and connections, publisher verification; rotate secrets before 6 March 2027 |
-| Stripe | Billing code rejects cross-region associations and unpaid checkout fulfillment. | Legal seller decision, correct Swedish merchant accounts, private activation and confirmed tax registrations, separate keys/products/prices/webhooks, live billing verification |
+| Stripe | User confirmed Vedin Labs AB, Sweden, as seller for both Stripe accounts. Billing code rejects cross-region associations and unpaid checkout fulfillment. Subscription checkout already enables automatic tax; manual and automatic usage top-ups do not calculate tax. Runtime REST requests do not pin `Stripe-Version`. No Stripe objects or keys changed in this review. | User completes private activation, US-labelled account merchant-country correction and tax setup. Confirm tax classification and top-up treatment, align/test API versions, configure separate keys/products/prices/webhooks, and verify billing before live charging |
 | GitHub, Slack, Linear, Notion | Regional session-bound OAuth callback code prepared. Shared OAuth registrations are permitted when direct regional callbacks and event routing preserve token/data isolation. Separate apps are the operational choice for webhook routing and permission isolation, not a universal residency requirement. Notion's documented subscription controls do not establish workspace-specific delivery filtering. | Create/configure regional apps and connections, credentials and events, then test actual connections in both regions. Use separate Notion connections unless provider confirmation establishes suitable filtering |
 
 ## Task preview evidence
@@ -74,6 +74,26 @@ Both production guard inventories are missing `STRIPE_SECRET_KEY`,
 presence alone does not prove that an integration works. Development is
 missing `BIRD_API_KEY` and `BIRD_WORKSPACE_ID`.
 
+Google project `jori-503709` now lists exactly `openid`, `userinfo.email`,
+`userinfo.profile`, `gmail.readonly`, `gmail.compose`, `gmail.send`,
+`calendar.events` and `calendar.calendarlist.readonly` in its saved consent
+configuration. Gmail API `gmail.googleapis.com` and Calendar API
+`calendar-json.googleapis.com` were already enabled and were verified by
+readback. This does not establish completed OAuth connections or approval
+for users outside the consent screen's test-user list.
+
+The Stripe seller decision is resolved. Both accounts must represent Vedin
+Labs AB in Sweden; the US instance label is not a US merchant-country choice.
+Private activation, merchant-country correction and tax setup remain deferred
+to the user. The user or their adviser must select the applicable tax
+classification and confirm registrations; no tax code has been assumed.
+The existing subscription checkout uses `automatic_tax`, so those registrations
+must be verified. Manual and automatic usage top-ups currently do not calculate
+tax, and their treatment must be resolved before live charging. Runtime Stripe
+REST requests omit `Stripe-Version`; account and webhook API versions must be
+aligned and tested before launch. These are billing readiness findings, not a
+completed billing rewrite or changes to Stripe objects or keys.
+
 For Notion, the documented subscription controls specify a connection, webhook
 URL and event types. Event payloads include `workspace_id` and
 `subscription_id`, but those fields do not establish pre-delivery filtering.
@@ -123,5 +143,6 @@ The supported target is scoped region-specific residency, not universal
 regional processing. Vercel and PostHog edge/platform processing, Stripe,
 Exa, current E2B execution, recipient mail systems and customer-connected
 providers have the limitations described in [residency](residency.md).
-No legal-seller changes, tax registrations, financial account activation or
-global image-inference exception have been authorized by a resolved decision.
+The seller is confirmed as Vedin Labs AB, Sweden, for both Stripe accounts.
+Private activation, merchant-country correction and tax setup remain with the
+user. No global image-inference exception has been authorized.
