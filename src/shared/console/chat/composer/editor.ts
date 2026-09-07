@@ -159,7 +159,7 @@ function useLatestRefs(
 }
 
 /** Tells the host what is being looked for under `+`, so it can narrow
- *  the resources it offers. */
+ *  the resources it offers, and that nothing is once the listbox closes. */
 function useResourceSearch(
   sources: MentionSources,
   suggestion: ComposerSuggestionState | null
@@ -169,9 +169,7 @@ function useResourceSearch(
   const { onSearch } = sources
 
   useEffect(() => {
-    if (query !== null) {
-      onSearch?.(query)
-    }
+    onSearch?.(query)
   }, [onSearch, query])
 }
 

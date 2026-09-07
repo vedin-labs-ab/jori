@@ -62,8 +62,9 @@ export function AttachMenu({
         setQuery("")
         setKind(null)
         // The host narrowed its lists to whatever was last looked for
-        // under `+`; the menu opens on everything.
-        sources.onSearch?.("")
+        // under `+`; the menu opens on everything, and closing it ends
+        // the search.
+        sources.onSearch?.(next ? "" : null)
       }}
       open={open}
     >

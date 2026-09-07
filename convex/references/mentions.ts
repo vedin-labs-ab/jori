@@ -23,8 +23,10 @@ import { createSight, type Sight } from "../visibility/sight"
 // reference would then refuse to open.
 
 /** How many rows a kind is read from before the search and the sight
- *  narrow them. */
+ *  narrow them: a search scans back through the organization's rows, a
+ *  browse of everything reads the newest few and no further. */
 const scanLimit = 200
+const browseLimit = mentionsPerKind * 2
 
 export type MentionResource = MessageContext & { name: string }
 
@@ -78,7 +80,7 @@ async function listChats(ctx: QueryCtx, viewer: Viewer, search: string) {
         .eq("createdBy", viewer.personId)
     )
     .order("desc")
-    .take(scanLimit)
+    .take(readLimit(search))
 
   return named(
     "chat",
@@ -115,7 +117,7 @@ async function listFiles(ctx: QueryCtx, viewer: Viewer, search: string) {
       index.eq("organizationId", viewer.sight.organizationId)
     )
     .order("desc")
-    .take(scanLimit)
+    .take(readLimit(search))
 
   return named(
     "file",
@@ -129,7 +131,7 @@ async function listJobs(ctx: QueryCtx, viewer: Viewer, search: string) {
   const jobs = await searchJobs(ctx, {
     organizationId: viewer.sight.organizationId,
     includeCompleted: true,
-    limit: scanLimit,
+    limit: readLimit(search),
     query: search,
   })
   const visible: Doc<"jobs">[] = []
@@ -159,6 +161,8 @@ async function listFolders(ctx: QueryCtx, viewer: Viewer, search: string) {
   return named("folder", visible, (folder) => folder.name, search)
 }
 
+/** Runs are the heaviest rows: a browse reads the newest page of them
+ *  and no more, whatever the sight then keeps. */
 async function listRuns(ctx: QueryCtx, viewer: Viewer, search: string) {
   const runs = await ctx.db
     .query("runs")
@@ -166,7 +170,7 @@ async function listRuns(ctx: QueryCtx, viewer: Viewer, search: string) {
       index.eq("organizationId", viewer.sight.organizationId)
     )
     .order("desc")
-    .take(scanLimit)
+    .take(search === "" ? mentionsPerKind : scanLimit)
 
   return named(
     "run",
@@ -174,6 +178,10 @@ async function listRuns(ctx: QueryCtx, viewer: Viewer, search: string) {
     (run) => run.snapshot.title,
     search
   )
+}
+
+function readLimit(search: string) {
+  return search === "" ? browseLimit : scanLimit
 }
 
 /** The rows of a kind whose name holds the search, as the picker lists
