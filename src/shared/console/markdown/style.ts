@@ -9,7 +9,7 @@ export const markdownProseClassName = [
   "[&_p]:my-1 [&_p]:min-h-6 [&_p]:max-w-full [&_p]:break-words [&_p]:leading-6 [&_p]:[overflow-wrap:anywhere]",
   "[&_h1]:mt-3 [&_h1]:mb-1 [&_h1]:font-semibold [&_h1]:text-base [&_h1]:leading-6",
   "[&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:font-semibold [&_h2]:text-sm [&_h2]:leading-6",
-  "[&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:font-semibold [&_h3]:text-xs [&_h3]:leading-6",
+  "[&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:font-medium [&_h3]:text-sm [&_h3]:leading-6",
   "[&_h4]:mt-2 [&_h4]:font-medium [&_h5]:mt-2 [&_h5]:font-medium [&_h6]:mt-2 [&_h6]:font-medium",
   "[&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:pl-0.5",
   "[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground",

@@ -1,81 +1,136 @@
-import { type ReplyChoices } from "@contracts/replies/parts"
+import { type PartAnswer } from "@contracts/replies/answers"
+import { type ReplyQuestion } from "@contracts/replies/parts"
 import { Check } from "lucide-react"
+import { type FormEvent } from "react"
 import {
   Questionnaire,
   QuestionnaireActions,
   QuestionnaireChoice,
+  QuestionnaireChoiceDescription,
   QuestionnaireChoices,
+  QuestionnaireDescription,
   QuestionnaireError,
   QuestionnaireInput,
   QuestionnaireItem,
+  QuestionnaireNext,
+  QuestionnairePrevious,
+  QuestionnaireProgress,
+  QuestionnaireSkip,
   QuestionnaireSubmit,
   QuestionnaireTitle,
 } from "@/components/ui/questionnaire"
 import { cn } from "@/lib/utils"
-import { choiceValue, composeAnswer } from "./answers"
+import { answerLabels, choiceValue, composeAnswers } from "./answers"
 
-const cardClassName = "rounded-lg border bg-background p-3"
+/** A question of a reply's, with the index of its part in the reply. */
+export type BundleQuestion = { index: number; part: ReplyQuestion }
 
-/** A question Jori asked: its options to pick one or several of, and,
- *  when the reply allows, a line to answer in other words. Answering
- *  sends the answer as the next message and the card shows what was
- *  chosen from then on. */
-export function QuestionCard({
-  answered,
+/** The questions Jori asked in one reply, taken together: a questionnaire
+ *  that walks them in order, each answered by a click or its letter, and
+ *  sends every answer at once as the next message. Answered, it shows
+ *  each question with what was chosen and stays that way. */
+export function QuestionBundle({
+  answers,
   onAnswer,
-  part,
+  questions,
 }: {
-  /** The values already sent for this part, once it has been answered. */
-  answered: string[] | undefined
-  onAnswer: (values: string[], text: string) => void
-  part: ReplyChoices
+  /** The values each part received, once the bundle has been answered. */
+  answers: Map<number, string[]> | undefined
+  onAnswer: (answers: PartAnswer[], text: string) => void
+  questions: BundleQuestion[]
 }) {
-  if (answered !== undefined) {
-    return <AnsweredQuestion part={part} values={answered} />
+  if (answers !== undefined) {
+    return (
+      <div className="grid gap-4">
+        {questions.map(({ index, part }) => (
+          <AnsweredQuestion
+            key={index}
+            part={part}
+            values={answers.get(index) ?? []}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const data = new FormData(event.currentTarget)
+    const answered = questions.map(({ index, part }, position) => ({
+      index,
+      part,
+      values: readValues(data.getAll(itemName(position))),
+    }))
+
+    onAnswer(
+      answered.map(({ index, values }) => ({ part: index, values })),
+      composeAnswers(answered)
+    )
   }
 
   return (
     <Questionnaire
-      className={cardClassName}
-      onSubmit={(event) => {
-        event.preventDefault()
-
-        const values = new FormData(event.currentTarget)
-          .getAll("answer")
-          .map((value) => String(value).trim())
-          .filter((value) => value !== "")
-
-        onAnswer(values, composeAnswer(part, values))
-      }}
+      items={questions.map(({ part }, position) => ({
+        name: itemName(position),
+        required: isRequired(part),
+        choices: part.options.map((option) => ({ value: choiceValue(option) })),
+      }))}
+      onSubmit={submit}
+      shortcuts="letters"
     >
-      <QuestionnaireItem
-        multiple={part.select === "many"}
-        name="answer"
-        required
-      >
-        <QuestionnaireTitle>{part.prompt}</QuestionnaireTitle>
-        <QuestionnaireChoices>
-          {part.options.map((option) => (
-            <QuestionnaireChoice
-              key={choiceValue(option)}
-              value={choiceValue(option)}
-            >
-              {option.label}
-            </QuestionnaireChoice>
-          ))}
-        </QuestionnaireChoices>
+      {questions.length > 1 ? <QuestionnaireProgress /> : null}
+      {questions.map(({ part }, position) => (
+        <QuestionItem
+          key={itemName(position)}
+          name={itemName(position)}
+          part={part}
+        />
+      ))}
+      <QuestionnaireActions>
+        <QuestionnairePrevious />
+        <QuestionnaireSkip />
+        <QuestionnaireNext />
+        <QuestionnaireSubmit>Answer</QuestionnaireSubmit>
+      </QuestionnaireActions>
+    </Questionnaire>
+  )
+}
+
+function QuestionItem({ name, part }: { name: string; part: ReplyQuestion }) {
+  return (
+    <QuestionnaireItem
+      multiple={part.select === "many"}
+      name={name}
+      required={isRequired(part)}
+    >
+      <QuestionnaireTitle>{part.prompt}</QuestionnaireTitle>
+      {part.description === undefined ? null : (
+        <QuestionnaireDescription>{part.description}</QuestionnaireDescription>
+      )}
+      <QuestionnaireChoices>
+        {part.options.map((option) => (
+          <QuestionnaireChoice
+            key={choiceValue(option)}
+            value={choiceValue(option)}
+          >
+            {option.label}
+            {option.description === undefined ? null : (
+              <QuestionnaireChoiceDescription>
+                {option.description}
+              </QuestionnaireChoiceDescription>
+            )}
+          </QuestionnaireChoice>
+        ))}
         {part.freeform === true ? (
           <QuestionnaireInput
             aria-label="Your own answer"
             placeholder="Or answer in your own words"
           />
         ) : null}
-        <QuestionnaireError />
-        <QuestionnaireActions>
-          <QuestionnaireSubmit>Answer</QuestionnaireSubmit>
-        </QuestionnaireActions>
-      </QuestionnaireItem>
-    </Questionnaire>
+      </QuestionnaireChoices>
+      <QuestionnaireError />
+    </QuestionnaireItem>
   )
 }
 
@@ -85,7 +140,7 @@ function AnsweredQuestion({
   part,
   values,
 }: {
-  part: ReplyChoices
+  part: ReplyQuestion
   values: string[]
 }) {
   const written = values.filter(
@@ -93,8 +148,15 @@ function AnsweredQuestion({
   )
 
   return (
-    <div className={cn(cardClassName, "grid gap-2")}>
-      <p className="font-heading font-semibold text-sm">{part.prompt}</p>
+    <div className="grid gap-2">
+      <div className="grid gap-1">
+        <p className="font-heading font-semibold text-sm">{part.prompt}</p>
+        {part.description === undefined ? null : (
+          <p className="text-muted-foreground text-xs/relaxed">
+            {part.description}
+          </p>
+        )}
+      </div>
       <ul className="grid gap-1 text-xs/relaxed">
         {part.options.map((option) => {
           const chosen = values.includes(choiceValue(option))
@@ -119,8 +181,22 @@ function AnsweredQuestion({
         })}
       </ul>
       {written.length === 0 ? null : (
-        <p className="text-xs/relaxed">{written.join(", ")}</p>
+        <p className="text-xs/relaxed">{answerLabels(part, written)}</p>
       )}
     </div>
   )
+}
+
+function itemName(position: number) {
+  return `question-${position}`
+}
+
+function isRequired(part: ReplyQuestion) {
+  return part.required !== false
+}
+
+function readValues(values: FormDataEntryValue[]) {
+  return values
+    .map((value) => String(value).trim())
+    .filter((value) => value !== "")
 }

@@ -105,10 +105,11 @@ function Code({ token }: { token: Tokens.Code }) {
 }
 
 /** A table scrolls sideways inside its own box, so wide columns never
- *  widen the message. */
+ *  widen the message. The box carries no margin of its own; the table's
+ *  is inside it, as everywhere the prose scale applies. */
 function Table({ token }: { token: Tokens.Table }) {
   return (
-    <div className="my-2 min-w-0 max-w-full overflow-x-auto">
+    <div className="min-w-0 max-w-full overflow-x-auto">
       <table>
         <thead>
           <tr>

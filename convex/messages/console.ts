@@ -17,13 +17,12 @@ import { type referenceTargetValidator } from "./references"
 
 export const consoleMessageType = "console.message"
 
-/** The choices part a person's message answers: the reply holding it, the
- *  part's index, and the values chosen. Kept with the message so the
- *  console shows the question answered. */
+/** The questions a person's message answers: the reply holding them and,
+ *  for each of its choices parts, the part's index and the values chosen.
+ *  Kept with the message so the console shows the questions answered. */
 export const consoleAnswerValidator = v.object({
   messageId: v.id("messages"),
-  part: v.number(),
-  values: v.array(v.string()),
+  answers: v.array(v.object({ part: v.number(), values: v.array(v.string()) })),
 })
 
 /** What a person's message carries besides its text, or nothing. */

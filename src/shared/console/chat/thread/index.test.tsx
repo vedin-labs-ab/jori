@@ -132,7 +132,7 @@ test("renders both turns: the ask in its bubble with its context, the reply as p
   // The job the host could not resolve is named by its kind and opens
   // nothing.
   expect(screen.getByText("Job")).toBeDefined()
-  expect(screen.getByText("· No longer available")).toBeDefined()
+  expect(screen.getByText("No longer available")).toBeDefined()
   expect(screen.queryByRole("button", { name: /Job/ })).toBeNull()
 })
 
@@ -142,7 +142,11 @@ test("a chip after the latest reply sends its label; chips leave once a later me
 
   fireEvent.click(screen.getByRole("button", { name: "Show the table" }))
 
-  expect(onChoose).toHaveBeenCalledWith("m2", 2, ["table"], "Show the table")
+  expect(onChoose).toHaveBeenCalledWith(
+    "m2",
+    [{ part: 2, values: ["table"] }],
+    "Show the table"
+  )
 
   unmount()
   renderThread({
@@ -247,14 +251,18 @@ test("a run that failed or was stopped says so under the last turn, with the way
   expect(screen.queryByRole("status")).toBeNull()
 })
 
-test("answering a question composes the message from the labels, then the card locks", () => {
+test("answering a question composes the message from the prompt and the labels, then the question locks", () => {
   const onChoose = vi.fn<ChooseHandler>()
   const { unmount } = renderThread({ messages: [ask, question], onChoose })
 
   fireEvent.click(screen.getByRole("radio", { name: "Yes, post it" }))
   fireEvent.click(screen.getByRole("button", { name: "Answer" }))
 
-  expect(onChoose).toHaveBeenCalledWith("m3", 0, ["post"], "Yes, post it")
+  expect(onChoose).toHaveBeenCalledWith(
+    "m3",
+    [{ part: 0, values: ["post"] }],
+    "Post the summary to #finance when done? Yes, post it"
+  )
 
   unmount()
   renderThread({
@@ -264,8 +272,8 @@ test("answering a question composes the message from the labels, then the card l
       message({
         id: "m5",
         role: "person",
-        text: "Yes, post it",
-        answer: { messageId: "m3", part: 0, values: ["post"] },
+        text: "Post the summary to #finance when done? Yes, post it",
+        answer: { messageId: "m3", answers: [{ part: 0, values: ["post"] }] },
       }),
     ],
   })
@@ -280,22 +288,4 @@ test("answering a question composes the message from the labels, then the card l
   expect(
     screen.getByText("Keep it here").getAttribute("aria-current")
   ).toBeNull()
-})
-
-test("an answer in the person's own words is sent as written", () => {
-  const onChoose = vi.fn<ChooseHandler>()
-
-  renderThread({ messages: [ask, question], onChoose })
-
-  fireEvent.change(screen.getByRole("textbox", { name: "Your own answer" }), {
-    target: { value: "Post it Monday" },
-  })
-  fireEvent.click(screen.getByRole("button", { name: "Answer" }))
-
-  expect(onChoose).toHaveBeenCalledWith(
-    "m3",
-    0,
-    ["Post it Monday"],
-    "Post it Monday"
-  )
 })

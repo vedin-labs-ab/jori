@@ -1,5 +1,6 @@
 import { type ReactNode } from "react"
 import { Suggestion } from "@/components/ui/suggestion"
+import { cn } from "@/lib/utils"
 import { ConsoleLink } from "../shell/link"
 import { conversationDestination } from "../shell/routes"
 import { relativeTime } from "../time"
@@ -7,8 +8,9 @@ import { chatColumnClassName } from "./thread"
 import { type ChatConversation } from "./types"
 
 /** Where a chat starts: the ask, a few things worth asking, and the
- *  conversations already had, when there are any. The composer arrives
- *  bound from the host. */
+ *  conversations already had, when there are any. The group sits in the
+ *  middle of the frame while it fits and scrolls once it does not; each
+ *  block reads in the chat's column, the composer bringing its own. */
 export function ChatHome({
   composer,
   now,
@@ -25,23 +27,28 @@ export function ChatHome({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-      <div className={`${chatColumnClassName} grid gap-6 py-8`}>
-        <h2 className="font-heading font-medium text-lg">What needs doing?</h2>
-        <div className="-mx-4 md:-mx-6 grid gap-3">
-          {composer}
-          {suggestions.length === 0 ? null : (
-            <ul
-              aria-label="Suggestions"
-              className="flex flex-wrap gap-2 px-4 md:px-6"
-            >
-              {suggestions.map((suggestion) => (
-                <li key={suggestion}>
-                  <Suggestion onClick={onSuggestion} suggestion={suggestion} />
-                </li>
-              ))}
-            </ul>
+      <div className="flex flex-1 flex-col justify-center gap-6 py-8">
+        <h2
+          className={cn(
+            chatColumnClassName,
+            "text-center font-heading font-medium text-lg"
           )}
-        </div>
+        >
+          What needs doing?
+        </h2>
+        {composer}
+        {suggestions.length === 0 ? null : (
+          <ul
+            aria-label="Suggestions"
+            className={cn(chatColumnClassName, "flex flex-wrap gap-2")}
+          >
+            {suggestions.map((suggestion) => (
+              <li key={suggestion}>
+                <Suggestion onClick={onSuggestion} suggestion={suggestion} />
+              </li>
+            ))}
+          </ul>
+        )}
         {recent.length === 0 ? null : (
           <RecentConversations now={now} recent={recent} />
         )}
@@ -58,7 +65,10 @@ function RecentConversations({
   recent: ChatConversation[]
 }) {
   return (
-    <section aria-labelledby="chat-recent" className="grid gap-2">
+    <section
+      aria-labelledby="chat-recent"
+      className={cn(chatColumnClassName, "grid gap-2")}
+    >
       <h3
         className="font-medium text-muted-foreground text-xs"
         id="chat-recent"

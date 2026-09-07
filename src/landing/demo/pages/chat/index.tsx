@@ -119,9 +119,9 @@ function Conversation({ conversationId }: { conversationId: string }) {
         live={run}
         messages={conversation.messages}
         now={now}
-        onChoose={(messageId, part, values, text) =>
+        onChoose={(messageId, answers, text) =>
           actions.sendChatMessage(text, conversationId, {
-            answer: { messageId, part, values },
+            answer: { messageId, answers },
           })
         }
         onLoadMore={() => {}}

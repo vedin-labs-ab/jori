@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { SeparatorDot } from "../../dot"
 import { referencePresentation } from "../presentation"
 import { type ChatReference, type ReferenceTarget } from "../types"
 
@@ -6,8 +7,9 @@ const cardClassName =
   "flex w-fit max-w-full min-w-0 items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-left text-xs"
 
 /** A resource a reply is about, as a card that opens it: the kind's
- *  icon, the name, and one line of detail. When the host cannot resolve
- *  the target, or says it is gone, the card says so and opens nothing. */
+ *  icon, the name, and one line of detail after a dot. When the host
+ *  cannot resolve the target, or says it is gone, the card says so in
+ *  the detail's place and opens nothing. */
 export function ReferenceCard({
   onOpen,
   reference,
@@ -27,7 +29,7 @@ export function ReferenceCard({
         <span className="min-w-0 truncate">
           {reference?.name ?? presentation.label}
         </span>
-        <span className="shrink-0">· No longer available</span>
+        <Detail>No longer available</Detail>
       </div>
     )
   }
@@ -47,10 +49,17 @@ export function ReferenceCard({
       />
       <span className="min-w-0 truncate font-medium">{reference.name}</span>
       {reference.detail === undefined ? null : (
-        <span className="min-w-0 truncate text-muted-foreground">
-          · {reference.detail}
-        </span>
+        <Detail>{reference.detail}</Detail>
       )}
     </button>
+  )
+}
+
+function Detail({ children }: { children: string }) {
+  return (
+    <>
+      <SeparatorDot className="text-muted-foreground/60" />
+      <span className="min-w-0 truncate text-muted-foreground">{children}</span>
+    </>
   )
 }

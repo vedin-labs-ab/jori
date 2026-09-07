@@ -18,7 +18,7 @@ export type ChatMessage = {
   parts: ReplyPart[]
   /** The resource or folder the person opened the chat about. */
   context?: MessageContext
-  /** The choices part this message answers. */
+  /** The reply's questions this message answers. */
   answer?: ChoicesAnswer
   createdAt: number
 }

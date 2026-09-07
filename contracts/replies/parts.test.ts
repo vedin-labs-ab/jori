@@ -90,30 +90,56 @@ test("choices need at least one option and at most the limit", () => {
   ).toThrow()
 })
 
-test("a reply holds at most six references and one choices part", () => {
-  const references = Array.from({ length: 7 }, () => reference)
+test("a question and its options carry a subtitle each", () => {
+  const question = {
+    kind: "choices",
+    prompt: "Where should the summary go?",
+    description: "The channel the thread already lives in.",
+    options: [
+      { label: "#finance", description: "Where renewals are discussed." },
+      { label: "Here" },
+    ],
+  }
 
-  // The schema caps the list at seven, the sum of both limits; the split
-  // between kinds is checked after.
+  expect(readReplyParts([question], replyPartKinds)).toEqual([question])
+})
+
+test("a reply holds at most six references, five questions, and one row of chips", () => {
+  const references = Array.from({ length: 7 }, () => reference)
+  const questions = Array.from({ length: 6 }, (_, index) => ({
+    ...choices,
+    prompt: `Question ${index}`,
+  }))
+
+  // The schema caps the list at twelve, the sum of the three limits; the
+  // split between kinds is checked after.
   expect(() =>
-    readReplyParts([...references, reference], replyPartKinds)
+    readReplyParts([...references, ...questions], replyPartKinds)
   ).toThrow(/must contain at most/)
   expect(() => readReplyParts(references, replyPartKinds)).toThrow(
     /at most 6 references/
   )
-  expect(() =>
+  expect(() => readReplyParts(questions, replyPartKinds)).toThrow(
+    /at most 5 questions/
+  )
+  expect(() => readReplyParts([choices, choices], replyPartKinds)).toThrow(
+    /at most one choices part without a prompt/
+  )
+  expect(
     readReplyParts(
-      [...references.slice(0, 5), choices, choices],
+      [...references.slice(0, 6), ...questions.slice(0, 5), choices],
       replyPartKinds
     )
-  ).toThrow(/at most one choices part/)
+  ).toHaveLength(12)
 })
 
 test("the schema offers only the kinds asked for", () => {
   const schema = replyPartsSchema(["reference"])
 
   expect(schema.maxItems).toBe(
-    replyPartLimits.references + replyPartLimits.choices
+    replyPartLimits.references +
+      replyPartLimits.questions +
+      replyPartLimits.chips
   )
   expect(schema.items).toMatchObject({
     anyOf: [{ properties: { kind: { const: "reference" } } }],

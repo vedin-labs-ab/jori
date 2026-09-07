@@ -18,7 +18,7 @@ export function ChatWorking({
   return (
     <div className="min-w-0" role="status">
       <Task defaultOpen={false}>
-        <div className="flex min-h-7 items-center gap-2">
+        <div className="flex min-h-6 items-center gap-2">
           {progress === undefined ? (
             <TaskLabel className="text-sm" shimmer>
               Working

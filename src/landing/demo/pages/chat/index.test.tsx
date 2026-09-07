@@ -50,12 +50,28 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   ).toBeDefined()
   expect(screen.queryByText("Working")).toBeNull()
 
-  // Answering sends the answer as the next message and locks the card.
-  fireEvent.click(screen.getByRole("radio", { name: "Keep it here" }))
+  // The questions are walked in order and answered together: one message
+  // with a line per question, and the questions lock.
+  expect(screen.getByRole("progressbar").textContent).toBe("Question 1 of 3")
+
+  fireEvent.click(screen.getByRole("radio", { name: /^Keep it here/ }))
+  fireEvent.click(screen.getByRole("button", { name: "Next" }))
+  fireEvent.click(screen.getByRole("radio", { name: /^Every Monday/ }))
+  fireEvent.click(screen.getByRole("button", { name: "Next" }))
+  fireEvent.click(screen.getByRole("radio", { name: /^Me/ }))
   fireEvent.click(screen.getByRole("button", { name: "Answer" }))
 
-  expect(await screen.findAllByText("Keep it here")).toHaveLength(2)
+  expect(
+    (await screen.findByText(/Keep it here/, { selector: "div" })).textContent
+  ).toBe(
+    [
+      "Post a summary to #finance when it is done? Keep it here",
+      "How often should Renewals watch run? Every Monday",
+      "Who should the reminders come from? Me",
+    ].join("\n")
+  )
   expect(screen.queryByRole("radio")).toBeNull()
+  expect(screen.getAllByRole("listitem", { current: true })).toHaveLength(3)
 })
 
 test("stopping the run leaves a quiet notice under the ask", async () => {

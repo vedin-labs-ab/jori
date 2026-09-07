@@ -179,12 +179,8 @@ function ConversationTurns({
       live={run}
       messages={page.messages}
       now={now}
-      onChoose={(messageId, part, values, text) =>
-        send(text, {
-          messageId: messageId as GenericId<"messages">,
-          part,
-          values,
-        })
+      onChoose={(messageId, answers, text) =>
+        send(text, { messageId: messageId as GenericId<"messages">, answers })
       }
       onLoadMore={page.loadMore}
       onOpenReference={onOpenReference}
