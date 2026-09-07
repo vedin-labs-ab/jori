@@ -21,9 +21,11 @@ import {
   resolveCurrentPerson,
 } from "../persons/account"
 import { resolvePersonByIdentity } from "../persons/identity/links"
+import { nameMentions } from "../references/tokens"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight } from "../visibility/sight"
+import { createConsoleConversation } from "./create"
 import { startMessageRun } from "./data"
 import { readLiveState } from "./live"
 import {
@@ -44,8 +46,6 @@ type ConsoleSendArgs = {
   answer?: Infer<typeof consoleAnswerValidator>
   model?: Infer<typeof modelSelectionValidator>
 }
-
-const titleMaxLength = 80
 
 /** A person's message to Jori from the console. The first message opens the
  *  conversation, with the model selection it was sent under; every message
@@ -175,7 +175,11 @@ export async function sendConsoleMessage(
   const now = Date.now()
   const conversation =
     args.conversationId === undefined
-      ? await createConsoleConversation(ctx, { ...args, text, now })
+      ? await createConsoleConversation(ctx, {
+          ...args,
+          text: nameMentions(text, references),
+          now,
+        })
       : await requireVisibleConsoleConversation(ctx, {
           conversationId: args.conversationId,
           organizationId: args.organizationId,
@@ -245,50 +249,6 @@ export async function listConsoleConversations(
     .paginate(args.paginationOpts)
 
   return { ...result, page: result.page.map(conversationView) }
-}
-
-// The conversation's key is its own id, so console messages resolve their
-// conversation through the same organization + integration + external index
-// as provider messages; the id only exists once the row does.
-async function createConsoleConversation(
-  ctx: MutationCtx,
-  args: {
-    organizationId: string
-    personId: Id<"persons">
-    text: string
-    model?: Infer<typeof modelSelectionValidator>
-    now: number
-  }
-) {
-  const conversationId = await ctx.db.insert("conversations", {
-    organizationId: args.organizationId,
-    surface: "console",
-    externalId: "",
-    scope: "person",
-    title: conversationTitle(args.text),
-    createdBy: args.personId,
-    updatedAt: args.now,
-    ...(args.model === undefined ? {} : { model: args.model }),
-  })
-
-  await ctx.db.patch(conversationId, { externalId: conversationId })
-
-  const conversation = await ctx.db.get(conversationId)
-
-  if (conversation === null) {
-    throw new Error("Conversation insert failed.")
-  }
-
-  return conversation
-}
-
-function conversationTitle(text: string) {
-  const line = text.split("\n").find((candidate) => candidate.trim() !== "")
-  const title = (line ?? text).trim()
-
-  return title.length > titleMaxLength
-    ? `${title.slice(0, titleMaxLength - 3)}...`
-    : title
 }
 
 function conversationView(conversation: Doc<"conversations">) {

@@ -1,24 +1,12 @@
 import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
-import { EditorContent } from "@tiptap/react"
-import { ArrowUp, Square, X } from "lucide-react"
-import { useEffect, useId } from "react"
-import { Badge } from "@/components/ui/badge"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-} from "@/components/ui/input-group"
-import { SigilHints } from "../../mentions/hints"
+import { type MouseEvent, useEffect, useId } from "react"
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 import {
   emptyMentionSources,
   type MentionSources,
   type MentionSuggestion,
 } from "../../mentions/sources"
-import { MentionSuggestions } from "../../mentions/suggest/listbox"
-import { ContextIndicator } from "../context"
-import { ModelPicker } from "../models"
-import { referencePresentation } from "../presentation"
 import { chatColumnClassName } from "../thread"
 import {
   type ChatContextUsage,
@@ -27,15 +15,9 @@ import {
   isLiveRun,
   type ResolveReference,
 } from "../types"
-import { AttachMenu } from "./attach"
 import { useComposerEditor } from "./editor"
-
-const sigilHints = [
-  { kind: "resource", label: "resources" },
-  { kind: "integration", label: "integrations" },
-  { kind: "skill", label: "skills" },
-  { kind: "tool", label: "tools" },
-] as const
+import { ComposerField, ContextChip } from "./field"
+import { ComposerFooter } from "./footer"
 
 /** Where the person writes: plain text with the things it mentions as
  *  chips in it, put there from a sigil's listbox or the "+" menu. Enter
@@ -51,6 +33,7 @@ export function ChatComposer({
   live,
   mentions = emptyMentionSources,
   onClearContext,
+  onMention,
   onSelect,
   onSend,
   onStop,
@@ -68,6 +51,9 @@ export function ChatComposer({
   /** What can be mentioned: the host's lists, and its search. */
   mentions?: MentionSources
   onClearContext?: () => void
+  /** Takes each resource as it is mentioned, so a host with a pane can
+   *  show what the person is talking about. */
+  onMention?: (target: MessageContext) => void
   /** Takes the model and effort the next run uses. */
   onSelect?: (selection: ModelSelection) => void
   /** Takes the text with its mention tokens, and the resources they
@@ -112,32 +98,25 @@ export function ChatComposer({
         composer.send()
       }}
     >
-      <InputGroup className="bg-background">
+      <InputGroup
+        className="overflow-hidden bg-background"
+        onClick={(event) => focusFromFrame(event, composer.editor)}
+      >
         {context === undefined ? null : (
           <InputGroupAddon align="block-start">
             <ContextChip onClear={onClearContext} reference={context} />
           </InputGroupAddon>
         )}
-        <div className="relative w-full min-w-0">
-          <EditorContent className="w-full min-w-0" editor={composer.editor} />
-          {composer.isEmpty ? (
-            <div className="pointer-events-none absolute top-2 right-2 left-2 truncate text-muted-foreground text-sm">
-              {placeholder}
-            </div>
-          ) : null}
-          <MentionSuggestions
-            emptyMessage={emptySuggestionMessage}
-            listboxId={composer.listboxId}
-            onActiveIndexChange={composer.setActiveSuggestionIndex}
-            onSelect={composer.selectSuggestion}
-            state={composer.suggestion}
-          />
-        </div>
+        <ComposerField
+          composer={composer}
+          onSelect={mentioned(composer.selectSuggestion, onMention)}
+          placeholder={placeholder}
+        />
         <ComposerFooter
           canSend={composer.canSend}
           isLive={isLive}
           mentions={mentions}
-          onPick={composer.insertMention}
+          onPick={mentioned(composer.insertMention, onMention)}
           onSelect={onSelect}
           onStop={onStop}
           reason={
@@ -150,81 +129,6 @@ export function ChatComposer({
         />
       </InputGroup>
     </form>
-  )
-}
-
-/** Under the field: the "+" and the sigils on the left, or the reason the
- *  field is disabled; the model, the ring, and the send or stop control
- *  on the right. */
-function ComposerFooter({
-  canSend,
-  isLive,
-  mentions,
-  onPick,
-  onSelect,
-  onStop,
-  reason,
-  selection,
-  usage,
-}: {
-  canSend: boolean
-  isLive: boolean
-  mentions: MentionSources
-  onPick: (suggestion: MentionSuggestion) => void
-  onSelect: ((selection: ModelSelection) => void) | undefined
-  onStop: () => void
-  reason: { id: string; text: string } | undefined
-  selection: ModelSelection | undefined
-  usage: ChatContextUsage | null | undefined
-}) {
-  return (
-    <InputGroupAddon align="block-end" className="justify-between gap-2">
-      <span className="flex min-w-0 items-center gap-1">
-        {reason === undefined ? (
-          <>
-            <AttachMenu onPick={onPick} sources={mentions} />
-            <span className="hidden min-w-0 md:flex">
-              <SigilHints hints={sigilHints} />
-            </span>
-          </>
-        ) : (
-          <span
-            className="min-w-0 truncate text-muted-foreground text-xs"
-            id={reason.id}
-          >
-            {reason.text}
-          </span>
-        )}
-      </span>
-      <span className="flex items-center gap-1">
-        {selection === undefined || onSelect === undefined ? null : (
-          <ModelPicker onSelect={onSelect} selection={selection} />
-        )}
-        {usage === undefined || usage === null ? null : (
-          <ContextIndicator usage={usage} />
-        )}
-        {isLive ? (
-          <InputGroupButton
-            aria-label="Stop run"
-            onClick={onStop}
-            size="icon-sm"
-            variant="default"
-          >
-            <Square className="fill-current" />
-          </InputGroupButton>
-        ) : (
-          <InputGroupButton
-            aria-label="Send message"
-            disabled={!canSend}
-            size="icon-sm"
-            type="submit"
-            variant="default"
-          >
-            <ArrowUp />
-          </InputGroupButton>
-        )}
-      </span>
-    </InputGroupAddon>
   )
 }
 
@@ -265,54 +169,30 @@ function useFieldState(
   }, [describedBy, disabled, editor])
 }
 
-function emptySuggestionMessage({
-  active,
-}: NonNullable<ReturnType<typeof useComposerEditor>["suggestion"]>) {
-  switch (active.kind) {
-    case "integration":
-      return active.query === ""
-        ? "No integrations to mention."
-        : "No matching integrations."
-    case "resource":
-      return active.query === ""
-        ? "Nothing to mention yet."
-        : "No matching resources."
-    case "skill":
-      return active.query === "" ? "No skills yet." : "No matching skills."
-    case "tool":
-      return active.query === "" ? "No tools to mention." : "No matching tools."
+/** A click on the frame itself, or on the footer beside its controls,
+ *  goes to the field, so the person never lands nowhere. */
+function focusFromFrame(
+  event: MouseEvent<HTMLDivElement>,
+  editor: ReturnType<typeof useComposerEditor>["editor"]
+) {
+  const interactive =
+    "button, a, [contenteditable], [role=menu], [role=dialog], [role=listbox]"
+
+  if ((event.target as HTMLElement).closest(interactive) === null) {
+    editor?.commands.focus("end")
   }
 }
 
-/** The resource the chat was opened about, named by its kind's icon, with
- *  a control to send the next message without it. */
-function ContextChip({
-  onClear,
-  reference,
-}: {
-  onClear: (() => void) | undefined
-  reference: ChatReference
-}) {
-  const { icon: Icon, label } = referencePresentation(
-    reference.kind,
-    reference.name
-  )
+/** The insertion, then the host told of the resource it put in. */
+function mentioned(
+  insert: (item: MentionSuggestion) => void,
+  onMention: ((target: MessageContext) => void) | undefined
+) {
+  return (item: MentionSuggestion) => {
+    insert(item)
 
-  return (
-    <Badge className="max-w-full gap-1 pr-1" variant="outline">
-      <Icon aria-hidden="true" />
-      <span className="sr-only">{label}: </span>
-      <span className="min-w-0 truncate">{reference.name}</span>
-      {onClear === undefined ? null : (
-        <button
-          aria-label={`Remove ${reference.name}`}
-          className="grid size-4 cursor-pointer place-items-center rounded-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/30"
-          onClick={onClear}
-          type="button"
-        >
-          <X aria-hidden="true" className="size-3" />
-        </button>
-      )}
-    </Badge>
-  )
+    if (item.kind === "resource" && item.target !== undefined) {
+      onMention?.(item.target)
+    }
+  }
 }

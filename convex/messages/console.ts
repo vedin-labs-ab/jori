@@ -36,7 +36,9 @@ export function consoleMessageData(input: {
     ...(input.context === undefined ? {} : { context: input.context }),
     ...(input.references === undefined || input.references.length === 0
       ? {}
-      : { references: input.references }),
+      : {
+          references: input.references.map(({ kind, id }) => ({ kind, id })),
+        }),
     ...(input.answer === undefined ? {} : { answer: input.answer }),
   }
 

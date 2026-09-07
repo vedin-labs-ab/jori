@@ -34,8 +34,14 @@ export function createMessageRunSnapshot(input: {
   integration: Doc<"integrations"> | null
   kind: MessageCauseKind
   message: Doc<"messages">
+  /** The message's text as a person reads it — its mentions named —
+   *  where that differs from the text itself. */
+  title?: string
 }): RunSnapshotInput {
-  const text = normalizeRequiredRunText(input.message.text ?? "", "Run title")
+  const text = normalizeRequiredRunText(
+    input.title ?? input.message.text ?? "",
+    "Run title"
+  )
 
   return {
     snapshot: {
