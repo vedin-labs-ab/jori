@@ -9,11 +9,7 @@ import {
   consoleMessageData,
   insertConsoleMessage,
 } from "../messages/console"
-import {
-  normalizeConsoleContext,
-  normalizeConsoleReferences,
-  referenceTargetValidator,
-} from "../messages/references"
+import { referenceTargetValidator } from "../messages/references"
 import { modelSelectionValidator } from "../model/selection"
 import {
   accountArgs,
@@ -25,7 +21,11 @@ import { nameMentions } from "../references/tokens"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight } from "../visibility/sight"
-import { createConsoleConversation } from "./create"
+import {
+  createConsoleConversation,
+  normalizeConsoleContext,
+  normalizeConsoleReferences,
+} from "./create"
 import { startMessageRun } from "./data"
 import { readLiveState } from "./live"
 import {

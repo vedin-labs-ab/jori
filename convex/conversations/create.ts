@@ -1,8 +1,11 @@
 import { type Infer } from "convex/values"
+import { type MessageContext } from "../../contracts/replies/answers"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type modelSelectionValidator } from "../model/selection"
-import { insertRow } from "../shared/context"
+import { loadReference, referenceTable } from "../references/lookup"
+import { insertRow, type QueryLikeCtx } from "../shared/context"
+import { type Sight } from "../visibility/sight"
 
 const titleMaxLength = 80
 
@@ -42,4 +45,48 @@ function conversationTitle(text: string) {
   return title.length > titleMaxLength
     ? `${title.slice(0, titleMaxLength - 3)}...`
     : title
+}
+
+/** The context's id in its kind's own table, or nothing for an id of
+ *  another shape — the check `references.resolve` makes, made before the
+ *  message is kept. */
+export function normalizeConsoleContext(
+  ctx: QueryLikeCtx,
+  context: MessageContext
+): MessageContext | null {
+  const id = ctx.db.normalizeId(referenceTable(context.kind), context.id)
+
+  return id === null ? null : { kind: context.kind, id }
+}
+
+/** The resources a message mentions, each in its kind's own table and
+ *  visible to the sender, or an error naming the first that is not: the
+ *  check the console's picker already made, made again before the message
+ *  is kept, so a stored mention always pointed at something real. */
+export async function normalizeConsoleReferences(
+  ctx: QueryLikeCtx,
+  sight: Sight,
+  references: MessageContext[]
+): Promise<Array<MessageContext & { name: string }>> {
+  const seen = new Set<string>()
+  const normalized: Array<MessageContext & { name: string }> = []
+
+  for (const reference of references) {
+    const target = normalizeConsoleContext(ctx, reference)
+    const loaded =
+      target === null ? null : await loadReference(ctx, sight, target)
+
+    if (target === null || loaded === null) {
+      throw new Error(`The mentioned ${reference.kind} is not available.`)
+    }
+
+    const key = `${target.kind}:${target.id}`
+
+    if (!seen.has(key)) {
+      seen.add(key)
+      normalized.push({ ...target, name: loaded.name })
+    }
+  }
+
+  return normalized
 }

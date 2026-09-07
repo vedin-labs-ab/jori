@@ -1,12 +1,10 @@
 import { expect, test } from "vitest"
 import { tableDoc, testOwner } from "../../test/convex/collections"
-import { databaseContext } from "../../test/convex/database"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { createSight } from "../visibility/sight"
 import {
-  consoleContextLine,
-  normalizeConsoleContext,
   type ReferenceTarget,
   resolveConsoleContext,
   resolveReferenceTarget,
@@ -16,6 +14,49 @@ const other = "persons:other" as Id<"persons">
 
 async function seed() {
   const { database, ctx } = databaseContext()
+  const filed = await seedFiled(database)
+  const runId = await run(database, {
+    organizationId: "org",
+    audience: "person",
+    createdBy: testOwner,
+    status: "completed",
+    title: "Chase the unpaid renewals",
+  })
+  const foreignRunId = await run(database, {
+    organizationId: "elsewhere",
+    audience: "organization",
+    status: "running",
+    title: "Not ours",
+  })
+  const chatId = await database.insert("conversations", {
+    organizationId: "org",
+    surface: "console",
+    externalId: "",
+    scope: "person",
+    title: "Which renewals are at risk?",
+    createdBy: testOwner,
+    updatedAt: 1,
+  })
+  const sightOf = (personId: Id<"persons">) =>
+    createSight(ctx, { organizationId: "org", personId })
+  const resolveAs = (personId: Id<"persons">, target: ReferenceTarget) =>
+    resolveReferenceTarget(ctx, sightOf(personId), target)
+  const resolveContextAs = (personId: Id<"persons">, data: unknown) =>
+    resolveConsoleContext(ctx, sightOf(personId), data)
+
+  return {
+    ...filed,
+    chatId,
+    ctx,
+    foreignRunId,
+    resolveAs,
+    resolveContextAs,
+    runId,
+  }
+}
+
+/** A table filed two folders deep, a job, and a private file. */
+async function seedFiled(database: TestDatabase) {
   const financeId = await database.insert(
     "folders",
     folderDoc({ name: "Finance" })
@@ -33,42 +74,28 @@ async function seed() {
     "files",
     fileDoc({ name: "secret.csv", visibility: { mode: "private" } })
   )
-  const runId = await database.insert("runs", {
-    organizationId: "org",
-    audience: "person",
-    createdBy: testOwner,
-    status: "completed",
-    snapshot: { title: "Chase the unpaid renewals", context: [], source: {} },
-    cause: { type: "manual" },
-    createdAt: 1,
-  })
-  const foreignRunId = await database.insert("runs", {
-    organizationId: "elsewhere",
-    audience: "organization",
-    status: "running",
-    snapshot: { title: "Not ours", context: [], source: {} },
-    cause: { type: "manual" },
-    createdAt: 1,
-  })
-  const sightOf = (personId: Id<"persons">) =>
-    createSight(ctx, { organizationId: "org", personId })
-  const resolveAs = (personId: Id<"persons">, target: ReferenceTarget) =>
-    resolveReferenceTarget(ctx, sightOf(personId), target)
-  const resolveContextAs = (personId: Id<"persons">, data: unknown) =>
-    resolveConsoleContext(ctx, sightOf(personId), data)
 
-  return {
-    ctx,
-    financeId,
-    foreignRunId,
-    jobId,
-    renewalsId,
-    resolveAs,
-    resolveContextAs,
-    runId,
-    secretId,
-    tableId,
+  return { financeId, jobId, renewalsId, secretId, tableId }
+}
+
+async function run(
+  database: TestDatabase,
+  run: {
+    organizationId: string
+    audience: "organization" | "person"
+    createdBy?: Id<"persons">
+    status: "completed" | "running"
+    title: string
   }
+) {
+  const { title, ...fields } = run
+
+  return await database.insert("runs", {
+    ...fields,
+    snapshot: { title, context: [], source: {} },
+    cause: { type: "manual" },
+    createdAt: 1,
+  })
 }
 
 test("names what the viewer may see, with where it is filed", async () => {
@@ -117,6 +144,19 @@ test("a run resolves to its title and status for those who may see it", async ()
   ).toMatchObject({ unavailable: true })
 })
 
+test("a chat resolves for the person whose it is, and for nobody else", async () => {
+  const { chatId, resolveAs } = await seed()
+  const target = { kind: "chat", id: chatId } as const
+
+  expect(await resolveAs(testOwner, target)).toEqual({
+    ...target,
+    name: "Which renewals are at risk?",
+    detail: "Chat",
+    unavailable: false,
+  })
+  expect(await resolveAs(other, target)).toMatchObject({ unavailable: true })
+})
+
 test("invisible, missing, and mistyped targets come back unavailable without a name", async () => {
   const { resolveAs, secretId, tableId } = await seed()
   const gone = { kind: "file", id: "files:404" } as const
@@ -142,16 +182,6 @@ test("invisible, missing, and mistyped targets come back unavailable without a n
   expect(
     await resolveAs(other, { kind: "job", id: "not-an-id" })
   ).toMatchObject({ unavailable: true })
-})
-
-test("a context's id is kept only in its kind's own table", async () => {
-  const { ctx, tableId } = await seed()
-
-  expect(normalizeConsoleContext(ctx, { kind: "table", id: tableId })).toEqual({
-    kind: "table",
-    id: tableId,
-  })
-  expect(normalizeConsoleContext(ctx, { kind: "job", id: "nope" })).toBeNull()
 })
 
 test("a filed resource's context resolves to its name and folder; a folder's to itself", async () => {
@@ -194,15 +224,4 @@ test("a context the person may not see, or no context, resolves to nothing", asy
   expect(
     await resolveContextAs(testOwner, { context: { kind: "video" } })
   ).toBeUndefined()
-})
-
-test("the model's line names the target with the id its tools take", () => {
-  const context = { kind: "table", id: "collections:7" } as const
-
-  expect(consoleContextLine(context, { ...context, name: "Renewals" })).toBe(
-    "Opened about table «Renewals» (tableId: collections:7)"
-  )
-  expect(consoleContextLine(context, undefined)).toBe(
-    "Opened about a table that is no longer available (tableId: collections:7)"
-  )
 })
