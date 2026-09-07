@@ -11,10 +11,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { scrollFadeViewport } from "@/shared/fade"
 import { type ChatConversation } from "../chat/types"
+import { ChatsMenu } from "./chats"
 import { CollapsibleGroup } from "./group"
 import { ConsoleLink } from "./link"
 import {
@@ -96,7 +98,9 @@ export function ConsoleSidebar({
 
 /** The person's conversations, by title, in a box about three rows tall
  *  that scrolls, so the sidebar never grows with the number of chats.
- *  Nothing at all until there is a conversation to show. */
+ *  Nothing at all until there is a conversation to show. Titles need the
+ *  open sidebar's width: the icon rail and a phone's sheet fold them into
+ *  one Chats entry that opens the list. */
 function ChatsGroup({
   chats,
   pathname,
@@ -104,8 +108,24 @@ function ChatsGroup({
   chats: ChatConversation[]
   pathname: string
 }) {
+  const { isMobile, state } = useSidebar()
+
   if (chats.length === 0) {
     return null
+  }
+
+  if (isMobile || state === "collapsed") {
+    return (
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <ChatsMenu
+            chats={chats}
+            pathname={pathname}
+            side={isMobile ? "bottom" : "right"}
+          />
+        </SidebarGroupContent>
+      </SidebarGroup>
+    )
   }
 
   return (

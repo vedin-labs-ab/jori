@@ -16,6 +16,14 @@ export const reasoningEfforts = [
 
 export type ReasoningEffort = (typeof reasoningEfforts)[number]
 
+export const effortLabels: Record<ReasoningEffort, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  xhigh: "Extra high",
+  max: "Max",
+}
+
 export type ModelSelection = {
   model: ModelSlug
   effort: ReasoningEffort
@@ -51,15 +59,30 @@ export function sameSelection(left: ModelSelection, right: ModelSelection) {
   return left.model === right.model && left.effort === right.effort
 }
 
-/** A model picked on its own runs at medium effort; the runtime leaves
- *  the effort out of the request for a model that does not reason. */
-export function selectModel(model: ModelSlug): ModelSelection {
-  return { model, effort: "medium" }
+/** A model picked on its own keeps the effort in force, and an effort
+ *  picked on its own keeps the model: the two are chosen one at a time
+ *  outside the tiers. The runtime leaves the effort out of the request
+ *  for a model that does not reason. */
+export function withModel(
+  selection: ModelSelection,
+  model: ModelSlug
+): ModelSelection {
+  return { model, effort: selection.effort }
 }
 
-/** How the composer names a selection: its tier, or its model's label. */
+export function withEffort(
+  selection: ModelSelection,
+  effort: ReasoningEffort
+): ModelSelection {
+  return { model: selection.model, effort }
+}
+
+/** How the composer names a selection: its tier, or, outside the three,
+ *  its model and its effort. */
 export function selectionLabel(selection: ModelSelection) {
   const tier = selectionTier(selection)
 
-  return tier === null ? modelLabel(selection.model) : tierLabels[tier]
+  return tier === null
+    ? `${modelLabel(selection.model)} · ${effortLabels[selection.effort]}`
+    : tierLabels[tier]
 }

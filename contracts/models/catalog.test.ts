@@ -13,9 +13,10 @@ import {
   reasoningEfforts,
   selectionLabel,
   selectionTier,
-  selectModel,
   tierOrder,
   tiers,
+  withEffort,
+  withModel,
 } from "./selection"
 
 test("every slug is listed once, under a vendor the picker groups by", () => {
@@ -52,11 +53,15 @@ test("every tier names a catalog model at an offered effort", () => {
   expect(defaultSelection).toEqual(tiers.standard)
 })
 
-test("a selection reads as its tier, or as its model when it is none", () => {
+test("a selection reads as its tier, or as its model and effort when it is none", () => {
   expect(selectionLabel(tiers.premium)).toBe("Premium")
-  expect(selectionLabel(selectModel("anthropic/claude-sonnet-5"))).toBe(
-    "Claude Sonnet 5"
-  )
+  expect(
+    selectionLabel(withModel(tiers.premium, "anthropic/claude-sonnet-5"))
+  ).toBe("Claude Sonnet 5 · High")
+  expect(withEffort(tiers.standard, "max")).toEqual({
+    model: "openai/gpt-5.6-sol",
+    effort: "max",
+  })
   expect(selectionTier({ model: "openai/gpt-6-astra", effort: "medium" })).toBe(
     null
   )
