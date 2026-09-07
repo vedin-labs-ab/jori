@@ -108,7 +108,7 @@ function RecentConversations({
       aria-labelledby="chat-recent"
       className={cn(chatColumnClassName, "grid gap-1")}
     >
-      <div className="flex items-center justify-between px-3">
+      <div className="flex items-center justify-between">
         <h3
           className="font-medium text-muted-foreground text-xs"
           id="chat-recent"
@@ -127,7 +127,9 @@ function RecentConversations({
           </ChatsPicker>
         )}
       </div>
-      <ul className="divide-y">
+      {/* The rows bleed past the column, so their text lines up with the
+          heading and the composer while the hover still has its inset. */}
+      <ul className="-mx-3 divide-y">
         {shown.map((conversation) => (
           <li key={conversation.id}>
             <ConsoleLink
@@ -150,7 +152,7 @@ function RecentConversations({
 }
 
 /** A row that goes somewhere: its text on one line, and the arrow that
- *  appears under the pointer to say so. */
+ *  opens under the pointer to say so, taking no room until it does. */
 const rowClassName =
   "group/row flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
 
@@ -158,7 +160,7 @@ function RowArrow() {
   return (
     <ArrowRight
       aria-hidden
-      className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-focus-visible/row:opacity-100 group-hover/row:opacity-100"
+      className="-ml-3 h-4 w-0 shrink-0 text-muted-foreground opacity-0 transition-[width,margin,opacity] duration-150 group-focus-visible/row:ml-0 group-focus-visible/row:w-4 group-focus-visible/row:opacity-100 group-hover/row:ml-0 group-hover/row:w-4 group-hover/row:opacity-100"
     />
   )
 }
