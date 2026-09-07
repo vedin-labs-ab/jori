@@ -1,7 +1,10 @@
 import { expect, test } from "vitest"
-import { eventJobDisplay, fakeQueryCtx } from "../../../../test/convex/console"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
+import {
+  eventJobDisplay,
+  fakeQueryCtx,
+  testRun,
+} from "../../../../test/convex/console"
+import { githubIntegration } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
 
 test("includes linked GitHub pull request details", async () => {
@@ -170,24 +173,4 @@ function linearIssueCommentEvent() {
       commentId: "comment-123",
     },
   }
-}
-
-function githubIntegration() {
-  return integrationDoc({
-    _id: id<"integrations">("integration"),
-    integration: "github",
-    externalId: "github-installation",
-  })
-}
-
-function testRun(
-  run: Record<string, unknown>,
-  overrides: Record<string, unknown> = {}
-) {
-  return {
-    status: "completed",
-    endedAt: 1000,
-    ...run,
-    ...overrides,
-  } as Parameters<typeof summarizeRun>[1]
 }

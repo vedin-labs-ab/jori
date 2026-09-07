@@ -29,6 +29,7 @@ const indexSortFields: Record<string, string[]> = {
   by_organization_and_integration_and_conversation_and_created_at: [
     "createdAt",
   ],
+  by_organization_and_person_and_created_at: ["createdAt"],
   by_run_and_order: ["order"],
 }
 

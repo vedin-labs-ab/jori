@@ -427,7 +427,7 @@ import type * as runs_agent_tools_types from "../runs/agent/tools/types.js";
 import type * as runs_audience from "../runs/audience.js";
 import type * as runs_console from "../runs/console.js";
 import type * as runs_console_context from "../runs/console/context.js";
-import type * as runs_console_details_index from "../runs/console/details/index.js";
+import type * as runs_console_details from "../runs/console/details.js";
 import type * as runs_console_filters from "../runs/console/filters.js";
 import type * as runs_console_live from "../runs/console/live.js";
 import type * as runs_console_offers from "../runs/console/offers.js";
@@ -1059,7 +1059,7 @@ declare const fullApi: ApiFromModules<{
   "runs/audience": typeof runs_audience;
   "runs/console": typeof runs_console;
   "runs/console/context": typeof runs_console_context;
-  "runs/console/details/index": typeof runs_console_details_index;
+  "runs/console/details": typeof runs_console_details;
   "runs/console/filters": typeof runs_console_filters;
   "runs/console/live": typeof runs_console_live;
   "runs/console/offers": typeof runs_console_offers;

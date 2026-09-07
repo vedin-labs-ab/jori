@@ -150,6 +150,25 @@ export function runDoc(overrides: Partial<Doc<"runs">> = {}): Doc<"runs"> {
   } as Doc<"runs">
 }
 
+/** A completed run for the summary under test; the run's own fields and
+ *  the overrides refine it, and a prepared tool snapshot rides along for
+ *  `preparedTraceRows`. */
+export function testRun(
+  run: Record<string, unknown>,
+  overrides: Record<string, unknown> = {}
+) {
+  return {
+    _id: "run",
+    _creationTime: 0,
+    organizationId: "organization",
+    status: "completed",
+    createdAt: 0,
+    endedAt: 1000,
+    ...run,
+    ...overrides,
+  } as Doc<"runs"> & { preparedTools?: unknown }
+}
+
 export function runSnapshot(title: string): Doc<"runs">["snapshot"] {
   return { context: [], source: { type: "manual" }, title }
 }

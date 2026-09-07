@@ -4,11 +4,11 @@ import { tableDoc } from "../../test/convex/collections"
 import {
   consoleContext,
   conversationOf,
+  finishRun,
   organizationId,
   person,
   rows,
 } from "../../test/convex/conversations"
-import { type TestDatabase } from "../../test/convex/database"
 import { type Doc } from "../_generated/dataModel"
 import { listConsoleConversations, sendConsoleMessage } from "./console"
 import { readLiveState } from "./live"
@@ -206,13 +206,6 @@ test("only the creator sees a console conversation", async () => {
     })
   ).rejects.toThrow("Conversation not found.")
 })
-
-async function finishRun(database: TestDatabase) {
-  for (const run of await rows<Doc<"runs">>(database, "runs")) {
-    await database.patch(run._id, { status: "completed" })
-  }
-}
-
 test("every message that runs schedules the thread's summary", async () => {
   const { database, ctx, scheduler } = consoleContext()
   const personId = await person(database)
