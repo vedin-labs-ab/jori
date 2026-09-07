@@ -34,19 +34,12 @@ beforeEach(() => {
 
 afterEach(cleanup)
 
-/** Opens a menu on its trigger. Radix opens on pointer down; the point is
- *  away from the origin, where every jsdom box sits, so the panel handle
- *  does not take the press for a resize. */
-function openMenu(trigger: HTMLElement) {
-  fireEvent.pointerDown(trigger, { clientX: 200, clientY: 200 })
-  fireEvent.click(trigger)
-}
-
 function renderPane(overrides: Partial<ChatPaneProps> = {}) {
   const handlers = {
     onActivate: vi.fn(),
     onClose: vi.fn(),
     onCloseAll: vi.fn(),
+    onCloseBeside: vi.fn(),
     onOpenChange: vi.fn(),
     onPin: vi.fn(),
   }
@@ -55,6 +48,7 @@ function renderPane(overrides: Partial<ChatPaneProps> = {}) {
     <ChatPane
       active={table}
       body={(target) => <p>Body of {target.id}</p>}
+      composer={<p>The composer</p>}
       open
       resolve={(target) => references[targetKey(target)]}
       tabs={[
@@ -71,6 +65,13 @@ function renderPane(overrides: Partial<ChatPaneProps> = {}) {
   return handlers
 }
 
+/** The items of the menu a right click on the tab opens. */
+function openTabMenu(name: string) {
+  fireEvent.contextMenu(screen.getByRole("tab", { name }))
+
+  return within(screen.getByRole("menu"))
+}
+
 test("the tabs name their targets, and the active one shows its body", () => {
   renderPane()
 
@@ -82,18 +83,24 @@ test("the tabs name their targets, and the active one shows its body", () => {
   ])
   expect(tabs[0]?.dataset.state).toBe("active")
   expect(screen.getByText("The chat")).toBeDefined()
+  expect(screen.getByText("The composer")).toBeDefined()
   expect(screen.getByText("Body of t1")).toBeDefined()
   expect(screen.queryByText("Body of j1")).toBeNull()
 
+  // The header names the target and its kind; the name is the way to
+  // its page.
   const header = screen.getByRole("complementary", { name: "Resources" })
 
   expect(within(header).getByText("Table")).toBeDefined()
   expect(
-    within(header).getByRole("link", { name: "Open page" }).getAttribute("href")
+    within(header)
+      .getByRole("link", { name: "Customer renewals" })
+      .getAttribute("href")
   ).toBe("/tables/t1")
+  expect(within(header).queryByText("Open page")).toBeNull()
 })
 
-test("a preview tab reads in italics; the pin marks and toggles", () => {
+test("a preview tab reads in italics; the pin marks and toggles, and a double click keeps", () => {
   const { onPin } = renderPane()
 
   expect(
@@ -110,10 +117,19 @@ test("a preview tab reads in italics; the pin marks and toggles", () => {
   fireEvent.click(screen.getByRole("button", { name: "Pin Renewals watch" }))
 
   expect(onPin).toHaveBeenCalledWith(job)
+
+  fireEvent.doubleClick(screen.getByRole("tab", { name: "Renewals watch" }))
+
+  expect(onPin).toHaveBeenCalledTimes(2)
+
+  // A tab already kept stays kept.
+  fireEvent.doubleClick(screen.getByRole("tab", { name: "Customer renewals" }))
+
+  expect(onPin).toHaveBeenCalledTimes(2)
 })
 
-test("choosing, closing, and closing all raise their callbacks", () => {
-  const { onActivate, onClose, onCloseAll, onOpenChange } = renderPane()
+test("choosing and closing raise their callbacks", () => {
+  const { onActivate, onClose, onOpenChange } = renderPane()
 
   fireEvent.mouseDown(screen.getByRole("tab", { name: "Renewals watch" }))
   fireEvent.click(screen.getByRole("tab", { name: "Renewals watch" }))
@@ -123,15 +139,78 @@ test("choosing, closing, and closing all raise their callbacks", () => {
   fireEvent.click(screen.getByRole("button", { name: "Close Renewals watch" }))
 
   expect(onClose).toHaveBeenCalledWith(job)
-
-  openMenu(screen.getByRole("button", { name: "Pane options" }))
-  fireEvent.click(screen.getByRole("menuitem", { name: "Close all" }))
-
-  expect(onCloseAll).toHaveBeenCalled()
+  expect(screen.queryByRole("button", { name: "Pane options" })).toBeNull()
 
   fireEvent.click(screen.getByRole("button", { name: "Close pane" }))
 
   expect(onOpenChange).toHaveBeenCalledWith(false)
+})
+
+test("a tab's menu offers the editor's closes, disabling what would take nothing", () => {
+  const { onClose, onCloseAll, onCloseBeside, onPin } = renderPane()
+  const first = openTabMenu("Customer renewals")
+  const disabled = (item: HTMLElement) => item.getAttribute("aria-disabled")
+
+  expect(
+    first.getAllByRole("menuitem").map((item) => item.textContent)
+  ).toEqual([
+    "Unpin",
+    "Close",
+    "Close others",
+    "Close to the left",
+    "Close to the right",
+    "Close all",
+  ])
+  expect(
+    disabled(first.getByRole("menuitem", { name: "Close to the left" }))
+  ).toBe("true")
+  expect(
+    disabled(first.getByRole("menuitem", { name: "Close to the right" }))
+  ).toBeNull()
+
+  fireEvent.click(first.getByRole("menuitem", { name: "Close to the right" }))
+
+  expect(onCloseBeside).toHaveBeenCalledWith(table, "right")
+
+  const last = openTabMenu("Renewals watch")
+
+  expect(last.getByRole("menuitem", { name: "Pin" })).toBeDefined()
+  expect(
+    disabled(last.getByRole("menuitem", { name: "Close to the right" }))
+  ).toBe("true")
+
+  fireEvent.click(last.getByRole("menuitem", { name: "Pin" }))
+
+  expect(onPin).toHaveBeenCalledWith(job)
+
+  fireEvent.click(
+    openTabMenu("Renewals watch").getByRole("menuitem", { name: "Close" })
+  )
+
+  expect(onClose).toHaveBeenCalledWith(job)
+
+  fireEvent.click(
+    openTabMenu("Renewals watch").getByRole("menuitem", { name: "Close all" })
+  )
+
+  expect(onCloseAll).toHaveBeenCalled()
+})
+
+test("alone in the strip, a tab has no others to close", () => {
+  renderPane({ tabs: [{ target: table, pinned: false }] })
+
+  const menu = openTabMenu("Customer renewals")
+
+  expect(
+    menu
+      .getByRole("menuitem", { name: "Close others" })
+      .getAttribute("aria-disabled")
+  ).toBe("true")
+  expect(
+    menu
+      .getByRole("menuitem", { name: "Close all" })
+      .getAttribute("aria-disabled")
+  ).toBeNull()
 })
 
 test("the strip's tabs are arrow-navigable", async () => {
@@ -150,7 +229,7 @@ test("the strip's tabs are arrow-navigable", async () => {
   )
 })
 
-test("a target the host cannot open reads as unavailable, with no body or page", () => {
+test("a target the host cannot open reads as unavailable, with no body or link", () => {
   const body = vi.fn(() => <p>Never</p>)
 
   renderPane({
@@ -165,7 +244,7 @@ test("a target the host cannot open reads as unavailable, with no body or page",
 
   expect(within(pane).getAllByText("No longer available")).toHaveLength(2)
   expect(screen.getByRole("tab", { name: "Old renewals" })).toBeDefined()
-  expect(screen.queryByRole("link", { name: "Open page" })).toBeNull()
+  expect(within(pane).queryByRole("link")).toBeNull()
   expect(body).not.toHaveBeenCalled()
 })
 
@@ -173,7 +252,9 @@ test("a target without a view for the pane points to its page", () => {
   renderPane({ body: () => null })
 
   expect(screen.getByText("Open the page to see it in full.")).toBeDefined()
-  expect(screen.getByRole("link", { name: "Open page" })).toBeDefined()
+  expect(
+    screen.getByRole("link", { name: "Customer renewals" }).getAttribute("href")
+  ).toBe("/tables/t1")
 })
 
 test("closed, or without tabs, only the chat is there", () => {
@@ -188,16 +269,30 @@ test("closed, or without tabs, only the chat is there", () => {
   expect(screen.queryByRole("complementary")).toBeNull()
 })
 
-test("the hint offers to keep the behavior or open manually", () => {
+test("the hint floats over the chat, above the composer, and offers the two ways on", () => {
   const onHint = vi.fn()
 
   renderPane({ onHint })
 
-  expect(screen.getByText("New resources open beside your chat.")).toBeDefined()
+  const hint = screen.getByRole("toolbar", {
+    name: "Resources beside the chat",
+  })
+  const pane = screen.getByRole("complementary", { name: "Resources" })
 
-  fireEvent.click(screen.getByRole("button", { name: "Open manually" }))
+  expect(hint.textContent).toContain("New resources open beside your chat.")
+  expect(within(pane).queryByText(/New resources/)).toBeNull()
+  expect(
+    hint.compareDocumentPosition(screen.getByText("The composer")) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy()
+
+  fireEvent.click(within(hint).getByRole("button", { name: "Open manually" }))
 
   expect(onHint).toHaveBeenCalledWith("manual")
+
+  fireEvent.click(within(hint).getByRole("button", { name: "Keep this" }))
+
+  expect(onHint).toHaveBeenCalledWith("keep")
 })
 
 test("below md the pane is a sheet over the chat, and Escape puts it away", () => {

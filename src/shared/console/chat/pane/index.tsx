@@ -14,6 +14,7 @@ import {
 import { referencePresentation } from "../presentation"
 import { type ChatReference, type ReferenceTarget } from "../types"
 import { PaneHeader } from "./header"
+import { PaneHint } from "./hint"
 import { targetKey } from "./routes"
 import { PaneStrip, type PaneStripProps } from "./strip"
 import { type PanePreference } from "./tabs"
@@ -28,8 +29,10 @@ export type ChatPaneProps = PaneStripProps & {
   /** What the active target shows: the host picks the view and supplies
    *  its data. Nothing means the target opens on its own page only. */
   body: (target: ReferenceTarget) => ReactNode
-  /** The chat column the pane sits beside. */
+  /** The thread the pane sits beside. */
   children: ReactNode
+  /** The composer under the thread; the hint floats between the two. */
+  composer: ReactNode
   onHint?: (preference: PanePreference) => void
   open: boolean
 }
@@ -41,6 +44,7 @@ export type ChatPaneProps = PaneStripProps & {
 export function ChatPane({
   body,
   children,
+  composer,
   onHint,
   open,
   ...strip
@@ -48,14 +52,21 @@ export function ChatPane({
   const isMobile = useIsMobile()
   const closeRef = useRef<HTMLButtonElement>(null)
   const isShown = open && strip.tabs.length > 0
-  const panel = (
-    <PanePanel body={body} closeRef={closeRef} onHint={onHint} {...strip} />
+  const chat = (
+    <>
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {children}
+        {onHint === undefined ? null : <PaneHint onChoose={onHint} />}
+      </div>
+      {composer}
+    </>
   )
+  const panel = <PanePanel body={body} closeRef={closeRef} {...strip} />
 
   if (isMobile) {
     return (
       <>
-        {children}
+        {chat}
         <Sheet onOpenChange={strip.onOpenChange} open={isShown}>
           <SheetContent
             aria-describedby={undefined}
@@ -82,7 +93,7 @@ export function ChatPane({
         id="chat"
         minSize={chatMinWidth}
       >
-        {children}
+        {chat}
       </ResizablePanel>
       {isShown ? (
         <>
@@ -105,12 +116,10 @@ export function ChatPane({
 function PanePanel({
   body,
   closeRef,
-  onHint,
   ...strip
 }: PaneStripProps & {
   body: (target: ReferenceTarget) => ReactNode
   closeRef: RefObject<HTMLButtonElement | null>
-  onHint: ((preference: PanePreference) => void) | undefined
 }) {
   const { active, resolve } = strip
   const reference = active === null ? undefined : resolve(active)
@@ -132,7 +141,6 @@ function PanePanel({
           content={isUnavailable ? null : body(active)}
           isUnavailable={isUnavailable}
           key={targetKey(active)}
-          onHint={onHint}
           reference={reference}
           target={active}
         />
@@ -148,13 +156,11 @@ function PanePanel({
 function PaneContent({
   content,
   isUnavailable,
-  onHint,
   reference,
   target,
 }: {
   content: ReactNode
   isUnavailable: boolean
-  onHint: ((preference: PanePreference) => void) | undefined
   reference: ChatReference | undefined
   target: ReferenceTarget
 }) {
@@ -162,12 +168,7 @@ function PaneContent({
 
   return (
     <>
-      <PaneHeader
-        crumb={crumb}
-        onHint={onHint}
-        reference={reference}
-        target={target}
-      />
+      <PaneHeader crumb={crumb} reference={reference} target={target} />
       {content === null || content === undefined ? (
         <PaneEmpty
           isUnavailable={isUnavailable}
@@ -184,7 +185,7 @@ function PaneContent({
 }
 
 /** A quiet body: the target is gone, or it has no view for the pane and
- *  the header's link is the way to it. */
+ *  the header's name is the way to it. */
 function PaneEmpty({
   isUnavailable,
   reference,

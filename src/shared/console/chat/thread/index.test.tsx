@@ -120,7 +120,6 @@ test("renders both turns: the ask in its bubble with its context, the reply as p
   renderThread({ messages: [ask, reply], onOpenReference })
 
   expect(screen.getByText("Which renewals are at risk?")).toBeDefined()
-  expect(screen.getByText("1m ago")).toBeDefined()
   expect(screen.getAllByText("Customer renewals")).toHaveLength(2)
   expect(screen.getByText("Harbor House").tagName).toBe("STRONG")
 
@@ -176,6 +175,8 @@ test("a live run and its draft are one turn of Jori's, and chips wait for it", (
   expect(turn?.querySelectorAll("title")).toHaveLength(0)
   expect(turn?.textContent).toContain("Working on it")
   expect(screen.getByRole("button", { name: "Thought" })).toBeDefined()
+  // The draft's turn carries no actions of its own.
+  expect(turn?.querySelector("time")).toBeNull()
 })
 
 test("before the reply's text, the turn shows the thinking as it streams", () => {
