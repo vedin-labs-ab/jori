@@ -1,10 +1,12 @@
-import { interactiveGraceMicros } from "../../contracts/billing"
+import {
+  type BudgetReason,
+  budgetSentence,
+  interactiveGraceMicros,
+} from "../../contracts/billing"
 import { type MutationCtx } from "../_generated/server"
 import { availableMicros, ensureAccount } from "./account"
 
-type RunBudget =
-  | { ok: true }
-  | { ok: false; reason: "trial-ended" | "paused" | "out-of-usage" }
+type RunBudget = { ok: true } | { ok: false; reason: BudgetReason }
 
 /**
  * Decides whether new work may start. Interactive work (console instructions,
@@ -36,15 +38,6 @@ export async function checkRunBudget(
   return { ok: true }
 }
 
-const budgetMessages = {
-  "trial-ended":
-    "The trial has ended. Choose a plan in Billing settings to keep Jori working.",
-  paused:
-    "The subscription is paused. Visit Billing settings to reactivate it.",
-  "out-of-usage":
-    "The organization is out of usage. Add to the wallet in Billing settings, or wait for the monthly reset.",
-} as const
-
 export async function requireRunBudget(
   ctx: MutationCtx,
   args: { organizationId: string; interactive: boolean }
@@ -52,6 +45,6 @@ export async function requireRunBudget(
   const budget = await checkRunBudget(ctx, args)
 
   if (!budget.ok) {
-    throw new Error(budgetMessages[budget.reason])
+    throw new Error(budgetSentence(budget.reason, "new work cannot start"))
   }
 }

@@ -15,6 +15,7 @@ import { executionPrincipalForPerson } from "../runs/principal"
 import { type MessageCauseKind } from "../runs/schema"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { findSession, isReusableSession, startSession } from "../sessions/data"
+import { insertRow } from "../shared/context"
 import { createSight } from "../visibility/sight"
 import { isFreshRunWithoutWaiter } from "./fresh"
 import { findConversation } from "./resolve"
@@ -64,20 +65,13 @@ async function insertConversation(
     message: Doc<"messages">
   }
 ) {
-  const conversationId = await ctx.db.insert("conversations", {
+  return await insertRow(ctx, "conversations", {
     organizationId: args.integration.organizationId,
     surface: args.message.surface,
     integrationId: args.integration._id,
     externalId: args.externalId,
     scope: conversationScope(args.message),
   })
-  const conversation = await ctx.db.get(conversationId)
-
-  if (conversation === null) {
-    throw new Error("Conversation insert failed.")
-  }
-
-  return conversation
 }
 
 export async function startMessageRun(

@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import {
+  budgetSentence,
   dollarsToMicros,
   formatUsd,
   priceModelTokens,
@@ -50,4 +51,18 @@ test("formats micro-dollars as currency", () => {
 test("marks sub-cent amounts instead of rounding them away", () => {
   expect(formatUsd(4_000)).toBe("<$0.01")
   expect(formatUsd(-4_000)).toBe("-<$0.01")
+})
+
+test("a budget sentence names the state, the consequence, and the remedy", () => {
+  expect(budgetSentence("out-of-usage", "this message waits")).toBe(
+    "Jori is out of usage, so this message waits. Add to the wallet in Billing settings, or wait for the monthly reset."
+  )
+  expect(budgetSentence("paused", "new work cannot start")).toBe(
+    "The subscription is paused, so new work cannot start. Visit Billing settings to reactivate it."
+  )
+  expect(
+    budgetSentence("trial-ended", "the run stopped before its next turn")
+  ).toBe(
+    "The trial has ended, so the run stopped before its next turn. Choose a plan in Billing settings to keep Jori working."
+  )
 })

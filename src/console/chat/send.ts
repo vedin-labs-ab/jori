@@ -1,3 +1,4 @@
+import { budgetSentence } from "@contracts/billing"
 import { insertAtTop, useMutation } from "convex/react"
 import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
@@ -11,8 +12,7 @@ type SendArgs = Omit<
   "organizationId"
 >
 
-const blockedMessage =
-  "Jori is out of usage, so this message waits. New work starts once the wallet is topped up or the monthly allowance resets."
+const blockedMessage = budgetSentence("out-of-usage", "this message waits")
 
 /** Sends the person's message. In an open conversation the bubble lands
  *  before the round trip, at the top of the newest-first page the thread

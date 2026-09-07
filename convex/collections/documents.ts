@@ -7,7 +7,7 @@ import { assertJsonSerializable } from "../../contracts/json/stable"
 import { assertJsonSchemaValue } from "../../contracts/schema/validate"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { type QueryLikeCtx } from "../shared/context"
+import { insertRow, type QueryLikeCtx } from "../shared/context"
 import { assertExpectedVersion } from "./input"
 import { type InsertAnchor, resolveInsertOrders } from "./order"
 import { type CollectionDoc, type CollectionKind, type KindSpec } from "./spec"
@@ -264,7 +264,7 @@ async function createDocument(
     order === undefined
       ? await resolveInsertOrders(ctx, collectionId, 1)
       : [order]
-  const documentId = await ctx.db.insert("documents", {
+  const document = await insertRow(ctx, "documents", {
     collectionId,
     value,
     version: 1,
@@ -272,11 +272,6 @@ async function createDocument(
     createdAt: now,
     updatedAt: now,
   })
-  const document = await ctx.db.get(documentId)
-
-  if (document === null) {
-    throw new Error("Document insert failed.")
-  }
 
   await adjustDocumentCount(ctx, collectionId, 1)
 

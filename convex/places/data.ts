@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { type QueryLikeCtx } from "../shared/context"
+import { insertRow, type QueryLikeCtx } from "../shared/context"
 import { type PlaceVisibility, placeVisibility } from "./schema"
 
 // The normalized descriptor provider edges attach to observed messages when
@@ -36,7 +36,7 @@ export async function ensurePlace(
     return await refreshPlace(ctx, existing, input.place)
   }
 
-  const placeId = await ctx.db.insert("places", {
+  return await insertRow(ctx, "places", {
     organizationId: input.integration.organizationId,
     integrationId: input.integration._id,
     externalId: input.place.externalId,
@@ -44,13 +44,6 @@ export async function ensurePlace(
     visibility: input.place.visibility,
     claims: [],
   })
-  const place = await ctx.db.get(placeId)
-
-  if (place === null) {
-    throw new Error("Place insert failed.")
-  }
-
-  return place
 }
 
 async function findPlace(

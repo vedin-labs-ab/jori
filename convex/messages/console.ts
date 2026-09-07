@@ -7,7 +7,7 @@ import { requireVisibleConsoleConversation } from "../conversations/resolve"
 import { resolveCurrentPerson } from "../persons/account"
 import { clearRunDraft } from "../runs/execution/drafts/data"
 import { type Actor } from "../shared/actor"
-import { type QueryLikeCtx } from "../shared/context"
+import { insertRow, type QueryLikeCtx } from "../shared/context"
 import { type referenceTargetValidator } from "./references"
 
 // Console messages: what a person types to Jori in the web console and what
@@ -147,7 +147,7 @@ export async function insertConsoleMessage(
     text: string
   }
 ) {
-  const messageId = await ctx.db.insert("messages", {
+  const message = await insertRow(ctx, "messages", {
     organizationId: input.conversation.organizationId,
     surface: "console",
     type: consoleMessageType,
@@ -160,11 +160,6 @@ export async function insertConsoleMessage(
     data: input.data,
     createdAt: input.now,
   })
-  const message = await ctx.db.get(messageId)
-
-  if (message === null) {
-    throw new Error("Message insert failed.")
-  }
 
   await ctx.db.patch(input.conversation._id, { updatedAt: input.now })
 

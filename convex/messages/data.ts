@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveActor } from "../persons/resolve"
 import { type Actor, actorValidator } from "../shared/actor"
+import { insertRow } from "../shared/context"
 import {
   type MessageIntegration,
   type MessageSurface,
@@ -59,7 +60,7 @@ export async function insertMessage(
   }
 ): Promise<Doc<"messages">> {
   const now = Date.now()
-  const messageId = await ctx.db.insert("messages", {
+  return await insertRow(ctx, "messages", {
     organizationId: input.integration.organizationId,
     surface: input.surface,
     integrationId: input.integration._id,
@@ -76,13 +77,6 @@ export async function insertMessage(
     observedAt: input.message.observedAt,
     createdAt: now,
   })
-  const message = await ctx.db.get(messageId)
-
-  if (message === null) {
-    throw new Error("Message insert failed.")
-  }
-
-  return message
 }
 
 /** Console messages are stamped with their person at write time; a provider
