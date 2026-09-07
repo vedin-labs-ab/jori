@@ -4,7 +4,6 @@ import {
   mentionText,
   readMentionAttributes,
 } from "@/shared/console/mentions/node"
-import { jobMentionText } from "../../../access"
 import { serializedCodeSpanNodeName } from "./fence"
 import { jobSurfaceNodeName, parseJobSurfaceIntegration } from "./schema"
 
@@ -108,9 +107,7 @@ function referencePlaceholder(
 function serializedReference(node: JSONContent) {
   if (node.type === jobSurfaceNodeName) {
     const integration = parseJobSurfaceIntegration(node.attrs?.integration)
-    return integration === null
-      ? ""
-      : jobMentionText("integration", integration)
+    return integration === null ? "" : mentionText("integration", integration)
   }
 
   if (node.type !== mentionNodeName) {

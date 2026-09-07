@@ -7,6 +7,7 @@ import {
   type ChatReference,
   type ReferenceTarget,
   type ResolveReference,
+  targetKey,
 } from "@/shared/console/chat/types"
 import { api } from "../../../convex/_generated/api"
 
@@ -121,8 +122,4 @@ function toChatReference(reference: ResolvedReference) {
 /** A target still being looked up reads as its kind, openable already. */
 function pending(target: ReferenceTarget): ChatReference {
   return { ...target, name: referencePresentation(target.kind, "").label }
-}
-
-function targetKey(target: ReferenceTarget) {
-  return `${target.kind}:${target.id}`
 }

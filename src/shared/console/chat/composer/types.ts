@@ -1,10 +1,6 @@
 import { type MessageContext } from "@contracts/replies/answers"
 import { type Editor } from "@tiptap/react"
-import {
-  type Dispatch,
-  type MutableRefObject,
-  type SetStateAction,
-} from "react"
+import { type Dispatch, type SetStateAction } from "react"
 import { type MentionCatalog } from "../../mentions/scan"
 import {
   type MentionSources,
@@ -36,23 +32,24 @@ export type ComposerEditorArgs = {
 }
 
 /** What the editor's handlers read of the latest render, since the
- *  editor is made once. */
+ *  editor is made once: the host's args, the catalog made of its
+ *  sources, the editor itself, and the listbox under the caret. */
+export type ComposerLatest = {
+  args: ComposerEditorArgs
+  catalog: MentionCatalog
+  editor: Editor | null
+  suggestion: ComposerSuggestionState | null
+}
+
+/** What the handlers keep across renders. */
 export type ComposerRefs = {
-  catalog: MutableRefObject<MentionCatalog>
-  editor: MutableRefObject<Editor | null>
-  /** The names of the resources put in as chips, by `kind:id`, so a chip
-   *  keeps its name after the picker's list has moved on. */
+  latest: { current: ComposerLatest }
+  /** The names of the resources put in as chips, by target key, so a
+   *  chip keeps its name after the picker's list has moved on. */
   names: Map<string, string>
-  /** The resources the text holds now, by `kind:id`, so a deletion is
+  /** The resources the text holds now, by target key, so a deletion is
    *  seen for the chip it took. */
   mentioned: Map<string, MessageContext>
   /** A send the host is still answering, so a second Enter waits. */
   sending: boolean
-  onMention: MutableRefObject<ComposerEditorArgs["onMention"]>
-  onUnmention: MutableRefObject<ComposerEditorArgs["onUnmention"]>
-  onSend: MutableRefObject<ComposerEditorArgs["onSend"]>
-  open: MutableRefObject<boolean>
-  resolve: MutableRefObject<ResolveReference | undefined>
-  sources: MutableRefObject<MentionSources>
-  suggestion: MutableRefObject<ComposerSuggestionState | null>
 }

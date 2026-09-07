@@ -1,10 +1,11 @@
-import { BookOpen } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { ProviderLogo } from "@/shared/logo/provider"
 import { referencePresentation } from "../../chat/presentation"
+import { MentionKindIcon } from "../icon"
 import { type MentionSuggestion } from "../sources"
 import { type SuggestionState } from "./state"
+
+const iconClassName = "size-3.5 shrink-0 text-muted-foreground"
 
 /** What a row of the listbox says of its option beyond the option
  *  itself: a hint it is described by, a title on hover. */
@@ -120,35 +121,23 @@ function SuggestionOption({
   )
 }
 
-/** The mark a suggestion wears: a resource's kind, a skill's book, and
- *  for a tool or an integration the integration's own logo. */
-export function SuggestionIcon({
-  suggestion,
-}: {
-  suggestion: MentionSuggestion
-}) {
-  if (suggestion.target !== undefined) {
+/** The mark a suggestion wears: a resource's kind, the rest their own. */
+function SuggestionIcon({ suggestion }: { suggestion: MentionSuggestion }) {
+  if (suggestion.kind === "resource") {
     const Icon = referencePresentation(
       suggestion.target.kind,
       suggestion.label
     ).icon
 
-    return (
-      <Icon
-        aria-hidden="true"
-        className="size-3.5 shrink-0 text-muted-foreground"
-      />
-    )
+    return <Icon aria-hidden="true" className={iconClassName} />
   }
 
-  if (suggestion.kind === "skill") {
-    return (
-      <BookOpen
-        aria-hidden="true"
-        className="size-3.5 shrink-0 text-muted-foreground"
-      />
-    )
-  }
-
-  return <ProviderLogo className="size-3.5" surface={suggestion.surface} />
+  return (
+    <MentionKindIcon
+      className={iconClassName}
+      id={suggestion.id}
+      kind={suggestion.kind}
+      surface={suggestion.surface}
+    />
+  )
 }

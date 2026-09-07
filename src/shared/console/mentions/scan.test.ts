@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { targetKey } from "../chat/types"
 import { findActiveMention } from "./active"
 import { mentionText } from "./node"
 import {
@@ -8,7 +9,6 @@ import {
   mentionKinds,
   parseResourceMention,
   readMentions,
-  resourceMentionId,
 } from "./scan"
 
 const catalog: MentionCatalog = {
@@ -58,7 +58,7 @@ describe("mention scan", () => {
   test("a resource token carries its target both ways", () => {
     const target = { kind: "table", id: "k17abc" } as const
 
-    expect(resourceMentionId(target)).toBe("table:k17abc")
+    expect(targetKey(target)).toBe("table:k17abc")
     expect(parseResourceMention("table:k17abc")).toEqual(target)
     expect(parseResourceMention("video:k17abc")).toBeNull()
     expect(parseResourceMention(7)).toBeNull()

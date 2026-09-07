@@ -1,6 +1,6 @@
 import { isReplyQuestion } from "@contracts/replies/parts"
 import { type OpenTarget } from "../pane/tabs"
-import { type ChatMessage, type ResolveReference } from "../types"
+import { type ChatMessage, type ResolveReference, targetKey } from "../types"
 import { ChoiceChips } from "./choices"
 import { QuestionBundle } from "./question"
 import { ReferenceCard } from "./reference"
@@ -47,7 +47,7 @@ export function ReplyParts({
         <div className="flex flex-wrap gap-2">
           {references.map((part) => (
             <ReferenceCard
-              key={`${part.target.kind}:${part.target.id}`}
+              key={targetKey(part.target)}
               onOpen={onOpenReference}
               reference={resolveReference(part.target)}
               target={part.target}

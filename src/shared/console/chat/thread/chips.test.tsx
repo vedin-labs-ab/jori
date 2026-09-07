@@ -17,11 +17,7 @@ const catalog = createMentionCatalog({
   ...emptyMentionSources,
   integrations: ["slack"],
   skills: ["triage"],
-  tools: ["search_files"].map((tool) => ({
-    label: tool,
-    surface: "jori" as const,
-    tool,
-  })),
+  tools: [{ surface: "jori", tool: "search_files" }],
 })
 const resolve: ResolveReference = (target) =>
   target.id === "t1"

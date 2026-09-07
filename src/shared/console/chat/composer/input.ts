@@ -13,11 +13,7 @@ import {
 } from "../../mentions/suggest/insert"
 import { handleSuggestionKey } from "../../mentions/suggest/keys"
 import { serializeComposerDocument } from "./codec"
-import {
-  type ComposerRefs,
-  type ComposerSuggestionState,
-  type SetComposerSuggestion,
-} from "./types"
+import { type ComposerRefs, type SetComposerSuggestion } from "./types"
 
 /** The listbox's keys first while it is open; then Enter sends, unless
  *  Shift holds it to a line break or an input method is composing. */
@@ -34,16 +30,9 @@ export function handleComposerKey({
 }) {
   const handled = handleSuggestionKey({
     event,
-    onSelect: (item) =>
-      selectSuggestion(
-        refs.editor.current,
-        refs,
-        refs.suggestion.current,
-        item,
-        setSuggestion
-      ),
+    onSelect: (item) => selectSuggestion(refs, item, setSuggestion),
     setSuggestion,
-    state: refs.suggestion.current,
+    state: refs.latest.current.suggestion,
   })
 
   if (handled) {
@@ -52,7 +41,7 @@ export function handleComposerKey({
 
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
     event.preventDefault()
-    sendDraft(refs.editor.current, refs, setPending)
+    sendDraft(refs, setPending)
     return true
   }
 
@@ -61,12 +50,12 @@ export function handleComposerKey({
 
 /** Puts the chosen suggestion where the sigil and its query stand. */
 export function selectSuggestion(
-  editor: Editor | null,
   refs: ComposerRefs,
-  state: ComposerSuggestionState | null,
   item: MentionSuggestion,
   setSuggestion: SetComposerSuggestion
 ) {
+  const { editor, suggestion: state } = refs.latest.current
+
   if (editor === null || state === null || item.disabled) {
     return
   }
@@ -79,11 +68,9 @@ export function selectSuggestion(
 }
 
 /** Puts a mention at the caret, from the attach menu. */
-export function insertMention(
-  editor: Editor | null,
-  refs: ComposerRefs,
-  item: MentionSuggestion
-) {
+export function insertMention(refs: ComposerRefs, item: MentionSuggestion) {
+  const { editor } = refs.latest.current
+
   if (editor === null) {
     return
   }
@@ -101,10 +88,7 @@ export function insertMention(
 function remember(refs: ComposerRefs, item: MentionSuggestion) {
   if (item.kind === "resource") {
     refs.names.set(item.id, item.label)
-
-    if (item.target !== undefined) {
-      refs.onMention.current?.(item.target)
-    }
+    refs.latest.current.args.onMention?.(item.target)
   }
 }
 
@@ -153,11 +137,12 @@ export function completeTypedMention({
  *  that fails leaves the words where they were for another try, and the
  *  host says why. */
 export function sendDraft(
-  editor: Editor | null,
   refs: ComposerRefs,
   setPending: (pending: boolean) => void
 ) {
-  if (editor === null || !refs.open.current || refs.sending) {
+  const { args, editor } = refs.latest.current
+
+  if (editor === null || !args.open || refs.sending) {
     return
   }
 
@@ -167,7 +152,7 @@ export function sendDraft(
     return
   }
 
-  const result = refs.onSend.current(draft.text, draft.references)
+  const result = args.onSend(draft.text, draft.references)
 
   if (!(result instanceof Promise)) {
     clearDraft(editor, refs)

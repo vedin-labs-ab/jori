@@ -47,7 +47,7 @@ export function insertMentionContent(
 }
 
 /** The marks at the selection, as content takes them; none is nothing. */
-export function activeMarks(editor: Editor) {
+function activeMarks(editor: Editor) {
   const marks = editor.state.selection.$from
     .marks()
     .map((mark) => mark.toJSON())

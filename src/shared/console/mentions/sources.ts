@@ -3,22 +3,24 @@ import {
   integrationLabel,
   type ToolSurface,
 } from "@contracts/integrations"
-import { type MessageContext } from "@contracts/replies/answers"
+import {
+  type MentionResource,
+  type MessageContext,
+} from "@contracts/replies/answers"
 import { referencePresentation } from "../chat/presentation"
+import { targetKey } from "../chat/types"
 import { type ActiveMention } from "./active"
 import { rankByName } from "./rank"
 import {
   type MentionCatalog,
   type MentionKind,
-  resourceMentionId,
+  type NamedMentionKind,
   sortMentionTokens,
 } from "./scan"
 
-/** A resource a message can mention, named for the picker. */
-export type MentionResource = MessageContext & { name: string }
+export type { MentionResource } from "@contracts/replies/answers"
 
 export type MentionTool = {
-  label: string
   surface: ToolSurface
   tool: string
 }
@@ -43,12 +45,16 @@ export type MentionSuggestion = {
   detail?: string
   disabled?: boolean
   id: string
-  kind: MentionKind
   label: string
-  /** The integration whose mark stands for it. */
-  surface?: string
-  target?: MessageContext
-}
+} & (
+  | { kind: "resource"; surface?: never; target: MessageContext }
+  | {
+      kind: NamedMentionKind
+      /** The integration whose mark stands for it. */
+      surface?: string
+      target?: never
+    }
+)
 
 export const emptyMentionSources: MentionSources = {
   integrations: [],
@@ -88,8 +94,8 @@ export function suggestMentions(
   return rankByName(active.query, mentionOptions(active.kind, sources))
 }
 
-/** Every item a kind offers, unranked: what the attach menu lists. */
-export function mentionOptions(
+/** Every item a kind offers, unranked. */
+function mentionOptions(
   kind: MentionKind,
   sources: MentionSources
 ): MentionSuggestion[] {
@@ -122,7 +128,7 @@ export function resourceSuggestion(
 
   return {
     detail: referencePresentation(target.kind, name).label,
-    id: resourceMentionId(target),
+    id: targetKey(target),
     kind: "resource",
     label: name,
     target,

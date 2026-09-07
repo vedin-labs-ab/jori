@@ -1,11 +1,14 @@
 import { mergeAttributes, Node } from "@tiptap/core"
-import { MentionNode, mentionNodeName } from "@/shared/console/mentions/node"
+import {
+  MentionNode,
+  mentionNodeName,
+  mentionText,
+} from "@/shared/console/mentions/node"
 import {
   getJobSurfaceLabel,
   isJobSurfaceIntegration,
   type JobMentionKind,
   type JobScope,
-  jobMentionText,
 } from "../../../access"
 import { type JobPolicyPermissions } from "../../../access/policy"
 
@@ -93,9 +96,7 @@ export const JobSurfaceNode = Node.create<JobSurfaceNodeOptions>({
   renderMarkdown(node) {
     const integration = parseJobSurfaceIntegration(node.attrs?.integration)
 
-    return integration === null
-      ? ""
-      : jobMentionText("integration", integration)
+    return integration === null ? "" : mentionText("integration", integration)
   },
 })
 
