@@ -1,3 +1,5 @@
+import { type RuntimeId } from "../../../contracts/runtime/ids"
+
 export type SandboxCommandInput = {
   command: string
   cwd?: string
@@ -41,6 +43,7 @@ export type SandboxWriteFile = {
 }
 
 export type SandboxRuntime = {
+  importFile(input: { fileId: RuntimeId<"files">; path: string }): Promise<void>
   cloneRepository(
     input: SandboxCloneRepositoryInput
   ): Promise<SandboxCloneResult>

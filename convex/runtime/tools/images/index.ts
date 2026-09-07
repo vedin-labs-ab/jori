@@ -27,18 +27,16 @@ export async function generateImageFile(
   const name = imageFileName(request.save.name, generated.mimeType)
   const workspacePath = `${generatedImageDirectory}/${name}`
 
-  await runtime.sandbox.writeFiles([
-    {
-      content: generated.bytes,
-      path: `${sandboxWorkspace}/${workspacePath}`,
-    },
-  ])
-
   const file = await runtime.platform.uploadFile({
     bytes: generated.bytes,
     mimeType: generated.mimeType,
     name,
     runId: runtime.context.run.id,
+  })
+
+  await runtime.sandbox.importFile({
+    fileId: file.fileId,
+    path: `${sandboxWorkspace}/${workspacePath}`,
   })
 
   return {

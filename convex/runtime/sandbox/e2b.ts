@@ -11,6 +11,7 @@ import {
   connectSandbox,
   createSandbox,
   defaultCommandTimeoutMs,
+  type E2BSandbox,
   killSandbox,
   normalizeCommandResult,
   runSandboxCommand,
@@ -220,10 +221,10 @@ async function reserveCleanup(
 
 /** The actions are stateless, so each one either reconnects to the sandbox the
  *  caller names or creates the run's first and records it. */
-async function openSandbox(
+export async function openSandbox(
   ctx: ActionCtx,
   args: { runId: Id<"runs">; sandboxId: string | null }
-) {
+): Promise<E2BSandbox> {
   if (args.sandboxId !== null) {
     return await connectSandbox(args.sandboxId)
   }

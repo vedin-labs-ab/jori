@@ -6,6 +6,10 @@ export function sandboxWorkspacePath(value: string | undefined) {
     : sandboxPath(value, { allowRoot: true })
 }
 
+export function sandboxFilePath(value: string) {
+  return sandboxPath(value)
+}
+
 export function sandboxClonePath(args: {
   repository: string
   value: string | null | undefined

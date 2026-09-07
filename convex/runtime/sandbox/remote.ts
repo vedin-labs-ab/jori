@@ -78,6 +78,15 @@ export class RemoteSandbox implements SandboxRuntime {
     )
   }
 
+  async importFile(input: { fileId: Id<"files">; path: string }) {
+    this.remember(
+      await this.ctx.runAction(internal.runtime.sandbox.e2b.imports.file, {
+        runId: this.runId,
+        ...input,
+      })
+    )
+  }
+
   async cloneRepository(input: SandboxCloneRepositoryInput) {
     return this.remember(
       await this.ctx.runAction(internal.runtime.sandbox.e2b.clone, {
