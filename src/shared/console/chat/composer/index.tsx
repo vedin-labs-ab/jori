@@ -2,6 +2,7 @@ import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
 import { type MouseEvent, useEffect, useId } from "react"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
+import { useStoredOpen } from "@/shared/storage"
 import {
   emptyMentionSources,
   type MentionSources,
@@ -16,7 +17,7 @@ import {
 } from "../types"
 import { useComposerEditor } from "./editor"
 import { ComposerField, ContextChip } from "./field"
-import { ComposerFooter } from "./footer"
+import { ComposerFooter, HintsPeek } from "./footer"
 
 /** Where the person writes: plain text with the things it mentions as
  *  chips in it, put there from a sigil's listbox or the "+" menu. Enter
@@ -35,6 +36,7 @@ export function ChatComposer({
   onMention,
   onSelect,
   onSend,
+  onUnmention,
   onStop,
   placeholder = "Tell Jori what needs doing",
   reason,
@@ -59,6 +61,9 @@ export function ChatComposer({
    *  name. */
   onSend: (text: string, references: MessageContext[]) => void
   onStop: () => void
+  /** Takes each resource whose chip is deleted, so a host that opened
+   *  it on the mention can let it go again. */
+  onUnmention?: (target: MessageContext) => void
   /** What the empty field says; the home types asks into it. */
   placeholder?: string
   /** Why the composer is disabled, shown when it is. */
@@ -72,6 +77,7 @@ export function ChatComposer({
   usage?: ChatContextUsage | null
 }) {
   const reasonId = useId()
+  const [hintsOpen, setHintsOpen] = useStoredOpen("jori.chat.hints")
   const isLive = isLiveRun(live)
   const showsReason = disabled && reason !== undefined
   const shownReason = showsReason ? reason : undefined
@@ -79,6 +85,7 @@ export function ChatComposer({
     disabled,
     onMention,
     onSend,
+    onUnmention,
     open: !disabled && !isLive,
     resolve,
     sources: mentions,
@@ -116,6 +123,7 @@ export function ChatComposer({
           canSend={composer.canSend}
           isLive={isLive}
           mentions={mentions}
+          onHideHints={hintsOpen ? () => setHintsOpen(false) : undefined}
           onPick={composer.insertMention}
           onSelect={onSelect}
           onStop={onStop}
@@ -128,6 +136,9 @@ export function ChatComposer({
           usage={usage}
         />
       </InputGroup>
+      {hintsOpen || shownReason !== undefined ? null : (
+        <HintsPeek onShow={() => setHintsOpen(true)} />
+      )}
     </form>
   )
 }

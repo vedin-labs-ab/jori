@@ -1,8 +1,15 @@
-import { useCallback, useReducer, useState } from "react"
+import {
+  type Dispatch,
+  useCallback,
+  useMemo,
+  useReducer,
+  useState,
+} from "react"
 import { readStorage, writeStorage } from "@/shared/storage"
 import { type ReferenceTarget } from "../types"
 import {
   initialPaneState,
+  type PaneAction,
   type PaneSide,
   type PaneTab,
   reducePane,
@@ -50,6 +57,8 @@ export type OpenTarget = (
 export function usePaneTabs(): {
   autoOpen: (target: ReferenceTarget) => void
   openTarget: OpenTarget
+  /** Lets a preview go — a chip deleted, say — and keeps a pinned tab. */
+  releaseTarget: (target: ReferenceTarget) => void
   pane: PaneProps
 } {
   const [state, dispatch] = useReducer(reducePane, initialPaneState)
@@ -73,40 +82,41 @@ export function usePaneTabs(): {
         dispatch({ type: "open", target, auto: false, ...options }),
       []
     ),
+    releaseTarget: useCallback(
+      (target: ReferenceTarget) => dispatch({ type: "release", target }),
+      []
+    ),
     pane: {
+      ...useTabActions(dispatch),
       active: state.active,
       autoOpens: preference !== "manual",
-      onActivate: useCallback(
-        (target: ReferenceTarget) => dispatch({ type: "activate", target }),
-        []
-      ),
-      onClose: useCallback(
-        (target: ReferenceTarget) => dispatch({ type: "close", target }),
-        []
-      ),
-      onCloseAll: useCallback(() => dispatch({ type: "closeAll" }), []),
-      onCloseBeside: useCallback(
-        (target: ReferenceTarget, side: PaneSide) =>
-          dispatch({ type: "closeBeside", target, side }),
-        []
-      ),
       onAutoOpens: useCallback(
         (on: boolean) => choose(on ? "keep" : "manual"),
         [choose]
       ),
       onHint: state.autoOpened && preference === undefined ? choose : undefined,
-      onOpenChange: useCallback(
-        (open: boolean) => dispatch({ type: "setOpen", open }),
-        []
-      ),
-      onPin: useCallback(
-        (target: ReferenceTarget) => dispatch({ type: "pin", target }),
-        []
-      ),
       open: state.open,
       tabs: state.tabs,
     },
   }
+}
+
+/** The pane's controls that are the reducer's alone, made once: the
+ *  dispatch never changes, so neither do they. */
+function useTabActions(dispatch: Dispatch<PaneAction>) {
+  return useMemo(
+    () => ({
+      onActivate: (target: ReferenceTarget) =>
+        dispatch({ type: "activate", target }),
+      onClose: (target: ReferenceTarget) => dispatch({ type: "close", target }),
+      onCloseAll: () => dispatch({ type: "closeAll" }),
+      onCloseBeside: (target: ReferenceTarget, side: PaneSide) =>
+        dispatch({ type: "closeBeside", target, side }),
+      onOpenChange: (open: boolean) => dispatch({ type: "setOpen", open }),
+      onPin: (target: ReferenceTarget) => dispatch({ type: "pin", target }),
+    }),
+    [dispatch]
+  )
 }
 
 function readPreference(): PanePreference | undefined {

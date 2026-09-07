@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react"
-import { type ReactNode, useCallback, useState } from "react"
+import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Collapsible,
@@ -13,7 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { readStorage, writeStorage } from "@/shared/storage"
+import { useStoredOpen } from "@/shared/storage"
 
 /** The control a group's label is: a ghost pill that grows on hover
  *  around text resting exactly where a plain label's would. Constant
@@ -37,7 +37,7 @@ export function CollapsibleGroup({
   /** The group's key in storage. */
   name: string
 }) {
-  const [open, setOpen] = useStoredOpen(name)
+  const [open, setOpen] = useStoredOpen(`jori.sidebar.${name}`)
   const { state } = useSidebar()
 
   return (
@@ -78,21 +78,4 @@ export function CollapsibleGroup({
       </SidebarGroup>
     </Collapsible>
   )
-}
-
-/** Open unless the browser remembers the group closed. */
-function useStoredOpen(name: string) {
-  const key = `jori.sidebar.${name}`
-  const [open, setOpen] = useState(() => readStorage(key) !== "closed")
-
-  return [
-    open,
-    useCallback(
-      (next: boolean) => {
-        writeStorage(key, next ? "open" : "closed")
-        setOpen(next)
-      },
-      [key]
-    ),
-  ] as const
 }

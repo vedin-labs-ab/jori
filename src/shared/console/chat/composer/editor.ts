@@ -1,3 +1,4 @@
+import { type MessageContext } from "@contracts/replies/answers"
 import { type Editor, useEditor } from "@tiptap/react"
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import {
@@ -15,6 +16,7 @@ import { useAutocompleteA11y } from "../../mentions/suggest/a11y"
 import { updateSuggestionIndex } from "../../mentions/suggest/keys"
 import { getSuggestionState } from "../../mentions/suggest/state"
 import { type ResolveReference } from "../types"
+import { serializeComposerDocument } from "./codec"
 import { createComposerExtensions } from "./extensions"
 import {
   completeTypedMention,
@@ -95,9 +97,11 @@ function useComposerRefs(
   const [refs] = useState<ComposerRefs>(() => ({
     catalog: { current: catalog },
     editor: { current: null },
+    mentioned: new Map<string, MessageContext>(),
     names: new Map(),
     onMention: { current: args.onMention },
     onSend: { current: args.onSend },
+    onUnmention: { current: args.onUnmention },
     open: { current: args.open },
     resolve: { current: args.resolve },
     sources: { current: args.sources },
@@ -118,6 +122,7 @@ function useLatestRefs(
     refs.catalog.current = catalog
     refs.editor.current = editor
     refs.onMention.current = args.onMention
+    refs.onUnmention.current = args.onUnmention
     refs.onSend.current = args.onSend
     refs.open.current = args.open
     refs.resolve.current = args.resolve
@@ -202,7 +207,27 @@ function createEditorOptions({
     onUpdate: ({ editor }) => {
       setIsEmpty(editor.isEmpty)
       updateSuggestion(editor)
+      noteUnmentions(editor, refs)
     },
     shouldRerenderOnTransaction: false,
   }
+}
+
+/** Tells the host of each resource whose chip the change took out of
+ *  the text, and remembers what the text holds now. */
+function noteUnmentions(editor: Editor, refs: ComposerRefs) {
+  const held = new Map(
+    serializeComposerDocument(editor.getJSON()).references.map((target) => [
+      `${target.kind}:${target.id}`,
+      target,
+    ])
+  )
+
+  for (const [key, target] of refs.mentioned) {
+    if (!held.has(key)) {
+      refs.onUnmention.current?.(target)
+    }
+  }
+
+  refs.mentioned = held
 }

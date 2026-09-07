@@ -111,7 +111,7 @@ function ConversationThread({
   const stop = useStopRun(organizationId, live.run)
   const resolveReference = useReferences(organizationId, page.messages)
   const mentions = useMentionSources(organizationId)
-  const { autoOpen, openTarget, pane } = usePaneTabs()
+  const { autoOpen, openTarget, pane, releaseTarget } = usePaneTabs()
 
   useDocumentTitle(live.title === "" ? undefined : `${live.title} · Jori`)
   useMaterialBreadcrumb(live.title)
@@ -137,6 +137,7 @@ function ConversationThread({
             })
           }
           onMention={openTarget}
+          onUnmention={releaseTarget}
           onStop={stop}
           resolve={resolveReference}
           selection={live.model}

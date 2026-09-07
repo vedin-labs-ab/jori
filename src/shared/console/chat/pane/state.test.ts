@@ -60,6 +60,21 @@ test("an opening that keeps pins the tab it makes, or the one it finds", () => {
   ])
 })
 
+test("a release closes a preview and leaves a pinned tab", () => {
+  const preview = after(open(table), { type: "release", target: table })
+
+  expect(preview.tabs).toEqual([])
+  expect(preview.open).toBe(false)
+
+  const kept = after(
+    open(table),
+    { type: "pin", target: table },
+    { type: "release", target: table }
+  )
+
+  expect(kept.tabs).toEqual([{ target: table, pinned: true }])
+})
+
 test("opening a target already in the strip brings it to the front", () => {
   const state = after(
     open(table),
