@@ -2,6 +2,7 @@ import { type Infer } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type modelSelectionValidator } from "../model/selection"
+import { insertRow } from "../shared/context"
 
 const titleMaxLength = 80
 
@@ -18,7 +19,7 @@ export async function createConsoleConversation(
     now: number
   }
 ) {
-  const conversationId = await ctx.db.insert("conversations", {
+  const conversation = await insertRow(ctx, "conversations", {
     organizationId: args.organizationId,
     surface: "console",
     externalId: "",
@@ -29,15 +30,9 @@ export async function createConsoleConversation(
     ...(args.model === undefined ? {} : { model: args.model }),
   })
 
-  await ctx.db.patch(conversationId, { externalId: conversationId })
+  await ctx.db.patch(conversation._id, { externalId: conversation._id })
 
-  const conversation = await ctx.db.get(conversationId)
-
-  if (conversation === null) {
-    throw new Error("Conversation insert failed.")
-  }
-
-  return conversation
+  return { ...conversation, externalId: conversation._id }
 }
 
 function conversationTitle(text: string) {

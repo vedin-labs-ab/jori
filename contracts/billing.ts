@@ -49,6 +49,37 @@ export const trial = {
  */
 export const interactiveGraceMicros = 2 * microsPerDollar
 
+/** Why new work may not start: the state Jori is in, and what ends it.
+ *  Every surface says both around its own consequence, so the composer's
+ *  toast, the refused mutation, and the stopped run agree. */
+export type BudgetReason = "trial-ended" | "paused" | "out-of-usage"
+
+export const budgetBlocks: Record<
+  BudgetReason,
+  { clause: string; remedy: string }
+> = {
+  "trial-ended": {
+    clause: "The trial has ended",
+    remedy: "Choose a plan in Billing settings to keep Jori working.",
+  },
+  paused: {
+    clause: "The subscription is paused",
+    remedy: "Visit Billing settings to reactivate it.",
+  },
+  "out-of-usage": {
+    clause: "Jori is out of usage",
+    remedy:
+      "Add to the wallet in Billing settings, or wait for the monthly reset.",
+  },
+}
+
+/** "<clause>, so <consequence>. <remedy>" */
+export function budgetSentence(reason: BudgetReason, consequence: string) {
+  const block = budgetBlocks[reason]
+
+  return `${block.clause}, so ${consequence}. ${block.remedy}`
+}
+
 export const topUp = {
   presetsUsd: [25, 50, 100, 200],
   defaultUsd: 50,

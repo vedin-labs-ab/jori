@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { type BudgetReason, budgetSentence } from "../../../contracts/billing"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
@@ -9,14 +10,9 @@ type BudgetOutcome = "blocked" | "ok"
 
 /** Why a run stopped between turns, in the words the chat shows under the
  *  turn and the composer's blocked reason repeats. */
-export const budgetErrors = {
-  "out-of-usage":
-    "Jori is out of usage, so the run stopped before its next turn. Add to the wallet in Billing settings, or wait for the monthly reset.",
-  paused:
-    "The subscription is paused, so the run stopped before its next turn. Visit Billing settings to reactivate it.",
-  "trial-ended":
-    "The trial has ended, so the run stopped before its next turn. Choose a plan in Billing settings to keep Jori working.",
-} as const
+export function budgetError(reason: BudgetReason) {
+  return budgetSentence(reason, "the run stopped before its next turn")
+}
 
 /** Interactive work gets the grace floor below zero; scheduled work stops
  *  at it, the way the guard treats new work of each kind. */
@@ -67,7 +63,7 @@ export async function checkTurnBudget(
   const sequence = budgetSequence(args.turn)
 
   await recordWorkerTrace(ctx, {
-    data: { error: budgetErrors[budget.reason] },
+    data: { error: budgetError(budget.reason) },
     key: `${run._id}:${sequence}:run.failed`,
     runId: run._id,
     sequence,

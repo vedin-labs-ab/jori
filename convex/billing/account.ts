@@ -1,6 +1,7 @@
 import { trial } from "../../contracts/billing"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { insertRow } from "../shared/context"
 
 const dayMs = 24 * 60 * 60 * 1000
 
@@ -29,7 +30,7 @@ export async function ensureAccount(
   }
 
   const now = Date.now()
-  const accountId = await ctx.db.insert("accounts", {
+  const account = await insertRow(ctx, "accounts", {
     organizationId,
     state: { kind: "trial", endsAt: now + trial.days * dayMs },
     micros: { allowance: trial.allowanceMicros, wallet: 0 },
@@ -44,12 +45,6 @@ export async function ensureAccount(
     micros: { amount: trial.allowanceMicros, balance: trial.allowanceMicros },
     source: "trial",
   })
-
-  const account = await ctx.db.get(accountId)
-
-  if (account === null) {
-    throw new Error("Billing account insert failed.")
-  }
 
   return account
 }

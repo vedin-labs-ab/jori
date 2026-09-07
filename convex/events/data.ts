@@ -3,6 +3,7 @@ import { type MutationCtx } from "../_generated/server"
 import { startEventJobs } from "../jobs/lifecycle"
 import { actorIdentityProvider } from "../persons/identity/schema"
 import { resolveActor } from "../persons/resolve"
+import { insertRow } from "../shared/context"
 import { normalizeEventData } from "./payload"
 import { type EventMatch } from "./schema"
 
@@ -96,7 +97,7 @@ async function insertEvent(ctx: MutationCtx, args: EventInput) {
     })
   }
 
-  const eventId = await ctx.db.insert("events", {
+  return await insertRow(ctx, "events", {
     organizationId: args.integration.organizationId,
     integrationId: args.integration._id,
     key: args.key,
@@ -107,11 +108,4 @@ async function insertEvent(ctx: MutationCtx, args: EventInput) {
     data: normalizeEventData(args.integration.integration, args.data),
     observedAt: args.observedAt,
   })
-  const event = await ctx.db.get(eventId)
-
-  if (event === null) {
-    throw new Error("Event insert failed.")
-  }
-
-  return event
 }

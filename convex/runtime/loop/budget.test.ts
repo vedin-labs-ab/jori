@@ -2,7 +2,7 @@ import { expect, test } from "vitest"
 import { databaseContext } from "../../../test/convex/database"
 import { type Doc } from "../../_generated/dataModel"
 import {
-  budgetErrors,
+  budgetError,
   budgetSequence,
   checkTurnBudget,
   isInteractiveRun,
@@ -25,7 +25,7 @@ test("a run whose organization ran dry fails before its next turn, with the reas
   expect(await checkTurnBudget(ctx, { runId, turn: 4 })).toBe("blocked")
   expect(await database.get(runId)).toMatchObject({
     status: "failed",
-    error: budgetErrors["out-of-usage"],
+    error: budgetError("out-of-usage"),
   })
 
   const [trace] = await database
@@ -38,7 +38,7 @@ test("a run whose organization ran dry fails before its next turn, with the reas
     sequence: budgetSequence(4),
     key: `${runId}:${budgetSequence(4)}:run.failed`,
   })
-  expect(budgetErrors["out-of-usage"]).toMatch(/^Jori is out of usage/)
+  expect(budgetError("out-of-usage")).toMatch(/^Jori is out of usage/)
 })
 
 test("interactive work keeps its grace below zero; scheduled work stops at it", async () => {
@@ -65,7 +65,7 @@ test("interactive work keeps its grace below zero; scheduled work stops at it", 
   expect(await database.get(interactive)).toMatchObject({ status: "running" })
   expect(await database.get(scheduled)).toMatchObject({
     status: "failed",
-    error: budgetErrors["out-of-usage"],
+    error: budgetError("out-of-usage"),
   })
 })
 
