@@ -2,6 +2,7 @@ import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import {
+  countMatches,
   normalizeQuery,
   parseCursor,
   type RunAudienceFilter,
@@ -9,117 +10,72 @@ import {
   runMatchesAudienceFilter,
   runMatchesFilter,
   runVisibleToPerson,
+  scanPage,
   summaryMatchesSearch,
 } from "./filters"
-import { type RunSummary, summarizeRun } from "./summaries"
+import { summarizeRun } from "./summaries"
+
+/** Whose pending approvals, under which facets: the runs a person may
+ *  see, of one job or the whole organization. */
+export type PendingApprovalScope = {
+  personId: Id<"persons"> | undefined
+  runFilter: RunFilter
+  audienceFilter: RunAudienceFilter
+  organizationId: string
+  jobId?: Id<"jobs">
+}
 
 export async function pagePendingApprovals(
   ctx: QueryCtx,
-  args: {
-    personId: Id<"persons"> | undefined
-    runFilter: RunFilter
-    audienceFilter: RunAudienceFilter
+  args: PendingApprovalScope & {
     query: string
-    organizationId: string
-    jobId?: Id<"jobs">
     paginationOpts: {
       cursor: string | null
       numItems: number
     }
   }
 ) {
-  const offset = parseCursor(args.paginationOpts.cursor)
   const normalizedQuery = normalizeQuery(args.query)
-  const rows: RunSummary[] = []
-  const now = Date.now()
-  let matchingIndex = 0
-  let hasMore = false
 
-  for await (const { approval, run } of pendingApprovalRuns(ctx, {
-    now,
-    personId: args.personId,
-    runFilter: args.runFilter,
-    audienceFilter: args.audienceFilter,
-    organizationId: args.organizationId,
-    jobId: args.jobId,
-  })) {
-    const summary = await summarizeRun(ctx, run, args.personId, approval)
+  return await scanPage(pendingApprovalRuns(ctx, args), {
+    offset: parseCursor(args.paginationOpts.cursor),
+    numItems: args.paginationOpts.numItems,
+    match: async ({ approval, run }) => {
+      if (normalizedQuery === "") {
+        return {}
+      }
 
-    if (!summaryMatchesSearch(summary, normalizedQuery)) {
-      continue
-    }
+      const summary = await summarizeRun(ctx, run, args.personId, approval)
 
-    if (matchingIndex < offset) {
-      matchingIndex += 1
-      continue
-    }
-
-    if (rows.length >= args.paginationOpts.numItems) {
-      hasMore = true
-      break
-    }
-
-    rows.push(summary)
-    matchingIndex += 1
-  }
-
-  return {
-    continueCursor: String(offset + rows.length),
-    isDone: !hasMore,
-    page: rows,
-  }
+      return summaryMatchesSearch(summary, normalizedQuery)
+        ? { row: summary }
+        : null
+    },
+    row: ({ approval, run }) => summarizeRun(ctx, run, args.personId, approval),
+  })
 }
 
 export async function countPendingApprovals(
   ctx: QueryCtx,
-  args: {
-    normalizedQuery: string
-    personId: Id<"persons"> | undefined
-    runFilter: RunFilter
-    audienceFilter: RunAudienceFilter
-    organizationId: string
-    jobId?: Id<"jobs">
-  }
+  args: PendingApprovalScope & { normalizedQuery: string }
 ) {
-  const now = Date.now()
-  let count = 0
-
-  for await (const { approval, run } of pendingApprovalRuns(ctx, {
-    now,
-    personId: args.personId,
-    runFilter: args.runFilter,
-    audienceFilter: args.audienceFilter,
-    organizationId: args.organizationId,
-    jobId: args.jobId,
-  })) {
-    if (args.normalizedQuery === "") {
-      count += 1
-      continue
-    }
-
-    const summary = await summarizeRun(ctx, run, args.personId, approval)
-
-    if (summaryMatchesSearch(summary, args.normalizedQuery)) {
-      count += 1
-    }
-  }
-
-  return count
+  return await countMatches(
+    pendingApprovalRuns(ctx, args),
+    async ({ approval, run }) =>
+      args.normalizedQuery === "" ||
+      summaryMatchesSearch(
+        await summarizeRun(ctx, run, args.personId, approval),
+        args.normalizedQuery
+      )
+  )
 }
 
 async function* pendingApprovalRuns(
   ctx: QueryCtx,
-  args: {
-    now: number
-    personId: Id<"persons"> | undefined
-    runFilter: RunFilter
-    audienceFilter: RunAudienceFilter
-    organizationId: string
-    jobId: Id<"jobs"> | undefined
-  }
+  scope: PendingApprovalScope
 ) {
   const seenRunIds = new Set<string>()
-  const approvals = pendingApprovalQuery(ctx, args.organizationId, args.now)
+  const approvals = pendingApprovalQuery(ctx, scope.organizationId, Date.now())
 
   for await (const approval of approvals) {
     if (approval.status !== "pending" || seenRunIds.has(approval.runId)) {
@@ -130,8 +86,8 @@ async function* pendingApprovalRuns(
 
     if (
       run === null ||
-      run.organizationId !== args.organizationId ||
-      (args.jobId !== undefined && run.job?.id !== args.jobId) ||
+      run.organizationId !== scope.organizationId ||
+      (scope.jobId !== undefined && run.job?.id !== scope.jobId) ||
       isTerminalRunStatus(run.status)
     ) {
       continue
@@ -140,9 +96,9 @@ async function* pendingApprovalRuns(
     seenRunIds.add(run._id)
 
     if (
-      runVisibleToPerson(run, args.personId) &&
-      runMatchesAudienceFilter(run, args.audienceFilter) &&
-      runMatchesFilter(run, args.runFilter)
+      runVisibleToPerson(run, scope.personId) &&
+      runMatchesAudienceFilter(run, scope.audienceFilter) &&
+      runMatchesFilter(run, scope.runFilter)
     ) {
       yield { approval, run }
     }
