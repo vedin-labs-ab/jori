@@ -76,7 +76,7 @@ alias users across instances. A project token cannot prove its region by its
 format; configuration review and a synthetic ingestion check must verify the
 token/host pairing before release.
 
-Public marketing collects the same minimized anonymous page events into its
+Public marketing collects the same minimized pseudonymous page events into its
 hosting project's analytics endpoint. Its host-only identifiers are separate
 from both consoles. Waitlist region selection does not move analytics identity,
 and form contents are never analytics properties.
@@ -240,11 +240,10 @@ grounding off. This is not an unconditional zero-retention guarantee.
 [service-specific terms](https://cloud.google.com/terms/service-terms),
 [abuse monitoring](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/abuse-monitoring).
 
-Direct synthetic production probes succeeded in both jurisdictions. These do
-not verify the deployed Convex image tool, file handling or accounting. The
-development project is separate but billing is disabled pending a Google Cloud
-billing-account project quota increase. See [release evidence](release.md) and
-[image configuration and accounting](images.md).
+Track development and production configuration, deployed image workflows,
+file handling and accounting results in [release evidence](release.md).
+The separate development project is billed and verified; no quota-increase
+request was submitted. See [image configuration and accounting](images.md).
 
 ## Release evidence
 

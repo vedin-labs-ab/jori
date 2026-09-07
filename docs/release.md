@@ -1,18 +1,18 @@
 # Regional release verification
 
-Last updated 8 September 2026, with both production backends at `325c1fcf`. The migration is
-not yet verified E2E. Provider setup, direct API tests, application outbox
-submission and completed customer workflows are different levels of evidence.
-Checks used synthetic data unless stated otherwise. Final development and
-full regional deployments are in progress, not complete.
+Last updated 8 September 2026. Final runtime `2c7e7ccd` is deployed to
+development and both production regions. Core regional workflows passed the
+checks below; customer-connected integrations and billing are not yet fully
+verified. Provider setup, direct API tests and completed application workflows
+are recorded separately. Checks used synthetic data unless stated otherwise.
 
 ## Deployment state
 
 | Target | Verified deployment | Remaining work |
 | --- | --- | --- |
-| Development | Convex `trustworthy-parakeet-343` and skills deployed from checked main `1aafd8d7`; the Convex 1.45.0 watcher restarted afterward. Bird and Vertex settings are now installed and verified. | Deploy the final revision and sync skills; verify application flows. `deploy:dev` does not deploy a hosted frontend. |
-| Production EU | Full frontend/backend deployment `f9b0adb8` completed; backend subsequently deployed at `325c1fcf`, including images and Notion bootstrap. `eu.usejori.com` returned 200 with the `dub1` function region. Convex is `sensible-spoonbill-17` in Ireland. | Final coordinated deployment and remaining workflow checks. |
-| Production US | Convex `insightful-goat-7` in Virginia deployed at `325c1fcf` with strict schema, images and Notion bootstrap. Six-record preservation repair completed. | The US frontend still returns 421 and awaits the final deployment. No skills sync ran during the preservation stage; final sync remains pending. |
+| Development | Convex `trustworthy-parakeet-343` and skills deployed from `2c7e7ccd`; Convex reported ready at 00:49:36 local time. Bird and Vertex settings verified. | Remaining connected-provider workflows. `deploy:dev` does not deploy a hosted frontend. |
+| Production EU | Full `2c7e7ccd` deployment and skills sync completed; Vercel deployment `jori-production-6bhrxc7f5-albin-vedins-projects.vercel.app` aliased to `eu.usejori.com`. Convex is `sensible-spoonbill-17` in Ireland. Regional frontend returned 200 with the `dub1` function region. | Remaining connected-provider workflows. |
+| Production US | Full `2c7e7ccd` deployment completed; Vercel deployment `jori-production-6ga4f684s-albin-vedins-projects.vercel.app`. Convex is `insightful-goat-7` in Virginia, with strict schema and completed preservation repair. Fresh organization onboarding passed without reload or errors. | Remaining connected-provider workflows. |
 
 The US repair renamed `link.linkedAt` to `link.at` on two identities and
 `associatedIntegrations` to `surfaces` on four global skills. Private
@@ -24,26 +24,30 @@ include that strict cleanup. Normal deployment unmounted obsolete Resend
 components and removed old indexes; the repair deleted no application records.
 Unused `JORI_WORKER_SECRET` settings were removed from development, US
 production and local configuration after confirming no code references.
+Unused `RESEND_API_KEY` settings were removed from development and US
+production. Names-only readback found no remaining `RESEND_*` settings in any
+Convex target or matching ignored local file. Two migration-only generated
+API stashes were removed after review; the unrelated mirror-work stash remains.
 
 ## Provider readiness
 
-| Provider | Verified evidence | Still required |
+| Provider | Verified evidence | Remaining work or limits |
 | --- | --- | --- |
-| Convex | Separate production deployments, deploy keys and auth secrets. Required production variable names present; optional Stripe configuration absent. US preservation completed. | Final dev/EU/US deployments, tenant-isolation tests and unused preview cleanup. Variable presence alone does not prove functionality. |
-| Vercel | Pro active; separate production projects pinned to `dub1` and `iad1`, function failover off. Regional domains and ten public build variables checked. EU function placement observed. | Final deployments, US host resolution, redirects, private caching and host-only cookie checks. |
-| Bird | Separate EU, US and development accounts/workspaces and scoped keys. Sending domains verified. Direct sends returned 202 and reached the test inboxes. Actual dev/EU/US Jori outbox submissions were accepted on the first attempt and removed retained bodies. Tracking off; no Jori delivery webhook. Temporary setup grants revoked. | Auth email flows and obsolete Resend configuration review. Acceptance alone does not prove recipient delivery. |
-| OpenRouter | Business active; separate region-only guardrails, ZDR on, training off. Both regions passed direct completion, structured-output and tool-call probes. Actual EU chat returned the requested synthetic response. Region-filtered image requests returned 404; images now use Google Cloud. | US chat and both regions' deployed tool tests. No global inference fallback. |
-| Google Cloud images | Separate EU/US/development projects, predict-only service accounts and credentials. All three billing links active and implicit caching disabled. Real adapter generated PNGs in each matching jurisdiction. Cross-project production IAM probes returned 403. | Actual Convex generation, regional file storage, sandbox transfer and deduplicated usage accounting. |
-| PostHog | Separate EU project `233772` and US project `530551`. IP discard on; autocapture, web vitals, dead clicks and heatmaps disabled and read back in both. US recording, console capture and network capture also disabled and read back. Synthetic events appeared only in matching projects. | Verify actual frontend destinations and browser collection behavior. |
-| Exa | Separate EU/US keys installed in matching Convex deployments; both returned 200 to synthetic search. Development retains its own key. | Deployed tool test. Global processing remains an exception behind the regional interface. |
-| E2B | Separate development/EU/US projects and keys. All templates built; matching credentials created sandboxes, ran a harmless command and deleted them. Opposite-region template access denied. Account offers only `us-west-1`. | Deployed sandbox creation, execution, file transfer and cleanup. US execution remains an exception for EU tenants. |
-| Google | Separate regional clients, secrets and callbacks. Saved consent scopes match code; Gmail/Calendar APIs enabled. Actual EU Google sign-in and creation of the Jori EU verification organization succeeded. | US sign-in, cross-tenant isolation and both regions' Gmail/Calendar connections. Audience remains External/Testing; publishing/verification required before general availability. |
+| Convex | Separate production deployments, deploy keys and auth secrets. Required production variable names present; optional Stripe configuration absent. All three final deployments, US preservation, onboarding and preview cleanup completed. | Variable presence alone does not prove an untested integration works. |
+| Vercel | Pro active; separate projects pinned to `dub1`/`iad1`, failover off. Both final production deployments completed. Regional hosts/sign-in resolve; marketing/trust stay public. Regional redirects passed with private/no-store, no-referrer and a secure host-only region cookie. Trust redirects strip the test query. | Global CDN/control-plane processing remains an exception. |
+| Bird | Separate EU, US and development accounts/workspaces and scoped keys. Sending domains verified. Direct and actual dev/EU/US outbox tests reached the Zoho inbox. All application submissions were accepted on attempt one and removed retained bodies; both waitlist confirmations also arrived. Tracking off; no Jori delivery webhook. Temporary grants and obsolete Resend settings removed. | Remaining auth email templates/flows. These tests do not guarantee delivery to every recipient. |
+| OpenRouter | Business active; separate region-only guardrails, ZDR on, training off. Direct completion/structured-output/tool-call probes and actual EU/US chat passed. Deployed Exa and sandbox tools completed in both regions. Region-filtered images returned 404; images now use Google Cloud. | Upstream capacity errors remain possible; one US image run received 429 before Vertex. No global inference fallback. |
+| Google Cloud images | Separate EU/US/development projects, predict-only service accounts and credentials. Billing active and implicit caching disabled. Adapter PNG tests passed in each jurisdiction; cross-project IAM probes returned 403. Actual EU/US image generation, storage, import and accounting passed; US sandbox bytes matched regional storage. | Provider safety filters remain enabled and may withhold output. |
+| PostHog | Separate EU project `233772` and US project `530551`. Actual EU `/chat` and US `/integrations` browser pageviews observed in matching project UIs; EU/US device and session IDs distinct. Served console bundles contain matching regional hosts/tokens and minimized pageviews. New cookies are host-only; marketing uses the US project. | Preserve metadata/edge exceptions. Legacy US apex-cookie identity was not reset. |
+| Exa | Separate EU/US keys; direct searches returned 200. Actual EU and US runs completed `web_search` with provider Exa. Development retains its own key. | Global processing remains an exception behind the regional interface. |
+| E2B | Separate development/EU/US projects and keys. Direct template/lifecycle tests passed and opposite-region template access was denied. Actual EU/US runs completed sandbox `bash`; EU image tool completed file import and its sandbox was cleaned up. Account offers only `us-west-1`. | US execution remains an exception for EU tenants. |
+| Google | Separate regional clients, secrets and callbacks. Saved consent scopes match code; Gmail/Calendar APIs enabled. Actual EU/US Google sign-in succeeded through regional clients. Fresh organization onboarding passed without reload/errors in both regions; the same user's regional organization lists differed as expected. | Both regions' Gmail/Calendar connections. Audience remains External/Testing; publishing/verification required before general availability. |
 | Microsoft | Separate organizational-account registrations and 180-day secrets installed. Three callbacks per region; delegated User.Read, offline_access, Mail.ReadWrite, Mail.Send and Calendars.ReadWrite. No tenant-wide consent granted. | Live sign-in/connections, publisher verification and rotation before 6 March 2027. |
 | Stripe | Both accounts must represent Vedin Labs AB, Sweden. Regional association and paid-checkout guards implemented. Missing settings disable billing without blocking prelaunch deployment. | User activation, merchant-country correction and tax decisions; then separate keys/products/prices/webhooks and billing verification. |
 | GitHub | Separate apps and credentials; JWT identity, exact permissions/events and regional webhook settings verified. Real ping redelivery returned 200 in both regions. Own signatures accepted; missing, bad and opposite-region signatures rejected. | Authenticated installation, OAuth installation-access proof and connected repository workflows. Inert pings do not establish these. |
-| Slack | Separate apps with token rotation and regional callbacks/interactivity; credentials read back. EU event URL verified, five bot events saved and public distribution enabled. | US event setup/distribution; both regions' connections, rotation, interactivity and event workflows. |
+| Slack | Separate apps with token rotation and regional callbacks/interactivity; credentials read back. Both event URLs, five bot events and public distribution verified. | Both regions' authenticated connections, rotation, interactivity and event workflows. |
 | Linear | Separate public apps and direct regional webhooks; client-credentials grant disabled. Matching client/webhook credentials read back. | Actual OAuth connections and webhook processing. |
-| Notion | Separate public connections and regional callbacks. Both subscriptions active with the exact three required event types; matching verification tokens saved/read back. Own signatures accepted, missing/bad/opposite-region signatures rejected. Temporary setup tables empty. No user-information capability. | Authenticated connections and real page/comment workflows in both regions. |
+| Notion | Separate public connections and regional callbacks. Both subscriptions active with the exact three required event types; matching verification tokens saved/read back. Own signatures accepted, missing/bad/opposite-region signatures rejected. Temporary setup tables empty. No user-information capability. | OAuth connection is paused at user page-consent approval; real page/comment workflows remain unverified in both regions. |
 
 ## Email and image evidence
 
@@ -73,11 +77,56 @@ from `milo-498910`; the Milo project was not deleted. No quota-increase form
 was submitted. Development's three Vertex values were stored only in its
 Convex deployment and verified by readback. Cache PATCH and GET returned 200
 with `disableCache: true`.
+After setup, the three temporary service-account JSON copies were deleted and
+the temporary gcloud user authorization was revoked; its account list was
+empty on readback. Runtime keys remain in matching Convex deployments.
+User-downloaded GitHub private-key files were not changed.
 
-These are real adapter/provider tests, not an executed Convex image tool.
-The checked file-reference transport has a 6 MiB unit test and ownership
-checks, but live storage, sandbox transfer and ledger writes remain
-unverified. See [image configuration and retention](images.md).
+The table records adapter/provider tests. A subsequent actual EU
+`generate_image` run completed and stored a 612,096-byte image. Read-only
+inspection found exactly one usage receipt for its Vertex request, with 58
+input tokens, 1,120 output tokens and 73,952 USD micros. The image usage rollup
+matched exactly. The complete run cost 306,251 micros, including ordinary
+model turns; the verification organization's debit and usage rollup totals
+both equaled 360,877 micros. File metadata and storage size agreed.
+
+The completed EU image tool included file import; its sandbox was subsequently
+cleaned up. File metadata and stored bytes agreed, and transport unit tests
+also cover a 6 MiB file and ownership checks. An original US illustration
+subsequently succeeded through the application and rendered in the browser.
+Its 1,804,856-byte regional file and existing sandbox copy matched exactly by
+size and SHA-256. Exactly one Vertex receipt recorded 88 input tokens, 1,120
+output tokens and 73,969 micros. The complete run debit was 312,615 micros,
+including chat turns. The daily image rollup matched the blocked and successful
+receipts; the organization's debit and usage totals both equaled 615,465
+micros. The scheduled sandbox cleanup succeeded at normal expiry, and the
+record was marked cleaned without error 243 ms later.
+
+Earlier US tests included an upstream OpenRouter 429 and Vertex responses with
+usage but no usable image. Content-free diagnostics on `2c7e7ccd` identified
+`IMAGE_RECITATION` with missing content parts: Google withheld that output.
+This was not evidence of a parser or regional-routing failure. The successful
+retry used a distinct original illustration; no provider filter was disabled.
+Filtered requests still produced usage receipts. See
+[image configuration and retention](images.md).
+
+Both public waitlist forms succeeded. The exact synthetic EU and US addresses
+each appeared once in their selected region's database and not in the opposite
+database. Each signup had exactly one outbox row at the same transaction
+timestamp. Both were accepted in the correct region on attempt one, with a
+provider ID and no retained body. This verifies public-form routing, database
+isolation and confirmation submission. Subsequent native Zoho inbox inspection
+also confirmed both waitlist emails and all three application outbox tests.
+
+Actual PostHog project UIs showed a US `/integrations` pageview at
+`2026-09-07T22:34:48.675Z` and an EU `/chat` pageview at
+`2026-09-07T22:36:43.139Z`, matching the browser tests. Payloads had no full URL,
+email, organization ID or customer content; person processing was false.
+EU/US pseudonymous IDs were distinct. PostHog still added GeoIP city/country
+and approximate coordinates despite IP discard, so this is not anonymous or
+zero-retention analytics. A legacy apex-domain US cookie appeared to seed the
+same US device ID across marketing and console; new code uses host-only
+cookies, but no reset of legacy IDs is claimed.
 
 ## Connected app and ingress evidence
 
@@ -109,7 +158,7 @@ The actual US application outbox test to `albin@usejori.com` was accepted on
 attempt one, recorded a provider ID and removed its message body. No invitation
 or access grant was created.
 
-Slack EU saved `app_mention`, `message.channels`, `message.groups`,
+Both Slack apps saved `app_mention`, `message.channels`, `message.groups`,
 `message.im` and `message.mpim`. Linear subscribes only to Comments, Issues,
 Projects and Inbox notifications. Notion permits content read/update/insert
 and comment read/insert, without user information. Both Notion subscriptions
@@ -122,9 +171,14 @@ Google's saved consent scopes are `openid`, `userinfo.email`,
 `calendar.events` and `calendar.calendarlist.readonly`. Broad Drive, Calendar
 and `gmail.modify` scopes were removed. EU sign-in and organization creation
 succeeded. A transient root-page error immediately after creation cleared on
-reload; its cause is not established. An actual EU chat prompt, `Reply exactly
-EU chat verified`, returned the requested response. Connected-provider
-permissions, US behavior and cross-tenant isolation still require verification.
+reload. The identity-initialization guard was subsequently deployed at
+`bd70a00b`; fresh organization creation passed in both regions without reload
+or console errors, including the Welcome modal. The same signed-in user's
+account menus showed separate regional organization lists. An actual EU chat
+prompt, `Reply exactly
+EU chat verified`, returned the requested response. US Google sign-in, chat,
+Exa search and sandbox execution also passed. Customer-connected provider
+consent and workflows remain separate, unfinished checks.
 
 ## Prelaunch and billing gate
 
@@ -152,23 +206,30 @@ calculate tax. Runtime REST requests omit `Stripe-Version`, so account/webhook
 API versions and top-up tax treatment must be aligned and tested. No Stripe
 objects or keys were changed in this verification work.
 
-## Remaining release gates
+## Preview cleanup
 
-- Rebase on current main and pass full `pnpm run check` and `pnpm run test`.
-  Never bypass checks or deploy a worktree to shared environments.
-- Finish preview verification for pending HTTP/schema changes, then merge
-  through the checked fast-forward workflow.
-- Deploy one final checked revision to dev and both production regions.
-  Verify strict US schema, skills sync, frontend availability and destinations.
-- Complete Slack US setup. Finish public
-  app distribution and provider verification where required before launch.
-- Run authenticated application checks in both production regions: sign-in,
-  organization access/isolation, auth/outbox email, browser analytics,
-  chat/search, images/accounting, sandbox transfer/cleanup and every connected
-  integration. Billing remains unavailable until its separate gate.
-- Review obsolete Resend settings and remove only confirmed unused task
-  previews, including `quixotic-raccoon-259` and `tremendous-ptarmigan-69`.
-  Do not remove a preview still needed by an active task.
+The four confirmed preview deployments `quixotic-raccoon-259`,
+`tremendous-ptarmigan-69`, `superb-ocelot-84` and `bold-donkey-387` were removed
+through the official management API. Each deletion returned 200 and readback
+returned 404. The final project listing contained only development,
+production EU and production US. No named deploy keys existed for those
+previews; no global keys were changed. No new backups were created, so preview
+data and files should be treated as permanently deleted. Source code remains
+recoverable from Git.
+
+## Remaining launch work
+
+Runtime deployment, preview cleanup and both regional image workflows are
+complete. Full `pnpm run check` and `pnpm run test` passed on the final runtime
+base, with 2,616 tests passed and four skipped. Documentation-only changes do
+not require another runtime deployment.
+
+- Complete authenticated customer connections and workflows for GitHub, Slack,
+  Linear, Notion, Gmail/Calendar and Microsoft. Notion page consent needs user
+  approval. Microsoft sign-in and remaining auth-email flows also need tests.
+- Complete Google audience/publishing and Microsoft publisher verification
+  before general availability. Billing remains unavailable until its separate
+  activation, tax and integration gate.
 - Record final revisions and actual workflow results here. Keep blocked or
   untested capabilities explicit.
 
