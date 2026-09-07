@@ -11,6 +11,7 @@ import { emailSubmissions } from "./email/schema"
 import { events } from "./events/schema"
 import { files } from "./files/schema"
 import { folders } from "./folders/schema"
+import { notionWebhookSetups } from "./integrations/notion/setup/schema"
 import { integrationOffers } from "./integrations/offers/schema"
 import { integrationInstalls, integrations } from "./integrations/schema"
 import { jobs } from "./jobs/schema"
@@ -40,6 +41,7 @@ import { usage } from "./usage/schema"
 import { waitlist } from "./waitlist/schema"
 
 export default defineSchema({
+  notionWebhookSetups,
   emailSubmissions,
   skills,
   allowlist,
