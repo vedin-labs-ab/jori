@@ -1,13 +1,13 @@
 import {
-  BellRing,
   CalendarClock,
   FileText,
-  History,
+  GitPullRequest,
+  ListChecks,
   type LucideIcon,
   Mail,
+  Megaphone,
+  Newspaper,
   Table2,
-  TriangleAlert,
-  Workflow,
 } from "lucide-react"
 
 /** Something worth asking first, with the icon of the domain it lives
@@ -17,18 +17,20 @@ export type ChatSuggestion = {
   text: string
 }
 
-/** The asks people bring most, written from the person's side and kept
- *  short enough for three to share one line; the home shows a few at a
- *  time and cycles the rest through the composer's placeholder. */
+/** The asks people at a company bring most — the day's meetings, the
+ *  team's update, what is stuck in the tracker, the inbox, a table to
+ *  keep — written from the person's side and kept short enough for three
+ *  to share one line; the home shows a few at a time and cycles the rest
+ *  through the composer's placeholder. */
 export const chatSuggestionPool: readonly ChatSuggestion[] = [
-  { icon: History, text: "What changed this week?" },
-  { icon: CalendarClock, text: "Set up a weekly digest" },
-  { icon: TriangleAlert, text: "Which jobs failed?" },
-  { icon: Table2, text: "Watch a table for changes" },
-  { icon: Mail, text: "Draft replies to my emails" },
-  { icon: FileText, text: "Write last week's postmortem" },
-  { icon: BellRing, text: "Remind owners of overdue steps" },
-  { icon: Workflow, text: "What did the jobs do today?" },
+  { icon: CalendarClock, text: "Prep tomorrow's meetings" },
+  { icon: Megaphone, text: "Draft a team update" },
+  { icon: ListChecks, text: "What's blocked in Linear?" },
+  { icon: GitPullRequest, text: "Which PRs need review?" },
+  { icon: Mail, text: "Which emails need a reply?" },
+  { icon: Table2, text: "Track invoices in a table" },
+  { icon: Newspaper, text: "Send me a Monday digest" },
+  { icon: FileText, text: "Write up the last incident" },
 ]
 
 /** How many suggestions the home shows at most: three share the column
