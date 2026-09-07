@@ -106,7 +106,11 @@ function sourceKind(context: RunContext) {
   const cause = context.run.cause
 
   if (cause.type === "message") {
-    return datum(cause.kind, cause.kind)
+    // Mention and reply are how a person reaches Jori on a provider; in
+    // the console they simply chatted.
+    return context.run.snapshot.source.surface === "jori"
+      ? datum("chat", "chat")
+      : datum(cause.kind, cause.kind)
   }
 
   if (cause.type !== "time") {
