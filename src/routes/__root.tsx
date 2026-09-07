@@ -3,6 +3,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import {
   createRootRoute,
   HeadContent,
+  redirect,
   Scripts,
   useRouterState,
 } from "@tanstack/react-router"
@@ -18,6 +19,8 @@ import {
   FullscreenSkeletonLoader,
 } from "@/shared/loading"
 import { regionConfig } from "@/shared/region/config"
+import { isMarketingPath, marketingUrl } from "@/shared/region/paths"
+import { handleRegionRequest } from "@/shared/region/routing"
 import { RootStateFrame } from "@/shared/state"
 import appCss from "../styles.css?url"
 
@@ -30,13 +33,6 @@ const appImage = new URL("/brand/og.jpg", regionConfig.publicOrigin).toString()
  *  one thought rather than as a picture with an unrelated caption. */
 const appDescription =
   "Jori is the shared drive your AI works out of: jobs, tables, stores, and files in folders your teams share, with sharing and spend attached to every folder."
-const providerlessRouteIds = new Set([
-  "/",
-  "/pricing",
-  "/privacy",
-  "/terms",
-  "/trust",
-])
 const SessionProviders = lazy(() =>
   import("@/shared/session").then((module) => ({
     default: module.SessionProviders,
@@ -90,6 +86,19 @@ const rootLinks: React.ComponentProps<"link">[] = [
 ]
 
 export const Route = createRootRoute({
+  beforeLoad: ({ location }) => {
+    if (typeof window === "undefined") {
+      return
+    }
+    const response = handleRegionRequest(
+      new Request(new URL(location.href, window.location.origin)),
+      regionConfig
+    )
+    const href = response?.headers.get("location")
+    if (href) {
+      throw redirect({ href, reloadDocument: true })
+    }
+  },
   errorComponent: RootError,
   head: () => ({ meta: rootMeta, links: rootLinks }),
   notFoundComponent: NotFound,
@@ -132,7 +141,7 @@ function NotFound() {
         // A plain anchor, not a router link: the console and the marketing
         // site share this boundary, and home resolves correctly for both.
         <Button asChild variant="outline">
-          <a href="/">Back to Jori</a>
+          <a href={marketingUrl()}>Back to Jori</a>
         </Button>
       }
       description="The link may be out of date, or the page may have moved."
@@ -146,8 +155,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const routeId = useRouterState({
     select: (state) => state.matches.at(-1)?.routeId,
   })
-  const usesSessionProvider =
-    routeId === undefined || !providerlessRouteIds.has(routeId)
+  const usesSessionProvider = routeId === undefined || !isMarketingPath(routeId)
   // Console routes need client session state before they can render. Sign-in
   // and public pages already send their complete first view from SSR.
   const waitsForClientSession = usesSessionProvider && routeId !== "/sign-in"

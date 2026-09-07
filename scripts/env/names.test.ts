@@ -12,6 +12,7 @@ test("deployment requires core services but not optional billing", () => {
     "GOOGLE_CLIENT_SECRET",
     "JORI_APP_URL",
     "JORI_E2B_TEMPLATE",
+    "JORI_PUBLIC_ORIGIN",
     "JORI_REGION",
     "MICROSOFT_CLIENT_ID",
     "MICROSOFT_CLIENT_SECRET",

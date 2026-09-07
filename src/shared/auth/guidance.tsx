@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { marketingUrl } from "../region/paths"
 
 type InfoDialogProps = {
   children: ReactNode
@@ -105,11 +105,12 @@ function LegalLink({
   to: "/privacy" | "/terms"
 }) {
   return (
-    <Link
+    <a
       className="underline underline-offset-2 transition-colors hover:text-foreground"
-      to={to}
+      href={marketingUrl(to)}
+      referrerPolicy="no-referrer"
     >
       {children}
-    </Link>
+    </a>
   )
 }

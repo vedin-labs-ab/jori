@@ -30,7 +30,17 @@ export function requireRegion() {
 }
 
 export function readOrigin(environment: RuntimeEnvironment = process.env) {
-  const value = environment[originEnv]?.trim()
+  return configuredOrigin(environment, originEnv)
+}
+
+export function readPublicOrigin(
+  environment: RuntimeEnvironment = process.env
+) {
+  return configuredOrigin(environment, "JORI_PUBLIC_ORIGIN")
+}
+
+function configuredOrigin(environment: RuntimeEnvironment, name: string) {
+  const value = environment[name]?.trim()
 
   if (value === undefined || value === "") {
     return undefined
@@ -41,7 +51,7 @@ export function readOrigin(environment: RuntimeEnvironment = process.env) {
   try {
     url = new URL(value.replace(/\/+$/, ""))
   } catch {
-    throw new Error(originError(value))
+    throw new Error(originError(value, name))
   }
 
   if (
@@ -49,7 +59,7 @@ export function readOrigin(environment: RuntimeEnvironment = process.env) {
     url.pathname !== "/" ||
     (url.protocol !== "https:" && url.protocol !== "http:")
   ) {
-    throw new Error(originError(value))
+    throw new Error(originError(value, name))
   }
 
   return url.origin
@@ -81,6 +91,6 @@ export function requireReturnUrl(returnUrl: string) {
   return url.toString()
 }
 
-function originError(value: string) {
-  return `${originEnv} must be an http(s) origin, received ${JSON.stringify(value)}.`
+function originError(value: string, name: string) {
+  return `${name} must be an http(s) origin, received ${JSON.stringify(value)}.`
 }

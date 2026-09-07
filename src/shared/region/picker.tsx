@@ -17,22 +17,20 @@ const regionOptions = [
 type RegionPickerProps = {
   labelAction?: ReactNode
   layout?: "compact" | "field"
+  value?: Region
+  onChange?: (region: Region) => void
+  disabled?: boolean
 }
 
 export function RegionPicker({
   labelAction,
   layout = "compact",
+  value = regionConfig.current,
+  onChange,
+  disabled,
 }: RegionPickerProps) {
   const pickerId = useId()
   const isField = layout === "field"
-
-  function selectRegion(region: Region) {
-    if (region === regionConfig.current || !regionConfig.enabled.has(region)) {
-      return
-    }
-
-    window.location.assign(regionSelectionUrl(regionConfig, region))
-  }
 
   // Inline, the region reads from the option itself, so the label is for
   // screen readers only. As a field it needs the visible name.
@@ -72,17 +70,18 @@ export function RegionPicker({
         label
       )}
       <NativeSelect
+        disabled={disabled}
         className={cn(isField && "w-full")}
         id={pickerId}
         onChange={(event) => {
           const region = event.currentTarget.value
 
           if (isRegion(region)) {
-            selectRegion(region)
+            selectRegion(region, onChange)
           }
         }}
         size={isField ? "default" : "sm"}
-        value={regionConfig.current}
+        value={value}
       >
         {regionOptions.map((option) => {
           const enabled = regionConfig.enabled.has(option.id)
@@ -101,4 +100,15 @@ export function RegionPicker({
       </NativeSelect>
     </div>
   )
+}
+
+function selectRegion(region: Region, onChange: RegionPickerProps["onChange"]) {
+  if (!regionConfig.enabled.has(region)) {
+    return
+  }
+  if (onChange !== undefined) {
+    onChange(region)
+  } else if (region !== regionConfig.current) {
+    window.location.assign(regionSelectionUrl(regionConfig, region))
+  }
 }

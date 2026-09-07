@@ -16,16 +16,16 @@ const config: RegionConfig = {
   publicOrigin: "https://jori.example",
 }
 
-test("leaves the current regional host alone", () => {
+test("leaves the current regional console host alone", () => {
   const response = handleRegionRequest(
-    new Request("https://us.jori.example/pricing"),
+    new Request("https://us.jori.example/chat/private?filter=customer"),
     config
   )
 
   expect(response).toBeNull()
 })
 
-test("routes apex requests to a remembered region", () => {
+test("keeps marketing on the apex regardless of the remembered region", () => {
   const response = handleRegionRequest(
     new Request("https://jori.example/pricing?plan=team", {
       headers: { cookie: "jori_region=eu" },
@@ -33,42 +33,44 @@ test("routes apex requests to a remembered region", () => {
     config
   )
 
-  expect(response?.status).toBe(307)
-  expect(response?.headers.get("location")).toBe(
-    "https://eu.jori.example/pricing?plan=team"
-  )
-  expect(response?.headers.get("set-cookie")).toBeNull()
+  expect(response).toBeNull()
 })
 
 test("estimates Europe and persists the routing preference", () => {
   const response = handleRegionRequest(
-    new Request("https://jori.example/", {
+    new Request("https://jori.example/sign-in", {
       headers: { "x-vercel-ip-country": "SE" },
     }),
     config
   )
 
-  expect(response?.headers.get("location")).toBe("https://eu.jori.example/")
+  expect(response?.headers.get("location")).toBe(
+    "https://eu.jori.example/sign-in"
+  )
   expect(response?.headers.get("set-cookie")).toContain("jori_region=eu")
   expect(response?.headers.get("cache-control")).toBe("private, no-store")
 })
 
 test("falls back to the deployment region when EU is disabled", () => {
   const response = handleRegionRequest(
-    new Request("https://jori.example/", {
+    new Request("https://jori.example/sign-in", {
       headers: { "cf-ipcountry": "DE" },
     }),
     { ...config, enabled: new Set(["us"]) }
   )
 
-  expect(response?.headers.get("location")).toBe("https://us.jori.example/")
+  expect(response?.headers.get("location")).toBe(
+    "https://us.jori.example/sign-in"
+  )
 })
 
 test("changes regions through the apex without transferring instance data", () => {
   const selection = regionSelectionUrl(config, "eu")
   const response = handleRegionRequest(new Request(selection), config)
 
-  expect(response?.headers.get("location")).toBe("https://eu.jori.example/")
+  expect(response?.headers.get("location")).toBe(
+    "https://eu.jori.example/sign-in"
+  )
   expect(response?.headers.get("set-cookie")).toContain("jori_region=eu")
 })
 
@@ -94,9 +96,7 @@ test("sends the www spelling to the public origin", () => {
   )
 
   expect(response?.status).toBe(308)
-  expect(response?.headers.get("location")).toBe(
-    "https://jori.example/pricing?plan=team"
-  )
+  expect(response?.headers.get("location")).toBe("https://jori.example/pricing")
 })
 
 test("sends the www spelling on behind a deployment proxy", () => {
@@ -137,9 +137,7 @@ test("uses a validated forwarded host behind a deployment proxy", () => {
     config
   )
 
-  expect(response?.headers.get("location")).toBe(
-    "https://us.jori.example/pricing"
-  )
+  expect(response).toBeNull()
 })
 
 test("does not forward writes from the public host", () => {

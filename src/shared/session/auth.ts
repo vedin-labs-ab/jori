@@ -11,6 +11,7 @@ import { QueryClient } from "@tanstack/react-query"
 import { organizationClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
 import { useConvexAuth } from "convex/react"
+import { regionConfig, requireRegionOrigin } from "../region/config"
 
 /** The single Better Auth client. Jori components read session and
  *  organization state through the hooks below so tests can mock one seam. */
@@ -30,7 +31,11 @@ export const authQueryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 5_000 } },
 })
 
-if (typeof document !== "undefined") {
+if (
+  typeof document !== "undefined" &&
+  window.location.origin ===
+    requireRegionOrigin(regionConfig, regionConfig.current)
+) {
   void prefetchSession(authQueryClient, authClient)
 }
 

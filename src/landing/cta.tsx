@@ -1,8 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
-import { type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
-import { usePublicSession } from "@/shared/session/public"
 import { WaitlistForm } from "./waitlist/form"
 
 /** The anchor every call to action points at. `MarketingShell` is what puts it
@@ -28,8 +26,7 @@ export function Closing({ lede }: { lede: string }) {
   )
 }
 
-/** The one call to action, auth-aware: members go to the console, everyone
- *  else drops to the waitlist. Pages that close on it scroll down; the rest
+/** Marketing never reads regional sessions. Pages that close on the waitlist scroll down; the rest
  *  (legal documents) send the reader to the home page's. `prominent` bumps the
  *  size for hero placements. */
 export function GetStarted({
@@ -39,18 +36,7 @@ export function GetStarted({
   onWaitlistPage?: boolean
   prominent?: boolean
 }) {
-  const session = usePublicSession()
-  const isSignedIn = session.data !== null && session.data !== undefined
   const size = prominent ? "xl" : "lg"
-
-  if (isSignedIn) {
-    return (
-      <SessionButton pending={session.isPending} size={size} to="/console">
-        Open console
-        <ArrowRight data-icon="inline-end" />
-      </SessionButton>
-    )
-  }
 
   const label = (
     <>
@@ -68,34 +54,6 @@ export function GetStarted({
           {label}
         </Link>
       )}
-    </Button>
-  )
-}
-
-/** A session-aware link button for marketing surfaces: disabled while the
- *  session state resolves, a plain link afterwards. The pending markup
- *  matches what the server renders, so hydration stays clean. */
-export function SessionButton({
-  children,
-  pending,
-  to,
-  ...buttonProps
-}: {
-  children: ReactNode
-  pending: boolean
-  to: string
-} & Pick<ComponentProps<typeof Button>, "className" | "size" | "variant">) {
-  if (pending) {
-    return (
-      <Button disabled size="lg" {...buttonProps}>
-        {children}
-      </Button>
-    )
-  }
-
-  return (
-    <Button asChild size="lg" {...buttonProps}>
-      <Link to={to}>{children}</Link>
     </Button>
   )
 }

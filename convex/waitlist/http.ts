@@ -1,7 +1,7 @@
 import { isRecord } from "../../contracts/json"
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
-import { readOrigin } from "../shared/origin"
+import { readOrigin, readPublicOrigin } from "../shared/origin"
 
 /**
  * The waitlist is a public form post, so it lives on an HTTP route rather
@@ -75,7 +75,7 @@ function readAddress(request: Request) {
 function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("origin")
 
-  return origin !== null && origin === readOrigin()
+  return origin !== null && [readOrigin(), readPublicOrigin()].includes(origin)
     ? { "access-control-allow-origin": origin, vary: "origin" }
     : {}
 }
