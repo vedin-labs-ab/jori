@@ -7,9 +7,10 @@ regional migration is still in progress.
 ## Decision
 
 Keep Jori's existing providers, with the separately approved Bird replacement
-for Resend. Deploy the same application to independently configured EU and US
-instances. Region is a deployment property, not a tenant-specific branch in
-every feature. Domain code sees one database and one integration of each kind.
+for Resend and direct Google Cloud image generation. Deploy the same application
+to independently configured EU and US instances. Region is a deployment property,
+not a tenant-specific branch in every feature. Domain code sees one database and
+one integration of each kind.
 Provider adapters resolve the credentials and endpoints at the boundary.
 
 Customer selection determines the instance. IP geolocation may suggest an
@@ -25,6 +26,7 @@ resource IDs, search parameters, or customer records to the other region.
 | Convex deployment | `production-eu` | `production-us` |
 | Bird | EU organization and workspace | US organization and workspace |
 | OpenRouter | EU-only workspace guardrail | US-only workspace guardrail |
+| Google Cloud images | `jori-production-eu`, `aiplatform.eu.rep.googleapis.com` | `jori-production-us`, `aiplatform.us.rep.googleapis.com` |
 | PostHog | EU Cloud project | US Cloud project |
 | PostHog ingestion | `eu.i.posthog.com` | `us.i.posthog.com` |
 
@@ -90,6 +92,12 @@ shared CDN cache.
 - E2B's current endpoint is an expressly accepted temporary exception. Sandbox
   execution can contain customer workloads, so this is more substantial than
   CDN metadata. The connection adapter supports later endpoint separation.
+- Google Cloud image inference uses its EU or US jurisdiction endpoint.
+  Authentication and account administration are not region-bound. Token exchange
+  carries service-account identity, not prompts or images. Suspected-abuse prompts may be retained for up to 90
+  days in the selected region or multi-region and reviewed by people. Generated
+  images also enter the E2B sandbox, so the E2B exception applies to them.
+  See [image data handling](images.md).
 - Exa search uses its global API. Separate EU and US keys isolate access, not
   processing geography or the provider's team-level records. Search queries,
   requested URLs and fetched content can leave the selected region. The
@@ -195,6 +203,30 @@ Message content and the recipient address are removed when submission finishes
 or retries close. Minimal submission records expire after 30 days. Bird owns
 delivery logs, bounces, complaints and suppression management. Jori has no
 email delivery webhook, duplicate event store or local suppression list.
+
+## Image generation
+
+Image prompts go directly to Google Cloud, not through OpenRouter. The shared
+adapter derives the jurisdiction hostname and resource location from
+`JORI_REGION`. Each deployment has its own project and predict-only service
+account. Missing configuration fails before sending a prompt; there is no
+global fallback. Credential separation and fixed routing are distinct controls.
+The service account is not claimed to be intrinsically region-restricted.
+
+Google documents EU and US processing for `gemini-3.1-flash-image`. Its
+data-location terms cover selected-region storage and ML processing for
+supported models, not every account attribute or service datum. Both production
+projects have implicit caching disabled. Leave request/response logging and
+grounding off. This is not an unconditional zero-retention guarantee.
+[Model processing locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-image),
+[service-specific terms](https://cloud.google.com/terms/service-terms),
+[abuse monitoring](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/abuse-monitoring).
+
+Direct synthetic production probes succeeded in both jurisdictions. These do
+not verify the deployed Convex image tool, file handling or accounting. The
+development project is separate but billing is disabled pending a Google Cloud
+billing-account project quota increase. See [release evidence](release.md) and
+[image configuration and accounting](images.md).
 
 ## Release evidence
 

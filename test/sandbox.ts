@@ -61,6 +61,10 @@ function runGit(cwd: string, ...args: string[]) {
 }
 
 class LocalSandbox implements SandboxRuntime {
+  async importFile() {
+    throw new Error("Local sandbox tests do not access Convex storage.")
+  }
+
   // What a slow shell looks like to the tool layer: the result is held back
   // until it is collected, the way a real one is until its callback lands.
   private held: SandboxCommandResult | null = null

@@ -14,7 +14,8 @@ customer data was used in these probes.
 | Convex | `production-eu` is `sensible-spoonbill-17` in Ireland; `production-us` is `insightful-goat-7` in Virginia. Separate deployment keys and auth secrets. Task preview schema/functions deployed successfully to `quixotic-raccoon-259`. Development `trustworthy-parakeet-343` deployed from checked main. Required production variable names were present; the six optional Stripe variables remain absent in each region. Development is missing the two Bird variables. | Production deployment, billing configuration before accepting payments, development email configuration, live app tests, preview cleanup |
 | Vercel | Pro active; separate `jori-production-eu` and `jori-production-us` projects pinned to `dub1` and `iad1`, function failover off. Regional domains and ten public build variables checked. | Deploy checked main, verify actual function placement, redirects, private caching and host-only cookies |
 | Bird | Separate EU/US organizations, workspaces and keys. Both sending domains verified. Direct regional sends returned 202 and both synthetic messages reached the test inbox. Tracking off; no Jori delivery webhook. Development workspace creation failed with `E10014`, the US organization's workspace limit. Temporary organization CLI grants revoked after use. | Resolve the workspace limit with Bird or choose a separate development account; no development workspace/key created. App outbox and auth email tests, remove obsolete Resend configuration after cutover |
-| OpenRouter | Business active; separate region-only workspace guardrails, ZDR on, training off. Both regions passed completion, structured output and tool-call probes. Direct Nano Banana image requests in both regions returned 404 at the data-region filter. | Deployed chat tests. Neither authenticated regional catalog offers image-output models under current guardrails. Verify regional Vertex BYOK support or configure direct Google regional image generation; no global fallback |
+| OpenRouter | Business active; separate region-only workspace guardrails, ZDR on, training off. Both regions passed completion, structured output and tool-call probes. Direct Nano Banana image requests in both regions returned 404 at the data-region filter. Images now use the separate direct Google Cloud adapter. | Deployed chat tests; no global fallback |
+| Google Cloud images | Separate `jori-production-eu`, `jori-production-us` and `jori-development` projects and predict-only service accounts created. Both production billing links active and implicit caching disabled. Synthetic requests to both exact jurisdiction endpoints returned 200 with PNG output and usage metadata. Adapter merged at `175e3971`; all 2,558 tests passed. | Deploy and test actual Convex authentication, image generation, regional file storage, sandbox copy and usage accounting. Development billing is disabled because the billing-account project quota was reached; no development inference verified |
 | PostHog | Separate EU Cloud project `233772`, named `jori-production-eu`, and US Cloud project `530551`, named `jori-production-us`. IP discard enabled in both. Autocapture, web vitals, dead clicks and heatmaps disabled and read back in both; US session recording, console capture and network capture also disabled and read back. Synthetic regional events appeared only in their matching projects. | Verify actual frontend request destinations and browser collection behavior |
 | Exa | Separate EU/US search keys installed only in matching Convex deployments; both returned 200 to a synthetic search. Development retains its own key. | Deployed tool test; global processing remains an accepted exception |
 | E2B | Separate development, production EU and production US projects and keys installed. All three templates built; matching keys created sandboxes, executed a harmless command and deleted them. Both EU/US cross-project template access attempts were denied. Account only offers `us-west-1`. | Verify deployed Jori sandbox creation, execution and cleanup; US execution remains a documented exception |
@@ -67,6 +68,32 @@ EU project `233772` and US project `530551` event lists, with each region's
 probe appearing only in its matching project. This verifies synthetic
 ingestion and project separation. Requests from the actual deployed frontend
 remain unverified.
+
+## Image-generation verification evidence
+
+Direct synthetic requests returned HTTP 200 from
+`aiplatform.eu.rep.googleapis.com` and `aiplatform.us.rep.googleapis.com` using
+their matching `jori-production-eu` and `jori-production-us` projects. Both
+responses reported `gemini-3.1-flash-image` and `ON_DEMAND` traffic. The EU PNG
+contained 1,092,313 bytes and the US PNG 990,068 bytes. Each response reported
+17 input text tokens and 1,120 output image tokens. This verifies provider
+configuration and regional endpoint availability, not the deployed Jori tool.
+
+The checked direct adapter was merged and pushed at `175e3971`, with 2,558 tests
+passed and four skipped. It uses the same regional endpoint shape, obtains its
+own short-lived service-account token, and records deduplicated provider usage
+through Jori's billing ledger. Actual Convex-runtime authentication, image file
+handling, sandbox copying and accounting remain unverified. The sandbox import
+now carries file references rather than bytes; unit tests cover a 6 MiB blob,
+above the 5 MiB Node-action argument limit, with run and organization ownership
+checks. This is not a live transport verification.
+
+All three projects have separate predict-only service accounts. Production
+billing links are active and implicit caching is disabled. Development billing
+could not be enabled because the billing account reached its linked-project
+quota. No development image inference is claimed. Missing image configuration
+does not block deploying the rest of Jori and never enables a global fallback.
+See [image configuration, pricing and retention](images.md).
 
 ## Deployment prerequisites
 
@@ -213,4 +240,7 @@ Exa, current E2B execution, recipient mail systems and customer-connected
 providers have the limitations described in [residency](residency.md).
 The seller is confirmed as Vedin Labs AB, Sweden, for both Stripe accounts.
 Private activation, merchant-country correction and tax setup remain with the
-user. No global image-inference exception has been authorized.
+user. Google Cloud image inference uses regional jurisdiction endpoints, with
+the authentication, administration and abuse-monitoring limitations described
+in [image data handling](images.md). No global image-inference exception has
+been authorized.

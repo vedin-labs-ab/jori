@@ -97,6 +97,27 @@ export const getVisible = internalQuery({
   handler: async (ctx, args) => await getVisibleFile(ctx, args),
 })
 
+/** A run may import only its own generated files from this deployment. */
+export const forRun = internalQuery({
+  args: { fileId: v.id("files"), runId: v.id("runs") },
+  returns: v.object({ storageId: v.id("_storage"), size: v.number() }),
+  handler: async (ctx, args) => {
+    const [file, run] = await Promise.all([
+      ctx.db.get(args.fileId),
+      ctx.db.get(args.runId),
+    ])
+    if (
+      file === null ||
+      run === null ||
+      file.runId !== run._id ||
+      file.organizationId !== run.organizationId
+    ) {
+      throw new Error("File does not belong to this run.")
+    }
+    return { storageId: file.storageId, size: file.size }
+  },
+})
+
 /** The one file predicate; a Sight built from the viewer answers it. */
 export async function canViewFile(
   ctx: QueryCtx,

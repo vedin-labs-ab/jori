@@ -42,6 +42,12 @@ const subprocessors = [
     purpose: "Routes model calls to the provider.",
   },
   {
+    logo: "/logos/subprocessors/google.png",
+    name: "Google Cloud",
+    url: "https://cloud.google.com/terms/data-processing-addendum",
+    purpose: "Processes image-generation prompts and creates images.",
+  },
+  {
     logo: "/logos/subprocessors/posthog.svg",
     name: "PostHog",
     url: "https://posthog.com",

@@ -47,9 +47,19 @@ response bodies that could echo customer input. Jori stores images through its
 existing regional Convex file path and also copies them into the run's E2B sandbox.
 The documented E2B regional-processing exception therefore still applies.
 
+Sandbox imports carry only the file ID and workspace path between Convex runtimes.
+The Node action verifies that the file belongs to the run and organization, reads
+the owning deployment's blob directly, and writes it to that run's sandbox. It
+does not create a download URL or accept a network source URL. This accommodates
+Jori's 25 MiB file limit without putting image bytes into a Node action's 5 MiB
+argument budget. If the sandbox copy fails, the generated file and usage receipt
+remain in regional storage; the tool reports the failure.
+
 Sources: [service-specific terms](https://cloud.google.com/terms/service-terms),
 [zero-retention configuration](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention),
 [abuse monitoring](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/abuse-monitoring).
+
+Transport limit: [Convex function arguments](https://docs.convex.dev/production/state/limits).
 
 ## Usage and failure semantics
 

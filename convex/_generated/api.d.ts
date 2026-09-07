@@ -522,6 +522,7 @@ import type * as runtime_platform from "../runtime/platform.js";
 import type * as runtime_sandbox_coding from "../runtime/sandbox/coding.js";
 import type * as runtime_sandbox_e2b from "../runtime/sandbox/e2b.js";
 import type * as runtime_sandbox_e2b_connection from "../runtime/sandbox/e2b/connection.js";
+import type * as runtime_sandbox_e2b_imports from "../runtime/sandbox/e2b/imports.js";
 import type * as runtime_sandbox_files from "../runtime/sandbox/files.js";
 import type * as runtime_sandbox_git from "../runtime/sandbox/git.js";
 import type * as runtime_sandbox_input from "../runtime/sandbox/input.js";
@@ -1178,6 +1179,7 @@ declare const fullApi: ApiFromModules<{
   "runtime/sandbox/coding": typeof runtime_sandbox_coding;
   "runtime/sandbox/e2b": typeof runtime_sandbox_e2b;
   "runtime/sandbox/e2b/connection": typeof runtime_sandbox_e2b_connection;
+  "runtime/sandbox/e2b/imports": typeof runtime_sandbox_e2b_imports;
   "runtime/sandbox/files": typeof runtime_sandbox_files;
   "runtime/sandbox/git": typeof runtime_sandbox_git;
   "runtime/sandbox/input": typeof runtime_sandbox_input;
