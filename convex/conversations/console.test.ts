@@ -232,10 +232,11 @@ test("every message that runs schedules the thread's summary", async () => {
 test("the resources a message mentions are kept with it, once each, and one the person cannot see refuses the message", async () => {
   const { database, ctx } = consoleContext()
   const personId = await person(database)
-  const tableId = await database.insert(
-    "collections",
-    tableDoc({ name: "Customer renewals", organizationId })
-  )
+  // Named the way a token's grammar takes an id, as a real id is.
+  const tableId = await database.insert("collections", {
+    ...tableDoc({ name: "Customer renewals", organizationId }),
+    _id: "k17renewals",
+  })
   const privateId = await database.insert(
     "collections",
     tableDoc({

@@ -1,5 +1,9 @@
 import { type MessageContext } from "@contracts/replies/answers"
-import { type ReferenceKind, referenceKinds } from "@contracts/replies/parts"
+import {
+  parseResourceToken,
+  type ReferenceKind,
+  resourceTokenPattern,
+} from "@contracts/replies/parts"
 
 // Mentions are explicit, sigil-prefixed tokens — `@Gmail`, `/meeting-prep`,
 // `#send_message`, `+[table:k17…]`. Prose is never scanned for bare names,
@@ -47,11 +51,6 @@ export type Mention = {
   kind: MentionKind
   start: number
 }
-
-const resourceMentionPattern = new RegExp(
-  `^\\[(${referenceKinds.join("|")}):([a-z0-9_-]+)\\]`,
-  "i"
-)
 
 /** The kinds a catalog recognizes, in sigil order. */
 export function catalogKinds(catalog: MentionCatalog): MentionKind[] {
@@ -135,26 +134,18 @@ export function resourceMentionId(target: MessageContext) {
 /** The target a resource mention names, or nothing for an id of another
  *  shape. */
 export function parseResourceMention(id: unknown): MessageContext | null {
-  if (typeof id !== "string") {
-    return null
-  }
-
-  const match = resourceMentionPattern.exec(`[${id}]`)
-
-  return match === null
-    ? null
-    : { kind: match[1].toLowerCase() as ReferenceKind, id: match[2] }
+  return typeof id === "string" ? parseResourceToken(`+[${id}]`) : null
 }
 
 function matchResourceMention(text: string, sigilIndex: number) {
-  const match = resourceMentionPattern.exec(text.slice(sigilIndex + 1))
+  const match = resourceTokenPattern.exec(text.slice(sigilIndex))
 
   if (match === null) {
     return null
   }
 
   return {
-    end: sigilIndex + 1 + match[0].length,
+    end: sigilIndex + match[0].length,
     id: resourceMentionId({
       kind: match[1].toLowerCase() as ReferenceKind,
       id: match[2],

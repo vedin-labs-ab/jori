@@ -52,15 +52,22 @@ function createDatabase() {
   }
 
   return {
-    normalizeId: (_table: string, id: string) => (id.includes(":") ? id : null),
+    // A generated id carries its table; a row a test named is known by
+    // its own id, whatever its shape.
+    normalizeId: (_table: string, id: string) =>
+      id.includes(":") || docs.has(id) ? id : null,
     get: async (id: string) => docs.get(id) ?? null,
     // Typed like the real insert, so seeded ids flow into helpers without
-    // a cast and a wrong-table id is a typecheck failure.
+    // a cast and a wrong-table id is a typecheck failure. A doc that names
+    // its own `_id` keeps it.
     insert: async <TableName extends keyof DataModel>(
       table: TableName,
       doc: Record<string, unknown>
     ) => {
-      const _id = `${table}:${counter++}`
+      const _id = typeof doc._id === "string" ? doc._id : `${table}:${counter}`
+
+      counter += 1
+
       // Monotonic like the real system field, so keyset iteration works.
       const stored = { _creationTime: counter, ...doc, _id }
 
