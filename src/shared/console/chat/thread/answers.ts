@@ -1,4 +1,5 @@
 import {
+  isReplyQuestion,
   type ReplyChoice,
   type ReplyChoices,
   type ReplyQuestion,
@@ -29,6 +30,32 @@ export function answeredParts(messages: ChatMessage[]) {
   }
 
   return answered
+}
+
+/** The messages the thread shows on the questions they answer rather than
+ *  as turns of their own: a person's answers are marked on the questions
+ *  themselves, so a bubble repeating them would say it twice. A chip's
+ *  message stays a turn, since its label is what the person said next.
+ *  A message whose questions are not loaded stays a turn too, so nothing
+ *  the person sent is ever unseen. */
+export function answeringMessages(messages: ChatMessage[]) {
+  const byId = new Map(messages.map((message) => [message.id, message]))
+  const answering = new Set<string>()
+
+  for (const message of messages) {
+    const reply = byId.get(message.answer?.messageId ?? "")
+    const answersQuestion = message.answer?.answers.some(({ part }) => {
+      const candidate = reply?.parts[part]
+
+      return candidate !== undefined && isReplyQuestion(candidate)
+    })
+
+    if (answersQuestion === true) {
+      answering.add(message.id)
+    }
+  }
+
+  return answering
 }
 
 /** What a chosen option sends: its value when it has one, else its label. */

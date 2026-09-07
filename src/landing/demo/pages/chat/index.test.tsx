@@ -61,17 +61,17 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   fireEvent.click(screen.getByRole("radio", { name: /^Me/ }))
   fireEvent.click(screen.getByRole("button", { name: "Answer" }))
 
+  // The answers are marked on the questions themselves; the message that
+  // carried them is not repeated as a turn.
   expect(
-    (await screen.findByText(/Keep it here/, { selector: "div" })).textContent
-  ).toBe(
-    [
-      "Post a summary to #finance when it is done? Keep it here",
-      "How often should Renewals watch run? Every Monday",
-      "Who should the reminders come from? Me",
-    ].join("\n")
-  )
+    await screen.findAllByRole("listitem", { current: true })
+  ).toHaveLength(3)
   expect(screen.queryByRole("radio")).toBeNull()
-  expect(screen.getAllByRole("listitem", { current: true })).toHaveLength(3)
+  expect(
+    screen.queryByText(
+      /Post a summary to #finance when it is done\? Keep it here/
+    )
+  ).toBeNull()
 })
 
 test("stopping the run leaves a quiet notice under the ask", async () => {

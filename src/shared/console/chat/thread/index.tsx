@@ -23,7 +23,7 @@ import {
   isLiveRun,
   type ResolveReference,
 } from "../types"
-import { answeredParts } from "./answers"
+import { answeredParts, answeringMessages } from "./answers"
 import { ChoiceChips } from "./choices"
 import { CondensedNotice } from "./condensed"
 import { ChatDraftTurn } from "./draft"
@@ -81,6 +81,7 @@ export function ChatThread({
   usage?: ChatContextUsage | null
 }) {
   const answered = useMemo(() => answeredParts(messages), [messages])
+  const answering = useMemo(() => answeringMessages(messages), [messages])
   const isLive = isLiveRun(live)
   const anchorId = lastPersonId(messages)
   const lastId = messages.at(-1)?.id
@@ -101,40 +102,42 @@ export function ChatThread({
               <EarlierMessages isLoading={isLoading} onLoadMore={onLoadMore} />
             ) : null}
             {isLoading && messages.length === 0 ? <ConsoleListLoading /> : null}
-            {messages.map((message) => (
-              <MessageScrollerItem
-                key={message.id}
-                messageId={message.id}
-                scrollAnchor={message.id === anchorId}
-              >
-                {message.role === "person" ? (
-                  <PersonMessage
-                    context={
-                      message.context === undefined
-                        ? undefined
-                        : resolveReference(message.context)
-                    }
-                    message={message}
-                    now={now}
-                  />
-                ) : (
-                  <JoriMessage>
-                    <Markdown text={message.text} />
-                    <ReplyParts
-                      answered={answered}
-                      message={message}
-                      onChoose={onChoose}
-                      onOpenReference={onOpenReference}
-                      resolveReference={resolveReference}
-                      showChips={
-                        message.id === lastId && !isLive && draft === null
+            {messages.map((message) =>
+              answering.has(message.id) ? null : (
+                <MessageScrollerItem
+                  key={message.id}
+                  messageId={message.id}
+                  scrollAnchor={message.id === anchorId}
+                >
+                  {message.role === "person" ? (
+                    <PersonMessage
+                      context={
+                        message.context === undefined
+                          ? undefined
+                          : resolveReference(message.context)
                       }
+                      message={message}
+                      now={now}
                     />
-                    <MessageActions message={message} now={now} />
-                  </JoriMessage>
-                )}
-              </MessageScrollerItem>
-            ))}
+                  ) : (
+                    <JoriMessage>
+                      <Markdown text={message.text} />
+                      <ReplyParts
+                        answered={answered}
+                        message={message}
+                        onChoose={onChoose}
+                        onOpenReference={onOpenReference}
+                        resolveReference={resolveReference}
+                        showChips={
+                          message.id === lastId && !isLive && draft === null
+                        }
+                      />
+                      <MessageActions message={message} now={now} />
+                    </JoriMessage>
+                  )}
+                </MessageScrollerItem>
+              )
+            )}
             {usage?.condensed ? (
               <MessageScrollerItem>
                 <CondensedNotice runId={usage.runId} />
