@@ -39,7 +39,7 @@ test("the trigger reads the model and effort, and the menu recommends the three"
   expect(onSelect).toHaveBeenCalledWith(tiers.basic)
 })
 
-test("a model outside the tiers keeps the effort in force, and the slider sets it", () => {
+test("a model outside the tiers keeps the effort in force, and Reasoning sets it", () => {
   const onSelect = vi.fn()
   const selection = {
     model: "anthropic/claude-sonnet-5",
@@ -57,23 +57,31 @@ test("a model outside the tiers keeps the effort in force, and the slider sets i
     ).toBe("false")
   }
 
-  const anthropic = screen.getByRole("menuitem", { name: "Anthropic" })
+  const reasoning = screen.getByRole("menuitem", { name: /Reasoning/ })
 
-  anthropic.focus()
-  fireEvent.keyDown(anthropic, { key: "ArrowRight" })
+  expect(reasoning.textContent).toContain("High")
+  reasoning.focus()
+  fireEvent.keyDown(reasoning, { key: "ArrowRight" })
 
-  // The chosen model carries the slider; the others do not.
-  const slider = screen.getByRole("slider")
+  expect(
+    screen
+      .getByRole("menuitemradio", { name: "High" })
+      .getAttribute("aria-checked")
+  ).toBe("true")
 
-  expect(slider.getAttribute("aria-valuenow")).toBe("2")
-
-  fireEvent.keyDown(slider, { key: "ArrowRight" })
+  fireEvent.click(screen.getByRole("menuitemradio", { name: "Extra high" }))
 
   expect(onSelect).toHaveBeenCalledWith({
     model: "anthropic/claude-sonnet-5",
     effort: "xhigh",
   })
 
+  openPicker("Model: Claude Sonnet 5, High reasoning")
+
+  const anthropic = screen.getByRole("menuitem", { name: "Anthropic" })
+
+  anthropic.focus()
+  fireEvent.keyDown(anthropic, { key: "ArrowRight" })
   fireEvent.click(screen.getByRole("menuitemradio", { name: "Claude Opus 5" }))
 
   expect(onSelect).toHaveBeenCalledWith({
