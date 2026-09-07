@@ -13,18 +13,18 @@ function openPicker(name: string) {
   })
 }
 
-test("the trigger reads as the tier and the menu recommends the three", () => {
+test("the trigger reads the model and effort, and the menu recommends the three", () => {
   const onSelect = vi.fn()
 
   render(<ModelPicker onSelect={onSelect} selection={tiers.standard} />)
-  openPicker("Model: Standard")
+  openPicker("Model: GPT-5.6 Sol, Medium reasoning")
 
   expect(screen.getByText("Recommendations")).toBeDefined()
 
   const standard = screen.getByRole("menuitemradio", { name: /Standard/ })
 
   expect(standard.getAttribute("aria-checked")).toBe("true")
-  expect(standard.textContent).toContain("GPT-5.6 Sol")
+  expect(standard.textContent).toContain("GPT-5.6 Sol · Medium")
   expect(
     screen
       .getByRole("menuitemradio", { name: /Premium/ })
@@ -39,16 +39,15 @@ test("the trigger reads as the tier and the menu recommends the three", () => {
   expect(onSelect).toHaveBeenCalledWith(tiers.basic)
 })
 
-test("a model outside the tiers names itself and is picked at medium effort", () => {
+test("a model outside the tiers keeps the effort in force, and the slider sets it", () => {
   const onSelect = vi.fn()
+  const selection = {
+    model: "anthropic/claude-sonnet-5",
+    effort: "high",
+  } as const
 
-  render(
-    <ModelPicker
-      onSelect={onSelect}
-      selection={{ model: "anthropic/claude-sonnet-5", effort: "medium" }}
-    />
-  )
-  openPicker("Model: Claude Sonnet 5")
+  render(<ModelPicker onSelect={onSelect} selection={selection} />)
+  openPicker("Model: Claude Sonnet 5, High reasoning")
 
   for (const tier of ["Basic", "Standard", "Premium"]) {
     expect(
@@ -62,10 +61,37 @@ test("a model outside the tiers names itself and is picked at medium effort", ()
 
   anthropic.focus()
   fireEvent.keyDown(anthropic, { key: "ArrowRight" })
+
+  // The chosen model carries the slider; the others do not.
+  const slider = screen.getByRole("slider")
+
+  expect(slider.getAttribute("aria-valuenow")).toBe("2")
+
+  fireEvent.keyDown(slider, { key: "ArrowRight" })
+
+  expect(onSelect).toHaveBeenCalledWith({
+    model: "anthropic/claude-sonnet-5",
+    effort: "xhigh",
+  })
+
   fireEvent.click(screen.getByRole("menuitemradio", { name: "Claude Opus 5" }))
 
   expect(onSelect).toHaveBeenCalledWith({
     model: "anthropic/claude-opus-5",
-    effort: "medium",
+    effort: "high",
   })
+})
+
+test("the chosen model wears the tier it makes", () => {
+  render(<ModelPicker onSelect={() => undefined} selection={tiers.premium} />)
+  openPicker("Model: GPT-6 Astra, High reasoning")
+
+  const openai = screen.getByRole("menuitem", { name: "OpenAI" })
+
+  openai.focus()
+  fireEvent.keyDown(openai, { key: "ArrowRight" })
+
+  expect(
+    screen.getByRole("menuitemradio", { name: /^GPT-6 Astra/ }).textContent
+  ).toContain("Premium")
 })

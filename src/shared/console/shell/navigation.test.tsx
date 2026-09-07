@@ -1,14 +1,20 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { ConsoleNavigationContext } from "./location"
 import { ConsoleSidebar } from "./navigation"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../test/router")),
   ...(await import("../../../../test/routing")),
 }))
+
+// The command list scrolls its chosen row into view, which jsdom lacks.
+beforeEach(() => {
+  Object.assign(HTMLElement.prototype, { scrollIntoView: () => undefined })
+})
 
 afterEach(() => {
   cleanup()
@@ -20,18 +26,26 @@ const chats = [
   { id: "conversations_flaky", title: "Flaky payroll test", updatedAt: 1 },
 ]
 
-function renderSidebar(pathname: string, conversations = chats) {
+function renderSidebar(
+  pathname: string,
+  conversations = chats,
+  options: { open?: boolean; navigate?: (href: string) => void } = {}
+) {
   return render(
     <TooltipProvider>
-      <SidebarProvider>
-        <ConsoleSidebar
-          account={null}
-          chats={conversations}
-          folders={null}
-          organization={null}
-          pathname={pathname}
-        />
-      </SidebarProvider>
+      <ConsoleNavigationContext.Provider
+        value={{ navigate: options.navigate ?? (() => undefined), pathname }}
+      >
+        <SidebarProvider open={options.open ?? true}>
+          <ConsoleSidebar
+            account={null}
+            chats={conversations}
+            folders={null}
+            organization={null}
+            pathname={pathname}
+          />
+        </SidebarProvider>
+      </ConsoleNavigationContext.Provider>
     </TooltipProvider>
   )
 }
@@ -107,4 +121,26 @@ test("Chats and Resources close from their labels, and stay closed on the next v
   fireEvent.click(screen.getByRole("button", { name: "Resources" }))
 
   expect(screen.getByRole("link", { name: "Jobs" })).toBeDefined()
+})
+
+test("the icon rail folds the chats into one entry that opens a searchable list", () => {
+  const navigate = vi.fn()
+
+  renderSidebar("/chat/conversations_flaky", chats, { open: false, navigate })
+
+  const entry = screen.getByRole("button", { name: "Chats" })
+
+  expect(entry.getAttribute("data-active")).toBe("true")
+
+  fireEvent.click(entry)
+  fireEvent.change(screen.getByPlaceholderText("Search chats…"), {
+    target: { value: "payroll" },
+  })
+
+  expect(screen.queryByRole("option", { name: "Renewals at risk" })).toBeNull()
+
+  fireEvent.click(screen.getByRole("option", { name: "Flaky payroll test" }))
+
+  expect(navigate).toHaveBeenCalledWith("/chat/conversations_flaky")
+  expect(screen.queryByPlaceholderText("Search chats…")).toBeNull()
 })
