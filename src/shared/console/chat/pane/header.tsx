@@ -10,9 +10,8 @@ import { SeparatorDot } from "../../dot"
 import { type MaterialBreadcrumb } from "../../materials/breadcrumb"
 import { SaveIcon, type SaveState } from "../../materials/save"
 import { ConsoleLink } from "../../shell/link"
-import { referencePresentation } from "../presentation"
+import { referenceDestination, referencePresentation } from "../presentation"
 import { type ChatReference, type ReferenceTarget } from "../types"
-import { targetDestination } from "./routes"
 
 /** Under the strip, what the active tab holds: the target's icon, its
  *  name as the way to its own page, and its kind, so the pane is never
@@ -79,7 +78,7 @@ function PageLink({
       className="group min-w-0 gap-0 px-0 font-medium text-foreground text-sm hover:px-1.5 focus-visible:px-1.5"
       variant="ghost"
     >
-      <ConsoleLink {...targetDestination(target)}>
+      <ConsoleLink {...referenceDestination(target)}>
         <span className={cn("truncate", saving && "shimmer")}>{name}</span>
         <span
           aria-hidden

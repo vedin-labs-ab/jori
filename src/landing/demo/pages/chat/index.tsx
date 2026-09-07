@@ -131,7 +131,9 @@ function Conversation({ conversationId }: { conversationId: string }) {
   return (
     <ChatPane
       {...pane}
-      body={(target) => <DemoPaneBody target={target} />}
+      body={(target) => (
+        <DemoPaneBody onOpenReference={openTarget} target={target} />
+      )}
       composer={
         <DemoComposer
           conversationId={conversationId}

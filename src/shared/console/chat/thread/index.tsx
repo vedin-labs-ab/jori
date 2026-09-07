@@ -72,8 +72,9 @@ export function ChatThread({
   onChoose: ChooseHandler
   onLoadMore: () => void
   onOpenReference: OpenTarget
-  /** What the live run is doing: the working line, its log, its requests. */
-  progress: ReactNode
+  /** What the live run is doing: the working line, its log, its requests.
+   *  Left out, a live run shows nothing until its draft arrives. */
+  progress?: ReactNode
   resolveReference: ResolveReference
   /** The latest run's context use, for the note that it condensed. */
   usage?: ChatContextUsage | null
@@ -238,7 +239,7 @@ function ThreadTail({
 }) {
   const isLive = isLiveRun(live)
 
-  if (isLive || draft !== null) {
+  if ((isLive && progress !== undefined) || draft !== null) {
     return (
       <MessageScrollerItem>
         <JoriMessage
