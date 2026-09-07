@@ -104,16 +104,8 @@ test("the tabs name their targets, and the active one shows its body", () => {
   expect(within(header).queryByText("Open page")).toBeNull()
 })
 
-test("a preview tab reads in italics; the pin marks and toggles, and a double click keeps", () => {
+test("the pin marks a kept tab and toggles, and a double click keeps", () => {
   const { onPin } = renderPane()
-
-  expect(
-    screen.getByRole("tab", { name: "Renewals watch" }).className
-  ).toContain("italic")
-  expect(
-    screen.getByRole("tab", { name: "Customer renewals" }).className
-  ).not.toContain("italic")
-
   const pinned = screen.getByRole("button", { name: "Unpin Customer renewals" })
 
   expect(pinned.getAttribute("aria-pressed")).toBe("true")

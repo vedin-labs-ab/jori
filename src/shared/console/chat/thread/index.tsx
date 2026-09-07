@@ -1,4 +1,4 @@
-import { memo, type ReactNode, useEffect, useMemo } from "react"
+import { type ReactNode, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
   MessageScroller,
@@ -7,11 +7,8 @@ import {
   MessageScrollerItem,
   MessageScrollerProvider,
   MessageScrollerViewport,
-  useMessageScroller,
 } from "@/components/ui/message-scroller"
 import { ConsoleListLoading } from "../../list/loading"
-import { Markdown } from "../../markdown"
-import { type MentionCatalog } from "../../mentions/scan"
 import {
   createMentionCatalog,
   emptyMentionSources,
@@ -22,15 +19,15 @@ import {
   type ChatContextUsage,
   type ChatMessage,
   type ChatRun,
-  endedWithoutReply,
   isLiveRun,
+  lastMessage,
   type ResolveReference,
 } from "../types"
 import { answeredParts, answeringMessages } from "./answers"
-import { CondensedNotice } from "./condensed"
-import { JoriMessage, MessageActions, PersonMessage } from "./message"
-import { RunNotice } from "./notice"
-import { type ChooseHandler, ReplyParts } from "./parts"
+import { CondensedNotice } from "./notice"
+import { type ChooseHandler } from "./parts"
+import { AnchorOnTurn, ThreadTail } from "./tail"
+import { Turn } from "./turn"
 
 /** The column every chat surface reads in. */
 export const chatColumnClassName = "mx-auto w-full max-w-[44rem] px-4 md:px-6"
@@ -86,7 +83,7 @@ export function ChatThread({
   const answering = useMemo(() => answeringMessages(messages), [messages])
   const catalog = useMemo(() => createMentionCatalog(mentions), [mentions])
   const isLive = isLiveRun(live)
-  const anchorId = lastPersonId(messages)
+  const anchorId = lastMessage(messages, "person")?.id
   const lastId = messages.at(-1)?.id
 
   return (
@@ -144,62 +141,6 @@ export function ChatThread({
   )
 }
 
-/** One message as its side shows it: the person's in a bubble with its
- *  context and its chips, Jori's as prose with its parts under the mark.
- *  Rendered once per message and left alone while the thread's tail
- *  changes under it. */
-const Turn = memo(function Turn({
-  answered,
-  catalog,
-  message,
-  now,
-  onChoose,
-  onOpenReference,
-  resolveReference,
-  showChips,
-}: {
-  answered: Map<string, Map<number, string[]>>
-  catalog: MentionCatalog
-  message: ChatMessage
-  now: number
-  onChoose: ChooseHandler
-  onOpenReference: OpenTarget
-  resolveReference: ResolveReference
-  showChips: boolean
-}) {
-  if (message.role === "person") {
-    return (
-      <PersonMessage
-        catalog={catalog}
-        context={
-          message.context === undefined
-            ? undefined
-            : resolveReference(message.context)
-        }
-        message={message}
-        now={now}
-        onOpenReference={onOpenReference}
-        resolveReference={resolveReference}
-      />
-    )
-  }
-
-  return (
-    <JoriMessage>
-      <Markdown text={message.text} />
-      <ReplyParts
-        answered={answered}
-        message={message}
-        onChoose={onChoose}
-        onOpenReference={onOpenReference}
-        resolveReference={resolveReference}
-        showChips={showChips}
-      />
-      <MessageActions message={message} now={now} />
-    </JoriMessage>
-  )
-})
-
 /** The way to the page before the oldest one loaded. */
 function EarlierMessages({
   isLoading,
@@ -221,70 +162,4 @@ function EarlierMessages({
       </Button>
     </div>
   )
-}
-
-/** After the messages: one turn of Jori's while the run works — what it
- *  is doing, then the reply as far as it has come, under a single mark —
- *  or, when the run ended without the reply, the notice that says so. A
- *  run starts from the person's message, so a message of Jori's standing
- *  last under a live run is that run's own heads-up, and the work goes on
- *  under it rather than as a new turn. A host that shows the draft alone
- *  has a turn with nothing in it until the draft says something; the
- *  item hides itself for as long as that is so, without the thread
- *  having to read the draft. */
-function ThreadTail({
-  draft,
-  live,
-  messages,
-  progress,
-}: {
-  draft: ReactNode
-  live: ChatRun | null
-  messages: ChatMessage[]
-  progress: ReactNode
-}) {
-  const isLive = isLiveRun(live)
-
-  if (isLive && (progress !== undefined || draft !== undefined)) {
-    return (
-      <MessageScrollerItem className="has-[[data-slot=turn]:empty]:hidden">
-        <JoriMessage continued={messages.at(-1)?.role === "jori"} streaming>
-          {progress}
-          {draft}
-        </JoriMessage>
-      </MessageScrollerItem>
-    )
-  }
-
-  return endedWithoutReply(messages, live) ? (
-    <MessageScrollerItem>
-      <RunNotice run={live} />
-    </MessageScrollerItem>
-  ) : null
-}
-
-/** Brings each new turn of the person's to the top of the view as it is
- *  sent, so the reply grows under it; the scroller anchors the first
- *  render the same way on its own. */
-function AnchorOnTurn({ anchorId }: { anchorId: string | undefined }) {
-  const { scrollToMessage } = useMessageScroller()
-
-  useEffect(() => {
-    if (anchorId !== undefined) {
-      scrollToMessage(anchorId, { align: "start" })
-    }
-  }, [anchorId, scrollToMessage])
-
-  return null
-}
-
-/** The person's latest turn, which the thread anchors on. */
-function lastPersonId(messages: ChatMessage[]) {
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    if (messages[index]?.role === "person") {
-      return messages[index]?.id
-    }
-  }
-
-  return undefined
 }

@@ -85,6 +85,20 @@ export type ResolveReference = (
   target: ReferenceTarget
 ) => ChatReference | undefined
 
+/** The latest message of a role: the person's, which the thread anchors
+ *  on, or Jori's, whose references a reply may open. */
+export function lastMessage(messages: ChatMessage[], role: ChatRole) {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index]
+
+    if (message?.role === role) {
+      return message
+    }
+  }
+
+  return undefined
+}
+
 /** Whether a run is still going, so the thread shows progress and the
  *  composer offers to stop it. */
 export function isLiveRun(run: ChatRun | null): run is ChatRun {

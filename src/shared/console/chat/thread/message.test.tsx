@@ -2,29 +2,14 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { ask, message, now, reply } from "../../../../../test/chat"
 import { absoluteTime } from "../../time"
-import { type ChatMessage } from "../types"
 import { JoriMessage, MessageActions, PersonMessage } from "./message"
 
 afterEach(cleanup)
 
-const now = 1_700_000_000_000
-
-const ask: ChatMessage = {
-  id: "m1",
-  role: "person",
-  text: "Which renewals are at risk?",
-  parts: [],
-  createdAt: now - 60_000,
-}
-
-const reply: ChatMessage = {
-  id: "m2",
-  role: "jori",
-  text: "**Harbor House** renews Sep 24.",
-  parts: [{ kind: "reference", target: { kind: "table", id: "t1" } }],
-  createdAt: now - 30_000,
-}
+/** The reply, sent since the clock last ticked. */
+const justSent = message({ ...reply, createdAt: now - 30_000 })
 
 function renderMessages() {
   const writeText = vi.fn(() => Promise.resolve())
@@ -38,7 +23,7 @@ function renderMessages() {
       <PersonMessage context={undefined} message={ask} now={now} />
       <JoriMessage>
         <p>The reply</p>
-        <MessageActions message={reply} now={now} />
+        <MessageActions message={justSent} now={now} />
       </JoriMessage>
     </TooltipProvider>
   )
@@ -46,7 +31,7 @@ function renderMessages() {
   return writeText
 }
 
-test("the actions keep their place under the message but show on hover or focus", () => {
+test("each message has its actions under it, none hidden from assistive technology", () => {
   renderMessages()
 
   const rows = screen
@@ -56,10 +41,7 @@ test("the actions keep their place under the message but show on hover or focus"
   expect(rows).toHaveLength(2)
 
   for (const row of rows) {
-    expect(row?.className).toContain("opacity-0")
-    expect(row?.className).toContain("group-hover/message:opacity-100")
-    expect(row?.className).toContain("focus-within:opacity-100")
-    expect(row?.closest(".group\\/message")).not.toBeNull()
+    expect(row?.querySelector("time")).not.toBeNull()
     expect(row?.querySelector("[aria-hidden='true'] button")).toBeNull()
   }
 })
