@@ -116,7 +116,7 @@ function RecentConversations({
           Recent
         </h3>
         {recent.length === shown.length ? null : (
-          <ChatsPicker chats={recent} side="bottom">
+          <ChatsPicker align="end" chats={recent} side="bottom">
             <button
               className="-mr-1.5 inline-flex items-center gap-0.5 rounded-sm px-1.5 py-0.5 font-medium text-muted-foreground text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
               type="button"
