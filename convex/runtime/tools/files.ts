@@ -3,6 +3,7 @@ import { type JsonObject } from "../../../contracts/json"
 import {
   fileTooLargeError,
   maxFileBytes,
+  type UploadedFile,
 } from "../../../contracts/runtime/files"
 import { type RuntimeId } from "../../../contracts/runtime/ids"
 import { internal } from "../../_generated/api"
@@ -10,7 +11,7 @@ import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { normalizeFileName } from "../../files/names"
 import { optionalString, requiredString } from "../../shared/input"
-import { type AgentRuntime, type UploadedFile } from "../platform"
+import { type AgentRuntime } from "../platform"
 import {
   isAbsolutePosix,
   joinPosix,

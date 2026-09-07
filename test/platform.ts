@@ -86,6 +86,7 @@ function answers() {
     readAgentRuns: vi.fn(async () => []),
     readWaiter: vi.fn(async () => null),
     recordEvent: vi.fn(async () => undefined),
+    recordUsage: vi.fn(async () => undefined),
     requestApproval: vi.fn(async () => ({
       approvalId: runtimeId<"approvals">("approval_1"),
       code: "ABC123",

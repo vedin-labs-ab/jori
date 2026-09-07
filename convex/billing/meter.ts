@@ -23,6 +23,20 @@ export async function meterModelUsage(
   }
 ) {
   const micros = priceTokens(await liveModelRate(ctx, args.model), args.tokens)
+  await meterPricedUsage(ctx, { ...args, micros })
+}
+
+/** The provider edge prices multimodal work; all debits share this ledger. */
+export async function meterPricedUsage(
+  ctx: MutationCtx,
+  args: {
+    model: string
+    run: Doc<"runs">
+    micros: number
+    tokens: { input: number; output: number }
+  }
+) {
+  const { micros } = args
 
   if (micros <= 0) {
     return

@@ -3,6 +3,7 @@ import { allowlist } from "./access/schema"
 import { approvals } from "./approvals/schema"
 import { backfills } from "./backfill/schema"
 import { accounts, transactions } from "./billing/schema"
+import { usageReceipts } from "./billing/usage/schema"
 import { collections, documents, shares } from "./collections/schema"
 import { conversations } from "./conversations/schema"
 import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
@@ -46,6 +47,7 @@ export default defineSchema({
   files,
   accounts,
   transactions,
+  usageReceipts,
   persons,
   identities,
   integrations,

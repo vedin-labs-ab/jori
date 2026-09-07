@@ -1,0 +1,94 @@
+import { type ProviderUsage } from "../../../../../contracts/billing"
+import { isRecord } from "../../../../../contracts/json"
+import { base64DecodeBytes } from "../../../../shared/encoding"
+import { vertexAccessToken } from "./auth"
+import { imageModel, vertexConfiguration } from "./config"
+import { vertexUsage } from "./usage"
+
+type Image = { bytes: Uint8Array; mimeType: string }
+export type GeneratedImage = { image: Image | null; usage: ProviderUsage }
+
+export async function generateVertexImage(
+  prompt: string
+): Promise<GeneratedImage> {
+  const config = vertexConfiguration()
+  const token = await vertexAccessToken(config)
+  const response = await fetch(config.endpoint, {
+    method: "POST",
+    redirect: "error",
+    signal: AbortSignal.timeout(120_000),
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        candidateCount: 1,
+        maxOutputTokens: 8192,
+        responseModalities: ["TEXT", "IMAGE"],
+        imageConfig: { imageSize: "1K" },
+      },
+    }),
+  })
+  if (!response.ok) {
+    // Provider error bodies can contain customer input. Do not retain them.
+    throw new Error(`Vertex image generation failed (${response.status}).`)
+  }
+  const result: unknown = await response.json()
+  if (
+    !isRecord(result) ||
+    typeof result.responseId !== "string" ||
+    result.responseId === ""
+  ) {
+    throw new Error("Vertex image response is missing its request ID.")
+  }
+  return {
+    usage: {
+      provider: "vertex",
+      model: `google/${imageModel}`,
+      requestId: result.responseId,
+      ...vertexUsage(result.usageMetadata),
+    },
+    image: readImage(result.candidates),
+  }
+}
+
+function readImage(candidates: unknown): Image | null {
+  if (!Array.isArray(candidates)) {
+    return null
+  }
+  for (const candidate of candidates) {
+    if (
+      !isRecord(candidate) ||
+      !isRecord(candidate.content) ||
+      !Array.isArray(candidate.content.parts)
+    ) {
+      continue
+    }
+    for (const part of candidate.content.parts) {
+      const image = readPart(part)
+      if (image !== null) {
+        return image
+      }
+    }
+  }
+  return null
+}
+
+function readPart(part: unknown): Image | null {
+  if (!isRecord(part) || !isRecord(part.inlineData)) {
+    return null
+  }
+  const { data, mimeType } = part.inlineData
+  if (
+    typeof data !== "string" ||
+    data === "" ||
+    (mimeType !== "image/png" &&
+      mimeType !== "image/jpeg" &&
+      mimeType !== "image/webp")
+  ) {
+    return null
+  }
+  return { bytes: base64DecodeBytes(data), mimeType }
+}
