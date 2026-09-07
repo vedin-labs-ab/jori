@@ -21,7 +21,10 @@ customer data was used in these probes.
 | Google | Separate regional OAuth clients, secrets and frontend/integration callbacks configured. Project `jori-503709` consent scopes saved and read back to match current code; broad Drive, Calendar and `gmail.modify` scopes removed. Gmail and Calendar APIs confirmed enabled. Audience remains External/Testing, restricted to test users. | Live sign-in and connection tests; publishing and verification before general availability |
 | Microsoft | Separate organizational-account registrations and 180-day secrets installed. Three callbacks per region configured. Both have delegated User.Read, offline_access, Mail.ReadWrite, Mail.Send and Calendars.ReadWrite; no tenant-wide consent granted. | Live sign-in and connections, publisher verification; rotate secrets before 6 March 2027 |
 | Stripe | User confirmed Vedin Labs AB, Sweden, as seller for both Stripe accounts. Billing code rejects cross-region associations and unpaid checkout fulfillment. Subscription checkout already enables automatic tax; manual and automatic usage top-ups do not calculate tax. Runtime REST requests do not pin `Stripe-Version`. No Stripe objects or keys changed in this review. | User completes private activation, US-labelled account merchant-country correction and tax setup. Confirm tax classification and top-up treatment, align/test API versions, configure separate keys/products/prices/webhooks, and verify billing before live charging |
-| GitHub, Slack, Linear, Notion | Regional session-bound OAuth callback code prepared. Shared OAuth registrations are permitted when direct regional callbacks and event routing preserve token/data isolation. Separate apps are the operational choice for webhook routing and permission isolation, not a universal residency requirement. Notion's documented subscription controls do not establish workspace-specific delivery filtering. | Create/configure regional apps and connections, credentials and events, then test actual connections in both regions. Use separate Notion connections unless provider confirmation establishes suitable filtering |
+| GitHub | Organization-owned `jori-production-eu` and `jori-production-us` apps created. Regional setup, OAuth and event URLs configured. App identity, client secret and webhook secret saved and read back in each matching Convex deployment. | Private-key downloads pending user assistance; install matching private keys, deploy ingress and test installation, OAuth access verification and events in both regions |
+| Slack | Separate EU/US apps created with token rotation enabled and direct regional OAuth and interactivity URLs. Client ID, client secret and signing secret saved and read back in each matching Convex deployment. | Deploy production ingress, configure event subscriptions and public distribution, then test connection, token rotation, interactivity and events |
+| Linear | Separate public EU/US OAuth apps and direct regional app webhooks configured; client-credentials grant disabled. Client ID, client secret and webhook secret saved and read back in each matching Convex deployment. | Deploy production ingress and test actual OAuth connections and event delivery in both regions |
+| Notion | Separate public EU/US OAuth connections created with matching regional callbacks. Client ID and secret saved and read back in each matching Convex deployment. No user-information capability enabled. | Deploy production ingress, create and verify each regional webhook subscription, save its verification token, then test connections and events |
 
 ## Task preview evidence
 
@@ -74,6 +77,15 @@ Both production guard inventories are missing `STRIPE_SECRET_KEY`,
 presence alone does not prove that an integration works. Development is
 missing `BIRD_API_KEY` and `BIRD_WORKSPACE_ID`.
 
+The guard inventory is not the full connected-integration readiness checklist.
+GitHub still needs `GITHUB_APP_PRIVATE_KEY` in each production deployment.
+Automated key downloads were blocked by the browser; the user has been asked
+to download each app's key. Notion webhook subscriptions and their verification
+tokens have not been created. Slack event subscriptions and public distribution
+remain pending. Complete these provider-side steps after production webhook
+ingress is available, then test delivery and authorization. Existing development
+app registrations remain unchanged; production app setup does not verify them.
+
 Google project `jori-503709` now lists exactly `openid`, `userinfo.email`,
 `userinfo.profile`, `gmail.readonly`, `gmail.compose`, `gmail.send`,
 `calendar.events` and `calendar.calendarlist.readonly` in its saved consent
@@ -94,12 +106,35 @@ REST requests omit `Stripe-Version`; account and webhook API versions must be
 aligned and tested before launch. These are billing readiness findings, not a
 completed billing rewrite or changes to Stripe objects or keys.
 
+## Connected app configuration
+
+GitHub, Slack, Linear and Notion OAuth callbacks target each app's own regional
+Convex site. Configured GitHub and Linear webhooks do the same; Slack and Notion
+event setup remains pending. No shared event relay or cross-region event fanout
+was added.
+The saved credential sets were read back from their matching deployments, but
+no completed customer connection or production event delivery is established
+by that check.
+
+GitHub apps have read/write access to Contents, Issues and Pull requests, plus
+read-only Metadata. Subscribed events are `issues`, `issue_comment`,
+`pull_request`, `pull_request_review_comment` and `push`. Both apps allow
+installation by any account and expire user tokens. OAuth during installation
+is disabled; Jori's separate OAuth step verifies the authenticated user's access
+to an installation before linking it to an organization.
+
+Slack app manifests enable token rotation. Their OAuth and interactivity URLs
+are regional; event subscriptions and public distribution still need setup.
+Linear apps subscribe only to Comments, Issues, Projects and Inbox notifications.
+Notion connections permit reading, updating and inserting content, and reading
+and inserting comments. They do not request user information.
+
 For Notion, the documented subscription controls specify a connection, webhook
 URL and event types. Event payloads include `workspace_id` and
 `subscription_id`, but those fields do not establish pre-delivery filtering.
-Separate regional public connections are therefore the recommended setup
-unless Notion confirms suitable filters. This is not a claim that cross-region
-broadcast delivery has been observed. See Notion's
+Separate regional public connections have therefore been created. Their
+webhook subscriptions remain pending production ingress deployment. This is
+not a claim that cross-region broadcast delivery has been observed. See Notion's
 [webhook reference](https://developers.notion.com/reference/webhooks) and
 [event delivery documentation](https://developers.notion.com/reference/webhooks-events-delivery).
 

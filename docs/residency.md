@@ -154,14 +154,22 @@ Never send every event to both instances and filter it after receipt.
 GitHub permits one webhook per app, and its app private key can authorize
 installation access. Slack has one event request URL per app. Linear's
 app-managed webhook also has one destination. Separate regional registrations
-are the simpler fit for these integrations. Verify Notion's subscription
-routing before choosing its registration layout. Retain the already configured
-Google and Microsoft regional clients; do not create churn merely to consolidate
-them. Customers use the same Connect flow in either instance.
+are the simpler fit for these integrations. Separate EU/US production apps
+have been created for GitHub, Slack and Linear. Notion also has separate public
+connections because its documented subscription controls do not establish
+pre-delivery workspace filtering. Google and Microsoft retain their regional
+clients. Existing development registrations remain separate and unchanged.
+Customers use the same Connect flow in either instance.
 [GitHub webhooks](https://docs.github.com/en/enterprise-cloud@latest/webhooks/using-webhooks/creating-webhooks),
 [Slack event requests](https://docs.slack.dev/apis/events-api/using-http-request-urls),
 [Linear manifests](https://linear.app/developers/oauth-app-manifests),
 [Notion webhooks](https://developers.notion.com/reference/webhooks).
+
+These registrations are configuration evidence, not completed connection
+tests. GitHub private keys, Slack event subscriptions and public distribution,
+and Notion webhook subscriptions remain pending. Production ingress and live
+OAuth/event tests must verify that each connection works only through its
+matching instance. See [release verification](release.md) for current readiness.
 
 Google currently groups our regional OAuth clients in one Cloud project.
 Revoking a user's grant can invalidate that user's tokens for every client in
