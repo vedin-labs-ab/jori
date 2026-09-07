@@ -7,23 +7,29 @@ export function useIsMobile() {
 }
 
 /** Whether the viewport is narrower than `width` pixels, kept in step
- *  with the window; false until the browser has answered. */
+ *  with the window and right from the first render on the client; false
+ *  on the server and in a browser that cannot say. */
 export function useIsBelow(width: number) {
-  const [isBelow, setIsBelow] = React.useState<boolean | undefined>(undefined)
+  const query = `(max-width: ${width - 1}px)`
 
-  React.useEffect(() => {
-    if (typeof window.matchMedia !== "function") {
-      return
-    }
+  return React.useSyncExternalStore(
+    React.useCallback(
+      (onChange: () => void) => {
+        if (typeof window.matchMedia !== "function") {
+          return () => undefined
+        }
 
-    const mql = window.matchMedia(`(max-width: ${width - 1}px)`)
-    const onChange = (event: MediaQueryListEvent) => {
-      setIsBelow(event.matches)
-    }
-    mql.addEventListener("change", onChange)
-    setIsBelow(mql.matches)
-    return () => mql.removeEventListener("change", onChange)
-  }, [width])
+        const list = window.matchMedia(query)
 
-  return !!isBelow
+        list.addEventListener("change", onChange)
+
+        return () => list.removeEventListener("change", onChange)
+      },
+      [query]
+    ),
+    () =>
+      typeof window.matchMedia === "function" &&
+      window.matchMedia(query).matches,
+    () => false
+  )
 }

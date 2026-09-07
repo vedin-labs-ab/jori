@@ -19,12 +19,21 @@ type Typed = {
   phase: Phase
 }
 
+/** The typing placeholder as the composer's `placeholder`: the ticks
+ *  re-render this text alone, not the page that offers the phrases. */
+export function TypedPlaceholder({
+  fallback,
+  phrases,
+}: {
+  fallback: string
+  phrases: readonly string[]
+}) {
+  return useTypedPlaceholder(phrases, fallback)
+}
+
 /** The placeholder to show now: `fallback` when there is nothing to
  *  type or motion is unwelcome, else the phrase in progress. */
-export function useTypedPlaceholder(
-  phrases: readonly string[],
-  fallback: string
-) {
+function useTypedPlaceholder(phrases: readonly string[], fallback: string) {
   const [typed, setTyped] = useState<Typed>({
     index: 0,
     length: 0,

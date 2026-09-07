@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-import { act, renderHook } from "@testing-library/react"
+import { act, render } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { useTypedPlaceholder } from "./placeholder"
+import { TypedPlaceholder } from "./placeholder"
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -21,7 +21,14 @@ function tick(ms: number) {
 }
 
 test("types a phrase, holds it, clears it, and moves to the next", () => {
-  const { result } = renderHook(() => useTypedPlaceholder(["Hi", "Yo"], "Ask"))
+  const { container } = render(
+    <TypedPlaceholder fallback="Ask" phrases={["Hi", "Yo"]} />
+  )
+  const result = {
+    get current() {
+      return container.textContent
+    },
+  }
 
   expect(result.current).toBe("")
 
@@ -47,9 +54,10 @@ test("types a phrase, holds it, clears it, and moves to the next", () => {
 })
 
 test("stays on the plain prompt with nothing to type or with motion reduced", () => {
-  expect(renderHook(() => useTypedPlaceholder([], "Ask")).result.current).toBe(
-    "Ask"
-  )
+  expect(
+    render(<TypedPlaceholder fallback="Ask" phrases={[]} />).container
+      .textContent
+  ).toBe("Ask")
 
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
@@ -57,6 +65,7 @@ test("stays on the plain prompt with nothing to type or with motion reduced", ()
   })
 
   expect(
-    renderHook(() => useTypedPlaceholder(["Hi"], "Ask")).result.current
+    render(<TypedPlaceholder fallback="Ask" phrases={["Hi"]} />).container
+      .textContent
   ).toBe("Ask")
 })

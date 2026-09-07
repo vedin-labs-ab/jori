@@ -3,7 +3,9 @@ import { type ChatConversation } from "@/shared/console/chat/types"
 import { useActiveOrganization } from "@/shared/session/auth"
 import { api } from "../../../convex/_generated/api"
 
-const sidebarCount = 20
+/** The sidebar and the home read the same page of conversations, so the
+ *  client holds one subscription between them. */
+export const recentCount = 50
 
 /** The person's most recently active conversations, the first `count` of
  *  them; nothing until they have loaded. */
@@ -25,5 +27,5 @@ export function useRecentConversations(
 export function useSidebarChats() {
   const organizationId = useActiveOrganization().data?.id
 
-  return useRecentConversations(organizationId, sidebarCount) ?? []
+  return useRecentConversations(organizationId, recentCount) ?? []
 }
