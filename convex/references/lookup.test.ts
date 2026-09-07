@@ -63,7 +63,7 @@ test("a message's mentions are kept once each, in their own tables, and only whe
       { kind: "table", id: tableId },
       { kind: "table", id: tableId },
     ])
-  ).toEqual([{ kind: "table", id: tableId }])
+  ).toEqual([{ kind: "table", id: tableId, name: expect.any(String) }])
   await expect(
     normalizeConsoleReferences(ctx, sightOf(other), [
       { kind: "file", id: secretId },

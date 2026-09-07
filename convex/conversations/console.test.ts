@@ -259,6 +259,10 @@ test("the resources a message mentions are kept with it, once each, and one the 
   expect(await database.get(result.messageId)).toMatchObject({
     data: { references: [{ kind: "table", id: tableId }] },
   })
+  // The title and the run read the mention by its name.
+  expect(await database.get(result.conversationId)).toMatchObject({
+    title: "Look at Customer renewals",
+  })
   await expect(
     sendConsoleMessage(ctx, {
       organizationId,

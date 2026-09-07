@@ -8,6 +8,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandShortcut,
 } from "@/components/ui/command"
 import { InputGroupButton } from "@/components/ui/input-group"
 import {
@@ -132,9 +133,9 @@ function KindRows({
           >
             <Icon aria-hidden="true" className="text-muted-foreground" />
             {pluralLabel(kind)}
-            <span className="ml-auto text-muted-foreground tabular-nums">
+            <CommandShortcut className="text-xs tabular-nums tracking-normal">
               {count}
-            </span>
+            </CommandShortcut>
           </CommandItem>
         )
       })}

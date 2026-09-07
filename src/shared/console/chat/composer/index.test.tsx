@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { typeInto } from "../../../../../test/editor"
@@ -193,8 +199,21 @@ test("a chip can be removed like any character, and a typed token becomes a chip
   expect(onSend).toHaveBeenCalledWith("Run  now", [])
 })
 
+test("a click on the frame beside the controls puts the caret in the field", async () => {
+  const { field } = await renderComposer()
+
+  field.blur()
+  expect(document.activeElement).not.toBe(field)
+
+  fireEvent.click(screen.getByText("resources"))
+
+  // The editor takes focus on the next frame.
+  await waitFor(() => expect(document.activeElement).toBe(field))
+})
+
 test("the + menu lists the kinds, then a kind's items, and puts the chosen one in as a chip", async () => {
-  const { field, onSend } = await renderComposer()
+  const onMention = vi.fn()
+  const { field, onSend } = await renderComposer({ onMention })
 
   typeInto(field, "Watch ")
   fireEvent.click(screen.getByRole("button", { name: "Attach a resource" }))
@@ -222,6 +241,7 @@ test("the + menu lists the kinds, then a kind's items, and puts the chosen one i
 
   fireEvent.keyDown(field, { key: "Enter" })
 
+  expect(onMention).toHaveBeenCalledWith({ kind: "job", id: "jobs_digest" })
   expect(onSend).toHaveBeenCalledWith("Watch +[job:jobs_digest]", [
     { kind: "job", id: "jobs_digest" },
   ])

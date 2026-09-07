@@ -136,6 +136,7 @@ function ConversationThread({
               ...(references.length === 0 ? {} : { references }),
             })
           }
+          onMention={openTarget}
           onStop={stop}
           resolve={resolveReference}
           selection={live.model}

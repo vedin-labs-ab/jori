@@ -143,14 +143,16 @@ export async function normalizeConsoleReferences(
   ctx: QueryLikeCtx,
   sight: Sight,
   references: MessageContext[]
-): Promise<MessageContext[]> {
+): Promise<Array<MessageContext & { name: string }>> {
   const seen = new Set<string>()
-  const normalized: MessageContext[] = []
+  const normalized: Array<MessageContext & { name: string }> = []
 
   for (const reference of references) {
     const target = normalizeConsoleContext(ctx, reference)
+    const loaded =
+      target === null ? null : await loadReference(ctx, sight, target)
 
-    if (target === null || (await loadReference(ctx, sight, target)) === null) {
+    if (target === null || loaded === null) {
       throw new Error(`The mentioned ${reference.kind} is not available.`)
     }
 
@@ -158,7 +160,7 @@ export async function normalizeConsoleReferences(
 
     if (!seen.has(key)) {
       seen.add(key)
-      normalized.push(target)
+      normalized.push({ ...target, name: loaded.name })
     }
   }
 

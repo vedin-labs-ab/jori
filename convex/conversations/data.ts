@@ -1,8 +1,13 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { checkRunBudget } from "../billing/guard"
-import { resolveConsoleContext } from "../messages/references"
+import {
+  type ResolvedContext,
+  resolveConsoleContext,
+  resolveConsoleReferences,
+} from "../messages/references"
 import { conversationScope } from "../messages/surface"
+import { nameMentions } from "../references/tokens"
 import { resolveRunAudience } from "../runs/audience"
 import { wakeRun } from "../runs/execution/waiters/data"
 import { startRun } from "../runs/execution/workflow"
@@ -185,9 +190,10 @@ async function insertRun(
     kind: MessageCauseKind
   }
 ) {
-  const context = await consoleRunContext(
+  const { context, title } = await consoleRunDetails(
     ctx,
     args.conversation,
+    args.message,
     args.createdBy
   )
   const folderId = context?.folderId
@@ -205,6 +211,7 @@ async function insertRun(
       integration: args.integration,
       kind: args.kind,
       message: args.message,
+      ...(title === undefined ? {} : { title }),
     }),
     ...(await resolveRunAudience(ctx, {
       origin: { conversation: args.conversation },
@@ -221,16 +228,18 @@ async function insertRun(
 }
 
 /** What a console conversation was opened about, as the person who
- *  opened it sees it: the context rides on their first message, and every
- *  run the conversation starts is filed under its folder — the folder
- *  itself, or the one the resource is filed in. */
-async function consoleRunContext(
+ *  opened it sees it — the context rides on their first message, and
+ *  every run the conversation starts is filed under its folder, the
+ *  folder itself or the one the resource is filed in — and the message's
+ *  text with its mentions named, for the run's title. */
+async function consoleRunDetails(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,
+  message: Doc<"messages">,
   personId: Id<"persons"> | undefined
-) {
+): Promise<{ context: ResolvedContext | undefined; title?: string }> {
   if (conversation.surface !== "console") {
-    return undefined
+    return { context: undefined }
   }
 
   const first = await ctx.db
@@ -249,6 +258,12 @@ async function consoleRunContext(
     organizationId: conversation.organizationId,
     personId,
   })
+  const references = await resolveConsoleReferences(ctx, sight, message.data)
 
-  return await resolveConsoleContext(ctx, sight, first?.data)
+  return {
+    context: await resolveConsoleContext(ctx, sight, first?.data),
+    ...(references.length === 0
+      ? {}
+      : { title: nameMentions(message.text ?? "", references) }),
+  }
 }
