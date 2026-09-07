@@ -1,5 +1,9 @@
+import { Document } from "@tiptap/extension-document"
+import { HardBreak } from "@tiptap/extension-hard-break"
+import { Paragraph } from "@tiptap/extension-paragraph"
+import { Text } from "@tiptap/extension-text"
+import { UndoRedo } from "@tiptap/extensions"
 import { ReactNodeViewRenderer } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
 import { MentionNode } from "../../mentions/node"
 import { type ResolveReference } from "../types"
 import { ComposerMentionView } from "./node"
@@ -11,28 +15,15 @@ export type ComposerMentionOptions = {
 
 /** The composer's schema: paragraphs of text with hard breaks and
  *  mention chips, undo, and nothing that formats — a chat message is
- *  plain text. */
+ *  plain text. Composed by hand rather than cut down from the starter
+ *  kit, so the marks, lists, and link parser it would carry never load. */
 export function createComposerExtensions(options: ComposerMentionOptions) {
   return [
-    StarterKit.configure({
-      blockquote: false,
-      bold: false,
-      bulletList: false,
-      code: false,
-      codeBlock: false,
-      dropcursor: false,
-      gapcursor: false,
-      heading: false,
-      horizontalRule: false,
-      italic: false,
-      link: false,
-      listItem: false,
-      listKeymap: false,
-      orderedList: false,
-      strike: false,
-      trailingNode: false,
-      underline: false,
-    }),
+    Document,
+    Paragraph,
+    Text,
+    HardBreak,
+    UndoRedo,
     ComposerMention.configure(options),
   ]
 }

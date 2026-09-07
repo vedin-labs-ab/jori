@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { BlockTokens } from "./blocks"
 import { parseMarkdown } from "./parse"
@@ -21,6 +21,8 @@ export function Markdown({
     [streaming, text]
   )
 
+  usePrefetchedGrammars()
+
   return (
     <div
       className={cn(
@@ -33,4 +35,28 @@ export function Markdown({
       <BlockTokens tokens={tokens} />
     </div>
   )
+}
+
+let hasPrefetchedGrammars = false
+
+/** Fetches the code grammars once the first markdown is on screen and the
+ *  main thread has a quiet moment, so a later code block colors at once
+ *  instead of reading plain while its chunk downloads. */
+function usePrefetchedGrammars() {
+  useEffect(() => {
+    if (hasPrefetchedGrammars) {
+      return
+    }
+
+    hasPrefetchedGrammars = true
+    whenIdle(() => void import("./grammars"))
+  }, [])
+}
+
+function whenIdle(work: () => void) {
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(work)
+  } else {
+    window.setTimeout(work, 200)
+  }
 }

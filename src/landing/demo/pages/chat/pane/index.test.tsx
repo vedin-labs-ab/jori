@@ -8,15 +8,15 @@ import {
   within,
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { DemoConsoleAt } from "../../../../../test/demo"
-import { typeInto } from "../../../../../test/editor"
-import { renewalsConversationId } from "../../fixtures/chat"
-import { folderId } from "../../fixtures/folders"
-import { demoId } from "../../fixtures/ids"
+import { DemoConsoleAt } from "../../../../../../test/demo"
+import { typeInto } from "../../../../../../test/editor"
+import { renewalsConversationId } from "../../../fixtures/chat"
+import { folderId } from "../../../fixtures/folders"
+import { demoId } from "../../../fixtures/ids"
 
 vi.mock("@tanstack/react-router", async () => ({
-  ...(await import("../../../../../test/router")),
-  ...(await import("../../../../../test/routing")),
+  ...(await import("../../../../../../test/router")),
+  ...(await import("../../../../../../test/routing")),
 }))
 
 beforeEach(() => {
@@ -26,10 +26,10 @@ beforeEach(() => {
 afterEach(cleanup)
 
 /** The pane's name is the way to the target's page. */
-function expectPaneLink(pane: HTMLElement, name: string, href: string) {
-  expect(within(pane).getByRole("link", { name }).getAttribute("href")).toBe(
-    href
-  )
+async function expectPaneLink(pane: HTMLElement, name: string, href: string) {
+  expect(
+    (await within(pane).findByRole("link", { name })).getAttribute("href")
+  ).toBe(href)
 }
 
 test("a reference card opens its table beside the chat, with the way to its page", async () => {
@@ -45,8 +45,11 @@ test("a reference card opens its table beside the chat, with the way to its page
   const pane = screen.getByRole("complementary", { name: "Resources" })
 
   expect(tab.dataset.state).toBe("active")
+  // The grid arrives with its own chunk once the tab is open.
   expect(
-    within(pane).getByRole("button", { name: "Customer column details" })
+    await within(pane).findByRole("button", {
+      name: "Customer column details",
+    })
   ).toBeDefined()
   expect(within(pane).getByText("4 rows")).toBeDefined()
   expect(
@@ -118,8 +121,8 @@ test("a folder, a run, and another chat each open beside the chat, with the way 
 
   const pane = screen.getByRole("complementary", { name: "Resources" })
 
-  expectPaneLink(pane, "Finance", `/folders/${finance}`)
-  expectPaneLink(pane, "Renewals", `/folders/${folderId("renewals")}`)
+  await expectPaneLink(pane, "Finance", `/folders/${finance}`)
+  await expectPaneLink(pane, "Renewals", `/folders/${folderId("renewals")}`)
   expect(within(pane).queryByRole("button", { name: "New" })).toBeNull()
 
   // The run: its row held open to the task and the outcome, with the
@@ -130,12 +133,14 @@ test("a folder, a run, and another chat each open beside the chat, with the way 
     })
   )
 
-  expectPaneLink(
+  await expectPaneLink(
     pane,
     "Add Harbor House to the renewals table",
     `/runs?run=${harbor}`
   )
-  expect(within(pane).getByText(/One row added, marked at risk/)).toBeDefined()
+  expect(
+    await within(pane).findByText(/One row added, marked at risk/)
+  ).toBeDefined()
   expect(within(pane).queryByRole("button", { expanded: true })).toBeNull()
 
   // The other chat: its turns, and its table card opens in the same pane.
@@ -145,13 +150,13 @@ test("a folder, a run, and another chat each open beside the chat, with the way 
     })
   )
 
-  expectPaneLink(
+  await expectPaneLink(
     pane,
     "Which renewals are at risk this month?",
     `/chat/${renewalsConversationId}`
   )
   expect(
-    within(pane).getByText("One of the four renewals is at risk.")
+    await within(pane).findByText("One of the four renewals is at risk.")
   ).toBeDefined()
 
   // The ask's chip and the reply's card both name the table; the card
@@ -166,5 +171,5 @@ test("a folder, a run, and another chat each open beside the chat, with the way 
     (await screen.findByRole("tab", { name: "Customer renewals" })).dataset
       .state
   ).toBe("active")
-  expect(within(pane).getByText("4 rows")).toBeDefined()
+  expect(await within(pane).findByText("4 rows")).toBeDefined()
 })

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Markdown } from "."
@@ -33,11 +33,14 @@ test("lays out a table with its alignment and inline runs", () => {
   expect(screen.getByText("Harbor House").tagName).toBe("STRONG")
 })
 
-test("highlights a fence in a known language and offers to copy it", () => {
+test("highlights a fence in a known language and offers to copy it", async () => {
   const { container } = renderMarkdown('```json\n{ "paid": false }\n```')
 
-  expect(container.querySelector("pre code .hljs-attr")?.textContent).toBe(
-    '"paid"'
+  // The grammars arrive on their own; the block reads plain until then.
+  await waitFor(() =>
+    expect(container.querySelector("pre code .hljs-attr")?.textContent).toBe(
+      '"paid"'
+    )
   )
   expect(screen.getByRole("button", { name: "Copy code" })).toBeDefined()
 })

@@ -4,31 +4,43 @@ import { countLabel } from "../../count"
 import { type FileSave } from "../../files/editor/section"
 import { noSiblings } from "../../files/siblings"
 import { type FileDetail } from "../../files/types"
-import { FolderContents } from "../../folders/list/contents"
-import { JobDetail, type JobDetailProps } from "../../jobs/detail"
+import { type FolderContents } from "../../folders/list/contents"
+import { type JobDetailProps } from "../../jobs/detail"
 import { ConsolePageLayout } from "../../layout"
 import { ConsoleListFooter, ConsoleListLayout } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
 import { menuWidth } from "../../menu"
-import { ExecutionRow, type RunRowSlots } from "../../runs/row"
+import { type RunRowSlots } from "../../runs/row"
 import { type ExecutionItem } from "../../runs/types"
 import { type SchemaWrite } from "../../stores/schema/dialog"
 import { type StoreDetail } from "../../stores/types"
 import { type ValueWrite } from "../../stores/value/editor"
-import { RowGrid } from "../../tables/grid"
+import { type RowGrid } from "../../tables/grid"
 import { ChatThread } from "../thread"
 
-// The store's editor and the file's viewer carry CodeMirror and the schema
-// builder; they arrive only once a tab holds one, so the chat's own chunk
-// stays light.
-const StoreValue = lazy(() =>
-  import("../../stores/value/section").then((module) => ({
-    default: module.StoreValue,
-  }))
-)
-const FileViewer = lazy(() =>
-  import("../../files/body").then((module) => ({ default: module.FileBody }))
-)
+// Each material's view arrives with the first tab that holds one, so the
+// chat's own chunk carries none of them: the job's overview with the
+// brief's codec, the table's grid, the folder's listing, the run's row,
+// and the store's and the file's editors with CodeMirror and the schema
+// builder. Another chat's turns are the thread this page already renders.
+const JobOverview = lazy(async () => ({
+  default: (await import("../../jobs/detail")).JobDetail,
+}))
+const TableGrid = lazy(async () => ({
+  default: (await import("../../tables/grid")).RowGrid,
+}))
+const StoreValue = lazy(async () => ({
+  default: (await import("../../stores/value/section")).StoreValue,
+}))
+const FileViewer = lazy(async () => ({
+  default: (await import("../../files/body")).FileBody,
+}))
+const RunRow = lazy(async () => ({
+  default: (await import("../../runs/row")).ExecutionRow,
+}))
+const FolderListing = lazy(async () => ({
+  default: (await import("../../folders/list/contents")).FolderContents,
+}))
 
 /** A material as the pane shows it: the host's data for the view its
  *  page mounts, less the page's chrome. */
@@ -85,7 +97,9 @@ export function ChatPaneBody({ material }: { material: ChatPaneMaterial }) {
     case "job":
       return (
         <ConsolePageLayout>
-          <JobDetail {...material.detail} />
+          <Arriving>
+            <JobOverview {...material.detail} />
+          </Arriving>
         </ConsolePageLayout>
       )
     case "table":
@@ -99,7 +113,9 @@ export function ChatPaneBody({ material }: { material: ChatPaneMaterial }) {
     case "folder":
       return (
         <ConsoleListLayout>
-          <FolderContents {...material.contents} />
+          <Arriving>
+            <FolderListing {...material.contents} />
+          </Arriving>
           {material.overlays}
         </ConsoleListLayout>
       )
@@ -108,10 +124,17 @@ export function ChatPaneBody({ material }: { material: ChatPaneMaterial }) {
   }
 }
 
+/** The list's loading state while a view's chunk is on its way. */
+function Arriving({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<ConsoleListLoading />}>{children}</Suspense>
+}
+
 function TableBody({ grid, overlays, rowCount }: PaneMaterial<"table">) {
   return (
     <ConsoleListLayout>
-      <RowGrid {...grid} />
+      <Arriving>
+        <TableGrid {...grid} />
+      </Arriving>
       <ConsoleListFooter>
         <p className="text-muted-foreground text-xs">
           {countLabel(rowCount, "row")}
@@ -129,14 +152,14 @@ function StoreBody({
 }: PaneMaterial<"store">) {
   return (
     <ConsoleListLayout>
-      <Suspense fallback={<ConsoleListLoading />}>
+      <Arriving>
         <StoreValue
           onWriteSchema={onWriteSchema}
           onWriteValue={onWriteValue}
           store={store}
           titleMenu={leadMenu}
         />
-      </Suspense>
+      </Arriving>
     </ConsoleListLayout>
   )
 }
@@ -144,14 +167,14 @@ function StoreBody({
 function FileBody({ file, onSave }: PaneMaterial<"file">) {
   return (
     <ConsoleListLayout>
-      <Suspense fallback={<ConsoleListLoading />}>
+      <Arriving>
         <FileViewer
           file={file}
           onSave={onSave}
           siblings={noSiblings}
           titleMenu={leadMenu}
         />
-      </Suspense>
+      </Arriving>
     </ConsoleListLayout>
   )
 }
@@ -161,13 +184,15 @@ function FileBody({ file, onSave }: PaneMaterial<"file">) {
 function RunBody({ execution, now, slots }: PaneMaterial<"run">) {
   return (
     <ConsolePageLayout>
-      <ExecutionRow
-        {...slots}
-        execution={execution}
-        now={now}
-        open
-        showAudience={false}
-      />
+      <Arriving>
+        <RunRow
+          {...slots}
+          execution={execution}
+          now={now}
+          open
+          showAudience={false}
+        />
+      </Arriving>
     </ConsolePageLayout>
   )
 }
