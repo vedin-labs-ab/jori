@@ -1,246 +1,170 @@
 # Regional release verification
 
-Last updated 7 September 2026. The migration was merged into `main` and pushed
-at `1aafd8d7`. Post-rebase checks passed, with 2,505 tests passed and four
-skipped. Development Convex deployment and skills sync completed from that
-revision; production deployments remain pending. Provider configuration and
-direct API probes do not prove application E2E operation. No production
-customer data was used in these probes.
+Last updated 8 September 2026, at checked main `011d5994`. The migration is
+not yet verified E2E. Provider setup, direct API tests, application outbox
+submission and completed customer workflows are different levels of evidence.
+Checks used synthetic data unless stated otherwise.
 
-## Verified configuration
+## Deployment state
 
-| Provider | Evidence | Still required |
+| Target | Verified deployment | Remaining work |
 | --- | --- | --- |
-| Convex | `production-eu` is `sensible-spoonbill-17` in Ireland; `production-us` is `insightful-goat-7` in Virginia. Separate deployment keys and auth secrets. Task preview schema/functions deployed successfully to `quixotic-raccoon-259`. Development `trustworthy-parakeet-343` deployed from checked main. Required production variable names were present; the six optional Stripe variables remain absent in each region. Development is missing the two Bird variables. | Production deployment, billing configuration before accepting payments, development email configuration, live app tests, preview cleanup |
-| Vercel | Pro active; separate `jori-production-eu` and `jori-production-us` projects pinned to `dub1` and `iad1`, function failover off. Regional domains and ten public build variables checked. | Deploy checked main, verify actual function placement, redirects, private caching and host-only cookies |
-| Bird | Separate EU/US organizations, workspaces and keys. Both sending domains verified. Direct regional sends returned 202 and both synthetic messages reached the test inbox. Tracking off; no Jori delivery webhook. Development workspace creation failed with `E10014`, the US organization's workspace limit. Temporary organization CLI grants revoked after use. | Resolve the workspace limit with Bird or choose a separate development account; no development workspace/key created. App outbox and auth email tests, remove obsolete Resend configuration after cutover |
-| OpenRouter | Business active; separate region-only workspace guardrails, ZDR on, training off. Both regions passed completion, structured output and tool-call probes. Direct Nano Banana image requests in both regions returned 404 at the data-region filter. Images now use the separate direct Google Cloud adapter. | Deployed chat tests; no global fallback |
-| Google Cloud images | Separate `jori-production-eu`, `jori-production-us` and `jori-development` projects and predict-only service accounts created. Both production billing links active and implicit caching disabled. Synthetic requests to both exact jurisdiction endpoints returned 200 with PNG output and usage metadata. Adapter merged at `175e3971`; all 2,558 tests passed. | Deploy and test actual Convex authentication, image generation, regional file storage, sandbox copy and usage accounting. Development billing is disabled because the billing-account project quota was reached; no development inference verified |
-| PostHog | Separate EU Cloud project `233772`, named `jori-production-eu`, and US Cloud project `530551`, named `jori-production-us`. IP discard enabled in both. Autocapture, web vitals, dead clicks and heatmaps disabled and read back in both; US session recording, console capture and network capture also disabled and read back. Synthetic regional events appeared only in their matching projects. | Verify actual frontend request destinations and browser collection behavior |
-| Exa | Separate EU/US search keys installed only in matching Convex deployments; both returned 200 to a synthetic search. Development retains its own key. | Deployed tool test; global processing remains an accepted exception |
-| E2B | Separate development, production EU and production US projects and keys installed. All three templates built; matching keys created sandboxes, executed a harmless command and deleted them. Both EU/US cross-project template access attempts were denied. Account only offers `us-west-1`. | Verify deployed Jori sandbox creation, execution and cleanup; US execution remains a documented exception |
-| Google | Separate regional OAuth clients, secrets and frontend/integration callbacks configured. Project `jori-503709` consent scopes saved and read back to match current code; broad Drive, Calendar and `gmail.modify` scopes removed. Gmail and Calendar APIs confirmed enabled. Audience remains External/Testing, restricted to test users. | Live sign-in and connection tests; publishing and verification before general availability |
-| Microsoft | Separate organizational-account registrations and 180-day secrets installed. Three callbacks per region configured. Both have delegated User.Read, offline_access, Mail.ReadWrite, Mail.Send and Calendars.ReadWrite; no tenant-wide consent granted. | Live sign-in and connections, publisher verification; rotate secrets before 6 March 2027 |
-| Stripe | User confirmed Vedin Labs AB, Sweden, as seller for both Stripe accounts. Billing code rejects cross-region associations and unpaid checkout fulfillment. Subscription checkout already enables automatic tax; manual and automatic usage top-ups do not calculate tax. Runtime REST requests do not pin `Stripe-Version`. No Stripe objects or keys changed in this review. | User completes private activation, US-labelled account merchant-country correction and tax setup. Confirm tax classification and top-up treatment, align/test API versions, configure separate keys/products/prices/webhooks, and verify billing before live charging |
-| GitHub | Organization-owned `jori-production-eu` and `jori-production-us` apps created. Regional setup and OAuth URLs configured. Credentials, including both user-downloaded private keys, saved in matching Convex deployments. JWT-authenticated `GET /app` returned 200 with matching app IDs, permissions and event lists. After manual activation, webhook GET/PATCH and readback returned 200 for both matching regional URLs, JSON content and TLS verification; signing secrets installed. | Deploy ingress and test installation, OAuth access verification and actual event delivery in both regions |
-| Slack | Separate EU/US apps created with token rotation enabled and direct regional OAuth and interactivity URLs. Client ID, client secret and signing secret saved and read back in each matching Convex deployment. | Deploy production ingress, configure event subscriptions and public distribution, then test connection, token rotation, interactivity and events |
-| Linear | Separate public EU/US OAuth apps and direct regional app webhooks configured; client-credentials grant disabled. Client ID, client secret and webhook secret saved and read back in each matching Convex deployment. | Deploy production ingress and test actual OAuth connections and event delivery in both regions |
-| Notion | Separate public EU/US OAuth connections created with matching regional callbacks. Client ID and secret saved and read back in each matching Convex deployment. No user-information capability enabled. | Deploy production ingress, create and verify each regional webhook subscription, save its verification token, then test connections and events |
+| Development | Convex `trustworthy-parakeet-343` and skills deployed from checked main `1aafd8d7`; the Convex 1.45.0 watcher restarted afterward. Bird and Vertex settings are now installed and verified. | Deploy the final revision and sync skills; verify application flows. `deploy:dev` does not deploy a hosted frontend. |
+| Production EU | Full frontend/backend deployment `f9b0adb8` completed. `eu.usejori.com` returned 200 with the `dub1` function region. Convex is `sensible-spoonbill-17` in Ireland. | Deploy the final revision, including images and subsequent integration changes, then repeat live checks. |
+| Production US | Convex-only stage `e0a693c2` deployed to `insightful-goat-7` in Virginia with schema validation enabled. Six-record preservation repair completed. | Deploy strict cleanup `011d5994` or its checked successor. The US frontend still returns 421 and awaits the final deployment. No skills sync ran during the preservation stage. |
 
-## Task preview evidence
+The US repair renamed `link.linkedAt` to `link.at` on two identities and
+`associatedIntegrations` to `surfaces` on four global skills. Private
+full-document comparison confirmed unchanged IDs, creation times, timestamps
+and all other content. Dry-run made no changes; the transaction succeeded;
+repeat execution was a no-op. Main `011d5994` removes every temporary
+validator, compatibility reader and migration function. That strict cleanup
+has not yet been deployed. Normal deployment unmounted obsolete Resend
+components and removed old indexes; the repair deleted no application records.
 
-The EU task preview completed schema validation and function deployment on
-7 September. Live HTTP probes returned 400 for an install without state, 401
-for an unsigned GitHub event, and 404 for the removed Bird delivery webhook.
-An unauthenticated OAuth callback redirected only to the configured task
-frontend, with `Cache-Control: no-store` and `Referrer-Policy: no-referrer`.
-The handoff omitted an unapproved query parameter. These are ingress checks,
-not proof of a completed customer OAuth connection.
+## Provider readiness
 
-The checked migration corrected Node module resolution in the template build
-script and removed the contradictory global US Vercel region. Template builds
-read their key, template name and optional endpoint from the selected Convex
-deployment, without a remembered E2B CLI account fallback.
+| Provider | Verified evidence | Still required |
+| --- | --- | --- |
+| Convex | Separate production deployments, deploy keys and auth secrets. Required production variable names present; optional Stripe configuration absent. US preservation completed. | Final dev/EU/US deployments, tenant-isolation tests and unused preview cleanup. Variable presence alone does not prove functionality. |
+| Vercel | Pro active; separate production projects pinned to `dub1` and `iad1`, function failover off. Regional domains and ten public build variables checked. EU function placement observed. | Final deployments, US host resolution, redirects, private caching and host-only cookie checks. |
+| Bird | Separate EU, US and development accounts/workspaces and scoped keys. Sending domains verified. Direct sends returned 202 and reached the test inboxes. Actual development and EU Jori outbox submissions were accepted on the first attempt and removed retained bodies. Tracking off; no Jori delivery webhook. Temporary setup grants revoked. | US app outbox test, auth email flows and obsolete Resend configuration review. Acceptance alone does not prove recipient delivery. |
+| OpenRouter | Business active; separate region-only guardrails, ZDR on, training off. Both regions passed direct completion, structured-output and tool-call probes. Region-filtered image requests returned 404; images now use Google Cloud. | Deployed chat/tool tests. No global inference fallback. |
+| Google Cloud images | Separate EU/US/development projects, predict-only service accounts and credentials. All three billing links active and implicit caching disabled. Real adapter generated PNGs in each matching jurisdiction. Cross-project production IAM probes returned 403. | Actual Convex generation, regional file storage, sandbox transfer and deduplicated usage accounting. |
+| PostHog | Separate EU project `233772` and US project `530551`. IP discard on; autocapture, web vitals, dead clicks and heatmaps disabled and read back in both. US recording, console capture and network capture also disabled and read back. Synthetic events appeared only in matching projects. | Verify actual frontend destinations and browser collection behavior. |
+| Exa | Separate EU/US keys installed in matching Convex deployments; both returned 200 to synthetic search. Development retains its own key. | Deployed tool test. Global processing remains an exception behind the regional interface. |
+| E2B | Separate development/EU/US projects and keys. All templates built; matching credentials created sandboxes, ran a harmless command and deleted them. Opposite-region template access denied. Account offers only `us-west-1`. | Deployed sandbox creation, execution, file transfer and cleanup. US execution remains an exception for EU tenants. |
+| Google | Separate regional clients, secrets and callbacks. Saved consent scopes match code; Gmail/Calendar APIs enabled. Actual EU Google sign-in succeeded for the signed-in test user. | Verify resulting organization/tenant behavior, US sign-in and both regions' Gmail/Calendar connections. Audience remains External/Testing; publishing/verification required before general availability. |
+| Microsoft | Separate organizational-account registrations and 180-day secrets installed. Three callbacks per region; delegated User.Read, offline_access, Mail.ReadWrite, Mail.Send and Calendars.ReadWrite. No tenant-wide consent granted. | Live sign-in/connections, publisher verification and rotation before 6 March 2027. |
+| Stripe | Both accounts must represent Vedin Labs AB, Sweden. Regional association and paid-checkout guards implemented. Missing settings disable billing without blocking prelaunch deployment. | User activation, merchant-country correction and tax decisions; then separate keys/products/prices/webhooks and billing verification. |
+| GitHub | Separate apps and credentials; JWT identity, exact permissions/events and regional webhook settings verified. Real ping redelivery returned 200 in both regions. Own signatures accepted; missing, bad and opposite-region signatures rejected. | Authenticated installation, OAuth installation-access proof and connected repository workflows. Inert pings do not establish these. |
+| Slack | Separate apps with token rotation and regional callbacks/interactivity; credentials read back. EU event URL verified, five bot events saved and public distribution enabled. | US event setup/distribution; both regions' connections, rotation, interactivity and event workflows. |
+| Linear | Separate public apps and direct regional webhooks; client-credentials grant disabled. Matching client/webhook credentials read back. | Actual OAuth connections and webhook processing. |
+| Notion | Separate public connections, regional callbacks and matching OAuth credentials. No user-information capability. EU subscription created with exactly three event types; token verification pending. | Activate EU subscription, create/verify US subscription, store matching secrets and test connections/events. Bootstrap setup code is checked separately, not production-deployed. |
 
-## E2B verification evidence
+## Email and image evidence
 
-All three template builds and direct sandbox lifecycle tests completed on
-7 September using the matching Convex-stored E2B keys. The keys were confirmed
-distinct and were not printed or written into the test sandboxes.
+Development Bird now has its own workspace
+`ws_01m1yv53keey7a6hr6efc1gxdk` and a runtime key limited to `emails:write`
+and `workspace:read`. Verified `mail.usejori.com` uses selector
+`bird-354-0926` and `bounce-dev.mail` pointing to `us1.bounce.bird.com`.
+This replaces the blocked attempt to add a workspace to the US production
+organization. No paid upgrade was needed. The development test message
+arrived in the Zoho inbox; the temporary setup grant was revoked.
 
-| Target | Template | Template ID | Test sandbox ID |
+Actual adapter tests used matching environment settings and
+`aiplatform.eu.rep.googleapis.com` or `aiplatform.us.rep.googleapis.com`:
+
+| Target | PNG bytes | Input/output tokens | Priced usage, USD micros |
 | --- | --- | --- | --- |
-| Development | `jori-development` | `lo6gsdaexh5bx9kqj09f` | `ijfo3g775su19sz58a0fc` |
-| Production EU | `jori-production-eu` | `3yhphavw0jehrhkeancq` | `isf0vfy8krdxli1mdj7ra` |
-| Production US | `jori-production-us` | `qerfoeuzxp0pa8hcp1g9` | `i651y9ljbj37kok58u36j` |
+| Production EU | 1,139,040 | 14 / 1,120 | 73,928 |
+| Production US | 1,126,817 | 14 / 1,120 | 73,928 |
+| Development, US jurisdiction | 28,240 | 26 / 1,120 | 73,935 |
 
-Each sandbox ran `node --version && pwd` in `/home/user/workspace`, returned
-Node `v26.3.0`, the expected directory, exit code zero and empty stderr.
-Each deletion returned `true`; subsequent running checks returned `false`.
-The EU key could not create the US template by ID, and the US key could not
-create the EU template by ID. Neither denied request created a sandbox.
-These tests verify provider configuration, not the deployed Jori workflow.
+Production responses had valid request IDs. The EU service account requesting
+the US project and the US service account requesting the EU project each
+received 403. Negative probes requested text only, not images.
 
-## PostHog verification evidence
+Development billing was enabled after the user approved unlinking billing
+from `milo-498910`; the Milo project was not deleted. No quota-increase form
+was submitted. Development's three Vertex values were stored only in its
+Convex deployment and verified by readback. Cache PATCH and GET returned 200
+with `disableCache: true`.
 
-The synthetic event `jori_residency_verification_20260907` was observed in the
-EU project `233772` and US project `530551` event lists, with each region's
-probe appearing only in its matching project. This verifies synthetic
-ingestion and project separation. Requests from the actual deployed frontend
-remain unverified.
+These are real adapter/provider tests, not an executed Convex image tool.
+The checked file-reference transport has a 6 MiB unit test and ownership
+checks, but live storage, sandbox transfer and ledger writes remain
+unverified. See [image configuration and retention](images.md).
 
-## Image-generation verification evidence
+## Connected app and ingress evidence
 
-Direct synthetic requests returned HTTP 200 from
-`aiplatform.eu.rep.googleapis.com` and `aiplatform.us.rep.googleapis.com` using
-their matching `jori-production-eu` and `jori-production-us` projects. Both
-responses reported `gemini-3.1-flash-image` and `ON_DEMAND` traffic. The EU PNG
-contained 1,092,313 bytes and the US PNG 990,068 bytes. Each response reported
-17 input text tokens and 1,120 output image tokens. This verifies provider
-configuration and regional endpoint availability, not the deployed Jori tool.
+OAuth registrations and event destinations belong to their matching region.
+No shared relay or cross-region fanout was added. Existing development app
+registrations were retained; production setup does not verify them.
 
-The checked direct adapter was merged and pushed at `175e3971`, with 2,558 tests
-passed and four skipped. It uses the same regional endpoint shape, obtains its
-own short-lived service-account token, and records deduplicated provider usage
-through Jori's billing ledger. Actual Convex-runtime authentication, image file
-handling, sandbox copying and accounting remain unverified. The sandbox import
-now carries file references rather than bytes; unit tests cover a 6 MiB blob,
-above the 5 MiB Node-action argument limit, with run and organization ownership
-checks. This is not a live transport verification.
+GitHub requests Contents, Issues and Pull requests read/write plus Metadata
+read-only, with only `issues`, `issue_comment`, `pull_request`,
+`pull_request_review_comment` and `push` events. Both apps expire user tokens
+and allow installation by any account. OAuth during installation is disabled;
+Jori's separate OAuth step proves installation access before linking an
+organization. Regional webhook URLs, JSON content and TLS verification were
+read back successfully.
 
-All three projects have separate predict-only service accounts. Production
-billing links are active and implicit caching is disabled. Development billing
-could not be enabled because the billing account reached its linked-project
-quota. No development image inference is claimed. Missing image configuration
-does not block deploying the rest of Jori and never enables a global fallback.
-See [image configuration, pricing and retention](images.md).
+Real GitHub ping redeliveries returned 200 in both regions. Synthetic
+own-secret pings returned 200; missing, invalid and opposite-region signatures
+returned 401. Both regions rejected unsigned Slack, Linear and Notion events
+with 401. Unconfigured `/stripe/events` returned 503; removed `/email/events`
+returned 404. All eight install routes rejected missing state with 400.
+GitHub, Google and Microsoft email callback probes redirected only to the
+matching frontend handoff with `no-store` and `no-referrer`. No completed
+customer integration is implied by these ingress checks.
 
-## Deployment prerequisites
+Slack EU saved `app_mention`, `message.channels`, `message.groups`,
+`message.im` and `message.mpim`. Linear subscribes only to Comments, Issues,
+Projects and Inbox notifications. Notion permits content read/update/insert
+and comment read/insert, without user information. EU webhook activation
+remains pending; the checked short-lived bootstrap flow still needs preview
+and production verification.
 
-Both production deployments are missing the optional billing variables
-`STRIPE_SECRET_KEY`,
-`STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_STARTER_MONTH`,
-`STRIPE_PRICE_STARTER_YEAR`, `STRIPE_PRICE_TEAM_MONTH` and
-`STRIPE_PRICE_TEAM_YEAR`. These no longer block a prelaunch deployment. All
-required names in the production guard were present; presence alone does not
-prove that an integration works. Development is
-missing `BIRD_API_KEY` and `BIRD_WORKSPACE_ID`.
-
-The user approved deploying without completed billing or image generation.
-Deployment readiness is separate from feature readiness. Billing actions reject
-incomplete Stripe configuration before creating an account or customer, and
-the Stripe transport cannot initiate charges. Unconfigured webhook ingress
-returns 503 without processing events. Read-only billing and trial metering
-continue to work; disabling automatic top-ups remains possible. Regional
-identity, credentials, frontend placement and code-check deployment guards are
-unchanged. No global image fallback is authorized.
-
-The prelaunch gate is server-side. Better Auth checks the regional allowlist
-before creating an organization, and billing APIs require the authenticated
-session's matching organization claim. Joining the waitlist does not admit a
-user. Existing members and invited users can access their organization, and
-removing an address from the allowlist does not revoke existing membership.
-The landing page alone is not an API access control.
-
-Bird rejected development workspace creation with `E10014` because the US
-organization has reached its workspace limit. No development workspace or key
-was created. Published paid plans do not confirm a higher workspace allowance,
-and no upgrade was purchased. Bird support must clarify the limit, or a separate
-development account must be chosen. Temporary organization CLI grants were
-revoked after use.
-
-The guard inventory is not the full connected-integration readiness checklist.
-GitHub private keys and webhook configuration are verified. Notion webhook
-subscriptions and their verification
-tokens have not been created. Slack event subscriptions and public distribution
-remain pending. Complete provider configuration and deploy production webhook
-ingress before testing delivery and authorization. Existing development app
-registrations remain unchanged; production app setup does not verify them.
-
-Google project `jori-503709` now lists exactly `openid`, `userinfo.email`,
+Google's saved consent scopes are `openid`, `userinfo.email`,
 `userinfo.profile`, `gmail.readonly`, `gmail.compose`, `gmail.send`,
-`calendar.events` and `calendar.calendarlist.readonly` in its saved consent
-configuration. Gmail API `gmail.googleapis.com` and Calendar API
-`calendar-json.googleapis.com` were already enabled and were verified by
-readback. This does not establish completed OAuth connections or approval
-for users outside the consent screen's test-user list.
+`calendar.events` and `calendar.calendarlist.readonly`. Broad Drive, Calendar
+and `gmail.modify` scopes were removed. EU sign-in succeeded, but organization
+creation and connected-provider permissions still require verification.
 
-The Stripe seller decision is resolved. Both accounts must represent Vedin
-Labs AB in Sweden; the US instance label is not a US merchant-country choice.
-Private activation, merchant-country correction and tax setup remain deferred
-to the user. The user or their adviser must select the applicable tax
-classification and confirm registrations; no tax code has been assumed.
-The existing subscription checkout uses `automatic_tax`, so those registrations
-must be verified. Manual and automatic usage top-ups currently do not calculate
-tax, and their treatment must be resolved before live charging. Runtime Stripe
-REST requests omit `Stripe-Version`; account and webhook API versions must be
-aligned and tested before launch. These are billing readiness findings, not a
-completed billing rewrite or changes to Stripe objects or keys.
+## Prelaunch and billing gate
 
-## Connected app configuration
+The user approved deployment without completed billing. Production still
+lacks optional `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+`STRIPE_PRICE_STARTER_MONTH`, `STRIPE_PRICE_STARTER_YEAR`,
+`STRIPE_PRICE_TEAM_MONTH` and `STRIPE_PRICE_TEAM_YEAR`. Billing actions fail
+before creating accounts or customers when configuration is incomplete; the
+transport cannot initiate charges. Read-only billing and trial metering
+remain available. No global image fallback is authorized.
 
-GitHub, Slack, Linear and Notion OAuth callbacks target each app's own regional
-Convex site. Configured GitHub and Linear webhooks do the same. Slack and Notion
-event setup remains pending. No shared event
-relay or cross-region event fanout was added.
-The saved credential sets were read back from their matching deployments, but
-no completed customer connection or production event delivery is established
-by that check.
+The access gate is server-side. Better Auth checks the regional allowlist
+before organization creation; billing requires the authenticated session's
+matching organization claim. Waitlist enrollment does not grant access.
+Existing members and invited users can access their organization; removing
+an allowlist entry does not revoke membership. The landing page is not an
+API gate.
 
-GitHub apps have read/write access to Contents, Issues and Pull requests, plus
-read-only Metadata. JWT-authenticated `GET /app` returned 200 for both matching
-app IDs and confirmed those permissions. The verified event lists contain only
-`issues`, `issue_comment`,
-`pull_request`, `pull_request_review_comment` and `push`. Both apps allow
-installation by any account and expire user tokens. OAuth during installation
-is disabled; Jori's separate OAuth step verifies the authenticated user's access
-to an installation before linking it to an organization.
+Before live charging, the user must complete Stripe activation and ensure
+both accounts represent Vedin Labs AB in Sweden. A US instance label does
+not change the merchant's country. Tax classification and registrations
+require the user or their adviser. Subscription checkout uses
+`automatic_tax`; manual and automatic usage top-ups do not currently
+calculate tax. Runtime REST requests omit `Stripe-Version`, so account/webhook
+API versions and top-up tax treatment must be aligned and tested. No Stripe
+objects or keys were changed in this verification work.
 
-GitHub webhook settings initially failed to persist. After the user activated
-each webhook, `GET /app/hook/config`, `PATCH /app/hook/config` and readback
-returned 200 for both apps. Each URL matches its regional Convex site's
-`/github/events` route, with JSON content and TLS verification enabled. Matching
-signing secrets are installed. Actual event delivery still requires production
-ingress deployment and a live test.
+## Remaining release gates
 
-Slack app manifests enable token rotation. Their OAuth and interactivity URLs
-are regional; event subscriptions and public distribution still need setup.
-Linear apps subscribe only to Comments, Issues, Projects and Inbox notifications.
-Notion connections permit reading, updating and inserting content, and reading
-and inserting comments. They do not request user information.
+- Rebase on current main and pass full `pnpm run check` and `pnpm run test`.
+  Never bypass checks or deploy a worktree to shared environments.
+- Finish preview verification for pending HTTP/schema changes, then merge
+  through the checked fast-forward workflow.
+- Deploy one final checked revision to dev and both production regions.
+  Verify strict US schema, skills sync, frontend availability and destinations.
+- Complete Slack US and both Notion webhook activation flows. Finish public
+  app distribution and provider verification where required before launch.
+- Run authenticated application checks in both production regions: sign-in,
+  organization access/isolation, auth/outbox email, browser analytics,
+  chat/search, images/accounting, sandbox transfer/cleanup and every connected
+  integration. Billing remains unavailable until its separate gate.
+- Review obsolete Resend settings and remove only confirmed unused task
+  previews, including `quixotic-raccoon-259` and `tremendous-ptarmigan-69`.
+  Do not remove a preview still needed by an active task.
+- Record final revisions and actual workflow results here. Keep blocked or
+  untested capabilities explicit.
 
-For Notion, the documented subscription controls specify a connection, webhook
-URL and event types. Event payloads include `workspace_id` and
-`subscription_id`, but those fields do not establish pre-delivery filtering.
-Separate regional public connections have therefore been created. Their
-webhook subscriptions remain pending production ingress deployment. This is
-not a claim that cross-region broadcast delivery has been observed. See Notion's
-[webhook reference](https://developers.notion.com/reference/webhooks) and
-[event delivery documentation](https://developers.notion.com/reference/webhooks-events-delivery).
+## Residency scope
 
-## Development deployment evidence
-
-`pnpm deploy:dev` completed successfully from clean main `1aafd8d7` using
-Convex CLI `1.45.0`. Checks passed, `trustworthy-parakeet-343` reported functions
-ready at 17:18:35 on 7 September, and skills sync completed without errors.
-Live HTTP probes returned 400 for `/github/install` without state and 404 for
-the removed `/email/events` webhook. These are ingress checks, not completed
-integration flows. Development email remains unverified because its Bird
-variables are missing. The command deploys Convex and skills, not a hosted
-development frontend.
-
-The outdated Convex CLI `1.42.3` watcher was stopped. A replacement watcher
-using `1.45.0` reported ready at 17:21:40. Unused `CONVEX_URL` and
-`CONVEX_SITE_URL` aliases were removed only from ignored local development
-configuration; current code uses the `VITE_` equivalents. Backend platform
-variables were unchanged, and the primary checkout remained clean.
-
-## Release gate
-
-- Run full `pnpm run check` and `pnpm run test`; neither may be bypassed.
-- Validate Convex schema and HTTP functions in a task preview, never a shared
-  development or production deployment from a worktree.
-- The migration was rebased, checked, fast-forwarded into main and pushed at
-  `1aafd8d7`. Deploy only from checked main; repeat these gates for later changes.
-- Development Convex and skills are deployed. Deploy both production regions
-  and confirm matching code revisions and environment destinations before
-  exercising the application.
-- Test sign-in, tenant isolation, email submission, analytics, chat, search,
-  sandbox execution and cleanup, billing, and each connected integration.
-- Delete only the two obsolete migration previews after they are no longer
-  needed: `quixotic-raccoon-259` and `tremendous-ptarmigan-69`.
-- Record deployment identifiers and test evidence here. Keep blocked or
-  untested capabilities explicit; do not label the release fully verified.
-
-## Scope
-
-The supported target is scoped region-specific residency, not universal
-regional processing. Vercel and PostHog edge/platform processing, Stripe,
-Exa, current E2B execution, recipient mail systems and customer-connected
-providers have the limitations described in [residency](residency.md).
-The seller is confirmed as Vedin Labs AB, Sweden, for both Stripe accounts.
-Private activation, merchant-country correction and tax setup remain with the
-user. Google Cloud image inference uses regional jurisdiction endpoints, with
-the authentication, administration and abuse-monitoring limitations described
-in [image data handling](images.md). No global image-inference exception has
-been authorized.
+The target is scoped region-specific residency, not universal regional
+processing. Vercel and PostHog edge/platform processing, Stripe, Exa, E2B's
+current US execution, recipient mail systems and customer-connected providers
+have the exceptions described in [residency](residency.md). Google Cloud images
+use jurisdiction endpoints with the authentication, administration and
+abuse-monitoring limits described in [image data handling](images.md).
+Regional accounts and endpoints do not prove that every subprocessor
+operation remains regional. No global image-inference fallback is authorized.
