@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { type OpenTarget } from "../pane/tabs"
 import {
-  type ChatDraft,
-  type ChatMessage,
-  type ChatReference,
-  type ChatRun,
-} from "../types"
-import { ChatThread, type ChooseHandler } from "."
+  ask,
+  message,
+  now,
+  renderThread,
+  reply,
+} from "../../../../../test/chat"
+import { type OpenTarget } from "../pane/tabs"
+import { type ChooseHandler } from "."
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
@@ -17,102 +17,6 @@ vi.mock("@tanstack/react-router", async () => ({
 }))
 
 afterEach(cleanup)
-
-const now = 1_700_000_000_000
-const table: ChatReference = {
-  kind: "table",
-  id: "collections_renewals",
-  name: "Customer renewals",
-  detail: "Finance › Renewals",
-}
-
-function message(
-  overrides: Partial<ChatMessage> & { id: string }
-): ChatMessage {
-  return {
-    role: "jori",
-    text: "",
-    parts: [],
-    createdAt: now - 60_000,
-    ...overrides,
-  }
-}
-
-const ask = message({
-  id: "m1",
-  role: "person",
-  text: "Which renewals are at risk?",
-  context: { kind: "table", id: "collections_renewals" },
-})
-
-const reply = message({
-  id: "m2",
-  text: "**Harbor House** renews Sep 24 and is at risk.",
-  parts: [
-    {
-      kind: "reference",
-      target: { kind: "table", id: "collections_renewals" },
-    },
-    { kind: "reference", target: { kind: "job", id: "jobs_gone" } },
-    {
-      kind: "choices",
-      options: [
-        { label: "Remind them" },
-        { label: "Show the table", value: "table" },
-      ],
-    },
-  ],
-})
-
-const question = message({
-  id: "m3",
-  text: "One question first.",
-  parts: [
-    {
-      kind: "choices",
-      prompt: "Post the summary to #finance when done?",
-      options: [
-        { label: "Yes, post it", value: "post" },
-        { label: "Keep it here" },
-      ],
-      freeform: true,
-    },
-  ],
-})
-
-function renderThread({
-  draft = null,
-  live = null,
-  messages,
-  onChoose = vi.fn<ChooseHandler>(),
-  onOpenReference = vi.fn<OpenTarget>(),
-}: {
-  draft?: ChatDraft | null
-  live?: ChatRun | null
-  messages: ChatMessage[]
-  onChoose?: ChooseHandler
-  onOpenReference?: OpenTarget
-}) {
-  return render(
-    <TooltipProvider>
-      <ChatThread
-        draft={draft}
-        hasMore={false}
-        isLoading={false}
-        live={live}
-        messages={messages}
-        now={now}
-        onChoose={onChoose}
-        onLoadMore={vi.fn()}
-        onOpenReference={onOpenReference}
-        progress={<p>Working on it</p>}
-        resolveReference={(target) =>
-          target.id === "collections_renewals" ? table : undefined
-        }
-      />
-    </TooltipProvider>
-  )
-}
 
 test("renders both turns: the ask in its bubble with its context, the reply as prose with its cards", () => {
   const onOpenReference = vi.fn<OpenTarget>()
@@ -259,43 +163,4 @@ test("a run that failed or was stopped says so under the last turn, with the way
   })
 
   expect(screen.queryByRole("status")).toBeNull()
-})
-
-test("answering a question composes the message from the prompt and the labels, then the question locks", () => {
-  const onChoose = vi.fn<ChooseHandler>()
-  const { unmount } = renderThread({ messages: [ask, question], onChoose })
-
-  fireEvent.click(screen.getByRole("radio", { name: "Yes, post it" }))
-  fireEvent.click(screen.getByRole("button", { name: "Answer" }))
-
-  expect(onChoose).toHaveBeenCalledWith(
-    "m3",
-    [{ part: 0, values: ["post"] }],
-    "Post the summary to #finance when done? Yes, post it"
-  )
-
-  unmount()
-  renderThread({
-    messages: [
-      ask,
-      question,
-      message({
-        id: "m5",
-        role: "person",
-        text: "Post the summary to #finance when done? Yes, post it",
-        answer: { messageId: "m3", answers: [{ part: 0, values: ["post"] }] },
-      }),
-    ],
-  })
-
-  expect(screen.queryByRole("radio")).toBeNull()
-  expect(screen.queryByRole("button", { name: "Answer" })).toBeNull()
-  expect(
-    screen
-      .getByText("Yes, post it", { selector: "li" })
-      .getAttribute("aria-current")
-  ).toBe("true")
-  expect(
-    screen.getByText("Keep it here").getAttribute("aria-current")
-  ).toBeNull()
 })

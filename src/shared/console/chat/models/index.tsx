@@ -11,6 +11,7 @@ import {
   type ModelTier,
   type ReasoningEffort,
   reasoningEfforts,
+  selectionLabel,
   selectionTier,
   tierLabels,
   tierOrder,
@@ -24,7 +25,6 @@ import {
   BatteryMedium,
   ChevronDown,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,9 +54,9 @@ const vendorOrder: ModelVendor[] = ["openai", "anthropic"]
  * What the chat runs on, chosen in the composer: the three recommended
  * tiers first, each a model at an effort, then every model of each vendor
  * under its own submenu, and the reasoning effort under its own, so any
- * model runs at any effort. The trigger reads the model and its effort
- * behind the tier's battery, or the vendor's mark when the choice is none
- * of the three. Changing it any time is fine; the next run takes it.
+ * model runs at any effort. The trigger reads the tier behind its battery,
+ * and only outside the three the model and its effort behind the vendor's
+ * mark. Changing it any time is fine; the next run takes it.
  */
 export function ModelPicker({
   onSelect,
@@ -82,8 +82,7 @@ export function ModelPicker({
           ) : (
             <Icon aria-hidden="true" />
           )}
-          {modelLabel(selection.model)}
-          <Badge variant="secondary">{effortLabels[selection.effort]}</Badge>
+          {selectionLabel(selection)}
           <ChevronDown aria-hidden="true" className="size-3.5" />
         </InputGroupButton>
       </DropdownMenuTrigger>
@@ -187,9 +186,9 @@ function VendorModels({
         <DropdownMenuRadioItem key={model.slug} value={model.slug}>
           {model.label}
           {model.slug === selection.model && tier !== null ? (
-            <Badge className="ml-auto" variant="secondary">
+            <span className="ml-auto text-muted-foreground">
               {tierLabels[tier]}
-            </Badge>
+            </span>
           ) : null}
         </DropdownMenuRadioItem>
       ))}

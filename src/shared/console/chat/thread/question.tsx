@@ -97,6 +97,12 @@ export function QuestionBundle({
   )
 }
 
+/** The kit sets a choice's indicator and shortcut against its first line,
+ *  for a label that may run to two; a label with no line under it sits
+ *  centered in its row instead, with both beside it. */
+const centeredChoice =
+  "items-center [&_[data-slot=questionnaire-choice-indicator]]:translate-y-0 [&_[data-slot=questionnaire-choice-shortcut]]:translate-y-0"
+
 function QuestionItem({ name, part }: { name: string; part: ReplyQuestion }) {
   return (
     <QuestionnaireItem
@@ -111,6 +117,9 @@ function QuestionItem({ name, part }: { name: string; part: ReplyQuestion }) {
       <QuestionnaireChoices>
         {part.options.map((option) => (
           <QuestionnaireChoice
+            className={
+              option.description === undefined ? centeredChoice : undefined
+            }
             key={choiceValue(option)}
             value={choiceValue(option)}
           >
