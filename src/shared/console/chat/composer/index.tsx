@@ -5,7 +5,6 @@ import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 import {
   emptyMentionSources,
   type MentionSources,
-  type MentionSuggestion,
 } from "../../mentions/sources"
 import { chatColumnClassName } from "../thread"
 import {
@@ -78,6 +77,7 @@ export function ChatComposer({
   const shownReason = showsReason ? reason : undefined
   const composer = useComposerEditor({
     disabled,
+    onMention,
     onSend,
     open: !disabled && !isLive,
     resolve,
@@ -109,14 +109,14 @@ export function ChatComposer({
         )}
         <ComposerField
           composer={composer}
-          onSelect={mentioned(composer.selectSuggestion, onMention)}
+          onSelect={composer.selectSuggestion}
           placeholder={placeholder}
         />
         <ComposerFooter
           canSend={composer.canSend}
           isLive={isLive}
           mentions={mentions}
-          onPick={mentioned(composer.insertMention, onMention)}
+          onPick={composer.insertMention}
           onSelect={onSelect}
           onStop={onStop}
           reason={
@@ -180,19 +180,5 @@ function focusFromFrame(
 
   if ((event.target as HTMLElement).closest(interactive) === null) {
     editor?.commands.focus("end")
-  }
-}
-
-/** The insertion, then the host told of the resource it put in. */
-function mentioned(
-  insert: (item: MentionSuggestion) => void,
-  onMention: ((target: MessageContext) => void) | undefined
-) {
-  return (item: MentionSuggestion) => {
-    insert(item)
-
-    if (item.kind === "resource" && item.target !== undefined) {
-      onMention?.(item.target)
-    }
   }
 }

@@ -94,9 +94,15 @@ export function insertMention(
   ])
 }
 
+/** A resource put in is remembered by name for its chip, and the host
+ *  is told, so a pane can show it. */
 function remember(refs: ComposerRefs, item: MentionSuggestion) {
   if (item.kind === "resource") {
     refs.names.set(item.id, item.label)
+
+    if (item.target !== undefined) {
+      refs.onMention.current?.(item.target)
+    }
   }
 }
 
