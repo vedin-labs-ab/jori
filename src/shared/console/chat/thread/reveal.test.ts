@@ -8,9 +8,10 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-const frame = () => act(() => vi.advanceTimersByTime(16))
+/** A step of the reveal: two frames. */
+const step = () => act(() => vi.advanceTimersByTime(32))
 
-test("shows what is there at first, then reveals growth a few characters a frame", () => {
+test("shows what is there at first, then reveals growth a few characters a step", () => {
   vi.useFakeTimers({
     toFake: ["requestAnimationFrame", "cancelAnimationFrame", "performance"],
   })
@@ -24,13 +25,17 @@ test("shows what is there at first, then reveals growth a few characters a frame
   rerender({ target: "On it. Reading the notes now." })
   expect(result.current).toBe("On it.")
 
-  frame()
-  expect(result.current).toBe("On it. R")
-  frame()
-  expect(result.current).toBe("On it. Rea")
+  // The first frame of a step shows nothing yet.
+  act(() => vi.advanceTimersByTime(16))
+  expect(result.current).toBe("On it.")
 
-  for (let count = 0; count < 20; count += 1) {
-    frame()
+  act(() => vi.advanceTimersByTime(16))
+  expect(result.current).toBe("On it. Rea")
+  step()
+  expect(result.current).toBe("On it. Reading")
+
+  for (let count = 0; count < 10; count += 1) {
+    step()
   }
 
   expect(result.current).toBe("On it. Reading the notes now.")
@@ -47,18 +52,18 @@ test("a burst drains within a second and never trails by more than a sentence", 
   )
 
   rerender({ target: burst })
-  frame()
+  step()
   expect(burst.length - result.current.length).toBeLessThanOrEqual(120)
 
-  let frames = 1
+  let steps = 1
 
-  while (result.current !== burst && frames < 60) {
-    frame()
-    frames += 1
+  while (result.current !== burst && steps < 30) {
+    step()
+    steps += 1
   }
 
   expect(result.current).toBe(burst)
-  expect(frames).toBeLessThan(60)
+  expect(steps).toBeLessThan(30)
 })
 
 test("a target that is not a continuation restarts", () => {
@@ -73,8 +78,8 @@ test("a target that is not a continuation restarts", () => {
   rerender({ target: "Second" })
   expect(result.current).toBe("")
 
-  frame()
-  expect(result.current).toBe("Se")
+  step()
+  expect(result.current).toBe("Seco")
 })
 
 test("reduced motion shows the target as it is", () => {
@@ -92,14 +97,14 @@ test("reduced motion shows the target as it is", () => {
   expect(result.current).toBe("The whole reply at once.")
 })
 
-test("each frame reveals a share of the backlog, at least two characters", () => {
+test("each step reveals a share of the backlog, at least four characters", () => {
   const target = "x".repeat(300)
 
-  expect(advance("", "abc")).toBe("ab")
-  expect(advance("", "x".repeat(60))).toBe("x".repeat(2))
-  expect(advance("", "x".repeat(90))).toBe("x".repeat(3))
-  // Further behind than a sentence: the rest shows at once, then a frame's
+  expect(advance("", "abc")).toBe("abc")
+  expect(advance("", "x".repeat(60))).toBe("x".repeat(4))
+  expect(advance("", "x".repeat(90))).toBe("x".repeat(6))
+  // Further behind than a sentence: the rest shows at once, then a step's
   // share of the sentence that remains.
-  expect(advance("", target)).toHaveLength(300 - 120 + 4)
+  expect(advance("", target)).toHaveLength(300 - 120 + 8)
   expect(advance(target, target)).toBe(target)
 })
