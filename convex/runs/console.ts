@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { resolveConsolePerson } from "../persons/account"
@@ -9,16 +9,30 @@ import {
   approvalFilterValidator,
   approvalMatchesFilter,
   audienceFilterValidator,
+  countMatches,
   normalizeQuery,
   parseCursor,
+  type RunAudienceFilter,
+  type RunFilter,
   runFilterValidator,
   runMatchesAudienceFilter,
   runMatchesFilter,
   runVisibleToPerson,
+  scanPage,
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
 import { type RunSummary, summarizeRun } from "./console/summaries"
+
+/** What the listing keeps: the runs a person may see, under the facets
+ *  and search the page shows. */
+type Listing = {
+  approvalFilter: ApprovalFilter
+  runFilter: RunFilter
+  audienceFilter: RunAudienceFilter
+  normalizedQuery: string
+  personId: Id<"persons"> | undefined
+}
 
 export const page = query({
   args: {
@@ -43,57 +57,21 @@ export const page = query({
       return await pagePendingApprovals(ctx, { ...args, personId })
     }
 
-    const offset = parseCursor(args.paginationOpts.cursor)
-    const normalizedQuery = normalizeQuery(args.query)
-    const rows: RunSummary[] = []
-    let matchingIndex = 0
-    let hasMore = false
-    const runs = organizationRuns(ctx, args.organizationId, args.jobId)
+    const listing = {
+      ...args,
+      normalizedQuery: normalizeQuery(args.query),
+      personId,
+    }
 
-    const shouldMatchSummary = needsSummary(
-      args.approvalFilter,
-      normalizedQuery
+    return await scanPage(
+      organizationRuns(ctx, args.organizationId, args.jobId),
+      {
+        offset: parseCursor(args.paginationOpts.cursor),
+        numItems: args.paginationOpts.numItems,
+        match: (run) => matchListing(ctx, run, listing),
+        row: (run) => summarizeRun(ctx, run, personId),
+      }
     )
-
-    for await (const run of runs) {
-      if (
-        !runVisibleToPerson(run, personId) ||
-        !runMatchesAudienceFilter(run, args.audienceFilter) ||
-        !runMatchesFilter(run, args.runFilter)
-      ) {
-        continue
-      }
-
-      const summary = shouldMatchSummary
-        ? await summarizeRun(ctx, run, personId)
-        : null
-
-      if (
-        summary !== null &&
-        !matchesSummary(summary, args.approvalFilter, normalizedQuery)
-      ) {
-        continue
-      }
-
-      if (matchingIndex < offset) {
-        matchingIndex += 1
-        continue
-      }
-
-      if (rows.length >= args.paginationOpts.numItems) {
-        hasMore = true
-        break
-      }
-
-      rows.push(summary ?? (await summarizeRun(ctx, run, personId)))
-      matchingIndex += 1
-    }
-
-    return {
-      continueCursor: String(offset + rows.length),
-      isDone: !hasMore,
-      page: rows,
-    }
   },
 })
 
@@ -113,54 +91,25 @@ export const stats = query({
       args.organizationId,
       identity
     )
-
-    const normalizedQuery = normalizeQuery(args.query)
-
-    if (args.approvalFilter === "pending") {
-      return {
-        filteredCount: await countPendingApprovals(ctx, {
-          runFilter: args.runFilter,
-          audienceFilter: args.audienceFilter,
-          normalizedQuery,
-          personId,
-          organizationId: args.organizationId,
-          jobId: args.jobId,
-        }),
-        totalCount: await countRuns(ctx, args, personId),
-      }
+    const listing = {
+      ...args,
+      normalizedQuery: normalizeQuery(args.query),
+      personId,
     }
+    const runs = () => organizationRuns(ctx, args.organizationId, args.jobId)
 
-    let filteredCount = 0
-    let totalCount = 0
-    const runs = organizationRuns(ctx, args.organizationId, args.jobId)
-
-    for await (const run of runs) {
-      if (!runVisibleToPerson(run, personId)) {
-        continue
-      }
-
-      totalCount += 1
-
-      if (
-        !runMatchesAudienceFilter(run, args.audienceFilter) ||
-        !runMatchesFilter(run, args.runFilter)
-      ) {
-        continue
-      }
-
-      if (!needsSummary(args.approvalFilter, normalizedQuery)) {
-        filteredCount += 1
-        continue
-      }
-
-      const summary = await summarizeRun(ctx, run, personId)
-
-      if (matchesSummary(summary, args.approvalFilter, normalizedQuery)) {
-        filteredCount += 1
-      }
+    return {
+      filteredCount:
+        args.approvalFilter === "pending"
+          ? await countPendingApprovals(ctx, listing)
+          : await countMatches(
+              runs(),
+              async (run) => (await matchListing(ctx, run, listing)) !== null
+            ),
+      totalCount: await countMatches(runs(), async (run) =>
+        runVisibleToPerson(run, personId)
+      ),
     }
-
-    return { filteredCount, totalCount }
   },
 })
 
@@ -183,37 +132,32 @@ function organizationRuns(
   return indexed.order("desc")
 }
 
-async function countRuns(
+/** Whether a run belongs on the listing. The run's own fields decide
+ *  first; only an approval facet or a search reads its summary, which a
+ *  kept run then carries to the page. */
+async function matchListing(
   ctx: QueryCtx,
-  args: { organizationId: string; jobId?: Id<"jobs"> },
-  personId: Id<"persons"> | undefined
-) {
-  let count = 0
-  const runs = organizationRuns(ctx, args.organizationId, args.jobId)
-
-  for await (const run of runs) {
-    if (runVisibleToPerson(run, personId)) {
-      count += 1
-    }
+  run: Doc<"runs">,
+  listing: Listing
+): Promise<{ row?: RunSummary } | null> {
+  if (
+    !runVisibleToPerson(run, listing.personId) ||
+    !runMatchesAudienceFilter(run, listing.audienceFilter) ||
+    !runMatchesFilter(run, listing.runFilter)
+  ) {
+    return null
   }
 
-  return count
-}
-
-function needsSummary(filter: ApprovalFilter, normalizedQuery: string) {
-  return filter !== "any" || normalizedQuery !== ""
-}
-
-function matchesSummary(
-  summary: RunSummary,
-  filter: ApprovalFilter,
-  normalizedQuery: string
-) {
-  if (!matchesApprovalFilter(summary, filter)) {
-    return false
+  if (listing.approvalFilter === "any" && listing.normalizedQuery === "") {
+    return {}
   }
 
-  return summaryMatchesSearch(summary, normalizedQuery)
+  const summary = await summarizeRun(ctx, run, listing.personId)
+
+  return matchesApprovalFilter(summary, listing.approvalFilter) &&
+    summaryMatchesSearch(summary, listing.normalizedQuery)
+    ? { row: summary }
+    : null
 }
 
 function matchesApprovalFilter(summary: RunSummary, filter: ApprovalFilter) {
