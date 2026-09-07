@@ -1,6 +1,6 @@
+import { canStartMention } from "@/shared/console/mentions/scan"
 import { findFuzzyJobSurfaceIntegration } from "./fuzzy"
 import {
-  canStartMention,
   type JobMention,
   type JobMentionCatalog,
   readJobMentions,
@@ -22,7 +22,7 @@ export function findCompletedJobMention(
 function readFuzzyIntegrationMatch(text: string): JobMention | null {
   const start = text.lastIndexOf("@")
 
-  if (start < 0 || !canStartMention("integration", text, start)) {
+  if (start < 0 || !canStartMention(text, start)) {
     return null
   }
 

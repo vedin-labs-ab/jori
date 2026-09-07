@@ -88,9 +88,12 @@ export function messageSnapshotBody(input: {
 }
 
 /** The chip for a chat's context: the folder or the filed resource by its
- *  name. A run has no chip of its own; the Activity page is where it is. */
+ *  name. A run and a chat have no chip of their own; the Activity page and
+ *  the chat itself are where they are. */
 function consoleContext(context: ResolvedContext | undefined) {
-  return context === undefined || context.kind === "run"
+  return context === undefined ||
+    context.kind === "run" ||
+    context.kind === "chat"
     ? []
     : compactDetails([detail(context.kind, context.name)]).flatMap(
         toSnapshotContext

@@ -11,9 +11,10 @@ export type PaneBody = (props: {
 }) => ReactNode
 
 /** What each kind of target shows beside the chat: the material views
- *  bound to Convex the way their pages are. A folder and a run have no
- *  view for the pane; the header's link is the way to them. */
+ *  bound to Convex the way their pages are. A folder, a run, and another
+ *  chat have no view for the pane; the header's link is the way to them. */
 export const paneBodies: Record<ReferenceKind, PaneBody | null> = {
+  chat: null,
   file: PaneFile,
   folder: null,
   job: PaneJob,

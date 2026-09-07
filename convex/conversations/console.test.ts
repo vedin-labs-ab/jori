@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { defaultSelection } from "../../contracts/models/selection"
+import { tableDoc } from "../../test/convex/collections"
 import {
   consoleContext,
   conversationOf,
@@ -226,4 +227,45 @@ test("every message that runs schedules the thread's summary", async () => {
   expect((await conversationOf(database, sent)).debounce).toMatchObject({
     functionId: "scheduled_1",
   })
+})
+
+test("the resources a message mentions are kept with it, once each, and one the person cannot see refuses the message", async () => {
+  const { database, ctx } = consoleContext()
+  const personId = await person(database)
+  const tableId = await database.insert(
+    "collections",
+    tableDoc({ name: "Customer renewals", organizationId })
+  )
+  const privateId = await database.insert(
+    "collections",
+    tableDoc({
+      name: "Owner's own",
+      organizationId,
+      visibility: { mode: "private" },
+    })
+  )
+
+  const result = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    references: [
+      { kind: "table", id: tableId },
+      { kind: "table", id: tableId },
+    ],
+    text: `Look at +[table:${tableId}]`,
+  })
+
+  expect(await database.get(result.messageId)).toMatchObject({
+    data: { references: [{ kind: "table", id: tableId }] },
+  })
+  await expect(
+    sendConsoleMessage(ctx, {
+      organizationId,
+      personId,
+      profile: {},
+      references: [{ kind: "table", id: privateId }],
+      text: "Look at that",
+    })
+  ).rejects.toThrow("The mentioned table is not available.")
 })

@@ -1,5 +1,3 @@
-import { type PartAnswer } from "@contracts/replies/answers"
-import { isReplyQuestion } from "@contracts/replies/parts"
 import { type ReactNode, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +11,12 @@ import {
 } from "@/components/ui/message-scroller"
 import { ConsoleListLoading } from "../../list/loading"
 import { Markdown } from "../../markdown"
+import { type MentionCatalog } from "../../mentions/scan"
+import {
+  createMentionCatalog,
+  emptyMentionSources,
+  type MentionSources,
+} from "../../mentions/sources"
 import { type OpenTarget } from "../pane/tabs"
 import {
   type ChatContextUsage,
@@ -24,26 +28,16 @@ import {
   type ResolveReference,
 } from "../types"
 import { answeredParts, answeringMessages } from "./answers"
-import { ChoiceChips } from "./choices"
 import { CondensedNotice } from "./condensed"
 import { ChatDraftTurn } from "./draft"
 import { JoriMessage, MessageActions, PersonMessage } from "./message"
 import { RunNotice } from "./notice"
-import { QuestionBundle } from "./question"
-import { ReferenceCard } from "./reference"
+import { type ChooseHandler, ReplyParts } from "./parts"
 
 /** The column every chat surface reads in. */
 export const chatColumnClassName = "mx-auto w-full max-w-[44rem] px-4 md:px-6"
 
-/** Choosing from a reply's options sends an ordinary message: the values
- *  each part received, and the text the view composed for them. A
- *  reply's questions are answered together; a chip answers its part
- *  alone. */
-export type ChooseHandler = (
-  messageId: string,
-  answers: PartAnswer[],
-  text: string
-) => void
+export type { ChooseHandler } from "./parts"
 
 /** A conversation, oldest first, anchored on the person's latest turn so
  *  the reply grows under it. What the run is doing arrives from the host
@@ -55,6 +49,7 @@ export function ChatThread({
   hasMore,
   isLoading,
   live,
+  mentions = emptyMentionSources,
   messages,
   now,
   onChoose,
@@ -69,6 +64,9 @@ export function ChatThread({
   hasMore: boolean
   isLoading: boolean
   live: ChatRun | null
+  /** What a person's message may mention by name, so its tokens read as
+   *  chips; resource tokens always do. */
+  mentions?: MentionSources
   messages: ChatMessage[]
   now: number
   onChoose: ChooseHandler
@@ -82,6 +80,7 @@ export function ChatThread({
 }) {
   const answered = useMemo(() => answeredParts(messages), [messages])
   const answering = useMemo(() => answeringMessages(messages), [messages])
+  const catalog = useMemo(() => createMentionCatalog(mentions), [mentions])
   const isLive = isLiveRun(live)
   const anchorId = lastPersonId(messages)
   const lastId = messages.at(-1)?.id
@@ -109,32 +108,18 @@ export function ChatThread({
                   messageId={message.id}
                   scrollAnchor={message.id === anchorId}
                 >
-                  {message.role === "person" ? (
-                    <PersonMessage
-                      context={
-                        message.context === undefined
-                          ? undefined
-                          : resolveReference(message.context)
-                      }
-                      message={message}
-                      now={now}
-                    />
-                  ) : (
-                    <JoriMessage>
-                      <Markdown text={message.text} />
-                      <ReplyParts
-                        answered={answered}
-                        message={message}
-                        onChoose={onChoose}
-                        onOpenReference={onOpenReference}
-                        resolveReference={resolveReference}
-                        showChips={
-                          message.id === lastId && !isLive && draft === null
-                        }
-                      />
-                      <MessageActions message={message} now={now} />
-                    </JoriMessage>
-                  )}
+                  <Turn
+                    answered={answered}
+                    catalog={catalog}
+                    message={message}
+                    now={now}
+                    onChoose={onChoose}
+                    onOpenReference={onOpenReference}
+                    resolveReference={resolveReference}
+                    showChips={
+                      message.id === lastId && !isLive && draft === null
+                    }
+                  />
                 </MessageScrollerItem>
               )
             )}
@@ -154,6 +139,60 @@ export function ChatThread({
         <MessageScrollerButton aria-label="Scroll to latest" />
       </MessageScroller>
     </MessageScrollerProvider>
+  )
+}
+
+/** One message as its side shows it: the person's in a bubble with its
+ *  context and its chips, Jori's as prose with its parts under the mark. */
+function Turn({
+  answered,
+  catalog,
+  message,
+  now,
+  onChoose,
+  onOpenReference,
+  resolveReference,
+  showChips,
+}: {
+  answered: Map<string, Map<number, string[]>>
+  catalog: MentionCatalog
+  message: ChatMessage
+  now: number
+  onChoose: ChooseHandler
+  onOpenReference: OpenTarget
+  resolveReference: ResolveReference
+  showChips: boolean
+}) {
+  if (message.role === "person") {
+    return (
+      <PersonMessage
+        catalog={catalog}
+        context={
+          message.context === undefined
+            ? undefined
+            : resolveReference(message.context)
+        }
+        message={message}
+        now={now}
+        onOpenReference={onOpenReference}
+        resolveReference={resolveReference}
+      />
+    )
+  }
+
+  return (
+    <JoriMessage>
+      <Markdown text={message.text} />
+      <ReplyParts
+        answered={answered}
+        message={message}
+        onChoose={onChoose}
+        onOpenReference={onOpenReference}
+        resolveReference={resolveReference}
+        showChips={showChips}
+      />
+      <MessageActions message={message} now={now} />
+    </JoriMessage>
   )
 }
 
@@ -218,68 +257,6 @@ function ThreadTail({
       <RunNotice run={live} />
     </MessageScrollerItem>
   ) : null
-}
-
-/** A reply's parts: each reference as a card, its questions as one
- *  bundle wherever the reply stands, and its chips after the latest
- *  reply only. Chips are next steps, so they leave with the next message. */
-function ReplyParts({
-  answered,
-  message,
-  onChoose,
-  onOpenReference,
-  resolveReference,
-  showChips,
-}: {
-  answered: Map<string, Map<number, string[]>>
-  message: ChatMessage
-  onChoose: ChooseHandler
-  onOpenReference: OpenTarget
-  resolveReference: ResolveReference
-  showChips: boolean
-}) {
-  const references = message.parts.filter((part) => part.kind === "reference")
-  const questions = message.parts.flatMap((part, index) =>
-    isReplyQuestion(part) ? [{ index, part }] : []
-  )
-  const chips = message.parts.flatMap((part, index) =>
-    part.kind === "choices" && !isReplyQuestion(part) ? [{ index, part }] : []
-  )
-
-  return (
-    <>
-      {references.length === 0 ? null : (
-        <div className="flex flex-wrap gap-2">
-          {references.map((part) => (
-            <ReferenceCard
-              key={`${part.target.kind}:${part.target.id}`}
-              onOpen={onOpenReference}
-              reference={resolveReference(part.target)}
-              target={part.target}
-            />
-          ))}
-        </div>
-      )}
-      {questions.length === 0 ? null : (
-        <QuestionBundle
-          answers={answered.get(message.id)}
-          onAnswer={(answers, text) => onChoose(message.id, answers, text)}
-          questions={questions}
-        />
-      )}
-      {showChips
-        ? chips.map(({ index, part }) => (
-            <ChoiceChips
-              key={index}
-              onChoose={(values, text) =>
-                onChoose(message.id, [{ part: index, values }], text)
-              }
-              options={part.options}
-            />
-          ))
-        : null}
-    </>
-  )
 }
 
 /** Brings each new turn of the person's to the top of the view as it is

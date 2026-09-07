@@ -15,6 +15,7 @@ export const referenceKinds = [
   "job",
   "folder",
   "run",
+  "chat",
 ] as const
 
 export type ReferenceKind = (typeof referenceKinds)[number]
@@ -80,7 +81,7 @@ const referenceSchema: JsonSchemaObject = {
         id: { type: "string", minLength: 1 },
       },
       description:
-        "A resource this reply is about: one you created, changed, or want the requester to open. Use the id a tool returned.",
+        "A resource this reply is about: one you created, changed, or want the requester to open, or a chat that has more on it. Use the id a tool returned.",
     },
   },
 }

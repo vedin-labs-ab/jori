@@ -1,6 +1,6 @@
 import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { useTypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
 import { ChatHome } from "@/shared/console/chat/home"
@@ -17,21 +17,24 @@ import {
   type ChatRun,
   isLiveRun,
   type ReferenceTarget,
+  type ResolveReference,
 } from "@/shared/console/chat/types"
 import { ChatWorking } from "@/shared/console/chat/working"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
+import { type MentionSources } from "@/shared/console/mentions/sources"
 import { ActivityTimeline } from "@/shared/console/runs/activity/item"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
 import { liveActivity, resolveReference } from "../../derive/chat"
+import { mentionSources } from "../../derive/mentions"
 import {
   chatContext,
   chatSelection,
   chatSuggestions,
 } from "../../fixtures/chat"
 import { liveDraft } from "../../state/chat"
-import { type DemoLiveReply } from "../../state/types"
+import { type DemoLiveReply, type DemoState } from "../../state/types"
 import { useDemoWorkspace } from "../../workspace"
 import { DemoPaneBody } from "./pane"
 import { useReplyStream } from "./stream"
@@ -51,11 +54,13 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
     suggestions.slice(shownSuggestions).map(({ text }) => text),
     "Tell Jori what needs doing"
   )
+  const mentions = useMemo(() => mentionSources(state), [state])
   const reference =
     context === undefined ? undefined : resolveReference(state, context)
-  const send = (text: string) => {
+  const send = (text: string, references: MessageContext[] = []) => {
     const conversationId = actions.sendChatMessage(text, undefined, {
       context: reference === undefined ? undefined : context,
+      references,
     })
 
     navigate(conversationDestination(conversationId))
@@ -68,11 +73,13 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
           autoFocus
           context={reference}
           live={null}
+          mentions={mentions}
           onClearContext={() => navigate({ to: "/chat" })}
           onSelect={setSelection}
           onSend={send}
           onStop={() => {}}
           placeholder={placeholder}
+          resolve={(target) => resolveReference(state, target)}
           selection={selection}
         />
       }
@@ -106,10 +113,7 @@ function Conversation({ conversationId }: { conversationId: string }) {
   const run: ChatRun | null =
     live?.conversationId === conversationId ? live.run : null
   const now = useNow(isLiveRun(run) ? 1000 : 60_000)
-  const resolve = useCallback(
-    (target: ReferenceTarget) => resolveReference(state, target),
-    [state]
-  )
+  const { mentions, resolve } = useWorkspaceBindings(state)
   const { autoOpen, openTarget, pane } = usePaneTabs()
 
   useReplyStream(live, actions)
@@ -128,7 +132,14 @@ function Conversation({ conversationId }: { conversationId: string }) {
     <ChatPane
       {...pane}
       body={(target) => <DemoPaneBody target={target} />}
-      composer={<DemoComposer conversationId={conversationId} run={run} />}
+      composer={
+        <DemoComposer
+          conversationId={conversationId}
+          mentions={mentions}
+          resolve={resolve}
+          run={run}
+        />
+      }
       resolve={resolve}
     >
       <ChatThread
@@ -136,6 +147,7 @@ function Conversation({ conversationId }: { conversationId: string }) {
         hasMore={false}
         isLoading={false}
         live={run}
+        mentions={mentions}
         messages={conversation.messages}
         now={now}
         onChoose={(messageId, answers, text) =>
@@ -153,13 +165,29 @@ function Conversation({ conversationId }: { conversationId: string }) {
   )
 }
 
+/** What the chat's views read of the workspace: the resolver a reply's
+ *  targets are named by, and what the composer can mention. */
+function useWorkspaceBindings(state: DemoState) {
+  return {
+    mentions: useMemo(() => mentionSources(state), [state]),
+    resolve: useCallback(
+      (target: ReferenceTarget) => resolveReference(state, target),
+      [state]
+    ),
+  }
+}
+
 /** The composer bound to send into the conversation, to stop the run
  *  answering it, and to hold the model the next one runs on. */
 function DemoComposer({
   conversationId,
+  mentions,
+  resolve,
   run,
 }: {
   conversationId: string
+  mentions: MentionSources
+  resolve: ResolveReference
   run: ChatRun | null
 }) {
   const { actions } = useDemoWorkspace()
@@ -169,9 +197,13 @@ function DemoComposer({
     <ChatComposer
       autoFocus
       live={run}
+      mentions={mentions}
       onSelect={setSelection}
-      onSend={(text) => actions.sendChatMessage(text, conversationId)}
+      onSend={(text, references) =>
+        actions.sendChatMessage(text, conversationId, { references })
+      }
       onStop={actions.stopChatRun}
+      resolve={resolve}
       selection={selection}
       usage={chatContext}
     />

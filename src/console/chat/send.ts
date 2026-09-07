@@ -38,6 +38,9 @@ export function useSendMessage(organizationId: string) {
           text: args.text,
           data: {
             ...(args.context === undefined ? {} : { context: args.context }),
+            ...(args.references === undefined
+              ? {}
+              : { references: args.references }),
             ...(args.answer === undefined ? {} : { answer: args.answer }),
           },
           createdAt: Date.now(),

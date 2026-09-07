@@ -1,6 +1,7 @@
 import {
   readChoicesAnswer,
   readMessageContext,
+  readMessageReferences,
 } from "@contracts/replies/answers"
 import { parseReplyParts } from "@contracts/replies/parts"
 import { usePaginatedQuery } from "convex/react"
@@ -16,10 +17,12 @@ export type MessageRow = FunctionReturnType<
 
 export const messagePageSize = 40
 
-/** A stored message as the thread reads it: the parts, context, and answer
- *  its `data` carries parsed out, each absent when it is not there. */
+/** A stored message as the thread reads it: the parts, context,
+ *  mentions, and answer its `data` carries parsed out, each absent when
+ *  it is not there. */
 export function toChatMessage(row: MessageRow): ChatMessage {
   const context = readMessageContext(row.data)
+  const references = readMessageReferences(row.data)
   const answer = readChoicesAnswer(row.data)
 
   return {
@@ -28,6 +31,7 @@ export function toChatMessage(row: MessageRow): ChatMessage {
     text: row.text,
     parts: parseReplyParts(row.data),
     ...(context === undefined ? {} : { context }),
+    ...(references.length === 0 ? {} : { references }),
     ...(answer === undefined ? {} : { answer }),
     createdAt: row.createdAt,
   }

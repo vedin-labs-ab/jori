@@ -1,3 +1,4 @@
+import { normalizeFuzzyAlias } from "@/shared/console/mentions/rank"
 import {
   type JobSurfaceIntegration,
   type JobSurfaceIntegrationMeta,
@@ -10,10 +11,6 @@ const normalizedIntegrationAliases = new Map(
     [integration.label, ...integration.aliases].map(normalizeFuzzyAlias),
   ])
 )
-
-export function normalizeFuzzyAlias(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, "")
-}
 
 export function findFuzzyJobSurfaceIntegration(
   value: string,

@@ -11,6 +11,7 @@ import {
 } from "../messages/console"
 import {
   normalizeConsoleContext,
+  normalizeConsoleReferences,
   referenceTargetValidator,
 } from "../messages/references"
 import { modelSelectionValidator } from "../model/selection"
@@ -22,6 +23,7 @@ import {
 import { resolvePersonByIdentity } from "../persons/identity/links"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
+import { createSight } from "../visibility/sight"
 import { startMessageRun } from "./data"
 import { readLiveState } from "./live"
 import {
@@ -37,6 +39,8 @@ type ConsoleSendArgs = {
   conversationId?: Id<"conversations">
   text: string
   context?: Infer<typeof referenceTargetValidator>
+  /** The resources the text mentions, as `+[kind:id]` tokens in it. */
+  references?: Infer<typeof referenceTargetValidator>[]
   answer?: Infer<typeof consoleAnswerValidator>
   model?: Infer<typeof modelSelectionValidator>
 }
@@ -46,13 +50,15 @@ const titleMaxLength = 80
 /** A person's message to Jori from the console. The first message opens the
  *  conversation, with the model selection it was sent under; every message
  *  is recorded, then handed to the same run start Slack mentions use, so a
- *  blocked budget keeps the message. */
+ *  blocked budget keeps the message. The resources it mentions must be
+ *  ones the person can see, or the message is refused. */
 export const send = mutation({
   args: {
     organizationId: v.string(),
     conversationId: v.optional(v.id("conversations")),
     text: v.string(),
     context: v.optional(referenceTargetValidator),
+    references: v.optional(v.array(referenceTargetValidator)),
     answer: v.optional(consoleAnswerValidator),
     model: v.optional(modelSelectionValidator),
   },
@@ -158,6 +164,14 @@ export async function sendConsoleMessage(
     throw new Error(`Context id is not a ${args.context?.kind}.`)
   }
 
+  const references = await normalizeConsoleReferences(
+    ctx,
+    createSight(ctx, {
+      organizationId: args.organizationId,
+      personId: args.personId,
+    }),
+    args.references ?? []
+  )
   const now = Date.now()
   const conversation =
     args.conversationId === undefined
@@ -170,7 +184,7 @@ export async function sendConsoleMessage(
   const message = await insertConsoleMessage(ctx, {
     actor: createPersonActor(args.personId, args.profile),
     conversation,
-    data: consoleMessageData({ ...args, context }),
+    data: consoleMessageData({ ...args, context, references }),
     mentioned: true,
     now,
     text,

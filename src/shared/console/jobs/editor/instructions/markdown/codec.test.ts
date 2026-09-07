@@ -170,3 +170,16 @@ function serialize(document: ReturnType<typeof parse>) {
 function roundTrip(description: string) {
   return serialize(parse(description)).description
 }
+
+test("a resource token is prose in a job: escaped as markdown, never a mention", () => {
+  const source = "Read +[table:k17abc] every morning, then /meeting-prep."
+  const once = roundTrip(source)
+
+  expect(once).toBe(
+    "Read +\\[table:k17abc\\] every morning, then /meeting-prep."
+  )
+  expect(roundTrip(once)).toBe(once)
+  expect(readInstructionReferences(parse(source))).toEqual([
+    { id: "meeting-prep", kind: "skill" },
+  ])
+})

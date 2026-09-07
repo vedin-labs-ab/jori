@@ -1,7 +1,10 @@
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
-import { replaceCompletedMention } from "../suggestion/input"
-import { handleSuggestionKey } from "../suggestion/keys"
+import { handleSuggestionKey } from "@/shared/console/mentions/suggest/keys"
+import {
+  insertMentionSuggestion,
+  replaceCompletedMention,
+} from "../suggestion/input"
 import { type InstructionSuggestionState } from "../suggestion/suggest"
 import { type InstructionRefs } from "../types"
 import { instructionContentClassName } from "./style"
@@ -38,10 +41,16 @@ export function createEditorProps({
     },
     handleKeyDown: (_view: Editor["view"], event: KeyboardEvent) =>
       handleSuggestionKey({
-        editor: refs.editor.current,
         event,
-        onWebAccessChange: refs.onWebSearchChange.current,
-        permissions: refs.permissions.current,
+        onSelect: (suggestion) =>
+          insertMentionSuggestion({
+            editor: refs.editor.current,
+            onWebAccessChange: refs.onWebSearchChange.current,
+            permissions: refs.permissions.current,
+            setSuggestion,
+            state: refs.suggestion.current,
+            suggestion,
+          }),
         setSuggestion,
         state: refs.suggestion.current,
       }),

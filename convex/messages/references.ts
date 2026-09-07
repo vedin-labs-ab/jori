@@ -2,27 +2,30 @@ import { v } from "convex/values"
 import {
   type MessageContext,
   readMessageContext,
+  readMessageReferences,
 } from "../../contracts/replies/answers"
-import { type ReferenceKind } from "../../contracts/replies/parts"
-import { type Doc, type Id, type TableNames } from "../_generated/dataModel"
+import { type Id } from "../_generated/dataModel"
 import { query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { requireUserId } from "../access/users"
-import { accessibleCollection } from "../collections/access"
-import { ancestorPath, getOrganizationFolder } from "../folders/tree"
-import { canSeeJob } from "../jobs/access"
+import { ancestorPath } from "../folders/tree"
 import { resolvePersonByIdentity } from "../persons/identity/links"
-import { runVisibleToPerson } from "../runs/console/filters"
+import {
+  loadReference,
+  type ReferenceTarget,
+  referenceTable,
+} from "../references/lookup"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 
-// What a reply's references and a message's context point at, named for
-// the console. Every kind reads through the predicate its own page uses,
-// and a miss of any sort — gone, foreign, invisible, malformed — comes back
-// unavailable, so a reference can neither probe nor leak. A console
-// message's context is the same shape — the resource or folder whose page
-// the chat was opened from — and is read back here for the run: where to
-// file it, what to say in its snapshot, and what to tell the model.
+// What a reply's references and a message's context and mentions point
+// at, named for the console. Every kind reads through the predicate its
+// own page uses, and a miss of any sort — gone, foreign, invisible,
+// malformed — comes back unavailable, so a reference can neither probe nor
+// leak. A console message's context is the same shape — the resource or
+// folder whose page the chat was opened from — and so are the resources
+// its text mentions; both are read back here for the run: where to file
+// it, what to say in its snapshot, and what to tell the model.
 
 export const referenceTargetValidator = v.object({
   kind: v.union(
@@ -31,12 +34,13 @@ export const referenceTargetValidator = v.object({
     v.literal("store"),
     v.literal("job"),
     v.literal("folder"),
-    v.literal("run")
+    v.literal("run"),
+    v.literal("chat")
   ),
   id: v.string(),
 })
 
-export type ReferenceTarget = { kind: ReferenceKind; id: string }
+export type { ReferenceTarget }
 
 /** A context as the run reads it: the target, its name, and the folder
  *  the run it starts is filed under — the folder itself, or the one a
@@ -105,85 +109,6 @@ function unavailable(target: ReferenceTarget): ResolvedReference {
   return { ...target, name: "", unavailable: true }
 }
 
-/** What a target names, read through the predicate its own page uses:
- *  the name, and the folder it is filed under — a folder's parent, for a
- *  folder — or a run's status, which stands in for that. Gone, foreign,
- *  invisible, and malformed all read as null. */
-export async function loadReference(
-  ctx: QueryLikeCtx,
-  sight: Sight,
-  target: ReferenceTarget
-): Promise<{ name: string; folderId?: Id<"folders">; status?: string } | null> {
-  switch (target.kind) {
-    case "job": {
-      const job = await load(ctx, "jobs", target.id)
-
-      return job !== null && (await canSeeJob(sight, job))
-        ? { name: job.name, folderId: job.folderId }
-        : null
-    }
-    case "table":
-    case "store": {
-      const collection = await accessibleCollection(
-        sight,
-        await load(ctx, "collections", target.id),
-        target.kind
-      )
-
-      return collection === null
-        ? null
-        : { name: collection.name, folderId: collection.folderId }
-    }
-    case "file": {
-      const file = await load(ctx, "files", target.id)
-
-      return file !== null && (await sight.canSee(file))
-        ? { name: file.name, folderId: file.folderId }
-        : null
-    }
-    case "folder": {
-      const folder = await loadFolder(ctx, sight.organizationId, target.id)
-
-      return folder !== null && (await sight.canSeeFolder(folder))
-        ? { name: folder.name, folderId: folder.parentId }
-        : null
-    }
-    case "run": {
-      const run = await load(ctx, "runs", target.id)
-
-      return run !== null &&
-        run.organizationId === sight.organizationId &&
-        runVisibleToPerson(run, sight.personId)
-        ? { name: run.snapshot.title, status: run.status }
-        : null
-    }
-  }
-}
-
-/** The row an id names in the table its kind implies; an id of another
- *  shape is no row at all. */
-async function load<TableName extends TableNames>(
-  ctx: QueryLikeCtx,
-  table: TableName,
-  id: string
-): Promise<Doc<TableName> | null> {
-  const normalized = ctx.db.normalizeId(table, id)
-
-  return normalized === null ? null : await ctx.db.get(normalized)
-}
-
-async function loadFolder(
-  ctx: QueryLikeCtx,
-  organizationId: string,
-  id: string
-) {
-  const normalized = ctx.db.normalizeId("folders", id)
-
-  return normalized === null
-    ? null
-    : await getOrganizationFolder(ctx, organizationId, normalized)
-}
-
 /** The folders something is filed under, root first, as one line. */
 async function filedUnder(
   ctx: QueryLikeCtx,
@@ -198,23 +123,6 @@ async function filedUnder(
         .join(" › ")
 }
 
-/** The table a kind's ids belong to. */
-export function referenceTable(kind: ReferenceKind): TableNames {
-  switch (kind) {
-    case "file":
-      return "files"
-    case "table":
-    case "store":
-      return "collections"
-    case "job":
-      return "jobs"
-    case "folder":
-      return "folders"
-    case "run":
-      return "runs"
-  }
-}
-
 /** The context's id in its kind's own table, or nothing for an id of
  *  another shape — the check `references.resolve` makes, made before the
  *  message is kept. */
@@ -225,6 +133,52 @@ export function normalizeConsoleContext(
   const id = ctx.db.normalizeId(referenceTable(context.kind), context.id)
 
   return id === null ? null : { kind: context.kind, id }
+}
+
+/** The resources a message mentions, each in its kind's own table and
+ *  visible to the sender, or an error naming the first that is not: the
+ *  check the console's picker already made, made again before the message
+ *  is kept, so a stored mention always pointed at something real. */
+export async function normalizeConsoleReferences(
+  ctx: QueryLikeCtx,
+  sight: Sight,
+  references: MessageContext[]
+): Promise<MessageContext[]> {
+  const seen = new Set<string>()
+  const normalized: MessageContext[] = []
+
+  for (const reference of references) {
+    const target = normalizeConsoleContext(ctx, reference)
+
+    if (target === null || (await loadReference(ctx, sight, target)) === null) {
+      throw new Error(`The mentioned ${reference.kind} is not available.`)
+    }
+
+    const key = `${target.kind}:${target.id}`
+
+    if (!seen.has(key)) {
+      seen.add(key)
+      normalized.push(target)
+    }
+  }
+
+  return normalized
+}
+
+/** The resources a message's data says its text mentions, each with its
+ *  name for the viewer, or without one when the viewer may not see it or
+ *  it is gone. */
+export async function resolveConsoleReferences(
+  ctx: QueryLikeCtx,
+  sight: Sight,
+  data: unknown
+): Promise<Array<MessageContext & { name: string | null }>> {
+  return await Promise.all(
+    readMessageReferences(data).map(async (reference) => ({
+      ...reference,
+      name: (await loadReference(ctx, sight, reference))?.name ?? null,
+    }))
+  )
 }
 
 /** The context a message's data carries, resolved for the viewer: the
@@ -266,9 +220,29 @@ export function consoleContextLine(
   context: MessageContext,
   resolved: ResolvedContext | undefined
 ) {
-  const id = `${context.kind}Id: ${context.id}`
+  const id = referenceIdLabel(context)
 
   return resolved === undefined
     ? `Opened about a ${context.kind} that is no longer available (${id})`
     : `Opened about ${context.kind} «${resolved.name}» (${id})`
+}
+
+/** One line for the model per mention in the text: the token as it
+ *  stands there, what it names, and the id the way the jori tools take
+ *  it. A mention that no longer resolves says so, id and all. */
+export function consoleReferenceLine(
+  reference: MessageContext & { name: string | null }
+) {
+  const token = `+[${reference.kind}:${reference.id}]`
+  const id = referenceIdLabel(reference)
+
+  return reference.name === null
+    ? `${token} mentions a ${reference.kind} that is no longer available (${id})`
+    : `${token} mentions ${reference.kind} «${reference.name}» (${id})`
+}
+
+function referenceIdLabel(target: MessageContext) {
+  const noun = target.kind === "chat" ? "conversation" : target.kind
+
+  return `${noun}Id: ${target.id}`
 }

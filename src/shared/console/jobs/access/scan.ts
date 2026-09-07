@@ -1,40 +1,40 @@
+import {
+  type Mention,
+  type MentionCatalog,
+  type MentionEntry,
+  mentionSigils,
+  type NamedMentionKind,
+  readMentions,
+  sortMentionTokens,
+} from "@/shared/console/mentions/scan"
 import { jobSurfaceIntegrations } from "./catalog"
 
-// Mentions are explicit, sigil-prefixed tokens — `@Gmail`, `/meeting-prep`,
-// `#send_message`. Prose is never scanned for bare names, so an email like
-// person@gmail.com or the word "linear" can never become a mention.
+// A job's instructions mention integrations, skills, and tools by name —
+// `@Gmail`, `/meeting-prep`, `#send_message` — through the shared mention
+// scan, with the resource sigil left out: a job names what it may use,
+// not what it is about.
 
-const jobMentionKinds = ["integration", "skill", "tool"] as const
+export const jobMentionKinds = ["integration", "skill", "tool"] as const
 export type JobMentionKind = (typeof jobMentionKinds)[number]
 
 export const jobMentionSigils = {
-  integration: "@",
-  skill: "/",
-  tool: "#",
+  integration: mentionSigils.integration,
+  skill: mentionSigils.skill,
+  tool: mentionSigils.tool,
 } as const satisfies Record<JobMentionKind, string>
 
-type JobMentionEntry = {
-  id: string
-  /** Lowercase spellings accepted after the sigil, longest first. */
-  tokens: readonly string[]
-}
-
 export type JobMentionCatalog = Record<
-  JobMentionKind,
-  readonly JobMentionEntry[]
->
+  NamedMentionKind,
+  readonly MentionEntry[]
+> &
+  MentionCatalog
 
-export type JobMention = {
-  end: number
-  id: string
-  kind: JobMentionKind
-  start: number
-}
+export type JobMention = Mention & { kind: JobMentionKind }
 
-const integrationEntries: JobMentionEntry[] = jobSurfaceIntegrations.map(
+const integrationEntries: MentionEntry[] = jobSurfaceIntegrations.map(
   (item) => ({
     id: item.integration,
-    tokens: sortTokens([item.label.toLowerCase(), ...item.aliases]),
+    tokens: sortMentionTokens([item.label.toLowerCase(), ...item.aliases]),
   })
 )
 
@@ -62,87 +62,13 @@ export function readJobMentions(
   text: string,
   catalog: JobMentionCatalog
 ): JobMention[] {
-  const mentions: JobMention[] = []
-
-  for (let index = 0; index < text.length; index += 1) {
-    const kind = sigilKind(text[index])
-
-    if (kind === null || !canStartMention(kind, text, index)) {
-      continue
-    }
-
-    const mention = matchMention(text, index, kind, catalog[kind])
-
-    if (mention !== null) {
-      mentions.push(mention)
-      index = mention.end - 1
-    }
-  }
-
-  return mentions
+  return readMentions(text, catalog).filter(isJobMention)
 }
 
-export function isMentionNameCharacter(character: string | undefined) {
-  return character !== undefined && /[a-z0-9_-]/i.test(character)
+export function isJobMentionKind(kind: string): kind is JobMentionKind {
+  return jobMentionKinds.some((candidate) => candidate === kind)
 }
 
-export function sigilKind(
-  character: string | undefined
-): JobMentionKind | null {
-  for (const kind of jobMentionKinds) {
-    if (jobMentionSigils[kind] === character) {
-      return kind
-    }
-  }
-
-  return null
-}
-
-/** Mentions start at a text boundary. Requiring whitespace (or the start of
- * text) keeps quoted examples, emails, URLs, paths, and headings inert. */
-export function canStartMention(
-  _kind: JobMentionKind,
-  text: string,
-  sigilIndex: number
-) {
-  const previous = text[sigilIndex - 1]
-
-  return previous === undefined || /\s/.test(previous)
-}
-
-function matchMention(
-  text: string,
-  sigilIndex: number,
-  kind: JobMentionKind,
-  entries: readonly JobMentionEntry[]
-): JobMention | null {
-  const tokenStart = sigilIndex + 1
-
-  for (const entry of entries) {
-    for (const token of entry.tokens) {
-      const tokenEnd = tokenStart + token.length
-      const candidate = text.slice(tokenStart, tokenEnd).toLowerCase()
-
-      if (candidate === token && isMentionEnd(text[tokenEnd])) {
-        return {
-          end: tokenEnd,
-          id: entry.id,
-          kind,
-          start: sigilIndex,
-        }
-      }
-    }
-  }
-
-  return null
-}
-
-function isMentionEnd(character: string | undefined) {
-  return character === undefined || !/[a-z0-9_]/i.test(character)
-}
-
-function sortTokens(tokens: readonly string[]) {
-  return [...new Set(tokens)].sort(
-    (left, right) => right.length - left.length || left.localeCompare(right)
-  )
+function isJobMention(mention: Mention): mention is JobMention {
+  return isJobMentionKind(mention.kind)
 }

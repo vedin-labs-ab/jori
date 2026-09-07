@@ -3,6 +3,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
+import { typeInto } from "../../../../../test/editor"
 import { renewalsConversationId } from "../../fixtures/chat"
 
 vi.mock("@tanstack/react-router", async () => ({
@@ -24,7 +25,7 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
 
   const field = screen.getByRole("textbox", { name: "Message" })
 
-  fireEvent.change(field, { target: { value: "Chase the unpaid renewals" } })
+  typeInto(field, "Chase the unpaid renewals")
   fireEvent.keyDown(field, { key: "Enter" })
 
   // The console moves to the new conversation, named in the header, where
@@ -79,7 +80,7 @@ test("stopping the run leaves a quiet notice under the ask", async () => {
 
   const field = await screen.findByRole("textbox", { name: "Message" })
 
-  fireEvent.change(field, { target: { value: "Chase the unpaid renewals" } })
+  typeInto(field, "Chase the unpaid renewals")
   fireEvent.keyDown(field, { key: "Enter" })
   fireEvent.click(await screen.findByRole("button", { name: "Stop" }))
 
@@ -95,7 +96,9 @@ test("opens the seeded conversation with its table and next steps", async () => 
     await screen.findByRole("columnheader", { name: "Customer" })
   ).toBeDefined()
   expect(
-    screen.getByRole("button", { name: /Customer renewals/ })
+    screen
+      .getAllByRole("button", { name: /Customer renewals/ })
+      .at(-1) as HTMLElement
   ).toBeDefined()
   expect(
     screen.getByRole("button", { name: "Remind Harbor House" })
@@ -119,7 +122,7 @@ test("the sidebar leads with New chat and lists the conversations under Activity
   // A sent message opens a conversation, which joins the list at once.
   const field = await screen.findByRole("textbox", { name: "Message" })
 
-  fireEvent.change(field, { target: { value: "Summarize last week" } })
+  typeInto(field, "Summarize last week")
   fireEvent.keyDown(field, { key: "Enter" })
 
   expect(await screen.findByText("Working")).toBeDefined()

@@ -165,6 +165,7 @@ type ChatAction =
       runId: string
       text: string
       context?: MessageContext
+      references?: MessageContext[]
       answer?: ChoicesAnswer
       reply: DemoReply
     }

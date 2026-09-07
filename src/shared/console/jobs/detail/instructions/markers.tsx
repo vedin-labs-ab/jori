@@ -2,6 +2,10 @@ import { type JSONContent } from "@tiptap/core"
 import { BookOpen, Wrench } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import {
+  MentionChip,
+  mentionChipClassName,
+} from "@/shared/console/mentions/chip"
 import { ProviderLogo } from "@/shared/logo/provider"
 import {
   getJobSurfaceAccess,
@@ -23,8 +27,7 @@ import {
 // The editor's pills with nothing to press: the same construction and
 // tones, so a brief reads the same on the page as in the editor.
 
-const markerClassName =
-  "mx-0.5 inline-flex h-5 items-center overflow-hidden rounded-sm border align-middle text-[0.625rem]/none"
+const markerClassName = mentionChipClassName
 
 /** An integration mention: its mark and name, then its access and how
  *  many of its tools the job may call. */
@@ -80,7 +83,7 @@ export function SurfaceMarker({
   )
 }
 
-/** A skill or tool mention: its kind's icon and its name. */
+/** A skill or tool mention: the shared chip with nothing to press. */
 export function ReferenceMarker({ node }: { node: JSONContent }) {
   const kind = parseJobReferenceKind(node.attrs?.kind)
   const id = node.attrs?.id
@@ -93,15 +96,12 @@ export function ReferenceMarker({ node }: { node: JSONContent }) {
   const Icon = kind === "skill" ? BookOpen : Wrench
 
   return (
-    <span
-      className={cn(markerClassName, tone.surface)}
+    <MentionChip
       data-job-reference={kind}
-    >
-      <MarkerName
-        icon={<Icon aria-hidden="true" className={cn("size-3", tone.icon)} />}
-        label={id}
-      />
-    </span>
+      icon={<Icon aria-hidden="true" className={cn("size-3", tone.icon)} />}
+      kind={kind}
+      label={id}
+    />
   )
 }
 

@@ -1,4 +1,5 @@
 import { type JSONContent } from "@tiptap/core"
+import { mentionNodeContent } from "@/shared/console/mentions/suggest/insert"
 import {
   type JobMention,
   type JobMentionCatalog,
@@ -145,11 +146,7 @@ function mentionNode(
   context: HydrationContext
 ): JSONContent {
   if (mention.kind !== "integration") {
-    return {
-      type: jobReferenceNodeName,
-      attrs: { id: mention.id, kind: mention.kind },
-      marks,
-    }
+    return mentionNodeContent(mention, marks)
   }
 
   const integration = mention.id as JobSurfaceIntegration

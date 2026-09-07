@@ -8,7 +8,7 @@ import { type DemoState } from "../state/types"
 import { folderOf, folderTrail } from "./folders"
 
 /** A reply's target as the workspace resolves it: the material, job,
- *  folder, or run by that id, with where it is filed as the detail. */
+ *  folder, run, or chat by that id, with where it is filed as the detail. */
 export function resolveReference(
   state: DemoState,
   target: ReferenceTarget
@@ -16,6 +16,15 @@ export function resolveReference(
   const { id, kind } = target
 
   switch (kind) {
+    case "chat": {
+      const conversation = state.chat.conversations.find(
+        (candidate) => candidate.id === id
+      )
+
+      return conversation === undefined
+        ? undefined
+        : { kind, id, name: conversation.title }
+    }
     case "folder": {
       const folder = folderOf(state, id)
 
