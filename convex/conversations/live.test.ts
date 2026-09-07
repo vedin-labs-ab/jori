@@ -7,7 +7,7 @@ import {
   person,
   rows,
 } from "../../test/convex/conversations"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { writeRunDraft } from "../runs/execution/drafts/data"
 import { sendConsoleMessage } from "./console"
 import { readLiveState } from "./live"
@@ -15,13 +15,6 @@ import { readLiveState } from "./live"
 // Starting a run hands it to the workflow component, which needs a real
 // backend; these tests are about what the thread reads back.
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
-
-const emptyContext = {
-  model: joriModel,
-  turn: null,
-  usedTokens: 0,
-  windowTokens: modelContextFallback.contextLength,
-}
 
 test("reports the session's run and the reply it is drafting", async () => {
   const { database, ctx } = consoleContext()
@@ -38,7 +31,7 @@ test("reports the session's run and the reply it is drafting", async () => {
   expect(await readLiveState(ctx, live)).toEqual({
     run: { id: run._id, status: "queued" },
     draft: null,
-    context: emptyContext,
+    context: emptyContext(run._id),
   })
 
   const draft = { reasoning: "Reading the notes.", text: "On it" }
@@ -48,7 +41,7 @@ test("reports the session's run and the reply it is drafting", async () => {
   expect(await readLiveState(ctx, live)).toEqual({
     run: { id: run._id, status: "queued" },
     draft,
-    context: emptyContext,
+    context: emptyContext(run._id),
   })
 
   // A run that did not finish says how it ended, so the thread can.
@@ -94,7 +87,9 @@ test("the thread's context use reads off its latest run, even once the session l
   })
 
   const expected = {
+    condensed: false,
     model: joriModel,
+    runId: run._id,
     turn: { cached: 40_000, input: 61_000, output: 900, reasoning: 300 },
     usedTokens: 61_000,
     windowTokens: 200_000,
@@ -113,6 +108,18 @@ test("the thread's context use reads off its latest run, even once the session l
     draft: null,
     context: expected,
   })
+
+  // A run that condensed its transcript says so; a clearing that found
+  // nothing old enough to clear does not.
+  await database.patch(run._id, { compaction: { clearedAtTurn: 6 } })
+
+  expect((await readLiveState(ctx, live)).context?.condensed).toBe(false)
+
+  await database.patch(run._id, {
+    compaction: { clearedAtTurn: 6, clearedBefore: 8 },
+  })
+
+  expect((await readLiveState(ctx, live)).context?.condensed).toBe(true)
 })
 
 test("a thread with no run yet has no context to show", async () => {
@@ -130,3 +137,14 @@ test("a thread with no run yet has no context to show", async () => {
     await readLiveState(ctx, await conversationOf(database, { conversationId }))
   ).toEqual({ run: null, draft: null, context: null })
 })
+
+function emptyContext(runId: Id<"runs">) {
+  return {
+    condensed: false,
+    model: joriModel,
+    runId,
+    turn: null,
+    usedTokens: 0,
+    windowTokens: modelContextFallback.contextLength,
+  }
+}

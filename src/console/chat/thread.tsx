@@ -125,6 +125,7 @@ function ConversationThread({
           live={live.run}
           onSend={(text) => void send({ conversationId, text })}
           onStop={stop}
+          usage={live.context}
         />
       }
       resolve={resolveReference}
@@ -195,6 +196,7 @@ function ConversationTurns({
         ) : null
       }
       resolveReference={resolveReference}
+      usage={live.context}
     />
   )
 }

@@ -6,9 +6,12 @@ import { findSession } from "../sessions/data"
 import { type QueryLikeCtx } from "../shared/context"
 
 /** How much of the model's window the thread's latest run is using, with
- *  the last turn's breakdown for the indicator's popover. */
+ *  the last turn's breakdown for the indicator's popover, and whether the
+ *  run condensed earlier context to keep going. */
 export type LiveContext = {
+  condensed: boolean
   model: string
+  runId: Id<"runs">
   turn: {
     cached: number
     input: number
@@ -56,9 +59,14 @@ async function readLiveContext(
 ): Promise<LiveContext> {
   const window = await modelWindow(ctx, joriModel)
   const turn = run.turnTokens
+  const compaction = run.compaction
 
   return {
+    condensed:
+      compaction?.clearedBefore !== undefined ||
+      compaction?.summary !== undefined,
     model: joriModel,
+    runId: run._id,
     turn:
       turn === undefined
         ? null

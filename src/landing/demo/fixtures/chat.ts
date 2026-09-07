@@ -1,5 +1,7 @@
+import { joriModel } from "@contracts/billing"
 import { type ReplyPart } from "@contracts/replies/parts"
 import {
+  type ChatContextUsage,
   type ChatConversation,
   type ChatMessage,
 } from "@/shared/console/chat/types"
@@ -22,6 +24,17 @@ export type DemoReply = {
 }
 
 export const renewalsConversationId = demoId("conversations", "renewals")
+
+/** How much of the model's window the conversation's run is using, as the
+ *  composer shows it: a few turns in, most of it still free. */
+export const chatContext: ChatContextUsage = {
+  condensed: false,
+  model: joriModel,
+  runId: demoId("runs", "renewals"),
+  turn: { cached: 41_200, input: 58_400, output: 640, reasoning: 210 },
+  usedTokens: 58_400,
+  windowTokens: 400_000,
+}
 
 /** What the home page offers to ask first. */
 export const chatSuggestions = [

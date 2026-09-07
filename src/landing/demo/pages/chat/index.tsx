@@ -19,7 +19,7 @@ import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
 import { liveActivity, resolveReference } from "../../derive/chat"
-import { chatSuggestions } from "../../fixtures/chat"
+import { chatContext, chatSuggestions } from "../../fixtures/chat"
 import { liveDraft } from "../../state/chat"
 import { type DemoLiveReply } from "../../state/types"
 import { useDemoWorkspace } from "../../workspace"
@@ -128,6 +128,7 @@ function Conversation({ conversationId }: { conversationId: string }) {
         onOpenReference={openTarget}
         progress={<LiveProgress live={live} now={now} />}
         resolveReference={resolve}
+        usage={chatContext}
       />
     </ChatPane>
   )
@@ -150,6 +151,7 @@ function DemoComposer({
       live={run}
       onSend={(text) => actions.sendChatMessage(text, conversationId)}
       onStop={actions.stopChatRun}
+      usage={chatContext}
     />
   )
 }
