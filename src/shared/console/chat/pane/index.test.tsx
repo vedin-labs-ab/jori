@@ -7,6 +7,7 @@ import {
   within,
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ChatReference, type ReferenceTarget } from "../types"
 import { ChatPane, type ChatPaneProps } from "."
 import { targetKey } from "./routes"
@@ -37,6 +38,8 @@ afterEach(cleanup)
 function renderPane(overrides: Partial<ChatPaneProps> = {}) {
   const handlers = {
     onActivate: vi.fn(),
+    autoOpens: true,
+    onAutoOpens: vi.fn(),
     onClose: vi.fn(),
     onCloseAll: vi.fn(),
     onCloseBeside: vi.fn(),
@@ -45,21 +48,23 @@ function renderPane(overrides: Partial<ChatPaneProps> = {}) {
   }
 
   render(
-    <ChatPane
-      active={table}
-      body={(target) => <p>Body of {target.id}</p>}
-      composer={<p>The composer</p>}
-      open
-      resolve={(target) => references[targetKey(target)]}
-      tabs={[
-        { target: table, pinned: true },
-        { target: job, pinned: false },
-      ]}
-      {...handlers}
-      {...overrides}
-    >
-      <p>The chat</p>
-    </ChatPane>
+    <TooltipProvider>
+      <ChatPane
+        active={table}
+        body={(target) => <p>Body of {target.id}</p>}
+        composer={<p>The composer</p>}
+        open
+        resolve={(target) => references[targetKey(target)]}
+        tabs={[
+          { target: table, pinned: true },
+          { target: job, pinned: false },
+        ]}
+        {...handlers}
+        {...overrides}
+      >
+        <p>The chat</p>
+      </ChatPane>
+    </TooltipProvider>
   )
 
   return handlers
@@ -311,4 +316,15 @@ test("below md the pane is a sheet over the chat, and Escape puts it away", () =
   fireEvent.keyDown(sheet, { key: "Escape" })
 
   expect(onOpenChange).toHaveBeenCalledWith(false)
+})
+
+test("the tab menu carries the switch for opening new resources on their own", () => {
+  const handlers = renderPane()
+  const item = openTabMenu("Renewals watch").getByRole("menuitemcheckbox", {
+    name: "Open new resources automatically",
+  })
+
+  expect(item.getAttribute("aria-checked")).toBe("true")
+  fireEvent.click(item)
+  expect(handlers.onAutoOpens).toHaveBeenCalledWith(false)
 })

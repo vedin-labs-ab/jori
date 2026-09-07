@@ -24,8 +24,12 @@ export type PaneProps = {
   onClose: (target: ReferenceTarget) => void
   onCloseAll: () => void
   onCloseBeside: (target: ReferenceTarget, side: PaneSide) => void
+  /** Whether a reply's first resource opens the pane on its own; the
+   *  one-time hint sets it, and the tab menu changes it later. */
+  autoOpens: boolean
   /** Set while the one-time hint should show; answers it. */
   onHint: ((preference: PanePreference) => void) | undefined
+  onAutoOpens: (on: boolean) => void
   onOpenChange: (open: boolean) => void
   onPin: (target: ReferenceTarget) => void
   open: boolean
@@ -63,6 +67,7 @@ export function usePaneTabs(): {
     ),
     pane: {
       active: state.active,
+      autoOpens: preference !== "manual",
       onActivate: useCallback(
         (target: ReferenceTarget) => dispatch({ type: "activate", target }),
         []
@@ -76,6 +81,10 @@ export function usePaneTabs(): {
         (target: ReferenceTarget, side: PaneSide) =>
           dispatch({ type: "closeBeside", target, side }),
         []
+      ),
+      onAutoOpens: useCallback(
+        (on: boolean) => choose(on ? "keep" : "manual"),
+        [choose]
       ),
       onHint: state.autoOpened && preference === undefined ? choose : undefined,
       onOpenChange: useCallback(
