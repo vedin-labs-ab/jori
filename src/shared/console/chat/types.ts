@@ -96,3 +96,21 @@ export function endedWithoutReply(
     (message) => message.role === "jori" && message.createdAt > endedAt
   )
 }
+
+/** How much of the model's window the thread's latest run is using, the
+ *  last turn's breakdown, and whether the run condensed earlier context to
+ *  keep going. The composer shows the use as a ring; the thread notes the
+ *  condensing. */
+export type ChatContextUsage = {
+  condensed: boolean
+  model: string
+  runId: string
+  turn: {
+    cached: number
+    input: number
+    output: number
+    reasoning: number
+  } | null
+  usedTokens: number
+  windowTokens: number
+}

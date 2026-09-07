@@ -7,9 +7,15 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
+import { ContextIndicator } from "../context"
 import { referencePresentation } from "../presentation"
 import { chatColumnClassName } from "../thread"
-import { type ChatReference, type ChatRun, isLiveRun } from "../types"
+import {
+  type ChatContextUsage,
+  type ChatReference,
+  type ChatRun,
+  isLiveRun,
+} from "../types"
 
 /** Where the person writes. Enter sends and Shift+Enter breaks the line;
  *  while a run is live the send control is the stop control instead.
@@ -23,6 +29,7 @@ export function ChatComposer({
   onSend,
   onStop,
   reason,
+  usage,
 }: {
   autoFocus?: boolean
   /** The resource the chat is about, shown as a chip the person can drop. */
@@ -34,6 +41,9 @@ export function ChatComposer({
   onStop: () => void
   /** Why the composer is disabled, shown when it is. */
   reason?: string
+  /** How much of the model's window the thread's latest run is using,
+   *  shown as a ring left of the send control; nothing before a run. */
+  usage?: ChatContextUsage | null
 }) {
   const reasonId = useId()
   const isLive = isLiveRun(live)
@@ -77,26 +87,31 @@ export function ChatComposer({
           >
             {disabled ? reason : null}
           </span>
-          {isLive ? (
-            <InputGroupButton
-              aria-label="Stop run"
-              onClick={onStop}
-              size="icon-sm"
-              variant="default"
-            >
-              <Square className="fill-current" />
-            </InputGroupButton>
-          ) : (
-            <InputGroupButton
-              aria-label="Send message"
-              disabled={!canSend}
-              size="icon-sm"
-              type="submit"
-              variant="default"
-            >
-              <ArrowUp />
-            </InputGroupButton>
-          )}
+          <span className="flex items-center gap-1">
+            {usage === undefined || usage === null ? null : (
+              <ContextIndicator usage={usage} />
+            )}
+            {isLive ? (
+              <InputGroupButton
+                aria-label="Stop run"
+                onClick={onStop}
+                size="icon-sm"
+                variant="default"
+              >
+                <Square className="fill-current" />
+              </InputGroupButton>
+            ) : (
+              <InputGroupButton
+                aria-label="Send message"
+                disabled={!canSend}
+                size="icon-sm"
+                type="submit"
+                variant="default"
+              >
+                <ArrowUp />
+              </InputGroupButton>
+            )}
+          </span>
         </InputGroupAddon>
       </InputGroup>
     </form>

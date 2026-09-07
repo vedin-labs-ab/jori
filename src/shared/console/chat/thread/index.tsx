@@ -14,6 +14,7 @@ import {
 import { ConsoleListLoading } from "../../list/loading"
 import { Markdown } from "../../markdown"
 import {
+  type ChatContextUsage,
   type ChatDraft,
   type ChatMessage,
   type ChatRun,
@@ -24,6 +25,7 @@ import {
 } from "../types"
 import { answeredParts } from "./answers"
 import { ChoiceChips } from "./choices"
+import { CondensedNotice } from "./condensed"
 import { ChatDraftTurn } from "./draft"
 import { JoriMessage, MessageActions, PersonMessage } from "./message"
 import { RunNotice } from "./notice"
@@ -60,6 +62,7 @@ export function ChatThread({
   onOpenReference,
   progress,
   resolveReference,
+  usage,
 }: {
   /** The turn so far, while one is streaming. */
   draft: ChatDraft | null
@@ -74,6 +77,8 @@ export function ChatThread({
   /** What the live run is doing: the working line, its log, its requests. */
   progress: ReactNode
   resolveReference: ResolveReference
+  /** The latest run's context use, for the note that it condensed. */
+  usage?: ChatContextUsage | null
 }) {
   const answered = useMemo(() => answeredParts(messages), [messages])
   const isLive = isLiveRun(live)
@@ -130,6 +135,11 @@ export function ChatThread({
                 )}
               </MessageScrollerItem>
             ))}
+            {usage?.condensed ? (
+              <MessageScrollerItem>
+                <CondensedNotice runId={usage.runId} />
+              </MessageScrollerItem>
+            ) : null}
             <ThreadTail
               draft={draft}
               live={live}

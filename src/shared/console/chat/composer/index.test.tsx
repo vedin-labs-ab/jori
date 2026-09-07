@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { ChatComposer } from "."
 
 afterEach(cleanup)
@@ -91,4 +92,42 @@ test("the context chip names the resource and can be dropped", () => {
   fireEvent.click(screen.getByRole("button", { name: "Remove Finance" }))
 
   expect(onClearContext).toHaveBeenCalledTimes(1)
+})
+
+test("the context ring sits by the send control once a run has measured the window", () => {
+  const usage = {
+    condensed: false,
+    model: "openai/gpt-x",
+    runId: "runs_1",
+    turn: { cached: 40_000, input: 61_000, output: 900, reasoning: 300 },
+    usedTokens: 61_000,
+    windowTokens: 200_000,
+  }
+  const { rerender } = render(
+    <TooltipProvider>
+      <ChatComposer
+        live={null}
+        onSend={vi.fn()}
+        onStop={vi.fn()}
+        usage={usage}
+      />
+    </TooltipProvider>
+  )
+
+  expect(
+    screen.getByRole("button", { name: "Context: 31%, 61K of 200K tokens" })
+  ).toBeDefined()
+
+  rerender(
+    <TooltipProvider>
+      <ChatComposer
+        live={null}
+        onSend={vi.fn()}
+        onStop={vi.fn()}
+        usage={null}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.queryByRole("button", { name: /Context:/ })).toBeNull()
 })
