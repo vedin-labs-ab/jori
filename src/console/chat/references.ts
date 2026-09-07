@@ -17,8 +17,15 @@ type ResolvedReference = FunctionReturnType<
 /** Every target the loaded messages point at, once each: the context a
  *  person's message was sent from, the resources its text mentions, and
  *  the references in Jori's replies. */
-export function referenceTargets(messages: ChatMessage[]) {
+export function referenceTargets(
+  messages: ChatMessage[],
+  extra: ReferenceTarget[] = none
+) {
   const targets = new Map<string, ReferenceTarget>()
+
+  for (const target of extra) {
+    targets.set(targetKey(target), target)
+  }
 
   for (const message of messages) {
     if (message.context !== undefined) {
@@ -39,16 +46,21 @@ export function referenceTargets(messages: ChatMessage[]) {
   return [...targets.values()]
 }
 
-/** Resolves the thread's references in one query; see `useReferenceTargets`. */
+/** Resolves the thread's references in one query, with any the host
+ *  names besides — the resources the composer mentions before they are
+ *  sent, say; see `useReferenceTargets`. */
 export function useReferences(
   organizationId: string,
-  messages: ChatMessage[]
+  messages: ChatMessage[],
+  extra: ReferenceTarget[] = none
 ): ResolveReference {
   return useReferenceTargets(
     organizationId,
-    useMemo(() => referenceTargets(messages), [messages])
+    useMemo(() => referenceTargets(messages, extra), [extra, messages])
   )
 }
+
+const none: ReferenceTarget[] = []
 
 /** Resolves the targets in one query. Targets already named stay named
  *  while a new one is looked up, and a target not yet answered shows as

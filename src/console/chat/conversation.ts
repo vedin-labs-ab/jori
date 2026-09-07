@@ -1,0 +1,97 @@
+import { useMutation } from "convex/react"
+import { type FunctionReturnType } from "convex/server"
+import { type GenericId } from "convex/values"
+import { useCallback, useState } from "react"
+import { type OpenTarget, usePaneTabs } from "@/shared/console/chat/pane/tabs"
+import { type ChatRun, type ReferenceTarget } from "@/shared/console/chat/types"
+import { showErrorToast } from "@/shared/console/error"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
+import { useDocumentTitle } from "@/shared/console/shell/title"
+import { api } from "../../../convex/_generated/api"
+import { useMentionSources } from "./mentions"
+import { useConversationMessages } from "./messages"
+import { useChooseModel } from "./models"
+import { useReferences } from "./references"
+import { useSendMessage } from "./send"
+
+export type LiveConversation = Extract<
+  FunctionReturnType<typeof api.conversations.console.live>,
+  { status: "ready" }
+>
+
+/** Everything a conversation's page binds: its messages, the ways to
+ *  send into it and to stop its run, what it may mention, its pane, and
+ *  the names of what it refers to. */
+export function useConversation(
+  organizationId: string,
+  conversationId: GenericId<"conversations">,
+  live: LiveConversation
+) {
+  const page = useConversationMessages(organizationId, conversationId)
+  const { autoOpen, openTarget, pane, releaseTarget } = usePaneTabs()
+  const mentioned = useMentioned(openTarget)
+
+  return {
+    autoOpen,
+    choose: useChooseModel(organizationId, conversationId),
+    mentioned,
+    mentions: useMentionSources(organizationId),
+    openTarget,
+    page,
+    pane,
+    releaseTarget,
+    resolveReference: useReferences(
+      organizationId,
+      page.messages,
+      mentioned.targets
+    ),
+    send: useSendMessage(organizationId),
+    stop: useStopRun(organizationId, live.run),
+  }
+}
+
+/** The resources the composer has mentioned, kept so the pane can name a
+ *  tab opened on one before any message carries it; `open` notes the
+ *  mention and opens it. */
+function useMentioned(openTarget: OpenTarget) {
+  const [targets, setTargets] = useState<ReferenceTarget[]>([])
+
+  return {
+    open: useCallback(
+      (target: ReferenceTarget) => {
+        setTargets((current) =>
+          current.some(
+            (candidate) =>
+              candidate.kind === target.kind && candidate.id === target.id
+          )
+            ? current
+            : [...current, target]
+        )
+        openTarget(target)
+      },
+      [openTarget]
+    ),
+    targets,
+  }
+}
+
+/** The page's title, in the tab and the breadcrumb. */
+export function useThreadChrome(title: string) {
+  useDocumentTitle(title === "" ? undefined : `${title} · Jori`)
+  useMaterialBreadcrumb(title)
+}
+
+/** Stops the live run the way the Activity page does; a failure says so. */
+function useStopRun(organizationId: string, run: ChatRun | null) {
+  const stop = useMutation(api.runs.control.stop)
+
+  return () => {
+    if (run === null) {
+      return
+    }
+
+    void stop({ organizationId, runId: run.id as GenericId<"runs"> }).catch(
+      (error: unknown) => showErrorToast(error, "Couldn't stop the run.")
+    )
+  }
+}
