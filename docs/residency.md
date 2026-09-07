@@ -192,12 +192,11 @@ Customers use the same Connect flow in either instance.
 [Linear manifests](https://linear.app/developers/oauth-app-manifests),
 [Notion webhooks](https://developers.notion.com/reference/webhooks).
 
-These registrations are configuration evidence, not completed connection
-tests. GitHub app authentication and regional webhook configuration are
-verified. Slack event subscriptions and public distribution, and Notion
-webhook subscriptions remain pending. Production ingress and live
-OAuth/event tests must verify that each connection works only through its
-matching instance. See [release verification](release.md) for current readiness.
+Registrations, signature checks and inert webhook probes do not establish a
+completed customer connection. Authenticated OAuth and event workflows must
+verify that each connection works only through its matching instance. Keep
+provider setup and deployment status in [release verification](release.md),
+including completed checks and the remaining launch gates.
 
 Google currently groups our regional OAuth clients in one Cloud project.
 Revoking a user's grant can invalidate that user's tokens for every client in
