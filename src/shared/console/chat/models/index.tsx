@@ -119,7 +119,9 @@ export function ModelPicker({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
+          {/* The level takes the row's free space so it sits against the
+              chevron, which otherwise shares that space with it. */}
+          <DropdownMenuSubTrigger className="[&>svg]:ml-0">
             Reasoning
             <span className="ml-auto text-muted-foreground">
               {effortLabels[selection.effort]}
