@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -10,7 +10,10 @@ vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../test/routing")),
 }))
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  window.localStorage.clear()
+})
 
 const chats = [
   { id: "conversations_renewals", title: "Renewals at risk", updatedAt: 2 },
@@ -76,4 +79,32 @@ test("without conversations there is no Chats group at all", () => {
   renderSidebar("/runs", [])
 
   expect(screen.queryByText("Chats")).toBeNull()
+})
+
+test("Chats and Resources close from their labels, and stay closed on the next visit", () => {
+  const { unmount } = renderSidebar("/chat")
+
+  fireEvent.click(screen.getByRole("button", { name: "Resources" }))
+
+  expect(screen.queryByRole("link", { name: "Jobs" })).toBeNull()
+  expect(screen.getByRole("link", { name: "Renewals at risk" })).toBeDefined()
+  expect(
+    screen
+      .getByRole("button", { name: "Resources" })
+      .getAttribute("aria-expanded")
+  ).toBe("false")
+
+  fireEvent.click(screen.getByRole("button", { name: "Chats" }))
+
+  expect(screen.queryByRole("link", { name: "Renewals at risk" })).toBeNull()
+
+  unmount()
+  renderSidebar("/chat")
+
+  expect(screen.queryByRole("link", { name: "Jobs" })).toBeNull()
+  expect(screen.queryByRole("link", { name: "Renewals at risk" })).toBeNull()
+
+  fireEvent.click(screen.getByRole("button", { name: "Resources" }))
+
+  expect(screen.getByRole("link", { name: "Jobs" })).toBeDefined()
 })

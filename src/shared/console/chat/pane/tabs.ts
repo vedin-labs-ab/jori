@@ -1,4 +1,5 @@
 import { useCallback, useReducer, useState } from "react"
+import { readStorage, writeStorage } from "@/shared/storage"
 import { type ReferenceTarget } from "../types"
 import {
   initialPaneState,
@@ -108,23 +109,12 @@ export function usePaneTabs(): {
   }
 }
 
-// The preference lives in the browser; storage can be missing or refuse,
-// and either way the pane behaves as if nothing was chosen.
-
 function readPreference(): PanePreference | undefined {
-  try {
-    const value = window.localStorage.getItem(storageKey)
+  const value = readStorage(storageKey)
 
-    return value === "keep" || value === "manual" ? value : undefined
-  } catch {
-    return undefined
-  }
+  return value === "keep" || value === "manual" ? value : undefined
 }
 
 function writePreference(preference: PanePreference) {
-  try {
-    window.localStorage.setItem(storageKey, preference)
-  } catch {
-    // Nothing to keep it in; the choice holds for this page.
-  }
+  writeStorage(storageKey, preference)
 }
