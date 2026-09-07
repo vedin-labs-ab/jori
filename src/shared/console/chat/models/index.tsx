@@ -9,6 +9,7 @@ import {
   effortLabels,
   type ModelSelection,
   type ModelTier,
+  type ReasoningEffort,
   reasoningEfforts,
   selectionTier,
   tierLabels,
@@ -38,7 +39,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { InputGroupButton } from "@/components/ui/input-group"
-import { Slider } from "@/components/ui/slider"
 import { VendorLogo } from "@/shared/logo/vendor"
 
 /** A battery low, half, or full: how much the tier spends on a turn. */
@@ -53,8 +53,8 @@ const vendorOrder: ModelVendor[] = ["openai", "anthropic"]
 /**
  * What the chat runs on, chosen in the composer: the three recommended
  * tiers first, each a model at an effort, then every model of each vendor
- * under its own submenu, where the chosen model carries the slider that
- * sets its reasoning effort. The trigger reads the model and its effort
+ * under its own submenu, and the reasoning effort under its own, so any
+ * model runs at any effort. The trigger reads the model and its effort
  * behind the tier's battery, or the vendor's mark when the choice is none
  * of the three. Changing it any time is fine; the next run takes it.
  */
@@ -108,7 +108,7 @@ export function ModelPicker({
                 <VendorLogo vendor={vendor} />
                 {modelVendors[vendor]}
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-64">
+              <DropdownMenuSubContent className="w-56">
                 <VendorModels
                   onSelect={onSelect}
                   selection={selection}
@@ -118,6 +118,29 @@ export function ModelPicker({
             </DropdownMenuSub>
           ))}
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            Reasoning
+            <span className="ml-auto text-muted-foreground">
+              {effortLabels[selection.effort]}
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-40">
+            <DropdownMenuRadioGroup
+              onValueChange={(effort) =>
+                onSelect(withEffort(selection, effort as ReasoningEffort))
+              }
+              value={selection.effort}
+            >
+              {reasoningEfforts.map((effort) => (
+                <DropdownMenuRadioItem key={effort} value={effort}>
+                  {effortLabels[effort]}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -141,8 +164,7 @@ function TierItem({ tier }: { tier: ModelTier }) {
 }
 
 /** A vendor's models, the chosen one marked with the tier it makes, if
- *  any, and followed by the slider for its effort. Picking a model keeps
- *  the effort in force. */
+ *  any. Picking a model keeps the effort in force. */
 function VendorModels({
   onSelect,
   selection,
@@ -161,66 +183,16 @@ function VendorModels({
       }
       value={selection.model}
     >
-      {vendorModels(vendor).map((model) => {
-        const chosen = model.slug === selection.model
-
-        return (
-          <div key={model.slug}>
-            <DropdownMenuRadioItem value={model.slug}>
-              {model.label}
-              {chosen && tier !== null ? (
-                <Badge className="ml-auto" variant="secondary">
-                  {tierLabels[tier]}
-                </Badge>
-              ) : null}
-            </DropdownMenuRadioItem>
-            {chosen ? (
-              <EffortSlider onSelect={onSelect} selection={selection} />
-            ) : null}
-          </div>
-        )
-      })}
+      {vendorModels(vendor).map((model) => (
+        <DropdownMenuRadioItem key={model.slug} value={model.slug}>
+          {model.label}
+          {model.slug === selection.model && tier !== null ? (
+            <Badge className="ml-auto" variant="secondary">
+              {tierLabels[tier]}
+            </Badge>
+          ) : null}
+        </DropdownMenuRadioItem>
+      ))}
     </DropdownMenuRadioGroup>
-  )
-}
-
-/** The effort, lowest to highest, under the chosen model. The menu owns
- *  the arrow keys around it, so the slider keeps its own. */
-function EffortSlider({
-  onSelect,
-  selection,
-}: {
-  onSelect: (selection: ModelSelection) => void
-  selection: ModelSelection
-}) {
-  const index = reasoningEfforts.indexOf(selection.effort)
-
-  return (
-    <fieldset
-      className="grid gap-1.5 px-2 pt-1 pb-2"
-      onKeyDown={(event) => event.stopPropagation()}
-    >
-      <legend className="sr-only">Reasoning effort</legend>
-      <Slider
-        max={reasoningEfforts.length - 1}
-        min={0}
-        onValueChange={([next]) => {
-          const effort = reasoningEfforts[next ?? index]
-
-          if (effort !== undefined && effort !== selection.effort) {
-            onSelect(withEffort(selection, effort))
-          }
-        }}
-        step={1}
-        value={[index]}
-      />
-      <div className="flex justify-between text-muted-foreground text-xs">
-        <span>{effortLabels[reasoningEfforts[0] ?? "low"]}</span>
-        <span className="text-foreground">
-          {effortLabels[selection.effort]}
-        </span>
-        <span>{effortLabels[reasoningEfforts.at(-1) ?? "max"]}</span>
-      </div>
-    </fieldset>
   )
 }
