@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { runModel } from "../model/selection"
 import { readOrganizationTimezone } from "../organization/profile"
 import {
   type UsageAttribution,
@@ -31,11 +32,12 @@ export async function recordUsageDebit(
   ctx: MutationCtx,
   args: {
     run: Doc<"runs">
+    model: string
     micros: number
     tokens: { input: number; output: number }
   }
 ) {
-  await accrue(ctx, args.run, {
+  await accrue(ctx, args.run, args.model, {
     runs: { ended: 0, failed: 0 },
     micros: args.micros,
     tokens: args.tokens,
@@ -48,7 +50,7 @@ export async function recordUsageEnded(
   ctx: MutationCtx,
   args: { run: Doc<"runs">; failed: boolean }
 ) {
-  await accrue(ctx, args.run, {
+  await accrue(ctx, args.run, runModel(args.run), {
     runs: { ended: 1, failed: args.failed ? 1 : 0 },
     micros: 0,
     tokens: { input: 0, output: 0 },
@@ -107,9 +109,14 @@ async function moveBucket(
 
 /** Adds one contribution to the day's bucket for the run's tuple, opening
  *  that bucket the first time the tuple is metered. */
-async function accrue(ctx: MutationCtx, run: Doc<"runs">, totals: UsageTotals) {
+async function accrue(
+  ctx: MutationCtx,
+  run: Doc<"runs">,
+  model: string,
+  totals: UsageTotals
+) {
   const now = Date.now()
-  const attribution = await resolveAttribution(ctx, run)
+  const attribution = await resolveAttribution(ctx, run, model)
   const identity = {
     organizationId: run.organizationId,
     date: usageDate(
@@ -154,7 +161,8 @@ function findBucket(ctx: MutationCtx, identity: BucketIdentity) {
  *  label because the job row may already be gone. */
 async function resolveAttribution(
   ctx: MutationCtx,
-  run: Doc<"runs">
+  run: Doc<"runs">,
+  model: string
 ): Promise<UsageAttribution> {
   return {
     folderId: run.folderId,
@@ -162,6 +170,7 @@ async function resolveAttribution(
     personId: run.createdBy,
     surface: run.snapshot.source.surface ?? "jori",
     trigger: triggersByCause[run.cause.type],
+    model,
   }
 }
 

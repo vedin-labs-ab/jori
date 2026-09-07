@@ -19,6 +19,7 @@ import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useConversationMessages } from "./messages"
+import { useChooseModel } from "./models"
 import { ConversationPaneBody } from "./pane"
 import { ChatProgress } from "./progress"
 import { useReferences } from "./references"
@@ -104,6 +105,7 @@ function ConversationThread({
 }) {
   const page = useConversationMessages(organizationId, conversationId)
   const send = useSendMessage(organizationId)
+  const choose = useChooseModel(organizationId, conversationId)
   const stop = useStopRun(organizationId, live.run)
   const resolveReference = useReferences(organizationId, page.messages)
   const { autoOpen, openTarget, pane } = usePaneTabs()
@@ -122,8 +124,10 @@ function ConversationThread({
         <ChatComposer
           autoFocus
           live={live.run}
+          onSelect={choose}
           onSend={(text) => void send({ conversationId, text })}
           onStop={stop}
+          selection={live.model}
           usage={live.context}
         />
       }

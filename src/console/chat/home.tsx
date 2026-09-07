@@ -1,6 +1,10 @@
+import {
+  defaultSelection,
+  type ModelSelection,
+} from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
 import { useNavigate } from "@tanstack/react-router"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatHome } from "@/shared/console/chat/home"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
@@ -25,7 +29,7 @@ const suggestions = [
 /** Where a chat starts: the first message opens a conversation and the
  *  console moves to it. Opened from a resource's page, the chat carries
  *  that resource as its context, shown as the composer's chip and sent
- *  with the first message. */
+ *  with the first message, as is the model picked for it. */
 export function ChatHomePage({ context }: { context?: MessageContext }) {
   return (
     <ConsolePage>
@@ -48,11 +52,13 @@ function ChatHomeContent({
   const recent = useRecentConversations(organizationId, recentCount)
   const now = useNow(60_000)
   const reference = useChatContext(organizationId, context)
+  const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
   // A blocked budget still opens the conversation with the message in it,
   // so the console moves there either way; only a failure stays.
   const start = (text: string) =>
     void send({
       text,
+      model: selection,
       ...(reference.context === undefined
         ? {}
         : { context: reference.context }),
@@ -70,8 +76,10 @@ function ChatHomeContent({
           context={reference.reference}
           live={null}
           onClearContext={reference.clear}
+          onSelect={setSelection}
           onSend={start}
           onStop={() => {}}
+          selection={selection}
         />
       }
       now={now}

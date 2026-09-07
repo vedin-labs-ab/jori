@@ -1,4 +1,5 @@
 import { vi } from "vitest"
+import { defaultSelection } from "../contracts/models/selection"
 import { type RuntimeContext } from "../contracts/runtime/context"
 import { type RuntimeId } from "../contracts/runtime/ids"
 import { type RuntimePrompt } from "../contracts/runtime/prompt"
@@ -143,6 +144,7 @@ export function createQueuedModel(responses: QueuedModelResponse[]) {
   const queue = responses.map(queuedModelResponse)
 
   return {
+    model: defaultSelection.model,
     complete: vi.fn<ModelRuntime["complete"]>(async () => {
       const response = queue.shift()
 

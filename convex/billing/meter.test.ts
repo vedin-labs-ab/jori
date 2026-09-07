@@ -1,6 +1,8 @@
 import { beforeEach, expect, test, vi } from "vitest"
+import { modelRate } from "../../contracts/models/catalog"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { liveModelRate } from "../model/rate"
 import { recordUsageDebit } from "../usage/record"
 import { ensureAccount, holdAutoTopUp } from "./account"
 import { debitRun } from "./ledger"
@@ -13,6 +15,10 @@ vi.mock("./account", async (importOriginal) => ({
 }))
 vi.mock("./ledger", () => ({ debitRun: vi.fn() }))
 vi.mock("../usage/record", () => ({ recordUsageDebit: vi.fn() }))
+vi.mock("../model/rate", () => ({ liveModelRate: vi.fn() }))
+
+// $2/M input and $10/M output, as the catalog lists the default model.
+const model = "openai/gpt-5.6-sol"
 
 const configuredAccount = {
   _id: "account-1",
@@ -33,6 +39,7 @@ const configuredAccount = {
 
 function meterOnce(account: Doc<"accounts">, schedule: () => void) {
   vi.mocked(ensureAccount).mockResolvedValue(account)
+  vi.mocked(liveModelRate).mockResolvedValue(modelRate(model))
 
   return meterModelUsage(
     {
@@ -40,6 +47,7 @@ function meterOnce(account: Doc<"accounts">, schedule: () => void) {
       scheduler: { runAfter: schedule },
     } as unknown as MutationCtx,
     {
+      model,
       run: {
         _id: "run-1",
         organizationId: account.organizationId,
@@ -54,6 +62,40 @@ beforeEach(() => {
   vi.mocked(holdAutoTopUp).mockReset()
   vi.mocked(debitRun).mockReset()
   vi.mocked(recordUsageDebit).mockReset()
+  vi.mocked(liveModelRate).mockReset()
+})
+
+test("the turn is priced at the live rate of the model that answered", async () => {
+  vi.mocked(ensureAccount).mockResolvedValue(configuredAccount)
+  vi.mocked(liveModelRate).mockResolvedValue({
+    inputMicrosPerToken: 0.2,
+    outputMicrosPerToken: 1.2,
+  })
+
+  await meterModelUsage(
+    {
+      db: { get: vi.fn(async () => configuredAccount) },
+      scheduler: { runAfter: vi.fn() },
+    } as unknown as MutationCtx,
+    {
+      model: "openai/gpt-5.6-luna",
+      run: { _id: "run-1", organizationId: "organization-1" } as Doc<"runs">,
+      tokens: { input: 1_000, output: 200 },
+    }
+  )
+
+  expect(liveModelRate).toHaveBeenCalledWith(
+    expect.anything(),
+    "openai/gpt-5.6-luna"
+  )
+  expect(debitRun).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({ micros: 440 })
+  )
+  expect(recordUsageDebit).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({ model: "openai/gpt-5.6-luna", micros: 440 })
+  )
 })
 
 test("a trial cannot schedule an auto top-up", async () => {
@@ -86,7 +128,7 @@ test("the debit carries the tokens the amount was made of", async () => {
   expect(debitRun).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
-      micros: 11_000,
+      micros: 4_000,
       tokens: { input: 1_000, output: 200 },
     })
   )
@@ -98,7 +140,7 @@ test("the rollup is credited exactly what the ledger was debited", async () => {
   expect(recordUsageDebit).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
-      micros: 11_000,
+      micros: 4_000,
       tokens: { input: 1_000, output: 200 },
     })
   )

@@ -1,7 +1,7 @@
 import { v } from "convex/values"
-import { joriModel } from "../../../contracts/billing"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { internalQuery } from "../../_generated/server"
+import { runModel } from "../../model/selection"
 import { type ModelWindow, modelWindow } from "../../model/window"
 import { type RunCompaction } from "../../runs/schema"
 
@@ -79,7 +79,7 @@ export const read = internalQuery({
       compaction: run.compaction,
       promptTokens: run.promptTokens,
       turn: args.turn,
-      window: await modelWindow(ctx, joriModel),
+      window: await modelWindow(ctx, runModel(run)),
     })
   },
 })

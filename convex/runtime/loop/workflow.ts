@@ -59,9 +59,19 @@ export const agent = workflow
     }
 
     for (let turn = 1; turn <= maxRunTurns; turn += 1) {
-      // The first turn's prompt is the smallest it will be; every later
-      // one is measured by the turn before it.
+      // The run's creation was gated on the budget; every later turn is
+      // gated again, then its prompt is measured by the turn before it,
+      // the first turn's being the smallest it will be.
       if (turn > 1) {
+        const budget = await step.runMutation(
+          internal.runtime.loop.budget.step,
+          { runId: args.runId, turn }
+        )
+
+        if (budget === "blocked") {
+          return "failed"
+        }
+
         await compactBeforeTurn(step, args.runId, turn)
       }
 

@@ -5,7 +5,9 @@ import {
   type ChatRequest,
   type ChatResult,
   type ChatStreamChunk,
+  type ProviderPreferences,
 } from "@openrouter/sdk/models"
+import { isRegion, type Region } from "../../contracts/region"
 import {
   readEnvironmentVariable,
   requireEnvironmentVariable,
@@ -55,6 +57,30 @@ export function requireOpenRouterConfig(): OpenRouterConfig {
       readEnvironmentVariable("OPENROUTER_HTTP_REFERER") ??
       readEnvironmentVariable("CONVEX_SITE_URL"),
   }
+}
+
+/**
+ * How OpenRouter routes Jori's requests, derived from the region this
+ * deployment serves. Providers that silently drop tool definitions cannot
+ * run the loop, so parameters are required of every provider. Region
+ * pinning plugs in here: once inference routes through the region's own
+ * endpoint (OpenRouter's business tier), the region decides the provider
+ * `order` and `only` lists, and nothing else in a request has to know.
+ */
+export function providerPreferences(): ProviderPreferences {
+  return { requireParameters: true, ...regionPreferences(deploymentRegion()) }
+}
+
+function regionPreferences(_region: Region | null): ProviderPreferences {
+  return {}
+}
+
+function deploymentRegion() {
+  const region =
+    readEnvironmentVariable("JORI_REGION") ??
+    readEnvironmentVariable("VITE_JORI_REGION")
+
+  return isRegion(region) ? region : null
 }
 
 function openRouterClient() {

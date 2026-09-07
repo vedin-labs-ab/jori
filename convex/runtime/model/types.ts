@@ -40,6 +40,9 @@ export type ModelDelta = ChatDelta
 export type ModelToolCallDelta = ChatToolCallDelta
 
 export type ModelRuntime = {
+  /** The model the runtime answers with, named on the completed trace so
+   *  the turn is priced from what ran. */
+  model: string
   complete(args: {
     messages: ModelMessage[]
     onDelta?: (delta: ModelDelta) => void

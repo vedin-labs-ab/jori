@@ -1,4 +1,7 @@
-import { joriModel } from "@contracts/billing"
+import {
+  defaultSelection,
+  type ModelSelection,
+} from "@contracts/models/selection"
 import { type ReplyPart } from "@contracts/replies/parts"
 import {
   type ChatContextUsage,
@@ -29,12 +32,15 @@ export const renewalsConversationId = demoId("conversations", "renewals")
  *  composer shows it: a few turns in, most of it still free. */
 export const chatContext: ChatContextUsage = {
   condensed: false,
-  model: joriModel,
+  model: defaultSelection.model,
   runId: demoId("runs", "renewals"),
   turn: { cached: 41_200, input: 58_400, output: 640, reasoning: 210 },
   usedTokens: 58_400,
   windowTokens: 400_000,
 }
+
+/** The selection the demo's chats start on. */
+export const chatSelection: ModelSelection = defaultSelection
 
 /** What the home page offers to ask first. */
 export const chatSuggestions = [

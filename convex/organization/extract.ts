@@ -1,4 +1,4 @@
-import { joriModel } from "../../contracts/billing"
+import { defaultSelection } from "../../contracts/models/selection"
 import { parseWebsiteAddress } from "../../contracts/website"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
@@ -29,7 +29,7 @@ export async function extractFacts(
   input: ExtractionInput
 ): Promise<OrganizationFacts> {
   const value = await requestStructured({
-    model: joriModel,
+    model: defaultSelection.model,
     schemaName: "organization_facts",
     schema: factsSchema,
     system: renderPromptTemplate(promptTemplates["organization/discovery"], {}),

@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { runModel } from "../../model/selection"
 import { usageDate, usageKey } from "../../usage/key"
 import { clearOrganization, type SeedContext, seedTimezone } from "../context"
 import { type SeededRun } from "./runs"
@@ -20,6 +21,7 @@ type Bucket = Pick<
   | "folderId"
   | "key"
   | "micros"
+  | "model"
   | "personId"
   | "runs"
   | "surface"
@@ -76,6 +78,7 @@ async function attribute(ctx: MutationCtx, run: Doc<"runs">) {
     personId: run.createdBy,
     surface: run.snapshot.source.surface ?? ("jori" as const),
     trigger: triggersByCause[run.cause.type],
+    model: runModel(run),
     failed: run.status === "failed",
   }
 }

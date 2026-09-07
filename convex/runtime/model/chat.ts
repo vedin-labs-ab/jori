@@ -5,9 +5,13 @@ import {
   type ChatResult,
   type ChatToolCall,
 } from "@openrouter/sdk/models"
-import { joriModel } from "../../../contracts/billing"
 import { decodeJsonObject, type JsonObject } from "../../../contracts/json"
-import { sendOpenRouterChat } from "../../model/openrouter"
+import { catalogModel } from "../../../contracts/models/catalog"
+import {
+  defaultSelection,
+  type ModelSelection,
+} from "../../../contracts/models/selection"
+import { providerPreferences, sendOpenRouterChat } from "../../model/openrouter"
 import { ingestReasoning, readsReasoning } from "./reasoning"
 import { readModelTokens } from "./tokens"
 import {
@@ -19,22 +23,33 @@ import {
   type ModelToolCall,
 } from "./types"
 
-// One effort for every turn: the provider's prompt cache does not carry
-// across an effort change, so a cheaper first turn cost a full re-read of
-// the prompt on the second.
-const reasoningEffort = "medium"
-
-const modelSettings: Pick<ChatRequest, "provider" | "reasoning"> = {
-  // Providers that silently drop tool definitions cannot run the loop.
-  provider: { requireParameters: true },
-  reasoning: { effort: reasoningEffort },
+/** The request's model settings: the selection's effort for every turn,
+ *  since the provider's prompt cache does not carry across an effort
+ *  change, and none for a model that does not reason. */
+function modelSettings(
+  selection: ModelSelection
+): Pick<ChatRequest, "provider" | "reasoning"> {
+  return {
+    provider: providerPreferences(),
+    ...(catalogModel(selection.model).reasoning
+      ? { reasoning: { effort: selection.effort } }
+      : {}),
+  }
 }
 
 export class OpenRouterModel implements ModelRuntime {
+  readonly model: string
+
   /** The session is the run: OpenRouter routes every call that shares it to
    *  the same provider, so the prompt prefix cached by one turn is there for
-   *  the next. */
-  constructor(private readonly session: string) {}
+   *  the next. The selection is the run's, or the default when it has
+   *  none. */
+  constructor(
+    private readonly session: string,
+    private readonly selection: ModelSelection = defaultSelection
+  ) {
+    this.model = selection.model
+  }
 
   async complete(args: {
     messages: ModelMessage[]
@@ -44,7 +59,7 @@ export class OpenRouterModel implements ModelRuntime {
     const result = await sendOpenRouterChat(
       {
         messages: toChatMessages(args.messages),
-        model: joriModel,
+        model: this.model,
         sessionId: this.session,
         // An empty tool list is left out rather than sent: providers differ
         // on whether an empty array is a request without tools or a bad
@@ -52,19 +67,21 @@ export class OpenRouterModel implements ModelRuntime {
         ...(args.tools.length === 0
           ? {}
           : { toolChoice: "auto" as const, tools: args.tools.map(toChatTool) }),
-        ...modelSettings,
+        ...modelSettings(this.selection),
       },
-      args.onDelta === undefined ? undefined : deltaListener(args.onDelta)
+      args.onDelta === undefined
+        ? undefined
+        : deltaListener(this.model, args.onDelta)
     )
 
-    return readModelResponse(result)
+    return readModelResponse(this.model, result)
   }
 }
 
 // The draft shows reasoning under the rule the response keeps it by, so a
 // model whose raw reasoning is dropped at the end never streams it either.
-function deltaListener(onDelta: (delta: ModelDelta) => void) {
-  if (readsReasoning(joriModel)) {
+function deltaListener(model: string, onDelta: (delta: ModelDelta) => void) {
+  if (readsReasoning(model)) {
     return onDelta
   }
 
@@ -78,7 +95,7 @@ function deltaListener(onDelta: (delta: ModelDelta) => void) {
   }
 }
 
-function readModelResponse(result: ChatResult): ModelResponse {
+function readModelResponse(model: string, result: ChatResult): ModelResponse {
   const choice = result.choices[0]
 
   if (choice === undefined) {
@@ -86,7 +103,7 @@ function readModelResponse(result: ChatResult): ModelResponse {
   }
 
   const content = readText(choice.message.content)
-  const reasoning = ingestReasoning(joriModel, choice.message.reasoning)
+  const reasoning = ingestReasoning(model, choice.message.reasoning)
   const tokens = readModelTokens(result.usage)
   const toolCalls = (choice.message.toolCalls ?? []).flatMap(readToolCall)
 

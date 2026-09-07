@@ -2,40 +2,41 @@ import { expect, test } from "vitest"
 import {
   dollarsToMicros,
   formatUsd,
-  joriModel,
-  modelRates,
   priceModelTokens,
-  resolveModelRate,
+  priceTokens,
 } from "./billing"
+import { modelRate } from "./models/catalog"
+import { defaultSelection } from "./models/selection"
 
-test("pins one model, priced by the rate table", () => {
-  expect(joriModel).toBe("openai/gpt-5.6-sol")
-  expect(modelRates[joriModel]).toBeDefined()
-})
-
-test("prices usage at exact integer list rates", () => {
-  // 1M input at $5/M plus 100k output at $30/M.
+test("prices usage at the catalog's list rates for the model", () => {
+  // 1M input at $2/M plus 100k output at $10/M.
   expect(
-    priceModelTokens(joriModel, { input: 1_000_000, output: 100_000 })
-  ).toBe(dollarsToMicros(5) + dollarsToMicros(3))
+    priceModelTokens(defaultSelection.model, {
+      input: 1_000_000,
+      output: 100_000,
+    })
+  ).toBe(dollarsToMicros(2) + dollarsToMicros(1))
 })
 
 test("a single token stays exact", () => {
-  expect(priceModelTokens(joriModel, { input: 1, output: 0 })).toBe(
-    modelRates[joriModel]?.inputMicrosPerToken
-  )
+  expect(
+    priceModelTokens(defaultSelection.model, { input: 1, output: 0 })
+  ).toBe(modelRate(defaultSelection.model).inputMicrosPerToken)
 })
 
-test("unknown models bill at the highest configured rate", () => {
-  const rate = resolveModelRate("someone/new-model")
-  const ceiling = Object.values(modelRates).reduce((max, candidate) =>
-    candidate.inputMicrosPerToken + candidate.outputMicrosPerToken >
-    max.inputMicrosPerToken + max.outputMicrosPerToken
-      ? candidate
-      : max
-  )
+test("fractional rates round to whole micro-dollars", () => {
+  expect(
+    priceTokens(
+      { inputMicrosPerToken: 0.2, outputMicrosPerToken: 1.2 },
+      { input: 3, output: 1 }
+    )
+  ).toBe(2)
+})
 
-  expect(rate).toEqual(ceiling)
+test("a model outside the catalog cannot be priced", () => {
+  expect(() =>
+    priceModelTokens("someone/new-model", { input: 1, output: 1 })
+  ).toThrow("someone/new-model is not a model Jori can run on.")
 })
 
 test("formats micro-dollars as currency", () => {

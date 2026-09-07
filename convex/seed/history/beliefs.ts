@@ -1,4 +1,4 @@
-import { joriModel } from "../../../contracts/billing"
+import { defaultSelection } from "../../../contracts/models/selection"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { promptVersions } from "../../deduction/limits"
@@ -172,7 +172,7 @@ async function writePasses(ctx: MutationCtx, seed: SeedContext) {
       scope: entry.scope,
       status: "completed",
       window: { start: seed.now - 7 * 24 * hourMs, end: seed.now },
-      prompt: { version: entry.prompt, model: joriModel },
+      prompt: { version: entry.prompt, model: defaultSelection.model },
       startedAt: seed.now - 2 * hourMs,
       endedAt: seed.now - 2 * hourMs + 90_000,
     })

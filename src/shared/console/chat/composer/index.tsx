@@ -1,3 +1,4 @@
+import { type ModelSelection } from "@contracts/models/selection"
 import { ArrowUp, Square, X } from "lucide-react"
 import { type KeyboardEvent, useId, useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +9,7 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { ContextIndicator } from "../context"
+import { ModelPicker } from "../models"
 import { referencePresentation } from "../presentation"
 import { chatColumnClassName } from "../thread"
 import {
@@ -19,16 +21,19 @@ import {
 
 /** Where the person writes. Enter sends and Shift+Enter breaks the line;
  *  while a run is live the send control is the stop control instead.
- *  Disabled with a reason, it says why under the field. */
+ *  Disabled with a reason, it says why under the field. The model picker
+ *  sits at the left of the footer when the host offers a selection. */
 export function ChatComposer({
   autoFocus = false,
   context,
   disabled = false,
   live,
   onClearContext,
+  onSelect,
   onSend,
   onStop,
   reason,
+  selection,
   usage,
 }: {
   autoFocus?: boolean
@@ -37,10 +42,14 @@ export function ChatComposer({
   disabled?: boolean
   live: ChatRun | null
   onClearContext?: () => void
+  /** Takes the model and effort the next run uses. */
+  onSelect?: (selection: ModelSelection) => void
   onSend: (text: string) => void
   onStop: () => void
   /** Why the composer is disabled, shown when it is. */
   reason?: string
+  /** The model and effort the next run uses, shown as the picker. */
+  selection?: ModelSelection
   /** How much of the model's window the thread's latest run is using,
    *  shown as a ring left of the send control; nothing before a run. */
   usage?: ChatContextUsage | null
@@ -81,11 +90,16 @@ export function ChatComposer({
           value={text}
         />
         <InputGroupAddon align="block-end" className="justify-between gap-2">
-          <span
-            className="min-w-0 truncate text-muted-foreground text-xs"
-            id={reasonId}
-          >
-            {disabled ? reason : null}
+          <span className="flex min-w-0 items-center gap-2">
+            {selection === undefined || onSelect === undefined ? null : (
+              <ModelPicker onSelect={onSelect} selection={selection} />
+            )}
+            <span
+              className="min-w-0 truncate text-muted-foreground text-xs"
+              id={reasonId}
+            >
+              {disabled ? reason : null}
+            </span>
           </span>
           <span className="flex items-center gap-1">
             {usage === undefined || usage === null ? null : (

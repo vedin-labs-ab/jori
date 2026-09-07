@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { joriModel } from "../../../contracts/billing"
+import { defaultSelection } from "../../../contracts/models/selection"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
@@ -9,7 +9,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../../_generated/server"
-import { sendOpenRouterChat } from "../../model/openrouter"
+import { providerPreferences, sendOpenRouterChat } from "../../model/openrouter"
 import { recordWorkerTrace } from "../../runs/execution/traces/data"
 import {
   compactTranscript,
@@ -168,8 +168,10 @@ async function summarizeTranscript(messages: TranscriptMessage[]) {
   const response = await sendOpenRouterChat({
     maxTokens: compactionSummaryTokens,
     messages: [{ content: compactionPrompt(messages), role: "user" }],
-    model: joriModel,
-    provider: { requireParameters: true },
+    // Condensing is mechanical work, so it runs on the default selection's
+    // model at low effort whatever the run itself is on.
+    model: defaultSelection.model,
+    provider: providerPreferences(),
     reasoning: { effort: "low" },
   })
   const content = response.choices[0]?.message.content

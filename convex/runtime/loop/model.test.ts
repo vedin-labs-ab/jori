@@ -52,6 +52,7 @@ test("a failed model call clears its draft", async () => {
   const platform = createPlatform()
   const runtime = createRuntime({ context: surface("console"), platform })
   const model: ModelRuntime = {
+    model: "openai/gpt-x",
     complete: async (args) => {
       args.onDelta?.({
         toolCalls: [
@@ -103,6 +104,7 @@ function streamingModel(
   const queued = createQueuedModel(responses)
 
   return {
+    model: queued.model,
     complete: async (args) => {
       for (const delta of deltas) {
         args.onDelta?.(delta)
@@ -125,6 +127,7 @@ test("a prompt the provider says no longer fits fails the run instead of retryin
   const platform = createPlatform()
   const runtime = createRuntime({ context: surface("console"), platform })
   const model: ModelRuntime = {
+    model: "openai/gpt-x",
     complete: async () => {
       throw Object.assign(new Error("Bad Request"), {
         body: '{"error":{"code":400,"message":"This endpoint\'s maximum context length is 128000 tokens."}}',
@@ -152,6 +155,7 @@ test("a failure the provider might get past still throws for the retry", async (
   const platform = createPlatform()
   const runtime = createRuntime({ context: surface("console"), platform })
   const model: ModelRuntime = {
+    model: "openai/gpt-x",
     complete: async () => {
       throw Object.assign(new Error("Bad Gateway"), { statusCode: 502 })
     },

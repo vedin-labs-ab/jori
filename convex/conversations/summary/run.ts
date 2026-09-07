@@ -1,7 +1,7 @@
 "use node"
 
 import { v } from "convex/values"
-import { joriModel } from "../../../contracts/billing"
+import { defaultSelection } from "../../../contracts/models/selection"
 import { internal } from "../../_generated/api"
 import { internalAction } from "../../_generated/server"
 import { sendOpenRouterChat } from "../../model/openrouter"
@@ -43,7 +43,7 @@ export const run = internalAction({
 
 async function summarizeConversation(input: PendingSummary) {
   const response = await sendOpenRouterChat({
-    model: joriModel,
+    model: defaultSelection.model,
     maxTokens: summaryOutputTokens,
     provider: { requireParameters: true, sort: "latency" },
     reasoning: { effort: "low" },

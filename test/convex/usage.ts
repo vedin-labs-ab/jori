@@ -1,3 +1,4 @@
+import { defaultSelection } from "../../contracts/models/selection"
 import { type TestDatabase } from "./database"
 
 // One metered day, seeded the way the rollup writes it. Every field a usage
@@ -39,6 +40,7 @@ export async function seedUsage(database: TestDatabase, row: UsageRow) {
     ...(job === undefined ? {} : { job }),
     surface: "jori",
     trigger: "schedule",
+    model: defaultSelection.model,
     runs: { ended, failed },
     micros,
     tokens: { input: micros, output: 1 },

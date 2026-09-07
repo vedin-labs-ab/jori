@@ -1,4 +1,5 @@
 import { expect, test } from "vitest"
+import { defaultSelection } from "../../contracts/models/selection"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { recordUsageDebit, recordUsageEnded, reparentUsage } from "./record"
@@ -41,11 +42,13 @@ test("turns of the same run accumulate in one bucket", async () => {
 
   await recordUsageDebit(ctx, {
     run: metered,
+    model: defaultSelection.model,
     micros: 500,
     tokens: { input: 100, output: 10 },
   })
   await recordUsageDebit(ctx, {
     run: metered,
+    model: defaultSelection.model,
     micros: 250,
     tokens: { input: 40, output: 5 },
   })
@@ -109,6 +112,7 @@ test("a debit landing after a failure joins the same bucket", async () => {
   await recordUsageEnded(ctx, { run: metered, failed: true })
   await recordUsageDebit(ctx, {
     run: metered,
+    model: defaultSelection.model,
     micros: 900,
     tokens: { input: 20, output: 3 },
   })
@@ -198,6 +202,7 @@ test("a deleted folder's spend moves to the destination", async () => {
 
   await recordUsageDebit(ctx, {
     run: run({ folderId }),
+    model: defaultSelection.model,
     micros: 100,
     tokens: { input: 10, output: 1 },
   })
@@ -214,12 +219,14 @@ test("spend landing on a bucket the destination already has is merged", async ()
 
   await recordUsageDebit(ctx, {
     run: run({ folderId }),
+    model: defaultSelection.model,
     micros: 100,
     tokens: { input: 10, output: 1 },
   })
   await recordUsageEnded(ctx, { run: run({ folderId }), failed: true })
   await recordUsageDebit(ctx, {
     run: run({ folderId: otherFolderId }),
+    model: defaultSelection.model,
     micros: 40,
     tokens: { input: 4, output: 2 },
   })

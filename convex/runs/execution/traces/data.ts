@@ -55,7 +55,11 @@ export async function recordWorkerTrace(
       args.data !== undefined &&
       "usage" in args.data
     ) {
-      await meterModelUsage(ctx, { run, tokens: args.data.usage.tokens })
+      await meterModelUsage(ctx, {
+        run,
+        model: args.data.model,
+        tokens: args.data.usage.tokens,
+      })
       await recordTurnTokens(ctx, run._id, args.data.usage.tokens)
     }
   }

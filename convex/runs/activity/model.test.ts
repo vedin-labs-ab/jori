@@ -37,6 +37,7 @@ test("projects token usage for completed model steps", () => {
       description: "Selected 1 action.",
       kind: "model",
       tokenUsage: {
+        model: "openai/gpt-5.6-sol",
         input: 1200,
         output: 80,
         reasoning: 20,

@@ -15,10 +15,12 @@ export type UsageAttribution = {
   personId?: Id<"persons">
   surface: ToolSurface
   trigger: UsageTrigger
+  /** The model the work ran on, so spend can be broken down by it. */
+  model: string
 }
 
 /** Stands in for a dimension the work has none of — unfiled, not a job's,
- *  or nobody's in particular — so every key has the same five parts. */
+ *  or nobody's in particular — so every key has the same six parts. */
 const absent = "-"
 
 /** The job's label is deliberately not part of this: a rename must
@@ -30,6 +32,7 @@ export function usageKey(attribution: UsageAttribution) {
     attribution.personId ?? absent,
     attribution.surface,
     attribution.trigger,
+    attribution.model,
   ].join(":")
 }
 

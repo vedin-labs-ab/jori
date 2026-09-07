@@ -1,5 +1,6 @@
-import { joriModel, modelRates } from "../../../contracts/billing"
 import { getNextCronRunAt } from "../../../contracts/jobs/schedule/cron"
+import { modelRate } from "../../../contracts/models/catalog"
+import { defaultSelection } from "../../../contracts/models/selection"
 import { type ToolSurface } from "../../shared/integrations"
 import { dayMs, type SeedContext, seedTimezone } from "../context"
 import { threads } from "../threads"
@@ -16,7 +17,7 @@ export const historyDays = 60
 
 /** Seeded cost is priced from the same rate table the ledger prices with, so
  *  a day's spend and its token count never disagree. */
-const rate = modelRates[joriModel]
+const rate = modelRate(defaultSelection.model)
 
 export type WorkItem = {
   at: number
