@@ -88,7 +88,7 @@ test("four chats show; the rest are a search away", () => {
   expect(screen.getAllByRole("link")).toHaveLength(4)
   expect(screen.queryByRole("link", { name: /Chat e/ })).toBeNull()
 
-  fireEvent.click(screen.getByRole("button", { name: "See all 6 chats" }))
+  fireEvent.click(screen.getByRole("button", { name: "See all" }))
   fireEvent.click(screen.getByRole("option", { name: "Chat f" }))
 
   expect(navigate).toHaveBeenCalledWith("/chat/conversations_f")

@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, ChevronRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Suggestion } from "@/components/ui/suggestion"
 import { cn } from "@/lib/utils"
@@ -58,8 +58,9 @@ export function ChatHome({
 
 /** A few asks as pills on one line, each behind its domain's icon. The
  *  line is the column, so the third pill steps aside where the column is
- *  too narrow for three, and what still overflows scrolls under a fade
- *  rather than wrapping. */
+ *  too narrow for three, and what still overflows scrolls rather than
+ *  wrapping; the line pads itself inside the scroll box so a pill's
+ *  bottom edge is not clipped. */
 function Suggestions({
   onSuggestion,
   suggestions,
@@ -72,12 +73,12 @@ function Suggestions({
       aria-label="Suggestions"
       className={cn(
         chatColumnClassName,
-        "@container flex flex-nowrap justify-center gap-2 overflow-x-auto"
+        "@container -my-1 flex flex-nowrap justify-center gap-2 overflow-x-auto py-1"
       )}
     >
       {suggestions.map(({ icon: Icon, text }, index) => (
         <li
-          className={cn("shrink-0", index >= 2 && "hidden @xl:block")}
+          className={cn("shrink-0", index >= 2 && "hidden @min-[38rem]:block")}
           key={text}
         >
           <Suggestion onClick={onSuggestion} suggestion={text}>
@@ -90,8 +91,9 @@ function Suggestions({
   )
 }
 
-/** The chats had most recently, a few of them, and after them the way to
- *  every one, in the same searchable list the sidebar's rail opens. */
+/** The chats had most recently, a few of them; the heading carries the
+ *  way to every one, in the same searchable list the sidebar's rail
+ *  opens, once there are more than it shows. */
 function RecentConversations({
   now,
   recent,
@@ -106,12 +108,25 @@ function RecentConversations({
       aria-labelledby="chat-recent"
       className={cn(chatColumnClassName, "grid gap-1")}
     >
-      <h3
-        className="px-3 font-medium text-muted-foreground text-xs"
-        id="chat-recent"
-      >
-        Recent
-      </h3>
+      <div className="flex items-center justify-between px-3">
+        <h3
+          className="font-medium text-muted-foreground text-xs"
+          id="chat-recent"
+        >
+          Recent
+        </h3>
+        {recent.length === shown.length ? null : (
+          <ChatsPicker chats={recent} side="bottom">
+            <button
+              className="-mr-1.5 inline-flex items-center gap-0.5 rounded-sm px-1.5 py-0.5 font-medium text-muted-foreground text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+              type="button"
+            >
+              See all
+              <ChevronRight aria-hidden className="size-3" />
+            </button>
+          </ChatsPicker>
+        )}
+      </div>
       <ul className="divide-y">
         {shown.map((conversation) => (
           <li key={conversation.id}>
@@ -129,21 +144,6 @@ function RecentConversations({
             </ConsoleLink>
           </li>
         ))}
-        {recent.length === shown.length ? null : (
-          <li>
-            <ChatsPicker chats={recent} side="bottom">
-              <button
-                className={cn(rowClassName, "text-muted-foreground")}
-                type="button"
-              >
-                <span className="min-w-0 flex-1 truncate">
-                  See all {recent.length} chats
-                </span>
-                <RowArrow />
-              </button>
-            </ChatsPicker>
-          </li>
-        )}
       </ul>
     </section>
   )
