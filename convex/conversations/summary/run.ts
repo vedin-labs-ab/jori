@@ -1,17 +1,13 @@
 "use node"
 
 import { v } from "convex/values"
-import { joriModel } from "../../contracts/billing"
-import { promptTemplates } from "../../prompts/generated"
-import { renderPromptTemplate } from "../../prompts/render"
-import { internal } from "../_generated/api"
-import { internalAction } from "../_generated/server"
-import {
-  type OpenRouterChatMessage,
-  sendOpenRouterChat,
-} from "../model/openrouter"
-import { summaryOutputTokens } from "./limits"
-import { type PendingSummary, type SummaryMessage } from "./summary"
+import { joriModel } from "../../../contracts/billing"
+import { internal } from "../../_generated/api"
+import { internalAction } from "../../_generated/server"
+import { sendOpenRouterChat } from "../../model/openrouter"
+import { summaryOutputTokens } from "../limits"
+import { type PendingSummary } from "./data"
+import { conversationSummaryPrompt } from "./prompt"
 
 const summarySchema = {
   type: "object",
@@ -26,16 +22,16 @@ export const run = internalAction({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, args) => {
     const pending = (await ctx.runQuery(
-      internal.conversations.summary.pending,
+      internal.conversations.summary.data.pending,
       args
     )) as PendingSummary | null
 
     if (pending === null || pending.messages.length === 0) {
-      await ctx.runMutation(internal.conversations.summary.clear, args)
+      await ctx.runMutation(internal.conversations.summary.data.clear, args)
       return null
     }
 
-    await ctx.runMutation(internal.conversations.summary.commit, {
+    await ctx.runMutation(internal.conversations.summary.data.commit, {
       conversationId: args.conversationId,
       summarizedAt: pending.readAt,
       summary: await summarizeConversation(pending),
@@ -59,33 +55,10 @@ async function summarizeConversation(input: PendingSummary) {
         schema: summarySchema,
       },
     },
-    messages: summaryMessages(input),
+    messages: [{ content: conversationSummaryPrompt(input), role: "user" }],
   })
 
   return parseSummary(readContent(response))
-}
-
-function summaryMessages(input: PendingSummary): OpenRouterChatMessage[] {
-  return [
-    {
-      role: "user",
-      content: renderPromptTemplate(promptTemplates["conversations/summary"], {
-        conversation: {
-          messages: input.messages.map(formatMessage).join("\n\n"),
-          summary: input.priorSummary,
-        },
-      }),
-    },
-  ]
-}
-
-function formatMessage(message: SummaryMessage) {
-  const observedAt = message.observedAt ?? message.createdAt
-
-  return [
-    `${new Date(observedAt).toISOString()} | ${message.speaker} | ${message.actor}`,
-    message.text,
-  ].join("\n")
 }
 
 function readContent(response: Awaited<ReturnType<typeof sendOpenRouterChat>>) {

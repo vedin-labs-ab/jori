@@ -83,6 +83,15 @@ const toolStartedData = v.object({ tool, input: v.any() })
 const toolCompletedData = v.object({ tool, result, provider })
 const toolFailedData = v.object({ tool, input: v.any(), error: v.string() })
 const toolWaitingData = v.object({ tool })
+// What a compaction replaced for the model: rows in [fromOrder, toOrder)
+// read as stubs or as the summary from here on, after a prompt that had
+// grown to `tokensBefore`.
+const compactionData = v.object({
+  kind: v.union(v.literal("cleared"), v.literal("summarized")),
+  fromOrder: v.number(),
+  toOrder: v.number(),
+  tokensBefore: v.number(),
+})
 
 const runPrepared = v.object({
   ...base,
@@ -175,6 +184,11 @@ const toolWaiting = v.object({
   type: v.literal("tool.waiting"),
   data: toolWaitingData,
 })
+const transcriptCompacted = v.object({
+  ...timeline,
+  type: v.literal("transcript.compacted"),
+  data: compactionData,
+})
 
 export const traceType = v.union(
   v.literal("run.prepared"),
@@ -196,7 +210,8 @@ export const traceType = v.union(
   v.literal("approval.requested"),
   v.literal("approval.resolved"),
   v.literal("file.saved"),
-  v.literal("agent.started")
+  v.literal("agent.started"),
+  v.literal("transcript.compacted")
 )
 
 export const traceData = v.union(
@@ -211,7 +226,8 @@ export const traceData = v.union(
   toolStartedData,
   toolCompletedData,
   toolFailedData,
-  toolWaitingData
+  toolWaitingData,
+  compactionData
 )
 
 export const traces = defineTable(
@@ -235,7 +251,8 @@ export const traces = defineTable(
     approvalRequested,
     approvalResolved,
     fileSaved,
-    agentStarted
+    agentStarted,
+    transcriptCompacted
   )
 )
   .index("by_run_and_timestamp", ["runId", "timestamp"])

@@ -1,23 +1,25 @@
 import { expect, test, vi } from "vitest"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { writeRunDraft } from "../runs/execution/drafts/data"
 import {
-  listConsoleConversations,
-  readLiveState,
-  sendConsoleMessage,
-} from "./console"
+  consoleContext,
+  conversationOf,
+  organizationId,
+  person,
+  rows,
+} from "../../test/convex/conversations"
+import { type TestDatabase } from "../../test/convex/database"
+import { type Doc } from "../_generated/dataModel"
+import { listConsoleConversations, sendConsoleMessage } from "./console"
+import { readLiveState } from "./live"
 import { findVisibleConsoleConversation } from "./resolve"
 
 // Starting a run hands it to the workflow component, which needs a real
 // backend; these tests are about the rows a console message writes.
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 
-const organizationId = "org"
 const paginationOpts = { cursor: null, numItems: 10 }
 
 test("the first message opens a person-scoped conversation and starts a run", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
 
   const result = await sendConsoleMessage(ctx, {
@@ -67,7 +69,7 @@ test("the first message opens a person-scoped conversation and starts a run", as
 })
 
 test("an answer to a reply's choices travels with the message", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
   const first = await sendConsoleMessage(ctx, {
     organizationId,
@@ -97,7 +99,7 @@ test("an answer to a reply's choices travels with the message", async () => {
 })
 
 test("a blocked budget keeps the message without a run", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
 
   await database.insert("accounts", {
@@ -119,12 +121,12 @@ test("a blocked budget keeps the message without a run", async () => {
   expect(await database.get(result.messageId)).not.toBeNull()
   expect(await rows(database, "runs")).toEqual([])
   expect(
-    await readLiveState(ctx, await conversation(database, result))
-  ).toEqual({ run: null, draft: null })
+    await readLiveState(ctx, await conversationOf(database, result))
+  ).toEqual({ run: null, draft: null, context: null })
 })
 
 test("lists a person's own conversations, most recently active first", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
   const otherPersonId = await person(database)
 
@@ -165,7 +167,7 @@ test("lists a person's own conversations, most recently active first", async () 
 })
 
 test("only the creator sees a console conversation", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
   const otherPersonId = await person(database)
   const sent = await sendConsoleMessage(ctx, {
@@ -203,73 +205,24 @@ test("only the creator sees a console conversation", async () => {
   ).rejects.toThrow("Conversation not found.")
 })
 
-test("reports the session's run and the reply it is drafting", async () => {
-  const { database, ctx } = databaseContext()
-  const personId = await person(database)
-  const sent = await sendConsoleMessage(ctx, {
-    organizationId,
-    personId,
-    profile: {},
-    text: "Go.",
-  })
-  const [run] = await rows<Doc<"runs">>(database, "runs")
-  const live = await conversation(database, sent)
-
-  expect(await readLiveState(ctx, live)).toEqual({
-    run: { id: run._id, status: "queued" },
-    draft: null,
-  })
-
-  const draft = { reasoning: "Reading the notes.", text: "On it" }
-
-  await writeRunDraft(ctx, { ...draft, runId: run._id, turn: 1 })
-
-  expect(await readLiveState(ctx, live)).toEqual({
-    run: { id: run._id, status: "queued" },
-    draft,
-  })
-
-  // A run that did not finish says how it ended, so the thread can.
-  await database.patch(run._id, {
-    status: "failed",
-    error: "Sandbox timed out",
-    endedAt: 5_000,
-  })
-
-  expect((await readLiveState(ctx, live)).run).toEqual({
-    id: run._id,
-    status: "failed",
-    error: "Sandbox timed out",
-    endedAt: 5_000,
-  })
-})
-
-async function person(database: TestDatabase) {
-  return await database.insert("persons", { organizationId })
-}
-
-async function conversation(
-  database: TestDatabase,
-  sent: { conversationId: Id<"conversations"> }
-) {
-  const conversation = await database.get(sent.conversationId)
-
-  if (conversation === null) {
-    throw new Error("Conversation not found.")
-  }
-
-  return conversation as unknown as Doc<"conversations">
-}
-
 async function finishRun(database: TestDatabase) {
   for (const run of await rows<Doc<"runs">>(database, "runs")) {
     await database.patch(run._id, { status: "completed" })
   }
 }
 
-async function rows<T>(database: TestDatabase, table: string) {
-  return (await database
-    .query(table)
-    .withIndex("by_id")
-    .collect()) as unknown as T[]
-}
+test("every message that runs schedules the thread's summary", async () => {
+  const { database, ctx, scheduler } = consoleContext()
+  const personId = await person(database)
+  const sent = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Rename the renewals table.",
+  })
+
+  expect(scheduler.runAt).toHaveBeenCalledTimes(1)
+  expect((await conversationOf(database, sent)).debounce).toMatchObject({
+    functionId: "scheduled_1",
+  })
+})

@@ -135,6 +135,7 @@ function createMessageValues(
   return {
     message: {
       conversation: conversation.body,
+      conversationOmitted: conversation.omitted,
       conversationSummary: conversation.summary,
       current: conversation.current,
       github: target.github,

@@ -14,6 +14,7 @@ import { integrations } from "./integrations/schema"
 import { jobs } from "./jobs/schema"
 import { subscriptions } from "./jobs/subscriptions/schema"
 import { messages } from "./messages/schema"
+import { models } from "./model/schema"
 import {
   organizationDiscovery,
   organizationProfile,
@@ -48,6 +49,7 @@ export default defineSchema({
   integrations,
   integrationOffers,
   messages,
+  models,
   places,
   organizationProfile,
   organizationSources,

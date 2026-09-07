@@ -43,7 +43,17 @@ type RuntimeRelationTraceData =
   | { child: RuntimeId<"runs"> }
   | { waiter: RuntimeId<"waiters"> }
 
+/** What a compaction replaced for the model: transcript rows in
+ *  [fromOrder, toOrder) read as stubs or as the summary from here on. */
+export type RuntimeCompactionTraceData = {
+  fromOrder: number
+  kind: "cleared" | "summarized"
+  toOrder: number
+  tokensBefore: number
+}
+
 export type RuntimeEventTraceData =
+  | RuntimeCompactionTraceData
   | RuntimeErrorTraceData
   | RuntimeModelTraceData
   | RuntimeRelationTraceData
@@ -69,6 +79,7 @@ export type RuntimeEventType =
   | "tool.failed"
   | "tool.started"
   | "tool.waiting"
+  | "transcript.compacted"
 
 export type RuntimeEventInput = {
   callId?: string

@@ -23,8 +23,12 @@ Target:
 {% endif %}
 {% endif %}
 
+{% if message.conversationSummary %}
+Earlier in this conversation: {{message.conversationSummary}}
+{% endif %}
+
 {% if message.conversation %}
-Recent messages{% if message.conversationSummary %} {{message.conversationSummary}}{% endif %}:
+Recent messages{% if message.conversationOmitted %} (older messages omitted){% endif %}:
 
 {{message.conversation}}
 {% endif %}

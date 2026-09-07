@@ -1,9 +1,12 @@
 import { expect, test } from "vitest"
-import { id } from "../../test/convex/database"
-import { type Doc } from "../_generated/dataModel"
-import { type QueryCtx } from "../_generated/server"
-import { summaryOverlapMessageLimit, summarySourceMessageLimit } from "./limits"
-import { loadSummaryMessages } from "./summary"
+import { id } from "../../../test/convex/database"
+import { type Doc } from "../../_generated/dataModel"
+import { type QueryCtx } from "../../_generated/server"
+import {
+  summaryOverlapMessageLimit,
+  summarySourceMessageLimit,
+} from "../limits"
+import { loadSummaryMessages } from "./data"
 
 test("loads all source messages for small conversations", async () => {
   const messages = await loadSummaryMessages(

@@ -120,3 +120,47 @@ function reply(text: string): QueuedModelResponse {
     type: "tool_calls",
   }
 }
+
+test("a prompt the provider says no longer fits fails the run instead of retrying it", async () => {
+  const platform = createPlatform()
+  const runtime = createRuntime({ context: surface("console"), platform })
+  const model: ModelRuntime = {
+    complete: async () => {
+      throw Object.assign(new Error("Bad Request"), {
+        body: '{"error":{"code":400,"message":"This endpoint\'s maximum context length is 128000 tokens."}}',
+        statusCode: 400,
+      })
+    },
+  }
+
+  await runModelTurn({ model, prompt: runtimePrompt(), runtime, turn: 3 })
+
+  expect(platform.recordEvent).toHaveBeenCalledWith(
+    expect.objectContaining({ sequence: 299, type: "model.failed" })
+  )
+  expect(platform.recordEvent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      data: { error: expect.stringContaining("context window") },
+      sequence: 299,
+      type: "run.failed",
+    })
+  )
+  expect(platform.transcript).toEqual([])
+})
+
+test("a failure the provider might get past still throws for the retry", async () => {
+  const platform = createPlatform()
+  const runtime = createRuntime({ context: surface("console"), platform })
+  const model: ModelRuntime = {
+    complete: async () => {
+      throw Object.assign(new Error("Bad Gateway"), { statusCode: 502 })
+    },
+  }
+
+  await expect(
+    runModelTurn({ model, prompt: runtimePrompt(), runtime, turn: 3 })
+  ).rejects.toThrow("Bad Gateway")
+  expect(platform.recordEvent).not.toHaveBeenCalledWith(
+    expect.objectContaining({ type: "run.failed" })
+  )
+})

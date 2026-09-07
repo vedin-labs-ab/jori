@@ -1,13 +1,17 @@
 import { v } from "convex/values"
-import { collapseWhitespace } from "../../contracts/text"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { collapseWhitespace } from "../../../contracts/text"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
   type QueryCtx,
-} from "../_generated/server"
-import { getActorDisplayName, getActorKind } from "../shared/actor"
-import { summaryOverlapMessageLimit, summarySourceMessageLimit } from "./limits"
+} from "../../_generated/server"
+import { getActorDisplayName, getActorKind } from "../../shared/actor"
+import { type MessageSurface } from "../../shared/integrations"
+import {
+  summaryOverlapMessageLimit,
+  summarySourceMessageLimit,
+} from "../limits"
 
 export type SummaryMessage = {
   actor: string
@@ -22,6 +26,7 @@ export type PendingSummary = {
   messages: SummaryMessage[]
   priorSummary: string | null
   readAt: number
+  surface: MessageSurface
 }
 
 type MessageRange =
@@ -49,6 +54,7 @@ export const pending = internalQuery({
       messages: await loadSummaryMessages(ctx, conversation),
       priorSummary: conversation.summary ?? null,
       readAt,
+      surface: conversation.surface,
     }
   },
 })

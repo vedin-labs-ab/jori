@@ -1,8 +1,8 @@
-import { internal } from "../_generated/api"
-import { type Doc } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
-import { nextDebounceSchedule } from "../shared/debounce"
-import { summaryDebounceMs, summaryMaxDelayMs } from "./limits"
+import { internal } from "../../_generated/api"
+import { type Doc } from "../../_generated/dataModel"
+import { type MutationCtx } from "../../_generated/server"
+import { nextDebounceSchedule } from "../../shared/debounce"
+import { summaryDebounceMs, summaryMaxDelayMs } from "../limits"
 
 export async function scheduleConversationSummary(
   ctx: MutationCtx,
@@ -22,7 +22,7 @@ export async function scheduleConversationSummary(
 
   const functionId = await ctx.scheduler.runAt(
     schedule.runAt,
-    internal.conversations.summarize.run,
+    internal.conversations.summary.run.run,
     { conversationId: conversation._id }
   )
 

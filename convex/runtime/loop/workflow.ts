@@ -2,6 +2,7 @@ import {
   cleanup,
   type EventId,
   vWorkflowId,
+  type WorkflowCtx,
   WorkflowManager,
 } from "@convex-dev/workflow"
 import { vResultValidator } from "@convex-dev/workpool"
@@ -11,6 +12,7 @@ import {
   maxRunTurns,
 } from "../../../contracts/runtime/runs"
 import { components, internal } from "../../_generated/api"
+import { type Id } from "../../_generated/dataModel"
 import { internalMutation } from "../../_generated/server"
 import { settleRunSandbox } from "../../runs/execution/sandboxes/data"
 import { recordWorkerTrace } from "../../runs/execution/traces/data"
@@ -57,6 +59,12 @@ export const agent = workflow
     }
 
     for (let turn = 1; turn <= maxRunTurns; turn += 1) {
+      // The first turn's prompt is the smallest it will be; every later
+      // one is measured by the turn before it.
+      if (turn > 1) {
+        await compactBeforeTurn(step, args.runId, turn)
+      }
+
       await step.runAction(
         internal.runtime.loop.model.step,
         { runId: args.runId, turn },
@@ -90,6 +98,40 @@ export const agent = workflow
     // The last act step already recorded the failure.
     return "failed"
   })
+
+/**
+ * Condense the transcript when the last turn's prompt grew past the
+ * thresholds: older tool results become stubs first, and the history
+ * before the last few turns becomes a summary only once a cleared prompt
+ * still reads too full. Each is a step, so a resumed workflow replays it.
+ */
+async function compactBeforeTurn(
+  step: WorkflowCtx,
+  runId: Id<"runs">,
+  turn: number
+) {
+  const plan = await step.runQuery(internal.runtime.compaction.plan.read, {
+    runId,
+    turn,
+  })
+
+  if (plan === "none") {
+    return
+  }
+
+  await step.runMutation(internal.runtime.compaction.clear.step, {
+    runId,
+    turn,
+  })
+
+  if (plan === "summarize") {
+    await step.runAction(
+      internal.runtime.compaction.summary.step,
+      { runId, turn },
+      { retry: true }
+    )
+  }
+}
 
 /**
  * The run's end, whatever brought it there. A workflow that failed outright

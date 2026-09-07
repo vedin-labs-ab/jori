@@ -97,6 +97,16 @@ export const modelRates: Record<string, ModelRate> = {
   [joriModel]: { inputMicrosPerToken: 5, outputMicrosPerToken: 30 },
 }
 
+/**
+ * The window assumed for a model whose row the daily refresh has not
+ * written yet: 128k tokens, the smallest window a frontier model has
+ * shipped with since 2024. Compaction thresholds read against it, so a
+ * guess that is too small condenses a run early while one that is too
+ * large lets a prompt grow until the provider rejects it; small is the
+ * safe error.
+ */
+export const modelContextFallback = { contextLength: 128_000 }
+
 /** A model missing from the rate table bills at the highest configured rate
  *  so a routing change can never silently undercharge. */
 export function resolveModelRate(model: string): ModelRate {

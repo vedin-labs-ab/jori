@@ -1,6 +1,7 @@
 import { type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { type QueryLikeCtx } from "../../../shared/context"
+import { compactTranscript, type TranscriptRow } from "./compact"
 import { type TranscriptMessage } from "./schema"
 
 export async function appendTranscript(
@@ -33,15 +34,30 @@ export async function appendTranscript(
   return null
 }
 
-/** Every row of a run's history, oldest first. A run holds a couple hundred
+/** A run's history, oldest first, as the model sees it: whole until the run
+ *  condenses it, stubbed and summarized after. A run holds a couple hundred
  *  rows at most, so the model step reads them in one go. */
 export async function listTranscript(ctx: QueryLikeCtx, runId: Id<"runs">) {
+  const run = await ctx.db.get(runId)
+
+  return compactTranscript(
+    await listTranscriptRows(ctx, runId),
+    run?.compaction
+  )
+}
+
+/** The rows as stored, with their orders: what compaction measures and
+ *  moves its boundaries against. */
+export async function listTranscriptRows(
+  ctx: QueryLikeCtx,
+  runId: Id<"runs">
+): Promise<TranscriptRow[]> {
   const rows = await ctx.db
     .query("transcript")
     .withIndex("by_run_and_order", (query) => query.eq("runId", runId))
     .collect()
 
-  return rows.map((row) => row.message)
+  return rows.map((row) => ({ message: row.message, order: row.order }))
 }
 
 /**

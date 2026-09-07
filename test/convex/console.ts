@@ -1,5 +1,8 @@
+import { encodeToolResult } from "../../contracts/json"
+import { type TranscriptRow } from "../../convex/runs/execution/transcript/compact"
+import { type TranscriptMessage } from "../../convex/runs/execution/transcript/schema"
 import { type MessageCauseKind } from "../../convex/runs/schema"
-import { id } from "./database"
+import { id, type TestDatabase } from "./database"
 
 type ActivityData = import("../../convex/runs/activity/types").ActivityData
 type Doc<TableName extends keyof DataModel> =
@@ -173,4 +176,67 @@ export function activityData(
   overrides: Partial<ActivityData> = {}
 ): ActivityData {
   return { ...emptyActivityData(), run: runDoc(), ...overrides }
+}
+
+/** Six assistant turns at even orders, each answered by one tool result. */
+export function transcript(): TranscriptRow[] {
+  const messages: TranscriptMessage[] = [
+    { content: "Rename the renewals table.", role: "user" },
+    assistantRow("read_file", "call_3"),
+    toolRow(3, "read_file", encodeToolResult("x".repeat(600))),
+    assistantRow("list_items", "call_5"),
+    toolRow(
+      5,
+      "list_items",
+      encodeToolResult({ cursor: "next", items: [{ id: 1 }, { id: 2 }] })
+    ),
+    assistantRow("bash", "call_7"),
+    toolRow(7, "bash", encodeToolResult({ exitCode: 0, stdout: "ok" })),
+    assistantRow("read_file", "call_9"),
+    toolRow(9, "read_file", encodeToolResult("short")),
+    assistantRow("bash", "call_11"),
+    toolRow(11, "bash", encodeToolResult({ exitCode: 0 })),
+    { content: "Done.", role: "assistant" },
+  ]
+
+  return messages.map((message, index) => ({ message, order: index + 1 }))
+}
+
+export function toolRow(
+  order: number,
+  toolName: string,
+  content: string
+): TranscriptMessage {
+  return { content, role: "tool", toolCallId: `call_${order}`, toolName }
+}
+
+/** A run whose last prompt sat at 130k tokens. */
+export async function liveRun(
+  database: TestDatabase,
+  status: Doc<"runs">["status"] = "running"
+) {
+  return await database.insert("runs", {
+    organizationId: "org",
+    audience: "organization",
+    cause: { type: "manual" },
+    principal: { kind: "organization" },
+    promptTokens: 130_000,
+    snapshot: { context: [], source: { type: "manual" }, title: "Run" },
+    status,
+    createdAt: 0,
+  })
+}
+
+export async function traces(database: TestDatabase) {
+  return (await database
+    .query("traces")
+    .collect()) as unknown as Doc<"traces">[]
+}
+
+function assistantRow(name: string, id: string): TranscriptMessage {
+  return {
+    content: null,
+    role: "assistant",
+    toolCalls: [{ args: { path: "x" }, id, name }],
+  }
 }

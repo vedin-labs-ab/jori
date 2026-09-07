@@ -105,6 +105,36 @@ export const toolSnapshot = v.object({
   webSearch: v.boolean(),
 })
 
+/** The turn's token counts as the console breaks them down. */
+const turnTokens = v.object({
+  cacheRead: v.number(),
+  input: v.number(),
+  output: v.number(),
+  reasoning: v.number(),
+})
+
+/**
+ * What the model sees of the transcript once the run has condensed it. The
+ * rows stay on disk for Activity and retries; `listTranscript` reads tool
+ * rows below `clearedBefore` as stubs and everything below the summary's
+ * `before` as the summary. `clearedAtTurn` is the turn the last clearing
+ * ran before, so the next decision knows whether the tokens it reads were
+ * measured on a cleared prompt.
+ */
+const runCompaction = v.object({
+  clearedAtTurn: v.number(),
+  clearedBefore: v.optional(v.number()),
+  summary: v.optional(
+    v.object({
+      before: v.number(),
+      content: v.string(),
+      turn: v.number(),
+    })
+  ),
+})
+
+export type RunCompaction = Infer<typeof runCompaction>
+
 export const runs = defineTable({
   organizationId: v.string(),
   /** The job this run answers to; absent for interactive work.
@@ -143,6 +173,14 @@ export const runs = defineTable({
    *  the job's filing when the run is created. Absent for interactive
    *  work, which is filed nowhere and rolls up unfiled. */
   folderId: v.optional(v.id("folders")),
+  /** Prompt tokens of the run's latest model turn, cached inclusive: how
+   *  much of the model's window the run is using. The trace layer writes
+   *  it once per turn, so the loop's compaction decision and the console's
+   *  indicator read it without walking traces. `turnTokens` is the same
+   *  turn's breakdown, for the indicator's popover. */
+  promptTokens: v.optional(v.number()),
+  turnTokens: v.optional(turnTokens),
+  compaction: v.optional(runCompaction),
   createdAt: v.number(),
   endedAt: v.optional(v.number()),
   stoppedBy: v.optional(actorValidator),

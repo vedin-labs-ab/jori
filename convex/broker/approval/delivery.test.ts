@@ -34,7 +34,7 @@ function consoleInput(): AgentRuntimeInput {
     integration: null,
     integrations: [],
     message: { _id: "messages:1", surface: "console" } as Doc<"messages">,
-    conversation: { entries: [], hasMoreMessages: false },
+    conversation: { entries: [], hasMoreMessages: false, summary: null },
     organization: null,
     requester: null,
     place: null,
