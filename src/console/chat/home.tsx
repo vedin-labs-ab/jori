@@ -17,6 +17,7 @@ import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
 import { ConsolePage } from "../page"
+import { useMentionSources } from "./mentions"
 import { useRecentConversations } from "./recent"
 import { useReferenceTargets } from "./references"
 import { useSendMessage } from "./send"
@@ -50,14 +51,16 @@ function ChatHomeContent({
   const recent = useRecentConversations(organizationId, recentCount)
   const now = useNow(60_000)
   const reference = useChatContext(organizationId, context)
+  const mentions = useMentionSources(organizationId)
   const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
   const { placeholder, suggestions } = useHomeSuggestions()
   // A blocked budget still opens the conversation with the message in it,
   // so the console moves there either way; only a failure stays.
-  const start = (text: string) =>
+  const start = (text: string, references: MessageContext[] = []) =>
     void send({
       text,
       model: selection,
+      ...(references.length === 0 ? {} : { references }),
       ...(reference.context === undefined
         ? {}
         : { context: reference.context }),
@@ -74,6 +77,7 @@ function ChatHomeContent({
           autoFocus
           context={reference.reference}
           live={null}
+          mentions={mentions}
           onClearContext={reference.clear}
           onSelect={setSelection}
           onSend={start}

@@ -10,14 +10,20 @@ import {
 } from "../shared/actor"
 import { createSight } from "../visibility/sight"
 import { messageActorIds, messageIdentifiers } from "./identifiers"
-import { consoleContextLine, resolveConsoleContext } from "./references"
+import {
+  consoleContextLine,
+  consoleReferenceLine,
+  resolveConsoleContext,
+  resolveConsoleReferences,
+} from "./references"
 
 const recentConversationLimit = 16
 
 export type ConversationEntry = {
   actor: string | null
   actorIds: string[]
-  /** What a console message was sent about, as one line for the model. */
+  /** What a console message was sent about and what its text mentions,
+   *  as a line each for the model. */
   context: string | null
   createdAt: number
   id: string
@@ -91,25 +97,34 @@ export function mergeRecentConversation(entries: ConversationEntry[]) {
     .slice(-recentConversationLimit)
 }
 
-/** The line a console message's context makes, read as the person who
- *  sent it sees the target; nothing for a message sent about nothing. */
+/** The lines a console message's context and mentions make, read as the
+ *  person who sent it sees the targets; nothing for a message sent about
+ *  nothing that mentions nothing. */
 async function messageContextLine(ctx: QueryCtx, message: Doc<"messages">) {
-  const context =
-    message.surface === "console" ? readMessageContext(message.data) : undefined
-
-  if (context === undefined) {
+  if (message.surface !== "console") {
     return undefined
   }
 
+  const context = readMessageContext(message.data)
   const sight = createSight(ctx, {
     organizationId: message.organizationId,
     personId: message.personId,
   })
+  const lines = [
+    ...(context === undefined
+      ? []
+      : [
+          consoleContextLine(
+            context,
+            await resolveConsoleContext(ctx, sight, message.data)
+          ),
+        ]),
+    ...(await resolveConsoleReferences(ctx, sight, message.data)).map(
+      consoleReferenceLine
+    ),
+  ]
 
-  return consoleContextLine(
-    context,
-    await resolveConsoleContext(ctx, sight, message.data)
-  )
+  return lines.length === 0 ? undefined : lines.join("\n")
 }
 
 async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {

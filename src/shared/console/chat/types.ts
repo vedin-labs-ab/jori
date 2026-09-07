@@ -18,6 +18,8 @@ export type ChatMessage = {
   parts: ReplyPart[]
   /** The resource or folder the person opened the chat about. */
   context?: MessageContext
+  /** The resources a person's text mentions, as `+[kind:id]` tokens. */
+  references?: MessageContext[]
   /** The reply's questions this message answers. */
   answer?: ChoicesAnswer
   createdAt: number

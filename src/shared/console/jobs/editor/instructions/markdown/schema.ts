@@ -1,4 +1,5 @@
 import { mergeAttributes, Node } from "@tiptap/core"
+import { MentionNode, mentionNodeName } from "@/shared/console/mentions/node"
 import {
   getJobSurfaceLabel,
   isJobSurfaceIntegration,
@@ -9,7 +10,9 @@ import {
 import { type JobPolicyPermissions } from "../../../access/policy"
 
 export const jobSurfaceNodeName = "jobSurface"
-export const jobReferenceNodeName = "jobReference"
+/** A skill or tool mention is the shared mention node, under the job's
+ *  own view and options. */
+export const jobReferenceNodeName = mentionNodeName
 export const fencedTextNodeName = "fencedText"
 
 const jobSurfacePolicyStates = ["allowed", "blocked"] as const
@@ -96,55 +99,13 @@ export const JobSurfaceNode = Node.create<JobSurfaceNodeOptions>({
   },
 })
 
-export const JobReferenceNode = Node.create<JobReferenceNodeOptions>({
-  name: jobReferenceNodeName,
-  group: "inline",
-  inline: true,
-  atom: true,
-  selectable: true,
-
+export const JobReferenceNode = MentionNode.extend<JobReferenceNodeOptions>({
   addOptions() {
     return {
       getPermissions: () => undefined,
       getScope: () => "personal",
       getWebSearch: () => false,
     }
-  },
-
-  addAttributes() {
-    return {
-      kind: {
-        default: null,
-        parseHTML: (element) =>
-          parseJobReferenceKind(element.getAttribute("data-kind")),
-        renderHTML: (attributes) => ({
-          "data-kind": parseJobReferenceKind(attributes.kind),
-        }),
-      },
-      id: {
-        default: null,
-        parseHTML: (element) => element.getAttribute("data-id"),
-        renderHTML: (attributes) => ({
-          "data-id": typeof attributes.id === "string" ? attributes.id : null,
-        }),
-      },
-    }
-  },
-
-  parseHTML() {
-    return [{ tag: "span[data-job-reference]" }]
-  },
-
-  renderHTML({ HTMLAttributes, node }) {
-    return [
-      "span",
-      mergeAttributes(HTMLAttributes, { "data-job-reference": "" }),
-      serializeReferenceNode(node.attrs),
-    ]
-  },
-
-  renderMarkdown(node) {
-    return serializeReferenceNode(node.attrs)
   },
 })
 
@@ -174,13 +135,4 @@ export function parseJobReferenceKind(
   kind: unknown
 ): Exclude<JobMentionKind, "integration"> | null {
   return kind === "skill" || kind === "tool" ? kind : null
-}
-
-function serializeReferenceNode(attrs: Record<string, unknown> | undefined) {
-  const kind = parseJobReferenceKind(attrs?.kind)
-  const id = attrs?.id
-
-  return kind === null || typeof id !== "string" || id === ""
-    ? ""
-    : jobMentionText(kind, id)
 }

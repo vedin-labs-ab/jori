@@ -37,3 +37,37 @@ if (
 ) {
   window.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver
 }
+
+// jsdom lays nothing out, so it has no scrollIntoView; cmdk scrolls its
+// active option into view as the selection moves. The tests only need the
+// call to exist.
+if (
+  typeof window !== "undefined" &&
+  typeof window.Element.prototype.scrollIntoView !== "function"
+) {
+  window.Element.prototype.scrollIntoView = () => undefined
+}
+
+// jsdom's ranges have no geometry, which ProseMirror reads to keep the
+// selection in view after a focus. Empty rectangles keep it quiet.
+if (typeof window !== "undefined") {
+  const emptyRect = () => ({
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: 0,
+    toJSON: () => ({}),
+    top: 0,
+    width: 0,
+    x: 0,
+    y: 0,
+  })
+
+  window.Range.prototype.getClientRects ??= () =>
+    ({
+      item: () => null,
+      length: 0,
+      [Symbol.iterator]: [].values,
+    }) as unknown as DOMRectList
+  window.Range.prototype.getBoundingClientRect ??= emptyRect
+}

@@ -348,6 +348,8 @@ import type * as reactions_cursor from "../reactions/cursor.js";
 import type * as reactions_data from "../reactions/data.js";
 import type * as reactions_intake from "../reactions/intake.js";
 import type * as reactions_summary from "../reactions/summary.js";
+import type * as references_lookup from "../references/lookup.js";
+import type * as references_mentions from "../references/mentions.js";
 import type * as runs_access from "../runs/access.js";
 import type * as runs_activity_format from "../runs/activity/format.js";
 import type * as runs_activity_helpers from "../runs/activity/helpers.js";
@@ -977,6 +979,8 @@ declare const fullApi: ApiFromModules<{
   "reactions/data": typeof reactions_data;
   "reactions/intake": typeof reactions_intake;
   "reactions/summary": typeof reactions_summary;
+  "references/lookup": typeof references_lookup;
+  "references/mentions": typeof references_mentions;
   "runs/access": typeof runs_access;
   "runs/activity/format": typeof runs_activity_format;
   "runs/activity/helpers": typeof runs_activity_helpers;

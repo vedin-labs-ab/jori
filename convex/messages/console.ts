@@ -25,13 +25,18 @@ export const consoleAnswerValidator = v.object({
   answers: v.array(v.object({ part: v.number(), values: v.array(v.string()) })),
 })
 
-/** What a person's message carries besides its text, or nothing. */
+/** What a person's message carries besides its text, or nothing: what it
+ *  was sent about, the resources its text mentions, and what it answers. */
 export function consoleMessageData(input: {
   context?: Infer<typeof referenceTargetValidator>
+  references?: Infer<typeof referenceTargetValidator>[]
   answer?: Infer<typeof consoleAnswerValidator>
 }) {
   const data = {
     ...(input.context === undefined ? {} : { context: input.context }),
+    ...(input.references === undefined || input.references.length === 0
+      ? {}
+      : { references: input.references }),
     ...(input.answer === undefined ? {} : { answer: input.answer }),
   }
 

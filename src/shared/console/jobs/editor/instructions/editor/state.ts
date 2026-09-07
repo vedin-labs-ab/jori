@@ -7,6 +7,8 @@ import {
   useMemo,
   useState,
 } from "react"
+import { useAutocompleteA11y } from "@/shared/console/mentions/suggest/a11y"
+import { updateSuggestionIndex } from "@/shared/console/mentions/suggest/keys"
 import {
   createJobMentionCatalog,
   isJobSurfaceAllowedForScope,
@@ -22,17 +24,12 @@ import {
   serializeJobInstructionDocument,
 } from "../document"
 import { insertMentionSuggestion } from "../suggestion/input"
-import { updateSuggestionIndex } from "../suggestion/keys"
 import {
   getInstructionSuggestionState,
   type InstructionSuggestionState,
 } from "../suggestion/suggest"
 import { type InstructionRefs, type JobInstructionsFieldProps } from "../types"
-import {
-  useInstructionAutocompleteA11y,
-  useInstructionSync,
-  useInstructionValidationA11y,
-} from "./effects"
+import { useInstructionSync, useInstructionValidationA11y } from "./effects"
 import { createInstructionExtensions } from "./extension"
 import { createEditorProps } from "./props"
 
@@ -64,7 +61,7 @@ export function useJobInstructionsEditor(props: JobInstructionsFieldProps) {
     suggestion,
     updateSuggestion,
   })
-  useInstructionAutocompleteA11y({ editor, listboxId, suggestion })
+  useAutocompleteA11y({ editor, listboxId, suggestion })
   useInstructionValidationA11y({
     editor,
     error: props.error,

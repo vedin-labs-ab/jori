@@ -30,6 +30,7 @@ function sent(
     text: action.text,
     parts: [],
     context: action.context,
+    references: action.references,
     answer: action.answer,
     createdAt: action.at,
   }

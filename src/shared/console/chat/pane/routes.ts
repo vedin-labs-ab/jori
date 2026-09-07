@@ -10,6 +10,11 @@ export type TargetDestination = {
  *  else on its own page. */
 export function targetDestination(target: ReferenceTarget): TargetDestination {
   switch (target.kind) {
+    case "chat":
+      return {
+        to: "/chat/$conversationId",
+        params: { conversationId: target.id },
+      }
     case "file":
       return { to: "/files/$fileId", params: { fileId: target.id } }
     case "table":

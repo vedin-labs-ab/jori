@@ -2,8 +2,9 @@ import { isRecord, readStringArray } from "../json"
 import { type ReferenceKind, referenceKinds } from "./parts"
 
 // What a person's message can carry besides its text: the resource or
-// folder the conversation was opened about, and the questions it
-// answers. The run reads the text; these let the console render intent.
+// folder the conversation was opened about, the resources its text
+// mentions, and the questions it answers. The run reads the text; these
+// let the console render intent.
 
 export type MessageContext = { kind: ReferenceKind; id: string }
 
@@ -23,11 +24,41 @@ export type ChoicesAnswer = {
 }
 
 export function readMessageContext(value: unknown): MessageContext | undefined {
-  if (!isRecord(value) || !isRecord(value.context)) {
+  return isRecord(value) ? readReferenceTarget(value.context) : undefined
+}
+
+/** The resources a message's text mentions, each once, in the order
+ *  kept. Anything that is not a target reads as nothing. */
+export function readMessageReferences(value: unknown): MessageContext[] {
+  if (!isRecord(value) || !Array.isArray(value.references)) {
+    return []
+  }
+
+  const seen = new Set<string>()
+  const references: MessageContext[] = []
+
+  for (const candidate of value.references) {
+    const reference = readReferenceTarget(candidate)
+    const key =
+      reference === undefined ? "" : `${reference.kind}:${reference.id}`
+
+    if (reference !== undefined && !seen.has(key)) {
+      seen.add(key)
+      references.push(reference)
+    }
+  }
+
+  return references
+}
+
+export function readReferenceTarget(
+  value: unknown
+): MessageContext | undefined {
+  if (!isRecord(value)) {
     return undefined
   }
 
-  const { kind, id } = value.context
+  const { kind, id } = value
 
   return isReferenceKind(kind) && typeof id === "string" && id !== ""
     ? { kind, id }

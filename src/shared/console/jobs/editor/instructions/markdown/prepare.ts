@@ -1,12 +1,12 @@
 import { type JSONContent } from "@tiptap/core"
+import {
+  mentionNodeName,
+  mentionText,
+  readMentionAttributes,
+} from "@/shared/console/mentions/node"
 import { jobMentionText } from "../../../access"
 import { serializedCodeSpanNodeName } from "./fence"
-import {
-  jobReferenceNodeName,
-  jobSurfaceNodeName,
-  parseJobReferenceKind,
-  parseJobSurfaceIntegration,
-} from "./schema"
+import { jobSurfaceNodeName, parseJobSurfaceIntegration } from "./schema"
 
 type SerializationContext = {
   index: number
@@ -113,16 +113,13 @@ function serializedReference(node: JSONContent) {
       : jobMentionText("integration", integration)
   }
 
-  if (node.type !== jobReferenceNodeName) {
+  if (node.type !== mentionNodeName) {
     return null
   }
 
-  const kind = parseJobReferenceKind(node.attrs?.kind)
-  const id = node.attrs?.id
+  const mention = readMentionAttributes(node.attrs)
 
-  return kind === null || typeof id !== "string"
-    ? ""
-    : `${kind === "skill" ? "/" : "#"}${id}`
+  return mention === null ? "" : mentionText(mention.kind, mention.id)
 }
 
 function availableSalt(occupiedText: string) {

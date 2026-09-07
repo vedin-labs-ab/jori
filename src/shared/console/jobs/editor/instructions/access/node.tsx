@@ -6,6 +6,7 @@ import {
 import { useState } from "react"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { cn } from "@/lib/utils"
+import { MentionActionButton } from "@/shared/console/mentions/chip"
 import {
   getJobSurfaceAccess,
   getJobSurfaceAccessLabel,
@@ -17,7 +18,7 @@ import {
 import { isJobSurfacePolicyBlocked } from "../../../access/policy"
 import { parseJobSurfaceTools } from "../document"
 import { type JobSurfaceNodeOptions } from "../markdown/schema"
-import { JobMarkerActionButton, JobSurfaceRemoveButton } from "./remove"
+import { JobSurfaceRemoveButton } from "./remove"
 import { getJobSurfaceAccessIcon, getJobSurfaceToneClassNames } from "./tone"
 import { JobSurfaceToolsDialog } from "./tools"
 import { setIntegrationTools } from "./update"
@@ -191,7 +192,7 @@ function JobSurfaceToolsButton({
     : `${toolSurfaceLabel} tools: ${toolCountLabel}. Configure tools.`
 
   return (
-    <JobMarkerActionButton
+    <MentionActionButton
       ariaLabel={label}
       className={iconClassName}
       onOpen={onOpen}
@@ -202,6 +203,6 @@ function JobSurfaceToolsButton({
     >
       <Icon className="size-3" />
       {count > 0 ? <span className="tabular-nums">{count}</span> : null}
-    </JobMarkerActionButton>
+    </MentionActionButton>
   )
 }

@@ -14,10 +14,12 @@ import {
 import { showErrorToast } from "@/shared/console/error"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
+import { type MentionSources } from "@/shared/console/mentions/sources"
 import { useDocumentTitle } from "@/shared/console/shell/title"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
+import { useMentionSources } from "./mentions"
 import { useConversationMessages } from "./messages"
 import { useChooseModel } from "./models"
 import { ConversationPaneBody } from "./pane"
@@ -108,6 +110,7 @@ function ConversationThread({
   const choose = useChooseModel(organizationId, conversationId)
   const stop = useStopRun(organizationId, live.run)
   const resolveReference = useReferences(organizationId, page.messages)
+  const mentions = useMentionSources(organizationId)
   const { autoOpen, openTarget, pane } = usePaneTabs()
 
   useDocumentTitle(live.title === "" ? undefined : `${live.title} · Jori`)
@@ -124,9 +127,17 @@ function ConversationThread({
         <ChatComposer
           autoFocus
           live={live.run}
+          mentions={mentions}
           onSelect={choose}
-          onSend={(text) => void send({ conversationId, text })}
+          onSend={(text, references) =>
+            void send({
+              conversationId,
+              text,
+              ...(references.length === 0 ? {} : { references }),
+            })
+          }
           onStop={stop}
+          resolve={resolveReference}
           selection={live.model}
           usage={live.context}
         />
@@ -135,6 +146,7 @@ function ConversationThread({
     >
       <ConversationTurns
         live={live}
+        mentions={mentions}
         onOpenReference={openTarget}
         onStop={stop}
         organizationId={organizationId}
@@ -156,6 +168,7 @@ function ConversationThread({
  *  bound to Convex under the latest one. */
 function ConversationTurns({
   live,
+  mentions,
   onOpenReference,
   onStop,
   organizationId,
@@ -164,6 +177,7 @@ function ConversationTurns({
   send,
 }: {
   live: LiveConversation
+  mentions: MentionSources
   onOpenReference: OpenTarget
   onStop: () => void
   organizationId: string
@@ -181,6 +195,7 @@ function ConversationTurns({
       hasMore={page.hasMore}
       isLoading={page.isLoading}
       live={run}
+      mentions={mentions}
       messages={page.messages}
       now={now}
       onChoose={(messageId, answers, text) =>

@@ -7,13 +7,16 @@ import { Ban, BookOpen, Braces, Wrench } from "lucide-react"
 import { useContext, useState } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
+import {
+  MentionActionButton,
+  MentionChip,
+} from "@/shared/console/mentions/chip"
 import { useRetained } from "@/shared/console/retain"
 import { type ToolPermission } from "@/shared/console/tools/model"
 import { jobToolReferenceIssue, jobToolScopeIssue } from "../../../access/tools"
 import { parseJobReferenceKind } from "../document"
 import { readEditorInstructionSurfaces } from "../editor/snapshot"
 import { type JobReferenceNodeOptions } from "../markdown/schema"
-import { JobMarkerActionButton, JobMarkerRemoveButton } from "./remove"
 import { ToolReferencesLoader, ToolSchemaDialog } from "./schema"
 import { jobReferenceToneClassNames } from "./tone"
 import {
@@ -62,6 +65,9 @@ export function JobReferenceNodeView({
   )
 }
 
+/** The shared mention chip, with the job's reading of it: a tool that
+ *  the job cannot call yet reads as an issue, and a tool's schema opens
+ *  from a segment after its name. */
 function ReferencePill({
   extension,
   id,
@@ -89,41 +95,39 @@ function ReferencePill({
       : undefined
 
   return (
-    <span
+    <MentionChip
       className={cn(
-        "mx-0.5 inline-flex h-5 items-center overflow-hidden rounded-sm border align-middle text-[0.625rem]/none",
-        tone.surface,
         issue !== undefined &&
-          "border-destructive/60 bg-destructive/5 text-destructive",
-        selected && "ring-2 ring-ring/40"
+          "border-destructive/60 bg-destructive/5 text-destructive"
       )}
       data-job-reference-access={issue === undefined ? "ready" : "unresolved"}
       data-job-reference-kind={kind}
       data-job-reference-scope={
         scopeIssue === undefined ? "allowed" : "blocked"
       }
-      title={issue}
-    >
-      <JobMarkerRemoveButton
-        icon={
-          <Icon
-            aria-hidden="true"
-            className={cn(
-              "size-3",
-              issue === undefined ? tone.icon : "text-destructive"
-            )}
-          />
-        }
-        label={id}
-        onRemove={onRemove}
-      />
-      {permission === undefined ? null : (
-        <ToolSchemaPane
-          permission={permission}
-          separatorClassName={tone.separator}
+      icon={
+        <Icon
+          aria-hidden="true"
+          className={cn(
+            "size-3",
+            issue === undefined ? tone.icon : "text-destructive"
+          )}
         />
-      )}
-    </span>
+      }
+      kind={kind}
+      label={id}
+      onRemove={onRemove}
+      selected={selected}
+      title={issue}
+      trailing={
+        permission === undefined ? null : (
+          <ToolSchemaPane
+            permission={permission}
+            separatorClassName={tone.separator}
+          />
+        )
+      }
+    />
   )
 }
 
@@ -156,7 +160,7 @@ function ToolSchemaPane({
         aria-hidden="true"
         className={cn("w-[0.5px] shrink-0 self-stretch", separatorClassName)}
       />
-      <JobMarkerActionButton
+      <MentionActionButton
         ariaLabel={`View the ${permission.label} schema`}
         onOpen={() => setShown(permission)}
         onWarm={() => setWarm(true)}
@@ -167,7 +171,7 @@ function ToolSchemaPane({
         ) : (
           <Braces className="size-3 opacity-80" />
         )}
-      </JobMarkerActionButton>
+      </MentionActionButton>
       {engaged ? (
         <ToolReferencesLoader
           onChange={setReferences}

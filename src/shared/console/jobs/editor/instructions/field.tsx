@@ -1,11 +1,18 @@
 import { EditorContent } from "@tiptap/react"
 import { FieldError } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
+import { SigilHints } from "@/shared/console/mentions/hints"
 import { jobScopeConflictMessage } from "../../access"
 import { useJobInstructionsEditor } from "./editor/state"
 import { instructionMarkdownClassName } from "./editor/style"
 import { InstructionSuggestions } from "./suggestion/suggestions"
 import { type JobInstructionsFieldProps } from "./types"
+
+const sigilHints = [
+  { kind: "integration", label: "access" },
+  { kind: "skill", label: "skills" },
+  { kind: "tool", label: "tools" },
+] as const
 
 export function JobInstructionsField(props: JobInstructionsFieldProps) {
   const errorId = props.error === undefined ? undefined : `${props.id}-error`
@@ -36,11 +43,7 @@ export function JobInstructionsField(props: JobInstructionsFieldProps) {
         >
           <EditorContent className="min-w-0 max-w-full" editor={editor} />
           <div className="flex min-h-9 items-center gap-2 border-t bg-muted/30 px-2 text-muted-foreground text-xs/relaxed">
-            <SigilHint sigil="@">access</SigilHint>
-            <span aria-hidden="true">·</span>
-            <SigilHint sigil="/">skills</SigilHint>
-            <span aria-hidden="true">·</span>
-            <SigilHint sigil="#">tools</SigilHint>
+            <SigilHints hints={sigilHints} />
           </div>
         </div>
         {isEmpty ? (
@@ -77,16 +80,5 @@ function InstructionErrorText({ error }: { error: string }) {
     ) : (
       part
     )
-  )
-}
-
-function SigilHint({ children, sigil }: { children: string; sigil: string }) {
-  return (
-    <span className="inline-flex items-center gap-1">
-      <kbd className="inline-flex h-4 min-w-4 items-center justify-center rounded-sm border bg-background px-1 font-medium font-mono text-[0.625rem]">
-        {sigil}
-      </kbd>
-      {children}
-    </span>
   )
 }

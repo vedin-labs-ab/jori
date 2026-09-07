@@ -1,4 +1,4 @@
-import { type ReactNode } from "react"
+import { Fragment, type ReactNode } from "react"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import {
   Tooltip,
@@ -8,22 +8,40 @@ import {
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
 import { CopyButton } from "../../copy"
+import { type MentionCatalog, readMentions } from "../../mentions/scan"
 import { absoluteTime, relativeTime } from "../../time"
+import { ChatMentionChip } from "../mentions"
+import { type OpenTarget } from "../pane/tabs"
 import { referencePresentation } from "../presentation"
-import { type ChatMessage, type ChatReference } from "../types"
+import {
+  type ChatMessage,
+  type ChatReference,
+  type ResolveReference,
+} from "../types"
+
+/** Without a catalog, only resource tokens read as chips. */
+const resourceCatalog: MentionCatalog = { resource: true }
 
 /** A person's turn: contained, on the right, and clamped when it runs
  *  long, so a pasted brief does not push the reply off the screen. The
- *  resource the chat was opened about sits above the words. */
+ *  resource the chat was opened about sits above the words; what the
+ *  words mention stands in them as chips. */
 export function PersonMessage({
+  catalog = resourceCatalog,
   context,
   message,
   now,
+  onOpenReference,
+  resolveReference,
 }: {
+  /** What the text's tokens may name, beyond resources. */
+  catalog?: MentionCatalog
   /** The message's context, as the host resolved it. */
   context: ChatReference | undefined
   message: ChatMessage
   now: number
+  onOpenReference?: OpenTarget
+  resolveReference?: ResolveReference
 }) {
   return (
     <div className="group/message flex flex-col items-end">
@@ -31,7 +49,12 @@ export function PersonMessage({
         {context === undefined ? null : <ContextLine reference={context} />}
         <ExpandableText maxLines={8}>
           <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-            {message.text}
+            <MentionedText
+              catalog={catalog}
+              onOpen={onOpenReference}
+              resolve={resolveReference}
+              text={message.text}
+            />
           </div>
         </ExpandableText>
       </div>
@@ -121,4 +144,47 @@ export function MessageActions({
       </Tooltip>
     </div>
   )
+}
+
+/** A person's text with its mention tokens as chips, inline where they
+ *  were written: a resource opens beside the chat, the rest are names.
+ *  Text with no tokens in it is the text alone. */
+function MentionedText({
+  catalog,
+  onOpen,
+  resolve,
+  text,
+}: {
+  catalog: MentionCatalog
+  onOpen: OpenTarget | undefined
+  resolve: ResolveReference | undefined
+  text: string
+}) {
+  const mentions = readMentions(text, catalog)
+
+  if (mentions.length === 0) {
+    return text
+  }
+
+  const segments = []
+  let cursor = 0
+
+  for (const mention of mentions) {
+    segments.push(
+      <Fragment key={mention.start}>
+        {text.slice(cursor, mention.start)}
+        <ChatMentionChip
+          id={mention.id}
+          kind={mention.kind}
+          onOpen={onOpen === undefined ? undefined : (target) => onOpen(target)}
+          resolve={resolve}
+        />
+      </Fragment>
+    )
+    cursor = mention.end
+  }
+
+  segments.push(text.slice(cursor))
+
+  return segments
 }

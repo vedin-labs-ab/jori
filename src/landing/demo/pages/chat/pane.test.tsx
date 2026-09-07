@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
+import { typeInto } from "../../../../../test/editor"
 import { renewalsConversationId } from "../../fixtures/chat"
 
 vi.mock("@tanstack/react-router", async () => ({
@@ -26,7 +27,9 @@ test("a reference card opens its table beside the chat, with the way to its page
   render(<DemoConsoleAt path={`/chat/${renewalsConversationId}`} />)
 
   fireEvent.click(
-    await screen.findByRole("button", { name: /Customer renewals/ })
+    (await screen.findAllByRole("button", { name: /Customer renewals/ })).at(
+      -1
+    ) as HTMLElement
   )
 
   const tab = await screen.findByRole("tab", { name: "Customer renewals" })
@@ -57,7 +60,7 @@ test("a reply opens the job it names, and the hint asks once how to go on", asyn
 
   const field = await screen.findByRole("textbox", { name: "Message" })
 
-  fireEvent.change(field, { target: { value: "Chase the unpaid renewals" } })
+  typeInto(field, "Chase the unpaid renewals")
   fireEvent.keyDown(field, { key: "Enter" })
 
   const tab = await screen.findByRole(

@@ -66,9 +66,10 @@ export function demoConversations(now: number): DemoConversation[] {
         {
           id: demoId("messages", "renewals-ask"),
           role: "person",
-          text: "Which renewals are at risk this month?",
+          text: `Which renewals in +[table:${renewalsTableId}] are at risk this month?`,
           parts: [],
           context: { kind: "table", id: renewalsTableId },
+          references: [{ kind: "table", id: renewalsTableId }],
           createdAt: asked,
         },
         {

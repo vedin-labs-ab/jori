@@ -1,5 +1,6 @@
 import { Ban, CircleDashed, FilePenLine, FileText, PenLine } from "lucide-react"
-import { type getJobSurfaceAccess, type JobMentionKind } from "../../../access"
+import { mentionTones } from "@/shared/console/mentions/tone"
+import { type getJobSurfaceAccess } from "../../../access"
 
 export function getJobSurfaceAccessIcon(
   access: ReturnType<typeof getJobSurfaceAccess>,
@@ -29,24 +30,12 @@ export function getJobSurfaceToneClassNames(
     : jobSurfaceToneClassNames[access]
 }
 
-/** Skill and tool pills share the integration pills' pastel construction —
- *  soft tinted surface, saturated icon, foreground text — on their own
- *  adjacent hues. */
+/** Skill and tool pills wear the shared mention tones, on hues adjacent
+ *  to the integration pills' pastels. */
 export const jobReferenceToneClassNames = {
-  skill: {
-    icon: "text-[#B45309]",
-    separator: "bg-[#EDD9B9]",
-    surface: "border-[#EDD9B9] bg-[#FDFAF2] text-[#1F2937]",
-  },
-  tool: {
-    icon: "text-[#0F766E]",
-    separator: "bg-[#B9DDD6]",
-    surface: "border-[#B9DDD6] bg-[#F4FBF9] text-[#1F2937]",
-  },
-} satisfies Record<
-  Exclude<JobMentionKind, "integration">,
-  { icon: string; separator: string; surface: string }
->
+  skill: mentionTones.skill,
+  tool: mentionTones.tool,
+}
 
 const jobSurfaceToneClassNames = {
   "": {
