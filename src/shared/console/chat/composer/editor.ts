@@ -45,14 +45,29 @@ export function useComposerEditor(args: ComposerEditorArgs) {
     names: new Map(),
     sending: false,
   }))
-  const { editor, isEmpty, pending, setPending, setSuggestion, suggestion } =
-    useComposerInstance(refs)
+  const {
+    editor,
+    isEmpty,
+    pending,
+    setPending,
+    setSuggestion,
+    suggestion,
+    updateSuggestion,
+  } = useComposerInstance(refs)
 
   // The handlers were made once; this is what they read of this render.
   refs.latest.current = { args, catalog, editor, suggestion }
 
   useAutocompleteA11y({ editor, listboxId, suggestion })
   useResourceSearch(args.sources, suggestion)
+  // The host's lists change under an open listbox — a lookup starting,
+  // then landing — so the list is read again from what the host has now.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the sources are the reason to read again
+  useEffect(() => {
+    if (editor !== null && refs.latest.current.suggestion !== null) {
+      updateSuggestion(editor)
+    }
+  }, [args.sources, editor, refs, updateSuggestion])
   useEffect(() => {
     editor?.setEditable(!args.disabled)
   }, [args.disabled, editor])
@@ -123,6 +138,7 @@ function useComposerInstance(refs: ComposerRefs) {
     pending,
     setPending,
     setSuggestion,
+    updateSuggestion,
     suggestion,
   }
 }
