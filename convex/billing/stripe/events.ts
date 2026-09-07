@@ -8,15 +8,10 @@ import {
 import { type Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { readArray, readRecord, readString } from "../../shared/input"
-import {
-  ensureAccount,
-  getAccount,
-  holdAutoTopUp,
-  trialRemainderMicros,
-} from "../account"
+import { getAccount, holdAutoTopUp, trialRemainderMicros } from "../account"
 import { addMonths } from "../cycle"
 import { creditTopUp, resetAllowance } from "../ledger"
-import { planForPriceId } from "./config"
+import { belongsToRegion, planForPriceId } from "./config"
 
 /**
  * The single place Stripe state enters Jori. Each event is applied in one
@@ -29,6 +24,9 @@ export const apply = internalMutation({
   handler: async (ctx, args) => {
     const type = readString(args.event, "type")
     const object = readRecord(readRecord(readRecord(args.event).data).object)
+    if (!belongsToRegion(object)) {
+      return null
+    }
     const deleted = type === "customer.subscription.deleted"
     const paid = type === "payment_intent.succeeded"
 
@@ -51,16 +49,19 @@ async function applyCheckoutCompleted(
   const metadata = readRecord(session.metadata)
   const organizationId = readString(metadata, "organizationId")
 
-  if (organizationId === undefined) {
+  if (organizationId === undefined || session.payment_status !== "paid") {
     return
   }
 
-  const account = await ensureAccount(ctx, organizationId)
-  const customerId =
-    readString(session, "customer") ?? account.stripe?.customerId
+  const account = await getAccount(ctx, organizationId)
+  const customerId = readString(session, "customer")
 
-  if (customerId !== undefined && account.stripe === undefined) {
-    await ctx.db.patch(account._id, { stripe: { customerId } })
+  if (
+    account === null ||
+    customerId === undefined ||
+    account.stripe?.customerId !== customerId
+  ) {
+    return
   }
 
   const kind = readString(metadata, "kind")

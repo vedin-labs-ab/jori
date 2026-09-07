@@ -4,10 +4,11 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
+import { requireReturnUrl } from "../../shared/origin"
 import { requireActivePlan } from "../account"
 import { interval, plan } from "../schema"
 import { requireString, stripeRequest } from "./client"
-import { stripePriceId } from "./config"
+import { stripeMetadata, stripePriceId } from "./config"
 
 /**
  * The hosted-surface edge: checkout for subscribing and topping up, and the
@@ -24,6 +25,7 @@ export const startPlanCheckout = action({
   },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
+    const returnUrl = requireReturnUrl(args.returnUrl)
 
     const account = await ensuredAccount(ctx, args.organizationId)
 
@@ -37,20 +39,21 @@ export const startPlanCheckout = action({
     const session = await stripeRequest("/v1/checkout/sessions", {
       params: {
         mode: "subscription",
+        payment_method_types: { "0": "card" },
         customer,
-        success_url: `${args.returnUrl}?billing=subscribed`,
-        cancel_url: `${args.returnUrl}?billing=canceled`,
+        success_url: billingReturnUrl(returnUrl, "subscribed"),
+        cancel_url: billingReturnUrl(returnUrl, "canceled"),
         line_items: {
           "0": { price: stripePriceId(args.plan, args.interval), quantity: 1 },
         },
-        metadata: {
+        metadata: stripeMetadata({
           organizationId: args.organizationId,
           kind: "plan",
           plan: args.plan,
           interval: args.interval,
-        },
+        }),
         subscription_data: {
-          metadata: { organizationId: args.organizationId },
+          metadata: stripeMetadata({ organizationId: args.organizationId }),
         },
         automatic_tax: { enabled: true },
         tax_id_collection: { enabled: true },
@@ -77,6 +80,7 @@ export const startTopUpCheckout = action({
   },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
+    const returnUrl = requireReturnUrl(args.returnUrl)
 
     if (
       !Number.isInteger(args.amountUsd) ||
@@ -95,9 +99,10 @@ export const startTopUpCheckout = action({
     const session = await stripeRequest("/v1/checkout/sessions", {
       params: {
         mode: "payment",
+        payment_method_types: { "0": "card" },
         customer,
-        success_url: `${args.returnUrl}?billing=topped-up`,
-        cancel_url: `${args.returnUrl}?billing=canceled`,
+        success_url: billingReturnUrl(returnUrl, "topped-up"),
+        cancel_url: billingReturnUrl(returnUrl, "canceled"),
         line_items: {
           "0": {
             price_data: {
@@ -108,12 +113,15 @@ export const startTopUpCheckout = action({
             quantity: 1,
           },
         },
-        payment_intent_data: { setup_future_usage: "off_session" },
-        metadata: {
+        payment_intent_data: {
+          setup_future_usage: "off_session",
+          metadata: stripeMetadata({ organizationId: args.organizationId }),
+        },
+        metadata: stripeMetadata({
           organizationId: args.organizationId,
           kind: "top-up",
           micros: String(micros),
-        },
+        }),
       },
     })
 
@@ -125,6 +133,7 @@ export const openPortal = action({
   args: { organizationId: v.string(), returnUrl: v.string() },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
+    const returnUrl = requireReturnUrl(args.returnUrl)
 
     const account = await ensuredAccount(ctx, args.organizationId)
 
@@ -135,7 +144,7 @@ export const openPortal = action({
     const session = await stripeRequest("/v1/billing_portal/sessions", {
       params: {
         customer: account.stripe.customerId,
-        return_url: args.returnUrl,
+        return_url: returnUrl,
       },
     })
 
@@ -165,7 +174,7 @@ async function ensuredCustomer(
   const customer = await stripeRequest("/v1/customers", {
     params: {
       ...(identity?.email === undefined ? {} : { email: identity.email }),
-      metadata: { organizationId },
+      metadata: stripeMetadata({ organizationId }),
     },
   })
   const customerId = requireString(customer, "id")
@@ -176,4 +185,10 @@ async function ensuredCustomer(
   })
 
   return customerId
+}
+
+function billingReturnUrl(returnUrl: string, status: string) {
+  const url = new URL(returnUrl)
+  url.searchParams.set("billing", status)
+  return url.toString()
 }

@@ -8,6 +8,16 @@ import {
   readEnvironmentVariable,
   requireEnvironmentVariable,
 } from "../../shared/environment"
+import { readRecord, readString } from "../../shared/input"
+import { requireRegion } from "../../shared/origin"
+
+export function stripeMetadata(values: Record<string, string>) {
+  return { ...values, region: requireRegion() }
+}
+
+export function belongsToRegion(object: Record<string, unknown>) {
+  return readString(readRecord(object.metadata), "region") === requireRegion()
+}
 
 export function requireStripeSecretKey() {
   return requireEnvironmentVariable("STRIPE_SECRET_KEY")
