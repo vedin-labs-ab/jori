@@ -10,16 +10,24 @@ const maxResultLength = 8000
 export async function finishRun(runtime: AgentRuntime, input: JsonObject) {
   const reason = optionalString(input.reason)
   const result = optionalString(input.result)
-  const communicated = runtime.context.activeSurface?.communicated ?? false
+  const surface = runtime.context.activeSurface
+  const communicated = surface?.communicated ?? false
 
-  if (
-    runtime.context.activeSurface !== null &&
-    !communicated &&
-    reason === undefined
-  ) {
-    throw new Error(
-      "finish_run requires reason when no visible communication was sent."
-    )
+  // A message on an integration may warrant no reply — one not meant for
+  // Jori, say — given a reason. A message in the chat is always for Jori,
+  // so ending it silently leaves the person looking at nothing.
+  if (surface !== null && !communicated) {
+    if (surface.surface === "console") {
+      throw new Error(
+        "Every message in the chat gets a reply: call send_reply before finish_run."
+      )
+    }
+
+    if (reason === undefined) {
+      throw new Error(
+        "finish_run requires reason when no visible communication was sent."
+      )
+    }
   }
 
   if (result !== undefined && result.length > maxResultLength) {
