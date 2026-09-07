@@ -6,7 +6,11 @@ import { imageModel, vertexConfiguration } from "./config"
 import { vertexUsage } from "./usage"
 
 type Image = { bytes: Uint8Array; mimeType: string }
-export type GeneratedImage = { image: Image | null; usage: ProviderUsage }
+export type GeneratedImage = {
+  image: Image | null
+  usage: ProviderUsage
+  failure?: string
+}
 
 export async function generateVertexImage(
   prompt: string
@@ -43,6 +47,7 @@ export async function generateVertexImage(
   ) {
     throw new Error("Vertex image response is missing its request ID.")
   }
+  const image = readImage(result.candidates)
   return {
     usage: {
       provider: "vertex",
@@ -50,7 +55,65 @@ export async function generateVertexImage(
       requestId: result.responseId,
       ...vertexUsage(result.usageMetadata),
     },
-    image: readImage(result.candidates),
+    image,
+    ...(image === null ? { failure: imageFailure(result.candidates) } : {}),
+  }
+}
+
+/** Only fixed codes and counts cross the provider edge, never response text. */
+function imageFailure(candidates: unknown): string {
+  if (!Array.isArray(candidates) || candidates.length === 0) {
+    return "Vertex returned no image candidates."
+  }
+  const reasons: string[] = []
+  for (const candidate of candidates.slice(0, 3)) {
+    if (!isRecord(candidate)) {
+      reasons.push("invalid candidate")
+      continue
+    }
+    const finish = imageFinishReason(candidate.finishReason)
+    const parts = isRecord(candidate.content) ? candidate.content.parts : null
+    reasons.push(`${finish}; ${imagePartFailure(parts)}`)
+  }
+  return `Vertex returned no supported image (${reasons.join(", ")}).`
+}
+
+function imagePartFailure(parts: unknown) {
+  if (!Array.isArray(parts) || parts.length === 0) {
+    return "missing content parts"
+  }
+  const inline = parts.find(
+    (part) => isRecord(part) && isRecord(part.inlineData)
+  )
+  if (inline === undefined) {
+    return "missing inline image"
+  }
+  if (
+    typeof inline.inlineData.data !== "string" ||
+    inline.inlineData.data === ""
+  ) {
+    return "missing inline bytes"
+  }
+  return "unsupported image media type"
+}
+
+function imageFinishReason(value: unknown) {
+  switch (value) {
+    case "STOP":
+    case "MAX_TOKENS":
+    case "SAFETY":
+    case "RECITATION":
+    case "BLOCKLIST":
+    case "PROHIBITED_CONTENT":
+    case "SPII":
+    case "IMAGE_SAFETY":
+    case "IMAGE_PROHIBITED_CONTENT":
+    case "IMAGE_RECITATION":
+    case "IMAGE_OTHER":
+    case "NO_IMAGE":
+      return value
+    default:
+      return "unknown finish reason"
   }
 }
 

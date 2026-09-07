@@ -22,7 +22,9 @@ export async function generateImageFile(
   await runtime.platform.recordUsage(result.usage)
   const generated = result.image
   if (generated === null) {
-    throw new Error("Vertex did not return a generated image.")
+    throw new Error(
+      result.failure ?? "Vertex did not return a generated image."
+    )
   }
   const name = imageFileName(request.save.name, generated.mimeType)
   const workspacePath = `${generatedImageDirectory}/${name}`

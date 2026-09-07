@@ -60,6 +60,23 @@ test("accounts for incurred usage even when the provider produces no image", asy
   expect(runtime.sandbox.importFile).not.toHaveBeenCalled()
 })
 
+test("records usage before reporting the provider's content-free classification", async () => {
+  const failure =
+    "Vertex returned no supported image (IMAGE_SAFETY; missing content parts)."
+  vi.mocked(generateVertexImage).mockResolvedValue({
+    image: null,
+    usage,
+    failure,
+  })
+  const runtime = imageRuntime()
+  await expect(
+    generateImageFile(runtime, { prompt: "Create an image." })
+  ).rejects.toThrow(failure)
+  expect(runtime.platform.recordUsage).toHaveBeenCalledExactlyOnceWith(usage)
+  expect(runtime.platform.uploadFile).not.toHaveBeenCalled()
+  expect(runtime.sandbox.importFile).not.toHaveBeenCalled()
+})
+
 test("records the provider charge before a file write can fail", async () => {
   const runtime = imageRuntime()
   vi.mocked(runtime.platform.uploadFile).mockRejectedValue(

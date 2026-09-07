@@ -65,6 +65,49 @@ test("returns billable usage for a response with no image", async () => {
   fetchMock.mockResolvedValue(Response.json({ ...response(), candidates: [] }))
   expect(await generateVertexImage("test")).toMatchObject({
     image: null,
+    failure: "Vertex returned no image candidates.",
+    usage: { micros: 73930 },
+  })
+})
+
+test.each([
+  [{ finishReason: "IMAGE_SAFETY" }, "IMAGE_SAFETY; missing content parts"],
+  [
+    { finishReason: "STOP", content: { parts: [{ text: "private output" }] } },
+    "STOP; missing inline image",
+  ],
+  [
+    {
+      finishReason: "STOP",
+      content: { parts: [{ inlineData: { mimeType: "image/png", data: "" } }] },
+    },
+    "STOP; missing inline bytes",
+  ],
+  [
+    {
+      finishReason: "STOP",
+      content: {
+        parts: [
+          { inlineData: { mimeType: "private media type", data: "data" } },
+        ],
+      },
+    },
+    "STOP; unsupported image media type",
+  ],
+  [
+    {
+      finishReason: "private provider message",
+      finishMessage: "private output",
+    },
+    "unknown finish reason; missing content parts",
+  ],
+])("classifies missing output without retaining provider content: %j", async (candidate, reason) => {
+  fetchMock.mockResolvedValue(
+    Response.json({ ...response(), candidates: [candidate] })
+  )
+  expect(await generateVertexImage("private prompt")).toMatchObject({
+    image: null,
+    failure: `Vertex returned no supported image (${reason}).`,
     usage: { micros: 73930 },
   })
 })
