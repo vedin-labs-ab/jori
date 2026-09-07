@@ -46,8 +46,10 @@ test("a store's value shows in the pane, with its menu on the pane's name and no
               }}
             />
           )}
+          autoOpens
           composer={null}
           onActivate={vi.fn()}
+          onAutoOpens={vi.fn()}
           onClose={vi.fn()}
           onCloseAll={vi.fn()}
           onCloseBeside={vi.fn()}

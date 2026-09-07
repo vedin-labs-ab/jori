@@ -13,6 +13,8 @@ import { type PaneSide, type PaneTab } from "./state"
 
 export type PaneStripProps = {
   active: ReferenceTarget | null
+  autoOpens: boolean
+  onAutoOpens: (on: boolean) => void
   onActivate: (target: ReferenceTarget) => void
   onClose: (target: ReferenceTarget) => void
   onCloseAll: () => void
@@ -93,7 +95,9 @@ export function PaneStrip({
  *  filled, always. A right click, or the menu key on the focused tab,
  *  opens the tab's menu. */
 function PaneTabItem({
+  autoOpens,
   index,
+  onAutoOpens,
   onClose,
   onCloseAll,
   onCloseBeside,
@@ -102,7 +106,9 @@ function PaneTabItem({
   tab,
   tabs,
 }: {
+  autoOpens: boolean
   index: number
+  onAutoOpens: (on: boolean) => void
   onClose: (target: ReferenceTarget) => void
   onCloseAll: () => void
   onCloseBeside: (target: ReferenceTarget, side: PaneSide) => void
@@ -165,7 +171,9 @@ function PaneTabItem({
         </div>
       </ContextMenuTrigger>
       <PaneTabMenu
+        autoOpens={autoOpens}
         index={index}
+        onAutoOpens={onAutoOpens}
         onClose={onClose}
         onCloseAll={onCloseAll}
         onCloseBeside={onCloseBeside}

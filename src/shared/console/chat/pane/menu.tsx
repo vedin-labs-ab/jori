@@ -1,4 +1,5 @@
 import {
+  ContextMenuCheckboxItem,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
@@ -12,7 +13,9 @@ import { type PaneSide, type PaneTab } from "./state"
  *  would take nothing is there but disabled, so the menu reads the same
  *  on every tab. */
 export function PaneTabMenu({
+  autoOpens,
   index,
+  onAutoOpens,
   onClose,
   onCloseAll,
   onCloseBeside,
@@ -20,7 +23,9 @@ export function PaneTabMenu({
   tab,
   tabs,
 }: {
+  autoOpens: boolean
   index: number
+  onAutoOpens: (on: boolean) => void
   onClose: (target: ReferenceTarget) => void
   onCloseAll: () => void
   onCloseBeside: (target: ReferenceTarget, side: PaneSide) => void
@@ -59,6 +64,13 @@ export function PaneTabMenu({
         Close to the right
       </ContextMenuItem>
       <ContextMenuItem onSelect={onCloseAll}>Close all</ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuCheckboxItem
+        checked={autoOpens}
+        onCheckedChange={onAutoOpens}
+      >
+        Open new resources automatically
+      </ContextMenuCheckboxItem>
     </ContextMenuContent>
   )
 }
