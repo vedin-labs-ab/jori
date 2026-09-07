@@ -1,37 +1,30 @@
-import { useMutation, useQuery } from "convex/react"
-import { type FunctionArgs, type FunctionReturnType } from "convex/server"
+import { useQuery } from "convex/react"
+import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatPane } from "@/shared/console/chat/pane"
 import { useReplyReferences } from "@/shared/console/chat/pane/auto"
-import { type OpenTarget, usePaneTabs } from "@/shared/console/chat/pane/tabs"
+import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
 import { ChatThread } from "@/shared/console/chat/thread"
 import {
-  type ChatRun,
   isLiveRun,
   type ReferenceTarget,
   type ResolveReference,
 } from "@/shared/console/chat/types"
-import { showErrorToast } from "@/shared/console/error"
-import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { type MentionSources } from "@/shared/console/mentions/sources"
-import { useDocumentTitle } from "@/shared/console/shell/title"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import { useMentionSources } from "./mentions"
-import { useConversationMessages } from "./messages"
-import { useChooseModel } from "./models"
+import {
+  type LiveConversation,
+  useConversation,
+  useThreadChrome,
+} from "./conversation"
+import { type useConversationMessages } from "./messages"
 import { ConversationPaneBody } from "./pane"
 import { ChatProgress } from "./progress"
-import { useReferences } from "./references"
-import { useSendMessage } from "./send"
 
-type LiveConversation = Extract<
-  FunctionReturnType<typeof api.conversations.console.live>,
-  { status: "ready" }
->
 type SendAnswer = FunctionArgs<typeof api.conversations.console.send>["answer"]
 
 /** One conversation with Jori: its turns, the run answering the latest
@@ -106,38 +99,32 @@ function ConversationThread({
   live: LiveConversation
   organizationId: string
 }) {
-  const page = useConversationMessages(organizationId, conversationId)
-  const send = useSendMessage(organizationId)
-  const choose = useChooseModel(organizationId, conversationId)
-  const stop = useStopRun(organizationId, live.run)
-  const resolveReference = useReferences(organizationId, page.messages)
-  const mentions = useMentionSources(organizationId)
-  const { autoOpen, openTarget, pane, releaseTarget } = usePaneTabs()
+  const thread = useConversation(organizationId, conversationId, live)
+  const { pane, page, resolveReference } = thread
 
-  useDocumentTitle(live.title === "" ? undefined : `${live.title} · Jori`)
-  useMaterialBreadcrumb(live.title)
-  useReplyReferences(conversationId, page.messages, autoOpen)
+  useThreadChrome(live.title)
+  useReplyReferences(conversationId, page.messages, thread.autoOpen)
 
   return (
     <ChatPane
       {...pane}
-      body={paneBody(organizationId, openTarget)}
+      body={paneBody(organizationId, thread.openTarget)}
       composer={
         <ChatComposer
           autoFocus
           live={live.run}
-          mentions={mentions}
-          onSelect={choose}
+          mentions={thread.mentions}
+          onMention={thread.mentioned.open}
+          onSelect={thread.choose}
           onSend={(text, references) =>
-            void send({
+            void thread.send({
               conversationId,
               text,
               ...(references.length === 0 ? {} : { references }),
             })
           }
-          onMention={openTarget}
-          onUnmention={releaseTarget}
-          onStop={stop}
+          onStop={thread.stop}
+          onUnmention={thread.releaseTarget}
           resolve={resolveReference}
           selection={live.model}
           usage={live.context}
@@ -147,14 +134,14 @@ function ConversationThread({
     >
       <ConversationTurns
         live={live}
-        mentions={mentions}
-        onOpenReference={openTarget}
-        onStop={stop}
+        mentions={thread.mentions}
+        onOpenReference={thread.openTarget}
+        onStop={thread.stop}
         organizationId={organizationId}
         page={page}
         resolveReference={resolveReference}
         send={(text, answer) =>
-          void send({
+          void thread.send({
             conversationId,
             text,
             ...(answer === undefined ? {} : { answer }),
@@ -230,19 +217,4 @@ function ConversationTurns({
       usage={live.context}
     />
   )
-}
-
-/** Stops the live run the way the Activity page does; a failure says so. */
-function useStopRun(organizationId: string, run: ChatRun | null) {
-  const stop = useMutation(api.runs.control.stop)
-
-  return () => {
-    if (run === null) {
-      return
-    }
-
-    void stop({ organizationId, runId: run.id as GenericId<"runs"> }).catch(
-      (error: unknown) => showErrorToast(error, "Couldn't stop the run.")
-    )
-  }
 }
