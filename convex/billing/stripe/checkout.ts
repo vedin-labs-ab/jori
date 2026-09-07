@@ -39,7 +39,6 @@ export const startPlanCheckout = action({
     const session = await stripeRequest("/v1/checkout/sessions", {
       params: {
         mode: "subscription",
-        payment_method_types: { "0": "card" },
         customer,
         success_url: billingReturnUrl(returnUrl, "subscribed"),
         cancel_url: billingReturnUrl(returnUrl, "canceled"),
@@ -99,7 +98,6 @@ export const startTopUpCheckout = action({
     const session = await stripeRequest("/v1/checkout/sessions", {
       params: {
         mode: "payment",
-        payment_method_types: { "0": "card" },
         customer,
         success_url: billingReturnUrl(returnUrl, "topped-up"),
         cancel_url: billingReturnUrl(returnUrl, "canceled"),

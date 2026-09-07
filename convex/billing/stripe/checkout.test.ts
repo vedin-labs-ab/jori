@@ -43,7 +43,7 @@ test.each([
   expect(stripeRequest).not.toHaveBeenCalled()
 })
 
-test("subscription checkout uses card payments and regional metadata", async () => {
+test("subscription checkout uses regional metadata and dynamic methods", async () => {
   await invoke(startPlanCheckout, context().ctx, {
     ...common,
     plan: "starter",
@@ -51,7 +51,6 @@ test("subscription checkout uses card payments and regional metadata", async () 
   })
   expect(stripeRequest).toHaveBeenCalledWith("/v1/checkout/sessions", {
     params: expect.objectContaining({
-      payment_method_types: { "0": "card" },
       metadata: expect.objectContaining({ region: "eu" }),
       subscription_data: {
         metadata: { organizationId: "organization-1", region: "eu" },
@@ -62,13 +61,15 @@ test("subscription checkout uses card payments and regional metadata", async () 
         "https://eu.usejori.com/settings?tab=billing&billing=canceled",
     }),
   })
+  expect(
+    vi.mocked(stripeRequest).mock.calls[0]?.[1]?.params
+  ).not.toHaveProperty("payment_method_types")
 })
 
 test("top-up checkout tags both session and payment intent", async () => {
   await invoke(startTopUpCheckout, context().ctx, { ...common, amountUsd: 25 })
   expect(stripeRequest).toHaveBeenCalledWith("/v1/checkout/sessions", {
     params: expect.objectContaining({
-      payment_method_types: { "0": "card" },
       metadata: expect.objectContaining({ region: "eu", kind: "top-up" }),
       payment_intent_data: {
         setup_future_usage: "off_session",
@@ -76,6 +77,9 @@ test("top-up checkout tags both session and payment intent", async () => {
       },
     }),
   })
+  expect(
+    vi.mocked(stripeRequest).mock.calls[0]?.[1]?.params
+  ).not.toHaveProperty("payment_method_types")
 })
 
 test("new Stripe customers carry the deployment region", async () => {
