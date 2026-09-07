@@ -18,6 +18,20 @@ initial choice, but does not move an existing tenant or override that choice.
 Switching instances starts a fresh navigation; it does not copy authentication,
 resource IDs, search parameters, or customer records to the other region.
 
+Marketing stays on `usejori.com`, including pricing, trust, privacy and terms.
+Regional roots enter `/console`, whose existing route forwards to `/chat` and
+the regional sign-in gate. Marketing never reads regional sessions. Its sign-in
+links perform a full navigation through the public region preference before
+loading authentication on a regional host. Region changes start at `/sign-in`
+without forwarding account IDs, query strings or callback tokens.
+
+The public waitlist has an explicit region selector. The browser posts directly
+to the selected `VITE_JORI_EU_SITE_URL` or `VITE_JORI_US_SITE_URL`, with cookies
+and referrers omitted and redirects rejected. Both builds carry these public
+addresses; each build's own address must match `VITE_CONVEX_SITE_URL`. Only the
+waitlist HTTP route allows `JORI_PUBLIC_ORIGIN` in CORS. This does not widen
+authentication origins. Signed-in waitlist forms stay in the account's region.
+
 | Resource | EU instance | US instance |
 | --- | --- | --- |
 | Application origin | `eu.usejori.com` | `us.usejori.com` |
@@ -61,6 +75,11 @@ public region selector. Use host-only analytics cookies and do not identify or
 alias users across instances. A project token cannot prove its region by its
 format; configuration review and a synthetic ingestion check must verify the
 token/host pairing before release.
+
+Public marketing collects the same minimized anonymous page events into its
+hosting project's analytics endpoint. Its host-only identifiers are separate
+from both consoles. Waitlist region selection does not move analytics identity,
+and form contents are never analytics properties.
 [PostHog projects](https://posthog.com/docs/settings/projects),
 [SDK configuration](https://posthog.com/docs/libraries/js/config).
 

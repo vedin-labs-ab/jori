@@ -11,6 +11,7 @@ function target(region: "eu" | "us") {
     VITE_CONVEX_URL: `https://${host}.convex.cloud`,
     VITE_CONVEX_SITE_URL: `https://${host}.convex.site`,
     VITE_JORI_REGION: region,
+    [`VITE_JORI_${region.toUpperCase()}_SITE_URL`]: `https://${host}.convex.site`,
   }
 }
 

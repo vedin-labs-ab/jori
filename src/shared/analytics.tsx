@@ -32,7 +32,8 @@ export function Analytics({ children }: { children: ReactNode }) {
     if (
       configuration === undefined ||
       page === undefined ||
-      window.location.origin !== origin
+      (window.location.origin !== origin &&
+        window.location.origin !== regionConfig.publicOrigin)
     ) {
       return
     }

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { Menu } from "lucide-react"
-import { lazy, type ReactNode, Suspense } from "react"
+import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,12 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { BrandLink } from "@/shared/brand/link"
-import { usePublicSession } from "@/shared/session/public"
-import { GetStarted, SessionButton } from "./cta"
+import { regionConfig } from "@/shared/region/config"
+import { GetStarted } from "./cta"
 
-const LandingAccount = lazy(() =>
-  import("./account").then((module) => ({ default: module.LandingAccount }))
-)
+const signInUrl = new URL("/sign-in", regionConfig.publicOrigin).toString()
 
 const navLinks = [
   { label: "Trust", to: "/trust" },
@@ -71,9 +69,6 @@ function NavLink({ children, to }: { children: ReactNode; to: string }) {
  * group one decision wide.
  */
 function MobileNav() {
-  const session = usePublicSession()
-  const isSignedIn = session.data !== null && session.data !== undefined
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -97,38 +92,26 @@ function MobileNav() {
             <Link to={link.to}>{link.label}</Link>
           </DropdownMenuItem>
         ))}
-        {isSignedIn ? null : (
-          <DropdownMenuItem asChild>
-            <Link to="/sign-in">Sign in</Link>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem asChild>
+          <a href={signInUrl}>Sign in</a>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
 function HeaderActions({ onWaitlistPage }: { onWaitlistPage: boolean }) {
-  const session = usePublicSession()
-  const isSignedIn = session.data !== null && session.data !== undefined
-
   return (
     <div className="flex items-center gap-2">
-      {isSignedIn ? null : (
-        <SessionButton
-          className="hidden sm:inline-flex"
-          pending={session.isPending}
-          to="/sign-in"
-          variant="ghost"
-        >
-          Sign in
-        </SessionButton>
-      )}
+      <Button
+        asChild
+        className="hidden sm:inline-flex"
+        size="lg"
+        variant="ghost"
+      >
+        <a href={signInUrl}>Sign in</a>
+      </Button>
       <GetStarted onWaitlistPage={onWaitlistPage} />
-      {isSignedIn ? (
-        <Suspense fallback={<div aria-hidden="true" className="size-8" />}>
-          <LandingAccount />
-        </Suspense>
-      ) : null}
     </div>
   )
 }

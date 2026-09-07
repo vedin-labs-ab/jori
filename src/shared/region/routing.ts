@@ -1,6 +1,7 @@
 import { isRegion, type Region } from "@contracts/region"
 import { type RegionConfig, requireRegionOrigin } from "./config"
 import { estimateRegion } from "./geography"
+import { isMarketingPath } from "./paths"
 import { readRegionPreference, regionPreferenceHeader } from "./preference"
 
 export function handleRegionRequest(
@@ -12,7 +13,7 @@ export function handleRegionRequest(
   const currentOrigin = requireRegionOrigin(config, config.current)
 
   if (requestOrigin === currentOrigin) {
-    return null
+    return regionalMarketingRedirect(request, requestUrl, currentOrigin, config)
   }
 
   const canonical = canonicalHostRedirect(request, requestUrl, config)
@@ -25,9 +26,37 @@ export function handleRegionRequest(
     return textResponse("Misdirected request.", 421)
   }
 
+  return publicRequest(request, requestUrl, config)
+}
+
+function regionalMarketingRedirect(
+  request: Request,
+  url: URL,
+  origin: string,
+  config: RegionConfig
+) {
+  if (origin === config.publicOrigin || !isMarketingPath(url.pathname)) {
+    return null
+  }
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return textResponse("Misdirected request.", 421)
+  }
+  return redirectResponse(
+    url.pathname === "/"
+      ? new URL("/console", origin).toString()
+      : new URL(url.pathname, config.publicOrigin).toString(),
+    config.publicOrigin
+  )
+}
+
+function publicRequest(
+  request: Request,
+  requestUrl: URL,
+  config: RegionConfig
+) {
   if (
-    requestUrl.pathname === "/api/auth" ||
-    requestUrl.pathname.startsWith("/api/auth/")
+    requestUrl.pathname === "/api" ||
+    requestUrl.pathname.startsWith("/api/")
   ) {
     return textResponse("Not found.", 404)
   }
@@ -40,9 +69,19 @@ export function handleRegionRequest(
     return textResponse("Misdirected request.", 421)
   }
 
+  if (isMarketingPath(requestUrl.pathname)) {
+    return null
+  }
+
   const preferred = readRegionPreference(request, config)
   const region = preferred ?? estimateRegion(request, config)
-  const target = regionalUrl(config, region, requestPath(requestUrl))
+  // A public link never carries tenant IDs, auth codes or return queries into
+  // an inferred region. Existing deep links must name their regional host.
+  const target = regionalUrl(
+    config,
+    region,
+    requestUrl.pathname === "/sign-in" ? "/sign-in" : "/console"
+  )
 
   return redirectResponse(
     target,
@@ -95,7 +134,7 @@ function handleRegionSelection(
   }
 
   return redirectResponse(
-    regionalUrl(config, candidate),
+    regionalUrl(config, candidate, "/sign-in"),
     config.publicOrigin,
     candidate
   )
@@ -121,11 +160,16 @@ function canonicalHostRedirect(
     return null
   }
 
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return textResponse("Misdirected request.", 421)
+  }
+
   return new Response(null, {
     headers: {
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "private, no-store",
+      "Referrer-Policy": "no-referrer",
       Location: new URL(
-        normalizeReturnPath(requestPath(requestUrl)),
+        isMarketingPath(requestUrl.pathname) ? requestUrl.pathname : "/sign-in",
         config.publicOrigin
       ).toString(),
     },
@@ -191,10 +235,6 @@ function requireEnabledRegion(config: RegionConfig, region: Region) {
   if (!config.enabled.has(region)) {
     throw new Error(`Region ${region} is not available.`)
   }
-}
-
-function requestPath(url: URL) {
-  return `${url.pathname}${url.search}${url.hash}`
 }
 
 function textResponse(body: string, status: number) {

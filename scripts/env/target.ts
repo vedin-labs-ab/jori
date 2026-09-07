@@ -45,4 +45,10 @@ export function validateTarget(env: NodeJS.ProcessEnv, region: Region) {
       "The deploy key must belong to this exact production deployment"
     )
   }
+  if (
+    env[`VITE_JORI_${region.toUpperCase()}_SITE_URL`] !==
+    env.VITE_CONVEX_SITE_URL
+  ) {
+    throw new Error("Waitlist must target the same regional Convex deployment")
+  }
 }

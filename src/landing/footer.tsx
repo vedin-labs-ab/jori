@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router"
 import { BrandLink } from "@/shared/brand/link"
-import { RegionPicker } from "@/shared/region/picker"
 
 const footerLinks = [
   { label: "Trust", to: "/trust" },
@@ -35,7 +34,6 @@ export function LandingFooter() {
               </Link>
             ))}
           </nav>
-          <RegionPicker />
         </div>
       </div>
     </footer>

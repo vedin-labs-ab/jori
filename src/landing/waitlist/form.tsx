@@ -1,3 +1,4 @@
+import { type Region } from "@contracts/region"
 import {
   readWaitlistEntry,
   teamSizeLabels,
@@ -14,6 +15,8 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { FieldHelp } from "@/shared/field"
+import { regionConfig } from "@/shared/region/config"
+import { RegionPicker } from "@/shared/region/picker"
 import { joinWaitlist } from "./client"
 
 type Status = "idle" | "submitting" | "joined"
@@ -39,6 +42,7 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
   const form = useRef<HTMLFormElement>(null)
   const [status, setStatus] = useState<Status>("idle")
   const [rejection, setRejection] = useState<Rejection>()
+  const [region, setRegion] = useState(regionConfig.current)
 
   useRejectionFocus(form, fieldId, rejection)
 
@@ -65,7 +69,10 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
     setStatus("submitting")
     setRejection(undefined)
 
-    const outcome = await requestSpot(fields)
+    const outcome = await requestSpot(
+      fields,
+      lockedEmail === undefined ? region : regionConfig.current
+    )
 
     setRejection(outcome)
     setStatus(outcome === undefined ? "joined" : "idle")
@@ -91,6 +98,14 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
         <SizeField fieldId={fieldId} invalid={invalid} rejection={rejection} />
       </div>
       <WorkField fieldId={fieldId} invalid={invalid} rejection={rejection} />
+      {lockedEmail === undefined ? (
+        <RegionPicker
+          layout="field"
+          value={region}
+          onChange={setRegion}
+          disabled={status === "submitting"}
+        />
+      ) : null}
       <Honeypot />
       <div>
         <Button disabled={status === "submitting"} type="submit">
@@ -228,8 +243,8 @@ function readFields(form: HTMLFormElement, lockedEmail?: string): Fields {
 
 /** One round trip, reduced to what the form does next: a rejection to show,
  *  or nothing left to say. */
-async function requestSpot(fields: Fields) {
-  const result = await joinWaitlist(fields).catch(
+async function requestSpot(fields: Fields, region: Region) {
+  const result = await joinWaitlist(fields, region).catch(
     () => ({ status: "failed" }) as const
   )
 

@@ -10,10 +10,6 @@ vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../test/routing")),
 }))
 
-vi.mock("@/shared/session/public", () => ({
-  usePublicSession: () => ({ data: null, isPending: false }),
-}))
-
 // jsdom has no layout, so the grid's scrollport would measure 0x0 and its
 // virtualizer would mount no rows once the chip opens the table.
 beforeEach(() => {

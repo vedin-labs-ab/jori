@@ -14,13 +14,23 @@ const joinWaitlist = vi.hoisted(() => vi.fn())
 
 vi.mock("./client", () => ({ joinWaitlist }))
 
+vi.mock("@/shared/region/config", async (original) => ({
+  ...(await original<typeof import("@/shared/region/config")>()),
+  regionConfig: {
+    current: "us",
+    enabled: new Set(["eu", "us"]),
+    origins: { eu: "https://eu.usejori.com", us: "https://us.usejori.com" },
+    publicOrigin: "https://usejori.com",
+  },
+}))
+
 afterEach(() => {
   cleanup()
   joinWaitlist.mockReset()
 })
 
 function fill() {
-  fireEvent.change(screen.getByLabelText("Work email"), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Work email" }), {
     target: { value: "maya@copperline.example" },
   })
   fireEvent.change(screen.getByLabelText(/by hand every week/), {
@@ -28,6 +38,32 @@ function fill() {
   })
   fireEvent.submit(screen.getByRole("button", { name: "Join the waitlist" }))
 }
+
+test("keeps marketing on the page and submits to the explicitly selected region", async () => {
+  joinWaitlist.mockResolvedValue({ status: "joined" })
+  render(<WaitlistForm />)
+  fireEvent.change(screen.getByLabelText("Data region"), {
+    target: { value: "eu" },
+  })
+  fill()
+  await screen.findByText("You're on the list.")
+  expect(joinWaitlist).toHaveBeenCalledWith(
+    expect.objectContaining({ email: "maya@copperline.example" }),
+    "eu"
+  )
+})
+
+test("an authenticated waitlist submission stays in its account region", async () => {
+  joinWaitlist.mockResolvedValue({ status: "joined" })
+  render(<WaitlistForm lockedEmail="member@example.test" />)
+  expect(screen.queryByLabelText("Data region")).toBeNull()
+  fill()
+  await screen.findByText("You're on the list.")
+  expect(joinWaitlist).toHaveBeenCalledWith(
+    expect.objectContaining({ email: "member@example.test" }),
+    "us"
+  )
+})
 
 test("moves focus to the confirmation, so the swap is never silent", async () => {
   joinWaitlist.mockResolvedValue({ status: "joined" })
