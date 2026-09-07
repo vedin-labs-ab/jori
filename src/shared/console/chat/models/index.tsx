@@ -14,7 +14,12 @@ import {
   tierOrder,
   tiers,
 } from "@contracts/models/selection"
-import { ChevronDown, SignalHigh, SignalLow, SignalMedium } from "lucide-react"
+import {
+  BatteryFull,
+  BatteryLow,
+  BatteryMedium,
+  ChevronDown,
+} from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,12 +34,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { InputGroupButton } from "@/components/ui/input-group"
+import { VendorLogo } from "@/shared/logo/vendor"
 
-/** One, two, or three bars: how much the tier spends on a turn. */
+/** A battery low, half, or full: how much the tier spends on a turn. */
 const tierIcons = {
-  basic: SignalLow,
-  standard: SignalMedium,
-  premium: SignalHigh,
+  basic: BatteryLow,
+  standard: BatteryMedium,
+  premium: BatteryFull,
 } as const
 
 const vendorOrder: ModelVendor[] = ["openai", "anthropic"]
@@ -86,6 +92,7 @@ export function ModelPicker({
           {vendorOrder.map((vendor) => (
             <DropdownMenuSub key={vendor}>
               <DropdownMenuSubTrigger>
+                <VendorLogo vendor={vendor} />
                 {modelVendors[vendor]}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-48">
