@@ -7,7 +7,7 @@ import { FileMenuItems } from "@/shared/console/files/menu"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
-import { menuWidth } from "@/shared/console/menu"
+import { MenuLead, menuWidth } from "@/shared/console/menu"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
@@ -135,7 +135,7 @@ export function FileMenu({
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
       <DropdownMenuContent align="start" className={menuWidth}>
-        {lead}
+        <MenuLead>{lead}</MenuLead>
         <FileMenuItems
           file={fileRowOf(material)}
           isPending={false}

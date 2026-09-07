@@ -36,8 +36,9 @@ export type FileCopySource = {
 
 /** The file's own lines for its title menu: provenance, the way an HTML
  *  file is shown, and a copy of the text — each only where the view has
- *  it. `view` is absent for every file but HTML, which leaves the group
- *  out rather than offering a choice of one. */
+ *  it, and a divider only between two of them; whatever a host sets
+ *  after them brings its own. `view` is absent for every file but HTML,
+ *  which leaves the group out rather than offering a choice of one. */
 export function FileLead({
   copy,
   file,
@@ -56,9 +57,9 @@ export function FileLead({
         owner={fileOwner(file)}
         updatedAt={file.updatedAt}
       />
-      <DropdownMenuSeparator />
       {view === undefined || onViewChange === undefined ? null : (
         <>
+          <DropdownMenuSeparator />
           <DropdownMenuLabel>View</DropdownMenuLabel>
           <DropdownMenuRadioGroup
             onValueChange={(next) => onViewChange(next as HtmlMode)}
@@ -69,18 +70,17 @@ export function FileLead({
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="code">Code</DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
-          <DropdownMenuSeparator />
         </>
       )}
       {copy === undefined ? null : (
         <>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => void copyText(() => readFileText(file, copy))}
           >
             <Copy />
             Copy text
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
         </>
       )}
     </>

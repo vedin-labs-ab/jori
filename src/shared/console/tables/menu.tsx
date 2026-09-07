@@ -1,4 +1,3 @@
-import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { countLabel } from "../count"
 import { MenuProvenance } from "../materials/actions/note"
 import { summaryOwner } from "../materials/owners"
@@ -15,13 +14,10 @@ export function TableLead({
   >
 }) {
   return (
-    <>
-      <MenuProvenance
-        detail={countLabel(table.rowCount, "row")}
-        owner={summaryOwner(table)}
-        updatedAt={table.updatedAt}
-      />
-      <DropdownMenuSeparator />
-    </>
+    <MenuProvenance
+      detail={countLabel(table.rowCount, "row")}
+      owner={summaryOwner(table)}
+      updatedAt={table.updatedAt}
+    />
   )
 }

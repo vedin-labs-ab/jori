@@ -3,7 +3,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu"
-import { menuWidth, RowMenuTrigger } from "../../menu"
+import { MenuLead, menuWidth, RowMenuTrigger } from "../../menu"
 import { type MaterialMenuActions, MaterialMenuItems } from "."
 import { ConfirmRemoveDialog } from "./confirm"
 
@@ -31,7 +31,7 @@ export function MaterialTitleMenu({
   return (
     <>
       <DropdownMenuContent align="start" className={menuWidth}>
-        {lead}
+        <MenuLead>{lead}</MenuLead>
         <MaterialMenuItems {...props} onRemove={confirm.request} />
       </DropdownMenuContent>
       {confirm.dialog}

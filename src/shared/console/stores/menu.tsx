@@ -43,9 +43,9 @@ export function StoreMenuItems({
         owner={summaryOwner(store)}
         updatedAt={store.updatedAt}
       />
-      <DropdownMenuSeparator />
       {view === undefined || onViewChange === undefined ? null : (
         <>
+          <DropdownMenuSeparator />
           <DropdownMenuLabel>View</DropdownMenuLabel>
           <DropdownMenuRadioGroup
             onValueChange={(next) => onViewChange(next as ValueEditorView)}
@@ -54,9 +54,9 @@ export function StoreMenuItems({
             <DropdownMenuRadioItem value="form">Form</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="code">Code</DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
-          <DropdownMenuSeparator />
         </>
       )}
+      <DropdownMenuSeparator />
       <DropdownMenuItem onSelect={onSchema}>
         <Braces />
         {store.schema === undefined ? "Add schema…" : "Schema…"}
@@ -68,7 +68,6 @@ export function StoreMenuItems({
         <Copy />
         Copy value
       </DropdownMenuItem>
-      <DropdownMenuSeparator />
     </>
   )
 }
