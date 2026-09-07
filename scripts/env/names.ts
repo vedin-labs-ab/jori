@@ -48,8 +48,9 @@ export const localNames: Record<Environment, readonly string[]> = {
  *  `createAuth` resolves every credential on each auth request, so a missing
  *  Microsoft secret breaks Google sign-in too. Runs execute inside the
  *  deployment, so they need the model key to deduce and the E2B key and
- *  template name to open a sandbox. Features add their names here as they
- *  come online. */
+ *  template name to open a sandbox. Stripe is optional for deployment: its
+ *  server-side edge rejects billing operations until all billing settings
+ *  exist. A deploy is not approval to charge customers. */
 export const deploymentNames = [
   "BETTER_AUTH_SECRET",
   "BIRD_API_KEY",
@@ -64,10 +65,4 @@ export const deploymentNames = [
   "MICROSOFT_CLIENT_ID",
   "MICROSOFT_CLIENT_SECRET",
   "OPENROUTER_API_KEY",
-  "STRIPE_SECRET_KEY",
-  "STRIPE_WEBHOOK_SECRET",
-  "STRIPE_PRICE_STARTER_MONTH",
-  "STRIPE_PRICE_STARTER_YEAR",
-  "STRIPE_PRICE_TEAM_MONTH",
-  "STRIPE_PRICE_TEAM_YEAR",
 ] as const

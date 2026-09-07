@@ -8,7 +8,11 @@ import { requireReturnUrl } from "../../shared/origin"
 import { requireActivePlan } from "../account"
 import { interval, plan } from "../schema"
 import { requireString, stripeRequest } from "./client"
-import { stripeMetadata, stripePriceId } from "./config"
+import {
+  requireStripeConfiguration,
+  stripeMetadata,
+  stripePriceId,
+} from "./config"
 
 /**
  * The hosted-surface edge: checkout for subscribing and topping up, and the
@@ -26,6 +30,7 @@ export const startPlanCheckout = action({
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
     const returnUrl = requireReturnUrl(args.returnUrl)
+    requireStripeConfiguration()
 
     const account = await ensuredAccount(ctx, args.organizationId)
 
@@ -80,6 +85,7 @@ export const startTopUpCheckout = action({
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
     const returnUrl = requireReturnUrl(args.returnUrl)
+    requireStripeConfiguration()
 
     if (
       !Number.isInteger(args.amountUsd) ||
@@ -132,6 +138,7 @@ export const openPortal = action({
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
     const returnUrl = requireReturnUrl(args.returnUrl)
+    requireStripeConfiguration()
 
     const account = await ensuredAccount(ctx, args.organizationId)
 

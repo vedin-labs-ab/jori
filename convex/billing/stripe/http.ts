@@ -1,12 +1,19 @@
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
-import { requireStripeWebhookSecret } from "./config"
+import { isStripeConfigured, requireStripeWebhookSecret } from "./config"
 import { readCheckoutSubscription } from "./fulfillment"
 
 const toleranceSeconds = 5 * 60
 
 export async function handleStripeEvents(ctx: ActionCtx, request: Request) {
+  if (!isStripeConfigured()) {
+    return new Response("Billing is not available in this instance yet.", {
+      status: 503,
+      headers: { "Cache-Control": "no-store" },
+    })
+  }
+
   const body = await request.text()
   const header = request.headers.get("stripe-signature")
 
