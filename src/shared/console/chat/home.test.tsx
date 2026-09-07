@@ -1,12 +1,19 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, expect, test, vi } from "vitest"
+import { History, Mail } from "lucide-react"
+import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { ConsoleNavigationContext } from "../shell/location"
 import { ChatHome } from "./home"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../test/router")),
   ...(await import("../../../../test/routing")),
 }))
+
+// The command list scrolls its chosen row into view, which jsdom lacks.
+beforeEach(() => {
+  Object.assign(HTMLElement.prototype, { scrollIntoView: () => undefined })
+})
 
 afterEach(cleanup)
 
@@ -32,7 +39,10 @@ test("offers the suggestions and lists the recent conversations by time", () => 
           updatedAt: now - 86_400_000 * 2,
         },
       ]}
-      suggestions={["Which renewals are at risk?", "Summarize #finance"]}
+      suggestions={[
+        { icon: History, text: "Which renewals are at risk?" },
+        { icon: Mail, text: "Summarize #finance" },
+      ]}
     />
   )
 
@@ -52,6 +62,36 @@ test("offers the suggestions and lists the recent conversations by time", () => 
   expect(
     screen.getByRole("link", { name: /Flaky payroll test/ }).textContent
   ).toContain("2d ago")
+  expect(screen.queryByText(/more…/)).toBeNull()
+})
+
+test("four chats show; the rest are a search away", () => {
+  const navigate = vi.fn()
+  const recent = ["a", "b", "c", "d", "e", "f"].map((id, index) => ({
+    id: `conversations_${id}`,
+    title: `Chat ${id}`,
+    updatedAt: now - index * 1_000,
+  }))
+
+  render(
+    <ConsoleNavigationContext.Provider value={{ navigate, pathname: "/chat" }}>
+      <ChatHome
+        composer={null}
+        now={now}
+        onSuggestion={vi.fn()}
+        recent={recent}
+        suggestions={[]}
+      />
+    </ConsoleNavigationContext.Provider>
+  )
+
+  expect(screen.getAllByRole("link")).toHaveLength(4)
+  expect(screen.queryByRole("link", { name: /Chat e/ })).toBeNull()
+
+  fireEvent.click(screen.getByRole("button", { name: "and 2 more…" }))
+  fireEvent.click(screen.getByRole("option", { name: "Chat f" }))
+
+  expect(navigate).toHaveBeenCalledWith("/chat/conversations_f")
 })
 
 test("without conversations there is no recent section at all", () => {

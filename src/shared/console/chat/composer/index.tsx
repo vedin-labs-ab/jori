@@ -33,6 +33,7 @@ export function ChatComposer({
   onSelect,
   onSend,
   onStop,
+  placeholder = "Tell Jori what needs doing",
   reason,
   selection,
   usage,
@@ -47,6 +48,8 @@ export function ChatComposer({
   onSelect?: (selection: ModelSelection) => void
   onSend: (text: string) => void
   onStop: () => void
+  /** What the empty field says; the home types asks into it. */
+  placeholder?: string
   /** Why the composer is disabled, shown when it is. */
   reason?: string
   /** The model and effort the next run uses, shown as the picker. */
@@ -86,7 +89,7 @@ export function ChatComposer({
           disabled={disabled}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Tell Jori what needs doing"
+          placeholder={placeholder}
           rows={1}
           value={text}
         />

@@ -3,6 +3,8 @@ import {
   type ModelSelection,
 } from "@contracts/models/selection"
 import { type ReplyPart } from "@contracts/replies/parts"
+import { History, Mail, TriangleAlert, Workflow } from "lucide-react"
+import { type ChatSuggestion } from "@/shared/console/chat/suggestions"
 import {
   type ChatContextUsage,
   type ChatConversation,
@@ -43,12 +45,12 @@ export const chatContext: ChatContextUsage = {
 export const chatSelection: ModelSelection = defaultSelection
 
 /** What the home page offers to ask first. */
-export const chatSuggestions = [
-  "Which renewals are at risk this month?",
-  "What did the payroll fix change?",
-  "Draft reminders for the unpaid vendor invoices",
-  "Summarize last week's runs",
-] as const
+export const chatSuggestions: readonly ChatSuggestion[] = [
+  { icon: TriangleAlert, text: "Which renewals are at risk this month?" },
+  { icon: History, text: "What did the payroll fix change?" },
+  { icon: Mail, text: "Draft reminders for the unpaid vendor invoices" },
+  { icon: Workflow, text: "Summarize last week's runs" },
+]
 
 /** The conversation the chat opens on: the question the hero's thread
  *  answers in Slack, asked here instead, with the table as the answer. */

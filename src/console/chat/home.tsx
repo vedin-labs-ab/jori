@@ -6,7 +6,13 @@ import { type MessageContext } from "@contracts/replies/answers"
 import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
+import { useTypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
 import { ChatHome } from "@/shared/console/chat/home"
+import {
+  chatSuggestionPool,
+  rotateSuggestions,
+  shownSuggestions,
+} from "@/shared/console/chat/suggestions"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
@@ -15,16 +21,8 @@ import { useRecentConversations } from "./recent"
 import { useReferenceTargets } from "./references"
 import { useSendMessage } from "./send"
 
-const recentCount = 10
+const recentCount = 50
 const noTargets: MessageContext[] = []
-
-/** What the home offers to ask first, written from the person's side. */
-const suggestions = [
-  "Summarize what changed this week",
-  "Set up a weekly digest for my team",
-  "Which jobs failed recently?",
-  "Draft a job that watches a table for changes",
-] as const
 
 /** Where a chat starts: the first message opens a conversation and the
  *  console moves to it. Opened from a resource's page, the chat carries
@@ -53,6 +51,7 @@ function ChatHomeContent({
   const now = useNow(60_000)
   const reference = useChatContext(organizationId, context)
   const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
+  const { placeholder, suggestions } = useHomeSuggestions()
   // A blocked budget still opens the conversation with the message in it,
   // so the console moves there either way; only a failure stays.
   const start = (text: string) =>
@@ -79,6 +78,7 @@ function ChatHomeContent({
           onSelect={setSelection}
           onSend={start}
           onStop={() => {}}
+          placeholder={placeholder}
           selection={selection}
         />
       }
@@ -88,6 +88,27 @@ function ChatHomeContent({
       suggestions={suggestions}
     />
   )
+}
+
+/** A few of the common asks, from a different place in the pool each
+ *  visit, and the rest typed into the composer's placeholder. */
+function useHomeSuggestions() {
+  const [start] = useState(() =>
+    Math.floor(Math.random() * chatSuggestionPool.length)
+  )
+  const rotated = useMemo(
+    () => rotateSuggestions(chatSuggestionPool, start),
+    [start]
+  )
+  const rest = useMemo(
+    () => rotated.slice(shownSuggestions).map(({ text }) => text),
+    [rotated]
+  )
+
+  return {
+    placeholder: useTypedPlaceholder(rest, "Tell Jori what needs doing"),
+    suggestions: rotated.slice(0, shownSuggestions),
+  }
 }
 
 /** The context the chat was opened with, named for the chip through the
