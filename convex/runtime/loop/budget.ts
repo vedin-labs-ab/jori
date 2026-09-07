@@ -5,7 +5,7 @@ import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { checkRunBudget } from "../../billing/guard"
 import { recordWorkerTrace } from "../../runs/execution/traces/data"
 
-export type BudgetOutcome = "blocked" | "ok"
+type BudgetOutcome = "blocked" | "ok"
 
 /** Why a run stopped between turns, in the words the chat shows under the
  *  turn and the composer's blocked reason repeats. */

@@ -1,8 +1,8 @@
 import { v } from "convex/values"
 import { query } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
+import { resolveConsolePerson } from "../../persons/account"
 import { runVisibleToPerson } from "../console/filters"
-import { resolveConsolePerson } from "../console/person"
 import { loadActivityData } from "./load"
 import { projectActivity } from "./project"
 

@@ -24,7 +24,7 @@ const replyContents = {
   { guidance: CommunicationGuidance; part?: ReplyPartKind }
 >
 
-export type CommunicationCapability = keyof typeof replyContents
+type CommunicationCapability = keyof typeof replyContents
 
 const surfaceCapabilities = {
   console: ["text", "reference", "choices"],

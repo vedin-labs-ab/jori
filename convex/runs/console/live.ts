@@ -1,8 +1,8 @@
 import { v } from "convex/values"
 import { query } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
+import { resolveConsolePerson } from "../../persons/account"
 import { runVisibleToPerson } from "./filters"
-import { resolveConsolePerson } from "./person"
 import { summarizeRun } from "./summaries"
 
 /** One run as the Activity page would list it, for a surface following

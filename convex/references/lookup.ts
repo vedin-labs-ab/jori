@@ -1,4 +1,7 @@
-import { type ReferenceKind } from "../../contracts/replies/parts"
+import {
+  type ReferenceKind,
+  type ReferenceTarget,
+} from "../../contracts/replies/parts"
 import { type Doc, type Id, type TableNames } from "../_generated/dataModel"
 import { accessibleCollection } from "../collections/access"
 import { findVisibleConsoleConversation } from "../conversations/resolve"
@@ -12,15 +15,40 @@ import { type Sight } from "../visibility/sight"
 // page uses: gone, foreign, invisible, and malformed all read as null, so
 // a reference can neither probe nor leak.
 
-export type ReferenceTarget = { kind: ReferenceKind; id: string }
-
 /** What a target names: its name, and the folder it is filed under — a
  *  folder's parent, for a folder — or a status that stands in for that:
  *  a run's, or "Chat" for a conversation. */
-export type LoadedReference = {
+type LoadedReference = {
   name: string
   folderId?: Id<"folders">
   status?: string
+}
+
+type ReferenceLoader = (
+  ctx: QueryLikeCtx,
+  sight: Sight,
+  id: string
+) => Promise<LoadedReference | null>
+
+/** Each kind's own table, and the read its page makes. Tables and stores
+ *  are both collections, told apart by their kind. */
+const references: Record<
+  ReferenceKind,
+  { table: TableNames; load: ReferenceLoader }
+> = {
+  file: { table: "files", load: loadFile },
+  table: {
+    table: "collections",
+    load: (ctx, sight, id) => loadCollection(ctx, sight, "table", id),
+  },
+  store: {
+    table: "collections",
+    load: (ctx, sight, id) => loadCollection(ctx, sight, "store", id),
+  },
+  job: { table: "jobs", load: loadJob },
+  folder: { table: "folders", load: loadFolder },
+  run: { table: "runs", load: loadRun },
+  chat: { table: "conversations", load: loadChat },
 }
 
 export async function loadReference(
@@ -28,40 +56,12 @@ export async function loadReference(
   sight: Sight,
   target: ReferenceTarget
 ): Promise<LoadedReference | null> {
-  switch (target.kind) {
-    case "job":
-      return await loadJob(ctx, sight, target.id)
-    case "table":
-    case "store":
-      return await loadCollection(ctx, sight, target.kind, target.id)
-    case "file":
-      return await loadFile(ctx, sight, target.id)
-    case "folder":
-      return await loadFolder(ctx, sight, target.id)
-    case "run":
-      return await loadRun(ctx, sight, target.id)
-    case "chat":
-      return await loadChat(ctx, sight, target.id)
-  }
+  return await references[target.kind].load(ctx, sight, target.id)
 }
 
 /** The table a kind's ids belong to. */
 export function referenceTable(kind: ReferenceKind): TableNames {
-  switch (kind) {
-    case "file":
-      return "files"
-    case "table":
-    case "store":
-      return "collections"
-    case "job":
-      return "jobs"
-    case "folder":
-      return "folders"
-    case "run":
-      return "runs"
-    case "chat":
-      return "conversations"
-  }
+  return references[kind].table
 }
 
 async function loadJob(ctx: QueryLikeCtx, sight: Sight, id: string) {

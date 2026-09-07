@@ -1,10 +1,12 @@
 import { type Infer, v } from "convex/values"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { requireUserId } from "../access/users"
 import { filedResourceType, loadFiledGate } from "../folders/filing"
-import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
-import { resolvePersonByIdentity } from "../persons/identity/links"
+import {
+  ensureCurrentPerson,
+  resolveConsolePerson,
+  resolveCurrentPerson,
+} from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   compareMove,
@@ -33,11 +35,11 @@ export const grantees = query({
   args: { organizationId: v.string() },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
-    const viewerId = await resolvePersonByIdentity(ctx, {
-      organizationId: args.organizationId,
-      provider: "auth",
-      externalId: requireUserId(identity),
-    })
+    const viewerId = await resolveConsolePerson(
+      ctx,
+      args.organizationId,
+      identity
+    )
 
     return {
       viewerId: viewerId ?? null,

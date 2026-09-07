@@ -15,7 +15,7 @@ import { type referenceTargetValidator } from "./references"
 // messages, keyed by the conversation's own id, with no integration behind
 // them.
 
-export const consoleMessageType = "console.message"
+const consoleMessageType = "console.message"
 
 /** The questions a person's message answers: the reply holding them and,
  *  for each of its choices parts, the part's index and the values chosen.
