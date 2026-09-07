@@ -1,5 +1,6 @@
 import { EditorContent } from "@tiptap/react"
 import { X } from "lucide-react"
+import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { MentionSuggestions } from "../../mentions/suggest/listbox"
 import { referencePresentation } from "../presentation"
@@ -17,7 +18,7 @@ export function ComposerField({
 }: {
   composer: Composer
   onSelect: Parameters<typeof MentionSuggestions>[0]["onSelect"]
-  placeholder: string
+  placeholder: ReactNode
 }) {
   return (
     <div className="relative w-full min-w-0">

@@ -1,6 +1,13 @@
 import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
-import { type FormEvent, type MouseEvent, memo, useEffect, useId } from "react"
+import {
+  type FormEvent,
+  type MouseEvent,
+  memo,
+  type ReactNode,
+  useEffect,
+  useId,
+} from "react"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 import { useStoredOpen } from "@/shared/storage"
 import {
@@ -66,8 +73,9 @@ export const ChatComposer = memo(function ChatComposer({
   /** Takes each resource whose chip is deleted, so a host that opened
    *  it on the mention can let it go again. */
   onUnmention?: (target: MessageContext) => void
-  /** What the empty field says; the home types asks into it. */
-  placeholder?: string
+  /** What the empty field says; the home types asks into it, as a node
+   *  that keeps its ticks to itself. */
+  placeholder?: ReactNode
   /** Why the composer is disabled, shown when it is. */
   reason?: string
   /** Names the resources mentioned, for their chips. */

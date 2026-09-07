@@ -6,7 +6,7 @@ import { type MessageContext } from "@contracts/replies/answers"
 import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
-import { useTypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
+import { TypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
 import { ChatHome } from "@/shared/console/chat/home"
 import {
   chatSuggestionPool,
@@ -18,11 +18,10 @@ import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
 import { ConsolePage } from "../page"
 import { useMentionSources } from "./mentions"
-import { useRecentConversations } from "./recent"
+import { recentCount, useRecentConversations } from "./recent"
 import { useReferenceTargets } from "./references"
 import { useSendMessage } from "./send"
 
-const recentCount = 50
 const noTargets: MessageContext[] = []
 
 /** Where a chat starts: the first message opens a conversation and the
@@ -108,7 +107,9 @@ function useHomeSuggestions() {
   )
 
   return {
-    placeholder: useTypedPlaceholder(rest, "Tell Jori what needs doing"),
+    placeholder: (
+      <TypedPlaceholder fallback="Tell Jori what needs doing" phrases={rest} />
+    ),
     suggestions: rotated.slice(0, shownSuggestions),
   }
 }

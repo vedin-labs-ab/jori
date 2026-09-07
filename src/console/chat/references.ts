@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { referencePresentation } from "@/shared/console/chat/presentation"
 import {
   type ChatMessage,
@@ -62,25 +62,41 @@ export function useReferences(
 
 const none: ReferenceTarget[] = []
 
-/** Resolves the targets in one query. Targets already named stay named
- *  while a new one is looked up, and a target not yet answered shows as
- *  its kind until it is; one the viewer may not see, or that is gone,
- *  resolves to nothing, which the cards read as unavailable. */
+/** Resolves the targets not yet named, in one query; a name, once
+ *  known, is kept, so a new message asks for its own targets alone. A
+ *  target not yet answered shows as its kind until it is; one the viewer
+ *  may not see, or that is gone, resolves to nothing, which the cards
+ *  read as unavailable. */
 export function useReferenceTargets(
   organizationId: string,
   targets: ReferenceTarget[]
 ): ResolveReference {
+  const known = useRef(new Map<string, ChatReference | undefined>())
+  const [version, setVersion] = useState(0)
+  const unnamed = targets.filter(
+    (target) => !known.current.has(targetKey(target))
+  )
   const resolved = useQuery(
     api.messages.references.resolve,
-    targets.length === 0 ? "skip" : { organizationId, targets }
+    unnamed.length === 0 ? "skip" : { organizationId, targets: unnamed }
   )
-  const known = useRef(new Map<string, ChatReference | undefined>())
 
-  return useMemo<ResolveReference>(() => {
-    for (const reference of resolved ?? []) {
+  useEffect(() => {
+    if (resolved === undefined) {
+      return
+    }
+
+    for (const reference of resolved) {
       known.current.set(targetKey(reference), toChatReference(reference))
     }
 
+    setVersion((count) => count + 1)
+  }, [resolved])
+
+  // The snapshot is what the callback reads, so a name landing later
+  // never changes what an earlier render was given.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the version counts the names landed in the ref
+  return useMemo<ResolveReference>(() => {
     const snapshot = new Map(known.current)
 
     return (target) => {
@@ -88,7 +104,7 @@ export function useReferenceTargets(
 
       return snapshot.has(key) ? snapshot.get(key) : pending(target)
     }
-  }, [resolved])
+  }, [version])
 }
 
 function toChatReference(reference: ResolvedReference) {

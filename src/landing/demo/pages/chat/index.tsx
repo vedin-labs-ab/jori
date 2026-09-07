@@ -2,7 +2,7 @@ import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
 import { useCallback, useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
-import { useTypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
+import { TypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
 import { ChatHome } from "@/shared/console/chat/home"
 import { ChatPane } from "@/shared/console/chat/pane"
 import { useReplyReferences } from "@/shared/console/chat/pane/auto"
@@ -50,9 +50,8 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
   const now = useNow(60_000)
   const [selection, setSelection] = useState<ModelSelection>(chatSelection)
   const [suggestions] = useState(() => rotateSuggestions(chatSuggestions, 0))
-  const placeholder = useTypedPlaceholder(
-    suggestions.slice(shownSuggestions).map(({ text }) => text),
-    "Tell Jori what needs doing"
+  const [phrases] = useState(() =>
+    suggestions.slice(shownSuggestions).map(({ text }) => text)
   )
   const mentions = useMemo(() => mentionSources(state), [state])
   const reference =
@@ -77,7 +76,12 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
           onSelect={setSelection}
           onSend={send}
           onStop={() => {}}
-          placeholder={placeholder}
+          placeholder={
+            <TypedPlaceholder
+              fallback="Tell Jori what needs doing"
+              phrases={phrases}
+            />
+          }
           resolve={(target) => resolveReference(state, target)}
           selection={selection}
         />
