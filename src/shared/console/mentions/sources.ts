@@ -38,6 +38,9 @@ export type MentionSources = {
    *  search ends — the listbox closed, the menu put away — so a host can
    *  let its lookup go until the next one starts. */
   onSearch?: (query: string | null) => void
+  /** Set while a host's lookup for the current search is on its way, so
+   *  an empty list reads as "looking" and Enter waits for it. */
+  searching?: boolean
 }
 
 export type MentionSuggestion = {

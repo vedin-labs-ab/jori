@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { renderComposer } from "../../../../../test/composer"
+import { mentionSources, renderComposer } from "../../../../../test/composer"
 import { typeInto } from "../../../../../test/editor"
 
 beforeEach(() => {
@@ -165,4 +165,18 @@ test("a click on the frame beside the controls puts the caret in the field", asy
 
   // The editor takes focus on the next frame.
   await waitFor(() => expect(document.activeElement).toBe(field))
+})
+
+test("Enter waits while the host is still looking for what a + names", async () => {
+  const { field, onSend } = await renderComposer({
+    mentions: { ...mentionSources, resources: [], searching: true },
+  })
+
+  typeInto(field, "Open +rel")
+
+  expect((await screen.findByRole("status")).textContent).toBe("Looking…")
+
+  fireEvent.keyDown(field, { key: "Enter" })
+
+  expect(onSend).not.toHaveBeenCalled()
 })

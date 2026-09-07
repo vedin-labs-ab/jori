@@ -90,12 +90,19 @@ function useComposerInstance(refs: ComposerRefs) {
           activeIndex: refs.latest.current.suggestion?.activeIndex ?? 0,
           kinds: mentionKinds,
           placement: "above",
-          suggest: (active) => ({
-            suggestions: suggestMentions(
-              active,
-              refs.latest.current.args.sources
-            ),
-          }),
+          suggest: (active) => {
+            const sources = refs.latest.current.args.sources
+            const suggestions = suggestMentions(active, sources)
+
+            return {
+              suggestions,
+              ...(active.kind === "resource" &&
+              suggestions.length === 0 &&
+              sources.searching === true
+                ? { empty: "loading" as const }
+                : {}),
+            }
+          },
         })
       ),
     [refs]
