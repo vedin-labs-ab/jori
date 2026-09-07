@@ -1,13 +1,10 @@
-import { type ContentsOptions, type SearchResponse } from "exa-js"
-
-type ExaResponse = SearchResponse<ContentsOptions>
-type ExaResult = ExaResponse["results"][number]
+import { type SearchResponse, type SearchResult } from "../../../search/types"
 
 type WebOperation = "contents" | "search"
 
 type WebToolResult = {
   provider: {
-    name: "exa"
+    name: string
     operation: WebOperation
     requestId?: string
     resolvedSearchType?: string
@@ -26,7 +23,7 @@ type WebResult = {
   url: string
   title: string | null
   source: {
-    provider: "exa"
+    provider: string
     id: string
     author?: string
     faviconUrl?: string
@@ -44,7 +41,7 @@ type WebResult = {
 }
 
 export function normalizeWebResponse(
-  response: ExaResponse,
+  response: SearchResponse,
   args: {
     maxCharacters: number
     operation: WebOperation
@@ -54,23 +51,25 @@ export function normalizeWebResponse(
   return {
     provider: normalizeProviderTrace(response, args.operation),
     results: response.results
-      .map((result) => normalizeWebResult(result, args.maxCharacters))
+      .map((result) =>
+        normalizeWebResult(result, args.maxCharacters, response.provider.name)
+      )
       .filter((result): result is WebResult => result !== null),
     truncated: response.results.length >= args.requestedResults,
   }
 }
 
 function normalizeProviderTrace(
-  response: ExaResponse,
+  response: SearchResponse,
   operation: WebOperation
 ): WebToolResult["provider"] {
-  const requestId = readString(response.requestId)
-  const resolvedSearchType = readString(response.resolvedSearchType)
-  const searchTimeMs = readNumber(response.searchTime)
-  const statuses = normalizeStatuses(response.statuses)
+  const requestId = readString(response.provider.requestId)
+  const resolvedSearchType = readString(response.provider.resolvedSearchType)
+  const searchTimeMs = readNumber(response.provider.searchTimeMs)
+  const statuses = normalizeStatuses(response.provider.statuses)
 
   return {
-    name: "exa",
+    name: response.provider.name,
     operation,
     ...(requestId === null ? {} : { requestId }),
     ...(resolvedSearchType === null ? {} : { resolvedSearchType }),
@@ -80,12 +79,12 @@ function normalizeProviderTrace(
 }
 
 function normalizeWebResult(
-  result: ExaResult,
-  maxCharacters: number
+  result: SearchResult,
+  maxCharacters: number,
+  provider: string
 ): WebResult | null {
-  const contentFields = result as ExaResult & Record<string, unknown>
-  const content = truncateText(readString(contentFields.text), maxCharacters)
-  const highlights = readHighlights(contentFields.highlights, maxCharacters)
+  const content = truncateText(readString(result.text), maxCharacters)
+  const highlights = readHighlights(result.highlights, maxCharacters)
   const url = readString(result.url)
 
   if (url === null) {
@@ -94,16 +93,16 @@ function normalizeWebResult(
 
   const id = readString(result.id) ?? url
   const author = readString(result.author)
-  const faviconUrl = readString(result.favicon)
-  const imageUrl = readString(result.image)
-  const publishedAt = readString(result.publishedDate)
+  const faviconUrl = readString(result.faviconUrl)
+  const imageUrl = readString(result.imageUrl)
+  const publishedAt = readString(result.publishedAt)
   const score = readNumber(result.score)
 
   return {
     url,
     title: readString(result.title),
     source: {
-      provider: "exa",
+      provider,
       id,
       ...(author === null ? {} : { author }),
       ...(faviconUrl === null ? {} : { faviconUrl }),

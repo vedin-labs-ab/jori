@@ -1,4 +1,4 @@
-import { beforeEach, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { encodeToolResult } from "../../../contracts/json"
 import { callWebTool } from "./web"
 
@@ -34,11 +34,14 @@ vi.mock("exa-js", () => {
 })
 
 beforeEach(() => {
-  process.env.EXA_API_KEY = "exa-key"
+  vi.stubEnv("EXA_API_KEY", "exa-key")
+  vi.stubEnv("JORI_REGION", "eu")
   exaMock.constructor.mockClear()
   exaMock.getContents.mockReset()
   exaMock.search.mockReset()
 })
+
+afterEach(() => vi.unstubAllEnvs())
 
 test("searches Exa and returns normalized web results", async () => {
   mockSearchResponse()

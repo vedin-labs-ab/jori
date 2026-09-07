@@ -1,10 +1,8 @@
-import { type ContentsOptions } from "exa-js"
 import { collapseWhitespace } from "../../contracts/text"
-import { createExaClient, withTimeout } from "../search"
+import { createSearchClient } from "../search"
 import { sha256Hex } from "../shared/crypto"
 
 const fetchMaxCharacters = 12_000
-const fetchTimeoutMs = 15_000
 const maxLinksPerPage = 50
 
 export type CrawledPage = {
@@ -102,50 +100,18 @@ export async function hashText(text: string): Promise<string> {
 async function fetchPage(
   url: string
 ): Promise<{ text: string; links: string[] } | null> {
-  const response = await withTimeout(
-    createExaClient().getContents(url, {
-      livecrawl: "always",
-      livecrawlTimeout: 8000,
-      text: { maxCharacters: fetchMaxCharacters },
-      extras: { links: maxLinksPerPage },
-    } satisfies ContentsOptions),
-    fetchTimeoutMs,
-    "fetch"
-  )
+  const response = await createSearchClient().fetch({
+    url,
+    refresh: true,
+    maxCharacters: fetchMaxCharacters,
+    maxLinks: maxLinksPerPage,
+  })
   const result = response.results[0]
-  const text = readText(result)
+  const text = result?.text
 
-  return text === null
+  return text === undefined || text.trim() === ""
     ? null
-    : { text: collapseWhitespace(text), links: readLinks(result) }
-}
-
-function readText(result: unknown) {
-  if (typeof result !== "object" || result === null) {
-    return null
-  }
-
-  return readString((result as Record<string, unknown>).text)
-}
-
-function readLinks(result: unknown): string[] {
-  if (typeof result !== "object" || result === null) {
-    return []
-  }
-
-  const extras = (result as Record<string, unknown>).extras
-
-  if (typeof extras !== "object" || extras === null) {
-    return []
-  }
-
-  const links = (extras as Record<string, unknown>).links
-
-  return Array.isArray(links) ? links.filter(isString) : []
-}
-
-function readString(value: unknown) {
-  return typeof value === "string" && value.trim() !== "" ? value : null
+    : { text: collapseWhitespace(text), links: result.links }
 }
 
 function isString(value: unknown): value is string {
