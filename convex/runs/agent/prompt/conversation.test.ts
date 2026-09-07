@@ -59,6 +59,7 @@ test("a console message's context reads as its own line, on the current message 
       }),
     ],
     hasMoreMessages: false,
+    summary: null,
   }
 
   const prompt = assemblePrompt(input).context
@@ -91,6 +92,32 @@ test("renders an omitted history note when recent context is truncated", () => {
   expect(prompt).toContain("Previous message 1")
   expect(prompt).toContain("Previous message 15")
   expect(prompt).not.toContain("Current trigger.")
+  expect(prompt).not.toContain("Earlier in this conversation")
+})
+
+test("the conversation's summary stands in for the messages the window omitted", () => {
+  const input = messageInputWithTruncatedConversation()
+
+  input.conversation.summary =
+    "Albin asked for the renewals table (collections:renewals) to be cleaned up."
+
+  const prompt = assemblePrompt(input).context
+  const earlier = prompt.indexOf("Earlier in this conversation: Albin asked")
+  const recent = prompt.indexOf("Recent messages (older messages omitted):")
+
+  expect(earlier).toBeGreaterThan(-1)
+  expect(earlier).toBeLessThan(recent)
+})
+
+test("a summary is left out while the recent window still holds everything", () => {
+  const input = messageInputWithConversation()
+
+  input.conversation.summary = "Stale summary of a short thread."
+
+  const prompt = assemblePrompt(input).context
+
+  expect(prompt).not.toContain("Earlier in this conversation")
+  expect(prompt).not.toContain("Stale summary")
 })
 
 function messageInputWithConversation() {
@@ -134,6 +161,7 @@ function messageInputWithTruncatedConversation() {
       }),
     ],
     hasMoreMessages: true,
+    summary: null,
   }
 
   return input
@@ -185,6 +213,7 @@ function recentConversation() {
       }),
     ],
     hasMoreMessages: false,
+    summary: null,
   }
 }
 

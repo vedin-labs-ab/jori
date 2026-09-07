@@ -51,8 +51,23 @@ function projectRunTraces(
       ]
     }
 
+    if (trace.type === "transcript.compacted") {
+      return [
+        traceItem(trace, "model", "completed", "Condensed earlier context", {
+          description: compactionDescription(trace.data.kind),
+        }),
+      ]
+    }
+
     return []
   })
+}
+
+/** Quiet by design: the run kept going, and this says only how. */
+function compactionDescription(kind: "cleared" | "summarized") {
+  return kind === "cleared"
+    ? "Cleared older tool results to make room."
+    : "Summarized the earlier history to make room."
 }
 
 function isTerminalRunTrace(trace: Doc<"traces">) {

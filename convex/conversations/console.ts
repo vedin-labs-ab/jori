@@ -19,15 +19,15 @@ import {
   resolveCurrentPerson,
 } from "../persons/account"
 import { resolvePersonByIdentity } from "../persons/identity/links"
-import { readRunDraft } from "../runs/execution/drafts/data"
-import { findSession } from "../sessions/data"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { startMessageRun } from "./data"
+import { readLiveState } from "./live"
 import {
   findVisibleConsoleConversation,
   requireVisibleConsoleConversation,
 } from "./resolve"
+import { scheduleConversationSummary } from "./summary/schedule"
 
 type ConsoleSendArgs = {
   organizationId: string
@@ -81,7 +81,8 @@ export const list = query({
 })
 
 /** The conversation's title, the run currently attached to its session,
- *  if any, and the reply that run is composing. */
+ *  if any, the reply that run is composing, and how much of the model's
+ *  window the thread's latest run is using. */
 export const live = query({
   args: {
     organizationId: v.string(),
@@ -160,6 +161,13 @@ export async function sendConsoleMessage(
     now,
   })
 
+  // The summary is what the next run in this thread reads of the messages
+  // the recent window no longer holds, so every message that runs is one
+  // it should fold in.
+  if (run.status !== "blocked") {
+    await scheduleConversationSummary(ctx, conversation, now)
+  }
+
   return {
     conversationId: conversation._id,
     messageId: message._id,
@@ -186,33 +194,6 @@ export async function listConsoleConversations(
     .paginate(args.paginationOpts)
 
   return { ...result, page: result.page.map(conversationView) }
-}
-
-/** The session's run — how it stands, and how it ended when it did not
- *  finish — and the draft of the reply it is writing: the reasoning while
- *  the model thinks, then the text, and nothing before either has been
- *  said. */
-export async function readLiveState(
-  ctx: QueryLikeCtx,
-  conversation: Doc<"conversations">
-) {
-  const session = await findSession(ctx, conversation._id)
-  const run =
-    session?.runId === undefined ? null : await ctx.db.get(session.runId)
-
-  if (run === null) {
-    return { run: null, draft: null }
-  }
-
-  return {
-    run: {
-      id: run._id,
-      status: run.status,
-      ...(run.error === undefined ? {} : { error: run.error }),
-      ...(run.endedAt === undefined ? {} : { endedAt: run.endedAt }),
-    },
-    draft: await readRunDraft(ctx, run._id),
-  }
 }
 
 // The conversation's key is its own id, so console messages resolve their

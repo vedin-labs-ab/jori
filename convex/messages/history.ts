@@ -1,6 +1,7 @@
 import { readMessageContext } from "../../contracts/replies/answers"
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
+import { findMessageConversation } from "../conversations/resolve"
 import { reactionSummariesForMessages } from "../reactions/summary"
 import {
   type ActorKind,
@@ -31,6 +32,9 @@ export type ConversationEntry = {
 export type RecentConversation = {
   entries: ConversationEntry[]
   hasMoreMessages: boolean
+  /** The conversation's rolling summary, standing in for the messages the
+   *  recent window no longer holds. */
+  summary: string | null
 }
 
 export async function recentConversation(
@@ -49,9 +53,12 @@ export async function recentConversation(
     )
   )
 
+  const conversation = await findMessageConversation(ctx, message)
+
   return {
     entries: mergeRecentConversation(entries),
     hasMoreMessages: messages.length > recentConversationLimit,
+    summary: conversation?.summary ?? null,
   }
 }
 

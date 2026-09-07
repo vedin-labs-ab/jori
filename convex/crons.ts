@@ -35,4 +35,14 @@ crons.interval(
   {}
 )
 
+// Daily refresh of the model's context window from OpenRouter's listing.
+// The loop's compaction thresholds and the console's context indicator
+// read the row it writes; until the first refresh they read a fallback.
+crons.interval(
+  "model window refresh",
+  { hours: 24 },
+  internal.model.refresh.run,
+  {}
+)
+
 export default crons

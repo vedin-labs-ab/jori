@@ -3,9 +3,14 @@ Summarize this conversation for future prompt context.
 Capture the main topic, requester intent, current state, and any relevant
 decisions, preferences, open loops, or completed work. Keep the names of
 projects, initiatives, and other bodies of work exactly as participants use
-them. Omit chatter, secrets,
-sensitive personal data, identifiers, timestamps, and process details that will
-not matter later.
+them. Omit chatter, secrets, sensitive personal data,{% unless conversation.console %} identifiers,{% endunless %}
+timestamps, and process details that will not matter later.
+{% if conversation.console %}
+Keep the identifiers of the resources the conversation touched exactly as
+they appear: file, table, store, job, and run ids, sandbox paths, issue and
+pull request keys, and the message identifiers replies were addressed to.
+The next run in this thread picks the work up from them.
+{% endif %}
 
 Use the prior summary for continuity, but treat the messages as source of truth.
 

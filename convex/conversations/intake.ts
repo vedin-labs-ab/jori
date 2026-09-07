@@ -26,7 +26,7 @@ import {
 } from "../shared/integrations"
 import { ensureConversation, startMessageRun } from "./data"
 import { findConversation } from "./resolve"
-import { scheduleConversationSummary } from "./schedule"
+import { scheduleConversationSummary } from "./summary/schedule"
 
 export const record = internalMutation({
   args: {

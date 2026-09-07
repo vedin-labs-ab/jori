@@ -24,12 +24,13 @@ export function createMessageConversationValues(input: MessageInput) {
     current: formatMessageEntry(
       messageEntry(input.message, undefined, context ?? undefined)
     ),
-    summary: formatConversationSummary(input),
+    omitted: input.conversation.hasMoreMessages,
+    // The summary stands in for what the recent window left out, so a
+    // window that holds the whole conversation has nothing for it to say.
+    summary: input.conversation.hasMoreMessages
+      ? input.conversation.summary
+      : null,
   }
-}
-
-function formatConversationSummary(input: MessageInput) {
-  return input.conversation.hasMoreMessages ? "(older messages omitted)" : null
 }
 
 function formatMessageEntry(entry: PromptMessageEntry) {

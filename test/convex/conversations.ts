@@ -1,3 +1,6 @@
+import { vi } from "vitest"
+import { databaseContext, type TestDatabase } from "./database"
+
 type MutationCtx = import("../../convex/_generated/server").MutationCtx
 
 /**
@@ -100,4 +103,52 @@ function tableIdPrefix(table: string) {
 
 function matches(row: Record<string, unknown>, filters: [string, unknown][]) {
   return filters.every(([field, value]) => row[field] === value)
+}
+
+type Doc<TableName extends keyof DataModel> =
+  import("../../convex/_generated/dataModel").Doc<TableName>
+type DataModel = import("../../convex/_generated/dataModel").DataModel
+type Id<TableName extends keyof DataModel> =
+  import("../../convex/_generated/dataModel").Id<TableName>
+
+export const organizationId = "org"
+
+/** The database context with the scheduler a console message reaches for
+ *  when it books the thread's summary. */
+export function consoleContext() {
+  let scheduled = 0
+  const scheduler = {
+    cancel: vi.fn(async () => undefined),
+    runAt: vi.fn(async () => {
+      scheduled += 1
+
+      return `scheduled_${scheduled}`
+    }),
+  }
+
+  return { ...databaseContext({ scheduler }), scheduler }
+}
+
+export async function person(database: TestDatabase) {
+  return await database.insert("persons", { organizationId })
+}
+
+export async function conversationOf(
+  database: TestDatabase,
+  sent: { conversationId: Id<"conversations"> }
+) {
+  const conversation = await database.get(sent.conversationId)
+
+  if (conversation === null) {
+    throw new Error("Conversation not found.")
+  }
+
+  return conversation as unknown as Doc<"conversations">
+}
+
+export async function rows<Row>(database: TestDatabase, table: string) {
+  return (await database
+    .query(table)
+    .withIndex("by_id")
+    .collect()) as unknown as Row[]
 }

@@ -56,10 +56,34 @@ export async function recordWorkerTrace(
       "usage" in args.data
     ) {
       await meterModelUsage(ctx, { run, tokens: args.data.usage.tokens })
+      await recordTurnTokens(ctx, run._id, args.data.usage.tokens)
     }
   }
 
   return { created }
+}
+
+/** The one write per turn that lets the loop and the console read the
+ *  run's context use straight off the run. */
+async function recordTurnTokens(
+  ctx: MutationCtx,
+  runId: Id<"runs">,
+  tokens: {
+    cacheRead: number
+    input: number
+    output: number
+    reasoning: number
+  }
+) {
+  await ctx.db.patch(runId, {
+    promptTokens: tokens.input,
+    turnTokens: {
+      cacheRead: tokens.cacheRead,
+      input: tokens.input,
+      output: tokens.output,
+      reasoning: tokens.reasoning,
+    },
+  })
 }
 
 async function patchSessionStatus(

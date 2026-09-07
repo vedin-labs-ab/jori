@@ -113,3 +113,49 @@ test("does not mark stale in-progress traces as live after run stop", () => {
     })
   )
 })
+
+test("a condensed transcript reads as a quiet model step", () => {
+  const items = projectActivity(
+    activityData({
+      traces: [
+        traceDoc({
+          data: {
+            kind: "cleared",
+            fromOrder: 1,
+            toOrder: 6,
+            tokensBefore: 130_000,
+          },
+          sequence: 697,
+          timestamp: 5,
+          type: "transcript.compacted",
+        }),
+        traceDoc({
+          data: {
+            kind: "summarized",
+            fromOrder: 1,
+            toOrder: 8,
+            tokensBefore: 140_000,
+          },
+          sequence: 798,
+          timestamp: 6,
+          type: "transcript.compacted",
+        }),
+      ],
+    })
+  )
+
+  expect(items).toEqual([
+    expect.objectContaining({
+      description: "Cleared older tool results to make room.",
+      kind: "model",
+      status: "completed",
+      title: "Condensed earlier context",
+    }),
+    expect.objectContaining({
+      description: "Summarized the earlier history to make room.",
+      kind: "model",
+      status: "completed",
+      title: "Condensed earlier context",
+    }),
+  ])
+})

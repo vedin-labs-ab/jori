@@ -1,6 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { tableDoc } from "../../test/convex/collections"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
+import { consoleContext } from "../../test/convex/conversations"
+import { type TestDatabase } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
 import { type Doc } from "../_generated/dataModel"
 import { sendConsoleMessage } from "./console"
@@ -13,7 +14,7 @@ vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 const organizationId = "org"
 
 test("a conversation opened from a folder files every run under it", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
   const folderId = await database.insert("folders", folderDoc())
 
@@ -40,7 +41,7 @@ test("a conversation opened from a folder files every run under it", async () =>
 })
 
 test("a conversation opened from a filed table files its runs under the table's folder, and says so", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
   const renewalsId = await database.insert(
     "folders",
@@ -70,7 +71,7 @@ test("a conversation opened from a filed table files its runs under the table's 
 })
 
 test("a context whose id is not of its kind is refused before anything is kept", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = consoleContext()
   const personId = await person(database)
 
   await expect(

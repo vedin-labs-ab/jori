@@ -7,6 +7,7 @@ import { internalAction } from "../../_generated/server"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 import { loadRuntime } from "../context"
 import { buildRuntimePrompt } from "../context/response"
+import { isContextOverflow } from "../model/overflow"
 import { nullableText } from "../model/reasoning"
 import {
   type ModelResponse,
@@ -92,17 +93,23 @@ export async function runModelTurn(args: {
     turn: args.turn,
   })
 
+  if (response === null) {
+    return
+  }
+
   reportUndeliveredText(runtime, response, args.turn)
   await runtime.platform.appendTranscript([assistantMessage(response)])
 }
 
+/** The model's answer, or null when the run just failed for a prompt the
+ *  provider would reject again on every retry. */
 export async function completeModelStep(args: {
   messages: TranscriptMessage[]
   model: ModelRuntime
   runtime: AgentRuntime
   tools: ModelTool[]
   turn: number
-}) {
+}): Promise<ModelResponse | null> {
   const sequence = modelSequence(args.turn)
   const startedAt = Date.now()
   const draft = openDraft(args.runtime, args.turn)
@@ -130,6 +137,13 @@ export async function completeModelStep(args: {
       sequence,
       type: "model.failed",
     })
+
+    if (isContextOverflow(error)) {
+      await failForOverflow(args.runtime, sequence)
+
+      return null
+    }
+
     throw error
   }
 
@@ -227,4 +241,17 @@ function modelUsage(
 
 function modelSequence(turn: number) {
   return turn * 100 - 1
+}
+
+const overflowError =
+  "The prompt no longer fits the model's context window, so the run cannot take another turn."
+
+/** A prompt the provider rejects as too long is rejected again on every
+ *  retry, so the run ends here with a reason a person can read. */
+function failForOverflow(runtime: AgentRuntime, sequence: number) {
+  return recordRuntimeEvent(runtime.platform, runtime.context, {
+    data: { error: overflowError },
+    sequence,
+    type: "run.failed",
+  })
 }

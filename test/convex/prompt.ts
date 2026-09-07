@@ -164,7 +164,7 @@ export function runtimeInput(
     },
     integration: promptIntegration(integration),
     integrations: [promptIntegration(integration)],
-    conversation: { entries: [], hasMoreMessages: false },
+    conversation: { entries: [], hasMoreMessages: false, summary: null },
     place: null,
     message: {
       _id: "message",
@@ -204,7 +204,7 @@ export function consoleRuntimeInput() {
     },
     integration: null,
     integrations: [],
-    conversation: { entries: [], hasMoreMessages: false },
+    conversation: { entries: [], hasMoreMessages: false, summary: null },
     place: null,
     message: {
       _id: "message",
