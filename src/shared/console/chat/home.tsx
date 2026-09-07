@@ -127,9 +127,7 @@ function RecentConversations({
           </ChatsPicker>
         )}
       </div>
-      {/* The rows bleed past the column, so their text lines up with the
-          heading and the composer while the hover still has its inset. */}
-      <ul className="-mx-3 divide-y">
+      <ul className="divide-y">
         {shown.map((conversation) => (
           <li key={conversation.id}>
             <ConsoleLink
