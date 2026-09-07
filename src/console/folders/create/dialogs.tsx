@@ -1,10 +1,16 @@
-import { useEffect, useRef } from "react"
+import { lazy, Suspense } from "react"
 import { type CreationRequest } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { UploadFileDialog } from "../../files/upload"
-import { useJobEditorHost } from "../../jobs/editor/host"
 import { CreateStoreDialog } from "../../stores/create"
 import { CreateTableDialog } from "../../tables/create"
+
+// The job's flow is the shared editor, whose host carries the form's state
+// and reaches the brief's schema. These dialogs mount in the shell on every
+// console page, so the host arrives with the first job request instead.
+const JobCreation = lazy(async () => ({
+  default: (await import("./job")).JobCreation,
+}))
 
 /** The resource creation dialogs, shared by the folder page and the sidebar
  *  tree. One request value drives them all; each dialog keeps its last
@@ -50,55 +56,15 @@ export function CreationDialogs({
         organizationId={organizationId}
       />
       {job === undefined ? null : (
-        <JobCreation
-          folderId={job.folderId}
-          isOpen={request?.creation === "job"}
-          onClose={onClose}
-          organizationId={organizationId}
-        />
+        <Suspense fallback={null}>
+          <JobCreation
+            folderId={job.folderId}
+            isOpen={request?.creation === "job"}
+            onClose={onClose}
+            organizationId={organizationId}
+          />
+        </Suspense>
       )}
     </>
   )
-}
-
-/** The jobs' create flow is the shared editor, not a plain dialog.
- *  The first job request mounts its host (which lazily loads the
- *  editor chunk), each request opens a fresh create form with the folder
- *  pre-selected, and the dialog's own close reports back. */
-function JobCreation({
-  folderId,
-  isOpen,
-  onClose,
-  organizationId,
-}: {
-  folderId?: string
-  isOpen: boolean
-  onClose: () => void
-  organizationId: string
-}) {
-  const { dialog, editor } = useJobEditorHost(organizationId)
-  const { isFormOpen, openCreateForm } = editor
-  const wasRequested = useRef(false)
-  const wasFormOpen = useRef(false)
-
-  // Open on each request's rising edge; the host outlives the request so
-  // the dialog can animate closed and later reopen onto another folder.
-  useEffect(() => {
-    if (isOpen && !wasRequested.current) {
-      openCreateForm(folderId)
-    }
-
-    wasRequested.current = isOpen
-  }, [folderId, isOpen, openCreateForm])
-
-  // Report the dialog's own close — a dismissal or a save — to the owner.
-  useEffect(() => {
-    if (wasFormOpen.current && !isFormOpen) {
-      onClose()
-    }
-
-    wasFormOpen.current = isFormOpen
-  }, [isFormOpen, onClose])
-
-  return dialog
 }

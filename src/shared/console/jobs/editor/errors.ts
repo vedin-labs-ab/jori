@@ -1,4 +1,4 @@
-import { jobScopeConflictMessage } from "../access"
+import { jobScopeConflictMessage } from "../access/scope"
 
 export const jobNameErrors = {
   required: "Name is required.",

@@ -136,7 +136,7 @@ test("a store's value shows in the pane, with its menu on the pane's name and no
   )
 })
 
-test("a run shows as its Activity row held open, and the pane's name leads to that row", () => {
+test("a run shows as its Activity row held open, and the pane's name leads to that row", async () => {
   const execution = makeExecution({
     id: "run-1" as ReturnType<typeof makeExecution>["id"],
     result: "Three reminders sent.",
@@ -166,12 +166,12 @@ test("a run shows as its Activity row held open, and the pane's name leads to th
       .getAttribute("href")
   ).toBe("/runs?run=run-1")
   // The detail is open from the start, and there is no control to fold it.
-  expect(within(pane).getByText("Three reminders sent.")).toBeDefined()
+  expect(await within(pane).findByText("Three reminders sent.")).toBeDefined()
   expect(within(pane).queryByRole("button", { expanded: true })).toBeNull()
   expect(within(pane).queryByRole("button", { expanded: false })).toBeNull()
 })
 
-test("a folder shows its listing, each row leading where it does on the page", () => {
+test("a folder shows its listing, each row leading where it does on the page", async () => {
   const contents = {
     status: "ready",
     folders: [
@@ -230,7 +230,7 @@ test("a folder shows its listing, each row leading where it does on the page", (
   )
 
   expect(
-    screen.getByRole("link", { name: "Renewals" }).getAttribute("href")
+    (await screen.findByRole("link", { name: "Renewals" })).getAttribute("href")
   ).toBe("/folders/folder-2")
   expect(screen.getByRole("link", { name: "Leads" }).getAttribute("href")).toBe(
     "/tables/table-1"
