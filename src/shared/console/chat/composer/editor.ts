@@ -96,6 +96,7 @@ function useComposerRefs(
     catalog: { current: catalog },
     editor: { current: null },
     names: new Map(),
+    onMention: { current: args.onMention },
     onSend: { current: args.onSend },
     open: { current: args.open },
     resolve: { current: args.resolve },
@@ -116,6 +117,7 @@ function useLatestRefs(
   useEffect(() => {
     refs.catalog.current = catalog
     refs.editor.current = editor
+    refs.onMention.current = args.onMention
     refs.onSend.current = args.onSend
     refs.open.current = args.open
     refs.resolve.current = args.resolve

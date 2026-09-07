@@ -132,7 +132,8 @@ test("the context ring sits by the send control once a run has measured the wind
 })
 
 test("the + sigil offers resources, and the chosen one goes with the message as its token", async () => {
-  const { field, onSend } = await renderComposer()
+  const onMention = vi.fn()
+  const { field, onSend } = await renderComposer({ onMention })
 
   typeInto(field, "Look at +ren")
 
@@ -159,6 +160,10 @@ test("the + sigil offers resources, and the chosen one goes with the message as 
   typeInto(field, "this month")
   fireEvent.keyDown(field, { key: "Enter" })
 
+  expect(onMention).toHaveBeenCalledWith({
+    kind: "table",
+    id: "collections_renewals",
+  })
   expect(onSend).toHaveBeenCalledWith(
     "Look at +[table:collections_renewals] this month",
     [{ kind: "table", id: "collections_renewals" }]

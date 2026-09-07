@@ -21,6 +21,8 @@ export type SetComposerSuggestion = Dispatch<
 
 export type ComposerEditorArgs = {
   disabled: boolean
+  /** Takes each resource as it is put in, however it was picked. */
+  onMention: ((target: MessageContext) => void) | undefined
   onSend: (text: string, references: MessageContext[]) => void
   /** Whether a message may leave now. */
   open: boolean
@@ -36,6 +38,7 @@ export type ComposerRefs = {
   /** The names of the resources put in as chips, by `kind:id`, so a chip
    *  keeps its name after the picker's list has moved on. */
   names: Map<string, string>
+  onMention: MutableRefObject<ComposerEditorArgs["onMention"]>
   onSend: MutableRefObject<ComposerEditorArgs["onSend"]>
   open: MutableRefObject<boolean>
   resolve: MutableRefObject<ResolveReference | undefined>

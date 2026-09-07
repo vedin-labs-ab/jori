@@ -18,9 +18,10 @@ const sigilHints = [
   { kind: "tool", label: "tools" },
 ] as const
 
-/** Under the field, on the quiet band the job field has: the "+" and the
- *  sigils on the left, or the reason the field is disabled; the model,
- *  the ring, and the send or stop control on the right. */
+/** Under the field: the "+" on the left, or the reason the field is
+ *  disabled; the model, the ring, and the send or stop control on the
+ *  right; and under them, on the quiet band the job field has, the
+ *  sigils. */
 export function ComposerFooter({
   canSend,
   isLive,
@@ -43,55 +44,59 @@ export function ComposerFooter({
   usage: ChatContextUsage | null | undefined
 }) {
   return (
-    <InputGroupAddon
-      align="block-end"
-      className="justify-between gap-2 border-t bg-muted/30 pt-2"
-    >
-      <span className="flex min-w-0 items-center gap-1">
-        {reason === undefined ? (
-          <>
+    <>
+      <InputGroupAddon align="block-end" className="justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1">
+          {reason === undefined ? (
             <AttachMenu onPick={onPick} sources={mentions} />
-            <span className="hidden min-w-0 md:flex">
-              <SigilHints hints={sigilHints} />
+          ) : (
+            <span
+              className="min-w-0 truncate text-muted-foreground text-xs"
+              id={reason.id}
+            >
+              {reason.text}
             </span>
-          </>
-        ) : (
-          <span
-            className="min-w-0 truncate text-muted-foreground text-xs"
-            id={reason.id}
-          >
-            {reason.text}
-          </span>
-        )}
-      </span>
-      <span className="flex items-center gap-1">
-        {selection === undefined || onSelect === undefined ? null : (
-          <ModelPicker onSelect={onSelect} selection={selection} />
-        )}
-        {usage === undefined || usage === null ? null : (
-          <ContextIndicator usage={usage} />
-        )}
-        {isLive ? (
-          <InputGroupButton
-            aria-label="Stop run"
-            onClick={onStop}
-            size="icon-sm"
-            variant="default"
-          >
-            <Square className="fill-current" />
-          </InputGroupButton>
-        ) : (
-          <InputGroupButton
-            aria-label="Send message"
-            disabled={!canSend}
-            size="icon-sm"
-            type="submit"
-            variant="default"
-          >
-            <ArrowUp />
-          </InputGroupButton>
-        )}
-      </span>
-    </InputGroupAddon>
+          )}
+        </span>
+        <span className="flex items-center gap-1">
+          {selection === undefined || onSelect === undefined ? null : (
+            <ModelPicker onSelect={onSelect} selection={selection} />
+          )}
+          {usage === undefined || usage === null ? null : (
+            <ContextIndicator usage={usage} />
+          )}
+          {isLive ? (
+            <InputGroupButton
+              aria-label="Stop run"
+              onClick={onStop}
+              size="icon-sm"
+              variant="default"
+            >
+              <Square className="fill-current" />
+            </InputGroupButton>
+          ) : (
+            <InputGroupButton
+              aria-label="Send message"
+              disabled={!canSend}
+              size="icon-sm"
+              type="submit"
+              variant="default"
+            >
+              <ArrowUp />
+            </InputGroupButton>
+          )}
+        </span>
+      </InputGroupAddon>
+      {/* The sigils on the quiet band the job field has, where a phone's
+          keyboard would only cover them. */}
+      {reason === undefined ? (
+        <InputGroupAddon
+          align="block-end"
+          className="hidden border-t bg-muted/30 py-1.5 md:flex"
+        >
+          <SigilHints hints={sigilHints} />
+        </InputGroupAddon>
+      ) : null}
+    </>
   )
 }
