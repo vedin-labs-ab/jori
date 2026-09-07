@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { tableDoc, testOwner } from "../../test/convex/collections"
-import { databaseContext } from "../../test/convex/database"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { type Doc } from "../_generated/dataModel"
 import {
   type ConversationEntry,
@@ -60,15 +60,16 @@ test("a console message's context and mentions reach the model as lines under it
     createdAt: 1,
     updatedAt: 1,
   })
-  const messageId = await database.insert("messages", {
+  const chatId = await database.insert("conversations", {
     organizationId: "org",
     surface: "console",
-    type: "console.message",
-    externalId: "m1",
-    mentioned: true,
-    actor: { kind: "person", personId: testOwner },
-    personId: testOwner,
-    conversationId: "c1",
+    externalId: "",
+    scope: "person",
+    title: "Renewals",
+    createdBy: testOwner,
+    updatedAt: 1,
+  })
+  const messageId = await consoleMessage(database, {
     text: `Which of +[table:${tableId}] are at risk? Also +[job:gone]`,
     data: {
       context: { kind: "folder", id: folderId },
@@ -79,6 +80,16 @@ test("a console message's context and mentions reach the model as lines under it
     },
     createdAt: 1,
   })
+
+  await consoleMessage(database, {
+    text: `See +[chat:${chatId}]`,
+    data: {
+      context: { kind: "table", id: "collections:404" },
+      references: [{ kind: "chat", id: chatId }],
+    },
+    createdAt: 2,
+  })
+
   const message = (await database.get(messageId)) as unknown as Doc<"messages">
 
   const { entries } = await recentConversation(ctx, message)
@@ -89,5 +100,27 @@ test("a console message's context and mentions reach the model as lines under it
       `+[table:${tableId}] mentions table «Customer renewals» (tableId: ${tableId})`,
       "+[job:gone] mentions a job that is no longer available (jobId: gone)",
     ].join("\n"),
+    [
+      "Opened about a table that is no longer available (tableId: collections:404)",
+      `+[chat:${chatId}] mentions chat «Renewals» (conversationId: ${chatId})`,
+    ].join("\n"),
   ])
 })
+
+/** The owner's message in the one console thread the test reads. */
+async function consoleMessage(
+  database: TestDatabase,
+  message: { text: string; data: unknown; createdAt: number }
+) {
+  return await database.insert("messages", {
+    organizationId: "org",
+    surface: "console",
+    type: "console.message",
+    externalId: `m${message.createdAt}`,
+    mentioned: true,
+    actor: { kind: "person", personId: testOwner },
+    personId: testOwner,
+    conversationId: "c1",
+    ...message,
+  })
+}
