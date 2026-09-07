@@ -10,7 +10,6 @@ import {
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { ensureCurrentPerson } from "../persons/account"
 import {
-  migratingSkillSurfaces,
   normalizeSkillInput,
   requireUniqueOrganizationSkillName,
   sortSkills,
@@ -53,7 +52,7 @@ export const list = query({
         name: skill.name,
         description: skill.description,
         category: skill.category,
-        surfaces: migratingSkillSurfaces(skill),
+        surfaces: skill.surfaces ?? [],
         body: skill.body,
         createdAt: skill.createdAt,
         updatedAt: skill.updatedAt,
@@ -172,7 +171,7 @@ export const listForRuntime = internalQuery({
       organizationId: skill.organizationId,
       name: skill.name,
       category: skill.category,
-      surfaces: migratingSkillSurfaces(skill),
+      surfaces: skill.surfaces ?? [],
       description: skill.description,
       ...(skill.communication === undefined
         ? {}

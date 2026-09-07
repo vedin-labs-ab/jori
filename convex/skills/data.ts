@@ -3,18 +3,7 @@ import {
   isSkillSurface,
   type SkillSurface,
 } from "../../contracts/skills"
-import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-
-/** Only while the six-row US preservation migration is being applied. */
-export function migratingSkillSurfaces(skill: Doc<"skills">) {
-  if ("surfaces" in skill) {
-    return skill.surfaces ?? []
-  }
-  return "associatedIntegrations" in skill
-    ? (skill.associatedIntegrations ?? [])
-    : []
-}
 
 type SkillCommunication = {
   parts: Record<string, string>

@@ -41,19 +41,11 @@ const linkMethod = v.union(
 
 export type LinkMethod = Infer<typeof linkMethod>
 
-// One-off US preservation bridge. Remove after migration:preserve succeeds.
-const identityLink = v.union(
-  v.object({
-    method: linkMethod,
-    at: v.number(),
-    evidence: v.optional(v.string()),
-  }),
-  v.object({
-    method: linkMethod,
-    linkedAt: v.number(),
-    evidence: v.optional(v.string()),
-  })
-)
+const identityLink = v.object({
+  method: linkMethod,
+  at: v.number(),
+  evidence: v.optional(v.string()),
+})
 
 export const identities = defineTable({
   organizationId: v.string(),
