@@ -11,6 +11,28 @@ import {
 import { readRecord, readString } from "../../shared/input"
 import { requireRegion } from "../../shared/origin"
 
+export const stripeEnvironmentNames = [
+  "STRIPE_SECRET_KEY",
+  "STRIPE_WEBHOOK_SECRET",
+  ...planKeys.flatMap((plan) =>
+    billingIntervals.map((interval) => priceEnvironmentName(plan, interval))
+  ),
+]
+
+/** Deployment can serve the waitlist and trials without accepting payments.
+ * Partial configuration must not create customers or initiate charges. */
+export function isStripeConfigured() {
+  return stripeEnvironmentNames.every(
+    (name) => readEnvironmentVariable(name) !== undefined
+  )
+}
+
+export function requireStripeConfiguration() {
+  if (!isStripeConfigured()) {
+    throw new Error("Billing is not available in this instance yet.")
+  }
+}
+
 export function stripeMetadata(values: Record<string, string>) {
   return { ...values, region: requireRegion() }
 }
@@ -20,6 +42,7 @@ export function belongsToRegion(object: Record<string, unknown>) {
 }
 
 export function requireStripeSecretKey() {
+  requireStripeConfiguration()
   return requireEnvironmentVariable("STRIPE_SECRET_KEY")
 }
 

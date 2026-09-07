@@ -2,6 +2,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type ActionCtx } from "../../_generated/server"
 import { openPortal, startPlanCheckout, startTopUpCheckout } from "./checkout"
 import { stripeRequest } from "./client"
+import { stripeEnvironmentNames } from "./config"
 
 vi.mock("./client", async (original) => ({
   ...(await original<typeof import("./client")>()),
@@ -19,10 +20,32 @@ const common = {
 beforeEach(() => {
   vi.stubEnv("JORI_REGION", "eu")
   vi.stubEnv("JORI_APP_URL", "https://eu.usejori.com")
+  for (const name of stripeEnvironmentNames) {
+    vi.stubEnv(name, "configured-test-value")
+  }
   vi.stubEnv("STRIPE_PRICE_STARTER_MONTH", "price_starter_month")
   vi.clearAllMocks()
 })
 afterEach(() => vi.unstubAllEnvs())
+
+test.each([
+  startPlanCheckout,
+  startTopUpCheckout,
+  openPortal,
+])("rejects incomplete billing before creating any resources", async (action) => {
+  vi.stubEnv("STRIPE_WEBHOOK_SECRET", "")
+  const { ctx, runMutation } = context()
+  await expect(
+    invoke(action, ctx, {
+      ...common,
+      plan: "starter",
+      interval: "month",
+      amountUsd: 25,
+    })
+  ).rejects.toThrow("Billing is not available in this instance yet.")
+  expect(runMutation).not.toHaveBeenCalled()
+  expect(stripeRequest).not.toHaveBeenCalled()
+})
 
 test.each([
   startPlanCheckout,

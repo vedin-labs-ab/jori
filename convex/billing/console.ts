@@ -4,6 +4,7 @@ import { type Doc } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { ensureAccount, getAccount, requireActivePlan } from "./account"
+import { requireStripeConfiguration } from "./stripe/config"
 
 const entryPageSize = 30
 
@@ -79,6 +80,10 @@ export const configureAutoTopUp = mutation({
   },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
+
+    if (args.config !== null) {
+      requireStripeConfiguration()
+    }
 
     const account = await ensureAccount(ctx, args.organizationId)
 
