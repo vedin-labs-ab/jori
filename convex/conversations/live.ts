@@ -8,7 +8,7 @@ import { type QueryLikeCtx } from "../shared/context"
 /** How much of the model's window the thread's latest run is using, with
  *  the last turn's breakdown for the indicator's popover, and whether the
  *  run condensed earlier context to keep going. */
-export type LiveContext = {
+type LiveContext = {
   condensed: boolean
   model: string
   runId: Id<"runs">

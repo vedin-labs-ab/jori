@@ -4,17 +4,16 @@ import {
   readMessageContext,
   readMessageReferences,
 } from "../../contracts/replies/answers"
+import {
+  type ReferenceTarget,
+  referenceKinds,
+} from "../../contracts/replies/parts"
 import { type Id } from "../_generated/dataModel"
 import { query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
-import { requireUserId } from "../access/users"
 import { ancestorPath } from "../folders/tree"
-import { resolvePersonByIdentity } from "../persons/identity/links"
-import {
-  loadReference,
-  type ReferenceTarget,
-  referenceTable,
-} from "../references/lookup"
+import { resolveConsolePerson } from "../persons/account"
+import { loadReference, referenceTable } from "../references/lookup"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 
@@ -28,15 +27,7 @@ import { createSight, type Sight } from "../visibility/sight"
 // it, what to say in its snapshot, and what to tell the model.
 
 export const referenceTargetValidator = v.object({
-  kind: v.union(
-    v.literal("file"),
-    v.literal("table"),
-    v.literal("store"),
-    v.literal("job"),
-    v.literal("folder"),
-    v.literal("run"),
-    v.literal("chat")
-  ),
+  kind: v.union(...referenceKinds.map((kind) => v.literal(kind))),
   id: v.string(),
 })
 
@@ -71,11 +62,11 @@ export const resolve = query({
 
     const sight = createSight(ctx, {
       organizationId: args.organizationId,
-      personId: await resolvePersonByIdentity(ctx, {
-        organizationId: args.organizationId,
-        provider: "auth",
-        externalId: requireUserId(access.identity),
-      }),
+      personId: await resolveConsolePerson(
+        ctx,
+        args.organizationId,
+        access.identity
+      ),
     })
 
     return await Promise.all(

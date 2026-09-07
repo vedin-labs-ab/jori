@@ -9,6 +9,7 @@ import {
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { readUserProfile, requireUserId } from "../access/users"
+import { type QueryLikeCtx } from "../shared/context"
 import {
   linkIdentityToPerson,
   resolveIdentity,
@@ -55,16 +56,26 @@ export async function ensureCurrentPersonFromAction(
   )
 }
 
+/** The caller's person, or nothing while their identity is still
+ *  syncing; authenticate in the handler before resolving it here. */
+export async function resolveConsolePerson(
+  ctx: QueryLikeCtx,
+  organizationId: string,
+  identity: Parameters<typeof readUserProfile>[0]
+) {
+  return await resolvePersonByIdentity(ctx, {
+    organizationId,
+    provider: "auth",
+    externalId: requireUserId(identity),
+  })
+}
+
 export async function resolveCurrentPerson(
   ctx: QueryCtx,
   organizationId: string
 ) {
   const identity = await requireOrganizationAccess(ctx, organizationId)
-  const personId = await resolvePersonByIdentity(ctx, {
-    organizationId,
-    provider: "auth",
-    externalId: requireUserId(identity),
-  })
+  const personId = await resolveConsolePerson(ctx, organizationId, identity)
 
   if (personId === undefined) {
     throw new Error("Your Jori identity is still syncing. Refresh shortly.")

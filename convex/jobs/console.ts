@@ -2,9 +2,11 @@ import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
-import { requireUserId } from "../access/users"
-import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
-import { resolvePersonByIdentity } from "../persons/identity/links"
+import {
+  ensureCurrentPerson,
+  resolveConsolePerson,
+  resolveCurrentPerson,
+} from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
 import { visibilityValidator } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
@@ -38,11 +40,11 @@ export const list = query({
       }
     }
 
-    const personId = await resolvePersonByIdentity(ctx, {
-      organizationId: args.organizationId,
-      provider: "auth",
-      externalId: requireUserId(access.identity),
-    })
+    const personId = await resolveConsolePerson(
+      ctx,
+      args.organizationId,
+      access.identity
+    )
     const jobs = await searchJobs(ctx, {
       organizationId: args.organizationId,
       query: args.query,
@@ -84,11 +86,11 @@ export const get = query({
       return { status: "unauthorized" as const, message: access.message }
     }
 
-    const personId = await resolvePersonByIdentity(ctx, {
-      organizationId: args.organizationId,
-      provider: "auth",
-      externalId: requireUserId(access.identity),
-    })
+    const personId = await resolveConsolePerson(
+      ctx,
+      args.organizationId,
+      access.identity
+    )
     const job = await ctx.db.get(args.jobId)
     const sight = createSight(ctx, {
       organizationId: args.organizationId,

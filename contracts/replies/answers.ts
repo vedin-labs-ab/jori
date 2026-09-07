@@ -55,9 +55,7 @@ export function readMessageReferences(value: unknown): MessageContext[] {
   return references
 }
 
-export function readReferenceTarget(
-  value: unknown
-): MessageContext | undefined {
+function readReferenceTarget(value: unknown): MessageContext | undefined {
   if (!isRecord(value)) {
     return undefined
   }

@@ -3,6 +3,7 @@ import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
+import { resolveConsolePerson } from "../persons/account"
 import {
   type ApprovalFilter,
   approvalFilterValidator,
@@ -17,7 +18,6 @@ import {
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
-import { resolveConsolePerson } from "./console/person"
 import { type RunSummary, summarizeRun } from "./console/summaries"
 
 export const page = query({

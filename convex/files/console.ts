@@ -7,8 +7,7 @@ import {
   query,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { requireUserId } from "../access/users"
-import { resolvePersonByIdentity } from "../persons/identity/links"
+import { resolveConsolePerson } from "../persons/account"
 import { personDisplay } from "../persons/names"
 import { visibilityValidator } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
@@ -141,11 +140,7 @@ async function resolveViewer(
   organizationId: string,
   identity: Awaited<ReturnType<typeof requireOrganizationAccess>>
 ): Promise<FileViewer> {
-  const personId = await resolvePersonByIdentity(ctx, {
-    organizationId,
-    provider: "auth",
-    externalId: requireUserId(identity),
-  })
+  const personId = await resolveConsolePerson(ctx, organizationId, identity)
 
   return { organizationId, personId }
 }

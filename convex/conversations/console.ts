@@ -3,7 +3,7 @@ import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
-import { readUserProfile, requireUserId } from "../access/users"
+import { readUserProfile } from "../access/users"
 import {
   consoleAnswerValidator,
   consoleMessageData,
@@ -18,9 +18,9 @@ import { modelSelectionValidator } from "../model/selection"
 import {
   accountArgs,
   ensureAccountPerson,
+  resolveConsolePerson,
   resolveCurrentPerson,
 } from "../persons/account"
-import { resolvePersonByIdentity } from "../persons/identity/links"
 import { nameMentions } from "../references/tokens"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
@@ -126,11 +126,11 @@ export const live = query({
 
     const conversation = await findVisibleConsoleConversation(ctx, {
       ...args,
-      personId: await resolvePersonByIdentity(ctx, {
-        organizationId: args.organizationId,
-        provider: "auth",
-        externalId: requireUserId(access.identity),
-      }),
+      personId: await resolveConsolePerson(
+        ctx,
+        args.organizationId,
+        access.identity
+      ),
     })
 
     if (conversation === null) {
