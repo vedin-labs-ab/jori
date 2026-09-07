@@ -4,12 +4,11 @@ import { type GenericId } from "convex/values"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatPane } from "@/shared/console/chat/pane"
 import { useReplyReferences } from "@/shared/console/chat/pane/auto"
-import { usePaneTabs } from "@/shared/console/chat/pane/tabs"
+import { type OpenTarget, usePaneTabs } from "@/shared/console/chat/pane/tabs"
 import { ChatThread } from "@/shared/console/chat/thread"
 import {
   type ChatRun,
   isLiveRun,
-  type ReferenceTarget,
   type ResolveReference,
 } from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
@@ -161,7 +160,7 @@ function ConversationTurns({
   send,
 }: {
   live: LiveConversation
-  onOpenReference: (target: ReferenceTarget) => void
+  onOpenReference: OpenTarget
   onStop: () => void
   organizationId: string
   page: ReturnType<typeof useConversationMessages>

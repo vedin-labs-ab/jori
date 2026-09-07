@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
+import { type OpenTarget } from "../pane/tabs"
 import { referencePresentation } from "../presentation"
 import { type ChatReference, type ReferenceTarget } from "../types"
 
@@ -7,15 +8,16 @@ const cardClassName =
   "flex w-fit max-w-full min-w-0 items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-left text-xs"
 
 /** A resource a reply is about, as a card that opens it: the kind's
- *  icon, the name, and one line of detail after a dot. When the host
- *  cannot resolve the target, or says it is gone, the card says so in
- *  the detail's place and opens nothing. */
+ *  icon, the name, and one line of detail after a dot. A click previews
+ *  the resource and a double click keeps it, the way the pane's tabs do.
+ *  When the host cannot resolve the target, or says it is gone, the card
+ *  says so in the detail's place and opens nothing. */
 export function ReferenceCard({
   onOpen,
   reference,
   target,
 }: {
-  onOpen: (target: ReferenceTarget) => void
+  onOpen: OpenTarget
   reference: ChatReference | undefined
   target: ReferenceTarget
 }) {
@@ -41,6 +43,7 @@ export function ReferenceCard({
         "cursor-pointer outline-none transition-colors hover:bg-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
       )}
       onClick={() => onOpen(target)}
+      onDoubleClick={() => onOpen(target, { pinned: true })}
       type="button"
     >
       <Icon

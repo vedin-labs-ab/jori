@@ -36,12 +36,19 @@ export type PaneProps = {
   tabs: PaneTab[]
 }
 
+/** How the person opens a target: a click previews it, a double click
+ *  keeps it. */
+export type OpenTarget = (
+  target: ReferenceTarget,
+  options?: { pinned: boolean }
+) => void
+
 /** The pane's tabs and the rules between them. `openTarget` is the
  *  person's — a card clicked, say — and `autoOpen` a reply's, which
  *  yields to a dismissal and to the stored preference. */
 export function usePaneTabs(): {
   autoOpen: (target: ReferenceTarget) => void
-  openTarget: (target: ReferenceTarget) => void
+  openTarget: OpenTarget
   pane: PaneProps
 } {
   const [state, dispatch] = useReducer(reducePane, initialPaneState)
@@ -60,9 +67,9 @@ export function usePaneTabs(): {
       },
       [preference]
     ),
-    openTarget: useCallback(
-      (target: ReferenceTarget) =>
-        dispatch({ type: "open", target, auto: false }),
+    openTarget: useCallback<OpenTarget>(
+      (target, options) =>
+        dispatch({ type: "open", target, auto: false, ...options }),
       []
     ),
     pane: {

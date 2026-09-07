@@ -47,6 +47,19 @@ test("a pinned tab stays, so the next target joins beside it", () => {
   expect(state.active).toEqual(file)
 })
 
+test("an opening that keeps pins the tab it makes, or the one it finds", () => {
+  const made = after(open(table), { ...open(job), pinned: true })
+
+  expect(made.tabs).toEqual([{ target: job, pinned: true }])
+
+  const found = after(open(table), { ...open(table), pinned: true }, open(job))
+
+  expect(found.tabs).toEqual([
+    { target: table, pinned: true },
+    { target: job, pinned: false },
+  ])
+})
+
 test("opening a target already in the strip brings it to the front", () => {
   const state = after(
     open(table),

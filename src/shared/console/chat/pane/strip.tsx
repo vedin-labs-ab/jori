@@ -145,7 +145,9 @@ function PaneTabItem({
             value={targetKey(tab.target)}
           >
             <Icon aria-hidden className="text-muted-foreground" />
-            <span className="min-w-0 truncate">{name}</span>
+            {/* An italic's last glyph leans past its advance, so the clip
+                keeps a pixel of room the layout gives straight back. */}
+            <span className="-mr-px min-w-0 truncate pr-px">{name}</span>
           </TabsTrigger>
           <Button
             aria-label={tab.pinned ? `Unpin ${name}` : `Pin ${name}`}
