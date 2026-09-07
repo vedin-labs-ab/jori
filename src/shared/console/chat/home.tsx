@@ -1,4 +1,4 @@
-import { ArrowRight, MessagesSquare } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { type ReactNode } from "react"
 import { Suggestion } from "@/components/ui/suggestion"
 import { cn } from "@/lib/utils"
@@ -136,7 +136,6 @@ function RecentConversations({
                 className={cn(rowClassName, "text-muted-foreground")}
                 type="button"
               >
-                <MessagesSquare aria-hidden className="size-4 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">
                   See all {recent.length} chats
                 </span>
