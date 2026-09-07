@@ -58,7 +58,8 @@ function emptySuggestionMessage({
 }
 
 /** The resource the chat was opened about, named by its kind's icon, with
- *  a control to send the next message without it. */
+ *  a control to send the next message without it — larger under a
+ *  finger, without growing the chip. */
 export function ContextChip({
   onClear,
   reference,
@@ -79,7 +80,7 @@ export function ContextChip({
       {onClear === undefined ? null : (
         <button
           aria-label={`Remove ${reference.name}`}
-          className="grid size-4 cursor-pointer place-items-center rounded-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="grid size-4 cursor-pointer place-items-center rounded-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:-my-1.5 pointer-coarse:size-7"
           onClick={onClear}
           type="button"
         >

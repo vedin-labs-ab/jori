@@ -1,35 +1,33 @@
-import { ChevronDown, Square } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { type ReactNode } from "react"
-import { Button } from "@/components/ui/button"
 import { Task, TaskContent, TaskLabel, TaskTrigger } from "../task"
 
-/** The status line of Jori's turn while the run works: the label, what
- *  the run is doing folded under it, and the control that stops it. It
- *  sits inside the turn, under the mark, above whatever of the reply has
- *  arrived. The host fills `progress` with the run's log; without it the
- *  line is the label alone. */
-export function ChatWorking({
-  onStop,
-  progress,
-}: {
-  onStop: () => void
-  progress?: ReactNode
-}) {
+/** The status line of Jori's turn while the run works: the label, and
+ *  what the run is doing folded under it. It sits inside the turn, under
+ *  the mark, above whatever of the reply has arrived; the composer's
+ *  control is the one that stops the run. The host fills `progress` with
+ *  the run's log; without it the line is the label alone. Only the label
+ *  is announced: the log under it changes too often to read aloud. */
+export function ChatWorking({ progress }: { progress?: ReactNode }) {
+  const label = (
+    <TaskLabel role="status" shimmer>
+      Working
+    </TaskLabel>
+  )
+
   return (
-    <div className="min-w-0" role="status">
+    <div className="min-w-0">
       <Task defaultOpen={false}>
-        <div className="flex min-h-6 items-center gap-2">
+        <div className="flex min-h-6 items-center gap-2 text-sm">
           {progress === undefined ? (
-            <TaskLabel className="text-sm" shimmer>
-              Working
-            </TaskLabel>
+            label
           ) : (
             <TaskTrigger title="Working">
               <button
-                className="flex cursor-pointer items-center gap-1 rounded-sm text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                className="flex cursor-pointer items-center gap-1 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 type="button"
               >
-                <TaskLabel shimmer>Working</TaskLabel>
+                {label}
                 <ChevronDown
                   aria-hidden="true"
                   className="size-3.5 text-muted-foreground transition-transform group-data-[state=open]:rotate-180"
@@ -37,16 +35,6 @@ export function ChatWorking({
               </button>
             </TaskTrigger>
           )}
-          <Button
-            className="ml-auto"
-            onClick={onStop}
-            size="xs"
-            type="button"
-            variant="ghost"
-          >
-            <Square className="fill-current" data-icon="inline-start" />
-            Stop
-          </Button>
         </div>
         {progress === undefined ? null : <TaskContent>{progress}</TaskContent>}
       </Task>

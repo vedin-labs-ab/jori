@@ -37,7 +37,7 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   expect(
     screen.getByText("Chase the unpaid renewals", { selector: "div" })
   ).toBeDefined()
-  expect(screen.getByRole("button", { name: "Stop" })).toBeDefined()
+  expect(screen.getByRole("button", { name: "Stop run" })).toBeDefined()
 
   // The thinking shows first, then the reply arrives, with the job it
   // names and its question.
@@ -82,7 +82,7 @@ test("stopping the run leaves a quiet notice under the ask", async () => {
 
   typeInto(field, "Chase the unpaid renewals")
   fireEvent.keyDown(field, { key: "Enter" })
-  fireEvent.click(await screen.findByRole("button", { name: "Stop" }))
+  fireEvent.click(await screen.findByRole("button", { name: "Stop run" }))
 
   expect(screen.getByText("Jori stopped before finishing")).toBeDefined()
   expect(screen.queryByText("Working")).toBeNull()

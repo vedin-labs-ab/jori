@@ -19,7 +19,7 @@ vi.mock("@tanstack/react-router", async () => ({
 
 const mobile = vi.hoisted(() => ({ current: false }))
 
-vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => mobile.current }))
+vi.mock("@/hooks/use-mobile", () => ({ useIsBelow: () => mobile.current }))
 
 const table: ReferenceTarget = { kind: "table", id: "t1" }
 const job: ReferenceTarget = { kind: "job", id: "j1" }
@@ -300,7 +300,7 @@ test("the hint floats over the chat, above the composer, and offers the two ways
   expect(onHint).toHaveBeenCalledWith("keep")
 })
 
-test("below md the pane is a sheet over the chat, and Escape puts it away", () => {
+test("below lg the pane is a sheet over the chat, and Escape puts it away", () => {
   mobile.current = true
 
   const { onOpenChange } = renderPane()

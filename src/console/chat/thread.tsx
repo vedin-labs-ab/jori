@@ -24,6 +24,7 @@ import {
 import { type useConversationMessages } from "./messages"
 import { ConversationPaneBody } from "./pane"
 import { ChatProgress } from "./progress"
+import { sendAnswer } from "./send"
 
 type SendAnswer = FunctionArgs<typeof api.conversations.console.send>["answer"]
 
@@ -117,7 +118,7 @@ function ConversationThread({
           onMention={thread.mentioned.open}
           onSelect={thread.choose}
           onSend={(text, references) =>
-            void thread.send({
+            thread.send({
               conversationId,
               text,
               ...(references.length === 0 ? {} : { references }),
@@ -136,12 +137,11 @@ function ConversationThread({
         live={live}
         mentions={thread.mentions}
         onOpenReference={thread.openTarget}
-        onStop={thread.stop}
         organizationId={organizationId}
         page={page}
         resolveReference={resolveReference}
         send={(text, answer) =>
-          void thread.send({
+          sendAnswer(thread.send, {
             conversationId,
             text,
             ...(answer === undefined ? {} : { answer }),
@@ -170,7 +170,6 @@ function ConversationTurns({
   live,
   mentions,
   onOpenReference,
-  onStop,
   organizationId,
   page,
   resolveReference,
@@ -179,7 +178,6 @@ function ConversationTurns({
   live: LiveConversation
   mentions: MentionSources
   onOpenReference: OpenTarget
-  onStop: () => void
   organizationId: string
   page: ReturnType<typeof useConversationMessages>
   resolveReference: ResolveReference
@@ -205,12 +203,7 @@ function ConversationTurns({
       onOpenReference={onOpenReference}
       progress={
         isLive ? (
-          <ChatProgress
-            now={now}
-            onStop={onStop}
-            organizationId={organizationId}
-            run={run}
-          />
+          <ChatProgress now={now} organizationId={organizationId} run={run} />
         ) : null
       }
       resolveReference={resolveReference}

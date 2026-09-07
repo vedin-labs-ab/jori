@@ -15,7 +15,7 @@ export function CondensedNotice({ runId }: { runId: string }) {
         Jori condensed earlier context to keep going
       </p>
       <ConsoleLink
-        className="inline-flex w-fit items-center gap-1 rounded-sm underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring/30"
+        className="inline-flex w-fit items-center gap-1 rounded-sm underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring"
         {...referenceDestination({ kind: "run", id: runId })}
       >
         See the run in Activity

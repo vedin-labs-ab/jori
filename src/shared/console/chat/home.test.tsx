@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 import { History, Mail } from "lucide-react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { ConsoleNavigationContext } from "../shell/location"
@@ -92,6 +98,64 @@ test("four chats show; the rest are a search away", () => {
   fireEvent.click(screen.getByRole("option", { name: "Chat f" }))
 
   expect(navigate).toHaveBeenCalledWith("/chat/conversations_f")
+})
+
+test("while the conversations are on their way, their block keeps its room", () => {
+  const { container } = render(
+    <ChatHome
+      composer={null}
+      now={now}
+      onSuggestion={vi.fn()}
+      recent={undefined}
+      suggestions={[]}
+    />
+  )
+
+  expect(container.querySelectorAll("[data-slot=skeleton]").length).toBe(5)
+  expect(screen.queryByText("Recent")).toBeNull()
+})
+
+test("a suggestion on its way holds the pills, and lets go once it lands", async () => {
+  let land: () => void = () => undefined
+  const onSuggestion = vi.fn(
+    () =>
+      new Promise<void>((resolve) => {
+        land = resolve
+      })
+  )
+
+  render(
+    <ChatHome
+      composer={null}
+      now={now}
+      onSuggestion={onSuggestion}
+      recent={[]}
+      suggestions={[
+        { icon: History, text: "Which renewals are at risk?" },
+        { icon: Mail, text: "Summarize #finance" },
+      ]}
+    />
+  )
+
+  fireEvent.click(screen.getByRole("button", { name: "Summarize #finance" }))
+
+  expect(onSuggestion).toHaveBeenCalledWith("Summarize #finance")
+  expect(
+    screen
+      .getByRole("button", { name: "Which renewals are at risk?" })
+      .hasAttribute("disabled")
+  ).toBe(true)
+  expect(screen.getByRole("status", { name: "Sending" })).toBeDefined()
+
+  land()
+
+  await waitFor(() =>
+    expect(
+      screen
+        .getByRole("button", { name: "Summarize #finance" })
+        .hasAttribute("disabled")
+    ).toBe(false)
+  )
 })
 
 test("without conversations there is no recent section at all", () => {

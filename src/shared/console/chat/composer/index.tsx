@@ -1,6 +1,6 @@
 import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
-import { type MouseEvent, useEffect, useId } from "react"
+import { type FormEvent, type MouseEvent, useEffect, useId } from "react"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 import { useStoredOpen } from "@/shared/storage"
 import {
@@ -22,10 +22,11 @@ import { ComposerFooter, HintsPeek } from "./footer"
 /** Where the person writes: plain text with the things it mentions as
  *  chips in it, put there from a sigil's listbox or the "+" menu. Enter
  *  sends and Shift+Enter breaks the line; while a run is live the send
- *  control is the stop control instead. Disabled with a reason, it says
- *  why under the field. The model picker stands with the context ring,
- *  left of it, when the host offers a selection; changing it mid-chat is
- *  fine, the next run takes it. */
+ *  control is the stop control instead, and while the host is still
+ *  answering a send the draft waits in the field behind a spinner.
+ *  Disabled with a reason, it says why under the field. The model picker
+ *  stands with the context ring, left of it, when the host offers a
+ *  selection; changing it mid-chat is fine, the next run takes it. */
 export function ChatComposer({
   autoFocus = false,
   context,
@@ -58,8 +59,8 @@ export function ChatComposer({
   /** Takes the model and effort the next run uses. */
   onSelect?: (selection: ModelSelection) => void
   /** Takes the text with its mention tokens, and the resources they
-   *  name. */
-  onSend: (text: string, references: MessageContext[]) => void
+   *  name; a promise holds the draft, cleared on resolve, kept on reject. */
+  onSend: (text: string, references: MessageContext[]) => unknown
   onStop: () => void
   /** Takes each resource whose chip is deleted, so a host that opened
    *  it on the mention can let it go again. */
@@ -77,10 +78,12 @@ export function ChatComposer({
   usage?: ChatContextUsage | null
 }) {
   const reasonId = useId()
-  const [hintsOpen, setHintsOpen] = useStoredOpen("jori.chat.hints")
+  const hints = useHintsBand()
   const isLive = isLiveRun(live)
-  const showsReason = disabled && reason !== undefined
-  const shownReason = showsReason ? reason : undefined
+  const shownReason =
+    disabled && reason !== undefined
+      ? { id: reasonId, text: reason }
+      : undefined
   const composer = useComposerEditor({
     disabled,
     onMention,
@@ -93,17 +96,15 @@ export function ChatComposer({
 
   useFieldState(composer.editor, {
     autoFocus,
-    describedBy: showsReason ? reasonId : undefined,
+    describedBy: shownReason?.id,
     disabled,
+    pending: composer.pending,
   })
 
   return (
     <form
       className={chatColumnClassName}
-      onSubmit={(event) => {
-        event.preventDefault()
-        composer.send()
-      }}
+      onSubmit={(event) => sendOnSubmit(event, composer.send)}
     >
       <InputGroup
         className="bg-background"
@@ -121,40 +122,67 @@ export function ChatComposer({
         />
         <ComposerFooter
           canSend={composer.canSend}
+          hintsId={hints.id}
           isLive={isLive}
           mentions={mentions}
-          onHideHints={hintsOpen ? () => setHintsOpen(false) : undefined}
+          onHideHints={hints.open ? hints.hide : undefined}
           onPick={composer.insertMention}
           onSelect={onSelect}
           onStop={onStop}
-          reason={
-            shownReason === undefined
-              ? undefined
-              : { id: reasonId, text: shownReason }
-          }
+          pending={composer.pending}
+          reason={shownReason}
           selection={selection}
           usage={usage}
         />
       </InputGroup>
-      {hintsOpen || shownReason !== undefined ? null : (
-        <HintsPeek onShow={() => setHintsOpen(true)} />
+      {hints.open || shownReason !== undefined ? null : (
+        <HintsPeek hintsId={hints.id} onShow={hints.show} />
       )}
     </form>
   )
 }
 
+/** The send control pressed: the draft goes, and the page stays. */
+function sendOnSubmit(event: FormEvent, send: () => void) {
+  event.preventDefault()
+  send()
+}
+
+/** The sigils' band under the footer: shown until folded away, as the
+ *  browser remembers, and named for the controls that fold and unfold
+ *  it. */
+function useHintsBand() {
+  const id = useId()
+  const [open, setOpen] = useStoredOpen("jori.chat.hints")
+
+  return {
+    hide: () => setOpen(false),
+    id,
+    open,
+    show: () => setOpen(true),
+  }
+}
+
 /** What the field says of itself beyond its words: focused on arrival
- *  when asked, disabled with the reason under it. */
+ *  when asked — unless the pointer is a finger, where the focus would
+ *  raise a keyboard over the page — and disabled with the reason under
+ *  it, or while a send is still on its way. */
 function useFieldState(
   editor: ReturnType<typeof useComposerEditor>["editor"],
   {
     autoFocus,
     describedBy,
     disabled,
-  }: { autoFocus: boolean; describedBy: string | undefined; disabled: boolean }
+    pending,
+  }: {
+    autoFocus: boolean
+    describedBy: string | undefined
+    disabled: boolean
+    pending: boolean
+  }
 ) {
   useEffect(() => {
-    if (autoFocus && editor !== null && !disabled) {
+    if (autoFocus && editor !== null && !disabled && !hasCoarsePointer()) {
       editor.commands.focus("end")
     }
   }, [autoFocus, disabled, editor])
@@ -166,7 +194,7 @@ function useFieldState(
       return
     }
 
-    if (disabled) {
+    if (disabled || pending) {
       element.setAttribute("aria-disabled", "true")
     } else {
       element.removeAttribute("aria-disabled")
@@ -177,7 +205,14 @@ function useFieldState(
     } else {
       element.setAttribute("aria-describedby", describedBy)
     }
-  }, [describedBy, disabled, editor])
+  }, [describedBy, disabled, editor, pending])
+}
+
+function hasCoarsePointer() {
+  return (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(pointer: coarse)").matches
+  )
 }
 
 /** A click on the frame itself, or on the footer beside its controls,

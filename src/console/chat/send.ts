@@ -17,7 +17,8 @@ const blockedMessage =
 /** Sends the person's message. In an open conversation the bubble lands
  *  before the round trip, at the top of the newest-first page the thread
  *  reads; the reply follows through the conversation's live state. A
- *  blocked budget keeps the message and says so; a failure says why. */
+ *  blocked budget keeps the message and says so; a failure says why and
+ *  rejects, so the composer keeps the draft for another try. */
 export function useSendMessage(organizationId: string) {
   const send = useMutation(api.conversations.console.send).withOptimisticUpdate(
     (localStore, args) => {
@@ -62,9 +63,18 @@ export function useSendMessage(organizationId: string) {
       } catch (error) {
         showErrorToast(error, "Couldn't send your message.")
 
-        return undefined
+        throw error
       }
     },
     [organizationId, send]
   )
+}
+
+/** A reply's chip pressed: the answer goes, and a failure has said why
+ *  in its toast, the chips staying to be pressed again. */
+export function sendAnswer(
+  send: ReturnType<typeof useSendMessage>,
+  args: SendArgs
+) {
+  void send(args).catch(() => undefined)
 }

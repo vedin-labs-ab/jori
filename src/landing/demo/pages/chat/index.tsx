@@ -201,9 +201,9 @@ function DemoComposer({
       live={run}
       mentions={mentions}
       onSelect={setSelection}
-      onSend={(text, references) =>
+      onSend={(text, references) => {
         actions.sendChatMessage(text, conversationId, { references })
-      }
+      }}
       onStop={actions.stopChatRun}
       resolve={resolve}
       selection={selection}
@@ -221,15 +221,12 @@ function LiveProgress({
   live: DemoLiveReply | null
   now: number
 }) {
-  const { actions } = useDemoWorkspace()
-
   if (live === null || !isLiveRun(live.run)) {
     return null
   }
 
   return (
     <ChatWorking
-      onStop={actions.stopChatRun}
       progress={
         <ActivityTimeline items={liveActivity(live.startedAt)} now={now} />
       }

@@ -57,12 +57,14 @@ export function PaneHeader({
   )
 }
 
-/** The name as the link to the target's page: no padding at rest, so the
- *  header's gaps stay optically even, growing on hover as the arrow that
- *  says where it goes opens beside it. The arrow's box and the gap
- *  before it are both collapsed at rest, so the arrow claims no width it
- *  is not using; the button's own sizing of bare icons is why the arrow
- *  sizes itself and the box does the collapsing. */
+/** The name as the link to the target's page, resting exactly where a
+ *  plain name would: the pill's room comes from padding cancelled by
+ *  negative margin, so the header's gaps stay optically even and the
+ *  name never moves under the pointer. The arrow that says where it goes
+ *  opens beside it on hover; its box and the gap before it are both
+ *  collapsed at rest, so the arrow claims no width it is not using. The
+ *  button's own sizing of bare icons is why the arrow sizes itself and
+ *  the box does the collapsing. */
 function PageLink({
   name,
   saving,
@@ -75,7 +77,7 @@ function PageLink({
   return (
     <Button
       asChild
-      className="group min-w-0 gap-0 px-0 font-medium text-foreground text-sm hover:px-1.5 focus-visible:px-1.5"
+      className="group -mx-1.5 min-w-0 gap-0 px-1.5 font-medium text-foreground text-sm"
       variant="ghost"
     >
       <ConsoleLink {...referenceDestination(target)}>

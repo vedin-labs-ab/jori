@@ -8,6 +8,10 @@ import { type ReferenceKind, referenceKinds } from "./parts"
 
 export type MessageContext = { kind: ReferenceKind; id: string }
 
+/** How many of a kind the composer's picker is offered; the search
+ *  narrows within. A kind at the cap reads as "25+" in the picker. */
+export const mentionsPerKind = 25
+
 /** The values one choices part received. */
 export type PartAnswer = {
   /** The part's index within the reply message. */

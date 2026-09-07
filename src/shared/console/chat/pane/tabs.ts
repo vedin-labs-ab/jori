@@ -5,6 +5,7 @@ import {
   useReducer,
   useState,
 } from "react"
+import { useIsBelow } from "@/hooks/use-mobile"
 import { readStorage, writeStorage } from "@/shared/storage"
 import { type ReferenceTarget } from "../types"
 import {
@@ -24,6 +25,17 @@ import {
 export type PanePreference = "keep" | "manual"
 
 const storageKey = "jori.chat.pane"
+
+/** Under this width the chat and the pane cannot share the frame — the
+ *  chat keeps 384px, the pane 320px, and the sidebar stands inline from
+ *  768px — so the pane covers the chat as a sheet instead. */
+const paneSheetBreakpoint = 1024
+
+/** Whether the pane is a sheet over the chat rather than a panel beside
+ *  it, which is the frame's width to decide. */
+export function usePaneSheet() {
+  return useIsBelow(paneSheetBreakpoint)
+}
 
 /** The pane's props as `ChatPane` takes them, spread straight in. */
 export type PaneProps = {
@@ -53,7 +65,8 @@ export type OpenTarget = (
 
 /** The pane's tabs and the rules between them. `openTarget` is the
  *  person's — a card clicked, say — and `autoOpen` a reply's, which
- *  yields to a dismissal and to the stored preference. */
+ *  yields to a dismissal and to the stored preference, and does nothing
+ *  while the pane is a sheet: a sheet would cover the reply just read. */
 export function usePaneTabs(): {
   autoOpen: (target: ReferenceTarget) => void
   openTarget: OpenTarget
@@ -63,6 +76,7 @@ export function usePaneTabs(): {
 } {
   const [state, dispatch] = useReducer(reducePane, initialPaneState)
   const [preference, setPreference] = useState(readPreference)
+  const isSheet = usePaneSheet()
   const choose = useCallback((next: PanePreference) => {
     writePreference(next)
     setPreference(next)
@@ -71,11 +85,11 @@ export function usePaneTabs(): {
   return {
     autoOpen: useCallback(
       (target: ReferenceTarget) => {
-        if (preference !== "manual") {
+        if (preference !== "manual" && !isSheet) {
           dispatch({ type: "open", target, auto: true })
         }
       },
-      [preference]
+      [isSheet, preference]
     ),
     openTarget: useCallback<OpenTarget>(
       (target, options) =>

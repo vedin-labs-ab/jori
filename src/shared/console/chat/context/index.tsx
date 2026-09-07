@@ -43,7 +43,7 @@ export function ContextIndicator({ usage }: { usage: ChatContextUsage }) {
           <PopoverTrigger
             aria-label={`Context: ${percent}%, ${summary}`}
             className={cn(
-              "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-1.5 text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/30",
+              "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-1.5 text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
               toneClassName[contextTone(fraction)]
             )}
             type="button"
