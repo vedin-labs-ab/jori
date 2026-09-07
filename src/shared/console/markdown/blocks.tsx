@@ -1,5 +1,5 @@
 import { type Token, type Tokens } from "marked"
-import { type ReactNode } from "react"
+import { memo, type ReactNode } from "react"
 import { CodeBlock } from "./code"
 import { InlineTokens, TaskMark } from "./inline"
 import { childTokens, decodeEntities } from "./text"
@@ -14,7 +14,19 @@ export function BlockTokens({ tokens }: { tokens: Token[] }) {
   ))
 }
 
-function BlockToken({ token }: { token: Token }): ReactNode {
+/** One block. A streaming text is lexed again as it grows, so the same
+ *  block arrives as a new token each write; the source it was read from
+ *  says whether it changed. */
+const BlockToken = memo(
+  function BlockToken({ token }: { token: Token }): ReactNode {
+    return blockElement(token)
+  },
+  (previous, next) =>
+    previous.token.type === next.token.type &&
+    previous.token.raw === next.token.raw
+)
+
+function blockElement(token: Token): ReactNode {
   switch (token.type) {
     case "paragraph":
       return <p>{inline(token)}</p>

@@ -2,18 +2,20 @@ import { useEffect, useState } from "react"
 
 /** How far the shown text may trail the target: about a sentence. */
 const maxLag = 120
-/** The share of the backlog one frame reveals, and the least it reveals. */
-const catchUpShare = 30
-const minStep = 2
+/** The share of the backlog one step reveals, and the least it reveals. */
+const catchUpShare = 15
+const minStep = 4
 
 /**
- * The target text, revealed a few characters per animation frame so that
- * a burst of writes reads as typing rather than as jumps. Each frame shows
- * max(2, ⌈backlog / 30⌉) more characters, so the pace rises with the
- * backlog and a sentence drains in about half a second; anything further
- * behind than a sentence shows at once. What is there on the first render
- * shows whole, a target that is not a continuation restarts, and a reader
- * who asked for reduced motion sees the target as it is.
+ * The target text, revealed a few characters every other animation frame
+ * so that a burst of writes reads as typing rather than as jumps. Each
+ * step shows max(4, ⌈backlog / 15⌉) more characters, so the pace rises
+ * with the backlog and a sentence drains in about half a second; anything
+ * further behind than a sentence shows at once. A step every other frame
+ * halves what the markdown has to lay out for the same pace. What is
+ * there on the first render shows whole, a target that is not a
+ * continuation restarts, and a reader who asked for reduced motion sees
+ * the target as it is.
  */
 export function useRevealedText(target: string) {
   const [shown, setShown] = useState(target)
@@ -25,8 +27,8 @@ export function useRevealedText(target: string) {
       return
     }
 
-    const frame = requestAnimationFrame(() => {
-      setShown(advance(current, target))
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setShown(advance(current, target)))
     })
 
     return () => cancelAnimationFrame(frame)
@@ -35,7 +37,7 @@ export function useRevealedText(target: string) {
   return reduced ? target : current
 }
 
-/** One frame's worth more of the target. */
+/** One step's worth more of the target. */
 export function advance(shown: string, target: string) {
   const start = Math.max(shown.length, target.length - maxLag)
   const backlog = target.length - start

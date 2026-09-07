@@ -9,6 +9,7 @@ import typescript from "highlight.js/lib/languages/typescript"
 import xml from "highlight.js/lib/languages/xml"
 import yaml from "highlight.js/lib/languages/yaml"
 import { createLowlight } from "lowlight"
+import { memo, useMemo } from "react"
 
 // The grammars a reply is likely to quote, each a few kilobytes; anything
 // else renders as plain text rather than pulling the whole catalog in.
@@ -47,8 +48,9 @@ type HastNode =
   | Extract<HastNodes[number], { type: "element" }>["children"][number]
 
 /** Code as `hljs-*` spans for a language the palette knows, or as the
- *  plain text it is for one it does not. */
-export function GrammarCode({
+ *  plain text it is for one it does not. Highlighted once per text: a
+ *  block being streamed is asked again each write. */
+export const GrammarCode = memo(function GrammarCode({
   code,
   language,
 }: {
@@ -56,13 +58,16 @@ export function GrammarCode({
   language: string
 }) {
   const name = aliases[language] ?? language
+  const nodes = useMemo(
+    () =>
+      lowlight.registered(name)
+        ? lowlight.highlight(name, code).children
+        : null,
+    [code, name]
+  )
 
-  if (!lowlight.registered(name)) {
-    return code
-  }
-
-  return <HastNodes nodes={lowlight.highlight(name, code).children} />
-}
+  return nodes === null ? code : <HastNodes nodes={nodes} />
+})
 
 function HastNodes({ nodes }: { nodes: HastNodes }) {
   return nodes.map((node, index) => (
