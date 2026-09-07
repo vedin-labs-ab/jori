@@ -22,7 +22,8 @@ import {
 /** Where the person writes. Enter sends and Shift+Enter breaks the line;
  *  while a run is live the send control is the stop control instead.
  *  Disabled with a reason, it says why under the field. The model picker
- *  sits at the left of the footer when the host offers a selection. */
+ *  stands with the context ring, left of it, when the host offers a
+ *  selection; changing it mid-chat is fine, the next run takes it. */
 export function ChatComposer({
   autoFocus = false,
   context,
@@ -90,18 +91,16 @@ export function ChatComposer({
           value={text}
         />
         <InputGroupAddon align="block-end" className="justify-between gap-2">
-          <span className="flex min-w-0 items-center gap-2">
+          <span
+            className="min-w-0 truncate text-muted-foreground text-xs"
+            id={reasonId}
+          >
+            {disabled ? reason : null}
+          </span>
+          <span className="flex items-center gap-1">
             {selection === undefined || onSelect === undefined ? null : (
               <ModelPicker onSelect={onSelect} selection={selection} />
             )}
-            <span
-              className="min-w-0 truncate text-muted-foreground text-xs"
-              id={reasonId}
-            >
-              {disabled ? reason : null}
-            </span>
-          </span>
-          <span className="flex items-center gap-1">
             {usage === undefined || usage === null ? null : (
               <ContextIndicator usage={usage} />
             )}

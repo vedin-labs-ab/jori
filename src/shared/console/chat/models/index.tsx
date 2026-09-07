@@ -68,7 +68,7 @@ export function ModelPicker({
           <ChevronDown aria-hidden="true" className="size-3.5" />
         </InputGroupButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
+      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Recommendations</DropdownMenuLabel>
           <DropdownMenuRadioGroup

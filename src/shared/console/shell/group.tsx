@@ -49,8 +49,14 @@ export function CollapsibleGroup({
       <SidebarGroup>
         <SidebarGroupLabel>
           <CollapsibleTrigger asChild>
+            {/* The trigger reads as expanded while the group is open, and
+                a ghost button wears its open look for that; the label is
+                a label, so at rest it shows nothing either way. */}
             <Button
-              className={cn(groupLabelButton, "group/label")}
+              className={cn(
+                groupLabelButton,
+                "group/label aria-expanded:bg-transparent aria-expanded:text-sidebar-foreground/70 aria-expanded:hover:bg-muted aria-expanded:hover:text-foreground"
+              )}
               variant="ghost"
             >
               {label}
@@ -65,7 +71,9 @@ export function CollapsibleGroup({
           </CollapsibleTrigger>
         </SidebarGroupLabel>
         <CollapsibleContent asChild>
-          <SidebarGroupContent>{children}</SidebarGroupContent>
+          <SidebarGroupContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+            {children}
+          </SidebarGroupContent>
         </CollapsibleContent>
       </SidebarGroup>
     </Collapsible>
