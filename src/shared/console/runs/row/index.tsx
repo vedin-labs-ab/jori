@@ -36,6 +36,7 @@ export const ExecutionRow = memo(function ExecutionRow({
   expanded,
   now,
   onPreload,
+  open = false,
   showAudience,
   stop,
 }: RunRowSlots & {
@@ -43,9 +44,13 @@ export const ExecutionRow = memo(function ExecutionRow({
   defaultOpen?: boolean
   execution: ExecutionItem
   now: number
+  /** Set, the row stands open with no control to close it: one run shown
+   *  on its own, as the chat's pane shows it. */
+  open?: boolean
   showAudience: boolean
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen)
+  const [isToggledOpen, setIsToggledOpen] = useState(defaultOpen)
+  const isOpen = open || isToggledOpen
   const durationMs = durationFor(execution, now)
   const isOngoing =
     execution.status === "queued" || execution.status === "running"
@@ -57,10 +62,14 @@ export const ExecutionRow = memo(function ExecutionRow({
       <RunRowHeader action={isOngoing ? stop?.(execution) : undefined}>
         <RunRowControl
           expanded={isOpen}
-          onClick={() => {
-            onPreload?.()
-            setIsOpen((current) => !current)
-          }}
+          onClick={
+            open
+              ? undefined
+              : () => {
+                  onPreload?.()
+                  setIsToggledOpen((current) => !current)
+                }
+          }
           onFocus={onPreload}
           onPointerEnter={onPreload}
         >

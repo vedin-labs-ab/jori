@@ -9,6 +9,7 @@ import { ChatThread } from "@/shared/console/chat/thread"
 import {
   type ChatRun,
   isLiveRun,
+  type ReferenceTarget,
   type ResolveReference,
 } from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
@@ -120,9 +121,7 @@ function ConversationThread({
   return (
     <ChatPane
       {...pane}
-      body={(target) => (
-        <ConversationPaneBody organizationId={organizationId} target={target} />
-      )}
+      body={paneBody(organizationId, openTarget)}
       composer={
         <ChatComposer
           autoFocus
@@ -163,6 +162,18 @@ function ConversationThread({
         }
       />
     </ChatPane>
+  )
+}
+
+/** The pane's body for whatever tab is active, bound to the organization
+ *  and to the pane's own way of opening what a body names. */
+function paneBody(organizationId: string, onOpenReference: OpenTarget) {
+  return (target: ReferenceTarget) => (
+    <ConversationPaneBody
+      onOpenReference={onOpenReference}
+      organizationId={organizationId}
+      target={target}
+    />
   )
 }
 

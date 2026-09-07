@@ -70,7 +70,7 @@ export function DemoPage({
   }
 
   if (surface === "runs") {
-    return <RunsPage openRunId={openRunId} />
+    return <RunsPage openRunId={openRunId ?? search.run} />
   }
 
   if (surface === "chat") {

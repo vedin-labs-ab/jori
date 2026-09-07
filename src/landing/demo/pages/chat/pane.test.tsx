@@ -11,6 +11,8 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
 import { typeInto } from "../../../../../test/editor"
 import { renewalsConversationId } from "../../fixtures/chat"
+import { folderId } from "../../fixtures/folders"
+import { demoId } from "../../fixtures/ids"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
@@ -22,6 +24,13 @@ beforeEach(() => {
 })
 
 afterEach(cleanup)
+
+/** The pane's name is the way to the target's page. */
+function expectPaneLink(pane: HTMLElement, name: string, href: string) {
+  expect(within(pane).getByRole("link", { name }).getAttribute("href")).toBe(
+    href
+  )
+}
 
 test("a reference card opens its table beside the chat, with the way to its page", async () => {
   render(<DemoConsoleAt path={`/chat/${renewalsConversationId}`} />)
@@ -87,4 +96,75 @@ test("a reply opens the job it names, and the hint asks once how to go on", asyn
   expect(
     screen.queryByRole("toolbar", { name: "Resources beside the chat" })
   ).toBeNull()
+})
+
+test("a folder, a run, and another chat each open beside the chat, with the way to their pages", async () => {
+  // Opening by hand, so the reply's own resource does not take the pane.
+  window.localStorage.setItem("jori.chat.pane", "manual")
+  render(<DemoConsoleAt path="/chat" />)
+
+  const field = await screen.findByRole("textbox", { name: "Message" })
+  const finance = folderId("finance")
+  const harbor = demoId("runs", "harbor")
+
+  typeInto(
+    field,
+    `Look at +[folder:${finance}], +[run:${harbor}] and +[chat:${renewalsConversationId}]`
+  )
+  fireEvent.keyDown(field, { key: "Enter" })
+
+  // The folder: its listing, with the subfolder and the table filed in it.
+  fireEvent.click(await screen.findByRole("button", { name: "Finance" }))
+
+  const pane = screen.getByRole("complementary", { name: "Resources" })
+
+  expectPaneLink(pane, "Finance", `/folders/${finance}`)
+  expectPaneLink(pane, "Renewals", `/folders/${folderId("renewals")}`)
+  expect(within(pane).queryByRole("button", { name: "New" })).toBeNull()
+
+  // The run: its row held open to the task and the outcome, with the
+  // name leading to that row on the Activity page.
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Add Harbor House to the renewals table",
+    })
+  )
+
+  expectPaneLink(
+    pane,
+    "Add Harbor House to the renewals table",
+    `/runs?run=${harbor}`
+  )
+  expect(within(pane).getByText(/One row added, marked at risk/)).toBeDefined()
+  expect(within(pane).queryByRole("button", { expanded: true })).toBeNull()
+
+  // The other chat: its turns, and its table card opens in the same pane.
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Which renewals are at risk this month?",
+    })
+  )
+
+  expectPaneLink(
+    pane,
+    "Which renewals are at risk this month?",
+    `/chat/${renewalsConversationId}`
+  )
+  expect(
+    within(pane).getByText("One of the four renewals is at risk.")
+  ).toBeDefined()
+
+  // The ask's chip and the reply's card both name the table; the card
+  // comes last.
+  fireEvent.click(
+    within(pane)
+      .getAllByRole("button", { name: /^Customer renewals/ })
+      .at(-1) as HTMLElement
+  )
+
+  expect(
+    (await screen.findByRole("tab", { name: "Customer renewals" })).dataset
+      .state
+  ).toBe("active")
+  expect(within(pane).getByText("4 rows")).toBeDefined()
 })

@@ -7,6 +7,7 @@ import {
   Workflow,
 } from "lucide-react"
 import { type ReactNode } from "react"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,6 +50,18 @@ export function NewInFolderSub(handlers: NewMenuHandlers) {
         <NewResourceItems labels="bare" {...handlers} />
       </DropdownMenuSubContent>
     </DropdownMenuSub>
+  )
+}
+
+/** "New" as the button a folder page and a folder's empty state carry. */
+export function NewInFolderButton(handlers: NewMenuHandlers) {
+  return (
+    <NewInFolderMenu {...handlers}>
+      <Button type="button">
+        <Plus />
+        New
+      </Button>
+    </NewInFolderMenu>
   )
 }
 
