@@ -32,8 +32,10 @@ export type MentionSources = {
   skills: readonly string[]
   tools: readonly MentionTool[]
   /** Called as the person searches, so a host can narrow the resources
-   *  server-side; the lists above follow. */
-  onSearch?: (query: string) => void
+   *  server-side; the lists above follow. Called with nothing once the
+   *  search ends — the listbox closed, the menu put away — so a host can
+   *  let its lookup go until the next one starts. */
+  onSearch?: (query: string | null) => void
 }
 
 export type MentionSuggestion = {
