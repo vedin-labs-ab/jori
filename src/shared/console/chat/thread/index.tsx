@@ -1,3 +1,5 @@
+import { type PartAnswer } from "@contracts/replies/answers"
+import { isReplyQuestion } from "@contracts/replies/parts"
 import { type ReactNode, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,23 +22,24 @@ import {
   type ReferenceTarget,
   type ResolveReference,
 } from "../types"
-import { answeredParts, answerKey } from "./answers"
+import { answeredParts } from "./answers"
 import { ChoiceChips } from "./choices"
 import { ChatDraftTurn } from "./draft"
 import { JoriMessage, MessageActions, PersonMessage } from "./message"
 import { RunNotice } from "./notice"
-import { QuestionCard } from "./question"
+import { QuestionBundle } from "./question"
 import { ReferenceCard } from "./reference"
 
 /** The column every chat surface reads in. */
 export const chatColumnClassName = "mx-auto w-full max-w-[44rem] px-4 md:px-6"
 
 /** Choosing from a reply's options sends an ordinary message: the values
- *  chosen, and the text the view composed for them. */
+ *  each part received, and the text the view composed for them. A
+ *  reply's questions are answered together; a chip answers its part
+ *  alone. */
 export type ChooseHandler = (
   messageId: string,
-  partIndex: number,
-  values: string[],
+  answers: PartAnswer[],
   text: string
 ) => void
 
@@ -204,9 +207,9 @@ function ThreadTail({
   ) : null
 }
 
-/** A reply's parts in order: each reference as a card, then its choices
- *  as chips after the latest reply, or as a question card wherever they
- *  stand. Chips are next steps, so they leave with the next message. */
+/** A reply's parts: each reference as a card, its questions as one
+ *  bundle wherever the reply stands, and its chips after the latest
+ *  reply only. Chips are next steps, so they leave with the next message. */
 function ReplyParts({
   answered,
   message,
@@ -215,7 +218,7 @@ function ReplyParts({
   resolveReference,
   showChips,
 }: {
-  answered: Map<string, string[]>
+  answered: Map<string, Map<number, string[]>>
   message: ChatMessage
   onChoose: ChooseHandler
   onOpenReference: (target: ReferenceTarget) => void
@@ -223,8 +226,11 @@ function ReplyParts({
   showChips: boolean
 }) {
   const references = message.parts.filter((part) => part.kind === "reference")
-  const choices = message.parts.flatMap((part, index) =>
-    part.kind === "choices" ? [{ index, part }] : []
+  const questions = message.parts.flatMap((part, index) =>
+    isReplyQuestion(part) ? [{ index, part }] : []
+  )
+  const chips = message.parts.flatMap((part, index) =>
+    part.kind === "choices" && !isReplyQuestion(part) ? [{ index, part }] : []
   )
 
   return (
@@ -241,28 +247,24 @@ function ReplyParts({
           ))}
         </div>
       )}
-      {choices.map(({ index, part }) =>
-        part.prompt === undefined ? (
-          showChips ? (
+      {questions.length === 0 ? null : (
+        <QuestionBundle
+          answers={answered.get(message.id)}
+          onAnswer={(answers, text) => onChoose(message.id, answers, text)}
+          questions={questions}
+        />
+      )}
+      {showChips
+        ? chips.map(({ index, part }) => (
             <ChoiceChips
               key={index}
               onChoose={(values, text) =>
-                onChoose(message.id, index, values, text)
+                onChoose(message.id, [{ part: index, values }], text)
               }
               options={part.options}
             />
-          ) : null
-        ) : (
-          <QuestionCard
-            answered={answered.get(answerKey(message.id, index))}
-            key={index}
-            onAnswer={(values, text) =>
-              onChoose(message.id, index, values, text)
-            }
-            part={part}
-          />
-        )
-      )}
+          ))
+        : null}
     </>
   )
 }

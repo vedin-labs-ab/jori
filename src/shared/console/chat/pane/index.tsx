@@ -31,7 +31,8 @@ export type ChatPaneProps = PaneStripProps & {
   body: (target: ReferenceTarget) => ReactNode
   /** The thread the pane sits beside. */
   children: ReactNode
-  /** The composer under the thread; the hint floats between the two. */
+  /** The composer under the thread, inset from the frame's edge; the
+   *  hint floats between the two. */
   composer: ReactNode
   onHint?: (preference: PanePreference) => void
   open: boolean
@@ -58,7 +59,7 @@ export function ChatPane({
         {children}
         {onHint === undefined ? null : <PaneHint onChoose={onHint} />}
       </div>
-      {composer}
+      <div className="pb-4">{composer}</div>
     </>
   )
   const panel = <PanePanel body={body} closeRef={closeRef} {...strip} />

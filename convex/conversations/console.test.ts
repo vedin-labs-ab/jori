@@ -76,7 +76,10 @@ test("an answer to a reply's choices travels with the message", async () => {
     text: "Post the summary?",
   })
   await finishRun(database)
-  const answer = { messageId: first.messageId, part: 0, values: ["post"] }
+  const answer = {
+    messageId: first.messageId,
+    answers: [{ part: 0, values: ["post"] }],
+  }
 
   const second = await sendConsoleMessage(ctx, {
     organizationId,

@@ -84,7 +84,7 @@ export function JoriMessage({
       ) : (
         <BrandIcon className="mt-0.5 size-5" />
       )}
-      <div className="grid min-w-0 flex-1 gap-3">{children}</div>
+      <div className="grid min-w-0 flex-1 gap-3 text-sm">{children}</div>
     </div>
   )
 }

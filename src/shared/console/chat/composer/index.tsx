@@ -7,7 +7,6 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { cn } from "@/lib/utils"
 import { referencePresentation } from "../presentation"
 import { chatColumnClassName } from "../thread"
 import { type ChatReference, type ChatRun, isLiveRun } from "../types"
@@ -45,7 +44,7 @@ export function ChatComposer({
 
   return (
     <form
-      className={cn(chatColumnClassName, "pb-4")}
+      className={chatColumnClassName}
       onSubmit={(event) => {
         event.preventDefault()
         send()

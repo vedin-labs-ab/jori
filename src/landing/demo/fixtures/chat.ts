@@ -86,13 +86,14 @@ export function demoConversations(now: number): DemoConversation[] {
 }
 
 /** The reply Jori gives whatever is asked in the demo: the ask taken on,
- *  the job that will keep it current, and one question before starting. */
+ *  the job that will keep it current, and the questions to settle before
+ *  starting, answered together. */
 export function demoReply(text: string): DemoReply {
   return {
     reasoning: [
       `The renewals table has what "${text}" needs: current rows with owners and dates.`,
       "Draft from those rows, post back here, and leave a job to keep the table current.",
-      "One thing to settle first: whether the summary goes to #finance.",
+      "Three things to settle first: where the summary goes, how often the job runs, and who the reminders come from.",
     ].join("\n"),
     text: [
       `Taking that on. I read the renewals table against "${text}" and there is enough there to work from.`,
@@ -108,11 +109,46 @@ export function demoReply(text: string): DemoReply {
       {
         kind: "choices",
         prompt: "Post a summary to #finance when it is done?",
+        description: "The channel the renewals thread already lives in.",
         options: [
-          { label: "Yes, post it", value: "post" },
-          { label: "Keep it here", value: "keep" },
+          {
+            label: "Yes, post it",
+            value: "post",
+            description: "A short note, with the rows it touched.",
+          },
+          {
+            label: "Keep it here",
+            value: "keep",
+            description: "Nothing leaves this chat.",
+          },
         ],
         freeform: true,
+      },
+      {
+        kind: "choices",
+        prompt: "How often should Renewals watch run?",
+        description: "It keeps the table current between asks.",
+        options: [
+          { label: "Every morning", value: "daily" },
+          {
+            label: "Every Monday",
+            value: "weekly",
+            description: "Before the finance sync.",
+          },
+          { label: "Only when I ask", value: "manual" },
+        ],
+      },
+      {
+        kind: "choices",
+        prompt: "Who should the reminders come from?",
+        options: [
+          { label: "Me", value: "me", description: "Sent from your address." },
+          {
+            label: "Jori",
+            value: "jori",
+            description: "Sent from Jori's, with you in copy.",
+          },
+        ],
       },
     ],
   }

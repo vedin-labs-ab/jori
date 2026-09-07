@@ -24,19 +24,32 @@ export type ReplyReference = {
   target: { kind: ReferenceKind; id: string }
 }
 
-export type ReplyChoice = { label: string; value?: string }
+export type ReplyChoice = {
+  label: string
+  value?: string
+  /** One line under the label, when the label alone would leave the
+   *  requester guessing what choosing it means. */
+  description?: string
+}
 
 /** One primitive with two renderings: without a prompt it is a row of
- *  chips after the message; with a prompt it is a question card. Either
- *  way the answer is an ordinary next message. */
+ *  chips after the message; with a prompt it is a question, and the
+ *  questions of one reply are answered together. Either way the answer
+ *  is an ordinary next message. */
 export type ReplyChoices = {
   kind: "choices"
   prompt?: string
+  /** One line under the prompt: what the answer decides, or what to
+   *  weigh. */
+  description?: string
   options: ReplyChoice[]
   select?: "one" | "many"
   freeform?: boolean
   required?: boolean
 }
+
+/** A choices part with a prompt: a question the requester answers. */
+export type ReplyQuestion = ReplyChoices & { prompt: string }
 
 export type ReplyPart = ReplyReference | ReplyChoices
 export type ReplyPartKind = ReplyPart["kind"]
@@ -45,7 +58,10 @@ export const replyPartKinds = ["reference", "choices"] as const
 
 export const replyPartLimits = {
   references: 6,
-  choices: 1,
+  /** Choices parts with a prompt: the questions of one reply. */
+  questions: 5,
+  /** Choices parts without a prompt: the one row of chips. */
+  chips: 1,
   options: 6,
 } as const
 
@@ -80,6 +96,11 @@ const choicesSchema: JsonSchemaObject = {
       description:
         "Ask one thing. Omit it to offer next steps the requester can send with one click.",
     },
+    description: {
+      type: "string",
+      description:
+        "One line under the prompt: what the answer decides, or what to weigh. Omit it when the prompt says enough.",
+    },
     options: {
       type: "array",
       minItems: 1,
@@ -91,6 +112,11 @@ const choicesSchema: JsonSchemaObject = {
         properties: {
           label: { type: "string", minLength: 1 },
           value: { type: "string" },
+          description: {
+            type: "string",
+            description:
+              "One line under the label: what choosing it means. Omit it when the label says enough.",
+          },
         },
       },
     },
@@ -99,7 +125,11 @@ const choicesSchema: JsonSchemaObject = {
       type: "boolean",
       description: "Let the requester answer in their own words instead.",
     },
-    required: { type: "boolean" },
+    required: {
+      type: "boolean",
+      description:
+        "Off, the requester may skip the question. On unless you say otherwise.",
+    },
   },
 }
 
@@ -113,10 +143,13 @@ export function replyPartsSchema(
 ): JsonSchemaObject {
   return {
     type: "array",
-    maxItems: replyPartLimits.references + replyPartLimits.choices,
+    maxItems:
+      replyPartLimits.references +
+      replyPartLimits.questions +
+      replyPartLimits.chips,
     items: { anyOf: kinds.map((kind) => partSchemas[kind]) },
     description:
-      "Content embedded after the text: resource references and choices.",
+      "Content embedded after the text: resource references, questions the requester answers together, and next steps as chips.",
   }
 }
 
@@ -166,9 +199,16 @@ export function parseReplyParts(value: unknown): ReplyPart[] {
   }
 }
 
+export function isReplyQuestion(part: ReplyPart): part is ReplyQuestion {
+  return part.kind === "choices" && part.prompt !== undefined
+}
+
 function assertPartCounts(parts: ReplyPart[]) {
   const references = parts.filter((part) => part.kind === "reference").length
-  const choices = parts.filter((part) => part.kind === "choices").length
+  const questions = parts.filter(isReplyQuestion).length
+  const chips = parts.filter(
+    (part) => part.kind === "choices" && !isReplyQuestion(part)
+  ).length
 
   if (references > replyPartLimits.references) {
     throw new Error(
@@ -176,7 +216,15 @@ function assertPartCounts(parts: ReplyPart[]) {
     )
   }
 
-  if (choices > replyPartLimits.choices) {
-    throw new Error("parts: at most one choices part per reply")
+  if (questions > replyPartLimits.questions) {
+    throw new Error(
+      `parts: at most ${replyPartLimits.questions} questions per reply`
+    )
+  }
+
+  if (chips > replyPartLimits.chips) {
+    throw new Error(
+      "parts: at most one choices part without a prompt per reply"
+    )
   }
 }
