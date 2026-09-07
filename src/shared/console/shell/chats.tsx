@@ -26,10 +26,13 @@ import { conversationDestination, conversationPathname } from "./routes"
 /** The person's chats in a searchable list that opens from whatever the
  *  host wraps in it; choosing one goes there and closes the list. */
 export function ChatsPicker({
+  align = "start",
   chats,
   children,
   side,
 }: {
+  /** Which edge of the trigger the list lines up with. */
+  align?: "start" | "end"
   chats: ChatConversation[]
   /** The trigger. */
   children: ReactNode
@@ -41,7 +44,7 @@ export function ChatsPicker({
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent align="start" className="w-72 p-0" side={side}>
+      <PopoverContent align={align} className="w-72 p-0" side={side}>
         <Command>
           <CommandInput placeholder="Search chats…" />
           <CommandList className={scrollFade}>
