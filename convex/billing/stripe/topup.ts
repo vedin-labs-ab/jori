@@ -5,6 +5,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
 import { readArray, readString } from "../../shared/input"
 import { stripeRequest } from "./client"
+import { stripeMetadata } from "./config"
 
 /**
  * Charges the saved card off-session after the meter claimed the top-up.
@@ -74,11 +75,11 @@ async function chargeSavedCard(args: {
       payment_method: paymentMethod,
       off_session: true,
       confirm: true,
-      metadata: {
+      metadata: stripeMetadata({
         kind: "auto-top-up",
         organizationId: args.organizationId,
         micros: String(args.amountMicros),
-      },
+      }),
     },
   })
 }
