@@ -55,6 +55,7 @@ export function useComposerEditor(args: ComposerEditorArgs) {
         getSuggestionState(editor, {
           activeIndex: refs.suggestion.current?.activeIndex ?? 0,
           kinds: mentionKinds,
+          placement: "above",
           suggest: (active) => ({
             suggestions: suggestMentions(active, refs.sources.current),
           }),

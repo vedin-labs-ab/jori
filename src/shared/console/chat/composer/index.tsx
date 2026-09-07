@@ -106,7 +106,7 @@ export function ChatComposer({
       }}
     >
       <InputGroup
-        className="overflow-hidden bg-background"
+        className="bg-background"
         onClick={(event) => focusFromFrame(event, composer.editor)}
       >
         {context === undefined ? null : (

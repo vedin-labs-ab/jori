@@ -96,7 +96,7 @@ export function ComposerFooter({
         <button
           aria-expanded="true"
           aria-label="Hide shortcuts"
-          className="order-last hidden w-full cursor-pointer items-center justify-between gap-2 border-t bg-muted/30 px-2 py-1.5 text-muted-foreground text-xs outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 md:flex"
+          className="order-last hidden w-full cursor-pointer items-center justify-between gap-2 rounded-b-[inherit] border-t bg-muted/30 px-2 py-1.5 text-muted-foreground text-xs outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 md:flex"
           onClick={onHideHints}
           type="button"
         >
