@@ -1,3 +1,4 @@
+import { type ModelSlug } from "@contracts/models/catalog"
 import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
 import {
@@ -36,6 +37,7 @@ import { ComposerFooter, HintsPeek } from "./footer"
  *  change in the thread beside it leaves the editor alone. */
 export const ChatComposer = memo(function ChatComposer({
   autoFocus = false,
+  availableModels,
   context,
   disabled = false,
   isLive = false,
@@ -53,6 +55,7 @@ export const ChatComposer = memo(function ChatComposer({
   usage,
 }: {
   autoFocus?: boolean
+  availableModels?: readonly ModelSlug[]
   /** The resource the chat is about, shown as a chip the person can drop. */
   context?: ChatReference
   disabled?: boolean
@@ -129,6 +132,7 @@ export const ChatComposer = memo(function ChatComposer({
           placeholder={placeholder}
         />
         <ComposerFooter
+          availableModels={availableModels}
           canSend={composer.canSend}
           hintsId={hints.id}
           isLive={isLive}

@@ -3,6 +3,20 @@ import { internal } from "./_generated/api"
 
 const crons = cronJobs()
 
+crons.interval(
+  "expire integration connections",
+  { minutes: 10 },
+  internal.integrations.connect.state.expire,
+  {}
+)
+
+crons.interval(
+  "email outbox maintenance",
+  { minutes: 1 },
+  internal.email.maintenance.sweep,
+  {}
+)
+
 // Daily heartbeat for organization-context freshness. The sweep only checks
 // sources whose `checkAt` is due; unchanged pages are nudged a day, processed
 // pages relax two weeks.

@@ -117,7 +117,7 @@ export function DataSection() {
           Jori reads through the OAuth grants you approve, integration by
           integration. Revoke a grant and the access is gone.
         </Definition>
-        <Definition icon={Share2} term="A short list of subprocessors">
+        <Definition icon={Share2} term="Subprocessors and service providers">
           <Subprocessors />
         </Definition>
         <Definition icon={Ban} term="Never used for training">

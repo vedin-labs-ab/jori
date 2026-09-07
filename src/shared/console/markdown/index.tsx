@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useState } from "react"
 import { cn } from "@/lib/utils"
 import { BlockTokens } from "./blocks"
 import { createStreamingParser, parseMarkdown } from "./parse"
+import { prefetchGrammars } from "./prefetch"
 import { markdownProseClassName } from "./style"
 
 /** Markdown laid out at the console's prose scale. While `streaming`, the
@@ -26,7 +27,7 @@ export const Markdown = memo(function Markdown({
     [parseStreaming, streaming, text]
   )
 
-  usePrefetchedGrammars()
+  useEffect(prefetchGrammars, [])
 
   return (
     <div
@@ -41,27 +42,3 @@ export const Markdown = memo(function Markdown({
     </div>
   )
 })
-
-let hasPrefetchedGrammars = false
-
-/** Fetches the code grammars once the first markdown is on screen and the
- *  main thread has a quiet moment, so a later code block colors at once
- *  instead of reading plain while its chunk downloads. */
-function usePrefetchedGrammars() {
-  useEffect(() => {
-    if (hasPrefetchedGrammars) {
-      return
-    }
-
-    hasPrefetchedGrammars = true
-    whenIdle(() => void import("./grammars"))
-  }, [])
-}
-
-function whenIdle(work: () => void) {
-  if (typeof window.requestIdleCallback === "function") {
-    window.requestIdleCallback(work)
-  } else {
-    window.setTimeout(work, 200)
-  }
-}

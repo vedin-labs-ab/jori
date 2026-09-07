@@ -1,3 +1,8 @@
+import { internal } from "../../_generated/api"
+import { type ActionCtx } from "../../_generated/server"
+import { privateRedirect, regionalCallback } from "./handoff"
+import { type ProviderInstallState } from "./signing"
+
 type ProviderCallbackStatus = "connected" | "error"
 
 const callbackStateMaxAgeMs = 10 * 60 * 1000
@@ -10,7 +15,7 @@ export function redirectWithStatus(
   const url = new URL(returnUrl)
   url.searchParams.set(param, status)
 
-  return Response.redirect(url.toString(), 302)
+  return privateRedirect(url.toString())
 }
 
 export function oauthAuthorizeRedirect(
@@ -42,10 +47,11 @@ export function oauthAuthorizeRedirect(
     `${requestUrl.origin}${args.callbackPath}`
   )
 
-  return Response.redirect(url.toString(), 302)
+  return privateRedirect(url.toString())
 }
 
-export async function readOAuthCallback<State extends { createdAt: number }>(
+export async function readOAuthCallback<State extends ProviderInstallState>(
+  ctx: ActionCtx,
   request: Request,
   args: {
     parse: (value: string) => Promise<State>
@@ -55,6 +61,10 @@ export async function readOAuthCallback<State extends { createdAt: number }>(
   | { ok: true; code: string; requestUrl: URL; state: State }
   | { ok: false; response: Response }
 > {
+  const handoff = await regionalCallback(ctx, request)
+  if (handoff !== null) {
+    return { ok: false, response: handoff }
+  }
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
   const stateValue = requestUrl.searchParams.get("state")
@@ -76,6 +86,20 @@ export async function readOAuthCallback<State extends { createdAt: number }>(
 
   if (!parsed.ok) {
     return parsed
+  }
+
+  try {
+    await ctx.runMutation(internal.integrations.connect.state.consume, {
+      attemptId: parsed.state.attemptId,
+    })
+  } catch {
+    return {
+      ok: false,
+      response: new Response(
+        "Invalid, expired or mismatched integration session",
+        { status: 403 }
+      ),
+    }
   }
 
   return { ok: true, code, requestUrl, state: parsed.state }

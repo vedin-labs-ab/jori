@@ -1,11 +1,8 @@
 /**
  * Who else touches the data, and for what.
  *
- * Real marks, from each vendor's own assets: Convex, Resend, OpenRouter, and
- * PostHog publish an SVG; E2B publishes only raster, so that one is its
- * official PNG. Each one is fitted into the same square box rather than
- * cropped or stretched to fill it — PostHog's hedgehog is wider than it is
- * tall, and a mark redrawn to match its neighbours is no longer the mark.
+ * Marks come from the vendors' official assets, fitted without cropping.
+ * This is a platform-provider summary, not a substitute for the DPA register.
  */
 const subprocessors = [
   {
@@ -15,16 +12,28 @@ const subprocessors = [
     purpose: "Stores the data, including sign-in sessions.",
   },
   {
+    logo: "/logos/subprocessors/vercel.svg",
+    name: "Vercel",
+    url: "https://vercel.com/legal/dpa",
+    purpose: "Hosts the application and serves requests through its CDN.",
+  },
+  {
     logo: "/logos/subprocessors/e2b.png",
     name: "E2B",
     url: "https://e2b.dev",
     purpose: "Runs sandboxed work.",
   },
   {
-    logo: "/logos/subprocessors/resend.svg",
-    name: "Resend",
-    url: "https://resend.com",
+    logo: "/logos/subprocessors/bird.svg",
+    name: "Bird",
+    url: "https://bird.com",
     purpose: "Delivers Jori's email.",
+  },
+  {
+    logo: "/logos/subprocessors/exa.svg",
+    name: "Exa",
+    url: "https://exa.ai/docs/reference/security",
+    purpose: "Processes web-search queries and fetches requested pages.",
   },
   {
     logo: "/logos/subprocessors/openrouter.svg",
@@ -36,7 +45,14 @@ const subprocessors = [
     logo: "/logos/subprocessors/posthog.svg",
     name: "PostHog",
     url: "https://posthog.com",
-    purpose: "Counts how the website is used.",
+    purpose: "Measures website and product usage.",
+  },
+  {
+    logo: "/logos/subprocessors/stripe.svg",
+    name: "Stripe",
+    url: "https://stripe.com/privacy",
+    purpose:
+      "Handles billing and payments, including its own legal obligations.",
   },
 ] as const
 

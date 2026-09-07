@@ -14,6 +14,7 @@ import {
   killSandbox,
   normalizeCommandResult,
   runSandboxCommand,
+  sandboxCleanupFailure,
   waitForCommand,
 } from "./support"
 
@@ -184,7 +185,15 @@ export const kill = internalAction({
       return null
     }
 
-    await killSandbox(args.externalId)
+    try {
+      await killSandbox(args.externalId)
+    } catch {
+      await ctx.runMutation(internal.runs.execution.sandboxes.records.cleaned, {
+        externalId: args.externalId,
+        error: sandboxCleanupFailure,
+      })
+      throw new Error(sandboxCleanupFailure)
+    }
     await ctx.runMutation(internal.runs.execution.sandboxes.records.cleaned, {
       externalId: args.externalId,
     })
@@ -193,21 +202,16 @@ export const kill = internalAction({
   },
 })
 
-/** An expiry names the lease this kill was scheduled for, so a sandbox that
- *  was claimed again in the meantime keeps running. A kill without one is the
- *  end of a run and takes the sandbox with it. */
+/** An expiry identifies the idle lease. Cleanup watchdogs and completed runs
+ * reserve without one, but still check ownership and the cleanup lease. */
 async function reserveCleanup(
   ctx: ActionCtx,
   args: { expiresAt?: number; externalId: string; runId: Id<"runs"> }
 ) {
-  if (args.expiresAt === undefined) {
-    return true
-  }
-
   return await ctx.runMutation(
     internal.runs.execution.sandboxes.records.reserve,
     {
-      expiresAt: args.expiresAt,
+      ...(args.expiresAt === undefined ? {} : { expiresAt: args.expiresAt }),
       externalId: args.externalId,
       runId: args.runId,
     }

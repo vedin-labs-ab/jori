@@ -1,3 +1,4 @@
+import { modelSlugs } from "@contracts/models/catalog"
 // @vitest-environment jsdom
 import { tiers } from "@contracts/models/selection"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
@@ -5,6 +6,37 @@ import { afterEach, expect, test, vi } from "vitest"
 import { ModelPicker } from "."
 
 afterEach(cleanup)
+
+test("the regional catalog removes unavailable recommendations and model choices", () => {
+  render(
+    <ModelPicker
+      availableModels={[tiers.standard.model]}
+      onSelect={() => undefined}
+      selection={tiers.standard}
+    />
+  )
+  openPicker("Model: GPT-5.6 Sol, Medium reasoning")
+  expect(screen.queryByRole("menuitemradio", { name: /Premium/ })).toBeNull()
+  expect(screen.queryByRole("menuitemradio", { name: /Basic/ })).toBeNull()
+  expect(screen.queryByRole("menuitem", { name: "Anthropic" })).toBeNull()
+  const vendor = screen.getByRole("menuitem", { name: "OpenAI" })
+  vendor.focus()
+  fireEvent.keyDown(vendor, { key: "ArrowRight" })
+  expect(
+    screen.queryByRole("menuitemradio", { name: /GPT-6 Astra/ })
+  ).toBeNull()
+})
+
+test("the picker cannot offer models before regional eligibility is known", () => {
+  render(
+    <ModelPicker
+      availableModels={undefined}
+      onSelect={() => undefined}
+      selection={tiers.standard}
+    />
+  )
+  expect(screen.getByRole("button").hasAttribute("disabled")).toBe(true)
+})
 
 function openPicker(name: string) {
   fireEvent.pointerDown(screen.getByRole("button", { name }), {
@@ -16,7 +48,13 @@ function openPicker(name: string) {
 test("the trigger reads the model and effort, and the menu recommends the three", () => {
   const onSelect = vi.fn()
 
-  render(<ModelPicker onSelect={onSelect} selection={tiers.standard} />)
+  render(
+    <ModelPicker
+      availableModels={modelSlugs}
+      onSelect={onSelect}
+      selection={tiers.standard}
+    />
+  )
   openPicker("Model: GPT-5.6 Sol, Medium reasoning")
 
   expect(screen.getByText("Recommendations")).toBeDefined()
@@ -46,7 +84,13 @@ test("a model outside the tiers keeps the effort in force, and Reasoning sets it
     effort: "high",
   } as const
 
-  render(<ModelPicker onSelect={onSelect} selection={selection} />)
+  render(
+    <ModelPicker
+      availableModels={modelSlugs}
+      onSelect={onSelect}
+      selection={selection}
+    />
+  )
   openPicker("Model: Claude Sonnet 5, High reasoning")
 
   for (const tier of ["Basic", "Standard", "Premium"]) {
@@ -91,7 +135,13 @@ test("a model outside the tiers keeps the effort in force, and Reasoning sets it
 })
 
 test("the chosen model wears the tier it makes", () => {
-  render(<ModelPicker onSelect={() => undefined} selection={tiers.premium} />)
+  render(
+    <ModelPicker
+      availableModels={modelSlugs}
+      onSelect={() => undefined}
+      selection={tiers.premium}
+    />
+  )
   openPicker("Model: GPT-6 Astra, High reasoning")
 
   const openai = screen.getByRole("menuitem", { name: "OpenAI" })

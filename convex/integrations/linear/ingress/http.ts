@@ -54,7 +54,7 @@ export async function handleLinearOAuthCallback(
   ctx: ActionCtx,
   request: Request
 ) {
-  const callback = await readOAuthCallback(request, {
+  const callback = await readOAuthCallback(ctx, request, {
     parse: parseSignedLinearState,
     label: "Linear OAuth",
   })

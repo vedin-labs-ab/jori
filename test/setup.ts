@@ -8,10 +8,15 @@ export {}
 // changes nothing about what is asserted, only how long a poll may wait
 // before giving up. Loaded on demand so node-environment tests, which never
 // import testing-library, do not pay for it in every worker.
-if (typeof window !== "undefined") {
+if (typeof document !== "undefined") {
   const { configure } = await import("@testing-library/dom")
+  const { afterAll, vi } = await import("vitest")
 
   configure({ asyncUtilTimeout: 4000 })
+
+  // Imports already started by lazy views cannot be cancelled at unmount.
+  // Finish evaluating them before their test environment is torn down.
+  afterAll(() => vi.dynamicImportSettled())
 }
 
 // jsdom leaves out ResizeObserver, which Radix form controls reach for once
@@ -33,6 +38,7 @@ class ResizeObserverStub {
 
 if (
   typeof window !== "undefined" &&
+  typeof window.Element !== "undefined" &&
   typeof window.ResizeObserver === "undefined"
 ) {
   window.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver
@@ -43,6 +49,7 @@ if (
 // call to exist.
 if (
   typeof window !== "undefined" &&
+  typeof window.Element !== "undefined" &&
   typeof window.Element.prototype.scrollIntoView !== "function"
 ) {
   window.Element.prototype.scrollIntoView = () => undefined
@@ -50,7 +57,7 @@ if (
 
 // jsdom's ranges have no geometry, which ProseMirror reads to keep the
 // selection in view after a focus. Empty rectangles keep it quiet.
-if (typeof window !== "undefined") {
+if (typeof window !== "undefined" && typeof window.Range !== "undefined") {
   const emptyRect = () => ({
     bottom: 0,
     height: 0,

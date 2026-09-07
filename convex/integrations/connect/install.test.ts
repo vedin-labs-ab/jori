@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { type Id } from "../../_generated/dataModel"
+import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { buildInstallState } from "./install"
+import { buildInstallState, upsertIntegration } from "./install"
 
 describe("buildInstallState", () => {
   beforeEach(() => {
@@ -72,10 +72,45 @@ describe("buildInstallState", () => {
   })
 })
 
+test("a reconnect cannot reassign a provider account to another organization", async () => {
+  const patch = vi.fn()
+  const ctx = { db: { patch } } as unknown as MutationCtx
+  const existing = {
+    _id: "integration_1",
+    organizationId: "owner_org",
+  } as Doc<"integrations">
+  const values = { organizationId: "attacker_org" } as Parameters<
+    typeof upsertIntegration
+  >[2]
+  await expect(upsertIntegration(ctx, existing, values)).rejects.toThrow(
+    "another organization"
+  )
+  expect(patch).not.toHaveBeenCalled()
+})
+
+test("a reconnect can refresh the owning organization's credentials", async () => {
+  const patch = vi.fn()
+  const ctx = { db: { patch } } as unknown as MutationCtx
+  const existing = {
+    _id: "integration_1",
+    organizationId: "owner_org",
+  } as Doc<"integrations">
+  const values = { organizationId: "owner_org" } as Parameters<
+    typeof upsertIntegration
+  >[2]
+  await expect(upsertIntegration(ctx, existing, values)).resolves.toBe(
+    "integration_1"
+  )
+  expect(patch).toHaveBeenCalledWith("integration_1", values)
+})
+
 function createCtx(identity: Record<string, unknown> | null) {
   return {
     auth: {
-      getUserIdentity: async () => identity,
+      getUserIdentity: async () =>
+        identity === null
+          ? null
+          : { tokenIdentifier: "issuer|user_1", sid: "session_1", ...identity },
     },
     db: {
       get: async () => null,

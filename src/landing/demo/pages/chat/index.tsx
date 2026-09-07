@@ -1,3 +1,4 @@
+import { modelSlugs } from "@contracts/models/catalog"
 import { type ModelSelection } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
 import { useCallback, useMemo, useState } from "react"
@@ -69,6 +70,7 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
     <ChatHome
       composer={
         <ChatComposer
+          availableModels={modelSlugs}
           autoFocus
           context={reference}
           mentions={mentions}
@@ -200,6 +202,7 @@ function DemoComposer({
 
   return (
     <ChatComposer
+      availableModels={modelSlugs}
       autoFocus
       isLive={isLiveRun(run)}
       mentions={mentions}

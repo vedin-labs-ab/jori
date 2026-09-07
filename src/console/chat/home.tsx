@@ -1,3 +1,4 @@
+import { modelAvailabilityReason } from "@contracts/models/availability"
 import {
   defaultSelection,
   type ModelSelection,
@@ -18,6 +19,7 @@ import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
 import { ConsolePage } from "../page"
 import { useMentionSources } from "./mentions"
+import { useAvailableModels } from "./models"
 import { recentCount, useRecentConversations } from "./recent"
 import { useReferenceTargets } from "./references"
 import { useSendMessage } from "./send"
@@ -52,6 +54,8 @@ function ChatHomeContent({
   const reference = useChatContext(organizationId, context)
   const mentions = useMentionSources(organizationId)
   const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
+  const availableModels = useAvailableModels()
+  const unavailable = modelAvailabilityReason(availableModels, selection)
   const { placeholder, suggestions } = useHomeSuggestions()
   // A blocked budget still opens the conversation with the message in it,
   // so the console moves there either way; a failure rejects, and the
@@ -73,6 +77,8 @@ function ChatHomeContent({
       composer={
         <ChatComposer
           autoFocus
+          availableModels={availableModels}
+          disabled={unavailable !== undefined}
           context={reference.reference}
           mentions={mentions}
           onClearContext={reference.clear}
@@ -80,6 +86,7 @@ function ChatHomeContent({
           onSend={start}
           onStop={() => {}}
           placeholder={placeholder}
+          reason={unavailable}
           selection={selection}
         />
       }

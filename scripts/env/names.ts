@@ -23,15 +23,18 @@ const files: Record<Environment, string> = {
   prod: ".env.prod.local",
 }
 
-export function environmentFile(environment: Environment) {
+export function environmentFile(
+  environment: Environment,
+  region?: "eu" | "us"
+) {
+  if (region !== undefined) {
+    return `.env.${environment}.${region}.local`
+  }
   return files[environment]
 }
 
-/** Local variables the wrapper refuses to run without.
- *
- *  Production is one deploy key. The Vercel CLI carries its own credentials
- *  and reads the linked project from `.vercel/`, so hosting credentials are
- *  not restated here. */
+/** The Vercel CLI authenticates locally, but regional files select projects
+ * explicitly. A shared .vercel link never decides a production target. */
 export const localNames: Record<Environment, readonly string[]> = {
   dev: ["CONVEX_DEPLOYMENT"],
   prod: ["CONVEX_DEPLOY_KEY"],
@@ -49,7 +52,10 @@ export const localNames: Record<Environment, readonly string[]> = {
  *  come online. */
 export const deploymentNames = [
   "BETTER_AUTH_SECRET",
+  "BIRD_API_KEY",
+  "BIRD_WORKSPACE_ID",
   "E2B_API_KEY",
+  "EXA_API_KEY",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
   "JORI_APP_URL",
@@ -58,5 +64,10 @@ export const deploymentNames = [
   "MICROSOFT_CLIENT_ID",
   "MICROSOFT_CLIENT_SECRET",
   "OPENROUTER_API_KEY",
-  "RESEND_API_KEY",
+  "STRIPE_SECRET_KEY",
+  "STRIPE_WEBHOOK_SECRET",
+  "STRIPE_PRICE_STARTER_MONTH",
+  "STRIPE_PRICE_STARTER_YEAR",
+  "STRIPE_PRICE_TEAM_MONTH",
+  "STRIPE_PRICE_TEAM_YEAR",
 ] as const

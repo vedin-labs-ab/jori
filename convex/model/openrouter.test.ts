@@ -1,8 +1,15 @@
 import { type ChatResult, type ChatStreamChunk } from "@openrouter/sdk/models"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { requireOpenRouterConfig, sendOpenRouterChat } from "./openrouter"
+import { requireOpenRouterConfig } from "./connection"
+import { sendOpenRouterChat } from "./openrouter"
 
-const sdk = vi.hoisted(() => ({ send: vi.fn() }))
+const sdk = vi.hoisted(() => ({ send: vi.fn(), eligible: vi.fn() }))
+vi.mock("./eligibility", () => ({ requireEligibleModels: sdk.eligible }))
+const provider = { requireParameters: true, dataCollection: "deny", zdr: true }
+const request = {
+  messages: [{ content: "Hi", role: "user" as const }],
+  model: "openai/gpt-5",
+}
 
 vi.mock("@openrouter/sdk/core", () => ({ OpenRouterCore: class {} }))
 
@@ -19,6 +26,7 @@ vi.mock("@openrouter/sdk/funcs/chatSend", () => ({
 }))
 
 const environmentNames = [
+  "JORI_REGION",
   "CONVEX_SITE_URL",
   "OPENROUTER_API_KEY",
   "OPENROUTER_APP_CATEGORIES",
@@ -31,6 +39,9 @@ const originalEnvironment = new Map(
 )
 
 describe("openrouter client", () => {
+  beforeEach(() => {
+    process.env.JORI_REGION = "us"
+  })
   afterEach(() => {
     for (const name of environmentNames) {
       const value = originalEnvironment.get(name)
@@ -60,6 +71,7 @@ describe("openrouter client", () => {
 
     expect(requireOpenRouterConfig()).toEqual({
       apiKey: "key",
+      serverURL: "https://us.openrouter.ai/api/v1",
       appCategories: "cloud-agent",
       appTitle: "Jori",
       httpReferer: "https://jori.example",
@@ -75,6 +87,7 @@ describe("openrouter client", () => {
 
     expect(requireOpenRouterConfig()).toEqual({
       apiKey: "key",
+      serverURL: "https://us.openrouter.ai/api/v1",
       appCategories: "job",
       appTitle: "Custom Jori",
       httpReferer: "https://app.example",
@@ -83,15 +96,7 @@ describe("openrouter client", () => {
 })
 
 describe("openrouter chat", () => {
-  const request = {
-    messages: [{ content: "Hi", role: "user" as const }],
-    model: "openai/gpt-5",
-  }
-
-  beforeEach(() => {
-    process.env.OPENROUTER_API_KEY = "key"
-    sdk.send.mockReset()
-  })
+  beforeEach(setupChat)
 
   test("streams the request and folds the chunks", async () => {
     const onDelta = vi.fn()
@@ -102,7 +107,11 @@ describe("openrouter chat", () => {
 
     expect(sdk.send).toHaveBeenCalledTimes(1)
     expect(sdk.send).toHaveBeenCalledWith({
-      chatRequest: { ...request, stream: true },
+      chatRequest: {
+        ...request,
+        stream: true,
+        provider,
+      },
     })
     expect(result.choices[0]?.message.content).toBe("Hello")
     expect(onDelta).toHaveBeenCalledTimes(2)
@@ -123,7 +132,11 @@ describe("openrouter chat", () => {
     expect(await sendOpenRouterChat(request)).toEqual(whole("Done."))
     expect(sdk.send).toHaveBeenCalledTimes(2)
     expect(sdk.send).toHaveBeenLastCalledWith({
-      chatRequest: { ...request, stream: false },
+      chatRequest: {
+        ...request,
+        stream: false,
+        provider,
+      },
     })
   })
 
@@ -151,6 +164,41 @@ describe("openrouter chat", () => {
     )
   })
 })
+
+describe("regional model enforcement", () => {
+  beforeEach(setupChat)
+  test("failed eligibility never sends a prompt, even through the nonstreaming retry", async () => {
+    sdk.eligible.mockRejectedValue(
+      new Error("Model unavailable in this region")
+    )
+    await expect(sendOpenRouterChat(request)).rejects.toThrow(
+      "unavailable in this region"
+    )
+    expect(sdk.send).not.toHaveBeenCalled()
+  })
+  test("normalizes output limits at the edge without weakening provider policy", async () => {
+    sdk.send.mockResolvedValue(whole("Done."))
+    await sendOpenRouterChat({ ...request, maxTokens: 1024 })
+    expect(sdk.send).toHaveBeenCalledWith({
+      chatRequest: {
+        ...request,
+        stream: true,
+        maxTokens: undefined,
+        maxCompletionTokens: 1024,
+        provider,
+      },
+    })
+  })
+})
+
+function setupChat() {
+  process.env.JORI_REGION = "us"
+  process.env.OPENROUTER_API_KEY = "key"
+  sdk.send.mockReset()
+  sdk.eligible
+    .mockReset()
+    .mockResolvedValue([{ supportedParameters: ["max_completion_tokens"] }])
+}
 
 async function* stream(chunks: ChatStreamChunk[]) {
   yield* chunks

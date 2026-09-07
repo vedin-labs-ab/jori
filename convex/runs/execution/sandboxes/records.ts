@@ -1,11 +1,10 @@
 import { v } from "convex/values"
 import { internalMutation, internalQuery } from "../../../_generated/server"
+import { markSandboxCleaned, reserveSandboxCleanup } from "./cleanup"
 import {
   claimReusableSandbox,
   findRetainedSandbox,
-  markSandboxCleaned,
   releaseIdleSandbox,
-  reserveExpiredSandboxCleanup,
   upsertSandbox,
 } from "./data"
 
@@ -55,13 +54,13 @@ export const release = internalMutation({
 
 export const reserve = internalMutation({
   args: {
-    expiresAt: v.number(),
+    expiresAt: v.optional(v.number()),
     externalId: v.string(),
     runId: v.id("runs"),
   },
   returns: v.boolean(),
   handler: async (ctx, args) => {
-    return await reserveExpiredSandboxCleanup(ctx, args)
+    return await reserveSandboxCleanup(ctx, args)
   },
 })
 

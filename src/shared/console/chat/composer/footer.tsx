@@ -1,3 +1,4 @@
+import { type ModelSlug } from "@contracts/models/catalog"
 import { type ModelSelection } from "@contracts/models/selection"
 import { ArrowUp, ChevronDown, Square } from "lucide-react"
 import { InputGroupAddon, InputGroupButton } from "@/components/ui/input-group"
@@ -25,6 +26,7 @@ const sigilHints = [
  *  under them, on the quiet band the job field has, the sigils, while
  *  the person keeps the band open. */
 export function ComposerFooter({
+  availableModels,
   canSend,
   hintsId,
   isLive,
@@ -38,6 +40,7 @@ export function ComposerFooter({
   selection,
   usage,
 }: {
+  availableModels: readonly ModelSlug[] | undefined
   canSend: boolean
   /** The band's id, for the controls that open and close it. */
   hintsId: string
@@ -71,7 +74,11 @@ export function ComposerFooter({
         </span>
         <span className="flex items-center gap-1">
           {selection === undefined || onSelect === undefined ? null : (
-            <ModelPicker onSelect={onSelect} selection={selection} />
+            <ModelPicker
+              availableModels={availableModels}
+              onSelect={onSelect}
+              selection={selection}
+            />
           )}
           {usage === undefined || usage === null ? null : (
             <ContextIndicator usage={usage} />

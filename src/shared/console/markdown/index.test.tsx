@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
+import { StrictMode } from "react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Markdown } from "."
@@ -19,6 +20,24 @@ function renderMarkdown(text: string, streaming = false) {
     </TooltipProvider>
   )
 }
+
+test("StrictMode leaves one prefetch scheduled and unmount cancels it", () => {
+  vi.useFakeTimers()
+  try {
+    const view = render(
+      <StrictMode>
+        <Markdown text="A short reply." />
+      </StrictMode>
+    )
+
+    expect(vi.getTimerCount()).toBe(1)
+    view.unmount()
+    expect(vi.getTimerCount()).toBe(0)
+  } finally {
+    cleanup()
+    vi.useRealTimers()
+  }
+})
 
 test("lays out a table with its alignment and inline runs", () => {
   renderMarkdown(

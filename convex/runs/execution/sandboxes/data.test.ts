@@ -2,10 +2,10 @@ import { expect, test } from "vitest"
 import { id } from "../../../../test/convex/database"
 import { type Doc } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
+import { reserveSandboxCleanup } from "./cleanup"
 import {
   claimReusableSandbox,
   releaseIdleSandbox,
-  reserveExpiredSandboxCleanup,
   settleRunSandbox,
   upsertSandbox,
 } from "./data"
@@ -76,7 +76,7 @@ test("expired cleanup only reserves matching idle leases", async () => {
   ])
 
   await expect(
-    reserveExpiredSandboxCleanup(ctx, {
+    reserveSandboxCleanup(ctx, {
       expiresAt: expiresAt + 1,
       externalId: "sandbox-external",
       runId: id<"runs">("run-1"),
@@ -85,14 +85,14 @@ test("expired cleanup only reserves matching idle leases", async () => {
   expect(row(ctx, "sandbox-1")).toMatchObject({ status: "idle" })
 
   await expect(
-    reserveExpiredSandboxCleanup(ctx, {
+    reserveSandboxCleanup(ctx, {
       expiresAt,
       externalId: "sandbox-external",
       runId: id<"runs">("run-1"),
     })
   ).resolves.toBe(true)
-  expect(row(ctx, "sandbox-1")).toMatchObject({ status: "cleaned" })
-  expect(row(ctx, "sandbox-1")).not.toHaveProperty("expiresAt")
+  expect(row(ctx, "sandbox-1")).toMatchObject({ status: "cleaning" })
+  expect(row(ctx, "sandbox-1")?.expiresAt).toBeGreaterThan(Date.now())
 })
 
 test("a failed run's sandbox is killed rather than left idle", async () => {

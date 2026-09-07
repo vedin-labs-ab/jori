@@ -23,6 +23,7 @@ import { createSignedNotionState } from "../notion/signing"
 import { createSignedSlackState } from "../slack/signing"
 import { redirectWithStatus } from "./http"
 import { type ProviderInstallState } from "./signing"
+import { createInstallAttempt } from "./state"
 
 /**
  * Starts any provider's install: mints the signed state the provider's
@@ -49,6 +50,7 @@ export async function buildInstallState(
   }
 ): Promise<ProviderInstallState> {
   return {
+    attemptId: await createInstallAttempt(ctx, args.organizationId),
     organizationId: args.organizationId,
     createdBy: await ensureCurrentPerson(ctx, args.organizationId),
     returnUrl: requireReturnUrl(args.returnUrl),
@@ -140,6 +142,11 @@ export async function upsertIntegration(
   values: IntegrationValues
 ): Promise<Id<"integrations">> {
   if (existing !== null) {
+    if (existing.organizationId !== values.organizationId) {
+      throw new Error(
+        "This provider account is already connected to another organization."
+      )
+    }
     await ctx.db.patch(existing._id, values)
 
     return existing._id

@@ -64,23 +64,17 @@ test("falls back to the deployment region when EU is disabled", () => {
   expect(response?.headers.get("location")).toBe("https://us.jori.example/")
 })
 
-test("changes regions through the apex and preserves a safe path", () => {
-  const selection = regionSelectionUrl(config, "eu", "/pricing?plan=team")
+test("changes regions through the apex without transferring instance data", () => {
+  const selection = regionSelectionUrl(config, "eu")
   const response = handleRegionRequest(new Request(selection), config)
 
-  expect(response?.headers.get("location")).toBe(
-    "https://eu.jori.example/pricing?plan=team"
-  )
+  expect(response?.headers.get("location")).toBe("https://eu.jori.example/")
   expect(response?.headers.get("set-cookie")).toContain("jori_region=eu")
 })
 
 test("does not create links to disabled regions", () => {
   expect(() =>
-    regionSelectionUrl(
-      { ...config, enabled: new Set(["us"]) },
-      "eu",
-      "/pricing"
-    )
+    regionSelectionUrl({ ...config, enabled: new Set(["us"]) }, "eu")
   ).toThrow("Region eu is not available.")
 })
 
