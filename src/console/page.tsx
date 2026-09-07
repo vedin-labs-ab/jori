@@ -4,7 +4,6 @@ import { UserInvitations } from "@/components/auth/organization/user-invitations
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { showErrorToast } from "@/shared/console/error"
-import { localTimezone } from "@/shared/console/time"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
   activateOrganization,
@@ -19,6 +18,7 @@ import { IntegrationCallbackToasts } from "./integrations/callback"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
 import { CreateOrganizationDialog } from "./organization/create"
 import { takeTimezone } from "./organization/pending"
+import { OrganizationSession } from "./organization/session"
 import { ConsoleShell } from "./shell"
 import { LaunchGate } from "./shell/gate"
 import { PublicConsoleFrame } from "./shell/public"
@@ -111,17 +111,32 @@ function SignedInConsole({
   }
 
   if (active.data !== null && active.data !== undefined) {
-    const content = (
-      <OrganizationContext.Provider value={active.data.id}>
-        {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
-        <SessionSync organizationId={active.data.id} />
-        <DeclareTimezone organizationId={active.data.id} />
-        <OnboardingGate />
-        {children(active.data.id)}
-      </OrganizationContext.Provider>
-    )
+    const organizationId = active.data.id
 
-    return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
+    return (
+      <OrganizationSession
+        key={organizationId}
+        loader={loader}
+        organizationId={organizationId}
+      >
+        {() => {
+          const content = (
+            <OrganizationContext.Provider value={organizationId}>
+              {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
+              <DeclareTimezone organizationId={organizationId} />
+              <OnboardingGate />
+              {children(organizationId)}
+            </OrganizationContext.Provider>
+          )
+
+          return chrome === "shell" ? (
+            <ConsoleShell>{content}</ConsoleShell>
+          ) : (
+            content
+          )
+        }}
+      </OrganizationSession>
+    )
   }
 
   const firstOrganizationId = organizations.data?.at(0)?.id
@@ -201,20 +216,6 @@ function CreateOrganizationView() {
       <CreateOrganizationDialog onOpenChange={setCreating} open={creating} />
     </section>
   )
-}
-
-/** Materializes the signed-in member as a person on console load. */
-function SessionSync({ organizationId }: { organizationId: string }) {
-  const sync = useMutation(api.persons.account.sync)
-
-  useEffect(() => {
-    void sync({
-      organizationId,
-      timezone: localTimezone(),
-    }).catch(() => undefined)
-  }, [sync, organizationId])
-
-  return null
 }
 
 /** Spends the zone chosen while creating this organization. It waits for
