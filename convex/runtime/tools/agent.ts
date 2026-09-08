@@ -9,12 +9,12 @@ import {
   type AgentRunStatus,
   isTerminalRunStatus,
 } from "../../../contracts/runtime/runs"
+import { maxAgentWaitRuns } from "../../../contracts/runtime/tools"
 import { type WaiterWake } from "../../../contracts/runtime/waiters"
 import { optionalStringArray, requiredString } from "../../shared/input"
 import { isParked, park, recordResumed } from "../loop/park"
 import { type AgentRuntime } from "../platform"
 
-const maxAgents = 20
 const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
 const maxTimeoutMs = durationMilliseconds({ unit: "days", value: 30 })
 const defaultTimeoutMs = durationMilliseconds({ unit: "minutes", value: 15 })
@@ -127,8 +127,8 @@ function readRunIds(value: unknown) {
     ),
   ] as RuntimeId<"runs">[]
 
-  if (runIds.length === 0 || runIds.length > maxAgents) {
-    throw new Error(`Agent waits require 1-${maxAgents} child runs.`)
+  if (runIds.length === 0 || runIds.length > maxAgentWaitRuns) {
+    throw new Error(`Agent waits require 1-${maxAgentWaitRuns} child runs.`)
   }
 
   return runIds

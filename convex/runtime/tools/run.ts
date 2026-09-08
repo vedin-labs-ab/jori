@@ -1,8 +1,7 @@
 import { type JsonObject } from "../../../contracts/json"
+import { maxRunResultLength } from "../../../contracts/runtime/tools"
 import { optionalString } from "../../shared/input"
 import { type AgentRuntime } from "../platform"
-
-const maxResultLength = 8000
 
 /** The one run-routed tool: the agent's own signal that the run is done.
  *  The outcome is stored on the run itself, so the parent reads it back
@@ -30,9 +29,9 @@ export async function finishRun(runtime: AgentRuntime, input: JsonObject) {
     }
   }
 
-  if (result !== undefined && result.length > maxResultLength) {
+  if (result !== undefined && result.length > maxRunResultLength) {
     throw new Error(
-      `finish_run result must be at most ${maxResultLength} characters; return a concise summary.`
+      `finish_run result must be at most ${maxRunResultLength} characters; return a concise summary.`
     )
   }
 

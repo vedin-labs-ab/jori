@@ -1,4 +1,4 @@
-import { sandboxWorkspace } from "../../../contracts/coding"
+import { codingLimits, sandboxWorkspace } from "../../../contracts/coding"
 import {
   boundedInteger,
   optionalTrimmedString,
@@ -17,7 +17,7 @@ export async function grepWorkspace(
       pattern: requiredTrimmedString(input.pattern, "pattern"),
       path: optionalTrimmedString(input.path),
       include: optionalTrimmedString(input.include),
-      limit: boundedInteger(input.limit, 100, 1, 500),
+      limit: boundedInteger(input.limit, 100, 1, codingLimits.grepMatches),
     },
     sandbox,
     script: searchScript,
@@ -34,7 +34,7 @@ export async function globWorkspace(
       mode: "glob",
       pattern: requiredTrimmedString(input.pattern, "pattern"),
       path: optionalTrimmedString(input.path),
-      limit: boundedInteger(input.limit, 200, 1, 1_000),
+      limit: boundedInteger(input.limit, 200, 1, codingLimits.globPaths),
     },
     sandbox,
     script: searchScript,

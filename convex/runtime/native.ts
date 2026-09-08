@@ -6,6 +6,10 @@ import { type JsonObject } from "../../contracts/json"
 import { type ToolAccess } from "../../contracts/permissions"
 import { durationUnits } from "../../contracts/runtime/duration"
 import {
+  maxAgentWaitRuns,
+  maxRunResultLength,
+} from "../../contracts/runtime/tools"
+import {
   stringArrayProperty,
   withOptionalFieldGuidance,
 } from "../runs/agent/tools/schemas"
@@ -59,9 +63,14 @@ export const sandboxTools = [
       additionalProperties: false,
       required: ["runIds"],
       properties: {
-        runIds: stringArrayProperty(
-          "Run IDs returned by start_agent. Include 1-20 direct child agents."
-        ),
+        runIds: {
+          ...stringArrayProperty(
+            "Run IDs returned by start_agent. Include 1-20 direct child agents."
+          ),
+          minItems: 1,
+          maxItems: maxAgentWaitRuns,
+          items: { type: "string", minLength: 1, pattern: "\\S" },
+        },
         timeout: {
           type: "object",
           additionalProperties: false,
@@ -143,6 +152,7 @@ function finishRunSchema(): JsonObject {
       },
       result: {
         type: "string",
+        maxLength: maxRunResultLength,
         description:
           "Outcome returned to the run that delegated this one; the parent receives it from wait_for_agents. Keep it a concise, self-contained summary (max 8,000 characters).",
       },
