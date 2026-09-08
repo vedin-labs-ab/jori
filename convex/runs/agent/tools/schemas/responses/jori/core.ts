@@ -146,7 +146,7 @@ export const coreJoriToolResponseSchemas = {
       mimeType: stringProperty("Stored content type."),
       name: stringProperty("Stored filename."),
       size: numberProperty("File size in bytes."),
-      url: nullableStringProperty("Temporary download URL, when available."),
+      url: nullableStringProperty("Bearer download URL, when available."),
     },
   }),
   generate_image: objectSchema({
@@ -159,16 +159,14 @@ export const coreJoriToolResponseSchemas = {
           mimeType: stringProperty("Image content type."),
           name: stringProperty("Image filename."),
           size: numberProperty("Image size in bytes."),
-          url: nullableStringProperty(
-            "Temporary download URL, when available."
-          ),
+          url: nullableStringProperty("Bearer download URL, when available."),
           model: stringProperty("Image model that generated it."),
           path: stringProperty("Workspace-relative sandbox path."),
         },
       }),
       provider: objectSchema({
         properties: {
-          name: constProperty("openrouter", "Image provider."),
+          name: constProperty("vertex", "Regional image provider."),
           requestId: stringProperty("Provider request ID."),
         },
       }),
