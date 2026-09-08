@@ -1,5 +1,7 @@
 import { beforeEach, expect, test, vi } from "vitest"
+import { schemaViolations } from "../../../../test/convex/schema"
 import { createRuntime } from "../../../../test/runtime"
+import { toolResponseSchemas } from "../../../runs/agent/tools/schemas/responses"
 import { type AgentRuntime } from "../../platform"
 import { type SandboxRuntime } from "../../sandbox/types"
 import { generateImageFile } from "./index"
@@ -48,6 +50,9 @@ test("generates a regional image, accounts for it and saves it as a file", async
     provider: { name: "vertex", requestId: "generation_1" },
     status: "ok",
   })
+  expect(schemaViolations(result, toolResponseSchemas.generate_image)).toEqual(
+    []
+  )
 })
 
 test("accounts for incurred usage even when the provider produces no image", async () => {

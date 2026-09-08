@@ -23,7 +23,7 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | github | `github_search_issues` | Compiles | Basic GitHub pass | Basic GitHub pass |
 | github | `github_get_issue` | Compiles | Basic GitHub pass | Basic GitHub pass |
 | github | `github_get_pull_request` | Compiles | Basic GitHub pass | Basic GitHub pass |
-| github | `github_get_file` | Compiles | Runtime pass, schema fix pending | Runtime pass, schema fix pending |
+| github | `github_get_file` | Compiles | Runtime and recorded schema pass | Runtime and recorded schema pass |
 | github | `github_clone_repository` | Compiles | Basic GitHub pass | Basic GitHub pass |
 | github | `github_add_issue_comment` | Compiles | Basic GitHub pass | Basic GitHub pass |
 | github | `github_reply_to_pull_request_review_comment` | Compiles | Review reply round trip | Review reply round trip |
@@ -33,29 +33,29 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | github | `github_create_pull_request` | Compiles | Basic GitHub pass | Basic GitHub pass |
 | github | `github_add_comment_reaction` | Compiles | Basic GitHub pass | Basic GitHub pass |
 | github | `github_update_pull_request` | Compiles | Basic GitHub pass | Basic GitHub pass |
-| gmail | `google_gmail_search_threads` | Compiles | Pending | Pending |
-| gmail | `google_gmail_get_thread` | Compiles | Pending | Pending |
-| gmail | `google_gmail_get_threads` | Compiles | Pending | Pending |
-| gmail | `google_gmail_get_message` | Compiles | Pending | Pending |
-| gmail | `google_gmail_get_messages` | Compiles | Pending | Pending |
-| gmail | `google_gmail_reply_to_thread` | Compiles | Pending | Pending |
-| gmail | `google_gmail_send_message` | Compiles | Pending | Pending |
-| gmail | `google_gmail_create_draft` | Compiles | Pending | Pending |
-| googleCalendar | `google_calendar_list_calendars` | Compiles | Pending | Pending |
-| googleCalendar | `google_calendar_list_events` | Compiles | Pending | Pending |
-| googleCalendar | `google_calendar_get_event` | Compiles | Pending | Pending |
-| googleCalendar | `google_calendar_create_event` | Compiles | Pending | Pending |
-| googleCalendar | `google_calendar_update_event` | Compiles | Pending | Pending |
+| gmail | `google_gmail_search_threads` | Compiles | Search and cursor pass | Search and cursor pass |
+| gmail | `google_gmail_get_thread` | Compiles | Synthetic readback pass | Synthetic readback pass |
+| gmail | `google_gmail_get_threads` | Compiles | Synthetic batch pass | Synthetic batch pass |
+| gmail | `google_gmail_get_message` | Compiles | Readback and error pass | Readback and error pass |
+| gmail | `google_gmail_get_messages` | Compiles | Batch and validation pass | Batch and validation pass |
+| gmail | `google_gmail_reply_to_thread` | Compiles | Own-account reply pass | Own-account reply pass |
+| gmail | `google_gmail_send_message` | Compiles | Own-account attachment pass | Own-account attachment pass |
+| gmail | `google_gmail_create_draft` | Compiles | HTML and reply draft pass | HTML and reply draft pass |
+| googleCalendar | `google_calendar_list_calendars` | Compiles | Live list pass | Live list pass |
+| googleCalendar | `google_calendar_list_events` | Compiles | Single/multi-calendar pass | Single/multi-calendar pass |
+| googleCalendar | `google_calendar_get_event` | Compiles | Readback and error pass | Readback and error pass |
+| googleCalendar | `google_calendar_create_event` | Compiles | Synthetic event pass | Synthetic event pass |
+| googleCalendar | `google_calendar_update_event` | Compiles | Update and settings pass | Update and settings pass |
 | jori | `list_capabilities` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `load_skill` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `search_runs` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `search_run_activity` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `read_workstreams` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `offer_integration` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
-| jori | `cancel_approval_request` | Compiles | Pending | Pending |
+| jori | `cancel_approval_request` | Compiles | Same-run cancellation and replay pass | Same-run cancellation and replay pass |
 | jori | `cancel_integration_offer` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `save_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `generate_image` | Compiles | Basic pass, batch 3 | Basic pass, batch 3 |
+| jori | `generate_image` | Compiles | Post-refactor runtime pass; schema correction pending | Post-refactor runtime pass; schema correction pending |
 | jori | `search_files` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `read_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `search_jobs` | Compiles | Empty search pass, batch 6 | Empty search pass, batch 6 |
@@ -74,7 +74,7 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | jori | `create_table` | Compiles | Regression pass | Regression pass |
 | jori | `insert_table_row` | Compiles | Regression pass | Regression pass |
 | jori | `update_table_row` | Compiles | Regression pass | Regression pass |
-| jori | `delete_table_row` | Compiles | Stale version rejected; deletion pending | Stale version rejected; deletion pending |
+| jori | `delete_table_row` | Compiles | Version rejection and approved deletion pass | Version rejection and approved deletion pass |
 | jori | `share_table` | Compiles | Mint and anonymous readback | Mint and anonymous readback |
 | jori | `search_stores` | Compiles | Round trip, contract retest | Round trip, contract retest |
 | jori | `read_store` | Compiles | Regression pass | Regression pass |
@@ -316,3 +316,33 @@ Convex documents that direct storage URLs remain usable until their files are de
 The user requested a short options review, not a storage migration. Options are an authorized Convex byte endpoint with additional download handling, Convex's R2 component with expiring URLs and EU/US jurisdictions, regional private S3 buckets, or Google Cloud Storage using the existing Google vendor. The recommendation is to compare R2's ready-made integration against GCS's vendor consolidation rather than build custom chunked downloads merely to retain native storage. Any migration or larger serving layer requires a separate decision. Existing exposed Convex URLs cannot be revoked by changing the application route alone.
 
 Sources: [Convex file serving](https://docs.convex.dev/file-storage/serve-files), [Convex R2 component](https://github.com/get-convex/r2), [R2 jurisdictions](https://developers.cloudflare.com/r2/reference/data-location/), [S3 signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html), [GCS signed URLs](https://docs.cloud.google.com/storage/docs/access-control/signed-urls).
+
+### Funded Google and lifecycle verification
+
+Main `fcd8a70f` deployed to development and both production regions. Vercel management readback confirmed EU `dpl_5xkUyARi5q5HJojEo2oB5WStDScT` Ready in dub1 and US `dpl_fHBBUAjMWRdS5BjH8UaotCXWWHKs` Ready in iad1. The expected EU/US and marketing aliases were present. Both regional `/chat` origins and the marketing root returned HTTP 200.
+
+The approved $25 non-billable allowance was applied exactly once to each verification organization through the internal audited grant. Receipt IDs are EU `ps76ty2xkrbc3acdww38r3sj458e1z3g` and US `sd79sbkpgj8rxacvw5jjxtz3js8e1j65`. Existing negative wallets, trial dates, and auto-top-up settings were unchanged. No Stripe payment or subscription change occurred.
+
+Gmail children EU `nx71v35a7dzv19jvn3d8ph34an8e1xes` and US `pn7fcrya1wrq9nvaz0aztt7dsd8e0x9a` completed all eight tools against the user's own test mailbox. Each sent one exact synthetic message with its region's 33-byte attachment, read it with all four single/batch tools, replied once and read back, and created unsent HTML and reply drafts. Search limit 1 returned distinct matching synthetic threads on two pages using the real continuation token. Empty message batches were rejected before provider access; the deliberately invalid message ID returned Gmail HTTP 400. No outside recipients were used. Independent Ajv validation accepted all 28 successful Gmail responses across the two runs.
+
+Calendar children EU `nx7a305qq3ghdkt94yqyyd45ax8e18e3` and US `pn70ss7yr4pv4wzh6dgqbjcgw58e0t5v` completed all five tools. Each created one labeled September 10 event without attendees, read it, changed its title/end time, and found it through primary-calendar and narrow multi-calendar searches. Missing start/end input was rejected; nonexistent event reads returned HTTP 404. All 14 successful responses passed independent schema validation.
+
+The first EU Calendar agent omitted transparency/reminders, incorrectly claiming the schema did not allow them. Its schema actually has additionalProperties:true and the adapter forwards these fields. EU correction child `nx7f814br8cc803x86a40xdq358e09f1` updated only the approved synthetic event's transparency to transparent and reminders to useDefault:false, then read back unchanged dates/title/attendees. US received the explicit clarification before creation. This was an observed model instruction-following failure, not an unsupported provider feature. The three EU correction responses also passed independent schema validation.
+
+All four Google credentials had expired before these tests. Their persisted expiry and update timestamps advanced during successful agent calls, with each retaining its matching region's person owner. This establishes natural token-refresh success without exposing or modifying tokens. It does not test revoked grants.
+
+Deletion children EU `nx7esz22cjh9zv2hsav29sqgts8e12cg` and US `pn7806t6304kgc2pd52e595zd18e0kcv` revalidated the exact approved Alpha rows at version 3, deleted only those rows, and read back unchanged Beta rows at version 1 and table rowCount 1. These permanent deletions were explicitly approved. All ten table responses passed independent schema validation.
+
+Job children EU `nx7ce6wrnzph2z42fwjhm41xj98e1vr6` and US `pn7er60t5kaayr1v7sxg5rn0n58e10dy` reactivated the two completed once jobs by changing only their triggers to 14:32:09.165 UTC. Readback showed version 3 and active status, with access/instructions unchanged. Same-key creation with a conflicting name was rejected, and searches found only the originals. Independent schema validation accepted their successful job responses. Scheduled runs EU `nx7a6tpbf6neehxhyp1xgmm8k58e1jjq` and US `pn7axcbwsk7w3g6fj038f5s6398e1v9y` subsequently completed; provider comment readback remains a separate check.
+
+Image children EU `nx7atammcgz8mxwgvsqarfetv18e1cgn` and US `pn7bj9jzzqbpdyr5x9j4yvz0ph8e0jtv` generated one image each after the shared upload refactor and verified matching read/search metadata. Files are EU `ks71nag5pvaahzxdgaj833kj2d8e0zbg`, 1,242,199 bytes, and US `rn71znpmmj0bbasqnmz9c8h9ed8e01mq`, 74,077 bytes, both image/png. Runtime generation succeeded, but independent schema checks rejected provider.name because the schema still required openrouter while both returned vertex. The correction names the actual regional provider and validates a runtime-generated response in the existing image test. Full gates and post-correction recorded-response validation remain required.
+
+The user approved temporary read_file policy changes in these two verification organizations, whose original override lists were empty. Console runs EU `nx7akphst82e000kd62spnmnws8e036p` and US `pn71g2a037ea6jqxr8q9sdmaax8e15g3` requested real prompted approvals. A subsequent user cancellation message continued each same run. Both called cancel_approval_request successfully, and the second call returned already_resolved. The approval records are cancelled and the file read never executed. Blocked reauthorization testing and restoring the original settings remain in progress.
+
+Provider readback confirmed exactly one scheduled comment per matching regional bot: EU `5586790997` and US `5586790640`. Neither once job is deleted. Image downloads returned HTTP 200 from the matching regional Convex host, with matching byte lengths and PNG signatures. The two actual generation responses pass the corrected local schema; this is recorded-response validation, not a new generation after deploying the schema.
+
+### Approved execution failure
+
+Blocked reauthorization runs EU `nx789nqyqtaagdxc4879s4xach8e1kvq` and US `pn7ae5wmvfdd85kf98q8ge918n8e0cnh` each requested a new read_file approval. Both rejected cancellation using a message ID from the other synthetic conversation with invalid_message. The administrator then changed read_file to blocked before approving these pending requests through the normal console decision action.
+
+Both approvals acquired claimedAt but never recorded result or consumedAt. The execution path claims first, then reauthorizes and executes outside a terminal-error catch, so a thrown failure strands the lease. Subsequent handoff reconciliation repeatedly described the action as having run with a pending result. The US model incorrectly claimed completion without file-result evidence; the EU model repeatedly inspected activity. These are failures, not blocked-mode passes. Both exact synthetic runs were stopped through the normal control mutation and verified stopped before policy restoration. The original allowed policy was restored, removing the temporary overrides. A checked fix and new live retest remain required.
