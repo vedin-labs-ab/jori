@@ -10,6 +10,7 @@ const originalFetch = globalThis.fetch
 afterEach(() => {
   globalThis.fetch = originalFetch
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
 })
 
 test("creates Notion pages with icon and cover payloads", async () => {
@@ -43,7 +44,26 @@ test("creates Notion pages with icon and cover payloads", async () => {
   })
 })
 
-test("uploads saved files to Notion file uploads", async () => {
+test.each([
+  "standard",
+  "Convex",
+])("uploads saved files with their MIME type using %s FormData", async (runtime) => {
+  if (runtime === "Convex") {
+    // Convex's FormData.set recreates File without preserving its MIME type.
+    // append preserves it. Model that runtime behavior at the upload boundary.
+    vi.stubGlobal(
+      "FormData",
+      class extends FormData {
+        override set(name: string, value: string | Blob, filename?: string) {
+          if (value instanceof Blob) {
+            super.set(name, new Blob([value]), filename)
+          } else {
+            super.set(name, value)
+          }
+        }
+      }
+    )
+  }
   const calls = mockNotionFetch((url: Parameters<typeof fetch>[0]) => {
     const pathname = new URL(String(url)).pathname
 
@@ -74,6 +94,7 @@ test("uploads saved files to Notion file uploads", async () => {
   })
   expect(calls[1]).toMatchObject({
     formFileName: "ÅÄÖ-🚀.png",
+    formFileType: "image/png",
     method: "POST",
     url: "https://api.notion.com/v1/file_uploads/upload_1/send",
   })
@@ -88,6 +109,7 @@ function mockNotionFetch(responseBody: unknown | MockNotionFetchResponder) {
   const calls: Array<{
     body: unknown
     formFileName?: string
+    formFileType?: string
     method: string
     url: string
   }> = []
@@ -98,6 +120,7 @@ function mockNotionFetch(responseBody: unknown | MockNotionFetchResponder) {
     calls.push({
       body: readBody(init?.body),
       formFileName: readFormFileName(init?.body),
+      formFileType: readFormFileType(init?.body),
       method: init?.method ?? "GET",
       url: `${parsedUrl.origin}${parsedUrl.pathname}`,
     })
@@ -124,6 +147,15 @@ function readFormFileName(body: BodyInit | null | undefined) {
   return typeof file === "object" && file !== null && "name" in file
     ? String(file.name)
     : undefined
+}
+
+function readFormFileType(body: BodyInit | null | undefined) {
+  if (!(body instanceof FormData)) {
+    return undefined
+  }
+
+  const file = body.get("file")
+  return file instanceof Blob ? file.type : undefined
 }
 
 function isResponder(

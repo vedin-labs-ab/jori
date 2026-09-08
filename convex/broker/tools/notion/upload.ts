@@ -76,7 +76,7 @@ async function sendFileUpload(
 ) {
   const form = new FormData()
 
-  form.set(
+  form.append(
     "file",
     new Blob([copyBytesToArrayBuffer(attachment.bytes)], {
       type: attachment.mimeType,
