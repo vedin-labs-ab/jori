@@ -45,7 +45,7 @@ export function UsageMeter() {
         </div>
       </div>
       <p className="border-t bg-muted/30 px-5 py-2.5 text-muted-foreground text-xs">
-        No invoice at the end of the month. Auto top-up is opt-in, and capped.
+        Monthly is what the plan includes. Wallet is credit you add on top.
       </p>
     </Prop>
   )

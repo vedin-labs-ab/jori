@@ -50,10 +50,10 @@ export function ReceiptsSection() {
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div className="space-y-5 text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
-            Every run lives in the console: what triggered it, which tools it
-            used, what it produced, what it asked along the way, and the folder
-            it was counted in. When Jori splits work into subtasks, each one
-            links back to the run that started it.
+            Every run lives in the console with what triggered it, the tools it
+            used, what it produced, and the folder it was counted in. When Jori
+            splits work into subtasks, each one links back to the run that
+            started it.
           </p>
           <p className="max-w-xl">
             A receipt is the record of what ran, not a summary written
@@ -90,7 +90,8 @@ const lines = [
 ]
 
 /** An ask-first request as the requester sees it: what would run, on whose
- *  behalf, with the decision still theirs. */
+ *  behalf, with the decision still theirs. The code is the one the prose
+ *  promises, set the way the console sets one. */
 function ReleaseApprovalCard() {
   return (
     <Prop hint="#eng on Slack" label="Approval requested">
@@ -104,6 +105,13 @@ function ReleaseApprovalCard() {
             <li key={line}>{line}</li>
           ))}
         </ul>
+        <p className="mt-3 text-muted-foreground text-xs">
+          Reply{" "}
+          <span className="rounded-sm bg-muted px-1 py-px font-medium font-mono text-foreground">
+            YD4UEFNV
+          </span>{" "}
+          in this thread, or decide here.
+        </p>
         <div aria-hidden="true" className="mt-4 flex gap-2">
           <span className={buttonVariants({ size: "default" })}>Approve</span>
           <span className={buttonVariants({ variant: "outline" })}>Deny</span>

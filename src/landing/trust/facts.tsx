@@ -8,12 +8,12 @@ import {
   FolderTree,
   GitBranch,
   Globe,
-  KeyRound,
   Link2,
+  MapPin,
   Share2,
   Users,
 } from "lucide-react"
-import { Definition, Jori, Section } from "../section"
+import { Definition, Jori, Region, Section } from "../section"
 import { Subprocessors } from "./subprocessors"
 
 export function ScopeSection() {
@@ -29,14 +29,13 @@ export function ScopeSection() {
       title="Acts as you, never past you"
     >
       <FactList>
-        <Definition icon={Fingerprint} term="Your accounts, your identity">
-          Jori acts through the accounts you connect, as you. Disconnect an
-          integration and its access ends with it.
+        <Definition icon={Fingerprint} term="Your accounts, as you">
+          Every action goes through an OAuth grant you approved, integration by
+          integration. Revoke a grant and the access ends with it.
         </Definition>
-        <Definition icon={Users} term="Personal and organization">
-          Everything Jori keeps is visible to only you, specific people,
-          specific teams, or everyone in the organization. Work shared past you
-          runs with the organization's context and integrations, not your own.
+        <Definition icon={Users} term="Your context, or the organization's">
+          Work you keep to yourself runs with your integrations. Work shared
+          past you runs with the organization's, never your own.
         </Definition>
         <Definition icon={GitBranch} term="Subtasks inherit less, never more">
           Jori can split a job into subtasks. A subtask can never hold access
@@ -50,7 +49,7 @@ export function ScopeSection() {
 export function VisibilitySection() {
   return (
     <Section
-      lede="Visibility is set on a folder or on an item, and the tree enforces it."
+      lede="Only you, specific people, specific teams, or everyone in the organization. Set it on a folder or an item, and the tree enforces it."
       support
       title="Who sees what"
     >
@@ -62,8 +61,8 @@ export function VisibilitySection() {
         </Definition>
         <Definition icon={Link2} term="Links carry their own secret">
           A share link opens a read-only page. Its secret rides in the URL
-          fragment, it expires on a clock you choose, and you can revoke it
-          whenever.
+          fragment, it expires on a clock you choose, and you can revoke it any
+          time.
         </Definition>
       </FactList>
     </Section>
@@ -113,9 +112,11 @@ export function DataSection() {
       title="Where your data goes, and doesn't"
     >
       <FactList>
-        <Definition icon={KeyRound} term="Access you grant">
-          Jori reads through the OAuth grants you approve, integration by
-          integration. Revoke a grant and the access is gone.
+        <Definition icon={MapPin} term="Stored in your region">
+          Choose an <Region region="eu" /> or <Region region="us" /> workspace
+          and Jori keeps your chats, files and workspace records there. Some
+          features use services outside it, including web search, code execution
+          and billing.
         </Definition>
         <Definition icon={Share2} term="Subprocessors and service providers">
           <Subprocessors />

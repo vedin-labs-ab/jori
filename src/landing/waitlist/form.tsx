@@ -210,7 +210,7 @@ function WorkField({ fieldId, invalid, rejection }: FieldProps) {
         id={`${fieldId}-work`}
         maxLength={waitlistLimits.work}
         name="work"
-        placeholder="The release checklist. Someone reads every PR and Linear issue on Thursday and writes up what is ready."
+        placeholder="The release checklist. Someone reads every PR and Linear issue on Thursday and writes up what's ready."
         required
         rows={3}
       />
@@ -363,9 +363,8 @@ function Joined() {
             subdomain with no mailbox behind it. Offering one here would be the
             same dead end one screen earlier. */}
         <p className="mt-1 text-muted-foreground text-sm leading-relaxed">
-          Check your inbox for a confirmation. We open to a few teams at a time
-          and set each one up ourselves, so you'll hear from us directly when
-          yours is next.
+          Check your inbox for a confirmation. We set each team up ourselves, so
+          you'll hear from us directly when yours is next.
         </p>
       </div>
     </div>

@@ -24,7 +24,7 @@ export function Sharing() {
         <dl className="space-y-8">
           <Definition term="The folder is the ceiling">
             Nothing inside a folder reaches further than the folder does,
-            whatever it's set to. Over-sharing is silent; the tree isn't.
+            whatever it's set to. The tree is a true map of who sees what.
           </Definition>
           <Definition term="Teams are an audience">
             Group the people who work together once. Then a folder, a table, or
@@ -32,7 +32,7 @@ export function Sharing() {
           </Definition>
           <Definition term="Links with a clock">
             A share link opens a read-only page without signing in, and expires
-            on a clock you choose. Revoke it whenever.
+            on a clock you choose. Revoke it any time.
           </Definition>
         </dl>
         <RenewalsSharing />

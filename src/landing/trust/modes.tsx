@@ -8,8 +8,10 @@ export function ModesSection() {
     <Section
       lede={
         <>
-          Allowed, ask first, or blocked: you set what <Jori tilt="right" /> can
-          do on their own, per action, per account.
+          Every tool is <ModeChip mode="allowed" /> outright,{" "}
+          <ModeChip mode="blocked" /> outright, or <ModeChip mode="prompted" />{" "}
+          every time. You set which for <Jori tilt="right" />, per action, per
+          account.
         </>
       }
       title="Every tool has a mode"
@@ -17,13 +19,13 @@ export function ModesSection() {
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div className="space-y-5 text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
-            Some tools read, some act. Reading is how Jori stays useful; acting
+            Some tools read, some act. Reading is how Jori stays useful. Acting
             is where you set the terms. Modes live in the console, and a change
             takes effect on the next run.
           </p>
           <p className="max-w-xl">
-            Answering where it's asked stays on, so Jori can always report back
-            in the thread that called them. Everything else is yours to set.
+            Replying in the thread that asked stays on, so Jori can always
+            report back. Everything else is yours to set.
           </p>
         </div>
         <ModeMatrix />
@@ -46,9 +48,23 @@ const modeStyles = {
   prompted: "bg-primary/10 font-medium text-foreground",
 } as const
 
+type Mode = keyof typeof modeLabels
+
 type ModeRow = {
   tool: string
-  mode: keyof typeof modeLabels
+  mode: Mode
+}
+
+/** A mode named in prose, drawn the way the matrix beside it draws it, so
+ *  the lede's three words are the three chips a reader is about to see. */
+function ModeChip({ mode }: { mode: Mode }) {
+  return (
+    <span
+      className={`inline-block rounded-md px-2 py-0.5 text-[0.8em] leading-tight ${modeStyles[mode]}`}
+    >
+      {modeLabels[mode]}
+    </span>
+  )
 }
 
 const modeRows: readonly ModeRow[] = [

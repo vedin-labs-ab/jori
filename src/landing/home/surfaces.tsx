@@ -14,11 +14,11 @@ export function Surfaces() {
         <>
           Mention <Jori tilt="right" /> in Slack, GitHub, or Linear and they
           answer in the thread. When the answer is a table, a store, or a file,
-          they send a link into the folder, readable by anyone you send it to.
+          it lands in the folder and the thread gets the link.
         </>
       }
       support
-      title="Wherever you work, it's the same Jori"
+      title="The same Jori, wherever you work"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
         <Integrations />

@@ -14,11 +14,11 @@ export function Record() {
     <Section
       lede={
         <>
-          Most AI works in private. <Jori tilt="right" /> works in the open:
-          Activity is the first thing in the console. Every run, whether it came
-          from a job or a mention, shows what triggered it, what they read, what
-          they did, what they asked, and what it cost. Stop any of them from
-          anywhere you can see it running.
+          Most AI works in private. <Jori tilt="right" /> works in the open.
+          Activity is the first page in the console, and every run, from a job
+          or a mention, shows what triggered it, what they read, what they did,
+          what they asked, and what it cost. Stop any run from wherever you can
+          see it.
         </>
       }
       title="Everything on the record"
@@ -42,8 +42,7 @@ export function Record() {
               an ask-first tool at all.
             </Definition>
             <Definition term="Stop means stop">
-              Any run can be stopped at any moment, and the record says who
-              stopped it.
+              Stop any run at any moment, and the record says who did.
             </Definition>
           </dl>
           <Link
