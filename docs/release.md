@@ -1,6 +1,6 @@
 # Regional release verification
 
-Last updated 8 September 2026. Final runtime `2c7e7ccd` is deployed to
+Last updated 8 September 2026. Latest runtime `ebb8c7fd` is deployed to
 development and both production regions. Core regional workflows passed the
 checks below; customer-connected integrations and billing are not yet fully
 verified. Provider setup, direct API tests and completed application workflows
@@ -10,9 +10,24 @@ are recorded separately. Checks used synthetic data unless stated otherwise.
 
 | Target | Verified deployment | Remaining work |
 | --- | --- | --- |
-| Development | Convex `trustworthy-parakeet-343` and skills deployed from `2c7e7ccd`; Convex reported ready at 00:49:36 local time. Bird and Vertex settings verified. | Remaining connected-provider workflows. `deploy:dev` does not deploy a hosted frontend. |
-| Production EU | Full `2c7e7ccd` deployment and skills sync completed; Vercel deployment `jori-production-6bhrxc7f5-albin-vedins-projects.vercel.app` aliased to `eu.usejori.com`. Convex is `sensible-spoonbill-17` in Ireland. Regional frontend returned 200 with the `dub1` function region. | Remaining connected-provider workflows. |
-| Production US | Full `2c7e7ccd` deployment completed; Vercel deployment `jori-production-6ga4f684s-albin-vedins-projects.vercel.app`. Convex is `insightful-goat-7` in Virginia, with strict schema and completed preservation repair. Fresh organization onboarding passed without reload or errors. | Remaining connected-provider workflows. |
+| Development | Convex `trustworthy-parakeet-343` and skills deployed from `ebb8c7fd`; Convex reported ready at 08:34:15 local time. Bird and Vertex settings verified. | Remaining connected-provider workflows. `deploy:dev` does not deploy a hosted frontend. |
+| Production EU | Full `ebb8c7fd` deployment and skills sync completed; Vercel deployment `jori-production-hlqohrdb9-albin-vedins-projects.vercel.app` is Ready in `dub1`, aliased to `eu.usejori.com`. Convex is `sensible-spoonbill-17` in Ireland. Actual Notion page-body read passed. | Remaining connected-provider workflows. |
+| Production US | Full `ebb8c7fd` deployment completed; Vercel deployment `jori-production-6ldsohfuf-albin-vedins-projects.vercel.app` is Ready in `iad1`, with `us.usejori.com`, `usejori.com` and `www.usejori.com` aliases. US `/chat` returned 200. Convex is `insightful-goat-7` in Virginia, with strict schema and completed preservation repair. Actual Notion page-body read passed. | Remaining connected-provider workflows. |
+
+The preceding `2c7e7ccd` release was also deployed and verified in all three
+targets. Development reported ready at 00:49:36 local time. Its production
+Vercel deployments were `jori-production-6bhrxc7f5-albin-vedins-projects.vercel.app`
+in EU and `jori-production-6ga4f684s-albin-vedins-projects.vercel.app` in US.
+That EU frontend returned 200 with the `dub1` function region; fresh regional
+organization onboarding passed without reload or errors. The workflow
+evidence below identifies later fixes and retests separately.
+
+The first US `ebb8c7fd` deployment attempt stopped at an unchanged
+`aria-disabled` assertion in `src/shared/console/chat/composer/send.test.tsx`.
+Its isolated nine tests passed,
+then the complete canonical deployment gate passed with 2,617 tests and four
+skipped. Deployment proceeded only after that full pass. No checks or tests
+were changed or bypassed; the skipped-test count remained four.
 
 The US repair renamed `link.linkedAt` to `link.at` on two identities and
 `associatedIntegrations` to `surfaces` on four global skills. Private
@@ -56,7 +71,7 @@ Restoration would require recreating the removed records.
 | GitHub | Separate apps and credentials; JWT identity, exact permissions/events and regional webhook settings verified. Real ping redelivery returned 200 in both regions. Own signatures accepted; missing, bad and opposite-region signatures rejected. | Authenticated installation, OAuth installation-access proof and connected repository workflows. Inert pings do not establish these. |
 | Slack | Separate apps with token rotation and regional callbacks/interactivity; credentials read back. Both event URLs, five bot events and public distribution verified. | Both regions' authenticated connections, rotation, interactivity and event workflows. |
 | Linear | Separate public apps and direct regional webhooks; client-credentials grant disabled. Matching client/webhook credentials read back. | Actual OAuth connections and webhook processing. |
-| Notion | Separate public connections, regional callbacks and active subscriptions. Both user-approved OAuth connections are active with distinct access/refresh tokens and bots. Page metadata reads, exactly one comment per region and signed comment webhook reception passed on the one authorized page. Own signatures accepted; missing/bad/opposite-region signatures rejected. No user-information capability. | Page-body reads exposed upstream optional-tool-field normalization. Explicit `strict: false` passed a synthetic A/B probe; deploy and retest actual regional page-body reads. Other Notion workflows remain untested. |
+| Notion | Separate public connections, regional callbacks and active subscriptions. Both user-approved OAuth connections are active with distinct access/refresh tokens and bots. Page metadata/body reads, exactly one comment per region and signed comment webhook reception passed on the one authorized page. Own signatures accepted; missing/bad/opposite-region signatures rejected. No user-information capability. | Optional-tool-field normalization was fixed at the shared model boundary and verified by actual EU/US reads on `ebb8c7fd`. Other Notion workflows remain untested. |
 
 ## Email and image evidence
 
@@ -202,7 +217,13 @@ or treating invalid cursor values as absent. OpenAI documents that Responses
 can normalize schemas into strict mode when the flag is omitted, unlike Chat
 Completions. The observed provider behavior is consistent with such a bridge.
 [Official function-calling guidance](https://developers.openai.com/api/docs/guides/function-calling#strict-mode).
-Actual EU/US page-body retests after deployment remain pending.
+After `ebb8c7fd` deployed, fresh natural-language page-body requests passed in
+both regions. EU run `nx74nv3dfjjztp0thza247a3fs8e1gye` and US run
+`pn7a1g36swh8m8mgmjtvt773ys8e0c94` each completed exactly one
+`notion_get_block_children` call with only the approved `blockId`, no cursor.
+Each returned seven blocks and `has_more: false`, without errors. No other
+pages were accessed and neither retest made a Notion write. Backend inspection
+returned only tool status and result counts, not the page body.
 
 Google's saved consent scopes are `openid`, `userinfo.email`,
 `userinfo.profile`, `gmail.readonly`, `gmail.compose`, `gmail.send`,
@@ -257,15 +278,16 @@ recoverable from Git.
 
 ## Remaining launch work
 
-Runtime deployment, preview cleanup and both regional image workflows are
+Runtime deployment, preview cleanup, both regional image workflows and the
+scoped Notion connection/read/comment/webhook checks are
 complete. Full `pnpm run check` and `pnpm run test` passed on the final runtime
-base, with 2,616 tests passed and four skipped. Documentation-only changes do
+base, with 2,617 tests passed and four skipped. Documentation-only changes do
 not require another runtime deployment.
 
 - Complete authenticated customer connections and workflows for GitHub, Slack,
-  Linear, Gmail/Calendar and Microsoft. Notion consent, metadata reads,
-  comments and signed comment webhooks passed; deploy the tool-optionality fix
-  and retest page-body reads. Other Notion operations, Microsoft sign-in and
+  Linear, Gmail/Calendar and Microsoft. Notion consent, metadata/body reads,
+  comments and signed comment webhooks passed. Other Notion operations,
+  Microsoft sign-in and
   remaining auth-email flows also need tests.
 - Complete Google audience/publishing and Microsoft publisher verification
   before general availability. Billing remains unavailable until its separate
