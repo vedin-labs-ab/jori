@@ -1,4 +1,22 @@
-import { type JsonSchema, objectSchema, stringProperty } from "../common"
+import {
+  type JsonSchema,
+  numberProperty,
+  objectSchema,
+  stringProperty,
+} from "../common"
+
+export function shareLinkSchema(): JsonSchema {
+  return objectSchema({
+    required: ["url", "urlPath", "expiresAt"],
+    properties: {
+      url: stringProperty("View-only share link."),
+      urlPath: stringProperty(
+        "Console path with the share secret in its fragment."
+      ),
+      expiresAt: numberProperty("Expiry time in epoch milliseconds."),
+    },
+  })
+}
 
 export function visibilitySchema(): JsonSchema {
   return {

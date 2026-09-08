@@ -13,6 +13,7 @@ import {
 } from "../common"
 import { brokerJoriToolResponseSchemas } from "./broker"
 import { runJoriToolResponseSchemas } from "./runs"
+import { shareLinkSchema } from "./visibility"
 import { workstreamJoriToolResponseSchemas } from "./workstreams"
 
 function fileSummaryProperties() {
@@ -183,13 +184,7 @@ export const coreJoriToolResponseSchemas = {
     description: "The file summary; null when not found.",
     properties: fileSummaryProperties(),
   },
-  share_file: objectSchema({
-    required: ["url", "expiresAt"],
-    properties: {
-      url: stringProperty("View-only share link."),
-      expiresAt: numberProperty("Expiry time in epoch milliseconds."),
-    },
-  }),
+  share_file: shareLinkSchema(),
   web_search: webToolResult(),
   web_fetch: webToolResult(),
 } satisfies SchemaMap

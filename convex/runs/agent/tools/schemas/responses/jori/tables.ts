@@ -7,7 +7,7 @@ import {
   type SchemaMap,
   stringProperty,
 } from "../common"
-import { visibilitySchema } from "./visibility"
+import { shareLinkSchema, visibilitySchema } from "./visibility"
 
 function tableSummaryProperties() {
   return {
@@ -86,11 +86,5 @@ export const tableToolResponseSchemas = {
       deleted: { type: "boolean", const: true },
     },
   }),
-  share_table: objectSchema({
-    required: ["url", "expiresAt"],
-    properties: {
-      url: stringProperty("View-only share link."),
-      expiresAt: numberProperty("Expiry time in epoch milliseconds."),
-    },
-  }),
+  share_table: shareLinkSchema(),
 } satisfies SchemaMap

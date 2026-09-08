@@ -1,8 +1,10 @@
 import { expect, test } from "vitest"
 import { getToolPermission } from "../../contracts/permissions"
+import { schemaViolations } from "../../test/convex/schema"
 import { integration } from "../../test/convex/tools"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type AgentRuntimeInput } from "../runs/agent/input"
+import { brokerJoriToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/broker"
 import { type ApprovalBrokerContext } from "./approval"
 import { listCapabilities } from "./capabilities"
 
@@ -19,6 +21,12 @@ test("separates run tools from connected and available capabilities", () => {
     "jori",
     "slack",
   ])
+  expect(
+    schemaViolations(
+      capabilities,
+      brokerJoriToolResponseSchemas.list_capabilities
+    )
+  ).toEqual([])
   expect(capabilities.connected.map((group) => group.surface)).toContain(
     "github"
   )
