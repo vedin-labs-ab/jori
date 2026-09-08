@@ -1,6 +1,7 @@
 import {
   arrayProperty,
   booleanProperty,
+  enumProperty,
   numberProperty,
   objectSchema,
   providerPayload,
@@ -98,9 +99,17 @@ export const githubToolResponseSchemas = {
           ),
         },
       }),
-      providerPayload(
-        "GitHub's contents object for non-file, non-directory types, unchanged."
-      ),
+      {
+        ...providerPayload(
+          "GitHub's symlink or submodule contents object, unchanged."
+        ),
+        required: ["type", "name", "path"],
+        properties: {
+          type: enumProperty(["symlink", "submodule"], "GitHub content type."),
+          name: stringProperty("Entry name."),
+          path: stringProperty("Repository-relative path."),
+        },
+      },
     ],
   },
   github_clone_repository: objectSchema({
