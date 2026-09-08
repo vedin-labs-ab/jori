@@ -115,11 +115,9 @@ function microsoftCalendarWriteSchema(
   return objectSchema({
     required,
     properties: {
-      event,
-      sendUpdates: {
-        type: "string",
-        enum: ["all", "none"],
-        description: "Whether attendees are emailed about the change.",
+      event: {
+        ...event,
+        description: `${event.description} Microsoft sends meeting invitations or updates to attendees; this tool cannot suppress those emails.`,
       },
       ...properties,
     },
