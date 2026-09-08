@@ -28,7 +28,8 @@ async function seedFolder(database: TestDatabase) {
 
 test("subfolders come back name-sorted, counting their direct children", async () => {
   const { database, ctx } = databaseContext()
-  const folderId = await database.insert("folders", folderDoc())
+  // Parent resources must never inflate a child folder's counts.
+  const folderId = await seedFolder(database)
 
   const zetaId = await database.insert(
     "folders",
