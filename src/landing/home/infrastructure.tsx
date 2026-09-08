@@ -1,39 +1,27 @@
+import { FieldHelp } from "@/shared/field"
 import { RegionFlag } from "@/shared/region/flags"
 import { Definition, Section } from "../section"
-
-/** Residency and price, folded into one quiet section: procurement facts,
- *  not the pitch. The Stripe carve-out is stated before anyone asks,
- *  because the buyer who cares about residency will. */
 
 export function Infrastructure() {
   return (
     <Section
       lede={
         <>
-          Choose where your data lives. Payments settle through{" "}
-          <a
-            className="relative -top-[0.1em] inline-block align-middle transition-opacity hover:opacity-70"
-            href="https://stripe.com"
-            rel="noreferrer"
-            target="_blank"
-          >
-            <img
-              alt="Stripe"
-              className="inline-block h-[1.15em]"
-              src="/logos/subprocessors/stripe.svg"
-            />
-          </a>{" "}
-          in the US; everything else stays in region.
+          Choose an EU or US workspace. Jori stores your chats, files and
+          workspace records in your chosen region.{" "}
+          <FieldHelp label="Data residency scope and exceptions" side="top">
+            Some features use services that process data outside your chosen
+            region, including web search, code execution and billing.
+          </FieldHelp>
         </>
       }
       support
-      title="Hosted in your region"
+      title="Region-specific data residency"
     >
       <dl className="grid max-w-3xl gap-x-12 gap-y-8 md:grid-cols-2">
         <Definition term="Data residency">
-          Two isolated regional applications, one product. Your data lives in
-          the <Region region="us" /> or the <Region region="eu" />. Region is a
-          place, not a checkbox on a form.
+          Separate applications, databases and file storage in the{" "}
+          <Region region="eu" /> and <Region region="us" />.
         </Definition>
         <Definition term="No seats, no markup">
           One price for the organization. Model work at the provider's list
