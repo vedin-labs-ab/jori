@@ -110,7 +110,7 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | notion | `notion_create_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_update_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_upload_file` | Compiles | Upload and cover retest pass | Upload and cover retest pass |
-| notion | `notion_append_block_children` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
+| notion | `notion_append_block_children` | Compiles | Start/end/after position pass | Position retest running |
 | notion | `notion_create_comment` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | slack | `channels_list` | Compiles | Pending | Pending |
 | slack | `conversations_history` | Compiles | Pending | Pending |
@@ -212,3 +212,13 @@ All-tools completion is still pending. In addition to connected-provider grants 
 Ajv accepted 71 recorded successful responses from 22 tools without schema violations. Samples cover synthetic tables, stores, files, sandbox reads/patches/search, lifecycle tools, console replies, workstreams, cancelled offers, and empty job searches. Error envelopes and open provider payloads are not counted as exact output-contract verification.
 
 EU child `nx7bscq77r333rh0jn1yf8e8cx8e125a` and US child `pn76tg6wgqm5sx7vqw52spczjx8e0y5m` each attempted read_table/read_store/read_file with the other deployment's synthetic IDs. All six requests failed ID validation without returning record content. Each then found its own local store. This demonstrates these foreign IDs do not resolve; same-region cross-organization visibility still needs a separate test.
+
+### Resumed verification
+
+After the user resumed, the unchanged Notion corrections passed the full gate again: 2,742 tests passed, four skipped. Commits `72d33293` and `3bf66d1f` were fast-forwarded to main and pushed. Development deployed at 11:25:52 local time. EU and US production deployments completed, including skills. Frontends are `jori-production-mxbutig2n-albin-vedins-projects.vercel.app` and `jori-production-89ztcxowe-albin-vedins-projects.vercel.app` respectively. The user authorized deploying the new checked revision after the blocked Gmail-author commit. No existing commit was rewritten, and no Vercel account or access policy changed.
+
+EU child `nx7as8sarmvcaaqvm4p1a2j6gd8e0g4s` completed the positioned-insertion regression on its existing synthetic page. It added exactly three labeled paragraphs with end, start, and after_block positions. The readback placed START first and AFTER immediately after END. Existing blocks were retained. US child `pn7a4yx4r7mvggavnc50846bvh8e0rps` has completed all three writes; final readback and run completion are still pending in the latest checkpoint.
+
+Sixteen native-runtime regressions failed before the next correction. Invalid delegation arrays were silently filtered, unexpected fields were ignored, invalid finish values could complete a run, and sandbox numeric values reached execution with coercion or clamping. A blocked native tool also executed when explicitly called. Runtime dispatch now checks blocked mode and validates native, active-surface, saved-file, and image inputs against the published schemas. Coding bounds and lifecycle limits are shared with their handlers. Ordinary broker calls retain their provider-specific normalization and validation.
+
+Three broker regressions demonstrated that list_capabilities skipped input validation and both ordinary and approved provider calls refreshed credentials before rejecting invalid input. These now validate first. Positive controls confirm that valid explicit empty delegation access still creates a child with no integration tools, and valid provider calls still prepare credentials and execute. The new local gate passed with 2,763 tests and four skipped. These runtime/broker fixes still need deployment and live regression; mocked tests are not E2E passes.

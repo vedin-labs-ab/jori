@@ -2,6 +2,23 @@ import { type ToolSurface } from "../../../contracts/integrations"
 import { type JsonObject } from "../../../contracts/json"
 import { type RuntimeTool } from "../../../contracts/runtime/context"
 import { readFinal } from "../../../contracts/runtime/tools"
+import { validateSchemaValue } from "../../broker/input/validation"
+
+export function validateRuntimeToolInput(tool: RuntimeTool, input: JsonObject) {
+  if (tool.mode === "blocked") {
+    throw new Error(`Tool is blocked: ${tool.name}`)
+  }
+
+  // Broker calls apply provider-specific normalization and validation there.
+  // Native tools and worker-side Jori tools never pass through that boundary.
+  if (
+    tool.route !== "convex" ||
+    tool.name === "save_file" ||
+    tool.name === "generate_image"
+  ) {
+    validateSchemaValue(input, tool.inputSchema, tool.name)
+  }
+}
 
 export function findTool(tools: RuntimeTool[], name: string) {
   const tool = tools.find((candidate) => candidate.name === name)

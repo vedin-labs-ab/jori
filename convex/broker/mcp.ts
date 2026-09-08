@@ -40,6 +40,7 @@ export async function callBrokerTool(
     const mode = authorizeTool(context, request)
 
     if (request.tool === "list_capabilities") {
+      normalizeBrokerToolInput(request.tool, request.args)
       return listCapabilities(context)
     }
 
@@ -100,12 +101,14 @@ async function runProviderTool(
   integration: Doc<"integrations">,
   request: BrokerToolRequest
 ) {
+  const toolArgs = normalizeBrokerToolInput(request.tool, request.args)
+
   return await callProviderTool({
     ctx,
     integration: await prepareIntegrationForRuntime(ctx, { integration }),
     run: context.run,
     tool: request.tool,
-    toolArgs: normalizeBrokerToolInput(request.tool, request.args),
+    toolArgs,
   })
 }
 

@@ -1,5 +1,8 @@
 import { type JsonObject } from "../json"
 
+export const maxAgentWaitRuns = 20
+export const maxRunResultLength = 8000
+
 export const toolFinalDescription =
   "Set true only when this tool call is the final useful action for the run. If active approvals or integration offers remain, the run waits; otherwise it completes after the tool succeeds."
 

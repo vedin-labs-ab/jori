@@ -1,3 +1,4 @@
+import { codingLimits } from "../../../contracts/coding"
 import { isRecord } from "../../../contracts/json"
 
 export function normalizeToolInput(value: unknown): Record<string, unknown> {
@@ -34,5 +35,10 @@ export function boundedInteger(
 }
 
 export function boundedTimeoutMs(value: unknown) {
-  return boundedInteger(value, 120_000, 1_000, 1_200_000)
+  return boundedInteger(
+    value,
+    120_000,
+    codingLimits.timeoutMinimum,
+    codingLimits.timeoutMaximum
+  )
 }

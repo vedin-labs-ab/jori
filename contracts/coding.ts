@@ -3,6 +3,15 @@
  *  sandbox read the name from here. */
 export const sandboxWorkspace = "/home/user/workspace"
 
+export const codingLimits = {
+  readOffset: 1_000_000,
+  readLines: 2_000,
+  grepMatches: 500,
+  globPaths: 1_000,
+  timeoutMinimum: 1_000,
+  timeoutMaximum: 1_200_000,
+}
+
 type CodingToolDefinition = {
   description: string
   inputSchema: Record<string, unknown>
@@ -16,8 +25,11 @@ export const codingToolDefinitions = [
       "Read a bounded line range from a file under /home/user/workspace.",
     inputSchema: objectSchema(["path"], {
       path: stringSchema("Workspace-relative or absolute file path."),
-      offset: numberSchema("One-based line number to start reading from."),
-      limit: numberSchema("Maximum lines to read."),
+      offset: integerSchema(
+        "One-based line number to start reading from.",
+        codingLimits.readOffset
+      ),
+      limit: integerSchema("Maximum lines to read.", codingLimits.readLines),
     }),
   },
   {
@@ -30,7 +42,10 @@ export const codingToolDefinitions = [
       include: stringSchema(
         "Optional glob pattern relative to the search directory. When path names a file, match its filename."
       ),
-      limit: numberSchema("Maximum matches to return."),
+      limit: integerSchema(
+        "Maximum matches to return.",
+        codingLimits.grepMatches
+      ),
     }),
   },
   {
@@ -42,7 +57,7 @@ export const codingToolDefinitions = [
         "Glob pattern relative to the search directory, for example src/**/*.ts."
       ),
       path: stringSchema("Optional workspace directory to search within."),
-      limit: numberSchema("Maximum paths to return."),
+      limit: integerSchema("Maximum paths to return.", codingLimits.globPaths),
     }),
   },
   {
@@ -56,7 +71,7 @@ export const codingToolDefinitions = [
       cwd: stringSchema(
         'Optional workspace directory to run from, for example "jori". Defaults to /home/user/workspace.'
       ),
-      timeoutMs: numberSchema("Optional command timeout in milliseconds."),
+      timeoutMs: timeoutSchema(),
     }),
   },
   {
@@ -81,7 +96,7 @@ export const codingToolDefinitions = [
       cwd: stringSchema(
         'Optional workspace directory to run from, for example "jori". Defaults to /home/user/workspace.'
       ),
-      timeoutMs: numberSchema("Optional command timeout in milliseconds."),
+      timeoutMs: timeoutSchema(),
     }),
   },
 ] as const satisfies readonly CodingToolDefinition[]
@@ -106,11 +121,21 @@ function objectSchema(
   }
 }
 
-function numberSchema(description: string) {
+function integerSchema(description: string, maximum: number, minimum = 1) {
   return {
-    type: "number",
+    type: "integer",
+    minimum,
+    maximum,
     description,
   }
+}
+
+function timeoutSchema() {
+  return integerSchema(
+    "Optional command timeout in milliseconds.",
+    codingLimits.timeoutMaximum,
+    codingLimits.timeoutMinimum
+  )
 }
 
 function stringSchema(description: string) {

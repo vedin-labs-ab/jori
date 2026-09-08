@@ -21,7 +21,12 @@ import {
 } from "./results"
 import { finishRun } from "./run"
 import { executeSandboxTool } from "./sandbox"
-import { findTool, requireSurface, shouldFinishConvexTool } from "./select"
+import {
+  findTool,
+  requireSurface,
+  shouldFinishConvexTool,
+  validateRuntimeToolInput,
+} from "./select"
 import { executeActiveSurfaceTool } from "./surface"
 
 export type ToolCallResult = {
@@ -53,6 +58,7 @@ export async function executeToolCall(
   let result: ToolExecution | Parked
 
   try {
+    validateRuntimeToolInput(tool, args.call.args)
     result = await executeTool(args, tool, onParked)
   } catch (error) {
     await startedPending
