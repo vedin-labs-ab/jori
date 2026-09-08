@@ -10,6 +10,19 @@ export const runStatuses = [
 
 export type RunStatus = (typeof runStatuses)[number]
 
+export const runActivityKinds = [
+  "agent",
+  "approval",
+  "file",
+  "model",
+  "offer",
+  "run",
+  "tool",
+  "wait",
+] as const
+
+export type RunActivityKind = (typeof runActivityKinds)[number]
+
 export function isTerminalRunStatus(status: RunStatus) {
   return status === "completed" || status === "failed" || status === "stopped"
 }

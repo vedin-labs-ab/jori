@@ -31,6 +31,7 @@ export const searchRuns = internalQuery({
     return await pageRunMatches(
       ctx,
       {
+        ...args,
         candidates,
         current,
         query: normalizeQuery(args.query),

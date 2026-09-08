@@ -1,3 +1,4 @@
+import { type RunActivityKind } from "../../../contracts/runtime/runs"
 import { type RuntimeToolMetadataItem } from "../../../contracts/runtime/tools"
 import { type Doc } from "../../_generated/dataModel"
 import { type Integration, type ToolSurface } from "../../shared/integrations"
@@ -15,15 +16,7 @@ export type ActivityStatus =
   | "stopped"
   | "waiting"
 
-export type ActivityKind =
-  | "agent"
-  | "approval"
-  | "file"
-  | "model"
-  | "offer"
-  | "run"
-  | "tool"
-  | "wait"
+export type ActivityKind = RunActivityKind
 
 export type ActivityDetail = {
   label: string

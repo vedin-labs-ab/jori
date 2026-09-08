@@ -41,6 +41,16 @@ test("run search exposes optional filters without bespoke sentinel guidance", ()
     description: expect.stringContaining("Case-insensitive substring"),
   })
   expect(properties(variants[1]).query).toBeUndefined()
+  expect(properties(variants[1]).cursor).toBeUndefined()
+  expect(properties(variants[1]).limit).toBeUndefined()
+  for (const variant of [variants[0], variants[2], variants[3]]) {
+    expect(properties(variant).cursor).toMatchObject({ type: "string" })
+    expect(properties(variant).limit).toMatchObject({
+      type: "number",
+      minimum: 1,
+      maximum: 50,
+    })
+  }
   expect(properties(variants[1]).runIds).toMatchObject({
     description: expect.stringContaining("current Run ID"),
   })
