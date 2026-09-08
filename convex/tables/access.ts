@@ -55,6 +55,14 @@ export function summarizeTable(table: TableDoc) {
   }
 }
 
+/** Agent columns are addressed by name, never by the console's internal IDs. */
+export function agentTableSummary(summary: ReturnType<typeof summarizeTable>) {
+  return {
+    ...summary,
+    columns: summary.columns.map(({ id: _id, ...column }) => column),
+  }
+}
+
 /** Console summary: the base summary plus the owner's display. A table
  *  without a resolvable named owner reads as Jori's own in the console. */
 export async function summarizeTableWithOwner(

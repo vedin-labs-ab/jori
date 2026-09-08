@@ -7,19 +7,16 @@ import {
   type SchemaMap,
   stringProperty,
 } from "../common"
+import { visibilitySchema } from "./visibility"
 
 function tableSummaryProperties() {
   return {
     tableId: stringProperty("Jori table ID."),
     name: stringProperty("Table name."),
-    visibility: objectSchema({
-      description:
-        "Who may see it inside the organization: only its owner (private), listed people, listed teams, or every member.",
-      properties: {
-        mode: stringProperty("private, people, teams, or organization."),
-      },
-    }),
+    visibility: visibilitySchema(),
     ownerId: stringProperty("Owning person ID."),
+    folderId: stringProperty("Containing folder ID, when filed in a folder."),
+    rowCount: numberProperty("Number of rows currently in the table.", 0),
     columns: arrayProperty(
       "Column schema every row is validated against; row values are keyed by column name.",
       objectSchema({

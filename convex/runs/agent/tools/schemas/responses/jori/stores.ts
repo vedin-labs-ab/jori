@@ -6,19 +6,19 @@ import {
   type SchemaMap,
   stringProperty,
 } from "../common"
+import { visibilitySchema } from "./visibility"
 
 function storeSummaryProperties() {
   return {
     storeId: stringProperty("Jori store ID."),
     name: stringProperty("Store name."),
-    visibility: objectSchema({
-      description:
-        "Who may see it inside the organization: only its owner (private), listed people, listed teams, or every member.",
-      properties: {
-        mode: stringProperty("private, people, teams, or organization."),
-      },
-    }),
+    visibility: visibilitySchema(),
     ownerId: stringProperty("Owning person ID."),
+    folderId: stringProperty("Containing folder ID, when filed in a folder."),
+    propertyCount: numberProperty(
+      "Number of declared schema leaf properties.",
+      0
+    ),
     schema: {
       type: "object",
       additionalProperties: true,
