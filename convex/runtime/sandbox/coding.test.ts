@@ -53,6 +53,27 @@ test("searches and discovers workspace files with bounds", async () => {
   })
 })
 
+test.each([
+  "audit",
+  "audit/note.txt",
+])("matches grep filters relative to the selected search path %s", async (searchPath) => {
+  const sandbox = createLocalSandbox({
+    "audit/note.txt": "audit line\n",
+    "other/note.txt": "outside line\n",
+  })
+
+  await expect(
+    executeCodingTool({
+      input: { path: searchPath, pattern: "audit", include: "note.txt" },
+      sandbox,
+      tool: "grep",
+    })
+  ).resolves.toMatchObject({
+    matches: [{ path: "audit/note.txt", lineNumber: 1, line: "audit line" }],
+    truncated: false,
+  })
+})
+
 test("applies patches inside the workspace and rejects escaping paths", async () => {
   const sandbox = createLocalSandbox({})
   await executeCodingTool({
