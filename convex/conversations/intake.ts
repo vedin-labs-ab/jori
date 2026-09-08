@@ -148,20 +148,17 @@ function observedMessage(
   }
 }
 
-// Slack mention detection happens at the provider edge, where the raw
-// payload still carries mention tokens; recorded text is human-readable.
+// Provider-normalized mention decisions are authoritative. Linear still
+// derives unspecified mentions from its recorded text.
 function normalizeMentioned(
   message: ObservedMessage,
   integration: Doc<"integrations">
 ) {
-  if (message.mentioned === true) {
-    return true
+  if (message.mentioned !== undefined) {
+    return message.mentioned
   }
 
-  if (
-    integration.integration === "github" ||
-    integration.integration === "linear"
-  ) {
+  if (integration.integration === "linear") {
     return mentionsJori(message.text)
   }
 

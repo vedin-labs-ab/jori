@@ -180,6 +180,7 @@ import type * as integrations_github_delivery_format from "../integrations/githu
 import type * as integrations_github_ingress_events from "../integrations/github/ingress/events.js";
 import type * as integrations_github_ingress_http from "../integrations/github/ingress/http.js";
 import type * as integrations_github_ingress_lifecycle from "../integrations/github/ingress/lifecycle.js";
+import type * as integrations_github_ingress_messages from "../integrations/github/ingress/messages.js";
 import type * as integrations_github_ingress_reactions from "../integrations/github/ingress/reactions.js";
 import type * as integrations_github_ingress_targets from "../integrations/github/ingress/targets.js";
 import type * as integrations_github_ingress_types from "../integrations/github/ingress/types.js";
@@ -841,6 +842,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/github/ingress/events": typeof integrations_github_ingress_events;
   "integrations/github/ingress/http": typeof integrations_github_ingress_http;
   "integrations/github/ingress/lifecycle": typeof integrations_github_ingress_lifecycle;
+  "integrations/github/ingress/messages": typeof integrations_github_ingress_messages;
   "integrations/github/ingress/reactions": typeof integrations_github_ingress_reactions;
   "integrations/github/ingress/targets": typeof integrations_github_ingress_targets;
   "integrations/github/ingress/types": typeof integrations_github_ingress_types;
