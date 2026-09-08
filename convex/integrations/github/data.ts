@@ -6,7 +6,7 @@ import {
 } from "../../shared/actor"
 import { readDataString } from "../../shared/data"
 
-function getGitHubBotLogin(data: unknown) {
+export function getGitHubBotLogin(data: unknown) {
   return (
     readDataString(data, "botLogin") ??
     botLogin(readDataString(data, "appSlug"))

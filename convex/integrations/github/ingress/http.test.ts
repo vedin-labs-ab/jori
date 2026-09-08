@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { encodeJson } from "../../../../contracts/json"
+import { internal } from "../../../_generated/api"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
 import { getGitHubMessage } from "./events"
@@ -22,7 +23,6 @@ test("records GitHub approval commands without starting a message run", async ()
   expect(ctx.runMutation).toHaveBeenCalledTimes(2)
   expect(ctx.runMutation.mock.calls[0]?.[1]).toMatchObject({
     accountId: "123",
-    integration: "github",
     mode: "record",
     text: "approve abc12345",
   })
@@ -53,7 +53,6 @@ test("ignores approval commands from commenters outside the repository audience"
   expect(ctx.runMutation).toHaveBeenCalledTimes(1)
   expect(ctx.runMutation.mock.calls[0]?.[1]).toMatchObject({
     accountId: "123",
-    integration: "github",
     text: "approve abc12345",
   })
   expect(ctx.runMutation.mock.calls[0]?.[1]).not.toHaveProperty("mode")
@@ -68,11 +67,14 @@ test("records ordinary GitHub comments with normal run intake", async () => {
   expect(ctx.runMutation).toHaveBeenCalledTimes(1)
   expect(ctx.runMutation.mock.calls[0]?.[1]).toMatchObject({
     accountId: "123",
-    integration: "github",
     text: "hello jori",
   })
   expect(ctx.runMutation.mock.calls[0]?.[1]).not.toHaveProperty("mode")
   expect(ctx.runQuery).not.toHaveBeenCalled()
+  expect(ctx.runMutation).toHaveBeenCalledWith(
+    internal.integrations.github.ingress.messages.record,
+    expect.anything()
+  )
 })
 
 type GitHubMessage = Parameters<typeof handleGitHubMessageEvent>[1]

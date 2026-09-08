@@ -214,10 +214,9 @@ async function recordGitHubMessage(
   }
 ) {
   await ctx.runMutation(
-    internal.conversations.intake.record,
+    internal.integrations.github.ingress.messages.record,
     compactRecord({
       accountId: message.accountId,
-      integration: "github",
       mode: options.mode,
       type: message.type,
       externalId: message.externalId,
