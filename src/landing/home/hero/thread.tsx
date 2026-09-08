@@ -68,14 +68,20 @@ export function RenewalsThread({
             </span>
           </button>{" "}
           will keep it current.
+          {/* Slack's unfurl of the table the reply filed into. Inline text
+              rather than a flex row, so the dot sits in the sentence's own
+              spaces, and in two unbreakable halves so a narrow thread wraps
+              the trail under the name whole rather than splitting each. */}
           <button
-            className="mt-2 flex w-fit items-center gap-1.5 rounded-md border bg-background px-2 py-1 font-medium text-xs transition-colors hover:bg-muted"
+            className="mt-2 max-w-full rounded-md border bg-background px-2 py-1 text-left font-medium text-xs transition-colors hover:bg-muted"
             onClick={onOpenTable}
             type="button"
           >
-            <Table2 className="size-3.5 text-muted-foreground" />
-            Customer renewals{" "}
-            <span className="font-normal text-muted-foreground">
+            <span className="whitespace-nowrap">
+              <Table2 className="mr-1.5 inline-block size-3.5 align-[-0.2em] text-muted-foreground" />
+              Customer renewals
+            </span>{" "}
+            <span className="whitespace-nowrap font-normal text-muted-foreground">
               · Finance › Renewals
             </span>
           </button>
