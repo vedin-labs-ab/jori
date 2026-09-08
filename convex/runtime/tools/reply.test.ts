@@ -1,13 +1,12 @@
 import { expect, test } from "vitest"
-import { type MessageSurface } from "../../../contracts/integrations"
 import { type JsonObject } from "../../../contracts/json"
-import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
+import { createSurfaceRuntime, runTool } from "../../../test/runtime"
 
 // send_reply's parts: checked against the surface's reply contract before
 // anything is sent, so the model sees the contract's own message.
 
 test("valid console parts pass through to the surface", async () => {
-  const runtime = replyRuntime("console")
+  const runtime = createSurfaceRuntime({ surface: "console" })
   const parts: JsonObject[] = [
     { kind: "reference", target: { kind: "table", id: "collections_1" } },
     { kind: "choices", options: [{ label: "Yes" }, { label: "No" }] },
@@ -29,7 +28,7 @@ test("valid console parts pass through to the surface", async () => {
 })
 
 test("an empty parts list sends as no parts", async () => {
-  const runtime = replyRuntime("console")
+  const runtime = createSurfaceRuntime({ surface: "console" })
 
   await runTool({
     call: {
@@ -49,7 +48,7 @@ test("an empty parts list sends as no parts", async () => {
 })
 
 test("a malformed part fails the call with the contract's message", async () => {
-  const runtime = replyRuntime("console")
+  const runtime = createSurfaceRuntime({ surface: "console" })
 
   const result = await runTool({
     call: {
@@ -72,7 +71,7 @@ test("a malformed part fails the call with the contract's message", async () => 
 })
 
 test("a surface that admits no parts rejects any", async () => {
-  const runtime = replyRuntime("slack")
+  const runtime = createSurfaceRuntime()
 
   const result = await runTool({
     call: {
@@ -92,20 +91,3 @@ test("a surface that admits no parts rejects any", async () => {
   })
   expect(runtime.platform.sendReply).not.toHaveBeenCalled()
 })
-
-function replyRuntime(surface: MessageSurface) {
-  return createRuntime({
-    context: runtimeContext({
-      activeSurface: { communicated: false, surface, target: null },
-      tools: [
-        {
-          access: "write",
-          description: "Send reply.",
-          inputSchema: {},
-          name: "send_reply",
-          route: "surface",
-        },
-      ],
-    }),
-  })
-}

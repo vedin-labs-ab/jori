@@ -1,10 +1,8 @@
 import { expect, test } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
-import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform"
+import { createSurfaceRuntime, runTool } from "../../../test/runtime"
 
 test("send_reply routes through Convex and marks the active surface communicated", async () => {
-  const runtime = surfaceRuntime()
+  const runtime = createSurfaceRuntime()
 
   const result = await runTool({
     call: {
@@ -29,12 +27,9 @@ test("send_reply routes through Convex and marks the active surface communicated
 })
 
 test("send_reply forwards the active Linear target by default", async () => {
-  const runtime = surfaceRuntime({
-    activeSurface: {
-      communicated: false,
-      surface: "linear",
-      target: "linear:thread:comment-id",
-    },
+  const runtime = createSurfaceRuntime({
+    surface: "linear",
+    target: "linear:thread:comment-id",
   })
 
   await runTool({
@@ -55,12 +50,9 @@ test("send_reply forwards the active Linear target by default", async () => {
 })
 
 test("send_reply can target a specific Linear comment", async () => {
-  const runtime = surfaceRuntime({
-    activeSurface: {
-      communicated: false,
-      surface: "linear",
-      target: "linear:thread:old-comment-id",
-    },
+  const runtime = createSurfaceRuntime({
+    surface: "linear",
+    target: "linear:thread:old-comment-id",
   })
 
   await runTool({
@@ -84,7 +76,7 @@ test("send_reply can target a specific Linear comment", async () => {
 })
 
 test("add_reaction routes through Convex and marks the active surface communicated", async () => {
-  const runtime = surfaceRuntime({ tools: [addReactionTool()] })
+  const runtime = createSurfaceRuntime({ tool: "add_reaction" })
 
   const result = await runTool({
     call: {
@@ -109,9 +101,9 @@ test("add_reaction routes through Convex and marks the active surface communicat
 })
 
 test("add_reaction is refused on the console surface", async () => {
-  const runtime = surfaceRuntime({
-    activeSurface: { communicated: false, surface: "console", target: null },
-    tools: [addReactionTool()],
+  const runtime = createSurfaceRuntime({
+    surface: "console",
+    tool: "add_reaction",
   })
 
   const result = await runTool({
@@ -132,13 +124,9 @@ test("add_reaction is refused on the console surface", async () => {
 })
 
 test("add_reaction validates GitHub reaction targets before calling Convex", async () => {
-  const runtime = surfaceRuntime({
-    activeSurface: {
-      communicated: false,
-      surface: "github",
-      target: null,
-    },
-    tools: [addReactionTool()],
+  const runtime = createSurfaceRuntime({
+    surface: "github",
+    tool: "add_reaction",
   })
 
   const result = await runTool({
@@ -163,13 +151,9 @@ test("add_reaction validates GitHub reaction targets before calling Convex", asy
 })
 
 test("add_reaction validates GitHub reaction values before calling Convex", async () => {
-  const runtime = surfaceRuntime({
-    activeSurface: {
-      communicated: false,
-      surface: "github",
-      target: null,
-    },
-    tools: [addReactionTool()],
+  const runtime = createSurfaceRuntime({
+    surface: "github",
+    tool: "add_reaction",
   })
 
   const result = await runTool({
@@ -193,42 +177,3 @@ test("add_reaction validates GitHub reaction values before calling Convex", asyn
   })
   expect(runtime.platform.addReaction).not.toHaveBeenCalled()
 })
-
-function surfaceRuntime(
-  options: {
-    activeSurface?: AgentRuntime["context"]["activeSurface"]
-    communicated?: boolean
-    tools?: RuntimeTool[]
-  } = {}
-): AgentRuntime {
-  return createRuntime({
-    context: runtimeContext({
-      activeSurface: options.activeSurface ?? {
-        communicated: options.communicated ?? false,
-        surface: "slack",
-        target: null,
-      },
-      tools: options.tools ?? [sendReplyTool()],
-    }),
-  })
-}
-
-function sendReplyTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Send reply.",
-    inputSchema: {},
-    name: "send_reply",
-    route: "surface",
-  }
-}
-
-function addReactionTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Add reaction.",
-    inputSchema: {},
-    name: "add_reaction",
-    route: "surface",
-  }
-}

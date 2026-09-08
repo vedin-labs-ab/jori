@@ -1,10 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
-import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform"
+import { createSurfaceRuntime, runTool } from "../../../test/runtime"
 
 test("send_reply can finish the run after a successful final reply", async () => {
-  const runtime = surfaceRuntime()
+  const runtime = createSurfaceRuntime()
 
   const result = await runTool({
     call: {
@@ -28,7 +26,7 @@ test("send_reply can finish the run after a successful final reply", async () =>
 })
 
 test("send_reply final does not finish when delivery fails", async () => {
-  const runtime = surfaceRuntime()
+  const runtime = createSurfaceRuntime()
   vi.mocked(runtime.platform.sendReply).mockRejectedValueOnce(
     new Error("Reply failed")
   )
@@ -54,7 +52,7 @@ test("send_reply final does not finish when delivery fails", async () => {
 })
 
 test("send_reply rejects invalid final before sending", async () => {
-  const runtime = surfaceRuntime()
+  const runtime = createSurfaceRuntime()
 
   const result = await runTool({
     call: {
@@ -77,7 +75,7 @@ test("send_reply rejects invalid final before sending", async () => {
 })
 
 test("add_reaction can finish the run after a successful final reaction", async () => {
-  const runtime = surfaceRuntime({ tools: [addReactionTool()] })
+  const runtime = createSurfaceRuntime({ tool: "add_reaction" })
 
   const result = await runTool({
     call: {
@@ -100,36 +98,3 @@ test("add_reaction can finish the run after a successful final reaction", async 
     target: { messageTs: "123.456" },
   })
 })
-
-function surfaceRuntime(options: { tools?: RuntimeTool[] } = {}): AgentRuntime {
-  return createRuntime({
-    context: runtimeContext({
-      activeSurface: {
-        communicated: false,
-        surface: "slack",
-        target: null,
-      },
-      tools: options.tools ?? [sendReplyTool()],
-    }),
-  })
-}
-
-function sendReplyTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Send reply.",
-    inputSchema: {},
-    name: "send_reply",
-    route: "surface",
-  }
-}
-
-function addReactionTool(): RuntimeTool {
-  return {
-    access: "write",
-    description: "Add reaction.",
-    inputSchema: {},
-    name: "add_reaction",
-    route: "surface",
-  }
-}

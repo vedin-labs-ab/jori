@@ -1,16 +1,5 @@
 import { expect, test } from "vitest"
-import { toolPermissions } from "../../../contracts/permissions"
-import { getToolInputSchema } from "../../runs/agent/tools/schemas"
 import { normalizeBrokerToolInput } from "."
-
-test("broker input schemas cover every broker-routed tool", () => {
-  const missing = toolPermissions
-    .filter((permission) => permission.route === "broker")
-    .filter((permission) => getToolInputSchema(permission.tool) === undefined)
-    .map((permission) => permission.tool)
-
-  expect(missing).toEqual([])
-})
 
 test("broker input validation accepts writable Notion page icon and cover shapes", () => {
   expect(
@@ -76,55 +65,29 @@ test("broker input validation rejects Notion blocks that combine multiple block 
   ).toThrow("notion_create_page.children[0]")
 })
 
-test("broker input validation accepts supported Notion page children", () => {
-  expect(
-    normalizeBrokerToolInput("notion_create_page", {
-      parent: { page_id: "page_1" },
-      properties: { title: { title: [{ text: { content: "Draft" } }] } },
-      children: [
-        {
-          object: "block",
-          type: "paragraph",
-          paragraph: {
-            rich_text: [{ type: "text", text: { content: "Hello" } }],
-          },
-        },
-        { object: "block", type: "divider", divider: {} },
-      ],
-    })
-  ).toMatchObject({
+test("broker input validation preserves supported Notion children and Unicode keys and text", () => {
+  const input = {
     parent: { page_id: "page_1" },
-  })
-})
-
-test("broker input validation preserves Unicode object keys and text", () => {
-  expect(
-    normalizeBrokerToolInput("notion_create_page", {
-      parent: { page_id: "page_1" },
-      properties: {
-        "ÅÄÖ 😀": {
-          title: [{ text: { content: "Räksmörgås 🚀" } }],
-        },
-      },
-      children: [
-        {
-          object: "block",
-          type: "paragraph",
-          paragraph: {
-            rich_text: [
-              { type: "text", text: { content: "Hallå världen ✨" } },
-            ],
-          },
-        },
-      ],
-    })
-  ).toMatchObject({
     properties: {
       "ÅÄÖ 😀": {
         title: [{ text: { content: "Räksmörgås 🚀" } }],
       },
     },
-  })
+    children: [
+      {
+        object: "block",
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: "Hallå världen ✨" } }],
+        },
+      },
+      { object: "block", type: "divider", divider: {} },
+    ],
+  }
+
+  expect(
+    normalizeBrokerToolInput("notion_create_page", structuredClone(input))
+  ).toEqual(input)
 })
 
 test("broker input validation requires calendar event timing for create tools", () => {

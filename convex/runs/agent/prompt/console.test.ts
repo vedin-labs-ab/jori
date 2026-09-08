@@ -5,7 +5,7 @@ import { runtimeSkills } from "../../../../test/convex/skills"
 import { normalizeSkillInput } from "../../../skills/data"
 import { assemblePrompt } from "."
 
-test("a console run reads the console skill's format after the communication rules", () => {
+test("a console run embeds its own skill after communication rules and lists other skills to load", () => {
   const prompt = assemblePrompt(consoleRuntimeInput(), {
     skills: runtimeSkills([
       { ...normalizeSkillInput(shippedSkills.console), organizationId: null },
@@ -27,15 +27,6 @@ test("a console run reads the console skill's format after the communication rul
     instructions.indexOf("# Finish")
   )
   expect(instructions).not.toMatch(/\n{3,}/)
-})
-
-test("the console skill is the surface's own, not a skill to load", () => {
-  const instructions = assemblePrompt(consoleRuntimeInput(), {
-    skills: runtimeSkills([
-      { ...normalizeSkillInput(shippedSkills.console), organizationId: null },
-    ]),
-  }).instructions
-
   expect(instructions).not.toContain("- `console`:")
   expect(instructions).toContain("- `slack`:")
   expect(instructions).not.toContain("mrkdwn`, never GitHub Markdown")
