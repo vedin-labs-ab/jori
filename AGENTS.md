@@ -1,102 +1,67 @@
 # Guidelines
 
-## Development Guidelines
+## Workflow
 
-- Ensure `pnpm run check` and `pnpm run test` pass before handoff. Together they are the handoff gate.
-- Use Biome only for linting and formatting.
-- Before making code changes, read `biome.jsonc`, `scripts/dependencies/index.ts`, and `scripts/structure/index.ts`; shape the implementation to satisfy formatting, dependency boundary, and folder structure constraints from the start.
-- Do not weaken or bypass checks to make them pass unless explicitly instructed.
+- Start work with `pnpm task <name>`: a `task/<name>` branch in
+  `~/.worktrees/jori/<name>` from local `main`, dependencies installed. One
+  task per worktree; never share a branch between agents.
+- The gate is `pnpm check` and `pnpm test`. Do not weaken or bypass a check
+  unless told to. `pnpm check:fix` formats and regenerates content.
+- Commit on the task branch, then land with `pnpm land <name>` from the
+  primary checkout. It rebases on `main`, runs the gate in the worktree, and
+  fast-forwards `main`. If it says `main` moved, run it again.
+- Before changing code, read `biome.jsonc`, `scripts/dependencies/index.ts`
+  and `scripts/structure/index.ts`. They define formatting, dependency
+  boundaries and folder structure; shape the change to pass them from the
+  start.
 
-### Change Workflow
+## Targets
 
-- For code changes, use a fresh worktree under `~/.worktrees/<repo-name>/<task-name>` from latest `main` on a dedicated `task/<task-name>` branch.
-- Keep each task isolated; never share mutable branches across agents.
-- Commit completed work on the task branch after required checks pass.
-- Before updating `main`, rebase the task branch on latest `main`, resolve conflicts, and rerun checks.
-- Update `main` atomically with a serialized fast-forward merge from the checked task branch.
-- If no git remote is configured, updating local `main` is sufficient.
-- If `main` moves before the update lands, repeat the rebase/check/fast-forward sequence.
+Every environment-bound command takes one target: `dev`, `prod-us` or
+`prod-eu`. The target names its env file (`.env.local` for dev,
+`.env.<target>.local` for production) and is the word a production ship asks
+you to type.
 
-### Environments
+| Command | Does |
+| --- | --- |
+| `pnpm ship <target> [--yes]` | Deploys. Dev pushes Convex and skills with no gate, since the `pnpm dev` watcher already pushes there. Production requires the primary checkout, a clean `main` equal to `origin/main`, the gate (skipped when this tree already passed it), and a confirmation. |
+| `pnpm skills <target>` | Syncs the skill catalog. |
+| `pnpm sandbox <target>` | Builds the E2B template. |
+| `pnpm db:seed dev`, `pnpm db:truncate dev` | Development data only. |
 
-Jori runs in two environments, `dev` and `prod`. Every resource is named for
-the environment that owns it, and every environment-targeting command is
-suffixed with it.
+- Worktrees never deploy: a push from one replaces what another task just
+  verified. A change that needs a live backend (a schema migration, an HTTP
+  action, webhook ingress) verifies against a Convex preview deployment
+  named after the task branch.
+- Ship production only when the user asks. Never read or print production
+  credentials.
 
-- Worktrees never deploy. Concurrent tasks share one development deployment,
-  so a push from a worktree silently replaces whatever another task just
-  verified. `pnpm check` and `pnpm test` are the gate instead.
-- A change that genuinely needs a live backend — a schema migration, an HTTP
-  action, webhook ingress — verifies against a Convex preview deployment named
-  after the task branch. It expires on its own and never touches a shared
-  environment.
-- After a task branch lands on `main`, the development deployment picks the
-  change up from the `pnpm dev` watcher. `pnpm ship dev` is only needed to
-  push without that watcher running.
-- Production ships from the primary checkout with `pnpm ship prod-us` or
-  `pnpm ship prod-eu`, only when the user asks for it, and only from a pushed
-  `main` that passed the gate. Never read or print production credentials.
+## Code
 
-### Code Quality & Architecture
+- Simplicity over cleverness, readability over everything: less code,
+  descriptive names, no duplication, no unclear abbreviations.
+- Organize by domain: colocate UI, logic, data access, schemas and tests
+  under the feature they serve, so the filesystem explains the system.
+  Single-word folder and file names; a name that needs two words needs
+  another folder.
+- Improve what you touch: remove local duplication, clarify names, simplify
+  control flow.
+- Pre-launch means no legacy: no phased migrations, fallbacks, compatibility
+  layers or temporary solutions. Make the clean, complete change.
 
-- Prefer simplicity over cleverness. If the same outcome can be achieved with less code, choose the simpler approach.
-- Aggressively avoid duplication. Extract reusable code into clear, well-defined functions or modules.
-- Prioritize readability above all. The codebase should be easy to scan and understand at a glance.
-- Use descriptive, explicit naming. Avoid single-letter variables and unclear abbreviations.
-- Improve the code you touch: remove local duplication, clarify names, simplify control flow, and leave nearby structure easier to understand.
+## UI
 
-### System Design Principles
-
-- Organize by domain and responsibility: colocate related UI, logic, data access, schemas, and tests under the feature or domain they serve.
-- Use folder and file structure to communicate intent, ownership, boundaries, and layering.
-- Prefer single-word folder and file names. If a name needs multiple words, introduce another folder layer so each level has one clear responsibility.
-- Prefer names and nesting that make the system understandable from the filesystem before reading implementation details.
-
-### Change Philosophy
-
-The platform is currently pre-launch, so prioritize clean, complete changes over compatibility with unfinished implementations.
-
-- Treat the system as if it has no legacy constraints.
-- Avoid phased migrations, fallbacks, and backward compatibility layers.
-- Prefer clean, decisive changes over incremental patching.
-- Do not introduce temporary solutions that become permanent bloat.
-
-Complexity compounds quickly. Be deliberate in preventing it.
-
-## Design Guidelines
-
-- Always use shadcn/ui primitives when available.
-- Install shadcn/ui components with the official `npx shadcn@latest add` command. Never recreate shadcn/ui components from memory.
-- Keep shadcn/ui default styling.
-- Keep product design simple and consistent.
-- Style elements using Tailwind via `className` only.
-- Do not modify `index.css` unless clearly necessary.
-- Desktop-optimized, fully responsive and adaptive.
-- Never use gradients.
-
-## Landing Mocks
-
-The landing page shows the console itself, not pictures of it. Every product
-visual on `src/landing` is a console view from `src/shared/console` rendered
-over fixture data from `src/landing/demo`, inside the same shell, list, and
-dialog primitives the console uses.
-
-- `src/shared/console` holds views: props in, callbacks out. No Convex hooks,
-  no session, no router state; links go through `ConsoleLink`. The dependency
-  check enforces this.
-- `src/console` binds those views to Convex, auth, and the router. A page is a
-  binding around a view, never a second copy of it.
-- `src/landing/demo` binds the same views to an in-memory workspace
-  (Copperline) with the same callbacks, so the mocks stay navigable.
-
-When a console view changes, the landing follows on its own. When a console
-surface gets a new view, write it in the kit and bind it twice. Never draw a
-console lookalike by hand in `src/landing`, and never import `src/console`
-from it.
+- shadcn/ui primitives, installed with `npx shadcn@latest add`, default
+  styling kept. Tailwind via `className` only. Leave `index.css` alone unless
+  clearly necessary.
+- Simple and consistent, desktop-optimized, fully responsive. No gradients.
+- Landing visuals are console views from `src/shared/console` rendered over
+  `src/landing/demo` fixtures. The kit takes props and emits callbacks (the
+  dependency check enforces it); `src/console` binds it to Convex and
+  `src/landing/demo` to the in-memory workspace. Never hand-draw a console
+  lookalike in `src/landing`, and never import `src/console` from it.
 
 ## Convex
 
-This project uses Convex as its backend.
-
-When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first**.  
-This file defines the correct usage patterns and overrides any prior assumptions.
+Read `convex/_generated/ai/guidelines.md` before touching Convex code. It
+overrides prior assumptions.
