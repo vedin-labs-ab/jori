@@ -40,13 +40,9 @@ describe("renderPromptTemplate", () => {
     ).toBe("Slack")
   })
 
-  test("collapses repeated blank lines outside fenced blocks", () => {
-    expect(renderPromptTemplate("A\n\n\nB", {})).toBe("A\n\nB")
-  })
-
-  test("preserves repeated blank lines inside fenced blocks", () => {
-    expect(renderPromptTemplate("A\n\n```text\nB\n\n\nC\n```\n\n\nD", {})).toBe(
-      "A\n\n```text\nB\n\n\nC\n```\n\nD"
-    )
+  test("collapses blank lines before and after fences, preserving those inside", () => {
+    expect(
+      renderPromptTemplate("A\n\n\nB\n```text\nC\n\n\nD\n```\n\n\nE", {})
+    ).toBe("A\n\nB\n```text\nC\n\n\nD\n```\n\nE")
   })
 })

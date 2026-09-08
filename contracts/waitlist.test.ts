@@ -41,17 +41,17 @@ test("rejects work that is only whitespace", () => {
 })
 
 test("collapses and clamps work to the shared limit", () => {
+  const prefix = "release checks "
   const result = readWaitlistEntry({
     ...valid,
     work: `  release   checks ${"x".repeat(waitlistLimits.work)}`,
   })
 
   expect(result).toMatchObject({
-    entry: { work: expect.stringMatching(/^release checks x+$/) },
+    entry: {
+      work: prefix + "x".repeat(waitlistLimits.work - prefix.length),
+    },
   })
-  expect("entry" in result ? result.entry.work.length : 0).toBe(
-    waitlistLimits.work
-  )
 })
 
 test("rejects an address longer than the shared limit", () => {
