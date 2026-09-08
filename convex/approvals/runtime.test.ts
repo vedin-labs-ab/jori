@@ -59,12 +59,17 @@ describe("approval command parsing", () => {
 })
 
 describe("approval runtime decisions", () => {
-  test("reports expired approvals without a second mutation", async () => {
+  test.each([
+    { status: "expired", message: expect.stringContaining("expired") },
+    { status: "closed", message: "This run is no longer active." },
+  ])("reports $status approvals without resuming the run", async ({
+    status,
+    message,
+  }) => {
     const approval = approvalDoc()
-    const ctx = actionCtx(async () => ({
-      status: "expired" as const,
-      approval,
-    }))
+    const ctx = {
+      runMutation: vi.fn().mockResolvedValue({ status, approval }),
+    } as unknown as ActionCtx
 
     const result = await decideApproval(ctx, {
       approval,
@@ -72,57 +77,10 @@ describe("approval runtime decisions", () => {
       decision: "approved",
     })
 
-    expect(result.status).toBe("expired")
-    expect(result.message).toContain("expired")
-    expect(ctx.runMutation).toHaveBeenCalledTimes(1)
-  })
-
-  test("does not resume approvals for closed runs", async () => {
-    const approval = approvalDoc()
-    const ctx = actionCtx(async (args) => {
-      if ("decidedBy" in args) {
-        return {
-          status: "closed" as const,
-          approval,
-        }
-      }
-
-      return null
-    })
-
-    const result = await decideApproval(ctx, {
-      approval,
-      decidedBy: userActor(),
-      decision: "approved",
-    })
-
-    expect(result).toMatchObject({
-      message: "This run is no longer active.",
-      status: "closed",
-    })
+    expect(result).toMatchObject({ status, message })
     expect(ctx.runMutation).toHaveBeenCalledTimes(1)
   })
 })
-
-function actionCtx(
-  runMutation: (args: Record<string, unknown>) => Promise<unknown>,
-  runQuery: (args: Record<string, unknown>) => Promise<unknown> = async () =>
-    null
-) {
-  return {
-    runMutation: vi.fn(
-      async (_reference: unknown, args: Record<string, unknown>) =>
-        runMutation(args)
-    ),
-    runQuery: vi.fn(
-      async (_reference: unknown, args: Record<string, unknown>) =>
-        runQuery(args)
-    ),
-  } as unknown as ActionCtx & {
-    runMutation: ReturnType<typeof vi.fn>
-    runQuery: ReturnType<typeof vi.fn>
-  }
-}
 
 function approvalDoc(): Doc<"approvals"> {
   return {

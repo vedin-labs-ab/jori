@@ -1,5 +1,4 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { modelRate } from "../../contracts/models/catalog"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { liveModelRate } from "../model/rate"
@@ -17,8 +16,8 @@ vi.mock("./ledger", () => ({ debitRun: vi.fn() }))
 vi.mock("../usage/record", () => ({ recordUsageDebit: vi.fn() }))
 vi.mock("../model/rate", () => ({ liveModelRate: vi.fn() }))
 
-// $2/M input and $10/M output, as the catalog lists the default model.
 const model = "openai/gpt-5.6-sol"
+const tokens = { input: 1_000, output: 200 }
 
 const configuredAccount = {
   _id: "account-1",
@@ -39,7 +38,10 @@ const configuredAccount = {
 
 function meterOnce(account: Doc<"accounts">, schedule: () => void) {
   vi.mocked(ensureAccount).mockResolvedValue(account)
-  vi.mocked(liveModelRate).mockResolvedValue(modelRate(model))
+  vi.mocked(liveModelRate).mockResolvedValue({
+    inputMicrosPerToken: 2,
+    outputMicrosPerToken: 10,
+  })
 
   return meterModelUsage(
     {
@@ -52,7 +54,7 @@ function meterOnce(account: Doc<"accounts">, schedule: () => void) {
         _id: "run-1",
         organizationId: account.organizationId,
       } as Doc<"runs">,
-      tokens: { input: 1_000, output: 200 },
+      tokens,
     }
   )
 }
@@ -65,7 +67,7 @@ beforeEach(() => {
   vi.mocked(liveModelRate).mockReset()
 })
 
-test("the turn is priced at the live rate of the model that answered", async () => {
+test("the live model rate prices the same tokens and amount for the ledger and rollup", async () => {
   vi.mocked(ensureAccount).mockResolvedValue(configuredAccount)
   vi.mocked(liveModelRate).mockResolvedValue({
     inputMicrosPerToken: 0.2,
@@ -80,7 +82,7 @@ test("the turn is priced at the live rate of the model that answered", async () 
     {
       model: "openai/gpt-5.6-luna",
       run: { _id: "run-1", organizationId: "organization-1" } as Doc<"runs">,
-      tokens: { input: 1_000, output: 200 },
+      tokens,
     }
   )
 
@@ -90,11 +92,15 @@ test("the turn is priced at the live rate of the model that answered", async () 
   )
   expect(debitRun).toHaveBeenCalledWith(
     expect.anything(),
-    expect.objectContaining({ micros: 440 })
+    expect.objectContaining({ micros: 440, tokens })
   )
   expect(recordUsageDebit).toHaveBeenCalledWith(
     expect.anything(),
-    expect.objectContaining({ model: "openai/gpt-5.6-luna", micros: 440 })
+    expect.objectContaining({
+      model: "openai/gpt-5.6-luna",
+      micros: 440,
+      tokens,
+    })
   )
 })
 
@@ -120,30 +126,6 @@ test("an active plan can schedule its configured auto top-up", async () => {
 
   expect(holdAutoTopUp).toHaveBeenCalledOnce()
   expect(schedule).toHaveBeenCalledOnce()
-})
-
-test("the debit carries the tokens the amount was made of", async () => {
-  await meterOnce(configuredAccount, vi.fn())
-
-  expect(debitRun).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.objectContaining({
-      micros: 4_000,
-      tokens: { input: 1_000, output: 200 },
-    })
-  )
-})
-
-test("the rollup is credited exactly what the ledger was debited", async () => {
-  await meterOnce(configuredAccount, vi.fn())
-
-  expect(recordUsageDebit).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.objectContaining({
-      micros: 4_000,
-      tokens: { input: 1_000, output: 200 },
-    })
-  )
 })
 
 test("a spent monthly cap holds the charge back", async () => {

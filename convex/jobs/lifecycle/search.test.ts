@@ -1,6 +1,6 @@
-import { expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
+import { databaseContext } from "../../../test/convex/database"
 import { type Doc, type Id } from "../../_generated/dataModel"
-import { type QueryCtx } from "../../_generated/server"
 import { searchJobs } from "./search"
 
 test("default search returns active top-level jobs only", async () => {
@@ -8,23 +8,20 @@ test("default search returns active top-level jobs only", async () => {
     job({ id: "parent", status: "active", at: 100 }),
     job({ id: "child", status: "active", at: 50, parentId: "parent" }),
     job({ id: "paused", status: "paused", at: 75 }),
+    job({
+      id: "foreign",
+      status: "active",
+      at: 25,
+      organizationId: "elsewhere",
+    }),
   ]
-  const { ctx, equals, withIndex } = searchContext(rows)
+  const ctx = await searchContext(rows)
 
   const result = await searchJobs(ctx, {
     organizationId: "organization",
   })
 
   expect(result.map((item) => item._id)).toEqual(["parent"])
-  expect(withIndex).toHaveBeenCalledWith(
-    "by_organization_and_status_and_parent",
-    expect.any(Function)
-  )
-  expect(equals.mock.calls).toEqual([
-    ["organizationId", "organization"],
-    ["status", "active"],
-    ["parent.id", undefined],
-  ])
 })
 
 test("completed search still omits owned jobs", async () => {
@@ -37,8 +34,14 @@ test("completed search still omits owned jobs", async () => {
       at: 50,
       parentId: "active",
     }),
+    job({
+      id: "foreign",
+      status: "completed",
+      at: 25,
+      organizationId: "elsewhere",
+    }),
   ]
-  const { ctx, equals, withIndex } = searchContext(rows)
+  const ctx = await searchContext(rows)
 
   const result = await searchJobs(ctx, {
     organizationId: "organization",
@@ -46,54 +49,16 @@ test("completed search still omits owned jobs", async () => {
   })
 
   expect(result.map((item) => item._id)).toEqual(["active", "completed"])
-  expect(withIndex).toHaveBeenCalledWith(
-    "by_organization_and_parent",
-    expect.any(Function)
-  )
-  expect(equals.mock.calls).toEqual([
-    ["organizationId", "organization"],
-    ["parent.id", undefined],
-  ])
 })
 
-function searchContext(rows: Doc<"jobs">[]) {
-  let organizationId: unknown
-  let status: unknown
-  let filtersByParent = false
-  const equals = vi.fn((field: string, value: unknown) => {
-    if (field === "organizationId") {
-      organizationId = value
-    } else if (field === "status") {
-      status = value
-    } else if (field === "parent.id") {
-      filtersByParent = true
-    }
-  })
-  const index = {
-    eq: (field: string, value: unknown) => {
-      equals(field, value)
-      return index
-    },
-  }
-  const collect = vi.fn(async () =>
-    rows.filter(
-      (row) =>
-        row.organizationId === organizationId &&
-        (status === undefined || row.status === status) &&
-        (!filtersByParent || row.parent === undefined)
-    )
-  )
-  const withIndex = vi.fn(
-    (_name: string, range: (value: typeof index) => typeof index) => {
-      range(index)
-      return { collect }
-    }
-  )
-  const ctx = {
-    db: { query: vi.fn(() => ({ withIndex })) },
-  } as unknown as QueryCtx
+async function searchContext(rows: Doc<"jobs">[]) {
+  const { database, ctx } = databaseContext()
 
-  return { ctx, equals, withIndex }
+  for (const row of rows) {
+    await database.insert("jobs", row)
+  }
+
+  return ctx
 }
 
 function job(input: {
@@ -101,6 +66,7 @@ function job(input: {
   status: Doc<"jobs">["status"]
   at: number
   parentId?: string
+  organizationId?: string
 }): Doc<"jobs"> {
   return {
     _id: input.id as Id<"jobs">,
@@ -116,7 +82,7 @@ function job(input: {
     principal: { kind: "organization" },
     visibility: { mode: "organization" },
     status: input.status,
-    organizationId: "organization",
+    organizationId: input.organizationId ?? "organization",
     trigger: { at: input.at },
     type: "once",
     updatedAt: 0,

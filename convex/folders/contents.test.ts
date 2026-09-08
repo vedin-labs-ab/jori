@@ -28,7 +28,7 @@ async function seedFolder(database: TestDatabase) {
 
 test("subfolders come back name-sorted, counting their direct children", async () => {
   const { database, ctx } = databaseContext()
-  const folderId = await seedFolder(database)
+  const folderId = await database.insert("folders", folderDoc())
 
   const zetaId = await database.insert(
     "folders",
@@ -93,7 +93,7 @@ test("root folders list the same way when no parent is given", async () => {
 
 test("child counts skip what the viewer cannot see", async () => {
   const { database, ctx } = databaseContext()
-  const folderId = await seedFolder(database)
+  const folderId = await database.insert("folders", folderDoc())
   const childId = await database.insert(
     "folders",
     folderDoc({ parentId: folderId, name: "Mine" })
@@ -129,7 +129,7 @@ test("child counts skip what the viewer cannot see", async () => {
 
 test("restricted subfolders drop out of the listing for excluded viewers", async () => {
   const { database, ctx } = databaseContext()
-  const folderId = await seedFolder(database)
+  const folderId = await database.insert("folders", folderDoc())
 
   await database.insert(
     "folders",
