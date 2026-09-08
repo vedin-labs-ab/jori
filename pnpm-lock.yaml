@@ -249,6 +249,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.0.3
         version: 6.0.3(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
       convex-test:
         specifier: ^0.0.56
         version: 0.0.56(convex@1.45.0(@clerk/react@6.11.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(bufferutil@4.1.0)(react@19.2.7)(utf-8-validate@6.0.6))

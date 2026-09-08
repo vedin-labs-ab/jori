@@ -1,6 +1,11 @@
 import { v } from "convex/values"
 import { internalQuery } from "../_generated/server"
-import { findAccessibleTable, searchTables, summarizeTable } from "./access"
+import {
+  agentTableSummary,
+  findAccessibleTable,
+  searchTables,
+  summarizeTable,
+} from "./access"
 
 export const search = internalQuery({
   args: {
@@ -13,7 +18,7 @@ export const search = internalQuery({
   handler: async (ctx, args) => {
     const tables = await searchTables(ctx, args)
 
-    return tables.map((table) => agentTableSummary(table))
+    return tables.map((table) => agentTableSummary(summarizeTable(table)))
   },
 })
 
@@ -26,18 +31,6 @@ export const read = internalQuery({
   handler: async (ctx, args) => {
     const table = await findAccessibleTable(ctx, args)
 
-    return table === null ? null : agentTableSummary(table)
+    return table === null ? null : agentTableSummary(summarizeTable(table))
   },
 })
-
-/** Agent-facing table summary: columns carry no internal ids — names are
- *  the only column identity the tool surface exposes, and row tools
- *  address columns by name. */
-function agentTableSummary(table: Parameters<typeof summarizeTable>[0]) {
-  const summary = summarizeTable(table)
-
-  return {
-    ...summary,
-    columns: summary.columns.map(({ id: _id, ...column }) => column),
-  }
-}

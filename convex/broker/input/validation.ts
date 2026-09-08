@@ -18,10 +18,12 @@ export function validateSchemaValue(
 
   if (variants.length > 0) {
     validateOneOf(value, variants, path)
-    return
   }
 
   validateEnum(value, schema, path)
+  if (Object.hasOwn(schema, "const") && value !== schema.const) {
+    throw new Error(`${path} must equal ${JSON.stringify(schema.const)}`)
+  }
 
   const type = readString(schema.type)
 
@@ -44,8 +46,11 @@ export function validateSchemaValue(
     return
   }
 
-  if (type === "number") {
+  if (type === "number" || type === "integer") {
     validateNumber(value, schema, path)
+    if (type === "integer" && !Number.isInteger(value)) {
+      throw new Error(`${path} must be an integer`)
+    }
   }
 
   if (type === "boolean" && typeof value !== "boolean") {
@@ -55,17 +60,22 @@ export function validateSchemaValue(
 
 function validateOneOf(value: unknown, variants: JsonSchema[], path: string) {
   const errors: string[] = []
+  let matches = 0
 
   for (const variant of orderVariants(value, variants)) {
     try {
       validateSchemaValue(value, variant, path)
-      return
+      matches += 1
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error))
     }
   }
 
-  throw new Error(`${path} must match one supported shape: ${errors[0]}`)
+  if (matches !== 1) {
+    throw new Error(
+      `${path} must match one supported shape: ${matches > 1 ? "matched multiple shapes" : errors[0]}`
+    )
+  }
 }
 
 function orderVariants(value: unknown, variants: JsonSchema[]) {

@@ -12,6 +12,7 @@ import {
   requiredString,
 } from "../shared/input"
 import { visibilityFromInput } from "../visibility/schema"
+import { agentTableSummary } from "./access"
 
 const tableTools = new Set([
   "search_tables",
@@ -53,12 +54,14 @@ export async function callJoriTableTool(
         limit: boundedNumber(args.limit, 25, 1, 100),
       })
     case "create_table":
-      return await ctx.runMutation(internal.tables.records.create, {
-        ...principal,
-        name: requiredString(args.name, "name"),
-        visibility: visibilityFromInput(args.visibility),
-        columns: args.columns,
-      })
+      return agentTableSummary(
+        await ctx.runMutation(internal.tables.records.create, {
+          ...principal,
+          name: requiredString(args.name, "name"),
+          visibility: visibilityFromInput(args.visibility),
+          columns: args.columns,
+        })
+      )
     case "read_table":
       return await ctx.runQuery(internal.tables.queries.read, {
         ...principal,

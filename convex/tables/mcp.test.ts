@@ -11,10 +11,12 @@ const execution = {
 
 describe("table tool dispatch", () => {
   test("create defaults visibility to organization and passes columns through", async () => {
-    const runMutation = vi.fn(async () => ({}))
     const columns = [{ name: "Title", type: "string", required: true }]
+    const runMutation = vi.fn(async () => ({
+      columns: columns.map((column) => ({ ...column, id: "internal-column" })),
+    }))
 
-    await callJoriTableTool(
+    const result = await callJoriTableTool(
       { runMutation } as unknown as ActionCtx,
       execution,
       { tool: "create_table", args: { name: "Leads", columns } }
@@ -27,6 +29,7 @@ describe("table tool dispatch", () => {
       visibility: { mode: "organization" },
       columns,
     })
+    expect(result).toEqual({ columns })
   })
 
   test("row listing maps limit and cursor to pagination options", async () => {
