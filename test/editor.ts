@@ -8,3 +8,15 @@ export function typeInto(field: HTMLElement, text: string) {
     clipboardData: { getData: () => text, types: ["text/plain"] },
   })
 }
+
+/** Models implicit Enter submission from a field. jsdom does not implement
+ *  it, so dispatch submit on the enclosing form. */
+export function submitFrom(field: HTMLElement) {
+  const form = field.closest("form")
+
+  if (form === null) {
+    throw new Error("The field is not inside a form.")
+  }
+
+  fireEvent.submit(form)
+}

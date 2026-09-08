@@ -7,6 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { submitFrom } from "../../../test/editor"
 import { CreateTableDialog } from "./create"
 
 const createTable = vi.fn()
@@ -49,31 +50,19 @@ function expandAdvancedSettings() {
   fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
 }
 
-/** jsdom leaves out the browser's implicit Enter-to-submit, so pressing
- *  Enter in a field is modeled by submitting the form it belongs to. */
-function pressEnter(field: HTMLElement) {
-  const form = field.closest("form")
-
-  if (form === null) {
-    throw new Error("The field is not inside a form.")
-  }
-
-  fireEvent.submit(form)
-}
-
-describe("create table enter submission", () => {
-  test("Enter in the name field runs validation before any mutation", () => {
+describe("create table form submission", () => {
+  test("submitting from the name field validates before any mutation", () => {
     renderDialog()
-    pressEnter(screen.getByLabelText("Name"))
+    submitFrom(screen.getByLabelText("Name"))
 
     expect(screen.getByRole("alert").textContent).toBe("Give the table a name.")
     expect(createTable).not.toHaveBeenCalled()
   })
 
-  test("Enter in a named form creates the table with no columns", async () => {
+  test("submitting a named form creates the table with no columns", async () => {
     renderDialog()
     fillName()
-    pressEnter(screen.getByLabelText("Name"))
+    submitFrom(screen.getByLabelText("Name"))
 
     await waitFor(() => expect(createTable).toHaveBeenCalledOnce())
     expect(createTable.mock.calls[0]?.[0]).toMatchObject({

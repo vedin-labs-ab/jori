@@ -1,26 +1,17 @@
 /* @vitest-environment jsdom */
 
-import { cleanup, render, screen } from "@testing-library/react"
-import { afterEach, describe, expect, it } from "vitest"
+import { cleanup, render, screen, within } from "@testing-library/react"
+import { afterEach, expect, test } from "vitest"
 import { Activity } from "./activity"
-import { BillingActivityEmpty } from "./empty"
 
 afterEach(cleanup)
 
-describe("BillingActivityEmpty", () => {
-  it("explains when billing activity will appear", () => {
-    render(<BillingActivityEmpty />)
+test("the empty activity table explains when costs will appear", () => {
+  render(<Activity entries={[]} />)
 
-    expect(screen.getByText("No billing activity yet")).toBeDefined()
-    expect(screen.getByText("Costs appear here as Jori works.")).toBeDefined()
-  })
+  const table = within(screen.getByRole("table"))
 
-  it("renders the empty state inside the activity table", () => {
-    render(<Activity entries={[]} />)
-
-    expect(
-      screen.getByText("No billing activity yet").closest("table")
-    ).not.toBeNull()
-    expect(screen.getByText("When")).toBeDefined()
-  })
+  expect(table.getByText("No billing activity yet")).toBeDefined()
+  expect(table.getByText("Costs appear here as Jori works.")).toBeDefined()
+  expect(table.getByRole("columnheader", { name: "When" })).toBeDefined()
 })

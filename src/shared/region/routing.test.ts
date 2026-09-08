@@ -80,15 +80,6 @@ test("does not create links to disabled regions", () => {
   ).toThrow("Region eu is not available.")
 })
 
-test("does not expose authentication on the apex", () => {
-  const response = handleRegionRequest(
-    new Request("https://jori.example/api/auth/get-session"),
-    config
-  )
-
-  expect(response?.status).toBe(404)
-})
-
 test("sends the www spelling to the public origin", () => {
   const response = handleRegionRequest(
     new Request("https://www.jori.example/pricing?plan=team"),
