@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import {
   type DragPayload,
   type ResourceDragItem,
@@ -15,6 +16,7 @@ import { DraggableTableRow } from "@/shared/console/folders/drag/row"
 import { useResourceRowDrag } from "@/shared/console/folders/drag/state"
 import { SelectionHeadCell, SelectionRowCell } from "@/shared/console/list/bar"
 import {
+  columnTier,
   facetEntries,
   type ListConfig,
   type ListControls,
@@ -116,7 +118,9 @@ export function FileTable({
 }
 
 /** The header row is the page's control surface: the kind facet rides the
- *  Type column, folders their own, and the measured columns sort. */
+ *  Type column, folders their own, and the measured columns sort. Each
+ *  column names its tier here and again on its cell, so the list sheds
+ *  columns instead of scrolling sideways in a narrow box. */
 function FileTableHead({
   config,
   controls,
@@ -131,24 +135,42 @@ function FileTableHead({
       <TableRow>
         <SelectionHeadCell selection={selection} />
         <SortHead controls={controls} label="Name" sortKey="name" />
-        <SortHead controls={controls} label="Size" sortKey="size" />
+        <SortHead
+          className={columnTier.md}
+          controls={controls}
+          label="Size"
+          sortKey="size"
+        />
         <FilterHead
+          className={columnTier["2xl"]}
           controls={controls}
           facets={facetEntries(config, ["kind"])}
           label="Type"
         />
         <FilterHead
+          className={columnTier.lg}
           controls={controls}
           facets={facetEntries(config, ["folder"])}
           label="Folder"
         />
-        <SortHead controls={controls} label="Created" sortKey="created" />
+        <SortHead
+          className={columnTier["3xl"]}
+          controls={controls}
+          label="Created"
+          sortKey="created"
+        />
         <FilterHead
+          className={columnTier.xl}
           controls={controls}
           facets={facetEntries(config, ["owner"])}
           label="Owner"
         />
-        <SortHead controls={controls} label="Last Updated" sortKey="updated" />
+        <SortHead
+          className={columnTier.xs}
+          controls={controls}
+          label="Last Updated"
+          sortKey="updated"
+        />
         <TableHead className="w-10" />
       </TableRow>
     </TableHeader>
@@ -228,26 +250,26 @@ function FileTableRow({
       <TableCell>
         <FileNameCell file={file} />
       </TableCell>
-      <TableCell className="text-muted-foreground">
+      <TableCell className={cn("text-muted-foreground", columnTier.md)}>
         {formatFileSize(file.size)}
       </TableCell>
-      <TableCell>
+      <TableCell className={columnTier["2xl"]}>
         <FileTypeCell file={file} />
       </TableCell>
-      <TableCell>
+      <TableCell className={columnTier.lg}>
         <MaterialFolderCell folderId={file.folderId} folders={folders} />
       </TableCell>
       <TableCell
-        className="text-muted-foreground"
+        className={cn("text-muted-foreground", columnTier["3xl"])}
         title={absoluteTime(file.createdAt)}
       >
         {relativeTime(file.createdAt, now)}
       </TableCell>
-      <TableCell>
+      <TableCell className={columnTier.xl}>
         <FileOwnerCell file={file} />
       </TableCell>
       <TableCell
-        className="text-muted-foreground"
+        className={cn("text-muted-foreground", columnTier.xs)}
         title={absoluteTime(file.updatedAt)}
       >
         {relativeTime(file.updatedAt, now)}

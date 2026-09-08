@@ -193,12 +193,12 @@ function RowChevron({
     <SidebarMenuAction
       aria-expanded={isExpanded}
       aria-label={`${isExpanded ? "Collapse" : "Expand"} ${name}`}
-      // Same reveal pattern as the "…" menu below: hidden on pointer
-      // viewports until the row is hovered or holds keyboard focus, always
-      // shown on touch viewports — plus always shown while expanded, so an
-      // open subtree keeps its collapse handle in sight.
+      // Same reveal pattern as the "…" menu below: hidden where there is
+      // a pointer to hover with until the row is hovered or holds keyboard
+      // focus, always shown where there is not — plus always shown while
+      // expanded, so an open subtree keeps its collapse handle in sight.
       className={cn(
-        "right-6 aria-expanded:opacity-100 md:opacity-0",
+        "right-6 aria-expanded:opacity-100 pointer-fine:opacity-0",
         !isDragActive &&
           "group-has-[:focus-visible]/row:opacity-100 group-hover/row:opacity-100"
       )}
@@ -239,7 +239,7 @@ function FolderTreeMenu({
         <SidebarMenuAction
           aria-label={`Open actions for ${folder.name}`}
           className={cn(
-            "aria-expanded:opacity-100 md:opacity-0",
+            "aria-expanded:opacity-100 pointer-fine:opacity-0",
             !isDragActive &&
               "group-has-[:focus-visible]/row:opacity-100 group-hover/row:opacity-100"
           )}

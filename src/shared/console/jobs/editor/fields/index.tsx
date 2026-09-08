@@ -47,14 +47,17 @@ export type JobEditorFieldsProps = {
 
 /** Everything between a job editor's header and footer, over one set of
  *  form values: the name, the brief, its access and timing, and under
- *  Advanced settings by the footer, where it is filed and who sees it. */
+ *  Advanced settings by the footer, where it is filed and who sees it.
+ *  The container every field inside keys its layout to. */
 export function JobEditorFields(props: JobEditorFieldsProps) {
   const { onValuesChange, values } = props
   const { actions, additionalSurfaces, instructionsError, nameError } =
     useFieldState(props)
 
   return (
-    <div className="grid gap-4">
+    // The fields measure themselves: the same set edits in a dialog on a
+    // phone, in a wide dialog, and beside the landing page's copy.
+    <div className="@container/editor grid gap-4">
       <JobNameField
         error={nameError}
         onValueChange={actions.updateName}

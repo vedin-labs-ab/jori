@@ -77,7 +77,13 @@ export function ValueEditorSection({
     view: editor.form === undefined ? undefined : editor.state.view,
   })
 
-  return <ValueBody editor={editor} onEdit={autosave.change} />
+  return (
+    // The editor is the container its rows measure against: the same form
+    // edits full-bleed on a store's page and inside a narrow box.
+    <div className="@container/store flex min-h-0 min-w-0 flex-1 flex-col">
+      <ValueBody editor={editor} onEdit={autosave.change} />
+    </div>
+  )
 }
 
 /** What the page's chrome needs from the editor. A store whose form the
@@ -244,7 +250,7 @@ function CodeEditor({
     <>
       <Textarea
         aria-label="Store value JSON"
-        className="min-h-0 flex-1 resize-none rounded-none border-0 px-4 py-3 font-mono text-xs shadow-none ring-inset focus-visible:ring-2 focus-visible:ring-ring/50 md:px-6"
+        className="min-h-0 flex-1 resize-none rounded-none border-0 px-4 py-3 font-mono text-xs shadow-none ring-inset focus-visible:ring-2 focus-visible:ring-ring/50 @3xl/inset:px-6"
         onChange={(event) => {
           editor.setCodeText(event.target.value)
           onEdit()
@@ -252,7 +258,7 @@ function CodeEditor({
         value={editor.state.codeText}
       />
       {codeError === undefined && codeNote === undefined ? null : (
-        <div className="grid gap-1 border-t px-4 py-2 md:px-6">
+        <div className="grid gap-1 border-t px-4 py-2 @3xl/inset:px-6">
           <FieldError>{codeError}</FieldError>
           {codeNote === undefined ? null : (
             <p className="text-muted-foreground text-xs">{codeNote}</p>

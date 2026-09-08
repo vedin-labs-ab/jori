@@ -7,9 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import { countLabel } from "../../count"
 import { SelectionHeadCell, SelectionRowCell } from "../../list/bar"
-import { type FacetEntry, type ListControls } from "../../list/controls"
+import {
+  columnTier,
+  type FacetEntry,
+  type ListControls,
+} from "../../list/controls"
 import { ConsoleListTable } from "../../list/frame"
 import { FilterHead, SortHead } from "../../list/head"
 import { type RowSelection } from "../../list/selection"
@@ -35,7 +40,10 @@ export const folderTableColumns = 7
  *  column leads, then identity — what a row is, and whose it is — the
  *  measures follow, and the last column carries every row's own menu.
  *  Cells hold a fixed height so the menu button cannot make one row
- *  taller than its neighbours. */
+ *  taller than its neighbours. Each column names the width it is worth,
+ *  head and cells alike: a narrow box keeps the name and when it last
+ *  changed, and the rest return as the list widens. Kind goes first —
+ *  the row's own icon already says what it is. */
 export function FolderListTable({
   children,
   controls,
@@ -55,10 +63,30 @@ export function FolderListTable({
         <TableRow>
           <SelectionHeadCell selection={selection} />
           <SortHead controls={controls} label="Name" sortKey="name" />
-          <FilterHead controls={controls} facets={kinds} label="Kind" />
-          <FilterHead controls={controls} facets={owners} label="Owner" />
-          <SortHead controls={controls} label="Items" sortKey="items" />
-          <SortHead controls={controls} label="Updated" sortKey="updated" />
+          <FilterHead
+            className={columnTier.xl}
+            controls={controls}
+            facets={kinds}
+            label="Kind"
+          />
+          <FilterHead
+            className={columnTier.lg}
+            controls={controls}
+            facets={owners}
+            label="Owner"
+          />
+          <SortHead
+            className={columnTier["2xl"]}
+            controls={controls}
+            label="Items"
+            sortKey="items"
+          />
+          <SortHead
+            className={columnTier.xs}
+            controls={controls}
+            label="Updated"
+            sortKey="updated"
+          />
           <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
@@ -114,13 +142,15 @@ export function FolderListRow({
           <span className="truncate">{folder.name}</span>
         </ConsoleLink>
       </TableCell>
-      <TableCell className="text-muted-foreground">Folder</TableCell>
-      <TableCell>
+      <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
+        Folder
+      </TableCell>
+      <TableCell className={columnTier.lg}>
         <MaterialOwnerCell owner={materialOwner(folder)} />
       </TableCell>
       <ItemsCell folder={folder} />
       <TableCell
-        className="text-muted-foreground"
+        className={cn("text-muted-foreground", columnTier.xs)}
         title={absoluteTime(folder.updatedAt)}
       >
         {relativeTime(folder.updatedAt, now)}
@@ -139,7 +169,7 @@ function ItemsCell({ folder }: { folder: ListedFolder }) {
   const label = itemsLabel(folder)
 
   return (
-    <TableCell>
+    <TableCell className={columnTier["2xl"]}>
       <MaterialMeasureCell
         className="tabular-nums"
         icon={Layers}

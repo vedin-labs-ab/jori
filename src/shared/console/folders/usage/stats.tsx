@@ -62,7 +62,7 @@ export function UsageStats({ usage }: { usage: UsageOverview | undefined }) {
 
 function Band({ children }: { children: ReactNode }) {
   return (
-    <div className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-6 gap-y-4 @3xl/usage:grid-cols-4">
       {children}
     </div>
   )

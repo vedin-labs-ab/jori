@@ -28,7 +28,7 @@ export const valueRowClassName = "flex border-b"
 /** The key column: fixed width so values align into one editing column,
  *  with nesting indented inside it. */
 const keyCellClassName =
-  "flex h-9 w-36 shrink-0 items-center gap-1.5 self-start border-r px-3 text-xs md:w-44"
+  "flex h-9 w-36 shrink-0 items-center gap-1.5 self-start border-r px-3 text-xs @lg/store:w-44"
 
 /** Ghost affordance filling a value cell, in the grid's New-row idiom. */
 const ghostCellClassName =

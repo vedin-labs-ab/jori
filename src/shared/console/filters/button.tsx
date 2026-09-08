@@ -7,8 +7,8 @@ import { ConsoleHeaderButton } from "../layout"
 /** The header's way into the panel. Off its defaults, the button fills in
  *  and a quiet count sits beside it; hovering or focusing the count turns
  *  it into a clear control, so the filters come off without opening the
- *  panel. Both hide with the label on small screens, where the button's
- *  name still says how many. */
+ *  panel. Both hide with the label in a tight header, where the
+ *  button's name still says how many. */
 export function ConsoleFilterButton({
   activeCount,
   onClear,
@@ -41,13 +41,15 @@ export function ConsoleFilterButton({
   // One tree whether or not the count shows, so the button keeps focus
   // when the clear control leaves beside it.
   return (
-    <ButtonGroup className="max-sm:contents">
+    <ButtonGroup className="@max-lg/inset:contents">
       {trigger}
-      {active ? <ButtonGroupSeparator className="max-sm:hidden" /> : null}
+      {active ? (
+        <ButtonGroupSeparator className="@max-lg/inset:hidden" />
+      ) : null}
       {active ? (
         <Button
           aria-label={`Clear ${activeCount === 1 ? "filter" : "filters"}`}
-          className="group/clear max-sm:hidden"
+          className="group/clear @max-lg/inset:hidden"
           onClick={onClear}
           size="icon"
           title="Clear filters"

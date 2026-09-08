@@ -65,10 +65,18 @@ const drag = (table: TableSummary): ResourceDragItem => ({
 })
 
 const columns = materialColumns<TableSummary>([
-  measureColumn("Columns", "columns", (table) => (
-    <TableColumnsCell table={table} />
-  )),
-  measureColumn("Rows", "rows", (table) => <TableRowsCell table={table} />),
+  measureColumn(
+    "Columns",
+    "columns",
+    (table) => <TableColumnsCell table={table} />,
+    "2xl"
+  ),
+  measureColumn(
+    "Rows",
+    "rows",
+    (table) => <TableRowsCell table={table} />,
+    "md"
+  ),
 ])
 
 export function TableList({

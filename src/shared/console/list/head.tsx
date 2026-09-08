@@ -49,12 +49,16 @@ function isFiltering(controls: ListControls, facets: FacetEntry[]) {
   return facets.some((facet) => controls.isFacetActive(facet.key))
 }
 
-/** Sortable header: the label is the button and clicking cycles the sort. */
+/** Sortable header: the label is the button and clicking cycles the sort.
+ *  The class a list hands in is the column's tier — head and cells carry
+ *  the same one, so a column leaves whole. */
 export function SortHead({
+  className,
   controls,
   label,
   sortKey,
 }: {
+  className?: string
   controls: ListControls
   label: string
   sortKey: string
@@ -63,7 +67,7 @@ export function SortHead({
     controls.sort?.key === sortKey ? controls.sort.direction : undefined
 
   return (
-    <TableHead aria-sort={ariaSort(direction)}>
+    <TableHead aria-sort={ariaSort(direction)} className={className}>
       <div className="flex items-center gap-0.5">
         <Button
           className={cn(
@@ -84,16 +88,18 @@ export function SortHead({
 
 /** Filter-only header: the label itself opens the facet menu. */
 export function FilterHead({
+  className,
   controls,
   facets,
   label,
 }: {
+  className?: string
   controls: ListControls
   facets: FacetEntry[]
   label: string
 }) {
   return (
-    <TableHead>
+    <TableHead className={className}>
       <div className="flex items-center">
         <FacetMenu controls={controls} facets={facets}>
           <Button

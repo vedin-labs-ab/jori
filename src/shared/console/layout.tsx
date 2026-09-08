@@ -25,7 +25,7 @@ export function ConsolePageLayout({
   return (
     <section
       className={cn(
-        "flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-3 pb-6 md:px-6",
+        "flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-3 pb-6 @3xl/inset:px-6",
         className
       )}
       {...props}
@@ -78,8 +78,10 @@ export function ConsoleHeaderAside({ children }: { children: ReactNode }) {
   )
 }
 
-/** Icon and label on wide screens, the icon alone on small ones. Anything
- *  handed in as children, such as a count badge, follows the label. */
+/** Icon and label in a roomy header, the icon alone in a tight one.
+ *  Anything handed in as children, such as a count badge, follows the
+ *  label. The header's actions are portaled into the inset, so they read
+ *  its width even though they are written on the page. */
 export function ConsoleHeaderButton({
   children,
   className,
@@ -93,11 +95,11 @@ export function ConsoleHeaderButton({
   return (
     <Button
       aria-label={label}
-      className={cn("max-sm:size-7 max-sm:px-0", className)}
+      className={cn("@max-lg/inset:size-7 @max-lg/inset:px-0", className)}
       {...props}
     >
       {icon}
-      <span className="max-sm:hidden">{label}</span>
+      <span className="@max-lg/inset:hidden">{label}</span>
       {children}
     </Button>
   )
@@ -117,7 +119,7 @@ export function ConsoleSearch({
   return (
     <>
       <ConsoleSearchField
-        className="hidden w-56 sm:block lg:w-72"
+        className="hidden w-56 @xl/inset:block @4xl/inset:w-72"
         label={label}
         onValueChange={onValueChange}
         placeholder={placeholder}
@@ -127,7 +129,7 @@ export function ConsoleSearch({
         <PopoverTrigger asChild>
           <Button
             aria-label={value === "" ? label : `${label}: ${value}`}
-            className="sm:hidden"
+            className="@xl/inset:hidden"
             size="icon"
             type="button"
             variant={value === "" ? "outline" : "secondary"}
@@ -137,7 +139,9 @@ export function ConsoleSearch({
         </PopoverTrigger>
         <PopoverContent
           align="end"
-          className="w-[min(20rem,calc(100vw-2rem))] gap-0 rounded-md p-0 shadow-none ring-0 sm:hidden"
+          // Portaled out of the inset, so it cannot ask how wide the
+          // console is; it only exists while its trigger opened it.
+          className="w-[min(20rem,calc(100vw-2rem))] gap-0 rounded-md p-0 shadow-none ring-0"
         >
           <ConsoleSearchField
             autoFocus

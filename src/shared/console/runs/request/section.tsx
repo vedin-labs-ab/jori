@@ -31,25 +31,28 @@ export function RunRequestSection({
   titleIcon: ReactNode
 }) {
   return (
-    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
-      <div className="flex items-start gap-1.5 font-medium">
-        <LabelIcon className="mt-0.5 size-3.5 text-muted-foreground" />
-        <RunSectionLabel label={label} />
-      </div>
-      <div className="min-w-0">
-        <div className="flex min-h-5 items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="inline-flex min-w-0 items-center gap-1.5 font-medium text-sm">
-              {titleIcon}
-              <span className="truncate">{title}</span>
-            </span>
-          </div>
-          <RunRequestPager navigation={navigation} />
+    // Its own container, like the detail rows it sits among.
+    <div className="@container/run">
+      <div className="grid gap-2 px-3 py-3 text-xs @sm/run:grid-cols-[10rem_1fr]">
+        <div className="flex items-start gap-1.5 font-medium">
+          <LabelIcon className="mt-0.5 size-3.5 text-muted-foreground" />
+          <RunSectionLabel label={label} />
         </div>
-        <p className="mt-2.5 text-foreground text-sm leading-relaxed">
-          {summary}
-        </p>
-        <RunRequestFooter actions={actions} meta={meta} />
+        <div className="min-w-0">
+          <div className="flex min-h-5 items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="inline-flex min-w-0 items-center gap-1.5 font-medium text-sm">
+                {titleIcon}
+                <span className="truncate">{title}</span>
+              </span>
+            </div>
+            <RunRequestPager navigation={navigation} />
+          </div>
+          <p className="mt-2.5 text-foreground text-sm leading-relaxed">
+            {summary}
+          </p>
+          <RunRequestFooter actions={actions} meta={meta} />
+        </div>
       </div>
     </div>
   )

@@ -29,13 +29,13 @@ export function ConsoleListPager({
   }
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-3 @lg/list:flex-row @lg/list:items-center">
       {pagination.footerLabel ? (
         <p className="text-muted-foreground text-xs">
           {pagination.footerLabel}
         </p>
       ) : null}
-      <Pagination className="mx-0 w-fit justify-start sm:ml-auto sm:justify-end">
+      <Pagination className="mx-0 w-fit justify-start @lg/list:ml-auto @lg/list:justify-end">
         <PaginationContent className="gap-2">
           <PaginationItem>
             <Button

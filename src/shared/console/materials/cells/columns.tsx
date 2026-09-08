@@ -1,4 +1,5 @@
 import { type ReactNode } from "react"
+import { type ColumnTier } from "../../list/controls"
 import { absoluteTime, relativeTime } from "../../time"
 import { type MaterialColumn } from "../list"
 import { summaryOwner } from "../owners"
@@ -13,32 +14,36 @@ import { type MaterialOwner, MaterialOwnerCell } from "./owner"
 export function measureColumn<Row>(
   label: string,
   sortKey: string,
-  cell: (row: Row) => ReactNode
+  cell: (row: Row) => ReactNode,
+  tier: ColumnTier
 ): MaterialColumn<Row> {
-  return { cell, head: { sortKey }, label }
+  return { cell, head: { sortKey }, label, tier }
 }
 
 /** Where the row is filed, with the folder facet on its head. */
-export function folderColumn<
-  Row extends { folderId?: string },
->(): MaterialColumn<Row> {
+export function folderColumn<Row extends { folderId?: string }>(
+  tier: ColumnTier
+): MaterialColumn<Row> {
   return {
     cell: (row, context) => (
       <MaterialFolderCell folderId={row.folderId} folders={context.folders} />
     ),
     head: { facets: ["folder"] },
     label: "Folder",
+    tier,
   }
 }
 
 /** Who the row belongs to, with the owner facet on its head. */
 export function ownerColumn<Row>(
-  owner: (row: Row) => MaterialOwner
+  owner: (row: Row) => MaterialOwner,
+  tier: ColumnTier
 ): MaterialColumn<Row> {
   return {
     cell: (row) => <MaterialOwnerCell owner={owner(row)} />,
     head: { facets: ["owner"] },
     label: "Owner",
+    tier,
   }
 }
 
@@ -47,12 +52,14 @@ export function ownerColumn<Row>(
 export function timeColumn<Row>(
   label: string,
   sortKey: string,
-  at: (row: Row) => number | undefined
+  at: (row: Row) => number | undefined,
+  tier: ColumnTier
 ): MaterialColumn<Row> {
   return {
     cell: (row, context) => timeCell(at(row), context.now),
     head: { sortKey },
     label,
+    tier,
   }
 }
 
@@ -77,15 +84,17 @@ type MaterialSummaryRow = {
 }
 
 /** The columns every table and store list shows after its own measures:
- *  the folder, when it was made, whose it is, and when it last changed. */
+ *  the folder, when it was made, whose it is, and when it last changed.
+ *  When it last changed is the one every list keeps down to a phone; the
+ *  rest come back as the list widens, in the order they are worth. */
 export function materialColumns<Row extends MaterialSummaryRow>(
   measures: MaterialColumn<Row>[]
 ): MaterialColumn<Row>[] {
   return [
     ...measures,
-    folderColumn(),
-    timeColumn("Created", "created", (row) => row.createdAt),
-    ownerColumn(summaryOwner),
-    timeColumn("Last Updated", "updated", (row) => row.updatedAt),
+    folderColumn("lg"),
+    timeColumn("Created", "created", (row) => row.createdAt, "3xl"),
+    ownerColumn(summaryOwner, "xl"),
+    timeColumn("Last Updated", "updated", (row) => row.updatedAt, "xs"),
   ]
 }
