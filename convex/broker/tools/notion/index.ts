@@ -71,12 +71,10 @@ async function getBlockChildren(token: string, args: Record<string, unknown>) {
 }
 
 async function queryDataSource(token: string, args: Record<string, unknown>) {
-  const sourceType =
-    args.sourceType === "database" ? "databases" : "data_sources"
   return await notionJson(
     token,
     "POST",
-    `/${sourceType}/${encodeURIComponent(requiredString(args.sourceId, "sourceId"))}/query`,
+    `/data_sources/${encodeURIComponent(requiredString(args.sourceId, "sourceId"))}/query`,
     pickBody(args, ["filter", "sorts", "page_size", "start_cursor"])
   )
 }
@@ -102,7 +100,7 @@ async function updatePage(token: string, args: Record<string, unknown>) {
     token,
     "PATCH",
     `/pages/${encodeURIComponent(requiredString(args.pageId, "pageId"))}`,
-    pickBody(args, ["properties", "icon", "cover", "archived", "in_trash"])
+    pickBody(args, ["properties", "icon", "cover", "in_trash"])
   )
 }
 
@@ -114,7 +112,7 @@ async function appendBlockChildren(
     token,
     "PATCH",
     `/blocks/${encodeURIComponent(requiredString(args.blockId, "blockId"))}/children`,
-    pickBody(args, ["children", "after"])
+    pickBody(args, ["children", "position"])
   )
 }
 
