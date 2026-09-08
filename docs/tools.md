@@ -109,7 +109,7 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | notion | `notion_list_comments` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_create_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_update_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
-| notion | `notion_upload_file` | Compiles | Failed MIME type, fix pending | Failed MIME type, fix pending |
+| notion | `notion_upload_file` | Compiles | Upload and cover retest pass | Upload and cover retest pass |
 | notion | `notion_append_block_children` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_create_comment` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | slack | `channels_list` | Compiles | Pending | Pending |
@@ -188,3 +188,21 @@ Both regions failed PNG uploads with Notion HTTP 400 because the multipart file 
 ### Synthetic job batch
 
 EU child `nx7abr6agwa40t5jgtmp1az5gd8e04yr` and US child `pn78ktv7s0xqmhz1cyk7mhmheh8e11em` found no matching synthetic jobs. Both rejected creation with empty integration access, requiring at least one integration tool. No job was created or scheduled. Read/update/idempotency/deletion remain unverified. The intended product rule and tool contract need review before changing this restriction.
+
+### Upload retest and current Notion API contracts
+
+The upload fix landed at `f7439f9b`. Development deployed at 10:28:59 local time. EU production completed with Vercel `dpl_9gvoCKPaT8FC2EPTidFeMFXjTU3S`, Ready in dub1. US backend deployed the same fix from `63dbf175`, which also contains a later marketing-copy commit. Its frontend deployment is still pending at this checkpoint.
+
+EU child `nx78d1men27v0r48j1zp2j5j6x8e0dv2` uploaded 1,026,264 PNG bytes with image/png. Notion upload `3d523f2d-e283-814d-8e89-00b2c0203501` reached uploaded status. US child `pn77shzv1wpkqrp19bmkzp6v5h8e1q71` uploaded 502,664 PNG bytes as `3d523f2d-e283-811b-9325-00b2be2a0cf9`. Each updated only its synthetic page cover and read the resulting file cover back.
+
+Further review found API-version drift. Jori uses Notion 2026-03-11 but advertised removed after/archived fields and a legacy database query route. The checked correction uses position with start/end/after_block, in_trash, and data-source IDs for queries and database-row parents. No older-version fallback was added. Six regression tests failed before the correction; the expanded nine-test set and full gate now pass, with 2,742 passed and four skipped. Live positioned insertion remains pending deployment.
+
+Sources: [Notion 2026-03-11 upgrade guide](https://developers.notion.com/guides/get-started/upgrade-guide-2026-03-11) and [data-source migration guide](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03).
+
+Two labeled databases were created as test fixtures beneath the existing synthetic pages, using each region's already-authorized Notion connection. This setup API call is not an agent-tool pass. EU database `974bb30e-59e2-4fec-9988-a71cb0fe89ab` has source `d636dbd3-3c21-4f3d-aa03-78b5d84d2e16`. US database `70c2c485-6fe2-4919-bbcc-cb07c3fe4eaa` has source `ba0eab5b-65d4-4431-9804-6982dbd88495`. No permissions changed. The US agent created Alpha/Beta rows, sorted and paginated them with a real cursor, filtered to exactly Beta, and read distinct block pages. EU query results remain pending review.
+
+### Independent output and negative regional checks
+
+Ajv accepted 71 recorded successful responses from 22 tools without schema violations. Samples cover synthetic tables, stores, files, sandbox reads/patches/search, lifecycle tools, console replies, workstreams, cancelled offers, and empty job searches. Error envelopes and open provider payloads are not counted as exact output-contract verification.
+
+EU child `nx7bscq77r333rh0jn1yf8e8cx8e125a` and US child `pn76tg6wgqm5sx7vqw52spczjx8e0y5m` each attempted read_table/read_store/read_file with the other deployment's synthetic IDs. All six requests failed ID validation without returning record content. Each then found its own local store. This demonstrates these foreign IDs do not resolve; same-region cross-organization visibility still needs a separate test.

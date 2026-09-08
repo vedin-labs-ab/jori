@@ -27,12 +27,9 @@ export const notionToolInputSchemas = {
     properties: notionPaginationProperties({
       filter: objectProperty("Notion query filter."),
       sorts: { type: "array", items: { type: "object" } },
-      sourceId: stringProperty("Notion data source ID or legacy database ID."),
-      sourceType: {
-        type: "string",
-        enum: ["dataSource", "database"],
-        description: "Use database only for legacy database IDs.",
-      },
+      sourceId: stringProperty(
+        "Notion data source ID, returned by notion_search with an object=data_source filter. Not a database container ID."
+      ),
     }),
   }),
   notion_list_comments: notionBlockPaginationSchema("blockId"),
@@ -49,7 +46,6 @@ export const notionToolInputSchemas = {
   notion_update_page: objectSchema({
     required: ["pageId"],
     properties: {
-      archived: { type: "boolean" },
       cover: notionCoverProperty(),
       icon: notionIconProperty(),
       in_trash: { type: "boolean" },
@@ -60,9 +56,9 @@ export const notionToolInputSchemas = {
   notion_append_block_children: objectSchema({
     required: ["blockId", "children"],
     properties: {
-      after: stringProperty("Optional block ID to append after."),
       blockId: stringProperty("Notion block or page ID."),
       children: notionChildrenProperty(),
+      position: notionPositionProperty(),
     },
   }),
   notion_create_comment: objectSchema({
@@ -89,6 +85,28 @@ export const notionToolInputSchemas = {
     },
   }),
 } satisfies SchemaMap
+
+function notionPositionProperty() {
+  return {
+    description: "Where to insert children. Omit to append at the end.",
+    oneOf: [
+      objectSchema({
+        required: ["type"],
+        properties: { type: { type: "string", enum: ["start", "end"] } },
+      }),
+      objectSchema({
+        required: ["type", "after_block"],
+        properties: {
+          type: { type: "string", const: "after_block" },
+          after_block: objectSchema({
+            required: ["id"],
+            properties: { id: stringProperty("Existing sibling block ID.") },
+          }),
+        },
+      }),
+    ],
+  }
+}
 
 function notionChildrenProperty() {
   return {
@@ -162,7 +180,7 @@ function textRichTextSchema() {
 function notionParentProperty() {
   return {
     description:
-      "Notion parent. Use page_id for a subpage or data_source_id/database_id for a database record.",
+      "Notion parent. Use page_id for a subpage or data_source_id for a database record.",
     oneOf: [
       objectSchema({
         required: ["page_id"],
@@ -172,12 +190,7 @@ function notionParentProperty() {
         required: ["data_source_id"],
         properties: {
           data_source_id: stringProperty("Parent data source ID."),
-          database_id: stringProperty("Legacy database ID, when present."),
         },
-      }),
-      objectSchema({
-        required: ["database_id"],
-        properties: { database_id: stringProperty("Parent database ID.") },
       }),
     ],
   }
