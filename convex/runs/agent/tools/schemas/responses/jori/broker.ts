@@ -17,7 +17,7 @@ function capabilityGroupSchema(
   extra: Record<string, unknown> = {}
 ): JsonSchema {
   return objectSchema({
-    required: ["surface", "label", "tools"],
+    required: ["surface", "label", "tools", ...Object.keys(extra)],
     properties: {
       surface: stringProperty("Integration surface key."),
       label: stringProperty("Display name of the surface."),
@@ -50,7 +50,13 @@ export const brokerJoriToolResponseSchemas = {
       ),
       connected: arrayProperty(
         "Groups connected for the organization.",
-        capabilityGroupSchema()
+        capabilityGroupSchema({
+          integrationIds: arrayProperty(
+            "Connected integration IDs.",
+            stringProperty("Integration ID.")
+          ),
+          status: constProperty("connected", "Already connected."),
+        })
       ),
       available: arrayProperty(
         "Integrations that could be connected.",
@@ -109,14 +115,7 @@ export const brokerJoriToolResponseSchemas = {
     required: ["status", "message"],
     properties: {
       status: enumProperty(
-        [
-          "cancelled",
-          "invalid_message",
-          "missing",
-          "decided",
-          "expired",
-          "failed",
-        ],
+        ["cancelled", "invalid_message", "missing", "already_resolved"],
         "What happened to the pending approval."
       ),
       message: stringProperty("Human-readable outcome."),

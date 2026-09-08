@@ -6,7 +6,7 @@ import {
   type SchemaMap,
   stringProperty,
 } from "../common"
-import { visibilitySchema } from "./visibility"
+import { shareLinkSchema, visibilitySchema } from "./visibility"
 
 function storeSummaryProperties() {
   return {
@@ -93,11 +93,5 @@ export const storeToolResponseSchemas = {
       }),
     ],
   },
-  share_store: objectSchema({
-    required: ["url", "expiresAt"],
-    properties: {
-      url: stringProperty("View-only share link."),
-      expiresAt: numberProperty("Expiry time in epoch milliseconds."),
-    },
-  }),
+  share_store: shareLinkSchema(),
 } satisfies SchemaMap
