@@ -61,6 +61,10 @@ function runGit(cwd: string, ...args: string[]) {
 }
 
 class LocalSandbox implements SandboxRuntime {
+  async exportFile(): Promise<never> {
+    throw new Error("Local sandbox tests do not access Convex storage.")
+  }
+
   async importFile() {
     throw new Error("Local sandbox tests do not access Convex storage.")
   }

@@ -5,6 +5,7 @@ import {
   type SandboxCloneRepositoryInput,
   type SandboxCommandHandle,
   type SandboxCommandInput,
+  type SandboxExportFileInput,
   type SandboxRuntime,
   type SandboxWriteFile,
 } from "./types"
@@ -85,6 +86,15 @@ export class RemoteSandbox implements SandboxRuntime {
         ...input,
       })
     )
+  }
+
+  async exportFile(input: SandboxExportFileInput) {
+    return this.remember(
+      await this.ctx.runAction(internal.runtime.sandbox.e2b.exports.file, {
+        runId: this.runId,
+        ...input,
+      })
+    ).file
   }
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {

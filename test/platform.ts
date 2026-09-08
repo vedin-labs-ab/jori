@@ -57,6 +57,7 @@ export function createSandbox(): SandboxRuntime {
 
   return {
     cloneRepository: unused,
+    exportFile: unused,
     finishCommand: unused,
     importFile: unused,
     readFile: unused,
