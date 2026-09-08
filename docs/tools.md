@@ -12,7 +12,7 @@ Use labeled synthetic fixtures. Do not modify unrelated customer content, send t
 
 Every catalogued input and output schema compiles independently with Ajv. All 93 broker tools reject invalid root values and unknown fields in contract tests. These checks do not establish provider behavior or complete per-tool validation coverage.
 
-The table round trips below completed in both regions, but their output contracts need a post-fix rerun. Other rows remain pending until their recorded calls are reviewed.
+Basic success paths are recorded below. A basic pass is not full operation, validation, permission, and failure-path coverage. The post-deployment table/store and grep regressions passed in both regions.
 
 | Provider | Tool | Contract tests | EU agent run | US agent run |
 | --- | --- | --- | --- | --- |
@@ -45,20 +45,20 @@ The table round trips below completed in both regions, but their output contract
 | googleCalendar | `google_calendar_create_event` | Compiles | Pending | Pending |
 | googleCalendar | `google_calendar_update_event` | Compiles | Pending | Pending |
 | jori | `list_capabilities` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `load_skill` | Compiles | Pending | Pending |
-| jori | `search_runs` | Compiles | Pending | Pending |
-| jori | `search_run_activity` | Compiles | Pending | Pending |
-| jori | `read_workstreams` | Compiles | Pending | Pending |
-| jori | `offer_integration` | Compiles | Pending | Pending |
+| jori | `load_skill` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
+| jori | `search_runs` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
+| jori | `search_run_activity` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
+| jori | `read_workstreams` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
+| jori | `offer_integration` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `cancel_approval_request` | Compiles | Pending | Pending |
-| jori | `cancel_integration_offer` | Compiles | Pending | Pending |
+| jori | `cancel_integration_offer` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `save_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `generate_image` | Compiles | Pending | Pending |
+| jori | `generate_image` | Compiles | Basic pass, batch 3 | Basic pass, batch 3 |
 | jori | `search_files` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `read_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `search_jobs` | Compiles | Pending | Pending |
+| jori | `search_jobs` | Compiles | Empty search pass, batch 6 | Empty search pass, batch 6 |
 | jori | `read_job` | Compiles | Pending | Pending |
-| jori | `add_job` | Compiles | Pending | Pending |
+| jori | `add_job` | Compiles | Empty access rejected, batch 6 | Empty access rejected, batch 6 |
 | jori | `update_job` | Compiles | Pending | Pending |
 | jori | `delete_job` | Compiles | Pending | Pending |
 | linear | `linear_search_issues` | Compiles | Pending | Pending |
@@ -66,18 +66,18 @@ The table round trips below completed in both regions, but their output contract
 | linear | `linear_list_comments` | Compiles | Pending | Pending |
 | linear | `linear_add_comment` | Compiles | Pending | Pending |
 | linear | `linear_add_reaction` | Compiles | Pending | Pending |
-| jori | `search_tables` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `read_table` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `list_table_rows` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `create_table` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `insert_table_row` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `update_table_row` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `search_tables` | Compiles | Regression pass | Regression pass |
+| jori | `read_table` | Compiles | Regression pass | Regression pass |
+| jori | `list_table_rows` | Compiles | Regression pass | Regression pass |
+| jori | `create_table` | Compiles | Regression pass | Regression pass |
+| jori | `insert_table_row` | Compiles | Regression pass | Regression pass |
+| jori | `update_table_row` | Compiles | Regression pass | Regression pass |
 | jori | `delete_table_row` | Compiles | Pending | Pending |
 | jori | `share_table` | Compiles | Pending | Pending |
 | jori | `search_stores` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `read_store` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `create_store` | Compiles | Round trip, contract retest | Round trip, contract retest |
-| jori | `write_store` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `read_store` | Compiles | Regression pass | Regression pass |
+| jori | `create_store` | Compiles | Regression pass | Regression pass |
+| jori | `write_store` | Compiles | Regression pass | Regression pass |
 | jori | `share_store` | Compiles | Pending | Pending |
 | jori | `share_file` | Compiles | Pending | Pending |
 | microsoftEmail | `microsoft_email_search_messages` | Compiles | Pending | Pending |
@@ -94,24 +94,24 @@ The table round trips below completed in both regions, but their output contract
 | jori | `send_reply` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `add_reaction` | Compiles | Pending | Pending |
 | jori | `read` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `grep` | Compiles | Basic pass, filter retest | Filter defect, retest |
+| jori | `grep` | Compiles | Regression pass | Regression pass |
 | jori | `glob` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `git` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `apply_patch` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `bash` | Compiles | Basic pass, restrictions reviewed | Basic pass, restrictions reviewed |
 | jori | `start_agent` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `wait_for_agents` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `stop_agent` | Compiles | Pending | Pending |
-| notion | `notion_search` | Compiles | Pending | Pending |
-| notion | `notion_get_page` | Compiles | Pending | Pending |
-| notion | `notion_get_block_children` | Compiles | Pending | Pending |
+| jori | `stop_agent` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
+| notion | `notion_search` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
+| notion | `notion_get_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
+| notion | `notion_get_block_children` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_query_data_source` | Compiles | Pending | Pending |
-| notion | `notion_list_comments` | Compiles | Pending | Pending |
-| notion | `notion_create_page` | Compiles | Pending | Pending |
-| notion | `notion_update_page` | Compiles | Pending | Pending |
-| notion | `notion_upload_file` | Compiles | Pending | Pending |
-| notion | `notion_append_block_children` | Compiles | Pending | Pending |
-| notion | `notion_create_comment` | Compiles | Pending | Pending |
+| notion | `notion_list_comments` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
+| notion | `notion_create_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
+| notion | `notion_update_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
+| notion | `notion_upload_file` | Compiles | Failed MIME type, fix pending | Failed MIME type, fix pending |
+| notion | `notion_append_block_children` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
+| notion | `notion_create_comment` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | slack | `channels_list` | Compiles | Pending | Pending |
 | slack | `conversations_history` | Compiles | Pending | Pending |
 | slack | `conversations_replies` | Compiles | Pending | Pending |
@@ -119,8 +119,8 @@ The table round trips below completed in both regions, but their output contract
 | slack | `users_search` | Compiles | Pending | Pending |
 | slack | `conversations_add_message` | Compiles | Pending | Pending |
 | slack | `slack_add_reaction` | Compiles | Pending | Pending |
-| jori | `web_search` | Compiles | Pending | Pending |
-| jori | `web_fetch` | Compiles | Pending | Pending |
+| jori | `web_search` | Compiles | Basic pass, batch 3 | Basic pass, batch 3 |
+| jori | `web_fetch` | Compiles | Basic pass, batch 3 | Basic pass, batch 3 |
 
 ## Variants and failure paths
 
@@ -163,12 +163,28 @@ EU parent `nx71kyfpmy02exd980pbxj70w18e0mzj` and child `nx73c5tkbe2bmby2vfkq4ped
 
 ### Deployment progress
 
-The first two fix commits landed on main at `7b43e338`, rebased onto the latest UI commits. The fresh full gate passed 2,732 tests. Development deployed successfully on 8 September at 09:55 local time, including skill synchronization. Convex code generation added the new shared visibility module to its generated type catalog. That generated update is being committed before production deployment; the production script correctly rejected the dirty generated file rather than deploying an uncommitted tree.
+Main `004377ff` is pushed and deployed to development and both production regions, including skill synchronization. EU Vercel deployment `dpl_EiT6NMkhfwWnzsEWdKMR1u37FnDp` is Ready in dub1. US deployment `dpl_MHDQq6y2qeKu9xP25kwEP462beNA` is Ready in iad1. Both regional origins returned HTTP 200 and routed to the console. These deployment checks do not replace tool E2E verification.
 
 ### Core history and cancellation batch
 
-Batch 4 is running in EU conversation `jx7cswz8mafwhy7jka0pjgstgx8e0dra` and US conversation `md75bgmqen110a7rh2zjs2peqs8e0fxt`. It covers run/activity/workstream reads, loading a skill, creating and cancelling a non-authorizing integration offer, and stopping a disposable child. Results remain pending review.
+Batch 4 completed in EU run `nx7cyjpm54sapwx76ah0mwjtyn8e1pdr` and US run `pn75afhw26am4x6rzkjem1z1498e02gp`. Both returned run/activity results and an empty workstream list, loaded the image skill, created and cancelled a non-authorizing GitHub offer, and stopped a disposable child. Both waits returned that child's stopped status. No integration access was granted.
 
 ### Provider access
 
 The EU verification organization has Notion connected. GitHub, Slack and Linear report not connected. The GitHub EU installation is prepared for selected repositories, not all repositories, but no installation grant has been submitted.
+
+### Post-deployment contract regression
+
+EU child `nx70p47qtw1n1jy1pera6x0dwd8e0qxf` and US child `pn7chr4sdvfdxz1kvkfmgtkapn8e0p8k` completed against main `004377ff`. Create/read/search table results omit internal column IDs. Each table ended with one valid row at amount 2, version 2. A numeric label and stale version were rejected without changing the row. Each integer-count store rejected 1.5 without advancing value or version, then accepted a merge patch to count 2, version 2. Both directory-relative and single-file grep filters returned the expected synthetic line. Glob and read agreed.
+
+US regression and both job batches entered through the existing public console send mutation using the exact verification account identity supplied by the authorized Convex administrator. This exercises normal agent execution and provider calls, but does not verify browser sign-in or UI input. EU regression entered through the signed-in browser.
+
+### Notion round trip and upload defect
+
+EU child `nx7d9sm4ahz18rr5j15awya5dx8e0vjs` created page `3d523f2d-e283-815e-81bd-eb5bd1833323`. US child `pn7744ytvzw0x1b61bwf3n5jy98e1kb6` created page `3d523f2d-e283-810b-aee7-ea5978af0ab2`. Both are labeled synthetic pages beneath the approved test parent. Page creation, title updates, paragraph append, comment creation, and reads succeeded through the matching regional integration. No data source was found for query testing.
+
+Both regions failed PNG uploads with Notion HTTP 400 because the multipart file arrived as application/octet-stream. A read-only production runtime probe showed that Convex FormData.set loses the File MIME type while append preserves it. The fix changes set to append. A regression modeled the Convex behavior, failed before the fix, and passed afterward. The full suite passed 2,733 tests with four workers and 4 skipped tests. Limiting worker concurrency addresses unrelated UI-loading contention without changing assertions or timeouts. Live upload retesting remains required after deployment.
+
+### Synthetic job batch
+
+EU child `nx7abr6agwa40t5jgtmp1az5gd8e04yr` and US child `pn78ktv7s0xqmhz1cyk7mhmheh8e11em` found no matching synthetic jobs. Both rejected creation with empty integration access, requiring at least one integration tool. No job was created or scheduled. Read/update/idempotency/deletion remain unverified. The intended product rule and tool contract need review before changing this restriction.
