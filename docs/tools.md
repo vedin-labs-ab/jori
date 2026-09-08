@@ -62,7 +62,7 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | jori | `read_job` | Compiles | Once-job readback | Once-job readback |
 | jori | `add_job` | Compiles | Create and idempotent replay | Create and idempotent replay |
 | jori | `update_job` | Compiles | Name/trigger update readback | Name/trigger update readback |
-| jori | `delete_job` | Compiles | Pending | Pending |
+| jori | `delete_job` | Live responses pass | Delete/read/search pass | Delete/read/search pass |
 | linear | `linear_search_issues` | Compiles | Linear round trip | Linear round trip |
 | linear | `linear_get_issue` | Compiles | Linear round trip | Linear round trip |
 | linear | `linear_list_comments` | Compiles | Linear round trip | Linear round trip |
@@ -346,3 +346,11 @@ Provider readback confirmed exactly one scheduled comment per matching regional 
 Blocked reauthorization runs EU `nx789nqyqtaagdxc4879s4xach8e1kvq` and US `pn7ae5wmvfdd85kf98q8ge918n8e0cnh` each requested a new read_file approval. Both rejected cancellation using a message ID from the other synthetic conversation with invalid_message. The administrator then changed read_file to blocked before approving these pending requests through the normal console decision action.
 
 Both approvals acquired claimedAt but never recorded result or consumedAt. The execution path claims first, then reauthorizes and executes outside a terminal-error catch, so a thrown failure strands the lease. Subsequent handoff reconciliation repeatedly described the action as having run with a pending result. The US model incorrectly claimed completion without file-result evidence; the EU model repeatedly inspected activity. These are failures, not blocked-mode passes. Both exact synthetic runs were stopped through the normal control mutation and verified stopped before policy restoration. The original allowed policy was restored, removing the temporary overrides. A checked fix and new live retest remain required.
+
+### Job deletion and same-deployment tenant isolation
+
+After explicit approval of the exact IDs, children EU `nx705batkf1zwjp1r9fh7z9p998e0km7` and US `pn76ggfnqk5va402xk7m63705h8e0dc1` rechecked the completed version-3 once jobs, permanently deleted only those two jobs, then received null from read_job and an empty exact-name search with completed jobs included. Independent schema validation accepted all eight job responses. No other jobs were deleted.
+
+Existing second synthetic organizations, EU `jh7fkg3s4gdndsjr53jhs45vqn8dyhvz` and US `jh78f939epdwv8w3zw9bz2wbp18dyfnz`, had verified owner membership for the same test user. Children EU `nx7c2fyynanena9nb5tkvjfnph8e1926` and US `pn73nx74rnvah57p2y5ttk4c958e08gn` ran in those organizations and attempted reads of the primary verification organization's valid deployment-local file, table and store IDs. All six reads returned null, and all six exact-name searches returned empty arrays. Their twelve actual responses passed independent schema validation. These are CLI-driven agent authorization tests with verified membership, not browser session-switch tests.
+
+Positive-control children EU `nx73v54d2pfthgw3hfmmasqksx8e03ng` and US `pn737t0yg70rh4fgq2fhn0tvyn8e1yze` read and found the same objects in their owning organizations. Each file remained 33 bytes, each table retained one row, and each store retained count 2 at version 2. This establishes same-deployment read/search isolation; it does not establish every write boundary or revoke existing bearer URLs.
