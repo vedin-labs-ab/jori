@@ -81,6 +81,7 @@ test("sends the transcript as one system message and the turns after it", async 
             description: "Read a file.",
             name: "read",
             parameters: readTool.inputSchema,
+            strict: false,
           },
           type: "function",
         },

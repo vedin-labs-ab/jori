@@ -183,6 +183,9 @@ function toChatTool(modelTool: ModelTool): ChatFunctionTool {
       description: modelTool.description,
       name: modelTool.name,
       parameters: modelTool.inputSchema,
+      // Preserve optional fields across provider Responses API bridges.
+      // An omitted strict flag can normalize every property to required.
+      strict: false,
     },
     type: "function",
   }

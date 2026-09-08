@@ -29,6 +29,15 @@ production. Names-only readback found no remaining `RESEND_*` settings in any
 Convex target or matching ignored local file. Two migration-only generated
 API stashes were removed after review; the unrelated mirror-work stash remains.
 
+With explicit user approval, three obsolete Resend DNS records were deleted:
+the `send.mail.usejori.com` MX pointing to
+`feedback-smtp.us-east-1.amazonses.com`, its SPF TXT containing
+`include:amazonses.com`, and `resend._domainkey.mail.usejori.com` TXT.
+All had TTL 600. Porkbun's record count changed from 23 to 20; dashboard and
+DNS readback found none of those records. Bird's regional DKIM and bounce
+records and Zoho's three apex MX records were retained. No other DNS changed.
+Restoration would require recreating the removed records.
+
 ## Provider readiness
 
 | Provider | Verified evidence | Remaining work or limits |
@@ -47,7 +56,7 @@ API stashes were removed after review; the unrelated mirror-work stash remains.
 | GitHub | Separate apps and credentials; JWT identity, exact permissions/events and regional webhook settings verified. Real ping redelivery returned 200 in both regions. Own signatures accepted; missing, bad and opposite-region signatures rejected. | Authenticated installation, OAuth installation-access proof and connected repository workflows. Inert pings do not establish these. |
 | Slack | Separate apps with token rotation and regional callbacks/interactivity; credentials read back. Both event URLs, five bot events and public distribution verified. | Both regions' authenticated connections, rotation, interactivity and event workflows. |
 | Linear | Separate public apps and direct regional webhooks; client-credentials grant disabled. Matching client/webhook credentials read back. | Actual OAuth connections and webhook processing. |
-| Notion | Separate public connections and regional callbacks. Both subscriptions active with the exact three required event types; matching verification tokens saved/read back. Own signatures accepted, missing/bad/opposite-region signatures rejected. Temporary setup tables empty. No user-information capability. | OAuth connection is paused at user page-consent approval; real page/comment workflows remain unverified in both regions. |
+| Notion | Separate public connections, regional callbacks and active subscriptions. Both user-approved OAuth connections are active with distinct access/refresh tokens and bots. Page metadata reads, exactly one comment per region and signed comment webhook reception passed on the one authorized page. Own signatures accepted; missing/bad/opposite-region signatures rejected. No user-information capability. | Page-body reads exposed upstream optional-tool-field normalization. Explicit `strict: false` passed a synthetic A/B probe; deploy and retest actual regional page-body reads. Other Notion workflows remain untested. |
 
 ## Email and image evidence
 
@@ -166,6 +175,35 @@ are active on API version `2026-03-11` with `page.content_updated`,
 `page.properties_updated` and `comment.created`. Bootstrap records were cleared
 after verified tokens were stored in their matching regional deployments.
 
+The user subsequently authorized only "The Moonlit Registry of Pickle Jar
+Thunder", page `38f23f2d-e283-81d9-a6e1-ee4f1e1b6a74`, in both verification
+organizations. Both connections are active. Access tokens, refresh tokens,
+bot IDs, client IDs, client secrets and webhook verification tokens were
+compared privately and are distinct between regions. No tokens or page bodies
+were copied into this report.
+
+Both application runs read that page's metadata and each created exactly one
+synthetic comment. The EU comment is
+`3d523f2d-e283-81b6-914e-001da53d67ce`; the US comment is
+`3d523f2d-e283-817e-bd8c-001d8d383465`. Each regional subscription delivered
+the other bot's comment to its own regional backend. The code ignores its own
+bot's events. This is expected for the same external page explicitly shared
+with both connections; it is not a shared Jori credential or database.
+
+Page-body reads failed because generated tool calls supplied invented
+`start_cursor` values, including after explicit instructions to omit the
+optional field. The local schema requires only `blockId`. A synthetic US
+OpenRouter probe used the production Sol model, Azure provider and unchanged
+regional/ZDR/data-collection restrictions. With `strict` omitted it emitted
+an unwanted empty cursor; with `strict: false` it emitted only `blockId`.
+The shared model adapter now sets `strict: false` explicitly. This preserves
+the existing optional-field contract instead of changing every vendor schema
+or treating invalid cursor values as absent. OpenAI documents that Responses
+can normalize schemas into strict mode when the flag is omitted, unlike Chat
+Completions. The observed provider behavior is consistent with such a bridge.
+[Official function-calling guidance](https://developers.openai.com/api/docs/guides/function-calling#strict-mode).
+Actual EU/US page-body retests after deployment remain pending.
+
 Google's saved consent scopes are `openid`, `userinfo.email`,
 `userinfo.profile`, `gmail.readonly`, `gmail.compose`, `gmail.send`,
 `calendar.events` and `calendar.calendarlist.readonly`. Broad Drive, Calendar
@@ -225,8 +263,10 @@ base, with 2,616 tests passed and four skipped. Documentation-only changes do
 not require another runtime deployment.
 
 - Complete authenticated customer connections and workflows for GitHub, Slack,
-  Linear, Notion, Gmail/Calendar and Microsoft. Notion page consent needs user
-  approval. Microsoft sign-in and remaining auth-email flows also need tests.
+  Linear, Gmail/Calendar and Microsoft. Notion consent, metadata reads,
+  comments and signed comment webhooks passed; deploy the tool-optionality fix
+  and retest page-body reads. Other Notion operations, Microsoft sign-in and
+  remaining auth-email flows also need tests.
 - Complete Google audience/publishing and Microsoft publisher verification
   before general availability. Billing remains unavailable until its separate
   activation, tax and integration gate.
