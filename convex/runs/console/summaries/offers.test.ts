@@ -1,16 +1,28 @@
 import { expect, test } from "vitest"
-import { fakeQueryCtx, messageDisplay } from "../../../../test/convex/console"
+import {
+  fakeQueryCtx,
+  messageDisplay,
+  testRun,
+} from "../../../../test/convex/console"
 import { summarizeRun } from "../summaries"
 
-test("includes the latest integration offer for the run", async () => {
-  const run = testRun("Create a Notion page.")
+test("summarizes offers newest first and includes them in run search", async () => {
+  const run = testRun({
+    cause: { type: "message", messageId: "message", kind: "mention" },
+    snapshot: {
+      title: "Create a Notion page.",
+      ...messageDisplay({ kind: "mention" }),
+    },
+  })
   const summary = await summarizeRun(
     fakeQueryCtx(
       { run },
       {
         integrationOffers: [
+          integrationOffer({ _id: "old-offer", createdAt: 10 }),
           integrationOffer({
-            _id: "offer",
+            _id: "new-offer",
+            createdAt: 20,
             summary: "Connect Notion so Jori can create the requested page.",
           }),
         ],
@@ -21,8 +33,8 @@ test("includes the latest integration offer for the run", async () => {
 
   expect(summary.offer).toEqual({
     delivery: undefined,
-    expiresAt: expect.any(Number),
-    id: "offer",
+    expiresAt: Number.MAX_SAFE_INTEGER,
+    id: "new-offer",
     integration: "notion",
     integrationLabel: "Notion",
     result: undefined,
@@ -30,47 +42,14 @@ test("includes the latest integration offer for the run", async () => {
     summary: "Connect Notion so Jori can create the requested page.",
     updatedAt: 10,
   })
-  expect(summary.offers).toHaveLength(1)
-  expect(summary.searchableText).toContain("connect notion")
-})
-
-test("uses the newest integration offer for the run", async () => {
-  const run = testRun("Connect a workspace.")
-  const summary = await summarizeRun(
-    fakeQueryCtx(
-      { run },
-      {
-        integrationOffers: [
-          integrationOffer({ _id: "old-offer", createdAt: 10 }),
-          integrationOffer({ _id: "new-offer", createdAt: 20 }),
-        ],
-      }
-    ),
-    run
-  )
-
-  expect(summary.offer?.id).toBe("new-offer")
   expect(summary.offers.map((offer) => offer.id)).toEqual([
     "new-offer",
     "old-offer",
   ])
+  expect(summary.searchableText).toContain(
+    "connect notion so jori can create the requested page."
+  )
 })
-
-function testRun(title: string) {
-  return {
-    _id: "run",
-    _creationTime: 0,
-    organizationId: "organization",
-    status: "completed",
-    createdAt: 0,
-    endedAt: 1000,
-    cause: { type: "message", messageId: "message", kind: "mention" },
-    snapshot: {
-      title,
-      ...messageDisplay({ kind: "mention" }),
-    },
-  } as Parameters<typeof summarizeRun>[1]
-}
 
 function integrationOffer(overrides: Record<string, unknown>) {
   return {
@@ -83,7 +62,7 @@ function integrationOffer(overrides: Record<string, unknown>) {
     summary: "Connect Notion.",
     source: { surface: "slack", runId: "run" },
     runId: "run",
-    expiresAt: Date.now() + 1000,
+    expiresAt: Number.MAX_SAFE_INTEGER,
     createdAt: 10,
     updatedAt: 10,
     ...overrides,

@@ -1,10 +1,6 @@
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
 import { type AgentRuntime } from "../platform"
-
-beforeEach(() => {
-  vi.clearAllMocks()
-})
 
 test("prompted tools request approval without executing", async () => {
   const runtime = toolRuntime()

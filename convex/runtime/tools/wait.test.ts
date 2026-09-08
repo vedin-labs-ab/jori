@@ -1,5 +1,4 @@
-import { beforeEach, expect, test, vi } from "vitest"
-import { createPlatform } from "../../../test/platform"
+import { afterEach, expect, test, vi } from "vitest"
 import {
   createRuntime,
   runTool,
@@ -10,9 +9,7 @@ import { isParked } from "../loop/park"
 import { type AgentRuntime } from "../platform"
 import { executeToolCall } from "./index"
 
-beforeEach(() => {
-  vi.clearAllMocks()
-})
+afterEach(() => vi.restoreAllMocks())
 
 test("wait_for_agents returns immediately when every child is terminal", async () => {
   const runtime = waitRuntime()
@@ -41,7 +38,7 @@ test("wait_for_agents defaults a missing timeout to 15 minutes", async () => {
   const now = Date.parse("2026-07-13T08:00:00.000Z")
   const runtime = waitRuntime()
   runtime.platform.readAgentRuns = vi.fn(async () => [agentRun("running")])
-  const clock = vi.spyOn(Date, "now").mockReturnValue(now)
+  vi.spyOn(Date, "now").mockReturnValue(now)
 
   await executeToolCall({
     call: {
@@ -53,7 +50,6 @@ test("wait_for_agents defaults a missing timeout to 15 minutes", async () => {
     sequence: 100,
   })
 
-  clock.mockRestore()
   expect(runtime.platform.park).toHaveBeenCalledWith(
     expect.objectContaining({ expiresAt: now + 15 * 60 * 1000 })
   )
@@ -64,7 +60,7 @@ test("wait_for_agents parks on its children and reports the wake", async () => {
   const runtime = waitRuntime()
   let children = [agentRun("running")]
   runtime.platform.readAgentRuns = vi.fn(async () => children)
-  const clock = vi.spyOn(Date, "now").mockReturnValue(now)
+  vi.spyOn(Date, "now").mockReturnValue(now)
 
   const parked = await executeToolCall({
     call: waitCall(),
@@ -72,7 +68,6 @@ test("wait_for_agents parks on its children and reports the wake", async () => {
     sequence: 100,
   })
 
-  clock.mockRestore()
   expect(isParked(parked)).toBe(true)
   expect(runtime.platform.park).toHaveBeenCalledWith({
     condition: { kind: "runs", runIds: ["run_child"] },
@@ -169,7 +164,6 @@ function waitRuntime(): AgentRuntime {
         },
       ],
     }),
-    platform: createPlatform(),
   })
 }
 

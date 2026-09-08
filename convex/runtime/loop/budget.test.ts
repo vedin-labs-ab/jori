@@ -1,12 +1,7 @@
 import { expect, test } from "vitest"
 import { databaseContext } from "../../../test/convex/database"
 import { type Doc } from "../../_generated/dataModel"
-import {
-  budgetError,
-  budgetSequence,
-  checkTurnBudget,
-  isInteractiveRun,
-} from "./budget"
+import { budgetError, budgetSequence, checkTurnBudget } from "./budget"
 
 const organizationId = "org"
 
@@ -54,10 +49,6 @@ test("interactive work keeps its grace below zero; scheduled work stops at it", 
     updatedAt: 0,
   })
 
-  expect(isInteractiveRun({ cause: { type: "manual" } })).toBe(true)
-  expect(isInteractiveRun({ cause: { type: "time", scheduledAt: 0 } })).toBe(
-    false
-  )
   expect(await checkTurnBudget(ctx, { runId: interactive, turn: 2 })).toBe("ok")
   expect(await checkTurnBudget(ctx, { runId: scheduled, turn: 2 })).toBe(
     "blocked"

@@ -1,10 +1,6 @@
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
 import { type AgentRuntime } from "../platform"
-
-beforeEach(() => {
-  vi.clearAllMocks()
-})
 
 test("start_agent forwards its explicit title", async () => {
   const runtime = agentRuntime()
