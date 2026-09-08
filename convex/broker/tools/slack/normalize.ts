@@ -16,6 +16,31 @@ export type SlackMessage = {
   reactions?: Array<{ name: string; count: number }>
   replyCount?: number
   edited?: boolean
+  files?: SlackFile[]
+}
+
+type SlackFile = {
+  fileId?: string
+  name?: string
+  title?: string
+  mimeType?: string
+  size?: number
+}
+
+function slackFiles(value: unknown): SlackFile[] | undefined {
+  const files = readArray(value)
+    .map(readRecord)
+    .map((file) =>
+      compactRecord({
+        fileId: optionalString(file.id),
+        name: optionalString(file.name),
+        title: optionalString(file.title),
+        mimeType: optionalString(file.mimetype),
+        size: typeof file.size === "number" ? file.size : undefined,
+      })
+    )
+
+  return files.length === 0 ? undefined : files
 }
 
 function slackMessage(message: Record<string, unknown>): SlackMessage {
@@ -41,6 +66,7 @@ function slackMessage(message: Record<string, unknown>): SlackMessage {
     replyCount:
       typeof message.reply_count === "number" ? message.reply_count : undefined,
     edited: message.edited === undefined ? undefined : true,
+    files: slackFiles(message.files),
   })
 }
 
@@ -105,6 +131,7 @@ export function slackSentResult(result: unknown) {
     status: "sent" as const,
     channel: optionalString(envelope.channel),
     ts: optionalString(envelope.ts),
+    files: slackFiles(envelope.files),
   })
 }
 

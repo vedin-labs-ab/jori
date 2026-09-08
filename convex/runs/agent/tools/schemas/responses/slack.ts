@@ -13,6 +13,21 @@ import {
 // Slack results are normalized at the broker edge; identifiers keep Slack's
 // values so they thread straight back into follow-up calls.
 
+function slackFilesSchema() {
+  return arrayProperty(
+    "Attached Slack files. Metadata fields appear only when supplied by Slack; private download URLs are omitted.",
+    objectSchema({
+      properties: {
+        fileId: stringProperty("Slack file ID, not a Jori saved-file ID."),
+        name: stringProperty("Filename."),
+        title: stringProperty("Display title."),
+        mimeType: stringProperty("File content type."),
+        size: numberProperty("File size in bytes."),
+      },
+    })
+  )
+}
+
 function slackMessageProperties() {
   return {
     ts: stringProperty("Message timestamp; identifies the message."),
@@ -36,6 +51,7 @@ function slackMessageProperties() {
     ),
     replyCount: numberProperty("Thread reply count, on thread parents."),
     edited: booleanProperty("True when the message was edited."),
+    files: slackFilesSchema(),
   }
 }
 
@@ -132,12 +148,13 @@ export const slackToolResponseSchemas = {
   }),
   conversations_add_message: objectSchema({
     description:
-      "Delivery confirmation. channel and ts appear for text messages; file uploads omit them.",
+      "Delivery confirmation. Text messages return channel and ts; file uploads return file receipts instead.",
     required: ["status"],
     properties: {
       status: constProperty("sent", "The message was posted."),
       channel: stringProperty("Conversation the message landed in."),
       ts: stringProperty("Timestamp of the posted message."),
+      files: slackFilesSchema(),
     },
   }),
   slack_add_reaction: objectSchema({

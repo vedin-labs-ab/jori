@@ -6,7 +6,52 @@ import {
   slackMemberListing,
   slackMessageListing,
   slackSearchListing,
+  slackSentResult,
 } from "./normalize"
+
+test("Slack file metadata survives message and upload normalization", () => {
+  const files = [
+    {
+      id: "F1",
+      name: "fixture.txt",
+      title: "Fixture",
+      mimetype: "text/plain",
+      size: 29,
+      url_private: "https://files.slack.com/private-content",
+    },
+  ]
+  const expected = [
+    {
+      fileId: "F1",
+      name: "fixture.txt",
+      title: "Fixture",
+      mimeType: "text/plain",
+      size: 29,
+    },
+  ]
+  const messages = slackMessageListing({
+    messages: [{ ts: "100.1", text: "Attached", files }],
+  })
+  const sent = slackSentResult({ ok: true, files })
+
+  expect(messages.messages[0]).toHaveProperty("files", expected)
+  expect(sent).toEqual({ status: "sent", files: expected })
+  expect(
+    schemaViolations(messages, slackToolResponseSchemas.conversations_replies)
+  ).toEqual([])
+  expect(
+    schemaViolations(sent, slackToolResponseSchemas.conversations_add_message)
+  ).toEqual([])
+})
+
+test("Slack upload summaries retain sparse provider file receipts", () => {
+  expect(
+    slackSentResult({ ok: true, files: [{ id: "F1", title: "Fixture" }] })
+  ).toEqual({
+    status: "sent",
+    files: [{ fileId: "F1", title: "Fixture" }],
+  })
+})
 
 describe("Slack message normalization", () => {
   test("message listings reduce to normalized messages", () => {

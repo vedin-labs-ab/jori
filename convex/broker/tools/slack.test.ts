@@ -128,7 +128,10 @@ describe("Slack files", () => {
       createFileContext()
     )
 
-    expect(result).toEqual({ status: "sent" })
+    expect(result).toEqual({
+      status: "sent",
+      files: [{ fileId: "F123", title: "kitten.png" }],
+    })
     expect(calls).toHaveLength(3)
     expect(calls[0]).toMatchObject({
       body: { filename: "kitten.png", length: "5" },
