@@ -186,8 +186,10 @@ function ConsoleHeaderTitle({
 
 /** The linked ancestors, then the material itself as the current page.
  *  A narrow inset keeps only the nearest ancestor: where the page sits is
- *  worth the room, the whole way there is not. The separators go with the
- *  ancestors they follow, so what is left reads as a trail either way. */
+ *  worth the room, the whole way there is not. A phone-width inset keeps
+ *  the name alone, since beside three header actions even one ancestor
+ *  only fits truncated. The separators go with the ancestors they follow,
+ *  so what is left reads as a trail either way. */
 function MaterialTrail({
   material,
   trail,
@@ -206,7 +208,9 @@ function MaterialTrail({
             <BreadcrumbItem
               className={cn(
                 "min-w-0",
-                index < trail.length - 1 && "@max-lg/inset:hidden"
+                index < trail.length - 1
+                  ? "@max-lg/inset:hidden"
+                  : "@max-xs/inset:hidden"
               )}
             >
               <BreadcrumbLink asChild className="truncate">
@@ -217,7 +221,9 @@ function MaterialTrail({
             </BreadcrumbItem>
           </Fragment>
         ))}
-        {trail.length === 0 ? null : <BreadcrumbSeparator />}
+        {trail.length === 0 ? null : (
+          <BreadcrumbSeparator className="@max-xs/inset:hidden" />
+        )}
         <BreadcrumbItem className="min-w-0">
           <MaterialName material={material} />
           {material.suffix}
