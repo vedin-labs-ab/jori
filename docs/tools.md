@@ -159,7 +159,15 @@ The US run exposed a real search inconsistency. `grep` matched `include` against
 
 ### Public web and regional image batch
 
-EU conversation `jx72vt2g901czvt43avvqxr3hx8e1psj` and the existing US audit conversation have active batch 3 requests. Each asks a child to use only public web tools plus core Jori image generation. Their results remain pending review.
+EU parent `nx71kyfpmy02exd980pbxj70w18e0mzj` and child `nx73c5tkbe2bmby2vfkq4ped0x8e1e4f` completed. US parent `pn790q8hgwxe62gvpnv5g5fsgh8e03sz` and child `pn7cecg9mfv4js7fxr1nd7zrkd8e1ryt` completed. Both children had no integration access and explicit web access. Each called `web_search` and `web_fetch` for the official JSON Schema combination documentation and received successful Exa results. Each generated an image through Vertex and read its saved metadata. File IDs are EU `ks7abwd6y1vs1wcx853k6ts7jx8e1gek` and US `rn78m1yswcj6mw9zmms0t6wakd8e1wh9`. The US child also loaded the `image-generation` skill successfully. No connected integration was called. These basic success paths do not establish all web/image failure and validation cases.
+
+### Deployment progress
+
+The first two fix commits landed on main at `7b43e338`, rebased onto the latest UI commits. The fresh full gate passed 2,732 tests. Development deployed successfully on 8 September at 09:55 local time, including skill synchronization. Convex code generation added the new shared visibility module to its generated type catalog. That generated update is being committed before production deployment; the production script correctly rejected the dirty generated file rather than deploying an uncommitted tree.
+
+### Core history and cancellation batch
+
+Batch 4 is running in EU conversation `jx7cswz8mafwhy7jka0pjgstgx8e0dra` and US conversation `md75bgmqen110a7rh2zjs2peqs8e0fxt`. It covers run/activity/workstream reads, loading a skill, creating and cancelling a non-authorizing integration offer, and stopping a disposable child. Results remain pending review.
 
 ### Provider access
 

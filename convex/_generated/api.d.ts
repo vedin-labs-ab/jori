@@ -431,6 +431,7 @@ import type * as runs_agent_tools_schemas_responses_jori_jobs from "../runs/agen
 import type * as runs_agent_tools_schemas_responses_jori_runs from "../runs/agent/tools/schemas/responses/jori/runs.js";
 import type * as runs_agent_tools_schemas_responses_jori_stores from "../runs/agent/tools/schemas/responses/jori/stores.js";
 import type * as runs_agent_tools_schemas_responses_jori_tables from "../runs/agent/tools/schemas/responses/jori/tables.js";
+import type * as runs_agent_tools_schemas_responses_jori_visibility from "../runs/agent/tools/schemas/responses/jori/visibility.js";
 import type * as runs_agent_tools_schemas_responses_jori_workstreams from "../runs/agent/tools/schemas/responses/jori/workstreams.js";
 import type * as runs_agent_tools_schemas_responses_linear from "../runs/agent/tools/schemas/responses/linear.js";
 import type * as runs_agent_tools_schemas_responses_mail from "../runs/agent/tools/schemas/responses/mail.js";
@@ -1088,6 +1089,7 @@ declare const fullApi: ApiFromModules<{
   "runs/agent/tools/schemas/responses/jori/runs": typeof runs_agent_tools_schemas_responses_jori_runs;
   "runs/agent/tools/schemas/responses/jori/stores": typeof runs_agent_tools_schemas_responses_jori_stores;
   "runs/agent/tools/schemas/responses/jori/tables": typeof runs_agent_tools_schemas_responses_jori_tables;
+  "runs/agent/tools/schemas/responses/jori/visibility": typeof runs_agent_tools_schemas_responses_jori_visibility;
   "runs/agent/tools/schemas/responses/jori/workstreams": typeof runs_agent_tools_schemas_responses_jori_workstreams;
   "runs/agent/tools/schemas/responses/linear": typeof runs_agent_tools_schemas_responses_linear;
   "runs/agent/tools/schemas/responses/mail": typeof runs_agent_tools_schemas_responses_mail;
