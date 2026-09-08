@@ -47,7 +47,7 @@ export function ReceiptsSection() {
       }
       title="Every run keeps receipts"
     >
-      <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div className="space-y-5 text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
             Every run lives in the console: what triggered it, which tools it

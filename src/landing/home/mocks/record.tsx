@@ -23,7 +23,7 @@ export function Record() {
       }
       title="Everything on the record"
     >
-      <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-16">
+      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-16">
         <DemoConsole
           className="h-[46rem]"
           navigation={console}

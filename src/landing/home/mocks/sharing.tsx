@@ -95,7 +95,10 @@ function RenewalsSharing() {
         {/* The dialog body draws its own top rule under the dialog's
             header; here the card's caption already draws that line. */}
         <div className="[&>*:first-child]:border-t-0">
-          <ClientOnly fallback={<div aria-hidden className="h-52" />}>
+          {/* h-42 is the links body's own height, measured in the browser
+              at viewports 360 through 1920, where it is 166px at every
+              one, so the card keeps its size when the links arrive. */}
+          <ClientOnly fallback={<div aria-hidden className="h-42" />}>
             <MaterialLinks
               onMint={onMint}
               onRevoke={onRevoke}
