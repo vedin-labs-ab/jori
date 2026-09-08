@@ -98,7 +98,6 @@ function answers() {
       username: "x-access-token",
     })),
     finishRun: vi.fn(async () => undefined),
-    markApprovalConsumed: vi.fn(async () => undefined),
     markOfferConsumed: vi.fn(async () => undefined),
     readAgentRuns: vi.fn(async () => []),
     readWaiter: vi.fn(async () => null),
