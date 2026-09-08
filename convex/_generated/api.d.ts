@@ -477,6 +477,7 @@ import type * as runs_execution_waiters_records from "../runs/execution/waiters/
 import type * as runs_execution_workflow from "../runs/execution/workflow.js";
 import type * as runs_instruction from "../runs/instruction.js";
 import type * as runs_introspect_access from "../runs/introspect/access.js";
+import type * as runs_introspect_cursor from "../runs/introspect/cursor.js";
 import type * as runs_introspect_filters from "../runs/introspect/filters.js";
 import type * as runs_introspect_ids from "../runs/introspect/ids.js";
 import type * as runs_introspect_mcp from "../runs/introspect/mcp.js";
@@ -1140,6 +1141,7 @@ declare const fullApi: ApiFromModules<{
   "runs/execution/workflow": typeof runs_execution_workflow;
   "runs/instruction": typeof runs_instruction;
   "runs/introspect/access": typeof runs_introspect_access;
+  "runs/introspect/cursor": typeof runs_introspect_cursor;
   "runs/introspect/filters": typeof runs_introspect_filters;
   "runs/introspect/ids": typeof runs_introspect_ids;
   "runs/introspect/mcp": typeof runs_introspect_mcp;
