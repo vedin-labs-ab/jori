@@ -27,7 +27,9 @@ export const codingToolDefinitions = [
     inputSchema: objectSchema(["pattern"], {
       pattern: stringSchema("JavaScript regular expression to search for."),
       path: stringSchema("Optional workspace path to search within."),
-      include: stringSchema("Optional glob pattern for matching file paths."),
+      include: stringSchema(
+        "Optional glob pattern relative to the search directory. When path names a file, match its filename."
+      ),
       limit: numberSchema("Maximum matches to return."),
     }),
   },
@@ -36,7 +38,9 @@ export const codingToolDefinitions = [
     description:
       "Find files under /home/user/workspace by glob pattern with bounded results.",
     inputSchema: objectSchema(["pattern"], {
-      pattern: stringSchema("Glob pattern, for example src/**/*.ts."),
+      pattern: stringSchema(
+        "Glob pattern relative to the search directory, for example src/**/*.ts."
+      ),
       path: stringSchema("Optional workspace directory to search within."),
       limit: numberSchema("Maximum paths to return."),
     }),

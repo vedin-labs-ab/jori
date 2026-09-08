@@ -16,111 +16,111 @@ The table round trips below completed in both regions, but their output contract
 
 | Provider | Tool | Contract tests | EU agent run | US agent run |
 | --- | --- | --- | --- | --- |
-| github | `github_list_repositories` | Pending | Pending | Pending |
-| github | `github_get_repository` | Pending | Pending | Pending |
-| github | `github_search_issues` | Pending | Pending | Pending |
-| github | `github_get_issue` | Pending | Pending | Pending |
-| github | `github_get_pull_request` | Pending | Pending | Pending |
-| github | `github_get_file` | Pending | Pending | Pending |
-| github | `github_clone_repository` | Pending | Pending | Pending |
-| github | `github_add_issue_comment` | Pending | Pending | Pending |
-| github | `github_reply_to_pull_request_review_comment` | Pending | Pending | Pending |
-| github | `github_list_pull_request_files` | Pending | Pending | Pending |
-| github | `github_list_pull_request_review_comments` | Pending | Pending | Pending |
-| github | `github_commit_to_pull_request` | Pending | Pending | Pending |
-| github | `github_create_pull_request` | Pending | Pending | Pending |
-| github | `github_add_comment_reaction` | Pending | Pending | Pending |
-| github | `github_update_pull_request` | Pending | Pending | Pending |
-| gmail | `google_gmail_search_threads` | Pending | Pending | Pending |
-| gmail | `google_gmail_get_thread` | Pending | Pending | Pending |
-| gmail | `google_gmail_get_threads` | Pending | Pending | Pending |
-| gmail | `google_gmail_get_message` | Pending | Pending | Pending |
-| gmail | `google_gmail_get_messages` | Pending | Pending | Pending |
-| gmail | `google_gmail_reply_to_thread` | Pending | Pending | Pending |
-| gmail | `google_gmail_send_message` | Pending | Pending | Pending |
-| gmail | `google_gmail_create_draft` | Pending | Pending | Pending |
-| googleCalendar | `google_calendar_list_calendars` | Pending | Pending | Pending |
-| googleCalendar | `google_calendar_list_events` | Pending | Pending | Pending |
-| googleCalendar | `google_calendar_get_event` | Pending | Pending | Pending |
-| googleCalendar | `google_calendar_create_event` | Pending | Pending | Pending |
-| googleCalendar | `google_calendar_update_event` | Pending | Pending | Pending |
-| jori | `list_capabilities` | Pending | Pending | Pending |
-| jori | `load_skill` | Pending | Pending | Pending |
-| jori | `search_runs` | Pending | Pending | Pending |
-| jori | `search_run_activity` | Pending | Pending | Pending |
-| jori | `read_workstreams` | Pending | Pending | Pending |
-| jori | `offer_integration` | Pending | Pending | Pending |
-| jori | `cancel_approval_request` | Pending | Pending | Pending |
-| jori | `cancel_integration_offer` | Pending | Pending | Pending |
-| jori | `save_file` | Pending | Pending | Pending |
-| jori | `generate_image` | Pending | Pending | Pending |
-| jori | `search_files` | Pending | Pending | Pending |
-| jori | `read_file` | Pending | Pending | Pending |
-| jori | `search_jobs` | Pending | Pending | Pending |
-| jori | `read_job` | Pending | Pending | Pending |
-| jori | `add_job` | Pending | Pending | Pending |
-| jori | `update_job` | Pending | Pending | Pending |
-| jori | `delete_job` | Pending | Pending | Pending |
-| linear | `linear_search_issues` | Pending | Pending | Pending |
-| linear | `linear_get_issue` | Pending | Pending | Pending |
-| linear | `linear_list_comments` | Pending | Pending | Pending |
-| linear | `linear_add_comment` | Pending | Pending | Pending |
-| linear | `linear_add_reaction` | Pending | Pending | Pending |
-| jori | `search_tables` | Pending | Pending | Pending |
-| jori | `read_table` | Pending | Pending | Pending |
-| jori | `list_table_rows` | Pending | Pending | Pending |
-| jori | `create_table` | Pending | Pending | Pending |
-| jori | `insert_table_row` | Pending | Pending | Pending |
-| jori | `update_table_row` | Pending | Pending | Pending |
-| jori | `delete_table_row` | Pending | Pending | Pending |
-| jori | `share_table` | Pending | Pending | Pending |
-| jori | `search_stores` | Pending | Pending | Pending |
-| jori | `read_store` | Pending | Pending | Pending |
-| jori | `create_store` | Pending | Pending | Pending |
-| jori | `write_store` | Pending | Pending | Pending |
-| jori | `share_store` | Pending | Pending | Pending |
-| jori | `share_file` | Pending | Pending | Pending |
-| microsoftEmail | `microsoft_email_search_messages` | Pending | Pending | Pending |
-| microsoftEmail | `microsoft_email_get_message` | Pending | Pending | Pending |
-| microsoftEmail | `microsoft_email_send_message` | Pending | Pending | Pending |
-| microsoftEmail | `microsoft_email_create_draft` | Pending | Pending | Pending |
-| microsoftEmail | `microsoft_email_update_message` | Pending | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_list_calendars` | Pending | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_list_events` | Pending | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_get_event` | Pending | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_create_event` | Pending | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_update_event` | Pending | Pending | Pending |
-| jori | `finish_run` | Pending | Pending | Pending |
-| jori | `send_reply` | Pending | Pending | Pending |
-| jori | `add_reaction` | Pending | Pending | Pending |
-| jori | `read` | Pending | Pending | Pending |
-| jori | `grep` | Pending | Pending | Pending |
-| jori | `glob` | Pending | Pending | Pending |
-| jori | `git` | Pending | Pending | Pending |
-| jori | `apply_patch` | Pending | Pending | Pending |
-| jori | `bash` | Pending | Pending | Pending |
-| jori | `start_agent` | Pending | Pending | Pending |
-| jori | `wait_for_agents` | Pending | Pending | Pending |
-| jori | `stop_agent` | Pending | Pending | Pending |
-| notion | `notion_search` | Pending | Pending | Pending |
-| notion | `notion_get_page` | Pending | Pending | Pending |
-| notion | `notion_get_block_children` | Pending | Pending | Pending |
-| notion | `notion_query_data_source` | Pending | Pending | Pending |
-| notion | `notion_list_comments` | Pending | Pending | Pending |
-| notion | `notion_create_page` | Pending | Pending | Pending |
-| notion | `notion_update_page` | Pending | Pending | Pending |
-| notion | `notion_upload_file` | Pending | Pending | Pending |
-| notion | `notion_append_block_children` | Pending | Pending | Pending |
-| notion | `notion_create_comment` | Pending | Pending | Pending |
-| slack | `channels_list` | Pending | Pending | Pending |
-| slack | `conversations_history` | Pending | Pending | Pending |
-| slack | `conversations_replies` | Pending | Pending | Pending |
-| slack | `conversations_search_messages` | Pending | Pending | Pending |
-| slack | `users_search` | Pending | Pending | Pending |
-| slack | `conversations_add_message` | Pending | Pending | Pending |
-| slack | `slack_add_reaction` | Pending | Pending | Pending |
-| jori | `web_search` | Pending | Pending | Pending |
-| jori | `web_fetch` | Pending | Pending | Pending |
+| github | `github_list_repositories` | Compiles | Pending | Pending |
+| github | `github_get_repository` | Compiles | Pending | Pending |
+| github | `github_search_issues` | Compiles | Pending | Pending |
+| github | `github_get_issue` | Compiles | Pending | Pending |
+| github | `github_get_pull_request` | Compiles | Pending | Pending |
+| github | `github_get_file` | Compiles | Pending | Pending |
+| github | `github_clone_repository` | Compiles | Pending | Pending |
+| github | `github_add_issue_comment` | Compiles | Pending | Pending |
+| github | `github_reply_to_pull_request_review_comment` | Compiles | Pending | Pending |
+| github | `github_list_pull_request_files` | Compiles | Pending | Pending |
+| github | `github_list_pull_request_review_comments` | Compiles | Pending | Pending |
+| github | `github_commit_to_pull_request` | Compiles | Pending | Pending |
+| github | `github_create_pull_request` | Compiles | Pending | Pending |
+| github | `github_add_comment_reaction` | Compiles | Pending | Pending |
+| github | `github_update_pull_request` | Compiles | Pending | Pending |
+| gmail | `google_gmail_search_threads` | Compiles | Pending | Pending |
+| gmail | `google_gmail_get_thread` | Compiles | Pending | Pending |
+| gmail | `google_gmail_get_threads` | Compiles | Pending | Pending |
+| gmail | `google_gmail_get_message` | Compiles | Pending | Pending |
+| gmail | `google_gmail_get_messages` | Compiles | Pending | Pending |
+| gmail | `google_gmail_reply_to_thread` | Compiles | Pending | Pending |
+| gmail | `google_gmail_send_message` | Compiles | Pending | Pending |
+| gmail | `google_gmail_create_draft` | Compiles | Pending | Pending |
+| googleCalendar | `google_calendar_list_calendars` | Compiles | Pending | Pending |
+| googleCalendar | `google_calendar_list_events` | Compiles | Pending | Pending |
+| googleCalendar | `google_calendar_get_event` | Compiles | Pending | Pending |
+| googleCalendar | `google_calendar_create_event` | Compiles | Pending | Pending |
+| googleCalendar | `google_calendar_update_event` | Compiles | Pending | Pending |
+| jori | `list_capabilities` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `load_skill` | Compiles | Pending | Pending |
+| jori | `search_runs` | Compiles | Pending | Pending |
+| jori | `search_run_activity` | Compiles | Pending | Pending |
+| jori | `read_workstreams` | Compiles | Pending | Pending |
+| jori | `offer_integration` | Compiles | Pending | Pending |
+| jori | `cancel_approval_request` | Compiles | Pending | Pending |
+| jori | `cancel_integration_offer` | Compiles | Pending | Pending |
+| jori | `save_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `generate_image` | Compiles | Pending | Pending |
+| jori | `search_files` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `read_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `search_jobs` | Compiles | Pending | Pending |
+| jori | `read_job` | Compiles | Pending | Pending |
+| jori | `add_job` | Compiles | Pending | Pending |
+| jori | `update_job` | Compiles | Pending | Pending |
+| jori | `delete_job` | Compiles | Pending | Pending |
+| linear | `linear_search_issues` | Compiles | Pending | Pending |
+| linear | `linear_get_issue` | Compiles | Pending | Pending |
+| linear | `linear_list_comments` | Compiles | Pending | Pending |
+| linear | `linear_add_comment` | Compiles | Pending | Pending |
+| linear | `linear_add_reaction` | Compiles | Pending | Pending |
+| jori | `search_tables` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `read_table` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `list_table_rows` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `create_table` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `insert_table_row` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `update_table_row` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `delete_table_row` | Compiles | Pending | Pending |
+| jori | `share_table` | Compiles | Pending | Pending |
+| jori | `search_stores` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `read_store` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `create_store` | Compiles | Round trip, contract retest | Round trip, contract retest |
+| jori | `write_store` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `share_store` | Compiles | Pending | Pending |
+| jori | `share_file` | Compiles | Pending | Pending |
+| microsoftEmail | `microsoft_email_search_messages` | Compiles | Pending | Pending |
+| microsoftEmail | `microsoft_email_get_message` | Compiles | Pending | Pending |
+| microsoftEmail | `microsoft_email_send_message` | Compiles | Pending | Pending |
+| microsoftEmail | `microsoft_email_create_draft` | Compiles | Pending | Pending |
+| microsoftEmail | `microsoft_email_update_message` | Compiles | Pending | Pending |
+| microsoftCalendar | `microsoft_calendar_list_calendars` | Compiles | Pending | Pending |
+| microsoftCalendar | `microsoft_calendar_list_events` | Compiles | Pending | Pending |
+| microsoftCalendar | `microsoft_calendar_get_event` | Compiles | Pending | Pending |
+| microsoftCalendar | `microsoft_calendar_create_event` | Compiles | Pending | Pending |
+| microsoftCalendar | `microsoft_calendar_update_event` | Compiles | Pending | Pending |
+| jori | `finish_run` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `send_reply` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `add_reaction` | Compiles | Pending | Pending |
+| jori | `read` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `grep` | Compiles | Basic pass, filter retest | Filter defect, retest |
+| jori | `glob` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `git` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `apply_patch` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `bash` | Compiles | Basic pass, restrictions reviewed | Basic pass, restrictions reviewed |
+| jori | `start_agent` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `wait_for_agents` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
+| jori | `stop_agent` | Compiles | Pending | Pending |
+| notion | `notion_search` | Compiles | Pending | Pending |
+| notion | `notion_get_page` | Compiles | Pending | Pending |
+| notion | `notion_get_block_children` | Compiles | Pending | Pending |
+| notion | `notion_query_data_source` | Compiles | Pending | Pending |
+| notion | `notion_list_comments` | Compiles | Pending | Pending |
+| notion | `notion_create_page` | Compiles | Pending | Pending |
+| notion | `notion_update_page` | Compiles | Pending | Pending |
+| notion | `notion_upload_file` | Compiles | Pending | Pending |
+| notion | `notion_append_block_children` | Compiles | Pending | Pending |
+| notion | `notion_create_comment` | Compiles | Pending | Pending |
+| slack | `channels_list` | Compiles | Pending | Pending |
+| slack | `conversations_history` | Compiles | Pending | Pending |
+| slack | `conversations_replies` | Compiles | Pending | Pending |
+| slack | `conversations_search_messages` | Compiles | Pending | Pending |
+| slack | `users_search` | Compiles | Pending | Pending |
+| slack | `conversations_add_message` | Compiles | Pending | Pending |
+| slack | `slack_add_reaction` | Compiles | Pending | Pending |
+| jori | `web_search` | Compiles | Pending | Pending |
+| jori | `web_fetch` | Compiles | Pending | Pending |
 
 ## Variants and failure paths
 
@@ -147,8 +147,20 @@ The table round trips below completed in both regions, but their output contract
 - The independent Ajv test helper replaces a test validator that had repeated the same incorrect `oneOf` behavior as production validation.
 - Before deployment, `pnpm run check` passed and `pnpm run test` passed 2,730 tests across 555 files, with 4 tests in 2 files skipped. No checks were weakened. Live post-fix verification is still required.
 
-### Store and sandbox batch in progress
+### Store and sandbox batch
 
 EU parent `nx7b19jy0e4ff07zg8xdncdtt58e1d47` created child `nx75ymsrzv1d3x4bp8x9bfhtnx8e0kwc` with `integrations: []` and `web: false`. The child created store `js7121wm9rde5xxnpvafqkh1wx8e04af`, wrote count 1, merge-patched count 2 with optimistic versioning, and read back version 2. Its sandbox rejected the requested path outside the Jori workspace and rejected Git writes through bash. Those refusals match the sandbox restrictions; the test prompt must use supported paths and Git operations.
 
-US batch parent `pn757kxcp57gz66ncmaqnchjzx8e0n5t` is still under review. Do not infer completion from a submitted prompt.
+US parent `pn73xvxhgr1nc5cqxk4q1xvjm18e1jnp` and child `pn757kxcp57gz66ncmaqnchjzx8e0n5t` completed with the same restricted access. Store `r5731ck6m0am5bcbx6dkrkv6n18e1mz1` ended at count 2, version 2. Both regions completed file read/search/patch/save operations, child `finish_run`, parent `wait_for_agents`, and console replies. Saved text file IDs are EU `ks7caex9rmbtxmh5jrgdg5ywas8e07b2` and US `rn7f0vgfvkbpjmzyvg07m6fge58e1v87`. Storage URLs pointed to their matching regional Convex deployments. `read_file` correctly returns metadata, not file text.
+
+The test prompt incorrectly requested Git initialization and an outside-workspace directory. The agents worked around the Git command guard in their disposable sandboxes, using an absolute Git executable in EU and a manually created `.git` structure in US. The shell guard is not a security boundary against arbitrary code execution. These workarounds are not evidence that Git write restrictions are comprehensive. Future tests must clone a designated fixture repository through the provider tool and keep paths in `/home/user/workspace`.
+
+The US run exposed a real search inconsistency. `grep` matched `include` against the workspace path while `glob` matched against the chosen search directory. A regression test reproduced the empty result. Both now use search-directory-relative matching, including filename matching when searching a single file. Targeted tests and the next full gate passed, with 2,732 tests passing and 4 skipped. The four UI loading failures seen on the preceding gate passed unchanged on both targeted and full reruns.
+
+### Public web and regional image batch
+
+EU conversation `jx72vt2g901czvt43avvqxr3hx8e1psj` and the existing US audit conversation have active batch 3 requests. Each asks a child to use only public web tools plus core Jori image generation. Their results remain pending review.
+
+### Provider access
+
+The EU verification organization has Notion connected. GitHub, Slack and Linear report not connected. The GitHub EU installation is prepared for selected repositories, not all repositories, but no installation grant has been submitted.

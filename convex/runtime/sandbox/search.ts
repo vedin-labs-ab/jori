@@ -65,7 +65,7 @@ async function grep(base) {
   const matches = [];
 
   for await (const file of walk(base)) {
-    if (include !== null && !include.test(file.relative)) continue;
+    if (include !== null && !include.test(file.fromBase)) continue;
     await grepFile(file, pattern, matches);
     if (matches.length > input.limit) break;
   }
@@ -123,7 +123,7 @@ async function* walk(base) {
   const stats = await fs.promises.stat(base.real);
 
   if (stats.isFile()) {
-    yield fileInfo(base.real, base.baseReal);
+    yield fileInfo(base.real, path.dirname(base.real));
     return;
   }
 
