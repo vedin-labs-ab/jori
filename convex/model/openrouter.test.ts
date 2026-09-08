@@ -25,37 +25,15 @@ vi.mock("@openrouter/sdk/funcs/chatSend", () => ({
   },
 }))
 
-const environmentNames = [
-  "JORI_REGION",
-  "CONVEX_SITE_URL",
-  "OPENROUTER_API_KEY",
-  "OPENROUTER_APP_CATEGORIES",
-  "OPENROUTER_APP_TITLE",
-  "OPENROUTER_HTTP_REFERER",
-] as const
-
-const originalEnvironment = new Map(
-  environmentNames.map((name) => [name, process.env[name]])
-)
+afterEach(() => vi.unstubAllEnvs())
 
 describe("openrouter client", () => {
   beforeEach(() => {
-    process.env.JORI_REGION = "us"
-  })
-  afterEach(() => {
-    for (const name of environmentNames) {
-      const value = originalEnvironment.get(name)
-
-      if (value === undefined) {
-        delete process.env[name]
-      } else {
-        process.env[name] = value
-      }
-    }
+    vi.stubEnv("JORI_REGION", "us")
   })
 
   test("requires an API key", () => {
-    delete process.env.OPENROUTER_API_KEY
+    vi.stubEnv("OPENROUTER_API_KEY", undefined)
 
     expect(() => requireOpenRouterConfig()).toThrow(
       "Missing OPENROUTER_API_KEY"
@@ -63,11 +41,11 @@ describe("openrouter client", () => {
   })
 
   test("reads API key and default attribution", () => {
-    process.env.OPENROUTER_API_KEY = " key "
-    process.env.CONVEX_SITE_URL = " https://jori.example "
-    delete process.env.OPENROUTER_APP_CATEGORIES
-    delete process.env.OPENROUTER_APP_TITLE
-    delete process.env.OPENROUTER_HTTP_REFERER
+    vi.stubEnv("OPENROUTER_API_KEY", " key ")
+    vi.stubEnv("CONVEX_SITE_URL", " https://jori.example ")
+    vi.stubEnv("OPENROUTER_APP_CATEGORIES", undefined)
+    vi.stubEnv("OPENROUTER_APP_TITLE", undefined)
+    vi.stubEnv("OPENROUTER_HTTP_REFERER", undefined)
 
     expect(requireOpenRouterConfig()).toEqual({
       apiKey: "key",
@@ -79,11 +57,11 @@ describe("openrouter client", () => {
   })
 
   test("allows OpenRouter attribution overrides", () => {
-    process.env.OPENROUTER_API_KEY = "key"
-    process.env.CONVEX_SITE_URL = "https://convex.example"
-    process.env.OPENROUTER_APP_CATEGORIES = "job"
-    process.env.OPENROUTER_APP_TITLE = "Custom Jori"
-    process.env.OPENROUTER_HTTP_REFERER = "https://app.example"
+    vi.stubEnv("OPENROUTER_API_KEY", "key")
+    vi.stubEnv("CONVEX_SITE_URL", "https://convex.example")
+    vi.stubEnv("OPENROUTER_APP_CATEGORIES", "job")
+    vi.stubEnv("OPENROUTER_APP_TITLE", "Custom Jori")
+    vi.stubEnv("OPENROUTER_HTTP_REFERER", "https://app.example")
 
     expect(requireOpenRouterConfig()).toEqual({
       apiKey: "key",
@@ -192,8 +170,8 @@ describe("regional model enforcement", () => {
 })
 
 function setupChat() {
-  process.env.JORI_REGION = "us"
-  process.env.OPENROUTER_API_KEY = "key"
+  vi.stubEnv("JORI_REGION", "us")
+  vi.stubEnv("OPENROUTER_API_KEY", "key")
   sdk.send.mockReset()
   sdk.eligible
     .mockReset()

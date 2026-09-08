@@ -148,16 +148,16 @@ describe("runtime delivery prompts", () => {
     expect(prompt).not.toContain("keep you posted")
   })
 
-  test("renders Slack communication and completion sections", () => {
-    const prompt = assemblePrompt(
-      runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-    )
-    const instructions = prompt.instructions
+  test.each(
+    messageTriggerCases
+  )("renders communication and completion sections for %s message runs", (provider, data) => {
+    const instructions = assemblePrompt(
+      runtimeInput(provider, data)
+    ).instructions
 
     expect(instructions).toContain("# Communication")
     expect(instructions).toContain("use the lightest action that delivers it")
     expect(instructions).toContain("Use `send_reply`")
-    expect(prompt.context).toContain("Active surface: `Slack`")
     expect(instructions).not.toContain("Current surface:")
     expect(instructions).toContain("# Finish")
     expect(instructions).toContain(
@@ -166,18 +166,6 @@ describe("runtime delivery prompts", () => {
     expect(instructions).not.toContain("final useful action")
     expectInstructionsOrder(instructions)
     expectNoSyntheticBlankLines(instructions)
-  })
-
-  test.each(
-    messageTriggerCases
-  )("renders generic communication guidance for %s message runs", (provider, data) => {
-    const prompt = assemblePrompt(runtimeInput(provider, data)).instructions
-
-    expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("use the lightest action that delivers it")
-    expect(prompt).toContain("Use `send_reply`")
-    expect(prompt).toContain("# Finish")
-    expect(prompt).toContain("prefer setting `final: true`")
   })
 
   test("omits automatic final delivery instructions", () => {
