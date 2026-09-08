@@ -1,33 +1,56 @@
 import { spawnSync } from "node:child_process"
 import { createInterface } from "node:readline/promises"
+import { type Region } from "../contracts/region.ts"
 import { verifyFrontend } from "./env/frontend.ts"
-import { deploymentNames } from "./env/names.ts"
-import { loadTarget, readTargetArguments } from "./env/target.ts"
+import { deploymentNames, readTarget, targetRegion } from "./env/names.ts"
+import { loadTarget } from "./env/target.ts"
+import { isVerified } from "./gate/stamp.ts"
+import { git, isClean, requirePrimaryCheckout } from "./git.ts"
 import { packageCommand, runCommand, toolCommand } from "./process.ts"
 
-const environment = "prod"
-const branch = "main"
-const region = readTargetArguments(process.argv.slice(2))
-
-await deployProduction()
-
 /**
- * Production is deliberate, so every guard runs before anything is touched:
- * a dirty checkout, the wrong branch, unpushed commits, a failing check, or a
- * half-configured deployment all stop the deploy while it is still a no-op.
+ * Usage: pnpm ship <dev|prod-eu|prod-us> [--yes]
+ *
+ * Development is a sandbox the `pnpm dev` watcher already pushes to, so it
+ * gets no gate here. Production is deliberate: every guard runs before
+ * anything is touched, so a dirty checkout, the wrong branch, unpushed
+ * commits, a failing gate, or a half-configured deployment all stop the
+ * deploy while it is still a no-op. `--yes` stands in for the typed
+ * confirmation where no terminal is attached.
  */
-async function deployProduction() {
+const branch = "main"
+const argv = process.argv.slice(2)
+const confirmed = argv.includes("--yes")
+const target = readTarget(argv.filter((argument) => argument !== "--yes"))
+const region = targetRegion(target)
+
+requirePrimaryCheckout("Shipping")
+
+if (region === undefined) {
+  await deployDevelopment()
+} else {
+  await deployProduction(region)
+}
+
+async function deployDevelopment() {
+  const env = loadTarget(target)
+
+  await step(env, "Deploying Convex", ["convex", "dev", "--once"])
+  await syncSkills(env)
+  write(`${target} is deployed.`)
+}
+
+async function deployProduction(region: Region) {
   requireCleanCheckout()
   requireBranch()
   requirePushedBranch()
 
-  const env = loadTarget(environment, region)
+  const env = loadTarget(target)
 
   await requireConfirmation()
-  await runCommand(packageCommand("check"))
-  await runCommand(packageCommand("test"))
+  await requireGate()
 
-  requireDeploymentVariables(env)
+  requireDeploymentVariables(env, region)
   verifyFrontend(env, region)
 
   // Each layer deploys before the one that calls it: the frontend is served
@@ -35,17 +58,12 @@ async function deployProduction() {
   // sync runs on the functions it was just deployed with.
   await step(env, "Deploying Convex", ["convex", "deploy", "--yes"])
   await step(env, "Deploying frontend", ["vercel", "deploy", "--prod", "--yes"])
-  await step(env, "Syncing skills", [
-    "convex",
-    "run",
-    "skills/catalog:syncGlobalSkills",
-  ])
-
-  write("Production deploy complete.")
+  await syncSkills(env)
+  write(`${target} is deployed.`)
 }
 
 function requireCleanCheckout() {
-  if (git(["status", "--porcelain"]) !== "") {
+  if (!isClean()) {
     throw new Error(
       "The checkout has uncommitted changes. Commit or stash them first."
     )
@@ -67,26 +85,47 @@ function requirePushedBranch() {
 
   if (git(["rev-parse", branch]) !== git(["rev-parse", `origin/${branch}`])) {
     throw new Error(
-      `${branch} and origin/${branch} differ. Push ${branch} before deploying.`
+      `${branch} and origin/${branch} differ. Push ${branch} before shipping.`
     )
   }
 }
 
 async function requireConfirmation() {
+  if (confirmed) {
+    return
+  }
+
+  if (!process.stdin.isTTY) {
+    throw new Error(`No terminal to confirm in. Pass --yes to ship ${target}.`)
+  }
+
   const revision = git(["rev-parse", "--short", "HEAD"])
   const readline = createInterface({
     input: process.stdin,
     output: process.stdout,
   })
   const answer = await readline.question(
-    `Deploy ${revision} to ${environment}-${region}? Type "${environment}-${region}" to continue: `
+    `Ship ${revision} to ${target}? Type "${target}" to continue: `
   )
 
   readline.close()
 
-  if (answer.trim() !== `${environment}-${region}`) {
+  if (answer.trim() !== target) {
     throw new Error("Deploy cancelled.")
   }
+}
+
+/** The gate runs once per tree. Landing on main records a pass, so shipping
+ *  what just landed skips straight to deploying. */
+async function requireGate() {
+  if (isVerified()) {
+    write("The gate already passed on this tree.")
+
+    return
+  }
+
+  await runCommand(packageCommand("check"))
+  await runCommand(packageCommand("test"))
 }
 
 /**
@@ -94,7 +133,7 @@ async function requireConfirmation() {
  * deployment itself. Values are never read or printed: a missing name is the
  * whole answer, and the command that reports it must not leak the rest.
  */
-function requireDeploymentVariables(env: NodeJS.ProcessEnv) {
+function requireDeploymentVariables(env: NodeJS.ProcessEnv, region: Region) {
   const output = commandOutput(
     env,
     ["convex", "env", "list", "--names-only"],
@@ -103,16 +142,21 @@ function requireDeploymentVariables(env: NodeJS.ProcessEnv) {
   const present = new Set(
     output.split("\n").map((line) => line.split("=")[0].trim())
   )
+  const missing = deploymentNames.filter((name) => !present.has(name))
 
-  reportMissing(
-    deploymentNames.filter((name) => !present.has(name)),
-    "The production Convex deployment",
-    "Set each one with: npx convex env set <NAME> <value>"
-  )
-  requireBackendIdentity(env)
+  if (missing.length > 0) {
+    throw new Error(
+      [
+        `The production Convex deployment is missing: ${missing.join(", ")}`,
+        "Set each one with: npx convex env set <NAME> <value>",
+      ].join("\n")
+    )
+  }
+
+  requireBackendIdentity(env, region)
 }
 
-function requireBackendIdentity(env: NodeJS.ProcessEnv) {
+function requireBackendIdentity(env: NodeJS.ProcessEnv, region: Region) {
   const actualRegion = commandOutput(
     env,
     ["convex", "env", "get", "JORI_REGION"],
@@ -150,16 +194,12 @@ function commandOutput(
   return result.stdout
 }
 
-function reportMissing(
-  missing: readonly string[],
-  where: string,
-  remedy: string
-) {
-  if (missing.length > 0) {
-    throw new Error(
-      [`${where} is missing: ${missing.join(", ")}`, remedy].join("\n")
-    )
-  }
+function syncSkills(env: NodeJS.ProcessEnv) {
+  return step(env, "Syncing skills", [
+    "convex",
+    "run",
+    "skills/catalog:syncGlobalSkills",
+  ])
 }
 
 async function step(
@@ -170,19 +210,6 @@ async function step(
   write(`${label}...`)
 
   await runCommand({ ...toolCommand(args), env, label })
-}
-
-function git(args: string[]) {
-  const result = spawnSync("git", args, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  })
-
-  if (result.status !== 0) {
-    throw new Error(`git ${args.join(" ")} failed.\n${result.stderr.trim()}`)
-  }
-
-  return result.stdout.trim()
 }
 
 function write(message: string) {

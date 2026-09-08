@@ -1,17 +1,18 @@
-import { isRegion, type Region } from "../../contracts/region.ts"
+import { type Region } from "../../contracts/region.ts"
 import { loadEnvironment } from "./load.ts"
-import { type Environment } from "./names.ts"
+import { type Target, targetRegion } from "./names.ts"
 
-export function readTargetArguments(args: string[]): Region {
-  if (args.length !== 2 || args[0] !== "--region" || !isRegion(args[1])) {
-    throw new Error("Choose an explicit target: --region eu or --region us")
+/** A target's environment, checked for the crossed wires a production
+ *  target can have: a frontend pointed at one region's backend, or a deploy
+ *  key for another. Development has one deployment and nothing to cross. */
+export function loadTarget(target: Target) {
+  const { env } = loadEnvironment(target)
+  const region = targetRegion(target)
+
+  if (region !== undefined) {
+    validateTarget(env, region)
   }
-  return args[1]
-}
 
-export function loadTarget(environment: Environment, region: Region) {
-  const { env } = loadEnvironment(environment, region)
-  validateTarget(env, region)
   return env
 }
 

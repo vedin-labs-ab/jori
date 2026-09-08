@@ -139,7 +139,7 @@ function printBatchResult(batchNumber: number, result: TruncateBatchResult) {
 }
 
 function printUsage() {
-  writeStdout("Usage: pnpm db:truncate:dev")
+  writeStdout("Usage: pnpm db:truncate dev")
   writeStdout("")
   writeStdout(
     "Truncates all application tables from the development Convex deployment."

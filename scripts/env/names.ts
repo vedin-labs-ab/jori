@@ -1,43 +1,46 @@
-/** The environments Jori deploys to.
- *
- *  Staging slots in here without touching anything else: add the name, add
- *  its env file, and provision resources under the matching `jori-staging`
- *  names. Nothing below is dev-or-prod specific by construction. */
-export const environments = ["dev", "prod"] as const
+import { isRegion, type Region } from "../../contracts/region.ts"
 
-export type Environment = (typeof environments)[number]
+/** The targets Jori deploys to: one development deployment, and one
+ *  production deployment per region. A target is one word used everywhere
+ *  a command is bound to a deployment: the argument it takes, the env file
+ *  it reads, and the confirmation a production deploy asks for. Staging
+ *  slots in here without touching anything else: add the name and its env
+ *  file. */
+export const targets = ["dev", "prod-eu", "prod-us"] as const
 
-export function isEnvironment(value: string): value is Environment {
-  return environments.includes(value as Environment)
+export type Target = (typeof targets)[number]
+
+export function isTarget(value: unknown): value is Target {
+  return targets.some((target) => target === value)
 }
 
-/** The env file an environment reads.
+export function readTarget(argv: readonly string[]): Target {
+  const [target, ...rest] = argv
+
+  if (!isTarget(target) || rest.length > 0) {
+    throw new Error(`Choose a target: ${targets.join(", ")}.`)
+  }
+
+  return target
+}
+
+/** Development is one deployment in one place; production is one per
+ *  region, and the region rides in the target's name. */
+export function targetRegion(target: Target): Region | undefined {
+  const region = target.split("-")[1]
+
+  return isRegion(region) ? region : undefined
+}
+
+/** The env file a target reads.
  *
  *  Development keeps the conventional name. The Convex CLI writes the selected
  *  deployment into `.env.local` and Vite loads it without being asked, so
  *  renaming it would mean fighting two tools for a filename that already means
- *  "this machine". Everything else is named for its environment, because
- *  nothing but development should ever be picked up by accident. */
-const files: Record<Environment, string> = {
-  dev: ".env.local",
-  prod: ".env.prod.local",
-}
-
-export function environmentFile(
-  environment: Environment,
-  region?: "eu" | "us"
-) {
-  if (region !== undefined) {
-    return `.env.${environment}.${region}.local`
-  }
-  return files[environment]
-}
-
-/** The Vercel CLI authenticates locally, but regional files select projects
- * explicitly. A shared .vercel link never decides a production target. */
-export const localNames: Record<Environment, readonly string[]> = {
-  dev: ["CONVEX_DEPLOYMENT"],
-  prod: ["CONVEX_DEPLOY_KEY"],
+ *  "this machine". Everything else is named for its target, because nothing
+ *  but development should ever be picked up by accident. */
+export function environmentFile(target: Target) {
+  return target === "dev" ? ".env.local" : `.env.${target}.local`
 }
 
 /** Variables the Convex deployment itself must hold before it can serve a

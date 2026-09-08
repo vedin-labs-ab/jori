@@ -1,9 +1,8 @@
-import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { parseEnv } from "node:util"
-import { type Region } from "../../contracts/region.ts"
-import { type Environment, environmentFile, localNames } from "./names.ts"
+import { commonDirectory } from "../git.ts"
+import { environmentFile, type Target } from "./names.ts"
 
 type LoadedEnvironment = {
   env: NodeJS.ProcessEnv
@@ -18,14 +17,11 @@ type LoadedEnvironment = {
  * always wins, which is what lets a one-off command point somewhere else
  * without editing a file.
  */
-export function loadEnvironment(
-  environment: Environment,
-  region?: Region
-): LoadedEnvironment {
+export function loadEnvironment(target: Target): LoadedEnvironment {
   const env: NodeJS.ProcessEnv = {}
   const sources: string[] = []
 
-  for (const source of environmentSources(environment, region)) {
+  for (const source of environmentSources(target)) {
     if (!existsSync(source)) {
       continue
     }
@@ -36,19 +32,15 @@ export function loadEnvironment(
 
   Object.assign(env, process.env)
 
-  const required =
-    region === undefined ? localNames[environment] : ["CONVEX_DEPLOYMENT"]
-  const missing = required.filter((name) => isEmpty(env[name]))
-
-  if (missing.length > 0) {
-    throw new Error(missingMessage(environment, missing, sources, region))
+  if (isEmpty(env.CONVEX_DEPLOYMENT)) {
+    throw new Error(missingMessage(target, sources))
   }
 
   return { env, sources }
 }
 
-function environmentSources(environment: Environment, region?: Region) {
-  const fileName = environmentFile(environment, region)
+function environmentSources(target: Target) {
+  const fileName = environmentFile(target)
   const candidates = [
     primaryCheckoutPath(fileName),
     path.join(process.cwd(), fileName),
@@ -60,35 +52,22 @@ function environmentSources(environment: Environment, region?: Region) {
 }
 
 function primaryCheckoutPath(fileName: string) {
-  const result = spawnSync("git", ["rev-parse", "--git-common-dir"], {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "ignore"],
-  })
-
-  if (result.status !== 0) {
+  try {
+    return path.join(path.dirname(commonDirectory()), fileName)
+  } catch {
     return null
   }
-
-  return path.join(
-    path.dirname(path.resolve(process.cwd(), result.stdout.trim())),
-    fileName
-  )
 }
 
 function isEmpty(value: string | undefined) {
   return value === undefined || value.trim() === ""
 }
 
-function missingMessage(
-  environment: Environment,
-  missing: readonly string[],
-  sources: readonly string[],
-  region?: Region
-) {
+function missingMessage(target: Target, sources: readonly string[]) {
   return [
-    `Missing ${environment} environment: ${missing.join(", ")}`,
+    `Missing ${target} environment: CONVEX_DEPLOYMENT`,
     `Loaded: ${sources.length === 0 ? "no env files" : sources.join(", ")}`,
-    `Add the missing values to ${environmentFile(environment, region)} in this`,
-    "checkout or the primary checkout.",
+    `Add it to ${environmentFile(target)} in this checkout or the primary`,
+    "checkout.",
   ].join("\n")
 }

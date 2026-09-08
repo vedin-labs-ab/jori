@@ -1,67 +1,49 @@
 import { readFileSync } from "node:fs"
 import { expect, test } from "vitest"
-import { taskArguments } from "./tasks"
+import { taskCommand } from "./tasks"
 
-test.each([
-  "sandbox",
-  "skills",
-])("%s development remains unregionalized", (task) => {
-  const args = taskArguments([task, "--env", "dev"])
-  expect(args.slice(0, 5)).toEqual([
-    "--experimental-strip-types",
-    "scripts/env/index.ts",
-    "--env",
-    "dev",
-    "--",
-  ])
-})
-
-test.each([
-  ["sandbox", "eu"],
-  ["sandbox", "us"],
-  ["skills", "eu"],
-  ["skills", "us"],
-])("%s production %s puts region before the command separator", (task, region) => {
-  const args = taskArguments([task, "--env", "prod", "--region", region])
-  expect(args.slice(0, 7)).toEqual([
-    "--experimental-strip-types",
-    "scripts/env/index.ts",
-    "--env",
-    "prod",
-    "--region",
-    region,
-    "--",
-  ])
-  expect(args.slice(7)).not.toContain("--region")
+test("binds a task to a target and forwards what follows", () => {
+  expect(taskCommand(["skills", "prod-eu"])).toEqual({
+    command: ["npx", "convex", "run", "skills/catalog:syncGlobalSkills"],
+    target: "prod-eu",
+  })
+  expect(taskCommand(["seed", "dev", "--organization", "org"])).toEqual({
+    command: [
+      "node",
+      "--experimental-strip-types",
+      "scripts/db/seed.ts",
+      "--organization",
+      "org",
+    ],
+    target: "dev",
+  })
 })
 
 test.each(
   [
     [],
-    ["unknown", "--env", "dev"],
-    ["sandbox", "--env", "staging"],
-    ["sandbox", "--env", "prod"],
-    ["sandbox", "--env", "prod", "--region", "invalid"],
-    ["sandbox", "--env", "prod", "--region", "eu", "--region", "us"],
-    ["sandbox", "--env", "dev", "--region", "eu"],
-    ["sandbox", "--env", "prod", "--", "--region", "eu"],
+    ["unknown", "dev"],
+    ["sandbox"],
+    ["sandbox", "staging"],
+    ["sandbox", "prod"],
+    ["sandbox", "--env", "dev"],
   ].map((args) => [args])
-)("rejects ambiguous targets and forwarded commands: %j", (args) => {
-  expect(() => taskArguments(args)).toThrow("Usage:")
+)("rejects a missing task or target: %j", (args) => {
+  expect(() => taskCommand(args)).toThrow("Usage:")
 })
 
-test("package commands allow ordinary pnpm region arguments", () => {
+test("package scripts take the target as their only argument", () => {
   const { scripts } = JSON.parse(readFileSync("package.json", "utf8")) as {
     scripts: Record<string, string>
   }
   for (const [name, task] of [
-    ["sandbox:build", "sandbox"],
-    ["skills:sync", "skills"],
+    ["sandbox", "sandbox"],
+    ["skills", "skills"],
+    ["db:seed", "seed"],
+    ["db:truncate", "truncate"],
   ]) {
-    for (const environment of ["dev", "prod"]) {
-      expect(scripts[`${name}:${environment}`]).toBe(
-        `node --experimental-strip-types scripts/env/task.ts ${task} --env ${environment}`
-      )
-    }
+    expect(scripts[name]).toBe(
+      `node --experimental-strip-types scripts/env/task.ts ${task}`
+    )
   }
 })

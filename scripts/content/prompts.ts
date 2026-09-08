@@ -1,18 +1,18 @@
-import { readdir, readFile, writeFile } from "node:fs/promises"
+import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
 
-export async function writePromptTemplates(root: string) {
+export async function renderPromptTemplates(root: string) {
   const promptTemplates = await readPromptTemplates(path.join(root, "prompts"))
 
-  await writeFile(
-    path.join(root, "prompts", "generated.ts"),
-    [
+  return {
+    content: [
       "export const promptTemplates = ",
       JSON.stringify(promptTemplates, null, 2),
       " as const\n\n",
       "export type PromptTemplateId = keyof typeof promptTemplates\n",
-    ].join("")
-  )
+    ].join(""),
+    file: path.join(root, "prompts", "generated.ts"),
+  }
 }
 
 async function readPromptTemplates(

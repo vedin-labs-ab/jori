@@ -3,13 +3,14 @@ import { spawn } from "node:child_process"
 export type Command = {
   args: string[]
   command: string
+  cwd?: string
   env?: NodeJS.ProcessEnv
   label: string
 }
 
-export async function runCommand({ args, command, env, label }: Command) {
+export async function runCommand({ args, command, cwd, env, label }: Command) {
   const exitCode = await new Promise<number>((resolve, reject) => {
-    const child = spawn(command, args, { env, stdio: "inherit" })
+    const child = spawn(command, args, { cwd, env, stdio: "inherit" })
 
     child.once("error", reject)
     child.once("exit", (code, signal) => {

@@ -143,7 +143,7 @@ function report(stage: string, result: unknown) {
 }
 
 function printUsage() {
-  writeStdout("Usage: pnpm db:seed:dev [--organization <id>]")
+  writeStdout("Usage: pnpm db:seed dev [--organization <id>]")
   writeStdout("")
   writeStdout(
     "Fills the development Convex deployment with a worked-in workspace:"
