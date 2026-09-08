@@ -48,25 +48,6 @@ test.each([
   expect(runtime.context.activeSurface?.communicated).toBe(false)
 })
 
-test("delivered integration offers mark the active surface communicated", async () => {
-  const runtime = communicationRuntime({
-    result: { delivery: { status: "delivered", surface: "slack" } },
-    surface: "slack",
-    tool: integrationOfferTool(),
-  })
-
-  await runTool({
-    call: {
-      args: { integration: "gmail", summary: "Gmail is needed here." },
-      id: "call_1",
-      name: "offer_integration",
-    },
-    runtime,
-  })
-
-  expect(runtime.context.activeSurface?.communicated).toBe(true)
-})
-
 test("final integration offers finish the tool step", async () => {
   const runtime = communicationRuntime({
     result: {
@@ -94,10 +75,15 @@ test("final integration offers finish the tool step", async () => {
 })
 
 test.each([
-  ["delivered", { delivery: { status: "delivered" } }],
-  ["not delivered", { delivery: { status: "created" } }],
-  ["already connected", { status: "connected" }],
-] as const)("integration offers do not finish without final when %s", async (_label, result) => {
+  [
+    "delivered on the active surface",
+    { delivery: { status: "delivered", surface: "slack" } },
+    true,
+  ],
+  ["delivered without a surface", { delivery: { status: "delivered" } }, false],
+  ["not delivered", { delivery: { status: "created" } }, false],
+  ["already connected", { status: "connected" }, false],
+] as const)("integration offers continue without final when %s", async (_label, result, communicated) => {
   const runtime = communicationRuntime({
     result,
     surface: "slack",
@@ -117,25 +103,7 @@ test.each([
   })
 
   expect(output.finished).toBe(false)
-})
-
-test("undelivered integration offers do not mark visible communication", async () => {
-  const runtime = communicationRuntime({
-    result: { delivery: { status: "created" } },
-    surface: "slack",
-    tool: integrationOfferTool(),
-  })
-
-  await runTool({
-    call: {
-      args: { integration: "gmail", summary: "Gmail is needed here." },
-      id: "call_1",
-      name: "offer_integration",
-    },
-    runtime,
-  })
-
-  expect(runtime.context.activeSurface?.communicated).toBe(false)
+  expect(runtime.context.activeSurface?.communicated).toBe(communicated)
 })
 
 function communicationRuntime(options: {

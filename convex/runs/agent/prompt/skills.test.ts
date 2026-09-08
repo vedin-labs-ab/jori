@@ -46,9 +46,6 @@ describe("runtime skill prompts", () => {
     expect(prompt).toContain(
       "Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax.\n\nUse Slack `blocks` when structure makes the message easier to scan."
     )
-    expect(prompt).toContain(
-      "Use Slack `blocks` when structure makes the message easier to scan"
-    )
     expect(prompt).toContain("Never use interactive Slack surfaces or controls")
     expect(prompt).not.toContain("## Slack")
     expect(prompt).not.toContain("### Text")

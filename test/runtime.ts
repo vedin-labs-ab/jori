@@ -1,4 +1,5 @@
 import { vi } from "vitest"
+import { type MessageSurface } from "../contracts/integrations"
 import { defaultSelection } from "../contracts/models/selection"
 import { type RuntimeContext } from "../contracts/runtime/context"
 import { type RuntimeId } from "../contracts/runtime/ids"
@@ -86,6 +87,33 @@ export function createRuntime(
     platform: options.platform ?? createPlatform(),
     sandbox: options.sandbox ?? createSandbox(),
   }
+}
+
+export function createSurfaceRuntime(
+  options: {
+    surface?: MessageSurface
+    target?: string
+    tool?: "send_reply" | "add_reaction"
+  } = {}
+) {
+  return createRuntime({
+    context: runtimeContext({
+      activeSurface: {
+        communicated: false,
+        surface: options.surface ?? "slack",
+        target: options.target ?? null,
+      },
+      tools: [
+        {
+          access: "write",
+          description: "Communicate on the active surface.",
+          inputSchema: {},
+          name: options.tool ?? "send_reply",
+          route: "surface",
+        },
+      ],
+    }),
+  })
 }
 
 /** One tool call that is expected to answer within the step. */
