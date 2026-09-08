@@ -26,6 +26,8 @@ type LinearTokenResponse =
 type LinearInstallationProfile = {
   botId: string
   botName?: string
+  botDisplayName: string
+  botUrl: string
   organization: {
     id: string
     name?: string
@@ -65,6 +67,8 @@ export async function fetchLinearInstallationProfile(accessToken: string) {
       viewer?: {
         id?: string
         name?: string
+        displayName?: string
+        url?: string
       }
       organization?: {
         id?: string
@@ -78,6 +82,8 @@ export async function fetchLinearInstallationProfile(accessToken: string) {
         viewer {
           id
           name
+          displayName
+          url
         }
         organization {
           id
@@ -89,15 +95,19 @@ export async function fetchLinearInstallationProfile(accessToken: string) {
   })
 
   const botId = result.data?.viewer?.id
+  const botDisplayName = result.data?.viewer?.displayName
+  const botUrl = result.data?.viewer?.url
   const organizationId = result.data?.organization?.id
 
-  if (botId === undefined || organizationId === undefined) {
+  if (!botId || !botDisplayName || !botUrl || !organizationId) {
     throw new Error("Could not read Linear installation profile")
   }
 
   return {
     botId,
     botName: result.data?.viewer?.name,
+    botDisplayName,
+    botUrl,
     organization: {
       id: organizationId,
       name: result.data?.organization?.name,

@@ -95,7 +95,7 @@ test("another regional app's mention does not open a conversation or run", async
   expect(stored.runs).toEqual([])
 })
 
-test("shared intake respects false and preserves Linear's unspecified fallback", async () => {
+test("shared intake requires an explicit Linear mention decision", async () => {
   const t = convexTest(schema, modules)
   await seedIntegration(t, "linear")
   for (const mentioned of [undefined, false, true]) {
@@ -110,7 +110,7 @@ test("shared intake respects false and preserves Linear's unspecified fallback",
   const stored = await t.run(
     async (ctx) => await ctx.db.query("messages").take(3)
   )
-  expect(stored.map((item) => item.mentioned)).toEqual([true, false, true])
+  expect(stored.map((item) => item.mentioned)).toEqual([false, false, true])
 })
 
 test("shared intake cannot reintroduce generic GitHub mentions", async () => {

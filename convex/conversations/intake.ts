@@ -143,30 +143,9 @@ function observedMessage(
 ): ObservedMessage {
   return {
     ...message,
-    mentioned: normalizeMentioned(message, integration),
+    mentioned: message.mentioned ?? false,
     actor: normalizeSelfActor(message.actor, integration),
   }
-}
-
-// Provider-normalized mention decisions are authoritative. Linear still
-// derives unspecified mentions from its recorded text.
-function normalizeMentioned(
-  message: ObservedMessage,
-  integration: Doc<"integrations">
-) {
-  if (message.mentioned !== undefined) {
-    return message.mentioned
-  }
-
-  if (integration.integration === "linear") {
-    return mentionsJori(message.text)
-  }
-
-  return false
-}
-
-function mentionsJori(text: string | undefined) {
-  return text !== undefined && /(?:^|\W)@jori(?:$|\W)/i.test(text)
 }
 
 async function messageRunConversation(

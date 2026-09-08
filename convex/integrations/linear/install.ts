@@ -18,6 +18,8 @@ export const recordOAuthInstallation = internalMutation({
     profile: v.object({
       botId: v.string(),
       botName: v.optional(v.string()),
+      botDisplayName: v.string(),
+      botUrl: v.string(),
       organization: v.object({
         id: v.string(),
         name: v.optional(v.string()),
@@ -51,6 +53,8 @@ export const recordOAuthInstallation = internalMutation({
       updatedAt: Date.now(),
       data: {
         botId: args.profile.botId,
+        botDisplayName: args.profile.botDisplayName,
+        botUrl: args.profile.botUrl,
       },
     })
   },
