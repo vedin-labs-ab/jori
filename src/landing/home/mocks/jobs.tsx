@@ -25,8 +25,18 @@ const JobEditorFields = lazy(async () => ({
     .JobEditorFields,
 }))
 const policyKey = jobPolicyKey(demoPermissions)
-const editorClassName =
-  "min-h-[35rem] min-w-0 rounded-xl border bg-card text-card-foreground"
+// The heights are the editor content's own, measured in the browser at
+// viewports 360, 390, 430, 640, 768, 1024, 1280 and 1920: 814, 790, 730,
+// 626, 706, 626, 610 and 610 pixels. The fields wrap against the editor's
+// container rather than the window, so the md grid's narrower column makes
+// the box taller again at 768. The placeholder and the editor carry the
+// same heights, so the box is the size the fields will take before they
+// arrive; re-measure when the fields change.
+const editorClassName = cn(
+  "min-h-[51rem] min-w-0 rounded-xl border bg-card text-card-foreground",
+  "min-[390px]:min-h-[49.5rem] min-[430px]:min-h-[46rem] sm:min-h-[39.5rem]",
+  "md:min-h-[44.5rem] lg:min-h-[39.5rem] xl:min-h-[38.5rem]"
+)
 
 /** The instructions pillar: the job editor's own fields, in place, over the
  *  brief the hero's thread runs on. */
