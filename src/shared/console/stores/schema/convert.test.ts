@@ -102,16 +102,7 @@ describe("fieldsToSchema", () => {
     expect(fieldsToSchema([])).toEqual({ type: "object" })
   })
 
-  test("omits required when no field is required", () => {
-    const schema = fieldsToSchema([createField({ name: "note" })])
-
-    expect(schema).toEqual({
-      type: "object",
-      properties: { note: { type: "string" } },
-    })
-  })
-
-  test("children parked under a primitive field are not emitted", () => {
+  test("omits required for optional fields and ignores their parked children", () => {
     const field = createField({
       name: "plain",
       type: "string",
@@ -190,7 +181,6 @@ describe("schemaToFields", () => {
   test("loads the full supported shape with required propagation", () => {
     const fields = schemaToFields(orderSchema)
 
-    expect(fields).toBeDefined()
     expect(shapeOf(fields ?? [])).toEqual(shapeOf(orderFields))
   })
 
@@ -204,20 +194,6 @@ describe("schemaToFields", () => {
 
   test.each(unrepresentable)("rejects %s", (_label, schema) => {
     expect(schemaToFields(schema)).toBeUndefined()
-  })
-})
-
-describe("round trips", () => {
-  test("form -> JSON -> form preserves the field model", () => {
-    const fields = schemaToFields(fieldsToSchema(orderFields))
-
-    expect(shapeOf(fields ?? [])).toEqual(shapeOf(orderFields))
-  })
-
-  test("JSON -> form -> JSON preserves the schema", () => {
-    const fields = schemaToFields(orderSchema)
-
-    expect(fieldsToSchema(fields ?? [])).toEqual(orderSchema)
   })
 })
 

@@ -7,6 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { submitFrom } from "../../../test/editor"
 import { CreateStoreDialog } from "./create"
 
 const createStore = vi.fn()
@@ -49,31 +50,19 @@ function expandAdvancedSettings() {
   fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
 }
 
-/** jsdom leaves out the browser's implicit Enter-to-submit, so pressing
- *  Enter in a field is modeled by submitting the form it belongs to. */
-function pressEnter(field: HTMLElement) {
-  const form = field.closest("form")
-
-  if (form === null) {
-    throw new Error("The field is not inside a form.")
-  }
-
-  fireEvent.submit(form)
-}
-
-describe("create store enter submission", () => {
-  test("Enter in the name field runs validation before any mutation", () => {
+describe("create store form submission", () => {
+  test("submitting from the name field validates before any mutation", () => {
     renderDialog()
-    pressEnter(screen.getByLabelText("Name"))
+    submitFrom(screen.getByLabelText("Name"))
 
     expect(screen.getByRole("alert").textContent).toBe("Give the store a name.")
     expect(createStore).not.toHaveBeenCalled()
   })
 
-  test("Enter in a named form creates the store without a schema", async () => {
+  test("submitting a named form creates the store without a schema", async () => {
     renderDialog()
     fillName()
-    pressEnter(screen.getByLabelText("Name"))
+    submitFrom(screen.getByLabelText("Name"))
 
     await waitFor(() => expect(createStore).toHaveBeenCalledOnce())
     expect(createStore.mock.calls[0]?.[0]).toMatchObject({

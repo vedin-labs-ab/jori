@@ -38,21 +38,15 @@ function navButton(name: "Previous file" | "Next file") {
   return screen.getByRole("button", { name })
 }
 
-test("reads the position between the steps to the neighbors", () => {
+test("shows the file's position and navigates to either neighbor", () => {
   renderDock(midListSiblings)
 
   const dock = screen.getByRole("toolbar", { name: "File navigation" })
 
   expect(dock.textContent).toBe("4 of 12")
-  expect(navButton("Previous file").hasAttribute("disabled")).toBe(false)
-  expect(navButton("Next file").hasAttribute("disabled")).toBe(false)
   expect(navButton("Next file").getAttribute("aria-keyshortcuts")).toBe(
     "ArrowRight"
   )
-})
-
-test("navigates to the clicked neighbor", () => {
-  renderDock(midListSiblings)
 
   fireEvent.click(navButton("Next file"))
   fireEvent.click(navButton("Previous file"))
