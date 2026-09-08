@@ -19,7 +19,7 @@ export function Chores() {
         </>
       }
       support
-      title="Hand over the work nobody wants."
+      title="Hand over the work nobody wants"
     >
       <DemoConsole className="h-[40rem]" navigation={console} sidebar={false} />
     </Section>

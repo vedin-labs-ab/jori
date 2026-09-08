@@ -63,12 +63,11 @@ export function Jobs() {
             written the job.
           </Definition>
           <Definition term="Only the access you gave it">
-            Each job runs with the access it was given and nothing it wasn't.
-            Web search is off until you turn it on.
+            Grants are per job. Web search is off until you turn it on.
           </Definition>
           <Definition term="Filed like anything else">
-            A job lives in a folder. Move it and it answers to the new folder:
-            who sees it, and where its runs are counted.
+            A job lives in a folder. Move it, and the new folder decides who
+            sees it and where its runs are counted.
           </Definition>
         </dl>
         <NearViewport className="min-w-0" fallback={<EditorPlaceholder />}>

@@ -2,6 +2,7 @@ import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
+import { RegionFlag } from "@/shared/region/flags"
 
 /**
  * Two rhythms, and only two. A lead section carries an argument the page is
@@ -193,6 +194,20 @@ export function Jori({ tilt = "left" }: { tilt?: keyof typeof tilts }) {
         )}
       />
       <span className={cn("inline-block", tilts[tilt].name)}>Jori</span>
+    </span>
+  )
+}
+
+/** A region named beside its flag, set in the foreground so the two
+ *  choices stand out of the muted line that offers them. */
+export function Region({ region }: { region: "eu" | "us" }) {
+  return (
+    <span className="whitespace-nowrap font-medium text-foreground">
+      <RegionFlag
+        className="mr-1 inline-block align-[-0.125em]"
+        region={region}
+      />
+      {region.toUpperCase()}
     </span>
   )
 }

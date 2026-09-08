@@ -28,8 +28,8 @@ export function Materials() {
         <>
           A job doesn't answer in a chat window. It writes rows to a table, a
           value to a store, a file to a folder. You and <Jori tilt="steep" />{" "}
-          edit the same materials with the same access, so anything they keep
-          current is something anyone can check and correct.
+          edit the same materials, so anything they keep current is something
+          you can check and correct.
         </>
       }
       title="Work lands where you can find it"
