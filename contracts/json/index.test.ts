@@ -24,9 +24,7 @@ describe("JSON transport codec", () => {
     }
 
     expect(decodeJson(encodeJson(value))).toEqual(value)
-    expect(decodeJsonObject(encodeJson(value)).properties).toEqual(
-      value.properties
-    )
+    expect(decodeJsonObject(encodeJson(value))).toEqual(value)
   })
 
   test("rejects non-json values", () => {
@@ -38,21 +36,6 @@ describe("JSON transport codec", () => {
 })
 
 describe("encodeToolResult", () => {
-  test("round-trips a tool input through a single encoded string", () => {
-    const input = {
-      properties: {
-        "Företag 😀": {
-          title: [{ text: { content: "Vedin Labs" } }],
-        },
-        ÅÄÖ: {
-          rich_text: [{ text: { content: "Ready" } }],
-        },
-      },
-    }
-
-    expect(decodeJsonObject(encodeJson(input))).toEqual(input)
-  })
-
   test("normalizes a missing tool result to json null", () => {
     expect(decodeJson(encodeToolResult(undefined))).toBeNull()
   })
