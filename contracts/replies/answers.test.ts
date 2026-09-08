@@ -18,7 +18,7 @@ test("a context of an unknown kind, or without an id, reads as none", () => {
   expect(readMessageContext(null)).toBe(undefined)
 })
 
-test("reads which reply a message answers and each part's values, keeping the strings", () => {
+test("reads the answered message and parts, keeping strings and empty selections", () => {
   expect(
     readChoicesAnswer({
       answer: {
@@ -64,12 +64,4 @@ test("an entry without an integer part and a values array is left out", () => {
       },
     })
   ).toEqual({ messageId: "m1", answers: [{ part: 1, values: ["yes"] }] })
-})
-
-test("an empty values array is an answer with nothing chosen", () => {
-  expect(
-    readChoicesAnswer({
-      answer: { messageId: "m1", answers: [{ part: 1, values: [] }] },
-    })
-  ).toEqual({ messageId: "m1", answers: [{ part: 1, values: [] }] })
 })

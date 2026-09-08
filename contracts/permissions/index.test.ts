@@ -7,6 +7,10 @@ import {
   toolPermissions,
 } from "."
 
+const permissionsByTool = new Map(
+  toolPermissions.map((permission) => [permission.tool, permission])
+)
+
 const requiredCommunicationToolNames = [
   "conversations_add_message",
   "slack_add_reaction",
@@ -72,10 +76,6 @@ describe("permission catalog shape", () => {
   })
 
   test("requires native runtime tools", () => {
-    const permissionsByTool = new Map(
-      toolPermissions.map((permission) => [permission.tool, permission])
-    )
-
     for (const tool of requiredNativeToolNames) {
       expect(permissionsByTool.get(tool)).toEqual(
         expect.objectContaining({
@@ -112,29 +112,19 @@ describe("permission catalog defaults", () => {
   })
 
   test("requires communication tools", () => {
-    const permissionsByTool = new Map(
-      toolPermissions.map((permission) => [permission.tool, permission])
-    )
-
     for (const tool of requiredCommunicationToolNames) {
       expect(permissionsByTool.get(tool)?.defaultMode).toBe("required")
     }
   })
 
   test("allows email send tools by default", () => {
-    const permissionsByTool = new Map(
-      toolPermissions.map((permission) => [permission.tool, permission])
-    )
-
     for (const tool of allowedEmailCommunicationToolNames) {
       expect(permissionsByTool.get(tool)?.defaultMode).toBe("allowed")
     }
   })
 
   test("documents summarized model reasoning on run activity", () => {
-    const activityPermission = toolPermissions.find(
-      (permission) => permission.tool === "search_run_activity"
-    )
+    const activityPermission = permissionsByTool.get("search_run_activity")
 
     expect(activityPermission?.usage).toContain("Summarized model reasoning")
     expect(activityPermission?.usage).toContain("not a verbatim transcript")
@@ -155,9 +145,7 @@ describe("permission catalog defaults", () => {
     ] as const
 
     for (const [tool, label] of calendarToolLabels) {
-      expect(
-        toolPermissions.find((permission) => permission.tool === tool)?.label
-      ).toBe(label)
+      expect(permissionsByTool.get(tool)?.label).toBe(label)
     }
   })
 })
