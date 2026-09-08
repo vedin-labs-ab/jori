@@ -43,9 +43,10 @@ async function writeValue(
 }
 
 describe("changing a store's schema", () => {
-  test("adds a schema to a schemaless store", async () => {
+  test("adds a schema and updates its hash and property count", async () => {
     const { database, ctx } = databaseContext()
     const storeId = await createStore(database, { schema: undefined })
+    const beforeHash = (await database.get(storeId))?.schemaHash
 
     const summary = await reschemaStore(ctx, {
       ...principal,
@@ -55,6 +56,7 @@ describe("changing a store's schema", () => {
 
     expect(summary?.schema).toEqual(totalSchema)
     expect(summary?.propertyCount).toBe(1)
+    expect(summary?.schemaHash).not.toBe(beforeHash)
   })
 
   test("removes the schema when passed null", async () => {
@@ -70,21 +72,6 @@ describe("changing a store's schema", () => {
     expect(summary?.schema).toBeUndefined()
     expect(summary?.propertyCount).toBeUndefined()
     expect(await database.get(storeId)).not.toHaveProperty("schema")
-  })
-
-  test("re-hashes the compiled schema on every change", async () => {
-    const { database, ctx } = databaseContext()
-    const storeId = await createStore(database, { schema: undefined })
-    const before = (await database.get(storeId)) as CollectionDoc<"store">
-    const beforeHash = before.schemaHash
-
-    const summary = await reschemaStore(ctx, {
-      ...principal,
-      storeId,
-      schema: totalSchema,
-    })
-
-    expect(summary?.schemaHash).not.toBe(beforeHash)
   })
 
   test("rejects an unsupported schema", async () => {

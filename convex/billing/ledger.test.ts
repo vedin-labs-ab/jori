@@ -38,8 +38,8 @@ const debit = {
   now: 42,
 }
 
-test("debits drain the allowance before the wallet", async () => {
-  const { ctx, patch } = fakeCtx()
+test("debits drain allowance first and record the pot split, tokens, and balance", async () => {
+  const { ctx, insert, patch } = fakeCtx()
 
   await debitRun(ctx, { ...debit, account: account(), micros: 1_200_000 })
 
@@ -47,6 +47,13 @@ test("debits drain the allowance before the wallet", async () => {
     micros: { allowance: 0, wallet: 300_000 },
     updatedAt: 42,
   })
+  expect(insert).toHaveBeenCalledWith(
+    "transactions",
+    expect.objectContaining({
+      micros: { amount: 1_200_000, allowance: 1_000_000, balance: 300_000 },
+      tokens: { input: 100, output: 20 },
+    })
+  )
 })
 
 test("the wallet may go negative for in-flight work", async () => {
@@ -80,24 +87,6 @@ test("a run accumulates money and tokens into a single debit entry", async () =>
     tokens: { input: 500, output: 100 },
     timestamp: 42,
   })
-})
-
-test("debit entries record their pot split, tokens, and the balance left", async () => {
-  const { ctx, insert } = fakeCtx()
-
-  await debitRun(ctx, {
-    ...debit,
-    account: account({ micros: { allowance: 50_000, wallet: 200_000 } }),
-    micros: 80_000,
-  })
-
-  expect(insert).toHaveBeenCalledWith(
-    "transactions",
-    expect.objectContaining({
-      micros: { amount: 80_000, allowance: 50_000, balance: 170_000 },
-      tokens: { input: 100, output: 20 },
-    })
-  )
 })
 
 test("top-ups are idempotent on the Stripe id", async () => {

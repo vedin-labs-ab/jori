@@ -22,7 +22,6 @@ test("unauthenticated callback uses regional first-party session handoff", async
       label: "Google",
     }
   )
-  expect(result.ok).toBe(false)
   if (result.ok) {
     throw new Error("Expected handoff")
   }
@@ -34,12 +33,11 @@ test("unauthenticated callback uses regional first-party session handoff", async
   expect(consume).not.toHaveBeenCalled()
 })
 
-test("mismatched or replayed session cannot reach provider code exchange", async () => {
+test("rejects a mismatched or replayed integration session with 403", async () => {
   const ctx = {
     auth: { getUserIdentity: async () => ({ subject: "user" }) },
     runMutation: vi.fn().mockRejectedValue(new Error("wrong session")),
   } as unknown as ActionCtx
-  const exchange = vi.fn()
   const state = {
     attemptId: "attempt_1",
     createdAt: Date.now(),
@@ -54,11 +52,6 @@ test("mismatched or replayed session cannot reach provider code exchange", async
       label: "Google",
     }
   )
-  if (result.ok) {
-    await exchange(result.code)
-  }
-  expect(result.ok).toBe(false)
-  expect(exchange).not.toHaveBeenCalled()
   if (result.ok) {
     throw new Error("Expected rejection")
   }
@@ -77,39 +70,25 @@ describe("readCallbackState", () => {
     expect(result).toEqual({ ok: true, state })
   })
 
-  test("rejects a state that fails to parse", async () => {
+  test.each([
+    { value: () => "not-a-state", error: "Invalid" },
+    {
+      value: () => JSON.stringify({ createdAt: Date.now() - 11 * 60 * 1000 }),
+      error: "Expired",
+    },
+  ])("rejects $error callback state", async ({ value, error }) => {
     const result = await readCallbackState({
-      value: "not-a-state",
+      value: value(),
       parse: parseJsonState,
       label: "Test OAuth",
     })
-
-    expect(result.ok).toBe(false)
 
     if (result.ok) {
       throw new Error("Expected a rejected state")
     }
 
     expect(result.response.status).toBe(400)
-    expect(await result.response.text()).toBe("Invalid Test OAuth state")
-  })
-
-  test("rejects a state older than ten minutes", async () => {
-    const state = { createdAt: Date.now() - 11 * 60 * 1000 }
-    const result = await readCallbackState({
-      value: JSON.stringify(state),
-      parse: parseJsonState,
-      label: "Test OAuth",
-    })
-
-    expect(result.ok).toBe(false)
-
-    if (result.ok) {
-      throw new Error("Expected a rejected state")
-    }
-
-    expect(result.response.status).toBe(400)
-    expect(await result.response.text()).toBe("Expired Test OAuth state")
+    expect(await result.response.text()).toBe(`${error} Test OAuth state`)
   })
 })
 

@@ -9,7 +9,7 @@ const other = "persons:other" as Id<"persons">
 
 const acting = { organizationId: "org", personId: testOwner }
 
-test("each resource type files into a folder and unfiles with null", async () => {
+test("filing and unfiling each resource type preserves its update clock", async () => {
   const { database, ctx } = databaseContext()
   const folderId = (await database.insert(
     "folders",
@@ -28,7 +28,10 @@ test("each resource type files into a folder and unfiles with null", async () =>
       resourceId,
       folderId,
     })
-    expect((await database.get(resourceId))?.folderId).toBe(folderId)
+    expect(await database.get(resourceId)).toMatchObject({
+      folderId,
+      updatedAt: 1,
+    })
 
     await fileResource(ctx, {
       ...acting,
@@ -36,26 +39,10 @@ test("each resource type files into a folder and unfiles with null", async () =>
       resourceId,
       folderId: null,
     })
-    expect((await database.get(resourceId))?.folderId).toBeUndefined()
+    const unfiled = await database.get(resourceId)
+    expect(unfiled?.folderId).toBeUndefined()
+    expect(unfiled?.updatedAt).toBe(1)
   }
-})
-
-test("filing leaves the resource's updatedAt untouched", async () => {
-  const { database, ctx } = databaseContext()
-  const folderId = (await database.insert(
-    "folders",
-    folderDoc()
-  )) as Id<"folders">
-  const resourceId = await database.insert("collections", tableDoc())
-
-  await fileResource(ctx, {
-    ...acting,
-    resourceType: "collection",
-    resourceId,
-    folderId,
-  })
-
-  expect((await database.get(resourceId))?.updatedAt).toBe(1)
 })
 
 test("filing someone else's personal resource is denied", async () => {

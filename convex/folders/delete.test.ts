@@ -54,7 +54,7 @@ async function remove(
   })
 }
 
-test("deleting takes every subfolder and lifts the contents to the parent", async () => {
+test("deleting a subtree lifts its contents without changing update clocks", async () => {
   const { database, ctx } = deletionContext()
   const parentId = await database.insert("folders", folderDoc())
   const folderId = await database.insert("folders", folderDoc({ parentId }))
@@ -77,10 +77,12 @@ test("deleting takes every subfolder and lifts the contents to the parent", asyn
   expect(await database.get(folderId)).toBeNull()
   expect(await database.get(childId)).toBeNull()
   expect(await database.get(grandchildId)).toBeNull()
-  expect((await database.get(seeded.collectionId))?.folderId).toBe(parentId)
-  expect((await database.get(seeded.fileId))?.folderId).toBe(parentId)
-  expect((await database.get(seeded.jobId))?.folderId).toBe(parentId)
-  expect((await database.get(deepFileId))?.folderId).toBe(parentId)
+  for (const resourceId of [...Object.values(seeded), deepFileId]) {
+    expect(await database.get(resourceId)).toMatchObject({
+      folderId: parentId,
+      updatedAt: 1,
+    })
+  }
 })
 
 test("deleting a root folder leaves the contents unfiled", async () => {
@@ -95,20 +97,11 @@ test("deleting a root folder leaves the contents unfiled", async () => {
   await remove(ctx, folderId)
 
   expect(await database.get(childId)).toBeNull()
-  expect((await database.get(seeded.collectionId))?.folderId).toBeUndefined()
-  expect((await database.get(seeded.fileId))?.folderId).toBeUndefined()
-  expect((await database.get(seeded.jobId))?.folderId).toBeUndefined()
-})
-
-test("refiling does not touch a resource's updatedAt", async () => {
-  const { database, ctx } = deletionContext()
-  const folderId = await database.insert("folders", folderDoc())
-  const seeded = await seedFiledResources(database, folderId)
-
-  await remove(ctx, folderId)
-
-  expect((await database.get(seeded.collectionId))?.updatedAt).toBe(1)
-  expect((await database.get(seeded.fileId))?.updatedAt).toBe(1)
+  for (const resourceId of Object.values(seeded)) {
+    const resource = await database.get(resourceId)
+    expect(resource?.folderId).toBeUndefined()
+    expect(resource?.updatedAt).toBe(1)
+  }
 })
 
 test("a destination that was itself deleted falls back to the root", async () => {
@@ -207,25 +200,18 @@ test("an overfull subtree continues through the scheduler", async () => {
   })
 })
 
-test("a deleted folder's spend follows it rather than dying with it", async () => {
+test.each([
+  { operation: "moving", deleteResources: false },
+  { operation: "deleting", deleteResources: true },
+])("$operation a folder's contents reparents its spend", async ({
+  deleteResources,
+}) => {
   const { database, ctx } = deletionContext()
   const parentId = await database.insert("folders", folderDoc())
   const folderId = await database.insert("folders", folderDoc({ parentId }))
   const runId = await seedSpend(database, ctx, folderId)
 
-  await remove(ctx, folderId)
-
-  expect((await database.get(runId))?.folderId).toBe(parentId)
-  expect(await spendFolders(database)).toEqual([parentId])
-})
-
-test("deleting the contents still only moves the spend", async () => {
-  const { database, ctx } = deletionContext()
-  const parentId = await database.insert("folders", folderDoc())
-  const folderId = await database.insert("folders", folderDoc({ parentId }))
-  const runId = await seedSpend(database, ctx, folderId)
-
-  await remove(ctx, folderId, true)
+  await remove(ctx, folderId, deleteResources)
 
   expect((await database.get(runId))?.folderId).toBe(parentId)
   expect(await spendFolders(database)).toEqual([parentId])

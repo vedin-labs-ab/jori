@@ -4,32 +4,29 @@ import {
   tableDoc,
   testOwner,
 } from "../../test/convex/collections"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
+import { databaseContext, id } from "../../test/convex/database"
 import { type CollectionDoc } from "../collections/spec"
 import { summarizeTable, summarizeTableWithOwner } from "./access"
 
-async function storedTable(
-  database: TestDatabase,
-  overrides: TableOverrides = {}
-) {
-  const tableId = await database.insert("collections", tableDoc(overrides))
-
-  return (await database.get(tableId)) as unknown as CollectionDoc<"table">
+function table(overrides: TableOverrides = {}): CollectionDoc<"table"> {
+  return {
+    ...tableDoc(overrides),
+    _id: id<"collections">("table"),
+    _creationTime: 1,
+  } as CollectionDoc<"table">
 }
 
 describe("summarizing a table", () => {
-  test("reads a missing document counter as zero", async () => {
-    const { database } = databaseContext()
-    const table = await storedTable(database)
+  test("reads a missing document counter as zero", () => {
+    const document = table()
 
-    expect(summarizeTable(table).rowCount).toBe(0)
+    expect(summarizeTable(document).rowCount).toBe(0)
   })
 
-  test("carries the maintained document counter", async () => {
-    const { database } = databaseContext()
-    const table = await storedTable(database, { documentCount: 42 })
+  test("carries the maintained document counter", () => {
+    const document = table({ documentCount: 42 })
 
-    expect(summarizeTable(table).rowCount).toBe(42)
+    expect(summarizeTable(document).rowCount).toBe(42)
   })
 })
 
@@ -45,8 +42,8 @@ describe("resolving the owner name", () => {
       name: "Ada Lovelace",
     })
 
-    const table = await storedTable(database)
-    const summary = await summarizeTableWithOwner(ctx, table)
+    const document = table()
+    const summary = await summarizeTableWithOwner(ctx, document)
 
     expect(summary.ownerName).toBe("Ada Lovelace")
   })
@@ -66,25 +63,25 @@ describe("resolving the owner name", () => {
       name: "Ada Lovelace",
     })
 
-    const table = await storedTable(database)
-    const summary = await summarizeTableWithOwner(ctx, table)
+    const document = table()
+    const summary = await summarizeTableWithOwner(ctx, document)
 
     expect(summary.ownerName).toBe("Ada Lovelace")
     expect(summary.ownerImage).toBe("https://lh3.example/avatar.png")
   })
 
   test("leaves the name unset without an owner", async () => {
-    const { database, ctx } = databaseContext()
-    const table = await storedTable(database, { ownerId: undefined })
-    const summary = await summarizeTableWithOwner(ctx, table)
+    const { ctx } = databaseContext()
+    const document = table({ ownerId: undefined })
+    const summary = await summarizeTableWithOwner(ctx, document)
 
     expect(summary.ownerName).toBeUndefined()
   })
 
   test("leaves the name unset when no identity names the owner", async () => {
-    const { database, ctx } = databaseContext()
-    const table = await storedTable(database)
-    const summary = await summarizeTableWithOwner(ctx, table)
+    const { ctx } = databaseContext()
+    const document = table()
+    const summary = await summarizeTableWithOwner(ctx, document)
 
     expect(summary.ownerName).toBeUndefined()
   })
