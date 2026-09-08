@@ -14,6 +14,8 @@ import { DraggableTableRow } from "../folders/drag/row"
 import { useResourceRowDrag } from "../folders/drag/state"
 import { SelectionHeadCell, SelectionRowCell } from "../list/bar"
 import {
+  type ColumnTier,
+  columnTier,
   facetEntries,
   type ListConfig,
   type ListControls,
@@ -41,11 +43,13 @@ export type MaterialCellContext = {
 }
 
 /** One column between Name and the menu. Its head sorts the list, opens
- *  the named facets, or — left plain — only labels the column. */
+ *  the named facets, or — left plain — only labels the column. The tier
+ *  says how wide the list must be before the column earns its place. */
 export type MaterialColumn<Row> = {
   cell: (row: Row, context: MaterialCellContext) => ReactNode
   head?: { facets: readonly string[] } | { sortKey: string }
   label: string
+  tier: ColumnTier
 }
 
 /** What tells one material list from another. */
@@ -173,13 +177,16 @@ function ColumnHead<Row>({
   config: ListConfig<Row>
   controls: ListControls
 }) {
+  const className = columnTier[column.tier]
+
   if (column.head === undefined) {
-    return <TableHead>{column.label}</TableHead>
+    return <TableHead className={className}>{column.label}</TableHead>
   }
 
   if ("sortKey" in column.head) {
     return (
       <SortHead
+        className={className}
         controls={controls}
         label={column.label}
         sortKey={column.head.sortKey}
@@ -189,6 +196,7 @@ function ColumnHead<Row>({
 
   return (
     <FilterHead
+      className={className}
       controls={controls}
       facets={facetEntries(config, column.head.facets)}
       label={column.label}
@@ -240,7 +248,9 @@ function MaterialListRow<Row extends MaterialListRow>({
       />
       <TableCell>{kind.nameCell(row)}</TableCell>
       {kind.columns.map((column) => (
-        <TableCell key={column.label}>{column.cell(row, context)}</TableCell>
+        <TableCell className={columnTier[column.tier]} key={column.label}>
+          {column.cell(row, context)}
+        </TableCell>
       ))}
       <TableCell className="text-right">{kind.menu(row)}</TableCell>
     </DraggableTableRow>

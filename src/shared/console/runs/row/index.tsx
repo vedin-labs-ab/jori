@@ -164,7 +164,7 @@ function ExpandedExecutionFallback() {
     <RunRowBody>
       <div
         aria-label="Loading run details"
-        className="grid gap-3 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]"
+        className="grid gap-3 px-3 py-3 text-xs @sm/run:grid-cols-[10rem_1fr]"
         role="status"
       >
         <div className="flex items-center gap-2">

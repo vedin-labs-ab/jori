@@ -5,6 +5,9 @@ import {
 } from "react"
 import { cn } from "@/lib/utils"
 
+/** One run in a list. The row is the container everything inside it
+ *  measures against, so a run reads the same in a full-width activity
+ *  page and in a narrow pane beside a chat. */
 export function RunRowFrame({
   children,
   className,
@@ -17,7 +20,7 @@ export function RunRowFrame({
   return (
     <article
       className={cn(
-        "overflow-hidden rounded-md bg-background ring-1 ring-foreground/10 ring-inset transition-shadow focus-within:ring-2 focus-within:ring-ring/50",
+        "@container/run overflow-hidden rounded-md bg-background ring-1 ring-foreground/10 ring-inset transition-shadow focus-within:ring-2 focus-within:ring-ring/50",
         className
       )}
       id={id}
@@ -61,7 +64,7 @@ export function RunRowControl({
   onPointerEnter?: PointerEventHandler<HTMLButtonElement>
 }) {
   const controlClassName = cn(
-    "group/run-row grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left outline-none md:grid-cols-[auto_1fr_auto]",
+    "group/run-row grid min-w-0 flex-1 grid-cols-[auto_1fr] items-center gap-3 p-3 text-left outline-none @lg/run:grid-cols-[auto_1fr_auto]",
     className
   )
 
@@ -110,7 +113,7 @@ export function RunRowMeta({
   return (
     <div
       className={cn(
-        "col-span-2 flex flex-wrap items-center gap-3 justify-self-start md:col-span-1 md:justify-self-end",
+        "col-span-2 flex flex-wrap items-center gap-3 justify-self-start @lg/run:col-span-1 @lg/run:justify-self-end",
         className
       )}
     >

@@ -35,7 +35,7 @@ export function FileDownloadButton({
   compact = false,
   url,
 }: {
-  /** Collapses to an icon on small screens, for the shell header. */
+  /** Collapses to an icon in a tight shell header. */
   compact?: boolean
   url: string
 }) {
@@ -43,12 +43,12 @@ export function FileDownloadButton({
     <Button
       aria-label="Download"
       asChild
-      className={cn(compact && "max-sm:size-7 max-sm:px-0")}
+      className={cn(compact && "@max-lg/inset:size-7 @max-lg/inset:px-0")}
       variant="outline"
     >
       <a href={url} rel="noreferrer" target="_blank">
         <Download />
-        <span className={cn(compact && "max-sm:hidden")}>Download</span>
+        <span className={cn(compact && "@max-lg/inset:hidden")}>Download</span>
       </a>
     </Button>
   )

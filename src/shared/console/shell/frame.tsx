@@ -31,7 +31,7 @@ import { SaveIcon, type SaveState } from "../materials/save"
 import { ConsoleLink } from "./link"
 import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
 
-const consoleFrame = "w-full px-4 md:px-6"
+const consoleFrame = "w-full px-4 @3xl/inset:px-6"
 
 /** The console's chrome around a page: the sidebar it is handed, and the
  *  header — trigger, the page's name or breadcrumb trail, the actions slot
@@ -89,8 +89,12 @@ export function ConsoleFrame({
           the page, so a wide grid or a long line of code widens the
           whole pane instead of scrolling inside its own scrollport —
           pushing the header's actions out past the clipped edge. */}
+      {/* @container/inset: the console adapts to the room it has, not to
+          the viewport. The same views fill a window in the console and a
+          phone-sized box on the landing page, so the header and the page
+          gutters ask the inset how wide it is. */}
       <SidebarInset
-        className="isolate min-h-0 min-w-0 outline-none"
+        className="@container/inset isolate min-h-0 min-w-0 outline-none"
         id={contentId}
         tabIndex={-1}
       >
@@ -172,12 +176,18 @@ function ConsoleHeaderTitle({
           page, so a reader walking the breadcrumb's navigation should
           reach the page's ancestry and stop. It draws its own divider,
           once it has something to divide from the trail. */}
-      {shown.material.aside}
+      {/* A note is the first thing a narrow header gives up: contents
+          before commentary. `contents` once there is room, so the aside
+          and its divider stay the header's own flex children. */}
+      <span className="hidden @2xl/inset:contents">{shown.material.aside}</span>
     </>
   )
 }
 
-/** The linked ancestors, then the material itself as the current page. */
+/** The linked ancestors, then the material itself as the current page.
+ *  A narrow inset keeps only the nearest ancestor: where the page sits is
+ *  worth the room, the whole way there is not. The separators go with the
+ *  ancestors they follow, so what is left reads as a trail either way. */
 function MaterialTrail({
   material,
   trail,
@@ -190,8 +200,15 @@ function MaterialTrail({
       <BreadcrumbList className="flex-nowrap">
         {trail.map((segment, index) => (
           <Fragment key={segmentKey(segment)}>
-            {index === 0 ? null : <BreadcrumbSeparator />}
-            <BreadcrumbItem className="min-w-0">
+            {index === 0 ? null : (
+              <BreadcrumbSeparator className="@max-lg/inset:hidden" />
+            )}
+            <BreadcrumbItem
+              className={cn(
+                "min-w-0",
+                index < trail.length - 1 && "@max-lg/inset:hidden"
+              )}
+            >
               <BreadcrumbLink asChild className="truncate">
                 <ConsoleLink params={segment.params} to={segment.to}>
                   {segment.name}

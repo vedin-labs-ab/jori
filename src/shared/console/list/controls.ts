@@ -3,7 +3,26 @@ import { useCallback, useState } from "react"
 
 // Header-embedded sorting and filtering for client-side list pages. Each
 // page declares a config — sort accessors and facet dimensions — and the
-// hook holds one active sort plus per-facet selections.
+// hook holds one active sort plus per-facet selections. A page declares
+// what each column is worth here too.
+
+/** What a column is worth, as the width its list needs before the column
+ *  earns its place. A list drops its least telling columns rather than
+ *  hiding them behind a sideways scroll, so the same table reads in a
+ *  phone-sized box and in a full window. The width is the list's own —
+ *  ConsoleListLayout is the `list` container — and every class is written
+ *  out in full, because Tailwind reads these names as source. */
+export const columnTier = {
+  "2xl": "@max-2xl/list:hidden",
+  "3xl": "@max-3xl/list:hidden",
+  "4xl": "@max-4xl/list:hidden",
+  lg: "@max-lg/list:hidden",
+  md: "@max-md/list:hidden",
+  xl: "@max-xl/list:hidden",
+  xs: "@max-xs/list:hidden",
+} as const
+
+export type ColumnTier = keyof typeof columnTier
 
 export type SortDirection = "asc" | "desc"
 

@@ -8,14 +8,18 @@ import { cn } from "@/lib/utils"
 // the shell header.
 
 /** Page root for full-bleed list pages. Relative so the floating selection
- *  bar can anchor to it. */
+ *  bar can anchor to it, and the `list` container the column tiers in
+ *  list/controls are measured against. */
 export function ConsoleListLayout({
   className,
   ...props
 }: ComponentProps<"section">) {
   return (
     <section
-      className={cn("relative flex min-h-0 min-w-0 flex-1 flex-col", className)}
+      className={cn(
+        "@container/list relative flex min-h-0 min-w-0 flex-1 flex-col",
+        className
+      )}
       {...props}
     />
   )
@@ -30,7 +34,7 @@ export function ConsoleListToolbar({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-x-4 gap-y-3 border-b px-4 py-3 md:px-6",
+        "flex flex-wrap items-center gap-x-4 gap-y-3 border-b px-4 py-3 @3xl/inset:px-6",
         className
       )}
       {...props}
@@ -47,7 +51,7 @@ export function ConsoleListContent({
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-3 pb-6 md:px-6",
+        "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pt-3 pb-6 @3xl/inset:px-6",
         className
       )}
       {...props}
@@ -79,8 +83,8 @@ export function ConsoleListTable({
         className={cn(
           "[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-background",
           "[&_th]:shadow-[inset_0_-1px_0_var(--color-border)] [&_thead_tr]:border-0",
-          "[&_td:first-child]:pl-4 [&_th:first-child]:pl-4 md:[&_td:first-child]:pl-6 md:[&_th:first-child]:pl-6",
-          "[&_td:last-child]:pr-4 [&_th:last-child]:pr-4 md:[&_td:last-child]:pr-6 md:[&_th:last-child]:pr-6",
+          "[&_td:first-child]:pl-4 [&_th:first-child]:pl-4 @3xl/inset:[&_td:first-child]:pl-6 @3xl/inset:[&_th:first-child]:pl-6",
+          "[&_td:last-child]:pr-4 [&_th:last-child]:pr-4 @3xl/inset:[&_td:last-child]:pr-6 @3xl/inset:[&_th:last-child]:pr-6",
           className
         )}
         {...props}
@@ -98,7 +102,7 @@ export function ConsoleListFooter({
 }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("bg-background px-4 py-2 md:px-6", className)}
+      className={cn("bg-background px-4 py-2 @3xl/inset:px-6", className)}
       {...props}
     />
   )

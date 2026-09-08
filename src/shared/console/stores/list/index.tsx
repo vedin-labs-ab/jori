@@ -56,12 +56,18 @@ const drag = (store: StoreSummary): ResourceDragItem => ({
 })
 
 const columns = materialColumns<StoreSummary>([
-  measureColumn("Properties", "properties", (store) => (
-    <StorePropertiesCell store={store} />
-  )),
-  measureColumn("Version", "version", (store) => (
-    <StoreVersionCell store={store} />
-  )),
+  measureColumn(
+    "Properties",
+    "properties",
+    (store) => <StorePropertiesCell store={store} />,
+    "2xl"
+  ),
+  measureColumn(
+    "Version",
+    "version",
+    (store) => <StoreVersionCell store={store} />,
+    "2xl"
+  ),
 ])
 
 export function StoreList({

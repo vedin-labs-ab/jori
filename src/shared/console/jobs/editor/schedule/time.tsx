@@ -13,7 +13,7 @@ export function JobTimePicker({
   value: string
 }) {
   return (
-    <div className="grid w-full min-w-32 gap-2 sm:w-max">
+    <div className="grid w-full min-w-32 gap-2 @md/editor:w-max">
       <Label className="whitespace-nowrap" htmlFor={id}>
         <span>
           Time{" "}

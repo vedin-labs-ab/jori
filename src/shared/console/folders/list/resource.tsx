@@ -6,7 +6,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import { SelectionRowCell } from "../../list/bar"
+import { columnTier } from "../../list/controls"
 import { type RowSelection } from "../../list/selection"
 import { MaterialOwnerCell } from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
@@ -59,20 +61,22 @@ export function ResourceListRow({
       <TableCell>
         <ResourceLink resource={resource} />
       </TableCell>
-      <TableCell className="text-muted-foreground">
+      <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
         <span className="inline-flex items-center gap-1.5">
           {resourcePresentation(resource).label}
           <ResourceStatusMark status={resource.status} />
         </span>
       </TableCell>
-      <TableCell>
+      <TableCell className={columnTier.lg}>
         <MaterialOwnerCell owner={materialOwner(resource)} />
       </TableCell>
       {/* Resources hold nothing, so the Items column carries a quiet dash —
           an empty cell under a sortable header would read as missing data. */}
-      <TableCell className="text-muted-foreground/60">&mdash;</TableCell>
+      <TableCell className={cn("text-muted-foreground/60", columnTier["2xl"])}>
+        &mdash;
+      </TableCell>
       <TableCell
-        className="text-muted-foreground"
+        className={cn("text-muted-foreground", columnTier.xs)}
         title={absoluteTime(resource.updatedAt)}
       >
         {relativeTime(resource.updatedAt, now)}

@@ -39,6 +39,10 @@ const nameLinkClassName =
 
 const figureClassName = "text-right tabular-nums"
 
+/** The two figures a narrow page can do without: failures are a subset of
+ *  the runs beside them, and the average is the spend over those runs. */
+const detailedFigureClassName = "@max-2xl/usage:hidden"
+
 type RankedEntry = { ended: number; failed: number; micros: number }
 
 /** The leaders, and the rest on request. Both tables hand their rows in
@@ -53,9 +57,11 @@ function RankedTable({ noun, rows }: { noun: string; rows: ReactNode[] }) {
           <TableRow className="hover:bg-transparent">
             <TableHead>{noun}</TableHead>
             <FigureHead>Runs</FigureHead>
-            <FigureHead>Failed</FigureHead>
+            <FigureHead className={detailedFigureClassName}>Failed</FigureHead>
             <FigureHead>Spend</FigureHead>
-            <FigureHead>Cost / run</FigureHead>
+            <FigureHead className={detailedFigureClassName}>
+              Cost / run
+            </FigureHead>
             <FigureHead>Share</FigureHead>
           </TableRow>
         </TableHeader>
@@ -85,8 +91,16 @@ function RankedTable({ noun, rows }: { noun: string; rows: ReactNode[] }) {
   )
 }
 
-function FigureHead({ children }: { children: ReactNode }) {
-  return <TableHead className={figureClassName}>{children}</TableHead>
+function FigureHead({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <TableHead className={cn(figureClassName, className)}>{children}</TableHead>
+  )
 }
 
 function FigureCell({
@@ -126,11 +140,18 @@ function RankedRow({
         {caption}
       </TableCell>
       <FigureCell>{entry.ended}</FigureCell>
-      <FigureCell className={entry.failed > 0 ? "text-destructive" : ""}>
+      <FigureCell
+        className={cn(
+          detailedFigureClassName,
+          entry.failed > 0 && "text-destructive"
+        )}
+      >
         {entry.failed}
       </FigureCell>
       <FigureCell className="font-medium">{formatUsd(entry.micros)}</FigureCell>
-      <FigureCell>{cost === undefined ? "—" : formatUsd(cost)}</FigureCell>
+      <FigureCell className={detailedFigureClassName}>
+        {cost === undefined ? "—" : formatUsd(cost)}
+      </FigureCell>
       <TableCell>
         <div className="flex items-center justify-end gap-2 tabular-nums">
           <span>{usagePercent(entry.micros, total) ?? "—"}</span>

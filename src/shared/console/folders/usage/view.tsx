@@ -48,18 +48,22 @@ export function UsageView({
       <ConsoleHeaderActions>
         <WindowSelect days={days} onDaysChange={onDaysChange} />
       </ConsoleHeaderActions>
-      {/* Held above the page's own scroll: the window's figures stay put
-          while the detail below moves. */}
-      <div className="border-b px-4 py-3 md:px-6">
-        <UsageStats usage={usage} />
+      {/* The page reads its own width: the figures band and the charts
+          divide against the room the view has, not the window's. */}
+      <div className="@container/usage flex min-h-0 min-w-0 flex-1 flex-col">
+        {/* Held above the page's own scroll: the window's figures stay put
+            while the detail below moves. */}
+        <div className="border-b px-4 py-3 @3xl/inset:px-6">
+          <UsageStats usage={usage} />
+        </div>
+        <ConsoleListContent>
+          {usage === undefined ? (
+            <ConsoleListLoading />
+          ) : (
+            <UsageBody days={days} folderId={folderId} usage={usage} />
+          )}
+        </ConsoleListContent>
       </div>
-      <ConsoleListContent>
-        {usage === undefined ? (
-          <ConsoleListLoading />
-        ) : (
-          <UsageBody days={days} folderId={folderId} usage={usage} />
-        )}
-      </ConsoleListContent>
     </>
   )
 }
@@ -128,7 +132,10 @@ function UsageBody({
           enough to read both at a glance — and the whole width when there
           is nowhere further down to point to. */}
       <div
-        className={cn("grid gap-4 md:gap-6", hasFolders && "lg:grid-cols-2")}
+        className={cn(
+          "grid gap-4 md:gap-6",
+          hasFolders && "@3xl/usage:grid-cols-2"
+        )}
       >
         <Section className="min-w-0">
           <SectionHeader

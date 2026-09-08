@@ -33,7 +33,7 @@ export function EmptyRow({
  *  there is nothing to show. */
 export function ConsoleListEmpty({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-6 md:px-6">
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-6 @3xl/inset:px-6">
       {children}
     </div>
   )

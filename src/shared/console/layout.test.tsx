@@ -54,7 +54,7 @@ test("toolbar search exposes a compact mobile trigger", () => {
     name: "Search files: report",
   })
 
-  expect(trigger.className).toContain("sm:hidden")
+  expect(trigger.className).toContain("@xl/inset:hidden")
   expect(trigger.dataset.variant).toBe("secondary")
 })
 
@@ -101,6 +101,6 @@ test("header buttons keep their accessible label when compact", () => {
   const button = screen.getByRole("button", { name: "New job" })
   const label = screen.getByText("New job")
 
-  expect(button.className).toContain("max-sm:size-7")
-  expect(label.className).toContain("max-sm:hidden")
+  expect(button.className).toContain("@max-lg/inset:size-7")
+  expect(label.className).toContain("@max-lg/inset:hidden")
 })

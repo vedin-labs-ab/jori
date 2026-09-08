@@ -236,12 +236,17 @@ export function DetailRow({
   label: ReactNode
 }) {
   return (
-    <div className="grid gap-2 px-3 py-3 text-xs sm:grid-cols-[10rem_1fr]">
-      <div className="flex items-start gap-2 font-medium">
-        <Icon className={cn("mt-0.5 size-3.5", iconClassName)} />
-        {label}
+    // Its own container: a detail row keeps its label column wherever it
+    // is read — a run in a list, a job's overview — and stacks where the
+    // two columns would not fit.
+    <div className="@container/run">
+      <div className="grid gap-2 px-3 py-3 text-xs @sm/run:grid-cols-[10rem_1fr]">
+        <div className="flex items-start gap-2 font-medium">
+          <Icon className={cn("mt-0.5 size-3.5", iconClassName)} />
+          {label}
+        </div>
+        {children}
       </div>
-      {children}
     </div>
   )
 }

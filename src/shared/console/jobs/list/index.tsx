@@ -42,12 +42,12 @@ const drag = (job: Job): ResourceDragItem => ({
 /** After the name: how the job starts, what it may touch, where it is
  *  filed and whose it is, then when it last ran and when it runs next. */
 const columns: MaterialColumn<Job>[] = [
-  { cell: (job) => <JobTriggerCell job={job} />, label: "Trigger" },
-  { cell: (job) => <JobToolSummary job={job} />, label: "Tools" },
-  folderColumn(),
-  ownerColumn(materialOwner),
-  timeColumn("Last run", "fired", (job) => job.firedAt),
-  timeColumn("Next run", "next", nextRunAt),
+  { cell: (job) => <JobTriggerCell job={job} />, label: "Trigger", tier: "md" },
+  { cell: (job) => <JobToolSummary job={job} />, label: "Tools", tier: "4xl" },
+  folderColumn("lg"),
+  ownerColumn(materialOwner, "xl"),
+  timeColumn("Last run", "fired", (job) => job.firedAt, "4xl"),
+  timeColumn("Next run", "next", nextRunAt, "3xl"),
 ]
 
 export function JobList({

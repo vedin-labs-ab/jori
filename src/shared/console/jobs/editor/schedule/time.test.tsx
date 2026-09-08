@@ -19,5 +19,5 @@ test("keeps the timezone label on one line and sizes the field to its content", 
   const label = input.labels?.item(0)
 
   expect(label?.className).toContain("whitespace-nowrap")
-  expect(input.parentElement?.className).toContain("sm:w-max")
+  expect(input.parentElement?.className).toContain("@md/editor:w-max")
 })

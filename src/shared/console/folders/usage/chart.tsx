@@ -57,7 +57,7 @@ export function UsageCharts({
 
   return (
     <>
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 @3xl/usage:grid-cols-2">
         <Section className="min-w-0">
           <SectionHeader title="Spend" />
           <StackedChart measure="micros" {...chart} />
