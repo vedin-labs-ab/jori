@@ -6,12 +6,14 @@ import {
   type JsonObject,
   type JsonValue,
 } from "../../../contracts/json"
+import { type ApprovalExecution } from "../../../contracts/runtime/handoffs"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type ApprovalBrokerContext } from "../../broker/approval"
 import { loadRunBrokerContext } from "../../broker/auth"
 import { type GitHubCloneCredentials } from "../platform"
+import { toolErrorResult } from "./results"
 
 // The broker carries every provider's tool implementation, more than the act
 // step's module graph can hold within the runtime's evaluation memory
@@ -22,7 +24,7 @@ async function broker() {
 
 type ApprovalClaim =
   | { state: "done"; result: string }
-  | { state: "executing" }
+  | { state: "executing"; expiresAt: number }
   | { state: "invalid" }
   | { state: "claim"; surface: ToolSurface; tool: string; inputJson: string }
 
@@ -79,45 +81,67 @@ export async function requestRunApproval(
 }
 
 /**
- * Run an approved action exactly once. The claim mutation is the lease: a
- * second caller sees the stored result or an in-flight execution instead of
- * calling the provider again.
+ * Attempt an approved action at most once. A lost result cannot establish
+ * whether a provider write happened, so an expired claim never retries it.
  */
 export async function executeRunApproval(
   ctx: ActionCtx,
   args: { approvalId: Id<"approvals">; runId: Id<"runs"> }
-): Promise<string> {
+): Promise<ApprovalExecution> {
   const claim = (await ctx.runMutation(internal.approvals.execution.claim, {
     approvalId: args.approvalId,
     runId: args.runId,
   })) as ApprovalClaim
 
-  if (claim.state === "done") {
-    return claim.result
+  if (claim.state === "done" || claim.state === "executing") {
+    return claim
   }
 
   if (claim.state !== "claim") {
-    return encodeToolResult(claimNotReadyResult(claim.state))
+    return {
+      state: "done",
+      result: encodeToolResult(toolErrorResult("Approval is not executable.")),
+    }
   }
 
-  const { executeApprovedTool } = await broker()
-  const result = await executeApprovedTool(
-    ctx,
-    await loadBrokerContext(ctx, args.runId),
-    {
-      args: decodeJsonObject(claim.inputJson),
-      surface: claim.surface,
-      tool: claim.tool,
-    }
-  )
-  const encoded = encodeToolResult(result)
-
-  await ctx.runMutation(internal.approvals.execution.record, {
-    approvalId: args.approvalId,
+  const encoded = await attemptApproval(ctx, args.runId, claim)
+  // Persistence failures must propagate, not become a second execution or
+  // overwrite a result whose commit acknowledgement was lost.
+  const result = await ctx.runMutation(internal.approvals.execution.record, {
+    ...args,
     result: encoded,
   })
 
-  return encoded
+  return { state: "done", result }
+}
+
+async function attemptApproval(
+  ctx: ActionCtx,
+  runId: Id<"runs">,
+  claim: Extract<ApprovalClaim, { state: "claim" }>
+) {
+  try {
+    const { executeApprovedTool } = await broker()
+    const result = await executeApprovedTool(
+      ctx,
+      await loadBrokerContext(ctx, runId),
+      {
+        args: decodeJsonObject(claim.inputJson),
+        surface: claim.surface,
+        tool: claim.tool,
+      }
+    )
+
+    return encodeToolResult(result)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Execution failed."
+
+    return encodeToolResult(
+      toolErrorResult(
+        `${message} Do not retry this approved action automatically; verify any external effects first.`
+      )
+    )
+  }
 }
 
 /** Cloning is a GitHub tool call the sandbox performs itself, so it is
@@ -146,17 +170,6 @@ export async function fetchRunCloneCredentials(
     owner: args.owner,
     repo: args.repo,
   })
-}
-
-function claimNotReadyResult(state: "executing" | "invalid") {
-  if (state === "executing") {
-    return { status: "pending", message: "Approved action is still running." }
-  }
-
-  return {
-    status: "error",
-    error: { message: "Approval is not executable." },
-  }
 }
 
 async function loadBrokerContext(

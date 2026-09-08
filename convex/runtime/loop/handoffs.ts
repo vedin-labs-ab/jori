@@ -75,9 +75,7 @@ async function reconcileApproval(
   await recordApprovalResolved(runtime, approval)
 
   if (approval.status === "approved") {
-    notes.push(await executeApprovedAction(runtime, approval))
-
-    return true
+    return await executeApprovedAction(runtime, approval)
   }
 
   await runtime.platform.markApprovalConsumed({ approvalId: approval.id })
@@ -90,17 +88,34 @@ async function executeApprovedAction(
   runtime: AgentRuntime,
   approval: ApprovalHandoff
 ) {
-  const encoded = await runtime.platform.executeApproval({
+  const execution = await runtime.platform.executeApproval({
     approvalId: approval.id,
     runId: runtime.context.run.id,
   })
-  const result = await materializeSandboxResult(runtime, decodeJson(encoded))
+
+  if (execution.state === "executing") {
+    approval.executionPendingUntil = execution.expiresAt
+
+    return false
+  }
+
+  delete approval.executionPendingUntil
+
+  const result = await materializeSandboxResult(
+    runtime,
+    decodeJson(execution.result)
+  )
 
   markVisibleCommunication(runtime, approval.tool, result)
 
-  return userNote(
-    `Approved action \`${approval.tool}\` (${approval.code}) ran. Result: ${encodeToolResult(result)}`
-  )
+  await runtime.platform.markApprovalConsumed({
+    approvalId: approval.id,
+    message: userNote(
+      `Approved action \`${approval.tool}\` (${approval.code}) returned: ${encodeToolResult(result)}. Treat an error as a failure, not evidence that the action succeeded.`
+    ),
+  })
+
+  return true
 }
 
 async function reconcileOffer(
@@ -130,9 +145,13 @@ async function reconcileOffer(
 
 function pendingHandoffs(handoffs: RunHandoffs): PendingHandoff[] {
   const approvals = handoffs.approvals
-    .filter(isPendingApproval)
+    .filter(
+      (approval) =>
+        isPendingApproval(approval) ||
+        approval.executionPendingUntil !== undefined
+    )
     .map((approval) => ({
-      expiresAt: approval.expiresAt,
+      expiresAt: approval.executionPendingUntil ?? approval.expiresAt,
       subject: { id: approval.id, kind: "approval" as const },
     }))
   const offers = handoffs.offers.filter(isPendingOffer).map((offer) => ({

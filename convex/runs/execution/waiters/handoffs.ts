@@ -1,5 +1,8 @@
 import { v } from "convex/values"
-import { type RunHandoffs } from "../../../../contracts/runtime/handoffs"
+import {
+  approvalExecutionTimeoutMs,
+  type RunHandoffs,
+} from "../../../../contracts/runtime/handoffs"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import {
   internalMutation,
@@ -7,6 +10,8 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../../../_generated/server"
+import { appendTranscript } from "../transcript/data"
+import { type TranscriptMessage, transcriptMessage } from "../transcript/schema"
 
 const scanLimit = 200
 
@@ -23,10 +28,11 @@ export const load = internalQuery({
 export const consumeApproval = internalMutation({
   args: {
     approvalId: v.id("approvals"),
+    message: v.optional(transcriptMessage),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    return await consumeApprovalHandoff(ctx, args.approvalId)
+    return await consumeApprovalHandoff(ctx, args.approvalId, args.message)
   },
 })
 
@@ -52,11 +58,16 @@ export async function loadRunHandoffs(
 
 export async function consumeApprovalHandoff(
   ctx: MutationCtx,
-  approvalId: Id<"approvals">
+  approvalId: Id<"approvals">,
+  message?: TranscriptMessage
 ) {
   const approval = await ctx.db.get(approvalId)
 
   if (approval !== null && approval.consumedAt === undefined) {
+    if (message !== undefined) {
+      await appendTranscript(ctx, approval.runId, [message])
+    }
+
     await ctx.db.patch(approval._id, { consumedAt: Date.now() })
   }
 
@@ -107,6 +118,12 @@ function toApprovalHandoff(approval: Doc<"approvals">) {
     summary: approval.summary,
     code: approval.code,
     expiresAt: approval.expiresAt,
+    ...(approval.claimedAt === undefined || approval.result !== undefined
+      ? {}
+      : {
+          executionPendingUntil:
+            approval.claimedAt + approvalExecutionTimeoutMs,
+        }),
   }
 }
 

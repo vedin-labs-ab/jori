@@ -8,7 +8,10 @@ import {
 } from "../../contracts/runtime/context"
 import { type RuntimeEventRecord } from "../../contracts/runtime/events"
 import { type UploadedFile } from "../../contracts/runtime/files"
-import { type RunHandoffs } from "../../contracts/runtime/handoffs"
+import {
+  type ApprovalExecution,
+  type RunHandoffs,
+} from "../../contracts/runtime/handoffs"
 import { type RuntimeId } from "../../contracts/runtime/ids"
 import { type AgentRunStatus } from "../../contracts/runtime/runs"
 import { type SurfaceReactionTarget } from "../../contracts/runtime/surface"
@@ -50,6 +53,7 @@ type RunRef = { runId: RunId }
 type WaiterRef = { waiterId: RuntimeId<"waiters"> }
 type SessionRef = { sessionId: RuntimeId<"sessions"> }
 type ApprovalRef = { approvalId: RuntimeId<"approvals"> }
+type ApprovalConsumption = ApprovalRef & { message?: TranscriptMessage }
 type OfferRef = { integrationOfferId: RuntimeId<"integrationOffers"> }
 type ChildRunArgs = { parentId: RunId; runId: RunId }
 type AgentRunsArgs = { parentId: RunId; runIds: RunId[] }
@@ -103,12 +107,12 @@ export type RuntimePlatform = {
   clearDraft(): Promise<void>
   createAgentRun(args: AgentRunArgs): Promise<unknown>
   drainSession(args: SessionRef): Promise<DrainedSessionBatch>
-  executeApproval(args: ApprovalRef & RunRef): Promise<string>
+  executeApproval(args: ApprovalRef & RunRef): Promise<ApprovalExecution>
   fetchGitHubCloneCredentials(args: CloneArgs): Promise<GitHubCloneCredentials>
   finishRun(args: { result: string }): Promise<void>
   listTranscript(): Promise<TranscriptMessage[]>
   loadRunHandoffs(args: RunRef): Promise<RunHandoffs>
-  markApprovalConsumed(args: ApprovalRef): Promise<void>
+  markApprovalConsumed(args: ApprovalConsumption): Promise<void>
   markOfferConsumed(args: OfferRef): Promise<void>
   park(args: ParkArgs): Promise<ParkedWaiter>
   readAgentRuns(args: AgentRunsArgs): Promise<AgentRunStatus[]>
@@ -203,7 +207,7 @@ export class ActionPlatform implements RuntimePlatform {
   loadRunHandoffs = (args: RunRef) =>
     this.query(internal.runs.execution.waiters.handoffs.load, args)
 
-  markApprovalConsumed = async (args: ApprovalRef) => {
+  markApprovalConsumed = async (args: ApprovalConsumption) => {
     await this.mutation(
       internal.runs.execution.waiters.handoffs.consumeApproval,
       args

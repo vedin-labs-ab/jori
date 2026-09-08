@@ -18,7 +18,12 @@ export function hasResolvedHandoffs(handoffs: RunHandoffs) {
 }
 
 export function isPendingApproval(approval: ApprovalHandoff) {
-  return approval.status === "pending"
+  return (
+    approval.status === "pending" ||
+    (approval.status === "approved" &&
+      approval.executionPendingUntil !== undefined &&
+      Date.now() < approval.executionPendingUntil)
+  )
 }
 
 export function isPendingOffer(offer: OfferHandoff) {

@@ -3,6 +3,8 @@ import { type RunHandoffs } from "../../../contracts/runtime/handoffs"
 import { createPlatform, type FakePlatform } from "../../../test/platform"
 import { createRuntime, runtimeId } from "../../../test/runtime"
 import { reconcileHandoffs } from "./handoffs"
+import { parkHandoffs } from "./park"
+import { hasResolvedHandoffs } from "./pending"
 
 test("executes an approved handoff once and injects the result", async () => {
   const { platform, runtime } = handoffRuntime({
@@ -65,6 +67,86 @@ test("keeps a pending handoff as a wait without progress", async () => {
   expect(result.pending).toEqual([
     { expiresAt: 1000, subject: { id: "approval_1", kind: "approval" } },
   ])
+})
+
+test("an already executing approval parks without claiming, progress or a success note", async () => {
+  const approval = {
+    ...approvalHandoff("approved"),
+    executionPendingUntil: Date.now() + 60_000,
+  }
+  const { runtime, platform } = handoffRuntime({ approvals: [approval] })
+  const result = await reconcileHandoffs(runtime)
+
+  expect(result).toEqual({
+    progressed: false,
+    pending: [
+      {
+        expiresAt: approval.executionPendingUntil,
+        subject: { kind: "approval", id: approval.id },
+      },
+    ],
+  })
+  expect(platform.spies.executeApproval).not.toHaveBeenCalled()
+  expect(platform.transcript).toEqual([])
+  platform.spies.loadRunHandoffs.mockResolvedValue({
+    approvals: [approval],
+    offers: [],
+  })
+  expect(await parkHandoffs(runtime, result.pending)).toEqual({
+    parked: { eventId: "event_1" },
+  })
+  expect(platform.spies.resolveWaiter).not.toHaveBeenCalled()
+})
+
+test.each([
+  60_000, 0,
+])("a concurrent claim remains a wait even at its deadline (%s ms)", async (remaining) => {
+  const { runtime, platform } = handoffRuntime({
+    approvals: [approvalHandoff("approved")],
+  })
+  const expiresAt = Date.now() + remaining
+  platform.spies.executeApproval.mockResolvedValue({
+    state: "executing",
+    expiresAt,
+  })
+
+  expect(await reconcileHandoffs(runtime)).toEqual({
+    progressed: false,
+    pending: [{ expiresAt, subject: { kind: "approval", id: "approval_1" } }],
+  })
+  expect(platform.transcript).toEqual([])
+  expect(platform.spies.markApprovalConsumed).not.toHaveBeenCalled()
+})
+
+test("an expired execution wait is resolved so the broker can settle its uncertain result", () => {
+  const approval = {
+    ...approvalHandoff("approved"),
+    executionPendingUntil: Date.now(),
+  }
+  expect(hasResolvedHandoffs({ approvals: [approval], offers: [] })).toBe(true)
+})
+
+test("a terminal execution error is delivered without saying the action ran successfully", async () => {
+  const { runtime, platform } = handoffRuntime({
+    approvals: [approvalHandoff("approved")],
+  })
+  platform.spies.executeApproval.mockResolvedValue({
+    state: "done",
+    result: JSON.stringify({
+      status: "error",
+      error: { message: "Tool is blocked: read_file" },
+    }),
+  })
+
+  expect(await reconcileHandoffs(runtime)).toEqual({
+    progressed: true,
+    pending: [],
+  })
+  expect(platform.transcript.at(-1)?.content).toContain(
+    "Tool is blocked: read_file"
+  )
+  expect(platform.transcript.at(-1)?.content).not.toContain(" ran.")
+  expect(platform.spies.markApprovalConsumed).toHaveBeenCalledTimes(1)
 })
 
 test("keeps a pending offer as a wait without progress", async () => {
