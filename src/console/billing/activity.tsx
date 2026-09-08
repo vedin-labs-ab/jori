@@ -327,6 +327,10 @@ function entryLabel(entry: BillingEntry) {
     return entry.auto ? "Auto top-up" : "Top-up"
   }
 
+  if (entry.source === "manual") {
+    return "Manual allowance"
+  }
+
   return entry.source === "trial" ? "Trial allowance" : "Monthly allowance"
 }
 

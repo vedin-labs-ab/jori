@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { getAccount } from "./account"
 
 /**
  * The only writers of billing balances. Debits drain the monthly allowance
@@ -133,4 +134,94 @@ export async function resetAllowance(
     micros: { amount: args.micros, balance: args.micros + micros.wallet },
     source: args.source,
   })
+}
+
+type AllowanceGrant = {
+  organizationId: string
+  micros: number
+  idempotencyKey: string
+  reason: string
+  operator: string
+}
+
+/** Add a non-billable grant without renewing the cycle or changing the plan. */
+export async function grantAllowance(ctx: MutationCtx, args: AllowanceGrant) {
+  validateGrant(args)
+  const existing = await ctx.db
+    .query("transactions")
+    .withIndex("by_idempotencyKey", (query) =>
+      query.eq("idempotencyKey", args.idempotencyKey)
+    )
+    .unique()
+
+  if (existing !== null) {
+    requireSameGrant(existing, args)
+    return { transactionId: existing._id, applied: false }
+  }
+
+  const account = await getAccount(ctx, args.organizationId)
+  if (account === null) {
+    throw new Error("An existing billing account is required.")
+  }
+  const allowance = account.micros.allowance + args.micros
+  const balance = allowance + account.micros.wallet
+  if (!Number.isSafeInteger(allowance) || !Number.isSafeInteger(balance)) {
+    throw new Error("The resulting balance must be a safe integer.")
+  }
+  const now = Date.now()
+  await ctx.db.patch(account._id, {
+    micros: { allowance, wallet: account.micros.wallet },
+    updatedAt: now,
+  })
+  const transactionId = await ctx.db.insert("transactions", {
+    organizationId: args.organizationId,
+    timestamp: now,
+    type: "allowance",
+    source: "manual",
+    micros: { amount: args.micros, balance },
+    idempotencyKey: args.idempotencyKey,
+    reason: args.reason,
+    operator: args.operator,
+  })
+  return { transactionId, applied: true }
+}
+
+function validateGrant(args: AllowanceGrant) {
+  if (
+    !Number.isSafeInteger(args.micros) ||
+    args.micros < 1 ||
+    args.micros > 1_000_000_000
+  ) {
+    throw new Error(
+      "Grant must be an integer between 1 and 1,000,000,000 micros."
+    )
+  }
+  for (const [label, value, maximum] of [
+    ["Idempotency key", args.idempotencyKey, 200],
+    ["Reason", args.reason, 1000],
+    ["Operator", args.operator, 200],
+  ] as const) {
+    if (
+      value.trim() !== value ||
+      value.length === 0 ||
+      value.length > maximum
+    ) {
+      throw new Error(
+        `${label} must be nonempty, trimmed, and at most ${maximum} characters.`
+      )
+    }
+  }
+}
+
+function requireSameGrant(entry: Doc<"transactions">, args: AllowanceGrant) {
+  if (
+    entry.type !== "allowance" ||
+    entry.source !== "manual" ||
+    entry.organizationId !== args.organizationId ||
+    entry.micros.amount !== args.micros ||
+    entry.reason !== args.reason ||
+    entry.operator !== args.operator
+  ) {
+    throw new Error("Idempotency key already belongs to a different grant.")
+  }
 }

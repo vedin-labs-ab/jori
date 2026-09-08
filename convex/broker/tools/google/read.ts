@@ -23,6 +23,7 @@ export async function searchGmailThreads(
     String(boundedNumber(args.maxResults, 10, 1, 50))
   )
   setOptionalSearchParam(url, "q", args.q)
+  setOptionalSearchParam(url, "pageToken", args.pageToken)
 
   return gmailThreadSearchPage(await googleJson(token, url.toString()))
 }

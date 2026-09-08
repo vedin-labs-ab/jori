@@ -10,27 +10,29 @@ Use labeled synthetic fixtures. Do not modify unrelated customer content, send t
 
 ## Coverage
 
+Scope update, 8 September: the user has no organizational Microsoft mailbox/calendar and explicitly replaced live E2E verification for those ten tools with code, configuration and automated-test review. Those tools must remain labeled non-live. Mocked results cannot prove real tenant consent, provider delivery or Microsoft processing residency. All other tools retain the live EU/US completion rule.
+
 Every catalogued input and output schema compiles independently with Ajv. All 93 broker tools reject invalid root values and unknown fields in contract tests. These checks do not establish provider behavior or complete per-tool validation coverage.
 
 Basic success paths are recorded below. A basic pass is not full operation, validation, permission, and failure-path coverage. The post-deployment table/store and grep regressions passed in both regions.
 
 | Provider | Tool | Contract tests | EU agent run | US agent run |
 | --- | --- | --- | --- | --- |
-| github | `github_list_repositories` | Compiles | Pending | Pending |
-| github | `github_get_repository` | Compiles | Pending | Pending |
-| github | `github_search_issues` | Compiles | Pending | Pending |
-| github | `github_get_issue` | Compiles | Pending | Pending |
-| github | `github_get_pull_request` | Compiles | Pending | Pending |
-| github | `github_get_file` | Compiles | Pending | Pending |
-| github | `github_clone_repository` | Compiles | Pending | Pending |
-| github | `github_add_issue_comment` | Compiles | Pending | Pending |
-| github | `github_reply_to_pull_request_review_comment` | Compiles | Pending | Pending |
-| github | `github_list_pull_request_files` | Compiles | Pending | Pending |
-| github | `github_list_pull_request_review_comments` | Compiles | Pending | Pending |
-| github | `github_commit_to_pull_request` | Compiles | Pending | Pending |
-| github | `github_create_pull_request` | Compiles | Pending | Pending |
-| github | `github_add_comment_reaction` | Compiles | Pending | Pending |
-| github | `github_update_pull_request` | Compiles | Pending | Pending |
+| github | `github_list_repositories` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_get_repository` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_search_issues` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_get_issue` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_get_pull_request` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_get_file` | Compiles | Runtime pass, schema fix pending | Runtime pass, schema fix pending |
+| github | `github_clone_repository` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_add_issue_comment` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_reply_to_pull_request_review_comment` | Compiles | Review reply round trip | Review reply round trip |
+| github | `github_list_pull_request_files` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_list_pull_request_review_comments` | Compiles | Review reply round trip | Review reply round trip |
+| github | `github_commit_to_pull_request` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_create_pull_request` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_add_comment_reaction` | Compiles | Basic GitHub pass | Basic GitHub pass |
+| github | `github_update_pull_request` | Compiles | Basic GitHub pass | Basic GitHub pass |
 | gmail | `google_gmail_search_threads` | Compiles | Pending | Pending |
 | gmail | `google_gmail_get_thread` | Compiles | Pending | Pending |
 | gmail | `google_gmail_get_threads` | Compiles | Pending | Pending |
@@ -57,39 +59,39 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | jori | `search_files` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `read_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `search_jobs` | Compiles | Empty search pass, batch 6 | Empty search pass, batch 6 |
-| jori | `read_job` | Compiles | Pending | Pending |
-| jori | `add_job` | Compiles | Empty access rejected, batch 6 | Empty access rejected, batch 6 |
-| jori | `update_job` | Compiles | Pending | Pending |
+| jori | `read_job` | Compiles | Once-job readback | Once-job readback |
+| jori | `add_job` | Compiles | Create and idempotent replay | Create and idempotent replay |
+| jori | `update_job` | Compiles | Name/trigger update readback | Name/trigger update readback |
 | jori | `delete_job` | Compiles | Pending | Pending |
-| linear | `linear_search_issues` | Compiles | Pending | Pending |
-| linear | `linear_get_issue` | Compiles | Pending | Pending |
-| linear | `linear_list_comments` | Compiles | Pending | Pending |
-| linear | `linear_add_comment` | Compiles | Pending | Pending |
-| linear | `linear_add_reaction` | Compiles | Pending | Pending |
+| linear | `linear_search_issues` | Compiles | Linear round trip | Linear round trip |
+| linear | `linear_get_issue` | Compiles | Linear round trip | Linear round trip |
+| linear | `linear_list_comments` | Compiles | Linear round trip | Linear round trip |
+| linear | `linear_add_comment` | Compiles | Linear round trip | Linear round trip |
+| linear | `linear_add_reaction` | Compiles | Linear round trip | Linear round trip |
 | jori | `search_tables` | Compiles | Regression pass | Regression pass |
 | jori | `read_table` | Compiles | Regression pass | Regression pass |
 | jori | `list_table_rows` | Compiles | Regression pass | Regression pass |
 | jori | `create_table` | Compiles | Regression pass | Regression pass |
 | jori | `insert_table_row` | Compiles | Regression pass | Regression pass |
 | jori | `update_table_row` | Compiles | Regression pass | Regression pass |
-| jori | `delete_table_row` | Compiles | Pending | Pending |
-| jori | `share_table` | Compiles | Pending | Pending |
+| jori | `delete_table_row` | Compiles | Stale version rejected; deletion pending | Stale version rejected; deletion pending |
+| jori | `share_table` | Compiles | Mint and anonymous readback | Mint and anonymous readback |
 | jori | `search_stores` | Compiles | Round trip, contract retest | Round trip, contract retest |
 | jori | `read_store` | Compiles | Regression pass | Regression pass |
 | jori | `create_store` | Compiles | Regression pass | Regression pass |
 | jori | `write_store` | Compiles | Regression pass | Regression pass |
-| jori | `share_store` | Compiles | Pending | Pending |
-| jori | `share_file` | Compiles | Pending | Pending |
-| microsoftEmail | `microsoft_email_search_messages` | Compiles | Pending | Pending |
-| microsoftEmail | `microsoft_email_get_message` | Compiles | Pending | Pending |
-| microsoftEmail | `microsoft_email_send_message` | Compiles | Pending | Pending |
-| microsoftEmail | `microsoft_email_create_draft` | Compiles | Pending | Pending |
-| microsoftEmail | `microsoft_email_update_message` | Compiles | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_list_calendars` | Compiles | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_list_events` | Compiles | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_get_event` | Compiles | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_create_event` | Compiles | Pending | Pending |
-| microsoftCalendar | `microsoft_calendar_update_event` | Compiles | Pending | Pending |
+| jori | `share_store` | Compiles | Mint and anonymous readback | Mint and anonymous readback |
+| jori | `share_file` | Compiles | Mint and anonymous readback | Mint and anonymous readback |
+| microsoftEmail | `microsoft_email_search_messages` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftEmail | `microsoft_email_get_message` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftEmail | `microsoft_email_send_message` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftEmail | `microsoft_email_create_draft` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftEmail | `microsoft_email_update_message` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftCalendar | `microsoft_calendar_list_calendars` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftCalendar | `microsoft_calendar_list_events` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftCalendar | `microsoft_calendar_get_event` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftCalendar | `microsoft_calendar_create_event` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
+| microsoftCalendar | `microsoft_calendar_update_event` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
 | jori | `finish_run` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `send_reply` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `add_reaction` | Compiles | Slack mention pass | Slack mention pass |
@@ -270,3 +272,35 @@ EU child `nx7bq2ya9gte3vcdf2sz54yay58e10sp` and US child `pn7d4vwxrzcztchsp9qkq8
 The correction at `afb0445d` exports sandbox files directly from the Node action to the calling deployment's storage. Only metadata crosses the action boundary. The action resolves organization and sandbox from the run, checks file size before and after reading, rejects symbolic-link paths and non-files, and shares upload-record cleanup with generated images. Checks passed and 2,781 tests passed with four skipped, including 19 targeted transfer tests. These local tests cover 17 MiB, exact 25 MiB, empty and oversized files, path types, missing ownership records, and failed-upload cleanup. Live post-deployment size retesting remains required.
 
 The user approved the restricted Linear and GitHub grants. Both Linear callbacks completed with only the Vedin Labs team selected. GitHub EU completed after the user's mobile security check with only vedin-labs-ab/jori selected. US GitHub setup is still in progress. Grant completion is setup evidence, not a provider-tool E2E pass.
+
+### Afternoon resumption and provider readbacks
+
+Main `f75920d9` was clean and unchanged on resumption, already deployed to development and both production regions. Live post-fix 64 KiB, 17 MiB and 25 MiB exports/readbacks passed; oversized, empty and symlink exports were rejected. EU child `nx7a0w3qpakpke4bpbspnt591d8e0s40` and US child `pn75w9zhzsrxgpnv82r07gphc58e1v33` completed.
+
+The stopped EU GitHub child `nx7dgga2gt3xvw3nadvt5g5m6x8e1vpz` had completed the same repository/issue/clone/PR operations as US child `pn7amjqdcsnz46hhs730x34m718e05v3`, including final file readback. Individual persisted results, not a completed-run label, establish those passes. Synthetic draft PRs EU #4 and US #3 remain unmerged. Final commits are EU `4b8e5215ba3c8972170c80e1f8c469590bec2013` and US `57e35ef9213d8e2c40503f99d820ebcaca9c5e8e`. Only docs/verification/eu.txt or us.txt changed in those fixtures.
+
+Review-reply children EU `nx7cwhydbdgsc201mvwzt9f28n8e0mhe` and US `pn75z9qh5cverm9n4swpzeqrbn8e06em` completed. They replied exactly once to designated human review comments and read matching bot authors, bodies and inReplyToId relationships. Reply IDs are EU `3958151136` and US `3958150320`. PR file pagination returned one fixture on page 1 and an empty page 2. Independent schema review found github_get_file's unconstrained object fallback overlaps normal file/directory branches in oneOf; runtime success is not yet a contract pass.
+
+Linear children EU `nx7ax22ez4c36ssstzw4stcmrd8e1w43` and US `pn72bpk2vb2w0skm7jfp0ta8f18e0cc6` completed all five tools on VED-14 and VED-15 respectively. Issue search/read, threaded comment readback and issue/comment reactions succeeded through distinct regional app bots. Mention-triggered reply/reaction variants remain untested.
+
+### Sharing and job lifecycle checks
+
+Sharing children EU `nx7aq49d181xesdaxpm7n07q8n8e0n3q` and US `pn7c7rz6dxbx73scc6p39hftgn8e1657` completed. Each minted exactly one one-hour link for the approved types table, count-2 value-clock store and I/O text file. Separate unauthenticated Convex HTTP clients read the expected content and rejected absent/incorrect secrets for every target. File bytes matched the 33-byte synthetic UTF-8 text. Storage and frontend URLs used the matching region. Secrets were not distributed. Expiry enforcement after the hour and remaining access variants still need verification.
+
+Once-job setup children EU `nx73067839be0ke61kd567y4pd8e13rj` and US `pn75k6c307fht9ys5kp1eyy4298e098b` completed create, identical-key replay, read, update and search. Duplicate creation returned created:false with the same ID. Jobs EU `mh72yhfmyc8vt20d1ezd26bngn8e03f0` and US `s171xwbngvqxtv8m3ryrvqjpx58e18qc` are private, comment-only GitHub jobs. Updates advanced version to 2 and changed the trigger from 13:10 to 13:12 UTC. Both organizations exhausted usage before the scheduled time. Job status completed does not establish successful execution.
+
+Deletion children EU `nx71pcsp55exegbtjjs6077x8h8e1k19` and US `pn708yv8hnfgd8fxhen2fdy4098e10sc` rejected stale expectedVersion 2 against Alpha version 3. Both runs failed on usage exhaustion before successful deletion; US additionally reread the unchanged row. Recheck exact state before continuing the authorized version-3 deletion. Gmail run `nx7fk37k297emzs0qb1v9t138n8e03r0` failed for exhausted usage before any Gmail tool call. The first Calendar send was blocked. These are not provider failures or live passes. The user approved adding $25 non-billable test allowance per verification organization, without Stripe changes, to resume testing.
+
+Live job responses also exposed stale schema descriptions: trigger kinds are once/cron/event, and records use visibility/principal rather than audience. The focused job contract correction documents and validates these current fields. Full gates and live contract validation remain required before calling this correction complete.
+
+The Gmail search response advertised nextPageToken but its input schema and adapter had no pageToken support. The correction adds the input and forwards the opaque token alongside the original query and limit. Regression tests cover continuation, first/last pages and invalid token types. This matches [Gmail's threads.list contract](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.threads/list). A mocked pagination test is not a live pagination pass.
+
+Read-only queries at 13:37 UTC confirmed both once jobs are completed with no associated run. Existing code intentionally consumes a once trigger when usage blocks execution. Neither job is recorded as a successful execution test; both need a funded rerun.
+
+### Microsoft offline audit
+
+The user explicitly replaced live Microsoft testing because no organizational mailbox/calendar is available. The audit added 85 tests across all ten tools, OAuth scopes and EU/US client/callback selection, credential refresh and rotation, revoked/transient grants, output-schema checks and HTTP 401/403/429/500 responses. The Microsoft-only tree passed check and its full suite with 2,866 passing tests and four skipped.
+
+One real defect was corrected: Microsoft Calendar exposed sendUpdates even though Graph does not support this query parameter or promise to suppress attendee notifications. The correction removes it and warns that invitations and updates can be sent. See [Graph create event](https://learn.microsoft.com/en-us/graph/api/user-post-events?view=graph-rest-1.0) and [update event](https://learn.microsoft.com/en-us/graph/api/event-update?view=graph-rest-1.0).
+
+Both production deployments have nonempty Microsoft client ID and secret settings, verified without printing values. This establishes presence, not credential validity. Authentication intentionally uses organizations rather than personal Microsoft accounts. Credentials are deployment-local, but Graph uses Microsoft's global commercial endpoint. Real consent, mailbox policies, delivery and processing residency remain unverified. No live Microsoft pass is claimed.

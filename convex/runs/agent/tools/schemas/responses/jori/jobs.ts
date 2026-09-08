@@ -1,21 +1,42 @@
 import {
   arrayProperty,
   booleanProperty,
+  enumProperty,
   type JsonSchema,
   numberProperty,
   objectSchema,
   type SchemaMap,
   stringProperty,
 } from "../common"
+import { visibilitySchema } from "./visibility"
 
 function jobRecordProperties() {
   return {
     _id: stringProperty("Job ID."),
     name: stringProperty("Job name."),
     instructions: stringProperty("Canonical Markdown instructions."),
-    type: stringProperty("recurring, once, or mention."),
-    status: stringProperty("active, paused, or completed."),
-    audience: stringProperty("personal or organization."),
+    type: enumProperty(["once", "cron", "event"], "Job trigger kind."),
+    status: enumProperty(
+      ["active", "paused", "completed"],
+      "Current job status."
+    ),
+    visibility: visibilitySchema(),
+    principal: {
+      description: "The identity each job run executes as.",
+      oneOf: [
+        objectSchema({
+          required: ["kind", "personId"],
+          properties: {
+            kind: { const: "person" },
+            personId: stringProperty("Execution person's ID."),
+          },
+        }),
+        objectSchema({
+          required: ["kind"],
+          properties: { kind: { const: "organization" } },
+        }),
+      ],
+    },
     createdAt: numberProperty("Creation time in epoch milliseconds."),
     updatedAt: numberProperty("Last update time in epoch milliseconds."),
   }
@@ -28,6 +49,17 @@ function jobRecord(
   return {
     type: "object",
     additionalProperties: true,
+    required: [
+      "_id",
+      "name",
+      "instructions",
+      "type",
+      "status",
+      "visibility",
+      "principal",
+      "createdAt",
+      "updatedAt",
+    ],
     description,
     properties: { ...jobRecordProperties(), ...extra },
   }
