@@ -89,8 +89,9 @@ export const page = query({
 })
 
 /** Anonymous read: the share secret is the whole credential. Returns null
- *  on every failure so callers cannot probe which files exist. Storage URLs
- *  are signed and temporary, so each read mints a fresh one. */
+ *  on every failure so callers cannot probe which files exist. Direct storage
+ *  URLs are reusable bearer URLs. Share expiry blocks further URL disclosure,
+ *  but does not revoke a storage URL that a recipient already obtained. */
 export const get = query({
   args: { fileId: v.string(), secret: v.optional(v.string()) },
   handler: async (ctx, args) => {
