@@ -127,6 +127,10 @@ describe("job instructions field layout", () => {
       '[data-slot="button-group"]'
     )
     const removePane = buttonGroup?.querySelector("[data-job-remove-content]")
+    const removeButton = screen.getByRole("button", { name: "Remove GitHub" })
+    const accessButton = screen.getByRole("button", {
+      name: "GitHub tools: 1 enabled. Configure tools.",
+    })
 
     const content = field.container.querySelector(".tiptap")
 
@@ -138,6 +142,10 @@ describe("job instructions field layout", () => {
     expect(buttonGroup?.className).toContain("h-5")
     expect(buttonGroup?.className).toContain("text-[0.625rem]/none")
     expect(removePane?.className).toContain("px-1")
+    expect(removeButton.className).toContain("self-stretch")
+    expect(removeButton.className).not.toContain("h-5")
+    expect(accessButton.className).toContain("self-stretch")
+    expect(accessButton.className).not.toContain("h-5")
   })
 })
 
@@ -173,6 +181,7 @@ describe("job instructions field footer", () => {
     expect(field.container.textContent).toContain("access")
     expect(field.container.textContent).toContain("skills")
     expect(field.container.textContent).toContain("tools")
+    expect(field.container.textContent).not.toContain("read/write")
 
     const footer = field.container.querySelector(
       "[data-job-instructions-frame] > div:last-child"
@@ -186,25 +195,9 @@ describe("job instructions field footer", () => {
 })
 
 describe("job instructions field", () => {
-  test("renders integration badges inside the editor", async () => {
-    renderInstructionsField({
-      description: "Post to @github.",
-      surfaces: [
-        { integration: "github", tools: ["github_add_issue_comment"] },
-      ],
-    })
-
-    expect(await screen.findByRole("textbox")).toBeDefined()
-    expect(
-      await screen.findByRole("button", {
-        name: "GitHub tools: 1 enabled. Configure tools.",
-      })
-    ).toBeDefined()
-  })
-
-  test("opens tool selection from the inline tool count", async () => {
+  test("renders a normalized integration badge and opens its tool selection", async () => {
     const field = renderInstructionsField({
-      description: "Post to @GitHub.",
+      description: "Post to @github.",
       surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     })
 

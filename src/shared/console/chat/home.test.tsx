@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { History, Mail } from "lucide-react"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { ConsoleNavigationContext } from "../shell/location"
 import { ChatHome } from "./home"
 
@@ -15,11 +15,6 @@ vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../test/router")),
   ...(await import("../../../../test/routing")),
 }))
-
-// The command list scrolls its chosen row into view, which jsdom lacks.
-beforeEach(() => {
-  Object.assign(HTMLElement.prototype, { scrollIntoView: () => undefined })
-})
 
 afterEach(cleanup)
 

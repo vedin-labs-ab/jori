@@ -86,7 +86,7 @@ test("a send that fails leaves the draft where it was", async () => {
   ])
 })
 
-test("the shortcut band and its peek name the band they control", async () => {
+test("shortcut controls name their band and remember visibility after remounting", async () => {
   await renderComposer()
 
   const band = screen.getByRole("button", { name: "Hide shortcuts" })
@@ -97,11 +97,26 @@ test("the shortcut band and its peek name the band they control", async () => {
 
   fireEvent.click(band)
 
+  expect(screen.queryByRole("button", { name: "Hide shortcuts" })).toBeNull()
   expect(
     screen
       .getByRole("button", { name: "Show shortcuts" })
       .getAttribute("aria-controls")
   ).toBe(bandId)
+
+  cleanup()
+  await renderComposer()
+
+  expect(screen.queryByRole("button", { name: "Hide shortcuts" })).toBeNull()
+  fireEvent.click(screen.getByRole("button", { name: "Show shortcuts" }))
+
+  expect(screen.getByRole("button", { name: "Hide shortcuts" })).toBeDefined()
+
+  cleanup()
+  await renderComposer()
+
+  expect(screen.getByRole("button", { name: "Hide shortcuts" })).toBeDefined()
+  expect(screen.queryByRole("button", { name: "Show shortcuts" })).toBeNull()
 })
 
 test("while a run is live the control stops it instead of sending", async () => {
@@ -133,20 +148,6 @@ test("disabled, it says why", async () => {
   expect(
     screen.queryByRole("button", { name: "Mention a resource" })
   ).toBeNull()
-})
-
-test("the shortcut band folds under the frame and comes back, as the browser remembers", async () => {
-  await renderComposer()
-
-  fireEvent.click(screen.getByRole("button", { name: "Hide shortcuts" }))
-
-  expect(screen.queryByRole("button", { name: "Hide shortcuts" })).toBeNull()
-  expect(window.localStorage.getItem("jori.chat.hints")).toBe("closed")
-
-  fireEvent.click(screen.getByRole("button", { name: "Show shortcuts" }))
-
-  expect(screen.getByRole("button", { name: "Hide shortcuts" })).toBeDefined()
-  expect(window.localStorage.getItem("jori.chat.hints")).toBe("open")
 })
 
 test("a click on the frame beside the controls puts the caret in the field", async () => {

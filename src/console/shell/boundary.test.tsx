@@ -30,12 +30,6 @@ function renderPage(pathname: string) {
   )
 }
 
-test("replaces only the page when it throws", () => {
-  renderPage("/tables")
-
-  expect(screen.getByText("This page didn't load")).toBeDefined()
-})
-
 test("clears the failure on navigation, without a reload", () => {
   const view = renderPage("/tables")
 

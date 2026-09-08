@@ -36,17 +36,6 @@ describe("job instructions shared tool access document", () => {
 })
 
 describe("job instructions tool access", () => {
-  test("keeps the footer focused on smart integration mentions", async () => {
-    const field = renderInstructionsField({
-      description: "",
-      surfaces: [],
-    })
-
-    expect(await screen.findByRole("textbox")).toBeDefined()
-    expect(field.container.textContent).toContain("access")
-    expect(field.container.textContent).not.toContain("read/write")
-  })
-
   test("hides the visible count for markers without enabled tools", async () => {
     renderInstructionsField({
       description: "Post to @GitHub.",

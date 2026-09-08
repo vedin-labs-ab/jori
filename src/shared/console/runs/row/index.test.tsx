@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, describe, expect, test } from "vitest"
-import { makeApproval, makeExecution, slackTools } from "../fixtures"
+import { makeApproval, makeExecution, slackToolsDetail } from "../fixtures"
 import { renderExecutionRow } from "./harness"
 
 afterEach(() => {
@@ -9,27 +9,10 @@ afterEach(() => {
 })
 
 describe("execution row task details", () => {
-  test("renders the execution task", async () => {
+  test("renders the task once without repeating the execution title", async () => {
     renderExecutionRow(
       makeExecution({
         task: "Summarize the Notion launch plan.",
-        title: "Notion test",
-      })
-    )
-
-    fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
-
-    await screen.findByText("Task")
-
-    expect(screen.getAllByText("Task")).toHaveLength(1)
-    expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
-    expect(screen.getByText("Summarize the Notion launch plan.")).toBeDefined()
-  })
-
-  test("does not render the title as the task", async () => {
-    renderExecutionRow(
-      makeExecution({
-        task: "Use the Notion page context to update the team.",
         title: "Notion test",
       })
     )
@@ -38,11 +21,10 @@ describe("execution row task details", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /notion test/i }))
 
-    await screen.findByText("Use the Notion page context to update the team.")
+    await screen.findByText("Summarize the Notion launch plan.")
 
-    expect(
-      screen.getByText("Use the Notion page context to update the team.")
-    ).toBeDefined()
+    expect(screen.getAllByText("Task")).toHaveLength(1)
+    expect(screen.getByRole("button", { name: "Copy Task" })).toBeDefined()
     expect(screen.getAllByText("Notion test")).toHaveLength(titleCount)
   })
 })
@@ -58,19 +40,7 @@ describe("execution row message details", () => {
           surface: "slack",
           url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=T123",
         },
-        details: [
-          {
-            type: "tools",
-            label: "Slack · Read 1 · Write 1",
-            groups: [
-              {
-                type: "slack",
-                label: "Slack",
-                tools: slackTools(),
-              },
-            ],
-          },
-        ],
+        details: [slackToolsDetail()],
       })
     )
 
