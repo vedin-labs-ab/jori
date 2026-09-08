@@ -19,6 +19,7 @@ import {
 } from "../../contracts/runtime/waiters"
 import { internal } from "../_generated/api"
 import { type ActionCtx } from "../_generated/server"
+import { uploadRunFile } from "../files/upload"
 import { type TranscriptMessage } from "../runs/execution/transcript/schema"
 import { type LoadedRuntime } from "./context"
 import { RemoteSandbox } from "./sandbox/remote"
@@ -32,7 +33,6 @@ import {
   fetchRunCloneCredentials,
   requestRunApproval,
 } from "./tools/broker"
-import { uploadRunFile } from "./tools/files"
 
 export type GitHubCloneCredentials = {
   remoteUrl: string
