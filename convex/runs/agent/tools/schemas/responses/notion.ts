@@ -2,6 +2,7 @@ import {
   arrayProperty,
   booleanProperty,
   constProperty,
+  enumProperty,
   type JsonSchema,
   objectSchema,
   type SchemaMap,
@@ -85,10 +86,19 @@ function notionComment(description: string): JsonSchema {
 }
 
 export const notionToolResponseSchemas = {
-  notion_search: notionListing(
-    "Pages and data sources matching the query.",
-    notionObject("page", "Page or data source object, unchanged.")
-  ),
+  notion_search: notionListing("Pages and data sources matching the query.", {
+    type: "object",
+    additionalProperties: true,
+    required: ["object", "id"],
+    description: "Page or data source object, unchanged.",
+    properties: {
+      object: enumProperty(
+        ["page", "data_source"],
+        "Notion search result type."
+      ),
+      id: stringProperty("Notion page or data source ID."),
+    },
+  }),
   notion_get_page: notionPage("The page object with its property values."),
   notion_get_block_children: notionListing(
     "The block's direct children.",

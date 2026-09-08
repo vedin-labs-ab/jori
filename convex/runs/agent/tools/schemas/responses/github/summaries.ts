@@ -2,6 +2,7 @@ import {
   arrayProperty,
   booleanProperty,
   type JsonSchema,
+  nullableStringProperty,
   numberProperty,
   objectSchema,
   stringProperty,
@@ -18,7 +19,7 @@ export function repositorySummary(): JsonSchema {
       id: numberProperty("GitHub repository ID."),
       fullName: stringProperty("owner/name form."),
       private: booleanProperty("True for private repositories."),
-      description: stringProperty("Repository description."),
+      description: nullableStringProperty("Repository description, or null."),
       defaultBranch: stringProperty("Default branch name."),
       htmlUrl: stringProperty("Repository page URL."),
       updatedAt: stringProperty("Last update timestamp."),
@@ -33,7 +34,9 @@ export function issueSummary(): JsonSchema {
       id: numberProperty("GitHub issue ID."),
       number: numberProperty("Issue number."),
       title: stringProperty("Issue title."),
-      body: stringProperty("Issue body in GitHub-flavored Markdown."),
+      body: nullableStringProperty(
+        "Issue body in GitHub-flavored Markdown, or null."
+      ),
       state: stringProperty("open or closed."),
       htmlUrl: stringProperty("Issue page URL."),
       pullRequest: booleanProperty("True when the issue is a pull request."),
@@ -53,7 +56,7 @@ export function pullRequestSummary(): JsonSchema {
       id: numberProperty("GitHub pull request ID."),
       number: numberProperty("Pull request number."),
       title: stringProperty("Pull request title."),
-      body: stringProperty("Pull request body."),
+      body: nullableStringProperty("Pull request body, or null."),
       state: stringProperty("open or closed."),
       draft: booleanProperty("True for draft pull requests."),
       merged: booleanProperty("True once merged."),
@@ -117,9 +120,11 @@ export function commitSummary(): JsonSchema {
     description: "The commit Jori created.",
     properties: {
       baseSha: stringProperty("Base commit SHA for new branches."),
-      files: arrayProperty("Repository-relative committed paths.", {
-        type: "string",
-      }),
+      files: {
+        type: "integer",
+        minimum: 0,
+        description: "Committed file count.",
+      },
       sha: stringProperty("New commit SHA."),
       treeSha: stringProperty("New tree SHA."),
     },

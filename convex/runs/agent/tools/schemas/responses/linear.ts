@@ -8,7 +8,11 @@ import {
 } from "./common"
 
 // Linear results come back from Jori-authored GraphQL selections, so the
-// node shapes are known; mutations return the raw GraphQL envelope.
+// node shapes are known; mutations return success and their result node.
+
+function nullableNode(description: string): JsonSchema {
+  return { ...providerPayload(description), type: ["object", "null"] }
+}
 
 function issueNode(description: string): JsonSchema {
   return {
@@ -22,8 +26,8 @@ function issueNode(description: string): JsonSchema {
       url: stringProperty("Issue page URL."),
       updatedAt: stringProperty("Last update timestamp."),
       state: providerPayload("Workflow state with name and type."),
-      assignee: providerPayload("Assignee with id and name, or null."),
-      creator: providerPayload("Creator with id and name, or null."),
+      assignee: nullableNode("Assignee with id and name, or null."),
+      creator: nullableNode("Creator with id and name, or null."),
     },
   }
 }
@@ -39,8 +43,8 @@ function commentNode(): JsonSchema {
       createdAt: stringProperty("Creation timestamp."),
       updatedAt: stringProperty("Last update timestamp."),
       url: stringProperty("Comment page URL."),
-      parent: providerPayload("Parent comment id for replies, or null."),
-      user: providerPayload("Comment author with id and name."),
+      parent: nullableNode("Parent comment id for replies, or null."),
+      user: nullableNode("Comment author with id and name, or null."),
     },
   }
 }

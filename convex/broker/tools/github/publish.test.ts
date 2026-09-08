@@ -1,7 +1,9 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { id } from "../../../../test/convex/database"
 import { integrationDoc } from "../../../../test/convex/integrations"
+import { schemaViolations } from "../../../../test/convex/schema"
 import { type Doc } from "../../../_generated/dataModel"
+import { getToolResponseSchema } from "../../../runs/agent/tools/schemas/responses"
 import { callGitHubTool } from "./index"
 
 const headSha = "a".repeat(40)
@@ -63,6 +65,12 @@ test("commits local source changes to a pull request without forcing the ref", a
     commit: { files: 2, sha: commitSha, treeSha: newTreeSha },
     pullRequest: { number: 12 },
   })
+  expect(
+    schemaViolations(
+      result,
+      getToolResponseSchema("github_commit_to_pull_request")
+    )
+  ).toEqual([])
 })
 
 test("creates a pull request branch from local source changes", async () => {
@@ -110,6 +118,39 @@ test("creates a pull request branch from local source changes", async () => {
     commit: { baseSha: headSha, files: 2, sha: commitSha, treeSha: newTreeSha },
     pullRequest: { number: 12 },
   })
+  expect(
+    schemaViolations(
+      result,
+      getToolResponseSchema("github_create_pull_request")
+    )
+  ).toEqual([])
+})
+
+test.each([
+  [],
+  ["PRODUCT.md"],
+  "2",
+  -1,
+  1.5,
+  null,
+])("rejects invalid committed-file counts %j", (files) => {
+  const create = getToolResponseSchema("github_create_pull_request")
+  const update = getToolResponseSchema("github_commit_to_pull_request")
+  expect(
+    schemaViolations({ commit: { files }, pullRequest: {} }, create)
+  ).not.toEqual([])
+  expect(
+    schemaViolations(
+      { changes: { files }, commit: { files: 2 }, pullRequest: {} },
+      update
+    )
+  ).not.toEqual([])
+  expect(
+    schemaViolations(
+      { changes: { files: 2 }, commit: { files }, pullRequest: {} },
+      update
+    )
+  ).not.toEqual([])
 })
 
 function sourceChanges(options: { headSha?: string } = {}) {
@@ -129,6 +170,7 @@ function pullRequestPayload(
     id: 100,
     number: 12,
     title: "Replace console references",
+    body: null,
     state: "open",
     draft: false,
     merged: false,
