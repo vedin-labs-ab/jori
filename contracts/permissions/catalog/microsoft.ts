@@ -70,7 +70,7 @@ export const microsoftToolPermissionRows = [
     "microsoft_calendar_create_event",
     "Create calendar event",
     "Add an event to your Microsoft Calendar.",
-    "Create a Microsoft Calendar event. Confirm time, attendees, and title before creating.",
+    "Create a Microsoft Calendar event. Confirm time, attendees, and title before creating. Microsoft sends invitations to attendees; this tool cannot suppress those emails.",
     "write",
   ],
   [
@@ -78,7 +78,7 @@ export const microsoftToolPermissionRows = [
     "microsoft_calendar_update_event",
     "Update calendar event",
     "Change an event on your Microsoft Calendar.",
-    "Update an existing Microsoft Calendar event. Read it first to preserve fields you are not changing.",
+    "Update an existing Microsoft Calendar event. Read it first to preserve fields you are not changing. Microsoft may send meeting updates to attendees; this tool cannot suppress those emails.",
     "write",
   ],
 ] satisfies ToolPermissionRow[]

@@ -33,7 +33,6 @@ export async function callMicrosoftCalendarTool(
       readRecord(
         await microsoftGraphJson(token, "/me/events", {
           method: "POST",
-          query: microsoftSendUpdatesQuery(args),
           body: requiredObject(args.event, "event"),
         })
       ),
@@ -48,7 +47,6 @@ export async function callMicrosoftCalendarTool(
           `/me/events/${encodeURIComponent(requiredString(args.eventId, "eventId"))}`,
           {
             method: "PATCH",
-            query: microsoftSendUpdatesQuery(args),
             body: requiredObject(args.event, "event"),
           }
         )
@@ -230,10 +228,4 @@ function calendarEventPath(args: Record<string, unknown>, eventId: string) {
   return calendarId === undefined
     ? `/me/events/${encodedEventId}`
     : `/me/calendars/${encodeURIComponent(calendarId)}/events/${encodedEventId}`
-}
-
-function microsoftSendUpdatesQuery(args: Record<string, unknown>) {
-  return args.sendUpdates === "all" || args.sendUpdates === "none"
-    ? { sendUpdates: args.sendUpdates }
-    : {}
 }
