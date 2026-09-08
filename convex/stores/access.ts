@@ -1,6 +1,6 @@
 import { countLeafProperties } from "../../contracts/schema/count"
 import { type JsonSchemaObject } from "../../contracts/schema/validate"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
   findAccessibleCollection,
   getAccessibleCollection,
@@ -57,6 +57,15 @@ export function summarizeStore(store: StoreDoc) {
     createdAt: store.createdAt,
     updatedAt: store.updatedAt,
     archivedAt: store.archivedAt,
+  }
+}
+
+/** Value writes have their own clock, separate from store metadata edits. */
+export function summarizeStoreValue(document: Doc<"documents"> | null) {
+  return {
+    value: (document?.value ?? null) as unknown,
+    version: document?.version ?? 0,
+    valueUpdatedAt: document?.updatedAt ?? null,
   }
 }
 

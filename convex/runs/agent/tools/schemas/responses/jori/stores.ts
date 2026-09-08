@@ -27,14 +27,16 @@ function storeSummaryProperties() {
     },
     schemaHash: stringProperty("Content hash of the schema."),
     createdAt: numberProperty("Creation time in epoch milliseconds."),
-    updatedAt: numberProperty("Last update time in epoch milliseconds."),
+    updatedAt: numberProperty(
+      "Last store metadata update in epoch milliseconds, not the value write time."
+    ),
     archivedAt: numberProperty("Archive time; absent while active."),
   }
 }
 
 export const storeToolResponseSchemas = {
   search_stores: arrayProperty(
-    "Accessible stores matching the query, most recently updated first.",
+    "Accessible stores matching the query, most recently edited metadata first.",
     objectSchema({
       description: "Compact store summary.",
       properties: storeSummaryProperties(),
@@ -56,6 +58,11 @@ export const storeToolResponseSchemas = {
       version: numberProperty(
         "Value version, incremented per write; 0 before the first write."
       ),
+      valueUpdatedAt: {
+        type: ["number", "null"],
+        description:
+          "Last value write time in epoch milliseconds; null before the first write. Independent of metadata updatedAt.",
+      },
     },
   },
   write_store: {
@@ -69,7 +76,9 @@ export const storeToolResponseSchemas = {
           name: stringProperty("Store name."),
           value: { description: "The stored JSON document after the write." },
           version: numberProperty("New value version."),
-          updatedAt: numberProperty("Write time in epoch milliseconds."),
+          valueUpdatedAt: numberProperty(
+            "Value write time in epoch milliseconds."
+          ),
           claimed: booleanProperty("True when a claim write won."),
         },
       }),
