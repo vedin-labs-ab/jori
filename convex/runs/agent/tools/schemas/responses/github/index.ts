@@ -160,9 +160,11 @@ export const githubToolResponseSchemas = {
     properties: {
       changes: objectSchema({
         properties: {
-          files: arrayProperty("Committed repository-relative paths.", {
-            type: "string",
-          }),
+          files: {
+            type: "integer",
+            minimum: 0,
+            description: "Committed file count.",
+          },
           headSha: stringProperty("Head SHA the commit was based on."),
         },
       }),
