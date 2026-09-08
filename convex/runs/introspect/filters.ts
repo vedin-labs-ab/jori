@@ -1,6 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { optionalString } from "../../shared/input"
+import { boundedNumber, optionalString } from "../../shared/input"
 import { type ActivityItem } from "../activity/types"
 import {
   matchesSummaryQuery,
@@ -8,17 +8,19 @@ import {
   type RunSummary,
 } from "../view/summary"
 import { canSee } from "./access"
-import { pageItems } from "./page"
+import {
+  compareRuns,
+  isAfterCursor,
+  nextRunCursor,
+  readRunCursor,
+  runSearchKey,
+} from "./cursor"
 import { uniqueRuns } from "./runs"
+import { type SearchRunsArgs } from "./schema"
 
-type RunFilters = {
+type RunFilters = Omit<SearchRunsArgs, "cursor" | "limit"> & {
   candidates: Doc<"runs">[]
   current: Doc<"runs">
-  query?: string
-  since?: number
-  source?: "slack" | "github" | "linear" | "job"
-  status?: Doc<"runs">["status"]
-  until?: number
 }
 
 type PageArgs = {
@@ -31,45 +33,69 @@ export async function pageRunMatches(
   filters: RunFilters,
   args: PageArgs
 ) {
-  const runs = matchingRuns(filters)
+  if (filters.mode === "ids" && args.cursor !== undefined) {
+    throw new Error("Invalid search_runs cursor: IDs mode is not paginated")
+  }
+
+  const search = runSearchKey(filters.current, filters)
+  const cursor = readRunCursor(args.cursor, search)
+  const runs = matchingRuns(filters).filter((run) => isAfterCursor(run, cursor))
+  const limit =
+    filters.mode === "ids" ? 50 : boundedNumber(args.limit, 15, 1, 50)
 
   if (filters.query === undefined) {
-    const page = pageItems(runs, args)
-
     return {
-      cursor: page.cursor,
-      runs: await projectRunSummaries(ctx, page.page),
+      cursor:
+        filters.mode === "ids" ? null : nextRunCursor(runs, limit, search),
+      runs: await projectRunSummaries(ctx, runs.slice(0, limit)),
     }
   }
 
-  const summaries = await projectMatchingSummaries(ctx, runs, filters.query)
-  const page = pageItems(summaries, args)
-
-  return { cursor: page.cursor, runs: page.page }
+  const matches = await projectMatchingSummaries(
+    ctx,
+    runs,
+    filters.query,
+    limit
+  )
+  return {
+    cursor:
+      filters.mode === "ids"
+        ? null
+        : nextRunCursor(
+            matches.map((match) => match.run),
+            limit,
+            search
+          ),
+    runs: matches.slice(0, limit).map((match) => match.summary),
+  }
 }
 
 function matchingRuns(filters: RunFilters) {
   return uniqueRuns(filters.candidates)
     .filter((run) => matchesRun(filters.current, run, filters))
-    .sort((left, right) => right.createdAt - left.createdAt)
+    .sort(compareRuns)
 }
 
 async function projectMatchingSummaries(
   ctx: QueryCtx,
   runs: Doc<"runs">[],
-  query: string
+  query: string,
+  limit: number
 ) {
-  const summaries: RunSummary[] = []
+  const matches: { run: Doc<"runs">; summary: RunSummary }[] = []
 
   for (const run of runs) {
     const summary = await projectRunSummary(ctx, run)
 
     if (matchesSummaryQuery(summary, query)) {
-      summaries.push(summary)
+      matches.push({ run, summary })
+      if (matches.length > limit) {
+        break
+      }
     }
   }
 
-  return summaries
+  return matches
 }
 
 async function projectRunSummaries(ctx: QueryCtx, runs: Doc<"runs">[]) {

@@ -1,4 +1,8 @@
-import { runStatuses } from "../../../../../../../contracts/runtime/runs"
+import { toolSurfaces } from "../../../../../../../contracts/integrations"
+import {
+  runActivityKinds,
+  runStatuses,
+} from "../../../../../../../contracts/runtime/runs"
 import {
   arrayProperty,
   enumProperty,
@@ -21,7 +25,21 @@ function runSummarySchema(): JsonSchema {
       trigger: stringProperty("What triggered the run."),
       audience: stringProperty("Audience of the run."),
       status: enumProperty(runStatuses, "Where the run is in its lifecycle."),
-      source: stringProperty("Surface or job the run came from."),
+      source: objectSchema({
+        description: "Snapshot of the run's source.",
+        required: ["type"],
+        properties: {
+          type: enumProperty(
+            ["job", "event", "manual", "message"],
+            "What started the run."
+          ),
+          surface: enumProperty(
+            toolSurfaces,
+            "Integration surface, when present."
+          ),
+          url: stringProperty("Link to the source, when present."),
+        },
+      }),
       context: arrayProperty("Context labels for the run.", {
         type: "object",
         additionalProperties: true,
@@ -44,10 +62,7 @@ function activityItemSchema(): JsonSchema {
       "One activity entry with kind-specific detail fields alongside the core ones.",
     properties: {
       id: stringProperty("Activity entry ID."),
-      kind: enumProperty(
-        ["tool", "model", "approval", "file", "agent"],
-        "What kind of step this was."
-      ),
+      kind: enumProperty(runActivityKinds, "What kind of step this was."),
       status: stringProperty(
         "Step status; failed entries match the error filter."
       ),
