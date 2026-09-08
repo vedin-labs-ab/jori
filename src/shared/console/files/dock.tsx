@@ -7,7 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Dock, DockDivider } from "../dock"
+import { Dock, DockDivider, DockGroup } from "../dock"
 import { type FileSiblings, useFileNavigate } from "./siblings"
 import { type FileDetail } from "./types"
 
@@ -36,12 +36,14 @@ export function FileDock({
   return (
     <Dock className="group/dock" label="File navigation">
       {hasSiblings ? (
-        <FileNav hasArrowKeys={hasArrowKeys} siblings={siblings} />
+        <DockGroup>
+          <FileNav hasArrowKeys={hasArrowKeys} siblings={siblings} />
+        </DockGroup>
       ) : null}
       {tools === undefined ? null : hasSiblings ? (
         <FoldedTools>{tools}</FoldedTools>
       ) : (
-        tools
+        <DockGroup>{tools}</DockGroup>
       )}
     </Dock>
   )
@@ -87,13 +89,15 @@ function FileNav({
 /** The tools behind a divider, in a column that opens from nothing while
  *  the dock is hovered or holds the focus — so a keyboard reaches them by
  *  tabbing past the navigation, and the dock widens from its center. The
- *  clip margin leaves room for a focus ring; the fade covers the fold. */
+ *  clip margin leaves room for a focus ring; the fade covers the fold.
+ *  A stacked dock has no hover worth waiting for and room below the
+ *  navigation, so there the tools stand open on their own row. */
 function FoldedTools({ children }: { children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[0fr] opacity-0 transition-[grid-template-columns,opacity] duration-200 ease-out group-focus-within/dock:grid-cols-[1fr] group-focus-within/dock:opacity-100 group-hover/dock:grid-cols-[1fr] group-hover/dock:opacity-100 motion-reduce:transition-none">
-      <div className="flex min-w-0 items-center overflow-clip [overflow-clip-margin:4px]">
-        <DockDivider className="mx-1" />
-        {children}
+    <div className="grid grid-cols-[0fr] opacity-0 transition-[grid-template-columns,opacity] duration-200 ease-out group-focus-within/dock:grid-cols-[1fr] group-focus-within/dock:opacity-100 group-hover/dock:grid-cols-[1fr] group-hover/dock:opacity-100 motion-reduce:transition-none @max-xl/dock:grid-cols-[1fr] @max-xl/dock:opacity-100">
+      <div className="flex min-w-0 items-center overflow-clip [overflow-clip-margin:4px] @max-xl/dock:flex-col @max-xl/dock:items-stretch">
+        <DockDivider className="mx-1 @max-xl/dock:mx-0" />
+        <DockGroup>{children}</DockGroup>
       </div>
     </div>
   )
