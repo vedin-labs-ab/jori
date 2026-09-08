@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
-import { makeExecution, slackTools } from "../fixtures"
+import { makeExecution, slackToolsDetail } from "../fixtures"
 import { renderExecutionRow } from "./harness"
 
 afterEach(() => {
@@ -22,17 +22,7 @@ test("renders recurring job details", async () => {
       details: [
         { type: "schedule", label: "Daily at 09:00 UTC" },
         { type: "next", label: "Next", timestamp: 1700125200000 },
-        {
-          type: "tools",
-          label: "Slack · Read 1 · Write 1",
-          groups: [
-            {
-              type: "slack",
-              label: "Slack",
-              tools: slackTools(),
-            },
-          ],
-        },
+        slackToolsDetail(),
         { type: "web_search", label: "Allowed" },
       ],
     })

@@ -7,7 +7,6 @@ beforeEach(() => {
   Object.assign(HTMLElement.prototype, {
     hasPointerCapture: () => false,
     releasePointerCapture: () => undefined,
-    scrollIntoView: () => undefined,
   })
 })
 

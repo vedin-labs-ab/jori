@@ -10,7 +10,7 @@ afterEach(() => {
 })
 
 describe("execution row one-shot details", () => {
-  test("renders one-shot job details", async () => {
+  test("renders one-shot job details and opens read-only tools", async () => {
     renderExecutionRow(
       oneShotExecution({
         details: [slackToolsDetail(), { type: "web_search", label: "Allowed" }],
@@ -27,27 +27,15 @@ describe("execution row one-shot details", () => {
     expect(screen.queryByText("Scheduled")).toBeNull()
     expect(screen.queryByText("one-shot")).toBeNull()
     expect(screen.getByText("Tools")).toBeDefined()
-    expect(
-      screen.getByRole("button", { name: "Open Slack tools" })
-    ).toBeDefined()
     expect(screen.getByText("Read 1")).toBeDefined()
     expect(screen.getByText("Write 1")).toBeDefined()
     expect(screen.queryByText("Send message, Read channel history")).toBeNull()
     expect(screen.getByText("Web search")).toBeDefined()
     expect(screen.getByText("Allowed")).toBeDefined()
-  })
-
-  test("opens read-only tool details", async () => {
-    renderExecutionRow(oneShotExecution({ details: [slackToolsDetail()] }))
-
-    fireEvent.click(screen.getByRole("button", { name: /daily image/i }))
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Open Slack tools" })
-    )
+    fireEvent.click(screen.getByRole("button", { name: "Open Slack tools" }))
 
     const dialog = screen.getByRole("dialog")
 
-    expect(dialog).toBeDefined()
     expect(screen.getByText("Slack tools")).toBeDefined()
     expect(screen.getByText("Read channel history")).toBeDefined()
     expect(screen.getByText("Read Slack channel messages.")).toBeDefined()

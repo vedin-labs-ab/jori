@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ConsoleNavigationContext } from "./location"
@@ -10,11 +10,6 @@ vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../test/router")),
   ...(await import("../../../../test/routing")),
 }))
-
-// The command list scrolls its chosen row into view, which jsdom lacks.
-beforeEach(() => {
-  Object.assign(HTMLElement.prototype, { scrollIntoView: () => undefined })
-})
 
 afterEach(() => {
   cleanup()
