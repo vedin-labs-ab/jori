@@ -110,15 +110,15 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | notion | `notion_create_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_update_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_upload_file` | Compiles | Upload and cover retest pass | Upload and cover retest pass |
-| notion | `notion_append_block_children` | Compiles | Start/end/after position pass | Position retest running |
+| notion | `notion_append_block_children` | Compiles | Start/end/after position pass | Start/end/after position pass |
 | notion | `notion_create_comment` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
-| slack | `channels_list` | Compiles | Pending | Pending |
-| slack | `conversations_history` | Compiles | Pending | Pending |
-| slack | `conversations_replies` | Compiles | Pending | Pending |
-| slack | `conversations_search_messages` | Compiles | Pending | Pending |
-| slack | `users_search` | Compiles | Pending | Pending |
-| slack | `conversations_add_message` | Compiles | Pending | Pending |
-| slack | `slack_add_reaction` | Compiles | Pending | Pending |
+| slack | `channels_list` | Compiles | Private channel pass | Private channel pass |
+| slack | `conversations_history` | Compiles | Basic round trip | Basic round trip |
+| slack | `conversations_replies` | Compiles | Root/reply/reaction readback | Root/reply/reaction readback |
+| slack | `conversations_search_messages` | Compiles | Synthetic root/reply found | Synthetic root/reply found |
+| slack | `users_search` | Compiles | Requester resolved | Requester resolved |
+| slack | `conversations_add_message` | Compiles | Root/thread reply pass | Root/thread reply pass |
+| slack | `slack_add_reaction` | Compiles | Added and read back | Added and read back |
 | jori | `web_search` | Compiles | Basic pass, batch 3 | Basic pass, batch 3 |
 | jori | `web_fetch` | Compiles | Basic pass, batch 3 | Basic pass, batch 3 |
 
@@ -217,8 +217,20 @@ EU child `nx7bscq77r333rh0jn1yf8e8cx8e125a` and US child `pn76tg6wgqm5sx7vqw52sp
 
 After the user resumed, the unchanged Notion corrections passed the full gate again: 2,742 tests passed, four skipped. Commits `72d33293` and `3bf66d1f` were fast-forwarded to main and pushed. Development deployed at 11:25:52 local time. EU and US production deployments completed, including skills. Frontends are `jori-production-mxbutig2n-albin-vedins-projects.vercel.app` and `jori-production-89ztcxowe-albin-vedins-projects.vercel.app` respectively. The user authorized deploying the new checked revision after the blocked Gmail-author commit. No existing commit was rewritten, and no Vercel account or access policy changed.
 
-EU child `nx7as8sarmvcaaqvm4p1a2j6gd8e0g4s` completed the positioned-insertion regression on its existing synthetic page. It added exactly three labeled paragraphs with end, start, and after_block positions. The readback placed START first and AFTER immediately after END. Existing blocks were retained. US child `pn7a4yx4r7mvggavnc50846bvh8e0rps` has completed all three writes; final readback and run completion are still pending in the latest checkpoint.
+EU child `nx7as8sarmvcaaqvm4p1a2j6gd8e0g4s` and US child `pn7a4yx4r7mvggavnc50846bvh8e0rps` completed the positioned-insertion regression on their existing synthetic pages. Each added exactly three labeled paragraphs with end, start, and after_block positions. Both readbacks placed START first and AFTER immediately after END. Existing blocks were retained.
 
 Sixteen native-runtime regressions failed before the next correction. Invalid delegation arrays were silently filtered, unexpected fields were ignored, invalid finish values could complete a run, and sandbox numeric values reached execution with coercion or clamping. A blocked native tool also executed when explicitly called. Runtime dispatch now checks blocked mode and validates native, active-surface, saved-file, and image inputs against the published schemas. Coding bounds and lifecycle limits are shared with their handlers. Ordinary broker calls retain their provider-specific normalization and validation.
 
-Three broker regressions demonstrated that list_capabilities skipped input validation and both ordinary and approved provider calls refreshed credentials before rejecting invalid input. These now validate first. Positive controls confirm that valid explicit empty delegation access still creates a child with no integration tools, and valid provider calls still prepare credentials and execute. The new local gate passed with 2,763 tests and four skipped. These runtime/broker fixes still need deployment and live regression; mocked tests are not E2E passes.
+Three broker regressions demonstrated that list_capabilities skipped input validation and both ordinary and approved provider calls refreshed credentials before rejecting invalid input. These now validate first. Positive controls confirm that valid explicit empty delegation access still creates a child with no integration tools, and valid provider calls still prepare credentials and execute. The new local gate passed with 2,763 tests and four skipped. These runtime/broker fixes landed at `34229cdd`, passed both production deployment gates, and deployed to development and both production regions with skills. EU deployment `dpl_BY5xiDmakmDhwuX1kgA1yvKt79SH` is Ready in dub1 and aliases eu.usejori.com. US deployment `dpl_G9dLBvzNJ718aPZoLsfdRHC2jtpp` is Ready in iad1 and aliases us.usejori.com, usejori.com, and www.usejori.com. Live negative-input variants remain pending; mocked tests are not E2E passes.
+
+### Competing store claims
+
+EU coordinator `nx7132jqxj5xhjb2g0aggkthj18e0sht` created private store `js72y660mehb9tsn0maywsz8dn8e1y7h`. Worker B `nx74p947k9069r242xz82pqzzs8e1wjm` won; worker A `nx702gvpek6r6bfrhwcvejz7158e0tn7` received claimed false with existing owner B. US coordinator `pn72rawp3evp1jy9j5m6v5s4t58e1p6q` created private store `r57fwzx17m7fgy37kwqb1x6dx58e19h4`. Worker A `pn7ejwrjsrsdnkkrjvvjdp8qa98e1dg5` won; worker B `pn7771vyss41z7msk71wx2qfqs8e0y5p` received claimed false with existing owner A. Both final readbacks retained the winner and version 1. Each worker called claim exactly once. Separate-agent competition passed; simultaneous database transaction overlap was not measured.
+
+Both readbacks exposed ambiguous timestamps: write_store.updatedAt described the document write, while read_store.updatedAt described collection metadata. The correction names the document clock valueUpdatedAt on reads and successful writes, with null before the first write. Metadata updatedAt retains its existing meaning and is documented explicitly. A shared value summary keeps both agent responses aligned. Convex function tests cover creation, write/read agreement, later metadata edits, held claims, and stale-version rejection without updating metadata on every value write. Live retesting is required after deployment.
+
+### Slack private-channel round trip
+
+The user approved both regional Slack OAuth grants, the displayed app terms, and a private channel containing only their account and both bots. Both callbacks completed and each regional integration is active in workspace `T0B9624RU04`. Private channel `C0C04T88WE9`, `jori-e2e-verification-20260908`, was created through Slack UI. A complete membership read verified exactly user `U0B8LV61PC7`, EU bot `U0C0CU19WLU`, and US bot `U0C0CUG4GAG`. Regional auth.test responses matched those identities. These setup checks are not agent E2E passes.
+
+EU child `nx761kxkwf5xyzr67ynsp5zf8n8e1wfr` and US child `pn7fwn2m0a5gh5fey565g2seah8e04w9` completed all seven catalogued Slack tools through normal agent execution. Each resolved the exact private channel and requester, read history, posted one labeled root and one threaded reply, added white_check_mark, read back both exact texts and the reaction, and found both messages through channel-scoped search. EU root/reply timestamps are `1788861253.613029` and `1788861275.881579`; US timestamps are `1788861129.452069` and `1788861142.236689`. Responses identified the matching regional bots. No external recipients or mentions were used. Attachment, pagination, duplicate-reaction, and Slack-triggered reply variants remain separate from these basic passes.

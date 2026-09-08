@@ -6,6 +6,7 @@ import {
   findAccessibleStore,
   getAccessibleStore,
   summarizeStore,
+  summarizeStoreValue,
 } from "./access"
 import { storeSpec } from "./spec"
 
@@ -26,8 +27,7 @@ export const read = internalQuery({
 
     return {
       ...summarizeStore(store),
-      value: (document?.value ?? null) as unknown,
-      version: document?.version ?? 0,
+      ...summarizeStoreValue(document),
     }
   },
 })
@@ -61,9 +61,7 @@ export const write = internalMutation({
     const summary = {
       storeId: store._id,
       name: store.name,
-      value: result.document.value as unknown,
-      version: result.document.version,
-      updatedAt: result.document.updatedAt,
+      ...summarizeStoreValue(result.document),
     }
 
     return args.write.type === "claim" ? { ...summary, claimed: true } : summary
