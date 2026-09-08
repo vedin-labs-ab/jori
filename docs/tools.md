@@ -4,7 +4,7 @@ Started 8 September 2026 on task/agent-verification, base 25bb89e3.
 
 ## Completion rule
 
-All 105 catalogued tools must have an actual Jori agent-run result in each production region. Channel-specific reply/reaction variants, meaningful operation variants, validation, permissions, and failure paths are tracked separately. Automated tests and direct provider probes support the evidence but are not agent E2E passes. Existing release evidence is historical until reproduced.
+The agreed scope is 95 tools with actual Jori agent-run results in each production region, plus ten Microsoft tools reviewed offline because the user has no organizational Microsoft account. Channel-specific reply/reaction variants, meaningful operation variants, validation, permissions, and failure paths are tracked separately. Automated tests and direct provider probes support the evidence but are not agent E2E passes. Recorded results can validate corrected response schemas; behavior fixes require fresh live retests.
 
 Use labeled synthetic fixtures. Do not modify unrelated customer content, send to outside recipients, enable global inference fallbacks, or weaken approval checks. Record run IDs and result summaries without credentials or private payloads. Record blocked and failed tools explicitly. Test fixtures may remain for reproducibility until cleanup is authorized.
 
@@ -14,7 +14,7 @@ Scope update, 8 September: the user has no organizational Microsoft mailbox/cale
 
 Every catalogued input and output schema compiles independently with Ajv. All 93 broker tools reject invalid root values and unknown fields in contract tests. These checks do not establish provider behavior or complete per-tool validation coverage.
 
-Basic success paths are recorded below. A basic pass is not full operation, validation, permission, and failure-path coverage. The post-deployment table/store and grep regressions passed in both regions.
+The table records per-tool live coverage. The findings below contain operation, validation, permission and failure-path evidence. All 95 live tools have at least one non-null actual result in each region accepted by independent Ajv validation against the current response schemas. This is representative coverage, not proof of every possible provider failure or model choice.
 
 | Provider | Tool | Contract tests | EU agent run | US agent run |
 | --- | --- | --- | --- | --- |
@@ -48,19 +48,19 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | googleCalendar | `google_calendar_update_event` | Compiles | Update and settings pass | Update and settings pass |
 | jori | `list_capabilities` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `load_skill` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
-| jori | `search_runs` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
-| jori | `search_run_activity` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
-| jori | `read_workstreams` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
+| jori | `search_runs` | Live responses pass | Stable cursor, 20 IDs and rejection pass | Stable cursor, 20 IDs and rejection pass |
+| jori | `search_run_activity` | Live responses pass | Filtered pages and unfiltered activity pass | Filtered pages and unfiltered activity pass |
+| jori | `read_workstreams` | Live responses pass | Populated journal/receipt pass | Populated journal/receipt pass |
 | jori | `offer_integration` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `cancel_approval_request` | Compiles | Same-run cancellation and replay pass | Same-run cancellation and replay pass |
 | jori | `cancel_integration_offer` | Compiles | Basic pass, batch 4 | Basic pass, batch 4 |
 | jori | `save_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `generate_image` | Compiles | Post-refactor runtime pass; schema correction pending | Post-refactor runtime pass; schema correction pending |
+| jori | `generate_image` | Recorded Vertex responses pass | Regional generation and download pass | Regional generation and download pass |
 | jori | `search_files` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `read_file` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `search_jobs` | Compiles | Empty search pass, batch 6 | Empty search pass, batch 6 |
+| jori | `read_file` | Live responses pass | Read, approval, denial and revocation pass | Read, approval, denial and revocation pass |
+| jori | `search_jobs` | Live responses pass | Populated search and deletion readback | Populated search and deletion readback |
 | jori | `read_job` | Compiles | Once-job readback | Once-job readback |
-| jori | `add_job` | Compiles | Create and idempotent replay | Create and idempotent replay |
+| jori | `add_job` | Live responses pass | Once/cron/event execution and replay | Once/cron/event execution and replay |
 | jori | `update_job` | Compiles | Name/trigger update readback | Name/trigger update readback |
 | jori | `delete_job` | Live responses pass | Delete/read/search pass | Delete/read/search pass |
 | linear | `linear_search_issues` | Compiles | Linear round trip | Linear round trip |
@@ -93,8 +93,8 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | microsoftCalendar | `microsoft_calendar_create_event` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
 | microsoftCalendar | `microsoft_calendar_update_event` | Offline audit passed | Non-live, user-approved scope | Non-live, user-approved scope |
 | jori | `finish_run` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `send_reply` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
-| jori | `add_reaction` | Compiles | Slack mention pass | Slack mention pass |
+| jori | `send_reply` | Live responses pass | Console, Slack, GitHub and Linear pass | Console, Slack, GitHub and Linear pass |
+| jori | `add_reaction` | Live responses pass | Slack, GitHub and Linear pass | Slack, GitHub and Linear pass |
 | jori | `read` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
 | jori | `grep` | Compiles | Regression pass | Regression pass |
 | jori | `glob` | Compiles | Basic pass, batch 1/2 | Basic pass, batch 1/2 |
@@ -133,6 +133,8 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 - Residency: each run uses its own region's Jori records and configured credentials. Exa and E2B remain documented processing exceptions.
 
 ## Findings
+
+These are chronological checkpoints. Earlier failures, missing connections and pending releases describe the state at that time, not current blockers. The closeout section records the final retests and remaining limitations.
 
 ### First table round trips
 
@@ -386,3 +388,60 @@ The native correction passed its full check and 2,942 tests, with four skipped. 
 After combining those corrections, a strict-organization recorded-output audit found at least one valid response for 94 tools in each production region. All recorded GitHub, Linear and Notion provider responses validated. The outstanding tool was search_runs, whose response-schema correction was still awaiting integration. The other failures were retired table/store outputs and the assigned history activity shapes. No historical fields were added for compatibility. The ten Microsoft tools remain outside live coverage by user instruction.
 
 After the history correction was combined, all six recorded search_runs responses and all four search_run_activity responses per region passed independent schema validation. This establishes at least one valid non-null recorded result for all 95 non-Microsoft tools in each region, not fresh execution after release. Main f1d4e023 landed and was pushed after the full check and test gates passed: 3,095 tests passed, four skipped. One unchanged landing lazy-load test failed under four-worker contention, passed in isolation, and passed in the full two-worker rerun. No assertions or timeouts changed. Production deployment and fresh approval, pagination and mention-routing retests remain required.
+
+## Closeout, 8 September 2026
+
+All 95 in-scope tools have been exercised live in both production regions, with representative operation, validation, authorization and failure-path coverage. All have non-null recorded responses accepted by the current independent response-schema checks. The ten Microsoft tools retain the user-approved offline status. No claim is made that every possible variant or provider outage has been tested.
+
+### Checked release
+
+Release `61253ef319bbcdbb87780e0eb8571dacc319d177` includes all demonstrated code fixes and the generated history module. Both gates passed with 3,095 passing tests and four skipped. It was pushed and deployed to development Convex, both production Convex deployments, and both regional Vercel projects, with skills synchronized. Vercel readback confirmed EU deployment `dpl_N4WCeurgznF7nmdAQd9qT1TfA6wm` Ready with runtime region dub1 and US `dpl_6FxRcWtKYYmLxtjMni2dDrxPTnTz` Ready with runtime region iad1. Both regional `/chat` URLs and the marketing root returned HTTP 200. Build location is not runtime location.
+
+Both production Linear installation records were refreshed through the normal installation mutation to capture the current regional bot identities. Credentials, owners and provider organization IDs were preserved. Development has no active Linear connection to refresh.
+
+### Fresh approval tests
+
+| Path | EU run | US run | Observed result |
+| --- | --- | --- | --- |
+| Approved read | `nx7c4h08cybsf5mrp0a7j9g8th8e0fe4` | `pn76bqnt2xna9k6er2vwwxkn6x8e0nq7` | Correct 33-byte file metadata, one claim, stored result and consumption, completed run |
+| Denied read | `nx7bjg7crn54g65hfnzw5aje0x8e1vvt` | `pn7495x74s9ezrd43enf5pzt218e0fe5` | Denied and consumed, no execution claim or file result, completed run |
+| Permission revoked before approval | `nx7e2t64rrw7a91bqdtcr0737s8e064e` | `pn73kc5dmwys0xzq7sf0d3gvqd8e1cd3` | Blocked-tool error persisted and consumed, no automatic retry, completed run |
+| Cancellation and replay | `nx7dr4j3zaqqvz2fkn27vhz8v58e1d8r` | `pn76bt7d7qz2embjmh0tx26vdh8e1x3k` | cancelled then already_resolved, no execution claim or file result, consumed and completed |
+
+The first US approved-read attempt, `pn77saww9gkjytapz4jgdd95an8e1amn`, copied the fixture ID incorrectly despite a correct prompt. Execution rejected that invalid ID, persisted the error, consumed it and completed without a retry. This is a model transcription failure and a successful terminal-error handling check, not the positive read pass. The separate US run in the table used the exact valid ID and succeeded.
+
+Temporary read_file overrides were restored to the original allowed mode through the normal permissions mutation. Final reads confirmed empty override lists in both organizations. The old pre-fix stranded runs remain stopped. The two recurring synthetic jobs per region remain paused, and the two explicitly approved once-job deletions remain absent. Other fixtures were retained for reproducibility.
+
+### Fresh history tests
+
+EU `nx73zx3a7ykp7y4kgxybxymhhs8e0y07` and US `pn749tc660kgtcv9p5wqytq4v58e1dh3` completed the same bounded sequence. A one-item completed-run search returned a cursor. A no-op child then completed before the parent continued the original cursor. Both second pages returned different run IDs, without the old positional-pagination duplicate.
+
+Children were EU `nx7e6hv84ddccgg9n1f30ecwy98e0jp0` and US `pn7adr7xk8m6c52tsp3b0nrv518e1tcd`. Both changed-filter cursor reuse and a malformed cursor were rejected once, without retries. Explicit IDs mode returned all 20 requested IDs with cursor:null in each region. Unfiltered child activity returned populated results. Actual successful history, activity, delegation and wait outputs passed independent schema validation.
+
+### Fresh GitHub and Linear routing tests
+
+| Source | EU completed run | US completed run |
+| --- | --- | --- |
+| GitHub issue mention | `nx75kmyhv2afkxseadkjm2es3h8e15m0` | `pn78znxr338tgjgh0ra32chrwh8e1nh2` |
+| GitHub review-comment follow-up | `nx7eh13c3cj0gh1e9wds1ff80n8e0rp2` | `pn7f2r6rrezxw367437yfhjw5h8e1cx9` |
+| Linear picker mention | `nx7a3x1484nmc9thxdrghaphs58e1e4j` | `pn70319sahcs8bpxy66s0m0qqx8e0wna` |
+
+Each listed run called generic send_reply and add_reaction exactly once. Provider readback confirmed one acknowledgment and one eyes reaction from the matching regional bot. Both ingresses received the source webhooks, but only the addressed region marked the messages mentioned and ran. The opposite region created no conversation or run for these sources. This verifies routing isolation within Jori, not regional processing by GitHub or Linear themselves.
+
+Fresh GitHub review sources `3960351768` and `3960351758` first created the addressed regional conversations, running EU `nx7dsk5tqd0tz7bjrgbz8m4kc18e0pw5` and US `pn70719v01hskgr9k2hdhvr0fh8e0es0`. Those runs used provider-specific reply tools. The review runs in the table were subsequent explicit-tool follow-ups in those same conversations. They verify generic reply/reaction routing, not initial conversation creation. The opposite region created no conversation or run for either batch.
+
+GitHub issue sources were EU `5588877691` on #5 and US `5588877733` on #6. Reply IDs were `5588882953` and `5588880453`; reaction IDs were `413115451` and `413115415`. Review sources were EU `3960368907` on PR #4 and US `3960368886` on PR #3. Reply IDs were `3960372215` and `3960372851`; reaction IDs were `436376365` and `436376387`. Review replies pointed to the correct source comment. Both draft PR heads and their single fixture-file changes remained unchanged.
+
+Linear sources were EU `cdebdf68-0414-4337-9eb9-257c5c28d03f` on VED-17 and US `1199bc0d-13aa-471a-b127-b86788619370` on VED-18. Reply IDs were `0514724c-c2fc-4767-9abc-629b0a90a217` and `564225d5-9b8a-44a1-b260-c3fe273db953`; reaction IDs were `a38af188-df9c-499e-83f9-9b6053de378e` and `dd0cc97a-95e4-4164-821e-a4de2d2d473e`.
+
+The EU Linear tool call explicitly supplied commentId and replied in that thread. The US supplied only text and used the existing issue-level target. Both follow the documented contract; no parent ID was dropped. Requiring every root-comment reply to thread would be a separate product-policy change.
+
+### Remaining limitations
+
+- Microsoft remains offline-tested. Real consent, mailbox policy, delivery and calendar behavior need a suitable account before a live claim is possible.
+- Jori share lookups expire, but a previously disclosed direct Convex storage URL remains usable until file deletion. The short alternatives review is complete; storage migration is a separate decision.
+- Exa and E2B remain documented processing exceptions. Regional routing and separate credentials do not establish EU processing for those providers.
+- The sandbox shell-command guard is not a security boundary against arbitrary code execution. The earlier workaround findings remain relevant.
+- Live tests do not establish every revoked OAuth grant, outage, rate-limit condition, simultaneous transaction overlap or future model decision. Automated negative tests supplement the representative live evidence.
+
+No remaining required live variant was identified in the final coverage reconciliation. This closeout adds evidence only; it changes no application behavior or vendor configuration.
