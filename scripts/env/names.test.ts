@@ -1,5 +1,25 @@
 import { expect, test } from "vitest"
-import { deploymentNames } from "./names.ts"
+import {
+  deploymentNames,
+  environmentFile,
+  readTarget,
+  targetRegion,
+} from "./names.ts"
+
+test("a target is one word that names its region and its env file", () => {
+  expect(readTarget(["dev"])).toBe("dev")
+  expect(readTarget(["prod-eu"])).toBe("prod-eu")
+  expect(() => readTarget([])).toThrow("Choose a target")
+  expect(() => readTarget(["prod"])).toThrow("Choose a target")
+  expect(() => readTarget(["prod-us", "extra"])).toThrow("Choose a target")
+
+  expect(targetRegion("dev")).toBeUndefined()
+  expect(targetRegion("prod-eu")).toBe("eu")
+  expect(targetRegion("prod-us")).toBe("us")
+
+  expect(environmentFile("dev")).toBe(".env.local")
+  expect(environmentFile("prod-us")).toBe(".env.prod-us.local")
+})
 
 test("deployment requires core services but not optional billing", () => {
   expect(deploymentNames).toEqual([

@@ -1,8 +1,6 @@
-import { runCommand } from "../process.ts"
-import { taskArguments } from "./tasks.ts"
+import { runInTarget } from "./run.ts"
+import { taskCommand } from "./tasks.ts"
 
-await runCommand({
-  args: taskArguments(process.argv.slice(2)),
-  command: process.execPath,
-  label: "Environment task",
-})
+const { command, target } = taskCommand(process.argv.slice(2))
+
+runInTarget(target, command)

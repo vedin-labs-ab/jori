@@ -1,48 +1,31 @@
-import { isRegion } from "../../contracts/region.ts"
-import { isEnvironment } from "./names.ts"
+import { isTarget, type Target, targets } from "./names.ts"
 
+/** The named tasks a package script binds to a target. Each is a fixed
+ *  command; whatever follows the target is handed to it unchanged. */
 const commands = {
   sandbox: ["node", "--experimental-strip-types", "scripts/e2b.ts"],
+  seed: ["node", "--experimental-strip-types", "scripts/db/seed.ts"],
   skills: ["npx", "convex", "run", "skills/catalog:syncGlobalSkills"],
+  truncate: ["node", "--experimental-strip-types", "scripts/db/truncate.ts"],
 } as const
 
-const usage =
-  "Usage: scripts/env/task.ts <sandbox|skills> --env dev|prod [--region eu|us]"
+type Task = keyof typeof commands
 
-/** Named package tasks accept appended target flags, then put them before the
- * generic environment wrapper's command separator. Child arguments are fixed,
- * so a caller's --region can never be mistaken for a provider CLI option. */
-export function taskArguments(argv: readonly string[]) {
-  const [task, environmentOption, environment, regionOption, region] = argv
+const usage = `Usage: scripts/env/task.ts <${Object.keys(commands).join("|")}> <${targets.join("|")}> [arguments…]`
 
-  if (
-    !isTask(task) ||
-    environmentOption !== "--env" ||
-    !isEnvironment(environment) ||
-    (argv.length !== 3 && argv.length !== 5)
-  ) {
+export function taskCommand(argv: readonly string[]): {
+  command: string[]
+  target: Target
+} {
+  const [task, target, ...rest] = argv
+
+  if (!isTask(task) || !isTarget(target)) {
     throw new Error(usage)
   }
 
-  if (
-    (environment === "dev" && argv.length !== 3) ||
-    (environment === "prod" &&
-      (regionOption !== "--region" || !isRegion(region)))
-  ) {
-    throw new Error(usage)
-  }
-
-  return [
-    "--experimental-strip-types",
-    "scripts/env/index.ts",
-    "--env",
-    environment,
-    ...(environment === "prod" ? ["--region", region] : []),
-    "--",
-    ...commands[task],
-  ]
+  return { command: [...commands[task], ...rest], target }
 }
 
-function isTask(value: string): value is keyof typeof commands {
-  return Object.hasOwn(commands, value)
+function isTask(value: string | undefined): value is Task {
+  return value !== undefined && Object.hasOwn(commands, value)
 }

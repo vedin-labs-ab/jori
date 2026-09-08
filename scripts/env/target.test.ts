@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { readTargetArguments, validateTarget } from "./target.ts"
+import { validateTarget } from "./target.ts"
 
 function target(region: "eu" | "us") {
   const host = region === "eu" ? "deployment.eu-west-1" : "deployment"
@@ -15,9 +15,7 @@ function target(region: "eu" | "us") {
   }
 }
 
-test("requires an explicit regional production target", () => {
-  expect(() => readTargetArguments([])).toThrow("explicit target")
-  expect(readTargetArguments(["--region", "eu"])).toBe("eu")
+test("rejects a frontend built for the other region", () => {
   expect(() => validateTarget(target("us"), "eu")).toThrow("Frontend region")
 })
 

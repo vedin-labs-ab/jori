@@ -1,11 +1,11 @@
-import { packageCommand, runCommand, runCommands } from "./process.ts"
+import { recordGate } from "./gate/stamp.ts"
+import { packageCommand, runCommands } from "./process.ts"
 
 await runChecks()
 
 async function runChecks() {
-  await runCommand(packageCommand("content:compile"))
-
   await runCommands([
+    packageCommand("check:content"),
     packageCommand("check:structure"),
     packageCommand("check:dependencies"),
     packageCommand("check:versions"),
@@ -14,4 +14,6 @@ async function runChecks() {
     packageCommand("check:biome"),
     packageCommand("check:bundle"),
   ])
+
+  recordGate("check")
 }

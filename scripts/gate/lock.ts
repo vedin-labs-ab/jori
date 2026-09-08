@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process"
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
@@ -10,39 +9,13 @@ import path from "node:path"
  * sound tests flaky; queueing them is also faster in total than letting
  * them thrash. The lock lives in the system temp dir, keyed by repository
  * name, so all worktrees contend on the same one.
- *
- * Usage: node --experimental-strip-types scripts/gate.ts <command> [args…]
  */
-
 const lockDirectory = path.join(tmpdir(), "jori-gate.lock")
 const pidFile = path.join(lockDirectory, "pid")
 const pollMs = 2_000
 
-const [, , command, ...commandArguments] = process.argv
-
-if (command === undefined) {
-  process.stderr.write("gate.ts needs a command to run.\n")
-  process.exit(1)
-}
-
-await acquireLock()
-
-const child = spawn(command, commandArguments, { stdio: "inherit" })
-
-child.on("exit", (code, signal) => {
-  releaseLock()
-  process.exitCode = signal === null ? (code ?? 1) : 1
-})
-
-for (const signal of ["SIGINT", "SIGTERM"] as const) {
-  process.on(signal, () => {
-    child.kill(signal)
-    releaseLock()
-    process.exit(1)
-  })
-}
-
-async function acquireLock() {
+/** Waits for the lock and returns the function that releases it. */
+export async function acquireLock() {
   let announced = false
 
   for (;;) {
@@ -50,7 +23,7 @@ async function acquireLock() {
       mkdirSync(lockDirectory)
       writeFileSync(pidFile, String(process.pid))
 
-      return
+      return releaseLock
     } catch {
       if (holderIsDead()) {
         rmSync(lockDirectory, { force: true, recursive: true })

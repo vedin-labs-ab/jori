@@ -31,10 +31,11 @@ suffixed with it.
   after the task branch. It expires on its own and never touches a shared
   environment.
 - After a task branch lands on `main`, the development deployment picks the
-  change up from the `pnpm dev` watcher. `pnpm deploy:dev` is only needed to
+  change up from the `pnpm dev` watcher. `pnpm ship dev` is only needed to
   push without that watcher running.
-- Production is deployed by a person, never by an agent. Do not run
-  `pnpm deploy:prod`, and do not read or write production credentials.
+- Production ships from the primary checkout with `pnpm ship prod-us` or
+  `pnpm ship prod-eu`, only when the user asks for it, and only from a pushed
+  `main` that passed the gate. Never read or print production credentials.
 
 ### Code Quality & Architecture
 
