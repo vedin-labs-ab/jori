@@ -33,6 +33,7 @@ import type * as backfill_page from "../backfill/page.js";
 import type * as backfill_record from "../backfill/record.js";
 import type * as backfill_step from "../backfill/step.js";
 import type * as billing_account from "../billing/account.js";
+import type * as billing_allowance from "../billing/allowance.js";
 import type * as billing_console from "../billing/console.js";
 import type * as billing_cycle from "../billing/cycle.js";
 import type * as billing_guard from "../billing/guard.js";
@@ -693,6 +694,7 @@ declare const fullApi: ApiFromModules<{
   "backfill/record": typeof backfill_record;
   "backfill/step": typeof backfill_step;
   "billing/account": typeof billing_account;
+  "billing/allowance": typeof billing_allowance;
   "billing/console": typeof billing_console;
   "billing/cycle": typeof billing_cycle;
   "billing/guard": typeof billing_guard;
