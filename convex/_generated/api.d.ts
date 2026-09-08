@@ -208,6 +208,7 @@ import type * as integrations_linear_ingress_http from "../integrations/linear/i
 import type * as integrations_linear_ingress_hydration from "../integrations/linear/ingress/hydration.js";
 import type * as integrations_linear_ingress_issues from "../integrations/linear/ingress/issues.js";
 import type * as integrations_linear_ingress_lifecycle from "../integrations/linear/ingress/lifecycle.js";
+import type * as integrations_linear_ingress_messages from "../integrations/linear/ingress/messages.js";
 import type * as integrations_linear_install from "../integrations/linear/install.js";
 import type * as integrations_linear_oauth from "../integrations/linear/oauth.js";
 import type * as integrations_linear_options from "../integrations/linear/options.js";
@@ -870,6 +871,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/linear/ingress/hydration": typeof integrations_linear_ingress_hydration;
   "integrations/linear/ingress/issues": typeof integrations_linear_ingress_issues;
   "integrations/linear/ingress/lifecycle": typeof integrations_linear_ingress_lifecycle;
+  "integrations/linear/ingress/messages": typeof integrations_linear_ingress_messages;
   "integrations/linear/install": typeof integrations_linear_install;
   "integrations/linear/oauth": typeof integrations_linear_oauth;
   "integrations/linear/options": typeof integrations_linear_options;

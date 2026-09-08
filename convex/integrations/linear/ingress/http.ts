@@ -166,10 +166,9 @@ async function recordLinearMessage(
   mode?: LinearRecordMode
 ) {
   await ctx.runMutation(
-    internal.conversations.intake.record,
+    internal.integrations.linear.ingress.messages.record,
     compactRecord({
       accountId: message.accountId,
-      integration: "linear",
       mode,
       type: message.type,
       externalId: message.externalId,
