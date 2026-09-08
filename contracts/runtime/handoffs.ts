@@ -5,6 +5,12 @@ export type HandoffSubject =
   | { kind: "approval"; id: RuntimeId<"approvals"> }
   | { kind: "offer"; id: RuntimeId<"integrationOffers"> }
 
+export const approvalExecutionTimeoutMs = 5 * 60 * 1000
+
+export type ApprovalExecution =
+  | { state: "done"; result: string }
+  | { state: "executing"; expiresAt: number }
+
 export type ApprovalHandoff = {
   id: RuntimeId<"approvals">
   status: "pending" | "approved" | "denied" | "cancelled" | "expired" | "failed"
@@ -13,6 +19,7 @@ export type ApprovalHandoff = {
   summary: string
   code: string
   expiresAt: number
+  executionPendingUntil?: number
 }
 
 export type OfferHandoff = {

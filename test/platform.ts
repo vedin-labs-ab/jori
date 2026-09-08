@@ -1,7 +1,10 @@
 import { vi } from "vitest"
 import { encodeToolResult } from "../contracts/json"
 import { type DrainedSessionBatch } from "../contracts/runtime/context"
-import { type RunHandoffs } from "../contracts/runtime/handoffs"
+import {
+  type ApprovalExecution,
+  type RunHandoffs,
+} from "../contracts/runtime/handoffs"
 import { type TranscriptMessage } from "../convex/runs/execution/transcript/schema"
 import { type RuntimePlatform } from "../convex/runtime/platform"
 import { type SandboxRuntime } from "../convex/runtime/sandbox/types"
@@ -28,6 +31,13 @@ export function createPlatform(
     appendTranscript: vi.fn(async (messages: TranscriptMessage[]) => {
       transcript.push(...messages)
     }),
+    markApprovalConsumed: vi.fn(
+      async (args: { message?: TranscriptMessage }) => {
+        if (args.message !== undefined) {
+          transcript.push(args.message)
+        }
+      }
+    ),
     drainSession: vi.fn(async () => sessions.shift() ?? emptySessionBatch()),
     listTranscript: vi.fn(async () => [...transcript]),
     loadRunHandoffs: vi.fn(async () => handoffs.shift() ?? emptyHandoffs()),
@@ -76,7 +86,12 @@ function answers() {
     createAgentRun: vi.fn(async () => ({
       runId: runtimeId<"runs">("run_child"),
     })),
-    executeApproval: vi.fn(async () => encodeToolResult({ status: "posted" })),
+    executeApproval: vi.fn(
+      async (): Promise<ApprovalExecution> => ({
+        state: "done",
+        result: encodeToolResult({ status: "posted" }),
+      })
+    ),
     fetchGitHubCloneCredentials: vi.fn(async () => ({
       remoteUrl: "https://github.com/acme/app.git",
       token: "secret-token",
