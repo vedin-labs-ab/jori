@@ -4,23 +4,21 @@ import {
   storeDoc,
   testOwner,
 } from "../../test/convex/collections"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
+import { databaseContext, id } from "../../test/convex/database"
 import { type CollectionDoc } from "../collections/spec"
 import { summarizeStore, summarizeStoreWithOwner } from "./access"
 
-async function storedStore(
-  database: TestDatabase,
-  overrides: StoreOverrides = {}
-) {
-  const storeId = await database.insert("collections", storeDoc(overrides))
-
-  return (await database.get(storeId)) as unknown as CollectionDoc<"store">
+function store(overrides: StoreOverrides = {}): CollectionDoc<"store"> {
+  return {
+    ...storeDoc(overrides),
+    _id: id<"collections">("store"),
+    _creationTime: 1,
+  } as CollectionDoc<"store">
 }
 
 describe("counting leaf properties", () => {
-  test("recurses into nested objects, counting only their leaves", async () => {
-    const { database } = databaseContext()
-    const store = await storedStore(database, {
+  test("recurses into nested objects, counting only their leaves", () => {
+    const document = store({
       schema: {
         type: "object",
         properties: {
@@ -33,12 +31,11 @@ describe("counting leaf properties", () => {
       },
     })
 
-    expect(summarizeStore(store).propertyCount).toBe(3)
+    expect(summarizeStore(document).propertyCount).toBe(3)
   })
 
-  test("counts an array's item shape once", async () => {
-    const { database } = databaseContext()
-    const store = await storedStore(database, {
+  test("counts an array's item shape once", () => {
+    const document = store({
       schema: {
         type: "object",
         properties: {
@@ -57,12 +54,11 @@ describe("counting leaf properties", () => {
       },
     })
 
-    expect(summarizeStore(store).propertyCount).toBe(3)
+    expect(summarizeStore(document).propertyCount).toBe(3)
   })
 
-  test("counts a free-form object property as one slot", async () => {
-    const { database } = databaseContext()
-    const store = await storedStore(database, {
+  test("counts a free-form object property as one slot", () => {
+    const document = store({
       schema: {
         type: "object",
         properties: {
@@ -72,29 +68,26 @@ describe("counting leaf properties", () => {
       },
     })
 
-    expect(summarizeStore(store).propertyCount).toBe(2)
+    expect(summarizeStore(document).propertyCount).toBe(2)
   })
 
-  test("counts a schema without a properties object as zero", async () => {
-    const { database } = databaseContext()
-    const store = await storedStore(database, { schema: { type: "object" } })
+  test("counts a schema without a properties object as zero", () => {
+    const document = store({ schema: { type: "object" } })
 
-    expect(summarizeStore(store).propertyCount).toBe(0)
+    expect(summarizeStore(document).propertyCount).toBe(0)
   })
 
-  test("counts an empty properties object as zero", async () => {
-    const { database } = databaseContext()
-    const store = await storedStore(database, {
+  test("counts an empty properties object as zero", () => {
+    const document = store({
       schema: { type: "object", properties: {} },
     })
 
-    expect(summarizeStore(store).propertyCount).toBe(0)
+    expect(summarizeStore(document).propertyCount).toBe(0)
   })
 
-  test("counts nothing at all for a store without a schema", async () => {
-    const { database } = databaseContext()
-    const store = await storedStore(database, { schema: undefined })
-    const summary = summarizeStore(store)
+  test("counts nothing at all for a store without a schema", () => {
+    const document = store({ schema: undefined })
+    const summary = summarizeStore(document)
 
     expect(summary.schema).toBeUndefined()
     expect(summary.propertyCount).toBeUndefined()
@@ -113,24 +106,24 @@ describe("resolving the owner name", () => {
       name: "Ada Lovelace",
     })
 
-    const store = await storedStore(database)
-    const summary = await summarizeStoreWithOwner(ctx, store)
+    const document = store()
+    const summary = await summarizeStoreWithOwner(ctx, document)
 
     expect(summary.ownerName).toBe("Ada Lovelace")
   })
 
   test("leaves the name unset without an owner", async () => {
-    const { database, ctx } = databaseContext()
-    const store = await storedStore(database, { ownerId: undefined })
-    const summary = await summarizeStoreWithOwner(ctx, store)
+    const { ctx } = databaseContext()
+    const document = store({ ownerId: undefined })
+    const summary = await summarizeStoreWithOwner(ctx, document)
 
     expect(summary.ownerName).toBeUndefined()
   })
 
   test("leaves the name unset when no identity names the owner", async () => {
-    const { database, ctx } = databaseContext()
-    const store = await storedStore(database)
-    const summary = await summarizeStoreWithOwner(ctx, store)
+    const { ctx } = databaseContext()
+    const document = store()
+    const summary = await summarizeStoreWithOwner(ctx, document)
 
     expect(summary.ownerName).toBeUndefined()
   })
