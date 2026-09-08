@@ -13,6 +13,9 @@ export const googleToolInputSchemas = {
   google_gmail_search_threads: objectSchema({
     properties: {
       maxResults: numberProperty("Maximum threads to return.", 1, 50),
+      pageToken: stringProperty(
+        "Gmail pagination token from the previous page."
+      ),
       q: stringProperty("Gmail search query."),
     },
   }),
@@ -109,7 +112,12 @@ function gmailBatchReadSchema(idsProperty: string) {
   return objectSchema({
     required: [idsProperty],
     properties: {
-      [idsProperty]: stringArrayProperty("Gmail IDs. Maximum 50."),
+      [idsProperty]: {
+        ...stringArrayProperty("Gmail IDs. Between 1 and 50."),
+        minItems: 1,
+        maxItems: 50,
+        items: { type: "string", pattern: "\\S" },
+      },
     },
   })
 }

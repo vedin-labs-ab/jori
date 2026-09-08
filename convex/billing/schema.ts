@@ -94,6 +94,16 @@ export const transactions = defineTable(
     v.object({
       organizationId: v.string(),
       timestamp: v.number(),
+      type: v.literal("allowance"),
+      micros: v.object({ amount: v.number(), balance: v.number() }),
+      source: v.literal("manual"),
+      idempotencyKey: v.string(),
+      reason: v.string(),
+      operator: v.string(),
+    }),
+    v.object({
+      organizationId: v.string(),
+      timestamp: v.number(),
       type: v.literal("topup"),
       micros: v.object({ amount: v.number(), balance: v.number() }),
       stripeId: v.string(),
@@ -104,3 +114,4 @@ export const transactions = defineTable(
   .index("by_organization_and_timestamp", ["organizationId", "timestamp"])
   .index("by_run", ["runId"])
   .index("by_stripe", ["stripeId"])
+  .index("by_idempotencyKey", ["idempotencyKey"])
