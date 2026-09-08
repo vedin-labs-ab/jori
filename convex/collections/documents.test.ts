@@ -59,35 +59,25 @@ async function createTable(
 }
 
 describe("singleton writes", () => {
-  test("the first write creates the document at version 1", async () => {
+  test("singleton writes create one document and advance its version in place", async () => {
     const { database, ctx } = databaseContext()
     const store = await createStore(database)
-    const result = await writeDocument(ctx, storeSpec, store, {
-      write: { type: "replace", value: { ready: true } },
-    })
-
-    expect(result).toMatchObject({
-      status: "written",
-      created: true,
-      document: { value: { ready: true }, version: 1 },
-    })
-    expect(await database.query("documents").collect()).toHaveLength(1)
-  })
-
-  test("later writes update the same document and bump its version", async () => {
-    const { database, ctx } = databaseContext()
-    const store = await createStore(database)
-
-    await writeDocument(ctx, storeSpec, store, {
+    const created = await writeDocument(ctx, storeSpec, store, {
       write: { type: "replace", value: { count: 1 } },
     })
 
-    const result = await writeDocument(ctx, storeSpec, store, {
+    expect(created).toMatchObject({
+      status: "written",
+      created: true,
+      document: { value: { count: 1 }, version: 1 },
+    })
+    expect(await database.query("documents").collect()).toHaveLength(1)
+    const updated = await writeDocument(ctx, storeSpec, store, {
       write: { type: "merge", patch: { extra: true } },
       expectedVersion: 1,
     })
 
-    expect(result).toMatchObject({
+    expect(updated).toMatchObject({
       status: "written",
       created: false,
       document: { value: { count: 1, extra: true }, version: 2 },
@@ -117,32 +107,22 @@ describe("singleton writes", () => {
 })
 
 describe("claims", () => {
-  test("a claim on a free path writes it and reports the new version", async () => {
+  test("a claim writes a free path once and returns its holder on later claims", async () => {
     const { database, ctx } = databaseContext()
     const store = await createStore(database)
-    const result = await writeDocument(ctx, storeSpec, store, {
+    const claimed = await writeDocument(ctx, storeSpec, store, {
       write: { type: "claim", path: ["jobs", "j:1"], value: { sent: true } },
     })
 
-    expect(result).toMatchObject({
+    expect(claimed).toMatchObject({
       status: "written",
       document: { value: { jobs: { "j:1": { sent: true } } }, version: 1 },
     })
-  })
-
-  test("a claim on a held path writes nothing and returns the holder", async () => {
-    const { database, ctx } = databaseContext()
-    const store = await createStore(database)
-
-    await writeDocument(ctx, storeSpec, store, {
-      write: { type: "claim", path: ["jobs", "j:1"], value: { sent: true } },
-    })
-
-    const result = await writeDocument(ctx, storeSpec, store, {
+    const held = await writeDocument(ctx, storeSpec, store, {
       write: { type: "claim", path: ["jobs", "j:1"], value: { sent: false } },
     })
 
-    expect(result).toEqual({
+    expect(held).toEqual({
       status: "held",
       existing: { sent: true },
       version: 1,
