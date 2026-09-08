@@ -105,7 +105,7 @@ Basic success paths are recorded below. A basic pass is not full operation, vali
 | notion | `notion_search` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_get_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_get_block_children` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
-| notion | `notion_query_data_source` | Compiles | Pending | Pending |
+| notion | `notion_query_data_source` | Compiles | Query/filter/cursor pass | Query/filter/cursor pass |
 | notion | `notion_list_comments` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_create_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
 | notion | `notion_update_page` | Compiles | Basic pass, batch 5 | Basic pass, batch 5 |
@@ -191,7 +191,9 @@ EU child `nx7abr6agwa40t5jgtmp1az5gd8e04yr` and US child `pn78ktv7s0xqmhz1cyk7mh
 
 ### Upload retest and current Notion API contracts
 
-The upload fix landed at `f7439f9b`. Development deployed at 10:28:59 local time. EU production completed with Vercel `dpl_9gvoCKPaT8FC2EPTidFeMFXjTU3S`, Ready in dub1. US backend deployed the same fix from `63dbf175`, which also contains a later marketing-copy commit. Its frontend deployment is still pending at this checkpoint.
+The upload fix landed at `f7439f9b`. Development deployed at 10:28:59 local time. EU production completed with Vercel `dpl_9gvoCKPaT8FC2EPTidFeMFXjTU3S`, Ready in dub1. US backend deployed the same fix from `63dbf175`, which also contains a later marketing-copy commit. US skills were synchronized separately after the frontend block below.
+
+Vercel deployment `dpl_B4pjxsxvMZvBox5eg3SHvSYUitxc` is BLOCKED with TEAM_ACCESS_REQUIRED, not building. The CLI displayed an indefinite Building spinner and inspect returned UNKNOWN; the management API identified the real state and confirmed no production alias was assigned. Vercel could not verify the Gmail commit-author address on `63dbf175` as a team member. Earlier successful commits use the owner's Hotmail address. The local waiting command was stopped, not the existing production deployment. User verification of the author email is required; no author rewriting or access-policy change was performed. Production must not be described as fully updated.
 
 EU child `nx78d1men27v0r48j1zp2j5j6x8e0dv2` uploaded 1,026,264 PNG bytes with image/png. Notion upload `3d523f2d-e283-814d-8e89-00b2c0203501` reached uploaded status. US child `pn77shzv1wpkqrp19bmkzp6v5h8e1q71` uploaded 502,664 PNG bytes as `3d523f2d-e283-811b-9325-00b2be2a0cf9`. Each updated only its synthetic page cover and read the resulting file cover back.
 
@@ -199,7 +201,11 @@ Further review found API-version drift. Jori uses Notion 2026-03-11 but advertis
 
 Sources: [Notion 2026-03-11 upgrade guide](https://developers.notion.com/guides/get-started/upgrade-guide-2026-03-11) and [data-source migration guide](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03).
 
-Two labeled databases were created as test fixtures beneath the existing synthetic pages, using each region's already-authorized Notion connection. This setup API call is not an agent-tool pass. EU database `974bb30e-59e2-4fec-9988-a71cb0fe89ab` has source `d636dbd3-3c21-4f3d-aa03-78b5d84d2e16`. US database `70c2c485-6fe2-4919-bbcc-cb07c3fe4eaa` has source `ba0eab5b-65d4-4431-9804-6982dbd88495`. No permissions changed. The US agent created Alpha/Beta rows, sorted and paginated them with a real cursor, filtered to exactly Beta, and read distinct block pages. EU query results remain pending review.
+Two labeled databases were created as test fixtures beneath the existing synthetic pages, using each region's already-authorized Notion connection. This setup API call is not an agent-tool pass. EU database `974bb30e-59e2-4fec-9988-a71cb0fe89ab` has source `d636dbd3-3c21-4f3d-aa03-78b5d84d2e16`. US database `70c2c485-6fe2-4919-bbcc-cb07c3fe4eaa` has source `ba0eab5b-65d4-4431-9804-6982dbd88495`. No permissions changed. EU child `nx7azsdmxayctr6q1vamw64hd98e0rrg` and US child `pn77shzv1wpkqrp19bmkzp6v5h8e1q71` each created Alpha/Beta rows, sorted and paginated them with a real cursor, filtered to exactly Beta, and read distinct block pages. Notion search returned both synthetic sources from the deliberately shared external parent; each agent used only its designated source ID for queries and writes.
+
+### Remaining contract review
+
+All-tools completion is still pending. In addition to connected-provider grants and operation variants, review native input validation, advertised numeric and lifecycle bounds, the list_capabilities fast path, and validation before provider credential refresh. The job contract should state its existing requirement for unattended integration write access. These are not covered by a basic success-path label.
 
 ### Independent output and negative regional checks
 
