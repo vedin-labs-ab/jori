@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Dock, DockDivider } from "../../dock"
+import { Dock, DockDivider, DockGroup } from "../../dock"
 import { type PanePreference } from "./tabs"
 
 const explanation =
@@ -22,34 +22,42 @@ export function PaneHint({
   onChoose: (preference: PanePreference) => void
 }) {
   return (
-    <Dock className="gap-1" label="Resources beside the chat">
-      <span className="flex min-w-0 items-center gap-1.5 pr-2 pl-1 text-xs">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              aria-label="About resources opening beside the chat"
-              className="size-6 shrink-0 text-muted-foreground"
-              size="icon-xs"
-              type="button"
-              variant="ghost"
-            >
-              <Info />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="max-w-72 text-pretty" side="top">
-            {explanation}
-          </PopoverContent>
-        </Popover>
-        New resources open beside your chat.
-      </span>
+    <Dock label="Resources beside the chat">
+      <DockGroup>
+        <span className="flex min-w-0 items-center gap-1.5 pr-2 pl-1 text-pretty text-xs">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                aria-label="About resources opening beside the chat"
+                className="size-6 shrink-0 text-muted-foreground"
+                size="icon-xs"
+                type="button"
+                variant="ghost"
+              >
+                <Info />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="max-w-72 text-pretty" side="top">
+              {explanation}
+            </PopoverContent>
+          </Popover>
+          New resources open beside your chat.
+        </span>
+      </DockGroup>
       <DockDivider />
-      <Button onClick={() => onChoose("keep")} type="button" variant="ghost">
-        <Check className="text-primary" />
-        Keep this
-      </Button>
-      <Button onClick={() => onChoose("manual")} type="button" variant="ghost">
-        Open manually
-      </Button>
+      <DockGroup>
+        <Button onClick={() => onChoose("keep")} type="button" variant="ghost">
+          <Check className="text-primary" />
+          Keep this
+        </Button>
+        <Button
+          onClick={() => onChoose("manual")}
+          type="button"
+          variant="ghost"
+        >
+          Open manually
+        </Button>
+      </DockGroup>
     </Dock>
   )
 }

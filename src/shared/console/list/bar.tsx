@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { TableCell, TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Dock, DockDivider } from "../dock"
+import { Dock, DockDivider, DockGroup } from "../dock"
 import { type RowSelection, selectionHeadState } from "./selection"
 
 /** Header checkbox: none, partial (a partly selected page shows the
@@ -97,50 +97,55 @@ export function SelectionActionsBar({
   }
 
   return (
-    <Dock className="gap-1" label="Selection actions">
-      <span className="px-2 font-medium text-xs tabular-nums">
-        {count} selected
-      </span>
-      <DockDivider />
-      {onMove === undefined ? null : (
+    <Dock label="Selection actions">
+      {/* The way out leads, beside the count it clears: the two are one
+          group, so a stacked bar keeps them on a row of their own. */}
+      <DockGroup>
         <Button
-          disabled={isBusy}
-          onClick={onMove}
+          aria-label="Clear selection"
+          onClick={onClear}
+          size="icon"
           type="button"
           variant="ghost"
         >
-          <FolderInput />
-          Move
+          <X />
         </Button>
-      )}
-      {onDownload === undefined ? null : (
-        <Button
-          disabled={isBusy}
-          onClick={onDownload}
-          type="button"
-          variant="ghost"
-        >
-          {isBusy ? <Loader2 className="animate-spin" /> : <Download />}
-          Download
-        </Button>
-      )}
-      <SelectionRemoveButton
-        count={count}
-        isBusy={isBusy}
-        noun={noun}
-        onRemove={onRemove}
-        removal={removal}
-      />
+        <span className="pr-2 font-medium text-xs tabular-nums">
+          {count} selected
+        </span>
+      </DockGroup>
       <DockDivider />
-      <Button
-        aria-label="Clear selection"
-        onClick={onClear}
-        size="icon"
-        type="button"
-        variant="ghost"
-      >
-        <X />
-      </Button>
+      <DockGroup>
+        {onMove === undefined ? null : (
+          <Button
+            disabled={isBusy}
+            onClick={onMove}
+            type="button"
+            variant="ghost"
+          >
+            <FolderInput />
+            Move
+          </Button>
+        )}
+        {onDownload === undefined ? null : (
+          <Button
+            disabled={isBusy}
+            onClick={onDownload}
+            type="button"
+            variant="ghost"
+          >
+            {isBusy ? <Loader2 className="animate-spin" /> : <Download />}
+            Download
+          </Button>
+        )}
+        <SelectionRemoveButton
+          count={count}
+          isBusy={isBusy}
+          noun={noun}
+          onRemove={onRemove}
+          removal={removal}
+        />
+      </DockGroup>
     </Dock>
   )
 }
