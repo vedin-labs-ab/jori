@@ -18,12 +18,10 @@ import {
   completeIntegrationOffer,
   failOfferAndRedirect,
 } from "../../connect/install"
-import {
-  fetchGitHubInstallationProfile,
-  type GitHubInstallationProfile,
-} from "../app"
+import { fetchGitHubInstallationProfile } from "../app"
 import { githubAppInstallBaseUrl, requireGitHubAppSlug } from "../config"
 import { fetchGitHubIdentity } from "../identity"
+import { normalizeInstallationProfile } from "../install"
 import {
   githubAuthorizationUrl,
   verifyGitHubInstallationAccess,
@@ -34,6 +32,7 @@ import {
   verifyGitHubRequest,
 } from "../signing"
 import { type getGitHubMessage } from "./events"
+import { prepareGitHubEvent } from "./prepare"
 import { type GitHubWebhookPayload } from "./types"
 
 export async function handleGitHubInstall(request: Request) {
@@ -171,20 +170,19 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
   if (event === null || deliveryId === null || payload === null) {
     return new Response("Missing GitHub delivery metadata", { status: 400 })
   }
-  const installationId = payload.installation?.id
-  if (installationId === undefined) {
-    return Response.json({ ok: true })
-  }
-  const webhook = {
+  const prepared = prepareGitHubEvent({
     event,
     payload,
     deliveryId,
+  })
+  if (prepared === null) {
+    return Response.json({ ok: true })
   }
   await ctx.runMutation(internal.integrations.webhooks.delivery.accept, {
     provider: "github",
-    externalId: String(installationId),
+    externalId: prepared.accountId,
     eventId: await sha256Hex(body),
-    payload: webhook,
+    payload: JSON.parse(JSON.stringify(prepared)),
   })
 
   return Response.json({ ok: true })
@@ -195,7 +193,8 @@ type GitHubRecordMode = "record" | "record_and_run"
 
 export async function handleGitHubMessageEvent(
   ctx: ActionCtx,
-  message: GitHubMessage
+  message: GitHubMessage,
+  expectedConnectionGeneration?: number
 ) {
   const actor = createGitHubActor(message)
 
@@ -209,6 +208,7 @@ export async function handleGitHubMessageEvent(
     await recordGitHubMessage(ctx, message, {
       actor,
       mode: "record",
+      expectedConnectionGeneration,
     })
     await handlePersonTextApprovalDecision(ctx, {
       accountId: message.accountId,
@@ -216,11 +216,15 @@ export async function handleGitHubMessageEvent(
       actorKind: message.actorKind,
       integration: "github",
       text: message.text,
+      expectedConnectionGeneration,
     })
     return
   }
 
-  await recordGitHubMessage(ctx, message, { actor })
+  await recordGitHubMessage(ctx, message, {
+    actor,
+    expectedConnectionGeneration,
+  })
 }
 
 async function recordGitHubMessage(
@@ -229,6 +233,7 @@ async function recordGitHubMessage(
   options: {
     actor: Actor | undefined
     mode?: GitHubRecordMode
+    expectedConnectionGeneration?: number
   }
 ) {
   await ctx.runMutation(
@@ -243,6 +248,7 @@ async function recordGitHubMessage(
       text: message.text,
       observedAt: message.observedAt,
       data: message.data,
+      expectedConnectionGeneration: options.expectedConnectionGeneration,
     })
   )
 }
@@ -253,20 +259,4 @@ function createGitHubActor(message: GitHubMessage) {
     kind: message.actorKind,
     name: message.actorName,
   })
-}
-
-function normalizeInstallationProfile(profile: GitHubInstallationProfile) {
-  return {
-    id: profile.id,
-    app_slug: profile.app_slug,
-    html_url: profile.html_url,
-    account:
-      profile.account === undefined
-        ? undefined
-        : {
-            login: profile.account.login,
-            avatar_url: profile.account.avatar_url,
-            html_url: profile.account.html_url,
-          },
-  }
 }

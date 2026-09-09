@@ -6,8 +6,27 @@ import {
 } from "../connect/credentials"
 import { upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
+import { type GitHubInstallationProfile } from "./app"
 import { requireGitHubCredentials } from "./credentials"
 import { githubIdentity } from "./identity"
+
+export function normalizeInstallationProfile(
+  profile: GitHubInstallationProfile
+) {
+  return {
+    id: profile.id,
+    app_slug: profile.app_slug,
+    html_url: profile.html_url,
+    account:
+      profile.account === undefined
+        ? undefined
+        : {
+            login: profile.account.login,
+            avatar_url: profile.account.avatar_url,
+            html_url: profile.account.html_url,
+          },
+  }
+}
 
 export const recordInstallation = internalMutation({
   args: {

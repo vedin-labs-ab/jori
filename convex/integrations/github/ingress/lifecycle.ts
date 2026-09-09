@@ -228,16 +228,11 @@ function readSenderId(payload: LifecyclePayload) {
     : String(payload.sender.id)
 }
 
-export async function recordGitHubLifecycleEvent(
+export async function recordGitHubLifecycle(
   ctx: ActionCtx,
-  webhook: Parameters<typeof getGitHubLifecycleEvent>[0]
+  lifecycle: GitHubLifecycleEvent,
+  expectedConnectionGeneration?: number
 ) {
-  const lifecycle = getGitHubLifecycleEvent(webhook)
-
-  if (lifecycle === null) {
-    return
-  }
-
   await ctx.runMutation(internal.events.ingest.recordFromProvider, {
     integration: "github",
     externalId: lifecycle.accountId,
@@ -246,5 +241,6 @@ export async function recordGitHubLifecycleEvent(
     actor: lifecycle.actor,
     text: lifecycle.text,
     data: lifecycle.data,
+    expectedConnectionGeneration,
   })
 }
