@@ -71,18 +71,11 @@ describe("counting leaf properties", () => {
     expect(summarizeStore(document).propertyCount).toBe(2)
   })
 
-  test("counts a schema without a properties object as zero", () => {
-    const document = store({ schema: { type: "object" } })
-
-    expect(summarizeStore(document).propertyCount).toBe(0)
-  })
-
-  test("counts an empty properties object as zero", () => {
-    const document = store({
-      schema: { type: "object", properties: {} },
-    })
-
-    expect(summarizeStore(document).propertyCount).toBe(0)
+  test.each([
+    { type: "object" },
+    { type: "object", properties: {} },
+  ])("counts an object without properties as zero: %j", (schema) => {
+    expect(summarizeStore(store({ schema })).propertyCount).toBe(0)
   })
 
   test("counts nothing at all for a store without a schema", () => {
@@ -112,19 +105,12 @@ describe("resolving the owner name", () => {
     expect(summary.ownerName).toBe("Ada Lovelace")
   })
 
-  test("leaves the name unset without an owner", async () => {
+  test.each([
+    undefined,
+    testOwner,
+  ])("leaves the name unset for an owner without an identity: %s", async (ownerId) => {
     const { ctx } = databaseContext()
-    const document = store({ ownerId: undefined })
-    const summary = await summarizeStoreWithOwner(ctx, document)
-
-    expect(summary.ownerName).toBeUndefined()
-  })
-
-  test("leaves the name unset when no identity names the owner", async () => {
-    const { ctx } = databaseContext()
-    const document = store()
-    const summary = await summarizeStoreWithOwner(ctx, document)
-
+    const summary = await summarizeStoreWithOwner(ctx, store({ ownerId }))
     expect(summary.ownerName).toBeUndefined()
   })
 })

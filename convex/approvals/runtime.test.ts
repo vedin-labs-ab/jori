@@ -6,55 +6,28 @@ import { type Actor } from "../shared/actor"
 import { decideApproval, parseApprovalDecisionText } from "./runtime"
 
 describe("approval command parsing", () => {
-  test("parses provider-neutral text commands", () => {
-    expect(parseApprovalDecisionText("approve yd4uefnv")).toEqual({
-      code: "YD4UEFNV",
-      decision: "approved",
-    })
-    expect(parseApprovalDecisionText(" deny ABC12345 ")).toEqual({
-      code: "ABC12345",
-      decision: "denied",
-    })
-    expect(parseApprovalDecisionText("@jori approve ABC12345")).toBeNull()
-    expect(parseApprovalDecisionText("approve abc")).toBeNull()
+  test.each([
+    ["approve yd4uefnv", "YD4UEFNV", "approved"],
+    [" deny ABC12345 ", "ABC12345", "denied"],
+    ["`approve yd4uefnv`", "YD4UEFNV", "approved"],
+    ["```deny ABC12345```", "ABC12345", "denied"],
+    ["```text\napprove yd4uefnv\n```", "YD4UEFNV", "approved"],
+    ['"deny ABC12345"', "ABC12345", "denied"],
+    ["approve ABC12345.", "ABC12345", "approved"],
+    ["`approve ABC12345`!", "ABC12345", "approved"],
+  ])("parses the complete command %s", (text, code, decision) => {
+    expect(parseApprovalDecisionText(text)).toEqual({ code, decision })
   })
 
-  test("accepts copied approval commands with message formatting", () => {
-    expect(parseApprovalDecisionText("`approve yd4uefnv`")).toEqual({
-      code: "YD4UEFNV",
-      decision: "approved",
-    })
-    expect(parseApprovalDecisionText("```deny ABC12345```")).toEqual({
-      code: "ABC12345",
-      decision: "denied",
-    })
-    expect(parseApprovalDecisionText("```text\napprove yd4uefnv\n```")).toEqual(
-      {
-        code: "YD4UEFNV",
-        decision: "approved",
-      }
-    )
-    expect(parseApprovalDecisionText('"deny ABC12345"')).toEqual({
-      code: "ABC12345",
-      decision: "denied",
-    })
-    expect(parseApprovalDecisionText("approve ABC12345.")).toEqual({
-      code: "ABC12345",
-      decision: "approved",
-    })
-    expect(parseApprovalDecisionText("`approve ABC12345`!")).toEqual({
-      code: "ABC12345",
-      decision: "approved",
-    })
-  })
-
-  test("rejects approval commands embedded in prose or other text", () => {
-    expect(parseApprovalDecisionText("123approve ABC12345-")).toBeNull()
-    expect(parseApprovalDecisionText("I copied `approve ABC12345`")).toBeNull()
-    expect(parseApprovalDecisionText("do not approve ABC12345")).toBeNull()
-    expect(
-      parseApprovalDecisionText("approve ABC12345 or deny ABC12345")
-    ).toBeNull()
+  test.each([
+    "@jori approve ABC12345",
+    "approve abc",
+    "123approve ABC12345-",
+    "I copied `approve ABC12345`",
+    "do not approve ABC12345",
+    "approve ABC12345 or deny ABC12345",
+  ])("rejects incomplete commands or surrounding prose: %s", (text) => {
+    expect(parseApprovalDecisionText(text)).toBeNull()
   })
 })
 

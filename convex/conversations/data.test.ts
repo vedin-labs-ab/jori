@@ -111,6 +111,56 @@ test("starts existing conversations without sessions as mentions", async () => {
   ])
 })
 
+test("starts reply runs when a waiter wake never resumed the run", async () => {
+  const conversation = conversationDoc()
+  const ctx = fakeMutationCtx([
+    ["conversations", conversation],
+    ...activeSessionSeed(conversation, "stale-run", "running"),
+    [
+      "waiters",
+      {
+        _id: id<"waiters">("waiter"),
+        _creationTime: 1000,
+        createdAt: 1000,
+        updatedAt: 1000,
+        expiresAt: 2000,
+        runId: id<"runs">("stale-run"),
+        status: "woken",
+        organizationId: "organization",
+        eventId: "event",
+      },
+    ],
+    [
+      "traces",
+      {
+        _id: id<"traces">("trace"),
+        _creationTime: 500,
+        key: "trace:stale-run:500",
+        runId: id<"runs">("stale-run"),
+        organizationId: "organization",
+        timestamp: 500,
+        type: "run.started",
+      },
+    ],
+  ])
+
+  const result = await startMessageRun(ctx, {
+    ...runArgs({ now: 10 * 60 * 1000, message: message("Still there?") }),
+    conversation,
+  })
+
+  expect(result.status).toBe("started")
+  expect(inserted(ctx, "runs")).toEqual([
+    expect.objectContaining({
+      cause: { type: "message", messageId: "message", kind: "reply" },
+    }),
+  ])
+  expect(ctx.patches).toContainEqual({
+    id: "session",
+    patch: expect.objectContaining({ runId: "runs-1" }),
+  })
+})
+
 function conversationDoc(): Doc<"conversations"> {
   return {
     _id: id<"conversations">("conversation-doc"),

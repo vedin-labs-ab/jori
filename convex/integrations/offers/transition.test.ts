@@ -10,7 +10,6 @@ import {
   markIntegrationOfferExpired,
   markIntegrationOfferFailed,
   type TerminalIntegrationOfferStatus,
-  terminalIntegrationOfferStatus,
 } from "./transition"
 
 vi.mock("../../runs/execution/waiters/data", () => ({ wakeRun: vi.fn() }))
@@ -121,18 +120,16 @@ test.each([
   expect(wakeRun).not.toHaveBeenCalled()
 })
 
-test("narrows terminal offer statuses", () => {
-  expect(terminalIntegrationOfferStatus("pending")).toBeNull()
-  expect(terminalIntegrationOfferStatus("claimed")).toBeNull()
-
-  for (const status of [
-    "cancelled",
-    "connected",
-    "expired",
-    "failed",
-  ] as const) {
-    expect(terminalIntegrationOfferStatus(status)).toBe(status)
-  }
+test("a claimed offer can still connect", async () => {
+  const fixture = offerFixture("claimed")
+  await markIntegrationOfferConnected(fixture.ctx, fixture.offer, {
+    integrationId,
+    now,
+  })
+  expect(fixture.patch).toHaveBeenCalledWith(
+    fixture.offer._id,
+    expect.objectContaining({ status: "connected" })
+  )
 })
 
 function offerFixture(status: Doc<"integrationOffers">["status"]) {
