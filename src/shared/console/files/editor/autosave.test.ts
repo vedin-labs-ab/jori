@@ -27,7 +27,7 @@ async function advance(milliseconds: number) {
 }
 
 describe("autosave", () => {
-  test("a burst of edits saves once with the newest text", async () => {
+  test("a burst saves the newest text once and lets the saved indicator linger", async () => {
     const { result } = renderAutosave()
 
     act(() => result.current.change("a", false))
@@ -36,14 +36,6 @@ describe("autosave", () => {
     await advance(1200)
 
     expect(persist).toHaveBeenCalledExactlyOnceWith("ab")
-    expect(result.current.status).toBe("saved")
-  })
-
-  test("the saved indicator goes quiet after lingering", async () => {
-    const { result } = renderAutosave()
-
-    act(() => result.current.change("a", false))
-    await advance(1200)
     expect(result.current.status).toBe("saved")
 
     await advance(4000)

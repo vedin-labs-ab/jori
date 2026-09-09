@@ -22,6 +22,7 @@ test("renders a compact non-collapsible activity item", () => {
   expect(screen.queryByRole("button", { name: /read file/i })).toBeNull()
   expect(screen.queryByText("just now")).toBeNull()
   expect(screen.queryByText("Path")).toBeNull()
+  expect(document.querySelector('[data-slot="tooltip-trigger"]')).toBeNull()
 })
 
 test("renders integration offer descriptions as provider identity", () => {
@@ -46,17 +47,7 @@ test("renders integration offer descriptions as provider identity", () => {
   expect(screen.queryByText(summary)).toBeNull()
   expect(
     document.querySelector('img[src="/logos/integrations/github.svg"]')
-  ).toBeDefined()
-})
-
-test("does not attach low-value tooltips to timeline icons", () => {
-  render(
-    <TooltipProvider>
-      <ActivityItem item={activityItem()} now={1700000002000} />
-    </TooltipProvider>
-  )
-
-  expect(document.querySelector('[data-slot="tooltip-trigger"]')).toBeNull()
+  ).not.toBeNull()
 })
 
 test("shimmers live activity without a separate live indicator", () => {
@@ -138,28 +129,6 @@ test("omits low-value send reply result descriptions", () => {
 
   expect(screen.getByText("Send reply")).toBeDefined()
   expect(screen.queryByText("Returned object (1).")).toBeNull()
-})
-
-test("renders compact tool metadata instead of generic descriptions", () => {
-  render(
-    <TooltipProvider>
-      <ActivityItem
-        item={activityItem({
-          description: "Returned object (3).",
-          metadata: [
-            { kind: "target", text: "current example" },
-            { kind: "outcome", text: "3 results" },
-          ],
-          title: "Search web",
-        })}
-        now={1700000002000}
-      />
-    </TooltipProvider>
-  )
-
-  expect(screen.getByText("current example")).toBeDefined()
-  expect(screen.getByText("3 results")).toBeDefined()
-  expect(screen.queryByText("Returned object (3).")).toBeNull()
 })
 
 test("groups consecutive tool calls into an expandable task", () => {

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
-import { afterEach, expect, test } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { activityItem } from "../../../../../../test/activity"
 import { ActivityItem } from "../item"
 
 afterEach(() => {
   cleanup()
+  vi.restoreAllMocks()
 })
 
 test("keeps fetched web page metadata focused on URL and page count", () => {
@@ -39,11 +40,12 @@ test("keeps fetched web page metadata focused on URL and page count", () => {
   expect(screen.queryByText(pageTitle)).toBeNull()
 })
 
-test("keeps web search metadata focused on query and result count", () => {
+test("shows search query and result count without scope or generic descriptions", () => {
   render(
     <TooltipProvider>
       <ActivityItem
         item={activityItem({
+          description: "Returned object (3).",
           metadata: [
             {
               kind: "target",
@@ -71,6 +73,7 @@ test("keeps web search metadata focused on query and result count", () => {
     "shrink-0"
   )
   expect(screen.queryByText("in theverge.com, techcrunch.com")).toBeNull()
+  expect(screen.queryByText("Returned object (3).")).toBeNull()
 })
 
 test("renders server-provided reaction labels without redundant outcomes", () => {
@@ -130,31 +133,13 @@ test("does not re-measure overflow when only the clock changes", () => {
     </TooltipProvider>
   )
 
-  let reads = 0
-  const scrollWidth = Object.getOwnPropertyDescriptor(
-    Element.prototype,
-    "scrollWidth"
+  const scrollWidth = vi.spyOn(Element.prototype, "scrollWidth", "get")
+
+  view.rerender(
+    <TooltipProvider>
+      <ActivityItem item={item} now={1700000003000} />
+    </TooltipProvider>
   )
 
-  Object.defineProperty(Element.prototype, "scrollWidth", {
-    configurable: true,
-    get() {
-      reads += 1
-      return 0
-    },
-  })
-
-  try {
-    view.rerender(
-      <TooltipProvider>
-        <ActivityItem item={item} now={1700000003000} />
-      </TooltipProvider>
-    )
-  } finally {
-    if (scrollWidth !== undefined) {
-      Object.defineProperty(Element.prototype, "scrollWidth", scrollWidth)
-    }
-  }
-
-  expect(reads).toBe(0)
+  expect(scrollWidth).not.toHaveBeenCalled()
 })

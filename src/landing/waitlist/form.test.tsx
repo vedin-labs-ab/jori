@@ -39,18 +39,25 @@ function fill() {
   fireEvent.submit(screen.getByRole("button", { name: "Join the waitlist" }))
 }
 
-test("keeps marketing on the page and submits to the explicitly selected region", async () => {
+test("submits to the selected region and focuses the confirmation on the page", async () => {
   joinWaitlist.mockResolvedValue({ status: "joined" })
   render(<WaitlistForm />)
   fireEvent.change(screen.getByLabelText("Data region"), {
     target: { value: "eu" },
   })
   fill()
-  await screen.findByText("You're on the list.")
+  // The submitting spinner is a status region too, so wait for the
+  // confirmation before checking where its effect places focus.
+  const confirmation = (await screen.findByText("You're on the list.")).closest(
+    "[role=status]"
+  )
   expect(joinWaitlist).toHaveBeenCalledWith(
     expect.objectContaining({ email: "maya@copperline.example" }),
     "eu"
   )
+  await waitFor(() => {
+    expect(document.activeElement).toBe(confirmation)
+  })
 })
 
 test("an authenticated waitlist submission stays in its account region", async () => {
@@ -63,27 +70,6 @@ test("an authenticated waitlist submission stays in its account region", async (
     expect.objectContaining({ email: "member@example.test" }),
     "us"
   )
-})
-
-test("moves focus to the confirmation, so the swap is never silent", async () => {
-  joinWaitlist.mockResolvedValue({ status: "joined" })
-  render(<WaitlistForm />)
-  fill()
-
-  // The submit button's spinner is a status region too, so match the
-  // confirmation by what it says rather than by role alone.
-  const confirmation = (await screen.findByText("You're on the list.")).closest(
-    "[role=status]"
-  )
-
-  expect(confirmation).not.toBeNull()
-
-  // The confirmation focuses itself from an effect, which React schedules
-  // after the commit findByText observes, so the focus lands a beat after
-  // the text. Poll for it instead of asserting the in-between frame.
-  await waitFor(() => {
-    expect(document.activeElement).toBe(confirmation)
-  })
 })
 
 test("points the rejected input at the reason it was rejected", async () => {
