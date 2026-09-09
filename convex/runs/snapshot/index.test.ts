@@ -61,6 +61,73 @@ test("snapshots message source details and source link", () => {
   })
 })
 
+test.each([
+  true,
+  false,
+])("snapshots event jobs with event present: %s", (hasEvent) => {
+  const sourceMessage = message("Summarize this thread.", {
+    channel: { id: "C123", name: "product" },
+    ts: "1700000000.000000",
+  })
+  const event = {
+    ...sourceMessage,
+    _id: id<"events">("event"),
+    integrationId: id<"integrations">("integration"),
+    key: "event",
+  }
+  const eventJob = job({
+    name: "Digest",
+    instructions: "Summarize.",
+    type: "event",
+    trigger: {
+      integrationId: id<"integrations">("integration"),
+      event: "message.created",
+    },
+  })
+  const snapshot = createJobRunSnapshot({
+    job: eventJob,
+    event: hasEvent ? event : null,
+    integration: integration(),
+  }).snapshot
+  const messageSnapshot = createMessageRunSnapshot({
+    message: sourceMessage,
+    integration: integration(),
+    kind: "mention",
+  }).snapshot
+
+  expect(snapshot).toEqual({
+    title: "Digest",
+    source: hasEvent
+      ? { ...messageSnapshot.source, type: "job" }
+      : { type: "job", surface: "slack" },
+    context: hasEvent ? messageSnapshot.context : [],
+  })
+  expect(
+    createJobRunSnapshot({ job: eventJob, event: hasEvent ? event : null })
+      .snapshot
+  ).toEqual({
+    title: "Digest",
+    source: { type: "job" },
+    context: [],
+  })
+})
+
+test("provider messages retain context without an integration record", () => {
+  expect(
+    createMessageRunSnapshot({
+      integration: null,
+      kind: "mention",
+      message: message("Summarize.", {
+        channel: { id: "C123", name: "product" },
+      }),
+    }).snapshot
+  ).toEqual({
+    title: "Summarize.",
+    source: { type: "message", surface: "slack" },
+    context: [{ type: "channel", label: "#product" }],
+  })
+})
+
 test("console messages read as Jori's own surface, with what the chat was opened about", () => {
   const consoleMessage = {
     ...message("Plan the launch.\nThree milestones."),

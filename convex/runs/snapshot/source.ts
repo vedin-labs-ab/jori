@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type ResolvedContext } from "../../messages/references"
+import { type Integration } from "../../shared/integrations"
 import {
   compactDetails,
   detail,
@@ -12,25 +13,13 @@ import {
   type RunSnapshot,
   runSnapshotContextTypes,
 } from "../schema"
-import { createSourceMetadata, type SourceMetadataItem } from "./metadata"
+import { createSourceMetadata } from "./metadata"
 import { originDetails } from "./origin"
 import { cronScheduleLabel } from "./schedule"
 
 type RunSnapshotBody = Omit<RunSnapshot, "title">
 type SnapshotContext = RunSnapshot["context"][number]
 type SnapshotContextType = SnapshotContext["type"]
-type SourceContextMetadataType =
-  | "channel"
-  | "event"
-  | "file"
-  | "folder"
-  | "issue"
-  | "page"
-  | "project"
-  | "pull_request"
-  | "repository"
-  | "sender"
-  | "subject"
 
 export function jobSnapshotBody(input: {
   job: Doc<"jobs">
@@ -38,8 +27,11 @@ export function jobSnapshotBody(input: {
   integration?: Doc<"integrations"> | null
 }): RunSnapshotBody {
   if (input.job.type === "event") {
-    return eventJobDisplay({
-      event: input.event ?? null,
+    const surface = input.integration?.integration
+
+    return providerSnapshotBody({
+      source: { type: "job", ...(surface === undefined ? {} : { surface }) },
+      content: input.event ?? null,
       integration: input.integration ?? null,
     })
   }
@@ -63,28 +55,11 @@ export function messageSnapshotBody(input: {
     }
   }
 
-  const metadata = createSourceMetadata({
-    data: input.message.data,
-    event: input.message.type,
-    integration: input.message.surface,
-  })
-  const details = snapshotContext({
-    data: input.message.data,
+  return providerSnapshotBody({
+    source: { type: "message", surface: input.message.surface },
+    content: input.message,
     integration: input.integration,
-    integrationKey: input.message.surface,
-    metadata,
-    text: input.message.text,
   })
-  const sourceUrl = sourceUrlFrom(details)
-
-  return {
-    source: {
-      type: "message",
-      surface: input.message.surface,
-      ...(sourceUrl === undefined ? {} : { url: sourceUrl }),
-    },
-    context: details.filter((item) => !isPayloadDetail(item)),
-  }
 }
 
 /** The chip for a chat's context: the folder or the filed resource by its
@@ -100,39 +75,38 @@ function consoleContext(context: ResolvedContext | undefined) {
       )
 }
 
-function eventJobDisplay(input: {
-  event: Doc<"events"> | null
+function providerSnapshotBody(input: {
+  source: { type: "job" | "message"; surface?: Integration }
+  content: { data?: unknown; text?: string } | null
   integration: Doc<"integrations"> | null
 }): RunSnapshotBody {
-  const event = input.event
-  const integration = input.integration?.integration
-  const metadata =
-    event === null || integration === undefined
+  const { content, source, integration } = input
+  if (content === null) {
+    return { source, context: [] }
+  }
+
+  const details = uniqueDetails([
+    ...originDetails({
+      data: content.data,
+      text: content.text,
+      integration,
+      integrationKey: source.surface,
+    }),
+    ...(source.surface === undefined
       ? []
       : createSourceMetadata({
-          data: event.data,
-          event: event.type,
-          integration,
-        })
-  const context =
-    event === null
-      ? []
-      : snapshotContext({
-          data: event.data,
-          integration: input.integration,
-          integrationKey: integration,
-          metadata,
-          text: event.text,
-        })
-  const sourceUrl = sourceUrlFrom(context)
+          data: content.data,
+          integration: source.surface,
+        })),
+  ]).flatMap(toSnapshotContext)
+  const sourceUrl = sourceUrlFrom(details)
 
   return {
     source: {
-      type: "job",
-      ...(integration === undefined ? {} : { surface: integration }),
+      ...source,
       ...(sourceUrl === undefined ? {} : { url: sourceUrl }),
     },
-    context: context.filter((item) => !isPayloadDetail(item)),
+    context: details.filter((item) => !isPayloadDetail(item)),
   }
 }
 
@@ -162,19 +136,6 @@ function timeJobDisplay(job: Doc<"jobs">): RunSnapshotBody {
   }
 }
 
-function snapshotContext(input: {
-  data: unknown
-  integration: Doc<"integrations"> | null
-  integrationKey: string | undefined
-  metadata: SourceMetadataItem[]
-  text: string | undefined
-}) {
-  return uniqueDetails([
-    ...originDetails(input),
-    ...sourceMetadataDetails(input.metadata),
-  ]).flatMap(toSnapshotContext)
-}
-
 function timeJobContext(input: {
   status: Doc<"jobs">["status"]
   trigger: Extract<Doc<"jobs">["trigger"], { nextAt: number }>
@@ -188,16 +149,6 @@ function timeJobContext(input: {
       ? undefined
       : detail("status", jobStatusLabel(input.status)),
   ]).flatMap(toSnapshotContext)
-}
-
-function sourceMetadataDetails(metadata: SourceMetadataItem[]) {
-  return compactDetails(
-    metadata
-      .filter(isRequestedMetadata)
-      .map((item) =>
-        detail(metadataType(item.type), item.label, { url: item.url })
-      )
-  )
 }
 
 function jobStatusLabel(status: Doc<"jobs">["status"]) {
@@ -218,30 +169,6 @@ function sourceUrlFrom(details: ExecutionDetail[]) {
 
 function isPayloadDetail(detail: Pick<ExecutionDetail, "type">) {
   return detail.type === "comment" || detail.type === "message"
-}
-
-function isRequestedMetadata(
-  item: SourceMetadataItem
-): item is SourceMetadataItem & {
-  type: SourceContextMetadataType
-} {
-  return (
-    item.type === "channel" ||
-    item.type === "event" ||
-    item.type === "file" ||
-    item.type === "folder" ||
-    item.type === "issue" ||
-    item.type === "page" ||
-    item.type === "project" ||
-    item.type === "pull_request" ||
-    item.type === "repository" ||
-    item.type === "sender" ||
-    item.type === "subject"
-  )
-}
-
-function metadataType(type: SourceContextMetadataType): ExecutionDetailType {
-  return type === "event" ? "calendar_event" : type
 }
 
 function toSnapshotContext(detail: ExecutionDetail): SnapshotContext[] {

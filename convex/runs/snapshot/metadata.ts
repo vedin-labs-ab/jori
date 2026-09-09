@@ -1,17 +1,11 @@
 import { readNumber, readString, readValue } from "../../shared/input"
 import { type Integration } from "../../shared/integrations"
-
-export type SourceMetadataItem = {
-  type: string
-  label: string
-  url?: string
-}
+import { compactDetails, detail, type ExecutionDetail } from "../detail"
 
 export function createSourceMetadata(args: {
   data: unknown
-  event?: string
   integration: Integration
-}): SourceMetadataItem[] {
+}): ExecutionDetail[] {
   if (args.integration === "slack") {
     return slackMetadata(args.data)
   }
@@ -46,20 +40,20 @@ function slackMetadata(data: unknown) {
   const channel = readObject(data, "channel")
   const name = readString(channel, "name")
 
-  return compactItems([
-    item("channel", name === undefined ? undefined : `#${name}`),
+  return compactDetails([
+    detail("channel", name === undefined ? undefined : `#${name}`),
   ])
 }
 
 function githubMetadata(data: unknown) {
   const repository = readObject(data, "repository")
 
-  return compactItems([
-    item(
+  return compactDetails([
+    detail(
       "repository",
       readString(repository, "name") ??
         repositoryName(readString(repository, "fullName")),
-      readString(repository, "url")
+      { url: readString(repository, "url") }
     ),
     githubTarget(data),
   ])
@@ -79,10 +73,10 @@ function githubTarget(data: unknown) {
       readNumber(issue, "number"))
     : (readNumber(data, "issueNumber") ?? readNumber(issue, "number"))
 
-  return item(
+  return detail(
     isPullRequest ? "pull_request" : "issue",
     githubIssueLikeLabel(number, readString(target, "title")),
-    readString(target, "url")
+    { url: readString(target, "url") }
   )
 }
 
@@ -94,9 +88,9 @@ function linearMetadata(data: unknown) {
   const issue = readObject(data, "issue")
   const project = readObject(issue, "project")
 
-  return compactItems([
-    item("project", readString(project, "name")),
-    item(
+  return compactDetails([
+    detail("project", readString(project, "name")),
+    detail(
       "issue",
       issueIdentifierLabel(
         readString(data, "issueIdentifier") ??
@@ -104,7 +98,7 @@ function linearMetadata(data: unknown) {
           readString(data, "issueId"),
         readString(issue, "title")
       ),
-      readString(issue, "url")
+      { url: readString(issue, "url") }
     ),
   ])
 }
@@ -133,12 +127,10 @@ export function issueIdentifierLabel(
 function notionMetadata(data: unknown) {
   const page = readObject(data, "page")
 
-  return compactItems([
-    item(
-      "page",
-      readString(page, "title") ?? readString(data, "pageTitle"),
-      readString(page, "url")
-    ),
+  return compactDetails([
+    detail("page", readString(page, "title") ?? readString(data, "pageTitle"), {
+      url: readString(page, "url"),
+    }),
   ])
 }
 
@@ -146,9 +138,9 @@ function emailMetadata(data: unknown) {
   const from = readObject(data, "from")
   const sender = readObject(data, "sender")
 
-  return compactItems([
-    item("subject", readString(data, "subject") ?? readString(data, "title")),
-    item(
+  return compactDetails([
+    detail("subject", readString(data, "subject") ?? readString(data, "title")),
+    detail(
       "sender",
       readString(from, "email") ??
         readString(sender, "email") ??
@@ -161,9 +153,9 @@ function emailMetadata(data: unknown) {
 function calendarMetadata(data: unknown) {
   const event = readObject(data, "event")
 
-  return compactItems([
-    item(
-      "event",
+  return compactDetails([
+    detail(
+      "calendar_event",
       readString(event, "name") ??
         readString(event, "title") ??
         readString(event, "summary") ??
@@ -171,28 +163,6 @@ function calendarMetadata(data: unknown) {
         readString(data, "summary")
     ),
   ])
-}
-
-function item(
-  type: string,
-  label: string | undefined,
-  url?: string
-): SourceMetadataItem | undefined {
-  const normalizedLabel = label?.trim()
-
-  if (normalizedLabel === undefined || normalizedLabel === "") {
-    return undefined
-  }
-
-  return {
-    type,
-    label: normalizedLabel,
-    ...(url === undefined || url === "" ? {} : { url }),
-  }
-}
-
-function compactItems(items: Array<SourceMetadataItem | undefined>) {
-  return items.filter((item): item is SourceMetadataItem => item !== undefined)
 }
 
 function readObject(data: unknown, key: string) {
