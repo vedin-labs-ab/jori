@@ -23,28 +23,6 @@ test("hides the control when the text fits", () => {
   expect(screen.queryByRole("button")).toBeNull()
 })
 
-test("shows the control only when the clamped text overflows", () => {
-  mockOverflowingContent()
-
-  render(<ExpandableText maxLines={2}>{longText}</ExpandableText>)
-
-  const control = screen.getByRole("button", { name: "show more" })
-
-  expect(control.getAttribute("aria-expanded")).toBe("false")
-})
-
-test("expands from a click anywhere on the collapsed text", () => {
-  mockOverflowingContent()
-
-  render(<ExpandableText maxLines={2}>{longText}</ExpandableText>)
-
-  fireEvent.click(screen.getByText(longText))
-
-  const control = screen.getByRole("button", { name: "Show less" })
-
-  expect(control.getAttribute("aria-expanded")).toBe("true")
-})
-
 test("ignores text clicks while the user is selecting", () => {
   mockOverflowingContent()
   vi.spyOn(window, "getSelection").mockReturnValue({
@@ -60,16 +38,20 @@ test("ignores text clicks while the user is selecting", () => {
   expect(control.getAttribute("aria-expanded")).toBe("false")
 })
 
-test("collapses only through the control once expanded", () => {
+test("overflowing text expands on click and collapses only through its control", () => {
   mockOverflowingContent()
 
   render(<ExpandableText maxLines={2}>{longText}</ExpandableText>)
 
-  fireEvent.click(screen.getByText(longText))
-  fireEvent.click(screen.getByText(longText))
+  expect(
+    screen.getByRole("button", { name: "show more" }).getAttribute("aria-expanded")
+  ).toBe("false")
 
+  fireEvent.click(screen.getByText(longText))
   const control = screen.getByRole("button", { name: "Show less" })
+  expect(control.getAttribute("aria-expanded")).toBe("true")
 
+  fireEvent.click(screen.getByText(longText))
   expect(control.getAttribute("aria-expanded")).toBe("true")
 
   fireEvent.click(control)

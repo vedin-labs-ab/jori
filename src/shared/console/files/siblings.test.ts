@@ -148,8 +148,8 @@ describe("useSiblingKeys", () => {
     previous: { fileId: "a" },
   } as Parameters<typeof useSiblingKeys>[0]
 
-  test("arrows navigate to the neighbors", () => {
-    renderHook(() => useSiblingKeys(siblings))
+  test("arrows navigate to the neighbors until the hook unmounts", () => {
+    const { unmount } = renderHook(() => useSiblingKeys(siblings))
 
     pressKey("ArrowLeft")
     pressKey("ArrowRight")
@@ -158,6 +158,12 @@ describe("useSiblingKeys", () => {
       [{ to: "/files/$fileId", params: { fileId: "a" } }],
       [{ to: "/files/$fileId", params: { fileId: "c" } }],
     ])
+
+    unmount()
+    navigate.mockClear()
+    pressKey("ArrowRight")
+
+    expect(navigate).not.toHaveBeenCalled()
   })
 
   test("stays inert while disabled", () => {
@@ -172,15 +178,6 @@ describe("useSiblingKeys", () => {
     renderHook(() => useSiblingKeys({ ...noSiblings, count: 3 }))
 
     pressKey("ArrowLeft")
-    pressKey("ArrowRight")
-
-    expect(navigate).not.toHaveBeenCalled()
-  })
-
-  test("unbinds on unmount", () => {
-    const { unmount } = renderHook(() => useSiblingKeys(siblings))
-
-    unmount()
     pressKey("ArrowRight")
 
     expect(navigate).not.toHaveBeenCalled()

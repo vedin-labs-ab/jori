@@ -4,7 +4,6 @@ import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ChatContextUsage, type ChatMessage } from "../types"
 import { ChatThread } from "."
-import { CondensedNotice } from "./notice"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
@@ -23,8 +22,8 @@ const usage: ChatContextUsage = {
   windowTokens: 200_000,
 }
 
-test("says the context was condensed and links the run in Activity", () => {
-  render(<CondensedNotice runId="runs_1" />)
+test("the thread links a condensed run in Activity and omits the notice otherwise", () => {
+  const { rerender } = render(thread(usage))
 
   expect(screen.getByRole("status").textContent).toContain(
     "Jori condensed earlier context to keep going"
@@ -34,15 +33,6 @@ test("says the context was condensed and links the run in Activity", () => {
       .getByRole("link", { name: /See the run in Activity/ })
       .getAttribute("href")
   ).toContain("runs_1")
-})
-
-test("the thread notes a run that condensed earlier context, under its turns", () => {
-  const { rerender } = render(thread(usage))
-
-  expect(
-    screen.getByText("Jori condensed earlier context to keep going")
-  ).toBeDefined()
-
   rerender(thread({ ...usage, condensed: false }))
 
   expect(screen.queryByText(/condensed earlier context/)).toBeNull()

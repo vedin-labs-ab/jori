@@ -10,23 +10,7 @@ const filterOptions = [
   { label: "Active", value: "active" },
 ] as const
 
-test("filter toggle renders every option and reports selections", () => {
-  const onValueChange = vi.fn()
-
-  render(
-    <ConsoleFilterToggle
-      onValueChange={onValueChange}
-      options={filterOptions}
-      value="all"
-    />
-  )
-
-  fireEvent.click(screen.getByRole("radio", { name: "Active" }))
-
-  expect(onValueChange).toHaveBeenCalledWith("active")
-})
-
-test("filter toggle ignores deselecting the active option", () => {
+test("filter toggle reports a new selection and ignores deselecting the active option", () => {
   const onValueChange = vi.fn()
 
   render(
@@ -40,6 +24,10 @@ test("filter toggle ignores deselecting the active option", () => {
   fireEvent.click(screen.getByRole("radio", { name: "All" }))
 
   expect(onValueChange).not.toHaveBeenCalled()
+
+  fireEvent.click(screen.getByRole("radio", { name: "Active" }))
+
+  expect(onValueChange).toHaveBeenCalledWith("active")
 })
 
 test("a labelled toggle stacks its label above the group by default", () => {
