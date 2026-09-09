@@ -31,63 +31,42 @@ test("only the kinds a surface accepts are admitted", () => {
   )
 })
 
-test("a reference needs a known kind and a non-empty id", () => {
-  expect(() =>
-    readReplyParts(
-      [{ kind: "reference", target: { kind: "page", id: "x" } }],
-      replyPartKinds
-    )
-  ).toThrow(/does not match any allowed shape/)
-  expect(() =>
-    readReplyParts(
-      [{ kind: "reference", target: { kind: "file", id: "" } }],
-      replyPartKinds
-    )
-  ).toThrow()
-})
-
-test("a part carries nothing beyond its schema", () => {
-  expect(() =>
-    readReplyParts([{ ...reference, extra: true }], replyPartKinds)
-  ).toThrow()
-  expect(() =>
-    readReplyParts(
-      [{ kind: "choices", options: [{ label: "Yes", icon: "check" }] }],
-      replyPartKinds
-    )
-  ).toThrow()
-})
-
-test("choices need at least one option and at most the limit", () => {
-  expect(() =>
-    readReplyParts([{ kind: "choices", options: [] }], replyPartKinds)
-  ).toThrow()
-  expect(() =>
-    readReplyParts(
-      [
-        {
-          kind: "choices",
-          options: Array.from(
-            { length: replyPartLimits.options + 1 },
-            (_, index) => ({ label: `Option ${index}` })
-          ),
-        },
-      ],
-      replyPartKinds
-    )
-  ).toThrow()
-  expect(() =>
-    readReplyParts(
-      [{ kind: "choices", options: [{ label: "" }] }],
-      replyPartKinds
-    )
-  ).toThrow()
-  expect(() =>
-    readReplyParts(
-      [{ kind: "choices", options: [{ label: "Yes" }], select: "all" }],
-      replyPartKinds
-    )
-  ).toThrow()
+test.each([
+  [
+    "an unknown reference kind",
+    { kind: "reference", target: { kind: "page", id: "x" } },
+  ],
+  [
+    "an empty reference id",
+    { kind: "reference", target: { kind: "file", id: "" } },
+  ],
+  ["an extra part field", { ...reference, extra: true }],
+  [
+    "an extra option field",
+    { kind: "choices", options: [{ label: "Yes", icon: "check" }] },
+  ],
+  ["no options", { kind: "choices", options: [] }],
+  [
+    "too many options",
+    {
+      kind: "choices",
+      options: Array.from(
+        { length: replyPartLimits.options + 1 },
+        (_, index) => ({
+          label: `Option ${index}`,
+        })
+      ),
+    },
+  ],
+  ["an empty option label", { kind: "choices", options: [{ label: "" }] }],
+  [
+    "an unsupported selection mode",
+    { kind: "choices", options: [{ label: "Yes" }], select: "all" },
+  ],
+])("rejects %s", (_name, part) => {
+  expect(() => readReplyParts([part], replyPartKinds)).toThrow(
+    /parts\.0: does not match any allowed shape/
+  )
 })
 
 test("a question and its options carry a subtitle each", () => {
