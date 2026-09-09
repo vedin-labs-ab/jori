@@ -2,6 +2,7 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { readArray, readRecord, readString } from "../../shared/input"
+import { credentialSnapshot } from "../connect/snapshot"
 import { NotionApiError, notionJson } from "./api"
 import { requireNotionCredentials } from "./credentials"
 
@@ -32,7 +33,7 @@ export async function enrichNotionEventData(
     }
     await ctx.runMutation(internal.integrations.notion.data.expire, {
       integrationId: args.integration._id,
-      accessToken: requireNotionCredentials(args.integration).tokens.access,
+      expectedSnapshot: credentialSnapshot(args.integration),
     })
     return args.data
   }

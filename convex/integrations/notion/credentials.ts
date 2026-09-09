@@ -2,6 +2,7 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { requireTokenCredentials } from "../connect/credentials"
+import { credentialSnapshot } from "../connect/snapshot"
 import { NotionApiError } from "./api"
 
 export function requireNotionCredentials(integration: Doc<"integrations">) {
@@ -29,7 +30,7 @@ export async function expireRevokedNotionAccess(
     internal.integrations.notion.data.expire,
     {
       integrationId: integration._id,
-      accessToken: requireNotionCredentials(integration).tokens.access,
+      expectedSnapshot: credentialSnapshot(integration),
     }
   )
   if (expired) {

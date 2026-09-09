@@ -8,7 +8,10 @@ import {
   getActorExternalId,
 } from "../../shared/actor"
 import { readDataString } from "../../shared/data"
-import { requireNotionCredentials } from "./credentials"
+import {
+  credentialSnapshotValidator,
+  matchesCredentialSnapshot,
+} from "../connect/snapshot"
 
 export const recordWebhookEvent = internalMutation({
   args: {
@@ -77,13 +80,15 @@ export const get = internalQuery({
 })
 
 export const expire = internalMutation({
-  args: { integrationId: v.id("integrations"), accessToken: v.string() },
+  args: {
+    integrationId: v.id("integrations"),
+    expectedSnapshot: credentialSnapshotValidator,
+  },
   handler: async (ctx, args) => {
     const integration = await ctx.db.get(args.integrationId)
     if (
       integration?.integration !== "notion" ||
-      integration.status !== "active" ||
-      requireNotionCredentials(integration).tokens.access !== args.accessToken
+      !matchesCredentialSnapshot(integration, args.expectedSnapshot)
     ) {
       return false
     }

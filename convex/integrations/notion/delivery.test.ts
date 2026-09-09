@@ -88,17 +88,24 @@ test("retries page hydration outages and marks revoked access expired", async ()
   ).toBe("expired")
 })
 
-test("a failed old token does not expire a reconnected grant", async () => {
+test("an in-flight unauthorized response cannot expire a reconnected grant with the same token", async () => {
   const { t, integrationId } = await setup()
-  await t.run(
-    async (ctx) =>
-      await ctx.db.patch(integrationId, {
-        credentials: { tokens: { access: "new-access" } },
-      })
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => {
+      await t.run(
+        async (ctx) =>
+          await ctx.db.patch(integrationId, {
+            connectionGeneration: 1,
+          })
+      )
+      return new Response("private response body", { status: 401 })
+    })
   )
-  await t.mutation(internal.integrations.notion.data.expire, {
+  await t.action(internal.integrations.notion.delivery.process, {
     integrationId,
-    accessToken: "synthetic-access",
+    connectionGeneration: 0,
+    payload: payload(),
   })
   expect(
     (await t.run(async (ctx) => await ctx.db.get(integrationId)))?.status
