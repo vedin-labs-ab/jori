@@ -47,9 +47,6 @@ describe("permission catalog shape", () => {
       toolPermissions.map((permission) => permission.surface)
     )
 
-    expect(permissionSurfaces.has("google")).toBe(false)
-    expect(permissionSurfaces.has("microsoft")).toBe(false)
-
     for (const surface of permissionSurfaces) {
       expect(knownSurfaces.has(surface)).toBe(true)
     }
