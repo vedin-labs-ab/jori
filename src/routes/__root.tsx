@@ -26,7 +26,12 @@ import appCss from "../styles.css?url"
 
 const appTitle = "Jori"
 /** Link previews fetch this from outside the app, so it cannot be a path. */
-const appImage = new URL("/brand/og.jpg", regionConfig.publicOrigin).toString()
+const appImage = new URL(
+  "/brand/social/og-light.png",
+  regionConfig.publicOrigin
+).toString()
+const appImageDescription =
+  "Jori: The shared drive your AI works out of, with AI jobs, tables, and files in a shared folder."
 /** Opens on the identity, because "shared drive" is the half of the
  *  sentence no other result claims: every competitor sells a per-seat
  *  assistant. The share image carries the same line, so a preview reads as
@@ -48,6 +53,7 @@ const rootMeta: React.ComponentProps<"meta">[] = [
   // The surface is white and light-only, so the browser chrome matches it
   // rather than falling back to the browser's own grey.
   { name: "theme-color", content: "#ffffff" },
+  { name: "color-scheme", content: "light" },
   { title: appTitle },
   { name: "description", content: appDescription },
   { property: "og:title", content: appTitle },
@@ -55,15 +61,17 @@ const rootMeta: React.ComponentProps<"meta">[] = [
   { property: "og:type", content: "website" },
   { property: "og:site_name", content: appTitle },
   { property: "og:image", content: appImage },
+  { property: "og:image:type", content: "image/png" },
   // Declared so a preview reserves the right box before it has the file, and
   // so the card still says something when images are off.
   { property: "og:image:width", content: "1200" },
   { property: "og:image:height", content: "630" },
-  { property: "og:image:alt", content: appTitle },
+  { property: "og:image:alt", content: appImageDescription },
   { name: "twitter:card", content: "summary_large_image" },
   { name: "twitter:image", content: appImage },
-  { name: "twitter:title", content: appTitle },
-  { name: "twitter:description", content: appDescription },
+  { name: "twitter:image:alt", content: appImageDescription },
+  // Page titles and descriptions fall back to their Open Graph tags on X.
+  // Root defaults here would override the more specific page metadata.
 ]
 const rootLinks: React.ComponentProps<"link">[] = [
   {
@@ -74,14 +82,29 @@ const rootLinks: React.ComponentProps<"link">[] = [
     crossOrigin: "anonymous",
   },
   { rel: "stylesheet", href: appCss },
-  { rel: "icon", href: "/brand/favicon/favicon.ico" },
+  {
+    rel: "icon",
+    href: "/favicon.ico",
+    type: "image/x-icon",
+    sizes: "16x16 32x32 48x48",
+  },
   {
     rel: "icon",
     type: "image/png",
-    sizes: "32x32",
-    href: "/brand/favicon/favicon-32.png",
+    sizes: "96x96",
+    href: "/brand/favicon/favicon-96.png",
   },
-  { rel: "apple-touch-icon", href: "/brand/favicon/apple-touch-icon.png" },
+  {
+    rel: "icon",
+    type: "image/svg+xml",
+    sizes: "any",
+    href: "/brand/favicon/favicon.svg",
+  },
+  {
+    rel: "apple-touch-icon",
+    sizes: "180x180",
+    href: "/brand/favicon/apple-touch-icon.png",
+  },
   { rel: "manifest", href: "/manifest.json" },
 ]
 
@@ -100,7 +123,17 @@ export const Route = createRootRoute({
     }
   },
   errorComponent: RootError,
-  head: () => ({ meta: rootMeta, links: rootLinks }),
+  head: ({ matches }) => {
+    const path = matches.at(-1)?.pathname
+    const url = path && isMarketingPath(path) ? marketingUrl(path) : undefined
+
+    return {
+      meta: url
+        ? [...rootMeta, { property: "og:url", content: url }]
+        : rootMeta,
+      links: url ? [...rootLinks, { rel: "canonical", href: url }] : rootLinks,
+    }
+  },
   notFoundComponent: NotFound,
   shellComponent: RootDocument,
 })
