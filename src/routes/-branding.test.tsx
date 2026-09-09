@@ -71,6 +71,10 @@ test("marketing navigation updates canonical identity and leaves app pages witho
   await act(() => router.navigate({ to: "/sign-in" }))
   expect(document.querySelector('link[rel="canonical"]')).toBeNull()
   expect(document.querySelector('meta[property="og:url"]')).toBeNull()
+
+  await act(() => router.navigate({ href: "/missing" }))
+  expect(document.querySelector('link[rel="canonical"]')).toBeNull()
+  expect(document.querySelector('meta[property="og:url"]')).toBeNull()
 })
 
 test("home structured data points to the public Jori identity and its dedicated square logo", async () => {

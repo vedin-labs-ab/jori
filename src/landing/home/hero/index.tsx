@@ -1,6 +1,7 @@
 import { ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { brandHeadline } from "@/shared/brand/content"
 import { GetStarted } from "../../cta"
 import { DemoConsole } from "../../demo/console"
 import { folderId } from "../../demo/fixtures/folders"
@@ -39,7 +40,7 @@ export function Hero() {
           <Surface logo="linear" name="Linear" />, and more
         </p>
         <h1 className="mt-5 font-medium text-5xl text-balance tracking-tight sm:text-6xl lg:text-7xl">
-          The shared drive your AI works out of.
+          {brandHeadline}
         </h1>
         <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
           Put the jobs nobody wants next to the tables and files they keep

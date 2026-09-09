@@ -60,6 +60,7 @@ async function captureImage(
     locale: "en-US",
   })
   const errors: string[] = []
+  await page.clock.setFixedTime(Date.UTC(2026, 8, 9, 9, 15))
   page.on("pageerror", (error) => errors.push(error.message))
   await page.goto(
     `http://127.0.0.1:${port}/scripts/brand/social.html?theme=${theme}&format=${format.name === "social" ? "square" : "landscape"}`,

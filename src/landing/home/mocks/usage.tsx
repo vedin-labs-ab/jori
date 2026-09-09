@@ -15,7 +15,7 @@ export function Usage() {
           Spend lands where the job is filed, so a team's total is its folder's
           total and a job's total is one row. Open Usage on any folder to see
           spend by subfolder and by source over the window you choose. A metered
-          bill, not a report <Jori tilt="slight" /> writes about their own work.
+          bill, not a report <Jori /> writes about their own work.
         </>
       }
       title="Every folder has a bill"

@@ -1,7 +1,7 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { BrandIcon } from "@/shared/brand"
+import { BrandMark } from "@/shared/brand"
 import { RegionFlag } from "@/shared/region/flags"
 
 /**
@@ -174,28 +174,9 @@ export function Sigil({ kind }: { kind: keyof typeof sigils }) {
   )
 }
 
-const tilts = {
-  left: { mark: "-rotate-[9deg]", name: "rotate-[3deg]" },
-  right: { mark: "rotate-[8deg]", name: "-rotate-[3deg]" },
-  slight: { mark: "-rotate-[6deg]", name: "rotate-[2deg]" },
-  steep: { mark: "rotate-[11deg]", name: "-rotate-[4deg]" },
-}
-
-/** Jori named in prose: the mark and the name, set in the foreground so the
- *  name reads as a person in a muted paragraph. The two lean apart, a
- *  different pair of angles each time, like a hand-set stamp. */
-export function Jori({ tilt = "left" }: { tilt?: keyof typeof tilts }) {
-  return (
-    <span className="whitespace-nowrap font-semibold text-foreground">
-      <BrandIcon
-        className={cn(
-          "mr-[0.3em] inline-block size-[0.95em] align-[-0.15em]",
-          tilts[tilt].mark
-        )}
-      />
-      <span className={cn("inline-block", tilts[tilt].name)}>Jori</span>
-    </span>
-  )
+/** The same lockup in prose, sized to the surrounding line. */
+export function Jori() {
+  return <BrandMark className="inline-block h-[1.15em] align-[-0.15em]" />
 }
 
 /** A region named beside its flag, set in the foreground so the two

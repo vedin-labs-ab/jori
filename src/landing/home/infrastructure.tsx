@@ -7,8 +7,8 @@ export function Infrastructure() {
     <Section
       lede={
         <>
-          Choose an EU or US workspace. <Jori tilt="slight" /> stores your
-          chats, files and workspace records in your chosen region.
+          Choose an EU or US workspace. <Jori /> stores your chats, files and
+          workspace records in your chosen region.
         </>
       }
       support

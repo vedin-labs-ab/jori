@@ -31,7 +31,7 @@ const appImage = new URL(
   regionConfig.publicOrigin
 ).toString()
 const appImageDescription =
-  "Jori: The shared drive your AI works out of, with AI jobs, tables, and files in a shared folder."
+  "Jori: The shared drive your AI works out of. A shared folder of renewal jobs, a customer table, and a store, beside a Slack thread confirming a new customer renewal."
 /** Opens on the identity, because "shared drive" is the half of the
  *  sentence no other result claims: every competitor sells a per-seat
  *  assistant. The share image carries the same line, so a preview reads as
@@ -125,7 +125,13 @@ export const Route = createRootRoute({
   errorComponent: RootError,
   head: ({ matches }) => {
     const path = matches.at(-1)?.pathname
-    const url = path && isMarketingPath(path) ? marketingUrl(path) : undefined
+    const notFound = matches.some(
+      (match) => match.globalNotFound || match.status === "notFound"
+    )
+    const url =
+      !notFound && path && isMarketingPath(path)
+        ? marketingUrl(path)
+        : undefined
 
     return {
       meta: url
