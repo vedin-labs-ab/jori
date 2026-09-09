@@ -4,6 +4,7 @@ import { convexTest } from "convex-test"
 import { afterEach, expect, test, vi } from "vitest"
 import { internal } from "../../_generated/api"
 import schema from "../../schema"
+import { createGitHubInstallationToken } from "./app"
 import { isGitHubSelfActor } from "./data"
 import { fetchGitHubIdentity } from "./identity"
 import { mentionsGitHubApp } from "./ingress/messages"
@@ -18,9 +19,15 @@ const identity = {
 
 vi.mock("./app", () => ({
   githubAppRequest: vi.fn(async () => ({ id: 11, slug: "jori-eu" })),
+  createGitHubInstallationToken: vi.fn(async () => ({
+    token: "fresh-installation-token",
+  })),
 }))
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.clearAllMocks()
+})
 
 test("loads the regional app's canonical bot identity", async () => {
   const fetch = vi.fn(async () =>
@@ -47,12 +54,17 @@ test("rejects a bot profile that belongs to another app", async () => {
 test("refreshes existing GitHub connections without changing ownership, access or other providers", async () => {
   const t = convexTest(schema, modules)
   const ids = await seedConnections(t)
+  const fetch = vi.fn(async (_url: string, init?: RequestInit) =>
+    new Headers(init?.headers).get("authorization") ===
+    "Bearer fresh-installation-token"
+      ? Response.json({ id: 101, login: "jori-eu[bot]", type: "Bot" })
+      : new Response(null, { status: 403 })
+  )
+  vi.stubGlobal("fetch", fetch)
   expect(
-    await t.mutation(internal.integrations.github.identity.update, {
-      identity,
-      cursor: null,
-    })
-  ).toEqual({ cursor: null, updated: 2 })
+    await t.action(internal.integrations.github.identity.refresh, {})
+  ).toEqual({ appSlug: "jori-eu", updated: 2 })
+  expect(createGitHubInstallationToken).toHaveBeenCalledWith("installation")
   const rows = await t.run(async (ctx) => ({
     github: await ctx.db.get(ids.github),
     expired: await ctx.db.get(ids.expired),
@@ -72,6 +84,29 @@ test("refreshes existing GitHub connections without changing ownership, access o
   expect(rows.slack?.data).toEqual({ botUserId: "slack-bot" })
   expect(mentionsGitHubApp("@jori-eu help", rows.github?.data)).toBe(true)
   expect(mentionsGitHubApp("@old-name @jori-us", rows.github?.data)).toBe(false)
+})
+
+test("refresh never requests an installation token for expired or disconnected connections", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seedConnections(t)
+  await t.run(async (ctx) => {
+    await ctx.db.patch(ids.github, { status: "disconnected" })
+  })
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      Response.json({ id: 101, login: "jori-eu[bot]", type: "Bot" })
+    )
+  )
+  expect(
+    await t.query(internal.integrations.github.identity.installation, {
+      cursor: null,
+    })
+  ).toEqual({ installationId: null, cursor: null })
+  expect(
+    await t.action(internal.integrations.github.identity.refresh, {})
+  ).toEqual({ appSlug: "jori-eu", updated: 2 })
+  expect(createGitHubInstallationToken).not.toHaveBeenCalled()
 })
 
 async function seedConnections(t: ReturnType<typeof convexTest>) {
