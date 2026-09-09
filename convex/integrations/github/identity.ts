@@ -1,6 +1,11 @@
 import { v } from "convex/values"
 import { internal } from "../../_generated/api"
-import { internalAction, internalMutation } from "../../_generated/server"
+import {
+  type ActionCtx,
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from "../../_generated/server"
 import { readDataString } from "../../shared/data"
 import { createGitHubInstallationToken, githubAppRequest } from "./app"
 import { githubApiUrl } from "./config"
@@ -62,7 +67,7 @@ export async function fetchGitHubIdentity(installationId?: string) {
 export const refresh = internalAction({
   args: {},
   handler: async (ctx): Promise<{ appSlug: string; updated: number }> => {
-    const identity = await fetchGitHubIdentity()
+    const identity = await fetchGitHubIdentity(await activeInstallationId(ctx))
     let cursor: string | null = null
     let updated = 0
     for (;;) {
@@ -76,6 +81,37 @@ export const refresh = internalAction({
         return { appSlug: identity.appSlug, updated }
       }
       cursor = page.cursor
+    }
+  },
+})
+
+async function activeInstallationId(ctx: ActionCtx) {
+  let cursor: string | null = null
+  for (;;) {
+    const page: { installationId: string | null; cursor: string | null } =
+      await ctx.runQuery(internal.integrations.github.identity.installation, {
+        cursor,
+      })
+    if (page.installationId !== null || page.cursor === null) {
+      return page.installationId ?? undefined
+    }
+    cursor = page.cursor
+  }
+}
+
+export const installation = internalQuery({
+  args: { cursor: v.union(v.string(), v.null()) },
+  handler: async (ctx, args) => {
+    const page = await ctx.db
+      .query("integrations")
+      .withIndex("by_integration_and_external", (q) =>
+        q.eq("integration", "github")
+      )
+      .paginate({ numItems: 100, cursor: args.cursor })
+    return {
+      installationId:
+        page.page.find((row) => row.status === "active")?.externalId ?? null,
+      cursor: page.isDone ? null : page.continueCursor,
     }
   },
 })
