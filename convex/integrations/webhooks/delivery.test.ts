@@ -149,6 +149,38 @@ test("an interrupted worker is recovered and its stale completion cannot overwri
   })
 })
 
+test("reconnecting an existing row invalidates deliveries accepted under the previous grant", async () => {
+  const { t, integrationId } = await setup()
+  const { id } = await t.mutation(
+    internal.integrations.webhooks.delivery.accept,
+    receipt
+  )
+  assert(id)
+  expect(await t.run(async (ctx) => await ctx.db.get(id))).toMatchObject({
+    connectionGeneration: 0,
+  })
+  await t.run(
+    async (ctx) =>
+      await ctx.db.patch(integrationId, { connectionGeneration: 1 })
+  )
+  expect(
+    await t.mutation(internal.integrations.webhooks.delivery.claim, { id })
+  ).toBeNull()
+  expect(await t.run(async (ctx) => await ctx.db.get(id))).toMatchObject({
+    status: "inactive",
+  })
+  const fresh = await t.mutation(
+    internal.integrations.webhooks.delivery.accept,
+    { ...receipt, eventId: "EvFRESH" }
+  )
+  assert(fresh.id)
+  expect(
+    await t.mutation(internal.integrations.webhooks.delivery.claim, {
+      id: fresh.id,
+    })
+  ).toMatchObject({ connectionGeneration: 1 })
+})
+
 test("retry exhaustion retains a replayable regional payload without exposing it in failures", async () => {
   const { t } = await setup()
   const { id } = await t.mutation(

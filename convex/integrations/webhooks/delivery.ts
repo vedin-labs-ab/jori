@@ -41,6 +41,7 @@ export const accept = internalMutation({
       eventId: args.eventId,
       integrationId: integration._id,
       organizationId: integration.organizationId,
+      connectionGeneration: integration.connectionGeneration ?? 0,
       payload: args.payload,
       status: "queued",
       attempts: 0,
@@ -70,7 +71,8 @@ export const claim = internalMutation({
       integration === null ||
       integration.status !== "active" ||
       integration.integration !== row.provider ||
-      integration.organizationId !== row.organizationId
+      integration.organizationId !== row.organizationId ||
+      (integration.connectionGeneration ?? 0) !== row.connectionGeneration
     ) {
       await ctx.db.patch(id, {
         status: "inactive",

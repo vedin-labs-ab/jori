@@ -14,6 +14,7 @@ export const webhookDeliveries = defineTable({
   eventId: v.string(),
   integrationId: v.id("integrations"),
   organizationId: v.string(),
+  connectionGeneration: v.number(),
   payload: v.optional(v.any()),
   status: v.union(
     v.literal("queued"),

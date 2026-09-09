@@ -88,12 +88,16 @@ test("a reconnect cannot reassign a provider account to another organization", a
   expect(patch).not.toHaveBeenCalled()
 })
 
-test("a reconnect can refresh the owning organization's credentials", async () => {
+test.each([
+  undefined,
+  2,
+])("a reconnect refreshes credentials and advances generation %s", async (generation) => {
   const patch = vi.fn()
   const ctx = { db: { patch } } as unknown as MutationCtx
   const existing = {
     _id: "integration_1",
     organizationId: "owner_org",
+    connectionGeneration: generation,
   } as Doc<"integrations">
   const values = { organizationId: "owner_org" } as Parameters<
     typeof upsertIntegration
@@ -101,7 +105,10 @@ test("a reconnect can refresh the owning organization's credentials", async () =
   await expect(upsertIntegration(ctx, existing, values)).resolves.toBe(
     "integration_1"
   )
-  expect(patch).toHaveBeenCalledWith("integration_1", values)
+  expect(patch).toHaveBeenCalledWith("integration_1", {
+    ...values,
+    connectionGeneration: (generation ?? 0) + 1,
+  })
 })
 
 function createCtx(identity: Record<string, unknown> | null) {
