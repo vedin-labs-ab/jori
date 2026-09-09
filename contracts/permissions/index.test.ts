@@ -97,29 +97,23 @@ describe("permission catalog shape", () => {
 })
 
 describe("permission catalog defaults", () => {
-  test("defaults integration tools by communication policy", () => {
+  test("includes communication tools and defaults integration permissions by policy", () => {
     const integrationSurfaces = new Set<string>(integrations)
+    const integrationPermissions = toolPermissions.filter((permission) =>
+      integrationSurfaces.has(permission.surface)
+    )
 
-    for (const permission of toolPermissions) {
-      if (!integrationSurfaces.has(permission.surface)) {
-        continue
-      }
+    expect(integrationPermissions.map((permission) => permission.tool)).toEqual(
+      expect.arrayContaining([
+        ...requiredCommunicationToolNames,
+        ...allowedEmailCommunicationToolNames,
+      ])
+    )
 
-      expect(permission.defaultMode).toBe(
+    for (const permission of integrationPermissions) {
+      expect(permission.defaultMode, permission.tool).toBe(
         requiredCommunicationTools.has(permission.tool) ? "required" : "allowed"
       )
-    }
-  })
-
-  test("requires communication tools", () => {
-    for (const tool of requiredCommunicationToolNames) {
-      expect(permissionsByTool.get(tool)?.defaultMode).toBe("required")
-    }
-  })
-
-  test("allows email send tools by default", () => {
-    for (const tool of allowedEmailCommunicationToolNames) {
-      expect(permissionsByTool.get(tool)?.defaultMode).toBe("allowed")
     }
   })
 
