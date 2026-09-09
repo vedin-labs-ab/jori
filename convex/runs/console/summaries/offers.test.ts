@@ -11,7 +11,7 @@ test("summarizes offers newest first and includes them in run search", async () 
     cause: { type: "message", messageId: "message", kind: "mention" },
     snapshot: {
       title: "Create a Notion page.",
-      ...messageDisplay({ kind: "mention" }),
+      ...messageDisplay({}),
     },
   })
   const summary = await summarizeRun(

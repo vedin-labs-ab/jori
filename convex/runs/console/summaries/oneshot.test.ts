@@ -13,17 +13,20 @@ import {
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
-test("includes one-shot job access details", async () => {
+test.each([
+  true,
+  false,
+])("includes one-shot job access details with web search allowed: %s", async (webSearch) => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
   const run = testRun(oneShotRun(scheduledAt), {
     createdAt: scheduledAt + 1000,
     endedAt: scheduledAt + 2000,
-    preparedTools: slackToolSnapshot(true),
+    preparedTools: slackToolSnapshot(webSearch),
   })
   const summary = await summarizeRun(
     fakeQueryCtx(
       {
-        job: oneShotJob(scheduledAt),
+        job: oneShotJob(scheduledAt, webSearch),
         integration: slackIntegration(),
         run,
       },
@@ -49,33 +52,8 @@ test("includes one-shot job access details", async () => {
         },
       ],
     },
-    { type: "web_search", label: "Allowed" },
+    { type: "web_search", label: webSearch ? "Allowed" : "Blocked" },
   ])
-})
-
-test("marks one-shot job web search as blocked when disabled", async () => {
-  const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
-  const run = testRun(oneShotRun(scheduledAt), {
-    createdAt: scheduledAt + 1000,
-    endedAt: scheduledAt + 2000,
-    preparedTools: slackToolSnapshot(false),
-  })
-  const summary = await summarizeRun(
-    fakeQueryCtx(
-      {
-        job: oneShotJob(scheduledAt, false),
-        integration: slackIntegration(),
-        run,
-      },
-      { traces: preparedTraceRows(run) }
-    ),
-    run
-  )
-
-  expect(summary.details).toContainEqual({
-    type: "web_search",
-    label: "Blocked",
-  })
 })
 
 test("keeps the one-shot label after an owned job is cleaned up", async () => {

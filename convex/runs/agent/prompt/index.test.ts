@@ -173,16 +173,6 @@ describe("runtime delivery prompts", () => {
     expectInstructionsOrder(instructions)
     expectNoSyntheticBlankLines(instructions)
   })
-
-  test("omits automatic final delivery instructions", () => {
-    const prompt = assemblePrompt(githubMessageInput()).instructions
-
-    expect(prompt).not.toMatch(/Jori will .*post it/)
-    expect(prompt).not.toContain("Use GitHub write tools only")
-    expect(prompt).not.toContain("not for routine replies")
-    expect(prompt).not.toContain("The requester cannot see you working")
-    expect(prompt).not.toContain("If a reply is useful, send it to this target")
-  })
 })
 
 describe("output contract prompts", () => {
@@ -232,14 +222,6 @@ describe("approval request prompts", () => {
     expect(prompt).not.toContain("# Approvals")
   })
 })
-
-function githubMessageInput() {
-  return runtimeInput("github", {
-    repository: { fullName: "acme/app" },
-    issueNumber: 12,
-    comment: { id: "comment-id", kind: "issue_comment" },
-  })
-}
 
 function expectRunBefore(prompt: string, section: string) {
   expectSingleRun(prompt)

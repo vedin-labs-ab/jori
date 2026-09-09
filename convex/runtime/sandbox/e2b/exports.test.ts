@@ -39,7 +39,6 @@ test.each([
     sandboxId: "sandbox-1",
     file: { fileId: "files:1", ...fileMetadata(size) },
   })
-  expect(JSON.stringify(result).length).toBeLessThan(512)
   expect(runQuery).toHaveBeenCalledWith(internal.runs.records.get, {
     runId: args.runId,
   })

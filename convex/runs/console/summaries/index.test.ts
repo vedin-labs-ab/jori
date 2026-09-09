@@ -51,7 +51,6 @@ test("uses stored message snapshots when the message document is unavailable", a
       title: "Please summarize this thread.",
       ...messageDisplay({
         context: [{ type: "channel", label: "C123" }],
-        kind: "mention",
       }),
     },
   })
@@ -108,7 +107,6 @@ test("uses source message text for message tasks", async () => {
       title: "Please summarize this thread.",
       ...messageDisplay({
         context: [{ type: "channel", label: "C123" }],
-        kind: "reply",
       }),
     },
   })
@@ -159,7 +157,6 @@ test("summarizes mention runs with source task links", async () => {
             url: "https://slack.com/app_redirect?channel=C123&team=slack-team",
           },
         ],
-        kind: "mention",
         url: "https://slack.com/app_redirect?channel=C123&message_ts=1700000000.000000&team=slack-team",
       }),
     },

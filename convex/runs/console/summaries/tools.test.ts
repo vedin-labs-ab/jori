@@ -80,7 +80,6 @@ function messageRun(kind: "mention" | "reply") {
       title: "Please summarize this thread.",
       ...messageDisplay({
         context: [{ type: "channel", label: "C123" }],
-        kind,
       }),
     },
   }
