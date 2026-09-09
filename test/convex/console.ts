@@ -1,7 +1,6 @@
 import { encodeToolResult } from "../../contracts/json"
 import { type TranscriptRow } from "../../convex/runs/execution/transcript/compact"
 import { type TranscriptMessage } from "../../convex/runs/execution/transcript/schema"
-import { type MessageCauseKind } from "../../convex/runs/schema"
 import { id, type TestDatabase } from "./database"
 
 type ActivityData = import("../../convex/runs/activity/types").ActivityData
@@ -56,7 +55,6 @@ export function eventJobDisplay(input: {
 
 export function messageDisplay(input: {
   context?: RunSnapshot["context"]
-  kind: MessageCauseKind
   surface?: NonNullable<RunSnapshot["source"]["surface"]>
   url?: string
 }): RunSnapshotInput {
