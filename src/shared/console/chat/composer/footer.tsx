@@ -3,6 +3,7 @@ import { type ModelSelection } from "@contracts/models/selection"
 import { ArrowUp, ChevronDown, Square } from "lucide-react"
 import { InputGroupAddon, InputGroupButton } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
 import { SigilHints } from "../../mentions/hints"
 import {
   type MentionSources,
@@ -93,18 +94,32 @@ export function ComposerFooter({
       </InputGroupAddon>
       {/* The sigils on the quiet band the job field has, where a phone's
           keyboard would only cover them; a click folds the band away. */}
-      {reason === undefined && onHideHints !== undefined ? (
-        <button
-          aria-controls={hintsId}
-          aria-expanded="true"
-          aria-label="Hide shortcuts"
-          className="order-last hidden w-full cursor-pointer items-center justify-between gap-2 rounded-b-[inherit] border-t bg-muted/30 px-2 py-1.5 text-muted-foreground text-xs outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 md:flex"
-          onClick={onHideHints}
-          type="button"
+      {reason === undefined ? (
+        <div
+          aria-hidden={onHideHints === undefined}
+          className={cn(
+            "order-last hidden w-full rounded-b-[inherit] transition-[grid-template-rows,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:grid",
+            onHideHints === undefined
+              ? "grid-rows-[0fr] opacity-0"
+              : "grid-rows-[1fr] opacity-100"
+          )}
+          inert={onHideHints === undefined}
         >
-          <SigilHints hints={sigilHints} id={hintsId} />
-          <ChevronDown aria-hidden className="size-3 shrink-0" />
-        </button>
+          <div className="min-h-0 overflow-hidden rounded-b-[inherit]">
+            <button
+              aria-controls={hintsId}
+              aria-expanded={onHideHints !== undefined}
+              aria-label="Hide shortcuts"
+              className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-b-[inherit] border-t bg-muted/30 px-2 py-1.5 text-muted-foreground text-xs outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 motion-reduce:transition-none"
+              disabled={onHideHints === undefined}
+              onClick={onHideHints}
+              type="button"
+            >
+              <SigilHints hints={sigilHints} id={hintsId} />
+              <ChevronDown aria-hidden className="size-3 shrink-0" />
+            </button>
+          </div>
+        </div>
       ) : null}
     </>
   )
@@ -167,18 +182,32 @@ export function HintsPeek({
   onShow,
 }: {
   hintsId: string
-  onShow: () => void
+  onShow: (() => void) | undefined
 }) {
+  const visible = onShow !== undefined
+
   return (
-    <button
-      aria-controls={hintsId}
-      aria-expanded="false"
-      aria-label="Show shortcuts"
-      className="group/peek -my-2 mx-auto hidden w-[calc(100%-1.5rem)] cursor-pointer py-2 outline-none md:block"
-      onClick={onShow}
-      type="button"
+    <div
+      aria-hidden={!visible}
+      className={cn(
+        "hidden transition-[grid-template-rows,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:grid",
+        visible ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+      )}
+      inert={!visible}
     >
-      <span className="block h-1.5 rounded-b-md border border-t-0 bg-muted/40 transition-[height,background-color] group-focus-visible/peek:h-2.5 group-focus-visible/peek:ring-2 group-focus-visible/peek:ring-ring group-hover/peek:h-2.5 group-hover/peek:bg-muted" />
-    </button>
+      <div className="flow-root min-h-0">
+        <button
+          aria-controls={hintsId}
+          aria-expanded="false"
+          aria-label="Show shortcuts"
+          className="group/peek -my-2 mx-auto block w-[calc(100%-1.5rem)] cursor-pointer py-2 outline-none"
+          disabled={!visible}
+          onClick={onShow}
+          type="button"
+        >
+          <span className="block h-1.5 rounded-b-md border border-t-0 bg-muted/40 transition-[height,background-color] group-focus-visible/peek:h-2.5 group-focus-visible/peek:ring-2 group-focus-visible/peek:ring-ring group-hover/peek:h-2.5 group-hover/peek:bg-muted motion-reduce:transition-none" />
+        </button>
+      </div>
+    </div>
   )
 }

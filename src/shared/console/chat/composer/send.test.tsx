@@ -87,7 +87,9 @@ test("a send that fails leaves the draft where it was", async () => {
 })
 
 test("shortcut controls name their band and remember visibility after remounting", async () => {
-  await renderComposer()
+  const { field } = await renderComposer()
+
+  typeInto(field, "Keep this draft")
 
   const band = screen.getByRole("button", { name: "Hide shortcuts" })
   const bandId = band.getAttribute("aria-controls")
@@ -98,11 +100,26 @@ test("shortcut controls name their band and remember visibility after remounting
   fireEvent.click(band)
 
   expect(screen.queryByRole("button", { name: "Hide shortcuts" })).toBeNull()
+  // The closing band stays mounted for its animation, but is inactive.
+  expect(band.isConnected).toBe(true)
+  expect(band.hasAttribute("disabled")).toBe(true)
+  expect(band.closest("[inert]")).not.toBeNull()
+  const peek = screen.getByRole("button", { name: "Show shortcuts" })
   expect(
     screen
       .getByRole("button", { name: "Show shortcuts" })
       .getAttribute("aria-controls")
   ).toBe(bandId)
+
+  fireEvent.click(peek)
+
+  expect(band.hasAttribute("disabled")).toBe(false)
+  expect(peek.isConnected).toBe(true)
+  expect(peek.hasAttribute("disabled")).toBe(true)
+  expect(peek.closest("[inert]")).not.toBeNull()
+  expect(field.textContent).toBe("Keep this draft")
+
+  fireEvent.click(band)
 
   cleanup()
   await renderComposer()
