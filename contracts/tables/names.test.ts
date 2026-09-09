@@ -8,16 +8,12 @@ const columns: TableColumn[] = [
 ]
 
 describe("resolveNamedValues", () => {
-  test("translates name-keyed values to the hidden id keys", () => {
-    expect(resolveNamedValues(columns, { Title: "Launch", Count: 3 })).toEqual({
+  test("resolves column names ignoring case and whitespace, preserving values", () => {
+    expect(
+      resolveNamedValues(columns, { " title ": "Launch", Count: 3 })
+    ).toEqual({
       c_1: "Launch",
       c_2: 3,
-    })
-  })
-
-  test("matches names forgivingly — trimmed, ignoring case", () => {
-    expect(resolveNamedValues(columns, { " title ": "x" })).toEqual({
-      c_1: "x",
     })
   })
 
@@ -44,15 +40,14 @@ describe("resolveNamedValues", () => {
 })
 
 describe("nameRowValues", () => {
-  test("labels stored values by column name in column order", () => {
-    expect(nameRowValues(columns, { c_2: 3, c_1: "Launch" })).toEqual({
+  test("labels stored values by column name and hides deleted columns", () => {
+    expect(
+      nameRowValues(columns, { c_2: 3, gone: true, c_1: "Launch" })
+    ).toEqual({
       Title: "Launch",
       Count: 3,
     })
-  })
-
-  test("hides values of columns that no longer exist", () => {
-    expect(nameRowValues(columns, { c_1: "Launch", gone: true })).toEqual({
+    expect(nameRowValues(columns, { c_1: "Launch" })).toEqual({
       Title: "Launch",
     })
   })
