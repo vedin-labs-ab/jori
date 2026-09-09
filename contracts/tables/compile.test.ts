@@ -1,17 +1,14 @@
 import { describe, expect, test } from "vitest"
-import {
-  assertJsonSchemaValue,
-  validateJsonSchemaValue,
-} from "../schema/validate"
-import { normalizeTableColumns } from "./columns"
+import { validateJsonSchemaValue } from "../schema/validate"
+import { type TableColumn } from "./columns"
 import { compileTableSchema } from "./compile"
 
-const columns = normalizeTableColumns([
-  { id: "title", name: "Title", type: "string", required: true },
+const columns: TableColumn[] = [
+  { id: "title", name: "Headline", type: "string", required: true },
   { id: "count", name: "Count", type: "integer" },
   { id: "score", name: "Score", type: "float" },
   { id: "done", name: "Done", type: "boolean" },
-])
+]
 
 const schema = compileTableSchema(columns)
 
@@ -21,43 +18,28 @@ function issues(values: unknown) {
   )
 }
 
-describe("compileTableSchema", () => {
-  test("maps columns to a closed object schema keyed by hidden id", () => {
-    expect(schema).toEqual({
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        title: { type: "string" },
-        count: { type: "integer" },
-        score: { type: "number" },
-        done: { type: "boolean" },
-      },
-      required: ["title"],
-    })
-  })
-
-  test("omits required entirely when every column is optional", () => {
-    expect(
-      compileTableSchema(
-        normalizeTableColumns([{ id: "note", name: "Note", type: "string" }])
-      )
-    ).toEqual({
-      type: "object",
-      additionalProperties: false,
-      properties: { note: { type: "string" } },
-    })
-  })
-})
-
 describe("compiled row validation", () => {
-  test("accepts a row matching every column type", () => {
-    expect(() =>
-      assertJsonSchemaValue({
-        schema,
-        value: { title: "Launch", count: 3, score: 0.5, done: false },
-        label: "Row",
-      })
-    ).not.toThrow()
+  test("accepts every column type keyed by hidden id, not display name", () => {
+    expect(
+      issues({ title: "Launch", count: 3, score: 0.5, done: false })
+    ).toEqual([])
+  })
+
+  test("accepts an empty row when every column is optional", () => {
+    const optionalSchema = compileTableSchema([
+      { id: "note", name: "Note", type: "string" },
+    ])
+
+    expect(validateJsonSchemaValue(optionalSchema, {}, "Row")).toEqual([])
+    expect(
+      validateJsonSchemaValue(optionalSchema, { note: "Draft" }, "Row")
+    ).toEqual([])
+    expect(
+      validateJsonSchemaValue(optionalSchema, { note: 1, extra: true }, "Row")
+    ).toEqual([
+      { path: "Row.note", message: "must be string" },
+      { path: "Row.extra", message: "is not allowed" },
+    ])
   })
 
   test("requires required columns and rejects unknown keys", () => {
