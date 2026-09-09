@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { referencePresentation } from "@/shared/console/chat/presentation"
 import {
   type ChatMessage,
@@ -72,11 +72,10 @@ export function useReferenceTargets(
   organizationId: string,
   targets: ReferenceTarget[]
 ): ResolveReference {
-  const known = useRef(new Map<string, ChatReference | undefined>())
-  const [version, setVersion] = useState(0)
-  const unnamed = targets.filter(
-    (target) => !known.current.has(targetKey(target))
+  const [known, setKnown] = useState(
+    () => new Map<string, ChatReference | undefined>()
   )
+  const unnamed = targets.filter((target) => !known.has(targetKey(target)))
   const resolved = useQuery(
     api.messages.references.resolve,
     unnamed.length === 0 ? "skip" : { organizationId, targets: unnamed }
@@ -87,25 +86,25 @@ export function useReferenceTargets(
       return
     }
 
-    for (const reference of resolved) {
-      known.current.set(targetKey(reference), toChatReference(reference))
-    }
+    setKnown((previous) => {
+      const next = new Map(previous)
 
-    setVersion((count) => count + 1)
+      for (const reference of resolved) {
+        next.set(targetKey(reference), toChatReference(reference))
+      }
+
+      return next
+    })
   }, [resolved])
 
-  // The snapshot is what the callback reads, so a name landing later
-  // never changes what an earlier render was given.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: the version counts the names landed in the ref
-  return useMemo<ResolveReference>(() => {
-    const snapshot = new Map(known.current)
-
-    return (target) => {
+  return useCallback<ResolveReference>(
+    (target) => {
       const key = targetKey(target)
 
-      return snapshot.has(key) ? snapshot.get(key) : pending(target)
-    }
-  }, [version])
+      return known.has(key) ? known.get(key) : pending(target)
+    },
+    [known]
+  )
 }
 
 function toChatReference(reference: ResolvedReference) {
