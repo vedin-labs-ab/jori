@@ -8,47 +8,38 @@ import { type Access, type MessageSurface } from "../../shared/integrations"
 
 export type RuntimeIntegration = Doc<"integrations">
 
-type MessageRuntimeInput = {
-  type: "message"
-  surface: MessageSurface
+type RuntimeInputContext = {
   run: Doc<"runs">
-  /** The row the message arrived through; null on the console surface. */
-  integration: RuntimeIntegration | null
   integrations: RuntimeIntegration[]
-  message: Doc<"messages">
-  conversation: RecentConversation
   organization: OrganizationFacts | null
   requester: RequesterContext | null
-  place: PlaceContext | null
   /** The requester's IANA zone, when known; drives the prompt's local time. */
   timezone: string | null
   workstreams: WorkstreamContext[] | null
 }
 
-type JobRuntimeInput = {
+type MessageRuntimeInput = RuntimeInputContext & {
+  type: "message"
+  surface: MessageSurface
+  /** The row the message arrived through; null on the console surface. */
+  integration: RuntimeIntegration | null
+  message: Doc<"messages">
+  conversation: RecentConversation
+  place: PlaceContext | null
+}
+
+type JobRuntimeInput = RuntimeInputContext & {
   type: "job"
   access: Access
   instructions: string
-  run: Doc<"runs">
   integration: RuntimeIntegration | null
-  integrations: RuntimeIntegration[]
   event: Doc<"events"> | null
-  organization: OrganizationFacts | null
-  requester: RequesterContext | null
-  timezone: string | null
-  workstreams: WorkstreamContext[] | null
 }
 
-export type InstructionRuntimeInput = {
+export type InstructionRuntimeInput = RuntimeInputContext & {
   type: "instruction"
-  run: Doc<"runs">
-  integrations: RuntimeIntegration[]
   instructions: string
   access?: Access
-  organization: OrganizationFacts | null
-  requester: RequesterContext | null
-  timezone: string | null
-  workstreams: WorkstreamContext[] | null
 }
 
 export type AgentRuntimeInput =
