@@ -1,4 +1,4 @@
-import { isRegion, type Region, regions } from "@contracts/region"
+import { isRegion, parseOrigin, type Region, regions } from "@contracts/region"
 
 const localOrigin = "http://localhost:5173"
 
@@ -135,27 +135,7 @@ function readOptionalOrigin(
 ) {
   const value = readString(environment, name) ?? fallback
 
-  if (value === undefined) {
-    return undefined
-  }
-
-  let url: URL
-
-  try {
-    url = new URL(value.replace(/\/+$/, ""))
-  } catch {
-    throw new Error(originError(name, value))
-  }
-
-  if (
-    url.origin !== value.replace(/\/+$/, "") ||
-    url.pathname !== "/" ||
-    (url.protocol !== "https:" && url.protocol !== "http:")
-  ) {
-    throw new Error(originError(name, value))
-  }
-
-  return url.origin
+  return value === undefined ? undefined : parseOrigin(value, name)
 }
 
 function readString(environment: RegionEnvironment, name: string) {
@@ -164,10 +144,6 @@ function readString(environment: RegionEnvironment, name: string) {
   return typeof value === "string" && value.trim() !== ""
     ? value.trim()
     : undefined
-}
-
-function originError(name: string, value: string) {
-  return `${name} must be an http(s) origin, received ${JSON.stringify(value)}.`
 }
 
 export const regionConfig = createRegionConfig(

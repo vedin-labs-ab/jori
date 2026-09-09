@@ -1,4 +1,4 @@
-import { isRegion } from "../../contracts/region"
+import { isRegion, parseOrigin } from "../../contracts/region"
 
 const regionEnv = "JORI_REGION"
 const originEnv = "JORI_APP_URL"
@@ -46,23 +46,7 @@ function configuredOrigin(environment: RuntimeEnvironment, name: string) {
     return undefined
   }
 
-  let url: URL
-
-  try {
-    url = new URL(value.replace(/\/+$/, ""))
-  } catch {
-    throw new Error(originError(value, name))
-  }
-
-  if (
-    url.origin !== value.replace(/\/+$/, "") ||
-    url.pathname !== "/" ||
-    (url.protocol !== "https:" && url.protocol !== "http:")
-  ) {
-    throw new Error(originError(value, name))
-  }
-
-  return url.origin
+  return parseOrigin(value, name)
 }
 
 export function requireOrigin() {
@@ -89,8 +73,4 @@ export function requireReturnUrl(returnUrl: string) {
   }
 
   return url.toString()
-}
-
-function originError(value: string, name: string) {
-  return `${name} must be an http(s) origin, received ${JSON.stringify(value)}.`
 }
