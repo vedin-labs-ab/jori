@@ -237,7 +237,6 @@ import type * as integrations_microsoft_install from "../integrations/microsoft/
 import type * as integrations_microsoft_oauth from "../integrations/microsoft/oauth.js";
 import type * as integrations_microsoft_options from "../integrations/microsoft/options.js";
 import type * as integrations_microsoft_signing from "../integrations/microsoft/signing.js";
-import type * as integrations_notion_access from "../integrations/notion/access.js";
 import type * as integrations_notion_api from "../integrations/notion/api.js";
 import type * as integrations_notion_config from "../integrations/notion/config.js";
 import type * as integrations_notion_credentials from "../integrations/notion/credentials.js";
@@ -919,7 +918,6 @@ declare const fullApi: ApiFromModules<{
   "integrations/microsoft/oauth": typeof integrations_microsoft_oauth;
   "integrations/microsoft/options": typeof integrations_microsoft_options;
   "integrations/microsoft/signing": typeof integrations_microsoft_signing;
-  "integrations/notion/access": typeof integrations_notion_access;
   "integrations/notion/api": typeof integrations_notion_api;
   "integrations/notion/config": typeof integrations_notion_config;
   "integrations/notion/credentials": typeof integrations_notion_credentials;

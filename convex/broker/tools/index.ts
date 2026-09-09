@@ -1,6 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
-import { expireRevokedNotionAccess } from "../../integrations/notion/access"
+import { expireRevokedNotionAccess } from "../../integrations/notion/credentials"
 import { callGitHubTool, createGitHubCloneCredentials } from "./github"
 import { callGoogleTool } from "./google"
 import { callLinearTool } from "./linear"
