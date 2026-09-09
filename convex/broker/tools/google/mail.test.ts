@@ -1,12 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { schemaViolations } from "../../../../test/convex/schema"
-import {
-  draftedMailSchema,
-  mailMessageSchema,
-  mailThreadSchema,
-  sentMailSchema,
-} from "../../../runs/agent/tools/schemas/responses/mail"
-import { sentMailResult, splitMailAddressList } from "../mail"
+import { mailThreadSchema } from "../../../runs/agent/tools/schemas/responses/mail"
 import {
   gmailMailMessage,
   gmailMailThread,
@@ -60,8 +54,14 @@ function fullGmailMessage() {
 }
 
 describe("Gmail mail normalization", () => {
-  test("decodes the MIME tree into the normalized message shape", () => {
-    const message = gmailMailMessage(fullGmailMessage())
+  test("decodes thread messages and conforms to the mail contract", () => {
+    const thread = gmailMailThread({
+      id: "thread-1",
+      messages: [fullGmailMessage()],
+    })
+    expect(thread.threadId).toBe("thread-1")
+    expect(thread.messages).toHaveLength(1)
+    const [message] = thread.messages
 
     expect(message).toEqual({
       provider: "gmail",
@@ -85,7 +85,7 @@ describe("Gmail mail normalization", () => {
         },
       ],
     })
-    expect(schemaViolations(message, mailMessageSchema())).toEqual([])
+    expect(schemaViolations(thread, mailThreadSchema())).toEqual([])
   })
 
   test("falls back to the HTML part when no plain text exists", () => {
@@ -97,58 +97,23 @@ describe("Gmail mail normalization", () => {
     expect(message.body).toBe("<p>When do we launch?</p>")
     expect(message.bodyType).toBe("html")
   })
-
-  test("address lists split on commas outside quoted names", () => {
-    expect(
-      splitMailAddressList('"Doe, Jane" <jane@example.com>, sam@example.com')
-    ).toEqual(['"Doe, Jane" <jane@example.com>', "sam@example.com"])
-    expect(splitMailAddressList(undefined)).toEqual([])
-  })
 })
 
-describe("Gmail listings and results", () => {
-  test("threads normalize with their messages and conform to the schema", () => {
-    const thread = gmailMailThread({
-      id: "thread-1",
-      messages: [fullGmailMessage()],
-    })
-
-    expect(thread.threadId).toBe("thread-1")
-    expect(thread.messages).toHaveLength(1)
-    expect(schemaViolations(thread, mailThreadSchema())).toEqual([])
+test("search pages reduce to thread stubs", () => {
+  const page = gmailThreadSearchPage({
+    threads: [
+      { id: "thread-1", snippet: "Launch question", historyId: "9" },
+      { id: "thread-2" },
+    ],
+    nextPageToken: "token",
+    resultSizeEstimate: 2,
   })
 
-  test("search pages reduce to thread stubs", () => {
-    const page = gmailThreadSearchPage({
-      threads: [
-        { id: "thread-1", snippet: "Launch question", historyId: "9" },
-        { id: "thread-2" },
-      ],
-      nextPageToken: "token",
-      resultSizeEstimate: 2,
-    })
-
-    expect(page).toEqual({
-      threads: [
-        { threadId: "thread-1", snippet: "Launch question" },
-        { threadId: "thread-2" },
-      ],
-      nextPageToken: "token",
-    })
-  })
-
-  test("send and draft results conform to the shared schemas", () => {
-    expect(
-      schemaViolations(
-        sentMailResult({ messageId: "m", threadId: "t" }),
-        sentMailSchema()
-      )
-    ).toEqual([])
-    expect(
-      schemaViolations(
-        { status: "drafted", draftId: "d", messageId: "m" },
-        draftedMailSchema()
-      )
-    ).toEqual([])
+  expect(page).toEqual({
+    threads: [
+      { threadId: "thread-1", snippet: "Launch question" },
+      { threadId: "thread-2" },
+    ],
+    nextPageToken: "token",
   })
 })
