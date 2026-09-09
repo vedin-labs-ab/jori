@@ -3,13 +3,13 @@ import { decodeJson, encodeToolResult } from "../../contracts/json"
 import { runtimeSkill, runtimeSkills } from "../../test/convex/skills"
 import { loadJoriSkillTool } from "./mcp"
 
-test("loads an available runtime skill", () => {
-  expect(
-    loadJoriSkillTool(runtimeSkills(), {
-      tool: "load_skill",
-      args: { name: "slack" },
-    })
-  ).toMatchObject({
+test("loads an available skill with all its communication instructions", () => {
+  const result = loadJoriSkillTool(runtimeSkills(), {
+    tool: "load_skill",
+    args: { name: "slack" },
+  })
+
+  expect(result).toMatchObject({
     status: "loaded",
     skill: {
       name: "slack",
@@ -19,16 +19,7 @@ test("loads an available runtime skill", () => {
       ),
     },
   })
-})
-
-test("loads complete instructions with all communication parts", () => {
-  expect(
-    loadJoriSkillTool(runtimeSkills(), {
-      tool: "load_skill",
-      args: { name: "slack" },
-    })
-  ).toMatchObject({
-    status: "loaded",
+  expect(result).toMatchObject({
     skill: {
       instructions: expect.stringContaining(
         "Use Slack `blocks` when structure makes the message easier to scan"

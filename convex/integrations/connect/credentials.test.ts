@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { integrationDoc } from "../../../test/convex/integrations"
+import { type Doc } from "../../_generated/dataModel"
 import { requireGitHubCredentials } from "../github/credentials"
 import { requireGoogleCredentials } from "../google/credentials"
 
@@ -50,19 +51,9 @@ describe("provider credentials", () => {
 })
 
 function integration(credentials: unknown): Doc<"integrations"> {
-  return {
-    _id: "integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
     integration: "gmail",
     scope: "user",
-    ownerId: "person" as Id<"persons">,
-    externalId: "account",
-    email: "user@example.com",
-    credentials,
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+    credentials: credentials as Doc<"integrations">["credentials"],
+  })
 }

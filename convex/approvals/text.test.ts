@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { encodeJson } from "../../contracts/json"
+import { integrationDoc } from "../../test/convex/integrations"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
@@ -32,10 +33,13 @@ test("detects exact user approval commands", () => {
 
 test("resolves text decisions by integration account", async () => {
   const approval = approvalDoc()
-  const integration = integrationDoc("linear")
+  const integration = integrationDoc({
+    integration: "linear",
+    externalId: "linear-org",
+  })
   const ctx = actionCtx(
-    async () => ({ approval, status: "approved" as const }),
-    async () => ({ approval, integration })
+    { approval, status: "approved" },
+    { approval, integration }
   )
 
   const result = await decideApprovalByAccount(ctx, {
@@ -60,10 +64,13 @@ test("resolves text decisions by integration account", async () => {
 
 test("handles provider text decisions through the shared path", async () => {
   const approval = approvalDoc()
-  const integration = integrationDoc("github")
+  const integration = integrationDoc({
+    integration: "github",
+    externalId: "github-installation",
+  })
   const ctx = actionCtx(
-    async () => ({ approval, status: "approved" as const }),
-    async () => ({ approval, integration })
+    { approval, status: "approved" },
+    { approval, integration }
   )
 
   const handled = await handlePersonTextApprovalDecision(ctx, {
@@ -96,7 +103,7 @@ test("handles provider text decisions through the shared path", async () => {
 })
 
 test("ignores bot-authored provider text commands", async () => {
-  const ctx = actionCtx(async () => null)
+  const ctx = actionCtx(null)
 
   const handled = await handlePersonTextApprovalDecision(ctx, {
     accountId: "github-installation",
@@ -115,24 +122,11 @@ test("ignores bot-authored provider text commands", async () => {
   expect(ctx.runMutation).not.toHaveBeenCalled()
 })
 
-function actionCtx(
-  runMutation: (args: Record<string, unknown>) => Promise<unknown>,
-  runQuery: (args: Record<string, unknown>) => Promise<unknown> = async () =>
-    null
-) {
+function actionCtx(result: unknown, target: unknown = null) {
   return {
-    runMutation: vi.fn(
-      async (_reference: unknown, args: Record<string, unknown>) =>
-        runMutation(args)
-    ),
-    runQuery: vi.fn(
-      async (_reference: unknown, args: Record<string, unknown>) =>
-        runQuery(args)
-    ),
-  } as unknown as ActionCtx & {
-    runMutation: ReturnType<typeof vi.fn>
-    runQuery: ReturnType<typeof vi.fn>
-  }
+    runMutation: vi.fn().mockResolvedValue(result),
+    runQuery: vi.fn().mockResolvedValue(target),
+  } as unknown as ActionCtx
 }
 
 function approvalDoc(): Doc<"approvals"> {
@@ -157,23 +151,5 @@ function userActor(): Actor {
   return {
     kind: "person",
     personId: "person_1" as Id<"persons">,
-  }
-}
-
-function integrationDoc(
-  integration: Doc<"integrations">["integration"]
-): Doc<"integrations"> {
-  return {
-    _creationTime: 0,
-    _id: "integration_1" as Id<"integrations">,
-    createdAt: 0,
-    createdBy: "person_1" as Id<"persons">,
-    credentials: {},
-    externalId: "linear-org",
-    integration,
-    scope: "organization",
-    status: "active",
-    organizationId: "organization",
-    updatedAt: 0,
   }
 }

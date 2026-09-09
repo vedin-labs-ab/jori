@@ -1,12 +1,11 @@
 import { expect, test } from "vitest"
-import { id } from "../../test/convex/database"
+import { databaseContext, id } from "../../test/convex/database"
 import { type DataModel, type Doc } from "../_generated/dataModel"
-import { type QueryCtx } from "../_generated/server"
 import { emitRecencyContexts } from "./recency"
 
 test("stores the trigger person's bundle as the requester context", async () => {
   const emission = await emitRecencyContexts(
-    fakeCtx(baseSeed()),
+    await seedContext(baseSeed()),
     session({ due: [id<"persons">("person")] }),
     []
   )
@@ -24,7 +23,7 @@ test("stores the trigger person's bundle as the requester context", async () => 
 
 test("returns null when nobody new is due", async () => {
   const emission = await emitRecencyContexts(
-    fakeCtx(baseSeed()),
+    await seedContext(baseSeed()),
     session({ done: [id<"persons">("person")] }),
     [message({ id: "m2", personId: "person", thread: "t1" })]
   )
@@ -38,7 +37,7 @@ test("canonicalizes merged persons before deduping", async () => {
     ["persons", person({ id: "old", supersededBy: "person" })],
   ] satisfies Seed[]
   const emission = await emitRecencyContexts(
-    fakeCtx(seed),
+    await seedContext(seed),
     session({ done: [id<"persons">("person")] }),
     [message({ id: "m2", personId: "old", thread: "t1" })]
   )
@@ -48,7 +47,7 @@ test("canonicalizes merged persons before deduping", async () => {
 
 test("marks a batch sender done even when nothing is loadable", async () => {
   const emission = await emitRecencyContexts(
-    fakeCtx(baseSeed()),
+    await seedContext(baseSeed()),
     session({ done: [id<"persons">("person")] }),
     [message({ id: "m2", name: "Sam", personId: "other", thread: "t9" })]
   )
@@ -70,7 +69,7 @@ test("emits a batch sender as context and keeps the stored requester", async () 
     ["conversations", conversation({ id: "c2", thread: "t2" })],
   ] satisfies Seed[]
   const emission = await emitRecencyContexts(
-    fakeCtx(seed),
+    await seedContext(seed),
     session({
       done: [id<"persons">("person")],
       requester: "stored requester context",
@@ -196,70 +195,12 @@ function conversation(args: {
   }
 }
 
-function fakeCtx(seed: Seed[]): QueryCtx {
-  return {
-    db: {
-      get: async (rowId: string) =>
-        seed.find(([, row]) => row._id === rowId)?.[1] ?? null,
-      query: (table: string) => ({
-        withIndex: (_index: string, build: (query: QueryFilter) => unknown) =>
-          indexedQuery(table, seed, build),
-      }),
-    },
-  } as unknown as QueryCtx
-}
-
-function indexedQuery(
-  table: string,
-  seed: Seed[],
-  build: (query: QueryFilter) => unknown
-) {
-  const filters: Filter[] = []
-
-  build(queryFilter(filters))
-
-  const matched = seed
-    .filter(([rowTable]) => rowTable === table)
-    .map(([, row]) => row)
-    .filter((row) =>
-      filters.every((filter) =>
-        filter.operator === "gte"
-          ? Number(row[filter.field]) >= Number(filter.value)
-          : row[filter.field] === filter.value
-      )
-    )
-
-  return {
-    order: () => ({ take: async (limit: number) => matched.slice(0, limit) }),
-    take: async (limit: number) => matched.slice(0, limit),
-    unique: async () => matched[0] ?? null,
+async function seedContext(seed: Seed[]) {
+  const { database, ctx } = databaseContext()
+  for (const [table, row] of seed) {
+    await database.insert(table, row)
   }
-}
-
-function queryFilter(filters: Filter[]): QueryFilter {
-  const query = {
-    eq: (field: string, value: unknown) => {
-      filters.push({ field, operator: "eq", value })
-      return query
-    },
-    gte: (field: string, value: unknown) => {
-      filters.push({ field, operator: "gte", value })
-      return query
-    },
-  }
-
-  return query
-}
-
-type Filter = {
-  field: string
-  operator: "eq" | "gte"
-  value: unknown
-}
-
-type QueryFilter = {
-  eq: (field: string, value: unknown) => QueryFilter
-  gte: (field: string, value: unknown) => QueryFilter
+  return ctx
 }
 
 type Row = Record<string, unknown>

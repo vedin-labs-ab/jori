@@ -2,7 +2,9 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { afterEach, expect, test, vi } from "vitest"
+import { schemaViolations } from "../../test/convex/schema"
 import { internal } from "../_generated/api"
+import { storeToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/stores"
 import schema from "../schema"
 
 const modules = import.meta.glob("/convex/{_generated,stores}/**/*.{ts,js}")
@@ -14,12 +16,27 @@ test("value reads and writes share a clock without rewriting metadata", async ()
   const clock = vi.spyOn(Date, "now").mockReturnValue(200)
   const empty = await t.query(internal.stores.values.read, args)
 
-  expect(empty).toMatchObject({ updatedAt: 100, valueUpdatedAt: null })
+  expect(empty).toMatchObject({
+    updatedAt: 100,
+    valueUpdatedAt: null,
+    value: null,
+    version: 0,
+  })
+  expect(schemaViolations(empty, storeToolResponseSchemas.read_store)).toEqual(
+    []
+  )
   const written = await t.mutation(internal.stores.values.write, {
     ...args,
     write: { type: "replace", value: { count: 1 } },
   })
-  expect(written).toMatchObject({ valueUpdatedAt: 200, version: 1 })
+  expect(written).toMatchObject({
+    valueUpdatedAt: 200,
+    version: 1,
+    value: { count: 1 },
+  })
+  expect(
+    schemaViolations(written, storeToolResponseSchemas.write_store)
+  ).toEqual([])
   expect(written).not.toHaveProperty("updatedAt")
   expect(await t.query(internal.stores.values.read, args)).toMatchObject({
     updatedAt: 100,

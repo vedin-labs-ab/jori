@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { encodeJson } from "../../../../contracts/json"
+import { integrationDoc } from "../../../../test/convex/integrations"
 import { internal } from "../../../_generated/api"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
@@ -9,7 +10,10 @@ import { type GitHubWebhookPayload } from "./types"
 
 test("records GitHub approval commands without starting a message run", async () => {
   const approval = approvalDoc()
-  const integration = integrationDoc()
+  const integration = integrationDoc({
+    integration: "github",
+    externalId: "123",
+  })
   const ctx = actionCtx({
     decisionResult: { approval, status: "approved" as const },
     queryResult: { approval, integration },
@@ -171,21 +175,5 @@ function approvalDoc(): Doc<"approvals"> {
     surface: "github",
     organizationId: "organization",
     tool: "github_commit_to_pull_request",
-  }
-}
-
-function integrationDoc(): Doc<"integrations"> {
-  return {
-    _creationTime: 0,
-    _id: "integration_1" as Id<"integrations">,
-    createdAt: 0,
-    createdBy: "person_1" as Id<"persons">,
-    credentials: {},
-    externalId: "123",
-    integration: "github",
-    scope: "organization",
-    status: "active",
-    organizationId: "organization",
-    updatedAt: 0,
   }
 }
