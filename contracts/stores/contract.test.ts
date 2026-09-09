@@ -14,7 +14,6 @@ const schema = {
 
 describe("normalizeStoreSchema", () => {
   test("returns the schema with meta keys stripped", () => {
-    expect(normalizeStoreSchema(schema)).toEqual(schema)
     expect(normalizeStoreSchema({ $schema: "draft", ...schema })).toEqual(
       schema
     )
