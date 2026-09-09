@@ -99,30 +99,19 @@ test("the Filters button sits ahead of the page's own header actions", () => {
   ).toBeGreaterThan(0)
 })
 
-test("the panel starts closed, inert, and out of the way", () => {
-  const { aside, button } = renderPage()
+test("opening and closing the panel updates its visibility and moves focus", () => {
+  const { aside, button, close } = renderPage()
 
   expect(button().getAttribute("aria-pressed")).toBe("false")
   expect(aside()?.dataset.state).toBe("closed")
   expect(aside()?.className).toContain("w-0")
   expect(aside()?.querySelector("aside")?.hasAttribute("inert")).toBe(true)
-})
-
-test("the button opens the panel and lands focus on its close control", () => {
-  const { aside, button, close } = renderPage()
-
   fireEvent.click(button())
 
   expect(button().getAttribute("aria-pressed")).toBe("true")
   expect(aside()?.className).toContain("w-72")
   expect(aside()?.querySelector("aside")?.hasAttribute("inert")).toBe(false)
   expect(document.activeElement).toBe(close())
-})
-
-test("closing hands focus back to the header button", () => {
-  const { button, close } = renderPage()
-
-  fireEvent.click(button())
   fireEvent.click(close())
 
   expect(button().getAttribute("aria-pressed")).toBe("false")

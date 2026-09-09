@@ -42,19 +42,14 @@ function type(input: HTMLInputElement, text: string) {
   fireEvent.input(input, { inputType: "insertText", target: { value } })
 }
 
-test("stands filled with the zone it was given", () => {
-  const input = renderField("Europe/Stockholm")
+test("shows the current zone and finds another by its readable name", async () => {
+  const onChange = vi.fn()
+  const input = renderField("Europe/Stockholm", onChange)
 
   expect(input.value).toBe("Europe/Stockholm")
   expect(
     screen.getByText("Days in usage and reports follow this zone.")
   ).toBeDefined()
-})
-
-test("searching by the readable name finds the underscored zone", async () => {
-  const onChange = vi.fn()
-  const input = renderField("Europe/Stockholm", onChange)
-
   input.focus()
   type(input, "new york")
 

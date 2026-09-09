@@ -7,26 +7,6 @@ afterEach(() => {
   cleanup()
 })
 
-test("a row offers the whole material menu, in order", () => {
-  renderMenu({ archivedAt: undefined })
-
-  openMenu()
-
-  expect(
-    screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Rename…", "Visibility…", "Move to folder…", "Archive"])
-})
-
-test("active materials offer archive only", () => {
-  renderMenu({ archivedAt: undefined })
-
-  openMenu()
-
-  expect(screen.getByRole("menuitem", { name: "Archive" })).toBeDefined()
-  expect(screen.queryByRole("menuitem", { name: "Restore" })).toBeNull()
-  expect(screen.queryByRole("menuitem", { name: "Delete" })).toBeNull()
-})
-
 test("archived materials offer restore and permanent delete", () => {
   const onRestore = vi.fn()
 
@@ -39,12 +19,16 @@ test("archived materials offer restore and permanent delete", () => {
   expect(onRestore).toHaveBeenCalledOnce()
 })
 
-test("archive confirms before calling back", () => {
+test("an active material's menu offers archive and confirms before calling back", () => {
   const onDelete = vi.fn()
 
   renderMenu({ archivedAt: undefined, onDelete })
 
   openMenu()
+  expect(
+    screen.getAllByRole("menuitem").map((item) => item.textContent)
+  ).toEqual(["Rename…", "Visibility…", "Move to folder…", "Archive"])
+
   fireEvent.click(screen.getByRole("menuitem", { name: "Archive" }))
 
   expect(onDelete).not.toHaveBeenCalled()

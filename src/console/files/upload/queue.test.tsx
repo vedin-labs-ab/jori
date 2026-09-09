@@ -100,21 +100,14 @@ function makeFiles() {
 }
 
 describe("upload queue", () => {
-  test("picked files land as queued rows", () => {
-    const { notes, photo } = makeFiles()
-
-    renderHarness()
-    pickFiles([notes, photo])
-
-    expect(screen.getByText("notes.txt")).toBeDefined()
-    expect(screen.getByText("photo.png")).toBeDefined()
-  })
-
-  test("re-picking the same file keeps a single row", () => {
+  test("picked files land as queued rows without duplicating a re-picked file", () => {
     const { notes, photo } = makeFiles()
 
     renderHarness()
     pickFiles([notes])
+
+    expect(screen.getByText("notes.txt")).toBeDefined()
+
     pickFiles([notes, photo])
 
     expect(screen.getAllByText("notes.txt")).toHaveLength(1)
@@ -150,6 +143,8 @@ describe("upload submission", () => {
 
     renderUploadHarness()
     pickFiles([notes, photo])
+    expect(screen.getByText("notes.txt")).toBeDefined()
+    expect(screen.getByText("photo.png")).toBeDefined()
     fireEvent.click(screen.getByText("Upload"))
 
     await waitFor(() => expect(uploads.createFile).toHaveBeenCalledTimes(2))

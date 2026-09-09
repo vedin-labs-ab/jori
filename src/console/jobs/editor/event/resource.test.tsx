@@ -8,7 +8,8 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { useState } from "react"
+import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { EventOptionField } from "./resource"
 
@@ -54,111 +55,71 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe("job event option field", () => {
-  test("selects a loaded option", async () => {
-    let selectedValue = ""
-    let rerender: ReturnType<typeof render>["rerender"] | undefined
-    const onValueChange = vi.fn((value: string) => {
-      selectedValue = value
-      rerender?.(renderEventOptionField(selectedValue, onValueChange))
-    })
+test("selects a loaded option inside a dialog without dismissing it", async () => {
+  const onOpenChange = vi.fn()
+  const onValueChange = vi.fn()
 
-    rerender = render(
-      renderEventOptionField(selectedValue, onValueChange)
-    ).rerender
+  renderDialog(onOpenChange, onValueChange)
 
-    const input = screen.getByRole("combobox", {
-      name: "Channel",
-    }) as HTMLInputElement
+  fireEvent.click(screen.getByRole("button"))
 
-    fireEvent.click(screen.getByRole("button"))
+  const option = await screen.findByRole("option", { name: /General/ })
+  const portal = document.querySelector('[data-slot="combobox-portal"]')
+  expect(portal?.className).toContain("pointer-events-auto")
 
-    const option = await screen.findByRole("option", { name: /General/ })
-    selectOption(option)
-
-    await waitFor(() => {
-      expect(onValueChange).toHaveBeenCalledWith("C123")
-      expect(input.value).toBe("General")
-    })
-  })
-})
-
-describe("job event option field in dialogs", () => {
-  test("selects a portaled option inside a dialog", async () => {
-    let isOpen = true
-    let selectedValue = ""
-    let rerender: ReturnType<typeof render>["rerender"] | undefined
-    const onOpenChange = vi.fn((open: boolean) => {
-      isOpen = open
-      rerender?.(renderDialogEventOptionField(isOpen, selectedValue, handlers))
-    })
-    const onValueChange = vi.fn((value: string) => {
-      selectedValue = value
-      rerender?.(renderDialogEventOptionField(isOpen, selectedValue, handlers))
-    })
-    const handlers = { onOpenChange, onValueChange }
-
-    rerender = render(
-      renderDialogEventOptionField(isOpen, selectedValue, handlers)
-    ).rerender
-
-    fireEvent.click(screen.getByRole("button"))
-
-    const option = await screen.findByRole("option", { name: /General/ })
-    const portal = document.querySelector('[data-slot="combobox-portal"]')
-
-    expect(portal?.className).toContain("pointer-events-auto")
-    selectOption(option)
-
-    await waitFor(() => {
-      expect(onValueChange).toHaveBeenCalledWith("C123")
-      expect(screen.getByRole("dialog")).toBeDefined()
-    })
-    expect(onOpenChange).not.toHaveBeenCalledWith(false)
-  })
-})
-
-function selectOption(option: HTMLElement) {
   fireEvent.pointerDown(option, {
     button: 0,
     ctrlKey: false,
     pointerType: "mouse",
   })
   fireEvent.click(option)
-}
 
-function renderEventOptionField(
-  value: string,
+  await waitFor(() => {
+    expect(onValueChange).toHaveBeenCalledWith("C123")
+    expect(
+      (screen.getByRole("combobox", { name: "Channel" }) as HTMLInputElement)
+        .value
+    ).toBe("General")
+  })
+  expect(screen.getByRole("dialog")).toBeDefined()
+  expect(onOpenChange).not.toHaveBeenCalledWith(false)
+})
+
+function renderDialog(
+  onOpenChange: (open: boolean) => void,
   onValueChange: (value: string) => void
 ) {
-  return (
-    <EventOptionField
-      organizationId="organization"
-      parameter={channelParameter}
-      match={{}}
-      disabled={false}
-      disabledMessage={undefined}
-      id="job-event-channel"
-      value={value}
-      onValueChange={onValueChange}
-    />
-  )
-}
+  function Fixture() {
+    const [open, setOpen] = useState(true)
+    const [value, setValue] = useState("")
 
-function renderDialogEventOptionField(
-  isOpen: boolean,
-  value: string,
-  handlers: {
-    onOpenChange: (isOpen: boolean) => void
-    onValueChange: (value: string) => void
+    return (
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next)
+          onOpenChange(next)
+        }}
+      >
+        <DialogContent showCloseButton={false}>
+          <DialogTitle>Job</DialogTitle>
+          <EventOptionField
+            organizationId="organization"
+            parameter={channelParameter}
+            match={{}}
+            disabled={false}
+            disabledMessage={undefined}
+            id="job-event-channel"
+            value={value}
+            onValueChange={(next) => {
+              setValue(next)
+              onValueChange(next)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    )
   }
-) {
-  return (
-    <Dialog open={isOpen} onOpenChange={handlers.onOpenChange}>
-      <DialogContent showCloseButton={false}>
-        <DialogTitle>Job</DialogTitle>
-        {renderEventOptionField(value, handlers.onValueChange)}
-      </DialogContent>
-    </Dialog>
-  )
+
+  render(<Fixture />)
 }

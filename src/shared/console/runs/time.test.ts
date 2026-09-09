@@ -1,98 +1,45 @@
-import { describe, expect, test } from "vitest"
+import { expect, test } from "vitest"
 import { makeApproval, makeExecution, makeOffer } from "./fixtures"
 import { displayNowForRun, runClockInterval } from "./time"
 import { type ExecutionItem } from "./types"
 
-const baseRun = makeExecution({
-  createdAt: 1700000000123,
-  durationMs: 1200,
-  endedAt: 1700000001323,
-  id: "run-1" as ExecutionItem["id"],
-  searchableText: "completed run",
-  source: { type: "manual" },
-  task: "Completed run",
-  title: "Completed run",
-  trigger: "Manual",
+const now = 1700000065123
+const baseRun = makeExecution()
+
+test("uses a minute interval and buckets display time for settled runs", () => {
+  expect(runClockInterval([baseRun], now)).toBe(60_000)
+  expect(displayNowForRun(baseRun, now)).toBe(1700000040000)
 })
 
-describe("run clock timing", () => {
-  test("uses a minute interval for settled runs", () => {
-    expect(runClockInterval([baseRun], 1700000065123)).toBe(60_000)
-  })
-
-  test("uses a second interval while a run is active", () => {
-    expect(
-      runClockInterval(
-        [{ ...baseRun, endedAt: undefined, status: "running" }],
-        1700000065123
-      )
-    ).toBe(1000)
-  })
-
-  test("uses a second interval while a pending approval is live", () => {
-    const approval = makeApproval({
-      decidedAt: undefined,
-      expiresAt: 1700000066000,
-      state: "pending",
-      summary: "Approve this run",
-      tool: "slack.postMessage",
-      toolLabel: "Post Slack message",
-    })
-
-    expect(
-      runClockInterval(
-        [
-          {
-            ...baseRun,
-            approval,
-            approvals: [approval],
-          },
-        ],
-        1700000065123
-      )
-    ).toBe(1000)
-  })
-
-  test("uses a second interval while a waiter is active", () => {
-    expect(
-      runClockInterval(
-        [
-          {
-            ...baseRun,
-            waiter: {
-              expiresAt: 1700001800000,
-              id: "waiter-1" as NonNullable<ExecutionItem["waiter"]>["id"],
-              state: "waiting",
-            },
-          },
-        ],
-        1700000065123
-      )
-    ).toBe(1000)
-  })
-
-  test("buckets display time for settled runs", () => {
-    expect(displayNowForRun(baseRun, 1700000065123)).toBe(1700000040000)
-  })
-})
-
-test("uses a second interval while a pending offer is live", () => {
-  const offer = makeOffer({
-    expiresAt: 1700000066000,
-    summary: "Connect Notion so Jori can continue.",
-    updatedAt: 1700000000000,
-  })
-
-  expect(
-    runClockInterval(
-      [
-        {
-          ...baseRun,
-          offer,
-          offers: [offer],
-        },
-      ],
-      1700000065123
-    )
-  ).toBe(1000)
+test.each([
+  {
+    label: "running execution",
+    run: makeExecution({ endedAt: undefined, status: "running" }),
+  },
+  {
+    label: "pending approval",
+    run: makeExecution({
+      approval: makeApproval({
+        decidedAt: undefined,
+        state: "pending",
+        expiresAt: now + 877,
+      }),
+    }),
+  },
+  {
+    label: "waiting execution",
+    run: makeExecution({
+      waiter: {
+        expiresAt: 1700001800000,
+        id: "waiter-1" as NonNullable<ExecutionItem["waiter"]>["id"],
+        state: "waiting",
+      },
+    }),
+  },
+  {
+    label: "pending offer",
+    run: makeExecution({ offer: makeOffer({ expiresAt: now + 877 }) }),
+  },
+])("uses a second interval for a $label", ({ run }) => {
+  expect(runClockInterval([run], now)).toBe(1000)
 })

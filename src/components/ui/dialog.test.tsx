@@ -65,32 +65,6 @@ test("dialogs use handled drawers on mobile", () => {
   expect(document.querySelector('[data-slot="drawer-handle"]')).not.toBeNull()
 })
 
-test("mobile dialogs automatically stack nested drawers", () => {
-  mobile = true
-
-  render(
-    <Dialog open>
-      <DialogContent>
-        <DialogTitle>Settings</DialogTitle>
-        <DialogDescription>Organization settings.</DialogDescription>
-        <Dialog open>
-          <DialogContent>
-            <DialogTitle>Billing</DialogTitle>
-            <DialogDescription>Billing settings.</DialogDescription>
-          </DialogContent>
-        </Dialog>
-      </DialogContent>
-    </Dialog>
-  )
-
-  expect(document.querySelectorAll('[data-slot="drawer-content"]')).toHaveLength(
-    2
-  )
-  expect(document.querySelectorAll('[data-slot="drawer-handle"]')).toHaveLength(
-    2
-  )
-})
-
 test("mobile nested drawers move focus into the active surface and restore it", async () => {
   mobile = true
 
@@ -124,6 +98,9 @@ test("mobile nested drawers move focus into the active surface and restore it", 
 
   const trigger = screen.getByRole("button", { name: "Invite member" })
   fireEvent.click(trigger)
+
+  expect(document.querySelectorAll('[data-slot="drawer-content"]')).toHaveLength(2)
+  expect(document.querySelectorAll('[data-slot="drawer-handle"]')).toHaveLength(2)
 
   await waitFor(() =>
     expect(document.activeElement).toBe(screen.getByLabelText("Email"))
