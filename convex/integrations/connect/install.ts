@@ -147,7 +147,10 @@ export async function upsertIntegration(
         "This provider account is already connected to another organization."
       )
     }
-    await ctx.db.patch(existing._id, values)
+    await ctx.db.patch(existing._id, {
+      ...values,
+      connectionGeneration: (existing.connectionGeneration ?? 0) + 1,
+    })
 
     return existing._id
   }
@@ -155,6 +158,7 @@ export async function upsertIntegration(
   return await ctx.db.insert("integrations", {
     ...values,
     createdAt: values.updatedAt,
+    connectionGeneration: 1,
   })
 }
 
