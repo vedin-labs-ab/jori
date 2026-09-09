@@ -14,7 +14,7 @@ background; `dark` means artwork for a dark background.
 
 | Placement | Files | Treatment |
 | --- | --- | --- |
-| Site and console | `src/shared/brand` components | Tight SVGs; the enclosing `.dark` class selects the inverse. |
+| Site and console | `src/shared/brand` components | Shared mark geometry; the enclosing `.dark` class selects the inverse. Public navigation uses a separate icon and live name. |
 | Standalone symbol | `mark/mark-{light,dark}.svg` | Tight transparent canvas. PNGs at 512 and 1024px are available. |
 | Complete logo | `wordmark/wordmark-{light,dark}.svg` | Fixed lettering and icon gap. PNGs are 256px high. |
 | Provider avatar, profile image, organization logo | `avatar/avatar-light-512.png` | Opaque, padded square. The complete mark survives a circular crop. Use this light asset for all four integration providers. |
@@ -37,8 +37,20 @@ and bots use the same light avatar in both regions; see
 ## Size and clear space
 
 Use the complete logo when introducing Jori, and the symbol in tabs, avatars,
-inline mentions, and compact controls. The minimum symbol size is 16px. Use
-the complete logo at 24px high or larger, normally 32px in navigation.
+inline mentions, and compact controls. The minimum standalone symbol size is
+16px. Use the exported complete logo at 24px high or larger.
+
+Public navigation uses `BrandLink`: a 32px symbol, an 8px gap, and live Geist
+Medium text at 16px. Keep the icon and name separate and upright. These are
+the established proportions in the marketing header and footer, also shared
+by the sign-in and public console shells.
+
+Marketing prose uses the `Jori` component in `src/landing/section.tsx`:
+a 0.95em symbol beside the live semibold name, sized to the surrounding text.
+Its four paired tilts are intentional: left (-9°/+3°), right (+8°/-3°),
+slight (-6°/+2°), and steep (+11°/-4°), listed as symbol/name. Preserve the
+chosen tilt at each occurrence. This opposing lean is part of the marketing
+identity, alongside the updated mark artwork.
 
 The gap from icon to lettering is one-quarter of the icon width. Leave at
 least the same amount around a standalone logo in page layout: 8px around a
@@ -46,10 +58,12 @@ least the same amount around a standalone logo in page layout: 8px around a
 Navigation alignment follows the visible left edge. Compact inline mentions
 and browser icons are intentional exceptions to the clear-space rule.
 
-Do not stretch, rotate individual parts, change the slit, apply opacity, or
-add shadows, borders, or CSS filters to the logo. On a photograph or a busy
-background, place the correct version on a quiet solid background. Keep the
-wordmark's proportions; don't typeset a second approximation beside a symbol.
+Do not stretch, change the slit, apply opacity, or add shadows, borders, or
+CSS filters to the logo. Keep exported wordmarks and social artwork at their
+fixed proportions and upright. The separate live name in public navigation
+and the paired rotations in marketing prose are deliberate UI treatments;
+do not replace them with the complete SVG wordmark. On a photograph or a
+busy background, place the correct version on a quiet solid background.
 
 ## Update the set
 
