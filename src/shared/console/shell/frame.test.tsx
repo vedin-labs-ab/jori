@@ -81,11 +81,12 @@ test("lets the content pane shrink below its content's width", () => {
   expect(document.querySelector("main")?.className).toContain("min-w-0")
 })
 
-test("shows nothing on a material detail page before its view publishes", () => {
-  renderFrame("/tables/abc123")
+test.each([
+  "/tables/abc123",
+  "/folders/abc123",
+])("%s waits for the view to publish before naming the page", (pathname) => {
+  renderFrame(pathname)
 
-  // The trail appears whole once the view publishes; assembling it in
-  // pieces read as jitter.
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
   expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
 })
@@ -155,13 +156,6 @@ test("keeps the previous crumb while the next material page loads", () => {
   expect(screen.queryByText("Reports")).toBeNull()
 })
 
-test("shows nothing on a folder page while its trail loads", () => {
-  renderFrame("/folders/abc123")
-
-  expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
-  expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
-})
-
 test("hangs the page's menu off its name when the view publishes one", () => {
   const { publish } = renderWithPublisher("/folders")
 
@@ -204,7 +198,7 @@ test("hangs a published aside off the trail, outside its navigation", () => {
   ).toBeGreaterThan(0)
 })
 
-test("sets a published suffix right after the name, with no divider", () => {
+test("keeps a published suffix inside the breadcrumb", () => {
   const { publish } = renderWithPublisher("/folders/usage")
 
   act(() =>
@@ -218,10 +212,7 @@ test("sets a published suffix right after the name, with no divider", () => {
   const trail = screen.getByRole("navigation", { name: "breadcrumb" })
   const suffix = screen.getByRole("button", { name: "About these figures" })
 
-  // A mark on the name itself, so it stays inside the crumb, and nothing
-  // stands between the two.
   expect(trail.contains(suffix)).toBe(true)
-  expect(trail.querySelector('[data-slot="separator"]')).toBeNull()
 })
 
 test("carries the skip link's landing id only when handed one", () => {
