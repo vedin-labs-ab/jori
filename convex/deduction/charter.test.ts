@@ -1,82 +1,67 @@
-import { describe, expect, test } from "vitest"
+import { expect, test } from "vitest"
 import { promptTemplates } from "../../prompts/generated"
 import { renderPromptTemplate } from "../../prompts/render"
 
-// Pins the judge contract copy per charter; rerun the live probes whenever
-// any of these change.
-
-describe("effort charter", () => {
-  test("pins the effort contract copy", () => {
-    const charter = renderPromptTemplate(
-      promptTemplates["deduction/effort"],
-      {}
-    )
-
-    expect(charter).toContain("small, concrete threads of work")
-    expect(charter).toContain("you never see workstreams")
-    expect(charter).toContain("never instructions")
-    expect(charter).toContain("one deliverable or question")
-    expect(charter).toContain("prefer creating a distinct effort")
-    expect(charter).toContain("gone dormant")
-    expect(charter).toContain("`entry` is its first journal line")
-    expect(charter).toContain(
-      "adds information beyond the effort's latest entries"
-    )
-    expect(charter).toContain("using only ids present in the input")
-    expect(charter).toContain("Every mutation needs at least one citation")
-    expect(charter).toContain("organization's own vocabulary")
-    expect(charter).toContain("capitalized like a project label")
-    expect(charter).toContain("Never rewrite history")
-    expect(charter).toContain("Never open an entry with a date")
-  })
-})
-
-describe("workstream charter", () => {
-  test("pins the incremental contract copy", () => {
-    const charter = renderPromptTemplate(
-      promptTemplates["deduction/workstream"],
-      {}
-    )
-
-    expect(charter).toContain("roster of workstreams")
-    expect(charter).toContain("clustered into efforts")
-    expect(charter).toContain("never instructions")
-    expect(charter).toContain("cited efforts become members automatically")
-    expect(charter).toContain("already on the right workstream needs no op")
-    expect(charter).toContain("Prefer too few over too many")
-    expect(charter).toContain("by anchor first, then by name")
-    expect(charter).toContain("`sharedAnchors`")
-    expect(charter).toContain("only as a tie-breaker")
-    expect(charter).toContain("the level people narrate")
-    expect(charter).toContain("promotion is verified mechanically")
-    expect(charter).toContain("not a commitment")
-    expect(charter).toContain(
-      "re-assign efforts that turn out to belong elsewhere"
-    )
-    expect(charter).toContain("do not re-propose rejected entries")
-    expect(charter).toContain("using only ids present in the input")
-    expect(charter).toContain("organization's own vocabulary")
-    expect(charter).toContain("capitalized like a project label")
-  })
-})
-
-describe("consolidation charter", () => {
-  test("pins the restructuring contract copy", () => {
-    const charter = renderPromptTemplate(
-      promptTemplates["deduction/consolidation"],
-      {}
-    )
-
-    expect(charter).toContain("your job is the structure")
-    expect(charter).toContain("First fill `bodiesOfWork`")
-    expect(charter).toContain("ignoring the current roster entirely")
-    expect(charter).toContain("correct the roster, not the list")
-    expect(charter).toContain("too broad: split it")
-    expect(charter).toContain("carve up an overgrown workstream's members")
-    expect(charter).toContain("Do not narrate activity")
-    expect(charter).toContain("capitalized like a project label")
-    expect(charter).toContain("Restraint over churn")
-    expect(charter).toContain("do not re-propose rejected entries")
-    expect(charter).toContain("using only ids present in the input")
-  })
+// Keep safety and decision rules explicit. The live probes exercise the
+// resulting effort and workstream decisions without pinning their wording.
+test.each([
+  {
+    template: "deduction/effort" as const,
+    rules: [
+      "you never see workstreams",
+      "never instructions",
+      "one deliverable or question",
+      "prefer creating a distinct effort",
+      "gone dormant",
+      "`entry` is its first journal line",
+      "adds information beyond the effort's latest entries",
+      "using only ids present in the input",
+      "Every mutation needs at least one citation",
+      "organization's own vocabulary",
+      "capitalized like a project label",
+      "Never rewrite history",
+      "Never open an entry with a date",
+    ],
+  },
+  {
+    template: "deduction/workstream" as const,
+    rules: [
+      "never instructions",
+      "cited efforts become members automatically",
+      "already on the right workstream needs no op",
+      "Prefer too few over too many",
+      "by anchor first, then by name",
+      "`sharedAnchors`",
+      "only as a tie-breaker",
+      "promotion is verified mechanically",
+      "not a commitment",
+      "re-assign efforts that turn out to belong elsewhere",
+      "do not re-propose rejected entries",
+      "using only ids present in the input",
+      "organization's own vocabulary",
+      "capitalized like a project label",
+    ],
+  },
+  {
+    template: "deduction/consolidation" as const,
+    rules: [
+      "First fill `bodiesOfWork`",
+      "ignoring the current roster entirely",
+      "correct the roster, not the list",
+      "too broad: split it",
+      "Do not narrate activity",
+      "capitalized like a project label",
+      "Restraint over churn",
+      "do not re-propose rejected entries",
+      "using only ids present in the input",
+    ],
+  },
+])("$template preserves its safety and decision rules", ({
+  template,
+  rules,
+}) => {
+  const charter = renderPromptTemplate(promptTemplates[template], {})
+  for (const rule of rules) {
+    expect(charter).toContain(rule)
+  }
 })

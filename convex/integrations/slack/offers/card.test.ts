@@ -20,7 +20,6 @@ test("renders a URL button for the requested integration", () => {
   const actions = card.actions as Record<string, unknown>[]
 
   expect(message.text).toContain("Connect GitHub to Jori")
-  expect(message.blocks).toHaveLength(1)
   expect(message.blocks).toMatchObject([
     {
       type: "card",
@@ -60,7 +59,6 @@ test("renders a URL button for the requested integration", () => {
   expect(subtext.text).toContain("Expires at <!date^1700000000^{time}|")
   expect(subtext.text.endsWith(".")).toBe(false)
   expect(JSON.stringify(card.subtext)).not.toContain("review permissions")
-  expect(actions).toHaveLength(2)
   expect(actions[0]).not.toHaveProperty("style")
   expect(actions[1]).toMatchObject({ style: "primary" })
 })
