@@ -13,7 +13,7 @@ import {
   integrationValidator,
 } from "../../shared/integrations"
 import { requireReturnUrl } from "../../shared/origin"
-import { createSignedGitHubState } from "../github/signing"
+import { createGitHubInstallState } from "../github/signing"
 import { googleIntegrationConfigs } from "../google/config"
 import { createSignedGoogleState } from "../google/signing"
 import { createSignedLinearState } from "../linear/signing"
@@ -74,7 +74,7 @@ export async function createSignedInstallState(
 
   switch (integration) {
     case "github":
-      return await createSignedGitHubState(state)
+      return await createGitHubInstallState(ctx, state)
     case "slack":
       return await createSignedSlackState(state)
     case "linear":

@@ -1,5 +1,17 @@
 import { requireEnvironmentVariable } from "../../shared/environment"
-import { githubApiUrl } from "./config"
+import {
+  githubApiUrl,
+  githubAppInstallBaseUrl,
+  requireGitHubAppSlug,
+} from "./config"
+
+export function githubInstallationUrl(state: string) {
+  const url = new URL(
+    `${githubAppInstallBaseUrl}/${requireGitHubAppSlug()}/installations/new`
+  )
+  url.searchParams.set("state", state)
+  return url.toString()
+}
 
 export function githubAuthorizationUrl(redirectUri: string, state: string) {
   const url = new URL("https://github.com/login/oauth/authorize")

@@ -19,11 +19,11 @@ import {
   failOfferAndRedirect,
 } from "../../connect/install"
 import { fetchGitHubInstallationProfile } from "../app"
-import { githubAppInstallBaseUrl, requireGitHubAppSlug } from "../config"
 import { fetchGitHubIdentity } from "../identity"
 import { normalizeInstallationProfile } from "../install"
 import {
   githubAuthorizationUrl,
+  githubInstallationUrl,
   verifyGitHubInstallationAccess,
 } from "../oauth"
 import {
@@ -43,12 +43,24 @@ export async function handleGitHubInstall(request: Request) {
     return new Response("Missing state", { status: 400 })
   }
 
-  const githubUrl = new URL(
-    `${githubAppInstallBaseUrl}/${requireGitHubAppSlug()}/installations/new`
-  )
-  githubUrl.searchParams.set("state", state)
+  const parsed = await readCallbackState({
+    value: state,
+    parse: parseSignedGitHubState,
+    label: "GitHub install",
+  })
+  if (!parsed.ok) {
+    return parsed.response
+  }
+  if (parsed.state.installationId !== undefined) {
+    return privateRedirect(
+      githubAuthorizationUrl(
+        `${requestUrl.origin}/github/oauth/callback`,
+        state
+      )
+    )
+  }
 
-  return Response.redirect(githubUrl.toString(), 302)
+  return privateRedirect(githubInstallationUrl(state))
 }
 
 export async function handleGitHubInstallCallback(
