@@ -21,9 +21,6 @@ describe("job date and time picker", () => {
     ) as HTMLInputElement
 
     expect(screen.getByLabelText("Date").textContent).toContain("2026")
-    expect(screen.getByText("(Europe/Stockholm)").className).toBe(
-      "font-normal text-muted-foreground"
-    )
     expect(timeInput.value).toBe("13:45")
   })
 

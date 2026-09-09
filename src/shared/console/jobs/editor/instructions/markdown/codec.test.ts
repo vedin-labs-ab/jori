@@ -27,7 +27,7 @@ test("round-trips the supported Markdown profile", () => {
     "```",
   ].join("\n")
 
-  expect(roundTrip(roundTrip(source))).toBe(roundTrip(source))
+  expect(roundTrip(source)).toBe(source)
 })
 
 test.each([

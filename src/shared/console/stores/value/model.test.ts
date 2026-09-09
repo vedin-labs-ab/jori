@@ -1,12 +1,8 @@
 import { describe, expect, test } from "vitest"
 import { schemaToForm } from "./model"
 
-function form(schema: unknown) {
-  return schemaToForm(schema)
-}
-
 function properties(schema: unknown) {
-  const derived = form(schema)
+  const derived = schemaToForm(schema)
 
   if (derived?.kind !== "object") {
     throw new Error("Expected an object form.")
@@ -44,7 +40,7 @@ describe("schemaToForm primitives", () => {
   })
 
   test("constraint keywords never block the form", () => {
-    const derived = form({
+    const derived = schemaToForm({
       type: "object",
       minProperties: 1,
       additionalProperties: false,
@@ -91,13 +87,13 @@ describe("schemaToForm enum and const", () => {
 
   test("enums of compound values stay code-only", () => {
     expect(
-      form({
+      schemaToForm({
         type: "object",
         properties: { status: { enum: [{ complex: true }] } },
       })
     ).toBeUndefined()
     expect(
-      form({ type: "object", properties: { status: { enum: [] } } })
+      schemaToForm({ type: "object", properties: { status: { enum: [] } } })
     ).toBeUndefined()
   })
 })
@@ -179,6 +175,6 @@ describe("schemaToForm code-only constructs", () => {
   ]
 
   test.each(codeOnly)("%s stays code-only", (_label, schema) => {
-    expect(form(schema)).toBeUndefined()
+    expect(schemaToForm(schema)).toBeUndefined()
   })
 })

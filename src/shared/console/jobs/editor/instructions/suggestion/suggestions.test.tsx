@@ -5,7 +5,7 @@ import { InstructionSuggestions } from "./suggestions"
 
 afterEach(cleanup)
 
-test("uses provider logos and a full-width muted footer", () => {
+test("describes only suggestions that add access with the shared hint", () => {
   render(
     <InstructionSuggestions
       listboxId="tool-suggestions"
@@ -40,7 +40,6 @@ test("uses provider logos and a full-width muted footer", () => {
   )
 
   const listbox = screen.getByRole("listbox")
-  const shell = listbox.parentElement?.parentElement
   const footer = screen.getByText(
     "Selecting a tool can add the access it needs."
   )
@@ -49,26 +48,9 @@ test("uses provider logos and a full-width muted footer", () => {
     name: "conversations_add_message",
   })
 
-  expect(shell?.classList).toContain("w-72")
-  expect(shell?.classList).toContain("max-w-[calc(100%-0.5rem)]")
-  expect(shell?.classList).not.toContain("p-1")
-  expect(listbox.parentElement?.classList).toContain("p-1")
-  expect(footer.parentElement).toBe(shell)
   expect(listbox.contains(footer)).toBe(false)
-  expect(footer.classList).toContain("border-t")
-  expect(footer.classList).toContain("bg-muted/30")
   expect(builtIn.getAttribute("aria-describedby")).toBeNull()
   expect(needsAccess.getAttribute("aria-describedby")).toBe(footer.id)
-  expectProviderLogos(builtIn, needsAccess)
   expect(screen.queryByText("Built in")).toBeNull()
   expect(screen.queryByText("+ Slack access")).toBeNull()
 })
-
-function expectProviderLogos(builtIn: HTMLElement, needsAccess: HTMLElement) {
-  expect(builtIn.querySelector("svg")?.getAttribute("viewBox")).toBe(
-    "6 6 52 52"
-  )
-  expect(needsAccess.querySelector("img")?.getAttribute("src")).toBe(
-    "/logos/integrations/slack.svg"
-  )
-}

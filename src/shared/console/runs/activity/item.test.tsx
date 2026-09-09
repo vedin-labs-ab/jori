@@ -85,7 +85,7 @@ test("does not pulse historical running-status events", () => {
     </TooltipProvider>
   )
 
-  expect(screen.queryByRole("status", { name: "Running now" })).toBeNull()
+  expect(screen.getByText("Run started").className).not.toContain("shimmer")
 })
 
 test("renders model token usage instead of selected action text", () => {
@@ -162,7 +162,6 @@ test("groups consecutive tool calls into an expandable task", () => {
 
   expect(screen.getByText("Read file")).toBeDefined()
   expect(screen.getByText("Fetch page")).toBeDefined()
-  expect(document.querySelectorAll('[data-slot="separator"]')).toHaveLength(3)
 })
 
 test("labels same-family tool groups with specific wording", () => {

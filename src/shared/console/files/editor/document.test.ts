@@ -89,19 +89,13 @@ test("a failed fetch reports an error without waiting for the deadline", async (
   expect(result.current.state.status).toBe("error")
 })
 
-test("unmounting mid-load leaves nothing behind", async () => {
+test("unmounting mid-load cancels the deadline", () => {
   fetchMock.mockImplementationOnce(() => new Promise<Response>(() => undefined))
   const file = fileOf()
 
-  const { result, unmount } = renderHook(() =>
-    useDocument(file, file.url ?? "")
-  )
+  const { unmount } = renderHook(() => useDocument(file, file.url ?? ""))
 
+  expect(vi.getTimerCount()).toBe(1)
   unmount()
-
-  await act(async () => {
-    vi.advanceTimersByTime(documentDeadline * 2)
-  })
-
-  expect(result.current.state.status).toBe("loading")
+  expect(vi.getTimerCount()).toBe(0)
 })
