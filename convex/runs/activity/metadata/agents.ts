@@ -1,5 +1,6 @@
+import { readStringArray } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
-import { countText, item, readStringArray } from "../helpers"
+import { countText, item } from "../helpers"
 
 export function agentWaitMetadata(
   tool: string,
@@ -12,7 +13,7 @@ export function agentWaitMetadata(
 
   const runIds = readStringArray(input.runIds)
 
-  if (runIds === undefined) {
+  if (runIds.length === 0) {
     return []
   }
 

@@ -1,18 +1,8 @@
 import { codingLimits } from "../../../contracts/coding"
-import { isRecord } from "../../../contracts/json"
-
-export function normalizeToolInput(value: unknown): Record<string, unknown> {
-  return isRecord(value) ? value : {}
-}
-
-export function optionalTrimmedString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
-}
+import { optionalString } from "../../shared/input"
 
 export function requiredTrimmedString(value: unknown, name: string) {
-  const text = optionalTrimmedString(value)
+  const text = optionalString(value)
 
   if (text === undefined) {
     throw new Error(`Missing ${name}`)

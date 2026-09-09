@@ -6,6 +6,7 @@ import {
   type OfferHandoff,
 } from "../../../contracts/runtime/handoffs"
 import { type RuntimeId } from "../../../contracts/runtime/ids"
+import { optionalString } from "../../shared/input"
 import { type RuntimePlatform, type TraceRuntime } from "../platform"
 import { recordRuntimeEvent } from "./record"
 
@@ -83,7 +84,7 @@ function toolResultEvent(
 function approvalEvent(
   result: Record<string, unknown>
 ): ToolResultEvent | undefined {
-  const approvalId = readString(result.approvalId)
+  const approvalId = optionalString(result.approvalId)
 
   if (result.status !== "approval_requested" || approvalId === undefined) {
     return undefined
@@ -99,7 +100,7 @@ function approvalEvent(
 function offerEvent(
   result: Record<string, unknown>
 ): ToolResultEvent | undefined {
-  const offerId = readString(result.integrationOfferId)
+  const offerId = optionalString(result.integrationOfferId)
 
   if (offerId === undefined) {
     return undefined
@@ -116,7 +117,7 @@ function agentEvent(
   toolName: string,
   result: Record<string, unknown>
 ): ToolResultEvent | undefined {
-  const runId = readString(result.runId)
+  const runId = optionalString(result.runId)
 
   if (toolName !== "start_agent" || runId === undefined) {
     return undefined
@@ -132,7 +133,7 @@ function agentEvent(
 function fileEvent(
   result: Record<string, unknown>
 ): ToolResultEvent | undefined {
-  const fileId = readString(result.fileId)
+  const fileId = optionalString(result.fileId)
 
   if (fileId === undefined) {
     return undefined
@@ -143,10 +144,4 @@ function fileEvent(
     keyId: fileId,
     type: "file.saved",
   }
-}
-
-function readString(value: unknown) {
-  return typeof value === "string" && value.trim() !== ""
-    ? value.trim()
-    : undefined
 }

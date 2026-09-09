@@ -1,4 +1,4 @@
-import { isRecord } from "../../../contracts/json"
+import { isRecord, readStringArray } from "../../../contracts/json"
 import { collapseWhitespace } from "../../../contracts/text"
 import { optionalNumber, optionalString } from "../../shared/input"
 import { type ActivityMetadataItem } from "./types"
@@ -41,7 +41,7 @@ export function fileTarget(input: Record<string, unknown>) {
 export function domainScope(value: unknown, prefix: string) {
   const domains = readStringArray(value)
 
-  return domains === undefined || domains.length === 0
+  return domains.length === 0
     ? undefined
     : item("scope", `${prefix} ${domains.slice(0, 2).join(", ")}`)
 }
@@ -109,16 +109,6 @@ export function item(kind: MetadataKind, value: string | undefined) {
   const text = cleanText(value)
 
   return text === undefined ? undefined : { kind, text }
-}
-
-export function readStringArray(value: unknown) {
-  if (!Array.isArray(value)) {
-    return undefined
-  }
-
-  const items = value.filter((item): item is string => typeof item === "string")
-
-  return items.length === 0 ? undefined : items
 }
 
 export function arrayLength(value: unknown) {
