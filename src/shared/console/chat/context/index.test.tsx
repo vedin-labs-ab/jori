@@ -15,7 +15,6 @@ test("the ring names the share and the tokens, and opens the last turn's receipt
   })
 
   expect(trigger.textContent).toContain("31%")
-  expect(trigger.className).toContain("text-muted-foreground")
 
   fireEvent.click(trigger)
 

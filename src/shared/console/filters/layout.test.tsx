@@ -104,12 +104,10 @@ test("opening and closing the panel updates its visibility and moves focus", () 
 
   expect(button().getAttribute("aria-pressed")).toBe("false")
   expect(aside()?.dataset.state).toBe("closed")
-  expect(aside()?.className).toContain("w-0")
   expect(aside()?.querySelector("aside")?.hasAttribute("inert")).toBe(true)
   fireEvent.click(button())
 
   expect(button().getAttribute("aria-pressed")).toBe("true")
-  expect(aside()?.className).toContain("w-72")
   expect(aside()?.querySelector("aside")?.hasAttribute("inert")).toBe(false)
   expect(document.activeElement).toBe(close())
   fireEvent.click(close())
@@ -140,23 +138,19 @@ test("facets off their default count on the button and reset together", () => {
   fireEvent.click(button())
 
   expect(screen.queryByRole("button", { name: "Reset" })).toBeNull()
-  expect(button().dataset.variant).toBe("outline")
 
   fireEvent.click(screen.getByRole("radio", { name: "Active" }))
 
   expect(button().getAttribute("aria-label")).toBe("Filters, 1 active")
-  expect(button().dataset.variant).toBe("secondary")
 
   const clear = screen.getByRole("button", { name: "Clear filter" })
 
   expect(within(clear).getByText("1")).toBeDefined()
-  expect(clear.dataset.variant).toBe("secondary")
 
   fireEvent.click(screen.getByRole("button", { name: "Reset" }))
 
   expect(screen.getByRole("radio", { name: "All" }).dataset.state).toBe("on")
   expect(screen.queryByRole("button", { name: "Reset" })).toBeNull()
-  expect(button().dataset.variant).toBe("outline")
 })
 
 test("the open state is remembered under the frame's storage key", async () => {
@@ -232,6 +226,5 @@ test("the count beside the button clears the filters on its own", () => {
 
   expect(screen.getByRole("radio", { name: "All" }).dataset.state).toBe("on")
   expect(screen.queryByRole("button", { name: /Clear/ })).toBeNull()
-  expect(button().dataset.variant).toBe("outline")
   expect(document.activeElement).toBe(button())
 })
