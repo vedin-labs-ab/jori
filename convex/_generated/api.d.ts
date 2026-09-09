@@ -208,6 +208,8 @@ import type * as integrations_google_install from "../integrations/google/instal
 import type * as integrations_google_oauth from "../integrations/google/oauth.js";
 import type * as integrations_google_options from "../integrations/google/options.js";
 import type * as integrations_google_signing from "../integrations/google/signing.js";
+import type * as integrations_inspection_activity from "../integrations/inspection/activity.js";
+import type * as integrations_inspection_connections from "../integrations/inspection/connections.js";
 import type * as integrations_linear_config from "../integrations/linear/config.js";
 import type * as integrations_linear_credentials from "../integrations/linear/credentials.js";
 import type * as integrations_linear_delivery_comments from "../integrations/linear/delivery/comments.js";
@@ -890,6 +892,8 @@ declare const fullApi: ApiFromModules<{
   "integrations/google/oauth": typeof integrations_google_oauth;
   "integrations/google/options": typeof integrations_google_options;
   "integrations/google/signing": typeof integrations_google_signing;
+  "integrations/inspection/activity": typeof integrations_inspection_activity;
+  "integrations/inspection/connections": typeof integrations_inspection_connections;
   "integrations/linear/config": typeof integrations_linear_config;
   "integrations/linear/credentials": typeof integrations_linear_credentials;
   "integrations/linear/delivery/comments": typeof integrations_linear_delivery_comments;
