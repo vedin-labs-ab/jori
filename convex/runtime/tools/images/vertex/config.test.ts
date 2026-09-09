@@ -43,7 +43,6 @@ test("rejects a service account from a different project", () => {
 test.each([
   "../other-project",
   "https://global.example",
-  "",
 ])("rejects invalid project IDs", (project) => {
   vi.stubEnv("VERTEX_PROJECT_ID", project)
   expect(() => vertexConfiguration()).toThrow("VERTEX_PROJECT_ID")

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest"
-import { fakeQueryCtx } from "../../../../test/convex/console"
+import { fakeQueryCtx, runDoc } from "../../../../test/convex/console"
 import { type Doc } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
 test("summarizes active waiters for parked running runs", async () => {
-  const run = testRun({
+  const run = runDoc({
     status: "running",
     endedAt: undefined,
   })
@@ -36,21 +36,3 @@ test("summarizes active waiters for parked running runs", async () => {
     state: "waiting",
   })
 })
-
-function testRun(overrides: Partial<Doc<"runs">>): Doc<"runs"> {
-  return {
-    _id: "run",
-    _creationTime: 0,
-    organizationId: "organization",
-    status: "completed",
-    cause: { type: "manual" },
-    createdAt: 0,
-    endedAt: 1000,
-    snapshot: {
-      context: [],
-      source: { type: "manual" },
-      title: "Connect GitHub",
-    },
-    ...overrides,
-  } as Doc<"runs">
-}

@@ -128,18 +128,32 @@ test("add_reaction is refused on the console surface", async () => {
   expect(runtime.context.activeSurface?.communicated).toBe(false)
 })
 
-test("add_reaction validates GitHub reaction targets before calling Convex", async () => {
+test.each([
+  {
+    reason: "invalid target",
+    reaction: "+1",
+    target: { commentId: "123", type: "comment" },
+    message: "target.commentId must be a positive integer",
+  },
+  {
+    reason: "unsupported reaction",
+    reaction: "thumbsup",
+    target: { commentId: 123, type: "comment" },
+    message:
+      "reaction must be one of +1, -1, laugh, confused, heart, hooray, rocket, eyes",
+  },
+])("add_reaction rejects $reason before calling Convex", async ({
+  reaction,
+  target,
+  message,
+}) => {
   const runtime = createSurfaceRuntime({
     surface: "github",
     tool: "add_reaction",
   })
-
   const result = await runTool({
     call: {
-      args: {
-        reaction: "+1",
-        target: { commentId: "123", type: "comment" },
-      },
+      args: { reaction, target },
       id: "call_1",
       name: "add_reaction",
     },
@@ -147,37 +161,7 @@ test("add_reaction validates GitHub reaction targets before calling Convex", asy
   })
 
   expect(JSON.parse(result.content)).toEqual({
-    error: {
-      message: "target.commentId must be a positive integer",
-    },
-    status: "error",
-  })
-  expect(runtime.platform.addReaction).not.toHaveBeenCalled()
-})
-
-test("add_reaction validates GitHub reaction values before calling Convex", async () => {
-  const runtime = createSurfaceRuntime({
-    surface: "github",
-    tool: "add_reaction",
-  })
-
-  const result = await runTool({
-    call: {
-      args: {
-        reaction: "thumbsup",
-        target: { commentId: 123, type: "comment" },
-      },
-      id: "call_1",
-      name: "add_reaction",
-    },
-    runtime,
-  })
-
-  expect(JSON.parse(result.content)).toEqual({
-    error: {
-      message:
-        "reaction must be one of +1, -1, laugh, confused, heart, hooray, rocket, eyes",
-    },
+    error: { message },
     status: "error",
   })
   expect(runtime.platform.addReaction).not.toHaveBeenCalled()
