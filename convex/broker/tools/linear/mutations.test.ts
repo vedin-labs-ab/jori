@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { type Doc, type Id } from "../../../_generated/dataModel"
+import { integration } from "../../../../test/convex/tools"
 import { postLinearComment } from "../../../integrations/linear/delivery/comments"
 import { linearToolResponseSchemas } from "../../../runs/agent/tools/schemas/responses/linear"
 import { callLinearTool } from "."
@@ -35,7 +35,7 @@ test("adds a Linear comment with CommentCreateInput", async () => {
   })
 
   const result = await callLinearTool(
-    linearIntegration(),
+    integration("linear"),
     "linear_add_comment",
     {
       body: "Tiny quip.",
@@ -60,7 +60,7 @@ test("posts a Linear comment reply through the first-class comment helper", asyn
     data: { commentCreate: { success: true } },
   })
 
-  await postLinearComment(linearIntegration(), {
+  await postLinearComment(integration("linear"), {
     body: "Approval required.",
     target: { id: "comment-id", issueId: "issue-id", type: "comment" },
   })
@@ -91,7 +91,7 @@ test.each([
   })
 
   const result = await callLinearTool(
-    linearIntegration(),
+    integration("linear"),
     "linear_add_reaction",
     {
       emoji: "\u{1F44D}",
@@ -112,7 +112,7 @@ test.each([
 
 test("requires a supported Linear reaction target", async () => {
   await expect(
-    callLinearTool(linearIntegration(), "linear_add_reaction", {
+    callLinearTool(integration("linear"), "linear_add_reaction", {
       emoji: "\u{1F44D}",
       target: { id: "target-id", type: "unsupported" },
     })
@@ -143,23 +143,4 @@ function mockLinearFetch(
   })
 
   return calls
-}
-
-function linearIntegration(): Doc<"integrations"> {
-  return {
-    _id: "linear-integration",
-    _creationTime: 0,
-    organizationId: "organization",
-    integration: "linear",
-    scope: "organization",
-    externalId: "linear-account",
-    credentials: {
-      tokens: { access: "access-token", refresh: "refresh-token" },
-      expiresAt: Date.now() + 60_000,
-    },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
 }

@@ -3,10 +3,8 @@ import {
   createFileContext,
   mockJsonFetch,
 } from "../../../../test/convex/broker"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { type Doc } from "../../../_generated/dataModel"
+import { integration } from "../../../../test/convex/tools"
 import {
   draftedMailSchema,
   sentMailSchema,
@@ -229,17 +227,6 @@ function readRawMessage(body: unknown, path: string[] = ["raw"]) {
   return Buffer.from(String(raw), "base64url").toString("utf8")
 }
 
-function gmailIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("gmail-integration"),
-    integration: "gmail",
-    scope: "user",
-    ownerId: id<"persons">("person"),
-    externalId: "google-account",
-    email: "sender@example.com",
-    credentials: {
-      tokens: { access: "access-token", refresh: "refresh-token" },
-      expiresAt: Date.now() + 60_000,
-    },
-  })
+function gmailIntegration() {
+  return { ...integration("gmail"), email: "sender@example.com" }
 }

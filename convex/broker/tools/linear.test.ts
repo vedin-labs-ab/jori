@@ -1,7 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { id } from "../../../test/convex/database"
-import { integrationDoc } from "../../../test/convex/integrations"
-import { type Doc } from "../../_generated/dataModel"
+import { integration } from "../../../test/convex/tools"
 import { callLinearTool } from "./linear"
 
 const originalFetch = globalThis.fetch
@@ -31,7 +29,7 @@ test("searches Linear issue text and comments", async () => {
   })
 
   const result = await callLinearTool(
-    linearIntegration(),
+    integration("linear"),
     "linear_search_issues",
     {
       first: 20,
@@ -80,7 +78,7 @@ test("deduplicates exact Linear identifier search results", async () => {
   ])
 
   const result = await callLinearTool(
-    linearIntegration(),
+    integration("linear"),
     "linear_search_issues",
     {
       query: "VED-1",
@@ -105,9 +103,13 @@ test("reads a Linear issue by UUID or identifier", async () => {
     },
   })
 
-  const result = await callLinearTool(linearIntegration(), "linear_get_issue", {
-    issueId: "VED-1",
-  })
+  const result = await callLinearTool(
+    integration("linear"),
+    "linear_get_issue",
+    {
+      issueId: "VED-1",
+    }
+  )
 
   expect(result).toEqual({
     id: "issue-id",
@@ -130,7 +132,7 @@ test("lists Linear issue comments", async () => {
   })
 
   const result = await callLinearTool(
-    linearIntegration(),
+    integration("linear"),
     "linear_list_comments",
     {
       first: 5,
@@ -146,7 +148,7 @@ test("throws on Linear GraphQL errors", async () => {
   mockLinearFetch({ errors: [{ message: "Nope" }] })
 
   await expect(
-    callLinearTool(linearIntegration(), "linear_get_issue", {
+    callLinearTool(integration("linear"), "linear_get_issue", {
       issueId: "issue-id",
     })
   ).rejects.toThrow("Linear GraphQL request failed")
@@ -176,16 +178,4 @@ function mockLinearFetch(
   })
 
   return calls
-}
-
-function linearIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("linear-integration"),
-    integration: "linear",
-    externalId: "linear-account",
-    credentials: {
-      tokens: { access: "access-token", refresh: "refresh-token" },
-      expiresAt: Date.now() + 60_000,
-    },
-  })
 }

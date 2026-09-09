@@ -21,7 +21,7 @@ vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 const paginationOpts = { cursor: null, numItems: 10 }
 
 test("the first message opens a person-scoped conversation and starts a run", async () => {
-  const { database, ctx } = consoleContext()
+  const { database, ctx, scheduler } = consoleContext()
   const personId = await person(database)
 
   const result = await sendConsoleMessage(ctx, {
@@ -32,6 +32,7 @@ test("the first message opens a person-scoped conversation and starts a run", as
   })
 
   expect(result.status).toBe("started")
+  expect(scheduler.runAt).toHaveBeenCalledTimes(1)
 
   const conversation = await database.get(result.conversationId)
   const message = await database.get(result.messageId)
@@ -43,6 +44,7 @@ test("the first message opens a person-scoped conversation and starts a run", as
     externalId: result.conversationId,
     title: "Plan the launch",
     createdBy: personId,
+    debounce: { functionId: "scheduled_1" },
   })
   expect(conversation).not.toHaveProperty("integrationId")
   expect(message).toMatchObject({
@@ -205,21 +207,6 @@ test("only the creator sees a console conversation", async () => {
       text: "Let me in.",
     })
   ).rejects.toThrow("Conversation not found.")
-})
-test("every message that runs schedules the thread's summary", async () => {
-  const { database, ctx, scheduler } = consoleContext()
-  const personId = await person(database)
-  const sent = await sendConsoleMessage(ctx, {
-    organizationId,
-    personId,
-    profile: {},
-    text: "Rename the renewals table.",
-  })
-
-  expect(scheduler.runAt).toHaveBeenCalledTimes(1)
-  expect((await conversationOf(database, sent)).debounce).toMatchObject({
-    functionId: "scheduled_1",
-  })
 })
 
 test("the resources a message mentions are kept with it, once each, and one the person cannot see refuses the message", async () => {

@@ -1,8 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { type Doc } from "../../../_generated/dataModel"
+import { integration } from "../../../../test/convex/tools"
 import { getToolResponseSchema } from "../../../runs/agent/tools/schemas/responses"
 import { callGitHubTool } from "./index"
 
@@ -27,7 +25,7 @@ test("commits local source changes to a pull request without forcing the ref", a
   ])
 
   const result = await callGitHubTool(
-    githubIntegration(),
+    integration("github"),
     "github_commit_to_pull_request",
     {
       changes: sourceChanges({ headSha }),
@@ -85,7 +83,7 @@ test("creates a pull request branch from local source changes", async () => {
   ])
 
   const result = await callGitHubTool(
-    githubIntegration(),
+    integration("github"),
     "github_create_pull_request",
     {
       branch: "jori/fix",
@@ -200,18 +198,6 @@ function stubGitHubResponses(responses: unknown[]) {
 
   vi.stubGlobal("fetch", fetchMock)
   return fetchMock
-}
-
-function githubIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("github-integration"),
-    integration: "github",
-    externalId: "github-account",
-    credentials: {
-      installationId: "123",
-      tokens: { access: "github-token" },
-    },
-  })
 }
 
 function jsonBody(
