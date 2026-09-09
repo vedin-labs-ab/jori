@@ -1,260 +1,65 @@
-# Regional residency
+# Residency and claims
 
-Architecture decision, 7 September 2026. This describes the intended boundary,
-not a certification that every production resource has been verified. The
-regional migration is still in progress.
+[Docs index](index.md) · [Architecture](architecture.md) · [Integrations](integrations.md)
 
-## Decision
+## Intended boundary
 
-Keep Jori's existing providers, with the separately approved Bird replacement
-for Resend and direct Google Cloud image generation. Deploy the same application
-to independently configured EU and US instances. Region is a deployment property,
-not a tenant-specific branch in every feature. Domain code sees one database and
-one integration of each kind.
-Provider adapters resolve the credentials and endpoints at the boundary.
+| Data or operation | Treatment |
+| --- | --- |
+| Chats, files, imported content, summaries and embeddings | Regional storage and processing, including caches, backups, replicas and content-bearing logs. |
+| Customer tokens, OAuth state, connection records, jobs | Regional storage and execution. |
+| Inference, images, search, indexing and sandbox work | Regional processing through provider adapters. Current gaps are below. |
+| Public app identity and minimal routing records | May be shared. App registration geography does not determine customer-data geography. |
+| Webhook ingress and restricted token issuance | May be shared under the integration guide. Disclose actual payload/credential processing, locations and retention. |
+| Billing, edge, support and provider administration | Review and disclose actual datasets, access, locations and retention. Minimize customer content. |
+| Customer-connected services and chosen recipients | Their own processing follows their terms and customer instructions. Jori's imported copies and processing remain in this boundary. |
 
-Customer selection determines the instance. IP geolocation may suggest an
-initial choice, but does not move an existing tenant or override that choice.
-Switching instances starts a fresh navigation; it does not copy authentication,
-resource IDs, search parameters, or customer records to the other region.
+An integration platform Jori hires to relay requests, hold tokens or execute
+connectors belongs in Jori's processing chain. Do not exempt it simply because
+a customer enables the destination integration. Determine legal roles from the
+actual relationship and processing.
 
-Marketing stays on `usejori.com`, including pricing, trust, privacy and terms.
-Regional roots enter `/console`, whose existing route forwards to `/chat` and
-the regional sign-in gate. Marketing never reads regional sessions. Its sign-in
-links perform a full navigation through the public region preference before
-loading authentication on a regional host. Region changes start at `/sign-in`
-without forwarding account IDs, query strings or callback tokens.
+## Known gaps
 
-The public waitlist has an explicit region selector. The browser posts directly
-to the selected `VITE_JORI_EU_SITE_URL` or `VITE_JORI_US_SITE_URL`, with cookies
-and referrers omitted and redirects rejected. Both builds carry these public
-addresses; each build's own address must match `VITE_CONVEX_SITE_URL`. Only the
-waitlist HTTP route allows `JORI_PUBLIC_ORIGIN` in CORS. This does not widen
-authentication origins. Signed-in waitlist forms stay in the account's region.
+Repository evidence reviewed 9 September 2026; this is not a fresh production
+audit or proof of provider contracts.
 
-| Resource | EU instance | US instance |
-| --- | --- | --- |
-| Application origin | `eu.usejori.com` | `us.usejori.com` |
-| Vercel project | `jori-production-eu` | `jori-production-us` |
-| Server rendering | Ireland, `dub1` | Virginia, `iad1` |
-| Convex deployment | `production-eu` | `production-us` |
-| Bird | EU organization and workspace | US organization and workspace |
-| OpenRouter | EU-only workspace guardrail | US-only workspace guardrail |
-| Google Cloud images | `jori-production-eu`, `aiplatform.eu.rep.googleapis.com` | `jori-production-us`, `aiplatform.us.rep.googleapis.com` |
-| PostHog | EU Cloud project | US Cloud project |
-| PostHog ingestion | `eu.i.posthog.com` | `us.i.posthog.com` |
+- **E2B:** EU workloads currently execute in the US, including customer files.
+  Regionalize or replace execution before claiming regional core processing.
+- **Exa:** global processing covers search, fetching and background website
+  crawling. A replacement must cover every caller, not only the visible tool.
+- **Stripe:** long-term billing exception. Keep prompts/documents out of billing
+  metadata. Duplicate accounts do not create regional processing guarantees.
+- **Other providers:** regional Convex, Vercel, OpenRouter, Google images, Bird
+  and PostHog configuration is recorded. Verify backups, retention and access.
+  Vercel/PostHog edge and provider operations remain separately scoped exceptions.
+- **Email and images:** recipient mail systems are outside Jori's control.
+  Google image abuse monitoring has separate retention terms; images also reach E2B.
+- **Integrations:** separate regional registrations remain deployed. Shared
+  ingress and restricted GitHub issuance are intended designs, not existing facts.
+- **Legal:** public privacy/terms pages were placeholders at review. Executed
+  agreements and complete retention rules are not established by this repository.
 
-No regional instance holds credentials that authorize access to the other
-instance's customer records. OAuth registration credentials may be shared only
-under the connected-integration decision below. No
-cross-region database replication, analytics export, identity merge, or
-automatic application failover is part of this design. Source code and public
-assets are shared; customer records are not.
+## Evidence before claims
 
-## Why separate frontend deployments
+For each provider or shared service, record purpose, legal role, data categories,
+storage/processing/access locations, retention, downstream processors, transfer
+mechanism, account-specific configuration evidence and review date. Keep entries
+in one maintained provider register when preparing the offering; do not invent
+contractual facts or store credentials/private payloads in documentation.
 
-| Approach | Benefit | Cost or limitation |
-| --- | --- | --- |
-| One static frontend, regional APIs | One release artifact; public JS/CSS can be cached globally | Requires explicit runtime routing and credential-safe configuration; not sufficient for Jori's server rendering and auth proxy by itself |
-| Separate regional Vercel projects, same source | Fixed backend and analytics destinations; isolated configuration and releases; fits the existing framework | Two deployment configurations; global Vercel infrastructure remains |
-| One global app with a tenant-aware routing service | Seamless single hostname across regions | Shared routing/auth state and more security-sensitive infrastructure; unnecessary for explicitly detached Jori instances |
-| Direct regional infrastructure | More control over ingress, logs, storage and backups | New infrastructure operations, contracts and release tooling; outside the chosen provider scope |
+Albin and counsel settle customer/provider DPAs, subprocessor notices, transfer
+arrangements, retention/deletion periods and support access. Engineering verifies
+the matching implementation. Regional hosting, no training, zero retention and
+GDPR compliance are separate claims. Selecting a region proves none of the others.
 
-Choose separate Vercel projects. Vercel lets us pin function execution, while
-static content is served through its global CDN. Regional function selection
-does not create an EU-only contract for all Vercel platform data.
-[Vercel function regions](https://vercel.com/docs/functions/configuring-functions/region),
-[Vercel compliance](https://vercel.com/docs/security/compliance).
+GDPR permits certain international transfers with the applicable mechanism and
+safeguards. Documenting an exception does not make it lawful or satisfy an EU-only
+customer contract. See [IMY transfer guidance](https://www.imy.se/verksamhet/dataskydd/det-har-galler-enligt-gdpr/overforing-till-tredje-land/)
+and [EDPB processor responsibilities](https://www.edpb.europa.eu/sme/learn-the-basics/data-controller-or-data-processor_en).
 
-## PostHog controls
-
-Use different projects in different PostHog cloud regions, not two projects in
-US Cloud. Each project has a distinct public token. Never put a personal API
-key in a browser build. No production events from development, previews or the
-public region selector. Use host-only analytics cookies and do not identify or
-alias users across instances. A project token cannot prove its region by its
-format; configuration review and a synthetic ingestion check must verify the
-token/host pairing before release.
-
-Public marketing collects the same minimized pseudonymous page events into its
-hosting project's analytics endpoint. Its host-only identifiers are separate
-from both consoles. Waitlist region selection does not move analytics identity,
-and form contents are never analytics properties.
-[PostHog projects](https://posthog.com/docs/settings/projects),
-[SDK configuration](https://posthog.com/docs/libraries/js/config).
-
-Keep exports and optional AI features off unless their destinations have been
-reviewed. Review event properties and consent separately from hosting region.
-Residency does not itself establish a lawful basis for tracking. PostHog offers
-a self-serve DPA, including on the free plan; the company must sign it before
-treating the generated agreement as binding.
-[PostHog privacy guidance](https://posthog.com/docs/privacy).
-
-## Exceptions and claim boundaries
-
-The accepted global-edge exception is about processing location, not just
-static asset storage. HTTPS edge services may process IP addresses, URLs,
-headers, cookies and requests. Keep customer documents and prompts out of
-frontend logs and unnecessary telemetry. Private responses must not enter a
-shared CDN cache.
-
-- Vercel's public terms permit transfers outside the selected function region.
-  Do not claim that all platform metadata, operational logs and backups are
-  region-bound. The DPA is broader than a CDN-only exception.
-  [Vercel DPA](https://vercel.com/legal/dpa).
-- PostHog lists regional AWS storage, database operations and execution, but
-  also worldwide Cloudflare edge processing for data in transit. EU Cloud is
-  not evidence that every optional feature or subprocessor is EU-only.
-  [PostHog subprocessors](https://posthog.com/subprocessors).
-- Stripe billing remains an acknowledged exception. Do not send product
-  documents or prompts as billing metadata.
-- E2B's current endpoint is an expressly accepted temporary exception. Sandbox
-  execution can contain customer workloads, so this is more substantial than
-  CDN metadata. The connection adapter supports later endpoint separation.
-- Google Cloud image inference uses its EU or US jurisdiction endpoint.
-  Authentication and account administration are not region-bound. Token exchange
-  carries service-account identity, not prompts or images. Suspected-abuse prompts may be retained for up to 90
-  days in the selected region or multi-region and reviewed by people. Generated
-  images also enter the E2B sandbox, so the E2B exception applies to them.
-  See [image data handling](images.md).
-- Exa search uses its global API. Separate EU and US keys isolate access, not
-  processing geography or the provider's team-level records. Search queries,
-  requested URLs and fetched content can leave the selected region. The
-  provider-neutral search adapter permits a later regional replacement.
-  See [search configuration](search.md).
-- Email delivery necessarily reaches recipient mail systems outside our
-  control. Regional Bird configuration concerns the sending provider, not the
-  recipient's geography or mailbox storage.
-- Provider account administration, support and customer-enabled integrations
-  require separate review. Regional application configuration does not change
-  their contractual terms.
-
-"Region-specific data residency" should name a precise covered dataset and
-list exceptions in supporting documentation. Do not turn it into "all data
-never leaves the selected region" or "EU sovereign." A headline can be brief;
-the underlying scope must be accurate. Public wording is unchanged by this
-migration. Legal review remains appropriate before making a contractual
-customer commitment.
-
-## Comparable published designs
-
-Linear replicated its production stack by region while keeping routing and
-authentication in a global service. Its design supports the principle of
-keeping regional complexity out of domain code; Jori intentionally does not
-adopt its shared customer identity service.
-[Linear architecture](https://linear.app/now/how-we-built-multi-region-support-for-linear).
-
-Sentry distinguishes regional event data from US account, integration and
-operational metadata. This is an example of documented scope, not evidence
-that all SaaS vendors share the same guarantees.
-[Sentry storage locations](https://docs.sentry.io/organization/data-storage-location/).
-
-Legora publishes separate EU and US core-provider tables. Its EU table lists
-Linkup for search; Exa appears in the US table. Sana documents a default OAuth
-app with optional customer-owned registrations. Lovable scopes region selection
-to hosted Cloud projects. These examples support explicit product boundaries,
-not a claim that every integration needs duplicate registrations. None reveals
-the exact number of OAuth clients each company operates across regions.
-[Legora subprocessors](https://legora.com/legal/eu-pre-approved-sub-processors),
-[Sana OAuth](https://support.sana.ai/en/articles/265266-custom-oauth-app-for-integrations-guide),
-[Lovable Cloud](https://docs.lovable.dev/features/cloud).
-
-## Connected integrations
-
-Keep customer tokens, connection records, OAuth state, imported content,
-background jobs and Jori's webhook processing inside the selected instance.
-The connected vendor's own processing remains subject to its terms. Once Jori
-imports content, its origin does not exempt our copy from the regional boundary.
-
-An OAuth registration identifies the application; it is not the customer token
-store. Do not require a different client ID per region as a compliance rule.
-Use a shared registration when it permits direct regional callbacks and event
-delivery without sharing customer tokens or introducing a cross-region relay.
-Keep development registrations separate from production.
-
-Use separate production registrations when one app-wide webhook destination
-would otherwise require a shared routing service, or an app credential can
-authorize access to installations in both regions. This is an operational and
-security choice. A separate registration alone does not regionalize a vendor.
-Never send every event to both instances and filter it after receipt.
-
-GitHub permits one webhook per app, and its app private key can authorize
-installation access. Slack has one event request URL per app. Linear's
-app-managed webhook also has one destination. Separate regional registrations
-are the simpler fit for these integrations. Separate EU/US production apps
-have been created for GitHub, Slack and Linear. Notion also has separate public
-connections because its documented subscription controls do not establish
-pre-delivery workspace filtering. Google and Microsoft retain their regional
-clients. Existing development registrations remain separate and unchanged.
-Customers use the same Connect flow in either instance.
-[GitHub webhooks](https://docs.github.com/en/enterprise-cloud@latest/webhooks/using-webhooks/creating-webhooks),
-[Slack event requests](https://docs.slack.dev/apis/events-api/using-http-request-urls),
-[Linear manifests](https://linear.app/developers/oauth-app-manifests),
-[Notion webhooks](https://developers.notion.com/reference/webhooks).
-
-Registrations, signature checks and inert webhook probes do not establish a
-completed customer connection. Authenticated OAuth and event workflows must
-verify that each connection works only through its matching instance. Keep
-provider setup and deployment status in [release verification](release.md),
-including completed checks and the remaining launch gates.
-
-Google currently groups our regional OAuth clients in one Cloud project.
-Revoking a user's grant can invalidate that user's tokens for every client in
-the project. Distinct client IDs do not isolate this disconnect behavior. This
-is vendor-side availability coupling, not shared Jori customer storage. Record
-it in connection testing; independent revocation would require separate Google
-projects, not a change to Jori's normalized integration interface.
-[Google token revocation](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#tokenrevoke).
-
-Do not introduce a global token store, installation directory or webhook relay
-for this release. Revisit that architecture only when a concrete product need
-outweighs its extra state, security boundary and operational work.
-
-## Transactional email
-
-Jori records submission to Bird, not delivery to the recipient. The regional
-outbox retries interrupted or throttled submissions with a stable idempotency
-key and stops before Bird's deduplication window expires. An ambiguous outcome
-becomes `uncertain`, never an automatic fresh send.
-
-Message content and the recipient address are removed when submission finishes
-or retries close. Minimal submission records expire after 30 days. Bird owns
-delivery logs, bounces, complaints and suppression management. Jori has no
-email delivery webhook, duplicate event store or local suppression list.
-
-## Image generation
-
-Image prompts go directly to Google Cloud, not through OpenRouter. The shared
-adapter derives the jurisdiction hostname and resource location from
-`JORI_REGION`. Each deployment has its own project and predict-only service
-account. Missing configuration fails before sending a prompt; there is no
-global fallback. Credential separation and fixed routing are distinct controls.
-The service account is not claimed to be intrinsically region-restricted.
-
-Google documents EU and US processing for `gemini-3.1-flash-image`. Its
-data-location terms cover selected-region storage and ML processing for
-supported models, not every account attribute or service datum. Both production
-projects have implicit caching disabled. Leave request/response logging and
-grounding off. This is not an unconditional zero-retention guarantee.
-[Model processing locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-1-flash-image),
-[service-specific terms](https://cloud.google.com/terms/service-terms),
-[abuse monitoring](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/abuse-monitoring).
-
-Track development and production configuration, deployed image workflows,
-file handling and accounting results in [release evidence](release.md).
-The separate development project is billed and verified; no quota-increase
-request was submitted. See [image configuration and accounting](images.md).
-
-## Release evidence
-
-Before each region goes live, verify the deployed frontend region and backend
-URL, matching provider workspace/project IDs, actual function placement,
-host-only cookies, private-response cache headers, analytics request host and
-synthetic event arrival, email acceptance and receipt, and
-regional inference eligibility. Verify no global provider fallback exists.
-Run `pnpm run check` and `pnpm run test` before merging. A configured project is
-not a verified deployment.
-
-Track dated configuration evidence and remaining checks in
-[release verification](release.md). Do not use that operational checklist as a
-contractual residency guarantee.
+Currently, scope claims to verified primary workspace storage and disclose
+execution/search exceptions. Stronger processing wording requires closing the
+gaps and defining remaining shared services. Avoid "all data stays in your region",
+"EU-only", "EU sovereign", or an undefined "regional core infrastructure*".
+Use EU, EEA and Europe precisely. An internal policy is not a signed agreement.

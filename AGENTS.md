@@ -1,5 +1,11 @@
 # Guidelines
 
+## Architecture
+
+Start with [the docs index](docs/index.md) before changing integrations, provider
+selection, identity, data flows, or residency claims. Read the relevant guide for
+the agreed priorities, regional boundary and integration decision tree.
+
 ## Workflow
 
 - For repository changes, run `pnpm task <name>` from the primary checkout.
