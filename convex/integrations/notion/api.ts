@@ -1,5 +1,4 @@
 import { toJsonObject } from "../../../contracts/json"
-import { fetchJsonObject } from "../../shared/http"
 import { notionApiUrl, notionApiVersion } from "./config"
 
 export async function notionJson(
@@ -9,15 +8,16 @@ export async function notionJson(
   body?: unknown,
   queryParams: Record<string, unknown> = {}
 ) {
-  return await fetchJsonObject(notionUrl(path, queryParams), {
+  const response = await fetch(notionUrl(path, queryParams), {
     method,
     headers: {
       authorization: `Bearer ${token}`,
       "content-type": "application/json",
       "notion-version": notionApiVersion,
     },
-    body,
+    body: body === undefined ? undefined : JSON.stringify(body),
   })
+  return await readNotionResponse(response)
 }
 
 export async function notionMultipartJson(
@@ -33,15 +33,25 @@ export async function notionMultipartJson(
     },
     body,
   })
-  const text = await response.text()
-  const parsed: unknown = text === "" ? null : JSON.parse(text)
-  const result = toJsonObject(parsed)
+  return await readNotionResponse(response)
+}
 
-  if (!response.ok) {
-    throw new Error(`Provider API request failed: ${JSON.stringify(result)}`)
+export class NotionApiError extends Error {
+  constructor(readonly status: number) {
+    super(`Notion API request failed (${status})`)
   }
+}
 
-  return result
+async function readNotionResponse(response: Response) {
+  if (!response.ok) {
+    throw new NotionApiError(response.status)
+  }
+  const text = await response.text()
+  try {
+    return toJsonObject(text === "" ? null : JSON.parse(text))
+  } catch {
+    throw new Error("Notion API returned an invalid response")
+  }
 }
 
 function notionUrl(path: string, queryParams: Record<string, unknown> = {}) {

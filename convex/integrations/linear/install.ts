@@ -52,6 +52,7 @@ export const recordOAuthInstallation = internalMutation({
       createdBy: args.createdBy,
       updatedAt: Date.now(),
       data: {
+        installedAt: Date.now(),
         botId: args.profile.botId,
         botDisplayName: args.profile.botDisplayName,
         botUrl: args.profile.botUrl,

@@ -131,3 +131,27 @@ function file(): Doc<"files"> {
     updatedAt: 0,
   } as Doc<"files">
 }
+
+test("expires a rejected Notion grant during a tool call without exposing provider response content", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => new Response("private provider body", { status: 401 }))
+  )
+  const runMutation = vi.fn(async () => true)
+  const { callProviderTool } = await import("./index")
+  await expect(
+    callProviderTool({
+      ctx: { runMutation } as unknown as ActionCtx,
+      integration: integration("notion"),
+      tool: "notion_get_page",
+      toolArgs: { pageId: "page" },
+    })
+  ).rejects.toThrow("Notion access has expired and needs to be reconnected.")
+  expect(runMutation).toHaveBeenCalledOnce()
+  expect(runMutation).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      integrationId: integration("notion")._id,
+    })
+  )
+})

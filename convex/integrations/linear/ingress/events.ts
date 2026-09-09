@@ -1,10 +1,12 @@
 import { withUnicodeEmoji } from "../../../../contracts/emoji/convert"
 import { readRecord, readString } from "../../../shared/input"
+import { getLinearNotificationMessage } from "./notifications"
 
 export type LinearWebhookPayload = {
   action?: string
   type?: string
   appUserId?: string
+  oauthClientId?: string
   actor?: {
     id?: string
     type?: string
@@ -59,6 +61,15 @@ export function getLinearMessage(args: {
 
   if (accountId === undefined || eventType === undefined) {
     return null
+  }
+
+  if (eventType === "AppUserNotification") {
+    return getLinearNotificationMessage(
+      args.payload,
+      accountId,
+      args.deliveryId,
+      getLinearCommentMessage
+    )
   }
 
   if (!isRelevantLinearEvent(eventType, action)) {
@@ -118,7 +129,7 @@ export function getLinearReaction(args: { payload: LinearWebhookPayload }) {
   }
 }
 
-function getLinearCommentMessage(
+export function getLinearCommentMessage(
   payload: LinearWebhookPayload,
   accountId: string,
   deliveryId: string | null
@@ -135,17 +146,14 @@ function getLinearCommentMessage(
   return {
     accountId,
     type: `comment.${action}`,
-    externalId: createLinearExternalId(
-      accountId,
-      deliveryId,
-      `${action}:${data.id}:${data.updatedAt ?? data.createdAt ?? ""}`
-    ),
+    externalId: `linear:${accountId}:comment:${action}:${data.id}${action === "create" ? "" : `:${data.updatedAt ?? deliveryId ?? ""}`}`,
+    appUserId: undefined as string | undefined,
+    mentioned: false,
     actorId: payload.actor?.id,
     actorEmail: payload.actor?.email,
-    actorKind:
-      payload.actor?.type === "application"
-        ? ("bot" as const)
-        : ("person" as const),
+    actorKind: ["application", "bot"].includes(payload.actor?.type ?? "")
+      ? ("bot" as const)
+      : ("person" as const),
     actorName: payload.actor?.name,
     conversationId: issueId,
     text: humanReadableCommentText(data.body),
@@ -197,14 +205,6 @@ function isRelevantLinearEvent(type: string, action: string | undefined) {
   }
 
   return false
-}
-
-function createLinearExternalId(
-  accountId: string,
-  deliveryId: string | null,
-  fallbackKey: string
-) {
-  return `linear:${accountId}:${deliveryId ?? fallbackKey}`
 }
 
 function getObservedAt(

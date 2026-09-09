@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { readNotionJobEvents } from "./events"
+import { notionEventAllowsBot, readNotionJobEvents } from "./events"
 
 test("projects Notion page content updates to page events", () => {
   const events = readNotionJobEvents(
@@ -137,3 +137,20 @@ function notionPayload(overrides: {
     data: overrides.data ?? {},
   }
 }
+
+test("matches the installed authorization bot against public event access", () => {
+  expect(notionEventAllowsBot({}, "bot-eu")).toBe(true)
+  const event = {
+    accessible_by: [
+      { type: "person", id: "owner" },
+      { type: "bot", id: "bot-eu" },
+    ],
+  }
+  expect(notionEventAllowsBot(event, "bot-eu")).toBe(true)
+  expect(notionEventAllowsBot(event, "bot-us")).toBe(false)
+  expect(notionEventAllowsBot(event, undefined)).toBe(false)
+  expect(notionEventAllowsBot({ accessible_by: [] }, "bot-eu")).toBe(false)
+  expect(notionEventAllowsBot({ accessible_by: "bot-eu" }, "bot-eu")).toBe(
+    false
+  )
+})

@@ -2,7 +2,7 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { readArray, readRecord, readString } from "../../shared/input"
-import { notionJson } from "./api"
+import { NotionApiError, notionJson } from "./api"
 import { requireNotionCredentials } from "./credentials"
 
 type NotionPageContext = {
@@ -16,23 +16,26 @@ export async function enrichNotionEventData(
   args: {
     data: Record<string, unknown>
     pageId: string | undefined
-    workspaceId: string
+    integration: Doc<"integrations">
   }
 ) {
   if (args.pageId === undefined) {
     return args.data
   }
 
-  const integration = await ctx.runQuery(
-    internal.integrations.lookup.activeByIntegrationExternal,
-    { integration: "notion", externalId: args.workspaceId }
-  )
-
-  if (integration === null) {
+  let page: NotionPageContext | undefined
+  try {
+    page = await fetchNotionPageContext(args.integration, args.pageId)
+  } catch (error) {
+    if (!(error instanceof NotionApiError) || error.status !== 401) {
+      throw error
+    }
+    await ctx.runMutation(internal.integrations.notion.data.expire, {
+      integrationId: args.integration._id,
+      accessToken: requireNotionCredentials(args.integration).tokens.access,
+    })
     return args.data
   }
-
-  const page = await fetchNotionPageContext(integration, args.pageId)
 
   if (page === undefined) {
     return args.data
@@ -92,8 +95,14 @@ async function fetchNotionPageContext(
       title: notionPageTitle(page),
       url: readString(page, "url"),
     }
-  } catch {
-    return undefined
+  } catch (error) {
+    if (
+      error instanceof NotionApiError &&
+      (error.status === 403 || error.status === 404)
+    ) {
+      return undefined
+    }
+    throw error
   }
 }
 

@@ -16,10 +16,12 @@ type LinearApprovalMessage = {
 
 export async function handleLinearApprovalDecision(
   ctx: ActionCtx,
-  message: LinearApprovalMessage
+  message: LinearApprovalMessage,
+  expectedConnectionGeneration?: number
 ) {
   return await handlePersonTextApprovalDecision(ctx, {
     accountId: message.accountId,
+    expectedConnectionGeneration,
     actor: createIntegrationActor({
       email: message.actorEmail,
       externalId: message.actorId,

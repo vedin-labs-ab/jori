@@ -1,5 +1,6 @@
 import { hmacSha256Hex, timingSafeEqual } from "../../shared/crypto"
 import { requireEnvironmentVariable } from "../../shared/environment"
+import { readNumber, readRecord } from "../../shared/input"
 import {
   createSignedState,
   type ProviderInstallState,
@@ -31,7 +32,19 @@ export async function verifyLinearRequest(request: Request, body: string) {
     ? signature.slice("sha256=".length)
     : signature
 
-  return timingSafeEqual(normalizedSignature, expected)
+  if (!timingSafeEqual(normalizedSignature, expected)) {
+    return false
+  }
+
+  try {
+    const timestamp = readNumber(
+      readRecord(JSON.parse(body)),
+      "webhookTimestamp"
+    )
+    return timestamp !== undefined && Math.abs(Date.now() - timestamp) <= 60_000
+  } catch {
+    return false
+  }
 }
 
 function requireLinearWebhookSecret() {

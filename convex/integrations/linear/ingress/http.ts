@@ -1,8 +1,6 @@
-import { linearIssueCommentEvent } from "../../../../contracts/jobs/events/names"
-import { compactRecord } from "../../../../contracts/json"
 import { internal } from "../../../_generated/api"
 import { type ActionCtx } from "../../../_generated/server"
-import { createIntegrationActor } from "../../../shared/actor"
+import { sha256Hex } from "../../../shared/crypto"
 import { unauthorizedResponse } from "../../../shared/http"
 import {
   oauthAuthorizeRedirect,
@@ -25,17 +23,7 @@ import {
   requireLinearClientId,
 } from "../oauth"
 import { parseSignedLinearState, verifyLinearRequest } from "../signing"
-import {
-  handleLinearApprovalDecision,
-  isLinearApprovalDecision,
-} from "./approvals"
-import {
-  getLinearMessage,
-  getLinearReaction,
-  type LinearWebhookPayload,
-} from "./events"
-import { fetchLinearIssueContext, type LinearIssueContext } from "./issues"
-import { recordLinearLifecycleEvent } from "./lifecycle"
+import { type LinearWebhookPayload } from "./events"
 
 export async function handleLinearInstall(request: Request) {
   return oauthAuthorizeRedirect(request, {
@@ -121,151 +109,23 @@ export async function handleLinearEvents(ctx: ActionCtx, request: Request) {
   }
 
   const payload = JSON.parse(body) as LinearWebhookPayload
-  const message = getLinearMessage({
-    payload,
-    deliveryId: request.headers.get("linear-delivery"),
-  })
-
-  if (message !== null) {
-    const hydratedMessage = await hydrateLinearMessage(ctx, message)
-
-    if (isLinearApprovalDecision(hydratedMessage)) {
-      await recordLinearMessage(ctx, hydratedMessage, "record")
-      await handleLinearApprovalDecision(ctx, hydratedMessage)
-      return Response.json({ ok: true })
-    }
-
-    await recordLinearMessage(ctx, hydratedMessage)
-
-    return Response.json({ ok: true })
+  const deliveryId = request.headers.get("linear-delivery")
+  if (payload.organizationId === undefined || deliveryId === null) {
+    return new Response("Invalid Linear event payload", { status: 400 })
   }
-
-  const reaction = getLinearReaction({ payload })
-
-  if (reaction !== null) {
-    await recordLinearReaction(ctx, reaction)
-
-    return Response.json({ ok: true })
+  if (
+    payload.oauthClientId !== undefined &&
+    payload.oauthClientId !== requireLinearClientId()
+  ) {
+    return unauthorizedResponse()
   }
-
-  await recordLinearLifecycleEvent(ctx, {
-    payload,
-    deliveryId: request.headers.get("linear-delivery"),
+  await ctx.runMutation(internal.integrations.webhooks.delivery.accept, {
+    provider: "linear",
+    externalId: payload.organizationId,
+    eventId: await sha256Hex(
+      JSON.stringify({ ...payload, webhookTimestamp: undefined })
+    ),
+    payload: { event: payload, deliveryId },
   })
-
   return Response.json({ ok: true })
-}
-
-type LinearMessage = NonNullable<ReturnType<typeof getLinearMessage>>
-type LinearReaction = NonNullable<ReturnType<typeof getLinearReaction>>
-type LinearRecordMode = "record" | "record_and_run"
-
-async function recordLinearMessage(
-  ctx: ActionCtx,
-  message: LinearMessage,
-  mode?: LinearRecordMode
-) {
-  await ctx.runMutation(
-    internal.integrations.linear.ingress.messages.record,
-    compactRecord({
-      accountId: message.accountId,
-      mode,
-      type: message.type,
-      externalId: message.externalId,
-      actor: createIntegrationActor({
-        externalId: message.actorId,
-        kind: message.actorKind,
-        email: message.actorEmail,
-        name: message.actorName,
-      }),
-      conversationId: message.conversationId,
-      text: message.text,
-      observedAt: message.observedAt,
-      data: message.data,
-    })
-  )
-}
-
-async function recordLinearReaction(ctx: ActionCtx, reaction: LinearReaction) {
-  await ctx.runMutation(internal.reactions.intake.record, {
-    accountId: reaction.accountId,
-    integration: "linear",
-    action: reaction.action,
-    reaction: reaction.reaction,
-    actor: createIntegrationActor({
-      externalId: reaction.actorId,
-      kind: "person",
-      email: reaction.actorEmail,
-      name: reaction.actorName,
-    }),
-    target: {
-      key: reaction.target.key,
-      identifiers: reaction.target.identifiers,
-      actor: createIntegrationActor({
-        externalId: reaction.target.actorId,
-        kind: "person",
-      }),
-      conversationId: reaction.target.conversationId,
-      text: reaction.target.text,
-    },
-    observedAt: reaction.observedAt,
-  })
-}
-
-async function hydrateLinearMessage(
-  ctx: ActionCtx,
-  message: LinearMessage
-): Promise<LinearMessage> {
-  const event = linearIssueCommentEvent(message.data.action)
-
-  if (event === undefined) {
-    return message
-  }
-
-  if (message.data.projectId !== undefined) {
-    return message
-  }
-
-  const plan = await ctx.runQuery(
-    internal.integrations.linear.ingress.hydration.issueProject,
-    {
-      accountId: message.accountId,
-      event,
-      match: linearIssueMatch(message),
-    }
-  )
-
-  if (plan.status !== "ready" || !plan.required) {
-    return message
-  }
-
-  return withLinearIssueContext(
-    message,
-    await fetchLinearIssueContext(plan.integration, message.data.issueId)
-  )
-}
-
-function linearIssueMatch(message: LinearMessage) {
-  return compactRecord({
-    issue: message.data.issueId,
-    team: message.data.teamId,
-  })
-}
-
-function withLinearIssueContext(
-  message: LinearMessage,
-  issue: LinearIssueContext | null
-): LinearMessage {
-  if (issue === null) {
-    return message
-  }
-
-  return {
-    ...message,
-    data: {
-      ...message.data,
-      teamId: message.data.teamId ?? issue.teamId,
-      projectId: message.data.projectId ?? issue.projectId,
-    },
-  }
 }

@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { expireRevokedNotionAccess } from "../../integrations/notion/access"
 import { callGitHubTool, createGitHubCloneCredentials } from "./github"
 import { callGoogleTool } from "./google"
 import { callLinearTool } from "./linear"
@@ -52,12 +53,17 @@ export async function callProviderTool(args: {
   }
 
   if (integration === "notion") {
-    return await callNotionTool(
-      args.integration,
-      args.tool,
-      args.toolArgs,
-      context
-    )
+    try {
+      return await callNotionTool(
+        args.integration,
+        args.tool,
+        args.toolArgs,
+        context
+      )
+    } catch (error) {
+      await expireRevokedNotionAccess(args.ctx, args.integration, error)
+      throw error
+    }
   }
 
   if (integration === "microsoftEmail" || integration === "microsoftCalendar") {

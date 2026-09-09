@@ -21,7 +21,8 @@ describe("Linear webhook messages", () => {
 
     expect(message).toMatchObject({
       type: "comment.update",
-      externalId: "linear:org-id:update:comment-id:2026-06-12T12:00:00Z",
+      externalId:
+        "linear:org-id:comment:update:comment-id:2026-06-12T12:00:00Z",
       data: {
         action: "update",
         eventType: "Comment",
@@ -68,5 +69,68 @@ describe("Linear webhook reactions", () => {
         text: "I can proceed with option B.",
       },
     })
+  })
+})
+
+test("deduplicates comment mentions across notification and data-change deliveries", () => {
+  const comment = {
+    id: "comment",
+    issueId: "issue",
+    body: "Please help",
+    createdAt: "2026-09-09T12:00:00Z",
+  }
+  const standard = getLinearMessage({
+    deliveryId: "comment-delivery",
+    payload: {
+      type: "Comment",
+      action: "create",
+      organizationId: "workspace",
+      data: comment,
+    },
+  })
+  const notified = getLinearMessage({
+    deliveryId: "notification-delivery",
+    payload: {
+      type: "AppUserNotification",
+      action: "issueCommentMention",
+      organizationId: "workspace",
+      appUserId: "bot",
+      notification: {
+        comment,
+        issue: { id: "issue" },
+        actor: { id: "person" },
+      },
+    },
+  })
+  expect(notified).toMatchObject({
+    externalId: standard?.externalId,
+    appUserId: "bot",
+    mentioned: true,
+    text: "Please help",
+    actorId: "person",
+  })
+})
+
+test("keeps issue notifications in their issue conversation", () => {
+  const message = getLinearMessage({
+    deliveryId: "mention-delivery",
+    payload: {
+      type: "AppUserNotification",
+      action: "issueMention",
+      organizationId: "workspace",
+      appUserId: "bot",
+      notification: {
+        issue: { id: "issue", description: "Help with this issue" },
+        actor: { id: "person" },
+      },
+    },
+  })
+  expect(message).toMatchObject({
+    type: "issue.mention",
+    conversationId: "issue",
+    text: "Help with this issue",
+    mentioned: true,
+    appUserId: "bot",
+    data: { commentId: undefined, action: undefined },
   })
 })
