@@ -1,5 +1,5 @@
 import { type ReactMutation, useMutation } from "convex/react"
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 import { readErrorMessage, showErrorToast } from "@/shared/console/error"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
@@ -55,12 +55,10 @@ function useJobForm(
   const [formError, setFormError] = useState<string>()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const onSaved = useRef<() => void>(undefined)
 
   function openForm(job: Job | undefined, initialFolderId?: string) {
     const values = jobFormValues(job, readJobPreferences())
 
-    onSaved.current = undefined
     setFormJob(job)
     setFormValues(
       initialFolderId === undefined
@@ -83,8 +81,6 @@ function useJobForm(
         organizationId,
       })
       setIsFormOpen(false)
-      onSaved.current?.()
-      onSaved.current = undefined
     } catch (error) {
       reportSaveError(error, setFormError)
     } finally {

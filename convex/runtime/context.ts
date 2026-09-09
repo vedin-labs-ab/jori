@@ -5,7 +5,6 @@ import { type ActionCtx } from "../_generated/server"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { type RuntimeSkill, runtimeSkillNames } from "../skills/runtime"
 import {
-  type LoadedRun,
   type LoadedSession,
   loadRuntimeSkills,
   loadSandboxReference,
@@ -27,7 +26,6 @@ export type LoadedRuntime = {
   input: AgentRuntimeInput
   lifecycleTools: ReturnType<typeof runLifecycleTools>
   permissions: RuntimePermissions
-  run: LoadedRun
   session: LoadedSession
   skills: RuntimeSkill[]
   tools: ReturnType<typeof runtimeToolSnapshot>
@@ -42,7 +40,8 @@ export async function loadRuntime(
   ctx: ActionCtx,
   runId: Id<"runs">
 ): Promise<LoadedRuntime> {
-  const { input, run, session } = await loadRunRecords(ctx, runId)
+  const { input, session } = await loadRunRecords(ctx, runId)
+  const { run } = input
   const skills = await loadRuntimeSkills(ctx, run.organizationId)
   const [sandbox, permissions, activeSurface] = await Promise.all([
     loadSandboxReference(ctx, { runId, status: run.status }),
@@ -62,14 +61,12 @@ export async function loadRuntime(
       input,
       lifecycleTools,
       permissions,
-      run,
       sandbox,
       session,
     }),
     input,
     lifecycleTools,
     permissions,
-    run,
     session,
     skills,
     tools: runtimeToolSnapshot(
@@ -82,15 +79,14 @@ export async function loadRuntime(
 }
 
 async function loadRunRecords(ctx: ActionCtx, runId: Id<"runs">) {
-  const [session, run, input] = (await Promise.all([
+  const [session, input] = (await Promise.all([
     ctx.runQuery(internal.sessions.data.getByRun, { runId }),
-    ctx.runQuery(internal.runs.records.get, { runId }),
     ctx.runQuery(internal.runs.records.getInputByRun, { runId }),
-  ])) as [LoadedSession, LoadedRun | null, AgentRuntimeInput | null]
+  ])) as [LoadedSession, AgentRuntimeInput | null]
 
-  if (run === null || input === null) {
+  if (input === null) {
     throw new Error("Runtime context not found.")
   }
 
-  return { input, run, session }
+  return { input, session }
 }

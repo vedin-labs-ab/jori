@@ -1,19 +1,9 @@
-import { type ModelSelection } from "../../../contracts/models/selection"
-import {
-  isTerminalRunStatus,
-  type RunStatus,
-} from "../../../contracts/runtime/runs"
+import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type RuntimeSkill } from "../../skills/runtime"
 
-export type LoadedRun = {
-  _id: Id<"runs">
-  model?: ModelSelection
-  status: RunStatus
-  organizationId: string
-}
 export type LoadedSandbox = { externalId: string } | null
 export type LoadedSession = {
   _id: Id<"sessions">

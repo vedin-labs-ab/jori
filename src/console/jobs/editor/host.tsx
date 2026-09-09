@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef } from "react"
+import { lazy, Suspense } from "react"
 import { jobPolicyKey } from "@/shared/console/jobs/access/policy"
 import { useRetainedMount } from "@/shared/console/retain"
 import { useToolPermissions } from "../../permissions/controller"
@@ -25,10 +25,6 @@ export function useJobEditorHost(organizationId: string) {
   const permissions = useToolPermissions(organizationId)
   const editor = useJobEditor(organizationId, permissions.permissions)
   const isDialogMounted = useRetainedMount(editor.isFormOpen)
-  const mount = useRef<{ isReady: boolean; waiters: (() => void)[] }>({
-    isReady: false,
-    waiters: [],
-  })
 
   return {
     editor,
@@ -37,21 +33,9 @@ export function useJobEditorHost(organizationId: string) {
     // Awaitable so flows that swap into the editor can wait for the chunk;
     // fire-and-forget callers (hover warmup) just ignore the promise.
     preloadDialog: () => loadJobDialog().then(() => undefined),
-    // Resolves once the dialog is actually in the DOM — downloading the
-    // chunk is not enough; the first TipTap mount is the visible wait.
-    whenDialogReady: () =>
-      mount.current.isReady
-        ? Promise.resolve()
-        : new Promise<void>((resolve) => mount.current.waiters.push(resolve)),
     dialog: isDialogMounted ? (
       <Suspense fallback={null}>
         <JobDialog
-          onReady={() => {
-            mount.current.isReady = true
-            for (const resolve of mount.current.waiters.splice(0)) {
-              resolve()
-            }
-          }}
           error={editor.formError}
           isOpen={editor.isFormOpen}
           isSaving={editor.isSaving}
