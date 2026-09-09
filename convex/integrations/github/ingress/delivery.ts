@@ -2,50 +2,52 @@ import { v } from "convex/values"
 import { internal } from "../../../_generated/api"
 import { internalAction, internalMutation } from "../../../_generated/server"
 import { readDataNumber } from "../../../shared/data"
-import { getGitHubMessage } from "./events"
 import { handleGitHubMessageEvent } from "./http"
-import { recordGitHubLifecycleEvent } from "./lifecycle"
-import { type GitHubWebhookPayload } from "./types"
+import { recordGitHubLifecycle } from "./lifecycle"
+import { type PreparedGitHubEvent } from "./prepare"
 
 export const process = internalAction({
-  args: { integrationId: v.id("integrations"), payload: v.any() },
+  args: {
+    integrationId: v.id("integrations"),
+    connectionGeneration: v.number(),
+    payload: v.any(),
+  },
   handler: async (ctx, args) => {
-    const webhook = args.payload as {
-      event: string
-      deliveryId: string
-      payload: GitHubWebhookPayload
-    }
-    const installationId = webhook.payload.installation?.id
-    if (installationId === undefined) {
-      return
-    }
+    const event = args.payload as PreparedGitHubEvent
     const integration = await ctx.runQuery(
       internal.integrations.lookup.activeByIntegrationExternal,
-      { integration: "github", externalId: String(installationId) }
+      { integration: "github", externalId: event.accountId }
     )
-    if (integration?._id !== args.integrationId) {
+    if (
+      integration?._id !== args.integrationId ||
+      (integration.connectionGeneration ?? 0) !== args.connectionGeneration
+    ) {
       return
     }
-    if (
-      webhook.event === "installation" &&
-      (webhook.payload.action === "deleted" ||
-        webhook.payload.action === "suspend")
-    ) {
+    if (event.kind === "revocation") {
       await ctx.runMutation(
         internal.integrations.github.ingress.delivery.revoke,
         {
           integrationId: args.integrationId,
-          installationId: String(installationId),
-          suspendedAt: readSuspendedAt(webhook.payload),
+          installationId: event.accountId,
+          suspendedAt: event.suspendedAt,
+          expectedConnectionGeneration: args.connectionGeneration,
         }
       )
       return
     }
-    const message = getGitHubMessage(webhook)
-    if (message === null) {
-      await recordGitHubLifecycleEvent(ctx, webhook)
+    if (event.kind === "lifecycle") {
+      await recordGitHubLifecycle(
+        ctx,
+        event.lifecycle,
+        args.connectionGeneration
+      )
     } else {
-      await handleGitHubMessageEvent(ctx, message)
+      await handleGitHubMessageEvent(
+        ctx,
+        event.message,
+        args.connectionGeneration
+      )
     }
   },
 })
@@ -55,13 +57,16 @@ export const revoke = internalMutation({
     integrationId: v.id("integrations"),
     installationId: v.string(),
     suspendedAt: v.optional(v.number()),
+    expectedConnectionGeneration: v.number(),
   },
   handler: async (ctx, args) => {
     const integration = await ctx.db.get(args.integrationId)
     if (
       integration?.integration !== "github" ||
       integration.externalId !== args.installationId ||
-      integration.status !== "active"
+      integration.status !== "active" ||
+      (integration.connectionGeneration ?? 0) !==
+        args.expectedConnectionGeneration
     ) {
       return
     }
@@ -80,8 +85,3 @@ export const revoke = internalMutation({
     })
   },
 })
-
-function readSuspendedAt(payload: GitHubWebhookPayload) {
-  const timestamp = Date.parse(payload.installation?.suspended_at ?? "")
-  return Number.isFinite(timestamp) ? timestamp : undefined
-}

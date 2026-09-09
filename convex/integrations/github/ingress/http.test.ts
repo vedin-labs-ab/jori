@@ -7,6 +7,7 @@ import { type ActionCtx } from "../../../_generated/server"
 import { hmacSha256Hex, sha256Hex } from "../../../shared/crypto"
 import { getGitHubMessage } from "./events"
 import { handleGitHubEvents, handleGitHubMessageEvent } from "./http"
+import { prepareGitHubEvent } from "./prepare"
 import { type GitHubWebhookPayload } from "./types"
 
 afterEach(() => vi.unstubAllEnvs())
@@ -24,11 +25,15 @@ test("durably accepts a signed GitHub event before acknowledging without process
       eventId: await sha256Hex(
         JSON.stringify(githubPayload("@jori-eu help", "MEMBER"))
       ),
-      payload: {
-        event: "issue_comment",
-        deliveryId: "delivery",
-        payload: githubPayload("@jori-eu help", "MEMBER"),
-      },
+      payload: JSON.parse(
+        JSON.stringify(
+          prepareGitHubEvent({
+            event: "issue_comment",
+            deliveryId: "delivery",
+            payload: githubPayload("@jori-eu help", "MEMBER"),
+          })
+        )
+      ),
     }
   )
   expect(ctx.runQuery).not.toHaveBeenCalled()

@@ -10,6 +10,7 @@ export const record = internalMutation({
   args: {
     ...observedMessageArgs,
     mode: v.optional(v.union(v.literal("record"), v.literal("record_and_run"))),
+    expectedConnectionGeneration: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const integration = await findActiveIntegrationByExternalId(ctx, {
@@ -17,7 +18,12 @@ export const record = internalMutation({
       externalId: args.accountId,
     })
 
-    if (integration === null) {
+    if (
+      integration === null ||
+      (args.expectedConnectionGeneration !== undefined &&
+        (integration.connectionGeneration ?? 0) !==
+          args.expectedConnectionGeneration)
+    ) {
       return
     }
 

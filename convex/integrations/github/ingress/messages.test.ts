@@ -78,6 +78,24 @@ test("does not record a comment for an unknown installation", async () => {
   ).toEqual([])
 })
 
+test("does not record an event from a connection grant replaced during processing", async () => {
+  const t = convexTest(schema, modules)
+  await seedIntegration(t)
+  await t.run(async (ctx) => {
+    const integration = await ctx.db.query("integrations").unique()
+    if (integration !== null) {
+      await ctx.db.patch(integration._id, { connectionGeneration: 1 })
+    }
+  })
+  await t.mutation(record, {
+    ...message("@jori-production-eu"),
+    expectedConnectionGeneration: 0,
+  })
+  expect(
+    await t.run(async (ctx) => await ctx.db.query("messages").take(1))
+  ).toEqual([])
+})
+
 test("another regional app's mention does not open a conversation or run", async () => {
   const t = convexTest(schema, modules)
   const personId = await seedIntegration(t)

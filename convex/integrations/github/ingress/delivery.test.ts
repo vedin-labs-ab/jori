@@ -4,6 +4,7 @@ import { convexTest } from "convex-test"
 import { expect, test } from "vitest"
 import { internal } from "../../../_generated/api"
 import schema from "../../../schema"
+import { prepareGitHubEvent } from "./prepare"
 
 const modules = import.meta.glob("/convex/**/*.{ts,js}")
 const processDelivery = internal.integrations.github.ingress.delivery.process
@@ -16,14 +17,15 @@ test.each([
   const integrationId = await seed(t)
   await t.action(processDelivery, {
     integrationId,
-    payload: {
+    connectionGeneration: 0,
+    payload: prepareGitHubEvent({
       event: "installation",
       deliveryId: "delivery",
       payload: {
         action,
         installation: { id: 123, suspended_at: "2026-09-09T10:00:00Z" },
       },
-    },
+    }),
   })
   expect(
     await t.run(async (ctx) => await ctx.db.get(integrationId))
@@ -35,11 +37,12 @@ test("cannot revoke another installation through the queue consumer", async () =
   const integrationId = await seed(t)
   await t.action(processDelivery, {
     integrationId,
-    payload: {
+    connectionGeneration: 0,
+    payload: prepareGitHubEvent({
       event: "installation",
       deliveryId: "delivery",
       payload: { action: "deleted", installation: { id: 456 } },
-    },
+    }),
   })
   expect(
     await t.run(async (ctx) => await ctx.db.get(integrationId))
@@ -54,14 +57,15 @@ test("a late suspension does not expire an installation reconnected afterward", 
   const integrationId = await seed(t, Date.parse("2026-09-09T11:00:00Z"))
   await t.action(processDelivery, {
     integrationId,
-    payload: {
+    connectionGeneration: 0,
+    payload: prepareGitHubEvent({
       event: "installation",
       deliveryId: "delivery",
       payload: {
         action: "suspend",
         installation: { id: 123, suspended_at: "2026-09-09T10:00:00Z" },
       },
-    },
+    }),
   })
   expect(
     await t.run(async (ctx) => await ctx.db.get(integrationId))
@@ -69,6 +73,23 @@ test("a late suspension does not expire an installation reconnected afterward", 
     status: "active",
     credentials: { tokens: { access: "cached" } },
   })
+})
+
+test("the final revocation mutation rejects an earlier connection grant", async () => {
+  const t = convexTest(schema, modules)
+  const integrationId = await seed(t)
+  await t.run(
+    async (ctx) =>
+      await ctx.db.patch(integrationId, { connectionGeneration: 1 })
+  )
+  await t.mutation(internal.integrations.github.ingress.delivery.revoke, {
+    integrationId,
+    installationId: "123",
+    expectedConnectionGeneration: 0,
+  })
+  expect(
+    await t.run(async (ctx) => await ctx.db.get(integrationId))
+  ).toMatchObject({ status: "active" })
 })
 
 async function seed(t: ReturnType<typeof convexTest>, installedAt = 0) {

@@ -137,3 +137,23 @@ test("stable bot ID recognizes historical self messages after a rename and rejec
     )
   ).toBe(false)
 })
+
+test("identity refresh cannot replace a connection from another registration", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seedConnections(t)
+  await t.run(
+    async (ctx) =>
+      await ctx.db.patch(ids.github, {
+        data: { appId: "us-app", appSlug: "jori-us" },
+      })
+  )
+  await expect(
+    t.mutation(internal.integrations.github.identity.update, {
+      identity,
+      cursor: null,
+    })
+  ).rejects.toThrow("different app registration")
+  expect(
+    (await t.run(async (ctx) => await ctx.db.get(ids.github)))?.data
+  ).toEqual({ appId: "us-app", appSlug: "jori-us" })
+})
