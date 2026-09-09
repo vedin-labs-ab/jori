@@ -1,5 +1,7 @@
+import { isRecord } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
+import { sha256Hex } from "../../shared/crypto"
 import { unauthorizedResponse } from "../../shared/http"
 import {
   oauthAuthorizeRedirect,
@@ -10,17 +12,14 @@ import {
   completeIntegrationOffer,
   failOfferAndRedirect,
 } from "../connect/install"
-import { handleSlackApprovalInteraction } from "./approvals"
 import {
   slackBotScopes,
   slackInstallUserScopes,
   slackOAuthAuthorizeUrl,
   slackOAuthCallbackPath,
 } from "./config"
-import { getSlackMessage, type SlackEventPayload } from "./ingress/events"
-import { handleSlackMessageEvent } from "./ingress/messages"
+import { type SlackEventPayload, slackEventAccountId } from "./ingress/events"
 import { exchangeSlackAuthorizationCode, requireSlackClientId } from "./oauth"
-import { handleSlackIntegrationOfferInteraction } from "./offers/interaction"
 import { parseSignedSlackState, verifySlackRequest } from "./signing"
 
 export async function handleSlackInstall(request: Request) {
@@ -84,6 +83,8 @@ export async function handleSlackOAuthCallback(
       bot,
       team: tokenResult.team,
       botUserId: tokenResult.bot_user_id,
+      appId: tokenResult.app_id,
+      authedUserId: tokenResult.authed_user?.id,
       userScopes: tokenResult.authed_user?.scope,
       user,
       setupIdentity: slackSetupIdentity(tokenResult.authed_user?.id),
@@ -131,7 +132,16 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return unauthorizedResponse()
   }
 
-  const payload = JSON.parse(body) as SlackEventPayload
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(body)
+  } catch {
+    return new Response("Invalid Slack event payload", { status: 400 })
+  }
+  if (!isRecord(parsed) || typeof parsed.type !== "string") {
+    return new Response("Invalid Slack event payload", { status: 400 })
+  }
+  const payload = parsed as SlackEventPayload
 
   if (payload.type === "url_verification") {
     return Response.json({ challenge: payload.challenge ?? "" })
@@ -141,11 +151,37 @@ export async function handleSlackEvents(ctx: ActionCtx, request: Request) {
     return Response.json({ ok: true })
   }
 
-  const message = getSlackMessage(payload)
-
-  if (message !== null) {
-    return await handleSlackMessageEvent(ctx, message)
+  const externalId = slackEventAccountId(payload)
+  if (
+    typeof externalId !== "string" ||
+    externalId === "" ||
+    typeof payload.event_id !== "string" ||
+    payload.event_id === "" ||
+    !isRecord(payload.event)
+  ) {
+    return new Response("Missing Slack event identifiers", { status: 400 })
   }
+  // Omit Slack's obsolete verification token and any unknown outer fields.
+  await ctx.runMutation(internal.integrations.webhooks.delivery.accept, {
+    provider: "slack",
+    externalId,
+    eventId: payload.event_id,
+    payload: {
+      kind: "event",
+      event: {
+        type: payload.type,
+        team_id: externalId,
+        event_id: payload.event_id,
+        ...(payload.event_time === undefined
+          ? {}
+          : { event_time: payload.event_time }),
+        ...(payload.api_app_id === undefined
+          ? {}
+          : { api_app_id: payload.api_app_id }),
+        event: payload.event,
+      },
+    },
+  })
 
   return Response.json({ ok: true })
 }
@@ -175,9 +211,31 @@ export async function handleSlackInteractions(
     return new Response("Invalid Slack interaction payload", { status: 400 })
   }
 
-  if (await handleSlackIntegrationOfferInteraction(ctx, parsed)) {
+  if (!isRecord(parsed) || parsed.type !== "block_actions") {
     return Response.json({ ok: true })
   }
-
-  return await handleSlackApprovalInteraction(ctx, parsed)
+  const team = isRecord(parsed.team) ? parsed.team : {}
+  if (typeof team.id !== "string" || team.id === "") {
+    return new Response("Missing Slack interaction workspace", { status: 400 })
+  }
+  // Block actions need an immediate acknowledgement, not a synchronous view
+  // response. Keep only fields consumed by the existing action handlers.
+  const interaction = {
+    type: parsed.type,
+    team: parsed.team,
+    user: parsed.user,
+    channel: parsed.channel,
+    message: parsed.message,
+    actions: parsed.actions,
+  }
+  await ctx.runMutation(internal.integrations.webhooks.delivery.accept, {
+    provider: "slack",
+    externalId: team.id,
+    eventId: `interaction:${await sha256Hex(payload)}`,
+    payload: {
+      kind: "interaction",
+      interaction: JSON.parse(JSON.stringify(interaction)),
+    },
+  })
+  return Response.json({ ok: true })
 }

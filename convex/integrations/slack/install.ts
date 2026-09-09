@@ -70,6 +70,8 @@ export const recordOAuthInstallation = internalMutation({
       name: v.optional(v.string()),
     }),
     botUserId: v.optional(v.string()),
+    appId: v.optional(v.string()),
+    authedUserId: v.optional(v.string()),
     userScopes: v.optional(v.string()),
     user: tokenPairValidator,
     setupIdentity: v.optional(setupIdentityValidator),
@@ -98,6 +100,9 @@ export const recordOAuthInstallation = internalMutation({
           user: args.userScopes,
         },
         botUserId: args.botUserId,
+        appId: args.appId,
+        authedUserId: args.authedUserId,
+        installedAt: Date.now(),
       },
     })
 
