@@ -17,12 +17,6 @@ function table(overrides: TableOverrides = {}): CollectionDoc<"table"> {
 }
 
 describe("summarizing a table", () => {
-  test("reads a missing document counter as zero", () => {
-    const document = table()
-
-    expect(summarizeTable(document).rowCount).toBe(0)
-  })
-
   test("carries the maintained document counter", () => {
     const document = table({ documentCount: 42 })
 

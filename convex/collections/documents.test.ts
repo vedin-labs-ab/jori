@@ -72,6 +72,7 @@ describe("singleton writes", () => {
       document: { value: { count: 1 }, version: 1 },
     })
     expect(await database.query("documents").collect()).toHaveLength(1)
+    expect((await database.get(store._id))?.documentCount).toBe(1)
     const updated = await writeDocument(ctx, storeSpec, store, {
       write: { type: "merge", patch: { extra: true } },
       expectedVersion: 1,
@@ -83,6 +84,7 @@ describe("singleton writes", () => {
       document: { value: { count: 1, extra: true }, version: 2 },
     })
     expect(await database.query("documents").collect()).toHaveLength(1)
+    expect((await database.get(store._id))?.documentCount).toBe(1)
   })
 
   test("a singleton refuses batched inserts", async () => {
@@ -118,6 +120,7 @@ describe("claims", () => {
       status: "written",
       document: { value: { jobs: { "j:1": { sent: true } } }, version: 1 },
     })
+    expect((await database.get(store._id))?.documentCount).toBe(1)
     const held = await writeDocument(ctx, storeSpec, store, {
       write: { type: "claim", path: ["jobs", "j:1"], value: { sent: false } },
     })
@@ -128,6 +131,7 @@ describe("claims", () => {
       version: 1,
     })
     expect(await database.query("documents").collect()).toHaveLength(1)
+    expect((await database.get(store._id))?.documentCount).toBe(1)
   })
 })
 

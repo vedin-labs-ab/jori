@@ -35,7 +35,7 @@ async function createShare(
   fileId: Id<"files">,
   overrides: ShareOverrides = {}
 ) {
-  await database.insert("shares", {
+  return await database.insert("shares", {
     organizationId: "org",
     target: { kind: "file", id: fileId },
     createdBy: owner,
@@ -62,9 +62,10 @@ describe("opening a file share", () => {
     const { database, ctx } = databaseContext()
     const fileId = await createFile(database)
 
-    await createShare(database, fileId, { expiresAt: Date.now() - 1 })
+    const shareId = await createShare(database, fileId)
 
     expect(await openFileShare(ctx, { fileId, secret: "wrong" })).toBeNull()
+    await database.patch(shareId, { expiresAt: Date.now() - 1 })
     expect(await openFileShare(ctx, { fileId, secret: "s3cret" })).toBeNull()
   })
 

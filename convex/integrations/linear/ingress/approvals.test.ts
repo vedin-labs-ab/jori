@@ -1,12 +1,16 @@
 import { expect, test, vi } from "vitest"
 import { encodeJson } from "../../../../contracts/json"
+import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
 import { handleLinearApprovalDecision } from "./approvals"
 
 test("handles exact Linear text approval commands", async () => {
   const approval = approvalDoc()
-  const integration = integrationDoc()
+  const integration = integrationDoc({
+    integration: "linear",
+    externalId: "linear-org",
+  })
   const ctx = actionCtx({
     queryResult: { approval, integration },
     mutationResult: { approval, status: "approved" as const },
@@ -83,21 +87,5 @@ function approvalDoc(): Doc<"approvals"> {
     surface: "notion",
     organizationId: "organization",
     tool: "notion_create_page",
-  }
-}
-
-function integrationDoc(): Doc<"integrations"> {
-  return {
-    _creationTime: 0,
-    _id: "integration_1" as Id<"integrations">,
-    createdAt: 0,
-    createdBy: "person_1" as Id<"persons">,
-    credentials: {},
-    externalId: "linear-org",
-    integration: "linear",
-    scope: "organization",
-    status: "active",
-    organizationId: "organization",
-    updatedAt: 0,
   }
 }

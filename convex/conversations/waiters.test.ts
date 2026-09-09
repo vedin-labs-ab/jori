@@ -5,6 +5,7 @@ import {
   type Seed,
 } from "../../test/convex/conversations"
 import { id } from "../../test/convex/database"
+import { integrationDoc } from "../../test/convex/integrations"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { startMessageRun } from "./data"
 
@@ -45,7 +46,7 @@ function runArgs(overrides: Partial<StartArgs> = {}): StartArgs {
   return {
     createdBy: "person" as Id<"persons">,
     externalId: "conversation",
-    integration: integration(),
+    integration: integrationDoc({ integration: "slack", externalId: "team" }),
     message: message(),
     now: 1000,
     conversation: null,
@@ -62,22 +63,6 @@ function conversation(): Doc<"conversations"> {
     integrationId: id<"integrations">("integration"),
     organizationId: "organization",
     scope: "organization",
-  }
-}
-
-function integration(): StartArgs["integration"] {
-  return {
-    _creationTime: 0,
-    _id: id<"integrations">("integration"),
-    createdAt: 0,
-    createdBy: "person" as Id<"persons">,
-    credentials: {},
-    externalId: "team",
-    integration: "slack",
-    scope: "organization",
-    status: "active",
-    organizationId: "organization",
-    updatedAt: 0,
   }
 }
 

@@ -31,7 +31,7 @@ async function createShare(
   storeId: Id<"collections">,
   { kind = "store", ...overrides }: ShareOverrides & { kind?: ShareKind } = {}
 ) {
-  await database.insert("shares", {
+  return await database.insert("shares", {
     organizationId: "org",
     target: { kind, id: storeId },
     createdBy: testOwner,
@@ -60,10 +60,11 @@ describe("opening a store share", () => {
     const storeId = await createStore(database)
     const archivedId = await createStore(database, { archivedAt: 5 })
 
-    await createShare(database, storeId, { expiresAt: Date.now() - 1 })
+    const shareId = await createShare(database, storeId)
     await createShare(database, archivedId)
 
     expect(await openStoreShare(ctx, { storeId, secret: "wrong" })).toBeNull()
+    await database.patch(shareId, { expiresAt: Date.now() - 1 })
     expect(await openStoreShare(ctx, { storeId, secret: "s3cret" })).toBeNull()
     expect(
       await openStoreShare(ctx, { storeId: archivedId, secret: "s3cret" })
