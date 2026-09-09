@@ -17,6 +17,11 @@ test.each([
         url: "https://github.com/vedin-labs/frontier",
       },
       {
+        type: "issue",
+        label: "#41: Callback fails",
+        url: "https://github.com/vedin-labs/frontier/issues/41",
+      },
+      {
         type: "pull_request",
         label: "#42: Add execution metadata",
         url: "https://github.com/vedin-labs/frontier/pull/42",

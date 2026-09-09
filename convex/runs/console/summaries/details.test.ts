@@ -1,6 +1,5 @@
 import { expect, test } from "vitest"
 import {
-  eventJobDisplay,
   fakeQueryCtx,
   jobDisplay,
   testRun,
@@ -61,29 +60,6 @@ test("includes approved decision actor details", async () => {
   })
 })
 
-test("includes linked provider source details", async () => {
-  const run = testRun(eventRun("GitHub event", "Handle the issue comment."))
-  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
-
-  expect(summary.details).toEqual([
-    {
-      type: "repository",
-      label: "vedin-labs/frontier",
-      url: "https://github.com/vedin-labs/frontier",
-    },
-    {
-      type: "issue",
-      label: "#42: Callback fails",
-      url: "https://github.com/vedin-labs/frontier/issues/42",
-    },
-    {
-      type: "comment",
-      label: "Can you investigate this failing callback?",
-      url: "https://github.com/vedin-labs/frontier/issues/42#comment-123",
-    },
-  ])
-})
-
 function manualRun(title: string, task: string) {
   return {
     _id: "run",
@@ -95,40 +71,6 @@ function manualRun(title: string, task: string) {
       title,
       ...jobDisplay({
         source: { type: "manual" },
-      }),
-    },
-    createdAt: 0,
-  }
-}
-
-function eventRun(title: string, task: string) {
-  return {
-    _id: "run",
-    _creationTime: 0,
-    organizationId: "organization",
-    cause: { type: "event", eventId: "event" },
-    instructions: task,
-    snapshot: {
-      title,
-      ...eventJobDisplay({
-        surface: "github",
-        context: [
-          {
-            type: "repository",
-            label: "vedin-labs/frontier",
-            url: "https://github.com/vedin-labs/frontier",
-          },
-          {
-            type: "issue",
-            label: "#42: Callback fails",
-            url: "https://github.com/vedin-labs/frontier/issues/42",
-          },
-          {
-            type: "comment",
-            label: "Can you investigate this failing callback?",
-            url: "https://github.com/vedin-labs/frontier/issues/42#comment-123",
-          },
-        ],
       }),
     },
     createdAt: 0,
