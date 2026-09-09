@@ -1,8 +1,9 @@
 import { expect, test } from "vitest"
 import { getToolPermission } from "../../contracts/permissions"
+import { runDoc } from "../../test/convex/console"
 import { schemaViolations } from "../../test/convex/schema"
 import { integration } from "../../test/convex/tools"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { brokerJoriToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/broker"
 import { type ApprovalBrokerContext } from "./approval"
@@ -142,7 +143,7 @@ function context(args: {
   return {
     connectedIntegrations: args.connectedIntegrations,
     input: args.input,
-    run: run(),
+    run: runDoc(),
     toolModes: args.toolModes,
   }
 }
@@ -153,7 +154,7 @@ function messageInput(integrations: Doc<"integrations">[]): AgentRuntimeInput {
   return {
     type: "message",
     surface: "slack",
-    run: run(),
+    run: runDoc(),
     message: {} as Doc<"messages">,
     conversation: { entries: [], hasMoreMessages: false, summary: null },
     integration: source ?? integration("slack"),
@@ -178,7 +179,7 @@ function jobInput(
       web,
     },
     instructions: "Test",
-    run: run(),
+    run: runDoc(),
     event: null,
     integration: null,
     integrations: [integration],
@@ -195,24 +196,4 @@ function joriTools(capabilities: ReturnType<typeof listCapabilities>) {
       .find((group) => group.surface === "jori")
       ?.tools.map((tool) => tool.tool) ?? []
   )
-}
-
-function run(): Doc<"runs"> {
-  return {
-    _id: "run",
-    _creationTime: 0,
-    organizationId: "organization",
-    status: "running",
-    instructions: "Task",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    cause: { type: "manual" },
-    snapshot: {
-      title: "Task",
-      source: {
-        type: "manual",
-      },
-      context: [],
-    },
-  } as unknown as Doc<"runs">
 }

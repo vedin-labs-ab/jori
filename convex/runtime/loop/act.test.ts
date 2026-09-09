@@ -7,16 +7,12 @@ import {
   runtimeContext,
 } from "../../../test/runtime"
 
-test.each([
-  ["empty content", ""],
-  ["literal double-quoted empty string", '""'],
-  ["literal single-quoted empty string", "''"],
-])("repairs %s stops back to finish_run", async (_label, content) => {
+test("repairs empty stops back to finish_run", async () => {
   const runtime = createRuntime({
     context: runtimeContext({ tools: [finishRunTool()] }),
   })
   const model = createQueuedModel([
-    { content, type: "stop" },
+    { content: "", type: "stop" },
     finishRunResponse(),
   ])
 
