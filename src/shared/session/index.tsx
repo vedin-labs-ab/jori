@@ -1,14 +1,10 @@
-import {
-  type AuthClient as ConvexAuthClient,
-  ConvexBetterAuthProvider,
-} from "@convex-dev/better-auth/react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { type ComponentProps, type ReactNode } from "react"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
 import { Toaster } from "@/components/ui/sonner"
 import { authClient, authQueryClient } from "./auth"
-import { convex } from "./client"
+import { SessionConnection } from "./connection"
 
 /** Better Auth and Convex for session-aware surfaces. Routes that can avoid
  *  resolving a session stay outside it. Sign-in is social-only, so the
@@ -33,15 +29,7 @@ export function SessionProviders({ children }: { children: ReactNode }) {
         redirectTo="/console"
         socialProviders={["google", "microsoft"]}
       >
-        {/* The provider's AuthClient type only models its own convex plugin;
-            the organization plugin widens useSession, so structurally ours is
-            a superset. */}
-        <ConvexBetterAuthProvider
-          authClient={authClient as unknown as ConvexAuthClient}
-          client={convex}
-        >
-          {children}
-        </ConvexBetterAuthProvider>
+        <SessionConnection>{children}</SessionConnection>
       </AuthProvider>
     </>
   )

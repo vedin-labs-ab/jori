@@ -61,20 +61,15 @@ export function useListOrganizations() {
   return useListOrganizationsQuery(organizationAuthClient)
 }
 
-/** One-way latch: once this page load has authenticated with Convex, token
- *  re-mints must read as still-authenticated instead of tearing down UI. */
-let convexAuthenticatedOnce = false
-
+/** Convex keeps confirmed sessions authenticated during token rotation. If
+ * refresh fails, close query gates until SessionConnection reconnects. */
 export function useConvexSession() {
   const { isAuthenticated, isLoading } = useConvexAuth()
-
-  if (isAuthenticated) {
-    convexAuthenticatedOnce = true
-  }
+  const { data: session } = authClient.useSession()
 
   return {
-    isAuthenticated: isAuthenticated || convexAuthenticatedOnce,
-    isLoading: isLoading && !convexAuthenticatedOnce,
+    isAuthenticated,
+    isLoading: isLoading || (!isAuthenticated && Boolean(session?.session)),
   }
 }
 
