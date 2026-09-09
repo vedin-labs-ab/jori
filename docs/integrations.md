@@ -33,6 +33,11 @@ not mean provider settings have already been updated.
 | Linear | Keep app notifications without adding admin scope solely for regional routing. [Webhooks](https://linear.app/developers/webhooks), [app notifications](https://linear.app/developers/agent-best-practices). |
 | Notion | Selective delivery per regional installation is not established by the documented subscription controls. [Webhooks](https://developers.notion.com/reference/webhooks). |
 
+For Slack, set Default username to `jori-eu` or `jori-us` in App Home before
+first installation. App manifests have no separate Default username field.
+Verify the installed username and visible identity after installation or
+configuration changes.
+
 Jori's console selects the regional app. All four provider registrations use
 `public/brand/avatar/avatar-light-512.png` for Jori's avatar. Follow the
 [brand guide](brand.md) for other placements. Use this description wherever the
@@ -49,6 +54,11 @@ Renaming must preserve registration IDs, grants and existing connection
 ownership. Refresh stored provider identities and any configured app slug after
 renaming, then verify mentions and replies on existing connections. Infrastructure
 names such as `jori-production-eu` are separate from the provider display name.
+
+An explicitly authorized registration replacement creates new provider IDs and
+grants. Preserve Jori organization and connection IDs, audit destinations, jobs
+and cards, and complete a new OAuth installation. Verify the replacement before
+retiring the old installation.
 
 ## Delivery and credentials
 
