@@ -6,6 +6,7 @@ import {
   isPersonApprovalDecisionText,
 } from "../../../approvals/runtime"
 import { type Actor, createIntegrationActor } from "../../../shared/actor"
+import { sha256Hex } from "../../../shared/crypto"
 import { unauthorizedResponse } from "../../../shared/http"
 import { privateRedirect, regionalCallback } from "../../connect/handoff"
 import {
@@ -22,6 +23,7 @@ import {
   type GitHubInstallationProfile,
 } from "../app"
 import { githubAppInstallBaseUrl, requireGitHubAppSlug } from "../config"
+import { fetchGitHubIdentity } from "../identity"
 import {
   githubAuthorizationUrl,
   verifyGitHubInstallationAccess,
@@ -31,8 +33,7 @@ import {
   parseSignedGitHubState,
   verifyGitHubRequest,
 } from "../signing"
-import { getGitHubMessage } from "./events"
-import { recordGitHubLifecycleEvent } from "./lifecycle"
+import { type getGitHubMessage } from "./events"
 import { type GitHubWebhookPayload } from "./types"
 
 export async function handleGitHubInstall(request: Request) {
@@ -110,6 +111,7 @@ export async function handleGitHubOAuthCallback(
   }
 
   let profile: Awaited<ReturnType<typeof fetchGitHubInstallationProfile>>
+  let identity: Awaited<ReturnType<typeof fetchGitHubIdentity>>
 
   try {
     await verifyGitHubInstallationAccess({
@@ -118,6 +120,10 @@ export async function handleGitHubOAuthCallback(
       redirectUri: `${requestUrl.origin}/github/oauth/callback`,
     })
     profile = await fetchGitHubInstallationProfile(installationId)
+    identity = await fetchGitHubIdentity(installationId)
+    if (profile.app_slug !== identity.appSlug) {
+      throw new Error("GitHub installation did not match the registered app")
+    }
   } catch {
     return await failOfferAndRedirect(ctx, {
       callbackParam: "github",
@@ -133,6 +139,7 @@ export async function handleGitHubOAuthCallback(
       organizationId: state.organizationId,
       createdBy: state.createdBy,
       installationId,
+      identity,
       profile: normalizeInstallationProfile(profile),
     }
   )
@@ -153,21 +160,32 @@ export async function handleGitHubEvents(ctx: ActionCtx, request: Request) {
     return unauthorizedResponse()
   }
 
-  const payload = JSON.parse(body) as GitHubWebhookPayload
-  const webhook = {
-    event: request.headers.get("x-github-event"),
-    payload,
-    deliveryId: request.headers.get("x-github-delivery"),
+  let payload: GitHubWebhookPayload
+  try {
+    payload = JSON.parse(body) as GitHubWebhookPayload
+  } catch {
+    return new Response("Invalid GitHub event", { status: 400 })
   }
-  const message = getGitHubMessage(webhook)
-
-  if (message === null) {
-    await recordGitHubLifecycleEvent(ctx, webhook)
-
+  const event = request.headers.get("x-github-event")
+  const deliveryId = request.headers.get("x-github-delivery")
+  if (event === null || deliveryId === null || payload === null) {
+    return new Response("Missing GitHub delivery metadata", { status: 400 })
+  }
+  const installationId = payload.installation?.id
+  if (installationId === undefined) {
     return Response.json({ ok: true })
   }
-
-  await handleGitHubMessageEvent(ctx, message)
+  const webhook = {
+    event,
+    payload,
+    deliveryId,
+  }
+  await ctx.runMutation(internal.integrations.webhooks.delivery.accept, {
+    provider: "github",
+    externalId: String(installationId),
+    eventId: await sha256Hex(body),
+    payload: webhook,
+  })
 
   return Response.json({ ok: true })
 }

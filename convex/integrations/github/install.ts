@@ -7,13 +7,14 @@ import {
 import { upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
 import { requireGitHubCredentials } from "./credentials"
-import { githubIntegrationData } from "./data"
+import { githubIdentity } from "./identity"
 
 export const recordInstallation = internalMutation({
   args: {
     organizationId: v.string(),
     createdBy: v.id("persons"),
     installationId: v.string(),
+    identity: githubIdentity,
     profile: v.object({
       id: v.number(),
       app_slug: v.optional(v.string()),
@@ -47,7 +48,7 @@ export const recordInstallation = internalMutation({
       status: "active",
       createdBy: args.createdBy,
       updatedAt: Date.now(),
-      data: githubIntegrationData(args.profile),
+      data: { ...args.identity, installedAt: Date.now() },
     })
   },
 })

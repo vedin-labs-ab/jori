@@ -4,6 +4,27 @@ import { internal } from "./_generated/api"
 const crons = cronJobs()
 
 crons.interval(
+  "integration webhook recovery",
+  { minutes: 5 },
+  internal.integrations.webhooks.delivery.sweep,
+  {}
+)
+
+crons.interval(
+  "GitHub failed delivery recovery",
+  { minutes: 10 },
+  internal.integrations.github.ingress.recovery.sweep,
+  {}
+)
+
+crons.interval(
+  "GitHub recovery receipt cleanup",
+  { hours: 24 },
+  internal.integrations.github.ingress.recovery.clean,
+  {}
+)
+
+crons.interval(
   "expire integration connections",
   { minutes: 10 },
   internal.integrations.connect.state.expire,

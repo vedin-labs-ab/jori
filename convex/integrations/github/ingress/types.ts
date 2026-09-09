@@ -2,6 +2,7 @@ export type GitHubWebhookPayload = {
   action?: string
   installation?: {
     id?: number
+    suspended_at?: string | null
   }
   repository?: GitHubRepository
   sender?: {

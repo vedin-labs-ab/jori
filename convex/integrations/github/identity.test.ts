@@ -1,0 +1,139 @@
+// @vitest-environment edge-runtime
+/// <reference types="vite/client" />
+import { convexTest } from "convex-test"
+import { afterEach, expect, test, vi } from "vitest"
+import { internal } from "../../_generated/api"
+import schema from "../../schema"
+import { isGitHubSelfActor } from "./data"
+import { fetchGitHubIdentity } from "./identity"
+import { mentionsGitHubApp } from "./ingress/messages"
+
+const modules = import.meta.glob("/convex/**/*.{ts,js}")
+const identity = {
+  appId: "11",
+  appSlug: "jori-eu",
+  botLogin: "jori-eu[bot]",
+  botUserId: "101",
+}
+
+vi.mock("./app", () => ({
+  githubAppRequest: vi.fn(async () => ({ id: 11, slug: "jori-eu" })),
+}))
+
+afterEach(() => vi.unstubAllGlobals())
+
+test("loads the regional app's canonical bot identity", async () => {
+  const fetch = vi.fn(async () =>
+    Response.json({ id: 101, login: "jori-eu[bot]", type: "Bot" })
+  )
+  vi.stubGlobal("fetch", fetch)
+  expect(await fetchGitHubIdentity()).toEqual(identity)
+  expect(fetch).toHaveBeenCalledWith(
+    "https://api.github.com/users/jori-eu%5Bbot%5D",
+    expect.anything()
+  )
+})
+
+test("rejects a bot profile that belongs to another app", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      Response.json({ id: 102, login: "jori-us[bot]", type: "Bot" })
+    )
+  )
+  await expect(fetchGitHubIdentity()).rejects.toThrow("did not match")
+})
+
+test("refreshes existing GitHub connections without changing ownership, access or other providers", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seedConnections(t)
+  expect(
+    await t.mutation(internal.integrations.github.identity.update, {
+      identity,
+      cursor: null,
+    })
+  ).toEqual({ cursor: null, updated: 2 })
+  const rows = await t.run(async (ctx) => ({
+    github: await ctx.db.get(ids.github),
+    expired: await ctx.db.get(ids.expired),
+    slack: await ctx.db.get(ids.slack),
+  }))
+  expect(rows.github).toMatchObject({
+    organizationId: "eu",
+    externalId: "installation",
+    status: "active",
+    credentials: {
+      installationId: "installation",
+      tokens: { access: "existing-token" },
+    },
+    data: { ...identity, setting: "preserve" },
+  })
+  expect(rows.expired).toMatchObject({ status: "expired", data: identity })
+  expect(rows.slack?.data).toEqual({ botUserId: "slack-bot" })
+  expect(mentionsGitHubApp("@jori-eu help", rows.github?.data)).toBe(true)
+  expect(mentionsGitHubApp("@old-name @jori-us", rows.github?.data)).toBe(false)
+})
+
+async function seedConnections(t: ReturnType<typeof convexTest>) {
+  return await t.run(async (ctx) => {
+    const person = await ctx.db.insert("persons", {
+      organizationId: "eu",
+      createdAt: 0,
+      updatedAt: 0,
+    })
+    const base = {
+      organizationId: "eu",
+      createdBy: person,
+      scope: "organization" as const,
+      createdAt: 0,
+      updatedAt: 0,
+    }
+    const github = await ctx.db.insert("integrations", {
+      ...base,
+      integration: "github",
+      externalId: "installation",
+      status: "active",
+      credentials: {
+        installationId: "installation",
+        tokens: { access: "existing-token" },
+      },
+      data: {
+        appSlug: "old-name",
+        botLogin: "old-name[bot]",
+        setting: "preserve",
+      },
+    })
+    const expired = await ctx.db.insert("integrations", {
+      ...base,
+      integration: "github",
+      externalId: "expired",
+      status: "expired",
+      credentials: {},
+    })
+    const slack = await ctx.db.insert("integrations", {
+      ...base,
+      integration: "slack",
+      externalId: "slack",
+      status: "active",
+      credentials: {},
+      data: { botUserId: "slack-bot" },
+    })
+    return { github, expired, slack }
+  })
+}
+
+test("stable bot ID recognizes historical self messages after a rename and rejects a reused name", () => {
+  const integration = { integration: "github" as const, data: identity }
+  expect(
+    isGitHubSelfActor(
+      { kind: "bot", externalId: "101", name: "old-name[bot]" },
+      integration
+    )
+  ).toBe(true)
+  expect(
+    isGitHubSelfActor(
+      { kind: "bot", externalId: "102", name: "jori-eu[bot]" },
+      integration
+    )
+  ).toBe(false)
+})

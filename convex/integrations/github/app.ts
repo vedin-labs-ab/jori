@@ -75,14 +75,29 @@ export async function revokeGitHubIntegration(
   )
 }
 
-async function githubAppRequest<Result>(
+export async function githubAppRequest<Result>(
   path: string,
-  init: {
-    method: "DELETE" | "GET" | "POST"
-    body?: unknown
-    successStatuses?: number[]
-  }
+  init: GitHubAppRequest
 ) {
+  const { result } = await githubAppResponse(path, init)
+  return result as Result
+}
+
+export async function githubAppPage<Result>(path: string) {
+  const { response, result } = await githubAppResponse(path, { method: "GET" })
+  const next = response.headers.get("link")?.match(/<([^>]+)>; rel="next"/)?.[1]
+  const cursor =
+    next === undefined ? undefined : new URL(next).searchParams.get("cursor")
+  return { items: result as Result[], cursor: cursor ?? null }
+}
+
+type GitHubAppRequest = {
+  method: "DELETE" | "GET" | "POST"
+  body?: unknown
+  successStatuses?: number[]
+}
+
+async function githubAppResponse(path: string, init: GitHubAppRequest) {
   const response = await fetch(`${githubApiUrl}${path}`, {
     method: init.method,
     headers: {
@@ -98,10 +113,10 @@ async function githubAppRequest<Result>(
   const result = await readGitHubResponse(response)
 
   if (!response.ok && !(init.successStatuses ?? []).includes(response.status)) {
-    throw new Error(`GitHub App request failed: ${JSON.stringify(result)}`)
+    throw new Error(`GitHub App request failed with status ${response.status}`)
   }
 
-  return result as Result
+  return { response, result }
 }
 
 async function readGitHubResponse(response: Response) {
