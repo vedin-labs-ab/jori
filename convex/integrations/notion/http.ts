@@ -1,8 +1,8 @@
 import { isRecord } from "../../../contracts/json"
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
-import { normalizeEventData } from "../../events/payload"
 import { unauthorizedResponse } from "../../shared/http"
+import { readString } from "../../shared/input"
 import {
   oauthAuthorizeRedirect,
   readOAuthCallback,
@@ -13,13 +13,11 @@ import {
   failOfferAndRedirect,
 } from "../connect/install"
 import { notionOAuthAuthorizeUrl, notionOAuthCallbackPath } from "./config"
-import { readNotionJobEvents } from "./events"
 import {
   exchangeNotionAuthorizationCode,
   readNotionSetupIdentity,
   requireNotionClientId,
 } from "./oauth"
-import { enrichNotionEventData } from "./pages"
 import { parseSignedNotionState, verifyNotionWebhookRequest } from "./signing"
 
 export async function handleNotionInstall(request: Request) {
@@ -87,6 +85,20 @@ export async function handleNotionOAuthCallback(
     }
   )
 
+  if (integrationId === null) {
+    if (state.integrationOfferId !== undefined) {
+      await ctx.runMutation(internal.integrations.offers.updates.complete, {
+        integrationOfferId: state.integrationOfferId,
+        error:
+          "An active Notion connection already uses a different authorization. Its existing access has been kept.",
+      })
+    }
+    return new Response(
+      "This Notion workspace already has an active connection using a different authorization. The existing connection has been kept. Return to Jori and ask the person who connected it to manage its access.",
+      { status: 409 }
+    )
+  }
+
   await completeIntegrationOffer(ctx, {
     integrationOfferId: state.integrationOfferId,
     integrationId,
@@ -116,33 +128,17 @@ export async function handleNotionEvents(ctx: ActionCtx, request: Request) {
     return unauthorizedResponse()
   }
 
-  for (const event of readNotionJobEvents(payload)) {
-    const data = normalizeEventData(
-      "notion",
-      await enrichNotionEventData(ctx, {
-        data: event.data,
-        pageId: event.pageId,
-        workspaceId: event.workspaceId,
-      })
-    )
-
-    if (data === undefined) {
-      continue
-    }
-
-    await ctx.runMutation(
-      internal.integrations.notion.data.recordWebhookEvent,
-      {
-        workspaceId: event.workspaceId,
-        key: event.key,
-        type: event.type,
-        match: event.match,
-        actor: event.actor,
-        data,
-        observedAt: event.observedAt,
-      }
-    )
+  const workspaceId = readString(payload, "workspace_id")
+  const eventId = readString(payload, "id")
+  if (workspaceId === undefined || eventId === undefined) {
+    return new Response("Invalid Notion event payload", { status: 400 })
   }
+  await ctx.runMutation(internal.integrations.webhooks.delivery.accept, {
+    provider: "notion",
+    externalId: workspaceId,
+    eventId,
+    payload,
+  })
 
   return Response.json({ ok: true })
 }

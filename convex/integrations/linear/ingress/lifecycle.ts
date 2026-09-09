@@ -177,7 +177,11 @@ function classifyChange(
 
 export async function recordLinearLifecycleEvent(
   ctx: ActionCtx,
-  args: { payload: LinearWebhookPayload; deliveryId: string | null }
+  args: {
+    payload: LinearWebhookPayload
+    deliveryId: string | null
+    expectedConnectionGeneration?: number
+  }
 ) {
   const lifecycle = getLinearLifecycleEvent(args)
 
@@ -187,6 +191,7 @@ export async function recordLinearLifecycleEvent(
 
   await ctx.runMutation(internal.events.ingest.recordFromProvider, {
     integration: "linear",
+    expectedConnectionGeneration: args.expectedConnectionGeneration,
     externalId: lifecycle.accountId,
     key: lifecycle.key,
     type: lifecycle.type,

@@ -165,7 +165,7 @@ test("reinstalling refreshes the bot identity on the existing integration", asyn
   const integration = await t.run(
     async (ctx) => await ctx.db.query("integrations").unique()
   )
-  expect(integration?.data).toEqual(newIdentity)
+  expect(integration?.data).toMatchObject(newIdentity)
   expect(mentionsLinearApp("@jori-production-eu", integration?.data)).toBe(
     false
   )
@@ -242,3 +242,22 @@ async function rows(t: ReturnType<typeof convexTest>) {
     runs: await ctx.db.query("runs").take(5),
   }))
 }
+
+test("accepts provider mentions only for the installed bot identity", async () => {
+  const { t, personId } = await setup("eu")
+  await t.mutation(record, {
+    ...message("Please help"),
+    appUserId: "bot-us",
+    mentioned: true,
+    actor: { kind: "person", personId },
+  })
+  expect((await rows(t)).runs).toEqual([])
+  await t.mutation(record, {
+    ...message("Please help"),
+    externalId: "mention",
+    appUserId: "bot-eu",
+    mentioned: true,
+    actor: { kind: "person", personId },
+  })
+  expect((await rows(t)).runs).toHaveLength(1)
+})

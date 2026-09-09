@@ -210,3 +210,20 @@ function readTimestamp(record: Record<string, unknown>) {
 
   return Number.isFinite(milliseconds) ? milliseconds : undefined
 }
+
+export function notionEventAllowsBot(
+  payload: unknown,
+  botId: string | undefined
+) {
+  const accessibleBy = readValue(payload, "accessible_by")
+  if (accessibleBy === undefined) {
+    return true
+  }
+  return (
+    botId !== undefined &&
+    readArray(accessibleBy).some(
+      (entry) =>
+        readString(entry, "type") === "bot" && readString(entry, "id") === botId
+    )
+  )
+}

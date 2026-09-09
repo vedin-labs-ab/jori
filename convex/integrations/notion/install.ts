@@ -4,6 +4,7 @@ import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
+import { readDataString } from "../../shared/data"
 import { upsertIntegration } from "../connect/install"
 import { findIntegrationByExternalId } from "../data"
 
@@ -27,6 +28,17 @@ export const recordOAuthInstallation = internalMutation({
       integration: "notion",
       externalId: args.profile.workspaceId,
     })
+    if (existing !== null && existing.organizationId !== args.organizationId) {
+      throw new Error(
+        "This provider account is already connected to another organization."
+      )
+    }
+    if (
+      existing?.status === "active" &&
+      readDataString(existing.data, "botId") !== args.profile.botId
+    ) {
+      return null
+    }
     const integrationId = await upsertIntegration(ctx, existing, {
       organizationId: args.organizationId,
       integration: "notion",

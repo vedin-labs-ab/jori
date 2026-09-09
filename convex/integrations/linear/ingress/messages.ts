@@ -8,6 +8,8 @@ import { findActiveIntegrationByExternalId } from "../../data"
 export const record = internalMutation({
   args: {
     ...observedMessageArgs,
+    appUserId: v.optional(v.string()),
+    expectedConnectionGeneration: v.optional(v.number()),
     mode: v.optional(v.union(v.literal("record"), v.literal("record_and_run"))),
   },
   handler: async (ctx, args) => {
@@ -16,14 +18,24 @@ export const record = internalMutation({
       externalId: args.accountId,
     })
 
-    if (integration === null) {
+    if (
+      integration === null ||
+      (args.expectedConnectionGeneration !== undefined &&
+        (integration.connectionGeneration ?? 0) !==
+          args.expectedConnectionGeneration)
+    ) {
       return
     }
 
+    const { appUserId, ...message } = args
+    const notified =
+      args.mentioned === true &&
+      appUserId !== undefined &&
+      appUserId === readDataString(integration.data, "botId")
     await ctx.runMutation(internal.conversations.intake.record, {
-      ...args,
+      ...message,
       integration: "linear",
-      mentioned: mentionsLinearApp(args.text, integration.data),
+      mentioned: notified || mentionsLinearApp(args.text, integration.data),
     })
   },
 })

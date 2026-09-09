@@ -20,7 +20,7 @@ export async function linearGraphql<Result = unknown>(
   const result = (await response.json()) as Result
 
   if (!response.ok || hasGraphqlErrors(result)) {
-    throw new Error(`Linear GraphQL request failed: ${JSON.stringify(result)}`)
+    throw new Error(`Linear GraphQL request failed (${response.status})`)
   }
 
   return result
