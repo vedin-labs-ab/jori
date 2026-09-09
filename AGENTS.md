@@ -46,6 +46,9 @@ you to type.
   another folder.
 - Improve what you touch: remove local duplication, clarify names, simplify
   control flow.
+- Before adding a test, identify the behavior or failure mode it protects
+  and check whether existing tests already protect it. Prefer extending an
+  existing test when clear. Avoid tests that merely mirror the implementation.
 - Pre-launch means no legacy: no phased migrations, fallbacks, compatibility
   layers or temporary solutions. Make the clean, complete change.
 
