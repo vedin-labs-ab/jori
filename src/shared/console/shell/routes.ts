@@ -127,7 +127,10 @@ export function isNavigationActive(
   to: string,
   exact = false
 ) {
-  return pathname === to || (!exact && pathname.startsWith(`${to}/`))
+  // Index-route matches include a trailing slash even when the URL does not.
+  const path = pathname.replace(/\/$/, "")
+
+  return path === to || (!exact && path.startsWith(`${to}/`))
 }
 
 /** A conversation's page, as a typed link the router checks. */

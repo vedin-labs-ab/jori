@@ -95,7 +95,7 @@ export function ancestorFolderIds(
 /** The folder a console path is about, on its page or its usage page. The
  *  surface's own pages are nobody's folder, so they read as none. */
 export function activeFolderId(pathname: string) {
-  const folderId = /^\/folders\/([^/]+)(?:\/usage)?$/.exec(pathname)?.[1]
+  const folderId = /^\/folders\/([^/]+)(?:\/usage)?\/?$/.exec(pathname)?.[1]
 
   return folderId === "usage" ? undefined : folderId
 }

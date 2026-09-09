@@ -72,10 +72,14 @@ test("walks ancestors nearest first and survives cycles", () => {
 test("a folder stays the active one on its usage page", () => {
   expect(activeFolderId("/folders/finance")).toBe("finance")
   expect(activeFolderId("/folders/finance/usage")).toBe("finance")
+  expect(activeFolderId("/folders/finance/")).toBe("finance")
+  expect(activeFolderId("/folders/finance/usage/")).toBe("finance")
 })
 
 test("the surface's own pages belong to no folder", () => {
   expect(activeFolderId("/folders")).toBeUndefined()
   expect(activeFolderId("/folders/usage")).toBeUndefined()
+  expect(activeFolderId("/folders/")).toBeUndefined()
+  expect(activeFolderId("/folders/usage/")).toBeUndefined()
   expect(activeFolderId("/runs")).toBeUndefined()
 })
