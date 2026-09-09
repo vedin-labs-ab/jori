@@ -85,19 +85,13 @@ test("a window with nothing in it explains itself instead of drawing zeroes", ()
   expect(screen.queryByTestId("charts")).toBeNull()
 })
 
-test("a window with spend draws the charts and names what spent it", () => {
+test("a window with spend shows its sources and omits an empty subfolder breakdown", () => {
   renderView(overview())
 
   expect(screen.getByTestId("charts")).toBeDefined()
   expect(screen.getByRole("link", { name: "Morning digest" })).toBeDefined()
   expect(screen.getByText("Spend by source")).toBeDefined()
-})
-
-test("nothing below this folder means no division to offer", () => {
-  renderView(overview())
-
   expect(screen.queryByText("Spend by subfolder")).toBeNull()
-  expect(screen.getByTestId("charts")).toBeDefined()
 })
 
 test("each subfolder row drills into that folder's own usage", () => {

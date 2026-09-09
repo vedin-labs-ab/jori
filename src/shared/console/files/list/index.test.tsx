@@ -2,7 +2,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { type ListControls } from "@/shared/console/list/controls"
-import { type RowSelection } from "@/shared/console/list/selection"
+import { listControls } from "../../../../../test/list/controls"
+import { emptySelection } from "../../../../../test/list/selection"
 import { type FileRow } from "../types"
 import { FileTable } from "."
 import { fileListConfig } from "./config"
@@ -31,34 +32,10 @@ function fileRow(overrides: Partial<FileRow> = {}) {
   } as FileRow
 }
 
-function stubSelection<Row>(): RowSelection<Row> {
-  return {
-    allSelected: false,
-    clear: () => undefined,
-    count: 0,
-    isSelected: () => false,
-    selected: [],
-    toggle: () => undefined,
-    toggleAll: () => undefined,
-  }
-}
-
-function stubControls(overrides: Partial<ListControls> = {}): ListControls {
-  return {
-    getFacet: () => undefined,
-    hasActiveControls: false,
-    isFacetActive: () => false,
-    setFacet: () => undefined,
-    sort: undefined,
-    toggleSort: () => undefined,
-    ...overrides,
-  }
-}
-
 function renderTable(
   files: FileRow[],
   {
-    controls = stubControls(),
+    controls = listControls(),
     hasFilters = false,
   }: { controls?: ListControls; hasFilters?: boolean } = {}
 ) {
@@ -76,7 +53,7 @@ function renderTable(
       onMoveToFolder={() => undefined}
       onUpload={() => undefined}
       pendingFileId={undefined}
-      selection={stubSelection()}
+      selection={emptySelection()}
     />
   )
 }
@@ -98,7 +75,7 @@ test("lists name, size, kind, times, and owner columns", () => {
 
 test("header buttons drive the sort", () => {
   const toggleSort = vi.fn()
-  renderTable([fileRow()], { controls: stubControls({ toggleSort }) })
+  renderTable([fileRow()], { controls: listControls({ toggleSort }) })
 
   fireEvent.click(screen.getByRole("button", { name: "Size" }))
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { type RowSelection } from "../../list/selection"
+import { emptySelection } from "../../../../../test/list/selection"
 import { type TableColumn, type TableRow } from "../types"
 import { RowGrid } from "."
 
@@ -33,18 +33,6 @@ function buildRows(count: number): TableRow[] {
   }))
 }
 
-function stubSelection(): RowSelection<TableRow> {
-  return {
-    allSelected: false,
-    clear: () => undefined,
-    count: 0,
-    isSelected: () => false,
-    selected: [],
-    toggle: () => undefined,
-    toggleAll: () => undefined,
-  }
-}
-
 function renderGrid(rows: TableRow[], options?: { isExhausted?: boolean }) {
   render(
     <RowGrid
@@ -65,12 +53,12 @@ function renderGrid(rows: TableRow[], options?: { isExhausted?: boolean }) {
       onInspectColumn={() => undefined}
       pendingRowId={undefined}
       rows={rows}
-      selection={stubSelection()}
+      selection={emptySelection()}
     />
   )
 }
 
-test("10,000 loaded rows mount only a small window of cells", () => {
+test("a fully loaded table mounts only a small window and requests no more rows", () => {
   renderGrid(buildRows(10_000))
 
   const mounted = screen.getAllByRole("button", { name: "Edit Title" })
@@ -79,6 +67,8 @@ test("10,000 loaded rows mount only a small window of cells", () => {
   expect(mounted.length).toBeLessThan(50)
   expect(screen.getByTitle("Row 1")).toBeTruthy()
   expect(screen.queryByTitle("Row 9999")).toBeNull()
+  expect(loadMore).not.toHaveBeenCalled()
+  expect(screen.getByText("New row")).toBeTruthy()
 })
 
 test("nearing the end of the loaded rows requests the next page", () => {
@@ -89,11 +79,4 @@ test("nearing the end of the loaded rows requests the next page", () => {
   // behind the honest loading band.
   expect(screen.queryByText("New row")).toBeNull()
   expect(screen.getByText("Loading more rows…")).toBeTruthy()
-})
-
-test("far from the end of a fully loaded table nothing more is requested", () => {
-  renderGrid(buildRows(10_000))
-
-  expect(loadMore).not.toHaveBeenCalled()
-  expect(screen.getByText("New row")).toBeTruthy()
 })

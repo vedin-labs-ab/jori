@@ -3,8 +3,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
-import { type RowSelection } from "@/shared/console/list/selection"
 import { type TableSummary } from "@/shared/console/tables/types"
+import { listControls } from "../../../../../test/list/controls"
+import { emptySelection } from "../../../../../test/list/selection"
 import { type MaterialRemoval } from "../../materials/removal"
 import { TableList } from "."
 import { tableListConfig } from "./config"
@@ -42,34 +43,10 @@ function tableSummary(overrides: Partial<TableSummary> = {}) {
   } as TableSummary
 }
 
-function stubSelection<Row>(): RowSelection<Row> {
-  return {
-    allSelected: false,
-    clear: () => undefined,
-    count: 0,
-    isSelected: () => false,
-    selected: [],
-    toggle: () => undefined,
-    toggleAll: () => undefined,
-  }
-}
-
-function stubControls(overrides: Partial<ListControls> = {}): ListControls {
-  return {
-    getFacet: () => undefined,
-    hasActiveControls: false,
-    isFacetActive: () => false,
-    setFacet: () => undefined,
-    sort: undefined,
-    toggleSort: () => undefined,
-    ...overrides,
-  }
-}
-
 function renderList(
   tables: TableSummary[],
   {
-    controls = stubControls(),
+    controls = listControls(),
     hasFilters = false,
   }: { controls?: ListControls; hasFilters?: boolean } = {}
 ) {
@@ -86,7 +63,7 @@ function renderList(
         onImport={() => undefined}
         onMoveToFolder={() => undefined}
         removal={removal}
-        selection={stubSelection()}
+        selection={emptySelection()}
         tables={tables}
         unauthorizedMessage={undefined}
       />
@@ -110,7 +87,7 @@ test("lists name, counts, times, and owner columns", () => {
 
 test("header buttons drive the sort and expose the facet menus", () => {
   const toggleSort = vi.fn()
-  renderList([tableSummary()], { controls: stubControls({ toggleSort }) })
+  renderList([tableSummary()], { controls: listControls({ toggleSort }) })
 
   fireEvent.click(screen.getByRole("button", { name: "Name" }))
   fireEvent.click(screen.getByRole("button", { name: "Rows" }))

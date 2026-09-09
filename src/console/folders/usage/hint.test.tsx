@@ -36,6 +36,7 @@ test("a folder's spend opens that folder's own usage page", () => {
   expect(link.getAttribute("href")).toBe("/folders/folders:1/usage")
   // The visible text stays terse; the accessible name says what it means.
   expect(screen.getByText("$12.40 · 30 days")).toBeDefined()
+  expect(document.querySelector('[data-slot="separator"]')).not.toBeNull()
 })
 
 test("without a folder the hint is the whole tree's spend", () => {
@@ -55,10 +56,4 @@ test("a figure still loading is no figure at all", () => {
   // under the reader; it waits instead, divider included.
   expect(screen.queryByRole("link")).toBeNull()
   expect(document.querySelector('[data-slot="separator"]')).toBeNull()
-})
-
-test("a figure that is ready brings its divider with it", () => {
-  renderHint(500_000, "folders:1")
-
-  expect(document.querySelector('[data-slot="separator"]')).not.toBeNull()
 })

@@ -3,7 +3,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
-import { type RowSelection } from "@/shared/console/list/selection"
+import { listControls } from "../../../../../test/list/controls"
+import { emptySelection } from "../../../../../test/list/selection"
 import { type MaterialRemoval } from "../../materials/removal"
 import { type StoreSummary } from "../types"
 import { StoreList } from "."
@@ -41,34 +42,10 @@ function storeSummary(overrides: Partial<StoreSummary> = {}) {
   } as StoreSummary
 }
 
-function stubSelection<Row>(): RowSelection<Row> {
-  return {
-    allSelected: false,
-    clear: () => undefined,
-    count: 0,
-    isSelected: () => false,
-    selected: [],
-    toggle: () => undefined,
-    toggleAll: () => undefined,
-  }
-}
-
-function stubControls(overrides: Partial<ListControls> = {}): ListControls {
-  return {
-    getFacet: () => undefined,
-    hasActiveControls: false,
-    isFacetActive: () => false,
-    setFacet: () => undefined,
-    sort: undefined,
-    toggleSort: () => undefined,
-    ...overrides,
-  }
-}
-
 function renderList(
   stores: StoreSummary[],
   {
-    controls = stubControls(),
+    controls = listControls(),
     hasFilters = false,
   }: { controls?: ListControls; hasFilters?: boolean } = {}
 ) {
@@ -84,7 +61,7 @@ function renderList(
         onEdit={() => undefined}
         onMoveToFolder={() => undefined}
         removal={removal}
-        selection={stubSelection()}
+        selection={emptySelection()}
         stores={stores}
         unauthorizedMessage={undefined}
       />
@@ -114,7 +91,7 @@ test("lists name, counts, times, and owner columns", () => {
 
 test("header buttons drive the sort and expose the facet menus", () => {
   const toggleSort = vi.fn()
-  renderList([storeSummary()], { controls: stubControls({ toggleSort }) })
+  renderList([storeSummary()], { controls: listControls({ toggleSort }) })
 
   fireEvent.click(screen.getByRole("button", { name: "Properties" }))
 

@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { type RowSelection } from "../../list/selection"
+import { emptySelection } from "../../../../../test/list/selection"
 import { type TableColumn, type TableRow } from "../types"
 import { GridRow } from "./row"
 
@@ -36,18 +36,6 @@ const row: TableRow = {
   updatedAt: 1,
 }
 
-function stubSelection(): RowSelection<TableRow> {
-  return {
-    allSelected: false,
-    clear: () => undefined,
-    count: 0,
-    isSelected: () => false,
-    selected: [],
-    toggle: () => undefined,
-    toggleAll: () => undefined,
-  }
-}
-
 function renderRow() {
   return render(
     <GridRow
@@ -62,7 +50,7 @@ function renderRow() {
       onFreshSettled={() => undefined}
       onInsert={onInsert}
       row={row}
-      selection={stubSelection()}
+      selection={emptySelection()}
       top={0}
     />
   )
