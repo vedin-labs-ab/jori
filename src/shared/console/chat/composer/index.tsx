@@ -147,9 +147,9 @@ export const ChatComposer = memo(function ChatComposer({
           usage={usage}
         />
       </InputGroup>
-      {hints.open || shownReason !== undefined ? null : (
+      {shownReason === undefined ? (
         <HintsPeek hintsId={hints.id} onShow={hints.show} />
-      )}
+      ) : null}
     </form>
   )
 })
@@ -171,7 +171,7 @@ function useHintsBand() {
     hide: () => setOpen(false),
     id,
     open,
-    show: () => setOpen(true),
+    show: open ? undefined : () => setOpen(true),
   }
 }
 
