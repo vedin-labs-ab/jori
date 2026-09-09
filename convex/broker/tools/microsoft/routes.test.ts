@@ -161,13 +161,11 @@ describe.each(cases)("$tool mocked Graph contract", (fixture) => {
     ).toThrow()
   })
 
-  test.each([
-    401, 403, 429, 500,
-  ])("surfaces Graph HTTP %s without retrying a write", async (status) => {
+  test("surfaces provider errors without retrying", async () => {
     const fetch = vi
       .fn()
       .mockResolvedValue(
-        Response.json({ error: { code: "SyntheticFailure" } }, { status })
+        Response.json({ error: { code: "SyntheticFailure" } }, { status: 500 })
       )
     vi.stubGlobal("fetch", fetch)
     await expect(

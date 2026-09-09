@@ -16,6 +16,7 @@ test("maps an issue born inside the window as created", () => {
       createdAt: "2026-07-01T09:00:00Z",
       updatedAt: "2026-07-04T09:30:00Z",
       team: { id: "team-1" },
+      project: { id: "project-1", name: "2.14 release" },
       state: { name: "In Progress" },
       creator: { id: "user-1", name: "Jonas" },
     },
@@ -32,6 +33,8 @@ test("maps an issue born inside the window as created", () => {
       issueId: "issue-1",
       issueIdentifier: "COP-73",
       teamId: "team-1",
+      projectId: "project-1",
+      project: { id: "project-1", name: "2.14 release" },
     },
   })
   expect(event?.actor).toMatchObject({ externalId: "user-1", name: "Jonas" })
@@ -54,23 +57,6 @@ test("maps an older issue as a state change naming the state", () => {
     type: "issue.state_changed",
     text: "Issue COP-12 moved to Blocked: County letter",
     data: { action: "update" },
-  })
-})
-
-test("carries the project when one exists", () => {
-  const event = readLinearBackfillIssue(
-    {
-      id: "issue-3",
-      createdAt: "2026-07-01T09:00:00Z",
-      updatedAt: "2026-07-02T10:00:00Z",
-      project: { id: "project-1", name: "2.14 release" },
-    },
-    window
-  )
-
-  expect(event?.data).toMatchObject({
-    projectId: "project-1",
-    project: { id: "project-1", name: "2.14 release" },
   })
 })
 

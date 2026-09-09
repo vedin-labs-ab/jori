@@ -54,13 +54,13 @@ describe("opening a table share", () => {
     expect(opened?.expiresAt).toEqual(expect.any(Number))
   })
 
-  test("returns null on a bad secret", async () => {
+  test.each([undefined, "wrong"])("rejects secret %s", async (secret) => {
     const { database, ctx } = databaseContext()
     const tableId = await createTable(database)
 
     await createShare(database, tableId)
 
-    expect(await openTableShare(ctx, { tableId, secret: "wrong" })).toBeNull()
+    expect(await openTableShare(ctx, { tableId, secret })).toBeNull()
   })
 
   test("returns null on an expired link", async () => {
@@ -147,15 +147,6 @@ describe("the folder chain over a link", () => {
     expect(
       (await openTableShare(ctx, { tableId, secret: "s3cret" }))?.table.name
     ).toBe("Leads")
-  })
-
-  test("a read with no secret opens nothing", async () => {
-    const { database, ctx } = databaseContext()
-    const tableId = await createTable(database)
-
-    await createShare(database, tableId)
-
-    expect(await openTableShare(ctx, { tableId })).toBeNull()
   })
 })
 

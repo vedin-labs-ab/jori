@@ -64,7 +64,7 @@ test("a claim that creates the singleton document counts it once", async () => {
   expect((await database.get(store._id))?.documentCount).toBe(1)
 })
 
-test("a rejected batch leaves the counter untouched", async () => {
+test("a rejected batch writes neither documents nor their counter", async () => {
   const { database, ctx } = databaseContext()
   const table = await createTable(database)
 
@@ -72,5 +72,6 @@ test("a rejected batch leaves the counter untouched", async () => {
     insertDocuments(ctx, tableSpec, table, [{ title: "ok" }, { title: 4 }])
   ).rejects.toThrow("must be string")
 
+  expect(await database.query("documents").collect()).toEqual([])
   expect((await database.get(table._id))?.documentCount).toBeUndefined()
 })

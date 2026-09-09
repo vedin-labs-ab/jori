@@ -181,16 +181,6 @@ describe("validation against the compiled schema", () => {
     ).rejects.toThrow("is not allowed")
   })
 
-  test("a batch with one invalid row inserts nothing", async () => {
-    const { database, ctx } = databaseContext()
-    const table = await createTable(database)
-
-    await expect(
-      insertDocuments(ctx, tableSpec, table, [{ title: "ok" }, { title: 4 }])
-    ).rejects.toThrow("must be string")
-    expect(await database.query("documents").collect()).toHaveLength(0)
-  })
-
   test("row updates merge, clear nulled columns, and revalidate", async () => {
     const { database, ctx } = databaseContext()
     const table = await createTable(database)
