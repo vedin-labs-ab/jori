@@ -49,11 +49,18 @@ test("rejects a disabled current region", () => {
   ).toThrow("Current region eu must be enabled.")
 })
 
-test("rejects origins containing paths", () => {
+test.each([
+  "https://jori.example/welcome",
+  "https://user:password@jori.example",
+  "https://jori.example?next=/console",
+  "https://jori.example#console",
+  "ftp://jori.example",
+  "not a URL",
+])("rejects an invalid public origin: %s", (origin) => {
   expect(() =>
     createRegionConfig(
       {
-        VITE_JORI_PUBLIC_ORIGIN: "https://jori.example/welcome",
+        VITE_JORI_PUBLIC_ORIGIN: origin,
         VITE_JORI_REGION: "us",
         VITE_JORI_US_ORIGIN: "https://us.jori.example",
       },
