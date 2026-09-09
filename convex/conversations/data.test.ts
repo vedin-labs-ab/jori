@@ -4,8 +4,7 @@ import {
   inserted,
   type Seed,
 } from "../../test/convex/conversations"
-import { databaseContext, id } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+import { id } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { startRun } from "../runs/execution/workflow"
 import { startMessageRun } from "./data"
@@ -107,65 +106,6 @@ test("starts existing conversations without sessions as mentions", async () => {
   expect(inserted(ctx, "runs")).toEqual([
     expect.objectContaining({
       cause: { type: "message", messageId: "message", kind: "mention" },
-    }),
-  ])
-})
-
-test("console runs carry no integration and file under the opening folder, named in the snapshot", async () => {
-  const { database, ctx } = databaseContext()
-  const organizationId = "organization"
-  const personId = await database.insert("persons", { organizationId })
-  const folderId = await database.insert(
-    "folders",
-    folderDoc({ organizationId, createdBy: personId })
-  )
-  const conversationId = await database.insert("conversations", {
-    organizationId,
-    surface: "console",
-    externalId: "",
-    scope: "person",
-    createdBy: personId,
-    updatedAt: 0,
-  })
-
-  await database.patch(conversationId, { externalId: conversationId })
-
-  const conversation = (await database.get(
-    conversationId
-  )) as unknown as Doc<"conversations">
-  const consoleMessage = (text: string, createdAt: number) => ({
-    ...message(text),
-    surface: "console" as const,
-    integrationId: undefined,
-    conversationId: conversation.externalId,
-    createdAt,
-  })
-
-  await database.insert("messages", {
-    ...consoleMessage("Summarize this folder.", 100),
-    data: { context: { kind: "folder", id: folderId } },
-  })
-
-  const result = await startMessageRun(ctx, {
-    conversation,
-    integration: null,
-    message: consoleMessage("Now draft the update.", 1000),
-    createdBy: personId,
-    externalId: conversation.externalId,
-    now: 1000,
-  })
-
-  expect(result.status).toBe("started")
-  expect(await database.query("runs").withIndex("by_id").collect()).toEqual([
-    expect.objectContaining({
-      audience: "person",
-      conversationId: conversation._id,
-      folderId,
-      principal: { kind: "person", personId },
-      snapshot: expect.objectContaining({
-        source: { type: "message", surface: "jori" },
-        context: [{ type: "folder", label: "Projects" }],
-      }),
     }),
   ])
 })

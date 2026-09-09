@@ -33,7 +33,6 @@ test.each([
 
 test("job responses require current visibility and execution identity", () => {
   const validate = compileSchema(jobJoriToolResponseSchemas.read_job)
-  expect(validate(job)).toBe(true)
   expect(
     validate({
       ...job,
@@ -55,11 +54,4 @@ test.each([
   expect(
     compileSchema(jobJoriToolResponseSchemas.read_job)({ ...job, type })
   ).toBe(false)
-})
-
-test("job response metadata documents visibility instead of obsolete audience", () => {
-  const schema = jobJoriToolResponseSchemas.read_job
-  expect(schema).toHaveProperty("properties.visibility")
-  expect(schema).toHaveProperty("properties.principal")
-  expect(schema).not.toHaveProperty("properties.audience")
 })

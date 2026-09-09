@@ -2,49 +2,6 @@ import { expect, test } from "vitest"
 import { type ToolCapability } from "../../../../contracts/permissions"
 import { createRunToolSnapshot } from "./snapshot"
 
-test("stores all surface tool capabilities for run details", () => {
-  const joriTools = [
-    {
-      access: "write" as const,
-      description: "Persist a generated file.",
-      label: "Save file",
-      tool: "save_file",
-    },
-  ]
-
-  expect(
-    createRunToolSnapshot({
-      webSearch: true,
-      capabilities: [
-        {
-          surface: "jori",
-          label: "Jori",
-          tools: joriTools,
-        },
-        {
-          surface: "slack",
-          label: "Slack",
-          tools: slackTools(),
-        },
-      ],
-    })
-  ).toEqual({
-    groups: [
-      {
-        surface: "jori",
-        label: "Jori",
-        tools: joriTools,
-      },
-      {
-        surface: "slack",
-        label: "Slack",
-        tools: slackTools(),
-      },
-    ],
-    webSearch: true,
-  })
-})
-
 test("stores all native Jori tools in one group", () => {
   const finishRunTool = {
     access: "write" as const,

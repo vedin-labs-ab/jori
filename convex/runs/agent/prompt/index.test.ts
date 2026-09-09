@@ -69,6 +69,7 @@ describe("runtime prompts", () => {
     }
 
     expect(prompt).not.toContain("Recent messages")
+    expect(prompt).not.toContain("- None")
     expect(prompt).toContain("Current message:")
     expect(prompt).not.toContain("\nHistory:\n")
     expect(prompt).not.toContain("{{message.target}}")

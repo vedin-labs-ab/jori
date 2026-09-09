@@ -5,7 +5,6 @@ import {
   jobDisplay,
   testRun,
 } from "../../../../test/convex/console"
-import { githubIntegration } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
 
 test("includes stopped details for stopped runs", async () => {
@@ -64,14 +63,7 @@ test("includes approved decision actor details", async () => {
 
 test("includes linked provider source details", async () => {
   const run = testRun(eventRun("GitHub event", "Handle the issue comment."))
-  const summary = await summarizeRun(
-    fakeQueryCtx({
-      event: githubIssueCommentEvent(),
-      integration: githubIntegration(),
-      run,
-    }),
-    run
-  )
+  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.details).toEqual([
     {
@@ -140,33 +132,5 @@ function eventRun(title: string, task: string) {
       }),
     },
     createdAt: 0,
-  }
-}
-
-function githubIssueCommentEvent() {
-  return {
-    _id: "event",
-    _creationTime: 0,
-    organizationId: "organization",
-    integrationId: "integration",
-    key: "github:event",
-    type: "issue.comment.created",
-    text: "Can you investigate this failing callback?",
-    data: {
-      repository: {
-        fullName: "vedin-labs/frontier",
-        url: "https://github.com/vedin-labs/frontier",
-      },
-      issueNumber: 42,
-      issue: {
-        number: 42,
-        title: "Callback fails",
-        url: "https://github.com/vedin-labs/frontier/issues/42",
-      },
-      comment: {
-        id: "123",
-        url: "https://github.com/vedin-labs/frontier/issues/42#comment-123",
-      },
-    },
   }
 }

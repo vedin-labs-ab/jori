@@ -6,46 +6,28 @@ import {
   preparedTraceRows,
   testRun,
 } from "../../../../test/convex/console"
-import { slackIntegration } from "../../../../test/convex/integrations"
 import {
   slackDisplayTools,
   slackToolSnapshot,
 } from "../../../../test/convex/tools"
 import { summarizeRun } from "../summaries"
 
-test("shows stored tools for event job runs", async () => {
-  const run = testRun(eventRun(), { preparedTools: slackToolSnapshot() })
+test.each([
+  true,
+  false,
+])("shows stored event job tools with web search allowed: %s", async (webSearch) => {
+  const run = testRun(eventRun(), {
+    preparedTools: slackToolSnapshot(webSearch),
+  })
   const summary = await summarizeRun(
-    fakeQueryCtx(
-      {
-        event: event(),
-        integration: slackIntegration(),
-        run,
-      },
-      { traces: preparedTraceRows(run) }
-    ),
+    fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
     run
   )
 
   expect(summary.details).toContainEqual(slackToolsDetail())
-  expect(summary.details).toContainEqual(webSearchDetail("Allowed"))
-})
-
-test("shows stored blocked web search for event job runs", async () => {
-  const run = testRun(eventRun(), { preparedTools: slackToolSnapshot(false) })
-  const summary = await summarizeRun(
-    fakeQueryCtx(
-      {
-        event: event(),
-        integration: slackIntegration(),
-        run,
-      },
-      { traces: preparedTraceRows(run) }
-    ),
-    run
+  expect(summary.details).toContainEqual(
+    webSearchDetail(webSearch ? "Allowed" : "Blocked")
   )
-
-  expect(summary.details).toContainEqual(webSearchDetail("Blocked"))
 })
 
 test("shows stored tools for mention and reply runs", async () => {
@@ -54,14 +36,7 @@ test("shows stored tools for mention and reply runs", async () => {
       preparedTools: slackToolSnapshot(),
     })
     const summary = await summarizeRun(
-      fakeQueryCtx(
-        {
-          integration: slackIntegration(),
-          message: message(kind),
-          run,
-        },
-        { traces: preparedTraceRows(run) }
-      ),
+      fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
       run
     )
 
@@ -76,48 +51,13 @@ test("marks approval-required access counts in mention and reply runs", async ()
       preparedTools: slackToolSnapshot(true, "read"),
     })
     const summary = await summarizeRun(
-      fakeQueryCtx(
-        {
-          integration: slackIntegration(),
-          message: message(kind),
-          run,
-        },
-        { traces: preparedTraceRows(run) }
-      ),
+      fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
       run
     )
 
     expect(summary.details).toContainEqual(slackToolsDetail("read"))
   }
 })
-function event() {
-  return {
-    _id: "event",
-    _creationTime: 0,
-    organizationId: "organization",
-    integrationId: "integration",
-    key: "slack:event",
-    type: "message.created",
-    data: { channel: { id: "C123", name: "social" } },
-  }
-}
-
-function message(kind: "mention" | "reply") {
-  return {
-    _id: "message",
-    _creationTime: 0,
-    organizationId: "organization",
-    integrationId: "integration",
-    surface: "slack",
-    type: "message.channels",
-    externalId: `slack:${kind}`,
-    mentioned: kind === "mention",
-    text: "Please summarize this thread.",
-    data: { channel: { id: "C123", name: "social" } },
-    createdAt: 0,
-  }
-}
-
 function eventRun() {
   return {
     job: { id: "missing-job" },

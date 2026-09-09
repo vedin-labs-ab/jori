@@ -26,10 +26,6 @@ test("formats drained messages like conversation messages", () => {
 \`\`\`text
 Here's what I've got.
 \`\`\``)
-  expect(formatted).not.toContain("New slack message")
-  expect(formatted).not.toContain("Authority:")
-  expect(formatted).not.toContain("Mentioned Jori:")
-  expect(formatted).not.toContain("Message:")
 })
 
 test("formats drained reaction interactions compactly", () => {

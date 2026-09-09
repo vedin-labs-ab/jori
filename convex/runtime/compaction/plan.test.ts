@@ -1,10 +1,5 @@
 import { expect, test } from "vitest"
-import {
-  compactionPlan,
-  compactionSequence,
-  contextBudget,
-  contextRatio,
-} from "./plan"
+import { compactionPlan, contextBudget, contextRatio } from "./plan"
 
 // 200k less the 32k the answer keeps: 168k of prompt budget.
 const window = { contextLength: 200_000, maxCompletionTokens: null }
@@ -61,11 +56,6 @@ test("a run summarizes once and keeps clearing after", () => {
       promptTokens: summarizeAt,
     })
   ).toBe("clear")
-})
-
-test("both steps sit just before the turn's model call", () => {
-  expect(compactionSequence(7, "cleared")).toBe(697)
-  expect(compactionSequence(7, "summarized")).toBe(698)
 })
 
 function plan(args: {

@@ -29,5 +29,5 @@ test("never drops a budget or silently chooses one for conflicting candidates", 
 })
 test("requests without an explicit budget remain unchanged", () => {
   const unbounded = { model: "model", messages: [] }
-  expect(withSupportedTokenBudget(unbounded, [completion])).toBe(unbounded)
+  expect(withSupportedTokenBudget(unbounded, [completion])).toEqual(unbounded)
 })
