@@ -1,9 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { createFileContext, mockJsonFetch } from "../../../test/convex/broker"
-import { id } from "../../../test/convex/database"
-import { integrationDoc } from "../../../test/convex/integrations"
 import { schemaViolations } from "../../../test/convex/schema"
-import { type Doc } from "../../_generated/dataModel"
+import { integration } from "../../../test/convex/tools"
 import {
   calendarListSchema,
   eventListingSchema,
@@ -45,7 +43,7 @@ describe("Microsoft Calendar discovery", () => {
     })
 
     const result = (await callMicrosoftTool(
-      microsoftCalendarIntegration(),
+      integration("microsoftCalendar"),
       "microsoft_calendar_list_events",
       {
         timeMax: "2030-01-02T08:00:00Z",
@@ -92,7 +90,7 @@ describe("Microsoft Calendar listings", () => {
     }))
 
     const result = await callMicrosoftTool(
-      microsoftCalendarIntegration(),
+      integration("microsoftCalendar"),
       "microsoft_calendar_list_calendars",
       {}
     )
@@ -124,7 +122,7 @@ describe("Outlook email tools", () => {
     const calls = mockJsonFetch(() => null)
 
     const result = await callMicrosoftTool(
-      microsoftEmailIntegration(),
+      integration("microsoftEmail"),
       "microsoft_email_send_message",
       {
         files: [{ fileId: "file-id" }],
@@ -154,27 +152,3 @@ describe("Outlook email tools", () => {
     })
   })
 })
-
-function microsoftEmailIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("microsoft-email-integration"),
-    integration: "microsoftEmail",
-    scope: "user",
-    ownerId: id<"persons">("person"),
-    externalId: "microsoft-account",
-    email: "sender@example.com",
-    credentials: {
-      tokens: { access: "access-token", refresh: "refresh-token" },
-      expiresAt: Date.now() + 60_000,
-      tenantId: "microsoft-tenant",
-    },
-  })
-}
-
-function microsoftCalendarIntegration(): Doc<"integrations"> {
-  return {
-    ...microsoftEmailIntegration(),
-    _id: id<"integrations">("microsoft-calendar-integration"),
-    integration: "microsoftCalendar",
-  }
-}

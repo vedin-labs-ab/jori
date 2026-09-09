@@ -1,9 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { mockJsonFetch } from "../../../../test/convex/broker"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { type Doc } from "../../../_generated/dataModel"
+import { integration } from "../../../../test/convex/tools"
 import { googleIntegrationConfigs } from "../../../integrations/google/config"
 import {
   calendarListSchema,
@@ -34,7 +32,7 @@ describe("Google Calendar listings", () => {
     }))
 
     const result = await callGoogleTool(
-      googleCalendarIntegration(),
+      integration("googleCalendar"),
       "google_calendar_list_calendars",
       {}
     )
@@ -83,7 +81,7 @@ describe("Google Calendar discovery", () => {
     })
 
     const result = (await callGoogleTool(
-      googleCalendarIntegration(),
+      integration("googleCalendar"),
       "google_calendar_list_events",
       {
         maxResults: 250,
@@ -151,7 +149,7 @@ describe("calendar event identity", () => {
 
     mockJsonFetch(() => ({ ...event("evt", "09:00"), summary: "Sync" }))
     const fetched = (await callGoogleTool(
-      googleCalendarIntegration(),
+      integration("googleCalendar"),
       "google_calendar_get_event",
       { calendarId: "team", eventId: "evt" }
     )) as Record<string, unknown>
@@ -165,7 +163,7 @@ async function listedEvent(raw: Record<string, unknown>) {
   mockJsonFetch(() => ({ items: [raw] }))
 
   const result = (await callGoogleTool(
-    googleCalendarIntegration(),
+    integration("googleCalendar"),
     "google_calendar_list_events",
     { calendarId: "team", maxResults: 10 }
   )) as { events: Record<string, unknown>[] }
@@ -175,19 +173,4 @@ async function listedEvent(raw: Record<string, unknown>) {
 
 function event(id: string, time: string) {
   return { id, start: { dateTime: `2030-01-01T${time}:00Z` } }
-}
-
-function googleCalendarIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("google-calendar-integration"),
-    integration: "googleCalendar",
-    scope: "user",
-    ownerId: id<"persons">("person"),
-    externalId: "google-account",
-    email: "sender@example.com",
-    credentials: {
-      tokens: { access: "access-token", refresh: "refresh-token" },
-      expiresAt: Date.now() + 60_000,
-    },
-  })
 }

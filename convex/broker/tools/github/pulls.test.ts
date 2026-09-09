@@ -1,8 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { encodeToolResult } from "../../../../contracts/json"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
-import { type Doc } from "../../../_generated/dataModel"
+import { integration } from "../../../../test/convex/tools"
 import { callGitHubTool } from "./index"
 
 afterEach(() => {
@@ -26,7 +24,7 @@ test("lists pull request files with pagination", async () => {
   ])
 
   const result = await callGitHubTool(
-    githubIntegration(),
+    integration("github"),
     "github_list_pull_request_files",
     {
       owner: "acme",
@@ -71,7 +69,7 @@ test("lists pull request review comments", async () => {
   ])
 
   const result = await callGitHubTool(
-    githubIntegration(),
+    integration("github"),
     "github_list_pull_request_review_comments",
     { owner: "acme", pullNumber: 12, repo: "app" }
   )
@@ -104,7 +102,7 @@ test("adds reactions to pull request review comments", async () => {
   ])
 
   const result = await callGitHubTool(
-    githubIntegration(),
+    integration("github"),
     "github_add_comment_reaction",
     {
       commentId: 456,
@@ -134,7 +132,7 @@ test("updates pull request metadata", async () => {
   const fetchMock = stubGitHubResponses([pullRequestPayload("New title")])
 
   const result = await callGitHubTool(
-    githubIntegration(),
+    integration("github"),
     "github_update_pull_request",
     {
       body: "",
@@ -173,18 +171,6 @@ function stubGitHubResponses(responses: unknown[]) {
 
   vi.stubGlobal("fetch", fetchMock)
   return fetchMock
-}
-
-function githubIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("github-integration"),
-    integration: "github",
-    externalId: "github-account",
-    credentials: {
-      installationId: "123",
-      tokens: { access: "github-token" },
-    },
-  })
 }
 
 function pullRequestPayload(title: string) {

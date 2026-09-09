@@ -15,12 +15,13 @@ const message = {
   ccRecipients: [],
   body: { contentType: "text", content: "Synthetic body" },
 }
-const event = {
-  id: "event/1",
+const meeting = {
   subject: "Synthetic event",
+  attendees: [{ emailAddress: { address: "fixture@example.com" } }],
   start: { dateTime: "2030-01-01T10:00:00", timeZone: "UTC" },
   end: { dateTime: "2030-01-01T11:00:00", timeZone: "UTC" },
 }
+const event = { id: "event/1", ...meeting }
 const outgoing = {
   to: ["fixture@example.com"],
   subject: "Synthetic mail",
@@ -88,9 +89,7 @@ const cases = [
   },
   {
     tool: "microsoft_calendar_create_event",
-    args: {
-      event: { subject: event.subject, start: event.start, end: event.end },
-    },
+    args: { event: meeting },
     invalid: { event: { subject: "Missing timing" } },
     path: "/me/events",
     method: "POST",
@@ -149,6 +148,17 @@ describe.each(cases)("$tool mocked Graph contract", (fixture) => {
     expect(
       schemaViolations(result, microsoftToolResponseSchemas[fixture.tool])
     ).toEqual([])
+    if (
+      fixture.tool === "microsoft_calendar_create_event" ||
+      fixture.tool === "microsoft_calendar_update_event"
+    ) {
+      expect(JSON.parse(init.body)).toEqual(fixture.args.event)
+      expect(result).toMatchObject({
+        id: "event/1",
+        entityKey: expect.stringMatching(/^[0-9a-f]{32}$/),
+        contentHash: expect.stringMatching(/^[0-9a-f]{32}$/),
+      })
+    }
     if (fixture.tool === "microsoft_email_send_message") {
       expect(JSON.parse(init.body)).toMatchObject({ saveToSentItems: false })
       expect(result).toEqual({ status: "sent" })
@@ -160,19 +170,21 @@ describe.each(cases)("$tool mocked Graph contract", (fixture) => {
       normalizeBrokerToolInput(fixture.tool, fixture.invalid)
     ).toThrow()
   })
+})
 
-  test("surfaces provider errors without retrying", async () => {
-    const fetch = vi
-      .fn()
-      .mockResolvedValue(
-        Response.json({ error: { code: "SyntheticFailure" } }, { status: 500 })
-      )
-    vi.stubGlobal("fetch", fetch)
-    await expect(
-      callMicrosoftTool(integration(fixture.tool), fixture.tool, fixture.args)
-    ).rejects.toThrow("SyntheticFailure")
-    expect(fetch).toHaveBeenCalledTimes(1)
-  })
+test.each(
+  cases
+)("$tool surfaces provider errors without retrying", async (fixture) => {
+  const fetch = vi
+    .fn()
+    .mockResolvedValue(
+      Response.json({ error: { code: "SyntheticFailure" } }, { status: 500 })
+    )
+  vi.stubGlobal("fetch", fetch)
+  await expect(
+    callMicrosoftTool(integration(fixture.tool), fixture.tool, fixture.args)
+  ).rejects.toThrow("SyntheticFailure")
+  expect(fetch).toHaveBeenCalledTimes(1)
 })
 
 function integration(tool: string) {

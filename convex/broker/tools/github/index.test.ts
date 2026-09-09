@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { encodeToolResult } from "../../../../contracts/json"
-import { id } from "../../../../test/convex/database"
-import { integrationDoc } from "../../../../test/convex/integrations"
-import { type Doc } from "../../../_generated/dataModel"
+import { integration } from "../../../../test/convex/tools"
 import { callGitHubTool, createGitHubCloneCredentials } from "./index"
 
 afterEach(() => {
@@ -12,7 +10,7 @@ afterEach(() => {
 describe("GitHub clone provider tool", () => {
   test("returns a JSON-safe clone descriptor", async () => {
     const result = await callGitHubTool(
-      githubIntegration(),
+      integration("github"),
       "github_clone_repository",
       {
         owner: "acme",
@@ -32,7 +30,7 @@ describe("GitHub clone provider tool", () => {
 
   test("preserves explicit clone destination and ref", async () => {
     const result = await callGitHubTool(
-      githubIntegration(),
+      integration("github"),
       "github_clone_repository",
       {
         directory: "workspace-app",
@@ -57,7 +55,7 @@ describe("GitHub clone provider tool", () => {
   test("creates clone credentials without exposing them through clone results", () => {
     expect(
       createGitHubCloneCredentials({
-        integration: githubIntegration(),
+        integration: integration("github"),
         owner: "acme",
         repo: "app",
       })
@@ -88,7 +86,7 @@ describe("GitHub comment tool", () => {
     vi.stubGlobal("fetch", fetchMock)
 
     const result = await callGitHubTool(
-      githubIntegration(),
+      integration("github"),
       "github_reply_to_pull_request_review_comment",
       {
         body: "Nice.",
@@ -123,15 +121,3 @@ describe("GitHub comment tool", () => {
     })
   })
 })
-
-function githubIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("github-integration"),
-    integration: "github",
-    externalId: "github-account",
-    credentials: {
-      installationId: "123",
-      tokens: { access: "github-token" },
-    },
-  })
-}

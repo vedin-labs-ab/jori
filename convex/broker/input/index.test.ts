@@ -109,7 +109,9 @@ test("broker input validation keeps Google and Microsoft event bodies distinct",
     normalizeBrokerToolInput("google_calendar_create_event", {
       event: { ...timedEvent("summary"), location: "Conference room" },
     })
-  ).toMatchObject({ event: { location: "Conference room" } })
+  ).toMatchObject({
+    event: { summary: "Planning", location: "Conference room" },
+  })
 
   expect(() =>
     normalizeBrokerToolInput("google_calendar_create_event", {
@@ -124,7 +126,12 @@ test("broker input validation keeps Google and Microsoft event bodies distinct",
         location: { displayName: "Conference room" },
       },
     })
-  ).toMatchObject({ event: { location: { displayName: "Conference room" } } })
+  ).toMatchObject({
+    event: {
+      subject: "Planning",
+      location: { displayName: "Conference room" },
+    },
+  })
 
   expect(() =>
     normalizeBrokerToolInput("microsoft_calendar_create_event", {
@@ -137,24 +144,14 @@ test("broker input validation keeps Google and Microsoft event bodies distinct",
   ).toThrow("microsoft_calendar_create_event.event.start.dateTime is required")
 })
 
-test("broker input validation accepts representative provider write inputs", () => {
+test("broker input validation preserves string Slack timestamps", () => {
   expect(
     normalizeBrokerToolInput("conversations_add_message", {
       channel: "C123",
       text: "Hello",
       thread_ts: "1782131901.806779",
     })
-  ).toMatchObject({ channel: "C123" })
-  expect(
-    normalizeBrokerToolInput("google_calendar_create_event", {
-      event: timedEvent("summary"),
-    })
-  ).toMatchObject({ event: { summary: "Planning" } })
-  expect(
-    normalizeBrokerToolInput("microsoft_calendar_create_event", {
-      event: timedEvent("subject"),
-    })
-  ).toMatchObject({ event: { subject: "Planning" } })
+  ).toMatchObject({ channel: "C123", thread_ts: "1782131901.806779" })
 })
 
 test("broker input validation coerces numeric Slack timestamps", () => {

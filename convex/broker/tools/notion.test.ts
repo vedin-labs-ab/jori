@@ -1,6 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { id } from "../../../test/convex/database"
-import { integrationDoc } from "../../../test/convex/integrations"
+import { integration } from "../../../test/convex/tools"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { callNotionTool } from "./notion"
@@ -14,7 +13,7 @@ test("creates Notion pages with icon and cover payloads", async () => {
   vi.stubGlobal("fetch", fetch)
 
   const result = await callNotionTool(
-    notionIntegration(),
+    integration("notion"),
     "notion_create_page",
     {
       cover: {
@@ -72,7 +71,7 @@ test.each([
 
   vi.stubGlobal("fetch", fetch)
   const result = await callNotionTool(
-    notionIntegration(),
+    integration("notion"),
     "notion_upload_file",
     { fileId: "file_1" },
     fileContext()
@@ -131,13 +130,4 @@ function file(): Doc<"files"> {
     createdAt: 0,
     updatedAt: 0,
   } as Doc<"files">
-}
-
-function notionIntegration(): Doc<"integrations"> {
-  return integrationDoc({
-    _id: id<"integrations">("notion_integration"),
-    integration: "notion",
-    externalId: "workspace",
-    credentials: { tokens: { access: "notion-token" } },
-  })
 }
