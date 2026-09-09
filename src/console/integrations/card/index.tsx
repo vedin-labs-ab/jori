@@ -60,17 +60,12 @@ export function IntegrationCard({
   return (
     <IntegrationCardSurface
       action={
-        isConnected ? (
-          <DisconnectDialog
-            isDisconnecting={disconnect.isDisconnecting}
-            onDisconnect={disconnect.disconnect}
-            title={config.label}
-          />
-        ) : (
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
+            variant={isConnected ? "outline" : "default"}
             onClick={install.connect}
-            disabled={install.isConnecting}
+            disabled={install.isConnecting || disconnect.isDisconnecting}
           >
             {install.isConnecting ? (
               <>
@@ -79,12 +74,22 @@ export function IntegrationCard({
               </>
             ) : (
               <>
-                {config.action}
+                {isConnected || status?.status === "expired"
+                  ? "Reconnect"
+                  : config.action}
                 <ExternalLink />
               </>
             )}
           </Button>
-        )
+          {isConnected ? (
+            <DisconnectDialog
+              disabled={install.isConnecting}
+              isDisconnecting={disconnect.isDisconnecting}
+              onDisconnect={disconnect.disconnect}
+              title={config.label}
+            />
+          ) : null}
+        </div>
       }
       description={isConnected ? config.connectedDetail : config.emptyDetail}
       logo={config.logo}

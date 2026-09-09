@@ -16,15 +16,21 @@ export function DisconnectDialog({
   isDisconnecting,
   onDisconnect,
   title,
+  disabled = false,
 }: {
   isDisconnecting: boolean
   onDisconnect: () => void
   title: string
+  disabled?: boolean
 }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="outline" disabled={isDisconnecting}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isDisconnecting || disabled}
+        >
           {isDisconnecting ? (
             <>
               <Loader2 className="size-4 animate-spin" />
