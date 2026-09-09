@@ -1,41 +1,62 @@
 import { Files, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { cn } from "@/lib/utils"
-import {
-  type DragPayload,
-  type ResourceDragItem,
-} from "@/shared/console/folders/drag/plan"
-import { DraggableTableRow } from "@/shared/console/folders/drag/row"
-import { useResourceRowDrag } from "@/shared/console/folders/drag/state"
-import { SelectionHeadCell, SelectionRowCell } from "@/shared/console/list/bar"
-import {
-  columnTier,
-  facetEntries,
   type ListConfig,
   type ListControls,
 } from "@/shared/console/list/controls"
-import {
-  ConsoleListEmpty,
-  FilterableEmptyState,
-} from "@/shared/console/list/empty"
-import { ConsoleListTable } from "@/shared/console/list/frame"
-import { FilterHead, SortHead } from "@/shared/console/list/head"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type RowSelection } from "@/shared/console/list/selection"
-import { MaterialFolderCell } from "@/shared/console/materials/cells/folder"
+import {
+  folderColumn,
+  ownerColumn,
+} from "@/shared/console/materials/cells/columns"
 import { type FolderNames } from "@/shared/console/materials/folders"
-import { absoluteTime, relativeTime, useNow } from "@/shared/console/time"
+import {
+  type MaterialColumn,
+  MaterialList,
+} from "@/shared/console/materials/list"
+import { fileOwner } from "@/shared/console/materials/owners"
+import { absoluteTime, relativeTime } from "@/shared/console/time"
 import { formatFileSize } from "@/shared/files/size"
 import { FileRowMenu } from "../menu"
 import { type FileRow } from "../types"
-import { FileNameCell, FileOwnerCell, FileTypeCell } from "./cells"
+import { FileNameCell, FileTypeCell } from "./cells"
+import { fileNoun } from "./config"
+
+const columns: MaterialColumn<FileRow>[] = [
+  {
+    cell: (file) => formatFileSize(file.size),
+    className: "text-muted-foreground",
+    head: { sortKey: "size" },
+    label: "Size",
+    tier: "md",
+  },
+  {
+    cell: (file) => <FileTypeCell file={file} />,
+    head: { facets: ["kind"] },
+    label: "Type",
+    tier: "2xl",
+  },
+  folderColumn("lg"),
+  {
+    cell: (file, context) => relativeTime(file.createdAt, context.now),
+    className: "text-muted-foreground",
+    head: { sortKey: "created" },
+    label: "Created",
+    tier: "3xl",
+    title: (file) => absoluteTime(file.createdAt),
+  },
+  ownerColumn(fileOwner, "xl"),
+  {
+    cell: (file, context) => relativeTime(file.updatedAt, context.now),
+    className: "text-muted-foreground",
+    head: { sortKey: "updated" },
+    label: "Last Updated",
+    tier: "xs",
+    title: (file) => absoluteTime(file.updatedAt),
+  },
+]
 
 export function FileTable({
   config,
@@ -70,132 +91,41 @@ export function FileTable({
     return <ConsoleListLoading />
   }
 
-  if (files.length === 0 && !hasFilters) {
-    return (
-      <ConsoleListEmpty>
-        <FilesEmptyState hasFilters={false} onUpload={onUpload} />
-      </ConsoleListEmpty>
-    )
-  }
-
-  const selected: DragPayload = {
-    folders: [],
-    resources: selection.selected.map(fileDragItem),
-  }
-
   return (
-    <>
-      <ConsoleListTable fill={files.length > 0}>
-        <FileTableHead
-          config={config}
-          controls={controls}
-          selection={selection}
-        />
-        <TableBody>
-          {files.map((file) => (
-            <FileTableRow
-              file={file}
-              folders={folders}
-              isPending={pendingFileId === file.fileId}
-              key={file.fileId}
-              onAccess={onAccess}
-              onDelete={onDelete}
-              onEdit={onEdit}
-              onMoveToFolder={onMoveToFolder}
-              selected={selected}
-              selection={selection}
-            />
-          ))}
-        </TableBody>
-      </ConsoleListTable>
-      {files.length === 0 ? (
-        <ConsoleListEmpty>
-          <FilesEmptyState hasFilters onUpload={onUpload} />
-        </ConsoleListEmpty>
-      ) : null}
-    </>
-  )
-}
-
-/** The header row is the page's control surface: the kind facet rides the
- *  Type column, folders their own, and the measured columns sort. Each
- *  column names its tier here and again on its cell, so the list sheds
- *  columns instead of scrolling sideways in a narrow box. */
-function FileTableHead({
-  config,
-  controls,
-  selection,
-}: {
-  config: ListConfig<FileRow>
-  controls: ListControls
-  selection: RowSelection<FileRow>
-}) {
-  return (
-    <TableHeader>
-      <TableRow>
-        <SelectionHeadCell selection={selection} />
-        <SortHead controls={controls} label="Name" sortKey="name" />
-        <SortHead
-          className={columnTier.md}
-          controls={controls}
-          label="Size"
-          sortKey="size"
-        />
-        <FilterHead
-          className={columnTier["2xl"]}
-          controls={controls}
-          facets={facetEntries(config, ["kind"])}
-          label="Type"
-        />
-        <FilterHead
-          className={columnTier.lg}
-          controls={controls}
-          facets={facetEntries(config, ["folder"])}
-          label="Folder"
-        />
-        <SortHead
-          className={columnTier["3xl"]}
-          controls={controls}
-          label="Created"
-          sortKey="created"
-        />
-        <FilterHead
-          className={columnTier.xl}
-          controls={controls}
-          facets={facetEntries(config, ["owner"])}
-          label="Owner"
-        />
-        <SortHead
-          className={columnTier.xs}
-          controls={controls}
-          label="Last Updated"
-          sortKey="updated"
-        />
-        <TableHead className="w-10" />
-      </TableRow>
-    </TableHeader>
-  )
-}
-
-function FilesEmptyState({
-  hasFilters,
-  onUpload,
-}: {
-  hasFilters: boolean
-  onUpload: () => void
-}) {
-  return (
-    <FilterableEmptyState
-      action={
-        <Button onClick={onUpload} type="button">
-          <Upload />
-          Upload file
-        </Button>
-      }
-      description="Files Jori saves during runs and uploads from your team appear here."
+    <MaterialList
+      config={config}
+      controls={controls}
+      folders={folders}
       hasFilters={hasFilters}
-      icon={Files}
-      noun="files"
+      kind={{
+        action: (
+          <Button onClick={onUpload} type="button">
+            <Upload />
+            Upload file
+          </Button>
+        ),
+        columns,
+        description:
+          "Files Jori saves during runs and uploads from your team appear here.",
+        drag: fileDragItem,
+        icon: Files,
+        identify: (file) => file.fileId,
+        menu: (file) => (
+          <FileRowMenu
+            file={file}
+            isPending={pendingFileId === file.fileId}
+            onAccess={onAccess}
+            onDelete={onDelete}
+            onEdit={onEdit}
+            onMoveToFolder={onMoveToFolder}
+          />
+        ),
+        nameCell: (file) => <FileNameCell file={file} />,
+        noun: fileNoun,
+      }}
+      rows={files}
+      selection={selection}
+      unauthorizedMessage={undefined}
     />
   )
 }
@@ -209,81 +139,4 @@ function fileDragItem(file: FileRow): ResourceDragItem {
     mimeType: file.mimeType,
     folderId: file.folderId,
   }
-}
-
-/** One file's row: it drags onto a folder, and a selected row takes the
- *  rest of the selection with it. */
-function FileTableRow({
-  file,
-  folders,
-  isPending,
-  onAccess,
-  onDelete,
-  onEdit,
-  onMoveToFolder,
-  selected,
-  selection,
-}: {
-  file: FileRow
-  folders: FolderNames | undefined
-  isPending: boolean
-  onAccess: (file: FileRow) => void
-  onDelete: (file: FileRow) => void
-  onEdit: (file: FileRow) => void
-  onMoveToFolder: (file: FileRow) => void
-  selected: DragPayload
-  selection: RowSelection<FileRow>
-}) {
-  const drag = useResourceRowDrag(fileDragItem(file), selected)
-  const now = useNow(30_000)
-
-  return (
-    <DraggableTableRow
-      data-state={selection.isSelected(file) ? "selected" : undefined}
-      drag={drag}
-    >
-      <SelectionRowCell
-        label={`Select ${file.name}`}
-        row={file}
-        selection={selection}
-      />
-      <TableCell>
-        <FileNameCell file={file} />
-      </TableCell>
-      <TableCell className={cn("text-muted-foreground", columnTier.md)}>
-        {formatFileSize(file.size)}
-      </TableCell>
-      <TableCell className={columnTier["2xl"]}>
-        <FileTypeCell file={file} />
-      </TableCell>
-      <TableCell className={columnTier.lg}>
-        <MaterialFolderCell folderId={file.folderId} folders={folders} />
-      </TableCell>
-      <TableCell
-        className={cn("text-muted-foreground", columnTier["3xl"])}
-        title={absoluteTime(file.createdAt)}
-      >
-        {relativeTime(file.createdAt, now)}
-      </TableCell>
-      <TableCell className={columnTier.xl}>
-        <FileOwnerCell file={file} />
-      </TableCell>
-      <TableCell
-        className={cn("text-muted-foreground", columnTier.xs)}
-        title={absoluteTime(file.updatedAt)}
-      >
-        {relativeTime(file.updatedAt, now)}
-      </TableCell>
-      <TableCell className="text-right">
-        <FileRowMenu
-          file={file}
-          isPending={isPending}
-          onAccess={onAccess}
-          onDelete={onDelete}
-          onEdit={onEdit}
-          onMoveToFolder={onMoveToFolder}
-        />
-      </TableCell>
-    </DraggableTableRow>
-  )
 }

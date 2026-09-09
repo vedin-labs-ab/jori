@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import { type CountedNoun } from "../count"
 import { type DragPayload, type ResourceDragItem } from "../folders/drag/plan"
 import { DraggableTableRow } from "../folders/drag/row"
@@ -27,7 +28,7 @@ import { type RowSelection } from "../list/selection"
 import { useNow } from "../time"
 import { type FolderNames } from "./folders"
 
-// The list a table, a store, or a job page shows: a selection column, the
+// The list a file, table, store, or job page shows: a selection column, the
 // name, whatever columns the kind declares, and the row's menu, with the
 // facets and sorts riding the column heads and the empty state's offer
 // telling one kind's list from another's. Every row drags onto a folder;
@@ -47,9 +48,11 @@ export type MaterialCellContext = {
  *  says how wide the list must be before the column earns its place. */
 export type MaterialColumn<Row> = {
   cell: (row: Row, context: MaterialCellContext) => ReactNode
+  className?: string
   head?: { facets: readonly string[] } | { sortKey: string }
   label: string
   tier: ColumnTier
+  title?: (row: Row) => string
 }
 
 /** What tells one material list from another. */
@@ -248,7 +251,11 @@ function MaterialListRow<Row extends MaterialListRow>({
       />
       <TableCell>{kind.nameCell(row)}</TableCell>
       {kind.columns.map((column) => (
-        <TableCell className={columnTier[column.tier]} key={column.label}>
+        <TableCell
+          className={cn(column.className, columnTier[column.tier])}
+          key={column.label}
+          title={column.title?.(row)}
+        >
           {column.cell(row, context)}
         </TableCell>
       ))}

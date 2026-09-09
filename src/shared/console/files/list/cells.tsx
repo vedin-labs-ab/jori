@@ -2,8 +2,6 @@ import {
   MaterialNameCell,
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
-import { MaterialOwnerCell } from "@/shared/console/materials/cells/owner"
-import { fileOwner } from "@/shared/console/materials/owners"
 import { VisibilityMark } from "@/shared/console/visibility/badge"
 import { fileKind } from "@/shared/files/kind"
 import { ConsoleLink } from "../../shell/link"
@@ -45,16 +43,4 @@ export function FileTypeCell({ file }: { file: FileRow }) {
       {kind.label}
     </div>
   )
-}
-
-/** Owner column: the uploading person for uploads; Jori itself for files an
- *  agent run saved. */
-export function FileOwnerCell({
-  compact = false,
-  file,
-}: {
-  compact?: boolean
-  file: FileRow
-}) {
-  return <MaterialOwnerCell compact={compact} owner={fileOwner(file)} />
 }
