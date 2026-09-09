@@ -45,8 +45,11 @@ function renderSidebar(
   )
 }
 
-test("New chat leads, then Activity, then the chats, then the resources", () => {
-  renderSidebar("/chat/conversations_flaky")
+test.each([
+  "/chat/conversations_flaky",
+  "/chat/conversations_flaky/",
+])("the current chat is active at %s, between Activity and resources", (pathname) => {
+  renderSidebar(pathname)
 
   const links = screen.getAllByRole("link").map((link) => link.textContent)
 
@@ -68,6 +71,11 @@ test("New chat leads, then Activity, then the chats, then the resources", () => 
       .getByRole("link", { name: "Flaky payroll test" })
       .getAttribute("data-active")
   ).toBe("true")
+  expect(
+    screen
+      .getByRole("link", { name: "Renewals at risk" })
+      .getAttribute("data-active")
+  ).toBe("false")
   expect(
     screen.getByRole("link", { name: "New chat" }).getAttribute("data-active")
   ).toBe("false")
@@ -118,10 +126,13 @@ test("Chats and Resources close from their labels, and stay closed on the next v
   expect(screen.getByRole("link", { name: "Jobs" })).toBeDefined()
 })
 
-test("the icon rail folds the chats into one entry that opens a searchable list", () => {
+test.each([
+  "/chat/conversations_flaky",
+  "/chat/conversations_flaky/",
+])("the icon rail marks Chats active at %s and opens a searchable list", (pathname) => {
   const navigate = vi.fn()
 
-  renderSidebar("/chat/conversations_flaky", chats, { open: false, navigate })
+  renderSidebar(pathname, chats, { open: false, navigate })
 
   const entry = screen.getByRole("button", { name: "Chats" })
 

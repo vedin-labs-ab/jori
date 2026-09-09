@@ -21,7 +21,11 @@ import {
 import { scrollFade } from "@/shared/fade"
 import { type ChatConversation } from "../chat/types"
 import { useConsoleNavigate } from "./location"
-import { conversationDestination, conversationPathname } from "./routes"
+import {
+  conversationDestination,
+  conversationPathname,
+  isNavigationActive,
+} from "./routes"
 
 /** The person's chats in a searchable list that opens from whatever the
  *  host wraps in it; choosing one goes there and closes the list. */
@@ -88,8 +92,8 @@ export function ChatsMenu({
       <SidebarMenuItem>
         <ChatsPicker chats={chats} side={side}>
           <SidebarMenuButton
-            isActive={chats.some(
-              (chat) => pathname === conversationPathname(chat.id)
+            isActive={chats.some((chat) =>
+              isNavigationActive(pathname, conversationPathname(chat.id), true)
             )}
             tooltip="Chats"
           >

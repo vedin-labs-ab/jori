@@ -146,7 +146,11 @@ function ChatsGroup({
             <SidebarMenuItem key={chat.id}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === conversationPathname(chat.id)}
+                isActive={isNavigationActive(
+                  pathname,
+                  conversationPathname(chat.id),
+                  true
+                )}
                 tooltip={chat.title}
               >
                 <ConsoleLink {...conversationDestination(chat.id)}>

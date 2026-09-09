@@ -3,6 +3,8 @@ import { RouterProvider } from "@tanstack/react-router"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { lazy } from "react"
 import { expect, test, vi } from "vitest"
+import { activeFolderId } from "@/shared/console/folders/tree"
+import { isNavigationActive } from "@/shared/console/shell/routes"
 import { setup, sync } from "../../test/navigation"
 
 const paths = [
@@ -183,4 +185,15 @@ test("sign-in, marketing, and integration offers stay outside the workspace layo
       router.matchRoutes(path).some((match) => match.routeId === "/_workspace")
     ).toBe(false)
   }
+})
+
+test("chat and folder index routes keep their sidebar item active", () => {
+  const router = setup()
+  const chatPath = router.matchRoutes("/chat/conversation").at(-1)?.pathname
+  const folderPath = router.matchRoutes("/folders/folder").at(-1)?.pathname
+
+  expect(isNavigationActive(chatPath ?? "", "/chat/conversation", true)).toBe(
+    true
+  )
+  expect(activeFolderId(folderPath ?? "")).toBe("folder")
 })

@@ -18,6 +18,7 @@ test("a member's page wears its surface's noun until its name has loaded", () =>
 
 test("New chat is active on its own path alone; the rest on their pages too", () => {
   expect(isNavigationActive("/chat", "/chat", true)).toBe(true)
+  expect(isNavigationActive("/chat/", "/chat", true)).toBe(true)
   expect(
     isNavigationActive("/chat/conversations_renewals", "/chat", true)
   ).toBe(false)
