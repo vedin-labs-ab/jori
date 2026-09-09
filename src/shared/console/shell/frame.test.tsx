@@ -17,8 +17,17 @@ vi.mock("@tanstack/react-router", async () => ({
   useRouterState: ({
     select,
   }: {
-    select: (state: { location: { pathname: string } }) => unknown
-  }) => select({ location: { pathname: "/" } }),
+    select: (state: {
+      location: { pathname: string }
+      matches: { pathname: string }[]
+      loadedAt: number
+    }) => unknown
+  }) =>
+    select({
+      location: { pathname: "/" },
+      matches: [{ pathname: "/" }],
+      loadedAt: 0,
+    }),
   Link: (await import("../../../../test/router")).Link,
 }))
 
@@ -139,16 +148,15 @@ test("a published empty trail names a root material without ancestors", () => {
   expect(screen.queryByRole("link", { name: "Folders" })).toBeNull()
 })
 
-test("keeps the previous crumb while the next material page loads", () => {
+test("clears the previous material controls while another page loads", () => {
   const { publish, setPathname } = renderWithPublisher("/folders/aaa")
 
   act(() => publish.current?.({ name: "Reports", trail: [] }))
   setPathname("/folders/bbb")
   act(() => publish.current?.(undefined))
 
-  // The old trail stands in until the next page publishes — never the
-  // half-built default in between.
-  expect(screen.getByText("Reports")).toBeDefined()
+  // The previous material must not leave live actions on the new page.
+  expect(screen.queryByText("Reports")).toBeNull()
 
   act(() => publish.current?.({ name: "Archive", trail: [] }))
 

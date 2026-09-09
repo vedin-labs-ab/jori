@@ -11,7 +11,7 @@ export type PageTarget = { run: string } | { page: number }
  * link arrives without a page and seeks the run.
  */
 export function useSearchTarget() {
-  const { page, run } = useSearch({ from: "/runs" })
+  const { page, run } = useSearch({ from: "/_workspace/runs" })
 
   return useMemo<PageTarget | undefined>(() => {
     if (page !== undefined) {

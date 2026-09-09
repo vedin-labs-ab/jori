@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { AlertTriangle } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
@@ -21,7 +22,7 @@ export function ShareShell({
           <h1 className="truncate font-medium text-sm">{name}</h1>
         </div>
         <Button asChild size="sm" variant="outline">
-          <a href={openPath}>Open in Jori</a>
+          <Link to={openPath}>Open in Jori</Link>
         </Button>
       </header>
       <div className="mx-auto grid w-full max-w-4xl gap-4 px-4 py-6">
@@ -44,7 +45,7 @@ export function ShareUnavailable({ openPath }: { openPath: string }) {
         </p>
       </div>
       <Button asChild variant="outline">
-        <a href={openPath}>Open in Jori</a>
+        <Link to={openPath}>Open in Jori</Link>
       </Button>
     </main>
   )

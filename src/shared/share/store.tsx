@@ -1,8 +1,8 @@
 import { useQuery } from "convex/react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { scrollFadeX } from "@/shared/fade"
-import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
 import { useShareExpired } from "./link"
 import { ShareShell, ShareUnavailable } from "./shell"
@@ -24,7 +24,7 @@ export function StoreShareView({
   const openPath = `/stores/${encodeURIComponent(storeId)}`
 
   if (store === undefined) {
-    return <FullscreenSkeletonLoader aria-label="Loading store" />
+    return <ConsoleListLoading label="Loading store" />
   }
 
   if (store === null || isExpired) {

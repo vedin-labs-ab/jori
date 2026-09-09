@@ -19,8 +19,17 @@ vi.mock("@tanstack/react-router", () => ({
   useRouterState: ({
     select,
   }: {
-    select: (state: { location: { pathname: string } }) => unknown
-  }) => select({ location: { pathname: "/things" } }),
+    select: (state: {
+      location: { pathname: string }
+      matches: { pathname: string }[]
+      loadedAt: number
+    }) => unknown
+  }) =>
+    select({
+      location: { pathname: "/things" },
+      matches: [{ pathname: "/things" }],
+      loadedAt: 0,
+    }),
 }))
 
 const mobile = vi.hoisted(() => ({ current: false }))

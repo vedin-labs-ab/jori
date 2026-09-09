@@ -28,7 +28,8 @@ export const ConsoleNavigationContext = createContext<ConsoleNavigation | null>(
 export function useConsolePathname() {
   const navigation = useContext(ConsoleNavigationContext)
   const pathname = useRouterState({
-    select: (state) => state.location.pathname,
+    select: (state) =>
+      state.matches.at(-1)?.pathname ?? state.location.pathname,
   })
 
   return navigation?.pathname ?? pathname

@@ -24,7 +24,7 @@ function renderPage(pathname: string) {
   }
 
   return render(
-    <ConsolePageBoundary pathname={pathname}>
+    <ConsolePageBoundary resetKey={pathname}>
       <Page />
     </ConsolePageBoundary>
   )
@@ -38,7 +38,7 @@ test("clears the failure on navigation, without a reload", () => {
   // The pathname is the reset key. Picking another destination in the
   // sidebar has to render that page, not hold the previous one's error.
   view.rerender(
-    <ConsolePageBoundary pathname="/runs">Runs content</ConsolePageBoundary>
+    <ConsolePageBoundary resetKey="/runs">Runs content</ConsolePageBoundary>
   )
 
   expect(screen.queryByText("This page didn't load")).toBeNull()

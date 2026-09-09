@@ -1,9 +1,9 @@
 import { useQuery } from "convex/react"
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { fileKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
-import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
 import { useShareExpired } from "./link"
 import { FilePreview } from "./preview"
@@ -27,7 +27,7 @@ export function FileShareView({
   const openPath = `/files/${encodeURIComponent(fileId)}`
 
   if (file === undefined) {
-    return <FullscreenSkeletonLoader aria-label="Loading file" />
+    return <ConsoleListLoading label="Loading file" />
   }
 
   if (file === null || isExpired) {

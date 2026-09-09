@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { MaterialFrame } from "."
+import { WorkspaceFrame } from "."
 import { useMaterialMode } from "./mode"
 
 const { viewer } = vi.hoisted(() => ({
@@ -52,9 +52,9 @@ test("a member gets the console chrome around the page", async () => {
   }
 
   render(
-    <MaterialFrame>
+    <WorkspaceFrame shareable>
       <Body />
-    </MaterialFrame>
+    </WorkspaceFrame>
   )
 
   expect(await screen.findByTestId("chrome")).toBeDefined()
@@ -70,9 +70,9 @@ test("an anonymous visitor gets no chrome at all", () => {
   }
 
   render(
-    <MaterialFrame>
+    <WorkspaceFrame shareable>
       <Body />
-    </MaterialFrame>
+    </WorkspaceFrame>
   )
 
   expect(screen.queryByTestId("chrome")).toBeNull()
@@ -87,9 +87,9 @@ test("an unread hash holds the page behind the fullscreen loader", () => {
   }
 
   render(
-    <MaterialFrame>
+    <WorkspaceFrame shareable>
       <Body />
-    </MaterialFrame>
+    </WorkspaceFrame>
   )
 
   expect(screen.getByText("Loading fullscreen")).toBeDefined()
@@ -98,20 +98,46 @@ test("an unread hash holds the page behind the fullscreen loader", () => {
 
 test("the chrome survives the page inside it changing", async () => {
   const { rerender } = render(
-    <MaterialFrame>
+    <WorkspaceFrame shareable>
       <div data-testid="page">list</div>
-    </MaterialFrame>
+    </WorkspaceFrame>
   )
   const first = await screen.findByTestId("chrome")
 
   rerender(
-    <MaterialFrame>
+    <WorkspaceFrame shareable>
       <div data-testid="page">detail</div>
-    </MaterialFrame>
+    </WorkspaceFrame>
   )
 
   // Same DOM node, not a rebuilt one: this is what keeps the sidebar and
   // header — and their state — alive across navigation.
   expect(screen.getByTestId("chrome")).toBe(first)
   expect(screen.getByTestId("page").textContent).toBe("detail")
+})
+
+test("an anonymous visitor on a protected route still enters the console gate", async () => {
+  viewer.isSignedIn = false
+  viewer.secret = "abc"
+  render(
+    <WorkspaceFrame shareable={false}>
+      <div>Protected page</div>
+    </WorkspaceFrame>
+  )
+  expect(await screen.findByTestId("chrome")).toBeDefined()
+})
+
+test("moving from a protected section to a member's shareable page keeps the frame", async () => {
+  const view = render(
+    <WorkspaceFrame shareable={false}>
+      <div>Jobs</div>
+    </WorkspaceFrame>
+  )
+  const chrome = await screen.findByTestId("chrome")
+  view.rerender(
+    <WorkspaceFrame shareable>
+      <div>Table</div>
+    </WorkspaceFrame>
+  )
+  expect(screen.getByTestId("chrome")).toBe(chrome)
 })

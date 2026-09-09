@@ -43,8 +43,17 @@ export const useRouter = () => ({
 export const useRouterState = <Selected>({
   select,
 }: {
-  select: (state: { location: { pathname: string } }) => Selected
-}) => select({ location: { pathname: "/" } })
+  select: (state: {
+    location: { pathname: string }
+    matches: { pathname: string }[]
+    loadedAt: number
+  }) => Selected
+}) =>
+  select({
+    location: { pathname: "/" },
+    matches: [{ pathname: "/" }],
+    loadedAt: 0,
+  })
 
 /** A test is the client, and it has hydrated. */
 export const useHydrated = () => true

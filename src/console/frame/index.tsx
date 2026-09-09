@@ -1,4 +1,4 @@
-import { Outlet } from "@tanstack/react-router"
+import { Outlet, useRouterState } from "@tanstack/react-router"
 import { lazy, type ReactNode, Suspense } from "react"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
@@ -13,18 +13,19 @@ import {
   resolveMaterialMode,
 } from "./mode"
 
-const MaterialChrome = lazy(() => import("./chrome"))
+const WorkspaceChrome = lazy(() => import("./chrome"))
 
-/**
- * The frame a material section renders in, chosen once above the outlet.
- *
- * Everything below it — the console list, one material's page, the share
- * view — swaps inside a frame that stays mounted, so the sidebar, header,
- * and their state survive navigation. Pages compose `ConsolePage` as usual;
- * it recognises the frame and reuses it instead of opening a second one.
- */
-export function MaterialFrame({ children }: { children: ReactNode }) {
-  const mode = useResolvedMode()
+/** Resolves the viewer above every workspace route. Only material detail
+ *  routes allow anonymous share access; all other pages use the session gate.
+ *  Keeping the same frame here preserves the shell across sections. */
+export function WorkspaceFrame({
+  children,
+  shareable,
+}: {
+  children: ReactNode
+  shareable: boolean
+}) {
+  const mode = useResolvedMode(shareable)
 
   if (mode === "resolving") {
     return <FullscreenSkeletonLoader />
@@ -41,18 +42,22 @@ export function MaterialFrame({ children }: { children: ReactNode }) {
   return (
     <MaterialModeProvider value="console">
       <Suspense fallback={<FullscreenSkeletonLoader />}>
-        <MaterialChrome>{children}</MaterialChrome>
+        <WorkspaceChrome>{children}</WorkspaceChrome>
       </Suspense>
     </MaterialModeProvider>
   )
 }
 
 /** Every gate query mounts together so their round-trips overlap. */
-function useResolvedMode(): MaterialMode {
+function useResolvedMode(shareable: boolean): MaterialMode {
   const secret = useShareSecret()
   const session = useSession()
   const convex = useConvexSession()
   const organization = useActiveOrganization()
+
+  if (!shareable) {
+    return "console"
+  }
 
   return resolveMaterialMode({
     hasOrganization:
@@ -66,13 +71,22 @@ function useResolvedMode(): MaterialMode {
   })
 }
 
-/** A material section's route component. The frame outlives the move between
- *  the list and one material, so the console chrome around them is mounted
- *  once. */
-export function MaterialSection() {
+/** Match the committed route, so a pending navigation cannot change the
+ *  viewer mode around the page that is still on screen. */
+export function WorkspaceSection() {
+  const shareable = useRouterState({
+    select: (state) =>
+      state.matches.some(
+        (match) =>
+          match.routeId === "/_workspace/files/$fileId/" ||
+          match.routeId === "/_workspace/stores/$storeId/" ||
+          match.routeId === "/_workspace/tables/$tableId/"
+      ),
+  })
+
   return (
-    <MaterialFrame>
+    <WorkspaceFrame shareable={shareable}>
       <Outlet />
-    </MaterialFrame>
+    </WorkspaceFrame>
   )
 }

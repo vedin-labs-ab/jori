@@ -1,4 +1,5 @@
 import { parseShareFragment } from "@contracts/shares/fragment"
+import { useRouterState } from "@tanstack/react-router"
 import { useEffect, useState, useSyncExternalStore } from "react"
 
 function subscribeToHash(onChange: () => void) {
@@ -17,6 +18,10 @@ function readShareSecret() {
  *  synchronously, so navigating to a material inside the app resolves in
  *  the same commit rather than flashing a loading state first. */
 export function useShareSecret() {
+  // Router pushes and replacements do not dispatch native hashchange events.
+  // Subscribe to the route hash too, including edits on the same detail URL.
+  useRouterState({ select: (state) => state.location.hash })
+
   return useSyncExternalStore(subscribeToHash, readShareSecret, readNoSecret)
 }
 
