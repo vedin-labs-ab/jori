@@ -5,18 +5,21 @@ import { packageCommand, runCommand } from "../process.ts"
 import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
 
 /**
- * Usage: pnpm land <name>
+ * Usage: pnpm land <name> [--no-verify]
  *
  * Rebases the task on `main`, runs the gate in the task's worktree, and
  * fast-forwards `main` from here, in that order and only in that order. The
  * merge runs from the primary checkout because a merge run inside the
  * worktree merges the branch into itself and reports success. If `main`
  * moved while the gate ran, nothing lands and the command says to run it
- * again, which repeats the rebase on the new `main`.
+ * again, which repeats the rebase on the new `main`. `--no-verify` skips
+ * the gate without recording a verification pass.
  */
 requirePrimaryCheckout("Landing")
 
-const task = readTaskName(process.argv.slice(2))
+const args = process.argv.slice(2)
+const skipGate = args.at(-1) === "--no-verify"
+const task = readTaskName(skipGate ? args.slice(0, -1) : args)
 const branch = branchOf(task)
 const directory = worktreeOf(task)
 
@@ -52,6 +55,12 @@ function rebase() {
 /** The gate runs in the worktree, on the rebased tree, and records its pass
  *  under the shared git directory, where the deploy that follows reads it. */
 async function gate() {
+  if (skipGate) {
+    process.stdout.write("Gate skipped; no verification recorded.\n")
+
+    return
+  }
+
   if (isVerified(directory)) {
     process.stdout.write("Gate already passed on this tree.\n")
 
