@@ -139,7 +139,7 @@ function RecentPlaceholder() {
       </div>
       <ul className="divide-y">
         {placeholderRows.map((row) => (
-          <li className="flex h-10 items-center px-3" key={row}>
+          <li className="flex h-10 items-center" key={row}>
             <Skeleton className="h-4 w-1/2" />
           </li>
         ))}
@@ -211,7 +211,7 @@ function RecentConversations({
 /** A row that goes somewhere: its text on one line, and the arrow that
  *  opens under the pointer to say so, taking no room until it does. */
 const rowClassName =
-  "group/row flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
+  "group/row flex w-full items-center gap-3 px-0 py-2.5 text-left text-sm outline-none transition-[background-color,padding] duration-150 hover:bg-muted hover:px-3 focus-visible:bg-muted focus-visible:px-3"
 
 function RowArrow() {
   return (
