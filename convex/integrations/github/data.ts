@@ -25,6 +25,11 @@ export function isGitHubSelfActor(
     return false
   }
 
+  const botUserId = readDataString(integration.data, "botUserId")
+  if (botUserId !== undefined) {
+    return getActorExternalId(actor) === botUserId
+  }
+
   const login = getGitHubBotLogin(integration.data)
   const name = getActorDisplayName(actor)
 
@@ -43,14 +48,6 @@ export function githubActorId(actor: Actor | undefined) {
   }
 
   return [`github:${actor?.kind === "bot" ? "bot" : "user"}:${externalId}`]
-}
-
-export function githubIntegrationData(profile: { app_slug?: string }) {
-  const appSlug = profile.app_slug
-
-  return appSlug === undefined || appSlug === ""
-    ? undefined
-    : { appSlug, botLogin: botLogin(appSlug) }
 }
 
 function botLogin(appSlug: string | undefined) {

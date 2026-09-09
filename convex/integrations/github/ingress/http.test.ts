@@ -1,12 +1,81 @@
-import { expect, test, vi } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { encodeJson } from "../../../../contracts/json"
 import { integrationDoc } from "../../../../test/convex/integrations"
 import { internal } from "../../../_generated/api"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
+import { hmacSha256Hex, sha256Hex } from "../../../shared/crypto"
 import { getGitHubMessage } from "./events"
-import { handleGitHubMessageEvent } from "./http"
+import { handleGitHubEvents, handleGitHubMessageEvent } from "./http"
 import { type GitHubWebhookPayload } from "./types"
+
+afterEach(() => vi.unstubAllEnvs())
+
+test("durably accepts a signed GitHub event before acknowledging without processing it inline", async () => {
+  vi.stubEnv("GITHUB_WEBHOOK_SECRET", "test-secret")
+  const ctx = actionCtx()
+  const request = await webhookRequest()
+  expect((await handleGitHubEvents(ctx, request)).status).toBe(200)
+  expect(ctx.runMutation).toHaveBeenCalledExactlyOnceWith(
+    internal.integrations.webhooks.delivery.accept,
+    {
+      provider: "github",
+      externalId: "123",
+      eventId: await sha256Hex(
+        JSON.stringify(githubPayload("@jori-eu help", "MEMBER"))
+      ),
+      payload: {
+        event: "issue_comment",
+        deliveryId: "delivery",
+        payload: githubPayload("@jori-eu help", "MEMBER"),
+      },
+    }
+  )
+  expect(ctx.runQuery).not.toHaveBeenCalled()
+})
+
+test("changing an unsigned delivery header cannot bypass GitHub deduplication", async () => {
+  vi.stubEnv("GITHUB_WEBHOOK_SECRET", "test-secret")
+  const ctx = actionCtx()
+  await handleGitHubEvents(ctx, await webhookRequest())
+  const replay = await webhookRequest()
+  replay.headers.set("x-github-delivery", "another-delivery")
+  await handleGitHubEvents(ctx, replay)
+  expect(ctx.runMutation.mock.calls[0][1].eventId).toEqual(
+    ctx.runMutation.mock.calls[1][1].eventId
+  )
+})
+
+test("rejects forged GitHub events before trusting the installation", async () => {
+  vi.stubEnv("GITHUB_WEBHOOK_SECRET", "test-secret")
+  const ctx = actionCtx()
+  const request = await webhookRequest()
+  request.headers.set("x-hub-signature-256", "sha256=forged")
+  expect((await handleGitHubEvents(ctx, request)).status).toBe(401)
+  expect(ctx.runMutation).not.toHaveBeenCalled()
+})
+
+test("does not acknowledge a GitHub delivery when durable acceptance fails", async () => {
+  vi.stubEnv("GITHUB_WEBHOOK_SECRET", "test-secret")
+  const ctx = actionCtx()
+  ctx.runMutation.mockRejectedValue(new Error("storage unavailable"))
+  await expect(handleGitHubEvents(ctx, await webhookRequest())).rejects.toThrow(
+    "storage unavailable"
+  )
+})
+
+async function webhookRequest() {
+  const body = JSON.stringify(githubPayload("@jori-eu help", "MEMBER"))
+  return new Request("https://eu.example/github/events", {
+    method: "POST",
+    body,
+    headers: {
+      "x-github-event": "issue_comment",
+      "x-github-delivery": "delivery",
+      "x-hub-signature-256": `sha256=${await hmacSha256Hex("test-secret", body)}`,
+    },
+  })
+}
 
 test("records GitHub approval commands without starting a message run", async () => {
   const approval = approvalDoc()
