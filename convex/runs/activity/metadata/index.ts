@@ -1,4 +1,4 @@
-import { isRecord } from "../../../../contracts/json"
+import { isRecord, readStringArray } from "../../../../contracts/json"
 import { reactionDisplayLabel } from "../../../../contracts/reactions/display"
 import { type Doc } from "../../../_generated/dataModel"
 import { optionalString } from "../../../shared/input"
@@ -13,7 +13,6 @@ import {
   issueOrPullTarget,
   item,
   noun,
-  readStringArray,
   repositoryLabel,
   targetObjectLabel,
 } from "../helpers"
@@ -97,7 +96,7 @@ function codeInputMetadata(tool: string, input: Record<string, unknown>) {
     case "bash":
       return [item("target", optionalString(input.command))]
     case "git":
-      return [item("target", readStringArray(input.args)?.join(" "))]
+      return [item("target", readStringArray(input.args).join(" "))]
     case "glob":
     case "grep":
       return [

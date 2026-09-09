@@ -7,6 +7,7 @@ import {
 } from "../../../test/convex/console"
 import { id } from "../../../test/convex/database"
 import { type Doc } from "../../_generated/dataModel"
+import { agentWaitMetadata } from "./metadata/agents"
 import { projectActivity } from "./project"
 
 test("projects parked agent waits without active execution", () => {
@@ -65,6 +66,20 @@ test("excludes parked time from completed tool duration", () => {
     isLive: false,
     status: "completed",
   })
+})
+
+test.each([
+  { value: undefined },
+  { value: [] },
+  { value: [null, 1] },
+])("omits agent metadata for an empty wait selection: %j", ({
+  value: runIds,
+}) => {
+  expect(
+    agentWaitMetadata("wait_for_agents", { runIds }, [
+      agent("running", "running"),
+    ])
+  ).toEqual([])
 })
 
 function agentWaitTraces() {

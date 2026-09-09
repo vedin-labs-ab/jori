@@ -12,6 +12,15 @@ test.each([
     ],
   },
   {
+    label: "with empty domain restrictions",
+    input: {
+      includeDomains: [],
+      excludeDomains: [null, 1],
+      query: "current example",
+    },
+    metadata: [{ kind: "target", text: "current example" }],
+  },
+  {
     label: "without a domain restriction",
     input: { query: "current example" },
     metadata: [{ kind: "target", text: "current example" }],

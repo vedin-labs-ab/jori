@@ -4,13 +4,9 @@ import {
   sandboxWorkspace,
 } from "../../../contracts/coding"
 import { isRecord } from "../../../contracts/json"
+import { optionalString, readRecord } from "../../shared/input"
 import { readWorkspaceFile } from "./files"
-import {
-  boundedTimeoutMs,
-  normalizeToolInput,
-  optionalTrimmedString,
-  requiredTrimmedString,
-} from "./input"
+import { boundedTimeoutMs, requiredTrimmedString } from "./input"
 import { boundedText } from "./output"
 import { applyWorkspacePatch } from "./patch/apply"
 import { sandboxWorkspacePath, shellQuote } from "./path"
@@ -32,7 +28,7 @@ export async function executeCodingTool(args: {
   }
 
   return await executeKnownCodingTool({
-    input: normalizeToolInput(args.input),
+    input: readRecord(args.input),
     sandbox: args.sandbox,
     tool: args.tool,
   })
@@ -53,7 +49,7 @@ export function isParkedCommand(value: unknown): value is ParkedCommand {
 /** How long the run waits on a parked command. The tool layer parks to the
  *  same bound the command was started with, so it reads it from here. */
 export function bashTimeoutMs(input: unknown) {
-  return boundedTimeoutMs(normalizeToolInput(input).timeoutMs)
+  return boundedTimeoutMs(readRecord(input).timeoutMs)
 }
 
 export async function finishBash(
@@ -87,7 +83,7 @@ async function executeKnownCodingTool(args: {
 
 async function runGit(sandbox: SandboxRuntime, input: Record<string, unknown>) {
   const args = requiredStringArray(input.args, "args")
-  const cwd = sandboxWorkspacePath(optionalTrimmedString(input.cwd))
+  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
 
   const result = await sandbox.runCommand({
     command: gitCommand(cwd, args),
@@ -105,7 +101,7 @@ async function runBash(
   sandbox: SandboxRuntime,
   input: Record<string, unknown>
 ) {
-  const cwd = sandboxWorkspacePath(optionalTrimmedString(input.cwd))
+  const cwd = sandboxWorkspacePath(optionalString(input.cwd))
   const outcome = await sandbox.startCommand({
     command: bashCommand(cwd, requiredTrimmedString(input.command, "command")),
     cwd: sandboxWorkspace,

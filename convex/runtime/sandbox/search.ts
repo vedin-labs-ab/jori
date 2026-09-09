@@ -1,9 +1,6 @@
 import { codingLimits, sandboxWorkspace } from "../../../contracts/coding"
-import {
-  boundedInteger,
-  optionalTrimmedString,
-  requiredTrimmedString,
-} from "./input"
+import { optionalString } from "../../shared/input"
+import { boundedInteger, requiredTrimmedString } from "./input"
 import { runJsonScript } from "./script"
 import { type SandboxRuntime } from "./types"
 
@@ -15,8 +12,8 @@ export async function grepWorkspace(
     input: {
       mode: "grep",
       pattern: requiredTrimmedString(input.pattern, "pattern"),
-      path: optionalTrimmedString(input.path),
-      include: optionalTrimmedString(input.include),
+      path: optionalString(input.path),
+      include: optionalString(input.include),
       limit: boundedInteger(input.limit, 100, 1, codingLimits.grepMatches),
     },
     sandbox,
@@ -33,7 +30,7 @@ export async function globWorkspace(
     input: {
       mode: "glob",
       pattern: requiredTrimmedString(input.pattern, "pattern"),
-      path: optionalTrimmedString(input.path),
+      path: optionalString(input.path),
       limit: boundedInteger(input.limit, 200, 1, codingLimits.globPaths),
     },
     sandbox,

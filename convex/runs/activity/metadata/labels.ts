@@ -1,11 +1,11 @@
+import { readStringArray } from "../../../../contracts/json"
 import { optionalNumber } from "../../../shared/input"
-import { readStringArray } from "../helpers"
 import { type ToolResult } from "../read"
 
 export function activityFilterLabel(value: unknown) {
   const filters = readStringArray(value)
 
-  if (filters === undefined) {
+  if (filters.length === 0) {
     return "all activity"
   }
 
