@@ -23,9 +23,10 @@ describe("job trigger prompts", () => {
     expect(context).not.toContain("- None")
     expect(context).toContain("## Instructions\n\nPost the daily digest.")
     expect(instructions).toContain(
-      "no useful work remains by calling `finish_run`"
+      "Finish the run when no useful work remains by calling `finish_run`."
     )
     expect(instructions).not.toContain("final: true")
+    expect(instructions).not.toContain("offer_integration")
     expect(instructions).not.toContain("# Communication")
     expect(instructions).not.toContain("send_reply")
     expectNoSyntheticBlankLines(context)

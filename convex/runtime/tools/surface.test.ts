@@ -1,26 +1,27 @@
 import { expect, test } from "vitest"
 import { createSurfaceRuntime, runTool } from "../../../test/runtime"
 
-test("send_reply routes through Convex and marks the active surface communicated", async () => {
+test.each([
+  false,
+  true,
+])("send_reply delivers the message and communicates with final=%s", async (final) => {
   const runtime = createSurfaceRuntime()
+  const blocks = [{ text: { text: "Done", type: "mrkdwn" }, type: "section" }]
 
   const result = await runTool({
     call: {
-      args: {
-        blocks: [{ text: { text: "Done", type: "mrkdwn" }, type: "section" }],
-        text: "Done",
-      },
+      args: final ? { final, text: "Done" } : { blocks, text: "Done" },
       id: "call_1",
       name: "send_reply",
     },
     runtime,
   })
 
-  expect(result.finished).toBe(false)
+  expect(result.finished).toBe(final)
   expect(JSON.parse(result.content)).toEqual({ status: "sent" })
   expect(runtime.context.activeSurface?.communicated).toBe(true)
   expect(runtime.platform.sendReply).toHaveBeenCalledWith({
-    blocks: [{ text: { text: "Done", type: "mrkdwn" }, type: "section" }],
+    blocks: final ? undefined : blocks,
     runId: "run_1",
     text: "Done",
   })
@@ -75,12 +76,16 @@ test("send_reply can target a specific Linear comment", async () => {
   )
 })
 
-test("add_reaction routes through Convex and marks the active surface communicated", async () => {
+test.each([
+  false,
+  true,
+])("add_reaction delivers the reaction and communicates with final=%s", async (final) => {
   const runtime = createSurfaceRuntime({ tool: "add_reaction" })
 
   const result = await runTool({
     call: {
       args: {
+        ...(final ? { final } : {}),
         reaction: "white_check_mark",
         target: { messageTs: "123.456" },
       },
@@ -90,7 +95,7 @@ test("add_reaction routes through Convex and marks the active surface communicat
     runtime,
   })
 
-  expect(result.finished).toBe(false)
+  expect(result.finished).toBe(final)
   expect(JSON.parse(result.content)).toEqual({ status: "added" })
   expect(runtime.context.activeSurface?.communicated).toBe(true)
   expect(runtime.platform.addReaction).toHaveBeenCalledWith({
