@@ -28,7 +28,7 @@ export const organizationProviders = [
       loading: "Connecting Slack",
       logo: {
         alt: "Slack logo",
-        src: "https://svgl.app/library/slack.svg",
+        src: "/logos/integrations/slack.svg",
       },
     },
     emptyHeadline: "No workspace connected",
@@ -48,7 +48,7 @@ export const organizationProviders = [
       loading: "Connecting Linear",
       logo: {
         alt: "Linear logo",
-        src: "https://svgl.app/library/linear.svg",
+        src: "/logos/integrations/linear.svg",
       },
     },
     emptyHeadline: "No workspace connected",
@@ -69,7 +69,7 @@ export const organizationProviders = [
       loading: "Connecting GitHub",
       logo: {
         alt: "GitHub logo",
-        src: "https://svgl.app/library/github_light.svg",
+        src: "/logos/integrations/github.svg",
       },
     },
     emptyHeadline: "No installation connected",
@@ -89,7 +89,7 @@ export const organizationProviders = [
       loading: "Connecting Notion",
       logo: {
         alt: "Notion logo",
-        src: "https://svgl.app/library/notion.svg",
+        src: "/logos/integrations/notion.svg",
       },
     },
     emptyHeadline: "No workspace connected",
