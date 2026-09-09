@@ -27,25 +27,6 @@ test("renders sigil-free pills whose icons carry the kind", async () => {
   )
 })
 
-test("marks a tool reference ready when its exact access exists", async () => {
-  const field = renderInstructionsField({
-    description: "Post with @Slack using #conversations_add_message.",
-    surfaces: [
-      {
-        integration: "slack",
-        tools: ["conversations_add_message"],
-      },
-    ],
-  })
-
-  expect(await screen.findByRole("textbox")).toBeDefined()
-  expect(
-    field.container
-      .querySelector('[data-job-reference-kind="tool"]')
-      ?.getAttribute("data-job-reference-access")
-  ).toBe("ready")
-})
-
 test("reacts when personal integration and tool references become organization-scoped", async () => {
   const field = renderInstructionsField({
     description: "Read @Gmail with #gmail_search.",
@@ -109,7 +90,15 @@ test("keeps a tool reference visible and unresolved after access is removed", as
     ],
   })
 
-  fireEvent.click(await screen.findByRole("button", { name: "Remove Slack" }))
+  const remove = await screen.findByRole("button", { name: "Remove Slack" })
+
+  expect(
+    field.container
+      .querySelector('[data-job-reference-kind="tool"]')
+      ?.getAttribute("data-job-reference-access")
+  ).toBe("ready")
+
+  fireEvent.click(remove)
 
   await waitFor(() => {
     const tool = field.container.querySelector(
@@ -169,30 +158,17 @@ test("resolves web tool references through the web access control", async () => 
   ).toBe("ready")
 })
 
-test("removes a reference from its hover remove button", async () => {
+test.each([
+  { surfaces: [] },
+  {
+    surfaces: [{ integration: "github" as const, tools: ["github_get_issue"] }],
+  },
+])("removing a skill preserves explicit access $surfaces", async ({
+  surfaces,
+}) => {
   const field = renderInstructionsField({
     description: "Run /meeting-prep now.",
-    surfaces: [],
-  })
-
-  const button = await screen.findByRole("button", {
-    name: "Remove meeting-prep",
-  })
-
-  fireEvent.click(button)
-
-  await waitFor(() => {
-    expect(field.onValueChange).toHaveBeenLastCalledWith({
-      description: "Run  now.",
-      surfaces: [],
-    })
-  })
-})
-
-test("preserves explicit access not represented by an integration pill", async () => {
-  const field = renderInstructionsField({
-    description: "Run /meeting-prep now.",
-    surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
+    surfaces,
   })
 
   fireEvent.click(
@@ -202,7 +178,7 @@ test("preserves explicit access not represented by an integration pill", async (
   await waitFor(() => {
     expect(field.onValueChange).toHaveBeenLastCalledWith({
       description: "Run  now.",
-      surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
+      surfaces,
     })
   })
 })

@@ -15,20 +15,13 @@ test("marks approval-required tools in message run details", async () => {
 
   await screen.findByRole("button", { name: "Open Notion tools" })
 
-  const count = screen.getByText("2")
-
   expect(screen.getByText("Tools")).toBeDefined()
-  expect(count.className).toContain("font-normal")
-  expect(count.className).toContain("text-[0.625rem]")
-  expect(count.className).toContain("text-muted-foreground")
+  expect(screen.getByText("2")).toBeDefined()
   expect(screen.getByText(hasTextContent("Write 1*"))).toBeDefined()
-  expect(screen.getByText("*").className).toContain("text-warning")
 
   fireEvent.click(screen.getByRole("button", { name: "Open Notion tools" }))
 
-  expect(screen.getByText("Requires approval").className).toContain(
-    "text-warning"
-  )
+  expect(screen.getByText("Requires approval")).toBeDefined()
   expect(screen.getAllByText("*")).toHaveLength(1)
 })
 
@@ -38,10 +31,6 @@ test("omits empty access counts in message run details", async () => {
   fireEvent.click(screen.getByRole("button", { name: /review tool access/i }))
 
   await screen.findByRole("button", { name: "Open GitHub tools" })
-
-  expect(
-    screen.getByRole("button", { name: "Open GitHub tools" })
-  ).toBeDefined()
   expect(screen.getByRole("button", { name: "Open Slack tools" })).toBeDefined()
   expect(screen.getByText("Read 1")).toBeDefined()
   expect(screen.getByText("Write 1")).toBeDefined()

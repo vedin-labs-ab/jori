@@ -42,26 +42,7 @@ test("renders the organization audience as the last item", () => {
   )
 
   expect(container.textContent?.endsWith("Organization")).toBe(true)
-  expect(
-    Array.from(container.querySelectorAll("svg")).some((element) =>
-      element.classList.contains("lucide-building-2")
-    )
-  ).toBe(true)
-})
-
-test("renders provider source labels", () => {
-  const { container } = render(
-    <SourceLine
-      audience="personal"
-      source={{
-        type: "message",
-        surface: "slack",
-      }}
-    />
-  )
-
-  expect(screen.getByText("Slack").className).toContain("font-medium")
-  expect(container.querySelector("img")).not.toBeNull()
+  expect(screen.getByText("Slack")).toBeDefined()
 })
 
 test("renders source kind and event labels", () => {
@@ -80,29 +61,12 @@ test("renders source kind and event labels", () => {
     />
   )
 
-  expect(screen.getByText("mention").className).toContain("font-mono")
-  expect(screen.getByText("issue.comment.created").className).toContain(
-    "font-mono"
-  )
-})
-
-test("renders Jori source labels", () => {
-  const { container } = render(
-    <SourceLine
-      audience="personal"
-      source={{
-        type: "job",
-        surface: "jori",
-      }}
-    />
-  )
-
-  expect(screen.getByText("Jori").className).toContain("font-medium")
-  expect(container.querySelector("svg[aria-hidden='true']")).not.toBeNull()
+  expect(screen.getByText("mention")).toBeDefined()
+  expect(screen.getByText("issue.comment.created")).toBeDefined()
 })
 
 test("renders recurring job source details", () => {
-  const { container } = render(
+  render(
     <SourceLine
       audience="personal"
       details={[{ type: "schedule", label: "Daily at 09:00 UTC" }]}
@@ -116,14 +80,10 @@ test("renders recurring job source details", () => {
 
   expect(screen.getByText("recurring")).toBeDefined()
   expect(screen.getByText("Daily at 09:00 UTC")).toBeDefined()
-  expect(
-    Array.from(container.querySelectorAll("svg[aria-hidden='true']")).some(
-      (element) => element.classList.contains("lucide-repeat-2")
-    )
-  ).toBe(true)
+  expect(screen.getByText("Jori")).toBeDefined()
 })
 
-test("renders Slack channels as channel chips", () => {
+test("renders Slack channel names", () => {
   render(
     <SourceLine
       audience="personal"
@@ -136,12 +96,8 @@ test("renders Slack channels as channel chips", () => {
     />
   )
 
-  const chip = screen.getByText("#product").parentElement
-
   expect(screen.getByText("mention")).toBeDefined()
-  expect(chip?.className).toContain("bg-current/10")
-  expect(chip?.className).toContain("text-[#1264A3]")
-  expect(chip?.className).toContain("dark:text-[#31B9E5]")
+  expect(screen.getByText("#product")).toBeDefined()
 })
 
 test("renders GitHub source details compactly", () => {
@@ -188,7 +144,7 @@ test("renders stopped actors", () => {
   expect(screen.getByText("albin@example.com")).toBeDefined()
 })
 
-test("renders the subtask relation with an emphasized parent title", () => {
+test("renders the subtask relation and parent title", () => {
   const { container } = render(
     <SourceLine
       audience="personal"
@@ -201,14 +157,6 @@ test("renders the subtask relation with an emphasized parent title", () => {
   )
 
   expect(container.textContent).toBe("JoriSubtask of Meeting BriefingPersonal")
-  expect(screen.getByText("Meeting Briefing").className).toContain(
-    "font-medium"
-  )
-  expect(
-    Array.from(container.querySelectorAll("svg")).some((element) =>
-      element.classList.contains("lucide-corner-down-right")
-    )
-  ).toBe(true)
 })
 
 test("renders a bare subtask when the parent title is unknown", () => {

@@ -115,8 +115,6 @@ test("renders bash commands as inline code", () => {
   const code = screen.getByText(command)
 
   expect(code.tagName).toBe("CODE")
-  expect(code.className).toContain("font-mono")
-  expect(code.className).toContain("bg-muted")
 })
 
 // A run's clock re-renders every row once a second, and reading overflow

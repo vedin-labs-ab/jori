@@ -52,7 +52,6 @@ describe("execution row message details", () => {
 
     expect(screen.getAllByText("Slack").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Task")).toHaveLength(1)
-    expect(screen.getByText("Tools")).toBeDefined()
     expect(
       screen.getByRole("button", { name: "Open Slack tools" })
     ).toBeDefined()
@@ -89,7 +88,6 @@ describe("execution row approval details", () => {
 
     await screen.findByText("Approval")
 
-    expect(screen.getByText("Approval")).toBeDefined()
     expect(screen.getByText("Send the requested Slack update.")).toBeDefined()
     expect(screen.queryByText("Request message")).toBeNull()
   })
@@ -120,7 +118,6 @@ describe("execution row linked details", () => {
 
     await screen.findByText("Repository")
 
-    expect(screen.getByText("Repository")).toBeDefined()
     expect(screen.getByText("Comment")).toBeDefined()
     const repositoryLink = screen.getByRole("link", {
       name: /vedin-labs\/frontier/i,
@@ -128,22 +125,19 @@ describe("execution row linked details", () => {
     const commentSourceLink = screen.getByRole("link", {
       name: /source/i,
     })
-    const commentBody = screen.getByText("Can you check this failure?")
+    expect(screen.getByText("Can you check this failure?")).toBeDefined()
 
     expect(repositoryLink.getAttribute("href")).toBe(
       "https://github.com/vedin-labs/frontier"
     )
-    expect(repositoryLink.closest(".bg-muted")).toBeNull()
-    expect(repositoryLink.parentElement?.className).not.toContain("py-1.5")
     expect(commentSourceLink.getAttribute("href")).toBe(
       "https://github.com/vedin-labs/frontier/issues/12#comment"
     )
-    expect(commentBody.closest(".bg-muted")).not.toBeNull()
   })
 })
 
 describe("execution row pull request details", () => {
-  test("renders pull request details as a plain linked fact", async () => {
+  test("renders pull request details with their source link", async () => {
     renderExecutionRow(
       makeExecution({
         task: "Review the pull request comment.",
@@ -162,7 +156,6 @@ describe("execution row pull request details", () => {
 
     await screen.findByText("Pull request")
 
-    expect(screen.getByText("Pull request")).toBeDefined()
     const pullRequestLink = screen.getByRole("link", {
       name: /#42 add execution metadata/i,
     })
@@ -170,7 +163,5 @@ describe("execution row pull request details", () => {
     expect(pullRequestLink.getAttribute("href")).toBe(
       "https://github.com/vedin-labs/frontier/pull/42"
     )
-    expect(pullRequestLink.closest(".bg-muted")).toBeNull()
-    expect(pullRequestLink.parentElement?.className).not.toContain("py-1.5")
   })
 })

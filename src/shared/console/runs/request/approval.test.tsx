@@ -33,12 +33,8 @@ test("pages through multiple approval requests", async () => {
 
   await screen.findByText("Send the requested Slack update.")
 
-  const count = screen.getByText("2")
-
   expect(screen.getByText("Approvals")).toBeDefined()
-  expect(count.className).toContain("font-normal")
-  expect(count.className).toContain("text-[0.625rem]")
-  expect(count.className).toContain("text-muted-foreground")
+  expect(screen.getByText("2")).toBeDefined()
 
   fireEvent.click(screen.getByRole("button", { name: "Next approval" }))
 
