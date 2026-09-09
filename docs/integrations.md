@@ -21,20 +21,34 @@ developer accounts. Keep development apps and data separate from production.
 
 ## Current choices
 
-Keep separate registrations for all four. Use the Jori name and icon wherever
-supported; verify the installation screens. The naming guidance below does not
-mean provider settings have already been updated.
+Keep separate registrations for all four. Use the display name "Jori". Where a
+provider requires globally unique names, use "Jori EU" and "Jori US". Ask Albin
+if those names are unavailable; do not invent alternatives. This guidance does
+not mean provider settings have already been updated.
 
 | Provider | Guidance |
 | --- | --- |
-| GitHub | Use symmetric names, such as "Jori EU" and "Jori US", subject to availability. Keep app keys regional. Names are unique and each app has one webhook. [Registration](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app). |
+| GitHub | Use "Jori EU" and "Jori US", subject to availability. Keep app keys regional. Names are unique and each app has one webhook. [Registration](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app). |
 | Slack | Events and interactions use app-wide destinations. Keep app and bot branding aligned. [Request URLs](https://docs.slack.dev/apis/events-api/using-http-request-urls/), [manifest](https://docs.slack.dev/reference/app-manifest/). |
 | Linear | Keep app notifications without adding admin scope solely for regional routing. [Webhooks](https://linear.app/developers/webhooks), [app notifications](https://linear.app/developers/agent-best-practices). |
 | Notion | Selective delivery per regional installation is not established by the documented subscription controls. [Webhooks](https://developers.notion.com/reference/webhooks). |
 
-Jori's console selects the regional app. Keep avatars, product descriptions,
-permissions and event subscriptions aligned through shared configuration where
-supported. Refresh stored provider identities when renaming an app.
+Jori's console selects the regional app. All four provider registrations use
+`public/brand/avatar/avatar-light-512.png` for Jori's avatar. Follow the
+[brand guide](brand.md) for other placements. Use this description wherever the
+provider exposes an app description field:
+
+> Jori helps your team find information and get work done across your connected tools.
+
+Check installation screens, app profiles, bot identities and the connection UI.
+Keep permissions and event subscriptions aligned through shared configuration
+where supported. A marketplace listing is separate from app branding; leave it
+unpublished unless publication is requested.
+
+Renaming must preserve registration IDs, grants and existing connection
+ownership. Refresh stored provider identities and any configured app slug after
+renaming, then verify mentions and replies on existing connections. Infrastructure
+names such as `jori-production-eu` are separate from the provider display name.
 
 ## Delivery and credentials
 

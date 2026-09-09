@@ -17,7 +17,7 @@ background; `dark` means artwork for a dark background.
 | Site and console | `src/shared/brand` components | Tight SVGs; the enclosing `.dark` class selects the inverse. |
 | Standalone symbol | `mark/mark-{light,dark}.svg` | Tight transparent canvas. PNGs at 512 and 1024px are available. |
 | Complete logo | `wordmark/wordmark-{light,dark}.svg` | Fixed lettering and icon gap. PNGs are 256px high. |
-| Provider avatar, profile image, organization logo | `avatar/avatar-{light,dark}-512.png` | Opaque, padded square. The complete mark survives a circular crop. |
+| Provider avatar, profile image, organization logo | `avatar/avatar-light-512.png` | Opaque, padded square. The complete mark survives a circular crop. Use this light asset for all four integration providers. |
 | Browser tab and search | `favicon/favicon.svg`, PNGs at 16/32/48/96px, ICO | Tight transparent corners. SVG follows the browser's color preference; raster fallbacks use the light version. |
 | Regular installed icon | `favicon/android-chrome-{192,512}.png` | Tight transparent rounded square, manifest purpose `any`. |
 | Masked installed icon | `favicon/maskable-512.png` | Opaque black square with white slit. The platform supplies the outside silhouette. |
@@ -29,6 +29,10 @@ The PNG and SVG mark files have no invisible rectangular margin. Do not add
 a white background to them. Opaque avatar, launcher, and social files are
 separate exports because their destinations crop, mask, or composite images.
 Installed icons do not automatically change with browser or page theme.
+
+The dark avatar export is available for other placements. Provider app profiles
+and bots use the same light avatar in both regions; see
+[integration branding](integrations.md#current-choices) for names and descriptions.
 
 ## Size and clear space
 
