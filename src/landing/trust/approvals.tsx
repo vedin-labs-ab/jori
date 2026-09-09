@@ -11,8 +11,8 @@ export function ApprovalsSection() {
     <Section
       lede={
         <>
-          Set a tool to ask first and <Jori /> requests before acting. Nothing
-          runs until you approve it.
+          Set a tool to ask first and <Jori tilt="slight" /> requests before
+          acting. Nothing runs until you approve it.
         </>
       }
       title="Ask first means ask you"
@@ -41,8 +41,8 @@ export function ReceiptsSection() {
     <Section
       lede={
         <>
-          What <Jori /> read, what they did, what they asked: timestamped, on
-          every run.
+          What <Jori tilt="steep" /> read, what they did, what they asked:
+          timestamped, on every run.
         </>
       }
       title="Every run keeps receipts"

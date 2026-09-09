@@ -1,16 +1,17 @@
 import { marketingUrl } from "../region/paths"
-import { BrandMark } from "."
+import { BrandIcon } from "."
 
-/** The brand mark as the way home on public surfaces. */
+/** Public navigation keeps the compact icon and live name as separate parts. */
 export function BrandLink() {
   return (
     <a
       aria-label="Jori home"
-      className="rounded-md"
+      className="flex items-center gap-2 rounded-md"
       href={marketingUrl()}
       referrerPolicy="no-referrer"
     >
-      <BrandMark />
+      <BrandIcon className="size-8" />
+      <span className="font-medium text-base">Jori</span>
     </a>
   )
 }

@@ -12,9 +12,9 @@ export function Surfaces() {
     <Section
       lede={
         <>
-          Mention <Jori /> in Slack, GitHub, or Linear and they answer in the
-          thread. When the answer is a table, a store, or a file, it lands in
-          the folder and the thread gets the link.
+          Mention <Jori tilt="right" /> in Slack, GitHub, or Linear and they
+          answer in the thread. When the answer is a table, a store, or a file,
+          it lands in the folder and the thread gets the link.
         </>
       }
       support

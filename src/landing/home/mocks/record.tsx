@@ -14,10 +14,11 @@ export function Record() {
     <Section
       lede={
         <>
-          Most AI works in private. <Jori /> works in the open. Activity is the
-          first page in the console, and every run, from a job or a mention,
-          shows what triggered it, what they read, what they did, what they
-          asked, and what it cost. Stop any run from wherever you can see it.
+          Most AI works in private. <Jori tilt="right" /> works in the open.
+          Activity is the first page in the console, and every run, from a job
+          or a mention, shows what triggered it, what they read, what they did,
+          what they asked, and what it cost. Stop any run from wherever you can
+          see it.
         </>
       }
       title="Everything on the record"
