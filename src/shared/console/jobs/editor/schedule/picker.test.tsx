@@ -6,25 +6,7 @@ import { JobDateTimePicker } from "./picker"
 afterEach(cleanup)
 
 describe("job date and time picker", () => {
-  test("renders the selected local date and time", () => {
-    render(
-      <JobDateTimePicker
-        id="run-at"
-        onValueChange={() => undefined}
-        timezone="Europe/Stockholm"
-        value="2026-01-15T13:45"
-      />
-    )
-
-    const timeInput = screen.getByLabelText(
-      "Time (Europe/Stockholm)"
-    ) as HTMLInputElement
-
-    expect(screen.getByLabelText("Date").textContent).toContain("2026")
-    expect(timeInput.value).toBe("13:45")
-  })
-
-  test("updates the datetime value when the time changes", () => {
+  test("shows the selected date and changes its time", () => {
     const onValueChange = vi.fn()
 
     render(
@@ -36,9 +18,14 @@ describe("job date and time picker", () => {
       />
     )
 
-    fireEvent.change(screen.getByLabelText("Time (Europe/Stockholm)"), {
-      target: { value: "14:30" },
-    })
+    const time = screen.getByLabelText(
+      "Time (Europe/Stockholm)"
+    ) as HTMLInputElement
+
+    expect(screen.getByLabelText("Date").textContent).toContain("2026")
+    expect(time.value).toBe("13:45")
+
+    fireEvent.change(time, { target: { value: "14:30" } })
 
     expect(onValueChange).toHaveBeenCalledWith("2026-01-15T14:30")
   })

@@ -1,22 +1,10 @@
-// @vitest-environment jsdom
 import { describe, expect, test } from "vitest"
 import { emptyJobForm, type JobFormValues } from "@/shared/console/jobs/types"
 import { createJobArgs } from "./args"
 
 describe("job event payload match", () => {
   test("creates event job args with required option match", () => {
-    expect(
-      createJobArgs(
-        eventForm({
-          name: "Watch support",
-          instructions: "Read Slack and post to Slack.",
-          eventIntegration: "slack",
-          event: "message.created",
-          eventMatch: { channel: "C123" },
-          surfaces: [{ integration: "slack", tools: slackTools() }],
-        })
-      )
-    ).toMatchObject({
+    expect(createJobArgs(eventForm())).toMatchObject({
       args: {
         type: "event",
         trigger: {
@@ -48,18 +36,9 @@ describe("job event payload match", () => {
 
 describe("job event payload validation", () => {
   test("requires event match declared by the catalog", () => {
-    expect(
-      createJobArgs(
-        eventForm({
-          name: "Watch support",
-          instructions: "Read Slack and post to Slack.",
-          eventIntegration: "slack",
-          event: "message.created",
-          eventMatch: {},
-          surfaces: [{ integration: "slack", tools: slackTools() }],
-        })
-      )
-    ).toEqual({ error: "Channel is required." })
+    expect(createJobArgs(eventForm({ eventMatch: {} }))).toEqual({
+      error: "Channel is required.",
+    })
   })
 
   test("rejects unavailable event-triggered jobs", () => {
@@ -86,18 +65,9 @@ describe("job event payload validation", () => {
   })
 
   test("rejects unsupported integration events", () => {
-    expect(
-      createJobArgs(
-        eventForm({
-          name: "Watch support",
-          instructions: "Read Slack and post to Slack.",
-          eventIntegration: "slack",
-          event: "page.updated",
-          eventMatch: { channel: "C123" },
-          surfaces: [{ integration: "slack", tools: slackTools() }],
-        })
-      )
-    ).toEqual({ error: "Choose a supported job event." })
+    expect(createJobArgs(eventForm({ event: "page.updated" }))).toEqual({
+      error: "Choose a supported job event.",
+    })
   })
 })
 
@@ -119,14 +89,21 @@ function githubReviewForm() {
   })
 }
 
-function slackTools() {
-  return ["conversations_history", "conversations_add_message"]
-}
-
-function eventForm(values: Partial<JobFormValues>): JobFormValues {
+function eventForm(values: Partial<JobFormValues> = {}): JobFormValues {
   return {
     ...emptyJobForm,
     type: "event",
+    name: "Watch support",
+    instructions: "Read Slack and post to Slack.",
+    eventIntegration: "slack",
+    event: "message.created",
+    eventMatch: { channel: "C123" },
+    surfaces: [
+      {
+        integration: "slack",
+        tools: ["conversations_history", "conversations_add_message"],
+      },
+    ],
     ...values,
   }
 }

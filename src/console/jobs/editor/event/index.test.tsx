@@ -8,27 +8,16 @@ import {
 } from "./fixtures"
 import { getIntegrationOptions } from "./options"
 
-describe("job event fields", () => {
-  test("disables the event picker when the selected integration has one event", () => {
+describe("job event integration picker", () => {
+  test("shows the selected integration and opens its picker", () => {
     renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     expect(screen.getByLabelText("Event").hasAttribute("disabled")).toBe(true)
-  })
-
-  test("renders the selected integration logo in the integration picker", () => {
-    renderEventFields({ eventIntegration: "slack", event: "message.created" })
-
     expect(
       screen
         .getByLabelText("Integration")
         .querySelector('img[src="/logos/integrations/slack.svg"]')
     ).not.toBeNull()
-  })
-})
-
-describe("job event integration picker", () => {
-  test("opens the integration picker menu", () => {
-    renderEventFields({ eventIntegration: "slack", event: "message.created" })
 
     openProviderPicker()
 
