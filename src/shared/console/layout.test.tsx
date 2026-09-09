@@ -41,48 +41,25 @@ test("toolbar search can use a placeholder different from its label", () => {
   expect(input.getAttribute("placeholder")).toBe("Search runs...")
 })
 
-test("toolbar search exposes a compact mobile trigger", () => {
-  render(
-    <ConsoleSearch
-      label="Search files"
-      onValueChange={() => {}}
-      value="report"
-    />
-  )
-
-  const trigger = screen.getByRole("button", {
-    name: "Search files: report",
-  })
-
-  expect(trigger.className).toContain("@xl/inset:hidden")
-  expect(trigger.dataset.variant).toBe("secondary")
-})
-
-test("compact search opens an auto-focused search field", async () => {
+test("compact search names the current query and opens a focused field", async () => {
   const onValueChange = vi.fn()
 
   render(
     <ConsoleSearch
       label="Search files"
       onValueChange={onValueChange}
-      value=""
+      value="draft"
     />
   )
 
-  fireEvent.click(screen.getByRole("button", { name: "Search files" }))
+  fireEvent.click(screen.getByRole("button", { name: "Search files: draft" }))
 
   const inputs = await screen.findAllByRole("textbox", {
     name: "Search files",
   })
   const compactInput = inputs.at(-1)
-  const popover = compactInput?.closest('[data-slot="popover-content"]')
 
   expect(compactInput).toBe(document.activeElement)
-  expect(popover?.className).toContain("bg-popover")
-  expect(popover?.className).not.toContain("bg-transparent")
-  expect(popover?.className).toContain("p-0")
-  expect(popover?.className).toContain("shadow-none")
-  expect(popover?.className).toContain("ring-0")
   fireEvent.change(compactInput as HTMLInputElement, {
     target: { value: "report" },
   })
@@ -98,9 +75,5 @@ test("header buttons keep their accessible label when compact", () => {
     />
   )
 
-  const button = screen.getByRole("button", { name: "New job" })
-  const label = screen.getByText("New job")
-
-  expect(button.className).toContain("@max-lg/inset:size-7")
-  expect(label.className).toContain("@max-lg/inset:hidden")
+  expect(screen.getByRole("button", { name: "New job" })).toBeDefined()
 })

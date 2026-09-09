@@ -20,21 +20,17 @@ const schema = {
 }
 
 describe("json view", () => {
-  test("expanded output matches JSON.stringify layout exactly", () => {
+  test("collapsing a bracket folds its region and expanding restores it", () => {
     const { container } = render(<JsonView value={schema} />)
 
     expect(container.textContent).toBe(`${JSON.stringify(schema, null, 2)}\n`)
-  })
-
-  test("collapsing a bracket folds its region and expanding restores it", () => {
-    const { container } = render(<JsonView value={schema} />)
 
     fireEvent.click(screen.getByTitle("Collapse 3 properties"))
     expect(container.textContent).toContain('"scan": { … }')
     expect(container.textContent).not.toContain('"scannedAt"')
 
     fireEvent.click(screen.getByTitle("Expand 3 properties"))
-    expect(container.textContent).toContain('"scannedAt": {')
+    expect(container.textContent).toBe(`${JSON.stringify(schema, null, 2)}\n`)
   })
 
   test("empty composites render plain and are not collapsible", () => {

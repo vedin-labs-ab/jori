@@ -79,9 +79,9 @@ test("points the rejected input at the reason it was rejected", async () => {
     message: "Enter a valid email address.",
   })
   render(<WaitlistForm />)
-  fill()
-
   const email = screen.getByLabelText("Work email")
+  expect(email.getAttribute("aria-describedby")).toBeNull()
+  fill()
 
   await waitFor(() => {
     expect(email.getAttribute("aria-invalid")).toBe("true")
@@ -92,14 +92,6 @@ test("points the rejected input at the reason it was rejected", async () => {
   expect(document.getElementById(describedBy)?.textContent).toBe(
     "Enter a valid email address."
   )
-})
-
-test("leaves the inputs undescribed while nothing is wrong", () => {
-  render(<WaitlistForm />)
-
-  expect(
-    screen.getByLabelText("Work email").getAttribute("aria-describedby")
-  ).toBeNull()
 })
 
 // Submitting disables the button focus was on, so a rejection that left focus

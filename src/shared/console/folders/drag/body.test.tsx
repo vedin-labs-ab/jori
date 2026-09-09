@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
 import { renderHook } from "@testing-library/react"
 import { expect, test } from "vitest"
-import { draggingBodyClassNames, markDragging, useDraggingBody } from "./body"
+import { useDraggingBody } from "./body"
 
-function bodyHasMark() {
-  return draggingBodyClassNames.every((name) =>
-    document.body.classList.contains(name)
-  )
+function expectDragging(active: boolean) {
+  for (const name of [
+    "cursor-grabbing",
+    "select-none",
+    "[&_*]:cursor-grabbing!",
+  ]) {
+    expect(document.body.classList.contains(name)).toBe(active)
+  }
 }
 
 test("the body wears the dragging mark only while a drag runs", () => {
@@ -14,32 +18,20 @@ test("the body wears the dragging mark only while a drag runs", () => {
     initialProps: { isDragging: false },
   })
 
-  expect(bodyHasMark()).toBe(false)
+  expectDragging(false)
 
   hook.rerender({ isDragging: true })
-  expect(bodyHasMark()).toBe(true)
+  expectDragging(true)
 
   hook.rerender({ isDragging: false })
-  expect(bodyHasMark()).toBe(false)
+  expectDragging(false)
 })
 
 test("unmounting mid-drag takes the mark off", () => {
   const hook = renderHook(() => useDraggingBody(true))
 
-  expect(bodyHasMark()).toBe(true)
+  expectDragging(true)
 
   hook.unmount()
-  expect(bodyHasMark()).toBe(false)
-})
-
-test("the mark grabs, forbids selection, and overrides descendants", () => {
-  const element = document.createElement("div")
-  const clear = markDragging(element)
-
-  expect(element.className).toBe(
-    "cursor-grabbing select-none [&_*]:cursor-grabbing!"
-  )
-
-  clear()
-  expect(element.className).toBe("")
+  expectDragging(false)
 })

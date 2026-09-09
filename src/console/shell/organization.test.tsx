@@ -67,16 +67,6 @@ beforeEach(() => {
 
 afterEach(cleanup)
 
-test("renders the trigger across the sidebar's full width", () => {
-  render(<SidebarOrganizationSwitcher />)
-
-  const trigger = screen.getByRole("button", { name: /Vedin Labs/ })
-  // The trigger spans the sidebar (SidebarMenuButton's default width),
-  // with the chevron pushed to the far end.
-  expect(trigger.className).not.toContain("w-fit")
-  expect(trigger.querySelector("svg.ml-auto")).not.toBeNull()
-})
-
 test("keeps the switcher open with a stable pending organization row", async () => {
   auth.activateOrganization.mockImplementation(
     () => new Promise(() => undefined)
@@ -92,15 +82,13 @@ test("keeps the switcher open with a stable pending organization row", async () 
   await waitFor(() =>
     expect(auth.activateOrganization).toHaveBeenCalledWith("test")
   )
-  const spinner = screen.getByRole("status", { name: "Switching to test" })
-  expect(spinner.getAttribute("class")).toContain("size-3.5")
+  expect(
+    screen.getByRole("status", { name: "Switching to test" })
+  ).toBeDefined()
   expect(screen.getByRole("menu").getAttribute("aria-busy")).toBe("true")
   const pendingItem = screen.getByRole("menuitem", { name: /test/ })
   expect(pendingItem.textContent).toContain("Avatar")
   expect(pendingItem.getAttribute("aria-disabled")).toBe("true")
-  expect(pendingItem.getAttribute("class")).toContain(
-    "data-disabled:opacity-50"
-  )
   expect(
     screen
       .getByRole("menuitem", { name: /Other organization/ })

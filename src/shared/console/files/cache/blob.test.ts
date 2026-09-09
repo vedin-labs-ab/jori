@@ -36,6 +36,8 @@ test("a hit serves the fetched blob without another network call", async () => {
   const cache = createBlobCache()
   const source = sourceOf()
 
+  expect(cache.peek(source)).toBeNull()
+
   const first = await cache.load(source)
   const second = await cache.load(source)
 
@@ -43,10 +45,6 @@ test("a hit serves the fetched blob without another network call", async () => {
   expect(second.objectUrl).toBe(first.objectUrl)
   expect(cache.peek(source)?.objectUrl).toBe(first.objectUrl)
   expect(await second.blob.text()).toBe("file bytes")
-})
-
-test("misses on a file it has never fetched", () => {
-  expect(createBlobCache().peek(sourceOf())).toBeNull()
 })
 
 test("an expired entry is evicted and refetched", async () => {

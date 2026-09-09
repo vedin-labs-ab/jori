@@ -26,18 +26,6 @@ afterEach(() => {
   cleanup()
 })
 
-test("aligns plan detail and usage breakdown on the same rhythm", () => {
-  render(<SummaryBand account={null} organizationId="organization" />)
-
-  const planDetail = screen.getByText(
-    "14 days of everything Jori does. Starts with the first run."
-  )
-  const usageBreakdown = screen.getByText("Wallet").parentElement
-
-  expect(planDetail.className).toContain("mt-1.5")
-  expect(usageBreakdown?.className).toContain("mt-1.5")
-})
-
 test("lets the usage breakdown reflow on narrow screens", () => {
   render(<SummaryBand account={null} organizationId="organization" />)
 

@@ -15,11 +15,14 @@ test("filter toggle reports a new selection and ignores deselecting the active o
 
   render(
     <ConsoleFilterToggle
+      label="Status"
       onValueChange={onValueChange}
       options={filterOptions}
       value="all"
     />
   )
+
+  expect(screen.getByRole("radiogroup", { name: "Status" })).toBeDefined()
 
   fireEvent.click(screen.getByRole("radio", { name: "All" }))
 
@@ -28,37 +31,4 @@ test("filter toggle reports a new selection and ignores deselecting the active o
   fireEvent.click(screen.getByRole("radio", { name: "Active" }))
 
   expect(onValueChange).toHaveBeenCalledWith("active")
-})
-
-test("a labelled toggle stacks its label above the group by default", () => {
-  render(
-    <ConsoleFilterToggle
-      label="Status"
-      onValueChange={() => {}}
-      options={filterOptions}
-      value="all"
-    />
-  )
-
-  const field = screen.getByText("Status").parentElement
-
-  expect(field?.className).toContain("flex-col")
-  expect(screen.getByRole("radiogroup", { name: "Status" })).toBeDefined()
-})
-
-test("a form can borrow the toggle with its label inline", () => {
-  render(
-    <ConsoleFilterToggle
-      inline
-      label="Amount"
-      onValueChange={() => {}}
-      options={filterOptions}
-      value="all"
-    />
-  )
-
-  const field = screen.getByText("Amount").parentElement
-
-  expect(field?.className).toContain("items-center")
-  expect(field?.className).not.toContain("flex-col")
 })

@@ -6,7 +6,7 @@ import {
   createJobInstructionDocument,
   serializeJobInstructionDocument,
 } from "./document"
-import { renderInstructionsField } from "./fixtures"
+import { renderInstructionsField, toolPermission } from "./fixtures"
 
 afterEach(cleanup)
 
@@ -36,19 +36,6 @@ describe("job instructions shared tool access document", () => {
 })
 
 describe("job instructions tool access", () => {
-  test("hides the visible count for markers without enabled tools", async () => {
-    renderInstructionsField({
-      description: "Post to @GitHub.",
-      surfaces: [{ integration: "github", tools: [] }],
-    })
-
-    const button = await screen.findByRole("button", {
-      name: "GitHub tools: No tools enabled. Configure tools.",
-    })
-
-    expect(button.textContent?.trim()).toBe("")
-  })
-
   test("keeps duplicate integration badges in sync", async () => {
     const field = renderInstructionsField({
       description: "Read @GitHub and post to @GitHub.",
@@ -84,4 +71,63 @@ describe("job instructions tool access", () => {
       })
     })
   })
+})
+
+test.each([
+  { tools: [], title: "No tools", count: "No tools enabled" },
+  { tools: ["github_get_issue"], title: "Read: 1 enabled", count: "1 enabled" },
+  {
+    tools: ["github_add_issue_comment"],
+    title: "Write: 1 enabled",
+    count: "1 enabled",
+  },
+  {
+    tools: ["github_get_issue", "github_add_issue_comment"],
+    title: "Read/write: 2 enabled",
+    count: "2 enabled",
+  },
+])("names the selected tool access as $title", async ({
+  tools,
+  title,
+  count,
+}) => {
+  renderInstructionsField({
+    description: "Post to @GitHub.",
+    surfaces: [{ integration: "github", tools }],
+  })
+
+  const button = await screen.findByRole("button", {
+    name: `GitHub tools: ${count}. Configure tools.`,
+  })
+
+  expect(button.getAttribute("title")).toBe(title)
+  expect(button.textContent?.trim()).toBe(
+    tools.length === 0 ? "" : `${tools.length}`
+  )
+})
+
+test("warns when policy denies access to a selected tool", async () => {
+  const field = renderInstructionsField({
+    description: "Post to @GitHub.",
+    permissions: [
+      toolPermission(
+        "github",
+        "github_get_issue",
+        "Read issue",
+        "read",
+        "blocked"
+      ),
+    ],
+    policyKey: "github-read-blocked",
+    surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
+  })
+
+  const button = await screen.findByRole("button", {
+    name: "GitHub tools: 1 enabled, some unavailable. Configure tools.",
+  })
+
+  expect(button.className).toContain("text-destructive")
+  expect(
+    field.container.querySelector('[data-job-surface-policy="blocked"]')
+  ).not.toBeNull()
 })

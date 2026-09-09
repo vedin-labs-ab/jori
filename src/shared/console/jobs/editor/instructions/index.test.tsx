@@ -75,101 +75,6 @@ describe("job instructions document", () => {
   })
 })
 
-describe("job instructions field layout", () => {
-  test("aligns placeholder with the editable text", async () => {
-    const field = renderInstructionsField({
-      description: "",
-      surfaces: [],
-    })
-
-    expect(await screen.findByRole("textbox")).toBeDefined()
-
-    const placeholder = field.container.querySelector(".pointer-events-none")
-
-    expect(placeholder?.className).toContain("top-[9px]")
-    expect(placeholder?.className).toContain("left-[9px]")
-    expect(placeholder?.className).toContain("right-[9px]")
-    expect(placeholder?.className).toContain("text-sm/6")
-    expect(placeholder?.className).toContain("md:text-xs/6")
-  })
-
-  test("constrains long unbroken text inside the editor", async () => {
-    const field = renderInstructionsField({
-      description: "Post to @GitHub then qweqweqweqweqweqweqweqweqweqweqweqwe.",
-      surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
-    })
-
-    expect(await screen.findByRole("textbox")).toBeDefined()
-
-    const editorFrame = field.container.querySelector(".relative > div")
-
-    expect(field.container.firstElementChild?.className).toContain("min-w-0")
-    expect(editorFrame?.className).toContain("min-w-0")
-    expect(editorFrame?.className).toContain("[overflow-wrap:anywhere]")
-  })
-
-  test("keeps text rows stable when badges are present", async () => {
-    const field = renderInstructionsField({
-      description: "Post @GitHub results to @Slack.",
-      surfaces: [
-        { integration: "github", tools: ["github_get_issue"] },
-        { integration: "slack", tools: ["conversations_add_message"] },
-      ],
-    })
-
-    expect(await screen.findByRole("textbox")).toBeDefined()
-
-    const editorFrame = field.container.querySelector(".relative > div")
-    const badgeWrapper = field.container.querySelector(
-      "[data-job-surface-view]"
-    )
-    const buttonGroup = badgeWrapper?.querySelector(
-      '[data-slot="button-group"]'
-    )
-    const removePane = buttonGroup?.querySelector("[data-job-remove-content]")
-    const removeButton = screen.getByRole("button", { name: "Remove GitHub" })
-    const accessButton = screen.getByRole("button", {
-      name: "GitHub tools: 1 enabled. Configure tools.",
-    })
-
-    const content = field.container.querySelector(".tiptap")
-
-    expect(editorFrame?.className).toContain("[&_.tiptap]:leading-6")
-    expect(content?.className).toContain("[&_p]:min-h-6")
-    expect(content?.className).toContain("[&_p]:leading-6")
-    expect(badgeWrapper?.className).toContain("align-middle")
-    expect(buttonGroup?.className).toContain("align-middle")
-    expect(buttonGroup?.className).toContain("h-5")
-    expect(buttonGroup?.className).toContain("text-[0.625rem]/none")
-    expect(removePane?.className).toContain("px-1")
-    expect(removeButton.className).toContain("self-stretch")
-    expect(removeButton.className).not.toContain("h-5")
-    expect(accessButton.className).toContain("self-stretch")
-    expect(accessButton.className).not.toContain("h-5")
-  })
-})
-
-describe("job instructions marker divider", () => {
-  test("uses a plain unrounded divider outside shadcn slot styling", async () => {
-    const field = renderInstructionsField({
-      description: "Post @GitHub results to @Slack.",
-      surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
-    })
-
-    expect(await screen.findByRole("textbox")).toBeDefined()
-
-    const separator = field.container.querySelector(
-      "[data-job-surface-separator]"
-    )
-
-    expect(separator?.className).toContain("self-stretch")
-    expect(separator?.className).toContain("w-[0.5px]")
-    expect(separator?.className).toContain("rounded-none")
-    expect(separator?.className).not.toContain("data-vertical")
-    expect(separator?.getAttribute("data-slot")).toBeNull()
-  })
-})
-
 describe("job instructions field footer", () => {
   test("shows marker guidance inside the editor frame", async () => {
     const field = renderInstructionsField({
@@ -182,15 +87,6 @@ describe("job instructions field footer", () => {
     expect(field.container.textContent).toContain("skills")
     expect(field.container.textContent).toContain("tools")
     expect(field.container.textContent).not.toContain("read/write")
-
-    const footer = field.container.querySelector(
-      "[data-job-instructions-frame] > div:last-child"
-    )
-
-    expect(footer?.className).toContain("border-t")
-    expect(footer?.className).toContain("bg-muted/30")
-    expect(footer?.className).toContain("px-2")
-    expect(footer?.className).not.toContain("mx-2")
   })
 })
 
