@@ -61,7 +61,7 @@ test("renders provider source labels", () => {
   )
 
   expect(screen.getByText("Slack").className).toContain("font-medium")
-  expect(container.querySelector("img")).toBeDefined()
+  expect(container.querySelector("img")).not.toBeNull()
 })
 
 test("renders source kind and event labels", () => {
@@ -98,7 +98,7 @@ test("renders Jori source labels", () => {
   )
 
   expect(screen.getByText("Jori").className).toContain("font-medium")
-  expect(container.querySelector("svg[aria-hidden='true']")).toBeDefined()
+  expect(container.querySelector("svg[aria-hidden='true']")).not.toBeNull()
 })
 
 test("renders recurring job source details", () => {

@@ -113,7 +113,7 @@ test("hands the initialized organization to the page", async () => {
   expect(await screen.findByText("organization")).toBeDefined()
 })
 
-test("a page inside an initialized console reuses that chrome", async () => {
+test("a nested page reuses the console chrome and gate queries", async () => {
   organization.isResolved = true
 
   render(
@@ -126,18 +126,6 @@ test("a page inside an initialized console reuses that chrome", async () => {
   // material page nested in a section frame does not rebuild the console.
   expect(await screen.findByText("organization")).toBeDefined()
   expect(screen.getAllByTestId("shell")).toHaveLength(1)
-})
-
-test("a nested page re-runs none of the gate queries", async () => {
-  organization.isResolved = true
-
-  render(
-    <ConsolePage>
-      {() => <ConsolePage>{() => <div>Console</div>}</ConsolePage>}
-    </ConsolePage>
-  )
-
-  await screen.findByText("Console")
   expect(loading.activeOrganizationQueries).toBe(1)
   expect(loading.organizationListQueries).toBe(1)
 })
