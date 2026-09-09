@@ -8,18 +8,20 @@ import {
 
 const rows = [
   { folderId: "ops", name: "Operations" },
-  { folderId: "finance", name: "Finance" },
+  { folderId: "finance", name: "Finance", updatedAt: 7 },
   { folderId: "invoices", name: "Invoices", parentId: "finance" },
   { folderId: "archive", name: "Archive", parentId: "invoices" },
   { folderId: "budgets", name: "Budgets", parentId: "finance" },
 ]
 
-test("nests the flat list and name-sorts every level", () => {
+test("nests and name-sorts every level while preserving row fields", () => {
   const tree = buildFolderTree(rows)
 
   expect(tree.map((node) => node.name)).toEqual(["Finance", "Operations"])
 
   const finance = tree[0]
+
+  expect(finance?.updatedAt).toBe(7)
 
   expect(finance?.children.map((node) => node.name)).toEqual([
     "Budgets",
@@ -37,14 +39,6 @@ test("treats a folder with a missing parent as a root", () => {
   ])
 
   expect(tree.map((node) => node.folderId)).toEqual(["kept", "stray"])
-})
-
-test("carries the row's extra fields onto the node", () => {
-  const tree = buildFolderTree([
-    { folderId: "only", name: "Only", updatedAt: 7 },
-  ])
-
-  expect(tree[0]?.updatedAt).toBe(7)
 })
 
 test("collects the folder itself and every descendant", () => {

@@ -29,16 +29,6 @@ test("stays loading until the media signals ready", () => {
   expect(result.current.status).toBe("ready")
 })
 
-test("media that never signals reveals at the deadline", () => {
-  const { result } = renderStatus("blob:media")
-
-  act(() => {
-    vi.advanceTimersByTime(revealDeadline)
-  })
-
-  expect(result.current.status).toBe("ready")
-})
-
 test("the deadline waits for a URL before counting down", () => {
   const { rerender, result } = renderStatus(null)
 
@@ -67,12 +57,14 @@ test("an error sticks and the deadline never overrides it", () => {
   expect(result.current.status).toBe("error")
 })
 
-test("a late error still surfaces after the deadline reveal", () => {
+test("the deadline reveals loaded media but a late error still surfaces", () => {
   const { result } = renderStatus("blob:media")
 
   act(() => {
     vi.advanceTimersByTime(revealDeadline)
   })
+  expect(result.current.status).toBe("ready")
+
   act(() => result.current.markError())
 
   expect(result.current.status).toBe("error")

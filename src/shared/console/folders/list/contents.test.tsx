@@ -98,7 +98,7 @@ function renderContents(
   )
 }
 
-test("folders and resources share the Name/Kind/Owner/Items/Updated table", () => {
+test("lists folders and resources with their owners and item counts", () => {
   renderContents(readyContents)
 
   for (const header of ["Name", "Kind", "Owner", "Items", "Updated"]) {
@@ -118,21 +118,11 @@ test("folders and resources share the Name/Kind/Owner/Items/Updated table", () =
   expect(
     screen.getByRole("button", { name: "Open actions for Leads" })
   ).toBeDefined()
-})
-
-test("the Owner column reads across both row groups", () => {
-  renderContents(readyContents)
-
   // A subfolder shows whoever made it, a filed resource its owner, and the
   // job — which no person owns — shows Jori.
   expect(screen.getAllByText("Ada Lovelace")).toHaveLength(2)
   expect(screen.getByText("Grace Hopper")).toBeDefined()
   expect(screen.getByText("Jori")).toBeDefined()
-})
-
-test("folder rows count their items; resource rows carry a dash", () => {
-  renderContents(readyContents)
-
   // Guides combines its counts into one number with the breakdown as the
   // tooltip; empty Scratch shows an honest zero.
   expect(screen.getByTitle("1 folder, 2 resources").textContent).toContain("3")
