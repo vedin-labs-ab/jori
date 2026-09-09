@@ -42,6 +42,10 @@ describe("mention scan", () => {
       "+[video:abc] +[table:] +[table:with space] +table:abc",
       "see+[table:abc]",
       "x@slack",
+      "Review slack and search_files.",
+      "https://acme.com/triage and docs/triage",
+      "# triage",
+      'Run x/triage, x#search_files, and "@Slack"',
     ]) {
       expect(readMentions(text, catalog)).toEqual([])
     }
@@ -81,6 +85,17 @@ describe("mention scan", () => {
 })
 
 describe("active mention", () => {
+  test("finds a nearby mention after a long paragraph", () => {
+    const text = `${"Earlier context. ".repeat(100)}Use #sha`
+
+    expect(findActiveMention(text, text.length, mentionKinds)).toEqual({
+      end: text.length,
+      kind: "tool",
+      query: "sha",
+      start: text.length - 4,
+    })
+  })
+
   test("finds the sigil and query the cursor is in, for the kinds an editor takes", () => {
     expect(findActiveMention("Look at +ren", 12, mentionKinds)).toEqual({
       end: 12,
@@ -103,6 +118,9 @@ describe("active mention", () => {
   })
 
   test("stays quiet after a sum, inside an email, past a space, and for a sigil the editor lacks", () => {
+    expect(findActiveMention("https://ac", 10, mentionKinds)).toBeNull()
+    expect(findActiveMention("and/or", 6, mentionKinds)).toBeNull()
+    expect(findActiveMention("Send git", 8, mentionKinds)).toBeNull()
     expect(findActiveMention("a+b", 3, mentionKinds)).toBeNull()
     expect(findActiveMention("person@gmail", 12, mentionKinds)).toBeNull()
     expect(findActiveMention("+ren later", 10, mentionKinds)).toBeNull()

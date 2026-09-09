@@ -28,7 +28,7 @@ describe("explicit mention scanning", () => {
   test("recognizes sigil tokens for all three kinds", () => {
     expect(
       readJobMentions(
-        "Review @github, run /meeting-prep, then #save_file.",
+        "Review @github, run /meeting-prep, then #save_file. +[table:abc]",
         catalog
       )
     ).toEqual([
@@ -36,31 +36,6 @@ describe("explicit mention scanning", () => {
       { end: 33, id: "meeting-prep", kind: "skill", start: 20 },
       { end: 50, id: "save_file", kind: "tool", start: 40 },
     ])
-  })
-
-  test("never scans bare prose", () => {
-    expect(
-      readJobMentions("Review github and email via outlook.", catalog)
-    ).toEqual([])
-  })
-
-  test("emails, URLs, paths, and headings stay inert", () => {
-    const text = [
-      "Mail person@gmail.com about https://acme.com/meeting-prep.",
-      "# release-notes",
-      "See docs/meeting-prep and read/write flows.",
-    ].join("\n")
-
-    expect(readJobMentions(text, catalog)).toEqual([])
-  })
-
-  test("sigils fire only at whitespace boundaries", () => {
-    expect(
-      readJobMentions("Run /meeting-prep and #save_file", catalog)
-    ).toHaveLength(2)
-    expect(
-      readJobMentions('Run x/meeting-prep, x#save_file, and "@GitHub"', catalog)
-    ).toEqual([])
   })
 })
 
@@ -93,7 +68,8 @@ describe("completed mention detection", () => {
 })
 
 describe("active mention autocomplete", () => {
-  test("finds the sigil-started query under the cursor per kind", () => {
+  test("enables job sigils and leaves resource mentions inactive", () => {
+    expect(findActiveJobMention("Look at +ren", 12)).toBeNull()
     expect(findActiveJobMention("Send to @li", 11)).toEqual({
       end: 11,
       kind: "integration",
@@ -111,24 +87,6 @@ describe("active mention autocomplete", () => {
       kind: "tool",
       query: "sha",
       start: 4,
-    })
-  })
-
-  test("never activates inside emails, URLs, or bare words", () => {
-    expect(findActiveJobMention("person@gm", 9)).toBeNull()
-    expect(findActiveJobMention("https://ac", 10)).toBeNull()
-    expect(findActiveJobMention("and/or", 6)).toBeNull()
-    expect(findActiveJobMention("Send git", 8)).toBeNull()
-  })
-
-  test("finds a nearby mention without scanning the preceding paragraph", () => {
-    const text = `${"Earlier context. ".repeat(100)}Use #sha`
-
-    expect(findActiveJobMention(text, text.length)).toEqual({
-      end: text.length,
-      kind: "tool",
-      query: "sha",
-      start: text.length - 4,
     })
   })
 })
