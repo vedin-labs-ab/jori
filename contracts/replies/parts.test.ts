@@ -4,7 +4,6 @@ import {
   readReplyParts,
   replyPartKinds,
   replyPartLimits,
-  replyPartsSchema,
 } from "./parts"
 
 const reference = {
@@ -26,6 +25,7 @@ test("reads references and choices in order", () => {
 })
 
 test("only the kinds a surface accepts are admitted", () => {
+  expect(readReplyParts([reference], ["reference"])).toEqual([reference])
   expect(() => readReplyParts([choices], ["reference"])).toThrow(
     /parts.0: does not match any allowed shape/
   )
@@ -110,14 +110,6 @@ test("a reply holds at most six references, five questions, and one row of chips
       replyPartKinds
     )
   ).toHaveLength(12)
-})
-
-test("the schema offers only the kinds asked for", () => {
-  const schema = replyPartsSchema(["reference"])
-
-  expect(schema.items).toMatchObject({
-    anyOf: [{ properties: { kind: { const: "reference" } } }],
-  })
 })
 
 test("stored parts that no longer validate read as nothing", () => {
