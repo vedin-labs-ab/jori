@@ -1,3 +1,4 @@
+import { type Dirent } from "node:fs"
 import { readdir } from "node:fs/promises"
 import path from "node:path"
 import {
@@ -16,10 +17,9 @@ type FolderScan = FolderCount & {
   hasSupportingSource: boolean
 }
 
-type DirectoryEntry = {
-  isDirectory(): boolean
-  isFile(): boolean
-  name: string
+type StructureScan = {
+  folders: FolderScan[]
+  namingViolations: NamingViolation[]
 }
 
 const root = process.cwd()
@@ -53,12 +53,12 @@ const skippedDirectories = [
 // serves, not here.
 const allowedSingleFileFolders = ["src/hooks", "src/lib"]
 
-const counts = await countFolders(root)
-const namingViolations = await findNamingViolations({
-  isSkipped,
-  isSource: isSourceFile,
-  root,
-})
+const { folders: counts, namingViolations } = await scanFolders(root)
+
+namingViolations.sort((left, right) =>
+  left.relativePath.localeCompare(right.relativePath)
+)
+
 const limitViolations = counts
   .filter((folder) => folder.count > defaultLimit)
   .sort((left, right) =>
@@ -85,7 +85,7 @@ if (
   )
 }
 
-async function countFolders(directory: string): Promise<FolderScan[]> {
+async function scanFolders(directory: string): Promise<StructureScan> {
   const entries = await readdir(directory, { withFileTypes: true })
   const relativePath = toRelativePath(directory)
   const childScanGroups = await scanChildren(directory, entries)
@@ -93,11 +93,18 @@ async function countFolders(directory: string): Promise<FolderScan[]> {
   const hasSupportingSource =
     entries.filter((entry) => entry.isFile() && isSourceFile(entry.name))
       .length > directSourceFileCount
-  const hasChildSource = childScanGroups.some((folders) => folders.length > 0)
-  const result = childScanGroups.flat()
+  const hasChildSource = childScanGroups.some((scan) => scan.folders.length > 0)
+  const folders = childScanGroups.flatMap((scan) => scan.folders)
+  const namingViolations = [
+    ...findNamingViolations(relativePath, entries, {
+      isSkipped,
+      isSource: isSourceFile,
+    }),
+    ...childScanGroups.flatMap((scan) => scan.namingViolations),
+  ]
 
   if (directSourceFileCount > 0 && !isSkipped(relativePath)) {
-    result.push({
+    folders.push({
       count: directSourceFileCount,
       hasChildSource,
       hasSupportingSource,
@@ -105,20 +112,20 @@ async function countFolders(directory: string): Promise<FolderScan[]> {
     })
   }
 
-  return result
+  return { folders, namingViolations }
 }
 
-async function scanChildren(directory: string, entries: DirectoryEntry[]) {
+async function scanChildren(directory: string, entries: Dirent[]) {
   return await Promise.all(
     entries
       .filter((entry) => entry.isDirectory())
       .map((entry) => path.join(directory, entry.name))
       .filter((childPath) => !isSkipped(toRelativePath(childPath)))
-      .map((childPath) => countFolders(childPath))
+      .map((childPath) => scanFolders(childPath))
   )
 }
 
-function countDirectSourceFiles(entries: DirectoryEntry[]) {
+function countDirectSourceFiles(entries: Dirent[]) {
   return entries.filter(
     (entry) => entry.isFile() && isCountedSourceFile(entry.name)
   ).length
