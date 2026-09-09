@@ -1,20 +1,18 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { createFileContext } from "../../../../test/convex/broker"
+import {
+  createFileContext,
+  mockJsonFetch,
+} from "../../../../test/convex/broker"
 import { id } from "../../../../test/convex/database"
 import { integrationDoc } from "../../../../test/convex/integrations"
 import { type Doc } from "../../../_generated/dataModel"
 import { callGoogleTool } from "."
 
-const originalFetch = globalThis.fetch
-
-afterEach(() => {
-  globalThis.fetch = originalFetch
-  vi.restoreAllMocks()
-})
+afterEach(() => vi.unstubAllGlobals())
 
 describe("Gmail batch read tools", () => {
   test("reads multiple Gmail threads with one broker tool call", async () => {
-    const calls = mockGoogleFetchByUrl((url) => ({
+    const calls = mockJsonFetch((url) => ({
       id: url.pathname.split("/").at(-1),
     }))
 
@@ -37,7 +35,7 @@ describe("Gmail batch read tools", () => {
   })
 
   test("reads multiple Gmail messages with one broker tool call", async () => {
-    const calls = mockGoogleFetchByUrl((url) => ({
+    const calls = mockJsonFetch((url) => ({
       id: url.pathname.split("/").at(-1),
     }))
 
@@ -62,7 +60,7 @@ describe("Gmail batch read tools", () => {
 
 describe("Gmail write tools", () => {
   test("sends a new Gmail message", async () => {
-    const calls = mockGoogleFetch({ id: "sent-message" })
+    const calls = mockJsonFetch(() => ({ id: "sent-message" }))
 
     const result = await callGoogleTool(
       gmailIntegration(),
@@ -92,7 +90,7 @@ describe("Gmail write tools", () => {
   })
 
   test("creates a Gmail draft", async () => {
-    const calls = mockGoogleFetch({ id: "draft" })
+    const calls = mockJsonFetch(() => ({ id: "draft" }))
 
     const result = await callGoogleTool(
       gmailIntegration(),
@@ -121,7 +119,7 @@ describe("Gmail write tools", () => {
 
 describe("Gmail thread draft tools", () => {
   test("creates a Gmail reply draft for a thread", async () => {
-    const calls = mockGoogleFetchByUrl((url) =>
+    const calls = mockJsonFetch((url) =>
       url.pathname.endsWith("/drafts")
         ? { id: "draft" }
         : {
@@ -156,7 +154,9 @@ describe("Gmail thread draft tools", () => {
       "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-1?format=metadata",
       "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
     ])
-    expect(readThreadId(calls[1]?.body)).toBe("thread-1")
+    expect(calls[1]?.body).toMatchObject({
+      message: { threadId: "thread-1" },
+    })
 
     const raw = readRawMessage(calls[1]?.body, ["message", "raw"])
     expect(raw).toContain("To: client@example.com")
@@ -169,7 +169,7 @@ describe("Gmail thread draft tools", () => {
 
 describe("Gmail files", () => {
   test("sends saved files", async () => {
-    const calls = mockGoogleFetch({ id: "sent-message" })
+    const calls = mockJsonFetch(() => ({ id: "sent-message" }))
 
     await callGoogleTool(
       gmailIntegration(),
@@ -196,38 +196,6 @@ describe("Gmail files", () => {
   })
 })
 
-function mockGoogleFetch(responseBody: unknown) {
-  const calls: Array<{ body: unknown; url: string }> = []
-
-  globalThis.fetch = vi.fn(async (url, init) => {
-    calls.push({
-      body: typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
-      url: String(url),
-    })
-
-    return Response.json(responseBody)
-  })
-
-  return calls
-}
-
-function mockGoogleFetchByUrl(responseBody: (url: URL) => unknown) {
-  const calls: Array<{ body: unknown; url: string }> = []
-
-  globalThis.fetch = vi.fn(async (url, init) => {
-    const requestUrl = new URL(String(url))
-
-    calls.push({
-      body: typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
-      url: requestUrl.toString(),
-    })
-
-    return Response.json(responseBody(requestUrl))
-  })
-
-  return calls
-}
-
 function readRawMessage(body: unknown, path: string[] = ["raw"]) {
   const raw = path.reduce<unknown>((value, key) => {
     return typeof value === "object" && value !== null
@@ -237,32 +205,7 @@ function readRawMessage(body: unknown, path: string[] = ["raw"]) {
 
   expect(raw).toEqual(expect.any(String))
 
-  return decodeBase64Url(String(raw))
-}
-
-function readThreadId(body: unknown) {
-  if (
-    typeof body !== "object" ||
-    body === null ||
-    !("message" in body) ||
-    typeof body.message !== "object" ||
-    body.message === null ||
-    !("threadId" in body.message)
-  ) {
-    return undefined
-  }
-
-  return body.message.threadId
-}
-
-function decodeBase64Url(value: string) {
-  const normalized = value.replaceAll("-", "+").replaceAll("_", "/")
-  const padded = normalized.padEnd(
-    normalized.length + ((4 - (normalized.length % 4)) % 4),
-    "="
-  )
-
-  return Buffer.from(padded, "base64").toString("utf8")
+  return Buffer.from(String(raw), "base64url").toString("utf8")
 }
 
 function gmailIntegration(): Doc<"integrations"> {

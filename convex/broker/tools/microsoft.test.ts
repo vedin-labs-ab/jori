@@ -1,23 +1,20 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { createFileContext } from "../../../test/convex/broker"
+import { createFileContext, mockJsonFetch } from "../../../test/convex/broker"
+import { id } from "../../../test/convex/database"
+import { integrationDoc } from "../../../test/convex/integrations"
 import { schemaViolations } from "../../../test/convex/schema"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { type Doc } from "../../_generated/dataModel"
 import {
   calendarListSchema,
   eventListingSchema,
 } from "../../runs/agent/tools/schemas/responses/calendar"
 import { callMicrosoftTool } from "./microsoft"
 
-const originalFetch = globalThis.fetch
-
-afterEach(() => {
-  globalThis.fetch = originalFetch
-  vi.restoreAllMocks()
-})
+afterEach(() => vi.unstubAllGlobals())
 
 describe("Microsoft Calendar discovery", () => {
   test("scans every calendar and follows Graph next links", async () => {
-    const calls = mockMicrosoftFetchByUrl((url) => {
+    const calls = mockJsonFetch((url) => {
       if (url.pathname.endsWith("/me/calendars")) {
         return {
           value: [
@@ -80,7 +77,7 @@ describe("Microsoft Calendar discovery", () => {
 
 describe("Microsoft Calendar listings", () => {
   test("normalizes Graph calendars and conforms to the schema", async () => {
-    mockMicrosoftFetch({
+    mockJsonFetch(() => ({
       value: [
         {
           id: "cal-1",
@@ -92,7 +89,7 @@ describe("Microsoft Calendar listings", () => {
         },
         { id: "cal-2", name: "Team", canEdit: false },
       ],
-    })
+    }))
 
     const result = await callMicrosoftTool(
       microsoftCalendarIntegration(),
@@ -124,7 +121,7 @@ describe("Microsoft Calendar listings", () => {
 
 describe("Outlook email tools", () => {
   test("sends saved files as Graph file attachments", async () => {
-    const calls = mockMicrosoftFetch(null)
+    const calls = mockJsonFetch(() => null)
 
     const result = await callMicrosoftTool(
       microsoftEmailIntegration(),
@@ -158,44 +155,12 @@ describe("Outlook email tools", () => {
   })
 })
 
-function mockMicrosoftFetch(responseBody: unknown) {
-  const calls: Array<{ body: unknown; url: string }> = []
-
-  globalThis.fetch = vi.fn(async (url, init) => {
-    calls.push({
-      body: typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
-      url: String(url),
-    })
-
-    return Response.json(responseBody)
-  })
-
-  return calls
-}
-
-function mockMicrosoftFetchByUrl(responseBody: (url: URL) => unknown) {
-  const calls: Array<{ body: unknown; url: string }> = []
-
-  globalThis.fetch = vi.fn(async (url, init) => {
-    const requestUrl = new URL(String(url))
-    calls.push({
-      body: typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
-      url: requestUrl.toString(),
-    })
-    return Response.json(responseBody(requestUrl))
-  })
-
-  return calls
-}
-
 function microsoftEmailIntegration(): Doc<"integrations"> {
-  return {
-    _id: "microsoft-email-integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("microsoft-email-integration"),
     integration: "microsoftEmail",
     scope: "user",
-    ownerId: "person" as Id<"persons">,
+    ownerId: id<"persons">("person"),
     externalId: "microsoft-account",
     email: "sender@example.com",
     credentials: {
@@ -203,17 +168,13 @@ function microsoftEmailIntegration(): Doc<"integrations"> {
       expiresAt: Date.now() + 60_000,
       tenantId: "microsoft-tenant",
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }
 
 function microsoftCalendarIntegration(): Doc<"integrations"> {
   return {
     ...microsoftEmailIntegration(),
-    _id: "microsoft-calendar-integration",
+    _id: id<"integrations">("microsoft-calendar-integration"),
     integration: "microsoftCalendar",
-  } as Doc<"integrations">
+  }
 }

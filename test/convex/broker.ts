@@ -1,5 +1,24 @@
 import { vi } from "vitest"
 
+export function mockJsonFetch(responseBody: (url: URL) => unknown) {
+  const calls: Array<{ body: unknown; url: string }> = []
+
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const requestUrl = new URL(String(url))
+      calls.push({
+        body:
+          typeof init?.body === "string" ? JSON.parse(init.body) : init?.body,
+        url: String(url),
+      })
+      return Response.json(responseBody(requestUrl))
+    })
+  )
+
+  return calls
+}
+
 export function createFileContext() {
   return {
     run: {
