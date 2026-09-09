@@ -60,41 +60,14 @@ test("projects searched runs with compact time and paginated outcome", () => {
   )
 })
 
-test("projects no-match searched runs as recent runs", () => {
+test.each([
+  { mode: "search", scope: "conversation" },
+  { query: "", scope: "conversation", since: 0, until: 0 },
+])("projects empty search filters as recent runs: %j", (input) => {
   const items = projectActivity(
     activityData({
       traces: [
-        toolStarted("search_runs", {
-          mode: "search",
-          scope: "conversation",
-        }),
-        toolCompleted("search_runs", result("runs", 0)),
-      ],
-    })
-  )
-
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      metadata: [
-        { kind: "scope", text: "conversation" },
-        { kind: "target", text: "recent runs" },
-        { kind: "outcome", text: "no matches" },
-      ],
-      title: "Search Runs",
-    })
-  )
-})
-
-test("projects legacy search sentinels as absent values", () => {
-  const items = projectActivity(
-    activityData({
-      traces: [
-        toolStarted("search_runs", {
-          query: "",
-          scope: "conversation",
-          since: 0,
-          until: 0,
-        }),
+        toolStarted("search_runs", input),
         toolCompleted("search_runs", result("runs", 0)),
       ],
     })

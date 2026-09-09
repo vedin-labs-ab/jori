@@ -54,7 +54,25 @@ test("keeps in-progress model work visible", () => {
   )
 })
 
-test("projects delegated runs as agents", () => {
+test.each([
+  {
+    status: "queued",
+    projected: "pending",
+    title: "Agent queued",
+    isLive: false,
+  },
+  {
+    status: "running",
+    projected: "running",
+    title: "Agent running",
+    isLive: true,
+  },
+] as const)("projects $status delegated runs as agents", ({
+  status,
+  projected,
+  title,
+  isLive,
+}) => {
   const items = projectActivity(
     activityData({
       agents: [
@@ -62,7 +80,7 @@ test("projects delegated runs as agents", () => {
           _id: id<"runs">("agent-run"),
           parentId: id<"runs">("run"),
           snapshot: runSnapshot("Draft a plan"),
-          status: "queued",
+          status,
         }),
       ],
     })
@@ -71,33 +89,10 @@ test("projects delegated runs as agents", () => {
   expect(items).toContainEqual(
     expect.objectContaining({
       id: "agent-run",
+      isLive,
       kind: "agent",
-      status: "pending",
-      title: "Agent queued",
-    })
-  )
-})
-
-test("marks running delegated agents as live", () => {
-  const items = projectActivity(
-    activityData({
-      agents: [
-        runDoc({
-          _id: id<"runs">("agent-run"),
-          parentId: id<"runs">("run"),
-          snapshot: runSnapshot("Draft a plan"),
-          status: "running",
-        }),
-      ],
-    })
-  )
-
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      id: "agent-run",
-      isLive: true,
-      kind: "agent",
-      status: "running",
+      status: projected,
+      title,
     })
   )
 })

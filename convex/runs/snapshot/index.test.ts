@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
 import { id } from "../../../test/convex/database"
+import { integrationDoc } from "../../../test/convex/integrations"
 import { type Id } from "../../_generated/dataModel"
 import {
   createInstructionRunSnapshot,
@@ -150,19 +151,7 @@ function job(
 function integration(): Parameters<
   typeof createMessageRunSnapshot
 >[0]["integration"] {
-  return {
-    _id: id<"integrations">("integration"),
-    _creationTime: 0,
-    organizationId: "organization",
-    integration: "slack",
-    scope: "organization",
-    externalId: "team",
-    credentials: {},
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  }
+  return integrationDoc({ integration: "slack", externalId: "team" })
 }
 
 function message(
