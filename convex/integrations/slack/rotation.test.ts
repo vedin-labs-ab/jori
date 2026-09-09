@@ -6,22 +6,8 @@ import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { prepareIntegrationForRuntime } from "../runtime"
 
-const originalEnv = new Map(
-  (["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET"] as const).map((name) => [
-    name,
-    process.env[name],
-  ])
-)
-
 afterEach(() => {
-  for (const [name, value] of originalEnv) {
-    if (value === undefined) {
-      delete process.env[name]
-    } else {
-      process.env[name] = value
-    }
-  }
-
+  vi.unstubAllEnvs()
   vi.unstubAllGlobals()
 })
 
@@ -93,8 +79,8 @@ test("marks a Slack integration expired when its refresh token is spent", async 
 })
 
 function stubSlackClient() {
-  process.env.SLACK_CLIENT_ID = "slack-client"
-  process.env.SLACK_CLIENT_SECRET = "slack-secret"
+  vi.stubEnv("SLACK_CLIENT_ID", "slack-client")
+  vi.stubEnv("SLACK_CLIENT_SECRET", "slack-secret")
 }
 
 function slackIntegration({

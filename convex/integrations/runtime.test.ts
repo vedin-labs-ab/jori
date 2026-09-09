@@ -6,25 +6,8 @@ import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { prepareIntegrationForRuntime } from "./runtime"
 
-const stubbedEnvNames = [
-  "GITHUB_APP_ID",
-  "GITHUB_APP_PRIVATE_KEY",
-  "GOOGLE_CLIENT_ID",
-  "GOOGLE_CLIENT_SECRET",
-] as const
-const originalEnv = new Map(
-  stubbedEnvNames.map((name) => [name, process.env[name]])
-)
-
 afterEach(() => {
-  for (const [name, value] of originalEnv) {
-    if (value === undefined) {
-      delete process.env[name]
-    } else {
-      process.env[name] = value
-    }
-  }
-
+  vi.unstubAllEnvs()
   vi.unstubAllGlobals()
 })
 
@@ -51,8 +34,8 @@ test("reuses a fresh GitHub installation token", async () => {
 })
 
 test("mints and persists a stale GitHub installation token", async () => {
-  process.env.GITHUB_APP_ID = "12345"
-  process.env.GITHUB_APP_PRIVATE_KEY = await createPrivateKeyBase64()
+  vi.stubEnv("GITHUB_APP_ID", "12345")
+  vi.stubEnv("GITHUB_APP_PRIVATE_KEY", await createPrivateKeyBase64())
   const fetch = vi.fn().mockResolvedValue(
     Response.json({
       token: "installation-token",
@@ -101,8 +84,8 @@ test("mints and persists a stale GitHub installation token", async () => {
 })
 
 test("marks a Google integration expired when the refresh grant is dead", async () => {
-  process.env.GOOGLE_CLIENT_ID = "google-client"
-  process.env.GOOGLE_CLIENT_SECRET = "google-secret"
+  vi.stubEnv("GOOGLE_CLIENT_ID", "google-client")
+  vi.stubEnv("GOOGLE_CLIENT_SECRET", "google-secret")
   const fetch = vi.fn().mockResolvedValue(
     Response.json({
       error: "invalid_grant",
@@ -128,8 +111,8 @@ test("marks a Google integration expired when the refresh grant is dead", async 
 })
 
 test("keeps a Google integration active on a transient refresh failure", async () => {
-  process.env.GOOGLE_CLIENT_ID = "google-client"
-  process.env.GOOGLE_CLIENT_SECRET = "google-secret"
+  vi.stubEnv("GOOGLE_CLIENT_ID", "google-client")
+  vi.stubEnv("GOOGLE_CLIENT_SECRET", "google-secret")
   const fetch = vi.fn().mockResolvedValue(
     Response.json({
       error: "internal_failure",
