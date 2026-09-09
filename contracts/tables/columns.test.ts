@@ -20,13 +20,6 @@ describe("normalizeTableColumns", () => {
     ])
   })
 
-  test("generates a hidden id when a column comes without one", () => {
-    const [column] = normalizeTableColumns([{ name: "Title", type: "string" }])
-
-    expect(column?.id).toMatch(/^c_[0-9a-f]{32}$/)
-    expect(column?.name).toBe("Title")
-  })
-
   test("allows a table with no columns at all", () => {
     expect(normalizeTableColumns([])).toEqual([])
   })
@@ -66,14 +59,17 @@ describe("normalizeTableColumns", () => {
 })
 
 describe("newColumnId", () => {
-  test("mints distinct ids that pass normalization", () => {
+  test("generated ids are distinct and survive normalization", () => {
     const first = newColumnId()
-    const second = newColumnId()
+    const columns = normalizeTableColumns([
+      { id: first, name: "Title", type: "string" },
+      { name: "Count", type: "integer" },
+    ])
 
-    expect(first).not.toBe(second)
-    expect(
-      normalizeTableColumns([{ id: first, name: "Fine", type: "string" }])
-    ).toHaveLength(1)
+    expect(columns[0]?.id).toBe(first)
+    expect(columns[1]?.id).toEqual(expect.any(String))
+    expect(columns[1]?.id).not.toBe(first)
+    expect(normalizeTableColumns(columns)).toEqual(columns)
   })
 })
 

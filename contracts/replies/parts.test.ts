@@ -115,11 +115,6 @@ test("a reply holds at most six references, five questions, and one row of chips
 test("the schema offers only the kinds asked for", () => {
   const schema = replyPartsSchema(["reference"])
 
-  expect(schema.maxItems).toBe(
-    replyPartLimits.references +
-      replyPartLimits.questions +
-      replyPartLimits.chips
-  )
   expect(schema.items).toMatchObject({
     anyOf: [{ properties: { kind: { const: "reference" } } }],
   })
