@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { Route } from "./chat/index"
+import { Route } from "./_workspace/chat/index"
 
 function validate(search: Record<string, unknown>) {
   const validateSearch = Route.options.validateSearch as (

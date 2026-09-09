@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react"
-import { Fragment, type ReactNode, useRef, useState } from "react"
+import { Fragment, type ReactNode, useCallback, useState } from "react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -69,7 +69,18 @@ export function ConsoleFrame({
   sidebarOpen?: boolean
 }) {
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null)
-  const [material, setMaterial] = useState<MaterialBreadcrumb>()
+  const [published, setPublished] = useState<{
+    pathname: string
+    material: MaterialBreadcrumb | undefined
+  }>()
+  const setMaterial = useCallback(
+    (material: MaterialBreadcrumb | undefined) => {
+      setPublished({ pathname, material })
+    },
+    [pathname]
+  )
+  const material =
+    published?.pathname === pathname ? published.material : undefined
 
   return (
     <SidebarProvider
@@ -149,7 +160,10 @@ function ConsoleHeaderTitle({
   material: MaterialBreadcrumb | undefined
   pathname: string
 }) {
-  const shown = useShownMaterial(material, pathname)
+  const shown =
+    material === undefined
+      ? undefined
+      : { material, surface: getMaterialSurface(pathname) }
 
   if (shown === undefined) {
     // A material page before anything published renders nothing — the
@@ -231,31 +245,6 @@ function MaterialTrail({
       </BreadcrumbList>
     </Breadcrumb>
   )
-}
-
-type ShownMaterial = {
-  material: MaterialBreadcrumb
-  surface: ReturnType<typeof getMaterialSurface>
-}
-
-/** The crumb the header shows: the live material when one is published,
- *  else the crumb retained from the previous material page — so moving
- *  between materials keeps the old trail up until the new one is ready
- *  instead of dipping through a half-built middle state. Leaving material
- *  pages drops the retained crumb. */
-function useShownMaterial(
-  material: MaterialBreadcrumb | undefined,
-  pathname: string
-): ShownMaterial | undefined {
-  const held = useRef<ShownMaterial>(undefined)
-
-  if (material !== undefined) {
-    held.current = { material, surface: getMaterialSurface(pathname) }
-  } else if (!isMaterialPage(pathname)) {
-    held.current = undefined
-  }
-
-  return held.current
 }
 
 /** The current material's name — plain, or the trigger of the page's own

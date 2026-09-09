@@ -13,8 +13,11 @@ import { SidebarOrganizationSwitcher } from "./organization"
 /** The console around a page: the shared frame and sidebar, bound to the
  *  router for where the console is and to the session for who is in it. */
 export function ConsoleShell({ children }: { children: ReactNode }) {
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
+  const { pathname, loadedAt } = useRouterState({
+    select: (state) => ({
+      pathname: state.matches.at(-1)?.pathname ?? state.location.pathname,
+      loadedAt: state.loadedAt,
+    }),
   })
   const chats = useSidebarChats()
 
@@ -39,7 +42,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
       >
         {/* Below the chrome, so a page that throws leaves the sidebar and
             header standing to navigate away with. */}
-        <ConsolePageBoundary pathname={pathname}>
+        <ConsolePageBoundary resetKey={`${pathname}:${loadedAt}`}>
           {children}
         </ConsolePageBoundary>
       </ConsoleFrame>

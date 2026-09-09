@@ -11,8 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { displayCellText } from "@/shared/console/tables/cells"
-import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { api } from "../../../convex/_generated/api"
 import { useShareExpired } from "./link"
 import { ShareShell, ShareUnavailable } from "./shell"
@@ -39,7 +39,7 @@ export function TableShareView({
   const openPath = `/tables/${encodeURIComponent(tableId)}`
 
   if (table === undefined) {
-    return <FullscreenSkeletonLoader aria-label="Loading table" />
+    return <ConsoleListLoading label="Loading table" />
   }
 
   if (table === null || isExpired) {
@@ -69,7 +69,7 @@ function SharedRows({
   )
 
   if (rows.status === "LoadingFirstPage") {
-    return <FullscreenSkeletonLoader aria-label="Loading rows" />
+    return <ConsoleListLoading label="Loading rows" />
   }
 
   if (rows.results.length === 0) {

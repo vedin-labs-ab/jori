@@ -18,7 +18,7 @@ import { useRunRowSlots } from "./slots"
 /** The Activity page: the filters, the rows they narrow, and the pager,
  *  over cursor pagination that the URL's page and run deep links steer. */
 export function RunsList({ organizationId }: { organizationId: string }) {
-  const { run: focusRunId } = useSearch({ from: "/runs" })
+  const { run: focusRunId } = useSearch({ from: "/_workspace/runs" })
   const target = useSearchTarget()
   const [approvalFilter, setApprovalFilter] = useState<ApprovalFilter>("any")
   const [runFilter, setRunFilter] = useState<RunFilter>("all")

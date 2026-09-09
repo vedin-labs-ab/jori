@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react"
+import { Fragment, type ReactNode, useEffect, useRef } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Sidebar,
@@ -49,6 +49,16 @@ export function ConsoleSidebar({
   organization: ReactNode
   pathname: string
 }) {
+  const { setOpenMobile } = useSidebar()
+  const previousPath = useRef(pathname)
+
+  useEffect(() => {
+    if (previousPath.current !== pathname) {
+      previousPath.current = pathname
+      setOpenMobile(false)
+    }
+  }, [pathname, setOpenMobile])
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>{organization}</SidebarHeader>

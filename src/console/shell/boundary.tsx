@@ -14,20 +14,19 @@ import { ConsoleEmptyState } from "@/shared/console/list/empty"
  * way back was a full reload. Here the shell outlives the failure, so the
  * next destination stays one click away.
  *
- * The pathname is the reset key, so navigating away clears the error by
- * itself. Without it the boundary would hold its failed state over whichever
- * page the member picked next, and the console would look broken from the
- * first crash until a reload.
+ * Reset only when the router commits a navigation, including search changes.
+ * Resetting on the address bar's pending path can retry the failed old page
+ * before the new match mounts and leave the new destination behind its error.
  */
 export function ConsolePageBoundary({
   children,
-  pathname,
+  resetKey,
 }: {
   children: ReactNode
-  pathname: string
+  resetKey: string
 }) {
   return (
-    <CatchBoundary errorComponent={PageError} getResetKey={() => pathname}>
+    <CatchBoundary errorComponent={PageError} getResetKey={() => resetKey}>
       {children}
     </CatchBoundary>
   )

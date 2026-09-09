@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
@@ -83,12 +84,12 @@ function OfferOutcomeActions({
         </Button>
       ) : (
         <Button asChild>
-          <a href="/integrations">View integrations</a>
+          <Link to="/integrations">View integrations</Link>
         </Button>
       )}
       {hasRetry ? (
         <Button asChild variant="link">
-          <a href="/integrations">Back to integrations</a>
+          <Link to="/integrations">Back to integrations</Link>
         </Button>
       ) : null}
     </div>

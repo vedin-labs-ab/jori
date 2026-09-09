@@ -10,78 +10,58 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ChatRouteImport } from './routes/chat'
+import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as ConsoleRouteImport } from './routes/console'
-import { Route as ContextRouteImport } from './routes/context'
-import { Route as FilesRouteImport } from './routes/files'
-import { Route as FoldersRouteImport } from './routes/folders'
-import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as RunsRouteImport } from './routes/runs'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignOutRouteImport } from './routes/sign-out'
-import { Route as SkillsRouteImport } from './routes/skills'
-import { Route as StoresRouteImport } from './routes/stores'
-import { Route as TablesRouteImport } from './routes/tables'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
-import { Route as ChatIndexRouteImport } from './routes/chat/index'
-import { Route as ContextIndexRouteImport } from './routes/context/index'
-import { Route as ContextPlacesRouteImport } from './routes/context/places'
-import { Route as ContextWorkstreamsRouteImport } from './routes/context/workstreams'
-import { Route as FilesIndexRouteImport } from './routes/files/index'
-import { Route as FoldersIndexRouteImport } from './routes/folders/index'
-import { Route as FoldersUsageRouteImport } from './routes/folders/usage'
-import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
-import { Route as IntegrationsPersonalRouteImport } from './routes/integrations/personal'
-import { Route as JobsIndexRouteImport } from './routes/jobs/index'
-import { Route as StoresIndexRouteImport } from './routes/stores/index'
-import { Route as TablesIndexRouteImport } from './routes/tables/index'
+import { Route as WorkspaceChatRouteImport } from './routes/_workspace/chat'
+import { Route as WorkspaceContextRouteImport } from './routes/_workspace/context'
+import { Route as WorkspaceFilesRouteImport } from './routes/_workspace/files'
+import { Route as WorkspaceFoldersRouteImport } from './routes/_workspace/folders'
+import { Route as WorkspaceIntegrationsRouteImport } from './routes/_workspace/integrations'
+import { Route as WorkspaceRunsRouteImport } from './routes/_workspace/runs'
+import { Route as WorkspaceSkillsRouteImport } from './routes/_workspace/skills'
+import { Route as WorkspaceStoresRouteImport } from './routes/_workspace/stores'
+import { Route as WorkspaceTablesRouteImport } from './routes/_workspace/tables'
+import { Route as WorkspaceChatIndexRouteImport } from './routes/_workspace/chat/index'
+import { Route as WorkspaceContextIndexRouteImport } from './routes/_workspace/context/index'
+import { Route as WorkspaceContextPlacesRouteImport } from './routes/_workspace/context/places'
+import { Route as WorkspaceContextWorkstreamsRouteImport } from './routes/_workspace/context/workstreams'
+import { Route as WorkspaceFilesIndexRouteImport } from './routes/_workspace/files/index'
+import { Route as WorkspaceFoldersIndexRouteImport } from './routes/_workspace/folders/index'
+import { Route as WorkspaceFoldersUsageRouteImport } from './routes/_workspace/folders/usage'
+import { Route as WorkspaceIntegrationsIndexRouteImport } from './routes/_workspace/integrations/index'
+import { Route as WorkspaceIntegrationsPersonalRouteImport } from './routes/_workspace/integrations/personal'
+import { Route as WorkspaceJobsIndexRouteImport } from './routes/_workspace/jobs/index'
+import { Route as WorkspaceStoresIndexRouteImport } from './routes/_workspace/stores/index'
+import { Route as WorkspaceTablesIndexRouteImport } from './routes/_workspace/tables/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiIntegrationsCallbackRouteImport } from './routes/api/integrations/callback'
-import { Route as ChatConversationIdIndexRouteImport } from './routes/chat/$conversationId/index'
-import { Route as FilesFileIdIndexRouteImport } from './routes/files/$fileId/index'
-import { Route as FoldersFolderIdIndexRouteImport } from './routes/folders/$folderId/index'
-import { Route as FoldersFolderIdUsageRouteImport } from './routes/folders/$folderId/usage'
-import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations/offers/$token'
-import { Route as JobsJobIdIndexRouteImport } from './routes/jobs/$jobId/index'
-import { Route as StoresStoreIdIndexRouteImport } from './routes/stores/$storeId/index'
-import { Route as TablesTableIdIndexRouteImport } from './routes/tables/$tableId/index'
+import { Route as IntegrationsOffersTokenRouteImport } from './routes/integrations_.offers.$token'
+import { Route as WorkspaceChatConversationIdIndexRouteImport } from './routes/_workspace/chat/$conversationId/index'
+import { Route as WorkspaceFilesFileIdIndexRouteImport } from './routes/_workspace/files/$fileId/index'
+import { Route as WorkspaceFoldersFolderIdIndexRouteImport } from './routes/_workspace/folders/$folderId/index'
+import { Route as WorkspaceFoldersFolderIdUsageRouteImport } from './routes/_workspace/folders/$folderId/usage'
+import { Route as WorkspaceJobsJobIdIndexRouteImport } from './routes/_workspace/jobs/$jobId/index'
+import { Route as WorkspaceStoresStoreIdIndexRouteImport } from './routes/_workspace/stores/$storeId/index'
+import { Route as WorkspaceTablesTableIdIndexRouteImport } from './routes/_workspace/tables/$tableId/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
+const WorkspaceRoute = WorkspaceRouteImport.update({
+  id: '/_workspace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/console',
   path: '/console',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContextRoute = ContextRouteImport.update({
-  id: '/context',
-  path: '/context',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FilesRoute = FilesRouteImport.update({
-  id: '/files',
-  path: '/files',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FoldersRoute = FoldersRouteImport.update({
-  id: '/folders',
-  path: '/folders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntegrationsRoute = IntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -94,11 +74,6 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RunsRoute = RunsRouteImport.update({
-  id: '/runs',
-  path: '/runs',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -107,21 +82,6 @@ const SignInRoute = SignInRouteImport.update({
 const SignOutRoute = SignOutRouteImport.update({
   id: '/sign-out',
   path: '/sign-out',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SkillsRoute = SkillsRouteImport.update({
-  id: '/skills',
-  path: '/skills',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StoresRoute = StoresRouteImport.update({
-  id: '/stores',
-  path: '/stores',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TablesRoute = TablesRouteImport.update({
-  id: '/tables',
-  path: '/tables',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -134,65 +94,113 @@ const TrustRoute = TrustRouteImport.update({
   path: '/trust',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatIndexRoute = ChatIndexRouteImport.update({
+const WorkspaceChatRoute = WorkspaceChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceContextRoute = WorkspaceContextRouteImport.update({
+  id: '/context',
+  path: '/context',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceFilesRoute = WorkspaceFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceFoldersRoute = WorkspaceFoldersRouteImport.update({
+  id: '/folders',
+  path: '/folders',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceIntegrationsRoute = WorkspaceIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceRunsRoute = WorkspaceRunsRouteImport.update({
+  id: '/runs',
+  path: '/runs',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceSkillsRoute = WorkspaceSkillsRouteImport.update({
+  id: '/skills',
+  path: '/skills',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceStoresRoute = WorkspaceStoresRouteImport.update({
+  id: '/stores',
+  path: '/stores',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceTablesRoute = WorkspaceTablesRouteImport.update({
+  id: '/tables',
+  path: '/tables',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceChatIndexRoute = WorkspaceChatIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ChatRoute,
+  getParentRoute: () => WorkspaceChatRoute,
 } as any)
-const ContextIndexRoute = ContextIndexRouteImport.update({
+const WorkspaceContextIndexRoute = WorkspaceContextIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ContextRoute,
+  getParentRoute: () => WorkspaceContextRoute,
 } as any)
-const ContextPlacesRoute = ContextPlacesRouteImport.update({
+const WorkspaceContextPlacesRoute = WorkspaceContextPlacesRouteImport.update({
   id: '/places',
   path: '/places',
-  getParentRoute: () => ContextRoute,
+  getParentRoute: () => WorkspaceContextRoute,
 } as any)
-const ContextWorkstreamsRoute = ContextWorkstreamsRouteImport.update({
-  id: '/workstreams',
-  path: '/workstreams',
-  getParentRoute: () => ContextRoute,
-} as any)
-const FilesIndexRoute = FilesIndexRouteImport.update({
+const WorkspaceContextWorkstreamsRoute =
+  WorkspaceContextWorkstreamsRouteImport.update({
+    id: '/workstreams',
+    path: '/workstreams',
+    getParentRoute: () => WorkspaceContextRoute,
+  } as any)
+const WorkspaceFilesIndexRoute = WorkspaceFilesIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => FilesRoute,
+  getParentRoute: () => WorkspaceFilesRoute,
 } as any)
-const FoldersIndexRoute = FoldersIndexRouteImport.update({
+const WorkspaceFoldersIndexRoute = WorkspaceFoldersIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => FoldersRoute,
+  getParentRoute: () => WorkspaceFoldersRoute,
 } as any)
-const FoldersUsageRoute = FoldersUsageRouteImport.update({
+const WorkspaceFoldersUsageRoute = WorkspaceFoldersUsageRouteImport.update({
   id: '/usage',
   path: '/usage',
-  getParentRoute: () => FoldersRoute,
+  getParentRoute: () => WorkspaceFoldersRoute,
 } as any)
-const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => IntegrationsRoute,
-} as any)
-const IntegrationsPersonalRoute = IntegrationsPersonalRouteImport.update({
-  id: '/personal',
-  path: '/personal',
-  getParentRoute: () => IntegrationsRoute,
-} as any)
-const JobsIndexRoute = JobsIndexRouteImport.update({
+const WorkspaceIntegrationsIndexRoute =
+  WorkspaceIntegrationsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspaceIntegrationsRoute,
+  } as any)
+const WorkspaceIntegrationsPersonalRoute =
+  WorkspaceIntegrationsPersonalRouteImport.update({
+    id: '/personal',
+    path: '/personal',
+    getParentRoute: () => WorkspaceIntegrationsRoute,
+  } as any)
+const WorkspaceJobsIndexRoute = WorkspaceJobsIndexRouteImport.update({
   id: '/jobs/',
   path: '/jobs/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => WorkspaceRoute,
 } as any)
-const StoresIndexRoute = StoresIndexRouteImport.update({
+const WorkspaceStoresIndexRoute = WorkspaceStoresIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => StoresRoute,
+  getParentRoute: () => WorkspaceStoresRoute,
 } as any)
-const TablesIndexRoute = TablesIndexRouteImport.update({
+const WorkspaceTablesIndexRoute = WorkspaceTablesIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => TablesRoute,
+  getParentRoute: () => WorkspaceTablesRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -204,188 +212,198 @@ const ApiIntegrationsCallbackRoute = ApiIntegrationsCallbackRouteImport.update({
   path: '/api/integrations/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatConversationIdIndexRoute = ChatConversationIdIndexRouteImport.update({
-  id: '/$conversationId/',
-  path: '/$conversationId/',
-  getParentRoute: () => ChatRoute,
-} as any)
-const FilesFileIdIndexRoute = FilesFileIdIndexRouteImport.update({
-  id: '/$fileId/',
-  path: '/$fileId/',
-  getParentRoute: () => FilesRoute,
-} as any)
-const FoldersFolderIdIndexRoute = FoldersFolderIdIndexRouteImport.update({
-  id: '/$folderId/',
-  path: '/$folderId/',
-  getParentRoute: () => FoldersRoute,
-} as any)
-const FoldersFolderIdUsageRoute = FoldersFolderIdUsageRouteImport.update({
-  id: '/$folderId/usage',
-  path: '/$folderId/usage',
-  getParentRoute: () => FoldersRoute,
-} as any)
 const IntegrationsOffersTokenRoute = IntegrationsOffersTokenRouteImport.update({
-  id: '/offers/$token',
-  path: '/offers/$token',
-  getParentRoute: () => IntegrationsRoute,
-} as any)
-const JobsJobIdIndexRoute = JobsJobIdIndexRouteImport.update({
-  id: '/jobs/$jobId/',
-  path: '/jobs/$jobId/',
+  id: '/integrations_/offers/$token',
+  path: '/integrations/offers/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StoresStoreIdIndexRoute = StoresStoreIdIndexRouteImport.update({
-  id: '/$storeId/',
-  path: '/$storeId/',
-  getParentRoute: () => StoresRoute,
+const WorkspaceChatConversationIdIndexRoute =
+  WorkspaceChatConversationIdIndexRouteImport.update({
+    id: '/$conversationId/',
+    path: '/$conversationId/',
+    getParentRoute: () => WorkspaceChatRoute,
+  } as any)
+const WorkspaceFilesFileIdIndexRoute =
+  WorkspaceFilesFileIdIndexRouteImport.update({
+    id: '/$fileId/',
+    path: '/$fileId/',
+    getParentRoute: () => WorkspaceFilesRoute,
+  } as any)
+const WorkspaceFoldersFolderIdIndexRoute =
+  WorkspaceFoldersFolderIdIndexRouteImport.update({
+    id: '/$folderId/',
+    path: '/$folderId/',
+    getParentRoute: () => WorkspaceFoldersRoute,
+  } as any)
+const WorkspaceFoldersFolderIdUsageRoute =
+  WorkspaceFoldersFolderIdUsageRouteImport.update({
+    id: '/$folderId/usage',
+    path: '/$folderId/usage',
+    getParentRoute: () => WorkspaceFoldersRoute,
+  } as any)
+const WorkspaceJobsJobIdIndexRoute = WorkspaceJobsJobIdIndexRouteImport.update({
+  id: '/jobs/$jobId/',
+  path: '/jobs/$jobId/',
+  getParentRoute: () => WorkspaceRoute,
 } as any)
-const TablesTableIdIndexRoute = TablesTableIdIndexRouteImport.update({
-  id: '/$tableId/',
-  path: '/$tableId/',
-  getParentRoute: () => TablesRoute,
-} as any)
+const WorkspaceStoresStoreIdIndexRoute =
+  WorkspaceStoresStoreIdIndexRouteImport.update({
+    id: '/$storeId/',
+    path: '/$storeId/',
+    getParentRoute: () => WorkspaceStoresRoute,
+  } as any)
+const WorkspaceTablesTableIdIndexRoute =
+  WorkspaceTablesTableIdIndexRouteImport.update({
+    id: '/$tableId/',
+    path: '/$tableId/',
+    getParentRoute: () => WorkspaceTablesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/chat': typeof ChatRouteWithChildren
   '/console': typeof ConsoleRoute
-  '/context': typeof ContextRouteWithChildren
-  '/files': typeof FilesRouteWithChildren
-  '/folders': typeof FoldersRouteWithChildren
-  '/integrations': typeof IntegrationsRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/runs': typeof RunsRoute
   '/sign-in': typeof SignInRoute
   '/sign-out': typeof SignOutRoute
-  '/skills': typeof SkillsRoute
-  '/stores': typeof StoresRouteWithChildren
-  '/tables': typeof TablesRouteWithChildren
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/context/places': typeof ContextPlacesRoute
-  '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/folders/usage': typeof FoldersUsageRoute
-  '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/chat/': typeof ChatIndexRoute
-  '/context/': typeof ContextIndexRoute
-  '/files/': typeof FilesIndexRoute
-  '/folders/': typeof FoldersIndexRoute
-  '/integrations/': typeof IntegrationsIndexRoute
-  '/jobs/': typeof JobsIndexRoute
-  '/stores/': typeof StoresIndexRoute
-  '/tables/': typeof TablesIndexRoute
+  '/chat': typeof WorkspaceChatRouteWithChildren
+  '/context': typeof WorkspaceContextRouteWithChildren
+  '/files': typeof WorkspaceFilesRouteWithChildren
+  '/folders': typeof WorkspaceFoldersRouteWithChildren
+  '/integrations': typeof WorkspaceIntegrationsRouteWithChildren
+  '/runs': typeof WorkspaceRunsRoute
+  '/skills': typeof WorkspaceSkillsRoute
+  '/stores': typeof WorkspaceStoresRouteWithChildren
+  '/tables': typeof WorkspaceTablesRouteWithChildren
+  '/context/places': typeof WorkspaceContextPlacesRoute
+  '/context/workstreams': typeof WorkspaceContextWorkstreamsRoute
+  '/folders/usage': typeof WorkspaceFoldersUsageRoute
+  '/integrations/personal': typeof WorkspaceIntegrationsPersonalRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/integrations/callback': typeof ApiIntegrationsCallbackRoute
-  '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/chat/$conversationId/': typeof ChatConversationIdIndexRoute
-  '/files/$fileId/': typeof FilesFileIdIndexRoute
-  '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
-  '/jobs/$jobId/': typeof JobsJobIdIndexRoute
-  '/stores/$storeId/': typeof StoresStoreIdIndexRoute
-  '/tables/$tableId/': typeof TablesTableIdIndexRoute
+  '/chat/': typeof WorkspaceChatIndexRoute
+  '/context/': typeof WorkspaceContextIndexRoute
+  '/files/': typeof WorkspaceFilesIndexRoute
+  '/folders/': typeof WorkspaceFoldersIndexRoute
+  '/integrations/': typeof WorkspaceIntegrationsIndexRoute
+  '/jobs/': typeof WorkspaceJobsIndexRoute
+  '/stores/': typeof WorkspaceStoresIndexRoute
+  '/tables/': typeof WorkspaceTablesIndexRoute
+  '/folders/$folderId/usage': typeof WorkspaceFoldersFolderIdUsageRoute
+  '/chat/$conversationId/': typeof WorkspaceChatConversationIdIndexRoute
+  '/files/$fileId/': typeof WorkspaceFilesFileIdIndexRoute
+  '/folders/$folderId/': typeof WorkspaceFoldersFolderIdIndexRoute
+  '/jobs/$jobId/': typeof WorkspaceJobsJobIdIndexRoute
+  '/stores/$storeId/': typeof WorkspaceStoresStoreIdIndexRoute
+  '/tables/$tableId/': typeof WorkspaceTablesTableIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/console': typeof ConsoleRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/runs': typeof RunsRoute
   '/sign-in': typeof SignInRoute
   '/sign-out': typeof SignOutRoute
-  '/skills': typeof SkillsRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/context/places': typeof ContextPlacesRoute
-  '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/folders/usage': typeof FoldersUsageRoute
-  '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/chat': typeof ChatIndexRoute
-  '/context': typeof ContextIndexRoute
-  '/files': typeof FilesIndexRoute
-  '/folders': typeof FoldersIndexRoute
-  '/integrations': typeof IntegrationsIndexRoute
-  '/jobs': typeof JobsIndexRoute
-  '/stores': typeof StoresIndexRoute
-  '/tables': typeof TablesIndexRoute
+  '/runs': typeof WorkspaceRunsRoute
+  '/skills': typeof WorkspaceSkillsRoute
+  '/context/places': typeof WorkspaceContextPlacesRoute
+  '/context/workstreams': typeof WorkspaceContextWorkstreamsRoute
+  '/folders/usage': typeof WorkspaceFoldersUsageRoute
+  '/integrations/personal': typeof WorkspaceIntegrationsPersonalRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/integrations/callback': typeof ApiIntegrationsCallbackRoute
-  '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
   '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/chat/$conversationId': typeof ChatConversationIdIndexRoute
-  '/files/$fileId': typeof FilesFileIdIndexRoute
-  '/folders/$folderId': typeof FoldersFolderIdIndexRoute
-  '/jobs/$jobId': typeof JobsJobIdIndexRoute
-  '/stores/$storeId': typeof StoresStoreIdIndexRoute
-  '/tables/$tableId': typeof TablesTableIdIndexRoute
+  '/chat': typeof WorkspaceChatIndexRoute
+  '/context': typeof WorkspaceContextIndexRoute
+  '/files': typeof WorkspaceFilesIndexRoute
+  '/folders': typeof WorkspaceFoldersIndexRoute
+  '/integrations': typeof WorkspaceIntegrationsIndexRoute
+  '/jobs': typeof WorkspaceJobsIndexRoute
+  '/stores': typeof WorkspaceStoresIndexRoute
+  '/tables': typeof WorkspaceTablesIndexRoute
+  '/folders/$folderId/usage': typeof WorkspaceFoldersFolderIdUsageRoute
+  '/chat/$conversationId': typeof WorkspaceChatConversationIdIndexRoute
+  '/files/$fileId': typeof WorkspaceFilesFileIdIndexRoute
+  '/folders/$folderId': typeof WorkspaceFoldersFolderIdIndexRoute
+  '/jobs/$jobId': typeof WorkspaceJobsJobIdIndexRoute
+  '/stores/$storeId': typeof WorkspaceStoresStoreIdIndexRoute
+  '/tables/$tableId': typeof WorkspaceTablesTableIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/chat': typeof ChatRouteWithChildren
+  '/_workspace': typeof WorkspaceRouteWithChildren
   '/console': typeof ConsoleRoute
-  '/context': typeof ContextRouteWithChildren
-  '/files': typeof FilesRouteWithChildren
-  '/folders': typeof FoldersRouteWithChildren
-  '/integrations': typeof IntegrationsRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/runs': typeof RunsRoute
   '/sign-in': typeof SignInRoute
   '/sign-out': typeof SignOutRoute
-  '/skills': typeof SkillsRoute
-  '/stores': typeof StoresRouteWithChildren
-  '/tables': typeof TablesRouteWithChildren
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/context/places': typeof ContextPlacesRoute
-  '/context/workstreams': typeof ContextWorkstreamsRoute
-  '/folders/usage': typeof FoldersUsageRoute
-  '/integrations/personal': typeof IntegrationsPersonalRoute
-  '/chat/': typeof ChatIndexRoute
-  '/context/': typeof ContextIndexRoute
-  '/files/': typeof FilesIndexRoute
-  '/folders/': typeof FoldersIndexRoute
-  '/integrations/': typeof IntegrationsIndexRoute
-  '/jobs/': typeof JobsIndexRoute
-  '/stores/': typeof StoresIndexRoute
-  '/tables/': typeof TablesIndexRoute
+  '/_workspace/chat': typeof WorkspaceChatRouteWithChildren
+  '/_workspace/context': typeof WorkspaceContextRouteWithChildren
+  '/_workspace/files': typeof WorkspaceFilesRouteWithChildren
+  '/_workspace/folders': typeof WorkspaceFoldersRouteWithChildren
+  '/_workspace/integrations': typeof WorkspaceIntegrationsRouteWithChildren
+  '/_workspace/runs': typeof WorkspaceRunsRoute
+  '/_workspace/skills': typeof WorkspaceSkillsRoute
+  '/_workspace/stores': typeof WorkspaceStoresRouteWithChildren
+  '/_workspace/tables': typeof WorkspaceTablesRouteWithChildren
+  '/_workspace/context/places': typeof WorkspaceContextPlacesRoute
+  '/_workspace/context/workstreams': typeof WorkspaceContextWorkstreamsRoute
+  '/_workspace/folders/usage': typeof WorkspaceFoldersUsageRoute
+  '/_workspace/integrations/personal': typeof WorkspaceIntegrationsPersonalRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/integrations/callback': typeof ApiIntegrationsCallbackRoute
-  '/folders/$folderId/usage': typeof FoldersFolderIdUsageRoute
-  '/integrations/offers/$token': typeof IntegrationsOffersTokenRoute
-  '/chat/$conversationId/': typeof ChatConversationIdIndexRoute
-  '/files/$fileId/': typeof FilesFileIdIndexRoute
-  '/folders/$folderId/': typeof FoldersFolderIdIndexRoute
-  '/jobs/$jobId/': typeof JobsJobIdIndexRoute
-  '/stores/$storeId/': typeof StoresStoreIdIndexRoute
-  '/tables/$tableId/': typeof TablesTableIdIndexRoute
+  '/integrations_/offers/$token': typeof IntegrationsOffersTokenRoute
+  '/_workspace/chat/': typeof WorkspaceChatIndexRoute
+  '/_workspace/context/': typeof WorkspaceContextIndexRoute
+  '/_workspace/files/': typeof WorkspaceFilesIndexRoute
+  '/_workspace/folders/': typeof WorkspaceFoldersIndexRoute
+  '/_workspace/integrations/': typeof WorkspaceIntegrationsIndexRoute
+  '/_workspace/jobs/': typeof WorkspaceJobsIndexRoute
+  '/_workspace/stores/': typeof WorkspaceStoresIndexRoute
+  '/_workspace/tables/': typeof WorkspaceTablesIndexRoute
+  '/_workspace/folders/$folderId/usage': typeof WorkspaceFoldersFolderIdUsageRoute
+  '/_workspace/chat/$conversationId/': typeof WorkspaceChatConversationIdIndexRoute
+  '/_workspace/files/$fileId/': typeof WorkspaceFilesFileIdIndexRoute
+  '/_workspace/folders/$folderId/': typeof WorkspaceFoldersFolderIdIndexRoute
+  '/_workspace/jobs/$jobId/': typeof WorkspaceJobsJobIdIndexRoute
+  '/_workspace/stores/$storeId/': typeof WorkspaceStoresStoreIdIndexRoute
+  '/_workspace/tables/$tableId/': typeof WorkspaceTablesTableIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/chat'
     | '/console'
+    | '/pricing'
+    | '/privacy'
+    | '/sign-in'
+    | '/sign-out'
+    | '/terms'
+    | '/trust'
+    | '/chat'
     | '/context'
     | '/files'
     | '/folders'
     | '/integrations'
-    | '/pricing'
-    | '/privacy'
     | '/runs'
-    | '/sign-in'
-    | '/sign-out'
     | '/skills'
     | '/stores'
     | '/tables'
-    | '/terms'
-    | '/trust'
     | '/context/places'
     | '/context/workstreams'
     | '/folders/usage'
     | '/integrations/personal'
+    | '/api/auth/$'
+    | '/api/integrations/callback'
+    | '/integrations/offers/$token'
     | '/chat/'
     | '/context/'
     | '/files/'
@@ -394,10 +412,7 @@ export interface FileRouteTypes {
     | '/jobs/'
     | '/stores/'
     | '/tables/'
-    | '/api/auth/$'
-    | '/api/integrations/callback'
     | '/folders/$folderId/usage'
-    | '/integrations/offers/$token'
     | '/chat/$conversationId/'
     | '/files/$fileId/'
     | '/folders/$folderId/'
@@ -410,16 +425,19 @@ export interface FileRouteTypes {
     | '/console'
     | '/pricing'
     | '/privacy'
-    | '/runs'
     | '/sign-in'
     | '/sign-out'
-    | '/skills'
     | '/terms'
     | '/trust'
+    | '/runs'
+    | '/skills'
     | '/context/places'
     | '/context/workstreams'
     | '/folders/usage'
     | '/integrations/personal'
+    | '/api/auth/$'
+    | '/api/integrations/callback'
+    | '/integrations/offers/$token'
     | '/chat'
     | '/context'
     | '/files'
@@ -428,10 +446,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/stores'
     | '/tables'
-    | '/api/auth/$'
-    | '/api/integrations/callback'
     | '/folders/$folderId/usage'
-    | '/integrations/offers/$token'
     | '/chat/$conversationId'
     | '/files/$fileId'
     | '/folders/$folderId'
@@ -441,68 +456,60 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/chat'
+    | '/_workspace'
     | '/console'
-    | '/context'
-    | '/files'
-    | '/folders'
-    | '/integrations'
     | '/pricing'
     | '/privacy'
-    | '/runs'
     | '/sign-in'
     | '/sign-out'
-    | '/skills'
-    | '/stores'
-    | '/tables'
     | '/terms'
     | '/trust'
-    | '/context/places'
-    | '/context/workstreams'
-    | '/folders/usage'
-    | '/integrations/personal'
-    | '/chat/'
-    | '/context/'
-    | '/files/'
-    | '/folders/'
-    | '/integrations/'
-    | '/jobs/'
-    | '/stores/'
-    | '/tables/'
+    | '/_workspace/chat'
+    | '/_workspace/context'
+    | '/_workspace/files'
+    | '/_workspace/folders'
+    | '/_workspace/integrations'
+    | '/_workspace/runs'
+    | '/_workspace/skills'
+    | '/_workspace/stores'
+    | '/_workspace/tables'
+    | '/_workspace/context/places'
+    | '/_workspace/context/workstreams'
+    | '/_workspace/folders/usage'
+    | '/_workspace/integrations/personal'
     | '/api/auth/$'
     | '/api/integrations/callback'
-    | '/folders/$folderId/usage'
-    | '/integrations/offers/$token'
-    | '/chat/$conversationId/'
-    | '/files/$fileId/'
-    | '/folders/$folderId/'
-    | '/jobs/$jobId/'
-    | '/stores/$storeId/'
-    | '/tables/$tableId/'
+    | '/integrations_/offers/$token'
+    | '/_workspace/chat/'
+    | '/_workspace/context/'
+    | '/_workspace/files/'
+    | '/_workspace/folders/'
+    | '/_workspace/integrations/'
+    | '/_workspace/jobs/'
+    | '/_workspace/stores/'
+    | '/_workspace/tables/'
+    | '/_workspace/folders/$folderId/usage'
+    | '/_workspace/chat/$conversationId/'
+    | '/_workspace/files/$fileId/'
+    | '/_workspace/folders/$folderId/'
+    | '/_workspace/jobs/$jobId/'
+    | '/_workspace/stores/$storeId/'
+    | '/_workspace/tables/$tableId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChatRoute: typeof ChatRouteWithChildren
+  WorkspaceRoute: typeof WorkspaceRouteWithChildren
   ConsoleRoute: typeof ConsoleRoute
-  ContextRoute: typeof ContextRouteWithChildren
-  FilesRoute: typeof FilesRouteWithChildren
-  FoldersRoute: typeof FoldersRouteWithChildren
-  IntegrationsRoute: typeof IntegrationsRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
-  RunsRoute: typeof RunsRoute
   SignInRoute: typeof SignInRoute
   SignOutRoute: typeof SignOutRoute
-  SkillsRoute: typeof SkillsRoute
-  StoresRoute: typeof StoresRouteWithChildren
-  TablesRoute: typeof TablesRouteWithChildren
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
-  JobsIndexRoute: typeof JobsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiIntegrationsCallbackRoute: typeof ApiIntegrationsCallbackRoute
-  JobsJobIdIndexRoute: typeof JobsJobIdIndexRoute
+  IntegrationsOffersTokenRoute: typeof IntegrationsOffersTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -514,11 +521,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
+    '/_workspace': {
+      id: '/_workspace'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof WorkspaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/console': {
@@ -526,34 +533,6 @@ declare module '@tanstack/react-router' {
       path: '/console'
       fullPath: '/console'
       preLoaderRoute: typeof ConsoleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/context': {
-      id: '/context'
-      path: '/context'
-      fullPath: '/context'
-      preLoaderRoute: typeof ContextRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/files': {
-      id: '/files'
-      path: '/files'
-      fullPath: '/files'
-      preLoaderRoute: typeof FilesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/folders': {
-      id: '/folders'
-      path: '/folders'
-      fullPath: '/folders'
-      preLoaderRoute: typeof FoldersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integrations': {
-      id: '/integrations'
-      path: '/integrations'
-      fullPath: '/integrations'
-      preLoaderRoute: typeof IntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -570,13 +549,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/runs': {
-      id: '/runs'
-      path: '/runs'
-      fullPath: '/runs'
-      preLoaderRoute: typeof RunsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
@@ -589,27 +561,6 @@ declare module '@tanstack/react-router' {
       path: '/sign-out'
       fullPath: '/sign-out'
       preLoaderRoute: typeof SignOutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/skills': {
-      id: '/skills'
-      path: '/skills'
-      fullPath: '/skills'
-      preLoaderRoute: typeof SkillsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/stores': {
-      id: '/stores'
-      path: '/stores'
-      fullPath: '/stores'
-      preLoaderRoute: typeof StoresRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tables': {
-      id: '/tables'
-      path: '/tables'
-      fullPath: '/tables'
-      preLoaderRoute: typeof TablesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -626,89 +577,152 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrustRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat/': {
-      id: '/chat/'
+    '/_workspace/chat': {
+      id: '/_workspace/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof WorkspaceChatRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/context': {
+      id: '/_workspace/context'
+      path: '/context'
+      fullPath: '/context'
+      preLoaderRoute: typeof WorkspaceContextRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/files': {
+      id: '/_workspace/files'
+      path: '/files'
+      fullPath: '/files'
+      preLoaderRoute: typeof WorkspaceFilesRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/folders': {
+      id: '/_workspace/folders'
+      path: '/folders'
+      fullPath: '/folders'
+      preLoaderRoute: typeof WorkspaceFoldersRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/integrations': {
+      id: '/_workspace/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof WorkspaceIntegrationsRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/runs': {
+      id: '/_workspace/runs'
+      path: '/runs'
+      fullPath: '/runs'
+      preLoaderRoute: typeof WorkspaceRunsRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/skills': {
+      id: '/_workspace/skills'
+      path: '/skills'
+      fullPath: '/skills'
+      preLoaderRoute: typeof WorkspaceSkillsRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/stores': {
+      id: '/_workspace/stores'
+      path: '/stores'
+      fullPath: '/stores'
+      preLoaderRoute: typeof WorkspaceStoresRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/tables': {
+      id: '/_workspace/tables'
+      path: '/tables'
+      fullPath: '/tables'
+      preLoaderRoute: typeof WorkspaceTablesRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/chat/': {
+      id: '/_workspace/chat/'
       path: '/'
       fullPath: '/chat/'
-      preLoaderRoute: typeof ChatIndexRouteImport
-      parentRoute: typeof ChatRoute
+      preLoaderRoute: typeof WorkspaceChatIndexRouteImport
+      parentRoute: typeof WorkspaceChatRoute
     }
-    '/context/': {
-      id: '/context/'
+    '/_workspace/context/': {
+      id: '/_workspace/context/'
       path: '/'
       fullPath: '/context/'
-      preLoaderRoute: typeof ContextIndexRouteImport
-      parentRoute: typeof ContextRoute
+      preLoaderRoute: typeof WorkspaceContextIndexRouteImport
+      parentRoute: typeof WorkspaceContextRoute
     }
-    '/context/places': {
-      id: '/context/places'
+    '/_workspace/context/places': {
+      id: '/_workspace/context/places'
       path: '/places'
       fullPath: '/context/places'
-      preLoaderRoute: typeof ContextPlacesRouteImport
-      parentRoute: typeof ContextRoute
+      preLoaderRoute: typeof WorkspaceContextPlacesRouteImport
+      parentRoute: typeof WorkspaceContextRoute
     }
-    '/context/workstreams': {
-      id: '/context/workstreams'
+    '/_workspace/context/workstreams': {
+      id: '/_workspace/context/workstreams'
       path: '/workstreams'
       fullPath: '/context/workstreams'
-      preLoaderRoute: typeof ContextWorkstreamsRouteImport
-      parentRoute: typeof ContextRoute
+      preLoaderRoute: typeof WorkspaceContextWorkstreamsRouteImport
+      parentRoute: typeof WorkspaceContextRoute
     }
-    '/files/': {
-      id: '/files/'
+    '/_workspace/files/': {
+      id: '/_workspace/files/'
       path: '/'
       fullPath: '/files/'
-      preLoaderRoute: typeof FilesIndexRouteImport
-      parentRoute: typeof FilesRoute
+      preLoaderRoute: typeof WorkspaceFilesIndexRouteImport
+      parentRoute: typeof WorkspaceFilesRoute
     }
-    '/folders/': {
-      id: '/folders/'
+    '/_workspace/folders/': {
+      id: '/_workspace/folders/'
       path: '/'
       fullPath: '/folders/'
-      preLoaderRoute: typeof FoldersIndexRouteImport
-      parentRoute: typeof FoldersRoute
+      preLoaderRoute: typeof WorkspaceFoldersIndexRouteImport
+      parentRoute: typeof WorkspaceFoldersRoute
     }
-    '/folders/usage': {
-      id: '/folders/usage'
+    '/_workspace/folders/usage': {
+      id: '/_workspace/folders/usage'
       path: '/usage'
       fullPath: '/folders/usage'
-      preLoaderRoute: typeof FoldersUsageRouteImport
-      parentRoute: typeof FoldersRoute
+      preLoaderRoute: typeof WorkspaceFoldersUsageRouteImport
+      parentRoute: typeof WorkspaceFoldersRoute
     }
-    '/integrations/': {
-      id: '/integrations/'
+    '/_workspace/integrations/': {
+      id: '/_workspace/integrations/'
       path: '/'
       fullPath: '/integrations/'
-      preLoaderRoute: typeof IntegrationsIndexRouteImport
-      parentRoute: typeof IntegrationsRoute
+      preLoaderRoute: typeof WorkspaceIntegrationsIndexRouteImport
+      parentRoute: typeof WorkspaceIntegrationsRoute
     }
-    '/integrations/personal': {
-      id: '/integrations/personal'
+    '/_workspace/integrations/personal': {
+      id: '/_workspace/integrations/personal'
       path: '/personal'
       fullPath: '/integrations/personal'
-      preLoaderRoute: typeof IntegrationsPersonalRouteImport
-      parentRoute: typeof IntegrationsRoute
+      preLoaderRoute: typeof WorkspaceIntegrationsPersonalRouteImport
+      parentRoute: typeof WorkspaceIntegrationsRoute
     }
-    '/jobs/': {
-      id: '/jobs/'
+    '/_workspace/jobs/': {
+      id: '/_workspace/jobs/'
       path: '/jobs'
       fullPath: '/jobs/'
-      preLoaderRoute: typeof JobsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof WorkspaceJobsIndexRouteImport
+      parentRoute: typeof WorkspaceRoute
     }
-    '/stores/': {
-      id: '/stores/'
+    '/_workspace/stores/': {
+      id: '/_workspace/stores/'
       path: '/'
       fullPath: '/stores/'
-      preLoaderRoute: typeof StoresIndexRouteImport
-      parentRoute: typeof StoresRoute
+      preLoaderRoute: typeof WorkspaceStoresIndexRouteImport
+      parentRoute: typeof WorkspaceStoresRoute
     }
-    '/tables/': {
-      id: '/tables/'
+    '/_workspace/tables/': {
+      id: '/_workspace/tables/'
       path: '/'
       fullPath: '/tables/'
-      preLoaderRoute: typeof TablesIndexRouteImport
-      parentRoute: typeof TablesRoute
+      preLoaderRoute: typeof WorkspaceTablesIndexRouteImport
+      parentRoute: typeof WorkspaceTablesRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -724,185 +738,213 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIntegrationsCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat/$conversationId/': {
-      id: '/chat/$conversationId/'
-      path: '/$conversationId'
-      fullPath: '/chat/$conversationId/'
-      preLoaderRoute: typeof ChatConversationIdIndexRouteImport
-      parentRoute: typeof ChatRoute
-    }
-    '/files/$fileId/': {
-      id: '/files/$fileId/'
-      path: '/$fileId'
-      fullPath: '/files/$fileId/'
-      preLoaderRoute: typeof FilesFileIdIndexRouteImport
-      parentRoute: typeof FilesRoute
-    }
-    '/folders/$folderId/': {
-      id: '/folders/$folderId/'
-      path: '/$folderId'
-      fullPath: '/folders/$folderId/'
-      preLoaderRoute: typeof FoldersFolderIdIndexRouteImport
-      parentRoute: typeof FoldersRoute
-    }
-    '/folders/$folderId/usage': {
-      id: '/folders/$folderId/usage'
-      path: '/$folderId/usage'
-      fullPath: '/folders/$folderId/usage'
-      preLoaderRoute: typeof FoldersFolderIdUsageRouteImport
-      parentRoute: typeof FoldersRoute
-    }
-    '/integrations/offers/$token': {
-      id: '/integrations/offers/$token'
-      path: '/offers/$token'
+    '/integrations_/offers/$token': {
+      id: '/integrations_/offers/$token'
+      path: '/integrations/offers/$token'
       fullPath: '/integrations/offers/$token'
       preLoaderRoute: typeof IntegrationsOffersTokenRouteImport
-      parentRoute: typeof IntegrationsRoute
-    }
-    '/jobs/$jobId/': {
-      id: '/jobs/$jobId/'
-      path: '/jobs/$jobId'
-      fullPath: '/jobs/$jobId/'
-      preLoaderRoute: typeof JobsJobIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/stores/$storeId/': {
-      id: '/stores/$storeId/'
+    '/_workspace/chat/$conversationId/': {
+      id: '/_workspace/chat/$conversationId/'
+      path: '/$conversationId'
+      fullPath: '/chat/$conversationId/'
+      preLoaderRoute: typeof WorkspaceChatConversationIdIndexRouteImport
+      parentRoute: typeof WorkspaceChatRoute
+    }
+    '/_workspace/files/$fileId/': {
+      id: '/_workspace/files/$fileId/'
+      path: '/$fileId'
+      fullPath: '/files/$fileId/'
+      preLoaderRoute: typeof WorkspaceFilesFileIdIndexRouteImport
+      parentRoute: typeof WorkspaceFilesRoute
+    }
+    '/_workspace/folders/$folderId/': {
+      id: '/_workspace/folders/$folderId/'
+      path: '/$folderId'
+      fullPath: '/folders/$folderId/'
+      preLoaderRoute: typeof WorkspaceFoldersFolderIdIndexRouteImport
+      parentRoute: typeof WorkspaceFoldersRoute
+    }
+    '/_workspace/folders/$folderId/usage': {
+      id: '/_workspace/folders/$folderId/usage'
+      path: '/$folderId/usage'
+      fullPath: '/folders/$folderId/usage'
+      preLoaderRoute: typeof WorkspaceFoldersFolderIdUsageRouteImport
+      parentRoute: typeof WorkspaceFoldersRoute
+    }
+    '/_workspace/jobs/$jobId/': {
+      id: '/_workspace/jobs/$jobId/'
+      path: '/jobs/$jobId'
+      fullPath: '/jobs/$jobId/'
+      preLoaderRoute: typeof WorkspaceJobsJobIdIndexRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/stores/$storeId/': {
+      id: '/_workspace/stores/$storeId/'
       path: '/$storeId'
       fullPath: '/stores/$storeId/'
-      preLoaderRoute: typeof StoresStoreIdIndexRouteImport
-      parentRoute: typeof StoresRoute
+      preLoaderRoute: typeof WorkspaceStoresStoreIdIndexRouteImport
+      parentRoute: typeof WorkspaceStoresRoute
     }
-    '/tables/$tableId/': {
-      id: '/tables/$tableId/'
+    '/_workspace/tables/$tableId/': {
+      id: '/_workspace/tables/$tableId/'
       path: '/$tableId'
       fullPath: '/tables/$tableId/'
-      preLoaderRoute: typeof TablesTableIdIndexRouteImport
-      parentRoute: typeof TablesRoute
+      preLoaderRoute: typeof WorkspaceTablesTableIdIndexRouteImport
+      parentRoute: typeof WorkspaceTablesRoute
     }
   }
 }
 
-interface ChatRouteChildren {
-  ChatIndexRoute: typeof ChatIndexRoute
-  ChatConversationIdIndexRoute: typeof ChatConversationIdIndexRoute
+interface WorkspaceChatRouteChildren {
+  WorkspaceChatIndexRoute: typeof WorkspaceChatIndexRoute
+  WorkspaceChatConversationIdIndexRoute: typeof WorkspaceChatConversationIdIndexRoute
 }
 
-const ChatRouteChildren: ChatRouteChildren = {
-  ChatIndexRoute: ChatIndexRoute,
-  ChatConversationIdIndexRoute: ChatConversationIdIndexRoute,
+const WorkspaceChatRouteChildren: WorkspaceChatRouteChildren = {
+  WorkspaceChatIndexRoute: WorkspaceChatIndexRoute,
+  WorkspaceChatConversationIdIndexRoute: WorkspaceChatConversationIdIndexRoute,
 }
 
-const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
-
-interface ContextRouteChildren {
-  ContextPlacesRoute: typeof ContextPlacesRoute
-  ContextWorkstreamsRoute: typeof ContextWorkstreamsRoute
-  ContextIndexRoute: typeof ContextIndexRoute
-}
-
-const ContextRouteChildren: ContextRouteChildren = {
-  ContextPlacesRoute: ContextPlacesRoute,
-  ContextWorkstreamsRoute: ContextWorkstreamsRoute,
-  ContextIndexRoute: ContextIndexRoute,
-}
-
-const ContextRouteWithChildren =
-  ContextRoute._addFileChildren(ContextRouteChildren)
-
-interface FilesRouteChildren {
-  FilesIndexRoute: typeof FilesIndexRoute
-  FilesFileIdIndexRoute: typeof FilesFileIdIndexRoute
-}
-
-const FilesRouteChildren: FilesRouteChildren = {
-  FilesIndexRoute: FilesIndexRoute,
-  FilesFileIdIndexRoute: FilesFileIdIndexRoute,
-}
-
-const FilesRouteWithChildren = FilesRoute._addFileChildren(FilesRouteChildren)
-
-interface FoldersRouteChildren {
-  FoldersUsageRoute: typeof FoldersUsageRoute
-  FoldersIndexRoute: typeof FoldersIndexRoute
-  FoldersFolderIdUsageRoute: typeof FoldersFolderIdUsageRoute
-  FoldersFolderIdIndexRoute: typeof FoldersFolderIdIndexRoute
-}
-
-const FoldersRouteChildren: FoldersRouteChildren = {
-  FoldersUsageRoute: FoldersUsageRoute,
-  FoldersIndexRoute: FoldersIndexRoute,
-  FoldersFolderIdUsageRoute: FoldersFolderIdUsageRoute,
-  FoldersFolderIdIndexRoute: FoldersFolderIdIndexRoute,
-}
-
-const FoldersRouteWithChildren =
-  FoldersRoute._addFileChildren(FoldersRouteChildren)
-
-interface IntegrationsRouteChildren {
-  IntegrationsPersonalRoute: typeof IntegrationsPersonalRoute
-  IntegrationsIndexRoute: typeof IntegrationsIndexRoute
-  IntegrationsOffersTokenRoute: typeof IntegrationsOffersTokenRoute
-}
-
-const IntegrationsRouteChildren: IntegrationsRouteChildren = {
-  IntegrationsPersonalRoute: IntegrationsPersonalRoute,
-  IntegrationsIndexRoute: IntegrationsIndexRoute,
-  IntegrationsOffersTokenRoute: IntegrationsOffersTokenRoute,
-}
-
-const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
-  IntegrationsRouteChildren,
+const WorkspaceChatRouteWithChildren = WorkspaceChatRoute._addFileChildren(
+  WorkspaceChatRouteChildren,
 )
 
-interface StoresRouteChildren {
-  StoresIndexRoute: typeof StoresIndexRoute
-  StoresStoreIdIndexRoute: typeof StoresStoreIdIndexRoute
+interface WorkspaceContextRouteChildren {
+  WorkspaceContextPlacesRoute: typeof WorkspaceContextPlacesRoute
+  WorkspaceContextWorkstreamsRoute: typeof WorkspaceContextWorkstreamsRoute
+  WorkspaceContextIndexRoute: typeof WorkspaceContextIndexRoute
 }
 
-const StoresRouteChildren: StoresRouteChildren = {
-  StoresIndexRoute: StoresIndexRoute,
-  StoresStoreIdIndexRoute: StoresStoreIdIndexRoute,
+const WorkspaceContextRouteChildren: WorkspaceContextRouteChildren = {
+  WorkspaceContextPlacesRoute: WorkspaceContextPlacesRoute,
+  WorkspaceContextWorkstreamsRoute: WorkspaceContextWorkstreamsRoute,
+  WorkspaceContextIndexRoute: WorkspaceContextIndexRoute,
 }
 
-const StoresRouteWithChildren =
-  StoresRoute._addFileChildren(StoresRouteChildren)
+const WorkspaceContextRouteWithChildren =
+  WorkspaceContextRoute._addFileChildren(WorkspaceContextRouteChildren)
 
-interface TablesRouteChildren {
-  TablesIndexRoute: typeof TablesIndexRoute
-  TablesTableIdIndexRoute: typeof TablesTableIdIndexRoute
+interface WorkspaceFilesRouteChildren {
+  WorkspaceFilesIndexRoute: typeof WorkspaceFilesIndexRoute
+  WorkspaceFilesFileIdIndexRoute: typeof WorkspaceFilesFileIdIndexRoute
 }
 
-const TablesRouteChildren: TablesRouteChildren = {
-  TablesIndexRoute: TablesIndexRoute,
-  TablesTableIdIndexRoute: TablesTableIdIndexRoute,
+const WorkspaceFilesRouteChildren: WorkspaceFilesRouteChildren = {
+  WorkspaceFilesIndexRoute: WorkspaceFilesIndexRoute,
+  WorkspaceFilesFileIdIndexRoute: WorkspaceFilesFileIdIndexRoute,
 }
 
-const TablesRouteWithChildren =
-  TablesRoute._addFileChildren(TablesRouteChildren)
+const WorkspaceFilesRouteWithChildren = WorkspaceFilesRoute._addFileChildren(
+  WorkspaceFilesRouteChildren,
+)
+
+interface WorkspaceFoldersRouteChildren {
+  WorkspaceFoldersUsageRoute: typeof WorkspaceFoldersUsageRoute
+  WorkspaceFoldersIndexRoute: typeof WorkspaceFoldersIndexRoute
+  WorkspaceFoldersFolderIdUsageRoute: typeof WorkspaceFoldersFolderIdUsageRoute
+  WorkspaceFoldersFolderIdIndexRoute: typeof WorkspaceFoldersFolderIdIndexRoute
+}
+
+const WorkspaceFoldersRouteChildren: WorkspaceFoldersRouteChildren = {
+  WorkspaceFoldersUsageRoute: WorkspaceFoldersUsageRoute,
+  WorkspaceFoldersIndexRoute: WorkspaceFoldersIndexRoute,
+  WorkspaceFoldersFolderIdUsageRoute: WorkspaceFoldersFolderIdUsageRoute,
+  WorkspaceFoldersFolderIdIndexRoute: WorkspaceFoldersFolderIdIndexRoute,
+}
+
+const WorkspaceFoldersRouteWithChildren =
+  WorkspaceFoldersRoute._addFileChildren(WorkspaceFoldersRouteChildren)
+
+interface WorkspaceIntegrationsRouteChildren {
+  WorkspaceIntegrationsPersonalRoute: typeof WorkspaceIntegrationsPersonalRoute
+  WorkspaceIntegrationsIndexRoute: typeof WorkspaceIntegrationsIndexRoute
+}
+
+const WorkspaceIntegrationsRouteChildren: WorkspaceIntegrationsRouteChildren = {
+  WorkspaceIntegrationsPersonalRoute: WorkspaceIntegrationsPersonalRoute,
+  WorkspaceIntegrationsIndexRoute: WorkspaceIntegrationsIndexRoute,
+}
+
+const WorkspaceIntegrationsRouteWithChildren =
+  WorkspaceIntegrationsRoute._addFileChildren(
+    WorkspaceIntegrationsRouteChildren,
+  )
+
+interface WorkspaceStoresRouteChildren {
+  WorkspaceStoresIndexRoute: typeof WorkspaceStoresIndexRoute
+  WorkspaceStoresStoreIdIndexRoute: typeof WorkspaceStoresStoreIdIndexRoute
+}
+
+const WorkspaceStoresRouteChildren: WorkspaceStoresRouteChildren = {
+  WorkspaceStoresIndexRoute: WorkspaceStoresIndexRoute,
+  WorkspaceStoresStoreIdIndexRoute: WorkspaceStoresStoreIdIndexRoute,
+}
+
+const WorkspaceStoresRouteWithChildren = WorkspaceStoresRoute._addFileChildren(
+  WorkspaceStoresRouteChildren,
+)
+
+interface WorkspaceTablesRouteChildren {
+  WorkspaceTablesIndexRoute: typeof WorkspaceTablesIndexRoute
+  WorkspaceTablesTableIdIndexRoute: typeof WorkspaceTablesTableIdIndexRoute
+}
+
+const WorkspaceTablesRouteChildren: WorkspaceTablesRouteChildren = {
+  WorkspaceTablesIndexRoute: WorkspaceTablesIndexRoute,
+  WorkspaceTablesTableIdIndexRoute: WorkspaceTablesTableIdIndexRoute,
+}
+
+const WorkspaceTablesRouteWithChildren = WorkspaceTablesRoute._addFileChildren(
+  WorkspaceTablesRouteChildren,
+)
+
+interface WorkspaceRouteChildren {
+  WorkspaceChatRoute: typeof WorkspaceChatRouteWithChildren
+  WorkspaceContextRoute: typeof WorkspaceContextRouteWithChildren
+  WorkspaceFilesRoute: typeof WorkspaceFilesRouteWithChildren
+  WorkspaceFoldersRoute: typeof WorkspaceFoldersRouteWithChildren
+  WorkspaceIntegrationsRoute: typeof WorkspaceIntegrationsRouteWithChildren
+  WorkspaceRunsRoute: typeof WorkspaceRunsRoute
+  WorkspaceSkillsRoute: typeof WorkspaceSkillsRoute
+  WorkspaceStoresRoute: typeof WorkspaceStoresRouteWithChildren
+  WorkspaceTablesRoute: typeof WorkspaceTablesRouteWithChildren
+  WorkspaceJobsIndexRoute: typeof WorkspaceJobsIndexRoute
+  WorkspaceJobsJobIdIndexRoute: typeof WorkspaceJobsJobIdIndexRoute
+}
+
+const WorkspaceRouteChildren: WorkspaceRouteChildren = {
+  WorkspaceChatRoute: WorkspaceChatRouteWithChildren,
+  WorkspaceContextRoute: WorkspaceContextRouteWithChildren,
+  WorkspaceFilesRoute: WorkspaceFilesRouteWithChildren,
+  WorkspaceFoldersRoute: WorkspaceFoldersRouteWithChildren,
+  WorkspaceIntegrationsRoute: WorkspaceIntegrationsRouteWithChildren,
+  WorkspaceRunsRoute: WorkspaceRunsRoute,
+  WorkspaceSkillsRoute: WorkspaceSkillsRoute,
+  WorkspaceStoresRoute: WorkspaceStoresRouteWithChildren,
+  WorkspaceTablesRoute: WorkspaceTablesRouteWithChildren,
+  WorkspaceJobsIndexRoute: WorkspaceJobsIndexRoute,
+  WorkspaceJobsJobIdIndexRoute: WorkspaceJobsJobIdIndexRoute,
+}
+
+const WorkspaceRouteWithChildren = WorkspaceRoute._addFileChildren(
+  WorkspaceRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChatRoute: ChatRouteWithChildren,
+  WorkspaceRoute: WorkspaceRouteWithChildren,
   ConsoleRoute: ConsoleRoute,
-  ContextRoute: ContextRouteWithChildren,
-  FilesRoute: FilesRouteWithChildren,
-  FoldersRoute: FoldersRouteWithChildren,
-  IntegrationsRoute: IntegrationsRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
-  RunsRoute: RunsRoute,
   SignInRoute: SignInRoute,
   SignOutRoute: SignOutRoute,
-  SkillsRoute: SkillsRoute,
-  StoresRoute: StoresRouteWithChildren,
-  TablesRoute: TablesRouteWithChildren,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
-  JobsIndexRoute: JobsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiIntegrationsCallbackRoute: ApiIntegrationsCallbackRoute,
-  JobsJobIdIndexRoute: JobsJobIdIndexRoute,
+  IntegrationsOffersTokenRoute: IntegrationsOffersTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
