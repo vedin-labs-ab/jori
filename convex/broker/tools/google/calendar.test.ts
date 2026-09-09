@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { mockJsonFetch } from "../../../../test/convex/broker"
+import { id } from "../../../../test/convex/database"
+import { integrationDoc } from "../../../../test/convex/integrations"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { type Doc, type Id } from "../../../_generated/dataModel"
+import { type Doc } from "../../../_generated/dataModel"
 import { googleIntegrationConfigs } from "../../../integrations/google/config"
 import {
   calendarListSchema,
@@ -8,16 +11,11 @@ import {
 } from "../../../runs/agent/tools/schemas/responses/calendar"
 import { callGoogleTool } from "."
 
-const originalFetch = globalThis.fetch
-
-afterEach(() => {
-  globalThis.fetch = originalFetch
-  vi.restoreAllMocks()
-})
+afterEach(() => vi.unstubAllGlobals())
 
 describe("Google Calendar listings", () => {
   test("normalizes calendar entries and conforms to the schema", async () => {
-    mockGoogleFetch(() => ({
+    mockJsonFetch(() => ({
       items: [
         {
           id: "primary",
@@ -67,7 +65,7 @@ describe("Google Calendar listings", () => {
 
 describe("Google Calendar discovery", () => {
   test("scans every readable calendar and follows event pages", async () => {
-    const calls = mockGoogleFetch((url) => {
+    const calls = mockJsonFetch((url) => {
       if (url.pathname.endsWith("/users/me/calendarList")) {
         return {
           items: [
@@ -107,9 +105,9 @@ describe("Google Calendar discovery", () => {
       expect.objectContaining({ id: "middle", calendarId: "team" }),
       expect.objectContaining({ id: "late", calendarId: "primary" }),
     ])
-    expect(calls[0]).toContain("showHidden=true")
-    expect(calls[0]).toContain("minAccessRole=reader")
-    expect(calls.some((url) => url.includes("pageToken=next"))).toBe(true)
+    expect(calls[0]?.url).toContain("showHidden=true")
+    expect(calls[0]?.url).toContain("minAccessRole=reader")
+    expect(calls.some((call) => call.url.includes("pageToken=next"))).toBe(true)
   })
 
   test("requests calendar-list access for calendar integrations", () => {
@@ -151,7 +149,7 @@ describe("calendar event identity", () => {
       summary: "Sync",
     })
 
-    mockGoogleFetch(() => ({ ...event("evt", "09:00"), summary: "Sync" }))
+    mockJsonFetch(() => ({ ...event("evt", "09:00"), summary: "Sync" }))
     const fetched = (await callGoogleTool(
       googleCalendarIntegration(),
       "google_calendar_get_event",
@@ -164,7 +162,7 @@ describe("calendar event identity", () => {
 })
 
 async function listedEvent(raw: Record<string, unknown>) {
-  mockGoogleFetch(() => ({ items: [raw] }))
+  mockJsonFetch(() => ({ items: [raw] }))
 
   const result = (await callGoogleTool(
     googleCalendarIntegration(),
@@ -179,35 +177,17 @@ function event(id: string, time: string) {
   return { id, start: { dateTime: `2030-01-01T${time}:00Z` } }
 }
 
-function mockGoogleFetch(responseBody: (url: URL) => unknown) {
-  const calls: string[] = []
-
-  globalThis.fetch = vi.fn(async (url) => {
-    const requestUrl = new URL(String(url))
-    calls.push(requestUrl.toString())
-    return Response.json(responseBody(requestUrl))
-  })
-
-  return calls
-}
-
 function googleCalendarIntegration(): Doc<"integrations"> {
-  return {
-    _id: "google-calendar-integration",
-    _creationTime: 0,
-    organizationId: "organization",
+  return integrationDoc({
+    _id: id<"integrations">("google-calendar-integration"),
     integration: "googleCalendar",
     scope: "user",
-    ownerId: "person" as Id<"persons">,
+    ownerId: id<"persons">("person"),
     externalId: "google-account",
     email: "sender@example.com",
     credentials: {
       tokens: { access: "access-token", refresh: "refresh-token" },
       expiresAt: Date.now() + 60_000,
     },
-    status: "active",
-    createdBy: "person" as Id<"persons">,
-    createdAt: 0,
-    updatedAt: 0,
-  } as Doc<"integrations">
+  })
 }

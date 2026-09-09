@@ -171,9 +171,14 @@ test("a folder's visibility cascades over its filed resources", async () => {
   expect(forOther).toEqual([])
 })
 
-test("resources carry their type and display extras, name-sorted", async () => {
+test("active resources carry their type and display extras, name-sorted", async () => {
   const { database, ctx } = databaseContext()
   const folderId = await seedFolder(database)
+
+  await database.insert(
+    "collections",
+    tableDoc({ folderId, name: "Old leads", archivedAt: 5 })
+  )
 
   const resources = await folderResources(ctx, {
     organizationId: "org",
@@ -181,14 +186,12 @@ test("resources carry their type and display extras, name-sorted", async () => {
     folderId,
   })
 
-  expect(resources.map((resource) => [resource.type, resource.name])).toEqual([
-    ["store", "Config"],
-    ["file", "costs.csv"],
-    ["job", "Digest"],
-    ["table", "Leads"],
+  expect(resources).toMatchObject([
+    { type: "store", name: "Config" },
+    { type: "file", name: "costs.csv", mimeType: "text/csv", size: 42 },
+    { type: "job", name: "Digest", status: "paused" },
+    { type: "table", name: "Leads" },
   ])
-  expect(resources[1]).toMatchObject({ mimeType: "text/csv", size: 42 })
-  expect(resources[2]).toMatchObject({ status: "paused" })
 })
 
 test("personal resources appear only for their owner", async () => {
@@ -225,9 +228,21 @@ test("personal resources appear only for their owner", async () => {
   const forOwner = await folderResources(ctx, { ...view, personId: testOwner })
   const forOther = await folderResources(ctx, { ...view, personId: other })
 
-  expect(forOwner).toHaveLength(7)
-  expect(forOther).toHaveLength(4)
-  expect(forOther.map((resource) => resource.name)).not.toContain("private.txt")
+  expect(forOwner.map((resource) => resource.name)).toEqual([
+    "Config",
+    "costs.csv",
+    "Digest",
+    "Leads",
+    "Private digest",
+    "Private notes",
+    "private.txt",
+  ])
+  expect(forOther.map((resource) => resource.name)).toEqual([
+    "Config",
+    "costs.csv",
+    "Digest",
+    "Leads",
+  ])
 })
 
 test("listed rows carry their owner, and none for what Jori owns", async () => {
@@ -260,24 +275,6 @@ test("listed rows carry their owner, and none for what Jori owns", async () => {
     ["Leads", testOwner, "Ada Lovelace"],
     ["run.md", undefined, undefined],
   ])
-})
-
-test("archived collections stay filed but hidden", async () => {
-  const { database, ctx } = databaseContext()
-  const folderId = await seedFolder(database)
-
-  await database.insert(
-    "collections",
-    tableDoc({ folderId, name: "Old leads", archivedAt: 5 })
-  )
-
-  const resources = await folderResources(ctx, {
-    organizationId: "org",
-    personId: other,
-    folderId,
-  })
-
-  expect(resources.map((resource) => resource.name)).not.toContain("Old leads")
 })
 
 test("tree rows mark the folders that hold anything", async () => {
