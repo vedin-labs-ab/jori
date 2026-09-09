@@ -4,6 +4,8 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useLayoutEffect,
+  useRef,
 } from "react"
 import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
@@ -53,11 +55,25 @@ export function ConsoleHeaderActionsProvider({
 
 export function ConsoleHeaderActions({ children }: { children: ReactNode }) {
   const slot = useContext(HeaderActionsContext)
+  const actions = useRef<HTMLDivElement>(null)
+
+  // Suspense hides the page's DOM, but this portal lives in the header.
+  // Its layout effects disconnect on suspension and reconnect on reveal.
+  useLayoutEffect(() => {
+    const element = actions.current
+    if (slot === null || element === null) {
+      return
+    }
+    element.style.removeProperty("display")
+    return () => element.style.setProperty("display", "none")
+  }, [slot])
 
   return slot === null
     ? null
     : createPortal(
-        <div className="flex items-center gap-2">{children}</div>,
+        <div className="flex items-center gap-2" ref={actions}>
+          {children}
+        </div>,
         slot
       )
 }

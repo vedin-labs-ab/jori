@@ -92,6 +92,7 @@ test("a cold page chunk loads inside the shell and can be abandoned", async () =
   ).toBeDefined()
   expect(document.querySelector("header")).toBe(header)
   expect(screen.queryByRole("status", { name: "Loading" })).toBeNull()
+  expect(screen.queryByRole("button", { name: "Page action" })).toBeNull()
   await act(async () => {
     await router.navigate({ to: "/runs" })
   })
