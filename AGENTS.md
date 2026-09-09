@@ -2,69 +2,62 @@
 
 ## Workflow
 
-- Start work with `pnpm task <name>`: a `task/<name>` branch in
-  `~/.worktrees/jori/<name>` from local `main`, dependencies installed. One
-  task per worktree; never share a branch between agents.
-- The gate is `pnpm check` and `pnpm test`. Do not weaken or bypass a check
-  unless told to. `pnpm check:fix` formats and regenerates content.
-- Commit on the task branch, then land with `pnpm land <name>` from the
-  primary checkout. It rebases on `main`, runs the gate in the worktree, and
-  fast-forwards `main`. If it says `main` moved, run it again.
-- Before changing code, read `biome.jsonc`, `scripts/dependencies/index.ts`
-  and `scripts/structure/index.ts`. They define formatting, dependency
-  boundaries and folder structure; shape the change to pass them from the
-  start.
+- For repository changes, run `pnpm task <name>` from the primary checkout.
+  Use a separate worktree and branch for each task or agent.
+- Run focused tests for behavior changes with `pnpm test <paths>`.
+  Commit on the task branch, then run `pnpm land <name>` from the primary
+  checkout. Landing runs or reuses `pnpm check` and `pnpm test`.
+- For documentation-only changes that cannot affect runtime behavior, review
+  the diff and land with `--no-verify`; no builds or tests are needed.
+  Prompts and skills are runtime inputs, not documentation.
+- Otherwise, do not weaken or bypass checks unless asked.
+  `pnpm check:fix` formats code and regenerates compiled content.
 
 ## Targets
 
-Every environment-bound command takes one target: `dev`, `prod-us` or
-`prod-eu`. The target names its env file (`.env.local` for dev,
-`.env.<target>.local` for production) and is the word a production ship asks
-you to type.
+Deployment and environment commands take `dev`, `prod-us`, or `prod-eu`.
+They load `.env.local` for dev and `.env.<target>.local` for production.
 
-| Command | Does |
+| Command | Purpose |
 | --- | --- |
-| `pnpm ship <target> [--yes]` | Deploys. Dev pushes Convex and skills with no gate, since the `pnpm dev` watcher already pushes there. Production requires the primary checkout, a clean `main` equal to `origin/main`, the gate (skipped when this tree already passed it), and a confirmation. |
-| `pnpm skills <target>` | Syncs the skill catalog. |
-| `pnpm sandbox <target>` | Builds the E2B template. |
-| `pnpm db:seed dev`, `pnpm db:truncate dev` | Development data only. |
+| `pnpm ship <target> [--yes]` | Dev: deploy Convex and skills. Production: deploy Convex, frontend, and skills. |
+| `pnpm skills <target>` | Sync the skill catalog. |
+| `pnpm sandbox <target>` | Build the E2B template. |
+| `pnpm db:seed dev`, `pnpm db:truncate dev` | Manage development data only. |
 
-- Worktrees never deploy: a push from one replaces what another task just
-  verified. A change that needs a live backend (a schema migration, an HTTP
-  action, webhook ingress) verifies against a Convex preview deployment
-  named after the task branch.
-- Ship production only when the user asks. Never read or print production
-  credentials.
+- Deploy shared dev and production only from the primary checkout.
+  Use a task-specific Convex preview when worktree changes need live
+  backend verification.
+- Ship production only when the user asks. Do not inspect or expose
+  production secrets; let deployment tooling load them.
 
 ## Code
 
-- Simplicity over cleverness, readability over everything: less code,
-  descriptive names, no duplication, no unclear abbreviations.
-- Organize by domain: colocate UI, logic, data access, schemas and tests
-  under the feature they serve, so the filesystem explains the system.
-  Single-word folder and file names; a name that needs two words needs
-  another folder.
-- Improve what you touch: remove local duplication, clarify names, simplify
-  control flow.
+- Prefer readable code, descriptive names, and simple control flow.
+  Keep cleanup local to the change.
+- Colocate UI, logic, data access, schemas, and tests by domain.
+  Use single-word source names, respecting framework conventions.
+- Formatting, dependency boundaries, and structure are defined in
+  `biome.jsonc`, `scripts/dependencies/rules.ts`, and `scripts/structure/`.
+  Consult them when relevant.
 - Before adding a test, identify the behavior or failure mode it protects
   and check whether existing tests already protect it. Prefer extending an
   existing test when clear. Avoid tests that merely mirror the implementation.
-- Pre-launch means no legacy: no phased migrations, fallbacks, compatibility
-  layers or temporary solutions. Make the clean, complete change.
+- Pre-launch: replace obsolete behavior directly, without compatibility
+  layers or staged migrations.
 
 ## UI
 
-- shadcn/ui primitives, installed with `npx shadcn@latest add`, default
-  styling kept. Tailwind via `className` only. Leave `index.css` alone unless
-  clearly necessary.
-- Simple and consistent, desktop-optimized, fully responsive. No gradients.
-- Landing visuals are console views from `src/shared/console` rendered over
-  `src/landing/demo` fixtures. The kit takes props and emits callbacks (the
-  dependency check enforces it); `src/console` binds it to Convex and
-  `src/landing/demo` to the in-memory workspace. Never hand-draw a console
-  lookalike in `src/landing`, and never import `src/console` from it.
+- Use shadcn/ui primitives, installed with `npx shadcn@latest add`, and
+  preserve their default styling.
+- Use Tailwind classes for static styling and inline styles for runtime
+  values. Reserve `src/styles.css` for shared theme tokens and global rules.
+- Desktop-first, responsive, no gradients.
+- Console views in `src/shared/console` take props and emit callbacks.
+  `src/console` binds them to Convex; `src/landing/demo` binds them to
+  fixtures. Landing demos reuse these views. Do not build console
+  lookalikes or import `src/console` into `src/landing`.
 
 ## Convex
 
-Read `convex/_generated/ai/guidelines.md` before touching Convex code. It
-overrides prior assumptions.
+Read `convex/_generated/ai/guidelines.md` before changing Convex code.
