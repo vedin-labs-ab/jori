@@ -3,6 +3,11 @@ import { internal } from "../../../_generated/api"
 import { type Doc } from "../../../_generated/dataModel"
 import { type ActionCtx, internalMutation } from "../../../_generated/server"
 import { readNumber } from "../../../shared/input"
+import {
+  credentialSnapshot,
+  credentialSnapshotValidator,
+  matchesCredentialSnapshot,
+} from "../../connect/snapshot"
 import { prepareIntegrationForRuntime } from "../../runtime"
 import { requireSlackCredentials } from "../credentials"
 import { slackGrantIsDead } from "../oauth"
@@ -20,6 +25,7 @@ export async function handleSlackLifecycleEvent(
   }
   const installedAt =
     readNumber(integration.data, "installedAt") ?? integration.createdAt
+  let snapshot = credentialSnapshot(integration)
   // Slack can deliver an old uninstall after a fresh OAuth installation.
   if (
     payload.event_time !== undefined &&
@@ -31,6 +37,7 @@ export async function handleSlackLifecycleEvent(
     // Events contain user IDs, not token values. A prior token may have been
     // revoked during rotation or reauthorization, so test the current grant.
     const current = await prepareIntegrationForRuntime(ctx, { integration })
+    snapshot = credentialSnapshot(current)
     const credentials = requireSlackCredentials(current)
     const valid = await Promise.all([
       slackTokenIsValid(credentials.bot.access),
@@ -45,6 +52,7 @@ export async function handleSlackLifecycleEvent(
     {
       integrationId: integration._id,
       installedAt,
+      expectedSnapshot: snapshot,
       ...(expectedConnectionGeneration === undefined
         ? {}
         : { expectedConnectionGeneration }),
@@ -58,6 +66,7 @@ export const deactivate = internalMutation({
   args: {
     integrationId: v.id("integrations"),
     installedAt: v.number(),
+    expectedSnapshot: credentialSnapshotValidator,
     expectedConnectionGeneration: v.optional(v.number()),
     status: v.union(v.literal("disconnected"), v.literal("expired")),
   },
@@ -66,7 +75,7 @@ export const deactivate = internalMutation({
     if (
       integration === null ||
       integration.integration !== "slack" ||
-      integration.status !== "active" ||
+      !matchesCredentialSnapshot(integration, args.expectedSnapshot) ||
       (args.expectedConnectionGeneration !== undefined &&
         (integration.connectionGeneration ?? 0) !==
           args.expectedConnectionGeneration)

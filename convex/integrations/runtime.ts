@@ -5,6 +5,7 @@ import {
   isGoogleIntegration,
   isMicrosoftIntegration,
 } from "../shared/integrations"
+import { credentialSnapshot } from "./connect/snapshot"
 import { createGitHubInstallationToken } from "./github/app"
 import { requireGitHubCredentials } from "./github/credentials"
 import { requireGoogleCredentials } from "./google/credentials"
@@ -18,12 +19,7 @@ import {
   hasFreshTokenExpiration,
   withCredentials,
 } from "./refresh"
-import {
-  requireSlackCredentials,
-  type SlackTokenPair,
-  slackTokenKinds,
-} from "./slack/credentials"
-import { refreshSlackAccessToken, slackGrantIsDead } from "./slack/oauth"
+import { prepareSlackIntegrationForRuntime } from "./slack/install"
 
 type RuntimeIntegration = Doc<"integrations">
 
@@ -81,6 +77,7 @@ async function prepareGitHubIntegrationForRuntime(
     internal.integrations.github.install.updateInstallationCredentials,
     {
       integrationId: integration._id,
+      expectedSnapshot: credentialSnapshot(integration),
       accessToken: tokenResult.token,
       expiresAt,
     }
@@ -109,6 +106,7 @@ async function prepareLinearIntegrationForRuntime(
     internal.integrations.linear.install.updateOAuthCredentials,
     {
       integrationId: integration._id,
+      expectedSnapshot: credentialSnapshot(integration),
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token,
       expiresAt: Date.now() + tokenResult.expires_in * 1000,
@@ -144,6 +142,7 @@ async function prepareGoogleIntegrationForRuntime(
     internal.integrations.google.install.updateOAuthCredentials,
     {
       integrationId: integration._id,
+      expectedSnapshot: credentialSnapshot(integration),
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token,
       expiresAt: Date.now() + tokenResult.expires_in * 1000,
@@ -181,6 +180,7 @@ async function prepareMicrosoftIntegrationForRuntime(
     internal.integrations.microsoft.install.updateOAuthCredentials,
     {
       integrationId: integration._id,
+      expectedSnapshot: credentialSnapshot(integration),
       accessToken: tokenResult.access_token,
       refreshToken: tokenResult.refresh_token,
       expiresAt: Date.now() + tokenResult.expires_in * 1000,
@@ -205,47 +205,4 @@ function hasFreshGitHubToken(credentials: {
     credentials.expiresAt !== undefined &&
     hasFreshTokenExpiration(credentials.expiresAt)
   )
-}
-
-/** Slack rotates the bot and user tokens on independent clocks, and each
- *  refresh token is single-use, so only the stale side is exchanged and the
- *  result is written back before the next one is attempted. */
-async function prepareSlackIntegrationForRuntime(
-  ctx: ActionCtx,
-  integration: RuntimeIntegration
-) {
-  const credentials = requireSlackCredentials(integration)
-  const stale = slackTokenKinds.filter(
-    (kind) => !hasFreshTokenExpiration(credentials[kind].expiresAt)
-  )
-
-  if (stale.length === 0) {
-    return integration
-  }
-
-  const refreshed: { bot?: SlackTokenPair; user?: SlackTokenPair } = {}
-
-  for (const kind of stale) {
-    const result = await refreshSlackAccessToken(credentials[kind].refresh)
-
-    if (!result.ok) {
-      return await failOAuthRefresh(ctx, integration, "Slack", {
-        error: slackGrantIsDead(result.error) ? "invalid_grant" : "slack_error",
-        error_description: result.error,
-      })
-    }
-
-    refreshed[kind] = {
-      access: result.access_token,
-      refresh: result.refresh_token,
-      expiresAt: Date.now() + result.expires_in * 1000,
-    }
-  }
-
-  const updatedCredentials = await ctx.runMutation(
-    internal.integrations.slack.install.updateOAuthCredentials,
-    { integrationId: integration._id, ...refreshed }
-  )
-
-  return withCredentials(integration, updatedCredentials)
 }

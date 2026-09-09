@@ -14,6 +14,7 @@ import {
 import { activeSessionIntegration } from "../../../sessions/integration"
 import { createIntegrationActor } from "../../../shared/actor"
 import { boundedNumber, readRecord, readString } from "../../../shared/input"
+import { credentialSnapshot } from "../../connect/snapshot"
 import { githubJsonArray } from "../api"
 import { createGitHubInstallationToken } from "../app"
 import { requireGitHubCredentials } from "../credentials"
@@ -137,6 +138,7 @@ async function ensureGitHubReactionToken(
         accessToken: tokenResult.token,
         expiresAt,
         integrationId: integration._id,
+        expectedSnapshot: credentialSnapshot(integration),
       }
     )
   }

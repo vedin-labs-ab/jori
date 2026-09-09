@@ -4,6 +4,7 @@ import { integrationDoc } from "../../../test/convex/integrations"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { sha256Hex } from "../../shared/crypto"
 import { prepareIntegrationForRuntime } from "../runtime"
 
 afterEach(() => {
@@ -22,7 +23,13 @@ test("spends only the stale Slack refresh token", async () => {
     })
   )
   vi.stubGlobal("fetch", fetch)
-  const runMutation = vi.fn().mockResolvedValue({})
+  const runMutation = vi.fn().mockResolvedValue({
+    credentials: {
+      bot: slackTokenPair("bot", false),
+      user: slackTokenPair("user", false),
+    },
+    credentialVersion: 1,
+  })
 
   await prepareIntegrationForRuntime({ runMutation } as unknown as ActionCtx, {
     integration: slackIntegration({ staleBot: true }),
@@ -33,6 +40,8 @@ test("spends only the stale Slack refresh token", async () => {
   expect(fetch).toHaveBeenCalledTimes(1)
   expect(runMutation.mock.calls[0]?.[1]).toEqual({
     integrationId: "integration",
+    expectedSnapshot: { connectionGeneration: 0, credentialVersion: 0 },
+    expectedTokens: { bot: await sha256Hex("xoxe-1-bot") },
     bot: {
       access: "xoxe.xoxb-new",
       refresh: "xoxe-1-new",

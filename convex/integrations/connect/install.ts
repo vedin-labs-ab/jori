@@ -150,6 +150,7 @@ export async function upsertIntegration(
     await ctx.db.patch(existing._id, {
       ...values,
       connectionGeneration: (existing.connectionGeneration ?? 0) + 1,
+      credentialVersion: 0,
     })
 
     return existing._id
@@ -159,6 +160,7 @@ export async function upsertIntegration(
     ...values,
     createdAt: values.updatedAt,
     connectionGeneration: 1,
+    credentialVersion: 0,
   })
 }
 

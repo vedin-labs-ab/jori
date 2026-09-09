@@ -5,6 +5,7 @@ import {
   saveOAuthCredentials,
 } from "../connect/credentials"
 import { upsertIntegration } from "../connect/install"
+import { credentialSnapshotValidator } from "../connect/snapshot"
 import { findIntegrationByExternalId } from "../data"
 import { type GitHubInstallationProfile } from "./app"
 import { requireGitHubCredentials } from "./credentials"
@@ -75,12 +76,14 @@ export const recordInstallation = internalMutation({
 export const updateInstallationCredentials = internalMutation({
   args: {
     integrationId: v.id("integrations"),
+    expectedSnapshot: credentialSnapshotValidator,
     accessToken: v.string(),
     expiresAt: v.number(),
   },
   handler: async (ctx, args) => {
     const integration = await requireProviderIntegration(ctx, {
       integrationId: args.integrationId,
+      expectedSnapshot: args.expectedSnapshot,
       provider: "github",
       label: "GitHub",
     })

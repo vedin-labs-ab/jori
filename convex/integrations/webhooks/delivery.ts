@@ -1,6 +1,10 @@
 import { v } from "convex/values"
 import { internal } from "../../_generated/api"
-import { internalMutation, internalQuery } from "../../_generated/server"
+import {
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+} from "../../_generated/server"
 import { findActiveIntegrationByExternalId } from "../data"
 import {
   webhookLeaseMs,
@@ -59,6 +63,10 @@ export const claim = internalMutation({
   args: { id: v.id("webhookDeliveries") },
   handler: async (ctx, { id }) => {
     const row = await ctx.db.get(id)
+    if (row !== null && row.expiresAt <= Date.now()) {
+      await ctx.db.delete(id)
+      return null
+    }
     if (
       row?.payload === undefined ||
       row.dueAt === undefined ||
@@ -190,12 +198,30 @@ export const sweep = internalMutation({
         }
       )
     }
-    const expired = await ctx.db
-      .query("webhookDeliveries")
-      .withIndex("by_expiresAt", (q) => q.lte("expiresAt", Date.now()))
-      .take(100)
-    for (const row of expired) {
-      await ctx.db.delete(row._id)
-    }
+    await cleanExpired(ctx)
   },
 })
+
+export const clean = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    await cleanExpired(ctx)
+  },
+})
+
+async function cleanExpired(ctx: MutationCtx) {
+  const expired = await ctx.db
+    .query("webhookDeliveries")
+    .withIndex("by_expiresAt", (q) => q.lte("expiresAt", Date.now()))
+    .take(100)
+  for (const row of expired) {
+    await ctx.db.delete(row._id)
+  }
+  if (expired.length === 100) {
+    await ctx.scheduler.runAfter(
+      0,
+      internal.integrations.webhooks.delivery.clean,
+      {}
+    )
+  }
+}
