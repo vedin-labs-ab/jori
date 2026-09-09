@@ -34,6 +34,7 @@ type SlackTokenResponse =
       refresh_token?: string
       expires_in?: number
       bot_user_id?: string
+      app_id?: string
       scope?: string
       authed_user?: {
         id?: string

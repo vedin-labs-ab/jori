@@ -3,6 +3,8 @@ export type SlackEventPayload = {
   challenge?: string
   team_id?: string
   event_id?: string
+  event_time?: number
+  api_app_id?: string
   event?: SlackEvent
   authorizations?: Array<{
     team_id?: string
@@ -20,6 +22,7 @@ type SlackEvent = {
   ts?: string
   thread_ts?: string
   client_msg_id?: string
+  tokens?: { oauth?: string[]; bot?: string[] }
 }
 
 export function getSlackMessage(payload: SlackEventPayload) {
@@ -37,10 +40,7 @@ export function getSlackMessage(payload: SlackEventPayload) {
     return null
   }
 
-  const accountId =
-    payload.team_id ??
-    payload.authorizations?.find((authorization) => authorization.team_id)
-      ?.team_id
+  const accountId = slackEventAccountId(payload)
 
   if (accountId === undefined) {
     return null
@@ -64,6 +64,14 @@ export function getSlackMessage(payload: SlackEventPayload) {
       : undefined,
     data: slackMessageData(payload, event),
   }
+}
+
+export function slackEventAccountId(payload: SlackEventPayload) {
+  return (
+    payload.team_id ??
+    payload.authorizations?.find((authorization) => authorization.team_id)
+      ?.team_id
+  )
 }
 
 function slackMessageData(payload: SlackEventPayload, event: SlackEvent) {

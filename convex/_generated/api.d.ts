@@ -275,7 +275,9 @@ import type * as integrations_slack_directory_users from "../integrations/slack/
 import type * as integrations_slack_format from "../integrations/slack/format.js";
 import type * as integrations_slack_http from "../integrations/slack/http.js";
 import type * as integrations_slack_ingress_actions from "../integrations/slack/ingress/actions.js";
+import type * as integrations_slack_ingress_delivery from "../integrations/slack/ingress/delivery.js";
 import type * as integrations_slack_ingress_events from "../integrations/slack/ingress/events.js";
+import type * as integrations_slack_ingress_lifecycle from "../integrations/slack/ingress/lifecycle.js";
 import type * as integrations_slack_ingress_messages from "../integrations/slack/ingress/messages.js";
 import type * as integrations_slack_ingress_text from "../integrations/slack/ingress/text.js";
 import type * as integrations_slack_install from "../integrations/slack/install.js";
@@ -945,7 +947,9 @@ declare const fullApi: ApiFromModules<{
   "integrations/slack/format": typeof integrations_slack_format;
   "integrations/slack/http": typeof integrations_slack_http;
   "integrations/slack/ingress/actions": typeof integrations_slack_ingress_actions;
+  "integrations/slack/ingress/delivery": typeof integrations_slack_ingress_delivery;
   "integrations/slack/ingress/events": typeof integrations_slack_ingress_events;
+  "integrations/slack/ingress/lifecycle": typeof integrations_slack_ingress_lifecycle;
   "integrations/slack/ingress/messages": typeof integrations_slack_ingress_messages;
   "integrations/slack/ingress/text": typeof integrations_slack_ingress_text;
   "integrations/slack/install": typeof integrations_slack_install;

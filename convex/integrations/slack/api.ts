@@ -78,10 +78,15 @@ export function requiredSlackResultString(result: SlackApiResult, key: string) {
 async function fetchSlackApi(url: string, options: RequestInit) {
   const response = await fetch(url, options)
   const text = await response.text()
-  const result = text === "" ? null : JSON.parse(text)
+  let result: unknown
+  try {
+    result = text === "" ? null : JSON.parse(text)
+  } catch {
+    throw new Error("Slack API request failed: invalid JSON response")
+  }
 
   if (!response.ok) {
-    throw new Error(`Slack API request failed: ${JSON.stringify(result)}`)
+    throw new Error(`Slack API request failed: HTTP ${response.status}`)
   }
 
   return result
@@ -93,7 +98,11 @@ function assertSlackApiSucceeded(result: unknown): SlackApiResult {
   }
 
   if (result !== null && result.ok === false) {
-    throw new Error(`Slack API request failed: ${JSON.stringify(result)}`)
+    const code =
+      typeof result.error === "string" && /^[a-z_]{1,80}$/.test(result.error)
+        ? result.error
+        : "unknown_error"
+    throw new Error(`Slack API request failed: ${code}`)
   }
 
   return result
