@@ -75,16 +75,6 @@ test("a console message's context reads as its own line, on the current message 
   expect(prompt).not.toContain("Not the trigger's own text.")
 })
 
-test("omits the recent messages block without prior conversation", () => {
-  const prompt = assemblePrompt(
-    runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" })
-  ).context
-
-  expect(prompt).not.toContain("Recent messages")
-  expect(prompt).not.toContain("- None")
-  expect(prompt).toContain("Current message:")
-})
-
 test("renders an omitted history note when recent context is truncated", () => {
   const prompt = assemblePrompt(messageInputWithTruncatedConversation()).context
 

@@ -23,9 +23,12 @@ test("executes an approved handoff once and injects the result", async () => {
   expect(platform.transcript.at(-1)?.content).toContain("posted")
 })
 
-test("surfaces a denied handoff and consumes it without executing", async () => {
+test.each([
+  ["denied", "denied"],
+  ["failed", "failed before it could be delivered"],
+] as const)("surfaces a %s handoff and consumes it without executing", async (status, message) => {
   const { platform, runtime } = handoffRuntime({
-    approvals: [approvalHandoff("denied")],
+    approvals: [approvalHandoff(status)],
   })
 
   const result = await reconcileHandoffs(runtime)
@@ -35,24 +38,7 @@ test("surfaces a denied handoff and consumes it without executing", async () => 
     approvalId: "approval_1",
   })
   expect(result.progressed).toBe(true)
-  expect(platform.transcript.at(-1)?.content).toContain("denied")
-})
-
-test("surfaces a failed approval delivery without executing", async () => {
-  const { platform, runtime } = handoffRuntime({
-    approvals: [approvalHandoff("failed")],
-  })
-
-  const result = await reconcileHandoffs(runtime)
-
-  expect(runtime.platform.executeApproval).not.toHaveBeenCalled()
-  expect(runtime.platform.markApprovalConsumed).toHaveBeenCalledWith({
-    approvalId: "approval_1",
-  })
-  expect(result.progressed).toBe(true)
-  expect(platform.transcript.at(-1)?.content).toContain(
-    "failed before it could be delivered"
-  )
+  expect(platform.transcript.at(-1)?.content).toContain(message)
 })
 
 test("keeps a pending handoff as a wait without progress", async () => {

@@ -38,9 +38,21 @@ test("a conversation opened from a folder files every run under it", async () =>
   })
 
   expect(second.conversationId).toBe(first.conversationId)
-  expect(
-    (await rows<Doc<"runs">>(database, "runs")).map((run) => run.folderId)
-  ).toEqual([folderId, folderId])
+  expect(await rows<Doc<"runs">>(database, "runs")).toEqual(
+    [first, second].map((sent) =>
+      expect.objectContaining({
+        audience: "person",
+        conversationId: first.conversationId,
+        folderId,
+        principal: { kind: "person", personId },
+        cause: expect.objectContaining({ messageId: sent.messageId }),
+        snapshot: expect.objectContaining({
+          source: { type: "message", surface: "jori" },
+          context: [{ type: "folder", label: "Projects" }],
+        }),
+      })
+    )
+  )
 })
 
 test("a conversation opened from a filed table files its runs under the table's folder, and says so", async () => {

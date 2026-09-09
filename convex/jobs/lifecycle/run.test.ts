@@ -19,33 +19,21 @@ beforeEach(() => {
 // Attribution is stamped at creation and never joined at read time, so a run
 // keeps costing the folder its job was filed in when it fired.
 
-test("a run is stamped with the folder its job is filed in", async () => {
+test.each([
+  "folder",
+  undefined,
+])("a run keeps its job's folder attribution: %s", async (folderId) => {
   const { ctx, insert } = context()
 
   await createJobRun(ctx, {
-    job: job("folder" as Id<"folders">),
+    job: job(folderId as Id<"folders"> | undefined),
     cause: { type: "time", scheduledAt: 1 },
     now: 1,
   })
 
   expect(insert).toHaveBeenCalledWith(
     "runs",
-    expect.objectContaining({ folderId: "folder" })
-  )
-})
-
-test("an unfiled job leaves its runs unfiled", async () => {
-  const { ctx, insert } = context()
-
-  await createJobRun(ctx, {
-    job: job(undefined),
-    cause: { type: "time", scheduledAt: 1 },
-    now: 1,
-  })
-
-  expect(insert).toHaveBeenCalledWith(
-    "runs",
-    expect.objectContaining({ folderId: undefined })
+    expect.objectContaining({ folderId })
   )
 })
 

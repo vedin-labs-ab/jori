@@ -28,7 +28,6 @@ test("loads organization summaries with conversation-level identifiers", async (
       summary: "Albin wants a cartoon avatar.",
     },
   ])
-  expect(entries[0]?.identifiers).not.toContain("slack:message:m1.000000")
 })
 
 test("keeps narrower context inside the person's own person-scoped run", async () => {
@@ -122,7 +121,6 @@ test("caps summaries, skips the current and summaryless conversations", async ()
     query(run("organization", current))
   )
 
-  expect(entries).toHaveLength(5)
   expect(entries.map((entry) => entry.conversationId)).toEqual(
     [5, 4, 3, 2, 1].map((index) => threads[index])
   )

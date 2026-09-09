@@ -1,10 +1,7 @@
 import { expect, test } from "vitest"
 import { databaseContext, id } from "../../../test/convex/database"
 import { type Doc } from "../../_generated/dataModel"
-import {
-  summaryOverlapMessageLimit,
-  summarySourceMessageLimit,
-} from "../limits"
+import { summarySourceMessageLimit } from "../limits"
 import { loadSummaryMessages } from "./data"
 
 test("loads all source messages for small conversations", async () => {
@@ -23,7 +20,6 @@ test("loads overlap and new messages for large conversations", async () => {
   )
 
   expect(texts(messages)).toEqual(messageNumbers(76, 120))
-  expect(messages).toHaveLength(summaryOverlapMessageLimit + 20)
 })
 
 test("prioritizes new messages over overlap within the source limit", async () => {
@@ -32,10 +28,7 @@ test("prioritizes new messages over overlap within the source limit", async () =
     conversation({ summarizedAt: 60.5 })
   )
 
-  expect(messages).toHaveLength(summarySourceMessageLimit)
-  expect(texts(messages)[0]).toBe("Message 51")
-  expect(texts(messages)).not.toContain("Message 50")
-  expect(texts(messages).at(-1)).toBe("Message 150")
+  expect(texts(messages)).toEqual(messageNumbers(51, 150))
 })
 
 /** The thread's messages, numbered 1 to `count`, each created at its
