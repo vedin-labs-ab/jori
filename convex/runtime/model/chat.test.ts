@@ -22,10 +22,11 @@ const readTool: ModelTool = {
   name: "read",
 }
 
-test("sends the transcript as one system message and the turns after it", async () => {
+test("sends the transcript, tools, and delta listener to the transport", async () => {
   openRouter.send.mockResolvedValue(
     chatResult({ content: "Done.", role: "assistant" })
   )
+  const onDelta = vi.fn()
 
   const messages: ModelMessage[] = [
     { content: "You are Jori.", role: "system" },
@@ -46,6 +47,7 @@ test("sends the transcript as one system message and the turns after it", async 
 
   await new OpenRouterModel("run_1").complete({
     messages,
+    onDelta,
     tools: [readTool],
   })
 
@@ -87,11 +89,11 @@ test("sends the transcript as one system message and the turns after it", async 
         },
       ],
     },
-    undefined
+    onDelta
   )
 })
 
-test("the run's selection names the model and its effort; the default is standard", async () => {
+test("uses the run's selection and omits tools when none are available", async () => {
   openRouter.send.mockResolvedValue(
     chatResult({ content: "Done.", role: "assistant" })
   )
@@ -113,39 +115,8 @@ test("the run's selection names the model and its effort; the default is standar
     }),
     undefined
   )
-})
-
-test("sends no tool list when there are none", async () => {
-  openRouter.send.mockResolvedValue(
-    chatResult({ content: "Done.", role: "assistant" })
-  )
-
-  await new OpenRouterModel("run_1").complete({
-    messages: [{ content: "Ship the release.", role: "user" }],
-    tools: [],
-  })
-
-  expect(openRouter.send).toHaveBeenCalledWith(
-    expect.objectContaining({ reasoning: { effort: "medium" } }),
-    undefined
-  )
   expect(openRouter.send.mock.lastCall?.[0]).not.toHaveProperty("tools")
   expect(openRouter.send.mock.lastCall?.[0]).not.toHaveProperty("toolChoice")
-})
-
-test("hands the delta listener to the transport", async () => {
-  openRouter.send.mockResolvedValue(
-    chatResult({ content: "Done.", role: "assistant" })
-  )
-  const onDelta = vi.fn()
-
-  await new OpenRouterModel("run_1").complete({
-    messages: [{ content: "Ship the release.", role: "user" }],
-    onDelta,
-    tools: [],
-  })
-
-  expect(openRouter.send).toHaveBeenCalledWith(expect.anything(), onDelta)
 })
 
 test("reads a stop response with its reasoning and tokens", async () => {

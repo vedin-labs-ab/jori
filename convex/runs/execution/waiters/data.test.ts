@@ -1,7 +1,6 @@
 import { createEvent, type EventId, sendEvent } from "@convex-dev/workflow"
 import { beforeEach, expect, test, vi } from "vitest"
-import { id } from "../../../../test/convex/database"
-import { type MutationCtx } from "../../../_generated/server"
+import { databaseContext, id } from "../../../../test/convex/database"
 import {
   expireWaiter,
   parkRun,
@@ -22,35 +21,46 @@ beforeEach(() => {
 })
 
 test("parking creates the wake event and schedules its expiry", async () => {
-  const ctx = fakeMutationCtx([run("run", "running", "workflow-1")])
+  const { ctx, database, runAt } = waiterContext()
+  const runId = await database.insert("runs", {
+    organizationId: "organization",
+    status: "running",
+    workflowId: "workflow-1",
+  })
 
-  await expect(
-    parkRun(ctx, { runId: id<"runs">("run"), expiresAt: 5000 })
-  ).resolves.toEqual({ waiterId: "waiters-1", eventId: "event-1" })
+  const parked = await parkRun(ctx, { runId, expiresAt: 5000 })
 
-  expect(vi.mocked(createEvent).mock.calls[0]?.[2]).toEqual({
+  expect(parked.eventId).toBe("event-1")
+  expect(createEvent).toHaveBeenCalledExactlyOnceWith(ctx, expect.anything(), {
     name: "wake",
     workflowId: "workflow-1",
   })
-  expect(ctx.rows.get("waiters-1")).toMatchObject({
+  expect(await database.get(parked.waiterId)).toMatchObject({
     eventId: "event-1",
     expiresAt: 5000,
     functionId: "scheduled-1",
     status: "waiting",
   })
-  expect(ctx.scheduled).toEqual([{ at: 5000, args: { waiterId: "waiters-1" } }])
+  expect(runAt).toHaveBeenCalledExactlyOnceWith(5000, expect.anything(), {
+    waiterId: parked.waiterId,
+  })
 })
 
 test("parking a run without a workflow is refused", async () => {
-  const ctx = fakeMutationCtx([run("run", "running")])
+  const { ctx, database } = waiterContext()
+  const runId = await database.insert("runs", {
+    organizationId: "organization",
+    status: "running",
+  })
 
-  await expect(
-    parkRun(ctx, { runId: id<"runs">("run"), expiresAt: 5000 })
-  ).rejects.toThrow("Run has no workflow to park.")
+  await expect(parkRun(ctx, { runId, expiresAt: 5000 })).rejects.toThrow(
+    "Run has no workflow to park."
+  )
 })
 
 test("wakes waiters with resolved offer subjects", async () => {
-  const ctx = fakeMutationCtx([waiter()])
+  const { ctx, database, cancel } = waiterContext()
+  const waiterId = await database.insert("waiters", waiter())
   const subject = {
     id: id<"integrationOffers">("offer"),
     kind: "offer" as const,
@@ -64,207 +74,85 @@ test("wakes waiters with resolved offer subjects", async () => {
     })
   ).resolves.toBe(true)
 
-  expect(ctx.patches).toEqual([
-    {
-      id: "waiter",
-      patch: expect.objectContaining({
-        reason: "resolved",
-        status: "woken",
-        subject,
-      }),
-    },
-  ])
-  expect(ctx.cancelled).toEqual(["function"])
-  expect(vi.mocked(sendEvent).mock.calls[0]?.[2]).toMatchObject({
-    id: "event-1",
-    value: { reason: "resolved", subject, waiter: "waiter" },
+  expect(await database.get(waiterId)).toMatchObject({
+    reason: "resolved",
+    status: "woken",
+    subject,
   })
-})
-
-test("expiring an already woken waiter sends nothing", async () => {
-  const ctx = fakeMutationCtx([waiter({ status: "woken" })])
-
-  await expect(expireWaiter(ctx, id<"waiters">("waiter"))).resolves.toBeNull()
-
-  expect(ctx.patches).toEqual([])
-  expect(sendEvent).not.toHaveBeenCalled()
-})
-
-test("wakes a parent only after every named child is terminal", async () => {
-  const ctx = fakeMutationCtx([
-    waiter({
-      condition: {
-        kind: "runs",
-        runIds: [id<"runs">("run-child-1"), id<"runs">("run-child-2")],
-      },
-      runId: id<"runs">("run-parent"),
-    }),
-    childRun("run-child-1", "completed"),
-    childRun("run-child-2", "running"),
-  ])
-
-  await expect(
-    wakeParentForTerminalRun(ctx, id<"runs">("run-child-1"))
-  ).resolves.toBe(false)
-
-  await ctx.db.patch(id<"runs">("run-child-2"), { status: "failed" })
-
-  await expect(
-    wakeParentForTerminalRun(ctx, id<"runs">("run-child-2"))
-  ).resolves.toBe(true)
-  expect(ctx.patches).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        id: "waiter",
-        patch: expect.objectContaining({ status: "woken" }),
-      }),
-    ])
+  expect(cancel).toHaveBeenCalledExactlyOnceWith("function")
+  expect(sendEvent).toHaveBeenCalledExactlyOnceWith(
+    ctx,
+    expect.anything(),
+    expect.objectContaining({
+      id: "event-1",
+      value: { reason: "resolved", subject, waiter: waiterId },
+    })
   )
 })
 
-function waiter(overrides: Record<string, unknown> = {}): Seed {
-  return [
+test("expiring an already woken waiter sends nothing", async () => {
+  const { ctx, database, cancel } = waiterContext()
+  const woken = waiter({ status: "woken" })
+  const waiterId = await database.insert("waiters", woken)
+
+  await expect(expireWaiter(ctx, waiterId)).resolves.toBeNull()
+
+  expect(await database.get(waiterId)).toEqual(woken)
+  expect(sendEvent).not.toHaveBeenCalled()
+  expect(cancel).not.toHaveBeenCalled()
+})
+
+test("wakes a parent only after every named child is terminal", async () => {
+  const { ctx, database } = waiterContext()
+  const firstChild = await database.insert("runs", {
+    parentId: id<"runs">("run-parent"),
+    organizationId: "organization",
+    status: "completed",
+  })
+  const secondChild = await database.insert("runs", {
+    parentId: id<"runs">("run-parent"),
+    organizationId: "organization",
+    status: "running",
+  })
+  const waiterId = await database.insert(
     "waiters",
-    {
-      _creationTime: 0,
-      _id: id<"waiters">("waiter"),
-      createdAt: 0,
-      eventId: "event-1",
-      expiresAt: 1000,
-      functionId: "function",
-      runId: id<"runs">("run"),
-      status: "waiting",
-      organizationId: "organization",
-      updatedAt: 0,
-      ...overrides,
-    },
-  ]
-}
+    waiter({
+      condition: { kind: "runs", runIds: [firstChild, secondChild] },
+      runId: id<"runs">("run-parent"),
+    })
+  )
 
-function run(runId: string, status: string, workflowId?: string): Seed {
-  return [
-    "runs",
-    {
-      _creationTime: 0,
-      _id: id<"runs">(runId),
-      status,
-      organizationId: "organization",
-      ...(workflowId === undefined ? {} : { workflowId }),
-    },
-  ]
-}
+  await expect(wakeParentForTerminalRun(ctx, firstChild)).resolves.toBe(false)
 
-function childRun(
-  runId: string,
-  status: "completed" | "failed" | "running"
-): Seed {
-  return [
-    "runs",
-    {
-      _creationTime: 0,
-      _id: id<"runs">(runId),
-      parentId: id<"runs">("run-parent"),
-      status,
-      organizationId: "organization",
-    },
-  ]
-}
+  await database.patch(secondChild, { status: "failed" })
 
-type Seed = [string, Record<string, unknown>]
-type FakeCtx = MutationCtx & {
-  cancelled: string[]
-  patches: Array<{ id: string; patch: unknown }>
-  rows: Map<string, Record<string, unknown>>
-  scheduled: Array<{ at: number; args: unknown }>
-}
+  await expect(wakeParentForTerminalRun(ctx, secondChild)).resolves.toBe(true)
+  expect(await database.get(waiterId)).toMatchObject({ status: "woken" })
+})
 
-function fakeMutationCtx(seed: Seed[]): FakeCtx {
-  const cancelled: string[] = []
-  const patches: Array<{ id: string; patch: unknown }> = []
-  const scheduled: Array<{ at: number; args: unknown }> = []
-  const rows = new Map(seed.map(([, doc]) => [String(doc._id), doc]))
-  let inserts = 0
-
+function waiter(overrides: Record<string, unknown> = {}) {
   return {
-    cancelled,
-    patches,
-    rows,
-    scheduled,
-    db: {
-      get: async (rowId: string) => rows.get(rowId) ?? null,
-      insert: async (table: string, doc: Record<string, unknown>) => {
-        inserts += 1
-        const rowId = `${table}-${inserts}`
-        rows.set(rowId, { _creationTime: 0, _id: rowId, ...doc })
-
-        return rowId
-      },
-      patch: async (rowId: string, patch: Record<string, unknown>) => {
-        rows.set(rowId, { ...rows.get(rowId), ...patch })
-        patches.push({ id: rowId, patch })
-      },
-      query: (table: string) => ({
-        withIndex: (_index: string, build: (query: QueryFilter) => unknown) => {
-          const filters: [string, unknown][] = []
-
-          build(queryFilter(filters))
-
-          return queryResult(rows, table, filters)
-        },
-      }),
-    },
-    scheduler: {
-      cancel: async (functionId: string) => {
-        cancelled.push(functionId)
-      },
-      runAt: async (at: number, _reference: unknown, args: unknown) => {
-        scheduled.push({ at, args })
-
-        return `scheduled-${scheduled.length}`
-      },
-    },
-  } as unknown as FakeCtx
-}
-
-function queryFilter(filters: [string, unknown][]): QueryFilter {
-  return {
-    eq: (field, value) => {
-      filters.push([field, value])
-      return queryFilter(filters)
-    },
+    _creationTime: 0,
+    _id: id<"waiters">("waiter"),
+    createdAt: 0,
+    eventId: "event-1",
+    expiresAt: 1000,
+    functionId: "function",
+    runId: id<"runs">("run"),
+    status: "waiting",
+    organizationId: "organization",
+    updatedAt: 0,
+    ...overrides,
   }
 }
 
-function queryResult(
-  rows: Map<string, Record<string, unknown>>,
-  table: string,
-  filters: [string, unknown][]
-) {
-  const matching = () =>
-    [...rows.values()].filter(
-      (row) => rowTable(row, table) && matches(row, filters)
-    )
+function waiterContext() {
+  const cancel = vi.fn()
+  const runAt = vi.fn().mockResolvedValue("scheduled-1")
 
   return {
-    first: async () => matching()[0] ?? null,
-    [Symbol.asyncIterator]: async function* () {
-      yield* matching()
-    },
+    ...databaseContext({ scheduler: { cancel, runAt } }),
+    cancel,
+    runAt,
   }
-}
-
-function rowTable(row: Record<string, unknown>, table: string) {
-  return typeof row._id === "string" && row._id.startsWith(tableIdPrefix(table))
-}
-
-function tableIdPrefix(table: string) {
-  return table.endsWith("s") ? table.slice(0, -1) : table
-}
-
-type QueryFilter = {
-  eq: (field: string, value: unknown) => QueryFilter
-}
-
-function matches(row: Record<string, unknown>, filters: [string, unknown][]) {
-  return filters.every(([field, value]) => row[field] === value)
 }
