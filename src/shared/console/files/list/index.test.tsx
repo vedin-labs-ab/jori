@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { type ComponentProps } from "react"
 import { afterEach, expect, test, vi } from "vitest"
-import { type ListControls } from "@/shared/console/list/controls"
+import { absoluteTime } from "@/shared/console/time"
 import { listControls } from "../../../../../test/list/controls"
 import { emptySelection } from "../../../../../test/list/selection"
 import { type FileRow } from "../types"
@@ -37,7 +38,8 @@ function renderTable(
   {
     controls = listControls(),
     hasFilters = false,
-  }: { controls?: ListControls; hasFilters?: boolean } = {}
+    ...props
+  }: Partial<ComponentProps<typeof FileTable>> = {}
 ) {
   render(
     <FileTable
@@ -54,12 +56,14 @@ function renderTable(
       onUpload={() => undefined}
       pendingFileId={undefined}
       selection={emptySelection()}
+      {...props}
     />
   )
 }
 
 test("lists name, size, kind, times, and owner columns", () => {
-  renderTable([fileRow()])
+  const file = fileRow()
+  renderTable([file])
 
   for (const header of ["Name", "Size", "Created", "Last Updated"]) {
     expect(screen.getByRole("button", { name: header })).toBeDefined()
@@ -71,6 +75,11 @@ test("lists name, size, kind, times, and owner columns", () => {
   expect(screen.getByRole("link", { name: "costs.csv" })).toBeDefined()
   expect(screen.getByText("42 B")).toBeDefined()
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
+  for (const at of [file.createdAt, file.updatedAt]) {
+    const cell = screen.getByTitle(absoluteTime(at))
+    expect(cell.tagName).toBe("TD")
+    expect(cell.classList.contains("text-muted-foreground")).toBe(true)
+  }
 })
 
 test("header buttons drive the sort", () => {
@@ -90,8 +99,53 @@ test("filters that match nothing keep the header controls reachable", () => {
 })
 
 test("an unfiltered empty list invites the first upload", () => {
-  renderTable([])
+  const onUpload = vi.fn()
+  renderTable([], { onUpload })
 
   expect(screen.getByText("No files yet")).toBeDefined()
   expect(screen.getByRole("button", { name: /Upload file/ })).toBeDefined()
+  fireEvent.click(screen.getByRole("button", { name: /Upload file/ }))
+  expect(onUpload).toHaveBeenCalledOnce()
 })
+
+test("run files belong to Jori even when a person name is present", () => {
+  renderTable([fileRow({ source: "run" })])
+
+  expect(screen.getByText("Jori")).toBeDefined()
+  expect(screen.queryByText("Ada Lovelace")).toBeNull()
+})
+
+test("loading hides stale rows and upload actions", () => {
+  renderTable([fileRow()], { isLoading: true })
+
+  expect(screen.getByRole("status", { name: "Loading page" })).toBeDefined()
+  expect(screen.queryByRole("table")).toBeNull()
+  expect(screen.queryByRole("button", { name: /Upload file/ })).toBeNull()
+})
+
+test("row actions target their file and disable mutations while pending", () => {
+  const file = fileRow()
+  const onEdit = vi.fn()
+  renderTable([file], { onEdit })
+
+  openMenu(file)
+  fireEvent.click(screen.getByRole("menuitem", { name: "Rename…" }))
+  expect(onEdit.mock.calls).toEqual([[file]])
+
+  cleanup()
+  renderTable([file], { pendingFileId: file.fileId })
+  openMenu(file)
+
+  for (const name of ["Rename…", "Visibility…", "Move to folder…", "Delete"]) {
+    expect(
+      screen.getByRole("menuitem", { name }).getAttribute("aria-disabled")
+    ).toBe("true")
+  }
+})
+
+function openMenu(file: FileRow) {
+  fireEvent.pointerDown(
+    screen.getByRole("button", { name: `Open actions for ${file.name}` }),
+    { button: 0, ctrlKey: false }
+  )
+}
