@@ -10,6 +10,25 @@ export type GitHubInstallState = ProviderInstallState & {
   installationId?: string
 }
 
+export async function createGitHubInstallState(
+  ctx: MutationCtx,
+  state: ProviderInstallState
+) {
+  const existing = await ctx.db
+    .query("integrations")
+    .withIndex("by_organization_and_integration", (q) =>
+      q.eq("organizationId", state.organizationId).eq("integration", "github")
+    )
+    .order("desc")
+    .first()
+  return await createSignedGitHubState({
+    ...state,
+    ...(existing?.status === "active"
+      ? { installationId: existing.externalId }
+      : {}),
+  })
+}
+
 export async function createSignedGitHubState(state: GitHubInstallState) {
   return await createSignedState(requireGitHubWebhookSecret(), state)
 }
@@ -40,3 +59,5 @@ export async function verifyGitHubRequest(request: Request, body: string) {
 function requireGitHubWebhookSecret() {
   return requireEnvironmentVariable("GITHUB_WEBHOOK_SECRET")
 }
+
+import { type MutationCtx } from "../../_generated/server"
