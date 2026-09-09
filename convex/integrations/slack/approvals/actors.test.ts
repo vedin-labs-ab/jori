@@ -1,6 +1,9 @@
+import { type FunctionReference, getFunctionName } from "convex/server"
 import { afterEach, expect, test, vi } from "vitest"
+import { internal } from "../../../_generated/api"
 import { type ActionCtx } from "../../../_generated/server"
 import { getActorDisplayName } from "../../../shared/actor"
+import { type SlackActorProfile } from "../directory/users"
 import { createSlackApprovalActor } from "."
 
 afterEach(() => {
@@ -22,27 +25,7 @@ test("hydrates Slack approval actors with profile names", async () => {
       })
     )
   )
-  let accountLookupCount = 0
-  const ctx = {
-    runMutation: vi.fn(async () => "identity_123"),
-    runQuery: vi.fn(
-      async (_reference: unknown, args: Record<string, unknown>) => {
-        if ("provider" in args) {
-          return null
-        }
-
-        if ("email" in args) {
-          return "user_123"
-        }
-
-        accountLookupCount += 1
-
-        return accountLookupCount === 1
-          ? { organizationId: "organization_1" }
-          : "xoxp-user-token"
-      }
-    ),
-  } as unknown as ActionCtx
+  const { ctx, token } = context(null)
 
   const actor = await createSlackApprovalActor(ctx, {
     accountId: "T123",
@@ -60,27 +43,16 @@ test("hydrates Slack approval actors with profile names", async () => {
       name: "ÅÄÖ 😊",
     },
   })
-  expect(accountLookupCount).toBe(2)
+  expect(token).toHaveBeenCalledOnce()
 })
 
 test("hydrates Slack approval actors from cached identities first", async () => {
   const fetch = vi.fn()
   vi.stubGlobal("fetch", fetch)
-  let accountLookupCount = 0
-  const ctx = {
-    runMutation: vi.fn(),
-    runQuery: vi.fn(
-      async (_reference: unknown, args: Record<string, unknown>) => {
-        if ("provider" in args) {
-          return { email: "albin@example.com", name: "Albin Vedin" }
-        }
-
-        accountLookupCount += 1
-
-        return { organizationId: "organization_1" }
-      }
-    ),
-  } as unknown as ActionCtx
+  const { ctx, token } = context({
+    email: "albin@example.com",
+    name: "Albin Vedin",
+  })
 
   const actor = await createSlackApprovalActor(ctx, {
     accountId: "T123",
@@ -90,5 +62,32 @@ test("hydrates Slack approval actors from cached identities first", async () => 
   expect(getActorDisplayName(actor)).toBe("Albin Vedin")
   expect(fetch).not.toHaveBeenCalled()
   expect(ctx.runMutation).not.toHaveBeenCalled()
-  expect(accountLookupCount).toBe(1)
+  expect(token).not.toHaveBeenCalled()
 })
+
+function context(cached: SlackActorProfile | null) {
+  const token = vi.fn(() => "xoxp-user-token")
+  const ctx = {
+    runMutation: vi.fn(async () => "identity_123"),
+    runQuery: async (reference: FunctionReference<"query">) => {
+      const name = getFunctionName(reference)
+
+      switch (name) {
+        case getFunctionName(
+          internal.integrations.slack.install.getProfileLookupTarget
+        ):
+          return { organizationId: "organization_1" }
+        case getFunctionName(
+          internal.persons.identity.actors.resolveProviderActorProfileRecord
+        ):
+          return cached
+        case getFunctionName(internal.integrations.slack.install.getUserToken):
+          return token()
+        default:
+          throw new Error(`Unexpected query: ${name}`)
+      }
+    },
+  } as unknown as ActionCtx
+
+  return { ctx, token }
+}
