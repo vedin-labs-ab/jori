@@ -1,9 +1,9 @@
 import { expect, test } from "vitest"
-import { priceModelTokens } from "../billing"
 import {
   catalogModel,
   isModelSlug,
   modelLabel,
+  modelRate,
   models,
   modelVendors,
   vendorModels,
@@ -17,12 +17,7 @@ test("every slug is listed once, under a vendor the picker groups by", () => {
   for (const model of models) {
     expect(Object.keys(modelVendors)).toContain(model.vendor)
     expect(model.contextLength).toBeGreaterThan(0)
-    expect(priceModelTokens(model.slug, { input: 1_000, output: 1_000 })).toBe(
-      Math.round(
-        1_000 * model.rate.inputMicrosPerToken +
-          1_000 * model.rate.outputMicrosPerToken
-      )
-    )
+    expect(modelRate(model.slug)).toEqual(model.rate)
   }
 
   expect(vendorModels("openai").length + vendorModels("anthropic").length).toBe(
