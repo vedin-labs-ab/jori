@@ -15,6 +15,7 @@ export const record = internalMutation({
   args: {
     accountId: v.string(),
     integration: messageIntegrationValidator,
+    expectedConnectionGeneration: v.optional(v.number()),
     action: reactionAction,
     reaction: v.string(),
     actor: v.optional(actorValidator),
@@ -27,7 +28,12 @@ export const record = internalMutation({
       integration: args.integration,
     })
 
-    if (integration === null) {
+    if (
+      integration === null ||
+      (args.expectedConnectionGeneration !== undefined &&
+        (integration.connectionGeneration ?? 0) !==
+          args.expectedConnectionGeneration)
+    ) {
       return { status: "missing_integration" as const }
     }
 

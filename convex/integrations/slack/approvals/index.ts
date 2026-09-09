@@ -21,11 +21,13 @@ type SlackApprovalDecisionInput = {
   actorName?: string
   text?: string
   data: unknown
+  expectedConnectionGeneration?: number
 }
 
 export const handleDecision = internalAction({
   args: {
     accountId: v.string(),
+    expectedConnectionGeneration: v.optional(v.number()),
     actor: v.optional(actorValidator),
     channelId: v.string(),
     threadTs: v.optional(v.string()),
@@ -39,6 +41,7 @@ export const handleDecision = internalAction({
       code: args.code,
       decision: args.decision,
       integration: "slack",
+      expectedConnectionGeneration: args.expectedConnectionGeneration,
     })
 
     if (result.integration === undefined || result.status === "approved") {
@@ -70,6 +73,7 @@ export async function handleSlackApprovalDecision(
     internal.integrations.slack.approvals.index.handleDecision,
     {
       accountId: input.accountId,
+      expectedConnectionGeneration: input.expectedConnectionGeneration,
       actor: createIntegrationActor({
         externalId: input.actorId,
         email: input.actorEmail,
@@ -87,7 +91,8 @@ export async function handleSlackApprovalDecision(
 
 export async function handleSlackApprovalInteraction(
   ctx: ActionCtx,
-  payload: unknown
+  payload: unknown,
+  expectedConnectionGeneration?: number
 ) {
   const interaction = parseSlackApprovalInteraction(payload)
 
@@ -104,6 +109,7 @@ export async function handleSlackApprovalInteraction(
     code: interaction.code,
     decision: interaction.decision,
     integration: "slack",
+    expectedConnectionGeneration,
   })
 
   return okResponse()

@@ -117,12 +117,30 @@ export const decide = internalMutation({
     approvalId: v.id("approvals"),
     decidedBy: actorValidator,
     decision: approvalDecision,
+    expectedConnection: v.optional(
+      v.object({ integrationId: v.id("integrations"), generation: v.number() })
+    ),
   },
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
 
     if (approval === null) {
       return { status: "missing" as const }
+    }
+
+    if (args.expectedConnection !== undefined) {
+      const integration = await ctx.db.get(
+        args.expectedConnection.integrationId
+      )
+      if (
+        integration === null ||
+        integration.status !== "active" ||
+        integration.organizationId !== approval.organizationId ||
+        (integration.connectionGeneration ?? 0) !==
+          args.expectedConnection.generation
+      ) {
+        return { status: "missing" as const }
+      }
     }
 
     if (approval.status !== "pending") {

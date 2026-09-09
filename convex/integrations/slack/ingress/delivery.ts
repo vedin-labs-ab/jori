@@ -14,7 +14,11 @@ import { handleSlackLifecycleEvent } from "./lifecycle"
 import { handleSlackMessageEvent } from "./messages"
 
 export const process = internalAction({
-  args: { integrationId: v.id("integrations"), payload: v.any() },
+  args: {
+    integrationId: v.id("integrations"),
+    connectionGeneration: v.number(),
+    payload: v.any(),
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
     if (!isRecord(args.payload)) {
@@ -33,11 +37,15 @@ export const process = internalAction({
       internal.integrations.lookup.activeByIntegrationExternal,
       { integration: "slack", externalId: accountId }
     )
-    if (integration === null || integration._id !== args.integrationId) {
+    if (
+      integration === null ||
+      integration._id !== args.integrationId ||
+      (integration.connectionGeneration ?? 0) !== args.connectionGeneration
+    ) {
       return null
     }
     if (args.payload.kind === "interaction") {
-      await handleInteraction(ctx, interaction)
+      await handleInteraction(ctx, interaction, args.connectionGeneration)
       return null
     }
     if (event === undefined) {
@@ -47,19 +55,32 @@ export const process = internalAction({
     if (appId !== undefined && event.api_app_id !== appId) {
       return null
     }
-    if (await handleSlackLifecycleEvent(ctx, integration, event)) {
+    if (
+      await handleSlackLifecycleEvent(
+        ctx,
+        integration,
+        event,
+        args.connectionGeneration
+      )
+    ) {
       return null
     }
     const message = getSlackMessage(event)
     if (message !== null) {
-      await handleSlackMessageEvent(ctx, message)
+      await handleSlackMessageEvent(ctx, message, args.connectionGeneration)
     }
     return null
   },
 })
 
-async function handleInteraction(ctx: ActionCtx, payload: unknown) {
-  if (!(await handleSlackIntegrationOfferInteraction(ctx, payload))) {
-    await handleSlackApprovalInteraction(ctx, payload)
+async function handleInteraction(
+  ctx: ActionCtx,
+  payload: unknown,
+  generation: number
+) {
+  if (
+    !(await handleSlackIntegrationOfferInteraction(ctx, payload, generation))
+  ) {
+    await handleSlackApprovalInteraction(ctx, payload, generation)
   }
 }

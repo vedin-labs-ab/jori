@@ -28,9 +28,17 @@ export const run = internalAction({
       await ctx.runAction(
         makeFunctionReference<
           "action",
-          { integrationId: Id<"integrations">; payload: unknown }
+          {
+            integrationId: Id<"integrations">
+            connectionGeneration: number
+            payload: unknown
+          }
         >(consumers[row.provider]),
-        { integrationId: row.integrationId, payload: row.payload }
+        {
+          integrationId: row.integrationId,
+          connectionGeneration: row.connectionGeneration,
+          payload: row.payload,
+        }
       )
       succeeded = true
     } catch {

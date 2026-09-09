@@ -11,7 +11,8 @@ import { type SlackEventPayload } from "./events"
 export async function handleSlackLifecycleEvent(
   ctx: ActionCtx,
   integration: Doc<"integrations">,
-  payload: SlackEventPayload
+  payload: SlackEventPayload,
+  expectedConnectionGeneration?: number
 ) {
   const type = payload.event?.type
   if (type !== "app_uninstalled" && type !== "tokens_revoked") {
@@ -44,6 +45,9 @@ export async function handleSlackLifecycleEvent(
     {
       integrationId: integration._id,
       installedAt,
+      ...(expectedConnectionGeneration === undefined
+        ? {}
+        : { expectedConnectionGeneration }),
       status: type === "app_uninstalled" ? "disconnected" : "expired",
     }
   )
@@ -54,6 +58,7 @@ export const deactivate = internalMutation({
   args: {
     integrationId: v.id("integrations"),
     installedAt: v.number(),
+    expectedConnectionGeneration: v.optional(v.number()),
     status: v.union(v.literal("disconnected"), v.literal("expired")),
   },
   handler: async (ctx, args) => {
@@ -61,7 +66,10 @@ export const deactivate = internalMutation({
     if (
       integration === null ||
       integration.integration !== "slack" ||
-      integration.status !== "active"
+      integration.status !== "active" ||
+      (args.expectedConnectionGeneration !== undefined &&
+        (integration.connectionGeneration ?? 0) !==
+          args.expectedConnectionGeneration)
     ) {
       return
     }
