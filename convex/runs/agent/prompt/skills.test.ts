@@ -18,38 +18,30 @@ describe("runtime skill prompts", () => {
     expect(prompt).not.toContain("# Format")
   })
 
-  test("eagerly loads Slack guidance for Slack final replies", () => {
-    const runtimePrompt = assemblePrompt(
+  test("embeds active-surface guidance and lists other skills to load", () => {
+    const slack = runtimeSkill({
+      name: "slack",
+      category: "communication",
+      surfaces: ["slack"],
+      description: "Format Slack replies.",
+      body: "This body should not replace communication guidance.",
+      communication: {
+        parts: { text: "Text guidance.", rich: "Rich guidance." },
+      },
+    })
+    const prompt = assemblePrompt(
       runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-      { skills: runtimeSkills() }
-    )
-    const prompt = runtimePrompt.instructions
+      { skills: [slack, runtimeSkills()[0]] }
+    ).instructions
 
     expect(prompt).toContain("# Communication")
-    expect(prompt).toContain("use the lightest action that delivers it")
-    expect(prompt).toContain("words outside a tool call are discarded")
-    expect(prompt).toContain("plain closure usually get no response")
-    expect(runtimePrompt.context).toContain("Active surface: `Slack`")
-    expect(prompt).not.toContain("Current surface:")
-    expect(prompt).toContain("# Format")
-    expect(prompt).toContain("# Skills")
-    expect(prompt).toContain("Load full instructions with `load_skill`")
-    expect(prompt).toContain("`image-generation`: Generate Jori image files")
+    expect(prompt).toContain("# Format\n\nText guidance.\n\nRich guidance.")
+    expect(prompt).not.toContain(slack.body)
     expect(prompt).not.toContain("`slack`: Format Slack replies")
+    expect(prompt).toContain("`image-generation`: Generate Jori image files")
     expect(prompt.indexOf("# Communication")).toBeLessThan(
-      prompt.indexOf("# Format")
+      prompt.indexOf("Text guidance.")
     )
-    expect(prompt).toContain("Format Slack messages with Slack `mrkdwn`")
-    expect(prompt).toContain(
-      "Most replies are a line or two of plain `mrkdwn`. Reach for structure only when it earns its place."
-    )
-    expect(prompt).toContain(
-      "Escape literal `&`, `<`, and `>` unless they are part of valid Slack syntax.\n\nUse Slack `blocks` when structure makes the message easier to scan."
-    )
-    expect(prompt).toContain("Never use interactive Slack surfaces or controls")
-    expect(prompt).not.toContain("## Slack")
-    expect(prompt).not.toContain("### Text")
-    expect(prompt).not.toContain("Output contract:")
   })
 })
 

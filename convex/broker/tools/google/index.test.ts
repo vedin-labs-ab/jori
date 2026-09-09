@@ -5,7 +5,12 @@ import {
 } from "../../../../test/convex/broker"
 import { id } from "../../../../test/convex/database"
 import { integrationDoc } from "../../../../test/convex/integrations"
+import { schemaViolations } from "../../../../test/convex/schema"
 import { type Doc } from "../../../_generated/dataModel"
+import {
+  draftedMailSchema,
+  sentMailSchema,
+} from "../../../runs/agent/tools/schemas/responses/mail"
 import { callGoogleTool } from "."
 
 afterEach(() => vi.unstubAllGlobals())
@@ -48,8 +53,8 @@ describe("Gmail batch read tools", () => {
     )
 
     expect(result).toMatchObject([
-      { provider: "gmail", messageId: "message-a" },
-      { provider: "gmail", messageId: "message-b" },
+      { provider: "gmail", messageId: "message-a", to: [], cc: [] },
+      { provider: "gmail", messageId: "message-b", to: [], cc: [] },
     ])
     expect(calls.map((call) => call.url)).toEqual([
       "https://gmail.googleapis.com/gmail/v1/users/me/messages/message-a?format=full",
@@ -58,63 +63,78 @@ describe("Gmail batch read tools", () => {
   })
 })
 
-describe("Gmail write tools", () => {
-  test("sends a new Gmail message", async () => {
-    const calls = mockJsonFetch(() => ({ id: "sent-message" }))
+test("sends a new Gmail message", async () => {
+  const calls = mockJsonFetch(() => ({
+    id: "sent-message",
+    threadId: "thread",
+  }))
 
-    const result = await callGoogleTool(
-      gmailIntegration(),
-      "google_gmail_send_message",
-      {
-        bcc: ["audit@example.com"],
-        body: "Hello from Jori",
-        cc: ["team@example.com"],
-        subject: "Hello",
-        to: ["recipient@example.com"],
-      }
-    )
+  const result = await callGoogleTool(
+    gmailIntegration(),
+    "google_gmail_send_message",
+    {
+      bcc: ["audit@example.com"],
+      body: "Hello from Jori",
+      cc: ["team@example.com"],
+      subject: "Hello",
+      to: ["recipient@example.com"],
+    }
+  )
 
-    expect(result).toEqual({ status: "sent", messageId: "sent-message" })
-    expect(calls).toHaveLength(1)
-    expect(calls[0]?.url).toBe(
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
-    )
-
-    const raw = readRawMessage(calls[0]?.body)
-    expect(raw).toContain("To: recipient@example.com")
-    expect(raw).toContain("Cc: team@example.com")
-    expect(raw).toContain("Bcc: audit@example.com")
-    expect(raw).toContain("Subject: Hello")
-    expect(raw).toContain("Content-Type: text/plain; charset=UTF-8")
-    expect(raw).toContain("\r\n\r\nHello from Jori")
+  expect(result).toEqual({
+    status: "sent",
+    messageId: "sent-message",
+    threadId: "thread",
   })
+  expect(schemaViolations(result, sentMailSchema())).toEqual([])
+  expect(calls).toHaveLength(1)
+  expect(calls[0]?.url).toBe(
+    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
+  )
 
-  test("creates a Gmail draft", async () => {
-    const calls = mockJsonFetch(() => ({ id: "draft" }))
+  const raw = readRawMessage(calls[0]?.body)
+  expect(raw).toContain("To: recipient@example.com")
+  expect(raw).toContain("Cc: team@example.com")
+  expect(raw).toContain("Bcc: audit@example.com")
+  expect(raw).toContain("Subject: Hello")
+  expect(raw).toContain("Content-Type: text/plain; charset=UTF-8")
+  expect(raw).toContain("\r\n\r\nHello from Jori")
+})
 
-    const result = await callGoogleTool(
-      gmailIntegration(),
-      "google_gmail_create_draft",
-      {
-        body: "<p>Hello from Jori</p>",
-        bodyType: "HTML",
-        subject: "Draft",
-        to: ["recipient@example.com"],
-      }
-    )
+test("creates a Gmail draft", async () => {
+  const calls = mockJsonFetch(() => ({
+    id: "draft",
+    message: { id: "message", threadId: "thread" },
+  }))
 
-    expect(result).toEqual({ status: "drafted", draftId: "draft" })
-    expect(calls).toHaveLength(1)
-    expect(calls[0]?.url).toBe(
-      "https://gmail.googleapis.com/gmail/v1/users/me/drafts"
-    )
+  const result = await callGoogleTool(
+    gmailIntegration(),
+    "google_gmail_create_draft",
+    {
+      body: "<p>Hello from Jori</p>",
+      bodyType: "HTML",
+      subject: "Draft",
+      to: ["recipient@example.com"],
+    }
+  )
 
-    const raw = readRawMessage(calls[0]?.body, ["message", "raw"])
-    expect(raw).toContain("To: recipient@example.com")
-    expect(raw).toContain("Subject: Draft")
-    expect(raw).toContain("Content-Type: text/html; charset=UTF-8")
-    expect(raw).toContain("\r\n\r\n<p>Hello from Jori</p>")
+  expect(result).toEqual({
+    status: "drafted",
+    draftId: "draft",
+    messageId: "message",
+    threadId: "thread",
   })
+  expect(schemaViolations(result, draftedMailSchema())).toEqual([])
+  expect(calls).toHaveLength(1)
+  expect(calls[0]?.url).toBe(
+    "https://gmail.googleapis.com/gmail/v1/users/me/drafts"
+  )
+
+  const raw = readRawMessage(calls[0]?.body, ["message", "raw"])
+  expect(raw).toContain("To: recipient@example.com")
+  expect(raw).toContain("Subject: Draft")
+  expect(raw).toContain("Content-Type: text/html; charset=UTF-8")
+  expect(raw).toContain("\r\n\r\n<p>Hello from Jori</p>")
 })
 
 describe("Gmail thread draft tools", () => {
@@ -171,7 +191,7 @@ describe("Gmail files", () => {
   test("sends saved files", async () => {
     const calls = mockJsonFetch(() => ({ id: "sent-message" }))
 
-    await callGoogleTool(
+    const result = await callGoogleTool(
       gmailIntegration(),
       "google_gmail_send_message",
       {
@@ -183,6 +203,7 @@ describe("Gmail files", () => {
       createFileContext()
     )
 
+    expect(result).toEqual({ status: "sent", messageId: "sent-message" })
     const raw = readRawMessage(calls[0]?.body)
 
     expect(raw).toContain("Content-Type: multipart/mixed; boundary=")

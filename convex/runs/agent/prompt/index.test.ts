@@ -158,6 +158,7 @@ describe("runtime delivery prompts", () => {
 
     expect(instructions).toContain("# Communication")
     expect(instructions).toContain("use the lightest action that delivers it")
+    expect(instructions).toContain("plain closure usually get no response")
     expect(instructions).toContain("Use `send_reply`")
     expect(instructions).not.toContain("Current surface:")
     expect(instructions).toContain("# Finish")
