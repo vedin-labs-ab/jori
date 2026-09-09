@@ -14,11 +14,7 @@ import { type runLifecycleTools, sandboxTools } from "../native"
 import { type RuntimePermissions } from "../permissions/index"
 import { visibleNativeToolSnapshots } from "../permissions/native"
 import { type loadActiveSurface } from "../surface"
-import {
-  type LoadedRun,
-  type LoadedSandbox,
-  type LoadedSession,
-} from "./loaders"
+import { type LoadedSandbox, type LoadedSession } from "./loaders"
 
 type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
 
@@ -63,7 +59,6 @@ export function runtimeResponse(args: {
   input: AgentRuntimeInput
   lifecycleTools: LifecycleTools
   permissions: RuntimePermissions
-  run: LoadedRun
   sandbox: LoadedSandbox
   session: LoadedSession
 }): RuntimeContext {
@@ -73,7 +68,7 @@ export function runtimeResponse(args: {
       id: args.input.run._id,
       rootId: args.input.run.rootId ?? null,
       sandboxId: args.sandbox?.externalId ?? null,
-      status: args.run.status,
+      status: args.input.run.status,
       organizationId: args.input.run.organizationId,
     },
     session:

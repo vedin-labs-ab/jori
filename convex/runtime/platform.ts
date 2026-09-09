@@ -150,7 +150,7 @@ export function createAgentRuntime(
     platform: new ActionPlatform(ctx, loaded.context),
     sandbox: new RemoteSandbox(
       ctx,
-      loaded.run._id,
+      loaded.input.run._id,
       loaded.context.run.sandboxId
     ),
   }

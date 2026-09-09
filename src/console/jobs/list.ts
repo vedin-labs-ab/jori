@@ -26,7 +26,7 @@ import {
 } from "@/shared/console/list/selection"
 import { api } from "../../../convex/_generated/api"
 import { useFolderNames } from "../shared/materials/names"
-import { filterJobsByView, hasJobFilters } from "./filter"
+import { hasJobFilters } from "./filter"
 
 export const defaultJobFilter: JobFilter = "active"
 
@@ -46,9 +46,7 @@ export function useJobListPage(organizationId: string) {
   const folders = useFolderNames(organizationId)
   const rows =
     list?.status === "ready"
-      ? filterJobsByView(list.jobs, filter).filter((job) =>
-          matchesAudienceFilter(job.audience, audience)
-        )
+      ? list.jobs.filter((job) => matchesAudienceFilter(job.audience, audience))
       : []
   const config = jobListConfig(folders, rows)
   const controls = useListControls(config)

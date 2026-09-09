@@ -1,4 +1,4 @@
-import { lazy, useEffect } from "react"
+import { lazy } from "react"
 import { type JobPolicyPermissions } from "@/shared/console/jobs/access/policy"
 import { JobEditorDialog } from "@/shared/console/jobs/editor/dialog"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
@@ -22,7 +22,6 @@ type JobDialogProps = {
   isOpen: boolean
   isSaving: boolean
   onOpenChange: (isOpen: boolean) => void
-  onReady?: () => void
   onSave: () => void
   onValuesChange: (values: JobFormValues) => void
   permissions?: JobPolicyPermissions
@@ -40,7 +39,6 @@ export function JobDialog({
   isOpen,
   isSaving,
   onOpenChange,
-  onReady,
   onSave,
   onValuesChange,
   permissions,
@@ -49,11 +47,6 @@ export function JobDialog({
   organizationId,
   values,
 }: JobDialogProps) {
-  // biome-ignore lint/correctness/useExhaustiveDependencies: fire once on mount
-  useEffect(() => {
-    onReady?.()
-  }, [])
-
   const skills = useSkillNames(organizationId)
   const people = usePeopleOptions(organizationId)
   const teams = useTeamOptions(organizationId)

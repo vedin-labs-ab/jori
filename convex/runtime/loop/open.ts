@@ -20,7 +20,7 @@ export const step = internalAction({
   handler: async (ctx, args): Promise<"opened" | "skipped"> => {
     const loaded = await loadRuntime(ctx, args.runId)
 
-    if (isTerminalRunStatus(loaded.run.status)) {
+    if (isTerminalRunStatus(loaded.input.run.status)) {
       return "skipped"
     }
 

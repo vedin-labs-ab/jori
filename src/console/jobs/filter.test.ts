@@ -1,41 +1,12 @@
 import { expect, test } from "vitest"
-import { type Job } from "@/shared/console/jobs/types"
-import { filterJobsByView, hasJobFilters } from "./filter"
+import { hasJobFilters } from "./filter"
 
-test("defaults to active jobs without treating the view as a filter", () => {
+test("the default active view has no filters unless there is a search", () => {
   expect(hasJobFilters("", "active")).toBe(false)
-  expect(filterJobsByView(jobs(), "active").map((item) => item.name)).toEqual([
-    "Active",
-  ])
+  expect(hasJobFilters("   ", "active")).toBe(false)
+  expect(hasJobFilters("digest", "active")).toBe(true)
 })
 
-test("shows every returned job in the all view", () => {
-  expect(hasJobFilters("", "all")).toBe(true)
-  expect(filterJobsByView(jobs(), "all").map((item) => item.name)).toEqual([
-    "Active",
-    "Paused",
-    "Completed",
-  ])
+test.each(["all", "paused"] as const)("%s is a filtered view", (filter) => {
+  expect(hasJobFilters("", filter)).toBe(true)
 })
-
-test("shows only paused jobs in the paused view", () => {
-  expect(hasJobFilters("", "paused")).toBe(true)
-  expect(filterJobsByView(jobs(), "paused").map((item) => item.name)).toEqual([
-    "Paused",
-  ])
-})
-
-function jobs(): Job[] {
-  return [
-    job("Active", "active"),
-    job("Paused", "paused"),
-    job("Completed", "completed"),
-  ]
-}
-
-function job(name: string, status: Job["status"]) {
-  return {
-    name,
-    status,
-  } as Job
-}
