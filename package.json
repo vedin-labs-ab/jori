@@ -5,6 +5,8 @@
   "type": "module",
   "packageManager": "pnpm@11.15.1",
   "scripts": {
+    "brand": "node --experimental-strip-types scripts/brand/index.ts",
+    "brand:social": "node --experimental-strip-types scripts/brand/capture.ts",
     "dev": "node --experimental-strip-types scripts/dev.ts",
     "dev:web": "vite",
     "dev:convex": "node --experimental-strip-types scripts/env/index.ts dev -- npx convex dev",
@@ -115,7 +117,9 @@
     "convex-test": "^0.0.56",
     "dependency-cruiser": "^18.1.0",
     "jsdom": "^29.1.1",
+    "playwright": "^1.63.0",
     "shadcn": "^4.13.1",
+    "sharp": "^0.35.4",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vite": "^8.1.5",
     "vitest": "^4.1.10"

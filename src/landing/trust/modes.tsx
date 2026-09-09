@@ -10,8 +10,7 @@ export function ModesSection() {
         <>
           Every tool is <ModeChip mode="allowed" /> outright,{" "}
           <ModeChip mode="blocked" /> outright, or <ModeChip mode="prompted" />{" "}
-          every time. You set which for <Jori tilt="right" />, per action, per
-          account.
+          every time. You set which for <Jori />, per action, per account.
         </>
       }
       title="Every tool has a mode"

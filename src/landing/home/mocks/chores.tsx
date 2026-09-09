@@ -13,9 +13,9 @@ export function Chores() {
       lede={
         <>
           Every company runs on chores: the weekly summary, the invoice chase,
-          the ticket triage, the changelog. Write each one down once.{" "}
-          <Jori tilt="left" /> runs it on a schedule or when something happens,
-          and files what they made where the team can find it.
+          the ticket triage, the changelog. Write each one down once. <Jori />{" "}
+          runs it on a schedule or when something happens, and files what they
+          made where the team can find it.
         </>
       }
       support

@@ -8,6 +8,7 @@ claims. Read only the guide relevant to the task.
 | [Architecture](architecture.md) | Product priorities, regional defaults and when to revisit a decision. |
 | [Integrations](integrations.md) | Registration choices, branding and reliable regional delivery. |
 | [Residency](residency.md) | Data boundaries, known exceptions and evidence for customer claims. |
+| [Brand](brand.md) | Logo variants, clear space, browser and app icons, and social image regeneration. |
 
 These guides record the decisions agreed on 9 September 2026. Implementation
 gaps are noted separately; guidance is not proof of production state.

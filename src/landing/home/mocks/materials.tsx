@@ -27,9 +27,9 @@ export function Materials() {
       lede={
         <>
           A job doesn't answer in a chat window. It writes rows to a table, a
-          value to a store, a file to a folder. You and <Jori tilt="steep" />{" "}
-          edit the same materials, so anything they keep current is something
-          you can check and correct.
+          value to a store, a file to a folder. You and <Jori /> edit the same
+          materials, so anything they keep current is something you can check
+          and correct.
         </>
       }
       title="Work lands where you can find it"

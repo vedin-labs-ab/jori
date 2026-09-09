@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { brandHeadline } from "@/shared/brand/content"
 import { BrandLink } from "@/shared/brand/link"
 
 const footerLinks = [
@@ -19,9 +20,7 @@ export function LandingFooter() {
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-6 py-8">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <BrandLink />
-          <p className="text-muted-foreground text-sm">
-            The shared drive your AI works out of.
-          </p>
+          <p className="text-muted-foreground text-sm">{brandHeadline}</p>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
           <nav

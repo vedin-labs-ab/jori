@@ -15,9 +15,9 @@ export function TrustPage() {
       <PageIntro
         lede={
           <>
-            Handing work to <Jori tilt="left" /> means handing them your
-            repositories, your issues, your threads, and your inbox. That access
-            comes with controls you can see and receipts you can audit.
+            Handing work to <Jori /> means handing them your repositories, your
+            issues, your threads, and your inbox. That access comes with
+            controls you can see and receipts you can audit.
           </>
         }
         title="Built to be checked."

@@ -21,8 +21,8 @@ export function ScopeSection() {
     <Section
       lede={
         <>
-          <Jori tilt="left" /> works with the accounts you connect, with the
-          access you grant. Nothing else.
+          <Jori /> works with the accounts you connect, with the access you
+          grant. Nothing else.
         </>
       }
       support
@@ -74,8 +74,7 @@ export function BoundariesSection() {
     <Section
       lede={
         <>
-          Not settings, and not promises. The way <Jori tilt="right" /> is
-          built.
+          Not settings, and not promises. The way <Jori /> is built.
         </>
       }
       support
