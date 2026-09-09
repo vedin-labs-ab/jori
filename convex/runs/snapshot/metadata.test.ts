@@ -5,7 +5,6 @@ test("uses only the Slack channel", () => {
   expect(
     createSourceMetadata({
       integration: "slack",
-      event: "message.created",
       data: {
         channel: { id: "C123", name: "support" },
         thread: { ts: "1710000000.000100" },
@@ -19,7 +18,6 @@ test("does not use Slack channel IDs as display metadata", () => {
   expect(
     createSourceMetadata({
       integration: "slack",
-      event: "message.created",
       data: {
         channel: { id: "C123" },
         ts: "1710000000.000200",
@@ -32,7 +30,6 @@ test("uses repository and issue for GitHub issue comments", () => {
   expect(
     createSourceMetadata({
       integration: "github",
-      event: "issue.comment.created",
       data: {
         repository: {
           fullName: "vedin-labs/frontier",
@@ -66,7 +63,6 @@ test("uses repository and pull request for GitHub pull request comments", () => 
   expect(
     createSourceMetadata({
       integration: "github",
-      event: "pull_request.review_comment.edited",
       data: {
         repository: { fullName: "vedin-labs/frontier" },
         pullNumber: 2,
@@ -92,7 +88,6 @@ test("uses project and issue for Linear issue comments", () => {
   expect(
     createSourceMetadata({
       integration: "linear",
-      event: "issue.comment.created",
       data: {
         issueIdentifier: "ENG-214",
         issue: {
@@ -117,7 +112,6 @@ test("uses page for Notion events", () => {
   expect(
     createSourceMetadata({
       integration: "notion",
-      event: "page.updated",
       data: {
         pageId: "page-id",
         page: {
@@ -141,7 +135,6 @@ test("does not use Notion page IDs as display metadata", () => {
   expect(
     createSourceMetadata({
       integration: "notion",
-      event: "page.updated",
       data: {
         pageId: "page-id",
         workspaceName: "Workspace",
@@ -154,7 +147,6 @@ test("uses subject and sender for incoming emails", () => {
   expect(
     createSourceMetadata({
       integration: "gmail",
-      event: "message.received",
       data: {
         subject: "Enterprise trial question",
         from: { email: "jane@acme.com" },
@@ -170,8 +162,7 @@ test("uses event name for calendar events", () => {
   expect(
     createSourceMetadata({
       integration: "googleCalendar",
-      event: "event.starting_soon",
       data: { event: { summary: "Design review" } },
     })
-  ).toEqual([{ type: "event", label: "Design review" }])
+  ).toEqual([{ type: "calendar_event", label: "Design review" }])
 })
