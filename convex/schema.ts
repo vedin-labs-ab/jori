@@ -14,6 +14,7 @@ import { folders } from "./folders/schema"
 import { notionWebhookSetups } from "./integrations/notion/setup/schema"
 import { integrationOffers } from "./integrations/offers/schema"
 import { integrationInstalls, integrations } from "./integrations/schema"
+import { webhookDeliveries } from "./integrations/webhooks/schema"
 import { jobs } from "./jobs/schema"
 import { subscriptions } from "./jobs/subscriptions/schema"
 import { messages } from "./messages/schema"
@@ -53,6 +54,7 @@ export default defineSchema({
   persons,
   identities,
   integrations,
+  webhookDeliveries,
   integrationInstalls,
   integrationOffers,
   messages,

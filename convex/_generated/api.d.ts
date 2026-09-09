@@ -8,6 +8,11 @@
  * @module
  */
 
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 import type * as access_allowlist from "../access/allowlist.js";
 import type * as access_gate from "../access/gate.js";
 import type * as access_index from "../access/index.js";
@@ -286,6 +291,10 @@ import type * as integrations_slack_reactions_snapshot from "../integrations/sla
 import type * as integrations_slack_signing from "../integrations/slack/signing.js";
 import type * as integrations_status from "../integrations/status.js";
 import type * as integrations_surface from "../integrations/surface.js";
+import type * as integrations_webhooks_delivery from "../integrations/webhooks/delivery.js";
+import type * as integrations_webhooks_policy from "../integrations/webhooks/policy.js";
+import type * as integrations_webhooks_schema from "../integrations/webhooks/schema.js";
+import type * as integrations_webhooks_worker from "../integrations/webhooks/worker.js";
 import type * as jobs_access from "../jobs/access.js";
 import type * as jobs_connections from "../jobs/connections.js";
 import type * as jobs_console from "../jobs/console.js";
@@ -665,12 +674,14 @@ import type * as workstreams_pulse from "../workstreams/pulse.js";
 import type * as workstreams_queries from "../workstreams/queries.js";
 import type * as workstreams_read from "../workstreams/read.js";
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
-
+/**
+ * A utility for referencing Convex functions in your app's API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 declare const fullApi: ApiFromModules<{
   "access/allowlist": typeof access_allowlist;
   "access/gate": typeof access_gate;
@@ -950,6 +961,10 @@ declare const fullApi: ApiFromModules<{
   "integrations/slack/signing": typeof integrations_slack_signing;
   "integrations/status": typeof integrations_status;
   "integrations/surface": typeof integrations_surface;
+  "integrations/webhooks/delivery": typeof integrations_webhooks_delivery;
+  "integrations/webhooks/policy": typeof integrations_webhooks_policy;
+  "integrations/webhooks/schema": typeof integrations_webhooks_schema;
+  "integrations/webhooks/worker": typeof integrations_webhooks_worker;
   "jobs/access": typeof jobs_access;
   "jobs/connections": typeof jobs_connections;
   "jobs/console": typeof jobs_console;
@@ -1329,28 +1344,10 @@ declare const fullApi: ApiFromModules<{
   "workstreams/queries": typeof workstreams_queries;
   "workstreams/read": typeof workstreams_read;
 }>;
-
-/**
- * A utility for referencing Convex functions in your app's public API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
- */
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
 >;
-
-/**
- * A utility for referencing Convex functions in your app's internal API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = internal.myModule.myFunction;
- * ```
- */
 export declare const internal: FilterApi<
   typeof fullApi,
   FunctionReference<any, "internal">
