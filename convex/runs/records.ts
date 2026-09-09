@@ -30,30 +30,25 @@ export const getInputByRun = internalQuery({
     }
 
     if (run.cause.type === "message") {
-      return await getMessageInput(ctx, { run })
+      return await getMessageInput(ctx, run)
     }
 
     if (run.job !== undefined && run.parentId === undefined) {
-      return await getJobInput(ctx, { run })
+      return await getJobInput(ctx, run)
     }
 
-    return await getInstructionInput(ctx, { run })
+    return await getInstructionInput(ctx, run)
   },
 })
 
-async function getMessageInput(
-  ctx: QueryCtx,
-  args: {
-    run: Doc<"runs">
-  }
-) {
-  if (args.run.cause.type !== "message") {
+async function getMessageInput(ctx: QueryCtx, run: Doc<"runs">) {
+  if (run.cause.type !== "message") {
     return null
   }
 
-  const message = await ctx.db.get(args.run.cause.messageId)
+  const message = await ctx.db.get(run.cause.messageId)
 
-  if (message === null || message.organizationId !== args.run.organizationId) {
+  if (message === null || message.organizationId !== run.organizationId) {
     return null
   }
 
@@ -66,22 +61,16 @@ async function getMessageInput(
     return null
   }
 
-  const integrations = await listActiveIntegrations(ctx, args.run)
-  const personContext = await readPrincipalContext(ctx, args.run, integrations)
+  const integrations = await listActiveIntegrations(ctx, run)
 
   return {
     type: "message" as const,
     surface: message.surface,
-    run: args.run,
     message,
     integration,
-    integrations,
+    ...(await readInputContext(ctx, run, integrations)),
     conversation: await recentConversation(ctx, message),
-    organization: await readApprovedFacts(ctx, args.run.organizationId),
-    requester: personContext.requester,
     place: await readPlaceContext(ctx, message),
-    timezone: personContext.timezone,
-    workstreams: await readWorkstreamRoster(ctx, args.run.organizationId),
   }
 }
 
@@ -100,27 +89,20 @@ async function readMessageIntegration(ctx: QueryCtx, message: Doc<"messages">) {
     : null
 }
 
-async function getJobInput(
-  ctx: QueryCtx,
-  args: {
-    run: Doc<"runs">
-  }
-) {
-  if (args.run.job === undefined) {
+async function getJobInput(ctx: QueryCtx, run: Doc<"runs">) {
+  if (run.job === undefined) {
     return null
   }
 
   const event =
-    args.run.cause.type === "event"
-      ? await ctx.db.get(args.run.cause.eventId)
-      : null
+    run.cause.type === "event" ? await ctx.db.get(run.cause.eventId) : null
   const integration =
-    event === null || event.organizationId !== args.run.organizationId
+    event === null || event.organizationId !== run.organizationId
       ? null
       : await ctx.db.get(event.integrationId)
-  const integrations = await listActiveIntegrations(ctx, args.run)
-  const access = args.run.access
-  const instructions = args.run.instructions?.trim()
+  const integrations = await listActiveIntegrations(ctx, run)
+  const access = run.access
+  const instructions = run.instructions?.trim()
 
   if (
     access === undefined ||
@@ -133,48 +115,32 @@ async function getJobInput(
   const grantedIntegrations = integrations.filter((integration) =>
     hasIntegrationTools(access, integration._id)
   )
-  const personContext = await readPrincipalContext(
-    ctx,
-    args.run,
-    grantedIntegrations
-  )
 
   return {
     type: "job" as const,
     access,
     instructions,
-    run: args.run,
     event:
-      event !== null && event.organizationId === args.run.organizationId
+      event !== null && event.organizationId === run.organizationId
         ? event
         : null,
     integration:
-      integration !== null &&
-      integration.organizationId === args.run.organizationId
+      integration !== null && integration.organizationId === run.organizationId
         ? integration
         : null,
-    integrations: grantedIntegrations,
-    organization: await readApprovedFacts(ctx, args.run.organizationId),
-    requester: personContext.requester,
-    timezone: personContext.timezone,
-    workstreams: await readWorkstreamRoster(ctx, args.run.organizationId),
+    ...(await readInputContext(ctx, run, grantedIntegrations)),
   }
 }
 
-async function getInstructionInput(
-  ctx: QueryCtx,
-  args: {
-    run: Doc<"runs">
-  }
-) {
-  const instructions = args.run.instructions?.trim()
+async function getInstructionInput(ctx: QueryCtx, run: Doc<"runs">) {
+  const instructions = run.instructions?.trim()
 
   if (instructions === undefined || instructions === "") {
     return null
   }
 
-  const access = args.run.access
-  const integrations = await listActiveIntegrations(ctx, args.run)
+  const access = run.access
+  const integrations = await listActiveIntegrations(ctx, run)
 
   const grantedIntegrations =
     access === undefined
@@ -182,22 +148,12 @@ async function getInstructionInput(
       : integrations.filter((integration) =>
           hasIntegrationTools(access, integration._id)
         )
-  const personContext = await readPrincipalContext(
-    ctx,
-    args.run,
-    grantedIntegrations
-  )
 
   return {
     type: "instruction" as const,
-    run: args.run,
     instructions,
     ...(access === undefined ? {} : { access }),
-    integrations: grantedIntegrations,
-    organization: await readApprovedFacts(ctx, args.run.organizationId),
-    requester: personContext.requester,
-    timezone: personContext.timezone,
-    workstreams: await readWorkstreamRoster(ctx, args.run.organizationId),
+    ...(await readInputContext(ctx, run, grantedIntegrations)),
   }
 }
 
@@ -232,19 +188,20 @@ async function listActiveIntegrations(ctx: QueryCtx, run: Doc<"runs">) {
   })
 }
 
-async function readPrincipalContext(
+/** Shared prompt context, using only the integrations selected for this input. */
+async function readInputContext(
   ctx: QueryCtx,
   run: Doc<"runs">,
   integrations: Doc<"integrations">[]
 ) {
   const personId = executionPrincipalPersonId(run.principal)
 
-  if (personId === undefined) {
-    return { requester: null, timezone: null }
-  }
-
   return {
+    run,
+    integrations,
     requester: await readRequesterContext(ctx, { personId, integrations }),
     timezone: await readPersonTimezone(ctx, personId),
+    organization: await readApprovedFacts(ctx, run.organizationId),
+    workstreams: await readWorkstreamRoster(ctx, run.organizationId),
   }
 }
