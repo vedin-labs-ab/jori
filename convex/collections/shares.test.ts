@@ -62,23 +62,16 @@ describe("share pruning", () => {
     expect(sharesToRetire(live, 1_000)).toEqual([])
   })
 
-  test("expired shares remain in history", () => {
-    const expired = { createdAt: 1, expiresAt: 500 }
-
-    expect(
-      sharesToRetire([expired, { createdAt: 2, expiresAt: 9_000 }], 1_000)
-    ).toEqual([])
-  })
-
-  test("the oldest active shares make room at capacity", () => {
+  test("retires the oldest active share at capacity and keeps expired history", () => {
     const shares = Array.from({ length: 20 }, (_, index) => ({
       createdAt: index,
       expiresAt: 9_000,
     }))
-    const pruned = sharesToRetire(shares, 1_000)
+    const expired = { createdAt: -1, expiresAt: 500 }
 
-    expect(pruned).toHaveLength(1)
-    expect(pruned[0]?.createdAt).toBe(0)
+    expect(sharesToRetire([expired, ...shares.reverse()], 1_000)).toEqual([
+      { createdAt: 0, expiresAt: 9_000 },
+    ])
   })
 })
 

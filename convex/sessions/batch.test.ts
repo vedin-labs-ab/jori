@@ -3,12 +3,22 @@ import { id } from "../../test/convex/database"
 import { type Doc } from "../_generated/dataModel"
 import { collectPendingBatch, formatRuntimeMessage } from "./batch"
 
-test("advances the cursor across non-text messages", () => {
+test.each([
+  ["non-text", message("skipped", 2)],
+  [
+    "self-authored",
+    message("skipped", 2, "Jori needs approval.", {
+      actor: { externalId: "UBOT", kind: "self" },
+    }),
+  ],
+])("advances across %s messages without returning them as user input", (_kind, skipped) => {
   const batch = collectPendingBatch(
     [
       message("last", 1, "Already consumed."),
-      message("empty", 2),
-      message("next", 3, "Use this."),
+      skipped,
+      message("next", 3, "Follow up.", {
+        actor: { externalId: "U123", kind: "person" },
+      }),
     ],
     session("last", 1),
     10,
@@ -31,27 +41,6 @@ test("does not advance past the returned message limit", () => {
   expect(batch.messages.map((item) => item._id)).toEqual(["first"])
   expect(batch.cursor?._id).toBe("first")
   expect(batch.hasMore).toBe(true)
-})
-
-test("advances across self messages without returning them as user input", () => {
-  const batch = collectPendingBatch(
-    [
-      message("last", 1, "Already consumed."),
-      message("approval", 2, "Jori needs approval.", {
-        actor: { externalId: "UBOT", kind: "self" },
-      }),
-      message("next", 3, "Follow up.", {
-        actor: { externalId: "U123", kind: "person" },
-      }),
-    ],
-    session("last", 1),
-    10,
-    false
-  )
-
-  expect(batch.messages.map((item) => item._id)).toEqual(["next"])
-  expect(batch.cursor?._id).toBe("next")
-  expect(batch.hasMore).toBe(false)
 })
 
 test("advances the cursor when only self messages are pending", () => {

@@ -6,7 +6,7 @@ import {
 } from "../../test/convex/collections"
 import { databaseContext, id } from "../../test/convex/database"
 import { type CollectionDoc } from "../collections/spec"
-import { summarizeTable, summarizeTableWithOwner } from "./access"
+import { summarizeTableWithOwner } from "./access"
 
 function table(overrides: TableOverrides = {}): CollectionDoc<"table"> {
   return {
@@ -16,16 +16,8 @@ function table(overrides: TableOverrides = {}): CollectionDoc<"table"> {
   } as CollectionDoc<"table">
 }
 
-describe("summarizing a table", () => {
-  test("carries the maintained document counter", () => {
-    const document = table({ documentCount: 42 })
-
-    expect(summarizeTable(document).rowCount).toBe(42)
-  })
-})
-
 describe("resolving the owner name", () => {
-  test("names the owner from a linked identity", async () => {
+  test("includes the row count and the owner from a linked identity", async () => {
     const { database, ctx } = databaseContext()
 
     await database.insert("identities", {
@@ -36,10 +28,10 @@ describe("resolving the owner name", () => {
       name: "Ada Lovelace",
     })
 
-    const document = table()
+    const document = table({ documentCount: 42 })
     const summary = await summarizeTableWithOwner(ctx, document)
 
-    expect(summary.ownerName).toBe("Ada Lovelace")
+    expect(summary).toMatchObject({ rowCount: 42, ownerName: "Ada Lovelace" })
   })
 
   test("carries the sign-in avatar from the linked auth account", async () => {
