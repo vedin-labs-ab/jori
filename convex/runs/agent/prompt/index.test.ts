@@ -164,6 +164,10 @@ describe("runtime delivery prompts", () => {
       "Finish the run when no useful work remains: prefer setting `final: true` on the last useful tool call that supports it, and call `finish_run` otherwise."
     )
     expect(instructions).not.toContain("final useful action")
+    expect(instructions).not.toContain("offer_integration")
+    expect(instructions).not.toContain(
+      "The run waits while active approvals or integration offers remain."
+    )
     expectInstructionsOrder(instructions)
     expectNoSyntheticBlankLines(instructions)
   })

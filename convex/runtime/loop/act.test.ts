@@ -38,36 +38,7 @@ test.each([
   )
 })
 
-test("repairs a non-empty stop without disabling tools", async () => {
-  const runtime = createRuntime({
-    context: runtimeContext({ tools: [finishRunTool(), slackMessageTool()] }),
-  })
-  const model = createQueuedModel([
-    { content: "I sent the result to Slack.", type: "stop" },
-    finishRunResponse(),
-  ])
-
-  await runLoop({ model, runtime })
-
-  expect(model.complete).toHaveBeenCalledTimes(2)
-  expect(model.complete).toHaveBeenLastCalledWith(
-    expect.objectContaining({
-      messages: expect.arrayContaining([
-        { content: "I sent the result to Slack.", role: "assistant" },
-        expect.objectContaining({
-          content: expect.stringContaining("Call `finish_run`"),
-          role: "user",
-        }),
-      ]),
-      tools: [
-        expect.objectContaining({ name: "finish_run" }),
-        expect.objectContaining({ name: "conversations_add_message" }),
-      ],
-    })
-  )
-})
-
-test("allows tool calls after stop repair", async () => {
+test("repairs non-empty stops and keeps tools available for the next turn", async () => {
   const runtime = createRuntime({
     context: runtimeContext({ tools: [finishRunTool(), slackMessageTool()] }),
   })
@@ -89,6 +60,22 @@ test("allows tool calls after stop repair", async () => {
 
   await runLoop({ model, runtime })
 
+  expect(model.complete).toHaveBeenCalledTimes(2)
+  expect(model.complete).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      messages: expect.arrayContaining([
+        { content: "Posting the answer.", role: "assistant" },
+        expect.objectContaining({
+          content: expect.stringContaining("Call `finish_run`"),
+          role: "user",
+        }),
+      ]),
+      tools: [
+        expect.objectContaining({ name: "finish_run" }),
+        expect.objectContaining({ name: "conversations_add_message" }),
+      ],
+    })
+  )
   expect(runtime.platform.callTool).toHaveBeenCalledWith(
     expect.objectContaining({
       input: { channel: "C123", text: "Posting the answer." },
@@ -100,44 +87,29 @@ test("allows tool calls after stop repair", async () => {
   )
 })
 
-test("marks the run failed when model steps are exhausted", async () => {
+test.each([
+  "tool_calls",
+  "stop",
+] as const)("fails when the model exhausts its steps with %s responses", async (type) => {
   const runtime = createRuntime({
     context: runtimeContext({ tools: [finishRunTool(), slackMessageTool()] }),
   })
   const model = createQueuedModel(
-    Array.from({ length: 30 }, (_value, index) => ({
-      content: null,
-      toolCalls: [
-        {
-          args: { channel: "C123", text: `attempt ${index}` },
-          id: `call_${index}`,
-          name: "conversations_add_message",
-        },
-      ],
-      type: "tool_calls" as const,
-    }))
-  )
-
-  await expect(runLoop({ model, runtime })).resolves.toBe("failed")
-
-  expect(model.complete).toHaveBeenCalledTimes(30)
-  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
-    expect.objectContaining({
-      data: { error: "Model loop exceeded the maximum step count." },
-      type: "run.failed",
-    })
-  )
-})
-
-test("fails the last turn even when the model stops instead of calling", async () => {
-  const runtime = createRuntime({
-    context: runtimeContext({ tools: [finishRunTool()] }),
-  })
-  const model = createQueuedModel(
-    Array.from({ length: 30 }, () => ({
-      content: "Still thinking.",
-      type: "stop" as const,
-    }))
+    Array.from({ length: 30 }, (_value, index) =>
+      type === "stop"
+        ? { content: "Still thinking.", type }
+        : {
+            content: null,
+            toolCalls: [
+              {
+                args: { channel: "C123", text: `attempt ${index}` },
+                id: `call_${index}`,
+                name: "conversations_add_message",
+              },
+            ],
+            type,
+          }
+    )
   )
 
   await expect(runLoop({ model, runtime })).resolves.toBe("failed")

@@ -4,10 +4,9 @@ import {
   fakeQueryCtx,
   testRun,
 } from "../../../../test/convex/console"
-import { githubIntegration } from "../../../../test/convex/integrations"
 import { summarizeRun } from "../summaries"
 
-test("includes linked GitHub pull request details", async () => {
+test("preserves stored GitHub pull request details and links", async () => {
   const run = testRun(
     eventRun({
       title: "GitHub PR event",
@@ -15,14 +14,7 @@ test("includes linked GitHub pull request details", async () => {
       snapshot: githubDisplay(),
     })
   )
-  const summary = await summarizeRun(
-    fakeQueryCtx({
-      event: githubPullRequestCommentEvent(),
-      integration: githubIntegration(),
-      run,
-    }),
-    run
-  )
+  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.details).toEqual([
     {
@@ -43,7 +35,7 @@ test("includes linked GitHub pull request details", async () => {
   ])
 })
 
-test("formats Linear issue details with a colon", async () => {
+test("preserves stored Linear issue labels and links", async () => {
   const run = testRun(
     eventRun({
       title: "Linear event",
@@ -51,13 +43,7 @@ test("formats Linear issue details with a colon", async () => {
       snapshot: linearDisplay(),
     })
   )
-  const summary = await summarizeRun(
-    fakeQueryCtx({
-      event: linearIssueCommentEvent(),
-      run,
-    }),
-    run
-  )
+  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
   expect(summary.details).toContainEqual({
     type: "issue",
@@ -72,16 +58,12 @@ function eventRun(input: {
   title: string
 }) {
   return {
-    _id: "run",
-    _creationTime: 0,
-    organizationId: "organization",
     cause: { type: "event", eventId: "event" },
     instructions: input.task,
     snapshot: {
       title: input.title,
       ...input.snapshot,
     },
-    createdAt: 0,
   }
 }
 
@@ -123,54 +105,4 @@ function linearDisplay() {
       },
     ],
   })
-}
-
-function githubPullRequestCommentEvent() {
-  return {
-    _id: "event",
-    _creationTime: 0,
-    organizationId: "organization",
-    integrationId: "integration",
-    key: "github:event",
-    type: "pull_request.review_comment.created",
-    text: "Can you check this pull request?",
-    data: {
-      repository: {
-        fullName: "vedin-labs/frontier",
-        url: "https://github.com/vedin-labs/frontier",
-      },
-      pullNumber: 42,
-      isPullRequest: true,
-      pullRequest: {
-        number: 42,
-        title: "Add execution metadata",
-        url: "https://github.com/vedin-labs/frontier/pull/42",
-      },
-      comment: {
-        id: "123",
-        url: "https://github.com/vedin-labs/frontier/pull/42#comment-123",
-      },
-    },
-  }
-}
-
-function linearIssueCommentEvent() {
-  return {
-    _id: "event",
-    _creationTime: 0,
-    organizationId: "organization",
-    integrationId: "integration",
-    key: "linear:event",
-    type: "issue.comment.created",
-    text: "Please take a look.",
-    data: {
-      issueIdentifier: "VED-5",
-      issue: {
-        identifier: "VED-5",
-        title: "Test issue",
-        url: "https://linear.app/acme/issue/VED-5/test-issue",
-      },
-      commentId: "comment-123",
-    },
-  }
 }
