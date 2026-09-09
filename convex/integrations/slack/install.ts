@@ -1,19 +1,40 @@
 import { v } from "convex/values"
-import { internalMutation, internalQuery } from "../../_generated/server"
+import { internal } from "../../_generated/api"
+import { type Doc } from "../../_generated/dataModel"
+import {
+  type ActionCtx,
+  internalMutation,
+  internalQuery,
+} from "../../_generated/server"
 import {
   linkSetupIdentity,
   setupIdentityValidator,
 } from "../../persons/install"
+import { sha256Hex } from "../../shared/crypto"
 import {
   requireProviderIntegration,
   saveOAuthCredentials,
 } from "../connect/credentials"
 import { upsertIntegration } from "../connect/install"
 import {
+  credentialSnapshot,
+  credentialSnapshotValidator,
+} from "../connect/snapshot"
+import {
   findActiveIntegrationByExternalId,
   findIntegrationByExternalId,
 } from "../data"
-import { readSlackTokenPair, requireSlackCredentials } from "./credentials"
+import {
+  failOAuthRefresh,
+  hasFreshTokenExpiration,
+  withCredentials,
+} from "../refresh"
+import {
+  readSlackTokenPair,
+  requireSlackCredentials,
+  slackTokenKinds,
+} from "./credentials"
+import { refreshSlackAccessToken, slackGrantIsDead } from "./oauth"
 
 const tokenPairValidator = v.object({
   access: v.string(),
@@ -127,6 +148,11 @@ export const recordOAuthInstallation = internalMutation({
 export const updateOAuthCredentials = internalMutation({
   args: {
     integrationId: v.id("integrations"),
+    expectedSnapshot: credentialSnapshotValidator,
+    expectedTokens: v.object({
+      bot: v.optional(v.string()),
+      user: v.optional(v.string()),
+    }),
     bot: v.optional(tokenPairValidator),
     user: v.optional(tokenPairValidator),
   },
@@ -137,11 +163,31 @@ export const updateOAuthCredentials = internalMutation({
       label: "Slack",
     })
     const current = requireSlackCredentials(integration)
-
-    return await saveOAuthCredentials(ctx, args.integrationId, {
+    if (
+      integration.status !== "active" ||
+      (integration.connectionGeneration ?? 0) !==
+        args.expectedSnapshot.connectionGeneration
+    ) {
+      throw new Error("Integration connection changed during token refresh")
+    }
+    // The other token may rotate concurrently. Compare only the sides being
+    // replaced, so their successful refreshes can still merge safely.
+    for (const kind of slackTokenKinds) {
+      if (
+        args[kind] !== undefined &&
+        args.expectedTokens[kind] !== (await sha256Hex(current[kind].refresh))
+      ) {
+        throw new Error("Integration connection changed during token refresh")
+      }
+    }
+    const credentials = await saveOAuthCredentials(ctx, args.integrationId, {
       bot: args.bot ?? current.bot,
       user: args.user ?? current.user,
     })
+    return {
+      credentials,
+      credentialVersion: (integration.credentialVersion ?? 0) + 1,
+    }
   },
 })
 
@@ -155,4 +201,44 @@ function readSlackUserToken(credentials: unknown) {
   }
 
   return undefined
+}
+
+export async function prepareSlackIntegrationForRuntime(
+  ctx: ActionCtx,
+  integration: Doc<"integrations">
+): Promise<Doc<"integrations">> {
+  let current = integration
+  for (const kind of slackTokenKinds) {
+    const credentials = requireSlackCredentials(current)
+    if (hasFreshTokenExpiration(credentials[kind].expiresAt)) {
+      continue
+    }
+    const expected = await sha256Hex(credentials[kind].refresh)
+    const result = await refreshSlackAccessToken(credentials[kind].refresh)
+    if (!result.ok) {
+      return await failOAuthRefresh(ctx, current, "Slack", {
+        error: slackGrantIsDead(result.error) ? "invalid_grant" : "slack_error",
+        error_description: result.error,
+      })
+    }
+    // Persist each single-use refresh token before exchanging the other side.
+    const updated = await ctx.runMutation(
+      internal.integrations.slack.install.updateOAuthCredentials,
+      {
+        integrationId: current._id,
+        expectedSnapshot: credentialSnapshot(current),
+        expectedTokens: { [kind]: expected },
+        [kind]: {
+          access: result.access_token,
+          refresh: result.refresh_token,
+          expiresAt: Date.now() + result.expires_in * 1000,
+        },
+      }
+    )
+    current = {
+      ...withCredentials(current, updated.credentials),
+      credentialVersion: updated.credentialVersion,
+    }
+  }
+  return current
 }

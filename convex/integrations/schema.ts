@@ -33,6 +33,7 @@ export const integrations = defineTable({
   createdBy: v.id("persons"),
   createdAt: v.number(),
   connectionGeneration: v.optional(v.number()),
+  credentialVersion: v.optional(v.number()),
   updatedAt: v.number(),
   data: v.optional(v.any()),
 })

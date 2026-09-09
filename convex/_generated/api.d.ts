@@ -171,6 +171,7 @@ import type * as integrations_connect_http from "../integrations/connect/http.js
 import type * as integrations_connect_install from "../integrations/connect/install.js";
 import type * as integrations_connect_oauth from "../integrations/connect/oauth.js";
 import type * as integrations_connect_signing from "../integrations/connect/signing.js";
+import type * as integrations_connect_snapshot from "../integrations/connect/snapshot.js";
 import type * as integrations_connect_state from "../integrations/connect/state.js";
 import type * as integrations_data from "../integrations/data.js";
 import type * as integrations_disconnect from "../integrations/disconnect.js";
@@ -852,6 +853,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/connect/install": typeof integrations_connect_install;
   "integrations/connect/oauth": typeof integrations_connect_oauth;
   "integrations/connect/signing": typeof integrations_connect_signing;
+  "integrations/connect/snapshot": typeof integrations_connect_snapshot;
   "integrations/connect/state": typeof integrations_connect_state;
   "integrations/data": typeof integrations_data;
   "integrations/disconnect": typeof integrations_disconnect;

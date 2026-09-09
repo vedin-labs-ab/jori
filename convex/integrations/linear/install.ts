@@ -5,6 +5,7 @@ import {
   saveOAuthCredentials,
 } from "../connect/credentials"
 import { upsertIntegration } from "../connect/install"
+import { credentialSnapshotValidator } from "../connect/snapshot"
 import { findIntegrationByExternalId } from "../data"
 
 export const recordOAuthInstallation = internalMutation({
@@ -68,6 +69,7 @@ function getLinearUrl(urlKey: string | undefined) {
 export const updateOAuthCredentials = internalMutation({
   args: {
     integrationId: v.id("integrations"),
+    expectedSnapshot: credentialSnapshotValidator,
     accessToken: v.string(),
     refreshToken: v.string(),
     expiresAt: v.number(),
@@ -76,6 +78,7 @@ export const updateOAuthCredentials = internalMutation({
   handler: async (ctx, args) => {
     await requireProviderIntegration(ctx, {
       integrationId: args.integrationId,
+      expectedSnapshot: args.expectedSnapshot,
       provider: "linear",
       label: "Linear",
     })

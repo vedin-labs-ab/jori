@@ -11,6 +11,7 @@ import {
   findUserIntegrationForInstall,
   upsertIntegration,
 } from "../connect/install"
+import { credentialSnapshotValidator } from "../connect/snapshot"
 import { type GoogleIntegration } from "./config"
 
 const googleIntegration = v.union(
@@ -116,6 +117,7 @@ function createGoogleIntegrationValues(
 export const updateOAuthCredentials = internalMutation({
   args: {
     integrationId: v.id("integrations"),
+    expectedSnapshot: credentialSnapshotValidator,
     accessToken: v.string(),
     refreshToken: v.optional(v.string()),
     expiresAt: v.number(),
@@ -124,6 +126,7 @@ export const updateOAuthCredentials = internalMutation({
   handler: async (ctx, args) => {
     const integration = await requireProviderIntegration(ctx, {
       integrationId: args.integrationId,
+      expectedSnapshot: args.expectedSnapshot,
       provider: "google",
       label: "Google Workspace",
     })

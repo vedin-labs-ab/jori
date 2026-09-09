@@ -4,6 +4,7 @@ import {
 } from "../../../contracts/integrations"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type CredentialSnapshot, matchesCredentialSnapshot } from "./snapshot"
 
 type CredentialField = "number" | "string"
 type CredentialShape = Record<string, CredentialField>
@@ -166,6 +167,7 @@ export async function requireProviderIntegration(
     integrationId: Id<"integrations">
     provider: Provider
     label: string
+    expectedSnapshot?: CredentialSnapshot
   }
 ) {
   const integration = await ctx.db.get(args.integrationId)
@@ -175,6 +177,13 @@ export async function requireProviderIntegration(
     providerForIntegration(integration.integration) !== args.provider
   ) {
     throw new Error(`${args.label} integration not found`)
+  }
+
+  if (
+    args.expectedSnapshot !== undefined &&
+    !matchesCredentialSnapshot(integration, args.expectedSnapshot)
+  ) {
+    throw new Error("Integration connection changed during token refresh")
   }
 
   return integration
@@ -187,8 +196,13 @@ export async function saveOAuthCredentials<
   integrationId: Id<"integrations">,
   credentials: Credentials
 ) {
+  const current = await ctx.db.get(integrationId)
+  if (current === null) {
+    throw new Error("Integration not found")
+  }
   await ctx.db.patch(integrationId, {
     credentials,
+    credentialVersion: (current.credentialVersion ?? 0) + 1,
     updatedAt: Date.now(),
   })
 

@@ -108,6 +108,7 @@ test.each([
   expect(patch).toHaveBeenCalledWith("integration_1", {
     ...values,
     connectionGeneration: (generation ?? 0) + 1,
+    credentialVersion: 0,
   })
 })
 

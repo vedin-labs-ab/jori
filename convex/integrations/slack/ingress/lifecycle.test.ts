@@ -44,6 +44,7 @@ test("a Slack uninstall deactivates its current installation", async () => {
   ).toBe(true)
   expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
     integrationId: "integration",
+    expectedSnapshot: { connectionGeneration: 0, credentialVersion: 0 },
     installedAt,
     status: "disconnected",
   })
@@ -101,6 +102,7 @@ test("a revoked current Slack grant expires the connection", async () => {
   )
   expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
     integrationId: "integration",
+    expectedSnapshot: { connectionGeneration: 0, credentialVersion: 0 },
     installedAt,
     status: "expired",
   })

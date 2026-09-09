@@ -66,6 +66,7 @@ test("mints and persists a stale GitHub installation token", async () => {
   expect(runMutation).toHaveBeenCalledTimes(1)
   expect(runMutation.mock.calls[0]?.[1]).toEqual({
     integrationId: "integration",
+    expectedSnapshot: { connectionGeneration: 0, credentialVersion: 0 },
     accessToken: "installation-token",
     expiresAt: Date.parse("2026-06-12T12:34:56.000Z"),
   })
@@ -107,6 +108,7 @@ test("marks a Google integration expired when the refresh grant is dead", async 
   )
   expect(runMutation.mock.calls[0]?.[1]).toEqual({
     integrationId: "integration",
+    expectedSnapshot: { connectionGeneration: 0, credentialVersion: 0 },
   })
 })
 
