@@ -1,14 +1,13 @@
 import { expect, test } from "vitest"
-import { id } from "../../test/convex/database"
+import { databaseContext, id } from "../../test/convex/database"
 import { type Doc } from "../_generated/dataModel"
-import { type QueryCtx } from "../_generated/server"
 import { reactionSummariesForMessages } from "./summary"
 
 const targetKey = "slack:message:C123:1710000000.000100"
 
 test("omits opaque reaction actor ids from message summaries", async () => {
   const result = await reactionSummariesForMessages(
-    fakeQueryCtx([
+    await reactionContext([
       reaction("one", ":eyes:", { externalId: "U123", kind: "person" }),
     ]),
     [message()]
@@ -19,7 +18,7 @@ test("omits opaque reaction actor ids from message summaries", async () => {
 
 test("shows available reaction actor names and counts unnamed actors", async () => {
   const result = await reactionSummariesForMessages(
-    fakeQueryCtx([
+    await reactionContext([
       reaction("one", ":white_check_mark:", {
         externalId: "U123",
         kind: "person",
@@ -43,47 +42,12 @@ test("shows available reaction actor names and counts unnamed actors", async () 
   )
 })
 
-function fakeQueryCtx(reactions: Doc<"reactions">[]): QueryCtx {
-  return {
-    db: {
-      query: (table: string) => ({
-        withIndex: (_index: string, build: (query: QueryFilter) => unknown) => {
-          const filters: [string, unknown][] = []
-          const query = {
-            eq: (field: string, value: unknown) => {
-              filters.push([field, value])
-              return query
-            },
-          }
-
-          build(query)
-
-          return {
-            take: async (limit: number) =>
-              table === "reactions"
-                ? rowsFor(reactions, filters).slice(0, limit)
-                : [],
-          }
-        },
-      }),
-    },
-  } as unknown as QueryCtx
-}
-
-function rowsFor(rows: Doc<"reactions">[], filters: [string, unknown][]) {
-  return rows.filter((row) =>
-    filters.every(([field, value]) => fieldValue(row, field) === value)
-  )
-}
-
-function fieldValue(row: Record<string, unknown>, field: string) {
-  return field.split(".").reduce<unknown>((value, key) => {
-    if (typeof value !== "object" || value === null) {
-      return undefined
-    }
-
-    return (value as Record<string, unknown>)[key]
-  }, row)
+async function reactionContext(reactions: Doc<"reactions">[]) {
+  const { database, ctx } = databaseContext()
+  for (const reaction of reactions) {
+    await database.insert("reactions", reaction)
+  }
+  return ctx
 }
 
 function message(): Doc<"messages"> {
@@ -124,8 +88,4 @@ function reaction(
     updatedAt: 0,
     createdAt: 0,
   }
-}
-
-type QueryFilter = {
-  eq: (field: string, value: unknown) => QueryFilter
 }

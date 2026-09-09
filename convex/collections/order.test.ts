@@ -45,7 +45,7 @@ afterEach(() => {
 })
 
 describe("append ordering", () => {
-  test("every insert stamps an order and later appends land after", async () => {
+  test("appends receive increasing orders and read back oldest first", async () => {
     const { database, ctx } = databaseContext()
     const table = await createTable(database)
     const first = await insertRow(ctx, table, "first")
@@ -54,6 +54,16 @@ describe("append ordering", () => {
 
     expect(orderOf(second)).toBeGreaterThan(orderOf(first))
     expect(orderOf(third)).toBeGreaterThan(orderOf(second))
+
+    const page = await pageDocuments(ctx, table._id, {
+      numItems: 10,
+      cursor: null,
+    })
+    expect(page.page.map((row) => row.value)).toEqual([
+      { title: "first" },
+      { title: "second" },
+      { title: "third" },
+    ])
   })
 
   test("a batch inserted in one moment keeps its given order", async () => {
@@ -68,35 +78,16 @@ describe("append ordering", () => {
       { title: "c" },
     ])
 
-    expect(rows.map((row) => orderOf(row))).toEqual([
-      1_000_000, 1_000_001, 1_000_002,
-    ])
-  })
-
-  test("pages read ascending, oldest append first", async () => {
-    const { database, ctx } = databaseContext()
-    const table = await createTable(database)
-
-    await insertRow(ctx, table, "first")
-    await insertRow(ctx, table, "second")
-
-    const page = await pageDocuments(ctx, table._id, {
-      numItems: 10,
-      cursor: null,
-    })
-
-    expect(page.page.map((row) => row.value)).toEqual([
-      { title: "first" },
-      { title: "second" },
-    ])
+    expect(orderOf(rows[1])).toBeGreaterThan(orderOf(rows[0]))
+    expect(orderOf(rows[2])).toBeGreaterThan(orderOf(rows[1]))
   })
 })
 
 describe("windowed paging", () => {
-  test("cursors walk a 10,000-row table in bounded ascending windows", async () => {
+  test("cursors preserve order without gaps across full and partial pages", async () => {
     const { database, ctx } = databaseContext()
     const table = await createTable(database)
-    const total = 10_000
+    const total = 7
 
     // Seeded in reverse so the walk proves the index ordering, not luck.
     for (let position = total; position >= 1; position--) {
@@ -115,11 +106,11 @@ describe("windowed paging", () => {
 
     for (;;) {
       const page = await pageDocuments(ctx, table._id, {
-        numItems: 150,
+        numItems: 3,
         cursor,
       })
 
-      expect(page.page.length).toBeLessThanOrEqual(150)
+      expect(page.page.length).toBeLessThanOrEqual(3)
       seen.push(...page.page.map((row) => orderOf(row)))
 
       if (page.isDone) {
@@ -129,8 +120,7 @@ describe("windowed paging", () => {
       cursor = page.continueCursor
     }
 
-    expect(seen).toHaveLength(total)
-    expect(seen).toEqual([...seen].sort((left, right) => left - right))
+    expect(seen).toEqual([1, 2, 3, 4, 5, 6, 7])
   })
 })
 

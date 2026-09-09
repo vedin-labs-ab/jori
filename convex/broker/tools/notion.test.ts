@@ -5,16 +5,13 @@ import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { callNotionTool } from "./notion"
 
-const originalFetch = globalThis.fetch
-
-afterEach(() => {
-  globalThis.fetch = originalFetch
-  vi.restoreAllMocks()
-  vi.unstubAllGlobals()
-})
+afterEach(() => vi.unstubAllGlobals())
 
 test("creates Notion pages with icon and cover payloads", async () => {
-  const calls = mockNotionFetch({ id: "page_1" })
+  const fetch = vi.fn<typeof globalThis.fetch>(async () =>
+    Response.json({ id: "page_1" })
+  )
+  vi.stubGlobal("fetch", fetch)
 
   const result = await callNotionTool(
     notionIntegration(),
@@ -31,16 +28,16 @@ test("creates Notion pages with icon and cover payloads", async () => {
   )
 
   expect(result).toEqual({ id: "page_1" })
-  expect(calls[0]).toMatchObject({
-    body: {
-      cover: {
-        type: "external",
-        external: { url: "https://example.com/cover.png" },
-      },
-      icon: { type: "emoji", emoji: "🪿" },
+  expect(fetch).toHaveBeenCalledExactlyOnceWith(
+    "https://api.notion.com/v1/pages",
+    expect.objectContaining({ method: "POST" })
+  )
+  expect(JSON.parse(String(fetch.mock.calls[0]?.[1]?.body))).toMatchObject({
+    cover: {
+      type: "external",
+      external: { url: "https://example.com/cover.png" },
     },
-    method: "POST",
-    url: "https://api.notion.com/v1/pages",
+    icon: { type: "emoji", emoji: "🪿" },
   })
 })
 
@@ -64,7 +61,7 @@ test.each([
       }
     )
   }
-  const calls = mockNotionFetch((url: Parameters<typeof fetch>[0]) => {
+  const fetch = vi.fn<typeof globalThis.fetch>(async (url) => {
     const pathname = new URL(String(url)).pathname
 
     return Response.json({
@@ -73,6 +70,7 @@ test.each([
     })
   })
 
+  vi.stubGlobal("fetch", fetch)
   const result = await callNotionTool(
     notionIntegration(),
     "notion_upload_file",
@@ -84,85 +82,25 @@ test.each([
     file: { type: "file_upload", file_upload: { id: "upload_1" } },
     fileUpload: { id: "upload_1", status: "uploaded" },
   })
-  expect(calls[0]).toMatchObject({
-    body: {
-      content_type: "image/png",
-      filename: "ÅÄÖ-🚀.png",
-      mode: "single_part",
-    },
-    url: "https://api.notion.com/v1/file_uploads",
+  expect(fetch).toHaveBeenCalledTimes(2)
+  expect(fetch.mock.calls[0]?.[0]).toBe(
+    "https://api.notion.com/v1/file_uploads"
+  )
+  expect(JSON.parse(String(fetch.mock.calls[0]?.[1]?.body))).toEqual({
+    content_type: "image/png",
+    filename: "ÅÄÖ-🚀.png",
+    mode: "single_part",
   })
-  expect(calls[1]).toMatchObject({
-    formFileName: "ÅÄÖ-🚀.png",
-    formFileType: "image/png",
-    method: "POST",
-    url: "https://api.notion.com/v1/file_uploads/upload_1/send",
+  expect(fetch.mock.calls[1]).toEqual([
+    "https://api.notion.com/v1/file_uploads/upload_1/send",
+    expect.objectContaining({ method: "POST", body: expect.any(FormData) }),
+  ])
+  const body = fetch.mock.calls[1]?.[1]?.body as FormData
+  expect(body.get("file")).toMatchObject({
+    name: "ÅÄÖ-🚀.png",
+    type: "image/png",
   })
 })
-
-type MockNotionFetchResponder = (
-  url: Parameters<typeof fetch>[0],
-  init: Parameters<typeof fetch>[1]
-) => Response | Promise<Response>
-
-function mockNotionFetch(responseBody: unknown | MockNotionFetchResponder) {
-  const calls: Array<{
-    body: unknown
-    formFileName?: string
-    formFileType?: string
-    method: string
-    url: string
-  }> = []
-
-  globalThis.fetch = vi.fn(async (url, init) => {
-    const parsedUrl = new URL(String(url))
-
-    calls.push({
-      body: readBody(init?.body),
-      formFileName: readFormFileName(init?.body),
-      formFileType: readFormFileType(init?.body),
-      method: init?.method ?? "GET",
-      url: `${parsedUrl.origin}${parsedUrl.pathname}`,
-    })
-
-    return isResponder(responseBody)
-      ? await responseBody(url, init)
-      : Response.json(responseBody)
-  })
-
-  return calls
-}
-
-function readBody(body: BodyInit | null | undefined) {
-  return typeof body === "string" ? JSON.parse(body) : body
-}
-
-function readFormFileName(body: BodyInit | null | undefined) {
-  if (!(body instanceof FormData)) {
-    return undefined
-  }
-
-  const file = body.get("file")
-
-  return typeof file === "object" && file !== null && "name" in file
-    ? String(file.name)
-    : undefined
-}
-
-function readFormFileType(body: BodyInit | null | undefined) {
-  if (!(body instanceof FormData)) {
-    return undefined
-  }
-
-  const file = body.get("file")
-  return file instanceof Blob ? file.type : undefined
-}
-
-function isResponder(
-  value: unknown | MockNotionFetchResponder
-): value is MockNotionFetchResponder {
-  return typeof value === "function"
-}
 
 function fileContext() {
   return {
