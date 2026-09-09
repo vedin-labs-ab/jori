@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { Suspense, useState } from "react"
 import { afterEach, expect, test, vi } from "vitest"
-import { ConsoleHeaderButton, ConsoleSearch } from "./layout"
+import {
+  ConsoleHeaderActions,
+  ConsoleHeaderActionsProvider,
+  ConsoleHeaderButton,
+  ConsoleSearch,
+} from "./layout"
 
 afterEach(() => {
   cleanup()
@@ -76,4 +82,48 @@ test("header buttons keep their accessible label when compact", () => {
   )
 
   expect(screen.getByRole("button", { name: "New job" })).toBeDefined()
+})
+
+test("portaled header actions hide with their suspended page and return on reveal", async () => {
+  let suspended = false
+  let finish: () => void = () => undefined
+  const pending = new Promise<void>((resolve) => {
+    finish = resolve
+  })
+  function Page() {
+    if (suspended) {
+      throw pending
+    }
+    return (
+      <section>
+        <ConsoleHeaderActions>
+          <button type="button">Save page</button>
+        </ConsoleHeaderActions>
+      </section>
+    )
+  }
+  function Frame() {
+    const [slot, setSlot] = useState<HTMLElement | null>(null)
+    return (
+      <>
+        <header ref={setSlot} />
+        <ConsoleHeaderActionsProvider slot={slot}>
+          <Suspense fallback="Loading page">
+            <Page />
+          </Suspense>
+        </ConsoleHeaderActionsProvider>
+      </>
+    )
+  }
+  const view = render(<Frame />)
+  const action = screen.getByRole("button", { name: "Save page" })
+  suspended = true
+  view.rerender(<Frame />)
+  expect(screen.getByText("Loading page")).toBeDefined()
+  expect(screen.queryByRole("button", { name: "Save page" })).toBeNull()
+  await act(async () => {
+    suspended = false
+    finish()
+  })
+  expect(screen.getByRole("button", { name: "Save page" })).toBe(action)
 })
