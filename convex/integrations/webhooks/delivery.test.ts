@@ -10,9 +10,7 @@ import {
   webhookRetentionMs,
 } from "./policy"
 
-const modules = import.meta.glob(
-  "/convex/{_generated,integrations}/**/*.{ts,js}"
-)
+const modules = import.meta.glob("/convex/**/*.{ts,js}")
 const receipt = {
   provider: "slack" as const,
   externalId: "TTEST",

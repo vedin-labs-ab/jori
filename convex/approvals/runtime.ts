@@ -14,6 +14,7 @@ type AccountApprovalDecisionArgs = {
   integration: Integration
   code: string
   decision: ApprovalDecision
+  expectedConnectionGeneration?: number
 }
 
 type TextApprovalDecisionArgs = {
@@ -22,6 +23,7 @@ type TextApprovalDecisionArgs = {
   actorKind?: Actor["kind"]
   integration: Integration
   text?: string
+  expectedConnectionGeneration?: number
 }
 
 export const expireApproval = internalAction({
@@ -58,6 +60,7 @@ export async function handlePersonTextApprovalDecision(
     code: command.code,
     decision: command.decision,
     integration: args.integration,
+    expectedConnectionGeneration: args.expectedConnectionGeneration,
   })
 
   return true
@@ -146,7 +149,12 @@ export async function decideApprovalByAccount(
     }
   )
 
-  if (target === null) {
+  if (
+    target === null ||
+    (args.expectedConnectionGeneration !== undefined &&
+      (target.integration.connectionGeneration ?? 0) !==
+        args.expectedConnectionGeneration)
+  ) {
     return {
       status: "missing",
       message: approvalDecisionMessage("missing"),
@@ -175,6 +183,7 @@ export async function decideApprovalByAccount(
     decidedBy: args.actor,
     decision: args.decision,
     integration: target.integration,
+    expectedConnectionGeneration: args.expectedConnectionGeneration,
   })
 }
 
@@ -185,17 +194,30 @@ export async function decideApproval(
     decidedBy: Actor
     decision: ApprovalDecision
     integration?: Doc<"integrations">
+    expectedConnectionGeneration?: number
   }
 ): Promise<ApprovalDecisionResult> {
   const result = await ctx.runMutation(internal.approvals.approvals.decide, {
     approvalId: args.approval._id,
     decision: args.decision,
     decidedBy: args.decidedBy,
+    expectedConnection:
+      args.expectedConnectionGeneration === undefined ||
+      args.integration === undefined
+        ? undefined
+        : {
+            integrationId: args.integration._id,
+            generation: args.expectedConnectionGeneration,
+          },
   })
 
   return {
     status: result.status,
-    integration: args.integration,
+    integration:
+      result.status === "missing" &&
+      args.expectedConnectionGeneration !== undefined
+        ? undefined
+        : args.integration,
     approval: result.approval,
     message: approvalDecisionMessage(result.status, result.approval),
   }

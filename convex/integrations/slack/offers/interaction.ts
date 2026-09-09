@@ -21,7 +21,8 @@ type SlackIntegrationOfferCancelInteraction = {
 
 export async function handleSlackIntegrationOfferInteraction(
   ctx: ActionCtx,
-  payload: unknown
+  payload: unknown,
+  expectedConnectionGeneration?: number
 ) {
   const cancel = parseSlackIntegrationOfferCancelInteraction(payload)
 
@@ -36,6 +37,7 @@ export async function handleSlackIntegrationOfferInteraction(
         channelId: cancel.channelId,
         messageTs: cancel.messageTs,
         integrationOfferId: cancel.integrationOfferId,
+        expectedConnectionGeneration,
       }
     )
     return true
@@ -47,6 +49,7 @@ export async function handleSlackIntegrationOfferInteraction(
 export const cancel = internalMutation({
   args: {
     accountId: v.string(),
+    expectedConnectionGeneration: v.optional(v.number()),
     actor: v.optional(actorValidator),
     channelId: v.string(),
     messageTs: v.string(),
@@ -75,7 +78,11 @@ export const cancel = internalMutation({
     if (
       integration === null ||
       integration.integration !== "slack" ||
-      integration.externalId !== args.accountId
+      integration.externalId !== args.accountId ||
+      integration.status !== "active" ||
+      (args.expectedConnectionGeneration !== undefined &&
+        (integration.connectionGeneration ?? 0) !==
+          args.expectedConnectionGeneration)
     ) {
       return null
     }

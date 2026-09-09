@@ -13,10 +13,19 @@ export const recordFromProvider = internalMutation({
   args: {
     integration: integrationValidator,
     externalId: v.string(),
+    expectedConnectionGeneration: v.optional(v.number()),
     ...eventFields,
   },
   handler: async (ctx, args) => {
     const integration = await findIntegrationByExternalId(ctx, args)
+
+    if (
+      args.expectedConnectionGeneration !== undefined &&
+      (integration?.connectionGeneration ?? 0) !==
+        args.expectedConnectionGeneration
+    ) {
+      return { status: "missing_integration" as const }
+    }
 
     return await ingest(ctx, integration, args)
   },

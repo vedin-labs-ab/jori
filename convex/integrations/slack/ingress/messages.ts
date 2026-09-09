@@ -24,9 +24,12 @@ type SlackMessage = NonNullable<ReturnType<typeof getSlackMessage>>
 
 export async function handleSlackMessageEvent(
   ctx: ActionCtx,
-  message: SlackMessage
+  message: SlackMessage,
+  expectedConnectionGeneration?: number
 ) {
-  if (await handledAsApprovalDecision(ctx, message)) {
+  if (
+    await handledAsApprovalDecision(ctx, message, expectedConnectionGeneration)
+  ) {
     return Response.json({ ok: true })
   }
 
@@ -47,6 +50,7 @@ export async function handleSlackMessageEvent(
 
   await ctx.runMutation(internal.conversations.intake.record, {
     accountId: message.accountId,
+    expectedConnectionGeneration,
     integration: "slack",
     type: message.type,
     externalId: message.externalId,
@@ -92,7 +96,8 @@ function slackMessagePlace(data: unknown): ObservedPlace | undefined {
 
 async function handledAsApprovalDecision(
   ctx: ActionCtx,
-  message: SlackMessage
+  message: SlackMessage,
+  expectedConnectionGeneration?: number
 ) {
   if (
     !isPersonApprovalDecisionText({
@@ -109,6 +114,7 @@ async function handledAsApprovalDecision(
   })
 
   return await handleSlackApprovalDecision(ctx, {
+    expectedConnectionGeneration,
     accountId: message.accountId,
     actorId: message.actorId,
     actorEmail: actorProfile?.email,

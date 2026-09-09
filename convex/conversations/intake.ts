@@ -31,6 +31,7 @@ import { scheduleConversationSummary } from "./summary/schedule"
 export const record = internalMutation({
   args: {
     integration: messageIntegrationValidator,
+    expectedConnectionGeneration: v.optional(v.number()),
     mode: v.optional(v.union(v.literal("record"), v.literal("record_and_run"))),
     place: v.optional(observedPlaceValidator),
     ...observedMessageArgs,
@@ -41,7 +42,12 @@ export const record = internalMutation({
       externalId: args.accountId,
     })
 
-    if (integration === null) {
+    if (
+      integration === null ||
+      (args.expectedConnectionGeneration !== undefined &&
+        (integration.connectionGeneration ?? 0) !==
+          args.expectedConnectionGeneration)
+    ) {
       return { status: "missing_integration" as const }
     }
 
