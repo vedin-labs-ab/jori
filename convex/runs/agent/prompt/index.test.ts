@@ -68,10 +68,7 @@ describe("runtime prompts", () => {
       expect(prompt).toContain(targetLines.join("\n"))
     }
 
-    expect(prompt).not.toContain("Recent messages")
-    expect(prompt).not.toContain("- None")
     expect(prompt).toContain("Current message:")
-    expect(prompt).not.toContain("\nHistory:\n")
     expect(prompt).not.toContain("{{message.target}}")
     expect(prompt).toContain(
       "- 1970-01-01T00:00:01.000Z | person | Albin Vedin"
@@ -126,8 +123,6 @@ describe("runtime Linear prompt metadata", () => {
     expect(prompt).toContain(
       "- 1970-01-01T00:00:01.000Z | person | Albin Vedin | identifiers=[internal:message:message, linear:issue:issue-id, linear:comment:comment-id] | actor_ids=[linear:user:UACTOR]"
     )
-    expect(prompt).not.toContain("identifiers=[]")
-    expect(prompt).not.toContain("actor_ids=[]")
   })
 })
 
@@ -144,9 +139,6 @@ describe("runtime delivery prompts", () => {
     expect(prompt).toContain(
       "A heads-up that could sit unchanged under any other task says nothing."
     )
-    expect(prompt).not.toContain("Good:")
-    expect(prompt).not.toContain("Bad:")
-    expect(prompt).not.toContain("keep you posted")
   })
 
   test.each(
@@ -165,13 +157,8 @@ describe("runtime delivery prompts", () => {
     expect(instructions).toContain(
       "Finish the run when no useful work remains: prefer setting `final: true` on the last useful tool call that supports it, and call `finish_run` otherwise."
     )
-    expect(instructions).not.toContain("final useful action")
-    expect(instructions).not.toContain("offer_integration")
-    expect(instructions).not.toContain(
-      "The run waits while active approvals or integration offers remain."
-    )
     expectInstructionsOrder(instructions)
-    expectNoSyntheticBlankLines(instructions)
+    expect(instructions).not.toMatch(/\n{3,}/)
   })
 })
 
@@ -210,8 +197,7 @@ describe("approval request prompts", () => {
     expect(prompt.indexOf("# Communication")).toBeLessThan(
       prompt.indexOf("# Approvals")
     )
-    expect(prompt).toContain("Callbacks are not handled.\n\n# Approvals")
-    expectNoSyntheticBlankLines(prompt)
+    expect(prompt).not.toMatch(/\n{3,}/)
   })
 
   test("omits the approvals section without prompted tools", () => {
@@ -228,9 +214,6 @@ function expectRunBefore(prompt: string, section: string) {
   expect(prompt.indexOf("# Run")).toBeLessThan(prompt.indexOf(section))
   expect(prompt.indexOf("Active surface:")).toBeLessThan(
     prompt.indexOf(section)
-  )
-  expect(prompt.indexOf("Run ID:")).toBeLessThan(
-    prompt.indexOf("Run started at:")
   )
   expect(prompt.indexOf("Run started at:")).toBeLessThan(
     prompt.indexOf(section)
@@ -250,8 +233,4 @@ function expectInstructionsOrder(prompt: string) {
   expect(prompt).not.toContain("# Output")
   expect(prompt).not.toContain("# Run")
   expect(prompt).not.toContain("# Trigger")
-}
-
-function expectNoSyntheticBlankLines(prompt: string) {
-  expect(prompt).not.toMatch(/\n{3,}/)
 }

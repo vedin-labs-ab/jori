@@ -39,18 +39,12 @@ Reacted ✅ to Jori's message: "I can proceed with option B."
 \`\`\``)
 })
 
-test("appends drained messages to the transcript", async () => {
+test.each([
+  undefined,
+  ["# Recent activity — Albin"],
+])("appends drained messages after optional person context: %s", async (contexts) => {
   const platform = createPlatform({
-    sessions: [
-      {
-        hasMore: false,
-        messages: [
-          runtimeMessage({
-            replyTarget: "linear:thread:comment-id",
-          }),
-        ],
-      },
-    ],
+    sessions: [{ contexts, hasMore: false, messages: [runtimeMessage()] }],
   })
   const runtime = createRuntime({
     context: runtimeContext({
@@ -60,33 +54,13 @@ test("appends drained messages to the transcript", async () => {
   })
 
   await expect(appendSessionMessages(runtime)).resolves.toBe(true)
-  expect(platform.transcript).toHaveLength(1)
-  expect(platform.transcript[0]?.content).toContain("Here's what I've got.")
-})
-
-test("appends person context before drained batch items", async () => {
-  const platform = createPlatform({
-    sessions: [
-      {
-        contexts: ["# Recent activity — Albin"],
-        hasMore: false,
-        messages: [runtimeMessage({ source: "person" })],
-      },
-    ],
-  })
-  const runtime = createRuntime({
-    context: runtimeContext({
-      session: { id: runtimeId<"sessions">("session") },
-    }),
-    platform,
-  })
-
-  await expect(appendSessionMessages(runtime)).resolves.toBe(true)
-  expect(platform.transcript[0]).toEqual({
-    content: "# Recent activity — Albin",
-    role: "user",
-  })
-  expect(platform.transcript).toHaveLength(2)
+  expect(platform.transcript).toEqual([
+    ...(contexts ?? []).map((content) => ({ content, role: "user" })),
+    {
+      content: expect.stringContaining("Here's what I've got."),
+      role: "user",
+    },
+  ])
 })
 
 test("builds the prompt prefix from the present context messages in order", () => {
