@@ -2,74 +2,57 @@
 
 [Docs index](index.md) · [Architecture](architecture.md) · [Residency](residency.md)
 
-## Choose the delivery design
+## Choose the registration
 
-Prefer one public Jori application per provider. Apply these branches in order:
+1. Use one registration when it supports all required regional flows. An
+   integration without webhooks may need only regional OAuth callbacks.
+2. Use separate EU/US registrations when app-wide delivery prevents direct
+   regional routing. Keep the same implementation with regional configuration.
+3. If neither meets the feature's needs, compare provider-supported alternatives
+   such as polling. Shared ingress requires a concrete reason and the
+   [exception review](architecture.md#when-to-revisit).
+4. If no option meets the requirements, state the limitation. Do not silently
+   broaden geography or permissions.
 
-1. **Direct delivery.** If one registration supports regional OAuth callbacks
-   and subscriptions per installation, use it. Keep token exchange and work regional.
-2. **Shared ingress.** Otherwise, if webhooks have one app-wide destination,
-   use the common shared receiver, once it meets the requirements below.
-3. **Separate registrations.** If shared ingress cannot meet security, delivery
-   or customer-contract requirements, use separate apps with common branding
-   where supported. Document unavoidable customer-visible differences.
-4. **Polling.** If neither works, consider regional polling only when provider
-   rules, latency, rate limits and event semantics meet the feature's needs.
-5. **Unavailable.** If no option meets the requirements, explain the limitation.
-   Do not silently broaden geography or permissions.
+Verify provider capabilities against current official documentation. OAuth
+callbacks do not route later webhooks; multiple subscriptions do not prove
+selective delivery. Separate registrations do not inherently require separate
+developer accounts. Keep development apps and data separate from production.
 
-Verify current official documentation for OAuth, webhook filtering, scopes,
-identity, revocation and distribution before choosing. An OAuth callback URL
-does not route subsequent events. Multiple webhook subscriptions do not prove
-selective delivery. Separate owner accounts are not inherently required.
-Keep development registrations and data separate from production.
+## Current choices
 
-## Shared receiver requirements
+Keep separate registrations for all four. Use the Jori name and icon wherever
+supported; verify the installation screens. The naming guidance below does not
+mean provider settings have already been updated.
 
-- Verify the raw provider request before trusting its routing identity.
-  Forward only to an authenticated, authorized regional destination.
-- Store minimal installation-to-region mappings centrally. Keep customer tokens,
-  content storage, jobs and API actions in regional workers.
-- Do not persist payloads in shared logs or queues. Acknowledge only after durable
-  regional acceptance. Design for provider deadlines/retries and regional outages;
-  do not acknowledge then lose events. Regional handlers deduplicate deliveries.
-- Reject or safely ignore forged, unknown, ambiguous, replayed or revoked routes
-  as appropriate for the provider. Never trigger work without a valid binding.
-  Never broadcast to both regions and discard the unwanted copy after delivery.
-- Establish bindings through authenticated installation flows. A workspace ID
-  may represent several grants. Resolve the [dual-region policy](architecture.md)
-  before consolidation; disconnecting one connection must not revoke another
-  without an explicit product decision.
-- Disclose ingress location and transient payload processing. Receiving the full
-  webhook is content processing, even without retention. Global edge hosting and
-  geo-DNS do not identify the customer's selected region.
-
-## App credentials and customer tokens
-
-Review actual authority before sharing a credential. An OAuth client secret is
-different from a customer token or an app key that can mint installation tokens.
-
-For a single GitHub App, use a restricted issuer that authorizes the requesting
-region and installation. Do not give regional workers unrestricted app-wide
-authority. Two keys for one app do not isolate installations. Keep issued tokens
-regional and out of shared logs/storage; document transient issuance separately.
-
-## Existing provider constraints
-
-Research baseline from 8 September 2026. Recheck before implementation.
-
-| Provider | Starting point |
+| Provider | Guidance |
 | --- | --- |
-| GitHub | One app webhook, multiple OAuth callbacks, separate installation setup flow. App names are globally unique. Shared ingress and restricted token issuance need design. [Webhooks](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks), [registration](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app). |
-| Slack | One Events API URL and app-wide interactivity URLs. Prefer shared ingress. Bot display name is separate from app name; distribution review is separate. [Request URLs](https://docs.slack.dev/apis/events-api/using-http-request-urls), [manifest](https://docs.slack.dev/reference/app-manifest/). |
-| Linear | App-managed webhooks have one URL. API-created workspace webhooks require admin authority and may not replace Jori's app-specific events. Prefer shared ingress over broader permissions solely to avoid another app. [Webhooks](https://linear.app/developers/webhooks), [manifest](https://linear.app/developers/oauth-app-manifests). |
-| Notion | Documented subscriptions do not establish installation filtering by region before delivery. Prefer shared ingress unless current provider capabilities establish direct selective delivery. [Webhooks](https://developers.notion.com/reference/webhooks). |
+| GitHub | Use symmetric names, such as "Jori EU" and "Jori US", subject to availability. Keep app keys regional. Names are unique and each app has one webhook. [Registration](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app). |
+| Slack | Events and interactions use app-wide destinations. Keep app and bot branding aligned. [Request URLs](https://docs.slack.dev/apis/events-api/using-http-request-urls/), [manifest](https://docs.slack.dev/reference/app-manifest/). |
+| Linear | Keep app notifications without adding admin scope solely for regional routing. [Webhooks](https://linear.app/developers/webhooks), [app notifications](https://linear.app/developers/agent-best-practices). |
+| Notion | Selective delivery per regional installation is not established by the documented subscription controls. [Webhooks](https://developers.notion.com/reference/webhooks). |
 
-## Completing an integration change
+Jori's console selects the regional app. Keep avatars, product descriptions,
+permissions and event subscriptions aligned through shared configuration where
+supported. Refresh stored provider identities when renaming an app.
 
-Record the chosen branch, permissions, data destinations and provider evidence
-in the task. Test meaningful failures: tenant/region mixups, forged and repeated
-events, connection replacement/revocation, outages and unintended fallback.
-Reuse existing tests. Follow `AGENTS.md` for gates, previews and authorized live
-checks. Report revision, date, tested workflows and gaps; mocks and a successful
-OAuth redirect do not prove a complete customer workflow.
+## Delivery and credentials
+
+- Verify provider signatures before trusting routing identifiers. Resolve the
+  active local connection and enforce its tenant permissions.
+- Durably accept and deduplicate events in the region before acknowledging;
+  process asynchronously. Handle synchronous interactions within their deadlines.
+- Define retry and recovery behavior per provider. GitHub needs explicit failed
+  delivery recovery. Handle provider revocation and reconnection.
+- Keep tokens and payloads regional, including queues and scheduled arguments.
+  Keep credentials and payloads out of logs. A shared app key can grant access
+  across installations; separate keys for one app do not create regional isolation.
+- Check grant semantics before changing connection ownership or revocation.
+  Do not make one connection's disconnect invalidate another unexpectedly.
+
+## Verify the change
+
+Record the chosen design and provider evidence in the task. Test relevant
+failures: tenant/region mixups, forged or duplicate events, revocation and outages.
+Reuse existing tests and follow `AGENTS.md` for checks. Report tested workflows
+and remaining gaps; a successful OAuth redirect alone is not end-to-end proof.
