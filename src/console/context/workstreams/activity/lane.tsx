@@ -197,16 +197,13 @@ export function PulseFooter({ children }: { children: ReactNode }) {
   )
 }
 
-// Mirrors the default two-week card's box - the shared shell plus 476px
-// content, three lane rows, axis, and banded footer - so the card resolves
-// in place instead of shifting the page when data arrives.
+// The description is already known and wraps exactly as it does when loaded.
+// Lane count remains provisional until activity data arrives.
 export function PulseSkeleton() {
   return (
     <PulseShell
       title={<Skeleton className="w-14 text-transparent">.</Skeleton>}
-      description={
-        <Skeleton className="w-80 max-w-full text-transparent">.</Skeleton>
-      }
+      description="Recent activity across workstreams and unplaced efforts."
       action={<Skeleton className="h-6 w-28" />}
     >
       <CardContent>
