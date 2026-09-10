@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internalMutation, internalQuery } from "../_generated/server"
 import { findSingletonDocument, writeDocument } from "../collections/documents"
 import { documentWrite } from "../collections/schema"
+import { resourceViewerArgs } from "../visibility/resources"
 import {
   findAccessibleStore,
   getAccessibleStore,
@@ -12,9 +13,8 @@ import { storeSpec } from "./spec"
 
 export const read = internalQuery({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     storeId: v.id("collections"),
-    personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
     const store = await findAccessibleStore(ctx, args)
@@ -37,9 +37,8 @@ export const read = internalQuery({
  *  validation. A held claim reports the holder instead of writing. */
 export const write = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     storeId: v.id("collections"),
-    personId: v.id("persons"),
     expectedVersion: v.optional(v.number()),
     write: documentWrite,
   },

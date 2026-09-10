@@ -83,7 +83,8 @@ export const documents = defineTable({
  *  polymorphic: collections carry their kind, files stay their own domain. */
 export const shares = defineTable({
   organizationId: v.string(),
-  createdBy: v.id("persons"),
+  createdBy: v.optional(v.id("persons")),
+  runId: v.optional(v.id("runs")),
   secret: v.string(),
   createdAt: v.number(),
   expiresAt: v.number(),

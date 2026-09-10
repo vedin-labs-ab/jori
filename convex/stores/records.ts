@@ -10,14 +10,17 @@ import {
   updateCollection,
 } from "../collections/records"
 import { type CollectionDoc } from "../collections/spec"
+import {
+  type ResourceViewer,
+  resourceViewerArgs,
+} from "../visibility/resources"
 import { visibilityValidator } from "../visibility/schema"
 import { getAccessibleStore, summarizeStore } from "./access"
 import { storeSpec } from "./spec"
 
 export const create = internalMutation({
   args: {
-    organizationId: v.string(),
-    personId: v.id("persons"),
+    ...resourceViewerArgs,
     name: v.string(),
     visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
@@ -35,9 +38,8 @@ export const create = internalMutation({
 
 export const update = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     storeId: v.id("collections"),
-    personId: v.id("persons"),
     name: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -45,6 +47,7 @@ export const update = internalMutation({
       organizationId: args.organizationId,
       collectionId: args.storeId,
       personId: args.personId,
+      runId: args.runId,
       name: args.name,
     })
 
@@ -55,9 +58,8 @@ export const update = internalMutation({
 /** Add, replace, or remove (schema: null) the store's schema constraint. */
 export const reschema = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     storeId: v.id("collections"),
-    personId: v.id("persons"),
     schema: v.any(),
   },
   handler: async (ctx, args) => await reschemaStore(ctx, args),
@@ -65,10 +67,8 @@ export const reschema = internalMutation({
 
 export async function reschemaStore(
   ctx: MutationCtx,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     storeId: Id<"collections">
-    personId: Id<"persons">
     schema: unknown
   }
 ) {
@@ -80,6 +80,7 @@ export async function reschemaStore(
     organizationId: args.organizationId,
     collectionId: args.storeId,
     personId: args.personId,
+    runId: args.runId,
     authoring: args.schema ?? null,
   })
 
@@ -121,9 +122,8 @@ async function assertValueSatisfies(
  *  value permanently. */
 export const remove = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     storeId: v.id("collections"),
-    personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
     const { collectionId, ...outcome } = await removeCollection(
@@ -138,9 +138,8 @@ export const remove = internalMutation({
 
 export const restore = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     storeId: v.id("collections"),
-    personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
     const { collectionId, ...outcome } = await restoreCollection(

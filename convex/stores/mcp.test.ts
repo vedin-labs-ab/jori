@@ -27,7 +27,7 @@ describe("store tool dispatch", () => {
     })
   })
 
-  test("create defaults visibility to organization", async () => {
+  test("create leaves visibility to the execution defaults", async () => {
     const runMutation = vi.fn(async () => ({}))
 
     await callJoriStoreTool(
@@ -43,7 +43,7 @@ describe("store tool dispatch", () => {
       expect.anything(),
       expect.objectContaining({
         name: "Dispatch log",
-        visibility: { mode: "organization" },
+        visibility: undefined,
         schema: { type: "object" },
       })
     )
@@ -80,15 +80,20 @@ describe("store tool dispatch", () => {
       },
     })
   })
+})
 
-  test("tools refuse to run without an authenticated person", async () => {
-    await expect(
-      callJoriStoreTool(
-        {} as ActionCtx,
-        { organizationId: "organization" },
-        { tool: "read_store", args: { storeId: "store" } }
-      )
-    ).rejects.toThrow("authenticated execution user")
+test("workspace executions pass their trusted run without a personal identity", async () => {
+  const runQuery = vi.fn(async () => null)
+  await callJoriStoreTool(
+    { runQuery } as unknown as ActionCtx,
+    { organizationId: "organization", runId: "runs_shared" as Id<"runs"> },
+    { tool: "read_store", args: { storeId: "store" } }
+  )
+  expect(runQuery).toHaveBeenCalledWith(expect.anything(), {
+    organizationId: "organization",
+    runId: "runs_shared",
+    personId: undefined,
+    storeId: "store",
   })
 })
 

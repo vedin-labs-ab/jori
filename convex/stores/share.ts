@@ -20,13 +20,16 @@ import {
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
+import {
+  type ResourceViewer,
+  resourceViewerArgs,
+} from "../visibility/resources"
 import { getAccessibleStore } from "./access"
 
 export const mint = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     storeId: v.id("collections"),
-    personId: v.id("persons"),
     expiresInHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => await mintStoreShare(ctx, args),
@@ -107,10 +110,8 @@ export const get = query({
 
 async function mintStoreShare(
   ctx: MutationCtx,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     storeId: Id<"collections">
-    personId: Id<"persons">
     expiresInHours?: number
   }
 ): Promise<MintedShare> {
@@ -124,6 +125,7 @@ async function mintStoreShare(
     target: storeTarget(store._id),
     material: store,
     personId: args.personId,
+    runId: args.runId,
     urlPath: `/stores/${store._id}`,
     expiresInHours: args.expiresInHours,
   })

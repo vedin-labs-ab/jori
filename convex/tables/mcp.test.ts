@@ -10,7 +10,7 @@ const execution = {
 }
 
 describe("table tool dispatch", () => {
-  test("create defaults visibility to organization and passes columns through", async () => {
+  test("create leaves visibility to the execution defaults and passes columns through", async () => {
     const columns = [{ name: "Title", type: "string", required: true }]
     const runMutation = vi.fn(async () => ({
       columns: columns.map((column) => ({ ...column, id: "internal-column" })),
@@ -26,7 +26,7 @@ describe("table tool dispatch", () => {
       organizationId: "organization",
       personId: "person",
       name: "Leads",
-      visibility: { mode: "organization" },
+      visibility: undefined,
       columns,
     })
     expect(result).toEqual({ columns })
@@ -99,14 +99,19 @@ describe("table row dispatch", () => {
     ).rejects.toThrow("rowId is required")
   })
 
-  test("tools refuse to run without an authenticated person", async () => {
-    await expect(
-      callJoriTableTool(
-        {} as ActionCtx,
-        { organizationId: "organization" },
-        { tool: "read_table", args: { tableId: "table" } }
-      )
-    ).rejects.toThrow("authenticated execution user")
+  test("workspace executions pass their trusted run without a personal identity", async () => {
+    const runQuery = vi.fn(async () => null)
+    await callJoriTableTool(
+      { runQuery } as unknown as ActionCtx,
+      { organizationId: "organization", runId: "runs_shared" as Id<"runs"> },
+      { tool: "read_table", args: { tableId: "table" } }
+    )
+    expect(runQuery).toHaveBeenCalledWith(expect.anything(), {
+      organizationId: "organization",
+      runId: "runs_shared",
+      personId: undefined,
+      tableId: "table",
+    })
   })
 
   test("share_table mints a link with the requested expiry", async () => {

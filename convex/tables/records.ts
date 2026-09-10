@@ -14,14 +14,17 @@ import {
   updateCollection,
 } from "../collections/records"
 import { type CollectionDoc } from "../collections/spec"
+import {
+  type ResourceViewer,
+  resourceViewerArgs,
+} from "../visibility/resources"
 import { visibilityValidator } from "../visibility/schema"
 import { getAccessibleTable, summarizeTable } from "./access"
 import { tableSpec } from "./spec"
 
 export const create = internalMutation({
   args: {
-    organizationId: v.string(),
-    personId: v.id("persons"),
+    ...resourceViewerArgs,
     name: v.string(),
     visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
@@ -39,9 +42,8 @@ export const create = internalMutation({
 
 export const update = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
     name: v.optional(v.string()),
     columns: v.optional(v.any()),
   },
@@ -54,6 +56,7 @@ export const update = internalMutation({
       organizationId: args.organizationId,
       collectionId: args.tableId,
       personId: args.personId,
+      runId: args.runId,
       name: args.name,
       authoring: change?.next,
     })
@@ -73,9 +76,8 @@ export const update = internalMutation({
  *  rows permanently. */
 export const remove = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
     const { collectionId, ...outcome } = await removeCollection(
@@ -90,9 +92,8 @@ export const remove = internalMutation({
 
 export const restore = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
     const { collectionId, ...outcome } = await restoreCollection(
@@ -111,10 +112,8 @@ export const restore = internalMutation({
  *  their values from every row. Exported for its tests. */
 export async function planColumnChange(
   ctx: MutationCtx,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     tableId: Id<"collections">
-    personId: Id<"persons">
     columns: unknown
   }
 ) {

@@ -3,11 +3,8 @@ import { stableHash } from "../../contracts/json/stable"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { resolveCreationFolder } from "../folders/tree"
-import {
-  normalizeStoredVisibility,
-  type StoredVisibility,
-} from "../visibility/schema"
+import { type ResourceViewer, resourceCreation } from "../visibility/resources"
+import { type StoredVisibility } from "../visibility/schema"
 import { getAccessibleCollection } from "./access"
 import { normalizeCollectionName } from "./input"
 import {
@@ -26,9 +23,7 @@ const purgeBatchSize = 200
 export async function createCollection<K extends CollectionKind>(
   ctx: MutationCtx,
   spec: KindSpec<K>,
-  args: {
-    organizationId: string
-    personId: Id<"persons">
+  args: ResourceViewer & {
     name: string
     visibility?: StoredVisibility
     folderId?: Id<"folders">
@@ -38,15 +33,7 @@ export async function createCollection<K extends CollectionKind>(
   const now = Date.now()
   const collectionId = await ctx.db.insert("collections", {
     organizationId: args.organizationId,
-    ownerId: args.personId,
-    visibility: normalizeStoredVisibility(
-      args.visibility ?? { mode: "organization" }
-    ),
-    folderId: await resolveCreationFolder(ctx, {
-      organizationId: args.organizationId,
-      personId: args.personId,
-      folderId: args.folderId,
-    }),
+    ...(await resourceCreation(ctx, args)),
     name: normalizeCollectionName(args.name),
     ...authoringFields(spec, spec.normalize(args.authoring)),
     createdAt: now,
@@ -76,10 +63,8 @@ function authoringFields<K extends CollectionKind>(
 export async function updateCollection<K extends CollectionKind>(
   ctx: MutationCtx,
   spec: KindSpec<K>,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     collectionId: Id<"collections">
-    personId: Id<"persons">
     name?: string
     authoring?: unknown
   }
@@ -108,10 +93,8 @@ export async function updateCollection<K extends CollectionKind>(
 export async function removeCollection<K extends CollectionKind>(
   ctx: MutationCtx,
   spec: KindSpec<K>,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     collectionId: Id<"collections">
-    personId: Id<"persons">
   }
 ) {
   const collection = await getAccessibleCollection(ctx, spec, args)
@@ -147,10 +130,8 @@ export async function purgeCollection(
 export async function restoreCollection<K extends CollectionKind>(
   ctx: MutationCtx,
   spec: KindSpec<K>,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     collectionId: Id<"collections">
-    personId: Id<"persons">
   }
 ) {
   const collection = await getAccessibleCollection(ctx, spec, args)

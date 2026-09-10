@@ -9,21 +9,18 @@ import {
 import { type CollectionDoc } from "../collections/spec"
 import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
+import { type ResourceViewer } from "../visibility/resources"
 import { storeSpec } from "./spec"
 
 type StoreDoc = CollectionDoc<"store">
 
-type StoreArgs = {
-  organizationId: string
+type StoreArgs = ResourceViewer & {
   storeId: Id<"collections">
-  personId: Id<"persons">
 }
 
 export async function searchStores(
   ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    personId: Id<"persons">
+  args: ResourceViewer & {
     query?: string
     includeArchived?: boolean
     limit?: number
@@ -92,5 +89,6 @@ function toCollectionArgs(args: StoreArgs) {
     organizationId: args.organizationId,
     collectionId: args.storeId,
     personId: args.personId,
+    runId: args.runId,
   }
 }

@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { internalQuery } from "../_generated/server"
+import { resourceViewerArgs } from "../visibility/resources"
 import {
   agentTableSummary,
   findAccessibleTable,
@@ -9,8 +10,7 @@ import {
 
 export const search = internalQuery({
   args: {
-    organizationId: v.string(),
-    personId: v.id("persons"),
+    ...resourceViewerArgs,
     query: v.optional(v.string()),
     includeArchived: v.optional(v.boolean()),
     limit: v.optional(v.number()),
@@ -24,9 +24,8 @@ export const search = internalQuery({
 
 export const read = internalQuery({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
     const table = await findAccessibleTable(ctx, args)

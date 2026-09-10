@@ -3,9 +3,11 @@ import { shareExpiresAt } from "../../contracts/shares/expiry"
 import { shareFragment } from "../../contracts/shares/fragment"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { createRunSight } from "../runs/sight"
 import { type QueryLikeCtx } from "../shared/context"
 import { bytesToHex } from "../shared/encoding"
 import { type RuntimeEnvironment, readOrigin } from "../shared/origin"
+import { createResourceSight } from "../visibility/resources"
 import { createSight, type Gate } from "../visibility/sight"
 
 // The one anonymous read mechanism for tables, stores, and files: a
@@ -33,14 +35,20 @@ export async function mintShare(
   args: {
     target: ShareTarget
     material: Gate
-    personId: Id<"persons">
+    personId?: Id<"persons">
+    runId?: Id<"runs">
     urlPath: string
     expiresInHours?: number
   }
 ): Promise<MintedShare> {
   const organizationId = args.material.organizationId
 
-  await requireShareable(ctx, args.material, args.personId, args.target.kind)
+  const sight = await createResourceSight(ctx, {
+    organizationId,
+    personId: args.personId,
+    runId: args.runId,
+  })
+  await requireShareable(sight, args.material, args.target.kind)
 
   const now = Date.now()
   const secret = randomShareSecret()
@@ -61,7 +69,8 @@ export async function mintShare(
 
   await ctx.db.insert("shares", {
     organizationId,
-    createdBy: args.personId,
+    createdBy: sight.personId,
+    runId: args.runId,
     secret,
     createdAt: now,
     expiresAt,
@@ -171,10 +180,7 @@ export async function openShare(
     !canOpenShare({
       share,
       material: args.material,
-      creatorCanShare: await createSight(ctx, {
-        organizationId: args.material.organizationId,
-        personId: share.createdBy,
-      }).canShare(args.material),
+      creatorCanShare: await shareCreatorCanShare(ctx, share, args.material),
       secret,
       now: Date.now(),
     })
@@ -188,21 +194,39 @@ export async function openShare(
 /** Minting refuses what the person cannot hand out. The chain is the
  *  reason worth naming: it is fixable by moving the material. */
 async function requireShareable(
-  ctx: MutationCtx,
+  sight: Awaited<ReturnType<typeof createResourceSight>>,
   material: Gate,
-  personId: Id<"persons">,
   kind: ShareTarget["kind"]
 ) {
-  const shareable = await createSight(ctx, {
-    organizationId: material.organizationId,
-    personId,
-  }).canShare(material)
+  const shareable = await sight.canShare(material)
 
   if (!shareable) {
     throw new Error(
       `This ${kind} is in a folder that restricts it; move it out of the folder to share it externally.`
     )
   }
+}
+
+async function shareCreatorCanShare(
+  ctx: QueryLikeCtx,
+  share: {
+    organizationId: string
+    createdBy?: Id<"persons">
+    runId?: Id<"runs">
+  },
+  material: Gate
+) {
+  if (share.runId !== undefined) {
+    const run = await ctx.db.get(share.runId)
+    return (
+      run?.organizationId === share.organizationId &&
+      (await (await createRunSight(ctx, run)).canShare(material))
+    )
+  }
+  return await createSight(ctx, {
+    organizationId: share.organizationId,
+    personId: share.createdBy,
+  }).canShare(material)
 }
 
 export function randomShareSecret() {
