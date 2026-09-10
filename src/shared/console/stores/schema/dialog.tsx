@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { readErrorMessage } from "@/shared/console/error"
 import { DialogForm } from "@/shared/console/materials/form"
+import { useRetained } from "@/shared/console/retain"
 import { type StoreDetail } from "../types"
 import { SchemaEditorSection } from "./editor"
 import { useSchemaEditor } from "./state"
@@ -35,14 +36,16 @@ export function StoreSchemaDialog({
   onWrite: SchemaWrite
   store: StoreDetail | undefined
 }) {
+  const retainedStore = useRetained(store)
+
   return (
     <Dialog onOpenChange={onOpenChange} open={store !== undefined}>
       <DialogContent className="sm:max-w-xl">
-        {store === undefined ? null : (
+        {retainedStore === undefined ? null : (
           <SchemaDialogForm
             onClose={() => onOpenChange(false)}
             onWrite={onWrite}
-            store={store}
+            store={retainedStore}
           />
         )}
       </DialogContent>
