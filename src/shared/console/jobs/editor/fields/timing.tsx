@@ -45,7 +45,7 @@ export function JobTiming({
         />
       </TabsContent>
       <TabsContent value="once" className="grid gap-2">
-        <Suspense fallback={<TimingFallback />}>
+        <Suspense fallback={<DateTimeFallback />}>
           <JobDateTimePicker
             id="job-run-at"
             onValueChange={(runAt) => onValuesChange({ ...values, runAt })}
@@ -64,5 +64,14 @@ export function JobTiming({
 function TimingFallback() {
   return (
     <div aria-hidden="true" className="h-16 rounded-md border bg-muted/30" />
+  )
+}
+
+function DateTimeFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="h-27 rounded-md border bg-muted/30 @md/editor:h-12"
+    />
   )
 }
