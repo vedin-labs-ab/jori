@@ -5,9 +5,7 @@ import { useCallback, useState } from "react"
 import { type OpenTarget, usePaneTabs } from "@/shared/console/chat/pane/tabs"
 import { type ChatRun, type ReferenceTarget } from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
-import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { useLatestCallback } from "@/shared/console/retain"
-import { useDocumentTitle } from "@/shared/console/shell/title"
 import { api } from "../../../convex/_generated/api"
 import { useMentionSources } from "./mentions"
 import { useConversationMessages } from "./messages"
@@ -75,12 +73,6 @@ function useMentioned(openTarget: OpenTarget) {
     ),
     targets,
   }
-}
-
-/** The page's title, in the tab and the breadcrumb. */
-export function useThreadChrome(title: string) {
-  useDocumentTitle(title === "" ? undefined : `${title} · Jori`)
-  useMaterialBreadcrumb(title)
 }
 
 /** Stops the live run the way the Activity page does; a failure says so. */

@@ -29,6 +29,7 @@ export type ChatConversation = {
   id: string
   title: string
   updatedAt: number
+  folderId?: string
 }
 
 export type ChatRunStatus =

@@ -38,6 +38,8 @@ export function ResourceRowMenu({
       return <FileResourceMenu actions={actions} resource={resource} />
     case "job":
       return <JobResourceMenu actions={actions} resource={resource} />
+    case "chat":
+      return <FilingOnlyMenu actions={actions} resource={resource} />
   }
 }
 

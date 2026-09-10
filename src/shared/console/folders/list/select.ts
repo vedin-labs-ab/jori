@@ -70,10 +70,13 @@ export function folderSelectionRemoval(
 ): SelectionRemoval {
   const hasArchiving = selection.resources.some(archives)
   const hasFilesOrJobs = selection.resources.some(
-    (resource) => !archives(resource)
+    (resource) => resource.type === "file" || resource.type === "job"
+  )
+  const hasChats = selection.resources.some(
+    (resource) => resource.type === "chat"
   )
 
-  if (selection.folders.length === 0 && !hasFilesOrJobs) {
+  if (selection.folders.length === 0 && !hasFilesOrJobs && !hasChats) {
     return {
       description:
         "This removes the tables and stores from the active list and blocks writes until they are restored.",
@@ -88,19 +91,41 @@ export function folderSelectionRemoval(
       : null,
     hasFilesOrJobs ? "Files and jobs are permanently deleted." : null,
     hasArchiving ? "Tables and stores are archived instead." : null,
+    hasChats
+      ? "Chats are removed from the folder and stay in your chat history."
+      : null,
   ]
     .filter((part) => part !== null)
     .join(" ")
 
-  return { description, isDestructive: true, label: "Delete" }
+  const isDestructive = selection.folders.length > 0 || hasFilesOrJobs
+
+  return {
+    description,
+    isDestructive,
+    label: isDestructive ? "Delete" : "Remove",
+  }
 }
 
 /** Success toast for a removed selection, naming what happened to each
  *  part of it. */
 export function folderSelectionRemovalSuccess(selection: FolderSelection) {
   const archived = selection.resources.filter(archives).length
+  const unfiled = selection.resources.filter(
+    (resource) => resource.type === "chat"
+  ).length
   const deleted =
-    selection.folders.length + selection.resources.length - archived
+    selection.folders.length + selection.resources.length - archived - unfiled
+
+  if (unfiled > 0) {
+    return [
+      archived > 0 ? `Archived ${countNoun(archived, itemNoun)}.` : null,
+      deleted > 0 ? `Deleted ${countNoun(deleted, itemNoun)}.` : null,
+      `Removed ${countNoun(unfiled, { singular: "chat", plural: "chats" })} from the folder.`,
+    ]
+      .filter((part) => part !== null)
+      .join(" ")
+  }
 
   if (deleted === 0) {
     return `Archived ${countNoun(archived, itemNoun)}.`

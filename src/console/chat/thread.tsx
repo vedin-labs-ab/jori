@@ -15,15 +15,13 @@ import {
 } from "@/shared/console/chat/types"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { type MentionSources } from "@/shared/console/mentions/sources"
+import { useDocumentTitle } from "@/shared/console/shell/title"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
-import {
-  type LiveConversation,
-  useConversation,
-  useThreadChrome,
-} from "./conversation"
+import { type LiveConversation, useConversation } from "./conversation"
 import { ConversationDraft } from "./draft"
+import { ConversationFiling } from "./filing"
 import { type useConversationMessages } from "./messages"
 import { useAvailableModels } from "./models"
 import { ConversationPaneBody } from "./pane"
@@ -114,44 +112,51 @@ function ConversationThread({
   const { openTarget, page, resolveReference } = thread
   const handlers = useThreadHandlers(organizationId, conversationId, thread)
 
-  useThreadChrome(live.title)
+  useDocumentTitle(live.title === "" ? undefined : `${live.title} · Jori`)
   useReplyReferences(conversationId, page.messages, thread.autoOpen)
 
   return (
-    <ChatPane
-      {...thread.pane}
-      body={handlers.body}
-      composer={
-        <ChatComposer
-          autoFocus
-          availableModels={availableModels}
-          disabled={unavailable !== undefined}
-          isLive={isLiveRun(live.run)}
-          mentions={thread.mentions}
-          onMention={thread.mentioned.open}
-          onSelect={thread.choose}
-          onSend={handlers.sendText}
-          onStop={thread.stop}
-          onUnmention={thread.releaseTarget}
-          resolve={resolveReference}
-          reason={unavailable}
-          selection={live.model}
-          usage={live.context}
-        />
-      }
-      resolve={resolveReference}
-    >
-      <ConversationTurns
+    <>
+      <ConversationFiling
         conversationId={conversationId}
         live={live}
-        mentions={thread.mentions}
-        onOpenReference={openTarget}
         organizationId={organizationId}
-        page={page}
-        resolveReference={resolveReference}
-        send={handlers.sendMessage}
       />
-    </ChatPane>
+      <ChatPane
+        {...thread.pane}
+        body={handlers.body}
+        composer={
+          <ChatComposer
+            autoFocus
+            availableModels={availableModels}
+            disabled={unavailable !== undefined}
+            isLive={isLiveRun(live.run)}
+            mentions={thread.mentions}
+            onMention={thread.mentioned.open}
+            onSelect={thread.choose}
+            onSend={handlers.sendText}
+            onStop={thread.stop}
+            onUnmention={thread.releaseTarget}
+            resolve={resolveReference}
+            reason={unavailable}
+            selection={live.model}
+            usage={live.context}
+          />
+        }
+        resolve={resolveReference}
+      >
+        <ConversationTurns
+          conversationId={conversationId}
+          live={live}
+          mentions={thread.mentions}
+          onOpenReference={openTarget}
+          organizationId={organizationId}
+          page={page}
+          resolveReference={resolveReference}
+          send={handlers.sendMessage}
+        />
+      </ChatPane>
+    </>
   )
 }
 

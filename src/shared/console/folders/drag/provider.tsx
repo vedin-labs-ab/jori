@@ -44,7 +44,7 @@ const settleDuration = 450
 // must navigate, so keyboard moves go through the actions menus instead.
 const screenReaderInstructions = {
   draggable:
-    "Rows move with a pointer drag. To move a folder or a resource with the keyboard, open the row's actions menu and choose Move to folder.",
+    "Rows move with a pointer drag. To move with the keyboard, choose Move to folder from the row's actions menu or the chat's title menu.",
 }
 
 /** What a released drag asks of its host: the move that the payload and

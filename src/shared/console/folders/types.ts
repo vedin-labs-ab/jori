@@ -1,5 +1,11 @@
 import { type FunctionArgs, type FunctionReturnType } from "convex/server"
-import { Database, type LucideIcon, Table2, Workflow } from "lucide-react"
+import {
+  Database,
+  type LucideIcon,
+  MessageSquare,
+  Table2,
+  Workflow,
+} from "lucide-react"
 import { fileKind } from "@/shared/files/kind"
 import { type api } from "../../../../convex/_generated/api"
 
@@ -69,6 +75,8 @@ export function resourcePresentation(resource: {
       return fileKind(resource.mimeType ?? "", resource.name)
     case "job":
       return { icon: Workflow, label: "Job" }
+    case "chat":
+      return { icon: MessageSquare, label: "Chat" }
   }
 }
 
