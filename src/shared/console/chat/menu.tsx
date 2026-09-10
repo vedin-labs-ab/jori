@@ -1,44 +1,38 @@
-import { FolderInput, FolderMinus } from "lucide-react"
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenuContent } from "@/components/ui/dropdown-menu"
+import { MaterialFilingItems } from "../materials/actions"
 import { menuWidth } from "../menu"
 
 /** The chat breadcrumb and filed rows use the same filing actions. */
-export function ChatFilingItems({
+export function ChatMenuItems({
+  onAccess,
   onMove,
   onUnfile,
 }: {
+  onAccess: () => void
   onMove: () => void
   onUnfile?: () => void
 }) {
   return (
-    <>
-      <DropdownMenuItem onSelect={onMove}>
-        <FolderInput />
-        Move to folder…
-      </DropdownMenuItem>
-      {onUnfile === undefined ? null : (
-        <DropdownMenuItem onSelect={onUnfile}>
-          <FolderMinus />
-          Remove from folder
-        </DropdownMenuItem>
-      )}
-    </>
+    <MaterialFilingItems
+      onAccess={onAccess}
+      onMoveToFolder={onMove}
+      onUnfile={onUnfile}
+    />
   )
 }
 
 export function ChatTitleMenu({
+  onAccess,
   onMove,
   onUnfile,
 }: {
+  onAccess: () => void
   onMove: () => void
   onUnfile?: () => void
 }) {
   return (
     <DropdownMenuContent align="start" className={menuWidth}>
-      <ChatFilingItems onMove={onMove} onUnfile={onUnfile} />
+      <ChatMenuItems onAccess={onAccess} onMove={onMove} onUnfile={onUnfile} />
     </DropdownMenuContent>
   )
 }

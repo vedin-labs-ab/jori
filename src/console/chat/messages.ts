@@ -28,6 +28,7 @@ export function toChatMessage(row: MessageRow): ChatMessage {
   return {
     id: row.id,
     role: row.role,
+    ...(row.author === undefined ? {} : { author: row.author }),
     text: row.text,
     parts: parseReplyParts(row.data),
     ...(context === undefined ? {} : { context }),

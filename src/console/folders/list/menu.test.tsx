@@ -129,7 +129,14 @@ test("a filed chat opens its conversation and can move without deleting its hist
     screen.getByRole("link", { name: /Renewals at risk/ }).getAttribute("href")
   ).toBe("/chat/chat-1")
   openActions("Renewals at risk")
-  expect(itemLabels()).toEqual(["Move to folder…", "Remove from folder"])
+  expect(itemLabels()).toEqual([
+    "Visibility…",
+    "Move to folder…",
+    "Remove from folder",
+  ])
+  fireEvent.click(screen.getByRole("menuitem", { name: "Visibility…" }))
+  expect(actions.onAccess).toHaveBeenCalledWith(resource)
+  openActions("Renewals at risk")
   fireEvent.click(screen.getByRole("menuitem", { name: "Remove from folder" }))
   expect(actions.onUnfile).toHaveBeenCalledWith(resource)
 })

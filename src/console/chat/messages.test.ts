@@ -21,6 +21,7 @@ test("a person's message carries its context and answer, and no parts", () => {
       row({
         id: "messages:1",
         role: "person",
+        author: { id: "maya", name: "Maya Lund", isViewer: false },
         text: "Yes, post it",
         data: {
           context: { kind: "folder", id: "folders:7" },
@@ -34,6 +35,7 @@ test("a person's message carries its context and answer, and no parts", () => {
   ).toEqual({
     id: "messages:1",
     role: "person",
+    author: { id: "maya", name: "Maya Lund", isViewer: false },
     text: "Yes, post it",
     parts: [],
     context: { kind: "folder", id: "folders:7" },

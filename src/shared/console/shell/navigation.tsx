@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { scrollFadeViewport } from "@/shared/fade"
 import { useChatDrag } from "../chat/drag"
 import { type ChatConversation } from "../chat/types"
+import { VisibilityMark } from "../visibility/badge"
 import { ChatsMenu } from "./chats"
 import { CollapsibleGroup } from "./group"
 import { ConsoleLink } from "./link"
@@ -182,7 +183,10 @@ function SidebarChat({
           onPointerDownCapture={drag.onPointerDownCapture}
           ref={drag.setNodeRef}
         >
-          <span>{chat.title}</span>
+          <span className="min-w-0 flex-1 truncate">{chat.title}</span>
+          {chat.visibility === "organization" ? null : (
+            <VisibilityMark visibility={chat.visibility} />
+          )}
         </ConsoleLink>
       </SidebarMenuButton>
     </SidebarMenuItem>

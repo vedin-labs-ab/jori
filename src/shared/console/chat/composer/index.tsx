@@ -27,8 +27,8 @@ import { ComposerFooter, HintsPeek } from "./footer"
 
 /** Where the person writes: plain text with the things it mentions as
  *  chips in it, put there from a sigil's listbox or the "+" menu. Enter
- *  sends and Shift+Enter breaks the line; while a run is live the send
- *  control is the stop control instead, and while the host is still
+ *  sends and Shift+Enter breaks the line; while a run is live the stop
+ *  control stays beside send, and while the host is still
  *  answering a send the draft waits in the field behind a spinner.
  *  Disabled with a reason, it says why under the field. The model picker
  *  stands with the context ring, left of it, when the host offers a
@@ -59,7 +59,7 @@ export const ChatComposer = memo(function ChatComposer({
   /** The resource the chat is about, shown as a chip the person can drop. */
   context?: ChatReference
   disabled?: boolean
-  /** A run is answering: the send control is the stop control. */
+  /** A run is answering: follow-ups can still be sent, or work stopped. */
   isLive?: boolean
   /** What can be mentioned: the host's lists, and its search. */
   mentions?: MentionSources
@@ -100,7 +100,7 @@ export const ChatComposer = memo(function ChatComposer({
     onMention,
     onSend,
     onUnmention,
-    open: !disabled && !isLive,
+    open: !disabled,
     resolve,
     sources: mentions,
   })

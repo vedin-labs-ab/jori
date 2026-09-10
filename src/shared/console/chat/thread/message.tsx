@@ -46,6 +46,11 @@ export const PersonMessage = memo(function PersonMessage({
 }) {
   return (
     <div className="group/message flex flex-col items-end">
+      {message.author === undefined ? null : (
+        <span className="mb-1 max-w-[75%] truncate text-muted-foreground text-xs">
+          {message.author.isViewer ? "You" : message.author.name}
+        </span>
+      )}
       <div className="min-w-0 max-w-[75%] rounded-lg bg-muted px-3 py-2 text-sm">
         {context === undefined ? null : <ContextLine reference={context} />}
         <ExpandableText maxLines={8}>

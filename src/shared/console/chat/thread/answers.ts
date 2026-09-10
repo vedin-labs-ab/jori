@@ -32,6 +32,19 @@ export function answeredParts(messages: ChatMessage[]) {
   return answered
 }
 
+/** The last person to answer a reply's questions, matching its shown values. */
+export function answerAuthors(messages: ChatMessage[]) {
+  const authors = new Map<string, ChatMessage["author"]>()
+
+  for (const message of messages) {
+    if (message.answer !== undefined) {
+      authors.set(message.answer.messageId, message.author)
+    }
+  }
+
+  return authors
+}
+
 /** The messages the thread shows on the questions they answer rather than
  *  as turns of their own: a person's answers are marked on the questions
  *  themselves, so a bubble repeating them would say it twice. A chip's

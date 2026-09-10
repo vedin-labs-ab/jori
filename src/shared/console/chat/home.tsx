@@ -9,6 +9,7 @@ import { ChatsPicker } from "../shell/chats"
 import { ConsoleLink } from "../shell/link"
 import { conversationDestination } from "../shell/routes"
 import { relativeTime } from "../time"
+import { VisibilityMark } from "../visibility/badge"
 import { useChatDrag } from "./drag"
 import { type ChatSuggestion } from "./suggestions"
 import { chatColumnClassName } from "./thread"
@@ -226,6 +227,9 @@ function RecentConversation({
         ref={drag.setNodeRef}
       >
         <span className="min-w-0 flex-1 truncate">{conversation.title}</span>
+        {conversation.visibility === "organization" ? null : (
+          <VisibilityMark visibility={conversation.visibility} />
+        )}
         <span className="shrink-0 text-muted-foreground text-xs">
           {relativeTime(conversation.updatedAt, now)}
         </span>

@@ -31,6 +31,7 @@ test("answering a question composes the message from the prompt and the labels, 
       question,
       message({
         id: "m5",
+        author: { id: "maya", name: "Maya Lund", isViewer: false },
         role: "person",
         text: "Post the summary to #finance when done? Yes, post it",
         answer: { messageId: "m3", answers: [{ part: 0, values: ["post"] }] },
@@ -38,6 +39,7 @@ test("answering a question composes the message from the prompt and the labels, 
     ],
   })
 
+  expect(screen.getByText("Answered by Maya Lund")).toBeDefined()
   expect(screen.queryByRole("radio")).toBeNull()
   expect(screen.queryByRole("button", { name: "Answer" })).toBeNull()
   // The answers are marked on the questions; the message that carried

@@ -86,7 +86,7 @@ function MoveDialogBody({
           {subject.resources.some(
             (resource) => resource.resourceType === "chat"
           )
-            ? " Chats stay private to you. Their runs and usage follow the folder."
+            ? " Moving chats preserves their visibility. Their runs and usage follow the folder."
             : null}
         </DialogDescription>
       </DialogHeader>

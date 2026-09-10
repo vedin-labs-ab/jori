@@ -8,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
+import { ChatMenuItems } from "@/shared/console/chat/menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
@@ -39,13 +40,28 @@ export function ResourceRowMenu({
     case "job":
       return <JobResourceMenu actions={actions} resource={resource} />
     case "chat":
-      return <FilingOnlyMenu actions={actions} resource={resource} />
+      return <ChatResourceMenu actions={actions} resource={resource} />
   }
 }
 
 type ResourceMenu = {
   actions: FolderResourceActions
   resource: FolderResource
+}
+
+function ChatResourceMenu({ actions, resource }: ResourceMenu) {
+  return (
+    <DropdownMenu>
+      <RowMenuTrigger name={resource.name} />
+      <DropdownMenuContent align="end" className={menuWidth}>
+        <ChatMenuItems
+          onAccess={() => actions.onAccess(resource)}
+          onMove={() => actions.onMove(resource)}
+          onUnfile={() => actions.onUnfile(resource)}
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 }
 
 /** Tables and stores share one lifecycle, so they share one branch. Nothing

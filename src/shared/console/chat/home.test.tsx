@@ -32,11 +32,13 @@ test("offers the suggestions and lists the recent conversations by time", () => 
         {
           id: "conversations_renewals",
           title: "Renewals at risk",
+          visibility: "organization",
           updatedAt: now - 3_600_000,
         },
         {
           id: "conversations_flaky",
           title: "Flaky payroll test",
+          visibility: "organization",
           updatedAt: now - 86_400_000 * 2,
         },
       ]}
@@ -71,6 +73,7 @@ test("four chats show; the rest are a search away", () => {
   const recent = ["a", "b", "c", "d", "e", "f"].map((id, index) => ({
     id: `conversations_${id}`,
     title: `Chat ${id}`,
+    visibility: "organization" as const,
     updatedAt: now - index * 1_000,
   }))
 

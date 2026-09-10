@@ -11,6 +11,7 @@ import { type ChooseHandler, ReplyParts } from "./parts"
  *  Rendered once per message and left alone while the thread's tail
  *  changes under it. */
 export const Turn = memo(function Turn({
+  answerAuthor,
   answered,
   catalog,
   message,
@@ -20,6 +21,7 @@ export const Turn = memo(function Turn({
   resolveReference,
   showChips,
 }: {
+  answerAuthor?: ChatMessage["author"]
   answered: Map<string, Map<number, string[]>>
   catalog: MentionCatalog
   message: ChatMessage
@@ -50,6 +52,7 @@ export const Turn = memo(function Turn({
     <JoriMessage>
       <Markdown text={message.text} />
       <ReplyParts
+        answerAuthor={answerAuthor}
         answered={answered}
         message={message}
         onChoose={onChoose}

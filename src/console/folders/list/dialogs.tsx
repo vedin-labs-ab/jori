@@ -4,6 +4,7 @@ import { EditFileDialog } from "@/shared/console/files/edit"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
+import { ConversationVisibility } from "../../chat/filing/access"
 import { useFileActions } from "../../files/manage"
 import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
 import { EditStoreDialog } from "../../stores/edit"
@@ -45,6 +46,11 @@ export function FolderResourceDialogs({
         organizationId={organizationId}
         request={requestFor(request, "file")}
       />
+      <ChatDialog
+        onClose={onClose}
+        organizationId={organizationId}
+        request={requestFor(request, "chat")}
+      />
     </>
   )
 }
@@ -60,6 +66,20 @@ type KindDialogs = {
   onClose: () => void
   organizationId: string
   request: ResourceRequest | undefined
+}
+
+function ChatDialog({ onClose, organizationId, request }: KindDialogs) {
+  const resource = useRetained(request?.resource)
+
+  return resource === undefined ? null : (
+    <ConversationVisibility
+      conversationId={resource.id as GenericId<"conversations">}
+      key={resource.id}
+      onClose={onClose}
+      open={request?.kind === "access"}
+      organizationId={organizationId}
+    />
+  )
 }
 
 function TableDialogs({ onClose, organizationId, request }: KindDialogs) {

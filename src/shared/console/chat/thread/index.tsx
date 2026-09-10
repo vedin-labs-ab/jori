@@ -23,7 +23,7 @@ import {
   lastMessage,
   type ResolveReference,
 } from "../types"
-import { answeredParts, answeringMessages } from "./answers"
+import { answerAuthors, answeredParts, answeringMessages } from "./answers"
 import { CondensedNotice } from "./notice"
 import { type ChooseHandler } from "./parts"
 import { AnchorOnTurn, ThreadTail } from "./tail"
@@ -80,10 +80,12 @@ export function ChatThread({
   usage?: ChatContextUsage | null
 }) {
   const answered = useMemo(() => answeredParts(messages), [messages])
+  const authors = useMemo(() => answerAuthors(messages), [messages])
   const answering = useMemo(() => answeringMessages(messages), [messages])
   const catalog = useMemo(() => createMentionCatalog(mentions), [mentions])
   const isLive = isLiveRun(live)
-  const anchorId = lastMessage(messages, "person")?.id
+  const anchor = lastMessage(messages, "person")
+  const anchorId = anchor?.id
   const lastId = messages.at(-1)?.id
 
   return (
@@ -97,7 +99,11 @@ export function ChatThread({
           <MessageScrollerContent
             className={`${chatColumnClassName} gap-6 py-4`}
           >
-            <AnchorOnTurn anchorId={anchorId} />
+            <AnchorOnTurn
+              anchorId={
+                anchor?.author?.isViewer === false ? undefined : anchorId
+              }
+            />
             {hasMore ? (
               <EarlierMessages isLoading={isLoading} onLoadMore={onLoadMore} />
             ) : null}
@@ -110,6 +116,7 @@ export function ChatThread({
                   scrollAnchor={message.id === anchorId}
                 >
                   <Turn
+                    answerAuthor={authors.get(message.id)}
                     answered={answered}
                     catalog={catalog}
                     message={message}

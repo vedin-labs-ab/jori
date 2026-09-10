@@ -90,6 +90,31 @@ export function MaterialCoreItems({
         <Pencil />
         Rename…
       </DropdownMenuItem>
+      <MaterialFilingItems
+        isPending={isPending}
+        onAccess={onAccess}
+        onMoveToFolder={onMoveToFolder}
+        onUnfile={onUnfile}
+      />
+      <DropdownMenuSeparator />
+    </>
+  )
+}
+
+/** Sharing and organization actions used by resource rows and titles. */
+export function MaterialFilingItems({
+  isPending = false,
+  onAccess,
+  onMoveToFolder,
+  onUnfile,
+}: {
+  isPending?: boolean
+  onAccess: () => void
+  onMoveToFolder: () => void
+  onUnfile?: () => void
+}) {
+  return (
+    <>
       <DropdownMenuItem disabled={isPending} onSelect={onAccess}>
         <LockKeyhole />
         Visibility…
@@ -104,7 +129,6 @@ export function MaterialCoreItems({
           Remove from folder
         </DropdownMenuItem>
       )}
-      <DropdownMenuSeparator />
     </>
   )
 }
