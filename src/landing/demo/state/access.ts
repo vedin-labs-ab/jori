@@ -1,4 +1,5 @@
 import { jobAudience } from "../fixtures/types"
+import { setChatVisibility } from "./chat"
 import { type DemoAction, type DemoState } from "./types"
 
 export function reduceAccess(state: DemoState, action: DemoAction): DemoState {
@@ -36,6 +37,10 @@ function setVisibility(
   action: Extract<DemoAction, { type: "setVisibility" }>
 ): DemoState {
   const { target, visibility, at } = action
+
+  if (target.kind === "chat") {
+    return setChatVisibility(state, action)
+  }
 
   if (target.kind === "folder") {
     return {

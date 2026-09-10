@@ -7,6 +7,7 @@ import {
 } from "@/shared/console/folders/types"
 import { ConsoleSidebar } from "@/shared/console/shell/navigation"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
+import { chatViews } from "./derive/chat"
 import { DemoCreationDialogs } from "./dialogs/creation"
 import { DemoFolderDialogs } from "./dialogs/folders"
 import { useDemoExpansion } from "./expansion"
@@ -26,7 +27,7 @@ export function DemoSidebar({ pathname }: { pathname: string }) {
     <>
       <ConsoleSidebar
         account={null}
-        chats={state.chat.conversations}
+        chats={chatViews(state)}
         folders={
           <FolderTree
             expansion={expansion}

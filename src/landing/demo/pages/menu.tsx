@@ -4,7 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu"
-import { ChatFilingItems } from "@/shared/console/chat/menu"
+import { ChatMenuItems } from "@/shared/console/chat/menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
@@ -13,12 +13,13 @@ import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
-import { chatMoveSubject } from "../derive/chat"
 import { jobMoveSubject } from "../derive/jobs"
 import { materialOf } from "../derive/materials"
+import { useDemoChatMenu } from "../dialogs/chat"
 import { MaterialDialogs, type MaterialRequest } from "../dialogs/materials"
 import { DemoMoveDialog } from "../dialogs/move"
 import { useJobEditor } from "../editor"
+import { type DemoConversation } from "../fixtures/chat"
 import { type DemoMaterial } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
 
@@ -51,29 +52,24 @@ export function DemoResourceMenu({ resource }: { resource: FolderResource }) {
 }
 
 function ChatResourceMenu({ resource }: { resource: FolderResource }) {
-  const { actions, state } = useDemoWorkspace()
-  const [moving, setMoving] = useState(false)
+  const { state } = useDemoWorkspace()
   const chat = state.chat.conversations.find((chat) => chat.id === resource.id)
 
-  if (chat === undefined) {
-    return null
-  }
+  return chat === undefined ? null : <FiledChatMenu chat={chat} />
+}
+
+function FiledChatMenu({ chat }: { chat: DemoConversation }) {
+  const { dialogs, items } = useDemoChatMenu(chat)
 
   return (
     <>
       <DropdownMenu>
         <RowMenuTrigger name={chat.title} />
         <DropdownMenuContent align="end" className={menuWidth}>
-          <ChatFilingItems
-            onMove={() => setMoving(true)}
-            onUnfile={() => actions.fileResource("chat", chat.id, null)}
-          />
+          <ChatMenuItems {...items} />
         </DropdownMenuContent>
       </DropdownMenu>
-      <DemoMoveDialog
-        onOpenChange={setMoving}
-        subject={moving ? chatMoveSubject(chat) : undefined}
-      />
+      {dialogs}
     </>
   )
 }

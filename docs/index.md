@@ -6,11 +6,12 @@ claims. Read only the guide relevant to the task.
 | Guide | What it answers |
 | --- | --- |
 | [Architecture](architecture.md) | Product priorities, regional defaults and when to revisit a decision. |
+| [Chats](chats.md) | Filing, shared participation, execution identity and resource access. |
 | [Integrations](integrations.md) | Registration choices, branding and reliable regional delivery. |
 | [Residency](residency.md) | Data boundaries, known exceptions and evidence for customer claims. |
 | [Brand](brand.md) | Logo variants, clear space, browser and app icons, and social image regeneration. |
 
-These guides record the decisions agreed on 9 September 2026. Implementation
+These guides record the current engineering decisions. Implementation
 gaps are noted separately; guidance is not proof of production state.
 
 Use source code for implementation details and current official documentation

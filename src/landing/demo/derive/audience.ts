@@ -38,7 +38,11 @@ export function resolveAudience(
 
   return {
     people: people
-      .filter((person) => gates.every((gate) => admits(gate, person)))
+      .filter(
+        (person) =>
+          person.id === gates[0]?.owner ||
+          gates.every((gate) => admits(gate, person))
+      )
       .map((person) => ({
         personId: person.id,
         name: person.name,
@@ -78,6 +82,11 @@ function filedFolderId(
     return state.jobs.find((job) => job.id === target.id)?.folderId
   }
 
+  if (target.kind === "chat") {
+    return state.chat.conversations.find((chat) => chat.id === target.id)
+      ?.folderId
+  }
+
   return materialOf(state, target.id)?.folderId
 }
 
@@ -88,6 +97,11 @@ function ownerOf(state: DemoState, target: AudienceTarget) {
 
   if (target.kind === "job" || target.kind === "draft") {
     return undefined
+  }
+
+  if (target.kind === "chat") {
+    return state.chat.conversations.find((chat) => chat.id === target.id)
+      ?.createdBy
   }
 
   return materialOf(state, target.id)?.ownerId

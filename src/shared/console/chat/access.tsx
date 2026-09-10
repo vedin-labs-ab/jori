@@ -9,7 +9,7 @@ export function ChatVisibilityNotice({
   value: Visibility
 }) {
   const isPrivate = value.mode === "private"
-  const changesContext = (current.mode === "private") !== isPrivate
+  const changesContext = JSON.stringify(current) !== JSON.stringify(value)
 
   return (
     <div className="grid gap-2 text-muted-foreground text-sm">
@@ -20,8 +20,8 @@ export function ChatVisibilityNotice({
       </p>
       {changesContext ? (
         <p>
-          Changing between private and shared stops any running work. Your next
-          message starts a fresh session with the chat history and the new
+          Changing visibility stops any running work. Your next message starts a
+          fresh session with the chat history and the selected access and
           connections.
         </p>
       ) : null}

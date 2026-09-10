@@ -75,14 +75,18 @@ test("shared file tools use the trusted run audience instead of a supplied viewe
   const runId = "shared-run" as Id<"runs">
   const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))
   const ctx = { runMutation } as unknown as ActionCtx
-  await callJoriFileTool(ctx, {
-    _id: runId,
-    organizationId: "organization",
-    principal: { kind: "organization" },
-  }, {
-    tool: "share_file",
-    args: { fileId: "file-id", personId, runId: "forged" },
-  })
+  await callJoriFileTool(
+    ctx,
+    {
+      _id: runId,
+      organizationId: "organization",
+      principal: { kind: "organization" },
+    },
+    {
+      tool: "share_file",
+      args: { fileId: "file-id", personId, runId: "forged" },
+    }
+  )
   expect(runMutation).toHaveBeenCalledWith(internal.files.share.mint, {
     organizationId: "organization",
     personId: undefined,

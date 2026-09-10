@@ -99,8 +99,13 @@ export async function resolveCreationFolder(
 ) {
   return args.folderId === undefined
     ? undefined
-    : (await requireVisibleFolder(ctx, { ...args, folderId: args.folderId }, sight))
-        ._id
+    : (
+        await requireVisibleFolder(
+          ctx,
+          { ...args, folderId: args.folderId },
+          sight
+        )
+      )._id
 }
 
 export async function listOrganizationFolders(

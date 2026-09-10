@@ -11,7 +11,7 @@ import {
   type FolderRow,
 } from "@/shared/console/folders/types"
 import { type FolderNames } from "@/shared/console/materials/folders"
-import { personName, viewerId } from "../fixtures/people"
+import { personName } from "../fixtures/people"
 import { type DemoFolder, type FolderId } from "../fixtures/types"
 import { type DemoState } from "../state/types"
 
@@ -168,10 +168,10 @@ function folderResources(state: DemoState, folderId: FolderId) {
         type: "chat",
         id: chat.id,
         name: chat.title,
-        visibility: "private",
+        visibility: chat.visibility.mode,
         updatedAt: chat.updatedAt,
-        ownerId: viewerId,
-        ownerName: personName(viewerId),
+        ownerId: chat.createdBy,
+        ownerName: personName(chat.createdBy),
         ownerImage: undefined,
       })
     )
