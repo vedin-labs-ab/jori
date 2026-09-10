@@ -81,7 +81,7 @@ export function ModelPicker({
       <DropdownMenuTrigger asChild>
         <InputGroupButton
           aria-label={`Model: ${modelLabel(selection.model)}, ${effortLabels[selection.effort]} reasoning`}
-          className="gap-1.5 text-muted-foreground"
+          className="min-w-28 gap-1.5 text-muted-foreground"
           disabled={
             availableModels === undefined || availableModels.length === 0
           }
@@ -145,7 +145,7 @@ export function ModelPicker({
               chevron, which otherwise shares that space with it. */}
           <DropdownMenuSubTrigger className="[&>svg]:ml-0">
             Reasoning
-            <span className="ml-auto text-muted-foreground">
+            <span className="ml-auto w-16 text-right text-muted-foreground">
               {effortLabels[selection.effort]}
             </span>
           </DropdownMenuSubTrigger>
