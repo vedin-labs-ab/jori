@@ -62,11 +62,13 @@ export function ChatHome({
         {suggestions.length === 0 ? null : (
           <Suggestions onSuggestion={onSuggestion} suggestions={suggestions} />
         )}
-        {recent === undefined ? (
-          <RecentPlaceholder />
-        ) : recent.length === 0 ? null : (
-          <RecentConversations now={now} recent={recent} />
-        )}
+        <div className={cn(chatColumnClassName, "min-h-[12.1875rem]")}>
+          {recent === undefined ? (
+            <RecentPlaceholder />
+          ) : recent.length === 0 ? null : (
+            <RecentConversations now={now} recent={recent} />
+          )}
+        </div>
       </div>
     </div>
   )
@@ -134,9 +136,9 @@ function RecentPlaceholder() {
     <div
       aria-busy
       aria-hidden
-      className={cn(chatColumnClassName, "grid gap-1")}
+      className="grid gap-1"
     >
-      <div className="flex h-4 items-center">
+      <div className="flex h-7 items-center">
         <Skeleton className="h-3 w-12" />
       </div>
       <ul className="divide-y">
@@ -165,9 +167,9 @@ function RecentConversations({
   return (
     <section
       aria-labelledby="chat-recent"
-      className={cn(chatColumnClassName, "grid gap-1")}
+      className="grid gap-1"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex h-7 items-center justify-between">
         <h3
           className="font-medium text-muted-foreground text-xs"
           id="chat-recent"
